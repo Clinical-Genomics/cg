@@ -95,18 +95,16 @@ class DeliveryAPI:
         pipeline: str,
     ) -> None:
         LOG.debug(f"Deliver case files for {case.internal_id}")
+
         if not get_case_tags_for_pipeline(pipeline):
             return
-        version: Version = self.hk_api.last_version(case.internal_id)
-        delivery_base: Path = get_delivery_dir_path(
-            case_name=case.name,
-            customer_id=case.customer.internal_id,
-            ticket=case.latest_ticket,
-            base_path=self.project_base_path,
-        )
-        if not self.dry_run:
-            LOG.debug(f"Creating project path {delivery_base}")
-            delivery_base.mkdir(parents=True, exist_ok=True)
+
+        version: Version | None = self.hk_api.last_version(case.internal_id)
+        if not version:
+            LOG.warning(f"No version found for case {case.internal_id}")
+            return
+
+        delivery_base: Path = self._create_delivery_directory(case)
         file_path: Path
         number_linked_files: int = 0
         links = self.store.get_case_samples_by_case_id(case.internal_id)
@@ -134,6 +132,18 @@ class DeliveryAPI:
                 LOG.info(f"Path {out_path} exists, skipping")
 
         LOG.info(f"Linked {number_linked_files} files for case {case.internal_id}")
+
+    def _create_delivery_directory(self, case: Case) -> Path:
+        delivery_base = get_delivery_dir_path(
+            case_name=case.name,
+            customer_id=case.customer.internal_id,
+            ticket=case.latest_ticket,
+            base_path=self.project_base_path,
+        )
+        if not self.dry_run:
+            LOG.debug(f"Creating project path {delivery_base}")
+            delivery_base.mkdir(parents=True, exist_ok=True)
+        return delivery_base
 
     def _deliver_sample_files(
         self,
