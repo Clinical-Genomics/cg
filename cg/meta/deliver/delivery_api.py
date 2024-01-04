@@ -13,6 +13,7 @@ from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
 from cg.exc import MissingFilesError
 from cg.meta.deliver.utils import (
+    get_delivery_case_name,
     get_delivery_dir_path,
     get_case_tags_for_pipeline,
     get_sample_tags_for_pipeline,
@@ -137,11 +138,7 @@ class DeliveryAPI:
         if not get_sample_tags_for_pipeline(pipeline):
             return
 
-        # Make sure that the directory exists
-        if pipeline in constants.ONLY_ONE_CASE_PER_TICKET:
-            case_name = None
-        else:
-            case_name = case.name
+        case_name: str | None = get_delivery_case_name(case=case, pipeline=pipeline)
 
         deliverable_samples = filter(
             lambda link: self._sample_is_deliverable(link=link, case=case, pipeline=pipeline),

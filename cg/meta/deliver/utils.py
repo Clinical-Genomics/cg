@@ -1,6 +1,7 @@
 from pathlib import Path
 from cg.constants import delivery as constants
 from cg.constants.constants import Pipeline
+from cg.store.models import Case
 
 
 def get_delivery_scope(delivery_arguments: set[str]) -> tuple[bool, bool]:
@@ -43,3 +44,7 @@ def get_case_tags_for_pipeline(pipeline: Pipeline) -> list[set[str]]:
 
 def get_sample_tags_for_pipeline(pipeline: Pipeline) -> list[set[str]]:
     return constants.PIPELINE_ANALYSIS_TAG_MAP[pipeline]["sample_tags"]
+
+
+def get_delivery_case_name(case: Case, pipeline: str) -> str | None:
+    return None if pipeline in constants.ONLY_ONE_CASE_PER_TICKET else case.name
