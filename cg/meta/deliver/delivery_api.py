@@ -93,15 +93,13 @@ class DeliveryAPI:
         self._link_case_files(case=case, version=version, pipeline=pipeline, out_dir=out_dir)
 
     def _link_case_files(self, case: Case, version: Version, pipeline: str, out_dir: Path):
-        number_linked_files: int = 0
         sample_ids: set[str] = self._get_sample_ids_for_case(case)
-        files: list[Path] = self._get_case_files_from_version(
+        files: Iterable[Path] = self._get_case_files_from_version(
             version=version, sample_ids=sample_ids, pipeline=pipeline
         )
         for file_path in files:
             out_path: Path = get_out_path(out_dir=out_dir, file=file_path, case=case)
-            if create_link(source=file_path, destination=out_path, dry_run=self.dry_run):
-                number_linked_files += 1
+            create_link(source=file_path, destination=out_path, dry_run=self.dry_run)
 
     def _get_sample_ids_for_case(self, case: Case) -> set[str]:
         links = self.store.get_case_samples_by_case_id(case.internal_id)
@@ -137,7 +135,7 @@ class DeliveryAPI:
                 sample=link.sample, case=case, pipeline=pipeline
             )
             sample_id = link.sample.internal_id
-            files: list[Path] = self._get_sample_files_from_version(
+            files: Iterable[Path] = self._get_sample_files_from_version(
                 version=version, sample_id=sample_id, pipeline=pipeline
             )
             for file_path in files:
