@@ -64,33 +64,10 @@ class DeliveryAPI:
         self.deliver_files(case=case, pipeline=pipeline)
 
     def deliver_files(self, case: Case, pipeline: str):
-        """Deliver all files for a case."""
         if not self._case_is_deliverable(case=case, pipeline=pipeline):
             return
-
-        if not self._samples_are_deliverable(case):
-            return
-
-        if get_case_tags_for_pipeline(pipeline):
-            self._deliver_case_files(
-                case=case,
-                pipeline=pipeline,
-            )
-
-        if not get_sample_tags_for_pipeline(pipeline):
-            return
-
-        links: list[CaseSample] = self.store.get_case_samples_by_case_id(case.internal_id)
-        for link in links:
-            if self._sample_is_deliverable(link=link, case=case, pipeline=pipeline):
-                self._deliver_sample_files(
-                    case=case,
-                    sample_id=link.sample.internal_id,
-                    sample_name=link.sample.name,
-                    pipeline=pipeline,
-                )
-                continue
-            LOG.warning(f"Sample {link.sample.internal_id} is not deliverable.")
+        self._deliver_case_files(case=case, pipeline=pipeline)
+        self._deliver_sample_files(case=case, pipeline=pipeline)
 
     def _sample_is_deliverable(self, link: CaseSample, case: Case, pipeline: str) -> bool:
         sample_is_external: bool = link.sample.application_version.application.is_external
@@ -99,7 +76,6 @@ class DeliveryAPI:
         sample_is_deliverable: bool = (
             sample_passes_qc or deliver_failed_samples or sample_is_external
         )
-
         last_version: Version = self.hk_api.last_version(case.internal_id)
         if pipeline == DataDelivery.FASTQ:
             last_version = self.hk_api.last_version(link.sample.internal_id)
@@ -109,7 +85,8 @@ class DeliveryAPI:
                 LOG.info(f"Could not find any version for {link.sample.internal_id}")
                 return False
             raise SyntaxError(f"Could not find any version for {link.sample.internal_id}")
-
+        if not sample_is_deliverable:
+            LOG.warning(f"Sample {link.sample.internal_id} is not deliverable.")
         return sample_is_deliverable
 
     def _deliver_case_files(
@@ -117,8 +94,9 @@ class DeliveryAPI:
         case: Case,
         pipeline: str,
     ) -> None:
-        """Deliver files on case level."""
         LOG.debug(f"Deliver case files for {case.internal_id}")
+        if not get_case_tags_for_pipeline(pipeline):
+            return
         version: Version = self.hk_api.last_version(case.internal_id)
         delivery_base: Path = get_delivery_dir_path(
             case_name=case.name,
@@ -160,61 +138,70 @@ class DeliveryAPI:
     def _deliver_sample_files(
         self,
         case: Case,
-        sample_id: str,
-        sample_name: str,
         pipeline: str,
     ) -> None:
         """Deliver files on sample level."""
+        if not get_sample_tags_for_pipeline(pipeline):
+            return
+
         # Make sure that the directory exists
         if pipeline in constants.ONLY_ONE_CASE_PER_TICKET:
             case_name = None
         else:
             case_name = case.name
 
-        if pipeline == DataDelivery.FASTQ:
-            version: Version = self.hk_api.last_version(sample_id)
-        else:
-            version: Version = self.hk_api.last_version(case.internal_id)
-        delivery_base: Path = get_delivery_dir_path(
-            case_name=case_name,
-            sample_name=sample_name,
-            customer_id=case.customer.internal_id,
-            ticket=case.latest_ticket,
-            base_path=self.project_base_path,
+        deliverable_samples = filter(
+            lambda link: self._sample_is_deliverable(link=link, case=case, pipeline=pipeline),
+            self.store.get_case_samples_by_case_id(case.internal_id),
         )
-        if not self.dry_run:
-            LOG.debug(f"Creating project path {delivery_base}")
-            delivery_base.mkdir(parents=True, exist_ok=True)
-        file_path: Path
-        number_linked_files_now: int = 0
-        number_previously_linked_files: int = 0
-        for file_path in self._get_sample_files_from_version(
-            version=version, sample_id=sample_id, pipeline=pipeline
-        ):
-            # Out path should include customer names
-            file_name: str = file_path.name.replace(sample_id, sample_name)
-            if case_name:
-                file_name: str = file_name.replace(case.internal_id, case.name)
-            out_path: Path = delivery_base / file_name
-            if self.dry_run:
-                LOG.info(f"Would hard link file {file_path} to {out_path}")
-                number_linked_files_now += 1
-                continue
-            LOG.info(f"Hard link file {file_path} to {out_path}")
-            try:
-                os.link(file_path, out_path)
-                number_linked_files_now += 1
-            except FileExistsError:
-                LOG.info(
-                    f"Warning: Path {out_path} exists, no hard link was made for file {file_name}"
-                )
-                number_previously_linked_files += 1
-        if number_previously_linked_files == 0 and number_linked_files_now == 0:
-            raise MissingFilesError(f"No files were linked for sample {sample_name}")
 
-        LOG.info(
-            f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case.internal_id}"
-        )
+        for link in deliverable_samples:
+            sample_id = link.sample.internal_id
+            sample_name = link.sample.name
+            if pipeline == DataDelivery.FASTQ:
+                version: Version = self.hk_api.last_version(sample_id)
+            else:
+                version: Version = self.hk_api.last_version(case.internal_id)
+            delivery_base: Path = get_delivery_dir_path(
+                case_name=case_name,
+                sample_name=sample_name,
+                customer_id=case.customer.internal_id,
+                ticket=case.latest_ticket,
+                base_path=self.project_base_path,
+            )
+            if not self.dry_run:
+                LOG.debug(f"Creating project path {delivery_base}")
+                delivery_base.mkdir(parents=True, exist_ok=True)
+            file_path: Path
+            number_linked_files_now: int = 0
+            number_previously_linked_files: int = 0
+            for file_path in self._get_sample_files_from_version(
+                version=version, sample_id=sample_id, pipeline=pipeline
+            ):
+                # Out path should include customer names
+                file_name: str = file_path.name.replace(sample_id, sample_name)
+                if case_name:
+                    file_name: str = file_name.replace(case.internal_id, case.name)
+                out_path: Path = delivery_base / file_name
+                if self.dry_run:
+                    LOG.info(f"Would hard link file {file_path} to {out_path}")
+                    number_linked_files_now += 1
+                    continue
+                LOG.info(f"Hard link file {file_path} to {out_path}")
+                try:
+                    os.link(file_path, out_path)
+                    number_linked_files_now += 1
+                except FileExistsError:
+                    LOG.info(
+                        f"Warning: Path {out_path} exists, no hard link was made for file {file_name}"
+                    )
+                    number_previously_linked_files += 1
+            if number_previously_linked_files == 0 and number_linked_files_now == 0:
+                raise MissingFilesError(f"No files were linked for sample {sample_name}")
+
+            LOG.info(
+                f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case.internal_id}"
+            )
 
     def _get_case_files_from_version(
         self,
@@ -328,7 +315,7 @@ class DeliveryAPI:
             elif not skip_missing:
                 raise SyntaxError(f"Could not find any version for {case.internal_id}")
             return False
-        return True
+        return self._samples_are_deliverable(case)
 
     def _samples_are_deliverable(self, case: Case) -> bool:
         if self.store.get_case_samples_by_case_id(case.internal_id):
