@@ -183,6 +183,7 @@ def confirm_transfer_of_nanopore_flow_cell(context: CGConfig, source_directory: 
     help="The path from where the syncing is done.",
 )
 def create_manifest_files(source_directory: str):
+    """Creates a file manifest for each flow cell in the source directory."""
     for source_flow_cell in glob(f"{source_directory}/*"):
         if is_manifest_file_required(Path(source_flow_cell)):
             create_manifest_file(Path(source_flow_cell))

@@ -4,17 +4,18 @@ import pytest
 
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.constants.nanopore_files import NanoporeDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.exc import FlowCellError
 from cg.io.csv import read_csv
 from cg.meta.demultiplex.utils import (
+    NANOPORE_SEQUENCING_SUMMARY_PATTERN,
     add_flow_cell_name_to_fastq_file_path,
     are_all_files_synced,
     create_delivery_file_in_flow_cell_directory,
     create_manifest_file,
     get_existing_manifest_file,
     get_lane_from_sample_fastq,
+    get_nanopore_summary_file,
     get_q30_threshold,
     get_sample_sheet_path_from_flow_cell_dir,
     get_undetermined_fastqs,
@@ -23,6 +24,7 @@ from cg.meta.demultiplex.utils import (
     is_flow_cell_sync_confirmed,
     is_lane_in_fastq_file_name,
     is_manifest_file_required,
+    is_nanopore_sequencing_complete,
     is_sample_id_in_directory_name,
     is_syncing_complete,
     is_valid_sample_fastq_file,
@@ -432,7 +434,7 @@ def test_is_syncing_complete_false(
             ],
             False,
         ),
-        ([NanoporeDirsAndFiles.sequencing_summary_pattern.replace("*", "FlowCell_ID1_ID2")], True),
+        ([NANOPORE_SEQUENCING_SUMMARY_PATTERN.replace("*", "FlowCell_ID1_ID2")], True),
     ],
 )
 def test_is_manifest_file_required(source_files: list[str], expected_result: bool, tmp_path: Path):
@@ -582,3 +584,49 @@ def test_get_undetermined_fastqs_multiple_matching_files(tmp_path):
 
     # THEN the undetermined fastq files for the lane should be returned
     assert set(result) == set(expected_files)
+
+
+def test_get_nanopore_summary_file_exists(tmp_path: Path):
+    # GIVEN a directory with a correct file in it
+    file_in_directory = Path(tmp_path, "final_summary_some_flow_cell.txt")
+    file_in_directory.touch()
+
+    # WHEN getting the nanopore summary file
+    file: Path | None = get_nanopore_summary_file(tmp_path)
+
+    # THEN the final summary file should be returned
+    assert file == file_in_directory
+
+
+def test_get_nanopore_summary_file(tmp_path: Path):
+    # GIVEN a directory without a summary file in it
+    file_in_directory = Path(tmp_path, "not_a_summary_file.txt")
+    file_in_directory.touch()
+
+    # WHEN getting the nanopore summary file
+    file: Path | None = get_nanopore_summary_file(tmp_path)
+
+    # THEN None should be returned
+    assert file is None
+
+
+def test_is_nanopore_sequencing_complete(tmp_path: Path):
+    # GIVEN a directory with a correct file in it
+    file_in_directory = Path(tmp_path, "final_summary_some_flow_cell.txt")
+    file_in_directory.touch()
+
+    # WHEN checking if the sequencing is complete
+    is_complete: bool = is_nanopore_sequencing_complete(tmp_path)
+
+    # THEN the sequencing should be complete
+    assert is_complete
+
+
+def test_is_nanopore_sequencing_incomplete(tmp_path: Path):
+    # GIVEN a directory with no file in it
+
+    # WHEN checking if the sequencing is complete
+    is_complete: bool = is_nanopore_sequencing_complete(tmp_path)
+
+    # THEN the sequencing should be complete
+    assert not is_complete
