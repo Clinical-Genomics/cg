@@ -8,19 +8,18 @@ from typing import Type
 from pydantic import ValidationError
 from typing_extensions import Literal
 
-from cg.apps.demultiplex.sample_sheet.models import (
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
-    SampleSheet,
 )
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_sheet_from_file,
-)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
 from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
+from cg.constants.symbols import EMPTY_STRING
 from cg.exc import FlowCellError, SampleSheetError
 from cg.models.demultiplex.run_parameters import (
     RunParameters,
@@ -45,15 +44,15 @@ class FlowCellDirectoryData:
     def __init__(self, flow_cell_path: Path, bcl_converter: str | None = None):
         LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
         self.path: Path = flow_cell_path
-        self.machine_name: str = ""
+        self.machine_name: str = EMPTY_STRING
         self._run_parameters: RunParameters | None = None
         self.run_date: datetime.datetime = datetime.datetime.now()
         self.machine_number: int = 0
-        self.base_name: str = ""  # Base name is flow cell-id + flow cell position
-        self.id: str = ""
+        self.base_name: str = EMPTY_STRING  # Base name is flow cell-id + flow cell position
+        self.id: str = EMPTY_STRING
         self.position: Literal["A", "B"] = "A"
         self.parse_flow_cell_dir_name()
-        self.bcl_converter: str = self.get_bcl_converter(bcl_converter)
+        self.bcl_converter: str = bcl_converter or BclConverter.DRAGEN
         self._sample_sheet_path_hk: Path | None = None
 
     def parse_flow_cell_dir_name(self):
@@ -142,25 +141,6 @@ class FlowCellDirectoryData:
     ) -> Literal[Sequencers.HISEQX, Sequencers.HISEQGA, Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
         """Return the sequencer type."""
         return SEQUENCER_TYPES[self.machine_name]
-
-    def get_bcl_converter(self, bcl_converter: str) -> str:
-        """
-        Return the BCL converter to use.
-        Tries to get the BCL converter from the sequencer type if not provided.
-        Note: bcl_converter can be used to override automatic selection.
-        Reason: Data reproducibility.
-        """
-        return bcl_converter or self.get_bcl_converter_by_sequencer()
-
-    def get_bcl_converter_by_sequencer(
-        self,
-    ) -> str:
-        """Return the BCL converter based on the sequencer."""
-        if self.sequencer_type in [Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
-            LOG.debug(f"Using BCL converter: {BclConverter.DRAGEN}")
-            return BclConverter.DRAGEN
-        LOG.debug(f"Using BCL converter: {BclConverter.BCL2FASTQ}")
-        return BclConverter.BCL2FASTQ
 
     @property
     def rta_complete_path(self) -> Path:

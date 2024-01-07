@@ -7,10 +7,8 @@ from pathlib import Path
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
-from cg.apps.demultiplex.sample_sheet.models import SampleSheet
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_sheet_from_file,
-)
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
