@@ -1,5 +1,4 @@
 """Fixtures for the upload Scout API tests."""
-
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -11,6 +10,7 @@ from housekeeper.store.models import Version
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.scout import UploadTrack
 from cg.constants.sequencing import SequencingMethod
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
@@ -606,7 +606,7 @@ def mip_load_config(
         owner=customer_id,
         family=case_id,
         vcf_snv=Path(mip_dna_analysis_dir, snv_vcf_file).as_posix(),
-        track="rare",
+        track=UploadTrack.RARE_DISEASE,
         delivery_report=delivery_report_html.as_posix(),
     )
 

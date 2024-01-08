@@ -7,7 +7,7 @@ from housekeeper.store.models import Version
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
-from cg.constants.scout import MIP_CASE_TAGS, MIP_SAMPLE_TAGS
+from cg.constants.scout import MIP_CASE_TAGS, MIP_SAMPLE_TAGS, UploadTrack
 from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
@@ -34,7 +34,8 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.case_tags: CaseTags = CaseTags(**MIP_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**MIP_SAMPLE_TAGS)
         self.load_config: MipLoadConfig = MipLoadConfig(
-            track="rare", delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG})
+            track=UploadTrack.RARE_DISEASE,
+            delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
         )
         self.mip_analysis_api: MipAnalysisAPI = mip_analysis_api
         self.lims_api: LimsAPI = lims_api

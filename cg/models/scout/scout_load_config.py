@@ -5,6 +5,7 @@ from datetime import datetime
 from pydantic import BaseModel, BeforeValidator, ConfigDict
 from typing_extensions import Annotated, Literal
 
+from cg.constants.scout import UploadTrack
 from cg.models.scout.validators import field_not_none
 
 
@@ -95,7 +96,7 @@ class ScoutLoadConfig(BaseModel):
     coverage_qc_report: str | None = None
     cnv_report: str | None = None
     multiqc: str | None = None
-    track: Literal["rare", "cancer"] = "rare"
+    track: UploadTrack = UploadTrack.RARE_DISEASE
 
     model_config = ConfigDict(validate_assignment=True)
 

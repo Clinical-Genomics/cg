@@ -4,7 +4,7 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
-from cg.constants.scout import BALSAMIC_UMI_CASE_TAGS, BALSAMIC_UMI_SAMPLE_TAGS
+from cg.constants.scout import BALSAMIC_UMI_CASE_TAGS, BALSAMIC_UMI_SAMPLE_TAGS, UploadTrack
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.models.scout.scout_load_config import BalsamicUmiLoadConfig, ScoutCancerIndividual
@@ -21,7 +21,8 @@ class BalsamicUmiConfigBuilder(BalsamicConfigBuilder):
         self.case_tags: CaseTags = CaseTags(**BALSAMIC_UMI_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**BALSAMIC_UMI_SAMPLE_TAGS)
         self.load_config: BalsamicUmiLoadConfig = BalsamicUmiLoadConfig(
-            track="cancer", delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG})
+            track=UploadTrack.CANCER,
+            delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
         )
 
     def include_sample_files(self, config_sample: ScoutCancerIndividual) -> None:

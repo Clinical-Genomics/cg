@@ -14,6 +14,11 @@ class ScoutExportFileName(StrEnum):
     PANELS: str = f"gene_panels{FileExtensions.BED}"
 
 
+class UploadTrack(StrEnum):
+    RARE_DISEASE: str = "rare"
+    CANCER: str = "cancer"
+
+
 class ScoutCustomCaseReportTags(StrEnum):
     DELIVERY: str = "delivery_report"
     CNV: str = "cnv_report"
