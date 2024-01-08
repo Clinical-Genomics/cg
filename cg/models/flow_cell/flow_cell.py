@@ -226,8 +226,8 @@ class FlowCellDirectoryData:
         )
         if SAMPLE_MODEL_TO_BCL_CONVERTER[sample_type_from_sample_sheet] != self.bcl_converter:
             LOG.warning(
-                f"Detected {SAMPLE_MODEL_TO_BCL_CONVERTER[sample_type_from_sample_sheet]} sheet for"
-                f" {self.bcl_converter} flow cell. "
+                f"Detected {SAMPLE_MODEL_TO_BCL_CONVERTER[sample_type_from_sample_sheet]} sample "
+                f"sheet for {self.bcl_converter} flow cell. "
                 "Generate the correct sample sheet or use the correct bcl converter."
             )
             return False
