@@ -40,9 +40,9 @@ RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
     Sequencers.NOVASEQ: RunParametersNovaSeq6000,
     Sequencers.NOVASEQX: RunParametersNovaSeqX,
 }
-BCL_CONVERTER_TO_SAMPLE_MODEL: dict[str, Type[FlowCellSample]] = {
-    BclConverter.BCL2FASTQ: FlowCellSampleBcl2Fastq,
-    BclConverter.DRAGEN: FlowCellSampleBCLConvert,
+SAMPLE_MODEL_TO_BCL_CONVERTER: dict[Type[FlowCellSample], str] = {
+    FlowCellSampleBCLConvert: BclConverter.DRAGEN,
+    FlowCellSampleBcl2Fastq: BclConverter.BCL2FASTQ,
 }
 
 
@@ -224,10 +224,10 @@ class FlowCellDirectoryData:
         sample_type_from_sample_sheet: Type[FlowCellSample] = get_sample_type(
             self.sample_sheet_path
         )
-        if BCL_CONVERTER_TO_SAMPLE_MODEL[self.bcl_converter] != sample_type_from_sample_sheet:
+        if SAMPLE_MODEL_TO_BCL_CONVERTER[sample_type_from_sample_sheet] != self.bcl_converter:
             LOG.warning(
-                f"Detected {sample_type_from_sample_sheet} sheet for "
-                f"{self.bcl_converter} flow cell. "
+                f"Detected {SAMPLE_MODEL_TO_BCL_CONVERTER[sample_type_from_sample_sheet]} sheet for"
+                f" {self.bcl_converter} flow cell. "
                 "Generate the correct sample sheet or use the correct bcl converter."
             )
             return False
