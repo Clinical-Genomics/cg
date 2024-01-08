@@ -78,7 +78,7 @@ class SpringArchiveAPI:
     def archive_file(
         self, file_and_sample: FileAndSample, archive_location: ArchiveLocations
     ) -> None:
-        job_id = self.archive_file_to_location(
+        job_id: int = self.archive_file_to_location(
             file_and_sample=file_and_sample, archive_location=archive_location
         )
         LOG.info(f"File submitted to {archive_location} with archival task id {job_id}.")
