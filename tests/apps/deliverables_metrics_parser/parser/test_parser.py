@@ -1,8 +1,11 @@
-"""Moldule to test the deliverables parser functions."""
+"""Module to test the deliverables parser functions."""
 from pathlib import Path
 
 import pytest
 
+from cg.apps.deliverables_metrics_parser.models.pipeline_metrics_deliverables import (
+    MIPDNAMetricsDeliverables,
+)
 from cg.apps.deliverables_metrics_parser.parser.deliverables_parser import (
     get_metrics_deliverables_file_path,
     parse_metrics_deliverables_file,
@@ -49,6 +52,20 @@ def test_read_metrics_deliverables_file(mip_dna_metrics_deliverables_file_path):
     # THEN the content has been read
     assert content
 
-    model = parse_metrics_deliverables_file(content)
-    print(model)
-    assert model
+
+def test_parse_metrics_deliverables_file(mip_dna_metrics_deliverables_file_path: Path, mocker):
+    """Test parsing of the metrics deliverables file."""
+    # GIVEN a file path to a metrics deliverables file
+
+    # WHEN parsing the metrics deliverables file
+    mocker.patch(
+        "cg.apps.deliverables_metrics_parser.parser.deliverables_parser.get_metrics_deliverables_file_path",
+        return_value=mip_dna_metrics_deliverables_file_path,
+    )
+
+    # THEN a list of metrics deliverables models is returned
+    parsed_metrics: list[MIPDNAMetricsDeliverables] = parse_metrics_deliverables_file(
+        pipeline=Pipeline.MIPDNA, case_id="some_case"
+    )
+
+    assert isinstance(parsed_metrics[0], MIPDNAMetricsDeliverables)

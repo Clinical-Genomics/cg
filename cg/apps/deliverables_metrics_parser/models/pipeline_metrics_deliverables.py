@@ -1,14 +1,13 @@
 """Module for the pipeline metrics deliverables models."""
 from pydantic import BaseModel, Field
 
-from cg.apps.deliverables_metrics_parser.models.supporting_models import ReadInformation
-
 
 class MIPDNAMetricsDeliverables(BaseModel):
     sample_id: str = None
     gender: str = None
-    reads: list[ReadInformation] = None
-    pct_pf_reads_improper_pairs: list[str] = Field(..., alias="PCT_PF_READS_IMPROPER_PAIRS")
+    # Skipping next two lines for now
+    # reads: str = None
+    # pct_pf_reads_improper_pairs: list[str] = Field(..., alias="PCT_PF_READS_IMPROPER_PAIRS")
     mean_target_coverage: str = Field(..., alias="MEAN_TARGET_COVERAGE")
     at_dropout: str = Field(..., alias="AT_DROPOUT")
     fraction_duplicates: float = None
