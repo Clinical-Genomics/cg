@@ -106,7 +106,7 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
         """No updating of barcode mismatch values for Bcl2Fastq samples."""
         LOG.debug(f"No updating of barcode mismatch values for Bcl2Fastq sample {self.sample_id}")
 
-    def __str__(self):
+    def __repr__(self):
         return f"{BclConverter.BCL2FASTQ} sample"
 
 
@@ -227,5 +227,5 @@ class FlowCellSampleBCLConvert(FlowCellSample):
             return
         self._update_barcode_mismatches_2(samples_to_compare=samples_to_compare)
 
-    def __str__(self):
+    def __repr__(self):
         return f"{BclConverter.BCLCONVERT} sample"
