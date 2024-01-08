@@ -26,7 +26,10 @@ class ReadFile:
     @classmethod
     def get_content_from_file(cls, file_format: str, file_path: Path, **kwargs: object) -> Any:
         """Read file using file format dispatch table."""
-        return cls.read_file[file_format](file_path=file_path, **kwargs)
+        try:
+            return cls.read_file[file_format](file_path=file_path, **kwargs)
+        except FileNotFoundError as error:
+            raise FileNotFoundError(f"File {file_path} not found") from error
 
 
 class ReadStream:
