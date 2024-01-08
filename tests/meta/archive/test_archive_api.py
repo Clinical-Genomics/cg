@@ -12,6 +12,7 @@ from cg.io.controller import APIRequest
 from cg.meta.archive.archive import ARCHIVE_HANDLERS, FileAndSample, SpringArchiveAPI
 from cg.meta.archive.ddn.constants import (
     FAILED_JOB_STATUSES,
+    METADATA_LIST,
     ONGOING_JOB_STATUSES,
     JobStatus,
 )
@@ -187,7 +188,7 @@ def test_archive_all_non_archived_spring_files(
     if limit not in [0, -1]:
         sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(sample_id)
         metadata: list[dict] = get_metadata(sample)
-        archive_request_json["metadataList"] = metadata
+        archive_request_json[METADATA_LIST] = metadata
         mock_request_submitter.assert_called_with(
             api_method=APIMethods.POST,
             url="some/api/files/archive",

@@ -50,6 +50,8 @@ ONGOING_JOB_STATUSES: list[str] = [
     JobStatus.RUNNING,
 ]
 
+METADATA_LIST = "metadataList"
+
 
 class MetadataFields(StrEnum):
     CUSTOMER_NAME: str = "customer_name"
@@ -57,7 +59,5 @@ class MetadataFields(StrEnum):
     SAMPLE_NAME: str = "sample_name"
     SEQUENCED_AT: str = "sequenced_at"
     TICKET_NUMBER: str = "ticket_number"
-
-
-METADATA_FIELD_NAME = "metadataName"
-METADATA_FIELD_VALUE = "value"
+    NAME = "metadataName"
+    VALUE = "value"

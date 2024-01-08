@@ -59,8 +59,8 @@ class SpringArchiveAPI:
                 archive_location=archive_location, file_limit=spring_file_count_limit
             )
 
-    def archive_files_to_location(self, archive_location: str, file_limit: int | None):
-        """Archives up to spring_file_count_limit number of files to the provided archive location."""
+    def archive_files_to_location(self, archive_location: str, file_limit: int | None) -> None:
+        """Archives up to spring file count limit number of files to the provided archive location."""
         files_to_archive: list[File] = self.housekeeper_api.get_non_archived_spring_files(
             tags=[archive_location],
             limit=file_limit,
@@ -75,7 +75,9 @@ class SpringArchiveAPI:
         else:
             LOG.info(f"No files to archive for location {archive_location}.")
 
-    def archive_file(self, file_and_sample: FileAndSample, archive_location: ArchiveLocations):
+    def archive_file(
+        self, file_and_sample: FileAndSample, archive_location: ArchiveLocations
+    ) -> None:
         job_id = self.archive_file_to_location(
             file_and_sample=file_and_sample, archive_location=archive_location
         )
