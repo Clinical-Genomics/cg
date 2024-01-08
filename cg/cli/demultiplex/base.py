@@ -5,6 +5,7 @@ import click
 
 from cg.cli.demultiplex.demux import (
     confirm_transfer_of_illumina_flow_cell,
+    confirm_transfer_of_nanopore_flow_cell,
     copy_novaseqx_flow_cells,
     create_manifest_files,
     demultiplex_all,
@@ -26,6 +27,7 @@ demultiplex_cmd_group: click.Group
 for sub_cmd in [
     create_manifest_files,
     confirm_transfer_of_illumina_flow_cell,
+    confirm_transfer_of_nanopore_flow_cell,
     demultiplex_flow_cell,
     demultiplex_all,
     finish_group,

@@ -78,17 +78,3 @@ def get_directories_in_path(path: Path) -> list[Path]:
     if not path.exists():
         raise FileNotFoundError(f"Path {path} does not exist.")
     return [entry for entry in path.iterdir() if entry.is_dir()]
-
-
-def get_only_match(directory: Path, pattern: str) -> Path:
-    """Get a single file or directory matching a pattern in a directory.
-    Raises:
-        FileNotFoundError: If the directory does not exist.
-        ValueError: If the pattern matches more than one file.
-    """
-    files = list(directory.glob(pattern))
-    if not files:
-        raise FileNotFoundError(f"No file matching pattern {pattern} in {directory}")
-    if len(files) > 1:
-        raise ValueError(f"Multiple files matching pattern {pattern} in {directory}")
-    return files[0]
