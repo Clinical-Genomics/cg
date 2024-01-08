@@ -12,6 +12,7 @@ from cg.io.controller import APIRequest
 from cg.meta.archive.archive import ARCHIVE_HANDLERS, FileAndSample, SpringArchiveAPI
 from cg.meta.archive.ddn.constants import (
     FAILED_JOB_STATUSES,
+    METADATA_LIST,
     ONGOING_JOB_STATUSES,
     JobStatus,
 )
@@ -22,6 +23,7 @@ from cg.meta.archive.ddn.models import (
     GetJobStatusResponse,
     MiriaObject,
 )
+from cg.meta.archive.ddn.utils import get_metadata
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
@@ -141,16 +143,16 @@ def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAP
         return_value=123,
     ), mock.patch.object(
         DDNDataFlowClient,
-        "archive_files",
+        "archive_file",
         return_value=123,
     ) as mock_request_submitter:
         # WHEN calling the corresponding archive method
-        spring_archive_api.archive_files_to_location(
-            files_and_samples=[file_and_sample], archive_location=ArchiveLocations.KAROLINSKA_BUCKET
+        spring_archive_api.archive_file_to_location(
+            file_and_sample=file_and_sample, archive_location=ArchiveLocations.KAROLINSKA_BUCKET
         )
 
     # THEN the correct archive function should have been called once
-    mock_request_submitter.assert_called_once_with(files_and_samples=[file_and_sample])
+    mock_request_submitter.assert_called_once_with(file_and_sample=file_and_sample)
 
 
 @pytest.mark.parametrize("limit", [None, -1, 0, 1])
@@ -184,6 +186,9 @@ def test_archive_all_non_archived_spring_files(
 
     # THEN the DDN archiving function should have been called with the correct destination and source if limit > 0
     if limit not in [0, -1]:
+        sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(sample_id)
+        metadata: list[dict] = get_metadata(sample)
+        archive_request_json[METADATA_LIST] = metadata
         mock_request_submitter.assert_called_with(
             api_method=APIMethods.POST,
             url="some/api/files/archive",

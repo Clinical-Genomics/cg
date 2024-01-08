@@ -18,6 +18,7 @@ from cg.meta.archive.ddn.constants import (
 )
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import MiriaObject, TransferPayload
+from cg.meta.archive.ddn.utils import get_metadata
 from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
@@ -264,7 +265,7 @@ def test__refresh_auth_token(ddn_dataflow_client: DDNDataFlowClient, ok_response
     assert ddn_dataflow_client.token_expiration.second == new_expiration.second
 
 
-def test_archive_folders(
+def test_archive_file(
     ddn_dataflow_client: DDNDataFlowClient,
     remote_storage_repository: str,
     local_storage_repository: str,
@@ -281,7 +282,7 @@ def test_archive_folders(
         "api_request_from_content",
         return_value=ok_miria_response,
     ) as mock_request_submitter:
-        job_id: int = ddn_dataflow_client.archive_files([file_and_sample])
+        job_id: int = ddn_dataflow_client.archive_file(file_and_sample)
 
     # THEN an integer should be returned
     assert isinstance(job_id, int)
@@ -300,7 +301,7 @@ def test_archive_folders(
             ],
             "osType": OSTYPE,
             "createFolder": True,
-            "metadataList": [],
+            "metadataList": get_metadata(file_and_sample.sample),
             "settings": [],
         },
         verify=False,

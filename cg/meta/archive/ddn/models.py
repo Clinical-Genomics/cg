@@ -21,7 +21,6 @@ def get_request_log(headers: dict, body: dict):
 class MiriaObject(FileTransferData):
     """Model for representing a singular object transfer."""
 
-    _metadata = None
     destination: str
     source: str
 
@@ -58,6 +57,7 @@ class TransferPayload(BaseModel):
     osType: str = OSTYPE
     createFolder: bool = True
     settings: list[dict] = []
+    metadataList: list[dict] = []
 
     def trim_paths(self, attribute_to_trim: str):
         """Trims the source path from its root directory for all objects in the transfer."""
@@ -76,7 +76,6 @@ class TransferPayload(BaseModel):
         """Creates a correctly structured dict to be used as the request payload."""
         payload: dict = super().model_dump(exclude={"files_to_transfer"})
         payload["pathInfo"] = [miria_file.model_dump() for miria_file in self.files_to_transfer]
-        payload["metadataList"] = []
         return payload
 
     def post_request(self, url: str, headers: dict) -> "TransferResponse":
