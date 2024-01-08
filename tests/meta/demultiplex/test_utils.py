@@ -15,6 +15,8 @@ from cg.meta.demultiplex.utils import (
     create_manifest_file,
     get_existing_manifest_file,
     get_lane_from_sample_fastq,
+    get_nanopore_flow_cell_directories,
+    get_nanopore_flow_cell_relative_path,
     get_nanopore_summary_file,
     get_q30_threshold,
     get_sample_sheet_path_from_flow_cell_dir,
@@ -630,3 +632,28 @@ def test_is_nanopore_sequencing_incomplete(tmp_path: Path):
 
     # THEN the sequencing should be complete
     assert not is_complete
+
+
+def test_get_nanopore_flow_cell_relative_path(nanopore_flow_cells_dir):
+    # GIVEN a nanopore flow cell directory
+    flow_cell_directory = get_nanopore_flow_cell_directories(nanopore_flow_cells_dir)[0]
+
+    # WHEN getting its relative path
+    relative_path = get_nanopore_flow_cell_relative_path(flow_cell_directory)
+
+    # THEN the relative path should be returned
+    assert relative_path.parts == flow_cell_directory.parts[-3:]
+
+
+def test_get_nanopore_flow_cell_directories(nanopore_flow_cells_dir):
+    # GIVEN a directory containing Nanopore data
+
+    # WHEN fetching the individual flow cell directories
+    flow_cell_directories = get_nanopore_flow_cell_directories(nanopore_flow_cells_dir)
+
+    # THEN flow cell directories should be returned
+    assert flow_cell_directories
+
+    # THEN each folder returned should have a final_summary file
+    for flow_cell_directory in flow_cell_directories:
+        assert get_nanopore_summary_file(flow_cell_directory)
