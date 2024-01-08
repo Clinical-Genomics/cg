@@ -4,13 +4,10 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
-from cg.constants.scout_upload import BALSAMIC_UMI_CASE_TAGS, BALSAMIC_UMI_SAMPLE_TAGS
+from cg.constants.scout import BALSAMIC_UMI_CASE_TAGS, BALSAMIC_UMI_SAMPLE_TAGS
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
-from cg.models.scout.scout_load_config import (
-    BalsamicUmiLoadConfig,
-    ScoutCancerIndividual,
-)
+from cg.models.scout.scout_load_config import BalsamicUmiLoadConfig, ScoutCancerIndividual
 from cg.store.models import Analysis, Sample
 
 LOG = logging.getLogger(__name__)
@@ -31,6 +28,5 @@ class BalsamicUmiConfigBuilder(BalsamicConfigBuilder):
         LOG.info("Including BALSAMIC specific sample level files")
 
     def get_balsamic_analysis_type(self, sample: Sample) -> str:
-        """Returns a formatted balsamic analysis type"""
-
+        """Returns a formatted balsamic analysis type."""
         return "panel-umi"

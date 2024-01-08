@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cg import resources
 from cg.constants import Pipeline
@@ -19,6 +19,7 @@ from cg.models.deliverables.metric_deliverables import (
     MetricsDeliverablesCondition,
     MultiqcDataJson,
 )
+from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import PipelineDeliverables
 from cg.models.rnafusion.rnafusion import (
     RnafusionAnalysis,
@@ -46,11 +47,11 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.profile: str = config.rnafusion.profile
         self.conda_env: str = config.rnafusion.conda_env
         self.conda_binary: str = config.rnafusion.conda_binary
-        self.tower_binary_path: str = config.rnafusion.tower_binary_path
+        self.tower_binary_path: str = config.tower_binary_path
         self.tower_pipeline: str = config.rnafusion.tower_pipeline
         self.account: str = config.rnafusion.slurm.account
         self.email: str = config.rnafusion.slurm.mail_user
-        self.compute_env: str = config.rnafusion.compute_env
+        self.compute_env_base: str = config.rnafusion.compute_env
         self.revision: str = config.rnafusion.revision
         self.nextflow_binary_path: str = config.rnafusion.binary_path
 
@@ -72,7 +73,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self, sample: Sample, case_id: str, strandedness: Strandedness
     ) -> list[list[str]]:
         """Get sample sheet content per sample."""
-        sample_metadata: list[dict] = self.gather_file_metadata_for_sample(sample_obj=sample)
+        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
         fastq_forward_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, forward_read=True
         )
@@ -103,7 +104,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             return content_per_sample
 
     def get_pipeline_parameters(
-        self, case_id: str, genomes_base: Optional[Path] = None
+        self, case_id: str, genomes_base: Path | None = None
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
         LOG.debug("Getting parameters information")
@@ -115,7 +116,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             priority=self.account,
         )
 
-    def get_references_path(self, genomes_base: Optional[Path] = None) -> Path:
+    def get_references_path(self, genomes_base: Path | None = None) -> Path:
         if genomes_base:
             return genomes_base.absolute()
         return Path(self.references).absolute()
@@ -242,7 +243,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Parse Rnafusion output analysis files and return analysis model."""
         sample_metrics: dict[str, dict] = {}
         for metric in qc_metrics_raw:
-            metric.name = metric.name.replace("5_3_bias", "bias_5_3")
             try:
                 sample_metrics[metric.id].update({metric.name.lower(): metric.value})
             except KeyError:

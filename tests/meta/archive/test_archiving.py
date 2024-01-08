@@ -9,22 +9,20 @@ from requests import Response
 from cg.constants.constants import APIMethods, FileFormat
 from cg.exc import DdnDataflowAuthenticationError
 from cg.io.controller import APIRequest, WriteStream
-from cg.meta.archive.ddn_dataflow import (
+from cg.meta.archive.ddn.constants import (
     DESTINATION_ATTRIBUTE,
     OSTYPE,
     ROOT_TO_TRIM,
     SOURCE_ATTRIBUTE,
     DataflowEndpoints,
-    DDNDataFlowClient,
-    MiriaObject,
-    TransferPayload,
 )
-from cg.meta.archive.models import FileAndSample, SampleAndDestination
+from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
+from cg.meta.archive.ddn.models import MiriaObject, TransferPayload
+from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import DataFlowConfig
 from cg.store import Store
-from cg.store.models import Sample
 
-FUNCTION_TO_MOCK = "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content"
+FUNCTION_TO_MOCK = "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content"
 
 
 def test_correct_source_root(
@@ -168,7 +166,7 @@ def test_ddn_dataflow_client_initialization_invalid_credentials(
 
     # WHEN initializing the DDNDataFlowClient class with the invalid credentials
     with mock.patch(
-        "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content",
+        "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content",
         return_value=unauthorized_response,
     ):
         # THEN an exception should be raised
@@ -272,7 +270,7 @@ def test_archive_folders(
     local_storage_repository: str,
     file_and_sample: FileAndSample,
     trimmed_local_path: str,
-    ok_ddn_response: Response,
+    ok_miria_response,
 ):
     """Tests that the archiving function correctly formats the input and sends API request."""
 
@@ -281,7 +279,7 @@ def test_archive_folders(
     with mock.patch.object(
         APIRequest,
         "api_request_from_content",
-        return_value=ok_ddn_response,
+        return_value=ok_miria_response,
     ) as mock_request_submitter:
         job_id: int = ddn_dataflow_client.archive_files([file_and_sample])
 
@@ -301,55 +299,45 @@ def test_archive_folders(
                 }
             ],
             "osType": OSTYPE,
-            "createFolder": False,
+            "createFolder": True,
             "metadataList": [],
+            "settings": [],
         },
+        verify=False,
     )
 
 
-def test_retrieve_samples(
+def test_retrieve_files(
     ddn_dataflow_client: DDNDataFlowClient,
     remote_storage_repository: str,
     local_storage_repository: str,
     archive_store: Store,
     trimmed_local_path: str,
-    sample_id: str,
-    ok_ddn_response: Response,
+    file_and_sample: FileAndSample,
+    ok_miria_response,
+    retrieve_request_json,
 ):
     """Tests that the retrieve function correctly formats the input and sends API request."""
 
-    # GIVEN a local path and a sample
-    full_path: str = f"/home{trimmed_local_path}"
-    sample: Sample = archive_store.get_sample_by_internal_id(sample_id)
-    sample_and_destination: SampleAndDestination = SampleAndDestination(
-        sample=sample, destination=full_path
-    )
+    # GIVEN a file and sample which is archived
 
-    # WHEN running the retrieve method and providing a SampleAndDestination object
+    # WHEN running retrieve_files and providing a FileAndSample object
     with mock.patch.object(
-        APIRequest, "api_request_from_content", return_value=ok_ddn_response
+        APIRequest, "api_request_from_content", return_value=ok_miria_response
     ) as mock_request_submitter:
-        job_id: int = ddn_dataflow_client.retrieve_samples([sample_and_destination])
+        job_id: int = ddn_dataflow_client.retrieve_files(files_and_samples=[file_and_sample])
 
         # THEN an integer should be returned
     assert isinstance(job_id, int)
 
     # THEN the mocked submit function should have been called exactly once with correct arguments
+    retrieve_request_json["pathInfo"][0]["source"] += "/" + Path(file_and_sample.file.path).name
     mock_request_submitter.assert_called_once_with(
         api_method=APIMethods.POST,
         url=urljoin(base=ddn_dataflow_client.url, url=DataflowEndpoints.RETRIEVE_FILES),
         headers=dict(ddn_dataflow_client.headers, **ddn_dataflow_client.auth_header),
-        json={
-            "pathInfo": [
-                {
-                    "source": remote_storage_repository + sample_and_destination.sample.internal_id,
-                    "destination": local_storage_repository + trimmed_local_path,
-                }
-            ],
-            "osType": OSTYPE,
-            "createFolder": False,
-            "metadataList": [],
-        },
+        json=retrieve_request_json,
+        verify=False,
     )
 
 

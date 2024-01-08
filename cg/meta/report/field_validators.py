@@ -1,13 +1,16 @@
 """Report field validation helper"""
 
-from typing import Optional
 
 from cg.constants import NA_FIELD
 from cg.constants.constants import SCALE_TO_MILLION_READ_PAIRS
 from cg.models.report.report import ReportModel
 
 
-def get_million_read_pairs(reads: int) -> Optional[float]:
+def get_mapped_reads_fraction(mapped_reads: float, total_reads: float) -> float | None:
+    return mapped_reads / total_reads if mapped_reads and total_reads else None
+
+
+def get_million_read_pairs(reads: int) -> float | None:
     """Return number of sequencing reads as millions of read pairs."""
     return (
         round(reads / SCALE_TO_MILLION_READ_PAIRS, 1) if reads or isinstance(reads, int) else None

@@ -1,6 +1,5 @@
 """This script tests the cli methods to add cases to status-db"""
 from datetime import datetime
-from typing import Union
 
 from sqlalchemy.orm import Query
 
@@ -137,7 +136,7 @@ def test_external_sample_to_re_analyse(
     with completed analysis show up among the cases to analyse."""
 
     # GIVEN a sample which is not sequenced and external
-    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=None, is_external=True)
+    test_sample: Sample = helpers.add_sample(base_store, is_external=True, last_sequenced_at=None)
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(
@@ -166,7 +165,7 @@ def test_new_external_case_not_in_result(base_store: Store, helpers: StoreHelper
     """Test that a case with one external sample that has no specified data_analysis does not show up."""
 
     # GIVEN an externally sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=None, is_external=True)
+    test_sample: Sample = helpers.add_sample(base_store, is_external=True, last_sequenced_at=None)
 
     # GIVEN a cancer case
     test_case: Case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
@@ -224,7 +223,7 @@ def test_all_samples_and_analysis_completed(
     test_analysis: Analysis = helpers.add_analysis(base_store, completed_at=timestamp_now)
 
     # Given a completed analysis
-    test_analysis.case.action: Union[None, str] = None
+    test_analysis.case.action: str | None = None
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
     link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)

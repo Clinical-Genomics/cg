@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Union
 
 from sqlalchemy.orm import Query
 
@@ -65,7 +64,7 @@ def test_filter_cases_has_sequence_when_external(base_store: Store, helpers: Sto
     """Test that a case is returned when there is a case with an externally sequenced sample."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=None, is_external=True)
+    test_sample: Sample = helpers.add_sample(base_store, is_external=True, last_sequenced_at=None)
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
@@ -119,7 +118,7 @@ def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
     """Test that no case is returned when there is a cases with sample that has not been sequenced nor is external."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=None, is_external=False)
+    test_sample: Sample = helpers.add_sample(base_store, is_external=False, last_sequenced_at=None)
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
@@ -234,7 +233,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method(
 
     # GIVEN a sample with a valid Loqusdb sequencing method
     test_sample_wes: Sample = helpers.add_sample(
-        base_store, last_sequenced_at=timestamp_now, application_type=SequencingMethod.WES
+        base_store, application_type=SequencingMethod.WES, last_sequenced_at=timestamp_now
     )
 
     # GIVEN a MIP-DNA associated test case
@@ -264,7 +263,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method_empty(
 
     # GIVEN a not supported loqusdb sample
     test_sample_wts: Sample = helpers.add_sample(
-        base_store, name="sample_wts", last_sequenced_at=timestamp_now, is_rna=True
+        base_store, is_rna=True, name="sample_wts", last_sequenced_at=timestamp_now
     )
 
     # GIVEN a MIP-DNA associated test case
@@ -327,7 +326,7 @@ def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(
-        base_store, last_sequenced_at=timestamp_now, is_external=False
+        base_store, is_external=False, last_sequenced_at=timestamp_now
     )
 
     # GIVEN a case
@@ -360,14 +359,14 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(
-        base_store, last_sequenced_at=timestamp_now, is_external=False
+        base_store, is_external=False, last_sequenced_at=timestamp_now
     )
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(base_store, pipeline=Pipeline.MIP_DNA)
 
     # Given an action set to None
-    test_analysis.case.action: Union[None, str] = None
+    test_analysis.case.action = None
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
     link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)
@@ -396,14 +395,14 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(
-        base_store, last_sequenced_at=timestamp_yesterday, is_external=True
+        base_store, is_external=True, last_sequenced_at=timestamp_yesterday
     )
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(base_store, pipeline=Pipeline.MIP_DNA)
 
     # Given an action set to None
-    test_analysis.case.action: Union[None, str] = None
+    test_analysis.case.action: str | None = None
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
     link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)

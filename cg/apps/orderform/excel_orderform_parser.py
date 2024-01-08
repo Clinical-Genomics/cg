@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import Optional
 
 import openpyxl
 from openpyxl.cell.cell import Cell
@@ -9,8 +8,9 @@ from openpyxl.worksheet.worksheet import Worksheet
 from pydantic import ConfigDict, TypeAdapter
 
 from cg.apps.orderform.orderform_parser import OrderformParser
+from cg.apps.orderform.utils import are_all_samples_metagenome
 from cg.constants import DataDelivery
-from cg.constants.orderforms import ORDERFORM_VERSIONS, Orderform
+from cg.constants.orderforms import Orderform
 from cg.exc import OrderFormError
 from cg.models.orders.excel_sample import ExcelSample
 from cg.models.orders.order import OrderType
@@ -24,11 +24,11 @@ class ExcelOrderformParser(OrderformParser):
     NO_VALUE: str = "no_value"
     SHEET_NAMES: list[str] = ["Orderform", "orderform", "order form"]
     VALID_ORDERFORMS: list[str] = [
-        f"{Orderform.MIP_DNA}:{ORDERFORM_VERSIONS[Orderform.MIP_DNA]}",  # Orderform MIP-DNA, Balsamic, sequencing only, MIP-RNA
-        f"{Orderform.MICROSALT}:{ORDERFORM_VERSIONS[Orderform.MICROSALT]}",  # Microbial WGS
-        f"{Orderform.RML}:{ORDERFORM_VERSIONS[Orderform.RML]}",  # Orderform Ready made libraries (RML)
-        f"{Orderform.METAGENOME}:{ORDERFORM_VERSIONS[Orderform.METAGENOME]}",  # Microbial meta genomes
-        f"{Orderform.SARS_COV_2}:{ORDERFORM_VERSIONS[Orderform.SARS_COV_2]}",  # Orderform SARS-CoV-2
+        f"{Orderform.MIP_DNA}:{Orderform.get_current_orderform_version(Orderform.MIP_DNA)}",  # Orderform MIP-DNA, Balsamic, sequencing only, MIP-RNA
+        f"{Orderform.MICROSALT}:{Orderform.get_current_orderform_version(Orderform.MICROSALT)}",  # Microbial WGS
+        f"{Orderform.RML}:{Orderform.get_current_orderform_version(Orderform.RML)}",  # Orderform Ready made libraries (RML)
+        f"{Orderform.METAGENOME}:{Orderform.get_current_orderform_version(Orderform.METAGENOME)}",  # Microbial meta genomes
+        f"{Orderform.SARS_COV_2}:{Orderform.get_current_orderform_version(Orderform.SARS_COV_2)}",  # Orderform SARS-CoV-2
     ]
     samples: list[ExcelSample] = []
 
@@ -70,7 +70,7 @@ class ExcelOrderformParser(OrderformParser):
     @staticmethod
     def get_sample_row_info(
         row: tuple[Cell], header_row: list[str], empty_row_found: bool
-    ) -> Optional[dict]:
+    ) -> dict | None:
         """Convert an Excel row with sample data into a dict with sample info"""
         values = []
         cell: Cell
@@ -117,7 +117,7 @@ class ExcelOrderformParser(OrderformParser):
                 return raw_samples
 
             if sample_rows:
-                sample_dict: Optional[dict] = ExcelOrderformParser.get_sample_row_info(
+                sample_dict: dict | None = ExcelOrderformParser.get_sample_row_info(
                     row=row, header_row=header_row, empty_row_found=empty_row_found
                 )
                 if sample_dict:
@@ -141,9 +141,8 @@ class ExcelOrderformParser(OrderformParser):
     def get_project_type(self, document_title: str) -> str:
         """Determine the project type and set it to the class."""
         document_number_to_project_type = {
-            Orderform.MICROSALT: str(OrderType.MICROSALT),
-            Orderform.METAGENOME: str(OrderType.METAGENOME),
-            Orderform.SARS_COV_2: str(OrderType.SARS_COV_2),
+            Orderform.MICROSALT: OrderType.MICROSALT,
+            Orderform.SARS_COV_2: OrderType.SARS_COV_2,
         }
         for document_number, value in document_number_to_project_type.items():
             if document_number in document_title:
@@ -151,9 +150,16 @@ class ExcelOrderformParser(OrderformParser):
 
         analysis = self.parse_data_analysis()
         if Orderform.RML in document_title:
-            return str(OrderType.RML) if analysis == self.NO_ANALYSIS else analysis
+            return OrderType.RML if analysis == self.NO_ANALYSIS else analysis
         if Orderform.MIP_DNA in document_title:
-            return str(OrderType.FASTQ) if analysis == self.NO_ANALYSIS else analysis
+            if analysis == self.NO_ANALYSIS:
+                return (
+                    OrderType.METAGENOME
+                    if are_all_samples_metagenome(self.samples)
+                    else OrderType.FASTQ
+                )
+            else:
+                return analysis
         raise OrderFormError(f"Undetermined project type in: {document_title}")
 
     def parse_data_analysis(self) -> str:

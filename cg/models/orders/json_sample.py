@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BeforeValidator, constr
 from typing_extensions import Annotated
 
@@ -9,16 +7,17 @@ from cg.models.orders.validators.json_sample_validators import convert_well, joi
 
 
 class JsonSample(OrderSample):
-    cohorts: Optional[list[str]] = None
-    concentration: Optional[str] = None
-    concentration_sample: Optional[str] = None
-    control: Optional[str] = None
+    cohorts: list[str] | None = None
+    concentration: str | None = None
+    concentration_ng_ul: str | None = None
+    concentration_sample: str | None = None
+    control: str | None = None
     data_analysis: Pipeline = Pipeline.MIP_DNA
     data_delivery: DataDelivery = DataDelivery.SCOUT
-    index: Optional[str] = None
-    panels: Optional[list[str]] = None
-    quantity: Optional[str] = None
-    synopsis: Annotated[Optional[str], BeforeValidator(join_list)] = None
+    index: str | None = None
+    panels: list[str] | None = None
+    quantity: str | None = None
+    synopsis: Annotated[str | None, BeforeValidator(join_list)] = None
     well_position: Annotated[
-        Optional[constr(pattern=r"^[A-H]:(1[0-2]|[1-9])$")], BeforeValidator(convert_well)
+        constr(pattern=r"^[A-H]:(1[0-2]|[1-9])$") | None, BeforeValidator(convert_well)
     ] = None

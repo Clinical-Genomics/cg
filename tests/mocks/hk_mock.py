@@ -5,7 +5,7 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Optional, Set
+from typing import Set
 
 from housekeeper.store.models import Bundle, File, Version
 
@@ -183,7 +183,7 @@ class MockHousekeeperAPI:
             return None
         return self._files[-1]
 
-    def get_file_from_latest_version(self, bundle_name: str, tags: list[str]) -> Optional[File]:
+    def get_file_from_latest_version(self, bundle_name: str, tags: list[str]) -> File | None:
         """Find a file in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
         if not version:
@@ -191,9 +191,7 @@ class MockHousekeeperAPI:
             raise HousekeeperBundleVersionMissingError
         return self.files(version=version.id, tags=tags).first()
 
-    def get_files_from_latest_version(
-        self, bundle_name: str, tags: list[str]
-    ) -> Optional[list[File]]:
+    def get_files_from_latest_version(self, bundle_name: str, tags: list[str]) -> list[File] | None:
         """Return files in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
         if not version:
@@ -441,6 +439,17 @@ class MockHousekeeperAPI:
         """
         return self.files(*args, **kwargs)
 
+    def get_file_insensitive_path(self, path: Path) -> File | None:
+        """Returns a file in Housekeeper with a path that matches the given path, insensitive to whether the paths
+        are included or not."""
+        file: File = self.files(path=path.as_posix()).first()
+        if not file:
+            if path.is_absolute():
+                file = self.files(path=str(path).replace(self.root_path, "")).first()
+            else:
+                file = self.files(path=self.root_path + str(path)).first()
+        return file
+
     def add_file(self, path, version_obj, tags, to_archive=False):
         """Add a file to housekeeper."""
         tags = tags or []
@@ -465,7 +474,7 @@ class MockHousekeeperAPI:
         return new_file
 
     def check_bundle_files(
-        self, bundle_name: str, file_paths: list[Path], last_version, tags: Optional[list] = None
+        self, bundle_name: str, file_paths: list[Path], last_version, tags: list | None = None
     ) -> list[Path]:
         """Checks if any of the files in the provided list are already added to the provided bundle. Returns a list of files that have not been added"""
         for file in self.get_files(bundle=bundle_name, tags=tags, version=last_version.id):
@@ -512,7 +521,7 @@ class MockHousekeeperAPI:
             sequencing_files_in_hk[bundle_name] = False
             for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
                 sample_file_in_hk: list[bool] = []
-                hk_files: Optional[list[File]] = self.get_files_from_latest_version(
+                hk_files: list[File] | None = self.get_files_from_latest_version(
                     bundle_name=bundle_name, tags=[tag]
                 )
                 sample_file_in_hk += [True for hk_file in hk_files if hk_file.is_included]
@@ -523,7 +532,7 @@ class MockHousekeeperAPI:
             )
         return all(sequencing_files_in_hk.values())
 
-    def delete_file(self, file_id: int) -> Optional[File]:
+    def delete_file(self, file_id: int) -> File | None:
         """Mock deleting a file both from database and disk (if included)."""
         file_obj = self._get_mock_file(file_id)
         if not file_obj:
@@ -539,11 +548,23 @@ class MockHousekeeperAPI:
 
         return file_obj
 
-    def _get_mock_file(self, file_id: int) -> Optional[File]:
+    def _get_mock_file(self, file_id: int) -> File | None:
         for file_obj in self._files:
             if file_obj.id == file_id:
                 return file_obj
         return None
+
+    def get_non_archived_files_for_bundle(
+        self, bundle_name: str, tags: list | None = None
+    ) -> list[File]:
+        """Returns all non-archived files from a given bundle, tagged with the given tags."""
+        pass
+
+    def get_archived_files_for_bundle(
+        self, bundle_name: str, tags: list | None = None
+    ) -> list[File]:
+        """Returns all archived files from a given bundle, tagged with the given tags."""
+        pass
 
     @staticmethod
     def get_tag_names_from_file(file) -> [str]:

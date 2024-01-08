@@ -4,17 +4,14 @@ from typing import Type
 
 from pydantic import TypeAdapter
 
-from cg.apps.demultiplex.sample_sheet.models import (
+from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSample,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
-    SampleSheet,
 )
+from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import (
-    SampleSheetBcl2FastqSections,
-    SampleSheetBCLConvertSections,
-)
+from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
 from cg.exc import SampleSheetError
 from cg.io.controller import ReadFile
 
@@ -62,10 +59,10 @@ def get_sample_type(sample_sheet_path: Path) -> Type[FlowCellSample]:
     for row in sample_sheet_content:
         if not row:
             continue
-        if SampleSheetBCLConvertSections.Data.HEADER.value in row[0]:
+        if SampleSheetBCLConvertSections.Data.HEADER in row[0]:
             LOG.info("Sample sheet was generated for BCL Convert")
             return FlowCellSampleBCLConvert
-        if SampleSheetBcl2FastqSections.Data.HEADER.value in row[0]:
+        if SampleSheetBcl2FastqSections.Data.HEADER in row[0]:
             LOG.info("Sample sheet was generated for BCL2FASTQ")
             return FlowCellSampleBcl2Fastq
     raise SampleSheetError("Could not determine sample sheet type")

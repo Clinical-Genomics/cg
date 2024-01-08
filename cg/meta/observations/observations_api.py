@@ -3,7 +3,6 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Union
 
 from housekeeper.store.models import Version
 
@@ -21,7 +20,7 @@ from cg.models.observations.input_files import (
     MipDNAObservationsInputFiles,
 )
 from cg.store import Store
-from cg.store.models import Analysis, Customer, Case
+from cg.store.models import Analysis, Case, Customer
 
 LOG = logging.getLogger(__name__)
 
@@ -40,14 +39,14 @@ class ObservationsAPI:
     def upload(self, case: Case) -> None:
         """Upload observations to Loqusdb."""
         self.check_customer_loqusdb_permissions(case.customer)
-        input_files: Union[
-            MipDNAObservationsInputFiles, BalsamicObservationsInputFiles
-        ] = self.get_observations_input_files(case)
+        input_files: MipDNAObservationsInputFiles | BalsamicObservationsInputFiles = (
+            self.get_observations_input_files(case)
+        )
         self.load_observations(case=case, input_files=input_files)
 
     def get_observations_input_files(
         self, case: Case
-    ) -> Union[MipDNAObservationsInputFiles, BalsamicObservationsInputFiles]:
+    ) -> MipDNAObservationsInputFiles | BalsamicObservationsInputFiles:
         """Fetch input files from a case to upload to Loqusdb."""
         analysis: Analysis = case.analyses[0]
         analysis_date: datetime = analysis.started_at or analysis.completed_at
@@ -80,8 +79,8 @@ class ObservationsAPI:
     def is_duplicate(
         case: Case,
         loqusdb_api: LoqusdbAPI,
-        profile_vcf_path: Optional[Path],
-        profile_threshold: Optional[float],
+        profile_vcf_path: Path | None,
+        profile_threshold: float | None,
     ) -> bool:
         """Check if a case has already been uploaded to Loqusdb."""
         loqusdb_case: dict = loqusdb_api.get_case(case_id=case.internal_id)
@@ -94,7 +93,7 @@ class ObservationsAPI:
         )
         return bool(loqusdb_case or duplicate or case.loqusdb_uploaded_samples)
 
-    def update_statusdb_loqusdb_id(self, samples: list[Case], loqusdb_id: Optional[str]) -> None:
+    def update_statusdb_loqusdb_id(self, samples: list[Case], loqusdb_id: str | None) -> None:
         """Update Loqusdb ID field in StatusDB for each of the provided samples."""
         for sample in samples:
             sample.loqusdb_id = loqusdb_id
@@ -102,28 +101,28 @@ class ObservationsAPI:
 
     def check_customer_loqusdb_permissions(self, customer: Customer) -> None:
         """Verifies that the customer is whitelisted for Loqusdb uploads."""
-        if customer.internal_id not in [cust_id.value for cust_id in self.get_loqusdb_customers()]:
+        if customer.internal_id not in [cust_id for cust_id in self.get_loqusdb_customers()]:
             LOG.error(
                 f"Customer {customer.internal_id} is not whitelisted for Loqusdb uploads. Cancelling upload."
             )
             raise LoqusdbUploadCaseError
         LOG.info(f"Valid customer {customer.internal_id} for Loqusdb uploads")
 
-    def get_loqusdb_customers(self) -> Union[LoqusdbMipCustomers, LoqusdbBalsamicCustomers]:
+    def get_loqusdb_customers(self) -> LoqusdbMipCustomers | LoqusdbBalsamicCustomers:
         """Returns the customers that are entitled to Loqusdb uploads."""
         raise NotImplementedError
 
     def load_observations(
         self,
         case: Case,
-        input_files: Union[MipDNAObservationsInputFiles, BalsamicObservationsInputFiles],
+        input_files: MipDNAObservationsInputFiles | BalsamicObservationsInputFiles,
     ) -> None:
         """Load observation counts to Loqusdb."""
         raise NotImplementedError
 
     def extract_observations_files_from_hk(
         self, hk_version: Version
-    ) -> Union[MipDNAObservationsInputFiles, BalsamicObservationsInputFiles]:
+    ) -> MipDNAObservationsInputFiles | BalsamicObservationsInputFiles:
         """Extract observations files given a housekeeper version."""
         raise NotImplementedError
 

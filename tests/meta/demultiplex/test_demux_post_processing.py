@@ -2,16 +2,14 @@ from pathlib import Path
 
 import pytest
 from housekeeper.store.models import File
+from pydantic import BaseModel
 
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_sample_sheet_path_to_housekeeper,
-)
+from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
 from cg.models.cg_config import CGConfig
 from cg.store.models import Sample
-from tests.meta.demultiplex.conftest import FlowCellInfo
 
 
 def test_set_dry_run(
@@ -32,23 +30,53 @@ def test_set_dry_run(
     assert post_demux_api.dry_run is True
 
 
+class DemultiplexingScenario(BaseModel):
+    flow_cell_directory: str
+    flow_cell_name: str
+    samples_ids: str
+    bcl_converter: str = BclConverter.DRAGEN
+
+
 @pytest.mark.parametrize(
-    "demux_type",
-    ["BCL2FASTQ_TREE", "BCLCONVERT_TREE", "BCLCONVERT_FLAT", "BCLCONVERT_ON_SEQUENCER"],
+    "scenario",
+    [
+        DemultiplexingScenario(
+            flow_cell_directory="flow_cell_directory_name_demultiplexed_with_bcl_convert",
+            flow_cell_name="flow_cell_name_demultiplexed_with_bcl_convert",
+            samples_ids="bcl_convert_demultiplexed_flow_cell_sample_internal_ids",
+        ),
+        DemultiplexingScenario(
+            flow_cell_directory="flow_cell_directory_name_demultiplexed_with_bcl2fastq",
+            flow_cell_name="flow_cell_name_demultiplexed_with_bcl2fastq",
+            samples_ids="bcl2fastq_demultiplexed_flow_cell_sample_internal_ids",
+            bcl_converter=BclConverter.BCL2FASTQ,
+        ),
+        DemultiplexingScenario(
+            flow_cell_directory="flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer",
+            flow_cell_name="flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer",
+            samples_ids="bcl_convert_demultiplexed_flow_cell_sample_internal_ids",
+        ),
+        DemultiplexingScenario(
+            flow_cell_directory="flow_cell_directory_name_demultiplexed_with_bcl_convert_flat",
+            flow_cell_name="flow_cell_name_demultiplexed_with_bcl_convert",
+            samples_ids="bcl_convert_demultiplexed_flow_cell_sample_internal_ids",
+        ),
+    ],
+    ids=["BCLConvert tree", "BCL2FASTQ", "BCLConvert on sequencer", "BCLConvert flat"],
 )
 def test_post_processing_of_flow_cell(
-    demux_type: str,
+    scenario: DemultiplexingScenario,
     demultiplex_context: CGConfig,
-    flow_cell_info_map: dict[str, FlowCellInfo],
+    request,
     tmp_demultiplexed_runs_directory: Path,
 ):
     """Test adding a demultiplexed flow cell to the databases with. Runs on each type of
     demultiplexing software and setting used."""
 
     # GIVEN a demultiplexed flow cell
-    flow_cell_demultiplexing_directory: str = flow_cell_info_map.get(demux_type).directory
-    flow_cell_name: str = flow_cell_info_map.get(demux_type).name
-    sample_internal_ids: list[str] = flow_cell_info_map.get(demux_type).sample_internal_ids
+    flow_cell_demultiplexing_directory: str = request.getfixturevalue(scenario.flow_cell_directory)
+    flow_cell_name: str = request.getfixturevalue(scenario.flow_cell_name)
+    sample_internal_ids: list[str] = request.getfixturevalue(scenario.samples_ids)
 
     # GIVEN the sample_internal_ids are present in statusdb
     for sample_internal_id in sample_internal_ids:
@@ -74,7 +102,10 @@ def test_post_processing_of_flow_cell(
         bundle=flow_cell_name, tags=[SequencingFileTag.SAMPLE_SHEET]
     ).all()
     # WHEN post-processing the demultiplexed flow cell
-    demux_post_processing_api.finish_flow_cell(flow_cell_demultiplexing_directory)
+    demux_post_processing_api.finish_flow_cell(
+        flow_cell_directory_name=flow_cell_demultiplexing_directory,
+        bcl_converter=scenario.bcl_converter,
+    )
 
     # THEN a flow cell was created in statusdb
     assert demux_post_processing_api.status_db.get_flow_cell_by_name(flow_cell_name)
@@ -148,7 +179,9 @@ def test_post_processing_tracks_undetermined_fastqs_for_bcl2fastq(
     # GIVEN a flow cell with undetermined fastqs in a non-pooled lane
 
     # WHEN post processing the flow cell
-    demux_post_processing_api.finish_flow_cell(bcl2fastq_flow_cell_dir_name)
+    demux_post_processing_api.finish_flow_cell(
+        flow_cell_directory_name=bcl2fastq_flow_cell_dir_name, bcl_converter=BclConverter.BCL2FASTQ
+    )
 
     # THEN the undetermined fastqs were stored in housekeeper
     fastq_files: list[File] = demux_post_processing_api.hk_api.get_files(
@@ -175,7 +208,9 @@ def test_post_processing_tracks_undetermined_fastqs_for_bclconvert(
     # GIVEN a flow cell with undetermined fastqs in a non-pooled lane
 
     # WHEN post processing the flow cell
-    demux_post_processing_api.finish_flow_cell(bclconvert_flow_cell_dir_name)
+    demux_post_processing_api.finish_flow_cell(
+        flow_cell_directory_name=bclconvert_flow_cell_dir_name, bcl_converter=BclConverter.DRAGEN
+    )
 
     # THEN the undetermined fastqs were stored in housekeeper
     fastq_files: list[File] = demux_post_processing_api.hk_api.get_files(
@@ -203,7 +238,9 @@ def test_sample_read_count_update_is_idempotent(
     # GIVEN a demultiplexed flow cell
 
     # WHEN post processing the flow cell twice
-    demux_post_processing_api.finish_flow_cell(bcl2fastq_flow_cell_dir_name)
+    demux_post_processing_api.finish_flow_cell(
+        flow_cell_directory_name=bcl2fastq_flow_cell_dir_name, bcl_converter=BclConverter.BCL2FASTQ
+    )
     first_sample_read_count: int = demux_post_processing_api.status_db.get_sample_by_internal_id(
         bcl2fastq_sample_id_with_non_pooled_undetermined_reads
     ).reads

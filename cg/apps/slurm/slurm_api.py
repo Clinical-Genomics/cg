@@ -1,7 +1,6 @@
 """Module to create sbatch files and communicate with SLURM."""
 import logging
 from pathlib import Path
-from typing import Optional
 
 from cg.apps.slurm.sbatch import (
     DRAGEN_SBATCH_HEADER_TEMPLATE,
@@ -31,7 +30,7 @@ class SlurmAPI:
     @staticmethod
     def generate_sbatch_content(sbatch_parameters: Sbatch) -> str:
         """Take a parameters object and generate a string with sbatch information."""
-        if hasattr(sbatch_parameters, Slurm.PARTITION.value):
+        if hasattr(sbatch_parameters, Slurm.PARTITION):
             sbatch_header: str = SlurmAPI.generate_dragen_sbatch_header(
                 sbatch_parameters=sbatch_parameters
             )
@@ -53,7 +52,7 @@ class SlurmAPI:
         return DRAGEN_SBATCH_HEADER_TEMPLATE.format(**sbatch_parameters.model_dump())
 
     @staticmethod
-    def generate_sbatch_body(commands: str, error_function: Optional[str] = None) -> str:
+    def generate_sbatch_body(commands: str, error_function: str | None = None) -> str:
         if not error_function:
             error_function = "log 'Something went wrong, aborting'"
 

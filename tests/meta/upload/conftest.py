@@ -101,9 +101,7 @@ def mip_dna_case(mip_dna_context: CGConfig, helpers: StoreHelpers) -> Case:
         data_analysis=Pipeline.MIP_DNA,
     )
     dna_mip_sample: Sample = helpers.add_sample(
-        store=store,
-        internal_id="mip-dna-case",
-        application_type="wgs",
+        store=store, application_type="wgs", internal_id="mip-dna-case"
     )
     helpers.add_relationship(store=store, case=mip_dna_case, sample=dna_mip_sample)
 

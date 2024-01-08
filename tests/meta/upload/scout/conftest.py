@@ -108,28 +108,19 @@ def rna_store(
     rna_case.internal_id = rna_case_id
 
     rna_sample_son = helpers.add_sample(
-        store=store,
-        name="rna_son",
-        subject_id="son",
-        application_type=SequencingMethod.WTS,
+        store=store, application_type=SequencingMethod.WTS, name="rna_son", subject_id="son"
     )
     rna_sample_daughter = helpers.add_sample(
         store=store,
+        application_type=SequencingMethod.WTS,
         name="rna_daughter",
         subject_id="daughter",
-        application_type=SequencingMethod.WTS,
     )
     rna_sample_mother = helpers.add_sample(
-        store=store,
-        name="rna_mother",
-        subject_id="mother",
-        application_type=SequencingMethod.WTS,
+        store=store, application_type=SequencingMethod.WTS, name="rna_mother", subject_id="mother"
     )
     rna_sample_father = helpers.add_sample(
-        store=store,
-        name="rna_father",
-        subject_id="father",
-        application_type=SequencingMethod.WTS,
+        store=store, application_type=SequencingMethod.WTS, name="rna_father", subject_id="father"
     )
     helpers.add_relationship(
         store=store,
@@ -169,31 +160,31 @@ def rna_store(
 
     dna_sample_son = helpers.add_sample(
         store=store,
-        name="dna_son",
-        subject_id="son",
         application_tag=SequencingMethod.WGS,
         application_type=SequencingMethod.WGS,
+        name="dna_son",
+        subject_id="son",
     )
     dna_sample_daughter = helpers.add_sample(
         store=store,
-        name="dna_daughter",
-        subject_id="daughter",
         application_tag=SequencingMethod.WGS,
         application_type=SequencingMethod.WGS,
+        name="dna_daughter",
+        subject_id="daughter",
     )
     dna_sample_mother = helpers.add_sample(
         store=store,
-        name="dna_mother",
-        subject_id="mother",
         application_tag=SequencingMethod.WGS,
         application_type=SequencingMethod.WGS,
+        name="dna_mother",
+        subject_id="mother",
     )
     dna_sample_father = helpers.add_sample(
         store=store,
-        name="dna_father",
-        subject_id="father",
         application_tag=SequencingMethod.WGS,
         application_type=SequencingMethod.WGS,
+        name="dna_father",
+        subject_id="father",
     )
     helpers.add_relationship(
         store=store,

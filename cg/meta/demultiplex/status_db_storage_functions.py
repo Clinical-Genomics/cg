@@ -1,7 +1,6 @@
 """Functions interacting with statusdb in the DemuxPostProcessingAPI."""
 import datetime
 import logging
-from typing import Optional
 
 from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
@@ -27,7 +26,7 @@ def store_flow_cell_data_in_status_db(
     Create flow cell from the parsed and validated flow cell data.
     And add the samples on the flow cell to the model.
     """
-    flow_cell: Optional[Flowcell] = store.get_flow_cell_by_name(flow_cell_name=parsed_flow_cell.id)
+    flow_cell: Flowcell | None = store.get_flow_cell_by_name(flow_cell_name=parsed_flow_cell.id)
     if not flow_cell:
         flow_cell: Flowcell = Flowcell(
             name=parsed_flow_cell.id,
@@ -111,12 +110,12 @@ def metric_has_sample_in_statusdb(sample_internal_id: str, store: Store) -> bool
 
 
 def metric_exists_in_status_db(metric: SampleLaneSequencingMetrics, store: Store) -> bool:
-    existing_metrics_entry: Optional[
-        SampleLaneSequencingMetrics
-    ] = store.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-        flow_cell_name=metric.flow_cell_name,
-        sample_internal_id=metric.sample_internal_id,
-        lane=metric.flow_cell_lane_number,
+    existing_metrics_entry: SampleLaneSequencingMetrics | None = (
+        store.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+            flow_cell_name=metric.flow_cell_name,
+            sample_internal_id=metric.sample_internal_id,
+            lane=metric.flow_cell_lane_number,
+        )
     )
     if existing_metrics_entry:
         LOG.warning(
@@ -132,7 +131,7 @@ def store_sample_data_in_status_db(flow_cell: FlowCellDirectoryData, store: Stor
     sequenced_at: datetime = flow_cell.sequenced_at
 
     for sample_id in sample_internal_ids:
-        sample: Optional[Sample] = store.get_sample_by_internal_id(sample_id)
+        sample: Sample | None = store.get_sample_by_internal_id(sample_id)
 
         if not sample:
             LOG.warning(f"Cannot find {sample_id}. Skipping.")
@@ -159,3 +158,12 @@ def update_sample_sequencing_date(sample: Sample, sequenced_at: datetime) -> Non
     if not sample.last_sequenced_at or sample.last_sequenced_at < sequenced_at:
         LOG.debug(f"Updating sample {sample.internal_id} with new sequencing date .")
         sample.last_sequenced_at = sequenced_at
+
+
+def delete_sequencing_metrics_from_statusdb(flow_cell_id: str, store: Store) -> None:
+    sequencing_metrics: list[
+        SampleLaneSequencingMetrics
+    ] = store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_id)
+    for metric in sequencing_metrics:
+        store.session.delete(metric)
+    store.session.commit()

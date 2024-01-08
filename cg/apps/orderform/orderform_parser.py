@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Hashable, Iterable, Optional
+from typing import Hashable, Iterable
 
 from pydantic import BaseModel, ConfigDict, constr
 
@@ -19,13 +19,13 @@ class OrderformParser(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
     samples: list[OrderSample] = []
-    project_type: Optional[OrderType] = None
-    delivery_type: Optional[DataDelivery] = None
+    project_type: OrderType | None = None
+    delivery_type: DataDelivery | None = None
     customer_id: constr(
         min_length=1, max_length=Customer.internal_id.property.columns[0].type.length
     ) = None
-    order_comment: Optional[str] = None
-    order_name: Optional[str] = None
+    order_comment: str | None = None
+    order_name: str | None = None
 
     def parse_orderform(self, orderform_file: Path) -> None:
         """Parse the orderform information"""

@@ -1,23 +1,21 @@
 """Tests the findbusinessdata part of the Cg store API."""
 import logging
 from datetime import datetime
-from typing import Optional
 
 import pytest
 from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus
 from cg.constants.constants import CaseActions, Pipeline
-from cg.constants.indexes import ListIndexes
 from cg.exc import CgError
 from cg.store import Store
 from cg.store.models import (
     Application,
     ApplicationLimitations,
     ApplicationVersion,
-    Customer,
     Case,
     CaseSample,
+    Customer,
     Flowcell,
     Invoice,
     Pool,
@@ -286,10 +284,10 @@ def test_are_all_flow_cells_on_disk_when_requested(
     case_id: str,
     helpers: StoreHelpers,
     sample: Sample,
+    request,
 ):
     """Test check if all flow cells for samples on a case is on disk when requested."""
     caplog.set_level(logging.DEBUG)
-
     # GIVEN a store with two flow cell
     helpers.add_flow_cell(
         store=base_store,
@@ -359,7 +357,7 @@ def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Sto
     # GIVEN a case with a sample with an application version
     application_version: ApplicationVersion = (
         rml_pool_store.get_case_by_internal_id(internal_id=case_id)
-        .links[ListIndexes.FIRST.value]
+        .links[0]
         .sample.application_version
     )
 
@@ -375,7 +373,7 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
     # GIVEN a case with a sample with an application version
     application_version: ApplicationVersion = (
         rml_pool_store.get_case_by_internal_id(internal_id=case_id)
-        .links[ListIndexes.FIRST.value]
+        .links[0]
         .sample.application_version
     )
 
@@ -896,7 +894,7 @@ def test_get_number_of_reads_for_sample_passing_q30_threshold(
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
 
     # GIVEN a metric for a specific sample
-    sample_metric: Optional[SampleLaneSequencingMetrics] = metrics.filter(
+    sample_metric: SampleLaneSequencingMetrics | None = metrics.filter(
         SampleLaneSequencingMetrics.sample_internal_id == sample_id
     ).first()
     assert sample_metric

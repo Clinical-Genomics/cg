@@ -3,8 +3,7 @@ import datetime as dt
 import pytest
 
 from cg.constants import Pipeline
-from cg.constants.constants import PrepCategory
-from cg.constants.invoice import CustomerNames
+from cg.constants.constants import CustomerId, PrepCategory
 from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus
 from cg.meta.orders.pool_submitter import PoolSubmitter
@@ -89,10 +88,10 @@ def rml_pool_store(
 
     new_sample = helpers.add_sample(
         store=store,
-        internal_id=sample_id,
         application_tag=application.tag,
         application_type=application.prep_category,
         customer_id=new_customer.id,
+        internal_id=sample_id,
     )
     new_sample.application_version = app_version
     store.session.add(new_sample)
@@ -129,11 +128,11 @@ def re_sequenced_sample_store(
     )
 
     store_sample = helpers.add_sample(
-        internal_id=sample_id,
-        is_tumour=False,
-        application_type=PrepCategory.READY_MADE_LIBRARY.value,
-        reads=1200000000,
         store=re_sequenced_sample_store,
+        application_type=PrepCategory.READY_MADE_LIBRARY.value,
+        is_tumour=False,
+        internal_id=sample_id,
+        reads=1200000000,
         original_ticket=ticket_id,
         last_sequenced_at=timestamp_now,
     )
@@ -190,14 +189,14 @@ def store_failing_sequencing_qc(
     )
 
     store_sample = helpers.add_sample(
-        internal_id="fluffy_sample",
-        is_tumour=False,
-        application_type=PrepCategory.READY_MADE_LIBRARY.value,
-        reads=5,
         store=store,
+        application_type=PrepCategory.READY_MADE_LIBRARY.value,
+        customer_id="fluffy_customer",
+        is_tumour=False,
+        internal_id="fluffy_sample",
+        reads=5,
         original_ticket=ticket_id,
         last_sequenced_at=timestamp_now,
-        customer_id="fluffy_customer",
     )
 
     helpers.add_flow_cell(
@@ -247,9 +246,9 @@ def store_with_samples_that_have_names(store: Store, helpers: StoreHelpers) -> S
 
     helpers.add_sample(
         store=store,
+        customer_id="unrelated_customer",
         internal_id="unrelated_id",
         name="unrelated_name",
-        customer_id="unrelated_customer",
     )
     return store
 
@@ -276,20 +275,20 @@ def store_with_samples_subject_id_and_tumour_status(
     """Return a store with two samples that have subject ids of which one is tumour"""
     helpers.add_sample(
         store=store,
+        customer_id=cust123,
+        is_tumour=True,
         internal_id="test_sample_1",
         name="sample_1",
         subject_id=test_subject,
-        is_tumour=True,
-        customer_id=cust123,
     )
 
     helpers.add_sample(
         store=store,
+        customer_id=cust123,
+        is_tumour=False,
         internal_id="test_sample_2",
         name="sample_2",
         subject_id=test_subject,
-        is_tumour=False,
-        customer_id=cust123,
     )
     return store
 
@@ -304,18 +303,18 @@ def store_with_samples_and_tumour_status_missing_subject_id(
     """Return a store with two samples of which one is tumour"""
     helpers.add_sample(
         store=store,
+        customer_id=cust123,
+        is_tumour=True,
         internal_id="test_sample_1",
         name="sample_1",
-        is_tumour=True,
-        customer_id=cust123,
     )
 
     helpers.add_sample(
         store=store,
+        customer_id=cust123,
+        is_tumour=False,
         internal_id="test_sample_2",
         name="sample_2",
-        is_tumour=False,
-        customer_id=cust123,
     )
     return store
 
@@ -335,11 +334,11 @@ def store_with_samples_customer_id_and_subject_id_and_tumour_status(
     for customer_id, subject_id, is_tumour in samples_data:
         helpers.add_sample(
             store=store,
+            customer_id=customer_id,
+            is_tumour=is_tumour,
             internal_id=f"test_sample_{customer_id}_{subject_id}",
             name=f"sample_{customer_id}_{subject_id}",
             subject_id=subject_id,
-            is_tumour=is_tumour,
-            customer_id=customer_id,
         )
     return store
 
@@ -360,7 +359,7 @@ def pool_order_1() -> str:
 def store_with_multiple_pools_for_customer(
     store: Store,
     helpers: StoreHelpers,
-    customer_id: str = CustomerNames.cust132,
+    customer_id: str = CustomerId.CUST132,
 ) -> Store:
     """Return a store with two pools with different names for the same customer."""
     for number in range(2):
@@ -381,7 +380,7 @@ def store_with_active_sample_analyze(store: Store, helpers: StoreHelpers) -> Sto
         store=store, name="test_case", internal_id="test_case_internal_id", action="analyze"
     )
     sample = helpers.add_sample(
-        store=store, name="test_sample", internal_id="test_sample_internal_id"
+        store=store, internal_id="test_sample_internal_id", name="test_sample"
     )
     helpers.add_relationship(store=store, sample=sample, case=case)
 
@@ -396,7 +395,7 @@ def store_with_active_sample_running(store: Store, helpers: StoreHelpers) -> Sto
         store=store, name="test_case", internal_id="test_case_internal_id", action="running"
     )
     sample = helpers.add_sample(
-        store=store, name="test_sample", internal_id="test_sample_internal_id"
+        store=store, internal_id="test_sample_internal_id", name="test_sample"
     )
     helpers.add_relationship(store=store, sample=sample, case=case)
 
@@ -423,8 +422,8 @@ def store_with_samples_for_multiple_customers(
     for number in range(3):
         helpers.add_sample(
             store=store,
-            internal_id="_".join(["test_sample", str(number)]),
             customer_id="".join(["cust00", str(number)]),
+            internal_id="_".join(["test_sample", str(number)]),
             no_invoice=False,
             delivered_at=timestamp_now,
         )

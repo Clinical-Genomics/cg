@@ -1,14 +1,18 @@
 from pathlib import Path
 
+import pytest
+from _pytest.fixtures import FixtureRequest
 from click import testing
+from pydantic import BaseModel
 
-from cg.apps.demultiplex.sample_sheet.models import (
+from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
+from cg.io.txt import read_txt
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
@@ -28,7 +32,6 @@ def test_create_sample_sheet_no_run_parameters_fails(
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=tmp_flow_cells_directory_no_run_parameters
     )
-    assert not flow_cell.run_parameters_path.exists()
 
     # GIVEN flow cell samples
     mocker.patch(
@@ -50,7 +53,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
     assert result.exit_code != EXIT_SUCCESS
 
     # THEN the correct information is communicated
-    assert "Could not find run parameters file" in caplog.text
+    assert "No run parameters file found in flow cell" in caplog.text
 
 
 def test_create_bcl2fastq_sample_sheet(
@@ -103,17 +106,46 @@ def test_create_bcl2fastq_sample_sheet(
     assert sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(flow_cell.id)
 
 
+class SampleSheetScenario(BaseModel):
+    flow_cell_directory: str
+    lims_samples: str
+    correct_sample_sheet: str
+
+
+@pytest.mark.parametrize(
+    "scenario",
+    [
+        SampleSheetScenario(
+            flow_cell_directory="novaseq_6000_pre_1_5_kits_flow_cell",
+            lims_samples="novaseq_6000_pre_1_5_kits_lims_samples",
+            correct_sample_sheet="novaseq_6000_pre_1_5_kits_correct_sample_sheet",
+        ),
+        SampleSheetScenario(
+            flow_cell_directory="novaseq_6000_post_1_5_kits_flow_cell",
+            lims_samples="novaseq_6000_post_1_5_kits_lims_samples",
+            correct_sample_sheet="novaseq_6000_post_1_5_kits_correct_sample_sheet",
+        ),
+        SampleSheetScenario(
+            flow_cell_directory="novaseq_x_flow_cell_directory",
+            lims_samples="novaseq_x_lims_samples",
+            correct_sample_sheet="novaseq_x_correct_sample_sheet",
+        ),
+    ],
+    ids=["Old NovaSeq 6000 flow cell", "New NovaSeq 6000 flow cell", "NovaSeq X flow cell"],
+)
 def test_create_dragen_sample_sheet(
     cli_runner: testing.CliRunner,
-    tmp_flow_cells_directory_no_sample_sheet: Path,
+    scenario: SampleSheetScenario,
     sample_sheet_context: CGConfig,
     lims_novaseq_bcl_convert_samples: list[FlowCellSampleBCLConvert],
     mocker,
+    request: FixtureRequest,
 ):
     """Test that creating a Dragen sample sheet works."""
+    flow_cell_directory: Path = request.getfixturevalue(scenario.flow_cell_directory)
     # GIVEN a flow cell directory with some run parameters
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        tmp_flow_cells_directory_no_sample_sheet, bcl_converter=BclConverter.DRAGEN
+        flow_cell_directory, bcl_converter=BclConverter.DRAGEN
     )
     assert flow_cell.run_parameters_path.exists()
 
@@ -128,14 +160,14 @@ def test_create_dragen_sample_sheet(
     # GIVEN flow cell samples
     mocker.patch(
         FLOW_CELL_FUNCTION_NAME,
-        return_value=lims_novaseq_bcl_convert_samples,
+        return_value=request.getfixturevalue(scenario.lims_samples),
     )
     # GIVEN a LIMS API that returns samples
 
     # WHEN creating a sample sheet
     result = cli_runner.invoke(
         create_sheet,
-        [str(tmp_flow_cells_directory_no_sample_sheet), "-b", BclConverter.DRAGEN],
+        [str(flow_cell_directory), "-b", BclConverter.DRAGEN],
         obj=sample_sheet_context,
     )
 
@@ -150,6 +182,11 @@ def test_create_dragen_sample_sheet(
 
     # THEN the sample sheet is in Housekeeper
     assert sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(flow_cell.id)
+
+    # THEN the sample sheet should have the exact structure
+    generated_content: str = read_txt(flow_cell.sample_sheet_path)
+    correct_content: str = read_txt(Path(request.getfixturevalue(scenario.correct_sample_sheet)))
+    assert generated_content == correct_content
 
 
 def test_incorrect_bcl2fastq_headers_samplesheet(

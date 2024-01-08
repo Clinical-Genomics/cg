@@ -1,14 +1,13 @@
 import logging
 import re
 from pathlib import Path
-from typing import Optional
 
 from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
-from cg.constants.scout_upload import MIP_CASE_TAGS, MIP_SAMPLE_TAGS
+from cg.constants.scout import MIP_CASE_TAGS, MIP_SAMPLE_TAGS
 from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
@@ -56,9 +55,10 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.load_config.rank_model_version = mip_analysis_data.rank_model_version
         self.load_config.sv_rank_model_version = mip_analysis_data.sv_rank_model_version
 
-        self.load_config.gene_panels = (
-            self.mip_analysis_api.convert_panels(
-                self.analysis_obj.case.customer.internal_id, self.analysis_obj.case.panels
+        self.load_config.gene_panels: list[str] | None = (
+            self.mip_analysis_api.get_aggregated_panels(
+                customer_id=self.analysis_obj.case.customer.internal_id,
+                default_panels=set(self.analysis_obj.case.panels),
             )
             or None
         )
@@ -90,12 +90,12 @@ class MipConfigBuilder(ScoutConfigBuilder):
         config_sample.father = (
             case_sample.father.internal_id
             if case_sample.father
-            else RelationshipStatus.HAS_NO_PARENT.value
+            else RelationshipStatus.HAS_NO_PARENT
         )
         config_sample.mother = (
             case_sample.mother.internal_id
             if case_sample.mother
-            else RelationshipStatus.HAS_NO_PARENT.value
+            else RelationshipStatus.HAS_NO_PARENT
         )
 
         return config_sample
@@ -161,7 +161,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         )
 
     @staticmethod
-    def extract_generic_filepath(file_path: Optional[str]) -> Optional[str]:
+    def extract_generic_filepath(file_path: str | None) -> str | None:
         """Remove a file's suffix and identifying integer or X/Y
         Example:
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes

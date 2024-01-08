@@ -3,7 +3,6 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 import click
 from housekeeper.store.models import Version
@@ -57,7 +56,7 @@ def generate_delivery_report(
         return
 
     version: Version = report_api.housekeeper_api.version(bundle=case_id, date=analysis_date)
-    delivery_report: Optional[str] = report_api.get_delivery_report_from_hk(
+    delivery_report: str | None = report_api.get_delivery_report_from_hk(
         case_id=case_id, version=version
     )
     if delivery_report:

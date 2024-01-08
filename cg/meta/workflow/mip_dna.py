@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from pathlib import Path
 
 from cg.constants import DEFAULT_CAPTURE_KIT, Pipeline
 from cg.constants.constants import AnalysisType
@@ -6,7 +6,7 @@ from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.pedigree import Pedigree
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, CaseSample
+from cg.store.models import CaseSample
 from cg.utils import Process
 
 
@@ -50,14 +50,14 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
         return self._process
 
     def config_sample(
-        self, link_obj: CaseSample, panel_bed: Optional[str]
-    ) -> dict[str, Union[str, int, None]]:
+        self, link_obj: CaseSample, panel_bed: str | None
+    ) -> dict[str, str | int | None]:
         """Return config sample data."""
-        sample_data: dict[str, Union[str, int]] = self.get_sample_data(link_obj=link_obj)
+        sample_data: dict[str, str | int] = self.get_sample_data(link_obj=link_obj)
         if sample_data["analysis_type"] == AnalysisType.WHOLE_GENOME_SEQUENCING:
             sample_data["capture_kit"]: str = panel_bed or DEFAULT_CAPTURE_KIT
         else:
-            sample_data["capture_kit"]: Optional[str] = panel_bed or self.get_target_bed_from_lims(
+            sample_data["capture_kit"]: str | None = panel_bed or self.get_target_bed_from_lims(
                 case_id=link_obj.case.internal_id
             )
         if link_obj.mother:
@@ -66,8 +66,10 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
             sample_data[Pedigree.FATHER.value]: str = link_obj.father.internal_id
         return sample_data
 
-    def panel(self, case_id: str, genome_build: str = GENOME_BUILD_37) -> list[str]:
-        """Create the aggregated gene panel file"""
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        all_panels = self.convert_panels(case_obj.customer.internal_id, case_obj.panels)
-        return self.scout_api.export_panels(build=genome_build, panels=all_panels)
+    def get_gene_panel(self, case_id: str) -> list[str]:
+        """Create and return the aggregated gene panel file."""
+        return self._get_gene_panel(case_id=case_id, genome_build=GENOME_BUILD_37)
+
+    def get_managed_variants(self) -> list[str]:
+        """Create and return the managed variants."""
+        return self._get_managed_variants(genome_build=GENOME_BUILD_37)

@@ -14,14 +14,6 @@ class FileAndSample(BaseModel):
     sample: Sample
 
 
-class SampleAndDestination(BaseModel):
-    """Contains a sample and the path to the sample bundle in Housekeeper where any retrieved files should be stored."""
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-    sample: Sample
-    destination: str
-
-
 class FileTransferData(BaseModel):
     """Base class for classes representing files to be archived."""
 
@@ -49,7 +41,7 @@ class ArchiveHandler:
         pass
 
     @abstractmethod
-    def retrieve_samples(self, samples_and_destinations: list[SampleAndDestination]):
+    def retrieve_files(self, files_and_samples: list[FileAndSample]):
         """Retrieves all files for all samples for the given flowcell."""
         pass
 
@@ -64,3 +56,7 @@ class ArchiveHandler:
     def is_job_done(self, job_id: int) -> bool:
         """Returns true if job has been completed, false otherwise."""
         pass
+
+    @abstractmethod
+    def delete_file(self, file_and_sample: FileAndSample) -> None:
+        """Deletes a file at the archive location."""

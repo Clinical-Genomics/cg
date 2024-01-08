@@ -100,7 +100,7 @@ class DeliverAPI:
 
         link: CaseSample
         for link in links:
-            if link.sample.sequencing_qc or self.deliver_failed_samples:
+            if self.sample_is_deliverable(link):
                 sample_id: str = link.sample.internal_id
                 sample_name: str = link.sample.name
                 LOG.debug(f"Fetch last version for sample bundle {sample_id}")
@@ -122,6 +122,12 @@ class DeliverAPI:
             LOG.warning(
                 f"Sample {link.sample.internal_id} did not receive enough reads and will not be delivered"
             )
+
+    def sample_is_deliverable(self, link: CaseSample) -> bool:
+        sample_is_external: bool = link.sample.application_version.application.is_external
+        deliver_failed_samples: bool = self.deliver_failed_samples
+        sample_passes_qc: bool = link.sample.sequencing_qc
+        return sample_passes_qc or deliver_failed_samples or sample_is_external
 
     def deliver_case_files(
         self, case_id: str, case_name: str, version: Version, sample_ids: set[str]

@@ -1,7 +1,6 @@
 """Code for uploading to scout via CLI"""
 import logging
 from pathlib import Path
-from typing import Optional
 
 import click
 from housekeeper.store.models import File, Version
@@ -11,7 +10,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.constants.scout_upload import ScoutCustomCaseReportTags
+from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.io.controller import WriteStream
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.upload.upload_api import UploadAPI
@@ -140,7 +139,7 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 
     tag_name: str = UploadScoutAPI.get_load_config_tag()
     version: Version = housekeeper_api.last_version(bundle=case_id)
-    scout_config_file: Optional[File] = housekeeper_api.get_latest_file_from_version(
+    scout_config_file: File | None = housekeeper_api.get_latest_file_from_version(
         version=version, tags={tag_name}
     )
 

@@ -4,7 +4,6 @@ import subprocess
 from io import TextIOWrapper
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Optional, Union
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import SPACE, FileExtensions
@@ -87,6 +86,7 @@ class EncryptionAPI:
             [
                 self.binary_path,
                 "--encrypt",
+                "--yes",
                 "--recipient",
                 EncryptionUserID.HASTA_USER_ID,
                 "--output",
@@ -148,7 +148,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         encryption_dir: Path,
         flow_cell: FlowCellDirectoryData,
         pigz_binary_path: str,
-        sbatch_parameter: dict[str, Union[str, int]],
+        sbatch_parameter: dict[str, str | int],
         slurm_api: SlurmAPI,
         tar_api: TarAPI,
         dry_run: bool = False,
@@ -240,7 +240,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         )
         return SPACE.join(decryption_parameters)
 
-    def is_encryption_possible(self) -> Optional[bool]:
+    def is_encryption_possible(self) -> bool | None:
         """Check if requirements for encryption are meet.
         Raises:
             FlowCellError if sequencing is not ready, encryption is pending or complete.
