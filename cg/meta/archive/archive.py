@@ -40,11 +40,11 @@ class SpringArchiveAPI:
         self.status_db: Store = status_db
         self.data_flow_config: DataFlowConfig = data_flow_config
 
-    def archive_files_to_location(
-        self, files_and_samples: list[FileAndSample], archive_location: ArchiveLocations
+    def archive_file_to_location(
+        self, file_and_sample: FileAndSample, archive_location: ArchiveLocations
     ) -> int:
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
-        return archive_handler.archive_files(files_and_samples=files_and_samples)
+        return archive_handler.archive_file(file_and_sample=file_and_sample)
 
     def archive_spring_files_and_add_archives_to_housekeeper(
         self, spring_file_count_limit: int | None
@@ -55,25 +55,37 @@ class SpringArchiveAPI:
             LOG.warning("Please do not provide a non-positive integer as limit - exiting.")
             return
         for archive_location in ArchiveLocations:
-            files_to_archive: list[File] = self.housekeeper_api.get_non_archived_spring_files(
-                tags=[archive_location],
-                limit=spring_file_count_limit,
+            self.archive_files_to_location(
+                archive_location=archive_location, file_limit=spring_file_count_limit
             )
-            if files_to_archive:
-                files_and_samples_for_location = self.add_samples_to_files(files_to_archive)
-                job_id = self.archive_files_to_location(
-                    files_and_samples=files_and_samples_for_location,
-                    archive_location=archive_location,
+
+    def archive_files_to_location(self, archive_location: str, file_limit: int | None) -> None:
+        """Archives up to spring file count limit number of files to the provided archive location."""
+        files_to_archive: list[File] = self.housekeeper_api.get_non_archived_spring_files(
+            tags=[archive_location],
+            limit=file_limit,
+        )
+        if files_to_archive:
+            files_and_samples_for_location = self.add_samples_to_files(files_to_archive)
+            for file_and_sample in files_and_samples_for_location:
+                self.archive_file(
+                    file_and_sample=file_and_sample, archive_location=archive_location
                 )
-                LOG.info(f"Files submitted to {archive_location} with archival task id {job_id}.")
-                self.housekeeper_api.add_archives(
-                    files=[
-                        file_and_sample.file for file_and_sample in files_and_samples_for_location
-                    ],
-                    archive_task_id=job_id,
-                )
-            else:
-                LOG.info(f"No files to archive for location {archive_location}.")
+
+        else:
+            LOG.info(f"No files to archive for location {archive_location}.")
+
+    def archive_file(
+        self, file_and_sample: FileAndSample, archive_location: ArchiveLocations
+    ) -> None:
+        job_id: int = self.archive_file_to_location(
+            file_and_sample=file_and_sample, archive_location=archive_location
+        )
+        LOG.info(f"File submitted to {archive_location} with archival task id {job_id}.")
+        self.housekeeper_api.add_archives(
+            files=[file_and_sample.file],
+            archive_task_id=job_id,
+        )
 
     def retrieve_case(self, case_id: str) -> None:
         """Submits jobs to retrieve any archived files belonging to the given case, and updates the Archive entries
