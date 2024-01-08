@@ -16,7 +16,6 @@ from cg.apps.demultiplex.sample_sheet.validators import SampleId
 from cg.constants.constants import GenomeVersion
 from cg.constants.demultiplexing import (
     CUSTOM_INDEX_TAIL,
-    BclConverter,
     SampleSheetBcl2FastqSections,
     SampleSheetBCLConvertSections,
 )
