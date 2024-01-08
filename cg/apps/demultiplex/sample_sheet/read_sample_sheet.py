@@ -4,17 +4,14 @@ from typing import Type
 
 from pydantic import TypeAdapter
 
-from cg.apps.demultiplex.sample_sheet.models import (
+from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSample,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
-    SampleSheet,
 )
+from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import (
-    SampleSheetBcl2FastqSections,
-    SampleSheetBCLConvertSections,
-)
+from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
 from cg.exc import SampleSheetError
 from cg.io.controller import ReadFile
 

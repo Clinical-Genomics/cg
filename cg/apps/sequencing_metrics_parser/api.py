@@ -16,7 +16,8 @@ from cg.store.models import SampleLaneSequencingMetrics
 def create_sample_lane_sequencing_metrics_for_flow_cell(
     flow_cell_directory: Path, bcl_converter: str
 ) -> list[SampleLaneSequencingMetrics]:
-    """Parse the sequencing metrics data for the correct demultiplexing software into the sequencing statistics model."""
+    """Parse the sequencing metrics data for the correct demultiplexing software
+    into the sequencing statistics model."""
     if bcl_converter == BclConverter.BCLCONVERT or bcl_converter == BclConverter.DRAGEN:
         return create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell(
             flow_cell_directory

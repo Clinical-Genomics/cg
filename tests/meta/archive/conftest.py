@@ -1,3 +1,4 @@
+import http
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -11,21 +12,17 @@ from requests import Response
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
-from cg.constants.constants import FileFormat
-from cg.constants.subject import Gender
+from cg.constants.constants import DataDelivery, FileFormat, Pipeline
+from cg.constants.subject import Sex
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
-from cg.meta.archive.ddn_dataflow import (
-    ROOT_TO_TRIM,
-    AuthToken,
-    DDNDataFlowClient,
-    MiriaObject,
-    TransferPayload,
-)
+from cg.meta.archive.ddn.constants import ROOT_TO_TRIM
+from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
+from cg.meta.archive.ddn.models import AuthToken, MiriaObject, TransferPayload
 from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import CGConfig, DataFlowConfig
 from cg.store import Store
-from cg.store.models import Customer, Sample
+from cg.store.models import Case, Customer, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -81,7 +78,7 @@ def retrieve_request_json(
     """Returns the body for a retrieval http post towards the DDN Miria API."""
     return {
         "osType": "Unix/MacOS",
-        "createFolder": True,
+        "createFolder": False,
         "pathInfo": [
             {
                 "destination": local_storage_repository
@@ -142,7 +139,7 @@ def ddn_dataflow_client(ddn_dataflow_config: DataFlowConfig) -> DDNDataFlowClien
         },
     ).encode()
     with mock.patch(
-        "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_content",
+        "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content",
         return_value=mock_ddn_auth_success_response,
     ):
         return DDNDataFlowClient(ddn_dataflow_config)
@@ -248,23 +245,24 @@ def archive_store(
     new_samples: list[Sample] = [
         base_store.add_sample(
             name=sample_name,
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             internal_id=sample_id,
         ),
         base_store.add_sample(
             name="sample_2_with_ddn_customer",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             internal_id=mother_sample_id,
         ),
         base_store.add_sample(
             name="sample_without_ddn_customer",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             internal_id=father_sample_id,
         ),
     ]
     new_samples[0].customer = customer_ddn
     new_samples[1].customer = customer_ddn
     new_samples[2].customer = customer_without_ddn
+
     external_app = base_store.get_application_by_tag("WGXCUSC000").versions[0]
     wgs_app = base_store.get_application_by_tag("WGSPCFC030").versions[0]
     for sample in new_samples:
@@ -272,6 +270,16 @@ def archive_store(
     base_store.session.add(customer_ddn)
     base_store.session.add(customer_without_ddn)
     base_store.session.add_all(new_samples)
+    base_store.session.commit()
+    case: Case = base_store.add_case(
+        data_analysis=Pipeline.MIP_DNA,
+        data_delivery=DataDelivery.NO_DELIVERY,
+        name="dummy_name",
+        ticket="123",
+        customer_id=customer_ddn.id,
+    )
+    base_store.relate_sample(case=case, sample=new_samples[0], status="unknown")
+    base_store.session.add(case)
     base_store.session.commit()
     return base_store
 
@@ -346,7 +354,7 @@ def archive_context(
 
     base_context.status_db.add_sample(
         name="sample_with_spring_files",
-        sex="male",
+        sex=Sex.MALE,
         internal_id="sample_with_spring_files",
         **{"customer": "MiriaCustomer"},
     )
@@ -362,7 +370,7 @@ def archive_context(
     file: File = real_housekeeper_api.add_file(
         path=path_to_spring_file_with_ongoing_archival,
         version_obj=bundle.versions[0],
-        tags=[SequencingFileTag.SPRING],
+        tags=[SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET],
     )
     file.id = 1234
     real_housekeeper_api.add_archives(files=[file], archive_task_id=archival_job_id)
@@ -378,3 +386,22 @@ def path_to_spring_file_to_archive() -> str:
 @pytest.fixture
 def path_to_spring_file_with_ongoing_archival() -> str:
     return "/home/path/to/ongoing/spring/file.spring"
+
+
+@pytest.fixture
+def failed_response() -> Response:
+    response = Response()
+    response.status_code = http.HTTPStatus.FORBIDDEN
+    return response
+
+
+@pytest.fixture
+def failed_delete_file_response(failed_response: Response) -> Response:
+    failed_response._content = b'{"detail":"Given token not valid for any token type","code":"token_not_valid","messages":[{"tokenClass":"AccessToken","tokenType":"access","message":"Token is invalid or expired"}]}'
+    return failed_response
+
+
+@pytest.fixture
+def ok_delete_file_response(ok_response: Response) -> Response:
+    ok_response._content = b'{"message":"Object has been deleted"}'
+    return ok_response

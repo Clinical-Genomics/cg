@@ -41,10 +41,7 @@ def test_list_samples_to_deliver_multiple_samples(base_store, helpers):
     # GIVEN a populated store with two samples where one is scheduled for delivery
     helpers.add_sample(store, last_sequenced_at=dt.datetime.now())
     helpers.add_sample(
-        store,
-        name="delivered",
-        last_sequenced_at=dt.datetime.now(),
-        delivered_at=dt.datetime.now(),
+        store, name="delivered", last_sequenced_at=dt.datetime.now(), delivered_at=dt.datetime.now()
     )
     assert len(store._get_query(table=Sample).all()) == 2
 

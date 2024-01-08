@@ -2,7 +2,7 @@ from typing import Any
 
 from pydantic.v1 import validator
 
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.models.deliverables.metric_deliverables import (
     MeanInsertSize,
     MedianTargetCoverage,
@@ -33,8 +33,8 @@ class DuplicateReads(SampleMetric):
         return value * 100
 
 
-class GenderCheck(SampleMetric):
-    """Definition of gender check metric"""
+class SexCheck(SampleMetric):
+    """Definition of sex check metric"""
 
     value: str
 
@@ -57,7 +57,7 @@ class MIPParsedMetrics(ParsedMetrics):
     duplicate_reads_step: str
     mapped_reads: float
     mapped_reads_step: str
-    predicted_sex: str = Gender.UNKNOWN
+    predicted_sex: str = Sex.UNKNOWN
     predicted_sex_step: str
 
 
@@ -68,13 +68,13 @@ class MIPMetricsDeliverables(MetricsDeliverables):
         "fraction_duplicates": DuplicateReads,
         "MEAN_INSERT_SIZE": MeanInsertSize,
         "MEDIAN_TARGET_COVERAGE": MedianTargetCoverage,
-        "gender": GenderCheck,
+        "gender": SexCheck,
     }
     duplicate_reads: list[DuplicateReads] | None
     mapped_reads: list[MIPMappedReads] | None
     mean_insert_size: list[MeanInsertSize] | None
     median_target_coverage: list[MedianTargetCoverage] | None
-    predicted_sex: list[GenderCheck] | None
+    predicted_sex: list[SexCheck] | None
     sample_metric_to_parse: list[str] = SAMPLE_METRICS_TO_PARSE
     sample_id_metrics: list[MIPParsedMetrics] | None
 
@@ -118,7 +118,7 @@ class MIPMetricsDeliverables(MetricsDeliverables):
         return add_metric(name="MEDIAN_TARGET_COVERAGE", values=values)
 
     @validator("predicted_sex", always=True)
-    def set_predicted_sex(cls, _, values: dict) -> list[GenderCheck]:
+    def set_predicted_sex(cls, _, values: dict) -> list[SexCheck]:
         """Set predicted sex"""
         return add_metric(name="gender", values=values)
 

@@ -7,7 +7,7 @@ import pytest
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants.constants import FileFormat
 from cg.constants.pedigree import Pedigree
-from cg.constants.subject import Gender, PhenotypeStatus, RelationshipStatus
+from cg.constants.subject import PhenotypeStatus, RelationshipStatus, Sex
 from cg.io.controller import ReadFile
 from cg.models.scout.scout_load_config import Reviewer
 from tests.mocks.process_mock import ProcessMock
@@ -30,7 +30,7 @@ SCOUT_INDIVIDUAL: dict = {
     Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
     Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,
     Pedigree.PHENOTYPE: PhenotypeStatus.AFFECTED,
-    Pedigree.SEX: Gender.MALE,
+    Pedigree.SEX: Sex.MALE,
 }
 
 

@@ -32,6 +32,7 @@ class GenePanelMasterList(StrEnum):
     NEURODEG: str = "NEURODEG"
     NMD: str = "NMD"
     OMIM_AUTO: str = "OMIM-AUTO"
+    OPTIC: str = "OPTIC"
     PANELAPP_GREEN: str = "PANELAPP-GREEN"
     PEDHEP: str = "PEDHEP"
     PID: str = "PID"
@@ -65,7 +66,7 @@ class GenePanelCombo:
         "DSD": {"DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"},
         "CM": {"CNM", "CM"},
         "Horsel": {"Horsel", "141217", "141201"},
-        "OPHTHALMO": (
+        "OPHTHALMO": {
             "OPHTHALMO",
             "ANTE-ED",
             "CATARACT",
@@ -74,5 +75,5 @@ class GenePanelCombo:
             "RETINA",
             "SED",
             "ALBINISM",
-        ),
+        },
     }

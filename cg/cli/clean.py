@@ -22,10 +22,9 @@ from cg.cli.workflow.commands import (
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
 )
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Pipeline
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
-from cg.exc import CleanFlowCellFailedError
+from cg.exc import CleanFlowCellFailedError, FlowCellError
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.models.cg_config import CGConfig
@@ -264,7 +263,6 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
         Path(context.encryption.encryption_dir),
     ]:
         directories_to_check.extend(get_directories_in_path(path))
-    exit_code = EXIT_SUCCESS
     for flow_cell_directory in directories_to_check:
         try:
             clean_flow_cell_api = CleanFlowCellAPI(
@@ -274,11 +272,9 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
                 dry_run=dry_run,
             )
             clean_flow_cell_api.delete_flow_cell_directory()
-        except CleanFlowCellFailedError as error:
+        except (CleanFlowCellFailedError, FlowCellError) as error:
             LOG.error(repr(error))
-            exit_code = EXIT_FAIL
-    if exit_code:
-        click.Abort
+            continue
 
 
 def _get_confirm_question(bundle, file_obj) -> str:
