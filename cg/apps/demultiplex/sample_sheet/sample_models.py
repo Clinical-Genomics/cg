@@ -16,6 +16,7 @@ from cg.apps.demultiplex.sample_sheet.validators import SampleId
 from cg.constants.constants import GenomeVersion
 from cg.constants.demultiplexing import (
     CUSTOM_INDEX_TAIL,
+    BclConverter,
     SampleSheetBcl2FastqSections,
     SampleSheetBCLConvertSections,
 )
@@ -104,6 +105,9 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
     ) -> None:
         """No updating of barcode mismatch values for Bcl2Fastq samples."""
         LOG.debug(f"No updating of barcode mismatch values for Bcl2Fastq sample {self.sample_id}")
+
+    def __str__(self):
+        return BclConverter.BCL2FASTQ
 
 
 class FlowCellSampleBCLConvert(FlowCellSample):
@@ -222,3 +226,6 @@ class FlowCellSampleBCLConvert(FlowCellSample):
             LOG.debug("Run is single-indexed, skipping barcode mismatch update for index 2")
             return
         self._update_barcode_mismatches_2(samples_to_compare=samples_to_compare)
+
+    def __str__(self):
+        return BclConverter.BCLCONVERT
