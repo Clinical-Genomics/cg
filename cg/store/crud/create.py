@@ -31,7 +31,7 @@ from cg.store.models import (
 LOG = logging.getLogger(__name__)
 
 
-class AddHandler(BaseHandler):
+class CreateHandler(BaseHandler):
     """Methods related to adding new data to the store."""
 
     def generate_readable_sample_id(self) -> str:

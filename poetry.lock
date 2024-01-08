@@ -858,13 +858,13 @@ files = [
 
 [[package]]
 name = "housekeeper"
-version = "4.10.16"
+version = "4.11.0"
 description = "Housekeeper takes care of files"
 optional = false
 python-versions = "*"
 files = [
-    {file = "housekeeper-4.10.16-py2.py3-none-any.whl", hash = "sha256:ef85d34f61df05065b0fa5a67ee8505ef5b84dd5f655cfe44909898fafeef5ee"},
-    {file = "housekeeper-4.10.16.tar.gz", hash = "sha256:cbd7bced914408e8a557f7817ead45bc61d3cf63c8a402aafac0982643f8e55d"},
+    {file = "housekeeper-4.11.0-py2.py3-none-any.whl", hash = "sha256:c309d32d12d26bd57389a21f36cc6ec93745570707b26e5a2f09686b6e95b1c8"},
+    {file = "housekeeper-4.11.0.tar.gz", hash = "sha256:05d8644bd4d6aa2765de4d6207049a82a7f12494b71923f3ef4fed9e23e844d3"},
 ]
 
 [package.dependencies]
@@ -1470,13 +1470,13 @@ xml = ["lxml (>=4.8.0)"]
 
 [[package]]
 name = "paramiko"
-version = "3.3.1"
+version = "3.4.0"
 description = "SSH2 protocol library"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "paramiko-3.3.1-py3-none-any.whl", hash = "sha256:b7bc5340a43de4287bbe22fe6de728aa2c22468b2a849615498dd944c2f275eb"},
-    {file = "paramiko-3.3.1.tar.gz", hash = "sha256:6a3777a961ac86dbef375c5f5b8d50014a1a96d0fd7f054a43bc880134b0ff77"},
+    {file = "paramiko-3.4.0-py3-none-any.whl", hash = "sha256:43f0b51115a896f9c00f59618023484cb3a14b98bbceab43394a39c6739b7ee7"},
+    {file = "paramiko-3.4.0.tar.gz", hash = "sha256:aac08f26a31dc4dffd92821527d1682d99d52f9ef6851968114a8728f3c274d3"},
 ]
 
 [package.dependencies]
@@ -2416,4 +2416,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "5c0c1e334201d01f0f75f6e550bf3056dadec69449beefb642568ed7d16ccba6"
+content-hash = "0e80e415fa553084eebcf19e0a13b173db121e7fe77aef7240f5dee85b894e04"
