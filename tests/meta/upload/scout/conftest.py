@@ -606,7 +606,7 @@ def mip_load_config(
         owner=customer_id,
         family=case_id,
         vcf_snv=Path(mip_dna_analysis_dir, snv_vcf_file).as_posix(),
-        track=UploadTrack.RARE_DISEASE,
+        track=UploadTrack.RARE_DISEASE.value,
         delivery_report=delivery_report_html.as_posix(),
     )
 

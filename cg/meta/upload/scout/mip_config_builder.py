@@ -34,7 +34,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.case_tags: CaseTags = CaseTags(**MIP_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**MIP_SAMPLE_TAGS)
         self.load_config: MipLoadConfig = MipLoadConfig(
-            track=UploadTrack.RARE_DISEASE,
+            track=UploadTrack.RARE_DISEASE.value,
             delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
         )
         self.mip_analysis_api: MipAnalysisAPI = mip_analysis_api

@@ -24,7 +24,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.case_tags: CaseTags = CaseTags(**BALSAMIC_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**BALSAMIC_SAMPLE_TAGS)
         self.load_config: BalsamicLoadConfig = BalsamicLoadConfig(
-            track=UploadTrack.CANCER,
+            track=UploadTrack.CANCER.value,
             delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
         )
 

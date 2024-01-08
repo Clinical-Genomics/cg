@@ -21,7 +21,7 @@ class BalsamicUmiConfigBuilder(BalsamicConfigBuilder):
         self.case_tags: CaseTags = CaseTags(**BALSAMIC_UMI_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**BALSAMIC_UMI_SAMPLE_TAGS)
         self.load_config: BalsamicUmiLoadConfig = BalsamicUmiLoadConfig(
-            track=UploadTrack.CANCER,
+            track=UploadTrack.CANCER.value,
             delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
         )
 

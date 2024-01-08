@@ -96,7 +96,9 @@ class ScoutLoadConfig(BaseModel):
     coverage_qc_report: str | None = None
     cnv_report: str | None = None
     multiqc: str | None = None
-    track: UploadTrack = UploadTrack.RARE_DISEASE
+    track: Literal[
+        UploadTrack.RARE_DISEASE.value, UploadTrack.CANCER.value
+    ] = UploadTrack.RARE_DISEASE.value
 
     model_config = ConfigDict(validate_assignment=True)
 

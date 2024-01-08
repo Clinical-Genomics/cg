@@ -28,7 +28,7 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
         self.case_tags: CaseTags = CaseTags(**RNAFUSION_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**RNAFUSION_SAMPLE_TAGS)
         self.load_config: RnafusionLoadConfig = RnafusionLoadConfig(
-            track=UploadTrack.CANCER,
+            track=UploadTrack.CANCER.value,
             delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
         )
 
