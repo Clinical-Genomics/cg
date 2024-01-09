@@ -27,6 +27,7 @@ from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
 from cg.exc import CleanFlowCellFailedError, FlowCellError
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
+from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Analysis
@@ -275,6 +276,15 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
         except (CleanFlowCellFailedError, FlowCellError) as error:
             LOG.error(repr(error))
             continue
+
+
+@clean.command("retrieved-spring-files")
+@DRY_RUN
+@click.pass_obj
+def clean_retrieved_spring_files(context: CGConfig, dry_run: bool):
+    """Command for cleaning Spring files which were retrieved more than 7 days ago."""
+    clean_retrieved_spring_files_api = CleanRetrievedSpringFilesAPI(context.housekeeper_api)
+    clean_retrieved_spring_files_api.clean_retrieved_spring_files(dry_run)
 
 
 def _get_confirm_question(bundle, file_obj) -> str:
