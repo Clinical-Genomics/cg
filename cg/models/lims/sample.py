@@ -13,6 +13,7 @@ class Udf(BaseModel):
     comment: str | None
     concentration: str | None
     concentration_sample: str | None
+    concentration_ng_ul: str | None
     customer: str
     control: str | None
     data_analysis: str | None

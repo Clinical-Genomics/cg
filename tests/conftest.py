@@ -33,6 +33,7 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, Pipeline, SequencingFileTag
 from cg.constants.constants import CaseActions, FileFormat, Strandedness
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.nanopore_files import NanoporeDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SequencingPlatform
@@ -1903,6 +1904,7 @@ def hk_bundle_sample_path(sample_id: str, timestamp: datetime) -> Path:
 def hk_bundle_data(
     case_id: str,
     bed_file: Path,
+    delivery_report_html: Path,
     timestamp_yesterday: datetime,
     sample_id: str,
     father_sample_id: str,
@@ -1918,7 +1920,12 @@ def hk_bundle_data(
                 "path": bed_file.as_posix(),
                 "archive": False,
                 "tags": ["bed", sample_id, father_sample_id, mother_sample_id, "coverage"],
-            }
+            },
+            {
+                "path": delivery_report_html.as_posix(),
+                "archive": False,
+                "tags": [HK_DELIVERY_REPORT_TAG],
+            },
         ],
     }
 
