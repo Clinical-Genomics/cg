@@ -97,9 +97,9 @@ class CompressAPI:
         return all_ok
 
     def _is_spring_archived(self, compression_data: CompressionData) -> bool:
-        spring_file: File | None = self.hk_api.files(
-            path=compression_data.spring_path.as_posix()
-        ).first()
+        spring_file: File | None = self.hk_api.get_file_insensitive_path(
+            path=compression_data.spring_path
+        )
         if (not spring_file) or (not spring_file.archive):
             return False
         return bool(spring_file.archive.archived_at)
