@@ -7,7 +7,11 @@ from pathlib import Path
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
-from housekeeper.store.database import create_all_tables, drop_all_tables, initialize_database
+from housekeeper.store.database import (
+    create_all_tables,
+    drop_all_tables,
+    initialize_database,
+)
 from housekeeper.store.models import Archive, Bundle, File, Version
 from sqlalchemy.orm import Query
 
@@ -649,3 +653,6 @@ class HousekeeperAPI:
         for archive in archives_to_update:
             archive.retrieval_task_id = new_retrieval_job_id
         self._store.session.commit()
+
+    def get_spring_files_retrieved_before(self, date: dt.datetime):
+        return self._store.get_files_retrieved_before(date, tag_names=[SequencingFileTag.SPRING])
