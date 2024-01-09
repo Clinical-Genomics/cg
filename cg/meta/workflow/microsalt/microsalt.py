@@ -89,9 +89,13 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return Path(self.queries_path, filename).with_suffix(".json")
 
     def get_job_ids_path(self, case_id: str) -> Path:
-        project_id: str = self.get_lims_project_id(case_id)
         case_path: Path = self.get_case_path(case_id)
-        return Path(case_path, f"{project_id}_slurm_ids.yaml")
+        job_ids_file_name: str = self.get_job_ids_file_name(case_id)
+        return Path(case_path, job_ids_file_name)
+
+    def get_job_ids_file_name(self, case_id: str) -> str:
+        project_id: str = self.get_lims_project_id(case_id)
+        return f"{project_id}_job_ids.yaml"
 
     def get_lims_project_id(self, case_id: str):
         case: Case = self.status_db.get_case_by_internal_id(case_id)
