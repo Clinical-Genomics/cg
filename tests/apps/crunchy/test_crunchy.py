@@ -56,7 +56,9 @@ def test_is_fastq_compression_possible(
     assert not spring_file.exists()
 
     # WHEN checking if SPRING compression is done
-    result = crunchy_api.is_fastq_compression_possible(compression_object)
+    result = crunchy_api.is_fastq_compression_possible(
+        compression_obj=compression_object, is_spring_archived=False
+    )
 
     # THEN result should be True
     assert result is True
@@ -83,7 +85,9 @@ def test_is_fastq_compression_possible_compression_pending(
     assert not spring_file.exists()
 
     # WHEN checking if SPRING compression is done
-    result = crunchy_api.is_fastq_compression_possible(compression_object)
+    result = crunchy_api.is_fastq_compression_possible(
+        compression_obj=compression_object, is_spring_archived=False
+    )
 
     # THEN result should be False since the compression flag exists
     assert result is False
@@ -107,12 +111,36 @@ def test_is_fastq_compression_possible_spring_exists(
     assert spring_file.exists()
 
     # WHEN checking if SPRING compression is done
-    result = crunchy_api.is_fastq_compression_possible(compression_object)
+    result = crunchy_api.is_fastq_compression_possible(
+        compression_obj=compression_object, is_spring_archived=False
+    )
 
     # THEN result should be False since the compression flag exists
     assert result is False
     # THEN assert that the correct message was communicated
     assert "SPRING file found" in caplog.text
+
+
+def test_is_fastq_compression_possible_spring_is_archived(
+    crunchy_config: dict[str, dict[str, Any]], compression_object: CompressionData, caplog
+):
+    """Test if FASTQ compression is possible when the Spring file is archived
+
+    This means that the SPRING file exists
+    """
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a crunchy-api, and existing FASTQ paths
+    crunchy_api = CrunchyAPI(crunchy_config)
+
+    # WHEN checking if SPRING compression is possible
+    result = crunchy_api.is_fastq_compression_possible(
+        compression_obj=compression_object, is_spring_archived=True
+    )
+
+    # THEN result should be False since the Spring file is archived
+    assert result is False
+    # THEN assert that the correct message was communicated
+    assert "Spring file is already archived - will not compress Fastq." in caplog.text
 
 
 def test_is_compression_done(

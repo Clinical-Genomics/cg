@@ -81,8 +81,10 @@ class CompressAPI:
                 )
                 all_ok = False
                 continue
-
-            if not self.crunchy_api.is_fastq_compression_possible(compression_obj=compression):
+            is_spring_archived: bool = self._is_spring_archived(compression)
+            if not self.crunchy_api.is_fastq_compression_possible(
+                compression_obj=compression, is_spring_archived=is_spring_archived
+            ):
                 LOG.warning(f"FASTQ to SPRING not possible for {sample_id}, run {run_name}")
                 all_ok = False
                 continue
@@ -92,6 +94,14 @@ class CompressAPI:
             )
             self.crunchy_api.fastq_to_spring(compression_obj=compression, sample_id=sample_id)
         return all_ok
+
+    def _is_spring_archived(self, compression_data: CompressionData) -> bool:
+        spring_file: File | None = self.hk_api.files(
+            path=compression_data.spring_path.as_posix()
+        ).first()
+        if (not spring_file) or (not spring_file.archive):
+            return False
+        return spring_file.archive.archived_at
 
     def decompress_spring(self, sample_id: str) -> bool:
         """Decompress SPRING archive for a sample.
