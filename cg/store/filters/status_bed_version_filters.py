@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Callable
+from typing import Callable
 
 from sqlalchemy.orm import Query
 
@@ -29,9 +29,9 @@ class BedVersionFilter(Enum):
 
 def apply_bed_version_filter(
     bed_versions: Query,
-    filter_functions: List[Callable],
-    bed_version_file_name: Optional[str] = None,
-    bed_version_short_name: Optional[str] = None,
+    filter_functions: list[Callable],
+    bed_version_file_name: str | None = None,
+    bed_version_short_name: str | None = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:

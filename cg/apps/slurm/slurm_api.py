@@ -1,7 +1,6 @@
 """Module to create sbatch files and communicate with SLURM."""
 import logging
 from pathlib import Path
-from typing import List, Optional
 
 from cg.apps.slurm.sbatch import (
     DRAGEN_SBATCH_HEADER_TEMPLATE,
@@ -25,13 +24,13 @@ class SlurmAPI:
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run."""
-        LOG.debug(f"Set dry run to {dry_run}")
+        LOG.debug(f"SlurmAPI: Set dry run to {dry_run}")
         self.dry_run = dry_run
 
     @staticmethod
     def generate_sbatch_content(sbatch_parameters: Sbatch) -> str:
         """Take a parameters object and generate a string with sbatch information."""
-        if hasattr(sbatch_parameters, Slurm.PARTITION.value):
+        if hasattr(sbatch_parameters, Slurm.PARTITION):
             sbatch_header: str = SlurmAPI.generate_dragen_sbatch_header(
                 sbatch_parameters=sbatch_parameters
             )
@@ -46,14 +45,14 @@ class SlurmAPI:
 
     @staticmethod
     def generate_sbatch_header(sbatch_parameters: Sbatch) -> str:
-        return SBATCH_HEADER_TEMPLATE.format(**sbatch_parameters.dict())
+        return SBATCH_HEADER_TEMPLATE.format(**sbatch_parameters.model_dump())
 
     @staticmethod
     def generate_dragen_sbatch_header(sbatch_parameters: Sbatch) -> str:
-        return DRAGEN_SBATCH_HEADER_TEMPLATE.format(**sbatch_parameters.dict())
+        return DRAGEN_SBATCH_HEADER_TEMPLATE.format(**sbatch_parameters.model_dump())
 
     @staticmethod
-    def generate_sbatch_body(commands: str, error_function: Optional[str] = None) -> str:
+    def generate_sbatch_body(commands: str, error_function: str | None = None) -> str:
         if not error_function:
             error_function = "log 'Something went wrong, aborting'"
 
@@ -62,15 +61,15 @@ class SlurmAPI:
     @staticmethod
     def write_sbatch_file(sbatch_content: str, sbatch_path: Path, dry_run: bool) -> None:
         if dry_run:
-            LOG.info("Write sbatch content to path %s: \n%s", sbatch_path, sbatch_content)
+            LOG.info(f"Write sbatch content to path {sbatch_path}: \n{sbatch_content}")
             return
-        LOG.debug("Write sbatch content %s to %s", sbatch_content, sbatch_path)
+        LOG.debug(f"Write sbatch content {sbatch_content} to {sbatch_path}")
         with open(sbatch_path, mode="w+t") as sbatch_file:
             sbatch_file.write(sbatch_content)
 
     def submit_sbatch_job(self, sbatch_path: Path) -> int:
-        LOG.info("Submit sbatch %s", sbatch_path)
-        sbatch_parameters: List[str] = [str(sbatch_path)]
+        LOG.info(f"Submit sbatch {sbatch_path}")
+        sbatch_parameters: list[str] = [str(sbatch_path)]
         self.process.run_command(parameters=sbatch_parameters, dry_run=self.dry_run)
         if self.process.stderr:
             LOG.info(self.process.stderr)

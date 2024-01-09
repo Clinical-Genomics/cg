@@ -1,5 +1,4 @@
-from cgmodels.cg.constants import Pipeline
-
+from cg.constants.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.config import BalsamicConfigJSON

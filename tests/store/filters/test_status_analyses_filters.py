@@ -1,5 +1,8 @@
 from datetime import datetime, timedelta
 
+from sqlalchemy.orm import Query
+
+from cg.constants.constants import Pipeline
 from cg.store import Store
 from cg.store.filters.status_analysis_filters import (
     filter_analyses_by_case_entry_id,
@@ -17,16 +20,14 @@ from cg.store.filters.status_analysis_filters import (
     order_analyses_by_completed_at_asc,
     order_analyses_by_uploaded_at_asc,
 )
-from cg.store.models import Analysis, Family
-from cgmodels.cg.constants import Pipeline
-from sqlalchemy.orm import Query
+from cg.store.models import Analysis, Case
 from tests.store_helpers import StoreHelpers
 
 
 def test_filter_valid_analyses_in_production(
     base_store: Store,
     helpers: StoreHelpers,
-    case: Family,
+    case: Case,
     timestamp_now: datetime,
     old_timestamp: datetime,
 ):
@@ -51,7 +52,7 @@ def test_filter_valid_analyses_in_production(
     assert outdated_analysis not in analyses
 
 
-def test_filter_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers, case: Family):
+def test_filter_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers, case: Case):
     """Test analyses filtering by pipeline."""
 
     # GIVEN a set of mock analyses
@@ -165,7 +166,7 @@ def test_filter_analyses_without_delivery_report(base_store: Store, helpers: Sto
     assert analysis_without_delivery_report in analyses
 
 
-def test_filter_report_analyses_by_pipeline(base_store: Store, helpers: StoreHelpers, case: Family):
+def test_filter_report_analyses_by_pipeline(base_store: Store, helpers: StoreHelpers, case: Case):
     """Test filtering delivery report related analysis by pipeline."""
 
     # GIVEN a set of mock analysis
@@ -190,7 +191,7 @@ def test_filter_report_analyses_by_pipeline(base_store: Store, helpers: StoreHel
 def test_order_analyses_by_completed_at_asc(
     store: Store,
     helpers: StoreHelpers,
-    case: Family,
+    case: Case,
     timestamp_now: datetime,
     timestamp_yesterday: datetime,
 ):
@@ -230,7 +231,7 @@ def test_order_analyses_by_uploaded_at_asc(
         assert analyses.all()[index].uploaded_at <= analyses.all()[index + 1].uploaded_at
 
 
-def test_filter_analysis_by_case(base_store: Store, helpers: StoreHelpers, case: Family):
+def test_filter_analysis_by_case(base_store: Store, helpers: StoreHelpers, case: Case):
     """Test filtering of analyses by case."""
 
     # GIVEN a set of mock analyses
@@ -248,7 +249,7 @@ def test_filter_analysis_by_case(base_store: Store, helpers: StoreHelpers, case:
     # THEN only the analysis belonging to the case should be retrieved
     assert analysis not in analyses
     assert analysis_other_case in analyses
-    assert analysis_other_case.family == case
+    assert analysis_other_case.case == case
 
 
 def test_filter_analysis_started_before(
@@ -261,7 +262,7 @@ def test_filter_analysis_started_before(
         store=base_store, started_at=timestamp_now - timedelta(days=1)
     )
     analysis: Analysis = helpers.add_analysis(
-        store=base_store, started_at=timestamp_now, case=analysis_old.family
+        store=base_store, started_at=timestamp_now, case=analysis_old.case
     )
 
     # WHEN filtering the analyses by started_at
@@ -285,7 +286,7 @@ def test_filter_analysis_not_cleaned(
     # GIVEN a set of mock analyses
     analysis_cleaned: Analysis = helpers.add_analysis(store=base_store, cleaned_at=timestamp_now)
     analysis: Analysis = helpers.add_analysis(
-        store=base_store, cleaned_at=None, case=analysis_cleaned.family
+        store=base_store, cleaned_at=None, case=analysis_cleaned.case
     )
 
     # WHEN filtering the analyses by cleaned_at
@@ -311,7 +312,7 @@ def test_filter_analyses_by_started_at(
     analysis_started_old: Analysis = helpers.add_analysis(
         store=base_store,
         started_at=timestamp_yesterday,
-        case=analysis_started_now.family,
+        case=analysis_started_now.case,
     )
 
     # WHEN filtering the analyses by started_at

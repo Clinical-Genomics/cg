@@ -1,21 +1,19 @@
-from typing import Optional, Any
+from typing import Any
 
-from pydantic import BaseModel, constr, conlist
+from pydantic.v1 import BaseModel, conlist, constr
 
 from cg.models.orders.constants import OrderType
-from cg.models.orders.samples import (
-    sample_class_for,
-)
+from cg.models.orders.samples import sample_class_for
 from cg.store.models import Customer, Sample
 
 
 class OrderIn(BaseModel):
     name: constr(min_length=2, max_length=Sample.order.property.columns[0].type.length)
-    comment: Optional[str]
+    comment: str | None
     customer: constr(min_length=1, max_length=Customer.internal_id.property.columns[0].type.length)
     samples: conlist(Any, min_items=1)
-    skip_reception_control: Optional[bool] = None
-    ticket: Optional[str]
+    skip_reception_control: bool | None = None
+    ticket: str | None
 
     @classmethod
     def parse_obj(cls, obj: dict, project: OrderType) -> "OrderIn":

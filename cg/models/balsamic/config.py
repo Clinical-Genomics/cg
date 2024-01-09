@@ -1,8 +1,7 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Union, Optional
 
-from pydantic import BaseModel, validator
+from pydantic.v1 import BaseModel, validator
 
 
 class BalsamicConfigAnalysis(BaseModel):
@@ -22,7 +21,7 @@ class BalsamicConfigAnalysis(BaseModel):
     analysis_workflow: str
     sequencing_type: str
     BALSAMIC_version: str
-    config_creation_date: Union[datetime, str]
+    config_creation_date: datetime | str
 
 
 class BalsamicConfigSample(BaseModel):
@@ -48,10 +47,10 @@ class BalsamicConfigReference(BaseModel):
     """
 
     reference_genome: Path
-    reference_genome_version: Optional[str]
+    reference_genome_version: str | None
 
     @validator("reference_genome_version", always=True)
-    def extract_genome_version_from_path(cls, value: Optional[str], values: dict) -> str:
+    def extract_genome_version_from_path(cls, value: str | None, values: dict) -> str:
         """
         Returns the genome version from the reference path:
         /home/proj/stage/cancer/balsamic_cache/X.X.X/hg19/genome/human_g1k_v37.fasta
@@ -70,8 +69,8 @@ class BalsamicConfigPanel(BaseModel):
     """
 
     capture_kit: str
-    capture_kit_version: Optional[str]
-    chrom: List[str]
+    capture_kit_version: str | None
+    chrom: list[str]
 
     @validator("capture_kit", pre=True)
     def extract_capture_kit_name_from_path(cls, capture_kit: str) -> str:
@@ -80,7 +79,7 @@ class BalsamicConfigPanel(BaseModel):
 
     @validator("capture_kit_version", always=True)
     def extract_capture_kit_name_from_name(
-        cls, capture_kit_version: Optional[str], values: dict
+        cls, capture_kit_version: str | None, values: dict
     ) -> str:
         """Return the panel bed version from its filename (e.g. gicfdna_3.1_hg19_design.bed)."""
         return values["capture_kit"].split("_")[-3]
@@ -100,12 +99,12 @@ class BalsamicConfigQC(BaseModel):
     """
 
     picard_rmdup: bool
-    adapter: Optional[str]
+    adapter: str | None
     quality_trim: bool
     adapter_trim: bool
     umi_trim: bool
-    min_seq_length: Optional[str]
-    umi_trim_length: Optional[str]
+    min_seq_length: str | None
+    umi_trim_length: str | None
 
 
 class BalsamicVarCaller(BaseModel):
@@ -121,9 +120,9 @@ class BalsamicVarCaller(BaseModel):
 
     mutation: str
     type: str
-    analysis_type: List[str]
-    sequencing_type: List[str]
-    workflow_solution: List[str]
+    analysis_type: list[str]
+    sequencing_type: list[str]
+    workflow_solution: list[str]
 
 
 class BalsamicConfigJSON(BaseModel):
@@ -137,9 +136,9 @@ class BalsamicConfigJSON(BaseModel):
     """
 
     analysis: BalsamicConfigAnalysis
-    samples: Dict[str, BalsamicConfigSample]
+    samples: dict[str, BalsamicConfigSample]
     reference: BalsamicConfigReference
-    panel: Optional[BalsamicConfigPanel]
+    panel: BalsamicConfigPanel | None
     QC: BalsamicConfigQC
-    vcf: Dict[str, BalsamicVarCaller]
-    bioinfo_tools_version: Dict[str, List[str]]
+    vcf: dict[str, BalsamicVarCaller]
+    bioinfo_tools_version: dict[str, list[str]]

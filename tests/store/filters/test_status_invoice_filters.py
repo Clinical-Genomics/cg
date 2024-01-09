@@ -1,13 +1,14 @@
 from sqlalchemy.orm import Query
+
 from cg.store import Store
-from cg.store.models import Invoice
-from tests.store_helpers import StoreHelpers
 from cg.store.filters.status_invoice_filters import (
     filter_invoices_by_invoice_id,
     filter_invoices_invoiced,
     filter_invoices_not_invoiced,
 )
+from cg.store.models import Invoice
 from tests.store.conftest import StoreConstants
+from tests.store_helpers import StoreHelpers
 
 
 def test_filter_get_invoices_by_invoice_id(

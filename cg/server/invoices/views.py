@@ -2,9 +2,10 @@ import http
 import os
 import tempfile
 from datetime import date
-from cg.constants.invoice import CostCenters
+
 from flask import (
     Blueprint,
+    abort,
     current_app,
     flash,
     redirect,
@@ -13,16 +14,14 @@ from flask import (
     send_from_directory,
     session,
     url_for,
-    abort,
 )
 from flask_dance.contrib.google import google
 
 from cg.apps.invoice.render import render_xlsx
+from cg.constants.invoice import CostCenters
 from cg.meta.invoice import InvoiceAPI
 from cg.server.ext import db, lims
-from typing import List, Union
 from cg.store.models import Customer, Invoice, Pool, Sample
-
 
 BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
 
@@ -41,7 +40,7 @@ def logged_in():
 def undo_invoice(invoice_id):
     invoice_obj: Invoice = db.get_invoice_by_entry_id(entry_id=invoice_id)
     record_type: str = invoice_obj.record_type
-    records: List[Union[Pool, Sample]] = db.get_pools_and_samples_for_invoice_by_invoice_id(
+    records: list[Pool | Sample] = db.get_pools_and_samples_for_invoice_by_invoice_id(
         invoice_id=invoice_id
     )
     db.session.delete(invoice_obj)
@@ -60,7 +59,7 @@ def make_new_invoice():
     if len(record_ids) == 0:
         return redirect(url_for(".new", record_type=record_type))
     if record_type == "Pool":
-        pools: List[Pool] = [db.get_pool_by_entry_id(pool_id) for pool_id in record_ids]
+        pools: list[Pool] = [db.get_pool_by_entry_id(pool_id) for pool_id in record_ids]
         new_invoice: Invoice = db.add_invoice(
             customer=customer,
             pools=pools,
@@ -69,7 +68,7 @@ def make_new_invoice():
             record_type="Pool",
         )
     elif record_type == "Sample":
-        samples: List[Sample] = [
+        samples: list[Sample] = [
             db.get_sample_by_internal_id(sample_id) for sample_id in record_ids
         ]
         new_invoice: Invoice = db.add_invoice(
@@ -140,15 +139,13 @@ def new(record_type):
     customer_id = request.args.get("customer", "cust002")
     customer: Customer = db.get_customer_by_internal_id(customer_internal_id=customer_id)
     if record_type == "Sample":
-        records: List[Union[Pool, Sample]] = db.get_samples_to_invoice_for_customer(
-            customer=customer
-        )
-        customers_to_invoice: List[Customer] = db.get_customers_to_invoice(
+        records: list[Pool | Sample] = db.get_samples_to_invoice_for_customer(customer=customer)
+        customers_to_invoice: list[Customer] = db.get_customers_to_invoice(
             records=db.get_samples_to_invoice_query()
         )
     elif record_type == "Pool":
-        records: List[Union[Pool, Sample]] = db.get_pools_to_invoice_for_customer(customer=customer)
-        customers_to_invoice: List[Customer] = db.get_customers_to_invoice(
+        records: list[Pool | Sample] = db.get_pools_to_invoice_for_customer(customer=customer)
+        customers_to_invoice: list[Customer] = db.get_customers_to_invoice(
             records=db.get_pools_to_invoice_query()
         )
     return render_template(
@@ -204,7 +201,7 @@ def invoice_template(invoice_id):
     excel_path = os.path.join(temp_dir, filename)
     workbook.save(excel_path)
 
-    return send_from_directory(directory=temp_dir, filename=filename, as_attachment=True)
+    return send_from_directory(directory=temp_dir, path=filename, as_attachment=True)
 
 
 @BLUEPRINT.route("/<int:invoice_id>/invoice_file/<cost_center>")
@@ -222,4 +219,4 @@ def modified_invoice(invoice_id, cost_center):
             file_object.write(invoice_obj.excel_kth)
         elif cost_center == "KI":
             file_object.write(invoice_obj.excel_ki)
-    return send_from_directory(directory=temp_dir, filename=file_name, as_attachment=True)
+    return send_from_directory(directory=temp_dir, path=file_name, as_attachment=True)

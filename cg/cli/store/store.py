@@ -3,6 +3,7 @@
 import logging
 
 import click
+
 from cg.apps.crunchy.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress.compress import CompressAPI
@@ -10,10 +11,10 @@ from cg.models.cg_config import CGConfig
 
 from .fastq import (
     store_case,
+    store_demultiplexed_flow_cell,
     store_flow_cell,
     store_sample,
     store_ticket,
-    store_demultiplexed_flow_cell,
 )
 
 LOG = logging.getLogger(__name__)
@@ -28,7 +29,7 @@ def store(context: CGConfig):
     crunchy_api: CrunchyAPI = context.crunchy_api
 
     compress_api = CompressAPI(
-        hk_api=housekeeper_api, crunchy_api=crunchy_api, demux_root=context.demultiplex.out_dir
+        hk_api=housekeeper_api, crunchy_api=crunchy_api, demux_root=context.flow_cells_dir
     )
     context.meta_apis["compress_api"] = compress_api
 

@@ -1,5 +1,6 @@
 from enum import Enum
-from typing import Callable, List, Optional
+from typing import Callable
+
 from sqlalchemy.orm import Query
 
 from cg.store.models import Organism
@@ -18,8 +19,8 @@ class OrganismFilter(Enum):
 
 def apply_organism_filter(
     organisms: Query,
-    filter_functions: List[Callable],
-    internal_id: Optional[str] = None,
+    filter_functions: list[Callable],
+    internal_id: str | None = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for filter_function in filter_functions:

@@ -1,36 +1,48 @@
-"""Module to create delivery reports"""
-
-from datetime import datetime
+"""Module to create delivery reports."""
 import logging
+from datetime import datetime
 from pathlib import Path
-from typing import TextIO, Optional, List
 
 import requests
+from housekeeper.store.models import File, Version
+from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sqlalchemy.orm import Query
 
-from cgmodels.cg.constants import Pipeline
-from housekeeper.store.models import File, Version
-
-from cg.constants.constants import FileFormat, MAX_ITEMS_TO_RETRIEVE
+from cg.constants import Pipeline
+from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.exc import DeliveryReportError
 from cg.io.controller import WriteStream
-from cg.meta.report.field_validators import get_missing_report_data, get_empty_report_data
+from cg.meta.meta import MetaAPI
+from cg.meta.report.field_validators import (
+    get_empty_report_data,
+    get_missing_report_data,
+)
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
-from cg.meta.meta import MetaAPI
 from cg.models.report.metadata import SampleMetadataModel
 from cg.models.report.report import (
-    ReportModel,
-    CustomerModel,
     CaseModel,
+    CustomerModel,
     DataAnalysisModel,
+    ReportModel,
     ScoutReportFiles,
 )
-from cg.models.report.sample import SampleModel, ApplicationModel, TimestampModel, MethodsModel
-from cg.store.models import Analysis, Application, Family, Sample, FamilySample
-from jinja2 import Environment, PackageLoader, select_autoescape, Template
+from cg.models.report.sample import (
+    ApplicationModel,
+    MethodsModel,
+    SampleModel,
+    TimestampModel,
+)
+from cg.store.models import (
+    Analysis,
+    Application,
+    ApplicationLimitations,
+    Case,
+    CaseSample,
+    Sample,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -52,56 +64,57 @@ class ReportAPI(MetaAPI):
         report_data: ReportModel = self.validate_report_fields(
             case_id=case_id, report_data=report_data, force_report=force_report
         )
-        rendered_report: str = self.render_delivery_report(report_data=report_data.dict())
+        rendered_report: str = self.render_delivery_report(report_data=report_data.model_dump())
         return rendered_report
 
     def create_delivery_report_file(
-        self, case_id: str, file_path: Path, analysis_date: datetime, force_report: bool
-    ) -> TextIO:
-        """Generates a temporary file containing a delivery report."""
-        file_path.mkdir(parents=True, exist_ok=True)
+        self, case_id: str, directory: Path, analysis_date: datetime, force_report: bool
+    ) -> Path:
+        """Generates a file containing the delivery report content."""
+        directory.mkdir(parents=True, exist_ok=True)
         delivery_report: str = self.create_delivery_report(
             case_id=case_id, analysis_date=analysis_date, force_report=force_report
         )
-        report_file_path: Path = Path(file_path / "delivery-report.html")
-        with open(report_file_path, "w") as delivery_report_file:
-            delivery_report_file.write(delivery_report)
-        return delivery_report_file
+        report_file_path: Path = Path(directory, "delivery-report.html")
+        with open(report_file_path, "w") as delivery_report_stream:
+            delivery_report_stream.write(delivery_report)
+        return report_file_path
 
     def add_delivery_report_to_hk(
-        self, delivery_report_file: Path, case_id: str, analysis_date: datetime
-    ) -> Optional[File]:
-        """
-        Adds a delivery report file, if it has not already been generated, to an analysis bundle for a specific case
-        in HK and returns a pointer to it.
-        """
-        version = self.housekeeper_api.version(case_id, analysis_date)
-        try:
-            self.get_delivery_report_from_hk(case_id=case_id)
-        except FileNotFoundError:
-            LOG.info(f"Adding a new delivery report to housekeeper for {case_id}")
-            file: File = self.housekeeper_api.add_file(
-                delivery_report_file.name, version, [case_id, HK_DELIVERY_REPORT_TAG]
-            )
-            self.housekeeper_api.include_file(file, version)
-            self.housekeeper_api.add_commit(file)
-            return file
-        return None
+        self, case_id: str, delivery_report_file: Path, version: Version
+    ) -> File | None:
+        """Add a delivery report file to a case bundle and return its file object."""
+        LOG.info(f"Adding a new delivery report to housekeeper for {case_id}")
+        file: File = self.housekeeper_api.add_file(
+            path=delivery_report_file, version_obj=version, tags=[case_id, HK_DELIVERY_REPORT_TAG]
+        )
+        self.housekeeper_api.include_file(file, version)
+        self.housekeeper_api.add_commit(file)
+        return file
 
-    def get_delivery_report_from_hk(self, case_id: str) -> str:
-        """Extracts the delivery reports of a specific case stored in HK."""
-        version: Version = self.housekeeper_api.last_version(case_id)
+    def get_delivery_report_from_hk(self, case_id: str, version: Version) -> str | None:
+        """Return path of a delivery report stored in HK."""
         delivery_report: File = self.housekeeper_api.get_latest_file(
             bundle=case_id, tags=[HK_DELIVERY_REPORT_TAG], version=version.id
         )
         if not delivery_report:
-            LOG.warning(f"No existing delivery report found in housekeeper for {case_id}")
-            raise FileNotFoundError
+            LOG.warning(f"No delivery report found in housekeeper for {case_id}")
+            return None
         return delivery_report.full_path
 
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
-        """Return the file path of the uploaded to Scout file given its tag."""
-        raise NotImplementedError
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
+        """Return file path of the uploaded to Scout file given its tag."""
+        version: Version = self.housekeeper_api.last_version(bundle=case_id)
+        tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
+        uploaded_file: File = self.housekeeper_api.get_latest_file(
+            bundle=case_id, tags=tags, version=version.id
+        )
+        if not tags or not uploaded_file:
+            LOG.warning(
+                f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
+            )
+            return None
+        return uploaded_file.full_path
 
     def render_delivery_report(self, report_data: dict) -> str:
         """Renders the report on the Jinja template."""
@@ -112,14 +125,14 @@ class ReportAPI(MetaAPI):
         template: Template = env.get_template(self.get_template_name())
         return template.render(**report_data)
 
-    def get_cases_without_delivery_report(self, pipeline: Pipeline) -> List[Family]:
+    def get_cases_without_delivery_report(self, pipeline: Pipeline) -> list[Case]:
         """Returns a list of cases that has been stored and need a delivery report."""
-        stored_cases: List[Family] = []
+        stored_cases: list[Case] = []
         analyses: Query = self.status_db.analyses_to_delivery_report(pipeline=pipeline)[
             :MAX_ITEMS_TO_RETRIEVE
         ]
         for analysis_obj in analyses:
-            case: Family = analysis_obj.family
+            case: Case = analysis_obj.case
             last_version: Version = self.housekeeper_api.last_version(bundle=case.internal_id)
             hk_file: File = self.housekeeper_api.get_files(
                 bundle=case.internal_id, version=last_version.id if last_version else None
@@ -133,14 +146,14 @@ class ReportAPI(MetaAPI):
                 )
         return stored_cases
 
-    def get_cases_without_uploaded_delivery_report(self, pipeline: Pipeline) -> List[Family]:
+    def get_cases_without_uploaded_delivery_report(self, pipeline: Pipeline) -> list[Case]:
         """Returns a list of cases that need a delivery report to be uploaded."""
         analyses: Query = self.status_db.analyses_to_upload_delivery_reports(pipeline=pipeline)[
             :MAX_ITEMS_TO_RETRIEVE
         ]
-        return [analysis_obj.family for analysis_obj in analyses]
+        return [analysis_obj.case for analysis_obj in analyses]
 
-    def update_delivery_report_date(self, case: Family, analysis_date: datetime) -> None:
+    def update_delivery_report_date(self, case: Case, analysis_date: datetime) -> None:
         """Updates the date when delivery report was created."""
         analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_started_at(
             case_entry_id=case.id, started_at_date=analysis_date
@@ -150,7 +163,7 @@ class ReportAPI(MetaAPI):
 
     def get_report_data(self, case_id: str, analysis_date: datetime) -> ReportModel:
         """Fetches all the data needed to generate a delivery report."""
-        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_started_at(
             case_entry_id=case.id, started_at_date=analysis_date
         )
@@ -161,7 +174,7 @@ class ReportAPI(MetaAPI):
             version=self.get_report_version(analysis=analysis),
             date=datetime.today(),
             case=case_model,
-            accredited=self.get_report_accreditation(
+            accredited=self.is_report_accredited(
                 samples=case_model.samples, analysis_metadata=analysis_metadata
             ),
         )
@@ -188,7 +201,7 @@ class ReportAPI(MetaAPI):
         return report_data
 
     @staticmethod
-    def get_customer_data(case: Family) -> CustomerModel:
+    def get_customer_data(case: Case) -> CustomerModel:
         """Returns customer validated attributes retrieved from status DB."""
         return CustomerModel(
             name=case.customer.name,
@@ -205,20 +218,20 @@ class ReportAPI(MetaAPI):
         """
         version = None
         if analysis:
-            version = len(analysis.family.analyses) - analysis.family.analyses.index(analysis)
+            version = len(analysis.case.analyses) - analysis.case.analyses.index(analysis)
         return version
 
     def get_case_data(
         self,
-        case: Family,
+        case: Case,
         analysis: Analysis,
         analysis_metadata: AnalysisModel,
     ) -> CaseModel:
         """Returns case associated validated attributes."""
-        samples: List[SampleModel] = self.get_samples_data(
+        samples: list[SampleModel] = self.get_samples_data(
             case=case, analysis_metadata=analysis_metadata
         )
-        unique_applications: List[ApplicationModel] = self.get_unique_applications(samples=samples)
+        unique_applications: list[ApplicationModel] = self.get_unique_applications(samples=samples)
         return CaseModel(
             name=case.name,
             id=case.internal_id,
@@ -229,15 +242,15 @@ class ReportAPI(MetaAPI):
             applications=unique_applications,
         )
 
-    def get_samples_data(self, case: Family, analysis_metadata: AnalysisModel) -> List[SampleModel]:
+    def get_samples_data(self, case: Case, analysis_metadata: AnalysisModel) -> list[SampleModel]:
         """Extracts all the samples associated to a specific case and their attributes."""
         samples = list()
-        case_samples: List[FamilySample] = self.status_db.get_case_samples_by_case_id(
+        case_samples: list[CaseSample] = self.status_db.get_case_samples_by_case_id(
             case_internal_id=case.internal_id
         )
         for case_sample in case_samples:
             sample: Sample = case_sample.sample
-            lims_sample: Optional[dict] = self.get_lims_sample(sample_id=sample.internal_id)
+            lims_sample: dict | None = self.get_lims_sample(sample_id=sample.internal_id)
             samples.append(
                 SampleModel(
                     name=sample.name,
@@ -257,14 +270,23 @@ class ReportAPI(MetaAPI):
             )
         return samples
 
-    def get_lims_sample(self, sample_id: str) -> Optional[dict]:
+    def get_lims_sample(self, sample_id: str) -> dict | None:
         """Fetches sample data from LIMS. Returns an empty dictionary if the request was unsuccessful."""
         lims_sample = dict()
         try:
             lims_sample: dict = self.lims_api.sample(sample_id)
         except requests.exceptions.HTTPError as ex:
-            LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
+            LOG.info(f"Could not fetch sample {sample_id} from LIMS: {ex}")
         return lims_sample
+
+    def get_pipeline_accreditation_limitation(self, application_tag: str) -> str | None:
+        """Return pipeline specific limitations given an application tag."""
+        application_limitation: ApplicationLimitations = (
+            self.status_db.get_application_limitation_by_tag_and_pipeline(
+                tag=application_tag, pipeline=self.analysis_api.pipeline
+            )
+        )
+        return application_limitation.limitations if application_limitation else None
 
     def get_sample_application_data(self, lims_sample: dict) -> ApplicationModel:
         """Retrieves the analysis application attributes."""
@@ -277,7 +299,9 @@ class ReportAPI(MetaAPI):
                 version=lims_sample.get("application_version"),
                 prep_category=application.prep_category,
                 description=application.description,
+                details=application.details,
                 limitations=application.limitations,
+                pipeline_limitations=self.get_pipeline_accreditation_limitation(application.tag),
                 accredited=application.is_accredited,
                 external=application.is_external,
             )
@@ -286,7 +310,7 @@ class ReportAPI(MetaAPI):
         )
 
     @staticmethod
-    def get_unique_applications(samples: List[SampleModel]) -> List[ApplicationModel]:
+    def get_unique_applications(samples: list[SampleModel]) -> list[ApplicationModel]:
         """Returns the unique case associated applications."""
         applications = list()
         for sample in samples:
@@ -302,17 +326,17 @@ class ReportAPI(MetaAPI):
             library_prep = self.lims_api.get_prep_method(lims_id=sample_id)
             sequencing = self.lims_api.get_sequencing_method(lims_id=sample_id)
         except requests.exceptions.HTTPError as ex:
-            LOG.info("Could not fetch sample (%s) methods from LIMS: %s", sample_id, ex)
+            LOG.info(f"Could not fetch sample ({sample_id}) methods from LIMS: {ex}")
 
         return MethodsModel(library_prep=library_prep, sequencing=sequencing)
 
     def get_case_analysis_data(
         self,
-        case: Family,
+        case: Case,
         analysis: Analysis,
         analysis_metadata: AnalysisModel,
     ) -> DataAnalysisModel:
-        """Retrieves the pipeline attributes used for data analysis."""
+        """Return pipeline attributes used for data analysis."""
         return DataAnalysisModel(
             customer_pipeline=case.data_analysis,
             data_delivery=case.data_delivery,
@@ -325,8 +349,8 @@ class ReportAPI(MetaAPI):
             scout_files=self.get_scout_uploaded_files(case=case),
         )
 
-    def get_scout_uploaded_files(self, case: Family) -> ScoutReportFiles:
-        """Extracts the files that will be uploaded to Scout."""
+    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
+        """Return files that will be uploaded to Scout."""
         return ScoutReportFiles(
             snv_vcf=self.get_scout_uploaded_file_from_hk(
                 case_id=case.internal_id, scout_tag="snv_vcf"
@@ -340,63 +364,66 @@ class ReportAPI(MetaAPI):
             smn_tsv=self.get_scout_uploaded_file_from_hk(
                 case_id=case.internal_id, scout_tag="smn_tsv"
             ),
+            vcf_fusion=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="vcf_fusion"
+            ),
         )
 
     @staticmethod
     def get_sample_timestamp_data(sample: Sample) -> TimestampModel:
-        """Retrieves the sample processing dates."""
+        """Return sample processing dates."""
         return TimestampModel(
             ordered_at=sample.ordered_at,
             received_at=sample.received_at,
             prepared_at=sample.prepared_at,
-            sequenced_at=sample.sequenced_at,
+            reads_updated_at=sample.last_sequenced_at,
         )
 
     def get_sample_metadata(
         self,
-        case: Family,
+        case: Case,
         sample: Sample,
         analysis_metadata: AnalysisModel,
     ) -> SampleMetadataModel:
-        """Return the sample metadata to include in the report."""
+        """Return sample metadata to include in the report."""
         raise NotImplementedError
 
-    def get_data_analysis_type(self, case: Family) -> Optional[str]:
-        """Retrieves the data analysis type carried out."""
+    def get_data_analysis_type(self, case: Case) -> str | None:
+        """Return data analysis type carried out."""
         case_sample: Sample = self.status_db.get_case_samples_by_case_id(
             case_internal_id=case.internal_id
         )[0].sample
-        lims_sample: Optional[dict] = self.get_lims_sample(sample_id=case_sample.internal_id)
+        lims_sample: dict | None = self.get_lims_sample(sample_id=case_sample.internal_id)
         application: Application = self.status_db.get_application_by_tag(
             tag=lims_sample.get("application")
         )
         return application.analysis_type if application else None
 
     def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
-        """Returns the build version of the genome reference of a specific case."""
+        """Return build version of the genome reference of a specific case."""
         raise NotImplementedError
 
     def get_variant_callers(self, _analysis_metadata: AnalysisModel) -> list:
-        """Extracts the list of variant-calling filters used during analysis."""
+        """Return list of variant-calling filters used during analysis."""
         return []
 
-    def get_report_accreditation(
-        self, samples: List[SampleModel], analysis_metadata: AnalysisModel
+    def is_report_accredited(
+        self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
-        """Checks if the report is accredited or not."""
+        """Check if the report is accredited."""
         raise NotImplementedError
 
     def get_required_fields(self, case: CaseModel) -> dict:
-        """Retrieves a dictionary with the delivery report required fields."""
+        """Return dictionary with the delivery report required fields."""
         raise NotImplementedError
 
     def get_template_name(self) -> str:
-        """Retrieves the pipeline specific template name."""
+        """Return pipeline specific template name."""
         raise NotImplementedError
 
     @staticmethod
     def get_application_required_fields(case: CaseModel, required_fields: list) -> dict:
-        """Retrieves sample required fields."""
+        """Return sample required fields."""
         required_sample_fields = dict()
         for application in case.applications:
             required_sample_fields.update({application.tag: required_fields})
@@ -404,7 +431,7 @@ class ReportAPI(MetaAPI):
 
     @staticmethod
     def get_sample_required_fields(case: CaseModel, required_fields: list) -> dict:
-        """Retrieves sample required fields."""
+        """Return sample required fields."""
         required_sample_fields = dict()
         for sample in case.samples:
             required_sample_fields.update({sample.id: required_fields})
@@ -412,18 +439,18 @@ class ReportAPI(MetaAPI):
 
     @staticmethod
     def get_timestamp_required_fields(case: CaseModel, required_fields: list) -> dict:
-        """Retrieves sample timestamps required fields."""
+        """Return sample timestamps required fields."""
         for sample in case.samples:
             if sample.application.external:
                 required_fields.remove("received_at")
                 break
         return ReportAPI.get_sample_required_fields(case=case, required_fields=required_fields)
 
-    def get_hk_scout_file_tags(self, scout_tag: str) -> Optional[list]:
-        """Retrieves pipeline specific uploaded to Scout Housekeeper file tags given a Scout key."""
+    def get_hk_scout_file_tags(self, scout_tag: str) -> list | None:
+        """Return pipeline specific uploaded to Scout Housekeeper file tags given a Scout key."""
         tags = self.get_upload_case_tags().get(scout_tag)
         return list(tags) if tags else None
 
     def get_upload_case_tags(self):
-        """Retrieves pipeline specific upload case tags."""
+        """Return pipeline specific upload case tags."""
         raise NotImplementedError

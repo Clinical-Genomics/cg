@@ -4,7 +4,8 @@ import logging
 import os
 from copy import deepcopy
 from pathlib import Path
-from typing import Iterable, List, Set, Tuple
+from typing import Iterable
+
 from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -12,7 +13,7 @@ from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
 from cg.exc import MissingFilesError
 from cg.store import Store
-from cg.store.models import Family, FamilySample, Sample
+from cg.store.models import Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -24,8 +25,8 @@ class DeliverAPI:
         self,
         store: Store,
         hk_api: HousekeeperAPI,
-        case_tags: List[Set[str]],
-        sample_tags: List[Set[str]],
+        case_tags: list[set[str]],
+        sample_tags: list[set[str]],
         project_base_path: Path,
         delivery_type: str,
         force_all: bool = False,
@@ -43,9 +44,9 @@ class DeliverAPI:
         self.store = store
         self.hk_api = hk_api
         self.project_base_path: Path = project_base_path
-        self.case_tags: List[Set[str]] = case_tags
-        self.all_case_tags: Set[str] = {tag for tags in case_tags for tag in tags}
-        self.sample_tags: List[Set[str]] = sample_tags
+        self.case_tags: list[set[str]] = case_tags
+        self.all_case_tags: set[str] = {tag for tags in case_tags for tag in tags}
+        self.sample_tags: list[set[str]] = sample_tags
         self.customer_id: str = ""
         self.ticket: str = ""
         self.dry_run = False
@@ -60,7 +61,7 @@ class DeliverAPI:
         LOG.info(f"Set dry run to {dry_run}")
         self.dry_run = dry_run
 
-    def deliver_files(self, case_obj: Family):
+    def deliver_files(self, case_obj: Case):
         """Deliver all files for a case.
 
         If there are sample tags deliver all files for the samples as well.
@@ -76,15 +77,15 @@ class DeliverAPI:
                 LOG.info(f"Could not find any version for {case_id}")
             elif not self.skip_missing_bundle:
                 raise SyntaxError(f"Could not find any version for {case_id}")
-        links: List[FamilySample] = self.store.get_case_samples_by_case_id(case_internal_id=case_id)
+        links: list[CaseSample] = self.store.get_case_samples_by_case_id(case_internal_id=case_id)
         if not links:
             LOG.warning(f"Could not find any samples linked to case {case_id}")
             return
-        samples: List[Sample] = [link.sample for link in links]
+        samples: list[Sample] = [link.sample for link in links]
         self.set_ticket(case_obj.latest_ticket)
         self.set_customer_id(case_obj=case_obj)
 
-        sample_ids: Set[str] = {sample.internal_id for sample in samples}
+        sample_ids: set[str] = {sample.internal_id for sample in samples}
 
         if self.case_tags:
             self.deliver_case_files(
@@ -97,9 +98,9 @@ class DeliverAPI:
         if not self.sample_tags:
             return
 
-        link: FamilySample
+        link: CaseSample
         for link in links:
-            if link.sample.sequencing_qc or self.deliver_failed_samples:
+            if self.sample_is_deliverable(link):
                 sample_id: str = link.sample.internal_id
                 sample_name: str = link.sample.name
                 LOG.debug(f"Fetch last version for sample bundle {sample_id}")
@@ -122,8 +123,14 @@ class DeliverAPI:
                 f"Sample {link.sample.internal_id} did not receive enough reads and will not be delivered"
             )
 
+    def sample_is_deliverable(self, link: CaseSample) -> bool:
+        sample_is_external: bool = link.sample.application_version.application.is_external
+        deliver_failed_samples: bool = self.deliver_failed_samples
+        sample_passes_qc: bool = link.sample.sequencing_qc
+        return sample_passes_qc or deliver_failed_samples or sample_is_external
+
     def deliver_case_files(
-        self, case_id: str, case_name: str, version: Version, sample_ids: Set[str]
+        self, case_id: str, case_name: str, version: Version, sample_ids: set[str]
     ) -> None:
         """Deliver files on case level."""
         LOG.debug(f"Deliver case files for {case_id}")
@@ -203,7 +210,7 @@ class DeliverAPI:
             f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case_id}"
         )
 
-    def get_case_files_from_version(self, version: Version, sample_ids: Set[str]) -> Iterable[Path]:
+    def get_case_files_from_version(self, version: Version, sample_ids: set[str]) -> Iterable[Path]:
         """Fetch all case files from a version that are tagged with any of the case tags."""
 
         if not version:
@@ -230,7 +237,7 @@ class DeliverAPI:
                 continue
             yield Path(file_obj.full_path)
 
-    def include_file_case(self, file: File, sample_ids: Set[str]) -> bool:
+    def include_file_case(self, file: File, sample_ids: set[str]) -> bool:
         """Check if file should be included in case bundle.
 
         At least one tag should match between file and tags.
@@ -249,7 +256,7 @@ class DeliverAPI:
             return False
 
         # Check if any of the file tags matches the case tags
-        tags: Set[str]
+        tags: set[str]
         for tags in self.case_tags:
             LOG.debug(f"check if {tags} is a subset of {file_tags}")
             if tags.issubset(file_tags):
@@ -267,7 +274,7 @@ class DeliverAPI:
         For fastq delivery we know that we want to deliver all files of bundle.
         """
         file_tags = {tag.name for tag in file_obj.tags}
-        tags: Set[str]
+        tags: set[str]
         # Check if any of the file tags matches the sample tags
         for tags in self.sample_tags:
             working_copy = deepcopy(tags)
@@ -282,7 +289,7 @@ class DeliverAPI:
         LOG.info(f"Setting customer_id to {customer_id}")
         self.customer_id = customer_id
 
-    def set_customer_id(self, case_obj: Family) -> None:
+    def set_customer_id(self, case_obj: Case) -> None:
         """Set the customer_id for this upload"""
         self._set_customer_id(case_obj.customer.internal_id)
 
@@ -307,7 +314,7 @@ class DeliverAPI:
         return delivery_path
 
     @staticmethod
-    def get_delivery_scope(delivery_arguments: Set[str]) -> Tuple[bool, bool]:
+    def get_delivery_scope(delivery_arguments: set[str]) -> tuple[bool, bool]:
         """Returns the scope of the delivery, ie whether sample and/or case files were delivered."""
         case_delivery: bool = False
         sample_delivery: bool = False

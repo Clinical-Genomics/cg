@@ -1,7 +1,15 @@
 from datetime import datetime as dt
 
+from cg.constants.subject import Sex
 from cg.store import Store
-from cg.store.models import ApplicationVersion, Collaboration, Customer, Organism, Sample, User
+from cg.store.models import (
+    ApplicationVersion,
+    Collaboration,
+    Customer,
+    Organism,
+    Sample,
+    User,
+)
 
 
 def test_add_collaboration(store: Store):
@@ -59,7 +67,7 @@ def test_add_microbial_sample(base_store: Store, helpers):
     # WHEN adding a new microbial sample
     new_sample = base_store.add_sample(
         name=name,
-        sex="unknown",
+        sex=Sex.UNKNOWN,
         internal_id=internal_id,
         priority=priority,
         application_version=application_version,

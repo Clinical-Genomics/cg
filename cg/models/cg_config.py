@@ -1,10 +1,8 @@
 import logging
-from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic.v1 import BaseModel, EmailStr, Field
 from typing_extensions import Literal
 
-from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -20,7 +18,9 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
+from cg.meta.backup.pdc import PdcAPI
 from cg.store import Store
+from cg.store.database import initialize_database
 
 LOG = logging.getLogger(__name__)
 
@@ -31,37 +31,34 @@ class Sequencers(BaseModel):
     novaseq: str
 
 
-class EncryptionDirs(BaseModel):
+class SlurmConfig(BaseModel):
+    account: str
+    hours: int | None
+    mail_user: EmailStr
+    memory: int | None
+    number_tasks: int | None
+    conda_env: str | None
+    qos: SlurmQos = SlurmQos.LOW
+
+
+class Encryption(BaseModel):
+    encryption_dir: str
+    binary_path: str
+
+
+class PDCArchivingDirectory(BaseModel):
     current: str
-    legacy: str
+    nas: str
+    pre_nas: str
 
 
-class FlowCellRunDirs(Sequencers):
-    pass
+class DataInput(BaseModel):
+    input_dir_path: str
 
 
 class BackupConfig(BaseModel):
-    root: Sequencers
-    encrypt_dir: EncryptionDirs
-
-
-class CleanDirs(BaseModel):
-    sample_sheets_dir_name: str
-    flow_cell_run_dirs: FlowCellRunDirs
-
-
-class CleanConfig(BaseModel):
-    flow_cells: CleanDirs
-
-
-class SlurmConfig(BaseModel):
-    account: str
-    hours: Optional[int]
-    mail_user: EmailStr
-    memory: Optional[int]
-    number_tasks: Optional[int]
-    conda_env: Optional[str]
-    qos: SlurmQos = SlurmQos.LOW
+    pdc_archiving_directory: PDCArchivingDirectory
+    slurm_flow_cell_encryption: SlurmConfig
 
 
 class HousekeeperConfig(BaseModel):
@@ -70,8 +67,6 @@ class HousekeeperConfig(BaseModel):
 
 
 class DemultiplexConfig(BaseModel):
-    run_dir: str  # Base path to  un demultiplexed flowcells
-    out_dir: str  # Base path to where the demultiplexed results lives
     slurm: SlurmConfig
 
 
@@ -82,7 +77,7 @@ class TrailblazerConfig(BaseModel):
 
 
 class StatinaConfig(BaseModel):
-    host: Optional[str]
+    host: str | None
     user: str
     key: str
     api_url: str
@@ -91,8 +86,8 @@ class StatinaConfig(BaseModel):
 
 
 class CommonAppConfig(BaseModel):
-    binary_path: str
-    config_path: Optional[str]
+    binary_path: str | None
+    config_path: str | None
 
 
 class FluffyUploadConfig(BaseModel):
@@ -115,7 +110,7 @@ class LimsConfig(BaseModel):
 
 
 class CrunchyConfig(BaseModel):
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     cram_reference: str
     slurm: SlurmConfig
 
@@ -138,18 +133,32 @@ class BalsamicConfig(CommonAppConfig):
 
 class MutantConfig(BaseModel):
     binary_path: str
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     conda_env: str
     root: str
 
 
 class MipConfig(BaseModel):
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     conda_env: str
     mip_config: str
     pipeline: str
     root: str
     script: str
+
+
+class RareDiseaseConfig(CommonAppConfig):
+    compute_env: str
+    conda_binary: str | None = None
+    conda_env: str
+    launch_directory: str
+    pipeline_path: str
+    profile: str
+    references: str
+    revision: str
+    root: str
+    slurm: SlurmConfig
+    tower_pipeline: str
 
 
 class RnafusionConfig(CommonAppConfig):
@@ -160,28 +169,31 @@ class RnafusionConfig(CommonAppConfig):
     conda_env: str
     compute_env: str
     profile: str
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     launch_directory: str
     revision: str
     slurm: SlurmConfig
-    tower_binary_path: str
     tower_pipeline: str
 
 
 class TaxprofilerConfig(CommonAppConfig):
-    root: str
     binary_path: str
-
-
-class CGStatsConfig(BaseModel):
-    binary_path: str
-    database: str
+    conda_binary: str | None = None
+    conda_env: str
+    compute_env: str
+    databases: str
+    hostremoval_reference: str
+    pipeline_path: str
+    profile: str
+    revision: str
     root: str
+    slurm: SlurmConfig
+    tower_pipeline: str
 
 
 class MicrosaltConfig(BaseModel):
     binary_path: str
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     conda_env: str
     queries_path: str
     root: str
@@ -226,7 +238,7 @@ class ExternalConfig(BaseModel):
     caesar: str
 
 
-class DDNDataFlowConfig(BaseModel):
+class DataFlowConfig(BaseModel):
     database_name: str
     user: str
     password: str
@@ -237,12 +249,17 @@ class DDNDataFlowConfig(BaseModel):
 
 class CGConfig(BaseModel):
     database: str
-    environment: Literal["production", "stage"] = "stage"
-    madeline_exe: str
     delivery_path: str
-    max_flowcells: Optional[int]
+    demultiplexed_flow_cells_dir: str
+    downsample_dir: str
+    downsample_script: str
     email_base_settings: EmailBaseSettings
-
+    environment: Literal["production", "stage"] = "stage"
+    flow_cells_dir: str
+    madeline_exe: str
+    tower_binary_path: str
+    max_flowcells: int | None
+    data_input: DataInput | None = None
     # Base APIs that always should exist
     status_db_: Store = None
     housekeeper: HousekeeperConfig
@@ -250,18 +267,15 @@ class CGConfig(BaseModel):
 
     # App APIs that can be instantiated in CGConfig
     backup: BackupConfig = None
-    cgstats: CGStatsConfig = None
-    cg_stats_api_: StatsAPI = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
-    clean: Optional[CleanConfig] = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
-    ddn: Optional[DDNDataFlowConfig] = None
+    data_flow: DataFlowConfig | None = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
-    encryption: Optional[CommonAppConfig] = None
+    encryption: Encryption | None = None
     external: ExternalConfig = None
     genotype: CommonAppConfig = None
     genotype_api_: GenotypeAPI = None
@@ -279,23 +293,26 @@ class CGConfig(BaseModel):
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
-    pdc: Optional[CommonAppConfig] = None
+    pigz: CommonAppConfig | None = None
+    pdc: CommonAppConfig | None = None
+    pdc_api_: PdcAPI | None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
-    tar: Optional[CommonAppConfig] = None
+    tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
     statina: StatinaConfig = None
-    fohm: Optional[FOHMConfig] = None
+    fohm: FOHMConfig | None = None
     fluffy: FluffyConfig = None
     microsalt: MicrosaltConfig = None
     gisaid: GisaidConfig = None
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig = None
+    raredisease: RareDiseaseConfig = Field(None, alias="raredisease")
     rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
     taxprofiler: TaxprofilerConfig = Field(None, alias="taxprofiler")
 
@@ -305,7 +322,6 @@ class CGConfig(BaseModel):
     class Config:
         arbitrary_types_allowed = True
         fields = {
-            "cg_stats_api_": "cg_stats_api",
             "chanjo_api_": "chanjo_api",
             "crunchy_api_": "crunchy_api",
             "demultiplex_api_": "demultiplex_api",
@@ -317,6 +333,7 @@ class CGConfig(BaseModel):
             "loqusdb_api_": "loqusdb_api",
             "madeline_api_": "madeline_api",
             "mutacc_auto_api_": "mutacc_auto_api",
+            "pdc_api_": "pdc_api",
             "scout_api_": "scout_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
@@ -329,15 +346,6 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating chanjo api")
             api = ChanjoAPI(config=self.dict())
             self.chanjo_api_ = api
-        return api
-
-    @property
-    def cg_stats_api(self) -> StatsAPI:
-        api = self.__dict__.get("cg_stats_api_")
-        if api is None:
-            LOG.debug("Instantiating cg_stats api")
-            api = StatsAPI(config=self.dict())
-            self.cg_stats_api_ = api
         return api
 
     @property
@@ -354,7 +362,9 @@ class CGConfig(BaseModel):
         demultiplex_api = self.__dict__.get("demultiplex_api_")
         if demultiplex_api is None:
             LOG.debug("Instantiating demultiplexing api")
-            demultiplex_api = DemultiplexingAPI(config=self.dict())
+            demultiplex_api = DemultiplexingAPI(
+                config=self.dict(), housekeeper_api=self.housekeeper_api
+            )
             self.demultiplex_api_ = demultiplex_api
         return demultiplex_api
 
@@ -434,6 +444,15 @@ class CGConfig(BaseModel):
         return api
 
     @property
+    def pdc_api(self) -> PdcAPI:
+        api = self.__dict__.get("pdc_api_")
+        if api is None:
+            LOG.debug("Instantiating PDC api")
+            api = PdcAPI(binary_path=self.pdc.binary_path)
+            self.pdc_api_ = api
+        return api
+
+    @property
     def scout_api(self) -> ScoutAPI:
         api = self.__dict__.get("scout_api_")
         if api is None:
@@ -447,7 +466,8 @@ class CGConfig(BaseModel):
         status_db = self.__dict__.get("status_db_")
         if status_db is None:
             LOG.debug("Instantiating status db")
-            status_db = Store(uri=self.database)
+            initialize_database(self.database)
+            status_db = Store()
             self.status_db_ = status_db
         return status_db
 

@@ -1,4 +1,4 @@
-FROM docker.io/library/python:3.7-slim-bullseye
+FROM docker.io/library/python:3.11-slim-bullseye
 
 ENV GUNICORN_WORKERS=1
 ENV GUNICORN_THREADS=1
@@ -28,13 +28,14 @@ ENV GOOGLE_OAUTH_CLIENT_SECRET="1"
 
 
 WORKDIR /home/src/app
+COPY pyproject.toml poetry.lock ./ 
+
+RUN pip install --no-cache-dir poetry \
+    && poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi
+
 COPY cg ./cg
 COPY templates ./templates
-COPY MANIFEST.in pyproject.toml requirements* setup.py ./
-
-
-RUN pip install -r requirements.txt
-RUN pip install -e .
 
 CMD gunicorn \
     --workers=$GUNICORN_WORKERS \

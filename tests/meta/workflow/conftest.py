@@ -1,32 +1,32 @@
 """Fixtures for the workflow tests."""
 import datetime
 from pathlib import Path
-from typing import List, Dict
+import shutil
 
 import pytest
-from cgmodels.cg.constants import Pipeline
 
-from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
-from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
-
+from cg.constants.constants import CaseActions, MicrosaltAppTags, MicrosaltQC, Pipeline
 from cg.meta.compress.compress import CompressAPI
-from cg.models.compression_data import CompressionData
+from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family, Sample
-from tests.store_helpers import StoreHelpers
-from tests.conftest import fixture_base_store
-from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crunchy_api
-from tests.meta.upload.scout.conftest import fixture_another_sample_id
+from cg.models.compression_data import CompressionData
+from cg.models.orders.sample_base import ControlEnum
+from cg.store.models import Case, Sample
 from tests.cli.workflow.balsamic.conftest import (
+    balsamic_housekeeper_dir,
     fastq_file_l_1_r_1,
     fastq_file_l_2_r_1,
     fastq_file_l_2_r_2,
-    balsamic_housekeeper_dir,
 )
+from tests.meta.compress.conftest import compress_api, real_crunchy_api
+from tests.meta.upload.scout.conftest import another_sample_id
+from tests.mocks.tb_mock import MockTB
+from tests.store_helpers import StoreHelpers
 
 
-@pytest.fixture(scope="function", name="populated_compress_spring_api")
-def fixture_populated_compress_spring_api(
+@pytest.fixture(scope="function")
+def populated_compress_spring_api(
     compress_api: CompressAPI, only_spring_bundle: dict, helpers
 ) -> CompressAPI:
     """Populated compress api fixture with only spring compressed fastq."""
@@ -35,8 +35,8 @@ def fixture_populated_compress_spring_api(
     return compress_api
 
 
-@pytest.fixture(scope="function", name="populated_compress_api_fastq_spring")
-def fixture_populated_compress_api_fastq_spring(
+@pytest.fixture(scope="function")
+def populated_compress_api_fastq_spring(
     compress_api: CompressAPI, spring_fastq_mix: dict, helpers
 ) -> CompressAPI:
     """Populated compress api fixture with both spring and fastq."""
@@ -46,7 +46,7 @@ def fixture_populated_compress_api_fastq_spring(
 
 
 @pytest.fixture(name="only_spring_bundle")
-def fixture_only_spring_bundle() -> dict:
+def only_spring_bundle() -> dict:
     """Return a dictionary with bundle info in the correct format."""
     return {
         "name": "ADM1",
@@ -62,7 +62,7 @@ def fixture_only_spring_bundle() -> dict:
 
 
 @pytest.fixture(name="spring_fastq_mix")
-def fixture_spring_fastq_mix(compression_object: CompressionData) -> dict:
+def spring_fastq_mix(compression_object: CompressionData) -> dict:
     """Return a dictionary with bundle info including both fastq and spring files."""
 
     return {
@@ -116,6 +116,39 @@ def microsalt_qc_fail_lims_project() -> str:
     return "ACC11111_qc_fail"
 
 
+@pytest.fixture
+def metrics_file_failing_qc(
+    microsalt_qc_fail_run_dir_path: Path,
+    microsalt_qc_fail_lims_project: str,
+    tmp_path: Path,
+) -> Path:
+    """Return a metrics file that fails QC with corresponding samples in the database."""
+    metrics_path = Path(microsalt_qc_fail_run_dir_path, f"{microsalt_qc_fail_lims_project}.json")
+    temp_metrics_path = Path(tmp_path, metrics_path.name)
+    shutil.copy(metrics_path, temp_metrics_path)
+    return temp_metrics_path
+
+
+@pytest.fixture
+def metrics_file_passing_qc(
+    microsalt_qc_pass_run_dir_path: Path,
+    microsalt_qc_pass_lims_project: str,
+    tmp_path: Path,
+) -> Path:
+    """Return a metrics file that pass QC with corresponding samples in the database."""
+    metrics_path = Path(microsalt_qc_pass_run_dir_path, f"{microsalt_qc_pass_lims_project}.json")
+    temp_metrics_path = Path(tmp_path, metrics_path.name)
+    shutil.copy(metrics_path, temp_metrics_path)
+    return temp_metrics_path
+
+
+@pytest.fixture
+def microsalt_metrics_file(
+    microsalt_qc_fail_run_dir_path: Path, microsalt_qc_fail_lims_project: str
+) -> Path:
+    return Path(microsalt_qc_fail_run_dir_path, f"{microsalt_qc_fail_lims_project}.json")
+
+
 @pytest.fixture(name="microsalt_case_qc_pass")
 def microsalt_case_qc_pass() -> str:
     """Return a microsalt case to pass QC."""
@@ -129,13 +162,13 @@ def microsalt_case_qc_fail() -> str:
 
 
 @pytest.fixture(name="qc_pass_microsalt_samples")
-def qc_pass_microsalt_samples() -> List[str]:
+def qc_pass_microsalt_samples() -> list[str]:
     """Return a list of 20 microsalt samples internal_ids."""
     return [f"ACC22222A{i}" for i in range(1, 21)]
 
 
 @pytest.fixture(name="qc_fail_microsalt_samples")
-def qc_fail_microsalt_samples() -> List[str]:
+def qc_fail_microsalt_samples() -> list[str]:
     """Return a list of 20 microsalt samples internal_ids."""
     return [f"ACC11111A{i}" for i in range(1, 21)]
 
@@ -146,37 +179,51 @@ def qc_microsalt_context(
     helpers: StoreHelpers,
     microsalt_case_qc_pass: str,
     microsalt_case_qc_fail: str,
-    qc_pass_microsalt_samples: List[str],
-    qc_fail_microsalt_samples: List[str],
-    microsalt_qc_pass_lims_project: str,
-    microsalt_qc_fail_lims_project: str,
+    qc_pass_microsalt_samples: list[str],
+    qc_fail_microsalt_samples: list[str],
 ) -> CGConfig:
     """Return a Microsalt CG context."""
+    cg_context.trailblazer_api_ = MockTB()
     analysis_api = MicrosaltAnalysisAPI(cg_context)
     store = analysis_api.status_db
 
     # Create MWR microsalt case that passes QC
-    microsalt_case_qc_pass: Family = helpers.add_case(
+    microsalt_case_qc_pass: Case = helpers.add_case(
         store=store,
         internal_id=microsalt_case_qc_pass,
         name=microsalt_case_qc_pass,
         data_analysis=Pipeline.MICROSALT,
+        action=CaseActions.RUNNING,
     )
 
-    for sample in qc_pass_microsalt_samples:
+    for sample in qc_pass_microsalt_samples[1:]:
         sample_to_add: Sample = helpers.add_sample(
             store=store,
-            internal_id=sample,
             application_tag=MicrosaltAppTags.MWRNXTR003,
             application_type=MicrosaltAppTags.PREP_CATEGORY,
+            internal_id=sample,
             reads=MicrosaltQC.TARGET_READS,
-            sequenced_at=datetime.datetime.now(),
+            last_sequenced_at=datetime.datetime.now(),
         )
 
         helpers.add_relationship(store=store, case=microsalt_case_qc_pass, sample=sample_to_add)
 
+    # Add a negative control sample that passes the qc
+    negative_control_sample: Sample = helpers.add_sample(
+        store=store,
+        internal_id=qc_pass_microsalt_samples[0],
+        application_tag=MicrosaltAppTags.MWRNXTR003,
+        application_type=MicrosaltAppTags.PREP_CATEGORY,
+        reads=0,
+        last_sequenced_at=datetime.datetime.now(),
+        control=ControlEnum.negative,
+    )
+    helpers.add_relationship(
+        store=store, case=microsalt_case_qc_pass, sample=negative_control_sample
+    )
+
     # Create a microsalt MWX case that fails QC
-    microsalt_case_qc_fail: Family = helpers.add_case(
+    microsalt_case_qc_fail: Case = helpers.add_case(
         store=store,
         internal_id=microsalt_case_qc_fail,
         name=microsalt_case_qc_fail,
@@ -186,11 +233,12 @@ def qc_microsalt_context(
     for sample in qc_fail_microsalt_samples:
         sample_to_add: Sample = helpers.add_sample(
             store=store,
-            internal_id=sample,
             application_tag=MicrosaltAppTags.MWXNXTR003,
             application_type=MicrosaltAppTags.PREP_CATEGORY,
+            internal_id=sample,
             reads=MicrosaltQC.TARGET_READS,
-            sequenced_at=datetime.datetime.now(),
+            last_sequenced_at=datetime.datetime.now(),
+            control=ControlEnum.negative,
         )
 
         helpers.add_relationship(store=store, case=microsalt_case_qc_fail, sample=sample_to_add)
@@ -209,7 +257,7 @@ def qc_microsalt_context(
 
 
 @pytest.fixture(name="rnafusion_metrics")
-def fixture_rnafusion_metrics() -> Dict[str, float]:
+def rnafusion_metrics() -> dict[str, float]:
     """Return Rnafusion raw analysis metrics dictionary."""
     return {
         "after_filtering_gc_content": 0.516984,
@@ -217,12 +265,23 @@ def fixture_rnafusion_metrics() -> Dict[str, float]:
         "after_filtering_q30_rate": 0.929476,
         "after_filtering_read1_mean_length": 99.0,
         "before_filtering_total_reads": 149984042.0,
-        "bias_5_3": 1.07,
+        "median_5prime_to_3prime_bias": 1.1211,
         "pct_adapter": 12.005654574904709,
         "pct_mrna_bases": 85.9731,
         "pct_ribosomal_bases": 0.6581,
         "pct_surviving": 99.42004630065911,
         "pct_duplication": 14.8643,
-        "reads_aligned": 72391566.0,
+        "read_pairs_examined": 72391566.0,
         "uniquely_mapped_percent": 91.02,
     }
+
+
+@pytest.fixture(name="mip_analysis_api")
+def fixture_mip_analysis_api(
+    cg_context: CGConfig, mip_hk_store, analysis_store
+) -> MipDNAAnalysisAPI:
+    """Return a MIP analysis API."""
+    analysis_api = MipDNAAnalysisAPI(cg_context)
+    analysis_api.housekeeper_api = mip_hk_store
+    analysis_api.status_db = analysis_store
+    return analysis_api

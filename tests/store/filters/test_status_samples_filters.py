@@ -1,35 +1,37 @@
-from sqlalchemy.orm import Query
-from typing import Dict, Any
-from cg.constants.subject import PhenotypeStatus, Gender
-from cg.constants.constants import SampleType
-from cg.store import Store
-from cg.store.models import Sample
+from typing import Any
 
+from sqlalchemy.orm import Query
+
+from cg.constants.constants import SampleType
+from cg.constants.subject import PhenotypeStatus, Sex
+from cg.store import Store
 from cg.store.filters.status_sample_filters import (
-    filter_samples_with_loqusdb_id,
-    filter_samples_without_loqusdb_id,
-    filter_samples_is_delivered,
-    filter_samples_is_not_delivered,
-    filter_samples_without_invoice_id,
-    filter_samples_is_not_down_sampled,
-    filter_samples_is_sequenced,
-    filter_samples_is_not_sequenced,
-    filter_samples_do_invoice,
-    filter_samples_by_invoice_id,
-    filter_samples_by_internal_id,
+    filter_samples_by_entry_customer_ids,
     filter_samples_by_entry_id,
-    filter_samples_with_type,
-    filter_samples_is_prepared,
-    filter_samples_is_not_prepared,
-    filter_samples_is_received,
-    filter_samples_is_not_received,
+    filter_samples_by_identifier_name_and_value,
+    filter_samples_by_internal_id,
+    filter_samples_by_internal_id_pattern,
+    filter_samples_by_invoice_id,
     filter_samples_by_name,
     filter_samples_by_subject_id,
-    filter_samples_by_entry_customer_ids,
-    filter_samples_by_internal_id_pattern,
-    filter_samples_by_identifier_name_and_value,
+    filter_samples_do_invoice,
+    filter_samples_is_delivered,
+    filter_samples_is_not_delivered,
+    filter_samples_is_not_down_sampled,
+    filter_samples_is_not_prepared,
+    filter_samples_is_not_received,
+    filter_samples_is_not_sequenced,
+    filter_samples_is_prepared,
+    filter_samples_is_received,
+    filter_samples_is_sequenced,
+    filter_samples_with_loqusdb_id,
+    filter_samples_with_type,
+    filter_samples_without_invoice_id,
+    filter_samples_without_loqusdb_id,
 )
+from cg.store.models import CaseSample, Sample
 from tests.store.conftest import StoreConstants
+from tests.store_helpers import StoreHelpers
 
 
 def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, loqusdb_id):
@@ -39,10 +41,13 @@ def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, lo
     case = helpers.add_case(store)
     sample = helpers.add_sample(store, loqusdb_id=loqusdb_id)
     sample_not_uploaded = helpers.add_sample(store, internal_id=sample_id)
-    sample_store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
-    sample_store.relate_sample(
-        family=case, sample=sample_not_uploaded, status=PhenotypeStatus.UNKNOWN
+    link_1: CaseSample = sample_store.relate_sample(
+        case=case, sample=sample, status=PhenotypeStatus.UNKNOWN
     )
+    link_2: CaseSample = sample_store.relate_sample(
+        case=case, sample=sample_not_uploaded, status=PhenotypeStatus.UNKNOWN
+    )
+    sample_store.session.add_all([link_1, link_2])
 
     # GIVEN a sample query
     samples: Query = store._get_query(table=Sample)
@@ -55,21 +60,22 @@ def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, lo
     assert sample_not_uploaded not in uploaded_samples
 
 
-def test_get_samples_without_loqusdb_id(helpers, store, sample_store, sample_id, loqusdb_id):
+def test_get_samples_without_loqusdb_id(
+    helpers: StoreHelpers, sample_store: Store, sample_id, loqusdb_id
+):
     """Test sample extraction without Loqusdb ID."""
 
     # GIVEN a sample observations that has not been uploaded to Loqusdb
-    case = helpers.add_case(store)
-    sample = helpers.add_sample(store)
-    sample_uploaded = helpers.add_sample(store, internal_id=sample_id, loqusdb_id=loqusdb_id)
-    sample_store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
-    sample_store.relate_sample(family=case, sample=sample_uploaded, status=PhenotypeStatus.UNKNOWN)
+    sample = helpers.add_sample(sample_store)
+    sample_uploaded = helpers.add_sample(
+        store=sample_store, internal_id=sample_id, loqusdb_id=loqusdb_id
+    )
 
     # GIVEN a sample query
-    samples: Query = store._get_query(table=Sample)
+    samples: Query = sample_store._get_query(table=Sample)
 
     # WHEN retrieving the Loqusdb not uploaded samples
-    not_uploaded_samples = filter_samples_without_loqusdb_id(samples=samples)
+    not_uploaded_samples = filter_samples_without_loqusdb_id(samples)
 
     # THEN the obtained sample should match the expected one
     assert sample in not_uploaded_samples
@@ -237,7 +243,7 @@ def test_filter_samples_is_sequenced(
     assert len(samples.all()) == 1
 
     # THEN the sample should have a sequenced at date
-    assert samples.all()[0].sequenced_at is not None
+    assert samples.all()[0].last_sequenced_at is not None
 
 
 def test_filter_samples_is_not_sequenced(
@@ -264,7 +270,7 @@ def test_filter_samples_is_not_sequenced(
     assert len(samples.all()) == 1
 
     # THEN the sample should not have a sequenced at date
-    assert samples.all()[0].sequenced_at is None
+    assert samples.all()[0].last_sequenced_at is None
 
 
 def test_filter_samples_do_invoice(
@@ -611,7 +617,7 @@ def test_filter_samples_by_identifier_name_and_value_unique_sample(
     sample: Sample = sample_query.first()
 
     # WHEN filtering the sample query with every existing attribute of the sample
-    identifiers: Dict[str, Any] = {
+    identifiers: dict[str, Any] = {
         "age_at_sampling": sample.age_at_sampling,
         "application_version_id": sample.application_version_id,
         "capture_kit": sample.capture_kit,
@@ -641,7 +647,7 @@ def test_filter_samples_by_identifier_name_and_value_unique_sample(
         "reference_genome": sample.reference_genome,
         "sequence_start": sample.sequence_start,
         "sex": sample.sex,
-        "sequenced_at": sample.sequenced_at,
+        "last_sequenced_at": sample.last_sequenced_at,
         "subject_id": sample.subject_id,
     }
     for key, value in identifiers.items():
@@ -666,7 +672,7 @@ def test_filter_samples_by_identifier_name_and_value_two_samples(sample_store: S
     filtered_query: Query = filter_samples_by_identifier_name_and_value(
         samples=sample_query,
         identifier_name="sex",
-        identifier_value=Gender.FEMALE,
+        identifier_value=Sex.FEMALE,
     )
 
     # THEN the filtered query has at least two elements
@@ -674,4 +680,4 @@ def test_filter_samples_by_identifier_name_and_value_two_samples(sample_store: S
 
     # THEN all the elements of the filtered query are females
     for sample in filtered_query:
-        assert sample.sex == Gender.FEMALE
+        assert sample.sex == Sex.FEMALE

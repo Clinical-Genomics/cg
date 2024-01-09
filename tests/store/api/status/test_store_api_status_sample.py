@@ -1,9 +1,8 @@
 """Tests for store API status module related to samples."""
 
 
-from typing import List
 from cg.store import Store
-from cg.store.models import Sample, Customer
+from cg.store.models import Customer, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -13,7 +12,7 @@ def test_samples_to_receive_external(sample_store: Store, helpers: StoreHelpers)
     assert len(sample_store._get_query(table=Sample).all()) > 1
 
     # WHEN finding external samples to receive
-    samples: List[Sample] = sample_store.get_samples_to_receive(external=True)
+    samples: list[Sample] = sample_store.get_samples_to_receive(external=True)
 
     # THEN samples should be a list of samples
     assert isinstance(samples, list)
@@ -60,14 +59,14 @@ def test_samples_to_sequence(sample_store):
             [
                 sample
                 for sample in sample_store._get_query(table=Sample).all()
-                if sample.sequenced_at
+                if sample.last_sequenced_at
             ]
         )
         >= 1
     )
 
     # WHEN finding which samples are in queue to be sequenced
-    sequence_samples: List[Sample] = sample_store.get_samples_to_sequence()
+    sequence_samples: list[Sample] = sample_store.get_samples_to_sequence()
 
     # THEN samples should be a list of samples
     assert isinstance(sequence_samples, list)
@@ -79,7 +78,7 @@ def test_samples_to_sequence(sample_store):
         ["sequenced-partly", "received-prepared"]
     )
     for sample in sequence_samples:
-        assert sample.sequenced_at is None
+        assert sample.last_sequenced_at is None
         if sample.name == "sequenced-partly":
             assert sample.reads > 0
 
@@ -96,7 +95,7 @@ def test_samples_to_prepare(sample_store):
     )
 
     # WHEN finding which samples are in queue to be prepared
-    prepare_samples: List[Sample] = sample_store.get_samples_to_prepare()
+    prepare_samples: list[Sample] = sample_store.get_samples_to_prepare()
 
     # THEN samples should be a list of samples
     assert isinstance(prepare_samples, list)
@@ -205,7 +204,7 @@ def test_get_samples_not_down_sampled(sample_store: Store, helpers: StoreHelpers
 def test_get_samples_to_invoice_for_customer(
     store_with_samples_for_multiple_customers: Store,
     helpers: StoreHelpers,
-    three_customer_ids: List[str],
+    three_customer_ids: list[str],
 ):
     """Test that samples to invoice can be returned for a customer."""
     # GIVEN a database with samples for a customer
@@ -217,7 +216,7 @@ def test_get_samples_to_invoice_for_customer(
     assert customer
 
     # WHEN getting the samples to invoice for a customer
-    samples: List[
+    samples: list[
         Sample
     ] = store_with_samples_for_multiple_customers.get_samples_to_invoice_for_customer(
         customer=customer,
@@ -233,7 +232,7 @@ def test_get_samples_to_invoice_for_customer(
 def test_get_samples_by_customer_id_and_pattern_with_collaboration(
     store_with_samples_for_multiple_customers: Store,
     helpers: StoreHelpers,
-    three_customer_ids: List[str],
+    three_customer_ids: list[str],
 ):
     """Test that samples can be returned for a customer."""
     # GIVEN a database with samples for a customer
@@ -245,7 +244,7 @@ def test_get_samples_by_customer_id_and_pattern_with_collaboration(
     assert customer
 
     # WHEN getting the samples for a customer
-    samples: List[
+    samples: list[
         Sample
     ] = store_with_samples_for_multiple_customers.get_samples_by_customer_id_and_pattern(
         customers=customer,

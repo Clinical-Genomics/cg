@@ -1,7 +1,8 @@
 """Code for validating an upload via CLI"""
-from typing import List, Optional
+
 
 import click
+
 from cg.apps.coverage import ChanjoAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -12,7 +13,7 @@ from .utils import suggest_cases_to_upload
 @click.command()
 @click.argument("family_id", required=False)
 @click.pass_obj
-def validate(context: CGConfig, family_id: Optional[str]):
+def validate(context: CGConfig, family_id: str | None):
     """Validate a family of samples."""
 
     status_db: Store = context.status_db
@@ -25,7 +26,7 @@ def validate(context: CGConfig, family_id: Optional[str]):
         raise click.Abort
 
     case_obj = status_db.get_case_by_internal_id(internal_id=family_id)
-    chanjo_samples: List[dict] = []
+    chanjo_samples: list[dict] = []
     for link_obj in case_obj.links:
         sample_id = link_obj.sample.internal_id
         chanjo_sample = chanjo_api.sample(sample_id)

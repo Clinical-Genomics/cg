@@ -3,12 +3,12 @@
 import datetime as dt
 import gzip
 from pathlib import Path
-from typing import List
 
 import pytest
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat, PrepCategory
+from cg.constants.constants import CaseActions, FileFormat, PrepCategory
 from cg.io.controller import WriteFile
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -18,39 +18,39 @@ from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.fixture(name="balsamic_dir")
+@pytest.fixture
 def balsamic_dir(tmpdir_factory, apps_dir: Path) -> str:
     """Return the path to the balsamic apps dir"""
     balsamic_dir = tmpdir_factory.mktemp("balsamic")
     return Path(balsamic_dir).absolute().as_posix()
 
 
-@pytest.fixture(name="balsamic_case_id")
-def fixture_balsamic_case_id() -> str:
+@pytest.fixture
+def balsamic_case_id() -> str:
     return "balsamic_case_wgs_single"
 
 
-@pytest.fixture(name="balsamic_housekeeper_dir")
+@pytest.fixture
 def balsamic_housekeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
     """Return the path to the balsamic housekeeper bundle dir."""
     return tmpdir_factory.mktemp("bundles")
 
 
-@pytest.fixture(name="balsamic_pon_1_path")
+@pytest.fixture
 def balsamic_pon_1_path(balsamic_dir: Path) -> str:
     balsamic_reference_path = Path(balsamic_dir, "balsamic_bed_1_case_PON_reference.cnn")
     balsamic_reference_path.touch(exist_ok=True)
     return balsamic_reference_path.as_posix()
 
 
-@pytest.fixture(name="balsamic_bed_1_path")
+@pytest.fixture
 def balsamic_bed_1_path(balsamic_dir: Path) -> str:
     balsamic_bed_1_path = Path(balsamic_dir, "balsamic_bed_1.bed")
     balsamic_bed_1_path.touch(exist_ok=True)
     return balsamic_bed_1_path.as_posix()
 
 
-@pytest.fixture(name="balsamic_bed_2_path")
+@pytest.fixture
 def balsamic_bed_2_path(balsamic_dir: Path) -> str:
     balsamic_bed_2_path = Path(balsamic_dir, "balsamic_bed_2.bed")
     balsamic_bed_2_path.touch(exist_ok=True)
@@ -161,7 +161,7 @@ def balsamic_mock_fastq_files(
     ]
 
 
-@pytest.fixture(scope="function", name="balsamic_housekeeper")
+@pytest.fixture(scope="function")
 def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files: list):
     """Create populated housekeeper that holds files for all mock samples"""
 
@@ -201,7 +201,7 @@ def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files: li
     return housekeeper_api
 
 
-@pytest.fixture(name="balsamic_lims")
+@pytest.fixture
 def balsamic_lims(context_config: dict) -> MockLimsAPI:
     """Create populated mock LIMS api to mimic all functionality of LIMS used by BALSAMIC"""
 
@@ -287,8 +287,8 @@ def balsamic_lims(context_config: dict) -> MockLimsAPI:
     return balsamic_lims
 
 
-@pytest.fixture(scope="function", name="balsamic_context")
-def fixture_balsamic_context(
+@pytest.fixture(scope="function")
+def balsamic_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
     balsamic_lims: MockLimsAPI,
@@ -323,22 +323,23 @@ def fixture_balsamic_context(
         internal_id="balsamic_case_wgs_paired_enough_reads",
         name="balsamic_case_wgs_paired_enough_reads",
         data_analysis=Pipeline.BALSAMIC,
+        action=CaseActions.HOLD,
     )
     sample_case_wgs_paired_tumor_enough_reads = helpers.add_sample(
         status_db,
-        internal_id="sample_case_wgs_paired_tumor_enough_reads",
-        is_tumour=True,
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        is_tumour=True,
+        internal_id="sample_case_wgs_paired_tumor_enough_reads",
         reads=10,
-        sequenced_at=dt.datetime.now(),
+        last_sequenced_at=dt.datetime.now(),
     )
     sample_case_wgs_paired_normal_enough_reads = helpers.add_sample(
         status_db,
-        internal_id="sample_case_wgs_paired_normal_enough_reads",
-        is_tumour=False,
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        is_tumour=False,
+        internal_id="sample_case_wgs_paired_normal_enough_reads",
         reads=10,
-        sequenced_at=dt.datetime.now(),
+        last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
         status_db,
@@ -357,22 +358,23 @@ def fixture_balsamic_context(
         internal_id="balsamic_case_wgs_paired",
         name="balsamic_case_wgs_paired",
         data_analysis=Pipeline.BALSAMIC,
+        action=CaseActions.HOLD,
     )
     sample_case_wgs_paired_tumor = helpers.add_sample(
         status_db,
-        internal_id="sample_case_wgs_paired_tumor",
-        is_tumour=True,
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        is_tumour=True,
+        internal_id="sample_case_wgs_paired_tumor",
         reads=10,
-        sequenced_at=dt.datetime.now(),
+        last_sequenced_at=dt.datetime.now(),
     )
     sample_case_wgs_paired_normal = helpers.add_sample(
         status_db,
-        internal_id="sample_case_wgs_paired_normal",
-        is_tumour=False,
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        is_tumour=False,
+        internal_id="sample_case_wgs_paired_normal",
         reads=10,
-        sequenced_at=dt.datetime.now(),
+        last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(status_db, case=case_wgs_paired, sample=sample_case_wgs_paired_tumor)
     helpers.add_relationship(status_db, case=case_wgs_paired, sample=sample_case_wgs_paired_normal)
@@ -386,21 +388,21 @@ def fixture_balsamic_context(
     )
     sample_case_tgs_paired_tumor = helpers.add_sample(
         status_db,
-        internal_id="sample_case_tgs_paired_tumor",
-        is_tumour=True,
         application_tag="TGSA",
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
+        is_tumour=True,
+        internal_id="sample_case_tgs_paired_tumor",
         reads=10,
-        sequenced_at=dt.datetime.now(),
+        last_sequenced_at=dt.datetime.now(),
     )
     sample_case_tgs_paired_normal = helpers.add_sample(
         status_db,
-        internal_id="sample_case_tgs_paired_normal",
-        is_tumour=False,
         application_tag="TGSA",
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
+        is_tumour=False,
+        internal_id="sample_case_tgs_paired_normal",
         reads=0,
-        sequenced_at=dt.datetime.now(),
+        last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(status_db, case=case_tgs_paired, sample=sample_case_tgs_paired_tumor)
     helpers.add_relationship(status_db, case=case_tgs_paired, sample=sample_case_tgs_paired_normal)
@@ -414,11 +416,11 @@ def fixture_balsamic_context(
     )
     sample_case_wgs_single_tumor = helpers.add_sample(
         status_db,
-        internal_id="sample_case_wgs_single_tumor",
-        is_tumour=True,
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        is_tumour=True,
+        internal_id="sample_case_wgs_single_tumor",
         reads=100,
-        sequenced_at=dt.datetime.now(),
+        last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(status_db, case=case_wgs_single, sample=sample_case_wgs_single_tumor)
 
@@ -431,11 +433,11 @@ def fixture_balsamic_context(
     )
     sample_case_tgs_single_tumor = helpers.add_sample(
         status_db,
-        internal_id="sample_case_tgs_single_tumor",
-        is_tumour=True,
         application_tag="TGSA",
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=True,
+        internal_id="sample_case_tgs_single_tumor",
+        last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(status_db, case=case_tgs_single, sample=sample_case_tgs_single_tumor)
 
@@ -448,11 +450,11 @@ def fixture_balsamic_context(
     )
     sample_case_tgs_single_normal_error = helpers.add_sample(
         status_db,
-        internal_id="sample_case_tgs_single_normal_error",
-        is_tumour=False,
         application_tag="TGSA",
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=False,
+        internal_id="sample_case_tgs_single_normal_error",
+        last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
         status_db,
@@ -469,27 +471,27 @@ def fixture_balsamic_context(
     )
     sample_case_tgs_paired_tumor_error = helpers.add_sample(
         status_db,
-        internal_id="sample_case_tgs_paired_tumor_error",
-        is_tumour=True,
         application_tag="TGSA",
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=True,
+        internal_id="sample_case_tgs_paired_tumor_error",
+        last_sequenced_at=dt.datetime.now(),
     )
     sample_case_tgs_paired_tumor2_error = helpers.add_sample(
         status_db,
-        internal_id="sample_case_tgs_paired_tumor2_error",
-        is_tumour=True,
         application_tag="TGSA",
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=True,
+        internal_id="sample_case_tgs_paired_tumor2_error",
+        last_sequenced_at=dt.datetime.now(),
     )
     sample_case_tgs_paired_normal_error = helpers.add_sample(
         status_db,
-        internal_id="sample_case_tgs_paired_normal_error",
-        is_tumour=False,
         application_tag="TGSA",
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=False,
+        internal_id="sample_case_tgs_paired_normal_error",
+        last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
         status_db,
@@ -516,18 +518,18 @@ def fixture_balsamic_context(
     )
     mixed_sample_case_wgs_paired_tumor_error = helpers.add_sample(
         status_db,
-        internal_id="mixed_sample_case_wgs_paired_tumor_error",
-        is_tumour=True,
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=True,
+        internal_id="mixed_sample_case_wgs_paired_tumor_error",
+        last_sequenced_at=dt.datetime.now(),
     )
     mixed_sample_case_tgs_paired_normal_error = helpers.add_sample(
         status_db,
-        internal_id="mixed_sample_case_tgs_paired_normal_error",
-        is_tumour=False,
         application_tag="TGSA",
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=False,
+        internal_id="mixed_sample_case_tgs_paired_normal_error",
+        last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
         status_db,
@@ -549,18 +551,18 @@ def fixture_balsamic_context(
     )
     mixed_sample_case_wgs_mic_paired_tumor_error = helpers.add_sample(
         status_db,
-        internal_id="mixed_sample_case_wgs_mic_paired_tumor_error",
-        is_tumour=True,
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=True,
+        internal_id="mixed_sample_case_wgs_mic_paired_tumor_error",
+        last_sequenced_at=dt.datetime.now(),
     )
     mixed_sample_case_wgs_mic_paired_normal_error = helpers.add_sample(
         status_db,
-        internal_id="mixed_sample_case_wgs_mic_paired_normal_error",
-        is_tumour=False,
         application_tag="MICA",
         application_type="mic",
-        sequenced_at=dt.datetime.now(),
+        is_tumour=False,
+        internal_id="mixed_sample_case_wgs_mic_paired_normal_error",
+        last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
         status_db,
@@ -582,19 +584,19 @@ def fixture_balsamic_context(
     )
     mixed_sample_case_mixed_bed_paired_tumor_error = helpers.add_sample(
         status_db,
-        internal_id="mixed_sample_case_mixed_bed_paired_tumor_error",
-        is_tumour=True,
         application_tag="TGSA",
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=True,
+        internal_id="mixed_sample_case_mixed_bed_paired_tumor_error",
+        last_sequenced_at=dt.datetime.now(),
     )
     mixed_sample_case_mixed_bed_paired_normal_error = helpers.add_sample(
         status_db,
-        internal_id="mixed_sample_case_mixed_bed_paired_normal_error",
-        is_tumour=False,
         application_tag="TGSA",
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=False,
+        internal_id="mixed_sample_case_mixed_bed_paired_normal_error",
+        last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
         status_db,
@@ -616,10 +618,10 @@ def fixture_balsamic_context(
     )
     mip_sample_case_wgs_single_tumor = helpers.add_sample(
         status_db,
-        internal_id="mip_sample_case_wgs_single_tumor",
-        is_tumour=True,
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=True,
+        internal_id="mip_sample_case_wgs_single_tumor",
+        last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
         status_db,
@@ -636,27 +638,27 @@ def fixture_balsamic_context(
     )
     sample_case_wgs_paired_two_normal_tumor_error = helpers.add_sample(
         status_db,
-        internal_id="sample_case_wgs_paired_two_normal_tumor_error",
-        is_tumour=True,
         application_tag="WGSA",
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=True,
+        internal_id="sample_case_wgs_paired_two_normal_tumor_error",
+        last_sequenced_at=dt.datetime.now(),
     )
     sample_case_wgs_paired_two_normal_normal1_error = helpers.add_sample(
         status_db,
-        internal_id="sample_case_wgs_paired_two_normal_normal1_error",
-        is_tumour=False,
         application_tag="WGSA",
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=False,
+        internal_id="sample_case_wgs_paired_two_normal_normal1_error",
+        last_sequenced_at=dt.datetime.now(),
     )
     sample_case_wgs_paired_two_normal_normal2_error = helpers.add_sample(
         status_db,
-        internal_id="sample_case_wgs_paired_two_normal_normal2_error",
-        is_tumour=False,
         application_tag="WGSA",
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=False,
+        internal_id="sample_case_wgs_paired_two_normal_normal2_error",
+        last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
         status_db,
@@ -683,11 +685,11 @@ def fixture_balsamic_context(
     )
     sample_case_wes_tumor = helpers.add_sample(
         status_db,
-        internal_id="sample_case_wes_tumor",
-        is_tumour=True,
         application_tag="WESA",
         application_type=PrepCategory.WHOLE_EXOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=True,
+        internal_id="sample_case_wes_tumor",
+        last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(status_db, case=case_wes_tumor, sample=sample_case_wes_tumor)
 
@@ -700,11 +702,11 @@ def fixture_balsamic_context(
     )
     sample_case_wes_panel_error = helpers.add_sample(
         status_db,
-        internal_id="sample_case_wes_panel_error",
-        is_tumour=True,
         application_tag="WESA",
         application_type=PrepCategory.WHOLE_EXOME_SEQUENCING,
-        sequenced_at=dt.datetime.now(),
+        is_tumour=True,
+        internal_id="sample_case_wes_panel_error",
+        last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
         status_db, case=case_wes_panel_error, sample=sample_case_wes_panel_error
@@ -766,8 +768,8 @@ def mock_config(balsamic_dir: Path, balsamic_case_id: str) -> None:
     )
 
 
-@pytest.fixture(name="deliverable_data")
-def fixture_deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict:
+@pytest.fixture
+def deliverable_data(balsamic_dir: Path, balsamic_case_id: str) -> dict:
     samples = [
         "sample_case_wgs_single_tumor",
     ]
@@ -831,11 +833,11 @@ def mock_deliverable(balsamic_dir: Path, deliverable_data: dict, balsamic_case_i
     )
 
 
-@pytest.fixture(name="hermes_deliverables")
-def fixture_hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -> dict:
+@pytest.fixture
+def hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -> dict:
     hermes_output: dict = {"pipeline": "balsamic", "bundle_id": balsamic_case_id, "files": []}
     for file_info in deliverable_data["files"]:
-        tags: List[str] = []
+        tags: list[str] = []
         if "html" in file_info["format"]:
             tags.append("multiqc-html")
         elif "fastq" in file_info["format"]:
@@ -846,8 +848,8 @@ def fixture_hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -
     return hermes_output
 
 
-@pytest.fixture(name="malformed_hermes_deliverables")
-def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
+@pytest.fixture
+def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
     malformed_deliverable = hermes_deliverables.copy()
     malformed_deliverable.pop("pipeline")
 

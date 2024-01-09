@@ -1,6 +1,8 @@
 from enum import Enum
-from typing import Callable, List, Optional
+from typing import Callable
+
 from sqlalchemy.orm import Query
+
 from cg.store.models import Panel
 
 
@@ -17,8 +19,8 @@ class PanelFilter(Enum):
 
 def apply_panel_filter(
     panels: Query,
-    filters: List[PanelFilter],
-    abbreviation: Optional[str] = None,
+    filters: list[PanelFilter],
+    abbreviation: str | None = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for filter_function in filters:

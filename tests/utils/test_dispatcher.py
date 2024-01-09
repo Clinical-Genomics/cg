@@ -1,12 +1,13 @@
-from typing import List
+from datetime import datetime
+
 import pytest
+
+from cg.constants import Pipeline
+from cg.constants.constants import CustomerId
+from cg.store import Store
+from cg.store.models import Analysis, Sample
 from cg.utils.dispatcher import Dispatcher
 from tests.store_helpers import StoreHelpers
-from cg.store import Store
-from cg.store.models import Sample, Analysis
-from cg.constants.invoice import CustomerNames
-from cg.constants import Pipeline
-from datetime import datetime
 
 
 def test_dispatch_table_generation(
@@ -136,7 +137,7 @@ def test_call_dictionary_extra_parameters_not_in_functions(
 def test_call_with_status_db_functions(
     store: Store,
     helpers: StoreHelpers,
-    customer_internal_id: str = CustomerNames.cust001,
+    customer_internal_id: str = CustomerId.CUST001,
     test_subject: str = "test_subject",
     is_tumour: bool = True,
 ):
@@ -144,7 +145,7 @@ def test_call_with_status_db_functions(
 
     # GIVEN a database with a customer, a subject and two samples
     helpers.add_sample(store, subject_id=test_subject)
-    helpers.add_sample(store, subject_id=test_subject, is_tumour=False)
+    helpers.add_sample(store, is_tumour=False, subject_id=test_subject)
 
     # WHEN calling the dispatcher with the customer and subject id
     dispatcher = Dispatcher(
@@ -157,7 +158,7 @@ def test_call_with_status_db_functions(
         },
     )
     # THEN the dispatcher should return the correct samples
-    samples: List[Sample] = dispatcher()
+    samples: list[Sample] = dispatcher()
     for sample in samples:
         assert sample.customer.internal_id == customer_internal_id
         assert sample.subject_id == test_subject
@@ -193,11 +194,11 @@ def test_dispatcher_on_other_functions(
             "started_at_before": timestamp_now,
         },
     )
-    analyses: List[Analysis] = function_dispatcher()
+    analyses: list[Analysis] = function_dispatcher()
 
     # THEN the dispatcher should return the correct analyses
     for analysis in analyses:
         assert analysis
-        assert analysis.family.internal_id == case_internal_id
+        assert analysis.case.internal_id == case_internal_id
         assert analysis.pipeline == pipeline
         assert analysis.started_at < timestamp_now

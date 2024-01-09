@@ -1,10 +1,11 @@
 """Code for uploading coverage reports via CLI"""
 
 import click
+
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
 
 from .utils import suggest_cases_to_upload
 
@@ -29,7 +30,7 @@ def upload_coverage(context: CGConfig, re_upload, family_id):
         suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
 
-    case_obj: Family = status_db.get_case_by_internal_id(internal_id=family_id)
+    case_obj: Case = status_db.get_case_by_internal_id(internal_id=family_id)
     upload_coverage_api = UploadCoverageApi(
         status_api=status_db,
         hk_api=context.housekeeper_api,

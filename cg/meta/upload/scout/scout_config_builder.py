@@ -1,17 +1,18 @@
 """Functions that handle files in the context of scout uploading"""
 import logging
-from typing import List, Optional, Set
 
 import requests
 from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.models.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
-from cg.store.models import Analysis, FamilySample, Sample
+from cg.store.models import Analysis, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
+
 
 # Maps keys that are used in scout load config on tags that are used in scout
 
@@ -25,22 +26,24 @@ class ScoutConfigBuilder:
         self.lims_api: LimsAPI = lims_api
         self.case_tags: CaseTags
         self.sample_tags: SampleTags
-        self.load_config: ScoutLoadConfig = ScoutLoadConfig()
+        self.load_config: ScoutLoadConfig = ScoutLoadConfig(
+            delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG})
+        )
 
     def add_common_info_to_load_config(self) -> None:
         """Add the mandatory common information to a scout load config object"""
         self.load_config.analysis_date = self.analysis_obj.completed_at
-        self.load_config.default_gene_panels = self.analysis_obj.family.panels
-        self.load_config.family = self.analysis_obj.family.internal_id
-        self.load_config.family_name = self.analysis_obj.family.name
-        self.load_config.owner = self.analysis_obj.family.customer.internal_id
-        self.load_config.synopsis = self.analysis_obj.family.synopsis
+        self.load_config.default_gene_panels = self.analysis_obj.case.panels
+        self.load_config.family = self.analysis_obj.case.internal_id
+        self.load_config.family_name = self.analysis_obj.case.name
+        self.load_config.owner = self.analysis_obj.case.customer.internal_id
+        self.load_config.synopsis = self.analysis_obj.case.synopsis
         self.include_cohorts()
         self.include_phenotype_groups()
         self.include_phenotype_terms()
 
     def add_common_sample_info(
-        self, config_sample: ScoutIndividual, case_sample: FamilySample
+        self, config_sample: ScoutIndividual, case_sample: CaseSample
     ) -> None:
         """Add the information to a sample that is common for different analysis types"""
         sample_id: str = case_sample.sample.internal_id
@@ -64,15 +67,14 @@ class ScoutConfigBuilder:
     def add_common_sample_files(
         self,
         config_sample: ScoutIndividual,
-        case_sample: FamilySample,
+        case_sample: CaseSample,
     ) -> None:
         """Add common sample files for different analysis types."""
-        sample_id: str = case_sample.sample.internal_id
-        LOG.info(f"Adding common files for sample {sample_id}")
-        self.include_sample_alignment_file(config_sample=config_sample)
-        self.include_sample_files(config_sample=config_sample)
+        LOG.info(f"Adding common files for sample {case_sample.sample.internal_id}")
+        self.include_sample_alignment_file(config_sample)
+        self.include_sample_files(config_sample)
 
-    def build_config_sample(self, case_sample: FamilySample) -> ScoutIndividual:
+    def build_config_sample(self, case_sample: CaseSample) -> ScoutIndividual:
         """Build a sample for the scout load config"""
         raise NotImplementedError
 
@@ -80,9 +82,9 @@ class ScoutConfigBuilder:
         """Build a load config for uploading a case to scout"""
         raise NotImplementedError
 
-    def include_sample_files(self, config_sample: ScoutIndividual) -> None:
+    def include_sample_files(self, _config_sample: ScoutIndividual) -> None:
         """Include all files that are used on sample level in Scout"""
-        raise NotImplementedError
+        return None
 
     def include_case_files(self) -> None:
         """Include all files that are used on case level in scout"""
@@ -90,9 +92,9 @@ class ScoutConfigBuilder:
 
     def include_phenotype_terms(self) -> None:
         LOG.info("Adding phenotype terms to scout load config")
-        phenotype_terms: Set[str] = set()
-        link_obj: FamilySample
-        for link_obj in self.analysis_obj.family.links:
+        phenotype_terms: set[str] = set()
+        link_obj: CaseSample
+        for link_obj in self.analysis_obj.case.links:
             sample_obj: Sample = link_obj.sample
             for phenotype_term in sample_obj.phenotype_terms:
                 LOG.debug(
@@ -106,9 +108,9 @@ class ScoutConfigBuilder:
 
     def include_phenotype_groups(self) -> None:
         LOG.info("Adding phenotype groups to scout load config")
-        phenotype_groups: Set[str] = set()
-        link_obj: FamilySample
-        for link_obj in self.analysis_obj.family.links:
+        phenotype_groups: set[str] = set()
+        link_obj: CaseSample
+        for link_obj in self.analysis_obj.case.links:
             sample_obj: Sample = link_obj.sample
             for phenotype_group in sample_obj.phenotype_groups:
                 LOG.debug(
@@ -122,7 +124,7 @@ class ScoutConfigBuilder:
 
     def include_cohorts(self) -> None:
         LOG.info("Including cohorts to scout load config")
-        cohorts: List[str] = self.analysis_obj.family.cohorts
+        cohorts: list[str] = self.analysis_obj.case.cohorts
         if cohorts:
             LOG.debug("Adding cohorts %s", ", ".join(cohorts))
             self.load_config.cohorts = cohorts
@@ -137,12 +139,6 @@ class ScoutConfigBuilder:
         LOG.info("Include MultiQC report to case")
         self.load_config.multiqc = self.get_file_from_hk(
             hk_tags=self.case_tags.multiqc_report, latest=True
-        )
-
-    def include_delivery_report(self) -> None:
-        LOG.info("Include delivery report to case")
-        self.load_config.delivery_report = self.get_file_from_hk(
-            hk_tags=self.case_tags.delivery_report, latest=True
         )
 
     def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
@@ -160,19 +156,19 @@ class ScoutConfigBuilder:
             hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
         )
 
-    def get_sample_file(self, hk_tags: Set[str], sample_id: str) -> Optional[str]:
+    def get_sample_file(self, hk_tags: set[str], sample_id: str) -> str | None:
         """Return a file that is specific for a individual from housekeeper"""
         tags: set = hk_tags.copy()
         tags.add(sample_id)
         return self.get_file_from_hk(hk_tags=tags)
 
-    def get_file_from_hk(self, hk_tags: Set[str], latest: Optional[bool] = False) -> Optional[str]:
+    def get_file_from_hk(self, hk_tags: set[str], latest: bool | None = False) -> str | None:
         """Get a file from housekeeper and return the path as a string."""
         LOG.info(f"Get file with tags {hk_tags}")
         if not hk_tags:
             LOG.debug("No tags provided, skipping")
             return None
-        hk_file: Optional[File] = (
+        hk_file: File | None = (
             HousekeeperAPI.get_latest_file_from_version(version=self.hk_version_obj, tags=hk_tags)
             if latest
             else HousekeeperAPI.get_file_from_version(version=self.hk_version_obj, tags=hk_tags)

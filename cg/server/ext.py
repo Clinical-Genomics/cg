@@ -1,9 +1,14 @@
+from decimal import Decimal
+from json import JSONEncoder
+
 from flask_admin import Admin
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
+
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.store.api.core import Store
+from cg.store.database import initialize_database
 
 
 class FlaskLims(LimsAPI):
@@ -29,7 +34,15 @@ class FlaskStore(Store):
 
     def init_app(self, app):
         uri = app.config["SQLALCHEMY_DATABASE_URI"]
-        super(FlaskStore, self).__init__(uri)
+        initialize_database(uri)
+        super(FlaskStore, self).__init__()
+
+
+class CustomJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super().default(obj)
 
 
 cors = CORS(resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)

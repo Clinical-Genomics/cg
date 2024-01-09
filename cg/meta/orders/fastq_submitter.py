@@ -1,19 +1,14 @@
 import datetime as dt
-from typing import List
-
-from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery, GenePanelMasterList
-from cg.constants.constants import PrepCategory
-from cg.constants.invoice import CustomerNames
+from cg.constants.constants import CustomerId, Pipeline, PrepCategory
+from cg.constants.priority import Priority
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
-from cg.constants.priority import Priority
-from cg.store.models import Sample, Family, FamilySample, Customer, ApplicationVersion
-from cg.constants.constants import PrepCategory
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Sample
 
 
 class FastqSubmitter(Submitter):
@@ -61,7 +56,7 @@ class FastqSubmitter(Submitter):
 
     def create_maf_case(self, sample_obj: Sample) -> None:
         """Add a MAF case to the Status database."""
-        case: Family = self.status.add_case(
+        case: Case = self.status.add_case(
             data_analysis=Pipeline(Pipeline.MIP_DNA),
             data_delivery=DataDelivery(DataDelivery.NO_DELIVERY),
             name="_".join([sample_obj.name, "MAF"]),
@@ -69,17 +64,17 @@ class FastqSubmitter(Submitter):
             priority=Priority.research,
             ticket=sample_obj.original_ticket,
         )
-        case.customer: Customer = self.status.get_customer_by_internal_id(
-            customer_internal_id=CustomerNames.CG_INTERNAL_CUSTOMER
+        case.customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=CustomerId.CG_INTERNAL_CUSTOMER
         )
-        relationship: FamilySample = self.status.relate_sample(
-            family=case, sample=sample_obj, status=StatusEnum.unknown
+        relationship: CaseSample = self.status.relate_sample(
+            case=case, sample=sample_obj, status=StatusEnum.unknown
         )
         self.status.session.add_all([case, relationship])
 
     def store_items_in_status(
-        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
-    ) -> List[Sample]:
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: list[dict]
+    ) -> list[Sample]:
         """Store fastq samples in the status database including family connection and delivery"""
         customer: Customer = self.status.get_customer_by_internal_id(
             customer_internal_id=customer_id
@@ -87,7 +82,7 @@ class FastqSubmitter(Submitter):
         if not customer:
             raise OrderError(f"Unknown customer: {customer_id}")
         new_samples = []
-        case: Family = self.status.get_case_by_name_and_customer(
+        case: Case = self.status.get_case_by_name_and_customer(
             customer=customer, case_name=ticket_id
         )
         submitted_case: dict = items[0]
@@ -130,7 +125,7 @@ class FastqSubmitter(Submitter):
                     self.create_maf_case(sample_obj=new_sample)
                 case.customer = customer
                 new_relationship = self.status.relate_sample(
-                    family=case, sample=new_sample, status=StatusEnum.unknown
+                    case=case, sample=new_sample, status=StatusEnum.unknown
                 )
                 new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
                 self.status.session.add_all([case, new_relationship, new_delivery])

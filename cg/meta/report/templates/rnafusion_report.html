@@ -114,7 +114,7 @@
                   <td>{{ sample.methods.library_prep }}</td>
                   <td>{{ sample.timestamps.prepared_at }}</td>
                   <td>{{ sample.methods.sequencing }}</td>
-                  <td>{{ sample.timestamps.sequenced_at }}</td>
+                  <td>{{ sample.timestamps.reads_updated_at }}</td>
                   <td>{{ case.data_analysis.pipeline }}</td>
                 </tr>
               {% endfor %}
@@ -222,7 +222,17 @@
           <div class="card-block">
             <h4 class="card-title">Scout</h4>
             <div class="card-text">
-              <p>Gene fusioner finns uppladdade i Scout: <a href="https://scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a></p>
+              <p>Analysfiler finns uppladdade i Scout: <a href="https://scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a></p>
+              <ul>
+                <li>
+                  <strong>Kliniska Fusionsvarianter</strong>:
+                    {% if case.data_analysis.scout_files.vcf_fusion != 'N/A' %}
+                      <em>{{ case.data_analysis.scout_files.vcf_fusion.replace(case.id, case.name) }}</em>
+                    {% else %}
+                      <em>Inga fusionsvarianter upptäcktes</em>
+                    {% endif %}
+                </li>
+              </ul>
             </div>
           </div>
         {% endif %}
@@ -233,11 +243,17 @@
               Teknisk beskrivning av analysen: {{ application.tag }}
             </h4>
             <p class="card-text">{{ application.description }}</p>
-            {% if application.limitations %}
-            <h4 class="card-title">
-              Begränsningar av analysen: {{ application.tag }}
-            </h4>
-            <p class="card-text">{{ application.limitations }}</p>
+            {% if application.details != 'N/A' %}
+              <p class="card-text">{{ application.details }}</p>
+            {% endif %}
+            {% if application.limitations != 'N/A' %}
+              <h4 class="card-title">
+                Begränsningar av analysen: {{ application.tag }}
+              </h4>
+              <p class="card-text">{{ application.limitations }}</p>
+              {% if application.pipeline_limitations != 'N/A' %}
+                <p class="card-text">{{ application.pipeline_limitations }}</p>
+              {% endif %}
             {% endif %}
           </div>
         {% endfor %}

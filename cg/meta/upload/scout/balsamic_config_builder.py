@@ -4,13 +4,14 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import SampleType
-from cg.constants.scout_upload import BALSAMIC_CASE_TAGS, BALSAMIC_SAMPLE_TAGS
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.scout import BALSAMIC_CASE_TAGS, BALSAMIC_SAMPLE_TAGS, UploadTrack
 from cg.constants.subject import PhenotypeStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.scout.scout_load_config import BalsamicLoadConfig, ScoutCancerIndividual
-from cg.store.models import Analysis, FamilySample, Sample
+from cg.store.models import Analysis, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -22,7 +23,10 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         )
         self.case_tags: CaseTags = CaseTags(**BALSAMIC_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**BALSAMIC_SAMPLE_TAGS)
-        self.load_config: BalsamicLoadConfig = BalsamicLoadConfig(track="cancer")
+        self.load_config: BalsamicLoadConfig = BalsamicLoadConfig(
+            track=UploadTrack.CANCER.value,
+            delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
+        )
 
     def include_case_files(self):
         LOG.info("Including BALSAMIC specific case level files")
@@ -34,7 +38,6 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         )
         self.include_cnv_report()
         self.include_multiqc_report()
-        self.include_delivery_report()
 
     def include_sample_files(self, config_sample: ScoutCancerIndividual) -> None:
         LOG.info("Including BALSAMIC specific sample level files.")
@@ -50,7 +53,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
         )
 
-    def build_config_sample(self, case_sample: FamilySample) -> ScoutCancerIndividual:
+    def build_config_sample(self, case_sample: CaseSample) -> ScoutCancerIndividual:
         """Build a sample with balsamic specific information."""
         config_sample = ScoutCancerIndividual()
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
@@ -91,7 +94,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.include_case_files()
 
         LOG.info("Building samples")
-        db_sample: FamilySample
+        db_sample: CaseSample
 
-        for db_sample in self.analysis_obj.family.links:
+        for db_sample in self.analysis_obj.case.links:
             self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))

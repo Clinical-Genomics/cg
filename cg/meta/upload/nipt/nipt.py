@@ -2,22 +2,20 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Union
-
-import requests
-from requests import Response
 
 import paramiko
-from cg.apps.cgstats.stats import StatsAPI
+import requests
+from housekeeper.store.models import File
+from requests import Response
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline
 from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
-from cg.meta.upload.nipt.models import StatinaUploadFiles
+from cg.meta.upload.nipt.models import FlowCellQ30AndReads, StatinaUploadFiles
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Analysis, Flowcell, Family
-from housekeeper.store.models import File
-from cg.apps.tb import TrailblazerAPI
+from cg.store.models import Analysis, Case, Flowcell
 
 LOG = logging.getLogger(__name__)
 
@@ -39,7 +37,6 @@ class NiptUploadAPI:
         self.sftp_remote_path = config.fluffy.sftp.remote_path
         self.root_dir = Path(config.housekeeper.root)
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
-        self.stats_api: StatsAPI = config.cg_stats_api
         self.status_db: Store = config.status_db
         self.dry_run: bool = False
         self.trailblazer_api: TrailblazerAPI = config.trailblazer_api
@@ -51,24 +48,38 @@ class NiptUploadAPI:
         self.dry_run = dry_run
 
     def flowcell_passed_qc_value(self, case_id: str, q30_threshold: float) -> bool:
-        """Check average Q30 and of the latest flow cell related to a case."""
-        latest_flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
-        flow_cell_reads_and_q30_summary: Dict[
-            str, Union[int, float]
-        ] = self.stats_api.flow_cell_reads_and_q30_summary(flow_cell_name=latest_flow_cell.name)
-        return flow_cell_reads_and_q30_summary[
-            "q30"
-        ] >= q30_threshold and flow_cell_reads_and_q30_summary[
-            "reads"
-        ] >= self.status_db.get_ready_made_library_expected_reads(
-            case_id=case_id
+        """
+        Check the average Q30 and the total number of reads for each sample
+        in the latest flow cell related to a case.
+        """
+        flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
+        flow_cell_summary: FlowCellQ30AndReads = FlowCellQ30AndReads(
+            average_q30_across_samples=self.status_db.get_average_percentage_passing_q30_for_flow_cell(
+                flow_cell_name=flow_cell.name
+            ),
+            total_reads_on_flow_cell=self.status_db.get_number_of_reads_for_flow_cell(
+                flow_cell_name=flow_cell.name
+            ),
         )
+        if not flow_cell_summary.passes_q30_threshold(
+            threshold=q30_threshold
+        ) or not flow_cell_summary.passes_read_threshold(
+            threshold=self.status_db.get_ready_made_library_expected_reads(case_id=case_id)
+        ):
+            LOG.warning(
+                f"Flow cell {flow_cell.name} did not pass QC for case {case_id} with Q30: "
+                f"{flow_cell_summary.average_q30_across_samples} and reads: {flow_cell_summary.total_reads_on_flow_cell}."
+                f"Skipping upload."
+            )
+            return False
+        LOG.debug(f"Flow cell {flow_cell.name} passed QC for case {case_id}.")
+        return True
 
-    def get_housekeeper_results_file(self, case_id: str, tags: Optional[list] = None) -> str:
+    def get_housekeeper_results_file(self, case_id: str, tags: list | None = None) -> str:
         """Get the result file for a NIPT analysis from Housekeeper"""
 
         if not tags:
-            tags: List[str] = self.RESULT_FILE_TAGS
+            tags: list[str] = self.RESULT_FILE_TAGS
 
         hk_all_results_file: File = self.housekeeper_api.get_file_from_latest_version(
             bundle_name=case_id, tags=tags
@@ -91,7 +102,7 @@ class NiptUploadAPI:
 
         return results_file
 
-    def get_all_upload_analyses(self) -> List[Analysis]:
+    def get_all_upload_analyses(self) -> list[Analysis]:
         """Gets all nipt analyses that are ready to be uploaded"""
         return self.status_db.get_latest_analysis_to_upload_for_pipeline(pipeline=Pipeline.FLUFFY)
 
@@ -119,7 +130,7 @@ class NiptUploadAPI:
     def update_analysis_uploaded_at_date(self, case_id: str) -> Analysis:
         """Updates analysis_uploaded_at for the uploaded analysis"""
 
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_obj: Analysis = case_obj.analyses[0]
 
         if not self.dry_run:
@@ -134,7 +145,7 @@ class NiptUploadAPI:
     def update_analysis_upload_started_date(self, case_id: str) -> Analysis:
         """Updates analysis_upload_started_at for the uploaded analysis"""
 
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_obj: Analysis = case_obj.analyses[0]
 
         if not self.dry_run:

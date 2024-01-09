@@ -1,11 +1,15 @@
 """Tests the find business data part of the Cg store API related to sample model."""
 
-import pytest
-from typing import List, Dict, Any
-from sqlalchemy.orm import Query
-from cg.store import Store
+from typing import Any
 
-from cg.store.models import Sample, Invoice, Customer
+import pytest
+from sqlalchemy.orm import Query
+
+from cg.store import Store
+from cg.store.models import Customer, Invoice, Sample
+from tests.meta.demultiplex.conftest import (
+    flow_cell_name_demultiplexed_with_bcl_convert,
+)
 from tests.store_helpers import StoreHelpers
 
 
@@ -114,7 +118,7 @@ def test_get_samples_by_subject_id(
 
 def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
     store_with_samples_customer_id_and_subject_id_and_tumour_status: Store,
-    customer_ids: List[int] = [1, 2],
+    customer_ids: list[int] = [1, 2],
     subject_id: str = "test_subject",
     is_tumour: bool = True,
 ):
@@ -266,7 +270,7 @@ def test_get_samples_by_customer_and_name_invalid_customer(
 
 def test_get_samples_by_any_id_not_an_attribute_fails(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    identifiers: Dict[str, Any] = {
+    identifiers: dict[str, Any] = {
         "non-existent-attribute": "not-an-attribute",
         "non-existent-value": "not-a-value",
     },
@@ -305,7 +309,7 @@ def test_get_samples_by_any_id_exclusive_filtering_gives_empty_query(
     assert sample_1.is_tumour != sample_2.is_tumour
 
     # WHEN filtering twice mutually exclusive conditions
-    identifiers: Dict[str, str] = {
+    identifiers: dict[str, str] = {
         "name": sample_1.name,
         "is_tumour": sample_2.is_tumour,
     }
@@ -319,7 +323,7 @@ def test_get_samples_by_any_id_exclusive_filtering_gives_empty_query(
     assert filtered_query.count() == 0
 
 
-def test_get_number_of_reads_for_sample_from_metrics(
+def test_get_number_of_reads_for_sample_passing_q30_from_metrics(
     store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads: int
 ):
     """Test if get_number_of_reads_for_sample_from_metrics function returns correct total reads."""

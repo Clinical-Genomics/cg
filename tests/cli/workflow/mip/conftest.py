@@ -4,38 +4,38 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline
+from cg.constants.subject import Sex
 from cg.meta.compress import CompressAPI
-from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.store.api.find_business_data import FindBusinessDataHandler
 from cg.store.api.status import StatusHandler
-from cg.store.models import Family
+from cg.store.models import Case
 from tests.store_helpers import StoreHelpers
-from tests.store.conftest import fixture_case_obj
 
 
-@pytest.fixture(name="mip_dna_fixture_config_path")
-def fixture_mip_dna_fixture_config_path() -> str:
+@pytest.fixture
+def mip_dna_config_path() -> str:
     return "tests/fixtures/apps/mip/dna/case_config.yaml"
 
 
-@pytest.fixture(name="mip_case_id")
-def fixture_mip_case_id() -> str:
+@pytest.fixture
+def mip_case_id() -> str:
     return "yellowhog"
 
 
-@pytest.fixture(name="mip_case_id_non_existing")
-def fixture_mip_case_id_non_existing() -> str:
+@pytest.fixture
+def mip_case_id_non_existing() -> str:
     return "this_case_id_does_not_exist"
 
 
-@pytest.fixture(name="mip_case_ids")
-def fixture_mip_case_ids(mip_case_id: str) -> dict:
+@pytest.fixture
+def mip_case_ids(mip_case_id: str) -> dict:
     """Dictionary of case ids, connected samples, their name and if they should fail (textbook or not)"""
 
     return {
@@ -57,8 +57,8 @@ def fixture_mip_case_ids(mip_case_id: str) -> dict:
     }
 
 
-@pytest.fixture(name="mip_case_dirs")
-def fixture_mip_case_dirs(mip_case_ids: dict, project_dir: Path) -> dict:
+@pytest.fixture
+def mip_case_dirs(mip_case_ids: dict, project_dir: Path) -> dict:
     """Create case directories and return a dictionary of the tmpdir paths"""
 
     mip_case_dirs = {}
@@ -71,8 +71,8 @@ def fixture_mip_case_dirs(mip_case_ids: dict, project_dir: Path) -> dict:
     return mip_case_dirs
 
 
-@pytest.fixture(name="mip_hermes_dna_deliverables_response_data")
-def fixture_mip_dna_hermes_deliverables_response_data(
+@pytest.fixture
+def mip_hermes_dna_deliverables_response_data(
     create_multiqc_html_file,
     create_multiqc_json_file,
     mip_case_id,
@@ -96,8 +96,8 @@ def fixture_mip_dna_hermes_deliverables_response_data(
     )
 
 
-@pytest.fixture(name="mip_rna_context")
-def fixture_mip_rna_context(
+@pytest.fixture
+def mip_rna_context(
     cg_context: CGConfig,
     analysis_family_single_case: dict,
     helpers: StoreHelpers,
@@ -117,8 +117,8 @@ def fixture_mip_rna_context(
     return cg_context
 
 
-@pytest.fixture(name="mip_dna_context")
-def fixture_mip_dna_context(
+@pytest.fixture
+def mip_dna_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
     mip_case_ids: dict,
@@ -145,10 +145,10 @@ def fixture_mip_dna_context(
             )
             sample = helpers.add_sample(
                 store=_store,
-                customer_id="cust000",
                 application_tag="WGSA",
                 application_type="wgs",
-                gender="unknown",
+                customer_id="cust000",
+                sex=Sex.UNKNOWN,
             )
             helpers.add_relationship(store=_store, sample=sample, case=case_obj, status="affected")
     cg_context.meta_apis["analysis_api"] = mip_analysis_api
@@ -158,13 +158,13 @@ def fixture_mip_dna_context(
 def setup_mocks(
     mocker,
     can_at_least_one_sample_be_decompressed: bool = False,
-    case_to_analyze: Family = None,
+    case_to_analyze: Case = None,
     decompress_spring: bool = False,
     has_latest_analysis_started: bool = False,
     is_spring_decompression_needed: bool = False,
     is_spring_decompression_running: bool = False,
 ) -> None:
-    """Helper function to setup the necessary mocks for the decompression logics."""
+    """Helper function to set up the necessary mocks for the decompression logics."""
     mocker.patch.object(StatusHandler, "cases_to_analyze")
     StatusHandler.cases_to_analyze.return_value = [case_to_analyze]
 
@@ -185,11 +185,17 @@ def setup_mocks(
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_running")
     PrepareFastqAPI.is_spring_decompression_running.return_value = is_spring_decompression_running
 
-    mocker.patch.object(PrepareFastqAPI, "check_fastq_links")
-    PrepareFastqAPI.check_fastq_links.return_value = None
+    mocker.patch.object(PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper")
+    PrepareFastqAPI.add_decompressed_fastq_files_to_housekeeper.return_value = None
 
     mocker.patch.object(MipDNAAnalysisAPI, "get_panel_bed")
     MipDNAAnalysisAPI.get_panel_bed.return_value = "a_string"
 
-    mocker.patch.object(FindBusinessDataHandler, "is_all_flow_cells_on_disk")
-    FindBusinessDataHandler.is_all_flow_cells_on_disk.return_value = True
+    mocker.patch.object(
+        ScoutAPI,
+        "export_managed_variants",
+        return_value=["a str"],
+    )
+
+    mocker.patch.object(FindBusinessDataHandler, "are_all_flow_cells_on_disk")
+    FindBusinessDataHandler.are_all_flow_cells_on_disk.return_value = True

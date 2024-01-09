@@ -2,21 +2,20 @@
 
 import logging
 from pathlib import Path
-from typing import Optional
 
 import click
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
-from cg.cli.workflow.nextflow.options import (
+from cg.cli.workflow.nf_analysis import (
+    OPTION_COMPUTE_ENV,
     OPTION_CONFIG,
     OPTION_LOG,
     OPTION_PARAMS_FILE,
     OPTION_PROFILE,
     OPTION_REVISION,
-    OPTION_STUB,
-    OPTION_TOWER,
+    OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
 )
@@ -25,16 +24,13 @@ from cg.cli.workflow.rnafusion.options import (
     OPTION_REFERENCES,
     OPTION_STRANDEDNESS,
 )
-from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV, OPTION_TOWER_RUN_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
-from cg.constants.tb import AnalysisStatus
-from cg.exc import CgError, DecompressionNeededError, MetricsQCError
+from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.command_args import CommandArgs
+from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -62,17 +58,16 @@ rnafusion.add_command(resolve_compression)
 def config_case(
     context: CGConfig, case_id: str, strandedness: str, genomes_base: Path, dry_run: bool
 ) -> None:
-    """Create sample sheet file for RNAFUSION analysis for a given CASE_ID."""
+    """Create sample sheet file and params file for a given case."""
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    LOG.info(f"Creating sample sheet file for {case_id}.")
-    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
+    LOG.info(f"Creating config files for {case_id}.")
     try:
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.config_case(
             case_id=case_id, strandedness=strandedness, genomes_base=genomes_base, dry_run=dry_run
         )
-
-    except CgError as error:
-        LOG.error(f"Could not create sample sheet: {error}")
+    except (CgError, ValidationError) as error:
+        LOG.error(f"Could not create config files for {case_id}: {error}")
         raise click.Abort() from error
 
 
@@ -82,8 +77,6 @@ def config_case(
 @OPTION_WORKDIR
 @OPTION_FROM_START
 @OPTION_PROFILE
-@OPTION_TOWER
-@OPTION_STUB
 @OPTION_CONFIG
 @OPTION_PARAMS_FILE
 @OPTION_REVISION
@@ -99,14 +92,12 @@ def run(
     work_dir: str,
     from_start: bool,
     profile: str,
-    with_tower: bool,
-    stub: bool,
     config: str,
     params_file: str,
     revision: str,
     compute_env: str,
     use_nextflow: bool,
-    nf_tower_id: Optional[str],
+    nf_tower_id: str | None,
     dry_run: bool,
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""
@@ -115,25 +106,20 @@ def run(
 
     command_args: CommandArgs = CommandArgs(
         **{
-            "log": NextflowAnalysisAPI.get_log_path(
+            "log": analysis_api.get_log_path(
                 case_id=case_id,
                 pipeline=analysis_api.pipeline,
-                root_dir=analysis_api.root_dir,
                 log=log,
             ),
-            "work_dir": NextflowAnalysisAPI.get_workdir_path(
-                case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
-            ),
+            "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
-            "with_tower": with_tower,
-            "stub": stub,
-            "config": NextflowAnalysisAPI.get_nextflow_config_path(nextflow_config=config),
-            "params_file": NextflowAnalysisAPI.get_params_file_path(
-                case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
+            "config": analysis_api.get_nextflow_config_path(nextflow_config=config),
+            "params_file": analysis_api.get_params_file_path(
+                case_id=case_id, params_file=params_file
             ),
             "name": case_id,
-            "compute_env": compute_env or analysis_api.compute_env,
+            "compute_env": compute_env or analysis_api.get_compute_env(case_id=case_id),
             "revision": revision or analysis_api.revision,
             "wait": "SUBMITTED",
             "id": nf_tower_id,
@@ -141,7 +127,7 @@ def run(
     )
 
     try:
-        analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
+        analysis_api.verify_sample_sheet_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.check_analysis_ongoing(case_id)
         LOG.info(f"Running RNAFUSION analysis for {case_id}")
         analysis_api.run_analysis(
@@ -168,8 +154,6 @@ def run(
 @OPTION_LOG
 @OPTION_WORKDIR
 @OPTION_PROFILE
-@OPTION_TOWER
-@OPTION_STUB
 @OPTION_CONFIG
 @OPTION_PARAMS_FILE
 @OPTION_REVISION
@@ -179,13 +163,11 @@ def run(
 @DRY_RUN
 @click.pass_context
 def start(
-    context: CGConfig,
+    context: click.Context,
     case_id: str,
     log: str,
     work_dir: str,
     profile: str,
-    with_tower: bool,
-    stub: bool,
     config: str,
     params_file: str,
     revision: str,
@@ -197,11 +179,8 @@ def start(
     """Start full workflow for CASE ID."""
     LOG.info(f"Starting analysis for {case_id}")
 
-    try:
-        context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
-    except DecompressionNeededError as error:
-        LOG.error(error)
-        raise click.Abort() from error
+    analysis_api: RnafusionAnalysisAPI = context.obj.meta_apis["analysis_api"]
+    analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
     context.invoke(config_case, case_id=case_id, genomes_base=genomes_base, dry_run=dry_run)
     context.invoke(
         run,
@@ -210,8 +189,6 @@ def start(
         work_dir=work_dir,
         from_start=True,
         profile=profile,
-        with_tower=with_tower,
-        stub=stub,
         config=config,
         params_file=params_file,
         revision=revision,
@@ -233,6 +210,8 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+        except AnalysisNotReadyError as error:
+            LOG.error(error)
         except CgError as error:
             LOG.error(error)
             exit_code = EXIT_FAIL
@@ -253,38 +232,17 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     If failed, it sets it as failed and adds a comment with information of the failed metrics."""
 
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     except CgError as error:
         raise click.Abort() from error
 
-    if not analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id):
-        LOG.error("The analysis status must be in the QC step to be stored.")
-        raise click.Abort()
     analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
-    if dry_run:
-        LOG.info("Dry-run: QC metrics validation would be performed.")
-        return
     try:
-        LOG.info("Validating QC metrics.")
-        analysis_api.validate_qc_metrics(case_id=case_id)
-    except MetricsQCError as error:
-        LOG.error(f"QC metrics failed for {case_id}")
-        analysis_api.trailblazer_api.set_analysis_status(
-            case_id=case_id, status=AnalysisStatus.FAILED
-        )
-        analysis_api.trailblazer_api.add_comment(case_id=case_id, comment=str(error))
-        raise click.Abort() from error
+        analysis_api.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
     except CgError as error:
-        LOG.error(f"Could not create metrics deliverables file: {error}")
-        analysis_api.trailblazer_api.set_analysis_status(
-            case_id=case_id, status=AnalysisStatus.ERROR
-        )
         raise click.Abort() from error
-
-    analysis_api.trailblazer_api.set_analysis_status(
-        case_id=case_id, status=AnalysisStatus.COMPLETED
-    )
 
 
 @rnafusion.command("report-deliver")
@@ -303,7 +261,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
             analysis_api.report_deliver(case_id=case_id)
         else:
             LOG.info("Dry-run")
-    except CgError as error:
+    except (CgError, ValidationError) as error:
         LOG.error(f"Could not create report file: {error}")
         raise click.Abort()
     except Exception as error:
@@ -348,8 +306,26 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
 def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     """Generate deliverables files for a case and store in Housekeeper if they
     pass QC metrics checks."""
-    LOG.info("Generating metrics file and performing QC checks for %s", case_id)
-    context.invoke(metrics_deliver, case_id=case_id, dry_run=dry_run)
+    analysis_api: RnafusionAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
+
+    is_latest_analysis_qc: bool = analysis_api.trailblazer_api.is_latest_analysis_qc(
+        case_id=case_id
+    )
+    if not is_latest_analysis_qc and not analysis_api.trailblazer_api.is_latest_analysis_completed(
+        case_id=case_id
+    ):
+        LOG.error(
+            "Case not stored. Trailblazer status must be either QC or COMPLETE to be able to store"
+        )
+        return
+
+    # Avoid storing a case without QC checks previously performed
+    if (
+        is_latest_analysis_qc
+        or not analysis_api.get_metrics_deliverables_path(case_id=case_id).exists()
+    ):
+        LOG.info(f"Generating metrics file and performing QC checks for {case_id}")
+        context.invoke(metrics_deliver, case_id=case_id, dry_run=dry_run)
     LOG.info(f"Storing analysis for {case_id}")
     context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
     context.invoke(store_housekeeper, case_id=case_id, dry_run=dry_run)
@@ -364,8 +340,9 @@ def store_available(context: click.Context, dry_run: bool) -> None:
     analysis_api: AnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
 
     exit_code: int = EXIT_SUCCESS
-    for case_obj in analysis_api.get_cases_to_qc():
-        LOG.info("Storing RNAFUSION deliverables for %s", case_obj.internal_id)
+
+    for case_obj in set([*analysis_api.get_cases_to_qc(), *analysis_api.get_cases_to_store()]):
+        LOG.info(f"Storing RNAFUSION deliverables for {case_obj.internal_id}")
         try:
             context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
         except Exception as error:

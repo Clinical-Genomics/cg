@@ -1,25 +1,29 @@
-"""All models aggregated in a base class"""
-from typing import Callable, Optional, Type, List
-
-from sqlalchemy.orm import Query, Session
-from sqlalchemy import and_, func
+"""All models aggregated in a base class."""
 from dataclasses import dataclass
+from typing import Callable, Type
+
+from sqlalchemy import and_, func
+from sqlalchemy.orm import Query, Session
+
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
+from cg.store.filters.status_customer_filters import (
+    CustomerFilter,
+    apply_customer_filter,
+)
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationLimitations,
     ApplicationVersion,
+    Case,
+    CaseSample,
     Customer,
-    Family,
-    FamilySample,
     Flowcell,
-    Sample,
 )
-from cg.utils.date import get_date_days_ago
-
 from cg.store.models import Model as ModelBase
+from cg.store.models import Sample
+from cg.utils.date import get_date_days_ago
 
 
 @dataclass
@@ -36,33 +40,31 @@ class BaseHandler:
     def _get_outer_join_cases_with_analyses_query(self) -> Query:
         """Return a query for all cases in the database with an analysis."""
         return (
-            self._get_query(table=Family)
+            self._get_query(table=Case)
             .outerjoin(Analysis)
-            .join(
-                Family.links,
-                FamilySample.sample,
-                ApplicationVersion,
-                Application,
-            )
+            .join(Case.links)
+            .join(CaseSample.sample)
+            .join(ApplicationVersion)
+            .join(Application)
         )
 
     def _get_join_cases_with_samples_query(self) -> Query:
         """Return a join query for all cases in the database with samples."""
-        return self._get_query(table=Family).join(
-            Family.links, FamilySample.sample, Family.customer
+        return (
+            self._get_query(table=Case).join(Case.links).join(CaseSample.sample).join(Case.customer)
         )
 
     def _get_join_analysis_case_query(self) -> Query:
         """Return join analysis case query."""
-        return self._get_query(table=Analysis).join(Analysis.family)
+        return self._get_query(table=Analysis).join(Analysis.case)
 
     def _get_join_case_sample_query(self) -> Query:
         """Return join case sample query."""
-        return self._get_query(table=FamilySample).join(FamilySample.family, FamilySample.sample)
+        return self._get_query(table=CaseSample).join(CaseSample.case).join(CaseSample.sample)
 
     def _get_join_case_and_sample_query(self) -> Query:
         """Return join case sample query."""
-        return self._get_query(table=Family).join(Family.links, FamilySample.sample)
+        return self._get_query(table=Case).join(Case.links).join(CaseSample.sample)
 
     def _get_join_sample_and_customer_query(self) -> Query:
         """Return join sample and customer query."""
@@ -70,28 +72,30 @@ class BaseHandler:
 
     def _get_join_flow_cell_sample_links_query(self) -> Query:
         """Return join flow cell samples and relationship query."""
-        return self._get_query(table=Flowcell).join(Flowcell.samples, Sample.links)
+        return self._get_query(table=Flowcell).join(Flowcell.samples).join(Sample.links)
 
     def _get_join_sample_family_query(self) -> Query:
         """Return a join sample case relationship query."""
-        return self._get_query(table=Sample).join(Family.links, FamilySample.sample)
+        return self._get_query(table=Sample).join(Case.links).join(CaseSample.sample)
 
     def _get_join_sample_application_version_query(self) -> Query:
         """Return join sample to application version query."""
-        return self._get_query(table=Sample).join(
-            Sample.application_version, ApplicationVersion.application
+        return (
+            self._get_query(table=Sample)
+            .join(Sample.application_version)
+            .join(ApplicationVersion.application)
         )
 
     def _get_join_analysis_sample_family_query(self) -> Query:
         """Return join analysis to sample to case query."""
-        return self._get_query(table=Analysis).join(Family, Family.links, FamilySample.sample)
+        return self._get_query(table=Analysis).join(Case).join(Case.links).join(CaseSample.sample)
 
     def _get_subquery_with_latest_case_analysis_date(self) -> Query:
         """Return a subquery with the case internal id and the date of its latest analysis."""
         case_and_date: Query = (
             self._get_join_analysis_case_query()
-            .group_by(Family.id)
-            .with_entities(Analysis.family_id, func.max(Analysis.started_at).label("started_at"))
+            .group_by(Case.id)
+            .with_entities(Analysis.case_id, func.max(Analysis.started_at).label("started_at"))
             .subquery()
         )
         return case_and_date
@@ -103,14 +107,14 @@ class BaseHandler:
         return analyses.join(
             case_and_date_subquery,
             and_(
-                Analysis.family_id == case_and_date_subquery.c.family_id,
+                Analysis.case_id == case_and_date_subquery.c.case_id,
                 Analysis.started_at == case_and_date_subquery.c.started_at,
             ),
         )
 
     def _get_filtered_case_query(
         self,
-        case_action: Optional[str],
+        case_action: str | None,
         customer_id: str,
         data_analysis: str,
         days: int,
@@ -120,8 +124,8 @@ class BaseHandler:
         priority: str,
         sample_id: str,
     ) -> Query:
-        cases_query: Query = self._get_query(table=Family)
-        filter_functions: List[Callable] = []
+        cases_query: Query = self._get_query(table=Case)
+        filter_functions: list[Callable] = []
 
         filter_case_order_date = None
         if days != 0:
@@ -150,9 +154,9 @@ class BaseHandler:
         )
 
         # customer filters
-        customer_filters: List[Callable] = []
+        customer_filters: list[Callable] = []
         if customer_id or exclude_customer_id:
-            cases_query = cases_query.join(Family.customer)
+            cases_query = cases_query.join(Case.customer)
 
         if customer_id:
             customer_filters.append(CustomerFilter.FILTER_BY_INTERNAL_ID)
@@ -169,15 +173,25 @@ class BaseHandler:
 
         # sample filters
         if sample_id:
-            cases_query = cases_query.join(Family.links, FamilySample.sample)
+            cases_query = cases_query.join(Case.links).join(CaseSample.sample)
             cases_query = apply_sample_filter(
                 samples=cases_query,
                 filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID_PATTERN],
                 internal_id_pattern=sample_id,
             )
         else:
-            cases_query = cases_query.outerjoin(Family.links, FamilySample.sample)
+            cases_query = cases_query.outerjoin(Case.links).outerjoin(CaseSample.sample)
 
         # other joins
-        cases_query = cases_query.outerjoin(Family.analyses, Sample.invoice, Sample.flowcells)
+        cases_query = (
+            cases_query.outerjoin(Case.analyses)
+            .outerjoin(Sample.invoice)
+            .outerjoin(Sample.flowcells)
+        )
         return cases_query
+
+    def _get_join_application_limitations_query(self) -> Query:
+        """Return a join query for all application limitations."""
+        return self._get_query(table=ApplicationLimitations).join(
+            ApplicationLimitations.application
+        )

@@ -1,24 +1,23 @@
 import logging
-
 from pathlib import Path
-from typing import Any, List, Optional, Dict, Union
+from typing import Any
 
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import COLLABORATORS, COMBOS, GenePanelMasterList, Pipeline, FileExtensions
+from cg.constants import FileExtensions, GenePanelMasterList, Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
-from cg.io.controller import WriteFile, ReadFile
-from cg.meta.workflow.analysis import AnalysisAPI
+from cg.io.controller import ReadFile, WriteFile
+from cg.meta.workflow.analysis import AnalysisAPI, add_gene_panel_combo
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_config import MipBaseConfig
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
-from cg.store.models import BedVersion, FamilySample, Family, Sample
+from cg.store.models import BedVersion, Case, CaseSample, Sample
 
 CLI_OPTIONS = {
     "config": {"option": "--config_file"},
@@ -80,13 +79,13 @@ class MipAnalysisAPI(AnalysisAPI):
         """Get case analysis sample info path"""
         return Path(self.root, case_id, "analysis", f"{case_id}_qc_sample_info.yaml")
 
-    def get_panel_bed(self, panel_bed: str = None) -> Optional[str]:
+    def get_panel_bed(self, panel_bed: str = None) -> str | None:
         """Check and return BED gene panel."""
         if not panel_bed:
             return None
         if panel_bed.endswith(FileExtensions.BED):
             return panel_bed
-        bed_version: Optional[BedVersion] = self.status_db.get_bed_version_by_short_name(
+        bed_version: BedVersion | None = self.status_db.get_bed_version_by_short_name(
             bed_version_short_name=panel_bed
         )
         if not bed_version:
@@ -99,7 +98,7 @@ class MipAnalysisAPI(AnalysisAPI):
         """
 
         # Validate and reformat to MIP pedigree config format
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         return ConfigHandler.make_pedigree_config(
             data={
                 "case": case_obj.internal_id,
@@ -122,7 +121,7 @@ class MipAnalysisAPI(AnalysisAPI):
         LOG.info("Config file saved to %s", pedigree_config_path)
 
     @staticmethod
-    def get_sample_data(link_obj: FamilySample) -> Dict[str, Union[str, int]]:
+    def get_sample_data(link_obj: CaseSample) -> dict[str, str | int]:
         """Return sample specific data."""
         return {
             "sample_id": link_obj.sample.internal_id,
@@ -133,7 +132,7 @@ class MipAnalysisAPI(AnalysisAPI):
             "expected_coverage": link_obj.sample.application_version.application.min_sequencing_depth,
         }
 
-    def get_sample_fastq_destination_dir(self, case: Family, sample: Sample) -> Path:
+    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
         """Return the path to the FASTQ destination directory."""
         return Path(
             self.root,
@@ -144,44 +143,30 @@ class MipAnalysisAPI(AnalysisAPI):
         )
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
-        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        for link in case_obj.links:
-            self.link_fastq_files_for_sample(
-                case_obj=case_obj,
-                sample_obj=link.sample,
-            )
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        for link in case.links:
+            self.link_fastq_files_for_sample(case=case, sample=link.sample)
 
-    def write_panel(self, case_id: str, content: List[str]):
-        """Write the gene panel to case dir"""
-        out_dir = Path(self.root, case_id)
-        out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = Path(out_dir, "gene_panels.bed")
-        with out_path.open("w") as out_handle:
-            out_handle.write("\n".join(content))
+    def write_panel(self, case_id: str, content: list[str]) -> None:
+        """Write the gene panel to case dir."""
+        self._write_panel(out_dir=Path(self.root, case_id), content=content)
 
     @staticmethod
-    def convert_panels(customer: str, default_panels: List[str]) -> List[str]:
-        """Convert between default panels and all panels included in gene list."""
-        # check if all default panels are part of master list
-        master_list: List[str] = GenePanelMasterList.get_panel_names()
-        if customer in COLLABORATORS and set(default_panels).issubset(master_list):
+    def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
+        """Check if customer should use the gene panel master list
+        and if all default panels are included in the gene panel master list.
+        If not, add gene panel combo and OMIM-AUTO.
+        Return an aggregated gene panel."""
+        master_list: list[str] = GenePanelMasterList.get_panel_names()
+        if customer_id in GenePanelMasterList.collaborators() and default_panels.issubset(
+            master_list
+        ):
             return master_list
-
-        # the rest are handled the same way
-        all_panels = set(default_panels)
-
-        # fill in extra panels if selection is part of a combo
-        for panel in default_panels:
-            if panel in COMBOS:
-                for extra_panel in COMBOS[panel]:
-                    all_panels.add(extra_panel)
-
-        # add OMIM to every panel choice
-        all_panels.add(GenePanelMasterList.OMIM_AUTO)
-
+        all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
+        all_panels |= {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
         return list(all_panels)
 
-    def _get_latest_raw_file(self, family_id: str, tags: List[str]) -> Any:
+    def _get_latest_raw_file(self, family_id: str, tags: list[str]) -> Any:
         """Get a python object file for a tag and a family ."""
 
         last_version = self.housekeeper_api.last_version(bundle=family_id)
@@ -281,10 +266,10 @@ class MipAnalysisAPI(AnalysisAPI):
                 return True
         return False
 
-    def get_cases_to_analyze(self) -> List[Family]:
+    def get_cases_to_analyze(self) -> list[Case]:
         """Return cases to analyze."""
-        cases_query: List[Family] = self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.threshold_reads
+        cases_query: list[Case] = self.status_db.cases_to_analyze(
+            pipeline=self.pipeline, threshold=self.use_read_count_threshold
         )
         cases_to_analyze = []
         for case_obj in cases_query:
@@ -327,10 +312,10 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_case_path(self, case_id: str) -> Path:
         return Path(self.root, case_id)
 
-    def get_trailblazer_config_path(self, case_id: str) -> Path:
+    def get_job_ids_path(self, case_id: str) -> Path:
         return Path(self.get_case_path(case_id=case_id), "analysis", "slurm_job_ids.yaml")
 
-    def config_sample(self, link_obj: FamilySample, panel_bed: str) -> dict:
+    def config_sample(self, link_obj: CaseSample, panel_bed: str) -> dict:
         raise NotImplementedError
 
     def get_pipeline_version(self, case_id: str) -> str:
@@ -341,3 +326,6 @@ class MipAnalysisAPI(AnalysisAPI):
         )
         sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sample_info_raw)
         return sample_info.mip_version
+
+    def write_managed_variants(self, case_id: str, content: list[str]) -> None:
+        self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)

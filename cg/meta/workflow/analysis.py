@@ -4,23 +4,41 @@ import os
 import shutil
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import List, Optional, Tuple, Union
 
 import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
-from cg.constants.constants import AnalysisType, WorkflowManager
-from cg.constants.priority import PRIORITY_TO_SLURM_QOS
-from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority, SequencingFileTag
+from cg.constants.constants import (
+    AnalysisType,
+    CaseActions,
+    FileFormat,
+    WorkflowManager,
+)
+from cg.constants.gene_panel import GenePanelCombo
+from cg.constants.scout import ScoutExportFileName
+from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
+from cg.io.controller import WriteFile
+from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
-from cg.store.models import Analysis, BedVersion, Family, FamilySample, Sample
+from cg.models.fastq import FastqFileMeta
+from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
+
+
+def add_gene_panel_combo(default_panels: set[str]) -> set[str]:
+    """Add gene panels combinations for gene panels being part of gene panel combination and return updated gene panels."""
+    additional_panels = set()
+    for panel in default_panels:
+        if panel in GenePanelCombo.COMBO_1:
+            additional_panels |= GenePanelCombo.COMBO_1.get(panel)
+    default_panels |= additional_panels
+    return default_panels
 
 
 class AnalysisAPI(MetaAPI):
@@ -38,7 +56,7 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     @property
-    def threshold_reads(self):
+    def use_read_count_threshold(self) -> bool:
         """Defines whether the threshold for adequate read count should be passed for all samples
         when determining if the analysis for a case should be automatically started"""
         return False
@@ -80,19 +98,19 @@ class AnalysisAPI(MetaAPI):
 
     def get_priority_for_case(self, case_id: str) -> int:
         """Get priority from the status db case priority"""
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        return case_obj.priority.value or Priority.research
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        return case.priority or Priority.research
 
     def get_slurm_qos_for_case(self, case_id: str) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
         priority: int = self.get_priority_for_case(case_id=case_id)
-        return PRIORITY_TO_SLURM_QOS[priority]
+        return Priority.priority_to_slurm_qos().get(priority)
 
     def get_workflow_manager(self) -> str:
         """Get workflow manager for a given pipeline."""
         return WorkflowManager.Slurm.value
 
-    def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
+    def get_case_path(self, case_id: str) -> list[Path] | Path:
         """Path to case working directory."""
         raise NotImplementedError
 
@@ -100,8 +118,8 @@ class AnalysisAPI(MetaAPI):
         """Path to case config file"""
         raise NotImplementedError
 
-    def get_trailblazer_config_path(self, case_id: str) -> Path:
-        """Path to Trailblazer job id file"""
+    def get_job_ids_path(self, case_id: str) -> Path:
+        """Path to file containing slurm/tower job ids for the case."""
         raise NotImplementedError
 
     def get_sample_name_from_lims_id(self, lims_id: str) -> str:
@@ -115,7 +133,7 @@ class AnalysisAPI(MetaAPI):
         """
         raise NotImplementedError
 
-    def get_bundle_deliverables_type(self, case_id: str) -> Optional[str]:
+    def get_bundle_deliverables_type(self, case_id: str) -> str | None:
         return None
 
     @staticmethod
@@ -138,7 +156,7 @@ class AnalysisAPI(MetaAPI):
         """Storing bundle data in Housekeeper for CASE_ID"""
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
         bundle_data: dict = self.get_hermes_transformed_deliverables(case_id)
-        bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
+        bundle_result: tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
             bundle_data=bundle_data
         )
         if not bundle_result:
@@ -163,17 +181,17 @@ class AnalysisAPI(MetaAPI):
         """Storing analysis bundle in StatusDB for CASE_ID"""
 
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_start: dt.datetime = self.get_bundle_created_date(case_id=case_id)
         pipeline_version: str = self.get_pipeline_version(case_id=case_id)
-        new_analysis: Family = self.status_db.add_analysis(
+        new_analysis: Case = self.status_db.add_analysis(
             pipeline=self.pipeline,
             version=pipeline_version,
             started_at=analysis_start,
             completed_at=dt.datetime.now(),
             primary=(len(case_obj.analyses) == 0),
         )
-        new_analysis.family = case_obj
+        new_analysis.case = case_obj
         if dry_run:
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
@@ -188,17 +206,17 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     def add_pending_trailblazer_analysis(self, case_id: str) -> None:
-        self.check_analysis_ongoing(case_id=case_id)
-        self.trailblazer_api.mark_analyses_deleted(case_id=case_id)
+        self.check_analysis_ongoing(case_id)
+        self.trailblazer_api.mark_analyses_deleted(case_id)
         self.trailblazer_api.add_pending_analysis(
             case_id=case_id,
             email=environ_email(),
             analysis_type=self.get_application_type(
-                self.status_db.get_case_by_internal_id(internal_id=case_id).links[0].sample
+                self.status_db.get_case_by_internal_id(case_id).links[0].sample
             ),
-            out_dir=self.get_trailblazer_config_path(case_id=case_id).parent.as_posix(),
-            config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
-            slurm_quality_of_service=self.get_slurm_qos_for_case(case_id=case_id),
+            out_dir=self.get_job_ids_path(case_id).parent.as_posix(),
+            config_path=self.get_job_ids_path(case_id).as_posix(),
+            slurm_quality_of_service=self.get_slurm_qos_for_case(case_id),
             data_analysis=str(self.pipeline),
             ticket=self.status_db.get_latest_ticket_from_case(case_id),
             workflow_manager=self.get_workflow_manager(),
@@ -211,7 +229,7 @@ class AnalysisAPI(MetaAPI):
             pipeline=str(self.pipeline),
             analysis_type=self.get_bundle_deliverables_type(case_id),
             created=self.get_bundle_created_date(case_id),
-        ).dict()
+        ).model_dump()
 
     def get_bundle_created_date(self, case_id: str) -> dt.datetime:
         return self.get_date_from_file_path(self.get_deliverables_file_path(case_id=case_id))
@@ -227,18 +245,16 @@ class AnalysisAPI(MetaAPI):
             LOG.warning("Could not retrieve %s workflow version!", self.pipeline)
             return "0.0.0"
 
-    def set_statusdb_action(
-        self, case_id: str, action: Optional[str], dry_run: bool = False
-    ) -> None:
+    def set_statusdb_action(self, case_id: str, action: str | None, dry_run: bool = False) -> None:
         """
         Set one of the allowed actions on a case in StatusDB.
         """
         if dry_run:
             LOG.info(f"Dry-run: Action {action} would be set for case {case_id}")
             return
-        if action in [None, *CASE_ACTIONS]:
-            case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-            case_obj.action = action
+        if action in [None, *CaseActions.actions()]:
+            case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+            case.action = action
             self.status_db.session.commit()
             LOG.info("Action %s set for case %s", action, case_id)
             return
@@ -246,18 +262,18 @@ class AnalysisAPI(MetaAPI):
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
         )
 
-    def get_analyses_to_clean(self, before: dt.datetime) -> List[Analysis]:
+    def get_analyses_to_clean(self, before: dt.datetime) -> list[Analysis]:
         analyses_to_clean = self.status_db.get_analyses_to_clean(
             pipeline=self.pipeline, before=before
         )
         return analyses_to_clean
 
-    def get_cases_to_analyze(self) -> List[Family]:
+    def get_cases_to_analyze(self) -> list[Case]:
         return self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.threshold_reads
+            pipeline=self.pipeline, threshold=self.use_read_count_threshold
         )
 
-    def get_cases_to_store(self) -> List[Family]:
+    def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,
         and is ready to be stored in Housekeeper."""
         return [
@@ -266,7 +282,7 @@ class AnalysisAPI(MetaAPI):
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
         ]
 
-    def get_cases_to_qc(self) -> List[Family]:
+    def get_cases_to_qc(self) -> list[Case]:
         """Return cases where analysis finished successfully,
         and is ready for QC metrics checks."""
         return [
@@ -275,65 +291,66 @@ class AnalysisAPI(MetaAPI):
             if self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
 
-    def get_sample_fastq_destination_dir(self, case: Family, sample: Sample):
+    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
         """Return the path to the FASTQ destination directory."""
         raise NotImplementedError
 
-    def gather_file_metadata_for_sample(self, sample_obj: Sample) -> List[dict]:
+    def gather_file_metadata_for_sample(self, sample: Sample) -> list[FastqFileMeta]:
         return [
-            self.fastq_handler.parse_file_data(file_obj.full_path)
-            for file_obj in self.housekeeper_api.files(
-                bundle=sample_obj.internal_id, tags=["fastq"]
+            self.fastq_handler.parse_file_data(hk_file.full_path)
+            for hk_file in self.housekeeper_api.files(
+                bundle=sample.internal_id, tags={SequencingFileTag.FASTQ}
             )
         ]
 
     def link_fastq_files_for_sample(
-        self, case_obj: Family, sample_obj: Sample, concatenate: bool = False
+        self, case: Case, sample: Sample, concatenate: bool = False
     ) -> None:
         """
-        Link FASTQ files for a sample to working directory.
+        Link FASTQ files for a sample to the work directory.
         If pipeline input requires concatenated fastq, files can also be concatenated
         """
-        linked_reads_paths = {1: [], 2: []}
-        concatenated_paths = {1: "", 2: ""}
-        files: List[dict] = self.gather_file_metadata_for_sample(sample_obj=sample_obj)
-        sorted_files = sorted(files, key=lambda k: k["path"])
-        fastq_dir = self.get_sample_fastq_destination_dir(case=case_obj, sample=sample_obj)
+        linked_reads_paths: dict[int, list[Path]] = {1: [], 2: []}
+        concatenated_paths: dict[int, str] = {1: "", 2: ""}
+        fastq_files_meta: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
+        sorted_fastq_files_meta: list[FastqFileMeta] = sorted(
+            fastq_files_meta, key=lambda k: k.path
+        )
+        fastq_dir: Path = self.get_sample_fastq_destination_dir(case=case, sample=sample)
         fastq_dir.mkdir(parents=True, exist_ok=True)
 
-        for fastq_data in sorted_files:
-            fastq_path = Path(fastq_data["path"])
-            fastq_name = self.fastq_handler.create_fastq_name(
-                lane=fastq_data["lane"],
-                flowcell=fastq_data["flowcell"],
-                sample=sample_obj.internal_id,
-                read=fastq_data["read"],
-                undetermined=fastq_data["undetermined"],
-                meta=self.get_additional_naming_metadata(sample_obj),
+        for fastq_file in sorted_fastq_files_meta:
+            fastq_file_name: str = self.fastq_handler.create_fastq_name(
+                lane=fastq_file.lane,
+                flow_cell=fastq_file.flow_cell_id,
+                sample=sample.internal_id,
+                read_direction=fastq_file.read_direction,
+                undetermined=fastq_file.undetermined,
+                meta=self.get_lims_naming_metadata(sample),
             )
-            destination_path: Path = fastq_dir / fastq_name
-            linked_reads_paths[fastq_data["read"]].append(destination_path)
+            destination_path = Path(fastq_dir, fastq_file_name)
+            linked_reads_paths[fastq_file.read_direction].append(destination_path)
             concatenated_paths[
-                fastq_data["read"]
-            ] = f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_name)}"
+                fastq_file.read_direction
+            ] = f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_file_name)}"
 
             if not destination_path.exists():
-                LOG.info(f"Linking: {fastq_path} -> {destination_path}")
-                destination_path.symlink_to(fastq_path)
+                LOG.info(f"Linking: {fastq_file.path} -> {destination_path}")
+                destination_path.symlink_to(fastq_file.path)
             else:
                 LOG.warning(f"Destination path already exists: {destination_path}")
 
         if not concatenate:
             return
 
-        LOG.info("Concatenation in progress for sample %s.", sample_obj.internal_id)
+        LOG.info(f"Concatenation in progress for sample: {sample.internal_id}")
         for read, value in linked_reads_paths.items():
             self.fastq_handler.concatenate(linked_reads_paths[read], concatenated_paths[read])
             self.fastq_handler.remove_files(value)
 
-    def get_target_bed_from_lims(self, case_id: str) -> Optional[str]:
+    def get_target_bed_from_lims(self, case_id: str) -> str | None:
         """Get target bed filename from LIMS."""
-        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample: Sample = case.links[0].sample
         if sample.from_sample:
             sample: Sample = self.status_db.get_sample_by_internal_id(
@@ -342,7 +359,7 @@ class AnalysisAPI(MetaAPI):
         target_bed_shortname: str = self.lims_api.capture_kit(lims_id=sample.internal_id)
         if not target_bed_shortname:
             return None
-        bed_version: Optional[BedVersion] = self.status_db.get_bed_version_by_short_name(
+        bed_version: BedVersion | None = self.status_db.get_bed_version_by_short_name(
             bed_version_short_name=target_bed_shortname
         )
         if not bed_version:
@@ -378,8 +395,8 @@ class AnalysisAPI(MetaAPI):
         if not decompression_possible:
             self.decompression_running(case_id=case_id)
             return
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        link: FamilySample
+        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        link: CaseSample
         any_decompression_started = False
         for link in case_obj.links:
             sample_id: str = link.sample.internal_id
@@ -401,27 +418,19 @@ class AnalysisAPI(MetaAPI):
             self.set_statusdb_action(case_id=case_id, action="analyze")
         LOG.info("Decompression started for %s", case_id)
 
-    def resolve_decompression(self, case_id: str, dry_run: bool) -> bool:
+    def resolve_decompression(self, case_id: str, dry_run: bool) -> None:
         """
-        Handles decompression automatically for case.
-        Return True if decompression is running
+        Decompresses a case if needed and adds new fastq files to Housekeeper.
         """
         if self.prepare_fastq_api.is_spring_decompression_needed(case_id):
             self.decompress_case(case_id=case_id, dry_run=dry_run)
-            return True
+            return
 
         if self.prepare_fastq_api.is_spring_decompression_running(case_id):
-            self.set_statusdb_action(case_id=case_id, action="analyze")
-            return True
+            self.set_statusdb_action(case_id=case_id, action=CaseActions.ANALYZE)
+            return
 
-        LOG.info("Linking fastq files in housekeeper for case %s", case_id)
-        self.prepare_fastq_api.check_fastq_links(case_id)
-
-        if self.prepare_fastq_api.is_spring_decompression_needed(case_id):
-            return True
-
-        LOG.info("Decompression for case %s not needed", case_id)
-        return False
+        self.prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
 
     @staticmethod
     def get_date_from_file_path(file_path: Path) -> dt.datetime.date:
@@ -430,7 +439,7 @@ class AnalysisAPI(MetaAPI):
         """
         return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
 
-    def get_additional_naming_metadata(self, sample_obj: Sample) -> Optional[str]:
+    def get_lims_naming_metadata(self, sample: Sample) -> str | None:
         return None
 
     def get_latest_metadata(self, case_id: str) -> AnalysisModel:
@@ -453,7 +462,7 @@ class AnalysisAPI(MetaAPI):
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
             self.status_db.session.commit()
 
-    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
         """Remove workflow run directory."""
 
         try:
@@ -472,3 +481,113 @@ class AnalysisAPI(MetaAPI):
             LOG.info(f"Cleaned {case_path}")
             self.clean_analyses(case_id=case_id)
             return EXIT_SUCCESS
+
+    def _is_flow_cell_check_applicable(self, case_id) -> bool:
+        """Returns true if the case is neither down sampled nor external."""
+        return not (
+            self.status_db.is_case_down_sampled(case_id) or self.status_db.is_case_external(case_id)
+        )
+
+    def ensure_flow_cells_on_disk(self, case_id: str) -> None:
+        """Check if flow cells are on disk for given case. If not, request flow cells."""
+        if not self._is_flow_cell_check_applicable(case_id):
+            LOG.info(
+                "Flow cell check is not applicable - "
+                "the case is either down sampled or external."
+            )
+            return
+        if not self.status_db.are_all_flow_cells_on_disk(case_id=case_id):
+            self.status_db.request_flow_cells_for_case(case_id)
+
+    def is_case_ready_for_analysis(self, case_id: str) -> bool:
+        """Returns True if no files need to be retrieved from an external location and if all Spring files are
+        decompressed."""
+        if self.does_any_file_need_to_be_retrieved(case_id):
+            return False
+        if self.prepare_fastq_api.is_spring_decompression_needed(
+            case_id
+        ) or self.prepare_fastq_api.is_spring_decompression_running(case_id):
+            LOG.warning(f"Case {case_id} is not ready - not all files are decompressed.")
+            return False
+        return True
+
+    def does_any_file_need_to_be_retrieved(self, case_id: str) -> bool:
+        """Checks whether we need to retrieve files from an external data location."""
+        if self._is_flow_cell_check_applicable(
+            case_id
+        ) and not self.status_db.are_all_flow_cells_on_disk(case_id):
+            LOG.warning(f"Case {case_id} is not ready - all flow cells not present on disk.")
+            return True
+        else:
+            if not self.are_all_spring_files_present(case_id):
+                LOG.warning(f"Case {case_id} is not ready - some files are archived.")
+                return True
+        return False
+
+    def prepare_fastq_files(self, case_id: str, dry_run: bool) -> None:
+        """Retrieves or decompresses Spring files if needed. If so, an AnalysisNotReady error
+        is raised."""
+        self.ensure_files_are_present(case_id)
+        self.resolve_decompression(case_id=case_id, dry_run=dry_run)
+        if not self.is_case_ready_for_analysis(case_id):
+            raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
+
+    def ensure_files_are_present(self, case_id: str):
+        """Checks if any flow cells need to be retrieved and submits a job if that is the case.
+        Also checks if any spring files are archived and submits a job to retrieve any which are."""
+        self.ensure_flow_cells_on_disk(case_id)
+        if not self.are_all_spring_files_present(case_id):
+            LOG.warning(f"Files are archived for case {case_id}")
+            spring_archive_api = SpringArchiveAPI(
+                status_db=self.status_db,
+                housekeeper_api=self.housekeeper_api,
+                data_flow_config=self.config.data_flow,
+            )
+            spring_archive_api.retrieve_case(case_id)
+
+    def are_all_spring_files_present(self, case_id: str) -> bool:
+        """Return True if no Spring files for the case are archived in the data location used by the customer."""
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        for sample in [link.sample for link in case.links]:
+            if (
+                files := self.housekeeper_api.get_archived_files_for_bundle(
+                    bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING]
+                )
+            ) and not all(file.archive.retrieved_at for file in files):
+                return False
+        return True
+
+    def get_archive_location_for_case(self, case_id: str) -> str:
+        return self.status_db.get_case_by_internal_id(case_id).customer.data_archive_location
+
+    @staticmethod
+    def _write_managed_variants(out_dir: Path, content: list[str]) -> None:
+        """Write the managed variants to case dir."""
+        out_dir.mkdir(parents=True, exist_ok=True)
+        WriteFile.write_file_from_content(
+            content="\n".join(content),
+            file_format=FileFormat.TXT,
+            file_path=Path(out_dir, ScoutExportFileName.MANAGED_VARIANTS),
+        )
+
+    @staticmethod
+    def _write_panel(out_dir: Path, content: list[str]) -> None:
+        """Write the managed variants to case dir."""
+        out_dir.mkdir(parents=True, exist_ok=True)
+        WriteFile.write_file_from_content(
+            content="\n".join(content),
+            file_format=FileFormat.TXT,
+            file_path=Path(out_dir, ScoutExportFileName.PANELS),
+        )
+
+    def _get_gene_panel(self, case_id: str, genome_build: str) -> list[str]:
+        """Create and return the aggregated gene panel file."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        all_panels: list[str] = self.get_aggregated_panels(
+            customer_id=case.customer.internal_id, default_panels=set(case.panels)
+        )
+        return self.scout_api.export_panels(build=genome_build, panels=all_panels)
+
+    def _get_managed_variants(self, genome_build: str) -> list[str]:
+        """Create and return the managed variants."""
+        return self.scout_api.export_managed_variants(genome_build=genome_build)

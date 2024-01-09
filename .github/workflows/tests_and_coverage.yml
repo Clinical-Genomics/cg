@@ -17,24 +17,27 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.7
+          python-version: "3.11"
+
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: false
 
       - name: Cache dependencies
         uses: actions/cache@v3
         id: cache
         with:
           path: ${{ env.pythonLocation }}
-          key: ${{ env.pythonLocation }}-${{ hashFiles('**/requirements*.txt') }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install Dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt -r requirements-dev.txt
+        run: poetry install --no-interaction
 
       - name: Test with pytest & Coveralls
         run: |
-          pytest --cov=cg/
+          pytest -n auto --cov=cg/
           coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}

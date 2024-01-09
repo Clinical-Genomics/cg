@@ -1,17 +1,17 @@
 from enum import Enum
-from typing import Optional, List, Callable
+from typing import Callable
 
 from sqlalchemy.orm import Query
 
-from cg.store.models import Flowcell, FamilySample, Family
+from cg.store.models import Case, CaseSample, Flowcell
 
 
-def filter_flow_cells_by_case(case: Family, flow_cells: Query, **kwargs) -> Query:
+def filter_flow_cells_by_case(case: Case, flow_cells: Query, **kwargs) -> Query:
     """Return flow cells by case id."""
-    return flow_cells.filter(FamilySample.family == case)
+    return flow_cells.filter(CaseSample.case == case)
 
 
-def get_flow_cell_by_name(flow_cells: Query, flow_cell_name: str, **kwargs) -> Query:
+def filter_flow_cell_by_name(flow_cells: Query, flow_cell_name: str, **kwargs) -> Query:
     """Return flow cell by flow cell id."""
     return flow_cells.filter(Flowcell.name == flow_cell_name)
 
@@ -22,7 +22,7 @@ def filter_flow_cell_by_name_search(flow_cells: Query, name_search: str, **kwarg
 
 
 def filter_flow_cells_with_statuses(
-    flow_cells: Query, flow_cell_statuses: List[str], **kwargs
+    flow_cells: Query, flow_cell_statuses: list[str], **kwargs
 ) -> Query:
     """Return flow cells by flow cell statuses."""
     return flow_cells.filter(Flowcell.status.in_(flow_cell_statuses))
@@ -30,11 +30,11 @@ def filter_flow_cells_with_statuses(
 
 def apply_flow_cell_filter(
     flow_cells: Query,
-    filter_functions: List[Callable],
-    case: Optional[Family] = None,
-    flow_cell_name: Optional[str] = None,
-    name_search: Optional[str] = None,
-    flow_cell_statuses: Optional[List[str]] = None,
+    filter_functions: list[Callable],
+    case: Case | None = None,
+    flow_cell_name: str | None = None,
+    name_search: str | None = None,
+    flow_cell_statuses: list[str] | None = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
@@ -51,7 +51,7 @@ def apply_flow_cell_filter(
 class FlowCellFilter(Enum):
     """Define FlowCell filter functions."""
 
-    GET_BY_CASE: Callable = filter_flow_cells_by_case
-    GET_BY_NAME: Callable = get_flow_cell_by_name
-    GET_BY_NAME_SEARCH: Callable = filter_flow_cell_by_name_search
-    GET_WITH_STATUSES: Callable = filter_flow_cells_with_statuses
+    FILTER_BY_CASE: Callable = filter_flow_cells_by_case
+    FILTER_BY_NAME: Callable = filter_flow_cell_by_name
+    FILTER_BY_NAME_SEARCH: Callable = filter_flow_cell_by_name_search
+    FILTER_WITH_STATUSES: Callable = filter_flow_cells_with_statuses

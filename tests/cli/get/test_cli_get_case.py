@@ -1,12 +1,12 @@
 """Test CLI functions to get analysis in the Status database."""
 
+from click.testing import CliRunner
+
 from cg.cli.get import get
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from click.testing import CliRunner
-
-from cg.store.models import Family
+from cg.store.models import Case
 from tests.store_helpers import StoreHelpers
 
 
@@ -26,7 +26,7 @@ def test_get_case_required(
 ):
     """Test to get a case using only the required argument."""
     # GIVEN a database with a analysis
-    family: Family = helpers.add_case(disk_store)
+    family: Case = helpers.add_case(disk_store)
 
     # WHEN getting a analysis
     result = cli_runner.invoke(get, ["case", family.internal_id], obj=base_context)

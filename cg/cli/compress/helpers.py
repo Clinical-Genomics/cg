@@ -4,37 +4,36 @@ import logging
 import os
 from math import ceil
 from pathlib import Path
-from typing import Iterator, Optional, List
+from typing import Iterator
 
-from housekeeper.store.models import Version, Bundle
+from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.compression import CASES_TO_IGNORE, MAX_READS_PER_GB, CRUNCHY_MIN_GB_PER_PROCESS
-from cg.constants.slurm import Slurm
-from cg.utils.date import get_date_days_ago
+from cg.constants.compression import CRUNCHY_MIN_GB_PER_PROCESS, MAX_READS_PER_GB
+from cg.constants.slurm import SlurmProcessing
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Case
+from cg.utils.date import get_date_days_ago
 
 LOG = logging.getLogger(__name__)
 
 
-def get_cases_to_process(
-    days_back: int, store: Store, case_id: Optional[str] = None
-) -> Optional[List[Family]]:
+def get_cases_to_process(days_back: int, store: Store, case_id: str | None = None) -> list[Case]:
     """Return cases to process."""
-    cases: List[Family] = []
+    cases: list[Case] = []
     if case_id:
-        case: Family = store.get_case_by_internal_id(internal_id=case_id)
+        case: Case = store.get_case_by_internal_id(case_id)
         if not case:
             LOG.warning(f"Could not find case {case_id}")
             return
-        cases.append(case)
+        if case.is_compressible:
+            cases.append(case)
     else:
         date_threshold: dt.datetime = get_date_days_ago(days_ago=days_back)
-        cases: List[Family] = store.get_cases_to_compress(date_threshold=date_threshold)
+        cases: list[Case] = store.get_cases_to_compress(date_threshold=date_threshold)
     return cases
 
 
@@ -42,25 +41,17 @@ def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
     """Fetch individual ids from cases that are ready for SPRING compression"""
     case_obj = store.get_case_by_internal_id(internal_id=case_id)
     if not case_obj:
-        LOG.error("Could not find case %s", case_id)
+        LOG.error(f"Could not find case {case_id}")
         raise CaseNotFoundError("")
 
     for link_obj in case_obj.links:
         yield link_obj.sample.internal_id
 
 
-def is_case_ignored(case_id: str) -> bool:
-    """Check if case should be skipped."""
-    if case_id in CASES_TO_IGNORE:
-        LOG.debug(f"Skipping case: {case_id}")
-        return True
-    return False
-
-
 def set_memory_according_to_reads(
-    sample_id: str, sample_reads: Optional[int] = None, sample_process_mem: Optional[int] = None
-) -> Optional[int]:
-    """Set SLURM sample process memory depending on number of sample reads if sample_process_mem is not set."""
+    sample_id: str, sample_reads: int | None = None, sample_process_mem: int | None = None
+) -> int | None:
+    """Set SLURM sample process memory depending on the number of sample reads if sample_process_mem is not set."""
     if sample_process_mem:
         return sample_process_mem
     if not sample_reads:
@@ -69,9 +60,9 @@ def set_memory_according_to_reads(
     sample_process_mem: int = ceil((sample_reads / MAX_READS_PER_GB))
     if sample_process_mem < CRUNCHY_MIN_GB_PER_PROCESS:
         return CRUNCHY_MIN_GB_PER_PROCESS
-    if CRUNCHY_MIN_GB_PER_PROCESS <= sample_process_mem < Slurm.MAX_NODE_MEMORY.value:
+    if CRUNCHY_MIN_GB_PER_PROCESS <= sample_process_mem < SlurmProcessing.MAX_NODE_MEMORY:
         return sample_process_mem
-    return Slurm.MAX_NODE_MEMORY.value
+    return SlurmProcessing.MAX_NODE_MEMORY
 
 
 def update_compress_api(
@@ -104,9 +95,9 @@ def get_versions(hk_api: HousekeeperAPI, bundle_name: str = None) -> Iterator[Ve
         if not bundle:
             LOG.info(f"Could not find bundle {bundle_name}")
             return
-        bundles: List[Bundle] = [bundle]
+        bundles: list[Bundle] = [bundle]
     else:
-        bundles: List[Bundle] = hk_api.bundles()
+        bundles: list[Bundle] = hk_api.bundles()
 
     for bundle in bundles:
         LOG.debug(f"Check for versions in {bundle.name}")
@@ -117,7 +108,7 @@ def get_versions(hk_api: HousekeeperAPI, bundle_name: str = None) -> Iterator[Ve
         yield last_version
 
 
-def get_true_dir(dir_path: Path) -> Optional[Path]:
+def get_true_dir(dir_path: Path) -> Path | None:
     """Loop over the files in a directory, if any symlinks are found return the parent dir of the
     origin file."""
     # Check if there are any links to fastq files in the directory
@@ -132,7 +123,7 @@ def get_true_dir(dir_path: Path) -> Optional[Path]:
 
 def compress_sample_fastqs_in_cases(
     compress_api: CompressAPI,
-    cases: List[Family],
+    cases: list[Case],
     dry_run: bool,
     number_of_conversions: int,
     hours: int = None,
@@ -146,14 +137,12 @@ def compress_sample_fastqs_in_cases(
         case_converted = True
         if case_conversion_count >= number_of_conversions:
             break
-        if is_case_ignored(case_id=case.internal_id):
-            continue
 
         LOG.info(f"Searching for FASTQ files in case {case.internal_id}")
         if not case.links:
             continue
         for case_link in case.links:
-            sample_process_mem: Optional[int] = set_memory_according_to_reads(
+            sample_process_mem: int | None = set_memory_according_to_reads(
                 sample_process_mem=mem,
                 sample_id=case_link.sample.internal_id,
                 sample_reads=case_link.sample.reads,
@@ -212,9 +201,7 @@ def correct_spring_paths(
                 LOG.info("Could not find spring and/or spring metadata files, skipping")
                 continue
             LOG.info(
-                "Moving existing spring file (and config) %s to hk bundle path %s",
-                true_spring_path,
-                spring_path,
+                f"Moving existing spring file (and config) {true_spring_path} to hk bundle path {spring_path}"
             )
             if not dry_run:
                 # We know from above that the spring path does not exist

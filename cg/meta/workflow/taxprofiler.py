@@ -1,30 +1,24 @@
 """Module for Taxprofiler Analysis API."""
 
 import logging
-from typing import Dict, List, Optional
+from pathlib import Path
+from typing import Any
 
-from pydantic import ValidationError
 from cg.constants import Pipeline
-from cg.meta.workflow.analysis import AnalysisAPI
-from cg.models.cg_config import CGConfig
-from cg.constants import Pipeline
-from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.sequencing import SequencingPlatform
-from cg.constants.taxprofiler import (
-    TAXPROFILER_INSTRUMENT_PLATFORM,
-    TAXPROFILER_RUN_ACCESSION,
-    TAXPROFILER_SAMPLE_SHEET_HEADERS,
-    TAXPROFILER_FASTA_HEADER,
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.models.cg_config import CGConfig
+from cg.models.fastq import FastqFileMeta
+from cg.models.taxprofiler.taxprofiler import (
+    TaxprofilerParameters,
+    TaxprofilerSampleSheetEntry,
 )
-from cg.meta.workflow.fastq import TaxprofilerFastqHandler
-from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
-from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
-from cg.store.models import Family
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
 
-class TaxprofilerAnalysisAPI(AnalysisAPI):
+class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     """Handles communication between Taxprofiler processes
     and the rest of CG infrastructure."""
 
@@ -35,85 +29,94 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.root_dir: str = config.taxprofiler.root
+        self.nfcore_pipeline_path: str = config.taxprofiler.pipeline_path
+        self.conda_env: str = config.taxprofiler.conda_env
+        self.conda_binary: str = config.taxprofiler.conda_binary
+        self.profile: str = config.taxprofiler.profile
+        self.revision: str = config.taxprofiler.revision
+        self.hostremoval_reference: Path = Path(config.taxprofiler.hostremoval_reference)
+        self.databases: Path = Path(config.taxprofiler.databases)
+        self.tower_binary_path: str = config.tower_binary_path
+        self.tower_pipeline: str = config.taxprofiler.tower_pipeline
+        self.account: str = config.taxprofiler.slurm.account
+        self.email: str = config.taxprofiler.slurm.mail_user
+        self.nextflow_binary_path: str = config.taxprofiler.binary_path
+        self.compute_env_base: str = config.taxprofiler.compute_env
 
-    @property
-    def root(self) -> str:
-        return self.root_dir
+    def get_sample_sheet_content_per_sample(
+        self, sample: Sample, instrument_platform: SequencingPlatform.ILLUMINA, fasta: str = ""
+    ) -> list[list[str]]:
+        """Get sample sheet content per sample."""
+        sample_name: str = sample.name
+        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample)
+        fastq_forward_read_paths: list[str] = self.extract_read_files(
+            metadata=sample_metadata, forward_read=True
+        )
+        fastq_reverse_read_paths: list[str] = self.extract_read_files(
+            metadata=sample_metadata, reverse_read=True
+        )
+        sample_sheet_entry = TaxprofilerSampleSheetEntry(
+            name=sample_name,
+            run_accession=sample_name,
+            instrument_platform=instrument_platform,
+            fastq_forward_read_paths=fastq_forward_read_paths,
+            fastq_reverse_read_paths=fastq_reverse_read_paths,
+            fasta=fasta,
+        )
+        return sample_sheet_entry.reformat_sample_content()
 
-    @property
-    def fastq_handler(self):
-        return TaxprofilerFastqHandler
-
-    def get_case_config_path(self, case_id):
-        return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
-
-    @staticmethod
-    def build_sample_sheet_content(
+    def get_sample_sheet_content(
+        self,
         case_id: str,
-        fastq_r1: List[str],
-        fastq_r2: List[str],
         instrument_platform: SequencingPlatform.ILLUMINA,
-        fasta: Optional[str] = "",
-    ) -> Dict[str, List[str]]:
-        """Build sample sheet headers and lists."""
-        try:
-            TaxprofilerSample(
-                sample=case_id,
-                fastq_r1=fastq_r1,
-                fastq_r2=fastq_r2,
-                instrument_platform=instrument_platform,
+        fasta: str = "",
+    ) -> list[list[Any]]:
+        """Write sample sheet for Taxprofiler analysis in case folder."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        sample_sheet_content = []
+        LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
+        LOG.debug("Getting sample sheet information")
+        for link in case.links:
+            sample_sheet_content.extend(
+                self.get_sample_sheet_content_per_sample(
+                    sample=link.sample, instrument_platform=instrument_platform, fasta=fasta
+                )
             )
-        except ValidationError as error:
-            LOG.error(error)
-            raise ValueError
-
-        # Complete sample lists to the same length as fastq_r1:
-        samples_full_list: List[str] = [case_id] * len(fastq_r1)
-        instrument_full_list: List[str] = [instrument_platform] * len(fastq_r1)
-        fasta_full_list: List[str] = [fasta] * len(fastq_r1)
-
-        sample_sheet_content: Dict[str, List[str]] = {
-            NFX_SAMPLE_HEADER: samples_full_list,
-            TAXPROFILER_RUN_ACCESSION: samples_full_list,
-            TAXPROFILER_INSTRUMENT_PLATFORM: instrument_full_list,
-            NFX_READ1_HEADER: fastq_r1,
-            NFX_READ2_HEADER: fastq_r2,
-            TAXPROFILER_FASTA_HEADER: fasta_full_list,
-        }
         return sample_sheet_content
 
-    def write_sample_sheet(
-        self, case_id: str, instrument_platform: SequencingPlatform.ILLUMINA, fasta: Optional[str]
-    ) -> None:
-        """Write sample sheet for taxprofiler analysis in case folder."""
-        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        for link in case.links:
-            sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
-            fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
-            fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
-            sample_sheet_content: Dict[str, List[str]] = self.build_sample_sheet_content(
-                case_id=case_id,
-                fastq_r1=fastq_r1,
-                fastq_r2=fastq_r2,
-                instrument_platform=instrument_platform,
-                fasta=fasta,
-            )
-            LOG.info(sample_sheet_content)
-            NextflowAnalysisAPI.create_samplesheet_csv(
-                samplesheet_content=sample_sheet_content,
-                headers=TAXPROFILER_SAMPLE_SHEET_HEADERS,
-                config_path=NextflowAnalysisAPI.get_case_config_path(
-                    case_id=case_id, root_dir=self.root_dir
-                ),
-            )
+    def get_pipeline_parameters(self, case_id: str) -> TaxprofilerParameters:
+        """Return Taxprofiler parameters."""
+        LOG.debug("Getting parameters information")
+        return TaxprofilerParameters(
+            cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
+            sample_sheet_path=self.get_sample_sheet_path(case_id=case_id),
+            outdir=self.get_case_path(case_id=case_id),
+            databases=self.databases,
+            hostremoval_reference=self.hostremoval_reference,
+            priority=self.account,
+        )
 
     def config_case(
-        self, case_id: str, instrument_platform: SequencingPlatform.ILLUMINA, fasta: Optional[str]
+        self,
+        case_id: str,
+        instrument_platform: SequencingPlatform.ILLUMINA,
+        dry_run: bool,
+        fasta: str = "",
     ) -> None:
-        """Create sample sheet file for Taxprofiler analysis."""
-        NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
-        LOG.info("Generating sample sheet")
-        self.write_sample_sheet(
-            case_id=case_id, instrument_platform=instrument_platform, fasta=fasta
+        """Create sample sheet file and parameters file for Taxprofiler analysis."""
+        self.create_case_directory(case_id=case_id, dry_run=dry_run)
+        sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(
+            case_id=case_id,
+            instrument_platform=instrument_platform,
+            fasta=fasta,
         )
-        LOG.info("Sample sheet written")
+        pipeline_parameters: TaxprofilerParameters = self.get_pipeline_parameters(case_id=case_id)
+        if dry_run:
+            LOG.info("Dry run: Config files will not be written")
+            return
+        self.write_sample_sheet(
+            content=sample_sheet_content,
+            file_path=self.get_sample_sheet_path(case_id=case_id),
+            header=TaxprofilerSampleSheetEntry.headers(),
+        )
+        self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())

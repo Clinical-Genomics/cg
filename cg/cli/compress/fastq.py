@@ -1,24 +1,23 @@
 """CLI function to compress FASTQ files into SPRING archives."""
 
 import logging
-from typing import Iterable, List, Optional
+from typing import Iterable
 
 import click
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress.helpers import (
-    correct_spring_paths,
-    update_compress_api,
-    is_case_ignored,
-    get_cases_to_process,
     compress_sample_fastqs_in_cases,
+    correct_spring_paths,
+    get_cases_to_process,
+    update_compress_api,
 )
 from cg.constants.constants import DRY_RUN
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -40,19 +39,19 @@ LOG = logging.getLogger(__name__)
 @click.pass_obj
 def fastq_cmd(
     context: CGConfig,
-    case_id: Optional[str],
+    case_id: str | None,
     days_back: int,
-    hours: Optional[int],
+    hours: int | None,
     dry_run: bool,
-    mem: Optional[int],
-    ntasks: Optional[int],
+    mem: int | None,
+    ntasks: int | None,
     number_of_conversions: int,
 ):
     """Compress old FASTQ files into SPRING."""
     LOG.info("Running compress FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
-    cases: List[Family] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
+    cases: list[Case] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
     if not cases:
         LOG.info("No cases to compress")
         return None
@@ -78,24 +77,25 @@ def fastq_cmd(
 )
 @DRY_RUN
 @click.pass_obj
-def clean_fastq(context: CGConfig, case_id: Optional[str], days_back: int, dry_run: bool):
+def clean_fastq(context: CGConfig, case_id: str | None, days_back: int, dry_run: bool):
     """Remove compressed FASTQ files, and update links in Housekeeper to SPRING files."""
     LOG.info("Running compress clean FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run)
 
-    cases: List[Family] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
+    cases: list[Case] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
     if not cases:
         return
 
     cleaned_inds = 0
     for case in cases:
-        if is_case_ignored(case_id=case.internal_id):
-            continue
-        samples: Iterable[str] = store.get_sample_ids_by_case_id(case_id=case.internal_id)
-        for sample_id in samples:
-            was_cleaned: bool = compress_api.clean_fastq(sample_id=sample_id)
+        sample_ids: Iterable[str] = store.get_sample_ids_by_case_id(case_id=case.internal_id)
+        for sample_id in sample_ids:
+            archive_location: str = store.get_sample_by_internal_id(sample_id).archive_location
+            was_cleaned: bool = compress_api.clean_fastq(
+                sample_id=sample_id, archive_location=archive_location
+            )
             if not was_cleaned:
                 LOG.info(f"Skipping individual {sample_id}")
                 continue
@@ -108,7 +108,7 @@ def clean_fastq(context: CGConfig, case_id: Optional[str], days_back: int, dry_r
 @click.option("-b", "--bundle-name")
 @DRY_RUN
 @click.pass_obj
-def fix_spring(context: CGConfig, bundle_name: Optional[str], dry_run: bool):
+def fix_spring(context: CGConfig, bundle_name: str | None, dry_run: bool):
     """Check if bundle(s) have non-existing SPRING files and correct these."""
     LOG.info("Running fix spring")
     compress_api = context.meta_apis["compress_api"]

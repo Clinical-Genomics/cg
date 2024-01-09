@@ -1,19 +1,15 @@
-"""Tests the findbusinessdata part of the Cg store API related to the Family model."""
-from typing import List
+"""Tests the findbusinessdata part of the Cg store API related to the Case model."""
 
-from cgmodels.cg.constants import Pipeline
 
-from cg.constants.constants import CaseActions
+from cg.constants.constants import CaseActions, Pipeline
 from cg.store import Store
-from cg.store.models import (
-    Family,
-)
+from cg.store.models import Case
 
 
 def test_get_cases_by_customer_and_case_name_search(store_with_cases_and_customers: Store):
     """Test that only cases with the specified customer and case name search pattern are returned."""
     # GIVEN a store with some cases and customers
-    case = store_with_cases_and_customers._get_query(table=Family).first()
+    case = store_with_cases_and_customers._get_query(table=Case).first()
     case_name_search = case.name[:3]
     customer = case.customer
 
@@ -33,7 +29,7 @@ def test_get_cases_by_customers_action_and_case_search_pattern(
 ):
     """Test that only cases with the specified customers, action, and case search pattern are returned."""
     # GIVEN a store with some cases and customers
-    case = store_with_cases_and_customers._get_query(table=Family).first()
+    case = store_with_cases_and_customers._get_query(table=Case).first()
     customer = case.customer
     assert case, customer
 
@@ -57,7 +53,7 @@ def test_get_cases_by_customer_pipeline_and_case_search_pattern(
 ):
     """Test that only cases with the specified customer, pipeline, and case search pattern are returned."""
     # GIVEN a store with some cases and customers
-    case = store_with_cases_and_customers._get_query(table=Family).first()
+    case = store_with_cases_and_customers._get_query(table=Case).first()
 
     # Set the pipeline and case_search
     customer = case.customer
@@ -81,7 +77,7 @@ def test_get_running_cases_in_pipeline(store_with_cases_and_customers: Store):
     # GIVEN a store with some cases
 
     # WHEN getting cases with a pipeline and are running
-    cases: List[Family] = store_with_cases_and_customers.get_running_cases_in_pipeline(
+    cases: list[Case] = store_with_cases_and_customers.get_running_cases_in_pipeline(
         pipeline=Pipeline.MIP_DNA
     )
 

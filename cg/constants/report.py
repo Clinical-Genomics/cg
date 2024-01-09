@@ -1,19 +1,18 @@
-# Delivery report constants
-
-from cgmodels.cg.constants import Pipeline
-
+"""Delivery report constants."""
 from cg.constants import DataDelivery
+from cg.constants.constants import Pipeline
 
-BALSAMIC_REPORT_ACCREDITED_PANELS = ["gmsmyeloid"]
+BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]
 
-REPORT_SUPPORTED_PIPELINES = (
+REPORT_SUPPORTED_PIPELINES: tuple[Pipeline, ...] = (
     Pipeline.BALSAMIC,
     Pipeline.BALSAMIC_UMI,
+    Pipeline.BALSAMIC_QC,
     Pipeline.MIP_DNA,
     Pipeline.RNAFUSION,
 )
 
-REPORT_SUPPORTED_DATA_DELIVERY = (
+REPORT_SUPPORTED_DATA_DELIVERY: tuple[DataDelivery, ...] = (
     DataDelivery.ANALYSIS_FILES,
     DataDelivery.ANALYSIS_SCOUT,
     DataDelivery.FASTQ_ANALYSIS,
@@ -23,18 +22,18 @@ REPORT_SUPPORTED_DATA_DELIVERY = (
     DataDelivery.SCOUT,
 )
 
-NA_FIELD = "N/A"
-YES_FIELD = "Ja"
-NO_FIELD = "Nej"
-PRECISION = 2
+NA_FIELD: str = "N/A"
+YES_FIELD: str = "Ja"
+NO_FIELD: str = "Nej"
+PRECISION: int = 2
 
-REPORT_GENDER = {
+REPORT_GENDER: dict[str, str] = {
     "unknown": "Okänd",
     "female": "Kvinna",
     "male": "Man",
 }
 
-BALSAMIC_ANALYSIS_TYPE = {
+BALSAMIC_ANALYSIS_TYPE: dict[str, str] = {
     "tumor_wgs": "Tumör-endast (helgenomsekvensering)",
     "tumor_normal_wgs": "Tumör/normal (helgenomsekvensering)",
     "tumor_panel": "Tumör-endast (panelsekvensering)",
@@ -42,7 +41,7 @@ BALSAMIC_ANALYSIS_TYPE = {
 }
 
 # Report required fields (OPTIONAL: "version")
-REQUIRED_REPORT_FIELDS = [
+REQUIRED_REPORT_FIELDS: list[str] = [
     "customer",
     "date",
     "case",
@@ -50,14 +49,14 @@ REQUIRED_REPORT_FIELDS = [
 ]
 
 # Customer required fields (OPTIONAL: "id")
-REQUIRED_CUSTOMER_FIELDS = [
+REQUIRED_CUSTOMER_FIELDS: list[str] = [
     "name",
     "invoice_address",
     "scout_access",
 ]
 
 # Case required fields
-REQUIRED_CASE_FIELDS = [
+REQUIRED_CASE_FIELDS: list[str] = [
     "name",
     "id",
     "samples",
@@ -66,32 +65,32 @@ REQUIRED_CASE_FIELDS = [
 ]
 
 # Application required fields (OPTIONAL: "version", "prep_category", "description", "limitations", "external")
-REQUIRED_APPLICATION_FIELDS = [
+REQUIRED_APPLICATION_FIELDS: list[str] = [
     "tag",
     "accredited",
 ]
 
 # Data analysis required fields
-_REQUIRED_DATA_ANALYSIS_FIELDS = [
+REQUIRED_DATA_ANALYSIS_FIELDS: list[str] = [
     "customer_pipeline",
     "pipeline",
     "pipeline_version",
     "genome_build",
 ]
 
-REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS = _REQUIRED_DATA_ANALYSIS_FIELDS + [
+REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS: list[str] = REQUIRED_DATA_ANALYSIS_FIELDS + [
     "panels",
 ]
 
-REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS = _REQUIRED_DATA_ANALYSIS_FIELDS + [
+REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS: list[str] = REQUIRED_DATA_ANALYSIS_FIELDS + [
     "type",
     "variant_callers",
 ]
 
-REQUIRED_DATA_ANALYSIS_RNAFUSION_FIELDS = _REQUIRED_DATA_ANALYSIS_FIELDS
+REQUIRED_DATA_ANALYSIS_RNAFUSION_FIELDS: list[str] = REQUIRED_DATA_ANALYSIS_FIELDS
 
 # Sample required fields
-_REQUIRED_SAMPLE_FIELDS = [
+_REQUIRED_SAMPLE_FIELDS: list[str] = [
     "name",
     "id",
     "ticket",
@@ -103,68 +102,73 @@ _REQUIRED_SAMPLE_FIELDS = [
     "timestamps",
 ]
 
-REQUIRED_SAMPLE_MIP_DNA_FIELDS = _REQUIRED_SAMPLE_FIELDS + [
+REQUIRED_SAMPLE_MIP_DNA_FIELDS: list[str] = _REQUIRED_SAMPLE_FIELDS + [
     "status",
 ]
 
-REQUIRED_SAMPLE_BALSAMIC_FIELDS = _REQUIRED_SAMPLE_FIELDS + [
+REQUIRED_SAMPLE_BALSAMIC_FIELDS: list[str] = _REQUIRED_SAMPLE_FIELDS + [
     "tumour",
 ]
 
-REQUIRED_SAMPLE_RNAFUSION_FIELDS = REQUIRED_SAMPLE_BALSAMIC_FIELDS
+REQUIRED_SAMPLE_RNAFUSION_FIELDS: list[str] = REQUIRED_SAMPLE_BALSAMIC_FIELDS
 
 # Methods required fields (OPTIONAL: "library_prep", "sequencing")
-REQUIRED_SAMPLE_METHODS_FIELDS = []
+REQUIRED_SAMPLE_METHODS_FIELDS: list[str] = []
 
-# Timestamp required fields (OPTIONAL: "prepared_at", "sequenced_at")
-REQUIRED_SAMPLE_TIMESTAMP_FIELDS = [
+# Timestamp required fields (OPTIONAL: "prepared_at", "reads_updated_at")
+REQUIRED_SAMPLE_TIMESTAMP_FIELDS: list[str] = [
     "ordered_at",
     "received_at",  # Optional for external samples
 ]
 
 # Metadata required fields
-_REQUIRED_SAMPLE_METADATA_FIELDS = [
+_REQUIRED_SAMPLE_METADATA_FIELDS: list[str] = [
     "million_read_pairs",
     "duplicates",
 ]
 
-REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS = _REQUIRED_SAMPLE_METADATA_FIELDS + [
+REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
     "gender",
     "mapped_reads",
     "mean_target_coverage",
     "pct_10x",
 ]
 
-REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS = REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS + [
+REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS: list[str] = REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS + [
     "bait_set",
 ]
 
-_REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS = _REQUIRED_SAMPLE_METADATA_FIELDS + [
+_REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
     "mean_insert_size",
     "fold_80",
 ]
 
-REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS = _REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS + [
+REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS: list[
+    str
+] = _REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS + [
     "bait_set",
     "bait_set_version",
     "median_target_coverage",
     "pct_250x",
     "pct_500x",
+    "gc_dropout",
 ]
 
-REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS = _REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS + [
+REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS: list[
+    str
+] = _REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS + [
     "median_coverage",
     "pct_60x",
+    "pct_reads_improper_pairs",
 ]
 
-REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS = (
-    REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
-    + [
-        "pct_15x",
-    ]
-)
+REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS: list[
+    str
+] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS + [
+    "pct_15x",
+]
 
-REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS = _REQUIRED_SAMPLE_METADATA_FIELDS + [
+REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
     "bias_5_3",
     "gc_content",
     "input_amount",

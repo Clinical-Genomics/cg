@@ -1,9 +1,10 @@
 """Test methods for compressing FASTQ"""
 import logging
 from pathlib import Path
-from typing import Dict, List
 
 import pytest
+from pydantic import ValidationError
+
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import (
     get_crunchy_metadata,
@@ -11,13 +12,12 @@ from cg.apps.crunchy.files import (
     get_log_dir,
     get_spring_archive_files,
 )
+from cg.apps.crunchy.models import CrunchyFile, CrunchyMetadata
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.models import CompressionData
 from cg.utils import Process
-from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
-from pydantic import ValidationError
 
 
 def test_get_spring_metadata(spring_metadata_file: Path):
@@ -41,7 +41,7 @@ def test_get_spring_archive_files(crunchy_metadata_object: CrunchyMetadata):
     assert isinstance(crunchy_metadata_object.files, list)
 
     # WHEN sorting the files
-    sorted_content: Dict[str, CrunchyFile] = get_spring_archive_files(crunchy_metadata_object)
+    sorted_content: dict[str, CrunchyFile] = get_spring_archive_files(crunchy_metadata_object)
 
     # THEN assert information about the three files is there
     assert len(sorted_content) == 3
@@ -53,7 +53,7 @@ def test_get_spring_archive_files(crunchy_metadata_object: CrunchyMetadata):
 
 
 def test_get_spring_metadata_malformed_info(
-    spring_metadata_file: Path, spring_metadata: List[dict]
+    spring_metadata_file: Path, spring_metadata: list[dict]
 ):
     """Test the method that fetches the SPRING metadata from a file when file is malformed"""
     # GIVEN a SPRING metadata file with missing information
@@ -69,7 +69,7 @@ def test_get_spring_metadata_malformed_info(
 
 
 def test_get_spring_metadata_wrong_number_files(
-    spring_metadata_file: Path, spring_metadata: List[dict]
+    spring_metadata_file: Path, spring_metadata: list[dict]
 ):
     """Test the method that fetches the SPRING metadata from a file when a file is missing"""
     # GIVEN a SPRING metadata file with missing file

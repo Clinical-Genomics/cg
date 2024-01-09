@@ -1,6 +1,8 @@
 from enum import Enum
-from typing import Callable, List, Optional
+from typing import Callable
+
 from sqlalchemy.orm import Query
+
 from cg.store.models import User
 
 
@@ -17,8 +19,8 @@ class UserFilter(Enum):
 
 def apply_user_filter(
     users: Query,
-    filter_functions: List[Callable],
-    email: Optional[str] = None,
+    filter_functions: list[Callable],
+    email: str | None = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for filter_function in filter_functions:

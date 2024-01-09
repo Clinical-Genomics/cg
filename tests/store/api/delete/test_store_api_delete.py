@@ -1,6 +1,5 @@
-from typing import List
 from cg.store import Store
-from cg.store.models import Flowcell, Family, FamilySample, Sample
+from cg.store.models import Case, CaseSample, Flowcell, Sample
 
 
 def test_delete_flow_cell(bcl2fastq_flow_cell_id: str, populated_flow_cell_store: Store):
@@ -48,14 +47,14 @@ def test_store_api_delete_relationships_between_sample_and_cases(
     store_with_multiple_cases_and_samples.delete_relationships_sample(sample=sample_in_single_case)
 
     # THEN it should no longer be associated with any cases, but other relationships should remain
-    results: List[FamilySample] = (
-        store_with_multiple_cases_and_samples._get_query(table=FamilySample)
-        .filter(FamilySample.sample_id == sample_in_single_case.id)
+    results: list[CaseSample] = (
+        store_with_multiple_cases_and_samples._get_query(table=CaseSample)
+        .filter(CaseSample.sample_id == sample_in_single_case.id)
         .all()
     )
-    existing_relationships: List[FamilySample] = (
-        store_with_multiple_cases_and_samples._get_query(table=FamilySample)
-        .filter(FamilySample.sample_id == sample_in_multiple_cases.id)
+    existing_relationships: list[CaseSample] = (
+        store_with_multiple_cases_and_samples._get_query(table=CaseSample)
+        .filter(CaseSample.sample_id == sample_in_multiple_cases.id)
         .all()
     )
 
@@ -71,13 +70,13 @@ def test_store_api_delete_all_empty_cases(
     """Test function to delete cases that are not associated with any samples"""
 
     # GIVEN a database containing a case without samples and a case with samples
-    case_without_samples: List[
-        FamilySample
+    case_without_samples: list[
+        CaseSample
     ] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
         case_internal_id=case_id_without_samples
     )
-    case_with_samples: List[
-        FamilySample
+    case_with_samples: list[
+        CaseSample
     ] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
         case_internal_id=case_id_with_multiple_samples
     )
@@ -91,11 +90,11 @@ def test_store_api_delete_all_empty_cases(
     )
 
     # THEN no entry should be found for the empty case, but the one with samples should remain.
-    result: List[FamilySample] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
+    result: list[CaseSample] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
         case_internal_id=case_id_without_samples
     )
-    case_with_samples: List[
-        FamilySample
+    case_with_samples: list[
+        CaseSample
     ] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
         case_internal_id=case_id_with_multiple_samples
     )
@@ -110,10 +109,10 @@ def test_store_api_delete_non_existing_case(
     """Test that nothing happens when trying to delete a case that does not exist."""
 
     # GIVEN a database containing some cases but not a specific case
-    case: Family = store_with_multiple_cases_and_samples.get_case_by_internal_id(
+    case: Case = store_with_multiple_cases_and_samples.get_case_by_internal_id(
         internal_id=case_id_does_not_exist
     )
-    existing_cases: List[Family] = store_with_multiple_cases_and_samples.get_cases()
+    existing_cases: list[Case] = store_with_multiple_cases_and_samples.get_cases()
 
     assert not case
     assert existing_cases
@@ -124,6 +123,28 @@ def test_store_api_delete_non_existing_case(
     )
 
     # THEN no case has been deleted and nothing happens
-    remaining_cases: List[Family] = store_with_multiple_cases_and_samples.get_cases()
+    remaining_cases: list[Case] = store_with_multiple_cases_and_samples.get_cases()
 
     assert len(remaining_cases) == len(existing_cases)
+
+
+def test_delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
+    store_with_sequencing_metrics: Store, flow_cell_name: str
+):
+    """Test function to delete flow cell entries in sample_lane_sequencing_metrics table"""
+
+    # GIVEN a database containing a flow cell
+    metrics = store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        flow_cell_name=flow_cell_name
+    )
+    assert metrics
+
+    # WHEN removing flow cell
+    store_with_sequencing_metrics.delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
+        flow_cell_name=metrics[0].flow_cell_name
+    )
+
+    # THEN no entry should be found for the flow cell
+    assert not store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+        flow_cell_name=metrics[0].flow_cell_name
+    )

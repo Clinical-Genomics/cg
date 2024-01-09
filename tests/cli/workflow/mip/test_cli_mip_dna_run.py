@@ -6,19 +6,19 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 
 def test_cg_dry_run(
-    cli_runner, mocker, caplog, case_id, email_adress, mip_dna_context, mip_dna_fixture_config_path
+    cli_runner, mocker, caplog, case_id, email_address, mip_dna_context, mip_dna_config_path
 ):
     """Test print the MIP run to console"""
 
     caplog.set_level(logging.INFO)
 
     mocker.patch.object(MipDNAAnalysisAPI, "get_target_bed_from_lims")
-    MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = mip_dna_fixture_config_path
+    MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = mip_dna_config_path
 
     # GIVEN a cli function
     # WHEN we run a case in dry run mode
     result = cli_runner.invoke(
-        run, ["--dry-run", "--email", email_adress, case_id], obj=mip_dna_context
+        run, ["--dry-run", "--email", email_address, case_id], obj=mip_dna_context
     )
     # THEN command is run successfully
     assert result.exit_code == 0
@@ -28,21 +28,21 @@ def test_cg_dry_run(
 
 
 def test_mip_dry_run(
-    cli_runner, mocker, caplog, case_id, email_adress, mip_dna_context, mip_dna_fixture_config_path
+    cli_runner, mocker, caplog, case_id, email_address, mip_dna_context, mip_dna_config_path
 ):
     """Test print the MIP run to console"""
 
     caplog.set_level(logging.INFO)
 
     mocker.patch.object(MipDNAAnalysisAPI, "get_target_bed_from_lims")
-    MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = mip_dna_fixture_config_path
+    MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = mip_dna_config_path
     mocker.patch.object(MipDNAAnalysisAPI, "run_analysis")
     MipDNAAnalysisAPI.run_analysis.return_value = 0
 
     # GIVEN a cli function
     # WHEN we run a case in dry run mode
     result = cli_runner.invoke(
-        run, ["--mip-dry-run", "--email", email_adress, case_id], obj=mip_dna_context
+        run, ["--mip-dry-run", "--email", email_address, case_id], obj=mip_dna_context
     )
 
     # THEN command is run successfully
@@ -57,17 +57,17 @@ def test_mip_run(
     mocker,
     caplog,
     case_id,
-    email_adress,
+    email_address,
     mip_dna_context,
     trailblazer_api,
-    mip_dna_fixture_config_path,
+    mip_dna_config_path,
 ):
     """Test print the MIP run"""
 
     caplog.set_level(logging.INFO)
 
     mocker.patch.object(MipDNAAnalysisAPI, "get_target_bed_from_lims")
-    MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = mip_dna_fixture_config_path
+    MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = mip_dna_config_path
     mocker.patch.object(MipDNAAnalysisAPI, "run_analysis")
     MipDNAAnalysisAPI.run_analysis.return_value = 0
 
@@ -76,7 +76,7 @@ def test_mip_run(
 
     # GIVEN a cli function
     # WHEN we run a case
-    result = cli_runner.invoke(run, ["--email", email_adress, case_id], obj=mip_dna_context)
+    result = cli_runner.invoke(run, ["--email", email_address, case_id], obj=mip_dna_context)
 
     # THEN command is run successfully
     assert result.exit_code == 0
@@ -90,17 +90,17 @@ def test_mip_run_fail(
     mocker,
     caplog,
     case_id,
-    email_adress,
+    email_address,
     mip_dna_context,
     tb_api,
-    mip_dna_fixture_config_path,
+    mip_dna_config_path,
 ):
     """Test already ongoing analysis MIP run"""
 
     caplog.set_level(logging.INFO)
 
     mocker.patch.object(MipDNAAnalysisAPI, "get_target_bed_from_lims")
-    MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = mip_dna_fixture_config_path
+    MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = mip_dna_config_path
     mocker.patch.object(MipDNAAnalysisAPI, "run_analysis")
     MipDNAAnalysisAPI.run_analysis.return_value = 0
 
@@ -109,7 +109,7 @@ def test_mip_run_fail(
 
     # GIVEN a cli function
     # WHEN we run a case
-    result = cli_runner.invoke(run, ["--email", email_adress, case_id], obj=mip_dna_context)
+    result = cli_runner.invoke(run, ["--email", email_address, case_id], obj=mip_dna_context)
 
     # THEN command should return an exit fail code
     assert result.exit_code == 1

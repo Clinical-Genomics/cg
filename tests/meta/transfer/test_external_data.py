@@ -1,16 +1,16 @@
 """Tests for the transfer of external data."""
 import logging
 from pathlib import Path
-from typing import List
+
+from housekeeper.store.models import Version
 
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.store import Store
 from cg.store.models import Sample
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
-from housekeeper.store.models import Version
 from tests.cli.workflow.conftest import dna_case
 from tests.mocks.hk_mock import MockHousekeeperAPI
-from tests.store.conftest import fixture_sample_obj
+from tests.store.conftest import sample_obj
 
 
 def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_id: str):
@@ -116,7 +116,7 @@ def test_get_failed_fastq_paths(external_data_api: ExternalDataAPI, fastq_file: 
     bad_md5sum_file_path: Path = fastq_file.parent.joinpath("fastq_run_R1_001.fastq.gz")
     # GIVEN a list of paths with one fastq_file with a correct md5sum and one with an incorrect md5sum
     # When the failed paths are extracted
-    failed_paths: List[Path] = external_data_api.get_failed_fastq_paths(
+    failed_paths: list[Path] = external_data_api.get_failed_fastq_paths(
         [fastq_file, bad_md5sum_file_path]
     )
     # THEN only the path to the failed file should be in the list

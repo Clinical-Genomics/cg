@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Callable
+from typing import Callable
 
 from sqlalchemy.orm import Query
 
@@ -18,7 +18,7 @@ class CollaborationFilter(Enum):
 
 
 def apply_collaboration_filter(
-    collaborations: Query, filter_functions: List[Callable], internal_id: Optional[str] = None
+    collaborations: Query, filter_functions: list[Callable], internal_id: str | None = None
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:

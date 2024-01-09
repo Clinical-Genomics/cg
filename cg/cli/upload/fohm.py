@@ -1,5 +1,4 @@
 import logging
-from typing import Optional, List
 
 import click
 
@@ -39,7 +38,7 @@ def fohm(context: CGConfig):
 @ARGUMENT_DATE
 @click.pass_obj
 def aggregate_delivery(
-    context: CGConfig, cases: list, dry_run: bool = False, datestr: Optional[str] = None
+    context: CGConfig, cases: list, dry_run: bool = False, datestr: str | None = None
 ):
     """Re-aggregates delivery files for FOHM and saves them to default working directory"""
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
@@ -57,7 +56,7 @@ def aggregate_delivery(
 @ARGUMENT_DATE
 @click.pass_obj
 def create_komplettering(
-    context: CGConfig, cases: list, dry_run: bool = False, datestr: Optional[str] = None
+    context: CGConfig, cases: list, dry_run: bool = False, datestr: str | None = None
 ):
     """Re-aggregates komplettering files for FOHM and saves them to default working directory"""
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
@@ -73,13 +72,13 @@ def create_komplettering(
 @ARGUMENT_DATE
 @click.pass_obj
 def preprocess_all(
-    context: CGConfig, cases: list, dry_run: bool = False, datestr: Optional[str] = None
+    context: CGConfig, cases: list, dry_run: bool = False, datestr: str | None = None
 ):
     """Create all FOHM upload files, upload to GISAID, sync SFTP and mail reports for all provided cases"""
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     gisaid_api = GisaidAPI(config=context)
     cases = list(cases)
-    upload_cases: List = []
+    upload_cases = []
     for case_id in cases:
         try:
             gisaid_api.upload(case_id=case_id)
@@ -108,7 +107,7 @@ def preprocess_all(
 @ARGUMENT_DATE
 @OPTION_DRY_RUN
 @click.pass_obj
-def upload_rawdata(context: CGConfig, dry_run: bool = False, datestr: Optional[str] = None):
+def upload_rawdata(context: CGConfig, dry_run: bool = False, datestr: str | None = None):
     """Deliver files in daily upload directory via sftp"""
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     fohm_api.sync_files_sftp()
@@ -118,7 +117,7 @@ def upload_rawdata(context: CGConfig, dry_run: bool = False, datestr: Optional[s
 @ARGUMENT_DATE
 @OPTION_DRY_RUN
 @click.pass_obj
-def send_reports(context: CGConfig, dry_run: bool = False, datestr: Optional[str] = None):
+def send_reports(context: CGConfig, dry_run: bool = False, datestr: str | None = None):
     """Send all komplettering reports found in current daily directory to target recipients"""
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     fohm_api.send_mail_reports()

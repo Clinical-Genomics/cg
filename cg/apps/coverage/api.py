@@ -1,7 +1,6 @@
 """Chanjo API"""
 import logging
 import tempfile
-from typing import List, Optional
 
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadStream
@@ -41,7 +40,7 @@ class ChanjoAPI:
 
         self.process.run_command(parameters=load_parameters)
 
-    def sample(self, sample_id: str) -> Optional[dict]:
+    def sample(self, sample_id: str) -> dict | None:
         """Fetch sample from the database"""
 
         sample_parameters = ["db", "samples", "-s", sample_id]
@@ -59,7 +58,7 @@ class ChanjoAPI:
         delete_parameters = ["db", "remove", sample_id]
         self.process.run_command(parameters=delete_parameters)
 
-    def omim_coverage(self, samples: List[dict]) -> dict:
+    def omim_coverage(self, samples: list[dict]) -> dict:
         """Calculate OMIM coverage for samples"""
 
         omim_parameters = ["calculate", "coverage", "--omim"]

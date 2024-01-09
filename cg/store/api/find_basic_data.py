@@ -1,36 +1,47 @@
 """Handler to find basic data objects"""
 import datetime as dt
-from typing import List, Optional
 
 from sqlalchemy.orm import Query, Session
 
+from cg.store.api.base import BaseHandler
+from cg.store.filters.status_application_filters import (
+    ApplicationFilter,
+    apply_application_filter,
+)
+from cg.store.filters.status_application_version_filters import (
+    ApplicationVersionFilter,
+    apply_application_versions_filter,
+)
+from cg.store.filters.status_bed_filters import BedFilter, apply_bed_filter
+from cg.store.filters.status_bed_version_filters import (
+    BedVersionFilter,
+    apply_bed_version_filter,
+)
+from cg.store.filters.status_collaboration_filters import (
+    CollaborationFilter,
+    apply_collaboration_filter,
+)
+from cg.store.filters.status_customer_filters import (
+    CustomerFilter,
+    apply_customer_filter,
+)
+from cg.store.filters.status_organism_filters import (
+    OrganismFilter,
+    apply_organism_filter,
+)
+from cg.store.filters.status_panel_filters import PanelFilter, apply_panel_filter
+from cg.store.filters.status_user_filters import UserFilter, apply_user_filter
 from cg.store.models import (
     Application,
     ApplicationVersion,
     Bed,
     BedVersion,
-    Customer,
     Collaboration,
+    Customer,
     Organism,
     Panel,
     User,
 )
-from cg.store.api.base import BaseHandler
-from cg.store.filters.status_application_filters import apply_application_filter, ApplicationFilter
-from cg.store.filters.status_application_version_filters import (
-    apply_application_versions_filter,
-    ApplicationVersionFilter,
-)
-from cg.store.filters.status_bed_filters import apply_bed_filter, BedFilter
-from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
-from cg.store.filters.status_collaboration_filters import (
-    CollaborationFilter,
-    apply_collaboration_filter,
-)
-from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
-from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
-from cg.store.filters.status_panel_filters import PanelFilter, apply_panel_filter
-from cg.store.filters.status_user_filters import apply_user_filter, UserFilter
 
 
 class FindBasicDataHandler(BaseHandler):
@@ -47,7 +58,7 @@ class FindBasicDataHandler(BaseHandler):
             tag=tag,
         ).first()
 
-    def get_applications_is_not_archived(self) -> List[Application]:
+    def get_applications_is_not_archived(self) -> list[Application]:
         """Return applications that are not archived."""
         return (
             apply_application_filter(
@@ -58,7 +69,7 @@ class FindBasicDataHandler(BaseHandler):
             .all()
         )
 
-    def get_applications(self) -> List[Application]:
+    def get_applications(self) -> list[Application]:
         """Return all applications."""
         return (
             self._get_query(table=Application)
@@ -66,7 +77,7 @@ class FindBasicDataHandler(BaseHandler):
             .all()
         )
 
-    def get_current_application_version_by_tag(self, tag: str) -> Optional[ApplicationVersion]:
+    def get_current_application_version_by_tag(self, tag: str) -> ApplicationVersion | None:
         """Return the current application version for an application tag."""
         application = self.get_application_by_tag(tag=tag)
         if not application:
@@ -116,7 +127,7 @@ class FindBasicDataHandler(BaseHandler):
 
     def get_active_beds(self) -> Query:
         """Get all beds which are not archived."""
-        bed_filter_functions: List[BedFilter] = [
+        bed_filter_functions: list[BedFilter] = [
             BedFilter.FILTER_NOT_ARCHIVED,
             BedFilter.ORDER_BY_NAME,
         ]
@@ -148,11 +159,11 @@ class FindBasicDataHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
-    def get_all_organisms(self) -> List[Organism]:
+    def get_all_organisms(self) -> list[Organism]:
         """Return all organisms ordered by organism internal id."""
         return self._get_query(table=Organism).order_by(Organism.internal_id)
 
-    def get_customers(self) -> List[Customer]:
+    def get_customers(self) -> list[Customer]:
         """Return costumers."""
         return self._get_query(table=Customer).all()
 
@@ -164,7 +175,7 @@ class FindBasicDataHandler(BaseHandler):
             abbreviation=abbreviation,
         ).first()
 
-    def get_panels(self) -> List[Panel]:
+    def get_panels(self) -> list[Panel]:
         """Returns all panels."""
         return self._get_query(table=Panel).order_by(Panel.abbrev).all()
 

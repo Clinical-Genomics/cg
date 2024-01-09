@@ -1,11 +1,12 @@
 """This script tests the cli methods to get analysis in status-db"""
 
+from click.testing import CliRunner
+
 from cg.cli.get import get
-from cg.constants import RETURN_SUCCESS
+from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Analysis
-from click.testing import CliRunner
 from tests.store_helpers import StoreHelpers
 
 
@@ -18,7 +19,7 @@ def test_get_analysis_bad_case(cli_runner: CliRunner, base_context: CGConfig):
     result = cli_runner.invoke(get, ["analysis", name], obj=base_context)
 
     # THEN it should error about missing case instead of getting a analysis
-    assert result.exit_code != RETURN_SUCCESS
+    assert result.exit_code != EXIT_SUCCESS
 
 
 def test_get_analysis_required(
@@ -27,14 +28,14 @@ def test_get_analysis_required(
     """Test to get a analysis using only the required argument"""
     # GIVEN a database with an analysis
     analysis: Analysis = helpers.add_analysis(disk_store, pipeline_version="9.3")
-    internal_id = analysis.family.internal_id
+    internal_id = analysis.case.internal_id
     assert disk_store._get_query(table=Analysis).count() == 1
 
     # WHEN getting a analysis
     result = cli_runner.invoke(get, ["analysis", internal_id], obj=base_context)
 
     # THEN it should have been gotten
-    assert result.exit_code == RETURN_SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
     assert str(analysis.started_at) in result.output
     assert analysis.pipeline in result.output
     assert analysis.pipeline_version in result.output

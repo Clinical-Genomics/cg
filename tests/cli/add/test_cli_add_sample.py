@@ -1,10 +1,10 @@
-from cg.cli.add import add
-from cg.constants import Priority, EXIT_SUCCESS
-from cg.constants.subject import Gender
-from cg.models.cg_config import CGConfig
-from cg.store import Store
 from click.testing import CliRunner
 
+from cg.cli.add import add
+from cg.constants import EXIT_SUCCESS, Priority
+from cg.constants.subject import Sex
+from cg.models.cg_config import CGConfig
+from cg.store import Store
 from cg.store.models import Customer, Sample
 from tests.store_helpers import StoreHelpers
 
@@ -23,7 +23,7 @@ def test_add_sample_missing_customer(cli_runner: CliRunner, base_context: CGConf
         [
             "sample",
             "--sex",
-            Gender.MALE,
+            Sex.MALE,
             "--application-tag",
             application,
             customer_id,
@@ -53,7 +53,7 @@ def test_add_sample_bad_application(
         [
             "sample",
             "--sex",
-            Gender.MALE,
+            Sex.MALE,
             "--application-tag",
             application,
             customer.internal_id,
@@ -83,7 +83,7 @@ def test_add_sample_required(cli_runner: CliRunner, base_context: CGConfig, help
         [
             "sample",
             "--sex",
-            Gender.MALE,
+            Sex.MALE,
             "--application-tag",
             application_tag,
             customer.internal_id,
@@ -97,7 +97,7 @@ def test_add_sample_required(cli_runner: CliRunner, base_context: CGConfig, help
     sample_query = disk_store._get_query(table=Sample)
     assert sample_query.count() == 1
     assert sample_query.first().name == name
-    assert sample_query.first().sex == Gender.MALE
+    assert sample_query.first().sex == Sex.MALE
 
 
 def test_add_sample_lims_id(cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers):
@@ -117,7 +117,7 @@ def test_add_sample_lims_id(cli_runner: CliRunner, base_context: CGConfig, helpe
         [
             "sample",
             "--sex",
-            Gender.MALE,
+            Sex.MALE,
             "--application-tag",
             application_tag,
             "--lims",
@@ -156,7 +156,7 @@ def test_add_sample_order(
         [
             "sample",
             "--sex",
-            Gender.MALE,
+            Sex.MALE,
             "--application-tag",
             application_tag,
             "--order",
@@ -195,7 +195,7 @@ def test_add_sample_when_down_sampled(
         [
             "sample",
             "--sex",
-            Gender.MALE,
+            Sex.MALE,
             "--application-tag",
             application_tag,
             "--down-sampled",
@@ -233,7 +233,7 @@ def test_add_sample_priority(
         [
             "sample",
             "--sex",
-            Gender.MALE,
+            Sex.MALE,
             "--application-tag",
             application_tag,
             "--priority",

@@ -1,9 +1,10 @@
 """Constants for cg."""
 
+from enum import StrEnum
+
 import click
 
 from cg.utils.date import get_date
-from cg.utils.enums import StrEnum
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
@@ -37,22 +38,28 @@ class CaseActions(StrEnum):
     HOLD: str = "hold"
     RUNNING: str = "running"
 
+    @classmethod
+    def actions(cls) -> list[str]:
+        return list(map(lambda action: action.value, cls))
 
-CASE_ACTIONS = [action.value for action in CaseActions]
-
-COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
-
-COMBOS = {
-    "DSD": ("DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"),
-    "CM": ("CNM", "CM"),
-    "Horsel": ("Horsel", "141217", "141201"),
-}
 
 CONTAINER_OPTIONS = ("Tube", "96 well plate", "No container")
 
 CONTROL_OPTIONS = ("", "negative", "positive")
 
 DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
+
+
+class CustomerId(StrEnum):
+    CG_INTERNAL_CUSTOMER: str = "cust000"
+    CUST001: str = "cust001"
+    CUST002: str = "cust002"
+    CUST003: str = "cust003"
+    CUST004: str = "cust004"
+    CUST032: str = "cust032"
+    CUST042: str = "cust042"
+    CUST132: str = "cust132"
+    CUST999: str = "cust999"
 
 
 class FlowCellStatus(StrEnum):
@@ -62,8 +69,9 @@ class FlowCellStatus(StrEnum):
     PROCESSING: str = "processing"
     RETRIEVED: str = "retrieved"
 
-
-FLOWCELL_STATUS = [status.value for status in FlowCellStatus]
+    @classmethod
+    def statuses(cls) -> list[str]:
+        return list(map(lambda status: status.value, cls))
 
 
 class AnalysisType(StrEnum):
@@ -93,12 +101,33 @@ SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
+class Pipeline(StrEnum):
+    BALSAMIC: str = "balsamic"
+    BALSAMIC_QC: str = "balsamic-qc"
+    BALSAMIC_UMI: str = "balsamic-umi"
+    BALSAMIC_PON: str = "balsamic-pon"
+    DEMULTIPLEX: str = "demultiplex"
+    FASTQ: str = "fastq"
+    FLUFFY: str = "fluffy"
+    MICROSALT: str = "microsalt"
+    MIP_DNA: str = "mip-dna"
+    MIP_RNA: str = "mip-rna"
+    RAREDISEASE: str = "raredisease"
+    RNAFUSION: str = "rnafusion"
+    RSYNC: str = "rsync"
+    SARS_COV_2: str = "sars-cov-2"
+    SPRING: str = "spring"
+    TAXPROFILER: str = "taxprofiler"
+
+
 class FileFormat(StrEnum):
     FASTQ: str = "fastq"
     JSON: str = "json"
     YAML: str = "yaml"
     CSV: str = "csv"
     XML: str = "xml"
+    TXT: str = "txt"
+    TSV: str = "tsv"
 
 
 class GenomeVersion(StrEnum):
@@ -133,6 +162,7 @@ class HastaSlurmPartitions(StrEnum):
 
 class FileExtensions(StrEnum):
     BED: str = ".bed"
+    COMPLETE: str = ".complete"
     CRAM: str = ".cram"
     CSV: str = ".csv"
     FASTQ: str = ".fastq"
@@ -140,10 +170,16 @@ class FileExtensions(StrEnum):
     GZIP: str = ".gz"
     JSON: str = ".json"
     KEY: str = ".key"
+    LOG: str = ".log"
+    MD5SUM: str = ".md5sum"
     NO_EXTENSION: str = ""
+    PASS_PHRASE: str = ".passphrase"
+    PENDING: str = ".pending"
+    SBATCH: str = ".sbatch"
     SPRING: str = ".spring"
     TAR: str = ".tar"
     TMP: str = ".tmp"
+    TSV: str = ".tsv"
     VCF: str = ".vcf"
     XML: str = ".xml"
     YAML: str = ".yaml"
@@ -175,10 +211,15 @@ SKIP_CONFIRMATION = click.option(
 
 
 class MicrosaltQC:
-    QC_PERCENT_THRESHOLD_MWX: float = 0.1
+    AVERAGE_COVERAGE_THRESHOLD: int = 10
+    MWX_THRESHOLD_SAMPLES_PASSING: float = 0.9
     COVERAGE_10X_THRESHOLD: float = 0.75
+    DUPLICATION_RATE_THRESHOLD: float = 0.8
+    INSERT_SIZE_THRESHOLD: int = 100
+    MAPPED_RATE_THRESHOLD: float = 0.3
     NEGATIVE_CONTROL_READS_THRESHOLD: float = 0.2
     TARGET_READS: int = 6000000
+    TARGET_READS_FAIL_THRESHOLD: float = 0.7
 
 
 class MicrosaltAppTags(StrEnum):
@@ -197,3 +238,16 @@ class MetaApis:
 class WorkflowManager(StrEnum):
     Slurm: str = "slurm"
     Tower: str = "nf_tower"
+
+
+class Strandedness(StrEnum):
+    """Strandedness types."""
+
+    FORWARD: str = "forward"
+    REVERSE: str = "reverse"
+    UNSTRANDED: str = "unstranded"
+
+
+PIPELINES_USING_PARTIAL_ANALYSES: list[Pipeline] = [Pipeline.MICROSALT, Pipeline.SARS_COV_2]
+
+NG_UL_SUFFIX: str = " ng/uL"

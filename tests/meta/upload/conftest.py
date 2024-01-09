@@ -2,36 +2,33 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Dict
 
 import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, Analysis, Sample
-
+from cg.store.models import Analysis, Case, Sample
 from tests.cli.workflow.mip.conftest import (
-    fixture_mip_rna_context,
-    fixture_mip_dna_context,
-    fixture_mip_case_ids,
-    fixture_mip_case_id,
+    mip_case_id,
+    mip_case_ids,
+    mip_dna_context,
+    mip_rna_context,
 )
-
 from tests.store_helpers import StoreHelpers
-from tests.mocks.hk_mock import MockHousekeeperAPI
 
 
 class MockCoverage(ChanjoAPI):
     """Mock chanjo coverage api."""
 
 
-@pytest.fixture(name="upload_genotypes_hk_bundle")
-def fixture_upload_genotypes_hk_bundle(
+@pytest.fixture
+def upload_genotypes_hk_bundle(
     case_id: str, timestamp, case_qc_metrics_deliverables: Path, bcf_file: Path
 ) -> dict:
     """Returns a dictionary in Housekeeper format with files used in upload Genotype process."""
@@ -51,8 +48,8 @@ def fixture_upload_genotypes_hk_bundle(
     return data
 
 
-@pytest.fixture(name="analysis_obj")
-def fixture_analysis_obj(
+@pytest.fixture
+def analysis_obj(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers: StoreHelpers
 ) -> Analysis:
     """Return an analysis object with a trio."""
@@ -61,8 +58,8 @@ def fixture_analysis_obj(
     return analysis_store_trio.get_case_by_internal_id(internal_id=case_id).analyses[0]
 
 
-@pytest.fixture(name="upload_genotypes_api")
-def fixture_upload_genotypes_api(
+@pytest.fixture
+def upload_genotypes_api(
     real_housekeeper_api, genotype_api, upload_genotypes_hk_bundle, helpers: StoreHelpers
 ) -> UploadGenotypesAPI:
     """Create a upload genotypes api."""
@@ -77,7 +74,7 @@ def fixture_upload_genotypes_api(
 
 @pytest.fixture(scope="function")
 def coverage_upload_api(
-    chanjo_config: Dict[str, Dict[str, str]], populated_housekeeper_api: MockHousekeeperAPI
+    chanjo_config: dict[str, dict[str, str]], populated_housekeeper_api: HousekeeperAPI
 ):
     """Return a upload coverage API."""
     return UploadCoverageApi(
@@ -86,27 +83,25 @@ def coverage_upload_api(
 
 
 @pytest.fixture(name="genotype_analysis_sex")
-def fixture_genotype_analysis_sex() -> dict:
+def genotype_analysis_sex() -> dict:
     """Return predicted sex per sample_id."""
     return {"ADM1": "male", "ADM2": "male", "ADM3": "female"}
 
 
 @pytest.fixture(name="mip_dna_case")
-def fixture_mip_dna_case(mip_dna_context: CGConfig, helpers: StoreHelpers) -> Family:
+def mip_dna_case(mip_dna_context: CGConfig, helpers: StoreHelpers) -> Case:
     """Return a MIP DNA case."""
 
     store: Store = mip_dna_context.status_db
 
-    mip_dna_case: Family = helpers.add_case(
+    mip_dna_case: Case = helpers.add_case(
         store=store,
         internal_id="mip-dna-case",
         name="mip-dna-case",
         data_analysis=Pipeline.MIP_DNA,
     )
     dna_mip_sample: Sample = helpers.add_sample(
-        store=store,
-        internal_id="mip-dna-case",
-        application_type="wgs",
+        store=store, application_type="wgs", internal_id="mip-dna-case"
     )
     helpers.add_relationship(store=store, case=mip_dna_case, sample=dna_mip_sample)
 
@@ -120,15 +115,13 @@ def fixture_mip_dna_case(mip_dna_context: CGConfig, helpers: StoreHelpers) -> Fa
 
 
 @pytest.fixture(name="mip_rna_case")
-def fixture_mip_rna_case(mip_rna_context: CGConfig, case_id: str):
+def mip_rna_case(mip_rna_context: CGConfig, case_id: str):
     """Return a MIP RNA case."""
     return mip_rna_context.status_db.get_case_by_internal_id(internal_id=case_id)
 
 
 @pytest.fixture(name="mip_rna_analysis")
-def fixture_mip_rna_analysis(
-    mip_rna_context: CGConfig, helpers: StoreHelpers, mip_rna_case: Family
-) -> Family:
+def mip_rna_analysis(mip_rna_context: CGConfig, helpers: StoreHelpers, mip_rna_case: Case) -> Case:
     """Return a MIP RNA analysis."""
     return helpers.add_analysis(
         store=mip_rna_context.status_db,

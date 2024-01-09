@@ -2,19 +2,18 @@ import datetime as dt
 from unittest.mock import patch
 
 import pytest
-from cgmodels.cg.constants import Pipeline
-
-from cg.store.models import Customer, Family
-from tests.store_helpers import StoreHelpers
 
 from cg.constants import DataDelivery
+from cg.constants.constants import Pipeline
+from cg.constants.subject import Sex
 from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.samples import MipDnaSample
 from cg.store import Store
-from cg.store.models import Pool, Sample
+from cg.store.models import Case, Customer, Pool, Sample
+from tests.store_helpers import StoreHelpers
 
 SUBMITTERS = [
     "fastq_submitter",
@@ -81,7 +80,7 @@ def test_submit(
             assert record.ticket == ticket_id
         elif isinstance(record, Sample):
             assert record.original_ticket == ticket_id
-        elif isinstance(record, Family):
+        elif isinstance(record, Case):
             for link_obj in record.links:
                 assert link_obj.sample.original_ticket == ticket_id
 
@@ -245,7 +244,7 @@ def test_submit_duplicate_sample_case_name(
     for sample in order_data.samples:
         case_id = sample.family_name
         if not store.get_case_by_name_and_customer(customer=customer, case_name=case_id):
-            case: Family = store.add_case(
+            case: Case = store.add_case(
                 data_analysis=Pipeline.MIP_DNA,
                 data_delivery=DataDelivery.SCOUT,
                 name=case_id,
@@ -350,10 +349,10 @@ def test_validate_sex_inconsistent_sex(
     for sample in order_data.samples:
         sample_obj: Sample = helpers.add_sample(
             store=store,
-            subject_id=sample.subject_id,
-            name=sample.name,
-            gender="male" if sample.sex == "female" else "female",
             customer_id=customer.internal_id,
+            sex=Sex.MALE if sample.sex == Sex.FEMALE else Sex.FEMALE,
+            name=sample.name,
+            subject_id=sample.subject_id,
         )
         store.session.add(sample_obj)
         store.session.commit()
@@ -380,10 +379,10 @@ def test_validate_sex_consistent_sex(
     for sample in order_data.samples:
         sample_obj: Sample = helpers.add_sample(
             store=store,
-            subject_id=sample.subject_id,
-            name=sample.name,
-            gender=sample.sex,
             customer_id=customer.internal_id,
+            sex=sample.sex,
+            name=sample.name,
+            subject_id=sample.subject_id,
         )
         store.session.add(sample_obj)
         store.session.commit()
@@ -411,10 +410,10 @@ def test_validate_sex_unknown_existing_sex(
     for sample in order_data.samples:
         sample_obj: Sample = helpers.add_sample(
             store=store,
-            subject_id=sample.subject_id,
-            name=sample.name,
-            gender="unknown",
             customer_id=customer.internal_id,
+            sex=Sex.UNKNOWN,
+            name=sample.name,
+            subject_id=sample.subject_id,
         )
         store.session.add(sample_obj)
         store.session.commit()
@@ -441,10 +440,10 @@ def test_validate_sex_unknown_new_sex(
     for sample in order_data.samples:
         sample_obj: Sample = helpers.add_sample(
             store=store,
-            subject_id=sample.subject_id,
-            name=sample.name,
-            gender=sample.sex,
             customer_id=customer.internal_id,
+            sex=sample.sex,
+            name=sample.name,
+            subject_id=sample.subject_id,
         )
         sample.sex = "unknown"
         store.session.add(sample_obj)
@@ -537,7 +536,7 @@ def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, ord
             customer_entry_id=[customer.id], sample_name=sample_name
         ):
             sample_obj = helpers.add_sample(
-                store=store, name=sample_name, customer_id=customer.internal_id
+                store=store, customer_id=customer.internal_id, name=sample_name
             )
             store.session.add(sample_obj)
             store.session.commit()

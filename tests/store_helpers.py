@@ -1,7 +1,7 @@
 """Utility functions to simply add test data in a cg store."""
 import logging
 from datetime import datetime
-from typing import List, Optional, Dict
+from pathlib import Path
 
 from housekeeper.store.models import Bundle, Version
 
@@ -10,24 +10,26 @@ from cg.constants import DataDelivery, Pipeline
 from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
-from cg.constants.subject import Gender, PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.store import Store
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationLimitations,
     ApplicationVersion,
     Bed,
     BedVersion,
+    Case,
+    CaseSample,
     Collaboration,
     Customer,
-    Family,
-    FamilySample,
     Flowcell,
     Invoice,
     Organism,
     Panel,
     Pool,
     Sample,
+    SampleLaneSequencingMetrics,
     User,
 )
 
@@ -58,6 +60,43 @@ class StoreHelpers:
             store.include(_version)
 
         return _bundle
+
+    @staticmethod
+    def format_hk_bundle_dict(
+        bundle_name: str, files: list[Path], all_tags: list[list[str]]
+    ) -> dict:
+        """Creates the dict representation for a housekeeper bundle with necessary values set."""
+        return {
+            "name": bundle_name,
+            "created_at": datetime.now(),
+            "expires_at": datetime.now(),
+            "files": [
+                {
+                    "path": file.as_posix(),
+                    "tags": tags,
+                    "archive": False,
+                }
+                for file, tags in zip(files, all_tags)
+            ],
+        }
+
+    @staticmethod
+    def quick_hk_bundle(
+        bundle_name: str, files: list[Path], store: HousekeeperAPI, tags: list[list[str]]
+    ):
+        """Adds a bundle to housekeeper with the given files and tags. Returns the new bundle.
+
+        Arguments:
+            bundle_name = The name of the bundle to be created.
+            files = A list of files to be added to the bundle.
+            store = The database instance where the bundle should be added.
+            tags = A list where each entry is the set of tags for the corresponding file.
+                   The length of this list should be the same as the length of the files list.
+        """
+        bundle_data: dict = StoreHelpers.format_hk_bundle_dict(
+            bundle_name=bundle_name, files=files, all_tags=tags
+        )
+        return StoreHelpers.ensure_hk_bundle(store=store, bundle_data=bundle_data)
 
     @staticmethod
     def ensure_hk_version(store: HousekeeperAPI, bundle_data: dict) -> Version:
@@ -117,7 +156,7 @@ class StoreHelpers:
     def add_application_version(
         store: Store,
         application: Application,
-        prices: Dict,
+        prices: dict,
         version: int = 1,
         valid_from: datetime = datetime.now(),
     ) -> ApplicationVersion:
@@ -197,9 +236,35 @@ class StoreHelpers:
         return application
 
     @staticmethod
+    def ensure_application_limitation(
+        store: Store,
+        application: Application,
+        pipeline: str = Pipeline.MIP_DNA,
+        limitations: str = "Dummy limitations",
+        **kwargs,
+    ) -> ApplicationLimitations:
+        """Ensure that application limitations exists in store."""
+        application_limitation: ApplicationLimitations = (
+            store.get_application_limitation_by_tag_and_pipeline(
+                tag=application.tag, pipeline=pipeline
+            )
+        )
+        if application_limitation:
+            return application_limitation
+        application_limitation: ApplicationLimitations = store.add_application_limitation(
+            application=application,
+            pipeline=pipeline,
+            limitations=limitations,
+            **kwargs,
+        )
+        store.session.add(application_limitation)
+        store.session.commit()
+        return application_limitation
+
+    @staticmethod
     def ensure_bed_version(store: Store, bed_name: str = "dummy_bed") -> BedVersion:
         """Return existing or create and return bed version for tests."""
-        bed: Optional[Bed] = store.get_bed_by_name(bed_name)
+        bed: Bed | None = store.get_bed_by_name(bed_name)
         if not bed:
             bed: Bed = store.add_bed(name=bed_name)
             store.session.add(bed)
@@ -245,7 +310,7 @@ class StoreHelpers:
     @staticmethod
     def add_analysis(
         store: Store,
-        case: Family = None,
+        case: Case = None,
         started_at: datetime = None,
         completed_at: datetime = None,
         uploaded_at: datetime = None,
@@ -264,7 +329,7 @@ class StoreHelpers:
         if not case:
             case = StoreHelpers.add_case(store, data_analysis=pipeline, data_delivery=data_delivery)
 
-        analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
+        analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version, case_id=case.id)
 
         analysis.started_at = started_at or datetime.now()
         if completed_at:
@@ -285,7 +350,7 @@ class StoreHelpers:
             analysis.uploaded_to_vogue_at = uploaded_to_vogue_at
 
         analysis.limitations = "A limitation"
-        analysis.family = case
+        analysis.case = case
         store.session.add(analysis)
         store.session.commit()
         return analysis
@@ -297,7 +362,7 @@ class StoreHelpers:
         application_type: str = "tgs",
         control: str = "",
         customer_id: str = None,
-        gender: str = Gender.FEMALE,
+        sex: str = Sex.FEMALE,
         is_external: bool = False,
         is_rna: bool = False,
         is_tumour: bool = False,
@@ -326,7 +391,7 @@ class StoreHelpers:
 
         sample = store.add_sample(
             name=name,
-            sex=gender,
+            sex=sex,
             control=control,
             original_ticket=original_ticket,
             tumour=is_tumour,
@@ -379,16 +444,16 @@ class StoreHelpers:
         action: str = None,
         internal_id: str = None,
         customer_id: str = "cust000",
-        panels: List[str] = [],
-        case_obj: Family = None,
+        panels: list[str] = [],
+        case_obj: Case = None,
         ticket: str = "123456",
-    ) -> Family:
+    ) -> Case:
         """Utility function to add a case to use in tests,
         If no case object is used a autogenerated case id will be used.
 
         """
         if not panels:
-            panels: List[str] = ["panel_test"]
+            panels: list[str] = ["panel_test"]
         customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
         if case_obj:
             panels = case_obj.panels
@@ -398,7 +463,7 @@ class StoreHelpers:
             )
 
         if not case_obj:
-            case_obj: Optional[Family] = store.get_case_by_internal_id(internal_id=name)
+            case_obj: Case | None = store.get_case_by_internal_id(internal_id=name)
         if not case_obj:
             case_obj = store.add_case(
                 data_analysis=data_analysis,
@@ -453,10 +518,11 @@ class StoreHelpers:
         ordered_at: datetime = None,
         completed_at: datetime = None,
         created_at: datetime = datetime.now(),
+        started_at: datetime = None,
     ):
         """Load a case with samples and link relations from a dictionary."""
         customer_obj = StoreHelpers.ensure_customer(store)
-        case = Family(
+        case = Case(
             name=case_info["name"],
             panels=case_info["panels"],
             internal_id=case_info["internal_id"],
@@ -479,13 +545,13 @@ class StoreHelpers:
             sample_id = sample_data["internal_id"]
             sample_obj = StoreHelpers.add_sample(
                 store,
-                gender=sample_data["sex"],
-                name=sample_data.get("name"),
-                internal_id=sample_id,
-                application_type=app_type,
                 application_tag=app_tag,
-                original_ticket=sample_data["original_ticket"],
+                application_type=app_type,
+                sex=sample_data["sex"],
+                internal_id=sample_id,
                 reads=sample_data["reads"],
+                name=sample_data.get("name"),
+                original_ticket=sample_data["original_ticket"],
                 capture_kit=sample_data["capture_kit"],
             )
             sample_objs[sample_id] = sample_obj
@@ -506,6 +572,7 @@ class StoreHelpers:
             pipeline=Pipeline.MIP_DNA,
             case=case,
             completed_at=completed_at or datetime.now(),
+            started_at=started_at or datetime.now(),
         )
         return case
 
@@ -560,7 +627,7 @@ class StoreHelpers:
             application_version=application_version,
             organism=organism,
             reads=6000000,
-            sex=Gender.UNKNOWN,
+            sex=Sex.UNKNOWN,
         )
         sample.customer = customer
         case = StoreHelpers.ensure_case(
@@ -574,7 +641,7 @@ class StoreHelpers:
         return sample
 
     @staticmethod
-    def add_samples(store: Store, nr_samples: int = 5) -> List[Sample]:
+    def add_samples(store: Store, nr_samples: int = 5) -> list[Sample]:
         """Utility function to add a number of samples to use in tests."""
         nr_samples = max(nr_samples, 2)
         return [
@@ -582,21 +649,26 @@ class StoreHelpers:
         ]
 
     @staticmethod
-    def add_flowcell(
+    def add_flow_cell(
         store: Store,
-        flow_cell_name: str = "flowcell_test",
+        flow_cell_name: str = "flow_cell_test",
         archived_at: datetime = None,
         sequencer_type: str = Sequencers.HISEQX,
-        samples: List[Sample] = None,
+        samples: list[Sample] = None,
         status: str = None,
         date: datetime = datetime.now(),
+        has_backup: bool | None = False,
     ) -> Flowcell:
         """Utility function to add a flow cell to the store and return an object."""
-        flow_cell = store.add_flow_cell(
+        flow_cell: Flowcell | None = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
+        if flow_cell:
+            return flow_cell
+        flow_cell: Flowcell = store.add_flow_cell(
             flow_cell_name=flow_cell_name,
             sequencer_name="dummy_sequencer",
             sequencer_type=sequencer_type,
             date=date,
+            has_backup=has_backup,
         )
         flow_cell.archived_at = archived_at
         if samples:
@@ -612,14 +684,14 @@ class StoreHelpers:
     def add_relationship(
         store: Store,
         sample: Sample,
-        case: Family,
+        case: Case,
         status: str = PhenotypeStatus.UNKNOWN,
         father: Sample = None,
         mother: Sample = None,
-    ) -> FamilySample:
+    ) -> CaseSample:
         """Utility function to link a sample to a case."""
         link = store.relate_sample(
-            sample=sample, family=case, status=status, father=father, mother=mother
+            sample=sample, case=case, status=status, father=father, mother=mother
         )
         store.session.add(link)
         store.session.commit()
@@ -628,9 +700,9 @@ class StoreHelpers:
     @staticmethod
     def add_synopsis_to_case(
         store: Store, case_id: str, synopsis: str = "a synopsis"
-    ) -> Optional[Family]:
+    ) -> Case | None:
         """Function for adding a synopsis to a case in the database."""
-        case_obj: Family = store.get_case_by_internal_id(internal_id=case_id)
+        case_obj: Case = store.get_case_by_internal_id(internal_id=case_id)
         if not case_obj:
             LOG.warning("Could not find case")
             return None
@@ -641,7 +713,7 @@ class StoreHelpers:
     @staticmethod
     def add_phenotype_groups_to_sample(
         store: Store, sample_id: str, phenotype_groups: [str] = None
-    ) -> Optional[Sample]:
+    ) -> Sample | None:
         """Function for adding a phenotype group to a sample in the database."""
         if phenotype_groups is None:
             phenotype_groups = ["a phenotype group"]
@@ -655,11 +727,11 @@ class StoreHelpers:
 
     @staticmethod
     def add_phenotype_terms_to_sample(
-        store: Store, sample_id: str, phenotype_terms: List[str] = []
-    ) -> Optional[Sample]:
+        store: Store, sample_id: str, phenotype_terms: list[str] = []
+    ) -> Sample | None:
         """Function for adding a phenotype term to a sample in the database."""
         if not phenotype_terms:
-            phenotype_terms: List[str] = ["a phenotype term"]
+            phenotype_terms: list[str] = ["a phenotype term"]
         sample_obj: Sample = store.get_sample_by_internal_id(internal_id=sample_id)
         if not sample_obj:
             LOG.warning("Could not find sample")
@@ -671,7 +743,7 @@ class StoreHelpers:
     @staticmethod
     def add_subject_id_to_sample(
         store: Store, sample_id: str, subject_id: str = "a subject_id"
-    ) -> Optional[Sample]:
+    ) -> Sample | None:
         """Function for adding a subject_id to a sample in the database."""
         sample_obj: Sample = store.get_sample_by_internal_id(internal_id=sample_id)
         if not sample_obj:
@@ -682,12 +754,12 @@ class StoreHelpers:
         return sample_obj
 
     @classmethod
-    def relate_samples(cls, base_store: Store, case: Family, samples: List[Sample]):
+    def relate_samples(cls, base_store: Store, case: Case, samples: list[Sample]):
         """Utility function to relate many samples to one case."""
 
         for sample in samples:
             link = base_store.relate_sample(
-                family=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+                case=case, sample=sample, status=PhenotypeStatus.UNKNOWN
             )
             base_store.session.add(link)
             base_store.session.commit()
@@ -699,25 +771,25 @@ class StoreHelpers:
         case_id: str,
         nr_samples: int,
         sequenced_at: datetime = datetime.now(),
-    ) -> Family:
+    ) -> Case:
         """Utility function to add one case with many samples and return the case."""
 
-        samples: List[Sample] = cls.add_samples(store=base_store, nr_samples=nr_samples)
+        samples: list[Sample] = cls.add_samples(store=base_store, nr_samples=nr_samples)
         for sample in samples:
-            sample.sequenced_at: datetime = sequenced_at
-        case: Family = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
+            sample.last_sequenced_at: datetime = sequenced_at
+        case: Case = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
         cls.relate_samples(base_store=base_store, case=case, samples=samples)
         return case
 
     @classmethod
     def add_cases_with_samples(
         cls, base_store: Store, nr_cases: int, sequenced_at: datetime
-    ) -> List[Family]:
+    ) -> list[Case]:
         """Utility function to add many cases with two samples to use in tests."""
 
-        cases: List[Family] = []
+        cases: list[Case] = []
         for i in range(nr_cases):
-            case: List[Family] = cls.add_case_with_samples(
+            case: list[Case] = cls.add_case_with_samples(
                 base_store, f"f{i}", 2, sequenced_at=sequenced_at
             )
             cases.append(case)
@@ -792,9 +864,9 @@ class StoreHelpers:
         invoice_id: int = 0,
         customer_id: str = "cust000",
         discount: int = 0,
-        pools: Optional[List[Pool]] = None,
-        samples: Optional[List[Sample]] = None,
-        invoiced_at: Optional[datetime] = None,
+        pools: list[Pool] | None = None,
+        samples: list[Sample] | None = None,
+        invoiced_at: datetime | None = None,
     ) -> Invoice:
         """Utility function to create an invoice with a costumer and samples or pools."""
         invoice = store.get_invoice_by_entry_id(entry_id=invoice_id)
@@ -820,10 +892,63 @@ class StoreHelpers:
         return invoice
 
     @classmethod
-    def add_case_with_sample(cls, base_store: Store, case_id: str, sample_id: str) -> Family:
+    def add_case_with_sample(cls, base_store: Store, case_id: str, sample_id: str) -> Case:
         """Helper function to add a case associated with a sample with the given ids."""
 
         case = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
         sample = cls.add_sample(store=base_store, internal_id=sample_id)
         cls.add_relationship(store=base_store, sample=sample, case=case)
         return case
+
+    @classmethod
+    def add_sample_lane_sequencing_metrics(
+        cls,
+        store: Store,
+        sample_internal_id: str,
+        flow_cell_name: str,
+        customer_id: str = "some_customer_007",
+        **kwargs,
+    ):
+        """Helper function to add a sample lane sequencing metrics associated with a sample with the given ids."""
+        sample: Sample = store.get_sample_by_internal_id(internal_id=sample_internal_id)
+        flow_cell: Flowcell = store.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
+
+        if not sample:
+            sample = cls.add_sample(
+                store=store, customer_id=customer_id, internal_id=sample_internal_id
+            )
+        if not flow_cell:
+            flow_cell = cls.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
+
+        metrics: SampleLaneSequencingMetrics = store.add_sample_lane_sequencing_metrics(
+            sample_internal_id=sample.internal_id,
+            flow_cell_name=flow_cell.name,
+            **kwargs,
+        )
+        metrics.sample = sample
+        metrics.flowcell = flow_cell
+        store.session.add(metrics)
+        store.session.commit()
+        return metrics
+
+    @classmethod
+    def add_multiple_sample_lane_sequencing_metrics_entries(cls, metrics_data: list, store) -> None:
+        """Add multiple sample lane sequencing metrics to a store."""
+
+        for (
+            sample_internal_id,
+            flow_cell_name_,
+            flow_cell_lane_number,
+            sample_total_reads_in_lane,
+            sample_base_percentage_passing_q30,
+            sample_base_mean_quality_score,
+        ) in metrics_data:
+            cls.add_sample_lane_sequencing_metrics(
+                store=store,
+                sample_internal_id=sample_internal_id,
+                flow_cell_name=flow_cell_name_,
+                flow_cell_lane_number=flow_cell_lane_number,
+                sample_total_reads_in_lane=sample_total_reads_in_lane,
+                sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
+                sample_base_mean_quality_score=sample_base_mean_quality_score,
+            )

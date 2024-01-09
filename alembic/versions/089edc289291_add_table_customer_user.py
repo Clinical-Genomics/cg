@@ -5,12 +5,13 @@ Revises: e9df15a35de4
 Create Date: 2021-03-23 09:07:55.647204
 
 """
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
+
+from alembic import op
 
 revision = "089edc289291"
 down_revision = "e9df15a35de4"

@@ -1,96 +1,122 @@
-from typing import List
+from pathlib import Path
 
-import pydantic
 import pytest
+from pydantic.v1 import ValidationError
 
-from cg.models.rnafusion.rnafusion_sample import RnafusionSample
+from cg.exc import SampleSheetError
+from cg.models.rnafusion.rnafusion import RnafusionSampleSheetEntry
 
 
 def test_instantiate_rnafusion_sample(
-    rnafusion_sample: str,
-    rnafusion_fastq_r1: List[str],
-    rnafusion_fastq_r2_same_length: List[str],
-    rnafusion_strandedness_acceptable: str,
+    sample_name: str,
+    fastq_forward_read_path: Path,
+    fastq_reverse_read_path: Path,
+    strandedness: str,
 ):
     """
-    Tests rnafusion sample.
+    Tests Rnafusion sample with correct values.
     """
     # GIVEN a sample with fastq files and strandedness
 
-    # WHEN instantiating a MipAnalysis object
-    rnafusion_sample_object = RnafusionSample(
-        sample=rnafusion_sample,
-        fastq_r1=rnafusion_fastq_r1,
-        fastq_r2=rnafusion_fastq_r2_same_length,
-        strandedness=rnafusion_strandedness_acceptable,
+    # WHEN instantiating a rnafusion sample object
+    rnafusion_sample_object = RnafusionSampleSheetEntry(
+        name=sample_name,
+        fastq_forward_read_paths=[fastq_forward_read_path, fastq_forward_read_path],
+        fastq_reverse_read_paths=[fastq_reverse_read_path, fastq_reverse_read_path],
+        strandedness=strandedness,
     )
 
     # THEN assert that it was successfully created
-    assert isinstance(rnafusion_sample_object, RnafusionSample)
+    assert isinstance(rnafusion_sample_object, RnafusionSampleSheetEntry)
 
 
-def test_instantiate_rnafusion_sample_fastq_r1_r2_different_length(
-    rnafusion_sample: str,
-    rnafusion_fastq_r1: List[str],
-    rnafusion_fastq_r2_not_same_length: List[str],
-    rnafusion_strandedness_acceptable: str,
+def test_incomplete_fastq_file_pairs(
+    sample_name: str,
+    fastq_forward_read_path: Path,
+    fastq_reverse_read_path: Path,
+    strandedness: str,
 ):
     """
-    Tests rnafusion sample with different fastq_r1 and fastq_r2 length.
+    Tests Rnafusion sample with lists of different length for fastq forward and reverse reads.
     """
+    # GIVEN a sample with fastq files of different lengths
 
-    # GIVEN a sample with fastq files and strandedness
+    # WHEN instantiating a sample object
 
-    # WHEN instantiating a sample object THEN throws a ValidationError
-
-    with pytest.raises(pydantic.ValidationError):
-        RnafusionSample(
-            sample=rnafusion_sample,
-            fastq_r1=rnafusion_fastq_r1,
-            fastq_r2=rnafusion_fastq_r2_not_same_length,
-            strandedness=rnafusion_strandedness_acceptable,
+    # THEN throws an error
+    with pytest.raises(SampleSheetError) as error:
+        RnafusionSampleSheetEntry(
+            name=sample_name,
+            fastq_forward_read_paths=[fastq_forward_read_path, fastq_forward_read_path],
+            fastq_reverse_read_paths=[fastq_reverse_read_path],
+            strandedness=strandedness,
         )
+    assert "Fastq file length for forward and reverse do not match" in str(error.value)
 
 
-def test_instantiate_rnafusion_sample_fastq_r2_empty(
-    rnafusion_sample: str,
-    rnafusion_fastq_r1: List[str],
-    rnafusion_fastq_r2_empty: list,
-    rnafusion_strandedness_acceptable: str,
+def test_fastq_empty_list(
+    sample_name: str,
+    fastq_forward_read_path: Path,
+    fastq_reverse_read_path: Path,
+    strandedness: str,
 ):
     """
-    Tests rnafusion sample with fastq_r2 empty (single end).
+    Tests Rnafusion sample with a empty list for fastq reverse reads (single end).
     """
 
     # GIVEN a sample with fastq files and strandedness
 
     # WHEN instantiating a sample object
-    rnafusion_sample_object: RnafusionSample = RnafusionSample(
-        sample=rnafusion_sample,
-        fastq_r1=rnafusion_fastq_r1,
-        fastq_r2=rnafusion_fastq_r2_empty,
-        strandedness=rnafusion_strandedness_acceptable,
-    )
 
-    # THEN assert that it was successfully created
-    assert isinstance(rnafusion_sample_object, RnafusionSample)
+    # THEN throws an error
+    with pytest.raises(ValidationError) as error:
+        RnafusionSampleSheetEntry(
+            name=sample_name,
+            fastq_forward_read_paths=[fastq_forward_read_path, fastq_forward_read_path],
+            fastq_reverse_read_paths=[],
+            strandedness=strandedness,
+        )
+    assert "ensure this value has at least 1 items" in str(error.value)
 
 
-def test_instantiate_rnafusion_strandedness_not_acceptable(
-    rnafusion_sample: str,
-    rnafusion_fastq_r1: List[str],
-    rnafusion_fastq_r2_same_length: List[str],
-    rnafusion_strandedness_not_acceptable: str,
+def test_strandedness_not_permitted(
+    sample_name: str,
+    fastq_forward_read_path: Path,
+    fastq_reverse_read_path: Path,
+    strandedness_not_permitted: str,
 ):
     """
-    Tests rnafusion sample with unacceptable strandedness.
+    Tests Rnafusion sample with not permitted strandedness.
     """
-    # WHEN instantiating a sample object THEN throws a ValidationError
 
-    with pytest.raises(pydantic.ValidationError):
-        RnafusionSample(
-            sample=rnafusion_sample,
-            fastq_r1=rnafusion_fastq_r1,
-            fastq_r2=rnafusion_fastq_r2_same_length,
-            strandedness=rnafusion_strandedness_not_acceptable,
+    # WHEN instantiating a sample object THEN throws a ValidationError
+    with pytest.raises(ValidationError) as error:
+        RnafusionSampleSheetEntry(
+            name=sample_name,
+            fastq_forward_read_paths=[fastq_forward_read_path],
+            fastq_reverse_read_paths=[fastq_reverse_read_path],
+            strandedness=strandedness_not_permitted,
         )
+    assert "value is not a valid enumeration member" in str(error.value)
+
+
+def test_non_existing_fastq_file(
+    sample_name: str,
+    fastq_forward_read_path: Path,
+    non_existing_file_path: Path,
+    strandedness: str,
+):
+    """
+    Tests Rnafusion sample with non existing files
+    """
+    # GIVEN a sample with a non existing file
+
+    # WHEN instantiating a sample object THEN throws an error
+    with pytest.raises(SampleSheetError) as error:
+        RnafusionSampleSheetEntry(
+            name=sample_name,
+            fastq_forward_read_paths=[fastq_forward_read_path],
+            fastq_reverse_read_paths=[non_existing_file_path],
+            strandedness=strandedness,
+        )
+    assert "Fastq file does not exist" in str(error.value)

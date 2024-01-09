@@ -1,13 +1,13 @@
 import logging
 from datetime import datetime
-from typing import Iterator, List, Optional
 from pathlib import Path
+from typing import Iterator
 
-from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import File, Version
 
-from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.constants import Pipeline
+from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.store import Store
 from cg.store.models import Analysis
 
@@ -19,7 +19,7 @@ class CleanAPI:
         self.status_db = status_db
         self.housekeeper_api = housekeeper_api
 
-    def get_bundle_files(self, before: datetime, pipeline: Pipeline) -> Iterator[List[File]]:
+    def get_bundle_files(self, before: datetime, pipeline: Pipeline) -> Iterator[list[File]]:
         """Get any bundle files for a specific version"""
 
         analysis: Analysis
@@ -30,9 +30,9 @@ class CleanAPI:
         for analysis in self.status_db.get_analyses_for_pipeline_started_at_before(
             pipeline=pipeline, started_at_before=before
         ):
-            bundle_name = analysis.family.internal_id
+            bundle_name = analysis.case.internal_id
 
-            hk_bundle_version: Optional[Version] = self.housekeeper_api.version(
+            hk_bundle_version: Version | None = self.housekeeper_api.version(
                 bundle=bundle_name, date=analysis.started_at
             )
             if not hk_bundle_version:
@@ -55,25 +55,23 @@ class CleanAPI:
             ).all()
 
     @staticmethod
-    def has_protected_tags(file: File, protected_tags_lists: List[List[str]]) -> bool:
+    def has_protected_tags(file: File, protected_tags_lists: list[list[str]]) -> bool:
         """Check if a file has any protected tags"""
 
         LOG.info(f"File {file.full_path} has the tags {file.tags}")
-        file_tags: List[str] = HousekeeperAPI.get_tag_names_from_file(file)
+        file_tags: list[str] = HousekeeperAPI.get_tag_names_from_file(file)
 
         _has_protected_tags: bool = False
         for protected_tags in protected_tags_lists:
             if set(protected_tags).issubset(set(file_tags)):
                 LOG.debug(
-                    "File %s has the protected tag(s) %s, skipping.",
-                    file.full_path,
-                    protected_tags,
+                    f"File {file.full_path} has the protected tag(s) {protected_tags}, skipping."
                 )
                 _has_protected_tags = True
                 break
 
         if not _has_protected_tags:
-            LOG.info("File %s has no protected tags.", file.full_path)
+            LOG.info(f"File {file.full_path} has no protected tags.")
         return _has_protected_tags
 
     def get_unprotected_existing_bundle_files(self, before: datetime) -> Iterator[File]:
@@ -83,10 +81,10 @@ class CleanAPI:
         for pipeline in Pipeline:
             protected_tags_lists = WORKFLOW_PROTECTED_TAGS.get(pipeline)
             if not protected_tags_lists:
-                LOG.debug("No protected tags defined for %s, skipping", pipeline)
+                LOG.debug(f"No protected tags defined for {pipeline}, skipping")
                 continue
 
-            hk_files: List[File]
+            hk_files: list[File]
             for hk_files in self.get_bundle_files(
                 before=before,
                 pipeline=pipeline,
@@ -98,7 +96,7 @@ class CleanAPI:
 
                     file_path: Path = Path(hk_file.full_path)
                     if not file_path.exists():
-                        LOG.info("File %s not on disk.", file_path)
+                        LOG.info(f"File {file_path} not on disk.")
                         continue
-                    LOG.info("File %s found on disk.", file_path)
+                    LOG.info(f"File {file_path} found on disk.")
                     yield hk_file

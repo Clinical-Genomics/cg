@@ -2,10 +2,10 @@
 from pathlib import Path
 from typing import Generator
 
-from housekeeper.store.models import Version
+from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import HK_FASTQ_TAGS
+from cg.constants import HK_FASTQ_TAGS, SequencingFileTag
 from cg.meta.compress import CompressAPI, files
 from cg.store import Store
 from cg.store.models import Sample
@@ -67,8 +67,8 @@ def test_add_fastq_housekeeper_when_no_fastq_in_hk(
     # GIVEN real Housekeeper API populated with a bundle with SPRING metadata
     hk_bundle: dict = decompress_hk_spring_bundle
     sample_id: str = hk_bundle["name"]
-    helpers.ensure_hk_bundle(real_housekeeper_api, hk_bundle)
-    sample: Sample = helpers.add_sample(store, internal_id=sample_id)
+    helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=hk_bundle)
+    sample: Sample = helpers.add_sample(store=store, internal_id=sample_id)
     compress_api.hk_api = real_housekeeper_api
 
     # GIVEN that there are no FASTQ files in HK
@@ -81,9 +81,10 @@ def test_add_fastq_housekeeper_when_no_fastq_in_hk(
 
     # WHEN adding the files to housekeeper
     compress_api.add_fastq_hk(
-        sample_obj=sample,
+        sample_internal_id=sample.internal_id,
         fastq_first=compression_files.fastq_first_file,
         fastq_second=compression_files.fastq_second_file,
+        fastq_tags=compress_api.get_fastq_tag_names(compression_files.spring_path),
     )
 
     # THEN assert that the FASTQ files where added to HK
@@ -137,3 +138,33 @@ def test_add_decompressed_fastq(
     assert files.is_file_in_version(
         version_obj=version, path=Path(hk_bundle_sample_path, fastq_second.name)
     )
+
+
+def test_get_fastq_tag_names(
+    compress_api: MockCompressAPI, helpers: StoreHelpers, hk_sample_bundle: dict
+):
+    """Test that the correct tags for a fastq file are returned given a spring file."""
+
+    # GIVEN a spring file
+    helpers.ensure_hk_bundle(store=compress_api.hk_api, bundle_data=hk_sample_bundle)
+    spring_file: File = compress_api.hk_api.files(tags={SequencingFileTag.SPRING}).first()
+    assert spring_file
+
+    # GIVEN that the spring_file is tagged with more than 'spring'
+    assert len(spring_file.tags) > 1 and SequencingFileTag.SPRING in [
+        tag.name for tag in spring_file.tags
+    ]
+
+    # WHEN getting fastq tags from its path
+    fastq_tags: list[str] = compress_api.get_fastq_tag_names(Path(spring_file.path))
+
+    # THEN the fastq tags should contain all non-spring tags of the spring file
+    for tag_name in [tag.name for tag in spring_file.tags]:
+        if tag_name != SequencingFileTag.SPRING:
+            assert tag_name in fastq_tags
+
+    # THEN the fastq tags should contain the fastq tag
+    assert SequencingFileTag.FASTQ in fastq_tags
+
+    # THEN the fastq tags should not contain the spring tag
+    assert SequencingFileTag.SPRING not in fastq_tags

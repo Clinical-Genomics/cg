@@ -1,8 +1,8 @@
 import pytest
 
 from cg.apps.scout.scout_export import ScoutExportCase
-from cg.constants.subject import PlinkPhenotypeStatus, RelationshipStatus, PlinkGender
 from cg.constants.pedigree import Pedigree
+from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex, RelationshipStatus
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 
 
@@ -49,7 +49,7 @@ class MockScoutApi:
 
 
 @pytest.fixture(name="scout_export_case_data")
-def fixture_scout_export_case_data(customer_id: str) -> dict:
+def scout_export_case_data(customer_id: str) -> dict:
     """Return information in the form of a scout export case"""
     case_data = {
         "_id": "internal_id",
@@ -60,7 +60,7 @@ def fixture_scout_export_case_data(customer_id: str) -> dict:
             {
                 "individual_id": "individual_1",
                 "bam_file": "",
-                Pedigree.SEX: PlinkGender.MALE,
+                Pedigree.SEX: PlinkSex.MALE,
                 Pedigree.FATHER: "individual_2",
                 Pedigree.MOTHER: "individual_3",
                 Pedigree.PHENOTYPE: PlinkPhenotypeStatus.AFFECTED,
@@ -68,7 +68,7 @@ def fixture_scout_export_case_data(customer_id: str) -> dict:
             {
                 "individual_id": "individual_2",
                 "bam_file": "",
-                Pedigree.SEX: PlinkGender.MALE,
+                Pedigree.SEX: PlinkSex.MALE,
                 Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
                 Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,
                 Pedigree.PHENOTYPE: PlinkPhenotypeStatus.UNAFFECTED,
@@ -76,7 +76,7 @@ def fixture_scout_export_case_data(customer_id: str) -> dict:
             {
                 "individual_id": "individual_3",
                 "bam_file": "",
-                Pedigree.SEX: PlinkGender.FEMALE,
+                Pedigree.SEX: PlinkSex.FEMALE,
                 Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
                 Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,
                 Pedigree.PHENOTYPE: PlinkPhenotypeStatus.UNAFFECTED,
@@ -87,26 +87,26 @@ def fixture_scout_export_case_data(customer_id: str) -> dict:
 
 
 @pytest.fixture(name="scout_export_case")
-def fixture_scout_export_case(scout_export_case_data: dict) -> ScoutExportCase:
+def scout_export_case(scout_export_case_data: dict) -> ScoutExportCase:
     """Returns a export case object"""
 
-    return ScoutExportCase(**scout_export_case_data)
+    return ScoutExportCase.model_validate(scout_export_case_data)
 
 
 @pytest.fixture(name="scout_export_case_missing_bam")
-def fixture_scout_export_case_missing_bam(scout_export_case_data: dict) -> ScoutExportCase:
+def scout_export_case_missing_bam(scout_export_case_data: dict) -> ScoutExportCase:
     """Returns a export case object where one individual is missing bam file"""
     scout_export_case_data["individuals"][1].pop("bam_file")
 
-    return ScoutExportCase(**scout_export_case_data)
+    return ScoutExportCase.model_validate(scout_export_case_data)
 
 
 @pytest.fixture(name="scout_export_case_no_causatives")
-def fixture_scout_export_case_no_causatives(scout_export_case_data: dict) -> ScoutExportCase:
+def scout_export_case_no_causatives(scout_export_case_data: dict) -> ScoutExportCase:
     """Returns a export case object without causatives"""
     scout_export_case_data.pop("causatives")
 
-    return ScoutExportCase(**scout_export_case_data)
+    return ScoutExportCase.model_validate(scout_export_case_data)
 
 
 @pytest.fixture(scope="function")

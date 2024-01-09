@@ -1,13 +1,22 @@
 """Fixtures for store tests."""
 import datetime as dt
 import enum
-from typing import Generator, List
+from typing import Generator
 
 import pytest
+
 from cg.constants import Pipeline
-from cg.constants.subject import Gender, PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.store import Store
-from cg.store.models import Analysis, Application, Customer, Family, Organism, Sample
+from cg.store.models import (
+    Analysis,
+    Application,
+    Case,
+    CaseSample,
+    Customer,
+    Organism,
+    Sample,
+)
 from tests.store_helpers import StoreHelpers
 
 
@@ -51,7 +60,7 @@ class StoreConstants(enum.Enum):
     INVOICE_ID_INVOICE_WITHOUT_ATTRIBUTES: int = 2
 
     @staticmethod
-    def generate_year_interval(n_entries: int, old_timestamp: dt.datetime) -> List[int]:
+    def generate_year_interval(n_entries: int, old_timestamp: dt.datetime) -> list[int]:
         """Create a list of approximately uniformly distributed year numbers from 1 to present."""
         start: int = old_timestamp.year
         stop: int = dt.date.today().year
@@ -64,7 +73,7 @@ class StoreConstants(enum.Enum):
 
 
 @pytest.fixture(name="microbial_submitted_order")
-def fixture_microbial_submitted_order() -> dict:
+def microbial_submitted_order() -> dict:
     """Build an example order as it looks after submission to."""
 
     def _get_item(name: str, internal_id: str, well_position: str, organism: str) -> dict:
@@ -124,7 +133,7 @@ def fixture_microbial_submitted_order() -> dict:
 
 
 @pytest.fixture(name="microbial_store")
-def fixture_microbial_store(
+def microbial_store(
     base_store: Store, microbial_submitted_order: dict
 ) -> Generator[Store, None, None]:
     """Set up a microbial store instance."""
@@ -142,7 +151,7 @@ def fixture_microbial_store(
         base_store.session.add(organism)
         sample = base_store.add_sample(
             name=sample_data["name"],
-            sex=Gender.UNKNOWN,
+            sex=Sex.UNKNOWN,
             comment=sample_data["comment"],
             priority=sample_data["priority"],
             reads=sample_data["reads"],
@@ -158,37 +167,37 @@ def fixture_microbial_store(
 
 
 @pytest.fixture(name="case")
-def fixture_case_obj(analysis_store: Store) -> Family:
+def case_obj(analysis_store: Store) -> Case:
     """Return a case models object."""
     return analysis_store.get_cases()[0]
 
 
 @pytest.fixture(name="sample")
-def fixture_sample_obj(analysis_store) -> Sample:
+def sample_obj(analysis_store) -> Sample:
     """Return a sample models object."""
     return analysis_store._get_query(table=Sample).first()
 
 
 @pytest.fixture(name="sequencer_name")
-def fixture_sequencer_name() -> str:
+def sequencer_name() -> str:
     """Return sequencer name."""
     return "A00689"
 
 
 @pytest.fixture(name="invalid_application_id")
-def fixture_invalid_application_id() -> int:
+def invalid_application_id() -> int:
     """Return an invalid application id."""
     return -1
 
 
 @pytest.fixture(name="invalid_application_tag")
-def fixture_invalid_application_tag() -> str:
+def invalid_application_tag() -> str:
     """Return an invalid application tag."""
     return "invalid-tag"
 
 
 @pytest.fixture(name="store_with_a_sample_that_has_many_attributes_and_one_without")
-def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
+def store_with_a_sample_that_has_many_attributes_and_one_without(
     store: Store,
     helpers: StoreHelpers,
     timestamp_now=dt.datetime.now(),
@@ -196,32 +205,32 @@ def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
     """Return a store with a sample that has many attributes and one without."""
     helpers.add_sample(
         store=store,
-        internal_id=StoreConstants.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        name=StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+        control=StoreConstants.CONTROL_SAMPLE_WITH_ATTRIBUTES.value,
+        customer_id=StoreConstants.CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES.value,
         is_external=True,
         is_tumour=True,
+        internal_id=StoreConstants.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        reads=StoreConstants.READS_SAMPLE_WITH_ATTRIBUTES.value,
+        name=StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+        original_ticket=StoreConstants.ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES.value,
         ordered_at=timestamp_now,
         created_at=timestamp_now,
         sequence_start=timestamp_now,
         delivered_at=timestamp_now,
         received_at=timestamp_now,
-        sequenced_at=timestamp_now,
+        last_sequenced_at=timestamp_now,
         prepared_at=timestamp_now,
         invoiced_at=timestamp_now,
         application_version_id=StoreConstants.APPLICATION_VERSION_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        customer_id=StoreConstants.CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES.value,
         subject_id=StoreConstants.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
         invoice_id=StoreConstants.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
         organism_id=StoreConstants.ORGANISM_ID_SAMPLE_WITH_ATTRIBUTES.value,
         loqusdb_id=StoreConstants.LOCUSDB_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        reads=StoreConstants.READS_SAMPLE_WITH_ATTRIBUTES.value,
         downsampled_to=StoreConstants.DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES.value,
         no_invoice=False,
-        original_ticket=StoreConstants.ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES.value,
         age_at_sampling=StoreConstants.AGE_AT_SAMPLING_SAMPLE_WITH_ATTRIBUTES.value,
         capture_kit=StoreConstants.CAPTURE_KIT_SAMPLE_WITH_ATTRIBUTES.value,
         comment=StoreConstants.COMMENT_SAMPLE_WITH_ATTRIBUTES.value,
-        control=StoreConstants.CONTROL_SAMPLE_WITH_ATTRIBUTES.value,
         from_sample=StoreConstants.FROM_SAMPLE_SAMPLE_WITH_ATTRIBUTES.value,
         order=StoreConstants.ORDER_SAMPLE_WITH_ATTRIBUTES.value,
         priority=StoreConstants.PRIORITY_SAMPLE_WITH_ATTRIBUTES.value,
@@ -231,13 +240,13 @@ def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
 
     helpers.add_sample(
         store=store,
-        internal_id=StoreConstants.INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES.value,
-        name=StoreConstants.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
         is_external=False,
         is_tumour=False,
+        internal_id=StoreConstants.INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES.value,
+        name=StoreConstants.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
         delivered_at=None,
         received_at=None,
-        sequenced_at=None,
+        last_sequenced_at=None,
         prepared_at=None,
         subject_id=None,
         invoice_id=None,
@@ -249,7 +258,7 @@ def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
 
 
 @pytest.fixture(name="store_with_a_pool_with_and_without_attributes")
-def fixture_store_with_a_pool_with_and_without_attributes(
+def store_with_a_pool_with_and_without_attributes(
     store: Store,
     helpers: StoreHelpers,
     timestamp_now=dt.datetime.now(),
@@ -278,7 +287,7 @@ def fixture_store_with_a_pool_with_and_without_attributes(
 
 
 @pytest.fixture(name="store_with_an_application_with_and_without_attributes")
-def fixture_store_with_an_application_with_and_without_attributes(
+def store_with_an_application_with_and_without_attributes(
     store: Store,
     helpers: StoreHelpers,
     timestamp_now=dt.datetime.now(),
@@ -303,28 +312,51 @@ def fixture_store_with_an_application_with_and_without_attributes(
     return store
 
 
+@pytest.fixture(name="store_with_application_limitations")
+def store_with_application_limitations(
+    store_with_an_application_with_and_without_attributes: Store, helpers: StoreHelpers
+) -> Store:
+    """Return a store with different application limitations."""
+    helpers.ensure_application_limitation(
+        store=store_with_an_application_with_and_without_attributes,
+        application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
+            StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value
+        ),
+        pipeline=Pipeline.MIP_DNA,
+    )
+    for pipeline in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]:
+        helpers.ensure_application_limitation(
+            store=store_with_an_application_with_and_without_attributes,
+            application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
+                StoreConstants.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value
+            ),
+            pipeline=pipeline,
+        )
+    return store_with_an_application_with_and_without_attributes
+
+
 @pytest.fixture(name="applications_store")
-def fixture_applications_store(store: Store, helpers: StoreHelpers) -> Store:
+def applications_store(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store populated with applications from excel file"""
-    app_tags: List[str] = ["PGOTTTR020", "PGOTTTR030", "PGOTTTR040"]
+    app_tags: list[str] = ["PGOTTTR020", "PGOTTTR030", "PGOTTTR040"]
     for app_tag in app_tags:
         helpers.ensure_application(store=store, tag=app_tag)
     return store
 
 
 @pytest.fixture(name="store_with_different_application_versions")
-def fixture_store_with_different_application_versions(
+def store_with_different_application_versions(
     applications_store: Store,
     helpers: StoreHelpers,
     old_timestamp: dt.datetime,
 ) -> Store:
     """Returns a store with application versions with different applications, dates and versions."""
-    applications: List[Application] = applications_store.get_applications()
-    years: List[int] = StoreConstants.generate_year_interval(
+    applications: list[Application] = applications_store.get_applications()
+    years: list[int] = StoreConstants.generate_year_interval(
         n_entries=len(applications),
         old_timestamp=old_timestamp,
     )
-    versions: List[int] = list(range(1, len(applications) + 1))
+    versions: list[int] = list(range(1, len(applications) + 1))
 
     for application, year, version in zip(applications, years, versions):
         helpers.ensure_application_version(
@@ -337,7 +369,7 @@ def fixture_store_with_different_application_versions(
 
 
 @pytest.fixture(name="store_with_an_invoice_with_and_without_attributes")
-def fixture_store_with_an_invoice_with_and_without_attributes(
+def store_with_an_invoice_with_and_without_attributes(
     store: Store,
     helpers: StoreHelpers,
     timestamp_now=dt.datetime.now(),
@@ -358,10 +390,10 @@ def fixture_store_with_an_invoice_with_and_without_attributes(
 
 
 @pytest.fixture(name="store_with_older_and_newer_analyses")
-def fixture_store_with_older_and_newer_analyses(
+def store_with_older_and_newer_analyses(
     base_store: Store,
     helpers: StoreHelpers,
-    case: Family,
+    case: Case,
     timestamp_now: dt.datetime,
     timestamp_yesterday: dt.datetime,
     old_timestamp: dt.datetime,
@@ -392,7 +424,7 @@ def fixture_store_with_older_and_newer_analyses(
 
 
 @pytest.fixture(name="store_with_analyses_for_cases")
-def fixture_store_with_analyses_for_cases(
+def store_with_analyses_for_cases(
     analysis_store: Store,
     helpers: StoreHelpers,
     timestamp_now: dt.datetime,
@@ -421,7 +453,8 @@ def fixture_store_with_analyses_for_cases(
             uploaded_to_vogue_at=timestamp_now,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-        analysis_store.relate_sample(
-            family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
+        link: CaseSample = analysis_store.relate_sample(
+            case=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
+        analysis_store.session.add(link)
     return analysis_store

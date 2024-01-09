@@ -1,6 +1,4 @@
 from pathlib import Path
-from typing import Optional
-
 
 from cg.models.cg_config import EmailBaseSettings
 
@@ -10,4 +8,4 @@ class EmailInfo(EmailBaseSettings):
     sender_email: str = "hiseq.clinical@hasta.scilifelab.se"
     subject: str
     message: str
-    file: Optional[Path]
+    file: Path | None

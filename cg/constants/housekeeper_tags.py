@@ -1,7 +1,9 @@
 """File tags for files in Housekeeper."""
-from typing import List
 
-from cgmodels.cg.constants import Pipeline, StrEnum
+
+from enum import StrEnum
+
+from cg.constants.constants import Pipeline
 
 
 class AlignmentFileTag(StrEnum):
@@ -14,8 +16,9 @@ class AlignmentFileTag(StrEnum):
     CRAM_CRAI: str = "crai"
     CRAM_INDEX: str = "cram-index"
 
-
-ALIGNMENT_FILE_TAGS: List[str] = [tag.value for tag in AlignmentFileTag]
+    @classmethod
+    def file_tags(cls) -> list[str]:
+        return list(map(lambda tag: tag.value, cls))
 
 
 class ArchiveTag(StrEnum):
@@ -34,12 +37,12 @@ class ScoutTag(StrEnum):
 class SequencingFileTag(StrEnum):
     """Tags for sequencing files."""
 
-    ARCHIVED_SAMPLE_SHEET: str = "archived_sample_sheet"
     CGSTATS_LOG: str = "log"
     FASTQ: str = "fastq"
     SAMPLE_SHEET: str = "samplesheet"
     SPRING: str = "spring"
     SPRING_METADATA: str = "spring-metadata"
+    DEMUX_LOG: str = "log"
 
 
 HK_MULTIQC_HTML_TAG = ["multiqc-html"]
@@ -49,10 +52,29 @@ HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]
 HK_DELIVERY_REPORT_TAG = "delivery-report"
 
 
+class AnalysisTag(StrEnum):
+    """Tags for analysis files."""
+
+    ARRIBA: str = "arriba"
+    ARRIBA_VISUALIZATION: str = "arriba-visualisation"
+    FUSION: str = "fusion"
+    FUSIONCATCHER: str = "fusioncatcher"
+    FUSIONCATCHER_SUMMARY: str = "fusioncatcher-summary"
+    FUSIONINSPECTOR: str = "fusioninspector"
+    FUSIONINSPECTOR_HTML: str = "fusioninspector-html"
+    FUSIONREPORT: str = "fusionreport"
+    GENE_COUNTS: str = "gene-counts"
+    MULTIQC_HTML: str = "multiqc-html"
+    RESEARCH: str = "research"
+    RNA: str = "rna"
+    STARFUSION: str = "star-fusion"
+    VCF_FUSION: str = "vcf-fusion"
+
+
 class HkMipAnalysisTag:
-    CONFIG: List[str] = ["mip-config"]
-    QC_METRICS: List[str] = ["qc-metrics", "deliverable"]
-    SAMPLE_INFO: List[str] = ["sample-info"]
+    CONFIG: list[str] = ["mip-config"]
+    QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
+    SAMPLE_INFO: list[str] = ["sample-info"]
 
 
 class BalsamicAnalysisTag(StrEnum):
@@ -61,14 +83,14 @@ class BalsamicAnalysisTag(StrEnum):
 
 
 class GensAnalysisTag:
-    COVERAGE: List[str] = ["gens", "coverage", "bed"]
-    FRACSNP: List[str] = ["gens", "fracsnp", "bed"]
+    COVERAGE: list[str] = ["gens", "coverage", "bed"]
+    FRACSNP: list[str] = ["gens", "fracsnp", "bed"]
 
 
 class BalsamicProtectedTags:
     """Balsamic pipeline protected tags by type."""
 
-    QC: List[List[str]] = [
+    QC: list[list[str]] = [
         ["balsamic-config"],
         ["balsamic-dag"],
         ["balsamic-report"],
@@ -77,7 +99,7 @@ class BalsamicProtectedTags:
         ["multiqc-json"],
         ["qc-metrics"],
     ]
-    VARIANT_CALLERS: List[List[str]] = [
+    VARIANT_CALLERS: list[list[str]] = [
         ["ascatngs"],
         ["cnv-report"],
         ["cnvkit"],
@@ -171,5 +193,18 @@ WORKFLOW_PROTECTED_TAGS = {
         ["multiqc-json"],
         ["gisaid-log"],
         ["gisaid-csv"],
+    ],
+    str(Pipeline.RNAFUSION): [
+        [AnalysisTag.FUSION, AnalysisTag.ARRIBA],
+        [AnalysisTag.FUSION, AnalysisTag.STARFUSION],
+        [AnalysisTag.FUSION, AnalysisTag.FUSIONCATCHER],
+        [AnalysisTag.FUSIONINSPECTOR],
+        [AnalysisTag.FUSIONREPORT, AnalysisTag.RESEARCH],
+        [AnalysisTag.FUSIONINSPECTOR_HTML, AnalysisTag.RESEARCH],
+        [AnalysisTag.ARRIBA_VISUALIZATION, AnalysisTag.RESEARCH],
+        [AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA],
+        [HK_DELIVERY_REPORT_TAG],
+        [AnalysisTag.VCF_FUSION],
+        [AnalysisTag.GENE_COUNTS],
     ],
 }

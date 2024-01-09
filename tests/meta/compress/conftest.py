@@ -1,10 +1,9 @@
 """Fixtures for Compress API tests."""
 import copy
-from typing import List, Dict, Any, Generator
-
 import os
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Generator
 
 import pytest
 
@@ -47,7 +46,7 @@ class MockCompressionData:
         spring_path: Path,
         updated: bool = False,
         date: datetime = None,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """Return SPRING metadata."""
         metadata = [
             {
@@ -73,7 +72,7 @@ class MockCompressionData:
     def spring_metadata_file(self) -> Path:
         """Return the path to an existing SPRING metadata file."""
 
-        spring_metadata: List[dict] = MockCompressionData._spring_metadata(
+        spring_metadata: list[dict] = MockCompressionData._spring_metadata(
             self.fastq_first, self.fastq_second, self.spring_path
         )
         WriteFile.write_file_from_content(
@@ -86,7 +85,7 @@ class MockCompressionData:
     @property
     def updated_spring_metadata_file(self) -> Path:
         """Return the path to an existing updated SPRING metadata file."""
-        spring_metadata: List[dict] = MockCompressionData._spring_metadata(
+        spring_metadata: list[dict] = MockCompressionData._spring_metadata(
             self.fastq_first, self.fastq_second, self.spring_path, True
         )
         WriteFile.write_file_from_content(
@@ -120,7 +119,7 @@ class MockCompressionData:
 
 
 @pytest.fixture(name="compression_files")
-def fixture_compression_files(compression_object: MockCompressionData) -> MockCompressionData:
+def compression_files(compression_object: MockCompressionData) -> MockCompressionData:
     """Return a CompressionData class with files."""
     return MockCompressionData(
         spring_path=compression_object.spring_path,
@@ -132,15 +131,15 @@ def fixture_compression_files(compression_object: MockCompressionData) -> MockCo
 
 
 @pytest.fixture(name="real_crunchy_api")
-def fixture_real_crunchy_api(
-    crunchy_config: Dict[str, Dict[str, Any]]
+def real_crunchy_api(
+    crunchy_config: dict[str, dict[str, Any]]
 ) -> Generator[CrunchyAPI, None, None]:
     """Crunchy API fixture."""
     yield CrunchyAPI(crunchy_config)
 
 
-@pytest.fixture(name="compress_api")
-def fixture_compress_api(
+@pytest.fixture()
+def compress_api(
     demultiplexed_runs: Path,
     real_crunchy_api: CrunchyAPI,
     housekeeper_api: HousekeeperAPI,
@@ -153,7 +152,7 @@ def fixture_compress_api(
 
 
 @pytest.fixture(name="populated_compress_fastq_api")
-def fixture_populated_compress_fastq_api(
+def populated_compress_fastq_api(
     compress_api: MockCompressAPI, compress_hk_fastq_bundle: dict, helpers: StoreHelpers
 ) -> MockCompressAPI:
     """Return populated Compress API."""
@@ -162,7 +161,7 @@ def fixture_populated_compress_fastq_api(
 
 
 @pytest.fixture(name="populated_decompress_spring_api")
-def fixture_populated_decompress_spring_api(
+def populated_decompress_spring_api(
     compress_api: MockCompressAPI, decompress_hk_spring_bundle: dict, helpers: StoreHelpers
 ) -> MockCompressAPI:
     """Return populated Compress API with a Housekeeper bundle containing SPRING files."""
@@ -171,32 +170,32 @@ def fixture_populated_decompress_spring_api(
 
 
 @pytest.fixture(name="sample")
-def fixture_sample():
+def sample():
     """Return the sample id for first sample."""
     return "sample_1"
 
 
 @pytest.fixture(name="spring_path")
-def fixture_spring_path(compression_object: MockCompressionData) -> Path:
+def spring_path(compression_object: MockCompressionData) -> Path:
     """Return the path to a non-existing spring file."""
     return compression_object.spring_path
 
 
 @pytest.fixture(name="spring_metadata_path")
-def fixture_spring_metadata_path(compression_object: MockCompressionData) -> Path:
+def spring_metadata_path(compression_object: MockCompressionData) -> Path:
     """Return the path to a non-existing spring metadata file."""
     return compression_object.spring_metadata_path
 
 
 @pytest.fixture(name="fastq_flag_file")
-def fixture_fastq_flag_file(spring_metadata_path: Path) -> Path:
+def fastq_flag_file(spring_metadata_path: Path) -> Path:
     """Return the path to an existing fastq flag file."""
     spring_metadata_path.touch()
     return spring_metadata_path
 
 
 @pytest.fixture(name="spring_file")
-def fixture_spring_file(spring_path: Path) -> Path:
+def spring_file(spring_path: Path) -> Path:
     """Return the path to an existing spring file."""
     spring_path.touch()
     return spring_path
@@ -206,7 +205,7 @@ def fixture_spring_file(spring_path: Path) -> Path:
 
 
 @pytest.fixture(name="decompress_hk_spring_bundle")
-def fixture_decompress_hk_spring_bundle(
+def decompress_hk_spring_bundle(
     sample_hk_bundle_no_files: dict, spring_file: Path, fastq_flag_file: Path, sample: str
 ) -> dict:
     """Create a complete bundle mock for testing decompression.

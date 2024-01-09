@@ -1,13 +1,13 @@
 import logging
 
 import click
+
 from cg.cli.workflow.commands import link, resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.exc import CgError, DecompressionNeededError
+from cg.exc import AnalysisNotReadyError, CgError
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.meta.workflow.analysis import AnalysisAPI
-
 
 OPTION_DRY = click.option(
     "-d", "--dry-run", "dry_run", help="Print command to console without executing", is_flag=True
@@ -69,9 +69,9 @@ def run(context: CGConfig, case_id: str, dry_run: bool, config: str, external_re
     # Submit analysis for tracking in Trailblazer
     try:
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-        LOG.info("Submitted case %s to Trailblazer!", case_id)
+        LOG.info(f"Submitted case {case_id} to Trailblazer!")
     except Exception as error:
-        LOG.warning("Unable to submit job file to Trailblazer, raised error: %s", error)
+        LOG.warning(f"Unable to submit job file to Trailblazer, raised error: {error}")
 
     analysis_api.set_statusdb_action(case_id=case_id, action="running")
 
@@ -92,17 +92,14 @@ def start(
     """
     Starts full Fluffy analysis workflow
     """
-    LOG.info("Starting full Fluffy workflow for %s", case_id)
+    LOG.info(f"Starting full Fluffy workflow for {case_id}")
     if dry_run:
         LOG.info("Dry run: the executed commands will not produce output!")
-    try:
-        context.invoke(link, case_id=case_id, dry_run=dry_run)
-        context.invoke(create_samplesheet, case_id=case_id, dry_run=dry_run)
-        context.invoke(
-            run, case_id=case_id, config=config, dry_run=dry_run, external_ref=external_ref
-        )
-    except DecompressionNeededError as error:
-        LOG.error(error)
+    analysis_api: FluffyAnalysisAPI = context.obj.meta_apis["analysis_api"]
+    analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
+    context.invoke(link, case_id=case_id, dry_run=dry_run)
+    context.invoke(create_samplesheet, case_id=case_id, dry_run=dry_run)
+    context.invoke(run, case_id=case_id, config=config, dry_run=dry_run, external_ref=external_ref)
 
 
 @fluffy.command("start-available")
@@ -117,11 +114,13 @@ def start_available(context: click.Context, dry_run: bool = False):
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+        except AnalysisNotReadyError as error:
+            LOG.error(error)
         except CgError as error:
             LOG.error(error)
             exit_code = EXIT_FAIL
         except Exception as error:
-            LOG.error("Unspecified error occurred: %s", error)
+            LOG.error(f"Unspecified error occurred: {error}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

@@ -2,14 +2,13 @@
 
 import logging
 import traceback
-from typing import Optional, List
-from cg.store.models import Analysis
 
 import click
 
 from cg.constants.nipt import Q30_THRESHOLD
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.nipt import NiptUploadAPI
+from cg.store.models import Analysis
 
 from .ftp import ftp
 from .ftp import nipt_upload_case as nipt_upload_ftp_case
@@ -29,7 +28,7 @@ def nipt():
 @click.option("--dry-run", is_flag=True)
 @click.option("--force", is_flag=True, help="Force upload of case to databases, despite qc")
 @click.pass_context
-def nipt_upload_case(context: click.Context, case_id: Optional[str], dry_run: bool, force: bool):
+def nipt_upload_case(context: click.Context, case_id: str | None, dry_run: bool, force: bool):
     """Upload NIPT result files for a case"""
 
     LOG.info("*** NIPT UPLOAD START ***")
@@ -46,9 +45,9 @@ def nipt_upload_case(context: click.Context, case_id: Optional[str], dry_run: bo
         context.invoke(batch, case_id=case_id, force=force, dry_run=dry_run)
         context.invoke(nipt_upload_ftp_case, case_id=case_id, force=force, dry_run=dry_run)
         nipt_upload_api.update_analysis_uploaded_at_date(case_id)
-        LOG.info("%s: analysis uploaded!", case_id)
+        LOG.info(f"{case_id}: analysis uploaded!")
     else:
-        LOG.error("Uploading case failed: %s", case_id)
+        LOG.error(f"Uploading case failed: {case_id}")
         LOG.error(
             f"Flowcell did not pass one of the following QC parameters:\n"
             f"target_reads={nipt_upload_api.target_reads(case_id=case_id)}, Q30_threshold={Q30_THRESHOLD}"
@@ -68,18 +67,18 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
     nipt_upload_api.set_dry_run(dry_run=dry_run)
 
     all_good = True
-    analyses: List[Analysis] = nipt_upload_api.get_all_upload_analyses()
+    analyses: list[Analysis] = nipt_upload_api.get_all_upload_analyses()
     if not analyses:
         LOG.info("No analyses found to upload")
         return
 
     for analysis in analyses:
-        internal_id = analysis.family.internal_id
+        internal_id = analysis.case.internal_id
 
         if nipt_upload_api.flowcell_passed_qc_value(
             case_id=internal_id, q30_threshold=Q30_THRESHOLD
         ):
-            LOG.info("Uploading case: %s", internal_id)
+            LOG.info(f"Uploading case: {internal_id}")
             try:
                 context.invoke(nipt_upload_case, case_id=internal_id, dry_run=dry_run)
             except AnalysisUploadError:

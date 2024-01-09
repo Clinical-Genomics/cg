@@ -1,14 +1,13 @@
+import datetime as dt
 import logging
 
 import click
-import datetime as dt
-from cgmodels.cg.constants import Pipeline
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
-from cg.constants.constants import DRY_RUN
-from cg.store import Store
-from cg.store.models import Analysis, Family
+from cg.constants.constants import DRY_RUN, Pipeline
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.store import Store
+from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
 
@@ -26,15 +25,15 @@ def fastq(context: click.Context):
 @click.pass_context
 def store_fastq_analysis(context: click.Context, case_id: str, dry_run: bool = False):
     """Creates an analysis object in status-db for the given fast case"""
-    LOG.info("Creating an analysis for case %s", case_id)
+    LOG.info(f"Creating an analysis for case {case_id}")
     status_db: Store = context.obj.status_db
-    case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+    case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     new_analysis: Analysis = status_db.add_analysis(
         pipeline=Pipeline.FASTQ,
         completed_at=dt.datetime.now(),
         primary=True,
         started_at=dt.datetime.now(),
-        family_id=case_obj.id,
+        case_id=case_obj.id,
     )
     if dry_run:
         return

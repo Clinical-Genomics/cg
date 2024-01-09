@@ -1,7 +1,8 @@
-from pathlib import Path
-from typing import Optional
-from pydantic import BaseModel, validator
 from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from cg.meta.upload.gisaid.constants import AUTHORS
 
@@ -13,16 +14,25 @@ class FastaFile(BaseModel):
 
 class GisaidAccession(BaseModel):
     log_message: str
-    accession_nr: Optional[str]
-    sample_id: Optional[str]
+    accession_nr: str | None = None
+    sample_id: str | None = None
 
-    @validator("accession_nr", always=True)
-    def parse_accession(cls, v, values):
-        return values["log_message"].split(";")[-1]
+    @model_validator(mode="before")
+    @classmethod
+    def set_generated_fields(cls, data: Any) -> Any:
+        """Constructs the fields that are generated from other fields."""
+        if isinstance(data, dict):
+            data.setdefault("accession_nr", _parse_accession_nr(data["log_message"]))
+            data.setdefault("sample_id", _parse_sample_id_from_log(data["log_message"]))
+        return data
 
-    @validator("sample_id", always=True)
-    def parse_sample_id(cls, v, values):
-        return values["log_message"].split("/")[2].split("_")[2]
+
+def _parse_accession_nr(log_message: str) -> str:
+    return log_message.split(";")[-1]
+
+
+def _parse_sample_id_from_log(log_message: str) -> str:
+    return log_message.split("/")[2].split("_")[2]
 
 
 class UploadFiles(BaseModel):
@@ -32,6 +42,7 @@ class UploadFiles(BaseModel):
 
 
 class GisaidSample(BaseModel):
+    model_config = ConfigDict(coerce_numbers_to_str=True)
     case_id: str
     cg_lims_id: str
     submitter: str
@@ -40,34 +51,51 @@ class GisaidSample(BaseModel):
     fn: str
     covv_collection_date: str
     covv_subm_sample_id: str
-    covv_virus_name: Optional[str]
-    covv_orig_lab: Optional[str]
-    covv_type: Optional[str] = "betacoronavirus"
-    covv_passage: Optional[str] = "Original"
-    covv_location: Optional[str]
-    covv_host: Optional[str] = "Human"
-    covv_gender: Optional[str] = "unknown"
-    covv_patient_age: Optional[str] = "unknown"
-    covv_patient_status: Optional[str] = "unknown"
-    covv_seq_technology: Optional[str] = "Illumina NovaSeq"
-    covv_orig_lab_addr: Optional[str]
-    covv_subm_lab: Optional[str] = "Karolinska University Hospital"
-    covv_subm_lab_addr: Optional[str] = "171 76 Stockholm, Sweden"
-    covv_authors: Optional[str] = " ,".join(AUTHORS)
+    covv_virus_name: str | None = None
+    covv_orig_lab: str | None = None
+    covv_type: str | None = "betacoronavirus"
+    covv_passage: str | None = "Original"
+    covv_location: str | None = None
+    covv_host: str | None = "Human"
+    covv_gender: str | None = "unknown"
+    covv_patient_age: str | None = "unknown"
+    covv_patient_status: str | None = "unknown"
+    covv_seq_technology: str | None = "Illumina NovaSeq"
+    covv_orig_lab_addr: str | None = None
+    covv_subm_lab: str | None = "Karolinska University Hospital"
+    covv_subm_lab_addr: str | None = "171 76 Stockholm, Sweden"
+    covv_authors: str | None = " ,".join(AUTHORS)
 
-    @validator("covv_location", always=True)
-    def parse_location(cls, v, values):
-        region: str = values.get("region")
-        return f"Europe/Sweden/{region}"
+    @model_validator(mode="before")
+    @classmethod
+    def set_generated_fields(cls, data: Any) -> Any:
+        """Constructs the fields that are generated from other fields."""
+        if isinstance(data, dict):
+            data.setdefault("covv_location", _generate_covv_location(data.get("region")))
+            data["covv_subm_sample_id"] = _generate_covv_subm_sample_id(
+                subm_sample_id=data.get(
+                    "covv_subm_sample_id",
+                ),
+                region_code=data.get("region_code"),
+            )
+            data.setdefault(
+                "covv_virus_name",
+                _generate_covv_virus_name(
+                    covv_subm_sample_id=data.get("covv_subm_sample_id"),
+                    covv_collection_date=data.get("covv_collection_date"),
+                ),
+            )
+        return data
 
-    @validator("covv_subm_sample_id", always=True)
-    def parse_subm_sample_id(cls, v, values):
-        region_code = values.get("region_code")
-        return f"{region_code}_SE100_{v}"
 
-    @validator("covv_virus_name", always=True)
-    def parse_virus_name(cls, v, values):
-        sample_name = values.get("covv_subm_sample_id")
-        date = values.get("covv_collection_date")
-        datetime_date = datetime.strptime(date, "%Y-%m-%d")
-        return f"hCoV-19/Sweden/{sample_name}/{datetime_date.year}"
+def _generate_covv_location(region: str) -> str:
+    return f"Europe/Sweden/{region}"
+
+
+def _generate_covv_subm_sample_id(subm_sample_id: str, region_code: str) -> str:
+    return f"{region_code}_SE100_{subm_sample_id}"
+
+
+def _generate_covv_virus_name(covv_subm_sample_id: str, covv_collection_date: str) -> str:
+    datetime_date: datetime = datetime.strptime(covv_collection_date, "%Y-%m-%d")
+    return f"hCoV-19/Sweden/{covv_subm_sample_id}/{datetime_date.year}"

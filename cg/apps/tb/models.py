@@ -1,49 +1,35 @@
 import datetime as dt
 from pathlib import Path
-from typing import Optional
 
-from dateutil.parser import parse as parse_datestr
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, BeforeValidator, ConfigDict
+from typing_extensions import Annotated
+
+from cg.apps.tb.validators import parse_str_to_datetime, parse_str_to_path
 
 
 class TrailblazerAnalysis(BaseModel):
     id: int
-    family: str
-    case_id = Optional[str]
+    case_id: str | None = None
+    version: str | None = None
+    logged_at: Annotated[dt.datetime | None, BeforeValidator(parse_str_to_datetime)]
+    started_at: Annotated[dt.datetime | None, BeforeValidator(parse_str_to_datetime)]
+    completed_at: Annotated[dt.datetime | None, BeforeValidator(parse_str_to_datetime)]
+    status: str | None = None
+    priority: str | None = None
+    out_dir: Annotated[Path | None, BeforeValidator(parse_str_to_path)]
+    config_path: Annotated[Path | None, BeforeValidator(parse_str_to_path)]
+    comment: str | None = None
+    is_deleted: bool | None = None
+    is_visible: bool | None = None
+    type: str | None = None
+    user_id: int | None = None
+    progress: float | None = 0.0
+    data_analysis: str | None = None
+    ticket: str | None = None
+    uploaded_at: str | None = None
 
-    version: Optional[str]
-    logged_at: Optional[str]
-    started_at: Optional[str]
-    completed_at: Optional[str]
-    status: Optional[str]
-    priority: Optional[str]
-    out_dir: Optional[str]
-    config_path: Optional[str]
-    comment: Optional[str]
-    is_deleted: Optional[bool]
-    is_visible: Optional[bool]
-    type: Optional[str]
-    user_id: Optional[int]
-    progress: Optional[float] = 0.0
-    data_analysis: Optional[str]
-    ticket: Optional[str]
-    uploaded_at: Optional[str]
-
-    @validator("case_id")
-    def inherit_family_value(cls, value: str, values: dict) -> str:
-        return values.get("family")
-
-    @validator("logged_at", "started_at", "completed_at")
-    def parse_str_to_datetime(cls, value: str) -> Optional[dt.datetime]:
-        if value:
-            return parse_datestr(value)
-
-    @validator("out_dir", "config_path")
-    def parse_str_to_path(cls, value: str) -> Optional[Path]:
-        if value:
-            return Path(value)
-
-    class Config:
-        extra = "allow"
-        validate_all = True
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        validate_default=True,
+        extra="ignore",
+    )

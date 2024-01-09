@@ -1,6 +1,6 @@
 # LIMS constants
 
-from cg.utils.enums import StrEnum
+from enum import StrEnum
 
 YES_NO_LIMS_BOOLEANS = ["require_qc_ok", "tumour", "verified_organism"]
 
@@ -12,6 +12,7 @@ PROP2UDF = {
     "comment": "Comment",
     "control": "Control",
     "concentration": "Concentration (nM)",
+    "concentration_ng_ul": "Concentration (ng/ul)",
     "concentration_sample": "Sample Conc.",
     "customer": "customer",
     "data_analysis": "Data Analysis",
@@ -86,7 +87,7 @@ MASTER_STEPS_UDFS = {
         },
         "obsolete_CG002 - Hybridize Library  (SS XT)": {
             "method_number": "Method document",
-            "method_version": "Method document versio",
+            "method_version": "Method document version",
         },
         "CG002 - Microbial Library Prep (Nextera)": {
             "method_number": "Method",
@@ -126,6 +127,10 @@ MASTER_STEPS_UDFS = {
             "atlas_document": "Sequencing Method",
             "atlas_version": "Atlas Version",
         },
+        "Define Run Format and Calculate Volumes (NovaSeq X)": {
+            "atlas_document": "Sequencing Method",
+            "atlas_version": "Atlas Version",
+        },
     },
     "delivery_method_step": {
         "CG002 - Delivery": {
@@ -140,8 +145,6 @@ MASTER_STEPS_UDFS = {
         },
     },
 }
-
-PROCESSES = {"sequenced_date": "AUTOMATED - NovaSeq Run"}
 
 
 class DocumentationMethod(StrEnum):

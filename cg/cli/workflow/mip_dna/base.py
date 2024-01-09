@@ -1,8 +1,9 @@
-"""Commands to start MIP rare disease DNA workflow"""
+"""Commands to start MIP rare disease DNA workflow."""
 
 import logging
 
 import click
+
 from cg.cli.workflow.commands import (
     ensure_flow_cells_on_disk,
     link,
@@ -10,9 +11,16 @@ from cg.cli.workflow.commands import (
     store,
     store_available,
 )
-from cg.cli.workflow.mip.base import config_case, panel, run, start, start_available
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.cli.workflow.mip.base import (
+    config_case,
+    managed_variants,
+    panel,
+    run,
+    start,
+    start_available,
+)
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -32,6 +40,7 @@ for sub_cmd in [
     config_case,
     ensure_flow_cells_on_disk,
     link,
+    managed_variants,
     panel,
     resolve_compression,
     run,

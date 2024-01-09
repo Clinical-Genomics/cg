@@ -1,33 +1,23 @@
-from typing import Optional, Any, List
+from pydantic import BeforeValidator, constr
+from typing_extensions import Annotated
 
 from cg.constants import DataDelivery, Pipeline
 from cg.models.orders.sample_base import OrderSample
-from pydantic import constr, validator
+from cg.models.orders.validators.json_sample_validators import convert_well, join_list
 
 
 class JsonSample(OrderSample):
-    cohorts: Optional[List[str]]
-    concentration: Optional[str]
-    concentration_sample: Optional[str]
-    control: Optional[str]
+    cohorts: list[str] | None = None
+    concentration: str | None = None
+    concentration_ng_ul: str | None = None
+    concentration_sample: str | None = None
+    control: str | None = None
     data_analysis: Pipeline = Pipeline.MIP_DNA
     data_delivery: DataDelivery = DataDelivery.SCOUT
-    index: Optional[str]
-    panels: Optional[List[str]]
-    quantity: Optional[str]
-    synopsis: Optional[str]
-    well_position: Optional[constr(regex=r"[A-H]:[0-9]+")]
-
-    @validator("synopsis", pre=True)
-    def join_list(cls, value: Any):
-        if isinstance(value, list):
-            return "".join(value)
-        return value
-
-    @validator("well_position", pre=True)
-    def convert_well(cls, value: str):
-        if not value:
-            return None
-        if ":" in value:
-            return value
-        return ":".join([value[0], value[1:]])
+    index: str | None = None
+    panels: list[str] | None = None
+    quantity: str | None = None
+    synopsis: Annotated[str | None, BeforeValidator(join_list)] = None
+    well_position: Annotated[
+        constr(pattern=r"^[A-H]:(1[0-2]|[1-9])$") | None, BeforeValidator(convert_well)
+    ] = None

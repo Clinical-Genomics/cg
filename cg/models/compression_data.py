@@ -64,9 +64,9 @@ class CompressionData:
     def pair_exists(self) -> bool:
         """Check that both files in FASTQ pair exists"""
         LOG.info("Check if FASTQ pair exists")
-        if not self.file_exists_and_is_accesible(self.fastq_first):
+        if not self.file_exists_and_is_accessible(self.fastq_first):
             return False
-        return bool(self.file_exists_and_is_accesible(self.fastq_second))
+        return bool(self.file_exists_and_is_accessible(self.fastq_second))
 
     @staticmethod
     def is_absolute(file_path: Path) -> bool:
@@ -77,7 +77,7 @@ class CompressionData:
         return True
 
     @staticmethod
-    def file_exists_and_is_accesible(file_path: Path) -> bool:
+    def file_exists_and_is_accessible(file_path: Path) -> bool:
         """Check if file exists and is accesible"""
         try:
             if not file_path.exists():
@@ -104,17 +104,17 @@ class CompressionData:
     def spring_exists(self) -> bool:
         """Check if the SPRING file exists"""
         LOG.info("Check if SPRING archive file exists")
-        return self.file_exists_and_is_accesible(self.spring_path)
+        return self.file_exists_and_is_accessible(self.spring_path)
 
     def metadata_exists(self) -> bool:
         """Check if the SPRING metadata file exists"""
         LOG.info("Check if SPRING metadata file exists")
-        return self.file_exists_and_is_accesible(self.spring_metadata_path)
+        return self.file_exists_and_is_accessible(self.spring_metadata_path)
 
     def pending_exists(self) -> bool:
         """Check if the SPRING pending flag file exists"""
         LOG.info("Check if pending compression file exists")
-        return self.file_exists_and_is_accesible(self.pending_path)
+        return self.file_exists_and_is_accessible(self.pending_path)
 
     def __str__(self):
         return f"CompressionData(run:{self.run_name})"

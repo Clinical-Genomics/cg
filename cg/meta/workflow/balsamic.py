@@ -1,19 +1,17 @@
-"""Module for Balsamic Analysis API"""
+"""Module for Balsamic Analysis API."""
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Union
 
-from housekeeper.store.models import Version, File
-from pydantic import ValidationError
+from housekeeper.store.models import File, Version
+from pydantic.v1 import ValidationError
 
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat, SampleType, AnalysisType
+from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
-from cg.constants.indexes import ListIndexes
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.sequencing import Variants
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -25,7 +23,8 @@ from cg.models.balsamic.metrics import (
     BalsamicWGSQCMetrics,
 )
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family, FamilySample, Sample
+from cg.models.fastq import FastqFileMeta
+from cg.store.models import Case, CaseSample, Sample
 from cg.utils import Process
 from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
 
@@ -60,7 +59,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return self.root_dir
 
     @property
-    def threshold_reads(self):
+    def use_read_count_threshold(self) -> bool:
         return True
 
     @property
@@ -83,9 +82,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.root_dir, case_id)
 
-    def get_cases_to_analyze(self) -> List[Family]:
-        cases_query: List[Family] = self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.threshold_reads
+    def get_cases_to_analyze(self) -> list[Case]:
+        cases_query: list[Case] = self.status_db.cases_to_analyze(
+            pipeline=self.pipeline, threshold=self.use_read_count_threshold
         )
         cases_to_analyze = []
         for case_obj in cases_query:
@@ -118,7 +117,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """
         return Path(self.root_dir, case_id, case_id + ".json")
 
-    def get_trailblazer_config_path(self, case_id: str) -> Path:
+    def get_job_ids_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "analysis", "slurm_jobids.yaml")
 
     def get_bundle_deliverables_type(self, case_id: str) -> str:
@@ -143,32 +142,32 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         LOG.info("Found analysis type %s", analysis_type)
         return analysis_type
 
-    def get_sample_fastq_destination_dir(self, case: Family, sample: Sample = None) -> Path:
+    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample = None) -> Path:
         """Return the path to the FASTQ destination directory."""
         return Path(self.get_case_path(case.internal_id), FileFormat.FASTQ)
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
-        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        for link in case_obj.links:
-            self.link_fastq_files_for_sample(
-                case_obj=case_obj, sample_obj=link.sample, concatenate=True
-            )
+        case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        for link in case.links:
+            self.link_fastq_files_for_sample(case=case, sample=link.sample, concatenate=True)
 
-    def get_concatenated_fastq_path(self, link_object: FamilySample) -> Path:
-        """Returns path to the concatenated FASTQ file of a sample"""
-        file_collection: List[dict] = self.gather_file_metadata_for_sample(link_object.sample)
+    def get_concatenated_fastq_path(self, link_object: CaseSample) -> Path:
+        """Returns the path to the concatenated FASTQ file of a sample"""
+        file_collection: list[FastqFileMeta] = self.gather_file_metadata_for_sample(
+            link_object.sample
+        )
         fastq_data = file_collection[0]
         linked_fastq_name = self.fastq_handler.create_fastq_name(
-            lane=fastq_data["lane"],
-            flowcell=fastq_data["flowcell"],
+            lane=fastq_data.lane,
+            flow_cell=fastq_data.flow_cell_id,
             sample=link_object.sample.internal_id,
-            read=fastq_data["read"],
-            undetermined=fastq_data["undetermined"],
+            read_direction=fastq_data.read_direction,
+            undetermined=fastq_data.undetermined,
         )
         concatenated_fastq_name: str = self.fastq_handler.get_concatenated_name(linked_fastq_name)
         return Path(
             self.root_dir,
-            link_object.family.internal_id,
+            link_object.case.internal_id,
             "fastq",
             concatenated_fastq_name,
         )
@@ -186,7 +185,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return SampleType.TUMOR
         return SampleType.NORMAL
 
-    def get_derived_bed(self, panel_bed: str) -> Optional[Path]:
+    def get_derived_bed(self, panel_bed: str) -> Path | None:
         """Returns the verified capture kit path or the derived panel BED path."""
         if not panel_bed:
             return None
@@ -206,7 +205,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             )
         return derived_panel_bed
 
-    def get_verified_bed(self, panel_bed: str, sample_data: dict) -> Optional[str]:
+    def get_verified_bed(self, panel_bed: str, sample_data: dict) -> str | None:
         """Takes a dict with samples and attributes.
         Retrieves unique attributes for application type and target_bed.
         Verifies that those attributes are the same across multiple samples,
@@ -220,7 +219,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         - When bed file required for analysis, but is not set or cannot be retrieved.
         """
 
-        panel_bed: Optional[Path] = self.get_derived_bed(panel_bed)
+        panel_bed: Path | None = self.get_derived_bed(panel_bed)
         application_types = {v["application_type"].lower() for k, v in sample_data.items()}
         target_beds: set = {v["target_bed"] for k, v in sample_data.items()}
 
@@ -242,7 +241,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 )
             return Path(self.bed_path, target_bed).as_posix()
 
-    def get_verified_pon(self, panel_bed: str, pon_cnn: str) -> Optional[str]:
+    def get_verified_pon(self, panel_bed: str, pon_cnn: str) -> str | None:
         """Returns the validated PON or extracts the latest one available if it is not provided
 
         Raises BalsamicStartError:
@@ -264,7 +263,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return latest_pon
 
-    def get_latest_pon_file(self, panel_bed: str) -> Optional[str]:
+    def get_latest_pon_file(self, panel_bed: str) -> str | None:
         """Returns the latest PON cnn file associated to a specific capture bed"""
 
         if not panel_bed:
@@ -273,39 +272,37 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         pon_list = Path(self.pon_path).glob(f"*{Path(panel_bed).stem}_{self.PON_file_suffix}")
         sorted_pon_files = sorted(
             pon_list,
-            key=lambda file: int(file.stem.split("_v")[ListIndexes.LAST.value]),
+            key=lambda file: int(file.stem.split("_v")[-1]),
             reverse=True,
         )
 
         return sorted_pon_files[0].as_posix() if sorted_pon_files else None
 
     @staticmethod
-    def get_verified_gender(sample_data: dict) -> Union[Gender.FEMALE, Gender.MALE]:
-        """Takes a dict with samples and attributes, and returns a verified case gender provided by the customer"""
+    def get_verified_gender(sample_data: dict) -> str:
+        """Takes a dict with samples and attributes, and returns a verified case gender provided by the customer."""
 
         gender = next(iter(sample_data.values()))["gender"]
 
         if all(val["gender"] == gender for val in sample_data.values()) and gender in set(
-            value for value in Gender
+            value for value in Sex
         ):
-            if gender not in [Gender.FEMALE, Gender.MALE]:
-                LOG.warning(
-                    f"The provided gender is unknown, setting {Gender.FEMALE.value} as the default"
-                )
-                gender = Gender.FEMALE.value
+            if gender not in [Sex.FEMALE, Sex.MALE]:
+                LOG.warning(f"The provided sex is unknown, setting {Sex.FEMALE} as the default")
+                gender = Sex.FEMALE
 
             return gender
         else:
             LOG.error(f"Unable to retrieve a valid gender from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
-    def get_verified_samples(self, case_id: str, sample_data: dict) -> Dict[str, str]:
+    def get_verified_samples(self, case_id: str, sample_data: dict) -> dict[str, str]:
         """Return a verified tumor and normal sample dictionary."""
 
-        tumor_samples: List[Sample] = self.status_db.get_samples_by_type(
+        tumor_samples: list[Sample] = self.status_db.get_samples_by_type(
             case_id=case_id, sample_type=SampleType.TUMOR
         )
-        normal_samples: List[Sample] = self.status_db.get_samples_by_type(
+        normal_samples: list[Sample] = self.status_db.get_samples_by_type(
             case_id=case_id, sample_type=SampleType.NORMAL
         )
         if (
@@ -340,7 +337,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "normal": normal_sample_path,
         }
 
-    def get_latest_raw_file_data(self, case_id: str, tags: list) -> Union[dict, list]:
+    def get_latest_raw_file_data(self, case_id: str, tags: list) -> dict | list:
         """Retrieves the data of the latest file associated to a specific case ID and a list of tags."""
 
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
@@ -402,7 +399,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     @staticmethod
     def cast_metrics_type(
         sequencing_type: str, metrics: dict
-    ) -> Union[BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics]:
+    ) -> BalsamicTargetedQCMetrics | BalsamicWGSQCMetrics:
         """Cast metrics model type according to the sequencing type"""
 
         if metrics:
@@ -416,7 +413,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return metrics
 
     @staticmethod
-    def get_latest_file_by_pattern(directory: Path, pattern: str) -> Optional[str]:
+    def get_latest_file_by_pattern(directory: Path, pattern: str) -> str | None:
         """Returns the latest file (<file_name>-<date>-.vcf.gz) matching a pattern from a specific directory."""
         available_files: iter = sorted(
             Path(directory).glob(f"*{pattern}*.vcf.gz"),
@@ -425,9 +422,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         return str(available_files[0]) if available_files else None
 
-    def get_parsed_observation_file_paths(self, observations: List[str]) -> dict:
+    def get_parsed_observation_file_paths(self, observations: list[str]) -> dict:
         """Returns a verified {option: path} observations dictionary."""
-        verified_observations: Dict[str, str] = {}
+        verified_observations: dict[str, str] = {}
         for wildcard in list(ObservationsFileWildcards):
             file_path: str = get_string_from_list_by_pattern(observations, wildcard)
             verified_observations.update(
@@ -442,7 +439,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return verified_observations
 
-    def get_swegen_verified_path(self, variants: Variants) -> Optional[str]:
+    def get_swegen_verified_path(self, variants: Variants) -> str | None:
         """Return verified SweGen path."""
         swegen_file: str = self.get_latest_file_by_pattern(
             directory=self.swegen_path, pattern=variants
@@ -455,8 +452,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
-        observations: List[str] = None,
-        gender: Optional[str] = None,
+        observations: list[str] = None,
+        gender: str | None = None,
     ) -> dict:
         """Takes a dictionary with per-sample parameters,
         validates them, and transforms into command line arguments
@@ -474,7 +471,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             else None
         )
 
-        config_case: Dict[str, str] = {
+        config_case: dict[str, str] = {
             "case_id": case_id,
             "analysis_workflow": self.pipeline,
             "genome_version": genome_version,
@@ -510,7 +507,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             )
         LOG.info("")
 
-    def get_sample_params(self, case_id: str, panel_bed: Optional[str]) -> dict:
+    def get_sample_params(self, case_id: str, panel_bed: str | None) -> dict:
         """Returns a dictionary of attributes for each sample in given family,
         where SAMPLE ID is used as key"""
 
@@ -537,14 +534,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if application_types:
             return application_types.pop().lower()
 
-    def resolve_target_bed(
-        self, panel_bed: Optional[str], link_object: FamilySample
-    ) -> Optional[str]:
+    def resolve_target_bed(self, panel_bed: str | None, link_object: CaseSample) -> str | None:
         if panel_bed:
             return panel_bed
         if self.get_application_type(link_object.sample) not in self.__BALSAMIC_BED_APPLICATIONS:
             return None
-        return self.get_target_bed_from_lims(link_object.family.internal_id)
+        return self.get_target_bed_from_lims(link_object.case.internal_id)
 
     def get_pipeline_version(self, case_id: str) -> str:
         LOG.debug("Fetch pipeline version")
@@ -560,8 +555,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
-        observations: List[str],
-        dry_run: bool = False,
+        observations: list[str],
     ) -> None:
         """Create config file for BALSAMIC analysis"""
         arguments = self.get_verified_config_case_arguments(
@@ -592,25 +586,25 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--swegen-sv": arguments.get("swegen_sv"),
                 "--clinical-snv-observations": arguments.get("clinical_snv"),
                 "--clinical-sv-observations": arguments.get("clinical_sv"),
-                "--cancer-all-snv-observations": arguments.get("cancer_all_snv"),
+                "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
+                "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
                 "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
                 "--cancer-somatic-sv-observations": arguments.get("cancer_somatic_sv"),
             }
         )
         parameters = command + options
-        self.process.run_command(parameters=parameters, dry_run=dry_run)
+        self.process.run_command(parameters=parameters)
 
     def run_analysis(
         self,
         case_id: str,
-        run_analysis: bool = True,
-        slurm_quality_of_service: Optional[str] = None,
+        slurm_quality_of_service: str | None = None,
         dry_run: bool = False,
     ) -> None:
         """Execute BALSAMIC run analysis with given options"""
 
         command = ["run", "analysis"]
-        run_analysis = ["--run-analysis"] if run_analysis else []
+        run_analysis = ["--run-analysis"] if not dry_run else []
         benchmark = ["--benchmark"]
         options = build_command_from_dict(
             {
