@@ -1,4 +1,3 @@
-import glob
 import logging
 import os
 import re
@@ -88,14 +87,19 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_config_path(self, filename: str) -> Path:
         return Path(self.queries_path, filename).with_suffix(".json")
 
-    def get_trailblazer_config_path(self, case_id: str) -> Path:
-        """Get trailblazer config path."""
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_obj: Sample = case_obj.links[0].sample
-        project_id: str = self.get_project(sample_obj.internal_id)
-        return Path(
-            self.root_dir, "results", "reports", "trailblazer", f"{project_id}_slurm_ids.yaml"
-        )
+    def get_job_ids_path(self, case_id: str) -> Path:
+        case_path: Path = self.get_case_path(case_id)
+        job_ids_file_name: str = self.get_job_ids_file_name(case_id)
+        return Path(case_path, job_ids_file_name)
+
+    def get_job_ids_file_name(self, case_id: str) -> str:
+        project_id: str = self.get_lims_project_id(case_id)
+        return f"{project_id}_slurm_ids.yaml"
+
+    def get_lims_project_id(self, case_id: str):
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        sample: Sample = case.links[0].sample
+        return self.get_project(sample.internal_id)
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
@@ -221,7 +225,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         Since sample_id is not specified, nothing is returned as sample_id"""
         case: Case = self.status_db.get_case_by_name(name=unique_id)
         if not case:
-            LOG.error("No case found for ticket number:  %s", unique_id)
+            LOG.error(f"No case found for ticket number:  {unique_id}")
             raise click.Abort
         case_id = case.internal_id
         return case_id, None
@@ -230,9 +234,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """If sample is specified, finds the corresponding case_id to which this sample belongs.
         The case_id is to be used for identifying the appropriate path to link fastq files and store the analysis output
         """
-        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=unique_id)
+        sample: Sample = self.status_db.get_sample_by_internal_id(unique_id)
         if not sample:
-            LOG.error("No sample found with id: %s", unique_id)
+            LOG.error(f"No sample found with id: {unique_id}")
             raise click.Abort
         case_id = sample.links[0].case.internal_id
         sample_id = sample.internal_id
@@ -240,9 +244,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_case_id_from_case(self, unique_id: str) -> tuple[str, None]:
         """If case_id is specified, validates the presence of case_id in database and returns it"""
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=unique_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(unique_id)
         if not case_obj:
-            LOG.error("No case found with the id:  %s", unique_id)
+            LOG.error(f"No case found with the id:  {unique_id}")
             raise click.Abort
         case_id = case_obj.internal_id
         return case_id, None

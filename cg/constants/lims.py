@@ -12,6 +12,7 @@ PROP2UDF = {
     "comment": "Comment",
     "control": "Control",
     "concentration": "Concentration (nM)",
+    "concentration_ng_ul": "Concentration (ng/ul)",
     "concentration_sample": "Sample Conc.",
     "customer": "customer",
     "data_analysis": "Data Analysis",
