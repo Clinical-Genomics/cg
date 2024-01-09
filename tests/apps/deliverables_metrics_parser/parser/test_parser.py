@@ -2,6 +2,7 @@
 from pathlib import Path
 
 import pytest
+from _pytest.fixtures import FixtureRequest
 
 from cg.apps.deliverables_metrics_parser.models.pipeline_metrics_deliverables import (
     MIPDNAMetricsDeliverables,
@@ -15,7 +16,7 @@ from cg.constants.pipeline import Pipeline
 
 
 @pytest.mark.parametrize(
-    "pipeline,expected_path",
+    "pipeline, expected_path",
     [
         (Pipeline.BALSAMIC, "balsamic_metrics_deliverables_path"),
         (Pipeline.MIPDNA, "mip_dna_metrics_deliverables_path"),
@@ -25,7 +26,7 @@ from cg.constants.pipeline import Pipeline
     ],
 )
 def test_get_metrics_deliverables_file_path(
-    pipeline: str, expected_path: str, case_id: str, request
+    pipeline: str, expected_path: str, case_id: str, request: FixtureRequest
 ):
     """Test get the metrics deliverables path for a case and pipeline."""
     # GIVEN a case id and a pipeline
@@ -40,7 +41,7 @@ def test_get_metrics_deliverables_file_path(
     assert metrics_deliverables_file_path == file_path
 
 
-def test_read_metrics_deliverables_file(mip_dna_metrics_deliverables_file_path):
+def test_read_metrics_deliverables_file(mip_dna_metrics_deliverables_file_path: Path):
     """Test to read the content of a metrics deliverables file."""
     # GIVEN a file path to a metrics deliverables file
 
@@ -62,10 +63,9 @@ def test_parse_metrics_deliverables_file(mip_dna_metrics_deliverables_file_path:
         "cg.apps.deliverables_metrics_parser.parser.deliverables_parser.get_metrics_deliverables_file_path",
         return_value=mip_dna_metrics_deliverables_file_path,
     )
-
-    # THEN a list of metrics deliverables models is returned
     parsed_metrics: list[MIPDNAMetricsDeliverables] = parse_metrics_deliverables_file(
         pipeline=Pipeline.MIPDNA, case_id="some_case"
     )
 
+    # THEN a list of metrics deliverables models is returned
     assert isinstance(parsed_metrics[0], MIPDNAMetricsDeliverables)
