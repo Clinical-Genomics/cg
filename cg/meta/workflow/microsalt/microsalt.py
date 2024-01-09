@@ -94,7 +94,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_job_ids_file_name(self, case_id: str) -> str:
         project_id: str = self.get_lims_project_id(case_id)
-        return f"{project_id}_job_ids.yaml"
+        return f"{project_id}_slurm_ids.yaml"
 
     def get_lims_project_id(self, case_id: str):
         case: Case = self.status_db.get_case_by_internal_id(case_id)
