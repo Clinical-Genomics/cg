@@ -89,7 +89,7 @@ class NfAnalysisAPI(AnalysisAPI):
         if nextflow_config:
             return Path(nextflow_config).absolute()
 
-    def get_trailblazer_config_path(self, case_id: str) -> Path:
+    def get_job_ids_path(self, case_id: str) -> Path:
         """Return the path to a Trailblazer config file containing Tower IDs."""
         return Path(self.root_dir, case_id, "tower_ids").with_suffix(FileExtensions.YAML)
 
@@ -197,7 +197,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def write_trailblazer_config(self, case_id: str, tower_id: str) -> None:
         """Write Tower IDs to a file used as the Trailblazer config."""
-        config_path: Path = self.get_trailblazer_config_path(case_id=case_id)
+        config_path: Path = self.get_job_ids_path(case_id=case_id)
         LOG.info(f"Writing Tower ID to {config_path.as_posix()}")
         WriteFile.write_file_from_content(
             content={case_id: [tower_id]},
@@ -246,7 +246,7 @@ class NfAnalysisAPI(AnalysisAPI):
         if command_args.resume:
             from_tower_id: int = command_args.id or NfTowerHandler.get_last_tower_id(
                 case_id=case_id,
-                trailblazer_config=self.get_trailblazer_config_path(case_id=case_id),
+                trailblazer_config=self.get_job_ids_path(case_id=case_id),
             )
             LOG.info(f"Pipeline will be resumed from run with Tower id: {from_tower_id}.")
             parameters: list[str] = NfTowerHandler.get_tower_relaunch_parameters(

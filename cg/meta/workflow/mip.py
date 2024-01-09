@@ -312,7 +312,7 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_case_path(self, case_id: str) -> Path:
         return Path(self.root, case_id)
 
-    def get_trailblazer_config_path(self, case_id: str) -> Path:
+    def get_job_ids_path(self, case_id: str) -> Path:
         return Path(self.get_case_path(case_id=case_id), "analysis", "slurm_job_ids.yaml")
 
     def config_sample(self, link_obj: CaseSample, panel_bed: str) -> dict:
