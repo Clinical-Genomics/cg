@@ -91,7 +91,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
         for link in case.links:
             sample_sheet_content.extend(
-                self.get_sample_sheet_content_per_sample(sample=link.sample, case=case, case_sample=link)
+                self.get_sample_sheet_content_per_sample(
+                    sample=link.sample, case=case, case_sample=link
+                )
             )
         return sample_sheet_content
 
@@ -129,11 +131,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return Raredisease phenotype code."""
         LOG.debug("Translate phenotype to int")
         if parent:
-            return(parent.internal_id)
+            return parent.internal_id
         else:
             return ""
-
-
 
     @property
     def root(self) -> str:
@@ -168,4 +168,3 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_managed_variants(self) -> list[str]:
         """Create and return the managed variants."""
         return self._get_managed_variants(genome_build=GENOME_BUILD_37)
-

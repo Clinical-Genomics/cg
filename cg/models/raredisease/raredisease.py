@@ -35,7 +35,7 @@ class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
         return [
             [
                 self.name,
-                lane+1,
+                lane + 1,
                 self.fastq_forward_read_paths,
                 self.fastq_reverse_read_paths,
                 self.sex,
@@ -44,9 +44,7 @@ class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
                 self.maternal_id,
                 self.case_id,
             ]
-            for lane, (self.fastq_forward_read_paths, self.fastq_reverse_read_paths) in enumerate(zip(
-                self.fastq_forward_read_paths, self.fastq_reverse_read_paths
-            ))
+            for lane, (self.fastq_forward_read_paths, self.fastq_reverse_read_paths) in enumerate(
+                zip(self.fastq_forward_read_paths, self.fastq_reverse_read_paths)
+            )
         ]
-
-

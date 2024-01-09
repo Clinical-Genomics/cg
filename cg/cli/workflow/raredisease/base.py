@@ -76,4 +76,3 @@ def managed_variants(context: CGConfig, case_id: str, dry_run: bool) -> None:
         echo_lines(lines=vcf_lines)
         return
     analysis_api.write_managed_variants(case_id=case_id, content=vcf_lines)
-
