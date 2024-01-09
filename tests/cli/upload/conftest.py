@@ -28,12 +28,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
 from cg.store.models import Analysis
-from tests.cli.workflow.mip.conftest import (
-    mip_case_id,
-    mip_case_ids,
-    mip_dna_context,
-    mip_rna_context,
-)
 from tests.meta.upload.scout.conftest import mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
@@ -246,7 +240,9 @@ class MockScoutUploadApi(UploadScoutAPI):
         self.housekeeper = None
         self.madeline_api = MockMadelineAPI()
         self.analysis = MockAnalysisApi()
-        self.config = ScoutLoadConfig()
+        self.config = ScoutLoadConfig(
+            delivery_report=Path("path", "to", "delivery-report.html").as_posix()
+        )
         self.file_exists = False
         self.lims = MockLims()
         self.missing_mandatory_field = False

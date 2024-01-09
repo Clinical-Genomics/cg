@@ -174,7 +174,7 @@ class ReportAPI(MetaAPI):
             version=self.get_report_version(analysis=analysis),
             date=datetime.today(),
             case=case_model,
-            accredited=self.get_report_accreditation(
+            accredited=self.is_report_accredited(
                 samples=case_model.samples, analysis_metadata=analysis_metadata
             ),
         )
@@ -407,10 +407,10 @@ class ReportAPI(MetaAPI):
         """Return list of variant-calling filters used during analysis."""
         return []
 
-    def get_report_accreditation(
+    def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
-        """Checks if the report is accredited or not."""
+        """Check if the report is accredited."""
         raise NotImplementedError
 
     def get_required_fields(self, case: CaseModel) -> dict:

@@ -8,8 +8,12 @@ from typing import Type
 from pydantic import ValidationError
 from typing_extensions import Literal
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+    get_sample_type,
+)
 from cg.apps.demultiplex.sample_sheet.sample_models import (
+    FlowCellSample,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
@@ -35,6 +39,10 @@ RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
     Sequencers.HISEQX: RunParametersHiSeq,
     Sequencers.NOVASEQ: RunParametersNovaSeq6000,
     Sequencers.NOVASEQX: RunParametersNovaSeqX,
+}
+SAMPLE_MODEL_TO_BCL_CONVERTER: dict[Type[FlowCellSample], str] = {
+    FlowCellSampleBCLConvert: BclConverter.DRAGEN,
+    FlowCellSampleBcl2Fastq: BclConverter.BCL2FASTQ,
 }
 
 
@@ -213,6 +221,16 @@ class FlowCellDirectoryData:
 
     def validate_sample_sheet(self) -> bool:
         """Validate if sample sheet is on correct format."""
+        sample_type_from_sample_sheet: Type[FlowCellSample] = get_sample_type(
+            self.sample_sheet_path
+        )
+        if SAMPLE_MODEL_TO_BCL_CONVERTER[sample_type_from_sample_sheet] != self.bcl_converter:
+            LOG.warning(
+                f"Detected {SAMPLE_MODEL_TO_BCL_CONVERTER[sample_type_from_sample_sheet]} sample "
+                f"sheet for {self.bcl_converter} flow cell. "
+                "Generate the correct sample sheet or use the correct bcl converter."
+            )
+            return False
         try:
             get_sample_sheet_from_file(self.sample_sheet_path)
         except (SampleSheetError, ValidationError) as error:
