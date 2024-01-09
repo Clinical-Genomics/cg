@@ -465,7 +465,6 @@ def store_with_analyses_for_cases(
             started_at=timestamp_yesterday,
             uploaded_at=timestamp_yesterday,
             delivery_reported_at=None,
-            uploaded_to_vogue_at=timestamp_yesterday,
             completed_at=timestamp_yesterday,
         )
         helpers.add_analysis(
@@ -474,7 +473,6 @@ def store_with_analyses_for_cases(
             started_at=timestamp_now,
             uploaded_at=timestamp_now,
             delivery_reported_at=None,
-            uploaded_to_vogue_at=None,
             completed_at=timestamp_now,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
@@ -505,7 +503,6 @@ def store_with_analyses_for_cases_not_uploaded_fluffy(
             started_at=timestamp_yesterday,
             uploaded_at=timestamp_yesterday,
             delivery_reported_at=None,
-            uploaded_to_vogue_at=timestamp_yesterday,
             pipeline=Pipeline.FLUFFY,
         )
         helpers.add_analysis(
@@ -514,7 +511,6 @@ def store_with_analyses_for_cases_not_uploaded_fluffy(
             started_at=timestamp_now,
             uploaded_at=None,
             delivery_reported_at=None,
-            uploaded_to_vogue_at=timestamp_now,
             pipeline=Pipeline.FLUFFY,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
@@ -545,7 +541,6 @@ def store_with_analyses_for_cases_not_uploaded_microsalt(
             started_at=timestamp_yesterday,
             uploaded_at=timestamp_yesterday,
             delivery_reported_at=None,
-            uploaded_to_vogue_at=timestamp_yesterday,
             pipeline=Pipeline.MICROSALT,
         )
         helpers.add_analysis(
@@ -554,7 +549,6 @@ def store_with_analyses_for_cases_not_uploaded_microsalt(
             started_at=timestamp_now,
             uploaded_at=None,
             delivery_reported_at=None,
-            uploaded_to_vogue_at=timestamp_now,
             pipeline=Pipeline.MICROSALT,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
@@ -584,7 +578,6 @@ def store_with_analyses_for_cases_to_deliver(
             started_at=timestamp_yesterday,
             uploaded_at=None,
             delivery_reported_at=None,
-            uploaded_to_vogue_at=timestamp_yesterday,
             completed_at=timestamp_yesterday,
             pipeline=Pipeline.FLUFFY,
         )
@@ -594,7 +587,6 @@ def store_with_analyses_for_cases_to_deliver(
             started_at=timestamp_now,
             uploaded_at=None,
             delivery_reported_at=None,
-            uploaded_to_vogue_at=None,
             completed_at=timestamp_now,
             pipeline=Pipeline.MIP_DNA,
         )
