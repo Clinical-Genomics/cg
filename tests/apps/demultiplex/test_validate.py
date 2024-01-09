@@ -1,4 +1,4 @@
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBcl2Fastq
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSampleBcl2Fastq
 from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 
 

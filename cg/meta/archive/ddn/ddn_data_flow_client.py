@@ -27,7 +27,8 @@ from cg.meta.archive.ddn.models import (
     RefreshPayload,
     TransferPayload,
 )
-from cg.meta.archive.models import ArchiveHandler, FileAndSample, SampleAndDestination
+from cg.meta.archive.ddn.utils import get_metadata
+from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
 
 LOG = logging.getLogger(__name__)
@@ -100,29 +101,27 @@ class DDNDataFlowClient(ArchiveHandler):
             self._refresh_auth_token()
         return {"Authorization": f"Bearer {self.auth_token}"}
 
-    def archive_files(self, files_and_samples: list[FileAndSample]) -> int:
+    def archive_file(self, file_and_sample: FileAndSample) -> int:
         """Archives all files provided, to their corresponding destination, as given by sources
         and destination in TransferData. Returns the job ID of the archiving task."""
         miria_file_data: list[MiriaObject] = self.convert_into_transfer_data(
-            files_and_samples, is_archiving=True
+            [file_and_sample], is_archiving=True
         )
+        metadata: list[dict] = get_metadata(file_and_sample.sample)
         archival_request: TransferPayload = self.create_transfer_request(
-            miria_file_data=miria_file_data, is_archiving_request=True
+            miria_file_data=miria_file_data, is_archiving_request=True, metadata=metadata
         )
         return archival_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.ARCHIVE_FILES),
         ).job_id
 
-    def retrieve_samples(self, samples_and_destinations: list[SampleAndDestination]) -> int:
-        """Retrieves all archived files for the provided samples and stores them in the specified location in
+    def retrieve_files(self, files_and_samples: list[FileAndSample]) -> int:
+        """Retrieves the provided files and stores them in the corresponding sample bundle in
         Housekeeper."""
-        miria_file_data: list[MiriaObject] = []
-        for sample_and_housekeeper_destination in samples_and_destinations:
-            miria_object: MiriaObject = MiriaObject.create_from_sample_and_destination(
-                sample_and_housekeeper_destination
-            )
-            miria_file_data.append(miria_object)
+        miria_file_data: list[MiriaObject] = self.convert_into_transfer_data(
+            files_and_samples=files_and_samples, is_archiving=False
+        )
         retrieval_request: TransferPayload = self.create_transfer_request(
             miria_file_data=miria_file_data, is_archiving_request=False
         )
@@ -132,7 +131,10 @@ class DDNDataFlowClient(ArchiveHandler):
         ).job_id
 
     def create_transfer_request(
-        self, miria_file_data: list[MiriaObject], is_archiving_request: bool
+        self,
+        miria_file_data: list[MiriaObject],
+        is_archiving_request: bool,
+        metadata: list[dict] = [],
     ) -> TransferPayload:
         """Performs the necessary curation of paths for the request to be valid, depending on if
         it is an archiving or a retrieve request.
@@ -148,7 +150,9 @@ class DDNDataFlowClient(ArchiveHandler):
         )
 
         transfer_request = TransferPayload(
-            files_to_transfer=miria_file_data, createFolder=is_archiving_request
+            files_to_transfer=miria_file_data,
+            createFolder=is_archiving_request,
+            metadataList=metadata,
         )
         transfer_request.trim_paths(attribute_to_trim=attribute)
         transfer_request.add_repositories(

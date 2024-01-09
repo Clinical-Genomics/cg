@@ -1,4 +1,5 @@
 import logging
+from glob import glob
 from pathlib import Path
 
 import click
@@ -58,7 +59,8 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
 
         if not flow_cell.validate_sample_sheet():
             LOG.warning(
-                f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}",
+                "Malformed sample sheet. "
+                f"Run cg demultiplex sample sheet validate {flow_cell.sample_sheet_path}",
             )
             continue
 
@@ -178,6 +180,7 @@ def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
     help="The path from where the syncing is done.",
 )
 def create_manifest_files(source_directory: str):
-    for source_flow_cell in Path(source_directory).iterdir():
-        if is_manifest_file_required(source_flow_cell):
-            create_manifest_file(source_flow_cell)
+    """Creates a file manifest for each flow cell in the source directory."""
+    for source_flow_cell in glob(f"{source_directory}/*"):
+        if is_manifest_file_required(Path(source_flow_cell)):
+            create_manifest_file(Path(source_flow_cell))

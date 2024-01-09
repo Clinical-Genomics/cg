@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "cg"
-version = "54.6.0"
+version = "54.10.5"
 description = "Clinical Genomics command center"
 authors = ["Clinical Genomics <support@clinicalgenomics.se>"]
 readme = "README.md"
@@ -69,7 +69,7 @@ urllib3 = "*"
 
 # Apps
 genologics = "*"
-housekeeper = ">=4.10.16"
+housekeeper = "*"
 
 
 [tool.poetry.dev-dependencies]
@@ -86,6 +86,10 @@ cg = "cg.cli.base:base"
 
 
 # Configurations
+
+[tool.poetry.group.dev.dependencies]
+pytest-xdist = "^3.5.0"
+
 [tool.black]
 line-length = 100
 

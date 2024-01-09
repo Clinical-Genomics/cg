@@ -8,7 +8,7 @@ from requests import Response
 from cg.constants.constants import APIMethods
 from cg.io.controller import APIRequest
 from cg.meta.archive.ddn.constants import OSTYPE, ROOT_TO_TRIM, JobStatus
-from cg.meta.archive.models import FileTransferData, SampleAndDestination
+from cg.meta.archive.models import FileTransferData
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -21,7 +21,6 @@ def get_request_log(headers: dict, body: dict):
 class MiriaObject(FileTransferData):
     """Model for representing a singular object transfer."""
 
-    _metadata = None
     destination: str
     source: str
 
@@ -32,17 +31,9 @@ class MiriaObject(FileTransferData):
         """Instantiates the class from a File and Sample object."""
         if is_archiving:
             return cls(destination=sample.internal_id, source=file.full_path)
-        return cls(destination=file.full_path, source=sample.internal_id)
-
-    @classmethod
-    def create_from_sample_and_destination(
-        cls, sample_and_destination: SampleAndDestination
-    ) -> "MiriaObject":
-        """Instantiates the class from a SampleAndDestination object,
-        i.e. when we want to fetch a folder containing all spring files for said sample."""
         return cls(
-            destination=sample_and_destination.destination,
-            source=sample_and_destination.sample.internal_id,
+            destination=Path(file.full_path).parent.as_posix(),
+            source=Path(sample.internal_id, Path(file.path).name).as_posix(),
         )
 
     def trim_path(self, attribute_to_trim: str):
@@ -66,6 +57,7 @@ class TransferPayload(BaseModel):
     osType: str = OSTYPE
     createFolder: bool = True
     settings: list[dict] = []
+    metadataList: list[dict] = []
 
     def trim_paths(self, attribute_to_trim: str):
         """Trims the source path from its root directory for all objects in the transfer."""
@@ -84,7 +76,6 @@ class TransferPayload(BaseModel):
         """Creates a correctly structured dict to be used as the request payload."""
         payload: dict = super().model_dump(exclude={"files_to_transfer"})
         payload["pathInfo"] = [miria_file.model_dump() for miria_file in self.files_to_transfer]
-        payload["metadataList"] = []
         return payload
 
     def post_request(self, url: str, headers: dict) -> "TransferResponse":

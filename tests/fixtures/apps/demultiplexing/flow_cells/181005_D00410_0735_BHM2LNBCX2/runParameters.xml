@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <RunParameters xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Setup>
-    <ExperimentName>HGYGYBCX2_ubiella_metvirus_RNA_9pM</ExperimentName>
+    <ExperimentName>HM2LNBCX2_duo_Alascca_8pM_ubiella_MH_Met_11pM</ExperimentName>
     <ScanID>-999</ScanID>
     <FCPosition>B</FCPosition>
     <WorkFlowType>DUALINDEX</WorkFlowType>
@@ -10,11 +10,12 @@
     <IndexRead1>8</IndexRead1>
     <IndexRead2>8</IndexRead2>
     <Read2>101</Read2>
-    <OutputFolder>X:\Runs</OutputFolder>
     <CompressBcls>true</CompressBcls>
+    <RemapQScores>v8RRv2bins</RemapQScores>
     <PeriodicSave>Save Tile Thumbnails</PeriodicSave>
     <Flowcell>HiSeq Rapid Flow Cell v2</Flowcell>
     <FirstBaseConfirmation>false</FirstBaseConfirmation>
+    <SampleSheet />
     <KeepIntensityFiles>false</KeepIntensityFiles>
     <Sbs>HiSeq Rapid SBS Kit v2</Sbs>
     <Pe>HiSeq Rapid PE Cluster Kit v2</Pe>
@@ -23,7 +24,7 @@
       <Lane>1</Lane>
       <Lane>2</Lane>
     </AlignToPhiX>
-    <ClusteringChoice>OnBoardClustering</ClusteringChoice>
+    <ClusteringChoice>CBotTemplateHybridization</ClusteringChoice>
     <RapidRunChemistry>RapidRunV2</RapidRunChemistry>
     <RunMode>RapidRun</RunMode>
     <Rehyb>None</Rehyb>
@@ -31,17 +32,17 @@
     <ServiceRun>false</ServiceRun>
     <ApplicationName>HiSeq Control Software</ApplicationName>
     <ApplicationVersion>2.2.58</ApplicationVersion>
-    <RunID>180504_D00410_0608_BHGYGYBCX2</RunID>
-    <RunStartDate>180504</RunStartDate>
+    <RunID>181005_D00410_0735_BHM2LNBCX2</RunID>
+    <RunStartDate>181005</RunStartDate>
     <IntegrationMode>BaseSpace</IntegrationMode>
     <BaseSpaceSettings>
-      <RunId>84966884</RunId>
-      <SendInstrumentHealthToILMN>true</SendInstrumentHealthToILMN>
       <RunMonitoringOnly>true</RunMonitoringOnly>
       <PlannedRun>false</PlannedRun>
+      <RunId>129810692</RunId>
+      <SendInstrumentHealthToILMN>true</SendInstrumentHealthToILMN>
     </BaseSpaceSettings>
     <ScannerID>D00410</ScannerID>
-    <ScanNumber>608</ScanNumber>
+    <ScanNumber>735</ScanNumber>
     <ComputerName>HWI-D00410</ComputerName>
     <FPGAVersion>7.9.7</FPGAVersion>
     <CPLDVersion>3.0.0</CPLDVersion>
@@ -50,7 +51,8 @@
     <CameraFirmware>2.01-F20-R02</CameraFirmware>
     <CameraDriver>6.45.20.3690</CameraDriver>
     <FocusCameraFirmware />
-    <Barcode>HGYGYBCX2</Barcode>
+    <Barcode>HM2LNBCX2</Barcode>
+    <WashBarcode>HHHHHBCX2</WashBarcode>
     <Username>sbsuser</Username>
     <SelectedSections>
       <Section Name="A_1" />
@@ -105,7 +107,7 @@
     <ReagentKits>
       <Sbs>
         <SbsReagentKit>
-          <ID>x</ID>
+          <ID>y</ID>
           <Prime>false</Prime>
           <NumberCyclesRemaining>225</NumberCyclesRemaining>
           <IsNew50Cycle>false</IsNew50Cycle>
@@ -115,7 +117,7 @@
       </Sbs>
       <Index>
         <ReagentKit>
-          <ID>x</ID>
+          <ID>y</ID>
         </ReagentKit>
       </Index>
       <Pe />

@@ -32,6 +32,7 @@ class GenePanelMasterList(StrEnum):
     NEURODEG: str = "NEURODEG"
     NMD: str = "NMD"
     OMIM_AUTO: str = "OMIM-AUTO"
+    OPTIC: str = "OPTIC"
     PANELAPP_GREEN: str = "PANELAPP-GREEN"
     PEDHEP: str = "PEDHEP"
     PID: str = "PID"

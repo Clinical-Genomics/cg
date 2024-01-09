@@ -79,10 +79,10 @@ class RnafusionReportAPI(ReportAPI):
         """Return build version of the genome reference of a specific case."""
         return GenomeVersion.hg38.value
 
-    def get_report_accreditation(
+    def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
-        """Checks if the report is accredited or not. Rnafusion is an accredited workflow."""
+        """Check if the report is accredited. Rnafusion is an accredited workflow."""
         return True
 
     def get_template_name(self) -> str:

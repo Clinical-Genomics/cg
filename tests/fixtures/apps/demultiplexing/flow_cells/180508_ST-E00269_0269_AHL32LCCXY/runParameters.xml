@@ -3,49 +3,49 @@
   <Setup>
     <LimsIntegrationMode>false</LimsIntegrationMode>
     <NumberOfRehybAttemptsRemaining>2</NumberOfRehybAttemptsRemaining>
-    <ExperimentName>HKHHGCCXX</ExperimentName>
+    <ExperimentName>HL32LCCXY</ExperimentName>
     <ScanID>-999</ScanID>
     <FCPosition>A</FCPosition>
-    <WorkFlowType>SINGLEINDEX</WorkFlowType>
+    <WorkFlowType>DUALINDEX</WorkFlowType>
     <Read1>151</Read1>
     <IndexRead1>8</IndexRead1>
-    <IndexRead2>0</IndexRead2>
+    <IndexRead2>8</IndexRead2>
     <Read2>151</Read2>
-    <OutputFolder>X:\Runs</OutputFolder>
     <PeriodicSave>Save All Thumbnails</PeriodicSave>
     <Flowcell>HiSeq X</Flowcell>
     <FirstBaseConfirmation>true</FirstBaseConfirmation>
     <SampleSheet />
     <Sbs>HiSeq X SBS</Sbs>
-    <Pe>HiSeq X PE</Pe>
-    <Index>HiSeq X Sequencing Primer</Index>
+    <Pe>HiSeq X PE Dual Index</Pe>
+    <Index>HiSeq X Dual Index Sequencing Primer</Index>
     <Rehyb>None</Rehyb>
     <PerformPreRunFluidicsCheck>false</PerformPreRunFluidicsCheck>
     <ApplicationName>HiSeq Control Software</ApplicationName>
-    <ApplicationVersion>3.3.39</ApplicationVersion>
-    <RunID>160202_ST-E00266_0064_AHKHHGCCXX</RunID>
-    <RunStartDate>160202</RunStartDate>
+    <ApplicationVersion>HD 3.5.0.7</ApplicationVersion>
+    <RunID>180508_ST-E00269_0269_AHL32LCCXY</RunID>
+    <RunStartDate>180508</RunStartDate>
+    <IntegrationMode>BaseSpace</IntegrationMode>
     <BaseSpaceSettings>
-      <Username>clinical.genomics@scilifelab.se</Username>
-      <RunId>17177178</RunId>
+      <RunId>85729648</RunId>
+      <InstrumentHealthRunId>85729648</InstrumentHealthRunId>
       <UseBaseSpace>true</UseBaseSpace>
       <SendInstrumentHealthToILMN>true</SendInstrumentHealthToILMN>
       <RunMonitoringOnly>true</RunMonitoringOnly>
     </BaseSpaceSettings>
-    <ScannerID>ST-E00266</ScannerID>
-    <ScanNumber>64</ScanNumber>
-    <ComputerName>HWI-E00266</ComputerName>
+    <ScannerID>ST-E00269</ScannerID>
+    <ScanNumber>269</ScanNumber>
+    <ComputerName>HWI-E00269</ComputerName>
     <FPGAVersion>10.37.13</FPGAVersion>
     <CPLDVersion>3.0.0</CPLDVersion>
-    <RTAVersion>2.7.1</RTAVersion>
-    <BaseSpaceBrokerVersion>2.5.2.28</BaseSpaceBrokerVersion>
+    <RTAVersion>2.7.7</RTAVersion>
+    <BaseSpaceBrokerVersion>2.9.2.15</BaseSpaceBrokerVersion>
     <ChemistryVersion>Illumina,Bruno Fluidics Controller,0,v2.0420</ChemistryVersion>
     <CameraFirmware>2.21-C00-R03</CameraFirmware>
     <CameraDriver>7.5.180.4395</CameraDriver>
     <FtdiDriver>2.12.0.0</FtdiDriver>
     <FocusCameraFirmware />
-    <Barcode>HKHHGCCXX</Barcode>
-    <WashBarcode>H1234CCXX</WashBarcode>
+    <Barcode>HL32LCCXY</Barcode>
+    <WashBarcode>HHHHHCCX2</WashBarcode>
     <Username>sbsuser</Username>
     <SelectedSections>
       <Section Name="A_1" />
@@ -59,6 +59,7 @@
     </SelectedSections>
     <FocusMethod>DynamicITF</FocusMethod>
     <SelectedSurface>BothLaneSurfaces</SelectedSurface>
+    <DoDualSurfaceAutoCenter>true</DoDualSurfaceAutoCenter>
     <SwathScanMode>AutoSwath</SwathScanMode>
     <EnableLft>true</EnableLft>
     <AutoTiltOnce>true</AutoTiltOnce>
@@ -93,14 +94,15 @@
     <Reads>
       <Read Number="1" NumCycles="151" IsIndexedRead="N" />
       <Read Number="2" NumCycles="8" IsIndexedRead="Y" />
-      <Read Number="3" NumCycles="151" IsIndexedRead="N" />
+      <Read Number="3" NumCycles="8" IsIndexedRead="Y" />
+      <Read Number="4" NumCycles="151" IsIndexedRead="N" />
     </Reads>
     <ReagentKits>
       <Sbs>
         <SbsReagentKit>
-          <ID>x</ID>
+          <ID />
           <Prime>false</Prime>
-          <NumberCyclesRemaining>310</NumberCyclesRemaining>
+          <NumberCyclesRemaining>325</NumberCyclesRemaining>
           <IsNew50Cycle>false</IsNew50Cycle>
           <IsNew150Cycle>false</IsNew150Cycle>
           <IsNew300Cycle>true</IsNew300Cycle>
@@ -108,14 +110,49 @@
       </Sbs>
       <Pe>
         <ReagentKit>
-          <ID>x</ID>
+          <ID />
         </ReagentKit>
       </Pe>
     </ReagentKits>
     <ReagentBottles>
-      <Sbs />
+      <Sbs>
+        <SbsReagents>
+          <BarcodedBottle>
+            <Type>CMR</Type>
+            <Barcode />
+          </BarcodedBottle>
+          <BarcodedBottle>
+            <Type>SRE</Type>
+            <Barcode />
+          </BarcodedBottle>
+          <BarcodedBottle>
+            <Type>EDP</Type>
+            <Barcode />
+          </BarcodedBottle>
+          <BarcodedBottle>
+            <Type>LFN</Type>
+            <Barcode />
+          </BarcodedBottle>
+          <BarcodedBottle>
+            <Type>ICB</Type>
+            <Barcode />
+          </BarcodedBottle>
+          <BarcodedBottle>
+            <Type>SB1</Type>
+            <Barcode />
+          </BarcodedBottle>
+          <BarcodedBottle>
+            <Type>SB2</Type>
+            <Barcode />
+          </BarcodedBottle>
+          <BarcodedBottle>
+            <Type>SB3</Type>
+            <Barcode />
+          </BarcodedBottle>
+        </SbsReagents>
+      </Sbs>
     </ReagentBottles>
-    <RecipeFragmentVersion>3.2.4</RecipeFragmentVersion>
+    <RecipeFragmentVersion>HD 3.6.0.4</RecipeFragmentVersion>
     <PromptForPeReagents>false</PromptForPeReagents>
     <MockRun>false</MockRun>
     <ScannedBarcode />
