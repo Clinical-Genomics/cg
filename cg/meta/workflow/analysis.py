@@ -118,8 +118,8 @@ class AnalysisAPI(MetaAPI):
         """Path to case config file"""
         raise NotImplementedError
 
-    def get_trailblazer_config_path(self, case_id: str) -> Path:
-        """Path to Trailblazer job id file"""
+    def get_job_ids_path(self, case_id: str) -> Path:
+        """Path to file containing slurm/tower job ids for the case."""
         raise NotImplementedError
 
     def get_sample_name_from_lims_id(self, lims_id: str) -> str:
@@ -206,17 +206,17 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     def add_pending_trailblazer_analysis(self, case_id: str) -> None:
-        self.check_analysis_ongoing(case_id=case_id)
-        self.trailblazer_api.mark_analyses_deleted(case_id=case_id)
+        self.check_analysis_ongoing(case_id)
+        self.trailblazer_api.mark_analyses_deleted(case_id)
         self.trailblazer_api.add_pending_analysis(
             case_id=case_id,
             email=environ_email(),
             analysis_type=self.get_application_type(
-                self.status_db.get_case_by_internal_id(internal_id=case_id).links[0].sample
+                self.status_db.get_case_by_internal_id(case_id).links[0].sample
             ),
-            out_dir=self.get_trailblazer_config_path(case_id=case_id).parent.as_posix(),
-            config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
-            slurm_quality_of_service=self.get_slurm_qos_for_case(case_id=case_id),
+            out_dir=self.get_job_ids_path(case_id).parent.as_posix(),
+            config_path=self.get_job_ids_path(case_id).as_posix(),
+            slurm_quality_of_service=self.get_slurm_qos_for_case(case_id),
             data_analysis=str(self.pipeline),
             ticket=self.status_db.get_latest_ticket_from_case(case_id),
             workflow_manager=self.get_workflow_manager(),
