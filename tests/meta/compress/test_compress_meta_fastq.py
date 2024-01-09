@@ -14,10 +14,10 @@ def test_compress_case_fastq_one_sample(populated_compress_fastq_api, sample, ca
 
     # WHEN Compressing the bam files for the case
     with mock.patch.object(CompressAPI, "_is_spring_archived", return_value=False):
-        res = compress_api.compress_fastq(sample)
+        result = compress_api.compress_fastq(sample)
 
         # THEN assert compression succeded
-        assert res is True
+        assert result is True
         # THEN assert that the correct information is communicated
         assert "Compressing" in caplog.text
         # THEN assert that the correct information is communicated
@@ -39,10 +39,10 @@ def test_compress_fastq_compression_done(
 
     # WHEN Compressing the bam files for the case
     with mock.patch.object(CompressAPI, "_is_spring_archived", return_value=False):
-        res = compress_api.compress_fastq(sample)
+        result = compress_api.compress_fastq(sample)
 
         # THEN assert compression succeded
-        assert res is False
+        assert result is False
         # THEN assert that the correct information is communicated
         assert f"FASTQ to SPRING not possible for {sample}" in caplog.text
 
@@ -61,10 +61,10 @@ def test_compress_sample_fastq_compression_pending(
 
     # WHEN compressing the FASTQ files for the case
     with mock.patch.object(CompressAPI, "_is_spring_archived", return_value=False):
-        res = compress_api.compress_fastq(sample)
+        result = compress_api.compress_fastq(sample)
 
         # THEN assert compression returns False
-        assert res is False
+        assert result is False
         # THEN assert that the correct information is communicated
         assert f"FASTQ to SPRING not possible for {sample}" in caplog.text
 
@@ -83,9 +83,9 @@ def test_compress_sample_fastq_archived_spring_file(
 
     # WHEN compressing the FASTQ files for the case
     with mock.patch.object(CompressAPI, "_is_spring_archived", return_value=True):
-        res = compress_api.compress_fastq(sample)
+        result = compress_api.compress_fastq(sample)
 
         # THEN assert compression returns False
-        assert res is False
+        assert result is False
         # THEN assert that the correct information is communicated
         assert f"FASTQ to SPRING not possible for {sample}" in caplog.text
