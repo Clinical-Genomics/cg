@@ -8,19 +8,22 @@ from typing import Type
 from pydantic import ValidationError
 from typing_extensions import Literal
 
-from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-    SampleSheet,
-)
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_sample_sheet_from_file,
+    get_sample_type,
 )
+from cg.apps.demultiplex.sample_sheet.sample_models import (
+    FlowCellSample,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
+)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
 from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
-from cg.constants.sequencing import Sequencers, SEQUENCER_TYPES
+from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
+from cg.constants.symbols import EMPTY_STRING
 from cg.exc import FlowCellError, SampleSheetError
 from cg.models.demultiplex.run_parameters import (
     RunParameters,
@@ -37,6 +40,10 @@ RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
     Sequencers.NOVASEQ: RunParametersNovaSeq6000,
     Sequencers.NOVASEQX: RunParametersNovaSeqX,
 }
+SAMPLE_MODEL_TO_BCL_CONVERTER: dict[Type[FlowCellSample], str] = {
+    FlowCellSampleBCLConvert: BclConverter.DRAGEN,
+    FlowCellSampleBcl2Fastq: BclConverter.BCL2FASTQ,
+}
 
 
 class FlowCellDirectoryData:
@@ -45,15 +52,15 @@ class FlowCellDirectoryData:
     def __init__(self, flow_cell_path: Path, bcl_converter: str | None = None):
         LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
         self.path: Path = flow_cell_path
-        self.machine_name: str = ""
+        self.machine_name: str = EMPTY_STRING
         self._run_parameters: RunParameters | None = None
         self.run_date: datetime.datetime = datetime.datetime.now()
         self.machine_number: int = 0
-        self.base_name: str = ""  # Base name is flow cell-id + flow cell position
-        self.id: str = ""
+        self.base_name: str = EMPTY_STRING  # Base name is flow cell-id + flow cell position
+        self.id: str = EMPTY_STRING
         self.position: Literal["A", "B"] = "A"
         self.parse_flow_cell_dir_name()
-        self.bcl_converter: str = self.get_bcl_converter(bcl_converter)
+        self.bcl_converter: str = bcl_converter or BclConverter.DRAGEN
         self._sample_sheet_path_hk: Path | None = None
 
     def parse_flow_cell_dir_name(self):
@@ -143,25 +150,6 @@ class FlowCellDirectoryData:
         """Return the sequencer type."""
         return SEQUENCER_TYPES[self.machine_name]
 
-    def get_bcl_converter(self, bcl_converter: str) -> str:
-        """
-        Return the BCL converter to use.
-        Tries to get the BCL converter from the sequencer type if not provided.
-        Note: bcl_converter can be used to override automatic selection.
-        Reason: Data reproducibility.
-        """
-        return bcl_converter or self.get_bcl_converter_by_sequencer()
-
-    def get_bcl_converter_by_sequencer(
-        self,
-    ) -> str:
-        """Return the BCL converter based on the sequencer."""
-        if self.sequencer_type in [Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
-            LOG.debug(f"Using BCL converter: {BclConverter.DRAGEN}")
-            return BclConverter.DRAGEN
-        LOG.debug(f"Using BCL converter: {BclConverter.BCL2FASTQ}")
-        return BclConverter.BCL2FASTQ
-
     @property
     def rta_complete_path(self) -> Path:
         """Return RTAComplete path."""
@@ -233,6 +221,16 @@ class FlowCellDirectoryData:
 
     def validate_sample_sheet(self) -> bool:
         """Validate if sample sheet is on correct format."""
+        sample_type_from_sample_sheet: Type[FlowCellSample] = get_sample_type(
+            self.sample_sheet_path
+        )
+        if SAMPLE_MODEL_TO_BCL_CONVERTER[sample_type_from_sample_sheet] != self.bcl_converter:
+            LOG.warning(
+                f"Detected {SAMPLE_MODEL_TO_BCL_CONVERTER[sample_type_from_sample_sheet]} sample "
+                f"sheet for {self.bcl_converter} flow cell. "
+                "Generate the correct sample sheet or use the correct bcl converter."
+            )
+            return False
         try:
             get_sample_sheet_from_file(self.sample_sheet_path)
         except (SampleSheetError, ValidationError) as error:
@@ -278,11 +276,11 @@ class FlowCellDirectoryData:
         """
         LOG.info("Check if flow cell is ready for downstream processing")
         if not self.is_sequencing_done():
-            LOG.info(f"Sequencing is not completed for flow cell {self.id}")
+            LOG.warning(f"Sequencing is not completed for flow cell {self.id}")
             return False
         LOG.debug(f"Sequence is done for flow cell {self.id}")
         if not self.is_copy_completed():
-            LOG.info(f"Copy of sequence data is not ready for flow cell {self.id}")
+            LOG.warning(f"Copy of sequence data is not ready for flow cell {self.id}")
             return False
         LOG.debug(f"All data has been transferred for flow cell {self.id}")
         LOG.info(f"Flow cell {self.id} is ready for downstream processing")

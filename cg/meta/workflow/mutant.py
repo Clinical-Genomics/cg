@@ -2,7 +2,7 @@ import logging
 import shutil
 from pathlib import Path
 
-from cg.constants import Pipeline
+from cg.constants import Pipeline, SequencingFileTag
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -55,7 +55,7 @@ class MutantAnalysisAPI(AnalysisAPI):
     def get_case_fastq_dir(self, case_id: str) -> Path:
         return Path(self.get_case_path(case_id=case_id), "fastq")
 
-    def get_trailblazer_config_path(self, case_id: str) -> Path:
+    def get_job_ids_path(self, case_id: str) -> Path:
         return Path(self.get_case_output_path(case_id=case_id), "trailblazer_config.yaml")
 
     def _is_nanopore(self, application: Application) -> bool:
@@ -81,16 +81,14 @@ class MutantAnalysisAPI(AnalysisAPI):
             application = sample_obj.application_version.application
             if self._is_nanopore(application):
                 self.link_nanopore_fastq_for_sample(
-                    case_obj=case_obj, sample_obj=sample_obj, concatenate=True
+                    case=case_obj, sample=sample_obj, concatenate=True
                 )
                 continue
             if not sample_obj.sequencing_qc:
                 LOG.info("Sample %s read count below threshold, skipping!", sample_obj.internal_id)
                 continue
             else:
-                self.link_fastq_files_for_sample(
-                    case_obj=case_obj, sample_obj=sample_obj, concatenate=True
-                )
+                self.link_fastq_files_for_sample(case=case_obj, sample=sample_obj, concatenate=True)
 
     def get_sample_parameters(self, sample_obj: Sample) -> MutantSampleConfig:
         return MutantSampleConfig(
@@ -140,16 +138,15 @@ class MutantAnalysisAPI(AnalysisAPI):
         )
         LOG.info("Saved config to %s", config_path)
 
-    def get_additional_naming_metadata(self, sample_obj: Sample) -> str | None:
-        sample_name = sample_obj.name
+    def get_lims_naming_metadata(self, sample: Sample) -> str | None:
         region_code = self.lims_api.get_sample_attribute(
-            lims_id=sample_obj.internal_id, key="region_code"
+            lims_id=sample.internal_id, key="region_code"
         ).split(" ")[0]
         lab_code = self.lims_api.get_sample_attribute(
-            lims_id=sample_obj.internal_id, key="lab_code"
+            lims_id=sample.internal_id, key="lab_code"
         ).split(" ")[0]
 
-        return f"{region_code}_{lab_code}_{sample_name}"
+        return f"{region_code}_{lab_code}_{sample.name}"
 
     def run_analysis(self, case_id: str, dry_run: bool, config_artic: str = None) -> None:
         if self.get_case_output_path(case_id=case_id).exists():
@@ -194,34 +191,34 @@ class MutantAnalysisAPI(AnalysisAPI):
             if Path(self.get_deliverables_file_path(case_id=case.internal_id)).exists()
         ]
 
-    def get_metadata_for_nanopore_sample(self, sample_obj: Sample) -> list[dict]:
+    def get_metadata_for_nanopore_sample(self, sample: Sample) -> list[dict]:
         return [
             self.fastq_handler.parse_nanopore_file_data(file_obj.full_path)
             for file_obj in self.housekeeper_api.files(
-                bundle=sample_obj.internal_id, tags=["fastq"]
+                bundle=sample.internal_id, tags={SequencingFileTag.FASTQ}
             )
         ]
 
     def link_nanopore_fastq_for_sample(
-        self, case_obj: Case, sample_obj: Sample, concatenate: bool = False
+        self, case: Case, sample: Sample, concatenate: bool = False
     ) -> None:
         """
         Link FASTQ files for a nanopore sample to working directory.
         If pipeline input requires concatenated fastq, files can also be concatenated
         """
         read_paths = []
-        files: list[dict] = self.get_metadata_for_nanopore_sample(sample_obj=sample_obj)
+        files: list[dict] = self.get_metadata_for_nanopore_sample(sample=sample)
         sorted_files = sorted(files, key=lambda k: k["path"])
-        fastq_dir = self.get_sample_fastq_destination_dir(case=case_obj, sample=sample_obj)
+        fastq_dir = self.get_sample_fastq_destination_dir(case=case, sample=sample)
         fastq_dir.mkdir(parents=True, exist_ok=True)
 
         for counter, fastq_data in enumerate(sorted_files):
             fastq_path = Path(fastq_data["path"])
             fastq_name = self.fastq_handler.create_nanopore_fastq_name(
                 flowcell=fastq_data["flowcell"],
-                sample=sample_obj.internal_id,
+                sample=sample.internal_id,
                 filenr=str(counter),
-                meta=self.get_additional_naming_metadata(sample_obj),
+                meta=self.get_lims_naming_metadata(sample),
             )
             destination_path: Path = fastq_dir / fastq_name
             read_paths.append(destination_path)
@@ -237,13 +234,13 @@ class MutantAnalysisAPI(AnalysisAPI):
 
         concatenated_fastq_name = self.fastq_handler.create_nanopore_fastq_name(
             flowcell=fastq_data["flowcell"],
-            sample=sample_obj.internal_id,
+            sample=sample.internal_id,
             filenr=str(1),
-            meta=self.get_additional_naming_metadata(sample_obj),
+            meta=self.get_lims_naming_metadata(sample),
         )
         concatenated_path = (
             f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(concatenated_fastq_name)}"
         )
-        LOG.info("Concatenation in progress for sample %s.", sample_obj.internal_id)
+        LOG.info(f"Concatenation in progress for sample {sample.internal_id}.")
         self.fastq_handler.concatenate(read_paths, concatenated_path)
         self.fastq_handler.remove_files(read_paths)

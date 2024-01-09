@@ -40,22 +40,26 @@ class CaseActions(StrEnum):
 
     @classmethod
     def actions(cls) -> list[str]:
-        return list(cls)
+        return list(map(lambda action: action.value, cls))
 
-
-COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
-
-COMBOS = {
-    "DSD": ("DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"),
-    "CM": ("CNM", "CM"),
-    "Horsel": ("Horsel", "141217", "141201"),
-}
 
 CONTAINER_OPTIONS = ("Tube", "96 well plate", "No container")
 
 CONTROL_OPTIONS = ("", "negative", "positive")
 
 DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
+
+
+class CustomerId(StrEnum):
+    CG_INTERNAL_CUSTOMER: str = "cust000"
+    CUST001: str = "cust001"
+    CUST002: str = "cust002"
+    CUST003: str = "cust003"
+    CUST004: str = "cust004"
+    CUST032: str = "cust032"
+    CUST042: str = "cust042"
+    CUST132: str = "cust132"
+    CUST999: str = "cust999"
 
 
 class FlowCellStatus(StrEnum):
@@ -67,7 +71,7 @@ class FlowCellStatus(StrEnum):
 
     @classmethod
     def statuses(cls) -> list[str]:
-        return list(cls)
+        return list(map(lambda status: status.value, cls))
 
 
 class AnalysisType(StrEnum):
@@ -207,10 +211,15 @@ SKIP_CONFIRMATION = click.option(
 
 
 class MicrosaltQC:
-    QC_PERCENT_THRESHOLD_MWX: float = 0.1
+    AVERAGE_COVERAGE_THRESHOLD: int = 10
+    MWX_THRESHOLD_SAMPLES_PASSING: float = 0.9
     COVERAGE_10X_THRESHOLD: float = 0.75
+    DUPLICATION_RATE_THRESHOLD: float = 0.8
+    INSERT_SIZE_THRESHOLD: int = 100
+    MAPPED_RATE_THRESHOLD: float = 0.3
     NEGATIVE_CONTROL_READS_THRESHOLD: float = 0.2
     TARGET_READS: int = 6000000
+    TARGET_READS_FAIL_THRESHOLD: float = 0.7
 
 
 class MicrosaltAppTags(StrEnum):
@@ -240,3 +249,5 @@ class Strandedness(StrEnum):
 
 
 PIPELINES_USING_PARTIAL_ANALYSES: list[Pipeline] = [Pipeline.MICROSALT, Pipeline.SARS_COV_2]
+
+NG_UL_SUFFIX: str = " ng/uL"

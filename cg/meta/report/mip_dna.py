@@ -16,7 +16,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     Pipeline,
 )
-from cg.constants.scout_upload import MIP_CASE_TAGS
+from cg.constants.scout import MIP_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -79,10 +79,10 @@ class MipDNAReportAPI(ReportAPI):
         """Return build version of the genome reference of a specific case."""
         return analysis_metadata.genome_build
 
-    def get_report_accreditation(
+    def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: MipAnalysis = None
     ) -> bool:
-        """Checks if the report is accredited or not by evaluating each of the sample process accreditations."""
+        """Check if the MIP-DNA report is accredited by evaluating each of the sample process accreditations."""
         for sample in samples:
             if not sample.application.accredited:
                 return False

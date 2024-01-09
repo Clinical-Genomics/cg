@@ -15,10 +15,11 @@ from housekeeper.store.models import File, Version
 from requests import Response
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.models import (
+from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreatorBCLConvert
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
@@ -29,9 +30,11 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, Pipeline, SequencingFileTag
 from cg.constants.constants import CaseActions, FileFormat, Strandedness
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.nanopore_files import NanoporeDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SequencingPlatform
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import write_yaml
@@ -39,6 +42,7 @@ from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
@@ -247,7 +251,7 @@ def analysis_family_single_case(
         "samples": [
             {
                 "name": "proband",
-                "sex": Gender.MALE,
+                "sex": Sex.MALE,
                 "internal_id": sample_id,
                 "status": "affected",
                 "original_ticket": ticket_id,
@@ -271,7 +275,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
         "samples": [
             {
                 "name": "child",
-                "sex": Gender.MALE,
+                "sex": Sex.MALE,
                 "internal_id": sample_id,
                 "father": "ADM2",
                 "mother": "ADM3",
@@ -282,7 +286,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
             },
             {
                 "name": "father",
-                "sex": Gender.MALE,
+                "sex": Sex.MALE,
                 "internal_id": "ADM2",
                 "status": "unaffected",
                 "original_ticket": ticket_id,
@@ -291,7 +295,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
             },
             {
                 "name": "mother",
-                "sex": Gender.FEMALE,
+                "sex": Sex.FEMALE,
                 "internal_id": "ADM3",
                 "status": "unaffected",
                 "original_ticket": ticket_id,
@@ -311,6 +315,7 @@ def base_config_dict() -> dict:
     return {
         "database": "sqlite:///",
         "madeline_exe": "path/to/madeline",
+        "tower_binary_path": "path/to/tower",
         "delivery_path": "path/to/delivery",
         "flow_cells_dir": "path/to/flow_cells",
         "demultiplexed_flow_cells_dir": "path/to/demultiplexed_flow_cells_dir",
@@ -777,7 +782,7 @@ def lims_novaseq_bcl_convert_samples(
     lims_novaseq_samples_raw: list[dict],
 ) -> list[FlowCellSampleBCLConvert]:
     """Return a list of parsed flow cell samples demultiplexed with BCL convert."""
-    return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
+    return [FlowCellSampleBCLConvert.model_validate(sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture
@@ -785,7 +790,17 @@ def lims_novaseq_bcl2fastq_samples(
     lims_novaseq_samples_raw: list[dict],
 ) -> list[FlowCellSampleBcl2Fastq]:
     """Return a list of parsed Bcl2fastq flow cell samples"""
-    return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
+    return [FlowCellSampleBcl2Fastq.model_validate(sample) for sample in lims_novaseq_samples_raw]
+
+
+@pytest.fixture
+def lims_novaseq_6000_bcl2fastq_samples(
+    lims_novaseq_6000_sample_raw: list[dict],
+) -> list[FlowCellSampleBcl2Fastq]:
+    """Return a list of parsed Bcl2fastq flow cell samples"""
+    return [
+        FlowCellSampleBcl2Fastq.model_validate(sample) for sample in lims_novaseq_6000_sample_raw
+    ]
 
 
 @pytest.fixture(name="tmp_flow_cells_directory")
@@ -834,21 +849,21 @@ def flow_cell_working_directory_bclconvert(
     return Path(tmp_flow_cells_directory, bcl_convert_flow_cell_dir.name)
 
 
-@pytest.fixture(name="tmp_flow_cell_name_no_run_parameters")
+@pytest.fixture
 def tmp_flow_cell_name_no_run_parameters() -> str:
     """This is the name of a flow cell directory with the run parameters missing."""
     return "180522_A00689_0200_BHLCKNCCXY"
 
 
-@pytest.fixture(name="tmp_flow_cell_name_malformed_sample_sheet")
-def fixture_tmp_flow_cell_name_malformed_sample_sheet() -> str:
+@pytest.fixture
+def tmp_flow_cell_name_malformed_sample_sheet() -> str:
     """ "Returns the name of a flow cell directory ready for demultiplexing with BCL convert.
     Contains a sample sheet with malformed headers.
     """
     return "201203_A00689_0200_AHVKJCDRXY"
 
 
-@pytest.fixture(name="tmp_flow_cell_name_no_sample_sheet")
+@pytest.fixture
 def tmp_flow_cell_name_no_sample_sheet() -> str:
     """Return the name of a flow cell directory with the run parameters and sample sheet missing."""
     return "170407_A00689_0209_BHHKVCALXX"
@@ -876,23 +891,23 @@ def tmp_flow_cells_directory_no_sample_sheet(
     return Path(tmp_flow_cells_directory, tmp_flow_cell_name_no_sample_sheet)
 
 
-@pytest.fixture(name="tmp_flow_cells_directory_malformed_sample_sheet")
-def fixture_tmp_flow_cells_directory_malformed_sample_sheet(
+@pytest.fixture
+def tmp_flow_cells_directory_malformed_sample_sheet(
     tmp_flow_cell_name_malformed_sample_sheet: str, tmp_flow_cells_directory: Path
 ) -> Path:
     """This is a path to a flow cell directory with a sample sheet with malformed headers."""
     return Path(tmp_flow_cells_directory, tmp_flow_cell_name_malformed_sample_sheet)
 
 
-@pytest.fixture(name="tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert")
-def fixture_tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert(
+@pytest.fixture
+def tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert(
     bcl_convert_flow_cell_full_name: str, tmp_flow_cells_directory: Path
 ) -> Path:
     """This is a path to a flow cell directory with the run parameters missing."""
     return Path(tmp_flow_cells_directory, bcl_convert_flow_cell_full_name)
 
 
-@pytest.fixture(name="tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq")
+@pytest.fixture
 def tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq(
     tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq: str, tmp_flow_cells_directory: Path
 ) -> Path:
@@ -996,6 +1011,18 @@ def sample_sheet_context(
     return cg_context
 
 
+@pytest.fixture
+def bcl_convert_sample_sheet_creator(
+    bcl_convert_flow_cell: FlowCellDirectoryData,
+    lims_novaseq_bcl_convert_samples: list[FlowCellSampleBCLConvert],
+) -> SampleSheetCreatorBCLConvert:
+    """Returns a sample sheet creator for version 2 sample sheets with dragen format."""
+    return SampleSheetCreatorBCLConvert(
+        flow_cell=bcl_convert_flow_cell,
+        lims_samples=lims_novaseq_bcl_convert_samples,
+    )
+
+
 @pytest.fixture(scope="session")
 def bcl_convert_demultiplexed_flow_cell_sample_internal_ids() -> list[str]:
     """
@@ -1041,7 +1068,7 @@ def flow_cell_directory_name_demultiplexed_with_bcl_convert(
 
 
 # Fixtures for test demultiplex flow cell
-@pytest.fixture(name="tmp_empty_demultiplexed_runs_directory")
+@pytest.fixture
 def tmp_empty_demultiplexed_runs_directory(tmp_demultiplexed_runs_directory) -> Path:
     return Path(tmp_demultiplexed_runs_directory, "empty")
 
@@ -1080,7 +1107,7 @@ def store_with_demultiplexed_samples(
     return store
 
 
-@pytest.fixture(name="demultiplexing_context_for_demux")
+@pytest.fixture
 def demultiplexing_context_for_demux(
     demultiplexing_api_for_demux: DemultiplexingAPI,
     cg_context: CGConfig,
@@ -1148,7 +1175,7 @@ def demultiplexing_api_for_demux(
     return demux_api
 
 
-@pytest.fixture(name="demultiplexing_api")
+@pytest.fixture
 def demultiplexing_api(
     demultiplex_configs: dict, sbatch_process: Process, populated_housekeeper_api: HousekeeperAPI
 ) -> DemultiplexingAPI:
@@ -1206,6 +1233,12 @@ def flow_cells_dir(demultiplex_fixtures: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
+def nanopore_flow_cells_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to the sequenced flow cells fixture directory."""
+    return Path(demultiplex_fixtures, NanoporeDirsAndFiles.DATA_DIRECTORY)
+
+
+@pytest.fixture(scope="session")
 def flow_cells_demux_all_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the sequenced flow cells fixture directory."""
     return Path(demultiplex_fixtures, "flow_cells_demux_all")
@@ -1217,16 +1250,122 @@ def demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
     return Path(demultiplex_fixtures, "demultiplexed-runs-unfinished")
 
 
-@pytest.fixture(scope="session")
-def hiseq_x_flow_cell_name() -> str:
-    """Return the full name of a HiSeq2500 flow cell with only one index."""
-    return "160202_ST-E00266_0064_AHKHHGCCXX"
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_flow_cell(tmp_flow_cells_directory: Path) -> Path:
+    return Path(tmp_flow_cells_directory, "230912_A00187_1009_AHK33MDRX3")
+
+
+@pytest.fixture()
+def novaseq_6000_post_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    return FlowCellDirectoryData(Path(flow_cells_dir, "230912_A00187_1009_AHK33MDRX3"))
+
+
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_correct_sample_sheet(
+    novaseq_6000_post_1_5_kits_flow_cell: Path,
+) -> Path:
+    return Path(novaseq_6000_post_1_5_kits_flow_cell, "CorrectSampleSheet.csv")
+
+
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_raw_lims_samples(
+    novaseq_6000_post_1_5_kits_flow_cell: Path,
+) -> Path:
+    return Path(novaseq_6000_post_1_5_kits_flow_cell, "HK33MDRX3_raw.json")
+
+
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_lims_samples(
+    novaseq_6000_post_1_5_kits_raw_lims_samples: Path,
+) -> list[FlowCellSampleBCLConvert]:
+    return [
+        FlowCellSampleBCLConvert.model_validate(sample)
+        for sample in read_json(novaseq_6000_post_1_5_kits_raw_lims_samples)
+    ]
+
+
+@pytest.fixture()
+def novaseq_6000_pre_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    return FlowCellDirectoryData(Path(flow_cells_dir, "190927_A00689_0069_BHLYWYDSXX"))
+
+
+@pytest.fixture
+def novaseq_6000_pre_1_5_kits_flow_cell(tmp_flow_cells_directory: Path) -> Path:
+    return Path(tmp_flow_cells_directory, "190927_A00689_0069_BHLYWYDSXX")
+
+
+@pytest.fixture
+def novaseq_6000_pre_1_5_kits_correct_sample_sheet(
+    novaseq_6000_pre_1_5_kits_flow_cell: Path,
+) -> Path:
+    return Path(novaseq_6000_pre_1_5_kits_flow_cell, "CorrectSampleSheet.csv")
+
+
+@pytest.fixture
+def novaseq_6000_pre_1_5_kits_raw_lims_samples(novaseq_6000_pre_1_5_kits_flow_cell: Path) -> Path:
+    return Path(novaseq_6000_pre_1_5_kits_flow_cell, "HLYWYDSXX_raw.json")
+
+
+@pytest.fixture
+def novaseq_6000_pre_1_5_kits_lims_samples(
+    novaseq_6000_pre_1_5_kits_raw_lims_samples: Path,
+) -> list[FlowCellSampleBCLConvert]:
+    return [
+        FlowCellSampleBCLConvert.model_validate(sample)
+        for sample in read_json(novaseq_6000_pre_1_5_kits_raw_lims_samples)
+    ]
+
+
+@pytest.fixture
+def novaseq_x_flow_cell_directory(tmp_flow_cells_directory: Path) -> Path:
+    return Path(tmp_flow_cells_directory, "20231108_LH00188_0028_B22F52TLT3")
+
+
+@pytest.fixture()
+def novaseq_x_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    return FlowCellDirectoryData(Path(flow_cells_dir, "20231108_LH00188_0028_B22F52TLT3"))
+
+
+@pytest.fixture
+def novaseq_x_correct_sample_sheet(novaseq_x_flow_cell_directory: Path) -> Path:
+    return Path(novaseq_x_flow_cell_directory, "CorrectSampleSheet.csv")
+
+
+@pytest.fixture
+def novaseq_x_raw_lims_samples(novaseq_x_flow_cell_directory: Path) -> Path:
+    return Path(novaseq_x_flow_cell_directory, "22F52TLT3_raw.json")
+
+
+@pytest.fixture
+def novaseq_x_lims_samples(novaseq_x_raw_lims_samples: Path) -> list[FlowCellSampleBCLConvert]:
+    return [
+        FlowCellSampleBCLConvert.model_validate(sample)
+        for sample in read_json(novaseq_x_raw_lims_samples)
+    ]
 
 
 @pytest.fixture(scope="session")
-def hiseq_2500_flow_cell_name() -> str:
+def hiseq_x_single_index_flow_cell_name() -> str:
+    """Return the full name of a HiSeqX flow cell with only one index."""
+    return "170517_ST-E00266_0210_BHJCFFALXX"
+
+
+@pytest.fixture(scope="session")
+def hiseq_x_dual_index_flow_cell_name() -> str:
+    """Return the full name of a HiSeqX flow cell with two indexes."""
+    return "180508_ST-E00269_0269_AHL32LCCXY"
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_dual_index_flow_cell_name() -> str:
     """Return the full name of a HiSeq2500 flow cell with double indexes."""
-    return "180504_D00410_0608_BHGYGYBCX2"
+    return "181005_D00410_0735_BHM2LNBCX2"
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_custom_index_flow_cell_name() -> str:
+    """Return the full name of a HiSeq2500 flow cell with double indexes."""
+    return "180509_D00450_0598_BHGYFNBCX2"
 
 
 @pytest.fixture(scope="session")
@@ -1254,15 +1393,35 @@ def novaseq_x_manifest_file(novaseq_x_flow_cell_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
-def hiseq_x_flow_cell_dir(flow_cells_dir: Path, hiseq_x_flow_cell_name: str) -> Path:
+def hiseq_x_single_index_flow_cell_dir(
+    flow_cells_dir: Path, hiseq_x_single_index_flow_cell_name: str
+) -> Path:
     """Return the path to a HiSeqX flow cell."""
-    return Path(flow_cells_dir, hiseq_x_flow_cell_name)
+    return Path(flow_cells_dir, hiseq_x_single_index_flow_cell_name)
 
 
 @pytest.fixture(scope="session")
-def hiseq_2500_flow_cell_dir(flow_cells_dir: Path, hiseq_2500_flow_cell_name: str) -> Path:
+def hiseq_x_dual_index_flow_cell_dir(
+    flow_cells_dir: Path, hiseq_x_dual_index_flow_cell_name: str
+) -> Path:
+    """Return the path to a HiSeqX flow cell."""
+    return Path(flow_cells_dir, hiseq_x_dual_index_flow_cell_name)
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_dual_index_flow_cell_dir(
+    flow_cells_dir: Path, hiseq_2500_dual_index_flow_cell_name: str
+) -> Path:
     """Return the path to a HiSeq2500 flow cell."""
-    return Path(flow_cells_dir, hiseq_2500_flow_cell_name)
+    return Path(flow_cells_dir, hiseq_2500_dual_index_flow_cell_name)
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_custom_index_flow_cell_dir(
+    flow_cells_dir: Path, hiseq_2500_custom_index_flow_cell_name: str
+) -> Path:
+    """Return the path to a HiSeq2500 flow cell."""
+    return Path(flow_cells_dir, hiseq_2500_custom_index_flow_cell_name)
 
 
 @pytest.fixture(scope="session")
@@ -1283,6 +1442,44 @@ def novaseq_x_flow_cell_dir(flow_cells_dir: Path, novaseq_x_flow_cell_full_name:
     return Path(flow_cells_dir, novaseq_x_flow_cell_full_name)
 
 
+@pytest.fixture
+def hiseq_x_single_index_bcl_convert_lims_samples(
+    hiseq_x_single_index_flow_cell_dir: Path,
+) -> list[FlowCellSampleBCLConvert]:
+    """Return a list of BCLConvert samples from a HiSeqX single index flow cell."""
+    path = Path(
+        hiseq_x_single_index_flow_cell_dir, f"HJCFFALXX_bcl_convert_raw{FileExtensions.JSON}"
+    )
+    return [FlowCellSampleBCLConvert.model_validate(sample) for sample in read_json(path)]
+
+
+@pytest.fixture
+def hiseq_x_dual_index_bcl_convert_lims_samples(
+    hiseq_x_dual_index_flow_cell_dir: Path,
+) -> list[FlowCellSampleBCLConvert]:
+    """Return a list of BCLConvert samples from a HiSeqX dual index flow cell."""
+    path = Path(hiseq_x_dual_index_flow_cell_dir, f"HL32LCCXY_bcl_convert_raw{FileExtensions.JSON}")
+    return [FlowCellSampleBCLConvert.model_validate(sample) for sample in read_json(path)]
+
+
+@pytest.fixture
+def hiseq_2500_dual_index_bcl_convert_lims_samples(
+    hiseq_2500_dual_index_flow_cell_dir: Path,
+) -> list[FlowCellSampleBCLConvert]:
+    """Return a list of BCLConvert samples from a HiSeq2500 dual index flow cell."""
+    path = Path(hiseq_2500_dual_index_flow_cell_dir, "HM2LNBCX2_bcl_convert_raw.json")
+    return [FlowCellSampleBCLConvert.model_validate(sample) for sample in read_json(path)]
+
+
+@pytest.fixture
+def hiseq_2500_custom_index_bcl_convert_lims_samples(
+    hiseq_2500_custom_index_flow_cell_dir: Path,
+) -> list[FlowCellSampleBCLConvert]:
+    """Return a list of BCLConvert samples from a HiSeq2500 custom index flow cell."""
+    path = Path(hiseq_2500_custom_index_flow_cell_dir, "HGYFNBCX2_bcl_convert_raw.json")
+    return [FlowCellSampleBCLConvert.model_validate(sample) for sample in read_json(path)]
+
+
 @pytest.fixture(scope="session")
 def novaseq_bcl2fastq_sample_sheet_path(bcl2fastq_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeq6000 Bcl2fastq sample sheet."""
@@ -1296,12 +1493,6 @@ def novaseq_bcl_convert_sample_sheet_path(bcl_convert_flow_cell_dir: Path) -> Pa
 
 
 @pytest.fixture(scope="session")
-def run_parameters_missing_versions_path(run_parameters_dir: Path) -> Path:
-    """Return a NovaSeq6000 run parameters file path without software and reagent kit versions."""
-    return Path(run_parameters_dir, "RunParameters_novaseq_no_software_nor_reagent_version.xml")
-
-
-@pytest.fixture(scope="session")
 def run_parameters_wrong_instrument(run_parameters_dir: Path) -> Path:
     """Return a NovaSeqX run parameters file path with a wrong instrument value."""
     return Path(run_parameters_dir, "RunParameters_novaseq_X_wrong_instrument.xml")
@@ -1309,24 +1500,70 @@ def run_parameters_wrong_instrument(run_parameters_dir: Path) -> Path:
 
 @pytest.fixture(scope="session")
 def hiseq_x_single_index_run_parameters_path(
-    hiseq_x_flow_cell_dir: Path,
+    hiseq_x_single_index_flow_cell_dir: Path,
 ) -> Path:
     """Return the path to a HiSeqX run parameters file with single index."""
-    return Path(hiseq_x_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE)
+    return Path(
+        hiseq_x_single_index_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE
+    )
 
 
 @pytest.fixture(scope="session")
-def hiseq_2500_double_index_run_parameters_path(
-    hiseq_2500_flow_cell_dir: Path,
+def hiseq_x_dual_index_run_parameters_path(
+    hiseq_x_dual_index_flow_cell_dir: Path,
 ) -> Path:
-    """Return the path to a HiSeqX run parameters file with single index."""
-    return Path(hiseq_2500_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
+    """Return the path to a HiSeqX run parameters file with dual index."""
+    return Path(
+        hiseq_x_dual_index_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE
+    )
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_dual_index_run_parameters_path(
+    hiseq_2500_dual_index_flow_cell_dir: Path,
+) -> Path:
+    """Return the path to a HiSeq2500 run parameters file with dual index."""
+    return Path(
+        hiseq_2500_dual_index_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE
+    )
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_custom_index_run_parameters_path(
+    hiseq_2500_custom_index_flow_cell_dir: Path,
+) -> Path:
+    """Return the path to a HiSeq2500 run parameters file with custom index."""
+    return Path(
+        hiseq_2500_custom_index_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE
+    )
 
 
 @pytest.fixture(scope="session")
 def novaseq_6000_run_parameters_path(bcl2fastq_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeq6000 run parameters file."""
     return Path(bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
+
+
+@pytest.fixture
+def novaseq_6000_run_parameters_pre_1_5_kits_path(
+    novaseq_6000_pre_1_5_kits_flow_cell: Path,
+) -> Path:
+    """Return the path to a NovaSeq6000 pre 1.5 kit run parameters file."""
+    return Path(
+        novaseq_6000_pre_1_5_kits_flow_cell,
+        DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE,
+    )
+
+
+@pytest.fixture
+def novaseq_6000_run_parameters_post_1_5_kits_path(
+    novaseq_6000_post_1_5_kits_flow_cell: Path,
+) -> Path:
+    """Return the path to a NovaSeq6000 post 1.5 kit run parameters file."""
+    return Path(
+        novaseq_6000_post_1_5_kits_flow_cell,
+        DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE,
+    )
 
 
 @pytest.fixture(scope="session")
@@ -1359,27 +1596,43 @@ def run_parameters_novaseq_x_different_index(run_parameters_dir: Path) -> RunPar
 
 
 @pytest.fixture(scope="module")
-def run_parameters_missing_versions(
-    run_parameters_missing_versions_path: Path,
-) -> RunParametersNovaSeq6000:
-    """Return a NovaSeq6000 run parameters object without software and reagent kit versions."""
-    return RunParametersNovaSeq6000(run_parameters_path=run_parameters_missing_versions_path)
+def run_parameters_missing_versions_path(
+    run_parameters_dir: Path,
+) -> Path:
+    """Return a NovaSeq6000 run parameters path without software and reagent kit versions."""
+    return Path(run_parameters_dir, "RunParameters_novaseq_no_software_nor_reagent_version.xml")
 
 
 @pytest.fixture(scope="session")
-def hiseq_2500_run_parameters_double_index(
-    hiseq_2500_double_index_run_parameters_path: Path,
-) -> RunParametersHiSeq:
-    """Return a NovaSeq6000 run parameters object."""
-    return RunParametersHiSeq(run_parameters_path=hiseq_2500_double_index_run_parameters_path)
-
-
-@pytest.fixture(scope="session")
-def hiseq_x_run_parameters_single_index(
+def hiseq_x_single_index_run_parameters(
     hiseq_x_single_index_run_parameters_path: Path,
 ) -> RunParametersHiSeq:
-    """Return a NovaSeq6000 run parameters object."""
+    """Return a HiSeqX run parameters object with single index."""
     return RunParametersHiSeq(run_parameters_path=hiseq_x_single_index_run_parameters_path)
+
+
+@pytest.fixture(scope="session")
+def hiseq_x_dual_index_run_parameters(
+    hiseq_x_dual_index_run_parameters_path: Path,
+) -> RunParametersHiSeq:
+    """Return a HiSeqX run parameters object with dual index."""
+    return RunParametersHiSeq(run_parameters_path=hiseq_x_dual_index_run_parameters_path)
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_dual_index_run_parameters(
+    hiseq_2500_dual_index_run_parameters_path: Path,
+) -> RunParametersHiSeq:
+    """Return a HiSeq2500 run parameters object with dual index."""
+    return RunParametersHiSeq(run_parameters_path=hiseq_2500_dual_index_run_parameters_path)
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_custom_index_run_parameters(
+    hiseq_2500_custom_index_run_parameters_path: Path,
+) -> RunParametersHiSeq:
+    """Return a HiSeq2500 run parameters object with custom index."""
+    return RunParametersHiSeq(run_parameters_path=hiseq_2500_custom_index_run_parameters_path)
 
 
 @pytest.fixture(scope="session")
@@ -1388,6 +1641,24 @@ def novaseq_6000_run_parameters(
 ) -> RunParametersNovaSeq6000:
     """Return a NovaSeq6000 run parameters object."""
     return RunParametersNovaSeq6000(run_parameters_path=novaseq_6000_run_parameters_path)
+
+
+@pytest.fixture
+def novaseq_6000_run_parameters_pre_1_5_kits(
+    novaseq_6000_run_parameters_pre_1_5_kits_path: Path,
+) -> RunParametersNovaSeq6000:
+    """Return a NovaSeq6000 run parameters pre 1.5 kit object."""
+    return RunParametersNovaSeq6000(
+        run_parameters_path=novaseq_6000_run_parameters_pre_1_5_kits_path
+    )
+
+
+@pytest.fixture
+def novaseq_6000_run_parameters_post_1_5_kits(novaseq_6000_run_parameters_post_1_5_kits_path: Path):
+    """Return a NovaSeq6000 run parameters post 1.5 kit object."""
+    return RunParametersNovaSeq6000(
+        run_parameters_path=novaseq_6000_run_parameters_post_1_5_kits_path
+    )
 
 
 @pytest.fixture(scope="session")
@@ -1399,15 +1670,35 @@ def novaseq_x_run_parameters(
 
 
 @pytest.fixture(scope="module")
-def hiseq_2500_flow_cell(hiseq_2500_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """Return a HiSeq2500 flow cell."""
-    return FlowCellDirectoryData(flow_cell_path=hiseq_2500_flow_cell_dir)
+def hiseq_x_single_index_flow_cell(
+    hiseq_x_single_index_flow_cell_dir: Path,
+) -> FlowCellDirectoryData:
+    """Return a single-index HiSeqX flow cell."""
+    return FlowCellDirectoryData(flow_cell_path=hiseq_x_single_index_flow_cell_dir)
 
 
 @pytest.fixture(scope="module")
-def hiseq_x_flow_cell(hiseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """Return a HiSeq2500 flow cell."""
-    return FlowCellDirectoryData(flow_cell_path=hiseq_x_flow_cell_dir)
+def hiseq_x_dual_index_flow_cell(
+    hiseq_x_dual_index_flow_cell_dir: Path,
+) -> FlowCellDirectoryData:
+    """Return a dual-index HiSeqX flow cell."""
+    return FlowCellDirectoryData(flow_cell_path=hiseq_x_dual_index_flow_cell_dir)
+
+
+@pytest.fixture(scope="module")
+def hiseq_2500_dual_index_flow_cell(
+    hiseq_2500_dual_index_flow_cell_dir: Path,
+) -> FlowCellDirectoryData:
+    """Return a dual-index HiSeq2500 flow cell."""
+    return FlowCellDirectoryData(flow_cell_path=hiseq_2500_dual_index_flow_cell_dir)
+
+
+@pytest.fixture(scope="module")
+def hiseq_2500_custom_index_flow_cell(
+    hiseq_2500_custom_index_flow_cell_dir: Path,
+) -> FlowCellDirectoryData:
+    """Return a custom-index HiSeq2500 flow cell."""
+    return FlowCellDirectoryData(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
 
 
 @pytest.fixture(scope="session")
@@ -1481,10 +1772,24 @@ def lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
 
 
 @pytest.fixture
+def lims_novaseq_6000_samples_file(bcl2fastq_flow_cell_dir: Path) -> Path:
+    """Return the path to the file with the raw samples of HVKJCDRXX flow cell in lims format."""
+    return Path(bcl2fastq_flow_cell_dir, "HVKJCDRXX_raw.json")
+
+
+@pytest.fixture
 def lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> list[dict]:
     """Return a list of raw flow cell samples."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=lims_novaseq_samples_file
+    )
+
+
+@pytest.fixture
+def lims_novaseq_6000_sample_raw(lims_novaseq_6000_samples_file: Path) -> list[dict]:
+    """Return the list of raw samples from flow cell HVKJCDRXX."""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=lims_novaseq_6000_samples_file
     )
 
 
@@ -1591,6 +1896,7 @@ def hk_bundle_sample_path(sample_id: str, timestamp: datetime) -> Path:
 def hk_bundle_data(
     case_id: str,
     bed_file: Path,
+    delivery_report_html: Path,
     timestamp_yesterday: datetime,
     sample_id: str,
     father_sample_id: str,
@@ -1606,7 +1912,12 @@ def hk_bundle_data(
                 "path": bed_file.as_posix(),
                 "archive": False,
                 "tags": ["bed", sample_id, father_sample_id, mother_sample_id, "coverage"],
-            }
+            },
+            {
+                "path": delivery_report_html.as_posix(),
+                "archive": False,
+                "tags": [HK_DELIVERY_REPORT_TAG],
+            },
         ],
     }
 
@@ -2086,19 +2397,19 @@ def base_store(
 def sample_store(base_store: Store) -> Store:
     """Populate store with samples."""
     new_samples = [
-        base_store.add_sample(name="ordered", sex=Gender.MALE, internal_id="test_internal_id"),
-        base_store.add_sample(name="received", sex=Gender.UNKNOWN, received=datetime.now()),
+        base_store.add_sample(name="ordered", sex=Sex.MALE, internal_id="test_internal_id"),
+        base_store.add_sample(name="received", sex=Sex.UNKNOWN, received=datetime.now()),
         base_store.add_sample(
             name="received-prepared",
-            sex=Gender.UNKNOWN,
+            sex=Sex.UNKNOWN,
             received=datetime.now(),
             prepared_at=datetime.now(),
         ),
-        base_store.add_sample(name="external", sex=Gender.FEMALE),
-        base_store.add_sample(name="external-received", sex=Gender.FEMALE, received=datetime.now()),
+        base_store.add_sample(name="external", sex=Sex.FEMALE),
+        base_store.add_sample(name="external-received", sex=Sex.FEMALE, received=datetime.now()),
         base_store.add_sample(
             name="sequenced",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             received=datetime.now(),
             prepared_at=datetime.now(),
             last_sequenced_at=datetime.now(),
@@ -2106,19 +2417,19 @@ def sample_store(base_store: Store) -> Store:
         ),
         base_store.add_sample(
             name="sequenced-partly",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             received=datetime.now(),
             prepared_at=datetime.now(),
             reads=(250 * 1000000),
         ),
         base_store.add_sample(
             name="to-deliver",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             last_sequenced_at=datetime.now(),
         ),
         base_store.add_sample(
             name="delivered",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             last_sequenced_at=datetime.now(),
             delivered_at=datetime.now(),
             no_invoice=False,
@@ -2298,6 +2609,7 @@ def context_config(
     cg_dir: Path,
     balsamic_dir: Path,
     microsalt_dir: Path,
+    raredisease_dir: Path,
     rnafusion_dir: Path,
     taxprofiler_dir: Path,
     flow_cells_dir: Path,
@@ -2320,6 +2632,7 @@ def context_config(
             "sender_password": "",
         },
         "madeline_exe": "echo",
+        "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
         "pon_path": str(cg_dir),
         "backup": {
             "pdc_archiving_directory": pdc_archiving_directory.dict(),
@@ -2453,6 +2766,22 @@ def context_config(
             "conda_env": "S_mutant",
             "root": str(mip_dir),
         },
+        "raredisease": {
+            "compute_env": "nf_tower_compute_env",
+            "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
+            "conda_env": "S_raredisease",
+            "launch_directory": Path("path", "to", "launchdir").as_posix(),
+            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "profile": "myprofile",
+            "references": Path("path", "to", "references").as_posix(),
+            "revision": "2.2.0",
+            "root": str(raredisease_dir),
+            "slurm": {
+                "account": "development",
+                "mail_user": "test.email@scilifelab.se",
+            },
+            "tower_pipeline": "raredisease",
+        },
         "rnafusion": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
             "compute_env": "nf_tower_compute_env",
@@ -2468,7 +2797,6 @@ def context_config(
                 "account": "development",
                 "mail_user": "test.email@scilifelab.se",
             },
-            "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
             "tower_pipeline": "rnafusion",
         },
         "pigz": {"binary_path": "/bin/pigz"},
@@ -2489,7 +2817,6 @@ def context_config(
                 "account": "development",
                 "mail_user": "taxprofiler.email@scilifelab.se",
             },
-            "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
             "tower_pipeline": "taxprofiler",
         },
         "scout": {
@@ -2780,6 +3107,13 @@ def sequencing_platform() -> str:
     return SequencingPlatform.ILLUMINA
 
 
+@pytest.fixture(scope="function")
+def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
+    """Return the path to the raredisease apps dir."""
+    raredisease_dir = tmpdir_factory.mktemp("raredisease")
+    return Path(raredisease_dir).absolute().as_posix()
+
+
 # Rnafusion fixtures
 
 
@@ -2939,10 +3273,10 @@ def rnafusion_context(
 
     sample_rnafusion_case_enough_reads: Sample = helpers.add_sample(
         status_db,
-        internal_id=sample_id,
-        last_sequenced_at=datetime.now(),
-        reads=total_sequenced_reads_pass,
         application_tag=apptag_rna,
+        internal_id=sample_id,
+        reads=total_sequenced_reads_pass,
+        last_sequenced_at=datetime.now(),
     )
 
     helpers.add_relationship(
@@ -2961,10 +3295,10 @@ def rnafusion_context(
 
     sample_not_enough_reads: Sample = helpers.add_sample(
         status_db,
-        internal_id=sample_id_not_enough_reads,
-        last_sequenced_at=datetime.now(),
-        reads=total_sequenced_reads_not_pass,
         application_tag=apptag_rna,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
     )
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
@@ -3191,9 +3525,9 @@ def taxprofiler_context(
     taxprofiler_sample: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        last_sequenced_at=datetime.now(),
-        name=sample_name,
         reads=total_sequenced_reads_pass,
+        name=sample_name,
+        last_sequenced_at=datetime.now(),
     )
 
     helpers.add_relationship(
@@ -3264,7 +3598,7 @@ def store_with_sequencing_metrics(
     ]
     helpers.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
     helpers.add_sample(
-        name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
+        store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
@@ -3405,8 +3739,8 @@ def store_with_case_and_sample_with_reads(
     for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
         helpers.add_sample(
             store=store,
-            internal_id=sample_internal_id,
             customer_id=case.customer_id,
+            internal_id=sample_internal_id,
             reads=100_000_000,
         )
         sample: Sample = store.get_sample_by_internal_id(internal_id=sample_internal_id)
@@ -3512,3 +3846,85 @@ def downsample_api(
     return DownsampleAPI(
         config=downsample_context,
     )
+
+
+@pytest.fixture(scope="session")
+def raredisease_case_id() -> str:
+    """Returns a raredisease case id."""
+    return "raredisease_case_enough_reads"
+
+
+@pytest.fixture(scope="function")
+def raredisease_context(
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    nf_analysis_housekeeper: HousekeeperAPI,
+    raredisease_case_id: str,
+    sample_id: str,
+    no_sample_case_id: str,
+    total_sequenced_reads_pass: int,
+    apptag_rna: str,
+    case_id_not_enough_reads: str,
+    sample_id_not_enough_reads: str,
+    total_sequenced_reads_not_pass: int,
+) -> CGConfig:
+    """Raredisease context to use in CLI."""
+    cg_context.housekeeper_api_ = nf_analysis_housekeeper
+    cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
+    status_db: Store = cg_context.status_db
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+
+    # Create a textbook case with enough reads
+    case_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=raredisease_case_id,
+        name=raredisease_case_id,
+        data_analysis=Pipeline.RAREDISEASE,
+    )
+
+    sample_raredisease_case_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=apptag_rna,
+        internal_id=sample_id,
+        reads=total_sequenced_reads_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=case_enough_reads,
+        sample=sample_raredisease_case_enough_reads,
+    )
+
+    # Create a case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Pipeline.RAREDISEASE,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=apptag_rna,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
+    return cg_context
+
+
+@pytest.fixture
+def fastq_file_meta_raw(flow_cell_name: str) -> dict:
+    return {
+        "path": Path("a", f"file{FileExtensions.FASTQ}{FileExtensions.GZIP}"),
+        "lane": str(1),
+        "read_direction": str(2),
+        "flow_cell_id": flow_cell_name,
+        "undetermined": None,
+    }

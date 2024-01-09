@@ -1,5 +1,7 @@
 from enum import StrEnum
 
+DEFAULT_SPRING_ARCHIVE_COUNT = 200
+
 
 class ArchiveLocations(StrEnum):
     """Archive locations for the different customers' Spring files."""

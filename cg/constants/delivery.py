@@ -1,6 +1,7 @@
 """Constants for delivery."""
 
 from cg.constants.constants import Pipeline
+from cg.constants.housekeeper_tags import AlignmentFileTag, AnalysisTag, HK_DELIVERY_REPORT_TAG
 
 ONLY_ONE_CASE_PER_TICKET: list[Pipeline] = [
     Pipeline.FASTQ,
@@ -37,8 +38,8 @@ BALSAMIC_ANALYSIS_CASE_TAGS: list[set[str]] = [
 ]
 
 BALSAMIC_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {"cram"},
-    {"cram-index"},
+    {AlignmentFileTag.CRAM},
+    {AlignmentFileTag.CRAM_INDEX},
 ]
 
 BALSAMIC_QC_ANALYSIS_CASE_TAGS: list[set[str]] = [
@@ -95,10 +96,10 @@ MIP_DNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
 ]
 
 MIP_DNA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {"bam"},
-    {"bam-index"},
-    {"cram"},
-    {"cram-index"},
+    {AlignmentFileTag.BAM},
+    {AlignmentFileTag.BAM_BAI},
+    {AlignmentFileTag.CRAM},
+    {AlignmentFileTag.CRAM_INDEX},
 ]
 
 MIP_RNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
@@ -114,12 +115,12 @@ MIP_RNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
 ]
 
 MIP_RNA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {"fusion", "star-fusion"},
-    {"fusion", "arriba"},
-    {"cram"},
-    {"cram-index"},
-    {"fusion", "vcf"},
-    {"fusion", "vcf-index"},
+    {AnalysisTag.FUSION, AnalysisTag.STARFUSION},
+    {AnalysisTag.FUSION, AnalysisTag.ARRIBA},
+    {AlignmentFileTag.CRAM},
+    {AlignmentFileTag.CRAM_INDEX},
+    {AnalysisTag.FUSION, "vcf"},
+    {AnalysisTag.FUSION, "vcf-index"},
     {"salmon-quant"},
 ]
 
@@ -150,23 +151,24 @@ SARSCOV2_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 ]
 
 RNAFUSION_ANALYSIS_CASE_TAGS: list[set[str]] = [
-    {"fusion", "arriba"},
-    {"fusion", "star-fusion"},
-    {"fusion", "fusioncatcher"},
-    {"cram"},
-    {"fusioncatcher-summary"},
-    {"fusioninspector"},
-    {"fusionreport", "research"},
-    {"fusioninspector-html", "research"},
-    {"arriba-visualisation", "research"},
-    {"multiqc-html", "rna"},
-    {"software-versions"},
-    {"qc-metrics"},
-    {"multiqc-json"},
-    {"delivery-report"},
+    {AnalysisTag.FUSION, AnalysisTag.ARRIBA},
+    {AnalysisTag.FUSION, AnalysisTag.STARFUSION},
+    {AnalysisTag.FUSION, AnalysisTag.FUSIONCATCHER},
+    {AnalysisTag.FUSIONCATCHER_SUMMARY},
+    {AnalysisTag.FUSIONINSPECTOR},
+    {AnalysisTag.FUSIONREPORT, AnalysisTag.RESEARCH},
+    {AnalysisTag.FUSIONINSPECTOR_HTML, AnalysisTag.RESEARCH},
+    {AnalysisTag.ARRIBA_VISUALIZATION, AnalysisTag.RESEARCH},
+    {AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA},
+    {HK_DELIVERY_REPORT_TAG},
+    {AnalysisTag.VCF_FUSION},
+    {AnalysisTag.GENE_COUNTS},
 ]
 
-RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = []
+RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
+    {AlignmentFileTag.CRAM},
+    {AlignmentFileTag.CRAM_INDEX},
+]
 
 
 PIPELINE_ANALYSIS_TAG_MAP: dict[Pipeline, dict] = {

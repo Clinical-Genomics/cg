@@ -86,7 +86,7 @@ class StatinaConfig(BaseModel):
 
 
 class CommonAppConfig(BaseModel):
-    binary_path: str
+    binary_path: str | None
     config_path: str | None
 
 
@@ -175,22 +175,21 @@ class RnafusionConfig(CommonAppConfig):
     launch_directory: str
     revision: str
     slurm: SlurmConfig
-    tower_binary_path: str
     tower_pipeline: str
 
 
 class TaxprofilerConfig(CommonAppConfig):
-    root: str
     binary_path: str
-    conda_env: str
-    profile: str
-    pipeline_path: str
-    revision: str
     conda_binary: str | None = None
-    hostremoval_reference: str
+    conda_env: str
+    compute_env: str
     databases: str
+    hostremoval_reference: str
+    pipeline_path: str
+    profile: str
+    revision: str
+    root: str
     slurm: SlurmConfig
-    tower_binary_path: str
     tower_pipeline: str
 
 
@@ -260,6 +259,7 @@ class CGConfig(BaseModel):
     environment: Literal["production", "stage"] = "stage"
     flow_cells_dir: str
     madeline_exe: str
+    tower_binary_path: str
     max_flowcells: int | None
     data_input: DataInput | None = None
     # Base APIs that always should exist
@@ -274,7 +274,7 @@ class CGConfig(BaseModel):
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
-    data_flow_config: DataFlowConfig | None = None
+    data_flow: DataFlowConfig | None = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
@@ -314,7 +314,7 @@ class CGConfig(BaseModel):
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig = None
-    raredisease: RarediseaseConfig = Field(None, alias="raredisease")
+    raredisease: RareDiseaseConfig = Field(None, alias="raredisease")
     rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
     taxprofiler: TaxprofilerConfig = Field(None, alias="taxprofiler")
 

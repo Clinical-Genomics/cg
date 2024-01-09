@@ -3,6 +3,8 @@
 
 from enum import StrEnum
 
+from cg.constants.constants import CustomerId
+
 GENOME_BUILD_37: str = "37"
 GENOME_BUILD_38: str = "GRCh38"
 
@@ -30,6 +32,7 @@ class GenePanelMasterList(StrEnum):
     NEURODEG: str = "NEURODEG"
     NMD: str = "NMD"
     OMIM_AUTO: str = "OMIM-AUTO"
+    OPTIC: str = "OPTIC"
     PANELAPP_GREEN: str = "PANELAPP-GREEN"
     PEDHEP: str = "PEDHEP"
     PID: str = "PID"
@@ -39,8 +42,38 @@ class GenePanelMasterList(StrEnum):
     SOVM: str = "SOVM"
     STROKE: str = "STROKE"
     AID: str = "AID"
+    INHERITED_CANCER: str = "Inherited cancer"
 
     @classmethod
     def get_panel_names(cls, panels=None) -> list[str]:
         """Return requested panel names from the Master list, or all panels if none are specified."""
-        return list(panels) if panels else list(cls)
+        return list(panels) if panels else list(map(lambda panel: panel.value, cls))
+
+    @staticmethod
+    def collaborators() -> set[str]:
+        """Return collaborators of the Master list."""
+        return {
+            CustomerId.CG_INTERNAL_CUSTOMER,
+            CustomerId.CUST002,
+            CustomerId.CUST003,
+            CustomerId.CUST004,
+            CustomerId.CUST042,
+        }
+
+
+class GenePanelCombo:
+    COMBO_1: dict[str, set[str]] = {
+        "DSD": {"DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"},
+        "CM": {"CNM", "CM"},
+        "Horsel": {"Horsel", "141217", "141201"},
+        "OPHTHALMO": {
+            "OPHTHALMO",
+            "ANTE-ED",
+            "CATARACT",
+            "CORNEA",
+            "GLAUCOMA",
+            "RETINA",
+            "SED",
+            "ALBINISM",
+        },
+    }

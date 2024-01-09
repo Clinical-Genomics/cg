@@ -1,4 +1,5 @@
-"""Tests for the models in scout load config"""
+"""Tests for the models in Scout load config."""
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -11,8 +12,10 @@ from tests.apps.scout.conftest import SCOUT_INDIVIDUAL
 
 @pytest.mark.parametrize("key, value", list(SCOUT_INDIVIDUAL.items()))
 def test_validate_scout_individual_attributes(scout_individual: dict, key: str, value: Any):
-    """Test to validate that all attributes of a ScoutMipIndividual are correctly set."""
+    """Test that all attributes of a ScoutMipIndividual are correctly set."""
+
     # GIVEN some sample information
+
     # WHEN instantiating a ScoutMipIndividual
     ind_obj: ScoutMipIndividual = scout_load_config.ScoutMipIndividual(**scout_individual)
 
@@ -20,26 +23,29 @@ def test_validate_scout_individual_attributes(scout_individual: dict, key: str, 
     assert getattr(ind_obj, key) == value
 
 
-def test_instantiate_empty_mip_config():
-    """Tests whether a MipLoadConfig can be instantiate without arguments."""
-    # GIVEN nothing
+def test_instantiate_empty_mip_config(delivery_report_html: Path):
+    """Tests whether a MipLoadConfig can be instantiated only with mandatory arguments."""
 
-    # WHEN instantiating a empty mip load config
-    config: MipLoadConfig = scout_load_config.MipLoadConfig()
+    # GIVEN a delivery report file
 
-    # THEN assert it is possible to instantiate without any information
+    # WHEN instantiating an empty MIP load config
+    config: MipLoadConfig = scout_load_config.MipLoadConfig(
+        delivery_report=delivery_report_html.as_posix()
+    )
+
+    # THEN assert it is possible to instantiate without any not mandatory information
     assert isinstance(config, scout_load_config.ScoutLoadConfig)
 
 
-def test_set_mandatory_to_none():
-    """The scout load config object should validate fields as they are set.
+def test_set_mandatory_to_none(delivery_report_html: Path):
+    """Test that a value error is raised when a mandatory field is set to None."""
 
-    This test will check that a value error is raised when a mandatory field is set to None.
-    """
     # GIVEN a load config object
-    config: MipLoadConfig = scout_load_config.MipLoadConfig()
+    config: MipLoadConfig = scout_load_config.MipLoadConfig(
+        delivery_report=delivery_report_html.as_posix()
+    )
 
     # WHEN setting a mandatory field to None
     with pytest.raises(ValidationError):
-        # THEN assert a validation error was raised
+        # THEN a validation error should be raised
         config.vcf_snv = None

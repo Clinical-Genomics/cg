@@ -7,10 +7,8 @@ from pathlib import Path
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
-from cg.apps.demultiplex.sample_sheet.models import SampleSheet
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_sheet_from_file,
-)
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
@@ -40,7 +38,7 @@ class FluffySampleSheetHeaders(StrEnum):
 
     @classmethod
     def headers(cls) -> list[str]:
-        return list(cls)
+        return list(map(lambda header: header.value, cls))
 
 
 class FluffySample(BaseModel):
@@ -132,7 +130,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         return Path(self.get_output_path(case_id), "deliverables.yaml")
 
-    def get_trailblazer_config_path(self, case_id: str) -> Path:
+    def get_job_ids_path(self, case_id: str) -> Path:
         """
         Location in working directory where SLURM job id file is to be stored.
         This file contains SLURM ID of jobs associated with current analysis ,

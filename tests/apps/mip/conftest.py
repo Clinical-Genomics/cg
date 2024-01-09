@@ -3,11 +3,14 @@
 
 import pytest
 
+from cg.constants import FileExtensions
+from cg.constants.subject import Sex
+
 
 def create_file(tmpdir, flowcell, lane, read, file_content):
     """actual file on disk"""
 
-    file_name = f"S1_FC000{flowcell}_L00{lane}_R_{read}.fastq.gz"
+    file_name = f"S1_FC000{flowcell}_L00{lane}_R_{read}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     file_path = tmpdir / file_name
     file_path.write(file_content)
     return file_path
@@ -50,7 +53,7 @@ def valid_config():
         father="0",
         mother="0",
         phenotype="affected",
-        sex="male",
+        sex=Sex.MALE,
         expected_coverage=15,
         capture_kit="agilent_sureselect_cre.v1",
     )
@@ -69,7 +72,7 @@ def invalid_config_analysis_type():
         father="0",
         mother="0",
         phenotype="affected",
-        sex="male",
+        sex=Sex.MALE,
         expected_coverage=15,
         capture_kit="agilent_sureselect_cre.v1",
     )
@@ -90,7 +93,7 @@ def invalid_config_unknown_field():
         father="0",
         mother="0",
         phenotype="affected",
-        sex="male",
+        sex=Sex.MALE,
         expected_coverage=15,
         capture_kit="agilent_sureselect_cre.v1",
         unknown_field="UNKNOWN",
@@ -111,7 +114,7 @@ def invalid_config_unknown_field_sample_id():
         father="0",
         mother="0",
         phenotype="affected",
-        sex="male",
+        sex=Sex.MALE,
         expected_coverage=15,
         capture_kit="agilent_sureselect_cre.v1",
     )
@@ -132,7 +135,7 @@ def invalid_config_unknown_field_analysis_type():
         father="0",
         mother="0",
         phenotype="affected",
-        sex="male",
+        sex=Sex.MALE,
         expected_coverage=15,
         capture_kit="agilent_sureselect_cre.v1",
     )

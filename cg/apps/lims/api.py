@@ -90,6 +90,7 @@ class LimsAPI(Lims, OrderHandler):
                 else None
             ),
             "comment": udfs.get("comment"),
+            "concentration_ng_ul": udfs.get("Concentration (ng/ul)"),
         }
 
     def get_received_date(self, lims_id: str) -> dt.date:
