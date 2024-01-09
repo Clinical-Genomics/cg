@@ -401,7 +401,6 @@ def store_with_older_and_newer_analyses(
     """Return a store with  older and newer analyses."""
     analysis = base_store._get_query(table=Analysis).first()
     analysis.uploaded_at = timestamp_now
-    analysis.uploaded_to_vogue_at = timestamp_now
     analysis.cleaned_at = timestamp_now
     analysis.started_at = timestamp_now
     analysis.completed_at = timestamp_now
@@ -416,7 +415,6 @@ def store_with_older_and_newer_analyses(
             started_at=time,
             completed_at=time,
             uploaded_at=time,
-            uploaded_to_vogue_at=time,
             cleaned_at=time,
         )
 
@@ -442,7 +440,6 @@ def store_with_analyses_for_cases(
             started_at=timestamp_yesterday,
             uploaded_at=timestamp_yesterday,
             delivery_reported_at=None,
-            uploaded_to_vogue_at=timestamp_yesterday,
         )
         helpers.add_analysis(
             analysis_store,
@@ -450,7 +447,6 @@ def store_with_analyses_for_cases(
             started_at=timestamp_now,
             uploaded_at=timestamp_now,
             delivery_reported_at=None,
-            uploaded_to_vogue_at=timestamp_now,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: CaseSample = analysis_store.relate_sample(
