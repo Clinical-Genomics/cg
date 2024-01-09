@@ -654,6 +654,6 @@ def test_get_nanopore_flow_cell_directories(nanopore_flow_cells_dir):
     # THEN flow cell directories should be returned
     assert flow_cell_directories
 
-    # THEN each folder returned should have a final_summary file
+    # THEN each folder returned should have a final summary file
     for flow_cell_directory in flow_cell_directories:
         assert get_nanopore_summary_file(flow_cell_directory)
