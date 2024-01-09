@@ -636,7 +636,7 @@ def test_is_nanopore_sequencing_incomplete(tmp_path: Path):
 
 def test_get_nanopore_flow_cell_relative_path(nanopore_flow_cells_dir):
     # GIVEN a nanopore flow cell directory
-    flow_cell_directory = get_nanopore_flow_cell_directories(nanopore_flow_cells_dir)[0]
+    flow_cell_directory: Path = get_nanopore_flow_cell_directories(nanopore_flow_cells_dir)[0]
 
     # WHEN getting its relative path
     relative_path = get_nanopore_flow_cell_relative_path(flow_cell_directory)

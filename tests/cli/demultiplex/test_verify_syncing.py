@@ -18,8 +18,6 @@ from cg.models.cg_config import CGConfig
 from cg.utils.files import get_directories_in_path
 from tests.meta.demultiplex.conftest import get_all_files_in_directory_tree
 
-THREE_LEVELS_DOWN = "*/*/*"
-
 
 def test_create_manifest_files_true(
     cli_runner, tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert: Path
@@ -184,12 +182,12 @@ def test_confirm_transfer_of_illumina_flow_cell_missing_files(
         Path(target_directory, flow_cell.name, DemultiplexingDirsAndFiles.COPY_COMPLETE).unlink(
             missing_ok=True
         )
-        
+
         # GIVEN that a file is missing
         Path(
             target_directory, flow_cell.name, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE
         ).unlink()
-        
+
         # GIVEN that they each have manifest files
         create_manifest_file(Path(source_directory, flow_cell.name))
 
@@ -227,10 +225,9 @@ def test_confirm_transfer_of_nanopore_flow_cell_all_files_present(
     cg_config_object.nanopore_data_directory = target_directory.as_posix()
     Path(target_directory, NanoporeDirsAndFiles.SYSTEMD_TRIGGER_DIRECTORY).mkdir()
     for flow_cell_directory in get_nanopore_flow_cell_directories(source_directory):
-        
         # GIVEN that no file is missing
-       
-         # GIVEN that they each have manifest files
+
+        # GIVEN that they each have manifest files
         create_manifest_file(flow_cell_directory)
 
     # WHEN checking if all files are present
@@ -276,14 +273,13 @@ def test_confirm_transfer_of_nanopore_flow_cell_missing_files(
     cg_config_object.nanopore_data_directory = target_directory.as_posix()
     Path(target_directory, NanoporeDirsAndFiles.SYSTEMD_TRIGGER_DIRECTORY).mkdir()
     for flow_cell_directory in get_nanopore_flow_cell_directories(source_directory):
-        
         # GIVEN that a file is missing
         list(
             Path(target_directory, get_nanopore_flow_cell_relative_path(flow_cell_directory)).glob(
                 "*txt"
             )
         )[0].unlink()
-        
+
         # GIVEN that they each have manifest files
         create_manifest_file(flow_cell_directory)
 
@@ -322,6 +318,7 @@ def test_confirm_transfer_of_nanopore_flow_cell_missing_files(
 def set_up_source_and_target_directories(
     folders_to_include: list[Path], temporary_path: Path
 ) -> tuple[Path, Path]:
+    """Set up temporary source and target directories for testing with the included folders."""
     source_directory = Path(temporary_path, "source")
     target_directory = Path(temporary_path, "target")
     source_directory.mkdir()

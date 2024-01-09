@@ -23,6 +23,7 @@ from cg.utils.files import (
 LOG = logging.getLogger(__name__)
 
 NANOPORE_SEQUENCING_SUMMARY_PATTERN: str = r"final_summary_*.txt"
+THREE_LEVELS_DOWN: str = "*/*/*"
 
 
 def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
@@ -300,10 +301,17 @@ def get_flow_cell_id(flow_cell_dir_name: str) -> str:
 
 
 def get_nanopore_flow_cell_directories(nanopore_data_directory: Path) -> list[Path]:
-    return list(Path(nanopore_data_directory).glob("*/*/*"))
+    return list(Path(nanopore_data_directory).glob(THREE_LEVELS_DOWN))
 
 
 def get_nanopore_flow_cell_relative_path(flow_cell_directory: Path) -> Path:
+    """
+    Return the relative path of a Nanopore flow cell directory.
+    Nanopore data structure:
+    {selected_output_dir}/{experiment_id}/{sample_id}/{start_time}_{device_ID}_{flow_cell_id}_{short_protocol_run_id}/{sequencing_data}.
+    This function then returns:
+    {experiment_id}/{sample_id}/{start_time}_{device_ID}_{flow_cell_id}_{short_protocol_run_id}
+    """
     return Path(*flow_cell_directory.parts[-3:])
 
 
