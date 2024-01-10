@@ -660,6 +660,7 @@ class HousekeeperAPI:
     def reset_retrieved_archive_data(self, files_to_reset: list[File]):
         """Resets 'retrieval_task_id' and 'retrieved_at' for all files' corresponding archive entries"""
         for file in files_to_reset:
+            LOG.debug(f"Resetting retrieval data for file {file.path}")
             file.archive.retrieval_task_id = None
             file.archive.retrieved_at = None
         self.housekeeper_api.commit()

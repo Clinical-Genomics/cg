@@ -33,6 +33,8 @@ class CleanRetrievedSpringFilesAPI:
     def clean_retrieved_spring_files(self, days_since_retrieval: int):
         """Removes Spring files retrieved more than given amount of days ago from Hasta,
         and resets retrieval data in Housekeeper."""
+
+        LOG.info("Starting cleaning of retrieved Spring files.")
         files_to_remove: list[File] = self._get_files_to_remove(days_since_retrieval)
         self._unlink_files(files_to_remove)
         if not self.dry_run:
