@@ -19,7 +19,9 @@ def test_get_files_to_remove(
     # WHEN getting files to remove when cleaning retrieved spring files
     files_to_remove: list[
         File
-    ] = populated_clean_retrieved_spring_files_api_dry_run._get_files_to_remove()
+    ] = populated_clean_retrieved_spring_files_api_dry_run._get_files_to_remove(
+        days_since_retrieval=7
+    )
 
     # THEN only the file with an old enough 'retrieved_at' should be returned
     assert [file.path for file in files_to_remove] == [
@@ -41,7 +43,9 @@ def test_clean_retrieved_spring_files_dry_run(
     # GIVEN a CleanRetrievedSpringFilesAPI with a populated Housekeeper database
 
     # WHEN running 'clean_retrieved_spring_files'
-    populated_clean_retrieved_spring_files_api_dry_run.clean_retrieved_spring_files()
+    populated_clean_retrieved_spring_files_api_dry_run.clean_retrieved_spring_files(
+        days_since_retrieval=7
+    )
 
     # THEN only the file with an old enough 'retrieved_at' should have been removed
     assert (
