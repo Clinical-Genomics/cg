@@ -218,7 +218,6 @@ class Analysis(Model):
 
     created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
     case_id = Column(ForeignKey("case.id", ondelete="CASCADE"), nullable=False)
-    uploaded_to_vogue_at = Column(types.DateTime, nullable=True)
 
     case = orm.relationship("Case", back_populates="analyses")
 
