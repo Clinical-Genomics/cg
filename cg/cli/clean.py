@@ -282,7 +282,7 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
 @DRY_RUN
 @click.pass_obj
 def clean_retrieved_spring_files(context: CGConfig, dry_run: bool):
-    """Command for cleaning Spring files which were retrieved more than 7 days ago."""
+    """Clean Spring files which were retrieved more than 7 days ago."""
     clean_retrieved_spring_files_api = CleanRetrievedSpringFilesAPI(
         housekeeper_api=context.housekeeper_api, dry_run=dry_run
     )
