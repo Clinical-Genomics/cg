@@ -242,7 +242,7 @@ def hk_sample_bundle_for_flow_cell_not_to_clean(
 def clean_retrieved_spring_files_api_dry_run(
     real_housekeeper_api: HousekeeperAPI,
 ) -> CleanRetrievedSpringFilesAPI:
-    """Returns a CleanRetrievedSpringFilesAPI"""
+    """Returns a CleanRetrievedSpringFilesAPI."""
     return CleanRetrievedSpringFilesAPI(housekeeper_api=real_housekeeper_api, dry_run=True)
 
 
