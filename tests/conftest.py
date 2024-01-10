@@ -16,13 +16,6 @@ from requests import Response
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
-from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
-    SampleSheetCreatorBCLConvert,
-)
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
@@ -393,7 +386,8 @@ def demultiplex_configs(
         "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
 
-  
+
+@pytest.fixture
 def real_crunchy_api(crunchy_config) -> CrunchyAPI:
     return CrunchyAPI(crunchy_config)
 
@@ -2287,7 +2281,6 @@ def rnafusion_context(
     case_id_not_enough_reads: str,
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
-    timestamp_yesterday: datetime,
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
