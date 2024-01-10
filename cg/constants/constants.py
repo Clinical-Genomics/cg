@@ -257,6 +257,5 @@ class MultiQC(StrEnum):
     MULTIQC: str = "multiqc"
     MULTIQC_DATA: str = "multiqc_data"
 
-      
-NG_UL_SUFFIX: str = " ng/uL"
 
+NG_UL_SUFFIX: str = " ng/uL"
