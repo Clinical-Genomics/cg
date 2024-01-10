@@ -656,3 +656,10 @@ class HousekeeperAPI:
 
     def get_spring_files_retrieved_before(self, date: dt.datetime):
         return self._store.get_files_retrieved_before(date, tag_names=[SequencingFileTag.SPRING])
+
+    def reset_retrieved_archive_data(self, files_to_reset: list[File]):
+        """Resets 'retrieval task id' and 'retrieved at' for all files' corresponding archive entries"""
+        for file in files_to_reset:
+            file.archive.retrieval_task_id = None
+            file.archive.retrieved_at = None
+        self.housekeeper_api.commit()

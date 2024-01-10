@@ -29,18 +29,11 @@ class CleanRetrievedSpringFilesAPI:
             LOG.info(f"Unlinking {file_path}")
             Path(file_path).unlink(missing_ok=True)
 
-    def _reset_retrieved_archive_data(self, files_to_remove: list[File]):
-        """Resets 'retrieval task id' and 'retrieved at' for all files' corresponding archive entries"""
-        for file in files_to_remove:
-            file.archive.retrieval_task_id = None
-            file.archive.retrieved_at = None
-        self.housekeeper_api.commit()
-
     def clean_retrieved_spring_files(self, dry_run: bool):
         """Removes Spring files which were retrieved more than 7 days ago."""
         files_to_remove: list[File] = self._get_files_to_remove()
         self._unlink_files(files_to_remove=files_to_remove, dry_run=dry_run)
         if not dry_run:
-            self._reset_retrieved_archive_data(files_to_remove)
+            self.housekeeper_api.reset_retrieved_archive_data(files_to_remove)
         else:
-            LOG.info("Would have resetted the files' retrieval data")
+            LOG.info("Would have reset the files' retrieval data")

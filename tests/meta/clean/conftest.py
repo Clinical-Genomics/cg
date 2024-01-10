@@ -1,13 +1,15 @@
 """Tests for the CleanFlowCellsAPI."""
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
+from housekeeper.store.models import Bundle, File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.subject import Sex
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
+from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, Sample
@@ -234,3 +236,127 @@ def hk_sample_bundle_for_flow_cell_not_to_clean(
         "expires": timestamp_yesterday,
         "files": [],
     }
+
+
+@pytest.fixture
+def clean_retrieved_spring_files_api(
+    real_housekeeper_api: HousekeeperAPI,
+) -> CleanRetrievedSpringFilesAPI:
+    """Returns a CleanRetrievedSpringFilesAPI"""
+    return CleanRetrievedSpringFilesAPI(real_housekeeper_api)
+
+
+@pytest.fixture
+def path_to_old_retrieved_spring_file() -> str:
+    return Path("path", "to", "old", "retrieved", "spring", "file").as_posix()
+
+
+@pytest.fixture
+def path_to_newly_retrieved_spring_file() -> str:
+    return Path("path", "to", "newly", "retrieved", "spring", "file").as_posix()
+
+
+@pytest.fixture
+def path_to_archived_but_not_retrieved_spring_file() -> str:
+    return Path("path", "to", "archived", "spring", "file").as_posix()
+
+
+@pytest.fixture
+def path_to_fastq_file() -> str:
+    return Path("path", "to", "fastq", "file").as_posix()
+
+
+@pytest.fixture
+def paths_for_populated_clean_retrieved_spring_files_api(
+    path_to_old_retrieved_spring_file: str,
+    path_to_newly_retrieved_spring_file: str,
+    path_to_archived_but_not_retrieved_spring_file: str,
+    path_to_fastq_file: str,
+) -> list[str]:
+    return [
+        path_to_old_retrieved_spring_file,
+        path_to_newly_retrieved_spring_file,
+        path_to_archived_but_not_retrieved_spring_file,
+        path_to_fastq_file,
+    ]
+
+
+@pytest.fixture
+def retrieved_test_bundle_name() -> str:
+    return "retrieved_test_bundle"
+
+
+@pytest.fixture
+def archive_task_id() -> int:
+    return 123
+
+
+@pytest.fixture
+def retrieval_task_id() -> int:
+    return 321
+
+
+@pytest.fixture
+def archived_at_timestamp() -> datetime:
+    return datetime.now() - timedelta(weeks=52)
+
+
+@pytest.fixture
+def retrieved_at_old_timestamp() -> datetime:
+    return datetime.now() - timedelta(weeks=50)
+
+
+@pytest.fixture
+def retrieved_at_new_timestamp() -> datetime:
+    return datetime.now() - timedelta(days=1)
+
+
+@pytest.fixture
+def populated_clean_retrieved_spring_files_api(
+    clean_retrieved_spring_files_api: CleanRetrievedSpringFilesAPI,
+    paths_for_populated_clean_retrieved_spring_files_api: list[str],
+    retrieved_test_bundle_name: str,
+    archive_task_id: int,
+    retrieval_task_id: int,
+    archived_at_timestamp: datetime,
+    retrieved_at_old_timestamp: datetime,
+    retrieved_at_new_timestamp: datetime,
+) -> CleanRetrievedSpringFilesAPI:
+    """
+    Returns a populated CleanRetrievedSpringFilesAPI instance, containing a bundle with one version and the following files:
+        - an archived Spring file which has not been retrieved
+        - an archived Spring file which was retrieved 1 day ago
+        - an archived Spring file which was retrieved 1 year ago
+        - a Fastq file
+    """
+    clean_retrieved_spring_files_api.housekeeper_api.add_bundle_and_version_if_non_existent(
+        bundle_name=retrieved_test_bundle_name
+    )
+    bundle: Bundle = clean_retrieved_spring_files_api.housekeeper_api.bundle(
+        retrieved_test_bundle_name
+    )
+    version: Version = bundle.versions[0]
+    for path in paths_for_populated_clean_retrieved_spring_files_api:
+        tags: list[str] = (
+            [SequencingFileTag.SPRING]
+            if SequencingFileTag.SPRING in path
+            else [SequencingFileTag.FASTQ]
+        )
+        file: File = clean_retrieved_spring_files_api.housekeeper_api.add_file(
+            path=path, version_obj=version, tags=tags
+        )
+        clean_retrieved_spring_files_api.housekeeper_api.commit()
+        if "spring" in path:
+            clean_retrieved_spring_files_api.housekeeper_api.add_archives(
+                files=[file], archive_task_id=archive_task_id
+            )
+            file.archive.archived_at = archived_at_timestamp
+            if "retrieved" in path:
+                file.archive.retrieval_task_id = retrieval_task_id
+                file.archive.retrieved_at = (
+                    retrieved_at_old_timestamp if "old" in path else retrieved_at_new_timestamp
+                )
+            clean_retrieved_spring_files_api.housekeeper_api.add_commit(file.archive)
+
+    clean_retrieved_spring_files_api.housekeeper_api.commit()
+    return clean_retrieved_spring_files_api
