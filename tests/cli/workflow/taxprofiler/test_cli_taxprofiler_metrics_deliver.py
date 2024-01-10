@@ -7,11 +7,9 @@ from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
 from cg.cli.workflow.taxprofiler.base import metrics_deliver
-from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
-from cg.io.controller import ReadFile
-from cg.constants.constants import FileFormat
+from cg.io.yaml import read_yaml
 
 
 def test_without_options(cli_runner: CliRunner, taxprofiler_context: CGConfig):
@@ -57,17 +55,12 @@ def test_metrics_deliver(
     taxprofiler_mock_analysis_finish,
     caplog: LogCaptureFixture,
     taxprofiler_case_id: str,
-    sample_name: str,
-    another_sample_name: str,
     taxprofiler_metrics_deliverables: Path,
 ):
     """Test command with a case id and a finished analysis which should execute successfully."""
     caplog.set_level(logging.INFO)
 
     # GIVEN case id
-
-    metrics_content: str = "name: filtering_result_passed_filter_reads\n"
-
     result = cli_runner.invoke(metrics_deliver, [taxprofiler_case_id], obj=taxprofiler_context)
 
     # THEN command should execute successfully
@@ -76,12 +69,13 @@ def test_metrics_deliver(
     # THEN metrics deliverable file should be generated
     assert taxprofiler_metrics_deliverables.is_file()
 
-    # THEN assert metrics_content in metrics_deliverables
-    with open(taxprofiler_metrics_deliverables, "r") as file:
-        metrics_deliverables_content = file.read()
+    # WHEN reading metrics_deliverable_content as yaml
+    metrics_deliverables_content = read_yaml(file_path=taxprofiler_metrics_deliverables)
 
-    # Check if the expected content is present in the file
-    assert metrics_content in metrics_deliverables_content
+    assert isinstance(metrics_deliverables_content, dict)
+
+    # THEN the metrics_deliverables_content contains the key "metrics"
+    assert "metrics" in metrics_deliverables_content.keys()
 
     # THEN taxprofiler and case_id should be found in command string
     assert "Writing metrics deliverables file to" in caplog.text

@@ -7,10 +7,9 @@ from typing import Any
 from cg import resources
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, Strandedness
-from cg.constants.metric_conditions import RNAFUSION_METRIC_CONDITIONS
+from cg.constants.metric_conditions import MetricConditions
 from cg.exc import MissingMetrics
 from cg.io.controller import ReadFile, WriteFile
-from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
@@ -157,7 +156,10 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
         """Check that all mandatory metrics are present. Raise error if missing."""
         given_metrics: set = {metric.name for metric in metrics}
-        mandatory_metrics: set = set(RNAFUSION_METRIC_CONDITIONS.keys())
+        mandatory_metrics: set = set(MetricConditions.RNAFUSION_METRIC_CONDITIONS.keys())
+        LOG.info("Mandatory Metrics Keys:")
+        for key in mandatory_metrics:
+            LOG.info(key)
         missing_metrics: set = mandatory_metrics.difference(given_metrics)
         if missing_metrics:
             LOG.error(f"Some mandatory metrics are missing: {', '.join(missing_metrics)}")
@@ -166,9 +168,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
         """Write <case>_metrics_deliverables.yaml file."""
         metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
-        metrics = self.get_multiqc_json_metrics(
-            case_id=case_id, pipeline_metrics=RNAFUSION_METRIC_CONDITIONS
-        )
+        metrics = self.get_multiqc_json_metrics(case_id=case_id)
         self.ensure_mandatory_metrics_present(metrics=metrics)
         if dry_run:
             LOG.info(
@@ -176,7 +176,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             )
             return
 
-        LOG.info(f"Writing metrics deliverables file to {metrics_deliverables_path.as_posix()}")
+        LOG.info(f"Writing metrics deliverables file to{metrics_deliverables_path.as_posix()}")
         WriteFile.write_file_from_content(
             content={"metrics": [metric.dict() for metric in metrics]},
             file_format=FileFormat.YAML,
@@ -195,7 +195,8 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_latest_metadata(self, case_id: str) -> RnafusionAnalysis:
         """Return the latest metadata of a specific Rnafusion case."""
-        qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(
-            case_id, RNAFUSION_METRIC_CONDITIONS
-        )
+        qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
         return self.parse_analysis(qc_metrics_raw=qc_metrics)
+
+    def get_pipeline_metrics(self) -> dict:
+        return MetricConditions.RNAFUSION_METRIC_CONDITIONS

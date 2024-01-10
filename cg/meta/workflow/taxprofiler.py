@@ -13,14 +13,9 @@ from cg.models.taxprofiler.taxprofiler import (
     TaxprofilerSampleSheetEntry,
 )
 from cg.store.models import Case, Sample
-from cg.io.controller import ReadFile, WriteFile
-from cg.constants.constants import FileFormat, MultiQC, FileExtensions
-from cg.constants.metric_conditions import TAXPROFILER_METRIC_CONDITIONS
-from cg.models.deliverables.metric_deliverables import (
-    MetricsBase,
-    MultiqcDataJson,
-)
-from cg.io.json import read_json
+from cg.io.controller import WriteFile
+from cg.constants.constants import FileFormat
+from cg.constants.metric_conditions import MetricConditions
 
 LOG = logging.getLogger(__name__)
 
@@ -127,57 +122,21 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         )
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 
-    def get_multiqc_per_sample(
-        self, case_id: str, sample: Sample, pipeline_metrics: dict | None = None
-    ) -> list[MetricsBase]:
-        """Return MultiQC values per sample."""
-        sample_name: str = sample.name
-        multiqc_json = MultiqcDataJson(
-            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
-        )
-        metrics_values: dict = {}
-        for sample_data in multiqc_json.report_general_stats_data:
-            for sample_key, sample_values in sample_data.items():
-                if sample_key == f"{sample_name}_{sample_name}":
-                    metrics_values.update(sample_values)
-                    LOG.info(f"Sample Key: {sample_key}, Values: {sample_values}")
-
-        metrics_list = [
-            MetricsBase(
-                header=None,
-                id=sample_name,
-                input=MultiQC.MULTIQC_DATA + FileExtensions.JSON,
-                name=metric_name,
-                step=MultiQC.MULTIQC,
-                value=metric_value,
-                condition=pipeline_metrics.get(metric_name),
-            )
-            for metric_name, metric_value in metrics_values.items()
-        ]
-        return metrics_list
-
     def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
         """Write <case>_metrics_deliverables.yaml file."""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
-        metrics: list[MetricsBase] = []
-        for link in case.links:
-            metrics.extend(
-                self.get_multiqc_per_sample(
-                    case_id=case_id,
-                    sample=link.sample,
-                    pipeline_metrics=TAXPROFILER_METRIC_CONDITIONS,
-                )
-            )
+        metrics = self.get_multiqc_json_metrics_per_sample(case_id=case_id)
         if dry_run:
             LOG.info(
                 f"Dry-run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
             )
             return
-
         LOG.info(f"Writing metrics deliverables file to {metrics_deliverables_path.as_posix()}")
         WriteFile.write_file_from_content(
             content={"metrics": [metric.dict() for metric in metrics]},
             file_format=FileFormat.YAML,
             file_path=metrics_deliverables_path,
         )
+
+    def get_pipeline_metrics(self) -> dict:
+        return MetricConditions.TAXPROFILER_METRIC_CONDITIONS

@@ -2,12 +2,11 @@ import logging
 import operator
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Union
-
-from cg.store.models import Sample
+from typing import Any, List
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager, MultiQC
+from cg.constants.metric_conditions import MetricConditions
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -19,8 +18,9 @@ from cg.utils import Process
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
     MultiqcDataJson,
+    MetricCondition,
 )
-from cg.store.models import Case, Sample
+from cg.store.models import Case
 from cg.io.json import read_json
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.deliverables.metric_deliverables import (
@@ -165,7 +165,7 @@ class NfAnalysisAPI(AnalysisAPI):
             raise ValueError(f"No config file found for case {case_id}")
 
     def verify_deliverables_file_exists(self, case_id: str) -> None:
-        """Raise an error if deliverables files file is not found."""
+        """Raise an error if deliverables file is not found."""
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
@@ -309,20 +309,28 @@ class NfAnalysisAPI(AnalysisAPI):
             MultiQC.MULTIQC_DATA + FileExtensions.JSON,
         )
 
-    def get_multiqc_json_metrics(
-        self, case_id: str, pipeline_metrics: dict | None = None
-    ) -> list[MetricsBase]:
+    def get_pipeline_metrics(self) -> dict:
+        """Get nf-core pipeline metrics constants."""
+        raise NotImplementedError
+
+    def get_workflow_manager(self) -> str:
+        """Get workflow manager from Tower."""
+        return WorkflowManager.Tower.value
+
+    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Get a multiqc_data.json file and returns metrics and values formatted."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_id: str = case.links[0].sample.internal_id
+        sample_id = case.links[0].sample.internal_id
         multiqc_json = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
         )
         metrics_values: dict = {}
+
         for key in multiqc_json.report_general_stats_data:
             if case_id in key:
                 metrics_values.update(list(key.values())[0])
                 LOG.info(f"Key: {key}, Values: {list(key.values())[0]}")
+
         return [
             MetricsBase(
                 header=None,
@@ -331,10 +339,48 @@ class NfAnalysisAPI(AnalysisAPI):
                 name=metric_name,
                 step=MultiQC.MULTIQC,
                 value=metric_value,
-                condition=pipeline_metrics.get(metric_name, None),
+                condition=self.get_pipeline_metrics().get(metric_name, None),
             )
             for metric_name, metric_value in metrics_values.items()
         ]
+
+    def get_multiqc_json_metrics_per_sample(self, case_id: str) -> list[MetricsBase]:
+        """Get a multiqc_data.json file and returns metrics and values formatted."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        multiqc_json = MultiqcDataJson(
+            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
+        )
+
+        metrics_list: list[MetricsBase] = []
+        metrics_values: dict = {}
+        unique_metrics = set()
+
+        for key in multiqc_json.report_general_stats_data:
+            for sample_key, sample_values in key.items():
+                for link in case.links:
+                    sample_name: str = link.sample.name
+                    sample_id: str = link.sample.internal_id
+                    if sample_key == f"{sample_name}_{sample_name}":
+                        LOG.info(f"Key: {sample_key}, Values: {sample_values}")
+                        metrics_values.update(sample_values)
+
+                    for metric_name, metric_value in metrics_values.items():
+                        metric_tuple = (metric_name, metric_value)
+                        if metric_tuple not in unique_metrics:
+                            unique_metrics.add(metric_tuple)
+                            metrics_list.append(
+                                MetricsBase(
+                                    header=None,
+                                    id=sample_id,
+                                    input=MultiQC.MULTIQC_DATA + FileExtensions.JSON,
+                                    name=metric_name,
+                                    step=MultiQC.MULTIQC,
+                                    value=metric_value,
+                                    condition=self.get_pipeline_metrics().get(metric_name, None),
+                                )
+                            )
+
+        return metrics_list
 
     def validate_qc_metrics(self, case_id: str, dry_run: bool = False) -> None:
         """Validate the information from a QC metrics deliverable file."""
