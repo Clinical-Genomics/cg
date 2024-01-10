@@ -135,7 +135,6 @@ class MockTB:
 
     def __init__(self):
         self._link_was_called = False
-        self._mark_analyses_deleted_called = False
         self._add_pending_was_called = False
         self._add_pending_analysis_was_called = False
         self._family = None
@@ -187,11 +186,6 @@ class MockTB:
 
         return Row()
 
-    def mark_analyses_deleted(self, case_id: str):
-        """Mock this function"""
-        self._case_id = case_id
-        self._mark_analyses_deleted_called = True
-
     def add_pending(self, case_id: str, email: str):
         """Mock this function"""
         self._case_id = case_id
@@ -203,10 +197,6 @@ class MockTB:
         self._case_id = case_id
         self._email = email
         self._add_pending_analysis_was_called = True
-
-    def mark_analyses_deleted_called(self):
-        """check if mark_analyses_deleted was called"""
-        return self._mark_analyses_deleted_called
 
     def add_pending_was_called(self):
         """check if add_pending was called"""
