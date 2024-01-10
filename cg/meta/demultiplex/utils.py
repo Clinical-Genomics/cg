@@ -3,10 +3,13 @@ import os
 import re
 from pathlib import Path
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+)
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.nanopore_files import NanoporeDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.io.csv import read_csv, write_csv
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -20,6 +23,7 @@ from cg.utils.files import (
 LOG = logging.getLogger(__name__)
 
 NANOPORE_SEQUENCING_SUMMARY_PATTERN: str = r"final_summary_*.txt"
+THREE_LEVELS_DOWN: str = "*/*/*"
 
 
 def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
@@ -206,11 +210,18 @@ def parse_manifest_file(manifest_file: Path) -> list[Path]:
 
 def is_file_relevant_for_demultiplexing(file: Path) -> bool:
     """Returns whether a file is relevant for demultiplexing."""
-    relevant_directories = [DemultiplexingDirsAndFiles.INTER_OP, DemultiplexingDirsAndFiles.DATA]
-    for relevant_directory in relevant_directories:
-        if relevant_directory in file.parts:
-            return True
-    return False
+    irrelevant_directories = [
+        "Thumbnail_Images",
+        ".tmp.cbcl",
+        ".cbcl.tmp",
+        "MyRun",
+        "tmp.filter",
+        "CopyComplete.txt",
+    ]
+    return all(
+        irrelevant_directory not in file.as_posix()
+        for irrelevant_directory in irrelevant_directories
+    )
 
 
 def get_existing_manifest_file(source_directory: Path) -> Path | None:
@@ -246,11 +257,62 @@ def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
     return are_all_files_synced(files_at_source=files_at_source, target_directory=target_directory)
 
 
+def confirm_illumina_flow_cell_sync(source_directory: Path, target_directory: Path) -> None:
+    """Checks if all relevant files from an Illumina sequencing run have been transferred."""
+    for source_flow_cell in Path(source_directory).iterdir():
+        target_flow_cell = Path(target_directory, source_flow_cell.name)
+        if is_flow_cell_sync_confirmed(target_flow_cell):
+            LOG.debug(f"Flow cell {source_flow_cell} has already been confirmed, skipping.")
+            continue
+        if is_syncing_complete(
+            source_directory=source_flow_cell,
+            target_directory=Path(target_directory, source_flow_cell.name),
+        ):
+            create_copy_complete_file(target_flow_cell)
+
+
+def confirm_nanopore_flow_cell_sync(source_directory: Path, target_directory: Path) -> None:
+    """Checks if all relevant files from a Nanopore sequencing run have been transferred."""
+    for source_flow_cell in get_nanopore_flow_cell_directories(source_directory):
+        target_flow_cell = Path(
+            target_directory, get_nanopore_flow_cell_relative_path(source_flow_cell)
+        )
+        if is_flow_cell_sync_confirmed(target_flow_cell):
+            LOG.debug(f"Flow cell {source_flow_cell} has already been confirmed, skipping.")
+            continue
+        if is_syncing_complete(
+            source_directory=source_flow_cell,
+            target_directory=target_flow_cell,
+        ):
+            create_copy_complete_file(target_flow_cell)
+            create_nanopore_trigger_file(
+                run_name=target_flow_cell.name,
+                trigger_directory=Path(
+                    target_directory, NanoporeDirsAndFiles.SYSTEMD_TRIGGER_DIRECTORY
+                ),
+            )
+
+
 def get_flow_cell_id(flow_cell_dir_name: str) -> str:
     """Return the flow cell id from the flow cell directory name.
     Example: 230802_A00689_0857_BHGTMFDSX7 -> HGTMFDSX7
     """
     return flow_cell_dir_name.split("_")[-1][1:]
+
+
+def get_nanopore_flow_cell_directories(nanopore_data_directory: Path) -> list[Path]:
+    return list(Path(nanopore_data_directory).glob(THREE_LEVELS_DOWN))
+
+
+def get_nanopore_flow_cell_relative_path(flow_cell_directory: Path) -> Path:
+    """
+    Return the relative path of a Nanopore flow cell directory.
+    Nanopore data structure:
+    {selected_output_dir}/{experiment_id}/{sample_id}/{start_time}_{device_ID}_{flow_cell_id}_{short_protocol_run_id}/{sequencing_data}.
+    This function then returns:
+    {experiment_id}/{sample_id}/{start_time}_{device_ID}_{flow_cell_id}_{short_protocol_run_id}
+    """
+    return Path(*flow_cell_directory.parts[-3:])
 
 
 def is_manifest_file_required(flow_cell_dir: Path) -> bool:
@@ -284,6 +346,15 @@ def create_manifest_file(flow_cell_dir_name: Path) -> Path:
         delimiter="\t",
     )
     return output_path
+
+
+def create_copy_complete_file(flow_cell_directory: Path) -> None:
+    Path(flow_cell_directory, DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
+
+
+def create_nanopore_trigger_file(run_name: str, trigger_directory: Path) -> None:
+    """Create a file named as the flow cell id in the systemd trigger directory."""
+    Path(trigger_directory, run_name).touch()
 
 
 def is_flow_cell_sync_confirmed(target_flow_cell_dir: Path) -> bool:

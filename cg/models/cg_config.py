@@ -257,6 +257,7 @@ class CGConfig(BaseModel):
     environment: Literal["production", "stage"] = "stage"
     flow_cells_dir: str
     madeline_exe: str
+    nanopore_data_directory: str
     tower_binary_path: str
     max_flowcells: int | None
     data_input: DataInput | None = None
