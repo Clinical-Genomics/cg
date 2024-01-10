@@ -14,7 +14,15 @@ import pytest
 from housekeeper.store.models import File, Version
 from requests import Response
 
+from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.demultiplex.sample_sheet.sample_models import (
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
+)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
+    SampleSheetCreatorBCLConvert,
+)
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
@@ -384,6 +392,10 @@ def demultiplex_configs(
         "demultiplexed_flow_cells_dir": tmp_demultiplexed_runs_directory.as_posix(),
         "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
+
+  
+def real_crunchy_api(crunchy_config) -> CrunchyAPI:
+    return CrunchyAPI(crunchy_config)
 
 
 @pytest.fixture
