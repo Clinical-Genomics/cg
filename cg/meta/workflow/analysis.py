@@ -207,7 +207,6 @@ class AnalysisAPI(MetaAPI):
 
     def add_pending_trailblazer_analysis(self, case_id: str) -> None:
         self.check_analysis_ongoing(case_id)
-        self.trailblazer_api.mark_analyses_deleted(case_id)
         self.trailblazer_api.add_pending_analysis(
             case_id=case_id,
             email=environ_email(),

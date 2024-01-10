@@ -91,20 +91,6 @@ class TrailblazerAPI:
     def is_latest_analysis_qc(self, case_id: str) -> bool:
         return self.get_latest_analysis_status(case_id=case_id) == AnalysisStatus.QC
 
-    def mark_analyses_deleted(self, case_id: str) -> list | None:
-        """Mark all analyses for case deleted without removing analysis files"""
-        request_body = {
-            "case_id": case_id,
-        }
-        response = self.query_trailblazer(
-            command="mark-analyses-deleted", request_body=request_body
-        )
-        if response:
-            if isinstance(response, list):
-                return [TrailblazerAnalysis.model_validate(analysis) for analysis in response]
-            if isinstance(response, dict):
-                return [TrailblazerAnalysis.model_validate(response)]
-
     def add_pending_analysis(
         self,
         case_id: str,
