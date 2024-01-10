@@ -1,15 +1,17 @@
 """Fixtures for the workflow tests."""
 import datetime
 from pathlib import Path
+import shutil
 
 import pytest
 
-from cg.constants.constants import MicrosaltAppTags, MicrosaltQC, Pipeline
+from cg.constants.constants import CaseActions, MicrosaltAppTags, MicrosaltQC, Pipeline
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.compression_data import CompressionData
+from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Case, Sample
 from tests.cli.workflow.balsamic.conftest import (
     balsamic_housekeeper_dir,
@@ -19,6 +21,7 @@ from tests.cli.workflow.balsamic.conftest import (
 )
 from tests.meta.compress.conftest import compress_api, real_crunchy_api
 from tests.meta.upload.scout.conftest import another_sample_id
+from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
 
 
@@ -113,6 +116,39 @@ def microsalt_qc_fail_lims_project() -> str:
     return "ACC11111_qc_fail"
 
 
+@pytest.fixture
+def metrics_file_failing_qc(
+    microsalt_qc_fail_run_dir_path: Path,
+    microsalt_qc_fail_lims_project: str,
+    tmp_path: Path,
+) -> Path:
+    """Return a metrics file that fails QC with corresponding samples in the database."""
+    metrics_path = Path(microsalt_qc_fail_run_dir_path, f"{microsalt_qc_fail_lims_project}.json")
+    temp_metrics_path = Path(tmp_path, metrics_path.name)
+    shutil.copy(metrics_path, temp_metrics_path)
+    return temp_metrics_path
+
+
+@pytest.fixture
+def metrics_file_passing_qc(
+    microsalt_qc_pass_run_dir_path: Path,
+    microsalt_qc_pass_lims_project: str,
+    tmp_path: Path,
+) -> Path:
+    """Return a metrics file that pass QC with corresponding samples in the database."""
+    metrics_path = Path(microsalt_qc_pass_run_dir_path, f"{microsalt_qc_pass_lims_project}.json")
+    temp_metrics_path = Path(tmp_path, metrics_path.name)
+    shutil.copy(metrics_path, temp_metrics_path)
+    return temp_metrics_path
+
+
+@pytest.fixture
+def microsalt_metrics_file(
+    microsalt_qc_fail_run_dir_path: Path, microsalt_qc_fail_lims_project: str
+) -> Path:
+    return Path(microsalt_qc_fail_run_dir_path, f"{microsalt_qc_fail_lims_project}.json")
+
+
 @pytest.fixture(name="microsalt_case_qc_pass")
 def microsalt_case_qc_pass() -> str:
     """Return a microsalt case to pass QC."""
@@ -145,10 +181,9 @@ def qc_microsalt_context(
     microsalt_case_qc_fail: str,
     qc_pass_microsalt_samples: list[str],
     qc_fail_microsalt_samples: list[str],
-    microsalt_qc_pass_lims_project: str,
-    microsalt_qc_fail_lims_project: str,
 ) -> CGConfig:
     """Return a Microsalt CG context."""
+    cg_context.trailblazer_api_ = MockTB()
     analysis_api = MicrosaltAnalysisAPI(cg_context)
     store = analysis_api.status_db
 
@@ -158,19 +193,34 @@ def qc_microsalt_context(
         internal_id=microsalt_case_qc_pass,
         name=microsalt_case_qc_pass,
         data_analysis=Pipeline.MICROSALT,
+        action=CaseActions.RUNNING,
     )
 
-    for sample in qc_pass_microsalt_samples:
+    for sample in qc_pass_microsalt_samples[1:]:
         sample_to_add: Sample = helpers.add_sample(
             store=store,
-            internal_id=sample,
             application_tag=MicrosaltAppTags.MWRNXTR003,
             application_type=MicrosaltAppTags.PREP_CATEGORY,
+            internal_id=sample,
             reads=MicrosaltQC.TARGET_READS,
             last_sequenced_at=datetime.datetime.now(),
         )
 
         helpers.add_relationship(store=store, case=microsalt_case_qc_pass, sample=sample_to_add)
+
+    # Add a negative control sample that passes the qc
+    negative_control_sample: Sample = helpers.add_sample(
+        store=store,
+        internal_id=qc_pass_microsalt_samples[0],
+        application_tag=MicrosaltAppTags.MWRNXTR003,
+        application_type=MicrosaltAppTags.PREP_CATEGORY,
+        reads=0,
+        last_sequenced_at=datetime.datetime.now(),
+        control=ControlEnum.negative,
+    )
+    helpers.add_relationship(
+        store=store, case=microsalt_case_qc_pass, sample=negative_control_sample
+    )
 
     # Create a microsalt MWX case that fails QC
     microsalt_case_qc_fail: Case = helpers.add_case(
@@ -183,11 +233,12 @@ def qc_microsalt_context(
     for sample in qc_fail_microsalt_samples:
         sample_to_add: Sample = helpers.add_sample(
             store=store,
-            internal_id=sample,
             application_tag=MicrosaltAppTags.MWXNXTR003,
             application_type=MicrosaltAppTags.PREP_CATEGORY,
+            internal_id=sample,
             reads=MicrosaltQC.TARGET_READS,
             last_sequenced_at=datetime.datetime.now(),
+            control=ControlEnum.negative,
         )
 
         helpers.add_relationship(store=store, case=microsalt_case_qc_fail, sample=sample_to_add)

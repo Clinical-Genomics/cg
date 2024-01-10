@@ -140,6 +140,8 @@ class SampleSheetBCLConvertSections:
             return {
                 Sequencers.NOVASEQ: "NovaSeq6000",
                 Sequencers.NOVASEQX: "NovaSeqXSeries",
+                Sequencers.HISEQX: "HiSeqXSeries",
+                Sequencers.HISEQGA: "HiSeq2500",
             }
 
         @classmethod
@@ -191,6 +193,17 @@ class SampleSheetBCLConvertSections:
             ]
 
 
+class IndexOverrideCycles(StrEnum):
+    """Class with the possible values that index cycles can take."""
+
+    FULL_10_INDEX: str = "I10;"
+    FULL_8_INDEX: str = "I8;"
+    IGNORED_10_INDEX: str = "N10;"
+    IGNORED_8_INDEX: str = "N8;"
+    INDEX_8_IGNORED_2: str = "I8N2;"
+    INDEX_8_IGNORED_2_REVERSED: str = "N2I8;"
+
+
 OPTION_BCL_CONVERTER = click.option(
     "-b",
     "--bcl-converter",
@@ -218,6 +231,7 @@ DEMUX_STATS_PATH: dict[str, dict[str, Path | None]] = {
 
 BCL2FASTQ_METRICS_DIRECTORY_NAME: str = "Stats"
 BCL2FASTQ_METRICS_FILE_NAME: str = "Stats.json"
+CUSTOM_INDEX_TAIL = "NNNNNNNNN"
 DRAGEN_PASSED_FILTER_PCT: float = 100.00000
 FASTQ_FILE_SUFFIXES: list[str] = [".fastq", ".gz"]
 INDEX_CHECK: str = "indexcheck"
@@ -233,12 +247,12 @@ class IndexSettings(BaseModel):
     These vary between machines and versions.
 
         Attributes:
-            should_i5_be_reverse_complimented (bool): Whether the i5 index should be reverse complemented.
+            should_i5_be_reverse_complemented (bool): Whether the i5 index should be reverse complemented.
             are_i5_override_cycles_reverse_complemented (bool): Whether the override cycles for i5 should be written in as NXIX.
 
     """
 
-    should_i5_be_reverse_complimented: bool
+    should_i5_be_reverse_complemented: bool
     are_i5_override_cycles_reverse_complemented: bool
 
 
@@ -246,12 +260,12 @@ class IndexSettings(BaseModel):
 # and rigorously tested.
 
 NOVASEQ_X_INDEX_SETTINGS = IndexSettings(
-    should_i5_be_reverse_complimented=False, are_i5_override_cycles_reverse_complemented=True
+    should_i5_be_reverse_complemented=False, are_i5_override_cycles_reverse_complemented=True
 )
-NOVASEQ_6000_POST_1_5_KITS = IndexSettings(
-    should_i5_be_reverse_complimented=True, are_i5_override_cycles_reverse_complemented=False
+NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS = IndexSettings(
+    should_i5_be_reverse_complemented=True, are_i5_override_cycles_reverse_complemented=False
 )
-NO_REVERSE_COMPLEMENTS = IndexSettings(
-    should_i5_be_reverse_complimented=False,
+NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS = IndexSettings(
+    should_i5_be_reverse_complemented=False,
     are_i5_override_cycles_reverse_complemented=False,
 )

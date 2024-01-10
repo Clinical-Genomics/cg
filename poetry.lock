@@ -564,6 +564,20 @@ files = [
 test = ["pytest (>=6)"]
 
 [[package]]
+name = "execnet"
+version = "2.0.2"
+description = "execnet: rapid multi-Python deployment"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "execnet-2.0.2-py3-none-any.whl", hash = "sha256:88256416ae766bc9e8895c76a87928c0012183da3cc4fc18016e6f050e025f41"},
+    {file = "execnet-2.0.2.tar.gz", hash = "sha256:cc59bc4423742fd71ad227122eb0dd44db51efb3dc4095b45ac9a08c770096af"},
+]
+
+[package.extras]
+testing = ["hatch", "pre-commit", "pytest", "tox"]
+
+[[package]]
 name = "fastapi"
 version = "0.104.0"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
@@ -844,13 +858,13 @@ files = [
 
 [[package]]
 name = "housekeeper"
-version = "4.10.14"
+version = "4.11.0"
 description = "Housekeeper takes care of files"
 optional = false
 python-versions = "*"
 files = [
-    {file = "housekeeper-4.10.14-py2.py3-none-any.whl", hash = "sha256:f292783e524483e526b861f3f345618080b8eca864549711c99b0959828bd4f9"},
-    {file = "housekeeper-4.10.14.tar.gz", hash = "sha256:d155a37c4d352f895ab90c45f44d0e51fec6c76ae59c74e0211db6af434114c4"},
+    {file = "housekeeper-4.11.0-py2.py3-none-any.whl", hash = "sha256:c309d32d12d26bd57389a21f36cc6ec93745570707b26e5a2f09686b6e95b1c8"},
+    {file = "housekeeper-4.11.0.tar.gz", hash = "sha256:05d8644bd4d6aa2765de4d6207049a82a7f12494b71923f3ef4fed9e23e844d3"},
 ]
 
 [package.dependencies]
@@ -1456,13 +1470,13 @@ xml = ["lxml (>=4.8.0)"]
 
 [[package]]
 name = "paramiko"
-version = "3.3.1"
+version = "3.4.0"
 description = "SSH2 protocol library"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "paramiko-3.3.1-py3-none-any.whl", hash = "sha256:b7bc5340a43de4287bbe22fe6de728aa2c22468b2a849615498dd944c2f275eb"},
-    {file = "paramiko-3.3.1.tar.gz", hash = "sha256:6a3777a961ac86dbef375c5f5b8d50014a1a96d0fd7f054a43bc880134b0ff77"},
+    {file = "paramiko-3.4.0-py3-none-any.whl", hash = "sha256:43f0b51115a896f9c00f59618023484cb3a14b98bbceab43394a39c6739b7ee7"},
+    {file = "paramiko-3.4.0.tar.gz", hash = "sha256:aac08f26a31dc4dffd92821527d1682d99d52f9ef6851968114a8728f3c274d3"},
 ]
 
 [package.dependencies]
@@ -1855,6 +1869,26 @@ pytest = ">=5.0"
 
 [package.extras]
 dev = ["pre-commit", "pytest-asyncio", "tox"]
+
+[[package]]
+name = "pytest-xdist"
+version = "3.5.0"
+description = "pytest xdist plugin for distributed testing, most importantly across multiple CPUs"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pytest-xdist-3.5.0.tar.gz", hash = "sha256:cbb36f3d67e0c478baa57fa4edc8843887e0f6cfc42d677530a36d7472b32d8a"},
+    {file = "pytest_xdist-3.5.0-py3-none-any.whl", hash = "sha256:d075629c7e00b611df89f490a5063944bee7a4362a5ff11c7cc7824a03dfce24"},
+]
+
+[package.dependencies]
+execnet = ">=1.1"
+pytest = ">=6.2.0"
+
+[package.extras]
+psutil = ["psutil (>=3.0)"]
+setproctitle = ["setproctitle"]
+testing = ["filelock"]
 
 [[package]]
 name = "python-dateutil"
@@ -2382,4 +2416,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "2f9e1bc07a1c8f49e9bc8a2c4672c07ca8f683a290f9fca9448f84c5f814d3e5"
+content-hash = "0e80e415fa553084eebcf19e0a13b173db121e7fe77aef7240f5dee85b894e04"

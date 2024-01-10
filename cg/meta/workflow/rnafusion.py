@@ -15,6 +15,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
 )
+from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import PipelineDeliverables
 from cg.models.rnafusion.rnafusion import (
     RnafusionAnalysis,
@@ -42,11 +43,11 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.profile: str = config.rnafusion.profile
         self.conda_env: str = config.rnafusion.conda_env
         self.conda_binary: str = config.rnafusion.conda_binary
-        self.tower_binary_path: str = config.rnafusion.tower_binary_path
+        self.tower_binary_path: str = config.tower_binary_path
         self.tower_pipeline: str = config.rnafusion.tower_pipeline
         self.account: str = config.rnafusion.slurm.account
         self.email: str = config.rnafusion.slurm.mail_user
-        self.compute_env: str = config.rnafusion.compute_env
+        self.compute_env_base: str = config.rnafusion.compute_env
         self.revision: str = config.rnafusion.revision
         self.nextflow_binary_path: str = config.rnafusion.binary_path
 
@@ -68,7 +69,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self, sample: Sample, case_id: str, strandedness: Strandedness
     ) -> list[list[str]]:
         """Get sample sheet content per sample."""
-        sample_metadata: list[dict] = self.gather_file_metadata_for_sample(sample_obj=sample)
+        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
         fastq_forward_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, forward_read=True
         )
