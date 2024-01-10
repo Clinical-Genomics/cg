@@ -112,6 +112,7 @@ class Pipeline(StrEnum):
     MICROSALT: str = "microsalt"
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"
+    MUTANT: str = "mutant"
     RAREDISEASE: str = "raredisease"
     RNAFUSION: str = "rnafusion"
     RSYNC: str = "rsync"

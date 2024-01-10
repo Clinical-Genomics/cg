@@ -12,16 +12,16 @@ from cg.apps.deliverables_metrics_parser.parser.deliverables_parser import (
     parse_metrics_deliverables_file,
     read_metrics_deliverables,
 )
-from cg.constants.pipeline import Pipeline
+from cg.constants.constants import Pipeline
 
 
 @pytest.mark.parametrize(
     "pipeline, expected_path",
     [
         (Pipeline.BALSAMIC, "balsamic_metrics_deliverables_path"),
-        (Pipeline.MIPDNA, "mip_dna_metrics_deliverables_path"),
-        (Pipeline.MIPRNA, "mip_rna_metrics_deliverables_path"),
-        (Pipeline.MUTANT, "mutant_metrics_deliverables_path"),
+        (Pipeline.MIP_DNA, "mip_dna_metrics_deliverables_path"),
+        (Pipeline.MIP_RNA, "mip_rna_metrics_deliverables_path"),
+        (Pipeline.SARS_COV_2, "mutant_metrics_deliverables_path"),
         (Pipeline.RNAFUSION, "rna_fusion_metrics_deliverables_path"),
     ],
 )

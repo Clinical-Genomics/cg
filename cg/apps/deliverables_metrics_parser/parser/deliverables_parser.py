@@ -8,8 +8,9 @@ from cg.apps.deliverables_metrics_parser.models.pipeline_metrics_deliverables im
     MIPDNAMetricsDeliverables,
 )
 from cg.constants.constants import FileFormat
-from cg.constants.pipeline import Pipeline
+from cg.constants.constants import Pipeline
 from cg.io.controller import ReadFile
+from cg.models.cg_config import CGConfig
 
 
 class MetricsParserConstants(Enum):
@@ -36,14 +37,21 @@ def generate_metrics_deliverables_model(
     return MIPDNAMetricsDeliverables.model_validate(sample_metrics)
 
 
-def get_metrics_deliverables_file_path(pipeline: str, case_id: str) -> Path:
+def get_metrics_deliverables_file_path(pipeline: str, case_id: str, config: CGConfig) -> Path:
     """Returns the metrics deliverables from the pipeline for a case."""
+
+    config.mip_rd_dna.root
+    config.mip_rd_rna.root
+    config.balsamic.root
+    config.rnafusion.root
+    config.mutant.root
+
     pipelines = {
-        Pipeline.MIPDNA: "/home/proj/production/rare-disease/cases/{case_id}/analysis/{case_id}_metrics_deliverables.yaml",
-        Pipeline.MIPRNA: "/home/proj/production/rare-disease/cases/{case_id}/analysis/{case_id}_metrics_deliverables.yaml",
-        Pipeline.BALSAMIC: "/home/proj/production/cancer/cases/{case_id}/analysis/qc/{case_id}_metrics_deliverables.yaml",
+        Pipeline.MIP_DNA: "{config.mip_rd_dna.root}/{case_id}/analysis/{case_id}_metrics_deliverables.yaml",
+        Pipeline.MIP_RNA: "{config.mip_rd_rna.root}/{case_id}/analysis/{case_id}_metrics_deliverables.yaml",
+        Pipeline.BALSAMIC: "{config.balsamic.root}/{case_id}/analysis/qc/{case_id}_metrics_deliverables.yaml",
         Pipeline.RNAFUSION: "/home/proj/production/rnafusion/cases/{case_id}/{case_id}_metrics_deliverables.yaml",
-        Pipeline.MUTANT: "/home/proj/production/mutant/cases/{case_id}/results/{case_id}_metrics_deliverables.yaml",
+        Pipeline.SARS_COV_2: "/home/proj/production/mutant/cases/{case_id}/results/{case_id}_metrics_deliverables.yaml",
     }
 
     if pipeline in pipelines:

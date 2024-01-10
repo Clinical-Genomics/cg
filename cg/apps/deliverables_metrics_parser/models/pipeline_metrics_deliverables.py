@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 class MIPDNAMetricsDeliverables(BaseModel):
     sample_id: str = None
-    gender: str = None
+    sex: str = Field(..., alias="gender")
     # Skipping next two lines for now
     # reads: str = None
     # pct_pf_reads_improper_pairs: list[str] = Field(..., alias="PCT_PF_READS_IMPROPER_PAIRS")
