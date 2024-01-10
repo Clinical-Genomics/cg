@@ -658,7 +658,7 @@ class HousekeeperAPI:
         return self._store.get_files_retrieved_before(date, tag_names=[SequencingFileTag.SPRING])
 
     def reset_retrieved_archive_data(self, files_to_reset: list[File]):
-        """Resets 'retrieval task id' and 'retrieved at' for all files' corresponding archive entries"""
+        """Resets 'retrieval_task_id' and 'retrieved_at' for all files' corresponding archive entries"""
         for file in files_to_reset:
             file.archive.retrieval_task_id = None
             file.archive.retrieved_at = None
