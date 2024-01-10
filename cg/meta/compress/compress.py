@@ -73,17 +73,11 @@ class CompressAPI:
         for run_name in sample_fastq:
             LOG.info(f"Check if compression possible for run {run_name}")
             compression: CompressionData = sample_fastq[run_name]["compression_data"]
-            if FileData.is_empty(compression.fastq_first):
-                LOG.warning(f"Fastq files are empty for {sample_id}: {compression.fastq_first}")
-                self.delete_fastq_housekeeper(
-                    hk_fastq_first=sample_fastq[run_name]["hk_first"],
-                    hk_fastq_second=sample_fastq[run_name]["hk_second"],
-                )
-                all_ok = False
-                continue
-            is_spring_archived: bool = self._is_spring_archived(compression)
-            is_compression_possible: bool = self.crunchy_api.is_fastq_compression_possible(
-                compression_obj=compression, is_spring_archived=is_spring_archived
+            is_compression_possible: bool = self._is_fastq_compression_possible(
+                compression=compression,
+                sample_id=sample_id,
+                sample_fastq=sample_fastq,
+                run_name=run_name,
             )
             if not is_compression_possible:
                 LOG.warning(f"FASTQ to SPRING not possible for {sample_id}, run {run_name}")
@@ -95,6 +89,21 @@ class CompressAPI:
             )
             self.crunchy_api.fastq_to_spring(compression_obj=compression, sample_id=sample_id)
         return all_ok
+
+    def _is_fastq_compression_possible(
+        self, compression: CompressionData, sample_id: str, sample_fastq: dict, run_name: str
+    ) -> bool:
+        if FileData.is_empty(compression.fastq_first):
+            LOG.warning(f"Fastq files are empty for {sample_id}: {compression.fastq_first}")
+            self.delete_fastq_housekeeper(
+                hk_fastq_first=sample_fastq[run_name]["hk_first"],
+                hk_fastq_second=sample_fastq[run_name]["hk_second"],
+            )
+            return False
+        if self._is_spring_archived(compression):
+            LOG.debug(f"Found archived Spring file for {sample_id} - compression not possible")
+            return False
+        return self.crunchy_api.is_fastq_compression_possible(compression_obj=compression)
 
     def _is_spring_archived(self, compression_data: CompressionData) -> bool:
         spring_file: File | None = self.hk_api.get_file_insensitive_path(
