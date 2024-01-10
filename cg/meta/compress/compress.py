@@ -14,7 +14,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
-from cg.models import CompressionData, FileData
+from cg.models import CompressionData
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -76,8 +76,6 @@ class CompressAPI:
             is_compression_possible: bool = self._is_fastq_compression_possible(
                 compression=compression,
                 sample_id=sample_id,
-                sample_fastq=sample_fastq,
-                run_name=run_name,
             )
             if not is_compression_possible:
                 LOG.warning(f"FASTQ to SPRING not possible for {sample_id}, run {run_name}")
@@ -90,16 +88,7 @@ class CompressAPI:
             self.crunchy_api.fastq_to_spring(compression_obj=compression, sample_id=sample_id)
         return all_ok
 
-    def _is_fastq_compression_possible(
-        self, compression: CompressionData, sample_id: str, sample_fastq: dict, run_name: str
-    ) -> bool:
-        if FileData.is_empty(compression.fastq_first):
-            LOG.warning(f"Fastq files are empty for {sample_id}: {compression.fastq_first}")
-            self.delete_fastq_housekeeper(
-                hk_fastq_first=sample_fastq[run_name]["hk_first"],
-                hk_fastq_second=sample_fastq[run_name]["hk_second"],
-            )
-            return False
+    def _is_fastq_compression_possible(self, compression: CompressionData, sample_id: str) -> bool:
         if self._is_spring_archived(compression):
             LOG.debug(f"Found archived Spring file for {sample_id} - compression not possible")
             return False
