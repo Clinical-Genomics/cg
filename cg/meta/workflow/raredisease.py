@@ -107,7 +107,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             outdir=self.get_case_path(case_id=case_id),
         )
 
-    def get_phenotype_code(self, phenotype: str) -> int:
+    @staticmethod
+    def get_phenotype_code(phenotype: str) -> int:
         """Return Raredisease phenotype code."""
         LOG.debug("Translate phenotype to int")
         if phenotype == "unaffected":
@@ -117,9 +118,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         else:
             return 0
 
-    def get_sex_code(self, sex: str) -> int:
-        """Return Raredisease phenotype code."""
-        LOG.debug("Translate phenotype to int")
+    @staticmethod
+    def get_sex_code(sex: str) -> int:
+        """Return Raredisease sex code."""
+        LOG.debug("Translate sex to int")
         if sex == "male":
             return 1
         elif sex == "female":
@@ -127,13 +129,11 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         else:
             return 0
 
-    def get_parental_id(self, parent: CaseSample) -> str:
-        """Return Raredisease phenotype code."""
-        LOG.debug("Translate phenotype to int")
-        if parent:
-            return parent.internal_id
-        else:
-            return ""
+    @staticmethod
+    def get_parental_id(parent: CaseSample) -> str:
+        """Return Raredisease parental id."""
+        LOG.debug("Return parental id")
+        return parent.internal_id if parent else ""
 
     @property
     def root(self) -> str:
