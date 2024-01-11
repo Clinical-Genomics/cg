@@ -1,7 +1,7 @@
 """ Module to decouple cg code from Housekeeper code """
-import datetime as dt
 import logging
 import os
+from datetime import datetime
 from pathlib import Path
 
 from housekeeper.include import checksum as hk_checksum
@@ -37,7 +37,7 @@ class HousekeeperAPI:
         LOG.warning(f"Called undefined {name} on {self.__class__.__name__}, please wrap")
         return getattr(self._store, name)
 
-    def new_bundle(self, name: str, created_at: dt.datetime = None) -> Bundle:
+    def new_bundle(self, name: str, created_at: datetime = None) -> Bundle:
         """Create a new file bundle."""
         return self._store.new_bundle(name, created_at)
 
@@ -241,11 +241,11 @@ class HousekeeperAPI:
         file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
         return file_obj
 
-    def new_version(self, created_at: dt.datetime, expires_at: dt.datetime = None) -> Version:
+    def new_version(self, created_at: datetime, expires_at: datetime = None) -> Version:
         """Create a new bundle version."""
         return self._store.new_version(created_at, expires_at)
 
-    def version(self, bundle: str, date: dt.datetime) -> Version:
+    def version(self, bundle: str, date: datetime) -> Version:
         """Fetch a version."""
         LOG.debug(f"Return version: {date}, from {bundle}")
         return self._store.get_version_by_date_and_bundle_name(
@@ -290,7 +290,7 @@ class HousekeeperAPI:
             bundle_result: tuple[Bundle, Version] = self.add_bundle(
                 bundle_data={
                     "name": bundle_name,
-                    "created_at": dt.datetime.now(),
+                    "created_at": datetime.now(),
                     "expires_at": None,
                     "files": [],
                 }
@@ -320,7 +320,7 @@ class HousekeeperAPI:
     def include(self, version_obj: Version):
         """Call the include version function to import related assets."""
         include_version(self.get_root_dir(), version_obj)
-        version_obj.included_at = dt.datetime.now()
+        version_obj.included_at = datetime.now()
 
     def add_commit(self, obj):
         """Wrap method in Housekeeper Store."""
@@ -380,7 +380,7 @@ class HousekeeperAPI:
             LOG.warning(
                 f"File is already included in Housekeeper for bundle: {bundle_name}, version: {bundle_version}"
             )
-        bundle_version.included_at = dt.datetime.now()
+        bundle_version.included_at = datetime.now()
         self.commit()
 
     def get_file_from_latest_version(self, bundle_name: str, tags: set[str]) -> File | None:
@@ -654,7 +654,7 @@ class HousekeeperAPI:
             archive.retrieval_task_id = new_retrieval_job_id
         self._store.session.commit()
 
-    def get_spring_files_retrieved_before(self, date: dt.datetime):
+    def get_spring_files_retrieved_before(self, date: datetime):
         return self._store.get_files_retrieved_before(date, tag_names=[SequencingFileTag.SPRING])
 
     def reset_retrieved_archive_data(self, files_to_reset: list[File]):
