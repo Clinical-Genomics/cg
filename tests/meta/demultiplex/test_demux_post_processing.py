@@ -7,7 +7,9 @@ from pydantic import BaseModel
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_sample_sheet_path_to_housekeeper,
+)
 from cg.models.cg_config import CGConfig
 from cg.store.models import Sample
 
@@ -68,7 +70,7 @@ def test_post_processing_of_flow_cell(
     scenario: DemultiplexingScenario,
     demultiplex_context: CGConfig,
     request,
-    tmp_demultiplexed_runs_directory: Path,
+    tmp_illumina_novaseq_demultiplexed_flow_cells_directory,
 ):
     """Test adding a demultiplexed flow cell to the databases with. Runs on each type of
     demultiplexing software and setting used."""
@@ -86,12 +88,15 @@ def test_post_processing_of_flow_cell(
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a directory with a flow cell demultiplexed with BCL Convert
-    demux_post_processing_api.demultiplexed_runs_dir = tmp_demultiplexed_runs_directory
+    demux_post_processing_api.demultiplexed_runs_dir = (
+        tmp_illumina_novaseq_demultiplexed_flow_cells_directory
+    )
 
     # GIVEN that the sample sheet is in housekeeper
     add_sample_sheet_path_to_housekeeper(
         flow_cell_directory=Path(
-            tmp_demultiplexed_runs_directory, flow_cell_demultiplexing_directory
+            tmp_illumina_novaseq_demultiplexed_flow_cells_directory,
+            flow_cell_demultiplexing_directory,
         ),
         flow_cell_name=flow_cell_name,
         hk_api=demux_post_processing_api.hk_api,
@@ -153,7 +158,7 @@ def test_post_processing_of_flow_cell(
 
 def test_get_all_demultiplexed_flow_cell_out_dirs(
     demultiplex_context: CGConfig,
-    tmp_demultiplexed_runs_directory: Path,
+    tmp_illumina_novaseq_demultiplexed_flow_cells_directory,
     tmp_demultiplexed_runs_bcl2fastq_directory: Path,
 ):
     """Test returning all flow cell directories from the demultiplexing run directory."""
@@ -161,7 +166,7 @@ def test_get_all_demultiplexed_flow_cell_out_dirs(
 
     # GIVEN a demultiplex context
     demux_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=demultiplex_context)
-    demux_api.demultiplexed_runs_dir = tmp_demultiplexed_runs_directory
+    demux_api.demultiplexed_runs_dir = tmp_illumina_novaseq_demultiplexed_flow_cells_directory
 
     # WHEN calling get_all_demultiplexed_flow_cell_dirs
     demultiplexed_flow_cell_dirs: list[Path] = demux_api.get_all_demultiplexed_flow_cell_dirs()

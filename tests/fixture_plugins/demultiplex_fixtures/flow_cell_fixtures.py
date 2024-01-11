@@ -42,18 +42,28 @@ def hiseq_2500_custom_index_flow_cell(
 
 
 @pytest.fixture()
-def novaseq_6000_post_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
-    return FlowCellDirectoryData(Path(flow_cells_dir, "230912_A00187_1009_AHK33MDRX3"))
+def novaseq_6000_post_1_5_kits_flow_cell_data(
+    illumina_novaseq_flow_cells_dir,
+) -> FlowCellDirectoryData:
+    return FlowCellDirectoryData(
+        Path(illumina_novaseq_flow_cells_dir, "230912_A00187_1009_AHK33MDRX3")
+    )
 
 
 @pytest.fixture()
-def novaseq_6000_pre_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
-    return FlowCellDirectoryData(Path(flow_cells_dir, "190927_A00689_0069_BHLYWYDSXX"))
+def novaseq_6000_pre_1_5_kits_flow_cell_data(
+    illumina_novaseq_flow_cells_dir,
+) -> FlowCellDirectoryData:
+    return FlowCellDirectoryData(
+        Path(illumina_novaseq_flow_cells_dir, "190927_A00689_0069_BHLYWYDSXX")
+    )
 
 
 @pytest.fixture()
-def novaseq_x_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
-    return FlowCellDirectoryData(Path(flow_cells_dir, "20231108_LH00188_0028_B22F52TLT3"))
+def novaseq_x_flow_cell_data(illumina_novaseq_flow_cells_dir) -> FlowCellDirectoryData:
+    return FlowCellDirectoryData(
+        Path(illumina_novaseq_flow_cells_dir, "20231108_LH00188_0028_B22F52TLT3")
+    )
 
 
 # Broken flow cells

@@ -206,13 +206,15 @@ def clean_context_microsalt(
 @pytest.fixture(scope="function")
 def clean_flow_cells_context(
     cg_context: CGConfig,
-    tmp_flow_cells_directory: Path,
-    tmp_demultiplexed_runs_directory: Path,
+    tmp_illumina_novaseq_flow_cells_directory,
+    tmp_illumina_novaseq_demultiplexed_flow_cells_directory,
     store_with_flow_cell_to_clean: Store,
     housekeeper_api_with_flow_cell_to_clean: HousekeeperAPI,
 ) -> CGConfig:
-    cg_context.flow_cells_dir = tmp_flow_cells_directory
-    cg_context.demultiplexed_flow_cells_dir = tmp_demultiplexed_runs_directory
+    cg_context.illumina_novaseq_flow_cells_directory = tmp_illumina_novaseq_flow_cells_directory
+    cg_context.illumina_novaseq_demultiplexed_flow_cells_directory = (
+        tmp_illumina_novaseq_demultiplexed_flow_cells_directory
+    )
     cg_context.housekeeper_api_ = housekeeper_api_with_flow_cell_to_clean
     cg_context.status_db_ = store_with_flow_cell_to_clean
 

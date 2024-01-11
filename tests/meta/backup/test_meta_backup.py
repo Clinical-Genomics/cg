@@ -413,7 +413,7 @@ def test_fetch_flow_cell_integration(
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
-        flow_cells_dir=cg_context.flow_cells_dir,
+        flow_cells_dir=cg_context.illumina_novaseq_flow_cells_directory,
     )
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ

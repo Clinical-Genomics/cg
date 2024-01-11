@@ -8,7 +8,6 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
 )
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreatorBcl2Fastq,
-    SampleSheetCreatorBCLConvert,
 )
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -317,18 +316,18 @@ def bcl_convert_flow_cell_sample(raw_index_sequence: str) -> FlowCellSampleBCLCo
 
 
 @pytest.fixture
-def bcl_convert_sample_sheet_path(demultiplexed_runs: Path):
+def bcl_convert_sample_sheet_path(illumina_novaseq_demultiplexed_runs):
     return Path(
-        demultiplexed_runs,
+        illumina_novaseq_demultiplexed_runs,
         "230504_A00689_0804_BHY7FFDRX2",
         "SampleSheet.csv",
     )
 
 
 @pytest.fixture
-def bcl2fastq_sample_sheet_path(demultiplexed_runs: Path):
+def bcl2fastq_sample_sheet_path(illumina_novaseq_demultiplexed_runs):
     return Path(
-        demultiplexed_runs,
+        illumina_novaseq_demultiplexed_runs,
         "170407_ST-E00198_0209_BHHKVCALXX",
         "SampleSheet.csv",
     )

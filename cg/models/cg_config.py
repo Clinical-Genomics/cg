@@ -250,12 +250,12 @@ class DataFlowConfig(BaseModel):
 class CGConfig(BaseModel):
     database: str
     delivery_path: str
-    demultiplexed_flow_cells_dir: str
+    illumina_novaseq_demultiplexed_flow_cells_directory: str
     downsample_dir: str
     downsample_script: str
     email_base_settings: EmailBaseSettings
     environment: Literal["production", "stage"] = "stage"
-    flow_cells_dir: str
+    illumina_novaseq_flow_cells_directory: str
     madeline_exe: str
     tower_binary_path: str
     max_flowcells: int | None

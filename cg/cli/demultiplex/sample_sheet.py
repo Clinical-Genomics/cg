@@ -6,7 +6,9 @@ import click
 from pydantic import ValidationError
 
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+)
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
@@ -14,7 +16,9 @@ from cg.constants.constants import DRY_RUN, FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError, HousekeeperFileMissingError, SampleSheetError
 from cg.io.controller import WriteFile, WriteStream
-from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_sample_sheet_path_to_housekeeper,
+)
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
@@ -56,7 +60,7 @@ def create_sheet(
     """
     LOG.info(f"Creating sample sheet for flow cell {flow_cell_name}")
     hk_api: HousekeeperAPI = context.housekeeper_api
-    flow_cell_path: Path = Path(context.flow_cells_dir, flow_cell_name)
+    flow_cell_path: Path = Path(context.illumina_novaseq_flow_cells_directory, flow_cell_name)
     if not flow_cell_path.exists():
         LOG.warning(f"Could not find flow cell {flow_cell_path}")
         raise click.Abort
@@ -135,7 +139,7 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
     information.
     """
     hk_api: HousekeeperAPI = context.housekeeper_api
-    flow_cell_runs_dir: Path = Path(context.flow_cells_dir)
+    flow_cell_runs_dir: Path = Path(context.illumina_novaseq_flow_cells_directory)
     for sub_dir in flow_cell_runs_dir.iterdir():
         if not sub_dir.is_dir():
             continue

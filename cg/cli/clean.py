@@ -258,8 +258,8 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
     directories_to_check: list[Path] = []
     for path in [
         Path(context.data_input.input_dir_path),
-        Path(context.flow_cells_dir),
-        Path(context.demultiplexed_flow_cells_dir),
+        Path(context.illumina_novaseq_flow_cells_directory),
+        Path(context.illumina_novaseq_demultiplexed_flow_cells_directory),
         Path(context.encryption.encryption_dir),
     ]:
         directories_to_check.extend(get_directories_in_path(path))

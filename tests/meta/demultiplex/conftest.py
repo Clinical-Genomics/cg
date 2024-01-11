@@ -22,9 +22,13 @@ FlowCellInfo = namedtuple("FlowCellInfo", "directory name sample_internal_ids")
 
 
 @pytest.fixture(name="tmp_demulitplexing_dir")
-def tmp_demulitplexing_dir(demultiplexed_runs: Path, bcl2fastq_flow_cell_full_name: str) -> Path:
+def tmp_illumina_novaseq_demulitplexing_dir(
+    illumina_novaseq_demultiplexed_runs, bcl2fastq_flow_cell_full_name: str
+) -> Path:
     """Return a tmp directory in demultiplexed-runs."""
-    tmp_demulitplexing_dir: Path = Path(demultiplexed_runs, bcl2fastq_flow_cell_full_name)
+    tmp_demulitplexing_dir: Path = Path(
+        illumina_novaseq_demultiplexed_runs, bcl2fastq_flow_cell_full_name
+    )
     tmp_demulitplexing_dir.mkdir(exist_ok=True, parents=True)
     return tmp_demulitplexing_dir
 
@@ -309,10 +313,10 @@ def lsyncd_target_directory(lsyncd_source_directory: Path, tmp_path_factory) -> 
 
 @pytest.fixture
 def demux_post_processing_api(
-    demultiplex_context: CGConfig, tmp_demultiplexed_runs_directory: Path
+    demultiplex_context: CGConfig, tmp_illumina_novaseq_demultiplexed_flow_cells_directory
 ) -> DemuxPostProcessingAPI:
     api = DemuxPostProcessingAPI(demultiplex_context)
-    api.demultiplexed_runs_dir = tmp_demultiplexed_runs_directory
+    api.demultiplexed_runs_dir = tmp_illumina_novaseq_demultiplexed_flow_cells_directory
     return api
 
 

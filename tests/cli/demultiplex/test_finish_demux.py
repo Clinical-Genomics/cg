@@ -1,6 +1,5 @@
 """Test finish demultiplexing CLI."""
 import logging
-from pathlib import Path
 
 from click import testing
 
@@ -13,7 +12,7 @@ def test_finish_all_cmd_dry_run(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
-    tmp_demultiplexed_runs_directory: Path,
+    tmp_illumina_novaseq_demultiplexed_flow_cells_directory,
 ):
     caplog.set_level(logging.INFO)
 
@@ -36,7 +35,7 @@ def test_finish_flow_cell_dry_run(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
-    tmp_demultiplexed_runs_directory: Path,
+    tmp_illumina_novaseq_demultiplexed_flow_cells_directory,
     bcl2fastq_flow_cell_full_name: str,
 ):
     caplog.set_level(logging.INFO)

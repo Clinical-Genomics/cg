@@ -28,8 +28,10 @@ class DemuxPostProcessingAPI:
 
     def __init__(self, config: CGConfig) -> None:
         self.config: CGConfig = config
-        self.flow_cells_dir: Path = Path(config.flow_cells_dir)
-        self.demultiplexed_runs_dir: Path = Path(config.demultiplexed_flow_cells_dir)
+        self.flow_cells_dir: Path = Path(config.illumina_novaseq_flow_cells_directory)
+        self.demultiplexed_runs_dir: Path = Path(
+            config.illumina_novaseq_demultiplexed_flow_cells_directory
+        )
         self.status_db: Store = config.status_db
         self.hk_api: HousekeeperAPI = config.housekeeper_api
         self.dry_run: bool = False

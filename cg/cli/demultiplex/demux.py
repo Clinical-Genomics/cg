@@ -126,8 +126,8 @@ def demultiplex_flow_cell(
 @click.pass_obj
 def copy_novaseqx_flow_cells(context: CGConfig):
     """Copy Novaseqx flow cells ready for post processing to demultiplexed runs."""
-    flow_cells_dir: Path = Path(context.flow_cells_dir)
-    demultiplexed_runs_dir: Path = Path(context.demultiplexed_flow_cells_dir)
+    flow_cells_dir: Path = Path(context.illumina_novaseq_flow_cells_directory)
+    demultiplexed_runs_dir: Path = Path(context.illumina_novaseq_demultiplexed_flow_cells_directory)
 
     for flow_cell_dir in flow_cells_dir.iterdir():
         if is_ready_for_post_processing(
@@ -156,7 +156,7 @@ def copy_novaseqx_flow_cells(context: CGConfig):
 def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
     """Checks if all relevant files for the demultiplexing have been synced.
     If so it creates a CopyComplete.txt file to show that that is the case."""
-    target_flow_cells_directory = Path(context.flow_cells_dir)
+    target_flow_cells_directory = Path(context.illumina_novaseq_flow_cells_directory)
     for source_flow_cell in Path(source_directory).iterdir():
         target_flow_cell = Path(target_flow_cells_directory, source_flow_cell.name)
         if is_flow_cell_sync_confirmed(target_flow_cell):

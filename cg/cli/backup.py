@@ -52,7 +52,7 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
     pdc_api.dry_run = dry_run
     status_db: Store = context.status_db
     flow_cells: list[FlowCellDirectoryData] = get_flow_cells_from_path(
-        flow_cells_dir=Path(context.flow_cells_dir)
+        flow_cells_dir=Path(context.illumina_novaseq_flow_cells_directory)
     )
     for flow_cell in flow_cells:
         db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell.id)
@@ -88,7 +88,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
     """Encrypt flow cells."""
     status_db: Store = context.status_db
     flow_cells: list[FlowCellDirectoryData] = get_flow_cells_from_path(
-        flow_cells_dir=Path(context.flow_cells_dir)
+        flow_cells_dir=Path(context.illumina_novaseq_flow_cells_directory)
     )
     for flow_cell in flow_cells:
         db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell.id)
@@ -128,7 +128,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: str | None =
         status=context.status_db,
         tar_api=tar_api,
         pdc_api=pdc_api,
-        flow_cells_dir=context.flow_cells_dir,
+        flow_cells_dir=context.illumina_novaseq_flow_cells_directory,
         dry_run=dry_run,
     )
     backup_api: BackupAPI = context.meta_apis["backup_api"]

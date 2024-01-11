@@ -14,6 +14,6 @@ def backup_context(cg_context: CGConfig) -> CGConfig:
         status=cg_context.status_db,
         tar_api=TarAPI(binary_path=cg_context.tar.binary_path),
         pdc_api=cg_context.pdc_api,
-        flow_cells_dir=cg_context.flow_cells_dir,
+        flow_cells_dir=cg_context.illumina_novaseq_flow_cells_directory,
     )
     return cg_context
