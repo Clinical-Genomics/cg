@@ -8,6 +8,8 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.nanopore_files import NanoporeDirsAndFiles
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
+CORRECT_SAMPLE_SHEET: str = "CorrectSampleSheet.csv"
+
 
 @pytest.fixture(name="tmp_flow_cells_directory")
 def tmp_flow_cells_directory(tmp_path: Path, flow_cells_dir: Path) -> Path:
@@ -208,9 +210,7 @@ def novaseq_6000_post_1_5_kits_flow_cell(tmp_flow_cells_directory: Path) -> Path
 def novaseq_6000_post_1_5_kits_correct_sample_sheet(
     novaseq_6000_post_1_5_kits_flow_cell: Path,
 ) -> Path:
-    return Path(
-        novaseq_6000_post_1_5_kits_flow_cell, DemultiplexingDirsAndFiles.CORRECT_SAMPLE_SHEET
-    )
+    return Path(novaseq_6000_post_1_5_kits_flow_cell, CORRECT_SAMPLE_SHEET)
 
 
 @pytest.fixture
@@ -229,9 +229,7 @@ def novaseq_6000_pre_1_5_kits_flow_cell(tmp_flow_cells_directory: Path) -> Path:
 def novaseq_6000_pre_1_5_kits_correct_sample_sheet(
     novaseq_6000_pre_1_5_kits_flow_cell: Path,
 ) -> Path:
-    return Path(
-        novaseq_6000_pre_1_5_kits_flow_cell, DemultiplexingDirsAndFiles.CORRECT_SAMPLE_SHEET
-    )
+    return Path(novaseq_6000_pre_1_5_kits_flow_cell, CORRECT_SAMPLE_SHEET)
 
 
 @pytest.fixture
@@ -246,7 +244,7 @@ def novaseq_x_flow_cell_directory(tmp_flow_cells_directory: Path) -> Path:
 
 @pytest.fixture
 def novaseq_x_correct_sample_sheet(novaseq_x_flow_cell_directory: Path) -> Path:
-    return Path(novaseq_x_flow_cell_directory, DemultiplexingDirsAndFiles.CORRECT_SAMPLE_SHEET)
+    return Path(novaseq_x_flow_cell_directory, CORRECT_SAMPLE_SHEET)
 
 
 @pytest.fixture
