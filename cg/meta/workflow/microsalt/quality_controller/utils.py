@@ -113,6 +113,11 @@ def is_sample_negative_control(sample: Sample) -> bool:
     return sample.control == ControlEnum.negative
 
 
+def is_non_microsalt_apptag(sample: Sample) -> bool:
+    app_tag: str = get_application_tag(sample)
+    return app_tag not in list(MicrosaltAppTags)
+
+
 def get_application_tag(sample: Sample) -> str:
     return sample.application_version.application.tag
 
