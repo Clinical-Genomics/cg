@@ -239,11 +239,11 @@ def hk_sample_bundle_for_flow_cell_not_to_clean(
 
 
 @pytest.fixture
-def clean_retrieved_spring_files_api_dry_run(
+def clean_retrieved_spring_files_api(
     real_housekeeper_api: HousekeeperAPI,
 ) -> CleanRetrievedSpringFilesAPI:
     """Returns a CleanRetrievedSpringFilesAPI."""
-    return CleanRetrievedSpringFilesAPI(housekeeper_api=real_housekeeper_api, dry_run=True)
+    return CleanRetrievedSpringFilesAPI(housekeeper_api=real_housekeeper_api, dry_run=False)
 
 
 @pytest.fixture
@@ -292,8 +292,8 @@ def retrieved_test_bundle_name() -> str:
 
 
 @pytest.fixture
-def populated_clean_retrieved_spring_files_api_dry_run(
-    clean_retrieved_spring_files_api_dry_run: CleanRetrievedSpringFilesAPI,
+def populated_clean_retrieved_spring_files_api(
+    clean_retrieved_spring_files_api: CleanRetrievedSpringFilesAPI,
     paths_for_populated_clean_retrieved_spring_files_api: list[str],
     retrieved_test_bundle_name: str,
     archival_job_id_miria: int,
@@ -309,10 +309,10 @@ def populated_clean_retrieved_spring_files_api_dry_run(
         - an archived Spring file which was retrieved in the year 1900
         - a Fastq file
     """
-    clean_retrieved_spring_files_api_dry_run.housekeeper_api.add_bundle_and_version_if_non_existent(
+    clean_retrieved_spring_files_api.housekeeper_api.add_bundle_and_version_if_non_existent(
         bundle_name=retrieved_test_bundle_name
     )
-    bundle: Bundle = clean_retrieved_spring_files_api_dry_run.housekeeper_api.bundle(
+    bundle: Bundle = clean_retrieved_spring_files_api.housekeeper_api.bundle(
         retrieved_test_bundle_name
     )
     version: Version = bundle.versions[0]
@@ -322,19 +322,19 @@ def populated_clean_retrieved_spring_files_api_dry_run(
             if SequencingFileTag.SPRING in path
             else [SequencingFileTag.FASTQ]
         )
-        file: File = clean_retrieved_spring_files_api_dry_run.housekeeper_api.add_file(
+        file: File = clean_retrieved_spring_files_api.housekeeper_api.add_file(
             path=path, version_obj=version, tags=tags
         )
-        clean_retrieved_spring_files_api_dry_run.housekeeper_api.commit()
+        clean_retrieved_spring_files_api.housekeeper_api.commit()
         if "spring" in path:
-            clean_retrieved_spring_files_api_dry_run.housekeeper_api.add_archives(
+            clean_retrieved_spring_files_api.housekeeper_api.add_archives(
                 files=[file], archive_task_id=archival_job_id_miria
             )
             file.archive.archived_at = timestamp
             if "retrieved" in path:
                 file.archive.retrieval_task_id = retrieval_job_id_miria
                 file.archive.retrieved_at = old_timestamp if "old" in path else timestamp_yesterday
-            clean_retrieved_spring_files_api_dry_run.housekeeper_api.add_commit(file.archive)
+            clean_retrieved_spring_files_api.housekeeper_api.add_commit(file.archive)
 
-    clean_retrieved_spring_files_api_dry_run.housekeeper_api.commit()
-    return clean_retrieved_spring_files_api_dry_run
+    clean_retrieved_spring_files_api.housekeeper_api.commit()
+    return clean_retrieved_spring_files_api

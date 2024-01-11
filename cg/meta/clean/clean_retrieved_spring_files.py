@@ -36,6 +36,9 @@ class CleanRetrievedSpringFilesAPI:
 
         LOG.info("Starting cleaning of retrieved Spring files.")
         files_to_remove: list[File] = self._get_files_to_remove(age_limit)
+        if not files_to_remove:
+            LOG.info("No retrieved Spring files to remove - exiting.")
+            return
         self._unlink_files(files_to_remove)
         if not self.dry_run:
             self.housekeeper_api.reset_retrieved_archive_data(files_to_remove)

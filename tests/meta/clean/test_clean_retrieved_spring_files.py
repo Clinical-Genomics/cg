@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 from housekeeper.store.models import File
 
@@ -6,7 +7,7 @@ from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFiles
 
 
 def test_get_files_to_remove(
-    populated_clean_retrieved_spring_files_api_dry_run: CleanRetrievedSpringFilesAPI,
+    populated_clean_retrieved_spring_files_api: CleanRetrievedSpringFilesAPI,
     path_to_old_retrieved_spring_file: str,
     path_to_old_retrieved_spring_file_in_housekeeper: str,
 ):
@@ -17,9 +18,9 @@ def test_get_files_to_remove(
     # GIVEN a CleanRetrievedSpringFilesAPI with a populated Housekeeper database
 
     # WHEN getting files to remove when cleaning retrieved spring files
-    files_to_remove: list[
-        File
-    ] = populated_clean_retrieved_spring_files_api_dry_run._get_files_to_remove(age_limit=7)
+    files_to_remove: list[File] = populated_clean_retrieved_spring_files_api._get_files_to_remove(
+        age_limit=7
+    )
 
     # THEN only the file with an old enough 'retrieved_at' should be returned
     assert [file.path for file in files_to_remove] == [
@@ -28,7 +29,7 @@ def test_get_files_to_remove(
 
 
 def test_clean_retrieved_spring_files_dry_run(
-    populated_clean_retrieved_spring_files_api_dry_run: CleanRetrievedSpringFilesAPI,
+    populated_clean_retrieved_spring_files_api: CleanRetrievedSpringFilesAPI,
     path_to_old_retrieved_spring_file: str,
     path_to_old_retrieved_spring_file_in_housekeeper: str,
     caplog,
@@ -39,12 +40,11 @@ def test_clean_retrieved_spring_files_dry_run(
     caplog.set_level(logging.INFO)
 
     # GIVEN a CleanRetrievedSpringFilesAPI with a populated Housekeeper database
+    # GIVEN that an old retrieved file exists
+    Path(path_to_old_retrieved_spring_file_in_housekeeper).touch()
 
     # WHEN running 'clean_retrieved_spring_files'
-    populated_clean_retrieved_spring_files_api_dry_run.clean_retrieved_spring_files(age_limit=7)
+    populated_clean_retrieved_spring_files_api.clean_retrieved_spring_files(age_limit=7)
 
-    # THEN only the file with an old enough 'retrieved_at' should have been removed
-    assert (
-        f"Dry run - would have unlinked {path_to_old_retrieved_spring_file_in_housekeeper}"
-        in caplog.text
-    )
+    # THEN the file with an old enough 'retrieved_at' should have been removed
+    assert not Path(path_to_old_retrieved_spring_file_in_housekeeper).exists()
