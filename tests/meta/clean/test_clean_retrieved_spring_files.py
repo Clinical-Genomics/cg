@@ -41,9 +41,7 @@ def test_clean_retrieved_spring_files_dry_run(
     # GIVEN a CleanRetrievedSpringFilesAPI with a populated Housekeeper database
 
     # WHEN running 'clean_retrieved_spring_files'
-    populated_clean_retrieved_spring_files_api_dry_run.clean_retrieved_spring_files(
-        days_since_retrieval=7
-    )
+    populated_clean_retrieved_spring_files_api_dry_run.clean_retrieved_spring_files(age_limit=7)
 
     # THEN only the file with an old enough 'retrieved_at' should have been removed
     assert (
