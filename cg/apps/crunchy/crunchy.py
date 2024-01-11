@@ -64,25 +64,24 @@ class CrunchyAPI:
     def is_fastq_compression_possible(compression_obj: CompressionData) -> bool:
         """Check if FASTQ compression is possible.
 
-        There are three possible answers to this question:
-
-         - Compression is running          -> Compression NOT possible
-         - SPRING archive exists           -> Compression NOT possible
-         - Data is external                -> Compression NOT possible
-         - Not compressed and not running  -> Compression IS possible
+        - Compression is running          -> Compression NOT possible
+        - SPRING file exists on Hasta     -> Compression NOT possible
+        - Data is external                -> Compression NOT possible
+        - Not compressed and
+           not running  -> Compression IS possible
         """
         if CrunchyAPI.is_compression_pending(compression_obj):
             return False
 
         if compression_obj.spring_exists():
-            LOG.info("SPRING file found")
+            LOG.debug("SPRING file found")
             return False
 
         if "external-data" in str(compression_obj.fastq_first):
-            LOG.info("File is external data and should not be compressed")
+            LOG.debug("File is external data and should not be compressed")
             return False
 
-        LOG.info("FASTQ compression is possible")
+        LOG.debug("FASTQ compression is possible")
 
         return True
 
