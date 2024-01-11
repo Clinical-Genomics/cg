@@ -12,7 +12,7 @@ from cg.store.models import Case, Flowcell, Sample, SampleLaneSequencingMetrics
 
 
 class DeleteDataHandler(BaseHandler):
-    """Contains methods to delete business data model instances"""
+    """Contains methods to delete business data model instances."""
 
     def __init__(self, session: Session):
         super().__init__(session=session)
