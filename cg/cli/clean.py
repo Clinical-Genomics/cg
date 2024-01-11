@@ -280,21 +280,19 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
 
 @clean.command("retrieved-spring-files")
 @click.option(
-    "--days-since-retrieval",
+    "--age-limit",
     type=int,
     default=7,
     help="Clean all Spring files which were retrieved more than given amount of days ago.",
 )
 @DRY_RUN
 @click.pass_obj
-def clean_retrieved_spring_files(context: CGConfig, days_since_retrieval: int, dry_run: bool):
+def clean_retrieved_spring_files(context: CGConfig, age_limit: int, dry_run: bool):
     """Clean Spring files which were retrieved more than given amount of days ago."""
     clean_retrieved_spring_files_api = CleanRetrievedSpringFilesAPI(
         housekeeper_api=context.housekeeper_api, dry_run=dry_run
     )
-    clean_retrieved_spring_files_api.clean_retrieved_spring_files(
-        days_since_retrieval=days_since_retrieval
-    )
+    clean_retrieved_spring_files_api.clean_retrieved_spring_files(age_limit)
 
 
 def _get_confirm_question(bundle, file_obj) -> str:

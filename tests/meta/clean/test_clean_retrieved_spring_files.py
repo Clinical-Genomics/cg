@@ -19,9 +19,7 @@ def test_get_files_to_remove(
     # WHEN getting files to remove when cleaning retrieved spring files
     files_to_remove: list[
         File
-    ] = populated_clean_retrieved_spring_files_api_dry_run._get_files_to_remove(
-        days_since_retrieval=7
-    )
+    ] = populated_clean_retrieved_spring_files_api_dry_run._get_files_to_remove(age_limit=7)
 
     # THEN only the file with an old enough 'retrieved_at' should be returned
     assert [file.path for file in files_to_remove] == [
