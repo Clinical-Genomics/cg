@@ -32,6 +32,7 @@ from cg.cli.upload.validate import validate
 from cg.constants import Pipeline
 from cg.exc import AnalysisAlreadyUploadedError
 from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
+from cg.meta.upload.microsalt.microsalt_upload_api import MicrosaltUploadAPI
 from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
 from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
 from cg.meta.upload.rnafusion.rnafusion import RnafusionUploadAPI
@@ -57,7 +58,7 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
     """Upload results from analyses"""
 
     config_object: CGConfig = context.obj
-    upload_api: UploadAPI = MipDNAUploadAPI(config=config_object)  # default upload API
+    upload_api: UploadAPI = MipDNAUploadAPI(config_object)
 
     LOG.info("----------------- UPLOAD -----------------")
 
@@ -65,21 +66,21 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
         context.obj.meta_apis["upload_api"] = upload_api
     elif case_id:  # Provided case ID without a subcommand: upload everything
         try:
-            upload_api.analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-            case: Case = upload_api.status_db.get_case_by_internal_id(internal_id=case_id)
+            upload_api.analysis_api.status_db.verify_case_exists(case_id)
+            case: Case = upload_api.status_db.get_case_by_internal_id(case_id)
             upload_api.verify_analysis_upload(case_obj=case, restart=restart)
         except AnalysisAlreadyUploadedError:
             # Analysis being uploaded or it has been already uploaded
             return
 
-        # Update the upload API based on the data analysis type (MIP-DNA by default)
-        # Upload for balsamic, balsamic-umi and balsamic-qc
         if Pipeline.BALSAMIC in case.data_analysis:
-            upload_api = BalsamicUploadAPI(config=config_object)
+            upload_api = BalsamicUploadAPI(config_object)
         elif case.data_analysis == Pipeline.RNAFUSION:
-            upload_api = RnafusionUploadAPI(config=config_object)
+            upload_api = RnafusionUploadAPI(config_object)
         elif case.data_analysis == Pipeline.MIP_RNA:
-            upload_api: UploadAPI = MipRNAUploadAPI(config=config_object)
+            upload_api = MipRNAUploadAPI(config_object)
+        elif case.data_analysis == Pipeline.MICROSALT:
+            upload_api = MicrosaltUploadAPI(config_object)
 
         context.obj.meta_apis["upload_api"] = upload_api
         upload_api.upload(ctx=context, case=case, restart=restart)
