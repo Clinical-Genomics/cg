@@ -56,7 +56,7 @@ def test_is_fastq_compression_possible(
     assert not spring_file.exists()
 
     # WHEN checking if SPRING compression is done
-    result = crunchy_api.is_fastq_compression_possible(compression_object)
+    result = crunchy_api.is_fastq_compression_possible(compression_obj=compression_object)
 
     # THEN result should be True
     assert result is True
@@ -83,7 +83,7 @@ def test_is_fastq_compression_possible_compression_pending(
     assert not spring_file.exists()
 
     # WHEN checking if SPRING compression is done
-    result = crunchy_api.is_fastq_compression_possible(compression_object)
+    result = crunchy_api.is_fastq_compression_possible(compression_obj=compression_object)
 
     # THEN result should be False since the compression flag exists
     assert result is False
@@ -107,7 +107,7 @@ def test_is_fastq_compression_possible_spring_exists(
     assert spring_file.exists()
 
     # WHEN checking if SPRING compression is done
-    result = crunchy_api.is_fastq_compression_possible(compression_object)
+    result = crunchy_api.is_fastq_compression_possible(compression_obj=compression_object)
 
     # THEN result should be False since the compression flag exists
     assert result is False
@@ -116,7 +116,7 @@ def test_is_fastq_compression_possible_spring_exists(
 
 
 def test_is_compression_done(
-    crunchy_config: dict[str, dict[str, Any]],
+    real_crunchy_api,
     spring_metadata_file: Path,
     compression_object: CompressionData,
     caplog,
@@ -124,14 +124,13 @@ def test_is_compression_done(
     """Test if compression is done when everything is correct"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api, and FASTQ paths
-    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN no SPRING file exists
     compression_object.spring_path.touch()
     assert spring_metadata_file == compression_object.spring_metadata_path
     assert spring_metadata_file.exists()
 
     # WHEN checking if SPRING compression is done
-    result = crunchy_api.is_fastq_compression_done(compression_object)
+    result = real_crunchy_api.is_fastq_compression_done(compression_object)
 
     # THEN result should be True
     assert result is True
@@ -140,18 +139,17 @@ def test_is_compression_done(
 
 
 def test_is_compression_done_no_spring(
-    crunchy_config: dict[str, dict[str, Any]], compression_object: CompressionData, caplog
+    real_crunchy_api: CrunchyAPI, compression_object: CompressionData, caplog
 ):
     """Test if compression is done when no SPRING archive"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api, and FASTQ paths
-    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN no SPRING file exists
     spring_file = compression_object.spring_path
     assert not spring_file.exists()
 
     # WHEN checking if SPRING compression is done
-    result = crunchy_api.is_fastq_compression_done(compression_object)
+    result = real_crunchy_api.is_fastq_compression_done(compression_object)
 
     # THEN result should be false
     assert not result
@@ -160,20 +158,19 @@ def test_is_compression_done_no_spring(
 
 
 def test_is_compression_done_no_flag_spring(
-    crunchy_config: dict[str, dict[str, Any]], compression_object: CompressionData, caplog
+    real_crunchy_api: CrunchyAPI, compression_object: CompressionData, caplog
 ):
     """Test if SPRING compression is done when no metadata file"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api, and FASTQ paths
-    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN a existing SPRING file
     compression_object.spring_path.touch()
     assert compression_object.spring_path.exists()
-    # GIVEN a non existing flag file
+    # GIVEN a non-existing flag file
     assert not compression_object.spring_metadata_path.exists()
 
     # WHEN checking if SPRING compression is done
-    result = crunchy_api.is_fastq_compression_done(compression_object)
+    result = real_crunchy_api.is_fastq_compression_done(compression_object)
 
     # THEN result should be false
     assert not result
@@ -182,7 +179,7 @@ def test_is_compression_done_no_flag_spring(
 
 
 def test_is_compression_done_spring(
-    crunchy_config: dict[str, dict[str, Any]],
+    real_crunchy_api: CrunchyAPI,
     compression_object: CompressionData,
     spring_metadata_file: Path,
     caplog,
@@ -190,7 +187,6 @@ def test_is_compression_done_spring(
     """Test if compression is done when SPRING files exists"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api, and FASTQ paths
-    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN a existing SPRING file
     compression_object.spring_path.touch()
     assert compression_object.spring_path.exists()
@@ -199,7 +195,7 @@ def test_is_compression_done_spring(
     assert compression_object.spring_metadata_path.exists()
 
     # WHEN checking if SPRING compression is done
-    result = crunchy_api.is_fastq_compression_done(compression_object)
+    result = real_crunchy_api.is_fastq_compression_done(compression_object)
 
     # THEN result should be True
     assert result
@@ -208,7 +204,7 @@ def test_is_compression_done_spring(
 
 
 def test_is_compression_done_spring_new_files(
-    crunchy_config: dict[str, dict[str, Any]],
+    real_crunchy_api: CrunchyAPI,
     compression_object: CompressionData,
     spring_metadata_file: Path,
     caplog,
@@ -219,7 +215,6 @@ def test_is_compression_done_spring_new_files(
     """
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api, and FASTQ paths
-    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN a existing SPRING file
     compression_object.spring_path.touch()
     assert compression_object.spring_path.exists()
@@ -237,7 +232,7 @@ def test_is_compression_done_spring_new_files(
         assert "updated" in file_info
 
     # WHEN checking if SPRING compression is done
-    result = crunchy_api.is_fastq_compression_done(compression_object)
+    result = real_crunchy_api.is_fastq_compression_done(compression_object)
 
     # THEN result should be False since the updated date < 3 weeks
     assert result is False
@@ -246,7 +241,7 @@ def test_is_compression_done_spring_new_files(
 
 
 def test_is_compression_done_spring_old_files(
-    crunchy_config: dict[str, dict[str, Any]],
+    real_crunchy_api: CrunchyAPI,
     compression_object: CompressionData,
     spring_metadata_file: Path,
     caplog,
@@ -257,7 +252,6 @@ def test_is_compression_done_spring_old_files(
     """
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api, and FASTQ paths
-    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN a existing SPRING file
     compression_object.spring_path.touch()
     assert compression_object.spring_path.exists()
@@ -277,7 +271,7 @@ def test_is_compression_done_spring_old_files(
     )
 
     # WHEN checking if SPRING compression is done
-    result = crunchy_api.is_fastq_compression_done(compression_object)
+    result = real_crunchy_api.is_fastq_compression_done(compression_object)
 
     # THEN result should be True since the updated date > 3 weeks
     assert result is True
@@ -286,7 +280,7 @@ def test_is_compression_done_spring_old_files(
 
 
 def test_is_spring_decompression_possible_no_fastq(
-    crunchy_config: dict[str, dict[str, Any]], compression_object: CompressionData, caplog
+    real_crunchy_api: CrunchyAPI, compression_object: CompressionData, caplog
 ):
     """Test if decompression is possible when there are no FASTQ files
 
@@ -294,7 +288,6 @@ def test_is_spring_decompression_possible_no_fastq(
     """
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api
-    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN a existing SPRING file
     compression_object.spring_path.touch()
     assert compression_object.spring_path.exists()
@@ -305,7 +298,7 @@ def test_is_spring_decompression_possible_no_fastq(
     assert not compression_object.fastq_second.exists()
 
     # WHEN checking if SPRING compression is done
-    result = crunchy_api.is_spring_decompression_possible(compression_object)
+    result = real_crunchy_api.is_spring_decompression_possible(compression_object)
 
     # THEN result should be True since there are no fastq files
     assert result is True
@@ -314,7 +307,7 @@ def test_is_spring_decompression_possible_no_fastq(
 
 
 def test_is_spring_decompression_possible_no_spring(
-    crunchy_config: dict[str, dict[str, Any]], compression_object: CompressionData, caplog
+    real_crunchy_api: CrunchyAPI, compression_object: CompressionData, caplog
 ):
     """Test if decompression is possible when there are no SPRING archive
 
@@ -322,10 +315,9 @@ def test_is_spring_decompression_possible_no_spring(
     """
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api, and FASTQ paths
-    crunchy_api = CrunchyAPI(crunchy_config)
 
     # WHEN checking if SPRING compression is done
-    result = crunchy_api.is_spring_decompression_possible(compression_object)
+    result = real_crunchy_api.is_spring_decompression_possible(compression_object)
 
     # THEN result should be False since there is no SPRING archive
     assert result is False
@@ -334,7 +326,7 @@ def test_is_spring_decompression_possible_no_spring(
 
 
 def test_is_spring_decompression_possible_fastq(
-    crunchy_config: dict[str, dict[str, Any]], compression_object: CompressionData, caplog
+    real_crunchy_api: CrunchyAPI, compression_object: CompressionData, caplog
 ):
     """Test if decompression is possible when there are existing FASTQ files
 
@@ -342,7 +334,6 @@ def test_is_spring_decompression_possible_fastq(
     """
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api, and FASTQ paths
-    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN a existing SPRING file
     compression_object.spring_path.touch()
     # GIVEN that the FASTQ files exists
@@ -350,7 +341,7 @@ def test_is_spring_decompression_possible_fastq(
     compression_object.fastq_second.touch()
 
     # WHEN checking if SPRING decompression is possible
-    result = crunchy_api.is_spring_decompression_possible(compression_object)
+    result = real_crunchy_api.is_spring_decompression_possible(compression_object)
 
     # THEN result should be False since the FASTQ files already exists
     assert result is False
@@ -359,31 +350,29 @@ def test_is_spring_decompression_possible_fastq(
 
 
 def test_is_not_pending_when_no_flag_file(
-    crunchy_config: dict[str, dict[str, Any]], compression_object: CompressionData
+    real_crunchy_api: CrunchyAPI, compression_object: CompressionData
 ):
     """Test if SPRING compression is pending when no flag file"""
     # GIVEN a crunchy-api, and a FASTQ file
-    crunchy_api = CrunchyAPI(crunchy_config)
-    # GIVEN a non existing pending flag
+    # GIVEN a non-existing pending flag
     assert not compression_object.pending_path.exists()
 
     # WHEN checking if SPRING compression is ongoing
-    result = crunchy_api.is_compression_pending(compression_object)
+    result = real_crunchy_api.is_compression_pending(compression_object)
 
     # THEN result should be False since the pending flag is not there
     assert result is False
 
 
-def test_is_pending(crunchy_config: dict[str, dict[str, Any]], compression_object: CompressionData):
+def test_is_pending(real_crunchy_api: CrunchyAPI, compression_object: CompressionData):
     """Test if SPRING compression is pending when pending file exists"""
     # GIVEN a crunchy-api, and FASTQ files
-    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN a existing pending flag
     compression_object.pending_path.touch()
     assert compression_object.pending_path.exists()
 
     # WHEN checking if SPRING compression is pending
-    result = crunchy_api.is_compression_pending(compression_object)
+    result = real_crunchy_api.is_compression_pending(compression_object)
 
     # THEN result should be True since the pending_path exists
     assert result is True

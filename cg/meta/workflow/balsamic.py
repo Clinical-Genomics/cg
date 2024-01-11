@@ -117,7 +117,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """
         return Path(self.root_dir, case_id, case_id + ".json")
 
-    def get_trailblazer_config_path(self, case_id: str) -> Path:
+    def get_job_ids_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "analysis", "slurm_jobids.yaml")
 
     def get_bundle_deliverables_type(self, case_id: str) -> str:
