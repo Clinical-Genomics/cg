@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 
 from cg.constants import Pipeline
