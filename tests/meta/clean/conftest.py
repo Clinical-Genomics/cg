@@ -1,5 +1,5 @@
 """Tests for the CleanFlowCellsAPI."""
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -292,36 +292,21 @@ def retrieved_test_bundle_name() -> str:
 
 
 @pytest.fixture
-def archived_at_timestamp() -> datetime:
-    return datetime.now() - timedelta(weeks=52)
-
-
-@pytest.fixture
-def retrieved_at_old_timestamp() -> datetime:
-    return datetime.now() - timedelta(weeks=50)
-
-
-@pytest.fixture
-def retrieved_at_new_timestamp() -> datetime:
-    return datetime.now() - timedelta(days=1)
-
-
-@pytest.fixture
 def populated_clean_retrieved_spring_files_api_dry_run(
     clean_retrieved_spring_files_api_dry_run: CleanRetrievedSpringFilesAPI,
     paths_for_populated_clean_retrieved_spring_files_api: list[str],
     retrieved_test_bundle_name: str,
     archival_job_id_miria: int,
     retrieval_job_id_miria: int,
-    archived_at_timestamp: datetime,
-    retrieved_at_old_timestamp: datetime,
-    retrieved_at_new_timestamp: datetime,
+    timestamp: datetime,
+    timestamp_yesterday: datetime,
+    old_timestamp: datetime,
 ) -> CleanRetrievedSpringFilesAPI:
     """
     Returns a populated CleanRetrievedSpringFilesAPI, containing a bundle with one version and the following files:
         - an archived Spring file which has not been retrieved
         - an archived Spring file which was retrieved 1 day ago
-        - an archived Spring file which was retrieved 1 year ago
+        - an archived Spring file which was retrieved in the year 1900
         - a Fastq file
     """
     clean_retrieved_spring_files_api_dry_run.housekeeper_api.add_bundle_and_version_if_non_existent(
@@ -345,12 +330,10 @@ def populated_clean_retrieved_spring_files_api_dry_run(
             clean_retrieved_spring_files_api_dry_run.housekeeper_api.add_archives(
                 files=[file], archive_task_id=archival_job_id_miria
             )
-            file.archive.archived_at = archived_at_timestamp
+            file.archive.archived_at = timestamp
             if "retrieved" in path:
                 file.archive.retrieval_task_id = retrieval_job_id_miria
-                file.archive.retrieved_at = (
-                    retrieved_at_old_timestamp if "old" in path else retrieved_at_new_timestamp
-                )
+                file.archive.retrieved_at = old_timestamp if "old" in path else timestamp_yesterday
             clean_retrieved_spring_files_api_dry_run.housekeeper_api.add_commit(file.archive)
 
     clean_retrieved_spring_files_api_dry_run.housekeeper_api.commit()
