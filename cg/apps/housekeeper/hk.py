@@ -663,4 +663,4 @@ class HousekeeperAPI:
             LOG.debug(f"Resetting retrieval data for file {file.path}")
             file.archive.retrieval_task_id = None
             file.archive.retrieved_at = None
-        self.housekeeper_api.commit()
+        self.commit()
