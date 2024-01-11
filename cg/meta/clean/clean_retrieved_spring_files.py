@@ -1,5 +1,5 @@
-import datetime
 import logging
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from housekeeper.store.models import File
@@ -19,7 +19,7 @@ class CleanRetrievedSpringFilesAPI:
     def _get_files_to_remove(self, days_since_retrieval: int) -> list[File]:
         """Returns all Spring files which were retrieved more than given amount of days ago."""
         return self.housekeeper_api.get_spring_files_retrieved_before(
-            date=datetime.datetime.now() - datetime.timedelta(days=days_since_retrieval)
+            date=datetime.now() - timedelta(days=days_since_retrieval)
         )
 
     def _unlink_files(self, files_to_unlink: list[File]) -> None:
