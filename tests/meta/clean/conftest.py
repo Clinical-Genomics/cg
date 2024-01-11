@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
-from housekeeper.store.models import Bundle, File, Version
+from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
@@ -315,6 +315,7 @@ def populated_clean_retrieved_spring_files_api(
     bundle: Bundle = clean_retrieved_spring_files_api.housekeeper_api.bundle(
         retrieved_test_bundle_name
     )
+    clean_retrieved_spring_files_api.housekeeper_api.commit()
     version: Version = bundle.versions[0]
     for path in paths_for_populated_clean_retrieved_spring_files_api:
         tags: list[str] = (
@@ -322,18 +323,23 @@ def populated_clean_retrieved_spring_files_api(
             if SequencingFileTag.SPRING in path
             else [SequencingFileTag.FASTQ]
         )
-        file: File = clean_retrieved_spring_files_api.housekeeper_api.add_file(
+        clean_retrieved_spring_files_api.housekeeper_api.add_file(
             path=path, version_obj=version, tags=tags
         )
         clean_retrieved_spring_files_api.housekeeper_api.commit()
-        if "spring" in path:
+    for file in clean_retrieved_spring_files_api.housekeeper_api.get_files(
+        bundle=retrieved_test_bundle_name
+    ):
+        if "spring" in file.path:
             clean_retrieved_spring_files_api.housekeeper_api.add_archives(
                 files=[file], archive_task_id=archival_job_id_miria
             )
             file.archive.archived_at = timestamp
-            if "retrieved" in path:
+            if "retrieved" in file.path:
                 file.archive.retrieval_task_id = retrieval_job_id_miria
-                file.archive.retrieved_at = old_timestamp if "old" in path else timestamp_yesterday
+                file.archive.retrieved_at = (
+                    old_timestamp if "old" in file.path else timestamp_yesterday
+                )
             clean_retrieved_spring_files_api.housekeeper_api.add_commit(file.archive)
 
     clean_retrieved_spring_files_api.housekeeper_api.commit()
