@@ -15,7 +15,7 @@ from cg.meta.workflow.microsalt.quality_controller.utils import (
     get_percent_reads_guaranteed,
     get_report_path,
     get_sample_target_reads,
-    is_non_microsalt_apptag,
+    has_non_microsalt_apptag,
     is_sample_negative_control,
     has_valid_10x_coverage,
     has_valid_average_coverage,
@@ -84,7 +84,7 @@ class QualityController:
             and valid_10x_coverage
         )
 
-        if is_non_microsalt_apptag(sample):
+        if has_non_microsalt_apptag(sample):
             sample_passes_qc = True
 
         sample_quality = SampleQualityResult(

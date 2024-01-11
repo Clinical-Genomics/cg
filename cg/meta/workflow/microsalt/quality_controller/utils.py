@@ -65,6 +65,11 @@ def has_valid_10x_coverage(metrics: SampleMetrics) -> bool:
     return is_valid_10x_coverage(coverage_10x) if coverage_10x else False
 
 
+def has_non_microsalt_apptag(sample: Sample) -> bool:
+    app_tag: str = get_application_tag(sample)
+    return app_tag not in list(MicrosaltAppTags)
+
+
 def get_negative_control_result(results: list[SampleQualityResult]) -> SampleQualityResult | None:
     for result in results:
         if result.is_control:
@@ -111,11 +116,6 @@ def non_urgent_samples_pass_qc(results: list[SampleQualityResult]) -> bool:
 
 def is_sample_negative_control(sample: Sample) -> bool:
     return sample.control == ControlEnum.negative
-
-
-def is_non_microsalt_apptag(sample: Sample) -> bool:
-    app_tag: str = get_application_tag(sample)
-    return app_tag not in list(MicrosaltAppTags)
 
 
 def get_application_tag(sample: Sample) -> str:
