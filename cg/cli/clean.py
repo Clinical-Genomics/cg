@@ -284,6 +284,7 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
     type=int,
     default=7,
     help="Clean all Spring files which were retrieved more than given amount of days ago.",
+    show_default=True,
 )
 @DRY_RUN
 @click.pass_obj
