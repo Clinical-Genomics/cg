@@ -272,6 +272,7 @@ def base_config_dict() -> dict:
         "delivery_path": "path/to/delivery",
         "illumina_novaseq_flow_cells_directory": "path/to/flow_cells",
         "illumina_novaseq_demultiplexed_flow_cells_directory": "path/to/demultiplexed_flow_cells_dir",
+        "nanopore_data_directory": "path/to/nanopore_data_directory",
         "downsample_dir": "path/to/downsample_dir",
         "downsample_script": "downsample.sh",
         "housekeeper": {
@@ -1654,6 +1655,7 @@ def context_config(
         "illumina_novaseq_demultiplexed_flow_cells_directory": str(
             illumina_novaseq_demultiplexed_runs
         ),
+        "nanopore_data_directory": "path/to/nanopore_data_directory",
         "downsample_dir": str(downsample_dir),
         "downsample_script": "downsample.sh",
         "email_base_settings": {

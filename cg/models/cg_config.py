@@ -257,6 +257,7 @@ class CGConfig(BaseModel):
     environment: Literal["production", "stage"] = "stage"
     illumina_novaseq_flow_cells_directory: str
     madeline_exe: str
+    nanopore_data_directory: str
     tower_binary_path: str
     max_flowcells: int | None
     data_input: DataInput | None = None
