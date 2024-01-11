@@ -9,9 +9,11 @@ from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.fastq import FastqFileMeta
 from cg.models.raredisease.raredisease import RarediseaseSampleSheetEntry
 from cg.models.nf_analysis import PipelineParameters
 from cg.store.models import Case, Sample, CaseSample
+
 
 LOG = logging.getLogger(__name__)
 
@@ -61,7 +63,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self, sample: Sample, case: Case = "", case_sample: CaseSample = ""
     ) -> list[list[str]]:
         """Get sample sheet content per sample."""
-        sample_metadata: list[str] = self.gather_file_metadata_for_sample(sample)
+        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample)
         fastq_forward_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, forward_read=True
         )

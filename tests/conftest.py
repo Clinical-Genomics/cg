@@ -658,6 +658,12 @@ def mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
 
 
 @pytest.fixture
+def raredisease_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with raredisease analysis files."""
+    return Path(analysis_dir, "raredisease")
+
+
+@pytest.fixture
 def rnafusion_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with rnafusion analysis files."""
     return Path(analysis_dir, "rnafusion")
@@ -2767,6 +2773,7 @@ def context_config(
             "root": str(mip_dir),
         },
         "raredisease": {
+            "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
             "compute_env": "nf_tower_compute_env",
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_raredisease",
