@@ -9,7 +9,6 @@ from cg.cli.utils import echo_lines
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
 from cg.constants.constants import DRY_RUN, MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.exc import CgError

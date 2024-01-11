@@ -159,7 +159,6 @@ class RarediseaseConfig(CommonAppConfig):
     revision: str
     root: str
     slurm: SlurmConfig
-    tower_binary_path: str
     tower_pipeline: str
 
 

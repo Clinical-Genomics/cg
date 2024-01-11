@@ -32,7 +32,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.profile: str = config.raredisease.profile
         self.conda_env: str = config.raredisease.conda_env
         self.conda_binary: str = config.raredisease.conda_binary
-        self.tower_binary_path: str = config.raredisease.tower_binary_path
+        self.tower_binary_path: str = config.tower_binary_path
         self.tower_pipeline: str = config.raredisease.tower_pipeline
         self.account: str = config.raredisease.slurm.account
         self.compute_env: str = config.raredisease.compute_env
