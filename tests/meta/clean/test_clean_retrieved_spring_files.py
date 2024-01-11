@@ -31,7 +31,7 @@ def test_get_files_to_remove(
 def test_clean_retrieved_spring_files_dry_run(
     populated_clean_retrieved_spring_files_api: CleanRetrievedSpringFilesAPI,
     path_to_old_retrieved_spring_file: str,
-    path_to_old_retrieved_spring_file_in_housekeeper: str,
+    retrieved_test_bundle_name: str,
     caplog,
 ):
     """Tests that only the Spring file with an old enough 'retrieved_at' would be removed when cleaning retrieved
@@ -41,10 +41,15 @@ def test_clean_retrieved_spring_files_dry_run(
 
     # GIVEN a CleanRetrievedSpringFilesAPI with a populated Housekeeper database
     # GIVEN that an old retrieved file exists
-    Path(path_to_old_retrieved_spring_file_in_housekeeper).touch()
+    for file in populated_clean_retrieved_spring_files_api.housekeeper_api.get_files(
+        bundle=retrieved_test_bundle_name
+    ):
+        if path_to_old_retrieved_spring_file in file.path:
+            file_path: str = file.path
+            Path(file_path).touch()
 
     # WHEN running 'clean_retrieved_spring_files'
     populated_clean_retrieved_spring_files_api.clean_retrieved_spring_files(age_limit=7)
 
     # THEN the file with an old enough 'retrieved_at' should have been removed
-    assert not Path(path_to_old_retrieved_spring_file_in_housekeeper).exists()
+    assert not Path(file_path).exists()
