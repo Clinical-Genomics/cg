@@ -9,7 +9,9 @@ from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig
 
 
-def test_unlinked_family_is_linked(mip_config_builder: MipConfigBuilder):
+def test_unlinked_family_is_linked(
+    mip_config_builder: MipConfigBuilder, delivery_report_html: Path
+):
     """Test that is_family check fails when samples are not linked"""
     # GIVEN a upload scout api and case data for a case without linked individuals
     family_data: MipLoadConfig = MipLoadConfig(
@@ -17,7 +19,8 @@ def test_unlinked_family_is_linked(mip_config_builder: MipConfigBuilder):
             "samples": [
                 {"sample_id": "ADM2", "father": "0", "mother": "0"},
                 {"sample_id": "ADM3", "father": "0", "mother": "0"},
-            ]
+            ],
+            "delivery_report": delivery_report_html.as_posix(),
         }
     )
     # WHEN running the check if case is linked
@@ -26,7 +29,7 @@ def test_unlinked_family_is_linked(mip_config_builder: MipConfigBuilder):
     assert res is False
 
 
-def test_family_is_linked(mip_config_builder: MipConfigBuilder):
+def test_family_is_linked(mip_config_builder: MipConfigBuilder, delivery_report_html: Path):
     """Test that is_family returns true when samples are linked"""
     # GIVEN a upload scout api and case data for a linked case
     family_data: MipLoadConfig = MipLoadConfig(
@@ -35,7 +38,8 @@ def test_family_is_linked(mip_config_builder: MipConfigBuilder):
                 {"sample_id": "ADM1", "father": "ADM2", "mother": "ADM3"},
                 {"sample_id": "ADM2", "father": "0", "mother": "0"},
                 {"sample_id": "ADM3", "father": "0", "mother": "0"},
-            ]
+            ],
+            "delivery_report": delivery_report_html.as_posix(),
         }
     )
     # WHEN running the check if case is linked
