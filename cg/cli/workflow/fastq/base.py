@@ -5,8 +5,8 @@ import click
 
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
+from cg.cli.workflow.fastq.utils import get_slurm_priority
 from cg.constants.constants import DRY_RUN, AnalysisType, Pipeline
-from cg.constants.priority import Priority
 from cg.constants.tb import AnalysisStatus
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.store import Store
@@ -30,13 +30,13 @@ def store_fastq_analysis(context: click.Context, case_id: str, dry_run: bool = F
     """Creates an analysis object in status-db for the given fast case"""
     LOG.info(f"Creating an analysis for case {case_id}")
     status_db: Store = context.obj.status_db
-    case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = status_db.get_case_by_internal_id(case_id)
     new_analysis: Analysis = status_db.add_analysis(
         pipeline=Pipeline.FASTQ,
         completed_at=dt.datetime.now(),
         primary=True,
         started_at=dt.datetime.now(),
-        case_id=case_obj.id,
+        case_id=case.id,
     )
     if dry_run:
         return
@@ -49,8 +49,8 @@ def store_fastq_analysis(context: click.Context, case_id: str, dry_run: bool = F
         data_analysis=Pipeline.FASTQ,
         config_path="",
         out_dir="",
-        slurm_quality_of_service=Priority.priority_to_slurm_qos().get(case_obj.priority),
-        ticket=case_obj.latest_ticket,
+        slurm_quality_of_service=case.slurm_priority,
+        ticket=case.latest_ticket,
     )
     trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
 
