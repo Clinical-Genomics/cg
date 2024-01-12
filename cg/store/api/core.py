@@ -1,10 +1,10 @@
 import logging
 
 from cg.store.api.find_basic_data import FindBasicDataHandler
-from cg.store.api.find_business_data import FindBusinessDataHandler
 from cg.store.api.status import StatusHandler
 from cg.store.crud.create import CreateHandler
 from cg.store.crud.delete import DeleteDataHandler
+from cg.store.crud.read import ReadHandler
 from cg.store.crud.update import UpdateHandler
 from cg.store.database import get_session
 
@@ -15,7 +15,7 @@ class CoreHandler(
     CreateHandler,
     DeleteDataHandler,
     FindBasicDataHandler,
-    FindBusinessDataHandler,
+    ReadHandler,
     StatusHandler,
     UpdateHandler,
 ):
@@ -24,7 +24,7 @@ class CoreHandler(
     def __init__(self, session):
         DeleteDataHandler(session)
         FindBasicDataHandler(session)
-        FindBusinessDataHandler(session)
+        ReadHandler(session)
         StatusHandler(session)
         UpdateHandler(session)
 

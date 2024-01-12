@@ -8,7 +8,7 @@ import pytest
 from cg.constants import DataDelivery, FlowCellStatus, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.api.find_business_data import FindBusinessDataHandler
+from cg.store.crud.read import ReadHandler
 from cg.store.models import Case
 from tests.store_helpers import StoreHelpers
 
@@ -239,5 +239,5 @@ def mock_analysis_flow_cell(mocker) -> None:
     on disk."""
     flow_cell = Mock()
     flow_cell.status = FlowCellStatus.ON_DISK
-    mocker.patch.object(FindBusinessDataHandler, "get_flow_cells_by_case")
-    FindBusinessDataHandler.get_flow_cells_by_case.return_value = [flow_cell]
+    mocker.patch.object(ReadHandler, "get_flow_cells_by_case")
+    ReadHandler.get_flow_cells_by_case.return_value = [flow_cell]
