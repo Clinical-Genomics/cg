@@ -27,7 +27,7 @@ def test_store_items_in_status_control_has_stored_value(
     submitter.store_items_in_status(
         comment="",
         customer_id=order.customer,
-        data_analysis=Pipeline.SARS_COV_2,
+        data_analysis=Pipeline.MUTANT,
         data_delivery=DataDelivery.FASTQ,
         order="",
         ordered=dt.datetime.now(),

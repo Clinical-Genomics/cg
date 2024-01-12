@@ -19,7 +19,7 @@ class MutantAnalysisAPI(AnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.SARS_COV_2,
+        pipeline: Pipeline = Pipeline.MUTANT,
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.root_dir = config.mutant.root

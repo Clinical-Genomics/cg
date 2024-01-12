@@ -57,7 +57,7 @@ def upgrade():
         .filter(Case.data_analysis == "")
     ):
         print(f"Altering family: {str(family)}")
-        family.data_analysis = str(Pipeline.SARS_COV_2)
+        family.data_analysis = str(Pipeline.MUTANT)
         print(f"Altered family: {str(family)}")
 
     session.commit()

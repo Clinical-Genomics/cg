@@ -181,7 +181,7 @@ def test_get_delivery_scope_sample_only():
 def test_get_delivery_scope_case_and_sample():
     """Testing the delivery scope of a case and sample delivery."""
     # GIVEN a case and sample delivery type
-    delivery_type = {Pipeline.SARS_COV_2}
+    delivery_type = {Pipeline.MUTANT}
 
     # WHEN getting the delivery scope
     sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)

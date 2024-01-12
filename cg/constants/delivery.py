@@ -1,18 +1,22 @@
 """Constants for delivery."""
 
 from cg.constants.constants import Pipeline
-from cg.constants.housekeeper_tags import AlignmentFileTag, AnalysisTag, HK_DELIVERY_REPORT_TAG
+from cg.constants.housekeeper_tags import (
+    HK_DELIVERY_REPORT_TAG,
+    AlignmentFileTag,
+    AnalysisTag,
+)
 
 ONLY_ONE_CASE_PER_TICKET: list[Pipeline] = [
     Pipeline.FASTQ,
     Pipeline.MICROSALT,
-    Pipeline.SARS_COV_2,
+    Pipeline.MUTANT,
 ]
 
 SKIP_MISSING: list[Pipeline] = [
     Pipeline.FASTQ,
     Pipeline.MICROSALT,
-    Pipeline.SARS_COV_2,
+    Pipeline.MUTANT,
 ]
 
 BALSAMIC_ANALYSIS_CASE_TAGS: list[set[str]] = [
@@ -193,7 +197,7 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Pipeline, dict] = {
         "case_tags": FASTQ_ANALYSIS_CASE_TAGS,
         "sample_tags": FASTQ_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.SARS_COV_2: {
+    Pipeline.MUTANT: {
         "case_tags": SARSCOV2_ANALYSIS_CASE_TAGS,
         "sample_tags": SARSCOV2_ANALYSIS_SAMPLE_TAGS,
     },

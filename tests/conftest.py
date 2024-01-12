@@ -2056,7 +2056,7 @@ def store_with_cases_and_customers(store: Store, helpers: StoreHelpers) -> Store
     case_details: list[tuple[str, str, Pipeline, CaseActions, Customer]] = [
         ("case 1", "flyingwhale", Pipeline.BALSAMIC, CaseActions.RUNNING, customers[0]),
         ("case 2", "swimmingtiger", Pipeline.FLUFFY, CaseActions.ANALYZE, customers[0]),
-        ("case 3", "sadbaboon", Pipeline.SARS_COV_2, CaseActions.HOLD, customers[1]),
+        ("case 3", "sadbaboon", Pipeline.MUTANT, CaseActions.HOLD, customers[1]),
         ("case 4", "funkysloth", Pipeline.MIP_DNA, CaseActions.ANALYZE, customers[1]),
         ("case 5", "deadparrot", Pipeline.MICROSALT, CaseActions.RUNNING, customers[2]),
         ("case 6", "anxiousbeetle", Pipeline.DEMULTIPLEX, CaseActions.RUNNING, customers[2]),
