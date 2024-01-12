@@ -115,7 +115,7 @@ class Pipeline(StrEnum):
     RAREDISEASE: str = "raredisease"
     RNAFUSION: str = "rnafusion"
     RSYNC: str = "rsync"
-    SARS_COV_2: str = "sars-cov-2"
+    SARS_COV_2: str = "mutant"
     SPRING: str = "spring"
     TAXPROFILER: str = "taxprofiler"
 
