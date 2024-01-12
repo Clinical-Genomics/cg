@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager, MultiQC
@@ -171,7 +171,7 @@ class NfAnalysisAPI(AnalysisAPI):
             raise ValueError(f"No config file found for case {case_id}")
 
     def verify_deliverables_file_exists(self, case_id: str) -> None:
-        """Raise an error if deliverables file is not found."""
+        """Raise an error if a deliverable file is not found."""
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
