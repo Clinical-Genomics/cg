@@ -85,7 +85,7 @@ class QualityController:
         )
 
         if has_non_microbial_apptag(sample):
-            sample_passes_qc = True
+            sample_passes_qc = valid_read_count
 
         sample_quality = SampleQualityResult(
             sample_id=sample_id,
