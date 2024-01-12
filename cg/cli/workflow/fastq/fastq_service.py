@@ -13,10 +13,10 @@ class FastqService:
         self.store = store
         self.trailblazer_api = trailblazer_api
 
-    def store_analysis(self, case_id: str) -> None:
+    def store_analysis(self, case_id: str, config_path: str) -> None:
         case: Case = self._get_case(case_id)
         self._add_analysis_to_store(case)
-        self._add_analysis_to_trailblazer(case)
+        self._add_analysis_to_trailblazer(case=case, config_path=config_path)
 
     def _get_case(self, case_id: str) -> Case:
         if case := self.store.get_case_by_internal_id(case_id):
@@ -34,12 +34,12 @@ class FastqService:
         self.store.session.add(new_analysis)
         self.store.session.commit()
 
-    def _add_analysis_to_trailblazer(self, case: Case) -> None:
+    def _add_analysis_to_trailblazer(self, case: Case, config_path: str) -> None:
         self.trailblazer_api.add_pending_analysis(
             case_id=case.id,
             analysis_type=AnalysisType.OTHER,
             data_analysis=Pipeline.FASTQ,
-            config_path="",
+            config_path=config_path,
             out_dir="",
             slurm_quality_of_service=case.slurm_priority,
             ticket=case.latest_ticket,
