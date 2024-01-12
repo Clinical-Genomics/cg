@@ -14,7 +14,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
-from cg.models import CompressionData, FileData
+from cg.models import CompressionData
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -73,16 +73,11 @@ class CompressAPI:
         for run_name in sample_fastq:
             LOG.info(f"Check if compression possible for run {run_name}")
             compression: CompressionData = sample_fastq[run_name]["compression_data"]
-            if FileData.is_empty(compression.fastq_first):
-                LOG.warning(f"Fastq files are empty for {sample_id}: {compression.fastq_first}")
-                self.delete_fastq_housekeeper(
-                    hk_fastq_first=sample_fastq[run_name]["hk_first"],
-                    hk_fastq_second=sample_fastq[run_name]["hk_second"],
-                )
-                all_ok = False
-                continue
-
-            if not self.crunchy_api.is_fastq_compression_possible(compression_obj=compression):
+            is_compression_possible: bool = self._is_fastq_compression_possible(
+                compression=compression,
+                sample_id=sample_id,
+            )
+            if not is_compression_possible:
                 LOG.warning(f"FASTQ to SPRING not possible for {sample_id}, run {run_name}")
                 all_ok = False
                 continue
@@ -92,6 +87,20 @@ class CompressAPI:
             )
             self.crunchy_api.fastq_to_spring(compression_obj=compression, sample_id=sample_id)
         return all_ok
+
+    def _is_fastq_compression_possible(self, compression: CompressionData, sample_id: str) -> bool:
+        if self._is_spring_archived(compression):
+            LOG.debug(f"Found archived Spring file for {sample_id} - compression not possible")
+            return False
+        return self.crunchy_api.is_fastq_compression_possible(compression_obj=compression)
+
+    def _is_spring_archived(self, compression_data: CompressionData) -> bool:
+        spring_file: File | None = self.hk_api.get_file_insensitive_path(
+            path=compression_data.spring_path
+        )
+        if (not spring_file) or (not spring_file.archive):
+            return False
+        return bool(spring_file.archive.archived_at)
 
     def decompress_spring(self, sample_id: str) -> bool:
         """Decompress SPRING archive for a sample.

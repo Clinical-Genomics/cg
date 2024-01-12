@@ -1,5 +1,4 @@
 """Fixtures for the upload Scout API tests."""
-
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -10,6 +9,8 @@ from housekeeper.store.models import Version
 
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.constants import FileFormat, PrepCategory
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.scout import UploadTrack
 from cg.constants.sequencing import SequencingMethod
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
@@ -241,6 +242,7 @@ def mip_dna_analysis_hk_bundle_data(
     sv_vcf_file: str,
     snv_research_vcf_file: str,
     sv_research_vcf_file: str,
+    delivery_report_html: Path,
 ) -> dict:
     """Return MIP DNA bundle data for Housekeeper."""
     return {
@@ -415,7 +417,7 @@ def balsamic_analysis_hk_bundle_data(
 
 @pytest.fixture(scope="function")
 def rnafusion_analysis_hk_bundle_data(
-    case_id: str, timestamp: datetime, rnafusion_analysis_dir: Path
+    case_id: str, timestamp: datetime, rnafusion_analysis_dir: Path, delivery_report_html: Path
 ) -> dict:
     """Get some bundle data for housekeeper."""
     return {
@@ -432,6 +434,11 @@ def rnafusion_analysis_hk_bundle_data(
                 "path": Path(rnafusion_analysis_dir, "rnafusion_report.html").as_posix(),
                 "archive": False,
                 "tags": ["fusionreport", "research"],
+            },
+            {
+                "path": delivery_report_html.as_posix(),
+                "archive": False,
+                "tags": [HK_DELIVERY_REPORT_TAG],
             },
         ],
     }
@@ -588,14 +595,19 @@ def balsamic_config_builder(
 
 @pytest.fixture(name="mip_load_config")
 def mip_load_config(
-    mip_dna_analysis_dir: Path, case_id: str, customer_id: str, snv_vcf_file: str
+    mip_dna_analysis_dir: Path,
+    case_id: str,
+    customer_id: str,
+    snv_vcf_file: str,
+    delivery_report_html: Path,
 ) -> MipLoadConfig:
     """Return a valid MIP load_config."""
     return MipLoadConfig(
         owner=customer_id,
         family=case_id,
         vcf_snv=Path(mip_dna_analysis_dir, snv_vcf_file).as_posix(),
-        track="rare",
+        track=UploadTrack.RARE_DISEASE.value,
+        delivery_report=delivery_report_html.as_posix(),
     )
 
 

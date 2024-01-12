@@ -1,5 +1,8 @@
 """Tests for FASTQ part of meta compress api"""
 import logging
+from unittest import mock
+
+from cg.meta.compress import CompressAPI
 
 
 def test_compress_case_fastq_one_sample(populated_compress_fastq_api, sample, caplog):
@@ -10,14 +13,15 @@ def test_compress_case_fastq_one_sample(populated_compress_fastq_api, sample, ca
     # GIVEN a populated compress api
 
     # WHEN Compressing the bam files for the case
-    res = compress_api.compress_fastq(sample)
+    with mock.patch.object(CompressAPI, "_is_spring_archived", return_value=False):
+        result = compress_api.compress_fastq(sample)
 
-    # THEN assert compression succeded
-    assert res is True
-    # THEN assert that the correct information is communicated
-    assert "Compressing" in caplog.text
-    # THEN assert that the correct information is communicated
-    assert "to SPRING format" in caplog.text
+        # THEN assert compression succeded
+        assert result is True
+        # THEN assert that the correct information is communicated
+        assert "Compressing" in caplog.text
+        # THEN assert that the correct information is communicated
+        assert "to SPRING format" in caplog.text
 
 
 def test_compress_fastq_compression_done(
@@ -34,15 +38,16 @@ def test_compress_fastq_compression_done(
     compression_object.spring_path.touch()
 
     # WHEN Compressing the bam files for the case
-    res = compress_api.compress_fastq(sample)
+    with mock.patch.object(CompressAPI, "_is_spring_archived", return_value=False):
+        result = compress_api.compress_fastq(sample)
 
-    # THEN assert compression succeded
-    assert res is False
-    # THEN assert that the correct information is communicated
-    assert f"FASTQ to SPRING not possible for {sample}" in caplog.text
+        # THEN assert compression succeded
+        assert result is False
+        # THEN assert that the correct information is communicated
+        assert f"FASTQ to SPRING not possible for {sample}" in caplog.text
 
 
-def test_compress_case_fastq_compression_pending(
+def test_compress_sample_fastq_compression_pending(
     populated_compress_fastq_api, sample, compression_object, caplog
 ):
     """Test to compress all FASTQ files for a sample when compression is pending
@@ -55,9 +60,32 @@ def test_compress_case_fastq_compression_pending(
     compression_object.pending_path.touch()
 
     # WHEN compressing the FASTQ files for the case
-    res = compress_api.compress_fastq(sample)
+    with mock.patch.object(CompressAPI, "_is_spring_archived", return_value=False):
+        result = compress_api.compress_fastq(sample)
 
-    # THEN assert compression returns False
-    assert res is False
-    # THEN assert that the correct information is communicated
-    assert f"FASTQ to SPRING not possible for {sample}" in caplog.text
+        # THEN assert compression returns False
+        assert result is False
+        # THEN assert that the correct information is communicated
+        assert f"FASTQ to SPRING not possible for {sample}" in caplog.text
+
+
+def test_compress_sample_fastq_archived_spring_file(
+    populated_compress_fastq_api, sample, compression_object, caplog
+):
+    """Test to compress all FASTQ files for a sample when the Spring file is archived
+
+    The program should not compress any files since the Spring file already exists
+    """
+    caplog.set_level(logging.DEBUG)
+    compress_api = populated_compress_fastq_api
+    # GIVEN that the pending flag exists
+    compression_object.pending_path.touch()
+
+    # WHEN compressing the FASTQ files for the case
+    with mock.patch.object(CompressAPI, "_is_spring_archived", return_value=True):
+        result = compress_api.compress_fastq(sample)
+
+        # THEN assert compression returns False
+        assert result is False
+        # THEN assert that the correct information is communicated
+        assert f"FASTQ to SPRING not possible for {sample}" in caplog.text

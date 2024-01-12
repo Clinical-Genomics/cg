@@ -130,7 +130,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         return Path(self.get_output_path(case_id), "deliverables.yaml")
 
-    def get_trailblazer_config_path(self, case_id: str) -> Path:
+    def get_job_ids_path(self, case_id: str) -> Path:
         """
         Location in working directory where SLURM job id file is to be stored.
         This file contains SLURM ID of jobs associated with current analysis ,
