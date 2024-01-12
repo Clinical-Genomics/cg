@@ -54,6 +54,7 @@ class QualityController:
         return sample_results
 
     def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> SampleQualityResult:
+        """Perform a quality control of a sample given its metrics."""
         valid_read_count: bool = self.has_valid_total_reads(sample_id)
         valid_mapping: bool = has_valid_mapping_rate(metrics)
         valid_duplication: bool = has_valid_duplication_rate(metrics)
@@ -85,7 +86,7 @@ class QualityController:
         )
 
         if has_non_microbial_apptag(sample):
-            sample_passes_qc = True
+            sample_passes_qc = valid_read_count
 
         sample_quality = SampleQualityResult(
             sample_id=sample_id,
