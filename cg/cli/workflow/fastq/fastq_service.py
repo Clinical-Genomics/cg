@@ -36,7 +36,7 @@ class FastqService:
 
     def _add_analysis_to_trailblazer(self, case: Case, config_path: str) -> None:
         self.trailblazer_api.add_pending_analysis(
-            case_id=case.id,
+            case_id=case.internal_id,
             analysis_type=AnalysisType.OTHER,
             data_analysis=Pipeline.FASTQ,
             config_path=config_path,
@@ -44,4 +44,6 @@ class FastqService:
             slurm_quality_of_service=case.slurm_priority,
             ticket=case.latest_ticket,
         )
-        self.trailblazer_api.set_analysis_status(case_id=case.id, status=AnalysisStatus.COMPLETED)
+        self.trailblazer_api.set_analysis_status(
+            case_id=case.internal_id, status=AnalysisStatus.COMPLETED
+        )
