@@ -65,7 +65,7 @@ def has_valid_10x_coverage(metrics: SampleMetrics) -> bool:
     return is_valid_10x_coverage(coverage_10x) if coverage_10x else False
 
 
-def has_non_microsalt_apptag(sample: Sample) -> bool:
+def has_non_microbial_apptag(sample: Sample) -> bool:
     app_tag: str = get_application_tag(sample)
     return app_tag not in list(MicrosaltAppTags)
 
