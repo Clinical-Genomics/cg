@@ -3,8 +3,11 @@ import logging
 
 import click
 
+from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
-from cg.constants.constants import DRY_RUN, Pipeline
+from cg.constants.constants import DRY_RUN, AnalysisType, Pipeline
+from cg.constants.priority import Priority
+from cg.constants.tb import AnalysisStatus
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.store import Store
 from cg.store.models import Analysis, Case
@@ -39,6 +42,17 @@ def store_fastq_analysis(context: click.Context, case_id: str, dry_run: bool = F
         return
     status_db.session.add(new_analysis)
     status_db.session.commit()
+    trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
+    trailblazer_api.add_pending_analysis(
+        case_id=case_id,
+        analysis_type=AnalysisType.OTHER,
+        data_analysis=Pipeline.FASTQ,
+        config_path="",
+        out_dir="",
+        slurm_quality_of_service=Priority.priority_to_slurm_qos().get(case_obj.priority),
+        ticket=case_obj.latest_ticket,
+    )
+    trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
 
 
 @fastq.command("store-available")
