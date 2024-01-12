@@ -858,13 +858,13 @@ files = [
 
 [[package]]
 name = "housekeeper"
-version = "4.11.0"
+version = "4.11.1"
 description = "Housekeeper takes care of files"
 optional = false
 python-versions = "*"
 files = [
-    {file = "housekeeper-4.11.0-py2.py3-none-any.whl", hash = "sha256:c309d32d12d26bd57389a21f36cc6ec93745570707b26e5a2f09686b6e95b1c8"},
-    {file = "housekeeper-4.11.0.tar.gz", hash = "sha256:05d8644bd4d6aa2765de4d6207049a82a7f12494b71923f3ef4fed9e23e844d3"},
+    {file = "housekeeper-4.11.1-py2.py3-none-any.whl", hash = "sha256:4999ad8769971ef58c9398647250fe026fca7ceee0802e7fd45ac801742372f1"},
+    {file = "housekeeper-4.11.1.tar.gz", hash = "sha256:e5b0586ffddafd7a6d9a8d73c23b100ef951557868f51d8506a92feeec3519d0"},
 ]
 
 [package.dependencies]
@@ -2416,4 +2416,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "0e80e415fa553084eebcf19e0a13b173db121e7fe77aef7240f5dee85b894e04"
+content-hash = "4b207f0dda6de428d35a994eb722cdf71bcb5c099d597ba0beecc3301293d029"
