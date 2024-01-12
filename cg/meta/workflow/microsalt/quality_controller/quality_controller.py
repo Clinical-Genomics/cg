@@ -54,6 +54,7 @@ class QualityController:
         return sample_results
 
     def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> SampleQualityResult:
+        """Perform a quality control of a sample given its metrics."""
         valid_read_count: bool = self.has_valid_total_reads(sample_id)
         valid_mapping: bool = has_valid_mapping_rate(metrics)
         valid_duplication: bool = has_valid_duplication_rate(metrics)
