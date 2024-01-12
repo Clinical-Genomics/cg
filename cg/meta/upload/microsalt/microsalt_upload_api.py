@@ -17,7 +17,7 @@ class MicrosaltUploadAPI(UploadAPI):
         super().__init__(config=config, analysis_api=self.analysis_api)
 
     def upload(self, ctx: click.Context, case: Case, restart: bool) -> None:
-        """Uploads MicroSALT analysis data and files."""
+        """Uploads MIP-DNA analysis data and files."""
         analysis: Analysis = case.analyses[0]
         self.update_upload_started_at(analysis)
 
