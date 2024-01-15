@@ -92,7 +92,7 @@ def bcl_convert_sample_sheet_creator(
     bcl_convert_flow_cell: FlowCellDirectoryData,
     novaseq_x_lims_samples: list[FlowCellSampleBCLConvert],
 ) -> SampleSheetCreatorBCLConvert:
-    """Returns a sample sheet creator for version 2 sample sheets with dragen format."""
+    """Returns a sample sheet creator for sample sheet v2."""
     return SampleSheetCreatorBCLConvert(
         flow_cell=bcl_convert_flow_cell,
         lims_samples=novaseq_x_lims_samples,
