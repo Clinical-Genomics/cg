@@ -118,7 +118,6 @@ class Pipeline(StrEnum):
     RSYNC: str = "rsync"
     SPRING: str = "spring"
     TAXPROFILER: str = "taxprofiler"
-    SARS_COV_2: str = "sars-cov-2"
 
 
 class FileFormat(StrEnum):
