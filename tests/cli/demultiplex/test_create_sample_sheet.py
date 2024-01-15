@@ -89,7 +89,7 @@ def test_create_bcl2fastq_sample_sheet(
     # WHEN creating a sample sheet
     result = cli_runner.invoke(
         create_sheet,
-        [str(tmp_flow_cells_directory_no_sample_sheet), "--bcl-converter", "bcl2fastq"],
+        [str(tmp_flow_cells_directory_no_sample_sheet), "--bcl-converter", BclConverter.BCL2FASTQ],
         obj=sample_sheet_context,
     )
 
@@ -145,7 +145,7 @@ def test_create_dragen_sample_sheet(
     flow_cell_directory: Path = request.getfixturevalue(scenario.flow_cell_directory)
     # GIVEN a flow cell directory with some run parameters
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_directory, bcl_converter=BclConverter.DRAGEN
+        flow_cell_directory, bcl_converter=BclConverter.BCLCONVERT
     )
     assert flow_cell.run_parameters_path.exists()
 
@@ -167,7 +167,7 @@ def test_create_dragen_sample_sheet(
     # WHEN creating a sample sheet
     result = cli_runner.invoke(
         create_sheet,
-        [str(flow_cell_directory), "-b", BclConverter.DRAGEN],
+        [str(flow_cell_directory), "-b", BclConverter.BCLCONVERT],
         obj=sample_sheet_context,
     )
 
@@ -214,7 +214,11 @@ def test_incorrect_bcl2fastq_headers_samplesheet(
     # WHEN creating a sample sheet
     cli_runner.invoke(
         create_sheet,
-        [str(tmp_flow_cells_directory_malformed_sample_sheet), "--bcl-converter", "bcl2fastq"],
+        [
+            str(tmp_flow_cells_directory_malformed_sample_sheet),
+            "--bcl-converter",
+            BclConverter.BCL2FASTQ,
+        ],
         obj=sample_sheet_context,
     )
 
