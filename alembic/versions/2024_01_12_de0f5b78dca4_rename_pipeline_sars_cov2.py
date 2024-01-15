@@ -51,5 +51,21 @@ def upgrade():
 
 
 def downgrade():
+    bind = op.get_bind()
+    session = orm.Session(bind=bind)
+    op.alter_column("case", "data_analysis", type_=types.VARCHAR(64))
+    op.alter_column("analysis", "pipeline", type_=types.VARCHAR(64))
+
+    for case in session.query(Case).filter(Case.data_analysis == Pipeline.MUTANT):
+        print(f"Altering case: {str(case)}")
+        case.data_analysis = "sars-cov-2"
+        print(f"Altered case: {str(case)}")
+
+    for analysis in session.query(Analysis).filter(Analysis.pipeline == Pipeline.MUTANT):
+        print(f"Altering analysis: {str(analysis)}")
+        analysis.pipeline = "sars-cov-2"
+        print(f"Altered analysis: {str(analysis)}")
+        
     op.alter_column("case", "data_analysis", type_=old_enum)
     op.alter_column("analysis", "pipeline", type_=old_enum)
+    session.commit()
