@@ -15,6 +15,7 @@ from cg.meta.workflow.microsalt.quality_controller.utils import (
     get_percent_reads_guaranteed,
     get_report_path,
     get_sample_target_reads,
+    has_non_microbial_apptag,
     is_sample_negative_control,
     has_valid_10x_coverage,
     has_valid_average_coverage,
@@ -53,6 +54,7 @@ class QualityController:
         return sample_results
 
     def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> SampleQualityResult:
+        """Perform a quality control of a sample given its metrics."""
         valid_read_count: bool = self.has_valid_total_reads(sample_id)
         valid_mapping: bool = has_valid_mapping_rate(metrics)
         valid_duplication: bool = has_valid_duplication_rate(metrics)
@@ -82,6 +84,9 @@ class QualityController:
             and valid_coverage
             and valid_10x_coverage
         )
+
+        if has_non_microbial_apptag(sample):
+            sample_passes_qc = valid_read_count
 
         sample_quality = SampleQualityResult(
             sample_id=sample_id,
