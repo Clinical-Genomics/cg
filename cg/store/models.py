@@ -17,6 +17,7 @@ from cg.constants import (
 )
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import CONTROL_OPTIONS, CaseActions, PrepCategory
+from cg.constants.priority import SlurmQos
 
 Model = declarative_base()
 
@@ -486,6 +487,12 @@ class Case(Model, PriorityMixin):
     def is_uploaded(self) -> bool:
         """Returns True if the latest connected analysis has been uploaded."""
         return self.analyses and self.analyses[0].uploaded_at
+
+    @property
+    def slurm_priority(self) -> SlurmQos:
+        case_priority: str = self.priority
+        slurm_priority: str = Priority.priority_to_slurm_qos().get(case_priority)
+        return SlurmQos(slurm_priority)
 
     def get_delivery_arguments(self) -> set[str]:
         """Translates the case data_delivery field to pipeline specific arguments."""
