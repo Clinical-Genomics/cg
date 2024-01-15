@@ -114,7 +114,6 @@ def test_demultiplex_dragen_flowcell(
     cli_runner: testing.CliRunner,
     tmp_flow_cell_directory_bclconvert: Path,
     demultiplexing_context_for_demux: CGConfig,
-    tmp_demultiplexed_runs_directory: Path,
     caplog,
     mocker,
 ):
@@ -123,7 +122,7 @@ def test_demultiplex_dragen_flowcell(
     # GIVEN that all files are present for Dragen demultiplexing
 
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_directory_bclconvert, bcl_converter="dragen"
+        flow_cell_path=tmp_flow_cell_directory_bclconvert, bcl_converter=BclConverter.BCLCONVERT
     )
     add_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_flow_cell_directory_bclconvert,
