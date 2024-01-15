@@ -18,9 +18,25 @@ down_revision = "584840c706a0"
 branch_labels = None
 depends_on = None
 
-old_options = set(Pipeline)
-old_options.remove("mutant")
-new_options = set(Pipeline)
+old_options = (
+    "taxprofiler",
+    "microsalt",
+    "rnafusion",
+    "balsamic-umi",
+    "raredisease",
+    "sars-cov-2",
+    "balsamic-qc",
+    "balsamic",
+    "balsamic-pon",
+    "demultiplex",
+    "fluffy",
+    "mip-dna",
+    "mip-rna",
+    "rsync",
+    "spring",
+    "fastq",
+)
+new_options = sorted(old_options + ("mutant",))
 
 old_enum = mysql.ENUM(*list(old_options))
 new_enum = mysql.ENUM(*list(new_options))
