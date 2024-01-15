@@ -4,7 +4,6 @@ import click
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.fastq.fastq_service import FastqService
-from cg.cli.workflow.fastq.utils import get_config_path
 from cg.constants.constants import DRY_RUN, Pipeline
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.store import Store
@@ -33,8 +32,7 @@ def create_fastq_analysis(context: click.Context, case_id: str, dry_run: bool = 
         store=context.obj.status_db,
         trailblazer_api=context.obj.trailblazer_api,
     )
-    config_path: str = get_config_path(context)
-    fastq_service.store_analysis(case_id=case_id, config_path=config_path)
+    fastq_service.store_analysis(case_id)
 
 
 @fastq.command("store-available")
