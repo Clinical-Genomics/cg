@@ -311,11 +311,10 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         matches: list[str] = [d for d in os.listdir(results_dir) if d.startswith(project_id)]
         if not matches:
             LOG.error(f"No result directory found for {case_id} with project id {project_id}")
-            raise MissingAnalysisDir
         return matches
 
     def get_case_path(self, case_id: str) -> Path:
         results_dir: Path = self.get_results_dir()
         matching_cases: list[str] = self.get_analyses_result_dirs(case_id)
-        case_dir: str = max(matching_cases, default=None)
+        case_dir: str = max(matching_cases, default="")
         return Path(results_dir, case_dir)
