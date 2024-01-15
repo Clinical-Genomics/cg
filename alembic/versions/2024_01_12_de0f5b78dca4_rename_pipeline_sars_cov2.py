@@ -23,8 +23,10 @@ old_options.remove("mutant")
 old_options.add("sars-cov-2")
 new_options = set(Pipeline)
 
-old_enum = mysql.ENUM(*old_options)
-new_enum = mysql.ENUM(*new_options)
+old_enum = mysql.ENUM(*list(old_options))
+print(old_enum)
+new_enum = mysql.ENUM(*list(new_options))
+print(new_enum)
 
 
 def upgrade():
