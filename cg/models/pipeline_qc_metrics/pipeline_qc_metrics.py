@@ -35,6 +35,7 @@ class CoverageMetrics(BaseModel):
     at_dropout: float | None = None
     pct_off_bait: float | None = None
     pct_pf_reads_improper_pairs: float | None = None
+    pct_chimeras: float | None = None
 
 
 class SequencingMetrics(BaseModel):
