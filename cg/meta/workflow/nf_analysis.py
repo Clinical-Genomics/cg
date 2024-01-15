@@ -393,8 +393,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
         return metrics_list
 
-    @staticmethod
-    def get_metrics_from_sample(sample_name: str, multiqc_json: list[dict]) -> dict:
+    def get_metrics_from_sample(self, sample_name: str, multiqc_json: list[dict]) -> dict:
         """Get tuple metric_name and metric_values from sample_id"""
 
         metrics_values: dict = {}
