@@ -53,25 +53,28 @@ def hiseq_2500_custom_index_bcl_convert_lims_samples(
 
 @pytest.fixture
 def novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples(
-    novaseq_6000_pre_1_5_kits_flow_cell: Path,
+    novaseq_6000_pre_1_5_kits_flow_cell_path: Path,
 ) -> list[FlowCellSampleBcl2Fastq]:
-    path = Path(novaseq_6000_pre_1_5_kits_flow_cell, "HLYWYDSXX_bcl2fastq_raw.json")
+    """Return a list of Bcl2Fastq samples from a NovaSeq6000 pre 1.5 flow cell."""
+    path = Path(novaseq_6000_pre_1_5_kits_flow_cell_path, "HLYWYDSXX_bcl2fastq_raw.json")
     return [FlowCellSampleBcl2Fastq.model_validate(sample) for sample in read_json(path)]
 
 
 @pytest.fixture
 def novaseq_6000_pre_1_5_kits_bcl_convert_lims_samples(
-    novaseq_6000_pre_1_5_kits_flow_cell: Path,
+    novaseq_6000_pre_1_5_kits_flow_cell_path: Path,
 ) -> list[FlowCellSampleBCLConvert]:
-    path = Path(novaseq_6000_pre_1_5_kits_flow_cell, "HLYWYDSXX_bcl_convert_raw.json")
+    """Return a list of BCLConvert samples from a NovaSeq6000 pre 1.5 flow cell."""
+    path = Path(novaseq_6000_pre_1_5_kits_flow_cell_path, "HLYWYDSXX_bcl_convert_raw.json")
     return [FlowCellSampleBCLConvert.model_validate(sample) for sample in read_json(path)]
 
 
 @pytest.fixture
 def novaseq_6000_post_1_5_kits_bcl_convert_lims_samples(
-    novaseq_6000_post_1_5_kits_flow_cell: Path,
+    novaseq_6000_post_1_5_kits_flow_cell_path: Path,
 ) -> list[FlowCellSampleBCLConvert]:
-    path = Path(novaseq_6000_post_1_5_kits_flow_cell, "HK33MDRX3_bcl_convert_raw.json")
+    """Return a list of BCLConvert samples from a NovaSeq6000 post 1.5 flow cell."""
+    path = Path(novaseq_6000_post_1_5_kits_flow_cell_path, "HK33MDRX3_bcl_convert_raw.json")
     return [FlowCellSampleBCLConvert.model_validate(sample) for sample in read_json(path)]
 
 

@@ -202,27 +202,27 @@ def demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
 
 
 @pytest.fixture
-def novaseq_6000_post_1_5_kits_flow_cell(tmp_flow_cells_directory: Path) -> Path:
+def novaseq_6000_post_1_5_kits_flow_cell_path(tmp_flow_cells_directory: Path) -> Path:
     return Path(tmp_flow_cells_directory, "230912_A00187_1009_AHK33MDRX3")
 
 
 @pytest.fixture
-def novaseq_6000_post_1_5_kits_correct_sample_sheet(
-    novaseq_6000_post_1_5_kits_flow_cell: Path,
+def novaseq_6000_post_1_5_kits_correct_sample_sheet_path(
+    novaseq_6000_post_1_5_kits_flow_cell_path: Path,
 ) -> Path:
-    return Path(novaseq_6000_post_1_5_kits_flow_cell, CORRECT_SAMPLE_SHEET)
+    return Path(novaseq_6000_post_1_5_kits_flow_cell_path, CORRECT_SAMPLE_SHEET)
 
 
 @pytest.fixture
-def novaseq_6000_pre_1_5_kits_flow_cell(tmp_flow_cells_directory: Path) -> Path:
+def novaseq_6000_pre_1_5_kits_flow_cell_path(tmp_flow_cells_directory: Path) -> Path:
     return Path(tmp_flow_cells_directory, "190927_A00689_0069_BHLYWYDSXX")
 
 
 @pytest.fixture
-def novaseq_6000_pre_1_5_kits_correct_sample_sheet(
-    novaseq_6000_pre_1_5_kits_flow_cell: Path,
+def novaseq_6000_pre_1_5_kits_correct_sample_sheet_path(
+    novaseq_6000_pre_1_5_kits_flow_cell_path: Path,
 ) -> Path:
-    return Path(novaseq_6000_pre_1_5_kits_flow_cell, CORRECT_SAMPLE_SHEET)
+    return Path(novaseq_6000_pre_1_5_kits_flow_cell_path, CORRECT_SAMPLE_SHEET)
 
 
 @pytest.fixture
@@ -357,22 +357,22 @@ def novaseq_6000_run_parameters_path(bcl2fastq_flow_cell_dir: Path) -> Path:
 
 @pytest.fixture
 def novaseq_6000_run_parameters_pre_1_5_kits_path(
-    novaseq_6000_pre_1_5_kits_flow_cell: Path,
+    novaseq_6000_pre_1_5_kits_flow_cell_path: Path,
 ) -> Path:
     """Return the path to a NovaSeq6000 pre 1.5 kit run parameters file."""
     return Path(
-        novaseq_6000_pre_1_5_kits_flow_cell,
+        novaseq_6000_pre_1_5_kits_flow_cell_path,
         DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE,
     )
 
 
 @pytest.fixture
 def novaseq_6000_run_parameters_post_1_5_kits_path(
-    novaseq_6000_post_1_5_kits_flow_cell: Path,
+    novaseq_6000_post_1_5_kits_flow_cell_path: Path,
 ) -> Path:
     """Return the path to a NovaSeq6000 post 1.5 kit run parameters file."""
     return Path(
-        novaseq_6000_post_1_5_kits_flow_cell,
+        novaseq_6000_post_1_5_kits_flow_cell_path,
         DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE,
     )
 
