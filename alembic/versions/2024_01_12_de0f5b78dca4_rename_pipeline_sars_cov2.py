@@ -32,8 +32,8 @@ print(new_enum)
 def upgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
-    op.alter_column("case", "data_analysis", type_=type.VARCHAR(64))
-    op.alter_column("analysis", "pipeline", type_=type.VARCHAR(64))
+    op.alter_column("case", "data_analysis", type_=mysql.VARCHAR(64))
+    op.alter_column("analysis", "pipeline", type_=mysql.VARCHAR(64))
 
     for case in session.query(Case).filter(Case.data_analysis == "sars-cov-2"):
         print(f"Altering case: {str(case)}")
@@ -53,8 +53,8 @@ def upgrade():
 def downgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
-    op.alter_column("case", "data_analysis", type_=type.VARCHAR(64))
-    op.alter_column("analysis", "pipeline", type_=type.VARCHAR(64))
+    op.alter_column("case", "data_analysis", type_=mysql.VARCHAR(64))
+    op.alter_column("analysis", "pipeline", type_=mysql.VARCHAR(64))
 
     for case in session.query(Case).filter(Case.data_analysis == Pipeline.MUTANT):
         print(f"Altering case: {str(case)}")
