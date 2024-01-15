@@ -116,14 +116,14 @@ class SampleSheetScenario(BaseModel):
     "scenario",
     [
         SampleSheetScenario(
-            flow_cell_directory="novaseq_6000_pre_1_5_kits_flow_cell",
+            flow_cell_directory="novaseq_6000_pre_1_5_kits_flow_cell_path",
             lims_samples="novaseq_6000_pre_1_5_kits_bcl_convert_lims_samples",
-            correct_sample_sheet="novaseq_6000_pre_1_5_kits_correct_sample_sheet",
+            correct_sample_sheet="novaseq_6000_pre_1_5_kits_correct_sample_sheet_path",
         ),
         SampleSheetScenario(
-            flow_cell_directory="novaseq_6000_post_1_5_kits_flow_cell",
+            flow_cell_directory="novaseq_6000_post_1_5_kits_flow_cell_path",
             lims_samples="novaseq_6000_post_1_5_kits_bcl_convert_lims_samples",
-            correct_sample_sheet="novaseq_6000_post_1_5_kits_correct_sample_sheet",
+            correct_sample_sheet="novaseq_6000_post_1_5_kits_correct_sample_sheet_path",
         ),
         SampleSheetScenario(
             flow_cell_directory="novaseq_x_flow_cell_directory",
