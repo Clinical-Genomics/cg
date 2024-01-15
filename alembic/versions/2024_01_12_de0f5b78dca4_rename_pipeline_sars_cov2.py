@@ -37,6 +37,7 @@ old_options = (
     "fastq",
 )
 new_options = sorted(old_options + ("mutant",))
+new_options.remove("sars-cov-2")
 
 old_enum = mysql.ENUM(*list(old_options))
 new_enum = mysql.ENUM(*list(new_options))
@@ -45,8 +46,14 @@ new_enum = mysql.ENUM(*list(new_options))
 def upgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
-    op.alter_column("case", "data_analysis", type_=mysql.VARCHAR(64))
-    op.alter_column("analysis", "pipeline", type_=mysql.VARCHAR(64))
+    op.alter_column("case", "data_analysis", type_=mysql.VARCHAR(64), existing_nullable=True)
+    op.alter_column("analysis", "pipeline", type_=mysql.VARCHAR(64), existing_nullable=True)
+
+    for case in session.query(Case).filter(Case.data_analysis == ""):
+        print(f"Altering case: {str(case)}")
+        case.data_analysis = "fastq"
+        case.action = "hold"
+        print(f"Altered case: {str(case)}")
 
     for case in session.query(Case).filter(Case.data_analysis == "sars-cov-2"):
         print(f"Altering case: {str(case)}")
@@ -58,27 +65,27 @@ def upgrade():
         analysis.pipeline = str(Pipeline.MUTANT)
         print(f"Altered analysis: {str(analysis)}")
 
-    op.alter_column("case", "data_analysis", type_=new_enum)
-    op.alter_column("analysis", "pipeline", type_=new_enum)
     session.commit()
+    op.alter_column("case", "data_analysis", type_=new_enum, existing_nullable=True)
+    op.alter_column("analysis", "pipeline", type_=new_enum, existing_nullable=True)
 
 
 def downgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
-    op.alter_column("case", "data_analysis", type_=mysql.VARCHAR(64))
-    op.alter_column("analysis", "pipeline", type_=mysql.VARCHAR(64))
+    op.alter_column("case", "data_analysis", type_=mysql.VARCHAR(64), existing_nullable=True)
+    op.alter_column("analysis", "pipeline", type_=mysql.VARCHAR(64), existing_nullable=True)
 
-    for case in session.query(Case).filter(Case.data_analysis == Pipeline.MUTANT):
+    for case in session.query(Case).filter(Case.data_analysis == "mutant"):
         print(f"Altering case: {str(case)}")
         case.data_analysis = "sars-cov-2"
         print(f"Altered case: {str(case)}")
 
-    for analysis in session.query(Analysis).filter(Analysis.pipeline == Pipeline.MUTANT):
+    for analysis in session.query(Analysis).filter(Analysis.pipeline == "mutant"):
         print(f"Altering analysis: {str(analysis)}")
         analysis.pipeline = "sars-cov-2"
         print(f"Altered analysis: {str(analysis)}")
 
-    op.alter_column("case", "data_analysis", type_=old_enum)
-    op.alter_column("analysis", "pipeline", type_=old_enum)
     session.commit()
+    op.alter_column("case", "data_analysis", type_=old_enum, existing_nullable=True)
+    op.alter_column("analysis", "pipeline", type_=old_enum, existing_nullable=True)
