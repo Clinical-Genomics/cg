@@ -3,7 +3,7 @@ from datetime import datetime
 
 from cg.cli.workflow.fastq.base import (
     store_available_fastq_analysis,
-    create_fastq_analysis,
+    store_fastq_analysis,
 )
 from cg.constants.constants import CaseActions, Pipeline
 from cg.store.models import Analysis, Case, Sample
@@ -17,7 +17,7 @@ def test_store_fastq_analysis(another_case_id: str, cli_runner, fastq_context, h
     assert not case_obj.analyses
 
     # WHEN a command is run to create an analysis for the case
-    cli_runner.invoke(create_fastq_analysis, [another_case_id], obj=fastq_context)
+    cli_runner.invoke(store_fastq_analysis, [another_case_id], obj=fastq_context)
 
     # THEN the analysis is created
     assert (
