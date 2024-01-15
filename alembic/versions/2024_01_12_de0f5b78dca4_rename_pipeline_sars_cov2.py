@@ -5,8 +5,7 @@ Revises: 584840c706a0
 Create Date: 2024-01-12 14:25:36.338102
 
 """
-from sqlalchemy import orm
-from sqlalchemy.dialects import mysql
+from sqlalchemy import orm, types
 
 from alembic import op
 from cg.constants import Pipeline
@@ -38,15 +37,15 @@ old_options = (
 )
 new_options = sorted(old_options + ("mutant",))
 
-old_enum = mysql.ENUM(*list(old_options))
-new_enum = mysql.ENUM(*list(new_options))
+old_enum = types.Enum(*list(old_options))
+new_enum = types.Enum(*list(new_options))
 
 
 def upgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
-    op.alter_column("case", "data_analysis", type_=mysql.VARCHAR(64))
-    op.alter_column("analysis", "pipeline", type_=mysql.VARCHAR(64))
+    op.alter_column("case", "data_analysis", type_=types.VARCHAR(64))
+    op.alter_column("analysis", "pipeline", type_=types.VARCHAR(64))
 
     for case in session.query(Case).filter(Case.data_analysis == "sars-cov-2"):
         print(f"Altering case: {str(case)}")
@@ -66,8 +65,8 @@ def upgrade():
 def downgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
-    op.alter_column("case", "data_analysis", type_=mysql.VARCHAR(64))
-    op.alter_column("analysis", "pipeline", type_=mysql.VARCHAR(64))
+    op.alter_column("case", "data_analysis", type_=types.VARCHAR(64))
+    op.alter_column("analysis", "pipeline", type_=types.VARCHAR(64))
 
     for case in session.query(Case).filter(Case.data_analysis == Pipeline.MUTANT):
         print(f"Altering case: {str(case)}")
