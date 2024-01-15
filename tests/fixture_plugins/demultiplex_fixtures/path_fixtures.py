@@ -214,13 +214,6 @@ def novaseq_6000_post_1_5_kits_correct_sample_sheet(
 
 
 @pytest.fixture
-def novaseq_6000_post_1_5_kits_raw_lims_samples(
-    novaseq_6000_post_1_5_kits_flow_cell: Path,
-) -> Path:
-    return Path(novaseq_6000_post_1_5_kits_flow_cell, "HK33MDRX3_raw.json")
-
-
-@pytest.fixture
 def novaseq_6000_pre_1_5_kits_flow_cell(tmp_flow_cells_directory: Path) -> Path:
     return Path(tmp_flow_cells_directory, "190927_A00689_0069_BHLYWYDSXX")
 
@@ -233,11 +226,6 @@ def novaseq_6000_pre_1_5_kits_correct_sample_sheet(
 
 
 @pytest.fixture
-def novaseq_6000_pre_1_5_kits_raw_lims_samples(novaseq_6000_pre_1_5_kits_flow_cell: Path) -> Path:
-    return Path(novaseq_6000_pre_1_5_kits_flow_cell, "HLYWYDSXX_raw.json")
-
-
-@pytest.fixture
 def novaseq_x_flow_cell_directory(tmp_flow_cells_directory: Path) -> Path:
     return Path(tmp_flow_cells_directory, "20231108_LH00188_0028_B22F52TLT3")
 
@@ -245,11 +233,6 @@ def novaseq_x_flow_cell_directory(tmp_flow_cells_directory: Path) -> Path:
 @pytest.fixture
 def novaseq_x_correct_sample_sheet(novaseq_x_flow_cell_directory: Path) -> Path:
     return Path(novaseq_x_flow_cell_directory, CORRECT_SAMPLE_SHEET)
-
-
-@pytest.fixture
-def novaseq_x_raw_lims_samples(novaseq_x_flow_cell_directory: Path) -> Path:
-    return Path(novaseq_x_flow_cell_directory, "22F52TLT3_raw.json")
 
 
 @pytest.fixture(scope="session")

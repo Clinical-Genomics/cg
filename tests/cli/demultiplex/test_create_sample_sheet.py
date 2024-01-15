@@ -23,7 +23,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_no_run_parameters: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: list[FlowCellSampleBcl2Fastq],
+    novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples: list[FlowCellSampleBcl2Fastq],
     caplog,
     mocker,
 ):
@@ -36,7 +36,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
     # GIVEN flow cell samples
     mocker.patch(
         FLOW_CELL_FUNCTION_NAME,
-        return_value=lims_novaseq_bcl2fastq_samples,
+        return_value=novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples,
     )
 
     # GIVEN that the context's flow cell directory holds the given flow cell
@@ -60,7 +60,7 @@ def test_create_bcl2fastq_sample_sheet(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_no_sample_sheet: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: list[FlowCellSampleBcl2Fastq],
+    novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples: list[FlowCellSampleBcl2Fastq],
     mocker,
 ):
     """Test that creating a Bcl2fastq sample sheet works."""
@@ -82,7 +82,7 @@ def test_create_bcl2fastq_sample_sheet(
     # GIVEN flow cell samples
     mocker.patch(
         FLOW_CELL_FUNCTION_NAME,
-        return_value=lims_novaseq_bcl2fastq_samples,
+        return_value=novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples,
     )
     # GIVEN a lims api that returns some samples
 
@@ -117,12 +117,12 @@ class SampleSheetScenario(BaseModel):
     [
         SampleSheetScenario(
             flow_cell_directory="novaseq_6000_pre_1_5_kits_flow_cell",
-            lims_samples="novaseq_6000_pre_1_5_kits_lims_samples",
+            lims_samples="novaseq_6000_pre_1_5_kits_bcl_convert_lims_samples",
             correct_sample_sheet="novaseq_6000_pre_1_5_kits_correct_sample_sheet",
         ),
         SampleSheetScenario(
             flow_cell_directory="novaseq_6000_post_1_5_kits_flow_cell",
-            lims_samples="novaseq_6000_post_1_5_kits_lims_samples",
+            lims_samples="novaseq_6000_post_1_5_kits_bcl_convert_lims_samples",
             correct_sample_sheet="novaseq_6000_post_1_5_kits_correct_sample_sheet",
         ),
         SampleSheetScenario(
@@ -137,7 +137,6 @@ def test_create_dragen_sample_sheet(
     cli_runner: testing.CliRunner,
     scenario: SampleSheetScenario,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl_convert_samples: list[FlowCellSampleBCLConvert],
     mocker,
     request: FixtureRequest,
 ):
@@ -193,7 +192,7 @@ def test_incorrect_bcl2fastq_headers_samplesheet(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_malformed_sample_sheet: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: list[FlowCellSampleBcl2Fastq],
+    novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples: list[FlowCellSampleBcl2Fastq],
     mocker,
     caplog,
 ):
@@ -207,7 +206,7 @@ def test_incorrect_bcl2fastq_headers_samplesheet(
     # GIVEN flow cell samples
     mocker.patch(
         FLOW_CELL_FUNCTION_NAME,
-        return_value=lims_novaseq_bcl2fastq_samples,
+        return_value=novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples,
     )
     # GIVEN a lims api that returns some samples
 
