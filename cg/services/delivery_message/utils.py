@@ -1,7 +1,18 @@
+from cg.constants.constants import DataDelivery
+from cg.services.delivery_message.messages import DeliveryMessage, FastqMessage
 from cg.store.models import Case
 
 
-def get_fastq_delivery_path(case: Case) -> str:
-    ticket_id: str = case.latest_ticket
-    customer_id: str = case.customer.internal_id
-    return f"/home/{customer_id}/inbox/{ticket_id}"
+message_map = {
+    DataDelivery.FASTQ: FastqMessage,
+}
+
+
+def get_message_strategy(case: Case) -> DeliveryMessage:
+    message_strategy: FastqMessage = message_map[case.data_analysis]()
+    return message_strategy
+
+
+def get_message(case: Case) -> str:
+    message_strategy: DeliveryMessage = get_message_strategy(case)
+    return message_strategy.create_message(case)

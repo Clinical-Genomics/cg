@@ -5,5 +5,5 @@ from cg.store.models import Case
 
 class DeliveryMessage(ABC):
     @abstractmethod
-    def generate_message(self, case: Case):
+    def create_message(self, case: Case):
         pass

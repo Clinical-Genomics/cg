@@ -3,5 +3,5 @@ from cg.store.models import Case
 
 
 class ScoutMessage(DeliveryMessage):
-    def generate_message(self, case: Case):
+    def create_message(self, case: Case):
         pass
