@@ -2,6 +2,7 @@
 import os
 from flask import Flask
 from flask.testing import FlaskClient
+from mock import patch
 
 import pytest
 
@@ -25,4 +26,6 @@ def app():
 
 @pytest.fixture
 def client(app: Flask, store_with_multiple_cases_and_samples: Store) -> FlaskClient:
-    return app.test_client()
+    # Bypass authentication
+    with patch.object(app, "before_request_funcs", new={}):
+        return app.test_client()
