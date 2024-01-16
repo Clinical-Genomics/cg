@@ -111,7 +111,8 @@ def test_get_applications_is_not_archived(
 
     # THEN return an application with the supplied application tag
     assert len(applications) == expected_number_of_not_archived_applications
-    assert (application.is_archived is False for application in applications)
+    for application in applications:
+        assert not application.is_archived
 
 
 def test_get_applications(microbial_store: Store, expected_number_of_applications):
@@ -789,7 +790,7 @@ def test_verify_case_exists(
 
 
 def test_verify_case_exists_with_non_existing_case(
-    caplog, case_id_does_not_exist: str, store_with_multiple_cases_and_samples: Store
+    case_id_does_not_exist: str, store_with_multiple_cases_and_samples: Store
 ):
     """Test validating a case that does not exist in the database."""
 
@@ -802,11 +803,10 @@ def test_verify_case_exists_with_non_existing_case(
         )
 
         # THEN the case is not found
-        assert f"Case {case_id_does_not_exist} could not be found in Status DB!" in caplog.text
 
 
 def test_verify_case_exists_with_no_case_samples(
-    caplog, case_id_without_samples: str, store_with_multiple_cases_and_samples: Store
+    case_id_without_samples: str, store_with_multiple_cases_and_samples: Store
 ):
     """Test validating a case without samples that exist in the database."""
 
@@ -819,7 +819,6 @@ def test_verify_case_exists_with_no_case_samples(
         )
 
         # THEN the case is found, but has no samples
-        assert "Case {case_id} has no samples in in Status DB!" in caplog.text
 
 
 def test_is_case_down_sampled_true(base_store: Store, case: Case, sample_id: str):
