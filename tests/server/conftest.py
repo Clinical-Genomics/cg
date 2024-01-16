@@ -9,7 +9,7 @@ import pytest
 from cg.server.app import create_app
 from cg.store.api.core import Store
 
-os.environ["CG_SQL_DATABASE_URI"] = "sqlite:///:memory:"
+os.environ["CG_SQL_DATABASE_URI"] = "sqlite:///"
 os.environ["LIMS_HOST"] = "dummy_value"
 os.environ["LIMS_USERNAME"] = "dummy_value"
 os.environ["LIMS_PASSWORD"] = "dummy_value"
