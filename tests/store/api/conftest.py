@@ -7,7 +7,6 @@ from cg.constants.constants import CustomerId, PrepCategory
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
 from cg.store.models import CaseSample
-from tests.meta.demultiplex.conftest import populated_flow_cell_store
 from tests.store_helpers import StoreHelpers
 
 
