@@ -1,6 +1,7 @@
 from cg.constants.constants import DataDelivery, MicrosaltAppTags, Pipeline
 from cg.services.delivery_message.messages import (
     AnalysisScoutMessage,
+    CovidMessage,
     DeliveryMessage,
     FastqMessage,
     FastqScoutMessage,
@@ -26,7 +27,10 @@ def get_message_strategy(case: Case) -> DeliveryMessage:
     if case.data_analysis == Pipeline.MICROSALT:
         return get_microsalt_message_strategy(case)
 
-    message_strategy: FastqMessage = message_map[case.data_analysis]()
+    if case.data_analysis == Pipeline.SARS_COV_2:
+        return CovidMessage()
+
+    message_strategy: DeliveryMessage = message_map[case.data_analysis]()
     return message_strategy
 
 
