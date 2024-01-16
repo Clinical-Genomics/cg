@@ -5,3 +5,9 @@ def get_fastq_delivery_path(case: Case) -> str:
     ticket_id: str = case.latest_ticket
     customer_id: str = case.customer.internal_id
     return f"/home/{customer_id}/inbox/{ticket_id}"
+
+
+def get_scout_link(case: Case) -> str:
+    customer_id: str = case.customer.internal_id
+    case_name: str = case.name
+    return f"https://scout.scilifelab.se/{customer_id}/{case_name}"
