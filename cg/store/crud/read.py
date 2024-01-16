@@ -731,7 +731,7 @@ class ReadHandler(BaseHandler):
         case: Case = self.get_case_by_internal_id(internal_id=case_id)
         return all(sample.application_version.application.is_external for sample in case.samples)
 
-    def get_case_by_internal_id(self, internal_id: str) -> Case:
+    def get_case_by_internal_id(self, internal_id: str) -> Case | None:
         """Get case by internal id."""
         return apply_case_filter(
             filter_functions=[CaseFilter.FILTER_BY_INTERNAL_ID],

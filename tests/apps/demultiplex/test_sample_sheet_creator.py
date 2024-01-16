@@ -21,7 +21,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(
     novaseq_x_flow_cell: FlowCellDirectoryData,
-    lims_novaseq_bcl_convert_samples: list[FlowCellSampleBCLConvert],
+    novaseq_x_lims_samples: list[FlowCellSampleBCLConvert],
 ):
     """Test that creating a BCL Convert sample sheet fails if the bcl converter is Bcl2fastq."""
     # GIVEN a NovaSeqX flow cell and samples and the bcl converter is Bcl2fastq
@@ -31,7 +31,7 @@ def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(
     with pytest.raises(SampleSheetError) as exc_info:
         SampleSheetCreatorBCLConvert(
             flow_cell=novaseq_x_flow_cell,
-            lims_samples=lims_novaseq_bcl_convert_samples,
+            lims_samples=novaseq_x_lims_samples,
         )
         # THEN an error is raised
         assert (
