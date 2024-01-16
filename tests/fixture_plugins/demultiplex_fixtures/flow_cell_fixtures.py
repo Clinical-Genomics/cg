@@ -6,7 +6,7 @@ import pytest
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
-# Functional flow cells
+# Functional flow cell runs
 
 
 @pytest.fixture(scope="module")
@@ -67,29 +67,7 @@ def novaseq_x_flow_cell(flow_cells_dir: Path) -> FlowCellDirectoryData:
     return FlowCellDirectoryData(Path(flow_cells_dir, "20231108_LH00188_0028_B22F52TLT3"))
 
 
-# Broken flow cells
-
-
-@pytest.fixture()
-def novaseq_6000_pre_1_5_kits_flow_cell_incomplete(
-    broken_flow_cells_dir: Path,
-) -> FlowCellDirectoryData:
-    """Return an incomplete Novaseq6000 flow cell with index settings pre 1.5 kits."""
-    return FlowCellDirectoryData(Path(broken_flow_cells_dir, "190927_A00689_0069_BHLYWYDSXX"))
-
-
-@pytest.fixture()
-def novaseq_6000_post_1_5_kits_flow_cell_incomplete(
-    broken_flow_cells_dir: Path,
-) -> FlowCellDirectoryData:
-    """Return an incomplete Novaseq6000 flow cell with index settings post 1.5 kits."""
-    return FlowCellDirectoryData(Path(broken_flow_cells_dir, "230912_A00187_1009_AHK33MDRX3"))
-
-
-@pytest.fixture()
-def novaseq_x_flow_cell_data_incomplete(broken_flow_cells_dir: Path) -> FlowCellDirectoryData:
-    """Return an incomplete NovaseqX flow cell."""
-    return FlowCellDirectoryData(Path(broken_flow_cells_dir, "20231108_LH00188_0028_B22F52TLT3"))
+# Broken flow cell runs
 
 
 @pytest.fixture()
@@ -98,6 +76,9 @@ def novaseq_6000_post_1_5_kits_flow_cell_no_sample_sheet(
 ) -> FlowCellDirectoryData:
     """Return a Novaseq6000 flow cell with index settings post 1.5 kits without sample sheet."""
     return FlowCellDirectoryData(Path(broken_flow_cells_dir, "230912_A00187_1009_AHK33MDRX3"))
+
+
+# Demultiplexed runs
 
 
 @pytest.fixture()
