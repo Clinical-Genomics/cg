@@ -1,5 +1,6 @@
 from cg.constants.constants import DataDelivery
 from cg.services.delivery_message.messages import (
+    AnalysisScoutMessage,
     DeliveryMessage,
     FastqMessage,
     FastqScoutMessage,
@@ -12,6 +13,7 @@ message_map = {
     DataDelivery.FASTQ: FastqMessage,
     DataDelivery.SCOUT: ScoutMessage,
     DataDelivery.FASTQ_SCOUT: FastqScoutMessage,
+    DataDelivery.ANALYSIS_SCOUT: AnalysisScoutMessage,
 }
 
 
