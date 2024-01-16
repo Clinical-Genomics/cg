@@ -2,12 +2,6 @@ import pytest
 
 
 @pytest.fixture
-def tmp_flow_cell_name_no_run_parameters() -> str:
-    """This is the name of a flow cell directory with the run parameters missing."""
-    return "180522_A00689_0200_BHLCKNCCXY"
-
-
-@pytest.fixture
 def tmp_flow_cell_name_malformed_sample_sheet() -> str:
     """ "Returns the name of a flow cell directory ready for demultiplexing with BCL convert.
     Contains a sample sheet with malformed headers.

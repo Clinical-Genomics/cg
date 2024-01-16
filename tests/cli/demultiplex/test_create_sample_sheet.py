@@ -21,27 +21,27 @@ FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.get_flow_cell_sa
 
 def test_create_sample_sheet_no_run_parameters_fails(
     cli_runner: testing.CliRunner,
-    tmp_flow_cells_directory_no_run_parameters: Path,
+    tmp_flow_cell_without_run_parameters_path: Path,
     sample_sheet_context: CGConfig,
-    novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples: list[FlowCellSampleBcl2Fastq],
+    hiseq_2500_custom_index_bcl_convert_lims_samples: list[FlowCellSampleBcl2Fastq],
     caplog,
     mocker,
 ):
     """Test that creating a flow cell sample sheet fails if there is no run parameters file."""
     # GIVEN a folder with a non-existing sample sheet nor RunParameters file
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cells_directory_no_run_parameters
+        flow_cell_path=tmp_flow_cell_without_run_parameters_path
     )
 
     # GIVEN flow cell samples
     mocker.patch(
         FLOW_CELL_FUNCTION_NAME,
-        return_value=novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples,
+        return_value=hiseq_2500_custom_index_bcl_convert_lims_samples,
     )
 
     # GIVEN that the context's flow cell directory holds the given flow cell
     sample_sheet_context.flow_cells_dir = (
-        tmp_flow_cells_directory_no_run_parameters.parent.as_posix()
+        tmp_flow_cell_without_run_parameters_path.parent.as_posix()
     )
 
     # WHEN running the create sample sheet command
@@ -147,9 +147,7 @@ def test_create_v2_sample_sheet(
     """Test that creating a v2 sample sheet works."""
     flow_cell_directory: Path = request.getfixturevalue(scenario.flow_cell_directory)
     # GIVEN a flow cell directory with some run parameters
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_directory, bcl_converter=BclConverter.BCLCONVERT
-    )
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_directory)
     assert flow_cell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet in the flow cell dir

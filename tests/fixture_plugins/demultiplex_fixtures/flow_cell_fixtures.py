@@ -67,17 +67,6 @@ def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
     return FlowCellDirectoryData(novaseq_x_flow_cell_dir)
 
 
-# Broken flow cell runs
-
-
-@pytest.fixture()
-def novaseq_6000_post_1_5_kits_flow_cell_no_sample_sheet(
-    broken_flow_cells_dir: Path,
-) -> FlowCellDirectoryData:
-    """Return a Novaseq6000 flow cell with index settings post 1.5 kits without sample sheet."""
-    return FlowCellDirectoryData(Path(broken_flow_cells_dir, "230912_A00187_1009_AHK33MDRX3"))
-
-
 # Demultiplexed runs
 
 
@@ -95,7 +84,7 @@ def novaseqx_flow_cell_with_sample_sheet_no_fastq(
     return flow_cell
 
 
-@pytest.fixture(name="tmp_bcl2fastq_flow_cell")
+@pytest.fixture
 def tmp_bcl2fastq_flow_cell(
     tmp_demultiplexed_runs_bcl2fastq_directory: Path,
 ) -> FlowCellDirectoryData:
@@ -106,7 +95,7 @@ def tmp_bcl2fastq_flow_cell(
     )
 
 
-@pytest.fixture(name="tmp_bcl_convert_flow_cell")
+@pytest.fixture
 def tmp_bcl_convert_flow_cell(
     tmp_flow_cell_directory_bclconvert: Path,
 ) -> FlowCellDirectoryData:
@@ -117,7 +106,7 @@ def tmp_bcl_convert_flow_cell(
     )
 
 
-@pytest.fixture(name="tmp_unfinished_bcl2fastq_flow_cell")
+@pytest.fixture
 def unfinished_bcl2fastq_flow_cell(
     demultiplexed_runs_unfinished_bcl2fastq_flow_cell_directory: Path,
 ) -> FlowCellDirectoryData:

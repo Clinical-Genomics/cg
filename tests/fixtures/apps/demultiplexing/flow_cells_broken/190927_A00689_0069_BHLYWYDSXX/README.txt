@@ -1,3 +1,4 @@
+INCOMPLETE: FLOW CELL WITHOUT SAMPLE SHEET
 Sequencer: NovaSeq6000
 Workflow: PairedEnd
 Indexes: 10, 10

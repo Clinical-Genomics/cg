@@ -132,10 +132,10 @@ def test_run_parameters_path(flow_cell_fixture: str, request: FixtureRequest):
     )
 
 
-def test_run_parameters_path_when_non_existing(tmp_flow_cells_directory_no_run_parameters: Path):
+def test_run_parameters_path_when_non_existing(tmp_flow_cell_without_run_parameters_path: Path):
     """Test that getting the path of the run parameters path fails if the file does not exist."""
     # GIVEN a flowcell object with a directory without a run parameters file
-    flow_cell = FlowCellDirectoryData(flow_cell_path=tmp_flow_cells_directory_no_run_parameters)
+    flow_cell = FlowCellDirectoryData(flow_cell_path=tmp_flow_cell_without_run_parameters_path)
 
     # WHEN fetching the run parameters path
     with pytest.raises(FlowCellError) as exc:
@@ -149,7 +149,7 @@ def test_run_parameters_path_when_non_existing(tmp_flow_cells_directory_no_run_p
     [
         ("hiseq_2500_custom_index_flow_cell", Sequencers.HISEQGA),
         ("hiseq_x_single_index_flow_cell", Sequencers.HISEQX),
-        ("novaseq_6000_post_1_5_kits_flow_cell_no_sample_sheet", Sequencers.NOVASEQ),
+        ("novaseq_6000_post_1_5_kits_flow_cell", Sequencers.NOVASEQ),
         ("novaseq_x_flow_cell", Sequencers.NOVASEQX),
     ],
 )
