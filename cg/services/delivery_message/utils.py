@@ -4,6 +4,7 @@ from cg.services.delivery_message.messages import (
     DeliveryMessage,
     FastqMessage,
     FastqScoutMessage,
+    FastqAnalysisScoutMessage,
     ScoutMessage,
 )
 from cg.store.models import Case
@@ -14,6 +15,7 @@ message_map = {
     DataDelivery.SCOUT: ScoutMessage,
     DataDelivery.FASTQ_SCOUT: FastqScoutMessage,
     DataDelivery.ANALYSIS_SCOUT: AnalysisScoutMessage,
+    DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
 }
 
 
