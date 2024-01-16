@@ -335,9 +335,6 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get nf-core pipeline metrics constants."""
         return {}
 
-    def get_workflow_manager(self) -> str:
-        """Get workflow manager from Tower."""
-        return WorkflowManager.Tower.value
 
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Get a multiqc_data.json file and returns metrics and values formatted."""
