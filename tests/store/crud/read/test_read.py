@@ -83,7 +83,7 @@ def test_get_application_by_tag(microbial_store: Store, tag: str = MicrosaltAppT
 
 
 def test_get_applications_is_not_archived(
-    microbial_store: Store, EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS
+    microbial_store: Store, expected_number_of_not_archived_applications
 ):
     """Test function to return the application when not archived."""
 
@@ -92,12 +92,12 @@ def test_get_applications_is_not_archived(
     # WHEN getting the query for the flow cells
     applications: list[Application] = microbial_store.get_applications_is_not_archived()
 
-    # THEN return a application with the supplied application tag
-    assert len(applications) == EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS
+    # THEN return an application with the supplied application tag
+    assert len(applications) == expected_number_of_not_archived_applications
     assert (application.is_archived is False for application in applications)
 
 
-def test_get_applications(microbial_store: Store, EXPECTED_NUMBER_OF_APPLICATIONS):
+def test_get_applications(microbial_store: Store, expected_number_of_applications):
     """Test function to return the applications."""
 
     # GIVEN a store with application records
@@ -105,8 +105,8 @@ def test_get_applications(microbial_store: Store, EXPECTED_NUMBER_OF_APPLICATION
     # WHEN getting the query for the flow cells
     applications: list[Application] = microbial_store.get_applications()
 
-    # THEN return a application with the supplied application tag
-    assert len(applications) == EXPECTED_NUMBER_OF_APPLICATIONS
+    # THEN return an application with the supplied application tag
+    assert len(applications) == expected_number_of_applications
 
 
 def test_get_bed_version_query(base_store: Store):

@@ -10,21 +10,6 @@ from cg.store.models import CaseSample
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.fixture(name="microbial_store")
-def microbial_store(store: Store, helpers: StoreHelpers) -> Store:
-    """Populate a store with microbial application tags"""
-    microbial_active_apptags = ["MWRNXTR003", "MWGNXTR003", "MWMNXTR003", "MWLNXTR003"]
-    microbial_inactive_apptags = ["MWXNXTR003", "VWGNXTR001", "VWLNXTR001"]
-
-    for app_tag in microbial_active_apptags:
-        helpers.ensure_application(store=store, tag=app_tag, prep_category="mic", is_archived=False)
-
-    for app_tag in microbial_inactive_apptags:
-        helpers.ensure_application(store=store, tag=app_tag, prep_category="mic", is_archived=True)
-
-    return store
-
-
 @pytest.fixture(name="max_nr_of_cases")
 def max_nr_of_cases() -> int:
     """Return the number of maximum number of cases"""
@@ -82,18 +67,6 @@ def store_failing_sequencing_qc(
 def max_nr_of_samples() -> int:
     """Return the number of maximum number of samples"""
     return 50
-
-
-@pytest.fixture(name="EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS")
-def expected_number_of_not_archived_applications() -> int:
-    """Return the number of expected number of not archived applications"""
-    return 4
-
-
-@pytest.fixture(name="EXPECTED_NUMBER_OF_APPLICATIONS")
-def expected_number_of_applications() -> int:
-    """Return the number of expected number of applications with prep category"""
-    return 7
 
 
 @pytest.fixture(name="three_customer_ids")
