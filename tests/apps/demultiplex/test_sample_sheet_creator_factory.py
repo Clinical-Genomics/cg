@@ -41,8 +41,9 @@ def test_sample_sheet_creator_factory_bcl_convert(
     novaseq_x_lims_samples: list[FlowCellSampleBCLConvert],
 ):
     """Test that a sample sheet creator defined with BCL convert data is BCL Convert."""
+
     # GIVEN a NovaSeqX flow cell and a list of NovaSeqX BCL Convert samples
-    assert novaseq_x_flow_cell.bcl_converter == BclConverter.DRAGEN
+    assert novaseq_x_flow_cell.bcl_converter == BclConverter.BCLCONVERT
 
     # WHEN defining the sample sheet creator
     sample_sheet_creator: SampleSheetCreator = get_sample_sheet_creator(

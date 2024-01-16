@@ -34,7 +34,7 @@ class DemultiplexingScenario(BaseModel):
     flow_cell_directory: str
     flow_cell_name: str
     samples_ids: str
-    bcl_converter: str = BclConverter.DRAGEN
+    bcl_converter: str = BclConverter.BCLCONVERT
 
 
 @pytest.mark.parametrize(
@@ -209,7 +209,8 @@ def test_post_processing_tracks_undetermined_fastqs_for_bclconvert(
 
     # WHEN post processing the flow cell
     demux_post_processing_api.finish_flow_cell(
-        flow_cell_directory_name=bclconvert_flow_cell_dir_name, bcl_converter=BclConverter.DRAGEN
+        flow_cell_directory_name=bclconvert_flow_cell_dir_name,
+        bcl_converter=BclConverter.BCLCONVERT,
     )
 
     # THEN the undetermined fastqs were stored in housekeeper
