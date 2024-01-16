@@ -58,7 +58,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
 
 def test_create_bcl2fastq_sample_sheet(
     cli_runner: testing.CliRunner,
-    tmp_flow_cells_directory_no_sample_sheet: Path,
+    tmp_novaseq_6000_pre_1_5_kits_incomplete_flow_cell_path: Path,
     sample_sheet_context: CGConfig,
     novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples: list[FlowCellSampleBcl2Fastq],
     mocker,
@@ -66,7 +66,7 @@ def test_create_bcl2fastq_sample_sheet(
     """Test that creating a Bcl2fastq sample sheet works."""
     # GIVEN a flowcell directory with some run parameters
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cells_directory_no_sample_sheet,
+        flow_cell_path=tmp_novaseq_6000_pre_1_5_kits_incomplete_flow_cell_path,
         bcl_converter=BclConverter.BCL2FASTQ,
     )
     assert flow_cell.run_parameters_path.exists()
@@ -89,7 +89,11 @@ def test_create_bcl2fastq_sample_sheet(
     # WHEN creating a sample sheet
     result = cli_runner.invoke(
         create_sheet,
-        [str(tmp_flow_cells_directory_no_sample_sheet), "--bcl-converter", BclConverter.BCL2FASTQ],
+        [
+            str(tmp_novaseq_6000_pre_1_5_kits_incomplete_flow_cell_path),
+            "--bcl-converter",
+            BclConverter.BCL2FASTQ,
+        ],
         obj=sample_sheet_context,
     )
 
@@ -116,31 +120,31 @@ class SampleSheetScenario(BaseModel):
     "scenario",
     [
         SampleSheetScenario(
-            flow_cell_directory="novaseq_6000_pre_1_5_kits_flow_cell_path",
+            flow_cell_directory="tmp_novaseq_6000_pre_1_5_kits_incomplete_flow_cell_path",
             lims_samples="novaseq_6000_pre_1_5_kits_bcl_convert_lims_samples",
             correct_sample_sheet="novaseq_6000_pre_1_5_kits_correct_sample_sheet_path",
         ),
         SampleSheetScenario(
-            flow_cell_directory="novaseq_6000_post_1_5_kits_flow_cell_path",
+            flow_cell_directory="tmp_novaseq_6000_post_1_5_kits_incomplete_flow_cell_path",
             lims_samples="novaseq_6000_post_1_5_kits_bcl_convert_lims_samples",
             correct_sample_sheet="novaseq_6000_post_1_5_kits_correct_sample_sheet_path",
         ),
         SampleSheetScenario(
-            flow_cell_directory="novaseq_x_flow_cell_directory",
+            flow_cell_directory="tmp_novaseq_x_incomplete_flow_cell_path",
             lims_samples="novaseq_x_lims_samples",
             correct_sample_sheet="novaseq_x_correct_sample_sheet",
         ),
     ],
     ids=["Old NovaSeq 6000 flow cell", "New NovaSeq 6000 flow cell", "NovaSeq X flow cell"],
 )
-def test_create_dragen_sample_sheet(
+def test_create_v2_sample_sheet(
     cli_runner: testing.CliRunner,
     scenario: SampleSheetScenario,
     sample_sheet_context: CGConfig,
     mocker,
     request: FixtureRequest,
 ):
-    """Test that creating a Dragen sample sheet works."""
+    """Test that creating a v2 sample sheet works."""
     flow_cell_directory: Path = request.getfixturevalue(scenario.flow_cell_directory)
     # GIVEN a flow cell directory with some run parameters
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(

@@ -42,17 +42,28 @@ def hiseq_2500_custom_index_flow_cell(
 
 
 @pytest.fixture()
-def novaseq_6000_post_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
-    return FlowCellDirectoryData(Path(flow_cells_dir, "230912_A00187_1009_AHK33MDRX3"))
-
-
-@pytest.fixture()
-def novaseq_6000_pre_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
+def novaseq_6000_pre_1_5_kits_flow_cell(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    """Return a Novaseq6000 flow cell with index settings pre 1.5 kits."""
     return FlowCellDirectoryData(Path(flow_cells_dir, "190927_A00689_0069_BHLYWYDSXX"))
 
 
 @pytest.fixture()
+def novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    """Return a Novaseq6000 flow cell with index settings pre 1.5 kits set as Bcl2Fastq."""
+    return FlowCellDirectoryData(
+        Path(flow_cells_dir, "190927_A00689_0069_BHLYWYDSXX"), bcl_converter=BclConverter.BCL2FASTQ
+    )
+
+
+@pytest.fixture()
+def novaseq_6000_post_1_5_kits_flow_cell(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    """Return a Novaseq6000 flow cell with index settings post 1.5 kits."""
+    return FlowCellDirectoryData(Path(flow_cells_dir, "230912_A00187_1009_AHK33MDRX3"))
+
+
+@pytest.fixture()
 def novaseq_x_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    """Return a NovaseqX flow cell."""
     return FlowCellDirectoryData(Path(flow_cells_dir, "20231108_LH00188_0028_B22F52TLT3"))
 
 
@@ -67,14 +78,34 @@ def bcl2fastq_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
     )
 
 
-@pytest.fixture(scope="session")
-def novaseq_flow_cell_demultiplexed_with_bcl2fastq(
-    bcl_convert_flow_cell_dir: Path,
+@pytest.fixture()
+def novaseq_6000_pre_1_5_kits_flow_cell_incomplete(
+    broken_flow_cells_dir: Path,
 ) -> FlowCellDirectoryData:
-    """Return a Novaseq6000 flow cell object demultiplexed using Bcl2fastq."""
-    return FlowCellDirectoryData(
-        flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
-    )
+    """Return an incomplete Novaseq6000 flow cell with index settings pre 1.5 kits."""
+    return FlowCellDirectoryData(Path(broken_flow_cells_dir, "190927_A00689_0069_BHLYWYDSXX"))
+
+
+@pytest.fixture()
+def novaseq_6000_post_1_5_kits_flow_cell_incomplete(
+    broken_flow_cells_dir: Path,
+) -> FlowCellDirectoryData:
+    """Return an incomplete Novaseq6000 flow cell with index settings post 1.5 kits."""
+    return FlowCellDirectoryData(Path(broken_flow_cells_dir, "230912_A00187_1009_AHK33MDRX3"))
+
+
+@pytest.fixture()
+def novaseq_x_flow_cell_data_incomplete(broken_flow_cells_dir: Path) -> FlowCellDirectoryData:
+    """Return an incomplete NovaseqX flow cell."""
+    return FlowCellDirectoryData(Path(broken_flow_cells_dir, "20231108_LH00188_0028_B22F52TLT3"))
+
+
+@pytest.fixture()
+def novaseq_6000_post_1_5_kits_flow_cell_no_sample_sheet(
+    broken_flow_cells_dir: Path,
+) -> FlowCellDirectoryData:
+    """Return a Novaseq6000 flow cell with index settings post 1.5 kits without sample sheet."""
+    return FlowCellDirectoryData(Path(broken_flow_cells_dir, "230912_A00187_1009_AHK33MDRX3"))
 
 
 @pytest.fixture(scope="module")

@@ -42,13 +42,13 @@ def test_flow_cell_position(bcl2fastq_flow_cell_dir: Path):
     assert position in ["A", "B"]
 
 
-def test_rta_exists(bcl2fastq_flow_cell: FlowCellDirectoryData):
+def test_rta_exists(novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq: FlowCellDirectoryData):
     """Test return of RTS file."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
 
     # WHEN fetching the path to the RTA file
-    rta_file: Path = bcl2fastq_flow_cell.rta_complete_path
+    rta_file: Path = novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq.rta_complete_path
 
     # THEN assert that the file exists
     assert rta_file.exists()

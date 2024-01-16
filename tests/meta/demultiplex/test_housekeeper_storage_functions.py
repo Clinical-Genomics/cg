@@ -97,27 +97,27 @@ def test_add_tags_if_all_exist(demultiplex_context: CGConfig):
 
 
 def test_add_fastq_files_without_sample_id(
-    demultiplex_context: CGConfig, bcl_convert_flow_cell: FlowCellDirectoryData
+    demultiplex_context: CGConfig, novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN that the sample sheet exists in housekeeper and the path is in the flow cell
     add_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=bcl_convert_flow_cell.path,
-        flow_cell_name=bcl_convert_flow_cell.id,
+        flow_cell_directory=novaseq_6000_post_1_5_kits_flow_cell.path,
+        flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell.id,
         hk_api=demultiplex_context.housekeeper_api,
     )
     sample_sheet_path: Path = demultiplex_context.housekeeper_api.get_sample_sheet_path(
-        bcl_convert_flow_cell.id
+        novaseq_6000_post_1_5_kits_flow_cell.id
     )
 
-    bcl_convert_flow_cell.set_sample_sheet_path_hk(sample_sheet_path)
+    novaseq_6000_post_1_5_kits_flow_cell.set_sample_sheet_path_hk(sample_sheet_path)
     demux_post_processing_api.hk_api.add_file_to_bundle_if_non_existent = MagicMock()
 
     # WHEN adding the fastq files to housekeeper
     add_sample_fastq_files_to_housekeeper(
-        flow_cell=bcl_convert_flow_cell,
+        flow_cell=novaseq_6000_post_1_5_kits_flow_cell,
         hk_api=demux_post_processing_api.hk_api,
         store=demux_post_processing_api.status_db,
     )

@@ -254,8 +254,8 @@ def test_get_cycles(run_parameters_fixture: str, request: FixtureRequest):
 @pytest.mark.parametrize(
     "flow_cell_fixture, expected_result",
     [
-        ("novaseq_6000_pre_1_5_kits_flow_cell_data", False),
-        ("novaseq_6000_post_1_5_kits_flow_cell_data", True),
+        ("novaseq_6000_pre_1_5_kits_flow_cell", False),
+        ("novaseq_6000_post_1_5_kits_flow_cell", True),
     ],
 )
 def test_is_novaseq6000_post_1_5_kit(
@@ -273,8 +273,8 @@ def test_is_novaseq6000_post_1_5_kit(
 @pytest.mark.parametrize(
     "flow_cell, correct_settings",
     [
-        ("novaseq_6000_pre_1_5_kits_flow_cell_data", NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS),
-        ("novaseq_6000_post_1_5_kits_flow_cell_data", NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS),
+        ("novaseq_6000_pre_1_5_kits_flow_cell", NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS),
+        ("novaseq_6000_post_1_5_kits_flow_cell", NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS),
         ("novaseq_x_flow_cell_data", NOVASEQ_X_INDEX_SETTINGS),
     ],
 )
