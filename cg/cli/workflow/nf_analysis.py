@@ -91,11 +91,7 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-    except CgError as error:
-        raise click.Abort() from error
-
-    analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
-    try:
+        analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
         analysis_api.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
     except CgError as error:
         raise click.Abort() from error
