@@ -88,7 +88,7 @@ def test_get_bcl_converter_default(
     flow_cell = FlowCellDirectoryData(Path(flow_cell_directory_name_demultiplexed_with_bcl_convert))
 
     # THEN it sets the converter to BCLConverter
-    assert flow_cell.bcl_converter == BclConverter.DRAGEN
+    assert flow_cell.bcl_converter == BclConverter.BCLCONVERT
 
 
 def test_get_bcl_converter_bcl2fastq_flow_cell(

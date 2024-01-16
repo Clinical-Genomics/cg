@@ -41,7 +41,7 @@ RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
     Sequencers.NOVASEQX: RunParametersNovaSeqX,
 }
 SAMPLE_MODEL_TO_BCL_CONVERTER: dict[Type[FlowCellSample], str] = {
-    FlowCellSampleBCLConvert: BclConverter.DRAGEN,
+    FlowCellSampleBCLConvert: BclConverter.BCLCONVERT,
     FlowCellSampleBcl2Fastq: BclConverter.BCL2FASTQ,
 }
 
@@ -60,7 +60,7 @@ class FlowCellDirectoryData:
         self.id: str = EMPTY_STRING
         self.position: Literal["A", "B"] = "A"
         self.parse_flow_cell_dir_name()
-        self.bcl_converter: str = bcl_converter or BclConverter.DRAGEN
+        self.bcl_converter: str = bcl_converter or BclConverter.BCLCONVERT
         self._sample_sheet_path_hk: Path | None = None
 
     def parse_flow_cell_dir_name(self):
