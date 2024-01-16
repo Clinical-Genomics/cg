@@ -15,12 +15,6 @@ def tmp_flow_cell_name_malformed_sample_sheet() -> str:
     return "201203_A00689_0200_AHVKJCDRXY"
 
 
-@pytest.fixture
-def tmp_flow_cell_name_no_sample_sheet() -> str:
-    """Return the name of a flow cell directory with the run parameters and sample sheet missing."""
-    return "170407_A00689_0209_BHHKVCALXX"
-
-
 @pytest.fixture(name="tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq")
 def tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq() -> str:
     """Returns the name of a flow cell directory ready for demultiplexing with bcl2fastq."""

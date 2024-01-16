@@ -70,14 +70,6 @@ def novaseq_x_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
 # Broken flow cells
 
 
-@pytest.fixture(scope="session")
-def bcl2fastq_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """Create a flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
-        flow_cell_path=bcl2fastq_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
-    )
-
-
 @pytest.fixture()
 def novaseq_6000_pre_1_5_kits_flow_cell_incomplete(
     broken_flow_cells_dir: Path,
@@ -114,12 +106,6 @@ def bcl_convert_flow_cell(bcl_convert_flow_cell_dir: Path) -> FlowCellDirectoryD
     return FlowCellDirectoryData(
         flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.BCLCONVERT
     )
-
-
-@pytest.fixture(scope="function")
-def novaseq_6000_flow_cell(bcl_convert_flow_cell: FlowCellDirectoryData) -> FlowCellDirectoryData:
-    """Return a NovaSeq6000 flow cell object."""
-    return bcl_convert_flow_cell
 
 
 @pytest.fixture(scope="function")
@@ -191,10 +177,12 @@ def unfinished_bcl2fastq_flow_cell(
 # Flow cell attributes
 
 
-@pytest.fixture(scope="session")
-def bcl2fastq_flow_cell_id(bcl2fastq_flow_cell: FlowCellDirectoryData) -> str:
+@pytest.fixture
+def bcl2fastq_flow_cell_id(
+    novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq: FlowCellDirectoryData,
+) -> str:
     """Return flow cell id from bcl2fastq flow cell object."""
-    return bcl2fastq_flow_cell.id
+    return novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq.id
 
 
 @pytest.fixture(scope="module")

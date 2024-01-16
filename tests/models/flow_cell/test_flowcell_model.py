@@ -149,8 +149,8 @@ def test_run_parameters_path_when_non_existing(tmp_flow_cells_directory_no_run_p
     [
         ("hiseq_2500_custom_index_flow_cell", Sequencers.HISEQGA),
         ("hiseq_x_single_index_flow_cell", Sequencers.HISEQX),
-        ("novaseq_6000_flow_cell", Sequencers.NOVASEQ),
-        ("novaseq_x_flow_cell", Sequencers.NOVASEQX),
+        ("novaseq_6000_post_1_5_kits_flow_cell_no_sample_sheet", Sequencers.NOVASEQ),
+        ("novaseq_x_flow_cell_data", Sequencers.NOVASEQX),
     ],
 )
 def test_flow_cell_run_parameters_type(
