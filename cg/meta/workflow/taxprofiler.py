@@ -16,7 +16,6 @@ from cg.models.taxprofiler.taxprofiler import (
 from cg.store.models import Case, Sample
 from cg.io.controller import WriteFile
 from cg.constants.constants import FileFormat
-from cg.constants.nf_analysis import MetricConditions
 
 LOG = logging.getLogger(__name__)
 
@@ -139,6 +138,3 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             file_format=FileFormat.YAML,
             file_path=metrics_deliverables_path,
         )
-
-    def get_pipeline_metrics(self) -> dict:
-        return MetricConditions.TAXPROFILER_METRIC_CONDITIONS

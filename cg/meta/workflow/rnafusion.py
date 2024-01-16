@@ -7,7 +7,7 @@ from typing import Any
 from cg import resources
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, Strandedness
-from cg.constants.nf_analysis import MetricConditions
+from cg.constants.nf_analysis import RNAFUSION_METRIC_CONDITIONS
 from cg.exc import MissingMetrics
 from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -157,7 +157,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
         """Check that all mandatory metrics are present. Raise error if missing."""
         given_metrics: set = {metric.name for metric in metrics}
-        mandatory_metrics: set = set(MetricConditions.RNAFUSION_METRIC_CONDITIONS.keys())
+        mandatory_metrics: set = set(RNAFUSION_METRIC_CONDITIONS.keys())
         LOG.info("Mandatory Metrics Keys:")
         for key in mandatory_metrics:
             LOG.info(key)
@@ -200,4 +200,4 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         return self.parse_analysis(qc_metrics_raw=qc_metrics)
 
     def get_pipeline_metrics(self) -> dict:
-        return MetricConditions.RNAFUSION_METRIC_CONDITIONS
+        return RNAFUSION_METRIC_CONDITIONS

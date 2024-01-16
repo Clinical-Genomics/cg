@@ -335,7 +335,6 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get nf-core pipeline metrics constants."""
         return {}
 
-
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Get a multiqc_data.json file and returns metrics and values formatted."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -390,7 +389,8 @@ class NfAnalysisAPI(AnalysisAPI):
 
         return metrics_list
 
-    def get_metrics_from_sample(self, sample_name: str, multiqc_json: list[dict]) -> dict:
+    @staticmethod
+    def get_metrics_from_sample(sample_name: str, multiqc_json: list[dict]) -> dict:
         """Get tuple metric_name and metric_values from sample_id"""
 
         metrics_values: dict = {}
