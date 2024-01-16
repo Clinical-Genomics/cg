@@ -22,5 +22,4 @@ class MetricConditions:
         "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.7},
     }
 
-    TAXPROFILER_METRIC_CONDITIONS: dict = {}
 
