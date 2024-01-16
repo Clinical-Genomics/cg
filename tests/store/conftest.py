@@ -1,12 +1,15 @@
 """Fixtures for store tests."""
 import datetime as dt
 import enum
+from datetime import datetime
 from typing import Generator
 
 import pytest
 
 from cg.constants import Pipeline
+from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus, Sex
+from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.store import Store
 from cg.store.models import (
     Analysis,
@@ -454,3 +457,81 @@ def store_with_analyses_for_cases(
         )
         analysis_store.session.add(link)
     return analysis_store
+
+
+@pytest.fixture
+def rml_pool_store(
+    case_id: str,
+    customer_id: str,
+    helpers,
+    sample_id: str,
+    store: Store,
+    ticket_id: str,
+    timestamp_now: datetime,
+):
+    new_customer = store.add_customer(
+        internal_id=customer_id,
+        name="Test customer",
+        scout_access=True,
+        invoice_address="skolgatan 15",
+        invoice_reference="abc",
+    )
+    store.session.add(new_customer)
+
+    application = store.add_application(
+        tag="RMLP05R800",
+        prep_category="rml",
+        description="Ready-made",
+        percent_kth=80,
+        percent_reads_guaranteed=75,
+        sequencing_depth=0,
+        target_reads=800,
+    )
+    store.session.add(application)
+
+    app_version = store.add_application_version(
+        application=application,
+        version=1,
+        valid_from=timestamp_now,
+        prices={
+            PriorityTerms.STANDARD: 12,
+            PriorityTerms.PRIORITY: 222,
+            PriorityTerms.EXPRESS: 123,
+            PriorityTerms.RESEARCH: 12,
+        },
+    )
+    store.session.add(app_version)
+
+    new_pool = store.add_pool(
+        customer=new_customer,
+        name="Test",
+        order="Test",
+        ordered=dt.datetime.now(),
+        application_version=app_version,
+    )
+    store.session.add(new_pool)
+    new_case = helpers.add_case(
+        store=store,
+        internal_id=case_id,
+        name=PoolSubmitter.create_case_name(ticket=ticket_id, pool_name="Test"),
+    )
+    store.session.add(new_case)
+
+    new_sample = helpers.add_sample(
+        store=store,
+        application_tag=application.tag,
+        application_type=application.prep_category,
+        customer_id=new_customer.id,
+        internal_id=sample_id,
+    )
+    new_sample.application_version = app_version
+    store.session.add(new_sample)
+    store.session.commit()
+
+    helpers.add_relationship(
+        store=store,
+        sample=new_sample,
+        case=new_case,
+    )
+
+    yield store
