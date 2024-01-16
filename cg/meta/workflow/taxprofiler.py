@@ -16,7 +16,7 @@ from cg.models.taxprofiler.taxprofiler import (
 from cg.store.models import Case, Sample
 from cg.io.controller import WriteFile
 from cg.constants.constants import FileFormat
-from cg.constants.metric_conditions import MetricConditions
+from cg.constants.nf_analysis import MetricConditions
 
 LOG = logging.getLogger(__name__)
 

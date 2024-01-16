@@ -7,7 +7,7 @@ from typing import Any
 from cg import resources
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, Strandedness
-from cg.constants.metric_conditions import MetricConditions
+from cg.constants.nf_analysis import MetricConditions
 from cg.exc import MissingMetrics
 from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
