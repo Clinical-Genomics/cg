@@ -24,7 +24,3 @@ class MetricConditions:
 
     TAXPROFILER_METRIC_CONDITIONS: dict = {}
 
-    @classmethod
-    def get_metric_name(cls, metric_name, param):
-        """Return metrics for each nf-core pipeline"""
-        pass
