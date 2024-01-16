@@ -214,7 +214,7 @@ def test_add_demux_logs_to_housekeeper(
 def test_store_fastq_path_in_housekeeper_correct_tags(
     populated_housekeeper_api: HousekeeperAPI,
     empty_fastq_file_path: Path,
-    novaseq6000_flow_cell: FlowCellDirectoryData,
+    bcl_convert_flow_cell_id: str,
 ):
     """Test that a fastq file is stored in Housekeeper with the correct tags."""
     sample_id: str = "sample_internal_id"
@@ -225,12 +225,12 @@ def test_store_fastq_path_in_housekeeper_correct_tags(
     populated_housekeeper_api.store_fastq_path_in_housekeeper(
         sample_internal_id=sample_id,
         sample_fastq_path=empty_fastq_file_path,
-        flow_cell_id=novaseq6000_flow_cell.id,
+        flow_cell_id=bcl_convert_flow_cell_id,
     )
 
     # THEN the file was added to Housekeeper with the correct tags
     file: File = populated_housekeeper_api.get_files(bundle=sample_id).first()
-    expected_tags: set[str] = {SequencingFileTag.FASTQ.value, novaseq6000_flow_cell.id, sample_id}
+    expected_tags: set[str] = {SequencingFileTag.FASTQ.value, bcl_convert_flow_cell_id, sample_id}
     assert {tag.name for tag in file.tags} == expected_tags
 
 

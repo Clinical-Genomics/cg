@@ -57,8 +57,8 @@ def test_rta_exists(novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq: FlowCellDirec
 @pytest.mark.parametrize(
     "flow_cell_fixture_name, model",
     [
-        ("bcl2fastq_flow_cell", FlowCellSampleBcl2Fastq),
-        ("bcl_convert_flow_cell", FlowCellSampleBCLConvert),
+        ("novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq", FlowCellSampleBcl2Fastq),
+        ("novaseq_6000_post_1_5_kits_flow_cell", FlowCellSampleBCLConvert),
         ("novaseq_x_flow_cell", FlowCellSampleBCLConvert),
     ],
 )
@@ -150,7 +150,7 @@ def test_run_parameters_path_when_non_existing(tmp_flow_cells_directory_no_run_p
         ("hiseq_2500_custom_index_flow_cell", Sequencers.HISEQGA),
         ("hiseq_x_single_index_flow_cell", Sequencers.HISEQX),
         ("novaseq_6000_post_1_5_kits_flow_cell_no_sample_sheet", Sequencers.NOVASEQ),
-        ("novaseq_x_flow_cell_data", Sequencers.NOVASEQX),
+        ("novaseq_x_flow_cell", Sequencers.NOVASEQX),
     ],
 )
 def test_flow_cell_run_parameters_type(
