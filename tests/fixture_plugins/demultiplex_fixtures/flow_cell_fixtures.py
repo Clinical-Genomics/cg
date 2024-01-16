@@ -62,9 +62,9 @@ def novaseq_6000_post_1_5_kits_flow_cell(flow_cells_dir: Path) -> FlowCellDirect
 
 
 @pytest.fixture()
-def novaseq_x_flow_cell(flow_cells_dir: Path) -> FlowCellDirectoryData:
+def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Return a NovaseqX flow cell."""
-    return FlowCellDirectoryData(Path(flow_cells_dir, "20231108_LH00188_0028_B22F52TLT3"))
+    return FlowCellDirectoryData(novaseq_x_flow_cell_dir)
 
 
 # Broken flow cell runs

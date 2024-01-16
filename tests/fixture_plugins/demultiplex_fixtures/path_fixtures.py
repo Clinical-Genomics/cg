@@ -275,7 +275,7 @@ def novaseq_x_correct_sample_sheet(novaseq_x_flow_cell_directory: Path) -> Path:
     return Path(novaseq_x_flow_cell_directory, CORRECT_SAMPLE_SHEET)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def novaseq_x_manifest_file(novaseq_x_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeqX manifest file."""
     return Path(novaseq_x_flow_cell_dir, "Manifest.tsv")
@@ -313,6 +313,12 @@ def hiseq_2500_custom_index_flow_cell_dir(
     return Path(flow_cells_dir, hiseq_2500_custom_index_flow_cell_name)
 
 
+@pytest.fixture
+def novaseq_x_flow_cell_dir(flow_cells_dir: Path) -> Path:
+    """Return the path to a NovaSeqX flow cell."""
+    return Path(flow_cells_dir, "20231108_LH00188_0028_B22F52TLT3")
+
+
 @pytest.fixture(scope="session")
 def bcl2fastq_flow_cell_dir(flow_cells_dir: Path, bcl2fastq_flow_cell_full_name: str) -> Path:
     """Return the path to the bcl2fastq flow cell demultiplex fixture directory."""
@@ -323,12 +329,6 @@ def bcl2fastq_flow_cell_dir(flow_cells_dir: Path, bcl2fastq_flow_cell_full_name:
 def bcl_convert_flow_cell_dir(flow_cells_dir: Path, bcl_convert_flow_cell_full_name: str) -> Path:
     """Return the path to the bcl_convert flow cell demultiplex fixture directory."""
     return Path(flow_cells_dir, bcl_convert_flow_cell_full_name)
-
-
-@pytest.fixture(scope="session")
-def novaseq_x_flow_cell_dir(flow_cells_dir: Path, novaseq_x_flow_cell_full_name: str) -> Path:
-    """Return the path to the NovaSeqX flow cell demultiplex fixture directory."""
-    return Path(flow_cells_dir, novaseq_x_flow_cell_full_name)
 
 
 @pytest.fixture(scope="session")
@@ -417,7 +417,7 @@ def novaseq_6000_run_parameters_post_1_5_kits_path(
     )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def novaseq_x_run_parameters_path(novaseq_x_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeqX run parameters file."""
     return Path(novaseq_x_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
