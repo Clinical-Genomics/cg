@@ -7,11 +7,9 @@ from pathlib import Path
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_sample_sheet_path_to_housekeeper,
-)
+from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.api import Store
@@ -242,7 +240,7 @@ def flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer() -> str:
 @pytest.fixture(scope="session")
 def bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
     """Return a folder structure that resembles a bcl2fastq run folder."""
-    base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), "bcl2fastq")))
+    base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), BclConverter.BCL2FASTQ)))
     folders: list[str] = ["l1t21", "l1t11", "l2t11", "l2t21"]
 
     for folder in folders:
