@@ -20,12 +20,11 @@ os.environ["CG_ENABLE_ADMIN"] = "1"
 
 @pytest.fixture
 def app():
-    """Test fixture to use when the flask app is needed"""
-    return create_app()
+    yield create_app()
 
 
 @pytest.fixture
 def client(app: Flask, store_with_multiple_cases_and_samples: Store) -> FlaskClient:
     # Bypass authentication
     with patch.object(app, "before_request_funcs", new={}):
-        return app.test_client()
+        yield app.test_client()
