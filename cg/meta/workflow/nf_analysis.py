@@ -333,7 +333,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_pipeline_metrics(self) -> dict:
         """Get nf-core pipeline metrics constants."""
-        raise NotImplementedError
+        return {}
 
     def get_workflow_manager(self) -> str:
         """Get workflow manager from Tower."""
