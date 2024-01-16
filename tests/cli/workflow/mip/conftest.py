@@ -13,8 +13,8 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
-from cg.store.api.find_business_data import FindBusinessDataHandler
 from cg.store.api.status import StatusHandler
+from cg.store.crud.read import ReadHandler
 from cg.store.models import Case
 from tests.store_helpers import StoreHelpers
 
@@ -197,5 +197,5 @@ def setup_mocks(
         return_value=["a str"],
     )
 
-    mocker.patch.object(FindBusinessDataHandler, "are_all_flow_cells_on_disk")
-    FindBusinessDataHandler.are_all_flow_cells_on_disk.return_value = True
+    mocker.patch.object(ReadHandler, "are_all_flow_cells_on_disk")
+    ReadHandler.are_all_flow_cells_on_disk.return_value = True
