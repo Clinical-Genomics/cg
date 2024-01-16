@@ -7,7 +7,7 @@ from cg.store.models import Case
 
 
 class CovidMessage(DeliveryMessage):
-    def create_message(self, case: Case):
+    def create_message(self, case: Case) -> str:
         delivery_path: str = get_fastq_delivery_path(case)
         pangolin_delivery_path: str = get_pangolin_delivery_path(case)
         return (

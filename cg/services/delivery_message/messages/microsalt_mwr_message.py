@@ -4,7 +4,7 @@ from cg.store.models import Case
 
 
 class MicrosaltMwrMessage(DeliveryMessage):
-    def create_message(self, case: Case):
+    def create_message(self, case: Case) -> str:
         delivery_path: str = get_fastq_delivery_path(case)
         return (
             f"Hello,\n\n "

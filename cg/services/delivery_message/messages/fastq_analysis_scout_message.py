@@ -4,7 +4,7 @@ from cg.store.models import Case
 
 
 class FastqAnalysisScoutMessage(DeliveryMessage):
-    def create_message(self, case: Case):
+    def create_message(self, case: Case) -> str:
         scout_link: str = get_scout_link(case)
         delivery_path: str = get_fastq_delivery_path(case)
         return (
