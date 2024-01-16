@@ -63,7 +63,7 @@ def novaseq_6000_post_1_5_kits_flow_cell(flow_cells_dir: Path) -> FlowCellDirect
 
 @pytest.fixture()
 def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """Return a NovaseqX flow cell."""
+    """Return a NovaSeqX flow cell."""
     return FlowCellDirectoryData(novaseq_x_flow_cell_dir)
 
 
