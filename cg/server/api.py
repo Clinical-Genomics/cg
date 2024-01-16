@@ -199,7 +199,7 @@ def parse_case(case_id):
     return jsonify(**case.to_dict(links=True, analyses=True))
 
 
-@BLUEPRINT.route("/cases/<case_id>/delivery_message")
+@BLUEPRINT.route("/cases/<case_id>/delivery_message", methods=["GET"])
 def get_case_delivery_message(case_id: str):
     service = DeliveryMessageService(db)
     try:

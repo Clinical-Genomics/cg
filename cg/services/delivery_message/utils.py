@@ -15,14 +15,9 @@ from cg.services.delivery_message.messages.microsalt_mwx_message import Microsal
 from cg.store.models import Case, Sample
 
 
-message_map = {
-    DataDelivery.FASTQ: FastqMessage,
-    DataDelivery.SCOUT: ScoutMessage,
-    DataDelivery.FASTQ_SCOUT: FastqScoutMessage,
-    DataDelivery.ANALYSIS_SCOUT: AnalysisScoutMessage,
-    DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
-    DataDelivery.STATINA: StatinaMessage,
-}
+def get_message(case: Case) -> str:
+    message_strategy: DeliveryMessage = get_message_strategy(case)
+    return message_strategy.create_message(case)
 
 
 def get_message_strategy(case: Case) -> DeliveryMessage:
@@ -32,8 +27,23 @@ def get_message_strategy(case: Case) -> DeliveryMessage:
     if case.data_analysis == Pipeline.SARS_COV_2:
         return CovidMessage()
 
-    message_strategy: DeliveryMessage = message_map[case.data_analysis]()
+    message_strategy: DeliveryMessage = get_message_strategy_from_data_delivery(case)
     return message_strategy
+
+
+def get_message_strategy_from_data_delivery(case: Case) -> DeliveryMessage:
+    message_strategy: DeliveryMessage = message_map[case.data_delivery]()
+    return message_strategy
+
+
+message_map = {
+    DataDelivery.FASTQ: FastqMessage,
+    DataDelivery.SCOUT: ScoutMessage,
+    DataDelivery.FASTQ_SCOUT: FastqScoutMessage,
+    DataDelivery.ANALYSIS_SCOUT: AnalysisScoutMessage,
+    DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
+    DataDelivery.STATINA: StatinaMessage,
+}
 
 
 def get_microsalt_message_strategy(case: Case) -> DeliveryMessage:
@@ -45,11 +55,6 @@ def get_microsalt_message_strategy(case: Case) -> DeliveryMessage:
 
     app_tag: str = get_case_app_tag(case)
     raise NotImplementedError(f"Microsalt apptag {app_tag} not supported.")
-
-
-def get_message(case: Case) -> str:
-    message_strategy: DeliveryMessage = get_message_strategy(case)
-    return message_strategy.create_message(case)
 
 
 def has_mwx_samples(case: Case):
