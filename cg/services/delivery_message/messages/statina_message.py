@@ -1,4 +1,4 @@
-from cg.services.delivery_message.messages import DeliveryMessage
+from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
 from cg.store.models import Case
 
 

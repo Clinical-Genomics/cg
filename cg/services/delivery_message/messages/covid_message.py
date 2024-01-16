@@ -1,4 +1,4 @@
-from cg.services.delivery_message.messages import DeliveryMessage
+from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
 from cg.services.delivery_message.messages.utils import (
     get_fastq_delivery_path,
     get_pangolin_delivery_path,

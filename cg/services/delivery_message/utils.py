@@ -2,7 +2,6 @@ from cg.constants.constants import DataDelivery, MicrosaltAppTags, Pipeline
 from cg.services.delivery_message.messages import (
     AnalysisScoutMessage,
     CovidMessage,
-    DeliveryMessage,
     FastqMessage,
     FastqScoutMessage,
     FastqAnalysisScoutMessage,
@@ -11,6 +10,7 @@ from cg.services.delivery_message.messages import (
     ScoutMessage,
     StatinaMessage,
 )
+from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
 from cg.services.delivery_message.messages.microsalt_mwx_message import MicrosaltMwxMessage
 from cg.store.models import Case, Sample
 
