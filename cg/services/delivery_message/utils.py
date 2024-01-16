@@ -9,6 +9,7 @@ from cg.services.delivery_message.messages import (
     MicrosaltMwrMessage,
     MicrosaltMwxMessage,
     ScoutMessage,
+    StatinaMessage,
 )
 from cg.services.delivery_message.messages.microsalt_mwx_message import MicrosaltMwxMessage
 from cg.store.models import Case, Sample
@@ -20,6 +21,7 @@ message_map = {
     DataDelivery.FASTQ_SCOUT: FastqScoutMessage,
     DataDelivery.ANALYSIS_SCOUT: AnalysisScoutMessage,
     DataDelivery.FASTQ_ANALYSIS_SCOUT: FastqAnalysisScoutMessage,
+    DataDelivery.STATINA: StatinaMessage,
 }
 
 
