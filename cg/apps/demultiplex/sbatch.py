@@ -1,7 +1,9 @@
 # This one needs run_dir, out_dir, basemask and sample_sheet
 
+from cg.constants.demultiplexing import BclConverter
+
 DEMULTIPLEX_COMMAND = {
-    "bcl2fastq": """
+    BclConverter.BCL2FASTQ: """
 log "singularity exec --bind \
 /home/proj/{environment}/demultiplexed-runs,\
 /home/proj/{environment}/flow_cells,\
@@ -25,7 +27,7 @@ bcl2fastq --loading-threads 3 --processing-threads 15 --writing-threads 3 \
 touch {demux_completed_file}
 log "bcl2fastq finished!"
 """,
-    "dragen": """
+    BclConverter.BCLCONVERT: """
 log "dragen --bcl-conversion-only true \
 --bcl-input-directory {run_dir} \
 --output-directory {demux_dir} \
