@@ -78,7 +78,7 @@ def tmp_flow_cell_without_run_parameters_path(
 
 
 @pytest.fixture
-def tmp_novaseq_6000_pre_1_5_kits_incomplete_flow_cell_path(
+def tmp_novaseq_6000_pre_1_5_kits_flow_cell_without_sample_sheet_path(
     tmp_broken_flow_cells_directory: Path,
 ) -> Path:
     """This is a path to a flow cell directory with the sample sheet missing."""
@@ -86,7 +86,7 @@ def tmp_novaseq_6000_pre_1_5_kits_incomplete_flow_cell_path(
 
 
 @pytest.fixture
-def tmp_novaseq_6000_post_1_5_kits_incomplete_flow_cell_path(
+def tmp_novaseq_6000_post_1_5_kits_flow_cell_without_sample_sheet_path(
     tmp_broken_flow_cells_directory: Path,
 ) -> Path:
     """This is a path to a flow cell directory with the sample sheet missing."""
@@ -94,7 +94,7 @@ def tmp_novaseq_6000_post_1_5_kits_incomplete_flow_cell_path(
 
 
 @pytest.fixture
-def tmp_novaseq_x_incomplete_flow_cell_path(
+def tmp_novaseq_x_without_sample_sheet_flow_cell_path(
     tmp_broken_flow_cells_directory: Path,
 ) -> Path:
     """This is a path to a flow cell directory with the sample sheet missing."""

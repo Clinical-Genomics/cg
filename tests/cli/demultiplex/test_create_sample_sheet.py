@@ -58,7 +58,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
 
 def test_create_bcl2fastq_sample_sheet(
     cli_runner: testing.CliRunner,
-    tmp_novaseq_6000_pre_1_5_kits_incomplete_flow_cell_path: Path,
+    tmp_novaseq_6000_pre_1_5_kits_flow_cell_without_sample_sheet_path: Path,
     sample_sheet_context: CGConfig,
     novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples: list[FlowCellSampleBcl2Fastq],
     mocker,
@@ -66,7 +66,7 @@ def test_create_bcl2fastq_sample_sheet(
     """Test that creating a Bcl2fastq sample sheet works."""
     # GIVEN a flowcell directory with some run parameters
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_novaseq_6000_pre_1_5_kits_incomplete_flow_cell_path,
+        flow_cell_path=tmp_novaseq_6000_pre_1_5_kits_flow_cell_without_sample_sheet_path,
         bcl_converter=BclConverter.BCL2FASTQ,
     )
     assert flow_cell.run_parameters_path.exists()
@@ -90,7 +90,7 @@ def test_create_bcl2fastq_sample_sheet(
     result = cli_runner.invoke(
         create_sheet,
         [
-            str(tmp_novaseq_6000_pre_1_5_kits_incomplete_flow_cell_path),
+            str(tmp_novaseq_6000_pre_1_5_kits_flow_cell_without_sample_sheet_path),
             "--bcl-converter",
             BclConverter.BCL2FASTQ,
         ],
@@ -120,17 +120,17 @@ class SampleSheetScenario(BaseModel):
     "scenario",
     [
         SampleSheetScenario(
-            flow_cell_directory="tmp_novaseq_6000_pre_1_5_kits_incomplete_flow_cell_path",
+            flow_cell_directory="tmp_novaseq_6000_pre_1_5_kits_flow_cell_without_sample_sheet_path",
             lims_samples="novaseq_6000_pre_1_5_kits_bcl_convert_lims_samples",
             correct_sample_sheet="novaseq_6000_pre_1_5_kits_correct_sample_sheet_path",
         ),
         SampleSheetScenario(
-            flow_cell_directory="tmp_novaseq_6000_post_1_5_kits_incomplete_flow_cell_path",
+            flow_cell_directory="tmp_novaseq_6000_post_1_5_kits_flow_cell_without_sample_sheet_path",
             lims_samples="novaseq_6000_post_1_5_kits_bcl_convert_lims_samples",
             correct_sample_sheet="novaseq_6000_post_1_5_kits_correct_sample_sheet_path",
         ),
         SampleSheetScenario(
-            flow_cell_directory="tmp_novaseq_x_incomplete_flow_cell_path",
+            flow_cell_directory="tmp_novaseq_x_without_sample_sheet_flow_cell_path",
             lims_samples="novaseq_x_lims_samples",
             correct_sample_sheet="novaseq_x_correct_sample_sheet",
         ),
