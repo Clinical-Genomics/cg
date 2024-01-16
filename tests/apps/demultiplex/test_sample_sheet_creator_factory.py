@@ -17,7 +17,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 def test_sample_sheet_creator_factory_novaseq_6000(
     novaseq_flow_cell_demultiplexed_with_bcl2fastq: FlowCellDirectoryData,
-    lims_novaseq_bcl2fastq_samples: list[FlowCellSampleBcl2Fastq],
+    novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples: list[FlowCellSampleBcl2Fastq],
 ):
     """Test that a sample sheet creator defined with NovaSeq6000 data is V1."""
     # GIVEN a NovaSeq6000 flow cell and a list of NovaSeq6000 samples
@@ -28,7 +28,7 @@ def test_sample_sheet_creator_factory_novaseq_6000(
     # WHEN defining the sample sheet creator
     sample_sheet_creator: SampleSheetCreator = get_sample_sheet_creator(
         flow_cell=novaseq_flow_cell_demultiplexed_with_bcl2fastq,
-        lims_samples=lims_novaseq_bcl2fastq_samples,
+        lims_samples=novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples,
         force=False,
     )
 
@@ -36,18 +36,18 @@ def test_sample_sheet_creator_factory_novaseq_6000(
     assert isinstance(sample_sheet_creator, SampleSheetCreatorBcl2Fastq)
 
 
-def test_sample_sheet_creator_factory_BCL_convert(
+def test_sample_sheet_creator_factory_bcl_convert(
     novaseq_x_flow_cell: FlowCellDirectoryData,
-    lims_novaseq_bcl_convert_samples: list[FlowCellSampleBCLConvert],
+    novaseq_x_lims_samples: list[FlowCellSampleBCLConvert],
 ):
     """Test that a sample sheet creator defined with BCL convert data is BCL Convert."""
-    # GIVEN a NovaSeqX flow cell and a list of NovaSeqX samples that is demultiplexed wit BCL Convert
+    # GIVEN a NovaSeqX flow cell and a list of NovaSeqX BCL Convert samples
     assert novaseq_x_flow_cell.bcl_converter == BclConverter.DRAGEN
 
     # WHEN defining the sample sheet creator
     sample_sheet_creator: SampleSheetCreator = get_sample_sheet_creator(
         flow_cell=novaseq_x_flow_cell,
-        lims_samples=lims_novaseq_bcl_convert_samples,
+        lims_samples=novaseq_x_lims_samples,
         force=False,
     )
 
