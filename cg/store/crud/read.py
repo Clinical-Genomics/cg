@@ -1,4 +1,4 @@
-"""Handler to find business data objects."""
+"""Handler to read data objects."""
 import datetime as dt
 import logging
 from typing import Callable, Iterator
@@ -54,8 +54,8 @@ from cg.store.models import (
 LOG = logging.getLogger(__name__)
 
 
-class FindBusinessDataHandler(BaseHandler):
-    """Contains methods to find business data model instances."""
+class ReadHandler(BaseHandler):
+    """Class for reading items in the database."""
 
     def __init__(self, session: Session):
         super().__init__(session=session)
