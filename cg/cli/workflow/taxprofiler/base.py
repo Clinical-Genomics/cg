@@ -5,7 +5,7 @@ import logging
 import click
 from pydantic.v1 import ValidationError
 
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression, metrics_deliver
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
     OPTION_COMPUTE_ENV,
     OPTION_CONFIG,
@@ -16,6 +16,7 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
+    metrics_deliver,
 )
 from cg.cli.workflow.taxprofiler.options import (
     OPTION_FROM_START,

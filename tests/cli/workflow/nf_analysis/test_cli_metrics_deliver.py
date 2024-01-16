@@ -17,8 +17,8 @@ LOG = logging.getLogger(__name__)
     "context",
     ["rnafusion_context", "taxprofiler_context"],
 )
-def test_config_case_without_options(cli_runner: CliRunner, context: CGConfig, request):
-    """Test config_case for Taxprofiler and Rnafusion without options."""
+def test_metrics_deliver_without_options(cli_runner: CliRunner, context: CGConfig, request):
+    """Test metrics-deliver for Taxprofiler and Rnafusion without options."""
     context = request.getfixturevalue(context)
 
     # WHEN dry running without anything specified
@@ -42,7 +42,7 @@ def metrics_deliver_with_missing_case(
     context: CGConfig,
     request,
 ):
-    """Test config_case for Taxprofiler and Rnafusion with a missing case."""
+    """Test metrics-deliver for Taxprofiler and Rnafusion with a missing case."""
     caplog.set_level(logging.ERROR)
     context = request.getfixturevalue(context)
 
