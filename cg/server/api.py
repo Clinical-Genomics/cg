@@ -204,7 +204,7 @@ def get_case_delivery_message(case_id: str):
     service = DeliveryMessageService(db)
     try:
         response: DeliveryMessageResponse = service.get_delivery_message(case_id)
-        return response.model_dump_json(), HTTPStatus.OK
+        return jsonify(response.model_dump_json()), HTTPStatus.OK
     except CaseNotFoundError as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
 

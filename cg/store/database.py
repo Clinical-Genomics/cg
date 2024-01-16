@@ -14,9 +14,6 @@ def initialize_database(db_uri: str) -> None:
     """Initialize the SQLAlchemy engine and session for status db."""
     global SESSION, ENGINE
 
-    if SESSION and ENGINE:
-        return
-
     ENGINE = create_engine(db_uri, pool_pre_ping=True)
     session_factory = sessionmaker(ENGINE)
     SESSION = scoped_session(session_factory)
