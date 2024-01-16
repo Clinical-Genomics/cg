@@ -9,14 +9,14 @@ class LaneMetrics(BaseModel):
     _yield: int | None = None
 
 
-class ConcatenatedMetrics(BaseModel):
+class ConcatenatedLaneMetrics(BaseModel):
     """Model for concatenated lane sequencing metrics."""
 
     number_of_reads: int
     _yield: int | None = None
 
 
-class CoverageMetrics(BaseModel):
+class DNACoverageMetrics(BaseModel):
     """Coverage metrics from the pipeline output."""
 
     mean_target_coverage: float | None = None
@@ -36,15 +36,33 @@ class CoverageMetrics(BaseModel):
     pct_off_bait: float | None = None
     pct_pf_reads_improper_pairs: float | None = None
     pct_chimeras: float | None = None
+    pct_adapter: float | None
+
+
+class RNACoverageMetrics(BaseModel):
+    """Coverage metrics for an RNA pipeline output."""
+
+    after_filtering_gc_content: float | None
+    after_filtering_q20_rate: float | None
+    after_filtering_q30_rate: float | None
+    after_filtering_read1_mean_length: float | None
+    median_5prime_to_3prime_bias: float | None
+    pct_adapter: float | None
+    pct_mrna_bases: float | None
+    pct_ribosomal_bases: float | None
+    pct_surviving: float | None
+    pct_duplication: float | None
+    read_pairs_examined: float | None
+    uniquely_mapped_percent: float | None
 
 
 class SequencingMetrics(BaseModel):
     """Model for collecting sample specific reads information."""
 
-    total_reads: list[LaneMetrics] | ConcatenatedMetrics
-    mapped_reads: list[LaneMetrics] | ConcatenatedMetrics
+    total_reads: list[LaneMetrics] | ConcatenatedLaneMetrics
+    mapped_reads: list[LaneMetrics] | ConcatenatedLaneMetrics
     percentage_mapped_reads: list[float] | float
-    coverage_metrics: CoverageMetrics
+    coverage_metrics: DNACoverageMetrics | RNACoverageMetrics
 
 
 class MIPDNAMetrics(BaseModel):
@@ -68,7 +86,6 @@ class SampleQCMetrics(BaseModel):
 
     sample_id: str
     sequencing_metrics: list[SequencingMetrics]
-    coverage_metrics: CoverageMetrics
     pipeline_specific_metrics: MIPDNAMetrics | BalsamicMetrics | RNAFusionMetrics | MIPRNAMetrics
 
 
