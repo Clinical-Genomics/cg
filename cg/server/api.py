@@ -203,6 +203,11 @@ def parse_case(case_id):
     return jsonify(**case.to_dict(links=True, analyses=True))
 
 
+@BLUEPRINT.route("/cases/<case_id>/delivery_message")
+def get_case_delivery_message(case_id: str):
+    pass
+
+
 @BLUEPRINT.route("/families_in_collaboration")
 def parse_families_in_collaboration():
     """Return cases in collaboration."""
