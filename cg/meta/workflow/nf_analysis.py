@@ -368,7 +368,7 @@ class NfAnalysisAPI(AnalysisAPI):
             )
             return
 
-        LOG.info(f"Writing metrics deliverables file to{metrics_deliverables_path.as_posix()}")
+        LOG.info(f"Writing metrics deliverables file to {metrics_deliverables_path.as_posix()}")
         WriteFile.write_file_from_content(
             content={"metrics": [metric.dict() for metric in metrics]},
             file_format=FileFormat.YAML,
