@@ -9,7 +9,7 @@ from dateutil.parser import parse as parse_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
-from cg.exc import FlowCellsNeededError, CgError
+from cg.exc import FlowCellsNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
