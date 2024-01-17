@@ -1,5 +1,6 @@
 """Test fixtures for cg/server tests"""
 import os
+from typing import Generator
 
 import pytest
 from flask import Flask
@@ -21,7 +22,7 @@ os.environ["CG_ENABLE_ADMIN"] = "1"
 
 
 @pytest.fixture
-def app() -> Flask:
+def app() -> Generator[Flask, None, None]:
     from cg.server.auto import app
 
     app.config.update({"TESTING": True})
@@ -46,7 +47,7 @@ def case(helpers: StoreHelpers) -> Case:
 
 
 @pytest.fixture
-def client(app: Flask) -> FlaskClient:
+def client(app: Flask) -> Generator[FlaskClient, None, None]:
     # Bypass authentication
     with patch.object(app, "before_request_funcs", new={}):
         yield app.test_client()

@@ -1,5 +1,4 @@
 from http import HTTPStatus
-
 from flask.testing import FlaskClient
 
 from cg.store.models import Case
