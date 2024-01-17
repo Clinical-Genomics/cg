@@ -5,12 +5,8 @@ import click
 from cg.models.cg_config import CGConfig
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.constants.constants import MetaApis
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
 from cg.exc import CgError
-
-ARGUMENT_CASE_ID = click.argument("case_id", required=True)
-OPTION_DRY = click.option(
-    "-d", "--dry-run", help="Simulate process without executing", is_flag=True
-)
 
 OPTION_WORKDIR = click.option(
     "--work-dir",
