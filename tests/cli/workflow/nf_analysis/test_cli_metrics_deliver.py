@@ -35,7 +35,7 @@ def test_metrics_deliver_without_options(cli_runner: CliRunner, context: CGConfi
     "context",
     ["rnafusion_context", "taxprofiler_context"],
 )
-def metrics_deliver_with_missing_case(
+def test_metrics_deliver_with_missing_case(
     cli_runner: CliRunner,
     caplog: LogCaptureFixture,
     case_id_does_not_exist: str,
