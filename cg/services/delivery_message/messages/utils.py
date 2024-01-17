@@ -18,5 +18,6 @@ def get_pangolin_delivery_path(case: Case) -> str:
     return f"/home/{customer_id}/inbox/wwLab_automatisk_hamtning"
 
 
-def get_statina_batch_id(case: Case) -> str:
-    return case.name.split("-")[1]
+def get_statina_link(case: Case) -> str:
+    batch_id: str = case.name.split("-")[1]
+    return f"https://statina.clinicalgenomics.se/batches/{batch_id}"
