@@ -1,0 +1,6 @@
+INCOMPLETE: FLOW CELL WITHOUT RUN PARAMETERS
+Sequencer: HiSeq2500
+Workflow: CUSTOM
+Indexes: 17,8
+BCL converter: BCLConvert
+

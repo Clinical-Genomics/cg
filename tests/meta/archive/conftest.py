@@ -260,6 +260,7 @@ def archive_store(
         ),
     ]
     new_samples[0].customer = customer_ddn
+    new_samples[0].last_sequenced_at = datetime.now()
     new_samples[1].customer = customer_ddn
     new_samples[2].customer = customer_without_ddn
 
