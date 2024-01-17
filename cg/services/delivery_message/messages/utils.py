@@ -16,3 +16,7 @@ def get_scout_link(case: Case) -> str:
 def get_pangolin_delivery_path(case: Case) -> str:
     customer_id: str = case.customer.internal_id
     return f"/home/{customer_id}/inbox/wwLab_automatisk_hamtning"
+
+
+def get_statina_batch_id(case: Case) -> str:
+    return case.name.split("-")[1]
