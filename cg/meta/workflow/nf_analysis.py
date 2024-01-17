@@ -128,9 +128,9 @@ class NfAnalysisAPI(AnalysisAPI):
         if not dry_run:
             Path(self.get_case_path(case_id=case_id)).mkdir(parents=True, exist_ok=True)
 
-    def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
-        """Write <case>_metrics_deliverables.yaml file."""
-        raise NotImplementedError
+    # def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
+    #     """Write <case>_metrics_deliverables.yaml file."""
+    #     raise NotImplementedError
 
     def get_log_path(self, case_id: str, pipeline: str, log: str = None) -> Path:
         """Path to NF log."""
@@ -336,6 +336,10 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get nf-core pipeline metrics constants."""
         return {}
 
+    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
+        """Return a list of the metrics specified in a MultiQC json file"""
+        raise NotImplementedError
+
     def get_metric_base_list(self, sample_id: str, metrics_values: dict) -> list[MetricsBase]:
         """Return list of metrics"""
         metric_base_list: list[MetricsBase] = []
@@ -352,6 +356,28 @@ class NfAnalysisAPI(AnalysisAPI):
                 )
             )
         return metric_base_list
+
+    @staticmethod
+    def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
+        return None
+
+    def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
+        """Write <case>_metrics_deliverables.yaml file."""
+        metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
+        metrics = self.get_multiqc_json_metrics(case_id=case_id)
+        self.ensure_mandatory_metrics_present(metrics=metrics)
+        if dry_run:
+            LOG.info(
+                f"Dry-run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
+            )
+            return
+
+        LOG.info(f"Writing metrics deliverables file to{metrics_deliverables_path.as_posix()}")
+        WriteFile.write_file_from_content(
+            content={"metrics": [metric.dict() for metric in metrics]},
+            file_format=FileFormat.YAML,
+            file_path=metrics_deliverables_path,
+        )
 
     def validate_qc_metrics(self, case_id: str, dry_run: bool = False) -> None:
         """Validate the information from a QC metrics deliverable file."""

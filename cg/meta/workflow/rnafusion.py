@@ -144,8 +144,8 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         )
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 
-    def parse_multiqc_json_metrics(self, case_id: str) -> dict:
-        """Get a multiqc_data.json file and returns metrics and values formatted for a case."""
+    def parse_multiqc_json_for_case(self, case_id: str) -> dict:
+        """Parse a multiqc_data.json file and returns a dictionary with metric name and metric values for a case."""
         multiqc_json = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
         )
@@ -160,7 +160,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Get a multiqc_data.json file and returns metrics and values formatted."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_id: str = case.links[0].sample.internal_id
-        metric_values: dict = self.parse_multiqc_json_metrics(case_id=case_id)
+        metric_values: dict = self.parse_multiqc_json_for_case(case_id=case_id)
         metric_base_list: list = self.get_metric_base_list(
             sample_id=sample_id, metrics_values=metric_values
         )
@@ -189,24 +189,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         if missing_metrics:
             LOG.error(f"Some mandatory metrics are missing: {', '.join(missing_metrics)}")
             raise MissingMetrics()
-
-    def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
-        """Write <case>_metrics_deliverables.yaml file."""
-        metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
-        metrics = self.get_multiqc_json_metrics(case_id=case_id)
-        self.ensure_mandatory_metrics_present(metrics=metrics)
-        if dry_run:
-            LOG.info(
-                f"Dry-run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
-            )
-            return
-
-        LOG.info(f"Writing metrics deliverables file to{metrics_deliverables_path.as_posix()}")
-        WriteFile.write_file_from_content(
-            content={"metrics": [metric.dict() for metric in metrics]},
-            file_format=FileFormat.YAML,
-            file_path=metrics_deliverables_path,
-        )
 
     def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> RnafusionAnalysis:
         """Parse Rnafusion output analysis files and return analysis model."""

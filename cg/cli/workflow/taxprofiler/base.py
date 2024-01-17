@@ -46,6 +46,7 @@ def taxprofiler(context: click.Context) -> None:
 
 
 taxprofiler.add_command(resolve_compression)
+taxprofiler.add_command(metrics_deliver)
 
 
 @taxprofiler.command("config-case")
@@ -210,6 +211,3 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
-
-
-taxprofiler.add_command(metrics_deliver)

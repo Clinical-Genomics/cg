@@ -137,7 +137,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         metrics_list: list[MetricsBase] = []
         for sample in samples:
             sample_id: str = sample.internal_id
-            metrics_values: dict = self.parse_multiqc_json_metrics(
+            metrics_values: dict = self.parse_multiqc_json_for_sample(
                 sample_name=sample.name, multiqc_json=multiqc_json
             )
             metric_base_list: list = self.get_metric_base_list(
@@ -147,8 +147,8 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         return metrics_list
 
     @staticmethod
-    def parse_multiqc_json_metrics(sample_name: str, multiqc_json: list[dict]) -> dict:
-        """Get tuple metric_name and metric_values from the sample name."""
+    def parse_multiqc_json_for_sample(sample_name: str, multiqc_json: list[dict]) -> dict:
+        """Parse a multiqc_data.json and returns a dictionary with metric name and metric values for each sample."""
         metrics_values: dict = {}
         for stat_dict in multiqc_json:
             for sample_key, sample_values in stat_dict.items():
@@ -157,19 +157,3 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
                     metrics_values.update(sample_values)
 
         return metrics_values
-
-    def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
-        """Write <case>_metrics_deliverables.yaml file."""
-        metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
-        metrics = self.get_multiqc_json_metrics(case_id=case_id)
-        if dry_run:
-            LOG.info(
-                f"Dry-run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
-            )
-            return
-        LOG.info(f"Writing metrics deliverables file to {metrics_deliverables_path.as_posix()}")
-        WriteFile.write_file_from_content(
-            content={"metrics": [metric.dict() for metric in metrics]},
-            file_format=FileFormat.YAML,
-            file_path=metrics_deliverables_path,
-        )
