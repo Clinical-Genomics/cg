@@ -7,8 +7,6 @@ from flask.testing import FlaskClient
 from mock import patch
 
 from cg.constants import DataDelivery, Pipeline
-from cg.server.app import create_app
-from cg.store import Store
 from cg.store.database import create_all_tables, drop_all_tables
 from cg.store.models import Case
 from tests.store_helpers import StoreHelpers
@@ -24,21 +22,18 @@ os.environ["CG_ENABLE_ADMIN"] = "1"
 
 @pytest.fixture
 def app() -> Flask:
-    app = create_app()
+    from cg.server.auto import app
+
+    app.config.update({"TESTING": True})
     create_all_tables()
     yield app
     drop_all_tables()
 
 
 @pytest.fixture
-def store(app: Flask) -> Store:
-    from cg.server.ext import db
+def case(helpers: StoreHelpers) -> Case:
+    from cg.server.ext import db as store
 
-    yield db
-
-
-@pytest.fixture
-def case(store: Store, helpers: StoreHelpers) -> Case:
     case: Case = helpers.add_case(
         customer_id=1,
         data_analysis=Pipeline.MIP_DNA,
@@ -53,8 +48,7 @@ def case(store: Store, helpers: StoreHelpers) -> Case:
 
 
 @pytest.fixture
-def client(app: Flask, case: Case) -> FlaskClient:
+def client(app: Flask) -> FlaskClient:
     # Bypass authentication
-
     with patch.object(app, "before_request_funcs", new={}):
         yield app.test_client()
