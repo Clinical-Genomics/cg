@@ -14,6 +14,7 @@ from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
+    MultiqcDataJson,
 )
 from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import PipelineDeliverables
@@ -23,6 +24,7 @@ from cg.models.rnafusion.rnafusion import (
     RnafusionSampleSheetEntry,
 )
 from cg.store.models import Case, Sample
+from cg.io.json import read_json
 
 LOG = logging.getLogger(__name__)
 
@@ -141,6 +143,28 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             header=RnafusionSampleSheetEntry.headers(),
         )
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
+
+    def parse_multiqc_json_metrics(self, case_id: str) -> dict:
+        """Get a multiqc_data.json file and returns metrics and values formatted for a case."""
+        multiqc_json = MultiqcDataJson(
+            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
+        )
+        metrics_values: dict = {}
+        for key in multiqc_json.report_general_stats_data:
+            if case_id in key:
+                metrics_values.update(list(key.values())[0])
+                LOG.info(f"Key: {key}, Values: {list(key.values())[0]}")
+        return metrics_values
+
+    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
+        """Get a multiqc_data.json file and returns metrics and values formatted."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        sample_id: str = case.links[0].sample.internal_id
+        metric_values: dict = self.parse_multiqc_json_metrics(case_id=case_id)
+        metric_base_list: list = self.get_metric_base_list(
+            sample_id=sample_id, metrics_values=metric_values
+        )
+        return metric_base_list
 
     def report_deliver(self, case_id: str) -> None:
         """Create deliverables file."""

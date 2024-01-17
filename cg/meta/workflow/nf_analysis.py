@@ -336,72 +336,22 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get nf-core pipeline metrics constants."""
         return {}
 
-    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
-        """Get a multiqc_data.json file and returns metrics and values formatted."""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_id: str = case.links[0].sample.internal_id
-        multiqc_json = MultiqcDataJson(
-            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
-        )
-        metrics_values: dict = {}
-
-        for key in multiqc_json.report_general_stats_data:
-            if case_id in key:
-                metrics_values.update(list(key.values())[0])
-                LOG.info(f"Key: {key}, Values: {list(key.values())[0]}")
-
-        return [
-            MetricsBase(
-                header=None,
-                id=sample_id,
-                input=MultiQC.MULTIQC_DATA + FileExtensions.JSON,
-                name=metric_name,
-                step=MultiQC.MULTIQC,
-                value=metric_value,
-                condition=self.get_pipeline_metrics().get(metric_name, None),
-            )
-            for metric_name, metric_value in metrics_values.items()
-        ]
-
-    def get_multiqc_json_metrics_per_sample(self, case_id: str) -> list[MetricsBase]:
-        """Return a list of the metrics specified in a MultiQC json file for the case samples."""
-        multiqc_json: list[dict] = MultiqcDataJson(
-            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
-        ).report_general_stats_data
-        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
-        metrics_list: list[MetricsBase] = []
-        for sample in samples:
-            sample_id: str = sample.internal_id
-            metrics: dict = self.get_metrics_from_sample(
-                sample_name=sample.name, multiqc_json=multiqc_json
-            )
-            for metric_name, metric_value in metrics.items():
-                metrics_list.append(
-                    MetricsBase(
-                        header=None,
-                        id=sample_id,
-                        input=MultiQC.MULTIQC_DATA + FileExtensions.JSON,
-                        name=metric_name,
-                        step=MultiQC.MULTIQC,
-                        value=metric_value,
-                        condition=self.get_pipeline_metrics().get(metric_name, None),
-                    )
+    def get_metric_base_list(self, sample_id: str, metrics_values: dict) -> list[MetricsBase]:
+        """Return list of metrics"""
+        metric_base_list: list[MetricsBase] = []
+        for metric_name, metric_value in metrics_values.items():
+            metric_base_list.append(
+                MetricsBase(
+                    header=None,
+                    id=sample_id,
+                    input=MultiQC.MULTIQC_DATA + FileExtensions.JSON,
+                    name=metric_name,
+                    step=MultiQC.MULTIQC,
+                    value=metric_value,
+                    condition=self.get_pipeline_metrics().get(metric_name, None),
                 )
-
-        return metrics_list
-
-    @staticmethod
-    def get_metrics_from_sample(sample_name: str, multiqc_json: list[dict]) -> dict:
-        """Get tuple metric_name and metric_values from the sample name."""
-
-        metrics_values: dict = {}
-        for stat_dict in multiqc_json:
-            for sample_key, sample_values in stat_dict.items():
-                if sample_key == f"{sample_name}_{sample_name}":
-                    LOG.info(f"Key: {sample_key}, Values: {sample_values}")
-                    metrics_values.update(sample_values)
-
-        return metrics_values
+            )
+        return metric_base_list
 
     def validate_qc_metrics(self, case_id: str, dry_run: bool = False) -> None:
         """Validate the information from a QC metrics deliverable file."""

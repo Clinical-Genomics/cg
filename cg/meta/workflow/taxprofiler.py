@@ -16,6 +16,11 @@ from cg.models.taxprofiler.taxprofiler import (
 from cg.store.models import Case, Sample
 from cg.io.controller import WriteFile
 from cg.constants.constants import FileFormat
+from cg.models.deliverables.metric_deliverables import (
+    MetricsBase,
+    MultiqcDataJson,
+)
+from cg.io.json import read_json
 
 LOG = logging.getLogger(__name__)
 
@@ -123,10 +128,40 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         )
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 
+    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
+        """Return a list of the metrics specified in a MultiQC json file for the case samples."""
+        multiqc_json: list[dict] = MultiqcDataJson(
+            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
+        ).report_general_stats_data
+        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
+        metrics_list: list[MetricsBase] = []
+        for sample in samples:
+            sample_id: str = sample.internal_id
+            metrics_values: dict = self.parse_multiqc_json_metrics(
+                sample_name=sample.name, multiqc_json=multiqc_json
+            )
+            metric_base_list: list = self.get_metric_base_list(
+                sample_id=sample_id, metrics_values=metrics_values
+            )
+            metrics_list.extend(metric_base_list)
+        return metrics_list
+
+    @staticmethod
+    def parse_multiqc_json_metrics(sample_name: str, multiqc_json: list[dict]) -> dict:
+        """Get tuple metric_name and metric_values from the sample name."""
+        metrics_values: dict = {}
+        for stat_dict in multiqc_json:
+            for sample_key, sample_values in stat_dict.items():
+                if sample_key == f"{sample_name}_{sample_name}":
+                    LOG.info(f"Key: {sample_key}, Values: {sample_values}")
+                    metrics_values.update(sample_values)
+
+        return metrics_values
+
     def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
         """Write <case>_metrics_deliverables.yaml file."""
         metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
-        metrics = self.get_multiqc_json_metrics_per_sample(case_id=case_id)
+        metrics = self.get_multiqc_json_metrics(case_id=case_id)
         if dry_run:
             LOG.info(
                 f"Dry-run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
