@@ -364,15 +364,15 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_multiqc_json_metrics_per_sample(self, case_id: str) -> list[MetricsBase]:
         """Get a multiqc_data.json file and returns metrics and values formatted for every sample_id."""
-        multiqc_json: MultiqcDataJson = MultiqcDataJson(
+        multiqc_json: list[dict] = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
-        )
-        samples: list = self.status_db.get_samples_by_case_id(case_id=case_id)
+        ).report_general_stats_data
+        samples: list[Samples] = self.status_db.get_samples_by_case_id(case_id=case_id)
         metrics_list: list[MetricsBase] = []
         for sample in samples:
             sample_id: str = sample.internal_id
-            metrics = self.get_metrics_from_sample(
-                sample_name=sample.name, multiqc_json=multiqc_json.report_general_stats_data
+            metrics: dict = self.get_metrics_from_sample(
+                sample_name=sample.name, multiqc_json=multiqc_json
             )
             for metric_name, metric_value in metrics.items():
                 metrics_list.append(
