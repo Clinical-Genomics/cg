@@ -14,8 +14,6 @@ from cg.models.taxprofiler.taxprofiler import (
     TaxprofilerSampleSheetEntry,
 )
 from cg.store.models import Case, Sample
-from cg.io.controller import WriteFile
-from cg.constants.constants import FileFormat
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
     MultiqcDataJson,

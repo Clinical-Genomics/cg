@@ -16,10 +16,7 @@ from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.utils import Process
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
-    MultiqcDataJson,
 )
-from cg.store.models import Case
-from cg.io.json import read_json
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.deliverables.metric_deliverables import (
     MetricsDeliverablesCondition,

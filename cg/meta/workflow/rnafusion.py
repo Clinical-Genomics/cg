@@ -9,7 +9,7 @@ from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, Strandedness
 from cg.constants.nf_analysis import RNAFUSION_METRIC_CONDITIONS
 from cg.exc import MissingMetrics
-from cg.io.controller import ReadFile, WriteFile
+from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
