@@ -42,8 +42,6 @@ def case(helpers: StoreHelpers) -> Case:
         ticket="123",
         store=store,
     )
-    store.session.add(case)
-    store.session.commit()
     return case
 
 
