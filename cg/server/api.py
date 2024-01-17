@@ -1,16 +1,14 @@
-from http import HTTPStatus
 import json
 import logging
 import tempfile
 from functools import wraps
+from http import HTTPStatus
 from pathlib import Path
 from typing import Any
 
 import cachecontrol
 import requests
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
-from cg.server.dto.delivery_message_response import DeliveryMessageResponse
-from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 from pydantic.v1 import ValidationError
@@ -28,7 +26,9 @@ from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
+from cg.server.dto.delivery_message_response import DeliveryMessageResponse
 from cg.server.ext import db, lims, osticket
+from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.store.models import (
     Analysis,
     Application,

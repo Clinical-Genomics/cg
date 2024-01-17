@@ -1,12 +1,17 @@
 from http import HTTPStatus
+
 from flask.testing import FlaskClient
 
+from cg.store.models import Case
 
-def test_get_delivery_message(client: FlaskClient, case_id: str):
+
+def test_get_delivery_message(client: FlaskClient, case: Case):
     # GIVEN a case id
 
     # WHEN a request is made to get a delivery message for the case
-    response = client.get(f"/api/v1/cases/{case_id}/delivery_message")
+    response = client.get(
+        f"/api/v1/cases/{case.internal_id}/delivery_message", content_type="application/json"
+    )
 
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
