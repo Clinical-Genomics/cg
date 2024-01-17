@@ -128,10 +128,6 @@ class NfAnalysisAPI(AnalysisAPI):
         if not dry_run:
             Path(self.get_case_path(case_id=case_id)).mkdir(parents=True, exist_ok=True)
 
-    # def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
-    #     """Write <case>_metrics_deliverables.yaml file."""
-    #     raise NotImplementedError
-
     def get_log_path(self, case_id: str, pipeline: str, log: str = None) -> Path:
         """Path to NF log."""
         if log:
