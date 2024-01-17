@@ -26,6 +26,7 @@ from cg.models.deliverables.metric_deliverables import (
 )
 from cg.exc import CgError, MetricsQCError
 from cg.constants.tb import AnalysisStatus
+from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -367,7 +368,7 @@ class NfAnalysisAPI(AnalysisAPI):
         multiqc_json: list[dict] = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
         ).report_general_stats_data
-        samples: list[Samples] = self.status_db.get_samples_by_case_id(case_id=case_id)
+        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
         metrics_list: list[MetricsBase] = []
         for sample in samples:
             sample_id: str = sample.internal_id
