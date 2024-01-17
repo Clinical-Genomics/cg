@@ -6,6 +6,7 @@ import pytest
 from flask import Flask
 from flask.testing import FlaskClient
 from mock import patch
+from cg.server.ext import db as store
 
 from cg.constants import DataDelivery, Pipeline
 from cg.store.database import create_all_tables, drop_all_tables
@@ -33,8 +34,6 @@ def app() -> Generator[Flask, None, None]:
 
 @pytest.fixture
 def case(helpers: StoreHelpers) -> Case:
-    from cg.server.ext import db as store
-
     case: Case = helpers.add_case(
         customer_id=1,
         data_analysis=Pipeline.MIP_DNA,
