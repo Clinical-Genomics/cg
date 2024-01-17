@@ -337,7 +337,7 @@ class NfAnalysisAPI(AnalysisAPI):
         raise NotImplementedError
 
     def get_metric_base_list(self, sample_id: str, metrics_values: dict) -> list[MetricsBase]:
-        """Return list of metrics"""
+        """Return a list of MetricsBase objects for a given sample."""
         metric_base_list: list[MetricsBase] = []
         for metric_name, metric_value in metrics_values.items():
             metric_base_list.append(
