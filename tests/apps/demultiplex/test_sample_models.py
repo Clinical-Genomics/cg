@@ -19,7 +19,7 @@ from cg.constants.demultiplexing import (
     IndexOverrideCycles,
     IndexSettings,
 )
-from cg.constants.symbols import DASH, EMPTY_STRING
+from cg.constants.symbols import EMPTY_STRING
 from cg.models.demultiplex.run_parameters import RunParameters
 
 
@@ -364,7 +364,7 @@ def test_process_indexes_for_sample_sheet_bcl_convert(
     sample.process_indexes(run_parameters=run_parameters)
 
     # THEN the sample is processed correctly
-    assert DASH not in sample.index
+    assert "-" not in sample.index
     assert sample.override_cycles != EMPTY_STRING
 
 

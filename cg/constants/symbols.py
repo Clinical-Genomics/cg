@@ -2,7 +2,6 @@
 
 ASTERISK = "*"
 COMMA = ","
-DASH = "-"
 DOT = "."
 EMPTY_STRING = ""
 FWD_SLASH = "/"
