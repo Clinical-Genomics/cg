@@ -19,7 +19,7 @@ from cg.constants.demultiplexing import (
     SampleSheetBcl2FastqSections,
     SampleSheetBCLConvertSections,
 )
-from cg.constants.symbols import DASH, EMPTY_STRING, LOWER_CASE_NA
+from cg.constants.symbols import EMPTY_STRING
 from cg.exc import SampleSheetError
 from cg.models.demultiplex.run_parameters import RunParameters
 
@@ -38,7 +38,7 @@ class FlowCellSample(BaseModel):
     def separate_indexes(self, is_run_single_index: bool) -> None:
         """Update values for index and index2 splitting the original LIMS dual index."""
         if is_dual_index(self.index):
-            index1, index2 = self.index.split(DASH)
+            index1, index2 = self.index.split("-")
             self.index = index1.strip().replace(CUSTOM_INDEX_TAIL, EMPTY_STRING)
             self.index2 = index2.strip() if not is_run_single_index else EMPTY_STRING
 
@@ -189,9 +189,9 @@ class FlowCellSampleBCLConvert(FlowCellSample):
         """Assign zero to barcode_mismatches_2 if the hamming distance between self.index2
         and the index2 of any sample in the lane is below the minimum threshold.
         If the sample is single-indexed, assign 'na'."""
-        if self.index2 == EMPTY_STRING and DASH not in self.index:
+        if self.index2 == EMPTY_STRING and "-" not in self.index:
             LOG.info(f"Turning barcode mismatch for index 2 to 'na' for sample {self.sample_id}")
-            self.barcode_mismatches_2 = LOWER_CASE_NA
+            self.barcode_mismatches_2 = "na"
             return
         for sample in samples_to_compare:
             if self.sample_id == sample.sample_id:
