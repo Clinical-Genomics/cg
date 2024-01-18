@@ -21,7 +21,6 @@ class DNACoverageMetrics(BaseModel):
 
     mean_target_coverage: float | None = None
     median_target_coverage: float | None = None
-    pct_duplication: float | None = None
     pct_target_bases_10x: float | None = None
     pct_target_bases_20x: float | None = None
     pct_target_bases_30x: float | None = None
@@ -36,7 +35,6 @@ class DNACoverageMetrics(BaseModel):
     pct_off_bait: float | None = None
     pct_pf_reads_improper_pairs: float | None = None
     pct_chimeras: float | None = None
-    pct_adapter: float | None
 
 
 class RNACoverageMetrics(BaseModel):
@@ -63,6 +61,8 @@ class SequencingMetrics(BaseModel):
     mapped_reads: list[LaneMetrics] | ConcatenatedLaneMetrics
     percentage_mapped_reads: list[float] | float
     coverage_metrics: DNACoverageMetrics | RNACoverageMetrics
+    pct_duplication: float | None = None
+    pct_adapter: float | None
 
 
 class MIPDNAMetrics(BaseModel):
