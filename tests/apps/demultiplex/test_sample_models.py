@@ -19,7 +19,7 @@ from cg.constants.demultiplexing import (
     IndexOverrideCycles,
     IndexSettings,
 )
-from cg.constants.symbols import DASH, EMPTY_STRING
+from cg.constants.symbols import EMPTY_STRING
 from cg.models.demultiplex.run_parameters import RunParameters
 
 
@@ -321,8 +321,14 @@ def test_update_barcode_mismatches_2(
     "run_parameters_fixture, raw_lims_samples_fixture",
     [
         ("novaseq_x_run_parameters", "novaseq_x_lims_samples"),
-        ("novaseq_6000_run_parameters_pre_1_5_kits", "novaseq_6000_pre_1_5_kits_lims_samples"),
-        ("novaseq_6000_run_parameters_post_1_5_kits", "novaseq_6000_post_1_5_kits_lims_samples"),
+        (
+            "novaseq_6000_run_parameters_pre_1_5_kits",
+            "novaseq_6000_pre_1_5_kits_bcl_convert_lims_samples",
+        ),
+        (
+            "novaseq_6000_run_parameters_post_1_5_kits",
+            "novaseq_6000_post_1_5_kits_bcl_convert_lims_samples",
+        ),
         ("hiseq_x_single_index_run_parameters", "hiseq_x_single_index_bcl_convert_lims_samples"),
         ("hiseq_x_dual_index_run_parameters", "hiseq_x_dual_index_bcl_convert_lims_samples"),
         ("hiseq_2500_dual_index_run_parameters", "hiseq_2500_dual_index_bcl_convert_lims_samples"),
@@ -358,7 +364,7 @@ def test_process_indexes_for_sample_sheet_bcl_convert(
     sample.process_indexes(run_parameters=run_parameters)
 
     # THEN the sample is processed correctly
-    assert DASH not in sample.index
+    assert "-" not in sample.index
     assert sample.override_cycles != EMPTY_STRING
 
 

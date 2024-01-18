@@ -6,7 +6,7 @@ import pytest
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
-# Functional flow cells
+# Functional flow cell runs
 
 
 @pytest.fixture(scope="module")
@@ -42,61 +42,32 @@ def hiseq_2500_custom_index_flow_cell(
 
 
 @pytest.fixture()
-def novaseq_6000_post_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
-    return FlowCellDirectoryData(Path(flow_cells_dir, "230912_A00187_1009_AHK33MDRX3"))
-
-
-@pytest.fixture()
-def novaseq_6000_pre_1_5_kits_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
+def novaseq_6000_pre_1_5_kits_flow_cell(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    """Return a Novaseq6000 flow cell with index settings pre 1.5 kits."""
     return FlowCellDirectoryData(Path(flow_cells_dir, "190927_A00689_0069_BHLYWYDSXX"))
 
 
 @pytest.fixture()
-def novaseq_x_flow_cell_data(flow_cells_dir: Path) -> FlowCellDirectoryData:
-    return FlowCellDirectoryData(Path(flow_cells_dir, "20231108_LH00188_0028_B22F52TLT3"))
-
-
-# Broken flow cells
-
-
-@pytest.fixture(scope="session")
-def bcl2fastq_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """Create a flow cell object with flow cell that is demultiplexed."""
+def novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    """Return a Novaseq6000 flow cell with index settings pre 1.5 kits set as Bcl2Fastq."""
     return FlowCellDirectoryData(
-        flow_cell_path=bcl2fastq_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
+        Path(flow_cells_dir, "190927_A00689_0069_BHLYWYDSXX"), bcl_converter=BclConverter.BCL2FASTQ
     )
 
 
-@pytest.fixture(scope="session")
-def novaseq_flow_cell_demultiplexed_with_bcl2fastq(
-    bcl_convert_flow_cell_dir: Path,
-) -> FlowCellDirectoryData:
-    """Return a Novaseq6000 flow cell object demultiplexed using Bcl2fastq."""
-    return FlowCellDirectoryData(
-        flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
-    )
+@pytest.fixture()
+def novaseq_6000_post_1_5_kits_flow_cell(flow_cells_dir: Path) -> FlowCellDirectoryData:
+    """Return a Novaseq6000 flow cell with index settings post 1.5 kits."""
+    return FlowCellDirectoryData(Path(flow_cells_dir, "230912_A00187_1009_AHK33MDRX3"))
 
 
-@pytest.fixture(scope="module")
-def bcl_convert_flow_cell(bcl_convert_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """Create a bcl_convert flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
-        flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
-    )
-
-
-@pytest.fixture(scope="function")
-def novaseq_6000_flow_cell(bcl_convert_flow_cell: FlowCellDirectoryData) -> FlowCellDirectoryData:
-    """Return a NovaSeq6000 flow cell object."""
-    return bcl_convert_flow_cell
-
-
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """Create a NovaSeqX flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
-        flow_cell_path=novaseq_x_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
-    )
+    """Return a NovaSeqX flow cell."""
+    return FlowCellDirectoryData(novaseq_x_flow_cell_dir)
+
+
+# Demultiplexed runs
 
 
 @pytest.fixture()
@@ -113,7 +84,7 @@ def novaseqx_flow_cell_with_sample_sheet_no_fastq(
     return flow_cell
 
 
-@pytest.fixture(name="tmp_bcl2fastq_flow_cell")
+@pytest.fixture
 def tmp_bcl2fastq_flow_cell(
     tmp_demultiplexed_runs_bcl2fastq_directory: Path,
 ) -> FlowCellDirectoryData:
@@ -125,28 +96,17 @@ def tmp_bcl2fastq_flow_cell(
 
 
 @pytest.fixture
-def novaseq6000_flow_cell(
-    tmp_flow_cells_directory_malformed_sample_sheet: Path,
-) -> FlowCellDirectoryData:
-    """Return a NovaSeq6000 flow cell."""
-    return FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cells_directory_malformed_sample_sheet,
-        bcl_converter=BclConverter.BCLCONVERT,
-    )
-
-
-@pytest.fixture(name="tmp_bcl_convert_flow_cell")
 def tmp_bcl_convert_flow_cell(
     tmp_flow_cell_directory_bclconvert: Path,
 ) -> FlowCellDirectoryData:
     """Create a flow cell object with flow cell that is demultiplexed."""
     return FlowCellDirectoryData(
         flow_cell_path=tmp_flow_cell_directory_bclconvert,
-        bcl_converter=BclConverter.DRAGEN,
+        bcl_converter=BclConverter.BCLCONVERT,
     )
 
 
-@pytest.fixture(name="tmp_unfinished_bcl2fastq_flow_cell")
+@pytest.fixture
 def unfinished_bcl2fastq_flow_cell(
     demultiplexed_runs_unfinished_bcl2fastq_flow_cell_directory: Path,
 ) -> FlowCellDirectoryData:
@@ -160,13 +120,15 @@ def unfinished_bcl2fastq_flow_cell(
 # Flow cell attributes
 
 
-@pytest.fixture(scope="session")
-def bcl2fastq_flow_cell_id(bcl2fastq_flow_cell: FlowCellDirectoryData) -> str:
+@pytest.fixture
+def bcl2fastq_flow_cell_id(
+    novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq: FlowCellDirectoryData,
+) -> str:
     """Return flow cell id from bcl2fastq flow cell object."""
-    return bcl2fastq_flow_cell.id
+    return novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq.id
 
 
-@pytest.fixture(scope="module")
-def bcl_convert_flow_cell_id(bcl_convert_flow_cell: FlowCellDirectoryData) -> str:
+@pytest.fixture
+def bcl_convert_flow_cell_id(novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData) -> str:
     """Return flow cell id from bcl_convert flow cell object."""
-    return bcl_convert_flow_cell.id
+    return novaseq_6000_post_1_5_kits_flow_cell.id

@@ -21,7 +21,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(
     novaseq_x_flow_cell: FlowCellDirectoryData,
-    lims_novaseq_bcl_convert_samples: list[FlowCellSampleBCLConvert],
+    novaseq_x_lims_samples: list[FlowCellSampleBCLConvert],
 ):
     """Test that creating a BCL Convert sample sheet fails if the bcl converter is Bcl2fastq."""
     # GIVEN a NovaSeqX flow cell and samples and the bcl converter is Bcl2fastq
@@ -31,7 +31,7 @@ def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(
     with pytest.raises(SampleSheetError) as exc_info:
         SampleSheetCreatorBCLConvert(
             flow_cell=novaseq_x_flow_cell,
-            lims_samples=lims_novaseq_bcl_convert_samples,
+            lims_samples=novaseq_x_lims_samples,
         )
         # THEN an error is raised
         assert (
@@ -98,13 +98,13 @@ def test_remove_unwanted_samples_dual_index(
 
 def test_remove_unwanted_samples_no_dual_index(
     novaseq6000_flow_cell_sample_no_dual_index: FlowCellSampleBcl2Fastq,
-    novaseq_6000_flow_cell: FlowCellDirectoryData,
+    novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData,
     caplog,
 ):
     """Test that samples with no dual index are removed."""
     # GIVEN a sample sheet creator with a sample without dual indexes
     sample_sheet_creator: SampleSheetCreatorBcl2Fastq = SampleSheetCreatorBcl2Fastq(
-        flow_cell=novaseq_6000_flow_cell,
+        flow_cell=novaseq_6000_post_1_5_kits_flow_cell,
         lims_samples=[novaseq6000_flow_cell_sample_no_dual_index],
     )
 
