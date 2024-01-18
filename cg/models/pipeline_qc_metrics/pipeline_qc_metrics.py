@@ -66,7 +66,7 @@ class SequencingMetrics(BaseModel):
 
 
 class MIPDNAMetrics(BaseModel):
-    pass
+    sex: str
 
 
 class MIPRNAMetrics(BaseModel):
