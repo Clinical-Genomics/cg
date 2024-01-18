@@ -1,10 +1,8 @@
 """Symbol constants."""
 
-DOT = "."
 EMPTY_STRING = ""
 FWD_SLASH = "/"
 NEW_LINE = "\n"
-PERIOD = "."
 SINGLE_QUOTE = "'"
 SPACE = " "
 UNDERSCORE = "_"
