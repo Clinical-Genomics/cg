@@ -5,12 +5,18 @@ from pathlib import Path
 from urllib.parse import urljoin
 
 from housekeeper.store.models import File
+from pydantic import BaseModel
 from requests import Response
 
 from cg.constants.constants import APIMethods
-from cg.exc import ArchiveJobFailedError, DdnDataflowAuthenticationError
+from cg.exc import (
+    ArchiveJobFailedError,
+    DdnDataflowAuthenticationError,
+    DdnDataflowDeleteFileError,
+)
 from cg.io.controller import APIRequest
 from cg.meta.archive.ddn.constants import (
+    DELETE_FILE_SUCCESSFUL_MESSAGE,
     DESTINATION_ATTRIBUTE,
     FAILED_JOB_STATUSES,
     SOURCE_ATTRIBUTE,
@@ -18,16 +24,18 @@ from cg.meta.archive.ddn.constants import (
     JobStatus,
 )
 from cg.meta.archive.ddn.models import (
+    ArchivalResponse,
     AuthPayload,
     AuthToken,
     DeleteFilePayload,
-    GetJobStatusPayload,
+    DeleteFileResponse,
     GetJobStatusResponse,
     MiriaObject,
     RefreshPayload,
+    RetrievalResponse,
     TransferPayload,
 )
-from cg.meta.archive.ddn.utils import get_metadata
+from cg.meta.archive.ddn.utils import get_metadata, get_request_log
 from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
 
@@ -111,10 +119,12 @@ class DDNDataFlowClient(ArchiveHandler):
         archival_request: TransferPayload = self.create_transfer_request(
             miria_file_data=miria_file_data, is_archiving_request=True, metadata=metadata
         )
-        return archival_request.post_request(
+        archival_response: ArchivalResponse = self._archive_file(
             headers=dict(self.headers, **self.auth_header),
-            url=urljoin(base=self.url, url=DataflowEndpoints.ARCHIVE_FILES),
-        ).job_id
+            endpoint=DataflowEndpoints.ARCHIVE_FILES,
+            body=archival_request,
+        )
+        return archival_response.job_id
 
     def retrieve_files(self, files_and_samples: list[FileAndSample]) -> int:
         """Retrieves the provided files and stores them in the corresponding sample bundle in
@@ -125,10 +135,12 @@ class DDNDataFlowClient(ArchiveHandler):
         retrieval_request: TransferPayload = self.create_transfer_request(
             miria_file_data=miria_file_data, is_archiving_request=False
         )
-        return retrieval_request.post_request(
+        retrieval_response: RetrievalResponse = self._retrieve_files(
             headers=dict(self.headers, **self.auth_header),
-            url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
-        ).job_id
+            body=retrieval_request,
+            endpoint=DataflowEndpoints.RETRIEVE_FILES,
+        )
+        return retrieval_response.job_id
 
     def create_transfer_request(
         self,
@@ -176,11 +188,10 @@ class DDNDataFlowClient(ArchiveHandler):
         """Returns True if the specified job is completed, and false if it is still ongoing.
         Raises:
             ArchiveJobFailedError if the specified job has a failed status."""
-        get_job_status_payload = GetJobStatusPayload(id=job_id)
-        get_job_status_response: GetJobStatusResponse = get_job_status_payload.get_job_status(
-            url=urljoin(self.url, DataflowEndpoints.GET_JOB_STATUS + str(job_id)),
-            headers=dict(self.headers, **self.auth_header),
+        get_job_status_response: GetJobStatusResponse = self._get_job_status(
+            headers=dict(self.headers, **self.auth_header), job_id=job_id
         )
+
         job_status: JobStatus = get_job_status_response.status
         LOG.info(f"Miria returned status {job_status} for job {job_id}")
         if job_status == JobStatus.COMPLETED:
@@ -200,7 +211,54 @@ class DDNDataFlowClient(ArchiveHandler):
         delete_file_payload = DeleteFilePayload(
             global_path=f"{self.archive_repository}{sample_id}/{file_name}"
         )
-        delete_file_payload.delete_file(
-            url=urljoin(self.url, DataflowEndpoints.DELETE_FILE),
+        response: Response = self._post_request(
+            endpoint=DataflowEndpoints.DELETE_FILE,
             headers=dict(self.headers, **self.auth_header),
+            body=delete_file_payload,
         )
+        delete_file_response = DeleteFileResponse.model_validate(response.json())
+        if delete_file_response.message != DELETE_FILE_SUCCESSFUL_MESSAGE:
+            raise DdnDataflowDeleteFileError(
+                f"Deletion failed with message {delete_file_response.message}"
+            )
+
+    def _archive_file(
+        self, body: BaseModel, endpoint: DataflowEndpoints, headers: dict
+    ) -> ArchivalResponse:
+        response: Response = self._post_request(body=body, endpoint=endpoint, headers=headers)
+        return ArchivalResponse.model_validate(response.json())
+
+    def _retrieve_files(
+        self, body: BaseModel, endpoint: DataflowEndpoints, headers: dict
+    ) -> RetrievalResponse:
+        response: Response = self._post_request(body=body, endpoint=endpoint, headers=headers)
+        return RetrievalResponse.model_validate(response.json())
+
+    def _post_request(
+        self, body: BaseModel, endpoint: DataflowEndpoints, headers: dict
+    ) -> Response:
+        LOG.info(get_request_log(body=body.model_dump()))
+
+        response: Response = APIRequest.api_request_from_content(
+            api_method=APIMethods.POST,
+            url=urljoin(self.url, endpoint),
+            headers=headers,
+            json=body.model_dump(by_alias=True),
+            verify=False,
+        )
+        response.raise_for_status()
+        return response
+
+    def _get_job_status(self, headers: dict, job_id: int) -> GetJobStatusResponse:
+        LOG.info(f"Sending GET request for job {job_id}")
+
+        url: str = urljoin(self.url, DataflowEndpoints.GET_JOB_STATUS + str(job_id))
+        response: Response = APIRequest.api_request_from_content(
+            api_method=APIMethods.POST,
+            url=url,
+            headers=headers,
+            json={},
+            verify=False,
+        )
+        response.raise_for_status()
+        return GetJobStatusResponse.model_validate(response.json())

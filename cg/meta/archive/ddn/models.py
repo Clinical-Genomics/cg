@@ -3,19 +3,12 @@ from pathlib import Path
 
 from housekeeper.store.models import File
 from pydantic import BaseModel, Field
-from requests import Response
 
-from cg.constants.constants import APIMethods
-from cg.io.controller import APIRequest
 from cg.meta.archive.ddn.constants import OSTYPE, ROOT_TO_TRIM, JobStatus
 from cg.meta.archive.models import FileTransferData
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
-
-
-def get_request_log(headers: dict, body: dict):
-    return "Sending request with headers: \n" + f"{headers} \n" + "and body: \n" + f"{body}"
 
 
 class MiriaObject(FileTransferData):
@@ -53,7 +46,7 @@ class MiriaObject(FileTransferData):
 class TransferPayload(BaseModel):
     """Model for representing a Dataflow transfer task."""
 
-    files_to_transfer: list[MiriaObject]
+    files_to_transfer: list[MiriaObject] = Field(..., serialization_alias="pathInfo")
     osType: str = OSTYPE
     createFolder: bool = True
     settings: list[dict] = []
@@ -72,40 +65,16 @@ class TransferPayload(BaseModel):
                 source_prefix=source_prefix, destination_prefix=destination_prefix
             )
 
-    def model_dump(self, **kwargs) -> dict:
-        """Creates a correctly structured dict to be used as the request payload."""
-        payload: dict = super().model_dump(exclude={"files_to_transfer"})
-        payload["pathInfo"] = [miria_file.model_dump() for miria_file in self.files_to_transfer]
-        return payload
 
-    def post_request(self, url: str, headers: dict) -> "TransferResponse":
-        """Sends a request to the given url with, the given headers, and its own content as payload.
+class ArchivalResponse(BaseModel):
+    """Model representing the response fields of an archive request to the Dataflow
+    API."""
 
-        Arguments:
-            url: URL to which the POST goes to.
-            headers: Headers which are set in the request
-        Raises:
-            HTTPError if the response status is not successful.
-            ValidationError if the response does not conform to the expected response structure.
-        Returns:
-            The job ID of the launched transfer task.
-        """
-
-        LOG.info(get_request_log(headers=headers, body=self.model_dump()))
-
-        response: Response = APIRequest.api_request_from_content(
-            api_method=APIMethods.POST,
-            url=url,
-            headers=headers,
-            json=self.model_dump(),
-            verify=False,
-        )
-        response.raise_for_status()
-        return TransferResponse.model_validate(response.json())
+    job_id: int = Field(alias="jobId")
 
 
-class TransferResponse(BaseModel):
-    """Model representing th response fields of an archive or retrieve reqeust to the Dataflow
+class RetrievalResponse(BaseModel):
+    """Model representing the response fields of a retrieval reqeust to the Dataflow
     API."""
 
     job_id: int = Field(alias="jobId")
@@ -141,52 +110,9 @@ class GetJobStatusResponse(BaseModel):
     status: JobStatus
 
 
-class GetJobStatusPayload(BaseModel):
-    """Model representing the payload for a get_job_status request."""
-
-    id: int
-
-    def get_job_status(self, url: str, headers: dict) -> GetJobStatusResponse:
-        """Sends a get request to the given URL with the given headers.
-        Returns the parsed status response of the task specified in the URL.
-        Raises:
-             HTTPError if the response code is not ok.
-        """
-
-        LOG.info(get_request_log(headers=headers, body=self.model_dump()))
-
-        response: Response = APIRequest.api_request_from_content(
-            api_method=APIMethods.GET,
-            url=url,
-            headers=headers,
-            json=self.model_dump(),
-            verify=False,
-        )
-        response.raise_for_status()
-        return GetJobStatusResponse.model_validate(response.json())
-
-
 class DeleteFileResponse(BaseModel):
     message: str
 
 
 class DeleteFilePayload(BaseModel):
     global_path: str
-
-    def delete_file(self, url: str, headers: dict) -> DeleteFileResponse:
-        """Posts to the given URL with the given headers to delete the file or directory at the specified global path.
-        Returns the parsed response.
-        Raises:
-             HTTPError if the response code is not ok.
-        """
-        LOG.info(get_request_log(headers=headers, body=self.model_dump()))
-
-        response: Response = APIRequest.api_request_from_content(
-            api_method=APIMethods.POST,
-            url=url,
-            headers=headers,
-            json=self.model_dump(),
-            verify=False,
-        )
-        response.raise_for_status()
-        return DeleteFileResponse.model_validate(response.json())
