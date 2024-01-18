@@ -14,6 +14,7 @@ LOG = logging.getLogger(__name__)
 def get_request_log(body: dict):
     return "Sending request with body: \n" + f"{body}"
 
+
 class MiriaObject(FileTransferData):
     """Model for representing a singular object transfer."""
 
@@ -75,6 +76,7 @@ class ArchivalResponse(BaseModel):
 
     job_id: int = Field(alias="jobId")
 
+
 class RetrievalResponse(BaseModel):
     """Model representing the response fields of a retrieval reqeust to the Dataflow
     API."""
@@ -110,6 +112,7 @@ class GetJobStatusResponse(BaseModel):
 
     job_id: int = Field(alias="id")
     status: JobStatus
+
 
 class DeleteFileResponse(BaseModel):
     message: str

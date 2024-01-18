@@ -126,7 +126,6 @@ class DDNDataFlowClient(ArchiveHandler):
         )
         return archival_response.job_id
 
-
     def retrieve_files(self, files_and_samples: list[FileAndSample]) -> int:
         """Retrieves the provided files and stores them in the corresponding sample bundle in
         Housekeeper."""
