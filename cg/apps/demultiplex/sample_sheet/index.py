@@ -4,7 +4,6 @@ import logging
 from pydantic import BaseModel
 
 from cg.constants.constants import FileFormat
-from cg.constants.symbols import DASH
 from cg.io.controller import ReadFile
 from cg.resources import VALID_INDEXES_PATH
 from cg.utils.utils import get_hamming_distance
@@ -20,7 +19,7 @@ SHORT_SAMPLE_INDEX_LENGTH: int = 8
 
 def is_dual_index(index: str) -> bool:
     """Determines if an index in the raw sample sheet is dual index or not."""
-    return DASH in index
+    return "-" in index
 
 
 class Index(BaseModel):
