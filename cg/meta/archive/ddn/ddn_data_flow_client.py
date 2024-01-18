@@ -121,7 +121,6 @@ class DDNDataFlowClient(ArchiveHandler):
         )
         archival_response: ArchivalResponse = self._archive_file(
             headers=dict(self.headers, **self.auth_header),
-            endpoint=DataflowEndpoints.ARCHIVE_FILES,
             body=archival_request,
         )
         return archival_response.job_id
@@ -138,7 +137,6 @@ class DDNDataFlowClient(ArchiveHandler):
         retrieval_response: RetrievalResponse = self._retrieve_files(
             headers=dict(self.headers, **self.auth_header),
             body=retrieval_request,
-            endpoint=DataflowEndpoints.RETRIEVE_FILES,
         )
         return retrieval_response.job_id
 
@@ -222,16 +220,16 @@ class DDNDataFlowClient(ArchiveHandler):
                 f"Deletion failed with message {delete_file_response.message}"
             )
 
-    def _archive_file(
-        self, body: BaseModel, endpoint: DataflowEndpoints, headers: dict
-    ) -> ArchivalResponse:
-        response: Response = self._post_request(body=body, endpoint=endpoint, headers=headers)
+    def _archive_file(self, body: BaseModel, headers: dict) -> ArchivalResponse:
+        response: Response = self._post_request(
+            body=body, endpoint=DataflowEndpoints.ARCHIVE_FILES, headers=headers
+        )
         return ArchivalResponse.model_validate(response.json())
 
-    def _retrieve_files(
-        self, body: BaseModel, endpoint: DataflowEndpoints, headers: dict
-    ) -> RetrievalResponse:
-        response: Response = self._post_request(body=body, endpoint=endpoint, headers=headers)
+    def _retrieve_files(self, body: BaseModel, headers: dict) -> RetrievalResponse:
+        response: Response = self._post_request(
+            body=body, endpoint=DataflowEndpoints.RETRIEVE_FILES, headers=headers
+        )
         return RetrievalResponse.model_validate(response.json())
 
     def _post_request(
