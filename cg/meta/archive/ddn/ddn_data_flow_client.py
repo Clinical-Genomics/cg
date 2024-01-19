@@ -221,12 +221,14 @@ class DDNDataFlowClient(ArchiveHandler):
             )
 
     def _archive_file(self, body: BaseModel, headers: dict) -> ArchivalResponse:
+        """Archives a file via DDN and validates the response."""
         response: Response = self._post_request(
             body=body, endpoint=DataflowEndpoints.ARCHIVE_FILES, headers=headers
         )
         return ArchivalResponse.model_validate(response.json())
 
     def _retrieve_files(self, body: BaseModel, headers: dict) -> RetrievalResponse:
+        """Retrieves files specified in the body and validates the response."""
         response: Response = self._post_request(
             body=body, endpoint=DataflowEndpoints.RETRIEVE_FILES, headers=headers
         )
@@ -235,7 +237,8 @@ class DDNDataFlowClient(ArchiveHandler):
     def _post_request(
         self, body: BaseModel, endpoint: DataflowEndpoints, headers: dict
     ) -> Response:
-        LOG.info(get_request_log(body=body.model_dump()))
+        """Posts a request with the provided body and headers to the given endpoint."""
+        LOG.info(get_request_log(body=body.model_dump(by_alias=True)))
 
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
@@ -248,6 +251,7 @@ class DDNDataFlowClient(ArchiveHandler):
         return response
 
     def _get_job_status(self, headers: dict, job_id: int) -> GetJobStatusResponse:
+        """Gets the job status for the provided job_id."""
         LOG.info(f"Sending GET request for job {job_id}")
 
         url: str = urljoin(self.url, DataflowEndpoints.GET_JOB_STATUS + str(job_id))
