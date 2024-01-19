@@ -3,7 +3,7 @@ import logging
 import re
 from datetime import datetime, timedelta
 
-from cg.constants.symbols import DASH, DOT, FWD_SLASH, SPACE
+from cg.constants.symbols import SPACE
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 DATETIME_FORMAT_DATE = "%Y-%m-%d %H:%M:%S"
@@ -43,7 +43,7 @@ def get_date(date: str | None = None, date_format: str | None = None) -> datetim
         except ValueError:
             LOG.info("Date is not in standard format")
 
-    for separator in [DASH, SPACE, DOT, FWD_SLASH]:
+    for separator in ["-", SPACE, ".", "/"]:
         date_parts = date.split(separator)
         if len(date_parts) == 3:
             return datetime(*(int(number) for number in date_parts))

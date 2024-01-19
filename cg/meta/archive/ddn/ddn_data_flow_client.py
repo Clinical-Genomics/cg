@@ -111,10 +111,12 @@ class DDNDataFlowClient(ArchiveHandler):
         archival_request: TransferPayload = self.create_transfer_request(
             miria_file_data=miria_file_data, is_archiving_request=True, metadata=metadata
         )
-        return archival_request.post_request(
+        job_id: int = archival_request.post_request(
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.ARCHIVE_FILES),
         ).job_id
+        LOG.info(f"File submitted to Miria with archival task id {job_id}.")
+        return job_id
 
     def retrieve_files(self, files_and_samples: list[FileAndSample]) -> int:
         """Retrieves the provided files and stores them in the corresponding sample bundle in
