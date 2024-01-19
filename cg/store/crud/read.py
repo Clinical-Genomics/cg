@@ -1,4 +1,4 @@
-"""Handler to find business data objects."""
+"""Handler to read data objects."""
 import datetime as dt
 import logging
 from typing import Callable, Iterator
@@ -54,8 +54,8 @@ from cg.store.models import (
 LOG = logging.getLogger(__name__)
 
 
-class FindBusinessDataHandler(BaseHandler):
-    """Contains methods to find business data model instances."""
+class ReadHandler(BaseHandler):
+    """Class for reading items in the database."""
 
     def __init__(self, session: Session):
         super().__init__(session=session)
@@ -731,7 +731,7 @@ class FindBusinessDataHandler(BaseHandler):
         case: Case = self.get_case_by_internal_id(internal_id=case_id)
         return all(sample.application_version.application.is_external for sample in case.samples)
 
-    def get_case_by_internal_id(self, internal_id: str) -> Case:
+    def get_case_by_internal_id(self, internal_id: str) -> Case | None:
         """Get case by internal id."""
         return apply_case_filter(
             filter_functions=[CaseFilter.FILTER_BY_INTERNAL_ID],

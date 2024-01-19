@@ -1,8 +1,8 @@
-import http
 import json
 import logging
 import tempfile
 from functools import wraps
+from http import HTTPStatus
 from pathlib import Path
 from typing import Any
 
@@ -21,12 +21,14 @@ from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.constants import FileFormat
-from cg.exc import OrderError, OrderFormError, TicketCreationError
+from cg.exc import CaseNotFoundError, OrderError, OrderFormError, TicketCreationError
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
+from cg.server.dto.delivery_message_response import DeliveryMessageResponse
 from cg.server.ext import db, lims, osticket
+from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.store.models import (
     Analysis,
     Application,
@@ -67,13 +69,11 @@ def before_request():
     """Authorize API routes with JSON Web Tokens."""
     if not request.is_secure:
         return abort(
-            make_response(
-                jsonify(message="Only https requests accepted"), http.HTTPStatus.FORBIDDEN
-            )
+            make_response(jsonify(message="Only https requests accepted"), HTTPStatus.FORBIDDEN)
         )
 
     if request.method == "OPTIONS":
-        return make_response(jsonify(ok=True), http.HTTPStatus.NO_CONTENT)
+        return make_response(jsonify(ok=True), HTTPStatus.NO_CONTENT)
 
     endpoint_func = current_app.view_functions[request.endpoint]
     if getattr(endpoint_func, "is_public", None):
@@ -82,9 +82,7 @@ def before_request():
     auth_header = request.headers.get("Authorization")
     if not auth_header:
         return abort(
-            make_response(
-                jsonify(message="no JWT token found on request"), http.HTTPStatus.UNAUTHORIZED
-            )
+            make_response(jsonify(message="no JWT token found on request"), HTTPStatus.UNAUTHORIZED)
         )
 
     jwt_token = auth_header.split("Bearer ")[-1]
@@ -93,16 +91,14 @@ def before_request():
     except ValueError as e:
         LOG.error(f"Error occurred while decoding JWT token: {e}")
         return abort(
-            make_response(
-                jsonify(message="outdated login certificate"), http.HTTPStatus.UNAUTHORIZED
-            )
+            make_response(jsonify(message="outdated login certificate"), HTTPStatus.UNAUTHORIZED)
         )
 
     user: User = db.get_user_by_email(user_data["email"])
     if user is None or not user.order_portal_login:
         message = f"{user_data['email']} doesn't have access"
         LOG.error(message)
-        return abort(make_response(jsonify(message=message), http.HTTPStatus.FORBIDDEN))
+        return abort(make_response(jsonify(message=message), HTTPStatus.FORBIDDEN))
 
     g.current_user = user
 
@@ -136,7 +132,7 @@ def submit_order(order_type):
         ValueError,
     ) as error:
         error_message = error.message if hasattr(error, "message") else str(error)
-        http_error_response = http.HTTPStatus.BAD_REQUEST
+        http_error_response = HTTPStatus.BAD_REQUEST
         LOG.error(error_message)
     except (  # system misbehaviour
         AttributeError,
@@ -152,7 +148,7 @@ def submit_order(order_type):
     ) as error:
         LOG.exception(error)
         error_message = error.message if hasattr(error, "message") else str(error)
-        http_error_response = http.HTTPStatus.INTERNAL_SERVER_ERROR
+        http_error_response = HTTPStatus.INTERNAL_SERVER_ERROR
     else:
         return jsonify(
             project=result["project"], records=[record.to_dict() for record in result["records"]]
@@ -197,10 +193,20 @@ def parse_case(case_id):
     """Return a case with links."""
     case: Case = db.get_case_by_internal_id(internal_id=case_id)
     if case is None:
-        return abort(http.HTTPStatus.NOT_FOUND)
+        return abort(HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
-        return abort(http.HTTPStatus.FORBIDDEN)
+        return abort(HTTPStatus.FORBIDDEN)
     return jsonify(**case.to_dict(links=True, analyses=True))
+
+
+@BLUEPRINT.route("/cases/<case_id>/delivery_message", methods=["GET"])
+def get_case_delivery_message(case_id: str):
+    service = DeliveryMessageService(db)
+    try:
+        response: DeliveryMessageResponse = service.get_delivery_message(case_id)
+        return jsonify(response.model_dump()), HTTPStatus.OK
+    except CaseNotFoundError as error:
+        return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
 
 
 @BLUEPRINT.route("/families_in_collaboration")
@@ -231,7 +237,7 @@ def parse_family_in_collaboration(family_id):
         customer_internal_id=request.args.get("customer")
     )
     if case.customer not in customer.collaborators:
-        return abort(http.HTTPStatus.FORBIDDEN)
+        return abort(HTTPStatus.FORBIDDEN)
     return jsonify(**case.to_dict(links=True, analyses=True))
 
 
@@ -239,7 +245,7 @@ def parse_family_in_collaboration(family_id):
 def parse_samples():
     """Return samples."""
     if request.args.get("status") and not g.current_user.is_admin:
-        return abort(http.HTTPStatus.FORBIDDEN)
+        return abort(HTTPStatus.FORBIDDEN)
     if request.args.get("status") == "incoming":
         samples: list[Sample] = db.get_samples_to_receive()
     elif request.args.get("status") == "labprep":
@@ -277,9 +283,9 @@ def parse_sample(sample_id):
     """Return a single sample."""
     sample: Sample = db.get_sample_by_internal_id(sample_id)
     if sample is None:
-        return abort(http.HTTPStatus.NOT_FOUND)
+        return abort(HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (sample.customer not in g.current_user.customers):
-        return abort(http.HTTPStatus.FORBIDDEN)
+        return abort(HTTPStatus.FORBIDDEN)
     return jsonify(**sample.to_dict(links=True, flowcells=True))
 
 
@@ -291,7 +297,7 @@ def parse_sample_in_collaboration(sample_id):
         customer_internal_id=request.args.get("customer")
     )
     if sample.customer not in customer.collaborators:
-        return abort(http.HTTPStatus.FORBIDDEN)
+        return abort(HTTPStatus.FORBIDDEN)
     return jsonify(**sample.to_dict(links=True, flowcells=True))
 
 
@@ -313,9 +319,9 @@ def parse_pool(pool_id):
     """Return a single pool."""
     pool: Pool = db.get_pool_by_entry_id(entry_id=pool_id)
     if pool is None:
-        return abort(http.HTTPStatus.NOT_FOUND)
+        return abort(HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (pool.customer not in g.current_user.customers):
-        return abort(http.HTTPStatus.FORBIDDEN)
+        return abort(HTTPStatus.FORBIDDEN)
     return jsonify(**pool.to_dict())
 
 
@@ -335,7 +341,7 @@ def parse_flow_cell(flowcell_id):
     """Return a single flowcell."""
     flow_cell: Flowcell = db.get_flow_cell_by_name(flow_cell_name=flowcell_id)
     if flow_cell is None:
-        return abort(http.HTTPStatus.NOT_FOUND)
+        return abort(HTTPStatus.NOT_FOUND)
     return jsonify(**flow_cell.to_dict(samples=True))
 
 
@@ -344,7 +350,7 @@ def get_sequencing_metrics(flow_cell_name: str):
     """Return sample lane sequencing metrics for a flow cell."""
 
     if not flow_cell_name:
-        return jsonify({"error": "Invalid or missing flow cell id"}), http.HTTPStatus.BAD_REQUEST
+        return jsonify({"error": "Invalid or missing flow cell id"}), HTTPStatus.BAD_REQUEST
 
     sequencing_metrics: list[
         SampleLaneSequencingMetrics
@@ -353,7 +359,7 @@ def get_sequencing_metrics(flow_cell_name: str):
     if not sequencing_metrics:
         return (
             jsonify({"error": f"Sequencing metrics not found for flow cell {flow_cell_name}."}),
-            http.HTTPStatus.NOT_FOUND,
+            HTTPStatus.NOT_FOUND,
         )
 
     return jsonify([metric.to_dict() for metric in sequencing_metrics])
@@ -425,7 +431,7 @@ def parse_current_user_information():
         LOG.error(
             "%s is not admin and is not connected to any customers, aborting", g.current_user.email
         )
-        return abort(http.HTTPStatus.FORBIDDEN)
+        return abort(HTTPStatus.FORBIDDEN)
 
     return jsonify(user=g.current_user.to_dict())
 
@@ -445,9 +451,7 @@ def parse_application(tag: str):
     """Return an application tag."""
     application: Application = db.get_application_by_tag(tag=tag)
     if not application:
-        return abort(
-            make_response(jsonify(message="Application not found"), http.HTTPStatus.NOT_FOUND)
-        )
+        return abort(make_response(jsonify(message="Application not found"), HTTPStatus.NOT_FOUND))
     return jsonify(**application.to_dict())
 
 
@@ -459,7 +463,7 @@ def get_application_pipeline_limitations(tag: str):
         tag
     )
     if not application_limitations:
-        return jsonify(message="Application limitations not found"), http.HTTPStatus.NOT_FOUND
+        return jsonify(message="Application limitations not found"), HTTPStatus.NOT_FOUND
     return jsonify([limitation.to_dict() for limitation in application_limitations])
 
 
@@ -491,7 +495,7 @@ def parse_orderform():
     ) as error:
         error_message = error.message if hasattr(error, "message") else str(error)
         LOG.error(error_message)
-        http_error_response = http.HTTPStatus.BAD_REQUEST
+        http_error_response = HTTPStatus.BAD_REQUEST
     except (  # system misbehaviour
         NewConnectionError,
         MaxRetryError,
@@ -500,7 +504,7 @@ def parse_orderform():
     ) as error:
         LOG.exception(error)
         error_message = error.message if hasattr(error, "message") else str(error)
-        http_error_response = http.HTTPStatus.INTERNAL_SERVER_ERROR
+        http_error_response = HTTPStatus.INTERNAL_SERVER_ERROR
     else:
         return jsonify(**parsed_order.model_dump())
 

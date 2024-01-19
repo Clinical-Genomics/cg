@@ -46,13 +46,13 @@ def bcl_convert_samples_similar_index2() -> list[FlowCellSampleBCLConvert]:
 
 @pytest.fixture
 def bcl2fastq_sample_sheet_creator(
-    novaseq_flow_cell_demultiplexed_with_bcl2fastq: FlowCellDirectoryData,
-    lims_novaseq_6000_bcl2fastq_samples: list[FlowCellSampleBcl2Fastq],
+    novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq: FlowCellDirectoryData,
+    novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples: list[FlowCellSampleBcl2Fastq],
 ) -> SampleSheetCreatorBcl2Fastq:
     """Returns a sample sheet creator for version 1 sample sheets with bcl2fastq format."""
     return SampleSheetCreatorBcl2Fastq(
-        flow_cell=novaseq_flow_cell_demultiplexed_with_bcl2fastq,
-        lims_samples=lims_novaseq_6000_bcl2fastq_samples,
+        flow_cell=novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq,
+        lims_samples=novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples,
     )
 
 

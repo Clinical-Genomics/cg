@@ -90,7 +90,7 @@ def novaseq_6000_run_parameters_post_1_5_kits(novaseq_6000_run_parameters_post_1
     )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def novaseq_x_run_parameters(
     novaseq_x_run_parameters_path: Path,
 ) -> RunParametersNovaSeqX:

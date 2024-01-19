@@ -14,8 +14,8 @@ from cg.store.models import Sample
 LOG = logging.getLogger(__name__)
 
 
-def get_request_log(headers: dict, body: dict):
-    return "Sending request with headers: \n" + f"{headers} \n" + "and body: \n" + f"{body}"
+def get_request_log(body: dict):
+    return "Sending request with body: \n" + f"{body}"
 
 
 class MiriaObject(FileTransferData):
@@ -91,7 +91,7 @@ class TransferPayload(BaseModel):
             The job ID of the launched transfer task.
         """
 
-        LOG.info(get_request_log(headers=headers, body=self.model_dump()))
+        LOG.info(get_request_log(self.model_dump()))
 
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
@@ -153,7 +153,7 @@ class GetJobStatusPayload(BaseModel):
              HTTPError if the response code is not ok.
         """
 
-        LOG.info(get_request_log(headers=headers, body=self.model_dump()))
+        LOG.info(get_request_log(self.model_dump()))
 
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.GET,
@@ -179,7 +179,7 @@ class DeleteFilePayload(BaseModel):
         Raises:
              HTTPError if the response code is not ok.
         """
-        LOG.info(get_request_log(headers=headers, body=self.model_dump()))
+        LOG.info(get_request_log(self.model_dump()))
 
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
