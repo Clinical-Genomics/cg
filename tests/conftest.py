@@ -1594,11 +1594,9 @@ def microsalt_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def pdc_archiving_dir(
-    tmp_flow_cell_name_no_run_parameters: str, tmp_flow_cells_directory: Path, tmp_path
-) -> Path:
+def pdc_archiving_dir(tmp_flow_cell_without_run_parameters_path: Path) -> Path:
     """Return a temporary directory for PDC archiving testing."""
-    return Path(tmp_flow_cells_directory, tmp_flow_cell_name_no_run_parameters)
+    return tmp_flow_cell_without_run_parameters_path
 
 
 @pytest.fixture

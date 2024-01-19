@@ -41,9 +41,8 @@ class SpringArchiveAPI:
         self.data_flow_config: DataFlowConfig = data_flow_config
 
     def archive_file_to_location(
-        self, file_and_sample: FileAndSample, archive_location: ArchiveLocations
+        self, file_and_sample: FileAndSample, archive_handler: ArchiveHandler
     ) -> int:
-        archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
         return archive_handler.archive_file(file_and_sample=file_and_sample)
 
     def archive_spring_files_and_add_archives_to_housekeeper(
@@ -67,21 +66,17 @@ class SpringArchiveAPI:
         )
         if files_to_archive:
             files_and_samples_for_location = self.add_samples_to_files(files_to_archive)
+            archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](
+                self.data_flow_config
+            )
             for file_and_sample in files_and_samples_for_location:
-                self.archive_file(
-                    file_and_sample=file_and_sample, archive_location=archive_location
-                )
+                self.archive_file(file_and_sample=file_and_sample, archive_handler=archive_handler)
 
         else:
             LOG.info(f"No files to archive for location {archive_location}.")
 
-    def archive_file(
-        self, file_and_sample: FileAndSample, archive_location: ArchiveLocations
-    ) -> None:
-        job_id: int = self.archive_file_to_location(
-            file_and_sample=file_and_sample, archive_location=archive_location
-        )
-        LOG.info(f"File submitted to {archive_location} with archival task id {job_id}.")
+    def archive_file(self, file_and_sample: FileAndSample, archive_handler: ArchiveHandler) -> None:
+        job_id: int = archive_handler.archive_file(file_and_sample)
         self.housekeeper_api.add_archives(
             files=[file_and_sample.file],
             archive_task_id=job_id,
@@ -174,10 +169,14 @@ class SpringArchiveAPI:
             ArchiveLocations, list[int]
         ] = self.sort_archival_ids_on_archive_location(ongoing_archivals)
         for archive_location in ArchiveLocations:
-            self.update_archival_jobs_for_archive_location(
-                archive_location=archive_location,
-                job_ids=archival_ids_per_location.get(archive_location),
-            )
+            if archival_ids := archival_ids_per_location.get(archive_location):
+                archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](
+                    self.data_flow_config
+                )
+                self.update_archival_jobs_for_archive_location(
+                    archive_handler=archive_handler,
+                    job_ids=archival_ids,
+                )
 
     def update_ongoing_retrievals(self) -> None:
         ongoing_retrievals: list[Archive] = self.housekeeper_api.get_ongoing_retrievals()
@@ -185,34 +184,37 @@ class SpringArchiveAPI:
             ArchiveLocations, list[int]
         ] = self.sort_retrieval_ids_on_archive_location(ongoing_retrievals)
         for archive_location in ArchiveLocations:
-            self.update_retrieval_jobs_for_archive_location(
-                archive_location=archive_location,
-                job_ids=retrieval_ids_per_location.get(archive_location),
-            )
+            if retrieval_ids := retrieval_ids_per_location.get(archive_location):
+                archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](
+                    self.data_flow_config
+                )
+                self.update_retrieval_jobs_for_archive_location(
+                    archive_handler=archive_handler,
+                    job_ids=retrieval_ids,
+                )
 
     def update_archival_jobs_for_archive_location(
-        self, archive_location: ArchiveLocations, job_ids: list[int]
+        self, archive_handler: ArchiveHandler, job_ids: list[int]
     ) -> None:
         for job_id in job_ids:
             self.update_ongoing_task(
-                task_id=job_id, archive_location=archive_location, is_archival=True
+                task_id=job_id, archive_handler=archive_handler, is_archival=True
             )
 
     def update_retrieval_jobs_for_archive_location(
-        self, archive_location: ArchiveLocations, job_ids: list[int]
+        self, archive_handler: ArchiveHandler, job_ids: list[int]
     ) -> None:
         for job_id in job_ids:
             self.update_ongoing_task(
-                task_id=job_id, archive_location=archive_location, is_archival=False
+                task_id=job_id, archive_handler=archive_handler, is_archival=False
             )
 
     def update_ongoing_task(
-        self, task_id: int, archive_location: ArchiveLocations, is_archival: bool
+        self, task_id: int, archive_handler: ArchiveHandler, is_archival: bool
     ) -> None:
         """Fetches info on an ongoing job and updates the Archive entry in Housekeeper."""
-        archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
         try:
-            LOG.info(f"Fetching status for job with id {task_id} from {archive_location}")
+            LOG.info(f"Fetching status for job with id {task_id}")
             is_job_done: bool = archive_handler.is_job_done(task_id)
             if is_job_done:
                 LOG.info(f"Job with id {task_id} has finished, updating Archive entries.")

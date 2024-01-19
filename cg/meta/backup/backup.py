@@ -9,7 +9,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS
 from cg.constants.constants import FileExtensions, FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.constants.symbols import NEW_LINE
 from cg.exc import ChecksumFailedError, PdcError, PdcNoFilesMatchingSearchError
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
@@ -239,7 +238,7 @@ class BackupAPI:
             self.pdc.query_pdc(search_pattern)
             if self.pdc.was_file_found(self.pdc.process.stderr):
                 LOG.info(f"Found archived files for PDC query: {search_pattern}")
-                return self.pdc.process.stdout.split(NEW_LINE)
+                return self.pdc.process.stdout.split("\n")
             LOG.debug(f"No archived files found for PDC query: {search_pattern}")
 
         raise PdcNoFilesMatchingSearchError(

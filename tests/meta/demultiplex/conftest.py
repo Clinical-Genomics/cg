@@ -81,12 +81,6 @@ def flow_cell_project_id() -> int:
     return 174578
 
 
-@pytest.fixture(name="hiseq_x_copy_complete_file")
-def hiseq_x_copy_complete_file(bcl2fastq_flow_cell: FlowCellDirectoryData) -> Path:
-    """Return HiSeqX flow cell copy complete file."""
-    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.HISEQ_X_COPY_COMPLETE)
-
-
 @pytest.fixture(name="populated_flow_cell_store")
 def populated_flow_cell_store(
     family_name: str,

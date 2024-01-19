@@ -128,7 +128,9 @@ def test_convert_into_transfer_data(
     assert isinstance(transferdata[0], MiriaObject)
 
 
-def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAPI, sample_id: str):
+def test_call_corresponding_archiving_method(
+    spring_archive_api: SpringArchiveAPI, sample_id: str, ddn_dataflow_client: DDNDataFlowClient
+):
     """Tests so that the correct archiving function is used when providing a Karolinska customer."""
     # GIVEN a file to be transferred
     # GIVEN a spring_archive_api with a mocked archive function
@@ -148,7 +150,7 @@ def test_call_corresponding_archiving_method(spring_archive_api: SpringArchiveAP
     ) as mock_request_submitter:
         # WHEN calling the corresponding archive method
         spring_archive_api.archive_file_to_location(
-            file_and_sample=file_and_sample, archive_location=ArchiveLocations.KAROLINSKA_BUCKET
+            file_and_sample=file_and_sample, archive_handler=ddn_dataflow_client
         )
 
     # THEN the correct archive function should have been called once
@@ -199,7 +201,7 @@ def test_archive_all_non_archived_spring_files(
 
         # THEN all spring files for Karolinska should have an entry in the Archive table in Housekeeper while no other
         # files should have an entry
-        files: list[File] = spring_archive_api.housekeeper_api.files()
+        files: list[File] = spring_archive_api.housekeeper_api.files().all()
         for file in files:
             if SequencingFileTag.SPRING in [tag.name for tag in file.tags]:
                 sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(
@@ -221,6 +223,7 @@ def test_archive_all_non_archived_spring_files(
 )
 def test_get_archival_status(
     spring_archive_api: SpringArchiveAPI,
+    ddn_dataflow_client: DDNDataFlowClient,
     caplog,
     ok_miria_job_status_response,
     archive_request_json,
@@ -250,7 +253,7 @@ def test_get_archival_status(
     ):
         spring_archive_api.update_ongoing_task(
             task_id=archival_job_id,
-            archive_location=ArchiveLocations.KAROLINSKA_BUCKET,
+            archive_handler=ddn_dataflow_client,
             is_archival=True,
         )
 
@@ -271,6 +274,7 @@ def test_get_archival_status(
 )
 def test_get_retrieval_status(
     spring_archive_api: SpringArchiveAPI,
+    ddn_dataflow_client: DDNDataFlowClient,
     caplog,
     ok_miria_job_status_response,
     archive_request_json,
@@ -307,7 +311,7 @@ def test_get_retrieval_status(
     ):
         spring_archive_api.update_ongoing_task(
             task_id=retrieval_job_id,
-            archive_location=ArchiveLocations.KAROLINSKA_BUCKET,
+            archive_handler=ddn_dataflow_client,
             is_archival=False,
         )
 

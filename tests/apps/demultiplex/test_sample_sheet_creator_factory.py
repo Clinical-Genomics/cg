@@ -16,18 +16,18 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 def test_sample_sheet_creator_factory_novaseq_6000(
-    novaseq_flow_cell_demultiplexed_with_bcl2fastq: FlowCellDirectoryData,
+    novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq: FlowCellDirectoryData,
     novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples: list[FlowCellSampleBcl2Fastq],
 ):
     """Test that a sample sheet creator defined with NovaSeq6000 data is V1."""
     # GIVEN a NovaSeq6000 flow cell and a list of NovaSeq6000 samples
 
     # GIVEN that the flow cell is demultiplexed with bcl2fastq
-    assert novaseq_flow_cell_demultiplexed_with_bcl2fastq.bcl_converter == BclConverter.BCL2FASTQ
+    assert novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq.bcl_converter == BclConverter.BCL2FASTQ
 
     # WHEN defining the sample sheet creator
     sample_sheet_creator: SampleSheetCreator = get_sample_sheet_creator(
-        flow_cell=novaseq_flow_cell_demultiplexed_with_bcl2fastq,
+        flow_cell=novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq,
         lims_samples=novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples,
         force=False,
     )
