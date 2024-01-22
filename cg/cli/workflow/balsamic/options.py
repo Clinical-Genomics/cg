@@ -43,3 +43,10 @@ OPTION_OBSERVATIONS = click.option(
     help="VCF paths of clinical and/or cancer SNVs and SVs observations (WGS analysis only). Set this option to "
     "override the latest Loqusdb dump files.",
 )
+
+OPTION_CACHE_VERSION = click.option(
+    "--cache-version",
+    type=click.STRING,
+    required=False,
+    help="Cache version to be used for init or analysis. Use 'develop' or 'X.X.X'.",
+)

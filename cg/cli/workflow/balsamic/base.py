@@ -1,5 +1,4 @@
 """CLI support to create config and/or start BALSAMIC."""
-
 import logging
 
 import click
@@ -7,6 +6,7 @@ from pydantic.v1 import ValidationError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.balsamic.options import (
+    OPTION_CACHE_VERSION,
     OPTION_GENDER,
     OPTION_GENOME_VERSION,
     OPTION_OBSERVATIONS,
@@ -49,6 +49,8 @@ balsamic.add_command(link)
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
 @OPTION_OBSERVATIONS
+@OPTION_CACHE_VERSION
+@DRY_RUN
 @click.pass_obj
 def config_case(
     context: CGConfig,
@@ -58,6 +60,8 @@ def config_case(
     panel_bed: str,
     pon_cnn: click.Path,
     observations: list[click.Path],
+    cache_version: str,
+    dry_run: bool,
 ):
     """Create config file for BALSAMIC analysis for a given CASE_ID."""
 
@@ -72,6 +76,8 @@ def config_case(
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
             observations=observations,
+            cache_version=cache_version,
+            dry_run=dry_run,
         )
     except CgError as error:
         LOG.error(f"Could not create config: {error}")
@@ -175,14 +181,18 @@ def store_housekeeper(context: CGConfig, case_id: str):
 @DRY_RUN
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
+@OPTION_CACHE_VERSION
+@OPTION_OBSERVATIONS
 @click.pass_context
 def start(
     context: click.Context,
     case_id: str,
     gender: str,
     genome_version: str,
+    cache_version: str,
     panel_bed: str,
     pon_cnn: str,
+    observations: list[click.Path],
     slurm_quality_of_service: str,
     dry_run: bool,
 ):
@@ -196,8 +206,11 @@ def start(
         case_id=case_id,
         gender=gender,
         genome_version=genome_version,
+        cache_version=cache_version,
         panel_bed=panel_bed,
         pon_cnn=pon_cnn,
+        observations=observations,
+        dry_run=False,
     )
     context.invoke(
         run,

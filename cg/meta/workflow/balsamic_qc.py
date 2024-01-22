@@ -1,4 +1,4 @@
-"""Module for Balsamic Analysis API"""
+"""Module for Balsamic QC Analysis API."""
 
 import logging
 
