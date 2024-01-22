@@ -57,12 +57,6 @@ def store_failing_sequencing_qc(
     return store
 
 
-@pytest.fixture(name="three_pool_names")
-def three_pool_names() -> list[str]:
-    """Return three customer ids."""
-    yield ["_".join(["test_pool", str(number)]) for number in range(3)]
-
-
 @pytest.fixture(name="store_with_analyses_for_cases")
 def store_with_analyses_for_cases(
     analysis_store: Store,

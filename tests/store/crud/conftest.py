@@ -372,3 +372,9 @@ def store_with_pools_for_multiple_customers(
             delivered_at=timestamp_now,
         )
     yield store
+
+
+@pytest.fixture
+def three_pool_names() -> list[str]:
+    """Return three customer ids."""
+    yield ["_".join(["test_pool", str(number)]) for number in range(3)]
