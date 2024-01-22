@@ -1,4 +1,4 @@
-"""Module for Balsamic Analysis API"""
+"""Module for Balsamic UMI Analysis API."""
 
 import logging
 

@@ -1,15 +1,15 @@
 """Module for Balsamic Analysis API."""
-
 import logging
 from pathlib import Path
 
 from housekeeper.store.models import File, Version
-from pydantic.v1 import ValidationError
+from pydantic.v1 import EmailStr, ValidationError
 
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
+from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Sex
 from cg.exc import BalsamicStartError, CgError
@@ -44,15 +44,23 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         pipeline: Pipeline = Pipeline.BALSAMIC,
     ):
         super().__init__(config=config, pipeline=pipeline)
-        self.root_dir = config.balsamic.root
-        self.account = config.balsamic.slurm.account
-        self.balsamic_cache = config.balsamic.balsamic_cache
-        self.email = config.balsamic.slurm.mail_user
-        self.qos = config.balsamic.slurm.qos
-        self.bed_path = config.balsamic.bed_path
-        self.pon_path = config.balsamic.pon_path
-        self.loqusdb_path = config.balsamic.loqusdb_path
-        self.swegen_path = config.balsamic.swegen_path
+        self.account: str = config.balsamic.slurm.account
+        self.binary_path: str = config.balsamic.binary_path
+        self.balsamic_cache: str = config.balsamic.balsamic_cache
+        self.conda_binary: str = config.balsamic.conda_binary
+        self.conda_env: str = config.balsamic.conda_env
+        self.bed_path: str = config.balsamic.bed_path
+        self.cadd_path: str = config.balsamic.cadd_path
+        self.genome_interval_path: str = config.balsamic.genome_interval_path
+        self.gnomad_af5_path: str = config.balsamic.gnomad_af5_path
+        self.gens_coverage_female_path: str = config.balsamic.gens_coverage_female_path
+        self.gens_coverage_male_path: str = config.balsamic.gens_coverage_male_path
+        self.email: EmailStr = config.balsamic.slurm.mail_user
+        self.loqusdb_path: str = config.balsamic.loqusdb_path
+        self.pon_path: str = config.balsamic.pon_path
+        self.qos: SlurmQos = config.balsamic.slurm.qos
+        self.root_dir: str = config.balsamic.root
+        self.swegen_path: str = config.balsamic.swegen_path
 
     @property
     def root(self) -> str:
@@ -69,7 +77,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     @property
     def process(self):
         if not self._process:
-            self._process = Process(self.config.balsamic.binary_path)
+            self._process = Process(
+                binary=self.binary_path, conda_binary=self.conda_binary, environment=self.conda_env
+            )
         return self._process
 
     @property
@@ -147,36 +157,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return Path(self.get_case_path(case.internal_id), FileFormat.FASTQ)
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
-        case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        """Link fastq files from Housekeeper to Balsamic case working directory."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link in case.links:
-            self.link_fastq_files_for_sample(case=case, sample=link.sample, concatenate=True)
-
-    def get_concatenated_fastq_path(self, link_object: CaseSample) -> Path:
-        """Returns the path to the concatenated FASTQ file of a sample"""
-        file_collection: list[FastqFileMeta] = self.gather_file_metadata_for_sample(
-            link_object.sample
-        )
-        fastq_data = file_collection[0]
-        linked_fastq_name = self.fastq_handler.create_fastq_name(
-            lane=fastq_data.lane,
-            flow_cell=fastq_data.flow_cell_id,
-            sample=link_object.sample.internal_id,
-            read_direction=fastq_data.read_direction,
-            undetermined=fastq_data.undetermined,
-        )
-        concatenated_fastq_name: str = self.fastq_handler.get_concatenated_name(linked_fastq_name)
-        return Path(
-            self.root_dir,
-            link_object.case.internal_id,
-            "fastq",
-            concatenated_fastq_name,
-        )
-
-    @staticmethod
-    def get_gender(sample_obj: Sample) -> str:
-        """Returns the gender associated to a specific sample"""
-
-        return sample_obj.sex
+            self.link_fastq_files_for_sample(case=case, sample=link.sample)
 
     @staticmethod
     def get_sample_type(sample_obj: Sample) -> SampleType:
@@ -279,26 +263,23 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return sorted_pon_files[0].as_posix() if sorted_pon_files else None
 
     @staticmethod
-    def get_verified_gender(sample_data: dict) -> str:
-        """Takes a dict with samples and attributes, and returns a verified case gender provided by the customer."""
-
-        gender = next(iter(sample_data.values()))["gender"]
-
-        if all(val["gender"] == gender for val in sample_data.values()) and gender in set(
+    def get_verified_sex(sample_data: dict) -> Sex:
+        """Takes a dict with samples and attributes, and returns a verified case sex provided by the customer."""
+        sex: Sex = next(iter(sample_data.values()))["sex"]
+        if all(val["sex"] == sex for val in sample_data.values()) and sex in set(
             value for value in Sex
         ):
-            if gender not in [Sex.FEMALE, Sex.MALE]:
+            if sex not in [Sex.FEMALE, Sex.MALE]:
                 LOG.warning(f"The provided sex is unknown, setting {Sex.FEMALE} as the default")
-                gender = Sex.FEMALE
+                sex = Sex.FEMALE
 
-            return gender
+            return sex
         else:
-            LOG.error(f"Unable to retrieve a valid gender from samples: {sample_data.keys()}")
+            LOG.error(f"Unable to retrieve a valid sex from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
-    def get_verified_samples(self, case_id: str, sample_data: dict) -> dict[str, str]:
+    def get_verified_samples(self, case_id: str) -> dict[str, str]:
         """Return a verified tumor and normal sample dictionary."""
-
         tumor_samples: list[Sample] = self.status_db.get_samples_by_type(
             case_id=case_id, sample_type=SampleType.TUMOR
         )
@@ -316,26 +297,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         tumor_sample_id: str = tumor_samples[0].internal_id if tumor_samples else None
         normal_sample_id: str = normal_samples[0].internal_id if normal_samples else None
-        tumor_sample_path: str = (
-            sample_data.get(tumor_sample_id).get("concatenated_path") if tumor_sample_id else None
-        )
-        normal_sample_path: str = (
-            sample_data.get(normal_sample_id).get("concatenated_path") if normal_sample_id else None
-        )
         if normal_sample_id and not tumor_sample_id:
             LOG.warning(
                 f"Only a normal sample was found for case {case_id}. "
                 f"Balsamic analysis will treat it as a tumor sample."
             )
-            tumor_sample_id, tumor_sample_path = normal_sample_id, normal_sample_path
-            normal_sample_id, normal_sample_path = None, None
-
-        return {
-            "tumor_sample_name": tumor_sample_id,
-            "tumor": tumor_sample_path,
-            "normal_sample_name": normal_sample_id,
-            "normal": normal_sample_path,
-        }
+            tumor_sample_id, normal_sample_id = normal_sample_id, None
+        return {"tumor_sample_name": tumor_sample_id, "normal_sample_name": normal_sample_id}
 
     def get_latest_raw_file_data(self, case_id: str, tags: list) -> dict | list:
         """Retrieves the data of the latest file associated to a specific case ID and a list of tags."""
@@ -439,6 +407,16 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return verified_observations
 
+    def get_verified_gens_file_paths(self, sex: Sex) -> dict[str, str] | None:
+        """Return a list of file path arguments for Gens."""
+        return {
+            "genome_interval": self.genome_interval_path,
+            "gnomad_min_af5": self.gnomad_af5_path,
+            "gens_coverage_pon": self.gens_coverage_female_path
+            if sex == Sex.FEMALE
+            else self.gens_coverage_male_path,
+        }
+
     def get_swegen_verified_path(self, variants: Variants) -> str | None:
         """Return verified SweGen path."""
         swegen_file: str = self.get_latest_file_by_pattern(
@@ -453,7 +431,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         panel_bed: str,
         pon_cnn: str,
         observations: list[str] = None,
-        gender: str | None = None,
+        sex: str | None = None,
     ) -> dict:
         """Takes a dictionary with per-sample parameters,
         validates them, and transforms into command line arguments
@@ -470,19 +448,23 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             if verified_panel_bed
             else None
         )
+        verified_sex: Sex = sex or self.get_verified_sex(sample_data=sample_data)
 
         config_case: dict[str, str] = {
             "case_id": case_id,
             "analysis_workflow": self.pipeline,
             "genome_version": genome_version,
-            "gender": gender or self.get_verified_gender(sample_data=sample_data),
+            "sex": verified_sex,
             "panel_bed": verified_panel_bed,
             "pon_cnn": verified_pon,
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
         }
-        config_case.update(self.get_verified_samples(case_id=case_id, sample_data=sample_data))
+        config_case.update(self.get_verified_samples(case_id=case_id))
         config_case.update(self.get_parsed_observation_file_paths(observations))
+        config_case.update(
+            self.get_verified_gens_file_paths(sex=verified_sex)
+        ) if not verified_panel_bed else None
 
         return config_case
 
@@ -513,9 +495,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         sample_data = {
             link_object.sample.internal_id: {
-                "gender": self.get_gender(link_object.sample),
+                "sex": link_object.sample.sex,
                 "tissue_type": self.get_sample_type(link_object.sample).value,
-                "concatenated_path": self.get_concatenated_fastq_path(link_object).as_posix(),
                 "application_type": self.get_application_type(link_object.sample),
                 "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
             }
@@ -556,11 +537,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         panel_bed: str,
         pon_cnn: str,
         observations: list[str],
+        cache_version: str,
+        dry_run: bool = False,
     ) -> None:
         """Create config file for BALSAMIC analysis"""
         arguments = self.get_verified_config_case_arguments(
             case_id=case_id,
-            gender=gender,
+            sex=gender,
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
@@ -570,30 +553,36 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         options = build_command_from_dict(
             {
                 "--analysis-dir": self.root_dir,
-                "--balsamic-cache": self.balsamic_cache,
-                "--case-id": arguments.get("case_id"),
-                "--gender": arguments.get("gender"),
                 "--analysis-workflow": arguments.get("analysis_workflow"),
-                "--genome-version": arguments.get("genome_version"),
-                "--normal": arguments.get(SampleType.NORMAL.value),
-                "--tumor": arguments.get(SampleType.TUMOR.value),
-                "--panel-bed": arguments.get("panel_bed"),
-                "--pon-cnn": arguments.get("pon_cnn"),
-                "--umi-trim-length": arguments.get("umi_trim_length"),
-                "--tumor-sample-name": arguments.get("tumor_sample_name"),
-                "--normal-sample-name": arguments.get("normal_sample_name"),
-                "--swegen-snv": arguments.get("swegen_snv"),
-                "--swegen-sv": arguments.get("swegen_sv"),
-                "--clinical-snv-observations": arguments.get("clinical_snv"),
-                "--clinical-sv-observations": arguments.get("clinical_sv"),
+                "--balsamic-cache": self.balsamic_cache,
+                "--cache-version": cache_version,
+                "--cadd-annotations": self.cadd_path,
                 "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
                 "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
                 "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
                 "--cancer-somatic-sv-observations": arguments.get("cancer_somatic_sv"),
+                "--case-id": arguments.get("case_id"),
+                "--clinical-snv-observations": arguments.get("clinical_snv"),
+                "--clinical-sv-observations": arguments.get("clinical_sv"),
+                "--fastq-path": self.get_sample_fastq_destination_dir(
+                    self.status_db.get_case_by_internal_id(case_id)
+                ),
+                "--gender": arguments.get("sex"),
+                "--genome-interval": arguments.get("genome_interval"),
+                "--genome-version": arguments.get("genome_version"),
+                "--gens-coverage-pon": arguments.get("gens_coverage_pon"),
+                "--gnomad-min-af5": arguments.get("gnomad_min_af5"),
+                "--normal-sample-name": arguments.get("normal_sample_name"),
+                "--panel-bed": arguments.get("panel_bed"),
+                "--pon-cnn": arguments.get("pon_cnn"),
+                "--swegen-snv": arguments.get("swegen_snv"),
+                "--swegen-sv": arguments.get("swegen_sv"),
+                "--tumor-sample-name": arguments.get("tumor_sample_name"),
+                "--umi-trim-length": arguments.get("umi_trim_length"),
             }
         )
         parameters = command + options
-        self.process.run_command(parameters=parameters)
+        self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def run_analysis(
         self,
