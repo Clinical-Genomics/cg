@@ -16,9 +16,7 @@ class CaseTags(BaseModel):
     vcf_str: set[str] = Field(
         None, description="Short Tandem Repeat variants, only for rare disease"
     )
-    cnv_report: set[str] | None = Field(
-        None, description="AscatNgs visualization report for cancer"
-    )
+    cnv_report: set[str] | None = Field(None, description="CNV visualization report for cancer")
     smn_tsv: set[str] | None = Field(None, description="SMN gene variants, only for rare disease")
     peddy_ped: set[str] = Field(None, description="Ped info from peddy, only for rare disease")
     peddy_sex: set[str] | None = Field(None, description="Peddy sex check, only for rare disease")
