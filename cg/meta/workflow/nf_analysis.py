@@ -357,7 +357,7 @@ class NfAnalysisAPI(AnalysisAPI):
     def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
         """Write <case>_metrics_deliverables.yaml file."""
         metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
-        metrics = self.get_multiqc_json_metrics(case_id=case_id)
+        metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id=case_id)
         self.ensure_mandatory_metrics_present(metrics=metrics)
         if dry_run:
             LOG.info(
