@@ -9,6 +9,7 @@ from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
     OPTION_COMPUTE_ENV,
     OPTION_CONFIG,
+    OPTION_FROM_START,
     OPTION_LOG,
     OPTION_PARAMS_FILE,
     OPTION_PROFILE,
@@ -18,7 +19,7 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_WORKDIR,
 )
 from cg.cli.workflow.taxprofiler.options import (
-    OPTION_FROM_START,
+
     OPTION_INSTRUMENT_PLATFORM,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS

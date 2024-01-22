@@ -2,14 +2,6 @@ import click
 
 from cg.constants.constants import Strandedness
 
-OPTION_FROM_START = click.option(
-    "--from-start",
-    is_flag=True,
-    default=False,
-    show_default=True,
-    help="Start pipeline from start without resuming execution",
-)
-
 OPTION_STRANDEDNESS = click.option(
     "--strandedness",
     type=str,
