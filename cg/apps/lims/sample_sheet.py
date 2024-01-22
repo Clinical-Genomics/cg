@@ -6,7 +6,7 @@ from typing import Iterable, Type
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
 
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 
 LOG = logging.getLogger(__name__)
 

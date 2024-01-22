@@ -2,14 +2,20 @@
 
 import logging
 from typing import Any
+from pathlib import Path
 
 from cg.constants import Pipeline
 from cg.io.config import concat_configs
+from cg.constants import GenePanelMasterList, Pipeline
+from cg.constants.gene_panel import GENOME_BUILD_37
+from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.fastq import FastqFileMeta
 from cg.models.raredisease.raredisease import RarediseaseSampleSheetEntry
 from cg.models.nf_analysis import PipelineParameters
 from cg.store.models import Case, Sample, CaseSample
+
 
 LOG = logging.getLogger(__name__)
 
@@ -33,7 +39,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.config_platform: str = config.config_platform
         self.config_params: str = config.config_params
         self.config_resources: str = config.config_resources
-        self.tower_binary_path: str = config.raredisease.tower_binary_path
+        self.tower_binary_path: str = config.tower_binary_path
         self.tower_pipeline: str = config.raredisease.tower_pipeline
         self.account: str = config.raredisease.slurm.account
         self.compute_env: str = config.raredisease.compute_env
@@ -62,7 +68,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self, sample: Sample, case: Case = "", case_sample: CaseSample = ""
     ) -> list[list[str]]:
         """Get sample sheet content per sample."""
-        sample_metadata: list[str] = self.gather_file_metadata_for_sample(sample)
+        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample)
         fastq_forward_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, forward_read=True
         )
@@ -92,7 +98,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
         for link in case.links:
             sample_sheet_content.extend(
-                self.get_sample_sheet_content_per_sample(sample=link.sample, case=case, case_sample=link)
+                self.get_sample_sheet_content_per_sample(
+                    sample=link.sample, case=case, case_sample=link
+                )
             )
         return sample_sheet_content
 
@@ -108,7 +116,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         #     outdir=self.get_case_path(case_id=case_id),
         # )
 
-    def get_phenotype_code(self, phenotype: str) -> int:
+    @staticmethod
+    def get_phenotype_code(phenotype: str) -> int:
         """Return Raredisease phenotype code."""
         LOG.debug("Translate phenotype to int")
         if phenotype == "unaffected":
@@ -118,9 +127,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         else:
             return 0
 
-    def get_sex_code(self, sex: str) -> int:
-        """Return Raredisease phenotype code."""
-        LOG.debug("Translate phenotype to int")
+    @staticmethod
+    def get_sex_code(sex: str) -> int:
+        """Return Raredisease sex code."""
+        LOG.debug("Translate sex to int")
         if sex == "male":
             return 1
         elif sex == "female":
@@ -128,12 +138,42 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         else:
             return 0
 
-    def get_parental_id(self, parent: CaseSample) -> str:
-        """Return Raredisease phenotype code."""
-        LOG.debug("Translate phenotype to int")
-        if parent:
-            return(parent.internal_id)
-        else:
-            return ""
+    @staticmethod
+    def get_parental_id(parent: CaseSample) -> str:
+        """Return Raredisease parental id."""
+        LOG.debug("Return parental id")
+        return parent.internal_id if parent else ""
 
+    @property
+    def root(self) -> str:
+        return self.config.raredisease.root
 
+    def write_managed_variants(self, case_id: str, content: list[str]) -> None:
+        self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)
+
+    def write_panel(self, case_id: str, content: list[str]) -> None:
+        """Write the gene panel to case dir."""
+        self._write_panel(out_dir=Path(self.root, case_id), content=content)
+
+    @staticmethod
+    def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
+        """Check if customer should use the gene panel master list
+        and if all default panels are included in the gene panel master list.
+        If not, add gene panel combo and OMIM-AUTO.
+        Return an aggregated gene panel."""
+        master_list: list[str] = GenePanelMasterList.get_panel_names()
+        if customer_id in GenePanelMasterList.collaborators() and default_panels.issubset(
+            master_list
+        ):
+            return master_list
+        all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
+        all_panels |= {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
+        return list(all_panels)
+
+    def get_gene_panel(self, case_id: str) -> list[str]:
+        """Create and return the aggregated gene panel file."""
+        return self._get_gene_panel(case_id=case_id, genome_build=GENOME_BUILD_37)
+
+    def get_managed_variants(self) -> list[str]:
+        """Create and return the managed variants."""
+        return self._get_managed_variants(genome_build=GENOME_BUILD_37)

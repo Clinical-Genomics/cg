@@ -45,3 +45,6 @@ class MockTB:
 
     def set_analysis_status(self, case_id: str, status: str):
         return
+
+    def add_comment(self, case_id: str, comment: str):
+        return

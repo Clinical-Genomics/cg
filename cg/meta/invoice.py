@@ -3,7 +3,8 @@ from typing import Any
 from pydantic.v1 import ValidationError
 
 from cg.apps.lims import LimsAPI
-from cg.constants.invoice import CostCenters, CustomerNames
+from cg.constants.constants import CustomerId
+from cg.constants.invoice import CostCenters
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import RecordType
 from cg.models.invoice.invoice import (
@@ -44,7 +45,7 @@ class InvoiceAPI:
     def get_customer_by_cost_center(self, cost_center: str) -> Customer | str:
         """Return the costumer based on cost center."""
         return (
-            self.db.get_customer_by_internal_id(customer_internal_id=CustomerNames.cust999)
+            self.db.get_customer_by_internal_id(customer_internal_id=CustomerId.CUST999)
             if cost_center.lower() == CostCenters.kth
             else self.customer_obj
         )
@@ -212,7 +213,7 @@ class InvoiceAPI:
 
     def get_priority(self, record: Sample or Pool, for_discount_price: bool = False) -> str:
         """Return the priority."""
-        if self.customer_obj.internal_id == CustomerNames.cust032:
+        if self.customer_obj.internal_id == CustomerId.CUST032:
             priority = PriorityTerms.STANDARD
         elif self.record_type == RecordType.Pool or (
             record.priority_human == "clinical trials" and for_discount_price

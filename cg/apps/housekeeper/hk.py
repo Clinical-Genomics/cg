@@ -259,9 +259,14 @@ class HousekeeperAPI:
             .first()
         )
 
-    def get_all_non_archived_spring_files(self) -> list[File]:
+    def get_non_archived_spring_files(
+        self, tags: list[str] | None = None, limit: int = None
+    ) -> list[File]:
         """Return all spring files which are not marked as archived in Housekeeper."""
-        return self._store.get_all_non_archived_files(tag_names=[SequencingFileTag.SPRING])
+        return self._store.get_non_archived_files(
+            tag_names=tags + [SequencingFileTag.SPRING] if tags else [SequencingFileTag.SPRING],
+            limit=limit,
+        )
 
     def get_latest_bundle_version(self, bundle_name: str) -> Version | None:
         """Get the latest version of a Housekeeper bundle."""
@@ -395,7 +400,7 @@ class HousekeeperAPI:
         return self.files(version=version.id, tags=tags)
 
     def is_fastq_or_spring_in_all_bundles(self, bundle_names: list[str]) -> bool:
-        """Return whether or not all FASTQ/SPRING files are included for the given bundles."""
+        """Return whether all FASTQ/SPRING files are included for the given bundles."""
         sequencing_files_in_hk: dict[str, bool] = {}
         if not bundle_names:
             return False
@@ -414,22 +419,30 @@ class HousekeeperAPI:
             )
         return all(sequencing_files_in_hk.values())
 
-    def get_non_archived_files(self, bundle_name: str, tags: list | None = None) -> list[File]:
+    def get_non_archived_files_for_bundle(
+        self, bundle_name: str, tags: list | None = None
+    ) -> list[File]:
         """Returns all non-archived_files from a given bundle, tagged with the given tags"""
-        return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags or [])
+        return self._store.get_non_archived_files_for_bundle(
+            bundle_name=bundle_name, tags=tags or []
+        )
 
-    def get_archived_files(self, bundle_name: str, tags: list | None = None) -> list[File]:
+    def get_archived_files_for_bundle(
+        self, bundle_name: str, tags: list | None = None
+    ) -> list[File]:
         """Returns all archived_files from a given bundle, tagged with the given tags"""
-        return self._store.get_archived_files(bundle_name=bundle_name, tags=tags or [])
+        LOG.debug(f"Getting archived files for bundle {bundle_name}")
+        return self._store.get_archived_files_for_bundle(bundle_name=bundle_name, tags=tags or [])
 
-    def add_archives(self, files: list[Path], archive_task_id: int) -> None:
+    def add_archives(self, files: list[File], archive_task_id: int) -> None:
         """Creates an archive object for the given files, and adds the archive task id to them."""
         for file in files:
-            archived_file: File | None = self._store.get_files(file_path=file.as_posix()).first()
-            if not archived_file:
-                raise HousekeeperFileMissingError(f"No file in housekeeper with the path {file}")
+            file_id: int = file.id
+            LOG.info(
+                f"Adding an archive to file {file_id} with archiving task id {archive_task_id}"
+            )
             archive: Archive = self._store.create_archive(
-                archived_file.id, archiving_task_id=archive_task_id
+                file_id=file_id, archiving_task_id=archive_task_id
             )
             self._store.session.add(archive)
         self.commit()
@@ -460,8 +473,7 @@ class HousekeeperAPI:
         """Return a list of bundles with corresponding file paths for all non-archived SPRING
         files."""
         return [
-            (file.version.bundle.name, file.path)
-            for file in self.get_all_non_archived_spring_files()
+            (file.version.bundle.name, file.path) for file in self.get_non_archived_spring_files()
         ]
 
     def set_archive_retrieved_at(self, file_id: int, retrieval_task_id: int):
@@ -494,6 +506,7 @@ class HousekeeperAPI:
         if not archive:
             raise ValueError(f"No Archive entry found for file with id {file_id}.")
         self._store.update_retrieval_task_id(archive=archive, retrieval_task_id=retrieval_task_id)
+        self.commit()
 
     def get_sample_sheets_from_latest_version(self, flow_cell_id: str) -> list[File]:
         """Returns the files tagged with 'samplesheet' for the given bundle."""
@@ -618,3 +631,21 @@ class HousekeeperAPI:
 
     def get_ongoing_retrievals(self) -> list[Archive]:
         return self._store.get_ongoing_retrievals()
+
+    def delete_archives(self, archival_task_id: int):
+        archives_to_delete: list[Archive] = self.get_archive_entries(
+            archival_task_id=archival_task_id
+        )
+        for archive in archives_to_delete:
+            self._store.session.delete(archive)
+        self._store.session.commit()
+
+    def update_archive_retrieved_at(
+        self, old_retrieval_job_id: int, new_retrieval_job_id: int | None
+    ):
+        archives_to_update: list[Archive] = self.get_archive_entries(
+            retrieval_task_id=old_retrieval_job_id
+        )
+        for archive in archives_to_update:
+            archive.retrieval_task_id = new_retrieval_job_id
+        self._store.session.commit()

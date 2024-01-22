@@ -117,7 +117,7 @@ def run(
                 case_id=case_id, params_file=params_file
             ),
             "name": case_id,
-            "compute_env": compute_env or analysis_api.compute_env,
+            "compute_env": compute_env or analysis_api.get_compute_env(case_id=case_id),
             "revision": revision or analysis_api.revision,
             "wait": NfTowerStatus.SUBMITTED,
             "id": nf_tower_id,

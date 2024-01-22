@@ -56,10 +56,7 @@ def clean_context(
         data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_to_clean = helpers.add_sample(
-        store,
-        internal_id=balsamic_case_clean,
-        is_tumour=True,
-        application_type="wgs",
+        store, application_type="wgs", is_tumour=True, internal_id=balsamic_case_clean
     )
     helpers.add_relationship(store, case=case_to_clean, sample=sample_case_to_clean)
 
@@ -84,10 +81,7 @@ def clean_context(
     store.session.commit()
 
     sample_case_to_not_clean = helpers.add_sample(
-        store,
-        internal_id=balsamic_case_not_clean,
-        is_tumour=True,
-        application_type="wgs",
+        store, application_type="wgs", is_tumour=True, internal_id=balsamic_case_not_clean
     )
     helpers.add_relationship(store, case=case_to_not_clean, sample=sample_case_to_not_clean)
 
@@ -158,10 +152,7 @@ def clean_context_microsalt(
         name=microsalt_case_clean,
         data_analysis=Pipeline.MICROSALT,
     )
-    sample_case_to_clean = helpers.add_sample(
-        store,
-        internal_id=microsalt_case_clean,
-    )
+    sample_case_to_clean = helpers.add_sample(store, internal_id=microsalt_case_clean)
 
     helpers.add_relationship(store, case=case_to_clean, sample=sample_case_to_clean)
 
@@ -189,10 +180,7 @@ def clean_context_microsalt(
         data_analysis=Pipeline.MICROSALT,
     )
 
-    sample_case_to_not_clean = helpers.add_sample(
-        store,
-        internal_id=microsalt_case_clean_dry,
-    )
+    sample_case_to_not_clean = helpers.add_sample(store, internal_id=microsalt_case_clean_dry)
     helpers.add_relationship(store, case=case_to_clean_dry_run, sample=sample_case_to_not_clean)
 
     helpers.add_analysis(

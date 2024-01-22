@@ -1,10 +1,10 @@
 """Tests for the Scout serialisation models"""
 from cg.apps.scout.scout_export import DiagnosisPhenotypes, ScoutExportCase
-from cg.apps.scout.validators import set_gender_if_other, set_parent_if_missing
+from cg.apps.scout.validators import set_parent_if_missing, set_sex_if_other
 from cg.constants.constants import FileFormat
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.pedigree import Pedigree
-from cg.constants.subject import Gender, PlinkGender, RelationshipStatus
+from cg.constants.subject import PlinkSex, RelationshipStatus, Sex
 from cg.io.controller import ReadStream
 
 
@@ -105,13 +105,13 @@ def test_convert_other_sex(other_sex_case_output: str):
     )
     case = cases[0]
     # GIVEN a case that has parent set to None
-    assert case["individuals"][0][Pedigree.SEX] == Gender.OTHER
+    assert case["individuals"][0][Pedigree.SEX] == Sex.OTHER
 
     # WHEN validating the output with model
     case_obj = ScoutExportCase.model_validate(case)
 
     # THEN assert that the sex has been converted to "0"
-    assert case_obj.model_dump()["individuals"][0][Pedigree.SEX] == PlinkGender.UNKNOWN
+    assert case_obj.model_dump()["individuals"][0][Pedigree.SEX] == PlinkSex.UNKNOWN
 
 
 def test_validate_rank_score_model_float(other_sex_case_output: str):
@@ -174,26 +174,26 @@ def test_set_parent_when_not_provided():
 
 
 def test_set_gender_if_provided():
-    """Test to validate that the gender is not altered when set and not Gender.OTHER."""
+    """Test to validate that the sex is not altered when set and not 'other'."""
 
-    # GIVEN a gender which is not Gender.OTHER as input
-    gender: PlinkGender = PlinkGender.FEMALE
+    # GIVEN a sex which is not "other" as input
+    sex: PlinkSex = PlinkSex.FEMALE
 
-    # WHEN running "set_gender_if_other"
-    validated_gender: str = set_gender_if_other(gender)
+    # WHEN running setting sex
+    validated_sex: str = set_sex_if_other(sex)
 
     # THEN the returned string should not have been altered
-    assert validated_gender == gender
+    assert validated_sex == sex
 
 
 def test_set_gender_if_other():
     """Test to validate that the gender is altered when set to Gender.OTHER."""
 
-    # GIVEN Gender.OTHER as input
-    gender: Gender = Gender.OTHER
+    # GIVEN sex "other" as input
+    sex: Sex = Sex.OTHER
 
-    # WHEN running "set_gender_if_other"
-    validated_gender: str = set_gender_if_other(gender)
+    # WHEN setting sex
+    validated_sex: str = set_sex_if_other(sex)
 
-    # THEN the returned gender should be PlinkGender.UNKNOWN
-    assert validated_gender == PlinkGender.UNKNOWN
+    # THEN the returned sex should be "unknown"
+    assert validated_sex == PlinkSex.UNKNOWN

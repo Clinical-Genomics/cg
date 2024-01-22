@@ -1,6 +1,7 @@
 """Utility functions to simply add test data in a cg store."""
 import logging
 from datetime import datetime
+from pathlib import Path
 
 from housekeeper.store.models import Bundle, Version
 
@@ -9,7 +10,7 @@ from cg.constants import DataDelivery, Pipeline
 from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
-from cg.constants.subject import Gender, PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.store import Store
 from cg.store.models import (
     Analysis,
@@ -59,6 +60,43 @@ class StoreHelpers:
             store.include(_version)
 
         return _bundle
+
+    @staticmethod
+    def format_hk_bundle_dict(
+        bundle_name: str, files: list[Path], all_tags: list[list[str]]
+    ) -> dict:
+        """Creates the dict representation for a housekeeper bundle with necessary values set."""
+        return {
+            "name": bundle_name,
+            "created_at": datetime.now(),
+            "expires_at": datetime.now(),
+            "files": [
+                {
+                    "path": file.as_posix(),
+                    "tags": tags,
+                    "archive": False,
+                }
+                for file, tags in zip(files, all_tags)
+            ],
+        }
+
+    @staticmethod
+    def quick_hk_bundle(
+        bundle_name: str, files: list[Path], store: HousekeeperAPI, tags: list[list[str]]
+    ):
+        """Adds a bundle to housekeeper with the given files and tags. Returns the new bundle.
+
+        Arguments:
+            bundle_name = The name of the bundle to be created.
+            files = A list of files to be added to the bundle.
+            store = The database instance where the bundle should be added.
+            tags = A list where each entry is the set of tags for the corresponding file.
+                   The length of this list should be the same as the length of the files list.
+        """
+        bundle_data: dict = StoreHelpers.format_hk_bundle_dict(
+            bundle_name=bundle_name, files=files, all_tags=tags
+        )
+        return StoreHelpers.ensure_hk_bundle(store=store, bundle_data=bundle_data)
 
     @staticmethod
     def ensure_hk_version(store: HousekeeperAPI, bundle_data: dict) -> Version:
@@ -324,7 +362,7 @@ class StoreHelpers:
         application_type: str = "tgs",
         control: str = "",
         customer_id: str = None,
-        gender: str = Gender.FEMALE,
+        sex: str = Sex.FEMALE,
         is_external: bool = False,
         is_rna: bool = False,
         is_tumour: bool = False,
@@ -353,7 +391,7 @@ class StoreHelpers:
 
         sample = store.add_sample(
             name=name,
-            sex=gender,
+            sex=sex,
             control=control,
             original_ticket=original_ticket,
             tumour=is_tumour,
@@ -507,13 +545,13 @@ class StoreHelpers:
             sample_id = sample_data["internal_id"]
             sample_obj = StoreHelpers.add_sample(
                 store,
-                gender=sample_data["sex"],
-                name=sample_data.get("name"),
-                internal_id=sample_id,
-                application_type=app_type,
                 application_tag=app_tag,
-                original_ticket=sample_data["original_ticket"],
+                application_type=app_type,
+                sex=sample_data["sex"],
+                internal_id=sample_id,
                 reads=sample_data["reads"],
+                name=sample_data.get("name"),
+                original_ticket=sample_data["original_ticket"],
                 capture_kit=sample_data["capture_kit"],
             )
             sample_objs[sample_id] = sample_obj
@@ -589,7 +627,7 @@ class StoreHelpers:
             application_version=application_version,
             organism=organism,
             reads=6000000,
-            sex=Gender.UNKNOWN,
+            sex=Sex.UNKNOWN,
         )
         sample.customer = customer
         case = StoreHelpers.ensure_case(
@@ -877,7 +915,7 @@ class StoreHelpers:
 
         if not sample:
             sample = cls.add_sample(
-                store=store, internal_id=sample_internal_id, customer_id=customer_id
+                store=store, customer_id=customer_id, internal_id=sample_internal_id
             )
         if not flow_cell:
             flow_cell = cls.add_flow_cell(store=store, flow_cell_name=flow_cell_name)

@@ -73,6 +73,12 @@ def tsv_stream() -> str:
 
 
 @pytest.fixture
+def txt_temp_path(cg_dir: Path) -> Path:
+    """Return a temp file path to use when writing text files."""
+    return Path(cg_dir, "write.txt")
+
+
+@pytest.fixture
 def csv_stream() -> str:
     """Return string with CSV format."""
     return """Lorem,ipsum,sit,amet"""
@@ -100,3 +106,9 @@ def xml_file_path(fixtures_dir: Path) -> Path:
 def xml_temp_path(cg_dir: Path) -> Path:
     """Return a temp file path to use when writing xml."""
     return Path(cg_dir, "write_xml.xml")
+
+
+@pytest.fixture
+def gzip_file_path(fixtures_dir: Path) -> Path:
+    """Return a file path to example Gzip file."""
+    return Path(fixtures_dir, "io", "example.gz")
