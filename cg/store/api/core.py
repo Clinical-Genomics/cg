@@ -1,6 +1,5 @@
 import logging
 
-from cg.store.api.find_basic_data import FindBasicDataHandler
 from cg.store.api.status import StatusHandler
 from cg.store.crud.create import CreateHandler
 from cg.store.crud.delete import DeleteDataHandler
@@ -14,7 +13,6 @@ LOG = logging.getLogger(__name__)
 class CoreHandler(
     CreateHandler,
     DeleteDataHandler,
-    FindBasicDataHandler,
     ReadHandler,
     StatusHandler,
     UpdateHandler,
@@ -23,7 +21,6 @@ class CoreHandler(
 
     def __init__(self, session):
         DeleteDataHandler(session)
-        FindBasicDataHandler(session)
         ReadHandler(session)
         StatusHandler(session)
         UpdateHandler(session)
