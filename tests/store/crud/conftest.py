@@ -350,3 +350,25 @@ def max_nr_of_samples() -> int:
 def max_nr_of_cases() -> int:
     """Return maximum numbers of cases"""
     return 50
+
+
+@pytest.fixture
+def three_customer_ids() -> list[str]:
+    """Return three customer ids."""
+    yield ["".join(["cust00", str(number)]) for number in range(3)]
+
+
+@pytest.fixture
+def store_with_pools_for_multiple_customers(
+    store: Store, helpers: StoreHelpers, timestamp_now: datetime
+) -> Store:
+    """Return a store with two samples for three different customers."""
+    for number in range(3):
+        helpers.ensure_pool(
+            store=store,
+            name="_".join(["test_pool", str(number)]),
+            customer_id="".join(["cust00", str(number)]),
+            no_invoice=False,
+            delivered_at=timestamp_now,
+        )
+    yield store

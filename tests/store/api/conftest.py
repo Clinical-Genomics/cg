@@ -57,32 +57,10 @@ def store_failing_sequencing_qc(
     return store
 
 
-@pytest.fixture(name="three_customer_ids")
-def three_customer_ids() -> list[str]:
-    """Return three customer ids."""
-    yield ["".join(["cust00", str(number)]) for number in range(3)]
-
-
 @pytest.fixture(name="three_pool_names")
 def three_pool_names() -> list[str]:
     """Return three customer ids."""
     yield ["_".join(["test_pool", str(number)]) for number in range(3)]
-
-
-@pytest.fixture(name="store_with_pools_for_multiple_customers")
-def store_with_pools_for_multiple_customers(
-    store: Store, helpers: StoreHelpers, timestamp_now: dt.datetime
-) -> Store:
-    """Return a store with two samples for three different customers."""
-    for number in range(3):
-        helpers.ensure_pool(
-            store=store,
-            name="_".join(["test_pool", str(number)]),
-            customer_id="".join(["cust00", str(number)]),
-            no_invoice=False,
-            delivered_at=timestamp_now,
-        )
-    yield store
 
 
 @pytest.fixture(name="store_with_analyses_for_cases")
