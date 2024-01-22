@@ -8,7 +8,7 @@ from cg.exc import SampleSheetError
 class PipelineParameters(BaseModel):
     clusterOptions: str = Field(..., alias="cluster_options")
     priority: str
-    params.input: Path = Field(..., alias="sample_sheet_path")
+    input: Path = Field(..., alias="sample_sheet_path")
     outdir: Path
 
 
