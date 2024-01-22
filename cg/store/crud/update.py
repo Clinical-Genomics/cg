@@ -3,7 +3,7 @@
 from sqlalchemy.orm import Session
 
 from cg.store.api.base import BaseHandler
-from cg.store.models import Flowcell
+from cg.store.models import Flowcell, Sample
 
 
 class UpdateHandler(BaseHandler):
@@ -15,4 +15,12 @@ class UpdateHandler(BaseHandler):
 
     def update_flow_cell_has_backup(self, flow_cell: Flowcell, has_backup: bool) -> None:
         flow_cell.has_backup = has_backup
+        self.session.commit()
+
+    def add_sample_comment(self, sample: Sample, comment: str) -> None:
+        """Update comment on sample with the provided comment."""
+        if sample.comment:
+            sample.comment = sample.comment + " " + comment
+        else:
+            sample.comment = comment
         self.session.commit()
