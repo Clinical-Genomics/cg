@@ -17,7 +17,7 @@ class UpdateHandler(BaseHandler):
         flow_cell.has_backup = has_backup
         self.session.commit()
 
-    def add_sample_comment(self, sample: Sample, comment: str) -> None:
+    def update_sample_comment(self, sample: Sample, comment: str) -> None:
         """Update comment on sample with the provided comment."""
         if sample.comment:
             sample.comment = sample.comment + " " + comment
