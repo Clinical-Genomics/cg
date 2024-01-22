@@ -1,7 +1,9 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
-class LaneMetrics(BaseModel):
+class LaneMetric(BaseModel):
     """Model for lane specific sequencing metrics."""
 
     lane: int
@@ -9,14 +11,14 @@ class LaneMetrics(BaseModel):
     _yield: int | None = None
 
 
-class ConcatenatedLaneMetrics(BaseModel):
+class ConcatenatedLaneMetric(BaseModel):
     """Model for concatenated lane sequencing metrics."""
 
     number_of_reads: int
     _yield: int | None = None
 
 
-class DNACoverageMetrics(BaseModel):
+class DNACoverageMetric(BaseModel):
     """Coverage metrics from the pipeline output."""
 
     mean_target_coverage: float | None = None
@@ -37,7 +39,7 @@ class DNACoverageMetrics(BaseModel):
     pct_chimeras: float | None = None
 
 
-class RNACoverageMetrics(BaseModel):
+class RNACoverageMetric(BaseModel):
     """Coverage metrics for an RNA pipeline output."""
 
     after_filtering_gc_content: float | None
@@ -54,45 +56,45 @@ class RNACoverageMetrics(BaseModel):
     uniquely_mapped_percent: float | None
 
 
-class SequencingMetrics(BaseModel):
+class SequencingMetric(BaseModel):
     """Model for collecting sample specific reads information."""
 
-    total_reads: list[LaneMetrics] | ConcatenatedLaneMetrics
-    mapped_reads: list[LaneMetrics] | ConcatenatedLaneMetrics
+    total_reads: list[LaneMetric] | ConcatenatedLaneMetric
+    mapped_reads: list[LaneMetric] | ConcatenatedLaneMetric
     percentage_mapped_reads: list[float] | float
-    coverage_metrics: DNACoverageMetrics | RNACoverageMetrics
+    coverage_metric: DNACoverageMetric | RNACoverageMetric
     pct_duplication: float | None = None
     pct_adapter: float | None
 
 
-class MIPDNAMetrics(BaseModel):
+class MIPDNAMetric(BaseModel):
     sex: str
 
 
-class MIPRNAMetrics(BaseModel):
+class MIPRNAMetric(BaseModel):
     pass
 
 
-class BalsamicMetrics(BaseModel):
+class BalsamicMetric(BaseModel):
     pass
 
 
-class RNAFusionMetrics(BaseModel):
+class RNAFusionMetric(BaseModel):
     pass
 
 
-class SampleQCMetrics(BaseModel):
+class SampleQCMetric(BaseModel):
     """Sample qc metrics from pipeline outputs."""
 
     sample_id: str
-    sequencing_metrics: list[SequencingMetrics]
-    pipeline_specific_metrics: MIPDNAMetrics | BalsamicMetrics | RNAFusionMetrics | MIPRNAMetrics
+    sequencing_metric: list[SequencingMetric]
+    pipeline_specific_metric: MIPDNAMetric | BalsamicMetric | RNAFusionMetric | MIPRNAMetric
 
 
-class CaseQCMetrics(BaseModel):
+class CaseQCMetric(BaseModel):
     """Case qc metrics from a pipeline run."""
 
-    pass
+    run_time: datetime
 
 
 class Pipeline(BaseModel):
@@ -102,10 +104,10 @@ class Pipeline(BaseModel):
     version: str
 
 
-class PipelineQCMetrics(BaseModel):
+class PipelineQCMetric(BaseModel):
     """Model for collecting pipeline qc metrics."""
 
     case_id: str
-    case_qc_metrics: CaseQCMetrics
-    sample_qc_metrics: list[SampleQCMetrics]
+    case_qc_metrics: CaseQCMetric
+    sample_qc_metrics: list[SampleQCMetric]
     pipeline: Pipeline

@@ -1,0 +1,44 @@
+{
+    "case_id": "goodboydog",
+    "case_qc_metric": {"run_time": "2024-01-22T12:30:00"},
+    "sample_qc_metric": [
+        {
+            "sample_id": "test_sample_1",
+            "sequencing_metric": [
+                {
+                    "total_reads": [
+                        {"lane": 1, "number_of_reads": 100, "_yield": null},
+                        {"lane": 2, "number_of_reads": 150, "_yield": null},
+                    ],
+                    "mapped_reads": [
+                        {"lane": 1, "number_of_reads": 90, "_yield": null},
+                        {"lane": 2, "number_of_reads": 140, "_yield": null},
+                    ],
+                    "percentage_mapped_reads": [95.0, 93.33],
+                    "coverage_metric": {
+                        "mean_target_coverage": 30.5,
+                        "median_target_coverage": 28.0,
+                        "pct_target_bases_10x": 98.0,
+                        "pct_target_bases_20x": 95.5,
+                        "pct_target_bases_30x": 92.0,
+                        "pct_target_bases_40x": 88.5,
+                        "pct_target_bases_50x": 85.0,
+                        "pct_target_bases_100x": 75.0,
+                        "pct_target_bases_250x": 50.0,
+                        "pct_target_bases_500x": 25.0,
+                        "pct_target_bases_1000x": 10.0,
+                        "gc_dropout": 1.5,
+                        "at_dropout": 2.0,
+                        "pct_off_bait": 5.0,
+                        "pct_pf_reads_improper_pairs": 1.2,
+                        "pct_chimeras": 0.8,
+                    },
+                    "pct_duplication": 10.0,
+                    "pct_adapter": 2.0,
+                }
+            ],
+            "pipeline_specific_metric": {"sex": "male"},
+        }
+    ],
+    "pipeline": {"name": "example_pipeline", "version": "1.0.0"},
+}
