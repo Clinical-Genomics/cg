@@ -4,6 +4,7 @@ import logging
 from typing import Any
 
 from cg.constants import Pipeline
+from cg.io.config import concat_configs
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.raredisease.raredisease import RarediseaseSampleSheetEntry
@@ -29,6 +30,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.profile: str = config.raredisease.profile
         self.conda_env: str = config.raredisease.conda_env
         self.conda_binary: str = config.raredisease.conda_binary
+        self.config_platform: str = config.config_platform
+        self.config_params: str = config.config_params
+        self.config_resources: str = config.config_resources
         self.tower_binary_path: str = config.raredisease.tower_binary_path
         self.tower_pipeline: str = config.raredisease.tower_pipeline
         self.account: str = config.raredisease.slurm.account
@@ -95,12 +99,14 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_pipeline_parameters(self, case_id: str) -> PipelineParameters:
         """Return parameters."""
         LOG.info("Getting parameters information")
-        return PipelineParameters(
-            cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
-            priority=self.account,
-            sample_sheet_path=self.get_sample_sheet_path(case_id=case_id),
-            outdir=self.get_case_path(case_id=case_id),
-        )
+        concat_configs([self.config_platform, self.config_params, self.config_resources], self.get_params_file_path(case_id=case_id))
+
+        # return PipelineParameters(
+        #     cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
+        #     priority=self.account,
+        #     sample_sheet_path=self.get_sample_sheet_path(case_id=case_id),
+        #     outdir=self.get_case_path(case_id=case_id),
+        # )
 
     def get_phenotype_code(self, phenotype: str) -> int:
         """Return Raredisease phenotype code."""

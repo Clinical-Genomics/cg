@@ -161,6 +161,14 @@ class NfAnalysisAPI(AnalysisAPI):
             file_path=self.get_params_file_path(case_id=case_id),
         )
 
+    # def write_config_file(self, case_id: str, pipeline_parameters: dict) -> None:
+    #     """Write params-file for analysis."""
+    #     LOG.debug("Writing parameters file")
+    #     write_config_nextflow_style(
+    #         content=pipeline_parameters,
+    #         file_path=self.get_params_file_path(case_id=case_id),
+    #     )
+
     @staticmethod
     def write_sample_sheet(
         content: list[list[Any]],
