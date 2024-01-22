@@ -10,12 +10,6 @@ from cg.store.models import CaseSample
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.fixture(name="max_nr_of_cases")
-def max_nr_of_cases() -> int:
-    """Return the number of maximum number of cases"""
-    return 50
-
-
 @pytest.fixture(name="store_failing_sequencing_qc")
 def store_failing_sequencing_qc(
     bcl2fastq_flow_cell_id: str,
@@ -61,12 +55,6 @@ def store_failing_sequencing_qc(
         sample_base_percentage_passing_q30=30,
     )
     return store
-
-
-@pytest.fixture(name="max_nr_of_samples")
-def max_nr_of_samples() -> int:
-    """Return the number of maximum number of samples"""
-    return 50
 
 
 @pytest.fixture(name="three_customer_ids")

@@ -338,3 +338,15 @@ def microbial_store(store: Store, helpers: StoreHelpers) -> Store:
         helpers.ensure_application(store=store, tag=app_tag, prep_category="mic", is_archived=True)
 
     return store
+
+
+@pytest.fixture
+def max_nr_of_samples() -> int:
+    """Return maximum numbers of samples"""
+    return 50
+
+
+@pytest.fixture
+def max_nr_of_cases() -> int:
+    """Return maximum numbers of cases"""
+    return 50
