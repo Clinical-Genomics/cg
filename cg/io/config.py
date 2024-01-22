@@ -15,19 +15,19 @@ def write_config(content: Any, file_path: Path) -> None:
         file.write(content)
 
 
-def concat_configs(file_paths: list[Path], target_file: Path) -> str:
+def concat_configs(file_paths: list[Path], target_file: Path, str_content: str = "") -> str:
     """Write content to a yaml stream"""
-    content = ""
+    content = str_content
     for file_path in file_paths:
         content = content + read_config(file_path)
     write_config(content, target_file)
 
 
-# def write_yaml_nextflow_style(content: dict[str, Any], file_path: Path) -> None:
-#     """Write content to yaml file accepted by Nextflow with non-quoted booleans and quoted strings."""
-#     with open(file_path, "w") as outfile:
-#         for key, value in content.items():
-#             if isinstance(value, Path):
-#                 value: str = value.as_posix()
-#             quotes = '"' if type(value) is str else ""
-#             outfile.write(f"{key}: {quotes}{value}{quotes}\n")
+def write_config_nextflow_style(content: dict[str, Any], file_path: Path) -> None:
+    """Write content to yaml file accepted by Nextflow with non-quoted booleans and quoted strings."""
+    with open(file_path, "w") as outfile:
+        for key, value in content.items():
+            if isinstance(value, Path):
+                value: str = value.as_posix()
+            quotes = '"' if type(value) is str else ""
+            outfile.write(f"params.{key} = {quotes}{value}{quotes}\n")

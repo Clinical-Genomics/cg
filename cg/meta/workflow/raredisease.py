@@ -5,7 +5,7 @@ from typing import Any
 from pathlib import Path
 
 from cg.constants import Pipeline
-from cg.io.config import concat_configs
+from cg.io.config import concat_configs, write_config_nextflow_style
 from cg.constants import GenePanelMasterList, Pipeline
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.meta.workflow.analysis import add_gene_panel_combo
@@ -107,17 +107,17 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_pipeline_parameters(self, case_id: str) -> PipelineParameters:
         """Return parameters."""
         LOG.info("Getting parameters information")
-        concat_configs(
-            [self.config_platform, self.config_params, self.config_resources],
-            self.get_params_file_path(case_id=case_id),
+        return PipelineParameters(
+            sample_sheet_path=self.get_sample_sheet_path(case_id=case_id),
+            outdir=self.get_case_path(case_id=case_id),
         )
 
-        # return PipelineParameters(
-        #     cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
-        #     priority=self.account,
-        #     sample_sheet_path=self.get_sample_sheet_path(case_id=case_id),
-        #     outdir=self.get_case_path(case_id=case_id),
-        # )
+    def write_params_file(self, case_id: str, pipeline_parameters: dict) -> None:
+        """Write params-file for analysis."""
+        LOG.debug("Writing parameters file")
+        concat_configs(
+            [self.config_platform, self.config_params, self.config_resources],
+            self.get_config_file_path(case_id=case_id), write_config_nextflow_style(pipeline_parameters) + self.set_cluster_options(case_id=case_id))
 
     @staticmethod
     def get_phenotype_code(phenotype: str) -> int:
