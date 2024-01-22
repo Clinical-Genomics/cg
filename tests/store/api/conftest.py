@@ -69,22 +69,6 @@ def three_pool_names() -> list[str]:
     yield ["_".join(["test_pool", str(number)]) for number in range(3)]
 
 
-@pytest.fixture(name="store_with_samples_for_multiple_customers")
-def store_with_samples_for_multiple_customers(
-    store: Store, helpers: StoreHelpers, timestamp_now: dt.datetime
-) -> Store:
-    """Return a store with two samples for three different customers."""
-    for number in range(3):
-        helpers.add_sample(
-            store=store,
-            customer_id="".join(["cust00", str(number)]),
-            internal_id="_".join(["test_sample", str(number)]),
-            no_invoice=False,
-            delivered_at=timestamp_now,
-        )
-    yield store
-
-
 @pytest.fixture(name="store_with_pools_for_multiple_customers")
 def store_with_pools_for_multiple_customers(
     store: Store, helpers: StoreHelpers, timestamp_now: dt.datetime
