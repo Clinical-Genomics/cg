@@ -2,15 +2,18 @@
 from pathlib import Path
 from typing import Any
 
+
 def read_config(file_path: Path) -> Any:
     """Read content in a config file"""
     with open(file_path, "r") as file:
         return file.read()
 
+
 def write_config(content: Any, file_path: Path) -> None:
     """Write content to a config file"""
     with open(file_path, "w") as file:
         file.write(content)
+
 
 def concat_configs(file_paths: list[Path], target_file: Path) -> str:
     """Write content to a yaml stream"""
@@ -28,4 +31,3 @@ def concat_configs(file_paths: list[Path], target_file: Path) -> str:
 #                 value: str = value.as_posix()
 #             quotes = '"' if type(value) is str else ""
 #             outfile.write(f"{key}: {quotes}{value}{quotes}\n")
-

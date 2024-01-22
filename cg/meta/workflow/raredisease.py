@@ -107,7 +107,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_pipeline_parameters(self, case_id: str) -> PipelineParameters:
         """Return parameters."""
         LOG.info("Getting parameters information")
-        concat_configs([self.config_platform, self.config_params, self.config_resources], self.get_params_file_path(case_id=case_id))
+        concat_configs(
+            [self.config_platform, self.config_params, self.config_resources],
+            self.get_params_file_path(case_id=case_id),
+        )
 
         # return PipelineParameters(
         #     cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",

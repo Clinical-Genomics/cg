@@ -19,7 +19,6 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_WORKDIR,
 )
 from cg.cli.workflow.taxprofiler.options import (
-
     OPTION_INSTRUMENT_PLATFORM,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
