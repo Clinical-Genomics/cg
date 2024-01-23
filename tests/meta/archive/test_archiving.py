@@ -82,7 +82,7 @@ def test_transfer_payload_model_dump(transfer_payload: TransferPayload):
     # GIVEN a TransferPayload object with two MiriaObject objects
 
     # WHEN obtaining the dict representation
-    dict_representation: dict = transfer_payload.model_dump()
+    dict_representation: dict = transfer_payload.model_dump(by_alias=True)
 
     # THEN the following fields should exist
     assert dict_representation.get("pathInfo", None)

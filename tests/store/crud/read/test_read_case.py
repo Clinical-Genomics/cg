@@ -1,9 +1,91 @@
+"""Tests the findbusinessdata part of the Cg store API related to the Case model."""
 from datetime import datetime, timedelta
 
-from cg.constants import DataDelivery, Pipeline, Priority
-from cg.constants.constants import CaseActions
+from cg.constants import DataDelivery, Priority
+from cg.constants.constants import CaseActions, Pipeline
 from cg.store import Store
 from cg.store.models import Analysis, Case, CaseSample
+
+
+def test_get_cases_by_customer_and_case_name_search(store_with_cases_and_customers: Store):
+    """Test that only cases with the specified customer and case name search pattern are returned."""
+    # GIVEN a store with some cases and customers
+    case = store_with_cases_and_customers._get_query(table=Case).first()
+    case_name_search = case.name[:3]
+    customer = case.customer
+
+    # WHEN calling filtering with the customer and case_name_search
+    filtered_cases = store_with_cases_and_customers.get_cases_by_customer_and_case_name_search(
+        customer=customer, case_name_search=case_name_search
+    )
+
+    # THEN cases with the specified customer and case name search pattern should be returned
+    for case in filtered_cases:
+        assert case_name_search in case.name
+        assert case.customer == customer
+
+
+def test_get_cases_by_customers_action_and_case_search_pattern(
+    store_with_cases_and_customers: Store,
+):
+    """Test that only cases with the specified customers, action, and case search pattern are returned."""
+    # GIVEN a store with some cases and customers
+    case = store_with_cases_and_customers._get_query(table=Case).first()
+    customer = case.customer
+    assert case, customer
+
+    action = case.action
+    case_search = case.name[:3]
+
+    # WHEN calling get_cases_by_customers_action_and_case_search_pattern with customers, action, and case_search
+    cases = store_with_cases_and_customers.get_cases_by_customers_action_and_case_search(
+        customers=[customer], action=action, case_search=case_search
+    )
+
+    # THEN cases with the specified customers, action, and case search pattern should be returned
+    for case in cases:
+        assert case.customer == customer
+        assert case.action == action
+        assert case_search in case.name
+
+
+def test_get_cases_by_customer_pipeline_and_case_search_pattern(
+    store_with_cases_and_customers: Store,
+):
+    """Test that only cases with the specified customer, pipeline, and case search pattern are returned."""
+    # GIVEN a store with some cases and customers
+    case = store_with_cases_and_customers._get_query(table=Case).first()
+
+    # Set the pipeline and case_search
+    customer = case.customer
+    pipeline = case.data_analysis
+    case_search = case.name[:3]
+
+    # WHEN calling get_cases_by_customer_pipeline_and_case_search_pattern with customer, pipeline, and case_search
+    cases = store_with_cases_and_customers.get_cases_by_customer_pipeline_and_case_search(
+        customer=customer, pipeline=pipeline, case_search=case_search
+    )
+
+    # THEN cases with the specified customer, pipeline, and case search pattern should be returned
+    for case in cases:
+        assert case.customer == customer
+        assert case.data_analysis == pipeline
+        assert case_search in case.name
+
+
+def test_get_running_cases_in_pipeline(store_with_cases_and_customers: Store):
+    """Test that only cases with the specified pipeline, and have action "running" are returned."""
+    # GIVEN a store with some cases
+
+    # WHEN getting cases with a pipeline and are running
+    cases: list[Case] = store_with_cases_and_customers.get_running_cases_in_pipeline(
+        pipeline=Pipeline.MIP_DNA
+    )
+
+    # THEN cases with the specified pipeline, and case action is returned
+    for case in cases:
+        assert case.action == CaseActions.RUNNING
+        assert case.data_analysis == Pipeline.MIP_DNA
 
 
 def test_delivered_at_affects_tat(base_store: Store, helpers):
@@ -1347,7 +1429,7 @@ def test_one_of_two_samples_received(base_store: Store, helpers):
     # WHEN getting active cases
     cases = base_store.cases()
 
-    # THEN cases should contain number of received samples
+    # THEN cases should contain the number of received samples
     assert cases
     for case in cases:
         assert case.get("total_samples") == 2
@@ -1471,7 +1553,7 @@ def test_case_without_samples(base_store: Store, helpers):
 
 
 def test_case_included(base_store: Store, helpers):
-    """Test to that cases displays case in database"""
+    """Test to that cases displays case in the database"""
 
     # GIVEN a database with a case
     new_case = add_case(helpers, base_store)

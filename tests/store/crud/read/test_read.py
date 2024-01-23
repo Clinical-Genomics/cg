@@ -1,29 +1,537 @@
-"""Tests the findbusinessdata part of the Cg store API."""
 import logging
 from datetime import datetime
 
 import pytest
 from sqlalchemy.orm import Query
 
-from cg.constants import FlowCellStatus
-from cg.constants.constants import CaseActions, Pipeline
+from cg.constants import FlowCellStatus, Priority
+from cg.constants.constants import CaseActions, MicrosaltAppTags, Pipeline
+from cg.constants.subject import PhenotypeStatus
 from cg.exc import CgError
 from cg.store import Store
 from cg.store.models import (
+    Analysis,
     Application,
     ApplicationLimitations,
     ApplicationVersion,
+    Bed,
+    BedVersion,
     Case,
     CaseSample,
+    Collaboration,
     Customer,
     Flowcell,
     Invoice,
+    Organism,
     Pool,
     Sample,
     SampleLaneSequencingMetrics,
+    User,
 )
 from tests.store.conftest import StoreConstants
 from tests.store_helpers import StoreHelpers
+
+
+def test_get_bed_by_entry_id(base_store: Store, entry_id: int = 1):
+    """Test returning panel bed by entry id."""
+
+    # GIVEN a store with bed records
+
+    # WHEN getting the query for the bed
+    bed: Bed = base_store.get_bed_by_entry_id(entry_id)
+
+    # THEN return a bed with the supplied bed id
+    assert bed.id == entry_id
+
+
+def test_get_bed_by_bed_name(base_store: Store, bed_name: str):
+    """Test returning panel bed by name."""
+
+    # GIVEN a store with bed records
+
+    # WHEN getting the query for the bed
+    bed: Bed = base_store.get_bed_by_name(bed_name)
+
+    # THEN return a bed with the supplied bed id
+    assert bed.name == bed_name
+
+
+def test_get_active_beds(base_store: Store):
+    """Test returning not archived bed records from the database."""
+
+    # GIVEN a store with beds
+
+    # WHEN fetching beds
+    beds: Query = base_store.get_active_beds()
+
+    # THEN beds should have been returned
+    assert beds
+
+    # THEN the bed records should not be archived
+    for bed in beds:
+        assert bed.is_archived is False
+
+
+def test_get_active_beds_when_archived(base_store: Store):
+    """Test returning not archived bed records from the database when archived."""
+
+    # GIVEN a store with beds
+    beds: Query = base_store.get_active_beds()
+    for bed in beds:
+        bed.is_archived = True
+        base_store.session.add(bed)
+        base_store.session.commit()
+
+    # WHEN fetching beds
+    active_beds: Query = base_store.get_active_beds()
+
+    # THEN return no beds
+    assert not list(active_beds)
+
+
+def test_get_application_by_tag(microbial_store: Store, tag: str = MicrosaltAppTags.MWRNXTR003):
+    """Test function to return the application by tag."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    application: Application = microbial_store.get_application_by_tag(tag=tag)
+
+    # THEN return a application with the supplied application tag
+    assert application.tag == tag
+
+
+def test_get_applications_is_not_archived(
+    microbial_store: Store, expected_number_of_not_archived_applications
+):
+    """Test function to return the application when not archived."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    applications: list[Application] = microbial_store.get_applications_is_not_archived()
+
+    # THEN return an application with the supplied application tag
+    assert len(applications) == expected_number_of_not_archived_applications
+    for application in applications:
+        assert not application.is_archived
+
+
+def test_case_in_uploaded_observations(helpers: StoreHelpers, sample_store: Store, loqusdb_id: str):
+    """Test retrieval of uploaded observations."""
+
+    # GIVEN a case with observations that has been uploaded to Loqusdb
+    analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    analysis.case.customer.loqus_upload = True
+    sample: Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
+    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
+    sample_store.session.add(link)
+    assert analysis.case.analyses
+    for link in analysis.case.links:
+        assert link.sample.loqusdb_id is not None
+
+    # WHEN getting observations to upload
+    uploaded_observations: Query = sample_store.observations_uploaded()
+
+    # THEN the case should be in the returned query
+    assert analysis.case in uploaded_observations
+
+
+def test_case_not_in_uploaded_observations(helpers: StoreHelpers, sample_store: Store):
+    """Test retrieval of uploaded observations that have not been uploaded to Loqusdb."""
+
+    # GIVEN a case with observations that has not been uploaded to loqusdb
+    analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    analysis.case.customer.loqus_upload = True
+    sample: Sample = helpers.add_sample(sample_store)
+    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
+    sample_store.session.add(link)
+    assert analysis.case.analyses
+    for link in analysis.case.links:
+        assert link.sample.loqusdb_id is None
+
+    # WHEN getting observations to upload
+    uploaded_observations: Query = sample_store.observations_uploaded()
+
+    # THEN the case should not be in the returned query
+    assert analysis.case not in uploaded_observations
+
+
+def test_case_in_observations_to_upload(helpers: StoreHelpers, sample_store: Store):
+    """Test extraction of ready to be uploaded to Loqusdb cases."""
+
+    # GIVEN a case with completed analysis and samples w/o loqusdb_id
+    analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    analysis.case.customer.loqus_upload = True
+    sample: Sample = helpers.add_sample(sample_store)
+    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
+    sample_store.session.add(link)
+    assert analysis.case.analyses
+    for link in analysis.case.links:
+        assert link.sample.loqusdb_id is None
+
+    # WHEN getting observations to upload
+    observations_to_upload: Query = sample_store.observations_to_upload()
+
+    # THEN the case should be in the returned query
+    assert analysis.case in observations_to_upload
+
+
+def test_case_not_in_observations_to_upload(
+    helpers: StoreHelpers, sample_store: Store, loqusdb_id: str
+):
+    """Test case extraction that should not be uploaded to Loqusdb."""
+
+    # GIVEN a case with completed analysis and samples with a Loqusdb ID
+    analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    analysis.case.customer.loqus_upload = True
+    sample: Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
+    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
+    sample_store.session.add(link)
+    assert analysis.case.analyses
+    for link in analysis.case.links:
+        assert link.sample.loqusdb_id is not None
+
+    # WHEN getting observations to upload
+    observations_to_upload: Query = sample_store.observations_to_upload()
+
+    # THEN the case should not be in the returned query
+    assert analysis.case not in observations_to_upload
+
+
+def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
+    """Test analyses to upload with no completed_at date."""
+    # GIVEN a store with an analysis without a completed_at date
+    helpers.add_analysis(store=sample_store)
+
+    # WHEN fetching all analyses that are ready for upload
+    records: list[Analysis] = [
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload()
+    ]
+
+    # THEN no analysis object should be returned since they did not have a completed_at entry
+    assert len(records) == 0
+
+
+def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
+    """Test analyses to upload with no pipeline specified."""
+    # GIVEN a store with one analysis
+    helpers.add_analysis(store=sample_store, completed_at=timestamp)
+
+    # WHEN fetching all analysis that are ready for upload without specifying pipeline
+    records: list[Analysis] = [
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=None)
+    ]
+
+    # THEN one analysis object should be returned
+    assert len(records) == 1
+
+
+def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, timestamp):
+    """Test analyses to upload to when existing pipeline."""
+    # GIVEN a store with an analysis that has been run with MIP
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
+
+    # WHEN fetching all analyses that are ready for upload and analysed with MIP
+    records: list[Analysis] = [
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=None)
+    ]
+
+    # THEN one analysis object should be returned
+    assert len(records) == 1
+
+
+def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, timestamp):
+    """Test analyses to upload to when existing pipeline and using it in filtering."""
+    # GIVEN a store with an analysis that is analysed with MIP
+    pipeline = Pipeline.MIP_DNA
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=pipeline)
+
+    # WHEN fetching all pipelines that are analysed with MIP
+    records: list[Analysis] = [
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=pipeline)
+    ]
+
+    for analysis_obj in records:
+        # THEN the pipeline should be MIP in the analysis object
+        assert analysis_obj.pipeline == str(pipeline)
+
+
+def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_store, timestamp):
+    """Test analyses to upload to when existing pipeline and using it in filtering."""
+    # GIVEN a store with an analysis that is analysed with MIP but does not have a completed_at
+    pipeline = Pipeline.MIP_DNA
+    helpers.add_analysis(store=sample_store, completed_at=None, pipeline=pipeline)
+
+    # WHEN fetching all analyses that are ready for upload and analysed by MIP
+    records: list[Analysis] = [
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=pipeline)
+    ]
+
+    # THEN no analysis object should be returned since they where not completed
+    assert len(records) == 0
+
+
+def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample_store, timestamp):
+    """Test analyses to upload to when missing pipeline and using it in filtering."""
+    # GIVEN a store with an analysis that has been analysed with "missing_pipeline"
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
+
+    # WHEN fetching all analyses that was analysed with MIP
+    records: list[Analysis] = [
+        analysis_obj
+        for analysis_obj in sample_store.get_analyses_to_upload(pipeline=Pipeline.FASTQ)
+    ]
+
+    # THEN no analysis object should be returned, since there were no MIP analyses
+    assert len(records) == 0
+
+
+def test_set_case_action(analysis_store: Store, case_id):
+    """Tests if actions of cases are changed to analyze."""
+    # Given a store with a case with action None
+    action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
+
+    assert action is None
+
+    # When setting the case to "analyze"
+    analysis_store.set_case_action(case_internal_id=case_id, action="analyze")
+    new_action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
+
+    # Then the action should be set to analyze
+    assert new_action == "analyze"
+
+
+def test_sequencing_qc_priority_express_sample_with_one_half_of_the_reads(
+    base_store: Store, helpers, timestamp_now
+):
+    """Test if priority express sample(s), having more than 50% of the application target reads, pass sample QC."""
+
+    # GIVEN a database with a case which has an express sample with half the number of reads
+    sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
+    application: Application = sample.application_version.application
+    application.target_reads = 40
+    sample.reads = 20
+    sample.priority = Priority.express
+
+    # WHEN retrieving the sequencing qc property of a express sample
+    sequencing_qc_ok: bool = sample.sequencing_qc
+
+    # THEN the qc property should be True
+    assert sequencing_qc_ok
+
+
+def test_sequencing_qc_priority_standard_sample_with_one_half_of_the_reads(
+    base_store: Store, helpers, timestamp_now
+):
+    """Test if priority standard sample(s), having more than 50% of the application target reads, pass sample QC."""
+
+    # GIVEN a database with a case which has a normal sample with half the number of reads
+    sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
+    application: Application = sample.application_version.application
+    application.target_reads = 40
+    sample.reads = 20
+    sample.priority = Priority.standard
+
+    # WHEN retrieving the sequencing qc property of a normal sample
+    sequencing_qc_ok: bool = sample.sequencing_qc
+
+    # THEN the qc property should be False
+    assert not sequencing_qc_ok
+
+
+def test_get_applications(microbial_store: Store, expected_number_of_applications):
+    """Test function to return the applications."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    applications: list[Application] = microbial_store.get_applications()
+
+    # THEN return an application with the supplied application tag
+    assert len(applications) == expected_number_of_applications
+
+
+def test_get_bed_version_query(base_store: Store):
+    """Test function to return the bed version query."""
+
+    # GIVEN a store with bed versions records
+
+    # WHEN getting the query for the bed versions
+    bed_version_query: Query = base_store._get_query(table=BedVersion)
+
+    # THEN a query should be returned
+    assert isinstance(bed_version_query, Query)
+
+
+def test_get_bed_version_by_file_name(base_store: Store, bed_version_file_name: str):
+    """Test function to return the bed version by file name."""
+
+    # GIVEN a store with bed versions records
+
+    # WHEN getting the query for the bed versions
+    bed_version: BedVersion = base_store.get_bed_version_by_file_name(
+        bed_version_file_name=bed_version_file_name
+    )
+
+    # THEN return a bed version with the supplied bed version file_name
+    assert bed_version.filename == bed_version_file_name
+
+
+def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name: str):
+    """Test function to return the bed version by short name."""
+
+    # GIVEN a store with bed versions records
+
+    # WHEN getting the query for the bed versions
+    bed_version: BedVersion = base_store.get_bed_version_by_short_name(
+        bed_version_short_name=bed_version_short_name
+    )
+
+    # THEN return a bed version with the supplied bed version short name
+    assert bed_version.shortname == bed_version_short_name
+
+
+def test_get_customer_by_internal_id(base_store: Store, customer_id: str):
+    """Test function to return the customer by customer id."""
+
+    # GIVEN a store with customer records
+
+    # WHEN getting the query for the customer
+    customer: Customer = base_store.get_customer_by_internal_id(customer_internal_id=customer_id)
+
+    # THEN return a customer with the supplied customer internal id
+    assert customer.internal_id == customer_id
+
+
+def test_get_customers(base_store: Store, customer_id: str):
+    """Test function to return customers."""
+
+    # GIVEN a store with customer records
+
+    # WHEN getting the customers
+    customers: list[Customer] = base_store.get_customers()
+
+    # THEN return customers
+    assert customers
+
+    # THEN return a customer with the database customer internal id
+    assert customers[0].internal_id == customer_id
+
+
+def test_get_collaboration_by_internal_id(base_store: Store, collaboration_id: str):
+    """Test function to return the collaborations by internal_id."""
+
+    # GIVEN a store with collaborations
+
+    # WHEN getting the query for the collaborations
+    collaboration: Collaboration = base_store.get_collaboration_by_internal_id(
+        internal_id=collaboration_id
+    )
+
+    # THEN return a collaboration with the give collaboration internal_id
+    assert collaboration.internal_id == collaboration_id
+
+
+def test_get_organism_by_internal_id_returns_correct_organism(store_with_organisms: Store):
+    """Test finding an organism by internal ID when the ID exists."""
+
+    # GIVEN a store with multiple organisms
+    organisms: Query = store_with_organisms._get_query(table=Organism)
+    assert organisms.count() > 0
+
+    # GIVEN a random organism from the store
+    organism: Organism = organisms.first()
+    assert isinstance(organism, Organism)
+
+    # WHEN finding the organism by internal ID
+    filtered_organism = store_with_organisms.get_organism_by_internal_id(organism.internal_id)
+
+    # THEN the filtered organism should be of instance Organism
+    assert isinstance(filtered_organism, Organism)
+
+    # THEN the filtered organism should match the database organism internal id
+    assert filtered_organism.internal_id == organism.internal_id
+
+
+def test_get_organism_by_internal_id_returns_none_when_id_does_not_exist(
+    store_with_organisms: Store,
+    non_existent_id: str,
+):
+    """Test finding an organism by internal ID when the ID does not exist."""
+
+    # GIVEN a store with multiple organisms
+    organisms: Query = store_with_organisms._get_query(table=Organism)
+    assert organisms.count() > 0
+
+    # WHEN finding the organism by internal ID that does not exist
+    filtered_organism: Organism = store_with_organisms.get_organism_by_internal_id(
+        internal_id=non_existent_id
+    )
+
+    # THEN the filtered organism should be None
+    assert filtered_organism is None
+
+
+def test_get_organism_by_internal_id_returns_none_when_id_is_none(
+    store_with_organisms: Store,
+):
+    """Test finding an organism by internal ID None returns None."""
+
+    # GIVEN a store with multiple organisms
+    organisms: Query = store_with_organisms._get_query(table=Organism)
+    assert organisms.count() > 0
+
+    # WHEN finding the organism by internal ID None
+    filtered_organism: Organism = store_with_organisms.get_organism_by_internal_id(internal_id=None)
+
+    # THEN the filtered organism should be None
+    assert filtered_organism is None
+
+
+def test_get_user_by_email_returns_correct_user(store_with_users: Store):
+    """Test fetching a user by email."""
+
+    # GIVEN a store with multiple users
+    num_users: int = store_with_users._get_query(table=User).count()
+    assert num_users > 0
+
+    # Select a random user from the store
+    user: User = store_with_users._get_query(table=User).first()
+    assert user is not None
+
+    # WHEN fetching the user by email
+    filtered_user: User = store_with_users.get_user_by_email(email=user.email)
+
+    # THEN a user should be returned
+    assert isinstance(filtered_user, User)
+
+    # THEN the email should match
+    assert filtered_user.email == user.email
+
+
+def test_get_user_by_email_returns_none_for_nonexisting_email(
+    store_with_users: Store, non_existent_email: str
+):
+    """Test getting user by email when the email does not exist."""
+
+    # GIVEN a non-existing email
+
+    # WHEN retrieving the user by email
+    filtered_user: User = store_with_users.get_user_by_email(email=non_existent_email)
+
+    # THEN no user should be returned
+    assert filtered_user is None
+
+
+def test_get_user_when_email_is_none_returns_none(store_with_users: Store):
+    """Test getting user by email when the email is None."""
+
+    # WHEN retrieving filtering by email None
+    filtered_user: User = store_with_users.get_user_by_email(email=None)
+
+    # THEN no user should be returned
+    assert filtered_user is None
 
 
 def test_get_analysis_by_case_entry_id_and_started_at(
@@ -507,7 +1015,7 @@ def test_verify_case_exists(
 
 
 def test_verify_case_exists_with_non_existing_case(
-    caplog, case_id_does_not_exist: str, store_with_multiple_cases_and_samples: Store
+    case_id_does_not_exist: str, store_with_multiple_cases_and_samples: Store
 ):
     """Test validating a case that does not exist in the database."""
 
@@ -520,11 +1028,10 @@ def test_verify_case_exists_with_non_existing_case(
         )
 
         # THEN the case is not found
-        assert f"Case {case_id_does_not_exist} could not be found in Status DB!" in caplog.text
 
 
 def test_verify_case_exists_with_no_case_samples(
-    caplog, case_id_without_samples: str, store_with_multiple_cases_and_samples: Store
+    case_id_without_samples: str, store_with_multiple_cases_and_samples: Store
 ):
     """Test validating a case without samples that exist in the database."""
 
@@ -537,7 +1044,6 @@ def test_verify_case_exists_with_no_case_samples(
         )
 
         # THEN the case is found, but has no samples
-        assert "Case {case_id} has no samples in in Status DB!" in caplog.text
 
 
 def test_is_case_down_sampled_true(base_store: Store, case: Case, sample_id: str):

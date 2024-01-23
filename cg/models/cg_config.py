@@ -123,6 +123,12 @@ class BalsamicConfig(CommonAppConfig):
     balsamic_cache: str
     bed_path: str
     binary_path: str
+    cadd_path: str
+    genome_interval_path: str
+    gnomad_af5_path: str
+    gens_coverage_female_path: str
+    gens_coverage_male_path: str
+    conda_binary: str
     conda_env: str
     loqusdb_path: str
     pon_path: str

@@ -101,6 +101,7 @@ class BalsamicProtectedTags:
     ]
     VARIANT_CALLERS: list[list[str]] = [
         ["ascatngs"],
+        ["visualization"],
         ["cnv-report"],
         ["cnvkit"],
         ["delly"],

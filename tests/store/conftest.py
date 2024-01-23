@@ -1,12 +1,15 @@
 """Fixtures for store tests."""
 import datetime as dt
 import enum
+from datetime import datetime
 from typing import Generator
 
 import pytest
 
 from cg.constants import Pipeline
+from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus, Sex
+from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.store import Store
 from cg.store.models import (
     Analysis,
@@ -454,3 +457,134 @@ def store_with_analyses_for_cases(
         )
         analysis_store.session.add(link)
     return analysis_store
+
+
+@pytest.fixture
+def rml_pool_store(
+    case_id: str,
+    customer_id: str,
+    helpers,
+    sample_id: str,
+    store: Store,
+    ticket_id: str,
+    timestamp_now: datetime,
+):
+    new_customer = store.add_customer(
+        internal_id=customer_id,
+        name="Test customer",
+        scout_access=True,
+        invoice_address="skolgatan 15",
+        invoice_reference="abc",
+    )
+    store.session.add(new_customer)
+
+    application = store.add_application(
+        tag="RMLP05R800",
+        prep_category="rml",
+        description="Ready-made",
+        percent_kth=80,
+        percent_reads_guaranteed=75,
+        sequencing_depth=0,
+        target_reads=800,
+    )
+    store.session.add(application)
+
+    app_version = store.add_application_version(
+        application=application,
+        version=1,
+        valid_from=timestamp_now,
+        prices={
+            PriorityTerms.STANDARD: 12,
+            PriorityTerms.PRIORITY: 222,
+            PriorityTerms.EXPRESS: 123,
+            PriorityTerms.RESEARCH: 12,
+        },
+    )
+    store.session.add(app_version)
+
+    new_pool = store.add_pool(
+        customer=new_customer,
+        name="Test",
+        order="Test",
+        ordered=dt.datetime.now(),
+        application_version=app_version,
+    )
+    store.session.add(new_pool)
+    new_case = helpers.add_case(
+        store=store,
+        internal_id=case_id,
+        name=PoolSubmitter.create_case_name(ticket=ticket_id, pool_name="Test"),
+    )
+    store.session.add(new_case)
+
+    new_sample = helpers.add_sample(
+        store=store,
+        application_tag=application.tag,
+        application_type=application.prep_category,
+        customer_id=new_customer.id,
+        internal_id=sample_id,
+    )
+    new_sample.application_version = app_version
+    store.session.add(new_sample)
+    store.session.commit()
+
+    helpers.add_relationship(
+        store=store,
+        sample=new_sample,
+        case=new_case,
+    )
+
+    yield store
+
+
+@pytest.fixture
+def store_with_analyses_for_cases_not_uploaded_fluffy(
+    analysis_store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: datetime,
+    timestamp_yesterday: datetime,
+) -> Store:
+    """Return a store with two analyses for two cases and pipeline."""
+    case_one = analysis_store.get_case_by_internal_id("yellowhog")
+    case_two = helpers.add_case(analysis_store, internal_id="test_case_1")
+
+    cases = [case_one, case_two]
+    for case in cases:
+        oldest_analysis = helpers.add_analysis(
+            analysis_store,
+            case=case,
+            started_at=timestamp_yesterday,
+            uploaded_at=timestamp_yesterday,
+            delivery_reported_at=None,
+            pipeline=Pipeline.FLUFFY,
+        )
+        helpers.add_analysis(
+            analysis_store,
+            case=case,
+            started_at=timestamp_now,
+            uploaded_at=None,
+            delivery_reported_at=None,
+            pipeline=Pipeline.FLUFFY,
+        )
+        sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
+        link: CaseSample = analysis_store.relate_sample(
+            case=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
+        )
+        analysis_store.session.add(link)
+    return analysis_store
+
+
+@pytest.fixture
+def store_with_samples_for_multiple_customers(
+    store: Store, helpers: StoreHelpers, timestamp_now: datetime
+) -> Store:
+    """Return a store with two samples for three different customers."""
+    for number in range(3):
+        helpers.add_sample(
+            store=store,
+            customer_id="".join(["cust00", str(number)]),
+            internal_id="_".join(["test_sample", str(number)]),
+            no_invoice=False,
+            delivered_at=timestamp_now,
+        )
+    yield store
