@@ -67,7 +67,7 @@ class SequencingMetric(BaseModel):
     pct_adapter: float | None
 
 
-class MIPDNAMetric(BaseModel):
+class RareDiseaseMetric(BaseModel):
     sex: str
 
 
