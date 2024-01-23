@@ -5,7 +5,7 @@ import petname
 
 from cg.constants import DataDelivery, FlowCellStatus, Pipeline, Priority
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
-from cg.store.api.base import BaseHandler
+from cg.store.base import BaseHandler
 from cg.store.models import (
     Analysis,
     Application,

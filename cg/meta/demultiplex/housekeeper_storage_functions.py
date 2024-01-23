@@ -17,7 +17,7 @@ from cg.meta.demultiplex.utils import (
     rename_fastq_file_if_needed,
 )
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.store import Store
+from cg.store.store import Store
 from cg.utils.files import get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)

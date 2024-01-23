@@ -15,8 +15,8 @@ from cg.constants.constants import SARS_COV_REGEX
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
-from cg.store import Store
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 from cg.utils.email import send_mail
 
 LOG = logging.getLogger(__name__)

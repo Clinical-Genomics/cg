@@ -13,8 +13,8 @@ from cg.exc import (
     HousekeeperFileMissingError,
 )
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
+from cg.store.store import Store
 from cg.utils.files import remove_directory_and_contents
 from cg.utils.time import is_directory_older_than_days_old
 

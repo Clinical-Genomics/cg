@@ -46,9 +46,9 @@ from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
-from cg.store import Store
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Case, Customer, Organism, Sample
+from cg.store.store import Store
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -1202,8 +1202,8 @@ def wgs_application_tag() -> str:
     return "WGSPCFC030"
 
 
-@pytest.fixture(name="store")
-def store() -> Store:
+@pytest.fixture
+def store() -> Generator[Store, None, None]:
     """Return a CG store."""
     initialize_database("sqlite:///")
     _store = Store()
@@ -1254,7 +1254,7 @@ def prices() -> dict[str, int]:
     return {"standard": 10, "priority": 20, "express": 30, "research": 5}
 
 
-@pytest.fixture(name="base_store")
+@pytest.fixture
 def base_store(
     apptag_rna: str,
     bed_name: str,
@@ -1265,7 +1265,7 @@ def base_store(
     invoice_reference: str,
     store: Store,
     prices: dict[str, int],
-) -> Store:
+) -> Generator[Store, None, None]:
     """Setup and example store."""
     collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
 
@@ -1968,8 +1968,8 @@ def store_with_panels(store: Store, helpers: StoreHelpers):
     yield store
 
 
-@pytest.fixture(name="store_with_organisms")
-def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
+@pytest.fixture
+def store_with_organisms(store: Store, helpers: StoreHelpers) -> Generator[Store, None, None]:
     """Return a store with multiple organisms."""
 
     organism_details = [
@@ -2016,8 +2016,8 @@ def non_existent_id():
     return "non_existent_entity_id"
 
 
-@pytest.fixture(name="store_with_users")
-def store_with_users(store: Store, helpers: StoreHelpers) -> Store:
+@pytest.fixture
+def store_with_users(store: Store, helpers: StoreHelpers) -> Generator[Store, None, None]:
     """Return a store with multiple users."""
 
     customer: Customer = helpers.ensure_customer(store=store)
@@ -2037,8 +2037,10 @@ def store_with_users(store: Store, helpers: StoreHelpers) -> Store:
     yield store
 
 
-@pytest.fixture(name="store_with_cases_and_customers")
-def store_with_cases_and_customers(store: Store, helpers: StoreHelpers) -> Store:
+@pytest.fixture
+def store_with_cases_and_customers(
+    store: Store, helpers: StoreHelpers
+) -> Generator[Store, None, None]:
     """Return a store with cases and customers."""
 
     customer_details: list[tuple[str, str, bool]] = [

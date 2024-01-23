@@ -28,7 +28,7 @@ from cg.utils.date import get_date_days_ago
 
 @dataclass
 class BaseHandler:
-    """All models in one base class."""
+    """All queries in one base class."""
 
     def __init__(self, session: Session):
         self.session = session

@@ -4,7 +4,6 @@ from sqlalchemy.orm import Query
 
 from cg.constants.constants import SampleType
 from cg.constants.subject import PhenotypeStatus, Sex
-from cg.store import Store
 from cg.store.filters.status_sample_filters import (
     filter_samples_by_entry_customer_ids,
     filter_samples_by_entry_id,
@@ -30,6 +29,7 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_without_loqusdb_id,
 )
 from cg.store.models import CaseSample, Sample
+from cg.store.store import Store
 from tests.store.conftest import StoreConstants
 from tests.store_helpers import StoreHelpers
 

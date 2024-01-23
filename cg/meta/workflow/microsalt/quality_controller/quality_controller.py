@@ -1,14 +1,20 @@
 import logging
 from pathlib import Path
-from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
 
-from cg.meta.workflow.microsalt.metrics_parser import MetricsParser, QualityMetrics, SampleMetrics
+from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
+from cg.meta.workflow.microsalt.metrics_parser import (
+    MetricsParser,
+    QualityMetrics,
+    SampleMetrics,
+)
 from cg.meta.workflow.microsalt.quality_controller.models import (
     CaseQualityResult,
     QualityResult,
     SampleQualityResult,
 )
-from cg.meta.workflow.microsalt.quality_controller.report_generator import ReportGenerator
+from cg.meta.workflow.microsalt.quality_controller.report_generator import (
+    ReportGenerator,
+)
 from cg.meta.workflow.microsalt.quality_controller.result_logger import ResultLogger
 from cg.meta.workflow.microsalt.quality_controller.utils import (
     get_application_tag,
@@ -16,18 +22,18 @@ from cg.meta.workflow.microsalt.quality_controller.utils import (
     get_report_path,
     get_sample_target_reads,
     has_non_microbial_apptag,
-    is_sample_negative_control,
     has_valid_10x_coverage,
     has_valid_average_coverage,
     has_valid_duplication_rate,
     has_valid_mapping_rate,
     has_valid_median_insert_size,
+    is_sample_negative_control,
     is_valid_total_reads,
     is_valid_total_reads_for_negative_control,
     quality_control_case,
 )
-from cg.store.api.core import Store
 from cg.store.models import Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

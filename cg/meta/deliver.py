@@ -12,8 +12,8 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
 from cg.exc import MissingFilesError
-from cg.store import Store
 from cg.store.models import Case, CaseSample, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

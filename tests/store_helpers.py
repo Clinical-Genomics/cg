@@ -11,7 +11,6 @@ from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import PhenotypeStatus, Sex
-from cg.store import Store
 from cg.store.models import (
     Analysis,
     Application,
@@ -32,6 +31,7 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     User,
 )
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

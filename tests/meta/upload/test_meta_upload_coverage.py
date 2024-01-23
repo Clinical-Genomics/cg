@@ -5,8 +5,8 @@ from datetime import datetime
 from cg.apps.coverage.api import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.coverage import UploadCoverageApi
-from cg.store import Store
 from cg.store.models import Case
+from cg.store.store import Store
 
 
 class MockAnalysis:

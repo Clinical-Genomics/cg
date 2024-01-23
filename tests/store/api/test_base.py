@@ -2,8 +2,8 @@
 from sqlalchemy.orm import Query
 
 from cg.constants.subject import PhenotypeStatus
-from cg.store.api.core import Store
 from cg.store.models import CaseSample
+from cg.store.store import Store
 
 
 def test_get_latest_analyses_for_cases_query(

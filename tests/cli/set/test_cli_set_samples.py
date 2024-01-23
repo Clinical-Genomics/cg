@@ -5,7 +5,7 @@ import pytest
 
 from cg.cli.set.base import samples
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 
 SUCCESS = 0
 

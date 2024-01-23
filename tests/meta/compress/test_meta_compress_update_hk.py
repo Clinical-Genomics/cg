@@ -7,8 +7,8 @@ from housekeeper.store.models import File, Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import HK_FASTQ_TAGS, SequencingFileTag
 from cg.meta.compress import CompressAPI, files
-from cg.store import Store
 from cg.store.models import Sample
+from cg.store.store import Store
 from tests.cli.conftest import MockCompressAPI
 from tests.meta.compress.conftest import MockCompressionData
 from tests.store_helpers import StoreHelpers
