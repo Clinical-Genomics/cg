@@ -572,3 +572,19 @@ def store_with_analyses_for_cases_not_uploaded_fluffy(
         )
         analysis_store.session.add(link)
     return analysis_store
+
+
+@pytest.fixture
+def store_with_samples_for_multiple_customers(
+    store: Store, helpers: StoreHelpers, timestamp_now: datetime
+) -> Store:
+    """Return a store with two samples for three different customers."""
+    for number in range(3):
+        helpers.add_sample(
+            store=store,
+            customer_id="".join(["cust00", str(number)]),
+            internal_id="_".join(["test_sample", str(number)]),
+            no_invoice=False,
+            delivered_at=timestamp_now,
+        )
+    yield store
