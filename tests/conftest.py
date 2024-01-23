@@ -1254,7 +1254,7 @@ def prices() -> dict[str, int]:
     return {"standard": 10, "priority": 20, "express": 30, "research": 5}
 
 
-@pytest.fixture(name="base_store")
+@pytest.fixture
 def base_store(
     apptag_rna: str,
     bed_name: str,
@@ -1265,7 +1265,7 @@ def base_store(
     invoice_reference: str,
     store: Store,
     prices: dict[str, int],
-) -> Store:
+) -> Generator[Store, None, None]:
     """Setup and example store."""
     collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
 
