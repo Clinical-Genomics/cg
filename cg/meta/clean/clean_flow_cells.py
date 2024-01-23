@@ -7,7 +7,11 @@ from housekeeper.store.models import File
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS
-from cg.exc import CleanFlowCellFailedError, HousekeeperFileMissingError
+from cg.exc import (
+    CleanFlowCellFailedError,
+    HousekeeperBundleVersionMissingError,
+    HousekeeperFileMissingError,
+)
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
@@ -165,11 +169,14 @@ class CleanFlowCellAPI:
         bundle_names: list[str] = [sample.internal_id for sample in flow_cell.samples]
         files: list[File] = []
         for bundle_name in bundle_names:
-            files.extend(
-                self.hk_api.get_files_from_latest_version(
-                    bundle_name=bundle_name, tags=[tag, self.flow_cell.id]
-                ).all()
-            )
+            try:
+                files.extend(
+                    self.hk_api.get_files_from_latest_version(
+                        bundle_name=bundle_name, tags=[tag, self.flow_cell.id]
+                    ).all()
+                )
+            except HousekeeperBundleVersionMissingError:
+                continue
         if not files:
             LOG.warning(f"No files with tag {tag} found on flow cell {self.flow_cell.id}")
             return None
