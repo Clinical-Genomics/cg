@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus
-from cg.store import Store
 from cg.store.filters.status_flow_cell_filters import (
     filter_flow_cell_by_name,
     filter_flow_cell_by_name_search,
@@ -9,6 +8,7 @@ from cg.store.filters.status_flow_cell_filters import (
     filter_flow_cells_with_statuses,
 )
 from cg.store.models import Case, Flowcell, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

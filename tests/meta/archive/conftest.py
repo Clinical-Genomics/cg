@@ -21,8 +21,8 @@ from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import AuthToken, MiriaObject, TransferPayload
 from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import CGConfig, DataFlowConfig
-from cg.store import Store
 from cg.store.models import Case, Customer, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

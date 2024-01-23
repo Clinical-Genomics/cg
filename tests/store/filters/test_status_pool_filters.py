@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Query
 
-from cg.store import Store
 from cg.store.filters.status_pool_filters import (
     filter_pools_by_customer_id,
     filter_pools_by_invoice_id,
@@ -14,6 +13,7 @@ from cg.store.filters.status_pool_filters import (
     filter_pools_without_invoice_id,
 )
 from cg.store.models import Pool
+from cg.store.store import Store
 from tests.store.conftest import StoreConstants
 
 

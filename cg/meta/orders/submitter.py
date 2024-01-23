@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 
 from cg.apps.lims import LimsAPI
 from cg.models.orders.order import OrderIn
-from cg.store import Store
 from cg.store.models import Model, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

@@ -14,8 +14,8 @@ from cg.constants import Pipeline
 from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
 from cg.meta.upload.nipt.models import FlowCellQ30AndReads, StatinaUploadFiles
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Analysis, Case, Flowcell
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

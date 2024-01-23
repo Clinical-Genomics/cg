@@ -7,7 +7,6 @@ from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.subject import Sex
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import (
     Application,
     ApplicationVersion,
@@ -19,6 +18,7 @@ from cg.store.models import (
     Sample,
     User,
 )
+from cg.store.store import Store
 from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)

@@ -7,8 +7,8 @@ from cg.cli.set.base import sample
 from cg.constants import EXIT_SUCCESS, Priority
 from cg.constants.subject import Sex
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Sample
+from cg.store.store import Store
 
 
 def test_invalid_sample(cli_runner: CliRunner, base_context: CGConfig):

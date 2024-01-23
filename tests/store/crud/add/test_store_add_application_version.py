@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from cg.store import Store
 from cg.store.models import Application, ApplicationVersion
+from cg.store.store import Store
 
 
 def test_add_application_version(

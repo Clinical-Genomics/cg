@@ -11,8 +11,8 @@ from cg.cli.set.cases import set_cases
 from cg.constants import FlowCellStatus
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import ApplicationVersion, Customer, Flowcell, Sample
+from cg.store.store import Store
 
 CONFIRM = "Continue?"
 HELP_KEY_VALUE = "Give a property on sample and the value to set it to, e.g. -kv name Prov52"

@@ -21,7 +21,7 @@ from cg.meta.archive.ddn.models import MiriaObject, TransferPayload
 from cg.meta.archive.ddn.utils import get_metadata
 from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import DataFlowConfig
-from cg.store import Store
+from cg.store.store import Store
 
 FUNCTION_TO_MOCK = "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content"
 

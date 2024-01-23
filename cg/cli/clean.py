@@ -29,8 +29,8 @@ from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Analysis
+from cg.store.store import Store
 from cg.utils.date import get_date_days_ago, get_timedelta_from_date
 from cg.utils.dispatcher import Dispatcher
 from cg.utils.files import get_directories_in_path

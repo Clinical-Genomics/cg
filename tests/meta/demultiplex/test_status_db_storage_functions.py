@@ -11,8 +11,8 @@ from cg.meta.demultiplex.status_db_storage_functions import (
     update_sample_read_count,
 )
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

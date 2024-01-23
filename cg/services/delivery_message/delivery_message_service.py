@@ -1,7 +1,7 @@
 from cg.exc import CaseNotFoundError
 from cg.server.dto.delivery_message_response import DeliveryMessageResponse
 from cg.services.delivery_message.utils import get_message
-from cg.store import Store
+from cg.store.store import Store
 
 
 class DeliveryMessageService:
