@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Query
 
 from cg.constants import Pipeline
-from cg.store import Store
 from cg.store.filters.status_application_limitations_filters import (
     filter_application_limitations_by_pipeline,
     filter_application_limitations_by_tag,
 )
+from cg.store.store import Store
 from tests.store.conftest import StoreConstants
 
 

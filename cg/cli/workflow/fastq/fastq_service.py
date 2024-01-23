@@ -4,8 +4,8 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.constants.constants import AnalysisType, Pipeline
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CaseNotFoundError
-from cg.store.api.core import Store
 from cg.store.models import Analysis, Case
+from cg.store.store import Store
 
 
 class FastqService:

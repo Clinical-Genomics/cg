@@ -6,8 +6,8 @@ import click
 
 from cg.constants import Pipeline
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE
-from cg.store import Store
 from cg.store.models import Analysis
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

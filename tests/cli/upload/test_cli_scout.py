@@ -9,8 +9,8 @@ from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Case
+from cg.store.store import Store
 from tests.mocks.scout import MockScoutLoadConfig
 from tests.store_helpers import StoreHelpers
 

@@ -6,8 +6,8 @@ from click.testing import CliRunner, Result
 import cg
 from cg.cli.base import base, init
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.database import get_tables, initialize_database
+from cg.store.store import Store
 
 
 def test_cli_version(cli_runner: CliRunner):

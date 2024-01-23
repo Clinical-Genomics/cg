@@ -3,7 +3,6 @@ from typing import Iterable
 
 from sqlalchemy.orm import Query
 
-from cg.store import Store
 from cg.store.filters.status_application_version_filters import (
     filter_application_versions_before_valid_from,
     filter_application_versions_by_application_entry_id,
@@ -11,6 +10,7 @@ from cg.store.filters.status_application_version_filters import (
     order_application_versions_by_valid_from_desc,
 )
 from cg.store.models import Application, ApplicationVersion
+from cg.store.store import Store
 
 
 def test_filter_application_version_by_application_entry_id_correct_id(

@@ -8,8 +8,8 @@ from housekeeper.store.models import File, Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import Pipeline
 from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
-from cg.store import Store
 from cg.store.models import Analysis
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

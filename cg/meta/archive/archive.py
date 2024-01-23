@@ -12,8 +12,8 @@ from cg.exc import ArchiveJobFailedError
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
-from cg.store import Store
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 ARCHIVE_HANDLERS: dict[str, Type[ArchiveHandler]] = {

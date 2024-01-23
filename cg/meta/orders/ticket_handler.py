@@ -9,8 +9,8 @@ from sendmail_container import FormDataRequest
 from cg.apps.osticket import OsTicket
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
-from cg.store import Store
 from cg.store.models import Customer, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

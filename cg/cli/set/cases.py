@@ -5,8 +5,8 @@ import click
 from cg.cli.set.case import set_case
 from cg.constants import Priority
 from cg.constants.constants import CaseActions
-from cg.store import Store
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 from cg.utils.click.EnumChoice import EnumChoice
 
 CONFIRM = "Continue?"

@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 
 from cg.constants import DataDelivery, Priority
 from cg.constants.constants import CaseActions, Pipeline
-from cg.store import Store
 from cg.store.models import Analysis, Case, CaseSample
+from cg.store.store import Store
 
 
 def test_get_cases_by_customer_and_case_name_search(store_with_cases_and_customers: Store):

@@ -9,8 +9,8 @@ from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models import CompressionData
-from cg.store import Store
 from cg.store.models import Case
+from cg.store.store import Store
 
 
 def test_is_spring_decompression_needed_when_true(

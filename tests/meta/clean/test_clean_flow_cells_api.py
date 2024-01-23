@@ -11,8 +11,8 @@ from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS_IN_SECONDS
 from cg.exc import CleanFlowCellFailedError, HousekeeperFileMissingError
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
-from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
+from cg.store.store import Store
 
 
 def test_get_flow_cell_from_statusdb(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Query, Session
 from cg.constants import FlowCellStatus, Pipeline
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError
-from cg.store.api.base import BaseHandler
+from cg.store.base import BaseHandler
 from cg.store.filters.status_analysis_filters import (
     AnalysisFilter,
     apply_analysis_filter,

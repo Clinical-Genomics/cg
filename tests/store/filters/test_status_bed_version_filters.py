@@ -1,9 +1,9 @@
-from cg.store import Store
 from cg.store.filters.status_bed_version_filters import (
     get_bed_version_by_file_name,
     get_bed_version_by_short_name,
 )
 from cg.store.models import BedVersion
+from cg.store.store import Store
 
 
 def test_get_bed_version_by_file_name(base_store: Store, bed_version_file_name: str):

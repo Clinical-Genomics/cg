@@ -12,8 +12,8 @@ from cg.meta.demultiplex.combine_sequencing_metrics import (
 )
 from cg.meta.demultiplex.utils import get_q30_threshold
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.store import Store
 from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

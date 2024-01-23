@@ -4,8 +4,8 @@ import pytest
 
 from cg.constants import Pipeline
 from cg.constants.constants import CustomerId
-from cg.store import Store
 from cg.store.models import Analysis, Sample
+from cg.store.store import Store
 from cg.utils.dispatcher import Dispatcher
 from tests.store_helpers import StoreHelpers
 
