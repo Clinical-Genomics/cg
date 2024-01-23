@@ -60,6 +60,7 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
         LOG.error(
             f"The {case.data_analysis} pipeline does not support delivery reports (case: {case.internal_id})"
         )
+        raise click.Abort
     if case.data_delivery not in REPORT_SUPPORTED_DATA_DELIVERY:
         LOG.error(
             f"The {case.data_delivery} data delivery does not support delivery reports (case: {case.internal_id})"

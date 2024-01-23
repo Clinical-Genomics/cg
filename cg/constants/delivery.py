@@ -19,7 +19,7 @@ BALSAMIC_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"delivery-report"},
     {"multiqc-html"},
     {"metrics"},
-    {"visualization"},
+    {"cnv-report"},
     {"coverage"},
     {"germline"},
     {"vcf-sv"},
