@@ -1,11 +1,11 @@
 from pathlib import Path
-from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
 
+from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
 from cg.meta.workflow.microsalt.quality_controller import QualityController
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.models.cg_config import CGConfig
-from cg.store.api.core import Store
 from cg.store.models import Application, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 PRICES = {"standard": 1_000, "priority": 2_000, "express": 3_000, "research": 4_000}
