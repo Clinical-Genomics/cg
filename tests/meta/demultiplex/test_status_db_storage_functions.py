@@ -59,7 +59,7 @@ def test_update_sample_read_count():
         store=status_db,
     )
 
-    # THEN the reads has been updated with the read count for the sample
+    # THEN the reads have been updated with the read count for the sample
     assert sample.reads == read_count
 
 

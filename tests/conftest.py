@@ -1202,8 +1202,8 @@ def wgs_application_tag() -> str:
     return "WGSPCFC030"
 
 
-@pytest.fixture(name="store")
-def store() -> Store:
+@pytest.fixture
+def store() -> Generator[Store, None, None]:
     """Return a CG store."""
     initialize_database("sqlite:///")
     _store = Store()
@@ -1968,8 +1968,8 @@ def store_with_panels(store: Store, helpers: StoreHelpers):
     yield store
 
 
-@pytest.fixture(name="store_with_organisms")
-def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
+@pytest.fixture
+def store_with_organisms(store: Store, helpers: StoreHelpers) -> Generator[Store, None, None]:
     """Return a store with multiple organisms."""
 
     organism_details = [
@@ -2016,8 +2016,8 @@ def non_existent_id():
     return "non_existent_entity_id"
 
 
-@pytest.fixture(name="store_with_users")
-def store_with_users(store: Store, helpers: StoreHelpers) -> Store:
+@pytest.fixture
+def store_with_users(store: Store, helpers: StoreHelpers) -> Generator[Store, None, None]:
     """Return a store with multiple users."""
 
     customer: Customer = helpers.ensure_customer(store=store)
@@ -2037,8 +2037,10 @@ def store_with_users(store: Store, helpers: StoreHelpers) -> Store:
     yield store
 
 
-@pytest.fixture(name="store_with_cases_and_customers")
-def store_with_cases_and_customers(store: Store, helpers: StoreHelpers) -> Store:
+@pytest.fixture
+def store_with_cases_and_customers(
+    store: Store, helpers: StoreHelpers
+) -> Generator[Store, None, None]:
     """Return a store with cases and customers."""
 
     customer_details: list[tuple[str, str, bool]] = [

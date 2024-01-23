@@ -267,7 +267,7 @@ class CGConfig(BaseModel):
     max_flowcells: int | None
     data_input: DataInput | None = None
     # Base APIs that always should exist
-    status_db_: Store = None
+    status_db_: Store | None = None
     housekeeper: HousekeeperConfig
     housekeeper_api_: HousekeeperAPI = None
 

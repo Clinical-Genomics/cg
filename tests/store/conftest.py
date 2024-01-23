@@ -392,7 +392,7 @@ def store_with_an_invoice_with_and_without_attributes(
     return store
 
 
-@pytest.fixture(name="store_with_older_and_newer_analyses")
+@pytest.fixture
 def store_with_older_and_newer_analyses(
     base_store: Store,
     helpers: StoreHelpers,
@@ -400,8 +400,8 @@ def store_with_older_and_newer_analyses(
     timestamp_now: dt.datetime,
     timestamp_yesterday: dt.datetime,
     old_timestamp: dt.datetime,
-) -> Store:
-    """Return a store with  older and newer analyses."""
+) -> Generator[Store, None, None]:
+    """Return a store with older and newer analyses."""
     analysis = base_store._get_query(table=Analysis).first()
     analysis.uploaded_at = timestamp_now
     analysis.cleaned_at = timestamp_now
@@ -577,7 +577,7 @@ def store_with_analyses_for_cases_not_uploaded_fluffy(
 @pytest.fixture
 def store_with_samples_for_multiple_customers(
     store: Store, helpers: StoreHelpers, timestamp_now: datetime
-) -> Store:
+) -> Generator[Store, None, None]:
     """Return a store with two samples for three different customers."""
     for number in range(3):
         helpers.add_sample(
