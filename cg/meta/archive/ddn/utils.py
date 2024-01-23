@@ -2,6 +2,10 @@ from cg.meta.archive.ddn.constants import MetadataFields
 from cg.store.models import Sample
 
 
+def get_request_log(body: dict):
+    return "Sending request with body: \n" + f"{body}"
+
+
 def get_metadata(sample: Sample) -> list[dict]:
     """Returns metadata generated from a sample."""
     metadata: list[dict] = [
