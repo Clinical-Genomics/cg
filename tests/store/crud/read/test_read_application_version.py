@@ -1,5 +1,5 @@
-from cg.store import Store
 from cg.store.models import Application, ApplicationVersion
+from cg.store.store import Store
 
 
 def test_get_current_application_version_by_tag_existing_tag(base_store: Store):

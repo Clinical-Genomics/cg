@@ -2,8 +2,8 @@
 from datetime import datetime
 
 from cg.constants import Pipeline
-from cg.store import Store
 from cg.store.models import CaseSample
+from cg.store.store import Store
 
 
 def test_analysis_included(

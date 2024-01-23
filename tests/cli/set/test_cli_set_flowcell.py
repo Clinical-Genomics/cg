@@ -4,8 +4,8 @@ from click.testing import CliRunner
 from cg.cli.set.base import flowcell
 from cg.constants import FlowCellStatus
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Flowcell
+from cg.store.store import Store
 
 SUCCESS = 0
 

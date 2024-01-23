@@ -8,7 +8,6 @@ from cg.constants import FlowCellStatus, Priority
 from cg.constants.constants import CaseActions, MicrosaltAppTags, Pipeline
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CgError
-from cg.store import Store
 from cg.store.models import (
     Analysis,
     Application,
@@ -28,6 +27,7 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     User,
 )
+from cg.store.store import Store
 from tests.store.conftest import StoreConstants
 from tests.store_helpers import StoreHelpers
 

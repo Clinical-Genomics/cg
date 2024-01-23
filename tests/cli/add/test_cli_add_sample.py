@@ -4,8 +4,8 @@ from cg.cli.add import add
 from cg.constants import EXIT_SUCCESS, Priority
 from cg.constants.subject import Sex
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Customer, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

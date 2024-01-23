@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "cg"
-version = "55.4.7"
+version = "55.4.10"
 description = "Clinical Genomics command center"
 authors = ["Clinical Genomics <support@clinicalgenomics.se>"]
 readme = "README.md"
@@ -50,7 +50,7 @@ werkzeug = "*"
 # Utils
 cachetools = "*"
 coloredlogs = "*"
-Jinja2 = "*"
+Jinja2 = ">=3.1.3"
 lxml = "*"
 marshmallow = "*"
 MarkupSafe = "*"

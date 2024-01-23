@@ -1,5 +1,5 @@
-from cg.store import Store
 from cg.store.models import Case, CaseSample, Flowcell, Sample
+from cg.store.store import Store
 from tests.meta.demultiplex.conftest import populated_flow_cell_store
 
 

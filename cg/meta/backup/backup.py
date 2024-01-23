@@ -15,8 +15,8 @@ from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models import CompressionData
 from cg.models.cg_config import PDCArchivingDirectory
-from cg.store import Store
 from cg.store.models import Flowcell
+from cg.store.store import Store
 from cg.utils.time import get_elapsed_time, get_start_time
 
 LOG = logging.getLogger(__name__)

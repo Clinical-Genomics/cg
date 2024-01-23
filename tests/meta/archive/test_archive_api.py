@@ -17,12 +17,7 @@ from cg.meta.archive.ddn.constants import (
     JobStatus,
 )
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
-from cg.meta.archive.ddn.models import (
-    AuthToken,
-    GetJobStatusPayload,
-    GetJobStatusResponse,
-    MiriaObject,
-)
+from cg.meta.archive.ddn.models import AuthToken, GetJobStatusResponse, MiriaObject
 from cg.meta.archive.ddn.utils import get_metadata
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DataFlowConfig
@@ -247,8 +242,8 @@ def test_get_archival_status(
         "api_request_from_content",
         return_value=ok_miria_job_status_response,
     ), mock.patch.object(
-        GetJobStatusPayload,
-        "get_job_status",
+        DDNDataFlowClient,
+        "_get_job_status",
         return_value=GetJobStatusResponse(id=archival_job_id, status=job_status),
     ):
         spring_archive_api.update_ongoing_task(
@@ -305,8 +300,8 @@ def test_get_retrieval_status(
         "api_request_from_content",
         return_value=ok_miria_job_status_response,
     ), mock.patch.object(
-        GetJobStatusPayload,
-        "get_job_status",
+        DDNDataFlowClient,
+        "_get_job_status",
         return_value=GetJobStatusResponse(id=retrieval_job_id, status=job_status),
     ):
         spring_archive_api.update_ongoing_task(

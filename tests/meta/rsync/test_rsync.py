@@ -8,8 +8,8 @@ import pytest
 from cg.constants.priority import SlurmAccount, SlurmQos
 from cg.exc import CgError
 from cg.meta.rsync import RsyncAPI
-from cg.store import Store
 from cg.store.models import Case
+from cg.store.store import Store
 from tests.meta.deliver.conftest import all_samples_in_inbox, dummy_file_name
 from tests.store.conftest import case_obj
 

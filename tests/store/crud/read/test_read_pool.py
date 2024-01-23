@@ -1,5 +1,5 @@
-from cg.store import Store
 from cg.store.models import Customer, Pool
+from cg.store.store import Store
 
 
 def test_get_pools_to_invoice_query(

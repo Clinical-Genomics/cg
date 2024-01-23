@@ -7,8 +7,8 @@ from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import ControlEnum
 from cg.models.orders.samples import SarsCov2Sample
-from cg.store import Store
 from cg.store.models import Customer, Sample
+from cg.store.store import Store
 
 
 def test_store_items_in_status_control_has_stored_value(

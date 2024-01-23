@@ -5,8 +5,8 @@ import pytest
 from cg.constants import Pipeline
 from cg.constants.constants import PrepCategory
 from cg.constants.subject import PhenotypeStatus
-from cg.store import Store
 from cg.store.models import CaseSample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

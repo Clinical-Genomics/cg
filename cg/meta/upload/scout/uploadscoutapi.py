@@ -22,8 +22,8 @@ from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.store import Store
 from cg.store.models import Analysis, Case, Customer, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

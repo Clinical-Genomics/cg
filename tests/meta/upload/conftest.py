@@ -12,8 +12,8 @@ from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Analysis, Case, Sample
+from cg.store.store import Store
 from tests.cli.workflow.mip.conftest import (
     mip_case_id,
     mip_case_ids,

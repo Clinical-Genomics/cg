@@ -1,7 +1,7 @@
 import logging
 
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 
 
 def test_instantiate_correct_configs(base_config_dict: dict):
