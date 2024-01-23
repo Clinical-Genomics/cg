@@ -230,6 +230,10 @@ class DdnDataflowAuthenticationError(CgError):
     """Exception raised when the DDN Dataflow authentication fails."""
 
 
+class DdnDataflowDeleteFileError(CgError):
+    """Exception raised when the deletion via DDN Dataflow fails."""
+
+
 class MissingFilesError(CgError):
     """Exception raised when there are missing files."""
 
