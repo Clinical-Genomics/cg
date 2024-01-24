@@ -24,10 +24,9 @@ def concat_configs(file_paths: list[Path], target_file: Path, str_content: str =
 
 
 def write_config_nextflow_style(content: dict[str, Any], file_path: Path) -> None:
-    """Write content to yaml file accepted by Nextflow with non-quoted booleans and quoted strings."""
-    with open(file_path, "w") as outfile:
-        for key, value in content.items():
-            if isinstance(value, Path):
-                value: str = value.as_posix()
-            quotes = '"' if type(value) is str else ""
-            outfile.write(f"params.{key} = {quotes}{value}{quotes}\n")
+    """Write content to stream accepted by Nextflow with non-quoted booleans and quoted strings."""
+    for key, value in content.items():
+        if isinstance(value, Path):
+            value: str = value.as_posix()
+        quotes = '"' if type(value) is str else ""
+        return f"params.{key} = {quotes}{value}{quotes}\n"
