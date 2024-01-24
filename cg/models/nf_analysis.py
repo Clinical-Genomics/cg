@@ -7,7 +7,7 @@ from cg.exc import SampleSheetError
 
 class PipelineParameters(BaseModel):
     input: Path = Field(..., alias="sample_sheet_path")
-    outdir: Path
+    outdir: Path = Field(..., alias="outdir")
 
 
 class NextflowSampleSheetEntry(BaseModel):
