@@ -20,10 +20,9 @@ from cg.models.deliverables.metric_deliverables import (
     MultiqcDataJson,
 )
 from cg.models.fastq import FastqFileMeta
-from cg.models.nf_analysis import PipelineDeliverables
+from cg.models.nf_analysis import PipelineDeliverables, PipelineParameters
 from cg.models.rnafusion.rnafusion import (
     RnafusionAnalysis,
-    RnafusionParameters,
     RnafusionSampleSheetEntry,
 )
 from cg.store.models import Case, Sample
@@ -105,15 +104,12 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_pipeline_parameters(
         self, case_id: str, genomes_base: Path | None = None
-    ) -> RnafusionParameters:
+    ) -> PipelineParameters:
         """Get Rnafusion parameters."""
         LOG.debug("Getting parameters information")
-        return RnafusionParameters(
-            cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
-            genomes_base=genomes_base or self.get_references_path(),
+        return PipelineParameters(
             sample_sheet_path=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
-            priority=self.account,
         )
 
     def get_references_path(self, genomes_base: Path | None = None) -> Path:
