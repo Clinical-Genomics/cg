@@ -393,7 +393,7 @@ class Case(Model, PriorityMixin):
     internal_id = Column(types.String(32), unique=True, nullable=False)
     is_compressible = Column(types.Boolean, nullable=False, default=True)
     name = Column(types.String(128), nullable=False)
-    order = Column(ForeignKey("order.id", ondelete="CASCADE"))
+    order_id = Column(ForeignKey("order.id", ondelete="CASCADE"))
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     _panels = Column(types.Text)
 
