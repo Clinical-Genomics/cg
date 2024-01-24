@@ -103,7 +103,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             )
             return content_per_sample
 
-    def get_pipeline_parameters(self, case_id: str, genomes_base: Path | None = None) -> RnafusionParameters:
+    def get_pipeline_parameters(
+        self, case_id: str, genomes_base: Path | None = None
+    ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
         LOG.debug("Getting parameters information")
         return RnafusionParameters(
