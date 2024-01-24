@@ -53,6 +53,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Create config files (parameters and sample sheet) for Raredisease analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
+        pipeline_parameters: PipelineParameters = self.get_pipeline_parameters(case_id=case_id)
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
@@ -61,7 +62,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             file_path=self.get_sample_sheet_path(case_id=case_id),
             header=RarediseaseSampleSheetEntry.headers(),
         )
-        pipeline_parameters: PipelineParameters = self.get_pipeline_parameters(case_id=case_id)
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 
     def get_sample_sheet_content_per_sample(
@@ -94,7 +94,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Write sample sheet for Raredisease analysis in case folder."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_sheet_content = []
-        LOG.debug("Getting sample sheet information")
+        LOG.info("Getting sample sheet information")
         LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
         for link in case.links:
             sample_sheet_content.extend(
