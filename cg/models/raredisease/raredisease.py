@@ -4,6 +4,7 @@ from pydantic.v1 import Field
 
 from cg.models.nf_analysis import NextflowSampleSheetEntry
 
+
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
     """Raredisease sample model is used when building the sample sheet."""
 

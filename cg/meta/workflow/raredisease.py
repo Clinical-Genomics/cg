@@ -117,7 +117,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         LOG.debug("Writing parameters file")
         concat_configs(
             [self.config_platform, self.config_params, self.config_resources],
-            self.get_config_file_path(case_id=case_id), write_config_nextflow_style(pipeline_parameters) + self.set_cluster_options(case_id=case_id))
+            self.get_config_file_path(case_id=case_id),
+            write_config_nextflow_style(pipeline_parameters)
+            + self.set_cluster_options(case_id=case_id),
+        )
 
     @staticmethod
     def get_phenotype_code(phenotype: str) -> int:
