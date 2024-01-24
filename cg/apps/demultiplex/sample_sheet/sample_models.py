@@ -50,7 +50,7 @@ class FlowCellSample(BaseModel):
 
     @abstractmethod
     def update_barcode_mismatches(
-        self, samples_to_compare: list, is_run_single_index: bool, is_i5_reverse_complement: bool
+        self, samples_to_compare: list, is_run_single_index: bool, is_reverse_complement: bool
     ) -> None:
         """Update the barcode_mismatches_1 and barcode_mismatches_2 attributes."""
         pass
@@ -101,7 +101,7 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
             self.index2 = get_reverse_complement_dna_seq(self.index2)
 
     def update_barcode_mismatches(
-        self, samples_to_compare: list, is_run_single_index: bool, is_i5_reverse_complement: bool
+        self, samples_to_compare: list, is_run_single_index: bool, is_reverse_complement: bool
     ) -> None:
         """No updating of barcode mismatch values for Bcl2Fastq samples."""
         LOG.debug(f"No updating of barcode mismatch values for Bcl2Fastq sample {self.sample_id}")
@@ -222,7 +222,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
         self,
         samples_to_compare: list["FlowCellSampleBCLConvert"],
         is_run_single_index: bool,
-        is_i5_reverse_complement: bool,
+        is_reverse_complement: bool,
     ) -> None:
         """Update barcode mismatch attributes comparing to the rest of the samples in the lane."""
         if not samples_to_compare:
@@ -232,5 +232,5 @@ class FlowCellSampleBCLConvert(FlowCellSample):
             LOG.debug("Run is single-indexed, skipping barcode mismatch update for index 2")
             return
         self._update_barcode_mismatches_2(
-            samples_to_compare=samples_to_compare, is_reverse_complement=is_i5_reverse_complement
+            samples_to_compare=samples_to_compare, is_reverse_complement=is_reverse_complement
         )

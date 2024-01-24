@@ -91,14 +91,14 @@ def get_hamming_distance_index_2(
     """Get the hamming distance between two index 2 sequences.
     In the case that one sequence is longer than the other, the distance is calculated between
     the shortest sequence and the last segment of equal length of the longest sequence.
-    If the sample requires reverse complement, the calculation is the same as for index 1."""
+    If it does not require reverse complement, the calculation is the same as for index 1."""
     shortest_index_length: int = min(len(sequence_1), len(sequence_2))
     return (
         get_hamming_distance(
-            str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
+            str_1=sequence_1[-shortest_index_length:], str_2=sequence_2[-shortest_index_length:]
         )
         if is_reverse_complement
         else get_hamming_distance(
-            str_1=sequence_1[-shortest_index_length:], str_2=sequence_2[-shortest_index_length:]
+            str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
         )
     )

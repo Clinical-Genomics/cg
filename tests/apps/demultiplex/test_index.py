@@ -108,52 +108,13 @@ def test_get_hamming_distance_index_1_different_prefixes():
     assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_1) == 2
 
 
-def test_get_hamming_distance_index_2_different_lengths_no_reverse_complement():
+def test_get_hamming_distance_index_2_different_lengths_reverse_complement():
     """Test that hamming distance between indexes with same suffix but different lengths is zero."""
     # GIVEN two index_2 sequences with the same suffixes but different lengths
     sequence_1: str = "GATTACA"
     sequence_2: str = "XXGATTACA"
 
     # WHEN getting the hamming distance between them in any order
-
-    # THEN the distance is zero
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=False
-        )
-        == 0
-    )
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=False
-        )
-        == 0
-    )
-
-    # WHEN getting the hamming distance between themselves
-
-    # THEN the distance is zero
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_1, sequence_2=sequence_1, is_reverse_complement=False
-        )
-        == 0
-    )
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_2, sequence_2=sequence_2, is_reverse_complement=False
-        )
-        == 0
-    )
-
-
-def test_get_hamming_distance_index_2_different_lengths_reverse_complement():
-    """Test that hamming distance between indexes with same prefix is zero if reverse complement."""
-    # GIVEN two index_2 sequences with the same prefixes but different lengths
-    sequence_1: str = "GATTACA"
-    sequence_2: str = "GATTACAXX"
-
-    # WHEN getting the hamming distance between them in any order with reverse complement
 
     # THEN the distance is zero
     assert (
@@ -174,6 +135,45 @@ def test_get_hamming_distance_index_2_different_lengths_reverse_complement():
     # THEN the distance is zero
     assert (
         get_hamming_distance_index_2(
+            sequence_1=sequence_1, sequence_2=sequence_1, is_reverse_complement=True
+        )
+        == 0
+    )
+    assert (
+        get_hamming_distance_index_2(
+            sequence_1=sequence_2, sequence_2=sequence_2, is_reverse_complement=True
+        )
+        == 0
+    )
+
+
+def test_get_hamming_distance_index_2_different_lengths_no_reverse_complement():
+    """Test that hamming distance between indexes with same prefix is zero if reverse complement."""
+    # GIVEN two index_2 sequences with the same prefixes but different lengths
+    sequence_1: str = "GATTACA"
+    sequence_2: str = "GATTACAXX"
+
+    # WHEN getting the hamming distance between them in any order with reverse complement
+
+    # THEN the distance is zero
+    assert (
+        get_hamming_distance_index_2(
+            sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=False
+        )
+        == 0
+    )
+    assert (
+        get_hamming_distance_index_2(
+            sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=False
+        )
+        == 0
+    )
+
+    # WHEN getting the hamming distance between themselves
+
+    # THEN the distance is zero
+    assert (
+        get_hamming_distance_index_2(
             sequence_1=sequence_1, sequence_2=sequence_1, is_reverse_complement=False
         )
         == 0
@@ -186,7 +186,7 @@ def test_get_hamming_distance_index_2_different_lengths_reverse_complement():
     )
 
 
-def test_get_hamming_distance_index_2_different_prefixes_no_reverse_complement():
+def test_get_hamming_distance_index_2_different_prefixes_reverse_complement():
     """Test that hamming distance for index 2 counts different characters from the right."""
     # GIVEN two index_2 sequences different lengths differing by two characters
     # when aligned to the right
@@ -198,13 +198,13 @@ def test_get_hamming_distance_index_2_different_prefixes_no_reverse_complement()
     # THEN the distance is equal to the number of different characters
     assert (
         get_hamming_distance_index_2(
-            sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=False
+            sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=True
         )
         == 2
     )
     assert (
         get_hamming_distance_index_2(
-            sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=False
+            sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=True
         )
         == 2
     )
