@@ -1,18 +1,22 @@
 {
     "case_id": "goodboydog",
-    "case_qc_metric": {"run_time": "2024-01-22T12:30:00"},
-    "sample_qc_metric": [
+    "case_qc_metrics": {
+        "run_time": "2024-01-22T12:30:00",
+        "cpu_hours": 10,
+        "memory_used_gb": 8
+    },
+    "sample_qc_metrics": [
         {
             "sample_id": "test_sample_1",
             "sequencing_metric": [
                 {
                     "total_reads": [
                         {"lane": 1, "number_of_reads": 100, "_yield": null},
-                        {"lane": 2, "number_of_reads": 150, "_yield": null},
+                        {"lane": 2, "number_of_reads": 150, "_yield": null}
                     ],
                     "mapped_reads": [
                         {"lane": 1, "number_of_reads": 90, "_yield": null},
-                        {"lane": 2, "number_of_reads": 140, "_yield": null},
+                        {"lane": 2, "number_of_reads": 140, "_yield": null}
                     ],
                     "percentage_mapped_reads": [95.0, 93.33],
                     "coverage_metric": {
@@ -31,14 +35,14 @@
                         "at_dropout": 2.0,
                         "pct_off_bait": 5.0,
                         "pct_pf_reads_improper_pairs": 1.2,
-                        "pct_chimeras": 0.8,
+                        "pct_chimeras": 0.8
                     },
                     "pct_duplication": 10.0,
-                    "pct_adapter": 2.0,
+                    "pct_adapter": 2.0
                 }
             ],
-            "pipeline_specific_metric": {"sex": "male"},
+            "pipeline_specific_metric": {"sex": "male"}
         }
     ],
-    "pipeline": {"name": "example_pipeline", "version": "1.0.0"},
+    "pipeline": {"name": "example_pipeline", "version": "1.0.0"}
 }

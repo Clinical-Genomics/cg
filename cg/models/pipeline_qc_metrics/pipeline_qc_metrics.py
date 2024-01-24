@@ -67,11 +67,11 @@ class SequencingMetric(BaseModel):
     pct_adapter: float | None
 
 
-class RareDiseaseMetric(BaseModel):
+class RareDiseaseDNAMetric(BaseModel):
     sex: str
 
 
-class MIPRNAMetric(BaseModel):
+class RareDiseaseRNAMetric(BaseModel):
     pass
 
 
@@ -88,13 +88,15 @@ class SampleQCMetric(BaseModel):
 
     sample_id: str
     sequencing_metric: list[SequencingMetric]
-    pipeline_specific_metric: MIPDNAMetric | BalsamicMetric | RNAFusionMetric | MIPRNAMetric
+    pipeline_specific_metric: RareDiseaseDNAMetric | BalsamicMetric | RNAFusionMetric | RareDiseaseRNAMetric
 
 
 class CaseQCMetric(BaseModel):
     """Case qc metrics from a pipeline run."""
 
     run_time: datetime
+    cpu_hours: int
+    memory_used_gb: int
 
 
 class Pipeline(BaseModel):
