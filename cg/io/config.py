@@ -23,7 +23,7 @@ def concat_configs(file_paths: list[Path], target_file: Path, str_content: str =
     write_config(content, target_file)
 
 
-def write_config_nextflow_style(content: dict[str, Any], file_path: Path) -> None:
+def write_config_nextflow_style(content: dict[str, Any]) -> None:
     """Write content to stream accepted by Nextflow with non-quoted booleans and quoted strings."""
     for key, value in content.items():
         if isinstance(value, Path):
