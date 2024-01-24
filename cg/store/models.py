@@ -393,7 +393,7 @@ class Case(Model, PriorityMixin):
     internal_id = Column(types.String(32), unique=True, nullable=False)
     is_compressible = Column(types.Boolean, nullable=False, default=True)
     name = Column(types.String(128), nullable=False)
-    order_id = Column(ForeignKey("order.id", ondelete="CASCADE"))
+    order_id = Column(ForeignKey("order.id"))
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     _panels = Column(types.Text)
 
@@ -882,8 +882,8 @@ class Order(Model):
     __tablename__ = "order"
 
     id = Column(types.Integer, primary_key=True, unique=True)
-    customer_id = Column(types.String(64), ForeignKey("customer.id"))
-    order_date = Column(types.DateTime)
+    customer_id = Column(types.String(64), ForeignKey("customer.id"), nullable=False)
+    order_date = Column(types.DateTime, nullable=False)
     ticket_id = Column(types.Integer, nullable=False, unique=True, index=True)
 
     def to_dict(self):

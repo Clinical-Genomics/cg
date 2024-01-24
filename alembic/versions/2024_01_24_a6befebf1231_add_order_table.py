@@ -21,8 +21,8 @@ def upgrade():
     op.create_table(
         "order",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("customer_id", sa.Integer(), nullable=True),
-        sa.Column("order_date", sa.DateTime(), nullable=True),
+        sa.Column("customer_id", sa.Integer(), nullable=False),
+        sa.Column("order_date", sa.DateTime(), nullable=False),
         sa.Column("ticket_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["customer_id"],
