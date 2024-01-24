@@ -1806,7 +1806,6 @@ def context_config(
             "root": str(mip_dir),
         },
         "raredisease": {
-            "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
             "compute_env": "nf_tower_compute_env",
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_raredisease",
