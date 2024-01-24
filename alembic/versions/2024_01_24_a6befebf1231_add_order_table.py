@@ -33,12 +33,16 @@ def upgrade():
     )
     op.create_index(op.f("ix_order_ticket_id"), "order", ["ticket_id"], unique=True)
     op.add_column(
-        "case", sa.Column("order_id", sa.Integer(), sa.ForeignKey("order.id"), nullable=True)
+        "case",
+        sa.Column(
+            "order_id", sa.Integer(), sa.ForeignKey("order.id", name="case_ibfk_2"), nullable=True
+        ),
     )
 
 
 def downgrade():
+    op.drop_constraint(table_name="case", constraint_name="case_ibfk_2", type_="foreignkey")
     op.drop_column("case", "order_id")
-    op.drop_index(op.f("ix_order_ticket_id"), table_name="order")
+    op.drop_index(index_name="ix_order_ticket_id", table_name="order")
     op.drop_table("order")
     # ### end Alembic commands ###
