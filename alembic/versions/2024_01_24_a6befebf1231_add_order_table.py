@@ -38,6 +38,7 @@ def upgrade():
 
 
 def downgrade():
+    op.drop_column("case", "order_id")
     op.drop_index(op.f("ix_order_ticket_id"), table_name="order")
     op.drop_table("order")
     # ### end Alembic commands ###
