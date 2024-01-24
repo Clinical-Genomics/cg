@@ -27,8 +27,10 @@ from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from cg.server.dto.delivery_message_response import DeliveryMessageResponse
+from cg.server.dto.orders_request import OrdersRequest
 from cg.server.ext import db, lims, osticket
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
+from cg.services.orders.order_service import OrderService
 from cg.store.models import (
     Analysis,
     Application,
@@ -471,10 +473,9 @@ def get_application_pipeline_limitations(tag: str):
 @BLUEPRINT.route("/orders")
 def get_orders():
     """Return the latest orders."""
-    if request.args.get("limit"):
-        orders: list[Order] = db.get_orders(request.args.get(key="limit", type=int))
-    else:
-        orders: list[Order] = db.get_orders()
+    orders_request: OrdersRequest = OrdersRequest.model_validate(request.args)
+    order_service = OrderService(db)
+    orders: list[Order] = order_service.get_orders(orders_request)
     if not orders:
         return jsonify(message="No orders found"), HTTPStatus.NOT_FOUND
     return jsonify([order.to_dict() for order in orders])
