@@ -1736,7 +1736,7 @@ class ReadHandler(BaseHandler):
         )
         return records.all()
 
-    def get_orders(self, limit: int | None) -> list[Order]:
+    def get_orders(self, limit: int | None = None) -> list[Order]:
         records = self._get_query(table=Order)
         if limit is not None:
             records = records.limit(limit)
