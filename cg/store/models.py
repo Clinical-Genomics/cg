@@ -882,7 +882,7 @@ class Order(Model):
     __tablename__ = "order"
 
     id = Column(types.Integer, primary_key=True, unique=True)
-    customer = Column(types.String(64), ForeignKey("customer.id"))
+    customer_id = Column(types.String(64), ForeignKey("customer.id"))
     order_date = Column(types.DateTime)
     ticket_id = Column(types.Integer, nullable=False, unique=True, index=True)
 
