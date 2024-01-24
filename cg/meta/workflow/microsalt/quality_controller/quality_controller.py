@@ -1,32 +1,39 @@
 import logging
 from pathlib import Path
-from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
 
-from cg.meta.workflow.microsalt.metrics_parser import MetricsParser, QualityMetrics, SampleMetrics
+from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
+from cg.meta.workflow.microsalt.metrics_parser import (
+    MetricsParser,
+    QualityMetrics,
+    SampleMetrics,
+)
 from cg.meta.workflow.microsalt.quality_controller.models import (
     CaseQualityResult,
     QualityResult,
     SampleQualityResult,
 )
-from cg.meta.workflow.microsalt.quality_controller.report_generator import ReportGenerator
+from cg.meta.workflow.microsalt.quality_controller.report_generator import (
+    ReportGenerator,
+)
 from cg.meta.workflow.microsalt.quality_controller.result_logger import ResultLogger
 from cg.meta.workflow.microsalt.quality_controller.utils import (
     get_application_tag,
     get_percent_reads_guaranteed,
     get_report_path,
     get_sample_target_reads,
-    is_sample_negative_control,
+    has_non_microbial_apptag,
     has_valid_10x_coverage,
     has_valid_average_coverage,
     has_valid_duplication_rate,
     has_valid_mapping_rate,
     has_valid_median_insert_size,
+    is_sample_negative_control,
     is_valid_total_reads,
     is_valid_total_reads_for_negative_control,
     quality_control_case,
 )
-from cg.store.api.core import Store
 from cg.store.models import Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -53,6 +60,7 @@ class QualityController:
         return sample_results
 
     def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> SampleQualityResult:
+        """Perform a quality control of a sample given its metrics."""
         valid_read_count: bool = self.has_valid_total_reads(sample_id)
         valid_mapping: bool = has_valid_mapping_rate(metrics)
         valid_duplication: bool = has_valid_duplication_rate(metrics)
@@ -82,6 +90,9 @@ class QualityController:
             and valid_coverage
             and valid_10x_coverage
         )
+
+        if has_non_microbial_apptag(sample):
+            sample_passes_qc = valid_read_count
 
         sample_quality = SampleQualityResult(
             sample_id=sample_id,

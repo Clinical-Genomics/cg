@@ -4,8 +4,8 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Priority
-from cg.store import Store
 from cg.store.models import ApplicationVersion, Case, Sample
+from cg.store.store import Store
 from cg.utils.calculations import multiply_by_million
 
 LOG = logging.getLogger(__name__)

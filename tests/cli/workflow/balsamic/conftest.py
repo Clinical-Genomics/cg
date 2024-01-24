@@ -12,7 +12,7 @@ from cg.constants.constants import CaseActions, FileFormat, PrepCategory
 from cg.io.controller import WriteFile
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers

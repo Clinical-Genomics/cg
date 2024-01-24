@@ -3,8 +3,8 @@ import copy
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.report.metadata import BalsamicTargetedSampleMetadataModel
-from cg.store import Store
 from cg.store.models import BedVersion, Case, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

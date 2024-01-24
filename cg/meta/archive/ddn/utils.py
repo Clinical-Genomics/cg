@@ -2,6 +2,10 @@ from cg.meta.archive.ddn.constants import MetadataFields
 from cg.store.models import Sample
 
 
+def get_request_log(body: dict):
+    return "Sending request with body: \n" + f"{body}"
+
+
 def get_metadata(sample: Sample) -> list[dict]:
     """Returns metadata generated from a sample."""
     metadata: list[dict] = [
@@ -19,7 +23,9 @@ def get_metadata(sample: Sample) -> list[dict]:
         },
         {
             MetadataFields.NAME.value: MetadataFields.SEQUENCED_AT.value,
-            MetadataFields.VALUE.value: sample.last_sequenced_at,
+            MetadataFields.VALUE.value: str(sample.last_sequenced_at)
+            if sample.last_sequenced_at
+            else sample.last_sequenced_at,
         },
         {
             MetadataFields.NAME.value: MetadataFields.TICKET_NUMBER.value,

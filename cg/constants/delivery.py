@@ -19,7 +19,7 @@ BALSAMIC_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"delivery-report"},
     {"multiqc-html"},
     {"metrics"},
-    {"visualization"},
+    {"cnv-report"},
     {"coverage"},
     {"germline"},
     {"vcf-sv"},
@@ -124,14 +124,7 @@ MIP_RNA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"salmon-quant"},
 ]
 
-MICROSALT_ANALYSIS_CASE_TAGS: list[set[str]] = [
-    {"microsalt-qc"},
-    {"microsalt-type"},
-    {"assembly"},
-    {"trimmed-forward-reads"},
-    {"trimmed-reverse-reads"},
-    {"reference-alignment-deduplicated"},
-]
+MICROSALT_ANALYSIS_CASE_TAGS = [{"qc-report"}, {"typing-report"}]
 
 MICROSALT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = []
 

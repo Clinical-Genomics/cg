@@ -7,9 +7,9 @@ import pytest
 
 from cg.constants import DataDelivery, FlowCellStatus, Pipeline
 from cg.models.cg_config import CGConfig
-from cg.store import Store
-from cg.store.api.find_business_data import FindBusinessDataHandler
+from cg.store.crud.read import ReadHandler
 from cg.store.models import Case
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -135,7 +135,6 @@ class MockTB:
 
     def __init__(self):
         self._link_was_called = False
-        self._mark_analyses_deleted_called = False
         self._add_pending_was_called = False
         self._add_pending_analysis_was_called = False
         self._family = None
@@ -187,11 +186,6 @@ class MockTB:
 
         return Row()
 
-    def mark_analyses_deleted(self, case_id: str):
-        """Mock this function"""
-        self._case_id = case_id
-        self._mark_analyses_deleted_called = True
-
     def add_pending(self, case_id: str, email: str):
         """Mock this function"""
         self._case_id = case_id
@@ -203,10 +197,6 @@ class MockTB:
         self._case_id = case_id
         self._email = email
         self._add_pending_analysis_was_called = True
-
-    def mark_analyses_deleted_called(self):
-        """check if mark_analyses_deleted was called"""
-        return self._mark_analyses_deleted_called
 
     def add_pending_was_called(self):
         """check if add_pending was called"""
@@ -249,5 +239,5 @@ def mock_analysis_flow_cell(mocker) -> None:
     on disk."""
     flow_cell = Mock()
     flow_cell.status = FlowCellStatus.ON_DISK
-    mocker.patch.object(FindBusinessDataHandler, "get_flow_cells_by_case")
-    FindBusinessDataHandler.get_flow_cells_by_case.return_value = [flow_cell]
+    mocker.patch.object(ReadHandler, "get_flow_cells_by_case")
+    ReadHandler.get_flow_cells_by_case.return_value = [flow_cell]

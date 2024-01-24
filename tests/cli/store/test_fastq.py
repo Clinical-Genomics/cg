@@ -12,8 +12,8 @@ from cg.cli.store.fastq import (
 from cg.constants import EXIT_SUCCESS
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Sample
+from cg.store.store import Store
 
 
 def test_store_sample_when_no_samples(

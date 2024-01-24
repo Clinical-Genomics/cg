@@ -1,13 +1,11 @@
 from pydantic import BaseModel
 
-from cg.constants.constants import MicrosaltAppTags
-
 
 class SampleQualityResult(BaseModel):
     sample_id: str
     passes_qc: bool
     is_control: bool
-    application_tag: MicrosaltAppTags
+    application_tag: str
     passes_reads_qc: bool
     passes_mapping_qc: bool = True
     passes_duplication_qc: bool = True

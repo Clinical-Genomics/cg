@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Query
 
 from cg.constants.constants import Pipeline
-from cg.store import Store
 from cg.store.filters.status_analysis_filters import (
     filter_analyses_by_case_entry_id,
     filter_analyses_by_started_at,
@@ -21,6 +20,7 @@ from cg.store.filters.status_analysis_filters import (
     order_analyses_by_uploaded_at_asc,
 )
 from cg.store.models import Analysis, Case
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

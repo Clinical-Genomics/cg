@@ -27,9 +27,10 @@ from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
 from cg.exc import CleanFlowCellFailedError, FlowCellError
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
+from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Analysis
+from cg.store.store import Store
 from cg.utils.date import get_date_days_ago, get_timedelta_from_date
 from cg.utils.dispatcher import Dispatcher
 from cg.utils.files import get_directories_in_path
@@ -275,6 +276,24 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
         except (CleanFlowCellFailedError, FlowCellError) as error:
             LOG.error(repr(error))
             continue
+
+
+@clean.command("retrieved-spring-files")
+@click.option(
+    "--age-limit",
+    type=int,
+    default=7,
+    help="Clean all Spring files which were retrieved more than given amount of days ago.",
+    show_default=True,
+)
+@DRY_RUN
+@click.pass_obj
+def clean_retrieved_spring_files(context: CGConfig, age_limit: int, dry_run: bool):
+    """Clean Spring files which were retrieved more than given amount of days ago."""
+    clean_retrieved_spring_files_api = CleanRetrievedSpringFilesAPI(
+        housekeeper_api=context.housekeeper_api, dry_run=dry_run
+    )
+    clean_retrieved_spring_files_api.clean_retrieved_spring_files(age_limit)
 
 
 def _get_confirm_question(bundle, file_obj) -> str:

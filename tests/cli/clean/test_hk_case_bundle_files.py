@@ -7,8 +7,8 @@ from cg.cli.clean import hk_case_bundle_files
 from cg.constants.constants import Pipeline
 from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Analysis
+from cg.store.store import Store
 from cg.utils.date import get_date_days_ago
 from tests.store_helpers import StoreHelpers
 

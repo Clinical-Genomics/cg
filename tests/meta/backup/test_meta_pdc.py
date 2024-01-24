@@ -15,8 +15,8 @@ from cg.exc import (
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Flowcell
+from cg.store.store import Store
 from tests.conftest import create_process_response
 from tests.store_helpers import StoreHelpers
 

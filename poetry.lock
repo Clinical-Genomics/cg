@@ -858,13 +858,13 @@ files = [
 
 [[package]]
 name = "housekeeper"
-version = "4.11.0"
+version = "4.11.1"
 description = "Housekeeper takes care of files"
 optional = false
 python-versions = "*"
 files = [
-    {file = "housekeeper-4.11.0-py2.py3-none-any.whl", hash = "sha256:c309d32d12d26bd57389a21f36cc6ec93745570707b26e5a2f09686b6e95b1c8"},
-    {file = "housekeeper-4.11.0.tar.gz", hash = "sha256:05d8644bd4d6aa2765de4d6207049a82a7f12494b71923f3ef4fed9e23e844d3"},
+    {file = "housekeeper-4.11.1-py2.py3-none-any.whl", hash = "sha256:4999ad8769971ef58c9398647250fe026fca7ceee0802e7fd45ac801742372f1"},
+    {file = "housekeeper-4.11.1.tar.gz", hash = "sha256:e5b0586ffddafd7a6d9a8d73c23b100ef951557868f51d8506a92feeec3519d0"},
 ]
 
 [package.dependencies]
@@ -958,13 +958,13 @@ files = [
 
 [[package]]
 name = "jinja2"
-version = "3.1.2"
+version = "3.1.3"
 description = "A very fast and expressive template engine."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "Jinja2-3.1.2-py3-none-any.whl", hash = "sha256:6088930bfe239f0e6710546ab9c19c9ef35e29792895fed6e6e31a023a182a61"},
-    {file = "Jinja2-3.1.2.tar.gz", hash = "sha256:31351a702a408a9e7595a8fc6150fc3f43bb6bf7e319770cbc0db9df9437e852"},
+    {file = "Jinja2-3.1.3-py3-none-any.whl", hash = "sha256:7d6d50dd97d52cbc355597bd845fabfbac3f551e1f99619e39a35ce8c370b5fa"},
+    {file = "Jinja2-3.1.3.tar.gz", hash = "sha256:ac8bd6544d4bb2c9792bf3a159e80bba8fda7f07e81bc3aed565432d5925ba90"},
 ]
 
 [package.dependencies]
@@ -2416,4 +2416,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "0e80e415fa553084eebcf19e0a13b173db121e7fe77aef7240f5dee85b894e04"
+content-hash = "1e458340cbae9afa171074c3b957e6044c14f095ba35391780ee3fc17532951f"

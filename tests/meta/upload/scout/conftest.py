@@ -18,8 +18,8 @@ from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import MipLoadConfig
-from cg.store import Store
 from cg.store.models import Analysis, Case, Sample
+from cg.store.store import Store
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI

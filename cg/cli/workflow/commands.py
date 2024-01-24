@@ -23,7 +23,7 @@ from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 
 OPTION_DRY = click.option(
     "-d", "--dry-run", help="Simulate process without executing", is_flag=True

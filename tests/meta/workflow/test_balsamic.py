@@ -1,4 +1,4 @@
-"""Tests for BALSAMIC analysis"""
+"""Tests for BALSAMIC analysis."""
 from pathlib import Path
 
 import pytest
@@ -11,55 +11,55 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 
-def test_get_verified_gender():
-    """Tests gender extraction from a sample dictionary"""
+def test_get_verified_sex():
+    """Test sex extraction from a sample dictionary."""
 
     # GIVEN a sample object
     sample_obj = {
-        "ACC0000A0": {"gender": "female"},
-        "ACC0000A1": {"gender": "female"},
+        "ACC0000A0": {"sex": "female"},
+        "ACC0000A1": {"sex": "female"},
     }
 
-    # WHEN extracting the gender
-    retrieved_gender: Sex = BalsamicAnalysisAPI.get_verified_gender(sample_obj)
+    # WHEN extracting the sex
+    retrieved_sex: Sex = BalsamicAnalysisAPI.get_verified_sex(sample_obj)
 
-    # THEN gender must match the expected one
-    assert retrieved_gender == "female"
+    # THEN sex must match the expected one
+    assert retrieved_sex == "female"
 
 
-def test_get_verified_gender_error():
-    """Tests gender extraction from a sample dictionary when two different gender has been provided"""
+def test_get_verified_sex_error():
+    """Test sex extraction from a sample dictionary when two different sexes have been provided."""
 
-    # GIVEN a sample object with different genders
+    # GIVEN a sample object with different sexes
     sample_obj = {
-        "ACC0000A0": {"gender": "male"},
-        "ACC0000A1": {"gender": "female"},
+        "ACC0000A0": {"sex": "male"},
+        "ACC0000A1": {"sex": "female"},
     }
 
-    # WHEN extracting the gender
+    # WHEN extracting the sex
     with pytest.raises(BalsamicStartError):
-        BalsamicAnalysisAPI.get_verified_gender(sample_obj)
+        BalsamicAnalysisAPI.get_verified_sex(sample_obj)
 
 
-def test_get_verified_gender_unknown(caplog):
-    """Tests gender extraction from a sample dictionary when the gender is unknown"""
+def test_get_verified_sex_unknown(caplog):
+    """Tests sex extraction from a sample dictionary when the sex is unknown."""
 
-    # GIVEN a sample object with different genders
+    # GIVEN a sample object with different sexes
     sample_obj = {
-        "ACC0000A0": {"gender": "unknown"},
-        "ACC0000A1": {"gender": "unknown"},
+        "ACC0000A0": {"sex": "unknown"},
+        "ACC0000A1": {"sex": "unknown"},
     }
 
-    # WHEN extracting the gender
-    retrieved_gender: Sex = BalsamicAnalysisAPI.get_verified_gender(sample_obj)
+    # WHEN extracting the sex
+    retrieved_sex: Sex = BalsamicAnalysisAPI.get_verified_sex(sample_obj)
 
-    # THEN gender must match the expected one
-    assert retrieved_gender == Sex.FEMALE
+    # THEN sex must match the expected one
+    assert retrieved_sex == Sex.FEMALE
     assert f"The provided sex is unknown, setting {Sex.FEMALE} as the default" in caplog.text
 
 
 def test_get_verified_pon():
-    """Tests PON verification"""
+    """Tests PON verification."""
 
     # GIVEN specific panel bed and PON files
     panel_bed = "/path/gmcksolid_4.1_hg19_design.bed"

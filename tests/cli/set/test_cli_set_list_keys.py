@@ -7,7 +7,7 @@ from cg.cli.set.base import list_keys
 from cg.constants import EXIT_SUCCESS
 from cg.constants.subject import Sex
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 
 
 def test_list_keys_without_sample(

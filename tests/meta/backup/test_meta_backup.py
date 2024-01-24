@@ -108,7 +108,7 @@ def test_get_archived_flow_cell_path(dsmc_q_archive_output: list[str], flow_cell
     )
 
 
-@mock.patch("cg.store.Store")
+@mock.patch("cg.store.store.Store")
 def test_maximum_processing_queue_full(mock_store):
     """Tests check_processing method of the backup API"""
     # GIVEN a flow cell needs to be retrieved from PDC

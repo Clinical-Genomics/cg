@@ -12,9 +12,6 @@ class MockTB:
     def add_pending_analysis(self, *args, **kwargs) -> None:
         return None
 
-    def mark_analyses_deleted(self, *args, **kwargs) -> None:
-        return None
-
     def add_commit(self, *args, **kwargs) -> None:
         return None
 

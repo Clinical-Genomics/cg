@@ -5,7 +5,7 @@ import click
 
 from cg.apps.coverage import ChanjoAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 
 from .utils import suggest_cases_to_upload
 
