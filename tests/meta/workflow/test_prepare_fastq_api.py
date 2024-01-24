@@ -190,7 +190,11 @@ def test_add_decompressed_sample_loops_through_spring(
     case = analysis_store.get_case_by_internal_id(case_id)
     sample = case.samples[0]
 
-    with mock.patch.object(files, "get_hk_files_dict", return_value={},), mock.patch.object(
+    with mock.patch.object(
+        files,
+        "get_hk_files_dict",
+        return_value={},
+    ), mock.patch.object(
         files,
         "get_spring_paths",
         return_value=[CompressionData(spring_file.with_suffix(""))],
