@@ -469,7 +469,7 @@ def get_application_pipeline_limitations(tag: str):
 
 
 @BLUEPRINT.route("/orders")
-def get_orders(limit: int):
+def get_orders():
     """Return the latest orders."""
     if request.args.get("limit"):
         orders: list[Order] = db.get_orders(request.args.get(key="limit", type=int))
