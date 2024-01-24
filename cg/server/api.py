@@ -36,6 +36,7 @@ from cg.store.models import (
     Case,
     Customer,
     Flowcell,
+    Order,
     Pool,
     Sample,
     SampleLaneSequencingMetrics,
@@ -465,6 +466,18 @@ def get_application_pipeline_limitations(tag: str):
     if not application_limitations:
         return jsonify(message="Application limitations not found"), HTTPStatus.NOT_FOUND
     return jsonify([limitation.to_dict() for limitation in application_limitations])
+
+
+@BLUEPRINT.route("/orders")
+def get_orders(limit: int):
+    """Return the latest orders."""
+    if request.args.get("limit"):
+        orders: list[Order] = db.get_orders(request.args.get(key="limit", type=int))
+    else:
+        orders: list[Order] = db.get_orders()
+    if not orders:
+        return jsonify(message="No orders found"), HTTPStatus.NOT_FOUND
+    return jsonify([order.to_dict() for order in orders])
 
 
 @BLUEPRINT.route("/orderform", methods=["POST"])
