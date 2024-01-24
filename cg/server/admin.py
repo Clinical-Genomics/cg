@@ -640,3 +640,12 @@ class SampleLaneSequencingMetricsView(BaseView):
         "flowcell": FlowcellView.view_flow_cell_link,
         "sample": SampleView.view_sample_link,
     }
+
+
+class OrderView(BaseView):
+    """Admin view for the Model.Order."""
+
+    column_filters = ["id", "ticket_id", "customer_id"]
+    column_searchable_list = ["id", "ticket_id", "customer_id"]
+    create_modal = True
+    edit_modal = True
