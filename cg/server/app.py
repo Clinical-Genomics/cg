@@ -21,7 +21,6 @@ from cg.store.models import (
     Delivery,
     Flowcell,
     Invoice,
-    Order,
     Organism,
     Panel,
     Pool,
@@ -118,7 +117,6 @@ def _register_admin_views():
     ext.admin.add_view(
         admin.SampleLaneSequencingMetricsView(SampleLaneSequencingMetrics, ext.db.session)
     )
-    ext.admin.add_view(admin.OrderView(Order, ext.db.session))
 
     # Business data views
     ext.admin.add_view(admin.CaseView(Case, ext.db.session))
