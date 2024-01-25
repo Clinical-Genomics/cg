@@ -75,6 +75,7 @@ from cg.store.models import (
     Customer,
     Flowcell,
     Invoice,
+    Order,
     Organism,
     Panel,
     Pool,
@@ -1733,6 +1734,13 @@ class ReadHandler(BaseHandler):
             filter_functions=pool_filter_functions,
             pools=records,
         )
+        return records.all()
+
+    def get_orders(self, limit: int | None = None) -> list[Order]:
+        """Returns a list of entries in the table Order."""
+        records: Query = self._get_query(table=Order)
+        if limit is not None:
+            records = records.limit(limit)
         return records.all()
 
     def _calculate_estimated_turnaround_time(
