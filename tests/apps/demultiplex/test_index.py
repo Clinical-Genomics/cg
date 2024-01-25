@@ -77,42 +77,65 @@ def test_get_reverse_complement_not_dna(caplog):
         get_reverse_complement_dna_seq(dna=strain)
 
 
-def test_get_hamming_distance_index_1_different_lengths():
-    """Test that hamming distance between indexes with same prefix but different lengths is zero."""
-    # GIVEN two index_1 sequences with the same prefixes but different lengths
-    sequence_1: str = "GATTACA"
-    sequence_2: str = "GATTACAXX"
+@pytest.mark.parametrize(
+    "sequence_1, sequence_2, expected_distance",
+    [
+        ("GATTACA", "GATTACA", 0),
+        ("GATTACA", "GATTACAXX", 0),
+        ("XXXACA", "GATTACA", 6),
+        ("XXXXXXX", "GATTACA", 7),
+    ],
+    ids=[
+        "Identical sequences",
+        "Same initial part, different lengths",
+        "Same final part, different lengths",
+        "Different sequences, same length",
+    ],
+)
+def test_get_hamming_distance_index_1(sequence_1: str, sequence_2: str, expected_distance: int):
+    """
+    Test that Hamming distances are calculated correctly for different sets of index 1 sequences.
+    This is, that the operation is commutative and aligns sequences from the left.
+    """
+    # GIVEN two index_1 sequences
+
     # WHEN getting the hamming distance between them in any order
 
     # THEN the distance is zero
-    assert get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_2) == 0
-    assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_1) == 0
-
-    # WHEN getting the hamming distance between themselves
-
-    # THEN the distance is zero
-    assert get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_1) == 0
-    assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_2) == 0
-
-
-def test_get_hamming_distance_index_1_different_prefixes():
-    """Test that hamming distance for index 1 counts different characters from the left."""
-    # GIVEN two index_1 sequences with different lengths differing by two characters
-    # when aligned to the left
-    sequence_1: str = "GATXX"
-    sequence_2: str = "GATTACA"
-    # WHEN getting the hamming distance between them in any order
-
-    # THEN the distance is equal to the number of different characters
-    assert get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_2) == 2
-    assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_1) == 2
+    assert (
+        get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_2)
+        == expected_distance
+    )
+    assert (
+        get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_1)
+        == expected_distance
+    )
 
 
-def test_get_hamming_distance_index_2_different_lengths_reverse_complement():
-    """Test that hamming distance between indexes with same suffix but different lengths is zero."""
-    # GIVEN two index_2 sequences with the same suffixes but different lengths
-    sequence_1: str = "GATTACA"
-    sequence_2: str = "XXGATTACA"
+@pytest.mark.parametrize(
+    "sequence_1, sequence_2, expected_distance",
+    [
+        ("GATTACA", "GATTACA", 0),
+        ("GATTACA", "XXGATTACA", 0),
+        ("GATXX", "GATTACA", 5),
+        ("XXXXXXX", "GATTACA", 7),
+    ],
+    ids=[
+        "Identical sequences",
+        "Same final part, different lengths",
+        "Same initial part, different lengths",
+        "Different sequences, same length",
+    ],
+)
+def test_get_hamming_distance_index_2_reverse_complement(
+    sequence_1: str, sequence_2: str, expected_distance: int
+):
+    """
+    Test that Hamming distances are calculated correctly for different sets of index 2 sequences
+    with reverse complement. This is, that the operation is commutative and aligns sequences from
+    the right.
+    """
+    # GIVEN two index_2 sequences
 
     # WHEN getting the hamming distance between them in any order
 
@@ -121,37 +144,40 @@ def test_get_hamming_distance_index_2_different_lengths_reverse_complement():
         get_hamming_distance_index_2(
             sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=True
         )
-        == 0
+        == expected_distance
     )
     assert (
         get_hamming_distance_index_2(
             sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=True
         )
-        == 0
-    )
-
-    # WHEN getting the hamming distance between themselves
-
-    # THEN the distance is zero
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_1, sequence_2=sequence_1, is_reverse_complement=True
-        )
-        == 0
-    )
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_2, sequence_2=sequence_2, is_reverse_complement=True
-        )
-        == 0
+        == expected_distance
     )
 
 
-def test_get_hamming_distance_index_2_different_lengths_no_reverse_complement():
-    """Test that hamming distance between indexes with same prefix is zero if reverse complement."""
-    # GIVEN two index_2 sequences with the same prefixes but different lengths
-    sequence_1: str = "GATTACA"
-    sequence_2: str = "GATTACAXX"
+@pytest.mark.parametrize(
+    "sequence_1, sequence_2, expected_distance",
+    [
+        ("GATTACA", "GATTACA", 0),
+        ("GATTACA", "GATTACAXX", 0),
+        ("XXXACA", "GATTACA", 6),
+        ("XXXXXXX", "GATTACA", 7),
+    ],
+    ids=[
+        "Identical sequences",
+        "Same initial part, different lengths",
+        "Same final part, different lengths",
+        "Different sequences, same length",
+    ],
+)
+def test_get_hamming_distance_index_2_no_reverse_complement(
+    sequence_1: str, sequence_2: str, expected_distance: int
+):
+    """
+    Test that Hamming distances are calculated correctly for different sets of index 2 sequences
+    without reverse complement. This is, that the operation is commutative and aligns sequences
+    from the left.
+    """
+    # GIVEN two index_2 sequences
 
     # WHEN getting the hamming distance between them in any order with reverse complement
 
@@ -160,75 +186,11 @@ def test_get_hamming_distance_index_2_different_lengths_no_reverse_complement():
         get_hamming_distance_index_2(
             sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=False
         )
-        == 0
+        == expected_distance
     )
     assert (
         get_hamming_distance_index_2(
             sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=False
         )
-        == 0
-    )
-
-    # WHEN getting the hamming distance between themselves
-
-    # THEN the distance is zero
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_1, sequence_2=sequence_1, is_reverse_complement=False
-        )
-        == 0
-    )
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_2, sequence_2=sequence_2, is_reverse_complement=False
-        )
-        == 0
-    )
-
-
-def test_get_hamming_distance_index_2_different_prefixes_reverse_complement():
-    """Test that hamming distance for index 2 counts different characters from the right."""
-    # GIVEN two index_2 sequences different lengths differing by two characters
-    # when aligned to the right
-    sequence_1: str = "XXACA"
-    sequence_2: str = "GATTACA"
-
-    # WHEN getting the hamming distance between them in any order
-
-    # THEN the distance is equal to the number of different characters
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=True
-        )
-        == 2
-    )
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=True
-        )
-        == 2
-    )
-
-
-def test_get_hamming_distance_index_2_different_prefixes_no_reverse_complement():
-    """Test that hamming distance for index 2 counts different characters from the right."""
-    # GIVEN two index_2 sequences different lengths differing by two characters
-    # when aligned to the right
-    sequence_1: str = "XXTTA"
-    sequence_2: str = "GATTACA"
-
-    # WHEN getting the hamming distance between them in any order
-
-    # THEN the distance is equal to the number of different characters
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=False
-        )
-        == 2
-    )
-    assert (
-        get_hamming_distance_index_2(
-            sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=False
-        )
-        == 2
+        == expected_distance
     )
