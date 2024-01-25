@@ -1,16 +1,17 @@
 """Test fixtures for cg/server tests"""
 import os
+from datetime import datetime
 from typing import Generator
 
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
 from mock import patch
-from cg.server.ext import db as store
 
 from cg.constants import DataDelivery, Pipeline
+from cg.server.ext import db as store
 from cg.store.database import create_all_tables, drop_all_tables
-from cg.store.models import Case
+from cg.store.models import Case, Order
 from tests.store_helpers import StoreHelpers
 
 os.environ["CG_SQL_DATABASE_URI"] = "sqlite:///"
@@ -43,6 +44,22 @@ def case(helpers: StoreHelpers) -> Case:
         store=store,
     )
     return case
+
+
+@pytest.fixture
+def order(helpers: StoreHelpers) -> Order:
+    order: Order = helpers.add_order(
+        store=store, customer_id=1, ticket_id=1, order_date=datetime.now()
+    )
+    return order
+
+
+@pytest.fixture
+def order_another(helpers: StoreHelpers) -> Order:
+    order: Order = helpers.add_order(
+        store=store, customer_id=2, ticket_id=2, order_date=datetime.now()
+    )
+    return order
 
 
 @pytest.fixture
