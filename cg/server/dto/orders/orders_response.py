@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class Order(BaseModel):
-    customer_id: int
+    customer_id: str
     ticket_id: int
     order_date: datetime
 

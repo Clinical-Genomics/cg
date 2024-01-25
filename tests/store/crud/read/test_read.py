@@ -1539,8 +1539,17 @@ def test_get_orders_populated_store(store: Store, order: Order, order_another: O
 
 
 def test_get_orders_limited(store: Store, order: Order, order_another: Order):
-    # GIVEN a store with two orders
+    # GIVEN a store with two orders and a customer
 
     # WHEN fetching a limited amount of orders
     # THEN only one should be returned
     assert len(store.get_orders(limit=1)) == 1
+
+
+def test_order_customer_relationship(store_with_multiple_pools_for_customer: Store, order: Order):
+    # GIVEN a store with an order and a customer
+
+    # WHEN accessing the order
+
+    # THEN the customer should be set via the relationship
+    assert order.customer
