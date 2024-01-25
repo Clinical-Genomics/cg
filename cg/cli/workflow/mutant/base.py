@@ -13,7 +13,7 @@ from cg.cli.workflow.commands import (
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.mutant import MutantAnalysisAPI
+from cg.meta.workflow.mutant.mutant import MutantAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 

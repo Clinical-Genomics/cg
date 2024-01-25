@@ -216,6 +216,11 @@ class MicrosaltAppTags(StrEnum):
     PREP_CATEGORY: str = "mic"
 
 
+class MutantQC:
+    FRACTION_OF_SAMPLES_WITH_FAILED_QC_TRESHOLD: float = 0.2
+   #TODO : "FAIL"
+
+
 DRY_RUN_MESSAGE = "Dry run: process call will not be executed!"
 
 
