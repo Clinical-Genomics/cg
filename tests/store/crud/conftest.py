@@ -6,7 +6,7 @@ import pytest
 from cg.constants import Pipeline
 from cg.constants.constants import CustomerId, PrepCategory
 from cg.constants.subject import PhenotypeStatus
-from cg.store.models import CaseSample
+from cg.store.models import CaseSample, Order
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -383,3 +383,19 @@ def store_with_pools_for_multiple_customers(
 def three_pool_names() -> list[str]:
     """Return three customer ids."""
     yield ["_".join(["test_pool", str(number)]) for number in range(3)]
+
+
+@pytest.fixture
+def order(helpers: StoreHelpers, store: Store) -> Order:
+    order: Order = helpers.add_order(
+        store=store, customer_id=1, ticket_id=1, order_date=datetime.now()
+    )
+    return order
+
+
+@pytest.fixture
+def order_another(helpers: StoreHelpers, store: Store) -> Order:
+    order: Order = helpers.add_order(
+        store=store, customer_id=2, ticket_id=2, order_date=datetime.now()
+    )
+    return order

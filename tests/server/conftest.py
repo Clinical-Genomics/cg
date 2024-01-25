@@ -47,7 +47,7 @@ def case(helpers: StoreHelpers) -> Case:
 
 
 @pytest.fixture
-def order(helpers: StoreHelpers) -> Case:
+def order(helpers: StoreHelpers) -> Order:
     order: Order = helpers.add_order(
         store=store, customer_id=1, ticket_id=1, order_date=datetime.now()
     )
@@ -55,7 +55,7 @@ def order(helpers: StoreHelpers) -> Case:
 
 
 @pytest.fixture
-def order_another(helpers: StoreHelpers) -> Case:
+def order_another(helpers: StoreHelpers) -> Order:
     order: Order = helpers.add_order(
         store=store, customer_id=2, ticket_id=2, order_date=datetime.now()
     )
