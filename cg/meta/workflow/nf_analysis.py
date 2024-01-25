@@ -23,7 +23,6 @@ from cg.models.deliverables.metric_deliverables import (
 )
 from cg.exc import CgError, MetricsQCError
 from cg.constants.tb import AnalysisStatus
-from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -354,11 +353,16 @@ class NfAnalysisAPI(AnalysisAPI):
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
         return None
 
+    def create_metrics_deliverables_content(self, case_id: str) -> dict[str, list[dict[str, Any]]]:
+        """Create the content of metrics deliverables file."""
+        metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id=case_id)
+        self.ensure_mandatory_metrics_present(metrics=metrics)
+        return {"metrics": [metric.dict() for metric in metrics]}
+
     def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
         """Write <case>_metrics_deliverables.yaml file."""
         metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
-        metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id=case_id)
-        self.ensure_mandatory_metrics_present(metrics=metrics)
+        content: dict = self.create_metrics_deliverables_content(case_id=case_id)
         if dry_run:
             LOG.info(
                 f"Dry-run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
@@ -367,7 +371,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
         LOG.info(f"Writing metrics deliverables file to {metrics_deliverables_path.as_posix()}")
         WriteFile.write_file_from_content(
-            content={"metrics": [metric.dict() for metric in metrics]},
+            content=content,
             file_format=FileFormat.YAML,
             file_path=metrics_deliverables_path,
         )

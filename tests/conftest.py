@@ -32,7 +32,7 @@ from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
 from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
-from cg.io.yaml import write_yaml
+from cg.io.yaml import write_yaml, read_yaml
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
@@ -2231,6 +2231,16 @@ def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
+def rnafusion_metrics_deliverables(rnafusion_analysis_dir, rnafusion_case_id) -> list[dict]:
+    """Returns the content of a mock metrics deliverables file."""
+    return read_yaml(
+        file_path=Path(
+            rnafusion_analysis_dir, "rnafusion_case_enough_reads_metrics_deliverables.yaml"
+        )
+    )
+
+
+@pytest.fixture(scope="function")
 def rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to deliverables file."""
     return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_deliverables").with_suffix(
@@ -2511,13 +2521,21 @@ def taxprofiler_parameters_default(
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_multiqc_json_metrics(taxprofiler_analysis_dir) -> dict:
+def taxprofiler_multiqc_json_metrics(taxprofiler_analysis_dir) -> list[dict]:
     """Returns the content of a mock Multiqc JSON file."""
     return read_json(file_path=Path(taxprofiler_analysis_dir, "multiqc_data.json"))
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_metrics_deliverables(taxprofiler_dir, taxprofiler_case_id) -> Path:
+def taxprofiler_metrics_deliverables(taxprofiler_analysis_dir, taxprofiler_case_id) -> dict:
+    """Returns the content of a mock metrics deliverables file."""
+    return read_yaml(
+        file_path=Path(taxprofiler_analysis_dir, "taxprofiler_case_metrics_deliverables.yaml")
+    )
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_metrics_deliverables_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
     """Path to deliverables file."""
     return Path(
         taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_metrics_deliverables"

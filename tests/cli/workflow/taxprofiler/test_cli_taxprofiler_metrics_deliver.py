@@ -18,7 +18,7 @@ def test_metrics_deliver(
     taxprofiler_mock_analysis_finish,
     caplog: LogCaptureFixture,
     taxprofiler_case_id: str,
-    taxprofiler_metrics_deliverables: Path,
+    taxprofiler_metrics_deliverables_path: Path,
 ):
     """Test command with a case id and a finished analysis which should execute successfully."""
     caplog.set_level(logging.INFO)
@@ -30,10 +30,10 @@ def test_metrics_deliver(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN metrics deliverable file should be generated
-    assert taxprofiler_metrics_deliverables.is_file()
+    assert taxprofiler_metrics_deliverables_path.is_file()
 
     # WHEN reading metrics_deliverable_content as yaml
-    metrics_deliverables_content = read_yaml(file_path=taxprofiler_metrics_deliverables)
+    metrics_deliverables_content = read_yaml(file_path=taxprofiler_metrics_deliverables_path)
 
     assert isinstance(metrics_deliverables_content, dict)
 

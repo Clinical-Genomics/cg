@@ -291,8 +291,8 @@ def fixture_mip_analysis_api(
 def taxprofiler_metrics() -> dict[str, float]:
     """Return Taxprofiler raw analysis metrics dictionary."""
     return {
-        "after_filtering_total_reads": 24810472.0,
+        "filtering_result_passed_filter_reads": 24810472.0,
         "reads_mapped": 19014950.0,
-        "before_filtering_total_reads": 25173558.0,
+        "total_reads": 12400055,
         "paired_aligned_none": 1409340,
     }
