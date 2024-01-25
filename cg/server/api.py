@@ -27,7 +27,7 @@ from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from cg.server.dto.delivery_message_response import DeliveryMessageResponse
-from cg.server.dto.orders_request import OrdersRequest
+from cg.server.dto.orders_request import OrdersRequest, OrdersResponse
 from cg.server.ext import db, lims, osticket
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.orders.order_service import OrderService
@@ -38,7 +38,6 @@ from cg.store.models import (
     Case,
     Customer,
     Flowcell,
-    Order,
     Pool,
     Sample,
     SampleLaneSequencingMetrics,
@@ -475,10 +474,8 @@ def get_orders():
     """Return the latest orders."""
     orders_request: OrdersRequest = OrdersRequest.model_validate(request.args)
     order_service = OrderService(db)
-    orders: list[Order] = order_service.get_orders(orders_request)
-    if not orders:
-        return jsonify(message="No orders found"), HTTPStatus.NOT_FOUND
-    return jsonify([order.to_dict() for order in orders])
+    response: OrdersResponse = order_service.get_orders(orders_request)
+    return jsonify(response.model_dump())
 
 
 @BLUEPRINT.route("/orderform", methods=["POST"])
