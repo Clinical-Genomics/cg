@@ -1,8 +1,8 @@
 """rename_pipeline_sars-cov2
 
 Revision ID: de0f5b78dca4
-Revises: 584840c706a0
-Create Date: 2024-01-12 14:25:36.338102
+Revises: a6befebf1231
+Create Date: 2024-01-25 09:24:36.338102
 
 """
 from sqlalchemy import orm
@@ -14,7 +14,7 @@ from cg.store.models import Analysis, Case
 
 # revision identifiers, used by Alembic.
 revision = "de0f5b78dca4"
-down_revision = "584840c706a0"
+down_revision = "a6befebf1231"
 branch_labels = None
 depends_on = None
 
