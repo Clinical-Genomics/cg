@@ -109,6 +109,7 @@ class SampleSheetCreator:
                 lims_sample.update_barcode_mismatches(
                     samples_to_compare=samples_in_lane,
                     is_run_single_index=self.run_parameters.is_single_index,
+                    is_reverse_complement=self.index_settings.are_i5_override_cycles_reverse_complemented,
                 )
 
     def construct_sample_sheet(self) -> list[list[str]]:
