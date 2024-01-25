@@ -208,3 +208,27 @@ def test_get_hamming_distance_index_2_different_prefixes_reverse_complement():
         )
         == 2
     )
+
+
+def test_get_hamming_distance_index_2_different_prefixes_no_reverse_complement():
+    """Test that hamming distance for index 2 counts different characters from the right."""
+    # GIVEN two index_2 sequences different lengths differing by two characters
+    # when aligned to the right
+    sequence_1: str = "XXTTA"
+    sequence_2: str = "GATTACA"
+
+    # WHEN getting the hamming distance between them in any order
+
+    # THEN the distance is equal to the number of different characters
+    assert (
+        get_hamming_distance_index_2(
+            sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=False
+        )
+        == 2
+    )
+    assert (
+        get_hamming_distance_index_2(
+            sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=False
+        )
+        == 2
+    )
