@@ -27,7 +27,8 @@ from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from cg.server.dto.delivery_message_response import DeliveryMessageResponse
-from cg.server.dto.orders_request import OrdersRequest, OrdersResponse
+from cg.server.dto.orders.orders_request import OrdersRequest
+from cg.server.dto.orders.orders_response import OrdersResponse
 from cg.server.ext import db, lims, osticket
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.orders.order_service import OrderService
