@@ -55,6 +55,14 @@ def order(helpers: StoreHelpers) -> Case:
 
 
 @pytest.fixture
+def order_another(helpers: StoreHelpers) -> Case:
+    order: Order = helpers.add_order(
+        store=store, customer_id=2, ticket_id=2, order_date=datetime.now()
+    )
+    return order
+
+
+@pytest.fixture
 def client(app: Flask) -> Generator[FlaskClient, None, None]:
     # Bypass authentication
     with patch.object(app, "before_request_funcs", new={}):

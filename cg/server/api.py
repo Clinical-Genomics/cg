@@ -473,7 +473,7 @@ def get_application_pipeline_limitations(tag: str):
 @BLUEPRINT.route("/orders")
 def get_orders():
     """Return the latest orders."""
-    orders_request: OrdersRequest = OrdersRequest.model_validate(request.args)
+    orders_request: OrdersRequest = OrdersRequest.model_validate(request.args.to_dict())
     order_service = OrderService(db)
     response: OrdersResponse = order_service.get_orders(orders_request)
     return jsonify(response.model_dump())
