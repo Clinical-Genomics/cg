@@ -5,6 +5,7 @@ from typing import Any
 
 from google.auth import jwt
 from google.auth.crypt import RSASigner
+from cg.apps.tb.dto.create_job_request import CreateJobRequest
 
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Pipeline
@@ -48,9 +49,9 @@ class TrailblazerAPI:
         return {"Authorization": f"Bearer {jwt_token}"}
 
     def query_trailblazer(
-        self, command: str, request_body: dict, method: str = APIMethods.POST
+        self, endpoint: str, request_body: dict, method: str = APIMethods.POST
     ) -> Any:
-        url = self.host + "/" + command
+        url = f"{self.host}/{endpoint}"
         LOG.debug(f"REQUEST HEADER {self.auth_header}")
         LOG.debug(f"{method}: URL={url}; JSON={request_body}")
 
@@ -61,7 +62,7 @@ class TrailblazerAPI:
         LOG.debug(f"RESPONSE STATUS CODE {response.status_code}")
         if not response.ok:
             raise TrailblazerAPIHTTPError(
-                f"Request {command} failed with status code {response.status_code}: {response.text}"
+                f"Request {endpoint} failed with status code {response.status_code}: {response.text}"
             )
         LOG.debug(f"RESPONSE BODY {response.text}")
         return ReadStream.get_content_from_stream(file_format=FileFormat.JSON, stream=response.text)
@@ -70,7 +71,7 @@ class TrailblazerAPI:
         request_body = {
             "case_id": case_id,
         }
-        response = self.query_trailblazer(command="get-latest-analysis", request_body=request_body)
+        response = self.query_trailblazer(endpoint="get-latest-analysis", request_body=request_body)
         if response:
             return TrailblazerAnalysis.model_validate(response)
 
@@ -115,7 +116,9 @@ class TrailblazerAPI:
             "workflow_manager": workflow_manager,
         }
         LOG.debug(f"Submitting job to Trailblazer: {request_body}")
-        response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
+        response = self.query_trailblazer(
+            endpoint="add-pending-analysis", request_body=request_body
+        )
         if response:
             return TrailblazerAnalysis.model_validate(response)
 
@@ -126,7 +129,7 @@ class TrailblazerAPI:
         LOG.debug(f"Setting analysis uploaded at for {request_body}")
         LOG.info(f"{case_id} - uploaded at set to {uploaded_at}")
         self.query_trailblazer(
-            command="set-analysis-uploaded", request_body=request_body, method=APIMethods.PUT
+            endpoint="set-analysis-uploaded", request_body=request_body, method=APIMethods.PUT
         )
 
     def set_analysis_status(self, case_id: str, status: str) -> datetime:
@@ -136,7 +139,7 @@ class TrailblazerAPI:
         LOG.debug(f"Request body: {request_body}")
         LOG.info(f"Setting analysis status to {status} for case {case_id}")
         self.query_trailblazer(
-            command="set-analysis-status", request_body=request_body, method=APIMethods.PUT
+            endpoint="set-analysis-status", request_body=request_body, method=APIMethods.PUT
         )
 
     def add_comment(self, case_id: str, comment: str):
@@ -146,5 +149,14 @@ class TrailblazerAPI:
         LOG.debug(f"Request body: {request_body}")
         LOG.info(f"Adding comment: {comment} to case {case_id}")
         self.query_trailblazer(
-            command="add-comment", request_body=request_body, method=APIMethods.PUT
+            endpoint="add-comment", request_body=request_body, method=APIMethods.PUT
+        )
+
+    def add_upload_job_to_analysis(self, analyis_id: str, slurm_job_id: str) -> None:
+        create_request = CreateJobRequest(slurm_id=slurm_job_id, job_type="upload")
+        request_body: dict = create_request.model_dump()
+        self.query_trailblazer(
+            endpoint=f"/analysis/{analyis_id}/job",
+            request_body=request_body,
+            method=APIMethods.POST,
         )
