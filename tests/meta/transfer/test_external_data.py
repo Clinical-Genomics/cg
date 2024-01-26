@@ -9,6 +9,7 @@ from cg.store.models import Sample
 from cg.store.store import Store
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.store.conftest import sample_obj
 
 
 def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_id: str):

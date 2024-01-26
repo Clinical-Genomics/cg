@@ -10,15 +10,7 @@ from cg.constants import Pipeline
 from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus, Sex
 from cg.meta.orders.pool_submitter import PoolSubmitter
-from cg.store.models import (
-    Analysis,
-    Application,
-    Case,
-    CaseSample,
-    Customer,
-    Organism,
-    Sample,
-)
+from cg.store.models import Analysis, Application, Case, CaseSample, Customer, Organism, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
