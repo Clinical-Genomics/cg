@@ -6,6 +6,7 @@ The normal entry for information is through the REST API which will pass a JSON
 document with all information about samples in the submission. The input will
 be validated and if passing all checks be accepted as new samples.
 """
+
 import logging
 
 from cg.apps.lims import LimsAPI

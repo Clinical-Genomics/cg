@@ -5,6 +5,7 @@ Revises: 0baf8309d227
 Create Date: 2022-04-06 10:45:32.903682
 
 """
+
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 

@@ -1,4 +1,5 @@
 """Tests for the clean flow cells API."""
+
 import logging
 import time
 
@@ -69,9 +70,9 @@ def test_get_sequencing_metrics_for_flow_cell_from_statusdb(
     # GIVEN a clean flow cell api with a store that contains a flow cell with SampleLaneSequencingMetrics entries
 
     # WHEN retrieving the flow cell from the store
-    metrics: list[
-        SampleLaneSequencingMetrics
-    ] = flow_cell_clean_api_can_be_removed.get_sequencing_metrics_for_flow_cell()
+    metrics: list[SampleLaneSequencingMetrics] = (
+        flow_cell_clean_api_can_be_removed.get_sequencing_metrics_for_flow_cell()
+    )
 
     # THEN a SampleLaneSequencingMetrics entry is retrieved
     assert isinstance(metrics[0], SampleLaneSequencingMetrics)
@@ -147,9 +148,9 @@ def test_get_files_for_flow_cell_bundle(flow_cell_clean_api_can_be_removed: Clea
         SequencingFileTag.SPRING,
         SequencingFileTag.SPRING_METADATA,
     ]:
-        files: list[
-            File
-        ] = flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(tag=tag)
+        files: list[File] = (
+            flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(tag=tag)
+        )
 
         # THEN fastq, spring and spring metadata files are returned
         assert files

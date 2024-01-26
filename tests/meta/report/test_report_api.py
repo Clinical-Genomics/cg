@@ -1,4 +1,5 @@
 """Test delivery report API methods."""
+
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path

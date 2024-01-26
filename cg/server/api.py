@@ -352,9 +352,9 @@ def get_sequencing_metrics(flow_cell_name: str):
     if not flow_cell_name:
         return jsonify({"error": "Invalid or missing flow cell id"}), HTTPStatus.BAD_REQUEST
 
-    sequencing_metrics: list[
-        SampleLaneSequencingMetrics
-    ] = db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
+    sequencing_metrics: list[SampleLaneSequencingMetrics] = (
+        db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
+    )
 
     if not sequencing_metrics:
         return (

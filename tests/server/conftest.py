@@ -1,4 +1,5 @@
 """Test fixtures for cg/server tests"""
+
 import os
 from typing import Generator
 
@@ -6,9 +7,9 @@ import pytest
 from flask import Flask
 from flask.testing import FlaskClient
 from mock import patch
-from cg.server.ext import db as store
 
 from cg.constants import DataDelivery, Pipeline
+from cg.server.ext import db as store
 from cg.store.database import create_all_tables, drop_all_tables
 from cg.store.models import Case
 from tests.store_helpers import StoreHelpers

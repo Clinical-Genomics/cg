@@ -1,4 +1,5 @@
 """Tests for RNA part of the scout upload API"""
+
 import logging
 from typing import Generator, Set
 

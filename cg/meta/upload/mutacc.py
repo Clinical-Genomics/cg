@@ -14,7 +14,6 @@ LOG = logging.getLogger(__name__)
 
 
 class UploadToMutaccAPI:
-
     """API to upload finished cases to mutacc"""
 
     def __init__(self, scout_api: ScoutAPI, mutacc_auto_api: MutaccAutoAPI):

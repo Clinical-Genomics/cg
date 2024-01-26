@@ -1,4 +1,5 @@
 """Tests for the deliver ticket command"""
+
 import logging
 from pathlib import Path
 

@@ -1,4 +1,5 @@
 """Module for demultiplexing CLI."""
+
 import logging
 
 import click

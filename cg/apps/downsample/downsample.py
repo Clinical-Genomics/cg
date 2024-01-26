@@ -1,4 +1,5 @@
 """API that handles downsampling of samples."""
+
 import logging
 from pathlib import Path
 

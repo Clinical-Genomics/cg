@@ -1,6 +1,5 @@
 """Maps tag info from housekeeper tags to scout load config"""
 
-
 from pydantic import BaseModel, Field
 
 

@@ -17,7 +17,6 @@ LOG = logging.getLogger(__name__)
 
 
 class ScoutAPI:
-
     """Interface to Scout."""
 
     def __init__(self, config):

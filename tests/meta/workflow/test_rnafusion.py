@@ -1,6 +1,5 @@
 """Module for Rnafusion analysis API tests."""
 
-
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase

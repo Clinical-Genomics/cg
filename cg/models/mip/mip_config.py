@@ -1,6 +1,5 @@
 """Model MIP config"""
 
-
 from pydantic.v1 import BaseModel, EmailStr, Field, validator
 
 from cg.constants.priority import SlurmQos

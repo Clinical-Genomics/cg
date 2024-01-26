@@ -5,6 +5,7 @@ Revises: ef472ce31931
 Create Date: 2021-05-03 13:27:48.441597
 
 """
+
 from sqlalchemy import Column, ForeignKey, String, orm, types
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import declarative_base

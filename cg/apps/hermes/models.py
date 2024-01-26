@@ -1,4 +1,5 @@
 """Models used by hermes <-> cg interactions"""
+
 import logging
 from pathlib import Path
 

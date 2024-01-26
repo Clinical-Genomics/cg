@@ -1,4 +1,5 @@
 """ Test the CLI for mip-rna config-case"""
+
 import logging
 
 from cg.cli.workflow.mip_rna.base import config_case

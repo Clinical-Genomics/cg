@@ -1,4 +1,5 @@
 """Fixtures for store tests."""
+
 import datetime as dt
 import enum
 from datetime import datetime

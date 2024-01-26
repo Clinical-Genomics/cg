@@ -13,7 +13,6 @@ LOG = logging.getLogger(__name__)
 
 
 class MutaccAutoAPI:
-
     """
     API for mutacc-auto
     """

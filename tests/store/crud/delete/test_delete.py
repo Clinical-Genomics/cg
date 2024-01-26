@@ -71,15 +71,15 @@ def test_store_api_delete_all_empty_cases(
     """Test function to delete cases that are not associated with any samples"""
 
     # GIVEN a database containing a case without samples and a case with samples
-    case_without_samples: list[
-        CaseSample
-    ] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
-        case_internal_id=case_id_without_samples
+    case_without_samples: list[CaseSample] = (
+        store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
+            case_internal_id=case_id_without_samples
+        )
     )
-    case_with_samples: list[
-        CaseSample
-    ] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
-        case_internal_id=case_id_with_multiple_samples
+    case_with_samples: list[CaseSample] = (
+        store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
+            case_internal_id=case_id_with_multiple_samples
+        )
     )
 
     assert not case_without_samples
@@ -94,10 +94,10 @@ def test_store_api_delete_all_empty_cases(
     result: list[CaseSample] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
         case_internal_id=case_id_without_samples
     )
-    case_with_samples: list[
-        CaseSample
-    ] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
-        case_internal_id=case_id_with_multiple_samples
+    case_with_samples: list[CaseSample] = (
+        store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
+            case_internal_id=case_id_with_multiple_samples
+        )
     )
 
     assert not result

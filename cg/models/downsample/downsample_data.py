@@ -1,4 +1,5 @@
 """Model for down sampling meta data."""
+
 import logging
 from pathlib import Path
 

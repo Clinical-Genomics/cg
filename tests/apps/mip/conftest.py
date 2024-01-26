@@ -1,6 +1,5 @@
 """Fixtures for testing mip app"""
 
-
 import pytest
 
 from cg.constants import FileExtensions

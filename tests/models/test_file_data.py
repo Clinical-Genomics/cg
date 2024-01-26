@@ -1,4 +1,5 @@
 """Tests for the file data class"""
+
 import gzip
 
 import pytest

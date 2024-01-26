@@ -901,9 +901,9 @@ def test_get_application_limitations_by_tag(
     # GIVEN a store with some application limitations
 
     # WHEN filtering by a given application tag
-    application_limitations: list[
-        ApplicationLimitations
-    ] = store_with_application_limitations.get_application_limitations_by_tag(tag=tag)
+    application_limitations: list[ApplicationLimitations] = (
+        store_with_application_limitations.get_application_limitations_by_tag(tag=tag)
+    )
 
     # THEN assert that the application limitations were found
     assert (
@@ -1110,9 +1110,9 @@ def test_get_invoice_by_status(store_with_an_invoice_with_and_without_attributes
     # GIVEN a database with two invoices of which one has attributes
 
     # WHEN fetching the invoice by status
-    invoices: list[
-        Invoice
-    ] = store_with_an_invoice_with_and_without_attributes.get_invoices_by_status(is_invoiced=True)
+    invoices: list[Invoice] = (
+        store_with_an_invoice_with_and_without_attributes.get_invoices_by_status(is_invoiced=True)
+    )
 
     # THEN one invoice should be returned
     assert invoices
@@ -1332,8 +1332,10 @@ def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
     # GIVEN a store with sequencing metrics
 
     # WHEN getting a metrics entry by flow cell name, sample internal id and lane
-    metrics_entry: SampleLaneSequencingMetrics = store_with_sequencing_metrics.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-        sample_internal_id=sample_id, flow_cell_name=flow_cell_name, lane=lane
+    metrics_entry: SampleLaneSequencingMetrics = (
+        store_with_sequencing_metrics.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+            sample_internal_id=sample_id, flow_cell_name=flow_cell_name, lane=lane
+        )
     )
 
     assert metrics_entry is not None
@@ -1457,10 +1459,10 @@ def test_get_sample_lane_sequencing_metrics_by_flow_cell_name(
     # GIVEN a store with sequencing metrics
 
     # WHEN getting sequencing metrics for a flow cell
-    metrics: list[
-        SampleLaneSequencingMetrics
-    ] = store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_by_flow_cell_name(
-        flow_cell_name=flow_cell_name
+    metrics: list[SampleLaneSequencingMetrics] = (
+        store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+            flow_cell_name=flow_cell_name
+        )
     )
 
     # THEN assert that the metrics are returned

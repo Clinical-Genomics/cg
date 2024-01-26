@@ -1,4 +1,5 @@
 """Fixtures for Compress API tests."""
+
 import copy
 import os
 from datetime import datetime

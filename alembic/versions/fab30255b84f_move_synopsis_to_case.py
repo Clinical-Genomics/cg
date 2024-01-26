@@ -6,7 +6,6 @@ Create Date: 2021-02-17 17:43:47.102289
 
 """
 
-
 import sqlalchemy as sa
 from sqlalchemy import orm
 from sqlalchemy.orm import declarative_base

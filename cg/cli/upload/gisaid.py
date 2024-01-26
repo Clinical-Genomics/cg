@@ -1,4 +1,5 @@
 """Code for uploading genotype data via CLI"""
+
 import logging
 
 import click

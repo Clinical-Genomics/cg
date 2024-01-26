@@ -30,9 +30,9 @@ def create_undetermined_non_pooled_metrics(
 ) -> list[SampleLaneSequencingMetrics]:
     """Return sequencing metrics for any undetermined reads in non-pooled lanes."""
 
-    non_pooled_lanes_and_samples: list[
-        tuple[int, str]
-    ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
+    non_pooled_lanes_and_samples: list[tuple[int, str]] = (
+        flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
+    )
 
     if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
         return create_bcl2fastq_undetermined_metrics(

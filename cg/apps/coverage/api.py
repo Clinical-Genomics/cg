@@ -1,4 +1,5 @@
 """Chanjo API"""
+
 import logging
 import tempfile
 
@@ -10,7 +11,6 @@ LOG = logging.getLogger(__name__)
 
 
 class ChanjoAPI:
-
     """Interface to Chanjo, the coverage analysis tool"""
 
     def __init__(self, config: dict):
