@@ -311,7 +311,9 @@ def test_update_barcode_mismatches_2(
     sample_to_update: FlowCellSampleBCLConvert = sample_list[0]
 
     # WHEN updating the value for index 2 barcode mismatches
-    sample_to_update._update_barcode_mismatches_2(samples_to_compare=sample_list)
+    sample_to_update._update_barcode_mismatches_2(
+        samples_to_compare=sample_list, is_reverse_complement=False
+    )
 
     # THEN the value for index 2 barcode mismatches is updated with the expected value
     assert sample_to_update.barcode_mismatches_2 == expected_barcode_mismatch

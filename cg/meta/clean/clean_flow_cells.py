@@ -8,7 +8,11 @@ from housekeeper.store.models import File
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS
-from cg.exc import CleanFlowCellFailedError, HousekeeperFileMissingError
+from cg.exc import (
+    CleanFlowCellFailedError,
+    HousekeeperBundleVersionMissingError,
+    HousekeeperFileMissingError,
+)
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.store.store import Store
@@ -130,8 +134,7 @@ class CleanFlowCellAPI:
             and self.has_spring_meta_data_files_for_samples_in_housekeeper()
         ):
             raise HousekeeperFileMissingError(
-                f"Flow cell {self.flow_cell.id} is missing fastq and spring files for some samples. "
-                f"Info can be found in debug mode."
+                f"Flow cell {self.flow_cell.id} is missing fastq and spring files for some samples."
             )
         return True
 
@@ -162,21 +165,20 @@ class CleanFlowCellAPI:
         return metrics
 
     def get_files_for_samples_on_flow_cell_with_tag(self, tag: str) -> list[File] | None:
-        """
-        Return the files with the specified tag for all samples on a Flow cell.
-        """
+        """Return the files with the specified tag for all samples on a Flow cell."""
         flow_cell: Flowcell = self.get_flow_cell_from_status_db()
         bundle_names: list[str] = [sample.internal_id for sample in flow_cell.samples]
         files: list[File] = []
         for bundle_name in bundle_names:
-            files.extend(
-                self.hk_api.get_files_from_latest_version(
-                    bundle_name=bundle_name, tags=[tag, self.flow_cell.id]
-                ).all()
-            )
-            if not files:
-                LOG.debug(
-                    f"No files with tag {tag} found for sample {bundle_name} on flow cell {self.flow_cell.id}"
+            try:
+                files.extend(
+                    self.hk_api.get_files_from_latest_version(
+                        bundle_name=bundle_name, tags=[tag, self.flow_cell.id]
+                    ).all()
                 )
-                return None
+            except HousekeeperBundleVersionMissingError:
+                continue
+        if not files:
+            LOG.warning(f"No files with tag {tag} found on flow cell {self.flow_cell.id}")
+            return None
         return files

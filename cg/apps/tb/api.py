@@ -6,10 +6,11 @@ from typing import Any
 
 from google.auth import jwt
 from google.auth.crypt import RSASigner
+from cg.apps.tb.dto.create_job_request import CreateJobRequest
 
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Pipeline
-from cg.constants.constants import APIMethods, FileFormat, WorkflowManager
+from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
 from cg.exc import TrailblazerAPIHTTPError
@@ -51,7 +52,7 @@ class TrailblazerAPI:
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST
     ) -> Any:
-        url = self.host + "/" + command
+        url = f"{self.host}/{command}"
         LOG.debug(f"REQUEST HEADER {self.auth_header}")
         LOG.debug(f"{method}: URL={url}; JSON={request_body}")
 
@@ -148,4 +149,13 @@ class TrailblazerAPI:
         LOG.info(f"Adding comment: {comment} to case {case_id}")
         self.query_trailblazer(
             command="add-comment", request_body=request_body, method=APIMethods.PUT
+        )
+
+    def add_upload_job_to_analysis(self, analyis_id: int, slurm_job_id: int) -> None:
+        create_request = CreateJobRequest(slurm_id=slurm_job_id, job_type=JobType.UPLOAD)
+        request_body: dict = create_request.model_dump()
+        self.query_trailblazer(
+            command=f"/analysis/{analyis_id}/jobs",
+            request_body=request_body,
+            method=APIMethods.POST,
         )

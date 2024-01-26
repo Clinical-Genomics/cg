@@ -76,11 +76,34 @@ def pad_index_two(index_string: str, reverse_complement: bool) -> str:
     return index_string + INDEX_TWO_PAD_SEQUENCE
 
 
-def get_hamming_distance_for_indexes(sequence_1: str, sequence_2: str) -> int:
-    """Get the hamming distance between two index sequences.
+def get_hamming_distance_index_1(sequence_1: str, sequence_2: str) -> int:
+    """
+    Get the hamming distance between two index 1 sequences.
     In the case that one sequence is longer than the other, the distance is calculated between
-    the shortest sequence and the first segment of equal length of the longest sequence."""
+    the shortest sequence and the first segment of equal length of the longest sequence.
+    """
     shortest_index_length: int = min(len(sequence_1), len(sequence_2))
     return get_hamming_distance(
         str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
+    )
+
+
+def get_hamming_distance_index_2(
+    sequence_1: str, sequence_2: str, is_reverse_complement: bool
+) -> int:
+    """
+    Get the hamming distance between two index 2 sequences.
+    In the case that one sequence is longer than the other, the distance is calculated between
+    the shortest sequence and the last segment of equal length of the longest sequence.
+    If it does not require reverse complement, the calculation is the same as for index 1.
+    """
+    shortest_index_length: int = min(len(sequence_1), len(sequence_2))
+    return (
+        get_hamming_distance(
+            str_1=sequence_1[-shortest_index_length:], str_2=sequence_2[-shortest_index_length:]
+        )
+        if is_reverse_complement
+        else get_hamming_distance(
+            str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
+        )
     )

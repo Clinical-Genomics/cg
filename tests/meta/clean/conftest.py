@@ -87,7 +87,7 @@ def store_with_flow_cell_to_clean(
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
-    sample_sequencing_metrics_details: list[str | int | float] = [
+    sample_sequencing_metrics_details: list[tuple] = [
         (sample_id, tmp_flow_cell_to_clean.id, 1, 50_000_0000, 90.5, 32),
         (sample_id, tmp_flow_cell_to_clean.id, 2, 50_000_0000, 90.4, 31),
     ]
