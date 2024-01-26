@@ -152,9 +152,9 @@ def test_get_files_for_flow_cell_bundle(
     # GIVEN a clean flow cell api with a flow cell that has files in housekeeper
 
     # WHEN getting the flow cell samples' files
-    files: list[
-        File
-    ] = flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(tag=tag)
+    files: list[File] = (
+        flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(tag=tag)
+    )
 
     # THEN files are returned
     assert files
@@ -192,16 +192,15 @@ def test_get_files_for_samples_on_flow_cell_with_tag_missing_sample(
     assert not hk_api.bundle(sample.internal_id)
 
     # WHEN getting the flow cell samples' files
-    files: list[
-        File
-    ] = flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(tag=tag)
+    files: list[File] = (
+        flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(tag=tag)
+    )
 
     # THEN files are returned
     assert files
 
     # THEN a warning is logged
     assert f"Bundle: {sample.internal_id} not found in Housekeeper" in caplog.text
-
 
 
 def test_can_flow_cell_be_deleted(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
