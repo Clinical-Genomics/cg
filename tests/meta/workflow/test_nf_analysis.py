@@ -37,7 +37,7 @@ def test_create_metrics_deliverables_content(
     """Test metrics deliverables file content function for Taxprofiler and Rnafusion."""
 
     caplog.set_level(logging.INFO)
-    context = request.getfixturevalue(context)
+    context: CGConfig = request.getfixturevalue(context)
     metrics_deliverables = request.getfixturevalue(metrics_deliverables)
     case_id = request.getfixturevalue(case_id)
     request.getfixturevalue(analysis_finish)
