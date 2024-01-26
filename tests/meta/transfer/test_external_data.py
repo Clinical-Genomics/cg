@@ -8,9 +8,7 @@ from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.store.models import Sample
 from cg.store.store import Store
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
-from tests.cli.workflow.conftest import dna_case
 from tests.mocks.hk_mock import MockHousekeeperAPI
-from tests.store.conftest import sample_obj
 
 
 def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_id: str):
@@ -130,13 +128,13 @@ def test_add_files_to_bundles(
     # GIVEN a file to be added
 
     # WHEN the files are added.
-    external_data_api.add_files_to_bundles(
+    external_data_api.add_and_include_files_to_bundles(
         fastq_paths=[fastq_file],
         last_version=hk_version,
         lims_sample_id=sample_id,
     )
 
-    # THEN the function should return True and the file should have benn added.
+    # THEN the function should return True and the file should have been added.
     assert str(fastq_file.absolute()) in [idx.path for idx in hk_version.files]
 
 
@@ -184,7 +182,7 @@ def test_add_transfer_to_housekeeper(
     # WHEN the sample bundles are added to housekeeper
     external_data_api.add_transfer_to_housekeeper(ticket=ticket_id)
 
-    # THEN two sample bundles exist in housekeeper and the file has been added to those bundles bundles
+    # THEN two sample bundles exist in housekeeper and the file has been added to those bundles
     added_samples = list(external_data_api.housekeeper_api.bundles())
     assert all(
         sample.internal_id in [added_sample.name for added_sample in added_samples]
@@ -193,7 +191,7 @@ def test_add_transfer_to_housekeeper(
     assert all(
         sample.versions[0].files[0].path == str(fastq_file.absolute()) for sample in added_samples
     )
-    # Then the sample that is not available should not exists
+    # Then the sample that is not available should not exist
     assert samples[-1].internal_id not in [added_sample.name for added_sample in added_samples]
 
 
@@ -220,7 +218,7 @@ def test_curate_sample_folder(
     sample: Sample = case.links[0].sample
     tmp_folder = Path(tmpdir_factory.mktemp(sample.name, numbered=False))
     external_data_api.curate_sample_folder(
-        cust_name=customer_id, sample_folder=tmp_folder, force=False
+        customer_id=customer_id, sample_folder=tmp_folder, force=False
     )
     assert (tmp_folder.parent / sample.internal_id).exists()
     assert not tmp_folder.exists()

@@ -2,7 +2,7 @@ import datetime as dt
 import logging
 from pathlib import Path
 
-from housekeeper.store.models import Version
+from housekeeper.store.models import File, Version
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import HK_FASTQ_TAGS
@@ -121,13 +121,16 @@ class ExternalDataAPI(MetaAPI):
         ]
         return available_samples
 
-    def add_files_to_bundles(
+    def add_and_include_files_to_bundles(
         self, fastq_paths: list[Path], last_version: Version, lims_sample_id: str
     ):
         """Adds the given fastq files to the the hk-bundle"""
         for path in fastq_paths:
             LOG.info(f"Adding path {path} to bundle {lims_sample_id} in housekeeper")
-            self.housekeeper_api.add_file(path=path, version_obj=last_version, tags=HK_FASTQ_TAGS)
+            hk_file: File = self.housekeeper_api.add_file(
+                path=path, version_obj=last_version, tags=HK_FASTQ_TAGS
+            )
+            self.housekeeper_api.include_file(version_obj=last_version, file_obj=hk_file)
 
     def get_failed_fastq_paths(self, fastq_paths_to_add: list[Path]) -> list[Path]:
         failed_sum_paths: list[Path] = []
@@ -149,10 +152,10 @@ class ExternalDataAPI(MetaAPI):
         )
         return fastq_paths_to_add
 
-    def curate_sample_folder(self, cust_name: str, force: bool, sample_folder: Path) -> None:
+    def curate_sample_folder(self, customer_id: str, force: bool, sample_folder: Path) -> None:
         """Changes the name of the folder to the internal_id. If force is true replaces any previous folder."""
         customer: Customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=cust_name
+            customer_internal_id=customer_id
         )
         customer_folder: Path = sample_folder.parent
         sample: Sample = self.status_db.get_sample_by_customer_and_name(
@@ -170,13 +173,14 @@ class ExternalDataAPI(MetaAPI):
     def add_transfer_to_housekeeper(
         self, ticket: str, dry_run: bool = False, force: bool = False
     ) -> None:
-        """Creates sample bundles in housekeeper and adds the available files corresponding to the ticket to the
-        bundle"""
+        """Creates sample bundles in housekeeper and adds the available ticket files to it."""
         failed_paths: list[Path] = []
-        cust: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
-        destination_folder_path: Path = self.get_destination_path(customer=cust)
+        customer_id: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
+        destination_folder_path: Path = self.get_destination_path(customer=customer_id)
         for sample_folder in destination_folder_path.iterdir():
-            self.curate_sample_folder(cust_name=cust, sample_folder=sample_folder, force=force)
+            self.curate_sample_folder(
+                customer_id=customer_id, sample_folder=sample_folder, force=force
+            )
         available_samples: list[Sample] = self.get_available_samples(
             folder=destination_folder_path, ticket=ticket
         )
@@ -191,9 +195,9 @@ class ExternalDataAPI(MetaAPI):
                 bundle_name=sample.internal_id
             )
             fastq_paths_to_add: list[Path] = self.get_fastq_paths_to_add(
-                customer=cust, hk_version=last_version, lims_sample_id=sample.internal_id
+                customer=customer_id, hk_version=last_version, lims_sample_id=sample.internal_id
             )
-            self.add_files_to_bundles(
+            self.add_and_include_files_to_bundles(
                 fastq_paths=fastq_paths_to_add,
                 last_version=last_version,
                 lims_sample_id=sample.internal_id,
