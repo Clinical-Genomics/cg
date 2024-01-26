@@ -886,6 +886,7 @@ class Order(Model):
     customer = orm.relationship("Customer", foreign_keys=[customer_id])
     order_date = Column(types.DateTime, nullable=False)
     ticket_id = Column(types.Integer, nullable=False, unique=True, index=True)
+    workflow = Column(types.Enum(*tuple(Pipeline)), nullable=False)
 
     def to_dict(self):
         return to_dict(model_instance=self)

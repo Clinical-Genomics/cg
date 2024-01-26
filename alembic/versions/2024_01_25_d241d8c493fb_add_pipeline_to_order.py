@@ -20,15 +20,12 @@ depends_on = None
 def upgrade():
     op.add_column(
         table_name="order",
-        column=sa.Column(
-            "pipeline",
-            sa.Enum(*tuple(Pipeline)),
-        ),
+        column=sa.Column("workflow", sa.Enum(*tuple(Pipeline)), nullable=False),
     )
 
 
 def downgrade():
     op.drop_column(
         table_name="order",
-        column_name="pipeline",
+        column_name="workflow",
     )

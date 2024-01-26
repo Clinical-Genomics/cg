@@ -61,7 +61,10 @@ def customer_another(helpers: StoreHelpers) -> Customer:
 @pytest.fixture
 def order(helpers: StoreHelpers, customer: Customer) -> Order:
     order: Order = helpers.add_order(
-        store=store, customer_id=customer.id, ticket_id=1, order_date=datetime.now()
+        store=store,
+        customer_id=customer.id,
+        ticket_id=1,
+        order_date=datetime.now(),
     )
     return order
 
