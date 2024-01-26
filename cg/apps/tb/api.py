@@ -9,7 +9,7 @@ from cg.apps.tb.dto.create_job_request import CreateJobRequest
 
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Pipeline
-from cg.constants.constants import APIMethods, FileFormat, WorkflowManager
+from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
 from cg.exc import TrailblazerAPIHTTPError
@@ -151,7 +151,7 @@ class TrailblazerAPI:
         )
 
     def add_upload_job_to_analysis(self, analyis_id: str, slurm_job_id: str) -> None:
-        create_request = CreateJobRequest(slurm_id=slurm_job_id, job_type="upload")
+        create_request = CreateJobRequest(slurm_id=slurm_job_id, job_type=JobType.UPLOAD)
         request_body: dict = create_request.model_dump()
         self.query_trailblazer(
             command=f"/analysis/{analyis_id}/job",
