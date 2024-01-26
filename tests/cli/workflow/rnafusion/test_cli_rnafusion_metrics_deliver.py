@@ -35,7 +35,7 @@ def test_without_samples(
 def test_metrics_deliver(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
-    mock_analysis_finish,
+    rnafusion_mock_analysis_finish,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
 ):

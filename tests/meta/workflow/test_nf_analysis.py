@@ -16,7 +16,7 @@ from cg.models.cg_config import CGConfig
             "rnafusion_context",
             "rnafusion_metrics_deliverables",
             "rnafusion_case_id",
-            "mock_analysis_finish",
+            "rnafusion_mock_analysis_finish",
         ),
         (
             "taxprofiler_context",
