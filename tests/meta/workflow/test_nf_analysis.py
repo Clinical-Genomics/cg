@@ -42,7 +42,7 @@ def test_create_metrics_deliverables_content(
     case_id = request.getfixturevalue(case_id)
     request.getfixturevalue(analysis_finish)
 
-    # GIVEN a Taxprofiler or Rnafusion analysis API and a list of QC metrics
+    # GIVEN a Nextflow pipeline analysis API and a list of QC metrics
     analysis_api: NfAnalysisAPI = context.meta_apis["analysis_api"]
 
     # WHEN writing the metrics deliverables file
