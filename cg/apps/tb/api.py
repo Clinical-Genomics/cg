@@ -150,11 +150,11 @@ class TrailblazerAPI:
             command="add-comment", request_body=request_body, method=APIMethods.PUT
         )
 
-    def add_upload_job_to_analysis(self, analyis_id: str, slurm_job_id: str) -> None:
+    def add_upload_job_to_analysis(self, analyis_id: int, slurm_job_id: int) -> None:
         create_request = CreateJobRequest(slurm_id=slurm_job_id, job_type=JobType.UPLOAD)
         request_body: dict = create_request.model_dump()
         self.query_trailblazer(
-            command=f"/analysis/{analyis_id}/job",
+            command=f"/analysis/{analyis_id}/jobs",
             request_body=request_body,
             method=APIMethods.POST,
         )

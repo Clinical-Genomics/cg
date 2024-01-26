@@ -4,5 +4,5 @@ from cg.constants.constants import JobType
 
 
 class CreateJobRequest(BaseModel):
-    slurm_id: str
+    slurm_id: int
     job_type: JobType
