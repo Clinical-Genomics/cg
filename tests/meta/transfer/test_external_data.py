@@ -128,7 +128,7 @@ def test_add_files_to_bundles(
     """Tests adding files to Housekeeper."""
     # GIVEN a file to be added
 
-    # WHEN the files are added.
+    # WHEN the files are added and included
     external_data_api.add_and_include_files_to_bundles(
         fastq_paths=[fastq_file],
         last_version=hk_version,
