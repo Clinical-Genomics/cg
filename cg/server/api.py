@@ -264,6 +264,16 @@ def parse_samples():
     return jsonify(samples=parsed_samples, total=len(samples))
 
 
+@BLUEPRINT.route("/ticket/<ticket_id>/samples")
+@is_public
+def get_ticket_samples(ticket_id):
+    """Return samples."""
+    ticket_id = "1000000"
+    samples: list[Sample] = db.get_samples_from_ticket(ticket_id)
+    parsed_samples: list[dict] = [sample.to_dict() for sample in samples]
+    return jsonify(samples=parsed_samples, total=len(samples))
+
+
 @BLUEPRINT.route("/samples_in_collaboration")
 def parse_samples_in_collaboration():
     """Return samples in a customer group."""
