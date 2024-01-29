@@ -27,9 +27,9 @@ from cg.models.cg_config import CGConfig
     ],
 )
 def test_create_metrics_deliverables_content(
-    context: CGConfig,
+    context: str,
     case_id: str,
-    metrics_deliverables: dict,
+    metrics_deliverables: str,
     caplog: LogCaptureFixture,
     analysis_finish,
     request,
@@ -37,9 +37,11 @@ def test_create_metrics_deliverables_content(
     """Test metrics deliverables file content function for Taxprofiler and Rnafusion."""
 
     caplog.set_level(logging.INFO)
+
+    # GIVEN each fixture is being initialised
     context: CGConfig = request.getfixturevalue(context)
-    metrics_deliverables = request.getfixturevalue(metrics_deliverables)
-    case_id = request.getfixturevalue(case_id)
+    metrics_deliverables: dict = request.getfixturevalue(metrics_deliverables)
+    case_id: str = request.getfixturevalue(case_id)
     request.getfixturevalue(analysis_finish)
 
     # GIVEN a Nextflow pipeline analysis API and a list of QC metrics

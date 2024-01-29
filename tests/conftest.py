@@ -2231,7 +2231,7 @@ def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def rnafusion_metrics_deliverables(rnafusion_analysis_dir, rnafusion_case_id) -> list[dict]:
+def rnafusion_metrics_deliverables(rnafusion_analysis_dir: Path) -> list[dict]:
     """Returns the content of a mock metrics deliverables file."""
     return read_yaml(
         file_path=Path(
@@ -2521,13 +2521,13 @@ def taxprofiler_parameters_default(
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_multiqc_json_metrics(taxprofiler_analysis_dir) -> list[dict]:
+def taxprofiler_multiqc_json_metrics(taxprofiler_analysis_dir: Path) -> list[dict]:
     """Returns the content of a mock Multiqc JSON file."""
     return read_json(file_path=Path(taxprofiler_analysis_dir, "multiqc_data.json"))
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_metrics_deliverables(taxprofiler_analysis_dir, taxprofiler_case_id) -> dict:
+def taxprofiler_metrics_deliverables(taxprofiler_analysis_dir: Path) -> dict:
     """Returns the content of a mock metrics deliverables file."""
     return read_yaml(
         file_path=Path(taxprofiler_analysis_dir, "taxprofiler_case_metrics_deliverables.yaml")
@@ -2535,7 +2535,7 @@ def taxprofiler_metrics_deliverables(taxprofiler_analysis_dir, taxprofiler_case_
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_metrics_deliverables_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
+def taxprofiler_metrics_deliverables_path(taxprofiler_dir: Path, taxprofiler_case_id: str) -> Path:
     """Path to deliverables file."""
     return Path(
         taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_metrics_deliverables"
