@@ -8,7 +8,6 @@ from cg.constants import FlowCellStatus, Priority
 from cg.constants.constants import CaseActions, MicrosaltAppTags, Pipeline
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CgError
-from cg.store import Store
 from cg.store.models import (
     Analysis,
     Application,
@@ -22,12 +21,14 @@ from cg.store.models import (
     Customer,
     Flowcell,
     Invoice,
+    Order,
     Organism,
     Pool,
     Sample,
     SampleLaneSequencingMetrics,
     User,
 )
+from cg.store.store import Store
 from tests.store.conftest import StoreConstants
 from tests.store_helpers import StoreHelpers
 
@@ -1519,3 +1520,27 @@ def test_sample_with_id_does_not_exist(store_with_case_and_sample_with_reads: St
 
     # THEN the sample does not exist
     assert not does_exist
+
+
+def test_get_orders_empty_store(store: Store):
+    # GIVEN a store without any orders
+
+    # WHEN fetching orders
+    # THEN none should be returned
+    assert not store.get_orders()
+
+
+def test_get_orders_populated_store(store: Store, order: Order, order_another: Order):
+    # GIVEN a store with two orders
+
+    # WHEN fetching orders
+    # THEN both should be returned
+    assert len(store.get_orders()) == 2
+
+
+def test_get_orders_limited(store: Store, order: Order, order_another: Order):
+    # GIVEN a store with two orders
+
+    # WHEN fetching a limited amount of orders
+    # THEN only one should be returned
+    assert len(store.get_orders(limit=1)) == 1

@@ -12,8 +12,8 @@ from cg.exc import ArchiveJobFailedError
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
-from cg.store import Store
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 ARCHIVE_HANDLERS: dict[str, Type[ArchiveHandler]] = {
@@ -297,7 +297,7 @@ class SpringArchiveAPI:
     def get_archive_location_from_file(file: File) -> ArchiveLocations | None:
         for tag_name in [tag.name for tag in file.tags]:
             if tag_name in iter(ArchiveLocations):
-                LOG.info(f"Found archive location {tag_name}")
+                LOG.debug(f"Found archive location {tag_name}")
                 return tag_name
         LOG.warning("No archive location in the file tags")
         return None

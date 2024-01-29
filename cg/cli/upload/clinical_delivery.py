@@ -6,14 +6,15 @@ from pathlib import Path
 import click
 
 from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import DRY_RUN
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.tb import AnalysisTypes
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
-from cg.store import Store
 from cg.store.models import Case
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -64,7 +65,8 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
     )
     analysis_name: str = f"{case_id}_rsync" if is_complete_delivery else f"{case_id}_partial"
     if not dry_run:
-        context.obj.trailblazer_api.add_pending_analysis(
+        trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
+        analysis: TrailblazerAnalysis = trailblazer_api.add_pending_analysis(
             case_id=analysis_name,
             analysis_type=AnalysisTypes.OTHER,
             config_path=rsync_api.trailblazer_config_path.as_posix(),
@@ -73,6 +75,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
             data_analysis=Pipeline.RSYNC,
             ticket=case.latest_ticket,
         )
+        trailblazer_api.add_upload_job_to_analysis(analysis_id=analysis.id, slurm_id=job_id)
     LOG.info(f"Transfer of case {case_id} started with SLURM job id {job_id}")
 
 

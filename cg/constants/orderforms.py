@@ -36,6 +36,6 @@ class Orderform(StrEnum):
             Orderform.MIP_DNA: "30",
             Orderform.RML: "17",
             Orderform.MICROSALT: "11",
-            Orderform.SARS_COV_2: "7",
+            Orderform.SARS_COV_2: "8",
         }
         return current_order_form_versions[order_form]

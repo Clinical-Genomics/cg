@@ -1,8 +1,8 @@
 """Tests for the functions in the store api status related to the customer module."""
 
 from cg.constants.constants import CustomerId
-from cg.store import Store
 from cg.store.models import Customer
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

@@ -6,7 +6,7 @@ from cg.constants.constants import Pipeline
 from cg.constants.delivery import INBOX_NAME
 from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -22,7 +22,7 @@ def test_get_inbox_path(
         store=cg_context.status_db,
         internal_id="angrybird",
         name=ticket_id,
-        data_analysis=Pipeline.SARS_COV_2,
+        data_analysis=Pipeline.MUTANT,
     )
 
     mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
@@ -79,7 +79,7 @@ def test_generate_date_tag(cg_context: CGConfig, mocker, helpers, ticket_id: str
         store=cg_context.status_db,
         internal_id="angrybird",
         name=ticket_id,
-        data_analysis=Pipeline.SARS_COV_2,
+        data_analysis=Pipeline.MUTANT,
     )
 
     case.ordered_at = timestamp_now

@@ -2,7 +2,7 @@
 
 from sqlalchemy.orm import Session
 
-from cg.store.api.base import BaseHandler
+from cg.store.base import BaseHandler
 from cg.store.models import Flowcell, Sample
 
 

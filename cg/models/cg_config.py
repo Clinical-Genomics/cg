@@ -19,8 +19,8 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
-from cg.store import Store
 from cg.store.database import initialize_database
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -267,7 +267,7 @@ class CGConfig(BaseModel):
     max_flowcells: int | None
     data_input: DataInput | None = None
     # Base APIs that always should exist
-    status_db_: Store = None
+    status_db_: Store | None = None
     housekeeper: HousekeeperConfig
     housekeeper_api_: HousekeeperAPI = None
 

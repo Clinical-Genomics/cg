@@ -7,9 +7,9 @@ import pytest
 
 from cg.constants import DataDelivery, FlowCellStatus, Pipeline
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.crud.read import ReadHandler
 from cg.store.models import Case
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

@@ -5,8 +5,8 @@ from click.testing import CliRunner
 from cg.cli.add import add
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Customer
+from cg.store.store import Store
 
 NEW_TEST_CUST_NAME: str = "new_test_cust"
 NEW_TEST_CUST_INTERNAL_ID: str = "new_test_cust_internal_id"

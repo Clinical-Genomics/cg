@@ -6,8 +6,8 @@ from sqlalchemy.orm import Query
 from cg.constants import Pipeline
 from cg.constants.constants import CaseActions
 from cg.constants.subject import PhenotypeStatus
-from cg.store import Store
 from cg.store.models import Analysis, Case, CaseSample, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

@@ -13,7 +13,7 @@ from cg.constants import FileExtensions, SequencingFileTag
 from cg.constants.pedigree import Pedigree
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

@@ -1,7 +1,7 @@
 import pytest
 
-from cg.store import Store
 from cg.store.models import Customer
+from cg.store.store import Store
 
 
 @pytest.mark.parametrize("contact_type", ["delivery", "primary", "invoice"])

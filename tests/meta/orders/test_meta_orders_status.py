@@ -19,8 +19,8 @@ from cg.meta.orders.rml_submitter import RmlSubmitter
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn, OrderType
-from cg.store import Store
 from cg.store.models import Application, Case, Delivery, Pool, Sample
+from cg.store.store import Store
 
 
 def test_pools_to_status(rml_order_to_submit):
@@ -125,7 +125,7 @@ def test_sarscov2_samples_to_status(sarscov2_order_to_submit):
     assert data["customer"] == "cust002"
     assert data["order"] == "Sars-CoV-2 samples"
     assert data["comment"] == "Order comment"
-    assert data["data_analysis"] == str(Pipeline.SARS_COV_2)
+    assert data["data_analysis"] == str(Pipeline.MUTANT)
     assert data["data_delivery"] == str(DataDelivery.FASTQ)
 
     # THEN first sample should contain all the relevant data from the microbial order

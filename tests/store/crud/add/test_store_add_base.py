@@ -1,7 +1,6 @@
 from datetime import datetime as dt
 
 from cg.constants.subject import Sex
-from cg.store import Store
 from cg.store.models import (
     ApplicationVersion,
     Collaboration,
@@ -10,6 +9,7 @@ from cg.store.models import (
     Sample,
     User,
 )
+from cg.store.store import Store
 
 
 def test_add_collaboration(store: Store):

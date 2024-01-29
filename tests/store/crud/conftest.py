@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
+from typing import Generator
 
 import pytest
 
 from cg.constants import Pipeline
 from cg.constants.constants import CustomerId, PrepCategory
 from cg.constants.subject import PhenotypeStatus
-from cg.store import Store
-from cg.store.models import CaseSample
+from cg.store.models import CaseSample, Order
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -118,7 +119,9 @@ def store_with_samples_that_have_names(store: Store, helpers: StoreHelpers) -> S
 
 
 @pytest.fixture
-def store_with_active_sample_analyze(store: Store, helpers: StoreHelpers) -> Store:
+def store_with_active_sample_analyze(
+    store: Store, helpers: StoreHelpers
+) -> Generator[Store, None, None]:
     """Return a store with an active sample with action analyze."""
     # GIVEN a store with a sample that is active
     case = helpers.add_case(
@@ -133,7 +136,9 @@ def store_with_active_sample_analyze(store: Store, helpers: StoreHelpers) -> Sto
 
 
 @pytest.fixture
-def store_with_active_sample_running(store: Store, helpers: StoreHelpers) -> Store:
+def store_with_active_sample_running(
+    store: Store, helpers: StoreHelpers
+) -> Generator[Store, None, None]:
     """Return a store with an active sample with action running."""
     # GIVEN a store with a sample that is active
     case = helpers.add_case(
@@ -230,7 +235,7 @@ def store_with_multiple_pools_for_customer(
     store: Store,
     helpers: StoreHelpers,
     customer_id: str = CustomerId.CUST132,
-) -> Store:
+) -> Generator[Store, None, None]:
     """Return a store with two pools with different names for the same customer."""
     for number in range(2):
         helpers.ensure_pool(
@@ -315,7 +320,7 @@ def pool_order_1() -> str:
 
 @pytest.fixture
 def expected_number_of_not_archived_applications() -> int:
-    """Return the number of expected number of not archived applications"""
+    """Return the number of expected numbers of not archived applications"""
     return 4
 
 
@@ -326,7 +331,7 @@ def expected_number_of_applications() -> int:
 
 
 @pytest.fixture
-def microbial_store(store: Store, helpers: StoreHelpers) -> Store:
+def microbial_store(store: Store, helpers: StoreHelpers) -> Generator[Store, None, None]:
     """Populate a store with microbial application tags"""
     microbial_active_apptags = ["MWRNXTR003", "MWGNXTR003", "MWMNXTR003", "MWLNXTR003"]
     microbial_inactive_apptags = ["MWXNXTR003", "VWGNXTR001", "VWLNXTR001"]
@@ -361,7 +366,7 @@ def three_customer_ids() -> list[str]:
 @pytest.fixture
 def store_with_pools_for_multiple_customers(
     store: Store, helpers: StoreHelpers, timestamp_now: datetime
-) -> Store:
+) -> Generator[Store, None, None]:
     """Return a store with two samples for three different customers."""
     for number in range(3):
         helpers.ensure_pool(
@@ -378,3 +383,19 @@ def store_with_pools_for_multiple_customers(
 def three_pool_names() -> list[str]:
     """Return three customer ids."""
     yield ["_".join(["test_pool", str(number)]) for number in range(3)]
+
+
+@pytest.fixture
+def order(helpers: StoreHelpers, store: Store) -> Order:
+    order: Order = helpers.add_order(
+        store=store, customer_id=1, ticket_id=1, order_date=datetime.now()
+    )
+    return order
+
+
+@pytest.fixture
+def order_another(helpers: StoreHelpers, store: Store) -> Order:
+    order: Order = helpers.add_order(
+        store=store, customer_id=2, ticket_id=2, order_date=datetime.now()
+    )
+    return order

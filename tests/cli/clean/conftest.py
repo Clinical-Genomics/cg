@@ -10,7 +10,7 @@ from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 from tests.meta.clean.conftest import (
     hk_flow_cell_to_clean_bundle,
     hk_sample_bundle_for_flow_cell_to_clean,

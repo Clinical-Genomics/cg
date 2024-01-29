@@ -1,8 +1,8 @@
-from cg.store import Store
 from cg.store.filters.status_collaboration_filters import (
     filter_collaboration_by_internal_id,
 )
 from cg.store.models import Collaboration
+from cg.store.store import Store
 
 
 def test_get_collaboration_by_internal_id(base_store: Store, collaboration_id: str):

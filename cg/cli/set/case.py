@@ -6,8 +6,8 @@ import click
 from cg.constants import DataDelivery, Pipeline, Priority
 from cg.constants.constants import CaseActions
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Case, Customer, Panel
+from cg.store.store import Store
 from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)

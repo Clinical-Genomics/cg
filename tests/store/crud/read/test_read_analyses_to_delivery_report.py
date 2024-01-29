@@ -2,8 +2,8 @@
 
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.subject import PhenotypeStatus
-from cg.store import Store
 from cg.store.models import CaseSample
+from cg.store.store import Store
 from cg.utils.date import get_date
 from tests.store_helpers import StoreHelpers
 
