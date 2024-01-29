@@ -15,7 +15,7 @@ class OrderType(StrEnum):
     MIP_RNA: str = Pipeline.MIP_RNA
     RML: str = "rml"
     RNAFUSION: str = Pipeline.RNAFUSION
-    SARS_COV_2: str = Pipeline.MUTANT
+    SARS_COV_2: str = "sars-cov-2"
 
 
 class ExcelSampleAliases(StrEnum):
