@@ -29,7 +29,7 @@ class ExternalDataAPI(MetaAPI):
         self.RSYNC_FILE_POSTFIX: str = "_rsync_external_data"
 
     def create_log_dir(self, ticket: str) -> Path:
-        """Creates a directory for log file to be stored"""
+        """Creates a directory for log file to be stored."""
         timestamp: dt.datetime = dt.datetime.now()
         timestamp_str: str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
         folder_name: Path = Path("_".join([ticket, timestamp_str]))
@@ -47,7 +47,7 @@ class ExternalDataAPI(MetaAPI):
         ticket: str,
         cust_sample_id: str | None = "",
     ) -> Path:
-        """Returns the path to where the sample files are fetched from"""
+        """Returns the path from where the sample files are fetched."""
         return Path(self.source_path % customer, ticket, cust_sample_id)
 
     def get_destination_path(self, customer: str, lims_sample_id: str | None = "") -> Path:
@@ -55,7 +55,7 @@ class ExternalDataAPI(MetaAPI):
         return Path(self.destination_path % customer, lims_sample_id)
 
     def transfer_sample_files_from_source(self, ticket: str) -> None:
-        """Transfers all sample files, related to given ticket, from source to destination"""
+        """Transfers all sample files, related to given ticket, from source to destination."""
         cust: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
         log_dir: Path = self.create_log_dir(ticket=ticket)
         error_function: str = ERROR_RSYNC_FUNCTION.format()
@@ -89,7 +89,7 @@ class ExternalDataAPI(MetaAPI):
         )
 
     def get_all_fastq(self, sample_folder: Path) -> list[Path]:
-        """Returns a list of all fastq.gz files in given folder"""
+        """Returns a list of all fastq.gz files in given folder."""
         all_fastqs: list[Path] = []
         for leaf in sample_folder.glob("*fastq.gz"):
             abs_path: Path = sample_folder.joinpath(leaf)
@@ -98,7 +98,7 @@ class ExternalDataAPI(MetaAPI):
         return all_fastqs
 
     def get_all_paths(self, customer: str, lims_sample_id: str) -> list[Path]:
-        """Returns the paths of all fastq files associated to the sample"""
+        """Returns the paths of all fastq files associated to the sample."""
         fastq_folder: Path = self.get_destination_path(
             lims_sample_id=lims_sample_id, customer=customer
         )
@@ -106,7 +106,7 @@ class ExternalDataAPI(MetaAPI):
         return all_fastq_in_folder
 
     def check_fastq_md5sum(self, fastq_path) -> Path | None:
-        """Returns the path of the input file if it does not match its md5sum"""
+        """Returns the path of the input file if it does not match its md5sum."""
         if Path(str(fastq_path) + ".md5").exists():
             given_md5sum: str = extract_md5sum(md5sum_file=Path(str(fastq_path) + ".md5"))
             if not check_md5sum(file_path=fastq_path, md5sum=given_md5sum):
@@ -174,8 +174,7 @@ class ExternalDataAPI(MetaAPI):
             )
 
     def add_transfer_to_housekeeper(self, ticket: str, force: bool = False) -> None:
-        """Creates sample bundles in housekeeper and adds the available ticket files to it."""
-        failed_paths: list[Path] = []
+        """Add and include available ticket files to a Housekeeper bundle."""
         customer_id: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
         destination_folder_path: Path = self.get_destination_path(customer=customer_id)
         for sample_folder in destination_folder_path.iterdir():
@@ -185,6 +184,7 @@ class ExternalDataAPI(MetaAPI):
         available_samples: list[Sample] = self.get_available_samples(
             folder=destination_folder_path, ticket=ticket
         )
+        failed_paths: list[Path] = []
         cases_to_start: list[dict] = []
         for sample in available_samples:
             cases_to_start.extend(

@@ -256,7 +256,9 @@ def test_get_include_file(populated_housekeeper_api: HousekeeperAPI, case_id: st
     assert included_path.exists() is False
 
     # WHEN including the file
-    included_file = populated_housekeeper_api.include_file(hk_file, version)
+    included_file: File = populated_housekeeper_api.include_file(
+        file_obj=hk_file, version_obj=version
+    )
 
     # THEN assert that the file has been linked to the included place
     assert included_path.exists() is True
