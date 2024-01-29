@@ -17,13 +17,14 @@ LOG = logging.getLogger(__name__)
 
 
 class ExternalDataAPI(MetaAPI):
-    def __init__(self, config: CGConfig):
+    def __init__(self, config: CGConfig, dry_run: bool = False):
         super().__init__(config)
         self.destination_path: str = config.external.hasta
         self.source_path: str = config.external.caesar
         self.base_path: str = config.data_delivery.base_path
         self.account: str = config.data_delivery.account
         self.mail_user: str = config.data_delivery.mail_user
+        self.dry_run: bool = dry_run
         self.slurm_api: SlurmAPI = SlurmAPI()
         self.RSYNC_FILE_POSTFIX: str = "_rsync_external_data"
 
@@ -50,7 +51,7 @@ class ExternalDataAPI(MetaAPI):
         return Path(self.source_path % customer, ticket, cust_sample_id)
 
     def get_destination_path(self, customer: str, lims_sample_id: str | None = "") -> Path:
-        """Returns the path to where the files are to be transferred"""
+        """Returns the path to where the files are to be transferred."""
         return Path(self.destination_path % customer, lims_sample_id)
 
     def transfer_sample_files_from_source(self, dry_run: bool, ticket: str) -> None:
