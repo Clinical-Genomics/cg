@@ -121,8 +121,6 @@ def submit_order(order_type):
         )
         project: OrderType = OrderType(order_type)
         order_in = OrderIn.parse_obj(request_json, project=project)
-        order_service = OrderService(db)
-        order_service.create_order(order_in)
 
         result = api.submit(
             project=project,
@@ -130,6 +128,8 @@ def submit_order(order_type):
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )
+        order_service = OrderService(db)
+        order_service.create_order(order_in)
     except (  # user misbehaviour
         OrderError,
         OrderFormError,
