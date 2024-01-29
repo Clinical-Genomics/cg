@@ -16,5 +16,5 @@ class OrderService:
         return create_orders_response(orders)
 
     def create_order(self, order_data: OrderIn) -> OrderResponse:
-        order: Order = self.store.create_order(order_data)
+        order: Order = self.store.add_order(order_data)
         return create_order_response(order)

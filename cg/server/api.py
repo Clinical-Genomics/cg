@@ -119,7 +119,7 @@ def submit_order(order_type):
                 content=request_json, file_format=FileFormat.JSON
             ),
         )
-        project: OrderType = OrderType(order_type)
+        project = OrderType(order_type)
         order_in = OrderIn.parse_obj(request_json, project=project)
 
         result = api.submit(
