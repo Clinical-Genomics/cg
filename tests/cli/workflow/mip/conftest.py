@@ -13,7 +13,6 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
-from cg.store.api.status import StatusHandler
 from cg.store.crud.read import ReadHandler
 from cg.store.models import Case
 from tests.store_helpers import StoreHelpers
@@ -165,8 +164,8 @@ def setup_mocks(
     is_spring_decompression_running: bool = False,
 ) -> None:
     """Helper function to set up the necessary mocks for the decompression logics."""
-    mocker.patch.object(StatusHandler, "cases_to_analyze")
-    StatusHandler.cases_to_analyze.return_value = [case_to_analyze]
+    mocker.patch.object(ReadHandler, "cases_to_analyze")
+    ReadHandler.cases_to_analyze.return_value = [case_to_analyze]
 
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
     PrepareFastqAPI.is_spring_decompression_needed.return_value = is_spring_decompression_needed

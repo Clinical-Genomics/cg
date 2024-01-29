@@ -562,7 +562,7 @@ class SampleView(BaseView):
         date: str = datetime.now().strftime("%Y-%m-%d")
         comment: str = f"Cancelled {date} by {user_name}"
 
-        db.add_sample_comment(sample=sample, comment=comment)
+        db.update_sample_comment(sample=sample, comment=comment)
 
     def display_cancel_confirmation(
         self, sample_entry_ids: list[str], remaining_cases: list[str]

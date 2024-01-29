@@ -7,8 +7,8 @@ from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import RmlSample
-from cg.store import Store
 from cg.store.models import Customer
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

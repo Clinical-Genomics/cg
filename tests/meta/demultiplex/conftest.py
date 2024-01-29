@@ -9,11 +9,13 @@ import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_sample_sheet_path_to_housekeeper,
+)
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.store.api import Store
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 FlowCellInfo = namedtuple("FlowCellInfo", "directory name sample_internal_ids")
@@ -79,12 +81,6 @@ def tmp_flow_cell_demux_base_path(project_dir: Path, bcl2fastq_flow_cell_full_na
 def flow_cell_project_id() -> int:
     """Return flow cell run project id."""
     return 174578
-
-
-@pytest.fixture(name="hiseq_x_copy_complete_file")
-def hiseq_x_copy_complete_file(bcl2fastq_flow_cell: FlowCellDirectoryData) -> Path:
-    """Return HiSeqX flow cell copy complete file."""
-    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.HISEQ_X_COPY_COMPLETE)
 
 
 @pytest.fixture(name="populated_flow_cell_store")

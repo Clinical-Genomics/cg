@@ -33,6 +33,11 @@ CAPTUREKIT_OPTIONS = (
 )
 
 
+class JobType(StrEnum):
+    UPLOAD: str = "upload"
+    ANALYSIS: str = "analysis"
+
+
 class CaseActions(StrEnum):
     ANALYZE: str = "analyze"
     HOLD: str = "hold"

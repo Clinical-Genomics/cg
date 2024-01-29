@@ -7,8 +7,8 @@ from click.testing import CliRunner
 
 from cg.cli.set.cases import set_cases
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

@@ -90,11 +90,11 @@ def novaseq_x_lims_samples(novaseq_x_flow_cell_directory: Path) -> list[FlowCell
 
 @pytest.fixture
 def bcl_convert_sample_sheet_creator(
-    bcl_convert_flow_cell: FlowCellDirectoryData,
+    novaseq_x_flow_cell: FlowCellDirectoryData,
     novaseq_x_lims_samples: list[FlowCellSampleBCLConvert],
 ) -> SampleSheetCreatorBCLConvert:
     """Returns a sample sheet creator for sample sheet v2."""
     return SampleSheetCreatorBCLConvert(
-        flow_cell=bcl_convert_flow_cell,
+        flow_cell=novaseq_x_flow_cell,
         lims_samples=novaseq_x_lims_samples,
     )

@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Query
 
-from cg.store import Store
 from cg.store.filters.status_case_sample_filters import (
     get_cases_with_sample_by_internal_id,
     get_samples_in_case_by_internal_id,
 )
+from cg.store.store import Store
 
 
 def test_get_samples_in_case_by_internal_id_valid_id(

@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Query
 
-from cg.store.api.core import Store
 from cg.store.filters.status_panel_filters import filter_panel_by_abbrev
 from cg.store.models import Panel
+from cg.store.store import Store
 
 
 def test_filter_panel_by_abbrev_returns_correct_panel(store_with_panels: Store):

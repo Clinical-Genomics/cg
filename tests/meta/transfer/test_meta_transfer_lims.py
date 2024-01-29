@@ -3,8 +3,8 @@ import datetime as dt
 from cg.apps.lims import LimsAPI
 from cg.meta.transfer import TransferLims
 from cg.meta.transfer.lims import IncludeOptions, SampleState
-from cg.store import Store
 from cg.store.models import Sample
+from cg.store.store import Store
 
 
 def has_same_received_at(lims, sample_obj):

@@ -11,7 +11,6 @@ from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import PhenotypeStatus, Sex
-from cg.store import Store
 from cg.store.models import (
     Analysis,
     Application,
@@ -25,6 +24,7 @@ from cg.store.models import (
     Customer,
     Flowcell,
     Invoice,
+    Order,
     Organism,
     Panel,
     Pool,
@@ -32,6 +32,7 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     User,
 )
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -478,6 +479,18 @@ class StoreHelpers:
         store.session.add(case_obj)
         store.session.commit()
         return case_obj
+
+    @staticmethod
+    def add_order(
+        store: Store,
+        customer_id: int,
+        ticket_id: int,
+        order_date: datetime = datetime(year=2023, month=12, day=24),
+    ) -> Order:
+        order = Order(customer_id=customer_id, ticket_id=ticket_id, order_date=order_date)
+        store.session.add(order)
+        store.session.commit()
+        return order
 
     @staticmethod
     def ensure_case(

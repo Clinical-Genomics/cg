@@ -5,7 +5,6 @@ from sqlalchemy.orm import Query
 from cg.constants.constants import CaseActions, DataDelivery, Pipeline
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
-from cg.store import Store
 from cg.store.filters.status_case_filters import (
     filter_case_by_internal_id,
     filter_cases_by_case_search,
@@ -29,6 +28,7 @@ from cg.store.filters.status_case_filters import (
     filter_running_cases,
 )
 from cg.store.models import Analysis, Case, CaseSample, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

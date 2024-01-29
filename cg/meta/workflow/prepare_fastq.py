@@ -11,8 +11,8 @@ from cg.constants.constants import PIPELINES_USING_PARTIAL_ANALYSES
 from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
 from cg.models import CompressionData
-from cg.store import Store
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

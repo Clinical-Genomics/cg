@@ -10,8 +10,8 @@ from cg.constants.subject import Sex
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.store import Store
 from cg.store.models import Flowcell, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -86,7 +86,7 @@ def store_with_flow_cell_to_clean(
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
-    sample_sequencing_metrics_details: list[str | int | float] = [
+    sample_sequencing_metrics_details: list[tuple] = [
         (sample_id, tmp_flow_cell_to_clean.id, 1, 50_000_0000, 90.5, 32),
         (sample_id, tmp_flow_cell_to_clean.id, 2, 50_000_0000, 90.4, 31),
     ]

@@ -1,4 +1,4 @@
-""" Module to group PDC related commands """
+""" Module to group PDC related commands."""
 
 import logging
 from pathlib import Path
@@ -15,8 +15,8 @@ from cg.exc import (
     PdcError,
 )
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
-from cg.store import Store
 from cg.store.models import Flowcell
+from cg.store.store import Store
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
