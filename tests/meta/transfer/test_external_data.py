@@ -17,7 +17,7 @@ def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_id: s
     caplog.set_level(logging.INFO)
 
     # WHEN the log directory is created
-    log_dir = external_data_api.create_log_dir(ticket=ticket_id, dry_run=True)
+    log_dir = external_data_api.create_log_dir(ticket=ticket_id)
 
     # THEN the path is not created since it is a dry run
     assert "Would have created path" in caplog.text
@@ -92,7 +92,7 @@ def test_transfer_sample_files_from_source(
     )
 
     # WHEN the transfer is initiated
-    external_data_api.transfer_sample_files_from_source(ticket=ticket_id, dry_run=True)
+    external_data_api.transfer_sample_files_from_source(ticket=ticket_id)
 
     # THEN only the two samples present in the source directory are included in the rsync
 
@@ -126,7 +126,8 @@ def test_add_files_to_bundles(
     external_data_api: ExternalDataAPI, fastq_file: Path, hk_version: Version, sample_id: str
 ):
     """Tests adding files to Housekeeper."""
-    # GIVEN a file to be added
+    # GIVEN an ExternalDataAPI with dry-run equals False
+    external_data_api.dry_run = False
 
     # WHEN the files are added and included
     external_data_api.add_and_include_files_to_bundles(
@@ -147,6 +148,8 @@ def test_add_transfer_to_housekeeper(
     ticket_id: str,
 ):
     """Test adding samples from a case to Housekeeper"""
+    # GIVEN an ExternalDataAPI with dry-run equals False
+    external_data_api.dry_run = False
     # GIVEN a Store with a DNA case, which is available for analysis
     case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
     mocker.patch.object(Store, "get_cases_by_ticket_id")

@@ -475,7 +475,7 @@ def rsync_api(cg_context: CGConfig) -> RsyncAPI:
 @pytest.fixture
 def external_data_api(analysis_store, cg_context: CGConfig) -> ExternalDataAPI:
     """ExternalDataAPI fixture."""
-    return ExternalDataAPI(config=cg_context)
+    return ExternalDataAPI(config=cg_context, dry_run=True)
 
 
 @pytest.fixture

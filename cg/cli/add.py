@@ -361,4 +361,4 @@ def download_external_delivery_data_to_hpc(context: CGConfig, ticket: str, dry_r
 def add_external_data_to_hk(context: CGConfig, ticket: str, dry_run: bool, force):
     """Adds external data to Housekeeper"""
     external_data_api = ExternalDataAPI(config=context, dry_run=dry_run)
-    external_data_api.add_transfer_to_housekeeper(dry_run=dry_run, ticket=ticket, force=force)
+    external_data_api.add_transfer_to_housekeeper(ticket=ticket, force=force)

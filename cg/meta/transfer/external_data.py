@@ -28,14 +28,14 @@ class ExternalDataAPI(MetaAPI):
         self.slurm_api: SlurmAPI = SlurmAPI()
         self.RSYNC_FILE_POSTFIX: str = "_rsync_external_data"
 
-    def create_log_dir(self, dry_run: bool, ticket: str) -> Path:
+    def create_log_dir(self, ticket: str) -> Path:
         """Creates a directory for log file to be stored"""
         timestamp: dt.datetime = dt.datetime.now()
         timestamp_str: str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
         folder_name: Path = Path("_".join([ticket, timestamp_str]))
         log_dir: Path = Path(self.base_path, folder_name)
         LOG.info(f"Creating folder: {log_dir}")
-        if dry_run:
+        if self.dry_run:
             LOG.info(f"Would have created path {log_dir}, but this is a dry run")
             return log_dir
         log_dir.mkdir(parents=True, exist_ok=False)
@@ -54,10 +54,10 @@ class ExternalDataAPI(MetaAPI):
         """Returns the path to where the files are to be transferred."""
         return Path(self.destination_path % customer, lims_sample_id)
 
-    def transfer_sample_files_from_source(self, dry_run: bool, ticket: str) -> None:
+    def transfer_sample_files_from_source(self, ticket: str) -> None:
         """Transfers all sample files, related to given ticket, from source to destination"""
         cust: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
-        log_dir: Path = self.create_log_dir(ticket=ticket, dry_run=dry_run)
+        log_dir: Path = self.create_log_dir(ticket=ticket)
         error_function: str = ERROR_RSYNC_FUNCTION.format()
         Path(self.destination_path % cust).mkdir(exist_ok=True)
 
@@ -76,7 +76,7 @@ class ExternalDataAPI(MetaAPI):
             commands=command,
             error=error_function,
         )
-        self.slurm_api.set_dry_run(dry_run=dry_run)
+        self.slurm_api.set_dry_run(dry_run=self.dry_run)
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
             sbatch_parameters=sbatch_parameters
         )
@@ -127,11 +127,13 @@ class ExternalDataAPI(MetaAPI):
     ):
         """Adds the given fastq files to the the hk-bundle"""
         for path in fastq_paths:
-            LOG.info(f"Adding path {path} to bundle {lims_sample_id} in housekeeper")
-            hk_file: File = self.housekeeper_api.add_file(
-                path=path, version_obj=last_version, tags=HK_FASTQ_TAGS
-            )
-            self.housekeeper_api.include_file(version_obj=last_version, file_obj=hk_file)
+            if not self.dry_run:
+                LOG.info(f"Adding path {path} to bundle {lims_sample_id} in housekeeper")
+
+                hk_file: File = self.housekeeper_api.add_file(
+                    path=path, version_obj=last_version, tags=HK_FASTQ_TAGS
+                )
+                self.housekeeper_api.include_file(version_obj=last_version, file_obj=hk_file)
 
     def get_failed_fastq_paths(self, fastq_paths_to_add: list[Path]) -> list[Path]:
         failed_sum_paths: list[Path] = []
@@ -171,9 +173,7 @@ class ExternalDataAPI(MetaAPI):
                 f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
             )
 
-    def add_transfer_to_housekeeper(
-        self, ticket: str, dry_run: bool = False, force: bool = False
-    ) -> None:
+    def add_transfer_to_housekeeper(self, ticket: str, force: bool = False) -> None:
         """Creates sample bundles in housekeeper and adds the available ticket files to it."""
         failed_paths: list[Path] = []
         customer_id: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
@@ -211,7 +211,7 @@ class ExternalDataAPI(MetaAPI):
             )
             LOG.info("Changes in housekeeper will not be committed and no cases will be added")
             return
-        if dry_run:
+        if self.dry_run:
             LOG.info("No changes will be committed since this is a dry-run")
             return
         self.housekeeper_api.commit()
