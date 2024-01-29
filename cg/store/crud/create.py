@@ -1,5 +1,7 @@
 import logging
 from datetime import datetime
+from cg.models.orders.orderform_schema import Orderform
+from cg.store.database import get_session
 
 import petname
 
@@ -20,6 +22,7 @@ from cg.store.models import (
     Delivery,
     Flowcell,
     Invoice,
+    Order,
     Organism,
     Panel,
     Pool,
@@ -403,3 +406,14 @@ class CreateHandler(BaseHandler):
             sample_internal_id=sample_internal_id,
             **kwargs,
         )
+
+    def add_order(self, order_data: Orderform):
+        order = Order(
+            order_type=order_data.data_analysis,
+            customer_id=order_data.customer,
+            ticket_id=order_data.ticket,
+        )
+        session = get_session()
+        session.add(order)
+        session.commit()
+        return order

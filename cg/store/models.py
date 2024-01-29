@@ -883,7 +883,7 @@ class Order(Model):
 
     id = Column(types.Integer, primary_key=True, unique=True)
     customer_id = Column(types.String(64), ForeignKey("customer.id"), nullable=False)
-    order_date = Column(types.DateTime, nullable=False)
+    order_date = Column(types.DateTime, nullable=False, default=dt.datetime.now())
     ticket_id = Column(types.Integer, nullable=False, unique=True, index=True)
 
     def to_dict(self):

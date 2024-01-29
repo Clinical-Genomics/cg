@@ -498,6 +498,8 @@ def parse_orderform():
             order_parser = JsonOrderformParser()
             order_parser.parse_orderform(order_data=json_data)
         parsed_order: Orderform = order_parser.generate_orderform()
+        order_service = OrderService(db)
+        order_service.create_order(parsed_order)
     except (  # user misbehaviour
         AttributeError,
         OrderFormError,
