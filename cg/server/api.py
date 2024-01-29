@@ -120,7 +120,9 @@ def submit_order(order_type):
             ),
         )
         project: OrderType = OrderType(order_type)
-        order_in: OrderIn = OrderIn.parse_obj(request_json, project=project)
+        order_in = OrderIn.parse_obj(request_json, project=project)
+        order_service = OrderService(db)
+        order_service.create_order(order_in)
 
         result = api.submit(
             project=project,
@@ -498,8 +500,6 @@ def parse_orderform():
             order_parser = JsonOrderformParser()
             order_parser.parse_orderform(order_data=json_data)
         parsed_order: Orderform = order_parser.generate_orderform()
-        order_service = OrderService(db)
-        order_service.create_order(parsed_order)
     except (  # user misbehaviour
         AttributeError,
         OrderFormError,

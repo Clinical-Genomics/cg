@@ -1,4 +1,4 @@
-from cg.models.orders.orderform_schema import Orderform
+from cg.models.orders.order import OrderIn
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import OrdersResponse
 from cg.server.dto.orders.orders_response import Order as OrderResponse
@@ -15,6 +15,6 @@ class OrderService:
         orders: list[Order] = self.store.get_orders(orders_request.limit)
         return create_orders_response(orders)
 
-    def create_order(self, order_data: Orderform) -> OrderResponse:
+    def create_order(self, order_data: OrderIn) -> OrderResponse:
         order: Order = self.store.create_order(order_data)
         return create_order_response(order)

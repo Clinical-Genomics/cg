@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from cg.models.orders.order import OrderIn
 from cg.models.orders.orderform_schema import Orderform
 from cg.store.database import get_session
 
@@ -407,9 +408,8 @@ class CreateHandler(BaseHandler):
             **kwargs,
         )
 
-    def add_order(self, order_data: Orderform):
+    def add_order(self, order_data: OrderIn):
         order = Order(
-            order_type=order_data.data_analysis,
             customer_id=order_data.customer,
             ticket_id=order_data.ticket,
         )
