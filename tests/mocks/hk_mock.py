@@ -306,7 +306,7 @@ class MockHousekeeperAPI:
         """Fetch a version"""
         return self._version_obj
 
-    def get_create_version(self, bundle_name: str):
+    def get_or_create_version(self, bundle_name: str):
         """Returns the latest version of a bundle if it exists. If no creates a bundle and returns its version"""
         last_version = self.last_version(bundle=bundle_name)
         if not last_version:
