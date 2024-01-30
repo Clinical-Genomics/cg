@@ -1745,7 +1745,7 @@ class ReadHandler(BaseHandler):
             workflow: str | None = orders_request.workflow
             if limit is not None:
                 records = records.limit(limit)
-            if workflow is not None:
+            if workflow:
                 records = records.filter(Order.workflow == workflow)
         return records.all()
 
