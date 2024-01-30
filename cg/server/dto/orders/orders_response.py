@@ -1,5 +1,3 @@
-from datetime import date
-
 from pydantic import BaseModel
 
 from cg.constants import Pipeline
@@ -8,7 +6,7 @@ from cg.constants import Pipeline
 class Order(BaseModel):
     customer_id: str
     ticket_id: int
-    order_date: date
+    order_date: str
     order_id: int
     workflow: Pipeline
 
