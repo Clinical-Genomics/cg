@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 
 from housekeeper.store.models import Bundle, Version
-from store_helpers import StoreHelpers
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
@@ -12,6 +11,7 @@ from cg.store.models import Case, Sample
 from cg.store.store import Store
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 from tests.store.conftest import sample_obj
+from tests.store_helpers import StoreHelpers
 
 
 def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_id: str):
