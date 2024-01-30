@@ -478,7 +478,7 @@ def get_orders():
     orders_request: OrdersRequest = OrdersRequest.model_validate(request.args.to_dict())
     order_service = OrderService(db)
     response: OrdersResponse = order_service.get_orders(orders_request)
-    return jsonify(response.model_dump())
+    return make_response(response.model_dump())
 
 
 @BLUEPRINT.route("/orderform", methods=["POST"])

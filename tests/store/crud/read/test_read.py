@@ -1539,7 +1539,7 @@ def test_get_orders_populated_store(store: Store, order: Order, order_another: O
 
 
 def test_get_orders_limited(store: Store, order: Order, order_another: Order):
-    # GIVEN a store with two orders
+    # GIVEN a store with two orders and a customer
 
     # WHEN fetching a limited amount of orders
     # THEN only one should be returned

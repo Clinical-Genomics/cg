@@ -11,7 +11,7 @@ from mock import patch
 from cg.constants import DataDelivery, Pipeline
 from cg.server.ext import db as store
 from cg.store.database import create_all_tables, drop_all_tables
-from cg.store.models import Case, Order
+from cg.store.models import Case, Customer, Order
 from tests.store_helpers import StoreHelpers
 
 os.environ["CG_SQL_DATABASE_URI"] = "sqlite:///"
@@ -47,17 +47,32 @@ def case(helpers: StoreHelpers) -> Case:
 
 
 @pytest.fixture
-def order(helpers: StoreHelpers) -> Order:
+def customer(helpers: StoreHelpers) -> Customer:
+    customer: Customer = helpers.ensure_customer(store=store, customer_id="test_customer")
+    return customer
+
+
+@pytest.fixture
+def customer_another(helpers: StoreHelpers) -> Customer:
+    customer: Customer = helpers.ensure_customer(store=store, customer_id="test_customer_2")
+    return customer
+
+
+@pytest.fixture
+def order(helpers: StoreHelpers, customer: Customer) -> Order:
     order: Order = helpers.add_order(
-        store=store, customer_id=1, ticket_id=1, order_date=datetime.now()
+        store=store,
+        customer_id=customer.id,
+        ticket_id=1,
+        order_date=datetime.now(),
     )
     return order
 
 
 @pytest.fixture
-def order_another(helpers: StoreHelpers) -> Order:
+def order_another(helpers: StoreHelpers, customer_another) -> Order:
     order: Order = helpers.add_order(
-        store=store, customer_id=2, ticket_id=2, order_date=datetime.now()
+        store=store, customer_id=customer_another.id, ticket_id=2, order_date=datetime.now()
     )
     return order
 

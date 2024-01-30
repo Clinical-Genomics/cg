@@ -486,8 +486,11 @@ class StoreHelpers:
         customer_id: int,
         ticket_id: int,
         order_date: datetime = datetime(year=2023, month=12, day=24),
+        workflow: Pipeline = Pipeline.MIP_DNA,
     ) -> Order:
-        order = Order(customer_id=customer_id, ticket_id=ticket_id, order_date=order_date)
+        order = Order(
+            customer_id=customer_id, ticket_id=ticket_id, order_date=order_date, workflow=workflow
+        )
         store.session.add(order)
         store.session.commit()
         return order
