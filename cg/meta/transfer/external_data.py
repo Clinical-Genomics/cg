@@ -192,7 +192,7 @@ class ExternalDataAPI(MetaAPI):
                     sample_internal_id=sample.internal_id
                 )
             )
-            last_version: Version = self.housekeeper_api.get_create_version(
+            last_version: Version = self.housekeeper_api.get_or_create_version(
                 bundle_name=sample.internal_id
             )
             fastq_paths_to_add: list[Path] = self.get_fastq_paths_to_add(
