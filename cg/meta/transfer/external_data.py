@@ -2,7 +2,7 @@ import datetime as dt
 import logging
 from pathlib import Path
 
-from housekeeper.store.models import File, Version
+from housekeeper.store.models import Version
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import HK_FASTQ_TAGS
@@ -122,18 +122,16 @@ class ExternalDataAPI(MetaAPI):
         ]
         return available_samples
 
-    def add_and_include_files_to_bundles(
-        self, fastq_paths: list[Path], last_version: Version, lims_sample_id: str
-    ):
+    def add_and_include_files_to_bundles(self, fastq_paths: list[Path], lims_sample_id: str):
         """Add the given fastq files to the the hk-bundle."""
+        if self.dry_run:
+            LOG.info("No changes will be committed since this is a dry-run")
+            return
         for path in fastq_paths:
-            if not self.dry_run:
-                LOG.info(f"Adding path {path} to bundle {lims_sample_id} in housekeeper")
-
-                hk_file: File = self.housekeeper_api.add_file(
-                    path=path, version_obj=last_version, tags=HK_FASTQ_TAGS
-                )
-                self.housekeeper_api.include_file(version_obj=last_version, file_obj=hk_file)
+            LOG.info(f"Adding path {path} to bundle {lims_sample_id} in housekeeper")
+            self.housekeeper_api.add_and_include_file_to_latest_version(
+                bundle_name=lims_sample_id, file=path, tags=HK_FASTQ_TAGS
+            )
 
     def get_failed_fastq_paths(self, fastq_paths_to_add: list[Path]) -> list[Path]:
         failed_sum_paths: list[Path] = []
@@ -200,7 +198,6 @@ class ExternalDataAPI(MetaAPI):
             )
             self.add_and_include_files_to_bundles(
                 fastq_paths=fastq_paths_to_add,
-                last_version=last_version,
                 lims_sample_id=sample.internal_id,
             )
             failed_paths.extend(self.get_failed_fastq_paths(fastq_paths_to_add=fastq_paths_to_add))
@@ -211,9 +208,8 @@ class ExternalDataAPI(MetaAPI):
             )
             LOG.info("Changes in housekeeper will not be committed and no cases will be added")
             return
-        if self.dry_run:
-            LOG.info("No changes will be committed since this is a dry-run")
-            return
-        self.housekeeper_api.commit()
-        for case in cases_to_start:
-            self.status_db.set_case_action(case_internal_id=case["internal_id"], action="analyze")
+        if not self.dry_run:
+            for case in cases_to_start:
+                self.status_db.set_case_action(
+                    case_internal_id=case["internal_id"], action="analyze"
+                )

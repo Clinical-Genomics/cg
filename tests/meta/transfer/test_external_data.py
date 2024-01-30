@@ -2,13 +2,14 @@
 import logging
 from pathlib import Path
 
-from housekeeper.store.models import Version
+from housekeeper.store.models import Bundle, Version
+from store_helpers import StoreHelpers
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
-from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store.conftest import sample_obj
 
 
@@ -123,24 +124,31 @@ def test_get_failed_fastq_paths(external_data_api: ExternalDataAPI, fastq_file: 
 
 
 def test_add_and_include_files_to_bundles(
-    external_data_api: ExternalDataAPI, fastq_file: Path, hk_version: Version, sample_id: str
+    external_data_api: ExternalDataAPI,
+    fastq_file: Path,
+    hk_bundle_data: dict,
+    sample_id: str,
+    helpers: StoreHelpers,
 ):
     """Tests adding files to Housekeeper."""
-    # GIVEN a fastq file an ExternalDataAPI with dry-run equals False
+    # GIVEN
     external_data_api.dry_run = False
+    hk_api: HousekeeperAPI = external_data_api.housekeeper_api
+    helpers.ensure_hk_version(hk_api, hk_bundle_data)
 
     # WHEN the file is added and included to Housekeeper
     external_data_api.add_and_include_files_to_bundles(
         fastq_paths=[fastq_file],
-        last_version=hk_version,
         lims_sample_id=sample_id,
     )
 
     # THEN the file should have been added to Housekeeper
-    assert str(fastq_file.absolute()) in [idx.path for idx in hk_version.files]
+    version: Version = hk_api.last_version(bundle=sample_id)
+    file_path = Path(version.relative_root_dir, fastq_file.name)
+    assert file_path.as_posix() in [file.path for file in version.files]
 
     # THEN the file should have been included to Housekeeper
-    assert fastq_file.absolute().exists()
+    assert Path(hk_api.root_dir, file_path).exists()
 
 
 def test_add_transfer_to_housekeeper(
@@ -159,24 +167,15 @@ def test_add_transfer_to_housekeeper(
     Store.get_cases_by_ticket_id.return_value = [case]
     samples = [case_sample.sample for case_sample in case.links]
 
-    # GIVEN a list of paths and only two samples being available
+    # GIVEN a list of paths and only one sample being available
     mocker.patch.object(ExternalDataAPI, "get_all_paths")
     ExternalDataAPI.get_all_paths.return_value = [fastq_file]
-
-    mocker.patch.object(MockHousekeeperAPI, "last_version")
-    MockHousekeeperAPI.last_version.return_value = None
-
-    mocker.patch.object(MockHousekeeperAPI, "get_files")
-    MockHousekeeperAPI.get_files.return_value = []
 
     mocker.patch.object(Path, "iterdir")
     Path.iterdir.return_value = []
 
     mocker.patch.object(ExternalDataAPI, "get_available_samples")
     ExternalDataAPI.get_available_samples.return_value = samples[:-1]
-
-    mocker.patch.object(Store, "cases")
-    Store.cases.return_value = [{"internal_id": "yellowhog"}]
 
     mocker.patch.object(Store, "set_case_action")
     Store.set_case_action.return_value = None
@@ -189,17 +188,17 @@ def test_add_transfer_to_housekeeper(
     # WHEN the sample bundles are added to housekeeper
     external_data_api.add_transfer_to_housekeeper(ticket=ticket_id)
 
-    # THEN two sample bundles exist in housekeeper and the file has been added to those bundles
-    added_samples = list(external_data_api.housekeeper_api.bundles())
+    # THEN sample bundles exist in housekeeper and the file has been added to those bundles
+    added_bundles: list[Bundle] = external_data_api.housekeeper_api.bundles().all()
     assert all(
-        sample.internal_id in [added_sample.name for added_sample in added_samples]
-        for sample in samples[:-1]
+        sample.internal_id in [bundle.name for bundle in added_bundles] for sample in samples[:-1]
     )
     assert all(
-        sample.versions[0].files[0].path == str(fastq_file.absolute()) for sample in added_samples
+        Path(bundle.versions[0].files[0].path).name == str(fastq_file.name)
+        for bundle in added_bundles
     )
     # THEN the sample that is not available should not exist
-    assert samples[-1].internal_id not in [added_sample.name for added_sample in added_samples]
+    assert samples[-1].internal_id not in [added_sample.name for added_sample in added_bundles]
 
 
 def test_get_available_samples(
