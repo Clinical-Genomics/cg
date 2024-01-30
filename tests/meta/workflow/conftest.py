@@ -1,7 +1,8 @@
 """Fixtures for the workflow tests."""
+
 import datetime
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 import pytest
 
@@ -244,12 +245,12 @@ def qc_microsalt_context(
         helpers.add_relationship(store=store, case=microsalt_case_qc_fail, sample=sample_to_add)
 
     # Setting the target reads to correspond with statusDB
-    store.get_application_by_tag(
-        tag=MicrosaltAppTags.MWRNXTR003
-    ).target_reads = MicrosaltQC.TARGET_READS
-    store.get_application_by_tag(
-        tag=MicrosaltAppTags.MWXNXTR003
-    ).target_reads = MicrosaltQC.TARGET_READS
+    store.get_application_by_tag(tag=MicrosaltAppTags.MWRNXTR003).target_reads = (
+        MicrosaltQC.TARGET_READS
+    )
+    store.get_application_by_tag(tag=MicrosaltAppTags.MWXNXTR003).target_reads = (
+        MicrosaltQC.TARGET_READS
+    )
 
     cg_context.meta_apis["analysis_api"] = analysis_api
 

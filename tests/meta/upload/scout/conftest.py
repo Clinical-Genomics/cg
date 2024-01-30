@@ -1,4 +1,5 @@
 """Fixtures for the upload Scout API tests."""
+
 import logging
 from datetime import datetime
 from pathlib import Path

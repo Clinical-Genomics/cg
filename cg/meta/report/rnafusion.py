@@ -1,6 +1,5 @@
 """RNAfusion delivery report API."""
 
-
 from cg.constants import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,

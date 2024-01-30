@@ -1,4 +1,5 @@
 """Fixtures for the model tests"""
+
 import gzip
 import io
 from pathlib import Path

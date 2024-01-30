@@ -1,6 +1,5 @@
 """File tags for files in Housekeeper."""
 
-
 from enum import StrEnum
 
 from cg.constants.constants import Pipeline

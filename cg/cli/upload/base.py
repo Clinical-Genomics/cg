@@ -1,4 +1,5 @@
 """Code that handles upload CLI commands."""
+
 import logging
 import sys
 import traceback

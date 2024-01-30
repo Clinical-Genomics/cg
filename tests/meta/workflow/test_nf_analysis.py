@@ -1,9 +1,10 @@
 """Module for nf-core analysis API tests."""
 
 import logging
+from typing import Any
+
 import pytest
 from _pytest.logging import LogCaptureFixture
-from typing import Any
 
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -48,9 +49,9 @@ def test_create_metrics_deliverables_content(
     analysis_api: NfAnalysisAPI = context.meta_apis["analysis_api"]
 
     # WHEN writing the metrics deliverables file
-    metrics_deliverables_content: dict[
-        str, list[dict[str, Any]]
-    ] = analysis_api.create_metrics_deliverables_content(case_id)
+    metrics_deliverables_content: dict[str, list[dict[str, Any]]] = (
+        analysis_api.create_metrics_deliverables_content(case_id)
+    )
 
     # THEN assert that the content created is correct
     assert metrics_deliverables_content == metrics_deliverables

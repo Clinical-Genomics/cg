@@ -1,4 +1,5 @@
 """Test module for the Rnafusion delivery report API."""
+
 from cg.constants import NA_FIELD
 from cg.meta.report.rnafusion import RnafusionReportAPI
 from cg.models.report.metadata import RnafusionSampleMetadataModel

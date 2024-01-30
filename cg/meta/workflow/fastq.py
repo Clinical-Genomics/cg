@@ -5,6 +5,7 @@ Classes:
     FastqFileNameCreator: Creates valid balsamic filenames
     FastqHandler: Handles fastq file linking
 """
+
 import datetime as dt
 import gzip
 import logging

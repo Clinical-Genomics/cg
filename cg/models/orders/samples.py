@@ -55,11 +55,14 @@ class Of1508Sample(OrderInSample):
     # Order portal specific
     internal_id: constr(max_length=Sample.internal_id.property.columns[0].type.length) | None
     # "required for new samples"
-    name: constr(
-        regex=NAME_PATTERN,
-        min_length=2,
-        max_length=Sample.name.property.columns[0].type.length,
-    ) | None
+    name: (
+        constr(
+            regex=NAME_PATTERN,
+            min_length=2,
+            max_length=Sample.name.property.columns[0].type.length,
+        )
+        | None
+    )
 
     # customer
     age_at_sampling: float | None
@@ -79,12 +82,12 @@ class Of1508Sample(OrderInSample):
     container_name: str | None
     well_position: str | None
     # "Required if samples are part of trio/family"
-    mother: constr(
-        regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length
-    ) | None
-    father: constr(
-        regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length
-    ) | None
+    mother: (
+        constr(regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length) | None
+    )
+    father: (
+        constr(regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length) | None
+    )
     # This information is required for panel analysis
     capture_kit: str | None
     # This information is required for panel- or exome analysis
@@ -100,9 +103,10 @@ class Of1508Sample(OrderInSample):
     phenotype_terms: list[str] | None
     require_qc_ok: bool = False
     quantity: int | None
-    subject_id: constr(
-        regex=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length
-    ) | None
+    subject_id: (
+        constr(regex=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length)
+        | None
+    )
     synopsis: str | None
 
     @validator("container", "container_name", "name", "source", "subject_id", "volume")

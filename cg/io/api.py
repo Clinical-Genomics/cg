@@ -1,4 +1,5 @@
 """Module to create API requests."""
+
 import requests
 from requests import Response
 

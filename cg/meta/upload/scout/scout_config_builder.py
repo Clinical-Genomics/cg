@@ -1,4 +1,5 @@
 """Functions that handle files in the context of scout uploading"""
+
 import logging
 
 import requests

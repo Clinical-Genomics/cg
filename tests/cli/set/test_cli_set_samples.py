@@ -1,4 +1,5 @@
 """Test methods for cg/cli/set/samples"""
+
 import logging
 
 import pytest

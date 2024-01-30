@@ -1,4 +1,5 @@
 """Module for defining invoice models."""
+
 from typing import Any
 
 from pydantic.v1 import BaseModel

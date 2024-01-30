@@ -1,4 +1,5 @@
 """Tests for the deliver base command"""
+
 import logging
 
 from click.testing import CliRunner

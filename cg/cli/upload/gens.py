@@ -1,4 +1,5 @@
 """Module for uploading to Gens via CLI."""
+
 import logging
 
 import click

@@ -1,4 +1,5 @@
 """Module for Flask-Admin views"""
+
 from datetime import datetime
 from gettext import gettext
 
@@ -413,9 +414,11 @@ class InvoiceView(BaseView):
                 "<a href='%s'>%s</a>"
                 % (
                     url_for("invoice.index_view", search=model.invoice.id),
-                    model.invoice.invoiced_at.date()
-                    if model.invoice.invoiced_at
-                    else "In progress",
+                    (
+                        model.invoice.invoiced_at.date()
+                        if model.invoice.invoiced_at
+                        else "In progress"
+                    ),
                 )
             )
             if model.invoice
