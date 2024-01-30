@@ -1528,7 +1528,7 @@ def test_get_orders_empty_store(store: Store):
 
     # WHEN fetching orders
     # THEN none should be returned
-    assert not store.get_orders()
+    assert not store.get_orders(OrdersRequest())
 
 
 def test_get_orders_populated_store(store: Store, order: Order, order_another: Order):
@@ -1536,7 +1536,7 @@ def test_get_orders_populated_store(store: Store, order: Order, order_another: O
 
     # WHEN fetching orders
     # THEN both should be returned
-    assert len(store.get_orders()) == 2
+    assert len(store.get_orders(OrdersRequest())) == 2
 
 
 def test_get_orders_limited(store: Store, order: Order, order_another: Order):

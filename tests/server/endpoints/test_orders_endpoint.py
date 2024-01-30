@@ -15,6 +15,7 @@ from cg.store.models import Order
         (2, Pipeline.MIP_DNA, 2),
         (None, Pipeline.BALSAMIC, 1),
         (None, Pipeline.FLUFFY, 0),
+        (None, None, 3),
     ],
 )
 def test_orders_endpoint(

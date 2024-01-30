@@ -1738,7 +1738,7 @@ class ReadHandler(BaseHandler):
         )
         return records.all()
 
-    def get_orders(self, orders_request: OrdersRequest | None = None) -> list[Order]:
+    def get_orders(self, orders_request: OrdersRequest) -> list[Order]:
         """Returns a list of entries in the table Order."""
         orders: Query = self._get_query(table=Order)
         order_filter_functions: list[Callable] = [OrderFilter.FILTER_ORDERS_BY_WORKFLOW]

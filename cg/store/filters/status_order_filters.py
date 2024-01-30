@@ -8,7 +8,7 @@ from cg.store.models import Order
 
 def filter_orders_by_workflow(orders: Query, workflow: str, **kwargs) -> Query:
     """Return orders filtered on workflow."""
-    return orders.filter(Order.workflow == workflow)
+    return orders.filter(Order.workflow == workflow) if workflow else orders
 
 
 def apply_order_filters(filter_functions: list[Callable], orders: Query, workflow: str) -> Query:
