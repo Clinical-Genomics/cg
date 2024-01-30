@@ -70,7 +70,7 @@ def downsample_sample(
     "store",
     help="Store the downsampled fastq files in housekeeper.\n "
     "Make sure the downsample sbtach job has finished before using this command! \n"
-    "Usage: cg downsample store ACC123145_2.0M ACC1231_30.0M",
+    "Usage: cg downsample store ACC123145DC2C0M ACC1231DS30C0M",
 )
 @click.argument("sample_ids", type=str, nargs=-1)
 @click.pass_obj

@@ -37,7 +37,7 @@ def store_downsampled_fastq_files_from_dir(
     """
     fastq_file_paths: list[Path] = get_files_matching_pattern(
         directory=Path(fastq_file_output_directory),
-        pattern=f"*{sample_id.split(sep='_')[0]}*.{SequencingFileTag.FASTQ}.gz",
+        pattern=f"*{sample_id.split(sep='DS')[0]}*.{SequencingFileTag.FASTQ}.gz",
     )
     if not fastq_file_paths:
         raise FileNotFoundError(
