@@ -1,6 +1,5 @@
 """Fixtures for testing apps"""
 
-
 import pytest
 import requests
 

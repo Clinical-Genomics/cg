@@ -1,4 +1,5 @@
 """ Start of CLI """
+
 import logging
 import sys
 from pathlib import Path

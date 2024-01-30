@@ -1,4 +1,5 @@
 """Fixtures for parsed raw LIMS samples for demultiplexing and sample sheet creation."""
+
 from pathlib import Path
 
 import pytest
@@ -7,7 +8,9 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreatorBCLConvert
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
+    SampleSheetCreatorBCLConvert,
+)
 from cg.constants import FileExtensions
 from cg.io.json import read_json
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData

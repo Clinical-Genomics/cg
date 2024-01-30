@@ -1,6 +1,5 @@
 """ Fixtures for microsalt CLI test """
 
-
 import pytest
 
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI

@@ -1,4 +1,5 @@
 """Model MIP sample info"""
+
 import datetime
 
 from pydantic.v1 import BaseModel, Field, validator

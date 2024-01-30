@@ -1,4 +1,5 @@
 """Module to read or write yaml files"""
+
 from pathlib import Path
 from typing import Any
 

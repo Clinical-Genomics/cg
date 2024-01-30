@@ -80,9 +80,9 @@ class BalsamicReportAPI(ReportAPI):
             bait_set=bed.name if bed else None,
             bait_set_version=analysis_metadata.config.panel.capture_kit_version,
             million_read_pairs=million_read_pairs,
-            median_target_coverage=sample_metrics.median_target_coverage
-            if sample_metrics
-            else None,
+            median_target_coverage=(
+                sample_metrics.median_target_coverage if sample_metrics else None
+            ),
             pct_250x=sample_metrics.pct_target_bases_250x if sample_metrics else None,
             pct_500x=sample_metrics.pct_target_bases_500x if sample_metrics else None,
             duplicates=sample_metrics.percent_duplication if sample_metrics else None,
@@ -103,9 +103,9 @@ class BalsamicReportAPI(ReportAPI):
             duplicates=sample_metrics.percent_duplication if sample_metrics else None,
             mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
-            pct_reads_improper_pairs=sample_metrics.pct_pf_reads_improper_pairs
-            if sample_metrics
-            else None,
+            pct_reads_improper_pairs=(
+                sample_metrics.pct_pf_reads_improper_pairs if sample_metrics else None
+            ),
         )
 
     def get_data_analysis_type(self, case: Case) -> str | None:
@@ -172,20 +172,20 @@ class BalsamicReportAPI(ReportAPI):
         )
         required_sample_metadata_fields: list[str] = []
         if BALSAMIC_ANALYSIS_TYPE["tumor_wgs"] in analysis_type:
-            required_sample_metadata_fields: list[
-                str
-            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
+            required_sample_metadata_fields: list[str] = (
+                REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
+            )
         elif BALSAMIC_ANALYSIS_TYPE["tumor_normal_wgs"] in analysis_type:
-            required_sample_metadata_fields: list[
-                str
-            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS
+            required_sample_metadata_fields: list[str] = (
+                REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS
+            )
         elif (
             BALSAMIC_ANALYSIS_TYPE["tumor_panel"] in analysis_type
             or BALSAMIC_ANALYSIS_TYPE["tumor_normal_panel"] in analysis_type
         ):
-            required_sample_metadata_fields: list[
-                str
-            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
+            required_sample_metadata_fields: list[str] = (
+                REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
+            )
         return {
             "report": REQUIRED_REPORT_FIELDS,
             "customer": REQUIRED_CUSTOMER_FIELDS,

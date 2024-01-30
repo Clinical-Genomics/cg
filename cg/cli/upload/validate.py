@@ -1,6 +1,5 @@
 """Code for validating an upload via CLI"""
 
-
 import click
 
 from cg.apps.coverage import ChanjoAPI

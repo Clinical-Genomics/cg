@@ -1,4 +1,5 @@
 """ This file groups all tests related to microsalt start creation """
+
 import logging
 
 from click.testing import CliRunner

@@ -1,4 +1,5 @@
 """Tests for chanjo coverage API."""
+
 from pathlib import Path
 
 from cg.apps.coverage.api import ChanjoAPI

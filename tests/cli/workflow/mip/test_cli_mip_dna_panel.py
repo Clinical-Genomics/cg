@@ -1,4 +1,5 @@
 """ Test the CLI for mip-dna panel"""
+
 from pathlib import Path
 
 import mock

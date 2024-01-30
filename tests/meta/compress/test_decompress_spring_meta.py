@@ -1,4 +1,5 @@
 """Test do decompress a spring archive"""
+
 import logging
 
 

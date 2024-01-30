@@ -1,4 +1,5 @@
 """Tests for the file handlers."""
+
 import logging
 
 from housekeeper.store.models import Version

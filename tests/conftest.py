@@ -1,4 +1,5 @@
 """Conftest file for pytest fixtures that needs to be shared for multiple tests."""
+
 import gzip
 import http
 import logging

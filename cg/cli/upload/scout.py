@@ -1,4 +1,5 @@
 """Code for uploading to scout via CLI"""
+
 import logging
 from pathlib import Path
 

@@ -1,4 +1,5 @@
 """This script tests the cli methods to create prerequisites and start a mip-dna analysis"""
+
 import logging
 
 from cg.cli.workflow.mip_dna.base import start_available

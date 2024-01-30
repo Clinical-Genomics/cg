@@ -1,6 +1,5 @@
 """Gene panel specific constants."""
 
-
 from enum import StrEnum
 
 from cg.constants.constants import CustomerId

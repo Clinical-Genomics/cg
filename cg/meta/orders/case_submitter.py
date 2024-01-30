@@ -202,9 +202,9 @@ class CaseSubmitter(Submitter):
                         "name": sample.name,
                         "phenotype_groups": list(sample.phenotype_groups),
                         "phenotype_terms": list(sample.phenotype_terms),
-                        "reference_genome": sample.reference_genome
-                        if hasattr(sample, "reference_genome")
-                        else None,
+                        "reference_genome": (
+                            sample.reference_genome if hasattr(sample, "reference_genome") else None
+                        ),
                         "sex": sample.sex,
                         "status": sample.status if hasattr(sample, "status") else None,
                         "subject_id": sample.subject_id,

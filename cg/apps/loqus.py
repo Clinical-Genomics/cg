@@ -1,4 +1,5 @@
 """Module for Loqusdb API."""
+
 import logging
 from pathlib import Path
 from subprocess import CalledProcessError

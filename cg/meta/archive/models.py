@@ -1,4 +1,5 @@
 """Contains base models to be inherited from in other archive software files."""
+
 from abc import abstractmethod
 
 from housekeeper.store.models import File

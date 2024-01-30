@@ -1,4 +1,5 @@
 """This script tests the cli methods to set families to status-db"""
+
 import logging
 
 from click.testing import CliRunner

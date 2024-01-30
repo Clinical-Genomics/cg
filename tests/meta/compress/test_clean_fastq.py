@@ -1,4 +1,5 @@
 """Tests for cleaning FASTQ files."""
+
 import logging
 from pathlib import Path
 from typing import Generator

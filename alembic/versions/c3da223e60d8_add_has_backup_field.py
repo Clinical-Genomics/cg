@@ -5,6 +5,7 @@ Revises: d0aa961845b9
 Create Date: 2023-09-22 11:10:14.616339
 
 """
+
 import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 

@@ -1,4 +1,5 @@
 """Priority specific constants"""
+
 from enum import IntEnum, StrEnum
 
 

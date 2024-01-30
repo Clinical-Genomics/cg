@@ -1,4 +1,5 @@
 """Fixtures for CLI tests."""
+
 from pathlib import Path
 from typing import Any
 

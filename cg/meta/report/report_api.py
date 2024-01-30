@@ -1,4 +1,5 @@
 """Module to create delivery reports."""
+
 import logging
 from datetime import datetime
 from pathlib import Path
