@@ -8,6 +8,7 @@ from cg.constants import FlowCellStatus, Priority
 from cg.constants.constants import CaseActions, MicrosaltAppTags, Pipeline
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CgError
+from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.store.models import (
     Analysis,
     Application,
@@ -1543,4 +1544,4 @@ def test_get_orders_limited(store: Store, order: Order, order_another: Order):
 
     # WHEN fetching a limited amount of orders
     # THEN only one should be returned
-    assert len(store.get_orders(limit=1)) == 1
+    assert len(store.get_orders(OrdersRequest(limit=1))) == 1

@@ -1737,15 +1737,16 @@ class ReadHandler(BaseHandler):
         )
         return records.all()
 
-    def get_orders(self, orders_request: OrdersRequest) -> list[Order]:
+    def get_orders(self, orders_request: OrdersRequest | None = None) -> list[Order]:
         """Returns a list of entries in the table Order."""
         records: Query = self._get_query(table=Order)
-        limit: int = orders_request.limit
-        workflow: str = orders_request.workflow
-        if limit is not None:
-            records = records.limit(limit)
-        if workflow is not None:
-            records.filter(Order.workflow == workflow)
+        if orders_request:
+            limit: int | None = orders_request.limit
+            workflow: str | None = orders_request.workflow
+            if limit is not None:
+                records = records.limit(limit)
+            if workflow is not None:
+                records.filter(Order.workflow == workflow)
         return records.all()
 
     def _calculate_estimated_turnaround_time(
