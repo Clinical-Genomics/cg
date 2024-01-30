@@ -1556,3 +1556,25 @@ def test_get_orders_workflow_filter(
     orders: list[Order] = store.get_orders(OrdersRequest(workflow=Pipeline.BALSAMIC))
     # THEN only one should be returned
     assert len(orders) == 1 and orders[0].workflow == Pipeline.BALSAMIC
+
+
+@pytest.mark.parametrize(
+    "limit, expected_returned",
+    [(None, 2), (1, 1), (2, 2)],
+    ids=["No limit", "Only one order", "Both orders"],
+)
+def test_get_orders_workflow_and_limit_filter(
+    store: Store,
+    order: Order,
+    order_another: Order,
+    order_balsamic: Order,
+    limit: int | None,
+    expected_returned: int,
+):
+    # GIVEN a store with three orders, two of which are MIP-DNA orders
+
+    # WHEN fetching only MIP-DNA orders
+    orders: list[Order] = store.get_orders(OrdersRequest(workflow=Pipeline.MIP_DNA, limit=limit))
+
+    # THEN we should get the expected number of orders returned
+    assert len(orders) == expected_returned
