@@ -4,7 +4,7 @@ from cg.server.dto.orders.orders_response import OrdersResponse
 from cg.server.dto.orders.orders_response import Order as OrderResponse
 from cg.services.orders.utils import create_order_response, create_orders_response
 from cg.services.orders.utils import create_orders_response
-from cg.store.models import Order
+from cg.store.models import Customer, Order
 from cg.store.store import Store
 
 

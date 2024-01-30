@@ -409,8 +409,9 @@ class CreateHandler(BaseHandler):
         )
 
     def add_order(self, order_data: OrderIn):
+        customer: Customer = self.get_customer_by_internal_id(order_data.customer)
         order = Order(
-            customer_id=order_data.customer,
+            customer_id=customer.id,
             ticket_id=order_data.ticket,
             workflow=order_data.order_type,
         )
