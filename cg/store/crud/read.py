@@ -10,6 +10,7 @@ from sqlalchemy.orm import Query, Session
 from cg.constants import FlowCellStatus, Pipeline
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError
+from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.store.base import BaseHandler
 from cg.store.filters.status_analysis_filters import (
     AnalysisFilter,
@@ -1736,11 +1737,15 @@ class ReadHandler(BaseHandler):
         )
         return records.all()
 
-    def get_orders(self, limit: int | None = None) -> list[Order]:
+    def get_orders(self, orders_request: OrdersRequest) -> list[Order]:
         """Returns a list of entries in the table Order."""
         records: Query = self._get_query(table=Order)
+        limit: int = orders_request.limit
+        workflow: str = orders_request.workflow
         if limit is not None:
             records = records.limit(limit)
+        if workflow is not None:
+            records.filter(Order.workflow == workflow)
         return records.all()
 
     def _calculate_estimated_turnaround_time(
