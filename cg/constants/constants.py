@@ -256,4 +256,12 @@ class Strandedness(StrEnum):
 
 PIPELINES_USING_PARTIAL_ANALYSES: list[Pipeline] = [Pipeline.MICROSALT, Pipeline.MUTANT]
 
+
+class MultiQC(StrEnum):
+    """MultiQC constants"""
+
+    MULTIQC: str = "multiqc"
+    MULTIQC_DATA: str = "multiqc_data"
+
+
 NG_UL_SUFFIX: str = " ng/uL"
