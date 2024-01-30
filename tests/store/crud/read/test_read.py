@@ -1567,7 +1567,7 @@ def test_get_orders_workflow_filter(
         "Workflow filtering and maximum two orders",
     ],
 )
-def test_get_orders_workflow_and_limit_filter(
+def test_get_orders_mip_dna_and_limit_filter(
     store: Store,
     order: Order,
     order_another: Order,
