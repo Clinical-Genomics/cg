@@ -113,7 +113,7 @@ class ExternalDataAPI(MetaAPI):
                 return fastq_path
 
     def get_available_samples(self, folder: Path, ticket: str) -> list[Sample]:
-        """Returns the samples from given ticket that are present in the provided folder"""
+        """Returns the samples from given ticket that are present in the provided folder."""
         available_folders: list[str] = [sample_path.parts[-1] for sample_path in folder.iterdir()]
         available_samples: list[Sample] = [
             sample
@@ -125,7 +125,7 @@ class ExternalDataAPI(MetaAPI):
     def add_and_include_files_to_bundles(
         self, fastq_paths: list[Path], last_version: Version, lims_sample_id: str
     ):
-        """Adds the given fastq files to the the hk-bundle"""
+        """Add the given fastq files to the the hk-bundle."""
         for path in fastq_paths:
             if not self.dry_run:
                 LOG.info(f"Adding path {path} to bundle {lims_sample_id} in housekeeper")

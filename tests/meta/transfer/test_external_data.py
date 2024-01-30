@@ -100,7 +100,7 @@ def test_transfer_sample_files_from_source(
 
 
 def test_get_all_fastq(external_data_api: ExternalDataAPI, external_data_directory: Path):
-    """Test the finding of fastq.gz files in customer directories"""
+    """Test the finding of fastq.gz files in customer directories."""
     # GIVEN a folder containing two folders with both fastq and md5 files
     for folder in external_data_directory.iterdir():
         # WHEN the list of file paths is created
