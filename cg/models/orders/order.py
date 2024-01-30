@@ -14,7 +14,7 @@ class OrderIn(BaseModel):
     samples: conlist(Any, min_items=1)
     skip_reception_control: bool | None = None
     ticket: str | None
-    order_type: OrderType = None
+    order_type: OrderType | None = None
 
     @classmethod
     def parse_obj(cls, obj: dict, project: OrderType) -> "OrderIn":
