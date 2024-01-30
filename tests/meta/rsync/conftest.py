@@ -14,7 +14,7 @@ def mutant_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> 
         store=cg_context.status_db,
         internal_id=case_id,
         name=ticket_id,
-        data_analysis=Pipeline.SARS_COV_2,
+        data_analysis=Pipeline.MUTANT,
     )
     return case
 

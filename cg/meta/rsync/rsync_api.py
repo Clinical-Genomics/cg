@@ -230,7 +230,7 @@ class RsyncAPI(MetaAPI):
         source_and_destination_paths: dict[str, Path] = self.get_source_and_destination_paths(
             ticket=ticket, customer_internal_id=customer_internal_id
         )
-        if cases[0].data_analysis == Pipeline.SARS_COV_2:
+        if cases[0].data_analysis == Pipeline.MUTANT:
             LOG.info("Delivering report for SARS-COV-2 analysis")
             commands = COVID_RSYNC.format(
                 source_path=source_and_destination_paths["delivery_source_path"],

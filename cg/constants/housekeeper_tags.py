@@ -178,7 +178,7 @@ WORKFLOW_PROTECTED_TAGS = {
         ["fusion", "vcf"],
         ["salmon-quant"],
     ],
-    str(Pipeline.SARS_COV_2): [
+    str(Pipeline.MUTANT): [
         ["fohm-delivery", "instrument-properties"],
         ["fohm-delivery", "pangolin-typing-fohm", "csv"],
         ["vcf", "vcf-report", "fohm-delivery"],
