@@ -1746,7 +1746,7 @@ class ReadHandler(BaseHandler):
             if limit is not None:
                 records = records.limit(limit)
             if workflow is not None:
-                records.filter(Order.workflow == workflow)
+                records = records.filter(Order.workflow == workflow)
         return records.all()
 
     def _calculate_estimated_turnaround_time(

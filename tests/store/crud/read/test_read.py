@@ -1540,8 +1540,19 @@ def test_get_orders_populated_store(store: Store, order: Order, order_another: O
 
 
 def test_get_orders_limited(store: Store, order: Order, order_another: Order):
-    # GIVEN a store with two orders and a customer
+    # GIVEN a store with two orders
 
     # WHEN fetching a limited amount of orders
     # THEN only one should be returned
     assert len(store.get_orders(OrdersRequest(limit=1))) == 1
+
+
+def test_get_orders_workflow_filter(
+    store: Store, order: Order, order_another: Order, order_balsamic: Order
+):
+    # GIVEN a store with three orders, one of which is a Balsamic order
+
+    # WHEN fetching only balsamic orders
+    orders: list[Order] = store.get_orders(OrdersRequest(workflow=Pipeline.BALSAMIC))
+    # THEN only one should be returned
+    assert len(orders) == 1 and orders[0].workflow == Pipeline.BALSAMIC
