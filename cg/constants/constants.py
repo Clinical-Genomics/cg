@@ -108,21 +108,22 @@ STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 class Pipeline(StrEnum):
     BALSAMIC: str = "balsamic"
+    BALSAMIC_PON: str = "balsamic-pon"
     BALSAMIC_QC: str = "balsamic-qc"
     BALSAMIC_UMI: str = "balsamic-umi"
-    BALSAMIC_PON: str = "balsamic-pon"
     DEMULTIPLEX: str = "demultiplex"
     FASTQ: str = "fastq"
     FLUFFY: str = "fluffy"
     MICROSALT: str = "microsalt"
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"
+    MUTANT: str = "mutant"
     RAREDISEASE: str = "raredisease"
     RNAFUSION: str = "rnafusion"
     RSYNC: str = "rsync"
-    SARS_COV_2: str = "sars-cov-2"
     SPRING: str = "spring"
     TAXPROFILER: str = "taxprofiler"
+    SARS_COV_2: str = "sars-cov-2"
 
 
 class FileFormat(StrEnum):
@@ -253,6 +254,14 @@ class Strandedness(StrEnum):
     UNSTRANDED: str = "unstranded"
 
 
-PIPELINES_USING_PARTIAL_ANALYSES: list[Pipeline] = [Pipeline.MICROSALT, Pipeline.SARS_COV_2]
+PIPELINES_USING_PARTIAL_ANALYSES: list[Pipeline] = [Pipeline.MICROSALT, Pipeline.MUTANT]
+
+
+class MultiQC(StrEnum):
+    """MultiQC constants"""
+
+    MULTIQC: str = "multiqc"
+    MULTIQC_DATA: str = "multiqc_data"
+
 
 NG_UL_SUFFIX: str = " ng/uL"
