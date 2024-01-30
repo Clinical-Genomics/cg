@@ -70,9 +70,21 @@ def order(helpers: StoreHelpers, customer: Customer) -> Order:
 
 
 @pytest.fixture
-def order_another(helpers: StoreHelpers, customer_another) -> Order:
+def order_another(helpers: StoreHelpers, customer_another: Customer) -> Order:
     order: Order = helpers.add_order(
         store=store, customer_id=customer_another.id, ticket_id=2, order_date=datetime.now()
+    )
+    return order
+
+
+@pytest.fixture
+def order_balsamic(helpers: StoreHelpers, customer_another: Customer) -> Order:
+    order: Order = helpers.add_order(
+        store=store,
+        customer_id=customer_another.id,
+        ticket_id=3,
+        order_date=datetime.now(),
+        workflow=Pipeline.BALSAMIC,
     )
     return order
 
