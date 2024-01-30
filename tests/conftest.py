@@ -32,7 +32,7 @@ from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
 from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
-from cg.io.yaml import write_yaml
+from cg.io.yaml import write_yaml, read_yaml
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
@@ -156,6 +156,12 @@ def sample_ids(sample_id: str, father_sample_id: str, mother_sample_id: str) -> 
 def sample_name() -> str:
     """Returns a sample name."""
     return "a_sample_name"
+
+
+@pytest.fixture(scope="session")
+def another_sample_name() -> str:
+    """Returns a sample name."""
+    return "another_sample_name"
 
 
 @pytest.fixture(scope="session")
@@ -709,6 +715,12 @@ def mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
 def rnafusion_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with rnafusion analysis files."""
     return Path(analysis_dir, "rnafusion")
+
+
+@pytest.fixture
+def taxprofiler_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with taxprofiler analysis files."""
+    return Path(analysis_dir, "taxprofiler")
 
 
 @pytest.fixture
@@ -2225,6 +2237,16 @@ def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
+def rnafusion_metrics_deliverables(rnafusion_analysis_dir: Path) -> list[dict]:
+    """Returns the content of a mock metrics deliverables file."""
+    return read_yaml(
+        file_path=Path(
+            rnafusion_analysis_dir, "rnafusion_case_enough_reads_metrics_deliverables.yaml"
+        )
+    )
+
+
+@pytest.fixture(scope="function")
 def rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to deliverables file."""
     return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_deliverables").with_suffix(
@@ -2380,7 +2402,7 @@ def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, rnafusion_case
 
 
 @pytest.fixture(scope="function")
-def mock_analysis_finish(
+def rnafusion_mock_analysis_finish(
     rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_multiqc_json_metrics: dict, tower_id: int
 ) -> None:
     """Create analysis_finish file for testing."""
@@ -2505,6 +2527,28 @@ def taxprofiler_parameters_default(
 
 
 @pytest.fixture(scope="function")
+def taxprofiler_multiqc_json_metrics(taxprofiler_analysis_dir: Path) -> list[dict]:
+    """Returns the content of a mock Multiqc JSON file."""
+    return read_json(file_path=Path(taxprofiler_analysis_dir, "multiqc_data.json"))
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_metrics_deliverables(taxprofiler_analysis_dir: Path) -> dict:
+    """Returns the content of a mock metrics deliverables file."""
+    return read_yaml(
+        file_path=Path(taxprofiler_analysis_dir, "taxprofiler_case_metrics_deliverables.yaml")
+    )
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_metrics_deliverables_path(taxprofiler_dir: Path, taxprofiler_case_id: str) -> Path:
+    """Path to deliverables file."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_metrics_deliverables"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
 def nf_analysis_housekeeper(
     housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
@@ -2538,15 +2582,17 @@ def taxprofiler_context(
     helpers: StoreHelpers,
     taxprofiler_case_id: str,
     sample_id: str,
+    father_sample_id: str,
     sample_name: str,
+    another_sample_name: str,
     trailblazer_api: MockTB,
     nf_analysis_housekeeper: HousekeeperAPI,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
 ) -> CGConfig:
     """Context to use in cli."""
-    cg_context.housekeeper_api_: HousekeeperAPI = nf_analysis_housekeeper
-    cg_context.trailblazer_api_: MockTB = trailblazer_api
+    cg_context.housekeeper_api_ = nf_analysis_housekeeper
+    cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
@@ -2565,13 +2611,69 @@ def taxprofiler_context(
         last_sequenced_at=datetime.now(),
     )
 
+    taxprofiler_another_sample: Sample = helpers.add_sample(
+        status_db,
+        internal_id=father_sample_id,
+        last_sequenced_at=datetime.now(),
+        name=another_sample_name,
+        reads=total_sequenced_reads_pass,
+    )
+
     helpers.add_relationship(
         status_db,
         case=taxprofiler_case,
         sample=taxprofiler_sample,
     )
 
+    helpers.add_relationship(
+        status_db,
+        case=taxprofiler_case,
+        sample=taxprofiler_another_sample,
+    )
+
     return cg_context
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_mock_analysis_finish(
+    taxprofiler_dir: Path,
+    taxprofiler_case_id: str,
+    taxprofiler_multiqc_json_metrics: dict,
+    tower_id: int,
+) -> None:
+    """Create analysis finish file for testing."""
+    Path.mkdir(
+        Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info"), parents=True, exist_ok=True
+    )
+    Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info", "software_versions.yml").touch(
+        exist_ok=True
+    )
+    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet.csv").touch(
+        exist_ok=True
+    )
+    Path.mkdir(
+        Path(taxprofiler_dir, taxprofiler_case_id, "multiqc", "multiqc_data"),
+        parents=True,
+        exist_ok=True,
+    )
+    write_json(
+        content=taxprofiler_multiqc_json_metrics,
+        file_path=Path(
+            taxprofiler_dir,
+            taxprofiler_case_id,
+            "multiqc",
+            "multiqc_data",
+            "multiqc_data",
+        ).with_suffix(FileExtensions.JSON),
+    )
+    write_yaml(
+        content={taxprofiler_case_id: [tower_id]},
+        file_path=Path(
+            taxprofiler_dir,
+            taxprofiler_case_id,
+            "tower_ids",
+        ).with_suffix(FileExtensions.YAML),
+    )
 
 
 @pytest.fixture(scope="session")
