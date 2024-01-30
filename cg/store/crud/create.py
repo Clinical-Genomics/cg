@@ -412,7 +412,7 @@ class CreateHandler(BaseHandler):
         order = Order(
             customer_id=order_data.customer,
             ticket_id=order_data.ticket,
-            order_type=order_data.order_type,
+            workflow=order_data.order_type,
         )
         session = get_session()
         session.add(order)
