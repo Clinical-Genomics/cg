@@ -1561,7 +1561,11 @@ def test_get_orders_workflow_filter(
 @pytest.mark.parametrize(
     "limit, expected_returned",
     [(None, 2), (1, 1), (2, 2)],
-    ids=["No limit", "Only one order", "Both orders"],
+    ids=[
+        "Only workflow filtering",
+        "Workflow filtering and maximum one order",
+        "Workflow filtering and maximum two orders",
+    ],
 )
 def test_get_orders_workflow_and_limit_filter(
     store: Store,
