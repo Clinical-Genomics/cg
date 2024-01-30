@@ -286,3 +286,14 @@ def fixture_mip_analysis_api(
     analysis_api.housekeeper_api = mip_hk_store
     analysis_api.status_db = analysis_store
     return analysis_api
+
+
+@pytest.fixture
+def taxprofiler_metrics() -> dict[str, float]:
+    """Return Taxprofiler raw analysis metrics dictionary."""
+    return {
+        "filtering_result_passed_filter_reads": 24810472.0,
+        "reads_mapped": 19014950.0,
+        "total_reads": 12400055,
+        "paired_aligned_none": 1409340,
+    }

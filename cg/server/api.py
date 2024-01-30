@@ -119,8 +119,8 @@ def submit_order(order_type):
                 content=request_json, file_format=FileFormat.JSON
             ),
         )
-        project: OrderType = OrderType(order_type)
-        order_in: OrderIn = OrderIn.parse_obj(request_json, project=project)
+        project = OrderType(order_type)
+        order_in = OrderIn.parse_obj(request_json, project=project)
 
         result = api.submit(
             project=project,
@@ -128,6 +128,8 @@ def submit_order(order_type):
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )
+        order_service = OrderService(db)
+        order_service.create_order(order_in)
     except (  # user misbehaviour
         OrderError,
         OrderFormError,
@@ -476,7 +478,7 @@ def get_orders():
     orders_request: OrdersRequest = OrdersRequest.model_validate(request.args.to_dict())
     order_service = OrderService(db)
     response: OrdersResponse = order_service.get_orders(orders_request)
-    return jsonify(response.model_dump())
+    return make_response(response.model_dump())
 
 
 @BLUEPRINT.route("/orderform", methods=["POST"])

@@ -130,13 +130,13 @@ def test_get_create_version(
     version_obj = populated_housekeeper_api.bundle(case_id).versions[0]
 
     # When the case_id is given the function should return its latest version
-    latest_version = populated_housekeeper_api.get_create_version(case_id)
+    latest_version = populated_housekeeper_api.get_or_create_version(case_id)
 
     # Then assert that the versions match
     assert version_obj == latest_version
 
     # When a case_id not present in hk is given.
-    latest_version = populated_housekeeper_api.get_create_version(another_case_id)
+    latest_version = populated_housekeeper_api.get_or_create_version(another_case_id)
 
     # Then assert the new bundle is created the version is new.
     assert latest_version.bundle.name == another_case_id

@@ -16,6 +16,7 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
+    metrics_deliver,
 )
 from cg.cli.workflow.taxprofiler.options import (
     OPTION_FROM_START,
@@ -45,6 +46,7 @@ def taxprofiler(context: click.Context) -> None:
 
 
 taxprofiler.add_command(resolve_compression)
+taxprofiler.add_command(metrics_deliver)
 
 
 @taxprofiler.command("config-case")

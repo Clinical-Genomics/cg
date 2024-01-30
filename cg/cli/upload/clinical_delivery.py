@@ -76,7 +76,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
             data_analysis=Pipeline.RSYNC,
             ticket=case.latest_ticket,
         )
-        trailblazer_api.add_upload_job_to_analysis(analysis_id=analysis.id, job_id=job_id)
+        trailblazer_api.add_upload_job_to_analysis(analysis_id=analysis.id, slurm_id=job_id)
     LOG.info(f"Transfer of case {case_id} started with SLURM job id {job_id}")
 
 

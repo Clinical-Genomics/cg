@@ -12,7 +12,7 @@ def test_get_sample_metadata(
     sample_id: str,
     rnafusion_case_id: str,
     rnafusion_validated_metrics: dict[str, str],
-    mock_analysis_finish,
+    rnafusion_mock_analysis_finish,
 ):
     """Test Rnafusion sample metadata extraction."""
 
@@ -41,7 +41,7 @@ def test_get_down_sample_metadata(
     sample_id: str,
     rnafusion_case_id: str,
     rnafusion_validated_metrics: dict[str, str],
-    mock_analysis_finish,
+    rnafusion_mock_analysis_finish,
 ):
     """Test Rnafusion sample metadata extraction."""
 
