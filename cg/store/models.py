@@ -882,9 +882,11 @@ class Order(Model):
     __tablename__ = "order"
 
     id = Column(types.Integer, primary_key=True, unique=True)
-    customer_id = Column(types.String(64), ForeignKey("customer.id"), nullable=False)
+    customer_id = Column(ForeignKey("customer.id"), nullable=False)
+    customer = orm.relationship("Customer", foreign_keys=[customer_id])
     order_date = Column(types.DateTime, nullable=False)
     ticket_id = Column(types.Integer, nullable=False, unique=True, index=True)
+    workflow = Column(types.Enum(*tuple(Pipeline)), nullable=False)
 
     def to_dict(self):
         return to_dict(model_instance=self)
