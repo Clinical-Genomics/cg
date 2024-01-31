@@ -107,7 +107,7 @@ def mip_rna_context(
 ) -> CGConfig:
     cg_context.housekeeper_api_ = housekeeper_api
     cg_context.trailblazer_api_ = tb_api
-    analysis_family_single_case["data_analysis"] = str(Workflow.MIP_RNA)
+    analysis_family_single_case["data_analysis"] = Workflow.MIP_RNA
     if not cg_context.status_db.get_case_by_internal_id(internal_id=case_id):
         helpers.ensure_case_from_dict(
             cg_context.status_db, case_info=analysis_family_single_case, app_tag=apptag_rna

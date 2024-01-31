@@ -63,7 +63,7 @@ def test_rna_case_excluded(cli_runner, caplog, mip_dna_context, rna_case, mocker
     # GIVEN a case that is ready for MIP RNA analysis
     #   -> has a sample that is sequenced and has an rna-application (wts)
 
-    assert rna_case.data_analysis == str(Workflow.MIP_RNA)
+    assert rna_case.data_analysis == Workflow.MIP_RNA
     for link in rna_case.links:
         sample = link.sample
         assert sample.last_sequenced_at

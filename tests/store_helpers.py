@@ -541,7 +541,7 @@ class StoreHelpers:
             panels=case_info["panels"],
             internal_id=case_info["internal_id"],
             ordered_at=ordered_at,
-            data_analysis=case_info.get("data_analysis", str(Workflow.MIP_DNA)),
+            data_analysis=case_info.get("data_analysis", Workflow.MIP_DNA),
             data_delivery=case_info.get("data_delivery", str(DataDelivery.SCOUT)),
             created_at=created_at,
             action=case_info.get("action"),

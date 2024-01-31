@@ -204,7 +204,7 @@ def analysis_family_single_case(
     return {
         "name": family_name,
         "internal_id": case_id,
-        "data_analysis": str(Workflow.MIP_DNA),
+        "data_analysis": Workflow.MIP_DNA,
         "application_type": "wgs",
         "panels": ["IEM", "EP"],
         "tickets": ticket_id,
@@ -228,7 +228,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
     return {
         "name": family_name,
         "internal_id": case_id,
-        "data_analysis": str(Workflow.MIP_DNA),
+        "data_analysis": Workflow.MIP_DNA,
         "application_type": "wgs",
         "tickets": ticket_id,
         "panels": ["IEM", "EP"],

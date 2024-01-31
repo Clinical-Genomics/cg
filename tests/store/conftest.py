@@ -115,7 +115,7 @@ def microbial_submitted_order() -> dict:
             organism=organism,
             reference_genome=ref_genomes[organism],
             extraction_method="MagNaPure 96 (contact Clinical Genomics before " "submission)",
-            analysis=str(Workflow.FASTQ),
+            analysis=Workflow.FASTQ,
             concentration_sample="1",
             mother=None,
             father=None,

@@ -141,9 +141,9 @@ def test_to_lims_balsamic(balsamic_order_to_submit, project):
     assert first_sample["name"] == "s1"
     assert {sample.container for sample in samples} == set(["96 well plate"])
     assert first_sample["udfs"]["data_analysis"] in [
-        str(Workflow.BALSAMIC),
-        str(Workflow.BALSAMIC_QC),
-        str(Workflow.BALSAMIC_UMI),
+        Workflow.BALSAMIC,
+        Workflow.BALSAMIC_QC,
+        Workflow.BALSAMIC_UMI,
     ]
     assert first_sample["udfs"]["application"] == "WGSPCFC030"
     assert first_sample["udfs"]["sex"] == "M"
