@@ -1,4 +1,5 @@
 """Test how the api handles versions."""
+
 import datetime
 from typing import Any
 

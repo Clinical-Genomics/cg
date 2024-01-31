@@ -1,4 +1,5 @@
 """Tests the cli for uploading delivery reports."""
+
 from click.testing import CliRunner, Result
 
 from cg.apps.housekeeper.hk import HousekeeperAPI

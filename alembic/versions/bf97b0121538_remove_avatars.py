@@ -5,6 +5,7 @@ Revises: 76e8252a6efb
 Create Date: 2022-02-25 16:13:16.666812
 
 """
+
 import sqlalchemy as sa
 from sqlalchemy.orm import declarative_base
 

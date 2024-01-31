@@ -1,4 +1,5 @@
 """Test fixtures for cg/server tests"""
+
 import os
 from datetime import datetime
 from typing import Generator

@@ -1,4 +1,5 @@
 """This script tests the cli methods to set flow cells in status-db."""
+
 from click.testing import CliRunner
 
 from cg.cli.set.base import flowcell

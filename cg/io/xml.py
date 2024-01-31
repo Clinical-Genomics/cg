@@ -1,4 +1,5 @@
 """Module for reading and writing xml files."""
+
 import logging
 from pathlib import Path
 from xml.etree.ElementTree import Element, ElementTree, parse

@@ -1,4 +1,5 @@
 """Tests for FASTQ part of meta compress api"""
+
 import logging
 from unittest import mock
 

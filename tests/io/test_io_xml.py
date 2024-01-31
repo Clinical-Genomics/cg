@@ -1,4 +1,5 @@
 """Tests for the io.xml module."""
+
 import xml.etree.ElementTree as ET
 
 import pytest

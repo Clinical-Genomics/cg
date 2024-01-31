@@ -1,6 +1,5 @@
 """Report field validation helper"""
 
-
 from cg.constants import NA_FIELD
 from cg.constants.constants import SCALE_TO_MILLION_READ_PAIRS
 from cg.models.report.report import ReportModel

@@ -1,4 +1,5 @@
 """Delivery report upload to scout commands."""
+
 import logging
 
 import click

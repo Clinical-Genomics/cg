@@ -1,4 +1,5 @@
 """Tests for the DownsampleAPI."""
+
 import logging
 from pathlib import Path
 

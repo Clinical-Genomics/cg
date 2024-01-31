@@ -1,4 +1,5 @@
 """Module for common workflow commands."""
+
 import logging
 
 import click

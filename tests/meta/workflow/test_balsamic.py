@@ -1,4 +1,5 @@
 """Tests for BALSAMIC analysis."""
+
 from pathlib import Path
 
 import pytest

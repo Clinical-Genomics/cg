@@ -1,4 +1,5 @@
 """Test observations API methods."""
+
 import logging
 
 import pytest
@@ -22,7 +23,7 @@ from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
     MipDNAObservationsInputFiles,
 )
-from cg.store.models import Customer, Case
+from cg.store.models import Case, Customer
 from tests.store_helpers import StoreHelpers
 
 

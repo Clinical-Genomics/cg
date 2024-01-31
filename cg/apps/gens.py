@@ -1,4 +1,5 @@
 """Module for Gens API."""
+
 import logging
 
 from cg.constants.constants import PrepCategory

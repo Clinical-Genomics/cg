@@ -1,4 +1,5 @@
 """Fixtures for the sequencing metrics parser tests."""
+
 from pathlib import Path
 
 import pytest

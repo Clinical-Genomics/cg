@@ -1,4 +1,5 @@
 """Test ObservationsInputFiles pydantic model behaviour."""
+
 from pathlib import Path
 
 import pytest
