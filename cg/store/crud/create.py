@@ -1,14 +1,13 @@
 import logging
 from datetime import datetime
-from cg.models.orders.order import OrderIn
-from cg.models.orders.orderform_schema import Orderform
-from cg.store.database import get_session
 
 import petname
 
 from cg.constants import DataDelivery, FlowCellStatus, Pipeline, Priority
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
+from cg.models.orders.order import OrderIn
 from cg.store.base import BaseHandler
+from cg.store.database import get_session
 from cg.store.models import (
     Analysis,
     Application,
@@ -179,6 +178,7 @@ class CreateHandler(BaseHandler):
         priority: Priority = None,
         received: datetime = None,
         original_ticket: str = None,
+        subject_id: str | None = None,
         tumour: bool = False,
         **kwargs,
     ) -> Sample:
@@ -199,6 +199,7 @@ class CreateHandler(BaseHandler):
             priority=priority,
             received_at=received,
             sex=sex,
+            subject_id=subject_id,
             **kwargs,
         )
 
