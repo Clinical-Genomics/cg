@@ -399,3 +399,15 @@ def order_another(helpers: StoreHelpers, store: Store) -> Order:
         store=store, customer_id=2, ticket_id=2, order_date=datetime.now()
     )
     return order
+
+
+@pytest.fixture
+def order_balsamic(helpers: StoreHelpers, store: Store) -> Order:
+    order: Order = helpers.add_order(
+        store=store,
+        customer_id=2,
+        ticket_id=3,
+        order_date=datetime.now(),
+        workflow=Pipeline.BALSAMIC,
+    )
+    return order
