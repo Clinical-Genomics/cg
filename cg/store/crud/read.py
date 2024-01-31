@@ -55,6 +55,7 @@ from cg.store.filters.status_metrics_filters import (
     SequencingMetricsFilter,
     apply_metrics_filter,
 )
+from cg.store.filters.status_order_filters import OrderFilter, apply_order_filters
 from cg.store.filters.status_organism_filters import (
     OrganismFilter,
     apply_organism_filter,
@@ -1739,12 +1740,16 @@ class ReadHandler(BaseHandler):
         )
         return records.all()
 
-    def get_orders(self, limit: int | None = None) -> list[Order]:
-        """Returns a list of entries in the table Order."""
-        records: Query = self._get_query(table=Order)
-        if limit is not None:
-            records = records.limit(limit)
-        return records.all()
+    def get_orders_by_workflow(
+        self, workflow: str | None = None, limit: int | None = None
+    ) -> list[Order]:
+        """Returns a list of entries in Order. The output is filtered on workflow and limited, if given."""
+        orders: Query = self._get_query(table=Order)
+        order_filter_functions: list[Callable] = [OrderFilter.FILTER_ORDERS_BY_WORKFLOW]
+        orders: Query = apply_order_filters(
+            orders=orders, filter_functions=order_filter_functions, workflow=workflow
+        )
+        return orders.limit(limit).all()
 
     def _calculate_estimated_turnaround_time(
         self,
