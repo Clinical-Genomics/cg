@@ -2,8 +2,8 @@ from pydantic import BaseModel
 
 
 class SequencingQualityMetrics(BaseModel):
-    pass
+    sequencing_quality: bool
 
 
 class PreAnalysisQualityMetrics(BaseModel):
-    sequencing_metrics: SequencingQualityMetrics = None
+    sequencing_metrics: SequencingQualityMetrics
