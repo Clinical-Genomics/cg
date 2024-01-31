@@ -7,9 +7,9 @@ from pathlib import Path
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
+from housekeeper.store import Store, models
 from housekeeper.store.database import create_all_tables, drop_all_tables, initialize_database
-from housekeeper.store.models import Archive, Bundle, File, Tag, Version
-from housekeeper.store.store import Store
+from housekeeper.store.models import Archive, Bundle, File, Version
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingFileTag
@@ -256,7 +256,7 @@ class HousekeeperAPI:
             self._store._get_query(table=Version)
             .join(Version.bundle)
             .filter(Bundle.name == bundle)
-            .order_by(Version.created_at.desc())
+            .order_by(models.Version.created_at.desc())
             .first()
         )
 
@@ -299,13 +299,13 @@ class HousekeeperAPI:
         """Create a new tag."""
         return self._store.new_tag(name, category)
 
-    def add_tag(self, name: str, category: str = None) -> Tag:
+    def add_tag(self, name: str, category: str = None) -> models.Tag:
         """Add a tag to the database."""
         tag_obj = self._store.new_tag(name, category)
         self.add_commit(tag_obj)
         return tag_obj
 
-    def get_tag(self, name: str) -> Tag:
+    def get_tag(self, name: str) -> models.Tag:
         """Fetch a tag."""
         return self._store.get_tag(name)
 

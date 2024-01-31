@@ -858,13 +858,13 @@ files = [
 
 [[package]]
 name = "housekeeper"
-version = "4.11.3"
+version = "4.11.1"
 description = "Housekeeper takes care of files"
 optional = false
 python-versions = "*"
 files = [
-    {file = "housekeeper-4.11.3-py2.py3-none-any.whl", hash = "sha256:35d0b3155ad166edb0c7d384d5ef1246bd660c1637276926addbe9793a01b68f"},
-    {file = "housekeeper-4.11.3.tar.gz", hash = "sha256:fd8b112e8be78aaf0a77695e53f4058cb4922c788d4daa20305db26a572d0035"},
+    {file = "housekeeper-4.11.1-py2.py3-none-any.whl", hash = "sha256:4999ad8769971ef58c9398647250fe026fca7ceee0802e7fd45ac801742372f1"},
+    {file = "housekeeper-4.11.1.tar.gz", hash = "sha256:e5b0586ffddafd7a6d9a8d73c23b100ef951557868f51d8506a92feeec3519d0"},
 ]
 
 [package.dependencies]
