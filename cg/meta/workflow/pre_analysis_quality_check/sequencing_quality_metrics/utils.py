@@ -1,8 +1,49 @@
+import logging
+
 from cg.constants.constants import PrepCategory
-from cg.store.models import Sample
+from cg.constants.priority import Priority
+from cg.store.models import Case, Sample
+
+LOG = logging.getLogger(__name__)
 
 
-def all_samples_are_ready_made_libraries(samples) -> bool:
+def is_sample_ready_made_library(sample: Sample) -> bool:
+    """
+    Check if a sample is a ready made library.
+
+    Returns:
+        bool: True if the sample is a ready made library, False otherwise.
+
+    """
+    passed_quality_check: bool = sample.prep_category == PrepCategory.ready_made_library
+    if not passed_quality_check:
+        LOG.warning(f"Sample {sample.internal_id} is not a ready made library.")
+    return passed_quality_check
+
+
+def case_has_express_priority(case: Case) -> bool:
+    """
+    Check if a case is express priority.
+
+    Returns:
+        bool: True if the case is express priority, False otherwise.
+
+    """
+    return case.priority == Priority.express
+
+
+def case_has_lower_priority_than_express(case: Case) -> bool:
+    """
+    Check if a case is lower than express priority.
+
+    Returns:
+        bool: True if the case is lower than express priority, False otherwise.
+
+    """
+    return case.priority < Priority.express
+
+
+def all_samples_are_ready_made_libraries(case: Case) -> bool:
     """
     Check if all samples in case are ready made libraries.
 
@@ -10,10 +51,10 @@ def all_samples_are_ready_made_libraries(samples) -> bool:
         bool: True if all samples are ready made libraries, False otherwise.
 
     """
-    return all(sample.prep_category == PrepCategory.ready_made_library for sample in samples)
+    return all(is_sample_ready_made_library(sample) for sample in case.samples)
 
 
-def standard_sequencing_qc(sample) -> bool:
+def sample_has_enough_reads(sample) -> bool:
     """
     Run standard sequencing qc for a sample.
 
@@ -21,10 +62,26 @@ def standard_sequencing_qc(sample) -> bool:
         bool: True if sample pass the qc, False otherwise.
 
     """
-    return all(sample.reads >= sample.expected_reads)
+    passed_quality_check: bool = all(sample.reads >= sample.expected_reads)
+    if not passed_quality_check:
+        LOG.warning(f"Sample {sample.internal_id} has too few reads.")
+    return passed_quality_check
 
 
-def express_sequencing_qc(sample) -> bool:
+def get_sequencing_qc_of_case(case: Case) -> bool:
+    """
+    Get the standard sequencing qc of a case.
+
+    Returns:
+        bool: True if the case pass the qc, False otherwise.
+
+    """
+    if case_has_lower_priority_than_express(case):
+        return all(sample_has_enough_reads(sample) for sample in case.samples)
+    return True
+
+
+def express_sample_has_enough_reads(sample: Sample) -> bool:
     """
     Run express sequencing qc for a sample.
 
@@ -32,10 +89,27 @@ def express_sequencing_qc(sample) -> bool:
         bool: True if the sample pass the qc, False otherwise.
 
     """
-    return sample.sample.reads >= express_reads_threshold(sample)
+    express_reads_threshold: int = round(sample.application_version.application.target_reads / 2)
+    passed_quality_check: bool = sample.reads >= express_reads_threshold
+    if not passed_quality_check:
+        LOG.warning(f"Sample {sample.internal_id} has too few reads.")
+    return passed_quality_check
 
 
-def all_samples_have_reads(samples: list[Sample]) -> bool:
+def get_express_sequencing_qc_of_case(case: Case) -> bool:
+    """
+    Get the express sequencing qc of a case.
+
+    Returns:
+        bool: True if the case pass the qc, False otherwise.
+
+    """
+    if case_has_express_priority(case):
+        return all(express_sample_has_enough_reads(sample) for sample in case.samples)
+    return True
+
+
+def all_samples_in_case_have_reads(case: Case) -> bool:
     """
     Check if all samples have reads.
 
@@ -43,10 +117,13 @@ def all_samples_have_reads(samples: list[Sample]) -> bool:
         bool: True if all samples have reads, False otherwise.
 
     """
-    return all(bool(sample.reads) for sample in samples)
+    passed_quality_check: bool = all(bool(sample.reads) for sample in case.samples)
+    if not passed_quality_check:
+        LOG.warning("Not all samples in case have reads.")
+    return passed_quality_check
 
 
-def any_sample_has_reads(samples: list[Sample]) -> bool:
+def any_sample_in_case_has_reads(case: Case) -> bool:
     """
     Check if any sample has reads.
 
@@ -54,40 +131,7 @@ def any_sample_has_reads(samples: list[Sample]) -> bool:
         bool: True if any sample has reads, False otherwise.
 
     """
-    return any(bool(sample.reads) for sample in samples)
-
-
-def express_reads_threshold(sample) -> int:
-    """
-    Get the express reads threshold for a sample.
-
-    Args:
-        sample (Sample): The sample object.
-
-    Returns:
-        int: The express reads threshold.
-
-    """
-    return round(sample.application_version.application.target_reads / 2)
-
-
-# def get_pre_analysis_quality_check_for_workflow(
-#     analysis_api: AnalysisAPI,
-# ) -> PreAnalysisQualityCheck:
-#     pre_analysis_quality_checks: dict[AnalysisAPI, PreAnalysisQualityCheck] = {
-#         BalsamicAnalysisAPI: BalsamicPreAnalysisQc,
-#         BalsamicQCAnalysisAPI: BalsamicPreAnalysisQc,
-#         BalsamicUmiAnalysisAPI: BalsamicPreAnalysisQc,
-#         MicrosaltAnalysisAPI: MicrobialPreAnalysisQc,
-#         MipDNAAnalysisAPI: MIPPreAnalysisQc,
-#         MipRNAAnalysisAPI: MIPPreAnalysisQc,
-#         TaxprofilerAnalysisAPI: TaxProfilerPreAnalysisQc,
-#         RnafusionAnalysisAPI: RnafusionPreAnalysisQc,
-#         RarediseaseAnalysisAPI: RareDiseasePreAnalysisQc,
-#     }
-#     pre_analysis_quality_check: PreAnalysisQualityCheck = pre_analysis_quality_checks.get(
-#         type(analysis_api)
-#     )
-#     if not pre_analysis_quality_check:
-#         raise NotImplementedError("No pre analysis quality check implemented for this workflow.")
-#     return pre_analysis_quality_check
+    passed_quality_check: bool = any(bool(sample.reads) for sample in case.samples)
+    if not passed_quality_check:
+        LOG.warning("No samples in case have reads.")
+    return passed_quality_check

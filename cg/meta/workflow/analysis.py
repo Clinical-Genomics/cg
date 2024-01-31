@@ -389,9 +389,9 @@ class AnalysisAPI(MetaAPI):
             "The analysis for %s could not start, decompression is needed",
             case_id,
         )
-        decompression_possible: bool = (
-            self.prepare_fastq_api.can_at_least_one_sample_be_decompressed(case_id)
-        )
+        decompression_possible: (
+            bool
+        ) = self.prepare_fastq_api.can_at_least_one_sample_be_decompressed(case_id)
         if not decompression_possible:
             self.decompression_running(case_id=case_id)
             return
