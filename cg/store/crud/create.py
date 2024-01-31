@@ -178,6 +178,7 @@ class CreateHandler(BaseHandler):
         priority: Priority = None,
         received: datetime = None,
         original_ticket: str = None,
+        subject_id: str = None,
         tumour: bool = False,
         **kwargs,
     ) -> Sample:
@@ -198,6 +199,7 @@ class CreateHandler(BaseHandler):
             priority=priority,
             received_at=received,
             sex=sex,
+            subject_id=subject_id,
             **kwargs,
         )
 
