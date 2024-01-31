@@ -1,4 +1,5 @@
 """Loqusdb related constants."""
+
 from enum import Enum, StrEnum
 
 from cg.constants.constants import Pipeline

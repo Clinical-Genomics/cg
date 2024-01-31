@@ -5,6 +5,7 @@ Revises: a6befebf1231
 Create Date: 2024-01-25 09:24:36.338102
 
 """
+
 from sqlalchemy import orm
 from sqlalchemy.dialects import mysql
 

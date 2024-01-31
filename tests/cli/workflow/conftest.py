@@ -1,4 +1,5 @@
 """Fixtures for cli analysis tests"""
+
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock

@@ -329,9 +329,9 @@ class AnalysisAPI(MetaAPI):
             )
             destination_path = Path(fastq_dir, fastq_file_name)
             linked_reads_paths[fastq_file.read_direction].append(destination_path)
-            concatenated_paths[
-                fastq_file.read_direction
-            ] = f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_file_name)}"
+            concatenated_paths[fastq_file.read_direction] = (
+                f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_file_name)}"
+            )
 
             if not destination_path.exists():
                 LOG.info(f"Linking: {fastq_file.path} -> {destination_path}")

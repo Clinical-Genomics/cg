@@ -4,10 +4,8 @@ from pathlib import Path
 from typing import Any
 
 from cg.constants import Pipeline
-from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager
+from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager, MultiQC
 from cg.constants.nextflow import NFX_WORK_DIR
-from cg.exc import CgError
-from cg.io.controller import WriteFile
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
@@ -15,8 +13,16 @@ from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
-from cg.store.models import Sample
 from cg.utils import Process
+from cg.models.deliverables.metric_deliverables import (
+    MetricsBase,
+)
+from cg.io.controller import ReadFile, WriteFile
+from cg.models.deliverables.metric_deliverables import (
+    MetricsDeliverablesCondition,
+)
+from cg.exc import CgError, MetricsQCError
+from cg.constants.tb import AnalysisStatus
 
 LOG = logging.getLogger(__name__)
 
@@ -158,7 +164,7 @@ class NfAnalysisAPI(AnalysisAPI):
             raise ValueError(f"No config file found for case {case_id}")
 
     def verify_deliverables_file_exists(self, case_id: str) -> None:
-        """Raise an error if deliverables files file is not found."""
+        """Raise an error if a deliverable file is not found."""
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
@@ -307,3 +313,90 @@ class NfAnalysisAPI(AnalysisAPI):
                 )
             files.append(FileDeliverable(**file))
         return PipelineDeliverables(files=files)
+
+    def get_multiqc_json_path(self, case_id: str) -> Path:
+        """Return the path of the multiqc_data.json file."""
+        return Path(
+            self.root_dir,
+            case_id,
+            MultiQC.MULTIQC,
+            MultiQC.MULTIQC_DATA,
+            MultiQC.MULTIQC_DATA + FileExtensions.JSON,
+        )
+
+    def get_pipeline_metrics(self) -> dict:
+        """Get nf-core pipeline metrics constants."""
+        return {}
+
+    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
+        """Return a list of the metrics specified in a MultiQC json file."""
+        raise NotImplementedError
+
+    def get_metric_base_list(self, sample_id: str, metrics_values: dict) -> list[MetricsBase]:
+        """Return a list of MetricsBase objects for a given sample."""
+        metric_base_list: list[MetricsBase] = []
+        for metric_name, metric_value in metrics_values.items():
+            metric_base_list.append(
+                MetricsBase(
+                    header=None,
+                    id=sample_id,
+                    input=MultiQC.MULTIQC_DATA + FileExtensions.JSON,
+                    name=metric_name,
+                    step=MultiQC.MULTIQC,
+                    value=metric_value,
+                    condition=self.get_pipeline_metrics().get(metric_name, None),
+                )
+            )
+        return metric_base_list
+
+    @staticmethod
+    def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
+        return None
+
+    def create_metrics_deliverables_content(self, case_id: str) -> dict[str, list[dict[str, Any]]]:
+        """Create the content of metrics deliverables file."""
+        metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id=case_id)
+        self.ensure_mandatory_metrics_present(metrics=metrics)
+        return {"metrics": [metric.dict() for metric in metrics]}
+
+    def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
+        """Write <case>_metrics_deliverables.yaml file."""
+        metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
+        content: dict = self.create_metrics_deliverables_content(case_id=case_id)
+        if dry_run:
+            LOG.info(
+                f"Dry-run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
+            )
+            return
+
+        LOG.info(f"Writing metrics deliverables file to {metrics_deliverables_path.as_posix()}")
+        WriteFile.write_file_from_content(
+            content=content,
+            file_format=FileFormat.YAML,
+            file_path=metrics_deliverables_path,
+        )
+
+    def validate_qc_metrics(self, case_id: str, dry_run: bool = False) -> None:
+        """Validate the information from a QC metrics deliverable file."""
+
+        if dry_run:
+            LOG.info("Dry-run: QC metrics validation would be performed")
+            return
+
+        LOG.info("Validating QC metrics")
+        try:
+            metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
+            qc_metrics_raw: dict = ReadFile.get_content_from_file(
+                file_format=FileFormat.YAML, file_path=metrics_deliverables_path
+            )
+            MetricsDeliverablesCondition(**qc_metrics_raw)
+        except MetricsQCError as error:
+            LOG.error(f"QC metrics failed for {case_id}")
+            self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)
+            self.trailblazer_api.add_comment(case_id=case_id, comment=str(error))
+            raise MetricsQCError from error
+        except CgError as error:
+            LOG.error(f"Could not create metrics deliverables file: {error}")
+            self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.ERROR)
+            raise CgError from error
+        self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)

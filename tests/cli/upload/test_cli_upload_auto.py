@@ -1,4 +1,5 @@
 """Test the cli for uploading using auto"""
+
 import datetime
 import logging
 

@@ -1,4 +1,5 @@
 """This script tests the run cli command"""
+
 import logging
 
 import pytest
@@ -210,7 +211,7 @@ def test_resume_without_id(
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
     mock_config,
-    mock_analysis_finish,
+    rnafusion_mock_analysis_finish,
 ):
     """Test resume command without providing NF-Tower ID when a Trailblazer Tower config file from a previous run
     exist."""

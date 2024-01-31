@@ -1,4 +1,5 @@
 """Module for building the rsync command to send files to customer inbox on the delivery server."""
+
 import datetime as dt
 import glob
 import logging

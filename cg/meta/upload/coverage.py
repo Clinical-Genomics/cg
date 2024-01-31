@@ -1,4 +1,5 @@
 """Upload coverage API"""
+
 import logging
 
 from cg.apps.coverage import ChanjoAPI

@@ -1,4 +1,5 @@
 """This script tests the cli method to clean old balsamic run dirs"""
+
 import datetime as dt
 import logging
 from pathlib import Path

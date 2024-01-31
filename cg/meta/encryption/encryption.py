@@ -1,4 +1,5 @@
 """API for encryption on Hasta"""
+
 import logging
 import subprocess
 from io import TextIOWrapper

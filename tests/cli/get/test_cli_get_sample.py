@@ -1,6 +1,5 @@
 """This script tests the cli methods to get samples in status-db"""
 
-
 from click.testing import CliRunner
 
 from cg.cli.get import get

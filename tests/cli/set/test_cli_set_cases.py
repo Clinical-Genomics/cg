@@ -1,4 +1,5 @@
 """This script tests the cli methods to set values of several cases in status-db."""
+
 import logging
 
 import pytest

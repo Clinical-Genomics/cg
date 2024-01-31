@@ -1,9 +1,10 @@
 """Tests for MicroSALT analysis."""
+
 from pathlib import Path
 
 from mock import MagicMock
-from cg.apps.lims.api import LimsAPI
 
+from cg.apps.lims.api import LimsAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case

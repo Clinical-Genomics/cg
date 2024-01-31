@@ -1,4 +1,5 @@
 """Set case attributes in the status database."""
+
 import logging
 
 import click

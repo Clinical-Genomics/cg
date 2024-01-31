@@ -1,4 +1,5 @@
 """Test CG CLI upload module."""
+
 from datetime import datetime, timedelta
 
 from click.testing import CliRunner

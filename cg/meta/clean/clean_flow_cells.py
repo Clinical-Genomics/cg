@@ -1,4 +1,5 @@
 """An API that handles the cleaning of flow cells."""
+
 import logging
 from pathlib import Path
 
@@ -154,9 +155,9 @@ class CleanFlowCellAPI:
         Raises:
               Value error if no SampleLaneSequencingMetrics are found in StatusDB.
         """
-        metrics: list[
-            SampleLaneSequencingMetrics
-        ] = self.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(self.flow_cell.id)
+        metrics: list[SampleLaneSequencingMetrics] = (
+            self.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(self.flow_cell.id)
+        )
         if not metrics:
             raise ValueError(
                 f"No SampleLaneSequencingMetrics found for {self.flow_cell.id} in StatusDB."

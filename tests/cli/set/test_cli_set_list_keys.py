@@ -1,4 +1,5 @@
 """Test methods for cg cli set list_keys"""
+
 import logging
 
 from click.testing import CliRunner

@@ -119,8 +119,8 @@ def submit_order(order_type):
                 content=request_json, file_format=FileFormat.JSON
             ),
         )
-        project: OrderType = OrderType(order_type)
-        order_in: OrderIn = OrderIn.parse_obj(request_json, project=project)
+        project = OrderType(order_type)
+        order_in = OrderIn.parse_obj(request_json, project=project)
 
         result = api.submit(
             project=project,
@@ -128,6 +128,8 @@ def submit_order(order_type):
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )
+        order_service = OrderService(db)
+        order_service.create_order(order_in)
     except (  # user misbehaviour
         OrderError,
         OrderFormError,
@@ -355,9 +357,9 @@ def get_sequencing_metrics(flow_cell_name: str):
     if not flow_cell_name:
         return jsonify({"error": "Invalid or missing flow cell id"}), HTTPStatus.BAD_REQUEST
 
-    sequencing_metrics: list[
-        SampleLaneSequencingMetrics
-    ] = db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
+    sequencing_metrics: list[SampleLaneSequencingMetrics] = (
+        db.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
+    )
 
     if not sequencing_metrics:
         return (

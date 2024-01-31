@@ -165,9 +165,9 @@ class SpringArchiveAPI:
 
     def update_ongoing_archivals(self) -> None:
         ongoing_archivals: list[Archive] = self.housekeeper_api.get_ongoing_archivals()
-        archival_ids_per_location: dict[
-            ArchiveLocations, list[int]
-        ] = self.sort_archival_ids_on_archive_location(ongoing_archivals)
+        archival_ids_per_location: dict[ArchiveLocations, list[int]] = (
+            self.sort_archival_ids_on_archive_location(ongoing_archivals)
+        )
         for archive_location in ArchiveLocations:
             if archival_ids := archival_ids_per_location.get(archive_location):
                 archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](
@@ -180,9 +180,9 @@ class SpringArchiveAPI:
 
     def update_ongoing_retrievals(self) -> None:
         ongoing_retrievals: list[Archive] = self.housekeeper_api.get_ongoing_retrievals()
-        retrieval_ids_per_location: dict[
-            ArchiveLocations, list[int]
-        ] = self.sort_retrieval_ids_on_archive_location(ongoing_retrievals)
+        retrieval_ids_per_location: dict[ArchiveLocations, list[int]] = (
+            self.sort_retrieval_ids_on_archive_location(ongoing_retrievals)
+        )
         for archive_location in ArchiveLocations:
             if retrieval_ids := retrieval_ids_per_location.get(archive_location):
                 archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](
@@ -242,9 +242,9 @@ class SpringArchiveAPI:
         archival jobs which should be archived there."""
 
         jobs_per_location: dict[ArchiveLocations, list[int]] = {}
-        jobs_and_locations: set[
-            tuple[int, ArchiveLocations]
-        ] = self.get_unique_archival_ids_and_archive_locations(archive_entries)
+        jobs_and_locations: set[tuple[int, ArchiveLocations]] = (
+            self.get_unique_archival_ids_and_archive_locations(archive_entries)
+        )
 
         for archive_location in ArchiveLocations:
             jobs_per_location[ArchiveLocations(archive_location)] = [
@@ -269,9 +269,9 @@ class SpringArchiveAPI:
         """Returns a dictionary with keys being ArchiveLocations and the values being the subset of the given
         retrieval jobs which should be archived there."""
         jobs_per_location: dict[ArchiveLocations, list[int]] = {}
-        jobs_and_locations: set[
-            tuple[int, ArchiveLocations]
-        ] = self.get_unique_retrieval_ids_and_archive_locations(archive_entries)
+        jobs_and_locations: set[tuple[int, ArchiveLocations]] = (
+            self.get_unique_retrieval_ids_and_archive_locations(archive_entries)
+        )
         for archive_location in ArchiveLocations:
             jobs_per_location[ArchiveLocations(archive_location)] = [
                 job_and_location[0]

@@ -1,4 +1,5 @@
 """Tests for the Scout serialisation models"""
+
 from cg.apps.scout.scout_export import DiagnosisPhenotypes, ScoutExportCase
 from cg.apps.scout.validators import set_parent_if_missing, set_sex_if_other
 from cg.constants.constants import FileFormat

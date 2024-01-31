@@ -1,4 +1,5 @@
 """This module tests the run CLI command."""
+
 import logging
 
 import pytest

@@ -123,7 +123,6 @@ class Pipeline(StrEnum):
     RSYNC: str = "rsync"
     SPRING: str = "spring"
     TAXPROFILER: str = "taxprofiler"
-    SARS_COV_2: str = "sars-cov-2"
 
 
 class FileFormat(StrEnum):
@@ -255,5 +254,13 @@ class Strandedness(StrEnum):
 
 
 PIPELINES_USING_PARTIAL_ANALYSES: list[Pipeline] = [Pipeline.MICROSALT, Pipeline.MUTANT]
+
+
+class MultiQC(StrEnum):
+    """MultiQC constants"""
+
+    MULTIQC: str = "multiqc"
+    MULTIQC_DATA: str = "multiqc_data"
+
 
 NG_UL_SUFFIX: str = " ng/uL"

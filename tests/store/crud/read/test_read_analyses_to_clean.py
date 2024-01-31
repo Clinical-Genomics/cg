@@ -1,4 +1,5 @@
 """This file tests the analyses_to_clean part of the status api"""
+
 from datetime import datetime
 
 from cg.constants import Pipeline

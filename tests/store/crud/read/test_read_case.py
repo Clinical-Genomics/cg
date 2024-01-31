@@ -1,4 +1,5 @@
 """Tests the findbusinessdata part of the Cg store API related to the Case model."""
+
 from datetime import datetime, timedelta
 
 from cg.constants import DataDelivery, Priority

@@ -1,4 +1,5 @@
 """Tests delivery report models validators."""
+
 from datetime import datetime
 from pathlib import Path
 from typing import Any

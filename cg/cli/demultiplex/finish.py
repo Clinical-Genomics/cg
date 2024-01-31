@@ -1,4 +1,5 @@
 """Commands to finish up after a demultiplex run."""
+
 import logging
 
 import click

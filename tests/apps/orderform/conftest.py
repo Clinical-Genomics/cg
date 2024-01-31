@@ -1,4 +1,5 @@
 """Fixtures for the orderform tests."""
+
 from pathlib import Path
 
 import openpyxl

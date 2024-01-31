@@ -1,4 +1,5 @@
 """Handler to read data objects."""
+
 import datetime as dt
 import logging
 from datetime import datetime, timedelta
@@ -54,6 +55,7 @@ from cg.store.filters.status_metrics_filters import (
     SequencingMetricsFilter,
     apply_metrics_filter,
 )
+from cg.store.filters.status_order_filters import OrderFilter, apply_order_filters
 from cg.store.filters.status_organism_filters import (
     OrganismFilter,
     apply_organism_filter,
@@ -419,9 +421,9 @@ class ReadHandler(BaseHandler):
 
     def get_average_percentage_passing_q30_for_flow_cell(self, flow_cell_name: str) -> float:
         """Calculates the average q30 for each sample on a flow cell and returns the average between the samples."""
-        sequencing_metrics: list[
-            SampleLaneSequencingMetrics
-        ] = self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
+        sequencing_metrics: list[SampleLaneSequencingMetrics] = (
+            self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
+        )
         unique_sample_internal_ids: set[str] = {
             sequencing_metric.sample_internal_id for sequencing_metric in sequencing_metrics
         }
@@ -440,9 +442,9 @@ class ReadHandler(BaseHandler):
 
     def get_number_of_reads_for_flow_cell(self, flow_cell_name: str) -> int:
         """Get total number of reads for a flow cell from sample lane sequencing metrics."""
-        sequencing_metrics: list[
-            SampleLaneSequencingMetrics
-        ] = self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
+        sequencing_metrics: list[SampleLaneSequencingMetrics] = (
+            self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
+        )
         read_count: int = 0
         for sequencing_metric in sequencing_metrics:
             read_count += sequencing_metric.sample_total_reads_in_lane
@@ -711,9 +713,11 @@ class ReadHandler(BaseHandler):
             SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
             SampleFilter.FILTER_BY_SUBJECT_ID,
         ]
-        filter_functions.append(
-            SampleFilter.FILTER_IS_TUMOUR
-        ) if is_tumour else filter_functions.append(SampleFilter.FILTER_IS_NOT_TUMOUR)
+        (
+            filter_functions.append(SampleFilter.FILTER_IS_TUMOUR)
+            if is_tumour
+            else filter_functions.append(SampleFilter.FILTER_IS_NOT_TUMOUR)
+        )
         return apply_sample_filter(
             samples=samples,
             customer_entry_ids=customer_ids,
@@ -1736,12 +1740,16 @@ class ReadHandler(BaseHandler):
         )
         return records.all()
 
-    def get_orders(self, limit: int | None = None) -> list[Order]:
-        """Returns a list of entries in the table Order."""
-        records: Query = self._get_query(table=Order)
-        if limit is not None:
-            records = records.limit(limit)
-        return records.all()
+    def get_orders_by_workflow(
+        self, workflow: str | None = None, limit: int | None = None
+    ) -> list[Order]:
+        """Returns a list of entries in Order. The output is filtered on workflow and limited, if given."""
+        orders: Query = self._get_query(table=Order)
+        order_filter_functions: list[Callable] = [OrderFilter.FILTER_ORDERS_BY_WORKFLOW]
+        orders: Query = apply_order_filters(
+            orders=orders, filter_functions=order_filter_functions, workflow=workflow
+        )
+        return orders.limit(limit).all()
 
     def _calculate_estimated_turnaround_time(
         self,

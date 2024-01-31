@@ -64,23 +64,26 @@ class OrderSample(BaseModel):
     data_delivery: DataDelivery
     elution_buffer: str | None = None
     extraction_method: str | None = None
-    family_name: constr(
-        pattern=NAME_PATTERN,
-        min_length=2,
-        max_length=Case.name.property.columns[0].type.length,
-    ) | None = None
-    father: constr(
-        pattern=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length
-    ) | None = None
+    family_name: (
+        constr(
+            pattern=NAME_PATTERN,
+            min_length=2,
+            max_length=Case.name.property.columns[0].type.length,
+        )
+        | None
+    ) = None
+    father: (
+        constr(pattern=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length) | None
+    ) = None
     formalin_fixation_time: int | None = None
     index: str | None = None
     index_number: str | None = None
     index_sequence: str | None = None
     internal_id: constr(max_length=Sample.internal_id.property.columns[0].type.length) | None = None
     lab_code: str | None = None
-    mother: constr(
-        pattern=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length
-    ) | None = None
+    mother: (
+        constr(pattern=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length) | None
+    ) = None
     name: constr(
         pattern=NAME_PATTERN,
         min_length=2,
@@ -99,9 +102,9 @@ class OrderSample(BaseModel):
     primer: str | None = None
     quantity: int | None = None
     reagent_label: str | None = None
-    reference_genome: constr(
-        max_length=Sample.reference_genome.property.columns[0].type.length
-    ) | None = None
+    reference_genome: (
+        constr(max_length=Sample.reference_genome.property.columns[0].type.length) | None
+    ) = None
     region: str | None = None
     region_code: str | None = None
     require_qc_ok: bool = False
@@ -110,9 +113,10 @@ class OrderSample(BaseModel):
     sex: SexEnum = SexEnum.unknown
     source: str | None = None
     status: StatusEnum = StatusEnum.unknown
-    subject_id: constr(
-        pattern=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length
-    ) | None = None
+    subject_id: (
+        constr(pattern=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length)
+        | None
+    ) = None
     tissue_block_size: str | None = None
     tumour: bool = False
     tumour_purity: int | None = None

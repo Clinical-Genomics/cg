@@ -1,4 +1,5 @@
 """Tests for meta compress functionality that updates housekeeper."""
+
 from pathlib import Path
 from typing import Generator
 

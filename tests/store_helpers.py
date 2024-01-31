@@ -1,4 +1,5 @@
 """Utility functions to simply add test data in a cg store."""
+
 import logging
 from datetime import datetime
 from pathlib import Path

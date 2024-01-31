@@ -1,4 +1,5 @@
 """Test methods for cg/cli/delete/cases"""
+
 import logging
 
 import pytest

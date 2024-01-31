@@ -1,4 +1,5 @@
 """Test module cg.cli.upload.nipt"""
+
 import datetime
 import logging
 

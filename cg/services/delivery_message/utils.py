@@ -2,16 +2,17 @@ from cg.constants.constants import DataDelivery, MicrosaltAppTags, Pipeline
 from cg.services.delivery_message.messages import (
     AnalysisScoutMessage,
     CovidMessage,
+    FastqAnalysisScoutMessage,
     FastqMessage,
     FastqScoutMessage,
-    FastqAnalysisScoutMessage,
     MicrosaltMwrMessage,
-    MicrosaltMwxMessage,
     ScoutMessage,
     StatinaMessage,
 )
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
-from cg.services.delivery_message.messages.microsalt_mwx_message import MicrosaltMwxMessage
+from cg.services.delivery_message.messages.microsalt_mwx_message import (
+    MicrosaltMwxMessage,
+)
 from cg.store.models import Case, Sample
 
 
@@ -24,7 +25,7 @@ def get_message_strategy(case: Case) -> DeliveryMessage:
     if case.data_analysis == Pipeline.MICROSALT:
         return get_microsalt_message_strategy(case)
 
-    if case.data_analysis == Pipeline.SARS_COV_2:
+    if case.data_analysis == Pipeline.MUTANT:
         return CovidMessage()
 
     message_strategy: DeliveryMessage = get_message_strategy_from_data_delivery(case)

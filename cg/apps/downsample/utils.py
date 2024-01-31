@@ -1,4 +1,5 @@
 """Utility functions for the downsampledata module."""
+
 import logging
 from pathlib import Path
 

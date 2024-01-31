@@ -883,8 +883,8 @@ class Order(Model):
 
     id = Column(types.Integer, primary_key=True, unique=True)
     customer_id = Column(ForeignKey("customer.id"), nullable=False)
-    customer = orm.relationship("Customer", foreign_keys=[customer_id])
-    order_date = Column(types.DateTime, nullable=False)
+    customer = orm.relationship(Customer, foreign_keys=[customer_id])
+    order_date = Column(types.DateTime, nullable=False, default=dt.datetime.now())
     ticket_id = Column(types.Integer, nullable=False, unique=True, index=True)
     workflow = Column(types.Enum(*tuple(Pipeline)), nullable=False)
 

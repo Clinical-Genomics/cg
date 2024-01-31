@@ -1,4 +1,5 @@
 """Functions that deal with modifications of the indexes."""
+
 import logging
 
 from pydantic import BaseModel

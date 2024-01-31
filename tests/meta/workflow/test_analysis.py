@@ -1,4 +1,5 @@
 """Test for analysis"""
+
 import logging
 from datetime import datetime
 

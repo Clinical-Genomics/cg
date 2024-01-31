@@ -1,4 +1,5 @@
 """Constants specific for Tar extraction"""
+
 from cg.utils.enums import ListEnum
 
 

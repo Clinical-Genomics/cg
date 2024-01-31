@@ -1,4 +1,5 @@
 """This script tests the cli methods to set values of a case in status-db."""
+
 from click.testing import CliRunner
 
 from cg.cli.set.case import set_case

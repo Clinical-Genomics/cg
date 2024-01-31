@@ -1,4 +1,5 @@
 """Delivery report helpers."""
+
 import logging
 from datetime import datetime
 
