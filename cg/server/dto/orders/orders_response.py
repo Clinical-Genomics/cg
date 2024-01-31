@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 
 
 class Order(BaseModel):
@@ -8,7 +8,7 @@ class Order(BaseModel):
     ticket_id: int
     order_date: str
     order_id: int
-    workflow: Pipeline
+    workflow: Workflow
 
 
 class OrdersResponse(BaseModel):

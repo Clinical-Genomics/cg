@@ -8,7 +8,7 @@ from typing import Callable, Iterator, Literal
 
 from sqlalchemy.orm import Query, Session
 
-from cg.constants import FlowCellStatus, Pipeline
+from cg.constants import FlowCellStatus, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError
 from cg.store.base import BaseHandler
@@ -132,7 +132,7 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_application_limitation_by_tag_and_pipeline(
-        self, tag: str, pipeline: Pipeline
+        self, tag: str, pipeline: Workflow
     ) -> ApplicationLimitations | None:
         """Return an application limitation given the application tag and pipeline."""
         filter_functions: list[ApplicationLimitationsFilter] = [
@@ -788,7 +788,7 @@ class ReadHandler(BaseHandler):
             raise CgError
         LOG.info(f"Case {case_internal_id} exists in Status DB")
 
-    def get_running_cases_in_pipeline(self, pipeline: Pipeline) -> list[Case]:
+    def get_running_cases_in_pipeline(self, pipeline: Workflow) -> list[Case]:
         """Return all running cases in a pipeline."""
         return apply_case_filter(
             filter_functions=[CaseFilter.FILTER_WITH_PIPELINE, CaseFilter.FILTER_IS_RUNNING],
@@ -1026,7 +1026,7 @@ class ReadHandler(BaseHandler):
         return self._get_join_cases_with_samples_query()
 
     def cases_to_analyze(
-        self, pipeline: Pipeline = None, threshold: bool = False, limit: int = None
+        self, pipeline: Workflow = None, threshold: bool = False, limit: int = None
     ) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
         case_filter_functions: list[CaseFilter] = [
@@ -1455,7 +1455,7 @@ class ReadHandler(BaseHandler):
             or (samples_sequenced_at and samples_sequenced_at < case_obj.ordered_at)
         )
 
-    def get_analyses_to_upload(self, pipeline: Pipeline = None) -> list[Analysis]:
+    def get_analyses_to_upload(self, pipeline: Workflow = None) -> list[Analysis]:
         """Return analyses that have not been uploaded."""
         analysis_filter_functions: list[AnalysisFilter] = [
             AnalysisFilter.FILTER_WITH_PIPELINE,
@@ -1471,7 +1471,7 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_analyses_to_clean(
-        self, before: datetime = datetime.now(), pipeline: Pipeline = None
+        self, before: datetime = datetime.now(), pipeline: Workflow = None
     ) -> list[Analysis]:
         """Return analyses that haven't been cleaned."""
         filter_functions: list[AnalysisFilter] = [
@@ -1491,7 +1491,7 @@ class ReadHandler(BaseHandler):
 
     def get_analyses_for_case_and_pipeline_started_at_before(
         self,
-        pipeline: Pipeline,
+        pipeline: Workflow,
         started_at_before: datetime,
         case_internal_id: str,
     ) -> list[Analysis]:
@@ -1531,7 +1531,7 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_analyses_for_pipeline_started_at_before(
-        self, pipeline: Pipeline, started_at_before: datetime
+        self, pipeline: Workflow, started_at_before: datetime
     ) -> list[Analysis]:
         """Return all analyses for a pipeline started before a certain date."""
         filter_functions: list[AnalysisFilter] = [
@@ -1553,7 +1553,7 @@ class ReadHandler(BaseHandler):
             started_at_date=started_at_before,
         ).all()
 
-    def observations_to_upload(self, pipeline: Pipeline = None) -> Query:
+    def observations_to_upload(self, pipeline: Workflow = None) -> Query:
         """Return observations that have not been uploaded."""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_PIPELINE,
@@ -1568,7 +1568,7 @@ class ReadHandler(BaseHandler):
             filter_functions=[SampleFilter.FILTER_WITHOUT_LOQUSDB_ID], samples=records
         )
 
-    def observations_uploaded(self, pipeline: Pipeline = None) -> Query:
+    def observations_uploaded(self, pipeline: Workflow = None) -> Query:
         """Return observations that have been uploaded."""
         records: Query = apply_case_filter(
             filter_functions=[CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_PIPELINE],
@@ -1583,7 +1583,7 @@ class ReadHandler(BaseHandler):
     def get_analyses(self) -> list[Analysis]:
         return self._get_query(table=Analysis).all()
 
-    def get_analyses_to_deliver_for_pipeline(self, pipeline: Pipeline = None) -> list[Analysis]:
+    def get_analyses_to_deliver_for_pipeline(self, pipeline: Workflow = None) -> list[Analysis]:
         """Return analyses that have been uploaded but not delivered."""
         analyses: Query = apply_sample_filter(
             samples=self._get_join_analysis_sample_family_query(),
@@ -1598,7 +1598,7 @@ class ReadHandler(BaseHandler):
             analyses=analyses, filter_functions=filter_functions, pipeline=pipeline
         ).all()
 
-    def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
+    def analyses_to_delivery_report(self, pipeline: Workflow = None) -> Query:
         """Return analyses that need a delivery report to be regenerated."""
         records: Query = apply_case_filter(
             filter_functions=[CaseFilter.FILTER_REPORT_SUPPORTED],
@@ -1615,7 +1615,7 @@ class ReadHandler(BaseHandler):
             filter_functions=analysis_filter_functions, analyses=records, pipeline=pipeline
         )
 
-    def analyses_to_upload_delivery_reports(self, pipeline: Pipeline = None) -> Query:
+    def analyses_to_upload_delivery_reports(self, pipeline: Workflow = None) -> Query:
         """Return analyses that need a delivery report to be uploaded."""
         records: Query = apply_case_filter(
             filter_functions=[CaseFilter.FILTER_WITH_SCOUT_DELIVERY],

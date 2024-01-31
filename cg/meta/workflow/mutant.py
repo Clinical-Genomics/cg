@@ -2,7 +2,7 @@ import logging
 import shutil
 from pathlib import Path
 
-from cg.constants import Pipeline, SequencingFileTag
+from cg.constants import SequencingFileTag, Workflow
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -19,7 +19,7 @@ class MutantAnalysisAPI(AnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.MUTANT,
+        pipeline: Workflow = Workflow.MUTANT,
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.root_dir = config.mutant.root

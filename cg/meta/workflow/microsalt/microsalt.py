@@ -8,10 +8,10 @@ from typing import Any
 
 import click
 
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, Workflow
 from cg.constants.constants import FileExtensions
 from cg.constants.tb import AnalysisStatus
-from cg.exc import CgDataError, MissingAnalysisDir
+from cg.exc import CgDataError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.meta.workflow.microsalt.quality_controller import QualityController
@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 class MicrosaltAnalysisAPI(AnalysisAPI):
     """API to manage Microsalt Analyses"""
 
-    def __init__(self, config: CGConfig, pipeline: Pipeline = Pipeline.MICROSALT):
+    def __init__(self, config: CGConfig, pipeline: Workflow = Workflow.MICROSALT):
         super().__init__(pipeline, config)
         self.root_dir = config.microsalt.root
         self.queries_path = config.microsalt.queries_path

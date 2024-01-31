@@ -12,8 +12,8 @@ from cg.constants import (
     STATUS_OPTIONS,
     DataDelivery,
     FlowCellStatus,
-    Pipeline,
     Priority,
+    Workflow,
 )
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import CONTROL_OPTIONS, CaseActions, PrepCategory
@@ -187,7 +187,7 @@ class ApplicationLimitations(Model):
 
     id = Column(types.Integer, primary_key=True)
     application_id = Column(ForeignKey(Application.id), nullable=False)
-    pipeline = Column(types.Enum(*list(Pipeline)), nullable=False)
+    pipeline = Column(types.Enum(*list(Workflow)), nullable=False)
     limitations = Column(types.Text)
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -206,7 +206,7 @@ class Analysis(Model):
     __tablename__ = "analysis"
 
     id = Column(types.Integer, primary_key=True)
-    pipeline = Column(types.Enum(*list(Pipeline)))
+    pipeline = Column(types.Enum(*list(Workflow)))
     pipeline_version = Column(types.String(32))
     started_at = Column(types.DateTime)
     completed_at = Column(types.DateTime)
@@ -387,7 +387,7 @@ class Case(Model, PriorityMixin):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship(Customer, foreign_keys=[customer_id])
-    data_analysis = Column(types.Enum(*list(Pipeline)))
+    data_analysis = Column(types.Enum(*list(Workflow)))
     data_delivery = Column(types.Enum(*list(DataDelivery)))
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
@@ -500,7 +500,7 @@ class Case(Model, PriorityMixin):
         delivery_arguments: set[str] = set()
         requested_deliveries: list[str] = re.split("[-_]", self.data_delivery)
         delivery_per_pipeline_map: dict[str, str] = {
-            DataDelivery.FASTQ: Pipeline.FASTQ,
+            DataDelivery.FASTQ: Workflow.FASTQ,
             DataDelivery.ANALYSIS_FILES: self.data_analysis,
         }
         for data_delivery, pipeline in delivery_per_pipeline_map.items():
@@ -886,7 +886,7 @@ class Order(Model):
     customer = orm.relationship(Customer, foreign_keys=[customer_id])
     order_date = Column(types.DateTime, nullable=False, default=dt.datetime.now())
     ticket_id = Column(types.Integer, nullable=False, unique=True, index=True)
-    workflow = Column(types.Enum(*tuple(Pipeline)), nullable=False)
+    workflow = Column(types.Enum(*tuple(Workflow)), nullable=False)
 
     def to_dict(self):
         return to_dict(model_instance=self)

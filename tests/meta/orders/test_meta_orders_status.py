@@ -3,7 +3,7 @@ from copy import deepcopy
 
 import pytest
 
-from cg.constants import DataDelivery, Pipeline, Priority
+from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.constants import CaseActions, PrepCategory
 from cg.exc import OrderError
 from cg.meta.orders import OrdersAPI
@@ -40,7 +40,7 @@ def test_pools_to_status(rml_order_to_submit):
     pool = data["pools"][0]
     assert pool["name"] == "pool-1"
     assert pool["application"] == "RMLP05R800"
-    assert pool["data_analysis"] == str(Pipeline.FASTQ)
+    assert pool["data_analysis"] == str(Workflow.FASTQ)
     assert pool["data_delivery"] == str(DataDelivery.FASTQ)
     assert len(pool["samples"]) == 2
     sample = pool["samples"][0]
@@ -98,7 +98,7 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
     assert data["customer"] == "cust002"
     assert data["order"] == "Microbial samples"
     assert data["comment"] == "Order comment"
-    assert data["data_analysis"] == str(Pipeline.MICROSALT)
+    assert data["data_analysis"] == str(Workflow.MICROSALT)
     assert data["data_delivery"] == str(DataDelivery.FASTQ)
 
     # THEN first sample should contain all the relevant data from the microbial order
@@ -125,7 +125,7 @@ def test_sarscov2_samples_to_status(sarscov2_order_to_submit):
     assert data["customer"] == "cust002"
     assert data["order"] == "Sars-CoV-2 samples"
     assert data["comment"] == "Order comment"
-    assert data["data_analysis"] == str(Pipeline.MUTANT)
+    assert data["data_analysis"] == str(Workflow.MUTANT)
     assert data["data_delivery"] == str(DataDelivery.FASTQ)
 
     # THEN first sample should contain all the relevant data from the microbial order
@@ -152,7 +152,7 @@ def test_cases_to_status(mip_order_to_submit):
     assert len(data["families"]) == 2
     family = data["families"][0]
     assert family["name"] == "family1"
-    assert family["data_analysis"] == str(Pipeline.MIP_DNA)
+    assert family["data_analysis"] == str(Workflow.MIP_DNA)
     assert family["data_delivery"] == str(DataDelivery.SCOUT)
     assert family["priority"] == Priority.standard.name
     assert family["cohorts"] == ["Other"]
@@ -236,7 +236,7 @@ def test_store_rml(orders_api, base_store, rml_status_data, ticket_id: str):
     assert new_pool.deliveries[0].destination == "caesar"
 
     new_case = base_store.get_cases()[0]
-    assert new_case.data_analysis == str(Pipeline.FASTQ)
+    assert new_case.data_analysis == str(Workflow.FASTQ)
     assert new_case.data_delivery == str(DataDelivery.FASTQ)
 
     # and that the pool is set for invoicing but not the samples of the pool
@@ -316,7 +316,7 @@ def test_store_fastq_samples_non_tumour_wgs_to_mip(orders_api, base_store, fastq
     )
 
     # THEN the analysis for the case should be MAF
-    assert new_samples[0].links[0].case.data_analysis == Pipeline.MIP_DNA
+    assert new_samples[0].links[0].case.data_analysis == Workflow.MIP_DNA
 
 
 def test_store_fastq_samples_tumour_wgs_to_fastq(
@@ -342,7 +342,7 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
     )
 
     # THEN the analysis for the case should be FASTQ
-    assert new_samples[0].links[0].case.data_analysis == Pipeline.FASTQ
+    assert new_samples[0].links[0].case.data_analysis == Workflow.FASTQ
 
 
 def test_store_fastq_samples_non_wgs_as_fastq(
@@ -374,7 +374,7 @@ def test_store_fastq_samples_non_wgs_as_fastq(
     )
 
     # THEN the analysis for the case should be fastq (none)
-    assert new_samples[0].links[0].case.data_analysis == Pipeline.FASTQ
+    assert new_samples[0].links[0].case.data_analysis == Workflow.FASTQ
 
 
 def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data, ticket_id: str):
@@ -415,7 +415,7 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data, 
         ticket_id=ticket_id,
         items=microbial_status_data["samples"],
         comment="",
-        data_analysis=Pipeline.MICROSALT,
+        data_analysis=Workflow.MICROSALT,
         data_delivery=DataDelivery.FASTQ_QC,
     )
 
@@ -445,7 +445,7 @@ def test_store_microbial_case_data_analysis_stored(
         ticket_id=ticket_id,
         items=microbial_status_data["samples"],
         comment="",
-        data_analysis=Pipeline.MICROSALT,
+        data_analysis=Workflow.MICROSALT,
         data_delivery=DataDelivery.FASTQ_QC,
     )
 
@@ -454,7 +454,7 @@ def test_store_microbial_case_data_analysis_stored(
     assert base_store._get_query(table=Case).count() == 1
 
     microbial_case = base_store.get_cases()[0]
-    assert microbial_case.data_analysis == str(Pipeline.MICROSALT)
+    assert microbial_case.data_analysis == str(Workflow.MICROSALT)
     assert microbial_case.data_delivery == str(DataDelivery.FASTQ_QC)
 
 
@@ -474,7 +474,7 @@ def test_store_microbial_sample_priority(
         ticket_id=ticket_id,
         items=microbial_status_data["samples"],
         comment="",
-        data_analysis=Pipeline.MICROSALT,
+        data_analysis=Workflow.MICROSALT,
         data_delivery=DataDelivery.FASTQ_QC,
     )
 
@@ -510,7 +510,7 @@ def test_store_mip(orders_api, base_store: Store, mip_status_data, ticket_id: st
 
     assert len(new_case.links) == 3
     new_link = new_case.links[0]
-    assert new_case.data_analysis == str(Pipeline.MIP_DNA)
+    assert new_case.data_analysis == str(Workflow.MIP_DNA)
     assert new_case.data_delivery == str(DataDelivery.SCOUT)
     assert set(new_case.cohorts) == {"Other"}
     assert (
@@ -563,7 +563,7 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data, ticket_id: s
 
     assert len(new_casing.links) == 2
     new_link = new_casing.links[0]
-    assert new_casing.data_analysis == str(Pipeline.MIP_RNA)
+    assert new_casing.data_analysis == str(Workflow.MIP_RNA)
     assert new_casing.data_delivery == str(DataDelivery.SCOUT)
     assert new_link.sample.name == "sample1-rna-t1"
     assert new_link.sample.application_version.application.tag == rna_application_tag
@@ -638,9 +638,9 @@ def test_store_cancer_samples(
     new_case = new_families[0]
     assert new_case.name == "family1"
     assert new_case.data_analysis in [
-        str(Pipeline.BALSAMIC),
-        str(Pipeline.BALSAMIC_QC),
-        str(Pipeline.BALSAMIC_UMI),
+        str(Workflow.BALSAMIC),
+        str(Workflow.BALSAMIC_QC),
+        str(Workflow.BALSAMIC_UMI),
     ]
     assert new_case.data_delivery == str(DataDelivery.FASTQ_ANALYSIS_SCOUT)
     assert set(new_case.panels) == set()

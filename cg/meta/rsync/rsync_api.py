@@ -8,7 +8,7 @@ from typing import Iterable
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.priority import SlurmAccount, SlurmQos
@@ -35,7 +35,7 @@ class RsyncAPI(MetaAPI):
         self.account: str = config.data_delivery.account
         self.log_dir: Path = Path(config.data_delivery.base_path)
         self.mail_user: str = config.data_delivery.mail_user
-        self.pipeline: str = Pipeline.RSYNC
+        self.pipeline: str = Workflow.RSYNC
 
     @property
     def slurm_quality_of_service(self) -> str:
@@ -136,7 +136,7 @@ class RsyncAPI(MetaAPI):
             out_dir=self.log_dir.as_posix(),
             slurm_quality_of_service=self.slurm_quality_of_service,
             email=self.mail_user,
-            data_analysis=Pipeline.RSYNC,
+            data_analysis=Workflow.RSYNC,
             ticket=ticket,
         )
 
@@ -231,7 +231,7 @@ class RsyncAPI(MetaAPI):
         source_and_destination_paths: dict[str, Path] = self.get_source_and_destination_paths(
             ticket=ticket, customer_internal_id=customer_internal_id
         )
-        if cases[0].data_analysis == Pipeline.MUTANT:
+        if cases[0].data_analysis == Workflow.MUTANT:
             LOG.info("Delivering report for SARS-COV-2 analysis")
             commands = COVID_RSYNC.format(
                 source_path=source_and_destination_paths["delivery_source_path"],

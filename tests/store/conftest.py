@@ -7,7 +7,7 @@ from typing import Generator
 
 import pytest
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus, Sex
 from cg.meta.orders.pool_submitter import PoolSubmitter
@@ -115,7 +115,7 @@ def microbial_submitted_order() -> dict:
             organism=organism,
             reference_genome=ref_genomes[organism],
             extraction_method="MagNaPure 96 (contact Clinical Genomics before " "submission)",
-            analysis=str(Pipeline.FASTQ),
+            analysis=str(Workflow.FASTQ),
             concentration_sample="1",
             mother=None,
             father=None,
@@ -326,9 +326,9 @@ def store_with_application_limitations(
         application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
             StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value
         ),
-        pipeline=Pipeline.MIP_DNA,
+        pipeline=Workflow.MIP_DNA,
     )
-    for pipeline in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]:
+    for pipeline in [Workflow.MIP_DNA, Workflow.BALSAMIC]:
         helpers.ensure_application_limitation(
             store=store_with_an_application_with_and_without_attributes,
             application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
@@ -415,7 +415,7 @@ def store_with_older_and_newer_analyses(
         helpers.add_analysis(
             store=base_store,
             case=case,
-            pipeline=Pipeline.BALSAMIC,
+            pipeline=Workflow.BALSAMIC,
             started_at=time,
             completed_at=time,
             uploaded_at=time,
@@ -557,7 +557,7 @@ def store_with_analyses_for_cases_not_uploaded_fluffy(
             started_at=timestamp_yesterday,
             uploaded_at=timestamp_yesterday,
             delivery_reported_at=None,
-            pipeline=Pipeline.FLUFFY,
+            pipeline=Workflow.FLUFFY,
         )
         helpers.add_analysis(
             analysis_store,
@@ -565,7 +565,7 @@ def store_with_analyses_for_cases_not_uploaded_fluffy(
             started_at=timestamp_now,
             uploaded_at=None,
             delivery_reported_at=None,
-            pipeline=Pipeline.FLUFFY,
+            pipeline=Workflow.FLUFFY,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: CaseSample = analysis_store.relate_sample(

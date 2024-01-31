@@ -8,7 +8,7 @@ import click
 
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, Workflow
 from cg.constants.constants import DRY_RUN
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.tb import AnalysisTypes
@@ -73,7 +73,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
             config_path=rsync_api.trailblazer_config_path.as_posix(),
             out_dir=rsync_api.log_dir.as_posix(),
             slurm_quality_of_service=Priority.priority_to_slurm_qos().get(case.priority),
-            data_analysis=Pipeline.RSYNC,
+            data_analysis=Workflow.RSYNC,
             ticket=case.latest_ticket,
         )
         trailblazer_api.add_upload_job_to_analysis(analysis_id=analysis.id, slurm_id=job_id)
@@ -89,7 +89,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
     exit_code: int = EXIT_SUCCESS
     status_db: Store = context.obj.status_db
     trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
-    for analysis_obj in status_db.get_analyses_to_upload(pipeline=Pipeline.FASTQ):
+    for analysis_obj in status_db.get_analyses_to_upload(pipeline=Workflow.FASTQ):
         if analysis_obj.case.analyses[0].uploaded_at:
             LOG.debug(
                 f"Newer analysis already uploaded for {analysis_obj.case.internal_id}, skipping"

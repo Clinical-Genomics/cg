@@ -1,6 +1,4 @@
-from pathlib import Path
-
-from cg.constants import DEFAULT_CAPTURE_KIT, Pipeline
+from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.pedigree import Pedigree
@@ -11,7 +9,7 @@ from cg.utils import Process
 
 
 class MipDNAAnalysisAPI(MipAnalysisAPI):
-    def __init__(self, config: CGConfig, pipeline: Pipeline = Pipeline.MIP_DNA):
+    def __init__(self, config: CGConfig, pipeline: Workflow = Workflow.MIP_DNA):
         super().__init__(config, pipeline)
 
     @property

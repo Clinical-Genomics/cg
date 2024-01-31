@@ -1,4 +1,4 @@
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.gene_panel import GENOME_BUILD_38
 from cg.constants.pedigree import Pedigree
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -7,7 +7,7 @@ from cg.utils import Process
 
 
 class MipRNAAnalysisAPI(MipAnalysisAPI):
-    def __init__(self, config: CGConfig, pipeline: Pipeline = Pipeline.MIP_RNA):
+    def __init__(self, config: CGConfig, pipeline: Workflow = Workflow.MIP_RNA):
         super().__init__(config, pipeline)
 
     @property

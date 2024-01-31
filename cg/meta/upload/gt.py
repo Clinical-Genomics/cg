@@ -4,7 +4,7 @@ from pathlib import Path
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.hk import models as housekeeper_models
-from cg.constants.constants import FileFormat, Pipeline, PrepCategory
+from cg.constants.constants import FileFormat, PrepCategory, Workflow
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.constants.subject import Sex
 from cg.io.controller import ReadFile
@@ -45,14 +45,14 @@ class UploadGenotypesAPI(object):
         hk_version = self.hk.last_version(case_id)
         hk_bcf = self.get_bcf_file(hk_version)
         data = {"bcf": hk_bcf.full_path}
-        if analysis_obj.pipeline in [Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]:
+        if analysis_obj.pipeline in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
             data["samples_sex"] = self._get_samples_sex_balsamic(case_obj=analysis_obj.case)
-        elif analysis_obj.pipeline == Pipeline.MIP_DNA:
+        elif analysis_obj.pipeline == Workflow.MIP_DNA:
             data["samples_sex"] = self._get_samples_sex_mip(
                 case_obj=analysis_obj.case, hk_version=hk_version
             )
         else:
-            raise ValueError(f"Pipeline {analysis_obj.pipeline} does not support Genotype upload")
+            raise ValueError(f"Workflow {analysis_obj.pipeline} does not support Genotype upload")
         return data
 
     def _get_samples_sex_mip(self, case_obj: Case, hk_version: housekeeper_models.Version) -> dict:

@@ -3,7 +3,7 @@ from typing import Callable
 
 from sqlalchemy.orm import Query
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.store.models import Application, ApplicationLimitations
 
 
@@ -15,7 +15,7 @@ def filter_application_limitations_by_tag(
 
 
 def filter_application_limitations_by_pipeline(
-    application_limitations: Query, pipeline: Pipeline, **kwargs
+    application_limitations: Query, pipeline: Workflow, **kwargs
 ) -> Query:
     """Return application limitations by pipeline."""
     return application_limitations.filter(ApplicationLimitations.pipeline == pipeline)
@@ -25,7 +25,7 @@ def apply_application_limitations_filter(
     filter_functions: list[Callable],
     application_limitations: Query,
     tag: str = None,
-    pipeline: Pipeline = None,
+    pipeline: Workflow = None,
 ) -> Query:
     """Apply filtering functions to the application limitations queries and return filtered results."""
     for filter_function in filter_functions:

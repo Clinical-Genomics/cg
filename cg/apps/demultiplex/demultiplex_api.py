@@ -10,7 +10,7 @@ from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.constants import FileFormat, Pipeline
+from cg.constants.constants import FileFormat, Workflow
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisTypes
@@ -207,7 +207,7 @@ class DemultiplexingAPI:
             out_dir=flow_cell.trailblazer_config_path.parent.as_posix(),
             slurm_quality_of_service=self.slurm_quality_of_service,
             email=self.mail,
-            data_analysis=str(Pipeline.DEMULTIPLEX),
+            data_analysis=str(Workflow.DEMULTIPLEX),
         )
 
     def start_demultiplexing(self, flow_cell: FlowCellDirectoryData):

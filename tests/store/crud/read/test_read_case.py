@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta
 
 from cg.constants import DataDelivery, Priority
-from cg.constants.constants import CaseActions, Pipeline
+from cg.constants.constants import CaseActions, Workflow
 from cg.store.models import Analysis, Case, CaseSample
 from cg.store.store import Store
 
@@ -80,13 +80,13 @@ def test_get_running_cases_in_pipeline(store_with_cases_and_customers: Store):
 
     # WHEN getting cases with a pipeline and are running
     cases: list[Case] = store_with_cases_and_customers.get_running_cases_in_pipeline(
-        pipeline=Pipeline.MIP_DNA
+        pipeline=Workflow.MIP_DNA
     )
 
     # THEN cases with the specified pipeline, and case action is returned
     for case in cases:
         assert case.action == CaseActions.RUNNING
-        assert case.data_analysis == Pipeline.MIP_DNA
+        assert case.data_analysis == Workflow.MIP_DNA
 
 
 def test_delivered_at_affects_tat(base_store: Store, helpers):
@@ -629,7 +629,7 @@ def test_include_case_by_case_uppercase_data_analysis(base_store: Store, helpers
     """Test to that cases can be included by uppercase data_analysis"""
 
     # GIVEN a database with a case with data analysis set
-    data_analysis = Pipeline.BALSAMIC
+    data_analysis = Workflow.BALSAMIC
     new_case = add_case(helpers, base_store, data_analysis=data_analysis)
 
     # WHEN getting active cases by data_analysis
@@ -645,7 +645,7 @@ def test_exclude_case_by_data_analysis(base_store: Store, helpers):
     """Test to that cases can be excluded by data_analysis"""
 
     # GIVEN a database with a case with data analysis set
-    add_case(helpers, base_store, data_analysis=Pipeline.BALSAMIC)
+    add_case(helpers, base_store, data_analysis=Workflow.BALSAMIC)
 
     # WHEN getting active cases by data_analysis
     cases = base_store.cases(data_analysis="dummy_analysis")
@@ -658,7 +658,7 @@ def test_include_case_by_partial_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a case with data analysis set
-    data_analysis = Pipeline.BALSAMIC
+    data_analysis = Workflow.BALSAMIC
     new_case = add_case(helpers, base_store, data_analysis=data_analysis)
 
     # WHEN getting active cases by partial data_analysis
@@ -674,7 +674,7 @@ def test_show_multiple_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a case with data analysis set
-    data_analysis = Pipeline.BALSAMIC
+    data_analysis = Workflow.BALSAMIC
     new_case = add_case(helpers, base_store, data_analysis=data_analysis)
     sample1 = helpers.add_sample(base_store)
     link_1: CaseSample = base_store.relate_sample(new_case, sample1, "unknown")
@@ -699,7 +699,7 @@ def test_show_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a case with data analysis set
-    data_analysis = Pipeline.BALSAMIC
+    data_analysis = Workflow.BALSAMIC
     new_case = add_case(helpers, base_store, data_analysis=data_analysis)
 
     # WHEN getting active cases by data_analysis
@@ -715,7 +715,7 @@ def test_include_case_by_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a case with data analysis set
-    data_analysis = Pipeline.BALSAMIC
+    data_analysis = Workflow.BALSAMIC
     new_case = add_case(helpers, base_store, data_analysis=data_analysis)
 
     # WHEN getting active cases by data_analysis
@@ -1348,7 +1348,7 @@ def test_analysis_pipeline(base_store: Store, helpers):
     """Test to that cases displays pipeline"""
 
     # GIVEN a database with an analysis that has pipeline
-    pipeline = Pipeline.BALSAMIC
+    pipeline = Workflow.BALSAMIC
     analysis = helpers.add_analysis(base_store, pipeline=pipeline)
     assert analysis.pipeline is not None
 
@@ -1612,7 +1612,7 @@ def add_case(
     ordered_days_ago=0,
     action=None,
     priority=None,
-    data_analysis=Pipeline.BALSAMIC,
+    data_analysis=Workflow.BALSAMIC,
     data_delivery=DataDelivery.SCOUT,
     ticket="123456",
 ):

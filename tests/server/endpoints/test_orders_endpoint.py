@@ -3,18 +3,18 @@ from http import HTTPStatus
 import pytest
 from flask.testing import FlaskClient
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.store.models import Order
 
 
 @pytest.mark.parametrize(
     "limit, workflow, expected_orders",
     [
-        (None, Pipeline.MIP_DNA, 2),
-        (1, Pipeline.MIP_DNA, 1),
-        (2, Pipeline.MIP_DNA, 2),
-        (None, Pipeline.BALSAMIC, 1),
-        (None, Pipeline.FLUFFY, 0),
+        (None, Workflow.MIP_DNA, 2),
+        (1, Workflow.MIP_DNA, 1),
+        (2, Workflow.MIP_DNA, 2),
+        (None, Workflow.BALSAMIC, 1),
+        (None, Workflow.FLUFFY, 0),
         (None, None, 3),
     ],
 )

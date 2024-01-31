@@ -21,7 +21,7 @@ from cg.cli.generate.report.utils import (
     get_report_api_pipeline,
     get_report_case,
 )
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.exc import CgError
 from cg.meta.report.report_api import ReportAPI
 from cg.store.models import Case
@@ -90,7 +90,7 @@ def generate_delivery_report(
 @OPTION_DRY_RUN
 @click.pass_context
 def generate_available_delivery_reports(
-    context: click.Context, pipeline: Pipeline, force_report: bool, dry_run: bool
+    context: click.Context, pipeline: Workflow, force_report: bool, dry_run: bool
 ) -> None:
     """Generates delivery reports for all cases that need one and stores them in housekeeper."""
 

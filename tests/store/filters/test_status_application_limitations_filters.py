@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Query
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.store.filters.status_application_limitations_filters import (
     filter_application_limitations_by_pipeline,
     filter_application_limitations_by_tag,
@@ -36,7 +36,7 @@ def test_filter_application_limitations_by_tag(
 
 def test_filter_application_limitations_by_pipeline(
     store_with_application_limitations: Store,
-    pipeline=Pipeline.BALSAMIC,
+    pipeline=Workflow.BALSAMIC,
 ) -> None:
     """Test to get application limitations by pipeline."""
 

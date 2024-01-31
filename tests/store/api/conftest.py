@@ -2,7 +2,7 @@ import datetime as dt
 
 import pytest
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import PrepCategory
 from cg.constants.subject import PhenotypeStatus
 from cg.store.models import CaseSample
@@ -24,7 +24,7 @@ def store_failing_sequencing_qc(
         store=store,
         internal_id="fluffy_case",
         name="fluffy_case",
-        data_analysis=Pipeline.FLUFFY,
+        data_analysis=Workflow.FLUFFY,
     )
 
     store_sample = helpers.add_sample(

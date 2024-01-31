@@ -1,7 +1,7 @@
 import datetime as dt
 
 from cg.constants import DataDelivery
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
@@ -27,7 +27,7 @@ def test_store_items_in_status_control_has_stored_value(
     submitter.store_items_in_status(
         comment="",
         customer_id=order.customer,
-        data_analysis=Pipeline.MUTANT,
+        data_analysis=Workflow.MUTANT,
         data_delivery=DataDelivery.FASTQ,
         order="",
         ordered=dt.datetime.now(),

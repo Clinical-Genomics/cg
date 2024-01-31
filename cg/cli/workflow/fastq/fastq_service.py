@@ -1,7 +1,7 @@
 import datetime as dt
 
 from cg.apps.tb.api import TrailblazerAPI
-from cg.constants.constants import AnalysisType, Pipeline
+from cg.constants.constants import AnalysisType, Workflow
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CaseNotFoundError
 from cg.store.models import Analysis, Case
@@ -25,7 +25,7 @@ class FastqService:
 
     def _add_analysis_to_store(self, case: Case) -> None:
         new_analysis: Analysis = self.store.add_analysis(
-            pipeline=Pipeline.FASTQ,
+            pipeline=Workflow.FASTQ,
             completed_at=dt.datetime.now(),
             primary=True,
             started_at=dt.datetime.now(),
@@ -38,7 +38,7 @@ class FastqService:
         self.trailblazer_api.add_pending_analysis(
             case_id=case.internal_id,
             analysis_type=AnalysisType.OTHER,
-            data_analysis=Pipeline.FASTQ,
+            data_analysis=Workflow.FASTQ,
             config_path="",
             out_dir="",
             slurm_quality_of_service=case.slurm_priority,

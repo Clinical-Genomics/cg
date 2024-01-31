@@ -1,5 +1,5 @@
 from cg.apps.orderform.orderform_parser import OrderformParser
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import DataDelivery, Workflow
 from cg.exc import OrderFormError
 from cg.models.orders.json_sample import JsonSample
 from cg.models.orders.order import OrderType
@@ -7,9 +7,9 @@ from cg.models.orders.order import OrderType
 
 class JsonOrderformParser(OrderformParser):
     ACCEPTED_DATA_ANALYSES: list[str] = [
-        str(Pipeline.MIP_DNA),
-        str(Pipeline.FLUFFY),
-        str(Pipeline.BALSAMIC),
+        str(Workflow.MIP_DNA),
+        str(Workflow.FLUFFY),
+        str(Workflow.BALSAMIC),
     ]
     NO_VALUE: str = "no_value"
     samples: list[JsonSample] = []

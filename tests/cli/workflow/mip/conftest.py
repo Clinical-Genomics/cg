@@ -6,7 +6,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.subject import Sex
 from cg.meta.compress import CompressAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -107,7 +107,7 @@ def mip_rna_context(
 ) -> CGConfig:
     cg_context.housekeeper_api_ = housekeeper_api
     cg_context.trailblazer_api_ = tb_api
-    analysis_family_single_case["data_analysis"] = str(Pipeline.MIP_RNA)
+    analysis_family_single_case["data_analysis"] = str(Workflow.MIP_RNA)
     if not cg_context.status_db.get_case_by_internal_id(internal_id=case_id):
         helpers.ensure_case_from_dict(
             cg_context.status_db, case_info=analysis_family_single_case, app_tag=apptag_rna
@@ -138,7 +138,7 @@ def mip_dna_context(
         if not _store.get_case_by_internal_id(internal_id=case_id):
             case_obj = helpers.add_case(
                 store=_store,
-                data_analysis=Pipeline.MIP_DNA,
+                data_analysis=Workflow.MIP_DNA,
                 internal_id=case_id,
                 name=mip_case_ids[case_id]["name"],
             )

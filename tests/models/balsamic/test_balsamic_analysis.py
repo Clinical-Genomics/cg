@@ -1,4 +1,4 @@
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.config import BalsamicConfigJSON
@@ -9,7 +9,7 @@ def test_instantiate_balsamic_analysis(cg_context, balsamic_config_raw, balsamic
     """Tests BALSAMIC analysis instance creation"""
 
     # GIVEN a config and metrics dictionaries and a BALSAMIC analysis API
-    balsamic_analysis_api = BalsamicAnalysisAPI(cg_context, Pipeline.BALSAMIC)
+    balsamic_analysis_api = BalsamicAnalysisAPI(cg_context, Workflow.BALSAMIC)
 
     # WHEN instantiating a BALSAMIC analysis object
     balsamic_analysis = balsamic_analysis_api.parse_analysis(

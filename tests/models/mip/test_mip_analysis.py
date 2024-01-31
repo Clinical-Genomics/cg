@@ -1,4 +1,4 @@
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 
@@ -26,7 +26,7 @@ def test_instantiate_parse_mip_analysis(
     Tests parse_analysis
     """
     # GIVEN a dictionary with some metrics and a MIP analysis API
-    mip_analysis_api = MipAnalysisAPI(cg_context, Pipeline.MIP_DNA)
+    mip_analysis_api = MipAnalysisAPI(cg_context, Workflow.MIP_DNA)
 
     # WHEN instantiating a MipAnalysis object
     mip_dna_analysis = mip_analysis_api.parse_analysis(

@@ -201,7 +201,7 @@ def test_resume_with_id(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN command should use tower for relaunch
-    assert "Pipeline will be resumed from run" in caplog.text
+    assert "Workflow will be resumed from run" in caplog.text
     assert "tw runs relaunch" in caplog.text
 
 
@@ -228,7 +228,7 @@ def test_resume_without_id(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN command should use tower for relaunch
-    assert "Pipeline will be resumed from run" in caplog.text
+    assert "Workflow will be resumed from run" in caplog.text
     assert "tw runs relaunch" in caplog.text
 
 

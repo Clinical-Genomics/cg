@@ -6,7 +6,7 @@ from sqlalchemy import and_, not_, or_
 from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
-from cg.constants.constants import CaseActions, DataDelivery, Pipeline
+from cg.constants.constants import CaseActions, DataDelivery, Workflow
 from cg.constants.observations import (
     LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
     LOQUSDB_MIP_SEQUENCING_METHODS,
@@ -121,13 +121,13 @@ def filter_cases_not_analysed(cases: Query, **kwargs) -> Query:
     return cases.filter(and_(not_analyzed_condition, not_in_progress_condition))
 
 
-def filter_cases_with_pipeline(cases: Query, pipeline: Pipeline = None, **kwargs) -> Query:
+def filter_cases_with_pipeline(cases: Query, pipeline: Workflow = None, **kwargs) -> Query:
     """Filter cases with pipeline."""
     return cases.filter(Case.data_analysis == pipeline) if pipeline else cases
 
 
 def filter_cases_with_loqusdb_supported_pipeline(
-    cases: Query, pipeline: Pipeline = None, **kwargs
+    cases: Query, pipeline: Workflow = None, **kwargs
 ) -> Query:
     """Filter Loqusdb related cases with pipeline."""
     records: Query = (
@@ -139,12 +139,12 @@ def filter_cases_with_loqusdb_supported_pipeline(
 
 
 def filter_cases_with_loqusdb_supported_sequencing_method(
-    cases: Query, pipeline: Pipeline = None, **kwargs
+    cases: Query, pipeline: Workflow = None, **kwargs
 ) -> Query:
     """Filter cases with Loqusdb supported sequencing method."""
     supported_sequencing_methods = {
-        Pipeline.MIP_DNA: LOQUSDB_MIP_SEQUENCING_METHODS,
-        Pipeline.BALSAMIC: LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
+        Workflow.MIP_DNA: LOQUSDB_MIP_SEQUENCING_METHODS,
+        Workflow.BALSAMIC: LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
     }
     return (
         cases.filter(Application.prep_category.in_(supported_sequencing_methods[pipeline]))
@@ -214,7 +214,7 @@ def apply_case_filter(
     name: str | None = None,
     name_search: str | None = None,
     order_date: datetime | None = None,
-    pipeline: Pipeline | None = None,
+    pipeline: Workflow | None = None,
     pipeline_search: str | None = None,
     priority: str | None = None,
     ticket_id: str | None = None,

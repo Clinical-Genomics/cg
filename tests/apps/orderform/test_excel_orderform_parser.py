@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.models.orders.excel_sample import ExcelSample
 from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import Orderform
@@ -166,7 +166,7 @@ def test_parse_mip_orderform(mip_orderform: str, nr_samples_mip_orderform: int):
     assert len(order_form_parser.samples) == nr_samples_mip_orderform
 
     # THEN assert that the project type is correct
-    assert order_form_parser.project_type == str(Pipeline.MIP_DNA)
+    assert order_form_parser.project_type == str(Workflow.MIP_DNA)
 
 
 def test_parse_rml_orderform(rml_orderform: str, nr_samples_rml_orderform: int):
@@ -207,7 +207,7 @@ def test_parse_fastq_orderform(fastq_orderform: str, nr_samples_fastq_orderform:
     assert len(order_form_parser.samples) == nr_samples_fastq_orderform
 
     # THEN it should determine the project type
-    assert order_form_parser.project_type == str(Pipeline.FASTQ)
+    assert order_form_parser.project_type == str(Workflow.FASTQ)
 
     # THEN it should determine the correct customer should have been parsed
     assert order_form_parser.customer_id == "cust000"

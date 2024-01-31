@@ -6,7 +6,7 @@ from typing import Iterator
 from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.store.models import Analysis
 from cg.store.store import Store
@@ -19,7 +19,7 @@ class CleanAPI:
         self.status_db = status_db
         self.housekeeper_api = housekeeper_api
 
-    def get_bundle_files(self, before: datetime, pipeline: Pipeline) -> Iterator[list[File]]:
+    def get_bundle_files(self, before: datetime, pipeline: Workflow) -> Iterator[list[File]]:
         """Get any bundle files for a specific version"""
 
         analysis: Analysis
@@ -77,8 +77,8 @@ class CleanAPI:
     def get_unprotected_existing_bundle_files(self, before: datetime) -> Iterator[File]:
         """Returns all existing bundle files from analyses started before 'before' that have no protected tags"""
 
-        pipeline: Pipeline
-        for pipeline in Pipeline:
+        pipeline: Workflow
+        for pipeline in Workflow:
             protected_tags_lists = WORKFLOW_PROTECTED_TAGS.get(pipeline)
             if not protected_tags_lists:
                 LOG.debug(f"No protected tags defined for {pipeline}, skipping")

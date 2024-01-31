@@ -2,7 +2,7 @@
 
 import pytest
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import (
@@ -44,7 +44,7 @@ def test_generate_balsamic_load_config(
     balsamic_analysis_obj: Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
 ):
     # GIVEN an analysis object that have been run with balsamic
-    assert balsamic_analysis_obj.pipeline == Pipeline.BALSAMIC
+    assert balsamic_analysis_obj.pipeline == Workflow.BALSAMIC
 
     # GIVEN an upload scout api with some balsamic information
 
@@ -59,7 +59,7 @@ def test_generate_balsamic_umi_load_config(
     balsamic_umi_analysis_obj: Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
 ):
     # GIVEN an analysis object that have been run with balsamic-umi
-    assert balsamic_umi_analysis_obj.pipeline == Pipeline.BALSAMIC_UMI
+    assert balsamic_umi_analysis_obj.pipeline == Workflow.BALSAMIC_UMI
 
     # GIVEN an upload scout api with some balsamic information
 
@@ -77,7 +77,7 @@ def test_generate_rnafusion_load_config(
 ):
     """Test that a rnafusion config is generated."""
     # GIVEN an analysis object that have been run with rnafusion
-    assert rnafusion_analysis_obj.pipeline == Pipeline.RNAFUSION
+    assert rnafusion_analysis_obj.pipeline == Workflow.RNAFUSION
 
     # GIVEN an upload scout api with some rnafusion information
 

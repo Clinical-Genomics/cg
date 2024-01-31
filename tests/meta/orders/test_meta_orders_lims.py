@@ -1,6 +1,6 @@
 import pytest
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.meta.orders.lims import build_lims_sample
 from cg.models.lims.sample import LimsSample
 from cg.models.orders.constants import OrderType
@@ -141,9 +141,9 @@ def test_to_lims_balsamic(balsamic_order_to_submit, project):
     assert first_sample["name"] == "s1"
     assert {sample.container for sample in samples} == set(["96 well plate"])
     assert first_sample["udfs"]["data_analysis"] in [
-        str(Pipeline.BALSAMIC),
-        str(Pipeline.BALSAMIC_QC),
-        str(Pipeline.BALSAMIC_UMI),
+        str(Workflow.BALSAMIC),
+        str(Workflow.BALSAMIC_QC),
+        str(Workflow.BALSAMIC_UMI),
     ]
     assert first_sample["udfs"]["application"] == "WGSPCFC030"
     assert first_sample["udfs"]["sex"] == "M"

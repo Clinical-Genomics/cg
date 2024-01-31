@@ -1,14 +1,13 @@
 import logging
 from datetime import datetime
-from cg.models.orders.order import OrderIn
-from cg.models.orders.orderform_schema import Orderform
-from cg.store.database import get_session
 
 import petname
 
-from cg.constants import DataDelivery, FlowCellStatus, Pipeline, Priority
+from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
+from cg.models.orders.order import OrderIn
 from cg.store.base import BaseHandler
+from cg.store.database import get_session
 from cg.store.models import (
     Analysis,
     Application,
@@ -204,7 +203,7 @@ class CreateHandler(BaseHandler):
 
     def add_case(
         self,
-        data_analysis: Pipeline,
+        data_analysis: Workflow,
         data_delivery: DataDelivery,
         name: str,
         ticket: str,
@@ -268,7 +267,7 @@ class CreateHandler(BaseHandler):
 
     def add_analysis(
         self,
-        pipeline: Pipeline,
+        pipeline: Workflow,
         version: str = None,
         completed_at: datetime = None,
         primary: bool = False,

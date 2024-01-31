@@ -1,4 +1,4 @@
-from cg.constants.constants import DataDelivery, MicrosaltAppTags, Pipeline
+from cg.constants.constants import DataDelivery, MicrosaltAppTags, Workflow
 from cg.services.delivery_message.messages import (
     AnalysisScoutMessage,
     CovidMessage,
@@ -22,10 +22,10 @@ def get_message(case: Case) -> str:
 
 
 def get_message_strategy(case: Case) -> DeliveryMessage:
-    if case.data_analysis == Pipeline.MICROSALT:
+    if case.data_analysis == Workflow.MICROSALT:
         return get_microsalt_message_strategy(case)
 
-    if case.data_analysis == Pipeline.MUTANT:
+    if case.data_analysis == Workflow.MUTANT:
         return CovidMessage()
 
     message_strategy: DeliveryMessage = get_message_strategy_from_data_delivery(case)

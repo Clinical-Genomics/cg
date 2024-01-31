@@ -14,7 +14,7 @@ from cg.cli.upload.observations.utils import (
     get_sequencing_method,
 )
 from cg.constants import EXIT_SUCCESS
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
@@ -95,7 +95,7 @@ def test_get_observations_api(base_context: CGConfig, helpers: StoreHelpers):
     store: Store = base_context.status_db
 
     # GIVEN a Loqusdb supported case
-    case: Case = helpers.add_case(store, data_analysis=Pipeline.MIP_DNA)
+    case: Case = helpers.add_case(store, data_analysis=Workflow.MIP_DNA)
     sample: Sample = helpers.add_sample(store, application_type=SequencingMethod.WES)
     link = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
     store.session.add(link)
