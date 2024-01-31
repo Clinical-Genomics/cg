@@ -1,4 +1,5 @@
 """ Module to decouple cg code from Housekeeper code """
+
 import logging
 import os
 from datetime import datetime

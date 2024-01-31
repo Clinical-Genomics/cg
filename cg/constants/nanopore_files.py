@@ -1,4 +1,5 @@
 """Constants related to Oxford Nanopore sequencing."""
+
 from enum import StrEnum
 
 

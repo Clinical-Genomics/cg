@@ -1,6 +1,7 @@
 """
 Tests for command module
 """
+
 from subprocess import CalledProcessError
 
 import pytest

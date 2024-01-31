@@ -1,4 +1,5 @@
 """Functions interacting with statusdb in the DemuxPostProcessingAPI."""
+
 import datetime
 import logging
 
@@ -65,15 +66,15 @@ def add_samples_to_flow_cell_in_status_db(
 
 
 def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, store: Store) -> None:
-    mapped_metrics: list[
-        SampleLaneSequencingMetrics
-    ] = create_sample_lane_sequencing_metrics_for_flow_cell(
-        flow_cell_directory=flow_cell.path,
-        bcl_converter=flow_cell.bcl_converter,
+    mapped_metrics: list[SampleLaneSequencingMetrics] = (
+        create_sample_lane_sequencing_metrics_for_flow_cell(
+            flow_cell_directory=flow_cell.path,
+            bcl_converter=flow_cell.bcl_converter,
+        )
     )
-    undetermined_metrics: list[
-        SampleLaneSequencingMetrics
-    ] = create_undetermined_non_pooled_metrics(flow_cell)
+    undetermined_metrics: list[SampleLaneSequencingMetrics] = (
+        create_undetermined_non_pooled_metrics(flow_cell)
+    )
 
     combined_metrics = combine_mapped_metrics_with_undetermined(
         mapped_metrics=mapped_metrics,
@@ -161,9 +162,9 @@ def update_sample_sequencing_date(sample: Sample, sequenced_at: datetime) -> Non
 
 
 def delete_sequencing_metrics_from_statusdb(flow_cell_id: str, store: Store) -> None:
-    sequencing_metrics: list[
-        SampleLaneSequencingMetrics
-    ] = store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_id)
+    sequencing_metrics: list[SampleLaneSequencingMetrics] = (
+        store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_id)
+    )
     for metric in sequencing_metrics:
         store.session.delete(metric)
     store.session.commit()

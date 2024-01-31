@@ -1,4 +1,5 @@
 """API for uploading cancer observations."""
+
 import logging
 from pathlib import Path
 
@@ -87,9 +88,11 @@ class BalsamicObservationsAPI(ObservationsAPI):
             snv_vcf_path=snv_vcf_path,
             sv_vcf_path=sv_vcf_path,
             qual_gq=True,
-            gq_threshold=BalsamicLoadParameters.QUAL_THRESHOLD.value
-            if is_somatic_db
-            else BalsamicLoadParameters.QUAL_GERMLINE_THRESHOLD.value,
+            gq_threshold=(
+                BalsamicLoadParameters.QUAL_THRESHOLD.value
+                if is_somatic_db
+                else BalsamicLoadParameters.QUAL_GERMLINE_THRESHOLD.value
+            ),
         )
         LOG.info(f"Uploaded {load_output['variants']} variants to {repr(loqusdb_api)}")
 

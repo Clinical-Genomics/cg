@@ -1,4 +1,5 @@
 """Test how the api handles bundles."""
+
 from datetime import datetime
 from typing import Any
 

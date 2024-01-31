@@ -89,11 +89,13 @@ class MipDNAObservationsAPI(ObservationsAPI):
             "snv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SNV_VCF]
             ).first(),
-            "sv_vcf_path": self.housekeeper_api.files(
-                version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SV_VCF]
-            ).first()
-            if self.sequencing_method == SequencingMethod.WGS
-            else None,
+            "sv_vcf_path": (
+                self.housekeeper_api.files(
+                    version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SV_VCF]
+                ).first()
+                if self.sequencing_method == SequencingMethod.WGS
+                else None
+            ),
             "profile_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.PROFILE_GBCF]
             ).first(),

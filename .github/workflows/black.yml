@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
@@ -18,4 +18,4 @@ jobs:
         uses: psf/black@stable
         with:
           options: ". --check --line-length 100"
-          version: "~=23.11.0"
+          version: "~=24.1.0"

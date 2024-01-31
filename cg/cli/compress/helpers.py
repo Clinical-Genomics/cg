@@ -1,4 +1,5 @@
 """Helper functions for compress cli."""
+
 import datetime as dt
 import logging
 import os

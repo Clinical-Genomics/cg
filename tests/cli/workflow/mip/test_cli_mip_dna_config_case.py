@@ -1,4 +1,5 @@
 """ Test the CLI for mip-dna config-case"""
+
 import logging
 
 from cg.cli.workflow.mip_dna.base import config_case

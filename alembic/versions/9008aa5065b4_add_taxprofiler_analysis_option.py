@@ -5,6 +5,7 @@ Revises: df1b3dd317d0
 Create Date: 2023-04-19 13:46:29.137152
 
 """
+
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import declarative_base

@@ -1,6 +1,5 @@
 """ Conftest for Loqusdb API."""
 
-
 import pytest
 
 from cg.apps.loqus import LoqusdbAPI

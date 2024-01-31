@@ -1,4 +1,5 @@
 """Tests for rsync base"""
+
 import logging
 
 from cg.cli.deliver.base import rsync

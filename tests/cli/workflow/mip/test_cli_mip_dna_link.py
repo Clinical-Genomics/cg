@@ -1,4 +1,5 @@
 """ Test the CLI for mip-dna link"""
+
 from cg.cli.workflow.mip_dna.base import link
 
 

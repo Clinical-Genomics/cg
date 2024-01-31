@@ -1,4 +1,5 @@
 """Madeline API"""
+
 import logging
 import pathlib
 import tempfile
