@@ -31,6 +31,15 @@ def case_has_express_priority(case: Case) -> bool:
     """
     return case.priority == Priority.express
 
+def sample_has_express_priority(sample: Sample) -> bool:
+    """
+    Check if a sample is express priority.
+
+    Returns:
+        bool: True if the sample is express priority, False otherwise.
+
+    """
+    return sample.priority == Priority.express
 
 def case_has_lower_priority_than_express(case: Case) -> bool:
     """
@@ -42,8 +51,20 @@ def case_has_lower_priority_than_express(case: Case) -> bool:
     """
     return case.priority < Priority.express
 
+def sample_has_reads(sample: Sample) -> bool:
+    """
+    Check if a sample has reads.
 
-def all_samples_are_ready_made_libraries(case: Case) -> bool:
+    Returns:
+        bool: True if the sample has reads, False otherwise.
+
+    """
+    passed_quality_check: bool = bool(sample.reads)
+    if not passed_quality_check:
+        LOG.warning(f"Sample {sample.internal_id} has no reads.")
+    return passed_quality_check
+
+def ready_made_library_sample_has_enough_reads(sample: Sample) -> bool:
     """
     Check if all samples in case are ready made libraries.
 
@@ -51,8 +72,9 @@ def all_samples_are_ready_made_libraries(case: Case) -> bool:
         bool: True if all samples are ready made libraries, False otherwise.
 
     """
-    return all(is_sample_ready_made_library(sample) for sample in case.samples)
-
+    if is_sample_ready_made_library(sample):
+        return sample_has_reads(sample)
+    return True
 
 def sample_has_enough_reads(sample) -> bool:
     """
@@ -108,6 +130,17 @@ def get_express_sequencing_qc_of_case(case: Case) -> bool:
         return all(express_sample_has_enough_reads(sample) for sample in case.samples)
     return True
 
+def get_express_sequencing_qc_of_sample(sample: Sample) -> bool:
+    """
+    Get the express sequencing qc of a sample.
+
+    Returns:
+        bool: True if the sample pass the qc, False otherwise.
+
+    """
+    if sample_has_express_priority(sample):
+        return express_sample_has_enough_reads(sample)
+    return True
 
 def all_samples_in_case_have_reads(case: Case) -> bool:
     """

@@ -15,6 +15,9 @@ from cg.constants.sequencing import Variants
 from cg.constants.subject import Sex
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
+from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import (
+    run_case_pre_analysis_quality_check
+)
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.balsamic.analysis import BalsamicAnalysis
@@ -93,20 +96,22 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.root_dir, case_id)
 
-    def get_cases_to_analyze(self) -> list[Case]:
-        cases_query: list[Case] = self.status_db.cases_to_analyze(
+    def get_cases_ready_for_analysis(self) -> list[Case]:
+        cases_to_analyze: list[Case] = self.status_db.cases_to_analyze(
             pipeline=self.pipeline, threshold=self.use_read_count_threshold
         )
-        cases_to_analyze = []
-        for case_obj in cases_query:
-            if case_obj.action == "analyze" or not case_obj.latest_analyzed:
-                cases_to_analyze.append(case_obj)
-            elif (
-                self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id)
-                == "failed"
-            ):
-                cases_to_analyze.append(case_obj)
-        return cases_to_analyze
+        cases_ready_for_analysis: list[Case] = []
+        
+        for case in cases_to_analyze:
+            if run_case_pre_analysis_quality_check(case):
+                if case.action == "analyze" or not case.latest_analyzed:
+                    cases_ready_for_analysis.append(case)
+                elif (
+                    self.trailblazer_api.get_latest_analysis_status(case_id=case.internal_id)
+                    == "failed"
+                ):
+                    cases_ready_for_analysis.append(case)
+        return cases_ready_for_analysis
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic deliverables file for the case_id should be located.

@@ -22,6 +22,9 @@ from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, 
 from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
+from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import (
+    run_case_pre_analysis_quality_check,
+)
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
@@ -95,6 +98,20 @@ class AnalysisAPI(MetaAPI):
         if not self.get_case_path(case_id=case_id).exists():
             LOG.info(f"No working directory for {case_id} exists")
             raise FileNotFoundError(f"No working directory for {case_id} exists")
+
+    def get_cases_ready_for_analysis(self):
+        """
+        Find cases that are ready for analysis.
+        
+        Returns:
+            cases_ready_for_analysis: list of cases that are ready for analysis
+        """
+        cases_to_analyze = self.get_cases_to_analyze()
+        cases_ready_for_analysis = []
+        for case in cases_to_analyze:
+            if run_case_pre_analysis_quality_check(case):
+                cases_ready_for_analysis.append(case)
+        return cases_ready_for_analysis
 
     def get_priority_for_case(self, case_id: str) -> int:
         """Get priority from the status db case priority"""

@@ -1052,8 +1052,6 @@ class ReadHandler(BaseHandler):
             )
         ]
 
-        if threshold:
-            families = [case_obj for case_obj in families if case_obj.all_samples_pass_qc]
         return families[:limit]
 
     def cases(

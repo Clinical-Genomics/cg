@@ -7,6 +7,9 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MutantFastqHandler
+from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import (
+    run_sample_sequencing_quality_check,
+)   
 from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
 from cg.store.models import Application, Case, Sample
@@ -84,19 +87,21 @@ class MutantAnalysisAPI(AnalysisAPI):
                     case=case_obj, sample=sample_obj, concatenate=True
                 )
                 continue
-            if not sample_obj.sequencing_qc:
+            sequencing_qc_passed: bool = run_sample_sequencing_quality_check(
+                sample=sample_obj)
+            if not sequencing_qc_passed:
                 LOG.info("Sample %s read count below threshold, skipping!", sample_obj.internal_id)
                 continue
             else:
                 self.link_fastq_files_for_sample(case=case_obj, sample=sample_obj, concatenate=True)
 
-    def get_sample_parameters(self, sample_obj: Sample) -> MutantSampleConfig:
+    def get_sample_parameters(self, sample_obj: Sample, sequencing_qc: bool) -> MutantSampleConfig:
         return MutantSampleConfig(
             CG_ID_sample=sample_obj.internal_id,
             case_ID=sample_obj.links[0].case.internal_id,
             Customer_ID_sample=sample_obj.name,
             customer_id=sample_obj.customer.internal_id,
-            sequencing_qc_pass=sample_obj.sequencing_qc,
+            sequencing_qc_pass=sequencing_qc,
             CG_ID_project=sample_obj.links[0].case.name,
             Customer_ID_project=sample_obj.original_ticket,
             application_tag=sample_obj.application_version.application.tag,
@@ -125,6 +130,13 @@ class MutantAnalysisAPI(AnalysisAPI):
     def create_case_config(self, case_id: str, dry_run: bool) -> None:
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         samples: list[Sample] = [link.sample for link in case_obj.links]
+        case_config_list: list[dict] = []
+        for sample in samples:
+            sequencing_qc: bool = run_sample_sequencing_quality_check(
+                sample=sample)
+            case_config_list.append(
+                self.get_sample_parameters(sample_obj=sample,sequencing_qc=sequencing_qc).model_dump()
+            )
         case_config_list = [
             self.get_sample_parameters(sample_obj).model_dump() for sample_obj in samples
         ]

@@ -12,6 +12,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
 from cg.exc import MissingFilesError
+from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import run_sample_sequencing_quality_check
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
@@ -126,7 +127,7 @@ class DeliverAPI:
     def sample_is_deliverable(self, link: CaseSample) -> bool:
         sample_is_external: bool = link.sample.application_version.application.is_external
         deliver_failed_samples: bool = self.deliver_failed_samples
-        sample_passes_qc: bool = link.sample.sequencing_qc
+        sample_passes_qc: bool = run_sample_sequencing_quality_check(sample=link.sample)
         return sample_passes_qc or deliver_failed_samples or sample_is_external
 
     def deliver_case_files(
