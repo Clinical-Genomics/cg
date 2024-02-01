@@ -4,21 +4,18 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.sequencing import SequencingPlatform
+from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.fastq import FastqFileMeta
 from cg.models.taxprofiler.taxprofiler import (
     TaxprofilerParameters,
     TaxprofilerSampleSheetEntry,
 )
 from cg.store.models import Case, Sample
-from cg.models.deliverables.metric_deliverables import (
-    MetricsBase,
-    MultiqcDataJson,
-)
-from cg.io.json import read_json
 
 LOG = logging.getLogger(__name__)
 
@@ -30,7 +27,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.TAXPROFILER,
+        pipeline: Workflow = Workflow.TAXPROFILER,
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.root_dir: str = config.taxprofiler.root

@@ -17,7 +17,7 @@ from cg.cli.workflow.commands import (
     OPTION_DRY,
     OPTION_LOQUSDB_SUPPORTED_PIPELINES,
 )
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.exc import CaseNotFoundError, LoqusdbError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
@@ -55,7 +55,7 @@ def upload_observations_to_loqusdb(context: CGConfig, case_id: str | None, dry_r
 @OPTION_DRY
 @click.pass_context
 def upload_available_observations_to_loqusdb(
-    context: click.Context, pipeline: Pipeline | None, dry_run: bool
+    context: click.Context, pipeline: Workflow | None, dry_run: bool
 ):
     """Uploads the available observations to Loqusdb."""
 

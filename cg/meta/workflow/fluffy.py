@@ -7,9 +7,11 @@ from pathlib import Path
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+)
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -72,7 +74,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.FLUFFY,
+        pipeline: Workflow = Workflow.FLUFFY,
     ):
         self.root_dir = Path(config.fluffy.root_dir)
         LOG.info("Set root dir to %s", config.fluffy.root_dir)

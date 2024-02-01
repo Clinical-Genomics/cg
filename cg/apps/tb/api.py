@@ -6,10 +6,10 @@ from typing import Any
 
 from google.auth import jwt
 from google.auth.crypt import RSASigner
-from cg.apps.tb.dto.create_job_request import CreateJobRequest
 
+from cg.apps.tb.dto.create_job_request import CreateJobRequest
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
@@ -101,7 +101,7 @@ class TrailblazerAPI:
         out_dir: str,
         slurm_quality_of_service: SlurmQos,
         email: str = None,
-        data_analysis: Pipeline = None,
+        data_analysis: Workflow = None,
         ticket: str = None,
         workflow_manager: str = WorkflowManager.Slurm,
     ) -> TrailblazerAnalysis:

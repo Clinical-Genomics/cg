@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Query
 
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.store.filters.status_analysis_filters import (
     filter_analyses_by_case_entry_id,
     filter_analyses_by_started_at,
@@ -56,14 +56,14 @@ def test_filter_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers,
     """Test analyses filtering by pipeline."""
 
     # GIVEN a set of mock analyses
-    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, pipeline=Pipeline.BALSAMIC)
+    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, pipeline=Workflow.BALSAMIC)
     mip_analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=case, pipeline=Pipeline.MIP_DNA
+        store=base_store, case=case, pipeline=Workflow.MIP_DNA
     )
 
     # WHEN extracting the analyses
     analyses: Query = filter_analyses_with_pipeline(
-        analyses=base_store._get_query(table=Analysis), pipeline=Pipeline.BALSAMIC
+        analyses=base_store._get_query(table=Analysis), pipeline=Workflow.BALSAMIC
     )
 
     # ASSERT that analyses is a query
@@ -170,14 +170,14 @@ def test_filter_report_analyses_by_pipeline(base_store: Store, helpers: StoreHel
     """Test filtering delivery report related analysis by pipeline."""
 
     # GIVEN a set of mock analysis
-    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, pipeline=Pipeline.BALSAMIC)
+    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, pipeline=Workflow.BALSAMIC)
     fluffy_analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=case, pipeline=Pipeline.FLUFFY
+        store=base_store, case=case, pipeline=Workflow.FLUFFY
     )
 
     # WHEN filtering delivery report related analyses
     analyses: Query = filter_report_analyses_by_pipeline(
-        analyses=base_store._get_query(table=Analysis), pipeline=Pipeline.BALSAMIC
+        analyses=base_store._get_query(table=Analysis), pipeline=Workflow.BALSAMIC
     )
 
     # ASSERT that analyses is a query

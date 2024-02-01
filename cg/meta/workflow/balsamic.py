@@ -6,7 +6,7 @@ from pathlib import Path
 from housekeeper.store.models import File, Version
 from pydantic.v1 import EmailStr, ValidationError
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
@@ -24,7 +24,6 @@ from cg.models.balsamic.metrics import (
     BalsamicWGSQCMetrics,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.fastq import FastqFileMeta
 from cg.store.models import Case, CaseSample, Sample
 from cg.utils import Process
 from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
@@ -42,7 +41,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.BALSAMIC,
+        pipeline: Workflow = Workflow.BALSAMIC,
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.account: str = config.balsamic.slurm.account

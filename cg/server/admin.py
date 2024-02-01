@@ -9,7 +9,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 
-from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Pipeline
+from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.server.ext import db
 from cg.store.models import Sample
 from cg.utils.flask.enum import SelectEnumField
@@ -197,7 +197,7 @@ class ApplicationLimitationsView(BaseView):
     column_searchable_list = ["application.tag"]
     column_editable_list = ["comment"]
     form_excluded_columns = ["created_at", "updated_at"]
-    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Pipeline)}
+    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Workflow)}
     create_modal = True
     edit_modal = True
 
@@ -312,7 +312,7 @@ class CaseView(BaseView):
         "synopsis",
     ]
     form_extra_fields = {
-        "data_analysis": SelectEnumField(enum_class=Pipeline),
+        "data_analysis": SelectEnumField(enum_class=Workflow),
         "data_delivery": SelectEnumField(enum_class=DataDelivery),
     }
 
@@ -437,7 +437,7 @@ class AnalysisView(BaseView):
         "case.internal_id",
         "case.name",
     ]
-    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Pipeline)}
+    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Workflow)}
 
 
 class OrganismView(BaseView):

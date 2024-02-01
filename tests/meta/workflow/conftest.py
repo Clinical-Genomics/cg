@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.constants.constants import CaseActions, MicrosaltAppTags, MicrosaltQC, Pipeline
+from cg.constants.constants import CaseActions, MicrosaltAppTags, MicrosaltQC, Workflow
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -193,7 +193,7 @@ def qc_microsalt_context(
         store=store,
         internal_id=microsalt_case_qc_pass,
         name=microsalt_case_qc_pass,
-        data_analysis=Pipeline.MICROSALT,
+        data_analysis=Workflow.MICROSALT,
         action=CaseActions.RUNNING,
     )
 
@@ -228,7 +228,7 @@ def qc_microsalt_context(
         store=store,
         internal_id=microsalt_case_qc_fail,
         name=microsalt_case_qc_fail,
-        data_analysis=Pipeline.MICROSALT,
+        data_analysis=Workflow.MICROSALT,
     )
 
     for sample in qc_fail_microsalt_samples:

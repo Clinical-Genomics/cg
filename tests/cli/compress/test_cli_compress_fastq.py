@@ -6,7 +6,7 @@ import logging
 from click.testing import CliRunner
 
 from cg.cli.compress.fastq import fastq_cmd, get_cases_to_process
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from cg.store.store import Store
@@ -32,7 +32,7 @@ def test_get_cases_to_process(
         store=status_db,
         name=case_id,
         internal_id=case_id,
-        data_analysis=Pipeline.MIP_DNA,
+        data_analysis=Workflow.MIP_DNA,
         action=None,
     )
     valid_compressable_case.created_at = dt.datetime.now() - dt.timedelta(days=1000)
@@ -141,7 +141,7 @@ def test_compress_fastq_cli_case_id(
         store=status_db,
         name=case_id,
         internal_id=case_id,
-        data_analysis=Pipeline.MIP_DNA,
+        data_analysis=Workflow.MIP_DNA,
         action=None,
     )
     valid_compressable_case.created_at = dt.datetime.now() - dt.timedelta(days=1000)

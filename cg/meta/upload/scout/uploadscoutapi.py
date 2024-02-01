@@ -10,7 +10,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.constants import HK_MULTIQC_HTML_TAG, Pipeline
+from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
@@ -115,10 +115,10 @@ class UploadScoutAPI:
         return file_obj
 
     def get_multiqc_html_report(
-        self, case_id: str, pipeline: Pipeline
+        self, case_id: str, pipeline: Workflow
     ) -> tuple[ScoutCustomCaseReportTags, File | None]:
         """Return a multiqc report for a case in Housekeeper."""
-        if pipeline == Pipeline.MIP_RNA:
+        if pipeline == Workflow.MIP_RNA:
             return (
                 ScoutCustomCaseReportTags.MULTIQC_RNA,
                 self.housekeeper.files(bundle=case_id, tags=HK_MULTIQC_HTML_TAG).first(),
@@ -352,27 +352,27 @@ class UploadScoutAPI:
 
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
         config_builders = {
-            Pipeline.BALSAMIC: BalsamicConfigBuilder(
+            Workflow.BALSAMIC: BalsamicConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
-            Pipeline.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
+            Workflow.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
-            Pipeline.MIP_DNA: MipConfigBuilder(
+            Workflow.MIP_DNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
                 mip_analysis_api=self.mip_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
-            Pipeline.MIP_RNA: MipConfigBuilder(
+            Workflow.MIP_RNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
                 mip_analysis_api=self.mip_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
-            Pipeline.RNAFUSION: RnafusionConfigBuilder(
+            Workflow.RNAFUSION: RnafusionConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
         }
@@ -438,9 +438,9 @@ class UploadScoutAPI:
             if (
                 case.data_analysis
                 in [
-                    Pipeline.MIP_DNA,
-                    Pipeline.BALSAMIC,
-                    Pipeline.BALSAMIC_UMI,
+                    Workflow.MIP_DNA,
+                    Workflow.BALSAMIC,
+                    Workflow.BALSAMIC_UMI,
                 ]
                 and case.customer in collaborators
             ):

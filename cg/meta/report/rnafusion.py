@@ -10,7 +10,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_RNAFUSION_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
-    Pipeline,
+    Workflow,
 )
 from cg.constants.constants import GenomeVersion
 from cg.constants.scout import RNAFUSION_CASE_TAGS
@@ -86,7 +86,7 @@ class RnafusionReportAPI(ReportAPI):
 
     def get_template_name(self) -> str:
         """Return template name to render the delivery report."""
-        return Pipeline.RNAFUSION + "_report.html"
+        return Workflow.RNAFUSION + "_report.html"
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Return dictionary with the delivery report required fields for Rnafusion."""

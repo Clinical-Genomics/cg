@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 
@@ -14,7 +14,7 @@ def mutant_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> 
         store=cg_context.status_db,
         internal_id=case_id,
         name=ticket_id,
-        data_analysis=Pipeline.MUTANT,
+        data_analysis=Workflow.MUTANT,
     )
     return case
 
@@ -26,7 +26,7 @@ def microsalt_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) 
         store=cg_context.status_db,
         internal_id=case_id,
         name=ticket_id,
-        data_analysis=Pipeline.MICROSALT,
+        data_analysis=Workflow.MICROSALT,
     )
     return case
 

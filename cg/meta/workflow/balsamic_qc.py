@@ -2,7 +2,7 @@
 
 import logging
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 
@@ -16,6 +16,6 @@ class BalsamicQCAnalysisAPI(BalsamicAnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.BALSAMIC_QC,
+        pipeline: Workflow = Workflow.BALSAMIC_QC,
     ):
         super().__init__(config=config, pipeline=pipeline)

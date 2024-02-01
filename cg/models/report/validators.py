@@ -13,7 +13,7 @@ from cg.constants import (
     REPORT_GENDER,
     YES_FIELD,
 )
-from cg.constants.constants import Pipeline, PrepCategory
+from cg.constants.constants import PrepCategory, Workflow
 from cg.constants.subject import Sex
 from cg.models.orders.constants import OrderType
 
@@ -72,6 +72,6 @@ def get_prep_category_as_string(prep_category: PrepCategory | None) -> str:
 
 def get_analysis_type_as_string(analysis_type: str | None, info: ValidationInfo) -> str:
     """Return the analysis type as an accepted string value for the delivery report."""
-    if analysis_type and Pipeline.BALSAMIC in info.data.get("pipeline"):
+    if analysis_type and Workflow.BALSAMIC in info.data.get("pipeline"):
         analysis_type: str = BALSAMIC_ANALYSIS_TYPE.get(analysis_type)
     return get_report_string(analysis_type)

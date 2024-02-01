@@ -6,7 +6,7 @@ from click.testing import CliRunner
 
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.commands import clean_run_dir
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
 
@@ -29,7 +29,7 @@ def test_dry_run(
     base_store = clean_context_microsalt.status_db
     helpers.add_analysis(
         base_store,
-        pipeline=Pipeline.MICROSALT,
+        pipeline=Workflow.MICROSALT,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
@@ -58,7 +58,7 @@ def test_dry_run(
 
     # THEN the analysis should still be in the analyses_to_clean query since this is a dry-ryn
     assert analysis_to_clean.cleaned_at == None
-    assert analysis_to_clean in base_store.get_analyses_to_clean(pipeline=Pipeline.MICROSALT)
+    assert analysis_to_clean in base_store.get_analyses_to_clean(pipeline=Workflow.MICROSALT)
 
 
 def test_clean_run(
@@ -77,7 +77,7 @@ def test_clean_run(
     base_store = clean_context_microsalt.status_db
     helpers.add_analysis(
         base_store,
-        pipeline=Pipeline.MICROSALT,
+        pipeline=Workflow.MICROSALT,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
@@ -106,4 +106,4 @@ def test_clean_run(
 
     # THEN the analysis should no longer be in the analyses_to_clean query
     assert isinstance(analysis_to_clean.cleaned_at, dt.datetime)
-    assert analysis_to_clean not in base_store.get_analyses_to_clean(pipeline=Pipeline.MICROSALT)
+    assert analysis_to_clean not in base_store.get_analyses_to_clean(pipeline=Workflow.MICROSALT)

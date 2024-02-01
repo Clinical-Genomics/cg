@@ -1,7 +1,7 @@
 import datetime as dt
 
 from cg.constants import DataDelivery
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.constants.subject import Sex
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
@@ -118,7 +118,7 @@ class MetagenomeSubmitter(Submitter):
 
                 if not case:
                     case = self.status.add_case(
-                        data_analysis=Pipeline(case_dict["data_analysis"]),
+                        data_analysis=Workflow(case_dict["data_analysis"]),
                         data_delivery=DataDelivery(case_dict["data_delivery"]),
                         name=str(ticket_id),
                         panels=None,

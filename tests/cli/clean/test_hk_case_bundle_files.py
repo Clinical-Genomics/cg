@@ -4,7 +4,7 @@ import logging
 from click.testing import CliRunner
 
 from cg.cli.clean import hk_case_bundle_files
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis
@@ -56,7 +56,7 @@ def test_clean_hk_case_files_too_old(cli_runner: CliRunner, clean_context: CGCon
     # THEN it should be successful
     assert result.exit_code == 0
     # THEN it should report not having cleaned anything
-    assert f"Process freed 0.0 GB" in caplog.text
+    assert "Process freed 0.0 GB" in caplog.text
 
 
 def test_clean_hk_case_files_single_analysis(
@@ -72,7 +72,7 @@ def test_clean_hk_case_files_single_analysis(
     store: Store = context.status_db
     days_ago: int = 1
     date_days_ago: dt.datetime = get_date_days_ago(days_ago)
-    pipeline: Pipeline = Pipeline.MIP_DNA
+    pipeline: Workflow = Workflow.MIP_DNA
 
     analysis: Analysis = helpers.add_analysis(
         store=store, started_at=date_days_ago, completed_at=date_days_ago, pipeline=pipeline
@@ -111,7 +111,7 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     store: Store = context.status_db
     days_ago: int = 1
     date_days_ago: dt.datetime = get_date_days_ago(days_ago)
-    pipeline: Pipeline = Pipeline.MIP_DNA
+    pipeline: Workflow = Workflow.MIP_DNA
 
     analysis: Analysis = helpers.add_analysis(
         store=store, started_at=date_days_ago, completed_at=date_days_ago, pipeline=pipeline

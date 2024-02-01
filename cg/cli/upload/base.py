@@ -30,7 +30,7 @@ from cg.cli.upload.scout import (
 )
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.cli.upload.validate import validate
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.exc import AnalysisAlreadyUploadedError
 from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
 from cg.meta.upload.microsalt.microsalt_upload_api import MicrosaltUploadAPI
@@ -74,13 +74,13 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
             # Analysis being uploaded or it has been already uploaded
             return
 
-        if Pipeline.BALSAMIC in case.data_analysis:
+        if Workflow.BALSAMIC in case.data_analysis:
             upload_api = BalsamicUploadAPI(config_object)
-        elif case.data_analysis == Pipeline.RNAFUSION:
+        elif case.data_analysis == Workflow.RNAFUSION:
             upload_api = RnafusionUploadAPI(config_object)
-        elif case.data_analysis == Pipeline.MIP_RNA:
+        elif case.data_analysis == Workflow.MIP_RNA:
             upload_api = MipRNAUploadAPI(config_object)
-        elif case.data_analysis == Pipeline.MICROSALT:
+        elif case.data_analysis == Workflow.MICROSALT:
             upload_api = MicrosaltUploadAPI(config_object)
 
         context.obj.meta_apis["upload_api"] = upload_api
@@ -92,9 +92,9 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
 
 
 @upload.command("auto")
-@click.option("--pipeline", type=EnumChoice(Pipeline), help="Limit to specific pipeline")
+@click.option("--pipeline", type=EnumChoice(Workflow), help="Limit to specific pipeline")
 @click.pass_context
-def upload_all_completed_analyses(context: click.Context, pipeline: Pipeline = None):
+def upload_all_completed_analyses(context: click.Context, pipeline: Workflow = None):
     """Upload all completed analyses"""
 
     LOG.info("----------------- AUTO -----------------")

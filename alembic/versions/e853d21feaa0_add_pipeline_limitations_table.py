@@ -9,7 +9,7 @@ Create Date: 2023-09-28 10:13:37.226849
 import sqlalchemy as sa
 
 from alembic import op
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 
 # revision identifiers, used by Alembic.
 revision = "e853d21feaa0"
@@ -30,7 +30,7 @@ def upgrade():
             sa.ForeignKey("application.id", ondelete="CASCADE"),
             nullable=False,
         ),
-        sa.Column("pipeline", sa.Enum(*list(Pipeline)), nullable=False),
+        sa.Column("pipeline", sa.Enum(*list(Workflow)), nullable=False),
         sa.Column("limitations", sa.Text()),
         sa.Column("comment", sa.Text()),
         sa.Column("created_at", sa.DateTime(), server_default=sa.func.now()),

@@ -81,7 +81,7 @@ class NfTowerHandler(NfBaseHandler):
         """Parse the stdout and return a workflow id. An example of the output to parse is:
         Case <CASE_ID> exists in status db
         Running RNAFUSION analysis for <CASE_ID>
-        Pipeline will be executed using tower
+        Workflow will be executed using tower
         Running command <COMMAND>
 
           Workflow 1uxZE9JM7Tl58r submitted at [<WORKSPACE>] workspace.

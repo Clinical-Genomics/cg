@@ -1,7 +1,7 @@
 import datetime as dt
 
 from cg.constants import DataDelivery
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.constants.subject import Sex
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
@@ -64,7 +64,7 @@ class MicrobialSubmitter(Submitter):
             ticket_id=order.ticket,
             items=status_data["samples"],
             comment=status_data["comment"],
-            data_analysis=Pipeline(status_data["data_analysis"]),
+            data_analysis=Workflow(status_data["data_analysis"]),
             data_delivery=DataDelivery(status_data["data_delivery"]),
         )
         return {"project": project_data, "records": samples}
@@ -73,7 +73,7 @@ class MicrobialSubmitter(Submitter):
         self,
         comment: str,
         customer_id: str,
-        data_analysis: Pipeline,
+        data_analysis: Workflow,
         data_delivery: DataDelivery,
         order: str,
         ordered: dt.datetime,

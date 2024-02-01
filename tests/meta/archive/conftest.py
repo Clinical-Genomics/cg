@@ -12,7 +12,7 @@ from requests import Response
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
-from cg.constants.constants import DataDelivery, FileFormat, Pipeline
+from cg.constants.constants import DataDelivery, FileFormat, Workflow
 from cg.constants.subject import Sex
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
@@ -273,7 +273,7 @@ def archive_store(
     base_store.session.add_all(new_samples)
     base_store.session.commit()
     case: Case = base_store.add_case(
-        data_analysis=Pipeline.MIP_DNA,
+        data_analysis=Workflow.MIP_DNA,
         data_delivery=DataDelivery.NO_DELIVERY,
         name="dummy_name",
         ticket="123",

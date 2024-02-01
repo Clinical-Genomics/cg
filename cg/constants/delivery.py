@@ -1,22 +1,22 @@
 """Constants for delivery."""
 
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import (
     HK_DELIVERY_REPORT_TAG,
     AlignmentFileTag,
     AnalysisTag,
 )
 
-ONLY_ONE_CASE_PER_TICKET: list[Pipeline] = [
-    Pipeline.FASTQ,
-    Pipeline.MICROSALT,
-    Pipeline.MUTANT,
+ONLY_ONE_CASE_PER_TICKET: list[Workflow] = [
+    Workflow.FASTQ,
+    Workflow.MICROSALT,
+    Workflow.MUTANT,
 ]
 
-SKIP_MISSING: list[Pipeline] = [
-    Pipeline.FASTQ,
-    Pipeline.MICROSALT,
-    Pipeline.MUTANT,
+SKIP_MISSING: list[Workflow] = [
+    Workflow.FASTQ,
+    Workflow.MICROSALT,
+    Workflow.MUTANT,
 ]
 
 BALSAMIC_ANALYSIS_CASE_TAGS: list[set[str]] = [
@@ -168,40 +168,40 @@ RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 ]
 
 
-PIPELINE_ANALYSIS_TAG_MAP: dict[Pipeline, dict] = {
-    Pipeline.BALSAMIC: {
+PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
+    Workflow.BALSAMIC: {
         "case_tags": BALSAMIC_ANALYSIS_CASE_TAGS,
         "sample_tags": BALSAMIC_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.BALSAMIC_QC: {
+    Workflow.BALSAMIC_QC: {
         "case_tags": BALSAMIC_QC_ANALYSIS_CASE_TAGS,
         "sample_tags": BALSAMIC_QC_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.BALSAMIC_UMI: {
+    Workflow.BALSAMIC_UMI: {
         "case_tags": BALSAMIC_UMI_ANALYSIS_CASE_TAGS,
         "sample_tags": BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.MIP_DNA: {
+    Workflow.MIP_DNA: {
         "case_tags": MIP_DNA_ANALYSIS_CASE_TAGS,
         "sample_tags": MIP_DNA_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.MIP_RNA: {
+    Workflow.MIP_RNA: {
         "case_tags": MIP_RNA_ANALYSIS_CASE_TAGS,
         "sample_tags": MIP_RNA_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.MICROSALT: {
+    Workflow.MICROSALT: {
         "case_tags": MICROSALT_ANALYSIS_CASE_TAGS,
         "sample_tags": MICROSALT_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.FASTQ: {
+    Workflow.FASTQ: {
         "case_tags": FASTQ_ANALYSIS_CASE_TAGS,
         "sample_tags": FASTQ_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.MUTANT: {
+    Workflow.MUTANT: {
         "case_tags": SARSCOV2_ANALYSIS_CASE_TAGS,
         "sample_tags": SARSCOV2_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.RNAFUSION: {
+    Workflow.RNAFUSION: {
         "case_tags": RNAFUSION_ANALYSIS_CASE_TAGS,
         "sample_tags": RNAFUSION_ANALYSIS_SAMPLE_TAGS,
     },

@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 
 from cg.constants import DataDelivery
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.constants.subject import Sex
 from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
@@ -245,7 +245,7 @@ def test_submit_duplicate_sample_case_name(
         case_id = sample.family_name
         if not store.get_case_by_name_and_customer(customer=customer, case_name=case_id):
             case: Case = store.add_case(
-                data_analysis=Pipeline.MIP_DNA,
+                data_analysis=Workflow.MIP_DNA,
                 data_delivery=DataDelivery.SCOUT,
                 name=case_id,
                 ticket=ticket_id,

@@ -4,7 +4,7 @@ import logging
 
 from sqlalchemy.orm import Query
 
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
@@ -54,8 +54,8 @@ def get_observations_api(
 ) -> MipDNAObservationsAPI | BalsamicObservationsAPI:
     """Return an observations API given a specific case object."""
     observations_apis = {
-        Pipeline.MIP_DNA: MipDNAObservationsAPI(context, get_sequencing_method(case)),
-        Pipeline.BALSAMIC: BalsamicObservationsAPI(context, get_sequencing_method(case)),
+        Workflow.MIP_DNA: MipDNAObservationsAPI(context, get_sequencing_method(case)),
+        Workflow.BALSAMIC: BalsamicObservationsAPI(context, get_sequencing_method(case)),
     }
     return observations_apis[case.data_analysis]
 

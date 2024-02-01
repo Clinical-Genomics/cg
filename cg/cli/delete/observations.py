@@ -10,7 +10,7 @@ from cg.cli.workflow.commands import (
     ARGUMENT_CASE_ID,
     OPTION_LOQUSDB_SUPPORTED_PIPELINES,
 )
-from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Pipeline
+from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Workflow
 from cg.exc import CaseNotFoundError, LoqusdbError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
@@ -49,7 +49,7 @@ def delete_observations(context: CGConfig, case_id: str, dry_run: bool, yes: boo
 @DRY_RUN
 @click.pass_context
 def delete_available_observations(
-    context: click.Context, pipeline: Pipeline | None, dry_run: bool, yes: bool
+    context: click.Context, pipeline: Workflow | None, dry_run: bool, yes: bool
 ):
     """Delete available observation from Loqusdb."""
 

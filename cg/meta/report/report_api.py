@@ -9,7 +9,7 @@ from housekeeper.store.models import File, Version
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sqlalchemy.orm import Query
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.exc import DeliveryReportError
@@ -126,7 +126,7 @@ class ReportAPI(MetaAPI):
         template: Template = env.get_template(self.get_template_name())
         return template.render(**report_data)
 
-    def get_cases_without_delivery_report(self, pipeline: Pipeline) -> list[Case]:
+    def get_cases_without_delivery_report(self, pipeline: Workflow) -> list[Case]:
         """Returns a list of cases that has been stored and need a delivery report."""
         stored_cases: list[Case] = []
         analyses: Query = self.status_db.analyses_to_delivery_report(pipeline=pipeline)[
@@ -147,7 +147,7 @@ class ReportAPI(MetaAPI):
                 )
         return stored_cases
 
-    def get_cases_without_uploaded_delivery_report(self, pipeline: Pipeline) -> list[Case]:
+    def get_cases_without_uploaded_delivery_report(self, pipeline: Workflow) -> list[Case]:
         """Returns a list of cases that need a delivery report to be uploaded."""
         analyses: Query = self.status_db.analyses_to_upload_delivery_reports(pipeline=pipeline)[
             :MAX_ITEMS_TO_RETRIEVE

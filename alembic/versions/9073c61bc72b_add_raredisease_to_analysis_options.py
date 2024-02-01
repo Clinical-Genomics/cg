@@ -11,7 +11,7 @@ from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import declarative_base
 
 from alembic import op
-from cg.constants import Pipeline
+from cg.constants import Workflow
 
 # revision identifiers, used by Alembic.
 revision = "9073c61bc72b"
@@ -47,13 +47,13 @@ new_analysis_enum = mysql.ENUM(*new_analysis_options)
 class Analysis(Base):
     __tablename__ = "analysis"
     id = sa.Column(sa.types.Integer, primary_key=True)
-    pipeline = sa.Column(sa.types.Enum(*list(Pipeline)))
+    pipeline = sa.Column(sa.types.Enum(*list(Workflow)))
 
 
 class Case(Base):
     __tablename__ = "family"
     id = sa.Column(sa.types.Integer, primary_key=True)
-    data_analysis = sa.Column(sa.types.Enum(*list(Pipeline)))
+    data_analysis = sa.Column(sa.types.Enum(*list(Workflow)))
 
 
 def upgrade():
