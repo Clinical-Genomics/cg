@@ -378,7 +378,7 @@ def test_get_case_analysis_data(
     )
 
     # THEN check if the retrieved analysis data is correct
-    assert case_analysis_data.pipeline == "mip-dna"
+    assert case_analysis_data.workflow == "mip-dna"
     assert case_analysis_data.panels == "IEM, EP"
     assert case_analysis_data.scout_files
 

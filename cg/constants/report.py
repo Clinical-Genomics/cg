@@ -73,7 +73,7 @@ REQUIRED_APPLICATION_FIELDS: list[str] = [
 
 # Data analysis required fields
 REQUIRED_DATA_ANALYSIS_FIELDS: list[str] = [
-    "customer_pipeline",
+    "customer_workflow",
     "pipeline",
     "pipeline_version",
     "genome_build",

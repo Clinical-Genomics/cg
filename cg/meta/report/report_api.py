@@ -339,9 +339,9 @@ class ReportAPI(MetaAPI):
     ) -> DataAnalysisModel:
         """Return pipeline attributes used for data analysis."""
         return DataAnalysisModel(
-            customer_pipeline=case.data_analysis,
+            customer_workflow=case.data_analysis,
             data_delivery=case.data_delivery,
-            pipeline=analysis.pipeline,
+            workflow=analysis.pipeline,
             pipeline_version=analysis.pipeline_version,
             type=self.get_data_analysis_type(case=case),
             genome_build=self.get_genome_build(analysis_metadata=analysis_metadata),
