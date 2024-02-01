@@ -23,7 +23,7 @@ def test_upload_auto_with_pipeline_as_argument(
     pipeline = Workflow.MIP_DNA
     helpers.add_analysis(store=upload_context.status_db, completed_at=timestamp, pipeline=pipeline)
 
-    # WHEN uploading all analysis from pipeline MIP
+    # WHEN uploading all analysis from workflow MIP
     caplog.set_level(logging.INFO)
     cli_runner.invoke(upload_all_completed_analyses, ["--workflow", "mip-dna"], obj=upload_context)
     # THEN assert that the MIP analysis was successfully uploaded

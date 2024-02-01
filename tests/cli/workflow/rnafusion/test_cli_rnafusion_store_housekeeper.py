@@ -151,7 +151,7 @@ def test_valid_case(
     assert rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
     assert rnafusion_context.meta_apis["analysis_api"].housekeeper_api.bundle(case_id)
 
-    # THEN pipeline version should be correctly stored
+    # THEN workflow version should be correctly stored
     assert (
         rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id)
         .analyses[0]

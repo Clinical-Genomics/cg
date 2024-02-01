@@ -57,7 +57,7 @@ def test_pipeline_included(
 ):
     """Tests that analyses that are included depending on pipeline."""
 
-    # GIVEN an analysis that is uploaded and pipeline is specified
+    # GIVEN an analysis that is uploaded and workflow is specified
     pipeline = Workflow.BALSAMIC
     analysis = helpers.add_analysis(
         analysis_store,
@@ -72,7 +72,7 @@ def test_pipeline_included(
     )
     analysis_store.session.add(link)
 
-    # WHEN calling the analyses_to_clean specifying the used pipeline
+    # WHEN calling the analyses_to_clean specifying the used workflow
     analyses_to_clean = analysis_store.get_analyses_to_clean(
         pipeline=pipeline, before=timestamp_now
     )
@@ -101,7 +101,7 @@ def test_pipeline_excluded(analysis_store: Store, helpers, timestamp_now: dateti
     )
     analysis_store.session.add(link)
 
-    # WHEN calling the analyses_to_clean specifying another pipeline
+    # WHEN calling the analyses_to_clean specifying another workflow
     analyses_to_clean = analysis_store.get_analyses_to_clean(pipeline=wrong_pipeline)
 
     # THEN this analysis should not be returned

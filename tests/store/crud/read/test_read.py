@@ -219,7 +219,7 @@ def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
     # GIVEN a store with one analysis
     helpers.add_analysis(store=sample_store, completed_at=timestamp)
 
-    # WHEN fetching all analysis that are ready for upload without specifying pipeline
+    # WHEN fetching all analysis that are ready for upload without specifying workflow
     records: list[Analysis] = [
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=None)
     ]
@@ -254,7 +254,7 @@ def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, 
     ]
 
     for analysis_obj in records:
-        # THEN the pipeline should be MIP in the analysis object
+        # THEN the workflow should be MIP in the analysis object
         assert analysis_obj.pipeline == str(pipeline)
 
 
@@ -926,7 +926,7 @@ def test_get_application_limitation_by_tag_and_pipeline(
 
     # GIVEN a store with some application limitations
 
-    # WHEN filtering by a given application tag and pipeline
+    # WHEN filtering by a given application tag and workflow
     application_limitation: ApplicationLimitations = (
         store_with_application_limitations.get_application_limitation_by_tag_and_pipeline(
             tag=tag, pipeline=pipeline

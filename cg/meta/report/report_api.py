@@ -126,14 +126,14 @@ class ReportAPI(MetaAPI):
         template: Template = env.get_template(self.get_template_name())
         return template.render(**report_data)
 
-    def get_cases_without_delivery_report(self, pipeline: Workflow) -> list[Case]:
+    def get_cases_without_delivery_report(self, workflow: Workflow) -> list[Case]:
         """Returns a list of cases that has been stored and need a delivery report."""
         stored_cases: list[Case] = []
-        analyses: Query = self.status_db.analyses_to_delivery_report(pipeline=pipeline)[
+        analyses: Query = self.status_db.analyses_to_delivery_report(workflow=workflow)[
             :MAX_ITEMS_TO_RETRIEVE
         ]
-        for analysis_obj in analyses:
-            case: Case = analysis_obj.case
+        for analysis in analyses:
+            case: Case = analysis.case
             last_version: Version = self.housekeeper_api.last_version(bundle=case.internal_id)
             hk_file: File = self.housekeeper_api.get_files(
                 bundle=case.internal_id, version=last_version.id if last_version else None

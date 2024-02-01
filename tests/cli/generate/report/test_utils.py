@@ -57,7 +57,7 @@ def test_get_report_api(delivery_report_click_context, cg_context, case_id):
 def test_get_report_api_pipeline(delivery_report_click_context):
     """Tests API assignment given a specific pipeline"""
 
-    # GIVEN a click context and a specific pipeline
+    # GIVEN a click context and a specific workflow
     pipeline = Workflow.BALSAMIC_UMI
 
     # WHEN validating a report api

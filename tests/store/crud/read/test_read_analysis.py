@@ -351,7 +351,7 @@ def test_exclude_other_pipeline_analysis_from_result(
     link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
-    # WHEN getting cases to analyse for another pipeline
+    # WHEN getting cases to analyse for another workflow
     cases: list[Case] = base_store.cases_to_analyze(pipeline=Workflow.MIP_DNA)
 
     # THEN cases should not contain the test case

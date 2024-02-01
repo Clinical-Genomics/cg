@@ -38,13 +38,13 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
     # Missing or not valid internal case ID
     if not case_id or not case:
         LOG.warning("Invalid case ID. Retrieving available cases.")
-        pipeline: Workflow = (
+        workflow: Workflow = (
             report_api.analysis_api.pipeline if context.obj.meta_apis.get("report_api") else None
         )
         cases_without_delivery_report: list[Case] = (
-            report_api.get_cases_without_delivery_report(pipeline=pipeline)
+            report_api.get_cases_without_delivery_report(workflow=workflow)
             if not context.obj.meta_apis.get("upload_api")
-            else report_api.get_cases_without_uploaded_delivery_report(pipeline=pipeline)
+            else report_api.get_cases_without_uploaded_delivery_report(pipeline=workflow)
         )
         if not cases_without_delivery_report:
             click.echo(
@@ -59,7 +59,7 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
         raise click.Abort
     if case.data_analysis not in REPORT_SUPPORTED_WORKFLOW:
         LOG.error(
-            f"The {case.data_analysis} pipeline does not support delivery reports (case: {case.internal_id})"
+            f"The {case.data_analysis} workflow does not support delivery reports (case: {case.internal_id})"
         )
         raise click.Abort
     if case.data_delivery not in REPORT_SUPPORTED_DATA_DELIVERY:

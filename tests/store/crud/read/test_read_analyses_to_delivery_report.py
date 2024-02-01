@@ -30,7 +30,7 @@ def test_missing(analysis_store: Store, helpers: StoreHelpers, timestamp_now):
     assert analysis.delivery_report_created_at is None
 
     # WHEN calling the analyses_to_delivery_report
-    analyses = analysis_store.analyses_to_delivery_report(pipeline=pipeline).all()
+    analyses = analysis_store.analyses_to_delivery_report(workflow=pipeline).all()
 
     # THEN this analyse should be returned
     assert analysis in analyses
@@ -66,7 +66,7 @@ def test_outdated_analysis(
     analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_delivery_report
-    analyses = analysis_store.analyses_to_delivery_report(pipeline=pipeline).all()
+    analyses = analysis_store.analyses_to_delivery_report(workflow=pipeline).all()
 
     # THEN this analyses should not be returned
     assert len(analyses) == 0
