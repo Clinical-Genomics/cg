@@ -4,11 +4,7 @@ import logging
 from abc import abstractmethod
 from typing import Type
 
-from cg.apps.demultiplex.sample_sheet.index import (
-    Index,
-    get_valid_indexes,
-    is_dual_index,
-)
+from cg.apps.demultiplex.sample_sheet.index import Index, get_valid_indexes, is_dual_index
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_samples_by_lane,
     get_validated_sample_sheet,
@@ -43,9 +39,9 @@ class SampleSheetCreator:
         self.flow_cell_id: str = flow_cell.id
         self.lims_samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
-        self.sample_type: Type[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq] = (
-            flow_cell.sample_type
-        )
+        self.sample_type: Type[
+            FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
+        ] = flow_cell.sample_type
         self.force: bool = force
         self.index_settings: IndexSettings = self.run_parameters.index_settings
 
@@ -138,14 +134,7 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
 
     def remove_samples_with_simple_index(self) -> None:
         """Filter out samples with single indexes."""
-        LOG.info("Removing all samples without dual indexes")
-        samples_to_keep: list[FlowCellSampleBcl2Fastq] = []
-        for sample in self.lims_samples:
-            if not is_dual_index(sample.index):
-                LOG.warning(f"Removing sample {sample.sample_id} since it does not have dual index")
-                continue
-            samples_to_keep.append(sample)
-        self.lims_samples = samples_to_keep
+        pass
 
     def get_additional_sections_sample_sheet(self) -> list[list[str]]:
         """Return all sections of the sample sheet that are not the data section."""
