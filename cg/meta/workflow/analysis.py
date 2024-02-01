@@ -225,7 +225,7 @@ class AnalysisAPI(MetaAPI):
         return self.hermes_api.create_housekeeper_bundle(
             bundle_name=case_id,
             deliverables=self.get_deliverables_file_path(case_id=case_id),
-            pipeline=str(self.pipeline),
+            workflow=str(self.pipeline),
             analysis_type=self.get_bundle_deliverables_type(case_id),
             created=self.get_bundle_created_date(case_id),
         ).model_dump()

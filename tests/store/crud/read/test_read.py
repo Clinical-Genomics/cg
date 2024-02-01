@@ -221,7 +221,7 @@ def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
 
     # WHEN fetching all analysis that are ready for upload without specifying pipeline
     records: list[Analysis] = [
-        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=None)
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=None)
     ]
 
     # THEN one analysis object should be returned
@@ -235,7 +235,7 @@ def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, ti
 
     # WHEN fetching all analyses that are ready for upload and analysed with MIP
     records: list[Analysis] = [
-        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=None)
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=None)
     ]
 
     # THEN one analysis object should be returned
@@ -250,7 +250,7 @@ def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, 
 
     # WHEN fetching all pipelines that are analysed with MIP
     records: list[Analysis] = [
-        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=pipeline)
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=pipeline)
     ]
 
     for analysis_obj in records:
@@ -266,7 +266,7 @@ def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_sto
 
     # WHEN fetching all analyses that are ready for upload and analysed by MIP
     records: list[Analysis] = [
-        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=pipeline)
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=pipeline)
     ]
 
     # THEN no analysis object should be returned since they where not completed
@@ -281,7 +281,7 @@ def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample
     # WHEN fetching all analyses that was analysed with MIP
     records: list[Analysis] = [
         analysis_obj
-        for analysis_obj in sample_store.get_analyses_to_upload(pipeline=Workflow.FASTQ)
+        for analysis_obj in sample_store.get_analyses_to_upload(workflow=Workflow.FASTQ)
     ]
 
     # THEN no analysis object should be returned, since there were no MIP analyses

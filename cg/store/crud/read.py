@@ -1455,7 +1455,7 @@ class ReadHandler(BaseHandler):
             or (samples_sequenced_at and samples_sequenced_at < case_obj.ordered_at)
         )
 
-    def get_analyses_to_upload(self, pipeline: Workflow = None) -> list[Analysis]:
+    def get_analyses_to_upload(self, workflow: Workflow = None) -> list[Analysis]:
         """Return analyses that have not been uploaded."""
         analysis_filter_functions: list[AnalysisFilter] = [
             AnalysisFilter.FILTER_WITH_PIPELINE,
@@ -1467,7 +1467,7 @@ class ReadHandler(BaseHandler):
         return apply_analysis_filter(
             filter_functions=analysis_filter_functions,
             analyses=self._get_join_analysis_case_query(),
-            pipeline=pipeline,
+            pipeline=workflow,
         ).all()
 
     def get_analyses_to_clean(

@@ -15,7 +15,7 @@ LOG = logging.getLogger(__name__)
 def suggest_cases_to_upload(status_db: Store, workflow: Workflow | None = None) -> None:
     """Print a list of suggested cases to upload."""
     LOG.warning("Provide a case, suggestions:")
-    records: list[Analysis] = status_db.get_analyses_to_upload(pipeline=workflow)[
+    records: list[Analysis] = status_db.get_analyses_to_upload(workflow=workflow)[
         :MAX_ITEMS_TO_RETRIEVE
     ]
     for case_obj in records:

@@ -134,7 +134,7 @@ def test_valid_case(
 
     # Make sure nothing is currently stored in Housekeeper
 
-    # Make sure  analysis not already stored in StatusDB
+    # Make sure analysis not already stored in StatusDB
     assert not rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
     # GIVEN that HermesAPI returns a deliverables output

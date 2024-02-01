@@ -15,7 +15,7 @@ from cg.cli.upload.observations.utils import (
 from cg.cli.workflow.commands import (
     ARGUMENT_CASE_ID,
     OPTION_DRY,
-    OPTION_LOQUSDB_SUPPORTED_PIPELINES,
+    OPTION_LOQUSDB_SUPPORTED_WORKFLOW,
 )
 from cg.constants.constants import Workflow
 from cg.exc import CaseNotFoundError, LoqusdbError
@@ -51,7 +51,7 @@ def upload_observations_to_loqusdb(context: CGConfig, case_id: str | None, dry_r
 
 
 @click.command("available-observations")
-@OPTION_LOQUSDB_SUPPORTED_PIPELINES
+@OPTION_LOQUSDB_SUPPORTED_WORKFLOW
 @OPTION_DRY
 @click.pass_context
 def upload_available_observations_to_loqusdb(

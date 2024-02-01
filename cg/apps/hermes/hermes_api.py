@@ -38,13 +38,13 @@ class HermesApi:
         self,
         bundle_name: str,
         deliverables: Path,
-        pipeline: str,
+        workflow: str,
         analysis_type: str | None,
         created: datetime | None,
     ) -> hk_models.InputBundle:
-        """Convert pipeline deliverables to housekeeper bundle ready to be inserted into hk"""
+        """Convert pipeline deliverables to a Housekeeper bundle ready to be inserted into Housekeeper."""
         cg_deliverables: CGDeliverables = self.convert_deliverables(
-            deliverables_file=deliverables, workflow=pipeline, analysis_type=analysis_type
+            deliverables_file=deliverables, workflow=workflow, analysis_type=analysis_type
         )
         return self.get_housekeeper_bundle(
             deliverables=cg_deliverables, created=created, bundle_name=bundle_name

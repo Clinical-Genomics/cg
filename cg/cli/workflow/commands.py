@@ -34,8 +34,8 @@ ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_ANALYSIS_PARAMETERS_CONFIG = click.option(
     "--config-artic", type=str, help="Config with computational and lab related settings"
 )
-OPTION_LOQUSDB_SUPPORTED_PIPELINES = click.option(
-    "--pipeline",
+OPTION_LOQUSDB_SUPPORTED_WORKFLOW = click.option(
+    "--workflow",
     type=click.Choice(LOQUSDB_SUPPORTED_PIPELINES),
     help="Limit observations upload to a specific pipeline",
 )

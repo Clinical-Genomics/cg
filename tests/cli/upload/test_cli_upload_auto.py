@@ -25,6 +25,6 @@ def test_upload_auto_with_pipeline_as_argument(
 
     # WHEN uploading all analysis from pipeline MIP
     caplog.set_level(logging.INFO)
-    cli_runner.invoke(upload_all_completed_analyses, ["--pipeline", "mip-dna"], obj=upload_context)
+    cli_runner.invoke(upload_all_completed_analyses, ["--workflow", "mip-dna"], obj=upload_context)
     # THEN assert that the MIP analysis was successfully uploaded
     assert "Uploading analysis for case" in caplog.text
