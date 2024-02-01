@@ -4,7 +4,7 @@ import logging
 
 import click
 
-from cg.constants import DataDelivery, Pipeline, Priority
+from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.constants import CaseActions
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Customer, Panel
@@ -21,7 +21,7 @@ LOG = logging.getLogger(__name__)
     "-d",
     "--data-analysis",
     "data_analysis",
-    type=EnumChoice(Pipeline),
+    type=EnumChoice(Workflow),
     help="Update case data analysis",
 )
 @click.option(
@@ -40,7 +40,7 @@ LOG = logging.getLogger(__name__)
 def set_case(
     context: CGConfig,
     action: str | None,
-    data_analysis: Pipeline | None,
+    data_analysis: Workflow | None,
     data_delivery: DataDelivery | None,
     priority: Priority | None,
     panel_abbreviations: tuple[str] | None,
@@ -116,7 +116,7 @@ def update_customer(case: Case, customer_id: str, status_db: Store) -> None:
     case.customer = customer_obj
 
 
-def update_data_analysis(case: Case, data_analysis: Pipeline) -> None:
+def update_data_analysis(case: Case, data_analysis: Workflow) -> None:
     LOG.info(f"Update data_analysis: {case.data_analysis or 'NA'} -> {data_analysis}")
     case.data_analysis = data_analysis
 

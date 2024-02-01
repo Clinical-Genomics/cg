@@ -106,7 +106,7 @@ SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
-class Pipeline(StrEnum):
+class Workflow(StrEnum):
     BALSAMIC: str = "balsamic"
     BALSAMIC_PON: str = "balsamic-pon"
     BALSAMIC_QC: str = "balsamic-qc"
@@ -253,7 +253,7 @@ class Strandedness(StrEnum):
     UNSTRANDED: str = "unstranded"
 
 
-PIPELINES_USING_PARTIAL_ANALYSES: list[Pipeline] = [Pipeline.MICROSALT, Pipeline.MUTANT]
+PIPELINES_USING_PARTIAL_ANALYSES: list[Workflow] = [Workflow.MICROSALT, Workflow.MUTANT]
 
 
 class MultiQC(StrEnum):

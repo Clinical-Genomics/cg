@@ -3,13 +3,13 @@
 from click.testing import CliRunner
 
 from cg.cli.add import add
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import DataDelivery, Workflow
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Customer, Panel
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
-CLI_OPTION_ANALYSIS = Pipeline.BALSAMIC_UMI
+CLI_OPTION_ANALYSIS = Workflow.BALSAMIC_UMI
 CLI_OPTION_DELIVERY = DataDelivery.FASTQ_QC
 
 

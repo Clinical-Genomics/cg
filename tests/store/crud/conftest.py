@@ -3,7 +3,7 @@ from typing import Generator
 
 import pytest
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import CustomerId, PrepCategory
 from cg.constants.subject import PhenotypeStatus
 from cg.store.models import CaseSample, Order
@@ -172,7 +172,7 @@ def store_with_analyses_for_cases_not_uploaded_microsalt(
             started_at=timestamp_yesterday,
             uploaded_at=timestamp_yesterday,
             delivery_reported_at=None,
-            pipeline=Pipeline.MICROSALT,
+            pipeline=Workflow.MICROSALT,
         )
         helpers.add_analysis(
             analysis_store,
@@ -180,7 +180,7 @@ def store_with_analyses_for_cases_not_uploaded_microsalt(
             started_at=timestamp_now,
             uploaded_at=None,
             delivery_reported_at=None,
-            pipeline=Pipeline.MICROSALT,
+            pipeline=Workflow.MICROSALT,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: CaseSample = analysis_store.relate_sample(
@@ -210,7 +210,7 @@ def store_with_analyses_for_cases_to_deliver(
             uploaded_at=None,
             delivery_reported_at=None,
             completed_at=timestamp_yesterday,
-            pipeline=Pipeline.FLUFFY,
+            pipeline=Workflow.FLUFFY,
         )
         helpers.add_analysis(
             analysis_store,
@@ -219,7 +219,7 @@ def store_with_analyses_for_cases_to_deliver(
             uploaded_at=None,
             delivery_reported_at=None,
             completed_at=timestamp_now,
-            pipeline=Pipeline.MIP_DNA,
+            pipeline=Workflow.MIP_DNA,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=None)
         link: CaseSample = analysis_store.relate_sample(
@@ -265,7 +265,7 @@ def re_sequenced_sample_store(
         store=re_sequenced_sample_store,
         internal_id=case_id,
         name=family_name,
-        data_analysis=Pipeline.FLUFFY,
+        data_analysis=Workflow.FLUFFY,
     )
 
     store_sample = helpers.add_sample(
@@ -408,6 +408,6 @@ def order_balsamic(helpers: StoreHelpers, store: Store) -> Order:
         customer_id=2,
         ticket_id=3,
         order_date=datetime.now(),
-        workflow=Pipeline.BALSAMIC,
+        workflow=Workflow.BALSAMIC,
     )
     return order

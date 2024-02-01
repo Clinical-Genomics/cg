@@ -9,7 +9,7 @@ from housekeeper.store.models import File
 
 import cg.store as Store
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CgDataError
@@ -64,7 +64,7 @@ def ensure_extra_rna_case_match(
     """Ensures that we have an extra RNA case that matches by subject_id the existing RNA case and DNA cases."""
     rna_extra_case = helpers.ensure_case(
         store=rna_store,
-        data_analysis=Pipeline.MIP_RNA,
+        data_analysis=Workflow.MIP_RNA,
         customer=rna_store.get_case_by_internal_id(rna_case_id).customer,
     )
     subject_id: str = get_subject_id_from_case(store=rna_store, case_id=rna_case_id)
@@ -620,7 +620,7 @@ def test_map_dna_cases_to_dna_sample_incorrect_pipeline(
     rna_sample: Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
 
     # GIVEN that the DNA case has a different pipeline than the expected pipeline
-    dna_case.data_analysis = Pipeline.FASTQ
+    dna_case.data_analysis = Workflow.FASTQ
 
     # WHEN mapping the DNA case name to the DNA sample name in the related DNA cases
     related_dna_cases: list[str] = upload_scout_api._dna_cases_related_to_dna_sample(

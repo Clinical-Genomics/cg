@@ -8,7 +8,7 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from pydantic import ValidationInfo
 
-from cg.constants import NA_FIELD, NO_FIELD, REPORT_GENDER, YES_FIELD, Pipeline
+from cg.constants import NA_FIELD, NO_FIELD, REPORT_GENDER, YES_FIELD, Workflow
 from cg.constants.constants import AnalysisType
 from cg.constants.subject import Sex
 from cg.models.orders.constants import OrderType
@@ -186,7 +186,7 @@ def test_get_analysis_type_as_string():
     # GIVEN a WGS analysis type and a model info dictionary
     analysis_type: AnalysisType = AnalysisType.WHOLE_GENOME_SEQUENCING
     model_info: ValidationInfo = ValidationInfo
-    model_info.data: dict[str, Any] = {"pipeline": Pipeline.MIP_DNA.value}
+    model_info.data: dict[str, Any] = {"pipeline": Workflow.MIP_DNA.value}
 
     # WHEN performing the validation
     validated_analysis_type: str = get_analysis_type_as_string(
@@ -203,7 +203,7 @@ def test_get_analysis_type_as_string_balsamic():
     # GIVEN a WGS analysis type and a model info dictionary
     analysis_type: str = "tumor_normal_wgs"
     model_info: ValidationInfo = ValidationInfo
-    model_info.data: dict[str, Any] = {"pipeline": Pipeline.BALSAMIC.value}
+    model_info.data: dict[str, Any] = {"pipeline": Workflow.BALSAMIC.value}
 
     # WHEN performing the validation
     validated_analysis_type: str = get_analysis_type_as_string(

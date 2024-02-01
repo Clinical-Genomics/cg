@@ -8,7 +8,7 @@ import click
 from cg.constants import (
     REPORT_SUPPORTED_DATA_DELIVERY,
     REPORT_SUPPORTED_PIPELINES,
-    Pipeline,
+    Workflow,
 )
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.balsamic_qc import BalsamicQCReportAPI
@@ -38,7 +38,7 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
     # Missing or not valid internal case ID
     if not case_id or not case:
         LOG.warning("Invalid case ID. Retrieving available cases.")
-        pipeline: Pipeline = (
+        pipeline: Workflow = (
             report_api.analysis_api.pipeline if context.obj.meta_apis.get("report_api") else None
         )
         cases_without_delivery_report: list[Case] = (
@@ -77,24 +77,24 @@ def get_report_api(context: click.Context, case: Case) -> ReportAPI:
     return get_report_api_pipeline(context, case.data_analysis)
 
 
-def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> ReportAPI:
+def get_report_api_pipeline(context: click.Context, pipeline: Workflow) -> ReportAPI:
     """Resolves the report API given a specific pipeline."""
     # Default report API pipeline: MIP-DNA
-    pipeline: Pipeline = pipeline if pipeline else Pipeline.MIP_DNA
-    dispatch_report_api: dict[Pipeline, ReportAPI] = {
-        Pipeline.BALSAMIC: BalsamicReportAPI(
+    pipeline: Workflow = pipeline if pipeline else Workflow.MIP_DNA
+    dispatch_report_api: dict[Workflow, ReportAPI] = {
+        Workflow.BALSAMIC: BalsamicReportAPI(
             config=context.obj, analysis_api=BalsamicAnalysisAPI(config=context.obj)
         ),
-        Pipeline.BALSAMIC_UMI: BalsamicUmiReportAPI(
+        Workflow.BALSAMIC_UMI: BalsamicUmiReportAPI(
             config=context.obj, analysis_api=BalsamicUmiAnalysisAPI(config=context.obj)
         ),
-        Pipeline.BALSAMIC_QC: BalsamicQCReportAPI(
+        Workflow.BALSAMIC_QC: BalsamicQCReportAPI(
             config=context.obj, analysis_api=BalsamicQCAnalysisAPI(config=context.obj)
         ),
-        Pipeline.MIP_DNA: MipDNAReportAPI(
+        Workflow.MIP_DNA: MipDNAReportAPI(
             config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
         ),
-        Pipeline.RNAFUSION: RnafusionReportAPI(
+        Workflow.RNAFUSION: RnafusionReportAPI(
             config=context.obj, analysis_api=RnafusionAnalysisAPI(config=context.obj)
         ),
     }

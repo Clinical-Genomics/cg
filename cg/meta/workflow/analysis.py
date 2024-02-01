@@ -9,7 +9,7 @@ import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority, SequencingFileTag
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
     AnalysisType,
     CaseActions,
@@ -46,7 +46,7 @@ class AnalysisAPI(MetaAPI):
     Parent class containing all methods that are either shared or overridden by other workflow APIs
     """
 
-    def __init__(self, pipeline: Pipeline, config: CGConfig):
+    def __init__(self, pipeline: Workflow, config: CGConfig):
         super().__init__(config=config)
         self.pipeline = pipeline
         self._process = None

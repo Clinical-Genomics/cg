@@ -4,7 +4,7 @@ import mock
 from click.testing import CliRunner, Result
 
 from cg.cli.upload.scout import create_scout_load_config, get_upload_api
-from cg.constants import EXIT_SUCCESS, Pipeline
+from cg.constants import EXIT_SUCCESS, Workflow
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -21,9 +21,9 @@ def test_get_upload_api(cg_context: CGConfig, case_id: str, helpers: StoreHelper
 
     # GIVEN a case with a balsamic analysis
     case: Case = helpers.ensure_case(
-        store=status_db, data_analysis=Pipeline.BALSAMIC, case_id=case_id
+        store=status_db, data_analysis=Workflow.BALSAMIC, case_id=case_id
     )
-    helpers.add_analysis(store=status_db, pipeline=Pipeline.BALSAMIC, case=case)
+    helpers.add_analysis(store=status_db, pipeline=Workflow.BALSAMIC, case=case)
 
     # WHEN getting the upload API
     upload_api: UploadAPI = get_upload_api(cg_config=cg_context, case=case)
@@ -45,9 +45,9 @@ def test_create_scout_load_config(
 
     # GIVEN a case with a balsamic analysis
     case: Case = helpers.ensure_case(
-        store=status_db, data_analysis=Pipeline.BALSAMIC, case_id=case_id
+        store=status_db, data_analysis=Workflow.BALSAMIC, case_id=case_id
     )
-    helpers.add_analysis(store=status_db, pipeline=Pipeline.BALSAMIC, case=case)
+    helpers.add_analysis(store=status_db, pipeline=Workflow.BALSAMIC, case=case)
 
     with mock.patch.object(UploadScoutAPI, "generate_config", return_value=MockScoutLoadConfig()):
         # WHEN creating the scout load config

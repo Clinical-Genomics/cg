@@ -11,7 +11,7 @@ from cg.cli.generate.report.utils import (
     get_report_api_pipeline,
     get_report_case,
 )
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
 from tests.mocks.report import MockMipDNAReportAPI
 
@@ -58,7 +58,7 @@ def test_get_report_api_pipeline(delivery_report_click_context):
     """Tests API assignment given a specific pipeline"""
 
     # GIVEN a click context and a specific pipeline
-    pipeline = Pipeline.BALSAMIC_UMI
+    pipeline = Workflow.BALSAMIC_UMI
 
     # WHEN validating a report api
     report_api = get_report_api_pipeline(delivery_report_click_context, pipeline)

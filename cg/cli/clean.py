@@ -23,7 +23,7 @@ from cg.cli.workflow.commands import (
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
 )
-from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Pipeline
+from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
 from cg.exc import CleanFlowCellFailedError, FlowCellError
 from cg.meta.clean.api import CleanAPI
@@ -172,7 +172,7 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
 
 @clean.command("hk-bundle-files")
 @click.option("-c", "--case-id", type=str, required=False)
-@click.option("-p", "--pipeline", type=Pipeline, required=False)
+@click.option("-p", "--pipeline", type=Workflow, required=False)
 @click.option("-t", "--tags", multiple=True, required=True)
 @click.option("-o", "--days-old", type=int, default=30)
 @DRY_RUN
@@ -182,7 +182,7 @@ def hk_bundle_files(
     case_id: str | None,
     tags: list,
     days_old: int | None,
-    pipeline: Pipeline | None,
+    pipeline: Workflow | None,
     dry_run: bool,
 ):
     """Remove files found in Housekeeper bundles."""

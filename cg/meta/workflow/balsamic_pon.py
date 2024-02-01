@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.exc import BalsamicStartError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -19,7 +19,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.BALSAMIC_PON,
+        pipeline: Workflow = Workflow.BALSAMIC_PON,
     ):
         super().__init__(config=config, pipeline=pipeline)
 

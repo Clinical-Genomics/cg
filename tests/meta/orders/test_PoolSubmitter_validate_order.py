@@ -1,7 +1,7 @@
 import pytest
 
 from cg.constants import DataDelivery
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.exc import OrderError
 from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.models.orders.constants import OrderType
@@ -32,7 +32,7 @@ def test_validate_case_name(rml_order_to_submit: dict, base_store: Store, helper
             store=base_store,
             case_name=PoolSubmitter.create_case_name(ticket=order.ticket, pool_name=sample.pool),
             customer=customer,
-            data_analysis=Pipeline.FLUFFY,
+            data_analysis=Workflow.FLUFFY,
             data_delivery=DataDelivery.STATINA,
         )
         base_store.session.add(case)

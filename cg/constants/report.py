@@ -1,16 +1,16 @@
 """Delivery report constants."""
 
 from cg.constants import DataDelivery
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 
 BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]
 
-REPORT_SUPPORTED_PIPELINES: tuple[Pipeline, ...] = (
-    Pipeline.BALSAMIC,
-    Pipeline.BALSAMIC_UMI,
-    Pipeline.BALSAMIC_QC,
-    Pipeline.MIP_DNA,
-    Pipeline.RNAFUSION,
+REPORT_SUPPORTED_PIPELINES: tuple[Workflow, ...] = (
+    Workflow.BALSAMIC,
+    Workflow.BALSAMIC_UMI,
+    Workflow.BALSAMIC_QC,
+    Workflow.MIP_DNA,
+    Workflow.RNAFUSION,
 )
 
 REPORT_SUPPORTED_DATA_DELIVERY: tuple[DataDelivery, ...] = (

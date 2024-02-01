@@ -11,7 +11,7 @@ from requests import Response
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
 from cg.meta.upload.nipt.models import FlowCellQ30AndReads, StatinaUploadFiles
 from cg.models.cg_config import CGConfig
@@ -105,7 +105,7 @@ class NiptUploadAPI:
 
     def get_all_upload_analyses(self) -> list[Analysis]:
         """Gets all nipt analyses that are ready to be uploaded"""
-        return self.status_db.get_latest_analysis_to_upload_for_pipeline(pipeline=Pipeline.FLUFFY)
+        return self.status_db.get_latest_analysis_to_upload_for_pipeline(pipeline=Workflow.FLUFFY)
 
     def upload_to_ftp_server(self, results_file: Path) -> None:
         """Upload the result file to the ftp server"""

@@ -9,7 +9,7 @@ from housekeeper.store.models import File, Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload.utils import suggest_cases_to_upload
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.io.controller import WriteStream
@@ -237,12 +237,12 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
 def get_upload_api(case: Case, cg_config: CGConfig) -> UploadAPI:
     """Return the upload API based on the data analysis type"""
 
-    analysis_apis: dict[Pipeline, UploadAPI] = {
-        Pipeline.BALSAMIC: BalsamicAnalysisAPI,
-        Pipeline.BALSAMIC_UMI: BalsamicUmiAnalysisAPI,
-        Pipeline.MIP_RNA: MipRNAAnalysisAPI,
-        Pipeline.MIP_DNA: MipDNAAnalysisAPI,
-        Pipeline.RNAFUSION: RnafusionAnalysisAPI,
+    analysis_apis: dict[Workflow, UploadAPI] = {
+        Workflow.BALSAMIC: BalsamicAnalysisAPI,
+        Workflow.BALSAMIC_UMI: BalsamicUmiAnalysisAPI,
+        Workflow.MIP_RNA: MipRNAAnalysisAPI,
+        Workflow.MIP_DNA: MipDNAAnalysisAPI,
+        Workflow.RNAFUSION: RnafusionAnalysisAPI,
     }
 
     return UploadAPI(

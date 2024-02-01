@@ -8,7 +8,7 @@ from click.testing import CliRunner
 
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.commands import clean_run_dir, past_run_dirs
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
 
@@ -82,7 +82,7 @@ def test_dry_run(
     base_store = clean_context.status_db
     helpers.add_analysis(
         base_store,
-        pipeline=Pipeline.BALSAMIC,
+        pipeline=Workflow.BALSAMIC,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
@@ -101,7 +101,7 @@ def test_dry_run(
     assert result.exit_code == EXIT_SUCCESS
     assert "Would have deleted" in caplog.text
     assert balsamic_case_clean in caplog.text
-    assert analysis_to_clean in base_store.get_analyses_to_clean(pipeline=Pipeline.BALSAMIC)
+    assert analysis_to_clean in base_store.get_analyses_to_clean(pipeline=Workflow.BALSAMIC)
 
 
 def test_cleaned_at_valid(
