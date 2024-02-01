@@ -17,7 +17,7 @@ class HermesApi:
         self.process = Process(binary=config["hermes"]["binary_path"])
 
     def convert_deliverables(
-        self, deliverables_file: Path, pipeline: str, analysis_type: str | None = None
+        self, deliverables_file: Path, workflow: str, analysis_type: str | None = None
     ) -> CGDeliverables:
         """Convert deliverables file in raw pipeline format to CG format with hermes"""
         LOG.info("Converting pipeline deliverables to CG deliverables")
@@ -25,7 +25,7 @@ class HermesApi:
             "convert",
             "deliverables",
             "--pipeline",
-            pipeline,
+            workflow,
             str(deliverables_file),
         ]
         if analysis_type:
@@ -44,7 +44,7 @@ class HermesApi:
     ) -> hk_models.InputBundle:
         """Convert pipeline deliverables to housekeeper bundle ready to be inserted into hk"""
         cg_deliverables: CGDeliverables = self.convert_deliverables(
-            deliverables_file=deliverables, pipeline=pipeline, analysis_type=analysis_type
+            deliverables_file=deliverables, workflow=pipeline, analysis_type=analysis_type
         )
         return self.get_housekeeper_bundle(
             deliverables=cg_deliverables, created=created, bundle_name=bundle_name

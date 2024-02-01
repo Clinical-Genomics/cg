@@ -172,7 +172,7 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
 
 @clean.command("hk-bundle-files")
 @click.option("-c", "--case-id", type=str, required=False)
-@click.option("-p", "--pipeline", type=Workflow, required=False)
+@click.option("-p", "--workflow", type=Workflow, required=False)
 @click.option("-t", "--tags", multiple=True, required=True)
 @click.option("-o", "--days-old", type=int, default=30)
 @DRY_RUN
@@ -182,7 +182,7 @@ def hk_bundle_files(
     case_id: str | None,
     tags: list,
     days_old: int | None,
-    pipeline: Workflow | None,
+    workflow: Workflow | None,
     dry_run: bool,
 ):
     """Remove files found in Housekeeper bundles."""
@@ -201,7 +201,7 @@ def hk_bundle_files(
         ],
         input_dict={
             "case_internal_id": case_id,
-            "pipeline": pipeline,
+            "pipeline": workflow,
             "started_at_before": date_threshold,
         },
     )
