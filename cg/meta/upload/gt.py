@@ -1,9 +1,10 @@
 import logging
 from pathlib import Path
 
+from housekeeper.store.models import File, Version
+
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.housekeeper.hk import models as housekeeper_models
 from cg.constants.constants import FileFormat, PrepCategory, Workflow
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.constants.subject import Sex
@@ -55,7 +56,7 @@ class UploadGenotypesAPI(object):
             raise ValueError(f"Workflow {analysis_obj.pipeline} does not support Genotype upload")
         return data
 
-    def _get_samples_sex_mip(self, case_obj: Case, hk_version: housekeeper_models.Version) -> dict:
+    def _get_samples_sex_mip(self, case_obj: Case, hk_version: Version) -> dict:
         qc_metrics_file = self.get_qcmetrics_file(hk_version)
         analysis_sexes = self.analysis_sex(qc_metrics_file)
         samples_sex = {}
@@ -87,7 +88,7 @@ class UploadGenotypesAPI(object):
             for sample_id_metric in qc_metrics.sample_id_metrics
         }
 
-    def get_bcf_file(self, hk_version_obj: housekeeper_models.Version) -> housekeeper_models.File:
+    def get_bcf_file(self, hk_version_obj: Version) -> File:
         """Fetch a bcf file and return the file object"""
         genotype_files: list = self._get_genotype_files(version_id=hk_version_obj.id)
         for genotype_file in genotype_files:
@@ -96,7 +97,7 @@ class UploadGenotypesAPI(object):
                 return genotype_file
         raise FileNotFoundError(f"No vcf or bcf file found for bundle {hk_version_obj.bundle_id}")
 
-    def get_qcmetrics_file(self, hk_version_obj: housekeeper_models.Version) -> Path:
+    def get_qcmetrics_file(self, hk_version_obj: Version) -> Path:
         """Fetch a qc_metrics file and return the path"""
         hk_qcmetrics = self.hk.files(
             version=hk_version_obj.id, tags=HkMipAnalysisTag.QC_METRICS
@@ -117,7 +118,7 @@ class UploadGenotypesAPI(object):
         self.gt.upload(str(data["bcf"]), data["samples_sex"], force=replace)
 
     @staticmethod
-    def _is_variant_file(genotype_file: housekeeper_models.File):
+    def _is_variant_file(genotype_file: File):
         return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
 
     def _get_genotype_files(self, version_id: int) -> list:
