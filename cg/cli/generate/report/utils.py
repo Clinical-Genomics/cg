@@ -7,7 +7,7 @@ import click
 
 from cg.constants import (
     REPORT_SUPPORTED_DATA_DELIVERY,
-    REPORT_SUPPORTED_PIPELINES,
+    REPORT_SUPPORTED_WORKFLOW,
     Workflow,
 )
 from cg.meta.report.balsamic import BalsamicReportAPI
@@ -57,7 +57,7 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
             for case in cases_without_delivery_report:
                 click.echo(f"{case.internal_id} ({case.data_analysis})")
         raise click.Abort
-    if case.data_analysis not in REPORT_SUPPORTED_PIPELINES:
+    if case.data_analysis not in REPORT_SUPPORTED_WORKFLOW:
         LOG.error(
             f"The {case.data_analysis} pipeline does not support delivery reports (case: {case.internal_id})"
         )
@@ -74,13 +74,13 @@ def get_report_api(context: click.Context, case: Case) -> ReportAPI:
     """Returns a report API to be used for the delivery report generation."""
     if context.obj.meta_apis.get("report_api"):
         return context.obj.meta_apis.get("report_api")
-    return get_report_api_pipeline(context, case.data_analysis)
+    return get_report_api_workflow(context, case.data_analysis)
 
 
-def get_report_api_pipeline(context: click.Context, pipeline: Workflow) -> ReportAPI:
-    """Resolves the report API given a specific pipeline."""
-    # Default report API pipeline: MIP-DNA
-    pipeline: Workflow = pipeline if pipeline else Workflow.MIP_DNA
+def get_report_api_workflow(context: click.Context, workflow: Workflow) -> ReportAPI:
+    """Return the report API given a specific workflow."""
+    # Default report API workflow: MIP-DNA
+    workflow: Workflow = workflow if workflow else Workflow.MIP_DNA
     dispatch_report_api: dict[Workflow, ReportAPI] = {
         Workflow.BALSAMIC: BalsamicReportAPI(
             config=context.obj, analysis_api=BalsamicAnalysisAPI(config=context.obj)
@@ -98,7 +98,7 @@ def get_report_api_pipeline(context: click.Context, pipeline: Workflow) -> Repor
             config=context.obj, analysis_api=RnafusionAnalysisAPI(config=context.obj)
         ),
     }
-    return dispatch_report_api.get(pipeline)
+    return dispatch_report_api.get(workflow)
 
 
 def get_report_analysis_started(

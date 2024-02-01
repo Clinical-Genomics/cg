@@ -5,7 +5,7 @@ from cg.constants.constants import Workflow
 
 BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]
 
-REPORT_SUPPORTED_PIPELINES: tuple[Workflow, ...] = (
+REPORT_SUPPORTED_WORKFLOW: tuple[Workflow, ...] = (
     Workflow.BALSAMIC,
     Workflow.BALSAMIC_UMI,
     Workflow.BALSAMIC_QC,

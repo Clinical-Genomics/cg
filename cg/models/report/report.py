@@ -3,7 +3,7 @@ import logging
 from pydantic import BaseModel, BeforeValidator, model_validator
 from typing_extensions import Annotated
 
-from cg.constants import NA_FIELD, REPORT_SUPPORTED_PIPELINES
+from cg.constants import NA_FIELD, REPORT_SUPPORTED_WORKFLOW
 from cg.models.report.sample import ApplicationModel, SampleModel
 from cg.models.report.validators import (
     get_analysis_type_as_string,
@@ -91,7 +91,7 @@ class DataAnalysisModel(BaseModel):
                 f"executed ({self.pipeline})"
             )
             raise ValueError
-        if self.pipeline not in REPORT_SUPPORTED_PIPELINES:
+        if self.pipeline not in REPORT_SUPPORTED_WORKFLOW:
             LOG.error(f"The pipeline {self.pipeline} does not support delivery report generation")
             raise ValueError
         return self

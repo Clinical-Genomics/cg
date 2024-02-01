@@ -8,7 +8,7 @@ import pytest
 from cg.cli.generate.report.utils import (
     get_report_analysis_started,
     get_report_api,
-    get_report_api_pipeline,
+    get_report_api_workflow,
     get_report_case,
 )
 from cg.constants import Workflow
@@ -61,7 +61,7 @@ def test_get_report_api_pipeline(delivery_report_click_context):
     pipeline = Workflow.BALSAMIC_UMI
 
     # WHEN validating a report api
-    report_api = get_report_api_pipeline(delivery_report_click_context, pipeline)
+    report_api = get_report_api_workflow(delivery_report_click_context, pipeline)
 
     # THEN the extracted API should match the expected type
     assert report_api

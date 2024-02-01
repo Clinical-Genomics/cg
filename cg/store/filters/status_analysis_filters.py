@@ -4,7 +4,7 @@ from typing import Callable
 
 from sqlalchemy.orm import Query
 
-from cg.constants import REPORT_SUPPORTED_PIPELINES
+from cg.constants import REPORT_SUPPORTED_WORKFLOW
 from cg.constants.constants import VALID_DATA_IN_PRODUCTION, Workflow
 from cg.store.models import Analysis, Case
 
@@ -51,7 +51,7 @@ def filter_report_analyses_by_pipeline(
     return (
         analyses.filter(Analysis.pipeline == str(pipeline))
         if pipeline
-        else analyses.filter(Analysis.pipeline.in_(REPORT_SUPPORTED_PIPELINES))
+        else analyses.filter(Analysis.pipeline.in_(REPORT_SUPPORTED_WORKFLOW))
     )
 
 
