@@ -39,7 +39,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.hostremoval_reference: Path = Path(config.taxprofiler.hostremoval_reference)
         self.databases: Path = Path(config.taxprofiler.databases)
         self.tower_binary_path: str = config.tower_binary_path
-        self.tower_pipeline: str = config.taxprofiler.tower_pipeline
+        self.tower_workflow: str = config.taxprofiler.tower_pipeline
         self.account: str = config.taxprofiler.slurm.account
         self.email: str = config.taxprofiler.slurm.mail_user
         self.nextflow_binary_path: str = config.taxprofiler.binary_path

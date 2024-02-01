@@ -38,7 +38,7 @@ class NfAnalysisAPI(AnalysisAPI):
         self.conda_env: str | None = None
         self.conda_binary: str | None = None
         self.tower_binary_path: str | None = None
-        self.tower_pipeline: str | None = None
+        self.tower_workflow: str | None = None
         self.account: str | None = None
         self.email: str | None = None
         self.compute_env_base: str | None = None
@@ -258,7 +258,7 @@ class NfAnalysisAPI(AnalysisAPI):
             )
         else:
             parameters: list[str] = NfTowerHandler.get_tower_launch_parameters(
-                tower_pipeline=self.tower_pipeline,
+                tower_pipeline=self.tower_workflow,
                 command_args=command_args.dict(),
             )
         self.process.run_command(parameters=parameters, dry_run=dry_run)

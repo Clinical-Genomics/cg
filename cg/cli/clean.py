@@ -195,13 +195,13 @@ def hk_bundle_files(
     function_dispatcher: Dispatcher = Dispatcher(
         functions=[
             status_db.get_analyses_started_at_before,
-            status_db.get_analyses_for_case_and_pipeline_started_at_before,
+            status_db.get_analyses_for_case_and_workflow_started_at_before,
             status_db.get_analyses_for_workflow_started_at_before,
             status_db.get_analyses_for_case_started_at_before,
         ],
         input_dict={
             "case_internal_id": case_id,
-            "pipeline": workflow,
+            "workflow": workflow,
             "started_at_before": date_threshold,
         },
     )

@@ -64,7 +64,7 @@ def test_get_analyses_to_deliver_for_pipeline(
 
     # WHEN fetching the latest analysis to upload to nipt
     analyses = store_with_analyses_for_cases_to_deliver.get_analyses_to_deliver_for_pipeline(
-        pipeline=pipeline
+        workflow=pipeline
     )
 
     # THEN only the newest analysis should be returned
@@ -428,8 +428,8 @@ def test_get_analyses_for_case_and_pipeline_before(
 
     # WHEN getting all analyses before a given date
     analyses: list[Analysis] = (
-        store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_case_and_pipeline_started_at_before(
-            case_internal_id=case_id, started_at_before=timestamp_now, pipeline=pipeline
+        store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_case_and_workflow_started_at_before(
+            workflow=pipeline, started_at_before=timestamp_now, case_internal_id=case_id
         )
     )
 

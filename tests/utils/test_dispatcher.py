@@ -184,13 +184,13 @@ def test_dispatcher_on_other_functions(
     function_dispatcher: Dispatcher = Dispatcher(
         functions=[
             store.get_analyses_started_at_before,
-            store.get_analyses_for_case_and_pipeline_started_at_before,
+            store.get_analyses_for_case_and_workflow_started_at_before,
             store.get_analyses_for_workflow_started_at_before,
             store.get_analyses_for_case_started_at_before,
         ],
         input_dict={
             "case_internal_id": case_internal_id,
-            "pipeline": pipeline,
+            "workflow": pipeline,
             "started_at_before": timestamp_now,
         },
     )

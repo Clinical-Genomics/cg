@@ -1489,9 +1489,9 @@ class ReadHandler(BaseHandler):
             started_at_date=before,
         ).all()
 
-    def get_analyses_for_case_and_pipeline_started_at_before(
+    def get_analyses_for_case_and_workflow_started_at_before(
         self,
-        pipeline: Workflow,
+        workflow: Workflow,
         started_at_before: datetime,
         case_internal_id: str,
     ) -> list[Analysis]:
@@ -1508,7 +1508,7 @@ class ReadHandler(BaseHandler):
             filter_functions=filter_functions,
             case_entry_id=case_entry_id,
             started_at_date=started_at_before,
-            pipeline=pipeline,
+            pipeline=workflow,
         ).all()
 
     def get_analyses_for_case_started_at_before(
@@ -1583,7 +1583,7 @@ class ReadHandler(BaseHandler):
     def get_analyses(self) -> list[Analysis]:
         return self._get_query(table=Analysis).all()
 
-    def get_analyses_to_deliver_for_pipeline(self, pipeline: Workflow = None) -> list[Analysis]:
+    def get_analyses_to_deliver_for_pipeline(self, workflow: Workflow = None) -> list[Analysis]:
         """Return analyses that have been uploaded but not delivered."""
         analyses: Query = apply_sample_filter(
             samples=self._get_join_analysis_sample_family_query(),
@@ -1595,7 +1595,7 @@ class ReadHandler(BaseHandler):
             AnalysisFilter.ORDER_BY_UPLOADED_AT,
         ]
         return apply_analysis_filter(
-            analyses=analyses, filter_functions=filter_functions, pipeline=pipeline
+            analyses=analyses, filter_functions=filter_functions, pipeline=workflow
         ).all()
 
     def analyses_to_delivery_report(self, workflow: Workflow | None = None) -> Query:
