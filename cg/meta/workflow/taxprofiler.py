@@ -27,9 +27,9 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Workflow = Workflow.TAXPROFILER,
+        workflow: Workflow = Workflow.TAXPROFILER,
     ):
-        super().__init__(config=config, pipeline=pipeline)
+        super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.taxprofiler.root
         self.nfcore_pipeline_path: str = config.taxprofiler.pipeline_path
         self.conda_env: str = config.taxprofiler.conda_env

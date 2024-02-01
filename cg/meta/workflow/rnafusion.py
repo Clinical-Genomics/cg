@@ -33,9 +33,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Workflow = Workflow.RNAFUSION,
+        workflow: Workflow = Workflow.RNAFUSION,
     ):
-        super().__init__(config=config, pipeline=pipeline)
+        super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.rnafusion.root
         self.nfcore_pipeline_path: str = config.rnafusion.pipeline_path
         self.references: str = config.rnafusion.references

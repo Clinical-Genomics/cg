@@ -19,9 +19,9 @@ class MutantAnalysisAPI(AnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Workflow = Workflow.MUTANT,
+        workflow: Workflow = Workflow.MUTANT,
     ):
-        super().__init__(workflow=pipeline, config=config)
+        super().__init__(workflow=workflow, config=config)
         self.root_dir = config.mutant.root
 
     @property

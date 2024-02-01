@@ -28,9 +28,9 @@ LOG = logging.getLogger(__name__)
 class NfAnalysisAPI(AnalysisAPI):
     """Parent class for handling NF-core analyses."""
 
-    def __init__(self, config: CGConfig, pipeline: Workflow):
-        super().__init__(workflow=pipeline, config=config)
-        self.pipeline: Workflow = pipeline
+    def __init__(self, config: CGConfig, workflow: Workflow):
+        super().__init__(workflow=workflow, config=config)
+        self.workflow: Workflow = workflow
         self.root_dir: str | None = None
         self.nfcore_pipeline_path: str | None = None
         self.references: str | None = None
@@ -122,14 +122,14 @@ class NfAnalysisAPI(AnalysisAPI):
         if not dry_run:
             Path(self.get_case_path(case_id=case_id)).mkdir(parents=True, exist_ok=True)
 
-    def get_log_path(self, case_id: str, pipeline: str, log: str = None) -> Path:
+    def get_log_path(self, case_id: str, workflow: str, log: str = None) -> Path:
         """Path to NF log."""
         if log:
             return log
         launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
         return Path(
             self.get_case_path(case_id),
-            f"{case_id}_{pipeline}_nextflow_{launch_time}",
+            f"{case_id}_{workflow}_nextflow_{launch_time}",
         ).with_suffix(FileExtensions.LOG)
 
     def get_workdir_path(self, case_id: str, work_dir: Path | None = None) -> Path:
