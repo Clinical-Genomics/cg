@@ -23,7 +23,7 @@ def test_get_latest_nipt_analysis_to_upload(
     # WHEN fetching the latest analysis to upload to nipt
     analyses: list[Analysis] = (
         store_with_analyses_for_cases_not_uploaded_fluffy.get_latest_analysis_to_upload_for_pipeline(
-            pipeline=pipeline
+            workflow=pipeline
         )
     )
 
@@ -45,7 +45,7 @@ def test_get_latest_microsalt_analysis_to_upload(
     # WHEN fetching the latest analysis to upload to microsalt
     analyses: list[Analysis] = (
         store_with_analyses_for_cases_not_uploaded_microsalt.get_latest_analysis_to_upload_for_pipeline(
-            pipeline=pipeline
+            workflow=pipeline
         )
     )
 

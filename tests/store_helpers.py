@@ -248,16 +248,13 @@ class StoreHelpers:
         """Ensure that application limitations exists in store."""
         application_limitation: ApplicationLimitations = (
             store.get_application_limitation_by_tag_and_pipeline(
-                tag=application.tag, pipeline=pipeline
+                tag=application.tag, workflow=pipeline
             )
         )
         if application_limitation:
             return application_limitation
         application_limitation: ApplicationLimitations = store.add_application_limitation(
-            application=application,
-            pipeline=pipeline,
-            limitations=limitations,
-            **kwargs,
+            application=application, workflow=pipeline, limitations=limitations, **kwargs
         )
         store.session.add(application_limitation)
         store.session.commit()
@@ -330,7 +327,7 @@ class StoreHelpers:
         if not case:
             case = StoreHelpers.add_case(store, data_analysis=pipeline, data_delivery=data_delivery)
 
-        analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version, case_id=case.id)
+        analysis = store.add_analysis(workflow=pipeline, version=pipeline_version, case_id=case.id)
 
         analysis.started_at = started_at or datetime.now()
         if completed_at:

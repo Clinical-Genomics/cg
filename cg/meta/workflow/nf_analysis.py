@@ -258,8 +258,7 @@ class NfAnalysisAPI(AnalysisAPI):
             )
         else:
             parameters: list[str] = NfTowerHandler.get_tower_launch_parameters(
-                tower_pipeline=self.tower_workflow,
-                command_args=command_args.dict(),
+                tower_workflow=self.tower_workflow, command_args=command_args.dict()
             )
         self.process.run_command(parameters=parameters, dry_run=dry_run)
         if self.process.stderr:

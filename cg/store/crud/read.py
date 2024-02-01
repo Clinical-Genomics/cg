@@ -132,9 +132,9 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_application_limitation_by_tag_and_pipeline(
-        self, tag: str, pipeline: Workflow
+        self, tag: str, workflow: Workflow
     ) -> ApplicationLimitations | None:
-        """Return an application limitation given the application tag and pipeline."""
+        """Return an application limitation given the application tag and workflow."""
         filter_functions: list[ApplicationLimitationsFilter] = [
             ApplicationLimitationsFilter.FILTER_BY_TAG,
             ApplicationLimitationsFilter.FILTER_BY_PIPELINE,
@@ -143,11 +143,11 @@ class ReadHandler(BaseHandler):
             application_limitations=self._get_join_application_limitations_query(),
             filter_functions=filter_functions,
             tag=tag,
-            pipeline=pipeline,
+            pipeline=workflow,
         ).first()
 
-    def get_latest_analysis_to_upload_for_pipeline(self, pipeline: str = None) -> list[Analysis]:
-        """Return latest not uploaded analysis for each case given a pipeline."""
+    def get_latest_analysis_to_upload_for_pipeline(self, workflow: str = None) -> list[Analysis]:
+        """Return latest not uploaded analysis for each case given a workflow."""
         filter_functions: list[AnalysisFilter] = [
             AnalysisFilter.FILTER_WITH_PIPELINE,
             AnalysisFilter.FILTER_IS_NOT_UPLOADED,
@@ -155,7 +155,7 @@ class ReadHandler(BaseHandler):
         return apply_analysis_filter(
             analyses=self._get_latest_analyses_for_cases_query(),
             filter_functions=filter_functions,
-            pipeline=pipeline,
+            pipeline=workflow,
         ).all()
 
     def get_analysis_by_case_entry_id_and_started_at(
@@ -239,24 +239,15 @@ class ReadHandler(BaseHandler):
         )
         return filtered_cases.limit(limit=limit).all()
 
-    def get_cases_by_customer_pipeline_and_case_search(
+    def get_cases_by_customer_workflow_and_case_search(
         self,
         customer: Customer | None,
-        pipeline: str | None,
+        workflow: str | None,
         case_search: str | None,
         limit: int | None = 30,
     ) -> list[Case]:
         """
-        Retrieve a list of cases filtered by customer, pipeline, and matching names or internal ids.
-
-        Args:
-            customer (Customer | None): A customer object to filter cases by.
-            pipeline (str | None): The pipeline string to filter cases by.
-            case_search (str | None): The case search string to filter cases by.
-            limit (int | None, default=30): The maximum number of cases to return.
-
-        Returns:
-            list[Case]: A list of filtered cases sorted by creation time and limited by the specified number.
+        Retrieve a list of cases filtered by customer, workflow, and matching names or internal ids.
         """
         filter_functions: list[Callable] = [
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
@@ -272,7 +263,7 @@ class ReadHandler(BaseHandler):
             filter_functions=filter_functions,
             customer_entry_id=customer_entry_id,
             case_search=case_search,
-            pipeline=pipeline,
+            pipeline=workflow,
         )
         return filtered_cases.limit(limit=limit).all()
 

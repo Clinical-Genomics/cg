@@ -224,10 +224,8 @@ def parse_families_in_collaboration():
 
     customer = db.get_customer_by_internal_id(customer_internal_id=customer_internal_id)
 
-    cases = db.get_cases_by_customer_pipeline_and_case_search(
-        case_search=case_search_pattern,
-        customer=customer,
-        pipeline=pipeline,
+    cases = db.get_cases_by_customer_workflow_and_case_search(
+        customer=customer, workflow=pipeline, case_search=case_search_pattern
     )
 
     case_dicts = [case.to_dict(links=True) for case in cases]

@@ -185,11 +185,11 @@ class AnalysisAPI(MetaAPI):
         analysis_start: dt.datetime = self.get_bundle_created_date(case_id=case_id)
         pipeline_version: str = self.get_pipeline_version(case_id=case_id)
         new_analysis: Case = self.status_db.add_analysis(
-            pipeline=self.workflow,
+            workflow=self.workflow,
             version=pipeline_version,
-            started_at=analysis_start,
             completed_at=dt.datetime.now(),
             primary=(len(case_obj.analyses) == 0),
+            started_at=analysis_start,
         )
         new_analysis.case = case_obj
         if dry_run:

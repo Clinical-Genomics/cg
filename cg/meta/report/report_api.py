@@ -284,7 +284,7 @@ class ReportAPI(MetaAPI):
         """Return pipeline specific limitations given an application tag."""
         application_limitation: ApplicationLimitations = (
             self.status_db.get_application_limitation_by_tag_and_pipeline(
-                tag=application_tag, pipeline=self.analysis_api.workflow
+                tag=application_tag, workflow=self.analysis_api.workflow
             )
         )
         return application_limitation.limitations if application_limitation else None

@@ -929,7 +929,7 @@ def test_get_application_limitation_by_tag_and_pipeline(
     # WHEN filtering by a given application tag and workflow
     application_limitation: ApplicationLimitations = (
         store_with_application_limitations.get_application_limitation_by_tag_and_pipeline(
-            tag=tag, pipeline=pipeline
+            tag=tag, workflow=pipeline
         )
     )
 

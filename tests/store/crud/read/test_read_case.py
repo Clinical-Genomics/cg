@@ -50,7 +50,7 @@ def test_get_cases_by_customers_action_and_case_search_pattern(
         assert case_search in case.name
 
 
-def test_get_cases_by_customer_pipeline_and_case_search_pattern(
+def test_get_cases_by_customer_workflow_and_case_search_pattern(
     store_with_cases_and_customers: Store,
 ):
     """Test that only cases with the specified customer, pipeline, and case search pattern are returned."""
@@ -62,9 +62,9 @@ def test_get_cases_by_customer_pipeline_and_case_search_pattern(
     pipeline = case.data_analysis
     case_search = case.name[:3]
 
-    # WHEN calling get_cases_by_customer_pipeline_and_case_search_pattern with customer, workflow, and case_search
-    cases = store_with_cases_and_customers.get_cases_by_customer_pipeline_and_case_search(
-        customer=customer, pipeline=pipeline, case_search=case_search
+    # WHEN calling get_cases_by_customer_workflow_and_case_search_pattern with customer, workflow, and case_search
+    cases = store_with_cases_and_customers.get_cases_by_customer_workflow_and_case_search(
+        customer=customer, workflow=pipeline, case_search=case_search
     )
 
     # THEN cases with the specified customer, workflow, and case search pattern should be returned
