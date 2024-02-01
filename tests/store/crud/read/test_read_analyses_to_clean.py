@@ -74,7 +74,7 @@ def test_pipeline_included(
 
     # WHEN calling the analyses_to_clean specifying the used workflow
     analyses_to_clean = analysis_store.get_analyses_to_clean(
-        pipeline=pipeline, before=timestamp_now
+        before=timestamp_now, workflow=pipeline
     )
 
     # THEN this analysis should be returned
@@ -102,7 +102,7 @@ def test_pipeline_excluded(analysis_store: Store, helpers, timestamp_now: dateti
     analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_clean specifying another workflow
-    analyses_to_clean = analysis_store.get_analyses_to_clean(pipeline=wrong_pipeline)
+    analyses_to_clean = analysis_store.get_analyses_to_clean(workflow=wrong_pipeline)
 
     # THEN this analysis should not be returned
     assert analysis not in analyses_to_clean

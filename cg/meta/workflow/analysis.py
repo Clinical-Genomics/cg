@@ -263,7 +263,7 @@ class AnalysisAPI(MetaAPI):
 
     def get_analyses_to_clean(self, before: dt.datetime) -> list[Analysis]:
         analyses_to_clean = self.status_db.get_analyses_to_clean(
-            pipeline=self.workflow, before=before
+            before=before, workflow=self.workflow
         )
         return analyses_to_clean
 
