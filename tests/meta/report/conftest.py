@@ -25,7 +25,7 @@ def report_api_mip_dna(
 ) -> MipDNAReportAPI:
     """MIP DNA ReportAPI fixture."""
     cg_context.meta_apis["analysis_api"] = MockMipAnalysis(
-        config=cg_context, pipeline=Workflow.MIP_DNA
+        config=cg_context, workflow=Workflow.MIP_DNA
     )
     cg_context.status_db_ = report_store
     cg_context.lims_api_ = MockLimsAPI(cg_context, lims_samples)
@@ -77,7 +77,7 @@ def case_samples_data(case_id: str, report_api_mip_dna: MipDNAReportAPI):
 @pytest.fixture(scope="function")
 def mip_analysis_api(cg_context: CGConfig) -> MockMipAnalysis:
     """MIP analysis mock data."""
-    return MockMipAnalysis(config=cg_context, pipeline=Workflow.MIP_DNA)
+    return MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
 
 
 @pytest.fixture(scope="session")

@@ -9,8 +9,8 @@ from cg.utils import Process
 
 
 class MipDNAAnalysisAPI(MipAnalysisAPI):
-    def __init__(self, config: CGConfig, pipeline: Workflow = Workflow.MIP_DNA):
-        super().__init__(config, pipeline)
+    def __init__(self, config: CGConfig, workflow: Workflow = Workflow.MIP_DNA):
+        super().__init__(config, workflow)
 
     @property
     def root(self) -> str:

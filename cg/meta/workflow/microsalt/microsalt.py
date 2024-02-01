@@ -26,8 +26,8 @@ LOG = logging.getLogger(__name__)
 class MicrosaltAnalysisAPI(AnalysisAPI):
     """API to manage Microsalt Analyses"""
 
-    def __init__(self, config: CGConfig, pipeline: Workflow = Workflow.MICROSALT):
-        super().__init__(pipeline, config)
+    def __init__(self, config: CGConfig, workflow: Workflow = Workflow.MICROSALT):
+        super().__init__(workflow, config)
         self.root_dir = config.microsalt.root
         self.queries_path = config.microsalt.queries_path
         self.quality_checker = QualityController(config.status_db)

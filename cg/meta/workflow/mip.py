@@ -39,8 +39,8 @@ class MipAnalysisAPI(AnalysisAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
     hooks into the status database that makes managing analyses simpler"""
 
-    def __init__(self, config: CGConfig, pipeline: Workflow):
-        super().__init__(pipeline, config)
+    def __init__(self, config: CGConfig, workflow: Workflow):
+        super().__init__(workflow, config)
 
     @property
     def root(self) -> str:

@@ -7,8 +7,8 @@ from cg.utils import Process
 
 
 class MipRNAAnalysisAPI(MipAnalysisAPI):
-    def __init__(self, config: CGConfig, pipeline: Workflow = Workflow.MIP_RNA):
-        super().__init__(config, pipeline)
+    def __init__(self, config: CGConfig, workflow: Workflow = Workflow.MIP_RNA):
+        super().__init__(config, workflow)
 
     @property
     def root(self) -> str:
