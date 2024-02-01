@@ -779,12 +779,12 @@ class ReadHandler(BaseHandler):
             raise CgError
         LOG.info(f"Case {case_internal_id} exists in Status DB")
 
-    def get_running_cases_in_pipeline(self, pipeline: Workflow) -> list[Case]:
+    def get_running_cases_in_pipeline(self, workflow: Workflow) -> list[Case]:
         """Return all running cases in a pipeline."""
         return apply_case_filter(
             filter_functions=[CaseFilter.FILTER_WITH_PIPELINE, CaseFilter.FILTER_IS_RUNNING],
             cases=self._get_query(table=Case),
-            pipeline=pipeline,
+            pipeline=workflow,
         ).all()
 
     def get_not_analysed_cases_by_sample_internal_id(
@@ -1017,7 +1017,7 @@ class ReadHandler(BaseHandler):
         return self._get_join_cases_with_samples_query()
 
     def cases_to_analyze(
-        self, pipeline: Workflow = None, threshold: bool = False, limit: int = None
+        self, workflow: Workflow = None, threshold: bool = False, limit: int = None
     ) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
         case_filter_functions: list[CaseFilter] = [
@@ -1028,7 +1028,7 @@ class ReadHandler(BaseHandler):
         cases = apply_case_filter(
             filter_functions=case_filter_functions,
             cases=self.get_families_with_analyses(),
-            pipeline=pipeline,
+            pipeline=workflow,
         )
 
         families: list[Query] = list(cases.order_by(Case.ordered_at))

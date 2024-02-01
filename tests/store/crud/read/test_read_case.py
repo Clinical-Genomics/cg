@@ -80,7 +80,7 @@ def test_get_running_cases_in_pipeline(store_with_cases_and_customers: Store):
 
     # WHEN getting cases with a workflow and are running
     cases: list[Case] = store_with_cases_and_customers.get_running_cases_in_pipeline(
-        pipeline=Workflow.MIP_DNA
+        workflow=Workflow.MIP_DNA
     )
 
     # THEN cases with the specified workflow, and case action is returned

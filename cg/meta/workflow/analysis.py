@@ -269,7 +269,7 @@ class AnalysisAPI(MetaAPI):
 
     def get_cases_to_analyze(self) -> list[Case]:
         return self.status_db.cases_to_analyze(
-            pipeline=self.workflow, threshold=self.use_read_count_threshold
+            workflow=self.workflow, threshold=self.use_read_count_threshold
         )
 
     def get_cases_to_store(self) -> list[Case]:
@@ -277,7 +277,7 @@ class AnalysisAPI(MetaAPI):
         and is ready to be stored in Housekeeper."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.workflow)
+            for case in self.status_db.get_running_cases_in_pipeline(workflow=self.workflow)
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
         ]
 
@@ -286,7 +286,7 @@ class AnalysisAPI(MetaAPI):
         and is ready for QC metrics checks."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.workflow)
+            for case in self.status_db.get_running_cases_in_pipeline(workflow=self.workflow)
             if self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
 

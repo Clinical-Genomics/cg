@@ -187,7 +187,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         and is ready to be stored in Housekeeper."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.workflow)
+            for case in self.status_db.get_running_cases_in_pipeline(workflow=self.workflow)
             if Path(self.get_deliverables_file_path(case_id=case.internal_id)).exists()
         ]
 
