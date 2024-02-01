@@ -1530,8 +1530,8 @@ class ReadHandler(BaseHandler):
             started_at_date=started_at_before,
         ).all()
 
-    def get_analyses_for_pipeline_started_at_before(
-        self, pipeline: Workflow, started_at_before: datetime
+    def get_analyses_for_workflow_started_at_before(
+        self, workflow: Workflow, started_at_before: datetime
     ) -> list[Analysis]:
         """Return all analyses for a pipeline started before a certain date."""
         filter_functions: list[AnalysisFilter] = [
@@ -1541,7 +1541,7 @@ class ReadHandler(BaseHandler):
         return apply_analysis_filter(
             filter_functions=filter_functions,
             analyses=self._get_query(table=Analysis),
-            pipeline=pipeline,
+            pipeline=workflow,
             started_at_date=started_at_before,
         ).all()
 
@@ -1553,7 +1553,7 @@ class ReadHandler(BaseHandler):
             started_at_date=started_at_before,
         ).all()
 
-    def observations_to_upload(self, pipeline: Workflow = None) -> Query:
+    def observations_to_upload(self, workflow: Workflow = None) -> Query:
         """Return observations that have not been uploaded."""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_PIPELINE,
@@ -1562,18 +1562,18 @@ class ReadHandler(BaseHandler):
         records: Query = apply_case_filter(
             filter_functions=case_filter_functions,
             cases=self.get_families_with_samples(),
-            pipeline=pipeline,
+            pipeline=workflow,
         )
         return apply_sample_filter(
             filter_functions=[SampleFilter.FILTER_WITHOUT_LOQUSDB_ID], samples=records
         )
 
-    def observations_uploaded(self, pipeline: Workflow = None) -> Query:
+    def observations_uploaded(self, workflow: Workflow = None) -> Query:
         """Return observations that have been uploaded."""
         records: Query = apply_case_filter(
             filter_functions=[CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_PIPELINE],
             cases=self.get_families_with_samples(),
-            pipeline=pipeline,
+            pipeline=workflow,
         )
         records: Query = apply_sample_filter(
             filter_functions=[SampleFilter.FILTER_WITH_LOQUSDB_ID], samples=records

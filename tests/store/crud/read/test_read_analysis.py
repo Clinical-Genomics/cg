@@ -474,8 +474,8 @@ def test_get_analyses_for_pipeline_before(
 
     # WHEN getting all analyses before a given date
     analyses: list[Analysis] = (
-        store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_pipeline_started_at_before(
-            started_at_before=timestamp_now, pipeline=pipeline
+        store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_workflow_started_at_before(
+            workflow=pipeline, started_at_before=timestamp_now
         )
     )
 

@@ -196,7 +196,7 @@ def hk_bundle_files(
         functions=[
             status_db.get_analyses_started_at_before,
             status_db.get_analyses_for_case_and_pipeline_started_at_before,
-            status_db.get_analyses_for_pipeline_started_at_before,
+            status_db.get_analyses_for_workflow_started_at_before,
             status_db.get_analyses_for_case_started_at_before,
         ],
         input_dict={

@@ -55,17 +55,17 @@ def upload_observations_to_loqusdb(context: CGConfig, case_id: str | None, dry_r
 @OPTION_DRY
 @click.pass_context
 def upload_available_observations_to_loqusdb(
-    context: click.Context, pipeline: Workflow | None, dry_run: bool
+    context: click.Context, workflow: Workflow | None, dry_run: bool
 ):
     """Uploads the available observations to Loqusdb."""
 
     click.echo(click.style("----------------- AVAILABLE OBSERVATIONS -----------------"))
 
     status_db: Store = context.obj.status_db
-    cases_to_upload: Query = status_db.observations_to_upload(pipeline=pipeline)
+    cases_to_upload: Query = status_db.observations_to_upload(workflow=workflow)
     if not cases_to_upload:
         LOG.error(
-            f"There are no available cases to upload to Loqusdb for {pipeline} ({datetime.now()})"
+            f"There are no available cases to upload to Loqusdb for {workflow} ({datetime.now()})"
         )
         return
 
