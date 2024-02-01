@@ -18,4 +18,4 @@ class BalsamicUmiAnalysisAPI(BalsamicAnalysisAPI):
         config: CGConfig,
         pipeline: Workflow = Workflow.BALSAMIC_UMI,
     ):
-        super().__init__(config=config, pipeline=pipeline)
+        super().__init__(config=config, workflow=pipeline)

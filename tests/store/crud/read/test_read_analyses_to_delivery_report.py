@@ -90,7 +90,7 @@ def test_analyses_to_upload_delivery_reports(
     )
 
     # WHEN calling the analyses_to_upload_delivery_reports
-    analyses = analysis_store.analyses_to_upload_delivery_reports(pipeline=pipeline).all()
+    analyses = analysis_store.analyses_to_upload_delivery_reports(workflow=pipeline).all()
 
     # THEN the previously defined analysis should be returned
     assert analysis in analyses

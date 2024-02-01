@@ -115,10 +115,10 @@ class UploadScoutAPI:
         return file_obj
 
     def get_multiqc_html_report(
-        self, case_id: str, pipeline: Workflow
+        self, case_id: str, workflow: Workflow
     ) -> tuple[ScoutCustomCaseReportTags, File | None]:
         """Return a multiqc report for a case in Housekeeper."""
-        if pipeline == Workflow.MIP_RNA:
+        if workflow == Workflow.MIP_RNA:
             return (
                 ScoutCustomCaseReportTags.MULTIQC_RNA,
                 self.housekeeper.files(bundle=case_id, tags=HK_MULTIQC_HTML_TAG).first(),

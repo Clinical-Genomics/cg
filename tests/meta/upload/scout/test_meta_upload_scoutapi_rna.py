@@ -676,7 +676,7 @@ def test_get_multiqc_html_report(
 
     # WHEN getting the multiqc html report
     report_type, multiqc_report = upload_mip_analysis_scout_api.get_multiqc_html_report(
-        case_id=dna_case_id, pipeline=case.data_analysis
+        case_id=dna_case_id, workflow=case.data_analysis
     )
 
     # THEN the multiqc html report should be returned and the correct report type

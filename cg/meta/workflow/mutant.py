@@ -21,7 +21,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         config: CGConfig,
         pipeline: Workflow = Workflow.MUTANT,
     ):
-        super().__init__(config=config, pipeline=pipeline)
+        super().__init__(workflow=pipeline, config=config)
         self.root_dir = config.mutant.root
 
     @property
@@ -187,7 +187,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         and is ready to be stored in Housekeeper."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
+            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.workflow)
             if Path(self.get_deliverables_file_path(case_id=case.internal_id)).exists()
         ]
 

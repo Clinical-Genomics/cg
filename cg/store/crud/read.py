@@ -1615,12 +1615,12 @@ class ReadHandler(BaseHandler):
             filter_functions=analysis_filter_functions, analyses=records, pipeline=workflow
         )
 
-    def analyses_to_upload_delivery_reports(self, pipeline: Workflow = None) -> Query:
+    def analyses_to_upload_delivery_reports(self, workflow: Workflow = None) -> Query:
         """Return analyses that need a delivery report to be uploaded."""
         records: Query = apply_case_filter(
             filter_functions=[CaseFilter.FILTER_WITH_SCOUT_DELIVERY],
             cases=self._get_join_analysis_case_query(),
-            pipeline=pipeline,
+            pipeline=workflow,
         )
         analysis_filter_functions: list[AnalysisFilter] = [
             AnalysisFilter.FILTER_REPORT_BY_PIPELINE,
@@ -1630,7 +1630,7 @@ class ReadHandler(BaseHandler):
             AnalysisFilter.ORDER_BY_COMPLETED_AT,
         ]
         return apply_analysis_filter(
-            filter_functions=analysis_filter_functions, analyses=records, pipeline=pipeline
+            filter_functions=analysis_filter_functions, analyses=records, pipeline=workflow
         )
 
     def get_samples_to_deliver(self) -> list[Sample]:

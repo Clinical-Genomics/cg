@@ -39,12 +39,12 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
     if not case_id or not case:
         LOG.warning("Invalid case ID. Retrieving available cases.")
         workflow: Workflow = (
-            report_api.analysis_api.pipeline if context.obj.meta_apis.get("report_api") else None
+            report_api.analysis_api.workflow if context.obj.meta_apis.get("report_api") else None
         )
         cases_without_delivery_report: list[Case] = (
             report_api.get_cases_without_delivery_report(workflow=workflow)
             if not context.obj.meta_apis.get("upload_api")
-            else report_api.get_cases_without_uploaded_delivery_report(pipeline=workflow)
+            else report_api.get_cases_without_uploaded_delivery_report(workflow=workflow)
         )
         if not cases_without_delivery_report:
             click.echo(

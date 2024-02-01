@@ -29,7 +29,7 @@ class NfAnalysisAPI(AnalysisAPI):
     """Parent class for handling NF-core analyses."""
 
     def __init__(self, config: CGConfig, pipeline: Workflow):
-        super().__init__(config=config, pipeline=pipeline)
+        super().__init__(workflow=pipeline, config=config)
         self.pipeline: Workflow = pipeline
         self.root_dir: str | None = None
         self.nfcore_pipeline_path: str | None = None

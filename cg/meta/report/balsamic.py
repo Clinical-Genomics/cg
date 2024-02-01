@@ -167,7 +167,7 @@ class BalsamicReportAPI(ReportAPI):
         analysis_type: str = case.data_analysis.type
         required_data_analysis_fields: list[str] = (
             REQUIRED_DATA_ANALYSIS_FIELDS
-            if self.analysis_api.pipeline == Workflow.BALSAMIC_QC
+            if self.analysis_api.workflow == Workflow.BALSAMIC_QC
             else REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS
         )
         required_sample_metadata_fields: list[str] = []

@@ -39,7 +39,7 @@ class CleanAPI:
                 LOG.warning(
                     f"Version not found for "
                     f"bundle:{bundle_name}; "
-                    f"pipeline: {workflow}; "
+                    f"workflow: {workflow}; "
                     f"date {analysis.started_at}"
                 )
                 continue
@@ -47,7 +47,7 @@ class CleanAPI:
             LOG.info(
                 f"Version found for "
                 f"bundle:{bundle_name}; "
-                f"pipeline: {workflow}; "
+                f"workflow: {workflow}; "
                 f"date {analysis.started_at}"
             )
             yield self.housekeeper_api.get_files(
@@ -77,15 +77,15 @@ class CleanAPI:
     def get_unprotected_existing_bundle_files(self, before: datetime) -> Iterator[File]:
         """Returns all existing bundle files from analyses started before 'before' that have no protected tags"""
 
-        pipeline: Workflow
-        for pipeline in Workflow:
-            protected_tags_lists = WORKFLOW_PROTECTED_TAGS.get(pipeline)
+        workflow: Workflow
+        for workflow in Workflow:
+            protected_tags_lists = WORKFLOW_PROTECTED_TAGS.get(workflow)
             if not protected_tags_lists:
-                LOG.debug(f"No protected tags defined for {pipeline}, skipping")
+                LOG.debug(f"No protected tags defined for {workflow}, skipping")
                 continue
 
             hk_files: list[File]
-            for hk_files in self.get_bundle_files(before=before, workflow=pipeline):
+            for hk_files in self.get_bundle_files(before=before, workflow=workflow):
                 hk_file: File
                 for hk_file in hk_files:
                     if self.has_protected_tags(hk_file, protected_tags_lists=protected_tags_lists):

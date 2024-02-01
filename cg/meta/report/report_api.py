@@ -147,15 +147,15 @@ class ReportAPI(MetaAPI):
                 )
         return stored_cases
 
-    def get_cases_without_uploaded_delivery_report(self, pipeline: Workflow) -> list[Case]:
+    def get_cases_without_uploaded_delivery_report(self, workflow: Workflow) -> list[Case]:
         """Returns a list of cases that need a delivery report to be uploaded."""
-        analyses: Query = self.status_db.analyses_to_upload_delivery_reports(pipeline=pipeline)[
+        analyses: Query = self.status_db.analyses_to_upload_delivery_reports(workflow=workflow)[
             :MAX_ITEMS_TO_RETRIEVE
         ]
-        return [analysis_obj.case for analysis_obj in analyses]
+        return [analysis.case for analysis in analyses]
 
     def update_delivery_report_date(self, case: Case, analysis_date: datetime) -> None:
-        """Updates the date when delivery report was created."""
+        """Updates the date when a delivery report was created."""
         analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_started_at(
             case_entry_id=case.id, started_at_date=analysis_date
         )
@@ -284,7 +284,7 @@ class ReportAPI(MetaAPI):
         """Return pipeline specific limitations given an application tag."""
         application_limitation: ApplicationLimitations = (
             self.status_db.get_application_limitation_by_tag_and_pipeline(
-                tag=application_tag, pipeline=self.analysis_api.pipeline
+                tag=application_tag, pipeline=self.analysis_api.workflow
             )
         )
         return application_limitation.limitations if application_limitation else None

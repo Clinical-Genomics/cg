@@ -199,7 +199,7 @@ def past_run_dirs(
     for analysis in possible_cleanups:
         case_id = analysis.case.internal_id
         try:
-            LOG.info(f"Cleaning {analysis_api.pipeline} output for {case_id}")
+            LOG.info(f"Cleaning {analysis_api.workflow} output for {case_id}")
             context.invoke(clean_run_dir, yes=yes, case_id=case_id, dry_run=dry_run)
         except FileNotFoundError:
             continue
@@ -209,7 +209,7 @@ def past_run_dirs(
 
     if exit_code:
         raise click.Abort
-    LOG.info(f"Done cleaning {analysis_api.pipeline} output")
+    LOG.info(f"Done cleaning {analysis_api.workflow} output")
 
 
 @click.command("balsamic-past-run-dirs")

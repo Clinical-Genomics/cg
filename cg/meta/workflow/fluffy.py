@@ -79,10 +79,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         self.root_dir = Path(config.fluffy.root_dir)
         LOG.info("Set root dir to %s", config.fluffy.root_dir)
         self.fluffy_config = Path(config.fluffy.config_path)
-        super().__init__(
-            pipeline,
-            config,
-        )
+        super().__init__(pipeline, config)
 
     @property
     def use_read_count_threshold(self) -> bool:
@@ -264,7 +261,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         and is ready to be stored in Housekeeper."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
+            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.workflow)
             if Path(self.get_analysis_finish_path(case_id=case.internal_id)).exists()
         ]
 

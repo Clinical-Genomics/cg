@@ -43,12 +43,12 @@ def add_gene_panel_combo(default_panels: set[str]) -> set[str]:
 
 class AnalysisAPI(MetaAPI):
     """
-    Parent class containing all methods that are either shared or overridden by other workflow APIs
+    Parent class containing all methods that are either shared or overridden by other workflow APIs.
     """
 
-    def __init__(self, pipeline: Workflow, config: CGConfig):
+    def __init__(self, workflow: Workflow, config: CGConfig):
         super().__init__(config=config)
-        self.pipeline = pipeline
+        self.workflow = workflow
         self._process = None
 
     @property
@@ -185,7 +185,7 @@ class AnalysisAPI(MetaAPI):
         analysis_start: dt.datetime = self.get_bundle_created_date(case_id=case_id)
         pipeline_version: str = self.get_pipeline_version(case_id=case_id)
         new_analysis: Case = self.status_db.add_analysis(
-            pipeline=self.pipeline,
+            pipeline=self.workflow,
             version=pipeline_version,
             started_at=analysis_start,
             completed_at=dt.datetime.now(),
@@ -216,7 +216,7 @@ class AnalysisAPI(MetaAPI):
             out_dir=self.get_job_ids_path(case_id).parent.as_posix(),
             config_path=self.get_job_ids_path(case_id).as_posix(),
             slurm_quality_of_service=self.get_slurm_qos_for_case(case_id),
-            data_analysis=str(self.pipeline),
+            data_analysis=str(self.workflow),
             ticket=self.status_db.get_latest_ticket_from_case(case_id),
             workflow_manager=self.get_workflow_manager(),
         )
@@ -225,7 +225,7 @@ class AnalysisAPI(MetaAPI):
         return self.hermes_api.create_housekeeper_bundle(
             bundle_name=case_id,
             deliverables=self.get_deliverables_file_path(case_id=case_id),
-            workflow=str(self.pipeline),
+            workflow=str(self.workflow),
             analysis_type=self.get_bundle_deliverables_type(case_id),
             created=self.get_bundle_created_date(case_id),
         ).model_dump()
@@ -241,7 +241,7 @@ class AnalysisAPI(MetaAPI):
             self.process.run_command(["--version"])
             return list(self.process.stdout_lines())[0].split()[-1]
         except (Exception, CalledProcessError):
-            LOG.warning("Could not retrieve %s workflow version!", self.pipeline)
+            LOG.warning("Could not retrieve %s workflow version!", self.workflow)
             return "0.0.0"
 
     def set_statusdb_action(self, case_id: str, action: str | None, dry_run: bool = False) -> None:
@@ -263,13 +263,13 @@ class AnalysisAPI(MetaAPI):
 
     def get_analyses_to_clean(self, before: dt.datetime) -> list[Analysis]:
         analyses_to_clean = self.status_db.get_analyses_to_clean(
-            pipeline=self.pipeline, before=before
+            pipeline=self.workflow, before=before
         )
         return analyses_to_clean
 
     def get_cases_to_analyze(self) -> list[Case]:
         return self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.use_read_count_threshold
+            pipeline=self.workflow, threshold=self.use_read_count_threshold
         )
 
     def get_cases_to_store(self) -> list[Case]:
@@ -277,7 +277,7 @@ class AnalysisAPI(MetaAPI):
         and is ready to be stored in Housekeeper."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
+            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.workflow)
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
         ]
 
@@ -286,7 +286,7 @@ class AnalysisAPI(MetaAPI):
         and is ready for QC metrics checks."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
+            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.workflow)
             if self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
 
