@@ -337,12 +337,12 @@ class ReportAPI(MetaAPI):
         analysis: Analysis,
         analysis_metadata: AnalysisModel,
     ) -> DataAnalysisModel:
-        """Return pipeline attributes used for data analysis."""
+        """Return workflow attributes used for data analysis."""
         return DataAnalysisModel(
             customer_workflow=case.data_analysis,
             data_delivery=case.data_delivery,
             workflow=analysis.pipeline,
-            pipeline_version=analysis.pipeline_version,
+            workflow_version=analysis.pipeline_version,
             type=self.get_data_analysis_type(case=case),
             genome_build=self.get_genome_build(analysis_metadata=analysis_metadata),
             variant_callers=self.get_variant_callers(_analysis_metadata=analysis_metadata),
@@ -419,7 +419,7 @@ class ReportAPI(MetaAPI):
         raise NotImplementedError
 
     def get_template_name(self) -> str:
-        """Return pipeline specific template name."""
+        """Return workflow specific template name."""
         raise NotImplementedError
 
     @staticmethod
@@ -448,10 +448,10 @@ class ReportAPI(MetaAPI):
         return ReportAPI.get_sample_required_fields(case=case, required_fields=required_fields)
 
     def get_hk_scout_file_tags(self, scout_tag: str) -> list | None:
-        """Return pipeline specific uploaded to Scout Housekeeper file tags given a Scout key."""
+        """Return workflow specific uploaded to Scout Housekeeper file tags given a Scout key."""
         tags = self.get_upload_case_tags().get(scout_tag)
         return list(tags) if tags else None
 
     def get_upload_case_tags(self):
-        """Return pipeline specific upload case tags."""
+        """Return workflow specific upload case tags."""
         raise NotImplementedError

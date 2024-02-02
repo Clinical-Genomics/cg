@@ -58,13 +58,13 @@ class ScoutReportFiles(BaseModel):
 
 class DataAnalysisModel(BaseModel):
     """
-    Model that describes the pipeline attributes used for the data analysis
+    Model that describes the workflow attributes used for the data analysis
 
     Attributes:
         customer_workflow: data analysis requested by the customer; source: StatusDB/family/data_analysis
         data_delivery: data delivery requested by the customer; source: StatusDB/family/data_delivery
-        workflow: actual pipeline used for analysis; source: statusDB/analysis/pipeline
-        pipeline_version: pipeline version; source: statusDB/analysis/pipeline_version
+        workflow: actual workflow used for analysis; source: statusDB/analysis/pipeline
+        workflow_version: workflow version; source: statusDB/analysis/pipeline_version
         type: analysis type carried out; source: pipeline workflow
         genome_build: build version of the genome reference; source: pipeline workflow
         variant_callers: variant-calling filters; source: pipeline workflow
@@ -75,7 +75,7 @@ class DataAnalysisModel(BaseModel):
     customer_workflow: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     data_delivery: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     workflow: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    pipeline_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    workflow_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     type: Annotated[str, BeforeValidator(get_analysis_type_as_string)] = NA_FIELD
     genome_build: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     variant_callers: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD

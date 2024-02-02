@@ -146,7 +146,7 @@ class ReadHandler(BaseHandler):
             workflow=workflow,
         ).first()
 
-    def get_latest_analysis_to_upload_for_pipeline(self, workflow: str = None) -> list[Analysis]:
+    def get_latest_analysis_to_upload_for_workflow(self, workflow: str = None) -> list[Analysis]:
         """Return latest not uploaded analysis for each case given a workflow."""
         filter_functions: list[AnalysisFilter] = [
             AnalysisFilter.FILTER_WITH_WORKFLOW,
