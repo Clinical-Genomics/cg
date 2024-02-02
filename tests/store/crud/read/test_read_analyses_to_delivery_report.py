@@ -18,7 +18,7 @@ def test_missing(analysis_store: Store, helpers: StoreHelpers, timestamp_now):
         started_at=timestamp_now,
         completed_at=timestamp_now,
         uploaded_at=timestamp_now,
-        pipeline=pipeline,
+        workflow=pipeline,
         data_delivery=DataDelivery.SCOUT,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
@@ -53,7 +53,7 @@ def test_outdated_analysis(
         started_at=timestamp_old_analysis,
         uploaded_at=timestamp_now,
         delivery_reported_at=timestamp_yesterday,
-        pipeline=pipeline,
+        workflow=pipeline,
     )
 
     # GIVEN samples which has been delivered
@@ -85,7 +85,7 @@ def test_analyses_to_upload_delivery_reports(
         completed_at=timestamp_now,
         uploaded_at=None,
         delivery_reported_at=timestamp_now,
-        pipeline=pipeline,
+        workflow=pipeline,
         data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
     )
 

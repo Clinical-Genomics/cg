@@ -508,8 +508,8 @@ def mip_dna_analysis(
         store=analysis_store_trio,
         case=case,
         started_at=timestamp,
-        pipeline=Workflow.MIP_DNA,
         completed_at=timestamp,
+        workflow=Workflow.MIP_DNA,
     )
     for link in case.links:
         helpers.add_phenotype_groups_to_sample(

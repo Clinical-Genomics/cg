@@ -61,10 +61,10 @@ def test_pipeline_included(
     pipeline = Workflow.BALSAMIC
     analysis = helpers.add_analysis(
         analysis_store,
-        pipeline=pipeline,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
+        workflow=pipeline,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: CaseSample = analysis_store.relate_sample(
@@ -90,10 +90,10 @@ def test_pipeline_excluded(analysis_store: Store, helpers, timestamp_now: dateti
     wrong_pipeline = Workflow.MIP_DNA
     analysis = helpers.add_analysis(
         analysis_store,
-        pipeline=used_pipeline,
         started_at=timestamp_now,
         uploaded_at=timestamp_now,
         cleaned_at=None,
+        workflow=used_pipeline,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     link: CaseSample = analysis_store.relate_sample(

@@ -296,7 +296,7 @@ def test_filter_cases_for_analysis(
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(
-        base_store, completed_at=timestamp_now, pipeline=Workflow.MIP_DNA
+        base_store, completed_at=timestamp_now, workflow=Workflow.MIP_DNA
     )
 
     # Given an action set to analyze
@@ -363,7 +363,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
     )
 
     # GIVEN a completed analysis
-    test_analysis: Analysis = helpers.add_analysis(base_store, pipeline=Workflow.MIP_DNA)
+    test_analysis: Analysis = helpers.add_analysis(base_store, workflow=Workflow.MIP_DNA)
 
     # Given an action set to None
     test_analysis.case.action = None
@@ -399,7 +399,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
     )
 
     # GIVEN a completed analysis
-    test_analysis: Analysis = helpers.add_analysis(base_store, pipeline=Workflow.MIP_DNA)
+    test_analysis: Analysis = helpers.add_analysis(base_store, workflow=Workflow.MIP_DNA)
 
     # Given an action set to None
     test_analysis.case.action: str | None = None

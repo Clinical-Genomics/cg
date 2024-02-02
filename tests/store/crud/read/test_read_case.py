@@ -1349,7 +1349,7 @@ def test_analysis_pipeline(base_store: Store, helpers):
 
     # GIVEN a database with an analysis that has workflow
     pipeline = Workflow.BALSAMIC
-    analysis = helpers.add_analysis(base_store, pipeline=pipeline)
+    analysis = helpers.add_analysis(base_store, workflow=pipeline)
     assert analysis.pipeline is not None
 
     # WHEN getting active cases

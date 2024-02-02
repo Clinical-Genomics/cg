@@ -21,7 +21,7 @@ def test_upload_auto_with_pipeline_as_argument(
     """Test upload auto"""
     # GIVEN a store with a MIP analysis
     pipeline = Workflow.MIP_DNA
-    helpers.add_analysis(store=upload_context.status_db, completed_at=timestamp, pipeline=pipeline)
+    helpers.add_analysis(store=upload_context.status_db, completed_at=timestamp, workflow=pipeline)
 
     # WHEN uploading all analysis from workflow MIP
     caplog.set_level(logging.INFO)

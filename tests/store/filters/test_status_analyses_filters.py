@@ -56,9 +56,9 @@ def test_filter_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers,
     """Test analyses filtering by pipeline."""
 
     # GIVEN a set of mock analyses
-    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, pipeline=Workflow.BALSAMIC)
+    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, workflow=Workflow.BALSAMIC)
     mip_analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=case, pipeline=Workflow.MIP_DNA
+        store=base_store, case=case, workflow=Workflow.MIP_DNA
     )
 
     # WHEN extracting the analyses
@@ -170,9 +170,9 @@ def test_filter_report_analyses_by_pipeline(base_store: Store, helpers: StoreHel
     """Test filtering delivery report related analysis by pipeline."""
 
     # GIVEN a set of mock analysis
-    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, pipeline=Workflow.BALSAMIC)
+    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, workflow=Workflow.BALSAMIC)
     fluffy_analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=case, pipeline=Workflow.FLUFFY
+        store=base_store, case=case, workflow=Workflow.FLUFFY
     )
 
     # WHEN filtering delivery report related analyses
@@ -262,7 +262,7 @@ def test_filter_analysis_started_before(
         store=base_store, started_at=timestamp_now - timedelta(days=1)
     )
     analysis: Analysis = helpers.add_analysis(
-        store=base_store, started_at=timestamp_now, case=analysis_old.case
+        store=base_store, case=analysis_old.case, started_at=timestamp_now
     )
 
     # WHEN filtering the analyses by started_at
@@ -286,7 +286,7 @@ def test_filter_analysis_not_cleaned(
     # GIVEN a set of mock analyses
     analysis_cleaned: Analysis = helpers.add_analysis(store=base_store, cleaned_at=timestamp_now)
     analysis: Analysis = helpers.add_analysis(
-        store=base_store, cleaned_at=None, case=analysis_cleaned.case
+        store=base_store, case=analysis_cleaned.case, cleaned_at=None
     )
 
     # WHEN filtering the analyses by cleaned_at
@@ -310,9 +310,7 @@ def test_filter_analyses_by_started_at(
         store=base_store, started_at=timestamp_now
     )
     analysis_started_old: Analysis = helpers.add_analysis(
-        store=base_store,
-        started_at=timestamp_yesterday,
-        case=analysis_started_now.case,
+        store=base_store, case=analysis_started_now.case, started_at=timestamp_yesterday
     )
 
     # WHEN filtering the analyses by started_at

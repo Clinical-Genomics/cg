@@ -29,10 +29,10 @@ def test_dry_run(
     base_store = clean_context_microsalt.status_db
     helpers.add_analysis(
         base_store,
-        pipeline=Workflow.MICROSALT,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
+        workflow=Workflow.MICROSALT,
     )
 
     analysis_to_clean = base_store.get_case_by_internal_id(microsalt_case_clean_dry).analyses[0]
@@ -77,10 +77,10 @@ def test_clean_run(
     base_store = clean_context_microsalt.status_db
     helpers.add_analysis(
         base_store,
-        pipeline=Workflow.MICROSALT,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
+        workflow=Workflow.MICROSALT,
     )
 
     analysis_to_clean = base_store.get_case_by_internal_id(microsalt_case_clean).analyses[0]

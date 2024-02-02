@@ -23,7 +23,7 @@ def test_get_upload_api(cg_context: CGConfig, case_id: str, helpers: StoreHelper
     case: Case = helpers.ensure_case(
         store=status_db, data_analysis=Workflow.BALSAMIC, case_id=case_id
     )
-    helpers.add_analysis(store=status_db, pipeline=Workflow.BALSAMIC, case=case)
+    helpers.add_analysis(store=status_db, case=case, workflow=Workflow.BALSAMIC)
 
     # WHEN getting the upload API
     upload_api: UploadAPI = get_upload_api(cg_config=cg_context, case=case)
@@ -47,7 +47,7 @@ def test_create_scout_load_config(
     case: Case = helpers.ensure_case(
         store=status_db, data_analysis=Workflow.BALSAMIC, case_id=case_id
     )
-    helpers.add_analysis(store=status_db, pipeline=Workflow.BALSAMIC, case=case)
+    helpers.add_analysis(store=status_db, case=case, workflow=Workflow.BALSAMIC)
 
     with mock.patch.object(UploadScoutAPI, "generate_config", return_value=MockScoutLoadConfig()):
         # WHEN creating the scout load config

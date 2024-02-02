@@ -169,16 +169,16 @@ def test_dispatcher_on_other_functions(
     helpers: StoreHelpers,
     timestamp_now: datetime,
     timestamp_yesterday: datetime,
-    pipeline: Workflow = Workflow.MIP_DNA,
+    workflow: Workflow = Workflow.MIP_DNA,
     case_internal_id: str = "test_case",
 ):
     """Test that the dispatcher can be used to call functions in the status db"""
 
     # GIVEN a database with a case and an analysis
     case = helpers.add_case(store, internal_id=case_internal_id)
-    helpers.add_analysis(store, case=case, started_at=timestamp_yesterday, pipeline=pipeline)
-    helpers.add_analysis(store, case=case, started_at=timestamp_now, pipeline=Workflow.FLUFFY)
-    helpers.add_analysis(store, case=case, started_at=timestamp_yesterday, pipeline=Workflow.FLUFFY)
+    helpers.add_analysis(store, case=case, started_at=timestamp_yesterday, workflow=workflow)
+    helpers.add_analysis(store, case=case, started_at=timestamp_now, workflow=Workflow.FLUFFY)
+    helpers.add_analysis(store, case=case, started_at=timestamp_yesterday, workflow=Workflow.FLUFFY)
 
     # WHEN calling the dispatcher with the to get analyses
     function_dispatcher: Dispatcher = Dispatcher(
@@ -190,7 +190,7 @@ def test_dispatcher_on_other_functions(
         ],
         input_dict={
             "case_internal_id": case_internal_id,
-            "workflow": pipeline,
+            "workflow": workflow,
             "started_at_before": timestamp_now,
         },
     )
@@ -200,5 +200,5 @@ def test_dispatcher_on_other_functions(
     for analysis in analyses:
         assert analysis
         assert analysis.case.internal_id == case_internal_id
-        assert analysis.pipeline == pipeline
+        assert analysis.pipeline == workflow
         assert analysis.started_at < timestamp_now

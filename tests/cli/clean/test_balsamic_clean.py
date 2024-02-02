@@ -82,10 +82,10 @@ def test_dry_run(
     base_store = clean_context.status_db
     helpers.add_analysis(
         base_store,
-        pipeline=Workflow.BALSAMIC,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
+        workflow=Workflow.BALSAMIC,
     )
 
     analysis_to_clean = base_store.get_case_by_internal_id(balsamic_case_clean).analyses[0]

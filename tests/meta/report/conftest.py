@@ -99,9 +99,9 @@ def report_store(analysis_store, helpers, timestamp_yesterday):
     """A mock store instance for report testing."""
     case = analysis_store.get_cases()[0]
     helpers.add_analysis(
-        analysis_store, case, pipeline=Workflow.MIP_DNA, started_at=timestamp_yesterday
+        analysis_store, case, started_at=timestamp_yesterday, workflow=Workflow.MIP_DNA
     )
-    helpers.add_analysis(analysis_store, case, pipeline=Workflow.MIP_DNA, started_at=datetime.now())
+    helpers.add_analysis(analysis_store, case, started_at=datetime.now(), workflow=Workflow.MIP_DNA)
     # Mock sample dates to calculate processing times
     for family_sample in analysis_store.get_case_samples_by_case_id(
         case_internal_id=case.internal_id
