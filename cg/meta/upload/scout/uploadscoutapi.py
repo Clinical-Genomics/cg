@@ -432,7 +432,7 @@ class UploadScoutAPI:
         list_of_dna_cases: list[Case], collaborators: set[Customer]
     ) -> list[str]:
         """Filters the given list of DNA samples and returns a subset of uploaded cases ordered by customers in the
-        specified list of collaborators and within the correct pipeline."""
+        specified list of collaborators and within the correct workflow."""
         filtered_dna_cases: list[str] = []
         for case in list_of_dna_cases:
             if (

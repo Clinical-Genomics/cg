@@ -318,7 +318,7 @@ class MipAnalysisAPI(AnalysisAPI):
     def config_sample(self, link_obj: CaseSample, panel_bed: str) -> dict:
         raise NotImplementedError
 
-    def get_pipeline_version(self, case_id: str) -> str:
+    def get_workflow_version(self, case_id: str) -> str:
         """Get MIP version from sample info file"""
         LOG.debug("Fetch pipeline version")
         sample_info_raw: dict = ReadFile.get_content_from_file(

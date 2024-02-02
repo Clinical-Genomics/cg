@@ -107,7 +107,7 @@ class AnalysisAPI(MetaAPI):
         return Priority.priority_to_slurm_qos().get(priority)
 
     def get_workflow_manager(self) -> str:
-        """Get workflow manager for a given pipeline."""
+        """Get workflow manager for a given workflow."""
         return WorkflowManager.Slurm.value
 
     def get_case_path(self, case_id: str) -> list[Path] | Path:
@@ -183,10 +183,10 @@ class AnalysisAPI(MetaAPI):
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
         case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_start: dt.datetime = self.get_bundle_created_date(case_id=case_id)
-        pipeline_version: str = self.get_pipeline_version(case_id=case_id)
+        workflow_version: str = self.get_workflow_version(case_id=case_id)
         new_analysis: Case = self.status_db.add_analysis(
             workflow=self.workflow,
-            version=pipeline_version,
+            version=workflow_version,
             completed_at=dt.datetime.now(),
             primary=(len(case_obj.analyses) == 0),
             started_at=analysis_start,
@@ -233,9 +233,9 @@ class AnalysisAPI(MetaAPI):
     def get_bundle_created_date(self, case_id: str) -> dt.datetime:
         return self.get_date_from_file_path(self.get_deliverables_file_path(case_id=case_id))
 
-    def get_pipeline_version(self, case_id: str) -> str:
+    def get_workflow_version(self, case_id: str) -> str:
         """
-        Calls the pipeline to get the pipeline version number. If fails, returns a placeholder value instead.
+        Calls the workflow to get the workflow version number. If fails, returns a placeholder value instead.
         """
         try:
             self.process.run_command(["--version"])

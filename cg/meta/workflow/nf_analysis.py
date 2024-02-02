@@ -69,7 +69,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get workflow manager from Tower."""
         return WorkflowManager.Tower.value
 
-    def get_pipeline_version(self, case_id: str) -> str:
+    def get_workflow_version(self, case_id: str) -> str:
         """Get pipeline version from config."""
         return self.revision
 
