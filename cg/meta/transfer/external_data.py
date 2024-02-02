@@ -46,14 +46,16 @@ def get_all_fastq(sample_folder: Path) -> list[Path]:
 class ExternalDataAPI(MetaAPI):
     """Base class for APIs handling external data."""
 
-    def __init__(self, config: CGConfig, dry_run: bool = False):
+    def __init__(self, config: CGConfig, ticket: str, dry_run: bool = False):
         super().__init__(config)
+        self.customer_id: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
         self._destination_path: str = config.external.hasta
         self.dry_run: bool = dry_run
+        self.ticket: str = ticket
 
-    def get_destination_path(self, customer: str, lims_sample_id: str | None = "") -> Path:
+    def get_destination_path(self, lims_sample_id: str | None = "") -> Path:
         """Returns the path to where the files are to be transferred."""
-        return Path(self._destination_path % customer, lims_sample_id)
+        return Path(self._destination_path % self.customer_id, lims_sample_id)
 
 
 class TransferExternalDataAPI(ExternalDataAPI):
@@ -123,24 +125,22 @@ class TransferExternalDataAPI(ExternalDataAPI):
 class AddExternalDataAPI(ExternalDataAPI):
     """API for adding external data to Housekeeper."""
 
-    def __init__(self, config: CGConfig, dry_run: bool = False, force: bool = False):
-        super().__init__(config, dry_run)
+    def __init__(self, config: CGConfig, ticket: str, dry_run: bool = False, force: bool = False):
+        super().__init__(config, ticket, dry_run)
         self.force: bool = force
 
-    def get_all_paths(self, customer: str, lims_sample_id: str) -> list[Path]:
+    def get_all_paths(self, lims_sample_id: str) -> list[Path]:
         """Returns the paths of all fastq files associated to the sample."""
-        fastq_folder: Path = self.get_destination_path(
-            lims_sample_id=lims_sample_id, customer=customer
-        )
+        fastq_folder: Path = self.get_destination_path(lims_sample_id=lims_sample_id)
         all_fastq_in_folder: list[Path] = get_all_fastq(sample_folder=fastq_folder)
         return all_fastq_in_folder
 
-    def get_samples_from_folder(self, folder: Path, ticket: str) -> list[Sample]:
+    def get_samples_from_folder(self, folder: Path) -> list[Sample]:
         """Returns the samples from given ticket that are present in the provided folder."""
         available_folders: list[str] = [sample_path.name for sample_path in folder.iterdir()]
         available_samples: list[Sample] = [
             sample
-            for sample in self.status_db.get_samples_from_ticket(ticket=ticket)
+            for sample in self.status_db.get_samples_from_ticket(ticket=self.ticket)
             if sample.internal_id in available_folders or sample.name in available_folders
         ]
         return available_samples
@@ -156,10 +156,9 @@ class AddExternalDataAPI(ExternalDataAPI):
                 bundle_name=lims_sample_id, file=path, tags=HK_FASTQ_TAGS
             )
 
-    def get_fastq_paths_to_add(
-        self, customer: str, hk_version: Version, lims_sample_id: str
-    ) -> list[Path]:
-        paths: list[Path] = self.get_all_paths(lims_sample_id=lims_sample_id, customer=customer)
+    def get_fastq_paths_to_add(self, lims_sample_id: str) -> list[Path]:
+        hk_version: Version = self.housekeeper_api.get_or_create_version(bundle_name=lims_sample_id)
+        paths: list[Path] = self.get_all_paths(lims_sample_id=lims_sample_id)
         fastq_paths_to_add: list[Path] = self.housekeeper_api.check_bundle_files(
             file_paths=paths,
             bundle_name=lims_sample_id,
@@ -168,13 +167,13 @@ class AddExternalDataAPI(ExternalDataAPI):
         )
         return fastq_paths_to_add
 
-    def curate_sample_folder(self, customer_id: str, sample_folder: Path) -> None:
+    def curate_sample_folder(self, sample_folder: Path) -> None:
         """
         Changes the name of the folder to the sample internal_id. If force is set to True,
         replaces any previous folder.
         """
         customer: Customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=customer_id
+            customer_internal_id=self.customer_id
         )
         customer_folder: Path = sample_folder.parent
         sample: Sample = self.status_db.get_sample_by_customer_and_name(
@@ -189,26 +188,28 @@ class AddExternalDataAPI(ExternalDataAPI):
                 f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
             )
 
-    def get_available_samples(self, ticket: str) -> list[Sample]:
+    def get_available_samples(self) -> list[Sample]:
         """Return a list of samples available for adding to Housekeeper."""
-        customer_id: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
-        destination_folder_path: Path = self.get_destination_path(customer=customer_id)
+        destination_folder_path: Path = self.get_destination_path()
         for sample_folder in destination_folder_path.iterdir():
-            self.curate_sample_folder(customer_id=customer_id, sample_folder=sample_folder)
+            self.curate_sample_folder(sample_folder=sample_folder)
         available_samples: list[Sample] = self.get_samples_from_folder(
-            folder=destination_folder_path, ticket=ticket
+            folder=destination_folder_path
         )
         return available_samples
 
     def are_all_fastq_valid(self, sample: Sample) -> bool:
         """Return True if all fastq files of a given sample pass md5 checksum."""
 
-    def add_transfer_to_housekeeper(self, ticket: str) -> None:
+    def add_transfer_to_housekeeper(self) -> None:
         """Add and include available ticket files to a Housekeeper bundle."""
-        available_samples: list[Sample] = self.get_available_samples(ticket=ticket)
+        available_samples: list[Sample] = self.get_available_samples()
         failed_paths: list[Path] = []
         cases_to_start: list[dict] = []
         for sample in available_samples:
+            fastq_paths_to_add: list[Path] = self.get_fastq_paths_to_add(
+                lims_sample_id=sample.internal_id
+            )
             self.are_all_fastq_valid(sample=sample)
 
             cases_to_start.extend(
@@ -216,12 +217,7 @@ class AddExternalDataAPI(ExternalDataAPI):
                     sample_internal_id=sample.internal_id
                 )
             )
-            last_version: Version = self.housekeeper_api.get_or_create_version(
-                bundle_name=sample.internal_id
-            )
-            fastq_paths_to_add: list[Path] = self.get_fastq_paths_to_add(
-                customer=customer_id, hk_version=last_version, lims_sample_id=sample.internal_id
-            )
+
             self.add_and_include_files_to_bundles(
                 fastq_paths=fastq_paths_to_add,
                 lims_sample_id=sample.internal_id,
