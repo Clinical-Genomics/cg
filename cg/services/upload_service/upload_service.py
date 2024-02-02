@@ -7,6 +7,6 @@ class UploadService:
         self.slurm_service = slurm_service
         self.trailblazer_api = trailblazer_api
 
-    def upload(self, command: str, name: str, analysis_id: int):
-        slurm_id: int = self.slurm_service.submit_job(command=command, name=name)
+    def upload(self, upload_command: str, name: str, analysis_id: int):
+        slurm_id: int = self.slurm_service.submit_job(command=upload_command, name=name)
         self.trailblazer_api.add_upload_job_to_analysis(slurm_id=slurm_id, analysis_id=analysis_id)
