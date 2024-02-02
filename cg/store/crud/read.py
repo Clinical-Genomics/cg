@@ -126,8 +126,8 @@ class ReadHandler(BaseHandler):
     def get_application_limitations_by_tag(self, tag: str) -> list[ApplicationLimitations] | None:
         """Return application limitations given the application tag."""
         return apply_application_limitations_filter(
-            application_limitations=self._get_join_application_limitations_query(),
             filter_functions=[ApplicationLimitationsFilter.FILTER_BY_TAG],
+            application_limitations=self._get_join_application_limitations_query(),
             tag=tag,
         ).all()
 
@@ -137,13 +137,13 @@ class ReadHandler(BaseHandler):
         """Return an application limitation given the application tag and workflow."""
         filter_functions: list[ApplicationLimitationsFilter] = [
             ApplicationLimitationsFilter.FILTER_BY_TAG,
-            ApplicationLimitationsFilter.FILTER_BY_PIPELINE,
+            ApplicationLimitationsFilter.FILTER_BY_WORKFLOW,
         ]
         return apply_application_limitations_filter(
-            application_limitations=self._get_join_application_limitations_query(),
             filter_functions=filter_functions,
+            application_limitations=self._get_join_application_limitations_query(),
             tag=tag,
-            pipeline=workflow,
+            workflow=workflow,
         ).first()
 
     def get_latest_analysis_to_upload_for_pipeline(self, workflow: str = None) -> list[Analysis]:
@@ -252,7 +252,7 @@ class ReadHandler(BaseHandler):
         filter_functions: list[Callable] = [
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
             CaseFilter.FILTER_BY_CASE_SEARCH,
-            CaseFilter.FILTER_WITH_PIPELINE,
+            CaseFilter.FILTER_WITH_WORKFLOW,
             CaseFilter.ORDER_BY_CREATED_AT,
         ]
 
@@ -783,7 +783,7 @@ class ReadHandler(BaseHandler):
         """Return all running cases in a pipeline."""
         return apply_case_filter(
             cases=self._get_query(table=Case),
-            filter_functions=[CaseFilter.FILTER_WITH_PIPELINE, CaseFilter.FILTER_IS_RUNNING],
+            filter_functions=[CaseFilter.FILTER_WITH_WORKFLOW, CaseFilter.FILTER_IS_RUNNING],
             workflow=workflow,
         ).all()
 
@@ -1022,7 +1022,7 @@ class ReadHandler(BaseHandler):
         """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.FILTER_HAS_SEQUENCE,
-            CaseFilter.FILTER_WITH_PIPELINE,
+            CaseFilter.FILTER_WITH_WORKFLOW,
             CaseFilter.FILTER_FOR_ANALYSIS,
         ]
         cases = apply_case_filter(
@@ -1547,7 +1547,7 @@ class ReadHandler(BaseHandler):
     def observations_to_upload(self, workflow: Workflow = None) -> Query:
         """Return observations that have not been uploaded."""
         case_filter_functions: list[CaseFilter] = [
-            CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_PIPELINE,
+            CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_WORKFLOW,
             CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD,
         ]
         records: Query = apply_case_filter(
@@ -1563,7 +1563,7 @@ class ReadHandler(BaseHandler):
         """Return observations that have been uploaded."""
         records: Query = apply_case_filter(
             cases=self.get_families_with_samples(),
-            filter_functions=[CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_PIPELINE],
+            filter_functions=[CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_WORKFLOW],
             workflow=workflow,
         )
         records: Query = apply_sample_filter(

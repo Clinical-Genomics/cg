@@ -11,16 +11,16 @@ from cg.store.filters.status_case_filters import (
     filter_cases_by_customer_entry_ids,
     filter_cases_by_entry_id,
     filter_cases_by_name,
-    filter_cases_by_pipeline_search,
     filter_cases_by_priority,
     filter_cases_by_ticket_id,
+    filter_cases_by_workflow_search,
     filter_cases_for_analysis,
     filter_cases_has_sequence,
     filter_cases_not_analysed,
-    filter_cases_with_loqusdb_supported_pipeline,
     filter_cases_with_loqusdb_supported_sequencing_method,
-    filter_cases_with_pipeline,
+    filter_cases_with_loqusdb_supported_workflow,
     filter_cases_with_scout_data_delivery,
+    filter_cases_with_workflow,
     filter_inactive_analysis_cases,
     filter_newer_cases_by_order_date,
     filter_older_cases_by_creation_date,
@@ -140,7 +140,7 @@ def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
     assert not cases.all()
 
 
-def test_filter_cases_with_pipeline_when_correct_pipline(
+def test_filter_cases_with_workflow_when_correct_pipline(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that no case is returned when there are no cases with the  specified pipeline."""
@@ -159,13 +159,13 @@ def test_filter_cases_with_pipeline_when_correct_pipline(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
-    cases: list[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Workflow.BALSAMIC))
+    cases: list[Query] = list(filter_cases_with_workflow(cases=cases, workflow=Workflow.BALSAMIC))
 
     # THEN cases should contain the test case
     assert cases
 
 
-def test_filter_cases_with_pipeline_when_incorrect_pipline(
+def test_filter_cases_with_workflow_when_incorrect_pipline(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that no case is returned when there are no cases with the  specified pipeline."""
@@ -184,13 +184,13 @@ def test_filter_cases_with_pipeline_when_incorrect_pipline(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
-    cases: list[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Workflow.MIP_DNA))
+    cases: list[Query] = list(filter_cases_with_workflow(cases=cases, workflow=Workflow.MIP_DNA))
 
     # THEN cases should not contain the test case
     assert not cases
 
 
-def test_filter_cases_with_loqusdb_supported_pipeline(
+def test_filter_cases_with_loqusdb_supported_workflow(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test retrieval of cases that support Loqusdb upload."""
@@ -219,7 +219,7 @@ def test_filter_cases_with_loqusdb_supported_pipeline(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases with pipeline
-    cases: list[Query] = list(filter_cases_with_loqusdb_supported_pipeline(cases=cases))
+    cases: list[Query] = list(filter_cases_with_loqusdb_supported_workflow(cases=cases))
 
     # THEN only the Loqusdb supported case should be extracted
     assert test_mip_case in cases
@@ -246,7 +246,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method(
 
     # WHEN retrieving the available cases
     cases: Query = filter_cases_with_loqusdb_supported_sequencing_method(
-        cases=cases, pipeline=Workflow.MIP_DNA
+        cases=cases, workflow=Workflow.MIP_DNA
     )
 
     # ASSERT that cases is a query
@@ -276,7 +276,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method_empty(
 
     # WHEN retrieving the valid cases
     cases: Query = filter_cases_with_loqusdb_supported_sequencing_method(
-        cases=cases, pipeline=Workflow.MIP_DNA
+        cases=cases, workflow=Workflow.MIP_DNA
     )
 
     # ASSERT that cases is a query
@@ -840,7 +840,7 @@ def test_filter_cases_not_analysed_in_progress(
     assert filtered_cases.count() == 0
 
 
-def test_filter_cases_by_pipeline_search_no_matching_pipeline(
+def test_filter_cases_by_workflow_search_no_matching_pipeline(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that no cases are returned when there are no cases with matching pipeline search."""
@@ -849,15 +849,15 @@ def test_filter_cases_by_pipeline_search_no_matching_pipeline(
     pipeline_search = "non_existent_pipeline"
 
     # WHEN filtering cases by a non-matching pipeline search
-    filtered_cases: Query = filter_cases_by_pipeline_search(
-        cases=cases_query, pipeline_search=pipeline_search
+    filtered_cases: Query = filter_cases_by_workflow_search(
+        cases=cases_query, workflow_search=pipeline_search
     )
 
     # THEN the query should return no cases
     assert filtered_cases.count() == 0
 
 
-def test_filter_cases_by_pipeline_search_partial_match(
+def test_filter_cases_by_workflow_search_partial_match(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that cases with partially matching pipeline search are returned."""
@@ -866,8 +866,8 @@ def test_filter_cases_by_pipeline_search_partial_match(
     pipeline_search = cases_query.first().data_analysis[:3]
 
     # WHEN filtering cases by a partially matching pipeline search
-    filtered_cases: Query = filter_cases_by_pipeline_search(
-        cases=cases_query, pipeline_search=pipeline_search
+    filtered_cases: Query = filter_cases_by_workflow_search(
+        cases=cases_query, workflow_search=pipeline_search
     )
 
     # THEN the query should return the cases with partially matching pipeline names
@@ -876,7 +876,7 @@ def test_filter_cases_by_pipeline_search_partial_match(
         assert pipeline_search in case.data_analysis
 
 
-def test_filter_cases_by_pipeline_search_exact_match(
+def test_filter_cases_by_workflow_search_exact_match(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that cases with exactly matching pipeline search are returned."""
@@ -885,8 +885,8 @@ def test_filter_cases_by_pipeline_search_exact_match(
     pipeline_search = cases_query.first().data_analysis
 
     # WHEN filtering cases by an exactly matching pipeline search
-    filtered_cases: Query = filter_cases_by_pipeline_search(
-        cases=cases_query, pipeline_search=pipeline_search
+    filtered_cases: Query = filter_cases_by_workflow_search(
+        cases=cases_query, workflow_search=pipeline_search
     )
 
     # THEN the query should return the cases with exactly matching pipeline names
