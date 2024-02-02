@@ -9,11 +9,11 @@ from cg.store.filters.status_analysis_filters import (
     filter_analyses_not_cleaned,
     filter_analyses_started_before,
     filter_analyses_with_delivery_report,
-    filter_analyses_with_pipeline,
+    filter_analyses_with_workflow,
     filter_analyses_without_delivery_report,
     filter_completed_analyses,
     filter_not_uploaded_analyses,
-    filter_report_analyses_by_pipeline,
+    filter_report_analyses_by_workflow,
     filter_uploaded_analyses,
     filter_valid_analyses_in_production,
     order_analyses_by_completed_at_asc,
@@ -52,8 +52,8 @@ def test_filter_valid_analyses_in_production(
     assert outdated_analysis not in analyses
 
 
-def test_filter_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers, case: Case):
-    """Test analyses filtering by pipeline."""
+def test_filter_analyses_with_workflow(base_store: Store, helpers: StoreHelpers, case: Case):
+    """Test analyses filtering by workflow."""
 
     # GIVEN a set of mock analyses
     balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, workflow=Workflow.BALSAMIC)
@@ -62,8 +62,8 @@ def test_filter_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers,
     )
 
     # WHEN extracting the analyses
-    analyses: Query = filter_analyses_with_pipeline(
-        analyses=base_store._get_query(table=Analysis), pipeline=Workflow.BALSAMIC
+    analyses: Query = filter_analyses_with_workflow(
+        analyses=base_store._get_query(table=Analysis), workflow=Workflow.BALSAMIC
     )
 
     # ASSERT that analyses is a query
@@ -166,7 +166,7 @@ def test_filter_analyses_without_delivery_report(base_store: Store, helpers: Sto
     assert analysis_without_delivery_report in analyses
 
 
-def test_filter_report_analyses_by_pipeline(base_store: Store, helpers: StoreHelpers, case: Case):
+def test_filter_report_analyses_by_workflow(base_store: Store, helpers: StoreHelpers, case: Case):
     """Test filtering delivery report related analysis by pipeline."""
 
     # GIVEN a set of mock analysis
@@ -176,8 +176,8 @@ def test_filter_report_analyses_by_pipeline(base_store: Store, helpers: StoreHel
     )
 
     # WHEN filtering delivery report related analyses
-    analyses: Query = filter_report_analyses_by_pipeline(
-        analyses=base_store._get_query(table=Analysis), pipeline=Workflow.BALSAMIC
+    analyses: Query = filter_report_analyses_by_workflow(
+        analyses=base_store._get_query(table=Analysis), workflow=Workflow.BALSAMIC
     )
 
     # ASSERT that analyses is a query

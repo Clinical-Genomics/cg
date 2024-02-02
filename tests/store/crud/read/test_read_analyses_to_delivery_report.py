@@ -43,7 +43,7 @@ def test_outdated_analysis(
 
     # GIVEN an analysis that is older than Hasta
     timestamp_old_analysis = get_date("2017-09-26")
-    pipeline = Workflow.BALSAMIC
+    workflow = Workflow.BALSAMIC
 
     # GIVEN a delivery report created at date which is older than the upload date to trigger delivery report generation
 
@@ -53,7 +53,7 @@ def test_outdated_analysis(
         started_at=timestamp_old_analysis,
         uploaded_at=timestamp_now,
         delivery_reported_at=timestamp_yesterday,
-        workflow=pipeline,
+        workflow=workflow,
     )
 
     # GIVEN samples which has been delivered
@@ -66,7 +66,7 @@ def test_outdated_analysis(
     analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_delivery_report
-    analyses = analysis_store.analyses_to_delivery_report(workflow=pipeline).all()
+    analyses = analysis_store.analyses_to_delivery_report(workflow=workflow).all()
 
     # THEN this analyses should not be returned
     assert len(analyses) == 0

@@ -146,12 +146,12 @@ class BaseHandler:
         cases_query = apply_case_filter(
             cases=cases_query,
             filter_functions=filter_functions,
-            order_date=filter_case_order_date,
             action=case_action,
-            priority=priority,
             internal_id_search=internal_id,
             name_search=name,
+            order_date=filter_case_order_date,
             pipeline_search=data_analysis,
+            priority=priority,
         )
 
         # customer filters
