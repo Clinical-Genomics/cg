@@ -19,8 +19,8 @@ class HermesApi:
     def convert_deliverables(
         self, deliverables_file: Path, workflow: str, analysis_type: str | None = None
     ) -> CGDeliverables:
-        """Convert deliverables file in raw pipeline format to CG format with hermes"""
-        LOG.info("Converting pipeline deliverables to CG deliverables")
+        """Convert deliverables file in raw workflow format to CG format with hermes"""
+        LOG.info("Converting workflow deliverables to CG deliverables")
         convert_command = [
             "convert",
             "deliverables",
@@ -42,7 +42,7 @@ class HermesApi:
         analysis_type: str | None,
         created: datetime | None,
     ) -> hk_models.InputBundle:
-        """Convert pipeline deliverables to a Housekeeper bundle ready to be inserted into Housekeeper."""
+        """Convert workflow deliverables to a Housekeeper bundle ready to be inserted into Housekeeper."""
         cg_deliverables: CGDeliverables = self.convert_deliverables(
             deliverables_file=deliverables, workflow=workflow, analysis_type=analysis_type
         )

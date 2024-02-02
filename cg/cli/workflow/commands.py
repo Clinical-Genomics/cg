@@ -37,7 +37,7 @@ OPTION_ANALYSIS_PARAMETERS_CONFIG = click.option(
 OPTION_LOQUSDB_SUPPORTED_WORKFLOW = click.option(
     "--workflow",
     type=click.Choice(LOQUSDB_SUPPORTED_PIPELINES),
-    help="Limit observations upload to a specific pipeline",
+    help="Limit observations upload to a specific workflow",
 )
 
 LOG = logging.getLogger(__name__)

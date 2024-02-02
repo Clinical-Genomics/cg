@@ -280,7 +280,7 @@ class ReportAPI(MetaAPI):
             LOG.info(f"Could not fetch sample {sample_id} from LIMS: {ex}")
         return lims_sample
 
-    def get_pipeline_accreditation_limitation(self, application_tag: str) -> str | None:
+    def get_workflow_accreditation_limitation(self, application_tag: str) -> str | None:
         """Return pipeline specific limitations given an application tag."""
         application_limitation: ApplicationLimitations = (
             self.status_db.get_application_limitation_by_tag_and_pipeline(
@@ -302,7 +302,7 @@ class ReportAPI(MetaAPI):
                 description=application.description,
                 details=application.details,
                 limitations=application.limitations,
-                pipeline_limitations=self.get_pipeline_accreditation_limitation(application.tag),
+                pipeline_limitations=self.get_workflow_accreditation_limitation(application.tag),
                 accredited=application.is_accredited,
                 external=application.is_external,
             )

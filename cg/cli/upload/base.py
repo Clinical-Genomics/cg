@@ -92,7 +92,7 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
 
 
 @upload.command("auto")
-@click.option("--workflow", type=EnumChoice(Workflow), help="Limit to specific pipeline")
+@click.option("--workflow", type=EnumChoice(Workflow), help="Limit to specific workflow")
 @click.pass_context
 def upload_all_completed_analyses(context: click.Context, workflow: Workflow = None):
     """Upload all completed analyses."""

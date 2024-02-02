@@ -47,7 +47,7 @@ def filter_analyses_without_delivery_report(analyses: Query, **kwargs) -> Query:
 def filter_report_analyses_by_workflow(
     analyses: Query, workflow: Workflow = None, **kwargs
 ) -> Query:
-    """Return the delivery report related analyses associated to the provided or supported pipelines."""
+    """Return the delivery report related analyses associated to the provided or supported workflows."""
     return (
         analyses.filter(Analysis.pipeline == workflow)
         if workflow

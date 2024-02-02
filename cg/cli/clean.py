@@ -146,7 +146,7 @@ def scout_finished_cases(
 @DRY_RUN
 @click.pass_context
 def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False) -> None:
-    """Clean up all non-protected files for all pipelines."""
+    """Clean up all non-protected files for all workflows."""
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
     clean_api: CleanAPI = CleanAPI(status_db=context.obj.status_db, housekeeper_api=housekeeper_api)
 
