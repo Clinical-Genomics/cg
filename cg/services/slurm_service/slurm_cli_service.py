@@ -6,11 +6,11 @@ from cg.services.slurm_service.slurm_service import SlurmService
 
 class SlurmCLIService(SlurmService):
 
-    def __init__(self) -> None:
+    def __init__(self, account: str, log_dir: Path, email: str) -> None:
         self.client = SlurmAPI()
-        self.account = ""
-        self.log_dir = ""
-        self.email = ""
+        self.account = account
+        self.log_dir = log_dir
+        self.email = email
 
     def submit_job(self, command: str, name: str) -> int:
         sbatch: Sbatch = self._create_sbatch(command=command, name=name)
@@ -29,4 +29,4 @@ class SlurmCLIService(SlurmService):
         )
 
     def _get_sbatch_path(self, name: str) -> Path:
-        return Path(f"{name}.sbatch")
+        return Path(self.log_dir, "{name}.sh")
