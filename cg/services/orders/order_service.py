@@ -11,6 +11,9 @@ class OrderService:
     def __init__(self, store: Store) -> None:
         self.store = store
 
+    def get_order(self, order_id: int) -> Order:
+        return self.store.get_order(order_id)
+
     def get_orders(self, orders_request: OrdersRequest) -> OrdersResponse:
         orders: list[Order] = self._get_orders(orders_request)
         return create_orders_response(orders)

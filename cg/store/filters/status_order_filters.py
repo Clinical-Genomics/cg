@@ -11,7 +11,14 @@ def filter_orders_by_workflow(orders: Query, workflow: str, **kwargs) -> Query:
     return orders.filter(Order.workflow == workflow) if workflow else orders
 
 
-def apply_order_filters(filter_functions: list[Callable], orders: Query, workflow: str) -> Query:
+def filter_orders_by_id(orders: Query, id: int, **kwargs) -> Query:
+    """Return orders filtered on id."""
+    return orders.filter(Order.id == id)
+
+
+def apply_order_filters(
+    filter_functions: list[Callable], orders: Query, id: int, workflow: str
+) -> Query:
     """Apply filtering functions to the order queries and return filtered results."""
     for filter_function in filter_functions:
         orders: Query = filter_function(orders=orders, workflow=workflow)
@@ -21,4 +28,5 @@ def apply_order_filters(filter_functions: list[Callable], orders: Query, workflo
 class OrderFilter(Enum):
     """Define order filter functions."""
 
+    FILTER_ORDERS_BY_ID: Callable = filter_orders_by_id
     FILTER_ORDERS_BY_WORKFLOW: Callable = filter_orders_by_workflow

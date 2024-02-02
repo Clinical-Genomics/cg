@@ -481,6 +481,14 @@ def get_orders():
     return make_response(response.model_dump())
 
 
+@BLUEPRINT.route("/orders/<order_id")
+def get_order(order_id: int):
+    """Return an order."""
+    order_service = OrderService(db)
+    response: OrdersResponse = order_service.get_order(order_id)
+    return make_response(response.model_dump())
+
+
 @BLUEPRINT.route("/orderform", methods=["POST"])
 def parse_orderform():
     """Parse an orderform/JSON export."""
