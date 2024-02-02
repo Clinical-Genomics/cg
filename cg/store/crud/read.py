@@ -131,7 +131,7 @@ class ReadHandler(BaseHandler):
             tag=tag,
         ).all()
 
-    def get_application_limitation_by_tag_and_pipeline(
+    def get_application_limitation_by_tag_and_workflow(
         self, tag: str, workflow: Workflow
     ) -> ApplicationLimitations | None:
         """Return an application limitation given the application tag and workflow."""

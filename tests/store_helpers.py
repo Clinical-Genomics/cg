@@ -247,7 +247,7 @@ class StoreHelpers:
     ) -> ApplicationLimitations:
         """Ensure that application limitations exists in store."""
         application_limitation: ApplicationLimitations = (
-            store.get_application_limitation_by_tag_and_pipeline(
+            store.get_application_limitation_by_tag_and_workflow(
                 tag=application.tag, workflow=workflow
             )
         )

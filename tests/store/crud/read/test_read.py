@@ -917,7 +917,7 @@ def test_get_application_limitations_by_tag(
     )
 
 
-def test_get_application_limitation_by_tag_and_pipeline(
+def test_get_application_limitation_by_tag_and_workflow(
     store_with_application_limitations: Store,
     tag: str = StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value,
     workflow: Workflow = Workflow.MIP_DNA,
@@ -928,7 +928,7 @@ def test_get_application_limitation_by_tag_and_pipeline(
 
     # WHEN filtering by a given application tag and workflow
     application_limitation: ApplicationLimitations = (
-        store_with_application_limitations.get_application_limitation_by_tag_and_pipeline(
+        store_with_application_limitations.get_application_limitation_by_tag_and_workflow(
             tag=tag, workflow=workflow
         )
     )

@@ -281,9 +281,9 @@ class ReportAPI(MetaAPI):
         return lims_sample
 
     def get_workflow_accreditation_limitation(self, application_tag: str) -> str | None:
-        """Return pipeline specific limitations given an application tag."""
+        """Return workflow specific limitations given an application tag."""
         application_limitation: ApplicationLimitations = (
-            self.status_db.get_application_limitation_by_tag_and_pipeline(
+            self.status_db.get_application_limitation_by_tag_and_workflow(
                 tag=application_tag, workflow=self.analysis_api.workflow
             )
         )
@@ -302,7 +302,7 @@ class ReportAPI(MetaAPI):
                 description=application.description,
                 details=application.details,
                 limitations=application.limitations,
-                pipeline_limitations=self.get_workflow_accreditation_limitation(application.tag),
+                workflow_limitations=self.get_workflow_accreditation_limitation(application.tag),
                 accredited=application.is_accredited,
                 external=application.is_external,
             )
