@@ -83,7 +83,7 @@ class DataAnalysisModel(BaseModel):
     scout_files: ScoutReportFiles
 
     @model_validator(mode="after")
-    def check_supported_pipeline(self) -> "DataAnalysisModel":
+    def check_supported_workflow(self) -> "DataAnalysisModel":
         """Check if the report generation supports a specific pipeline and analysis type."""
         if self.workflow != self.customer_workflow:
             LOG.error(
