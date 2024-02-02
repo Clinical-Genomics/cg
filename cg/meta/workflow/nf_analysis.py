@@ -166,11 +166,11 @@ class NfAnalysisAPI(AnalysisAPI):
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
-    def write_params_file(self, case_id: str, pipeline_parameters: dict) -> None:
+    def write_params_file(self, case_id: str, workflow_parameters: dict) -> None:
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")
         write_yaml_nextflow_style(
-            content=pipeline_parameters,
+            content=workflow_parameters,
             file_path=self.get_params_file_path(case_id=case_id),
         )
 
@@ -321,7 +321,7 @@ class NfAnalysisAPI(AnalysisAPI):
             MultiQC.MULTIQC_DATA + FileExtensions.JSON,
         )
 
-    def get_pipeline_metrics(self) -> dict:
+    def get_workflow_metrics(self) -> dict:
         """Get nf-core pipeline metrics constants."""
         return {}
 
@@ -341,7 +341,7 @@ class NfAnalysisAPI(AnalysisAPI):
                     name=metric_name,
                     step=MultiQC.MULTIQC,
                     value=metric_value,
-                    condition=self.get_pipeline_metrics().get(metric_name, None),
+                    condition=self.get_workflow_metrics().get(metric_name, None),
                 )
             )
         return metric_base_list

@@ -98,7 +98,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             )
             return content_per_sample
 
-    def get_pipeline_parameters(
+    def get_workflow_parameters(
         self, case_id: str, genomes_base: Path | None = None
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
@@ -128,7 +128,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(
             case_id=case_id, strandedness=strandedness
         )
-        pipeline_parameters: RnafusionParameters = self.get_pipeline_parameters(
+        workflow_parameters: RnafusionParameters = self.get_workflow_parameters(
             case_id=case_id, genomes_base=genomes_base
         )
         if dry_run:
@@ -139,7 +139,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             file_path=self.get_sample_sheet_path(case_id=case_id),
             header=RnafusionSampleSheetEntry.headers(),
         )
-        self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
+        self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
 
     def parse_multiqc_json_for_case(self, case_id: str) -> dict:
         """Parse a multiqc_data.json file and returns a dictionary with metric name and metric values for a case."""
@@ -202,5 +202,5 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
         return self.parse_analysis(qc_metrics_raw=qc_metrics)
 
-    def get_pipeline_metrics(self) -> dict:
+    def get_workflow_metrics(self) -> dict:
         return RNAFUSION_METRIC_CONDITIONS
