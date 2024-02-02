@@ -3,5 +3,5 @@ from abc import ABC, abstractmethod
 
 class SlurmService(ABC):
     @abstractmethod
-    def submit_job(self, job):
+    def submit_job(self, command: str, name: str) -> int:
         pass
