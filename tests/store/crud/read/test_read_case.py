@@ -74,12 +74,12 @@ def test_get_cases_by_customer_workflow_and_case_search_pattern(
         assert case_search in case.name
 
 
-def test_get_running_cases_in_pipeline(store_with_cases_and_customers: Store):
+def test_get_running_cases_in_workflow(store_with_cases_and_customers: Store):
     """Test that only cases with the specified pipeline, and have action "running" are returned."""
     # GIVEN a store with some cases
 
     # WHEN getting cases with a workflow and are running
-    cases: list[Case] = store_with_cases_and_customers.get_running_cases_in_pipeline(
+    cases: list[Case] = store_with_cases_and_customers.get_running_cases_in_workflow(
         workflow=Workflow.MIP_DNA
     )
 

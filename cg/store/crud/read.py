@@ -779,7 +779,7 @@ class ReadHandler(BaseHandler):
             raise CgError
         LOG.info(f"Case {case_internal_id} exists in Status DB")
 
-    def get_running_cases_in_pipeline(self, workflow: Workflow) -> list[Case]:
+    def get_running_cases_in_workflow(self, workflow: Workflow) -> list[Case]:
         """Return all running cases in a pipeline."""
         return apply_case_filter(
             cases=self._get_query(table=Case),

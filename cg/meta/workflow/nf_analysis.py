@@ -32,7 +32,7 @@ class NfAnalysisAPI(AnalysisAPI):
         super().__init__(workflow=workflow, config=config)
         self.workflow: Workflow = workflow
         self.root_dir: str | None = None
-        self.nfcore_pipeline_path: str | None = None
+        self.nfcore_workflow_path: str | None = None
         self.references: str | None = None
         self.profile: str | None = None
         self.conda_env: str | None = None
@@ -222,7 +222,7 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.info("Workflow will be executed using Nextflow")
         parameters: list[str] = NextflowHandler.get_nextflow_run_parameters(
             case_id=case_id,
-            pipeline_path=self.nfcore_pipeline_path,
+            pipeline_path=self.nfcore_workflow_path,
             root_dir=self.root_dir,
             command_args=command_args.dict(),
         )

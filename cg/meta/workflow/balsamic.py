@@ -529,7 +529,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return self.get_target_bed_from_lims(link_object.case.internal_id)
 
     def get_workflow_version(self, case_id: str) -> str:
-        LOG.debug("Fetch pipeline version")
+        LOG.debug("Fetch workflow version")
         config_data: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=self.get_case_config_path(case_id=case_id)
         )

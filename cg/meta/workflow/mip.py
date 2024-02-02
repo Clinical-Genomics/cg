@@ -51,7 +51,7 @@ class MipAnalysisAPI(AnalysisAPI):
         raise NotImplementedError
 
     @property
-    def mip_pipeline(self) -> str:
+    def mip_workflow(self) -> str:
         raise NotImplementedError
 
     @property
@@ -320,7 +320,7 @@ class MipAnalysisAPI(AnalysisAPI):
 
     def get_workflow_version(self, case_id: str) -> str:
         """Get MIP version from sample info file"""
-        LOG.debug("Fetch pipeline version")
+        LOG.debug("Fetch workflow version")
         sample_info_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=self.get_sample_info_path(case_id)
         )

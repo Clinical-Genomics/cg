@@ -187,7 +187,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         and is ready to be stored in Housekeeper."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(workflow=self.workflow)
+            for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
             if Path(self.get_deliverables_file_path(case_id=case.internal_id)).exists()
         ]
 
@@ -204,7 +204,7 @@ class MutantAnalysisAPI(AnalysisAPI):
     ) -> None:
         """
         Link FASTQ files for a nanopore sample to working directory.
-        If pipeline input requires concatenated fastq, files can also be concatenated
+        If workflow input requires concatenated fastq, files can also be concatenated
         """
         read_paths = []
         files: list[dict] = self.get_metadata_for_nanopore_sample(sample=sample)

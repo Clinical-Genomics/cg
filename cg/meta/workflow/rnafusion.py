@@ -37,7 +37,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.rnafusion.root
-        self.nfcore_pipeline_path: str = config.rnafusion.pipeline_path
+        self.nfcore_workflow_path: str = config.rnafusion.pipeline_path
         self.references: str = config.rnafusion.references
         self.profile: str = config.rnafusion.profile
         self.conda_env: str = config.rnafusion.conda_env

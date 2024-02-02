@@ -277,7 +277,7 @@ class AnalysisAPI(MetaAPI):
         and is ready to be stored in Housekeeper."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(workflow=self.workflow)
+            for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
         ]
 
@@ -286,7 +286,7 @@ class AnalysisAPI(MetaAPI):
         and is ready for QC metrics checks."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(workflow=self.workflow)
+            for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
             if self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
 
@@ -307,7 +307,7 @@ class AnalysisAPI(MetaAPI):
     ) -> None:
         """
         Link FASTQ files for a sample to the work directory.
-        If pipeline input requires concatenated fastq, files can also be concatenated
+        If workflow input requires concatenated fastq, files can also be concatenated
         """
         linked_reads_paths: dict[int, list[Path]] = {1: [], 2: []}
         concatenated_paths: dict[int, str] = {1: "", 2: ""}

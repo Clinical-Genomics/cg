@@ -87,7 +87,7 @@ class GensAnalysisTag:
 
 
 class BalsamicProtectedTags:
-    """Balsamic pipeline protected tags by type."""
+    """Balsamic workflow protected tags by type."""
 
     QC: list[list[str]] = [
         ["balsamic-config"],

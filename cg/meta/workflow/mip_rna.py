@@ -23,7 +23,7 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
         return self.config.mip_rd_rna.conda_env
 
     @property
-    def mip_pipeline(self) -> str:
+    def mip_workflow(self) -> str:
         return self.config.mip_rd_rna.pipeline
 
     @property
@@ -38,7 +38,7 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
     def process(self) -> Process:
         if not self._process:
             self._process = Process(
-                binary=f"{self.script} {self.mip_pipeline}",
+                binary=f"{self.script} {self.mip_workflow}",
                 conda_binary=f"{self.conda_binary}" if self.conda_binary else None,
                 config=self.config.mip_rd_rna.mip_config,
                 environment=self.conda_env,
