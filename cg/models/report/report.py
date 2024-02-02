@@ -92,7 +92,7 @@ class DataAnalysisModel(BaseModel):
             )
             raise ValueError
         if self.workflow not in REPORT_SUPPORTED_WORKFLOW:
-            LOG.error(f"The pipeline {self.workflow} does not support delivery report generation")
+            LOG.error(f"The workflow {self.workflow} does not support delivery report generation")
             raise ValueError
         return self
 
