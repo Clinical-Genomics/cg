@@ -1,4 +1,5 @@
 from cg.apps.tb.api import TrailblazerAPI
+from cg.constants.priority import SlurmAccount, SlurmQos
 from cg.models.slurm.sbatch import Sbatch
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.upload_service.upload_config import UploadConfig
@@ -26,4 +27,9 @@ class UploadService:
             job_name=job_name,
             log_dir=self.config.log_dir,
             time=UPLOAD_MAX_HOURS,
+            quality_of_service=get_quality_of_service(self.config.account),
         )
+
+
+def get_quality_of_service(account: SlurmAccount) -> SlurmQos:
+    return SlurmQos.HIGH if account == SlurmAccount.PRODUCTION else SlurmQos.LOW
