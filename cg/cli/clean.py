@@ -172,7 +172,7 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
 
 @clean.command("hk-bundle-files")
 @click.option("-c", "--case-id", type=str, required=False)
-@click.option("-p", "--workflow", type=Workflow, required=False)
+@click.option("-w", "--workflow", type=Workflow, required=False)
 @click.option("-t", "--tags", multiple=True, required=True)
 @click.option("-o", "--days-old", type=int, default=30)
 @DRY_RUN
