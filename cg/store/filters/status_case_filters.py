@@ -10,7 +10,7 @@ from cg.constants.constants import CaseActions, DataDelivery, Workflow
 from cg.constants.observations import (
     LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
     LOQUSDB_MIP_SEQUENCING_METHODS,
-    LOQUSDB_SUPPORTED_PIPELINES,
+    LOQUSDB_SUPPORTED_WORKFLOWS,
 )
 from cg.store.models import Analysis, Application, Case, Customer, Sample
 
@@ -133,7 +133,7 @@ def filter_cases_with_loqusdb_supported_workflow(
     records: Query = (
         cases.filter(Case.data_analysis == workflow)
         if workflow
-        else cases.filter(Case.data_analysis.in_(LOQUSDB_SUPPORTED_PIPELINES))
+        else cases.filter(Case.data_analysis.in_(LOQUSDB_SUPPORTED_WORKFLOWS))
     )
     return records.filter(Customer.loqus_upload == True)
 

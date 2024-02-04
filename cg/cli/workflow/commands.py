@@ -8,7 +8,7 @@ from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
+from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.exc import FlowCellsNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -36,7 +36,7 @@ OPTION_ANALYSIS_PARAMETERS_CONFIG = click.option(
 )
 OPTION_LOQUSDB_SUPPORTED_WORKFLOW = click.option(
     "--workflow",
-    type=click.Choice(LOQUSDB_SUPPORTED_PIPELINES),
+    type=click.Choice(LOQUSDB_SUPPORTED_WORKFLOWS),
     help="Limit observations upload to a specific workflow",
 )
 
