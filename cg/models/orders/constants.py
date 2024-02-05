@@ -1,20 +1,20 @@
 from enum import StrEnum
 
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 
 
 class OrderType(StrEnum):
-    BALSAMIC: str = Pipeline.BALSAMIC
-    BALSAMIC_QC: str = Pipeline.BALSAMIC_QC
-    BALSAMIC_UMI: str = Pipeline.BALSAMIC_UMI
-    FASTQ: str = Pipeline.FASTQ
-    FLUFFY: str = Pipeline.FLUFFY
+    BALSAMIC: str = Workflow.BALSAMIC
+    BALSAMIC_QC: str = Workflow.BALSAMIC_QC
+    BALSAMIC_UMI: str = Workflow.BALSAMIC_UMI
+    FASTQ: str = Workflow.FASTQ
+    FLUFFY: str = Workflow.FLUFFY
     METAGENOME: str = "metagenome"
-    MICROSALT: str = Pipeline.MICROSALT
-    MIP_DNA: str = Pipeline.MIP_DNA
-    MIP_RNA: str = Pipeline.MIP_RNA
+    MICROSALT: str = Workflow.MICROSALT
+    MIP_DNA: str = Workflow.MIP_DNA
+    MIP_RNA: str = Workflow.MIP_RNA
     RML: str = "rml"
-    RNAFUSION: str = Pipeline.RNAFUSION
+    RNAFUSION: str = Workflow.RNAFUSION
     SARS_COV_2: str = "sars-cov-2"
 
 

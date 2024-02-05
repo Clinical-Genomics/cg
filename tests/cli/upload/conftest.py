@@ -11,7 +11,7 @@ from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.constants import FileFormat, Pipeline
+from cg.constants.constants import FileFormat, Workflow
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.housekeeper_tags import (
     HK_DELIVERY_REPORT_TAG,
@@ -197,8 +197,8 @@ def fastq_context(
     base_context.meta_apis["delivery_api"] = DeliverAPI(
         store=base_context.status_db,
         hk_api=base_context.housekeeper_api,
-        case_tags=PIPELINE_ANALYSIS_TAG_MAP[Pipeline.FASTQ]["case_tags"],
-        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[Pipeline.FASTQ]["sample_tags"],
+        case_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.FASTQ]["case_tags"],
+        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.FASTQ]["sample_tags"],
         delivery_type="fastq",
         project_base_path=Path(base_context.delivery_path),
     )

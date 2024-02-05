@@ -1,4 +1,5 @@
 """Test for the time utils functions."""
+
 import time
 from pathlib import Path
 

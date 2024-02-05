@@ -1,4 +1,5 @@
 """Commands for compressing files, and cleaning uncompressed files"""
+
 import logging
 
 import click

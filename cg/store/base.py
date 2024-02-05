@@ -1,4 +1,5 @@
 """All models aggregated in a base class."""
+
 from dataclasses import dataclass
 from typing import Callable, Type
 

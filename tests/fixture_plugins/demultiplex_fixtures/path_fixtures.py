@@ -1,4 +1,5 @@
 """Path fixtures for demultiplex tests."""
+
 import shutil
 from pathlib import Path
 

@@ -12,7 +12,6 @@ LOG = logging.getLogger(__name__)
 
 
 class MockOsTicket(OsTicket):
-
     """Interface to ticket system."""
 
     def __init__(self):

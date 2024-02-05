@@ -1,4 +1,5 @@
 """ Test the CLI for run mip-dna """
+
 import logging
 
 from cg.cli.workflow.mip_dna.base import run

@@ -1,6 +1,6 @@
 """This file tests the analyses_to_delivery_report part of the status api"""
 
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import DataDelivery, Workflow
 from cg.constants.subject import PhenotypeStatus
 from cg.store.models import CaseSample
 from cg.store.store import Store
@@ -12,7 +12,7 @@ def test_missing(analysis_store: Store, helpers: StoreHelpers, timestamp_now):
     """Tests that analyses that are completed, but lacks delivery report are returned."""
 
     # GIVEN an analysis that is delivered but has no delivery report
-    pipeline = Pipeline.BALSAMIC
+    pipeline = Workflow.BALSAMIC
     analysis = helpers.add_analysis(
         analysis_store,
         started_at=timestamp_now,
@@ -43,7 +43,7 @@ def test_outdated_analysis(
 
     # GIVEN an analysis that is older than Hasta
     timestamp_old_analysis = get_date("2017-09-26")
-    pipeline = Pipeline.BALSAMIC
+    pipeline = Workflow.BALSAMIC
 
     # GIVEN a delivery report created at date which is older than the upload date to trigger delivery report generation
 
@@ -78,7 +78,7 @@ def test_analyses_to_upload_delivery_reports(
     """Tests extraction of analyses ready for delivery report upload"""
 
     # GIVEN an analysis that has a delivery report generated
-    pipeline = Pipeline.BALSAMIC
+    pipeline = Workflow.BALSAMIC
     analysis = helpers.add_analysis(
         analysis_store,
         started_at=timestamp_now,

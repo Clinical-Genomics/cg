@@ -5,17 +5,15 @@ from pathlib import Path
 from typing import Any
 
 from cg import resources
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import FileFormat, Strandedness
 from cg.constants.nf_analysis import RNAFUSION_METRIC_CONDITIONS
 from cg.exc import MissingMetrics
 from cg.io.controller import ReadFile
+from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import (
-    MetricsBase,
-    MultiqcDataJson,
-)
+from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import PipelineDeliverables
 from cg.models.rnafusion.rnafusion import (
@@ -24,7 +22,6 @@ from cg.models.rnafusion.rnafusion import (
     RnafusionSampleSheetEntry,
 )
 from cg.store.models import Case, Sample
-from cg.io.json import read_json
 
 LOG = logging.getLogger(__name__)
 
@@ -36,7 +33,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.RNAFUSION,
+        pipeline: Workflow = Workflow.RNAFUSION,
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.root_dir: str = config.rnafusion.root

@@ -1,4 +1,5 @@
 """ Test the CLI for run mip-rna """
+
 import logging
 
 from cg.apps.tb import TrailblazerAPI

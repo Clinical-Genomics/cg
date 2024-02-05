@@ -1,9 +1,12 @@
 """Tests for the SampleSheetCreator classes."""
+
 from pathlib import Path
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_validated_sample_sheet
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_validated_sample_sheet,
+)
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
@@ -66,9 +69,9 @@ def test_construct_bcl_convert_sheet(
     assert bcl_convert_sample_sheet_creator.lims_samples
 
     # WHEN building the sample sheet
-    sample_sheet_content: list[
-        list[str]
-    ] = bcl_convert_sample_sheet_creator.construct_sample_sheet()
+    sample_sheet_content: list[list[str]] = (
+        bcl_convert_sample_sheet_creator.construct_sample_sheet()
+    )
 
     # THEN a correctly formatted sample sheet was created
     sample_sheet: SampleSheet = get_validated_sample_sheet(

@@ -5,7 +5,7 @@ from typing import Callable
 from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_PIPELINES
-from cg.constants.constants import VALID_DATA_IN_PRODUCTION, Pipeline
+from cg.constants.constants import VALID_DATA_IN_PRODUCTION, Workflow
 from cg.store.models import Analysis, Case
 
 
@@ -14,7 +14,7 @@ def filter_valid_analyses_in_production(analyses: Query, **kwargs) -> Query:
     return analyses.filter(VALID_DATA_IN_PRODUCTION < Analysis.completed_at)
 
 
-def filter_analyses_with_pipeline(analyses: Query, pipeline: Pipeline = None, **kwargs) -> Query:
+def filter_analyses_with_pipeline(analyses: Query, pipeline: Workflow = None, **kwargs) -> Query:
     """Return analyses with supplied pipeline."""
     return analyses.filter(Analysis.pipeline == str(pipeline)) if pipeline else analyses
 
@@ -45,7 +45,7 @@ def filter_analyses_without_delivery_report(analyses: Query, **kwargs) -> Query:
 
 
 def filter_report_analyses_by_pipeline(
-    analyses: Query, pipeline: Pipeline = None, **kwargs
+    analyses: Query, pipeline: Workflow = None, **kwargs
 ) -> Query:
     """Return the delivery report related analyses associated to the provided or supported pipelines."""
     return (
@@ -93,7 +93,7 @@ def filter_analysis_case_action_is_none(analyses: Query, **kwargs) -> Query:
 def apply_analysis_filter(
     filter_functions: list[Callable],
     analyses: Query,
-    pipeline: Pipeline = None,
+    pipeline: Workflow = None,
     case_entry_id: int = None,
     completed_at_date: datetime = None,
     started_at_date: datetime = None,

@@ -3,26 +3,24 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from cg.constants import Pipeline
-from cg.constants.constants import FileExtensions, FileFormat, WorkflowManager, MultiQC
+from cg.constants import Workflow
+from cg.constants.constants import FileExtensions, FileFormat, MultiQC, WorkflowManager
 from cg.constants.nextflow import NFX_WORK_DIR
+from cg.constants.tb import AnalysisStatus
+from cg.exc import CgError, MetricsQCError
+from cg.io.controller import ReadFile, WriteFile
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
+from cg.models.deliverables.metric_deliverables import (
+    MetricsBase,
+    MetricsDeliverablesCondition,
+)
 from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.utils import Process
-from cg.models.deliverables.metric_deliverables import (
-    MetricsBase,
-)
-from cg.io.controller import ReadFile, WriteFile
-from cg.models.deliverables.metric_deliverables import (
-    MetricsDeliverablesCondition,
-)
-from cg.exc import CgError, MetricsQCError
-from cg.constants.tb import AnalysisStatus
 
 LOG = logging.getLogger(__name__)
 
@@ -30,9 +28,9 @@ LOG = logging.getLogger(__name__)
 class NfAnalysisAPI(AnalysisAPI):
     """Parent class for handling NF-core analyses."""
 
-    def __init__(self, config: CGConfig, pipeline: Pipeline):
+    def __init__(self, config: CGConfig, pipeline: Workflow):
         super().__init__(config=config, pipeline=pipeline)
-        self.pipeline: Pipeline = pipeline
+        self.pipeline: Workflow = pipeline
         self.root_dir: str | None = None
         self.nfcore_pipeline_path: str | None = None
         self.references: str | None = None
@@ -221,7 +219,7 @@ class NfAnalysisAPI(AnalysisAPI):
             conda_binary=self.conda_binary,
             launch_directory=self.get_case_path(case_id=case_id),
         )
-        LOG.info("Pipeline will be executed using Nextflow")
+        LOG.info("Workflow will be executed using Nextflow")
         parameters: list[str] = NextflowHandler.get_nextflow_run_parameters(
             case_id=case_id,
             pipeline_path=self.nfcore_pipeline_path,
@@ -248,13 +246,13 @@ class NfAnalysisAPI(AnalysisAPI):
         self, case_id: str, command_args: CommandArgs, dry_run: bool
     ) -> None:
         """Run analysis with given options using NF-Tower."""
-        LOG.info("Pipeline will be executed using Tower")
+        LOG.info("Workflow will be executed using Tower")
         if command_args.resume:
             from_tower_id: int = command_args.id or NfTowerHandler.get_last_tower_id(
                 case_id=case_id,
                 trailblazer_config=self.get_job_ids_path(case_id=case_id),
             )
-            LOG.info(f"Pipeline will be resumed from run with Tower id: {from_tower_id}.")
+            LOG.info(f"Workflow will be resumed from run with Tower id: {from_tower_id}.")
             parameters: list[str] = NfTowerHandler.get_tower_relaunch_parameters(
                 from_tower_id=from_tower_id, command_args=command_args.dict()
             )

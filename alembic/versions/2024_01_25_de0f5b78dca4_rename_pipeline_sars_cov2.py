@@ -5,11 +5,12 @@ Revises: a6befebf1231
 Create Date: 2024-01-25 09:24:36.338102
 
 """
+
 from sqlalchemy import orm
 from sqlalchemy.dialects import mysql
 
 from alembic import op
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.store.models import Analysis, Case
 
 # revision identifiers, used by Alembic.
@@ -57,12 +58,12 @@ def upgrade():
 
     for case in session.query(Case).filter(Case.data_analysis == "sars-cov-2"):
         print(f"Altering case: {str(case)}")
-        case.data_analysis = str(Pipeline.MUTANT)
+        case.data_analysis = str(Workflow.MUTANT)
         print(f"Altered case: {str(case)}")
 
     for analysis in session.query(Analysis).filter(Analysis.pipeline == "sars-cov-2"):
         print(f"Altering analysis: {str(analysis)}")
-        analysis.pipeline = str(Pipeline.MUTANT)
+        analysis.pipeline = str(Workflow.MUTANT)
         print(f"Altered analysis: {str(analysis)}")
 
     session.commit()

@@ -5,6 +5,7 @@ Revises: fab30255b84f
 Create Date: 2021-02-26 10:03:23.560737
 
 """
+
 from datetime import datetime
 
 import sqlalchemy as sa
@@ -12,7 +13,7 @@ from sqlalchemy import orm
 from sqlalchemy.orm import declarative_base
 
 from alembic import op
-from cg.constants import PREP_CATEGORIES, DataDelivery, Pipeline
+from cg.constants import PREP_CATEGORIES, DataDelivery, Workflow
 
 Base = declarative_base()
 
@@ -37,7 +38,7 @@ class Case(Base):
     name = sa.Column(sa.types.String(128), nullable=False)
     customer_id = sa.Column(sa.ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship(Customer, foreign_keys=[customer_id])
-    data_analysis = sa.Column(sa.types.Enum(*list(Pipeline)))
+    data_analysis = sa.Column(sa.types.Enum(*list(Workflow)))
     data_delivery = sa.Column(sa.types.Enum(*list(DataDelivery)))
     priority = sa.Column(sa.types.Integer, default=1, nullable=False)
     _panels = sa.Column(sa.types.Text)
@@ -110,7 +111,7 @@ def upgrade():
         session.query(Case)
         .filter(Case.customer_id == 1)
         .filter(Case.data_delivery == DataDelivery.FASTQ)
-        .filter(Case.data_analysis == Pipeline.FASTQ)
+        .filter(Case.data_analysis == Workflow.FASTQ)
         .filter(Case.priority == "research")
         .filter(Case.ordered_at >= datetime(year=2021, month=2, day=2))
     ):
@@ -125,7 +126,7 @@ def upgrade():
                 and sample.name == family.name
             ):
                 print(f"changing data analysis from FASTQ to MIP for: {family}")
-                family.data_analysis = Pipeline.MIP_DNA
+                family.data_analysis = Workflow.MIP_DNA
                 count += 1
 
     session.commit()
@@ -142,7 +143,7 @@ def downgrade():
         session.query(Case)
         .filter(Case.customer_id == 1)
         .filter(Case.data_delivery == DataDelivery.FASTQ)
-        .filter(Case.data_analysis == Pipeline.MIP_DNA)
+        .filter(Case.data_analysis == Workflow.MIP_DNA)
         .filter(Case.priority == "research")
         .filter(Case.ordered_at >= datetime(year=2021, month=2, day=2))
     ):
@@ -157,7 +158,7 @@ def downgrade():
                 and sample.name == family.name
             ):
                 print(f"changing data analysis from MIP to FASTQ for: {family}")
-                family.data_analysis = Pipeline.FASTQ
+                family.data_analysis = Workflow.FASTQ
                 count += 1
 
     session.commit()

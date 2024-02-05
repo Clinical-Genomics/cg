@@ -1,4 +1,5 @@
 """Nf-tower related constants."""
+
 from enum import StrEnum
 from typing import Any
 

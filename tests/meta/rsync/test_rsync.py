@@ -1,4 +1,5 @@
 """Tests for rsync API"""
+
 import logging
 import shutil
 from pathlib import Path

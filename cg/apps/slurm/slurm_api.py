@@ -1,4 +1,5 @@
 """Module to create sbatch files and communicate with SLURM."""
+
 import logging
 from pathlib import Path
 

@@ -1,4 +1,5 @@
 """Balsamic QC delivery report API."""
+
 import logging
 
 from cg.meta.report.balsamic import BalsamicReportAPI

@@ -1,4 +1,5 @@
 """Test CLI functions to get flow cells in the Status database."""
+
 from datetime import datetime
 
 from click.testing import CliRunner
