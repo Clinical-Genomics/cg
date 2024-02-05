@@ -1,14 +1,15 @@
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.priority import SlurmQos
+from cg.constants.slurm import (
+    SLURM_UPLOAD_EXCLUDED_COMPUTE_NODES,
+    SLURM_UPLOAD_MAX_HOURS,
+    SLURM_UPLOAD_MEMORY,
+)
 from cg.models.slurm.sbatch import Sbatch
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
 from cg.services.slurm_upload_service.utils import get_quality_of_service
-
-UPLOAD_MEMORY = 1
-UPLOAD_MAX_HOURS = 24
-EXCLUDED_COMPUTE_NODES = "--exclude=gpu-compute-0-[0-1],cg-dragen"
 
 
 class SlurmUploadService:
@@ -35,8 +36,8 @@ class SlurmUploadService:
             command=command,
             job_name=job_name,
             log_dir=self.config.log_dir,
-            time=UPLOAD_MAX_HOURS,
+            time=SLURM_UPLOAD_MAX_HOURS,
             quality_of_service=quality_of_service,
-            exclude=EXCLUDED_COMPUTE_NODES,
-            memory=UPLOAD_MEMORY,
+            exclude=SLURM_UPLOAD_EXCLUDED_COMPUTE_NODES,
+            memory=SLURM_UPLOAD_MEMORY,
         )
