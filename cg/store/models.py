@@ -765,13 +765,13 @@ class Sample(Model, PriorityMixin):
     def state(self) -> str:
         """Get the current sample state."""
         if self.delivered_at:
-            return f"Delivered {self.delivered_at.date()}"
+            return "Delivered"
         if self.last_sequenced_at:
-            return f"Sequenced {self.last_sequenced_at.date()}"
+            return "Sequenced"
         if self.sequence_start:
-            return f"Sequencing {self.sequence_start.date()}"
+            return "Sequencing"
         if self.received_at:
-            return f"Received {self.received_at.date()}"
+            return "Received"
 
         return f"Ordered {self.ordered_at.date()}"
 
