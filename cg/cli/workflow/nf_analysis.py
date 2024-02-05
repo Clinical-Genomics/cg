@@ -80,6 +80,7 @@ OPTION_FROM_START = click.option(
     help="Start pipeline from start without resuming execution",
 )
 
+
 @click.command("metrics-deliver")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
