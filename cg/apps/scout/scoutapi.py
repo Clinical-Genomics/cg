@@ -11,6 +11,7 @@ from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.exc import ScoutUploadError
 from cg.io.controller import ReadFile, ReadStream
 from cg.models.scout.scout_load_config import ScoutLoadConfig
+from cg.services.upload_service.upload_service import SlurmUploadService
 from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
@@ -19,10 +20,11 @@ LOG = logging.getLogger(__name__)
 class ScoutAPI:
     """Interface to Scout."""
 
-    def __init__(self, config):
+    def __init__(self, config, slurm_upload_service: SlurmUploadService):
         binary_path = config["scout"]["binary_path"]
         config_path = config["scout"]["config_path"]
         self.process = Process(binary=binary_path, config=config_path)
+        self.slurm_upload_service = slurm_upload_service
 
     def upload(self, scout_load_config: Path, force: bool = False):
         """Load analysis of a new family into Scout."""
@@ -30,10 +32,8 @@ class ScoutAPI:
         scout_config: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=scout_load_config
         )
-        scout_load_config_object: ScoutLoadConfig = ScoutLoadConfig(**scout_config)
-        existing_case: ScoutExportCase | None = self.get_case(
-            case_id=scout_load_config_object.family
-        )
+        scout_load_config_object = ScoutLoadConfig(**scout_config)
+        existing_case: ScoutExportCase | None = self.get_case(scout_load_config_object.family)
         load_command = ["load", "case", str(scout_load_config)]
         if existing_case:
             if force or scout_load_config_object.analysis_date > existing_case.analysis_date:

@@ -19,6 +19,10 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
+from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
+from cg.services.slurm_service.slurm_service import SlurmService
+from cg.services.upload_service.upload_config import SlurmUploadConfig
+from cg.services.upload_service.upload_service import SlurmUploadService
 from cg.store.database import initialize_database
 from cg.store.store import Store
 
@@ -459,11 +463,28 @@ class CGConfig(BaseModel):
         return api
 
     @property
+    def slurm_service(self) -> SlurmService:
+        return SlurmCLIService()
+
+    @property
+    def slurm_upload_service(self) -> SlurmUploadService:
+        slurm_upload_config = SlurmUploadConfig(
+            email=self.data_delivery.mail_user,
+            account=self.data_delivery.account,
+            log_dir=self.data_delivery.base_path,
+        )
+        return SlurmUploadService(
+            slurm_service=self.slurm_service,
+            trailblazer_api=self.trailblazer_api,
+            config=slurm_upload_config,
+        )
+
+    @property
     def scout_api(self) -> ScoutAPI:
         api = self.__dict__.get("scout_api_")
         if api is None:
             LOG.debug("Instantiating scout api")
-            api = ScoutAPI(config=self.dict())
+            api = ScoutAPI(config=self.dict(), slurm_upload_service=self.slurm_upload_service)
             self.scout_api_ = api
         return api
 
