@@ -52,19 +52,19 @@ def test_analysis_excluded(analysis_store: Store, helpers, timestamp_now: dateti
     assert analysis not in analyses_to_clean
 
 
-def test_pipeline_included(
+def test_workflow_included(
     analysis_store: Store, helpers, timestamp_now: datetime, timestamp_yesterday: datetime
 ):
-    """Tests that analyses that are included depending on pipeline."""
+    """Tests that analyses that are included depending on workflow."""
 
     # GIVEN an analysis that is uploaded and workflow is specified
-    pipeline = Workflow.BALSAMIC
+    workflow = Workflow.BALSAMIC
     analysis = helpers.add_analysis(
         analysis_store,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
-        workflow=pipeline,
+        workflow=workflow,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: CaseSample = analysis_store.relate_sample(
@@ -74,7 +74,7 @@ def test_pipeline_included(
 
     # WHEN calling the analyses_to_clean specifying the used workflow
     analyses_to_clean = analysis_store.get_analyses_to_clean(
-        before=timestamp_now, workflow=pipeline
+        before=timestamp_now, workflow=workflow
     )
 
     # THEN this analysis should be returned

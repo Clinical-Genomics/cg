@@ -328,13 +328,13 @@ def store_with_application_limitations(
         ),
         workflow=Workflow.MIP_DNA,
     )
-    for pipeline in [Workflow.MIP_DNA, Workflow.BALSAMIC]:
+    for workflow in [Workflow.MIP_DNA, Workflow.BALSAMIC]:
         helpers.ensure_application_limitation(
             store=store_with_an_application_with_and_without_attributes,
             application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
                 StoreConstants.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value
             ),
-            workflow=pipeline,
+            workflow=workflow,
         )
     return store_with_an_application_with_and_without_attributes
 
