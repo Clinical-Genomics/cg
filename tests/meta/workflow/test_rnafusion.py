@@ -1,6 +1,5 @@
 """Module for Rnafusion analysis API tests."""
 
-
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
@@ -13,7 +12,7 @@ def test_parse_analysis(
     sample_id: str,
     rnafusion_multiqc_json_metrics: dict,
     rnafusion_metrics: dict,
-    mock_analysis_finish,
+    rnafusion_mock_analysis_finish,
 ):
     """Test Rnafusion output analysis files parsing."""
 
@@ -29,7 +28,7 @@ def test_parse_analysis(
 
 
 def test_get_latest_metadata(
-    rnafusion_context: CGConfig, rnafusion_case_id: str, mock_analysis_finish
+    rnafusion_context: CGConfig, rnafusion_case_id: str, rnafusion_mock_analysis_finish
 ):
     """Test retrieval of Rnafusion latest metadata."""
 

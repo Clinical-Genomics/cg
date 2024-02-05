@@ -5,7 +5,7 @@ from typing import Any
 from pydantic.v1 import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import FileExtensions, GenePanelMasterList, Pipeline
+from cg.constants import FileExtensions, GenePanelMasterList, Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
@@ -39,7 +39,7 @@ class MipAnalysisAPI(AnalysisAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
     hooks into the status database that makes managing analyses simpler"""
 
-    def __init__(self, config: CGConfig, pipeline: Pipeline):
+    def __init__(self, config: CGConfig, pipeline: Workflow):
         super().__init__(pipeline, config)
 
     @property

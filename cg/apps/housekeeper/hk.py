@@ -1,4 +1,5 @@
 """ Module to decouple cg code from Housekeeper code """
+
 import logging
 import os
 from datetime import datetime
@@ -6,13 +7,9 @@ from pathlib import Path
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
-from housekeeper.store import Store, models
-from housekeeper.store.database import (
-    create_all_tables,
-    drop_all_tables,
-    initialize_database,
-)
-from housekeeper.store.models import Archive, Bundle, File, Version
+from housekeeper.store.database import create_all_tables, drop_all_tables, initialize_database
+from housekeeper.store.models import Archive, Bundle, File, Tag, Version
+from housekeeper.store.store import Store
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingFileTag
@@ -259,7 +256,7 @@ class HousekeeperAPI:
             self._store._get_query(table=Version)
             .join(Version.bundle)
             .filter(Bundle.name == bundle)
-            .order_by(models.Version.created_at.desc())
+            .order_by(Version.created_at.desc())
             .first()
         )
 
@@ -281,7 +278,7 @@ class HousekeeperAPI:
         LOG.debug(f"Found Housekeeper version object for {bundle_name}: {repr(last_version)}")
         return last_version
 
-    def get_create_version(self, bundle_name: str) -> Version:
+    def get_or_create_version(self, bundle_name: str) -> Version:
         """Returns the latest version of a bundle if it exists. If not creates a bundle and
         returns its version."""
         last_version: Version = self.last_version(bundle=bundle_name)
@@ -302,13 +299,13 @@ class HousekeeperAPI:
         """Create a new tag."""
         return self._store.new_tag(name, category)
 
-    def add_tag(self, name: str, category: str = None) -> models.Tag:
+    def add_tag(self, name: str, category: str = None) -> Tag:
         """Add a tag to the database."""
         tag_obj = self._store.new_tag(name, category)
         self.add_commit(tag_obj)
         return tag_obj
 
-    def get_tag(self, name: str) -> models.Tag:
+    def get_tag(self, name: str) -> Tag:
         """Fetch a tag."""
         return self._store.get_tag(name)
 
@@ -352,10 +349,7 @@ class HousekeeperAPI:
         self, bundle_name: str, file: Path, tags: list
     ) -> None:
         """Adds and includes a file in the latest version of a bundle."""
-        version: Version = self.last_version(bundle_name)
-        if not version:
-            LOG.warning(f"Bundle: {bundle_name} not found in Housekeeper")
-            raise HousekeeperBundleVersionMissingError
+        version: Version = self.get_or_create_version(bundle_name)
         hk_file: File = self.add_file(version_obj=version, tags=tags, path=str(file.absolute()))
         self.include_file(version_obj=version, file_obj=hk_file)
         self.commit()

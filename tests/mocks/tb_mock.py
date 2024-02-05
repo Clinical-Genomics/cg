@@ -30,9 +30,9 @@ class MockTB:
         ]
 
     def ensure_get_latest_analysis_response(self, analysis_dict: dict) -> None:
-        self.get_latest_analysis_response[
-            analysis_dict["family"]
-        ] = TrailblazerAnalysis.model_validate(analysis_dict)
+        self.get_latest_analysis_response[analysis_dict["family"]] = (
+            TrailblazerAnalysis.model_validate(analysis_dict)
+        )
 
     def is_latest_analysis_completed(self, case_id: str):
         return True

@@ -15,7 +15,6 @@ TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
 
 
 class OsTicket(object):
-
     """Interface to ticket system"""
 
     def __init__(self):

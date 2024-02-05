@@ -1,11 +1,14 @@
 """Tests for functions of DemultiplexAPI."""
+
 from pathlib import Path
 
 import pytest
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_sample_sheet_path_to_housekeeper,
+)
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 

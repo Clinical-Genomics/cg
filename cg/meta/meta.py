@@ -18,7 +18,6 @@ from cg.store.store import Store
 
 
 class MetaAPI:
-
     """MetaAPI class initializing all App APIs used within CG in non-conflicting manner"""
 
     def __init__(self, config: CGConfig):

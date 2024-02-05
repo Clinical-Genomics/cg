@@ -1,4 +1,5 @@
 """Functions interacting with housekeeper in the DemuxPostProcessingAPI."""
+
 import logging
 from pathlib import Path
 from typing import Iterable
@@ -47,9 +48,9 @@ def store_undetermined_fastq_files(
     flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, store: Store
 ) -> None:
     """Store undetermined fastq files for non-pooled samples in Housekeeper."""
-    non_pooled_lanes_and_samples: list[
-        tuple[int, str]
-    ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
+    non_pooled_lanes_and_samples: list[tuple[int, str]] = (
+        flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
+    )
 
     for lane, sample_id in non_pooled_lanes_and_samples:
         undetermined_fastqs: list[Path] = get_undetermined_fastqs(

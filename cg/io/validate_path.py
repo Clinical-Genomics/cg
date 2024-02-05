@@ -1,4 +1,5 @@
 """Module to validate paths."""
+
 import logging
 from pathlib import Path
 

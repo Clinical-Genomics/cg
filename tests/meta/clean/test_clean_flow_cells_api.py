@@ -1,4 +1,5 @@
 """Tests for the clean flow cells API."""
+
 import logging
 import time
 
@@ -71,9 +72,9 @@ def test_get_sequencing_metrics_for_flow_cell_from_statusdb(
     # GIVEN a clean flow cell api with a store that contains a flow cell with SampleLaneSequencingMetrics entries
 
     # WHEN retrieving the flow cell from the store
-    metrics: list[
-        SampleLaneSequencingMetrics
-    ] = flow_cell_clean_api_can_be_removed.get_sequencing_metrics_for_flow_cell()
+    metrics: list[SampleLaneSequencingMetrics] = (
+        flow_cell_clean_api_can_be_removed.get_sequencing_metrics_for_flow_cell()
+    )
 
     # THEN a SampleLaneSequencingMetrics entry is retrieved
     assert isinstance(metrics[0], SampleLaneSequencingMetrics)
@@ -151,9 +152,9 @@ def test_get_files_for_flow_cell_bundle(
     # GIVEN a clean flow cell api with a flow cell that has files in housekeeper
 
     # WHEN getting the flow cell samples' files
-    files: list[
-        File
-    ] = flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(tag=tag)
+    files: list[File] = (
+        flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(tag=tag)
+    )
 
     # THEN files are returned
     assert files
@@ -191,9 +192,9 @@ def test_get_files_for_samples_on_flow_cell_with_tag_missing_sample(
     assert not hk_api.bundle(sample.internal_id)
 
     # WHEN getting the flow cell samples' files
-    files: list[
-        File
-    ] = flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(tag=tag)
+    files: list[File] = (
+        flow_cell_clean_api_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(tag=tag)
+    )
 
     # THEN files are returned
     assert files

@@ -1,4 +1,5 @@
 """Tests for functions related to indexes."""
+
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.index import (

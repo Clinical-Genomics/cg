@@ -1,4 +1,5 @@
 """Test finish demultiplexing CLI."""
+
 import logging
 from pathlib import Path
 

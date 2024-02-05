@@ -42,9 +42,9 @@ def test_get_current_application_version_by_tag_latest_version(
 ):
     """Test that the returned application version is the most recent."""
     # GIVEN a store with applications versions with different 'valid_from' attributes
-    application_versions: list[
-        ApplicationVersion
-    ] = store_with_different_application_versions._get_query(table=ApplicationVersion).all()
+    application_versions: list[ApplicationVersion] = (
+        store_with_different_application_versions._get_query(table=ApplicationVersion).all()
+    )
     assert application_versions[0].valid_from != application_versions[-1].valid_from
 
     # GIVEN a valid application tag

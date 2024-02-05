@@ -1,4 +1,5 @@
 """Nextflow related constants."""
+
 from enum import IntEnum
 
 NFX_WORK_DIR = "work"

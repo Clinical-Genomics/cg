@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus, Priority
-from cg.constants.constants import CaseActions, MicrosaltAppTags, Pipeline
+from cg.constants.constants import CaseActions, MicrosaltAppTags, Workflow
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CgError
 from cg.store.models import (
@@ -122,7 +122,7 @@ def test_case_in_uploaded_observations(helpers: StoreHelpers, sample_store: Stor
     """Test retrieval of uploaded observations."""
 
     # GIVEN a case with observations that has been uploaded to Loqusdb
-    analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
     link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
@@ -142,7 +142,7 @@ def test_case_not_in_uploaded_observations(helpers: StoreHelpers, sample_store: 
     """Test retrieval of uploaded observations that have not been uploaded to Loqusdb."""
 
     # GIVEN a case with observations that has not been uploaded to loqusdb
-    analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store)
     link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
@@ -162,7 +162,7 @@ def test_case_in_observations_to_upload(helpers: StoreHelpers, sample_store: Sto
     """Test extraction of ready to be uploaded to Loqusdb cases."""
 
     # GIVEN a case with completed analysis and samples w/o loqusdb_id
-    analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store)
     link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
@@ -184,7 +184,7 @@ def test_case_not_in_observations_to_upload(
     """Test case extraction that should not be uploaded to Loqusdb."""
 
     # GIVEN a case with completed analysis and samples with a Loqusdb ID
-    analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    analysis: Analysis = helpers.add_analysis(store=sample_store, pipeline=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
     link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
@@ -231,7 +231,7 @@ def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
 def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, timestamp):
     """Test analyses to upload to when existing pipeline."""
     # GIVEN a store with an analysis that has been run with MIP
-    helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Workflow.MIP_DNA)
 
     # WHEN fetching all analyses that are ready for upload and analysed with MIP
     records: list[Analysis] = [
@@ -245,7 +245,7 @@ def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, ti
 def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, timestamp):
     """Test analyses to upload to when existing pipeline and using it in filtering."""
     # GIVEN a store with an analysis that is analysed with MIP
-    pipeline = Pipeline.MIP_DNA
+    pipeline = Workflow.MIP_DNA
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=pipeline)
 
     # WHEN fetching all pipelines that are analysed with MIP
@@ -261,7 +261,7 @@ def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, 
 def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_store, timestamp):
     """Test analyses to upload to when existing pipeline and using it in filtering."""
     # GIVEN a store with an analysis that is analysed with MIP but does not have a completed_at
-    pipeline = Pipeline.MIP_DNA
+    pipeline = Workflow.MIP_DNA
     helpers.add_analysis(store=sample_store, completed_at=None, pipeline=pipeline)
 
     # WHEN fetching all analyses that are ready for upload and analysed by MIP
@@ -276,12 +276,12 @@ def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_sto
 def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample_store, timestamp):
     """Test analyses to upload to when missing pipeline and using it in filtering."""
     # GIVEN a store with an analysis that has been analysed with "missing_pipeline"
-    helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Workflow.MIP_DNA)
 
     # WHEN fetching all analyses that was analysed with MIP
     records: list[Analysis] = [
         analysis_obj
-        for analysis_obj in sample_store.get_analyses_to_upload(pipeline=Pipeline.FASTQ)
+        for analysis_obj in sample_store.get_analyses_to_upload(pipeline=Workflow.FASTQ)
     ]
 
     # THEN no analysis object should be returned, since there were no MIP analyses
@@ -902,9 +902,9 @@ def test_get_application_limitations_by_tag(
     # GIVEN a store with some application limitations
 
     # WHEN filtering by a given application tag
-    application_limitations: list[
-        ApplicationLimitations
-    ] = store_with_application_limitations.get_application_limitations_by_tag(tag=tag)
+    application_limitations: list[ApplicationLimitations] = (
+        store_with_application_limitations.get_application_limitations_by_tag(tag=tag)
+    )
 
     # THEN assert that the application limitations were found
     assert (
@@ -920,7 +920,7 @@ def test_get_application_limitations_by_tag(
 def test_get_application_limitation_by_tag_and_pipeline(
     store_with_application_limitations: Store,
     tag: str = StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value,
-    pipeline: Pipeline = Pipeline.MIP_DNA,
+    pipeline: Workflow = Workflow.MIP_DNA,
 ) -> ApplicationLimitations:
     """Test get application limitations by application tag and pipeline."""
 
@@ -1111,9 +1111,9 @@ def test_get_invoice_by_status(store_with_an_invoice_with_and_without_attributes
     # GIVEN a database with two invoices of which one has attributes
 
     # WHEN fetching the invoice by status
-    invoices: list[
-        Invoice
-    ] = store_with_an_invoice_with_and_without_attributes.get_invoices_by_status(is_invoiced=True)
+    invoices: list[Invoice] = (
+        store_with_an_invoice_with_and_without_attributes.get_invoices_by_status(is_invoiced=True)
+    )
 
     # THEN one invoice should be returned
     assert invoices
@@ -1333,8 +1333,10 @@ def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
     # GIVEN a store with sequencing metrics
 
     # WHEN getting a metrics entry by flow cell name, sample internal id and lane
-    metrics_entry: SampleLaneSequencingMetrics = store_with_sequencing_metrics.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-        sample_internal_id=sample_id, flow_cell_name=flow_cell_name, lane=lane
+    metrics_entry: SampleLaneSequencingMetrics = (
+        store_with_sequencing_metrics.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+            sample_internal_id=sample_id, flow_cell_name=flow_cell_name, lane=lane
+        )
     )
 
     assert metrics_entry is not None
@@ -1458,10 +1460,10 @@ def test_get_sample_lane_sequencing_metrics_by_flow_cell_name(
     # GIVEN a store with sequencing metrics
 
     # WHEN getting sequencing metrics for a flow cell
-    metrics: list[
-        SampleLaneSequencingMetrics
-    ] = store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_by_flow_cell_name(
-        flow_cell_name=flow_cell_name
+    metrics: list[SampleLaneSequencingMetrics] = (
+        store_with_sequencing_metrics.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+            flow_cell_name=flow_cell_name
+        )
     )
 
     # THEN assert that the metrics are returned
@@ -1527,7 +1529,7 @@ def test_get_orders_empty_store(store: Store):
 
     # WHEN fetching orders
     # THEN none should be returned
-    assert not store.get_orders()
+    assert not store.get_orders_by_workflow()
 
 
 def test_get_orders_populated_store(store: Store, order: Order, order_another: Order):
@@ -1535,7 +1537,7 @@ def test_get_orders_populated_store(store: Store, order: Order, order_another: O
 
     # WHEN fetching orders
     # THEN both should be returned
-    assert len(store.get_orders()) == 2
+    assert len(store.get_orders_by_workflow()) == 2
 
 
 def test_get_orders_limited(store: Store, order: Order, order_another: Order):
@@ -1543,4 +1545,41 @@ def test_get_orders_limited(store: Store, order: Order, order_another: Order):
 
     # WHEN fetching a limited amount of orders
     # THEN only one should be returned
-    assert len(store.get_orders(limit=1)) == 1
+    assert len(store.get_orders_by_workflow(limit=1)) == 1
+
+
+def test_get_orders_workflow_filter(
+    store: Store, order: Order, order_another: Order, order_balsamic: Order
+):
+    # GIVEN a store with three orders, one of which is a Balsamic order
+
+    # WHEN fetching only balsamic orders
+    orders: list[Order] = store.get_orders_by_workflow(workflow=Workflow.BALSAMIC)
+    # THEN only one should be returned
+    assert len(orders) == 1 and orders[0].workflow == Workflow.BALSAMIC
+
+
+@pytest.mark.parametrize(
+    "limit, expected_returned",
+    [(None, 2), (1, 1), (2, 2)],
+    ids=[
+        "Only workflow filtering",
+        "Workflow filtering and maximum one order",
+        "Workflow filtering and maximum two orders",
+    ],
+)
+def test_get_orders_mip_dna_and_limit_filter(
+    store: Store,
+    order: Order,
+    order_another: Order,
+    order_balsamic: Order,
+    limit: int | None,
+    expected_returned: int,
+):
+    # GIVEN a store with three orders, two of which are MIP-DNA orders
+
+    # WHEN fetching only MIP-DNA orders
+    orders: list[Order] = store.get_orders_by_workflow(workflow=Workflow.MIP_DNA, limit=limit)
+
+    # THEN we should get the expected number of orders returned
+    assert len(orders) == expected_returned

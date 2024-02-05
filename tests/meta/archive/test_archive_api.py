@@ -27,9 +27,9 @@ from cg.store.models import Sample
 def test_add_samples_to_files(spring_archive_api: SpringArchiveAPI):
     """Tests matching Files to Samples when both files have a matching sample."""
     # GIVEN a list of SPRING Files to archive
-    files_to_archive: list[
-        File
-    ] = spring_archive_api.housekeeper_api.get_non_archived_spring_files()
+    files_to_archive: list[File] = (
+        spring_archive_api.housekeeper_api.get_non_archived_spring_files()
+    )
 
     # WHEN adding the Sample objects
     file_and_samples: list[FileAndSample] = spring_archive_api.add_samples_to_files(
@@ -46,9 +46,9 @@ def test_add_samples_to_files(spring_archive_api: SpringArchiveAPI):
 def test_add_samples_to_files_missing_sample(spring_archive_api: SpringArchiveAPI):
     """Tests matching Files to Samples when one of the files does not match a Sample."""
     # GIVEN a list of SPRING Files to archive
-    files_to_archive: list[
-        File
-    ] = spring_archive_api.housekeeper_api.get_non_archived_spring_files()
+    files_to_archive: list[File] = (
+        spring_archive_api.housekeeper_api.get_non_archived_spring_files()
+    )
     # GIVEN one of the files does not match the
     files_to_archive[0].version.bundle.name = "does-not-exist"
     # WHEN adding the Sample objects
