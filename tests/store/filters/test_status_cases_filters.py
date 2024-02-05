@@ -846,11 +846,11 @@ def test_filter_cases_by_workflow_search_no_matching_workflow(
     """Test that no cases are returned when there are no cases with matching workflow search."""
     # GIVEN a store containing cases with different pipeline names
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
-    pipeline_search = "non_existent_pipeline"
+    workflow_search = "non_existent_pipeline"
 
     # WHEN filtering cases by a non-matching workflow search
     filtered_cases: Query = filter_cases_by_workflow_search(
-        cases=cases_query, workflow_search=pipeline_search
+        cases=cases_query, workflow_search=workflow_search
     )
 
     # THEN the query should return no cases
@@ -863,17 +863,17 @@ def test_filter_cases_by_workflow_search_partial_match(
     """Test that cases with partially matching pipeline search are returned."""
     # GIVEN a store containing cases with different pipeline names
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
-    pipeline_search = cases_query.first().data_analysis[:3]
+    workflow_search = cases_query.first().data_analysis[:3]
 
     # WHEN filtering cases by a partially matching workflow search
     filtered_cases: Query = filter_cases_by_workflow_search(
-        cases=cases_query, workflow_search=pipeline_search
+        cases=cases_query, workflow_search=workflow_search
     )
 
     # THEN the query should return the cases with partially matching workflow names
     assert filtered_cases.count() > 0
     for case in filtered_cases:
-        assert pipeline_search in case.data_analysis
+        assert workflow_search in case.data_analysis
 
 
 def test_filter_cases_by_workflow_search_exact_match(
@@ -886,13 +886,13 @@ def test_filter_cases_by_workflow_search_exact_match(
 
     # WHEN filtering cases by an exactly matching workflow search
     filtered_cases: Query = filter_cases_by_workflow_search(
-        cases=cases_query, workflow_search=pipeline_search
+        cases=cases_query, workflow_search=workflow_search
     )
 
     # THEN the query should return the cases with exactly matching workflow names
     assert filtered_cases.count() > 0
     for case in filtered_cases:
-        assert case.data_analysis == pipeline_search
+        assert case.data_analysis == workflow_search
 
 
 def test_filter_cases_by_priority_no_matching_priority(
