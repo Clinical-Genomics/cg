@@ -1,4 +1,5 @@
 """Interactions with the gisaid cli upload_results_to_gisaid"""
+
 import logging
 import re
 import tempfile

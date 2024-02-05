@@ -1,9 +1,8 @@
 """File tags for files in Housekeeper."""
 
-
 from enum import StrEnum
 
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 
 
 class AlignmentFileTag(StrEnum):
@@ -115,13 +114,13 @@ class BalsamicProtectedTags:
 
 
 WORKFLOW_PROTECTED_TAGS = {
-    str(Pipeline.BALSAMIC): BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
-    str(Pipeline.BALSAMIC_QC): BalsamicProtectedTags.QC,
-    str(Pipeline.BALSAMIC_PON): [],
-    str(Pipeline.BALSAMIC_UMI): BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
-    str(Pipeline.FASTQ): [],
-    str(Pipeline.FLUFFY): ["NIPT_csv", "MultiQC"],
-    str(Pipeline.MICROSALT): [
+    Workflow.BALSAMIC: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
+    Workflow.BALSAMIC_QC: BalsamicProtectedTags.QC,
+    Workflow.BALSAMIC_PON: [],
+    Workflow.BALSAMIC_UMI: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
+    Workflow.FASTQ: [],
+    Workflow.FLUFFY: ["NIPT_csv", "MultiQC"],
+    Workflow.MICROSALT: [
         ["microsalt-log"],
         ["config"],
         ["qc-report", "visualization"],
@@ -130,7 +129,7 @@ WORKFLOW_PROTECTED_TAGS = {
         ["microsalt-config"],
         ["assembly"],
     ],
-    str(Pipeline.MIP_DNA): [
+    Workflow.MIP_DNA: [
         ["vcf-snv-clinical"],
         ["vcf-clinical"],  # legacy
         ["vcf-snv-research"],
@@ -166,7 +165,7 @@ WORKFLOW_PROTECTED_TAGS = {
         ["multiqc-html"],
         ["storage"],
     ],
-    str(Pipeline.MIP_RNA): [
+    Workflow.MIP_RNA: [
         ["vcf-snv-clinical"],
         ["vcf-snv-research"],
         ["mip-config"],
@@ -178,7 +177,7 @@ WORKFLOW_PROTECTED_TAGS = {
         ["fusion", "vcf"],
         ["salmon-quant"],
     ],
-    str(Pipeline.SARS_COV_2): [
+    Workflow.MUTANT: [
         ["fohm-delivery", "instrument-properties"],
         ["fohm-delivery", "pangolin-typing-fohm", "csv"],
         ["vcf", "vcf-report", "fohm-delivery"],
@@ -195,7 +194,7 @@ WORKFLOW_PROTECTED_TAGS = {
         ["gisaid-log"],
         ["gisaid-csv"],
     ],
-    str(Pipeline.RNAFUSION): [
+    Workflow.RNAFUSION: [
         [AnalysisTag.FUSION, AnalysisTag.ARRIBA],
         [AnalysisTag.FUSION, AnalysisTag.STARFUSION],
         [AnalysisTag.FUSION, AnalysisTag.FUSIONCATCHER],

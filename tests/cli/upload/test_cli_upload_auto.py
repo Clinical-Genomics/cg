@@ -1,11 +1,12 @@
 """Test the cli for uploading using auto"""
+
 import datetime
 import logging
 
 from click.testing import CliRunner
 
 from cg.cli.upload.base import upload_all_completed_analyses
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
 
@@ -19,7 +20,7 @@ def test_upload_auto_with_pipeline_as_argument(
 ):
     """Test upload auto"""
     # GIVEN a store with a MIP analysis
-    pipeline = Pipeline.MIP_DNA
+    pipeline = Workflow.MIP_DNA
     helpers.add_analysis(store=upload_context.status_db, completed_at=timestamp, pipeline=pipeline)
 
     # WHEN uploading all analysis from pipeline MIP

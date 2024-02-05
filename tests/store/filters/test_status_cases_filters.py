@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import Query
 
-from cg.constants.constants import CaseActions, DataDelivery, Pipeline
+from cg.constants.constants import CaseActions, DataDelivery, Workflow
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.store.filters.status_case_filters import (
@@ -149,7 +149,7 @@ def test_filter_cases_with_pipeline_when_correct_pipline(
     test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a cancer case
-    test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
+    test_case = helpers.add_case(base_store, data_analysis=Workflow.BALSAMIC)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
     link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
@@ -159,7 +159,7 @@ def test_filter_cases_with_pipeline_when_correct_pipline(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
-    cases: list[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.BALSAMIC))
+    cases: list[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Workflow.BALSAMIC))
 
     # THEN cases should contain the test case
     assert cases
@@ -174,7 +174,7 @@ def test_filter_cases_with_pipeline_when_incorrect_pipline(
     test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a cancer case
-    test_case: Case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
+    test_case: Case = helpers.add_case(base_store, data_analysis=Workflow.BALSAMIC)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
     link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
@@ -184,7 +184,7 @@ def test_filter_cases_with_pipeline_when_incorrect_pipline(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
-    cases: list[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.MIP_DNA))
+    cases: list[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Workflow.MIP_DNA))
 
     # THEN cases should not contain the test case
     assert not cases
@@ -199,10 +199,10 @@ def test_filter_cases_with_loqusdb_supported_pipeline(
     test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a MIP-DNA and a FLUFFY case
-    test_mip_case: Case = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
+    test_mip_case: Case = helpers.add_case(base_store, data_analysis=Workflow.MIP_DNA)
     test_mip_case.customer.loqus_upload = True
     test_fluffy_case: Case = helpers.add_case(
-        base_store, name="test", data_analysis=Pipeline.FLUFFY
+        base_store, name="test", data_analysis=Workflow.FLUFFY
     )
     test_fluffy_case.customer.loqus_upload = True
 
@@ -237,7 +237,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method(
     )
 
     # GIVEN a MIP-DNA associated test case
-    test_case_wes: Case = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
+    test_case_wes: Case = helpers.add_case(base_store, data_analysis=Workflow.MIP_DNA)
     link = base_store.relate_sample(test_case_wes, test_sample_wes, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
@@ -246,7 +246,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method(
 
     # WHEN retrieving the available cases
     cases: Query = filter_cases_with_loqusdb_supported_sequencing_method(
-        cases=cases, pipeline=Pipeline.MIP_DNA
+        cases=cases, pipeline=Workflow.MIP_DNA
     )
 
     # ASSERT that cases is a query
@@ -267,7 +267,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method_empty(
     )
 
     # GIVEN a MIP-DNA associated test case
-    test_case_wts: Case = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
+    test_case_wts: Case = helpers.add_case(base_store, data_analysis=Workflow.MIP_DNA)
     link = base_store.relate_sample(test_case_wts, test_sample_wts, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
@@ -276,7 +276,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method_empty(
 
     # WHEN retrieving the valid cases
     cases: Query = filter_cases_with_loqusdb_supported_sequencing_method(
-        cases=cases, pipeline=Pipeline.MIP_DNA
+        cases=cases, pipeline=Workflow.MIP_DNA
     )
 
     # ASSERT that cases is a query
@@ -296,7 +296,7 @@ def test_filter_cases_for_analysis(
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(
-        base_store, completed_at=timestamp_now, pipeline=Pipeline.MIP_DNA
+        base_store, completed_at=timestamp_now, pipeline=Workflow.MIP_DNA
     )
 
     # Given an action set to analyze
@@ -363,7 +363,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
     )
 
     # GIVEN a completed analysis
-    test_analysis: Analysis = helpers.add_analysis(base_store, pipeline=Pipeline.MIP_DNA)
+    test_analysis: Analysis = helpers.add_analysis(base_store, pipeline=Workflow.MIP_DNA)
 
     # Given an action set to None
     test_analysis.case.action = None
@@ -399,7 +399,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
     )
 
     # GIVEN a completed analysis
-    test_analysis: Analysis = helpers.add_analysis(base_store, pipeline=Pipeline.MIP_DNA)
+    test_analysis: Analysis = helpers.add_analysis(base_store, pipeline=Workflow.MIP_DNA)
 
     # Given an action set to None
     test_analysis.case.action: str | None = None

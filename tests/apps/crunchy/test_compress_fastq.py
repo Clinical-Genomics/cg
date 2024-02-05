@@ -1,4 +1,5 @@
 """Test methods for compressing FASTQ"""
+
 import logging
 from pathlib import Path
 

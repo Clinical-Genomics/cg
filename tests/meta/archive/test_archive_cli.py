@@ -54,9 +54,9 @@ def test_archive_spring_files_success(
     # GIVEN a CLI runner and a context
 
     # GIVEN a spring file belonging to a customer with archive location 'karolinska_bucket'
-    all_non_archived_spring_files: list[
-        File
-    ] = archive_context.housekeeper_api.get_non_archived_spring_files()
+    all_non_archived_spring_files: list[File] = (
+        archive_context.housekeeper_api.get_non_archived_spring_files()
+    )
     assert len(all_non_archived_spring_files) == 1
     spring_file: File = all_non_archived_spring_files[0]
 

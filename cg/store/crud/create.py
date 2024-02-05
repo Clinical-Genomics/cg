@@ -3,9 +3,11 @@ from datetime import datetime
 
 import petname
 
-from cg.constants import DataDelivery, FlowCellStatus, Pipeline, Priority
+from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
+from cg.models.orders.order import OrderIn
 from cg.store.base import BaseHandler
+from cg.store.database import get_session
 from cg.store.models import (
     Analysis,
     Application,
@@ -20,6 +22,7 @@ from cg.store.models import (
     Delivery,
     Flowcell,
     Invoice,
+    Order,
     Organism,
     Panel,
     Pool,
@@ -200,7 +203,7 @@ class CreateHandler(BaseHandler):
 
     def add_case(
         self,
-        data_analysis: Pipeline,
+        data_analysis: Workflow,
         data_delivery: DataDelivery,
         name: str,
         ticket: str,
@@ -264,7 +267,7 @@ class CreateHandler(BaseHandler):
 
     def add_analysis(
         self,
-        pipeline: Pipeline,
+        pipeline: Workflow,
         version: str = None,
         completed_at: datetime = None,
         primary: bool = False,
@@ -403,3 +406,15 @@ class CreateHandler(BaseHandler):
             sample_internal_id=sample_internal_id,
             **kwargs,
         )
+
+    def add_order(self, order_data: OrderIn):
+        customer: Customer = self.get_customer_by_internal_id(order_data.customer)
+        order = Order(
+            customer_id=customer.id,
+            ticket_id=order_data.ticket,
+            workflow=order_data.order_type,
+        )
+        session = get_session()
+        session.add(order)
+        session.commit()
+        return order

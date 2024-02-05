@@ -1,4 +1,5 @@
 """Loqusdb input files models."""
+
 import logging
 
 from pydantic import BaseModel, FilePath

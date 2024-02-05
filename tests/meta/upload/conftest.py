@@ -7,7 +7,7 @@ import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -98,7 +98,7 @@ def mip_dna_case(mip_dna_context: CGConfig, helpers: StoreHelpers) -> Case:
         store=store,
         internal_id="mip-dna-case",
         name="mip-dna-case",
-        data_analysis=Pipeline.MIP_DNA,
+        data_analysis=Workflow.MIP_DNA,
     )
     dna_mip_sample: Sample = helpers.add_sample(
         store=store, application_type="wgs", internal_id="mip-dna-case"
@@ -108,7 +108,7 @@ def mip_dna_case(mip_dna_context: CGConfig, helpers: StoreHelpers) -> Case:
     helpers.add_analysis(
         store=store,
         case=mip_dna_case,
-        pipeline=Pipeline.MIP_DNA,
+        pipeline=Workflow.MIP_DNA,
     )
 
     return mip_dna_case
@@ -126,5 +126,5 @@ def mip_rna_analysis(mip_rna_context: CGConfig, helpers: StoreHelpers, mip_rna_c
     return helpers.add_analysis(
         store=mip_rna_context.status_db,
         case=mip_rna_case,
-        pipeline=Pipeline.MIP_RNA,
+        pipeline=Workflow.MIP_RNA,
     )

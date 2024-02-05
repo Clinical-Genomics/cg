@@ -80,7 +80,7 @@ def test_report_deliver_successful(
     rnafusion_case_id: str,
     rnafusion_deliverables_file_path: Path,
     deliverables_template_content: list[dict],
-    mock_analysis_finish,
+    rnafusion_mock_analysis_finish,
     caplog: LogCaptureFixture,
     mocker,
 ):

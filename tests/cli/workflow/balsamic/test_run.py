@@ -1,4 +1,5 @@
 """This script tests the run cli command"""
+
 import logging
 from pathlib import Path
 

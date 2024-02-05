@@ -4,7 +4,7 @@ import click
 import pytest
 
 from cg.cli.generate.report.base import generate_delivery_report
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.models.cg_config import CGConfig
 from tests.mocks.report import MockMipDNAAnalysisAPI, MockMipDNAReportAPI
 
@@ -27,7 +27,7 @@ def mip_dna_context(cg_context, helpers, case_id, real_housekeeper_api) -> CGCon
     )
     case = helpers.add_case(
         store=store,
-        data_analysis=Pipeline.MIP_DNA,
+        data_analysis=Workflow.MIP_DNA,
         internal_id=case_id,
     )
     sample = helpers.add_sample(
@@ -36,7 +36,7 @@ def mip_dna_context(cg_context, helpers, case_id, real_housekeeper_api) -> CGCon
     helpers.add_analysis(
         store=store,
         case=case,
-        pipeline=Pipeline.MIP_DNA,
+        pipeline=Workflow.MIP_DNA,
         delivery_reported_at=datetime.now(),
         started_at=datetime.now(),
     )

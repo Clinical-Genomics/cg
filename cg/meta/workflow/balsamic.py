@@ -1,11 +1,12 @@
 """Module for Balsamic Analysis API."""
+
 import logging
 from pathlib import Path
 
 from housekeeper.store.models import File, Version
 from pydantic.v1 import EmailStr, ValidationError
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
@@ -23,7 +24,6 @@ from cg.models.balsamic.metrics import (
     BalsamicWGSQCMetrics,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.fastq import FastqFileMeta
 from cg.store.models import Case, CaseSample, Sample
 from cg.utils import Process
 from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
@@ -41,7 +41,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.BALSAMIC,
+        pipeline: Workflow = Workflow.BALSAMIC,
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.account: str = config.balsamic.slurm.account
@@ -397,10 +397,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             file_path: str = get_string_from_list_by_pattern(observations, wildcard)
             verified_observations.update(
                 {
-                    wildcard: file_path
-                    if file_path
-                    else self.get_latest_file_by_pattern(
-                        directory=self.loqusdb_path, pattern=wildcard
+                    wildcard: (
+                        file_path
+                        if file_path
+                        else self.get_latest_file_by_pattern(
+                            directory=self.loqusdb_path, pattern=wildcard
+                        )
                     )
                 }
             )
@@ -412,9 +414,11 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return {
             "genome_interval": self.genome_interval_path,
             "gnomad_min_af5": self.gnomad_af5_path,
-            "gens_coverage_pon": self.gens_coverage_female_path
-            if sex == Sex.FEMALE
-            else self.gens_coverage_male_path,
+            "gens_coverage_pon": (
+                self.gens_coverage_female_path
+                if sex == Sex.FEMALE
+                else self.gens_coverage_male_path
+            ),
         }
 
     def get_swegen_verified_path(self, variants: Variants) -> str | None:
@@ -462,9 +466,11 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         }
         config_case.update(self.get_verified_samples(case_id=case_id))
         config_case.update(self.get_parsed_observation_file_paths(observations))
-        config_case.update(
-            self.get_verified_gens_file_paths(sex=verified_sex)
-        ) if not verified_panel_bed else None
+        (
+            config_case.update(self.get_verified_gens_file_paths(sex=verified_sex))
+            if not verified_panel_bed
+            else None
+        )
 
         return config_case
 

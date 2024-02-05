@@ -1,6 +1,5 @@
 """Tests for the creation of the sample sheet"""
 
-
 from cg.apps.demultiplex.sample_sheet.create import get_sample_sheet_creator
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,

@@ -1,4 +1,5 @@
 """CLI for delivering files with CG"""
+
 import logging
 from pathlib import Path
 

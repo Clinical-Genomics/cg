@@ -1,9 +1,18 @@
 from pathlib import Path
 
-from pydantic.v1 import Field
+from pydantic import Field, BaseModel
 
 from cg.constants.sequencing import SequencingPlatform
 from cg.models.nf_analysis import NextflowSampleSheetEntry, PipelineParameters
+
+
+class TaxprofilerQCMetrics(BaseModel):
+    """Taxprofiler QC metrics."""
+
+    after_filtering_total_reads: float | None
+    reads_mapped: float | None
+    before_filtering_total_reads: float | None
+    paired_aligned_none: float | None
 
 
 class TaxprofilerParameters(PipelineParameters):

@@ -1,4 +1,5 @@
 """Tests for the models in Scout load config."""
+
 from pathlib import Path
 from typing import Any
 

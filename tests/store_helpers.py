@@ -1,4 +1,5 @@
 """Utility functions to simply add test data in a cg store."""
+
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -6,7 +7,7 @@ from pathlib import Path
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import DataDelivery, Workflow
 from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
@@ -24,6 +25,7 @@ from cg.store.models import (
     Customer,
     Flowcell,
     Invoice,
+    Order,
     Organism,
     Panel,
     Pool,
@@ -239,7 +241,7 @@ class StoreHelpers:
     def ensure_application_limitation(
         store: Store,
         application: Application,
-        pipeline: str = Pipeline.MIP_DNA,
+        pipeline: str = Workflow.MIP_DNA,
         limitations: str = "Dummy limitations",
         **kwargs,
     ) -> ApplicationLimitations:
@@ -317,7 +319,7 @@ class StoreHelpers:
         upload_started: datetime = None,
         delivery_reported_at: datetime = None,
         cleaned_at: datetime = None,
-        pipeline: Pipeline = Pipeline.BALSAMIC,
+        pipeline: Workflow = Workflow.BALSAMIC,
         pipeline_version: str = "1.0",
         data_delivery: DataDelivery = DataDelivery.FASTQ_QC,
         uploading: bool = False,
@@ -436,7 +438,7 @@ class StoreHelpers:
     def add_case(
         store: Store,
         name: str = "case_test",
-        data_analysis: str = Pipeline.MIP_DNA,
+        data_analysis: str = Workflow.MIP_DNA,
         data_delivery: DataDelivery = DataDelivery.SCOUT,
         action: str = None,
         internal_id: str = None,
@@ -480,12 +482,27 @@ class StoreHelpers:
         return case_obj
 
     @staticmethod
+    def add_order(
+        store: Store,
+        customer_id: int,
+        ticket_id: int,
+        order_date: datetime = datetime(year=2023, month=12, day=24),
+        workflow: Workflow = Workflow.MIP_DNA,
+    ) -> Order:
+        order = Order(
+            customer_id=customer_id, ticket_id=ticket_id, order_date=order_date, workflow=workflow
+        )
+        store.session.add(order)
+        store.session.commit()
+        return order
+
+    @staticmethod
     def ensure_case(
         store: Store,
         case_name: str = "test-case",
         case_id: str = "blueeagle",
         customer: Customer = None,
-        data_analysis: Pipeline = Pipeline.MIP_DNA,
+        data_analysis: Workflow = Workflow.MIP_DNA,
         data_delivery: DataDelivery = DataDelivery.SCOUT,
         action: str = None,
     ):
@@ -524,7 +541,7 @@ class StoreHelpers:
             panels=case_info["panels"],
             internal_id=case_info["internal_id"],
             ordered_at=ordered_at,
-            data_analysis=case_info.get("data_analysis", str(Pipeline.MIP_DNA)),
+            data_analysis=case_info.get("data_analysis", Workflow.MIP_DNA),
             data_delivery=case_info.get("data_delivery", str(DataDelivery.SCOUT)),
             created_at=created_at,
             action=case_info.get("action"),
@@ -566,7 +583,7 @@ class StoreHelpers:
 
         StoreHelpers.add_analysis(
             store,
-            pipeline=Pipeline.MIP_DNA,
+            pipeline=Workflow.MIP_DNA,
             case=case,
             completed_at=completed_at or datetime.now(),
             started_at=started_at or datetime.now(),
@@ -631,7 +648,7 @@ class StoreHelpers:
             store=store,
             case_name=str(ticket),
             customer=customer,
-            data_analysis=Pipeline.MICROSALT,
+            data_analysis=Workflow.MICROSALT,
             data_delivery=DataDelivery.FASTQ_QC,
         )
         StoreHelpers.add_relationship(store=store, case=case, sample=sample)

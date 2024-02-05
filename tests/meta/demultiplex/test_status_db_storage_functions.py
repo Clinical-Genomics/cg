@@ -105,9 +105,9 @@ def test_delete_sequencing_metrics_from_statusdb_existing_metrics(
     store = store_with_sequencing_metrics
 
     # GIVEN that the flow cell has sequencing metrics
-    metrics: list[
-        SampleLaneSequencingMetrics
-    ] = store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
+    metrics: list[SampleLaneSequencingMetrics] = (
+        store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
+    )
     assert metrics
 
     # WHEN deleting sequencing metrics from statusdb
@@ -128,9 +128,9 @@ def test_delete_sequencing_metrics_from_statusdb_no_metrics(
 
     # GIVEN a new flow cell with no sequencing metrics
     flow_cell: Flowcell = helpers.add_flow_cell(store=store)
-    metrics: list[
-        SampleLaneSequencingMetrics
-    ] = store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell.name)
+    metrics: list[SampleLaneSequencingMetrics] = (
+        store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell.name)
+    )
     assert not metrics
 
     # WHEN deleting sequencing metrics from statusdb

@@ -1,7 +1,8 @@
 """This file tests the analyses_to_clean part of the status api"""
+
 from datetime import datetime
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.store.models import CaseSample
 from cg.store.store import Store
 
@@ -57,7 +58,7 @@ def test_pipeline_included(
     """Tests that analyses that are included depending on pipeline."""
 
     # GIVEN an analysis that is uploaded and pipeline is specified
-    pipeline = Pipeline.BALSAMIC
+    pipeline = Workflow.BALSAMIC
     analysis = helpers.add_analysis(
         analysis_store,
         pipeline=pipeline,
@@ -85,8 +86,8 @@ def test_pipeline_excluded(analysis_store: Store, helpers, timestamp_now: dateti
 
     # GIVEN an analysis that is uploaded
 
-    used_pipeline = Pipeline.BALSAMIC
-    wrong_pipeline = Pipeline.MIP_DNA
+    used_pipeline = Workflow.BALSAMIC
+    wrong_pipeline = Workflow.MIP_DNA
     analysis = helpers.add_analysis(
         analysis_store,
         pipeline=used_pipeline,

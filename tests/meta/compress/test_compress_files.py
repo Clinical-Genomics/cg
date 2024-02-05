@@ -1,4 +1,5 @@
 """Tests for the compression files module"""
+
 import logging
 
 from cg.meta.compress import files

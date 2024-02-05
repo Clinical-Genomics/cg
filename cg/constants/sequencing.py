@@ -1,4 +1,5 @@
 """Constants related to sequencing."""
+
 from enum import StrEnum
 
 

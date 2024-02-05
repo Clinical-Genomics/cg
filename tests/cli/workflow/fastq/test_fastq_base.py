@@ -5,7 +5,7 @@ from cg.cli.workflow.fastq.base import (
     store_available_fastq_analysis,
     store_fastq_analysis,
 )
-from cg.constants.constants import CaseActions, Pipeline
+from cg.constants.constants import CaseActions, Workflow
 from cg.store.models import Analysis, Case, Sample
 
 
@@ -45,7 +45,7 @@ def test_store_available_fastq_analysis(
         fastq_context.status_db, case_id=another_case_id, sample_id="sample_for_another_case_id"
     )
     assert not case_obj.analyses
-    case_obj.data_analysis = Pipeline.FASTQ
+    case_obj.data_analysis = Workflow.FASTQ
     case_obj.action = CaseActions.ANALYZE
     case_obj.samples[0].last_sequenced_at = datetime.now()
 

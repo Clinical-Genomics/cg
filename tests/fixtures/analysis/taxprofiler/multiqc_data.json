@@ -1,0 +1,154 @@
+{
+    "report_data_sources": {},
+    "report_general_stats_data": [
+        {
+            "a_sample_name_a_sample_name_raw_1": {
+                "percent_gc": 42.0,
+                "avg_sequence_length": 151.0
+            },
+            "a_sample_name_a_sample_name_raw_2": {
+                "percent_gc": 40.0,
+                "avg_sequence_length": 151.0
+            },
+            "another_sample_name_another_sample_name_raw_2": {
+                "percent_gc": 42.0,
+                "avg_sequence_length": 151.0
+            },
+            "another_sample_name_another_sample_name_raw_1": {
+                "percent_gc": 42.0,
+                "avg_sequence_length": 151.0
+            }
+        },
+        {
+            "a_sample_name_a_sample_name_processed_1": {
+                "percent_gc": 40.0,
+                "avg_sequence_length": 150.43304485256695
+            },
+            "another_sample_name_another_sample_name_processed_2": {
+                "percent_gc": 42.0,
+                "avg_sequence_length": 149.54545191791527
+            },
+            "a_sample_name_a_sample_name_processed_2": {
+                "percent_gc": 40.0,
+                "avg_sequence_length": 150.43309579957497
+            },
+            "another_sample_name_another_sample_name_processed_1": {
+                "percent_gc": 42.0,
+                "avg_sequence_length": 150.31898468815814
+            }
+        },
+        {
+            "a_sample_name_a_sample_name": {
+                "filtering_result_passed_filter_reads": 24810472.0,
+                "filtering_result_low_quality_reads": 353472.0,
+                "filtering_result_too_many_N_reads": 362.0,
+                "filtering_result_too_short_reads": 9252.0,
+                "filtering_result_too_long_reads": 0.0,
+                "pct_duplication": 9.06289,
+                "after_filtering_total_reads": 24810472.0,
+                "after_filtering_total_bases": 3729762485.0,
+                "after_filtering_q20_bases": 3632227951.0
+            },
+            "another_sample_name_another_sample_name": {
+                "filtering_result_passed_filter_reads": 18583052.0,
+                "filtering_result_low_quality_reads": 357656.0,
+                "filtering_result_too_many_N_reads": 524.0,
+                "filtering_result_too_short_reads": 11144.0,
+                "filtering_result_too_long_reads": 0.0,
+                "pct_duplication": 5.29809,
+                "after_filtering_total_reads": 18583052.0,
+                "after_filtering_total_bases": 2780127919.0,
+                "after_filtering_q20_bases": 2691806490.0,
+                "after_filtering_q30_bases": 2544698121.0,
+                "after_filtering_q20_rate": 0.968231
+            }
+        },
+        {
+            "a_sample_name_a_sample_name_1": {
+                "Input reads": 21848064,
+                "Input bases": 3286972543,
+                "Low entropy discards reads": 11660,
+                "Low entropy discards reads percent": 0.05,
+                "Low entropy discards bases": 1722930
+            },
+            "another_sample_name_another_sample_1": {
+                "Input reads": 20388654,
+                "Input bases": 3049509473,
+                "Low entropy discards reads": 10294,
+                "Low entropy discards reads percent": 0.05,
+                "Low entropy discards bases": 1324808
+            }
+        },
+        {
+            "a_sample_name_a_sample_name": {
+                "total_reads": 12400055,
+                "paired_total": 12400055,
+                "paired_aligned_none": 1409340,
+                "paired_aligned_one": 9019738,
+                "paired_aligned_multi": 1970977,
+                "paired_aligned_discord_one": 679727,
+                "paired_aligned_mate_none": 593752,
+                "paired_aligned_mate_one": 374624,
+                "paired_aligned_mate_multi": 490850,
+                "overall_alignment_rate": 97.61,
+                "paired_aligned_mate_multi_halved": 245425.0,
+                "paired_aligned_mate_none_halved": 296876.0,
+                "paired_aligned_mate_one_halved": 187312.0
+            },
+            "another_sample_name_another_sample_name": {
+                "total_reads": 10064481,
+                "paired_total": 10064481,
+                "paired_aligned_none": 1787568,
+                "paired_aligned_one": 6440297,
+                "paired_aligned_multi": 1836616,
+                "paired_aligned_discord_one": 591252,
+                "paired_aligned_mate_none": 1114012,
+                "paired_aligned_mate_one": 503082,
+                "paired_aligned_mate_multi": 775538,
+                "overall_alignment_rate": 94.47,
+                "paired_aligned_mate_multi_halved": 387769.0,
+                "paired_aligned_mate_none_halved": 557006.0,
+                "paired_aligned_mate_one_halved": 251541.0
+            }
+        },
+        {
+            "a_sample_name_a_sample_name": {
+                "raw_total_sequences": 20128962.0,
+                "filtered_sequences": 0.0,
+                "sequences": 20128962.0,
+                "is_sorted": 1.0,
+                "1st_fragments": 10064481.0,
+                "last_fragments": 10064481.0,
+                "reads_mapped": 19014950.0,
+                "reads_mapped_and_paired": 18397740.0,
+                "reads_unmapped": 1114012.0,
+                "reads_properly_paired": 16553826.0,
+                "reads_paired": 20128962.0,
+                "reads_duplicated": 0.0,
+                "reads_MQ0": 499437.0,
+                "reads_QC_failed": 0.0,
+                "non-primary_alignments": 0.0,
+                "supplementary_alignments": 0.0
+            },
+            "another_sample_name_another_sample_name": {
+                "raw_total_sequences": 24712584.0,
+                "filtered_sequences": 0.0,
+                "sequences": 24712584.0,
+                "is_sorted": 1.0,
+                "1st_fragments": 12356292.0,
+                "last_fragments": 12356292.0,
+                "reads_mapped": 24094459.0,
+                "reads_mapped_and_paired": 23689984.0,
+                "reads_unmapped": 618125.0,
+                "reads_properly_paired": 21995288.0,
+                "reads_paired": 24712584.0,
+                "reads_duplicated": 0.0,
+                "reads_MQ0": 239636.0,
+                "reads_QC_failed": 0.0,
+                "non-primary_alignments": 0.0,
+                "supplementary_alignments": 0.0
+            }
+        }
+    ],
+    "report_general_stats_headers": []
+}

@@ -1,9 +1,14 @@
 """ Create a sample sheet for NovaSeq flow cells."""
+
 import logging
 from abc import abstractmethod
 from typing import Type
 
-from cg.apps.demultiplex.sample_sheet.index import Index, get_valid_indexes, is_dual_index
+from cg.apps.demultiplex.sample_sheet.index import (
+    Index,
+    get_valid_indexes,
+    is_dual_index,
+)
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_samples_by_lane,
     get_validated_sample_sheet,
@@ -38,9 +43,9 @@ class SampleSheetCreator:
         self.flow_cell_id: str = flow_cell.id
         self.lims_samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
-        self.sample_type: Type[
-            FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
-        ] = flow_cell.sample_type
+        self.sample_type: Type[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq] = (
+            flow_cell.sample_type
+        )
         self.force: bool = force
         self.index_settings: IndexSettings = self.run_parameters.index_settings
 
@@ -109,6 +114,7 @@ class SampleSheetCreator:
                 lims_sample.update_barcode_mismatches(
                     samples_to_compare=samples_in_lane,
                     is_run_single_index=self.run_parameters.is_single_index,
+                    is_reverse_complement=self.index_settings.are_i5_override_cycles_reverse_complemented,
                 )
 
     def construct_sample_sheet(self) -> list[list[str]]:
