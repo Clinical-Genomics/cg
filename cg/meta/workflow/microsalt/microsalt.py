@@ -88,18 +88,14 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return Path(self.queries_path, filename).with_suffix(".json")
 
     def get_job_ids_path(self, case_id: str) -> Path:
-        case_path: Path = self.get_case_path(case_id)
-        job_ids_file_name: str = self.get_job_ids_file_name(case_id)
-        return Path(case_path, job_ids_file_name)
-
-    def get_job_ids_file_name(self, case_id: str) -> str:
-        project_id: str = self.get_lims_project_id(case_id)
-        return f"{project_id}_slurm_ids.yaml"
-
-    def get_lims_project_id(self, case_id: str):
-        case: Case = self.status_db.get_case_by_internal_id(case_id)
-        sample: Sample = case.links[0].sample
-        return self.get_project(sample.internal_id)
+        project_id: str = self.get_project_id(case_id)
+        return Path(
+            self.root_dir,
+            "results",
+            "reports",
+            "trailblazer",
+            f"{project_id}_slurm_ids.{FileExtensions.YAML}",
+        )
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
