@@ -241,7 +241,7 @@ class AnalysisAPI(MetaAPI):
             self.process.run_command(["--version"])
             return list(self.process.stdout_lines())[0].split()[-1]
         except (Exception, CalledProcessError):
-            LOG.warning("Could not retrieve %s workflow version!", self.workflow)
+            LOG.warning(f"Could not retrieve {self.workflow} workflow version!")
             return "0.0.0"
 
     def set_statusdb_action(self, case_id: str, action: str | None, dry_run: bool = False) -> None:
