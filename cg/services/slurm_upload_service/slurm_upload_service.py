@@ -5,6 +5,7 @@ from cg.models.slurm.sbatch import Sbatch
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
 
+UPLOAD_MEMORY = 1
 UPLOAD_MAX_HOURS = 24
 EXCLUDED_COMPUTE_NODES = "--exclude=gpu-compute-0-[0-1],cg-dragen"
 
@@ -35,6 +36,7 @@ class SlurmUploadService:
             time=UPLOAD_MAX_HOURS,
             quality_of_service=get_quality_of_service(self.config.account),
             exclude=EXCLUDED_COMPUTE_NODES,
+            memory=UPLOAD_MEMORY,
         )
 
 
