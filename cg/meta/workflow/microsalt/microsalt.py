@@ -17,7 +17,7 @@ from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.meta.workflow.microsalt.quality_controller import QualityController
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import (
-    run_sample_sequencing_quality_check
+    run_sample_sequencing_quality_check,
 )
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Sample
@@ -181,7 +181,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         priority = (
             Priority.research.name if sample_obj.priority_int == 0 else Priority.standard.name
         )
-        sequencing_qc: bool = 
+        sequencing_qc: bool = run_sample_sequencing_quality_check(sample_obj)
 
         return {
             "CG_ID_project": self.get_project(sample_id),
@@ -198,7 +198,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             "date_libprep": str(sample_obj.prepared_at or datetime.min),
             "method_libprep": method_library_prep or "Not in LIMS",
             "method_sequencing": method_sequencing or "Not in LIMS",
-            "sequencing_qc_passed": sample_obj.sequencing_qc,
+            "sequencing_qc_passed": sequencing_qc,
         }
 
     def get_project(self, sample_id: str) -> str:

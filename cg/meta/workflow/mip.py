@@ -16,8 +16,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_config import MipBaseConfig
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
-from cg.models.mip.mip_sample_info import MipBaseSa
-mpleInfo
+from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 from cg.store.models import BedVersion, Case, CaseSample, Sample
 
 CLI_OPTIONS = {
