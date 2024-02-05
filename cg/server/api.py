@@ -28,7 +28,7 @@ from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from cg.server.dto.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.orders_request import OrdersRequest
-from cg.server.dto.orders.orders_response import OrdersResponse
+from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.ext import db, lims, osticket
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.orders.order_service import OrderService
@@ -481,11 +481,11 @@ def get_orders():
     return make_response(response.model_dump())
 
 
-@BLUEPRINT.route("/orders/<order_id")
+@BLUEPRINT.route("/orders/<order_id>")
 def get_order(order_id: int):
     """Return an order."""
     order_service = OrderService(db)
-    response: OrdersResponse = order_service.get_order(order_id)
+    response: Order = order_service.get_order(order_id)
     return make_response(response.model_dump())
 
 

@@ -1751,10 +1751,10 @@ class ReadHandler(BaseHandler):
         )
         return orders.limit(limit).all()
 
-    def get_order(self, order_id: int) -> Order:
+    def get_order_by_id(self, order_id: int) -> Order:
         """Returns the entry in Order matching the given id."""
         orders: Query = self._get_query(table=Order)
-        order_filter_functions: list[Callable] = [OrderFilter.FILTER_ORDERS_BY_WORKFLOW]
+        order_filter_functions: list[Callable] = [OrderFilter.FILTER_ORDERS_BY_ID]
         orders: Query = apply_order_filters(
             orders=orders, filter_functions=order_filter_functions, id=order_id
         )
