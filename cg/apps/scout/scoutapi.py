@@ -33,7 +33,8 @@ class ScoutAPI:
             file_format=FileFormat.YAML, file_path=scout_load_config
         )
         scout_load_config_object = ScoutLoadConfig(**scout_config)
-        existing_case: ScoutExportCase | None = self.get_case(scout_load_config_object.family)
+        case_id: str = scout_load_config_object.family
+        existing_case: ScoutExportCase | None = self.get_case(case_id)
         load_command = ["load", "case", str(scout_load_config)]
         if existing_case:
             if force or scout_load_config_object.analysis_date > existing_case.analysis_date:
@@ -44,11 +45,9 @@ class ScoutAPI:
                 LOG.warning(f"Analysis of case already loaded: {existing_date}")
                 return
         LOG.debug("load new Scout case")
-        case_id: str = scout_load_config_object.family
         job_name = "scout_case_upload"
-        self.slurm_upload_service.upload(
-            upload_command=load_command, job_name=job_name, case_id=case_id
-        )
+        command: str = " ".join(load_command)
+        self.slurm_upload_service.upload(upload_command=command, job_name=job_name, case_id=case_id)
         LOG.debug("Case loaded successfully to Scout")
 
     def export_panels(self, panels: list[str], build: str = GENOME_BUILD_37) -> list[str]:
@@ -220,8 +219,9 @@ class ScoutAPI:
         try:
             LOG.info(f"Uploading {report_type} report to case {case_id}")
             job_name = f"scout_{report_type}_report_upload"
+            command: str = " ".join(upload_report_command)
             self.slurm_upload_service.upload(
-                upload_command=upload_report_command, job_name=job_name, case_id=case_id
+                upload_command=command, job_name=job_name, case_id=case_id
             )
         except CalledProcessError:
             LOG.warning(f"Something went wrong when uploading {report_type} for case {case_id}")
@@ -253,8 +253,9 @@ class ScoutAPI:
         try:
             LOG.info(f"Uploading splice junctions bed file {file_path} to case {case_id}.")
             job_name = "scout_splice_junctions_upload"
+            command: str = " ".join(upload_command)
             self.slurm_upload_service.upload(
-                upload_command=upload_command, job_name=job_name, case_id=case_id
+                upload_command=command, job_name=job_name, case_id=case_id
             )
         except CalledProcessError as error:
             raise ScoutUploadError(
@@ -280,8 +281,9 @@ class ScoutAPI:
         try:
             LOG.info(f"Uploading rna coverage bigwig file {file_path} to case {case_id}")
             job_name = "scout_rna_coverage_upload"
+            command: str = " ".join(upload_command)
             self.slurm_upload_service.upload(
-                upload_command=upload_command, job_name=job_name, case_id=case_id
+                upload_command=command, job_name=job_name, case_id=case_id
             )
         except CalledProcessError as error:
             raise ScoutUploadError(
