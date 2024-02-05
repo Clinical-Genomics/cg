@@ -81,19 +81,19 @@ def test_workflow_included(
     assert analysis in analyses_to_clean
 
 
-def test_pipeline_excluded(analysis_store: Store, helpers, timestamp_now: datetime):
+def test_workflow_excluded(analysis_store: Store, helpers, timestamp_now: datetime):
     """Tests that analyses are excluded depending on pipeline."""
 
     # GIVEN an analysis that is uploaded
 
-    used_pipeline = Workflow.BALSAMIC
-    wrong_pipeline = Workflow.MIP_DNA
+    used_workflow = Workflow.BALSAMIC
+    wrong_workflow = Workflow.MIP_DNA
     analysis = helpers.add_analysis(
         analysis_store,
         started_at=timestamp_now,
         uploaded_at=timestamp_now,
         cleaned_at=None,
-        workflow=used_pipeline,
+        workflow=used_workflow,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     link: CaseSample = analysis_store.relate_sample(
@@ -102,7 +102,7 @@ def test_pipeline_excluded(analysis_store: Store, helpers, timestamp_now: dateti
     analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_clean specifying another workflow
-    analyses_to_clean = analysis_store.get_analyses_to_clean(workflow=wrong_pipeline)
+    analyses_to_clean = analysis_store.get_analyses_to_clean(workflow=wrong_workflow)
 
     # THEN this analysis should not be returned
     assert analysis not in analyses_to_clean
