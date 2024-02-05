@@ -46,10 +46,9 @@ def test_order_endpoint(
     client: FlaskClient,
     order: Order,
     order_another: Order,
-    order_balsamic: Order,
 ):
     """Tests that the order endpoint returns the order with matching id"""
-    # GIVEN a store with three orders, two of which are MIP-DNA and the last is BALSAMIC
+    # GIVEN a store with two orders
 
     order_id_to_fetch: int = order.id
 
@@ -62,3 +61,17 @@ def test_order_endpoint(
 
     # THEN the response should only contain the specified order
     assert response.json == create_order_response(order).model_dump()
+
+
+def test_order_endpoint_not_found(
+    client: FlaskClient, order: Order, order_another: Order, non_existent_order_id: int
+):
+    """Tests that the order endpoint returns the order with matching id"""
+    # GIVEN a store with two orders
+
+    # WHEN a request is made to get a non-existent order
+    endpoint: str = f"/api/v1/orders/{non_existent_order_id}"
+    response = client.get(endpoint)
+
+    # THEN the response should be unsuccessful
+    assert response.status_code == HTTPStatus.NOT_FOUND

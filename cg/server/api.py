@@ -21,7 +21,13 @@ from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.constants import FileFormat
-from cg.exc import CaseNotFoundError, OrderError, OrderFormError, TicketCreationError
+from cg.exc import (
+    CaseNotFoundError,
+    OrderError,
+    OrderFormError,
+    OrderNotFoundError,
+    TicketCreationError,
+)
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
@@ -485,8 +491,11 @@ def get_orders():
 def get_order(order_id: int):
     """Return an order."""
     order_service = OrderService(db)
-    response: Order = order_service.get_order(order_id)
-    return make_response(response.model_dump())
+    try:
+        response: Order = order_service.get_order(order_id)
+        return make_response(response.model_dump())
+    except OrderNotFoundError as error:
+        return abort(make_response(jsonify(message=error.args), HTTPStatus.NOT_FOUND))
 
 
 @BLUEPRINT.route("/orderform", methods=["POST"])

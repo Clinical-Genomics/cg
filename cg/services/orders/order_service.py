@@ -1,3 +1,4 @@
+from cg.exc import OrderNotFoundError
 from cg.models.orders.order import OrderIn
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order as OrderResponse
@@ -12,7 +13,10 @@ class OrderService:
         self.store = store
 
     def get_order(self, order_id: int) -> OrderResponse:
-        return create_order_response(self.store.get_order_by_id(order_id))
+        order: Order = self.store.get_order_by_id(order_id)
+        if not order:
+            raise OrderNotFoundError(f"Order {order_id} not found.")
+        return create_order_response(order)
 
     def get_orders(self, orders_request: OrdersRequest) -> OrdersResponse:
         orders: list[Order] = self._get_orders(orders_request)
