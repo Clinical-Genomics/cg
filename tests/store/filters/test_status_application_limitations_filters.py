@@ -36,7 +36,7 @@ def test_filter_application_limitations_by_tag(
 
 def test_filter_application_limitations_by_workflow(
     store_with_application_limitations: Store,
-    pipeline=Workflow.BALSAMIC,
+    workflow=Workflow.BALSAMIC,
 ) -> None:
     """Test to get application limitations by pipeline."""
 
@@ -45,7 +45,7 @@ def test_filter_application_limitations_by_workflow(
     # WHEN getting an application limitations by pipeline
     application_limitations: Query = filter_application_limitations_by_workflow(
         application_limitations=store_with_application_limitations._get_join_application_limitations_query(),
-        workflow=pipeline,
+        workflow=workflow,
     )
 
     # ASSERT that application limitations is a query
@@ -55,5 +55,5 @@ def test_filter_application_limitations_by_workflow(
     assert (
         application_limitations.all()
         and len(application_limitations.all()) == 1
-        and application_limitations.all()[0].pipeline == pipeline
+        and application_limitations.all()[0].pipeline == workflow
     )

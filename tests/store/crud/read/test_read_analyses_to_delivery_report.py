@@ -9,16 +9,16 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_missing(analysis_store: Store, helpers: StoreHelpers, timestamp_now):
-    """Tests that analyses that are completed, but lacks delivery report are returned."""
+    """Test that analyses that are completed, but lacks a delivery report returned."""
 
     # GIVEN an analysis that is delivered but has no delivery report
-    pipeline = Workflow.BALSAMIC
+    workflow = Workflow.BALSAMIC
     analysis = helpers.add_analysis(
         analysis_store,
         started_at=timestamp_now,
         completed_at=timestamp_now,
         uploaded_at=timestamp_now,
-        workflow=pipeline,
+        workflow=workflow,
         data_delivery=DataDelivery.SCOUT,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
@@ -30,7 +30,7 @@ def test_missing(analysis_store: Store, helpers: StoreHelpers, timestamp_now):
     assert analysis.delivery_report_created_at is None
 
     # WHEN calling the analyses_to_delivery_report
-    analyses = analysis_store.analyses_to_delivery_report(workflow=pipeline).all()
+    analyses = analysis_store.analyses_to_delivery_report(workflow=workflow).all()
 
     # THEN this analyse should be returned
     assert analysis in analyses
@@ -78,19 +78,19 @@ def test_analyses_to_upload_delivery_reports(
     """Tests extraction of analyses ready for delivery report upload"""
 
     # GIVEN an analysis that has a delivery report generated
-    pipeline = Workflow.BALSAMIC
+    workflow = Workflow.BALSAMIC
     analysis = helpers.add_analysis(
         analysis_store,
         started_at=timestamp_now,
         completed_at=timestamp_now,
         uploaded_at=None,
         delivery_reported_at=timestamp_now,
-        workflow=pipeline,
+        workflow=workflow,
         data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
     )
 
     # WHEN calling the analyses_to_upload_delivery_reports
-    analyses = analysis_store.analyses_to_upload_delivery_reports(workflow=pipeline).all()
+    analyses = analysis_store.analyses_to_upload_delivery_reports(workflow=workflow).all()
 
     # THEN the previously defined analysis should be returned
     assert analysis in analyses
