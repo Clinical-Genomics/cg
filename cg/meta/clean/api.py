@@ -20,7 +20,7 @@ class CleanAPI:
         self.housekeeper_api = housekeeper_api
 
     def get_bundle_files(self, before: datetime, workflow: Workflow) -> Iterator[list[File]]:
-        """Get any bundle files for a specific version"""
+        """Get any bundle files for a specific version."""
 
         analysis: Analysis
         LOG.debug(
