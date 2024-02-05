@@ -84,7 +84,7 @@ class DataAnalysisModel(BaseModel):
 
     @model_validator(mode="after")
     def check_supported_workflow(self) -> "DataAnalysisModel":
-        """Check if the report generation supports a specific pipeline and analysis type."""
+        """Check if the report generation supports a specific workflow and analysis type."""
         if self.workflow != self.customer_workflow:
             LOG.error(
                 f"The analysis requested by the customer ({self.customer_workflow}) does not match the one "

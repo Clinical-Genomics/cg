@@ -1610,7 +1610,6 @@ class ReadHandler(BaseHandler):
         records: Query = apply_case_filter(
             cases=self._get_join_analysis_case_query(),
             filter_functions=[CaseFilter.FILTER_WITH_SCOUT_DELIVERY],
-            workflow=workflow,
         )
         analysis_filter_functions: list[AnalysisFilter] = [
             AnalysisFilter.FILTER_REPORT_BY_WORKFLOW,
