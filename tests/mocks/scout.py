@@ -1,6 +1,7 @@
 """Mock the scout api"""
 
 import logging
+from mock import Mock
 
 from pydantic.v1 import BaseModel, validator
 from typing_extensions import Literal
@@ -58,6 +59,7 @@ class MockScoutAPI(ScoutAPI):
         self._upload_report_success = True
         self._alignment_file_updated = 0
         self.process = ProcessMock(binary="scout", error=False)
+        self.slurm_upload_service = Mock()
 
     # Mock specific functions
 
