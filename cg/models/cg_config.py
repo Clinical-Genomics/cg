@@ -21,8 +21,8 @@ from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
-from cg.services.upload_service.upload_config import SlurmUploadConfig
-from cg.services.upload_service.upload_service import SlurmUploadService
+from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
+from cg.services.slurm_upload_service.slurm_upload_service import SlurmUploadService
 from cg.store.database import initialize_database
 from cg.store.store import Store
 

@@ -11,7 +11,7 @@ from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.exc import ScoutUploadError
 from cg.io.controller import ReadFile, ReadStream
 from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.services.upload_service.upload_service import SlurmUploadService
+from cg.services.slurm_upload_service.slurm_upload_service import SlurmUploadService
 from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
@@ -44,7 +44,11 @@ class ScoutAPI:
                 LOG.warning(f"Analysis of case already loaded: {existing_date}")
                 return
         LOG.debug("load new Scout case")
-        self.process.run_command(load_command)
+        case_id: str = scout_load_config_object.family
+        job_name = "scout_case_upload"
+        self.slurm_upload_service.upload(
+            upload_command=load_command, job_name=job_name, case_id=case_id
+        )
         LOG.debug("Case loaded successfully to Scout")
 
     def export_panels(self, panels: list[str], build: str = GENOME_BUILD_37) -> list[str]:
@@ -194,7 +198,10 @@ class ScoutAPI:
 
         try:
             LOG.info(f"Uploading delivery report {report_path} to case {case_id}")
-            self.process.run_command(upload_command)
+            job_name = "scout_report_upload"
+            self.slurm_upload_service.upload(
+                upload_command=upload_command, job_name=job_name, case_id=case_id
+            )
         except CalledProcessError:
             LOG.warning("Something went wrong when uploading delivery report")
 
@@ -212,7 +219,10 @@ class ScoutAPI:
 
         try:
             LOG.info(f"Uploading {report_type} report to case {case_id}")
-            self.process.run_command(upload_report_command)
+            job_name = f"scout_{report_type}_report_upload"
+            self.slurm_upload_service.upload(
+                upload_command=upload_report_command, job_name=job_name, case_id=case_id
+            )
         except CalledProcessError:
             LOG.warning(f"Something went wrong when uploading {report_type} for case {case_id}")
 
@@ -242,7 +252,10 @@ class ScoutAPI:
 
         try:
             LOG.info(f"Uploading splice junctions bed file {file_path} to case {case_id}.")
-            self.process.run_command(upload_command)
+            job_name = "scout_splice_junctions_upload"
+            self.slurm_upload_service.upload(
+                upload_command=upload_command, job_name=job_name, case_id=case_id
+            )
         except CalledProcessError as error:
             raise ScoutUploadError(
                 "Something went wrong when uploading the splice junctions bed file."
@@ -266,7 +279,10 @@ class ScoutAPI:
 
         try:
             LOG.info(f"Uploading rna coverage bigwig file {file_path} to case {case_id}")
-            self.process.run_command(upload_command)
+            job_name = "scout_rna_coverage_upload"
+            self.slurm_upload_service.upload(
+                upload_command=upload_command, job_name=job_name, case_id=case_id
+            )
         except CalledProcessError as error:
             raise ScoutUploadError(
                 "Something went wrong when uploading rna coverage bigwig file"
