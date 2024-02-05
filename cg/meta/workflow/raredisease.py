@@ -5,7 +5,7 @@ from typing import Any
 from pathlib import Path
 
 from cg.io.config import concat_configs, write_config_nextflow_style
-from cg.constants import GenePanelMasterList, Workflow, Pipeline
+from cg.constants import GenePanelMasterList, Workflow
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
