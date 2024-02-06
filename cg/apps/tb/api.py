@@ -8,12 +8,12 @@ from google.auth import jwt
 from google.auth.crypt import RSASigner
 
 from cg.apps.tb.dto.create_job_request import CreateJobRequest
-from cg.apps.tb.models import TrailblazerAnalysis
+from cg.apps.tb.models import AnalysesResponse, TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
-from cg.exc import TrailblazerAPIHTTPError
+from cg.exc import TrailblazerAPIHTTPError, TrailblazerAnalysisNotFound
 from cg.io.controller import APIRequest, ReadStream
 
 LOG = logging.getLogger(__name__)
@@ -67,6 +67,14 @@ class TrailblazerAPI:
             )
         LOG.debug(f"RESPONSE BODY {response.text}")
         return ReadStream.get_content_from_stream(file_format=FileFormat.JSON, stream=response.text)
+
+    def get_latest_completed_analysis(self, case_id: str) -> TrailblazerAnalysis | None:
+        endpoint = f"analyses?case_id={case_id}&status={AnalysisStatus.COMPLETED}&most_recent=true"
+        response = self.query_trailblazer(command=endpoint, request_body={}, method=APIMethods.GET)
+        validated_response = AnalysesResponse.model_validate(response)
+        if validated_response.analyses:
+            return validated_response.analyses[0]
+        raise TrailblazerAnalysisNotFound(f"No completed analysis found for case {case_id}")
 
     def get_latest_analysis(self, case_id: str) -> TrailblazerAnalysis | None:
         request_body = {

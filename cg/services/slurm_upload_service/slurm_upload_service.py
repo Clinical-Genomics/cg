@@ -24,7 +24,7 @@ class SlurmUploadService:
         self.config = config
 
     def upload(self, upload_command: str, job_name: str, case_id: str):
-        analysis: TrailblazerAnalysis = self.trailblazer_api.get_latest_analysis(case_id)
+        analysis: TrailblazerAnalysis = self.trailblazer_api.get_latest_completed_analysis(case_id)
         job_config: Sbatch = self._get_job_config(command=upload_command, job_name=job_name)
         slurm_id: int = self.slurm_service.submit_job(job_config)
         self.trailblazer_api.add_upload_job_to_analysis(slurm_id=slurm_id, analysis_id=analysis.id)

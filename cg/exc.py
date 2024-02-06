@@ -192,6 +192,9 @@ class TrailblazerAPIHTTPError(CgError):
     """Raised when Trailblazer REST API response code is not 200."""
 
 
+class TrailblazerAnalysisNotFound(CgError):
+    """Raised when a Trailblazer analysis is not found."""
+
 class ValidationError(CgError):
     """
     Exception related to delivery report validation.

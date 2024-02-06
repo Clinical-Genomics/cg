@@ -197,10 +197,7 @@ class ScoutAPI:
 
         try:
             LOG.info(f"Uploading delivery report {report_path} to case {case_id}")
-            job_name = "scout_report_upload"
-            self.slurm_upload_service.upload(
-                upload_command=upload_command, job_name=job_name, case_id=case_id
-            )
+            self.process.run_command(upload_command)
         except CalledProcessError:
             LOG.warning("Something went wrong when uploading delivery report")
 
@@ -218,11 +215,7 @@ class ScoutAPI:
 
         try:
             LOG.info(f"Uploading {report_type} report to case {case_id}")
-            job_name = f"scout_{report_type}_report_upload"
-            command: str = " ".join(upload_report_command)
-            self.slurm_upload_service.upload(
-                upload_command=command, job_name=job_name, case_id=case_id
-            )
+            self.process.run_command(upload_report_command)
         except CalledProcessError:
             LOG.warning(f"Something went wrong when uploading {report_type} for case {case_id}")
 
@@ -252,11 +245,7 @@ class ScoutAPI:
 
         try:
             LOG.info(f"Uploading splice junctions bed file {file_path} to case {case_id}.")
-            job_name = "scout_splice_junctions_upload"
-            command: str = " ".join(upload_command)
-            self.slurm_upload_service.upload(
-                upload_command=command, job_name=job_name, case_id=case_id
-            )
+            self.process.run_command(upload_command)
         except CalledProcessError as error:
             raise ScoutUploadError(
                 "Something went wrong when uploading the splice junctions bed file."
