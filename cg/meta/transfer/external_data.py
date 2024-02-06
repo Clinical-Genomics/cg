@@ -11,26 +11,19 @@ from cg.meta.rsync.sbatch import ERROR_RSYNC_FUNCTION, RSYNC_CONTENTS_COMMAND
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store.models import Customer, Sample
-from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
+from cg.utils.checksum.checksum import is_md5sum_correct
 
 LOG = logging.getLogger(__name__)
 
 
-def check_fastq_md5sum(fastq_path) -> Path | None:
-    """Returns the path of the input file if it does not match its md5sum."""
-    if Path(str(fastq_path) + ".md5").exists():
-        given_md5sum: str = extract_md5sum(md5sum_file=Path(str(fastq_path) + ".md5"))
-        if not check_md5sum(file_path=fastq_path, md5sum=given_md5sum):
-            return fastq_path
-
-
-def get_failed_fastq_paths(fastq_paths_to_add: list[Path]) -> list[Path]:
-    failed_sum_paths: list[Path] = []
-    for path in fastq_paths_to_add:
-        failed_path: Path | None = check_fastq_md5sum(path)
-        if failed_path:
-            failed_sum_paths.append(failed_path)
-    return failed_sum_paths
+def are_all_fastq_valid(fastq_paths: list[Path]) -> bool:
+    """Return True if all fastq files of a given sample pass md5 checksum."""
+    are_all_valid: bool = True
+    for path in fastq_paths:
+        if is_md5sum_correct(path):
+            are_all_valid = False
+            LOG.warning(f"Sample {path} did not match the given md5sum")
+    return are_all_valid
 
 
 def get_all_fastq(sample_folder: Path) -> list[Path]:
@@ -61,8 +54,8 @@ class ExternalDataAPI(MetaAPI):
 class TransferExternalDataAPI(ExternalDataAPI):
     """API for transferring external data from Caesar to Hasta."""
 
-    def __init__(self, config: CGConfig, dry_run: bool = False):
-        super().__init__(config, dry_run)
+    def __init__(self, config: CGConfig, ticket: str, dry_run: bool = False):
+        super().__init__(config, ticket, dry_run)
         self.account: str = config.data_delivery.account
         self.base_path: str = config.data_delivery.base_path
         self.mail_user: str = config.data_delivery.mail_user
@@ -70,15 +63,15 @@ class TransferExternalDataAPI(ExternalDataAPI):
         self.source_path: str = config.external.caesar
         self.RSYNC_FILE_POSTFIX: str = "_rsync_external_data"
 
-    def get_source_path(self, customer: str, ticket: str, cust_sample_id: str | None = "") -> Path:
+    def get_source_path(self, sample_id: str | None = "") -> Path:
         """Returns the path from where the sample files are fetched."""
-        return Path(self.source_path % customer, ticket, cust_sample_id)
+        return Path(self.source_path % self.customer_id, self.ticket, sample_id)
 
-    def create_log_dir(self, ticket: str) -> Path:
+    def create_log_dir(self) -> Path:
         """Creates a directory for log file to be stored."""
         timestamp: dt.datetime = dt.datetime.now()
         timestamp_str: str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
-        folder_name: Path = Path("_".join([ticket, timestamp_str]))
+        folder_name: Path = Path("_".join([self.ticket, timestamp_str]))
         log_dir: Path = Path(self.base_path, folder_name)
         LOG.info(f"Creating folder: {log_dir}")
         if self.dry_run:
@@ -87,19 +80,18 @@ class TransferExternalDataAPI(ExternalDataAPI):
         log_dir.mkdir(parents=True, exist_ok=False)
         return log_dir
 
-    def transfer_sample_files_from_source(self, ticket: str) -> None:
+    def transfer_sample_files_from_source(self) -> None:
         """Transfers all sample files, related to given ticket, from source to destination."""
-        customer_id: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
-        log_dir: Path = self.create_log_dir(ticket=ticket)
+        log_dir: Path = self.create_log_dir()
         error_function: str = ERROR_RSYNC_FUNCTION.format()
-        Path(self._destination_path % customer_id).mkdir(exist_ok=True)
+        Path(self._destination_path % self.customer_id).mkdir(exist_ok=True)
 
         command: str = RSYNC_CONTENTS_COMMAND.format(
-            source_path=self.get_source_path(customer=customer_id, ticket=ticket),
-            destination_path=self.get_destination_path(customer=customer_id),
+            source_path=self.get_source_path(),
+            destination_path=self.get_destination_path(),
         )
         sbatch_parameters: Sbatch = Sbatch(
-            job_name=ticket + self.RSYNC_FILE_POSTFIX,
+            job_name=self.ticket + self.RSYNC_FILE_POSTFIX,
             account=self.account,
             number_tasks=1,
             memory=1,
@@ -113,11 +105,11 @@ class TransferExternalDataAPI(ExternalDataAPI):
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
             sbatch_parameters=sbatch_parameters
         )
-        sbatch_path: Path = Path(log_dir, ticket + self.RSYNC_FILE_POSTFIX + ".sh")
+        sbatch_path: Path = Path(log_dir, self.ticket + self.RSYNC_FILE_POSTFIX + ".sh")
         self.slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
         LOG.info(
             "The folder {src_path} is now being rsynced to hasta".format(
-                src_path=self.get_source_path(customer=customer_id, ticket=ticket)
+                src_path=self.get_source_path()
             )
         )
 
@@ -128,44 +120,6 @@ class AddExternalDataAPI(ExternalDataAPI):
     def __init__(self, config: CGConfig, ticket: str, dry_run: bool = False, force: bool = False):
         super().__init__(config, ticket, dry_run)
         self.force: bool = force
-
-    def get_all_paths(self, lims_sample_id: str) -> list[Path]:
-        """Returns the paths of all fastq files associated to the sample."""
-        fastq_folder: Path = self.get_destination_path(lims_sample_id=lims_sample_id)
-        all_fastq_in_folder: list[Path] = get_all_fastq(sample_folder=fastq_folder)
-        return all_fastq_in_folder
-
-    def get_samples_from_folder(self, folder: Path) -> list[Sample]:
-        """Returns the samples from given ticket that are present in the provided folder."""
-        available_folders: list[str] = [sample_path.name for sample_path in folder.iterdir()]
-        available_samples: list[Sample] = [
-            sample
-            for sample in self.status_db.get_samples_from_ticket(ticket=self.ticket)
-            if sample.internal_id in available_folders or sample.name in available_folders
-        ]
-        return available_samples
-
-    def add_and_include_files_to_bundles(self, fastq_paths: list[Path], lims_sample_id: str):
-        """Add the given fastq files to the the hk-bundle."""
-        if self.dry_run:
-            LOG.info("No changes will be committed since this is a dry-run")
-            return
-        for path in fastq_paths:
-            LOG.info(f"Adding path {path} to bundle {lims_sample_id} in housekeeper")
-            self.housekeeper_api.add_and_include_file_to_latest_version(
-                bundle_name=lims_sample_id, file=path, tags=HK_FASTQ_TAGS
-            )
-
-    def get_fastq_paths_to_add(self, lims_sample_id: str) -> list[Path]:
-        hk_version: Version = self.housekeeper_api.get_or_create_version(bundle_name=lims_sample_id)
-        paths: list[Path] = self.get_all_paths(lims_sample_id=lims_sample_id)
-        fastq_paths_to_add: list[Path] = self.housekeeper_api.check_bundle_files(
-            file_paths=paths,
-            bundle_name=lims_sample_id,
-            last_version=hk_version,
-            tags=HK_FASTQ_TAGS,
-        )
-        return fastq_paths_to_add
 
     def curate_sample_folder(self, sample_folder: Path) -> None:
         """
@@ -188,50 +142,78 @@ class AddExternalDataAPI(ExternalDataAPI):
                 f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
             )
 
-    def get_available_samples(self) -> list[Sample]:
+    def get_sample_ids_from_folder(self, folder: Path) -> list[str]:
+        """Returns the samples present in the provided folder."""
+        available_folders: list[str] = [sample_path.name for sample_path in folder.iterdir()]
+        available_sample_ids: list[str] = [
+            sample.internal_id
+            for sample in self.status_db.get_samples_from_ticket(ticket=self.ticket)
+            if sample.internal_id in available_folders or sample.name in available_folders
+        ]
+        return available_sample_ids
+
+    def get_available_sample_ids(self) -> list[str]:
         """Return a list of samples available for adding to Housekeeper."""
         destination_folder_path: Path = self.get_destination_path()
         for sample_folder in destination_folder_path.iterdir():
             self.curate_sample_folder(sample_folder=sample_folder)
-        available_samples: list[Sample] = self.get_samples_from_folder(
+        available_sample_ids: list[str] = self.get_sample_ids_from_folder(
             folder=destination_folder_path
         )
-        return available_samples
+        return available_sample_ids
 
-    def are_all_fastq_valid(self, sample: Sample) -> bool:
-        """Return True if all fastq files of a given sample pass md5 checksum."""
+    def get_fastq_paths_to_add(self, lims_sample_id: str) -> list[Path]:
+        """Return the paths of fastq files that have not been to the Housekeeper bundle."""
+        hk_version: Version = self.housekeeper_api.get_or_create_version(bundle_name=lims_sample_id)
+        paths: list[Path] = get_all_fastq(sample_folder=self.get_destination_path(lims_sample_id))
+        fastq_paths_to_add: list[Path] = self.housekeeper_api.check_bundle_files(
+            file_paths=paths,
+            bundle_name=lims_sample_id,
+            last_version=hk_version,
+            tags=HK_FASTQ_TAGS,
+        )
+        return fastq_paths_to_add
 
-    def add_transfer_to_housekeeper(self) -> None:
-        """Add and include available ticket files to a Housekeeper bundle."""
-        available_samples: list[Sample] = self.get_available_samples()
-        failed_paths: list[Path] = []
-        cases_to_start: list[dict] = []
-        for sample in available_samples:
-            fastq_paths_to_add: list[Path] = self.get_fastq_paths_to_add(
-                lims_sample_id=sample.internal_id
-            )
-            self.are_all_fastq_valid(sample=sample)
-
-            cases_to_start.extend(
-                self.status_db.get_not_analysed_cases_by_sample_internal_id(
-                    sample_internal_id=sample.internal_id
-                )
-            )
-
-            self.add_and_include_files_to_bundles(
-                fastq_paths=fastq_paths_to_add,
-                lims_sample_id=sample.internal_id,
-            )
-            failed_paths.extend(get_failed_fastq_paths(fastq_paths_to_add=fastq_paths_to_add))
-        if failed_paths:
-            LOG.info(
-                "The following samples did not match the given md5sum: "
-                + ", ".join([str(path) for path in failed_paths])
-            )
-            LOG.info("Changes in housekeeper will not be committed and no cases will be added")
+    def add_and_include_files_to_bundles(self, fastq_paths: list[Path], lims_sample_id: str):
+        """Add the given fastq files to the the hk-bundle."""
+        if self.dry_run:
+            LOG.info("No changes will be committed since this is a dry-run")
             return
-        if not self.dry_run:
-            for case in cases_to_start:
-                self.status_db.set_case_action(
-                    case_internal_id=case["internal_id"], action="analyze"
+        for path in fastq_paths:
+            LOG.info(f"Adding path {path} to bundle {lims_sample_id} in housekeeper")
+            self.housekeeper_api.add_and_include_file_to_latest_version(
+                bundle_name=lims_sample_id, file=path, tags=HK_FASTQ_TAGS
+            )
+
+    def start_cases(self, cases: list[dict]) -> None:
+        """Start cases that have not been analysed."""
+        if self.dry_run:
+            LOG.info("No cases will be started since this is a dry-run")
+            return
+        for case in cases:
+            self.status_db.set_case_action(case_internal_id=case["internal_id"], action="analyze")
+            LOG.info(f"Case {case['internal_id']} has been set to 'analyze'")
+
+    def add_fastqs_to_housekeeper_and_start_cases(self) -> None:
+        """
+        Add and include available ticket fastq files to a Housekeeper bundle if they are not
+        corrupted and start cases associated with the ticket.
+        """
+        available_sample_ids: list[str] = self.get_available_sample_ids()
+        for sample_id in available_sample_ids:
+            fastq_paths_to_add: list[Path] = self.get_fastq_paths_to_add(lims_sample_id=sample_id)
+            if are_all_fastq_valid(fastq_paths=fastq_paths_to_add):
+                self.add_and_include_files_to_bundles(
+                    fastq_paths=fastq_paths_to_add,
+                    lims_sample_id=sample_id,
+                )
+                self.start_cases(
+                    cases=self.status_db.get_not_analysed_cases_by_sample_internal_id(
+                        sample_internal_id=sample_id
+                    )
+                )
+            else:
+                LOG.warning(
+                    f"Some files in {sample_id} did not match the given md5sum."
+                    " Changes in housekeeper will not be committed and no cases will be started"
                 )

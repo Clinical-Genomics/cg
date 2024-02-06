@@ -35,6 +35,14 @@ def extract_md5sum(md5sum_file: Path) -> str:
     return ""
 
 
+def is_md5sum_correct(file_path: Path) -> bool:
+    """Return True if the given file exists and matches its md5sum."""
+    if Path(str(file_path) + ".md5").exists():
+        given_md5sum: str = extract_md5sum(md5sum_file=Path(str(file_path) + ".md5"))
+        return check_md5sum(file_path=file_path, md5sum=given_md5sum)
+    return False
+
+
 def sha512_checksum(file: Path) -> str:
     """Generates the sha512 checksum of a file"""
     LOG.debug("Checksum for file %s: ", file)
