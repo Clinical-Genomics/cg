@@ -1,5 +1,4 @@
 import logging
-import os
 import re
 import shutil
 from datetime import datetime
@@ -16,6 +15,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.meta.workflow.microsalt.quality_controller import QualityController
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
+from cg.meta.workflow.microsalt.utils import get_most_recent_project_directory
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Sample
 from cg.utils import Process
@@ -301,16 +301,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_results_dir(self) -> Path:
         return Path(self.root_dir, "results")
 
-    def get_analyses_result_dirs(self, case_id: str) -> list[str]:
+    def get_case_path(self, case_id: str) -> Path:
         project_id: str = self.get_project_id(case_id)
         results_dir: Path = self.get_results_dir()
-        matches: list[str] = [d for d in os.listdir(results_dir) if d.startswith(project_id)]
-        if not matches:
-            LOG.error(f"No result directory found for {case_id} with project id {project_id}")
-        return matches
-
-    def get_case_path(self, case_id: str) -> Path:
-        results_dir: Path = self.get_results_dir()
-        matching_cases: list[str] = self.get_analyses_result_dirs(case_id)
-        case_dir: str = max(matching_cases, default="")
-        return Path(results_dir, case_dir)
+        return get_most_recent_project_directory(project_id=project_id, results_dir=results_dir)
