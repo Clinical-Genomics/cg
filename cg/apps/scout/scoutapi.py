@@ -269,11 +269,7 @@ class ScoutAPI:
 
         try:
             LOG.info(f"Uploading rna coverage bigwig file {file_path} to case {case_id}")
-            job_name = "scout_rna_coverage_upload"
-            command: str = " ".join(upload_command)
-            self.slurm_upload_service.upload(
-                upload_command=command, job_name=job_name, case_id=case_id
-            )
+            self.process.run_command(upload_command)
         except CalledProcessError as error:
             raise ScoutUploadError(
                 "Something went wrong when uploading rna coverage bigwig file"
