@@ -13,7 +13,7 @@ def get_project_directory_date(dir_name: str) -> datetime:
 
 
 def get_project_directories(project_id: str, directory: Path) -> list[str]:
-    return [d for d in os.listdir(directory) if d.startswith(project_id)]
+    return [sub_dir for sub_dir in os.listdir(directory) if sub_dir.startswith(project_id)]
 
 
 def sort_project_directories_by_date(project_directories: list[str]) -> list[str]:
