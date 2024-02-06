@@ -773,7 +773,7 @@ class Sample(Model, PriorityMixin):
         if self.received_at:
             return "Received"
 
-        return f"Ordered {self.ordered_at.date()}"
+        return "Ordered"
 
     @property
     def archive_location(self) -> str:
