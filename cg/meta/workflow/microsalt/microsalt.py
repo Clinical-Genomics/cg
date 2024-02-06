@@ -94,7 +94,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             "results",
             "reports",
             "trailblazer",
-            f"{project_id}_slurm_ids.{FileExtensions.YAML}",
+            f"{project_id}_slurm_ids{FileExtensions.YAML}",
         )
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
