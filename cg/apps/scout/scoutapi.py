@@ -45,7 +45,7 @@ class ScoutAPI:
                 existing_date = existing_case.analysis_date.date()
                 LOG.warning(f"Analysis of case already loaded: {existing_date}")
                 return
-        job_name = "scout_case_upload"
+        job_name = "scout_analysis_upload"
         command: str = f"{self.scout_base_command} " + " ".join(load_command)
         self.slurm_upload_service.upload(upload_command=command, job_name=job_name, case_id=case_id)
 
