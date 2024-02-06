@@ -16,9 +16,9 @@ from cg.services.slurm_upload_service.utils import get_quality_of_service
 class SlurmUploadService:
     def __init__(
         self,
+        config: SlurmUploadConfig,
         slurm_service: SlurmService,
         trailblazer_api: TrailblazerAPI,
-        config: SlurmUploadConfig,
     ):
         self.slurm_service = slurm_service
         self.trailblazer_api = trailblazer_api
@@ -36,11 +36,11 @@ class SlurmUploadService:
             account=self.config.account,
             commands=command,
             email=self.config.email,
+            exclude=SLURM_UPLOAD_EXCLUDED_COMPUTE_NODES,
+            hours=SLURM_UPLOAD_MAX_HOURS,
             job_name=job_name,
             log_dir=self.config.log_dir,
-            hours=SLURM_UPLOAD_MAX_HOURS,
-            quality_of_service=quality_of_service,
-            exclude=SLURM_UPLOAD_EXCLUDED_COMPUTE_NODES,
             memory=SLURM_UPLOAD_MEMORY,
             number_tasks=SLURM_UPLOAD_TASKS,
+            quality_of_service=quality_of_service,
         )
