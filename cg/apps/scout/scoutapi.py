@@ -25,6 +25,7 @@ class ScoutAPI:
         config_path = config["scout"]["config_path"]
         self.process = Process(binary=binary_path, config=config_path)
         self.slurm_upload_service = slurm_upload_service
+        self.scout_base_command = f"{binary_path} {config_path}"
 
     def upload(self, scout_load_config: Path, force: bool = False):
         """Load analysis of a new family into Scout."""
@@ -46,7 +47,7 @@ class ScoutAPI:
                 return
         LOG.debug("load new Scout case")
         job_name = "scout_case_upload"
-        command: str = " ".join(load_command)
+        command: str = f"{self.scout_base_command} " + " ".join(load_command)
         self.slurm_upload_service.upload(upload_command=command, job_name=job_name, case_id=case_id)
         LOG.debug("Case loaded successfully to Scout")
 
