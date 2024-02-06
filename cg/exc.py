@@ -138,7 +138,7 @@ class MicrosaltError(CgError):
     """
 
 
-class MissingAnalysisDir(CgError):
+class MissingAnalysisRunDirectory(CgError):
     """
     Error related to missing analysis.
     """
