@@ -496,7 +496,7 @@ def get_order(order_id: int):
         response_dict: dict = response.model_dump()
         return make_response(response_dict)
     except OrderNotFoundError as error:
-        return jsonify(str(error)), HTTPStatus.NOT_FOUND
+        return make_response(jsonify(str(error)), HTTPStatus.NOT_FOUND)
 
 
 @BLUEPRINT.route("/orderform", methods=["POST"])
