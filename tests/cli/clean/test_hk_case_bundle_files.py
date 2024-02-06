@@ -72,10 +72,10 @@ def test_clean_hk_case_files_single_analysis(
     store: Store = context.status_db
     days_ago: int = 1
     date_days_ago: dt.datetime = get_date_days_ago(days_ago)
-    pipeline: Workflow = Workflow.MIP_DNA
+    workflow: Workflow = Workflow.MIP_DNA
 
     analysis: Analysis = helpers.add_analysis(
-        store=store, started_at=date_days_ago, completed_at=date_days_ago, pipeline=pipeline
+        store=store, started_at=date_days_ago, completed_at=date_days_ago, workflow=workflow
     )
     bundle_name: str = analysis.case.internal_id
 
@@ -111,15 +111,15 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     store: Store = context.status_db
     days_ago: int = 1
     date_days_ago: dt.datetime = get_date_days_ago(days_ago)
-    pipeline: Workflow = Workflow.MIP_DNA
+    workflow: Workflow = Workflow.MIP_DNA
 
     analysis: Analysis = helpers.add_analysis(
-        store=store, started_at=date_days_ago, completed_at=date_days_ago, pipeline=pipeline
+        store=store, started_at=date_days_ago, completed_at=date_days_ago, workflow=workflow
     )
     bundle_name: str = analysis.case.internal_id
 
     # GIVEN a housekeeper api with some file with protected tags
-    protected_tags = WORKFLOW_PROTECTED_TAGS[pipeline][0]
+    protected_tags = WORKFLOW_PROTECTED_TAGS[workflow][0]
     hk_bundle_data["name"] = bundle_name
     hk_bundle_data["files"][0]["tags"] = protected_tags
     helpers.ensure_hk_bundle(cg_context.housekeeper_api, bundle_data=hk_bundle_data)

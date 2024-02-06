@@ -35,7 +35,7 @@ class RsyncAPI(MetaAPI):
         self.account: str = config.data_delivery.account
         self.log_dir: Path = Path(config.data_delivery.base_path)
         self.mail_user: str = config.data_delivery.mail_user
-        self.pipeline: str = Workflow.RSYNC
+        self.workflow: str = Workflow.RSYNC
 
     @property
     def slurm_quality_of_service(self) -> str:
