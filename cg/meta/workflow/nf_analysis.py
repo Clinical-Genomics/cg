@@ -306,7 +306,9 @@ class NfAnalysisAPI(AnalysisAPI):
                     continue
                 file[deliverable_field] = file[deliverable_field].replace("CASEID", case_id)
                 file[deliverable_field] = file[deliverable_field].replace("SAMPLEID", sample_id)
-                file[deliverable_field] = file[deliverable_field].replace("SAMPLENAME", str(sample_name))
+                file[deliverable_field] = file[deliverable_field].replace(
+                    "SAMPLENAME", str(sample_name)
+                )
                 file[deliverable_field] = file[deliverable_field].replace(
                     "PATHTOCASE", str(self.get_case_path(case_id=case_id))
                 )
