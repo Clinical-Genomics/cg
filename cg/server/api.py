@@ -219,15 +219,13 @@ def parse_families_in_collaboration():
     """Return cases in collaboration."""
 
     customer_internal_id = request.args.get("customer")
-    pipeline = request.args.get("data_analysis")
+    workflow = request.args.get("data_analysis")
     case_search_pattern = request.args.get("enquiry")
 
     customer = db.get_customer_by_internal_id(customer_internal_id=customer_internal_id)
 
-    cases = db.get_cases_by_customer_pipeline_and_case_search(
-        case_search=case_search_pattern,
-        customer=customer,
-        pipeline=pipeline,
+    cases = db.get_cases_by_customer_workflow_and_case_search(
+        customer=customer, workflow=workflow, case_search=case_search_pattern
     )
 
     case_dicts = [case.to_dict(links=True) for case in cases]

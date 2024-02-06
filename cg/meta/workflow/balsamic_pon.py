@@ -19,9 +19,9 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Workflow = Workflow.BALSAMIC_PON,
+        workflow: Workflow = Workflow.BALSAMIC_PON,
     ):
-        super().__init__(config=config, pipeline=pipeline)
+        super().__init__(config=config, workflow=workflow)
 
     def config_case(
         self,

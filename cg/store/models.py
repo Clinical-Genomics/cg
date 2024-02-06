@@ -496,16 +496,16 @@ class Case(Model, PriorityMixin):
         return SlurmQos(slurm_priority)
 
     def get_delivery_arguments(self) -> set[str]:
-        """Translates the case data_delivery field to pipeline specific arguments."""
+        """Translates the case data_delivery field to workflow specific arguments."""
         delivery_arguments: set[str] = set()
         requested_deliveries: list[str] = re.split("[-_]", self.data_delivery)
-        delivery_per_pipeline_map: dict[str, str] = {
+        delivery_per_workflow_map: dict[str, str] = {
             DataDelivery.FASTQ: Workflow.FASTQ,
             DataDelivery.ANALYSIS_FILES: self.data_analysis,
         }
-        for data_delivery, pipeline in delivery_per_pipeline_map.items():
+        for data_delivery, workflow in delivery_per_workflow_map.items():
             if data_delivery in requested_deliveries:
-                delivery_arguments.add(pipeline)
+                delivery_arguments.add(workflow)
         return delivery_arguments
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:

@@ -326,15 +326,15 @@ def store_with_application_limitations(
         application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
             StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value
         ),
-        pipeline=Workflow.MIP_DNA,
+        workflow=Workflow.MIP_DNA,
     )
-    for pipeline in [Workflow.MIP_DNA, Workflow.BALSAMIC]:
+    for workflow in [Workflow.MIP_DNA, Workflow.BALSAMIC]:
         helpers.ensure_application_limitation(
             store=store_with_an_application_with_and_without_attributes,
             application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
                 StoreConstants.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value
             ),
-            pipeline=pipeline,
+            workflow=workflow,
         )
     return store_with_an_application_with_and_without_attributes
 
@@ -415,11 +415,11 @@ def store_with_older_and_newer_analyses(
         helpers.add_analysis(
             store=base_store,
             case=case,
-            pipeline=Workflow.BALSAMIC,
             started_at=time,
             completed_at=time,
             uploaded_at=time,
             cleaned_at=time,
+            workflow=Workflow.BALSAMIC,
         )
 
     yield base_store
@@ -557,7 +557,7 @@ def store_with_analyses_for_cases_not_uploaded_fluffy(
             started_at=timestamp_yesterday,
             uploaded_at=timestamp_yesterday,
             delivery_reported_at=None,
-            pipeline=Workflow.FLUFFY,
+            workflow=Workflow.FLUFFY,
         )
         helpers.add_analysis(
             analysis_store,
@@ -565,7 +565,7 @@ def store_with_analyses_for_cases_not_uploaded_fluffy(
             started_at=timestamp_now,
             uploaded_at=None,
             delivery_reported_at=None,
-            pipeline=Workflow.FLUFFY,
+            workflow=Workflow.FLUFFY,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: CaseSample = analysis_store.relate_sample(

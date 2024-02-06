@@ -105,11 +105,7 @@ def mip_dna_case(mip_dna_context: CGConfig, helpers: StoreHelpers) -> Case:
     )
     helpers.add_relationship(store=store, case=mip_dna_case, sample=dna_mip_sample)
 
-    helpers.add_analysis(
-        store=store,
-        case=mip_dna_case,
-        pipeline=Workflow.MIP_DNA,
-    )
+    helpers.add_analysis(store=store, case=mip_dna_case, workflow=Workflow.MIP_DNA)
 
     return mip_dna_case
 
@@ -124,7 +120,5 @@ def mip_rna_case(mip_rna_context: CGConfig, case_id: str):
 def mip_rna_analysis(mip_rna_context: CGConfig, helpers: StoreHelpers, mip_rna_case: Case) -> Case:
     """Return a MIP RNA analysis."""
     return helpers.add_analysis(
-        store=mip_rna_context.status_db,
-        case=mip_rna_case,
-        pipeline=Workflow.MIP_RNA,
+        store=mip_rna_context.status_db, case=mip_rna_case, workflow=Workflow.MIP_RNA
     )

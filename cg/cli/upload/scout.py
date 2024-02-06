@@ -216,7 +216,7 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
     status_db: Store = context.status_db
     case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     scout_report_type, multiqc_report = scout_upload_api.get_multiqc_html_report(
-        case_id=case_id, pipeline=case.data_analysis
+        case_id=case_id, workflow=case.data_analysis
     )
     if scout_report_type == ScoutCustomCaseReportTags.MULTIQC_RNA:
         scout_upload_api.upload_rna_report_to_dna_case_in_scout(
