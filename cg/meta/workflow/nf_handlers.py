@@ -30,7 +30,7 @@ class NfTowerHandler(NfBaseHandler):
     """
 
     @classmethod
-    def get_tower_launch_parameters(cls, tower_pipeline: str, command_args: dict) -> list[str]:
+    def get_tower_launch_parameters(cls, tower_workflow: str, command_args: dict) -> list[str]:
         """Returns a tower launch command given a dictionary with arguments."""
 
         tower_options: list[str] = build_command_from_dict(
@@ -48,7 +48,7 @@ class NfTowerHandler(NfBaseHandler):
             },
             exclude_true=True,
         )
-        return ["launch"] + tower_options + [tower_pipeline]
+        return ["launch"] + tower_options + [tower_workflow]
 
     @classmethod
     def get_tower_relaunch_parameters(cls, from_tower_id: int, command_args: dict) -> list[str]:

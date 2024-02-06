@@ -39,7 +39,7 @@ class GenotypeAPI:
             # This is the sample sex specified by the customer
             sample_sex = samples_sex[sample_id]["pedigree"]
             self.update_sample_sex(sample_id, sample_sex)
-            # This is the predicted sex based on variant calls from the pipeline
+            # This is the predicted sex based on variant calls from the workflow
             analysis_predicted_sex = samples_sex[sample_id]["analysis"]
             self.update_analysis_sex(sample_id, sex=analysis_predicted_sex)
 

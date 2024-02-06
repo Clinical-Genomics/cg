@@ -1,5 +1,4 @@
 import logging
-import os
 import re
 import shutil
 from datetime import datetime
@@ -16,6 +15,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.meta.workflow.microsalt.quality_controller import QualityController
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
+from cg.meta.workflow.microsalt.utils import get_most_recent_project_directory
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Sample
 from cg.utils import Process
@@ -26,8 +26,8 @@ LOG = logging.getLogger(__name__)
 class MicrosaltAnalysisAPI(AnalysisAPI):
     """API to manage Microsalt Analyses"""
 
-    def __init__(self, config: CGConfig, pipeline: Workflow = Workflow.MICROSALT):
-        super().__init__(pipeline, config)
+    def __init__(self, config: CGConfig, workflow: Workflow = Workflow.MICROSALT):
+        super().__init__(workflow, config)
         self.root_dir = config.microsalt.root
         self.queries_path = config.microsalt.queries_path
         self.quality_checker = QualityController(config.status_db)
@@ -94,7 +94,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             "results",
             "reports",
             "trailblazer",
-            f"{project_id}_slurm_ids.{FileExtensions.YAML}",
+            f"{project_id}_slurm_ids{FileExtensions.YAML}",
         )
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
@@ -280,7 +280,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Return cases that are completed in trailblazer."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(self.pipeline)
+            for case in self.status_db.get_running_cases_in_workflow(self.workflow)
             if self.trailblazer_api.is_latest_analysis_completed(case.internal_id)
         ]
 
@@ -301,16 +301,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_results_dir(self) -> Path:
         return Path(self.root_dir, "results")
 
-    def get_analyses_result_dirs(self, case_id: str) -> list[str]:
+    def get_case_path(self, case_id: str) -> Path:
         project_id: str = self.get_project_id(case_id)
         results_dir: Path = self.get_results_dir()
-        matches: list[str] = [d for d in os.listdir(results_dir) if d.startswith(project_id)]
-        if not matches:
-            LOG.error(f"No result directory found for {case_id} with project id {project_id}")
-        return matches
-
-    def get_case_path(self, case_id: str) -> Path:
-        results_dir: Path = self.get_results_dir()
-        matching_cases: list[str] = self.get_analyses_result_dirs(case_id)
-        case_dir: str = max(matching_cases, default="")
-        return Path(results_dir, case_dir)
+        return get_most_recent_project_directory(project_id=project_id, directory=results_dir)
