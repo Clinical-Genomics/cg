@@ -5,6 +5,7 @@ from cg.constants.slurm import (
     SLURM_UPLOAD_EXCLUDED_COMPUTE_NODES,
     SLURM_UPLOAD_MAX_HOURS,
     SLURM_UPLOAD_MEMORY,
+    SLURM_UPLOAD_TASKS,
 )
 from cg.models.slurm.sbatch import Sbatch
 from cg.services.slurm_service.slurm_service import SlurmService
@@ -41,4 +42,5 @@ class SlurmUploadService:
             quality_of_service=quality_of_service,
             exclude=SLURM_UPLOAD_EXCLUDED_COMPUTE_NODES,
             memory=SLURM_UPLOAD_MEMORY,
+            number_tasks=SLURM_UPLOAD_TASKS,
         )
