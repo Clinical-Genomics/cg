@@ -33,10 +33,11 @@ class SlurmUploadService:
         quality_of_service: SlurmQos = get_quality_of_service(self.config.account)
         return Sbatch(
             account=self.config.account,
-            command=command,
+            commands=command,
+            email=self.config.email,
             job_name=job_name,
             log_dir=self.config.log_dir,
-            time=SLURM_UPLOAD_MAX_HOURS,
+            hours=SLURM_UPLOAD_MAX_HOURS,
             quality_of_service=quality_of_service,
             exclude=SLURM_UPLOAD_EXCLUDED_COMPUTE_NODES,
             memory=SLURM_UPLOAD_MEMORY,
