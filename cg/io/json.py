@@ -17,7 +17,7 @@ def read_json_stream(stream: str) -> Any:
 def write_json(content: Any, file_path: Path) -> None:
     """Write content to a json file"""
     with open(file_path, "w") as file:
-        json.dump(content, file)
+        json.dump(content, file, indent=4)
 
 
 def write_json_stream(content: Any) -> str:
