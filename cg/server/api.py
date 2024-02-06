@@ -493,7 +493,8 @@ def get_order(order_id: int):
     order_service = OrderService(db)
     try:
         response: Order = order_service.get_order(order_id)
-        return make_response(response.model_dump())
+        response_dict: dict = response.model_dump()
+        return make_response(response_dict)
     except OrderNotFoundError as error:
         return abort(make_response(jsonify(message=error.args), HTTPStatus.NOT_FOUND))
 
