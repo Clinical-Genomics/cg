@@ -96,7 +96,7 @@
                   <td>{{ sample.source }}*</td>
                   <td>{{ sample.ticket }}</td>
                   <td>{{ sample.application.tag }}*</td>
-                  <td>{{ case.data_analysis.customer_pipeline }}*</td>
+                  <td>{{ case.data_analysis.customer_workflow }}*</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -127,7 +127,7 @@
                   <td>{{ sample.metadata.bait_set }}</td>
                   <td>{{ sample.methods.sequencing }}</td>
                   <td>{{ sample.timestamps.reads_updated_at }}</td>
-                  <td>{{ case.data_analysis.pipeline }}</td>
+                  <td>{{ case.data_analysis.workflow }}</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -147,7 +147,7 @@
             <tbody>
               <tr>
                 <td>{{ case.name }}*</td>
-                <td>{{ case.data_analysis.pipeline_version }}</td>
+                <td>{{ case.data_analysis.workflow_version }}</td>
                 <td>{{ case.data_analysis.panels }}</td>
                 <td>{{ case.data_analysis.genome_build }}</td>
               </tr>
@@ -240,8 +240,8 @@
                 Begränsningar av analysen: {{ application.tag }}
               </h4>
               <p class="card-text">{{ application.limitations }}</p>
-              {% if application.pipeline_limitations != 'N/A' %}
-                <p class="card-text">{{ application.pipeline_limitations }}</p>
+              {% if application.workflow_limitations != 'N/A' %}
+                <p class="card-text">{{ application.workflow_limitations }}</p>
               {% endif %}
             {% endif %}
           </div>

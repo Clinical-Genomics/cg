@@ -2198,7 +2198,7 @@ def rnafusion_sample_sheet_content(
 
 @pytest.fixture(scope="function")
 def hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
-    hermes_output: dict = {"pipeline": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
+    hermes_output: dict = {"workflow": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
     for file_info in deliverable_data["files"]:
         tags: list[str] = []
         if "html" in file_info["format"]:
@@ -2210,7 +2210,7 @@ def hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
 @pytest.fixture(scope="function")
 def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
     malformed_deliverable: dict = hermes_deliverables.copy()
-    malformed_deliverable.pop("pipeline")
+    malformed_deliverable.pop("workflow")
 
     return malformed_deliverable
 
