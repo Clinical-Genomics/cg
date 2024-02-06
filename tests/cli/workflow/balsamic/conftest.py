@@ -835,7 +835,7 @@ def mock_deliverable(balsamic_dir: Path, deliverable_data: dict, balsamic_case_i
 
 @pytest.fixture
 def hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -> dict:
-    hermes_output: dict = {"pipeline": "balsamic", "bundle_id": balsamic_case_id, "files": []}
+    hermes_output: dict = {"workflow": "balsamic", "bundle_id": balsamic_case_id, "files": []}
     for file_info in deliverable_data["files"]:
         tags: list[str] = []
         if "html" in file_info["format"]:
@@ -851,7 +851,7 @@ def hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -> dict:
 @pytest.fixture
 def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
     malformed_deliverable = hermes_deliverables.copy()
-    malformed_deliverable.pop("pipeline")
+    malformed_deliverable.pop("workflow")
 
     return malformed_deliverable
 

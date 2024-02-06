@@ -378,7 +378,7 @@ def test_get_case_analysis_data(
     )
 
     # THEN check if the retrieved analysis data is correct
-    assert case_analysis_data.pipeline == "mip-dna"
+    assert case_analysis_data.workflow == "mip-dna"
     assert case_analysis_data.panels == "IEM, EP"
     assert case_analysis_data.scout_files
 
@@ -417,7 +417,7 @@ def test_get_case_analysis_data_pipeline_not_supported(
     case_mip_dna: Case,
     caplog: LogCaptureFixture,
 ):
-    """Test validation error if the analysis pipeline is not supported by the delivery report workflow."""
+    """Test validation error if the analysis workflow is not supported by the delivery report workflow."""
 
     # GIVEN a pre-built case with Fluffy as data analysis
     case_mip_dna.data_analysis = Workflow.FLUFFY
@@ -435,7 +435,7 @@ def test_get_case_analysis_data_pipeline_not_supported(
             case=case_mip_dna, analysis=mip_analysis, analysis_metadata=mip_metadata
         )
     assert (
-        f"The pipeline {case_mip_dna.data_analysis} does not support delivery report generation"
+        f"The workflow {case_mip_dna.data_analysis} does not support delivery report generation"
         in caplog.text
     )
 

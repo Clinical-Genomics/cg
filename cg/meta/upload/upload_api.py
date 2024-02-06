@@ -31,7 +31,7 @@ class UploadAPI(MetaAPI):
         )
 
     def upload(self, ctx: click.Context, case: Case, restart: bool) -> None:
-        """Uploads pipeline specific analysis data and files"""
+        """Uploads workflow specific analysis data and files."""
 
         raise NotImplementedError
 

@@ -105,7 +105,7 @@ def test_case_with_malformed_deliverables_file(
     # GIVEN that the output is malformed
     with pytest.raises(ValidationError):
         analysis_api.hermes_api.convert_deliverables(
-            deliverables_file=Path("a_file"), pipeline="balsamic"
+            deliverables_file=Path("a_file"), workflow="balsamic"
         )
 
         # GIVEN case-id

@@ -508,8 +508,8 @@ def mip_dna_analysis(
         store=analysis_store_trio,
         case=case,
         started_at=timestamp,
-        pipeline=Workflow.MIP_DNA,
         completed_at=timestamp,
+        workflow=Workflow.MIP_DNA,
     )
     for link in case.links:
         helpers.add_phenotype_groups_to_sample(
@@ -621,7 +621,7 @@ def lims_api(lims_samples: list[dict]) -> MockLimsAPI:
 @pytest.fixture(name="mip_analysis_api")
 def mip_analysis_api(cg_context: CGConfig) -> MockMipAnalysis:
     """Return a MIP analysis API."""
-    return MockMipAnalysis(config=cg_context, pipeline=Workflow.MIP_DNA)
+    return MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
 
 
 @pytest.fixture(name="upload_scout_api")
@@ -634,7 +634,7 @@ def upload_scout_api(
     store: Store,
 ) -> UploadScoutAPI:
     """Return upload Scout API."""
-    analysis_mock = MockMipAnalysis(config=cg_context, pipeline=Workflow.MIP_DNA)
+    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
     lims_api = MockLimsAPI(samples=lims_samples)
 
     return UploadScoutAPI(
@@ -657,7 +657,7 @@ def upload_mip_analysis_scout_api(
     store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
     """Return MIP upload Scout API."""
-    analysis_mock = MockMipAnalysis(config=cg_context, pipeline=Workflow.MIP_DNA)
+    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
     lims_api = MockLimsAPI(samples=lims_samples)
 
     yield UploadScoutAPI(
@@ -680,7 +680,7 @@ def upload_balsamic_analysis_scout_api(
     store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
     """Return Balsamic upload Scout API."""
-    analysis_mock = MockMipAnalysis(config=cg_context, pipeline=Workflow.MIP_DNA)
+    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
     lims_api = MockLimsAPI(samples=lims_samples)
 
     yield UploadScoutAPI(
@@ -721,7 +721,7 @@ def upload_rnafusion_analysis_scout_api(
     store: Store,
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api."""
-    analysis_mock = MockMipAnalysis(config=cg_context, pipeline=Workflow.MIP_DNA)
+    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
     lims_api = MockLimsAPI(samples=lims_samples)
 
     _api = UploadScoutAPI(

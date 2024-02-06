@@ -34,9 +34,7 @@ def balsamic(context: click.Context):
     AnalysisAPI.get_help(context)
 
     config = context.obj
-    context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(
-        config=config,
-    )
+    context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(config=config)
 
 
 balsamic.add_command(resolve_compression)

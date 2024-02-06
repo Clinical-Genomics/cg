@@ -146,7 +146,7 @@ def scout_finished_cases(
 @DRY_RUN
 @click.pass_context
 def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False) -> None:
-    """Clean up all non-protected files for all pipelines."""
+    """Clean up all non-protected files for all workflows."""
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
     clean_api: CleanAPI = CleanAPI(status_db=context.obj.status_db, housekeeper_api=housekeeper_api)
 
@@ -172,7 +172,7 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
 
 @clean.command("hk-bundle-files")
 @click.option("-c", "--case-id", type=str, required=False)
-@click.option("-p", "--pipeline", type=Workflow, required=False)
+@click.option("-w", "--workflow", type=Workflow, required=False)
 @click.option("-t", "--tags", multiple=True, required=True)
 @click.option("-o", "--days-old", type=int, default=30)
 @DRY_RUN
@@ -182,7 +182,7 @@ def hk_bundle_files(
     case_id: str | None,
     tags: list,
     days_old: int | None,
-    pipeline: Workflow | None,
+    workflow: Workflow | None,
     dry_run: bool,
 ):
     """Remove files found in Housekeeper bundles."""
@@ -195,13 +195,13 @@ def hk_bundle_files(
     function_dispatcher: Dispatcher = Dispatcher(
         functions=[
             status_db.get_analyses_started_at_before,
-            status_db.get_analyses_for_case_and_pipeline_started_at_before,
-            status_db.get_analyses_for_pipeline_started_at_before,
+            status_db.get_analyses_for_case_and_workflow_started_at_before,
+            status_db.get_analyses_for_workflow_started_at_before,
             status_db.get_analyses_for_case_started_at_before,
         ],
         input_dict={
             "case_internal_id": case_id,
-            "pipeline": pipeline,
+            "workflow": workflow,
             "started_at_before": date_threshold,
         },
     )
@@ -218,7 +218,7 @@ def hk_bundle_files(
             LOG.warning(
                 f"Version not found for "
                 f"bundle:{bundle_name}; "
-                f"pipeline: {analysis.pipeline}; "
+                f"workflow: {analysis.pipeline}; "
                 f"date {analysis.started_at}"
             )
             continue
@@ -226,7 +226,7 @@ def hk_bundle_files(
         LOG.info(
             f"Version found for "
             f"bundle:{bundle_name}; "
-            f"pipeline: {analysis.pipeline}; "
+            f"workflow: {analysis.pipeline}; "
             f"date {analysis.started_at}"
         )
         version_files: list[File] = housekeeper_api.get_files(

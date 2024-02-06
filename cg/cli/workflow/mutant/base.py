@@ -25,9 +25,7 @@ LOG = logging.getLogger(__name__)
 def mutant(context: click.Context) -> None:
     """Mutant analysis workflow"""
     AnalysisAPI.get_help(context)
-    context.obj.meta_apis["analysis_api"] = MutantAnalysisAPI(
-        config=context.obj,
-    )
+    context.obj.meta_apis["analysis_api"] = MutantAnalysisAPI(config=context.obj)
 
 
 mutant.add_command(resolve_compression)

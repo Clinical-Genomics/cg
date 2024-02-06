@@ -141,17 +141,17 @@ class BaseHandler:
         if name:
             filter_functions.append(CaseFilter.FILTER_BY_NAME_SEARCH)
         if data_analysis:
-            filter_functions.append(CaseFilter.FILTER_BY_PIPELINE_SEARCH)
+            filter_functions.append(CaseFilter.FILTER_BY_WORKFLOW_SEARCH)
 
         cases_query = apply_case_filter(
             cases=cases_query,
             filter_functions=filter_functions,
-            order_date=filter_case_order_date,
             action=case_action,
-            priority=priority,
             internal_id_search=internal_id,
             name_search=name,
-            pipeline_search=data_analysis,
+            order_date=filter_case_order_date,
+            workflow_search=data_analysis,
+            priority=priority,
         )
 
         # customer filters

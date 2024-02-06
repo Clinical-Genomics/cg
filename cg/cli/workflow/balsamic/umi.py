@@ -28,9 +28,7 @@ def balsamic_umi(context: click.Context):
         click.echo(context.get_help())
         return None
     config = context.obj
-    context.obj.meta_apis["analysis_api"] = BalsamicUmiAnalysisAPI(
-        config=config,
-    )
+    context.obj.meta_apis["analysis_api"] = BalsamicUmiAnalysisAPI(config=config)
 
 
 balsamic_umi.add_command(resolve_compression)

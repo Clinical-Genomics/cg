@@ -168,11 +168,11 @@ We convert all the info that we get from LIMS/`genologics` to dictionaries befor
 
 Interface to Trailblazer.
 
-- Monitor analysis pipeline status
+- Monitor analysis workflow status
 
 #### Genotype (gt)
 
-Interface to Genotype. For uploading results from the pipeline about genotypes to compare and validate that we are clear of sample mix-ups.
+Interface to Genotype. For uploading results from the workflow about genotypes to compare and validate that we are clear of sample mix-ups.
 
 #### Housekeeper (hk)
 
@@ -188,7 +188,7 @@ Internal app for opening tickets in SupportSystems. We use this mainly to link a
 
 #### Scout (scoutapi)
 
-Interface to Scout. For uploading analysis results to Scout. It's also used to access the generation of gene panels files used in the analysis pipeline.
+Interface to Scout. For uploading analysis results to Scout. It's also used to access the generation of gene panels files used in the analysis workflow.
 
 #### Delivery report
 

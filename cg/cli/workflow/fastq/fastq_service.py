@@ -25,7 +25,7 @@ class FastqService:
 
     def _add_analysis_to_store(self, case: Case) -> None:
         new_analysis: Analysis = self.store.add_analysis(
-            pipeline=Workflow.FASTQ,
+            workflow=Workflow.FASTQ,
             completed_at=dt.datetime.now(),
             primary=True,
             started_at=dt.datetime.now(),

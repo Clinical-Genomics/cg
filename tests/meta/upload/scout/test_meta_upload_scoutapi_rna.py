@@ -619,7 +619,7 @@ def test_map_dna_cases_to_dna_sample_incorrect_pipeline(
     dna_case: Case = rna_store.get_case_by_internal_id(dna_case_id)
     rna_sample: Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
 
-    # GIVEN that the DNA case has a different pipeline than the expected pipeline
+    # GIVEN that the DNA case has a different workflow than the expected workflow
     dna_case.data_analysis = Workflow.FASTQ
 
     # WHEN mapping the DNA case name to the DNA sample name in the related DNA cases
@@ -676,7 +676,7 @@ def test_get_multiqc_html_report(
 
     # WHEN getting the multiqc html report
     report_type, multiqc_report = upload_mip_analysis_scout_api.get_multiqc_html_report(
-        case_id=dna_case_id, pipeline=case.data_analysis
+        case_id=dna_case_id, workflow=case.data_analysis
     )
 
     # THEN the multiqc html report should be returned and the correct report type

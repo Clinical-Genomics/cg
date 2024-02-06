@@ -57,17 +57,17 @@ class UploadScoutAPI:
         self.lims = lims_api
         self.status_db = status_db
 
-    def generate_config(self, analysis_obj: Analysis) -> ScoutLoadConfig:
+    def generate_config(self, analysis: Analysis) -> ScoutLoadConfig:
         """Fetch data about an analysis to load Scout."""
         LOG.info("Generate scout load config")
 
         # Fetch last version from housekeeper
         # This should be safe since analyses are only added if data is analysed
-        hk_version_obj: Version = self.housekeeper.last_version(analysis_obj.case.internal_id)
+        hk_version_obj: Version = self.housekeeper.last_version(analysis.case.internal_id)
         LOG.debug(f"Found housekeeper version {hk_version_obj.id}")
 
-        LOG.info("Found pipeline %s", analysis_obj.pipeline)
-        config_builder = self.get_config_builder(analysis=analysis_obj, hk_version=hk_version_obj)
+        LOG.info(f"Found workflow {analysis.pipeline}")
+        config_builder = self.get_config_builder(analysis=analysis, hk_version=hk_version_obj)
 
         config_builder.build_load_config()
 
@@ -115,10 +115,10 @@ class UploadScoutAPI:
         return file_obj
 
     def get_multiqc_html_report(
-        self, case_id: str, pipeline: Workflow
+        self, case_id: str, workflow: Workflow
     ) -> tuple[ScoutCustomCaseReportTags, File | None]:
         """Return a multiqc report for a case in Housekeeper."""
-        if pipeline == Workflow.MIP_RNA:
+        if workflow == Workflow.MIP_RNA:
             return (
                 ScoutCustomCaseReportTags.MULTIQC_RNA,
                 self.housekeeper.files(bundle=case_id, tags=HK_MULTIQC_HTML_TAG).first(),
@@ -432,7 +432,7 @@ class UploadScoutAPI:
         list_of_dna_cases: list[Case], collaborators: set[Customer]
     ) -> list[str]:
         """Filters the given list of DNA samples and returns a subset of uploaded cases ordered by customers in the
-        specified list of collaborators and within the correct pipeline."""
+        specified list of collaborators and within the correct workflow."""
         filtered_dna_cases: list[str] = []
         for case in list_of_dna_cases:
             if (

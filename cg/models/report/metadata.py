@@ -28,7 +28,7 @@ class MipDNASampleMetadataModel(SampleMetadataModel):
 
     Attributes:
         bait_set: panel bed used for the analysis; source: LIMS
-        gender: gender estimated by the pipeline; source: pipeline workflow
+        gender: gender estimated by the workflow; source: pipeline workflow
         mapped_reads: percentage of reads aligned to the reference sequence; source: pipeline workflow
         mean_target_coverage: mean coverage of a target region; source: pipeline workflow
         pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: pipeline workflow

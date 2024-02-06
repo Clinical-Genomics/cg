@@ -14,7 +14,7 @@ from cg.io.controller import WriteFile, WriteStream
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, Sample
+from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -44,9 +44,7 @@ ARGUMENT_UNIQUE_IDENTIFIER = click.argument("unique_id", required=True, type=cli
 def microsalt(context: click.Context) -> None:
     """Microbial workflow"""
     AnalysisAPI.get_help(context)
-    context.obj.meta_apis["analysis_api"] = MicrosaltAnalysisAPI(
-        config=context.obj,
-    )
+    context.obj.meta_apis["analysis_api"] = MicrosaltAnalysisAPI(config=context.obj)
 
 
 microsalt.add_command(store)

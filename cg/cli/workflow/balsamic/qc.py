@@ -28,9 +28,7 @@ def balsamic_qc(context: click.Context):
         click.echo(context.get_help())
         return None
     config = context.obj
-    context.obj.meta_apis["analysis_api"] = BalsamicQCAnalysisAPI(
-        config=config,
-    )
+    context.obj.meta_apis["analysis_api"] = BalsamicQCAnalysisAPI(config=config)
 
 
 balsamic_qc.add_command(resolve_compression)

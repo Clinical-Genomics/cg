@@ -101,7 +101,7 @@ def test_case_with_malformed_deliverables_file(
     # GIVEN that the output is malformed
     with pytest.raises(ValidationError):
         analysis_api.hermes_api.convert_deliverables(
-            deliverables_file=Path("a_file"), pipeline="rnafusion"
+            deliverables_file=Path("a_file"), workflow="rnafusion"
         )
 
         # GIVEN case-id
@@ -134,7 +134,7 @@ def test_valid_case(
 
     # Make sure nothing is currently stored in Housekeeper
 
-    # Make sure  analysis not already stored in StatusDB
+    # Make sure analysis not already stored in StatusDB
     assert not rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
     # GIVEN that HermesAPI returns a deliverables output
@@ -151,7 +151,7 @@ def test_valid_case(
     assert rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
     assert rnafusion_context.meta_apis["analysis_api"].housekeeper_api.bundle(case_id)
 
-    # THEN pipeline version should be correctly stored
+    # THEN workflow version should be correctly stored
     assert (
         rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id)
         .analyses[0]

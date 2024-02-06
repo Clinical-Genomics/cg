@@ -113,7 +113,7 @@ def test_nipt_statina_upload_auto(
     analysis_obj: Analysis = helpers.add_analysis(
         store=upload_context.status_db,
         completed_at=datetime.datetime.now(),
-        pipeline=Workflow.FLUFFY,
+        workflow=Workflow.FLUFFY,
     )
     assert analysis_obj.completed_at
     assert not analysis_obj.uploaded_at
@@ -173,7 +173,7 @@ def test_nipt_statina_upload_auto_analysis_without_case(
     analysis_obj: Analysis = helpers.add_analysis(
         store=upload_context.status_db,
         completed_at=datetime.datetime.now(),
-        pipeline=Workflow.FLUFFY,
+        workflow=Workflow.FLUFFY,
     )
     analysis_obj.case = None
     mocker.patch.object(NiptUploadAPI, "get_all_upload_analyses", return_value=[analysis_obj])
@@ -195,7 +195,7 @@ def test_nipt_statina_upload_auto_dry_run(
     analysis_obj: Analysis = helpers.add_analysis(
         store=upload_context.status_db,
         completed_at=datetime.datetime.now(),
-        pipeline=Workflow.FLUFFY,
+        workflow=Workflow.FLUFFY,
     )
     assert analysis_obj.completed_at
     assert not analysis_obj.uploaded_at

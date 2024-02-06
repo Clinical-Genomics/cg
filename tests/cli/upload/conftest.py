@@ -253,7 +253,7 @@ class MockScoutUploadApi(UploadScoutAPI):
     def _request_analysis(self, analysis_store_single_case):
         self.analysis = analysis_store_single_case
 
-    def generate_config(self, analysis_obj, **kwargs):
+    def generate_config(self, analysis, **kwargs):
         """Mock the generate config"""
         if self.missing_mandatory_field:
             self.config.vcf_snv = None

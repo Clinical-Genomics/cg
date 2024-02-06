@@ -14,25 +14,25 @@ def filter_application_limitations_by_tag(
     return application_limitations.filter(Application.tag == tag)
 
 
-def filter_application_limitations_by_pipeline(
-    application_limitations: Query, pipeline: Workflow, **kwargs
+def filter_application_limitations_by_workflow(
+    application_limitations: Query, workflow: Workflow, **kwargs
 ) -> Query:
-    """Return application limitations by pipeline."""
-    return application_limitations.filter(ApplicationLimitations.pipeline == pipeline)
+    """Return application limitations by workflow."""
+    return application_limitations.filter(ApplicationLimitations.pipeline == workflow)
 
 
 def apply_application_limitations_filter(
     filter_functions: list[Callable],
     application_limitations: Query,
     tag: str = None,
-    pipeline: Workflow = None,
+    workflow: Workflow = None,
 ) -> Query:
     """Apply filtering functions to the application limitations queries and return filtered results."""
     for filter_function in filter_functions:
         application_limitations: Query = filter_function(
             application_limitations=application_limitations,
             tag=tag,
-            pipeline=pipeline,
+            workflow=workflow,
         )
     return application_limitations
 
@@ -41,4 +41,4 @@ class ApplicationLimitationsFilter(Enum):
     """Define ApplicationLimitations filter functions."""
 
     FILTER_BY_TAG = filter_application_limitations_by_tag
-    FILTER_BY_PIPELINE = filter_application_limitations_by_pipeline
+    FILTER_BY_WORKFLOW = filter_application_limitations_by_workflow

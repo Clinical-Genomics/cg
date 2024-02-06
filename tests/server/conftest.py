@@ -91,6 +91,11 @@ def order_balsamic(helpers: StoreHelpers, customer_another: Customer) -> Order:
 
 
 @pytest.fixture
+def non_existent_order_id() -> int:
+    return 900
+
+
+@pytest.fixture
 def client(app: Flask) -> Generator[FlaskClient, None, None]:
     # Bypass authentication
     with patch.object(app, "before_request_funcs", new={}):

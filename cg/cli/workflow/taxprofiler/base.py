@@ -40,9 +40,7 @@ LOG = logging.getLogger(__name__)
 def taxprofiler(context: click.Context) -> None:
     """nf-core/taxprofiler analysis workflow."""
     AnalysisAPI.get_help(context)
-    context.obj.meta_apis[MetaApis.ANALYSIS_API] = TaxprofilerAnalysisAPI(
-        config=context.obj,
-    )
+    context.obj.meta_apis[MetaApis.ANALYSIS_API] = TaxprofilerAnalysisAPI(config=context.obj)
 
 
 taxprofiler.add_command(resolve_compression)
@@ -106,9 +104,7 @@ def run(
     command_args: CommandArgs = CommandArgs(
         **{
             "log": analysis_api.get_log_path(
-                case_id=case_id,
-                pipeline=analysis_api.pipeline,
-                log=log,
+                case_id=case_id, workflow=analysis_api.workflow, log=log
             ),
             "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,

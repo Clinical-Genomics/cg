@@ -37,7 +37,7 @@ class ApplicationModel(BaseModel):
     description: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     details: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     limitations: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    pipeline_limitations: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    workflow_limitations: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     accredited: bool | None = None
     external: bool | None = None
 

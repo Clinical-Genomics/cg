@@ -25,7 +25,7 @@ class UploadGenotypesAPI(object):
         self.hk = hk_api
         self.gt = gt_api
 
-    def data(self, analysis_obj: Analysis) -> dict:
+    def data(self, analysis: Analysis) -> dict:
         """Fetch data about an analysis to load genotypes.
 
         Returns: dict on form
@@ -41,19 +41,19 @@ class UploadGenotypesAPI(object):
         }
 
         """
-        case_id = analysis_obj.case.internal_id
+        case_id = analysis.case.internal_id
         LOG.info(f"Fetching upload genotype data for {case_id}")
         hk_version = self.hk.last_version(case_id)
         hk_bcf = self.get_bcf_file(hk_version)
         data = {"bcf": hk_bcf.full_path}
-        if analysis_obj.pipeline in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
-            data["samples_sex"] = self._get_samples_sex_balsamic(case_obj=analysis_obj.case)
-        elif analysis_obj.pipeline == Workflow.MIP_DNA:
+        if analysis.pipeline in [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]:
+            data["samples_sex"] = self._get_samples_sex_balsamic(case_obj=analysis.case)
+        elif analysis.pipeline == Workflow.MIP_DNA:
             data["samples_sex"] = self._get_samples_sex_mip(
-                case_obj=analysis_obj.case, hk_version=hk_version
+                case_obj=analysis.case, hk_version=hk_version
             )
         else:
-            raise ValueError(f"Workflow {analysis_obj.pipeline} does not support Genotype upload")
+            raise ValueError(f"Workflow {analysis.pipeline} does not support Genotype upload")
         return data
 
     def _get_samples_sex_mip(self, case_obj: Case, hk_version: Version) -> dict:

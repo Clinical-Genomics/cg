@@ -61,7 +61,7 @@ def test_get_data(
     UploadGenotypesAPI.analysis_sex.return_value = genotype_analysis_sex
 
     # WHEN parsing the data
-    result = upload_genotypes_api.data(analysis_obj=analysis_obj)
+    result = upload_genotypes_api.data(analysis=analysis_obj)
 
     # THEN assert that the result looks like expected
     assert len(result["samples_sex"]) == 3

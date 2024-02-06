@@ -74,17 +74,17 @@ def store_with_analyses_for_cases(
             analysis_store,
             case=case,
             started_at=timestamp_yesterday,
+            completed_at=timestamp_yesterday,
             uploaded_at=timestamp_yesterday,
             delivery_reported_at=None,
-            completed_at=timestamp_yesterday,
         )
         helpers.add_analysis(
             analysis_store,
             case=case,
             started_at=timestamp_now,
+            completed_at=timestamp_now,
             uploaded_at=timestamp_now,
             delivery_reported_at=None,
-            completed_at=timestamp_now,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: CaseSample = analysis_store.relate_sample(

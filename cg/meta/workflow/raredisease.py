@@ -19,9 +19,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Workflow = Workflow.RAREDISEASE,
+        workflow: Workflow = Workflow.RAREDISEASE,
     ):
-        super().__init__(config=config, pipeline=pipeline)
+        super().__init__(config=config, workflow=workflow)
 
     @property
     def root(self) -> str:
