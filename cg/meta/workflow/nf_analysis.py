@@ -298,6 +298,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return PipelineDeliverables for a given case."""
         deliverable_template: list[dict] = self.get_deliverables_template_content()
         sample_id: str = self.status_db.get_samples_by_case_id(case_id).pop().internal_id
+        sample_name: str = self.status_db.get_sample_by_internal_id(sample_id).name
         files: list[FileDeliverable] = []
         for file in deliverable_template:
             for deliverable_field, deliverable_value in file.items():
@@ -305,6 +306,7 @@ class NfAnalysisAPI(AnalysisAPI):
                     continue
                 file[deliverable_field] = file[deliverable_field].replace("CASEID", case_id)
                 file[deliverable_field] = file[deliverable_field].replace("SAMPLEID", sample_id)
+                file[deliverable_field] = file[deliverable_field].replace("SAMPLENAME", str(sample_name))
                 file[deliverable_field] = file[deliverable_field].replace(
                     "PATHTOCASE", str(self.get_case_path(case_id=case_id))
                 )
@@ -397,3 +399,14 @@ class NfAnalysisAPI(AnalysisAPI):
             self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.ERROR)
             raise CgError from error
         self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
+
+    def report_deliver(self, case_id: str) -> None:
+        """Create deliverables file."""
+        deliverables_content: PipelineDeliverables = self.get_deliverables_for_case(case_id=case_id)
+        self.write_deliverables_file(
+            deliverables_content=deliverables_content.dict(),
+            file_path=self.get_deliverables_file_path(case_id=case_id),
+        )
+        LOG.info(
+            f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
+        )

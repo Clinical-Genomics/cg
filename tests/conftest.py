@@ -2550,6 +2550,14 @@ def taxprofiler_metrics_deliverables_path(taxprofiler_dir: Path, taxprofiler_cas
 
 
 @pytest.fixture(scope="function")
+def taxprofiler_deliverables_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
+    """Path to deliverables file."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_deliverables"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
 def nf_analysis_housekeeper(
     housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
@@ -2596,6 +2604,9 @@ def taxprofiler_context(
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
     taxprofiler_case: Case = helpers.add_case(
         store=status_db,

@@ -5,12 +5,15 @@ from pathlib import Path
 from typing import Any
 
 from cg.constants import Workflow
-from cg.constants.sequencing import SequencingPlatform
 from cg.io.json import read_json
+from cg import resources
+from cg.constants.sequencing import SequencingPlatform
+from cg.constants.constants import FileFormat
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.fastq import FastqFileMeta
+from cg.io.controller import ReadFile
 from cg.models.taxprofiler.taxprofiler import (
     TaxprofilerParameters,
     TaxprofilerSampleSheetEntry,
@@ -152,3 +155,11 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
                     metrics_values.update(sample_values)
 
         return metrics_values
+
+    @staticmethod
+    def get_deliverables_template_content() -> list[dict]:
+        """Return deliverables file template content."""
+        return ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML,
+            file_path=resources.TAXPROFILER_BUNDLE_FILENAMES_PATH,
+        )

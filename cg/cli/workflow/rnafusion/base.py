@@ -19,6 +19,7 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
     metrics_deliver,
+    report_deliver,
 )
 from cg.cli.workflow.rnafusion.options import (
     OPTION_FROM_START,
@@ -220,30 +221,7 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
 
 
 rnafusion.add_command(metrics_deliver)
-
-
-@rnafusion.command("report-deliver")
-@ARGUMENT_CASE_ID
-@DRY_RUN
-@click.pass_obj
-def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Create a housekeeper deliverables file for given CASE ID."""
-
-    analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-
-    try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
-        if not dry_run:
-            analysis_api.report_deliver(case_id=case_id)
-        else:
-            LOG.info("Dry-run")
-    except (CgError, ValidationError) as error:
-        LOG.error(f"Could not create report file: {error}")
-        raise click.Abort()
-    except Exception as error:
-        LOG.error(f"Could not create report file: {error}")
-        raise click.Abort()
+rnafusion.add_command(report_deliver)
 
 
 @rnafusion.command("store-housekeeper")

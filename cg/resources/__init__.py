@@ -8,6 +8,12 @@ VALID_INDEXES_PATH: Path = Path(pkg_resources.resource_filename("cg", VALID_INDE
 
 RNAFUSION_BUNDLE_FILENAMES: str = Path("resources", "rnafusion_bundle_filenames.csv").as_posix()
 
+TAXPROFILER_BUNDLE_FILENAMES: str = Path("resources", "taxprofiler_bundle_filenames.csv").as_posix()
+
 RNAFUSION_BUNDLE_FILENAMES_PATH: Path = Path(
     pkg_resources.resource_filename("cg", RNAFUSION_BUNDLE_FILENAMES)
+)
+
+TAXPROFILER_BUNDLE_FILENAMES_PATH: Path = Path(
+    pkg_resources.resource_filename("cg", TAXPROFILER_BUNDLE_FILENAMES)
 )

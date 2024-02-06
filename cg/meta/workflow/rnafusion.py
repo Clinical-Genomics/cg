@@ -163,17 +163,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         )
         return metric_base_list
 
-    def report_deliver(self, case_id: str) -> None:
-        """Create deliverables file."""
-        deliverables_content: PipelineDeliverables = self.get_deliverables_for_case(case_id=case_id)
-        self.write_deliverables_file(
-            deliverables_content=deliverables_content.dict(),
-            file_path=self.get_deliverables_file_path(case_id=case_id),
-        )
-        LOG.info(
-            f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
-        )
-
     @staticmethod
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
         """Check that all mandatory metrics are present. Raise error if missing."""
