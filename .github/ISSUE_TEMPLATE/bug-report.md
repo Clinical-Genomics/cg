@@ -1,8 +1,9 @@
 ---
 name: Bug report
-title: ''
-labels: 'bug'
-assignees: ''
+description: File a bug report
+title: "Bug:"
+labels: "bug"
+assignees: ""
 ---
 
 **Describe the bug**
