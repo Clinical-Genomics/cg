@@ -45,11 +45,9 @@ class ScoutAPI:
                 existing_date = existing_case.analysis_date.date()
                 LOG.warning(f"Analysis of case already loaded: {existing_date}")
                 return
-        LOG.debug("load new Scout case")
         job_name = "scout_case_upload"
         command: str = f"{self.scout_base_command} " + " ".join(load_command)
         self.slurm_upload_service.upload(upload_command=command, job_name=job_name, case_id=case_id)
-        LOG.debug("Case loaded successfully to Scout")
 
     def export_panels(self, panels: list[str], build: str = GENOME_BUILD_37) -> list[str]:
         """Pass through to export of a list of gene panels.

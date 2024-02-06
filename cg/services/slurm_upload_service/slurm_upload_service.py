@@ -1,3 +1,4 @@
+import logging
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.priority import SlurmQos
@@ -13,6 +14,9 @@ from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConf
 from cg.services.slurm_upload_service.utils import get_quality_of_service
 
 
+LOG = logging.getLogger(__name__)
+
+
 class SlurmUploadService:
     def __init__(
         self,
@@ -25,7 +29,9 @@ class SlurmUploadService:
         self.config = config
 
     def upload(self, upload_command: str, job_name: str, case_id: str):
+        LOG.debug(f"Uploading case {case_id} to via SLURM with command: {upload_command}")
         analysis: TrailblazerAnalysis = self.trailblazer_api.get_latest_completed_analysis(case_id)
+        job_name = f"{job_name}_{analysis.id}"
         job_config: Sbatch = self._get_job_config(command=upload_command, job_name=job_name)
         slurm_id: int = self.slurm_service.submit_job(job_config)
         self.trailblazer_api.add_upload_job_to_analysis(slurm_id=slurm_id, analysis_id=analysis.id)
