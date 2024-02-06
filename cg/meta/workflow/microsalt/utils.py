@@ -6,7 +6,10 @@ from cg.exc import MissingAnalysisRunDirectory
 
 
 def parse_project_directory_date(dir_name: str) -> datetime:
-    return datetime.strptime(dir_name.split("_")[-1], "%Y.%m.%d_%H.%M.%S")
+    # Assumes format like <project_id>_year.month.day_hour.minute.second
+    _, date, time = dir_name.split("_")
+    date_time = f"{date}_{time}"
+    return datetime.strptime(date_time, "%Y.%m.%d_%H.%M.%S")
 
 
 def get_project_directories(project_id: str, directory: Path) -> list[str]:
