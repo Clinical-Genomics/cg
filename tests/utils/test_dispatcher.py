@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import CustomerId
 from cg.store.models import Analysis, Sample
 from cg.store.store import Store
@@ -169,28 +169,28 @@ def test_dispatcher_on_other_functions(
     helpers: StoreHelpers,
     timestamp_now: datetime,
     timestamp_yesterday: datetime,
-    pipeline: Pipeline = Pipeline.MIP_DNA,
+    workflow: Workflow = Workflow.MIP_DNA,
     case_internal_id: str = "test_case",
 ):
     """Test that the dispatcher can be used to call functions in the status db"""
 
     # GIVEN a database with a case and an analysis
     case = helpers.add_case(store, internal_id=case_internal_id)
-    helpers.add_analysis(store, case=case, started_at=timestamp_yesterday, pipeline=pipeline)
-    helpers.add_analysis(store, case=case, started_at=timestamp_now, pipeline=Pipeline.FLUFFY)
-    helpers.add_analysis(store, case=case, started_at=timestamp_yesterday, pipeline=Pipeline.FLUFFY)
+    helpers.add_analysis(store, case=case, started_at=timestamp_yesterday, workflow=workflow)
+    helpers.add_analysis(store, case=case, started_at=timestamp_now, workflow=Workflow.FLUFFY)
+    helpers.add_analysis(store, case=case, started_at=timestamp_yesterday, workflow=Workflow.FLUFFY)
 
     # WHEN calling the dispatcher with the to get analyses
     function_dispatcher: Dispatcher = Dispatcher(
         functions=[
             store.get_analyses_started_at_before,
-            store.get_analyses_for_case_and_pipeline_started_at_before,
-            store.get_analyses_for_pipeline_started_at_before,
+            store.get_analyses_for_case_and_workflow_started_at_before,
+            store.get_analyses_for_workflow_started_at_before,
             store.get_analyses_for_case_started_at_before,
         ],
         input_dict={
             "case_internal_id": case_internal_id,
-            "pipeline": pipeline,
+            "workflow": workflow,
             "started_at_before": timestamp_now,
         },
     )
@@ -200,5 +200,5 @@ def test_dispatcher_on_other_functions(
     for analysis in analyses:
         assert analysis
         assert analysis.case.internal_id == case_internal_id
-        assert analysis.pipeline == pipeline
+        assert analysis.pipeline == workflow
         assert analysis.started_at < timestamp_now

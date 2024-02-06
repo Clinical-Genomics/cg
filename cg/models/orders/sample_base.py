@@ -3,7 +3,7 @@ from enum import StrEnum
 from pydantic import BaseModel, BeforeValidator, ConfigDict, constr
 from typing_extensions import Annotated
 
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import DataDelivery, Workflow
 from cg.models.orders.validators.sample_base_validators import snake_case
 from cg.store.models import Application, Case, Customer, Pool, Sample
 
@@ -60,7 +60,7 @@ class OrderSample(BaseModel):
     control: str | None = None
     customer: constr(max_length=Customer.internal_id.property.columns[0].type.length) | None = None
     custom_index: str | None = None
-    data_analysis: Pipeline
+    data_analysis: Workflow
     data_delivery: DataDelivery
     elution_buffer: str | None = None
     extraction_method: str | None = None

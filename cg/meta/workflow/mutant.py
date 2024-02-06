@@ -2,7 +2,7 @@ import logging
 import shutil
 from pathlib import Path
 
-from cg.constants import Pipeline, SequencingFileTag
+from cg.constants import SequencingFileTag, Workflow
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -19,9 +19,9 @@ class MutantAnalysisAPI(AnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.MUTANT,
+        workflow: Workflow = Workflow.MUTANT,
     ):
-        super().__init__(config=config, pipeline=pipeline)
+        super().__init__(workflow=workflow, config=config)
         self.root_dir = config.mutant.root
 
     @property
@@ -187,7 +187,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         and is ready to be stored in Housekeeper."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
+            for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
             if Path(self.get_deliverables_file_path(case_id=case.internal_id)).exists()
         ]
 
@@ -204,7 +204,7 @@ class MutantAnalysisAPI(AnalysisAPI):
     ) -> None:
         """
         Link FASTQ files for a nanopore sample to working directory.
-        If pipeline input requires concatenated fastq, files can also be concatenated
+        If workflow input requires concatenated fastq, files can also be concatenated
         """
         read_paths = []
         files: list[dict] = self.get_metadata_for_nanopore_sample(sample=sample)

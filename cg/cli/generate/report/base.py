@@ -12,16 +12,16 @@ from cg.cli.generate.report.options import (
     ARGUMENT_CASE_ID,
     OPTION_DRY_RUN,
     OPTION_FORCE_REPORT,
-    OPTION_PIPELINE,
     OPTION_STARTED_AT,
+    OPTION_WORKFLOW,
 )
 from cg.cli.generate.report.utils import (
     get_report_analysis_started,
     get_report_api,
-    get_report_api_pipeline,
+    get_report_api_workflow,
     get_report_case,
 )
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.exc import CgError
 from cg.meta.report.report_api import ReportAPI
 from cg.store.models import Case
@@ -85,23 +85,23 @@ def generate_delivery_report(
 
 
 @click.command("available-delivery-reports")
-@OPTION_PIPELINE
+@OPTION_WORKFLOW
 @OPTION_FORCE_REPORT
 @OPTION_DRY_RUN
 @click.pass_context
 def generate_available_delivery_reports(
-    context: click.Context, pipeline: Pipeline, force_report: bool, dry_run: bool
+    context: click.Context, workflow: Workflow, force_report: bool, dry_run: bool
 ) -> None:
-    """Generates delivery reports for all cases that need one and stores them in housekeeper."""
+    """Generates delivery reports for all cases that need one and stores them in Housekeeper."""
 
     click.echo(click.style("--------------- AVAILABLE DELIVERY REPORTS ---------------"))
 
     exit_code = EXIT_SUCCESS
 
-    report_api: ReportAPI = get_report_api_pipeline(context, pipeline)
-    context.obj.meta_apis["report_api"] = report_api if pipeline else None
+    report_api: ReportAPI = get_report_api_workflow(context=context, workflow=workflow)
+    context.obj.meta_apis["report_api"] = report_api if workflow else None
 
-    cases_without_delivery_report = report_api.get_cases_without_delivery_report(pipeline)
+    cases_without_delivery_report = report_api.get_cases_without_delivery_report(workflow)
     if not cases_without_delivery_report:
         click.echo(
             click.style(

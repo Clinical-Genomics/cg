@@ -1,5 +1,4 @@
 import logging
-import os
 import re
 import shutil
 from datetime import datetime
@@ -8,14 +7,15 @@ from typing import Any
 
 import click
 
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, Workflow
 from cg.constants.constants import FileExtensions
 from cg.constants.tb import AnalysisStatus
-from cg.exc import CgDataError, MissingAnalysisDir
+from cg.exc import CgDataError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.meta.workflow.microsalt.quality_controller import QualityController
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
+from cg.meta.workflow.microsalt.utils import get_most_recent_project_directory
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Sample
 from cg.utils import Process
@@ -26,8 +26,8 @@ LOG = logging.getLogger(__name__)
 class MicrosaltAnalysisAPI(AnalysisAPI):
     """API to manage Microsalt Analyses"""
 
-    def __init__(self, config: CGConfig, pipeline: Pipeline = Pipeline.MICROSALT):
-        super().__init__(pipeline, config)
+    def __init__(self, config: CGConfig, workflow: Workflow = Workflow.MICROSALT):
+        super().__init__(workflow, config)
         self.root_dir = config.microsalt.root
         self.queries_path = config.microsalt.queries_path
         self.quality_checker = QualityController(config.status_db)
@@ -88,18 +88,14 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return Path(self.queries_path, filename).with_suffix(".json")
 
     def get_job_ids_path(self, case_id: str) -> Path:
-        case_path: Path = self.get_case_path(case_id)
-        job_ids_file_name: str = self.get_job_ids_file_name(case_id)
-        return Path(case_path, job_ids_file_name)
-
-    def get_job_ids_file_name(self, case_id: str) -> str:
-        project_id: str = self.get_lims_project_id(case_id)
-        return f"{project_id}_slurm_ids.yaml"
-
-    def get_lims_project_id(self, case_id: str):
-        case: Case = self.status_db.get_case_by_internal_id(case_id)
-        sample: Sample = case.links[0].sample
-        return self.get_project(sample.internal_id)
+        project_id: str = self.get_project_id(case_id)
+        return Path(
+            self.root_dir,
+            "results",
+            "reports",
+            "trailblazer",
+            f"{project_id}_slurm_ids{FileExtensions.YAML}",
+        )
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
@@ -284,7 +280,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Return cases that are completed in trailblazer."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(self.pipeline)
+            for case in self.status_db.get_running_cases_in_workflow(self.workflow)
             if self.trailblazer_api.is_latest_analysis_completed(case.internal_id)
         ]
 
@@ -305,16 +301,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_results_dir(self) -> Path:
         return Path(self.root_dir, "results")
 
-    def get_analyses_result_dirs(self, case_id: str) -> list[str]:
+    def get_case_path(self, case_id: str) -> Path:
         project_id: str = self.get_project_id(case_id)
         results_dir: Path = self.get_results_dir()
-        matches: list[str] = [d for d in os.listdir(results_dir) if d.startswith(project_id)]
-        if not matches:
-            LOG.error(f"No result directory found for {case_id} with project id {project_id}")
-        return matches
-
-    def get_case_path(self, case_id: str) -> Path:
-        results_dir: Path = self.get_results_dir()
-        matching_cases: list[str] = self.get_analyses_result_dirs(case_id)
-        case_dir: str = max(matching_cases, default="")
-        return Path(results_dir, case_dir)
+        return get_most_recent_project_directory(project_id=project_id, directory=results_dir)

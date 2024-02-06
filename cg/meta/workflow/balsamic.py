@@ -6,7 +6,7 @@ from pathlib import Path
 from housekeeper.store.models import File, Version
 from pydantic.v1 import EmailStr, ValidationError
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
@@ -24,7 +24,6 @@ from cg.models.balsamic.metrics import (
     BalsamicWGSQCMetrics,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.fastq import FastqFileMeta
 from cg.store.models import Case, CaseSample, Sample
 from cg.utils import Process
 from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
@@ -42,9 +41,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.BALSAMIC,
+        workflow: Workflow = Workflow.BALSAMIC,
     ):
-        super().__init__(config=config, pipeline=pipeline)
+        super().__init__(workflow=workflow, config=config)
         self.account: str = config.balsamic.slurm.account
         self.binary_path: str = config.balsamic.binary_path
         self.balsamic_cache: str = config.balsamic.balsamic_cache
@@ -95,7 +94,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_cases_to_analyze(self) -> list[Case]:
         cases_query: list[Case] = self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.use_read_count_threshold
+            workflow=self.workflow, threshold=self.use_read_count_threshold
         )
         cases_to_analyze = []
         for case_obj in cases_query:
@@ -457,7 +456,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         config_case: dict[str, str] = {
             "case_id": case_id,
-            "analysis_workflow": self.pipeline,
+            "analysis_workflow": self.workflow,
             "genome_version": genome_version,
             "sex": verified_sex,
             "panel_bed": verified_panel_bed,
@@ -529,8 +528,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return None
         return self.get_target_bed_from_lims(link_object.case.internal_id)
 
-    def get_pipeline_version(self, case_id: str) -> str:
-        LOG.debug("Fetch pipeline version")
+    def get_workflow_version(self, case_id: str) -> str:
+        LOG.debug("Fetch workflow version")
         config_data: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=self.get_case_config_path(case_id=case_id)
         )

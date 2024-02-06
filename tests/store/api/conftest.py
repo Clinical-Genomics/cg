@@ -2,7 +2,7 @@ import datetime as dt
 
 import pytest
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import PrepCategory
 from cg.constants.subject import PhenotypeStatus
 from cg.store.models import CaseSample
@@ -24,7 +24,7 @@ def store_failing_sequencing_qc(
         store=store,
         internal_id="fluffy_case",
         name="fluffy_case",
-        data_analysis=Pipeline.FLUFFY,
+        data_analysis=Workflow.FLUFFY,
     )
 
     store_sample = helpers.add_sample(
@@ -74,17 +74,17 @@ def store_with_analyses_for_cases(
             analysis_store,
             case=case,
             started_at=timestamp_yesterday,
+            completed_at=timestamp_yesterday,
             uploaded_at=timestamp_yesterday,
             delivery_reported_at=None,
-            completed_at=timestamp_yesterday,
         )
         helpers.add_analysis(
             analysis_store,
             case=case,
             started_at=timestamp_now,
+            completed_at=timestamp_now,
             uploaded_at=timestamp_now,
             delivery_reported_at=None,
-            completed_at=timestamp_now,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: CaseSample = analysis_store.relate_sample(

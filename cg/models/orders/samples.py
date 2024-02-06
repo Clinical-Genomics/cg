@@ -1,7 +1,7 @@
 from pydantic.v1 import BaseModel, constr, validator
 
 from cg.constants import DataDelivery
-from cg.constants.constants import GenomeVersion, Pipeline
+from cg.constants.constants import GenomeVersion, Workflow
 from cg.models.orders.order import OrderType
 from cg.models.orders.sample_base import (
     NAME_PATTERN,
@@ -33,7 +33,7 @@ class OrderInSample(BaseModel):
     application: constr(max_length=Application.tag.property.columns[0].type.length)
     comment: constr(max_length=Sample.comment.property.columns[0].type.length) | None
     skip_reception_control: bool | None = None
-    data_analysis: Pipeline
+    data_analysis: Workflow
     data_delivery: DataDelivery
     name: constr(
         regex=NAME_PATTERN,

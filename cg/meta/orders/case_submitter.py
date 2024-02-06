@@ -2,7 +2,7 @@ import datetime as dt
 import logging
 
 from cg.constants import DataDelivery, Priority
-from cg.constants.constants import CaseActions, Pipeline
+from cg.constants.constants import CaseActions, Workflow
 from cg.constants.pedigree import Pedigree
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
@@ -171,7 +171,7 @@ class CaseSubmitter(Submitter):
             )
 
             panels: set[str] = set()
-            if data_analysis == Pipeline.MIP_DNA:
+            if data_analysis == Workflow.MIP_DNA:
                 panels: set[str] = {
                     panel for sample in case_samples for panel in sample.panels if panel
                 }
@@ -353,7 +353,7 @@ class CaseSubmitter(Submitter):
     def _create_case(self, case: dict, customer_obj: Customer, ticket: str):
         case_obj = self.status.add_case(
             cohorts=case["cohorts"],
-            data_analysis=Pipeline(case["data_analysis"]),
+            data_analysis=Workflow(case["data_analysis"]),
             data_delivery=DataDelivery(case["data_delivery"]),
             name=case["name"],
             priority=case["priority"],
