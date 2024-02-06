@@ -304,4 +304,4 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_case_path(self, case_id: str) -> Path:
         project_id: str = self.get_project_id(case_id)
         results_dir: Path = self.get_results_dir()
-        return get_most_recent_project_directory(project_id=project_id, results_dir=results_dir)
+        return get_most_recent_project_directory(project_id=project_id, directory=results_dir)
