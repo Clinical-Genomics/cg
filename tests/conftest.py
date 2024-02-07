@@ -501,17 +501,33 @@ def hasta_external_dir() -> str:
     return "/path/on/hasta/"
 
 
+@pytest.fixture(scope="session")
+def external_data_directory(
+    tmpdir_factory, customer_id: str, cust_sample_id: str, ticket_id: str
+) -> Path:
+    """Returns a customer folder with fastq.gz files in sample-directories."""
+    cust_folder: Path = tmpdir_factory.mktemp(customer_id, numbered=False)
+    ticket_folder: Path = Path(cust_folder, ticket_id)
+    ticket_folder.mkdir()
+    samples: list[str] = [f"{cust_sample_id}1", f"{cust_sample_id}2"]
+    for sample in samples:
+        Path(ticket_folder, sample).mkdir(exist_ok=True, parents=True)
+        for read in [1, 2]:
+            Path(ticket_folder, sample, f"{sample}_fastq_{read}.fastq.gz").touch(exist_ok=True)
+            Path(ticket_folder, sample, f"{sample}_fastq_{read}.fastq.gz.md5").touch(exist_ok=True)
+    return Path(ticket_folder)
+
+
 @pytest.fixture
-def external_data_api(analysis_store, real_cg_context: CGConfig, ticket_id: str) -> ExternalDataAPI:
+def external_data_api(analysis_store, real_cg_context: CGConfig) -> ExternalDataAPI:
     """Return a external data api."""
-    return ExternalDataAPI(config=real_cg_context, ticket=ticket_id, dry_run=True)
+    return ExternalDataAPI(config=real_cg_context)
 
 
 @pytest.fixture
 def transfer_external_data_api(
     analysis_store,
     real_cg_context: CGConfig,
-    ticket_id: str,
     tmp_path: Path,
     hasta_external_dir: str,
     customer_id: str,
@@ -519,20 +535,19 @@ def transfer_external_data_api(
     """Return a external data api."""
     tmp_hasta_dir = Path(tmp_path, hasta_external_dir, customer_id)
     tmp_hasta_dir.mkdir(parents=True, exist_ok=True)
-    return TransferExternalDataAPI(config=real_cg_context, ticket=ticket_id, dry_run=True)
+    return TransferExternalDataAPI(config=real_cg_context)
 
 
 @pytest.fixture
 def add_external_data_api(
     analysis_store,
     real_cg_context: CGConfig,
-    ticket_id: str,
     tmp_path: Path,
     hasta_external_dir: str,
     customer_id: str,
 ) -> AddExternalDataAPI:
     """Return a external data api."""
-    return AddExternalDataAPI(config=real_cg_context, ticket=ticket_id, dry_run=True, force=True)
+    return AddExternalDataAPI(config=real_cg_context)
 
 
 @pytest.fixture
