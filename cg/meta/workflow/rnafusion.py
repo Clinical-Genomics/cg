@@ -69,8 +69,8 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Return nextflow config content."""
         return """process {
     withName:'MULTIQC' {
-        memory = { check_max( 1.GB * task.attempt, 'memory'  ) }
-        time   = { check_max( 4.h  * task.attempt, 'time'    ) }
+        memory = { 1.GB * task.attempt }
+        time   = { 4.h  * task.attempt }
         cpus = 2
         ext.args = ' --data-format json '
     }
