@@ -100,4 +100,44 @@
   path_index: ~
   step: qc-metrics
   tag: qc-metrics
+- format: json
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_RnaSeqMetrics.json
+  path_index: ~
+  step: multiqc-json
+  tag: multiqc-picard-rnaseq
+- format: json
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_fastp.json
+  path_index: ~
+  step: multiqc-json
+  tag: multiqc-fastp
+- format: json
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_general_stats.json
+  path_index: ~
+  step: multiqc-json
+  tag: multiqc-general-stats
+- format: json
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_dups.json
+  path_index: ~
+  step: multiqc-json
+  tag: multiqc-picard-duplicates
+- format: json
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_star.json
+  path_index: ~
+  step: multiqc-json
+  tag: multiqc-star
+- format: json
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_insertSize.json
+  step: multiqc-json
+  tag: multiqc-picard-insert-size
+
+
+
+
+
 
