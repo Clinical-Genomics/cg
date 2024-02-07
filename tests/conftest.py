@@ -519,9 +519,9 @@ def external_data_directory(
 
 
 @pytest.fixture
-def external_data_api(analysis_store, real_cg_context: CGConfig) -> ExternalDataAPI:
+def external_data_api(analysis_store, real_cg_context: CGConfig, ticket_id: str) -> ExternalDataAPI:
     """Return a external data api."""
-    return ExternalDataAPI(config=real_cg_context)
+    return ExternalDataAPI(config=real_cg_context, ticket=ticket_id, dry_run=True)
 
 
 @pytest.fixture
@@ -529,13 +529,14 @@ def transfer_external_data_api(
     analysis_store,
     real_cg_context: CGConfig,
     tmp_path: Path,
+    ticket_id: str,
     hasta_external_dir: str,
     customer_id: str,
 ) -> TransferExternalDataAPI:
     """Return a external data api."""
     tmp_hasta_dir = Path(tmp_path, hasta_external_dir, customer_id)
     tmp_hasta_dir.mkdir(parents=True, exist_ok=True)
-    return TransferExternalDataAPI(config=real_cg_context)
+    return TransferExternalDataAPI(config=real_cg_context, ticket=ticket_id, dry_run=True)
 
 
 @pytest.fixture
@@ -543,11 +544,12 @@ def add_external_data_api(
     analysis_store,
     real_cg_context: CGConfig,
     tmp_path: Path,
+    ticket_id: str,
     hasta_external_dir: str,
     customer_id: str,
 ) -> AddExternalDataAPI:
     """Return a external data api."""
-    return AddExternalDataAPI(config=real_cg_context)
+    return AddExternalDataAPI(config=real_cg_context, ticket=ticket_id, dry_run=True, force=False)
 
 
 @pytest.fixture
