@@ -324,6 +324,11 @@ def mip_rna_analysis_hk_bundle_data(
 
     files: list[dict] = [
         {
+            "path": Path(mip_dna_analysis_dir, f"{rna_case_id}.cram").as_posix(),
+            "archive": False,
+            "tags": ["cram", rna_case_id],
+        },
+        {
             "path": Path(mip_dna_analysis_dir, f"{rna_case_id}_report.selected.pdf").as_posix(),
             "archive": False,
             "tags": ["fusion", "pdf", "clinical", rna_case_id],
