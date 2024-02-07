@@ -8,10 +8,11 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import HK_FASTQ_TAGS
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import ERROR_RSYNC_FUNCTION, RSYNC_CONTENTS_COMMAND
-from cg.meta.transfer.utils import are_all_fastq_valid, get_all_fastq_from_folder
+from cg.meta.transfer.utils import are_all_fastq_valid
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store.models import Customer, Sample
+from cg.utils.files import get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
 
@@ -40,6 +41,7 @@ class TransferExternalDataAPI(ExternalDataAPI):
         self.base_path: str = config.data_delivery.base_path
         self.mail_user: str = config.data_delivery.mail_user
         self.slurm_api: SlurmAPI = SlurmAPI()
+        self.slurm_api.set_dry_run(dry_run=self.dry_run)
         self.source_path: str = config.external.caesar
         self.RSYNC_FILE_POSTFIX: str = "_rsync_external_data"
 
@@ -63,7 +65,6 @@ class TransferExternalDataAPI(ExternalDataAPI):
     def transfer_sample_files_from_source(self) -> None:
         """Transfers all sample files, related to given ticket, from source to destination."""
         log_dir: Path = self.create_log_dir()
-        error_function: str = ERROR_RSYNC_FUNCTION.format()
         self.get_destination_path().mkdir(exist_ok=True)
         command: str = RSYNC_CONTENTS_COMMAND.format(
             source_path=self.get_source_path(),
@@ -78,19 +79,12 @@ class TransferExternalDataAPI(ExternalDataAPI):
             email=self.mail_user,
             hours=24,
             commands=command,
-            error=error_function,
+            error=ERROR_RSYNC_FUNCTION.format(),
         )
-        self.slurm_api.set_dry_run(dry_run=self.dry_run)
-        sbatch_content: str = self.slurm_api.generate_sbatch_content(
-            sbatch_parameters=sbatch_parameters
-        )
+        sbatch_content: str = self.slurm_api.generate_sbatch_content(sbatch_parameters)
         sbatch_path: Path = Path(log_dir, self.ticket + self.RSYNC_FILE_POSTFIX + ".sh")
         self.slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
-        LOG.info(
-            "The folder {src_path} is now being rsynced to hasta".format(
-                src_path=self.get_source_path()
-            )
-        )
+        LOG.info(f"The folder {self.get_source_path()} is now being rsynced to hasta")
 
 
 class AddExternalDataAPI(ExternalDataAPI):
@@ -104,6 +98,8 @@ class AddExternalDataAPI(ExternalDataAPI):
         """
         Changes the name of the folder to the sample internal_id. If force is set to True,
         replaces any previous folder.
+        Raises:
+            Exception if the sample from the folder is not present in statusdb.
         """
         customer: Customer = self.status_db.get_customer_by_internal_id(self.customer_id)
         customer_folder: Path = sample_folder.parent
@@ -135,19 +131,19 @@ class AddExternalDataAPI(ExternalDataAPI):
         destination_folder_path: Path = self.get_destination_path()
         for sample_folder in destination_folder_path.iterdir():
             self.curate_sample_folder(sample_folder=sample_folder)
-        available_sample_ids: list[str] = self.get_sample_ids_from_folder(
-            folder=destination_folder_path
-        )
+        available_sample_ids: list[str] = self.get_sample_ids_from_folder(destination_folder_path)
         return available_sample_ids
 
     def get_fastq_paths_to_add(self, sample_id: str) -> list[Path]:
         """Return the paths of fastq files that have not been to the Housekeeper bundle."""
         hk_version: Version = self.housekeeper_api.get_or_create_version(bundle_name=sample_id)
-        paths: list[Path] = get_all_fastq_from_folder(
-            sample_folder=self.get_destination_path(sample_id)
-        )
+        sample_folder: Path = self.get_destination_path(sample_id)
+        file_paths: list[Path] = [
+            sample_folder.joinpath(path)
+            for path in get_files_matching_pattern(directory=sample_folder, pattern="*.fastq.gz")
+        ]
         fastq_paths_to_add: list[Path] = self.housekeeper_api.check_bundle_files(
-            file_paths=paths,
+            file_paths=file_paths,
             bundle_name=sample_id,
             last_version=hk_version,
             tags=HK_FASTQ_TAGS,
