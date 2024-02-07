@@ -9,14 +9,12 @@ from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, MetricsQCError
 from cg.io.controller import ReadFile, WriteFile
+from cg.io.txt import write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import (
-    MetricsBase,
-    MetricsDeliverablesCondition,
-)
+from cg.models.deliverables.metric_deliverables import MetricsBase, MetricsDeliverablesCondition
 from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
@@ -87,11 +85,13 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get the compute environment for the head job based on the case priority."""
         return f"{self.compute_env_base}-{self.get_slurm_qos_for_case(case_id=case_id)}"
 
-    @staticmethod
-    def get_nextflow_config_path(nextflow_config: str | None = None) -> Path | None:
-        """Path to Nextflow config file."""
+    def get_nextflow_config_path(self, case_id: str, nextflow_config: Path | None = None) -> Path:
+        """Path to nextflow config file."""
         if nextflow_config:
             return Path(nextflow_config).absolute()
+        return Path((self.get_case_path(case_id)), f"{case_id}_nextflow_config").with_suffix(
+            FileExtensions.JSON
+        )
 
     def get_job_ids_path(self, case_id: str) -> Path:
         """Return the path to a Trailblazer config file containing Tower IDs."""
@@ -173,6 +173,15 @@ class NfAnalysisAPI(AnalysisAPI):
             content=workflow_parameters,
             file_path=self.get_params_file_path(case_id=case_id),
         )
+
+    def write_nextflow_config(self, case_id: str) -> None:
+        """Write nextflow config in json format."""
+        if self.get_nextflow_config_content:
+            LOG.debug("Writing nextflow config file")
+            write_txt(
+                content=self.get_nextflow_config_content,
+                file_path=self.get_nextflow_config_path(case_id=case_id),
+            )
 
     @staticmethod
     def write_sample_sheet(

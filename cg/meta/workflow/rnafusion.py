@@ -64,6 +64,19 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             file_path=resources.RNAFUSION_BUNDLE_FILENAMES_PATH,
         )
 
+    @property
+    def get_nextflow_config_content(self) -> str:
+        """Return nextflow config content."""
+        return """process {
+    withName:'MULTIQC' {
+        memory = { check_max( 1.GB * task.attempt, 'memory'  ) }
+        time   = { check_max( 4.h  * task.attempt, 'time'    ) }
+        cpus = 2
+        ext.args = ' --data-format json '
+    }
+}
+"""
+
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, case_id: str, strandedness: Strandedness
     ) -> list[list[str]]:
@@ -140,6 +153,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             header=RnafusionSampleSheetEntry.headers(),
         )
         self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
+        self.write_nextflow_config(case_id=case_id)
 
     def parse_multiqc_json_for_case(self, case_id: str) -> dict:
         """Parse a multiqc_data.json file and returns a dictionary with metric name and metric values for a case."""
