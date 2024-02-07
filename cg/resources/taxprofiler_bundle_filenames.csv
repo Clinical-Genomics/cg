@@ -15,7 +15,37 @@
   path: PATHTOCASE/krona/kraken2_k2_pluspf.html
   path_index: ~
   step: krona
-  tag: krona_plot
+  tag: krona_kraken_plot
+- format: html
+  id: CASEID
+  path: PATHTOCASE/krona/centrifuge_p_compressed+h+v.html
+  path_index: ~
+  step: krona
+  tag: krona_centrifuge_plot
+- format: txt
+  id: CASEID
+  path: PATHTOCASE/bracken/bracken_bracken_combined_reports.txt
+  path_index: ~
+  step: bracken
+  tag: bracken_combined_report
+- format: tsv
+  id: SAMPLEID
+  path: PATHTOCASE/bracken/bracken/SAMPLENAME_pe_bracken.bracken.tsv
+  path_index: ~
+  step: bracken
+  tag: bracken_report
+- format: txt
+  id: CASEID
+  path: PATHTOCASE/centrifuge/centrifuge_p_compressed+h+v_combined_reports.txt
+  path_index: ~
+  step: centrifuge
+  tag: centrifuge_combined_report
+- format: txt
+  id: SAMPLEID
+  path: PATHTOCASE/centrifuge/ p_compressed+h+v/SAMPLENAME_pe_p_compressed+h+v.centrifuge.txt
+  path_index: ~
+  step: centrifuge
+  tag: centrifuge_report
 - format: html
   id: CASEID
   path: PATHTOCASE/multiqc/multiqc_report.html
