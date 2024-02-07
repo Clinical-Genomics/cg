@@ -93,7 +93,7 @@ def test_config_case_default_parameters(
         "Writing nextflow config file",
     ]
     for expected_log in expected_logs:
-        assert expected_log in expected_logs
+        assert expected_log in caplog.text
 
     # THEN files should be generated
     assert rnafusion_sample_sheet_path.is_file()

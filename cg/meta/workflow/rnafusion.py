@@ -64,7 +64,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             file_path=resources.RNAFUSION_BUNDLE_FILENAMES_PATH,
         )
 
-    @property
     def get_nextflow_config_content(self) -> str:
         """Return nextflow config content."""
         return """process {

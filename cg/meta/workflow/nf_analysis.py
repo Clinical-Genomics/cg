@@ -71,6 +71,10 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get pipeline version from config."""
         return self.revision
 
+    def get_nextflow_config_content(self) -> str:
+        """Return nextflow config content."""
+        return None
+
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
         return Path(self.root_dir, case_id)
@@ -85,7 +89,9 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get the compute environment for the head job based on the case priority."""
         return f"{self.compute_env_base}-{self.get_slurm_qos_for_case(case_id=case_id)}"
 
-    def get_nextflow_config_path(self, case_id: str, nextflow_config: Path | None = None) -> Path:
+    def get_nextflow_config_path(
+        self, case_id: str, nextflow_config: Path | str | None = None
+    ) -> Path:
         """Path to nextflow config file."""
         if nextflow_config:
             return Path(nextflow_config).absolute()
@@ -176,10 +182,10 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def write_nextflow_config(self, case_id: str) -> None:
         """Write nextflow config in json format."""
-        if self.get_nextflow_config_content:
+        if content := self.get_nextflow_config_content():
             LOG.debug("Writing nextflow config file")
             write_txt(
-                content=self.get_nextflow_config_content,
+                content=content,
                 file_path=self.get_nextflow_config_path(case_id=case_id),
             )
 
