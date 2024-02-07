@@ -166,11 +166,23 @@ def upload_rna_to_scout(context, case_id: str, dry_run: bool, research: bool) ->
 
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
+    context.invoke(upload_rna_alignment_file_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(
         upload_rna_fusion_report_to_scout, case_id=case_id, dry_run=dry_run, research=research
     )
     context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
+
+
+@click.command(name="rna-alignment-file-to-scout")
+@click.option("--dry-run", is_flag=True)
+@click.argument("case_id")
+@click.pass_obj
+def upload_rna_alignment_file_to_scout(context: CGConfig, dry_run: bool, case_id: str) -> None:
+    """Upload RNA alignment file for a case to Scout."""
+    LOG.info("----------------- UPLOAD RNA ALIGNMENT FILE TO SCOUT -----------------------")
+    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+    scout_upload_api.upload_rna_alignment_file(case_id=case_id, dry_run=dry_run)
 
 
 @click.command(name="rna-fusion-report-to-scout")
