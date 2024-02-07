@@ -8,32 +8,12 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import HK_FASTQ_TAGS
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import ERROR_RSYNC_FUNCTION, RSYNC_CONTENTS_COMMAND
+from cg.meta.transfer.utils import are_all_fastq_valid, get_all_fastq_from_folder
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store.models import Customer, Sample
-from cg.utils.checksum.checksum import is_md5sum_correct
 
 LOG = logging.getLogger(__name__)
-
-
-def are_all_fastq_valid(fastq_paths: list[Path]) -> bool:
-    """Return True if all fastq files of a given sample pass md5 checksum."""
-    are_all_valid: bool = True
-    for path in fastq_paths:
-        if is_md5sum_correct(path):
-            are_all_valid = False
-            LOG.warning(f"Sample {path} did not match the given md5sum")
-    return are_all_valid
-
-
-def get_all_fastq(sample_folder: Path) -> list[Path]:
-    """Returns a list of all fastq.gz files in given folder."""
-    all_fastqs: list[Path] = []
-    for leaf in sample_folder.glob("*fastq.gz"):
-        abs_path: Path = sample_folder.joinpath(leaf)
-        LOG.info(f"Found file {str(abs_path)} inside folder {sample_folder}")
-        all_fastqs.append(abs_path)
-    return all_fastqs
 
 
 class ExternalDataAPI(MetaAPI):
@@ -46,9 +26,9 @@ class ExternalDataAPI(MetaAPI):
         self.dry_run: bool = dry_run
         self.ticket: str = ticket
 
-    def get_destination_path(self, lims_sample_id: str | None = "") -> Path:
+    def get_destination_path(self, sample_id: str | None = "") -> Path:
         """Returns the path to where the files are to be transferred."""
-        return Path(self._destination_path % self.customer_id, lims_sample_id)
+        return Path(self._destination_path % self.customer_id, sample_id)
 
 
 class TransferExternalDataAPI(ExternalDataAPI):
@@ -84,8 +64,7 @@ class TransferExternalDataAPI(ExternalDataAPI):
         """Transfers all sample files, related to given ticket, from source to destination."""
         log_dir: Path = self.create_log_dir()
         error_function: str = ERROR_RSYNC_FUNCTION.format()
-        Path(self._destination_path % self.customer_id).mkdir(exist_ok=True)
-
+        self.get_destination_path().mkdir(exist_ok=True)
         command: str = RSYNC_CONTENTS_COMMAND.format(
             source_path=self.get_source_path(),
             destination_path=self.get_destination_path(),
@@ -126,9 +105,7 @@ class AddExternalDataAPI(ExternalDataAPI):
         Changes the name of the folder to the sample internal_id. If force is set to True,
         replaces any previous folder.
         """
-        customer: Customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=self.customer_id
-        )
+        customer: Customer = self.status_db.get_customer_by_internal_id(self.customer_id)
         customer_folder: Path = sample_folder.parent
         sample: Sample = self.status_db.get_sample_by_customer_and_name(
             customer_entry_id=[customer.id], sample_name=sample_folder.name
@@ -139,7 +116,8 @@ class AddExternalDataAPI(ExternalDataAPI):
             sample_folder.rename(customer_folder.joinpath(sample.internal_id))
         elif not sample and not self.status_db.get_sample_by_internal_id(sample_folder.name):
             raise Exception(
-                f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
+                f"{sample_folder} is not a sample present in statusdb. "
+                "Move or remove it to continue"
             )
 
     def get_sample_ids_from_folder(self, folder: Path) -> list[str]:
@@ -162,13 +140,15 @@ class AddExternalDataAPI(ExternalDataAPI):
         )
         return available_sample_ids
 
-    def get_fastq_paths_to_add(self, lims_sample_id: str) -> list[Path]:
+    def get_fastq_paths_to_add(self, sample_id: str) -> list[Path]:
         """Return the paths of fastq files that have not been to the Housekeeper bundle."""
-        hk_version: Version = self.housekeeper_api.get_or_create_version(bundle_name=lims_sample_id)
-        paths: list[Path] = get_all_fastq(sample_folder=self.get_destination_path(lims_sample_id))
+        hk_version: Version = self.housekeeper_api.get_or_create_version(bundle_name=sample_id)
+        paths: list[Path] = get_all_fastq_from_folder(
+            sample_folder=self.get_destination_path(sample_id)
+        )
         fastq_paths_to_add: list[Path] = self.housekeeper_api.check_bundle_files(
             file_paths=paths,
-            bundle_name=lims_sample_id,
+            bundle_name=sample_id,
             last_version=hk_version,
             tags=HK_FASTQ_TAGS,
         )
@@ -201,7 +181,7 @@ class AddExternalDataAPI(ExternalDataAPI):
         """
         available_sample_ids: list[str] = self.get_available_sample_ids()
         for sample_id in available_sample_ids:
-            fastq_paths_to_add: list[Path] = self.get_fastq_paths_to_add(lims_sample_id=sample_id)
+            fastq_paths_to_add: list[Path] = self.get_fastq_paths_to_add(sample_id=sample_id)
             if are_all_fastq_valid(fastq_paths=fastq_paths_to_add):
                 self.add_and_include_files_to_bundles(
                     fastq_paths=fastq_paths_to_add,

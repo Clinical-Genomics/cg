@@ -32,6 +32,14 @@ def external_data_directory(
     return Path(ticket_folder)
 
 
+@pytest.fixture
+def add_data_directory() -> Path:
+    """Return a path to a directory with fastq files."""
+    cust_folder: Path = tmpdir_factory.mktemp(customer_id, numbered=False)
+    ticket_folder: Path = Path(cust_folder, ticket_id)
+    ticket_folder.mkdir()
+
+
 @pytest.fixture(name="sample_sheet_path")
 def sample_sheet_path(tmpdir_factory) -> Generator[Path, None, None]:
     """Create and return path to sample sheet."""

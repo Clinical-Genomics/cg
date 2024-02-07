@@ -13,6 +13,7 @@ from typing import Any, Generator
 
 import pytest
 from housekeeper.store.models import File, Version
+from pytest import TempPathFactory
 from requests import Response
 
 from cg.apps.crunchy import CrunchyAPI
@@ -37,7 +38,11 @@ from cg.io.yaml import read_yaml, write_yaml
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
-from cg.meta.transfer.external_data import ExternalDataAPI
+from cg.meta.transfer.external_data import (
+    AddExternalDataAPI,
+    ExternalDataAPI,
+    TransferExternalDataAPI,
+)
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
@@ -491,9 +496,43 @@ def real_cg_context(
 
 
 @pytest.fixture
-def external_data_api(analysis_store, real_cg_context: CGConfig) -> ExternalDataAPI:
+def hasta_external_dir() -> str:
+    """Return the path to the external dir on hasta."""
+    return "/path/on/hasta/"
+
+
+@pytest.fixture
+def external_data_api(analysis_store, real_cg_context: CGConfig, ticket_id: str) -> ExternalDataAPI:
     """Return a external data api."""
-    return ExternalDataAPI(config=real_cg_context, dry_run=True)
+    return ExternalDataAPI(config=real_cg_context, ticket=ticket_id, dry_run=True)
+
+
+@pytest.fixture
+def transfer_external_data_api(
+    analysis_store,
+    real_cg_context: CGConfig,
+    ticket_id: str,
+    tmp_path: Path,
+    hasta_external_dir: str,
+    customer_id: str,
+) -> TransferExternalDataAPI:
+    """Return a external data api."""
+    tmp_hasta_dir = Path(tmp_path, hasta_external_dir, customer_id)
+    tmp_hasta_dir.mkdir(parents=True, exist_ok=True)
+    return TransferExternalDataAPI(config=real_cg_context, ticket=ticket_id, dry_run=True)
+
+
+@pytest.fixture
+def add_external_data_api(
+    analysis_store,
+    real_cg_context: CGConfig,
+    ticket_id: str,
+    tmp_path: Path,
+    hasta_external_dir: str,
+    customer_id: str,
+) -> AddExternalDataAPI:
+    """Return a external data api."""
+    return AddExternalDataAPI(config=real_cg_context, ticket=ticket_id, dry_run=True, force=True)
 
 
 @pytest.fixture
