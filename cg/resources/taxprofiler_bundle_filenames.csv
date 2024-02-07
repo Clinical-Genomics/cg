@@ -42,7 +42,7 @@
   tag: centrifuge_combined_report
 - format: txt
   id: SAMPLEID
-  path: PATHTOCASE/centrifuge/ p_compressed+h+v/SAMPLENAME_pe_p_compressed+h+v.centrifuge.txt
+  path: PATHTOCASE/centrifuge/p_compressed+h+v/SAMPLENAME_pe_p_compressed+h+v.centrifuge.txt
   path_index: ~
   step: centrifuge
   tag: centrifuge_report
