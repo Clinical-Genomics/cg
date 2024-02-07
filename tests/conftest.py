@@ -2238,6 +2238,14 @@ def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
+def rnafusion_nexflow_config_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
+    """Path to config file."""
+    return Path(
+        rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_nextflow_config"
+    ).with_suffix(FileExtensions.JSON)
+
+
+@pytest.fixture(scope="function")
 def rnafusion_metrics_deliverables(rnafusion_analysis_dir: Path) -> list[dict]:
     """Returns the content of a mock metrics deliverables file."""
     return read_yaml(
