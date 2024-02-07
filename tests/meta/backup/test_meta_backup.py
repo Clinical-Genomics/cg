@@ -260,6 +260,7 @@ def test_fetch_flow_cell_no_flow_cells_requested(
 
 @mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
 @mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
+@mock.patch("cg.meta.backup.backup.BackupAPI.create_copy_complete")
 @mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell_path")
 @mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key_path")
 @mock.patch("cg.meta.backup.backup.BackupAPI.check_processing")
@@ -274,6 +275,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     mock_get_first_flow_cell,
     mock_get_archived_encryption_key_path,
     mock_get_archived_flow_cell_path,
+    mock_create_copy_complete,
     mock_create_rta_complete,
     archived_key,
     archived_flow_cell,
@@ -323,6 +325,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
 
 @mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
 @mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
+@mock.patch("cg.meta.backup.backup.BackupAPI.create_copy_complete")
 @mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell_path")
 @mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key_path")
 @mock.patch("cg.meta.backup.backup.BackupAPI.check_processing")
@@ -338,6 +341,9 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     mock_check_processing,
     mock_get_archived_key,
     mock_get_archived_flow_cell,
+    mock_create_copy_complete,
+    mock_create_rta_complete,
+    mock_unlink_files,
     archived_key,
     archived_flow_cell,
     cg_context,
@@ -386,6 +392,7 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
 
 @mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
 @mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
+@mock.patch("cg.meta.backup.backup.BackupAPI.create_copy_complete")
 @mock.patch("cg.meta.backup.backup.BackupAPI.query_pdc_for_flow_cell")
 @mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key_path")
 @mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell_path")
@@ -396,11 +403,14 @@ def test_fetch_flow_cell_integration(
     mock_store,
     mock_flow_cell,
     mock_tar,
+    mock_flow_cell_path,
+    mock_key_path,
     mock_query,
-    archived_key,
-    archived_flow_cell,
+    mock_create_copy_complete,
+    mock_create_rta_complete,
+    mock_unlink_files,
     cg_context,
-    pdc_query,
+    dsmc_q_archive_output,
     caplog,
 ):
     """Component integration test for the BackupAPI, fetching a specified flow cell"""
@@ -419,7 +429,7 @@ def test_fetch_flow_cell_integration(
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
     mock_store.get_flow_cells_by_statuses.return_value.count.return_value = 0
-    mock_query.return_value = pdc_query
+    mock_query.return_value = dsmc_q_archive_output
 
     backup_api.tar_api.run_tar_command.return_value = None
     result = backup_api.fetch_flow_cell(flow_cell=mock_flow_cell)

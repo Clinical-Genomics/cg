@@ -114,6 +114,7 @@ class BackupAPI:
 
             self.extract_flow_cell(decrypted_flow_cell, run_dir)
             self.create_rta_complete(decrypted_flow_cell, run_dir)
+            self.create_copy_complete(decrypted_flow_cell, run_dir)
             self.unlink_files(
                 decrypted_flow_cell, encryption_key, retrieved_flow_cell, retrieved_key
             )
@@ -158,9 +159,14 @@ class BackupAPI:
     @staticmethod
     def create_rta_complete(decrypted_flow_cell: Path, run_dir: Path):
         """Create an RTAComplete.txt file in the flow cell run directory."""
-        (
-            run_dir / Path(decrypted_flow_cell.stem).stem / DemultiplexingDirsAndFiles.RTACOMPLETE
-        ).touch()
+        rta_complete_file = Path(run_dir, decrypted_flow_cell.stem, "RTAComplete.txt")
+        rta_complete_file.touch()
+
+    @staticmethod
+    def create_copy_complete(decrypted_flow_cell: Path, run_dir: Path):
+        """Create a CopyComplete.txt file in the flow cell run directory."""
+        copy_complete_file = Path(run_dir, decrypted_flow_cell.stem, "CopyComplete.txt")
+        copy_complete_file.touch()
 
     def extract_flow_cell(self, decrypted_flow_cell, run_dir):
         """Extract the flow cell tar archive."""
