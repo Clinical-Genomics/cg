@@ -49,7 +49,6 @@ class ScoutAPI:
         self.process.run_command(load_command)
         LOG.debug("Case loaded successfully to Scout")
 
-
     def export_panels(self, panels: list[str], build: str = GENOME_BUILD_37) -> list[str]:
         """Pass through to export of a list of gene panels.
 
