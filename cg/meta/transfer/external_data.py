@@ -20,12 +20,29 @@ LOG = logging.getLogger(__name__)
 class ExternalDataAPI(MetaAPI):
     """Base class for APIs handling external data."""
 
-    def __init__(self, config: CGConfig, ticket: str, dry_run: bool = False):
+    def __init__(self, config: CGConfig):
         super().__init__(config)
-        self.customer_id: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
         self._destination_path: str = config.external.hasta
-        self.dry_run: bool = dry_run
-        self.ticket: str = ticket
+        self.dry_run: bool = False
+        self.force: bool = False
+        self.ticket: str | None = None
+
+    def set_dry_run(self, dry_run: bool) -> None:
+        """Set dry run."""
+        self.dry_run = dry_run
+
+    def set_force(self, force: bool) -> None:
+        """Set force."""
+        self.force = force
+
+    def set_ticket(self, ticket: str) -> None:
+        """Set ticket."""
+        self.ticket = ticket
+
+    @property
+    def customer_id(self) -> str:
+        """Return the customer id."""
+        return self.status_db.get_customer_id_from_ticket(ticket=self.ticket)
 
     def get_destination_path(self, sample_id: str | None = "") -> Path:
         """Returns the path to where the files are to be transferred."""
@@ -35,15 +52,19 @@ class ExternalDataAPI(MetaAPI):
 class TransferExternalDataAPI(ExternalDataAPI):
     """API for transferring external data from Caesar to Hasta."""
 
-    def __init__(self, config: CGConfig, ticket: str, dry_run: bool = False):
-        super().__init__(config, ticket, dry_run)
+    def __init__(self, config: CGConfig):
+        super().__init__(config)
         self.account: str = config.data_delivery.account
         self.base_path: str = config.data_delivery.base_path
         self.mail_user: str = config.data_delivery.mail_user
         self.slurm_api: SlurmAPI = SlurmAPI()
-        self.slurm_api.set_dry_run(dry_run=self.dry_run)
         self.source_path: str = config.external.caesar
         self.RSYNC_FILE_POSTFIX: str = "_rsync_external_data"
+
+    def set_dry_run(self, dry_run: bool) -> None:
+        """Set dry run."""
+        super().set_dry_run(dry_run=dry_run)
+        self.slurm_api.set_dry_run(dry_run=self.dry_run)
 
     def get_source_path(self, sample_id: str | None = "") -> Path:
         """Returns the path from where the sample files are fetched."""
@@ -62,8 +83,9 @@ class TransferExternalDataAPI(ExternalDataAPI):
         log_dir.mkdir(parents=True, exist_ok=False)
         return log_dir
 
-    def transfer_sample_files_from_source(self) -> None:
+    def transfer_sample_files_from_source(self, ticket: str) -> None:
         """Transfers all sample files, related to given ticket, from source to destination."""
+        self.set_ticket(ticket)
         log_dir: Path = self.create_log_dir()
         self.get_destination_path().mkdir(exist_ok=True)
         command: str = RSYNC_CONTENTS_COMMAND.format(
@@ -89,10 +111,6 @@ class TransferExternalDataAPI(ExternalDataAPI):
 
 class AddExternalDataAPI(ExternalDataAPI):
     """API for adding external data to Housekeeper."""
-
-    def __init__(self, config: CGConfig, ticket: str, dry_run: bool = False, force: bool = False):
-        super().__init__(config, ticket, dry_run)
-        self.force: bool = force
 
     def curate_sample_folder(self, sample_folder: Path) -> None:
         """
@@ -170,11 +188,13 @@ class AddExternalDataAPI(ExternalDataAPI):
             self.status_db.set_case_action(case_internal_id=case["internal_id"], action="analyze")
             LOG.info(f"Case {case['internal_id']} has been set to 'analyze'")
 
-    def add_fastqs_to_housekeeper_and_start_cases(self) -> None:
+    def add_fastqs_to_housekeeper_and_start_cases(self, ticket: str, force: bool) -> None:
         """
         Add and include available ticket fastq files to a Housekeeper bundle if they are not
         corrupted and start cases associated with the ticket.
         """
+        self.set_ticket(ticket)
+        self.set_force(force)
         available_sample_ids: list[str] = self.get_available_sample_ids()
         for sample_id in available_sample_ids:
             fastq_paths_to_add: list[Path] = self.get_fastq_paths_to_add(sample_id=sample_id)

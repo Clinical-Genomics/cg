@@ -341,8 +341,9 @@ def link_sample_to_case(
 def download_external_delivery_data_to_hpc(context: CGConfig, ticket: str, dry_run: bool):
     """Downloads external data from the delivery server and places it in appropriate folder on
     the HPC"""
-    external_data_api = TransferExternalDataAPI(config=context, ticket=ticket, dry_run=dry_run)
-    external_data_api.transfer_sample_files_from_source()
+    external_data_api = TransferExternalDataAPI(config=context)
+    external_data_api.set_dry_run(dry_run=dry_run)
+    external_data_api.transfer_sample_files_from_source(ticket=ticket)
 
 
 @add.command("external-hk")
@@ -360,7 +361,6 @@ def download_external_delivery_data_to_hpc(context: CGConfig, ticket: str, dry_r
 @click.pass_obj
 def add_external_data_to_hk(context: CGConfig, ticket: str, dry_run: bool, force):
     """Adds external data to Housekeeper and starts their analyses."""
-    external_data_api = AddExternalDataAPI(
-        config=context, ticket=ticket, dry_run=dry_run, force=force
-    )
-    external_data_api.add_fastqs_to_housekeeper_and_start_cases()
+    external_data_api = AddExternalDataAPI(config=context)
+    external_data_api.set_dry_run(dry_run=dry_run)
+    external_data_api.add_fastqs_to_housekeeper_and_start_cases(ticket=ticket, force=force)
