@@ -169,6 +169,48 @@ class UploadScoutAPI:
             unique_dna_cases_related_to_rna_case.update(rna_dna_collection.dna_case_ids)
         return unique_dna_cases_related_to_rna_case
 
+    def get_rna_alignment_cram(self, case_id: str, sample_id: str) -> File | None:
+        """Return an RNA alignment CRAM file for a case in Housekeeper."""
+        tags: set[str] = {"cram", sample_id}
+        rna_alignment_cram: File | None = None
+        try:
+            rna_alignment_cram = self.housekeeper.get_file_from_latest_version(
+                bundle_name=case_id, tags=tags
+            )
+        except HousekeeperBundleVersionMissingError:
+            LOG.warning(f"Could not find bundle for {case_id}")
+        return rna_alignment_cram
+
+    def upload_rna_alignment_file(self, case_id: str, dry_run: bool) -> None:
+        """Upload RNA alignment file to Scout."""
+        rna_case: Case = self.status_db.get_case_by_internal_id(case_id)
+        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
+        for rna_dna_collection in rna_dna_collections:
+            rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
+            dna_sample_name: str = rna_dna_collection.dna_sample_name
+            rna_alignment_cram: File | None = self.get_rna_alignment_cram(
+                case_id=case_id, sample_id=rna_sample_internal_id
+            )
+            if rna_alignment_cram is None:
+                raise FileNotFoundError(
+                    f"No RNA alignment CRAM file was found in Housekeeper for {rna_sample_internal_id}"
+                )
+            LOG.debug(f"RNA alignment CRAM file {rna_alignment_cram.path} found")
+            for dna_case_id in rna_dna_collection.dna_case_ids:
+                LOG.info(
+                    f"Uploading RNA alignment CRAM file for sample {dna_sample_name} to case {dna_case_id}"
+                )
+                if dry_run:
+                    continue
+                self.scout_api.upload_rna_alignment_file(
+                    case_id=dna_case_id,
+                    customer_sample_id=dna_sample_name,
+                    file_path=rna_alignment_cram.full_path,
+                )
+        for upload_statement in self.get_rna_alignment_file_upload_summary(rna_dna_collections):
+            LOG.info(upload_statement)
+        LOG.info("Upload RNA alignment CRAM file finished!")
+
     def upload_fusion_report_to_scout(
         self, dry_run: bool, case_id: str, research: bool = False
     ) -> None:
@@ -320,6 +362,18 @@ class UploadScoutAPI:
         for upload_statement in self.get_rna_splice_junctions_upload_summary(rna_dna_collections):
             LOG.info(upload_statement)
         LOG.info("Upload splice junctions bed file finished!")
+
+    @staticmethod
+    def get_rna_alignment_file_upload_summary(
+        rna_dna_collections: list[RNADNACollection],
+    ) -> list[str]:
+        upload_summary: list[str] = []
+        for rna_dna_collection in rna_dna_collections:
+            upload_summary.extend(
+                f"Uploaded RNA alignment CRAM file for sample {rna_dna_collection.dna_sample_name} in case {dna_case}"
+                for dna_case in rna_dna_collection.dna_case_ids
+            )
+        return upload_summary
 
     @staticmethod
     def get_rna_splice_junctions_upload_summary(

@@ -271,3 +271,25 @@ class ScoutAPI:
             raise ScoutUploadError(
                 "Something went wrong when uploading rna coverage bigwig file"
             ) from error
+
+    def upload_rna_alignment_file(self, case_id: str, customer_sample_id: str, file_path: str):
+        """Load an RNA alignment CRAM file into a case in the database."""
+
+        upload_command: list[str] = [
+            "update",
+            "individual",
+            "-c",
+            case_id,
+            "-n",
+            customer_sample_id,
+            "rna_alignment_path",
+            file_path,
+        ]
+
+        try:
+            LOG.info(f"Uploading RNA alignment CRAM file {file_path} to case {case_id}")
+            self.process.run_command(upload_command)
+        except CalledProcessError as error:
+            raise ScoutUploadError(
+                "Something went wrong when uploading the RNA alignment CRAM file"
+            ) from error
