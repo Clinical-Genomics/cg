@@ -33,3 +33,7 @@ class TrailblazerAnalysis(BaseModel):
         validate_default=True,
         extra="ignore",
     )
+
+
+class AnalysesResponse(BaseModel):
+    analyses: list[TrailblazerAnalysis]
