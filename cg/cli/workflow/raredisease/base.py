@@ -10,6 +10,7 @@ from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.cli.workflow.nf_analysis import metrics_deliver
 
 LOG = logging.getLogger(__name__)
 
@@ -20,6 +21,9 @@ def raredisease(context: click.Context) -> None:
     """NF-core/raredisease analysis workflow."""
     AnalysisAPI.get_help(context)
     context.obj.meta_apis[MetaApis.ANALYSIS_API] = RarediseaseAnalysisAPI(config=context.obj)
+
+
+raredisease.add_command(metrics_deliver)
 
 
 @raredisease.command("panel")
