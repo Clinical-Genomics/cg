@@ -86,8 +86,8 @@ class LimsAPI(Lims, OrderHandler):
             "received": self.get_received_date(lims_sample.id),
             "application": udfs.get("Sequencing Analysis"),
             "application_version": (
-                int(udfs["Application Tag Version"])
-                if udfs.get("Application Tag Version")
+                int(udfs["Capture library version"])
+                if udfs.get("Capture library version")
                 else None
             ),
             "comment": udfs.get("comment"),
