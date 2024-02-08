@@ -71,7 +71,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get pipeline version from config."""
         return self.revision
 
-    def get_nextflow_config_content(self) -> str:
+    def get_nextflow_config_content(self) -> str | None:
         """Return nextflow config content."""
         return None
 
