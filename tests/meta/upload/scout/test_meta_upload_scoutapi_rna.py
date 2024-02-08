@@ -96,8 +96,10 @@ def test_upload_rna_alignment_file_to_scout(
     # WHEN running the method to upload RNA files to Scout
     upload_scout_api.upload_rna_alignment_file(case_id=rna_case_id, dry_run=True)
 
-    # THEN the RNA alignment file should have been uploaded to the DNA case in Scout
+    # THEN the RNA alignment file should have been uploaded to the linked DNA cases in Scout
     assert "Upload RNA alignment CRAM file finished!" in caplog.text
+    for dna_case in ["dna_mother", "dna_father", "dna_daughter", "dna_son"]:
+        assert dna_case in caplog.text
 
 
 def test_upload_rna_junctions_to_scout(
