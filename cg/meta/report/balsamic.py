@@ -33,7 +33,7 @@ from cg.models.report.metadata import (
     BalsamicTargetedSampleMetadataModel,
     BalsamicWGSSampleMetadataModel,
 )
-from cg.models.report.report import CaseModel
+from cg.models.report.report import CaseModel, ScoutReportFiles
 from cg.models.report.sample import SampleModel
 from cg.store.models import Bed, BedVersion, Case, Sample
 
@@ -91,8 +91,9 @@ class BalsamicReportAPI(ReportAPI):
             gc_dropout=sample_metrics.gc_dropout if sample_metrics else None,
         )
 
+    @staticmethod
     def get_wgs_metadata(
-        self, million_read_pairs: float, sample_metrics: BalsamicWGSQCMetrics
+        million_read_pairs: float, sample_metrics: BalsamicWGSQCMetrics
     ) -> BalsamicWGSSampleMetadataModel:
         """Return report metadata for Balsamic WGS analysis."""
         return BalsamicWGSSampleMetadataModel(
@@ -162,6 +163,17 @@ class BalsamicReportAPI(ReportAPI):
             return True
         return False
 
+    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
+        """Return files that will be uploaded to Scout."""
+        return ScoutReportFiles(
+            snv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="snv_vcf"
+            ),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="sv_vcf"
+            ),
+        )
+
     def get_required_fields(self, case: CaseModel) -> dict:
         """Return a dictionary with the delivery report required fields for Balsamic."""
         analysis_type: str = case.data_analysis.type
@@ -172,20 +184,20 @@ class BalsamicReportAPI(ReportAPI):
         )
         required_sample_metadata_fields: list[str] = []
         if BALSAMIC_ANALYSIS_TYPE["tumor_wgs"] in analysis_type:
-            required_sample_metadata_fields: list[str] = (
-                REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
-            )
+            required_sample_metadata_fields: list[
+                str
+            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
         elif BALSAMIC_ANALYSIS_TYPE["tumor_normal_wgs"] in analysis_type:
-            required_sample_metadata_fields: list[str] = (
-                REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS
-            )
+            required_sample_metadata_fields: list[
+                str
+            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS
         elif (
             BALSAMIC_ANALYSIS_TYPE["tumor_panel"] in analysis_type
             or BALSAMIC_ANALYSIS_TYPE["tumor_normal_panel"] in analysis_type
         ):
-            required_sample_metadata_fields: list[str] = (
-                REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
-            )
+            required_sample_metadata_fields: list[
+                str
+            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
         return {
             "report": REQUIRED_REPORT_FIELDS,
             "customer": REQUIRED_CUSTOMER_FIELDS,

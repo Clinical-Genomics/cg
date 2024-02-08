@@ -352,23 +352,7 @@ class ReportAPI(MetaAPI):
 
     def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
-        return ScoutReportFiles(
-            snv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="snv_vcf"
-            ),
-            sv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="sv_vcf"
-            ),
-            vcf_str=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="vcf_str"
-            ),
-            smn_tsv=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="smn_tsv"
-            ),
-            vcf_fusion=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="vcf_fusion"
-            ),
-        )
+        raise NotImplementedError
 
     @staticmethod
     def get_sample_timestamp_data(sample: Sample) -> TimestampModel:
