@@ -214,7 +214,7 @@ def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
     assert len(records) == 0
 
 
-def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
+def test_analyses_to_upload_when_no_workflow(helpers, sample_store, timestamp):
     """Test analyses to upload with no workflow specified."""
     # GIVEN a store with one analysis
     helpers.add_analysis(store=sample_store, completed_at=timestamp)
@@ -228,7 +228,7 @@ def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
     assert len(records) == 1
 
 
-def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, timestamp):
+def test_analyses_to_upload_when_analysis_has_workflow(helpers, sample_store, timestamp):
     """Test analyses to upload to when existing workflow."""
     # GIVEN a store with an analysis that has been run with MIP
     helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=Workflow.MIP_DNA)
@@ -242,7 +242,7 @@ def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, ti
     assert len(records) == 1
 
 
-def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, timestamp):
+def test_analyses_to_upload_when_filtering_with_workflow(helpers, sample_store, timestamp):
     """Test analyses to upload to when existing workflow and using it in filtering."""
     # GIVEN a store with an analysis that is analysed with MIP
     pipeline = Workflow.MIP_DNA
