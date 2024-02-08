@@ -16,7 +16,7 @@ from cg.constants.subject import Sex
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
 from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import (
-    run_case_pre_analysis_quality_check
+    run_case_pre_analysis_quality_check,
 )
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
@@ -70,10 +70,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return self.root_dir
 
     @property
-    def use_read_count_threshold(self) -> bool:
-        return True
-
-    @property
     def fastq_handler(self):
         return BalsamicFastqHandler
 
@@ -96,11 +92,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return Path(self.root_dir, case_id)
 
     def get_cases_ready_for_analysis(self) -> list[Case]:
-        cases_to_analyze: list[Case] = self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.use_read_count_threshold
-        )
+        cases_to_analyze: list[Case] = self.status_db.cases_to_analyze(workflow=self.workflow)
         cases_ready_for_analysis: list[Case] = []
-        
+
         for case in cases_to_analyze:
             if run_case_pre_analysis_quality_check(case):
                 if case.action == "analyze" or not case.latest_analyzed:

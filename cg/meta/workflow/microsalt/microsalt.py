@@ -36,10 +36,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         self.quality_checker = QualityController(config.status_db)
 
     @property
-    def use_read_count_threshold(self) -> bool:
-        return False
-
-    @property
     def fastq_handler(self):
         return MicrosaltFastqHandler
 

@@ -412,9 +412,9 @@ class ReadHandler(BaseHandler):
 
     def get_average_percentage_passing_q30_for_flow_cell(self, flow_cell_name: str) -> float:
         """Calculates the average q30 for each sample on a flow cell and returns the average between the samples."""
-        sequencing_metrics: list[SampleLaneSequencingMetrics] = (
-            self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
-        )
+        sequencing_metrics: list[
+            SampleLaneSequencingMetrics
+        ] = self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
         unique_sample_internal_ids: set[str] = {
             sequencing_metric.sample_internal_id for sequencing_metric in sequencing_metrics
         }
@@ -433,9 +433,9 @@ class ReadHandler(BaseHandler):
 
     def get_number_of_reads_for_flow_cell(self, flow_cell_name: str) -> int:
         """Get total number of reads for a flow cell from sample lane sequencing metrics."""
-        sequencing_metrics: list[SampleLaneSequencingMetrics] = (
-            self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
-        )
+        sequencing_metrics: list[
+            SampleLaneSequencingMetrics
+        ] = self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
         read_count: int = 0
         for sequencing_metric in sequencing_metrics:
             read_count += sequencing_metric.sample_total_reads_in_lane
@@ -1016,9 +1016,7 @@ class ReadHandler(BaseHandler):
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
 
-    def cases_to_analyze(
-        self, workflow: Workflow = None, threshold: bool = False, limit: int = None
-    ) -> list[Case]:
+    def cases_to_analyze(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.FILTER_HAS_SEQUENCE,

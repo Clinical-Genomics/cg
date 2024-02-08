@@ -383,7 +383,7 @@ def test_one_of_two_sequenced_samples(
     base_store.session.add_all([link_1, link_2])
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyze(workflow=Workflow.MIP_DNA, threshold=True)
+    cases: list[Case] = base_store.cases_to_analyze(workflow=Workflow.MIP_DNA)
 
     # THEN no cases should be returned
     assert not cases

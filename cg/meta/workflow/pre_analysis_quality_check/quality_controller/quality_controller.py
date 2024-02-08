@@ -1,12 +1,16 @@
-from typing import Callable
+from typing import Any, Callable
 
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 
 
-class CaseQualityController:
+class QualityController:
     
+    def __call__(self, store: Store) -> Any:
+        store: Store = store
+        
     @staticmethod
-    def run_qc(case: Case, quality_checks: list[Callable]) -> bool:
+    def run_qc(obj: Case | Sample, quality_checks: list[Callable]) -> bool:
         """
         Run the qc for the case.
 
@@ -14,16 +18,4 @@ class CaseQualityController:
             bool: True if the case passes the qc, False otherwise.
 
         """
-        return all(quality_check(case) for quality_check in quality_checks)
-
-class SampleQualityController:
-    @staticmethod
-    def run_qc(sample: Sample, quality_checks: list[Callable]) -> bool:
-        """
-        Run the qc for the sample.
-
-        Returns:
-            bool: True if the sample passes the qc, False otherwise.
-
-        """
-        return all(quality_check(sample) for quality_check in quality_checks)
+        return any(quality_check(obj) for quality_check in quality_checks)

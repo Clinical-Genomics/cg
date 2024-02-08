@@ -441,16 +441,6 @@ class Case(Model, PriorityMixin):
                 sequenced_dates.append(link.sample.last_sequenced_at)
         return max(sequenced_dates, default=None)
 
-    @property
-    def all_samples_pass_qc(self) -> bool:
-        pass_qc = []
-        for link in self.links:
-            if link.sample.application_version.application.is_external or link.sample.sequencing_qc:
-                pass_qc.append(True)
-            else:
-                pass_qc.append(False)
-        return all(pass_qc)
-
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
@@ -727,16 +717,18 @@ class Sample(Model, PriorityMixin):
         return self._is_external
 
     @property
-    def sequencing_qc(self) -> bool:
-        """Return sequencing qc passed or failed."""
-        application = self.application_version.application
-        # Express priority needs to be analyzed at a lower threshold for primary analysis
-        if self.priority == Priority.express:
-            one_half_of_target_reads = application.target_reads / 2
-            return self.reads >= one_half_of_target_reads
-        if self.application_version.application.prep_category == PrepCategory.READY_MADE_LIBRARY:
-            return bool(self.reads)
-        return self.reads > application.expected_reads
+    def archive_location(self) -> str:
+        """Returns the data_archive_location if the customer linked to the sample."""
+        return self.customer.data_archive_location
+
+    @property
+    def expected_reads_for_sample(self) -> int:
+        """Return the expected reads of the sample."""
+        return self.application_version.application.expected_reads
+
+    @property
+    def has_reads(self) -> bool:
+        return bool(self.reads)
 
     @property
     def phenotype_groups(self) -> list[str]:
@@ -774,15 +766,6 @@ class Sample(Model, PriorityMixin):
             return f"Received {self.received_at.date()}"
 
         return f"Ordered {self.ordered_at.date()}"
-
-    @property
-    def archive_location(self) -> str:
-        """Returns the data_archive_location if the customer linked to the sample."""
-        return self.customer.data_archive_location
-
-    @property
-    def has_reads(self) -> bool:
-        return bool(self.reads)
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""

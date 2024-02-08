@@ -303,44 +303,6 @@ def test_set_case_action(analysis_store: Store, case_id):
     assert new_action == "analyze"
 
 
-def test_sequencing_qc_priority_express_sample_with_one_half_of_the_reads(
-    base_store: Store, helpers, timestamp_now
-):
-    """Test if priority express sample(s), having more than 50% of the application target reads, pass sample QC."""
-
-    # GIVEN a database with a case which has an express sample with half the number of reads
-    sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
-    application: Application = sample.application_version.application
-    application.target_reads = 40
-    sample.reads = 20
-    sample.priority = Priority.express
-
-    # WHEN retrieving the sequencing qc property of a express sample
-    sequencing_qc_ok: bool = sample.sequencing_qc
-
-    # THEN the qc property should be True
-    assert sequencing_qc_ok
-
-
-def test_sequencing_qc_priority_standard_sample_with_one_half_of_the_reads(
-    base_store: Store, helpers, timestamp_now
-):
-    """Test if priority standard sample(s), having more than 50% of the application target reads, pass sample QC."""
-
-    # GIVEN a database with a case which has a normal sample with half the number of reads
-    sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
-    application: Application = sample.application_version.application
-    application.target_reads = 40
-    sample.reads = 20
-    sample.priority = Priority.standard
-
-    # WHEN retrieving the sequencing qc property of a normal sample
-    sequencing_qc_ok: bool = sample.sequencing_qc
-
-    # THEN the qc property should be False
-    assert not sequencing_qc_ok
-
-
 def test_get_applications(microbial_store: Store, expected_number_of_applications):
     """Test function to return the applications."""
 

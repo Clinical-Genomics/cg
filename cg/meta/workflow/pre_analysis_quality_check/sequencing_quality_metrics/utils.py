@@ -15,7 +15,7 @@ def is_sample_ready_made_library(sample: Sample) -> bool:
         bool: True if the sample is a ready made library, False otherwise.
 
     """
-    passed_quality_check: bool = sample.prep_category == PrepCategory.ready_made_library
+    passed_quality_check: bool = sample.prep_category == PrepCategory.READY_MADE_LIBRARY
     if not passed_quality_check:
         LOG.warning(f"Sample {sample.internal_id} is not a ready made library.")
     return passed_quality_check
@@ -31,6 +31,7 @@ def case_has_express_priority(case: Case) -> bool:
     """
     return case.priority == Priority.express
 
+
 def sample_has_express_priority(sample: Sample) -> bool:
     """
     Check if a sample is express priority.
@@ -40,6 +41,7 @@ def sample_has_express_priority(sample: Sample) -> bool:
 
     """
     return sample.priority == Priority.express
+
 
 def case_has_lower_priority_than_express(case: Case) -> bool:
     """
@@ -51,6 +53,7 @@ def case_has_lower_priority_than_express(case: Case) -> bool:
     """
     return case.priority < Priority.express
 
+
 def sample_has_reads(sample: Sample) -> bool:
     """
     Check if a sample has reads.
@@ -59,10 +62,11 @@ def sample_has_reads(sample: Sample) -> bool:
         bool: True if the sample has reads, False otherwise.
 
     """
-    passed_quality_check: bool = bool(sample.reads)
+    passed_quality_check: bool = sample.has_reads
     if not passed_quality_check:
         LOG.warning(f"Sample {sample.internal_id} has no reads.")
     return passed_quality_check
+
 
 def ready_made_library_sample_has_enough_reads(sample: Sample) -> bool:
     """
@@ -74,9 +78,10 @@ def ready_made_library_sample_has_enough_reads(sample: Sample) -> bool:
     """
     if is_sample_ready_made_library(sample):
         return sample_has_reads(sample)
-    return True
+    return False
 
-def sample_has_enough_reads(sample) -> bool:
+
+def sample_has_enough_reads(sample: Sample) -> bool:
     """
     Run standard sequencing qc for a sample.
 
@@ -84,7 +89,7 @@ def sample_has_enough_reads(sample) -> bool:
         bool: True if sample pass the qc, False otherwise.
 
     """
-    passed_quality_check: bool = all(sample.reads >= sample.expected_reads)
+    passed_quality_check: bool = sample.reads >= sample.expected_reads_for_sample
     if not passed_quality_check:
         LOG.warning(f"Sample {sample.internal_id} has too few reads.")
     return passed_quality_check
@@ -100,7 +105,7 @@ def get_sequencing_qc_of_case(case: Case) -> bool:
     """
     if case_has_lower_priority_than_express(case):
         return all(sample_has_enough_reads(sample) for sample in case.samples)
-    return True
+    return False
 
 
 def express_sample_has_enough_reads(sample: Sample) -> bool:
@@ -128,7 +133,8 @@ def get_express_sequencing_qc_of_case(case: Case) -> bool:
     """
     if case_has_express_priority(case):
         return all(express_sample_has_enough_reads(sample) for sample in case.samples)
-    return True
+    return False
+
 
 def get_express_sequencing_qc_of_sample(sample: Sample) -> bool:
     """
@@ -140,7 +146,8 @@ def get_express_sequencing_qc_of_sample(sample: Sample) -> bool:
     """
     if sample_has_express_priority(sample):
         return express_sample_has_enough_reads(sample)
-    return True
+    return False
+
 
 def all_samples_in_case_have_reads(case: Case) -> bool:
     """
@@ -150,7 +157,7 @@ def all_samples_in_case_have_reads(case: Case) -> bool:
         bool: True if all samples have reads, False otherwise.
 
     """
-    passed_quality_check: bool = all(bool(sample.reads) for sample in case.samples)
+    passed_quality_check: bool = all(sample.has_reads for sample in case.samples)
     if not passed_quality_check:
         LOG.warning("Not all samples in case have reads.")
     return passed_quality_check
@@ -164,7 +171,7 @@ def any_sample_in_case_has_reads(case: Case) -> bool:
         bool: True if any sample has reads, False otherwise.
 
     """
-    passed_quality_check: bool = any(bool(sample.reads) for sample in case.samples)
+    passed_quality_check: bool = any(sample.has_reads for sample in case.samples)
     if not passed_quality_check:
         LOG.warning("No samples in case have reads.")
     return passed_quality_check

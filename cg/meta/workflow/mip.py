@@ -269,7 +269,7 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_cases_ready_for_analysis(self) -> list[Case]:
         """Return cases to analyze."""
         cases_query: list[Case] = self.status_db.cases_to_analyze(
-            workflow=self.workflow, threshold=self.use_read_count_threshold
+            workflow=self.workflow,
         )
         cases_to_analyze = []
         for case_obj in cases_query:
