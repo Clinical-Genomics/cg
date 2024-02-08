@@ -44,10 +44,6 @@ class OrderInSample(BaseModel):
     require_qc_ok: bool = False
     volume: str
     concentration_ng_ul: str | None
-    subject_id: (
-        constr(regex=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length)
-        | None
-    )
 
     @classmethod
     def is_sample_for(cls, project: OrderType):
@@ -107,6 +103,10 @@ class Of1508Sample(OrderInSample):
     phenotype_terms: list[str] | None
     require_qc_ok: bool = False
     quantity: int | None
+    subject_id: (
+        constr(regex=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length)
+        | None
+    )
     synopsis: str | None
 
     @validator("container", "container_name", "name", "source", "subject_id", "volume")
@@ -221,6 +221,7 @@ class MetagenomeSample(Of1508Sample):
     # "This information is not required"
     concentration_sample: float | None
     family_name: None = None
+    subject_id: None = None
 
     @validator("concentration_sample", pre=True)
     def str_to_float(cls, v: str) -> float | None:
