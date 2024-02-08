@@ -5,16 +5,14 @@ from pathlib import Path
 from typing import Any
 
 from cg.constants import Workflow
+from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG
 from cg.constants.sequencing import SequencingPlatform
 from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.fastq import FastqFileMeta
-from cg.models.taxprofiler.taxprofiler import (
-    TaxprofilerParameters,
-    TaxprofilerSampleSheetEntry,
-)
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
@@ -44,6 +42,10 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.email: str = config.taxprofiler.slurm.mail_user
         self.nextflow_binary_path: str = config.taxprofiler.binary_path
         self.compute_env_base: str = config.taxprofiler.compute_env
+
+    def get_nextflow_config_content(self) -> str:
+        """Return nextflow config content."""
+        return MULTIQC_NEXFLOW_CONFIG
 
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, instrument_platform: SequencingPlatform.ILLUMINA, fasta: str = ""
@@ -122,6 +124,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             header=TaxprofilerSampleSheetEntry.headers(),
         )
         self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
+        self.write_nextflow_config(case_id=case_id)
 
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Return a list of the metrics specified in a MultiQC json file for the case samples."""
