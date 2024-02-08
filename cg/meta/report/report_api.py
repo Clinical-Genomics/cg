@@ -260,7 +260,9 @@ class ReportAPI(MetaAPI):
                     gender=sample.sex,
                     source=lims_sample.get("source") if lims_sample else None,
                     tumour=sample.is_tumour,
-                    application=self.get_sample_application_data(lims_sample=lims_sample),
+                    application=self.get_sample_application_data(
+                        sample=sample, lims_sample=lims_sample
+                    ),
                     methods=self.get_sample_methods_data(sample_id=sample.internal_id),
                     status=case_sample.status,
                     metadata=self.get_sample_metadata(
@@ -289,15 +291,16 @@ class ReportAPI(MetaAPI):
         )
         return application_limitation.limitations if application_limitation else None
 
-    def get_sample_application_data(self, lims_sample: dict) -> ApplicationModel:
+    def get_sample_application_data(self, sample: Sample, lims_sample: dict) -> ApplicationModel:
         """Retrieves the analysis application attributes."""
         application: Application = self.status_db.get_application_by_tag(
             tag=lims_sample.get("application")
         )
+        LOG.error(sample.application_version.version)
         return (
             ApplicationModel(
                 tag=application.tag,
-                version=lims_sample.get("application_version"),
+                version=sample.application_version.version,
                 prep_category=application.prep_category,
                 description=application.description,
                 details=application.details,
