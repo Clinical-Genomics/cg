@@ -85,7 +85,7 @@ def test_upload_rna_alignment_file_to_scout(
     upload_scout_api: UploadScoutAPI,
     caplog: LogCaptureFixture,
 ):
-    """Test that A RNA case's alignment file can be loaded via a CG CLI command into an already existing DNA case."""
+    """Test that a RNA case's alignment file can be loaded via a CG CLI command into an already existing DNA case."""
     caplog.set_level(logging.INFO)
 
     # GIVEN RNA and DNA cases connected via subject ID
