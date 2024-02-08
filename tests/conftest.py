@@ -496,9 +496,9 @@ def real_cg_context(
 
 
 @pytest.fixture
-def hasta_external_dir() -> str:
+def hasta_external_dir(tmp_path) -> Path:
     """Return the path to the external dir on hasta."""
-    return "/path/on/hasta/"
+    return Path(tmp_path, "/path/on/hasta/")
 
 
 @pytest.fixture(scope="session")
@@ -528,14 +528,10 @@ def external_data_api(analysis_store, real_cg_context: CGConfig, ticket_id: str)
 def transfer_external_data_api(
     analysis_store,
     real_cg_context: CGConfig,
-    tmp_path: Path,
     ticket_id: str,
-    hasta_external_dir: str,
     customer_id: str,
 ) -> TransferExternalDataAPI:
     """Return a external data api."""
-    tmp_hasta_dir = Path(tmp_path, hasta_external_dir, customer_id)
-    tmp_hasta_dir.mkdir(parents=True, exist_ok=True)
     return TransferExternalDataAPI(config=real_cg_context, ticket=ticket_id, dry_run=True)
 
 
@@ -545,7 +541,6 @@ def add_external_data_api(
     real_cg_context: CGConfig,
     tmp_path: Path,
     ticket_id: str,
-    hasta_external_dir: str,
     customer_id: str,
 ) -> AddExternalDataAPI:
     """Return a external data api."""

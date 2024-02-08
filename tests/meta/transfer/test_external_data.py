@@ -35,12 +35,15 @@ def test_get_destination_path(
 
 
 def test_create_log_dir(
-    caplog, transfer_external_data_api: TransferExternalDataAPI, ticket_id: str
+    caplog,
+    transfer_external_data_api: TransferExternalDataAPI,
+    ticket_id: str,
+    hasta_external_dir: Path,
 ):
     """Test generating the directory for logging."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN a transfer API initialised with a ticket
+    # GIVEN a transfer API initialised with a ticket and dry run equals True
 
     # WHEN the log directory is created
     log_dir = transfer_external_data_api.create_log_dir()
@@ -88,7 +91,7 @@ def test_transfer_sample_files_from_source(
     mocker.patch.object(Store, "get_customer_id_from_ticket")
     Store.get_customer_id_from_ticket.return_value = customer_id
 
-    mocker.patch.object(ExternalDataAPI, "get_source_path")
+    mocker.patch.object(TransferExternalDataAPI, "get_source_path")
     transfer_external_data_api.get_source_path.return_value = external_data_directory
 
     transfer_external_data_api.source_path = str(
@@ -106,7 +109,7 @@ def test_transfer_sample_files_from_source(
 
 
 def test_add_and_include_files_to_bundles(
-    external_data_api: ExternalDataAPI,
+    add_external_data_api: AddExternalDataAPI,
     fastq_file: Path,
     hk_bundle_data: dict,
     sample_id: str,
@@ -114,12 +117,12 @@ def test_add_and_include_files_to_bundles(
 ):
     """Tests adding files to Housekeeper."""
     # GIVEN
-    external_data_api.dry_run = False
-    hk_api: HousekeeperAPI = external_data_api.housekeeper_api
+    add_external_data_api.dry_run = False
+    hk_api: HousekeeperAPI = add_external_data_api.housekeeper_api
     helpers.ensure_hk_version(hk_api, hk_bundle_data)
 
     # WHEN the file is added and included to Housekeeper
-    external_data_api.add_and_include_files_to_bundles(
+    add_external_data_api.add_and_include_files_to_bundles(
         fastq_paths=[fastq_file],
         lims_sample_id=sample_id,
     )
@@ -135,29 +138,29 @@ def test_add_and_include_files_to_bundles(
 
 def test_add_transfer_to_housekeeper(
     case_id,
-    external_data_api: ExternalDataAPI,
+    add_external_data_api: AddExternalDataAPI,
     fastq_file: Path,
     mocker,
     ticket_id: str,
 ):
     """Test adding and including samples from a case to Housekeeper."""
-    # GIVEN an ExternalDataAPI with dry-run equals False
-    external_data_api.dry_run = False
+    # GIVEN an AddExternalDataAPI
+
     # GIVEN a Store with a DNA case, which is available for analysis
-    case: Case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = add_external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
     mocker.patch.object(Store, "get_cases_by_ticket_id")
     Store.get_cases_by_ticket_id.return_value = [case]
-    samples = [case_sample.sample for case_sample in case.links]
+    sample_ids: list[str] = [case_sample.sample.internal_id for case_sample in case.links]
 
     # GIVEN a list of paths and only one sample being available
-    mocker.patch.object(ExternalDataAPI, "get_all_paths")
-    ExternalDataAPI.get_all_paths.return_value = [fastq_file]
+    mocker.patch.object(AddExternalDataAPI, "get_all_paths")
+    AddExternalDataAPI.get_all_paths.return_value = [fastq_file]
 
     mocker.patch.object(Path, "iterdir")
     Path.iterdir.return_value = []
 
-    mocker.patch.object(ExternalDataAPI, "get_available_samples")
-    ExternalDataAPI.get_available_samples.return_value = samples[:-1]
+    mocker.patch.object(AddExternalDataAPI, "get_available_samples")
+    AddExternalDataAPI.get_available_sample_ids.return_value = sample_ids[:-1]
 
     mocker.patch.object(Store, "set_case_action")
     Store.set_case_action.return_value = None
