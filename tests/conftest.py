@@ -1789,7 +1789,7 @@ def context_config(
             "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-dna-stage.yaml",
-            "pipeline": "analyse rd_dna",
+            "workflow": "analyse rd_dna",
             "root": str(mip_dir),
             "script": "mip",
         },
@@ -1797,7 +1797,7 @@ def context_config(
             "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-rna-stage.yaml",
-            "pipeline": "analyse rd_rna",
+            "workflow": "analyse rd_rna",
             "root": str(mip_dir),
             "script": "mip",
         },
@@ -1817,7 +1817,7 @@ def context_config(
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_raredisease",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "workflow_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
             "revision": "2.2.0",
@@ -1826,7 +1826,7 @@ def context_config(
                 "account": "development",
                 "mail_user": "test.email@scilifelab.se",
             },
-            "tower_pipeline": "raredisease",
+            "tower_workflow": "raredisease",
         },
         "rnafusion": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
@@ -1834,7 +1834,7 @@ def context_config(
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_RNAFUSION",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "workflow_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
             "revision": "2.2.0",
@@ -1843,7 +1843,7 @@ def context_config(
                 "account": "development",
                 "mail_user": "test.email@scilifelab.se",
             },
-            "tower_pipeline": "rnafusion",
+            "tower_workflow": "rnafusion",
         },
         "pigz": {"binary_path": "/bin/pigz"},
         "pdc": {"binary_path": "/bin/dsmc"},
@@ -1854,7 +1854,7 @@ def context_config(
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_taxprofiler",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "workflow_path": Path("workflow", "path").as_posix(),
             "databases": Path("path", "to", "databases").as_posix(),
             "profile": "myprofile",
             "hostremoval_reference": Path("path", "to", "hostremoval_reference").as_posix(),
@@ -1863,7 +1863,7 @@ def context_config(
                 "account": "development",
                 "mail_user": "taxprofiler.email@scilifelab.se",
             },
-            "tower_pipeline": "taxprofiler",
+            "tower_workflow": "taxprofiler",
         },
         "scout": {
             "binary_path": "bin/scout",
@@ -2117,7 +2117,7 @@ def strandedness_not_permitted() -> str:
 
 @pytest.fixture(scope="session")
 def pipeline_version() -> str:
-    """Return a pipeline version."""
+    """Return a workflow version."""
     return "2.2.0"
 
 

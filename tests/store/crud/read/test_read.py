@@ -215,7 +215,7 @@ def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
 
 
 def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
-    """Test analyses to upload with no pipeline specified."""
+    """Test analyses to upload with no workflow specified."""
     # GIVEN a store with one analysis
     helpers.add_analysis(store=sample_store, completed_at=timestamp)
 
@@ -229,7 +229,7 @@ def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
 
 
 def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, timestamp):
-    """Test analyses to upload to when existing pipeline."""
+    """Test analyses to upload to when existing workflow."""
     # GIVEN a store with an analysis that has been run with MIP
     helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=Workflow.MIP_DNA)
 
@@ -243,7 +243,7 @@ def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, ti
 
 
 def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, timestamp):
-    """Test analyses to upload to when existing pipeline and using it in filtering."""
+    """Test analyses to upload to when existing workflow and using it in filtering."""
     # GIVEN a store with an analysis that is analysed with MIP
     pipeline = Workflow.MIP_DNA
     helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=pipeline)
@@ -259,7 +259,7 @@ def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, 
 
 
 def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_store, timestamp):
-    """Test analyses to upload to when existing pipeline and using it in filtering."""
+    """Test analyses to upload to when existing workflow and using it in filtering."""
     # GIVEN a store with an analysis that is analysed with MIP but does not have a completed_at
     pipeline = Workflow.MIP_DNA
     helpers.add_analysis(store=sample_store, completed_at=None, workflow=pipeline)
@@ -274,7 +274,7 @@ def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_sto
 
 
 def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample_store, timestamp):
-    """Test analyses to upload to when missing pipeline and using it in filtering."""
+    """Test analyses to upload to when missing workflow and using it in filtering."""
     # GIVEN a store with an analysis that has been analysed with "missing_pipeline"
     helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=Workflow.MIP_DNA)
 

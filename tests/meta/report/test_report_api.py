@@ -389,7 +389,7 @@ def test_get_case_analysis_data_pipeline_match_error(
     case_mip_dna: Case,
     caplog: LogCaptureFixture,
 ):
-    """Test validation error if a customer requested pipeline does not match the data analysis."""
+    """Test validation error if a customer requested workflow does not match the data analysis."""
 
     # GIVEN a pre-built case and a MIP-DNA analysis that has been started as Balsamic
     mip_analysis: Analysis = case_mip_dna.analyses[0]

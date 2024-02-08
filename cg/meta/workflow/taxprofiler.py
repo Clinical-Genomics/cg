@@ -12,7 +12,10 @@ from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.fastq import FastqFileMeta
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
+from cg.models.taxprofiler.taxprofiler import (
+    TaxprofilerParameters,
+    TaxprofilerSampleSheetEntry,
+)
 from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
@@ -29,7 +32,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.taxprofiler.root
-        self.nfcore_workflow_path: str = config.taxprofiler.pipeline_path
+        self.nfcore_workflow_path: str = config.taxprofiler.workflow_path
         self.conda_env: str = config.taxprofiler.conda_env
         self.conda_binary: str = config.taxprofiler.conda_binary
         self.profile: str = config.taxprofiler.profile
@@ -37,7 +40,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.hostremoval_reference: Path = Path(config.taxprofiler.hostremoval_reference)
         self.databases: Path = Path(config.taxprofiler.databases)
         self.tower_binary_path: str = config.tower_binary_path
-        self.tower_workflow: str = config.taxprofiler.tower_pipeline
+        self.tower_workflow: str = config.taxprofiler.tower_workflow
         self.account: str = config.taxprofiler.slurm.account
         self.email: str = config.taxprofiler.slurm.mail_user
         self.nextflow_binary_path: str = config.taxprofiler.binary_path

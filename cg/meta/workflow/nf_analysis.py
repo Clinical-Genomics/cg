@@ -14,7 +14,10 @@ from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import MetricsBase, MetricsDeliverablesCondition
+from cg.models.deliverables.metric_deliverables import (
+    MetricsBase,
+    MetricsDeliverablesCondition,
+)
 from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
@@ -68,7 +71,7 @@ class NfAnalysisAPI(AnalysisAPI):
         return WorkflowManager.Tower.value
 
     def get_workflow_version(self, case_id: str) -> str:
-        """Get pipeline version from config."""
+        """Get workflow version from config."""
         return self.revision
 
     def get_nextflow_config_content(self) -> str | None:
@@ -237,7 +240,7 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.info("Workflow will be executed using Nextflow")
         parameters: list[str] = NextflowHandler.get_nextflow_run_parameters(
             case_id=case_id,
-            pipeline_path=self.nfcore_workflow_path,
+            workflow_path=self.nfcore_workflow_path,
             root_dir=self.root_dir,
             command_args=command_args.dict(),
         )
@@ -337,7 +340,7 @@ class NfAnalysisAPI(AnalysisAPI):
         )
 
     def get_workflow_metrics(self) -> dict:
-        """Get nf-core pipeline metrics constants."""
+        """Get nf-core workflow metrics constants."""
         return {}
 
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
