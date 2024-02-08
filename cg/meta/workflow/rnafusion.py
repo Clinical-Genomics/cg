@@ -7,7 +7,7 @@ from typing import Any
 from cg import resources
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat, Strandedness
-from cg.constants.nf_analysis import RNAFUSION_METRIC_CONDITIONS
+from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
 from cg.exc import MissingMetrics
 from cg.io.controller import ReadFile
 from cg.io.json import read_json
@@ -66,15 +66,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_nextflow_config_content(self) -> str:
         """Return nextflow config content."""
-        return """process {
-    withName:'MULTIQC' {
-        memory = { 1.GB * task.attempt }
-        time   = { 4.h  * task.attempt }
-        cpus = 2
-        ext.args = ' --data-format json '
-    }
-}
-"""
+        return MULTIQC_NEXFLOW_CONFIG
 
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, case_id: str, strandedness: Strandedness
