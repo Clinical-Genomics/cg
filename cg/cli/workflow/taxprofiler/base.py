@@ -18,10 +18,7 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_WORKDIR,
     metrics_deliver,
 )
-from cg.cli.workflow.taxprofiler.options import (
-    OPTION_FROM_START,
-    OPTION_INSTRUMENT_PLATFORM,
-)
+from cg.cli.workflow.taxprofiler.options import OPTION_FROM_START, OPTION_INSTRUMENT_PLATFORM
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.constants.nf_analysis import NfTowerStatus
@@ -109,7 +106,9 @@ def run(
             "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
-            "config": analysis_api.get_nextflow_config_path(nextflow_config=config),
+            "config": analysis_api.get_nextflow_config_path(
+                case_id=case_id, nextflow_config=config
+            ),
             "params_file": analysis_api.get_params_file_path(
                 case_id=case_id, params_file=params_file
             ),
