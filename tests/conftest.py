@@ -2116,7 +2116,7 @@ def strandedness_not_permitted() -> str:
 
 
 @pytest.fixture(scope="session")
-def pipeline_version() -> str:
+def workflow_version() -> str:
     """Return a workflow version."""
     return "2.2.0"
 
