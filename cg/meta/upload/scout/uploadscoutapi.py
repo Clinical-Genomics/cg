@@ -192,7 +192,7 @@ class UploadScoutAPI:
             rna_alignment_cram: File | None = self.get_rna_alignment_cram(
                 case_id=case_id, sample_id=rna_sample_internal_id
             )
-            if rna_alignment_cram is None:
+            if not rna_alignment_cram:
                 raise FileNotFoundError(
                     f"No RNA alignment CRAM file was found in Housekeeper for {rna_sample_internal_id}"
                 )
@@ -220,7 +220,7 @@ class UploadScoutAPI:
         report_type: str = "Research" if research else "Clinical"
 
         fusion_report: File | None = self.get_fusion_report(case_id, research)
-        if fusion_report is None:
+        if not fusion_report:
             raise FileNotFoundError(
                 f"{report_type} fusion report was not found in Housekeeper for {case_id}."
             )
@@ -302,7 +302,7 @@ class UploadScoutAPI:
                 case_id=case_id, sample_id=rna_sample_internal_id
             )
 
-            if rna_coverage_bigwig is None:
+            if not rna_coverage_bigwig:
                 raise FileNotFoundError(
                     f"No RNA coverage bigwig file was found in housekeeper for {rna_sample_internal_id}."
                 )
@@ -340,7 +340,7 @@ class UploadScoutAPI:
                 case_id=case_id, sample_id=rna_sample_internal_id
             )
 
-            if splice_junctions_bed is None:
+            if not splice_junctions_bed:
                 raise FileNotFoundError(
                     f"No splice junctions bed file was found in Housekeeper for {rna_sample_internal_id}."
                 )
