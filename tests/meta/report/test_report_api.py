@@ -383,7 +383,7 @@ def test_get_case_analysis_data(
     assert case_analysis_data.scout_files
 
 
-def test_get_case_analysis_data_pipeline_match_error(
+def test_get_case_analysis_data_workflow_match_error(
     report_api_mip_dna: MipDNAReportAPI,
     mip_analysis_api: MipDNAAnalysisAPI,
     case_mip_dna: Case,
@@ -411,7 +411,7 @@ def test_get_case_analysis_data_pipeline_match_error(
     )
 
 
-def test_get_case_analysis_data_pipeline_not_supported(
+def test_get_case_analysis_data_workflow_not_supported(
     report_api_mip_dna: MipDNAReportAPI,
     mip_analysis_api: MipDNAAnalysisAPI,
     case_mip_dna: Case,

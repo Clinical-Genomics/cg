@@ -604,7 +604,7 @@ def test_add_dna_cases_to_dna_sample(
     assert dna_case.internal_id in rna_dna_collection.dna_case_ids
 
 
-def test_map_dna_cases_to_dna_sample_incorrect_pipeline(
+def test_map_dna_cases_to_dna_sample_incorrect_workflow(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
     dna_sample_son_id: str,
