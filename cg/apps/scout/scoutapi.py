@@ -27,7 +27,7 @@ class ScoutAPI:
         self.slurm_upload_service = slurm_upload_service
         self.scout_base_command = f"{binary_path} --config {config_path}"
 
-    def upload(self, scout_load_config: Path, force: bool = False):
+    def upload(self, scout_load_config: Path, force: bool = False) -> None:
         """Load analysis of a new family into Scout."""
 
         scout_config: dict = ReadFile.get_content_from_file(
@@ -228,7 +228,9 @@ class ScoutAPI:
         )
         self.upload_report(case_id=case_id, report_path=report_path, report_type=report_type)
 
-    def upload_splice_junctions_bed(self, file_path: str, case_id: str, customer_sample_id: str):
+    def upload_splice_junctions_bed(
+        self, file_path: str, case_id: str, customer_sample_id: str
+    ) -> None:
         """Load a splice junctions bed file into a case in the database."""
 
         upload_command: list[str] = [
@@ -274,7 +276,9 @@ class ScoutAPI:
                 "Something went wrong when uploading rna coverage bigwig file"
             ) from error
 
-    def upload_rna_alignment_file(self, case_id: str, customer_sample_id: str, file_path: str):
+    def upload_rna_alignment_file(
+        self, case_id: str, customer_sample_id: str, file_path: str
+    ) -> None:
         """Load an RNA alignment CRAM file into a case in the database."""
 
         upload_command: list[str] = [
