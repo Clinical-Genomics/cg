@@ -66,13 +66,13 @@
   tag: multiqc-html
 - format: csv
   id: CASEID
-  path: PATHTOCASE/pipeline_info/samplesheet.valid.csv
+  path: PATHTOCASE/workflow_info/samplesheet.valid.csv
   path_index: ~
   step: samplesheet-valid
   tag: samplesheet-valid
 - format: yml
   id: CASEID
-  path: PATHTOCASE/pipeline_info/software_versions.yml
+  path: PATHTOCASE/workflow_info/software_versions.yml
   path_index: ~
   step: software-versions
   tag: software-versions

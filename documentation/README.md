@@ -2,7 +2,8 @@
 
 `cg` stands for _Clinical Genomics_; a clinical sequencing platform under [SciLifeLab][scilife].
 
-This is our main package for interacting with data and samples that flow through our pipeline. We rely on a set of specialized "apps" to deal with a lot of complexity like:
+This is our main package for interacting with data and samples that flow through our workflows.
+We rely on a set of specialized "apps" to deal with a lot of complexity like:
 
 - [Trailblazer][trailblazer]: Python wrapper around [MIP][mip], a rare disease genomics pipeline
 - [Housekeeper][housekeeper]: storage, retrieval, and archival of files
