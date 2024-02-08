@@ -12,6 +12,7 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
 from cg.constants.constants import FileFormat, PrepCategory
+from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
@@ -171,7 +172,7 @@ class UploadScoutAPI:
 
     def get_rna_alignment_cram(self, case_id: str, sample_id: str) -> File | None:
         """Return an RNA alignment CRAM file for a case in Housekeeper."""
-        tags: set[str] = {"cram", sample_id}
+        tags: set[str] = {AlignmentFileTag.CRAM, sample_id}
         rna_alignment_cram: File | None = None
         try:
             rna_alignment_cram = self.housekeeper.get_file_from_latest_version(
