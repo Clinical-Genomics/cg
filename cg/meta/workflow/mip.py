@@ -5,7 +5,7 @@ from typing import Any
 from pydantic.v1 import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import FileExtensions, GenePanelMasterList, Pipeline
+from cg.constants import FileExtensions, GenePanelMasterList, Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
@@ -39,8 +39,8 @@ class MipAnalysisAPI(AnalysisAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
     hooks into the status database that makes managing analyses simpler"""
 
-    def __init__(self, config: CGConfig, pipeline: Pipeline):
-        super().__init__(pipeline, config)
+    def __init__(self, config: CGConfig, workflow: Workflow):
+        super().__init__(workflow, config)
 
     @property
     def root(self) -> str:
@@ -51,7 +51,7 @@ class MipAnalysisAPI(AnalysisAPI):
         raise NotImplementedError
 
     @property
-    def mip_pipeline(self) -> str:
+    def mip_workflow(self) -> str:
         raise NotImplementedError
 
     @property
@@ -269,7 +269,7 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_cases_ready_for_analysis(self) -> list[Case]:
         """Return cases to analyze."""
         cases_query: list[Case] = self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.use_read_count_threshold
+            workflow=self.workflow, threshold=self.use_read_count_threshold
         )
         cases_to_analyze = []
         for case_obj in cases_query:
@@ -318,9 +318,9 @@ class MipAnalysisAPI(AnalysisAPI):
     def config_sample(self, link_obj: CaseSample, panel_bed: str) -> dict:
         raise NotImplementedError
 
-    def get_pipeline_version(self, case_id: str) -> str:
+    def get_workflow_version(self, case_id: str) -> str:
         """Get MIP version from sample info file"""
-        LOG.debug("Fetch pipeline version")
+        LOG.debug("Fetch workflow version")
         sample_info_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=self.get_sample_info_path(case_id)
         )

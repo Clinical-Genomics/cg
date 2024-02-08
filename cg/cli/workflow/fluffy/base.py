@@ -25,9 +25,7 @@ def fluffy(context: click.Context):
     Fluffy workflow
     """
     AnalysisAPI.get_help(context)
-    context.obj.meta_apis["analysis_api"] = FluffyAnalysisAPI(
-        config=context.obj,
-    )
+    context.obj.meta_apis["analysis_api"] = FluffyAnalysisAPI(config=context.obj)
 
 
 fluffy.add_command(link)

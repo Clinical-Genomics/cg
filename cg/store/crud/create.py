@@ -1,14 +1,13 @@
 import logging
 from datetime import datetime
-from cg.models.orders.order import OrderIn
-from cg.models.orders.orderform_schema import Orderform
-from cg.store.database import get_session
 
 import petname
 
-from cg.constants import DataDelivery, FlowCellStatus, Pipeline, Priority
+from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
+from cg.models.orders.order import OrderIn
 from cg.store.base import BaseHandler
+from cg.store.database import get_session
 from cg.store.models import (
     Analysis,
     Application,
@@ -136,7 +135,7 @@ class CreateHandler(BaseHandler):
     @staticmethod
     def add_application_limitation(
         application: Application,
-        pipeline: str,
+        workflow: str,
         limitations: str,
         comment: str = "Dummy comment",
         created_at: datetime = datetime.now(),
@@ -146,7 +145,7 @@ class CreateHandler(BaseHandler):
         """Build a new application limitations record."""
         return ApplicationLimitations(
             application=application,
-            pipeline=pipeline,
+            pipeline=workflow,
             limitations=limitations,
             comment=comment,
             created_at=created_at,
@@ -204,7 +203,7 @@ class CreateHandler(BaseHandler):
 
     def add_case(
         self,
-        data_analysis: Pipeline,
+        data_analysis: Workflow,
         data_delivery: DataDelivery,
         name: str,
         ticket: str,
@@ -268,7 +267,7 @@ class CreateHandler(BaseHandler):
 
     def add_analysis(
         self,
-        pipeline: Pipeline,
+        workflow: Workflow,
         version: str = None,
         completed_at: datetime = None,
         primary: bool = False,
@@ -278,7 +277,7 @@ class CreateHandler(BaseHandler):
     ) -> Analysis:
         """Build a new Analysis record."""
         return Analysis(
-            pipeline=str(pipeline),
+            pipeline=workflow,
             pipeline_version=version,
             completed_at=completed_at,
             is_primary=primary,

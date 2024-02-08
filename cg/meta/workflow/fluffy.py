@@ -7,9 +7,11 @@ from pathlib import Path
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_sample_sheet_from_file,
+)
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -72,15 +74,12 @@ class FluffyAnalysisAPI(AnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.FLUFFY,
+        workflow: Workflow = Workflow.FLUFFY,
     ):
         self.root_dir = Path(config.fluffy.root_dir)
         LOG.info("Set root dir to %s", config.fluffy.root_dir)
         self.fluffy_config = Path(config.fluffy.config_path)
-        super().__init__(
-            pipeline,
-            config,
-        )
+        super().__init__(workflow, config)
 
     @property
     def use_read_count_threshold(self) -> bool:
@@ -262,7 +261,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         and is ready to be stored in Housekeeper."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
+            for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
             if Path(self.get_analysis_finish_path(case_id=case.internal_id)).exists()
         ]
 

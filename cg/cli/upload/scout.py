@@ -9,7 +9,7 @@ from housekeeper.store.models import File, Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload.utils import suggest_cases_to_upload
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.io.controller import WriteStream
@@ -216,7 +216,7 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
     status_db: Store = context.status_db
     case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     scout_report_type, multiqc_report = scout_upload_api.get_multiqc_html_report(
-        case_id=case_id, pipeline=case.data_analysis
+        case_id=case_id, workflow=case.data_analysis
     )
     if scout_report_type == ScoutCustomCaseReportTags.MULTIQC_RNA:
         scout_upload_api.upload_rna_report_to_dna_case_in_scout(
@@ -237,12 +237,12 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
 def get_upload_api(case: Case, cg_config: CGConfig) -> UploadAPI:
     """Return the upload API based on the data analysis type"""
 
-    analysis_apis: dict[Pipeline, UploadAPI] = {
-        Pipeline.BALSAMIC: BalsamicAnalysisAPI,
-        Pipeline.BALSAMIC_UMI: BalsamicUmiAnalysisAPI,
-        Pipeline.MIP_RNA: MipRNAAnalysisAPI,
-        Pipeline.MIP_DNA: MipDNAAnalysisAPI,
-        Pipeline.RNAFUSION: RnafusionAnalysisAPI,
+    analysis_apis: dict[Workflow, UploadAPI] = {
+        Workflow.BALSAMIC: BalsamicAnalysisAPI,
+        Workflow.BALSAMIC_UMI: BalsamicUmiAnalysisAPI,
+        Workflow.MIP_RNA: MipRNAAnalysisAPI,
+        Workflow.MIP_DNA: MipDNAAnalysisAPI,
+        Workflow.RNAFUSION: RnafusionAnalysisAPI,
     }
 
     return UploadAPI(

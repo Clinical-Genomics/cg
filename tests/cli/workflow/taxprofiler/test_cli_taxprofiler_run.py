@@ -2,7 +2,6 @@
 
 import logging
 
-import pytest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
@@ -126,5 +125,5 @@ def test_with_config_use_tower_resume(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN command should use tower for relaunch
-    assert "Pipeline will be resumed from run" in caplog.text
+    assert "Workflow will be resumed from run" in caplog.text
     assert "path/to/bin/tw runs relaunch" in caplog.text

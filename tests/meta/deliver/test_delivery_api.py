@@ -5,7 +5,7 @@ from pathlib import Path
 from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
@@ -155,7 +155,7 @@ def test_get_sample_files_from_version(
 def test_get_delivery_scope_case_only():
     """Testing the delivery scope of a case only delivery."""
     # GIVEN a case only delivery type
-    delivery_type: set[str] = {Pipeline.MIP_DNA}
+    delivery_type: set[str] = {Workflow.MIP_DNA}
 
     # WHEN getting the delivery scope
     sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
@@ -168,7 +168,7 @@ def test_get_delivery_scope_case_only():
 def test_get_delivery_scope_sample_only():
     """Testing the delivery scope of a sample only delivery."""
     # GIVEN a sample only delivery type
-    delivery_type = {Pipeline.FASTQ}
+    delivery_type = {Workflow.FASTQ}
 
     # WHEN getting the delivery scope
     sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
@@ -181,7 +181,7 @@ def test_get_delivery_scope_sample_only():
 def test_get_delivery_scope_case_and_sample():
     """Testing the delivery scope of a case and sample delivery."""
     # GIVEN a case and sample delivery type
-    delivery_type = {Pipeline.MUTANT}
+    delivery_type = {Workflow.MUTANT}
 
     # WHEN getting the delivery scope
     sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)

@@ -61,7 +61,7 @@ class PrepareFastqAPI:
     @staticmethod
     def _should_skip_sample(case: Case, sample: Sample):
         """
-        For some pipelines, we want to start a partial analysis disregarding the samples with no reads.
+        For some workflows, we want to start a partial analysis disregarding the samples with no reads.
         This method returns true if we should skip the sample.
         """
         if case.data_analysis in PIPELINES_USING_PARTIAL_ANALYSES and not sample.has_reads:

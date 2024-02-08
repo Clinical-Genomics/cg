@@ -12,7 +12,8 @@ def test_clean_hk_bundle_files_no_files(cli_runner: CliRunner, cg_context: CGCon
     # GIVEN a housekeeper api and a bundle without files
     bundle_name = "non_existing"
     assert not cg_context.housekeeper_api.bundle(bundle_name)
-    case = cg_context.status_db.get_case_by_internal_id(bundle_name)
+    cg_context.status_db.get_case_by_internal_id(bundle_name)
+
     # WHEN running the clean hk alignment files command
     caplog.set_level(logging.INFO)
     result = cli_runner.invoke(
@@ -22,7 +23,7 @@ def test_clean_hk_bundle_files_no_files(cli_runner: CliRunner, cg_context: CGCon
     # THEN assert it exits with success
     assert result.exit_code == 0
     # THEN assert it was communicated that no files where found
-    assert f"Process freed 0.0GB. Dry run: False" in caplog.text
+    assert "Process freed 0.0GB. Dry run: False" in caplog.text
 
 
 def test_clean_hk_bundle_files_dry_run(
@@ -31,7 +32,6 @@ def test_clean_hk_bundle_files_dry_run(
     cg_context: CGConfig,
     cli_runner: CliRunner,
     helpers: StoreHelpers,
-    mocker,
     timestamp: datetime,
 ):
     # GIVEN a housekeeper api with some alignment files

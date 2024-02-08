@@ -8,10 +8,10 @@ import pytest
 from cg.cli.generate.report.utils import (
     get_report_analysis_started,
     get_report_api,
-    get_report_api_pipeline,
+    get_report_api_workflow,
     get_report_case,
 )
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
 from tests.mocks.report import MockMipDNAReportAPI
 
@@ -54,14 +54,14 @@ def test_get_report_api(delivery_report_click_context, cg_context, case_id):
     assert isinstance(report_api, MockMipDNAReportAPI)
 
 
-def test_get_report_api_pipeline(delivery_report_click_context):
-    """Tests API assignment given a specific pipeline"""
+def test_get_report_api_workflow(delivery_report_click_context):
+    """Tests API assignment given a specific workflow."""
 
-    # GIVEN a click context and a specific pipeline
-    pipeline = Pipeline.BALSAMIC_UMI
+    # GIVEN a click context and a specific workflow
+    workflow = Workflow.BALSAMIC_UMI
 
     # WHEN validating a report api
-    report_api = get_report_api_pipeline(delivery_report_click_context, pipeline)
+    report_api = get_report_api_workflow(delivery_report_click_context, workflow)
 
     # THEN the extracted API should match the expected type
     assert report_api

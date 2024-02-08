@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta
 
 from cg.constants import DataDelivery, Priority
-from cg.constants.constants import CaseActions, Pipeline
+from cg.constants.constants import CaseActions, Workflow
 from cg.store.models import Analysis, Case, CaseSample
 from cg.store.store import Store
 
@@ -50,43 +50,43 @@ def test_get_cases_by_customers_action_and_case_search_pattern(
         assert case_search in case.name
 
 
-def test_get_cases_by_customer_pipeline_and_case_search_pattern(
+def test_get_cases_by_customer_workflow_and_case_search_pattern(
     store_with_cases_and_customers: Store,
 ):
-    """Test that only cases with the specified customer, pipeline, and case search pattern are returned."""
+    """Test that only cases with the specified customer, workflow, and case search pattern are returned."""
     # GIVEN a store with some cases and customers
     case = store_with_cases_and_customers._get_query(table=Case).first()
 
-    # Set the pipeline and case_search
+    # Set the workflow and case_search
     customer = case.customer
-    pipeline = case.data_analysis
+    workflow = case.data_analysis
     case_search = case.name[:3]
 
-    # WHEN calling get_cases_by_customer_pipeline_and_case_search_pattern with customer, pipeline, and case_search
-    cases = store_with_cases_and_customers.get_cases_by_customer_pipeline_and_case_search(
-        customer=customer, pipeline=pipeline, case_search=case_search
+    # WHEN calling get_cases_by_customer_workflow_and_case_search_pattern with customer, workflow, and case_search
+    cases = store_with_cases_and_customers.get_cases_by_customer_workflow_and_case_search(
+        customer=customer, workflow=workflow, case_search=case_search
     )
 
-    # THEN cases with the specified customer, pipeline, and case search pattern should be returned
+    # THEN cases with the specified customer, workflow, and case search pattern should be returned
     for case in cases:
         assert case.customer == customer
-        assert case.data_analysis == pipeline
+        assert case.data_analysis == workflow
         assert case_search in case.name
 
 
-def test_get_running_cases_in_pipeline(store_with_cases_and_customers: Store):
+def test_get_running_cases_in_workflow(store_with_cases_and_customers: Store):
     """Test that only cases with the specified pipeline, and have action "running" are returned."""
     # GIVEN a store with some cases
 
-    # WHEN getting cases with a pipeline and are running
-    cases: list[Case] = store_with_cases_and_customers.get_running_cases_in_pipeline(
-        pipeline=Pipeline.MIP_DNA
+    # WHEN getting cases with a workflow and are running
+    cases: list[Case] = store_with_cases_and_customers.get_running_cases_in_workflow(
+        workflow=Workflow.MIP_DNA
     )
 
-    # THEN cases with the specified pipeline, and case action is returned
+    # THEN cases with the specified workflow, and case action is returned
     for case in cases:
         assert case.action == CaseActions.RUNNING
-        assert case.data_analysis == Pipeline.MIP_DNA
+        assert case.data_analysis == Workflow.MIP_DNA
 
 
 def test_delivered_at_affects_tat(base_store: Store, helpers):
@@ -629,7 +629,7 @@ def test_include_case_by_case_uppercase_data_analysis(base_store: Store, helpers
     """Test to that cases can be included by uppercase data_analysis"""
 
     # GIVEN a database with a case with data analysis set
-    data_analysis = Pipeline.BALSAMIC
+    data_analysis = Workflow.BALSAMIC
     new_case = add_case(helpers, base_store, data_analysis=data_analysis)
 
     # WHEN getting active cases by data_analysis
@@ -645,7 +645,7 @@ def test_exclude_case_by_data_analysis(base_store: Store, helpers):
     """Test to that cases can be excluded by data_analysis"""
 
     # GIVEN a database with a case with data analysis set
-    add_case(helpers, base_store, data_analysis=Pipeline.BALSAMIC)
+    add_case(helpers, base_store, data_analysis=Workflow.BALSAMIC)
 
     # WHEN getting active cases by data_analysis
     cases = base_store.cases(data_analysis="dummy_analysis")
@@ -658,7 +658,7 @@ def test_include_case_by_partial_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a case with data analysis set
-    data_analysis = Pipeline.BALSAMIC
+    data_analysis = Workflow.BALSAMIC
     new_case = add_case(helpers, base_store, data_analysis=data_analysis)
 
     # WHEN getting active cases by partial data_analysis
@@ -674,7 +674,7 @@ def test_show_multiple_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a case with data analysis set
-    data_analysis = Pipeline.BALSAMIC
+    data_analysis = Workflow.BALSAMIC
     new_case = add_case(helpers, base_store, data_analysis=data_analysis)
     sample1 = helpers.add_sample(base_store)
     link_1: CaseSample = base_store.relate_sample(new_case, sample1, "unknown")
@@ -699,7 +699,7 @@ def test_show_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a case with data analysis set
-    data_analysis = Pipeline.BALSAMIC
+    data_analysis = Workflow.BALSAMIC
     new_case = add_case(helpers, base_store, data_analysis=data_analysis)
 
     # WHEN getting active cases by data_analysis
@@ -715,7 +715,7 @@ def test_include_case_by_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
     # GIVEN a database with a case with data analysis set
-    data_analysis = Pipeline.BALSAMIC
+    data_analysis = Workflow.BALSAMIC
     new_case = add_case(helpers, base_store, data_analysis=data_analysis)
 
     # WHEN getting active cases by data_analysis
@@ -1344,21 +1344,21 @@ def test_analysis_uploaded_at(base_store: Store, helpers):
         assert case.get("analysis_uploaded_at") is not None
 
 
-def test_analysis_pipeline(base_store: Store, helpers):
-    """Test to that cases displays pipeline"""
+def test_analysis_workflow(base_store: Store, helpers):
+    """Test to that cases displays workflow."""
 
-    # GIVEN a database with an analysis that has pipeline
-    pipeline = Pipeline.BALSAMIC
-    analysis = helpers.add_analysis(base_store, pipeline=pipeline)
+    # GIVEN a database with an analysis that has workflow
+    workflow = Workflow.BALSAMIC
+    analysis = helpers.add_analysis(base_store, workflow=workflow)
     assert analysis.pipeline is not None
 
     # WHEN getting active cases
     cases = base_store.cases()
 
-    # THEN cases should contain info on pipeline
+    # THEN cases should contain info on workflow
     assert cases
     for case in cases:
-        assert case.get("analysis_pipeline") == str(pipeline)
+        assert case.get("analysis_pipeline") == str(workflow)
 
 
 def test_samples_delivered(base_store: Store, helpers):
@@ -1612,7 +1612,7 @@ def add_case(
     ordered_days_ago=0,
     action=None,
     priority=None,
-    data_analysis=Pipeline.BALSAMIC,
+    data_analysis=Workflow.BALSAMIC,
     data_delivery=DataDelivery.SCOUT,
     ticket="123456",
 ):
