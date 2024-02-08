@@ -296,7 +296,6 @@ class ReportAPI(MetaAPI):
         application: Application = self.status_db.get_application_by_tag(
             tag=lims_sample.get("application")
         )
-        LOG.error(sample.application_version.version)
         return (
             ApplicationModel(
                 tag=application.tag,
