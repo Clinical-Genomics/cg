@@ -159,13 +159,17 @@ class BackupAPI:
     @staticmethod
     def create_rta_complete(decrypted_flow_cell: Path, run_dir: Path):
         """Create an RTAComplete.txt file in the flow cell run directory."""
-        rta_complete_file = Path(run_dir, decrypted_flow_cell.stem, DemultiplexingDirsAndFiles.RTACOMPLETE)
+        rta_complete_file = Path(
+            run_dir, decrypted_flow_cell.stem, DemultiplexingDirsAndFiles.RTACOMPLETE
+        )
         rta_complete_file.touch()
 
     @staticmethod
     def create_copy_complete(decrypted_flow_cell: Path, run_dir: Path):
         """Create a CopyComplete.txt file in the flow cell run directory."""
-        copy_complete_file = Path(run_dir, decrypted_flow_cell.stem, DemultiplexingDirsAndFiles.COPY_COMPLETE)
+        copy_complete_file = Path(
+            run_dir, decrypted_flow_cell.stem, DemultiplexingDirsAndFiles.COPY_COMPLETE
+        )
         copy_complete_file.touch()
 
     def extract_flow_cell(self, decrypted_flow_cell, run_dir):
