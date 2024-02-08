@@ -199,7 +199,7 @@ def start(
     analysis_api: BalsamicAnalysisAPI = context.obj.meta_apis["analysis_api"]
     analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
     LOG.info(f"Starting analysis for {case_id}")
-    context.invoke(link, case_id=case_id, dry_run=False)
+    context.invoke(link, case_id=case_id, dry_run=dry_run)
     context.invoke(
         config_case,
         case_id=case_id,
@@ -209,7 +209,7 @@ def start(
         panel_bed=panel_bed,
         pon_cnn=pon_cnn,
         observations=observations,
-        dry_run=False,
+        dry_run=dry_run,
     )
     context.invoke(
         run,
