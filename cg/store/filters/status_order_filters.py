@@ -16,12 +16,23 @@ def filter_orders_by_id(orders: Query, id: int, **kwargs) -> Query:
     return orders.filter(Order.id == id)
 
 
+def filter_orders_by_ticket_id(orders: Query, ticket_id: int, **kwargs) -> Query:
+    """Return orders filtered on ticket id."""
+    return orders.filter(Order.ticket_id == ticket_id)
+
+
 def apply_order_filters(
-    filter_functions: list[Callable], orders: Query, id: int = None, workflow: str = None
+    filter_functions: list[Callable],
+    orders: Query,
+    id: int = None,
+    ticket_id: int = None,
+    workflow: str = None,
 ) -> Query:
     """Apply filtering functions to the order queries and return filtered results."""
     for filter_function in filter_functions:
-        orders: Query = filter_function(orders=orders, id=id, workflow=workflow)
+        orders: Query = filter_function(
+            orders=orders, id=id, ticket_id=ticket_id, workflow=workflow
+        )
     return orders
 
 
@@ -29,4 +40,5 @@ class OrderFilter(Enum):
     """Define order filter functions."""
 
     FILTER_ORDERS_BY_ID: Callable = filter_orders_by_id
+    FILTER_ORDERS_BY_TICKET_ID: Callable = filter_orders_by_ticket_id
     FILTER_ORDERS_BY_WORKFLOW: Callable = filter_orders_by_workflow

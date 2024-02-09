@@ -40,6 +40,7 @@ class FastqService:
             analysis_type=AnalysisType.OTHER,
             data_analysis=Workflow.FASTQ,
             config_path="",
+            order_id=str(case.order_id),
             out_dir="",
             slurm_quality_of_service=case.slurm_priority,
             ticket=case.latest_ticket,
