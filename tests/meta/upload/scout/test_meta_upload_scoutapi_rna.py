@@ -79,11 +79,15 @@ def ensure_extra_rna_case_match(
 
 
 def test_upload_rna_alignment_file_to_scout(
+    caplog: LogCaptureFixture,
+    dna_sample_daughter_id: str,
+    dna_sample_father_id: str,
+    dna_sample_mother_id: str,
+    dna_sample_son_id: str,
+    mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
     rna_store: Store,
-    mip_rna_analysis_hk_api: HousekeeperAPI,
     upload_scout_api: UploadScoutAPI,
-    caplog: LogCaptureFixture,
 ):
     """Test that a RNA case's alignment file can be loaded via a CG CLI command into an already existing DNA case."""
     caplog.set_level(logging.INFO)
@@ -98,7 +102,12 @@ def test_upload_rna_alignment_file_to_scout(
 
     # THEN the RNA alignment file should have been uploaded to the linked DNA cases in Scout
     assert "Upload RNA alignment CRAM file finished!" in caplog.text
-    for dna_case in ["dna_mother", "dna_father", "dna_daughter", "dna_son"]:
+    for dna_case in [
+        dna_sample_mother_id,
+        dna_sample_father_id,
+        dna_sample_daughter_id,
+        dna_sample_son_id,
+    ]:
         assert dna_case in caplog.text
 
 
