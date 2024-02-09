@@ -72,7 +72,7 @@
   tag: samplesheet-valid
 - format: yml
   id: CASEID
-  path: PATHTOCASE/workflow_info/software_versions.yml
+  path: PATHTOCASE/pipeline_info/software_versions.yml
   path_index: ~
   step: software-versions
   tag: software-versions
