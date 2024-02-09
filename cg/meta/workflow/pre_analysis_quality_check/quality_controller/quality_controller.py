@@ -1,14 +1,9 @@
-from typing import Any, Callable
+from typing import Callable
 
 from cg.store.models import Case, Sample
-from cg.store.store import Store
 
 
 class QualityController:
-    
-    def __call__(self, store: Store) -> Any:
-        store: Store = store
-        
     @staticmethod
     def run_qc(obj: Case | Sample, quality_checks: list[Callable]) -> bool:
         """
