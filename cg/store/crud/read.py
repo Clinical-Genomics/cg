@@ -1749,15 +1749,6 @@ class ReadHandler(BaseHandler):
         )
         return orders.first()
 
-    def get_order_by_ticket_id(self, ticket_id: int) -> Order | None:
-        """Returns the entry in Order matching the given id."""
-        orders: Query = self._get_query(table=Order)
-        order_filter_functions: list[Callable] = [OrderFilter.FILTER_ORDERS_BY_TICKET_ID]
-        orders: Query = apply_order_filters(
-            orders=orders, filter_functions=order_filter_functions, ticket_id=ticket_id
-        )
-        return orders.first()
-
     def _calculate_estimated_turnaround_time(
         self,
         is_rerun,
