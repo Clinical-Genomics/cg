@@ -18,7 +18,7 @@ def _get_sequencing_quality_checks_for_case(
     )
     if not sequencing_quality_checks:
         raise NotImplementedError(
-            f"No sequencing quality check have implemented for workflow {case.data_analysis}."
+            f"No sequencing quality check have implemented for workflow {data_analysis}."
         )
     return sequencing_quality_checks
 
@@ -34,7 +34,7 @@ def run_case_pre_analysis_quality_check(
     case: Case,
 ) -> bool:
     sequencing_quality_checks: list[Callable] | None = _get_sequencing_quality_checks_for_case(
-        data_analysis=case.data_analysis
+        case.data_analysis
     )
 
     quality_checks: list[Callable] = sequencing_quality_checks
