@@ -11,6 +11,7 @@ import requests
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
+from google.auth import exceptions
 from pydantic.v1 import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.exc import IntegrityError
@@ -97,8 +98,8 @@ def before_request():
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
         user_data = verify_google_token(jwt_token)
-    except ValueError as e:
-        LOG.error(f"Error occurred while decoding JWT token: {e}")
+    except (exceptions.OAuthError, ValueError) as e:
+        LOG.error(f"Error {e} occurred while decoding JWT token: {jwt_token}")
         return abort(
             make_response(jsonify(message="outdated login certificate"), HTTPStatus.UNAUTHORIZED)
         )
