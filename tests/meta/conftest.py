@@ -1,4 +1,5 @@
 """Fixtures for the meta tests."""
+
 import datetime as dt
 from datetime import datetime
 from pathlib import Path
@@ -14,8 +15,8 @@ from cg.constants.sequencing import Sequencers
 from cg.constants.subject import Sex
 from cg.meta.invoice import InvoiceAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-from cg.store import Store
 from cg.store.models import ApplicationVersion, Customer, Invoice, Sample
+from cg.store.store import Store
 from tests.mocks.limsmock import MockLimsAPI
 from tests.store_helpers import StoreHelpers
 

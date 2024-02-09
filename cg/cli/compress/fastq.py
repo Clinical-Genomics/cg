@@ -16,8 +16,8 @@ from cg.constants.constants import DRY_RUN
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

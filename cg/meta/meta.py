@@ -14,11 +14,10 @@ from cg.meta.compress import CompressAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 
 
 class MetaAPI:
-
     """MetaAPI class initializing all App APIs used within CG in non-conflicting manner"""
 
     def __init__(self, config: CGConfig):

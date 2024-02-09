@@ -1,4 +1,5 @@
 """Constants related to demultiplexing."""
+
 from enum import StrEnum
 from pathlib import Path
 
@@ -11,7 +12,6 @@ from cg.constants.sequencing import Sequencers
 class BclConverter(StrEnum):
     """Define the BCL converter."""
 
-    DRAGEN: str = "dragen"
     BCL2FASTQ: str = "bcl2fastq"
     BCLCONVERT: str = "bcl_convert"
 
@@ -207,7 +207,7 @@ class IndexOverrideCycles(StrEnum):
 OPTION_BCL_CONVERTER = click.option(
     "-b",
     "--bcl-converter",
-    type=click.Choice(["bcl2fastq", "dragen"]),
+    type=click.Choice([BclConverter.BCL2FASTQ, BclConverter.BCLCONVERT]),
     default=None,
     help="Specify bcl conversion software. Choose between bcl2fastq and dragen. "
     "If not specified, the software will be determined automatically using the sequencer type.",
@@ -215,12 +215,12 @@ OPTION_BCL_CONVERTER = click.option(
 
 
 DEMUX_STATS_PATH: dict[str, dict[str, Path | None]] = {
-    "bcl2fastq": {
+    BclConverter.BCL2FASTQ: {
         "demultiplexing_stats": Path("Stats", "DemultiplexingStats.xml"),
         "conversion_stats": Path("Stats", "ConversionStats.xml"),
         "runinfo": None,
     },
-    "dragen": {
+    BclConverter.BCLCONVERT: {
         "demultiplexing_stats": Path("Reports", "Demultiplex_Stats.csv"),
         "conversion_stats": Path("Reports", "Demultiplex_Stats.csv"),
         "adapter_metrics_stats": Path("Reports", "Adapter_Metrics.csv"),

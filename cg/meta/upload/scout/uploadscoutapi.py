@@ -10,7 +10,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.constants import HK_MULTIQC_HTML_TAG, Pipeline
+from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
@@ -22,8 +22,8 @@ from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.store import Store
 from cg.store.models import Analysis, Case, Customer, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -57,17 +57,17 @@ class UploadScoutAPI:
         self.lims = lims_api
         self.status_db = status_db
 
-    def generate_config(self, analysis_obj: Analysis) -> ScoutLoadConfig:
+    def generate_config(self, analysis: Analysis) -> ScoutLoadConfig:
         """Fetch data about an analysis to load Scout."""
         LOG.info("Generate scout load config")
 
         # Fetch last version from housekeeper
         # This should be safe since analyses are only added if data is analysed
-        hk_version_obj: Version = self.housekeeper.last_version(analysis_obj.case.internal_id)
+        hk_version_obj: Version = self.housekeeper.last_version(analysis.case.internal_id)
         LOG.debug(f"Found housekeeper version {hk_version_obj.id}")
 
-        LOG.info("Found pipeline %s", analysis_obj.pipeline)
-        config_builder = self.get_config_builder(analysis=analysis_obj, hk_version=hk_version_obj)
+        LOG.info(f"Found workflow {analysis.pipeline}")
+        config_builder = self.get_config_builder(analysis=analysis, hk_version=hk_version_obj)
 
         config_builder.build_load_config()
 
@@ -115,10 +115,10 @@ class UploadScoutAPI:
         return file_obj
 
     def get_multiqc_html_report(
-        self, case_id: str, pipeline: Pipeline
+        self, case_id: str, workflow: Workflow
     ) -> tuple[ScoutCustomCaseReportTags, File | None]:
         """Return a multiqc report for a case in Housekeeper."""
-        if pipeline == Pipeline.MIP_RNA:
+        if workflow == Workflow.MIP_RNA:
             return (
                 ScoutCustomCaseReportTags.MULTIQC_RNA,
                 self.housekeeper.files(bundle=case_id, tags=HK_MULTIQC_HTML_TAG).first(),
@@ -352,27 +352,27 @@ class UploadScoutAPI:
 
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
         config_builders = {
-            Pipeline.BALSAMIC: BalsamicConfigBuilder(
+            Workflow.BALSAMIC: BalsamicConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
-            Pipeline.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
+            Workflow.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
-            Pipeline.MIP_DNA: MipConfigBuilder(
+            Workflow.MIP_DNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
                 mip_analysis_api=self.mip_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
-            Pipeline.MIP_RNA: MipConfigBuilder(
+            Workflow.MIP_RNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
                 mip_analysis_api=self.mip_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
-            Pipeline.RNAFUSION: RnafusionConfigBuilder(
+            Workflow.RNAFUSION: RnafusionConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
         }
@@ -391,12 +391,12 @@ class UploadScoutAPI:
             )
 
         collaborators: set[Customer] = rna_sample.customer.collaborators
-        subject_id_samples: list[
-            Sample
-        ] = self.status_db.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
-            customer_ids=[customer.id for customer in collaborators],
-            subject_id=rna_sample.subject_id,
-            is_tumour=rna_sample.is_tumour,
+        subject_id_samples: list[Sample] = (
+            self.status_db.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
+                customer_ids=[customer.id for customer in collaborators],
+                subject_id=rna_sample.subject_id,
+                is_tumour=rna_sample.is_tumour,
+            )
         )
 
         subject_id_dna_samples: list[Sample] = self._get_application_prep_category(
@@ -432,15 +432,15 @@ class UploadScoutAPI:
         list_of_dna_cases: list[Case], collaborators: set[Customer]
     ) -> list[str]:
         """Filters the given list of DNA samples and returns a subset of uploaded cases ordered by customers in the
-        specified list of collaborators and within the correct pipeline."""
+        specified list of collaborators and within the correct workflow."""
         filtered_dna_cases: list[str] = []
         for case in list_of_dna_cases:
             if (
                 case.data_analysis
                 in [
-                    Pipeline.MIP_DNA,
-                    Pipeline.BALSAMIC,
-                    Pipeline.BALSAMIC_UMI,
+                    Workflow.MIP_DNA,
+                    Workflow.BALSAMIC,
+                    Workflow.BALSAMIC_UMI,
                 ]
                 and case.customer in collaborators
             ):

@@ -1,4 +1,5 @@
 """ Trailblazer API for cg."""
+
 import datetime
 import logging
 from typing import Any
@@ -6,12 +7,13 @@ from typing import Any
 from google.auth import jwt
 from google.auth.crypt import RSASigner
 
-from cg.apps.tb.models import TrailblazerAnalysis
-from cg.constants import Pipeline
-from cg.constants.constants import APIMethods, FileFormat, WorkflowManager
+from cg.apps.tb.dto.create_job_request import CreateJobRequest
+from cg.apps.tb.models import AnalysesResponse, TrailblazerAnalysis
+from cg.constants import Workflow
+from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
-from cg.exc import TrailblazerAPIHTTPError
+from cg.exc import TrailblazerAPIHTTPError, TrailblazerAnalysisNotFound
 from cg.io.controller import APIRequest, ReadStream
 
 LOG = logging.getLogger(__name__)
@@ -50,7 +52,7 @@ class TrailblazerAPI:
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST
     ) -> Any:
-        url = self.host + "/" + command
+        url = f"{self.host}/{command}"
         LOG.debug(f"REQUEST HEADER {self.auth_header}")
         LOG.debug(f"{method}: URL={url}; JSON={request_body}")
 
@@ -65,6 +67,14 @@ class TrailblazerAPI:
             )
         LOG.debug(f"RESPONSE BODY {response.text}")
         return ReadStream.get_content_from_stream(file_format=FileFormat.JSON, stream=response.text)
+
+    def get_latest_completed_analysis(self, case_id: str) -> TrailblazerAnalysis | None:
+        endpoint = f"analyses?case_id={case_id}&status[]={AnalysisStatus.COMPLETED}&limit=1"
+        response = self.query_trailblazer(command=endpoint, request_body={}, method=APIMethods.GET)
+        validated_response = AnalysesResponse.model_validate(response)
+        if validated_response.analyses:
+            return validated_response.analyses[0]
+        raise TrailblazerAnalysisNotFound(f"No completed analysis found for case {case_id}")
 
     def get_latest_analysis(self, case_id: str) -> TrailblazerAnalysis | None:
         request_body = {
@@ -99,7 +109,7 @@ class TrailblazerAPI:
         out_dir: str,
         slurm_quality_of_service: SlurmQos,
         email: str = None,
-        data_analysis: Pipeline = None,
+        data_analysis: Workflow = None,
         ticket: str = None,
         workflow_manager: str = WorkflowManager.Slurm,
     ) -> TrailblazerAnalysis:
@@ -147,4 +157,13 @@ class TrailblazerAPI:
         LOG.info(f"Adding comment: {comment} to case {case_id}")
         self.query_trailblazer(
             command="add-comment", request_body=request_body, method=APIMethods.PUT
+        )
+
+    def add_upload_job_to_analysis(self, analysis_id: int, slurm_id: int) -> None:
+        create_request = CreateJobRequest(slurm_id=slurm_id, job_type=JobType.UPLOAD)
+        request_body: dict = create_request.model_dump()
+        self.query_trailblazer(
+            command=f"/analysis/{analysis_id}/jobs",
+            request_body=request_body,
+            method=APIMethods.POST,
         )

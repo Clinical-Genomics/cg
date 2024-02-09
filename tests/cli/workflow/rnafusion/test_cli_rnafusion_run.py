@@ -1,4 +1,5 @@
 """This script tests the run cli command"""
+
 import logging
 
 import pytest
@@ -200,7 +201,7 @@ def test_resume_with_id(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN command should use tower for relaunch
-    assert "Pipeline will be resumed from run" in caplog.text
+    assert "Workflow will be resumed from run" in caplog.text
     assert "tw runs relaunch" in caplog.text
 
 
@@ -210,7 +211,7 @@ def test_resume_without_id(
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
     mock_config,
-    mock_analysis_finish,
+    rnafusion_mock_analysis_finish,
 ):
     """Test resume command without providing NF-Tower ID when a Trailblazer Tower config file from a previous run
     exist."""
@@ -227,7 +228,7 @@ def test_resume_without_id(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN command should use tower for relaunch
-    assert "Pipeline will be resumed from run" in caplog.text
+    assert "Workflow will be resumed from run" in caplog.text
     assert "tw runs relaunch" in caplog.text
 
 

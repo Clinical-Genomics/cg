@@ -15,8 +15,8 @@ from cg.models.invoice.invoice import (
 )
 from cg.server.ext import FlaskLims
 from cg.server.ext import lims as genologics_lims
-from cg.store import Store
 from cg.store.models import Customer, Invoice, Pool, Sample, User
+from cg.store.store import Store
 
 
 class InvoiceAPI:

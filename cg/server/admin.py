@@ -1,4 +1,5 @@
 """Module for Flask-Admin views"""
+
 from datetime import datetime
 from gettext import gettext
 
@@ -8,7 +9,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 
-from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Pipeline
+from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.server.ext import db
 from cg.store.models import Sample
 from cg.utils.flask.enum import SelectEnumField
@@ -196,7 +197,7 @@ class ApplicationLimitationsView(BaseView):
     column_searchable_list = ["application.tag"]
     column_editable_list = ["comment"]
     form_excluded_columns = ["created_at", "updated_at"]
-    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Pipeline)}
+    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Workflow)}
     create_modal = True
     edit_modal = True
 
@@ -311,7 +312,7 @@ class CaseView(BaseView):
         "synopsis",
     ]
     form_extra_fields = {
-        "data_analysis": SelectEnumField(enum_class=Pipeline),
+        "data_analysis": SelectEnumField(enum_class=Workflow),
         "data_delivery": SelectEnumField(enum_class=DataDelivery),
     }
 
@@ -413,9 +414,11 @@ class InvoiceView(BaseView):
                 "<a href='%s'>%s</a>"
                 % (
                     url_for("invoice.index_view", search=model.invoice.id),
-                    model.invoice.invoiced_at.date()
-                    if model.invoice.invoiced_at
-                    else "In progress",
+                    (
+                        model.invoice.invoiced_at.date()
+                        if model.invoice.invoiced_at
+                        else "In progress"
+                    ),
                 )
             )
             if model.invoice
@@ -434,7 +437,7 @@ class AnalysisView(BaseView):
         "case.internal_id",
         "case.name",
     ]
-    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Pipeline)}
+    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Workflow)}
 
 
 class OrganismView(BaseView):
@@ -562,7 +565,7 @@ class SampleView(BaseView):
         date: str = datetime.now().strftime("%Y-%m-%d")
         comment: str = f"Cancelled {date} by {user_name}"
 
-        db.add_sample_comment(sample=sample, comment=comment)
+        db.update_sample_comment(sample=sample, comment=comment)
 
     def display_cancel_confirmation(
         self, sample_entry_ids: list[str], remaining_cases: list[str]

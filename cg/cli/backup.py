@@ -1,4 +1,5 @@
 """Backup related CLI commands."""
+
 import logging
 from pathlib import Path
 from typing import Iterable
@@ -30,8 +31,8 @@ from cg.models.flow_cell.flow_cell import (
     FlowCellDirectoryData,
     get_flow_cells_from_path,
 )
-from cg.store import Store
 from cg.store.models import Flowcell, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

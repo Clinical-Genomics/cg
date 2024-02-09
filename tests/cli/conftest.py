@@ -1,4 +1,6 @@
 """Fixtures for CLI tests."""
+
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -8,7 +10,7 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 from tests.cli.compress.conftest import CaseInfo
 from tests.store_helpers import StoreHelpers
 

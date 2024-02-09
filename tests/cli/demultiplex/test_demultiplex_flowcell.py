@@ -1,4 +1,5 @@
 """Tests for running the demultiplex flowcell command"""
+
 import logging
 from pathlib import Path
 
@@ -48,7 +49,7 @@ def test_demultiplex_bcl2fastq_flow_cell_dry_run(
             str(tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq),
             "--dry-run",
             "-b",
-            "bcl2fastq",
+            BclConverter.BCL2FASTQ,
         ],
         obj=demultiplexing_context_for_demux,
     )
@@ -92,7 +93,11 @@ def test_demultiplex_bcl2fastq_flow_cell(
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
         demultiplex_flow_cell,
-        [str(tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq), "-b", "bcl2fastq"],
+        [
+            str(tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq),
+            "-b",
+            BclConverter.BCL2FASTQ,
+        ],
         obj=demultiplexing_context_for_demux,
     )
 
@@ -112,7 +117,6 @@ def test_demultiplex_dragen_flowcell(
     cli_runner: testing.CliRunner,
     tmp_flow_cell_directory_bclconvert: Path,
     demultiplexing_context_for_demux: CGConfig,
-    tmp_illumina_novaseq_demultiplexed_flow_cells_directory,
     caplog,
     mocker,
 ):
@@ -121,7 +125,7 @@ def test_demultiplex_dragen_flowcell(
     # GIVEN that all files are present for Dragen demultiplexing
 
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_directory_bclconvert, bcl_converter="dragen"
+        flow_cell_path=tmp_flow_cell_directory_bclconvert, bcl_converter=BclConverter.BCLCONVERT
     )
     add_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_flow_cell_directory_bclconvert,
@@ -144,7 +148,7 @@ def test_demultiplex_dragen_flowcell(
     # WHEN starting demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
         demultiplex_flow_cell,
-        [str(tmp_flow_cell_directory_bclconvert), "-b", "dragen"],
+        [str(tmp_flow_cell_directory_bclconvert), "-b", BclConverter.BCLCONVERT],
         obj=demultiplexing_context_for_demux,
     )
 

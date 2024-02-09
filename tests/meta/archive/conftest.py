@@ -12,7 +12,7 @@ from requests import Response
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
-from cg.constants.constants import DataDelivery, FileFormat, Pipeline
+from cg.constants.constants import DataDelivery, FileFormat, Workflow
 from cg.constants.subject import Sex
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
@@ -21,8 +21,8 @@ from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import AuthToken, MiriaObject, TransferPayload
 from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import CGConfig, DataFlowConfig
-from cg.store import Store
 from cg.store.models import Case, Customer, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -260,6 +260,7 @@ def archive_store(
         ),
     ]
     new_samples[0].customer = customer_ddn
+    new_samples[0].last_sequenced_at = datetime.now()
     new_samples[1].customer = customer_ddn
     new_samples[2].customer = customer_without_ddn
 
@@ -272,7 +273,7 @@ def archive_store(
     base_store.session.add_all(new_samples)
     base_store.session.commit()
     case: Case = base_store.add_case(
-        data_analysis=Pipeline.MIP_DNA,
+        data_analysis=Workflow.MIP_DNA,
         data_delivery=DataDelivery.NO_DELIVERY,
         name="dummy_name",
         ticket="123",

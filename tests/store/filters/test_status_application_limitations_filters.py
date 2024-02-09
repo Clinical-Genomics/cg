@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Query
 
-from cg.constants import Pipeline
-from cg.store import Store
+from cg.constants import Workflow
 from cg.store.filters.status_application_limitations_filters import (
-    filter_application_limitations_by_pipeline,
     filter_application_limitations_by_tag,
+    filter_application_limitations_by_workflow,
 )
+from cg.store.store import Store
 from tests.store.conftest import StoreConstants
 
 
@@ -34,18 +34,18 @@ def test_filter_application_limitations_by_tag(
     )
 
 
-def test_filter_application_limitations_by_pipeline(
+def test_filter_application_limitations_by_workflow(
     store_with_application_limitations: Store,
-    pipeline=Pipeline.BALSAMIC,
+    workflow=Workflow.BALSAMIC,
 ) -> None:
     """Test to get application limitations by pipeline."""
 
     # GIVEN a store with application limitations
 
     # WHEN getting an application limitations by pipeline
-    application_limitations: Query = filter_application_limitations_by_pipeline(
+    application_limitations: Query = filter_application_limitations_by_workflow(
         application_limitations=store_with_application_limitations._get_join_application_limitations_query(),
-        pipeline=pipeline,
+        workflow=workflow,
     )
 
     # ASSERT that application limitations is a query
@@ -55,5 +55,5 @@ def test_filter_application_limitations_by_pipeline(
     assert (
         application_limitations.all()
         and len(application_limitations.all()) == 1
-        and application_limitations.all()[0].pipeline == pipeline
+        and application_limitations.all()[0].pipeline == workflow
     )

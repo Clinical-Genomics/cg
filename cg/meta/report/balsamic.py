@@ -15,7 +15,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS,
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
-    Pipeline,
+    Workflow,
 )
 from cg.constants.scout import BALSAMIC_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
@@ -80,9 +80,9 @@ class BalsamicReportAPI(ReportAPI):
             bait_set=bed.name if bed else None,
             bait_set_version=analysis_metadata.config.panel.capture_kit_version,
             million_read_pairs=million_read_pairs,
-            median_target_coverage=sample_metrics.median_target_coverage
-            if sample_metrics
-            else None,
+            median_target_coverage=(
+                sample_metrics.median_target_coverage if sample_metrics else None
+            ),
             pct_250x=sample_metrics.pct_target_bases_250x if sample_metrics else None,
             pct_500x=sample_metrics.pct_target_bases_500x if sample_metrics else None,
             duplicates=sample_metrics.percent_duplication if sample_metrics else None,
@@ -100,21 +100,12 @@ class BalsamicReportAPI(ReportAPI):
             median_coverage=sample_metrics.median_coverage if sample_metrics else None,
             pct_15x=sample_metrics.pct_15x if sample_metrics else None,
             pct_60x=sample_metrics.pct_60x if sample_metrics else None,
-            duplicates=self.get_wgs_percent_duplication(sample_metrics=sample_metrics),
+            duplicates=sample_metrics.percent_duplication if sample_metrics else None,
             mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
-            pct_reads_improper_pairs=sample_metrics.pct_pf_reads_improper_pairs
-            if sample_metrics
-            else None,
-        )
-
-    @staticmethod
-    def get_wgs_percent_duplication(sample_metrics: BalsamicWGSQCMetrics):
-        """Return duplication percentage taking into account both reads."""
-        return (
-            (sample_metrics.percent_duplication_r1 + sample_metrics.percent_duplication_r2) / 2
-            if sample_metrics
-            else None
+            pct_reads_improper_pairs=(
+                sample_metrics.pct_pf_reads_improper_pairs if sample_metrics else None
+            ),
         )
 
     def get_data_analysis_type(self, case: Case) -> str | None:
@@ -176,25 +167,25 @@ class BalsamicReportAPI(ReportAPI):
         analysis_type: str = case.data_analysis.type
         required_data_analysis_fields: list[str] = (
             REQUIRED_DATA_ANALYSIS_FIELDS
-            if self.analysis_api.pipeline == Pipeline.BALSAMIC_QC
+            if self.analysis_api.workflow == Workflow.BALSAMIC_QC
             else REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS
         )
         required_sample_metadata_fields: list[str] = []
         if BALSAMIC_ANALYSIS_TYPE["tumor_wgs"] in analysis_type:
-            required_sample_metadata_fields: list[
-                str
-            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
+            required_sample_metadata_fields: list[str] = (
+                REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
+            )
         elif BALSAMIC_ANALYSIS_TYPE["tumor_normal_wgs"] in analysis_type:
-            required_sample_metadata_fields: list[
-                str
-            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS
+            required_sample_metadata_fields: list[str] = (
+                REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS
+            )
         elif (
             BALSAMIC_ANALYSIS_TYPE["tumor_panel"] in analysis_type
             or BALSAMIC_ANALYSIS_TYPE["tumor_normal_panel"] in analysis_type
         ):
-            required_sample_metadata_fields: list[
-                str
-            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
+            required_sample_metadata_fields: list[str] = (
+                REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
+            )
         return {
             "report": REQUIRED_REPORT_FIELDS,
             "customer": REQUIRED_CUSTOMER_FIELDS,
@@ -219,7 +210,7 @@ class BalsamicReportAPI(ReportAPI):
 
     def get_template_name(self) -> str:
         """Return template name to render the delivery report."""
-        return Pipeline.BALSAMIC + "_report.html"
+        return Workflow.BALSAMIC + "_report.html"
 
     def get_upload_case_tags(self) -> dict:
         """Return Balsamic upload case tags."""

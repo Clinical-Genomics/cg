@@ -1,4 +1,5 @@
 """Timestamp fixtures."""
+
 from datetime import MAXYEAR, datetime, timedelta
 
 import pytest

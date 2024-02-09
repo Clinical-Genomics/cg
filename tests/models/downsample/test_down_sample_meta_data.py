@@ -2,8 +2,8 @@
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.store import Store
 from cg.store.models import Sample
+from cg.store.store import Store
 
 
 def test_downsample_meta_data_pass_checks(

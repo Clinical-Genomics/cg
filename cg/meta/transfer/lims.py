@@ -4,8 +4,8 @@ from enum import Enum
 import genologics.entities
 
 from cg.apps.lims import LimsAPI
-from cg.store import Store
 from cg.store.models import Pool, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

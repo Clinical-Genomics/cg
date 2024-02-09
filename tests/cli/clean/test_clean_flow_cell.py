@@ -1,4 +1,5 @@
 """Test for the clean flow cells cmd."""
+
 import logging
 from pathlib import Path
 from unittest import mock

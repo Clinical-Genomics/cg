@@ -6,11 +6,11 @@ from pathlib import Path
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 from tests.meta.clean.conftest import (
     hk_flow_cell_to_clean_bundle,
     hk_sample_bundle_for_flow_cell_to_clean,
@@ -53,7 +53,7 @@ def clean_context(
         store=store,
         internal_id=balsamic_case_clean,
         name=balsamic_case_clean,
-        data_analysis=Pipeline.BALSAMIC,
+        data_analysis=Workflow.BALSAMIC,
     )
     sample_case_to_clean = helpers.add_sample(
         store, application_type="wgs", is_tumour=True, internal_id=balsamic_case_clean
@@ -63,10 +63,10 @@ def clean_context(
     helpers.add_analysis(
         store,
         case=case_to_clean,
-        pipeline=Pipeline.BALSAMIC,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
+        workflow=Workflow.BALSAMIC,
     )
     Path(analysis_api.get_case_path(balsamic_case_clean)).mkdir(exist_ok=True, parents=True)
 
@@ -75,7 +75,7 @@ def clean_context(
         store=store,
         internal_id=balsamic_case_not_clean,
         name=balsamic_case_not_clean,
-        data_analysis=Pipeline.BALSAMIC,
+        data_analysis=Workflow.BALSAMIC,
     )
     case_to_not_clean.action = "running"
     store.session.commit()
@@ -88,10 +88,10 @@ def clean_context(
     helpers.add_analysis(
         store,
         case=case_to_not_clean,
-        pipeline=Pipeline.BALSAMIC,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
+        workflow=Workflow.BALSAMIC,
     )
     Path(analysis_api.get_case_path(balsamic_case_not_clean)).mkdir(exist_ok=True, parents=True)
     cg_context.meta_apis["analysis_api"] = analysis_api
@@ -150,7 +150,7 @@ def clean_context_microsalt(
         store=store,
         internal_id=microsalt_case_clean,
         name=microsalt_case_clean,
-        data_analysis=Pipeline.MICROSALT,
+        data_analysis=Workflow.MICROSALT,
     )
     sample_case_to_clean = helpers.add_sample(store, internal_id=microsalt_case_clean)
 
@@ -159,10 +159,10 @@ def clean_context_microsalt(
     helpers.add_analysis(
         store,
         case=case_to_clean,
-        pipeline=Pipeline.MICROSALT,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
+        workflow=Workflow.MICROSALT,
     )
     case_path_list = analysis_api.get_case_path(microsalt_case_clean)
     for path in case_path_list:
@@ -177,7 +177,7 @@ def clean_context_microsalt(
         store=store,
         internal_id=microsalt_case_clean_dry,
         name=microsalt_case_clean_dry,
-        data_analysis=Pipeline.MICROSALT,
+        data_analysis=Workflow.MICROSALT,
     )
 
     sample_case_to_not_clean = helpers.add_sample(store, internal_id=microsalt_case_clean_dry)
@@ -186,10 +186,10 @@ def clean_context_microsalt(
     helpers.add_analysis(
         store,
         case=case_to_clean_dry_run,
-        pipeline=Pipeline.MICROSALT,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
+        workflow=Workflow.MICROSALT,
     )
 
     case_path_list = analysis_api.get_case_path(microsalt_case_clean_dry)

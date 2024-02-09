@@ -42,13 +42,13 @@ def test_flow_cell_position(bcl2fastq_flow_cell_dir: Path):
     assert position in ["A", "B"]
 
 
-def test_rta_exists(bcl2fastq_flow_cell: FlowCellDirectoryData):
+def test_rta_exists(novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq: FlowCellDirectoryData):
     """Test return of RTS file."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
 
     # WHEN fetching the path to the RTA file
-    rta_file: Path = bcl2fastq_flow_cell.rta_complete_path
+    rta_file: Path = novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq.rta_complete_path
 
     # THEN assert that the file exists
     assert rta_file.exists()
@@ -57,8 +57,8 @@ def test_rta_exists(bcl2fastq_flow_cell: FlowCellDirectoryData):
 @pytest.mark.parametrize(
     "flow_cell_fixture_name, model",
     [
-        ("bcl2fastq_flow_cell", FlowCellSampleBcl2Fastq),
-        ("bcl_convert_flow_cell", FlowCellSampleBCLConvert),
+        ("novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq", FlowCellSampleBcl2Fastq),
+        ("novaseq_6000_post_1_5_kits_flow_cell", FlowCellSampleBCLConvert),
         ("novaseq_x_flow_cell", FlowCellSampleBCLConvert),
     ],
 )
@@ -88,7 +88,7 @@ def test_get_bcl_converter_default(
     flow_cell = FlowCellDirectoryData(Path(flow_cell_directory_name_demultiplexed_with_bcl_convert))
 
     # THEN it sets the converter to BCLConverter
-    assert flow_cell.bcl_converter == BclConverter.DRAGEN
+    assert flow_cell.bcl_converter == BclConverter.BCLCONVERT
 
 
 def test_get_bcl_converter_bcl2fastq_flow_cell(
@@ -132,10 +132,10 @@ def test_run_parameters_path(flow_cell_fixture: str, request: FixtureRequest):
     )
 
 
-def test_run_parameters_path_when_non_existing(tmp_flow_cells_directory_no_run_parameters: Path):
+def test_run_parameters_path_when_non_existing(tmp_flow_cell_without_run_parameters_path: Path):
     """Test that getting the path of the run parameters path fails if the file does not exist."""
     # GIVEN a flowcell object with a directory without a run parameters file
-    flow_cell = FlowCellDirectoryData(flow_cell_path=tmp_flow_cells_directory_no_run_parameters)
+    flow_cell = FlowCellDirectoryData(flow_cell_path=tmp_flow_cell_without_run_parameters_path)
 
     # WHEN fetching the run parameters path
     with pytest.raises(FlowCellError) as exc:
@@ -149,7 +149,7 @@ def test_run_parameters_path_when_non_existing(tmp_flow_cells_directory_no_run_p
     [
         ("hiseq_2500_custom_index_flow_cell", Sequencers.HISEQGA),
         ("hiseq_x_single_index_flow_cell", Sequencers.HISEQX),
-        ("novaseq_6000_flow_cell", Sequencers.NOVASEQ),
+        ("novaseq_6000_post_1_5_kits_flow_cell", Sequencers.NOVASEQ),
         ("novaseq_x_flow_cell", Sequencers.NOVASEQX),
     ],
 )

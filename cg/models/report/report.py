@@ -3,7 +3,7 @@ import logging
 from pydantic import BaseModel, BeforeValidator, model_validator
 from typing_extensions import Annotated
 
-from cg.constants import NA_FIELD, REPORT_SUPPORTED_PIPELINES
+from cg.constants import NA_FIELD, REPORT_SUPPORTED_WORKFLOW
 from cg.models.report.sample import ApplicationModel, SampleModel
 from cg.models.report.validators import (
     get_analysis_type_as_string,
@@ -58,13 +58,13 @@ class ScoutReportFiles(BaseModel):
 
 class DataAnalysisModel(BaseModel):
     """
-    Model that describes the pipeline attributes used for the data analysis
+    Model that describes the workflow attributes used for the data analysis
 
     Attributes:
-        customer_pipeline: data analysis requested by the customer; source: StatusDB/family/data_analysis
+        customer_workflow: data analysis requested by the customer; source: StatusDB/family/data_analysis
         data_delivery: data delivery requested by the customer; source: StatusDB/family/data_delivery
-        pipeline: actual pipeline used for analysis; source: statusDB/analysis/pipeline
-        pipeline_version: pipeline version; source: statusDB/analysis/pipeline_version
+        workflow: actual workflow used for analysis; source: statusDB/analysis/pipeline
+        workflow_version: workflow version; source: statusDB/analysis/pipeline_version
         type: analysis type carried out; source: pipeline workflow
         genome_build: build version of the genome reference; source: pipeline workflow
         variant_callers: variant-calling filters; source: pipeline workflow
@@ -72,10 +72,10 @@ class DataAnalysisModel(BaseModel):
         scout_files: list of file names uploaded to Scout
     """
 
-    customer_pipeline: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    customer_workflow: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     data_delivery: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    pipeline: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    pipeline_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    workflow: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    workflow_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     type: Annotated[str, BeforeValidator(get_analysis_type_as_string)] = NA_FIELD
     genome_build: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     variant_callers: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
@@ -83,16 +83,16 @@ class DataAnalysisModel(BaseModel):
     scout_files: ScoutReportFiles
 
     @model_validator(mode="after")
-    def check_supported_pipeline(self) -> "DataAnalysisModel":
-        """Check if the report generation supports a specific pipeline and analysis type."""
-        if self.pipeline != self.customer_pipeline:
+    def check_supported_workflow(self) -> "DataAnalysisModel":
+        """Check if the report generation supports a specific workflow and analysis type."""
+        if self.workflow != self.customer_workflow:
             LOG.error(
-                f"The analysis requested by the customer ({self.customer_pipeline}) does not match the one "
-                f"executed ({self.pipeline})"
+                f"The analysis requested by the customer ({self.customer_workflow}) does not match the one "
+                f"executed ({self.workflow})"
             )
             raise ValueError
-        if self.pipeline not in REPORT_SUPPORTED_PIPELINES:
-            LOG.error(f"The pipeline {self.pipeline} does not support delivery report generation")
+        if self.workflow not in REPORT_SUPPORTED_WORKFLOW:
+            LOG.error(f"The workflow {self.workflow} does not support delivery report generation")
             raise ValueError
         return self
 

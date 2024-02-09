@@ -1,11 +1,12 @@
 """Model for down sampling meta data."""
+
 import logging
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Priority
-from cg.store import Store
+from cg.constants import DataDelivery, Priority
 from cg.store.models import ApplicationVersion, Case, Sample
+from cg.store.store import Store
 from cg.utils.calculations import multiply_by_million
 
 LOG = logging.getLogger(__name__)
@@ -110,7 +111,7 @@ class DownsampleData:
             return self.status_db.get_case_by_name(self.downsampled_case_name)
         downsampled_case: Case = self.status_db.add_case(
             data_analysis=self.original_case.data_analysis,
-            data_delivery=self.original_case.data_delivery,
+            data_delivery=DataDelivery.NO_DELIVERY,
             name=self.downsampled_case_name,
             panels=self.original_case.panels,
             priority=self.original_case.priority,

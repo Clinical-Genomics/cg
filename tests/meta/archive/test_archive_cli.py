@@ -16,13 +16,7 @@ from cg.meta.archive.ddn.constants import (
     JobStatus,
 )
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
-from cg.meta.archive.ddn.models import (
-    AuthToken,
-    GetJobStatusPayload,
-    GetJobStatusResponse,
-    TransferPayload,
-    TransferResponse,
-)
+from cg.meta.archive.ddn.models import ArchivalResponse, AuthToken, GetJobStatusResponse
 from cg.models.cg_config import CGConfig
 
 
@@ -60,9 +54,9 @@ def test_archive_spring_files_success(
     # GIVEN a CLI runner and a context
 
     # GIVEN a spring file belonging to a customer with archive location 'karolinska_bucket'
-    all_non_archived_spring_files: list[
-        File
-    ] = archive_context.housekeeper_api.get_non_archived_spring_files()
+    all_non_archived_spring_files: list[File] = (
+        archive_context.housekeeper_api.get_non_archived_spring_files()
+    )
     assert len(all_non_archived_spring_files) == 1
     spring_file: File = all_non_archived_spring_files[0]
 
@@ -76,7 +70,7 @@ def test_archive_spring_files_success(
         "api_request_from_content",
         return_value=ok_miria_response,
     ), mock.patch.object(
-        TransferPayload, "post_request", return_value=TransferResponse(jobId=archival_job_id)
+        DDNDataFlowClient, "_archive_file", return_value=ArchivalResponse(jobId=archival_job_id)
     ):
         result = cli_runner.invoke(
             archive_spring_files,
@@ -120,8 +114,8 @@ def test_get_archival_job_status(
         "api_request_from_content",
         return_value=ok_miria_response,
     ), mock.patch.object(
-        GetJobStatusPayload,
-        "get_job_status",
+        DDNDataFlowClient,
+        "_get_job_status",
         return_value=GetJobStatusResponse(id=archival_job_id, status=job_status),
     ):
         result = cli_runner.invoke(
@@ -177,8 +171,8 @@ def test_get_retrieval_job_status(
         "api_request_from_content",
         return_value=ok_miria_response,
     ), mock.patch.object(
-        GetJobStatusPayload,
-        "get_job_status",
+        DDNDataFlowClient,
+        "_get_job_status",
         return_value=GetJobStatusResponse(id=retrieval_job_id, status=job_status),
     ):
         result = cli_runner.invoke(

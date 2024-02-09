@@ -2,12 +2,11 @@ import logging
 
 import click
 
-from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline, Priority
+from cg.constants import STATUS_OPTIONS, DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.subject import Sex
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import (
     Application,
     ApplicationVersion,
@@ -19,6 +18,7 @@ from cg.store.models import (
     Sample,
     User,
 )
+from cg.store.store import Store
 from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)
@@ -225,7 +225,7 @@ def add_sample(
     "data_analysis",
     help="Analysis workflow",
     required=True,
-    type=EnumChoice(Pipeline),
+    type=EnumChoice(Workflow),
 )
 @click.option(
     "-dd",
@@ -243,7 +243,7 @@ def add_case(
     context: CGConfig,
     priority: Priority,
     panel_abbreviations: tuple[str],
-    data_analysis: Pipeline,
+    data_analysis: Workflow,
     data_delivery: DataDelivery,
     customer_id: str,
     name: str,

@@ -19,8 +19,12 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
-from cg.store import Store
+from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
+from cg.services.slurm_service.slurm_service import SlurmService
+from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
+from cg.services.slurm_upload_service.slurm_upload_service import SlurmUploadService
 from cg.store.database import initialize_database
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -123,6 +127,12 @@ class BalsamicConfig(CommonAppConfig):
     balsamic_cache: str
     bed_path: str
     binary_path: str
+    cadd_path: str
+    genome_interval_path: str
+    gnomad_af5_path: str
+    gens_coverage_female_path: str
+    gens_coverage_male_path: str
+    conda_binary: str
     conda_env: str
     loqusdb_path: str
     pon_path: str
@@ -262,7 +272,7 @@ class CGConfig(BaseModel):
     max_flowcells: int | None
     data_input: DataInput | None = None
     # Base APIs that always should exist
-    status_db_: Store = None
+    status_db_: Store | None = None
     housekeeper: HousekeeperConfig
     housekeeper_api_: HousekeeperAPI = None
 
@@ -454,11 +464,28 @@ class CGConfig(BaseModel):
         return api
 
     @property
+    def slurm_service(self) -> SlurmService:
+        return SlurmCLIService()
+
+    @property
+    def slurm_upload_service(self) -> SlurmUploadService:
+        slurm_upload_config = SlurmUploadConfig(
+            email=self.data_delivery.mail_user,
+            account=self.data_delivery.account,
+            log_dir=self.data_delivery.base_path,
+        )
+        return SlurmUploadService(
+            slurm_service=self.slurm_service,
+            trailblazer_api=self.trailblazer_api,
+            config=slurm_upload_config,
+        )
+
+    @property
     def scout_api(self) -> ScoutAPI:
         api = self.__dict__.get("scout_api_")
         if api is None:
             LOG.debug("Instantiating scout api")
-            api = ScoutAPI(config=self.dict())
+            api = ScoutAPI(config=self.dict(), slurm_upload_service=self.slurm_upload_service)
             self.scout_api_ = api
         return api
 

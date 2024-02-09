@@ -1,4 +1,5 @@
 """Module for parsing sequencing run metadata from RunParameters file."""
+
 import logging
 from abc import abstractmethod
 from pathlib import Path

@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Query
 
-from cg.store import Store
 from cg.store.filters.status_bed_filters import (
     get_bed_by_entry_id,
     get_bed_by_name,
@@ -8,6 +7,7 @@ from cg.store.filters.status_bed_filters import (
     order_beds_by_name,
 )
 from cg.store.models import Bed
+from cg.store.store import Store
 
 
 def test_get_bed_by_entry_id(base_store: Store, entry_id: int = 1):

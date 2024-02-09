@@ -1,4 +1,5 @@
 """Test delivery report API methods."""
+
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -6,15 +7,25 @@ from pathlib import Path
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from cg.constants import REPORT_GENDER, Pipeline
+from cg.constants import REPORT_GENDER, Workflow
 from cg.exc import DeliveryReportError
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.report.report import CaseModel, CustomerModel, DataAnalysisModel, ReportModel
-from cg.models.report.sample import ApplicationModel, MethodsModel, SampleModel, TimestampModel
-from cg.store import Store
+from cg.models.report.report import (
+    CaseModel,
+    CustomerModel,
+    DataAnalysisModel,
+    ReportModel,
+)
+from cg.models.report.sample import (
+    ApplicationModel,
+    MethodsModel,
+    SampleModel,
+    TimestampModel,
+)
 from cg.store.models import Analysis, Case, CaseSample
+from cg.store.store import Store
 from tests.meta.report.helper import recursive_assert
 from tests.store_helpers import StoreHelpers
 
@@ -367,7 +378,7 @@ def test_get_case_analysis_data(
     )
 
     # THEN check if the retrieved analysis data is correct
-    assert case_analysis_data.pipeline == "mip-dna"
+    assert case_analysis_data.workflow == "mip-dna"
     assert case_analysis_data.panels == "IEM, EP"
     assert case_analysis_data.scout_files
 
@@ -382,7 +393,7 @@ def test_get_case_analysis_data_pipeline_match_error(
 
     # GIVEN a pre-built case and a MIP-DNA analysis that has been started as Balsamic
     mip_analysis: Analysis = case_mip_dna.analyses[0]
-    mip_analysis.pipeline = Pipeline.BALSAMIC
+    mip_analysis.pipeline = Workflow.BALSAMIC
 
     # GIVEN a mip analysis mock metadata
     mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
@@ -395,7 +406,7 @@ def test_get_case_analysis_data_pipeline_match_error(
             case=case_mip_dna, analysis=mip_analysis, analysis_metadata=mip_metadata
         )
     assert (
-        f"The analysis requested by the customer ({Pipeline.MIP_DNA}) does not match the one executed "
+        f"The analysis requested by the customer ({Workflow.MIP_DNA}) does not match the one executed "
         f"({mip_analysis.pipeline})" in caplog.text
     )
 
@@ -406,12 +417,12 @@ def test_get_case_analysis_data_pipeline_not_supported(
     case_mip_dna: Case,
     caplog: LogCaptureFixture,
 ):
-    """Test validation error if the analysis pipeline is not supported by the delivery report workflow."""
+    """Test validation error if the analysis workflow is not supported by the delivery report workflow."""
 
     # GIVEN a pre-built case with Fluffy as data analysis
-    case_mip_dna.data_analysis = Pipeline.FLUFFY
+    case_mip_dna.data_analysis = Workflow.FLUFFY
     mip_analysis: Analysis = case_mip_dna.analyses[0]
-    mip_analysis.pipeline = Pipeline.FLUFFY
+    mip_analysis.pipeline = Workflow.FLUFFY
 
     # GIVEN a mip analysis mock metadata
     mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
@@ -424,7 +435,7 @@ def test_get_case_analysis_data_pipeline_not_supported(
             case=case_mip_dna, analysis=mip_analysis, analysis_metadata=mip_metadata
         )
     assert (
-        f"The pipeline {case_mip_dna.data_analysis} does not support delivery report generation"
+        f"The workflow {case_mip_dna.data_analysis} does not support delivery report generation"
         in caplog.text
     )
 

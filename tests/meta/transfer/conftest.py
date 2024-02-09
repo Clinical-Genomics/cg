@@ -5,7 +5,7 @@ import pytest
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.transfer import TransferLims
-from cg.store import Store
+from cg.store.store import Store
 from tests.mocks.limsmock import MockLimsAPI
 
 

@@ -6,6 +6,7 @@ The normal entry for information is through the REST API which will pass a JSON
 document with all information about samples in the submission. The input will
 be validated and if passing all checks be accepted as new samples.
 """
+
 import logging
 
 from cg.apps.lims import LimsAPI
@@ -25,7 +26,7 @@ from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.meta.orders.submitter import Submitter
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
-from cg.store import Store
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

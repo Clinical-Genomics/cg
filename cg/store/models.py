@@ -12,11 +12,12 @@ from cg.constants import (
     STATUS_OPTIONS,
     DataDelivery,
     FlowCellStatus,
-    Pipeline,
     Priority,
+    Workflow,
 )
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import CONTROL_OPTIONS, CaseActions, PrepCategory
+from cg.constants.priority import SlurmQos
 
 Model = declarative_base()
 
@@ -186,7 +187,7 @@ class ApplicationLimitations(Model):
 
     id = Column(types.Integer, primary_key=True)
     application_id = Column(ForeignKey(Application.id), nullable=False)
-    pipeline = Column(types.Enum(*list(Pipeline)), nullable=False)
+    pipeline = Column(types.Enum(*list(Workflow)), nullable=False)
     limitations = Column(types.Text)
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -205,7 +206,7 @@ class Analysis(Model):
     __tablename__ = "analysis"
 
     id = Column(types.Integer, primary_key=True)
-    pipeline = Column(types.Enum(*list(Pipeline)))
+    pipeline = Column(types.Enum(*list(Workflow)))
     pipeline_version = Column(types.String(32))
     started_at = Column(types.DateTime)
     completed_at = Column(types.DateTime)
@@ -386,12 +387,13 @@ class Case(Model, PriorityMixin):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship(Customer, foreign_keys=[customer_id])
-    data_analysis = Column(types.Enum(*list(Pipeline)))
+    data_analysis = Column(types.Enum(*list(Workflow)))
     data_delivery = Column(types.Enum(*list(DataDelivery)))
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     is_compressible = Column(types.Boolean, nullable=False, default=True)
     name = Column(types.String(128), nullable=False)
+    order_id = Column(ForeignKey("order.id"))
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     _panels = Column(types.Text)
 
@@ -487,17 +489,23 @@ class Case(Model, PriorityMixin):
         """Returns True if the latest connected analysis has been uploaded."""
         return self.analyses and self.analyses[0].uploaded_at
 
+    @property
+    def slurm_priority(self) -> SlurmQos:
+        case_priority: str = self.priority
+        slurm_priority: str = Priority.priority_to_slurm_qos().get(case_priority)
+        return SlurmQos(slurm_priority)
+
     def get_delivery_arguments(self) -> set[str]:
-        """Translates the case data_delivery field to pipeline specific arguments."""
+        """Translates the case data_delivery field to workflow specific arguments."""
         delivery_arguments: set[str] = set()
         requested_deliveries: list[str] = re.split("[-_]", self.data_delivery)
-        delivery_per_pipeline_map: dict[str, str] = {
-            DataDelivery.FASTQ: Pipeline.FASTQ,
+        delivery_per_workflow_map: dict[str, str] = {
+            DataDelivery.FASTQ: Workflow.FASTQ,
             DataDelivery.ANALYSIS_FILES: self.data_analysis,
         }
-        for data_delivery, pipeline in delivery_per_pipeline_map.items():
+        for data_delivery, workflow in delivery_per_workflow_map.items():
             if data_delivery in requested_deliveries:
-                delivery_arguments.add(pipeline)
+                delivery_arguments.add(workflow)
         return delivery_arguments
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
@@ -863,6 +871,22 @@ class SampleLaneSequencingMetrics(Model):
             name="uix_flowcell_sample_lane",
         ),
     )
+
+    def to_dict(self):
+        return to_dict(model_instance=self)
+
+
+class Order(Model):
+    """Model for storing orders."""
+
+    __tablename__ = "order"
+
+    id = Column(types.Integer, primary_key=True, unique=True)
+    customer_id = Column(ForeignKey("customer.id"), nullable=False)
+    customer = orm.relationship(Customer, foreign_keys=[customer_id])
+    order_date = Column(types.DateTime, nullable=False, default=dt.datetime.now())
+    ticket_id = Column(types.Integer, nullable=False, unique=True, index=True)
+    workflow = Column(types.Enum(*tuple(Workflow)), nullable=False)
 
     def to_dict(self):
         return to_dict(model_instance=self)

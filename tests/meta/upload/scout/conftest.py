@@ -1,4 +1,5 @@
 """Fixtures for the upload Scout API tests."""
+
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -7,7 +8,7 @@ from typing import Generator
 import pytest
 from housekeeper.store.models import Version
 
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import DataDelivery, Workflow
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import UploadTrack
@@ -18,8 +19,8 @@ from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import MipLoadConfig
-from cg.store import Store
 from cg.store.models import Analysis, Case, Sample
+from cg.store.store import Store
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -102,7 +103,7 @@ def rna_store(
         store=store,
         case_name="rna_case",
         customer=helpers.ensure_customer(store=store),
-        data_analysis=Pipeline.MIP_RNA,
+        data_analysis=Workflow.MIP_RNA,
         data_delivery=DataDelivery.SCOUT,
     )
     rna_case.internal_id = rna_case_id
@@ -153,7 +154,7 @@ def rna_store(
         store=store,
         case_name="dna_case",
         customer=helpers.ensure_customer(store=store),
-        data_analysis=Pipeline.MIP_DNA,
+        data_analysis=Workflow.MIP_DNA,
         data_delivery=DataDelivery.SCOUT,
     )
     dna_case.internal_id = dna_case_id
@@ -507,8 +508,8 @@ def mip_dna_analysis(
         store=analysis_store_trio,
         case=case,
         started_at=timestamp,
-        pipeline=Pipeline.MIP_DNA,
         completed_at=timestamp,
+        workflow=Workflow.MIP_DNA,
     )
     for link in case.links:
         helpers.add_phenotype_groups_to_sample(
@@ -526,24 +527,24 @@ def mip_dna_analysis(
 @pytest.fixture(name="balsamic_analysis_obj")
 def balsamic_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a Balsamic analysis object."""
-    analysis_obj.pipeline = Pipeline.BALSAMIC
+    analysis_obj.pipeline = Workflow.BALSAMIC
     for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
             PrepCategory.WHOLE_EXOME_SEQUENCING
         )
-        link_object.case.data_analysis = Pipeline.BALSAMIC
+        link_object.case.data_analysis = Workflow.BALSAMIC
     return analysis_obj
 
 
 @pytest.fixture(name="balsamic_umi_analysis_obj")
 def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a Balsamic UMI analysis object."""
-    analysis_obj.pipeline = Pipeline.BALSAMIC_UMI
+    analysis_obj.pipeline = Workflow.BALSAMIC_UMI
     for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
             PrepCategory.WHOLE_EXOME_SEQUENCING
         )
-        link_object.case.data_analysis = Pipeline.BALSAMIC_UMI
+        link_object.case.data_analysis = Workflow.BALSAMIC_UMI
 
     return analysis_obj
 
@@ -551,12 +552,12 @@ def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
 @pytest.fixture(name="rnafusion_analysis_obj")
 def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a RNAfusion analysis object."""
-    analysis_obj.pipeline = Pipeline.RNAFUSION
+    analysis_obj.pipeline = Workflow.RNAFUSION
     for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
             PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING
         )
-        link_object.case.data_analysis = Pipeline.RNAFUSION
+        link_object.case.data_analysis = Workflow.RNAFUSION
         link_object.case.panels = None
     return analysis_obj
 
@@ -620,7 +621,7 @@ def lims_api(lims_samples: list[dict]) -> MockLimsAPI:
 @pytest.fixture(name="mip_analysis_api")
 def mip_analysis_api(cg_context: CGConfig) -> MockMipAnalysis:
     """Return a MIP analysis API."""
-    return MockMipAnalysis(config=cg_context, pipeline=Pipeline.MIP_DNA)
+    return MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
 
 
 @pytest.fixture(name="upload_scout_api")
@@ -633,7 +634,7 @@ def upload_scout_api(
     store: Store,
 ) -> UploadScoutAPI:
     """Return upload Scout API."""
-    analysis_mock = MockMipAnalysis(config=cg_context, pipeline=Pipeline.MIP_DNA)
+    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
     lims_api = MockLimsAPI(samples=lims_samples)
 
     return UploadScoutAPI(
@@ -656,7 +657,7 @@ def upload_mip_analysis_scout_api(
     store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
     """Return MIP upload Scout API."""
-    analysis_mock = MockMipAnalysis(config=cg_context, pipeline=Pipeline.MIP_DNA)
+    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
     lims_api = MockLimsAPI(samples=lims_samples)
 
     yield UploadScoutAPI(
@@ -679,7 +680,7 @@ def upload_balsamic_analysis_scout_api(
     store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
     """Return Balsamic upload Scout API."""
-    analysis_mock = MockMipAnalysis(config=cg_context, pipeline=Pipeline.MIP_DNA)
+    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
     lims_api = MockLimsAPI(samples=lims_samples)
 
     yield UploadScoutAPI(
@@ -720,7 +721,7 @@ def upload_rnafusion_analysis_scout_api(
     store: Store,
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api."""
-    analysis_mock = MockMipAnalysis(config=cg_context, pipeline=Pipeline.MIP_DNA)
+    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
     lims_api = MockLimsAPI(samples=lims_samples)
 
     _api = UploadScoutAPI(

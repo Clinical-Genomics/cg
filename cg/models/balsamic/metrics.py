@@ -22,8 +22,13 @@ class BalsamicMetricsBase(MetricsBase):
 class BalsamicQCMetrics(BaseModel):
     """BALSAMIC common QC metrics"""
 
-    mean_insert_size: float | None
     fold_80_base_penalty: float | None
+    mean_insert_size: float | None
+    percent_duplication: float | None
+
+    _percent_duplication = validator("percent_duplication", allow_reuse=True)(
+        percent_value_validation
+    )
 
 
 class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
@@ -31,7 +36,6 @@ class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
 
     mean_target_coverage: float | None
     median_target_coverage: float | None
-    percent_duplication: float | None
     pct_target_bases_50x: float | None
     pct_target_bases_100x: float | None
     pct_target_bases_250x: float | None
@@ -41,7 +45,6 @@ class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
     gc_dropout: float | None
 
     _pct_values = validator(
-        "percent_duplication",
         "pct_target_bases_50x",
         "pct_target_bases_100x",
         "pct_target_bases_250x",
@@ -56,8 +59,6 @@ class BalsamicWGSQCMetrics(BalsamicQCMetrics):
     """BALSAMIC WGS QC metrics"""
 
     median_coverage: float | None
-    percent_duplication_r1: float | None
-    percent_duplication_r2: float | None
     pct_15x: float | None
     pct_30x: float | None
     pct_60x: float | None

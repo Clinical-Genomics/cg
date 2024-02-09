@@ -1,7 +1,7 @@
 import datetime as dt
 
 from cg.constants import DataDelivery, GenePanelMasterList
-from cg.constants.constants import CustomerId, Pipeline, PrepCategory
+from cg.constants.constants import CustomerId, PrepCategory, Workflow
 from cg.constants.priority import Priority
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
@@ -46,6 +46,7 @@ class FastqSubmitter(Submitter):
                     "name": sample.name,
                     "priority": sample.priority,
                     "sex": sample.sex,
+                    "subject_id": sample.subject_id,
                     "tumour": sample.tumour,
                     "volume": sample.volume,
                 }
@@ -57,7 +58,7 @@ class FastqSubmitter(Submitter):
     def create_maf_case(self, sample_obj: Sample) -> None:
         """Add a MAF case to the Status database."""
         case: Case = self.status.add_case(
-            data_analysis=Pipeline(Pipeline.MIP_DNA),
+            data_analysis=Workflow(Workflow.MIP_DNA),
             data_delivery=DataDelivery(DataDelivery.NO_DELIVERY),
             name="_".join([sample_obj.name, "MAF"]),
             panels=[GenePanelMasterList.OMIM_AUTO],
@@ -99,6 +100,7 @@ class FastqSubmitter(Submitter):
                     priority=sample["priority"],
                     tumour=sample["tumour"],
                     capture_kit=sample["capture_kit"],
+                    subject_id=sample["subject_id"],
                 )
                 new_sample.customer: Customer = customer
                 application_tag: str = sample["application"]
@@ -111,7 +113,7 @@ class FastqSubmitter(Submitter):
                 new_samples.append(new_sample)
                 if not case:
                     case = self.status.add_case(
-                        data_analysis=Pipeline(submitted_case["data_analysis"]),
+                        data_analysis=Workflow(submitted_case["data_analysis"]),
                         data_delivery=DataDelivery(submitted_case["data_delivery"]),
                         name=ticket_id,
                         panels=None,

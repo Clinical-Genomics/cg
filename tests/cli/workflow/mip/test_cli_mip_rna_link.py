@@ -1,4 +1,5 @@
 """ Test the CLI for mip-rna link"""
+
 import logging
 
 from cg.cli.workflow.mip_rna.base import link

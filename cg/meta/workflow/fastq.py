@@ -5,6 +5,7 @@ Classes:
     FastqFileNameCreator: Creates valid balsamic filenames
     FastqHandler: Handles fastq file linking
 """
+
 import datetime as dt
 import gzip
 import logging
@@ -135,7 +136,7 @@ class FastqHandler:
         meta: str | None = None,
     ) -> str:
         """Name a FASTQ file with standard conventions and
-        no naming constrains from the pipeline."""
+        no naming constrains from the workflow."""
         flow_cell: str = f"{flow_cell}-undetermined" if undetermined else flow_cell
         date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
         return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read_direction}{FileExtensions.FASTQ}{FileExtensions.GZIP}"

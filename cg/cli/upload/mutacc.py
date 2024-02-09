@@ -1,4 +1,5 @@
 """Code that handles uploading to mutacc from the CLI"""
+
 import logging
 
 import click

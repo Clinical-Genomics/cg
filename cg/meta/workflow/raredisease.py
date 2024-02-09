@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-from cg.constants import GenePanelMasterList, Pipeline
+from cg.constants import GenePanelMasterList, Workflow
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -19,9 +19,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.RAREDISEASE,
+        workflow: Workflow = Workflow.RAREDISEASE,
     ):
-        super().__init__(config=config, pipeline=pipeline)
+        super().__init__(config=config, workflow=workflow)
 
     @property
     def root(self) -> str:

@@ -5,6 +5,7 @@ Revises: 9008aa5065b4
 Create Date: 2023-05-04 09:29:09.945895
 
 """
+
 import sqlalchemy as sa
 from sqlalchemy import Column, ForeignKey, orm, types
 from sqlalchemy.orm import declarative_base

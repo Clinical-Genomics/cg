@@ -5,20 +5,15 @@ from pathlib import Path
 from typing import Any
 
 from cg import resources
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import FileFormat, Strandedness
-from cg.constants.rnafusion import RNAFUSION_METRIC_CONDITIONS
-from cg.constants.tb import AnalysisStatus
-from cg.exc import CgError, MetricsQCError, MissingMetrics
-from cg.io.controller import ReadFile, WriteFile
+from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
+from cg.exc import MissingMetrics
+from cg.io.controller import ReadFile
 from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import (
-    MetricsBase,
-    MetricsDeliverablesCondition,
-    MultiqcDataJson,
-)
+from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import PipelineDeliverables
 from cg.models.rnafusion.rnafusion import (
@@ -38,17 +33,17 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.RNAFUSION,
+        workflow: Workflow = Workflow.RNAFUSION,
     ):
-        super().__init__(config=config, pipeline=pipeline)
+        super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.rnafusion.root
-        self.nfcore_pipeline_path: str = config.rnafusion.pipeline_path
+        self.nfcore_workflow_path: str = config.rnafusion.pipeline_path
         self.references: str = config.rnafusion.references
         self.profile: str = config.rnafusion.profile
         self.conda_env: str = config.rnafusion.conda_env
         self.conda_binary: str = config.rnafusion.conda_binary
         self.tower_binary_path: str = config.tower_binary_path
-        self.tower_pipeline: str = config.rnafusion.tower_pipeline
+        self.tower_workflow: str = config.rnafusion.tower_pipeline
         self.account: str = config.rnafusion.slurm.account
         self.email: str = config.rnafusion.slurm.mail_user
         self.compute_env_base: str = config.rnafusion.compute_env
@@ -68,6 +63,10 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             file_format=FileFormat.YAML,
             file_path=resources.RNAFUSION_BUNDLE_FILENAMES_PATH,
         )
+
+    def get_nextflow_config_content(self) -> str:
+        """Return nextflow config content."""
+        return MULTIQC_NEXFLOW_CONFIG
 
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, case_id: str, strandedness: Strandedness
@@ -103,7 +102,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             )
             return content_per_sample
 
-    def get_pipeline_parameters(
+    def get_workflow_parameters(
         self, case_id: str, genomes_base: Path | None = None
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
@@ -133,7 +132,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(
             case_id=case_id, strandedness=strandedness
         )
-        pipeline_parameters: RnafusionParameters = self.get_pipeline_parameters(
+        workflow_parameters: RnafusionParameters = self.get_workflow_parameters(
             case_id=case_id, genomes_base=genomes_base
         )
         if dry_run:
@@ -144,7 +143,30 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             file_path=self.get_sample_sheet_path(case_id=case_id),
             header=RnafusionSampleSheetEntry.headers(),
         )
-        self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
+        self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
+        self.write_nextflow_config(case_id=case_id)
+
+    def parse_multiqc_json_for_case(self, case_id: str) -> dict:
+        """Parse a multiqc_data.json file and returns a dictionary with metric name and metric values for a case."""
+        multiqc_json = MultiqcDataJson(
+            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
+        )
+        metrics_values: dict = {}
+        for key in multiqc_json.report_general_stats_data:
+            if case_id in key:
+                metrics_values.update(list(key.values())[0])
+                LOG.info(f"Key: {key}, Values: {list(key.values())[0]}")
+        return metrics_values
+
+    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
+        """Get a multiqc_data.json file and returns metrics and values formatted."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        sample_id: str = case.links[0].sample.internal_id
+        metric_values: dict = self.parse_multiqc_json_for_case(case_id=case_id)
+        metric_base_list: list = self.get_metric_base_list(
+            sample_id=sample_id, metrics_values=metric_values
+        )
+        return metric_base_list
 
     def report_deliver(self, case_id: str) -> None:
         """Create deliverables file."""
@@ -157,87 +179,18 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
         )
 
-    def get_multiqc_json_path(self, case_id: str) -> Path:
-        """Return the path of the multiqc_data.json file."""
-        return Path(self.root_dir, case_id, "multiqc", "multiqc_data", "multiqc_data.json")
-
-    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
-        """Get a multiqc_data.json file and returns metrics and values formatted."""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_id: str = case.links[0].sample.internal_id
-        multiqc_json: MultiqcDataJson = MultiqcDataJson(
-            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
-        )
-        metrics_values: dict = {}
-        for key in multiqc_json.report_general_stats_data:
-            if case_id in key:
-                metrics_values.update(list(key.values())[0])
-        return [
-            MetricsBase(
-                header=None,
-                id=sample_id,
-                input="multiqc_data.json",
-                name=metric_name,
-                step="multiqc",
-                value=metric_value,
-                condition=RNAFUSION_METRIC_CONDITIONS.get(metric_name, None),
-            )
-            for metric_name, metric_value in metrics_values.items()
-        ]
-
     @staticmethod
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
         """Check that all mandatory metrics are present. Raise error if missing."""
         given_metrics: set = {metric.name for metric in metrics}
         mandatory_metrics: set = set(RNAFUSION_METRIC_CONDITIONS.keys())
+        LOG.info("Mandatory Metrics Keys:")
+        for key in mandatory_metrics:
+            LOG.info(key)
         missing_metrics: set = mandatory_metrics.difference(given_metrics)
         if missing_metrics:
             LOG.error(f"Some mandatory metrics are missing: {', '.join(missing_metrics)}")
             raise MissingMetrics()
-
-    def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
-        """Write <case>_metrics_deliverables.yaml file."""
-        metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
-        metrics = self.get_multiqc_json_metrics(case_id=case_id)
-        self.ensure_mandatory_metrics_present(metrics=metrics)
-
-        if dry_run:
-            LOG.info(
-                f"Dry-run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
-            )
-            return
-
-        LOG.info(f"Writing metrics deliverables file to {metrics_deliverables_path.as_posix()}")
-        WriteFile.write_file_from_content(
-            content={"metrics": [metric.dict() for metric in metrics]},
-            file_format=FileFormat.YAML,
-            file_path=metrics_deliverables_path,
-        )
-
-    def validate_qc_metrics(self, case_id: str, dry_run: bool = False) -> None:
-        """Validate the information from a qc metrics deliverable file."""
-
-        if dry_run:
-            LOG.info("Dry-run: QC metrics validation would be performed")
-            return
-
-        LOG.info("Validating QC metrics")
-        try:
-            metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
-            qc_metrics_raw: dict = ReadFile.get_content_from_file(
-                file_format=FileFormat.YAML, file_path=metrics_deliverables_path
-            )
-            MetricsDeliverablesCondition(**qc_metrics_raw)
-        except MetricsQCError as error:
-            LOG.error(f"QC metrics failed for {case_id}")
-            self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)
-            self.trailblazer_api.add_comment(case_id=case_id, comment=str(error))
-            raise MetricsQCError from error
-        except CgError as error:
-            LOG.error(f"Could not create metrics deliverables file: {error}")
-            self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.ERROR)
-            raise CgError from error
-        self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
 
     def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> RnafusionAnalysis:
         """Parse Rnafusion output analysis files and return analysis model."""
@@ -253,3 +206,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Return the latest metadata of a specific Rnafusion case."""
         qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
         return self.parse_analysis(qc_metrics_raw=qc_metrics)
+
+    def get_workflow_metrics(self) -> dict:
+        return RNAFUSION_METRIC_CONDITIONS

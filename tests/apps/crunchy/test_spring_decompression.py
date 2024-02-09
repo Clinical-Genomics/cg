@@ -1,4 +1,5 @@
 """Tests for SPRING decompression methods"""
+
 import logging
 
 import pytest

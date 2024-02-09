@@ -1,4 +1,5 @@
 """Tests the cli for generating delivery reports."""
+
 import logging
 from datetime import datetime
 

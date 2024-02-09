@@ -4,15 +4,15 @@ from unittest.mock import patch
 import pytest
 
 from cg.constants import DataDelivery
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.constants.subject import Sex
 from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.samples import MipDnaSample
-from cg.store import Store
 from cg.store.models import Case, Customer, Pool, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 SUBMITTERS = [
@@ -245,7 +245,7 @@ def test_submit_duplicate_sample_case_name(
         case_id = sample.family_name
         if not store.get_case_by_name_and_customer(customer=customer, case_name=case_id):
             case: Case = store.add_case(
-                data_analysis=Pipeline.MIP_DNA,
+                data_analysis=Workflow.MIP_DNA,
                 data_delivery=DataDelivery.SCOUT,
                 name=case_id,
                 ticket=ticket_id,

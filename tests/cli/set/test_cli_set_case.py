@@ -1,11 +1,12 @@
 """This script tests the cli methods to set values of a case in status-db."""
+
 from click.testing import CliRunner
 
 from cg.cli.set.case import set_case
-from cg.constants import EXIT_SUCCESS, DataDelivery, Pipeline
+from cg.constants import EXIT_SUCCESS, DataDelivery, Workflow
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Case
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -142,7 +143,7 @@ def test_set_case_data_analysis(
     """Test to set a case using an existing data_analysis."""
 
     # GIVEN a database with a case and a data_analysis not yet set on the case
-    data_analysis: str = Pipeline.FASTQ
+    data_analysis: str = Workflow.FASTQ
     case_to_alter: str = helpers.add_case(base_store)
     assert str(data_analysis) != case_to_alter.data_analysis
 

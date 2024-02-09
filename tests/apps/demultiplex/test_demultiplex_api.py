@@ -1,4 +1,5 @@
 """Tests for functions of DemultiplexAPI."""
+
 from pathlib import Path
 
 import pytest
@@ -203,15 +204,19 @@ def test_is_demultiplexing_possible_already_started(
 def test_remove_demultiplexing_output_directory(
     demultiplexing_api: DemultiplexingAPI,
     tmp_path: Path,
-    bcl_convert_flow_cell: FlowCellDirectoryData,
+    novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData,
 ):
     """Test that the demultiplexing output directory is removed."""
     # GIVEN a flow cell with a demultiplexing output directory
     demultiplexing_api.demultiplexed_runs_dir = tmp_path
-    demultiplexing_api.create_demultiplexing_output_dir(bcl_convert_flow_cell)
-    assert demultiplexing_api.flow_cell_out_dir_path(bcl_convert_flow_cell).exists()
+    demultiplexing_api.create_demultiplexing_output_dir(novaseq_6000_post_1_5_kits_flow_cell)
+    assert demultiplexing_api.flow_cell_out_dir_path(novaseq_6000_post_1_5_kits_flow_cell).exists()
 
     # WHEN removing the demultiplexing output directory
-    demultiplexing_api.remove_demultiplexing_output_directory(flow_cell=bcl_convert_flow_cell)
+    demultiplexing_api.remove_demultiplexing_output_directory(
+        flow_cell=novaseq_6000_post_1_5_kits_flow_cell
+    )
 
-    assert not demultiplexing_api.flow_cell_out_dir_path(bcl_convert_flow_cell).exists()
+    assert not demultiplexing_api.flow_cell_out_dir_path(
+        novaseq_6000_post_1_5_kits_flow_cell
+    ).exists()

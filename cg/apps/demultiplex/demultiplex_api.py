@@ -1,4 +1,5 @@
 """This API should handle everything around demultiplexing."""
+
 import logging
 import shutil
 from pathlib import Path
@@ -9,7 +10,7 @@ from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.constants import FileFormat, Pipeline
+from cg.constants.constants import FileFormat, Workflow
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisTypes
@@ -206,7 +207,7 @@ class DemultiplexingAPI:
             out_dir=flow_cell.trailblazer_config_path.parent.as_posix(),
             slurm_quality_of_service=self.slurm_quality_of_service,
             email=self.mail,
-            data_analysis=str(Pipeline.DEMULTIPLEX),
+            data_analysis=Workflow.DEMULTIPLEX,
         )
 
     def start_demultiplexing(self, flow_cell: FlowCellDirectoryData):
@@ -238,7 +239,7 @@ class DemultiplexingAPI:
                 number_tasks=18,
                 quality_of_service=self.slurm_quality_of_service,
             )
-        if flow_cell.bcl_converter == BclConverter.DRAGEN:
+        if flow_cell.bcl_converter == BclConverter.BCLCONVERT:
             sbatch_parameters: SbatchDragen = SbatchDragen(
                 account=self.slurm_account,
                 commands=commands,

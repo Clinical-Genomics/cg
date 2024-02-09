@@ -1,14 +1,15 @@
 """ Module to decouple cg code from Housekeeper code """
-import datetime as dt
+
 import logging
 import os
+from datetime import datetime
 from pathlib import Path
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
-from housekeeper.store import Store, models
 from housekeeper.store.database import create_all_tables, drop_all_tables, initialize_database
-from housekeeper.store.models import Archive, Bundle, File, Version
+from housekeeper.store.models import Archive, Bundle, File, Tag, Version
+from housekeeper.store.store import Store
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingFileTag
@@ -33,7 +34,7 @@ class HousekeeperAPI:
         LOG.warning(f"Called undefined {name} on {self.__class__.__name__}, please wrap")
         return getattr(self._store, name)
 
-    def new_bundle(self, name: str, created_at: dt.datetime = None) -> Bundle:
+    def new_bundle(self, name: str, created_at: datetime = None) -> Bundle:
         """Create a new file bundle."""
         return self._store.new_bundle(name, created_at)
 
@@ -237,11 +238,11 @@ class HousekeeperAPI:
         file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
         return file_obj
 
-    def new_version(self, created_at: dt.datetime, expires_at: dt.datetime = None) -> Version:
+    def new_version(self, created_at: datetime, expires_at: datetime = None) -> Version:
         """Create a new bundle version."""
         return self._store.new_version(created_at, expires_at)
 
-    def version(self, bundle: str, date: dt.datetime) -> Version:
+    def version(self, bundle: str, date: datetime) -> Version:
         """Fetch a version."""
         LOG.debug(f"Return version: {date}, from {bundle}")
         return self._store.get_version_by_date_and_bundle_name(
@@ -255,7 +256,7 @@ class HousekeeperAPI:
             self._store._get_query(table=Version)
             .join(Version.bundle)
             .filter(Bundle.name == bundle)
-            .order_by(models.Version.created_at.desc())
+            .order_by(Version.created_at.desc())
             .first()
         )
 
@@ -277,7 +278,7 @@ class HousekeeperAPI:
         LOG.debug(f"Found Housekeeper version object for {bundle_name}: {repr(last_version)}")
         return last_version
 
-    def get_create_version(self, bundle_name: str) -> Version:
+    def get_or_create_version(self, bundle_name: str) -> Version:
         """Returns the latest version of a bundle if it exists. If not creates a bundle and
         returns its version."""
         last_version: Version = self.last_version(bundle=bundle_name)
@@ -286,7 +287,7 @@ class HousekeeperAPI:
             bundle_result: tuple[Bundle, Version] = self.add_bundle(
                 bundle_data={
                     "name": bundle_name,
-                    "created_at": dt.datetime.now(),
+                    "created_at": datetime.now(),
                     "expires_at": None,
                     "files": [],
                 }
@@ -298,13 +299,13 @@ class HousekeeperAPI:
         """Create a new tag."""
         return self._store.new_tag(name, category)
 
-    def add_tag(self, name: str, category: str = None) -> models.Tag:
+    def add_tag(self, name: str, category: str = None) -> Tag:
         """Add a tag to the database."""
         tag_obj = self._store.new_tag(name, category)
         self.add_commit(tag_obj)
         return tag_obj
 
-    def get_tag(self, name: str) -> models.Tag:
+    def get_tag(self, name: str) -> Tag:
         """Fetch a tag."""
         return self._store.get_tag(name)
 
@@ -316,7 +317,7 @@ class HousekeeperAPI:
     def include(self, version_obj: Version):
         """Call the include version function to import related assets."""
         include_version(self.get_root_dir(), version_obj)
-        version_obj.included_at = dt.datetime.now()
+        version_obj.included_at = datetime.now()
 
     def add_commit(self, obj):
         """Wrap method in Housekeeper Store."""
@@ -348,10 +349,7 @@ class HousekeeperAPI:
         self, bundle_name: str, file: Path, tags: list
     ) -> None:
         """Adds and includes a file in the latest version of a bundle."""
-        version: Version = self.last_version(bundle_name)
-        if not version:
-            LOG.warning(f"Bundle: {bundle_name} not found in Housekeeper")
-            raise HousekeeperBundleVersionMissingError
+        version: Version = self.get_or_create_version(bundle_name)
         hk_file: File = self.add_file(version_obj=version, tags=tags, path=str(file.absolute()))
         self.include_file(version_obj=version, file_obj=hk_file)
         self.commit()
@@ -376,7 +374,7 @@ class HousekeeperAPI:
             LOG.warning(
                 f"File is already included in Housekeeper for bundle: {bundle_name}, version: {bundle_version}"
             )
-        bundle_version.included_at = dt.datetime.now()
+        bundle_version.included_at = datetime.now()
         self.commit()
 
     def get_file_from_latest_version(self, bundle_name: str, tags: set[str]) -> File | None:
@@ -649,3 +647,14 @@ class HousekeeperAPI:
         for archive in archives_to_update:
             archive.retrieval_task_id = new_retrieval_job_id
         self._store.session.commit()
+
+    def get_spring_files_retrieved_before(self, date: datetime):
+        return self._store.get_files_retrieved_before(date, tag_names=[SequencingFileTag.SPRING])
+
+    def reset_retrieved_archive_data(self, files_to_reset: list[File]):
+        """Resets 'retrieval_task_id' and 'retrieved_at' for all files' corresponding archive entries"""
+        for file in files_to_reset:
+            LOG.debug(f"Resetting retrieval data for file {file.path}")
+            file.archive.retrieval_task_id = None
+            file.archive.retrieved_at = None
+        self.commit()

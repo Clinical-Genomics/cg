@@ -21,7 +21,7 @@ from cg.meta.archive.ddn.models import MiriaObject, TransferPayload
 from cg.meta.archive.ddn.utils import get_metadata
 from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import DataFlowConfig
-from cg.store import Store
+from cg.store.store import Store
 
 FUNCTION_TO_MOCK = "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content"
 
@@ -82,7 +82,7 @@ def test_transfer_payload_model_dump(transfer_payload: TransferPayload):
     # GIVEN a TransferPayload object with two MiriaObject objects
 
     # WHEN obtaining the dict representation
-    dict_representation: dict = transfer_payload.model_dump()
+    dict_representation: dict = transfer_payload.model_dump(by_alias=True)
 
     # THEN the following fields should exist
     assert dict_representation.get("pathInfo", None)
