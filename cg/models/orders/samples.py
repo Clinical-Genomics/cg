@@ -179,6 +179,7 @@ class FastqSample(OrderInSample):
     capture_kit: str | None
     # "Not Required"
     quantity: int | None
+    subject_id: str | None
 
     @validator("quantity", pre=True)
     def str_to_int(cls, v: str) -> int | None:
