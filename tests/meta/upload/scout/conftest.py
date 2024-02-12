@@ -11,8 +11,10 @@ from housekeeper.store.models import Version
 from cg.constants import DataDelivery, Workflow
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack
 from cg.constants.sequencing import SequencingMethod
+from cg.constants.subject import PhenotypeStatus
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
@@ -150,13 +152,13 @@ def rna_store(
         store=store,
         application_type=SequencingMethod.WTS,
         name=rna_sample_mother_id,
-        subject_id="mother",
+        subject_id=Pedigree.MOTHER,
     )
     rna_sample_father = helpers.add_sample(
         store=store,
         application_type=SequencingMethod.WTS,
         name=rna_sample_father_id,
-        subject_id="father",
+        subject_id=Pedigree.FATHER,
     )
     helpers.add_relationship(
         store=store,
@@ -164,7 +166,7 @@ def rna_store(
         case=rna_case,
         mother=rna_sample_mother,
         father=rna_sample_father,
-        status="affected",
+        status=PhenotypeStatus.AFFECTED,
     )
     helpers.add_relationship(
         store=store,
@@ -172,13 +174,13 @@ def rna_store(
         case=rna_case,
         mother=rna_sample_mother,
         father=rna_sample_father,
-        status="unaffected",
+        status=PhenotypeStatus.UNAFFECTED,
     )
     helpers.add_relationship(
-        store=store, sample=rna_sample_mother, case=rna_case, status="unaffected"
+        store=store, sample=rna_sample_mother, case=rna_case, status=PhenotypeStatus.UNAFFECTED
     )
     helpers.add_relationship(
-        store=store, sample=rna_sample_father, case=rna_case, status="affected"
+        store=store, sample=rna_sample_father, case=rna_case, status=PhenotypeStatus.AFFECTED
     )
 
     for link in rna_case.links:
@@ -213,14 +215,14 @@ def rna_store(
         application_tag=SequencingMethod.WGS,
         application_type=SequencingMethod.WGS,
         name=dna_sample_mother_id,
-        subject_id="mother",
+        subject_id=Pedigree.MOTHER,
     )
     dna_sample_father = helpers.add_sample(
         store=store,
         application_tag=SequencingMethod.WGS,
         application_type=SequencingMethod.WGS,
         name=dna_sample_father_id,
-        subject_id="father",
+        subject_id=Pedigree.FATHER,
     )
     helpers.add_relationship(
         store=store,
@@ -228,7 +230,7 @@ def rna_store(
         case=dna_case,
         mother=dna_sample_mother,
         father=dna_sample_father,
-        status="affected",
+        status=PhenotypeStatus.AFFECTED,
     )
     helpers.add_relationship(
         store=store,
@@ -236,13 +238,13 @@ def rna_store(
         case=dna_case,
         mother=dna_sample_mother,
         father=dna_sample_father,
-        status="unaffected",
+        status=PhenotypeStatus.UNAFFECTED,
     )
     helpers.add_relationship(
-        store=store, sample=dna_sample_mother, case=dna_case, status="unaffected"
+        store=store, sample=dna_sample_mother, case=dna_case, status=PhenotypeStatus.UNAFFECTED
     )
     helpers.add_relationship(
-        store=store, sample=dna_sample_father, case=dna_case, status="affected"
+        store=store, sample=dna_sample_father, case=dna_case, status=PhenotypeStatus.AFFECTED
     )
 
     for link in dna_case.links:
