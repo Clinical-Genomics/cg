@@ -216,7 +216,7 @@ class AnalysisAPI(MetaAPI):
             out_dir=self.get_job_ids_path(case_id).parent.as_posix(),
             slurm_quality_of_service=self.get_slurm_qos_for_case(case_id),
             email=environ_email(),
-            workflow=str(self.workflow),
+            workflow=self.workflow,
             ticket=self.status_db.get_latest_ticket_from_case(case_id),
             workflow_manager=self.get_workflow_manager(),
         )
