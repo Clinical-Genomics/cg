@@ -21,6 +21,7 @@ from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.utils import Process
+from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -297,22 +298,35 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_deliverables_for_case(self, case_id: str) -> PipelineDeliverables:
         """Return PipelineDeliverables for a given case."""
         deliverable_template: list[dict] = self.get_deliverables_template_content()
-        sample_id: str = self.status_db.get_samples_by_case_id(case_id).pop().internal_id
-        sample_name: str = self.status_db.get_sample_by_internal_id(sample_id).name
+        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
+        case_path: str = str(self.get_case_path(case_id=case_id))
         files: list[FileDeliverable] = []
-        for file in deliverable_template:
-            for deliverable_field, deliverable_value in file.items():
-                if deliverable_value is None:
-                    continue
-                file[deliverable_field] = file[deliverable_field].replace("CASEID", case_id)
-                file[deliverable_field] = file[deliverable_field].replace("SAMPLEID", sample_id)
-                file[deliverable_field] = file[deliverable_field].replace(
-                    "SAMPLENAME", str(sample_name)
-                )
-                file[deliverable_field] = file[deliverable_field].replace(
-                    "PATHTOCASE", str(self.get_case_path(case_id=case_id))
-                )
-            files.append(FileDeliverable(**file))
+
+        for sample in samples:
+            sample_id: str = sample.internal_id
+            sample_name: str = sample.name
+
+            for file in deliverable_template:
+                file_content = dict(file)
+                for deliverable_field, deliverable_value in file.items():
+                    if deliverable_value is None:
+                        continue
+
+                    file_content[deliverable_field] = file_content[deliverable_field].replace(
+                        "CASEID", case_id
+                    )
+                    file_content[deliverable_field] = file_content[deliverable_field].replace(
+                        "SAMPLEID", sample_id
+                    )
+                    file_content[deliverable_field] = file_content[deliverable_field].replace(
+                        "SAMPLENAME", str(sample_name)
+                    )
+                    file_content[deliverable_field] = file_content[deliverable_field].replace(
+                        "PATHTOCASE", case_path
+                    )
+
+                files.append(FileDeliverable(**file_content))
+
         return PipelineDeliverables(files=files)
 
     def get_multiqc_json_path(self, case_id: str) -> Path:
