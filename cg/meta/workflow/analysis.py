@@ -209,14 +209,14 @@ class AnalysisAPI(MetaAPI):
         self.check_analysis_ongoing(case_id)
         self.trailblazer_api.add_pending_analysis(
             case_id=case_id,
-            email=environ_email(),
             analysis_type=self.get_application_type(
                 self.status_db.get_case_by_internal_id(case_id).links[0].sample
             ),
-            out_dir=self.get_job_ids_path(case_id).parent.as_posix(),
             config_path=self.get_job_ids_path(case_id).as_posix(),
+            out_dir=self.get_job_ids_path(case_id).parent.as_posix(),
             slurm_quality_of_service=self.get_slurm_qos_for_case(case_id),
-            data_analysis=str(self.workflow),
+            email=environ_email(),
+            workflow=str(self.workflow),
             ticket=self.status_db.get_latest_ticket_from_case(case_id),
             workflow_manager=self.get_workflow_manager(),
         )

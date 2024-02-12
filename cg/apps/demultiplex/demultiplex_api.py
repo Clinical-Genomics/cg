@@ -207,7 +207,7 @@ class DemultiplexingAPI:
             out_dir=flow_cell.trailblazer_config_path.parent.as_posix(),
             slurm_quality_of_service=self.slurm_quality_of_service,
             email=self.mail,
-            data_analysis=Workflow.DEMULTIPLEX,
+            workflow=Workflow.DEMULTIPLEX,
         )
 
     def start_demultiplexing(self, flow_cell: FlowCellDirectoryData):
