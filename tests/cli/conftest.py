@@ -145,13 +145,15 @@ def real_crunchy_api(crunchy_config: dict[str, dict[str, Any]]):
 
 @pytest.fixture
 def real_compress_api(
-    demultiplexed_runs: Path, housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
+    illumina_demultiplexed_runs_directory,
+    housekeeper_api: HousekeeperAPI,
+    real_crunchy_api: CrunchyAPI,
 ) -> CompressAPI:
     """Return a compress API context."""
     return CompressAPI(
         crunchy_api=real_crunchy_api,
         hk_api=housekeeper_api,
-        demux_root=demultiplexed_runs.as_posix(),
+        demux_root=illumina_demultiplexed_runs_directory.as_posix(),
     )
 
 
