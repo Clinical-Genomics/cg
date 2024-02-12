@@ -126,7 +126,7 @@ def test_valid_case(
     mock_deliverable,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
-    pipeline_version: str,
+    workflow_version: str,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN case-id
@@ -144,19 +144,19 @@ def test_valid_case(
     # WHEN running command
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
 
-    # THEN bundle should be successfully added to HK and StatusDB
+    # THEN a bundle should be successfully added to HK and StatusDB
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
     assert "Analysis successfully stored in StatusDB" in caplog.text
     assert rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
     assert rnafusion_context.meta_apis["analysis_api"].housekeeper_api.bundle(case_id)
 
-    # THEN workflow version should be correctly stored
+    # THEN a workflow version should be correctly stored
     assert (
         rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id)
         .analyses[0]
         .pipeline_version
-        == pipeline_version
+        == workflow_version
     )
 
 

@@ -218,7 +218,7 @@ def test_filter_cases_with_loqusdb_supported_workflow(
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
-    # WHEN getting cases with pipeline
+    # WHEN getting cases with workflow
     cases: list[Query] = list(filter_cases_with_loqusdb_supported_workflow(cases=cases))
 
     # THEN only the Loqusdb supported case should be extracted
@@ -844,7 +844,7 @@ def test_filter_cases_by_workflow_search_no_matching_workflow(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that no cases are returned when there are no cases with matching workflow search."""
-    # GIVEN a store containing cases with different pipeline names
+    # GIVEN a store containing cases with different workflow names
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
     workflow_search = "non_existent_pipeline"
 
@@ -860,8 +860,8 @@ def test_filter_cases_by_workflow_search_no_matching_workflow(
 def test_filter_cases_by_workflow_search_partial_match(
     store_with_multiple_cases_and_samples: Store,
 ):
-    """Test that cases with partially matching pipeline search are returned."""
-    # GIVEN a store containing cases with different pipeline names
+    """Test that cases with partially matching workflow search are returned."""
+    # GIVEN a store containing cases with different workflow names
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
     workflow_search = cases_query.first().data_analysis[:3]
 
@@ -880,7 +880,7 @@ def test_filter_cases_by_workflow_search_exact_match(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that cases with exactly matching workflow search are returned."""
-    # GIVEN a store containing cases with different pipeline names
+    # GIVEN a store containing cases with different workflow names
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
     workflow_search = cases_query.first().data_analysis
 
