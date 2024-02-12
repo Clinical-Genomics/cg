@@ -37,13 +37,13 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.rnafusion.root
-        self.nfcore_workflow_path: str = config.rnafusion.pipeline_path
+        self.nfcore_workflow_path: str = config.rnafusion.workflow_path
         self.references: str = config.rnafusion.references
         self.profile: str = config.rnafusion.profile
         self.conda_env: str = config.rnafusion.conda_env
         self.conda_binary: str = config.rnafusion.conda_binary
         self.tower_binary_path: str = config.tower_binary_path
-        self.tower_workflow: str = config.rnafusion.tower_pipeline
+        self.tower_workflow: str = config.rnafusion.tower_workflow
         self.account: str = config.rnafusion.slurm.account
         self.email: str = config.rnafusion.slurm.mail_user
         self.compute_env_base: str = config.rnafusion.compute_env
