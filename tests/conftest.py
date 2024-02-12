@@ -277,8 +277,8 @@ def base_config_dict() -> dict:
         "madeline_exe": "path/to/madeline",
         "tower_binary_path": "path/to/tower",
         "delivery_path": "path/to/delivery",
-        "illumina_novaseq_flow_cells_directory": "path/to/flow_cells",
-        "illumina_novaseq_demultiplexed_flow_cells_directory": "path/to/demultiplexed_flow_cells_dir",
+        "illumina_flow_cells_directory": "path/to/flow_cells",
+        "illumina_demultiplexed_runs_directory": "path/to/demultiplexed_flow_cells_dir",
         "nanopore_data_directory": "path/to/nanopore_data_directory",
         "downsample_dir": "path/to/downsample_dir",
         "downsample_script": "downsample.sh",
@@ -371,12 +371,12 @@ def demultiplex_context(
 
 @pytest.fixture(name="demultiplex_configs_for_demux")
 def demultiplex_configs_for_demux(
-    tmp_illumina_novaseq_flow_cells_demux_all_directory,
+    tmp_illumina_flow_cells_demux_all_directory,
     tmp_empty_demultiplexed_runs_directory: Path,
 ) -> dict:
     """Return demultiplex configs."""
     return {
-        "flow_cells_dir": tmp_illumina_novaseq_flow_cells_demux_all_directory.as_posix(),
+        "flow_cells_dir": tmp_illumina_flow_cells_demux_all_directory.as_posix(),
         "demultiplexed_flow_cells_dir": tmp_empty_demultiplexed_runs_directory.as_posix(),
         "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
@@ -384,13 +384,13 @@ def demultiplex_configs_for_demux(
 
 @pytest.fixture(name="demultiplex_configs")
 def demultiplex_configs(
-    tmp_illumina_novaseq_flow_cells_directory,
-    tmp_illumina_novaseq_demultiplexed_flow_cells_directory,
+    tmp_illumina_flow_cells_directory,
+    tmp_illumina_demultiplexed_flow_cells_directory,
 ) -> dict:
     """Return demultiplex configs."""
     return {
-        "flow_cells_dir": tmp_illumina_novaseq_flow_cells_directory.as_posix(),
-        "demultiplexed_flow_cells_dir": tmp_illumina_novaseq_demultiplexed_flow_cells_directory.as_posix(),
+        "flow_cells_dir": tmp_illumina_flow_cells_directory.as_posix(),
+        "demultiplexed_flow_cells_dir": tmp_illumina_demultiplexed_flow_cells_directory.as_posix(),
         "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
 
@@ -1653,8 +1653,8 @@ def context_config(
     raredisease_dir: Path,
     rnafusion_dir: Path,
     taxprofiler_dir: Path,
-    illumina_novaseq_flow_cells_dir,
-    illumina_novaseq_demultiplexed_runs,
+    illumina_flow_cells_directory,
+    illumina_demultiplexed_runs_directory,
     downsample_dir: Path,
     pdc_archiving_directory: PDCArchivingDirectory,
 ) -> dict:
@@ -1662,10 +1662,8 @@ def context_config(
     return {
         "database": cg_uri,
         "delivery_path": str(cg_dir),
-        "illumina_novaseq_flow_cells_directory": str(illumina_novaseq_flow_cells_dir),
-        "illumina_novaseq_demultiplexed_flow_cells_directory": str(
-            illumina_novaseq_demultiplexed_runs
-        ),
+        "illumina_flow_cells_directory": str(illumina_flow_cells_directory),
+        "illumina_demultiplexed_runs_directory": str(illumina_demultiplexed_runs_directory),
         "nanopore_data_directory": "path/to/nanopore_data_directory",
         "downsample_dir": str(downsample_dir),
         "downsample_script": "downsample.sh",
@@ -2849,9 +2847,7 @@ def flow_cell_encryption_api(
         encryption_dir=Path(cg_context.backup.pdc_archiving_directory.current),
         dry_run=True,
         flow_cell=FlowCellDirectoryData(
-            flow_cell_path=Path(
-                cg_context.illumina_novaseq_flow_cells_directory, flow_cell_full_name
-            )
+            flow_cell_path=Path(cg_context.illumina_flow_cells_directory, flow_cell_full_name)
         ),
         pigz_binary_path=cg_context.pigz.binary_path,
         slurm_api=SlurmAPI(),

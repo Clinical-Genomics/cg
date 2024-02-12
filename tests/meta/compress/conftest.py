@@ -141,7 +141,7 @@ def real_crunchy_api(
 
 @pytest.fixture()
 def compress_api(
-    illumina_novaseq_demultiplexed_runs,
+    illumina_demultiplexed_runs_directory,
     real_crunchy_api: CrunchyAPI,
     housekeeper_api: HousekeeperAPI,
     project_dir: Path,

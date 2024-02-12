@@ -60,7 +60,7 @@ def create_sheet(
     """
     LOG.info(f"Creating sample sheet for flow cell {flow_cell_name}")
     hk_api: HousekeeperAPI = context.housekeeper_api
-    flow_cell_path: Path = Path(context.illumina_novaseq_flow_cells_directory, flow_cell_name)
+    flow_cell_path: Path = Path(context.illumina_flow_cells_directory, flow_cell_name)
     if not flow_cell_path.exists():
         LOG.warning(f"Could not find flow cell {flow_cell_path}")
         raise click.Abort
@@ -139,7 +139,7 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
     information.
     """
     hk_api: HousekeeperAPI = context.housekeeper_api
-    flow_cell_runs_dir: Path = Path(context.illumina_novaseq_flow_cells_directory)
+    flow_cell_runs_dir: Path = Path(context.illumina_flow_cells_directory)
     for sub_dir in flow_cell_runs_dir.iterdir():
         if not sub_dir.is_dir():
             continue

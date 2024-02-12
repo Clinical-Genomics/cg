@@ -31,7 +31,7 @@ def store(context: CGConfig):
     compress_api = CompressAPI(
         hk_api=housekeeper_api,
         crunchy_api=crunchy_api,
-        demux_root=context.illumina_novaseq_flow_cells_directory,
+        demux_root=context.illumina_flow_cells_directory,
     )
     context.meta_apis["compress_api"] = compress_api
 

@@ -19,7 +19,7 @@ def test_is_sample_sheet_in_housekeeper_exists(
     """Test that checking the existence of an existing sample sheet in Housekeeper returns True."""
     # GIVEN a DemultiplexAPI and a flow cell with a sample sheet
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
-    demultiplexing_context_for_demux.illumina_novaseq_flow_cells_directory = (
+    demultiplexing_context_for_demux.illumina_flow_cells_directory = (
         tmp_bcl2fastq_flow_cell.path.parent
     )
 
@@ -43,7 +43,7 @@ def test_is_sample_sheet_in_housekeeper_not_in_hk(
     """Test that checking the existence of a non-existing sample sheet in Housekeeper returns False."""
     # GIVEN a DemultiplexAPI and a flow cell with a sample sheet
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
-    demultiplexing_context_for_demux.illumina_novaseq_flow_cells_directory = (
+    demultiplexing_context_for_demux.illumina_flow_cells_directory = (
         tmp_bcl2fastq_flow_cell.path.parent
     )
 

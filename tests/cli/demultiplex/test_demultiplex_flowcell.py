@@ -168,7 +168,7 @@ def test_demultiplex_dragen_flowcell(
 def test_demultiplex_all_novaseq(
     cli_runner: testing.CliRunner,
     demultiplexing_context_for_demux: CGConfig,
-    tmp_illumina_novaseq_flow_cells_demux_all_directory,
+    tmp_illumina_flow_cells_demux_all_directory,
     caplog,
 ):
     """Test the demultiplex-all command on a directory with newly sequenced NovaSeq6000 flow cells."""
@@ -176,10 +176,10 @@ def test_demultiplex_all_novaseq(
 
     # GIVEN a demultiplexing context with an API and correct structure
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
-    assert demux_api.flow_cells_dir == tmp_illumina_novaseq_flow_cells_demux_all_directory
+    assert demux_api.flow_cells_dir == tmp_illumina_flow_cells_demux_all_directory
 
     # GIVEN sequenced flow cells with their sample sheet in Housekeeper
-    for flow_cell_dir in tmp_illumina_novaseq_flow_cells_demux_all_directory.iterdir():
+    for flow_cell_dir in tmp_illumina_flow_cells_demux_all_directory.iterdir():
         flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=flow_cell_dir)
         add_sample_sheet_path_to_housekeeper(
             flow_cell_directory=flow_cell_dir,
