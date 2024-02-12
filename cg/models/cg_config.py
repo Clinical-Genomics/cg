@@ -260,13 +260,14 @@ class DataFlowConfig(BaseModel):
 class CGConfig(BaseModel):
     database: str
     delivery_path: str
-    demultiplexed_flow_cells_dir: str
+    illumina_demultiplexed_runs_directory: str
     downsample_dir: str
     downsample_script: str
     email_base_settings: EmailBaseSettings
     environment: Literal["production", "stage"] = "stage"
-    flow_cells_dir: str
+    illumina_flow_cells_directory: str
     madeline_exe: str
+    nanopore_data_directory: str
     tower_binary_path: str
     max_flowcells: int | None
     data_input: DataInput | None = None
