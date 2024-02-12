@@ -39,9 +39,9 @@ class SampleSheetCreator:
         self.flow_cell_id: str = flow_cell.id
         self.lims_samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
-        self.sample_type: Type[
-            FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq
-        ] = flow_cell.sample_type
+        self.sample_type: Type[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq] = (
+            flow_cell.sample_type
+        )
         self.force: bool = force
         self.index_settings: IndexSettings = self.run_parameters.index_settings
 
