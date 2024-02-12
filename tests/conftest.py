@@ -376,8 +376,8 @@ def demultiplex_configs_for_demux(
 ) -> dict:
     """Return demultiplex configs."""
     return {
-        "flow_cells_dir": tmp_illumina_flow_cells_demux_all_directory.as_posix(),
-        "demultiplexed_flow_cells_dir": tmp_empty_demultiplexed_runs_directory.as_posix(),
+        "illumina_flow_cells_directory": tmp_illumina_flow_cells_demux_all_directory.as_posix(),
+        "illumina_demultiplexed_runs_directory": tmp_empty_demultiplexed_runs_directory.as_posix(),
         "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
 
@@ -389,8 +389,8 @@ def demultiplex_configs(
 ) -> dict:
     """Return demultiplex configs."""
     return {
-        "flow_cells_dir": tmp_illumina_flow_cells_directory.as_posix(),
-        "demultiplexed_flow_cells_dir": tmp_illumina_demultiplexed_flow_cells_directory.as_posix(),
+        "illumina_flow_cells_directory": tmp_illumina_flow_cells_directory.as_posix(),
+        "illumina_demultiplexed_runs_directory": tmp_illumina_demultiplexed_flow_cells_directory.as_posix(),
         "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
 
