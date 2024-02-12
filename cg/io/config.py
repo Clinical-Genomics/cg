@@ -2,13 +2,15 @@
 
 from pathlib import Path
 from typing import Any
+from cg.constants.symbols import EMPTY_STRING
 
 def write_config_nextflow_style(content: dict[str, Any]) -> str:
     """Write content to stream accepted by Nextflow config files with non-quoted booleans and quoted strings."""
-    string = ""
+    string = EMPTY_STRING
+    double_quotes = '"'
     for key, value in content.items():
         if isinstance(value, Path):
             value: str = value.as_posix()
-        quotes = '"' if type(value) is str else ""
+        quotes = double_quotes if type(value) is str else EMPTY_STRING
         string += f"params.{key} = {quotes}{value}{quotes}\n"
     return string

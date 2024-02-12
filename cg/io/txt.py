@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import List, Optional
+from cg.constants.symbols import EMPTY_STRING
 
 def read_txt(file_path: Path, read_to_string: bool = False) -> list[str] | str:
     """Read content in a TXT file."""
@@ -18,7 +19,7 @@ def write_txt(content: list[str], file_path: Path) -> None:
 
 def concat_txt(file_paths: list[Path], target_file: Path, str_content: Optional[List[str]] = None) -> None:
     """Concatenate files and eventual string content."""
-    content: str = ''
+    content: str = EMPTY_STRING
     if str_content:
         for txt in str_content:
             content += txt
