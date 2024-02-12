@@ -780,7 +780,7 @@ class ReadHandler(BaseHandler):
         LOG.info(f"Case {case_internal_id} exists in Status DB")
 
     def get_running_cases_in_workflow(self, workflow: Workflow) -> list[Case]:
-        """Return all running cases in a pipeline."""
+        """Return all running cases in a workflow."""
         return apply_case_filter(
             cases=self._get_query(table=Case),
             filter_functions=[CaseFilter.FILTER_WITH_WORKFLOW, CaseFilter.FILTER_IS_RUNNING],
@@ -1524,7 +1524,7 @@ class ReadHandler(BaseHandler):
     def get_analyses_for_workflow_started_at_before(
         self, workflow: Workflow, started_at_before: datetime
     ) -> list[Analysis]:
-        """Return all analyses for a pipeline started before a certain date."""
+        """Return all analyses for a workflow started before a certain date."""
         filter_functions: list[AnalysisFilter] = [
             AnalysisFilter.FILTER_WITH_WORKFLOW,
             AnalysisFilter.FILTER_STARTED_AT_BEFORE,
@@ -1537,7 +1537,7 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_analyses_started_at_before(self, started_at_before: datetime) -> list[Analysis]:
-        """Return all analyses for a pipeline started before a certain date."""
+        """Return all analyses for a workflow started before a certain date."""
         return apply_analysis_filter(
             filter_functions=[AnalysisFilter.FILTER_STARTED_AT_BEFORE],
             analyses=self._get_query(table=Analysis),

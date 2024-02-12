@@ -11,8 +11,10 @@ from housekeeper.store.models import Version
 from cg.constants import DataDelivery, Workflow
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack
 from cg.constants.sequencing import SequencingMethod
+from cg.constants.subject import PhenotypeStatus
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
@@ -33,68 +35,94 @@ from tests.store_helpers import StoreHelpers
 LOG = logging.getLogger(__name__)
 
 
-@pytest.fixture(name="rna_case_id")
+@pytest.fixture
 def rna_case_id() -> str:
     """Return a rna case id."""
     return "affirmativecat"
 
 
-@pytest.fixture(name="dna_case_id")
+@pytest.fixture
 def dna_case_id(case_id: str) -> str:
     """Return a DNA case id."""
     return case_id
 
 
-@pytest.fixture(name="rna_sample_son_id")
+@pytest.fixture
 def rna_sample_son_id() -> str:
     """Return a son RNA sample id."""
     return "rna_son"
 
 
-@pytest.fixture(name="rna_sample_daughter_id")
+@pytest.fixture
 def rna_sample_daughter_id() -> str:
     """Return a daughter RNA sample id."""
     return "rna_daughter"
 
 
-@pytest.fixture(name="rna_sample_mother_id")
+@pytest.fixture
 def rna_sample_mother_id() -> str:
     """Return a mother RNA sample id."""
     return "rna_mother"
 
 
-@pytest.fixture(name="rna_sample_father_id")
+@pytest.fixture
 def rna_sample_father_id() -> str:
     """Return a father RNA sample id."""
     return "rna_father"
 
 
-@pytest.fixture(name="dna_sample_son_id")
+@pytest.fixture
 def dna_sample_son_id() -> str:
     """Return a son DNA sample id."""
     return "dna_son"
 
 
-@pytest.fixture(name="another_sample_id")
+@pytest.fixture
+def dna_sample_daughter_id() -> str:
+    """Return a daughter DNA sample id."""
+    return "dna_daughter"
+
+
+@pytest.fixture
+def dna_sample_mother_id() -> str:
+    """Return a mother DNA sample id."""
+    return "dna_mother"
+
+
+@pytest.fixture
+def dna_sample_father_id() -> str:
+    """Return a father DNA sample id."""
+    return "dna_father"
+
+
+@pytest.fixture
 def another_sample_id() -> str:
     """Return another sample id."""
     return "another_sample_id"
 
 
-@pytest.fixture(name="another_rna_sample_id")
+@pytest.fixture
 def another_rna_sample_id() -> str:
     """Return another RNA sample id."""
     return "another_rna_sample_id"
 
 
-@pytest.fixture(name="rna_store")
+@pytest.fixture
 def rna_store(
     base_store: Store,
     helpers: StoreHelpers,
     rna_case_id: str,
     dna_case_id: str,
+    rna_sample_son_id: str,
+    rna_sample_daughter_id: str,
+    rna_sample_father_id: str,
+    rna_sample_mother_id: str,
+    dna_sample_son_id: str,
+    dna_sample_daughter_id: str,
+    dna_sample_father_id: str,
+    dna_sample_mother_id: str,
 ) -> Store:
-    """Populate store with a RNA case that is connected to a DNA case via sample.subject_id."""
+    """Populate store with an RNA case that is connected to a DNA case via subject ID."""
 
     store: Store = base_store
 
@@ -109,19 +137,28 @@ def rna_store(
     rna_case.internal_id = rna_case_id
 
     rna_sample_son = helpers.add_sample(
-        store=store, application_type=SequencingMethod.WTS, name="rna_son", subject_id="son"
+        store=store,
+        application_type=SequencingMethod.WTS,
+        name=rna_sample_son_id,
+        subject_id="son",
     )
     rna_sample_daughter = helpers.add_sample(
         store=store,
         application_type=SequencingMethod.WTS,
-        name="rna_daughter",
+        name=rna_sample_daughter_id,
         subject_id="daughter",
     )
     rna_sample_mother = helpers.add_sample(
-        store=store, application_type=SequencingMethod.WTS, name="rna_mother", subject_id="mother"
+        store=store,
+        application_type=SequencingMethod.WTS,
+        name=rna_sample_mother_id,
+        subject_id=Pedigree.MOTHER,
     )
     rna_sample_father = helpers.add_sample(
-        store=store, application_type=SequencingMethod.WTS, name="rna_father", subject_id="father"
+        store=store,
+        application_type=SequencingMethod.WTS,
+        name=rna_sample_father_id,
+        subject_id=Pedigree.FATHER,
     )
     helpers.add_relationship(
         store=store,
@@ -129,7 +166,7 @@ def rna_store(
         case=rna_case,
         mother=rna_sample_mother,
         father=rna_sample_father,
-        status="affected",
+        status=PhenotypeStatus.AFFECTED,
     )
     helpers.add_relationship(
         store=store,
@@ -137,13 +174,13 @@ def rna_store(
         case=rna_case,
         mother=rna_sample_mother,
         father=rna_sample_father,
-        status="unaffected",
+        status=PhenotypeStatus.UNAFFECTED,
     )
     helpers.add_relationship(
-        store=store, sample=rna_sample_mother, case=rna_case, status="unaffected"
+        store=store, sample=rna_sample_mother, case=rna_case, status=PhenotypeStatus.UNAFFECTED
     )
     helpers.add_relationship(
-        store=store, sample=rna_sample_father, case=rna_case, status="affected"
+        store=store, sample=rna_sample_father, case=rna_case, status=PhenotypeStatus.AFFECTED
     )
 
     for link in rna_case.links:
@@ -163,29 +200,29 @@ def rna_store(
         store=store,
         application_tag=SequencingMethod.WGS,
         application_type=SequencingMethod.WGS,
-        name="dna_son",
+        name=dna_sample_son_id,
         subject_id="son",
     )
     dna_sample_daughter = helpers.add_sample(
         store=store,
         application_tag=SequencingMethod.WGS,
         application_type=SequencingMethod.WGS,
-        name="dna_daughter",
+        name=dna_sample_daughter_id,
         subject_id="daughter",
     )
     dna_sample_mother = helpers.add_sample(
         store=store,
         application_tag=SequencingMethod.WGS,
         application_type=SequencingMethod.WGS,
-        name="dna_mother",
-        subject_id="mother",
+        name=dna_sample_mother_id,
+        subject_id=Pedigree.MOTHER,
     )
     dna_sample_father = helpers.add_sample(
         store=store,
         application_tag=SequencingMethod.WGS,
         application_type=SequencingMethod.WGS,
-        name="dna_father",
-        subject_id="father",
+        name=dna_sample_father_id,
+        subject_id=Pedigree.FATHER,
     )
     helpers.add_relationship(
         store=store,
@@ -193,7 +230,7 @@ def rna_store(
         case=dna_case,
         mother=dna_sample_mother,
         father=dna_sample_father,
-        status="affected",
+        status=PhenotypeStatus.AFFECTED,
     )
     helpers.add_relationship(
         store=store,
@@ -201,13 +238,13 @@ def rna_store(
         case=dna_case,
         mother=dna_sample_mother,
         father=dna_sample_father,
-        status="unaffected",
+        status=PhenotypeStatus.UNAFFECTED,
     )
     helpers.add_relationship(
-        store=store, sample=dna_sample_mother, case=dna_case, status="unaffected"
+        store=store, sample=dna_sample_mother, case=dna_case, status=PhenotypeStatus.UNAFFECTED
     )
     helpers.add_relationship(
-        store=store, sample=dna_sample_father, case=dna_case, status="affected"
+        store=store, sample=dna_sample_father, case=dna_case, status=PhenotypeStatus.AFFECTED
     )
 
     for link in dna_case.links:
@@ -323,6 +360,11 @@ def mip_rna_analysis_hk_bundle_data(
     """Return MIP RNA bundle data for Housekeeper."""
 
     files: list[dict] = [
+        {
+            "path": Path(mip_dna_analysis_dir, f"{rna_case_id}.cram").as_posix(),
+            "archive": False,
+            "tags": ["cram", rna_case_id],
+        },
         {
             "path": Path(mip_dna_analysis_dir, f"{rna_case_id}_report.selected.pdf").as_posix(),
             "archive": False,
@@ -445,7 +487,7 @@ def rnafusion_analysis_hk_bundle_data(
     }
 
 
-@pytest.fixture(name="balsamic_analysis_hk_version")
+@pytest.fixture
 def balsamic_analysis_hk_version(
     housekeeper_api: MockHousekeeperAPI, balsamic_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
@@ -453,7 +495,7 @@ def balsamic_analysis_hk_version(
     return helpers.ensure_hk_version(housekeeper_api, balsamic_analysis_hk_bundle_data)
 
 
-@pytest.fixture(name="mip_dna_analysis_hk_version")
+@pytest.fixture
 def mip_dna_analysis_hk_version(
     housekeeper_api: MockHousekeeperAPI, mip_dna_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
@@ -461,7 +503,7 @@ def mip_dna_analysis_hk_version(
     return helpers.ensure_hk_version(housekeeper_api, mip_dna_analysis_hk_bundle_data)
 
 
-@pytest.fixture(name="mip_dna_analysis_hk_api")
+@pytest.fixture
 def mip_dna_analysis_hk_api(
     housekeeper_api: MockHousekeeperAPI, mip_dna_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
@@ -470,7 +512,7 @@ def mip_dna_analysis_hk_api(
     return housekeeper_api
 
 
-@pytest.fixture(name="mip_rna_analysis_hk_api")
+@pytest.fixture
 def mip_rna_analysis_hk_api(
     housekeeper_api: MockHousekeeperAPI, mip_rna_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
@@ -479,7 +521,7 @@ def mip_rna_analysis_hk_api(
     return housekeeper_api
 
 
-@pytest.fixture(name="balsamic_analysis_hk_api")
+@pytest.fixture
 def balsamic_analysis_hk_api(
     housekeeper_api: MockHousekeeperAPI, balsamic_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
@@ -488,7 +530,7 @@ def balsamic_analysis_hk_api(
     return housekeeper_api
 
 
-@pytest.fixture(name="rnafusion_analysis_hk_api")
+@pytest.fixture
 def rnafusion_analysis_hk_api(
     housekeeper_api: MockHousekeeperAPI, rnafusion_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
@@ -497,7 +539,7 @@ def rnafusion_analysis_hk_api(
     return housekeeper_api
 
 
-@pytest.fixture(name="mip_dna_analysis")
+@pytest.fixture
 def mip_dna_analysis(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers: StoreHelpers
 ) -> Analysis:
@@ -524,7 +566,7 @@ def mip_dna_analysis(
     return analysis
 
 
-@pytest.fixture(name="balsamic_analysis_obj")
+@pytest.fixture
 def balsamic_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a Balsamic analysis object."""
     analysis_obj.pipeline = Workflow.BALSAMIC
@@ -536,7 +578,7 @@ def balsamic_analysis_obj(analysis_obj: Analysis) -> Analysis:
     return analysis_obj
 
 
-@pytest.fixture(name="balsamic_umi_analysis_obj")
+@pytest.fixture
 def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a Balsamic UMI analysis object."""
     analysis_obj.pipeline = Workflow.BALSAMIC_UMI
@@ -549,7 +591,7 @@ def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
     return analysis_obj
 
 
-@pytest.fixture(name="rnafusion_analysis_obj")
+@pytest.fixture
 def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a RNAfusion analysis object."""
     analysis_obj.pipeline = Workflow.RNAFUSION
@@ -562,7 +604,7 @@ def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
     return analysis_obj
 
 
-@pytest.fixture(name="mip_config_builder")
+@pytest.fixture
 def mip_config_builder(
     mip_dna_analysis_hk_version: Version,
     mip_dna_analysis: Analysis,
@@ -580,7 +622,7 @@ def mip_config_builder(
     )
 
 
-@pytest.fixture(name="balsamic_config_builder")
+@pytest.fixture
 def balsamic_config_builder(
     balsamic_analysis_hk_version: Version,
     balsamic_analysis_obj: Analysis,
@@ -594,7 +636,7 @@ def balsamic_config_builder(
     )
 
 
-@pytest.fixture(name="mip_load_config")
+@pytest.fixture
 def mip_load_config(
     mip_dna_analysis_dir: Path,
     case_id: str,
@@ -612,19 +654,19 @@ def mip_load_config(
     )
 
 
-@pytest.fixture(name="lims_api")
+@pytest.fixture
 def lims_api(lims_samples: list[dict]) -> MockLimsAPI:
     """Return a LIMS API."""
     return MockLimsAPI(samples=lims_samples)
 
 
-@pytest.fixture(name="mip_analysis_api")
+@pytest.fixture
 def mip_analysis_api(cg_context: CGConfig) -> MockMipAnalysis:
     """Return a MIP analysis API."""
     return MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
 
 
-@pytest.fixture(name="upload_scout_api")
+@pytest.fixture
 def upload_scout_api(
     cg_context: CGConfig,
     scout_api: MockScoutAPI,
@@ -647,7 +689,7 @@ def upload_scout_api(
     )
 
 
-@pytest.fixture(name="upload_mip_analysis_scout_api")
+@pytest.fixture
 def upload_mip_analysis_scout_api(
     cg_context: CGConfig,
     scout_api: MockScoutAPI,
@@ -670,7 +712,7 @@ def upload_mip_analysis_scout_api(
     )
 
 
-@pytest.fixture(name="upload_balsamic_analysis_scout_api")
+@pytest.fixture
 def upload_balsamic_analysis_scout_api(
     cg_context: CGConfig,
     scout_api: MockScoutAPI,
@@ -693,7 +735,7 @@ def upload_balsamic_analysis_scout_api(
     )
 
 
-@pytest.fixture(name="rna_dna_sample_case_map")
+@pytest.fixture
 def rna_dna_sample_case_map(
     rna_sample_son_id: str,
     rna_store: Store,
@@ -711,7 +753,7 @@ def rna_dna_sample_case_map(
     return rna_dna_sample_case_map
 
 
-@pytest.fixture(name="upload_rnafusion_analysis_scout_api")
+@pytest.fixture
 def upload_rnafusion_analysis_scout_api(
     cg_context: CGConfig,
     scout_api: MockScoutAPI,

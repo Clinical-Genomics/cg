@@ -159,7 +159,7 @@ def store_with_analyses_for_cases_not_uploaded_microsalt(
     timestamp_now: datetime,
     timestamp_yesterday: datetime,
 ) -> Store:
-    """Return a store with two analyses for two cases and pipeline."""
+    """Return a store with two analyses for two cases and workflow."""
 
     case_one = analysis_store.get_case_by_internal_id("yellowhog")
     case_two = helpers.add_case(analysis_store, internal_id="test_case_1")

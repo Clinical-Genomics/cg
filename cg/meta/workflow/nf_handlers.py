@@ -114,7 +114,7 @@ class NextflowHandler(NfBaseHandler):
 
     @classmethod
     def get_nextflow_run_parameters(
-        cls, case_id: str, pipeline_path: str, root_dir: str, command_args: dict
+        cls, case_id: str, workflow_path: str, root_dir: str, command_args: dict
     ) -> list[str]:
         """Returns a Nextflow run command given a dictionary with arguments."""
 
@@ -135,7 +135,7 @@ class NextflowHandler(NfBaseHandler):
             ),
             exclude_true=True,
         )
-        return nextflow_options + ["run", pipeline_path] + run_options
+        return nextflow_options + ["run", workflow_path] + run_options
 
     @staticmethod
     def get_head_job_sbatch_path(case_directory: Path) -> Path:

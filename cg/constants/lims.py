@@ -60,6 +60,7 @@ MASTER_STEPS_UDFS = {
         "Hybridize Library TWIST v1": "Bait Set",
         "Hybridize Library TWIST v2": "Bait Set",
         "Target enrichment TWIST v1": "Bait Set",
+        "Library Prep (Dev) v3": "Bait Set",
     },
     "rna_prep_step": {
         "Aliquot Samples for Fragmentation (RNA) v1": "Amount needed (ng)",

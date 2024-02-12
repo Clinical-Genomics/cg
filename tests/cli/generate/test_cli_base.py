@@ -12,7 +12,7 @@ def test_generate_no_options(base_context, cli_runner):
     # WHEN dry running
     result = cli_runner.invoke(generate, obj=base_context)
 
-    # THEN the output should list all the supported pipelines
+    # THEN the output should list all the supported workflows
     assert result.exit_code == EXIT_SUCCESS
     assert "delivery-report" in result.output
     assert "available-delivery-reports" in result.output

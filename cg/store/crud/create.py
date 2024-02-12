@@ -409,10 +409,11 @@ class CreateHandler(BaseHandler):
 
     def add_order(self, order_data: OrderIn):
         customer: Customer = self.get_customer_by_internal_id(order_data.customer)
+        workflow: str = order_data.samples[0].data_analysis
         order = Order(
             customer_id=customer.id,
             ticket_id=order_data.ticket,
-            workflow=order_data.order_type,
+            workflow=workflow,
         )
         session = get_session()
         session.add(order)

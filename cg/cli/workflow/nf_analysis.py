@@ -2,11 +2,11 @@
 
 import click
 
-from cg.models.cg_config import CGConfig
-from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-from cg.constants.constants import MetaApis
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
+from cg.constants.constants import MetaApis
 from cg.exc import CgError
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.models.cg_config import CGConfig
 
 OPTION_WORKDIR = click.option(
     "--work-dir",
@@ -43,7 +43,7 @@ OPTION_CONFIG = click.option(
 OPTION_PARAMS_FILE = click.option(
     "--params-file",
     type=click.Path(),
-    help="Nextflow pipeline-specific parameter file path",
+    help="Nextflow workflow-specific parameter file path",
 )
 
 OPTION_USE_NEXTFLOW = click.option(
@@ -52,7 +52,7 @@ OPTION_USE_NEXTFLOW = click.option(
     is_flag=True,
     default=False,
     show_default=True,
-    help="Execute pipeline using nextflow",
+    help="Execute workflow using nextflow",
 )
 
 OPTION_REVISION = click.option(

@@ -33,7 +33,7 @@ from cg.models.report.metadata import (
     BalsamicTargetedSampleMetadataModel,
     BalsamicWGSSampleMetadataModel,
 )
-from cg.models.report.report import CaseModel
+from cg.models.report.report import CaseModel, ScoutReportFiles
 from cg.models.report.sample import SampleModel
 from cg.store.models import Bed, BedVersion, Case, Sample
 
@@ -91,8 +91,9 @@ class BalsamicReportAPI(ReportAPI):
             gc_dropout=sample_metrics.gc_dropout if sample_metrics else None,
         )
 
+    @staticmethod
     def get_wgs_metadata(
-        self, million_read_pairs: float, sample_metrics: BalsamicWGSQCMetrics
+        million_read_pairs: float, sample_metrics: BalsamicWGSQCMetrics
     ) -> BalsamicWGSSampleMetadataModel:
         """Return report metadata for Balsamic WGS analysis."""
         return BalsamicWGSSampleMetadataModel(
@@ -161,6 +162,17 @@ class BalsamicReportAPI(ReportAPI):
         ):
             return True
         return False
+
+    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
+        """Return files that will be uploaded to Scout."""
+        return ScoutReportFiles(
+            snv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="snv_vcf"
+            ),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="sv_vcf"
+            ),
+        )
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Return a dictionary with the delivery report required fields for Balsamic."""

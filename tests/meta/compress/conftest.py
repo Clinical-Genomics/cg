@@ -139,9 +139,9 @@ def real_crunchy_api(
     yield CrunchyAPI(crunchy_config)
 
 
-@pytest.fixture()
+@pytest.fixture
 def compress_api(
-    demultiplexed_runs: Path,
+    illumina_demultiplexed_runs_directory: Path,
     real_crunchy_api: CrunchyAPI,
     housekeeper_api: HousekeeperAPI,
     project_dir: Path,

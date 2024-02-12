@@ -46,6 +46,7 @@ class FastqSubmitter(Submitter):
                     "name": sample.name,
                     "priority": sample.priority,
                     "sex": sample.sex,
+                    "subject_id": sample.subject_id,
                     "tumour": sample.tumour,
                     "volume": sample.volume,
                 }
@@ -99,6 +100,7 @@ class FastqSubmitter(Submitter):
                     priority=sample["priority"],
                     tumour=sample["tumour"],
                     capture_kit=sample["capture_kit"],
+                    subject_id=sample["subject_id"],
                 )
                 new_sample.customer: Customer = customer
                 application_tag: str = sample["application"]

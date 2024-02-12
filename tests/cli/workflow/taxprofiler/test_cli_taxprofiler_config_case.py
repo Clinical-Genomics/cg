@@ -11,10 +11,7 @@ from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
-from cg.models.taxprofiler.taxprofiler import (
-    TaxprofilerParameters,
-    TaxprofilerSampleSheetEntry,
-)
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 
 
 def test_config_case_default_parameters(
@@ -46,7 +43,7 @@ def test_config_case_default_parameters(
         "Writing parameters file",
     ]
     for expected_log in expected_logs:
-        assert expected_log in expected_logs
+        assert expected_log in caplog.text
 
     # THEN files should be generated
     assert taxprofiler_sample_sheet_path.is_file()

@@ -53,11 +53,11 @@ def test_add_case_required(
     assert case_query.first().panels == [panel_id]
 
 
-def test_add_case_bad_pipeline(
+def test_add_case_bad_workflow(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket_id: str
 ):
     """Test to add a case using only the required arguments"""
-    # GIVEN a database with a customer and an panel
+    # GIVEN a database with a customer and a panel
 
     # WHEN adding a case
     disk_store: Store = base_context.status_db
