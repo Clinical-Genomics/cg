@@ -101,7 +101,7 @@ def run(
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.verify_case_config_file_exists(case_id=case_id)
+        analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.check_analysis_ongoing(case_id)
         analysis_api.run_analysis(
             case_id=case_id,
@@ -209,7 +209,7 @@ def start(
         panel_bed=panel_bed,
         pon_cnn=pon_cnn,
         observations=observations,
-        dry_run=False,
+        dry_run=dry_run,
     )
     context.invoke(
         run,

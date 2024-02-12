@@ -7,7 +7,7 @@ from typing import Any
 from cg import resources
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat, Strandedness
-from cg.constants.nf_analysis import RNAFUSION_METRIC_CONDITIONS
+from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
 from cg.exc import MissingMetrics
 from cg.io.controller import ReadFile
 from cg.io.json import read_json
@@ -37,13 +37,13 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.rnafusion.root
-        self.nfcore_workflow_path: str = config.rnafusion.pipeline_path
+        self.nfcore_workflow_path: str = config.rnafusion.workflow_path
         self.references: str = config.rnafusion.references
         self.profile: str = config.rnafusion.profile
         self.conda_env: str = config.rnafusion.conda_env
         self.conda_binary: str = config.rnafusion.conda_binary
         self.tower_binary_path: str = config.tower_binary_path
-        self.tower_workflow: str = config.rnafusion.tower_pipeline
+        self.tower_workflow: str = config.rnafusion.tower_workflow
         self.account: str = config.rnafusion.slurm.account
         self.email: str = config.rnafusion.slurm.mail_user
         self.compute_env_base: str = config.rnafusion.compute_env
@@ -63,6 +63,10 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             file_format=FileFormat.YAML,
             file_path=resources.RNAFUSION_BUNDLE_FILENAMES_PATH,
         )
+
+    def get_nextflow_config_content(self) -> str:
+        """Return nextflow config content."""
+        return MULTIQC_NEXFLOW_CONFIG
 
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, case_id: str, strandedness: Strandedness
@@ -140,6 +144,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             header=RnafusionSampleSheetEntry.headers(),
         )
         self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
+        self.write_nextflow_config(case_id=case_id)
 
     def parse_multiqc_json_for_case(self, case_id: str) -> dict:
         """Parse a multiqc_data.json file and returns a dictionary with metric name and metric values for a case."""

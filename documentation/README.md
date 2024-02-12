@@ -2,9 +2,10 @@
 
 `cg` stands for _Clinical Genomics_; a clinical sequencing platform under [SciLifeLab][scilife].
 
-This is our main package for interacting with data and samples that flow through our pipeline. We rely on a set of specialized "apps" to deal with a lot of complexity like:
+This is our main package for interacting with data and samples that flow through our workflows.
+We rely on a set of specialized "apps" to deal with a lot of complexity like:
 
-- [Trailblazer][trailblazer]: Python wrapper around [MIP][mip], a rare disease genomics pipeline
+- [Trailblazer][trailblazer]: Python wrapper around [MIP][mip], a rare disease genomics workflow
 - [Housekeeper][housekeeper]: storage, retrieval, and archival of files
 - [Genotype][genotype]: managing genotypes for detecting sample mix-ups
 
@@ -42,11 +43,11 @@ We convert all the info that we get from LIMS/`genologics` to dictionaries befor
 Interface to Trailblazer.
 
 - One responsibility is to define the set of files from MIP to store (in Housekeeper)
-- Also used to interact with the pipeline for starting it
+- Also used to interact with the workflow for starting it
 
 #### gt
 
-Interface to Genotype. For uploading results from the pipeline about genotypes to compare and validate that we are clear of sample mix-ups.
+Interface to Genotype. For uploading results from the workflow about genotypes to compare and validate that we are clear of sample mix-ups.
 
 #### hk
 
@@ -62,7 +63,7 @@ Internal app for opening tickets in SupportSystems. We use this mainly to link a
 
 #### scoutapi
 
-Interface to Scout. For uploading analysis results to Scout. It's also used to access the generation of gene panels files used in the analysis pipeline.
+Interface to Scout. For uploading analysis results to Scout. It's also used to access the generation of gene panels files used in the analysis workflow.
 
 
 ### `cli`
@@ -81,7 +82,7 @@ You can also accomplish simliar tasks through the admin interface of the REST se
 
 #### analysis
 
-The MIP pipeline is accessed through Trailblazer but `cg` provides additional conventions and hooks into the status database that makes managing analyses simpler.
+The MIP workflow is accessed through Trailblazer but `cg` provides additional conventions and hooks into the status database that makes managing analyses simpler.
 
 You can start the analysis of a single family "raredragon" by just running:
 
@@ -89,7 +90,7 @@ You can start the analysis of a single family "raredragon" by just running:
 cg analysis --family raredragon
 ```
 
-This command will create the MIP config in the correct location, link and rename FASTQ files from Housekeeper, and write an aggregated gene panel file. Then it will start the pipeline. All these 4 actions can be issued individually as well:
+This command will create the MIP config in the correct location, link and rename FASTQ files from Housekeeper, and write an aggregated gene panel file. Then it will start the workflow. All these 4 actions can be issued individually as well:
 
 ```bash
 cg analysis [config|link|panel|start] raredragon

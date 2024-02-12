@@ -19,6 +19,10 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
+from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
+from cg.services.slurm_service.slurm_service import SlurmService
+from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
+from cg.services.slurm_upload_service.slurm_upload_service import SlurmUploadService
 from cg.store.database import initialize_database
 from cg.store.store import Store
 
@@ -148,7 +152,7 @@ class MipConfig(BaseModel):
     conda_binary: str | None = None
     conda_env: str
     mip_config: str
-    pipeline: str
+    workflow: str
     root: str
     script: str
 
@@ -158,20 +162,20 @@ class RareDiseaseConfig(CommonAppConfig):
     conda_binary: str | None = None
     conda_env: str
     launch_directory: str
-    pipeline_path: str
+    workflow_path: str
     profile: str
     references: str
     revision: str
     root: str
     slurm: SlurmConfig
-    tower_pipeline: str
+    tower_workflow: str
 
 
 class RnafusionConfig(CommonAppConfig):
     root: str
     references: str
     binary_path: str
-    pipeline_path: str
+    workflow_path: str
     conda_env: str
     compute_env: str
     profile: str
@@ -179,7 +183,7 @@ class RnafusionConfig(CommonAppConfig):
     launch_directory: str
     revision: str
     slurm: SlurmConfig
-    tower_pipeline: str
+    tower_workflow: str
 
 
 class TaxprofilerConfig(CommonAppConfig):
@@ -189,12 +193,12 @@ class TaxprofilerConfig(CommonAppConfig):
     compute_env: str
     databases: str
     hostremoval_reference: str
-    pipeline_path: str
+    workflow_path: str
     profile: str
     revision: str
     root: str
     slurm: SlurmConfig
-    tower_pipeline: str
+    tower_workflow: str
 
 
 class MicrosaltConfig(BaseModel):
@@ -256,13 +260,14 @@ class DataFlowConfig(BaseModel):
 class CGConfig(BaseModel):
     database: str
     delivery_path: str
-    demultiplexed_flow_cells_dir: str
+    illumina_demultiplexed_runs_directory: str
     downsample_dir: str
     downsample_script: str
     email_base_settings: EmailBaseSettings
     environment: Literal["production", "stage"] = "stage"
-    flow_cells_dir: str
+    illumina_flow_cells_directory: str
     madeline_exe: str
+    nanopore_data_directory: str
     tower_binary_path: str
     max_flowcells: int | None
     data_input: DataInput | None = None
@@ -459,11 +464,28 @@ class CGConfig(BaseModel):
         return api
 
     @property
+    def slurm_service(self) -> SlurmService:
+        return SlurmCLIService()
+
+    @property
+    def slurm_upload_service(self) -> SlurmUploadService:
+        slurm_upload_config = SlurmUploadConfig(
+            email=self.data_delivery.mail_user,
+            account=self.data_delivery.account,
+            log_dir=self.data_delivery.base_path,
+        )
+        return SlurmUploadService(
+            slurm_service=self.slurm_service,
+            trailblazer_api=self.trailblazer_api,
+            config=slurm_upload_config,
+        )
+
+    @property
     def scout_api(self) -> ScoutAPI:
         api = self.__dict__.get("scout_api_")
         if api is None:
             LOG.debug("Instantiating scout api")
-            api = ScoutAPI(config=self.dict())
+            api = ScoutAPI(config=self.dict(), slurm_upload_service=self.slurm_upload_service)
             self.scout_api_ = api
         return api
 

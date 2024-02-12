@@ -235,7 +235,7 @@ def tb_api():
     return MockTB()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_analysis_flow_cell(mocker) -> None:
     """Mocks the get_flow_cells_by_case method to return a list containing a flow cell whose status is
     on disk."""
