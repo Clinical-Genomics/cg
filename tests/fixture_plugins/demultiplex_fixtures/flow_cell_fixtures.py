@@ -42,13 +42,13 @@ def hiseq_2500_custom_index_flow_cell(
     return FlowCellDirectoryData(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
 
 
-@pytest.fixture()
+@pytest.fixture
 def novaseq_6000_pre_1_5_kits_flow_cell(flow_cells_dir: Path) -> FlowCellDirectoryData:
     """Return a Novaseq6000 flow cell with index settings pre 1.5 kits."""
     return FlowCellDirectoryData(Path(flow_cells_dir, "190927_A00689_0069_BHLYWYDSXX"))
 
 
-@pytest.fixture()
+@pytest.fixture
 def novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq(flow_cells_dir: Path) -> FlowCellDirectoryData:
     """Return a Novaseq6000 flow cell with index settings pre 1.5 kits set as Bcl2Fastq."""
     return FlowCellDirectoryData(
@@ -56,13 +56,13 @@ def novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq(flow_cells_dir: Path) -> FlowC
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def novaseq_6000_post_1_5_kits_flow_cell(flow_cells_dir: Path) -> FlowCellDirectoryData:
     """Return a Novaseq6000 flow cell with index settings post 1.5 kits."""
     return FlowCellDirectoryData(Path(flow_cells_dir, "230912_A00187_1009_AHK33MDRX3"))
 
 
-@pytest.fixture()
+@pytest.fixture
 def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Return a NovaSeqX flow cell."""
     return FlowCellDirectoryData(novaseq_x_flow_cell_dir)
@@ -71,7 +71,7 @@ def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
 # Demultiplexed runs
 
 
-@pytest.fixture()
+@pytest.fixture
 def novaseqx_flow_cell_with_sample_sheet_no_fastq(
     novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
 ) -> FlowCellDirectoryData:

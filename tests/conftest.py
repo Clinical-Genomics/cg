@@ -2869,7 +2869,7 @@ def create_process_response(
 
 
 # Downsample
-@pytest.fixture()
+@pytest.fixture
 def store_with_case_and_sample_with_reads(
     store: Store,
     helpers: StoreHelpers,
@@ -2895,31 +2895,31 @@ def store_with_case_and_sample_with_reads(
     return store
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_case_internal_id() -> str:
     """Return a case internal id."""
     return "supersonicturtle"
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_sample_internal_id_1() -> str:
     """Return a sample internal id."""
     return "ACC12345675213"
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_sample_internal_id_2() -> str:
     """Return a sample internal id."""
     return "ACC12345684213"
 
 
-@pytest.fixture()
+@pytest.fixture
 def number_of_reads_in_millions() -> int:
     """Return a number of reads in millions."""
     return 50
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     fastq_file: Path,

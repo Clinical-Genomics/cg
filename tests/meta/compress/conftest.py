@@ -139,7 +139,7 @@ def real_crunchy_api(
     yield CrunchyAPI(crunchy_config)
 
 
-@pytest.fixture()
+@pytest.fixture
 def compress_api(
     demultiplexed_runs: Path,
     real_crunchy_api: CrunchyAPI,
