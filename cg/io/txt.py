@@ -17,11 +17,11 @@ def write_txt(content: list[str], file_path: Path) -> None:
         file.writelines(content)
 
 def concat_txt(file_paths: list[Path], target_file: Path, str_content: Optional[List[str]] = None) -> None:
-    """Concatenate files and eventual string content"""
-    content = ''
+    """Concatenate files and eventual string content."""
+    content: str = ''
     if str_content:
         for txt in str_content:
             content += txt
     for file_path in file_paths:
         content += read_txt(file_path)
-    write_txt(content, target_file)
+    write_txt(content=content, file_path=target_file)
