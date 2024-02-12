@@ -30,7 +30,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.root_dir: str = config.raredisease.root
-        self.nfcore_pipeline_path: str = config.raredisease.pipeline_path
+        self.nfcore_workflow_path: str = config.raredisease.pipeline_path
         self.references: str = config.raredisease.references
         self.profile: str = config.raredisease.profile
         self.conda_env: str = config.raredisease.conda_env
@@ -39,7 +39,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.config_params: str = config.raredisease.config_params
         self.config_resources: str = config.raredisease.config_resources
         self.tower_binary_path: str = config.tower_binary_path
-        self.tower_pipeline: str = config.raredisease.tower_pipeline
+        self.tower_workflow: str = config.raredisease.tower_pipeline
         self.account: str = config.raredisease.slurm.account
         self.compute_env: str = config.raredisease.compute_env
         self.revision: str = config.raredisease.revision
@@ -90,7 +90,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self,
         case_id: str,
     ) -> list[list[Any]]:
-        """Write sample sheet for Raredisease analysis in case folder."""
+        """Return sample sheet for Raredisease analysis in case folder."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_sheet_content = []
         LOG.info("Getting sample sheet information")
