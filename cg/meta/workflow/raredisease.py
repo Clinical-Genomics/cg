@@ -44,7 +44,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.compute_env: str = config.raredisease.compute_env
         self.revision: str = config.raredisease.revision
 
-    def config_case(
+    def write_config_case(
         self,
         case_id: str,
         dry_run: bool,
