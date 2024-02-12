@@ -167,7 +167,7 @@ def test_filter_analyses_without_delivery_report(base_store: Store, helpers: Sto
 
 
 def test_filter_report_analyses_by_workflow(base_store: Store, helpers: StoreHelpers, case: Case):
-    """Test filtering delivery report related analysis by pipeline."""
+    """Test filtering delivery report related analysis by workflow."""
 
     # GIVEN a set of mock analysis
     balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, workflow=Workflow.BALSAMIC)

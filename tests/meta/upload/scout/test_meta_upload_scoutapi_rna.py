@@ -493,7 +493,7 @@ def test_get_application_prep_category(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test that RNA samples are removed when filtering sample list by pipeline"""
+    """Test that RNA samples are removed when filtering sample list by workflow."""
 
     # GIVEN an RNA sample that is connected by subject ID to one RNA and one DNA sample in other cases
 
@@ -604,7 +604,7 @@ def test_add_dna_cases_to_dna_sample(
     assert dna_case.internal_id in rna_dna_collection.dna_case_ids
 
 
-def test_map_dna_cases_to_dna_sample_incorrect_pipeline(
+def test_map_dna_cases_to_dna_sample_incorrect_workflow(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
     dna_sample_son_id: str,

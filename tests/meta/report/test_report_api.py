@@ -384,13 +384,13 @@ def test_get_case_analysis_data(
     assert case_analysis_data.scout_files
 
 
-def test_get_case_analysis_data_pipeline_match_error(
+def test_get_case_analysis_data_workflow_match_error(
     report_api_mip_dna: MipDNAReportAPI,
     mip_analysis_api: MipDNAAnalysisAPI,
     case_mip_dna: Case,
     caplog: LogCaptureFixture,
 ):
-    """Test validation error if a customer requested pipeline does not match the data analysis."""
+    """Test validation error if a customer requested workflow does not match the data analysis."""
 
     # GIVEN a pre-built case and a MIP-DNA analysis that has been started as Balsamic
     mip_analysis: Analysis = case_mip_dna.analyses[0]
@@ -412,7 +412,7 @@ def test_get_case_analysis_data_pipeline_match_error(
     )
 
 
-def test_get_case_analysis_data_pipeline_not_supported(
+def test_get_case_analysis_data_workflow_not_supported(
     report_api_mip_dna: MipDNAReportAPI,
     mip_analysis_api: MipDNAAnalysisAPI,
     case_mip_dna: Case,
