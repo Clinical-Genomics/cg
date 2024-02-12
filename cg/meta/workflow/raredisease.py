@@ -111,7 +111,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             outdir=self.get_case_path(case_id=case_id),
         )
 
-    def write_params_file(self, case_id: str, pipeline_parameters: dict) -> None:
+    def write_params_file(self, case_id: str, workflow_parameters: dict) -> None:
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")
         concat_configs(
