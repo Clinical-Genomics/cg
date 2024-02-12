@@ -1653,8 +1653,8 @@ def context_config(
     raredisease_dir: Path,
     rnafusion_dir: Path,
     taxprofiler_dir: Path,
-    illumina_flow_cells_directory,
-    illumina_demultiplexed_runs_directory,
+    illumina_flow_cells_directory: Path,
+    illumina_demultiplexed_runs_directory: Path,
     downsample_dir: Path,
     pdc_archiving_directory: PDCArchivingDirectory,
 ) -> dict:

@@ -482,7 +482,7 @@ def tmp_empty_demultiplexed_runs_directory(
 
 @pytest.fixture
 def novaseqx_demultiplexed_flow_cell(
-    illumina_demultiplexed_runs_directory, novaseq_x_flow_cell_full_name: str
+    illumina_demultiplexed_runs_directory: Path, novaseq_x_flow_cell_full_name: str
 ):
     """Return the path to a demultiplexed NovaSeqX flow cell."""
     return Path(illumina_demultiplexed_runs_directory, novaseq_x_flow_cell_full_name)

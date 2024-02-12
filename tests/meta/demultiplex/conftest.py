@@ -23,7 +23,7 @@ FlowCellInfo = namedtuple("FlowCellInfo", "directory name sample_internal_ids")
 
 @pytest.fixture(name="tmp_demulitplexing_dir")
 def tmp_illumina_novaseq_demulitplexing_dir(
-    illumina_demultiplexed_runs_directory, bcl2fastq_flow_cell_full_name: str
+    illumina_demultiplexed_runs_directory: Path, bcl2fastq_flow_cell_full_name: str
 ) -> Path:
     """Return a tmp directory in demultiplexed-runs."""
     tmp_demulitplexing_dir: Path = Path(

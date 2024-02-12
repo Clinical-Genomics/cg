@@ -70,7 +70,7 @@ def test_post_processing_of_flow_cell(
     scenario: DemultiplexingScenario,
     demultiplex_context: CGConfig,
     request,
-    tmp_illumina_demultiplexed_flow_cells_directory,
+    tmp_illumina_demultiplexed_flow_cells_directory: Path,
 ):
     """Test adding a demultiplexed flow cell to the databases with. Runs on each type of
     demultiplexing software and setting used."""
