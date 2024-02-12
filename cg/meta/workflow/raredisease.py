@@ -103,7 +103,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             )
         return sample_sheet_content
 
-    def get_pipeline_parameters(self, case_id: str) -> PipelineParameters:
+    def get_workflow_parameters(self, case_id: str) -> WorkflowParameters:
         """Return parameters."""
         LOG.info("Getting parameters information")
         return PipelineParameters(
