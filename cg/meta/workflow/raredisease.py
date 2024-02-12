@@ -4,7 +4,8 @@ import logging
 from typing import Any
 from pathlib import Path
 
-from cg.io.config import concat_configs, write_config_nextflow_style
+from cg.io.txt import concat_txt
+from cg.io.config import write_config_nextflow_style
 from cg.constants import GenePanelMasterList, Workflow
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.meta.workflow.analysis import add_gene_panel_combo
@@ -12,7 +13,7 @@ from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
 from cg.models.raredisease.raredisease import RarediseaseSampleSheetEntry
-from cg.models.nf_analysis import PipelineParameters
+from cg.models.nf_analysis import WorkflowParameters
 from cg.store.models import Case, Sample, CaseSample
 
 
@@ -114,11 +115,13 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def write_params_file(self, case_id: str, pipeline_parameters: dict) -> None:
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")
-        concat_configs(
-            [self.config_platform, self.config_params, self.config_resources],
-            self.get_config_file_path(case_id=case_id),
-            write_config_nextflow_style(pipeline_parameters)
-            + self.set_cluster_options(case_id=case_id),
+        config_files_list = [self.config_platform, self.config_params, self.config_resources]
+        extra_parameters_str = [write_config_nextflow_style(pipeline_parameters),
+                                self.set_cluster_options(case_id=case_id)]
+        concat_txt(
+            file_paths = config_files_list,
+            target_file=self.get_config_file_path(case_id=case_id),
+            str_content=extra_parameters_str
         )
 
     @staticmethod

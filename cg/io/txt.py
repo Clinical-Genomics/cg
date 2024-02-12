@@ -1,7 +1,7 @@
 """Module to read or write txt files."""
 
 from pathlib import Path
-
+from typing import List, Optional
 
 def read_txt(file_path: Path, read_to_string: bool = False) -> list[str] | str:
     """Read content in a TXT file."""
@@ -16,9 +16,12 @@ def write_txt(content: list[str], file_path: Path) -> None:
     with open(file_path, "w") as file:
         file.writelines(content)
 
-def concat_txt(file_paths: list[Path], target_file: Path, str_content: str = "") -> None:
+def concat_txt(file_paths: list[Path], target_file: Path, str_content: Optional[List[str]] = None) -> None:
     """Concatenate files and eventual string content"""
-    content = str_content
+    content = ''
+    if str_content:
+        for txt in str_content:
+            content += txt
     for file_path in file_paths:
-        content = content + read_txt(file_path)
+        content += read_txt(file_path)
     write_txt(content, target_file)
