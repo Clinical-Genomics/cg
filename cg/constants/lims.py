@@ -15,7 +15,7 @@ PROP2UDF = {
     "concentration_ng_ul": "Concentration (ng/ul)",
     "concentration_sample": "Sample Conc.",
     "customer": "customer",
-    "workflow": "Data Analysis",
+    "data_analysis": "Data Analysis",
     "data_delivery": "Data Delivery",
     "elution_buffer": "Sample Buffer",
     "extraction_method": "Extraction method",
