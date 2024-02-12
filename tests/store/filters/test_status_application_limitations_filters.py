@@ -38,11 +38,11 @@ def test_filter_application_limitations_by_workflow(
     store_with_application_limitations: Store,
     workflow=Workflow.BALSAMIC,
 ) -> None:
-    """Test to get application limitations by pipeline."""
+    """Test to get application limitations by workflow."""
 
     # GIVEN a store with application limitations
 
-    # WHEN getting an application limitations by pipeline
+    # WHEN getting an application limitations by workflow
     application_limitations: Query = filter_application_limitations_by_workflow(
         application_limitations=store_with_application_limitations._get_join_application_limitations_query(),
         workflow=workflow,

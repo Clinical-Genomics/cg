@@ -82,7 +82,7 @@ def test_workflow_included(
 
 
 def test_workflow_excluded(analysis_store: Store, helpers, timestamp_now: datetime):
-    """Tests that analyses are excluded depending on pipeline."""
+    """Tests that analyses are excluded depending on workflow."""
 
     # GIVEN an analysis that is uploaded
 

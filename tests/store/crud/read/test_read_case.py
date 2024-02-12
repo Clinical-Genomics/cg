@@ -75,7 +75,7 @@ def test_get_cases_by_customer_workflow_and_case_search_pattern(
 
 
 def test_get_running_cases_in_workflow(store_with_cases_and_customers: Store):
-    """Test that only cases with the specified pipeline, and have action "running" are returned."""
+    """Test that only cases with the specified workflow, and have action "running" are returned."""
     # GIVEN a store with some cases
 
     # WHEN getting cases with a workflow and are running

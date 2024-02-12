@@ -126,7 +126,7 @@ def test_set_case_bad_data_analysis(
     # GIVEN a database with a case
 
     # WHEN setting a data_analysis on a case
-    data_analysis: str = "dummy_pipeline"
+    data_analysis: str = "dummy_workflow"
     case_id: str = helpers.add_case(store=base_store).internal_id
     result = cli_runner.invoke(
         set_case, [case_id, "--data-analysis", data_analysis], obj=base_context

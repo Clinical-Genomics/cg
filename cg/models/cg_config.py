@@ -152,7 +152,7 @@ class MipConfig(BaseModel):
     conda_binary: str | None = None
     conda_env: str
     mip_config: str
-    pipeline: str
+    workflow: str
     root: str
     script: str
 
@@ -162,20 +162,20 @@ class RareDiseaseConfig(CommonAppConfig):
     conda_binary: str | None = None
     conda_env: str
     launch_directory: str
-    pipeline_path: str
+    workflow_path: str
     profile: str
     references: str
     revision: str
     root: str
     slurm: SlurmConfig
-    tower_pipeline: str
+    tower_workflow: str
 
 
 class RnafusionConfig(CommonAppConfig):
     root: str
     references: str
     binary_path: str
-    pipeline_path: str
+    workflow_path: str
     conda_env: str
     compute_env: str
     profile: str
@@ -183,7 +183,7 @@ class RnafusionConfig(CommonAppConfig):
     launch_directory: str
     revision: str
     slurm: SlurmConfig
-    tower_pipeline: str
+    tower_workflow: str
 
 
 class TaxprofilerConfig(CommonAppConfig):
@@ -193,12 +193,12 @@ class TaxprofilerConfig(CommonAppConfig):
     compute_env: str
     databases: str
     hostremoval_reference: str
-    pipeline_path: str
+    workflow_path: str
     profile: str
     revision: str
     root: str
     slurm: SlurmConfig
-    tower_pipeline: str
+    tower_workflow: str
 
 
 class MicrosaltConfig(BaseModel):
