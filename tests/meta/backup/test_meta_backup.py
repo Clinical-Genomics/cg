@@ -18,6 +18,7 @@ from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.models.cg_config import PDCArchivingDirectory
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from tests.mocks.hk_mock import MockFile
 
 
@@ -663,3 +664,32 @@ def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
 
     # THEN the decryption failure should be logged
     assert "Decryption failed" in caplog.text
+
+
+@pytest.mark.parametrize(
+    "copy_complete_exists",
+    [True, False],
+    ids=["copy_complete_exists", "copy_complete_does_not_exist"],
+)
+def test_create_copy_complete(
+    copy_complete_exists: bool, backup_api: BackupAPI, novaseq_x_flow_cell: FlowCellDirectoryData
+):
+    # GIVEN a flow cell that has been decrypted in flow_cell directory
+    flow_cell_dir: Path = novaseq_x_flow_cell.path
+    flow_cells: Path = flow_cell_dir.parent
+
+    # GIVEN the copy complete to be created
+    copy_complete_txt: str = "CopyComplete.txt"
+
+    # GIVEN or not a copy complete file exists
+    if copy_complete_exists:
+        novaseq_x_flow_cell.path.joinpath(copy_complete_txt).touch()
+    else:
+        novaseq_x_flow_cell.path.joinpath(copy_complete_txt).unlink(missing_ok=True)
+
+    # WHEN creating a copy complete file
+
+    backup_api.create_copy_complete(decrypted_flow_cell=flow_cell_dir, run_dir=flow_cells)
+
+    # THEN the copy complete file should exist
+    assert novaseq_x_flow_cell.path.joinpath(copy_complete_txt).exists() is True
