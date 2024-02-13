@@ -130,6 +130,7 @@ class SampleSheetBCLConvertSections:
         HEADER: str = "[Header]"
         RUN_NAME: str = "RunName"
         INSTRUMENT_PLATFORM_TITLE: str = "InstrumentPlatform"
+        INDEX_SETTINGS: str = "IndexSettings"
 
         @classmethod
         def file_format(cls) -> list[str]:
@@ -252,6 +253,7 @@ class IndexSettings(BaseModel):
 
     """
 
+    name: str
     should_i5_be_reverse_complemented: bool
     are_i5_override_cycles_reverse_complemented: bool
 
@@ -260,12 +262,17 @@ class IndexSettings(BaseModel):
 # and rigorously tested.
 
 NOVASEQ_X_INDEX_SETTINGS = IndexSettings(
-    should_i5_be_reverse_complemented=False, are_i5_override_cycles_reverse_complemented=True
+    name="NovaSeqX",
+    should_i5_be_reverse_complemented=False,
+    are_i5_override_cycles_reverse_complemented=True,
 )
 NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS = IndexSettings(
-    should_i5_be_reverse_complemented=True, are_i5_override_cycles_reverse_complemented=False
+    name="NovaSeq6000Post1.5Kits",
+    should_i5_be_reverse_complemented=True,
+    are_i5_override_cycles_reverse_complemented=False,
 )
 NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS = IndexSettings(
+    name="NoReverseComplements",
     should_i5_be_reverse_complemented=False,
     are_i5_override_cycles_reverse_complemented=False,
 )

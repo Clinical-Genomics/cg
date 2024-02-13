@@ -3,6 +3,7 @@ FileFormatVersion,2
 RunName,22F52TLT3
 InstrumentPlatform,NovaSeqXSeries
 IndexOrientation,Forward
+IndexSettings,NovaSeqX
 [Reads]
 Read1Cycles,151
 Read2Cycles,151
