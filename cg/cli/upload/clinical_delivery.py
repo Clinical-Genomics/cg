@@ -13,6 +13,7 @@ from cg.constants.constants import DRY_RUN
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.tb import AnalysisTypes
 from cg.meta.deliver import DeliverAPI
+from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.meta.rsync import RsyncAPI
 from cg.store.models import Case
 from cg.store.store import Store
@@ -44,6 +45,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
         return
 
     LOG.debug(f"Delivery types are: {delivery_types}")
+    deliver_ticket_api = DeliverTicketAPI(context.obj)
     for delivery_type in delivery_types:
         DeliverAPI(
             store=context.obj.status_db,
@@ -52,6 +54,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
             sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
             delivery_type=delivery_type,
             project_base_path=Path(context.obj.delivery_path),
+            deliver_ticket_api=deliver_ticket_api,
         ).deliver_files(case_obj=case)
 
     rsync_api: RsyncAPI = RsyncAPI(context.obj)

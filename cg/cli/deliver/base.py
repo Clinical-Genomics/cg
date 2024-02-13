@@ -83,6 +83,7 @@ def deliver_analysis(
         return
 
     status_db: Store = context.status_db
+    deliver_ticket_api = DeliverTicketAPI(context)
     for delivery in delivery_type:
         deliver_api = DeliverAPI(
             store=status_db,
@@ -93,6 +94,7 @@ def deliver_analysis(
             delivery_type=delivery,
             force_all=force_all,
             ignore_missing_bundles=ignore_missing_bundles,
+            deliver_ticket_api=deliver_ticket_api,
         )
         deliver_api.set_dry_run(dry_run)
         cases: list[Case] = []
