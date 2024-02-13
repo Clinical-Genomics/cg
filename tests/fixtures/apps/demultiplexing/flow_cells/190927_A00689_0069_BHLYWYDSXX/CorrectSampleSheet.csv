@@ -3,6 +3,7 @@ FileFormatVersion,2
 RunName,HLYWYDSXX
 InstrumentPlatform,NovaSeq6000
 IndexOrientation,Forward
+IndexSettings,NoReverseComplements
 [Reads]
 Read1Cycles,151
 Read2Cycles,151
