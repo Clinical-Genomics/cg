@@ -272,3 +272,9 @@ NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS = IndexSettings(
     should_i5_be_reverse_complemented=False,
     are_i5_override_cycles_reverse_complemented=False,
 )
+
+NAME_TO_INDEX_SETTINGS: dict[str, IndexSettings] = {
+    "NovaSeqX": NOVASEQ_X_INDEX_SETTINGS,
+    "NovaSeq6000Post1.5Kits": NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS,
+    "NoReverseComplements": NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS,
+}

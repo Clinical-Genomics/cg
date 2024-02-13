@@ -1,3 +1,5 @@
+"""Module with validator classes for the sample sheet."""
+
 import logging
 import re
 from pathlib import Path
@@ -16,26 +18,22 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
 )
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import (
-    NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS,
-    NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS,
-    NOVASEQ_X_INDEX_SETTINGS,
-    IndexSettings,
+    NAME_TO_INDEX_SETTINGS,
     SampleSheetBcl2FastqSections,
     SampleSheetBCLConvertSections,
 )
-from cg.exc import SampleSheetError
+from cg.exc import OverrideCyclesError, SampleSheetError
 from cg.io.controller import ReadFile
 
 LOG = logging.getLogger(__name__)
 
-NAME_TO_INDEX_SETTINGS: dict[str, IndexSettings] = {
-    "NovaSeqX": NOVASEQ_X_INDEX_SETTINGS,
-    "NovaSeq6000Post1.5Kits": NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS,
-    "NoReverseComplements": NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS,
-}
+FORWARD_INDEX_CYCLE_PATTERN: str = r"I(\d+)N(\d+)"
+REVERSE_INDEX_CYCLE_PATTERN: str = r"N(\d+)I(\d+)"
 
 
 class SampleSheetValidator:
+    """Class for validating the content of a sample sheet."""
+
     def __init__(self, sample_sheet_path: Path):
         if sample_sheet_path.exists():
             self.path: Path = sample_sheet_path
@@ -44,39 +42,14 @@ class SampleSheetValidator:
         self.content: list[list[str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.CSV, file_path=sample_sheet_path
         )
-        self.sample_type: Type[FlowCellSample] = self.get_sample_type()
+        self.sample_type: Type[FlowCellSample] = self._get_sample_type()
         self.read1_cycles: int | None = None
         self.read2_cycles: int | None = None
         self.index1_cycles: int | None = None
         self.index2_cycles: int | None = None
+        self.is_index2_reverse_complement: bool | None = None
 
-    def _get_index_settings(self) -> str:
-        """Return the index settings from the sample sheet."""
-        for row in self.content:
-            if SampleSheetBCLConvertSections.Header.INDEX_SETTINGS in row:
-                return row[1]
-        raise SampleSheetError("No index settings found in sample sheet")
-
-    @property
-    def index_settings(self) -> IndexSettings:
-        """Return the index settings from the sample sheet."""
-        settings_name: str = self._get_index_settings()
-        return NAME_TO_INDEX_SETTINGS[settings_name]
-
-    def _get_cycle(self, cycle_name: str) -> int:
-        """Return the cycle from the sample sheet."""
-        for row in self.content:
-            if cycle_name in row:
-                return int(row[1])
-
-    def set_cycles(self):
-        """Set values to the cycle attributes."""
-        self.read1_cycles = self._get_cycle(SampleSheetBCLConvertSections.Reads.READ_CYCLES_1)
-        self.read2_cycles = self._get_cycle(SampleSheetBCLConvertSections.Reads.READ_CYCLES_2)
-        self.index1_cycles = self._get_cycle(SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_1)
-        self.index2_cycles = self._get_cycle(SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2)
-
-    def get_sample_type(self) -> Type[FlowCellSample]:
+    def _get_sample_type(self) -> Type[FlowCellSample]:
         """Return the sample type identified from the sample sheet content."""
         for row in self.content:
             if not row:
@@ -87,18 +60,9 @@ class SampleSheetValidator:
             if SampleSheetBcl2FastqSections.Data.HEADER in row[0]:
                 LOG.info("Sample sheet was generated for BCL2FASTQ")
                 return FlowCellSampleBcl2Fastq
-        raise SampleSheetError("Could not determine sample sheet type")
-
-    def _core_validate(self) -> None:
-        """
-        Determine if the samples have the correct form.
-            Raises:
-            ValidationError if the samples do not have the correct attributes based on their model.
-            SampleSheetError if the samples are not unique per lane.
-        """
-        raw_samples: list[dict[str, str]] = get_raw_samples(self.content)
-        validated_samples = TypeAdapter(list[self.sample_type]).validate_python(raw_samples)
-        validate_samples_unique_per_lane(validated_samples)
+        message: str = "Could not determine sample sheet type"
+        LOG.error(message)
+        raise SampleSheetError(message)
 
     def validate_all_sections_present(self) -> None:
         """
@@ -114,65 +78,229 @@ class SampleSheetValidator:
         has_settings: bool = [SampleSheetBCLConvertSections.Settings.HEADER] in self.content
         has_data: bool = [SampleSheetBCLConvertSections.Data.HEADER] in self.content
         if not all([has_header, has_cycles, has_settings, has_data]):
-            raise SampleSheetError("Sample sheet does not have all the necessary sections")
-
-    def _validate_reads_cycles(self, cycles: list[str], sample_id: str) -> None:
-        """Determine if the reads cycles are valid."""
-        if cycles[0] != f"Y{self.read1_cycles}" or cycles[-1] != f"Y{self.read2_cycles}":
-            message: str = f"Override cycles don't match with read cycles for sample {sample_id}"
+            message: str = "Sample sheet does not have all the necessary sections"
             LOG.error(message)
             raise SampleSheetError(message)
 
-    def _validate_index1_cycles(self, index1_cycle: str, sample_id: str) -> None:
-        """Determine if the index 1 cycles are valid."""
-        if index1_cycle == f"I{self.index1_cycles}":
-            return
-        pattern = r"I(\d+)N(\d+)"
-        match = re.match(pattern, index1_cycle)
-        if match:
-            a, b = map(int, match.groups())
-            if a + b == self.index1_cycles:
-                return
-        message: str = f"Incorrect index1 cycle {index1_cycle} for sample {sample_id}"
+    def _get_index_settings_name(self) -> str:
+        """Return the index settings from the sample sheet's header."""
+        for row in self.content:
+            if SampleSheetBCLConvertSections.Header.INDEX_SETTINGS in row:
+                return row[1]
+        message: str = "No index settings found in sample sheet"
         LOG.error(message)
         raise SampleSheetError(message)
 
-    def _validate_single_override_cycles(self, sample: dict[str, str]) -> None:
-        """Determine if a single override cycle is valid."""
-        cycles: list[str] = sample["OverrideCycles"].split(";")
-        sample_id: str = sample["Sample_ID"]
-        self._validate_reads_cycles(cycles=cycles, sample_id=sample_id)
-        self._validate_index1_cycles(index1_cycle=cycles[1], sample_id=sample_id)
+    def set_is_index2_reverse_complement(self) -> None:
+        """Return whether the index2 override cycles value is reverse-complemented."""
+        settings_name: str = self._get_index_settings_name()
+        self.is_index2_reverse_complement = NAME_TO_INDEX_SETTINGS[
+            settings_name
+        ].are_i5_override_cycles_reverse_complemented
+
+    def _get_cycle(self, cycle_name: str, nullable: bool = False) -> int | None:
+        """Return the cycle from the sample sheet."""
+        for row in self.content:
+            if cycle_name in row:
+                return int(row[1])
+        if not nullable:
+            message: str = f"No {cycle_name} found in sample sheet"
+            LOG.error(message)
+            raise SampleSheetError(message)
+
+    def set_cycles(self):
+        """Set values to the run cycle attributes."""
+        self.read1_cycles = self._get_cycle(SampleSheetBCLConvertSections.Reads.READ_CYCLES_1)
+        self.read2_cycles = self._get_cycle(SampleSheetBCLConvertSections.Reads.READ_CYCLES_2)
+        self.index1_cycles = self._get_cycle(SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_1)
+        self.index2_cycles = self._get_cycle(
+            cycle_name=SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2, nullable=True
+        )
+
+    def validate_samples(self) -> None:
+        """
+        Determine if the samples have the correct attributes and are not unique per lane.
+            Raises:
+            ValidationError if the samples do not have the correct attributes based on their model.
+            SampleSheetError if the samples are not unique per lane.
+        """
+        raw_samples: list[dict[str, str]] = get_raw_samples(self.content)
+        validated_samples = TypeAdapter(list[self.sample_type]).validate_python(raw_samples)
+        validate_samples_unique_per_lane(validated_samples)
 
     def validate_override_cycles(self) -> None:
         """Determine if the samples' override cycles are valid.
         Raises:
-            SampleSheetError if the samples' override cycles are not valid.
+            SampleSheetError if any of the samples' override cycles are not valid.
         """
         samples: list[dict[str, str]] = get_raw_samples(self.content)
+        validator = OverrideCyclesValidator(
+            run_read1_cycles=self.read1_cycles,
+            run_read2_cycles=self.read2_cycles,
+            run_index1_cycles=self.index1_cycles,
+            run_index2_cycles=self.index2_cycles,
+            is_reverse_complement=self.is_index2_reverse_complement,
+        )
         for sample in samples:
-            override_cycles: list[str] = sample["OverrideCycles"].split(";")
-            if len(override_cycles) != 4:
-                raise SampleSheetError("OverrideCycles must have 4 values")
-            for cycle in override_cycles:
-                if not cycle.isdigit():
-                    raise SampleSheetError("OverrideCycles must have integer values")
+            try:
+                validator.validate_sample(sample)
+            except OverrideCyclesError as error:
+                raise SampleSheetError from error
 
-    def _validate_bcl_convert(self):
-        """Determine if the BCLConvert sample sheet is valid.
-        Raises:
-            ValidationError if the sample sheet has not the correct structure.
+    def validate_bcl_convert(self):
+        """Determine if the BCLConvert sample sheet is valid, which means:
+        - All sections are present
+        - The index settings are specified in the sample sheet header
+        - The read and index cycles are specified in the sample sheet's reads section
+        - The samples have the correct attributes
+        - The override cycles are valid
         """
-        self._core_validate()
         self.validate_all_sections_present()
+        self.set_is_index2_reverse_complement()
+        self.set_cycles()
+        self.validate_samples()
+        self.validate_override_cycles()
 
     def validate(self):
-        """
-        Determine if the sample sheet is valid.
-        Raises:
-            ValidationError if the sample sheet has not the correct structure
-        """
+        """Call the proper validation depending of the sample sheet type."""
         if self.sample_type is FlowCellSampleBCLConvert:
-            self._validate_bcl_convert()
+            self.validate_bcl_convert()
         else:
-            self._core_validate()
+            self.validate_samples()
+
+
+class OverrideCyclesValidator:
+    """Class for validating the override cycles value of a sample in a sample sheet."""
+
+    def __init__(
+        self,
+        run_read1_cycles: int,
+        run_read2_cycles: int,
+        run_index1_cycles: int,
+        run_index2_cycles: int,
+        is_reverse_complement: bool,
+    ):
+        self.sample: dict[str, str] | None = None
+        self.sample_cycles: list[str] | None = None
+        self.sample_id: str | None = None
+        self.run_read1_cycles: int = run_read1_cycles
+        self.run_read2_cycles: int = run_read2_cycles
+        self.run_index1_cycles: int = run_index1_cycles
+        self.run_index2_cycles: int = run_index2_cycles
+        self.is_reverse_complement: bool = is_reverse_complement
+
+    @staticmethod
+    def is_index_cycle_value_following_pattern(
+        pattern: str, index_cycle: str, run_cycles: int, index_sequence: str
+    ) -> bool:
+        """
+        Returns whether an index cycle string is following a valid cycle regex pattern and has
+        consistent values. Valid patterns are 'I(\d+)N(\d+)' and 'N(\d+)I(\d+)'. Having consistent
+        values means that the sum of the number of index characters (I) and the number of ignored
+        characters (N) specified in the index cycle string is equal to the number of run cycles
+        and the length of the index sequence is equal to the number of index characters (I).
+        """
+        match = re.match(pattern, index_cycle)
+        if match:
+            if pattern == FORWARD_INDEX_CYCLE_PATTERN:
+                index_chars, ignored_chars = map(int, match.groups())
+            elif pattern == REVERSE_INDEX_CYCLE_PATTERN:
+                ignored_chars, index_chars = map(int, match.groups())
+            else:
+                LOG.warning(f"Pattern {pattern} is not a valid index cycle pattern")
+                return False
+            if index_chars + ignored_chars == run_cycles and len(index_sequence) == index_chars:
+                return True
+        return False
+
+    def _validate_reads_cycles(self) -> None:
+        """
+        Determine if the sample read cycles are valid, i.e. if the sample read cycle values are
+        equal to the respective run read cycles.
+        Raises:
+            OverrideCyclesError if the reads cycles are not valid.
+        """
+        read1_cycle: str = self.sample_cycles[0]
+        read2_cycle: str = self.sample_cycles[-1]
+        if (
+            read1_cycle == f"Y{self.run_read1_cycles}"
+            and read2_cycle == f"Y{self.run_read2_cycles}"
+        ):
+            return
+        message: str = f"Incorrect read cycles {self.sample_cycles} for sample {self.sample_id}"
+        LOG.error(message)
+        raise OverrideCyclesError(message)
+
+    def _validate_index1_cycles(self) -> None:
+        """
+        Determine if the sample index 1 cycle is valid, i.e., if the number of index characters in
+        the override cycles coincides with the length of the index sequence and if the number of
+        ignored characters in the override cycles matches the difference between the length of the
+        index sequence and the number of run index1 cycles.
+        Raises:
+            OverrideCyclesError if the index 1 cycle is not valid.
+        """
+        index1_cycle: str = self.sample_cycles[1]
+        if (
+            self.run_index1_cycles == len(self.sample["Index"])
+            and index1_cycle == f"I{self.run_index1_cycles}"
+        ):
+            return
+        if self.is_index_cycle_value_following_pattern(
+            pattern=FORWARD_INDEX_CYCLE_PATTERN,
+            index_cycle=index1_cycle,
+            run_cycles=self.run_index1_cycles,
+            index_sequence=self.sample["Index1"],
+        ):
+            return
+        message: str = f"Incorrect index1 cycle {index1_cycle} for sample {self.sample_id}"
+        LOG.error(message)
+        raise OverrideCyclesError(message)
+
+    def _validate_index2_cycles(self) -> None:
+        """
+        Determine if the index 2 cycle is valid, i.e., if the number of ignored and index characters
+        correspond to the length of the sample index2 sequence and the number of run index2 cycles,
+        or if the index cycles should be None.
+        Raises:
+            OverrideCyclesError if the index 2 cycle is not valid.
+        """
+        if not self.run_index2_cycles and len(self.sample_cycles) == 3:
+            return
+        index2_cycle: str = self.sample_cycles[2]
+        if not self.sample["Index2"] and index2_cycle == f"N{self.run_index2_cycles}":
+            return
+        if (
+            self.run_index2_cycles == len(self.sample["Index2"])
+            and index2_cycle == f"I{self.run_index2_cycles}"
+        ):
+            return
+        if self.is_reverse_complement and self.is_index_cycle_value_following_pattern(
+            pattern=REVERSE_INDEX_CYCLE_PATTERN,
+            index_cycle=index2_cycle,
+            run_cycles=self.run_index2_cycles,
+            index_sequence=self.sample["Index2"],
+        ):
+            return
+        elif not self.is_reverse_complement and self.is_index_cycle_value_following_pattern(
+            pattern=FORWARD_INDEX_CYCLE_PATTERN,
+            index_cycle=index2_cycle,
+            run_cycles=self.run_index2_cycles,
+            index_sequence=self.sample["Index2"],
+        ):
+            return
+        message: str = f"Incorrect index2 cycle {index2_cycle} for sample {self.sample_id}"
+        LOG.error(message)
+        raise OverrideCyclesError(message)
+
+    def validate_sample(
+        self,
+        sample: dict[str, str],
+    ) -> None:
+        """Determine if the override cycles are valid for a given sample."""
+        self.sample = sample
+        self.sample_cycles = sample["OverrideCycles"].split(";")
+        self.sample_id = sample["Sample_ID"]
+        self._validate_reads_cycles()
+        self._validate_index1_cycles()
+        self._validate_index2_cycles()
