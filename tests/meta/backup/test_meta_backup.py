@@ -691,5 +691,5 @@ def test_create_copy_complete(
 
     backup_api.create_copy_complete(decrypted_flow_cell=flow_cell_dir, run_dir=flow_cells)
 
-    # THEN the copy complete file should exist
-    assert novaseq_x_flow_cell.path.joinpath(copy_complete_txt).exists() is True
+    # THEN the copy complete file should exist in the flow cell directory
+    assert flow_cell_dir.joinpath(copy_complete_txt).exists() is True
