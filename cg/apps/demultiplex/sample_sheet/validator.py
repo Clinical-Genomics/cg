@@ -282,7 +282,7 @@ class OverrideCyclesValidator:
             index_sequence=self.sample["Index2"],
         ):
             return
-        elif not self.is_reverse_complement and self.is_index_cycle_value_following_pattern(
+        if not self.is_reverse_complement and self.is_index_cycle_value_following_pattern(
             pattern=FORWARD_INDEX_CYCLE_PATTERN,
             index_cycle=index2_cycle,
             run_cycles=self.run_index2_cycles,
