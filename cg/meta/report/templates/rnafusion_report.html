@@ -226,8 +226,8 @@
               <ul>
                 <li>
                   <strong>Kliniska Fusionsvarianter</strong>:
-                    {% if case.data_analysis.scout_files.vcf_fusion != 'N/A' %}
-                      <em>{{ case.data_analysis.scout_files.vcf_fusion.replace(case.id, case.name) }}</em>
+                    {% if case.scout_files.vcf_fusion != 'N/A' %}
+                      <em>{{ case.scout_files.vcf_fusion.replace(case.id, case.name) }}</em>
                     {% else %}
                       <em>Inga fusionsvarianter upptäcktes</em>
                     {% endif %}

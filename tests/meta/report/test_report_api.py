@@ -241,6 +241,7 @@ def test_get_case_data(
     assert case_data.data_analysis
     assert case_data.samples
     assert case_data.applications
+    assert case_data.scout_files
 
 
 def test_get_samples_data(
@@ -381,7 +382,6 @@ def test_get_case_analysis_data(
     # THEN check if the retrieved analysis data is correct
     assert case_analysis_data.workflow == "mip-dna"
     assert case_analysis_data.panels == "IEM, EP"
-    assert case_analysis_data.scout_files
 
 
 def test_get_case_analysis_data_workflow_match_error(

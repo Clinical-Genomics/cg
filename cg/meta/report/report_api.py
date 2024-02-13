@@ -241,6 +241,8 @@ class ReportAPI(MetaAPI):
             ),
             samples=samples,
             applications=unique_applications,
+            scout_files=self.get_scout_uploaded_files(case=case),
+            delivered_files=[""],  # TODO
         )
 
     def get_samples_data(self, case: Case, analysis_metadata: AnalysisModel) -> list[SampleModel]:
@@ -269,6 +271,7 @@ class ReportAPI(MetaAPI):
                         case=case, sample=sample, analysis_metadata=analysis_metadata
                     ),
                     timestamps=self.get_sample_timestamp_data(sample=sample),
+                    delivered_files=[""],  # TODO
                 )
             )
         return samples
@@ -349,7 +352,6 @@ class ReportAPI(MetaAPI):
             genome_build=self.get_genome_build(analysis_metadata=analysis_metadata),
             variant_callers=self.get_variant_callers(_analysis_metadata=analysis_metadata),
             panels=case.panels,
-            scout_files=self.get_scout_uploaded_files(case=case),
         )
 
     def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:

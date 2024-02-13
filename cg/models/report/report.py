@@ -69,7 +69,6 @@ class DataAnalysisModel(BaseModel):
         genome_build: build version of the genome reference; source: workflow
         variant_callers: variant-calling filters; source: workflow
         panels: list of case specific panels; source: StatusDB/family/panels
-        scout_files: list of file names uploaded to Scout
     """
 
     customer_workflow: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
@@ -80,7 +79,6 @@ class DataAnalysisModel(BaseModel):
     genome_build: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     variant_callers: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
     panels: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
-    scout_files: ScoutReportFiles
 
     @model_validator(mode="after")
     def check_supported_workflow(self) -> "DataAnalysisModel":
@@ -107,6 +105,8 @@ class CaseModel(BaseModel):
         samples: list of samples associated to a case/family
         data_analysis: workflow attributes
         applications: case associated unique applications
+        scout_files: list of file names uploaded to Scout
+        delivered_files: delivered to Caesar case specific files
     """
 
     name: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
@@ -114,6 +114,8 @@ class CaseModel(BaseModel):
     samples: list[SampleModel]
     data_analysis: DataAnalysisModel
     applications: list[ApplicationModel]
+    scout_files: ScoutReportFiles
+    delivered_files: list[str]  # TODO
 
 
 class ReportModel(BaseModel):

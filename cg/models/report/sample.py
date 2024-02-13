@@ -88,6 +88,7 @@ class SampleModel(BaseModel):
         methods: sample processing methods model
         metadata: sample associated metrics and trending data model
         timestamps: processing timestamp attributes
+        delivered_files: delivered to Caesar sample specific files
     """
 
     name: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
@@ -106,3 +107,4 @@ class SampleModel(BaseModel):
         | RnafusionSampleMetadataModel
     )
     timestamps: TimestampModel
+    delivered_files: list[str]  # TODO
