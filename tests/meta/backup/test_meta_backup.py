@@ -675,6 +675,9 @@ def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
 def test_create_copy_complete(
     copy_complete_exists: bool, backup_api: BackupAPI, novaseq_x_flow_cell: FlowCellDirectoryData
 ):
+    """Tests creating a copy complete file in the flow cell directory. There are two cases: when
+    the file exists and when it does not exist."""
+
     # GIVEN a flow cell that has been decrypted in flow_cell directory
     flow_cell_dir: Path = novaseq_x_flow_cell.path
     flow_cells: Path = flow_cell_dir.parent
