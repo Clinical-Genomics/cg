@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 from pathlib import Path
+from cg.constants.constants import Workflow
 
 from cg.constants.delivery import INBOX_NAME
 from cg.exc import CgError
@@ -168,6 +169,8 @@ class DeliverTicketAPI(MetaAPI):
         cases: list[Case] = self.get_all_cases_from_ticket(ticket=ticket)
         case_id = cases[0].internal_id
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if case_obj.data_delivery == Workflow.MICROSALT:
+            return True
         samples: list[Sample] = [link.sample for link in case_obj.links]
         app_tag = self.get_app_tag(samples=samples)
         for prefix in PREFIX_TO_CONCATENATE:

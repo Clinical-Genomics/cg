@@ -12,6 +12,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
 from cg.exc import MissingFilesError
+from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
@@ -31,6 +32,7 @@ class DeliverAPI:
         delivery_type: str,
         force_all: bool = False,
         ignore_missing_bundles: bool = False,
+        deliver_ticket_api: DeliverTicketAPI = None,
     ):
         """Initialize a delivery api
 
@@ -55,6 +57,7 @@ class DeliverAPI:
             self.delivery_type in constants.SKIP_MISSING or ignore_missing_bundles
         )
         self.deliver_failed_samples = force_all
+        self.deliver_ticket_api = deliver_ticket_api
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run."""
@@ -86,7 +89,7 @@ class DeliverAPI:
         self.set_customer_id(case_obj=case_obj)
 
         sample_ids: set[str] = {sample.internal_id for sample in samples}
-
+        self.concatenate_fastqs(case_obj)
         if self.case_tags:
             self.deliver_case_files(
                 case_id=case_id,
@@ -122,6 +125,13 @@ class DeliverAPI:
             LOG.warning(
                 f"Sample {link.sample.internal_id} did not receive enough reads and will not be delivered"
             )
+
+    def concatenate_fastqs(self, case: Case) -> None:
+        ticket: str = case.latest_ticket
+        if not self.deliver_ticket_api:
+            return
+        if self.deliver_ticket_api.check_if_concatenation_is_needed(ticket):
+            self.deliver_ticket_api.concatenate(ticket, self.dry_run)
 
     def sample_is_deliverable(self, link: CaseSample) -> bool:
         sample_is_external: bool = link.sample.application_version.application.is_external
