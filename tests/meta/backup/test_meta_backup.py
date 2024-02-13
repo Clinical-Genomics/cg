@@ -668,12 +668,14 @@ def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
 
 
 @pytest.mark.parametrize(
-    "copy_complete_exists",
+    "copy_complete_should_exist",
     [True, False],
     ids=["copy_complete_exists", "copy_complete_does_not_exist"],
 )
 def test_create_copy_complete(
-    copy_complete_exists: bool, backup_api: BackupAPI, novaseq_x_flow_cell: FlowCellDirectoryData
+    copy_complete_should_exist: bool,
+    backup_api: BackupAPI,
+    novaseq_x_flow_cell: FlowCellDirectoryData,
 ):
     """Tests creating a copy complete file in the flow cell directory. There are two cases: when
     the file exists and when it does not exist."""
@@ -686,9 +688,9 @@ def test_create_copy_complete(
     copy_complete_txt: str = DemultiplexingDirsAndFiles.COPY_COMPLETE
 
     # GIVEN or not a copy complete file exists
-    if copy_complete_exists:
+    if copy_complete_should_exist:
         novaseq_x_flow_cell.path.joinpath(copy_complete_txt).touch()
-    elif not copy_complete_exists:
+    elif not copy_complete_should_exist:
         novaseq_x_flow_cell.path.joinpath(copy_complete_txt).unlink(missing_ok=True)
 
     # WHEN creating a copy complete file
