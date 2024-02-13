@@ -12,6 +12,7 @@ from mock import call
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, FlowCellStatus
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers
 from cg.exc import ChecksumFailedError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
@@ -679,12 +680,12 @@ def test_create_copy_complete(
     flow_cells: Path = flow_cell_dir.parent
 
     # GIVEN the copy complete to be created
-    copy_complete_txt: str = "CopyComplete.txt"
+    copy_complete_txt: str = DemultiplexingDirsAndFiles.COPY_COMPLETE
 
     # GIVEN or not a copy complete file exists
     if copy_complete_exists:
         novaseq_x_flow_cell.path.joinpath(copy_complete_txt).touch()
-    else:
+    elif not copy_complete_exists:
         novaseq_x_flow_cell.path.joinpath(copy_complete_txt).unlink(missing_ok=True)
 
     # WHEN creating a copy complete file
