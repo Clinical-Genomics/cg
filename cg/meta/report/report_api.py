@@ -10,10 +10,12 @@ from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sqlalchemy.orm import Query
 
 from cg.constants import Workflow
-from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
+from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, DataDelivery, FileFormat
+from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.exc import DeliveryReportError
 from cg.io.controller import WriteStream
+from cg.meta.deliver import DeliverAPI
 from cg.meta.meta import MetaAPI
 from cg.meta.report.field_validators import (
     get_empty_report_data,
@@ -242,7 +244,7 @@ class ReportAPI(MetaAPI):
             samples=samples,
             applications=unique_applications,
             scout_files=self.get_scout_uploaded_files(case=case),
-            delivered_files=[""],  # TODO
+            delivered_files=self.get_case_delivered_files(case=case),
         )
 
     def get_samples_data(self, case: Case, analysis_metadata: AnalysisModel) -> list[SampleModel]:
@@ -271,7 +273,9 @@ class ReportAPI(MetaAPI):
                         case=case, sample=sample, analysis_metadata=analysis_metadata
                     ),
                     timestamps=self.get_sample_timestamp_data(sample=sample),
-                    delivered_files=[""],  # TODO
+                    delivered_files=self.get_sample_delivered_files(
+                        case=case, sample_id=sample.internal_id
+                    ),
                 )
             )
         return samples
@@ -353,6 +357,43 @@ class ReportAPI(MetaAPI):
             variant_callers=self.get_variant_callers(_analysis_metadata=analysis_metadata),
             panels=case.panels,
         )
+
+    def get_case_delivered_files(self, case: Case) -> list[Path]:
+        """Returns a list of case level files to be delivered to Caesar."""
+        deliver_api: DeliverAPI = DeliverAPI(
+            store=self.status_db,
+            hk_api=self.housekeeper_api,
+            case_tags=PIPELINE_ANALYSIS_TAG_MAP[self.analysis_api.workflow]["case_tags"],
+            sample_tags=PIPELINE_ANALYSIS_TAG_MAP[self.analysis_api.workflow]["sample_tags"],
+            project_base_path=Path(self.config.delivery_path),
+            delivery_type=self.analysis_api.workflow,
+        )
+        last_version: Version = self.housekeeper_api.last_version(bundle=case.internal_id)
+        sample_ids: set[str] = {link.sample.internal_id for link in case.links}
+        delivered_files: list[Path] = list(
+            deliver_api.get_case_files_from_version(version=last_version, sample_ids=sample_ids)
+        )
+        return delivered_files
+
+    def get_sample_delivered_files(self, case: Case, sample_id: str) -> list[Path]:
+        """Returns a list of sample level files to be delivered to Caesar."""
+        last_version: Version = self.housekeeper_api.last_version(bundle=case.internal_id)
+        delivered_files: list[Path] = []
+        for delivery_type in case.get_delivery_arguments():
+            if delivery_type == DataDelivery.FASTQ:
+                last_version: Version = self.housekeeper_api.last_version(bundle=sample_id)
+            deliver_api: DeliverAPI = DeliverAPI(
+                store=self.status_db,
+                hk_api=self.housekeeper_api,
+                case_tags=PIPELINE_ANALYSIS_TAG_MAP[self.analysis_api.workflow]["case_tags"],
+                sample_tags=PIPELINE_ANALYSIS_TAG_MAP[self.analysis_api.workflow]["sample_tags"],
+                project_base_path=Path(self.config.delivery_path),
+                delivery_type=delivery_type,
+            )
+            delivered_sample_files: list[Path] = deliver_api.get_sample_files_from_version(
+                version_obj=last_version, sample_id=sample_id
+            )
+            delivered_files.extend(delivered_sample_files)
 
     def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
