@@ -67,7 +67,7 @@ def backup_api(cg_context: CGConfig, illumina_flow_cells_directory: Path) -> Bac
     pdc_api: PdcAPI = PdcAPI(binary_path=cg_context.pdc.binary_path, dry_run=True)
 
     pdc_archiving_directory: PDCArchivingDirectory = cg_context.backup.pdc_archiving_directory
-    _backup_api = BackupAPI(
+    _backup_api: BackupAPI = BackupAPI(
         encryption_api=encryption_api,
         status=store,
         tar_api=tar_api,
