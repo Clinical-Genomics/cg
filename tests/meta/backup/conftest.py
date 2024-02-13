@@ -40,7 +40,7 @@ Accessing as node: SLLCLINICAL
     return output.splitlines()
 
 
-@pytest.fixture()
+@pytest.fixture
 def archived_flow_cells(pdc_archiving_directory: PDCArchivingDirectory) -> list[str]:
     """Returns a list of archived flow cells."""
     return [

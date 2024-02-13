@@ -24,7 +24,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.models.report.metadata import MipDNASampleMetadataModel
-from cg.models.report.report import CaseModel
+from cg.models.report.report import CaseModel, ScoutReportFiles
 from cg.models.report.sample import SampleModel
 from cg.store.models import Case, Sample
 
@@ -87,6 +87,23 @@ class MipDNAReportAPI(ReportAPI):
             if not sample.application.accredited:
                 return False
         return True
+
+    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
+        """Return files that will be uploaded to Scout."""
+        return ScoutReportFiles(
+            snv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="snv_vcf"
+            ),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="sv_vcf"
+            ),
+            vcf_str=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="vcf_str"
+            ),
+            smn_tsv=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="smn_tsv"
+            ),
+        )
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Return dictionary with the delivery report required fields for MIP DNA."""
