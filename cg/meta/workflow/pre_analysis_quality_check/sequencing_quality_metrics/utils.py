@@ -54,20 +54,6 @@ def case_has_lower_priority_than_express(case: Case) -> bool:
     return case.priority < Priority.express
 
 
-def sample_has_reads(sample: Sample) -> bool:
-    """
-    Check if a sample has reads.
-
-    Returns:
-        bool: True if the sample has reads, False otherwise.
-
-    """
-    passed_quality_check: bool = sample.has_reads
-    if not passed_quality_check:
-        LOG.warning(f"Sample {sample.internal_id} has no reads.")
-    return passed_quality_check
-
-
 def ready_made_library_sample_has_enough_reads(sample: Sample) -> bool:
     """
     Check if all samples in case are ready made libraries.
@@ -77,7 +63,9 @@ def ready_made_library_sample_has_enough_reads(sample: Sample) -> bool:
 
     """
     if is_sample_ready_made_library(sample):
-        return sample_has_reads(sample)
+        if not sample.has_reads:
+            LOG.warning(f"Sample {sample.internal_id} has no reads.")
+        return sample.has_reads
     return False
 
 
@@ -108,6 +96,14 @@ def get_sequencing_qc_of_case(case: Case) -> bool:
     return False
 
 
+def get_express_reads_threshold_for_sample(sample: Sample) -> int:
+    """
+    Get the express reads threshold for a sample.
+    """
+
+    return round(sample.application_version.application.target_reads / 2)
+
+
 def express_sample_has_enough_reads(sample: Sample) -> bool:
     """
     Run express sequencing qc for a sample.
@@ -116,7 +112,7 @@ def express_sample_has_enough_reads(sample: Sample) -> bool:
         bool: True if the sample pass the qc, False otherwise.
 
     """
-    express_reads_threshold: int = round(sample.application_version.application.target_reads / 2)
+    express_reads_threshold: int = get_express_reads_threshold_for_sample(sample)
     passed_quality_check: bool = sample.reads >= express_reads_threshold
     if not passed_quality_check:
         LOG.warning(f"Sample {sample.internal_id} has too few reads.")
@@ -147,20 +143,6 @@ def get_express_sequencing_qc_of_sample(sample: Sample) -> bool:
     if sample_has_express_priority(sample):
         return express_sample_has_enough_reads(sample)
     return False
-
-
-def all_samples_in_case_have_reads(case: Case) -> bool:
-    """
-    Check if all samples have reads.
-
-    Returns:
-        bool: True if all samples have reads, False otherwise.
-
-    """
-    passed_quality_check: bool = all(sample.has_reads for sample in case.samples)
-    if not passed_quality_check:
-        LOG.warning("Not all samples in case have reads.")
-    return passed_quality_check
 
 
 def any_sample_in_case_has_reads(case: Case) -> bool:

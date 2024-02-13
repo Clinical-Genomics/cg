@@ -97,13 +97,14 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         for case in cases_to_analyze:
             if run_case_pre_analysis_quality_check(case):
-                if case.action == "analyze" or not case.latest_analyzed:
-                    cases_ready_for_analysis.append(case)
-                elif (
-                    self.trailblazer_api.get_latest_analysis_status(case_id=case.internal_id)
+                if (
+                    case.action == "analyze"
+                    or not case.latest_analyzed
+                    or self.trailblazer_api.get_latest_analysis_status(case_id=case.internal_id)
                     == "failed"
                 ):
                     cases_ready_for_analysis.append(case)
+
         return cases_ready_for_analysis
 
     def get_deliverables_file_path(self, case_id: str) -> Path:

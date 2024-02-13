@@ -456,6 +456,7 @@ def balsamic_context(
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=False,
         internal_id="sample_case_tgs_single_normal_error",
+        reads=0,
         last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
@@ -476,6 +477,7 @@ def balsamic_context(
         application_tag="TGSA",
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=True,
+        reads=0,
         internal_id="sample_case_tgs_paired_tumor_error",
         last_sequenced_at=dt.datetime.now(),
     )
@@ -484,6 +486,7 @@ def balsamic_context(
         application_tag="TGSA",
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=True,
+        reads=0,
         internal_id="sample_case_tgs_paired_tumor2_error",
         last_sequenced_at=dt.datetime.now(),
     )
@@ -492,6 +495,7 @@ def balsamic_context(
         application_tag="TGSA",
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=False,
+        reads=0,
         internal_id="sample_case_tgs_paired_normal_error",
         last_sequenced_at=dt.datetime.now(),
     )
@@ -522,6 +526,7 @@ def balsamic_context(
         status_db,
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=True,
+        reads=0,
         internal_id="mixed_sample_case_wgs_paired_tumor_error",
         last_sequenced_at=dt.datetime.now(),
     )
@@ -530,6 +535,7 @@ def balsamic_context(
         application_tag="TGSA",
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=False,
+        reads=0,
         internal_id="mixed_sample_case_tgs_paired_normal_error",
         last_sequenced_at=dt.datetime.now(),
     )
@@ -556,6 +562,7 @@ def balsamic_context(
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=True,
         internal_id="mixed_sample_case_wgs_mic_paired_tumor_error",
+        reads=0,
         last_sequenced_at=dt.datetime.now(),
     )
     mixed_sample_case_wgs_mic_paired_normal_error = helpers.add_sample(
@@ -564,6 +571,7 @@ def balsamic_context(
         application_type="mic",
         is_tumour=False,
         internal_id="mixed_sample_case_wgs_mic_paired_normal_error",
+        reads=0,
         last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
@@ -598,6 +606,7 @@ def balsamic_context(
         application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=False,
         internal_id="mixed_sample_case_mixed_bed_paired_normal_error",
+        reads=0,
         last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
@@ -644,6 +653,7 @@ def balsamic_context(
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=True,
         internal_id="sample_case_wgs_paired_two_normal_tumor_error",
+        reads=0,
         last_sequenced_at=dt.datetime.now(),
     )
     sample_case_wgs_paired_two_normal_normal1_error = helpers.add_sample(
@@ -652,6 +662,7 @@ def balsamic_context(
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=False,
         internal_id="sample_case_wgs_paired_two_normal_normal1_error",
+        reads=0,
         last_sequenced_at=dt.datetime.now(),
     )
     sample_case_wgs_paired_two_normal_normal2_error = helpers.add_sample(
@@ -660,6 +671,7 @@ def balsamic_context(
         application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=False,
         internal_id="sample_case_wgs_paired_two_normal_normal2_error",
+        reads=0,
         last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
@@ -708,6 +720,7 @@ def balsamic_context(
         application_type=PrepCategory.WHOLE_EXOME_SEQUENCING,
         is_tumour=True,
         internal_id="sample_case_wes_panel_error",
+        reads=0,
         last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
