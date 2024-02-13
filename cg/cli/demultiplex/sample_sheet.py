@@ -6,19 +6,15 @@ import click
 from pydantic import ValidationError
 
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_sheet_from_file,
-)
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.validator import SampleSheetValidator
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import DRY_RUN, FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError, HousekeeperFileMissingError, SampleSheetError
 from cg.io.controller import WriteFile, WriteStream
-from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_sample_sheet_path_to_housekeeper,
-)
+from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
@@ -36,9 +32,10 @@ def validate_sample_sheet(sheet: click.Path):
     """Validate a sample sheet."""
     LOG.info(f"Validating {sheet} sample sheet")
     try:
-        get_sample_sheet_from_file(Path(sheet))
-    except ValidationError as error:
-        LOG.warning(error)
+        validator = SampleSheetValidator(Path(sheet))
+        validator.validate_sample_sheet()
+    except (ValidationError, SampleSheetError) as error:
+        LOG.error(error)
         raise click.Abort from error
     LOG.info("Sample sheet passed validation")
 

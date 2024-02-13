@@ -2,9 +2,7 @@ from pathlib import Path
 
 from click.testing import CliRunner, Result
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_sheet_from_file,
-)
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.cli.demultiplex.sample_sheet import validate_sample_sheet
 from cg.constants import EXIT_SUCCESS, FileExtensions
 
@@ -76,7 +74,7 @@ def test_validate_correct_bcl2fastq_sample_sheet(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_validate_correct_dragen_sample_sheet(
+def test_validate_correct_v2_sample_sheet(
     cli_runner: CliRunner,
     novaseq_bcl_convert_sample_sheet_path: Path,
 ):

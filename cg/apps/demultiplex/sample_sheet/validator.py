@@ -161,7 +161,7 @@ class SampleSheetValidator:
         self.validate_samples()
         self.validate_override_cycles()
 
-    def validate(self):
+    def validate_sample_sheet(self):
         """Call the proper validation depending of the sample sheet type."""
         if self.sample_type is FlowCellSampleBCLConvert:
             self.validate_bcl_convert()
