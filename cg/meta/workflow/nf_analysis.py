@@ -343,7 +343,9 @@ class NfAnalysisAPI(AnalysisAPI):
                         "PATHTOCASE", case_path
                     )
 
-                files.append(FileDeliverable(**file_content))
+                files.append(
+                    FileDeliverable(**file_content)
+                ) if file_content not in files else files
 
         return PipelineDeliverables(files=files)
 
