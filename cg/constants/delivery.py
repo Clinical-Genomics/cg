@@ -145,6 +145,7 @@ SARSCOV2_ANALYSIS_CASE_TAGS: list[set[str]] = [
 
 SARSCOV2_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"fastq"},
+    {"vcf", "vcf-report", "fohm-delivery"},
 ]
 
 RNAFUSION_ANALYSIS_CASE_TAGS: list[set[str]] = [
