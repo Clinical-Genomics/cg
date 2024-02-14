@@ -40,7 +40,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
     )
 
     # GIVEN that the context's flow cell directory holds the given flow cell
-    sample_sheet_context.flow_cells_dir = (
+    sample_sheet_context.illumina_flow_cells_directory = (
         tmp_flow_cell_without_run_parameters_path.parent.as_posix()
     )
 

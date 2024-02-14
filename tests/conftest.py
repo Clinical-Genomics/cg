@@ -277,8 +277,9 @@ def base_config_dict() -> dict:
         "madeline_exe": "path/to/madeline",
         "tower_binary_path": "path/to/tower",
         "delivery_path": "path/to/delivery",
-        "flow_cells_dir": "path/to/flow_cells",
-        "demultiplexed_flow_cells_dir": "path/to/demultiplexed_flow_cells_dir",
+        "illumina_flow_cells_directory": "path/to/flow_cells",
+        "illumina_demultiplexed_runs_directory": "path/to/demultiplexed_flow_cells_dir",
+        "nanopore_data_directory": "path/to/nanopore_data_directory",
         "downsample_dir": "path/to/downsample_dir",
         "downsample_script": "downsample.sh",
         "housekeeper": {
@@ -370,26 +371,26 @@ def demultiplex_context(
 
 @pytest.fixture(name="demultiplex_configs_for_demux")
 def demultiplex_configs_for_demux(
-    tmp_flow_cells_demux_all_directory: Path,
+    tmp_illumina_flow_cells_demux_all_directory,
     tmp_empty_demultiplexed_runs_directory: Path,
 ) -> dict:
     """Return demultiplex configs."""
     return {
-        "flow_cells_dir": tmp_flow_cells_demux_all_directory.as_posix(),
-        "demultiplexed_flow_cells_dir": tmp_empty_demultiplexed_runs_directory.as_posix(),
+        "illumina_flow_cells_directory": tmp_illumina_flow_cells_demux_all_directory.as_posix(),
+        "illumina_demultiplexed_runs_directory": tmp_empty_demultiplexed_runs_directory.as_posix(),
         "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
 
 
 @pytest.fixture(name="demultiplex_configs")
 def demultiplex_configs(
-    tmp_flow_cells_directory: Path,
-    tmp_demultiplexed_runs_directory: Path,
+    tmp_illumina_flow_cells_directory,
+    tmp_illumina_demultiplexed_flow_cells_directory,
 ) -> dict:
     """Return demultiplex configs."""
     return {
-        "flow_cells_dir": tmp_flow_cells_directory.as_posix(),
-        "demultiplexed_flow_cells_dir": tmp_demultiplexed_runs_directory.as_posix(),
+        "illumina_flow_cells_directory": tmp_illumina_flow_cells_directory.as_posix(),
+        "illumina_demultiplexed_runs_directory": tmp_illumina_demultiplexed_flow_cells_directory.as_posix(),
         "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
 
@@ -1652,8 +1653,8 @@ def context_config(
     raredisease_dir: Path,
     rnafusion_dir: Path,
     taxprofiler_dir: Path,
-    flow_cells_dir: Path,
-    demultiplexed_runs: Path,
+    illumina_flow_cells_directory: Path,
+    illumina_demultiplexed_runs_directory: Path,
     downsample_dir: Path,
     pdc_archiving_directory: PDCArchivingDirectory,
 ) -> dict:
@@ -1661,8 +1662,9 @@ def context_config(
     return {
         "database": cg_uri,
         "delivery_path": str(cg_dir),
-        "flow_cells_dir": str(flow_cells_dir),
-        "demultiplexed_flow_cells_dir": str(demultiplexed_runs),
+        "illumina_flow_cells_directory": str(illumina_flow_cells_directory),
+        "illumina_demultiplexed_runs_directory": str(illumina_demultiplexed_runs_directory),
+        "nanopore_data_directory": "path/to/nanopore_data_directory",
         "downsample_dir": str(downsample_dir),
         "downsample_script": "downsample.sh",
         "email_base_settings": {
@@ -1789,7 +1791,7 @@ def context_config(
             "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-dna-stage.yaml",
-            "pipeline": "analyse rd_dna",
+            "workflow": "analyse rd_dna",
             "root": str(mip_dir),
             "script": "mip",
         },
@@ -1797,7 +1799,7 @@ def context_config(
             "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-rna-stage.yaml",
-            "pipeline": "analyse rd_rna",
+            "workflow": "analyse rd_rna",
             "root": str(mip_dir),
             "script": "mip",
         },
@@ -1817,7 +1819,7 @@ def context_config(
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_raredisease",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "workflow_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
             "revision": "2.2.0",
@@ -1826,7 +1828,7 @@ def context_config(
                 "account": "development",
                 "mail_user": "test.email@scilifelab.se",
             },
-            "tower_pipeline": "raredisease",
+            "tower_workflow": "raredisease",
         },
         "rnafusion": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
@@ -1834,7 +1836,7 @@ def context_config(
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_RNAFUSION",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "workflow_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
             "revision": "2.2.0",
@@ -1843,7 +1845,7 @@ def context_config(
                 "account": "development",
                 "mail_user": "test.email@scilifelab.se",
             },
-            "tower_pipeline": "rnafusion",
+            "tower_workflow": "rnafusion",
         },
         "pigz": {"binary_path": "/bin/pigz"},
         "pdc": {"binary_path": "/bin/dsmc"},
@@ -1854,7 +1856,7 @@ def context_config(
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_taxprofiler",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "workflow_path": Path("workflow", "path").as_posix(),
             "databases": Path("path", "to", "databases").as_posix(),
             "profile": "myprofile",
             "hostremoval_reference": Path("path", "to", "hostremoval_reference").as_posix(),
@@ -1863,7 +1865,7 @@ def context_config(
                 "account": "development",
                 "mail_user": "taxprofiler.email@scilifelab.se",
             },
-            "tower_pipeline": "taxprofiler",
+            "tower_workflow": "taxprofiler",
         },
         "scout": {
             "binary_path": "bin/scout",
@@ -2116,8 +2118,8 @@ def strandedness_not_permitted() -> str:
 
 
 @pytest.fixture(scope="session")
-def pipeline_version() -> str:
-    """Return a pipeline version."""
+def workflow_version() -> str:
+    """Return a workflow version."""
     return "2.2.0"
 
 
@@ -2845,7 +2847,7 @@ def flow_cell_encryption_api(
         encryption_dir=Path(cg_context.backup.pdc_archiving_directory.current),
         dry_run=True,
         flow_cell=FlowCellDirectoryData(
-            flow_cell_path=Path(cg_context.flow_cells_dir, flow_cell_full_name)
+            flow_cell_path=Path(cg_context.illumina_flow_cells_directory, flow_cell_full_name)
         ),
         pigz_binary_path=cg_context.pigz.binary_path,
         slurm_api=SlurmAPI(),
@@ -2869,7 +2871,7 @@ def create_process_response(
 
 
 # Downsample
-@pytest.fixture()
+@pytest.fixture
 def store_with_case_and_sample_with_reads(
     store: Store,
     helpers: StoreHelpers,
@@ -2895,31 +2897,31 @@ def store_with_case_and_sample_with_reads(
     return store
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_case_internal_id() -> str:
     """Return a case internal id."""
     return "supersonicturtle"
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_sample_internal_id_1() -> str:
     """Return a sample internal id."""
     return "ACC12345675213"
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_sample_internal_id_2() -> str:
     """Return a sample internal id."""
     return "ACC12345684213"
 
 
-@pytest.fixture()
+@pytest.fixture
 def number_of_reads_in_millions() -> int:
     """Return a number of reads in millions."""
     return 50
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     fastq_file: Path,

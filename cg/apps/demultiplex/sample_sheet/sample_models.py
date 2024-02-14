@@ -117,12 +117,6 @@ class FlowCellSampleBCLConvert(FlowCellSample):
     override_cycles: str = Field(
         EMPTY_STRING, alias=SampleSheetBCLConvertSections.Data.OVERRIDE_CYCLES
     )
-    adapter_read_1: str = Field(
-        EMPTY_STRING, alias=SampleSheetBCLConvertSections.Data.ADAPTER_READ_1
-    )
-    adapter_read_2: str = Field(
-        EMPTY_STRING, alias=SampleSheetBCLConvertSections.Data.ADAPTER_READ_2
-    )
     barcode_mismatches_1: int = Field(
         1, alias=SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_1
     )
@@ -180,7 +174,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
                 get_hamming_distance_index_1(sequence_1=self.index, sequence_2=sample.index)
                 < MINIMUM_HAMMING_DISTANCE
             ):
-                LOG.info(f"Turning barcode mismatch for index 1 to 0 for sample {self.sample_id}")
+                LOG.debug(f"Turning barcode mismatch for index 1 to 0 for sample {self.sample_id}")
                 self.barcode_mismatches_1 = 0
                 break
 
@@ -193,7 +187,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
         and the index2 of any sample in the lane is below the minimum threshold.
         If the sample is single-indexed, assign 'na'."""
         if self.index2 == EMPTY_STRING and "-" not in self.index:
-            LOG.info(f"Turning barcode mismatch for index 2 to 'na' for sample {self.sample_id}")
+            LOG.debug(f"Turning barcode mismatch for index 2 to 'na' for sample {self.sample_id}")
             self.barcode_mismatches_2 = "na"
             return
         for sample in samples_to_compare:
@@ -207,7 +201,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
                 )
                 < MINIMUM_HAMMING_DISTANCE
             ):
-                LOG.info(f"Turning barcode mismatch for index 2 to 0 for sample {self.sample_id}")
+                LOG.debug(f"Turning barcode mismatch for index 2 to 0 for sample {self.sample_id}")
                 self.barcode_mismatches_2 = 0
                 break
 
