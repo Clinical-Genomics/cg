@@ -87,8 +87,7 @@ class MutantAnalysisAPI(AnalysisAPI):
             if not sequencing_qc_passed:
                 LOG.info("Sample %s read count below threshold, skipping!", sample_obj.internal_id)
                 continue
-            else:
-                self.link_fastq_files_for_sample(case=case_obj, sample=sample_obj, concatenate=True)
+            self.link_fastq_files_for_sample(case=case_obj, sample=sample_obj, concatenate=True)
 
     def get_sample_parameters(self, sample_obj: Sample, sequencing_qc: bool) -> MutantSampleConfig:
         return MutantSampleConfig(
@@ -133,9 +132,6 @@ class MutantAnalysisAPI(AnalysisAPI):
                     sample_obj=sample, sequencing_qc=sequencing_qc
                 ).model_dump()
             )
-        case_config_list = [
-            self.get_sample_parameters(sample_obj).model_dump() for sample_obj in samples
-        ]
         config_path = self.get_case_config_path(case_id=case_id)
         if dry_run:
             LOG.info("Dry-run, would have created config at path %s, with content:", config_path)
