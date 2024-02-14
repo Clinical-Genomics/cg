@@ -250,7 +250,7 @@ class OverrideCyclesValidator:
             pattern=FORWARD_INDEX_CYCLE_PATTERN,
             index_cycle=index1_cycle,
             run_cycles=self.run_index1_cycles,
-            index_sequence=self.sample["Index1"],
+            index_sequence=self.sample["Index"],
         ):
             return
         message: str = f"Incorrect index1 cycle {index1_cycle} for sample {self.sample_id}"

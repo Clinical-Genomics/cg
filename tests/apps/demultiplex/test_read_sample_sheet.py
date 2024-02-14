@@ -180,11 +180,13 @@ def test_get_sample_sheet_dragen_duplicate_different_lanes(
     assert sample_sheet.samples
 
 
-def test_get_sample_internal_ids_from_sample_sheet(novaseq6000_bcl_convert_sample_sheet_path: Path):
+def test_get_sample_internal_ids_from_sample_sheet(
+    novaseq_6000_post_1_5_kits_correct_sample_sheet_path: Path,
+):
     """Test that getting sample internal ids from a sample sheet returns a unique list of strings."""
     # GIVEN a sample sheet with only valid samples
     sample_sheet: SampleSheet = get_sample_sheet_from_file(
-        novaseq6000_bcl_convert_sample_sheet_path
+        novaseq_6000_post_1_5_kits_correct_sample_sheet_path
     )
 
     # WHEN getting the valid sample internal ids
