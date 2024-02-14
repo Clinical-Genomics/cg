@@ -5,5 +5,6 @@ class FastqServiceError(Exception):
 class ConcatenationError(FastqServiceError):
     pass
 
+
 class InvalidFastqDirectory(FastqServiceError):
     pass

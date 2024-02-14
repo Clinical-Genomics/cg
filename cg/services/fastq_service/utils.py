@@ -1,22 +1,45 @@
 from pathlib import Path
+import re
 import shutil
 
-from cg.services.fastq_service.exceptions import InvalidConcatenationError
+from cg.services.fastq_service.exceptions import ConcatenationError
 
 
-def remove_files(files: list[Path]) -> None:
-    for file in files:
-        file.unlink()
+def concatenate_forward_reads(directory: Path, output_file: Path) -> None:
+    fastqs = get_forward_read_fastqs(directory)
+    if not fastqs:
+        return
+    concatenate(input_files=fastqs, output_file=output_file)
+    validate_concatenation(input_files=fastqs, output_file=output_file)
+
+
+def concatenate_reverse_reads(directory: Path, output_file: Path) -> None:
+    fastqs: list[Path] = get_reverse_read_fastqs(directory)
+    if not fastqs:
+        return
+    concatenate(input_files=fastqs, output_file=output_file)
+    validate_concatenation(input_files=fastqs, output_file=output_file)
+
+
+def get_forward_read_fastqs(fastq_directory: Path) -> list[Path]:
+    return get_fastqs_by_direction(fastq_directory=fastq_directory, direction=1)
+
+
+def get_reverse_read_fastqs(fastq_directory: Path) -> list[Path]:
+    return get_fastqs_by_direction(fastq_directory=fastq_directory, direction=2)
+
+
+def get_fastqs_by_direction(fastq_directory: Path, direction: int) -> list[Path]:
+    pattern = f".+_R{direction}_[0-9]+.fastq.gz"
+    fastqs: list[Path] = []
+    for file in fastq_directory.iterdir():
+        if re.match(pattern, file.name):
+            fastqs.append(file)
+    return sort_files_by_name(fastqs)
 
 
 def get_total_size(files: list[Path]) -> int:
     return sum(file.stat().st_size for file in files)
-
-
-def sort_files_by_name(files: list[Path]) -> list[Path]:
-    files_map = {file_path.name: file_path for file_path in files}
-    sorted_names = sorted(files_map.keys())
-    return [files_map[name] for name in sorted_names]
 
 
 def concatenate(input_files: list[Path], output_file: Path) -> None:
@@ -30,4 +53,10 @@ def validate_concatenation(input_files: list[Path], output_file: Path) -> None:
     total_size: int = get_total_size(input_files)
     concatenated_size: int = get_total_size([output_file])
     if total_size != concatenated_size:
-        raise InvalidConcatenationError
+        raise ConcatenationError
+
+
+def sort_files_by_name(files: list[Path]) -> list[Path]:
+    files_map = {file.name: file for file in files}
+    sorted_names = sorted(files_map.keys())
+    return [files_map[name] for name in sorted_names]
