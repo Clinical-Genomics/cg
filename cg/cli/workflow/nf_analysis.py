@@ -114,9 +114,6 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
             analysis_api.report_deliver(case_id=case_id)
         else:
             LOG.info("Dry-run")
-    except (CgError, ValidationError) as error:
-        LOG.error(f"Could not create report file: {error}")
-        raise click.Abort()
     except Exception as error:
         LOG.error(f"Could not create report file: {error}")
         raise click.Abort()
