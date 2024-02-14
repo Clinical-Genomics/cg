@@ -9,7 +9,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MutantFastqHandler
 from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import (
     run_sample_sequencing_quality_check,
-)
+)   
 from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
 from cg.store.models import Application, Case, Sample
@@ -83,7 +83,8 @@ class MutantAnalysisAPI(AnalysisAPI):
                     case=case_obj, sample=sample_obj, concatenate=True
                 )
                 continue
-            sequencing_qc_passed: bool = run_sample_sequencing_quality_check(sample=sample_obj)
+            sequencing_qc_passed: bool = run_sample_sequencing_quality_check(
+                sample=sample_obj)
             if not sequencing_qc_passed:
                 LOG.info("Sample %s read count below threshold, skipping!", sample_obj.internal_id)
                 continue
@@ -127,11 +128,10 @@ class MutantAnalysisAPI(AnalysisAPI):
         samples: list[Sample] = [link.sample for link in case_obj.links]
         case_config_list: list[dict] = []
         for sample in samples:
-            sequencing_qc: bool = run_sample_sequencing_quality_check(sample=sample)
+            sequencing_qc: bool = run_sample_sequencing_quality_check(
+                sample=sample)
             case_config_list.append(
-                self.get_sample_parameters(
-                    sample_obj=sample, sequencing_qc=sequencing_qc
-                ).model_dump()
+                self.get_sample_parameters(sample_obj=sample,sequencing_qc=sequencing_qc).model_dump()
             )
         case_config_list = [
             self.get_sample_parameters(sample_obj).model_dump() for sample_obj in samples

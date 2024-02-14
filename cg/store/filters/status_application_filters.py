@@ -18,12 +18,12 @@ def filter_applications_is_not_archived(applications: Query, **kwargs) -> Query:
 
 def filter_applications_is_external(applications: Query, **kwargs) -> Query:
     """Return application which is external."""
-    return applications.filter(Application.is_external is True)
+    return applications.filter(Application.is_external == True)
 
 
 def filter_applications_is_not_external(applications: Query, **kwargs) -> Query:
     """Return application which is not external."""
-    return applications.filter(Application.is_external is False)
+    return applications.filter(Application.is_external == False)
 
 
 def apply_application_filter(

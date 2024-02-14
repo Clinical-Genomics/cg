@@ -5,7 +5,6 @@ from cg.store.store import Store
 
 from tests.conftest import StoreHelpers
 
-
 class ScenariosGenerator:
     def __init__(self, store: Store, helpers: StoreHelpers):
         self.store: Store = store
@@ -158,3 +157,4 @@ class ScenariosGenerator:
                 pass_reads=pass_reads, prep_category=prep_category, workflow=workflow
             )
         return self.add_case(pass_reads=pass_reads, prep_category=prep_category, workflow=workflow)
+
