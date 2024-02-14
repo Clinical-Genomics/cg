@@ -12,7 +12,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
 from cg.exc import MissingFilesError
-from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import run_sample_sequencing_quality_check
+from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import (
+    run_sample_sequencing_quality_check,
+)
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 

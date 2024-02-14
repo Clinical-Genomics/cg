@@ -316,7 +316,7 @@ def balsamic_context(
         store=status_db,
         application_tag="WESA",
         prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING,
-        target_reads=10
+        target_reads=10,
     )
 
     # Create textbook case for WGS PAIRED with enough reads

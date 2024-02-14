@@ -6,7 +6,9 @@ from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.fastq.fastq_service import FastqService
 from cg.constants.constants import DRY_RUN, Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import run_case_pre_analysis_quality_check
+from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import (
+    run_case_pre_analysis_quality_check,
+)
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)

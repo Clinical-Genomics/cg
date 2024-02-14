@@ -3,7 +3,6 @@ import sys
 from pathlib import Path
 
 from cg.constants.demultiplexing import FASTQ_FILE_SUFFIXES
-from cg.constants.symbols import UNDERSCORE
 
 LOG = logging.getLogger(__name__)
 

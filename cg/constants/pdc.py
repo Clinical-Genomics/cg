@@ -1,7 +1,5 @@
 """PDC related constants"""
 
-from enum import IntEnum
-
 from cg.utils.enums import ListEnum
 
 

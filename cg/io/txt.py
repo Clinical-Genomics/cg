@@ -1,7 +1,6 @@
 """Module to read or write txt files."""
 
 from pathlib import Path
-from typing import Any
 
 
 def read_txt(file_path: Path, read_to_string: bool = False) -> list[str] | str:
