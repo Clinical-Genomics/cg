@@ -3,6 +3,5 @@ from pathlib import Path
 
 class FastqService:
 
-    def concatenate(self, input_files: list[Path], output_file: Path) -> None:
-        """Concatenates multiple FASTQ files into a single output file."""
+    def concatenate(self, fastq_directory: Path, forward_output: Path, reverse_output: Path):
         pass
