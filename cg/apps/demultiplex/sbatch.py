@@ -17,7 +17,7 @@ touch {demux_completed_file}"
 
 singularity exec --bind \
 /home/proj/{environment}/sequencing_data/illumina/demultiplexed-runs,\
-/home/proj/{environment}/sequencing_data/illumina/low_cells,\
+/home/proj/{environment}/sequencing_data/illumina/flow_cells,\
 /home/proj/{environment}/sequencing_data/illumina/flow_cells/'$SLURM_JOB_ID':/run/user/$(id -u) \
 /home/proj/{environment}/demux-on-hasta/novaseq/container/bcl2fastq_v2-20-0.sif \
 bcl2fastq --loading-threads 3 --processing-threads 15 --writing-threads 3 \
