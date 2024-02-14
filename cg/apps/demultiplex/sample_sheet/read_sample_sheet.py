@@ -87,7 +87,7 @@ def get_raw_samples(sample_sheet_content: list[list[str]]) -> list[dict[str, str
 
     for line in sample_sheet_content:
         # Skip lines that are too short to contain samples
-        if len(line) <= 5:
+        if len(line) <= 4:
             continue
         if line[0] in [
             SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID.value,
