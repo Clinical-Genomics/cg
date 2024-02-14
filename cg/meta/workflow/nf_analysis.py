@@ -325,27 +325,27 @@ class NfAnalysisAPI(AnalysisAPI):
             sample_name: str = sample.name
 
             for file in deliverable_template:
-                file_content = dict(file)
+                deliverables = dict(file)
                 for deliverable_field, deliverable_value in file.items():
                     if deliverable_value is None:
                         continue
 
-                    file_content[deliverable_field] = file_content[deliverable_field].replace(
+                    deliverables[deliverable_field] = deliverables[deliverable_field].replace(
                         "CASEID", case_id
                     )
-                    file_content[deliverable_field] = file_content[deliverable_field].replace(
+                    deliverables[deliverable_field] = deliverables[deliverable_field].replace(
                         "SAMPLEID", sample_id
                     )
-                    file_content[deliverable_field] = file_content[deliverable_field].replace(
+                    deliverables[deliverable_field] = deliverables[deliverable_field].replace(
                         "SAMPLENAME", str(sample_name)
                     )
-                    file_content[deliverable_field] = file_content[deliverable_field].replace(
+                    deliverables[deliverable_field] = deliverables[deliverable_field].replace(
                         "PATHTOCASE", case_path
                     )
 
                 (
-                    files.append(FileDeliverable(**file_content))
-                    if file_content not in files
+                    files.append(FileDeliverable(**deliverables))
+                    if deliverables not in files
                     else files
                 )
 
