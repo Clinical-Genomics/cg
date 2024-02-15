@@ -390,10 +390,13 @@ class ReportAPI(MetaAPI):
                 project_base_path=Path(self.config.delivery_path),
                 delivery_type=delivery_type,
             )
-            delivered_sample_files: list[Path] = deliver_api.get_sample_files_from_version(
-                version_obj=last_version, sample_id=sample_id
+            delivered_sample_files: list[Path] = list(
+                deliver_api.get_sample_files_from_version(
+                    version_obj=last_version, sample_id=sample_id
+                )
             )
             delivered_files.extend(delivered_sample_files)
+        return delivered_files
 
     def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""

@@ -27,7 +27,7 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
 from cg.constants.constants import CaseActions, FileFormat, Strandedness
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AlignmentFileTag
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
@@ -72,6 +72,7 @@ pytest_plugins = [
     "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_fixtures",
 ]
+
 
 # Case fixtures
 
@@ -937,6 +938,7 @@ def hk_sample_bundle(
     sample_hk_bundle_no_files: dict,
     sample_id: str,
     spring_file: Path,
+    sample_cram: Path,
 ) -> dict:
     """Returns a dict for building a housekeeper bundle for a sample."""
     sample_hk_bundle_no_files["files"] = [
@@ -949,6 +951,11 @@ def hk_sample_bundle(
             "path": fastq_file.as_posix(),
             "archive": False,
             "tags": [SequencingFileTag.FASTQ, sample_id],
+        },
+        {
+            "path": sample_cram.as_posix(),
+            "archive": False,
+            "tags": [AlignmentFileTag.CRAM, sample_id],
         },
     ]
     return sample_hk_bundle_no_files
