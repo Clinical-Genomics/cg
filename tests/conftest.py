@@ -907,6 +907,7 @@ def hk_bundle_data(
     case_id: str,
     bed_file: Path,
     delivery_report_html: Path,
+    sample_cram: Path,
     timestamp_yesterday: datetime,
     sample_id: str,
     father_sample_id: str,
@@ -928,6 +929,11 @@ def hk_bundle_data(
                 "archive": False,
                 "tags": [HK_DELIVERY_REPORT_TAG],
             },
+            {
+                "path": sample_cram.as_posix(),
+                "archive": False,
+                "tags": [AlignmentFileTag.CRAM, sample_id],
+            },
         ],
     }
 
@@ -938,7 +944,6 @@ def hk_sample_bundle(
     sample_hk_bundle_no_files: dict,
     sample_id: str,
     spring_file: Path,
-    sample_cram: Path,
 ) -> dict:
     """Returns a dict for building a housekeeper bundle for a sample."""
     sample_hk_bundle_no_files["files"] = [
@@ -951,11 +956,6 @@ def hk_sample_bundle(
             "path": fastq_file.as_posix(),
             "archive": False,
             "tags": [SequencingFileTag.FASTQ, sample_id],
-        },
-        {
-            "path": sample_cram.as_posix(),
-            "archive": False,
-            "tags": [AlignmentFileTag.CRAM, sample_id],
         },
     ]
     return sample_hk_bundle_no_files

@@ -63,7 +63,7 @@ def get_set_path_as_set_string(file_paths: set[Path] | None) -> set[str]:
     if file_paths:
         for file_path in file_paths:
             (
-                set_string.update(Path(file_path).name)
+                set_string.add(Path(file_path).name)
                 if file_path and Path(file_path).is_file()
                 else None
             )
