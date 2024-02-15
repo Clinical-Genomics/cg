@@ -23,6 +23,7 @@ from cg.models.report.validators import (
     get_path_as_string,
     get_prep_category_as_string,
     get_report_string,
+    get_set_path_as_set_string,
 )
 
 
@@ -148,6 +149,19 @@ def test_get_path_as_string(filled_file: Path):
 
     # THEN check if the input values were formatted correctly
     assert path_name == "a_file.txt"
+
+
+def test_get_set_path_as_set_string(bed_file: Path, sample_cram: Path):
+    """Test set of files report validation."""
+
+    # GIVEN a set of files
+    set_paths: set[Path] = {bed_file, sample_cram}
+
+    # WHEN performing the validation
+    validated_paths: set[str] = get_set_path_as_set_string(set_paths)
+
+    # THEN the validated path names should be returned
+    assert validated_paths == {set_path.name for set_path in set_paths}
 
 
 def test_get_gender_as_string():
