@@ -24,15 +24,18 @@ class MockTB:
     def get_latest_analysis(self, case_id: str) -> TrailblazerAnalysis | None:
         return self.get_latest_analysis_response.get(case_id)
 
+    def get_latest_analysis_status(self, *args, **kwargs) -> None:
+        return None
+
     def ensure_analyses_response(self, analyses_list: list) -> None:
         self.analyses_response = [
             TrailblazerAnalysis.model_validate(analysis) for analysis in analyses_list
         ]
 
     def ensure_get_latest_analysis_response(self, analysis_dict: dict) -> None:
-        self.get_latest_analysis_response[analysis_dict["family"]] = (
-            TrailblazerAnalysis.model_validate(analysis_dict)
-        )
+        self.get_latest_analysis_response[
+            analysis_dict["family"]
+        ] = TrailblazerAnalysis.model_validate(analysis_dict)
 
     def is_latest_analysis_completed(self, case_id: str):
         return True

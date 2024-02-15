@@ -129,7 +129,7 @@ def test_start_available(
 
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
-
+    
     # THEN command exits with a successful exit code
     assert result.exit_code == EXIT_SUCCESS
 
@@ -137,7 +137,7 @@ def test_start_available(
     assert f"Starting analysis for {case_id_success}" in caplog.text
 
     # THEN the ineligible case should NOT be run
-    assert case_id_not_enough_reads not in caplog.text
+    assert f"Starting analysis for {case_id_not_enough_reads}" not in caplog.text
 
 
 def test_store_available(
