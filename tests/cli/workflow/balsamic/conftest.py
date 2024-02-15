@@ -13,6 +13,7 @@ from cg.io.controller import WriteFile
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
+from cg.store.models import ApplicationVersion, Sample
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
@@ -319,6 +320,22 @@ def balsamic_context(
         target_reads=10,
     )
 
+    # Create wgs application version
+    helpers.ensure_application_version(
+        store=status_db,
+        application_tag="WGSA",
+        prep_category=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        target_reads=10,
+    )
+
+    # Create a mic application version
+    helpers.ensure_application_version(
+        store=status_db,
+        application_tag="MICA",
+        prep_category="mic",
+        target_reads=10,
+    )
+
     # Create textbook case for WGS PAIRED with enough reads
     case_wgs_paired_enough_reads = helpers.add_case(
         store=status_db,
@@ -565,7 +582,7 @@ def balsamic_context(
         reads=0,
         last_sequenced_at=dt.datetime.now(),
     )
-    mixed_sample_case_wgs_mic_paired_normal_error = helpers.add_sample(
+    mixed_sample_case_wgs_mic_paired_normal_error: Sample = helpers.add_sample(
         status_db,
         application_tag="MICA",
         application_type="mic",
