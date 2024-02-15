@@ -174,8 +174,6 @@ class SampleSheetBCLConvertSections:
         INDEX_1: str = "Index"
         INDEX_2: str = "Index2"
         OVERRIDE_CYCLES: str = "OverrideCycles"
-        ADAPTER_READ_1: str = "AdapterRead1"
-        ADAPTER_READ_2: str = "AdapterRead2"
         BARCODE_MISMATCHES_1: str = "BarcodeMismatchesIndex1"
         BARCODE_MISMATCHES_2: str = "BarcodeMismatchesIndex2"
 
@@ -187,8 +185,6 @@ class SampleSheetBCLConvertSections:
                 cls.INDEX_1,
                 cls.INDEX_2,
                 cls.OVERRIDE_CYCLES,
-                cls.ADAPTER_READ_1,
-                cls.ADAPTER_READ_2,
                 cls.BARCODE_MISMATCHES_1,
                 cls.BARCODE_MISMATCHES_2,
             ]
