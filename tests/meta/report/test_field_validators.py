@@ -1,17 +1,23 @@
-"""Tests report data validation"""
+"""Tests report data validation."""
+
+import math
+from typing import Any
 
 from cg.meta.report.field_validators import (
     get_empty_report_data,
     get_million_read_pairs,
     get_missing_report_data,
 )
+from cg.meta.report.mip_dna import MipDNAReportAPI
+from cg.models.report.report import ReportModel
+from cg.store.models import Case
 
 
-def test_get_empty_report_data(report_api_mip_dna, case_mip_dna):
+def test_get_empty_report_data(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case):
     """Tests the empty report fields retrieval."""
 
     # GIVEN a report data model
-    report_data = report_api_mip_dna.get_report_data(
+    report_data: ReportModel = report_api_mip_dna.get_report_data(
         case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
 
@@ -26,7 +32,7 @@ def test_get_empty_report_data(report_api_mip_dna, case_mip_dna):
     report_data.case.samples[1].metadata.duplicates = None
 
     # WHEN retrieving the missing data
-    empty_fields = get_empty_report_data(report_data)
+    empty_fields: dict[str, Any] = get_empty_report_data(report_data)
 
     # THEN assert that the empty fields are correctly retrieved
     assert "version" in empty_fields["report"]
@@ -39,18 +45,18 @@ def test_get_empty_report_data(report_api_mip_dna, case_mip_dna):
     assert "duplicates" in empty_fields["metadata"]["ADM2"]
 
 
-def test_get_missing_report_data(report_api_mip_dna, case_mip_dna):
+def test_get_missing_report_data(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case):
     """Checks the missing report fields retrieval."""
 
     # GIVEN a report data model
-    report_data = report_api_mip_dna.get_report_data(
+    report_data: ReportModel = report_api_mip_dna.get_report_data(
         case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
     report_data.case.samples[0].application.prep_category = "wgs"  # ADM1 sample (WGS)
     report_data.case.samples[1].application.prep_category = "wes"  # ADM2 sample (WES)
 
     # GIVEN a dictionary of report empty fields and a list of required MIP DNA report fields
-    empty_fields = {
+    empty_fields: dict[str, Any] = {
         "report": ["version", "accredited"],
         "customer": ["id"],
         "methods": {"ADM1": ["library_prep"]},
@@ -60,10 +66,10 @@ def test_get_missing_report_data(report_api_mip_dna, case_mip_dna):
         },
     }
 
-    required_fields = report_api_mip_dna.get_required_fields(report_data.case)
+    required_fields: dict[str, Any] = report_api_mip_dna.get_required_fields(report_data.case)
 
     # WHEN retrieving the missing data
-    missing_fields = get_missing_report_data(empty_fields, required_fields)
+    missing_fields: dict[str, Any] = get_missing_report_data(empty_fields, required_fields)
 
     # THEN assert that the required fields are identified
     assert "version" not in missing_fields["report"]
@@ -82,24 +88,24 @@ def test_get_million_read_pairs():
     """Tests millions read pairs computation."""
 
     # GIVEN a number os sequencing reads and its representation in millions of read pairs
-    sample_reads = 1_200_000_000
-    expected_million_read_pairs = 600.0
+    sample_reads: int = 1_200_000_000
+    expected_million_read_pairs: float = 600.0
 
     # WHEN obtaining the number of reds in millions of read pairs
-    million_read_pairs = get_million_read_pairs(sample_reads)
+    million_read_pairs: float = get_million_read_pairs(sample_reads)
 
     # THEN the expected value should match the calculated one
-    assert million_read_pairs == expected_million_read_pairs
+    assert math.isclose(million_read_pairs, expected_million_read_pairs)
 
 
 def test_get_million_read_pairs_zero_input():
     """Tests millions read pairs computation when the sample reads number is zero."""
 
     # GIVEN zero as number of reads
-    sample_reads = 0
+    sample_reads: int = 0
 
     # WHEN retrieving the number of reds in millions of read pairs
-    million_read_pairs = get_million_read_pairs(sample_reads)
+    million_read_pairs: float = get_million_read_pairs(sample_reads)
 
     # THEN the obtained value should be zero
-    assert million_read_pairs == 0.0
+    assert math.isclose(million_read_pairs, 0.0)
