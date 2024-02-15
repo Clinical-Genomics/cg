@@ -667,13 +667,7 @@ def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
     assert "Decryption failed" in caplog.text
 
 
-@pytest.mark.parametrize(
-    "copy_complete_should_exist",
-    [True, False],
-    ids=["copy_complete_exists", "copy_complete_does_not_exist"],
-)
-def test_create_copy_complete(
-    copy_complete_should_exist: bool,
+def test_create_copy_complete_file_exist(
     backup_api: BackupAPI,
     novaseq_x_flow_cell: FlowCellDirectoryData,
 ):
@@ -687,14 +681,34 @@ def test_create_copy_complete(
     # GIVEN the copy complete to be created
     copy_complete_txt: str = DemultiplexingDirsAndFiles.COPY_COMPLETE
 
-    # GIVEN or not a copy complete file exists
-    if copy_complete_should_exist:
-        novaseq_x_flow_cell.path.joinpath(copy_complete_txt).touch()
-    elif not copy_complete_should_exist:
-        novaseq_x_flow_cell.path.joinpath(copy_complete_txt).unlink(missing_ok=True)
+    # GIVEN a copy complete file exists
+    flow_cell_dir.joinpath(copy_complete_txt).touch()
 
     # WHEN creating a copy complete file
+    backup_api.create_copy_complete(decrypted_flow_cell=flow_cell_dir, run_dir=flow_cells)
 
+    # THEN the copy complete file should exist in the flow cell directory
+    assert flow_cell_dir.joinpath(copy_complete_txt).exists() is True
+
+
+def test_create_copy_complete_file_does_not_exist(
+    backup_api: BackupAPI,
+    novaseq_x_flow_cell: FlowCellDirectoryData,
+):
+    """Tests creating a copy complete file in the flow cell directory. There are two cases: when
+    the file exists and when it does not exist."""
+
+    # GIVEN a flow cell that has been decrypted in flow_cell directory
+    flow_cell_dir: Path = novaseq_x_flow_cell.path
+    flow_cells: Path = flow_cell_dir.parent
+
+    # GIVEN the copy complete to be created
+    copy_complete_txt: str = DemultiplexingDirsAndFiles.COPY_COMPLETE
+
+    # GIVEN that the copy complete file does not exists
+    flow_cell_dir.joinpath(copy_complete_txt).unlink(missing_ok=True)
+
+    # WHEN creating a copy complete file
     backup_api.create_copy_complete(decrypted_flow_cell=flow_cell_dir, run_dir=flow_cells)
 
     # THEN the copy complete file should exist in the flow cell directory
