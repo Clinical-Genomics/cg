@@ -468,32 +468,29 @@ def test_get_sample_timestamp_data(
 
 
 def test_get_case_delivered_files(
-    case_id: str, delivery_report_html: Path, report_api_mip_dna: MipDNAReportAPI
+    case_mip_dna: Case, delivery_report_html: Path, report_api_mip_dna: MipDNAReportAPI
 ):
     """Test get case level delivered files to Caesar."""
 
     # GIVEN a report API, a MIP-dna case, and a case level delivered file
-    case: Case = report_api_mip_dna.status_db.get_case_by_internal_id(case_id)
-
     # WHEN extracting the case delivered files
-    delivered_files: set[Path] = report_api_mip_dna.get_case_delivered_files(case)
+    delivered_files: set[Path] = report_api_mip_dna.get_case_delivered_files(case_mip_dna)
 
     # THEN the files matching MIP-DNA case tags should be returned
     assert delivery_report_html.name in [file.name for file in delivered_files]
 
 
 def test_get_sample_delivered_files(
-    case_id: str, sample_id: str, sample_cram: Path, report_api_mip_dna: MipDNAReportAPI
+    case_mip_dna: Case, sample_id: str, sample_cram: Path, report_api_mip_dna: MipDNAReportAPI
 ):
     """Test get sample level delivered files to Caesar."""
 
     # GIVEN a report API, a MIP-dna case, and a sample level delivered file
-    case: Case = report_api_mip_dna.status_db.get_case_by_internal_id(case_id)
-    case.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
+    case_mip_dna.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
 
     # WHEN extracting the case delivered files
     delivered_files: set[Path] = report_api_mip_dna.get_sample_delivered_files(
-        case=case, sample_id=sample_id
+        case=case_mip_dna, sample_id=sample_id
     )
 
     # THEN the files matching MIP-DNA sample tags should be returned

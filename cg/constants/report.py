@@ -63,6 +63,7 @@ REQUIRED_CASE_FIELDS: list[str] = [
     "samples",
     "data_analysis",
     "applications",
+    "delivered_files",
 ]
 
 # Application required fields (OPTIONAL: "version", "prep_category", "description", "limitations", "external")
@@ -101,6 +102,7 @@ _REQUIRED_SAMPLE_FIELDS: list[str] = [
     "methods",
     "metadata",
     "timestamps",
+    "delivered_files",
 ]
 
 REQUIRED_SAMPLE_MIP_DNA_FIELDS: list[str] = _REQUIRED_SAMPLE_FIELDS + [
