@@ -14,7 +14,9 @@ from cg.constants.constants import DRY_RUN, FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError, HousekeeperFileMissingError, SampleSheetError
 from cg.io.controller import WriteFile, WriteStream
-from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_and_include_sample_sheet_path_to_housekeeper,
+)
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
@@ -76,7 +78,7 @@ def create_sheet(
     if flow_cell.sample_sheet_exists():
         LOG.info("Sample sheet already exists in flow cell directory")
         if not dry_run:
-            add_sample_sheet_path_to_housekeeper(
+            add_and_include_sample_sheet_path_to_housekeeper(
                 flow_cell_directory=flow_cell_path, flow_cell_name=flow_cell_id, hk_api=hk_api
             )
         return
@@ -118,7 +120,7 @@ def create_sheet(
         file_path=flow_cell.sample_sheet_path,
     )
     LOG.info("Adding sample sheet to Housekeeper")
-    add_sample_sheet_path_to_housekeeper(
+    add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=flow_cell_path, flow_cell_name=flow_cell_id, hk_api=hk_api
     )
 
@@ -152,7 +154,7 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
         if flow_cell.sample_sheet_exists():
             LOG.debug("Sample sheet already exists in flow cell directory")
             if not dry_run:
-                add_sample_sheet_path_to_housekeeper(
+                add_and_include_sample_sheet_path_to_housekeeper(
                     flow_cell_directory=sub_dir, flow_cell_name=flow_cell_id, hk_api=hk_api
                 )
             continue
@@ -204,6 +206,6 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
             file_path=flow_cell.sample_sheet_path,
         )
         LOG.info("Adding sample sheet to Housekeeper")
-        add_sample_sheet_path_to_housekeeper(
+        add_and_include_sample_sheet_path_to_housekeeper(
             flow_cell_directory=sub_dir, flow_cell_name=flow_cell_id, hk_api=hk_api
         )

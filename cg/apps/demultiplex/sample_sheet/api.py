@@ -4,6 +4,7 @@ from pathlib import Path
 
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
@@ -11,6 +12,9 @@ from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import BclConverter
 from cg.exc import FlowCellError, HousekeeperFileMissingError, SampleSheetError
 from cg.io.controller import ReadFile, WriteFile
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_and_include_sample_sheet_path_to_housekeeper,
+)
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
@@ -75,13 +79,15 @@ class SampleSheetAPI:
             return
         return self.get_valid_sample_sheet_path(sample_sheet_path)
 
-    def validate_from_content(self, content: list[list[str]]) -> None:
+    @staticmethod
+    def validate_from_content(content: list[list[str]]) -> None:
         """
         Validate a sample sheet given its content.
         Raises:
             SampleSheetError: If the sample sheet is not valid.
         """
-        pass
+        validator: SampleSheetValidator = SampleSheetValidator(content)
+        validator.validate_sample_sheet()
 
     def validate_from_path(self, path: Path) -> None:
         """
@@ -109,7 +115,7 @@ class SampleSheetAPI:
             raise SampleSheetError(message)
         return create_sample_sheet(flow_cell=flow_cell, lims_samples=lims_samples)
 
-    def create_sample_sheet(self, flow_cell: FlowCellDirectoryData) -> None:
+    def create_sample_sheet_file(self, flow_cell: FlowCellDirectoryData) -> None:
         """Create a valid sample sheet in the flow cell directory and add it to Housekeeper."""
         sample_sheet_content: list[list[str]] = self.create_sample_sheet_content(flow_cell)
         if not self.force:
@@ -119,7 +125,9 @@ class SampleSheetAPI:
             file_format=FileFormat.CSV,
             file_path=flow_cell.sample_sheet_path,
         )
-        # TODO: REPLACE FOR ADDING AND INCLUDING TO HK
+        add_and_include_sample_sheet_path_to_housekeeper(
+            flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id, hk_api=self.hk_api
+        )
 
     def get_or_create_sample_sheet(self, flow_cell_name: str, bcl_converter: str) -> None:
         """
@@ -133,19 +141,23 @@ class SampleSheetAPI:
             flow_cell_name=flow_cell_name, bcl_converter=bcl_converter
         )
         if hk_sample_sheet_path := self.get_valid_sample_sheet_path_from_hk(flow_cell.id):
-            LOG.debug(
+            LOG.info(
                 "Sample sheet already exists in Housekeeper. Hard-linking it to flow cell directory"
             )
             if not self.dry_run:
                 os.link(src=hk_sample_sheet_path, dst=flow_cell.sample_sheet_path)
-            return
         elif self.get_valid_sample_sheet_path(flow_cell.sample_sheet_path):
-            LOG.info("Sample sheet already exists in flow cell directory")
+            LOG.info("Sample sheet already exists in flow cell directory. Adding to Housekeeper")
             if not self.dry_run:
-                # TODO: REPLACE FOR ADDING AND INCLUDING TO HK
-                return
+                add_and_include_sample_sheet_path_to_housekeeper(
+                    flow_cell_directory=flow_cell.path,
+                    flow_cell_name=flow_cell.id,
+                    hk_api=self.hk_api,
+                )
         else:
-            self.create_sample_sheet(flow_cell)
+            LOG.info(f"Creating new sample sheet for flow cell {flow_cell_name}")
+            if not self.dry_run:
+                self.create_sample_sheet_file(flow_cell)
 
     def get_or_create_all_sample_sheets(self):
         """Ensure that a valid sample sheet is present in all flow cell directories."""
