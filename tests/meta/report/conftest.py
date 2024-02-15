@@ -5,7 +5,7 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat
+from cg.constants.constants import DataDelivery, FileFormat
 from cg.io.controller import ReadFile
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
@@ -64,7 +64,9 @@ def report_api_rnafusion(
 @pytest.fixture(scope="function")
 def case_mip_dna(case_id: str, report_api_mip_dna: MipDNAReportAPI) -> Case:
     """MIP DNA case instance."""
-    return report_api_mip_dna.status_db.get_case_by_internal_id(internal_id=case_id)
+    case = report_api_mip_dna.status_db.get_case_by_internal_id(internal_id=case_id)
+    case.data_delivery = DataDelivery.ANALYSIS_SCOUT
+    return case
 
 
 @pytest.fixture(scope="function")

@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from cg.constants import REPORT_GENDER, DataDelivery, Workflow
+from cg.constants import REPORT_GENDER, Workflow
 from cg.exc import DeliveryReportError
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -473,6 +473,7 @@ def test_get_case_delivered_files(
     """Test get case level delivered files to Caesar."""
 
     # GIVEN a report API, a MIP-dna case, and a case level delivered file
+
     # WHEN extracting the case delivered files
     delivered_files: set[Path] = report_api_mip_dna.get_case_delivered_files(case_mip_dna)
 
@@ -486,7 +487,6 @@ def test_get_sample_delivered_files(
     """Test get sample level delivered files to Caesar."""
 
     # GIVEN a report API, a MIP-dna case, and a sample level delivered file
-    case_mip_dna.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
 
     # WHEN extracting the case delivered files
     delivered_files: set[Path] = report_api_mip_dna.get_sample_delivered_files(
