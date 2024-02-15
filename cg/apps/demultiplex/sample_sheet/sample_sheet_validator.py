@@ -99,7 +99,12 @@ class SampleSheetValidator:
         ].are_i5_override_cycles_reverse_complemented
 
     def _get_cycle(self, cycle_name: str, nullable: bool = False) -> int | None:
-        """Return the cycle from the sample sheet."""
+        """
+        Return the cycle from the sample sheet given the cycle name. Set nullable to True to
+        return None if the cycle is not found.
+        Raises:
+            SampleSheetError if the cycle is not found and nullable is False.
+        """
         for row in self.content:
             if cycle_name in row:
                 return int(row[1])
@@ -177,7 +182,7 @@ class OverrideCyclesValidator:
         run_read1_cycles: int,
         run_read2_cycles: int,
         run_index1_cycles: int,
-        run_index2_cycles: int,
+        run_index2_cycles: int | None,
         is_reverse_complement: bool,
     ):
         self.sample: dict[str, str] | None = None
@@ -186,7 +191,7 @@ class OverrideCyclesValidator:
         self.run_read1_cycles: int = run_read1_cycles
         self.run_read2_cycles: int = run_read2_cycles
         self.run_index1_cycles: int = run_index1_cycles
-        self.run_index2_cycles: int = run_index2_cycles
+        self.run_index2_cycles: int | None = run_index2_cycles
         self.is_reverse_complement: bool = is_reverse_complement
 
     @staticmethod

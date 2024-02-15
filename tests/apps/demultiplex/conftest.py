@@ -6,9 +6,7 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
-    SampleSheetCreatorBcl2Fastq,
-)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreatorBcl2Fastq
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
@@ -316,18 +314,12 @@ def bcl_convert_flow_cell_sample(raw_index_sequence: str) -> FlowCellSampleBCLCo
 
 
 @pytest.fixture
-def bcl_convert_sample_sheet_path(illumina_demultiplexed_runs_directory):
-    return Path(
-        illumina_demultiplexed_runs_directory,
-        "230504_A00689_0804_BHY7FFDRX2",
-        "SampleSheet.csv",
-    )
+def sample_sheet_content_only_headers() -> list[list[str]]:
+    """Return a sample sheet content with only headers."""
+    return [["[Header]"], ["[Reads]"], ["[BCLConvert_Settings]"], ["[BCLConvert_Data]"]]
 
 
 @pytest.fixture
-def bcl2fastq_sample_sheet_path(illumina_demultiplexed_runs_directory):
-    return Path(
-        illumina_demultiplexed_runs_directory,
-        "170407_ST-E00198_0209_BHHKVCALXX",
-        "SampleSheet.csv",
-    )
+def sample_sheet_content_missing_data_header() -> list[list[str]]:
+    """Return a sample sheet content with only headers."""
+    return [["[Header]"], ["[Reads]"], ["[BCLConvert_Settings]"]]

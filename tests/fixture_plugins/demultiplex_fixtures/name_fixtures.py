@@ -77,6 +77,12 @@ def bcl_convert_flow_cell_full_name() -> str:
     return "211101_A00187_0615_AHLG5GDRZZ"
 
 
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_flow_cell_full_name() -> str:
+    """Return the full name of a NovaSeq 6000 post 1.5 kits flow cell."""
+    return "230912_A00187_1009_AHK33MDRX3"
+
+
 @pytest.fixture(scope="session")
 def novaseq_x_flow_cell_full_name() -> str:
     """Return the full name of a NovaSeqX flow cell."""

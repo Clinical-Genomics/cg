@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Type
 
 import pytest
 
@@ -203,21 +204,27 @@ def test_get_sample_internal_ids_from_sample_sheet(
         assert is_valid_sample_internal_id(sample_internal_id=sample_internal_id) is True
 
 
-def test_get_sample_type_for_bcl_convert(bcl_convert_sample_sheet_path: Path):
+def test_get_sample_type_for_bcl_convert(
+    novaseq_6000_post_1_5_kits_correct_sample_sheet_path: Path,
+):
     # GIVEN a bcl convert sample sheet path
 
     # WHEN getting the sample type
-    sample_type: FlowCellSample = get_sample_type(bcl_convert_sample_sheet_path)
+    sample_type: Type[FlowCellSample] = get_sample_type(
+        novaseq_6000_post_1_5_kits_correct_sample_sheet_path
+    )
 
     # THEN the sample type is FlowCellSampleBCLConvert
     assert sample_type is FlowCellSampleBCLConvert
 
 
-def test_get_sample_type_for_bcl2fastq(bcl2fastq_sample_sheet_path: Path):
+def test_get_sample_type_for_bcl2fastq(hiseq_2500_custom_index_bcl2fastq_sample_sheet: Path):
     # GIVEN a bcl convert sample sheet path
 
     # WHEN getting the sample type
-    sample_type: FlowCellSample = get_sample_type(bcl2fastq_sample_sheet_path)
+    sample_type: Type[FlowCellSample] = get_sample_type(
+        hiseq_2500_custom_index_bcl2fastq_sample_sheet
+    )
 
     # THEN the sample type is FlowCellSampleBCLConvert
     assert sample_type is FlowCellSampleBcl2Fastq

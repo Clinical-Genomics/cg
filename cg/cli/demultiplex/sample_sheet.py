@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
-from cg.apps.demultiplex.sample_sheet.validator import SampleSheetValidator
+from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import DRY_RUN, FileFormat
