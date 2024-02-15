@@ -11,6 +11,7 @@ from cg.models.report.validators import (
     get_list_as_string,
     get_path_as_string,
     get_report_string,
+    get_set_path_as_set_string,
 )
 
 LOG = logging.getLogger(__name__)
@@ -115,7 +116,7 @@ class CaseModel(BaseModel):
     data_analysis: DataAnalysisModel
     applications: list[ApplicationModel]
     scout_files: ScoutReportFiles
-    delivered_files: set[str]  # TODO
+    delivered_files: Annotated[set[str], BeforeValidator(get_set_path_as_set_string)]
 
 
 class ReportModel(BaseModel):

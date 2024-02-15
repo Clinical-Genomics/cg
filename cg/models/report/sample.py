@@ -14,6 +14,7 @@ from cg.models.report.validators import (
     get_gender_as_string,
     get_prep_category_as_string,
     get_report_string,
+    get_set_path_as_set_string,
 )
 
 
@@ -107,4 +108,4 @@ class SampleModel(BaseModel):
         | RnafusionSampleMetadataModel
     )
     timestamps: TimestampModel
-    delivered_files: set[str]  # TODO
+    delivered_files: Annotated[set[str], BeforeValidator(get_set_path_as_set_string)]

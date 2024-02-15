@@ -57,6 +57,19 @@ def get_path_as_string(file_path: str | None) -> str:
     return Path(file_path).name if file_path and Path(file_path).is_file() else NA_FIELD
 
 
+def get_set_path_as_set_string(file_paths: set[Path] | None) -> set[str]:
+    """Return a report validated set of files."""
+    set_string: set[str] = set()
+    if file_paths:
+        for file_path in file_paths:
+            (
+                set_string.update(Path(file_path).name)
+                if file_path and Path(file_path).is_file()
+                else None
+            )
+    return set_string
+
+
 def get_gender_as_string(gender: Sex | None) -> str:
     """Return a report adapted gender."""
     return get_report_string(REPORT_GENDER.get(gender))
