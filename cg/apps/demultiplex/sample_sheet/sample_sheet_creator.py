@@ -5,14 +5,12 @@ from abc import abstractmethod
 from typing import Type
 
 from cg.apps.demultiplex.sample_sheet.index import Index, get_valid_indexes, is_dual_index
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_samples_by_lane,
-    get_validated_sample_sheet,
-)
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_by_lane
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
+from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.constants.demultiplexing import (
     BclConverter,
     IndexSettings,
@@ -124,11 +122,7 @@ class SampleSheetCreator:
             LOG.info("Skipping validation of sample sheet due to force flag")
             return sample_sheet_content
         LOG.info("Validating sample sheet")
-        # TODO: make teh validator receive content
-        get_validated_sample_sheet(
-            sample_sheet_content=sample_sheet_content,
-            sample_type=self.sample_type,
-        )
+        SampleSheetValidator(content=sample_sheet_content).validate_sample_sheet()
         LOG.info("Sample sheet passed validation")
         return sample_sheet_content
 

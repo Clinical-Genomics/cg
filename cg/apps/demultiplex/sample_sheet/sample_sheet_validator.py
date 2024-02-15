@@ -34,14 +34,16 @@ REVERSE_INDEX_CYCLE_PATTERN: str = r"N(\d+)I(\d+)"
 class SampleSheetValidator:
     """Class for validating the content of a sample sheet."""
 
-    def __init__(self, sample_sheet_path: Path):
-        if sample_sheet_path.exists():
-            self.path: Path = sample_sheet_path
+    def __init__(self, path: Path | None = None, content: list[list[str]] | None = None):
+        """Instantiate the class with a sample sheet file path or sample sheet content."""
+        if content:
+            self.content: list[list[str]] = content
+        elif path and path.exists():
+            self.content: list[list[str]] = ReadFile.get_content_from_file(
+                file_format=FileFormat.CSV, file_path=path
+            )
         else:
-            raise SampleSheetError(f"Sample sheet file {sample_sheet_path} does not exist")
-        self.content: list[list[str]] = ReadFile.get_content_from_file(
-            file_format=FileFormat.CSV, file_path=sample_sheet_path
-        )
+            raise SampleSheetError(f"Provide a valid content or an existing sample sheet file.")
         self.sample_type: Type[FlowCellSample] = self._get_sample_type()
         self.read1_cycles: int | None = None
         self.read2_cycles: int | None = None
