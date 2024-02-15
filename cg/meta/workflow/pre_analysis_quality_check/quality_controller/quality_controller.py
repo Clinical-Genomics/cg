@@ -10,7 +10,7 @@ class QualityController:
         Run the qc for the case.
 
         Returns:
-            bool: True if the case passes the qc, False otherwise.
+            bool: True if the case passes any of the quality cheks passed, False otherwise.
 
         """
         return any(quality_check(obj) for quality_check in quality_checks)
