@@ -358,7 +358,7 @@ class ReportAPI(MetaAPI):
             panels=case.panels,
         )
 
-    def get_case_delivered_files(self, case: Case) -> list[Path]:
+    def get_case_delivered_files(self, case: Case) -> set[Path]:
         """Returns a list of case level files to be delivered to Caesar."""
         deliver_api: DeliverAPI = DeliverAPI(
             store=self.status_db,
@@ -370,15 +370,15 @@ class ReportAPI(MetaAPI):
         )
         last_version: Version = self.housekeeper_api.last_version(bundle=case.internal_id)
         sample_ids: set[str] = {link.sample.internal_id for link in case.links}
-        delivered_files: list[Path] = list(
+        delivered_files: set[Path] = set(
             deliver_api.get_case_files_from_version(version=last_version, sample_ids=sample_ids)
         )
         return delivered_files
 
-    def get_sample_delivered_files(self, case: Case, sample_id: str) -> list[Path]:
+    def get_sample_delivered_files(self, case: Case, sample_id: str) -> set[Path]:
         """Returns a list of sample level files to be delivered to Caesar."""
         last_version: Version = self.housekeeper_api.last_version(bundle=case.internal_id)
-        delivered_files: list[Path] = []
+        delivered_files: set[Path] = set()
         for delivery_type in case.get_delivery_arguments():
             if delivery_type == DataDelivery.FASTQ:
                 last_version: Version = self.housekeeper_api.last_version(bundle=sample_id)
@@ -390,12 +390,12 @@ class ReportAPI(MetaAPI):
                 project_base_path=Path(self.config.delivery_path),
                 delivery_type=delivery_type,
             )
-            delivered_sample_files: list[Path] = list(
+            delivered_sample_files: set[Path] = set(
                 deliver_api.get_sample_files_from_version(
                     version_obj=last_version, sample_id=sample_id
                 )
             )
-            delivered_files.extend(delivered_sample_files)
+            delivered_files.update(delivered_sample_files)
         return delivered_files
 
     def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:

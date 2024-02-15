@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from cg.constants import REPORT_GENDER, Workflow
+from cg.constants import REPORT_GENDER, DataDelivery, Workflow
 from cg.exc import DeliveryReportError
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -465,3 +465,36 @@ def test_get_sample_timestamp_data(
 
     # THEN check if the dates are correctly retrieved
     assert sample_timestamp_data.model_dump() == expected_case_samples_data
+
+
+def test_get_case_delivered_files(
+    case_id: str, delivery_report_html: Path, report_api_mip_dna: MipDNAReportAPI
+):
+    """Test get case level delivered files to Caesar."""
+
+    # GIVEN a report API, a MIP-dna case, and a case level delivered file
+    case: Case = report_api_mip_dna.status_db.get_case_by_internal_id(case_id)
+
+    # WHEN extracting the case delivered files
+    delivered_files: set[Path] = report_api_mip_dna.get_case_delivered_files(case)
+
+    # THEN the files matching MIP-DNA case tags should be returned
+    assert delivery_report_html.name in [file.name for file in delivered_files]
+
+
+def test_get_sample_delivered_files(
+    case_id: str, sample_id: str, sample_cram: Path, report_api_mip_dna: MipDNAReportAPI
+):
+    """Test get sample level delivered files to Caesar."""
+
+    # GIVEN a report API, a MIP-dna case, and a sample level delivered file
+    case: Case = report_api_mip_dna.status_db.get_case_by_internal_id(case_id)
+    case.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
+
+    # WHEN extracting the case delivered files
+    delivered_files: set[Path] = report_api_mip_dna.get_sample_delivered_files(
+        case=case, sample_id=sample_id
+    )
+
+    # THEN the files matching MIP-DNA sample tags should be returned
+    assert sample_cram.name in [file.name for file in delivered_files]

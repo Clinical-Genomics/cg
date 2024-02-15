@@ -115,7 +115,7 @@ class CaseModel(BaseModel):
     data_analysis: DataAnalysisModel
     applications: list[ApplicationModel]
     scout_files: ScoutReportFiles
-    delivered_files: list[str]  # TODO
+    delivered_files: set[str]  # TODO
 
 
 class ReportModel(BaseModel):

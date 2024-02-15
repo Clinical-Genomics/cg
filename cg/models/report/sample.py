@@ -107,4 +107,4 @@ class SampleModel(BaseModel):
         | RnafusionSampleMetadataModel
     )
     timestamps: TimestampModel
-    delivered_files: list[str]  # TODO
+    delivered_files: set[str]  # TODO

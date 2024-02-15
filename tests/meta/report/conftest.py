@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
@@ -21,7 +22,10 @@ from tests.mocks.report import MockChanjo, MockHousekeeperMipDNAReportAPI
 
 @pytest.fixture(scope="function")
 def report_api_mip_dna(
-    cg_context: CGConfig, lims_samples: list[dict], report_store: Store
+    cg_context: CGConfig,
+    lims_samples: list[dict],
+    report_store: Store,
+    populated_housekeeper_api: HousekeeperAPI,
 ) -> MipDNAReportAPI:
     """MIP DNA ReportAPI fixture."""
     cg_context.meta_apis["analysis_api"] = MockMipAnalysis(
@@ -31,6 +35,7 @@ def report_api_mip_dna(
     cg_context.lims_api_ = MockLimsAPI(cg_context, lims_samples)
     cg_context.chanjo_api_ = MockChanjo()
     cg_context.scout_api_ = MockScoutApi(cg_context)
+    cg_context.housekeeper_api_ = populated_housekeeper_api
     return MockHousekeeperMipDNAReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
 
 
