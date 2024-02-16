@@ -53,7 +53,7 @@ def test_report_deliver_with_missing_case(
     # GIVEN case_id not in database
     assert not context.status_db.get_case_by_internal_id(internal_id=case_id_does_not_exist)
 
-    # WHEN running
+    # WHEN generating deliverables file
     result = cli_runner.invoke(report_deliver, [case_id_does_not_exist], obj=context)
 
     # THEN command should NOT successfully call the command it creates
