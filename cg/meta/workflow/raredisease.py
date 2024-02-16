@@ -7,6 +7,7 @@ from pathlib import Path
 from cg.io.txt import concat_txt
 from cg.io.config import write_config_nextflow_style
 from cg.constants import GenePanelMasterList, Workflow
+from cg.constants.constants import FileExtensions
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.meta.workflow.analysis import add_gene_panel_combo
@@ -54,7 +55,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Create a parameter (.config) files and a Nextflow sample sheet input for Raredisease analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
-        pipeline_parameters: WorkflowParameters = self.get_pipeline_parameters(case_id=case_id)
+        workflow_parameters: WorkflowParameters = self.get_workflow_parameters(case_id=case_id)
         if dry_run:
             LOG.info("Dry run: nextflow sample sheet and parameter file will not be written")
             return
@@ -63,7 +64,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             file_path=self.get_sample_sheet_path(case_id=case_id),
             header=RarediseaseSampleSheetHeaders.headers(),
         )
-        self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
+        self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
 
     def get_sample_sheet_content_per_sample(
         self, case: Case = "", case_sample: CaseSample = ""
@@ -125,7 +126,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")
         config_files_list = [self.config_platform, self.config_params, self.config_resources]
-        extra_parameters_str = [write_config_nextflow_style(pipeline_parameters),
+        extra_parameters_str = [write_config_nextflow_style(workflow_parameters),
                                 self.set_cluster_options(case_id=case_id)]
         concat_txt(
             file_paths = config_files_list,
