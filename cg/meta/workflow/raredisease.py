@@ -7,7 +7,7 @@ from pathlib import Path
 from cg.io.txt import concat_txt
 from cg.io.config import write_config_nextflow_style
 from cg.constants import GenePanelMasterList, Workflow
-from cg.constants.subject import PlinkPhenotypeStatus
+from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -136,23 +136,22 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     @staticmethod
     def get_phenotype_code(phenotype: str) -> int:
         """Return Raredisease phenotype code."""
-        LOG.debug("Translate phenotype to integer")
+        LOG.debug("Translate phenotype to integer code")
         try:
-            status = PlinkPhenotypeStatus[phenotype.upper()]
+            code = PlinkPhenotypeStatus[phenotype.upper()]
         except KeyError:
-            raise ValueError(f"{phenotype} is not a valid phenotype status")
-        return status
+            raise ValueError(f"{phenotype} is not a valid phenotype")
+        return code
 
     @staticmethod
     def get_sex_code(sex: str) -> int:
         """Return Raredisease sex code."""
-        LOG.debug("Translate sex to int")
-        if sex == "male":
-            return 1
-        elif sex == "female":
-            return 2
-        else:
-            return 0
+        LOG.debug("Translate sex to integer code")
+        try:
+            code = PlinkSex[sex.upper()]
+        except KeyError:
+            raise ValueError(f"{sex} is not a valid sex")
+        return code
 
     @staticmethod
     def get_parental_id(parent: CaseSample) -> str:
