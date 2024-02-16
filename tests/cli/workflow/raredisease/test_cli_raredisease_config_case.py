@@ -37,7 +37,7 @@ def test_config_case_dry_run(
     assert "Writing sample sheet" not in caplog.text
     assert "Writing parameters file" not in caplog.text
 
-def test_config_case_dry_run(
+def test_config_case(
     cli_runner: CliRunner,
     raredisease_context: CGConfig,
     caplog: LogCaptureFixture,

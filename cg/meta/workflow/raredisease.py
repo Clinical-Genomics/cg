@@ -86,7 +86,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             maternal_id=CaseSample.get_maternal_id(case_sample.mother),
             case_id=case.internal_id,
         )
-        return sample_sheet_entry.reformat_sample_content()
+        return sample_sheet_entry.as_list_of_list()
 
     def get_sample_sheet_content(
         self,

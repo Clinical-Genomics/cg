@@ -15,7 +15,7 @@ class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
     maternal_id: str
     case_id: str
 
-    def reformat_sample_content(self) -> list[list[str]]:
+    def as_list_of_list(self) -> list[list[str]]:
         """Reformat sample sheet content as a list of lists, where each list represents a line in the final file."""
         return [
             [
