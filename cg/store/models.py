@@ -2,7 +2,7 @@ import datetime as dt
 import re
 
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.util import deprecated
 
@@ -19,7 +19,9 @@ from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import CONTROL_OPTIONS, CaseActions, PrepCategory
 from cg.constants.priority import SlurmQos
 
-Model = declarative_base()
+
+class Base(DeclarativeBase):
+    pass
 
 
 def to_dict(model_instance):
@@ -33,7 +35,7 @@ def to_dict(model_instance):
 
 flowcell_sample = Table(
     "flowcell_sample",
-    Model.metadata,
+    Base.metadata,
     Column("flowcell_id", types.Integer, ForeignKey("flowcell.id"), nullable=False),
     Column("sample_id", types.Integer, ForeignKey("sample.id"), nullable=False),
     UniqueConstraint("flowcell_id", "sample_id", name="_flowcell_sample_uc"),
@@ -41,7 +43,7 @@ flowcell_sample = Table(
 
 customer_user = Table(
     "customer_user",
-    Model.metadata,
+    Base.metadata,
     Column("customer_id", types.Integer, ForeignKey("customer.id"), nullable=False),
     Column("user_id", types.Integer, ForeignKey("user.id"), nullable=False),
     UniqueConstraint("customer_id", "user_id", name="_customer_user_uc"),
@@ -49,7 +51,7 @@ customer_user = Table(
 
 customer_collaboration = Table(
     "customer_collaboration",
-    Model.metadata,
+    Base.metadata,
     Column("customer_id", types.Integer, ForeignKey("customer.id"), nullable=False),
     Column("collaboration_id", types.Integer, ForeignKey("collaboration.id"), nullable=False),
     UniqueConstraint("customer_id", "collaboration_id", name="_customer_collaboration_uc"),
@@ -86,7 +88,7 @@ class PriorityMixin:
         return self.priority_int < 1
 
 
-class Application(Model):
+class Application(Base):
     __tablename__ = "application"
 
     id = Column(types.Integer, primary_key=True)
@@ -150,7 +152,7 @@ class Application(Model):
         return to_dict(model_instance=self)
 
 
-class ApplicationVersion(Model):
+class ApplicationVersion(Base):
     __tablename__ = "application_version"
     __table_args__ = (UniqueConstraint("application_id", "version", name="_app_version_uc"),)
 
@@ -182,7 +184,7 @@ class ApplicationVersion(Model):
         return data
 
 
-class ApplicationLimitations(Model):
+class ApplicationLimitations(Base):
     __tablename__ = "application_limitations"
 
     id = Column(types.Integer, primary_key=True)
@@ -202,7 +204,7 @@ class ApplicationLimitations(Model):
         return to_dict(model_instance=self)
 
 
-class Analysis(Model):
+class Analysis(Base):
     __tablename__ = "analysis"
 
     id = Column(types.Integer, primary_key=True)
@@ -233,7 +235,7 @@ class Analysis(Model):
         return data
 
 
-class Bed(Model):
+class Bed(Base):
     """Model for bed target captures"""
 
     __tablename__ = "bed"
@@ -253,7 +255,7 @@ class Bed(Model):
         return to_dict(model_instance=self)
 
 
-class BedVersion(Model):
+class BedVersion(Base):
     """Model for bed target captures versions"""
 
     __tablename__ = "bed_version"
@@ -285,7 +287,7 @@ class BedVersion(Model):
         return data
 
 
-class Customer(Model):
+class Customer(Base):
     __tablename__ = "customer"
     agreement_date = Column(types.DateTime)
     agreement_registration = Column(types.String(32))
@@ -341,7 +343,7 @@ class Customer(Model):
         return to_dict(model_instance=self)
 
 
-class Collaboration(Model):
+class Collaboration(Base):
     __tablename__ = "collaboration"
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
@@ -363,7 +365,7 @@ class Collaboration(Model):
         }
 
 
-class Delivery(Model):
+class Delivery(Base):
     __tablename__ = "delivery"
     id = Column(types.Integer, primary_key=True)
     delivered_at = Column(types.DateTime)
@@ -377,7 +379,7 @@ class Delivery(Model):
         return to_dict(model_instance=self)
 
 
-class Case(Model, PriorityMixin):
+class Case(Base, PriorityMixin):
     __tablename__ = "case"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
@@ -523,7 +525,7 @@ class Case(Model, PriorityMixin):
         return data
 
 
-class CaseSample(Model):
+class CaseSample(Base):
     __tablename__ = "case_sample"
     __table_args__ = (UniqueConstraint("case_id", "sample_id", name="_case_sample_uc"),)
 
@@ -561,7 +563,7 @@ class CaseSample(Model):
         return f"{self.case.internal_id} | {self.sample.internal_id}"
 
 
-class Flowcell(Model):
+class Flowcell(Base):
     __tablename__ = "flowcell"
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), unique=True, nullable=False)
@@ -591,7 +593,7 @@ class Flowcell(Model):
         return data
 
 
-class Organism(Model):
+class Organism(Base):
     __tablename__ = "organism"
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), nullable=False, unique=True)
@@ -610,7 +612,7 @@ class Organism(Model):
         return to_dict(model_instance=self)
 
 
-class Panel(Model):
+class Panel(Base):
     __tablename__ = "panel"
     abbrev = Column(types.String(32), unique=True)
     current_version = Column(types.Float, nullable=False)
@@ -628,7 +630,7 @@ class Panel(Model):
         return to_dict(model_instance=self)
 
 
-class Pool(Model):
+class Pool(Base):
     __tablename__ = "pool"
     __table_args__ = (UniqueConstraint("order", "name", name="_order_name_uc"),)
 
@@ -657,7 +659,7 @@ class Pool(Model):
         return to_dict(model_instance=self)
 
 
-class Sample(Model, PriorityMixin):
+class Sample(Base, PriorityMixin):
     __tablename__ = "sample"
     age_at_sampling = Column(types.FLOAT)
     application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
@@ -798,7 +800,7 @@ class Sample(Model, PriorityMixin):
         return data
 
 
-class Invoice(Model):
+class Invoice(Base):
     __tablename__ = "invoice"
     id = Column(types.Integer, primary_key=True)
     customer_id = Column(ForeignKey("customer.id"), nullable=False)
@@ -824,7 +826,7 @@ class Invoice(Model):
         return to_dict(model_instance=self)
 
 
-class User(Model):
+class User(Base):
     __tablename__ = "user"
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(128), nullable=False)
@@ -844,7 +846,7 @@ class User(Model):
         return self.name
 
 
-class SampleLaneSequencingMetrics(Model):
+class SampleLaneSequencingMetrics(Base):
     """Model for storing sequencing metrics per lane and sample."""
 
     __tablename__ = "sample_lane_sequencing_metrics"
@@ -876,7 +878,7 @@ class SampleLaneSequencingMetrics(Model):
         return to_dict(model_instance=self)
 
 
-class Order(Model):
+class Order(Base):
     """Model for storing orders."""
 
     __tablename__ = "order"
