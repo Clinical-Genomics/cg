@@ -5,7 +5,7 @@ from pydantic.v1 import BaseModel, Field, conlist, validator
 from cg.exc import SampleSheetError
 
 
-class PipelineParameters(BaseModel):
+class WorkflowParameters(BaseModel):
     input: Path = Field(..., alias="sample_sheet_path")
     outdir: Path = Field(..., alias="outdir")
 

@@ -54,7 +54,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Create a parameter (.config) files and a Nextflow samplesheet input for Raredisease analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
-        pipeline_parameters: PipelineParameters = self.get_pipeline_parameters(case_id=case_id)
+        pipeline_parameters: WorkflowParameters = self.get_pipeline_parameters(case_id=case_id)
         if dry_run:
             LOG.info("Dry run: nextflow samplesheet and parameter file will not be written")
             return
@@ -108,7 +108,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_workflow_parameters(self, case_id: str) -> WorkflowParameters:
         """Return parameters."""
         LOG.info("Getting parameters information")
-        return PipelineParameters(
+        return WorkflowParameters(
             sample_sheet_path=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
         )
