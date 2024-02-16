@@ -36,3 +36,30 @@ def test_config_case_dry_run(
     assert "Dry run: Config files will not be written" in caplog.text
     assert "Writing sample sheet" not in caplog.text
     assert "Writing parameters file" not in caplog.text
+
+def test_config_case_dry_run(
+    cli_runner: CliRunner,
+    raredisease_context: CGConfig,
+    caplog: LogCaptureFixture,
+    raredisease_case_id: str,
+):
+    """Test case-config."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a valid case
+
+    # WHEN performing a dry-run
+    result = cli_runner.invoke(config_case, [raredisease_case_id], obj=raredisease_context)
+
+    # THEN command should should exit successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN sample sheet and parameters information should be collected
+    assert "Getting sample sheet information" in caplog.text
+    assert "Getting parameters information" in caplog.text
+
+    # THEN sample sheet and parameters information files should not be written
+
+    assert "Dry run: Config files will not be written" not in caplog.text
+    assert "Writing sample sheet" not in caplog.text
+    assert "Writing parameters file" not in caplog.text
