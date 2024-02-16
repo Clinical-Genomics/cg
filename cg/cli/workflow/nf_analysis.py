@@ -103,7 +103,7 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @OPTION_DRY
 @click.pass_obj
 def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Create a Housekeeper deliverables file for given CASE ID."""
+    """Create a Housekeeper deliverables file for given case id."""
 
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 
