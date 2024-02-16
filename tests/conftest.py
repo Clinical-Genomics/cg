@@ -9,7 +9,7 @@ from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 from subprocess import CompletedProcess
-from typing import Any, Generator
+from typing import Any, Generator, List
 
 import pytest
 from housekeeper.store.models import File, Version
@@ -908,6 +908,8 @@ def hk_bundle_data(
     bed_file: Path,
     delivery_report_html: Path,
     sample_cram: Path,
+    father_sample_cram: Path,
+    mother_sample_cram: Path,
     timestamp_yesterday: datetime,
     sample_id: str,
     father_sample_id: str,
@@ -933,6 +935,16 @@ def hk_bundle_data(
                 "path": sample_cram.as_posix(),
                 "archive": False,
                 "tags": [AlignmentFileTag.CRAM, sample_id],
+            },
+            {
+                "path": father_sample_cram.as_posix(),
+                "archive": False,
+                "tags": [AlignmentFileTag.CRAM, father_sample_id],
+            },
+            {
+                "path": mother_sample_cram.as_posix(),
+                "archive": False,
+                "tags": [AlignmentFileTag.CRAM, mother_sample_id],
             },
         ],
     }
@@ -1062,6 +1074,20 @@ def populated_housekeeper_api(
     helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_sample_bundle)
     helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_father_sample_bundle)
     return hk_api
+
+
+@pytest.fixture
+def populated_housekeeper_api_files_exist(
+    case_id: str,
+    populated_housekeeper_api: HousekeeperAPI,
+) -> HousekeeperAPI:
+    """Set up a Housekeeper store with some data and created files."""
+    hk_files: List[File] = populated_housekeeper_api.get_files(case_id).all()
+    for file in hk_files:
+        path: Path = Path(file.full_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.touch()
+    return populated_housekeeper_api
 
 
 @pytest.fixture(name="hk_version")
