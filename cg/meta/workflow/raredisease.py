@@ -92,7 +92,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self,
         case_id: str,
     ) -> list[list[Any]]:
-        """Return sample sheet for Raredisease analysis in case folder."""
+        """Return Raredisease sample sheet content for a case."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_sheet_content = []
         LOG.info("Getting sample sheet information")
