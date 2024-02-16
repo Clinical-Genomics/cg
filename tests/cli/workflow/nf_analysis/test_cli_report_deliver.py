@@ -75,7 +75,7 @@ def test_report_deliver_without_samples(
     no_sample_case_id: str,
     request,
 ):
-    """Test report_deliver command for Taxprofiler and Rnafusion with case_id and no samples."""
+    """Test report-deliver command for workflow with case id and no samples."""
     caplog.set_level(logging.ERROR)
     context = request.getfixturevalue(context)
 
