@@ -120,7 +120,7 @@ def test_report_deliver_successful(
     mocker,
     request,
 ):
-    """Test that deliverable files is properly created on a valid and successful run for Taxprofiler and Rnafusion."""
+    """Test that deliverable files is properly created on a valid and successful run for workflow."""
     caplog.set_level(logging.INFO)
 
     # GIVEN each fixture is being initialised
