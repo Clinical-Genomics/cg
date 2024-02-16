@@ -117,12 +117,6 @@ class NfAnalysisAPI(AnalysisAPI):
             FileExtensions.YAML
         )
 
-    def get_config_file_path(self, case_id: str, params_file: Path | None = None) -> Path:
-        """Return parameters file or a path where the default parameters file for a case id should be located."""
-        if params_file:
-            return Path(params_file).absolute()
-        return Path((self.get_case_path(case_id)), f"{case_id}_params_file{FileExtensions.CONFIG}")
-
     def create_case_directory(self, case_id: str, dry_run: bool = False) -> None:
         """Create case directory."""
         if not dry_run:
