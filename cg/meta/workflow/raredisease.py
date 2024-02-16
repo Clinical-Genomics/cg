@@ -13,7 +13,7 @@ from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.models.raredisease.raredisease import RarediseaseSampleSheetEntry
+from cg.models.raredisease.raredisease import RarediseaseSampleSheetEntry, RarediseaseSampleSheetHeaders
 from cg.models.nf_analysis import WorkflowParameters
 from cg.store.models import Case, Sample, CaseSample
 
@@ -61,7 +61,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.write_sample_sheet(
             content=sample_sheet_content,
             file_path=self.get_sample_sheet_path(case_id=case_id),
-            header=RarediseaseSampleSheetEntry.headers(),
+            header=RarediseaseSampleSheetHeaders.headers(),
         )
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 
