@@ -317,7 +317,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return PipelineDeliverables for a given case."""
         deliverable_template: list[dict] = self.get_deliverables_template_content()
         samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
-        case_path: str = str(self.get_case_path(case_id=case_id))
+        case_path = str(self.get_case_path(case_id=case_id))
         files: list[FileDeliverable] = []
 
         for sample in samples:
