@@ -11,7 +11,7 @@ class WorkflowParameters(BaseModel):
 
 
 class NextflowSampleSheetEntry(BaseModel):
-    """Nextflow samplesheet model.
+    """Nextflow sample sheet model.
 
     Attributes:
         name: sample name, or case id
