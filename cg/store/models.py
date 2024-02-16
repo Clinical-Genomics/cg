@@ -1,22 +1,21 @@
-import datetime as dt
 import re
+from datetime import datetime
+from typing import Any, Optional
 
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.util import deprecated
 
-from cg.constants import (
-    PREP_CATEGORIES,
-    SEX_OPTIONS,
-    STATUS_OPTIONS,
-    DataDelivery,
-    FlowCellStatus,
-    Priority,
-    Workflow,
-)
+from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
-from cg.constants.constants import CONTROL_OPTIONS, CaseActions, PrepCategory
+from cg.constants.constants import (
+    CONTROL_OPTIONS,
+    CaseActions,
+    PrepCategory,
+    SexOptions,
+    StatusOptions,
+)
 from cg.constants.priority import SlurmQos
 
 
@@ -91,40 +90,42 @@ class PriorityMixin:
 class Application(Base):
     __tablename__ = "application"
 
-    id = Column(types.Integer, primary_key=True)
-    tag = Column(types.String(32), unique=True, nullable=False)
-    prep_category = Column(types.Enum(*PREP_CATEGORIES), nullable=False)
-    is_external = Column(types.Boolean, nullable=False, default=False)
-    description = Column(types.String(256), nullable=False)
-    is_accredited = Column(types.Boolean, nullable=False)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    tag: Mapped[str] = mapped_column(types.String(32), unique=True, nullable=False)
+    prep_category: Mapped[str] = mapped_column(types.Enum(*PrepCategory), nullable=False)
+    is_external: Mapped[bool] = mapped_column(types.Boolean, nullable=False, default=False)
+    description: Mapped[str] = mapped_column(types.String(256), nullable=False)
+    is_accredited: Mapped[bool] = mapped_column(types.Boolean, nullable=False)
 
-    turnaround_time = Column(types.Integer)
-    minimum_order = Column(types.Integer, default=1)
-    sequencing_depth = Column(types.Integer)
-    min_sequencing_depth = Column(types.Integer, default=0, nullable=False)
-    target_reads = Column(types.BigInteger, default=0)
-    percent_reads_guaranteed = Column(types.Integer, nullable=False)
-    sample_amount = Column(types.Integer)
-    sample_volume = Column(types.Text)
-    sample_concentration = Column(types.Text)
-    sample_concentration_minimum = Column(types.DECIMAL)
-    sample_concentration_maximum = Column(types.DECIMAL)
-    sample_concentration_minimum_cfdna = Column(types.DECIMAL)
-    sample_concentration_maximum_cfdna = Column(types.DECIMAL)
-    priority_processing = Column(types.Boolean, default=False)
-    details = Column(types.Text)
-    limitations = Column(types.Text)
-    percent_kth = Column(types.Integer, nullable=False)
-    comment = Column(types.Text)
-    is_archived = Column(types.Boolean, default=False)
+    turnaround_time: Mapped[Optional[int]] = mapped_column(types.Integer)
+    minimum_order: Mapped[Optional[int]] = mapped_column(types.Integer, default=1)
+    sequencing_depth: Mapped[Optional[int]] = mapped_column(types.Integer)
+    min_sequencing_depth: Mapped[int] = mapped_column(types.Integer, default=0, nullable=False)
+    target_reads: Mapped[Optional[int]] = mapped_column(types.BigInteger, default=0)
+    percent_reads_guaranteed: Mapped[int] = mapped_column(types.Integer, nullable=False)
+    sample_amount: Mapped[Optional[int]] = mapped_column(types.Integer)
+    sample_volume: Mapped[Optional[str]] = mapped_column(types.Text)
+    sample_concentration: Mapped[Optional[str]] = mapped_column(types.Text)
+    sample_concentration_minimum: Mapped[Optional[float]] = mapped_column(types.DECIMAL)
+    sample_concentration_maximum: Mapped[Optional[float]] = mapped_column(types.DECIMAL)
+    sample_concentration_minimum_cfdna: Mapped[Optional[float]] = mapped_column(types.DECIMAL)
+    sample_concentration_maximum_cfdna: Mapped[Optional[float]] = mapped_column(types.DECIMAL)
+    priority_processing: Mapped[bool] = mapped_column(types.Boolean, default=False)
+    details: Mapped[Optional[str]] = mapped_column(types.Text)
+    limitations: Mapped[Optional[str]] = mapped_column(types.Text)
+    percent_kth: Mapped[int] = mapped_column(types.Integer, nullable=False)
+    comment: Mapped[Optional[str]] = mapped_column(types.Text)
+    is_archived: Mapped[bool] = mapped_column(types.Boolean, default=False)
 
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+    created_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, default=datetime.now)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, onupdate=datetime.now)
 
-    versions = orm.relationship(
+    versions: Mapped[list["ApplicationVersion"]] = orm.relationship(
         "ApplicationVersion", order_by="ApplicationVersion.version", back_populates="application"
     )
-    pipeline_limitations = orm.relationship("ApplicationLimitations", back_populates="application")
+    pipeline_limitations: Mapped[list["ApplicationLimitations"]] = orm.relationship(
+        "ApplicationLimitations", back_populates="application"
+    )
 
     def __str__(self) -> str:
         return self.tag
@@ -156,22 +157,22 @@ class ApplicationVersion(Base):
     __tablename__ = "application_version"
     __table_args__ = (UniqueConstraint("application_id", "version", name="_app_version_uc"),)
 
-    id = Column(types.Integer, primary_key=True)
-    version = Column(types.Integer, nullable=False)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    version: Mapped[int] = mapped_column(types.Integer, nullable=False)
 
-    valid_from = Column(types.DateTime, default=dt.datetime.now, nullable=False)
-    price_standard = Column(types.Integer)
-    price_priority = Column(types.Integer)
-    price_express = Column(types.Integer)
-    price_research = Column(types.Integer)
-    price_clinical_trials = Column(types.Integer)
-    comment = Column(types.Text)
+    valid_from = mapped_column(types.DateTime, default=datetime.now, nullable=False)
+    price_standard: Mapped[Optional[int]] = mapped_column(types.Integer)
+    price_priority: Mapped[Optional[int]] = mapped_column(types.Integer)
+    price_express: Mapped[Optional[int]] = mapped_column(types.Integer)
+    price_research: Mapped[Optional[int]] = mapped_column(types.Integer)
+    price_clinical_trials: Mapped[Optional[int]] = mapped_column(types.Integer)
+    comment: Mapped[Optional[str]] = mapped_column(types.Text)
 
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
-    application_id = Column(ForeignKey(Application.id), nullable=False)
+    created_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, default=datetime.now)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, onupdate=datetime.now)
+    application_id: Mapped[int] = mapped_column(ForeignKey(Application.id), nullable=False)
 
-    application = orm.relationship(Application, back_populates="versions")
+    application: Mapped["Application"] = orm.relationship(Application, back_populates="versions")
 
     def __str__(self) -> str:
         return f"{self.application.tag} ({self.version})"
@@ -187,13 +188,13 @@ class ApplicationVersion(Base):
 class ApplicationLimitations(Base):
     __tablename__ = "application_limitations"
 
-    id = Column(types.Integer, primary_key=True)
-    application_id = Column(ForeignKey(Application.id), nullable=False)
-    pipeline = Column(types.Enum(*list(Workflow)), nullable=False)
-    limitations = Column(types.Text)
-    comment = Column(types.Text)
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    application_id: Mapped[int] = mapped_column(ForeignKey(Application.id), nullable=False)
+    pipeline: Mapped[Workflow] = mapped_column(types.Enum(*list(Workflow)), nullable=False)
+    limitations: Mapped[Optional[str]] = mapped_column(types.Text)
+    comment: Mapped[Optional[str]] = mapped_column(types.Text)
+    created_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, default=datetime.now)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, onupdate=datetime.now)
 
     application = orm.relationship(Application, back_populates="pipeline_limitations")
 
@@ -207,22 +208,24 @@ class ApplicationLimitations(Base):
 class Analysis(Base):
     __tablename__ = "analysis"
 
-    id = Column(types.Integer, primary_key=True)
-    pipeline = Column(types.Enum(*list(Workflow)))
-    pipeline_version = Column(types.String(32))
-    started_at = Column(types.DateTime)
-    completed_at = Column(types.DateTime)
-    delivery_report_created_at = Column(types.DateTime)
-    upload_started_at = Column(types.DateTime)
-    uploaded_at = Column(types.DateTime)
-    cleaned_at = Column(types.DateTime)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    pipeline: Mapped[Optional[Workflow]] = mapped_column(types.Enum(*list(Workflow)))
+    pipeline_version: Mapped[Optional[str]] = mapped_column(types.String(32))
+    started_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    delivery_report_created_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    upload_started_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    uploaded_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    cleaned_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
     # primary analysis is the one originally delivered to the customer
-    is_primary = Column(types.Boolean, default=False)
+    is_primary: Mapped[Optional[bool]] = mapped_column(types.Boolean, default=False)
 
-    created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
-    case_id = Column(ForeignKey("case.id", ondelete="CASCADE"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        types.DateTime, default=datetime.now, nullable=False
+    )
+    case_id: Mapped[int] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"), nullable=False)
 
-    case = orm.relationship("Case", back_populates="analyses")
+    case: Mapped["Case"] = orm.relationship("Case", back_populates="analyses")
 
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
@@ -239,14 +242,16 @@ class Bed(Base):
     """Model for bed target captures"""
 
     __tablename__ = "bed"
-    id = Column(types.Integer, primary_key=True)
-    name = Column(types.String(32), unique=True, nullable=False)
-    comment = Column(types.Text)
-    is_archived = Column(types.Boolean, default=False)
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(types.String(32), unique=True, nullable=False)
+    comment: Mapped[Optional[str]] = mapped_column(types.Text)
+    is_archived: Mapped[bool] = mapped_column(types.Boolean, default=False)
+    created_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, default=datetime.now)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, onupdate=datetime.now)
 
-    versions = orm.relationship("BedVersion", order_by="BedVersion.version", back_populates="bed")
+    versions: Mapped[list["BedVersion"]] = orm.relationship(
+        "BedVersion", order_by="BedVersion.version", back_populates="bed"
+    )
 
     def __str__(self) -> str:
         return self.name
@@ -261,20 +266,20 @@ class BedVersion(Base):
     __tablename__ = "bed_version"
     __table_args__ = (UniqueConstraint("bed_id", "version", name="_app_version_uc"),)
 
-    id = Column(types.Integer, primary_key=True)
-    shortname = Column(types.String(64))
-    version = Column(types.Integer, nullable=False)
-    filename = Column(types.String(256), nullable=False)
-    checksum = Column(types.String(32))
-    panel_size = Column(types.Integer)
-    genome_version = Column(types.String(32))
-    designer = Column(types.String(256))
-    comment = Column(types.Text)
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
-    bed_id = Column(ForeignKey(Bed.id), nullable=False)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    shortname: Mapped[Optional[str]] = mapped_column(types.String(64))
+    version: Mapped[int] = mapped_column(types.Integer, nullable=False)
+    filename: Mapped[str] = mapped_column(types.String(256), nullable=False)
+    checksum: Mapped[Optional[str]] = mapped_column(types.String(32))
+    panel_size: Mapped[Optional[int]] = mapped_column(types.Integer)
+    genome_version: Mapped[Optional[str]] = mapped_column(types.String(32))
+    designer: Mapped[Optional[str]] = mapped_column(types.String(256))
+    comment: Mapped[Optional[str]] = mapped_column(types.Text)
+    created_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, default=datetime.now)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, onupdate=datetime.now)
+    bed_id: Mapped[int] = mapped_column(ForeignKey(Bed.id), nullable=False)
 
-    bed = orm.relationship(Bed, back_populates="versions")
+    bed: Mapped["Bed"] = orm.relationship(Bed, back_populates="versions")
 
     def __str__(self) -> str:
         return f"{self.bed.name} ({self.version})"
@@ -289,41 +294,51 @@ class BedVersion(Base):
 
 class Customer(Base):
     __tablename__ = "customer"
-    agreement_date = Column(types.DateTime)
-    agreement_registration = Column(types.String(32))
-    comment = Column(types.Text)
-    id = Column(types.Integer, primary_key=True)
-    internal_id = Column(types.String(32), unique=True, nullable=False)
-    invoice_address = Column(types.Text, nullable=False)
-    invoice_reference = Column(types.String(32), nullable=False)
-    is_trusted = Column(types.Boolean, nullable=False, default=False)
-    lab_contact_id = Column(ForeignKey("user.id"))
-    lab_contact = orm.relationship("User", foreign_keys=[lab_contact_id])
-    loqus_upload = Column(types.Boolean, nullable=False, default=False)
-    name = Column(types.String(128), nullable=False)
-    organisation_number = Column(types.String(32))
-    priority = Column(types.Enum("diagnostic", "research"))
-    project_account_ki = Column(types.String(32))
-    project_account_kth = Column(types.String(32))
-    return_samples = Column(types.Boolean, nullable=False, default=False)
-    scout_access = Column(types.Boolean, nullable=False, default=False)
-    uppmax_account = Column(types.String(32))
-    data_archive_location = Column(types.String(32), nullable=False, default=PDC_ARCHIVE_LOCATION)
-    is_clinical = Column(types.Boolean, nullable=False, default=False)
+    agreement_date: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    agreement_registration: Mapped[Optional[str]] = mapped_column(types.String(32))
+    comment: Mapped[Optional[str]] = mapped_column(types.Text)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    internal_id: Mapped[str] = mapped_column(types.String(32), unique=True, nullable=False)
+    invoice_address: Mapped[str] = mapped_column(types.Text, nullable=False)
+    invoice_reference: Mapped[str] = mapped_column(types.String(32), nullable=False)
+    is_trusted = mapped_column(types.Boolean, nullable=False, default=False)
+    lab_contact_id: Mapped[Optional[int]] = mapped_column(ForeignKey("user.id"))
+    lab_contact: Mapped[Optional["User"]] = orm.relationship("User", foreign_keys=[lab_contact_id])
+    loqus_upload: Mapped[bool] = mapped_column(types.Boolean, nullable=False, default=False)
+    name: Mapped[str] = mapped_column(types.String(128), nullable=False)
+    organisation_number: Mapped[Optional[str]] = mapped_column(types.String(32))
+    priority: Mapped[Optional[str]] = mapped_column(types.Enum("diagnostic", "research"))
+    project_account_ki: Mapped[Optional[str]] = mapped_column(types.String(32))
+    project_account_kth: Mapped[Optional[str]] = mapped_column(types.String(32))
+    return_samples: Mapped[bool] = mapped_column(types.Boolean, nullable=False, default=False)
+    scout_access: Mapped[bool] = mapped_column(types.Boolean, nullable=False, default=False)
+    uppmax_account: Mapped[Optional[str]] = mapped_column(types.String(32))
+    data_archive_location: Mapped[str] = mapped_column(
+        types.String(32), nullable=False, default=PDC_ARCHIVE_LOCATION
+    )
+    is_clinical: Mapped[bool] = mapped_column(types.Boolean, nullable=False, default=False)
 
-    collaborations = orm.relationship(
+    collaborations: Mapped[list["Collaboration"]] = orm.relationship(
         "Collaboration", secondary="customer_collaboration", back_populates="customers"
     )
 
-    delivery_contact_id = Column(ForeignKey("user.id"))
-    delivery_contact = orm.relationship("User", foreign_keys=[delivery_contact_id])
-    invoice_contact_id = Column(ForeignKey("user.id"))
-    invoice_contact = orm.relationship("User", foreign_keys=[invoice_contact_id])
-    primary_contact_id = Column(ForeignKey("user.id"))
-    primary_contact = orm.relationship("User", foreign_keys=[primary_contact_id])
+    delivery_contact_id: Mapped[Optional[int]] = mapped_column(ForeignKey("user.id"))
+    delivery_contact: Mapped[Optional["User"]] = orm.relationship(
+        "User", foreign_keys=[delivery_contact_id]
+    )
+    invoice_contact_id: Mapped[Optional[int]] = mapped_column(ForeignKey("user.id"))
+    invoice_contact: Mapped[Optional["User"]] = orm.relationship(
+        "User", foreign_keys=[invoice_contact_id]
+    )
+    primary_contact_id: Mapped[Optional[int]] = mapped_column(ForeignKey("user.id"))
+    primary_contact: Mapped[Optional["User"]] = orm.relationship(
+        "User", foreign_keys=[primary_contact_id]
+    )
 
-    panels = orm.relationship("Panel", back_populates="customer")
-    users = orm.relationship("User", secondary=customer_user, back_populates="customers")
+    panels: Mapped[list["Panel"]] = orm.relationship("Panel", back_populates="customer")
+    users: Mapped[list["User"]] = orm.relationship(
+        "User", secondary=customer_user, back_populates="customers"
+    )
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -345,10 +360,10 @@ class Customer(Base):
 
 class Collaboration(Base):
     __tablename__ = "collaboration"
-    id = Column(types.Integer, primary_key=True)
-    internal_id = Column(types.String(32), unique=True, nullable=False)
-    name = Column(types.String(128), nullable=False)
-    customers = orm.relationship(
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    internal_id: Mapped[str] = mapped_column(types.String(32), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(types.String(128), nullable=False)
+    customers: Mapped[list["Customer"]] = orm.relationship(
         "Customer", secondary="customer_collaboration", back_populates="collaborations"
     )
 
@@ -367,13 +382,15 @@ class Collaboration(Base):
 
 class Delivery(Base):
     __tablename__ = "delivery"
-    id = Column(types.Integer, primary_key=True)
-    delivered_at = Column(types.DateTime)
-    removed_at = Column(types.DateTime)
-    destination = Column(types.Enum("caesar", "pdc", "uppmax", "mh", "custom"), default="caesar")
-    sample_id = Column(ForeignKey("sample.id", ondelete="CASCADE"))
-    pool_id = Column(ForeignKey("pool.id", ondelete="CASCADE"))
-    comment = Column(types.Text)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    delivered_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    removed_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    destination: Mapped[Optional[str]] = mapped_column(
+        types.Enum("caesar", "pdc", "uppmax", "mh", "custom"), default="caesar"
+    )
+    sample_id: Mapped[Optional[int]] = mapped_column(ForeignKey("sample.id", ondelete="CASCADE"))
+    pool_id: Mapped[Optional[int]] = mapped_column(ForeignKey("pool.id", ondelete="CASCADE"))
+    comment: Mapped[Optional[str]] = mapped_column(types.Text)
 
     def to_dict(self):
         return to_dict(model_instance=self)
@@ -383,28 +400,34 @@ class Case(Base, PriorityMixin):
     __tablename__ = "case"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
-    action = Column(types.Enum(*CaseActions.actions()))
-    _cohorts = Column(types.Text)
-    comment = Column(types.Text)
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
-    customer = orm.relationship(Customer, foreign_keys=[customer_id])
-    data_analysis = Column(types.Enum(*list(Workflow)))
-    data_delivery = Column(types.Enum(*list(DataDelivery)))
-    id = Column(types.Integer, primary_key=True)
-    internal_id = Column(types.String(32), unique=True, nullable=False)
-    is_compressible = Column(types.Boolean, nullable=False, default=True)
-    name = Column(types.String(128), nullable=False)
-    order_id = Column(ForeignKey("order.id"))
-    ordered_at = Column(types.DateTime, default=dt.datetime.now)
-    _panels = Column(types.Text)
+    action: Mapped[Optional[CaseActions]] = mapped_column(types.Enum(*CaseActions.actions()))
+    _cohorts: Mapped[Optional[str]] = mapped_column(types.Text)
+    comment: Mapped[Optional[str]] = mapped_column(types.Text)
+    created_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, default=datetime.now)
+    customer_id: Mapped[int] = mapped_column(
+        ForeignKey("customer.id", ondelete="CASCADE"), nullable=False
+    )
+    customer: Mapped["Customer"] = orm.relationship(Customer, foreign_keys=[customer_id])
+    data_analysis: Mapped[Optional[Workflow]] = mapped_column(types.Enum(*list(Workflow)))
+    data_delivery: Mapped[Optional[DataDelivery]] = mapped_column(types.Enum(*list(DataDelivery)))
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    internal_id: Mapped[str] = mapped_column(types.String(32), unique=True, nullable=False)
+    is_compressible: Mapped[bool] = mapped_column(types.Boolean, nullable=False, default=True)
+    name: Mapped[str] = mapped_column(types.String(128), nullable=False)
+    order_id: Mapped[Optional[int]] = mapped_column(ForeignKey("order.id"))
+    ordered_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, default=datetime.now)
+    _panels: Mapped[Optional[str]] = mapped_column(types.Text)
 
-    priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
-    synopsis = Column(types.Text)
-    tickets = Column(types.VARCHAR(128))
+    priority: Mapped[Priority] = mapped_column(
+        types.Enum(Priority), default=Priority.standard, nullable=False
+    )
+    synopsis: Mapped[Optional[str]] = mapped_column(types.Text)
+    tickets: Mapped[Optional[str]] = mapped_column(types.VARCHAR(128))
 
-    analyses = orm.relationship(Analysis, back_populates="case", order_by="-Analysis.completed_at")
-    links = orm.relationship("CaseSample", back_populates="case")
+    analyses: Mapped[list["Analysis"]] = orm.relationship(
+        Analysis, back_populates="case", order_by="-Analysis.completed_at"
+    )
+    links: Mapped[list["CaseSample"]] = orm.relationship("CaseSample", back_populates="case")
 
     @property
     def cohorts(self) -> list[str]:
@@ -430,11 +453,11 @@ class Case(Base, PriorityMixin):
         return self.tickets.split(sep=",")[-1] if self.tickets else None
 
     @property
-    def latest_analyzed(self) -> dt.datetime | None:
+    def latest_analyzed(self) -> datetime | None:
         return self.analyses[0].completed_at if self.analyses else None
 
     @property
-    def latest_sequenced(self) -> dt.datetime | None:
+    def latest_sequenced(self) -> datetime | None:
         sequenced_dates = []
         for link in self.links:
             if link.sample.application_version.application.is_external:
@@ -529,21 +552,31 @@ class CaseSample(Base):
     __tablename__ = "case_sample"
     __table_args__ = (UniqueConstraint("case_id", "sample_id", name="_case_sample_uc"),)
 
-    id = Column(types.Integer, primary_key=True)
-    case_id = Column(ForeignKey("case.id", ondelete="CASCADE"), nullable=False)
-    sample_id = Column(ForeignKey("sample.id", ondelete="CASCADE"), nullable=False)
-    status = Column(types.Enum(*STATUS_OPTIONS), default="unknown", nullable=False)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    case_id: Mapped[str] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"), nullable=False)
+    sample_id: Mapped[int] = mapped_column(
+        ForeignKey("sample.id", ondelete="CASCADE"), nullable=False
+    )
+    status: Mapped[StatusOptions] = mapped_column(
+        types.Enum(*StatusOptions), default="unknown", nullable=False
+    )
 
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+    created_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, default=datetime.now)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, onupdate=datetime.now)
 
-    mother_id = Column(ForeignKey("sample.id"))
-    father_id = Column(ForeignKey("sample.id"))
+    mother_id: Mapped[Optional[int]] = mapped_column(ForeignKey("sample.id"))
+    father_id: Mapped[Optional[int]] = mapped_column(ForeignKey("sample.id"))
 
-    case = orm.relationship(Case, back_populates="links")
-    sample = orm.relationship("Sample", foreign_keys=[sample_id], back_populates="links")
-    mother = orm.relationship("Sample", foreign_keys=[mother_id], back_populates="mother_links")
-    father = orm.relationship("Sample", foreign_keys=[father_id], back_populates="father_links")
+    case: Mapped["Case"] = orm.relationship(Case, back_populates="links")
+    sample: Mapped["Sample"] = orm.relationship(
+        "Sample", foreign_keys=[sample_id], back_populates="links"
+    )
+    mother: Mapped[Optional["Sample"]] = orm.relationship(
+        "Sample", foreign_keys=[mother_id], back_populates="mother_links"
+    )
+    father: Mapped[Optional["Sample"]] = orm.relationship(
+        "Sample", foreign_keys=[father_id], back_populates="father_links"
+    )
 
     def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
         """Represent as dictionary"""
@@ -565,18 +598,24 @@ class CaseSample(Base):
 
 class Flowcell(Base):
     __tablename__ = "flowcell"
-    id = Column(types.Integer, primary_key=True)
-    name = Column(types.String(32), unique=True, nullable=False)
-    sequencer_type = Column(types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx"))
-    sequencer_name = Column(types.String(32))
-    sequenced_at = Column(types.DateTime)
-    status = Column(types.Enum(*FlowCellStatus.statuses()), default="ondisk")
-    archived_at = Column(types.DateTime)
-    has_backup = Column(types.Boolean, nullable=False, default=False)
-    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(types.String(32), unique=True, nullable=False)
+    sequencer_type: Mapped[Optional[str]] = mapped_column(
+        types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx")
+    )
+    sequencer_name: Mapped[Optional[str]] = mapped_column(types.String(32))
+    sequenced_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    status: Mapped[Optional[FlowCellStatus]] = mapped_column(
+        types.Enum(*FlowCellStatus.statuses()), default="ondisk"
+    )
+    archived_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    has_backup: Mapped[bool] = mapped_column(types.Boolean, nullable=False, default=False)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, onupdate=datetime.now)
 
-    samples = orm.relationship("Sample", secondary=flowcell_sample, back_populates="flowcells")
-    sequencing_metrics = orm.relationship(
+    samples: Mapped[list["Sample"]] = orm.relationship(
+        "Sample", secondary=flowcell_sample, back_populates="flowcells"
+    )
+    sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
         "SampleLaneSequencingMetrics",
         back_populates="flowcell",
         cascade="all, delete, delete-orphan",
@@ -595,14 +634,14 @@ class Flowcell(Base):
 
 class Organism(Base):
     __tablename__ = "organism"
-    id = Column(types.Integer, primary_key=True)
-    internal_id = Column(types.String(32), nullable=False, unique=True)
-    name = Column(types.String(255), nullable=False, unique=True)
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
-    reference_genome = Column(types.String(255))
-    verified = Column(types.Boolean, default=False)
-    comment = Column(types.Text)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    internal_id: Mapped[str] = mapped_column(types.String(32), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(types.String(255), nullable=False, unique=True)
+    created_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, default=datetime.now)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, onupdate=datetime.now)
+    reference_genome: Mapped[Optional[str]] = mapped_column(types.String(255))
+    verified: Mapped[Optional[bool]] = mapped_column(types.Boolean, default=False)
+    comment: Mapped[Optional[str]] = mapped_column(types.Text)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -614,14 +653,16 @@ class Organism(Base):
 
 class Panel(Base):
     __tablename__ = "panel"
-    abbrev = Column(types.String(32), unique=True)
-    current_version = Column(types.Float, nullable=False)
-    customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
-    customer = orm.relationship(Customer, back_populates="panels")
-    date = Column(types.DateTime, nullable=False)
-    gene_count = Column(types.Integer)
-    id = Column(types.Integer, primary_key=True)
-    name = Column(types.String(64), unique=True)
+    abbrev: Mapped[Optional[str]] = mapped_column(types.String(32), unique=True)
+    current_version: Mapped[float] = mapped_column(types.Float, nullable=False)
+    customer_id: Mapped[int] = mapped_column(
+        ForeignKey("customer.id", ondelete="CASCADE"), nullable=False
+    )
+    customer: Mapped["Customer"] = orm.relationship(Customer, back_populates="panels")
+    date: Mapped[datetime] = mapped_column(types.DateTime, nullable=False)
+    gene_count: Mapped[Optional[int]] = mapped_column(types.Integer)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    name: Mapped[Optional[str]] = mapped_column(types.String(64), unique=True)
 
     def __str__(self):
         return f"{self.abbrev} ({self.current_version})"
@@ -634,26 +675,30 @@ class Pool(Base):
     __tablename__ = "pool"
     __table_args__ = (UniqueConstraint("order", "name", name="_order_name_uc"),)
 
-    application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
-    application_version = orm.relationship(
+    application_version_id: Mapped[int] = mapped_column(
+        ForeignKey("application_version.id"), nullable=False
+    )
+    application_version: Mapped["ApplicationVersion"] = orm.relationship(
         ApplicationVersion, foreign_keys=[application_version_id]
     )
-    comment = Column(types.Text)
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
-    customer = orm.relationship(Customer, foreign_keys=[customer_id])
-    delivered_at = Column(types.DateTime)
-    deliveries = orm.relationship(Delivery, backref="pool")
-    id = Column(types.Integer, primary_key=True)
-    invoice_id = Column(ForeignKey("invoice.id"))
-    name = Column(types.String(32), nullable=False)
-    no_invoice = Column(types.Boolean, default=False)
-    order = Column(types.String(64), nullable=False)
-    ordered_at = Column(types.DateTime, nullable=False)
-    received_at = Column(types.DateTime)
-    ticket = Column(types.String(32))
+    comment: Mapped[Optional[str]] = mapped_column(types.Text)
+    created_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, default=datetime.now)
+    customer_id: Mapped[int] = mapped_column(
+        ForeignKey("customer.id", ondelete="CASCADE"), nullable=False
+    )
+    customer: Mapped["Customer"] = orm.relationship(Customer, foreign_keys=[customer_id])
+    delivered_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    deliveries: Mapped[list["Delivery"]] = orm.relationship(Delivery, backref="pool")
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    invoice_id: Mapped[Optional[int]] = mapped_column(ForeignKey("invoice.id"))
+    name: Mapped[str] = mapped_column(types.String(32), nullable=False)
+    no_invoice: Mapped[Optional[bool]] = mapped_column(types.Boolean, default=False)
+    order: Mapped[str] = mapped_column(types.String(64), nullable=False)
+    ordered_at: Mapped[datetime] = mapped_column(types.DateTime, nullable=False)
+    received_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    ticket: Mapped[Optional[str]] = mapped_column(types.String(32))
 
-    invoice = orm.relationship("Invoice", back_populates="pools")
+    invoice: Mapped[Optional["Invoice"]] = orm.relationship("Invoice", back_populates="pools")
 
     def to_dict(self):
         return to_dict(model_instance=self)
@@ -661,60 +706,72 @@ class Pool(Base):
 
 class Sample(Base, PriorityMixin):
     __tablename__ = "sample"
-    age_at_sampling = Column(types.FLOAT)
-    application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
-    application_version = orm.relationship(
+    age_at_sampling: Mapped[Optional[float]] = mapped_column(types.FLOAT)
+    application_version_id: Mapped[int] = mapped_column(
+        ForeignKey("application_version.id"), nullable=False
+    )
+    application_version: Mapped["ApplicationVersion"] = orm.relationship(
         ApplicationVersion, foreign_keys=[application_version_id]
     )
-    capture_kit = Column(types.String(64))
-    comment = Column(types.Text)
-    control = Column(types.Enum(*CONTROL_OPTIONS))
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
-    customer = orm.relationship("Customer", foreign_keys=[customer_id])
-    delivered_at = Column(types.DateTime)
-    deliveries = orm.relationship(Delivery, backref="sample")
-    downsampled_to = Column(types.BigInteger)
-    from_sample = Column(types.String(128))
-    id = Column(types.Integer, primary_key=True)
-    internal_id = Column(types.String(32), nullable=False, unique=True)
-    invoice_id = Column(ForeignKey("invoice.id"))
-    invoiced_at = Column(types.DateTime)  # DEPRECATED
-    _is_external = Column("is_external", types.Boolean)  # DEPRECATED
-    is_tumour = Column(types.Boolean, default=False)
-    loqusdb_id = Column(types.String(64))
-    name = Column(types.String(128), nullable=False)
-    no_invoice = Column(types.Boolean, default=False)
-    order = Column(types.String(64))
-    ordered_at = Column(types.DateTime, nullable=False)
-    organism_id = Column(ForeignKey("organism.id"))
-    organism = orm.relationship("Organism", foreign_keys=[organism_id])
-    original_ticket = Column(types.String(32))
-    _phenotype_groups = Column(types.Text)
-    _phenotype_terms = Column(types.Text)
-    prepared_at = Column(types.DateTime)
+    capture_kit: Mapped[Optional[str]] = mapped_column(types.String(64))
+    comment: Mapped[Optional[str]] = mapped_column(types.Text)
+    control: Mapped[Optional[str]] = mapped_column(types.Enum(*CONTROL_OPTIONS))
+    created_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, default=datetime.now)
+    customer_id: Mapped[int] = mapped_column(
+        ForeignKey("customer.id", ondelete="CASCADE"), nullable=False
+    )
+    customer: Mapped["Customer"] = orm.relationship("Customer", foreign_keys=[customer_id])
+    delivered_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    deliveries: Mapped[list["Delivery"]] = orm.relationship(Delivery, backref="sample")
+    downsampled_to: Mapped[Optional[int]] = mapped_column(types.BigInteger)
+    from_sample: Mapped[Optional[str]] = mapped_column(types.String(128))
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    internal_id: Mapped[str] = mapped_column(types.String(32), nullable=False, unique=True)
+    invoice_id: Mapped[Optional[int]] = mapped_column(ForeignKey("invoice.id"))
+    invoiced_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)  # DEPRECATED
+    _is_external: Mapped[Optional[bool]] = mapped_column("is_external", types.Boolean)  # DEPRECATED
+    is_tumour: Mapped[Optional[bool]] = mapped_column(types.Boolean, default=False)
+    loqusdb_id: Mapped[Optional[str]] = mapped_column(types.String(64))
+    name: Mapped[str] = mapped_column(types.String(128), nullable=False)
+    no_invoice: Mapped[bool] = mapped_column(types.Boolean, default=False)
+    order: Mapped[Optional[str]] = mapped_column(types.String(64))
+    ordered_at: Mapped[bool] = mapped_column(types.DateTime, nullable=False)
+    organism_id: Mapped[Optional[int]] = mapped_column(ForeignKey("organism.id"))
+    organism: Mapped[Optional["Organism"]] = orm.relationship(
+        "Organism", foreign_keys=[organism_id]
+    )
+    original_ticket: Mapped[Optional[str]] = mapped_column(types.String(32))
+    _phenotype_groups: Mapped[Optional[str]] = mapped_column(types.Text)
+    _phenotype_terms: Mapped[Optional[str]] = mapped_column(types.Text)
+    prepared_at: Mapped[Optional[str]] = mapped_column(types.DateTime)
 
-    priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
-    reads = Column(types.BigInteger, default=0)
-    last_sequenced_at = Column(types.DateTime)
-    received_at = Column(types.DateTime)
-    reference_genome = Column(types.String(255))
-    sequence_start = Column(types.DateTime)
-    sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
-    subject_id = Column(types.String(128))
+    priority: Mapped[Priority] = mapped_column(
+        types.Enum(Priority), default=Priority.standard, nullable=False
+    )
+    reads: Mapped[Optional[int]] = mapped_column(types.BigInteger, default=0)
+    last_sequenced_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    received_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    reference_genome: Mapped[Optional[str]] = mapped_column(types.String(255))
+    sequence_start: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    sex: Mapped[SexOptions] = mapped_column(types.Enum(*SexOptions), nullable=False)
+    subject_id: Mapped[Optional[str]] = mapped_column(types.String(128))
 
-    links = orm.relationship(
+    links: Mapped[list["CaseSample"]] = orm.relationship(
         CaseSample, foreign_keys=[CaseSample.sample_id], back_populates="sample"
     )
-    mother_links = orm.relationship(
+    mother_links: Mapped[list["CaseSample"]] = orm.relationship(
         CaseSample, foreign_keys=[CaseSample.mother_id], back_populates="mother"
     )
-    father_links = orm.relationship(
+    father_links: Mapped[list["CaseSample"]] = orm.relationship(
         CaseSample, foreign_keys=[CaseSample.father_id], back_populates="father"
     )
-    flowcells = orm.relationship(Flowcell, secondary=flowcell_sample, back_populates="samples")
-    sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")
-    invoice = orm.relationship("Invoice", back_populates="samples")
+    flowcells: Mapped[list["Flowcell"]] = orm.relationship(
+        Flowcell, secondary=flowcell_sample, back_populates="samples"
+    )
+    sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
+        "SampleLaneSequencingMetrics", back_populates="sample"
+    )
+    invoice: Mapped[Optional["Invoice"]] = orm.relationship("Invoice", back_populates="samples")
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -802,21 +859,21 @@ class Sample(Base, PriorityMixin):
 
 class Invoice(Base):
     __tablename__ = "invoice"
-    id = Column(types.Integer, primary_key=True)
-    customer_id = Column(ForeignKey("customer.id"), nullable=False)
-    customer = orm.relationship(Customer, foreign_keys=[customer_id])
-    created_at = Column(types.DateTime, default=dt.datetime.now)
-    updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
-    invoiced_at = Column(types.DateTime)
-    comment = Column(types.Text)
-    discount = Column(types.Integer, default=0)
-    excel_kth = Column(types.BLOB)
-    excel_ki = Column(types.BLOB)
-    price = Column(types.Integer)
-    record_type = Column(types.Text)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"), nullable=False)
+    customer: Mapped["Customer"] = orm.relationship(Customer, foreign_keys=[customer_id])
+    created_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, default=datetime.now)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, onupdate=datetime.now)
+    invoiced_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
+    comment: Mapped[Optional[str]] = mapped_column(types.Text)
+    discount: Mapped[Optional[int]] = mapped_column(types.Integer, default=0)
+    excel_kth: Mapped[Optional[Any]] = mapped_column(types.BLOB)
+    excel_ki: Mapped[Optional[Any]] = mapped_column(types.BLOB)
+    price: Mapped[Optional[int]] = mapped_column(types.Integer)
+    record_type: Mapped[Optional[str]] = mapped_column(types.Text)
 
-    samples = orm.relationship(Sample, back_populates="invoice")
-    pools = orm.relationship(Pool, back_populates="invoice")
+    samples: Mapped[list["Sample"]] = orm.relationship(Sample, back_populates="invoice")
+    pools: Mapped[list["Pool"]] = orm.relationship(Pool, back_populates="invoice")
 
     def __str__(self):
         return f"{self.customer_id} ({self.invoiced_at})"
@@ -828,13 +885,15 @@ class Invoice(Base):
 
 class User(Base):
     __tablename__ = "user"
-    id = Column(types.Integer, primary_key=True)
-    name = Column(types.String(128), nullable=False)
-    email = Column(types.String(128), unique=True, nullable=False)
-    is_admin = Column(types.Boolean, default=False)
-    order_portal_login = Column(types.Boolean, default=False)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(types.String(128), nullable=False)
+    email: Mapped[str] = mapped_column(types.String(128), unique=True, nullable=False)
+    is_admin: Mapped[Optional[bool]] = mapped_column(types.Boolean, default=False)
+    order_portal_login: Mapped[Optional[bool]] = mapped_column(types.Boolean, default=False)
 
-    customers = orm.relationship(Customer, secondary=customer_user, back_populates="users")
+    customers: Mapped[list["Customer"]] = orm.relationship(
+        Customer, secondary=customer_user, back_populates="users"
+    )
 
     def to_dict(self) -> dict:
         """Represent as dictionary."""
@@ -851,19 +910,23 @@ class SampleLaneSequencingMetrics(Base):
 
     __tablename__ = "sample_lane_sequencing_metrics"
 
-    id = Column(types.Integer, primary_key=True)
-    flow_cell_name = Column(types.String(32), ForeignKey("flowcell.name"), nullable=False)
-    flow_cell_lane_number = Column(types.Integer)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
+    flow_cell_name: Mapped[str] = mapped_column(
+        types.String(32), ForeignKey("flowcell.name"), nullable=False
+    )
+    flow_cell_lane_number: Mapped[Optional[int]] = mapped_column(types.Integer)
 
-    sample_internal_id = Column(types.String(32), ForeignKey("sample.internal_id"), nullable=False)
-    sample_total_reads_in_lane = Column(types.BigInteger)
-    sample_base_percentage_passing_q30 = Column(types.Numeric(6, 2))
-    sample_base_mean_quality_score = Column(types.Numeric(6, 2))
+    sample_internal_id: Mapped[int] = mapped_column(
+        types.String(32), ForeignKey("sample.internal_id"), nullable=False
+    )
+    sample_total_reads_in_lane: Mapped[Optional[int]] = mapped_column(types.BigInteger)
+    sample_base_percentage_passing_q30: Mapped[Optional[float]] = mapped_column(types.Numeric(6, 2))
+    sample_base_mean_quality_score: Mapped[Optional[float]] = mapped_column(types.Numeric(6, 2))
 
-    created_at = Column(types.DateTime)
+    created_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime)
 
-    flowcell = orm.relationship(Flowcell, back_populates="sequencing_metrics")
-    sample = orm.relationship(Sample, back_populates="sequencing_metrics")
+    flowcell: Mapped["Flowcell"] = orm.relationship(Flowcell, back_populates="sequencing_metrics")
+    sample: Mapped["Sample"] = orm.relationship(Sample, back_populates="sequencing_metrics")
 
     __table_args__ = (
         UniqueConstraint(
@@ -883,12 +946,14 @@ class Order(Base):
 
     __tablename__ = "order"
 
-    id = Column(types.Integer, primary_key=True, unique=True)
-    customer_id = Column(ForeignKey("customer.id"), nullable=False)
-    customer = orm.relationship(Customer, foreign_keys=[customer_id])
-    order_date = Column(types.DateTime, nullable=False, default=dt.datetime.now())
-    ticket_id = Column(types.Integer, nullable=False, unique=True, index=True)
-    workflow = Column(types.Enum(*tuple(Workflow)), nullable=False)
+    id: Mapped[int] = mapped_column(types.Integer, primary_key=True, unique=True)
+    customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"), nullable=False)
+    customer: Mapped["Customer"] = orm.relationship(Customer, foreign_keys=[customer_id])
+    order_date: Mapped[datetime] = mapped_column(
+        types.DateTime, nullable=False, default=datetime.now()
+    )
+    ticket_id: Mapped[int] = mapped_column(types.Integer, nullable=False, unique=True, index=True)
+    workflow: Mapped[Workflow] = mapped_column(types.Enum(*tuple(Workflow)), nullable=False)
 
     def to_dict(self):
         return to_dict(model_instance=self)
