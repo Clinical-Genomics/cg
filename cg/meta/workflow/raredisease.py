@@ -33,7 +33,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.raredisease.root
-        self.nfcore_workflow_path: str = config.raredisease.pipeline_path
+        self.nfcore_workflow_path: str = config.raredisease.workflow_path
         self.references: str = config.raredisease.references
         self.profile: str = config.raredisease.profile
         self.conda_env: str = config.raredisease.conda_env
