@@ -257,6 +257,31 @@
           </div>
         {% endif %}
 
+        {% if "analysis" in case.data_analysis.data_delivery %}
+          <div class="card-block">
+            <h4 class="card-title">Caesar</h4>
+            <div class="card-text">
+              <p>Filer som laddats upp till din inkorg:</p>
+              <ul>
+                <li><strong>Case</strong></li>: {{ case.name }}
+                  <ul>
+                    {% for file in case.delivered_files %}
+                      <li>file</li>
+                    {% endfor %}
+                  </ul>
+                {% for sample in case.samples %}
+                  <li><strong>Prov</strong></li>: {{ sample.name }}
+                    <ul>
+                      {% for file in sample.delivered_files %}
+                         <li>file</li>
+                      {% endfor %}
+                    </ul>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        {% endif %}
+
         {% for application in case.applications %}
           <div class="card-block">
             <h4 class="card-title">
