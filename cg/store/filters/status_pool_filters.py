@@ -101,16 +101,16 @@ def apply_pool_filter(
 class PoolFilter(Enum):
     """Define Pool filter functions."""
 
-    FILTER_BY_ENTRY_ID: Callable = get_pools_by_entry_id
-    FILTER_BY_NAME: Callable = get_pools_by_name
-    FILTER_IS_RECEIVED: Callable = get_pools_is_received
-    FILTER_IS_NOT_RECEIVED: Callable = get_pools_is_not_received
-    FILTER_IS_DELIVERED: Callable = get_pools_is_delivered
-    FILTER_IS_NOT_DELIVERED: Callable = get_pools_is_not_delivered
-    FILTER_BY_INVOICE_ID: Callable = get_pools_by_invoice_id
-    FILTER_WITHOUT_INVOICE_ID: Callable = get_pools_without_invoice_id
-    FILTER_DO_INVOICE: Callable = get_pools_do_invoice
-    FILTER_BY_CUSTOMER_ID: Callable = get_pools_by_customer_id
-    FILTER_BY_NAME_ENQUIRY: Callable = get_pools_by_name_enquiry
-    FILTER_BY_ORDER_ENQUIRY: Callable = get_pools_by_order_enquiry
-    FILTER_BY_CUSTOMER: Callable = get_pools_by_customer
+    GET_BY_ENTRY_ID: Callable = get_pools_by_entry_id
+    GET_BY_NAME: Callable = get_pools_by_name
+    GET_IS_RECEIVED: Callable = get_pools_is_received
+    GET_IS_NOT_RECEIVED: Callable = get_pools_is_not_received
+    GET_IS_DELIVERED: Callable = get_pools_is_delivered
+    GET_IS_NOT_DELIVERED: Callable = get_pools_is_not_delivered
+    GET_BY_INVOICE_ID: Callable = get_pools_by_invoice_id
+    GET_WITHOUT_INVOICE_ID: Callable = get_pools_without_invoice_id
+    GET_DO_INVOICE: Callable = get_pools_do_invoice
+    GET_BY_CUSTOMER_ID: Callable = get_pools_by_customer_id
+    GET_BY_NAME_ENQUIRY: Callable = get_pools_by_name_enquiry
+    GET_BY_ORDER_ENQUIRY: Callable = get_pools_by_order_enquiry
+    GET_BY_CUSTOMER: Callable = get_pools_by_customer

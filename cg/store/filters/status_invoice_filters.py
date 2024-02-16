@@ -36,6 +36,6 @@ def apply_invoice_filter(
 class InvoiceFilter(Enum):
     """Define Invoice filter functions."""
 
-    FILTER_BY_INVOICE_ID: Callable = get_invoices_by_invoice_id
-    FILTER_BY_INVOICED: Callable = get_invoices_invoiced
-    FILTER_BY_NOT_INVOICED: Callable = get_invoices_not_invoiced
+    GET_BY_INVOICE_ID: Callable = get_invoices_by_invoice_id
+    GET_BY_INVOICED: Callable = get_invoices_invoiced
+    GET_BY_NOT_INVOICED: Callable = get_invoices_not_invoiced

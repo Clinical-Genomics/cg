@@ -243,31 +243,31 @@ def apply_case_filter(
 class CaseFilter(Enum):
     """Define case filters."""
 
-    FILTER_BY_ACTION: Callable = get_cases_by_action
-    FILTER_BY_CASE_SEARCH: Callable = get_cases_by_case_search
-    FILTER_BY_CUSTOMER_ENTRY_ID: Callable = get_cases_by_customer_entry_id
-    FILTER_BY_CUSTOMER_ENTRY_IDS: Callable = get_cases_by_customer_entry_ids
-    FILTER_BY_ENTRY_ID: Callable = get_cases_by_entry_id
-    FILTER_BY_INTERNAL_ID: Callable = get_case_by_internal_id
-    FILTER_BY_INTERNAL_ID_SEARCH: Callable = get_cases_by_internal_id_search
-    FILTER_BY_NAME: Callable = get_cases_by_name
-    FILTER_BY_NAME_SEARCH: Callable = get_cases_by_name_search
-    FILTER_BY_WORKFLOW_SEARCH: Callable = get_cases_by_workflow_search
-    FILTER_BY_PRIORITY: Callable = get_cases_by_priority
-    FILTER_BY_TICKET: Callable = get_cases_by_ticket_id
-    FILTER_FOR_ANALYSIS: Callable = get_cases_for_analysis
-    FILTER_HAS_INACTIVE_ANALYSIS: Callable = get_inactive_analysis_cases
-    FILTER_HAS_SEQUENCE: Callable = get_cases_has_sequence
-    FILTER_IS_RUNNING: Callable = get_running_cases
-    FILTER_IS_COMPRESSIBLE: Callable = get_compressible_cases
-    FILTER_NEW_BY_ORDER_DATE: Callable = get_newer_cases_by_order_date
-    FILTER_NOT_ANALYSED: Callable = get_cases_not_analysed
-    FILTER_OLD_BY_CREATION_DATE: Callable = get_older_cases_by_creation_date
-    FILTER_REPORT_SUPPORTED: Callable = get_report_supported_data_delivery_cases
-    FILTER_WITH_LOQUSDB_SUPPORTED_WORKFLOW: Callable = get_cases_with_loqusdb_supported_workflow
-    FILTER_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD: Callable = (
+    GET_BY_ACTION: Callable = get_cases_by_action
+    GET_BY_CASE_SEARCH: Callable = get_cases_by_case_search
+    GET_BY_CUSTOMER_ENTRY_ID: Callable = get_cases_by_customer_entry_id
+    GET_BY_CUSTOMER_ENTRY_IDS: Callable = get_cases_by_customer_entry_ids
+    GET_BY_ENTRY_ID: Callable = get_cases_by_entry_id
+    GET_BY_INTERNAL_ID: Callable = get_case_by_internal_id
+    GET_BY_INTERNAL_ID_SEARCH: Callable = get_cases_by_internal_id_search
+    GET_BY_NAME: Callable = get_cases_by_name
+    GET_BY_NAME_SEARCH: Callable = get_cases_by_name_search
+    GET_BY_WORKFLOW_SEARCH: Callable = get_cases_by_workflow_search
+    GET_BY_PRIORITY: Callable = get_cases_by_priority
+    GET_BY_TICKET: Callable = get_cases_by_ticket_id
+    GET_FOR_ANALYSIS: Callable = get_cases_for_analysis
+    GET_HAS_INACTIVE_ANALYSIS: Callable = get_inactive_analysis_cases
+    GET_HAS_SEQUENCE: Callable = get_cases_has_sequence
+    GET_IS_RUNNING: Callable = get_running_cases
+    GET_IS_COMPRESSIBLE: Callable = get_compressible_cases
+    GET_NEW_BY_ORDER_DATE: Callable = get_newer_cases_by_order_date
+    GET_NOT_ANALYSED: Callable = get_cases_not_analysed
+    GET_OLD_BY_CREATION_DATE: Callable = get_older_cases_by_creation_date
+    GET_REPORT_SUPPORTED: Callable = get_report_supported_data_delivery_cases
+    GET_WITH_LOQUSDB_SUPPORTED_WORKFLOW: Callable = get_cases_with_loqusdb_supported_workflow
+    GET_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD: Callable = (
         get_cases_with_loqusdb_supported_sequencing_method
     )
-    FILTER_WITH_WORKFLOW: Callable = get_cases_with_workflow
-    FILTER_WITH_SCOUT_DELIVERY: Callable = get_cases_with_scout_data_delivery
+    GET_WITH_WORKFLOW: Callable = get_cases_with_workflow
+    GET_WITH_SCOUT_DELIVERY: Callable = get_cases_with_scout_data_delivery
     ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at

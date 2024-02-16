@@ -48,7 +48,7 @@ def apply_application_filter(
 class ApplicationFilter(Enum):
     """Define Application filter functions."""
 
-    FILTER_IS_EXTERNAL = get_applications_is_external
-    FILTER_IS_NOT_EXTERNAL = get_applications_is_not_external
-    FILTER_BY_TAG = get_applications_by_tag
-    FILTER_IS_NOT_ARCHIVED = get_applications_is_not_archived
+    GET_IS_EXTERNAL = get_applications_is_external
+    GET_IS_NOT_EXTERNAL = get_applications_is_not_external
+    GET_BY_TAG = get_applications_by_tag
+    GET_IS_NOT_ARCHIVED = get_applications_is_not_archived

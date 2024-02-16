@@ -14,7 +14,7 @@ def get_collaboration_by_internal_id(collaborations: Query, internal_id: str, **
 class CollaborationFilter(Enum):
     """Define Collaboration filter functions."""
 
-    FILTER_BY_INTERNAL_ID: Callable = get_collaboration_by_internal_id
+    GET_BY_INTERNAL_ID: Callable = get_collaboration_by_internal_id
 
 
 def apply_collaboration_filter(

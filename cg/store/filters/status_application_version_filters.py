@@ -58,7 +58,7 @@ def apply_application_versions_filter(
 class ApplicationVersionFilter(Enum):
     """Define Application Version filter functions."""
 
-    FILTER_BY_APPLICATION_ENTRY_ID = get_application_versions_by_application_entry_id
-    FILTER_BY_ENTRY_ID = get_application_versions_by_application_version_entry_id
-    FILTER_BY_VALID_FROM_BEFORE = get_application_versions_before_valid_from
+    GET_BY_APPLICATION_ENTRY_ID = get_application_versions_by_application_entry_id
+    GET_BY_ENTRY_ID = get_application_versions_by_application_version_entry_id
+    GET_BY_VALID_FROM_BEFORE = get_application_versions_before_valid_from
     ORDER_BY_VALID_FROM_DESC = order_application_versions_by_valid_from_desc

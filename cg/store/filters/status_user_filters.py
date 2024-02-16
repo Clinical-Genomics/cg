@@ -14,7 +14,7 @@ def get_user_by_email(users: Query, email: str, **kwargs) -> Query:
 class UserFilter(Enum):
     """Define User filter functions."""
 
-    FILTER_BY_EMAIL: Callable = get_user_by_email
+    GET_BY_EMAIL: Callable = get_user_by_email
 
 
 def apply_user_filter(

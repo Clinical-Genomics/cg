@@ -48,13 +48,13 @@ def get_by_sample_internal_id(metrics: Query, sample_internal_id: str, **kwargs)
 
 
 class SequencingMetricsFilter(Enum):
-    FILTER_TOTAL_READ_COUNT_FOR_SAMPLE: Callable = get_total_read_count_for_sample
-    FILTER_BY_FLOW_CELL_SAMPLE_INTERNAL_ID_AND_LANE: Callable = (
+    GET_TOTAL_READ_COUNT_FOR_SAMPLE: Callable = get_total_read_count_for_sample
+    GET_BY_FLOW_CELL_SAMPLE_INTERNAL_ID_AND_LANE: Callable = (
         get_by_flow_cell_sample_internal_id_and_lane
     )
-    FILTER_BY_FLOW_CELL_NAME: Callable = get_by_flow_cell_name
-    FILTER_BY_SAMPLE_INTERNAL_ID: Callable = get_by_sample_internal_id
-    FILTER_ABOVE_Q30_THRESHOLD: Callable = get_above_q30_threshold
+    GET_BY_FLOW_CELL_NAME: Callable = get_by_flow_cell_name
+    GET_BY_SAMPLE_INTERNAL_ID: Callable = get_by_sample_internal_id
+    GET_ABOVE_Q30_THRESHOLD: Callable = get_above_q30_threshold
 
 
 def apply_metrics_filter(

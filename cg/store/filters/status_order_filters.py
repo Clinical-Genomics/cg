@@ -28,5 +28,5 @@ def apply_order_filters(
 class OrderFilter(Enum):
     """Define order filter functions."""
 
-    FILTER_ORDERS_BY_ID: Callable = get_orders_by_id
-    FILTER_ORDERS_BY_WORKFLOW: Callable = get_orders_by_workflow
+    GET_ORDERS_BY_ID: Callable = get_orders_by_id
+    GET_ORDERS_BY_WORKFLOW: Callable = get_orders_by_workflow

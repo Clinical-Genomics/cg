@@ -112,18 +112,18 @@ def apply_analysis_filter(
 class AnalysisFilter(Enum):
     """Define Analysis filter functions."""
 
-    FILTER_VALID_IN_PRODUCTION: Callable = get_valid_analyses_in_production
-    FILTER_WITH_WORKFLOW: Callable = get_analyses_with_workflow
-    FILTER_COMPLETED: Callable = get_completed_analyses
-    FILTER_IS_UPLOADED: Callable = get_uploaded_analyses
-    FILTER_IS_NOT_UPLOADED: Callable = get_not_uploaded_analyses
-    FILTER_WITH_DELIVERY_REPORT: Callable = get_analyses_with_delivery_report
-    FILTER_WITHOUT_DELIVERY_REPORT: Callable = get_analyses_without_delivery_report
-    FILTER_REPORT_BY_WORKFLOW: Callable = get_report_analyses_by_workflow
-    FILTER_BY_CASE_ENTRY_ID: Callable = get_analyses_by_case_entry_id
-    FILTER_IS_NOT_CLEANED: Callable = get_analyses_not_cleaned
-    FILTER_STARTED_AT_BEFORE: Callable = get_analyses_started_before
-    FILTER_BY_STARTED_AT: Callable = get_analyses_by_started_at
-    FILTER_CASE_ACTION_IS_NONE: Callable = get_analysis_case_action_is_none
+    GET_VALID_IN_PRODUCTION: Callable = get_valid_analyses_in_production
+    GET_WITH_WORKFLOW: Callable = get_analyses_with_workflow
+    GET_COMPLETED: Callable = get_completed_analyses
+    GET_IS_UPLOADED: Callable = get_uploaded_analyses
+    GET_IS_NOT_UPLOADED: Callable = get_not_uploaded_analyses
+    GET_WITH_DELIVERY_REPORT: Callable = get_analyses_with_delivery_report
+    GET_WITHOUT_DELIVERY_REPORT: Callable = get_analyses_without_delivery_report
+    GET_REPORT_BY_WORKFLOW: Callable = get_report_analyses_by_workflow
+    GET_BY_CASE_ENTRY_ID: Callable = get_analyses_by_case_entry_id
+    GET_IS_NOT_CLEANED: Callable = get_analyses_not_cleaned
+    GET_STARTED_AT_BEFORE: Callable = get_analyses_started_before
+    GET_BY_STARTED_AT: Callable = get_analyses_by_started_at
+    GET_CASE_ACTION_IS_NONE: Callable = get_analysis_case_action_is_none
     ORDER_BY_UPLOADED_AT: Callable = order_analyses_by_uploaded_at_asc
     ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at_asc
