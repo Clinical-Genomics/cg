@@ -159,7 +159,7 @@ def store_with_analyses_for_cases_not_uploaded_microsalt(
     timestamp_now: datetime,
     timestamp_yesterday: datetime,
 ) -> Store:
-    """Return a store with two analyses for two cases and pipeline."""
+    """Return a store with two analyses for two cases and workflow."""
 
     case_one = analysis_store.get_case_by_internal_id("yellowhog")
     case_two = helpers.add_case(analysis_store, internal_id="test_case_1")
@@ -172,7 +172,7 @@ def store_with_analyses_for_cases_not_uploaded_microsalt(
             started_at=timestamp_yesterday,
             uploaded_at=timestamp_yesterday,
             delivery_reported_at=None,
-            pipeline=Workflow.MICROSALT,
+            workflow=Workflow.MICROSALT,
         )
         helpers.add_analysis(
             analysis_store,
@@ -180,7 +180,7 @@ def store_with_analyses_for_cases_not_uploaded_microsalt(
             started_at=timestamp_now,
             uploaded_at=None,
             delivery_reported_at=None,
-            pipeline=Workflow.MICROSALT,
+            workflow=Workflow.MICROSALT,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: CaseSample = analysis_store.relate_sample(
@@ -207,19 +207,19 @@ def store_with_analyses_for_cases_to_deliver(
             analysis_store,
             case=case,
             started_at=timestamp_yesterday,
+            completed_at=timestamp_yesterday,
             uploaded_at=None,
             delivery_reported_at=None,
-            completed_at=timestamp_yesterday,
-            pipeline=Workflow.FLUFFY,
+            workflow=Workflow.FLUFFY,
         )
         helpers.add_analysis(
             analysis_store,
             case=case,
             started_at=timestamp_now,
+            completed_at=timestamp_now,
             uploaded_at=None,
             delivery_reported_at=None,
-            completed_at=timestamp_now,
-            pipeline=Workflow.MIP_DNA,
+            workflow=Workflow.MIP_DNA,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=None)
         link: CaseSample = analysis_store.relate_sample(

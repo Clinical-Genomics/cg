@@ -12,10 +12,13 @@ def read_txt(file_path: Path, read_to_string: bool = False) -> list[str] | str:
         return list(file)
 
 
-def write_txt(content: list[str], file_path: Path) -> None:
+def write_txt(content: list[str] | str, file_path: Path) -> None:
     """Write content to a text file."""
     with open(file_path, "w") as file:
-        file.writelines(content)
+        if isinstance(content, list):
+            file.writelines(content)
+        else:
+            file.write(content)
 
 def concat_txt(file_paths: list[Path], target_file: Path, str_content: Optional[List[str]] = None) -> None:
     """Concatenate files and eventual string content."""

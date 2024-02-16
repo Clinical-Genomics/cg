@@ -16,6 +16,6 @@ class BalsamicQCAnalysisAPI(BalsamicAnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Workflow = Workflow.BALSAMIC_QC,
+        workflow: Workflow = Workflow.BALSAMIC_QC,
     ):
-        super().__init__(config=config, pipeline=pipeline)
+        super().__init__(config=config, workflow=workflow)

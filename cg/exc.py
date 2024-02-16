@@ -138,7 +138,7 @@ class MicrosaltError(CgError):
     """
 
 
-class MissingAnalysisDir(CgError):
+class MissingAnalysisRunDirectory(CgError):
     """
     Error related to missing analysis.
     """
@@ -190,6 +190,10 @@ class TicketCreationError(CgError):
 
 class TrailblazerAPIHTTPError(CgError):
     """Raised when Trailblazer REST API response code is not 200."""
+
+
+class TrailblazerAnalysisNotFound(CgError):
+    """Raised when a Trailblazer analysis is not found."""
 
 
 class ValidationError(CgError):
@@ -252,3 +256,7 @@ class ArchiveJobFailedError(CgError):
 
 class XMLError(CgError):
     """Exception raised when something is wrong with the content of an XML file."""
+
+
+class OrderNotFoundError(CgError):
+    """Exception raised when an order is not found."""

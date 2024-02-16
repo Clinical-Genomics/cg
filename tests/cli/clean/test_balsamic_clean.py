@@ -82,10 +82,10 @@ def test_dry_run(
     base_store = clean_context.status_db
     helpers.add_analysis(
         base_store,
-        pipeline=Workflow.BALSAMIC,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
+        workflow=Workflow.BALSAMIC,
     )
 
     analysis_to_clean = base_store.get_case_by_internal_id(balsamic_case_clean).analyses[0]
@@ -101,7 +101,7 @@ def test_dry_run(
     assert result.exit_code == EXIT_SUCCESS
     assert "Would have deleted" in caplog.text
     assert balsamic_case_clean in caplog.text
-    assert analysis_to_clean in base_store.get_analyses_to_clean(pipeline=Workflow.BALSAMIC)
+    assert analysis_to_clean in base_store.get_analyses_to_clean(workflow=Workflow.BALSAMIC)
 
 
 def test_cleaned_at_valid(

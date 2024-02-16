@@ -22,9 +22,7 @@ LOG = logging.getLogger(__name__)
 def raredisease(context: click.Context) -> None:
     """NF-core/raredisease analysis workflow."""
     AnalysisAPI.get_help(context)
-    context.obj.meta_apis[MetaApis.ANALYSIS_API] = RarediseaseAnalysisAPI(
-        config=context.obj,
-    )
+    context.obj.meta_apis[MetaApis.ANALYSIS_API] = RarediseaseAnalysisAPI(config=context.obj)
 
 
 @raredisease.command("config-case")

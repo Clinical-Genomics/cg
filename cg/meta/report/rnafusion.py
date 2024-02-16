@@ -23,7 +23,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.report.metadata import RnafusionSampleMetadataModel
-from cg.models.report.report import CaseModel
+from cg.models.report.report import CaseModel, ScoutReportFiles
 from cg.models.report.sample import SampleModel
 from cg.models.rnafusion.rnafusion import RnafusionAnalysis, RnafusionQCMetrics
 from cg.store.models import Case, Sample
@@ -87,6 +87,14 @@ class RnafusionReportAPI(ReportAPI):
     def get_template_name(self) -> str:
         """Return template name to render the delivery report."""
         return Workflow.RNAFUSION + "_report.html"
+
+    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
+        """Return files that will be uploaded to Scout."""
+        return ScoutReportFiles(
+            vcf_fusion=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="vcf_fusion"
+            )
+        )
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Return dictionary with the delivery report required fields for Rnafusion."""
