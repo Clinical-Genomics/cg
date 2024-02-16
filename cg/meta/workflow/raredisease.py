@@ -56,7 +56,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
         pipeline_parameters: PipelineParameters = self.get_pipeline_parameters(case_id=case_id)
         if dry_run:
-            LOG.info("Dry run: Config files will not be written")
+            LOG.info("Dry run: nextflow samplesheet and parameter file will not be written")
             return
         self.write_sample_sheet(
             content=sample_sheet_content,
