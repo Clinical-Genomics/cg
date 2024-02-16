@@ -46,7 +46,7 @@ def test_report_deliver_with_missing_case(
     case_id_does_not_exist: str,
     request,
 ):
-    """Test report-deliver command for Taxprofiler and Rnafusion with invalid case to start with."""
+    """Test report-deliver command for workflow with invalid case to start with."""
     caplog.set_level(logging.WARNING)
     context = request.getfixturevalue(context)
 
