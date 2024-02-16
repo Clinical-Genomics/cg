@@ -2,9 +2,7 @@ from pathlib import Path
 
 from click.testing import CliRunner, Result
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_sheet_from_file,
-)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.cli.demultiplex.sample_sheet import validate_sample_sheet
 from cg.constants import EXIT_SUCCESS, FileExtensions
 
@@ -55,7 +53,7 @@ def test_validate_sample_sheet_wrong_file_type(
 
 def test_validate_correct_bcl2fastq_sample_sheet(
     cli_runner: CliRunner,
-    novaseq_bcl2fastq_sample_sheet_path: Path,
+    sample_sheet: Path,
 ):
     """Test validate sample sheet when using a bcl2fastq sample sheet."""
 
@@ -64,7 +62,7 @@ def test_validate_correct_bcl2fastq_sample_sheet(
     assert sample_sheet.exists()
 
     # GIVEN that the sample sheet is correct
-    get_sample_sheet_from_file(sample_sheet)
+    SampleSheetValidator().validate_sample_sheet_from_file(sample_sheet)
 
     # WHEN validating the sample sheet
     result: Result = cli_runner.invoke(
@@ -78,16 +76,16 @@ def test_validate_correct_bcl2fastq_sample_sheet(
 
 def test_validate_correct_dragen_sample_sheet(
     cli_runner: CliRunner,
-    novaseq_bcl_convert_sample_sheet_path: Path,
+    novaseq_6000_post_1_5_kits_correct_sample_sheet_path: Path,
 ):
     """Test validate sample sheet when using a BCLconvert sample sheet."""
 
     # GIVEN the path to a Bcl2fastq sample sheet that exists
-    sample_sheet: Path = novaseq_bcl_convert_sample_sheet_path
+    sample_sheet: Path = novaseq_6000_post_1_5_kits_correct_sample_sheet_path
     assert sample_sheet.exists()
 
     # GIVEN that the sample sheet is correct
-    get_sample_sheet_from_file(sample_sheet)
+    SampleSheetValidator().validate_sample_sheet_from_file(sample_sheet)
 
     # WHEN validating the sample sheet
     result: Result = cli_runner.invoke(

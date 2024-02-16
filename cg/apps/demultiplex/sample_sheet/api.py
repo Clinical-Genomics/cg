@@ -109,6 +109,10 @@ class SampleSheetAPI:
             flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id, hk_api=self.hk_api
         )
 
+    def validate(self, sample_sheet_path: Path) -> None:
+        """Validate a sample sheet."""
+        self.validator.validate_sample_sheet_from_file(sample_sheet_path)
+
     def get_or_create_sample_sheet(self, flow_cell_name: str, bcl_converter: str) -> None:
         """
         Ensure that a valid sample sheet is present in the flow cell directory.

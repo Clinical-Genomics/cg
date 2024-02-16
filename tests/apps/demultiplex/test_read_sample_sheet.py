@@ -6,7 +6,6 @@ import pytest
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_raw_samples,
-    get_sample_sheet_from_file,
     get_sample_type,
     get_samples_by_lane,
     get_validated_sample_sheet,
@@ -18,7 +17,6 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBCLConvert,
 )
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
-from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 from cg.constants.constants import FileFormat
 from cg.exc import SampleSheetError
 from cg.io.controller import ReadFile
@@ -146,27 +144,6 @@ def test_get_sample_sheet_bcl2fastq_duplicate_different_lanes(
 
     # THEN a sample sheet is returned with samples in it
     assert sample_sheet.samples
-
-
-def test_get_sample_internal_ids_from_sample_sheet(novaseq6000_bcl_convert_sample_sheet_path: Path):
-    """Test that getting sample internal ids from a sample sheet returns a unique list of strings."""
-    # GIVEN a sample sheet with only valid samples
-    sample_sheet: SampleSheet = get_sample_sheet_from_file(
-        novaseq6000_bcl_convert_sample_sheet_path
-    )
-
-    # WHEN getting the valid sample internal ids
-    sample_internal_ids: list[str] = sample_sheet.get_sample_ids()
-
-    # THEN the returned value is a list
-    assert isinstance(sample_internal_ids, list)
-    # THEN the list contains strings
-    assert isinstance(sample_internal_ids[0], str)
-    # THEN the sample internal ids are unique
-    assert len(sample_internal_ids) == len(set(sample_internal_ids))
-    # THEN the sample internal ids are the expected ones
-    for sample_internal_id in sample_internal_ids:
-        assert is_valid_sample_internal_id(sample_internal_id=sample_internal_id) is True
 
 
 def test_get_sample_type_for_bcl_convert(bcl_convert_sample_sheet_path: Path):
