@@ -2560,7 +2560,7 @@ def taxprofiler_metrics_deliverables_path(taxprofiler_dir: Path, taxprofiler_cas
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_deliverables_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
+def taxprofiler_deliverables_file_path(taxprofiler_dir: Path, taxprofiler_case_id: str) -> Path:
     """Path to deliverables file."""
     return Path(
         taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_deliverables"
