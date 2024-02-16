@@ -36,9 +36,9 @@ def mip_dna_context(cg_context, helpers, case_id, real_housekeeper_api) -> CGCon
     helpers.add_analysis(
         store=store,
         case=case,
-        pipeline=Workflow.MIP_DNA,
-        delivery_reported_at=datetime.now(),
         started_at=datetime.now(),
+        delivery_reported_at=datetime.now(),
+        workflow=Workflow.MIP_DNA,
     )
     helpers.add_relationship(
         store=store,

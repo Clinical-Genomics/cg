@@ -29,9 +29,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Workflow = Workflow.RAREDISEASE,
+        workflow: Workflow = Workflow.RAREDISEASE,
     ):
-        super().__init__(config=config, pipeline=pipeline)
+        super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.raredisease.root
         self.nfcore_workflow_path: str = config.raredisease.pipeline_path
         self.references: str = config.raredisease.references

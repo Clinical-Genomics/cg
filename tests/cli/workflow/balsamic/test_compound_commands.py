@@ -5,7 +5,13 @@ from click.testing import CliRunner
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
-from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
+from cg.cli.workflow.balsamic.base import (
+    balsamic,
+    start,
+    start_available,
+    store,
+    store_available,
+)
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 
@@ -73,7 +79,7 @@ def test_store(
     # Make sure the bundle was not present in the store
     assert not balsamic_context.housekeeper_api.bundle(case_id)
 
-    # Make sure  analysis not already stored in ClinicalDB
+    # Make sure analysis not already stored in ClinicalDB
     assert not balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
     # GIVEN that HermesAPI returns a deliverables output

@@ -7,8 +7,8 @@ from cg.utils import Process
 
 
 class MipRNAAnalysisAPI(MipAnalysisAPI):
-    def __init__(self, config: CGConfig, pipeline: Workflow = Workflow.MIP_RNA):
-        super().__init__(config, pipeline)
+    def __init__(self, config: CGConfig, workflow: Workflow = Workflow.MIP_RNA):
+        super().__init__(config, workflow)
 
     @property
     def root(self) -> str:
@@ -23,8 +23,8 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
         return self.config.mip_rd_rna.conda_env
 
     @property
-    def mip_pipeline(self) -> str:
-        return self.config.mip_rd_rna.pipeline
+    def mip_workflow(self) -> str:
+        return self.config.mip_rd_rna.workflow
 
     @property
     def script(self) -> str:
@@ -38,7 +38,7 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
     def process(self) -> Process:
         if not self._process:
             self._process = Process(
-                binary=f"{self.script} {self.mip_pipeline}",
+                binary=f"{self.script} {self.mip_workflow}",
                 conda_binary=f"{self.conda_binary}" if self.conda_binary else None,
                 config=self.config.mip_rd_rna.mip_config,
                 environment=self.conda_env,

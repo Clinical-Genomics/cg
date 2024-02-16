@@ -241,23 +241,20 @@ class StoreHelpers:
     def ensure_application_limitation(
         store: Store,
         application: Application,
-        pipeline: str = Workflow.MIP_DNA,
+        workflow: str = Workflow.MIP_DNA,
         limitations: str = "Dummy limitations",
         **kwargs,
     ) -> ApplicationLimitations:
         """Ensure that application limitations exists in store."""
         application_limitation: ApplicationLimitations = (
-            store.get_application_limitation_by_tag_and_pipeline(
-                tag=application.tag, pipeline=pipeline
+            store.get_application_limitation_by_tag_and_workflow(
+                tag=application.tag, workflow=workflow
             )
         )
         if application_limitation:
             return application_limitation
         application_limitation: ApplicationLimitations = store.add_application_limitation(
-            application=application,
-            pipeline=pipeline,
-            limitations=limitations,
-            **kwargs,
+            application=application, workflow=workflow, limitations=limitations, **kwargs
         )
         store.session.add(application_limitation)
         store.session.commit()
@@ -319,7 +316,7 @@ class StoreHelpers:
         upload_started: datetime = None,
         delivery_reported_at: datetime = None,
         cleaned_at: datetime = None,
-        pipeline: Workflow = Workflow.BALSAMIC,
+        workflow: Workflow = Workflow.BALSAMIC,
         pipeline_version: str = "1.0",
         data_delivery: DataDelivery = DataDelivery.FASTQ_QC,
         uploading: bool = False,
@@ -328,9 +325,9 @@ class StoreHelpers:
         """Utility function to add an analysis for tests."""
 
         if not case:
-            case = StoreHelpers.add_case(store, data_analysis=pipeline, data_delivery=data_delivery)
+            case = StoreHelpers.add_case(store, data_analysis=workflow, data_delivery=data_delivery)
 
-        analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version, case_id=case.id)
+        analysis = store.add_analysis(workflow=workflow, version=pipeline_version, case_id=case.id)
 
         analysis.started_at = started_at or datetime.now()
         if completed_at:
@@ -345,8 +342,8 @@ class StoreHelpers:
             analysis.upload_started_at = upload_started or datetime.now()
         if config_path:
             analysis.config_path = config_path
-        if pipeline:
-            analysis.pipeline = str(pipeline)
+        if workflow:
+            analysis.pipeline = str(workflow)
 
         analysis.limitations = "A limitation"
         analysis.case = case
@@ -583,10 +580,10 @@ class StoreHelpers:
 
         StoreHelpers.add_analysis(
             store,
-            pipeline=Workflow.MIP_DNA,
             case=case,
-            completed_at=completed_at or datetime.now(),
             started_at=started_at or datetime.now(),
+            completed_at=completed_at or datetime.now(),
+            workflow=Workflow.MIP_DNA,
         )
         return case
 

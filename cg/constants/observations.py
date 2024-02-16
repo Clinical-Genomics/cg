@@ -6,7 +6,7 @@ from cg.constants.constants import Workflow
 from cg.constants.sequencing import SequencingMethod
 
 LOQUSDB_ID = "_id"
-LOQUSDB_SUPPORTED_PIPELINES = [Workflow.MIP_DNA, Workflow.BALSAMIC]
+LOQUSDB_SUPPORTED_WORKFLOWS = [Workflow.MIP_DNA, Workflow.BALSAMIC]
 LOQUSDB_MIP_SEQUENCING_METHODS = [SequencingMethod.WGS, SequencingMethod.WES]
 LOQUSDB_BALSAMIC_SEQUENCING_METHODS = [SequencingMethod.WGS]
 

@@ -9,6 +9,7 @@ from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, MetricsQCError
 from cg.io.controller import ReadFile, WriteFile
+from cg.io.txt import write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
@@ -28,17 +29,17 @@ LOG = logging.getLogger(__name__)
 class NfAnalysisAPI(AnalysisAPI):
     """Parent class for handling NF-core analyses."""
 
-    def __init__(self, config: CGConfig, pipeline: Workflow):
-        super().__init__(config=config, pipeline=pipeline)
-        self.pipeline: Workflow = pipeline
+    def __init__(self, config: CGConfig, workflow: Workflow):
+        super().__init__(workflow=workflow, config=config)
+        self.workflow: Workflow = workflow
         self.root_dir: str | None = None
-        self.nfcore_pipeline_path: str | None = None
+        self.nfcore_workflow_path: str | None = None
         self.references: str | None = None
         self.profile: str | None = None
         self.conda_env: str | None = None
         self.conda_binary: str | None = None
         self.tower_binary_path: str | None = None
-        self.tower_pipeline: str | None = None
+        self.tower_workflow: str | None = None
         self.account: str | None = None
         self.email: str | None = None
         self.compute_env_base: str | None = None
@@ -69,9 +70,13 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get workflow manager from Tower."""
         return WorkflowManager.Tower.value
 
-    def get_pipeline_version(self, case_id: str) -> str:
-        """Get pipeline version from config."""
+    def get_workflow_version(self, case_id: str) -> str:
+        """Get workflow version from config."""
         return self.revision
+
+    def get_nextflow_config_content(self) -> str | None:
+        """Return nextflow config content."""
+        return None
 
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
@@ -87,11 +92,15 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get the compute environment for the head job based on the case priority."""
         return f"{self.compute_env_base}-{self.get_slurm_qos_for_case(case_id=case_id)}"
 
-    @staticmethod
-    def get_nextflow_config_path(nextflow_config: str | None = None) -> Path | None:
-        """Path to Nextflow config file."""
+    def get_nextflow_config_path(
+        self, case_id: str, nextflow_config: Path | str | None = None
+    ) -> Path:
+        """Path to nextflow config file."""
         if nextflow_config:
             return Path(nextflow_config).absolute()
+        return Path((self.get_case_path(case_id)), f"{case_id}_nextflow_config").with_suffix(
+            FileExtensions.JSON
+        )
 
     def get_job_ids_path(self, case_id: str) -> Path:
         """Return the path to a Trailblazer config file containing Tower IDs."""
@@ -122,14 +131,14 @@ class NfAnalysisAPI(AnalysisAPI):
         if not dry_run:
             Path(self.get_case_path(case_id=case_id)).mkdir(parents=True, exist_ok=True)
 
-    def get_log_path(self, case_id: str, pipeline: str, log: str = None) -> Path:
+    def get_log_path(self, case_id: str, workflow: str, log: str = None) -> Path:
         """Path to NF log."""
         if log:
             return log
         launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
         return Path(
             self.get_case_path(case_id),
-            f"{case_id}_{pipeline}_nextflow_{launch_time}",
+            f"{case_id}_{workflow}_nextflow_{launch_time}",
         ).with_suffix(FileExtensions.LOG)
 
     def get_workdir_path(self, case_id: str, work_dir: Path | None = None) -> Path:
@@ -169,13 +178,22 @@ class NfAnalysisAPI(AnalysisAPI):
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
-    def write_params_file(self, case_id: str, pipeline_parameters: dict) -> None:
+    def write_params_file(self, case_id: str, workflow_parameters: dict) -> None:
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")
         write_yaml_nextflow_style(
-            content=pipeline_parameters,
+            content=workflow_parameters,
             file_path=self.get_params_file_path(case_id=case_id),
         )
+
+    def write_nextflow_config(self, case_id: str) -> None:
+        """Write nextflow config in json format."""
+        if content := self.get_nextflow_config_content():
+            LOG.debug("Writing nextflow config file")
+            write_txt(
+                content=content,
+                file_path=self.get_nextflow_config_path(case_id=case_id),
+            )
 
     @staticmethod
     def write_sample_sheet(
@@ -225,7 +243,7 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.info("Workflow will be executed using Nextflow")
         parameters: list[str] = NextflowHandler.get_nextflow_run_parameters(
             case_id=case_id,
-            pipeline_path=self.nfcore_pipeline_path,
+            workflow_path=self.nfcore_workflow_path,
             root_dir=self.root_dir,
             command_args=command_args.dict(),
         )
@@ -261,8 +279,7 @@ class NfAnalysisAPI(AnalysisAPI):
             )
         else:
             parameters: list[str] = NfTowerHandler.get_tower_launch_parameters(
-                tower_pipeline=self.tower_pipeline,
-                command_args=command_args.dict(),
+                tower_workflow=self.tower_workflow, command_args=command_args.dict()
             )
         self.process.run_command(parameters=parameters, dry_run=dry_run)
         if self.process.stderr:
@@ -325,8 +342,8 @@ class NfAnalysisAPI(AnalysisAPI):
             MultiQC.MULTIQC_DATA + FileExtensions.JSON,
         )
 
-    def get_pipeline_metrics(self) -> dict:
-        """Get nf-core pipeline metrics constants."""
+    def get_workflow_metrics(self) -> dict:
+        """Get nf-core workflow metrics constants."""
         return {}
 
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
@@ -345,7 +362,7 @@ class NfAnalysisAPI(AnalysisAPI):
                     name=metric_name,
                     step=MultiQC.MULTIQC,
                     value=metric_value,
-                    condition=self.get_pipeline_metrics().get(metric_name, None),
+                    condition=self.get_workflow_metrics().get(metric_name, None),
                 )
             )
         return metric_base_list

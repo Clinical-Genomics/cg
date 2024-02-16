@@ -49,7 +49,7 @@ def test_generate_balsamic_load_config(
     # GIVEN an upload scout api with some balsamic information
 
     # WHEN generating a load config
-    config = upload_balsamic_analysis_scout_api.generate_config(analysis_obj=balsamic_analysis_obj)
+    config = upload_balsamic_analysis_scout_api.generate_config(analysis=balsamic_analysis_obj)
 
     # THEN assert that the config is a balsamic config
     assert isinstance(config, BalsamicLoadConfig)
@@ -64,9 +64,7 @@ def test_generate_balsamic_umi_load_config(
     # GIVEN an upload scout api with some balsamic information
 
     # WHEN generating a load config
-    config = upload_balsamic_analysis_scout_api.generate_config(
-        analysis_obj=balsamic_umi_analysis_obj
-    )
+    config = upload_balsamic_analysis_scout_api.generate_config(analysis=balsamic_umi_analysis_obj)
 
     # THEN assert that the config is a balsamic-umi config
     assert isinstance(config, BalsamicUmiLoadConfig)
@@ -83,7 +81,7 @@ def test_generate_rnafusion_load_config(
 
     # WHEN generating a load config
     config: ScoutLoadConfig = upload_rnafusion_analysis_scout_api.generate_config(
-        analysis_obj=rnafusion_analysis_obj
+        analysis=rnafusion_analysis_obj
     )
 
     # THEN assert that the config is a rnafusion config
@@ -102,7 +100,7 @@ def test_generate_config_adds_meta_result_key(
 
     # WHEN generating the scout config for the analysis
     result_data: ScoutLoadConfig = upload_mip_analysis_scout_api.generate_config(
-        analysis_obj=mip_dna_analysis
+        analysis=mip_dna_analysis
     )
 
     # THEN the config should contain the rank model version used

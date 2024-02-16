@@ -10,7 +10,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat
+from cg.constants.constants import DRY_RUN, FileFormat
 from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.io.controller import WriteStream
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
@@ -127,7 +127,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     is_flag=True,
     help="re-upload existing analysis",
 )
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.argument("case_id")
 @click.pass_obj
 def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case_id: str):
@@ -157,7 +157,7 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 
 
 @click.command(name="rna-to-scout")
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.option("-r", "--research", is_flag=True, help="Upload research report instead of clinical")
 @click.argument("case_id")
 @click.pass_context
@@ -166,6 +166,7 @@ def upload_rna_to_scout(context, case_id: str, dry_run: bool, research: bool) ->
 
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
+    context.invoke(upload_rna_alignment_file_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(
         upload_rna_fusion_report_to_scout, case_id=case_id, dry_run=dry_run, research=research
@@ -173,8 +174,19 @@ def upload_rna_to_scout(context, case_id: str, dry_run: bool, research: bool) ->
     context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
 
 
+@click.command(name="rna-alignment-file-to-scout")
+@DRY_RUN
+@click.argument("case_id")
+@click.pass_obj
+def upload_rna_alignment_file_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> None:
+    """Upload RNA alignment file for a case to Scout."""
+    LOG.info("----------------- UPLOAD RNA ALIGNMENT FILE TO SCOUT -----------------------")
+    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+    scout_upload_api.upload_rna_alignment_file(case_id=case_id, dry_run=dry_run)
+
+
 @click.command(name="rna-fusion-report-to-scout")
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.option("--research", is_flag=True)
 @click.argument("case_id")
 @click.pass_obj
@@ -192,7 +204,7 @@ def upload_rna_fusion_report_to_scout(
 
 
 @click.command(name="rna-junctions-to-scout")
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.argument("case_id")
 @click.pass_obj
 def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> None:
@@ -205,7 +217,7 @@ def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool
 
 
 @click.command(name="multiqc-to-scout")
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.argument("case_id")
 @click.pass_obj
 def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> None:
@@ -216,7 +228,7 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
     status_db: Store = context.status_db
     case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     scout_report_type, multiqc_report = scout_upload_api.get_multiqc_html_report(
-        case_id=case_id, pipeline=case.data_analysis
+        case_id=case_id, workflow=case.data_analysis
     )
     if scout_report_type == ScoutCustomCaseReportTags.MULTIQC_RNA:
         scout_upload_api.upload_rna_report_to_dna_case_in_scout(

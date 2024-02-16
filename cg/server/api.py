@@ -11,6 +11,7 @@ import requests
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
+from google.auth import exceptions
 from pydantic.v1 import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.exc import IntegrityError
@@ -21,14 +22,20 @@ from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.constants import FileFormat
-from cg.exc import CaseNotFoundError, OrderError, OrderFormError, TicketCreationError
+from cg.exc import (
+    CaseNotFoundError,
+    OrderError,
+    OrderFormError,
+    OrderNotFoundError,
+    TicketCreationError,
+)
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from cg.server.dto.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.orders_request import OrdersRequest
-from cg.server.dto.orders.orders_response import OrdersResponse
+from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.ext import db, lims, osticket
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.orders.order_service import OrderService
@@ -91,8 +98,8 @@ def before_request():
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
         user_data = verify_google_token(jwt_token)
-    except ValueError as e:
-        LOG.error(f"Error occurred while decoding JWT token: {e}")
+    except (exceptions.OAuthError, ValueError) as e:
+        LOG.error(f"Error {e} occurred while decoding JWT token: {jwt_token}")
         return abort(
             make_response(jsonify(message="outdated login certificate"), HTTPStatus.UNAUTHORIZED)
         )
@@ -219,15 +226,13 @@ def parse_families_in_collaboration():
     """Return cases in collaboration."""
 
     customer_internal_id = request.args.get("customer")
-    pipeline = request.args.get("data_analysis")
+    workflow = request.args.get("data_analysis")
     case_search_pattern = request.args.get("enquiry")
 
     customer = db.get_customer_by_internal_id(customer_internal_id=customer_internal_id)
 
-    cases = db.get_cases_by_customer_pipeline_and_case_search(
-        case_search=case_search_pattern,
-        customer=customer,
-        pipeline=pipeline,
+    cases = db.get_cases_by_customer_workflow_and_case_search(
+        customer=customer, workflow=workflow, case_search=case_search_pattern
     )
 
     case_dicts = [case.to_dict(links=True) for case in cases]
@@ -479,6 +484,18 @@ def get_orders():
     order_service = OrderService(db)
     response: OrdersResponse = order_service.get_orders(orders_request)
     return make_response(response.model_dump())
+
+
+@BLUEPRINT.route("/orders/<order_id>")
+def get_order(order_id: int):
+    """Return an order."""
+    order_service = OrderService(db)
+    try:
+        response: Order = order_service.get_order(order_id)
+        response_dict: dict = response.model_dump()
+        return make_response(response_dict)
+    except OrderNotFoundError as error:
+        return make_response(jsonify(error=str(error)), HTTPStatus.NOT_FOUND)
 
 
 @BLUEPRINT.route("/orderform", methods=["POST"])

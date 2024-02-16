@@ -16,7 +16,7 @@ class SampleMetadataModel(BaseModel):
 
     Attributes:
         million_read_pairs: number of million read pairs obtained; source: StatusDB/sample/reads (/2*10^6)
-        duplicates: fraction of mapped sequence that is marked as duplicate; source: pipeline workflow
+        duplicates: fraction of mapped sequence that is marked as duplicate; source: workflow
     """
 
     million_read_pairs: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
@@ -28,10 +28,10 @@ class MipDNASampleMetadataModel(SampleMetadataModel):
 
     Attributes:
         bait_set: panel bed used for the analysis; source: LIMS
-        gender: gender estimated by the pipeline; source: pipeline workflow
-        mapped_reads: percentage of reads aligned to the reference sequence; source: pipeline workflow
-        mean_target_coverage: mean coverage of a target region; source: pipeline workflow
-        pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: pipeline workflow
+        gender: gender estimated by the workflow; source: workflow
+        mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
+        mean_target_coverage: mean coverage of a target region; source: workflow
+        pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: workflow
     """
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
@@ -45,8 +45,8 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
     """Metrics and trending data model associated to a specific BALSAMIC sample.
 
     Attributes:
-            mean_insert_size: mean insert size of the distribution; source: pipeline workflow
-            fold_80: fold 80 base penalty; source: pipeline workflow
+            mean_insert_size: mean insert size of the distribution; source: workflow
+            fold_80: fold 80 base penalty; source: workflow
     """
 
     mean_insert_size: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
@@ -58,10 +58,10 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
 
     Attributes:
             bait_set: panel bed used for the analysis; source: LIMS
-            bait_set_version: panel bed version; source: pipeline workflow
-            median_target_coverage: median coverage of a target region in bases; source: pipeline workflow
-            pct_250x: percent of targeted bases that are covered to 250X coverage or more; source: pipeline workflow
-            pct_500x: percent of targeted bases that are covered to 500X coverage or more; source: pipeline workflow
+            bait_set_version: panel bed version; source: workflow
+            median_target_coverage: median coverage of a target region in bases; source: workflow
+            pct_250x: percent of targeted bases that are covered to 250X coverage or more; source: workflow
+            pct_500x: percent of targeted bases that are covered to 500X coverage or more; source: workflow
     """
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
@@ -76,9 +76,9 @@ class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
     """Metrics and trending data model associated to a specific BALSAMIC sample.
 
     Attributes:
-            median_coverage: median coverage in bases of the genome territory; source: pipeline workflow
-            pct_15x: fraction of bases that attained at least 15X sequence coverage; source: pipeline workflow
-            pct_60x: fraction of bases that attained at least 15X sequence coverage; source: pipeline workflow
+            median_coverage: median coverage in bases of the genome territory; source: workflow
+            pct_15x: fraction of bases that attained at least 15X sequence coverage; source: workflow
+            pct_60x: fraction of bases that attained at least 15X sequence coverage; source: workflow
     """
 
     median_coverage: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
@@ -91,21 +91,21 @@ class RnafusionSampleMetadataModel(SampleMetadataModel):
     """Metrics and trending data model associated to a specific Rnafusion sample.
 
     Attributes:
-        bias_5_3: bias is the ratio between read counts; source: pipeline workflow
-        gc_content: percentage of GC bases calculated on trimmed reads; source: pipeline workflow
+        bias_5_3: bias is the ratio between read counts; source: workflow
+        gc_content: percentage of GC bases calculated on trimmed reads; source: workflow
         input_amount: input amount in ng; source: LIMS
         insert_size: distance between paired-end sequencing reads in a DNA fragment
-        insert_size_peak: insert size length; source: pipeline workflow
-        mapped_reads: percentage of reads aligned to the reference sequence; source: pipeline workflow
-        mean_length_r1: average length of reads that pass QC filters; source: pipeline workflow
-        mrna_bases:  proportion of bases that originate from messenger RNA; source: pipeline workflow
-        pct_adapter: proportion of reads that contain adapter sequences; source: pipeline workflow
-        pct_surviving: percentage of reads that pass quality control filters; source: pipeline workflow
-        q20_rate: proportion of bases with a minimum Phred score of 20; source: pipeline workflow
-        q30_rate: proportion of bases with a minimum Phred score of 30; source: pipeline workflow
-        ribosomal_bases: proportion of bases that originate from ribosomal RNA; source: pipeline workflow
+        insert_size_peak: insert size length; source: workflow
+        mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
+        mean_length_r1: average length of reads that pass QC filters; source: workflow
+        mrna_bases:  proportion of bases that originate from messenger RNA; source: workflow
+        pct_adapter: proportion of reads that contain adapter sequences; source: workflow
+        pct_surviving: percentage of reads that pass quality control filters; source: workflow
+        q20_rate: proportion of bases with a minimum Phred score of 20; source: workflow
+        q30_rate: proportion of bases with a minimum Phred score of 30; source: workflow
+        ribosomal_bases: proportion of bases that originate from ribosomal RNA; source: workflow
         rin: RNA integrity number; source: LIMS
-        uniquely_mapped_reads: percentage of mapped reads; source: pipeline workflow
+        uniquely_mapped_reads: percentage of mapped reads; source: workflow
     """
 
     bias_5_3: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD

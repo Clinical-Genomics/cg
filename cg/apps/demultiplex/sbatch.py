@@ -5,9 +5,9 @@ from cg.constants.demultiplexing import BclConverter
 DEMULTIPLEX_COMMAND = {
     BclConverter.BCL2FASTQ: """
 log "singularity exec --bind \
-/home/proj/{environment}/demultiplexed-runs,\
-/home/proj/{environment}/flow_cells,\
-/home/proj/{environment}/flow_cells/'$SLURM_JOB_ID':/run/user/$(id -u) \
+/home/proj/{environment}/sequencing_data/illumina/demultiplexed-runs,\
+/home/proj/{environment}/sequencing_data/illumina/flow_cells,\
+/home/proj/{environment}/sequencing_data/illumina/flow_cells/'$SLURM_JOB_ID':/run/user/$(id -u) \
 /home/proj/{environment}/demux-on-hasta/novaseq/container/bcl2fastq_v2-20-0.sif \
 bcl2fastq --loading-threads 3 --processing-threads 15 --writing-threads 3 \
 --runfolder-dir {run_dir} --output-dir {unaligned_dir} \
@@ -16,9 +16,9 @@ bcl2fastq --loading-threads 3 --processing-threads 15 --writing-threads 3 \
 touch {demux_completed_file}"
 
 singularity exec --bind \
-/home/proj/{environment}/demultiplexed-runs,\
-/home/proj/{environment}/flow_cells,\
-/home/proj/{environment}/flow_cells/'$SLURM_JOB_ID':/run/user/$(id -u) \
+/home/proj/{environment}/sequencing_data/illumina/demultiplexed-runs,\
+/home/proj/{environment}/sequencing_data/illumina/flow_cells,\
+/home/proj/{environment}/sequencing_data/illumina/flow_cells/'$SLURM_JOB_ID':/run/user/$(id -u) \
 /home/proj/{environment}/demux-on-hasta/novaseq/container/bcl2fastq_v2-20-0.sif \
 bcl2fastq --loading-threads 3 --processing-threads 15 --writing-threads 3 \
 --runfolder-dir {run_dir} --output-dir {unaligned_dir} \

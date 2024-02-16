@@ -126,36 +126,36 @@ class ReadHandler(BaseHandler):
     def get_application_limitations_by_tag(self, tag: str) -> list[ApplicationLimitations] | None:
         """Return application limitations given the application tag."""
         return apply_application_limitations_filter(
-            application_limitations=self._get_join_application_limitations_query(),
             filter_functions=[ApplicationLimitationsFilter.FILTER_BY_TAG],
+            application_limitations=self._get_join_application_limitations_query(),
             tag=tag,
         ).all()
 
-    def get_application_limitation_by_tag_and_pipeline(
-        self, tag: str, pipeline: Workflow
+    def get_application_limitation_by_tag_and_workflow(
+        self, tag: str, workflow: Workflow
     ) -> ApplicationLimitations | None:
-        """Return an application limitation given the application tag and pipeline."""
+        """Return an application limitation given the application tag and workflow."""
         filter_functions: list[ApplicationLimitationsFilter] = [
             ApplicationLimitationsFilter.FILTER_BY_TAG,
-            ApplicationLimitationsFilter.FILTER_BY_PIPELINE,
+            ApplicationLimitationsFilter.FILTER_BY_WORKFLOW,
         ]
         return apply_application_limitations_filter(
-            application_limitations=self._get_join_application_limitations_query(),
             filter_functions=filter_functions,
+            application_limitations=self._get_join_application_limitations_query(),
             tag=tag,
-            pipeline=pipeline,
+            workflow=workflow,
         ).first()
 
-    def get_latest_analysis_to_upload_for_pipeline(self, pipeline: str = None) -> list[Analysis]:
-        """Return latest not uploaded analysis for each case given a pipeline."""
+    def get_latest_analysis_to_upload_for_workflow(self, workflow: str = None) -> list[Analysis]:
+        """Return latest not uploaded analysis for each case given a workflow."""
         filter_functions: list[AnalysisFilter] = [
-            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.FILTER_WITH_WORKFLOW,
             AnalysisFilter.FILTER_IS_NOT_UPLOADED,
         ]
         return apply_analysis_filter(
-            analyses=self._get_latest_analyses_for_cases_query(),
             filter_functions=filter_functions,
-            pipeline=pipeline,
+            analyses=self._get_latest_analyses_for_cases_query(),
+            workflow=workflow,
         ).all()
 
     def get_analysis_by_case_entry_id_and_started_at(
@@ -168,10 +168,10 @@ class ReadHandler(BaseHandler):
         ]
 
         return apply_analysis_filter(
+            filter_functions=filter_functions,
             analyses=self._get_query(Analysis),
             case_entry_id=case_entry_id,
             started_at_date=started_at_date,
-            filter_functions=filter_functions,
         ).first()
 
     def get_cases_by_customer_and_case_name_search(
@@ -233,35 +233,26 @@ class ReadHandler(BaseHandler):
         filtered_cases: Query = apply_case_filter(
             cases=self._get_query(table=Case),
             filter_functions=filter_functions,
-            customer_entry_ids=customer_entry_ids,
             action=action,
             case_search=case_search,
+            customer_entry_ids=customer_entry_ids,
         )
         return filtered_cases.limit(limit=limit).all()
 
-    def get_cases_by_customer_pipeline_and_case_search(
+    def get_cases_by_customer_workflow_and_case_search(
         self,
         customer: Customer | None,
-        pipeline: str | None,
+        workflow: str | None,
         case_search: str | None,
         limit: int | None = 30,
     ) -> list[Case]:
         """
-        Retrieve a list of cases filtered by customer, pipeline, and matching names or internal ids.
-
-        Args:
-            customer (Customer | None): A customer object to filter cases by.
-            pipeline (str | None): The pipeline string to filter cases by.
-            case_search (str | None): The case search string to filter cases by.
-            limit (int | None, default=30): The maximum number of cases to return.
-
-        Returns:
-            list[Case]: A list of filtered cases sorted by creation time and limited by the specified number.
+        Retrieve a list of cases filtered by customer, workflow, and matching names or internal ids.
         """
         filter_functions: list[Callable] = [
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
             CaseFilter.FILTER_BY_CASE_SEARCH,
-            CaseFilter.FILTER_WITH_PIPELINE,
+            CaseFilter.FILTER_WITH_WORKFLOW,
             CaseFilter.ORDER_BY_CREATED_AT,
         ]
 
@@ -270,9 +261,9 @@ class ReadHandler(BaseHandler):
         filtered_cases: Query = apply_case_filter(
             cases=self._get_query(table=Case),
             filter_functions=filter_functions,
-            customer_entry_id=customer_entry_id,
             case_search=case_search,
-            pipeline=pipeline,
+            customer_entry_id=customer_entry_id,
+            workflow=workflow,
         )
         return filtered_cases.limit(limit=limit).all()
 
@@ -300,9 +291,9 @@ class ReadHandler(BaseHandler):
     def get_cases_by_ticket_id(self, ticket_id: str) -> list[Case]:
         """Return cases associated with a given ticket id."""
         return apply_case_filter(
+            cases=self._get_query(table=Case),
             filter_functions=[CaseFilter.FILTER_BY_TICKET],
             ticket_id=ticket_id,
-            cases=self._get_query(table=Case),
         ).all()
 
     def get_customer_id_from_ticket(self, ticket: str) -> str:
@@ -315,9 +306,9 @@ class ReadHandler(BaseHandler):
     def get_samples_from_ticket(self, ticket: str) -> list[Sample]:
         """Returns the samples related to given ticket."""
         return apply_case_filter(
+            cases=self._get_join_sample_family_query(),
             filter_functions=[CaseFilter.FILTER_BY_TICKET],
             ticket_id=ticket,
-            cases=self._get_join_sample_family_query(),
         ).all()
 
     def get_latest_ticket_from_case(self, case_id: str) -> str:
@@ -771,8 +762,8 @@ class ReadHandler(BaseHandler):
     def get_case_by_internal_id(self, internal_id: str) -> Case | None:
         """Get case by internal id."""
         return apply_case_filter(
-            filter_functions=[CaseFilter.FILTER_BY_INTERNAL_ID],
             cases=self._get_query(table=Case),
+            filter_functions=[CaseFilter.FILTER_BY_INTERNAL_ID],
             internal_id=internal_id,
         ).first()
 
@@ -788,12 +779,12 @@ class ReadHandler(BaseHandler):
             raise CgError
         LOG.info(f"Case {case_internal_id} exists in Status DB")
 
-    def get_running_cases_in_pipeline(self, pipeline: Workflow) -> list[Case]:
-        """Return all running cases in a pipeline."""
+    def get_running_cases_in_workflow(self, workflow: Workflow) -> list[Case]:
+        """Return all running cases in a workflow."""
         return apply_case_filter(
-            filter_functions=[CaseFilter.FILTER_WITH_PIPELINE, CaseFilter.FILTER_IS_RUNNING],
             cases=self._get_query(table=Case),
-            pipeline=pipeline,
+            filter_functions=[CaseFilter.FILTER_WITH_WORKFLOW, CaseFilter.FILTER_IS_RUNNING],
+            workflow=workflow,
         ).all()
 
     def get_not_analysed_cases_by_sample_internal_id(
@@ -1026,18 +1017,18 @@ class ReadHandler(BaseHandler):
         return self._get_join_cases_with_samples_query()
 
     def cases_to_analyze(
-        self, pipeline: Workflow = None, threshold: bool = False, limit: int = None
+        self, workflow: Workflow = None, threshold: bool = False, limit: int = None
     ) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.FILTER_HAS_SEQUENCE,
-            CaseFilter.FILTER_WITH_PIPELINE,
+            CaseFilter.FILTER_WITH_WORKFLOW,
             CaseFilter.FILTER_FOR_ANALYSIS,
         ]
         cases = apply_case_filter(
-            filter_functions=case_filter_functions,
             cases=self.get_families_with_analyses(),
-            pipeline=pipeline,
+            filter_functions=case_filter_functions,
+            workflow=workflow,
         )
 
         families: list[Query] = list(cases.order_by(Case.ordered_at))
@@ -1147,8 +1138,8 @@ class ReadHandler(BaseHandler):
             CaseFilter.FILTER_IS_COMPRESSIBLE,
         ]
         return apply_case_filter(
-            filter_functions=case_filter_functions,
             cases=self._get_query(table=Case),
+            filter_functions=case_filter_functions,
             creation_date=date_threshold,
         ).all()
 
@@ -1455,10 +1446,10 @@ class ReadHandler(BaseHandler):
             or (samples_sequenced_at and samples_sequenced_at < case_obj.ordered_at)
         )
 
-    def get_analyses_to_upload(self, pipeline: Workflow = None) -> list[Analysis]:
+    def get_analyses_to_upload(self, workflow: Workflow = None) -> list[Analysis]:
         """Return analyses that have not been uploaded."""
         analysis_filter_functions: list[AnalysisFilter] = [
-            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.FILTER_WITH_WORKFLOW,
             AnalysisFilter.FILTER_COMPLETED,
             AnalysisFilter.FILTER_IS_NOT_UPLOADED,
             AnalysisFilter.FILTER_VALID_IN_PRODUCTION,
@@ -1467,11 +1458,11 @@ class ReadHandler(BaseHandler):
         return apply_analysis_filter(
             filter_functions=analysis_filter_functions,
             analyses=self._get_join_analysis_case_query(),
-            pipeline=pipeline,
+            workflow=workflow,
         ).all()
 
     def get_analyses_to_clean(
-        self, before: datetime = datetime.now(), pipeline: Workflow = None
+        self, before: datetime = datetime.now(), workflow: Workflow = None
     ) -> list[Analysis]:
         """Return analyses that haven't been cleaned."""
         filter_functions: list[AnalysisFilter] = [
@@ -1480,18 +1471,18 @@ class ReadHandler(BaseHandler):
             AnalysisFilter.FILTER_STARTED_AT_BEFORE,
             AnalysisFilter.FILTER_CASE_ACTION_IS_NONE,
         ]
-        if pipeline:
-            filter_functions.append(AnalysisFilter.FILTER_WITH_PIPELINE)
+        if workflow:
+            filter_functions.append(AnalysisFilter.FILTER_WITH_WORKFLOW)
         return apply_analysis_filter(
             filter_functions=filter_functions,
             analyses=self._get_latest_analyses_for_cases_query(),
-            pipeline=pipeline,
+            workflow=workflow,
             started_at_date=before,
         ).all()
 
-    def get_analyses_for_case_and_pipeline_started_at_before(
+    def get_analyses_for_case_and_workflow_started_at_before(
         self,
-        pipeline: Workflow,
+        workflow: Workflow,
         started_at_before: datetime,
         case_internal_id: str,
     ) -> list[Analysis]:
@@ -1500,15 +1491,15 @@ class ReadHandler(BaseHandler):
         case_entry_id: int = case.id if case else None
         filter_functions: list[AnalysisFilter] = [
             AnalysisFilter.FILTER_BY_CASE_ENTRY_ID,
-            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.FILTER_WITH_WORKFLOW,
             AnalysisFilter.FILTER_STARTED_AT_BEFORE,
         ]
         return apply_analysis_filter(
-            analyses=self._get_query(table=Analysis),
             filter_functions=filter_functions,
+            analyses=self._get_query(table=Analysis),
+            workflow=workflow,
             case_entry_id=case_entry_id,
             started_at_date=started_at_before,
-            pipeline=pipeline,
         ).all()
 
     def get_analyses_for_case_started_at_before(
@@ -1524,56 +1515,56 @@ class ReadHandler(BaseHandler):
             AnalysisFilter.FILTER_STARTED_AT_BEFORE,
         ]
         return apply_analysis_filter(
-            analyses=self._get_query(table=Analysis),
             filter_functions=filter_functions,
+            analyses=self._get_query(table=Analysis),
             case_entry_id=case_entry_id,
             started_at_date=started_at_before,
         ).all()
 
-    def get_analyses_for_pipeline_started_at_before(
-        self, pipeline: Workflow, started_at_before: datetime
+    def get_analyses_for_workflow_started_at_before(
+        self, workflow: Workflow, started_at_before: datetime
     ) -> list[Analysis]:
-        """Return all analyses for a pipeline started before a certain date."""
+        """Return all analyses for a workflow started before a certain date."""
         filter_functions: list[AnalysisFilter] = [
-            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.FILTER_WITH_WORKFLOW,
             AnalysisFilter.FILTER_STARTED_AT_BEFORE,
         ]
         return apply_analysis_filter(
             filter_functions=filter_functions,
             analyses=self._get_query(table=Analysis),
-            pipeline=pipeline,
+            workflow=workflow,
             started_at_date=started_at_before,
         ).all()
 
     def get_analyses_started_at_before(self, started_at_before: datetime) -> list[Analysis]:
-        """Return all analyses for a pipeline started before a certain date."""
+        """Return all analyses for a workflow started before a certain date."""
         return apply_analysis_filter(
             filter_functions=[AnalysisFilter.FILTER_STARTED_AT_BEFORE],
             analyses=self._get_query(table=Analysis),
             started_at_date=started_at_before,
         ).all()
 
-    def observations_to_upload(self, pipeline: Workflow = None) -> Query:
+    def observations_to_upload(self, workflow: Workflow = None) -> Query:
         """Return observations that have not been uploaded."""
         case_filter_functions: list[CaseFilter] = [
-            CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_PIPELINE,
+            CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_WORKFLOW,
             CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD,
         ]
         records: Query = apply_case_filter(
-            filter_functions=case_filter_functions,
             cases=self.get_families_with_samples(),
-            pipeline=pipeline,
+            filter_functions=case_filter_functions,
+            workflow=workflow,
         )
         return apply_sample_filter(
             filter_functions=[SampleFilter.FILTER_WITHOUT_LOQUSDB_ID], samples=records
         )
 
-    def observations_uploaded(self, pipeline: Workflow = None) -> Query:
+    def observations_uploaded(self, workflow: Workflow = None) -> Query:
         """Return observations that have been uploaded."""
         records: Query = apply_case_filter(
-            filter_functions=[CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_PIPELINE],
             cases=self.get_families_with_samples(),
-            pipeline=pipeline,
+            filter_functions=[CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_WORKFLOW],
+            workflow=workflow,
         )
         records: Query = apply_sample_filter(
             filter_functions=[SampleFilter.FILTER_WITH_LOQUSDB_ID], samples=records
@@ -1583,7 +1574,7 @@ class ReadHandler(BaseHandler):
     def get_analyses(self) -> list[Analysis]:
         return self._get_query(table=Analysis).all()
 
-    def get_analyses_to_deliver_for_pipeline(self, pipeline: Workflow = None) -> list[Analysis]:
+    def get_analyses_to_deliver_for_pipeline(self, workflow: Workflow = None) -> list[Analysis]:
         """Return analyses that have been uploaded but not delivered."""
         analyses: Query = apply_sample_filter(
             samples=self._get_join_analysis_sample_family_query(),
@@ -1591,46 +1582,44 @@ class ReadHandler(BaseHandler):
         )
         filter_functions: list[AnalysisFilter] = [
             AnalysisFilter.FILTER_IS_NOT_UPLOADED,
-            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.FILTER_WITH_WORKFLOW,
             AnalysisFilter.ORDER_BY_UPLOADED_AT,
         ]
         return apply_analysis_filter(
-            analyses=analyses, filter_functions=filter_functions, pipeline=pipeline
+            filter_functions=filter_functions, analyses=analyses, workflow=workflow
         ).all()
 
-    def analyses_to_delivery_report(self, pipeline: Workflow = None) -> Query:
+    def analyses_to_delivery_report(self, workflow: Workflow | None = None) -> Query:
         """Return analyses that need a delivery report to be regenerated."""
         records: Query = apply_case_filter(
-            filter_functions=[CaseFilter.FILTER_REPORT_SUPPORTED],
             cases=self._get_join_analysis_case_query(),
-            pipeline=pipeline,
+            filter_functions=[CaseFilter.FILTER_REPORT_SUPPORTED],
         )
         analysis_filter_functions: list[AnalysisFilter] = [
-            AnalysisFilter.FILTER_REPORT_BY_PIPELINE,
+            AnalysisFilter.FILTER_REPORT_BY_WORKFLOW,
             AnalysisFilter.FILTER_WITHOUT_DELIVERY_REPORT,
             AnalysisFilter.FILTER_VALID_IN_PRODUCTION,
             AnalysisFilter.ORDER_BY_COMPLETED_AT,
         ]
         return apply_analysis_filter(
-            filter_functions=analysis_filter_functions, analyses=records, pipeline=pipeline
+            filter_functions=analysis_filter_functions, analyses=records, workflow=workflow
         )
 
-    def analyses_to_upload_delivery_reports(self, pipeline: Workflow = None) -> Query:
+    def analyses_to_upload_delivery_reports(self, workflow: Workflow = None) -> Query:
         """Return analyses that need a delivery report to be uploaded."""
         records: Query = apply_case_filter(
-            filter_functions=[CaseFilter.FILTER_WITH_SCOUT_DELIVERY],
             cases=self._get_join_analysis_case_query(),
-            pipeline=pipeline,
+            filter_functions=[CaseFilter.FILTER_WITH_SCOUT_DELIVERY],
         )
         analysis_filter_functions: list[AnalysisFilter] = [
-            AnalysisFilter.FILTER_REPORT_BY_PIPELINE,
+            AnalysisFilter.FILTER_REPORT_BY_WORKFLOW,
             AnalysisFilter.FILTER_WITH_DELIVERY_REPORT,
             AnalysisFilter.FILTER_IS_NOT_UPLOADED,
             AnalysisFilter.FILTER_VALID_IN_PRODUCTION,
             AnalysisFilter.ORDER_BY_COMPLETED_AT,
         ]
         return apply_analysis_filter(
-            filter_functions=analysis_filter_functions, analyses=records, pipeline=pipeline
+            filter_functions=analysis_filter_functions, analyses=records, workflow=workflow
         )
 
     def get_samples_to_deliver(self) -> list[Sample]:
@@ -1750,6 +1739,15 @@ class ReadHandler(BaseHandler):
             orders=orders, filter_functions=order_filter_functions, workflow=workflow
         )
         return orders.limit(limit).all()
+
+    def get_order_by_id(self, order_id: int) -> Order | None:
+        """Returns the entry in Order matching the given id."""
+        orders: Query = self._get_query(table=Order)
+        order_filter_functions: list[Callable] = [OrderFilter.FILTER_ORDERS_BY_ID]
+        orders: Query = apply_order_filters(
+            orders=orders, filter_functions=order_filter_functions, id=order_id
+        )
+        return orders.first()
 
     def _calculate_estimated_turnaround_time(
         self,

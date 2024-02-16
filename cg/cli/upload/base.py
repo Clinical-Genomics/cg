@@ -23,6 +23,7 @@ from cg.cli.upload.scout import (
     create_scout_load_config,
     upload_case_to_scout,
     upload_multiqc_to_scout,
+    upload_rna_alignment_file_to_scout,
     upload_rna_fusion_report_to_scout,
     upload_rna_junctions_to_scout,
     upload_rna_to_scout,
@@ -92,21 +93,21 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
 
 
 @upload.command("auto")
-@click.option("--pipeline", type=EnumChoice(Workflow), help="Limit to specific pipeline")
+@click.option("--workflow", type=EnumChoice(Workflow), help="Limit to specific workflow")
 @click.pass_context
-def upload_all_completed_analyses(context: click.Context, pipeline: Workflow = None):
-    """Upload all completed analyses"""
+def upload_all_completed_analyses(context: click.Context, workflow: Workflow = None):
+    """Upload all completed analyses."""
 
     LOG.info("----------------- AUTO -----------------")
 
     status_db: Store = context.obj.status_db
 
     exit_code = 0
-    for analysis_obj in status_db.get_analyses_to_upload(pipeline=pipeline):
+    for analysis_obj in status_db.get_analyses_to_upload(workflow=workflow):
         if analysis_obj.case.analyses[0].uploaded_at is not None:
             LOG.warning(
                 f"Skipping upload for case {analysis_obj.case.internal_id}. "
-                f"It has been already uploaded at {analysis_obj.case.analyses[0].uploaded_at}."
+                f"Case has been already uploaded at {analysis_obj.case.analyses[0].uploaded_at}."
             )
             continue
 
@@ -136,6 +137,7 @@ upload.add_command(upload_delivery_report_to_scout)
 upload.add_command(upload_genotypes)
 upload.add_command(upload_multiqc_to_scout)
 upload.add_command(upload_observations_to_loqusdb)
+upload.add_command(upload_rna_alignment_file_to_scout)
 upload.add_command(upload_rna_fusion_report_to_scout)
 upload.add_command(upload_rna_junctions_to_scout)
 upload.add_command(upload_rna_to_scout)

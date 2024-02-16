@@ -50,40 +50,40 @@ def test_get_cases_by_customers_action_and_case_search_pattern(
         assert case_search in case.name
 
 
-def test_get_cases_by_customer_pipeline_and_case_search_pattern(
+def test_get_cases_by_customer_workflow_and_case_search_pattern(
     store_with_cases_and_customers: Store,
 ):
-    """Test that only cases with the specified customer, pipeline, and case search pattern are returned."""
+    """Test that only cases with the specified customer, workflow, and case search pattern are returned."""
     # GIVEN a store with some cases and customers
     case = store_with_cases_and_customers._get_query(table=Case).first()
 
-    # Set the pipeline and case_search
+    # Set the workflow and case_search
     customer = case.customer
-    pipeline = case.data_analysis
+    workflow = case.data_analysis
     case_search = case.name[:3]
 
-    # WHEN calling get_cases_by_customer_pipeline_and_case_search_pattern with customer, pipeline, and case_search
-    cases = store_with_cases_and_customers.get_cases_by_customer_pipeline_and_case_search(
-        customer=customer, pipeline=pipeline, case_search=case_search
+    # WHEN calling get_cases_by_customer_workflow_and_case_search_pattern with customer, workflow, and case_search
+    cases = store_with_cases_and_customers.get_cases_by_customer_workflow_and_case_search(
+        customer=customer, workflow=workflow, case_search=case_search
     )
 
-    # THEN cases with the specified customer, pipeline, and case search pattern should be returned
+    # THEN cases with the specified customer, workflow, and case search pattern should be returned
     for case in cases:
         assert case.customer == customer
-        assert case.data_analysis == pipeline
+        assert case.data_analysis == workflow
         assert case_search in case.name
 
 
-def test_get_running_cases_in_pipeline(store_with_cases_and_customers: Store):
-    """Test that only cases with the specified pipeline, and have action "running" are returned."""
+def test_get_running_cases_in_workflow(store_with_cases_and_customers: Store):
+    """Test that only cases with the specified workflow, and have action "running" are returned."""
     # GIVEN a store with some cases
 
-    # WHEN getting cases with a pipeline and are running
-    cases: list[Case] = store_with_cases_and_customers.get_running_cases_in_pipeline(
-        pipeline=Workflow.MIP_DNA
+    # WHEN getting cases with a workflow and are running
+    cases: list[Case] = store_with_cases_and_customers.get_running_cases_in_workflow(
+        workflow=Workflow.MIP_DNA
     )
 
-    # THEN cases with the specified pipeline, and case action is returned
+    # THEN cases with the specified workflow, and case action is returned
     for case in cases:
         assert case.action == CaseActions.RUNNING
         assert case.data_analysis == Workflow.MIP_DNA
@@ -1344,21 +1344,21 @@ def test_analysis_uploaded_at(base_store: Store, helpers):
         assert case.get("analysis_uploaded_at") is not None
 
 
-def test_analysis_pipeline(base_store: Store, helpers):
-    """Test to that cases displays pipeline"""
+def test_analysis_workflow(base_store: Store, helpers):
+    """Test to that cases displays workflow."""
 
-    # GIVEN a database with an analysis that has pipeline
-    pipeline = Workflow.BALSAMIC
-    analysis = helpers.add_analysis(base_store, pipeline=pipeline)
+    # GIVEN a database with an analysis that has workflow
+    workflow = Workflow.BALSAMIC
+    analysis = helpers.add_analysis(base_store, workflow=workflow)
     assert analysis.pipeline is not None
 
     # WHEN getting active cases
     cases = base_store.cases()
 
-    # THEN cases should contain info on pipeline
+    # THEN cases should contain info on workflow
     assert cases
     for case in cases:
-        assert case.get("analysis_pipeline") == str(pipeline)
+        assert case.get("analysis_pipeline") == str(workflow)
 
 
 def test_samples_delivered(base_store: Store, helpers):

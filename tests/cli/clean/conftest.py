@@ -63,10 +63,10 @@ def clean_context(
     helpers.add_analysis(
         store,
         case=case_to_clean,
-        pipeline=Workflow.BALSAMIC,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
+        workflow=Workflow.BALSAMIC,
     )
     Path(analysis_api.get_case_path(balsamic_case_clean)).mkdir(exist_ok=True, parents=True)
 
@@ -88,10 +88,10 @@ def clean_context(
     helpers.add_analysis(
         store,
         case=case_to_not_clean,
-        pipeline=Workflow.BALSAMIC,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
+        workflow=Workflow.BALSAMIC,
     )
     Path(analysis_api.get_case_path(balsamic_case_not_clean)).mkdir(exist_ok=True, parents=True)
     cg_context.meta_apis["analysis_api"] = analysis_api
@@ -159,10 +159,10 @@ def clean_context_microsalt(
     helpers.add_analysis(
         store,
         case=case_to_clean,
-        pipeline=Workflow.MICROSALT,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
+        workflow=Workflow.MICROSALT,
     )
     case_path_list = analysis_api.get_case_path(microsalt_case_clean)
     for path in case_path_list:
@@ -186,10 +186,10 @@ def clean_context_microsalt(
     helpers.add_analysis(
         store,
         case=case_to_clean_dry_run,
-        pipeline=Workflow.MICROSALT,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
+        workflow=Workflow.MICROSALT,
     )
 
     case_path_list = analysis_api.get_case_path(microsalt_case_clean_dry)
@@ -206,13 +206,15 @@ def clean_context_microsalt(
 @pytest.fixture(scope="function")
 def clean_flow_cells_context(
     cg_context: CGConfig,
-    tmp_flow_cells_directory: Path,
-    tmp_demultiplexed_runs_directory: Path,
+    tmp_illumina_flow_cells_directory,
+    tmp_illumina_demultiplexed_flow_cells_directory,
     store_with_flow_cell_to_clean: Store,
     housekeeper_api_with_flow_cell_to_clean: HousekeeperAPI,
 ) -> CGConfig:
-    cg_context.flow_cells_dir = tmp_flow_cells_directory
-    cg_context.demultiplexed_flow_cells_dir = tmp_demultiplexed_runs_directory
+    cg_context.illumina_flow_cells_directory = tmp_illumina_flow_cells_directory
+    cg_context.illumina_demultiplexed_runs_directory = (
+        tmp_illumina_demultiplexed_flow_cells_directory
+    )
     cg_context.housekeeper_api_ = housekeeper_api_with_flow_cell_to_clean
     cg_context.status_db_ = store_with_flow_cell_to_clean
 
