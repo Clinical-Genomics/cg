@@ -66,10 +66,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.write_params_file(case_id=case_id, pipeline_parameters=pipeline_parameters.dict())
 
     def get_sample_sheet_content_per_sample(
-        self, sample: Sample, case: Case = "", case_sample: CaseSample = ""
+        self, case: Case = "", case_sample: CaseSample = ""
     ) -> list[list[str]]:
         """Get sample sheet content per sample."""
-        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample)
+        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(case_sample.sample)
         fastq_forward_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, forward_read=True
         )
