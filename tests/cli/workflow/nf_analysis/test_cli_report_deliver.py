@@ -56,7 +56,7 @@ def test_report_deliver_with_missing_case(
     # WHEN generating deliverables file
     result = cli_runner.invoke(report_deliver, [case_id_does_not_exist], obj=context)
 
-    # THEN command should NOT successfully call the command it creates
+    # THEN command should NOT succeed
     assert result.exit_code != EXIT_SUCCESS
 
     # THEN ERROR log should be printed containing invalid case_id
