@@ -100,7 +100,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         for link in case.links:
             sample_sheet_content.extend(
                 self.get_sample_sheet_content_per_sample(
-                    sample=link.sample, case=case, case_sample=link
+                    case=case, case_sample=link
                 )
             )
         return sample_sheet_content
