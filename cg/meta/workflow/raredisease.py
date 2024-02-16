@@ -7,6 +7,7 @@ from pathlib import Path
 from cg.io.txt import concat_txt
 from cg.io.config import write_config_nextflow_style
 from cg.constants import GenePanelMasterList, Workflow
+from cg.constants.subject import PlinkPhenotypeStatus
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -50,7 +51,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         case_id: str,
         dry_run: bool,
     ) -> None:
-        """Create config files (parameters and sample sheet) for Raredisease analysis."""
+        """Create a parameter (.config) files and a Nextflow samplesheet input for Raredisease analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
         pipeline_parameters: PipelineParameters = self.get_pipeline_parameters(case_id=case_id)
@@ -127,13 +128,12 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     @staticmethod
     def get_phenotype_code(phenotype: str) -> int:
         """Return Raredisease phenotype code."""
-        LOG.debug("Translate phenotype to int")
-        if phenotype == "unaffected":
-            return 1
-        elif phenotype == "affected":
-            return 2
-        else:
-            return 0
+        LOG.debug("Translate phenotype to integer")
+        try:
+            status = PlinkPhenotypeStatus[phenotype.upper()]
+        except KeyError:
+            raise ValueError(f"{phenotype} is not a valid phenotype status")
+        return status
 
     @staticmethod
     def get_sex_code(sex: str) -> int:
