@@ -560,6 +560,13 @@ class CaseSample(Model):
     def __str__(self) -> str:
         return f"{self.case.internal_id} | {self.sample.internal_id}"
 
+    def get_maternal_id(self, mother: str = None) -> str:
+        """Return parental id."""
+        return mother.internal_id if mother else ""
+
+    def get_paternal_id(self, father: str = None) -> str:
+        """Return parental id."""
+        return father.internal_id if father else ""
 
 class Flowcell(Model):
     __tablename__ = "flowcell"
