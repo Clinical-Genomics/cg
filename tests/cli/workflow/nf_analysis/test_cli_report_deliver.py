@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
     ["rnafusion_context", "taxprofiler_context"],
 )
 def test_report_deliver_without_options(cli_runner: CliRunner, context: CGConfig, request):
-    """Test report-deliver for Taxprofiler and Rnafusion without options."""
+    """Test report-deliver for workflow without options."""
     context = request.getfixturevalue(context)
 
     # WHEN dry running without anything specified
