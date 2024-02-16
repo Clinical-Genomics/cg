@@ -5,7 +5,7 @@ from pathlib import Path
 import click
 from pydantic import ValidationError
 
-from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
+from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet_content
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -100,7 +100,7 @@ def create_sheet(
         LOG.warning(f"Could not find any samples in LIMS for {flow_cell_id}")
         raise click.Abort
     try:
-        sample_sheet_content: list[list[str]] = create_sample_sheet(
+        sample_sheet_content: list[list[str]] = create_sample_sheet_content(
             flow_cell=flow_cell, lims_samples=lims_samples
         )
     except (FileNotFoundError, FileExistsError, FlowCellError) as error:
@@ -178,7 +178,7 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
             continue
 
         try:
-            sample_sheet_content: list[list[str]] = create_sample_sheet(
+            sample_sheet_content: list[list[str]] = create_sample_sheet_content(
                 flow_cell=flow_cell,
                 lims_samples=lims_samples,
             )

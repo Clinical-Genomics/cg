@@ -6,9 +6,7 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
-    SampleSheetCreatorBcl2Fastq,
-)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreatorBcl2Fastq
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
@@ -170,63 +168,6 @@ def sample_sheet_bcl2fastq_duplicate_different_lane(
         ]
     )
     return valid_sample_sheet_bcl2fastq
-
-
-@pytest.fixture
-def valid_sample_sheet_dragen(
-    sample_sheet_line_sample_1: list[str], sample_sheet_line_sample_2: list[str]
-) -> list[list[str]]:
-    """Return the content of a valid Dragen sample sheet."""
-    return [
-        [SampleSheetBcl2FastqSections.Data.HEADER],
-        [
-            SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID.value,
-            "Lane",
-            "Sample_ID",
-            "SampleRef",
-            "index",
-            "index2",
-            "SampleName",
-            "Control",
-            "Recipe",
-            "Operator",
-            "Sample_Project",
-        ],
-        sample_sheet_line_sample_1,
-        sample_sheet_line_sample_2,
-    ]
-
-
-@pytest.fixture
-def sample_sheet_dragen_duplicate_same_lane(
-    valid_sample_sheet_dragen: list[list[str]], sample_sheet_line_sample_2: list[str]
-) -> list[list[str]]:
-    """Return the content of a Dragen sample sheet with a duplicated sample in the same lane."""
-    valid_sample_sheet_dragen.append(sample_sheet_line_sample_2)
-    return valid_sample_sheet_dragen
-
-
-@pytest.fixture
-def sample_sheet_dragen_duplicate_different_lane(
-    valid_sample_sheet_dragen: list[list[str]],
-) -> list[list[str]]:
-    """Return the content of a Dragen sample sheet with a duplicated sample in a different lane."""
-    valid_sample_sheet_dragen.append(
-        [
-            "HWHMWDMXX",
-            "2",
-            "ACC7628A1",
-            "hg19",
-            "AGTTAGCTGG",
-            "GATGAGAATG",
-            "814206",
-            "N",
-            "R1",
-            "script",
-            "814206",
-        ]
-    )
-    return valid_sample_sheet_dragen
 
 
 @pytest.fixture

@@ -4,10 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_validated_sample_sheet,
-)
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_flow_cell_samples_from_content
 from cg.apps.demultiplex.sample_sheet.sample_models import (
+    FlowCellSample,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
@@ -16,7 +15,6 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreatorBcl2Fastq,
     SampleSheetCreatorBCLConvert,
 )
-from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants.demultiplexing import BclConverter
 from cg.exc import SampleSheetError
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -54,11 +52,8 @@ def test_construct_bcl2fastq_sheet(
     sample_sheet_content: list[list[str]] = bcl2fastq_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
-    sample_sheet: SampleSheet = get_validated_sample_sheet(
-        sample_sheet_content=sample_sheet_content,
-        sample_type=FlowCellSampleBcl2Fastq,
-    )
-    assert sample_sheet.samples
+    samples: list[FlowCellSample] = get_flow_cell_samples_from_content(sample_sheet_content)
+    assert samples
 
 
 def test_construct_bcl_convert_sheet(
@@ -69,16 +64,13 @@ def test_construct_bcl_convert_sheet(
     assert bcl_convert_sample_sheet_creator.lims_samples
 
     # WHEN building the sample sheet
-    sample_sheet_content: list[list[str]] = (
-        bcl_convert_sample_sheet_creator.construct_sample_sheet()
-    )
+    sample_sheet_content: list[
+        list[str]
+    ] = bcl_convert_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
-    sample_sheet: SampleSheet = get_validated_sample_sheet(
-        sample_sheet_content=sample_sheet_content,
-        sample_type=FlowCellSampleBCLConvert,
-    )
-    assert sample_sheet.samples
+    samples: list[FlowCellSample] = get_flow_cell_samples_from_content(sample_sheet_content)
+    assert samples
 
 
 def test_remove_unwanted_samples_dual_index(

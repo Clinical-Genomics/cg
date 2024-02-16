@@ -9,9 +9,7 @@ from typing import Type
 from pydantic import ValidationError
 from typing_extensions import Literal
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_sheet_from_file,
-)
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
@@ -234,10 +232,6 @@ class FlowCellDirectoryData:
         if not self._sample_sheet_path_hk:
             raise FlowCellError("Sample sheet path has not been assigned yet")
         return get_sample_sheet_from_file(self._sample_sheet_path_hk)
-
-    def get_sample_sheet(self) -> SampleSheet:
-        """Return sample sheet object."""
-        return get_sample_sheet_from_file(self.sample_sheet_path)
 
     def is_sequencing_done(self) -> bool:
         """Check if sequencing is done.

@@ -2,7 +2,7 @@ import logging
 import os
 from pathlib import Path
 
-from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
+from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet_content
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -11,7 +11,7 @@ from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import BclConverter
 from cg.exc import FlowCellError, HousekeeperFileMissingError, SampleSheetError
-from cg.io.controller import ReadFile, WriteFile
+from cg.io.controller import WriteFile
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
@@ -31,6 +31,7 @@ class SampleSheetAPI:
         self.lims_api: LimsAPI = config.lims_api
         self.dry_run: bool = False
         self.force: bool = False
+        self.validator = SampleSheetValidator()
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run."""
@@ -64,7 +65,7 @@ class SampleSheetAPI:
         """Return the sample sheet path if it exists and if it passes validation."""
         if sample_sheet_path and sample_sheet_path.exists():
             try:
-                self.validate_from_path(sample_sheet_path)
+                self.validator.validate_sample_sheet_from_file(sample_sheet_path)
             except SampleSheetError:
                 LOG.warning(f"Sample sheet {sample_sheet_path} was not valid")
                 return
@@ -79,28 +80,7 @@ class SampleSheetAPI:
             return
         return self.get_valid_sample_sheet_path(sample_sheet_path)
 
-    @staticmethod
-    def validate_from_content(content: list[list[str]]) -> None:
-        """
-        Validate a sample sheet given its content.
-        Raises:
-            SampleSheetError: If the sample sheet is not valid.
-        """
-        validator: SampleSheetValidator = SampleSheetValidator(content)
-        validator.validate_sample_sheet()
-
-    def validate_from_path(self, path: Path) -> None:
-        """
-        Validate a sample sheet given the path to the file.
-        Raises:
-            SampleSheetError: If the sample sheet is not valid.
-        """
-        content: list[list[str]] = ReadFile.get_content_from_file(
-            file_format=FileFormat.CSV, file_path=path
-        )
-        self.validate_from_content(content)
-
-    def create_sample_sheet_content(self, flow_cell: FlowCellDirectoryData) -> list[list[str]]:
+    def get_sample_sheet_content(self, flow_cell: FlowCellDirectoryData) -> list[list[str]]:
         """Return the sample sheet content for a flow cell."""
         lims_samples: list[FlowCellSample] = list(
             get_flow_cell_samples(
@@ -113,13 +93,13 @@ class SampleSheetAPI:
             message: str = f"Could not find any samples in LIMS for {flow_cell.id}"
             LOG.warning(message)
             raise SampleSheetError(message)
-        return create_sample_sheet(flow_cell=flow_cell, lims_samples=lims_samples)
+        return create_sample_sheet_content(flow_cell=flow_cell, lims_samples=lims_samples)
 
     def create_sample_sheet_file(self, flow_cell: FlowCellDirectoryData) -> None:
         """Create a valid sample sheet in the flow cell directory and add it to Housekeeper."""
-        sample_sheet_content: list[list[str]] = self.create_sample_sheet_content(flow_cell)
+        sample_sheet_content: list[list[str]] = self.get_sample_sheet_content(flow_cell)
         if not self.force:
-            self.validate_from_content(sample_sheet_content)
+            self.validator.validate_sample_sheet_from_content(sample_sheet_content)
         WriteFile.write_file_from_content(
             content=sample_sheet_content,
             file_format=FileFormat.CSV,

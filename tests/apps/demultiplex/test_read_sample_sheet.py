@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Type
 
 import pytest
 
@@ -18,7 +19,9 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
 )
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
+from cg.constants.constants import FileFormat
 from cg.exc import SampleSheetError
+from cg.io.controller import ReadFile
 
 
 def test_validate_samples_are_unique(
@@ -127,25 +130,7 @@ def test_get_sample_sheet_bcl2fastq_duplicate_same_lane(
     # WHEN creating the sample sheet object
     with pytest.raises(SampleSheetError):
         # THEN a sample sheet error is raised
-        get_validated_sample_sheet(
-            sample_sheet_content=sample_sheet_bcl2fastq_duplicate_same_lane,
-            sample_type=FlowCellSampleBcl2Fastq,
-        )
-
-
-def test_get_sample_sheet_dragen_duplicate_same_lane(
-    sample_sheet_dragen_duplicate_same_lane: list[list[str]],
-):
-    """Test that creating a Dragen sample sheet with duplicated samples in a lane fails."""
-    # GIVEN a Dragen sample sheet with a sample duplicated in a lane
-
-    # WHEN creating the sample sheet object
-    with pytest.raises(SampleSheetError):
-        # THEN a sample sheet error is raised
-        get_validated_sample_sheet(
-            sample_sheet_content=sample_sheet_dragen_duplicate_same_lane,
-            sample_type=FlowCellSampleBCLConvert,
-        )
+        get_validated_sample_sheet(sample_sheet_bcl2fastq_duplicate_same_lane)
 
 
 def test_get_sample_sheet_bcl2fastq_duplicate_different_lanes(
@@ -156,24 +141,7 @@ def test_get_sample_sheet_bcl2fastq_duplicate_different_lanes(
 
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = get_validated_sample_sheet(
-        sample_sheet_content=sample_sheet_bcl2fastq_duplicate_different_lane,
-        sample_type=FlowCellSampleBcl2Fastq,
-    )
-
-    # THEN a sample sheet is returned with samples in it
-    assert sample_sheet.samples
-
-
-def test_get_sample_sheet_dragen_duplicate_different_lanes(
-    sample_sheet_dragen_duplicate_different_lane: list[list[str]],
-):
-    """Test that Dragen a sample sheet created with duplicated samples in different lanes has samples."""
-    # GIVEN a Dragen sample sheet with same sample duplicated in different lanes
-
-    # WHEN creating the sample sheet object
-    sample_sheet: SampleSheet = get_validated_sample_sheet(
-        sample_sheet_content=sample_sheet_dragen_duplicate_different_lane,
-        sample_type=FlowCellSampleBCLConvert,
+        sample_sheet_bcl2fastq_duplicate_different_lane
     )
 
     # THEN a sample sheet is returned with samples in it
@@ -205,7 +173,10 @@ def test_get_sample_type_for_bcl_convert(bcl_convert_sample_sheet_path: Path):
     # GIVEN a bcl convert sample sheet path
 
     # WHEN getting the sample type
-    sample_type: FlowCellSample = get_sample_type(bcl_convert_sample_sheet_path)
+    content: list[list[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.CSV, file_path=bcl_convert_sample_sheet_path
+    )
+    sample_type: Type[FlowCellSample] = get_sample_type(content)
 
     # THEN the sample type is FlowCellSampleBCLConvert
     assert sample_type is FlowCellSampleBCLConvert
@@ -215,7 +186,10 @@ def test_get_sample_type_for_bcl2fastq(bcl2fastq_sample_sheet_path: Path):
     # GIVEN a bcl convert sample sheet path
 
     # WHEN getting the sample type
-    sample_type: FlowCellSample = get_sample_type(bcl2fastq_sample_sheet_path)
+    content: list[list[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.CSV, file_path=bcl2fastq_sample_sheet_path
+    )
+    sample_type: Type[FlowCellSample] = get_sample_type(content)
 
     # THEN the sample type is FlowCellSampleBCLConvert
     assert sample_type is FlowCellSampleBcl2Fastq

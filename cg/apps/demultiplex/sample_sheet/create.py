@@ -24,7 +24,7 @@ def get_sample_sheet_creator(
     return SampleSheetCreatorBCLConvert(flow_cell=flow_cell, lims_samples=lims_samples)
 
 
-def create_sample_sheet(
+def create_sample_sheet_content(
     flow_cell: FlowCellDirectoryData,
     lims_samples: list[FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert],
 ) -> list[list[str]]:
