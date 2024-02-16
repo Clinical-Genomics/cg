@@ -5,6 +5,7 @@ from pathlib import Path
 import click
 from pydantic import ValidationError
 
+from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet_content
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
@@ -30,12 +31,14 @@ def sample_sheet_commands():
 
 @sample_sheet_commands.command(name="validate")
 @click.argument("sheet", type=click.Path(exists=True, dir_okay=False))
-def validate_sample_sheet(sheet: click.Path):
+@click.pass_obj
+def validate_sample_sheet(context: CGConfig, sheet: click.Path):
     """Validate a sample sheet."""
     LOG.info(f"Validating {sheet} sample sheet")
+    sample_sheet_api = SampleSheetAPI(config=context)
     try:
-        get_sample_sheet_from_file(Path(sheet))
-    except ValidationError as error:
+        sample_sheet_api.validate(Path(sheet))
+    except (SampleSheetError, ValidationError) as error:
         LOG.warning(error)
         raise click.Abort from error
     LOG.info("Sample sheet passed validation")
