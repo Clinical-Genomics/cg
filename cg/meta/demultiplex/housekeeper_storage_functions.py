@@ -161,7 +161,7 @@ def add_and_include_sample_sheet_path_to_housekeeper(
     flow_cell_directory: Path, flow_cell_name: str, hk_api: HousekeeperAPI
 ) -> None:
     """Add sample sheet path to Housekeeper."""
-
+    LOG.info("Adding sample sheet to Housekeeper")
     try:
         sample_sheet_file_path: Path = get_sample_sheet_path_from_flow_cell_dir(flow_cell_directory)
         hk_api.add_bundle_and_version_if_non_existent(flow_cell_name)

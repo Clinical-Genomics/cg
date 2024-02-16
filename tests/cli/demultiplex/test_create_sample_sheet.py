@@ -16,14 +16,14 @@ from cg.io.txt import read_txt
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
-FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.get_flow_cell_samples"
+FLOW_CELL_FUNCTION_NAME: str = "cg.apps.demultiplex.sample_sheet.api.get_flow_cell_samples"
 
 
 def test_create_sample_sheet_no_run_parameters_fails(
     cli_runner: testing.CliRunner,
     tmp_flow_cell_without_run_parameters_path: Path,
     sample_sheet_context: CGConfig,
-    hiseq_2500_custom_index_bcl_convert_lims_samples: list[FlowCellSampleBcl2Fastq],
+    hiseq_2500_custom_index_bcl_convert_lims_samples: list[FlowCellSampleBCLConvert],
     caplog,
     mocker,
 ):

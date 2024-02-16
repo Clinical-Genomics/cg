@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 from typing import Type
 
 from pydantic import TypeAdapter
@@ -10,10 +9,8 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBCLConvert,
 )
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
-from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
 from cg.exc import SampleSheetError
-from cg.io.controller import ReadFile
 
 LOG = logging.getLogger(__name__)
 
@@ -99,7 +96,11 @@ def get_samples_by_lane(
 def get_flow_cell_samples_from_content(
     sample_sheet_content: list[list[str]],
 ) -> list[FlowCellSample]:
-    """Return the samples in a sample sheet as a list of FlowCellSample objects."""
+    """
+    Return the samples in a sample sheet as a list of FlowCellSample objects.
+    Raises:
+            ValidationError: if the samples do not have the correct attributes based on their model.
+    """
     sample_type: Type[FlowCellSample] = get_sample_type(sample_sheet_content)
     raw_samples: list[dict[str, str]] = get_raw_samples(sample_sheet_content=sample_sheet_content)
     adapter = TypeAdapter(list[sample_type])
@@ -113,11 +114,3 @@ def get_validated_sample_sheet(
     samples: list[FlowCellSample] = get_flow_cell_samples_from_content(sample_sheet_content)
     validate_samples_unique_per_lane(samples=samples)
     return SampleSheet(samples=samples)
-
-
-def get_sample_sheet_from_file(infile: Path) -> SampleSheet:
-    """Parse and validate a sample sheet from file."""
-    sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=infile
-    )
-    return get_validated_sample_sheet(sample_sheet_content)

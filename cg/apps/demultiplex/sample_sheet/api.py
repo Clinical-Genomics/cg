@@ -2,6 +2,9 @@ import logging
 import os
 from pathlib import Path
 
+import click
+from pydantic import ValidationError
+
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet_content
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
@@ -11,7 +14,7 @@ from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import BclConverter
 from cg.exc import FlowCellError, HousekeeperFileMissingError, SampleSheetError
-from cg.io.controller import WriteFile
+from cg.io.controller import WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
@@ -51,8 +54,9 @@ class SampleSheetAPI:
         """
         flow_cell_path: Path = Path(self.flow_cell_runs_dir, flow_cell_name)
         if not flow_cell_path.exists():
-            LOG.warning(f"Could not find flow cell {flow_cell_path}")
-            raise SampleSheetError(f"Could not find flow cell {flow_cell_path}")
+            message: str = f"Could not find flow cell {flow_cell_path}"
+            LOG.warning(message)
+            raise SampleSheetError(message)
         try:
             flow_cell = FlowCellDirectoryData(
                 flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
@@ -66,10 +70,13 @@ class SampleSheetAPI:
         if sample_sheet_path and sample_sheet_path.exists():
             try:
                 self.validator.validate_sample_sheet_from_file(sample_sheet_path)
-            except SampleSheetError:
+            except (SampleSheetError, ValidationError):
                 LOG.warning(f"Sample sheet {sample_sheet_path} was not valid")
                 return
-        return sample_sheet_path
+            return sample_sheet_path
+        else:
+            LOG.warning(f"Sample sheet with path {sample_sheet_path} does not exist")
+            return
 
     def get_valid_sample_sheet_path_from_hk(self, flow_cell_id: str) -> Path | None:
         """Return the sample sheet path from Housekeeper if is valid and exists."""
@@ -100,6 +107,14 @@ class SampleSheetAPI:
         sample_sheet_content: list[list[str]] = self.get_sample_sheet_content(flow_cell)
         if not self.force:
             self.validator.validate_sample_sheet_from_content(sample_sheet_content)
+        LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
+        if self.dry_run:
+            click.echo(
+                WriteStream.write_stream_from_content(
+                    file_format=FileFormat.CSV, content=sample_sheet_content
+                )
+            )
+            return
         WriteFile.write_file_from_content(
             content=sample_sheet_content,
             file_format=FileFormat.CSV,
@@ -140,8 +155,7 @@ class SampleSheetAPI:
                 )
         else:
             LOG.info(f"Creating new sample sheet for flow cell {flow_cell_name}")
-            if not self.dry_run:
-                self.create_sample_sheet_file(flow_cell)
+            self.create_sample_sheet_file(flow_cell)
 
     def get_or_create_all_sample_sheets(self):
         """Ensure that a valid sample sheet is present in all flow cell directories."""
