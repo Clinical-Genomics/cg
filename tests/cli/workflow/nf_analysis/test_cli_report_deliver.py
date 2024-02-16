@@ -82,7 +82,7 @@ def test_report_deliver_without_samples(
     # GIVEN case-id
     case_id: str = no_sample_case_id
 
-    # WHEN dry running with dry specified
+    # WHEN generating deliverables with dry specified
     result = cli_runner.invoke(report_deliver, [case_id, "--dry-run"], obj=context)
 
     # THEN command should NOT execute successfully
