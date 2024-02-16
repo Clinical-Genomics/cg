@@ -3,8 +3,9 @@ from pathlib import Path
 import pytest
 from _pytest.fixtures import FixtureRequest
 from click import testing
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
+from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
@@ -103,8 +104,8 @@ def test_create_bcl2fastq_sample_sheet(
     # THEN the sample sheet was created
     assert flow_cell.sample_sheet_exists()
 
-    # THEN the sample sheet is on the correct format
-    assert flow_cell.validate_sample_sheet()
+    # THEN the sample sheet passes validation
+    SampleSheetAPI(sample_sheet_context).validate(flow_cell.sample_sheet_path)
 
     # THEN the sample sheet is in Housekeeper
     assert sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(flow_cell.id)
@@ -178,8 +179,8 @@ def test_create_v2_sample_sheet(
     # THEN the sample sheet was created
     assert flow_cell.sample_sheet_exists()
 
-    # THEN the sample sheet is on the correct format
-    assert flow_cell.validate_sample_sheet()
+    # THEN the sample sheet passes validation
+    SampleSheetAPI(sample_sheet_context).validate(flow_cell.sample_sheet_path)
 
     # THEN the sample sheet is in Housekeeper
     assert sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(flow_cell.id)
@@ -190,7 +191,7 @@ def test_create_v2_sample_sheet(
     assert generated_content == correct_content
 
 
-def test_incorrect_bcl2fastq_headers_samplesheet(
+def test_incorrect_bcl2fastq_samplesheet_is_regenerated(
     cli_runner: testing.CliRunner,
     tmp_flow_cells_directory_malformed_sample_sheet: Path,
     sample_sheet_context: CGConfig,
@@ -198,12 +199,17 @@ def test_incorrect_bcl2fastq_headers_samplesheet(
     mocker,
     caplog,
 ):
-    """Test that correct logging is done when a Bcl2fastq generated sample sheet is malformed."""
+    """Test that when a flow cell has a malformed sample sheet it is regenerated correctly."""
     # GIVEN a flowcell directory with some run parameters
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=tmp_flow_cells_directory_malformed_sample_sheet,
         bcl_converter=BclConverter.BCL2FASTQ,
     )
+
+    # GIVEN a sample sheet API and an invalid sample sheet
+    sample_sheet_api: SampleSheetAPI = SampleSheetAPI(sample_sheet_context)
+    with pytest.raises(ValidationError):
+        sample_sheet_api.validate(flow_cell.sample_sheet_path)
 
     # GIVEN flow cell samples
     mocker.patch(
@@ -223,19 +229,5 @@ def test_incorrect_bcl2fastq_headers_samplesheet(
         obj=sample_sheet_context,
     )
 
-    # THEN the sample sheet was created
-    assert flow_cell.sample_sheet_exists()
-
-    # THEN the sample sheet is not in the correct format
-    assert not flow_cell.validate_sample_sheet()
-
-    # THEN the expected headers should have been logged
-    assert (
-        "Ensure that the headers in the sample sheet follows the allowed structure for bcl2fastq"
-        in caplog.text
-    )
-
-    assert (
-        "FCID,Lane,SampleID,SampleRef,index,SampleName,Control,Recipe,Operator,Project"
-        in caplog.text
-    )
+    # THEN the sample sheet was re-created and passes validation
+    sample_sheet_api.validate(flow_cell.sample_sheet_path)

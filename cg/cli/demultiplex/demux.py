@@ -3,8 +3,10 @@ from glob import glob
 from pathlib import Path
 
 import click
+from pydantic import ValidationError
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     hardlink_flow_cell_analysis_data,
@@ -13,7 +15,7 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     mark_flow_cell_as_queued_for_post_processing,
 )
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, DemultiplexingDirsAndFiles
-from cg.exc import FlowCellError
+from cg.exc import FlowCellError, SampleSheetError
 from cg.meta.demultiplex.utils import (
     create_manifest_file,
     is_flow_cell_sync_confirmed,
@@ -35,6 +37,7 @@ DRY_RUN = click.option("--dry-run", is_flag=True)
 def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run: bool):
     """Demultiplex all flow cells that are ready under the flow cells directory."""
     LOG.info("Running cg demultiplex all ...")
+    sample_sheet_api = SampleSheetAPI(context)
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
     if flow_cells_directory:
@@ -57,12 +60,13 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
             LOG.warning(f"Can not start demultiplexing for flow cell {flow_cell.id}!")
             continue
 
-        if not flow_cell.validate_sample_sheet():
+        try:
+            sample_sheet_api.validate(flow_cell.sample_sheet_path)
+        except (SampleSheetError, ValidationError) as error:
             LOG.warning(
-                "Malformed sample sheet. "
-                f"Run cg demultiplex sample sheet validate {flow_cell.sample_sheet_path}",
+                f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}"
             )
-            continue
+            raise click.Abort from error
 
         if not dry_run:
             demultiplex_api.prepare_output_directory(flow_cell)
@@ -90,6 +94,7 @@ def demultiplex_flow_cell(
     """
 
     LOG.info(f"Running cg demultiplex flow cell, using {bcl_converter}")
+    sample_sheet_api = SampleSheetAPI(context)
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     flow_cell_directory: Path = Path(context.demultiplex_api.flow_cells_dir, flow_cell_name)
     demultiplex_api.set_dry_run(dry_run=dry_run)
@@ -107,11 +112,13 @@ def demultiplex_flow_cell(
         LOG.warning("Can not start demultiplexing!")
         return
 
-    if not flow_cell.validate_sample_sheet():
+    try:
+        sample_sheet_api.validate(flow_cell.sample_sheet_path)
+    except (SampleSheetError, ValidationError) as error:
         LOG.warning(
             f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}"
         )
-        raise click.Abort
+        raise click.Abort from error
 
     if not dry_run:
         demultiplex_api.prepare_output_directory(flow_cell)
