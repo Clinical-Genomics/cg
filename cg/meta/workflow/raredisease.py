@@ -81,7 +81,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             name=case_sample.sample.internal_id,
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
-            sex=self.get_sex_code(sample.sex),
+            sex=self.get_sex_code(case_sample.sample.sex),
             phenotype=self.get_phenotype_code(case_sample.status),
             paternal_id=CaseSample.get_paternal_id(case_sample.father),
             maternal_id=CaseSample.get_maternal_id(case_sample.mother),
