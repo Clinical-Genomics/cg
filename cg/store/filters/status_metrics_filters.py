@@ -7,7 +7,7 @@ from sqlalchemy.orm import Query
 from cg.store.models import SampleLaneSequencingMetrics
 
 
-def filter_total_read_count_for_sample(metrics: Query, sample_internal_id: str, **kwargs) -> Query:
+def get_total_read_count_for_sample(metrics: Query, sample_internal_id: str, **kwargs) -> Query:
     """Return total read count for sample across all lanes."""
     total_reads_query: Query = metrics.with_entities(
         func.sum(SampleLaneSequencingMetrics.sample_total_reads_in_lane)
@@ -15,14 +15,14 @@ def filter_total_read_count_for_sample(metrics: Query, sample_internal_id: str, 
     return total_reads_query
 
 
-def filter_above_q30_threshold(metrics: Query, q30_threshold: int, **kwargs) -> Query:
+def get_above_q30_threshold(metrics: Query, q30_threshold: int, **kwargs) -> Query:
     """Filter metrics above Q30 threshold and return the ratio."""
     return metrics.filter(
         SampleLaneSequencingMetrics.sample_base_percentage_passing_q30 > q30_threshold,
     )
 
 
-def filter_by_flow_cell_sample_internal_id_and_lane(
+def get_by_flow_cell_sample_internal_id_and_lane(
     metrics: Query, flow_cell_name: str, sample_internal_id: str, lane: int, **kwargs
 ) -> Query:
     """Filter metrics by flow cell name, sample internal id and lane."""
@@ -33,14 +33,14 @@ def filter_by_flow_cell_sample_internal_id_and_lane(
     )
 
 
-def filter_by_flow_cell_name(metrics: Query, flow_cell_name: str, **kwargs) -> Query:
+def get_by_flow_cell_name(metrics: Query, flow_cell_name: str, **kwargs) -> Query:
     """Filter metrics by flow cell name."""
     return metrics.filter(
         SampleLaneSequencingMetrics.flow_cell_name == flow_cell_name,
     )
 
 
-def filter_by_sample_internal_id(metrics: Query, sample_internal_id: str, **kwargs) -> Query:
+def get_by_sample_internal_id(metrics: Query, sample_internal_id: str, **kwargs) -> Query:
     """Filter metrics by sample internal id."""
     return metrics.filter(
         SampleLaneSequencingMetrics.sample_internal_id == sample_internal_id,
@@ -48,13 +48,13 @@ def filter_by_sample_internal_id(metrics: Query, sample_internal_id: str, **kwar
 
 
 class SequencingMetricsFilter(Enum):
-    FILTER_TOTAL_READ_COUNT_FOR_SAMPLE: Callable = filter_total_read_count_for_sample
+    FILTER_TOTAL_READ_COUNT_FOR_SAMPLE: Callable = get_total_read_count_for_sample
     FILTER_BY_FLOW_CELL_SAMPLE_INTERNAL_ID_AND_LANE: Callable = (
-        filter_by_flow_cell_sample_internal_id_and_lane
+        get_by_flow_cell_sample_internal_id_and_lane
     )
-    FILTER_BY_FLOW_CELL_NAME: Callable = filter_by_flow_cell_name
-    FILTER_BY_SAMPLE_INTERNAL_ID: Callable = filter_by_sample_internal_id
-    FILTER_ABOVE_Q30_THRESHOLD: Callable = filter_above_q30_threshold
+    FILTER_BY_FLOW_CELL_NAME: Callable = get_by_flow_cell_name
+    FILTER_BY_SAMPLE_INTERNAL_ID: Callable = get_by_sample_internal_id
+    FILTER_ABOVE_Q30_THRESHOLD: Callable = get_above_q30_threshold
 
 
 def apply_metrics_filter(

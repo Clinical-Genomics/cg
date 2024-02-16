@@ -2,10 +2,10 @@ from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus
 from cg.store.filters.status_flow_cell_filters import (
-    filter_flow_cell_by_name,
-    filter_flow_cell_by_name_search,
-    filter_flow_cells_by_case,
-    filter_flow_cells_with_statuses,
+    get_flow_cell_by_name,
+    get_flow_cell_by_name_search,
+    get_flow_cells_by_case,
+    get_flow_cells_with_statuses,
 )
 from cg.store.models import Case, Flowcell, Sample
 from cg.store.store import Store
@@ -27,7 +27,7 @@ def test_get_flow_cells_by_case(
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell: list[Flowcell] | None = filter_flow_cells_by_case(
+    returned_flow_cell: list[Flowcell] | None = get_flow_cells_by_case(
         flow_cells=base_store._get_join_flow_cell_sample_links_query(), case=case
     )
 
@@ -47,7 +47,7 @@ def test_get_flow_cells_by_case_when_no_flow_cell_for_case(
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell: list[Flowcell] | None = filter_flow_cells_by_case(
+    returned_flow_cell: list[Flowcell] | None = get_flow_cells_by_case(
         flow_cells=base_store._get_join_flow_cell_sample_links_query(), case=case
     )
 
@@ -66,7 +66,7 @@ def test_get_flow_cell_by_id(base_store: Store, helpers: StoreHelpers, bcl2fastq
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell: Query = filter_flow_cell_by_name(
+    returned_flow_cell: Query = get_flow_cell_by_name(
         flow_cells=base_store._get_query(table=Flowcell), flow_cell_name=bcl2fastq_flow_cell_id
     )
 
@@ -89,7 +89,7 @@ def test_get_flow_cell_by_id_and_by_enquiry(
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell: list[Flowcell] = filter_flow_cell_by_name_search(
+    returned_flow_cell: list[Flowcell] = get_flow_cell_by_name_search(
         flow_cells=base_store._get_query(table=Flowcell), name_search=bcl2fastq_flow_cell_id[:4]
     )
 
@@ -110,7 +110,7 @@ def test_get_flow_cells_with_statuses(
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell_query: Query = filter_flow_cells_with_statuses(
+    returned_flow_cell_query: Query = get_flow_cells_with_statuses(
         flow_cells=base_store._get_query(table=Flowcell),
         flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.PROCESSING],
     )
@@ -119,7 +119,7 @@ def test_get_flow_cells_with_statuses(
     assert isinstance(returned_flow_cell_query, Query)
 
 
-def test_filter_flow_cells_by_name(
+def test_get_flow_cells_by_name(
     base_store: Store, helpers: StoreHelpers, bcl2fastq_flow_cell_id: str
 ):
     """Test flow cell is returned by name."""
@@ -132,7 +132,7 @@ def test_filter_flow_cells_by_name(
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell_query: Query = filter_flow_cell_by_name(
+    returned_flow_cell_query: Query = get_flow_cell_by_name(
         flow_cells=base_store._get_query(table=Flowcell), flow_cell_name=flow_cell.name
     )
     returned_flow_cell: Flowcell = returned_flow_cell_query.first()

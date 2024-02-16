@@ -1,19 +1,19 @@
 from sqlalchemy.orm import Query
 
 from cg.store.filters.status_customer_filters import (
-    filter_customer_by_customer_internal_id,
-    filter_customer_by_exclude_customer_internal_id,
+    get_customer_by_customer_internal_id,
+    get_customer_by_exclude_customer_internal_id,
 )
 from cg.store.models import Customer
 from cg.store.store import Store
 
 
-def test_filter_customer_by_customer_id(base_store: Store, customer_id: str):
+def test_get_customer_by_customer_id(base_store: Store, customer_id: str):
     """Test return customer by customer internal id."""
     # GIVEN a store containing customers
 
     # WHEN retrieving a customer
-    customer: Customer = filter_customer_by_customer_internal_id(
+    customer: Customer = get_customer_by_customer_internal_id(
         customers=base_store._get_query(table=Customer),
         customer_internal_id=customer_id,
     ).first()
@@ -25,7 +25,7 @@ def test_filter_customer_by_customer_id(base_store: Store, customer_id: str):
     assert customer.internal_id == customer_id
 
 
-def test_filter_customer_by_exclude_customer_internal_id_exclude_one(
+def test_get_customer_by_exclude_customer_internal_id_exclude_one(
     store_with_cases_and_customers: Store,
 ):
     """Test that all customers except the one with the excluded internal ID are returned."""
@@ -34,7 +34,7 @@ def test_filter_customer_by_exclude_customer_internal_id_exclude_one(
     exclude_internal_id = customers_query.first().internal_id
 
     # WHEN filtering customers by excluding a specific customer internal ID
-    filtered_customers = filter_customer_by_exclude_customer_internal_id(
+    filtered_customers = get_customer_by_exclude_customer_internal_id(
         customers=customers_query, exclude_customer_internal_id=exclude_internal_id
     )
 
@@ -44,7 +44,7 @@ def test_filter_customer_by_exclude_customer_internal_id_exclude_one(
         assert customer.internal_id != exclude_internal_id
 
 
-def test_filter_customer_by_exclude_customer_internal_id_exclude_nonexistent(
+def test_get_customer_by_exclude_customer_internal_id_exclude_nonexistent(
     store_with_cases_and_customers: Store,
 ):
     """Test that all customers are returned when excluding a nonexistent internal ID."""
@@ -53,7 +53,7 @@ def test_filter_customer_by_exclude_customer_internal_id_exclude_nonexistent(
     exclude_internal_id = "nonexistent_id"
 
     # WHEN filtering customers by excluding a nonexistent customer internal ID
-    filtered_customers = filter_customer_by_exclude_customer_internal_id(
+    filtered_customers = get_customer_by_exclude_customer_internal_id(
         customers=customers_query, exclude_customer_internal_id=exclude_internal_id
     )
 

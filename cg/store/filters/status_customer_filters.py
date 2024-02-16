@@ -6,14 +6,14 @@ from sqlalchemy.orm import Query
 from cg.store.models import Customer
 
 
-def filter_customer_by_customer_internal_id(
+def get_customer_by_customer_internal_id(
     customers: Query, customer_internal_id: str, **kwargs
 ) -> Query:
     """Return customer by customer internal id."""
     return customers.filter(Customer.internal_id == customer_internal_id)
 
 
-def filter_customer_by_exclude_customer_internal_id(
+def get_customer_by_exclude_customer_internal_id(
     customers: Query, exclude_customer_internal_id: str, **kwargs
 ) -> Query:
     """Return customer excluded by customer internal id."""
@@ -23,8 +23,8 @@ def filter_customer_by_exclude_customer_internal_id(
 class CustomerFilter(Enum):
     """Define customer filter functions."""
 
-    FILTER_BY_INTERNAL_ID: Callable = filter_customer_by_customer_internal_id
-    EXCLUDE_INTERNAL_ID: Callable = filter_customer_by_exclude_customer_internal_id
+    FILTER_BY_INTERNAL_ID: Callable = get_customer_by_customer_internal_id
+    EXCLUDE_INTERNAL_ID: Callable = get_customer_by_exclude_customer_internal_id
 
 
 def apply_customer_filter(

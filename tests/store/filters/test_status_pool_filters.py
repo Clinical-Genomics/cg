@@ -1,23 +1,23 @@
 from sqlalchemy.orm import Query
 
 from cg.store.filters.status_pool_filters import (
-    filter_pools_by_customer_id,
-    filter_pools_by_invoice_id,
-    filter_pools_by_name_enquiry,
-    filter_pools_by_order_enquiry,
-    filter_pools_do_invoice,
-    filter_pools_is_delivered,
-    filter_pools_is_not_delivered,
-    filter_pools_is_not_received,
-    filter_pools_is_received,
-    filter_pools_without_invoice_id,
+    get_pools_by_customer_id,
+    get_pools_by_invoice_id,
+    get_pools_by_name_enquiry,
+    get_pools_by_order_enquiry,
+    get_pools_do_invoice,
+    get_pools_is_delivered,
+    get_pools_is_not_delivered,
+    get_pools_is_not_received,
+    get_pools_is_received,
+    get_pools_without_invoice_id,
 )
 from cg.store.models import Pool
 from cg.store.store import Store
 from tests.store.conftest import StoreConstants
 
 
-def test_filter_pools_is_delivered(
+def test_get_pools_is_delivered(
     store_with_a_pool_with_and_without_attributes: Store,
     name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
 ):
@@ -26,7 +26,7 @@ def test_filter_pools_is_delivered(
     # GIVEN a store with two pools of which one is delivered
 
     # WHEN getting delivered pools
-    pools: Query = filter_pools_is_delivered(
+    pools: Query = get_pools_is_delivered(
         pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
     )
 
@@ -43,7 +43,7 @@ def test_filter_pools_is_delivered(
     assert pools.all()[0].name == name
 
 
-def test_filter_pools_is_not_delivered(
+def test_get_pools_is_not_delivered(
     store_with_a_pool_with_and_without_attributes: Store,
     name=StoreConstants.NAME_POOL_WITHOUT_ATTRIBUTES.value,
 ):
@@ -52,7 +52,7 @@ def test_filter_pools_is_not_delivered(
     # GIVEN a store with two pools of which one is delivered
 
     # WHEN getting not delivered pools
-    pools: Query = filter_pools_is_not_delivered(
+    pools: Query = get_pools_is_not_delivered(
         pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
     )
 
@@ -69,7 +69,7 @@ def test_filter_pools_is_not_delivered(
     assert pools.all()[0].name == name
 
 
-def test_filter_pools_is_received(
+def test_get_pools_is_received(
     store_with_a_pool_with_and_without_attributes: Store,
     name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
 ):
@@ -78,7 +78,7 @@ def test_filter_pools_is_received(
     # GIVEN a store with two pools of which one is received
 
     # WHEN getting received pools
-    pools: Query = filter_pools_is_received(
+    pools: Query = get_pools_is_received(
         pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
     )
 
@@ -95,7 +95,7 @@ def test_filter_pools_is_received(
     assert pools.all()[0].name == name
 
 
-def test_filter_pools_is_not_received(
+def test_get_pools_is_not_received(
     store_with_a_pool_with_and_without_attributes: Store,
     name=StoreConstants.NAME_POOL_WITHOUT_ATTRIBUTES.value,
 ):
@@ -104,7 +104,7 @@ def test_filter_pools_is_not_received(
     # GIVEN a store with two pools of which one is received
 
     # WHEN getting received pools
-    pools: Query = filter_pools_is_not_received(
+    pools: Query = get_pools_is_not_received(
         pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
     )
 
@@ -121,7 +121,7 @@ def test_filter_pools_is_not_received(
     assert pools.all()[0].name == name
 
 
-def test_filter_pools_do_invoice(
+def test_get_pools_do_invoice(
     store_with_a_pool_with_and_without_attributes: Store,
     name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
 ):
@@ -130,7 +130,7 @@ def test_filter_pools_do_invoice(
     # GIVEN a pool marked for invoicing and one not marked for invoicing
 
     # WHEN getting pools marked for invoicing
-    pools: Query = filter_pools_do_invoice(
+    pools: Query = get_pools_do_invoice(
         pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
     )
 
@@ -147,7 +147,7 @@ def test_filter_pools_do_invoice(
     assert pools.all()[0].name == name
 
 
-def test_filter_pools_by_invoice_id(
+def test_get_pools_by_invoice_id(
     store_with_a_pool_with_and_without_attributes: Store,
     name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
     invoice_id=StoreConstants.INVOICE_ID_POOL_WITH_ATTRIBUTES.value,
@@ -157,7 +157,7 @@ def test_filter_pools_by_invoice_id(
     # GIVEN a store with two pools of which one us marked for invoicing
 
     # WHEN getting pools with invoice_id
-    pools: Query = filter_pools_by_invoice_id(
+    pools: Query = get_pools_by_invoice_id(
         pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool),
         invoice_id=invoice_id,
     )
@@ -175,7 +175,7 @@ def test_filter_pools_by_invoice_id(
     assert pools.all()[0].name == name
 
 
-def test_filter_pools_without_invoice_id(
+def test_get_pools_without_invoice_id(
     store_with_a_pool_with_and_without_attributes: Store,
     name=StoreConstants.NAME_POOL_WITHOUT_ATTRIBUTES.value,
 ):
@@ -184,7 +184,7 @@ def test_filter_pools_without_invoice_id(
     # GIVEN a store with two pools of which one has no invoice id
 
     # WHEN getting pools without invoice_id
-    pools: Query = filter_pools_without_invoice_id(
+    pools: Query = get_pools_without_invoice_id(
         pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
     )
 
@@ -201,7 +201,7 @@ def test_filter_pools_without_invoice_id(
     assert pools.all()[0].name == name
 
 
-def test_filter_pools_by_name_enquiry(
+def test_get_pools_by_name_enquiry(
     store_with_a_pool_with_and_without_attributes: Store,
     name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
 ):
@@ -210,7 +210,7 @@ def test_filter_pools_by_name_enquiry(
     # GIVEN a store with two pools of which one has a name enquiry
 
     # WHEN getting pools with name enquiry
-    pools: Query = filter_pools_by_name_enquiry(
+    pools: Query = get_pools_by_name_enquiry(
         pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool),
         name_enquiry=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
     )
@@ -228,7 +228,7 @@ def test_filter_pools_by_name_enquiry(
     assert pools.all()[0].name == name
 
 
-def test_filter_pools_by_order_enquiry(
+def test_get_pools_by_order_enquiry(
     store_with_a_pool_with_and_without_attributes: Store,
     name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
 ):
@@ -237,7 +237,7 @@ def test_filter_pools_by_order_enquiry(
     # GIVEN a store with two pools of which one has an order enquiry
 
     # WHEN getting pools with order enquiry
-    pools: Query = filter_pools_by_order_enquiry(
+    pools: Query = get_pools_by_order_enquiry(
         pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool),
         order_enquiry=StoreConstants.ORDER_POOL_WITH_ATTRIBUTES.value,
     )
@@ -255,7 +255,7 @@ def test_filter_pools_by_order_enquiry(
     assert pools.all()[0].name == name
 
 
-def test_filter_pools_by_customer_id(
+def test_get_pools_by_customer_id(
     store_with_a_pool_with_and_without_attributes: Store,
 ):
     """Test that a pool is returned when there is a pool with a specific customer id."""
@@ -263,7 +263,7 @@ def test_filter_pools_by_customer_id(
     # GIVEN a store with two pools of with the same customer
 
     # WHEN getting pools with customer id
-    pools: Query = filter_pools_by_customer_id(
+    pools: Query = get_pools_by_customer_id(
         pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool),
         customer_ids=[1],
     )

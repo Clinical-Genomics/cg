@@ -553,7 +553,7 @@ class SampleView(BaseView):
 
         case_ids: list[str] = list(all_associated_case_ids)
         db.delete_cases_without_samples(case_internal_ids=case_ids)
-        cases_with_remaining_samples: list[str] = db.filter_cases_with_samples(case_ids=case_ids)
+        cases_with_remaining_samples: list[str] = db.get_cases_with_samples(case_ids=case_ids)
 
         self.display_cancel_confirmation(
             sample_entry_ids=entry_ids, remaining_cases=cases_with_remaining_samples

@@ -279,7 +279,7 @@ class ReadHandler(BaseHandler):
             case_samples=self._get_join_case_sample_query(),
         ).all()
 
-    def filter_cases_with_samples(self, case_ids: list[str]) -> list[str]:
+    def get_cases_with_samples(self, case_ids: list[str]) -> list[str]:
         """Return case id:s associated with samples."""
         cases_with_samples = set()
         for case_id in case_ids:

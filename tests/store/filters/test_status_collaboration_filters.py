@@ -1,5 +1,5 @@
 from cg.store.filters.status_collaboration_filters import (
-    filter_collaboration_by_internal_id,
+    get_collaboration_by_internal_id,
 )
 from cg.store.models import Collaboration
 from cg.store.store import Store
@@ -10,7 +10,7 @@ def test_get_collaboration_by_internal_id(base_store: Store, collaboration_id: s
     # GIVEN a store with a collaboration
 
     # WHEN retrieving the collaboration
-    collaboration: Collaboration = filter_collaboration_by_internal_id(
+    collaboration: Collaboration = get_collaboration_by_internal_id(
         collaborations=base_store._get_query(table=Collaboration),
         internal_id=collaboration_id,
     ).first()
@@ -27,7 +27,7 @@ def test_get_collaboration_by_internal_id_wrong_name(base_store: Store, collabor
     # GIVEN a store a collaboration
 
     # WHEN attempting to retrieve a non-existing collaboration
-    collaboration: Collaboration = filter_collaboration_by_internal_id(
+    collaboration: Collaboration = get_collaboration_by_internal_id(
         collaborations=base_store._get_query(table=Collaboration),
         internal_id="missing_collaboration",
     ).first()

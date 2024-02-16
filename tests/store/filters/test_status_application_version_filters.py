@@ -4,16 +4,16 @@ from typing import Iterable
 from sqlalchemy.orm import Query
 
 from cg.store.filters.status_application_version_filters import (
-    filter_application_versions_before_valid_from,
-    filter_application_versions_by_application_entry_id,
-    filter_application_versions_by_application_version_entry_id,
+    get_application_versions_before_valid_from,
+    get_application_versions_by_application_entry_id,
+    get_application_versions_by_application_version_entry_id,
     order_application_versions_by_valid_from_desc,
 )
 from cg.store.models import Application, ApplicationVersion
 from cg.store.store import Store
 
 
-def test_filter_application_version_by_application_entry_id_correct_id(
+def test_get_application_version_by_application_entry_id_correct_id(
     base_store: Store,
 ):
     """Test that the correct application version is returned when using a correct application entry id."""
@@ -25,7 +25,7 @@ def test_filter_application_version_by_application_entry_id_correct_id(
     assert application.id != base_store.get_applications()[1].id
 
     # WHEN the application version query is filtered by the id of the application
-    filtered_app_version_query: Query = filter_application_versions_by_application_entry_id(
+    filtered_app_version_query: Query = get_application_versions_by_application_entry_id(
         application_versions=app_version_query,
         application_entry_id=application.id,
     )
@@ -41,7 +41,7 @@ def test_filter_application_version_by_application_entry_id_correct_id(
     assert all(application_id == application.id for application_id in application_ids)
 
 
-def test_filter_application_version_by_application_entry_id_wrong_id(
+def test_get_application_version_by_application_entry_id_wrong_id(
     base_store: Store,
     invalid_application_id: int,
 ):
@@ -50,7 +50,7 @@ def test_filter_application_version_by_application_entry_id_wrong_id(
     app_version_query: Query = base_store._get_query(table=ApplicationVersion)
 
     # WHEN filtering with an invalid application id
-    filtered_app_version_query: Query = filter_application_versions_by_application_entry_id(
+    filtered_app_version_query: Query = get_application_versions_by_application_entry_id(
         application_versions=app_version_query,
         application_entry_id=invalid_application_id,
     )
@@ -59,7 +59,7 @@ def test_filter_application_version_by_application_entry_id_wrong_id(
     assert filtered_app_version_query.count() == 0
 
 
-def test_filter_application_version_by_application_entry_id_empty_query(
+def test_get_application_version_by_application_entry_id_empty_query(
     store: Store, application_id: int = 1
 ):
     """Test that filtering an empty query by application entry id returns an empty query."""
@@ -68,7 +68,7 @@ def test_filter_application_version_by_application_entry_id_empty_query(
     assert app_version_query.count() == 0
 
     # WHEN filtering by application id
-    filtered_app_version_query: Query = filter_application_versions_by_application_entry_id(
+    filtered_app_version_query: Query = get_application_versions_by_application_entry_id(
         application_versions=app_version_query,
         application_entry_id=application_id,
     )
@@ -78,7 +78,7 @@ def test_filter_application_version_by_application_entry_id_empty_query(
     assert filtered_app_version_query.count() == 0
 
 
-def test_filter_application_versions_before_valid_from_valid_date(
+def test_get_application_versions_before_valid_from_valid_date(
     base_store: Store,
 ):
     """Test that filtering by `valid_from` returns a query with older elements than the given date."""
@@ -91,7 +91,7 @@ def test_filter_application_versions_before_valid_from_valid_date(
     assert first_app_version.valid_from < third_app_version.valid_from
 
     # WHEN filtering the application version query by `valid_from` of the third query
-    filtered_app_version_query: Query = filter_application_versions_before_valid_from(
+    filtered_app_version_query: Query = get_application_versions_before_valid_from(
         application_versions=app_version_query,
         valid_from=third_app_version.valid_from,
     )
@@ -106,7 +106,7 @@ def test_filter_application_versions_before_valid_from_valid_date(
     assert newest_application_version.valid_from < third_app_version.valid_from
 
 
-def test_filter_application_versions_before_valid_from_future_date(
+def test_get_application_versions_before_valid_from_future_date(
     base_store: Store,
     future_date: dt.datetime,
 ):
@@ -115,7 +115,7 @@ def test_filter_application_versions_before_valid_from_future_date(
     app_version_query: Query = base_store._get_query(table=ApplicationVersion)
 
     # WHEN filtering using a future date
-    filtered_app_version_query: Query = filter_application_versions_before_valid_from(
+    filtered_app_version_query: Query = get_application_versions_before_valid_from(
         application_versions=app_version_query,
         valid_from=future_date,
     )
@@ -127,7 +127,7 @@ def test_filter_application_versions_before_valid_from_future_date(
     assert all(non_filtered == filtered for non_filtered, filtered in app_version_pair)
 
 
-def test_filter_application_versions_before_valid_from_old_date(
+def test_get_application_versions_before_valid_from_old_date(
     base_store: Store,
     old_timestamp: dt.datetime,
 ):
@@ -136,7 +136,7 @@ def test_filter_application_versions_before_valid_from_old_date(
     app_version_query: Query = base_store._get_query(table=ApplicationVersion)
 
     # WHEN filtering using a past date
-    filtered_app_version_query: Query = filter_application_versions_before_valid_from(
+    filtered_app_version_query: Query = get_application_versions_before_valid_from(
         application_versions=app_version_query,
         valid_from=old_timestamp,
     )
@@ -145,7 +145,7 @@ def test_filter_application_versions_before_valid_from_old_date(
     assert filtered_app_version_query.count() == 0
 
 
-def test_filter_application_version_before_valid_from_empty_query(
+def test_get_application_version_before_valid_from_empty_query(
     store: Store,
     timestamp_now: dt.datetime,
 ):
@@ -155,7 +155,7 @@ def test_filter_application_version_before_valid_from_empty_query(
     assert app_version_query.count() == 0
 
     # WHEN filtering by application id
-    filtered_app_version_query: Query = filter_application_versions_before_valid_from(
+    filtered_app_version_query: Query = get_application_versions_before_valid_from(
         application_versions=app_version_query,
         valid_from=timestamp_now,
     )
@@ -201,7 +201,7 @@ def test_order_application_versions_by_valid_from_desc_empty_query(store: Store)
     assert ordered_app_version_query.count() == 0
 
 
-def test_filter_application_versions_by_application_version_entry_id_no_match(
+def test_get_application_versions_by_application_version_entry_id_no_match(
     store_with_different_application_versions: Store,
 ):
     """Test that no application versions are returned when there is no matching application version entry id."""
@@ -212,18 +212,16 @@ def test_filter_application_versions_by_application_version_entry_id_no_match(
     non_existent_application_version_entry_id = "non_existent_application_version_entry_id"
 
     # WHEN filtering application versions by a non-matching application version entry id
-    filtered_application_versions: Query = (
-        filter_application_versions_by_application_version_entry_id(
-            application_versions=application_versions_query,
-            application_version_entry_id=non_existent_application_version_entry_id,
-        )
+    filtered_application_versions: Query = get_application_versions_by_application_version_entry_id(
+        application_versions=application_versions_query,
+        application_version_entry_id=non_existent_application_version_entry_id,
     )
 
     # THEN the query should return no application versions
     assert filtered_application_versions.count() == 0
 
 
-def test_filter_application_versions_by_application_version_entry_id_match(
+def test_get_application_versions_by_application_version_entry_id_match(
     store_with_different_application_versions: Store,
 ):
     """Test that application versions with matching application version entry id are returned."""
@@ -234,11 +232,9 @@ def test_filter_application_versions_by_application_version_entry_id_match(
     existing_application_version_entry_id = application_versions_query.first().id
 
     # WHEN filtering application versions by a matching application version entry id
-    filtered_application_versions: Query = (
-        filter_application_versions_by_application_version_entry_id(
-            application_versions=application_versions_query,
-            application_version_entry_id=existing_application_version_entry_id,
-        )
+    filtered_application_versions: Query = get_application_versions_by_application_version_entry_id(
+        application_versions=application_versions_query,
+        application_version_entry_id=existing_application_version_entry_id,
     )
 
     # THEN the query should return the application version with the matching entry id

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Query
 from cg.store.models import Panel
 
 
-def filter_panel_by_abbrev(panels: Query, abbreviation: str, **kwargs) -> Query:
+def get_panel_by_abbrev(panels: Query, abbreviation: str, **kwargs) -> Query:
     """Return panel by abbreviation."""
     return panels.filter(Panel.abbrev == abbreviation)
 
@@ -14,7 +14,7 @@ def filter_panel_by_abbrev(panels: Query, abbreviation: str, **kwargs) -> Query:
 class PanelFilter(Enum):
     """Define Panel filter functions."""
 
-    FILTER_BY_ABBREVIATION: Callable = filter_panel_by_abbrev
+    FILTER_BY_ABBREVIATION: Callable = get_panel_by_abbrev
 
 
 def apply_panel_filter(

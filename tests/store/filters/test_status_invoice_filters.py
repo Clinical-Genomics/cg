@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Query
 
 from cg.store.filters.status_invoice_filters import (
-    filter_invoices_by_invoice_id,
-    filter_invoices_invoiced,
-    filter_invoices_not_invoiced,
+    get_invoices_by_invoice_id,
+    get_invoices_invoiced,
+    get_invoices_not_invoiced,
 )
 from cg.store.models import Invoice
 from cg.store.store import Store
@@ -11,7 +11,7 @@ from tests.store.conftest import StoreConstants
 from tests.store_helpers import StoreHelpers
 
 
-def test_filter_get_invoices_by_invoice_id(
+def test_get_get_invoices_by_invoice_id(
     store_with_an_invoice_with_and_without_attributes: Store,
     entry_id=StoreConstants.INVOICE_ID_INVOICE_WITH_ATTRIBUTES.value,
 ):
@@ -20,7 +20,7 @@ def test_filter_get_invoices_by_invoice_id(
     # GIVEN an Store with two invoices
 
     # WHEN getting invoice by invoice id
-    invoice: Query = filter_invoices_by_invoice_id(
+    invoice: Query = get_invoices_by_invoice_id(
         invoices=store_with_an_invoice_with_and_without_attributes._get_query(table=Invoice),
         entry_id=entry_id,
     )
@@ -32,13 +32,13 @@ def test_filter_get_invoices_by_invoice_id(
     assert invoice.all() and len(invoice.all()) == 1
 
 
-def test_filter_get_invoices_invoiced(store_with_an_invoice_with_and_without_attributes: Store):
+def test_get_get_invoices_invoiced(store_with_an_invoice_with_and_without_attributes: Store):
     """Test to get invoice by invoice id."""
 
     # GIVEN an Store with two invoices of which one is invoiced
 
     # WHEN getting invoice by invoice id
-    invoice: Query = filter_invoices_invoiced(
+    invoice: Query = get_invoices_invoiced(
         invoices=store_with_an_invoice_with_and_without_attributes._get_query(table=Invoice)
     )
 
@@ -49,7 +49,7 @@ def test_filter_get_invoices_invoiced(store_with_an_invoice_with_and_without_att
     assert invoice.all() and len(invoice.all()) == 1
 
 
-def test_filter_get_invoices_not_invoiced(
+def test_get_get_invoices_not_invoiced(
     store_with_an_invoice_with_and_without_attributes: Store, helpers: StoreHelpers
 ):
     """Test to get invoice by invoice id."""
@@ -57,7 +57,7 @@ def test_filter_get_invoices_not_invoiced(
     # GIVEN a Store with two invoices of which one is invoiced
 
     # WHEN getting invoice by invoice id
-    invoice: Query = filter_invoices_not_invoiced(
+    invoice: Query = get_invoices_not_invoiced(
         invoices=store_with_an_invoice_with_and_without_attributes._get_query(table=Invoice)
     )
 

@@ -1,9 +1,9 @@
-from cg.store.filters.status_user_filters import filter_user_by_email
+from cg.store.filters.status_user_filters import get_user_by_email
 from cg.store.models import User
 from cg.store.store import Store
 
 
-def test_filter_user_by_email_returns_correct_user(store_with_users: Store):
+def test_get_user_by_email_returns_correct_user(store_with_users: Store):
     """Test getting user by email."""
 
     # GIVEN a store with a user
@@ -11,7 +11,7 @@ def test_filter_user_by_email_returns_correct_user(store_with_users: Store):
     assert user
 
     # WHEN retrieving the user by email
-    filtered_user: User = filter_user_by_email(
+    filtered_user: User = get_user_by_email(
         users=store_with_users._get_query(table=User),
         email=user.email,
     ).first()
@@ -23,7 +23,7 @@ def test_filter_user_by_email_returns_correct_user(store_with_users: Store):
     assert filtered_user.email == user.email
 
 
-def test_filter_user_by_email_returns_none_for_nonexisting_email(
+def test_get_user_by_email_returns_none_for_nonexisting_email(
     store_with_users: Store, non_existent_email: str
 ):
     """Test getting user by email when the email does not exist."""
@@ -31,7 +31,7 @@ def test_filter_user_by_email_returns_none_for_nonexisting_email(
     # GIVEN a non-existing email
 
     # WHEN retrieving the user by email
-    filtered_user: User = filter_user_by_email(
+    filtered_user: User = get_user_by_email(
         users=store_with_users._get_query(table=User),
         email=non_existent_email,
     ).first()
@@ -40,11 +40,11 @@ def test_filter_user_by_email_returns_none_for_nonexisting_email(
     assert filtered_user is None
 
 
-def test_filter_user_by_email_none_returns_none(store_with_users: Store):
+def test_get_user_by_email_none_returns_none(store_with_users: Store):
     """Test getting user by email None."""
 
     # WHEN retrieving the user by email None
-    filtered_user: User = filter_user_by_email(
+    filtered_user: User = get_user_by_email(
         users=store_with_users._get_query(table=User),
         email=None,
     ).first()

@@ -6,22 +6,22 @@ from sqlalchemy.orm import Query
 from cg.store.models import Case, CaseSample, Flowcell
 
 
-def filter_flow_cells_by_case(case: Case, flow_cells: Query, **kwargs) -> Query:
+def get_flow_cells_by_case(case: Case, flow_cells: Query, **kwargs) -> Query:
     """Return flow cells by case id."""
     return flow_cells.filter(CaseSample.case == case)
 
 
-def filter_flow_cell_by_name(flow_cells: Query, flow_cell_name: str, **kwargs) -> Query:
+def get_flow_cell_by_name(flow_cells: Query, flow_cell_name: str, **kwargs) -> Query:
     """Return flow cell by flow cell id."""
     return flow_cells.filter(Flowcell.name == flow_cell_name)
 
 
-def filter_flow_cell_by_name_search(flow_cells: Query, name_search: str, **kwargs) -> Query:
+def get_flow_cell_by_name_search(flow_cells: Query, name_search: str, **kwargs) -> Query:
     """Return flow cell by flow cell id enquiry."""
     return flow_cells.filter(Flowcell.name.like(f"%{name_search}%"))
 
 
-def filter_flow_cells_with_statuses(
+def get_flow_cells_with_statuses(
     flow_cells: Query, flow_cell_statuses: list[str], **kwargs
 ) -> Query:
     """Return flow cells by flow cell statuses."""
@@ -51,7 +51,7 @@ def apply_flow_cell_filter(
 class FlowCellFilter(Enum):
     """Define FlowCell filter functions."""
 
-    FILTER_BY_CASE: Callable = filter_flow_cells_by_case
-    FILTER_BY_NAME: Callable = filter_flow_cell_by_name
-    FILTER_BY_NAME_SEARCH: Callable = filter_flow_cell_by_name_search
-    FILTER_WITH_STATUSES: Callable = filter_flow_cells_with_statuses
+    FILTER_BY_CASE: Callable = get_flow_cells_by_case
+    FILTER_BY_NAME: Callable = get_flow_cell_by_name
+    FILTER_BY_NAME_SEARCH: Callable = get_flow_cell_by_name_search
+    FILTER_WITH_STATUSES: Callable = get_flow_cells_with_statuses

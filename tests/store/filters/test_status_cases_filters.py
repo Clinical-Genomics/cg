@@ -6,35 +6,33 @@ from cg.constants.constants import CaseActions, DataDelivery, Workflow
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.store.filters.status_case_filters import (
-    filter_case_by_internal_id,
-    filter_cases_by_case_search,
-    filter_cases_by_customer_entry_ids,
-    filter_cases_by_entry_id,
-    filter_cases_by_name,
-    filter_cases_by_priority,
-    filter_cases_by_ticket_id,
-    filter_cases_by_workflow_search,
-    filter_cases_for_analysis,
-    filter_cases_has_sequence,
-    filter_cases_not_analysed,
-    filter_cases_with_loqusdb_supported_sequencing_method,
-    filter_cases_with_loqusdb_supported_workflow,
-    filter_cases_with_scout_data_delivery,
-    filter_cases_with_workflow,
-    filter_inactive_analysis_cases,
-    filter_newer_cases_by_order_date,
-    filter_older_cases_by_creation_date,
-    filter_report_supported_data_delivery_cases,
-    filter_running_cases,
+    get_case_by_internal_id,
+    get_cases_by_case_search,
+    get_cases_by_customer_entry_ids,
+    get_cases_by_entry_id,
+    get_cases_by_name,
+    get_cases_by_priority,
+    get_cases_by_ticket_id,
+    get_cases_by_workflow_search,
+    get_cases_for_analysis,
+    get_cases_has_sequence,
+    get_cases_not_analysed,
+    get_cases_with_loqusdb_supported_sequencing_method,
+    get_cases_with_loqusdb_supported_workflow,
+    get_cases_with_scout_data_delivery,
+    get_cases_with_workflow,
+    get_inactive_analysis_cases,
+    get_newer_cases_by_order_date,
+    get_older_cases_by_creation_date,
+    get_report_supported_data_delivery_cases,
+    get_running_cases,
 )
 from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
-def test_filter_cases_has_sequence(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
-):
+def test_get_cases_has_sequence(base_store: Store, helpers: StoreHelpers, timestamp_now: datetime):
     """Test that a case is returned when there is a cases with a sequenced sample."""
 
     # GIVEN a sequenced sample
@@ -51,7 +49,7 @@ def test_filter_cases_has_sequence(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = filter_cases_has_sequence(cases=cases)
+    cases: Query = get_cases_has_sequence(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -60,7 +58,7 @@ def test_filter_cases_has_sequence(
     assert cases
 
 
-def test_filter_cases_has_sequence_when_external(base_store: Store, helpers: StoreHelpers):
+def test_get_cases_has_sequence_when_external(base_store: Store, helpers: StoreHelpers):
     """Test that a case is returned when there is a case with an externally sequenced sample."""
 
     # GIVEN a sequenced sample
@@ -77,7 +75,7 @@ def test_filter_cases_has_sequence_when_external(base_store: Store, helpers: Sto
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = filter_cases_has_sequence(cases=cases)
+    cases: Query = get_cases_has_sequence(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -86,7 +84,7 @@ def test_filter_cases_has_sequence_when_external(base_store: Store, helpers: Sto
     assert cases
 
 
-def test_filter_cases_has_sequence_when_not_sequenced(base_store: Store, helpers: StoreHelpers):
+def test_get_cases_has_sequence_when_not_sequenced(base_store: Store, helpers: StoreHelpers):
     """Test that no case is returned when there is a cases with sample that has not been sequenced."""
 
     # GIVEN a sequenced sample
@@ -103,7 +101,7 @@ def test_filter_cases_has_sequence_when_not_sequenced(base_store: Store, helpers
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = filter_cases_has_sequence(cases=cases)
+    cases: Query = get_cases_has_sequence(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -112,7 +110,7 @@ def test_filter_cases_has_sequence_when_not_sequenced(base_store: Store, helpers
     assert not cases.all()
 
 
-def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
+def test_get_cases_has_sequence_when_not_external_nor_sequenced(
     base_store: Store, helpers: StoreHelpers
 ):
     """Test that no case is returned when there is a cases with sample that has not been sequenced nor is external."""
@@ -131,7 +129,7 @@ def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = filter_cases_has_sequence(cases=cases)
+    cases: Query = get_cases_has_sequence(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -140,7 +138,7 @@ def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
     assert not cases.all()
 
 
-def test_filter_cases_with_workflow_when_correct_workflow(
+def test_get_cases_with_workflow_when_correct_workflow(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that no case is returned when there are no cases with the specified workflow."""
@@ -159,13 +157,13 @@ def test_filter_cases_with_workflow_when_correct_workflow(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another workflow
-    cases: list[Query] = list(filter_cases_with_workflow(cases=cases, workflow=Workflow.BALSAMIC))
+    cases: list[Query] = list(get_cases_with_workflow(cases=cases, workflow=Workflow.BALSAMIC))
 
     # THEN cases should contain the test case
     assert cases
 
 
-def test_filter_cases_with_workflow_when_incorrect_pipline(
+def test_get_cases_with_workflow_when_incorrect_pipline(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that no case is returned when there are no cases with the specified workflow."""
@@ -184,13 +182,13 @@ def test_filter_cases_with_workflow_when_incorrect_pipline(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another workflow
-    cases: list[Query] = list(filter_cases_with_workflow(cases=cases, workflow=Workflow.MIP_DNA))
+    cases: list[Query] = list(get_cases_with_workflow(cases=cases, workflow=Workflow.MIP_DNA))
 
     # THEN cases should not contain the test case
     assert not cases
 
 
-def test_filter_cases_with_loqusdb_supported_workflow(
+def test_get_cases_with_loqusdb_supported_workflow(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test retrieval of cases that support Loqusdb upload."""
@@ -219,14 +217,14 @@ def test_filter_cases_with_loqusdb_supported_workflow(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases with workflow
-    cases: list[Query] = list(filter_cases_with_loqusdb_supported_workflow(cases=cases))
+    cases: list[Query] = list(get_cases_with_loqusdb_supported_workflow(cases=cases))
 
     # THEN only the Loqusdb supported case should be extracted
     assert test_mip_case in cases
     assert test_fluffy_case not in cases
 
 
-def test_filter_cases_with_loqusdb_supported_sequencing_method(
+def test_get_cases_with_loqusdb_supported_sequencing_method(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test retrieval of cases with a valid Loqusdb sequencing method."""
@@ -245,7 +243,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN retrieving the available cases
-    cases: Query = filter_cases_with_loqusdb_supported_sequencing_method(
+    cases: Query = get_cases_with_loqusdb_supported_sequencing_method(
         cases=cases, workflow=Workflow.MIP_DNA
     )
 
@@ -256,7 +254,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method(
     assert test_case_wes in cases
 
 
-def test_filter_cases_with_loqusdb_supported_sequencing_method_empty(
+def test_get_cases_with_loqusdb_supported_sequencing_method_empty(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test retrieval of cases with a valid Loqusdb sequencing method."""
@@ -275,7 +273,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method_empty(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN retrieving the valid cases
-    cases: Query = filter_cases_with_loqusdb_supported_sequencing_method(
+    cases: Query = get_cases_with_loqusdb_supported_sequencing_method(
         cases=cases, workflow=Workflow.MIP_DNA
     )
 
@@ -286,9 +284,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method_empty(
     assert not cases.all()
 
 
-def test_filter_cases_for_analysis(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
-):
+def test_get_cases_for_analysis(base_store: Store, helpers: StoreHelpers, timestamp_now: datetime):
     """Test that a case is returned when there is a cases with an action set to analyse."""
 
     # GIVEN a sequenced sample
@@ -310,7 +306,7 @@ def test_filter_cases_for_analysis(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = filter_cases_for_analysis(cases=cases)
+    cases: Query = get_cases_for_analysis(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -319,7 +315,7 @@ def test_filter_cases_for_analysis(
     assert cases
 
 
-def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
+def test_get_cases_for_analysis_when_sequenced_sample_and_no_analysis(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned when there are internally created cases with no action set and no prior analysis."""
@@ -340,7 +336,7 @@ def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = filter_cases_for_analysis(cases=cases)
+    cases: Query = get_cases_for_analysis(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -349,7 +345,7 @@ def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
     assert cases
 
 
-def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_data(
+def test_get_cases_for_analysis_when_cases_with_no_action_and_new_sequence_data(
     base_store: Store,
     helpers: StoreHelpers,
     timestamp_yesterday: datetime,
@@ -379,7 +375,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = filter_cases_for_analysis(cases=cases)
+    cases: Query = get_cases_for_analysis(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -388,7 +384,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
     assert cases
 
 
-def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_data(
+def test_get_cases_for_analysis_when_cases_with_no_action_and_old_sequence_data(
     base_store: Store, helpers: StoreHelpers, timestamp_yesterday: datetime
 ):
     """Test that a case is not returned when cases with no action, but old sequence data."""
@@ -412,7 +408,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = filter_cases_for_analysis(cases=cases)
+    cases: Query = get_cases_for_analysis(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -421,7 +417,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
     assert not cases.all()
 
 
-def test_filter_cases_with_scout_data_delivery(
+def test_get_cases_with_scout_data_delivery(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned when Scout is specified as a data delivery option."""
@@ -440,7 +436,7 @@ def test_filter_cases_with_scout_data_delivery(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases with Scout as data delivery option
-    cases: Query = filter_cases_with_scout_data_delivery(cases=cases)
+    cases: Query = get_cases_with_scout_data_delivery(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -449,7 +445,7 @@ def test_filter_cases_with_scout_data_delivery(
     assert cases
 
 
-def test_filter_report_supported_data_delivery_cases(
+def test_get_report_supported_data_delivery_cases(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned for a delivery report supported data delivery option."""
@@ -472,7 +468,7 @@ def test_filter_report_supported_data_delivery_cases(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN retrieving the delivery report supported cases
-    cases: Query = filter_report_supported_data_delivery_cases(cases=cases)
+    cases: Query = get_report_supported_data_delivery_cases(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -482,7 +478,7 @@ def test_filter_report_supported_data_delivery_cases(
     assert test_invalid_case not in cases
 
 
-def test_filter_inactive_analysis_cases(base_store: Store, helpers: StoreHelpers):
+def test_get_inactive_analysis_cases(base_store: Store, helpers: StoreHelpers):
     """Test that an inactive case is returned when there is case which has no action set."""
 
     # GIVEN a case
@@ -492,7 +488,7 @@ def test_filter_inactive_analysis_cases(base_store: Store, helpers: StoreHelpers
     cases: Query = base_store._get_query(table=Case)
 
     # WHEN getting completed cases
-    cases: Query = filter_inactive_analysis_cases(cases=cases)
+    cases: Query = get_inactive_analysis_cases(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -503,7 +499,7 @@ def test_filter_inactive_analysis_cases(base_store: Store, helpers: StoreHelpers
     assert cases.all()[0].internal_id == test_case.internal_id
 
 
-def test_filter_inactive_analysis_cases_when_on_hold(base_store: Store, helpers: StoreHelpers):
+def test_get_inactive_analysis_cases_when_on_hold(base_store: Store, helpers: StoreHelpers):
     """Test that an inactivated case is returned when there is case which has action set to hold."""
 
     # GIVEN a case
@@ -513,7 +509,7 @@ def test_filter_inactive_analysis_cases_when_on_hold(base_store: Store, helpers:
     cases: Query = base_store._get_query(table=Case)
 
     # WHEN getting completed cases
-    cases: Query = filter_inactive_analysis_cases(cases=cases)
+    cases: Query = get_inactive_analysis_cases(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -524,9 +520,7 @@ def test_filter_inactive_analysis_cases_when_on_hold(base_store: Store, helpers:
     assert cases[0].internal_id == test_case.internal_id
 
 
-def test_filter_inactive_analysis_cases_when_not_completed(
-    base_store: Store, helpers: StoreHelpers
-):
+def test_get_inactive_analysis_cases_when_not_completed(base_store: Store, helpers: StoreHelpers):
     """Test that no case is returned when there is case which action set to running."""
 
     # GIVEN a case
@@ -536,7 +530,7 @@ def test_filter_inactive_analysis_cases_when_not_completed(
     cases: Query = base_store._get_query(table=Case)
 
     # WHEN getting completed cases
-    cases: Query = filter_inactive_analysis_cases(cases=cases)
+    cases: Query = get_inactive_analysis_cases(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -555,9 +549,7 @@ def test_get_old_cases(base_store: Store, helpers: StoreHelpers, timestamp_in_2_
     cases: Query = base_store._get_query(table=Case)
 
     # WHEN getting completed cases
-    cases: Query = filter_older_cases_by_creation_date(
-        cases=cases, creation_date=timestamp_in_2_weeks
-    )
+    cases: Query = get_older_cases_by_creation_date(cases=cases, creation_date=timestamp_in_2_weeks)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -580,9 +572,7 @@ def test_get_old_cases_none_when_all_cases_are_too_new(
     cases: Query = base_store._get_query(table=Case)
 
     # WHEN getting completed cases
-    cases: Query = filter_older_cases_by_creation_date(
-        cases=cases, creation_date=timestamp_yesterday
-    )
+    cases: Query = get_older_cases_by_creation_date(cases=cases, creation_date=timestamp_yesterday)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -591,20 +581,20 @@ def test_get_old_cases_none_when_all_cases_are_too_new(
     assert not cases.all()
 
 
-def test_filter_case_by_existing_entry_id(store_with_multiple_cases_and_samples: Store):
+def test_get_case_by_existing_entry_id(store_with_multiple_cases_and_samples: Store):
     # GIVEN a store containing a case with an entry id
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
     entry_id: int = cases_query.first().id
     assert entry_id
 
     # WHEN filtering for cases with the entry_id
-    cases: Query = filter_cases_by_entry_id(cases=cases_query, entry_id=entry_id)
+    cases: Query = get_cases_by_entry_id(cases=cases_query, entry_id=entry_id)
 
     # THEN the case should have the entry_id
     assert cases.first().id == entry_id
 
 
-def test_filter_cases_by_non_existing_entry_id(
+def test_get_cases_by_non_existing_entry_id(
     store_with_multiple_cases_and_samples: Store, non_existent_id: str
 ):
     # GIVEN a store containing cases without a specific entry id
@@ -613,13 +603,13 @@ def test_filter_cases_by_non_existing_entry_id(
     assert non_existent_id not in entry_ids
 
     # WHEN filtering for cases with the non existing entry id
-    cases: Query = filter_cases_by_entry_id(cases=cases_query, entry_id=non_existent_id)
+    cases: Query = get_cases_by_entry_id(cases=cases_query, entry_id=non_existent_id)
 
     # THEN the query should contain no cases
     assert cases.count() == 0
 
 
-def test_filter_case_by_existing_internal_id(
+def test_get_case_by_existing_internal_id(
     store_with_multiple_cases_and_samples: Store, case_id: str
 ):
     # GIVEN a store containing a case with an internal id case_id
@@ -628,7 +618,7 @@ def test_filter_case_by_existing_internal_id(
     assert case_id in internal_ids
 
     # WHEN filtering for cases with the internal id case_id
-    cases: Query = filter_case_by_internal_id(cases=cases_query, internal_id=case_id)
+    cases: Query = get_case_by_internal_id(cases=cases_query, internal_id=case_id)
 
     # THEN the query should contain only one case
     assert cases.count() == 1
@@ -637,7 +627,7 @@ def test_filter_case_by_existing_internal_id(
     assert cases.first().internal_id == case_id
 
 
-def test_filter_cases_by_non_existing_internal_id(
+def test_get_cases_by_non_existing_internal_id(
     store_with_multiple_cases_and_samples: Store, non_existent_id: str
 ):
     # GIVEN a store containing a case with an internal id case_id
@@ -646,37 +636,37 @@ def test_filter_cases_by_non_existing_internal_id(
     assert non_existent_id not in internal_ids
 
     # WHEN filtering for cases with the internal id case_id
-    cases: Query = filter_case_by_internal_id(cases=cases_query, internal_id=non_existent_id)
+    cases: Query = get_case_by_internal_id(cases=cases_query, internal_id=non_existent_id)
 
     # THEN the query should contain no cases
     assert cases.count() == 0
 
 
-def test_filter_case_by_empty_internal_id(store_with_multiple_cases_and_samples: Store):
+def test_get_case_by_empty_internal_id(store_with_multiple_cases_and_samples: Store):
     # GIVEN a store containing cases
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
 
     # WHEN filtering for cases with an empty internal id
-    cases: Query = filter_case_by_internal_id(cases=cases_query, internal_id="")
+    cases: Query = get_case_by_internal_id(cases=cases_query, internal_id="")
 
     # THEN the query should return no cases
     assert cases.count() == 0
 
 
-def test_filter_running_cases_no_running_cases(store_with_multiple_cases_and_samples: Store):
+def test_get_running_cases_no_running_cases(store_with_multiple_cases_and_samples: Store):
     """Test that no cases are returned when no cases have a running action."""
     # GIVEN a store containing cases with no "running" action
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
     cases_query = cases_query.filter(Case.action != CaseActions.RUNNING)
 
     # WHEN getting active cases
-    active_cases: Query = filter_running_cases(cases=cases_query)
+    active_cases: Query = get_running_cases(cases=cases_query)
 
     # THEN the query should return no cases
     assert active_cases.count() == 0
 
 
-def test_filter_running_cases_with_running_cases(store_with_multiple_cases_and_samples: Store):
+def test_get_running_cases_with_running_cases(store_with_multiple_cases_and_samples: Store):
     """Test that at least one case is returned when at least one case has a running action."""
     # GIVEN a store containing cases with at least one "running" action
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
@@ -684,13 +674,13 @@ def test_filter_running_cases_with_running_cases(store_with_multiple_cases_and_s
     assert CaseActions.RUNNING in actions
 
     # WHEN getting active cases
-    active_cases: Query = filter_running_cases(cases=cases_query)
+    active_cases: Query = get_running_cases(cases=cases_query)
 
     # THEN the query should return at least one case
     assert active_cases.count() >= 1
 
 
-def test_filter_running_cases_only_running_cases(store_with_multiple_cases_and_samples: Store):
+def test_get_running_cases_only_running_cases(store_with_multiple_cases_and_samples: Store):
     """Test that all cases are returned when all cases have a running action."""
     # GIVEN a store containing only cases with "running" action
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
@@ -698,13 +688,13 @@ def test_filter_running_cases_only_running_cases(store_with_multiple_cases_and_s
         case.action = CaseActions.RUNNING
 
     # WHEN getting active cases
-    active_cases: Query = filter_running_cases(cases=cases_query)
+    active_cases: Query = get_running_cases(cases=cases_query)
 
     # THEN the query should return the same number of cases as the original query
     assert active_cases.count() == cases_query.count()
 
 
-def test_filter_cases_by_ticket_no_matching_ticket(
+def test_get_cases_by_ticket_no_matching_ticket(
     store_with_multiple_cases_and_samples: Store, non_existent_id: str
 ):
     """Test that no cases are returned when filtering by a non-existent ticket."""
@@ -712,13 +702,13 @@ def test_filter_cases_by_ticket_no_matching_ticket(
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
 
     # WHEN filtering cases by a non-existent ticket
-    filtered_cases: Query = filter_cases_by_ticket_id(cases=cases_query, ticket_id=non_existent_id)
+    filtered_cases: Query = get_cases_by_ticket_id(cases=cases_query, ticket_id=non_existent_id)
 
     # THEN the query should return no cases
     assert filtered_cases.count() == 0
 
 
-def test_filter_cases_by_ticket_matching_ticket(
+def test_get_cases_by_ticket_matching_ticket(
     store_with_multiple_cases_and_samples: Store, ticket_id: str
 ):
     """Test that cases are returned when filtering by an existing ticket id."""
@@ -726,7 +716,7 @@ def test_filter_cases_by_ticket_matching_ticket(
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
 
     # WHEN filtering cases by an existing ticket id
-    filtered_cases: Query = filter_cases_by_ticket_id(cases=cases_query, ticket_id=ticket_id)
+    filtered_cases: Query = get_cases_by_ticket_id(cases=cases_query, ticket_id=ticket_id)
 
     # THEN the query should return cases with the matching ticket
     assert filtered_cases.count() > 0
@@ -734,7 +724,7 @@ def test_filter_cases_by_ticket_matching_ticket(
         assert ticket_id in case.tickets
 
 
-def test_filter_cases_by_customer_entry_ids(store_with_multiple_cases_and_samples: Store):
+def test_get_cases_by_customer_entry_ids(store_with_multiple_cases_and_samples: Store):
     """Test that cases are returned when filtering by customer entry ids."""
     # GIVEN a store containing cases with customer ids
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
@@ -742,7 +732,7 @@ def test_filter_cases_by_customer_entry_ids(store_with_multiple_cases_and_sample
     assert customer_ids
 
     # WHEN filtering cases by customer ids
-    filtered_cases: Query = filter_cases_by_customer_entry_ids(
+    filtered_cases: Query = get_cases_by_customer_entry_ids(
         cases=cases_query, customer_entry_ids=customer_ids
     )
 
@@ -754,21 +744,21 @@ def test_filter_cases_by_customer_entry_ids(store_with_multiple_cases_and_sample
         assert case.customer_id in customer_ids
 
 
-def test_filter_cases_by_name(store_with_multiple_cases_and_samples: Store):
+def test_get_cases_by_name(store_with_multiple_cases_and_samples: Store):
     """Test that cases are returned when filtering by name."""
     # GIVEN a store containing cases with various names
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
     test_name = cases_query.first().name
 
     # WHEN filtering cases by a specific name
-    filtered_cases: Query = filter_cases_by_name(cases=cases_query, name=test_name)
+    filtered_cases: Query = get_cases_by_name(cases=cases_query, name=test_name)
 
     # THEN all cases in filtered_cases should have the specified name
     for case in filtered_cases:
         assert case.name == test_name
 
 
-def test_filter_cases_by_search_pattern(store_with_multiple_cases_and_samples: Store):
+def test_get_cases_by_search_pattern(store_with_multiple_cases_and_samples: Store):
     """Test that cases are returned when filtering by matching internal ids."""
     # GIVEN a store containing cases with internal ids and names
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
@@ -776,7 +766,7 @@ def test_filter_cases_by_search_pattern(store_with_multiple_cases_and_samples: S
     test_name_pattern = cases_query.first().name[:3]
 
     # WHEN filtering cases by matching internal id or name
-    filtered_cases: Query = filter_cases_by_case_search(
+    filtered_cases: Query = get_cases_by_case_search(
         cases=cases_query,
         case_search=test_internal_id_pattern,
         name_search_pattern=test_name_pattern,
@@ -790,7 +780,7 @@ def test_filter_cases_by_search_pattern(store_with_multiple_cases_and_samples: S
     )
 
 
-def test_filter_cases_not_analysed_no_cases(
+def test_get_cases_not_analysed_no_cases(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that no cases are returned when all cases have been analysed."""
@@ -800,13 +790,13 @@ def test_filter_cases_not_analysed_no_cases(
         case.analyses.append(Analysis(completed_at=datetime.now()))
 
     # WHEN filtering cases for cases that have not been analysed
-    filtered_cases: Query = filter_cases_not_analysed(cases=cases_query)
+    filtered_cases: Query = get_cases_not_analysed(cases=cases_query)
 
     # THEN the query should return no cases
     assert filtered_cases.count() == 0
 
 
-def test_filter_cases_not_analysed_no_cases_in_progress(
+def test_get_cases_not_analysed_no_cases_in_progress(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that all cases are returned when no cases are in progress."""
@@ -817,13 +807,13 @@ def test_filter_cases_not_analysed_no_cases_in_progress(
         case.action = CaseActions.HOLD
 
     # WHEN filtering cases for cases that have not been analysed
-    filtered_cases: Query = filter_cases_not_analysed(cases=cases_query)
+    filtered_cases: Query = get_cases_not_analysed(cases=cases_query)
 
     # THEN the query should return all cases
     assert filtered_cases.count() == cases_query.count()
 
 
-def test_filter_cases_not_analysed_in_progress(
+def test_get_cases_not_analysed_in_progress(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that no cases in progress are returned."""
@@ -834,13 +824,13 @@ def test_filter_cases_not_analysed_in_progress(
         case.action = CaseActions.ANALYZE
 
     # WHEN filtering cases for cases that have not been analysed
-    filtered_cases: Query = filter_cases_not_analysed(cases=cases_query)
+    filtered_cases: Query = get_cases_not_analysed(cases=cases_query)
 
     # THEN the query should return no cases
     assert filtered_cases.count() == 0
 
 
-def test_filter_cases_by_workflow_search_no_matching_workflow(
+def test_get_cases_by_workflow_search_no_matching_workflow(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that no cases are returned when there are no cases with matching workflow search."""
@@ -849,7 +839,7 @@ def test_filter_cases_by_workflow_search_no_matching_workflow(
     workflow_search = "non_existent_pipeline"
 
     # WHEN filtering cases by a non-matching workflow search
-    filtered_cases: Query = filter_cases_by_workflow_search(
+    filtered_cases: Query = get_cases_by_workflow_search(
         cases=cases_query, workflow_search=workflow_search
     )
 
@@ -857,7 +847,7 @@ def test_filter_cases_by_workflow_search_no_matching_workflow(
     assert filtered_cases.count() == 0
 
 
-def test_filter_cases_by_workflow_search_partial_match(
+def test_get_cases_by_workflow_search_partial_match(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that cases with partially matching workflow search are returned."""
@@ -866,7 +856,7 @@ def test_filter_cases_by_workflow_search_partial_match(
     workflow_search = cases_query.first().data_analysis[:3]
 
     # WHEN filtering cases by a partially matching workflow search
-    filtered_cases: Query = filter_cases_by_workflow_search(
+    filtered_cases: Query = get_cases_by_workflow_search(
         cases=cases_query, workflow_search=workflow_search
     )
 
@@ -876,7 +866,7 @@ def test_filter_cases_by_workflow_search_partial_match(
         assert workflow_search in case.data_analysis
 
 
-def test_filter_cases_by_workflow_search_exact_match(
+def test_get_cases_by_workflow_search_exact_match(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that cases with exactly matching workflow search are returned."""
@@ -885,7 +875,7 @@ def test_filter_cases_by_workflow_search_exact_match(
     workflow_search = cases_query.first().data_analysis
 
     # WHEN filtering cases by an exactly matching workflow search
-    filtered_cases: Query = filter_cases_by_workflow_search(
+    filtered_cases: Query = get_cases_by_workflow_search(
         cases=cases_query, workflow_search=workflow_search
     )
 
@@ -895,7 +885,7 @@ def test_filter_cases_by_workflow_search_exact_match(
         assert case.data_analysis == workflow_search
 
 
-def test_filter_cases_by_priority_no_matching_priority(
+def test_get_cases_by_priority_no_matching_priority(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that no cases are returned when there are no cases with matching priority."""
@@ -904,15 +894,13 @@ def test_filter_cases_by_priority_no_matching_priority(
     non_existent_priority = "non_existent_priority"
 
     # WHEN filtering cases by a non-matching priority
-    filtered_cases: Query = filter_cases_by_priority(
-        cases=cases_query, priority=non_existent_priority
-    )
+    filtered_cases: Query = get_cases_by_priority(cases=cases_query, priority=non_existent_priority)
 
     # THEN the query should return no cases
     assert filtered_cases.count() == 0
 
 
-def test_filter_cases_by_priority_matching_priority(
+def test_get_cases_by_priority_matching_priority(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that cases with matching priority are returned."""
@@ -921,7 +909,7 @@ def test_filter_cases_by_priority_matching_priority(
     existing_priority = cases_query.first().priority
 
     # WHEN filtering cases by a matching priority
-    filtered_cases: Query = filter_cases_by_priority(cases=cases_query, priority=existing_priority)
+    filtered_cases: Query = get_cases_by_priority(cases=cases_query, priority=existing_priority)
 
     # THEN the query should return the cases with matching priority
     assert filtered_cases.count() > 0
@@ -929,7 +917,7 @@ def test_filter_cases_by_priority_matching_priority(
         assert case.priority == existing_priority
 
 
-def test_filter_cases_by_priority_all_priorities(
+def test_get_cases_by_priority_all_priorities(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that filtering cases by all available priorities returns all cases."""
@@ -940,13 +928,13 @@ def test_filter_cases_by_priority_all_priorities(
     # WHEN filtering cases by all available priorities
     filtered_cases = []
     for priority in all_priorities:
-        filtered_cases.extend(filter_cases_by_priority(cases=cases_query, priority=priority).all())
+        filtered_cases.extend(get_cases_by_priority(cases=cases_query, priority=priority).all())
 
     # THEN the query should return all cases
     assert len(filtered_cases) == cases_query.count()
 
 
-def test_filter_newer_cases_by_order_date_no_newer_cases(
+def test_get_newer_cases_by_order_date_no_newer_cases(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that no cases are returned when there are no cases with a newer order date."""
@@ -955,7 +943,7 @@ def test_filter_newer_cases_by_order_date_no_newer_cases(
     latest_order_date = max(case.ordered_at for case in cases_query)
 
     # WHEN filtering cases by a date that is later than the latest order date
-    filtered_cases: Query = filter_newer_cases_by_order_date(
+    filtered_cases: Query = get_newer_cases_by_order_date(
         cases=cases_query, order_date=latest_order_date
     )
 
@@ -963,7 +951,7 @@ def test_filter_newer_cases_by_order_date_no_newer_cases(
     assert filtered_cases.count() == 0
 
 
-def test_filter_newer_cases_by_order_date_some_newer_cases(
+def test_get_newer_cases_by_order_date_some_newer_cases(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that cases with order dates newer than the given date are returned."""
@@ -976,7 +964,7 @@ def test_filter_newer_cases_by_order_date_some_newer_cases(
     some_order_date = min_order_date + (max_order_date - min_order_date) / 2
 
     # WHEN filtering cases by a date that is earlier than some order dates
-    filtered_cases: Query = filter_newer_cases_by_order_date(
+    filtered_cases: Query = get_newer_cases_by_order_date(
         cases=cases_query, order_date=some_order_date
     )
 
@@ -995,7 +983,7 @@ def test_get_older_cases_by_created_date_no_older_cases(
     oldest_created_date = min(case.created_at for case in cases_query)
 
     # WHEN filtering cases by a date that is later than the oldest order date
-    filtered_cases: Query = filter_older_cases_by_creation_date(
+    filtered_cases: Query = get_older_cases_by_creation_date(
         cases=cases_query, creation_date=oldest_created_date
     )
 
@@ -1003,7 +991,7 @@ def test_get_older_cases_by_created_date_no_older_cases(
     assert filtered_cases.count() == 0
 
 
-def test_filter_runningfilter_older_cases_by_creation_date_some_newer_cases(
+def test_get_running_filter_older_cases_by_creation_date_some_newer_cases(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that cases with creation dates older than the given date are returned."""
@@ -1016,7 +1004,7 @@ def test_filter_runningfilter_older_cases_by_creation_date_some_newer_cases(
     some_creation_date = min_creation_date + (max_creation_date - min_creation_date) / 2
 
     # WHEN filtering cases by a date that is earlier than some creation dates
-    filtered_cases: Query = filter_older_cases_by_creation_date(
+    filtered_cases: Query = get_older_cases_by_creation_date(
         cases=cases_query, creation_date=some_creation_date
     )
 

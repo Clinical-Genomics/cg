@@ -2,14 +2,14 @@ from sqlalchemy.orm import Query
 
 from cg.constants import Workflow
 from cg.store.filters.status_application_limitations_filters import (
-    filter_application_limitations_by_tag,
-    filter_application_limitations_by_workflow,
+    get_application_limitations_by_tag,
+    get_application_limitations_by_workflow,
 )
 from cg.store.store import Store
 from tests.store.conftest import StoreConstants
 
 
-def test_filter_application_limitations_by_tag(
+def test_get_application_limitations_by_tag(
     store_with_application_limitations: Store,
     tag=StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value,
 ) -> None:
@@ -18,7 +18,7 @@ def test_filter_application_limitations_by_tag(
     # GIVEN a store with application limitations
 
     # WHEN getting an application limitations by tag
-    application_limitations: Query = filter_application_limitations_by_tag(
+    application_limitations: Query = get_application_limitations_by_tag(
         application_limitations=store_with_application_limitations._get_join_application_limitations_query(),
         tag=tag,
     )
@@ -34,7 +34,7 @@ def test_filter_application_limitations_by_tag(
     )
 
 
-def test_filter_application_limitations_by_workflow(
+def test_get_application_limitations_by_workflow(
     store_with_application_limitations: Store,
     workflow=Workflow.BALSAMIC,
 ) -> None:
@@ -43,7 +43,7 @@ def test_filter_application_limitations_by_workflow(
     # GIVEN a store with application limitations
 
     # WHEN getting an application limitations by workflow
-    application_limitations: Query = filter_application_limitations_by_workflow(
+    application_limitations: Query = get_application_limitations_by_workflow(
         application_limitations=store_with_application_limitations._get_join_application_limitations_query(),
         workflow=workflow,
     )

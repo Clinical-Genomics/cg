@@ -5,28 +5,28 @@ from sqlalchemy.orm import Query
 from cg.constants.constants import SampleType
 from cg.constants.subject import PhenotypeStatus, Sex
 from cg.store.filters.status_sample_filters import (
-    filter_samples_by_entry_customer_ids,
-    filter_samples_by_entry_id,
-    filter_samples_by_identifier_name_and_value,
-    filter_samples_by_internal_id,
-    filter_samples_by_internal_id_pattern,
-    filter_samples_by_invoice_id,
-    filter_samples_by_name,
-    filter_samples_by_subject_id,
-    filter_samples_do_invoice,
-    filter_samples_is_delivered,
-    filter_samples_is_not_delivered,
-    filter_samples_is_not_down_sampled,
-    filter_samples_is_not_prepared,
-    filter_samples_is_not_received,
-    filter_samples_is_not_sequenced,
-    filter_samples_is_prepared,
-    filter_samples_is_received,
-    filter_samples_is_sequenced,
-    filter_samples_with_loqusdb_id,
-    filter_samples_with_type,
-    filter_samples_without_invoice_id,
-    filter_samples_without_loqusdb_id,
+    get_samples_by_entry_customer_ids,
+    get_samples_by_entry_id,
+    get_samples_by_identifier_name_and_value,
+    get_samples_by_internal_id,
+    get_samples_by_internal_id_pattern,
+    get_samples_by_invoice_id,
+    get_samples_by_name,
+    get_samples_by_subject_id,
+    get_samples_do_invoice,
+    get_samples_is_delivered,
+    get_samples_is_not_delivered,
+    get_samples_is_not_down_sampled,
+    get_samples_is_not_prepared,
+    get_samples_is_not_received,
+    get_samples_is_not_sequenced,
+    get_samples_is_prepared,
+    get_samples_is_received,
+    get_samples_is_sequenced,
+    get_samples_with_loqusdb_id,
+    get_samples_with_type,
+    get_samples_without_invoice_id,
+    get_samples_without_loqusdb_id,
 )
 from cg.store.models import CaseSample, Sample
 from cg.store.store import Store
@@ -53,7 +53,7 @@ def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, lo
     samples: Query = store._get_query(table=Sample)
 
     # WHEN retrieving the Loqusdb uploaded samples
-    uploaded_samples = filter_samples_with_loqusdb_id(samples=samples)
+    uploaded_samples = get_samples_with_loqusdb_id(samples=samples)
 
     # THEN the obtained sample should match the expected one
     assert sample in uploaded_samples
@@ -75,14 +75,14 @@ def test_get_samples_without_loqusdb_id(
     samples: Query = sample_store._get_query(table=Sample)
 
     # WHEN retrieving the Loqusdb not uploaded samples
-    not_uploaded_samples = filter_samples_without_loqusdb_id(samples)
+    not_uploaded_samples = get_samples_without_loqusdb_id(samples)
 
     # THEN the obtained sample should match the expected one
     assert sample in not_uploaded_samples
     assert sample_uploaded not in not_uploaded_samples
 
 
-def test_filter_samples_is_delivered(
+def test_get_samples_is_delivered(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
     """Test that a sample is returned when there is a delivered sample."""
@@ -90,7 +90,7 @@ def test_filter_samples_is_delivered(
     # GIVEN a store with two samples of which one is delivered
 
     # WHEN getting delivered samples
-    samples: Query = filter_samples_is_delivered(
+    samples: Query = get_samples_is_delivered(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         )
@@ -109,7 +109,7 @@ def test_filter_samples_is_delivered(
     assert samples.all()[0].delivered_at is not None
 
 
-def test_filter_samples_is_not_delivered(
+def test_get_samples_is_not_delivered(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
     """Test that a sample is returned when there is a sample that is not delivered."""
@@ -117,7 +117,7 @@ def test_filter_samples_is_not_delivered(
     # GIVEN a store with two samples of which one is not delivered
 
     # WHEN getting not sequenced samples
-    samples: Query = filter_samples_is_not_delivered(
+    samples: Query = get_samples_is_not_delivered(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         )
@@ -136,7 +136,7 @@ def test_filter_samples_is_not_delivered(
     assert samples.all()[0].delivered_at is None
 
 
-def test_filter_get_samples_by_invoice_id(
+def test_get_get_samples_by_invoice_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
     invoice_id=StoreConstants.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
 ):
@@ -145,7 +145,7 @@ def test_filter_get_samples_by_invoice_id(
     # GIVEN a store with two samples of which one has an invoice id
 
     # WHEN getting not sequenced samples
-    samples: Query = filter_samples_by_invoice_id(
+    samples: Query = get_samples_by_invoice_id(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         ),
@@ -165,7 +165,7 @@ def test_filter_get_samples_by_invoice_id(
     assert samples.all()[0].invoice_id == invoice_id
 
 
-def test_filter_samples_without_invoice_id(
+def test_get_samples_without_invoice_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
     """Test that a sample is returned when there is a sample that has no invoice id."""
@@ -173,7 +173,7 @@ def test_filter_samples_without_invoice_id(
     # GIVEN a store with two samples of which one does not have an invoice id
 
     # WHEN getting not sequenced samples
-    samples: Query = filter_samples_without_invoice_id(
+    samples: Query = get_samples_without_invoice_id(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         )
@@ -192,7 +192,7 @@ def test_filter_samples_without_invoice_id(
     assert samples.all()[0].invoice_id is None
 
 
-def test_filter_samples_not_down_sampled(
+def test_get_samples_not_down_sampled(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
     """Test that a sample is returned when there is a sample that is not down sampled."""
@@ -200,7 +200,7 @@ def test_filter_samples_not_down_sampled(
     # GIVEN a store with two samples of which one is not sequenced
 
     # WHEN getting not sequenced samples
-    samples: Query = filter_samples_is_not_down_sampled(
+    samples: Query = get_samples_is_not_down_sampled(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         )
@@ -219,7 +219,7 @@ def test_filter_samples_not_down_sampled(
     assert samples.all()[0].downsampled_to is None
 
 
-def test_filter_samples_is_sequenced(
+def test_get_samples_is_sequenced(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
     """Test that a sample is returned when there is a sample that is not sequenced."""
@@ -227,7 +227,7 @@ def test_filter_samples_is_sequenced(
     # GIVEN a store with two samples of which one is not sequenced
 
     # WHEN getting not sequenced samples
-    samples: Query = filter_samples_is_sequenced(
+    samples: Query = get_samples_is_sequenced(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         )
@@ -246,7 +246,7 @@ def test_filter_samples_is_sequenced(
     assert samples.all()[0].last_sequenced_at is not None
 
 
-def test_filter_samples_is_not_sequenced(
+def test_get_samples_is_not_sequenced(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
     """Test that a sample is returned when there is a sample that is not sequenced."""
@@ -254,7 +254,7 @@ def test_filter_samples_is_not_sequenced(
     # GIVEN a store with two samples of which one is not sequenced
 
     # WHEN getting not sequenced samples
-    samples: Query = filter_samples_is_not_sequenced(
+    samples: Query = get_samples_is_not_sequenced(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         )
@@ -273,7 +273,7 @@ def test_filter_samples_is_not_sequenced(
     assert samples.all()[0].last_sequenced_at is None
 
 
-def test_filter_samples_do_invoice(
+def test_get_samples_do_invoice(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
     """Test that a sample is returned when there is not a sample that should be invoiced."""
@@ -281,7 +281,7 @@ def test_filter_samples_do_invoice(
     # GIVEN a  store with two samples of which one is marked to skip invoicing
 
     # WHEN getting  samples mark to be invoiced
-    samples: Query = filter_samples_do_invoice(
+    samples: Query = get_samples_do_invoice(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         )
@@ -300,7 +300,7 @@ def test_filter_samples_do_invoice(
     assert samples.all()[0].no_invoice is False
 
 
-def test_filter_samples_is_received(
+def test_get_samples_is_received(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
     """Test that a sample is returned when there is a sample that is received."""
@@ -308,7 +308,7 @@ def test_filter_samples_is_received(
     # GIVEN a store with two samples of which one is received
 
     # WHEN getting received samples
-    samples: Query = filter_samples_is_received(
+    samples: Query = get_samples_is_received(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         )
@@ -327,7 +327,7 @@ def test_filter_samples_is_received(
     assert samples.all()[0].received_at is not None
 
 
-def test_filter_samples_is_not_received(
+def test_get_samples_is_not_received(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
     """Test that a sample is returned when there is a sample that is not received."""
@@ -335,7 +335,7 @@ def test_filter_samples_is_not_received(
     # GIVEN a store that has two samples of which one is not received
 
     # WHEN getting not received samples
-    samples: Query = filter_samples_is_not_received(
+    samples: Query = get_samples_is_not_received(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         )
@@ -351,14 +351,14 @@ def test_filter_samples_is_not_received(
     assert samples.all()[0].received_at is None
 
 
-def test_filter_samples_is_prepared(
+def test_get_samples_is_prepared(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
     """Test that a sample is returned when there is a sample that is prepared."""
 
     # GIVEN a store that has two samples of which one is prepared
 
-    samples: Query = filter_samples_is_prepared(
+    samples: Query = get_samples_is_prepared(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         )
@@ -377,7 +377,7 @@ def test_filter_samples_is_prepared(
     assert samples.all()[0].prepared_at is not None
 
 
-def test_filter_samples_is_not_prepared(
+def test_get_samples_is_not_prepared(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
     """Test that a sample is returned when there is a sample that is not prepared."""
@@ -385,7 +385,7 @@ def test_filter_samples_is_not_prepared(
     # GIVEN a store that has two samples of which one is not prepared
 
     # WHEN getting not prepared samples
-    samples: Query = filter_samples_is_not_prepared(
+    samples: Query = get_samples_is_not_prepared(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         )
@@ -401,7 +401,7 @@ def test_filter_samples_is_not_prepared(
     assert samples.all()[0].prepared_at is None
 
 
-def test_filter_get_samples_by_internal_id(
+def test_get_get_samples_by_internal_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
     sample_internal_id: str = StoreConstants.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
 ):
@@ -410,7 +410,7 @@ def test_filter_get_samples_by_internal_id(
     # GIVEN a store with two samples of which one has the given internal id
 
     # WHEN getting a sample by id
-    samples: Query = filter_samples_by_internal_id(
+    samples: Query = get_samples_by_internal_id(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         ),
@@ -430,7 +430,7 @@ def test_filter_get_samples_by_internal_id(
     assert samples.all()[0].internal_id == sample_internal_id
 
 
-def test_filter_get_samples_by_entry_id(
+def test_get_get_samples_by_entry_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
     entry_id: int = 1,
 ):
@@ -439,7 +439,7 @@ def test_filter_get_samples_by_entry_id(
     # GIVEN a store with two samples
 
     # WHEN getting a sample by id
-    samples: Query = filter_samples_by_entry_id(
+    samples: Query = get_samples_by_entry_id(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         ),
@@ -459,7 +459,7 @@ def test_filter_get_samples_by_entry_id(
     assert samples.all()[0].id == entry_id
 
 
-def test_filter_get_samples_with_type(
+def test_get_get_samples_with_type(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
     name=StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
     tissue_type: SampleType = SampleType.TUMOR,
@@ -469,7 +469,7 @@ def test_filter_get_samples_with_type(
     # GIVEN a store with two samples of which one is of the given type
 
     # WHEN getting a sample by type
-    samples: Query = filter_samples_with_type(
+    samples: Query = get_samples_with_type(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         ),
@@ -489,7 +489,7 @@ def test_filter_get_samples_with_type(
     assert samples.all()[0].is_tumour is True
 
 
-def test_filter_get_samples_by_name(
+def test_get_get_samples_by_name(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
     name=StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
@@ -497,7 +497,7 @@ def test_filter_get_samples_by_name(
     # GIVEN a store with two samples that have names
 
     # WHEN getting a sample by name
-    samples: Query = filter_samples_by_name(
+    samples: Query = get_samples_by_name(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         ),
@@ -517,7 +517,7 @@ def test_filter_get_samples_by_name(
     assert samples.all()[0].name == name
 
 
-def test_filter_get_samples_by_subject_id(
+def test_get_get_samples_by_subject_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
     subject_id: str = StoreConstants.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
 ):
@@ -525,7 +525,7 @@ def test_filter_get_samples_by_subject_id(
     # GIVEN a store with two samples of which one has a subject id
 
     # WHEN getting a sample by subject id
-    samples: Query = filter_samples_by_subject_id(
+    samples: Query = get_samples_by_subject_id(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         ),
@@ -545,7 +545,7 @@ def test_filter_get_samples_by_subject_id(
     assert samples.all()[0].subject_id == subject_id
 
 
-def test_filter_get_samples_by_customer_id(
+def test_get_get_samples_by_customer_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
     """Test that a sample is returned when there is a sample with the given customer id."""
@@ -557,7 +557,7 @@ def test_filter_get_samples_by_customer_id(
     assert customer_id != samples.order_by(Sample.customer_id.desc()).first().customer_id
 
     # WHEN filtering the sample query by customer id
-    filtered_query: Query = filter_samples_by_entry_customer_ids(
+    filtered_query: Query = get_samples_by_entry_customer_ids(
         samples=samples,
         customer_entry_ids=[customer_id],
     )
@@ -575,7 +575,7 @@ def test_filter_get_samples_by_customer_id(
     assert filtered_query.first().customer_id == customer_id
 
 
-def test_filter_get_samples_by_internal_id_pattern(
+def test_get_get_samples_by_internal_id_pattern(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
     internal_id_pattern: str = "with_attributes",
 ):
@@ -583,7 +583,7 @@ def test_filter_get_samples_by_internal_id_pattern(
     # GIVEN a store with two samples of which one has a name name pattern
 
     # WHEN getting a sample by name pattern
-    samples: Query = filter_samples_by_internal_id_pattern(
+    samples: Query = get_samples_by_internal_id_pattern(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         ),
@@ -603,7 +603,7 @@ def test_filter_get_samples_by_internal_id_pattern(
     assert samples[0].internal_id == StoreConstants.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value
 
 
-def test_filter_samples_by_identifier_name_and_value_unique_sample(
+def test_get_samples_by_identifier_name_and_value_unique_sample(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
     """Test that the function filters correctly for any identifier."""
@@ -651,7 +651,7 @@ def test_filter_samples_by_identifier_name_and_value_unique_sample(
         "subject_id": sample.subject_id,
     }
     for key, value in identifiers.items():
-        filtered_sample_query: Query = filter_samples_by_identifier_name_and_value(
+        filtered_sample_query: Query = get_samples_by_identifier_name_and_value(
             samples=sample_query,
             identifier_name=key,
             identifier_value=value,
@@ -662,14 +662,14 @@ def test_filter_samples_by_identifier_name_and_value_unique_sample(
         assert getattr(filtered_sample_query.first(), key) == value
 
 
-def test_filter_samples_by_identifier_name_and_value_two_samples(sample_store: Store):
+def test_get_samples_by_identifier_name_and_value_two_samples(sample_store: Store):
     """."""
     # GIVEN a store with more than 2 samples
     sample_query: Query = sample_store._get_query(table=Sample)
     assert sample_query.count() > 2
 
     # WHEN filtering the females from the sample query using identifiers
-    filtered_query: Query = filter_samples_by_identifier_name_and_value(
+    filtered_query: Query = get_samples_by_identifier_name_and_value(
         samples=sample_query,
         identifier_name="sex",
         identifier_value=Sex.FEMALE,

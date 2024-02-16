@@ -6,7 +6,7 @@ from sqlalchemy.orm import Query
 from cg.store.models import User
 
 
-def filter_user_by_email(users: Query, email: str, **kwargs) -> Query:
+def get_user_by_email(users: Query, email: str, **kwargs) -> Query:
     """Return user by email."""
     return users.filter(User.email == email)
 
@@ -14,7 +14,7 @@ def filter_user_by_email(users: Query, email: str, **kwargs) -> Query:
 class UserFilter(Enum):
     """Define User filter functions."""
 
-    FILTER_BY_EMAIL: Callable = filter_user_by_email
+    FILTER_BY_EMAIL: Callable = get_user_by_email
 
 
 def apply_user_filter(

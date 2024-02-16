@@ -7,14 +7,12 @@ from cg.constants import Workflow
 from cg.store.models import Application, ApplicationLimitations
 
 
-def filter_application_limitations_by_tag(
-    application_limitations: Query, tag: str, **kwargs
-) -> Query:
+def get_application_limitations_by_tag(application_limitations: Query, tag: str, **kwargs) -> Query:
     """Return application limitations by tag."""
     return application_limitations.filter(Application.tag == tag)
 
 
-def filter_application_limitations_by_workflow(
+def get_application_limitations_by_workflow(
     application_limitations: Query, workflow: Workflow, **kwargs
 ) -> Query:
     """Return application limitations by workflow."""
@@ -40,5 +38,5 @@ def apply_application_limitations_filter(
 class ApplicationLimitationsFilter(Enum):
     """Define ApplicationLimitations filter functions."""
 
-    FILTER_BY_TAG = filter_application_limitations_by_tag
-    FILTER_BY_WORKFLOW = filter_application_limitations_by_workflow
+    FILTER_BY_TAG = get_application_limitations_by_tag
+    FILTER_BY_WORKFLOW = get_application_limitations_by_workflow
