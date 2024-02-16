@@ -27,5 +27,5 @@ def concat_txt(file_paths: list[Path], target_file: Path, str_content: Optional[
         for txt in str_content:
             content += txt
     for file_path in file_paths:
-        content += read_txt(file_path)
+        content += read_txt(file_path, read_to_string = True)
     write_txt(content=content, file_path=target_file)
