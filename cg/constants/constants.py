@@ -50,7 +50,12 @@ class CaseActions(StrEnum):
 
 CONTAINER_OPTIONS = ("Tube", "96 well plate", "No container")
 
-CONTROL_OPTIONS = ("", "negative", "positive")
+
+class ControlOptions(StrEnum):
+    NEGATIVE: str = "negative"
+    POSITIVE: str = "positive"
+    EMPTY: str = ""
+
 
 DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
