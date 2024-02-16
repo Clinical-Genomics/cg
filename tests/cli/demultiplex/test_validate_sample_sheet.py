@@ -53,7 +53,7 @@ def test_validate_sample_sheet_wrong_file_type(
 
 def test_validate_correct_bcl2fastq_sample_sheet(
     cli_runner: CliRunner,
-    sample_sheet: Path,
+    novaseq_bcl2fastq_sample_sheet_path,
 ):
     """Test validate sample sheet when using a bcl2fastq sample sheet."""
 

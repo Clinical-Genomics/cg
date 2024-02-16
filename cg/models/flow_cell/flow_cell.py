@@ -9,12 +9,12 @@ from typing import Type
 from pydantic import ValidationError
 from typing_extensions import Literal
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
+from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
 from cg.constants.constants import LENGTH_LONG_DATE
@@ -55,6 +55,7 @@ class FlowCellDirectoryData:
         self.parse_flow_cell_dir_name()
         self.bcl_converter: str = bcl_converter or BclConverter.BCLCONVERT
         self._sample_sheet_path_hk: Path | None = None
+        self.sample_sheet_validator = SampleSheetValidator()
 
     def parse_flow_cell_dir_name(self):
         """Parse relevant information from flow cell name.
@@ -215,7 +216,7 @@ class FlowCellDirectoryData:
     def validate_sample_sheet(self) -> bool:
         """Validate if sample sheet is on correct format."""
         try:
-            get_sample_sheet_from_file(self.sample_sheet_path)
+            self.sample_sheet_validator.validate_sample_sheet_from_file(self.sample_sheet_path)
         except (SampleSheetError, ValidationError) as error:
             LOG.warning("Invalid sample sheet")
             LOG.warning(error)
@@ -231,7 +232,9 @@ class FlowCellDirectoryData:
         """Return sample sheet object."""
         if not self._sample_sheet_path_hk:
             raise FlowCellError("Sample sheet path has not been assigned yet")
-        return get_sample_sheet_from_file(self._sample_sheet_path_hk)
+        return self.sample_sheet_validator.get_sample_sheet_object_from_file(
+            self._sample_sheet_path_hk
+        )
 
     def is_sequencing_done(self) -> bool:
         """Check if sequencing is done.

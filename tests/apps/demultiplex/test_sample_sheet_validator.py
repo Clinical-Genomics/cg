@@ -1,15 +1,21 @@
 from pathlib import Path
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
+from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 
 
-def test_get_sample_internal_ids_from_sample_sheet(novaseq6000_bcl_convert_sample_sheet_path: Path):
+def test_get_sample_internal_ids_from_sample_sheet(
+    novaseq_6000_post_1_5_kits_correct_sample_sheet_path: Path,
+):
     """Test that getting sample internal ids from a sample sheet returns a unique list of strings."""
+
+    # GIVEN a sample hseet validator
+    validator = SampleSheetValidator()
+
     # GIVEN a sample sheet with only valid samples
-    sample_sheet: SampleSheet = get_sample_sheet_from_file(
-        novaseq6000_bcl_convert_sample_sheet_path
+    sample_sheet: SampleSheet = validator.get_sample_sheet_object_from_file(
+        novaseq_6000_post_1_5_kits_correct_sample_sheet_path
     )
 
     # WHEN getting the valid sample internal ids

@@ -7,10 +7,8 @@ from pathlib import Path
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_sheet_from_file,
-)
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
+from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
@@ -79,6 +77,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         self.root_dir = Path(config.fluffy.root_dir)
         LOG.info("Set root dir to %s", config.fluffy.root_dir)
         self.fluffy_config = Path(config.fluffy.config_path)
+        self.sample_sheet_validator = SampleSheetValidator()
         super().__init__(workflow, config)
 
     @property
@@ -211,7 +210,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(case_id)
         sample_sheet_path: Path = self.housekeeper_api.get_sample_sheet_path(flow_cell.name)
-        sample_sheet: SampleSheet = get_sample_sheet_from_file(sample_sheet_path)
+        sample_sheet: SampleSheet = self.sample_sheet_validator.get_sample_sheet_object_from_file(
+            sample_sheet_path
+        )
 
         if not dry_run:
             Path(self.root_dir, case_id).mkdir(parents=True, exist_ok=True)
