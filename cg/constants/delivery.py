@@ -138,7 +138,7 @@ FASTQ_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"fastq"},
 ]
 
-SARSCOV2_ANALYSIS_CASE_TAGS: list[set[str]] = [
+MUTANT_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"pangolin"},
     {"ks-delivery"},
 ]
@@ -199,7 +199,7 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
         "sample_tags": FASTQ_ANALYSIS_SAMPLE_TAGS,
     },
     Workflow.MUTANT: {
-        "case_tags": SARSCOV2_ANALYSIS_CASE_TAGS,
+        "case_tags": MUTANT_ANALYSIS_CASE_TAGS,
         "sample_tags": MUTANT_ANALYSIS_SAMPLE_TAGS,
     },
     Workflow.RNAFUSION: {
