@@ -42,7 +42,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.config_params: str = config.raredisease.config_params
         self.config_resources: str = config.raredisease.config_resources
         self.tower_binary_path: str = config.tower_binary_path
-        self.tower_workflow: str = config.raredisease.tower_pipeline
+        self.tower_workflow: str = config.raredisease.tower_workflow
         self.account: str = config.raredisease.slurm.account
         self.compute_env: str = config.raredisease.compute_env
         self.revision: str = config.raredisease.revision
