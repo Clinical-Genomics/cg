@@ -59,7 +59,7 @@ def test_report_deliver_with_missing_case(
     # THEN command should NOT succeed
     assert result.exit_code != EXIT_SUCCESS
 
-    # THEN ERROR log should be printed containing invalid case_id
+    # THEN ERROR log should be printed containing the invalid case id
     assert case_id_does_not_exist in caplog.text
     assert "could not be found" in caplog.text
 
