@@ -1,8 +1,6 @@
 """CLI for delivering files with CG"""
 
 import logging
-from pathlib import Path
-
 import click
 
 from cg.apps.tb import TrailblazerAPI
@@ -11,8 +9,6 @@ from cg.meta.deliver import DeliveryAPI
 from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case
-from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

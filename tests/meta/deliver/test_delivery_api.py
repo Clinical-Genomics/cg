@@ -202,7 +202,7 @@ def test_deliver_files_enough_reads(
     deliver_api.deliver_files(case=case, pipeline=Workflow.MIP_DNA)
 
     # THEN the sample folder should be created
-    assert Path(deliver_api.project_base_path, deliver_api_destination_path, sample.name).exists()
+    assert Path(deliver_api.customers_folder, deliver_api_destination_path, sample.name).exists()
 
 
 def test_deliver_files_not_enough_reads(
@@ -227,7 +227,7 @@ def test_deliver_files_not_enough_reads(
 
     # THEN the sample folder should not be created
     assert not Path(
-        deliver_api.project_base_path, deliver_api_destination_path, sample.name
+        deliver_api.customers_folder, deliver_api_destination_path, sample.name
     ).exists()
 
 
@@ -255,4 +255,4 @@ def test_deliver_files_not_enough_reads_force(
     deliver_api.deliver_files(case=case, pipeline=Workflow.MIP_DNA)
 
     # THEN the sample folder should be created
-    assert Path(deliver_api.project_base_path, deliver_api_destination_path, sample.name).exists()
+    assert Path(deliver_api.customers_folder, deliver_api_destination_path, sample.name).exists()

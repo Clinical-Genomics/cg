@@ -39,7 +39,7 @@ class DeliveryAPI:
     ):
         self.store = store
         self.hk_api = hk_api
-        self.project_base_path = project_base_path
+        self.customers_folder = project_base_path
         self.ignore_missing_bundles = ignore_missing_bundles
         self.deliver_failed_samples = force_all
         self.dry_run = dry_run
@@ -101,7 +101,7 @@ class DeliveryAPI:
             case_name=case.name,
             customer_id=case.customer.internal_id,
             ticket=case.latest_ticket,
-            base_path=self.project_base_path,
+            base_path=self.customers_folder,
         )
         if not self.dry_run:
             LOG.debug(f"Creating project path {delivery_base}")
@@ -145,7 +145,7 @@ class DeliveryAPI:
             sample_name=sample.name,
             customer_id=case.customer.internal_id,
             ticket=case.latest_ticket,
-            base_path=self.project_base_path,
+            base_path=self.customers_folder,
         )
         if not self.dry_run:
             LOG.debug(f"Creating project path {delivery_base}")
