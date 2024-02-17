@@ -1,17 +1,19 @@
 import pytest
+
 from cg.constants.constants import MicrosaltAppTags
 from cg.meta.workflow.microsalt.metrics_parser.models import (
     MicrosaltSamtoolsStats,
     PicardMarkduplicate,
     SampleMetrics,
 )
-
 from cg.meta.workflow.microsalt.quality_controller.models import (
     CaseQualityResult,
     SampleQualityResult,
 )
-from cg.meta.workflow.microsalt.quality_controller.quality_controller import QualityController
-from cg.store.api.core import Store
+from cg.meta.workflow.microsalt.quality_controller.quality_controller import (
+    QualityController,
+)
+from cg.store.store import Store
 
 
 def create_sample_metrics(

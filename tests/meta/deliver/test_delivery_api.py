@@ -5,13 +5,13 @@ from pathlib import Path
 from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliveryAPI
 from cg.meta.deliver.utils import get_delivery_dir_path, get_delivery_scope
-from cg.store import Store
 from cg.store.models import Case, CaseSample, Sample
+from cg.store.store import Store
 from tests.cli.deliver.conftest import fastq_delivery_bundle, mip_delivery_bundle
 from tests.store.conftest import case_obj
 from tests.store_helpers import StoreHelpers
@@ -48,7 +48,7 @@ def test_get_case_analysis_files(populated_deliver_api: DeliveryAPI, case_id: st
 
     # WHEN fetching all case files from the delivery api
     bundle_latest_files = deliver_api._get_case_files_from_version(
-        version=version, sample_ids=sample_ids, pipeline=Pipeline.MIP_DNA
+        version=version, sample_ids=sample_ids, pipeline=Workflow.MIP_DNA
     )
 
     # THEN housekeeper files should be returned
@@ -92,7 +92,7 @@ def test_get_case_files_from_version(
 
     # WHEN fetching the case files
     case_files = deliver_api._get_case_files_from_version(
-        version=version, sample_ids=sample_ids, pipeline=Pipeline.MIP_DNA
+        version=version, sample_ids=sample_ids, pipeline=Workflow.MIP_DNA
     )
 
     # THEN we should only get the case specific files back
@@ -131,7 +131,7 @@ def test_get_sample_files_from_version(
 
     # WHEN fetching the sample specific files
     sample_files = deliver_api._get_sample_files_from_version(
-        version=version, sample_id="ADM1", pipeline=Pipeline.MIP_DNA
+        version=version, sample_id="ADM1", pipeline=Workflow.MIP_DNA
     )
 
     # THEN assert that only the sample specific file was returned
@@ -146,7 +146,7 @@ def test_get_sample_files_from_version(
 def test_get_delivery_scope_case_only():
     """Testing the delivery scope of a case only delivery."""
     # GIVEN a case only delivery type
-    delivery_type: set[str] = {Pipeline.MIP_DNA}
+    delivery_type: set[str] = {Workflow.MIP_DNA}
 
     # WHEN getting the delivery scope
     sample_delivery, case_delivery = get_delivery_scope(delivery_type)
@@ -159,7 +159,7 @@ def test_get_delivery_scope_case_only():
 def test_get_delivery_scope_sample_only():
     """Testing the delivery scope of a sample only delivery."""
     # GIVEN a sample only delivery type
-    delivery_type = {Pipeline.FASTQ}
+    delivery_type = {Workflow.FASTQ}
 
     # WHEN getting the delivery scope
     sample_delivery, case_delivery = get_delivery_scope(delivery_type)
@@ -172,7 +172,7 @@ def test_get_delivery_scope_sample_only():
 def test_get_delivery_scope_case_and_sample():
     """Testing the delivery scope of a case and sample delivery."""
     # GIVEN a case and sample delivery type
-    delivery_type = {Pipeline.SARS_COV_2}
+    delivery_type = {Workflow.MUTANT}
 
     # WHEN getting the delivery scope
     sample_delivery, case_delivery = get_delivery_scope(delivery_type)
@@ -199,7 +199,7 @@ def test_deliver_files_enough_reads(
     helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
 
     # WHEN delivering files for the case
-    deliver_api.deliver_files(case=case, pipeline=Pipeline.MIP_DNA)
+    deliver_api.deliver_files(case=case, pipeline=Workflow.MIP_DNA)
 
     # THEN the sample folder should be created
     assert Path(deliver_api.project_base_path, deliver_api_destination_path, sample.name).exists()
@@ -223,7 +223,7 @@ def test_deliver_files_not_enough_reads(
     helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
 
     # WHEN delivering files for the case
-    deliver_api.deliver_files(case=case, pipeline=Pipeline.MIP_DNA)
+    deliver_api.deliver_files(case=case, pipeline=Workflow.MIP_DNA)
 
     # THEN the sample folder should not be created
     assert not Path(
@@ -252,7 +252,7 @@ def test_deliver_files_not_enough_reads_force(
     deliver_api.deliver_failed_samples = True
 
     # WHEN delivering files for the case
-    deliver_api.deliver_files(case=case, pipeline=Pipeline.MIP_DNA)
+    deliver_api.deliver_files(case=case, pipeline=Workflow.MIP_DNA)
 
     # THEN the sample folder should be created
     assert Path(deliver_api.project_base_path, deliver_api_destination_path, sample.name).exists()

@@ -6,15 +6,14 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.subject import Sex
 from cg.meta.compress import CompressAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
-from cg.store.api.find_business_data import FindBusinessDataHandler
-from cg.store.api.status import StatusHandler
+from cg.store.crud.read import ReadHandler
 from cg.store.models import Case
 from tests.store_helpers import StoreHelpers
 
@@ -108,7 +107,7 @@ def mip_rna_context(
 ) -> CGConfig:
     cg_context.housekeeper_api_ = housekeeper_api
     cg_context.trailblazer_api_ = tb_api
-    analysis_family_single_case["data_analysis"] = str(Pipeline.MIP_RNA)
+    analysis_family_single_case["data_analysis"] = Workflow.MIP_RNA
     if not cg_context.status_db.get_case_by_internal_id(internal_id=case_id):
         helpers.ensure_case_from_dict(
             cg_context.status_db, case_info=analysis_family_single_case, app_tag=apptag_rna
@@ -139,7 +138,7 @@ def mip_dna_context(
         if not _store.get_case_by_internal_id(internal_id=case_id):
             case_obj = helpers.add_case(
                 store=_store,
-                data_analysis=Pipeline.MIP_DNA,
+                data_analysis=Workflow.MIP_DNA,
                 internal_id=case_id,
                 name=mip_case_ids[case_id]["name"],
             )
@@ -165,8 +164,8 @@ def setup_mocks(
     is_spring_decompression_running: bool = False,
 ) -> None:
     """Helper function to set up the necessary mocks for the decompression logics."""
-    mocker.patch.object(StatusHandler, "cases_to_analyze")
-    StatusHandler.cases_to_analyze.return_value = [case_to_analyze]
+    mocker.patch.object(ReadHandler, "cases_to_analyze")
+    ReadHandler.cases_to_analyze.return_value = [case_to_analyze]
 
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
     PrepareFastqAPI.is_spring_decompression_needed.return_value = is_spring_decompression_needed
@@ -197,5 +196,5 @@ def setup_mocks(
         return_value=["a str"],
     )
 
-    mocker.patch.object(FindBusinessDataHandler, "are_all_flow_cells_on_disk")
-    FindBusinessDataHandler.are_all_flow_cells_on_disk.return_value = True
+    mocker.patch.object(ReadHandler, "are_all_flow_cells_on_disk")
+    ReadHandler.are_all_flow_cells_on_disk.return_value = True

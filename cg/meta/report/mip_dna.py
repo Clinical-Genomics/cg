@@ -14,7 +14,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_MIP_DNA_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
-    Pipeline,
+    Workflow,
 )
 from cg.constants.scout import MIP_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
@@ -24,7 +24,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.models.report.metadata import MipDNASampleMetadataModel
-from cg.models.report.report import CaseModel
+from cg.models.report.report import CaseModel, ScoutReportFiles
 from cg.models.report.sample import SampleModel
 from cg.store.models import Case, Sample
 
@@ -88,6 +88,23 @@ class MipDNAReportAPI(ReportAPI):
                 return False
         return True
 
+    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
+        """Return files that will be uploaded to Scout."""
+        return ScoutReportFiles(
+            snv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="snv_vcf"
+            ),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="sv_vcf"
+            ),
+            vcf_str=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="vcf_str"
+            ),
+            smn_tsv=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="smn_tsv"
+            ),
+        )
+
     def get_required_fields(self, case: CaseModel) -> dict:
         """Return dictionary with the delivery report required fields for MIP DNA."""
         return {
@@ -125,7 +142,7 @@ class MipDNAReportAPI(ReportAPI):
 
     def get_template_name(self) -> str:
         """Return template name to render the delivery report."""
-        return Pipeline.MIP_DNA + "_report.html"
+        return Workflow.MIP_DNA + "_report.html"
 
     def get_upload_case_tags(self) -> dict:
         """Return MIP DNA upload case tags."""

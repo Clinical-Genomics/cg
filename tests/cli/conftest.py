@@ -1,4 +1,5 @@
 """Fixtures for CLI tests."""
+
 from pathlib import Path
 from typing import Any
 
@@ -9,7 +10,7 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 from tests.cli.compress.conftest import CaseInfo
 from tests.store_helpers import StoreHelpers
 
@@ -144,13 +145,15 @@ def real_crunchy_api(crunchy_config: dict[str, dict[str, Any]]):
 
 @pytest.fixture
 def real_compress_api(
-    demultiplexed_runs: Path, housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
+    illumina_demultiplexed_runs_directory,
+    housekeeper_api: HousekeeperAPI,
+    real_crunchy_api: CrunchyAPI,
 ) -> CompressAPI:
     """Return a compress API context."""
     return CompressAPI(
         crunchy_api=real_crunchy_api,
         hk_api=housekeeper_api,
-        demux_root=demultiplexed_runs.as_posix(),
+        demux_root=illumina_demultiplexed_runs_directory.as_posix(),
     )
 
 

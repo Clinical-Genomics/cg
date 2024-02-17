@@ -1,12 +1,13 @@
 """Tests for the transfer of external data."""
+
 import logging
 from pathlib import Path
 
 from housekeeper.store.models import Version
 
 from cg.meta.transfer.external_data import ExternalDataAPI
-from cg.store import Store
 from cg.store.models import Sample
+from cg.store.store import Store
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 from tests.cli.workflow.conftest import dna_case
 from tests.mocks.hk_mock import MockHousekeeperAPI

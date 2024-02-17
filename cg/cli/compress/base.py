@@ -1,4 +1,5 @@
 """Commands for compressing files, and cleaning uncompressed files"""
+
 import logging
 
 import click
@@ -30,7 +31,9 @@ def compress(context: CGConfig):
     crunchy_api = context.crunchy_api
 
     compress_api = CompressAPI(
-        hk_api=hk_api, crunchy_api=crunchy_api, demux_root=context.demultiplexed_flow_cells_dir
+        hk_api=hk_api,
+        crunchy_api=crunchy_api,
+        demux_root=context.illumina_demultiplexed_runs_directory,
     )
     context.meta_apis["compress_api"] = compress_api
 
@@ -68,7 +71,7 @@ def decompress(context: CGConfig):
     compress_api = CompressAPI(
         hk_api=hk_api,
         crunchy_api=crunchy_api,
-        demux_root=context.demultiplexed_flow_cells_dir,
+        demux_root=context.illumina_demultiplexed_runs_directory,
         backup_api=spring_backup_api,
     )
 

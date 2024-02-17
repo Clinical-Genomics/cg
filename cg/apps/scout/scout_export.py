@@ -22,12 +22,12 @@ class Individual(BaseModel):
         Literal[PlinkSex.UNKNOWN, PlinkSex.MALE, PlinkSex.FEMALE, Sex.OTHER],
         BeforeValidator(set_sex_if_other),
     ]
-    father: Annotated[
-        str, BeforeValidator(set_parent_if_missing)
-    ] = RelationshipStatus.HAS_NO_PARENT
-    mother: Annotated[
-        str, BeforeValidator(set_parent_if_missing)
-    ] = RelationshipStatus.HAS_NO_PARENT
+    father: Annotated[str, BeforeValidator(set_parent_if_missing)] = (
+        RelationshipStatus.HAS_NO_PARENT
+    )
+    mother: Annotated[str, BeforeValidator(set_parent_if_missing)] = (
+        RelationshipStatus.HAS_NO_PARENT
+    )
     phenotype: PlinkPhenotypeStatus
     analysis_type: str = "wgs"
 

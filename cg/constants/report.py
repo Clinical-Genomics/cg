@@ -1,15 +1,16 @@
 """Delivery report constants."""
+
 from cg.constants import DataDelivery
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 
 BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]
 
-REPORT_SUPPORTED_PIPELINES: tuple[Pipeline, ...] = (
-    Pipeline.BALSAMIC,
-    Pipeline.BALSAMIC_UMI,
-    Pipeline.BALSAMIC_QC,
-    Pipeline.MIP_DNA,
-    Pipeline.RNAFUSION,
+REPORT_SUPPORTED_WORKFLOW: tuple[Workflow, ...] = (
+    Workflow.BALSAMIC,
+    Workflow.BALSAMIC_UMI,
+    Workflow.BALSAMIC_QC,
+    Workflow.MIP_DNA,
+    Workflow.RNAFUSION,
 )
 
 REPORT_SUPPORTED_DATA_DELIVERY: tuple[DataDelivery, ...] = (
@@ -72,9 +73,9 @@ REQUIRED_APPLICATION_FIELDS: list[str] = [
 
 # Data analysis required fields
 REQUIRED_DATA_ANALYSIS_FIELDS: list[str] = [
-    "customer_pipeline",
-    "pipeline",
-    "pipeline_version",
+    "customer_workflow",
+    "workflow",
+    "workflow_version",
     "genome_build",
 ]
 
@@ -143,30 +144,33 @@ _REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA
     "fold_80",
 ]
 
-REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS: list[
-    str
-] = _REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS + [
-    "bait_set",
-    "bait_set_version",
-    "median_target_coverage",
-    "pct_250x",
-    "pct_500x",
-    "gc_dropout",
-]
+REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS: list[str] = (
+    _REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS
+    + [
+        "bait_set",
+        "bait_set_version",
+        "median_target_coverage",
+        "pct_250x",
+        "pct_500x",
+        "gc_dropout",
+    ]
+)
 
-REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS: list[
-    str
-] = _REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS + [
-    "median_coverage",
-    "pct_60x",
-    "pct_reads_improper_pairs",
-]
+REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS: list[str] = (
+    _REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS
+    + [
+        "median_coverage",
+        "pct_60x",
+        "pct_reads_improper_pairs",
+    ]
+)
 
-REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS: list[
-    str
-] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS + [
-    "pct_15x",
-]
+REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS: list[str] = (
+    REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
+    + [
+        "pct_15x",
+    ]
+)
 
 REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
     "bias_5_3",

@@ -3,7 +3,7 @@ import logging
 import os
 from pathlib import Path
 from cg.constants import delivery as constants
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.store.models import Case, Sample
 from housekeeper.store.models import File, Version
 
@@ -44,11 +44,11 @@ def get_delivery_dir_path(
     return delivery_path
 
 
-def get_case_tags_for_pipeline(pipeline: Pipeline) -> list[set[str]]:
+def get_case_tags_for_pipeline(pipeline: Workflow) -> list[set[str]]:
     return constants.PIPELINE_ANALYSIS_TAG_MAP[pipeline]["case_tags"]
 
 
-def get_sample_tags_for_pipeline(pipeline: Pipeline) -> list[set[str]]:
+def get_sample_tags_for_pipeline(pipeline: Workflow) -> list[set[str]]:
     return constants.PIPELINE_ANALYSIS_TAG_MAP[pipeline]["sample_tags"]
 
 

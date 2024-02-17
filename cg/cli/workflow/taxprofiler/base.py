@@ -16,11 +16,9 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
+    metrics_deliver,
 )
-from cg.cli.workflow.taxprofiler.options import (
-    OPTION_FROM_START,
-    OPTION_INSTRUMENT_PLATFORM,
-)
+from cg.cli.workflow.taxprofiler.options import OPTION_FROM_START, OPTION_INSTRUMENT_PLATFORM
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.constants.nf_analysis import NfTowerStatus
@@ -39,12 +37,11 @@ LOG = logging.getLogger(__name__)
 def taxprofiler(context: click.Context) -> None:
     """nf-core/taxprofiler analysis workflow."""
     AnalysisAPI.get_help(context)
-    context.obj.meta_apis[MetaApis.ANALYSIS_API] = TaxprofilerAnalysisAPI(
-        config=context.obj,
-    )
+    context.obj.meta_apis[MetaApis.ANALYSIS_API] = TaxprofilerAnalysisAPI(config=context.obj)
 
 
 taxprofiler.add_command(resolve_compression)
+taxprofiler.add_command(metrics_deliver)
 
 
 @taxprofiler.command("config-case")
@@ -104,14 +101,14 @@ def run(
     command_args: CommandArgs = CommandArgs(
         **{
             "log": analysis_api.get_log_path(
-                case_id=case_id,
-                pipeline=analysis_api.pipeline,
-                log=log,
+                case_id=case_id, workflow=analysis_api.workflow, log=log
             ),
             "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
-            "config": analysis_api.get_nextflow_config_path(nextflow_config=config),
+            "config": analysis_api.get_nextflow_config_path(
+                case_id=case_id, nextflow_config=config
+            ),
             "params_file": analysis_api.get_params_file_path(
                 case_id=case_id, params_file=params_file
             ),

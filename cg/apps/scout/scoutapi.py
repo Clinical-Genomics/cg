@@ -11,30 +11,31 @@ from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.exc import ScoutUploadError
 from cg.io.controller import ReadFile, ReadStream
 from cg.models.scout.scout_load_config import ScoutLoadConfig
+from cg.services.slurm_upload_service.slurm_upload_service import SlurmUploadService
 from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
 
 
 class ScoutAPI:
-
     """Interface to Scout."""
 
-    def __init__(self, config):
+    def __init__(self, config, slurm_upload_service: SlurmUploadService):
         binary_path = config["scout"]["binary_path"]
         config_path = config["scout"]["config_path"]
         self.process = Process(binary=binary_path, config=config_path)
+        self.slurm_upload_service = slurm_upload_service
+        self.scout_base_command = f"{binary_path} --config {config_path}"
 
-    def upload(self, scout_load_config: Path, force: bool = False):
+    def upload(self, scout_load_config: Path, force: bool = False) -> None:
         """Load analysis of a new family into Scout."""
 
         scout_config: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=scout_load_config
         )
-        scout_load_config_object: ScoutLoadConfig = ScoutLoadConfig(**scout_config)
-        existing_case: ScoutExportCase | None = self.get_case(
-            case_id=scout_load_config_object.family
-        )
+        scout_load_config_object = ScoutLoadConfig(**scout_config)
+        case_id: str = scout_load_config_object.family
+        existing_case: ScoutExportCase | None = self.get_case(case_id)
         load_command = ["load", "case", str(scout_load_config)]
         if existing_case:
             if force or scout_load_config_object.analysis_date > existing_case.analysis_date:
@@ -227,15 +228,17 @@ class ScoutAPI:
         )
         self.upload_report(case_id=case_id, report_path=report_path, report_type=report_type)
 
-    def upload_splice_junctions_bed(self, file_path: str, case_id: str, customer_sample_id: str):
+    def upload_splice_junctions_bed(
+        self, file_path: str, case_id: str, customer_sample_id: str
+    ) -> None:
         """Load a splice junctions bed file into a case in the database."""
 
         upload_command: list[str] = [
             "update",
             "individual",
-            "-c",
+            "--case-id",
             case_id,
-            "-n",
+            "--ind",
             customer_sample_id,
             "splice_junctions_bed",
             file_path,
@@ -257,9 +260,9 @@ class ScoutAPI:
         upload_command: list[str] = [
             "update",
             "individual",
-            "-c",
+            "--case-id",
             case_id,
-            "-n",
+            "--ind",
             customer_sample_id,
             "rna_coverage_bigwig",
             file_path,
@@ -271,4 +274,28 @@ class ScoutAPI:
         except CalledProcessError as error:
             raise ScoutUploadError(
                 "Something went wrong when uploading rna coverage bigwig file"
+            ) from error
+
+    def upload_rna_alignment_file(
+        self, case_id: str, customer_sample_id: str, file_path: str
+    ) -> None:
+        """Load an RNA alignment CRAM file into a case in the database."""
+
+        upload_command: list[str] = [
+            "update",
+            "individual",
+            "--case-id",
+            case_id,
+            "--ind",
+            customer_sample_id,
+            "rna_alignment_path",
+            file_path,
+        ]
+
+        try:
+            LOG.info(f"Uploading RNA alignment CRAM file {file_path} to case {case_id}")
+            self.process.run_command(upload_command)
+        except CalledProcessError as error:
+            raise ScoutUploadError(
+                "Something went wrong when uploading the RNA alignment CRAM file"
             ) from error

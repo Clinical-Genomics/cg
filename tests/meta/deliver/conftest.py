@@ -1,4 +1,5 @@
 """Fixtures for backup tests."""
+
 from pathlib import Path
 
 import pytest
@@ -6,8 +7,9 @@ import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
 from cg.meta.deliver import DeliveryAPI
-from cg.store import Store
+from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.store.models import Case
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

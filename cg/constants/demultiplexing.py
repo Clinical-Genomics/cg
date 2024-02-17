@@ -1,4 +1,5 @@
 """Constants related to demultiplexing."""
+
 from enum import StrEnum
 from pathlib import Path
 
@@ -11,7 +12,6 @@ from cg.constants.sequencing import Sequencers
 class BclConverter(StrEnum):
     """Define the BCL converter."""
 
-    DRAGEN: str = "dragen"
     BCL2FASTQ: str = "bcl2fastq"
     BCLCONVERT: str = "bcl_convert"
 
@@ -130,6 +130,7 @@ class SampleSheetBCLConvertSections:
         HEADER: str = "[Header]"
         RUN_NAME: str = "RunName"
         INSTRUMENT_PLATFORM_TITLE: str = "InstrumentPlatform"
+        INDEX_SETTINGS: str = "IndexSettings"
 
         @classmethod
         def file_format(cls) -> list[str]:
@@ -173,8 +174,6 @@ class SampleSheetBCLConvertSections:
         INDEX_1: str = "Index"
         INDEX_2: str = "Index2"
         OVERRIDE_CYCLES: str = "OverrideCycles"
-        ADAPTER_READ_1: str = "AdapterRead1"
-        ADAPTER_READ_2: str = "AdapterRead2"
         BARCODE_MISMATCHES_1: str = "BarcodeMismatchesIndex1"
         BARCODE_MISMATCHES_2: str = "BarcodeMismatchesIndex2"
 
@@ -186,8 +185,6 @@ class SampleSheetBCLConvertSections:
                 cls.INDEX_1,
                 cls.INDEX_2,
                 cls.OVERRIDE_CYCLES,
-                cls.ADAPTER_READ_1,
-                cls.ADAPTER_READ_2,
                 cls.BARCODE_MISMATCHES_1,
                 cls.BARCODE_MISMATCHES_2,
             ]
@@ -207,7 +204,7 @@ class IndexOverrideCycles(StrEnum):
 OPTION_BCL_CONVERTER = click.option(
     "-b",
     "--bcl-converter",
-    type=click.Choice(["bcl2fastq", "dragen"]),
+    type=click.Choice([BclConverter.BCL2FASTQ, BclConverter.BCLCONVERT]),
     default=None,
     help="Specify bcl conversion software. Choose between bcl2fastq and dragen. "
     "If not specified, the software will be determined automatically using the sequencer type.",
@@ -215,12 +212,12 @@ OPTION_BCL_CONVERTER = click.option(
 
 
 DEMUX_STATS_PATH: dict[str, dict[str, Path | None]] = {
-    "bcl2fastq": {
+    BclConverter.BCL2FASTQ: {
         "demultiplexing_stats": Path("Stats", "DemultiplexingStats.xml"),
         "conversion_stats": Path("Stats", "ConversionStats.xml"),
         "runinfo": None,
     },
-    "dragen": {
+    BclConverter.BCLCONVERT: {
         "demultiplexing_stats": Path("Reports", "Demultiplex_Stats.csv"),
         "conversion_stats": Path("Reports", "Demultiplex_Stats.csv"),
         "adapter_metrics_stats": Path("Reports", "Adapter_Metrics.csv"),
@@ -252,6 +249,7 @@ class IndexSettings(BaseModel):
 
     """
 
+    name: str
     should_i5_be_reverse_complemented: bool
     are_i5_override_cycles_reverse_complemented: bool
 
@@ -260,12 +258,17 @@ class IndexSettings(BaseModel):
 # and rigorously tested.
 
 NOVASEQ_X_INDEX_SETTINGS = IndexSettings(
-    should_i5_be_reverse_complemented=False, are_i5_override_cycles_reverse_complemented=True
+    name="NovaSeqX",
+    should_i5_be_reverse_complemented=False,
+    are_i5_override_cycles_reverse_complemented=True,
 )
 NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS = IndexSettings(
-    should_i5_be_reverse_complemented=True, are_i5_override_cycles_reverse_complemented=False
+    name="NovaSeq6000Post1.5Kits",
+    should_i5_be_reverse_complemented=True,
+    are_i5_override_cycles_reverse_complemented=False,
 )
 NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS = IndexSettings(
+    name="NoReverseComplements",
     should_i5_be_reverse_complemented=False,
     are_i5_override_cycles_reverse_complemented=False,
 )

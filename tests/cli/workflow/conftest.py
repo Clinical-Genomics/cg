@@ -1,15 +1,16 @@
 """Fixtures for cli analysis tests"""
+
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
 
-from cg.constants import DataDelivery, FlowCellStatus, Pipeline
+from cg.constants import DataDelivery, FlowCellStatus, Workflow
 from cg.models.cg_config import CGConfig
-from cg.store import Store
-from cg.store.api.find_business_data import FindBusinessDataHandler
+from cg.store.crud.read import ReadHandler
 from cg.store.models import Case
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -31,20 +32,20 @@ def analysis_store(base_store: Store, workflow_case_id: str, helpers: StoreHelpe
     """Store to be used in tests"""
     _store = base_store
 
-    case = helpers.add_case(_store, workflow_case_id, data_analysis=Pipeline.MIP_DNA)
+    case = helpers.add_case(_store, workflow_case_id, data_analysis=Workflow.MIP_DNA)
 
     dna_sample = helpers.add_sample(
         _store, "dna_sample", is_rna=False, reads=10000000, last_sequenced_at=datetime.now()
     )
     helpers.add_relationship(_store, sample=dna_sample, case=case)
 
-    case = helpers.add_case(_store, "rna_case", data_analysis=Pipeline.MIP_RNA)
+    case = helpers.add_case(_store, "rna_case", data_analysis=Workflow.MIP_RNA)
     rna_sample = helpers.add_sample(
         _store, "rna_sample", is_rna=True, reads=10000000, last_sequenced_at=datetime.now()
     )
     helpers.add_relationship(_store, sample=rna_sample, case=case)
 
-    case = helpers.add_case(_store, "dna_rna_mix_case", data_analysis=Pipeline.MIP_DNA)
+    case = helpers.add_case(_store, "dna_rna_mix_case", data_analysis=Workflow.MIP_DNA)
     helpers.add_relationship(_store, sample=rna_sample, case=case)
     helpers.add_relationship(_store, sample=dna_sample, case=case)
 
@@ -75,7 +76,7 @@ def fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_id: str) 
         "name": family_name,
         "panels": None,
         "internal_id": case_id,
-        "data_analysis": Pipeline.FASTQ,
+        "data_analysis": Workflow.FASTQ,
         "data_delivery": DataDelivery.FASTQ,
         "completed_at": None,
         "action": None,
@@ -135,7 +136,6 @@ class MockTB:
 
     def __init__(self):
         self._link_was_called = False
-        self._mark_analyses_deleted_called = False
         self._add_pending_was_called = False
         self._add_pending_analysis_was_called = False
         self._family = None
@@ -187,11 +187,6 @@ class MockTB:
 
         return Row()
 
-    def mark_analyses_deleted(self, case_id: str):
-        """Mock this function"""
-        self._case_id = case_id
-        self._mark_analyses_deleted_called = True
-
     def add_pending(self, case_id: str, email: str):
         """Mock this function"""
         self._case_id = case_id
@@ -203,10 +198,6 @@ class MockTB:
         self._case_id = case_id
         self._email = email
         self._add_pending_analysis_was_called = True
-
-    def mark_analyses_deleted_called(self):
-        """check if mark_analyses_deleted was called"""
-        return self._mark_analyses_deleted_called
 
     def add_pending_was_called(self):
         """check if add_pending was called"""
@@ -243,11 +234,11 @@ def tb_api():
     return MockTB()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_analysis_flow_cell(mocker) -> None:
     """Mocks the get_flow_cells_by_case method to return a list containing a flow cell whose status is
     on disk."""
     flow_cell = Mock()
     flow_cell.status = FlowCellStatus.ON_DISK
-    mocker.patch.object(FindBusinessDataHandler, "get_flow_cells_by_case")
-    FindBusinessDataHandler.get_flow_cells_by_case.return_value = [flow_cell]
+    mocker.patch.object(ReadHandler, "get_flow_cells_by_case")
+    ReadHandler.get_flow_cells_by_case.return_value = [flow_cell]

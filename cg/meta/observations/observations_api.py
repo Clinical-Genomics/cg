@@ -19,8 +19,8 @@ from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
     MipDNAObservationsInputFiles,
 )
-from cg.store import Store
 from cg.store.models import Analysis, Case, Customer
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

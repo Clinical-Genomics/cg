@@ -1,4 +1,5 @@
 """Interactions with the gisaid cli upload_results_to_gisaid"""
+
 import logging
 import re
 import tempfile
@@ -13,8 +14,8 @@ from cg.constants.constants import SARS_COV_REGEX, FileFormat
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Sample
+from cg.store.store import Store
 from cg.utils import Process
 
 from .constants import HEADERS

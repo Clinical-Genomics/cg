@@ -18,7 +18,7 @@ def create_sample_lane_sequencing_metrics_for_flow_cell(
 ) -> list[SampleLaneSequencingMetrics]:
     """Parse the sequencing metrics data for the correct demultiplexing software
     into the sequencing statistics model."""
-    if bcl_converter == BclConverter.BCLCONVERT or bcl_converter == BclConverter.DRAGEN:
+    if bcl_converter == BclConverter.BCLCONVERT:
         return create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell(
             flow_cell_directory
         )
@@ -30,9 +30,9 @@ def create_undetermined_non_pooled_metrics(
 ) -> list[SampleLaneSequencingMetrics]:
     """Return sequencing metrics for any undetermined reads in non-pooled lanes."""
 
-    non_pooled_lanes_and_samples: list[
-        tuple[int, str]
-    ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
+    non_pooled_lanes_and_samples: list[tuple[int, str]] = (
+        flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
+    )
 
     if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
         return create_bcl2fastq_undetermined_metrics(

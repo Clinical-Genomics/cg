@@ -3,8 +3,8 @@ import logging
 import click
 
 from cg.cli.delete.case import delete_case
-from cg.store import Store
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 
 CONFIRM = "Continue?"
 

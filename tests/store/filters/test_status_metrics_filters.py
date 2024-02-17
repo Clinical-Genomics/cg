@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Query
 
-from cg.store import Store
 from cg.store.filters.status_metrics_filters import (
     filter_above_q30_threshold,
     filter_by_flow_cell_name,
@@ -9,6 +8,7 @@ from cg.store.filters.status_metrics_filters import (
     filter_total_read_count_for_sample,
 )
 from cg.store.models import SampleLaneSequencingMetrics
+from cg.store.store import Store
 from tests.meta.demultiplex.conftest import (
     flow_cell_name_demultiplexed_with_bcl_convert,
 )

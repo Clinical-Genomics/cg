@@ -90,4 +90,4 @@ def dragen_fastq_files_in_project_directory(project_directory: Path) -> bool:
 
 def get_dragen_sample_name(dragen_fastq_file: Path) -> str:
     """Derives the sample name from a dragen fastq file"""
-    return dragen_fastq_file.name.split(UNDERSCORE)[0]
+    return dragen_fastq_file.name.split("_")[0]

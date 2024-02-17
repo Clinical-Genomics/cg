@@ -8,7 +8,7 @@ from click.testing import CliRunner
 from cg.cli.deliver.base import deliver_analysis, deliver_ticket
 from cg.constants.process import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 
 
 def test_run_deliver_with_help(cli_runner: CliRunner, base_context: CGConfig):

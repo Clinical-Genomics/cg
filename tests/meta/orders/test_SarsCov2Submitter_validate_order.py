@@ -6,7 +6,7 @@ from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import ControlEnum
 from cg.models.orders.samples import SarsCov2Sample
-from cg.store import Store
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 

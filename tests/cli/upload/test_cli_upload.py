@@ -1,12 +1,13 @@
 """Test CG CLI upload module."""
+
 from datetime import datetime, timedelta
 
 from click.testing import CliRunner
 
 from cg.cli.upload.base import upload
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Case
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -23,7 +24,7 @@ def test_upload_started_long_time_ago_raises_exception(
     case_id = case.internal_id
     today = datetime.now()
     upload_started = today - timedelta(hours=100)
-    helpers.add_analysis(disk_store, case=case, uploading=True, upload_started=upload_started)
+    helpers.add_analysis(disk_store, case=case, upload_started=upload_started, uploading=True)
 
     # WHEN trying to upload an analysis that was started a long time ago
     result = cli_runner.invoke(upload, ["-f", case_id], obj=base_context)

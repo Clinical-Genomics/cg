@@ -1,4 +1,5 @@
 """ Module for retrieving flow cells from backup."""
+
 import logging
 import subprocess
 from pathlib import Path
@@ -9,15 +10,14 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS
 from cg.constants.constants import FileExtensions, FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.constants.symbols import NEW_LINE
 from cg.exc import ChecksumFailedError, PdcError, PdcNoFilesMatchingSearchError
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models import CompressionData
 from cg.models.cg_config import PDCArchivingDirectory
-from cg.store import Store
 from cg.store.models import Flowcell
+from cg.store.store import Store
 from cg.utils.time import get_elapsed_time, get_start_time
 
 LOG = logging.getLogger(__name__)
@@ -114,6 +114,7 @@ class BackupAPI:
 
             self.extract_flow_cell(decrypted_flow_cell, run_dir)
             self.create_rta_complete(decrypted_flow_cell, run_dir)
+            self.create_copy_complete(decrypted_flow_cell, run_dir)
             self.unlink_files(
                 decrypted_flow_cell, encryption_key, retrieved_flow_cell, retrieved_key
             )
@@ -158,9 +159,18 @@ class BackupAPI:
     @staticmethod
     def create_rta_complete(decrypted_flow_cell: Path, run_dir: Path):
         """Create an RTAComplete.txt file in the flow cell run directory."""
-        (
-            run_dir / Path(decrypted_flow_cell.stem).stem / DemultiplexingDirsAndFiles.RTACOMPLETE
-        ).touch()
+        rta_complete_file = Path(
+            run_dir, decrypted_flow_cell.stem, DemultiplexingDirsAndFiles.RTACOMPLETE
+        )
+        rta_complete_file.touch()
+
+    @staticmethod
+    def create_copy_complete(decrypted_flow_cell: Path, run_dir: Path):
+        """Create a CopyComplete.txt file in the flow cell run directory."""
+        copy_complete_file = Path(
+            run_dir, decrypted_flow_cell.stem, DemultiplexingDirsAndFiles.COPY_COMPLETE
+        )
+        copy_complete_file.touch()
 
     def extract_flow_cell(self, decrypted_flow_cell, run_dir):
         """Extract the flow cell tar archive."""
@@ -239,7 +249,7 @@ class BackupAPI:
             self.pdc.query_pdc(search_pattern)
             if self.pdc.was_file_found(self.pdc.process.stderr):
                 LOG.info(f"Found archived files for PDC query: {search_pattern}")
-                return self.pdc.process.stdout.split(NEW_LINE)
+                return self.pdc.process.stdout.split("\n")
             LOG.debug(f"No archived files found for PDC query: {search_pattern}")
 
         raise PdcNoFilesMatchingSearchError(

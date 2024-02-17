@@ -4,8 +4,8 @@ from typing import Callable
 
 from sqlalchemy.orm import Query
 
-from cg.constants import REPORT_SUPPORTED_PIPELINES
-from cg.constants.constants import VALID_DATA_IN_PRODUCTION, Pipeline
+from cg.constants import REPORT_SUPPORTED_WORKFLOW
+from cg.constants.constants import VALID_DATA_IN_PRODUCTION, Workflow
 from cg.store.models import Analysis, Case
 
 
@@ -14,9 +14,9 @@ def filter_valid_analyses_in_production(analyses: Query, **kwargs) -> Query:
     return analyses.filter(VALID_DATA_IN_PRODUCTION < Analysis.completed_at)
 
 
-def filter_analyses_with_pipeline(analyses: Query, pipeline: Pipeline = None, **kwargs) -> Query:
-    """Return analyses with supplied pipeline."""
-    return analyses.filter(Analysis.pipeline == str(pipeline)) if pipeline else analyses
+def filter_analyses_with_workflow(analyses: Query, workflow: Workflow = None, **kwargs) -> Query:
+    """Return analyses with supplied workflow."""
+    return analyses.filter(Analysis.pipeline == workflow) if workflow else analyses
 
 
 def filter_completed_analyses(analyses: Query, **kwargs) -> Query:
@@ -44,14 +44,14 @@ def filter_analyses_without_delivery_report(analyses: Query, **kwargs) -> Query:
     return analyses.filter(Analysis.delivery_report_created_at.is_(None))
 
 
-def filter_report_analyses_by_pipeline(
-    analyses: Query, pipeline: Pipeline = None, **kwargs
+def filter_report_analyses_by_workflow(
+    analyses: Query, workflow: Workflow = None, **kwargs
 ) -> Query:
-    """Return the delivery report related analyses associated to the provided or supported pipelines."""
+    """Return the delivery report related analyses associated to the provided or supported workflows."""
     return (
-        analyses.filter(Analysis.pipeline == str(pipeline))
-        if pipeline
-        else analyses.filter(Analysis.pipeline.in_(REPORT_SUPPORTED_PIPELINES))
+        analyses.filter(Analysis.pipeline == workflow)
+        if workflow
+        else analyses.filter(Analysis.pipeline.in_(REPORT_SUPPORTED_WORKFLOW))
     )
 
 
@@ -93,7 +93,7 @@ def filter_analysis_case_action_is_none(analyses: Query, **kwargs) -> Query:
 def apply_analysis_filter(
     filter_functions: list[Callable],
     analyses: Query,
-    pipeline: Pipeline = None,
+    workflow: Workflow = None,
     case_entry_id: int = None,
     completed_at_date: datetime = None,
     started_at_date: datetime = None,
@@ -103,7 +103,7 @@ def apply_analysis_filter(
     for filter_function in filter_functions:
         analyses: Query = filter_function(
             analyses=analyses,
-            pipeline=pipeline,
+            workflow=workflow,
             case_entry_id=case_entry_id,
             completed_at_date=completed_at_date,
             started_at_date=started_at_date,
@@ -115,13 +115,13 @@ class AnalysisFilter(Enum):
     """Define Analysis filter functions."""
 
     FILTER_VALID_IN_PRODUCTION: Callable = filter_valid_analyses_in_production
-    FILTER_WITH_PIPELINE: Callable = filter_analyses_with_pipeline
+    FILTER_WITH_WORKFLOW: Callable = filter_analyses_with_workflow
     FILTER_COMPLETED: Callable = filter_completed_analyses
     FILTER_IS_UPLOADED: Callable = filter_uploaded_analyses
     FILTER_IS_NOT_UPLOADED: Callable = filter_not_uploaded_analyses
     FILTER_WITH_DELIVERY_REPORT: Callable = filter_analyses_with_delivery_report
     FILTER_WITHOUT_DELIVERY_REPORT: Callable = filter_analyses_without_delivery_report
-    FILTER_REPORT_BY_PIPELINE: Callable = filter_report_analyses_by_pipeline
+    FILTER_REPORT_BY_WORKFLOW: Callable = filter_report_analyses_by_workflow
     FILTER_BY_CASE_ENTRY_ID: Callable = filter_analyses_by_case_entry_id
     FILTER_IS_NOT_CLEANED: Callable = filter_analyses_not_cleaned
     FILTER_STARTED_AT_BEFORE: Callable = filter_analyses_started_before

@@ -1,4 +1,5 @@
 """Tests for the meta BackupAPI."""
+
 import fnmatch
 import logging
 import subprocess
@@ -11,12 +12,14 @@ from mock import call
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, FlowCellStatus
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers
 from cg.exc import ChecksumFailedError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.models.cg_config import PDCArchivingDirectory
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from tests.mocks.hk_mock import MockFile
 
 
@@ -108,7 +111,7 @@ def test_get_archived_flow_cell_path(dsmc_q_archive_output: list[str], flow_cell
     )
 
 
-@mock.patch("cg.store.Store")
+@mock.patch("cg.store.store.Store")
 def test_maximum_processing_queue_full(mock_store):
     """Tests check_processing method of the backup API"""
     # GIVEN a flow cell needs to be retrieved from PDC
@@ -259,6 +262,7 @@ def test_fetch_flow_cell_no_flow_cells_requested(
 
 @mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
 @mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
+@mock.patch("cg.meta.backup.backup.BackupAPI.create_copy_complete")
 @mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell_path")
 @mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key_path")
 @mock.patch("cg.meta.backup.backup.BackupAPI.check_processing")
@@ -273,6 +277,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     mock_get_first_flow_cell,
     mock_get_archived_encryption_key_path,
     mock_get_archived_flow_cell_path,
+    mock_create_copy_complete,
     mock_create_rta_complete,
     archived_key,
     archived_flow_cell,
@@ -322,6 +327,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
 
 @mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
 @mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
+@mock.patch("cg.meta.backup.backup.BackupAPI.create_copy_complete")
 @mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell_path")
 @mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key_path")
 @mock.patch("cg.meta.backup.backup.BackupAPI.check_processing")
@@ -337,6 +343,9 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     mock_check_processing,
     mock_get_archived_key,
     mock_get_archived_flow_cell,
+    mock_create_copy_complete,
+    mock_create_rta_complete,
+    mock_unlink_files,
     archived_key,
     archived_flow_cell,
     cg_context,
@@ -385,6 +394,7 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
 
 @mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
 @mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
+@mock.patch("cg.meta.backup.backup.BackupAPI.create_copy_complete")
 @mock.patch("cg.meta.backup.backup.BackupAPI.query_pdc_for_flow_cell")
 @mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key_path")
 @mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell_path")
@@ -395,11 +405,14 @@ def test_fetch_flow_cell_integration(
     mock_store,
     mock_flow_cell,
     mock_tar,
+    mock_flow_cell_path,
+    mock_key_path,
     mock_query,
-    archived_key,
-    archived_flow_cell,
+    mock_create_copy_complete,
+    mock_create_rta_complete,
+    mock_unlink_files,
     cg_context,
-    pdc_query,
+    dsmc_q_archive_output,
     caplog,
 ):
     """Component integration test for the BackupAPI, fetching a specified flow cell"""
@@ -413,12 +426,12 @@ def test_fetch_flow_cell_integration(
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
-        flow_cells_dir=cg_context.flow_cells_dir,
+        flow_cells_dir=cg_context.illumina_flow_cells_directory,
     )
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
     mock_store.get_flow_cells_by_statuses.return_value.count.return_value = 0
-    mock_query.return_value = pdc_query
+    mock_query.return_value = dsmc_q_archive_output
 
     backup_api.tar_api.run_tar_command.return_value = None
     result = backup_api.fetch_flow_cell(flow_cell=mock_flow_cell)
@@ -652,3 +665,51 @@ def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
 
     # THEN the decryption failure should be logged
     assert "Decryption failed" in caplog.text
+
+
+def test_create_copy_complete_file_exist(
+    backup_api: BackupAPI,
+    novaseq_x_flow_cell: FlowCellDirectoryData,
+):
+    """Tests creating a copy complete file in the flow cell directory. There are two cases: when
+    the file exists and when it does not exist."""
+
+    # GIVEN a flow cell that has been decrypted in flow_cell directory
+    flow_cell_dir: Path = novaseq_x_flow_cell.path
+    flow_cells: Path = flow_cell_dir.parent
+
+    # GIVEN the copy complete to be created
+    copy_complete_txt: str = DemultiplexingDirsAndFiles.COPY_COMPLETE
+
+    # GIVEN a copy complete file exists
+    flow_cell_dir.joinpath(copy_complete_txt).touch()
+
+    # WHEN creating a copy complete file
+    backup_api.create_copy_complete(decrypted_flow_cell=flow_cell_dir, run_dir=flow_cells)
+
+    # THEN the copy complete file should exist in the flow cell directory
+    assert flow_cell_dir.joinpath(copy_complete_txt).exists() is True
+
+
+def test_create_copy_complete_file_does_not_exist(
+    backup_api: BackupAPI,
+    novaseq_x_flow_cell: FlowCellDirectoryData,
+):
+    """Tests creating a copy complete file in the flow cell directory. There are two cases: when
+    the file exists and when it does not exist."""
+
+    # GIVEN a flow cell that has been decrypted in flow_cell directory
+    flow_cell_dir: Path = novaseq_x_flow_cell.path
+    flow_cells: Path = flow_cell_dir.parent
+
+    # GIVEN the copy complete to be created
+    copy_complete_txt: str = DemultiplexingDirsAndFiles.COPY_COMPLETE
+
+    # GIVEN that the copy complete file does not exists
+    flow_cell_dir.joinpath(copy_complete_txt).unlink(missing_ok=True)
+
+    # WHEN creating a copy complete file
+    backup_api.create_copy_complete(decrypted_flow_cell=flow_cell_dir, run_dir=flow_cells)
+
+    # THEN the copy complete file should exist in the flow cell directory
+    assert flow_cell_dir.joinpath(copy_complete_txt).exists() is True

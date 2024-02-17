@@ -1,4 +1,5 @@
 """Tests for running the demultiplex flowcell command"""
+
 import logging
 from pathlib import Path
 
@@ -7,7 +8,9 @@ from click import testing
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
-from cg.meta.demultiplex.housekeeper_storage_functions import add_sample_sheet_path_to_housekeeper
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_sample_sheet_path_to_housekeeper,
+)
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
@@ -46,7 +49,7 @@ def test_demultiplex_bcl2fastq_flow_cell_dry_run(
             str(tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq),
             "--dry-run",
             "-b",
-            "bcl2fastq",
+            BclConverter.BCL2FASTQ,
         ],
         obj=demultiplexing_context_for_demux,
     )
@@ -90,7 +93,11 @@ def test_demultiplex_bcl2fastq_flow_cell(
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
         demultiplex_flow_cell,
-        [str(tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq), "-b", "bcl2fastq"],
+        [
+            str(tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq),
+            "-b",
+            BclConverter.BCL2FASTQ,
+        ],
         obj=demultiplexing_context_for_demux,
     )
 
@@ -110,7 +117,6 @@ def test_demultiplex_dragen_flowcell(
     cli_runner: testing.CliRunner,
     tmp_flow_cell_directory_bclconvert: Path,
     demultiplexing_context_for_demux: CGConfig,
-    tmp_demultiplexed_runs_directory: Path,
     caplog,
     mocker,
 ):
@@ -119,7 +125,7 @@ def test_demultiplex_dragen_flowcell(
     # GIVEN that all files are present for Dragen demultiplexing
 
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_directory_bclconvert, bcl_converter="dragen"
+        flow_cell_path=tmp_flow_cell_directory_bclconvert, bcl_converter=BclConverter.BCLCONVERT
     )
     add_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_flow_cell_directory_bclconvert,
@@ -142,7 +148,7 @@ def test_demultiplex_dragen_flowcell(
     # WHEN starting demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
         demultiplex_flow_cell,
-        [str(tmp_flow_cell_directory_bclconvert), "-b", "dragen"],
+        [str(tmp_flow_cell_directory_bclconvert), "-b", BclConverter.BCLCONVERT],
         obj=demultiplexing_context_for_demux,
     )
 
@@ -162,7 +168,7 @@ def test_demultiplex_dragen_flowcell(
 def test_demultiplex_all_novaseq(
     cli_runner: testing.CliRunner,
     demultiplexing_context_for_demux: CGConfig,
-    tmp_flow_cells_demux_all_directory: Path,
+    tmp_illumina_flow_cells_demux_all_directory,
     caplog,
 ):
     """Test the demultiplex-all command on a directory with newly sequenced NovaSeq6000 flow cells."""
@@ -170,10 +176,10 @@ def test_demultiplex_all_novaseq(
 
     # GIVEN a demultiplexing context with an API and correct structure
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
-    assert demux_api.flow_cells_dir == tmp_flow_cells_demux_all_directory
+    assert demux_api.flow_cells_dir == tmp_illumina_flow_cells_demux_all_directory
 
     # GIVEN sequenced flow cells with their sample sheet in Housekeeper
-    for flow_cell_dir in tmp_flow_cells_demux_all_directory.iterdir():
+    for flow_cell_dir in tmp_illumina_flow_cells_demux_all_directory.iterdir():
         flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=flow_cell_dir)
         add_sample_sheet_path_to_housekeeper(
             flow_cell_directory=flow_cell_dir,

@@ -6,11 +6,11 @@ import click
 from tabulate import tabulate
 
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Case, Customer, Flowcell, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
-ANALYSIS_HEADERS = ["Analysis Date", "Pipeline", "Version"]
+ANALYSIS_HEADERS = ["Analysis Date", "Workflow", "Version"]
 FAMILY_HEADERS = ["Case", "Name", "Customer", "Priority", "Panels", "Action"]
 FLOW_CELL_HEADERS = ["Flowcell", "Type", "Sequencer", "Date", "Archived?", "Status"]
 LINK_HEADERS = ["Sample", "Mother", "Father"]

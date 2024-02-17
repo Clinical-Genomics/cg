@@ -11,8 +11,8 @@ from cg.meta.demultiplex.status_db_storage_functions import (
     update_sample_read_count,
 )
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -59,7 +59,7 @@ def test_update_sample_read_count():
         store=status_db,
     )
 
-    # THEN the reads has been updated with the read count for the sample
+    # THEN the reads have been updated with the read count for the sample
     assert sample.reads == read_count
 
 
@@ -105,9 +105,9 @@ def test_delete_sequencing_metrics_from_statusdb_existing_metrics(
     store = store_with_sequencing_metrics
 
     # GIVEN that the flow cell has sequencing metrics
-    metrics: list[
-        SampleLaneSequencingMetrics
-    ] = store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
+    metrics: list[SampleLaneSequencingMetrics] = (
+        store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name)
+    )
     assert metrics
 
     # WHEN deleting sequencing metrics from statusdb
@@ -128,9 +128,9 @@ def test_delete_sequencing_metrics_from_statusdb_no_metrics(
 
     # GIVEN a new flow cell with no sequencing metrics
     flow_cell: Flowcell = helpers.add_flow_cell(store=store)
-    metrics: list[
-        SampleLaneSequencingMetrics
-    ] = store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell.name)
+    metrics: list[SampleLaneSequencingMetrics] = (
+        store.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell.name)
+    )
     assert not metrics
 
     # WHEN deleting sequencing metrics from statusdb

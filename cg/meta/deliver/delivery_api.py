@@ -1,5 +1,3 @@
-"""Module for deliveries of workflow files"""
-
 import logging
 from pathlib import Path
 from typing import Iterable
@@ -21,7 +19,7 @@ from cg.meta.deliver.utils import (
     include_file_case,
     include_file_sample,
 )
-from cg.store import Store
+from cg.store.store import Store
 from cg.store.models import Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)

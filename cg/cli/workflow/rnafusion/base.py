@@ -18,6 +18,7 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
+    metrics_deliver,
 )
 from cg.cli.workflow.rnafusion.options import (
     OPTION_FROM_START,
@@ -31,7 +32,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.rnafusion import CommandArgs
-from cg.store import Store
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -41,9 +42,7 @@ LOG = logging.getLogger(__name__)
 def rnafusion(context: click.Context) -> None:
     """nf-core/rnafusion analysis workflow."""
     AnalysisAPI.get_help(context)
-    context.obj.meta_apis[MetaApis.ANALYSIS_API] = RnafusionAnalysisAPI(
-        config=context.obj,
-    )
+    context.obj.meta_apis[MetaApis.ANALYSIS_API] = RnafusionAnalysisAPI(config=context.obj)
 
 
 rnafusion.add_command(resolve_compression)
@@ -107,14 +106,14 @@ def run(
     command_args: CommandArgs = CommandArgs(
         **{
             "log": analysis_api.get_log_path(
-                case_id=case_id,
-                pipeline=analysis_api.pipeline,
-                log=log,
+                case_id=case_id, workflow=analysis_api.workflow, log=log
             ),
             "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
-            "config": analysis_api.get_nextflow_config_path(nextflow_config=config),
+            "config": analysis_api.get_nextflow_config_path(
+                case_id=case_id, nextflow_config=config
+            ),
             "params_file": analysis_api.get_params_file_path(
                 case_id=case_id, params_file=params_file
             ),
@@ -222,27 +221,7 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
         raise click.Abort
 
 
-@rnafusion.command("metrics-deliver")
-@ARGUMENT_CASE_ID
-@DRY_RUN
-@click.pass_obj
-def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Create and validate a metrics deliverables file for given case id.
-    If QC metrics are met it sets the status in Trailblazer to complete.
-    If failed, it sets it as failed and adds a comment with information of the failed metrics."""
-
-    analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-
-    try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-    except CgError as error:
-        raise click.Abort() from error
-
-    analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
-    try:
-        analysis_api.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
-    except CgError as error:
-        raise click.Abort() from error
+rnafusion.add_command(metrics_deliver)
 
 
 @rnafusion.command("report-deliver")

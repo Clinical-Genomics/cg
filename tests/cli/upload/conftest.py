@@ -11,7 +11,7 @@ from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.constants import FileFormat, Pipeline
+from cg.constants.constants import FileFormat, Workflow
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.housekeeper_tags import (
     HK_DELIVERY_REPORT_TAG,
@@ -26,8 +26,8 @@ from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.store import Store
 from cg.store.models import Analysis
+from cg.store.store import Store
 from tests.meta.upload.scout.conftest import mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
@@ -251,7 +251,7 @@ class MockScoutUploadApi(UploadScoutAPI):
     def _request_analysis(self, analysis_store_single_case):
         self.analysis = analysis_store_single_case
 
-    def generate_config(self, analysis_obj, **kwargs):
+    def generate_config(self, analysis, **kwargs):
         """Mock the generate config"""
         if self.missing_mandatory_field:
             self.config.vcf_snv = None

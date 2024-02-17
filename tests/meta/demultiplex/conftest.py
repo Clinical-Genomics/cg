@@ -7,24 +7,28 @@ from pathlib import Path
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.store.api import Store
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 FlowCellInfo = namedtuple("FlowCellInfo", "directory name sample_internal_ids")
 
 
 @pytest.fixture(name="tmp_demulitplexing_dir")
-def tmp_demulitplexing_dir(demultiplexed_runs: Path, bcl2fastq_flow_cell_full_name: str) -> Path:
+def tmp_illumina_novaseq_demulitplexing_dir(
+    illumina_demultiplexed_runs_directory: Path, bcl2fastq_flow_cell_full_name: str
+) -> Path:
     """Return a tmp directory in demultiplexed-runs."""
-    tmp_demulitplexing_dir: Path = Path(demultiplexed_runs, bcl2fastq_flow_cell_full_name)
+    tmp_demulitplexing_dir: Path = Path(
+        illumina_demultiplexed_runs_directory, bcl2fastq_flow_cell_full_name
+    )
     tmp_demulitplexing_dir.mkdir(exist_ok=True, parents=True)
     return tmp_demulitplexing_dir
 
@@ -81,12 +85,6 @@ def tmp_flow_cell_demux_base_path(project_dir: Path, bcl2fastq_flow_cell_full_na
 def flow_cell_project_id() -> int:
     """Return flow cell run project id."""
     return 174578
-
-
-@pytest.fixture(name="hiseq_x_copy_complete_file")
-def hiseq_x_copy_complete_file(bcl2fastq_flow_cell: FlowCellDirectoryData) -> Path:
-    """Return HiSeqX flow cell copy complete file."""
-    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.HISEQ_X_COPY_COMPLETE)
 
 
 @pytest.fixture(name="populated_flow_cell_store")
@@ -242,7 +240,7 @@ def flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer() -> str:
 @pytest.fixture(scope="session")
 def bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
     """Return a folder structure that resembles a bcl2fastq run folder."""
-    base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), "bcl2fastq")))
+    base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), BclConverter.BCL2FASTQ)))
     folders: list[str] = ["l1t21", "l1t11", "l2t11", "l2t21"]
 
     for folder in folders:
@@ -309,10 +307,10 @@ def lsyncd_target_directory(lsyncd_source_directory: Path, tmp_path_factory) -> 
 
 @pytest.fixture
 def demux_post_processing_api(
-    demultiplex_context: CGConfig, tmp_demultiplexed_runs_directory: Path
+    demultiplex_context: CGConfig, tmp_illumina_demultiplexed_flow_cells_directory
 ) -> DemuxPostProcessingAPI:
     api = DemuxPostProcessingAPI(demultiplex_context)
-    api.demultiplexed_runs_dir = tmp_demultiplexed_runs_directory
+    api.demultiplexed_runs_dir = tmp_illumina_demultiplexed_flow_cells_directory
     return api
 
 

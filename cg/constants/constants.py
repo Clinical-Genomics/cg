@@ -33,6 +33,11 @@ CAPTUREKIT_OPTIONS = (
 )
 
 
+class JobType(StrEnum):
+    UPLOAD: str = "upload"
+    ANALYSIS: str = "analysis"
+
+
 class CaseActions(StrEnum):
     ANALYZE: str = "analyze"
     HOLD: str = "hold"
@@ -101,21 +106,21 @@ SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
-class Pipeline(StrEnum):
+class Workflow(StrEnum):
     BALSAMIC: str = "balsamic"
+    BALSAMIC_PON: str = "balsamic-pon"
     BALSAMIC_QC: str = "balsamic-qc"
     BALSAMIC_UMI: str = "balsamic-umi"
-    BALSAMIC_PON: str = "balsamic-pon"
     DEMULTIPLEX: str = "demultiplex"
     FASTQ: str = "fastq"
     FLUFFY: str = "fluffy"
     MICROSALT: str = "microsalt"
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"
+    MUTANT: str = "mutant"
     RAREDISEASE: str = "raredisease"
     RNAFUSION: str = "rnafusion"
     RSYNC: str = "rsync"
-    SARS_COV_2: str = "sars-cov-2"
     SPRING: str = "spring"
     TAXPROFILER: str = "taxprofiler"
 
@@ -248,6 +253,14 @@ class Strandedness(StrEnum):
     UNSTRANDED: str = "unstranded"
 
 
-PIPELINES_USING_PARTIAL_ANALYSES: list[Pipeline] = [Pipeline.MICROSALT, Pipeline.SARS_COV_2]
+PIPELINES_USING_PARTIAL_ANALYSES: list[Workflow] = [Workflow.MICROSALT, Workflow.MUTANT]
+
+
+class MultiQC(StrEnum):
+    """MultiQC constants"""
+
+    MULTIQC: str = "multiqc"
+    MULTIQC_DATA: str = "multiqc_data"
+
 
 NG_UL_SUFFIX: str = " ng/uL"

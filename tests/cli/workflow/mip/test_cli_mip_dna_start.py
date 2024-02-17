@@ -1,8 +1,9 @@
 """This script tests the cli methods to create prerequisites and start a mip-dna analysis"""
+
 import logging
 
 from cg.cli.workflow.mip_dna.base import start_available
-from cg.constants import EXIT_SUCCESS, Pipeline
+from cg.constants import EXIT_SUCCESS, Workflow
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 
 
@@ -62,7 +63,7 @@ def test_rna_case_excluded(cli_runner, caplog, mip_dna_context, rna_case, mocker
     # GIVEN a case that is ready for MIP RNA analysis
     #   -> has a sample that is sequenced and has an rna-application (wts)
 
-    assert rna_case.data_analysis == str(Pipeline.MIP_RNA)
+    assert rna_case.data_analysis == Workflow.MIP_RNA
     for link in rna_case.links:
         sample = link.sample
         assert sample.last_sequenced_at
