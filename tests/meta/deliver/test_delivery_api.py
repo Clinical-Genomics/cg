@@ -40,16 +40,10 @@ def test_get_case_analysis_files(populated_deliver_api: DeliveryAPI, case_id: st
     assert version
 
     # GIVEN that a case object exists in the database
-    link_objs: list[CaseSample] = deliver_api.store.get_case_samples_by_case_id(
-        case_internal_id=case_id
-    )
-    samples: list[Sample] = [link.sample for link in link_objs]
-    sample_ids: set[str] = {sample.internal_id for sample in samples}
+    case: Case = deliver_api.store.get_case_by_internal_id(case_id)
 
     # WHEN fetching all case files from the delivery api
-    bundle_latest_files = deliver_api._get_case_files_from_version(
-        version=version, sample_ids=sample_ids, workflow=Workflow.MIP_DNA
-    )
+    bundle_latest_files = deliver_api._get_case_files(case=case, workflow=Workflow.MIP_DNA)
 
     # THEN housekeeper files should be returned
     assert bundle_latest_files
@@ -85,15 +79,11 @@ def test_get_case_files_from_version(
     version: Version = real_housekeeper_api.last_version(case_id)
     assert len(version.files) == 2
 
-    # GIVEN the sample ids of the samples
-    link_objs: list[CaseSample] = analysis_store.get_case_samples_by_case_id(case_id)
-    samples: list[Sample] = [link.sample for link in link_objs]
-    sample_ids: set[str] = {sample.internal_id for sample in samples}
+    # GIVEN a case
+    case: Case = deliver_api.store.get_case_by_internal_id(case_id)
 
     # WHEN fetching the case files
-    case_files = deliver_api._get_case_files_from_version(
-        version=version, sample_ids=sample_ids, workflow=Workflow.MIP_DNA
-    )
+    case_files = deliver_api._get_case_files(case=case, workflow=Workflow.MIP_DNA)
 
     # THEN we should only get the case specific files back
     nr_files: int = 0

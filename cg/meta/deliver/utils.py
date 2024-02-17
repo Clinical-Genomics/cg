@@ -75,27 +75,27 @@ def include_file_case(file: File, sample_ids: set[str], workflow: str) -> bool:
     At least one tag should match between file and tags.
     Do not include files with sample tags.
     """
-    file_tags = {tag.name for tag in file.tags}
+    tags_on_file = {tag.name for tag in file.tags}
     case_tags = get_case_tags_for_workflow(workflow)
     all_case_tags: set[str] = {tag for tags in case_tags for tag in tags}
-    if all_case_tags.isdisjoint(file_tags):
+    if all_case_tags.isdisjoint(tags_on_file):
         LOG.debug("No tags are matching")
         return False
 
-    LOG.debug(f"Found file tags {', '.join(file_tags)}")
+    LOG.debug(f"Found file tags {', '.join(tags_on_file)}")
 
     # Check if any of the sample tags exist
-    if sample_ids.intersection(file_tags):
+    if sample_ids.intersection(tags_on_file):
         LOG.debug(f"Found sample tag, skipping {file.path}")
         return False
 
     # Check if any of the file tags matches the case tags
     tags: set[str]
     for tags in case_tags:
-        LOG.debug(f"check if {tags} is a subset of {file_tags}")
-        if tags.issubset(file_tags):
+        LOG.debug(f"check if {tags} is a subset of {tags_on_file}")
+        if tags.issubset(tags_on_file):
             return True
-    LOG.debug(f"Could not find any tags matching file {file.path} with tags {file_tags}")
+    LOG.debug(f"Could not find any tags matching file {file.path} with tags {tags_on_file}")
 
     return False
 

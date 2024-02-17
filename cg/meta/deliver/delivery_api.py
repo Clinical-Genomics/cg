@@ -77,15 +77,11 @@ class DeliveryAPI:
         self._link_case_files(case=case, workflow=workflow)
 
     def _link_case_files(self, case: Case, workflow: str):
-        version: Version = self.hk_api.last_version(case.internal_id)
         out_dir: Path = self._create_delivery_directory(case)
-        sample_ids: set[str] = self._get_sample_ids_for_case(case)
-        files: Iterable[Path] = self._get_case_files_from_version(
-            version=version, sample_ids=sample_ids, workflow=workflow
-        )
-        for file_path in files:
-            out_path: Path = get_out_path(out_dir=out_dir, file=file_path, case=case)
-            create_link(source=file_path, destination=out_path, dry_run=self.dry_run)
+        files: list[Path] = self._get_case_files(workflow=workflow, case=case)
+        for file in files:
+            out_file: Path = get_out_path(out_dir=out_dir, file=file, case=case)
+            create_link(source=file, destination=out_file, dry_run=self.dry_run)
 
     def _get_sample_ids_for_case(self, case: Case) -> set[str]:
         links = self.store.get_case_samples_by_case_id(case.internal_id)
@@ -160,25 +156,18 @@ class DeliveryAPI:
         bundle: str = sample.internal_id if workflow == DataDelivery.FASTQ else case.internal_id
         return self.hk_api.last_version(bundle)
 
-    def _get_case_files_from_version(
-        self, version: Version, sample_ids: set[str], workflow: str
-    ) -> Iterable[Path]:
-        """Fetch all case files from a version that are tagged with any of the case tags."""
+    def _get_case_files(self, case: Case, workflow: str) -> Iterable[Path]:
+        version: Version = self.hk_api.last_version(case.internal_id)
+        sample_ids: set[str] = self._get_sample_ids_for_case(case)
 
-        if not version:
-            LOG.warning("Version is None, cannot get files")
+        if not version or not version.files:
             return []
 
-        if not version.files:
-            LOG.warning(f"No files associated with Housekeeper version {version.id}")
-            return []
-
-        version_file: File
-        for version_file in version.files:
-            if not include_file_case(file=version_file, sample_ids=sample_ids, workflow=workflow):
-                LOG.debug(f"Skipping file {version_file.path}")
-                continue
-            yield Path(version_file.full_path)
+        case_files: list[Path] = []
+        for file in version.files:
+            if include_file_case(file=file, sample_ids=sample_ids, workflow=workflow):
+                case_files.append(Path(file.full_path))
+        return case_files
 
     def _get_sample_files_from_version(
         self,
