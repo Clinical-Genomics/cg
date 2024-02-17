@@ -66,10 +66,9 @@ class DeliveryAPI:
         self.deliver_files(case=case, pipeline=pipeline)
 
     def deliver_files(self, case: Case, pipeline: str):
-        if not self._case_is_deliverable(case=case, pipeline=pipeline):
-            return
-        self._deliver_case_files(case=case, pipeline=pipeline)
-        self._deliver_sample_files(case=case, pipeline=pipeline)
+        if self._case_is_deliverable(case=case, pipeline=pipeline):
+            self._deliver_case_files(case=case, pipeline=pipeline)
+            self._deliver_sample_files(case=case, pipeline=pipeline)
 
     def _deliver_case_files(self, case: Case, pipeline: str) -> None:
         LOG.debug(f"Deliver case files for {case.internal_id}")
