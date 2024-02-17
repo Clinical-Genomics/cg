@@ -66,7 +66,7 @@ class DeliveryAPI:
         self.deliver_files(case=case, pipeline=pipeline)
 
     def deliver_files(self, case: Case, pipeline: str):
-        if self._case_is_deliverable(case=case, pipeline=pipeline):
+        if self._is_case_deliverable(case=case, pipeline=pipeline):
             self._deliver_case_files(case=case, pipeline=pipeline)
             self._deliver_sample_files(case=case, pipeline=pipeline)
 
@@ -114,10 +114,9 @@ class DeliveryAPI:
         deliverable_samples = self._get_deliverable_samples(case=case, pipeline=pipeline)
         case_name: str | None = get_delivery_case_name(case=case, pipeline=pipeline)
         for link in deliverable_samples:
-            delivery_base: Path = self._create_sample_delivery_directory(
+            sample_target_directory: Path = self._create_sample_delivery_directory(
                 case=case, sample=link.sample, pipeline=pipeline
             )
-
             number_linked_files: int = 0
             version: Version = self._get_version_for_sample(
                 sample=link.sample, case=case, pipeline=pipeline
@@ -130,7 +129,7 @@ class DeliveryAPI:
                 file_name: str = get_sample_out_file_name(file=file_path, sample=link.sample)
                 if case_name:
                     file_name: str = file_name.replace(case.internal_id, case.name)
-                out_path = Path(delivery_base, file_name)
+                out_path = Path(sample_target_directory, file_name)
                 if create_link(source=file_path, destination=out_path, dry_run=self.dry_run):
                     number_linked_files += 1
 
@@ -194,7 +193,7 @@ class DeliveryAPI:
                 continue
             yield Path(file_obj.full_path)
 
-    def _case_is_deliverable(self, case: Case, pipeline: str) -> bool:
+    def _is_case_deliverable(self, case: Case, pipeline: str) -> bool:
         last_version = self.hk_api.last_version(case.internal_id)
         if not last_version:
             case_tags = get_case_tags_for_pipeline(pipeline)
