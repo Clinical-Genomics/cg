@@ -12,10 +12,10 @@ from cg.meta.deliver.utils import (
     create_link,
     get_delivery_case_name,
     get_delivery_dir_path,
-    get_case_tags_for_pipeline,
+    get_case_tags_for_workflow,
     get_out_path,
     get_sample_out_file_name,
-    get_sample_tags_for_pipeline,
+    get_sample_tags_for_workflow,
     include_file_case,
     should_include_file_sample,
 )
@@ -44,44 +44,44 @@ class DeliveryAPI:
         self.deliver_failed_samples = force_all
         self.dry_run = dry_run
 
-    def deliver(self, ticket: str | None, case_id: str | None, pipeline: str) -> None:
+    def deliver(self, ticket: str | None, case_id: str | None, workflow: str) -> None:
         if ticket:
-            self._deliver_files_by_ticket(ticket=ticket, pipeline=pipeline)
+            self._deliver_files_by_ticket(ticket=ticket, workflow=workflow)
         elif case_id:
-            self._deliver_files_by_case(case_id=case_id, pipeline=pipeline)
+            self._deliver_files_by_case(case_id=case_id, workflow=workflow)
 
-    def _deliver_files_by_ticket(self, ticket: str, pipeline: str) -> None:
+    def _deliver_files_by_ticket(self, ticket: str, workflow: str) -> None:
         cases: list[Case] = self.store.get_cases_by_ticket_id(ticket)
         if not cases:
             LOG.warning(f"Could not find cases for ticket {ticket}")
             return
         for case in cases:
-            self.deliver_files(case=case, pipeline=pipeline)
+            self.deliver_files(case=case, workflow=workflow)
 
-    def _deliver_files_by_case(self, case_id: str, pipeline: str) -> None:
+    def _deliver_files_by_case(self, case_id: str, workflow: str) -> None:
         case: Case | None = self.store.get_case_by_internal_id(case_id)
         if not case:
             LOG.warning(f"Could not find case {case_id}")
             return
-        self.deliver_files(case=case, pipeline=pipeline)
+        self.deliver_files(case=case, workflow=workflow)
 
-    def deliver_files(self, case: Case, pipeline: str):
-        if self._is_case_deliverable(case=case, pipeline=pipeline):
-            self._deliver_case_files(case=case, pipeline=pipeline)
-            self._deliver_sample_files(case=case, pipeline=pipeline)
+    def deliver_files(self, case: Case, workflow: str):
+        if self._is_case_deliverable(case=case, workflow=workflow):
+            self._deliver_case_files(case=case, workflow=workflow)
+            self._deliver_sample_files(case=case, workflow=workflow)
 
-    def _deliver_case_files(self, case: Case, pipeline: str) -> None:
+    def _deliver_case_files(self, case: Case, workflow: str) -> None:
         LOG.debug(f"Deliver case files for {case.internal_id}")
-        if not get_case_tags_for_pipeline(pipeline):
+        if not get_case_tags_for_workflow(workflow):
             return
-        self._link_case_files(case=case, pipeline=pipeline)
+        self._link_case_files(case=case, workflow=workflow)
 
-    def _link_case_files(self, case: Case, pipeline: str):
+    def _link_case_files(self, case: Case, workflow: str):
         version: Version = self.hk_api.last_version(case.internal_id)
         out_dir: Path = self._create_delivery_directory(case)
         sample_ids: set[str] = self._get_sample_ids_for_case(case)
         files: Iterable[Path] = self._get_case_files_from_version(
-            version=version, sample_ids=sample_ids, pipeline=pipeline
+            version=version, sample_ids=sample_ids, workflow=workflow
         )
         for file_path in files:
             out_path: Path = get_out_path(out_dir=out_dir, file=file_path, case=case)
@@ -105,25 +105,25 @@ class DeliveryAPI:
             delivery_base.mkdir(parents=True, exist_ok=True)
         return delivery_base
 
-    def _deliver_sample_files(self, case: Case, pipeline: str) -> None:
-        if not get_sample_tags_for_pipeline(pipeline):
+    def _deliver_sample_files(self, case: Case, workflow: str) -> None:
+        if not get_sample_tags_for_workflow(workflow):
             return
 
         deliverable_samples: list[CaseSample] = self._get_deliverable_samples(
-            case=case, pipeline=pipeline
+            case=case, workflow=workflow
         )
-        case_name: str | None = get_delivery_case_name(case=case, pipeline=pipeline)
+        case_name: str | None = get_delivery_case_name(case=case, workflow=workflow)
         for link in deliverable_samples:
             sample_target_directory: Path = self._create_sample_delivery_directory(
-                case=case, sample=link.sample, pipeline=pipeline
+                case=case, sample=link.sample, workflow=workflow
             )
             number_linked_files: int = 0
             version: Version = self._get_version_for_sample(
-                sample=link.sample, case=case, pipeline=pipeline
+                sample=link.sample, case=case, workflow=workflow
             )
             sample_id = link.sample.internal_id
             files: Iterable[Path] = self._get_sample_files_from_version(
-                version=version, sample_id=sample_id, pipeline=pipeline
+                version=version, sample_id=sample_id, workflow=workflow
             )
             for file_path in files:
                 file_name: str = get_sample_out_file_name(file=file_path, sample=link.sample)
@@ -136,8 +136,8 @@ class DeliveryAPI:
             if not files and number_linked_files == 0:
                 raise MissingFilesError(f"Could not find any files for sample {sample_id}")
 
-    def _create_sample_delivery_directory(self, case: Case, sample: Sample, pipeline: str) -> Path:
-        case_name: str | None = get_delivery_case_name(case=case, pipeline=pipeline)
+    def _create_sample_delivery_directory(self, case: Case, sample: Sample, workflow: str) -> Path:
+        case_name: str | None = get_delivery_case_name(case=case, workflow=workflow)
         delivery_base: Path = get_delivery_dir_path(
             case_name=case_name,
             sample_name=sample.name,
@@ -150,18 +150,18 @@ class DeliveryAPI:
             delivery_base.mkdir(parents=True, exist_ok=True)
         return delivery_base
 
-    def _get_deliverable_samples(self, case: Case, pipeline: str) -> Iterable[CaseSample]:
+    def _get_deliverable_samples(self, case: Case, workflow: str) -> Iterable[CaseSample]:
         return filter(
-            lambda link: self._is_sample_deliverable(link=link, case=case, pipeline=pipeline),
+            lambda link: self._is_sample_deliverable(link=link, case=case, workflow=workflow),
             self.store.get_case_samples_by_case_id(case.internal_id),
         )
 
-    def _get_version_for_sample(self, sample: Sample, case: Case, pipeline: str) -> Version:
-        bundle: str = sample.internal_id if pipeline == DataDelivery.FASTQ else case.internal_id
+    def _get_version_for_sample(self, sample: Sample, case: Case, workflow: str) -> Version:
+        bundle: str = sample.internal_id if workflow == DataDelivery.FASTQ else case.internal_id
         return self.hk_api.last_version(bundle)
 
     def _get_case_files_from_version(
-        self, version: Version, sample_ids: set[str], pipeline: str
+        self, version: Version, sample_ids: set[str], workflow: str
     ) -> Iterable[Path]:
         """Fetch all case files from a version that are tagged with any of the case tags."""
 
@@ -175,7 +175,7 @@ class DeliveryAPI:
 
         version_file: File
         for version_file in version.files:
-            if not include_file_case(file=version_file, sample_ids=sample_ids, pipeline=pipeline):
+            if not include_file_case(file=version_file, sample_ids=sample_ids, workflow=workflow):
                 LOG.debug(f"Skipping file {version_file.path}")
                 continue
             yield Path(version_file.full_path)
@@ -184,20 +184,22 @@ class DeliveryAPI:
         self,
         version: Version,
         sample_id: str,
-        pipeline: str,
+        workflow: str,
     ) -> Iterable[Path]:
         """Fetch files for a sample from a version that are tagged with sample tags."""
         file_obj: File
         for file_obj in version.files:
-            if not should_include_file_sample(file=file_obj, sample_id=sample_id, pipeline=pipeline):
+            if not should_include_file_sample(
+                file=file_obj, sample_id=sample_id, workflow=workflow
+            ):
                 continue
             yield Path(file_obj.full_path)
 
-    def _is_case_deliverable(self, case: Case, pipeline: str) -> bool:
+    def _is_case_deliverable(self, case: Case, workflow: str) -> bool:
         last_version = self.hk_api.last_version(case.internal_id)
         if not last_version:
-            case_tags = get_case_tags_for_pipeline(pipeline)
-            skip_missing = pipeline in constants.SKIP_MISSING or self.ignore_missing_bundles
+            case_tags = get_case_tags_for_workflow(workflow)
+            skip_missing = workflow in constants.SKIP_MISSING or self.ignore_missing_bundles
             if not case_tags:
                 LOG.info(f"Could not find any version for {case.internal_id}")
             elif not skip_missing:
@@ -205,7 +207,7 @@ class DeliveryAPI:
             return False
         return True
 
-    def _is_sample_deliverable(self, link: CaseSample, case: Case, pipeline: str) -> bool:
+    def _is_sample_deliverable(self, link: CaseSample, case: Case, workflow: str) -> bool:
         sample_is_external: bool = link.sample.application_version.application.is_external
         deliver_failed_samples: bool = self.deliver_failed_samples
         sample_passes_qc: bool = link.sample.sequencing_qc
@@ -213,10 +215,10 @@ class DeliveryAPI:
             sample_passes_qc or deliver_failed_samples or sample_is_external
         )
         last_version: Version = self.hk_api.last_version(case.internal_id)
-        if pipeline == DataDelivery.FASTQ:
+        if workflow == DataDelivery.FASTQ:
             last_version = self.hk_api.last_version(link.sample.internal_id)
         if not last_version:
-            skip_missing = pipeline in constants.SKIP_MISSING or self.ignore_missing_bundles
+            skip_missing = workflow in constants.SKIP_MISSING or self.ignore_missing_bundles
             if skip_missing:
                 LOG.info(f"Could not find any version for {link.sample.internal_id}")
                 return False

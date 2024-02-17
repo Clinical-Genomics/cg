@@ -42,7 +42,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
 
     LOG.debug(f"Delivery types are: {delivery_types}")
     for delivery_type in delivery_types:
-        context.obj.delivery_api.deliver_files(case=case, pipeline=delivery_type)
+        context.obj.delivery_api.deliver_files(case=case, workflow=delivery_type)
 
     rsync_api = RsyncAPI(context.obj)
     is_complete_delivery, job_id = rsync_api.slurm_rsync_single_case(

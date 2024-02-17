@@ -44,16 +44,16 @@ def get_delivery_dir_path(
     return delivery_path
 
 
-def get_case_tags_for_pipeline(pipeline: Workflow) -> list[set[str]]:
-    return constants.PIPELINE_ANALYSIS_TAG_MAP[pipeline]["case_tags"]
+def get_case_tags_for_workflow(workflow: Workflow) -> list[set[str]]:
+    return constants.PIPELINE_ANALYSIS_TAG_MAP[workflow]["case_tags"]
 
 
-def get_sample_tags_for_pipeline(pipeline: Workflow) -> list[set[str]]:
-    return constants.PIPELINE_ANALYSIS_TAG_MAP[pipeline]["sample_tags"]
+def get_sample_tags_for_workflow(workflow: Workflow) -> list[set[str]]:
+    return constants.PIPELINE_ANALYSIS_TAG_MAP[workflow]["sample_tags"]
 
 
-def get_delivery_case_name(case: Case, pipeline: str) -> str | None:
-    return None if pipeline in constants.ONLY_ONE_CASE_PER_TICKET else case.name
+def get_delivery_case_name(case: Case, workflow: str) -> str | None:
+    return None if workflow in constants.ONLY_ONE_CASE_PER_TICKET else case.name
 
 
 def get_out_path(out_dir: Path, file: Path, case: Case) -> Path:
@@ -69,14 +69,14 @@ def get_sample_out_file_name(file: Path, sample: Sample) -> str:
     return file.name.replace(sample.internal_id, sample.name)
 
 
-def include_file_case(file: File, sample_ids: set[str], pipeline: str) -> bool:
+def include_file_case(file: File, sample_ids: set[str], workflow: str) -> bool:
     """Check if file should be included in case bundle.
 
     At least one tag should match between file and tags.
     Do not include files with sample tags.
     """
     file_tags = {tag.name for tag in file.tags}
-    case_tags = get_case_tags_for_pipeline(pipeline)
+    case_tags = get_case_tags_for_workflow(workflow)
     all_case_tags: set[str] = {tag for tags in case_tags for tag in tags}
     if all_case_tags.isdisjoint(file_tags):
         LOG.debug("No tags are matching")
@@ -100,7 +100,7 @@ def include_file_case(file: File, sample_ids: set[str], pipeline: str) -> bool:
     return False
 
 
-def should_include_file_sample(file: File, sample_id: str, pipeline: str) -> bool:
+def should_include_file_sample(file: File, sample_id: str, workflow: str) -> bool:
     """Check if file should be included in sample bundle.
 
     At least one tag should match between file and tags.
@@ -111,10 +111,10 @@ def should_include_file_sample(file: File, sample_id: str, pipeline: str) -> boo
     file_tags = {tag.name for tag in file.tags}
     tags: set[str]
     # Check if any of the file tags matches the sample tags
-    sample_tags = get_sample_tags_for_pipeline(pipeline)
+    sample_tags = get_sample_tags_for_workflow(workflow)
     for tags in sample_tags:
         working_copy = deepcopy(tags)
-        if pipeline != Workflow.FASTQ:
+        if workflow != Workflow.FASTQ:
             working_copy.add(sample_id)
         if working_copy.issubset(file_tags):
             return True
