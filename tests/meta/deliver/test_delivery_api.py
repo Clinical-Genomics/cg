@@ -71,7 +71,7 @@ def test_get_case_files_from_version(
     deliver_api = DeliveryAPI(
         store=analysis_store,
         hk_api=real_housekeeper_api,
-        project_base_path=project_dir,
+        customers_folder=project_dir,
     )
 
     # GIVEN a housekeeper db populated with a bundle including a case specific file and a sample specific file

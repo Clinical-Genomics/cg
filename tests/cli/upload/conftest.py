@@ -198,7 +198,7 @@ def fastq_context(
         store=base_context.status_db,
         hk_api=base_context.housekeeper_api,
         pipeline="fastq",
-        project_base_path=Path(base_context.delivery_path),
+        customers_folder=Path(base_context.delivery_path),
     )
     base_context.meta_apis["rsync_api"] = RsyncAPI(cg_context)
     base_context.trailblazer_api_ = trailblazer_api

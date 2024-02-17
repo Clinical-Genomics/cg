@@ -32,14 +32,14 @@ class DeliveryAPI:
         self,
         store: Store,
         hk_api: HousekeeperAPI,
-        project_base_path: Path,
+        customers_folder: Path,
         force_all: bool = False,
         ignore_missing_bundles: bool = False,
         dry_run: bool = False,
     ):
         self.store = store
         self.hk_api = hk_api
-        self.customers_folder = project_base_path
+        self.customers_folder = customers_folder
         self.ignore_missing_bundles = ignore_missing_bundles
         self.deliver_failed_samples = force_all
         self.dry_run = dry_run

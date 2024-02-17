@@ -25,7 +25,7 @@ def deliver_api(
     yield DeliveryAPI(
         store=analysis_store,
         hk_api=real_housekeeper_api,
-        project_base_path=project_dir,
+        customers_folder=project_dir,
     )
 
 
@@ -49,7 +49,7 @@ def populated_deliver_api(
     return DeliveryAPI(
         store=analysis_store,
         hk_api=delivery_hk_api,
-        project_base_path=project_dir,
+        customers_folder=project_dir,
     )
 
 

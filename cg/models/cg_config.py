@@ -518,7 +518,7 @@ class CGConfig(BaseModel):
             api = DeliveryAPI(
                 store=self.status_db,
                 hk_api=self.housekeeper_api,
-                project_base_path=self.delivery_path,
+                customers_folder=self.delivery_path,
             )
             self.delivery_api_ = api
         return api
