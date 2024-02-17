@@ -44,15 +44,6 @@ class DeliveryAPI:
         self.deliver_failed_samples = force_all
         self.dry_run = dry_run
 
-    def set_dry_run(self, dry_run: bool):
-        self.dry_run = dry_run
-
-    def set_deliver_failed_samples(self, deliver_failed_samples: bool):
-        self.deliver_failed_samples = deliver_failed_samples
-
-    def set_ignore_missing_bundles(self, ignore_missing_bundles: bool):
-        self.ignore_missing_bundles = ignore_missing_bundles
-
     def deliver(self, ticket: str | None, case_id: str | None, pipeline: str) -> None:
         if ticket:
             self._deliver_files_by_ticket(ticket=ticket, pipeline=pipeline)
