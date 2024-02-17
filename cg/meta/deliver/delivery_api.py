@@ -105,24 +105,24 @@ class DeliveryAPI:
         if not get_sample_tags_for_workflow(workflow):
             return
 
-        deliverable_samples: list[CaseSample] = self._get_deliverable_samples(
+        deliverable_samples: list[Sample] = self._get_deliverable_samples(
             case=case, workflow=workflow
         )
         case_name: str | None = get_delivery_case_name(case=case, workflow=workflow)
-        for link in deliverable_samples:
+        for sample in deliverable_samples:
             sample_target_directory: Path = self._create_sample_delivery_directory(
-                case=case, sample=link.sample, workflow=workflow
+                case=case, sample=sample, workflow=workflow
             )
             number_linked_files: int = 0
             version: Version = self._get_version_for_sample(
-                sample=link.sample, case=case, workflow=workflow
+                sample=sample, case=case, workflow=workflow
             )
-            sample_id = link.sample.internal_id
+            sample_id = sample.internal_id
             files: Iterable[Path] = self._get_sample_files_from_version(
                 version=version, sample_id=sample_id, workflow=workflow
             )
             for file_path in files:
-                file_name: str = get_sample_out_file_name(file=file_path, sample=link.sample)
+                file_name: str = get_sample_out_file_name(file=file_path, sample=sample)
                 if case_name:
                     file_name: str = file_name.replace(case.internal_id, case.name)
                 out_path = Path(sample_target_directory, file_name)
@@ -146,11 +146,13 @@ class DeliveryAPI:
             delivery_base.mkdir(parents=True, exist_ok=True)
         return delivery_base
 
-    def _get_deliverable_samples(self, case: Case, workflow: str) -> Iterable[CaseSample]:
-        return filter(
-            lambda link: self._is_sample_deliverable(link=link, case=case, workflow=workflow),
-            self.store.get_case_samples_by_case_id(case.internal_id),
-        )
+    def _get_deliverable_samples(self, case: Case, workflow: str) -> list[Sample]:
+        deliverable_samples: list[CaseSample] = []
+        case_samples: list[CaseSample] = self.store.get_case_samples_by_case_id(case.internal_id)
+        for link in case_samples:
+            if self._is_sample_deliverable(link=link, case=case, workflow=workflow):
+                deliverable_samples.append(link.sample)
+        return deliverable_samples
 
     def _get_version_for_sample(self, sample: Sample, case: Case, workflow: str) -> Version:
         bundle: str = sample.internal_id if workflow == DataDelivery.FASTQ else case.internal_id
