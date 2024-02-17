@@ -100,7 +100,7 @@ def include_file_case(file: File, sample_ids: set[str], pipeline: str) -> bool:
     return False
 
 
-def include_file_sample(file: File, sample_id: str, pipeline: str) -> bool:
+def should_include_file_sample(file: File, sample_id: str, pipeline: str) -> bool:
     """Check if file should be included in sample bundle.
 
     At least one tag should match between file and tags.
@@ -114,7 +114,7 @@ def include_file_sample(file: File, sample_id: str, pipeline: str) -> bool:
     sample_tags = get_sample_tags_for_pipeline(pipeline)
     for tags in sample_tags:
         working_copy = deepcopy(tags)
-        if pipeline != "fastq":
+        if pipeline != Workflow.FASTQ:
             working_copy.add(sample_id)
         if working_copy.issubset(file_tags):
             return True

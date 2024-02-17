@@ -17,7 +17,7 @@ from cg.meta.deliver.utils import (
     get_sample_out_file_name,
     get_sample_tags_for_pipeline,
     include_file_case,
-    include_file_sample,
+    should_include_file_sample,
 )
 from cg.store.store import Store
 from cg.store.models import Case, CaseSample, Sample
@@ -72,15 +72,13 @@ class DeliveryAPI:
 
     def _deliver_case_files(self, case: Case, pipeline: str) -> None:
         LOG.debug(f"Deliver case files for {case.internal_id}")
-
         if not get_case_tags_for_pipeline(pipeline):
             return
+        self._link_case_files(case=case, pipeline=pipeline)
 
+    def _link_case_files(self, case: Case, pipeline: str):
         version: Version = self.hk_api.last_version(case.internal_id)
         out_dir: Path = self._create_delivery_directory(case)
-        self._link_case_files(case=case, version=version, pipeline=pipeline, out_dir=out_dir)
-
-    def _link_case_files(self, case: Case, version: Version, pipeline: str, out_dir: Path):
         sample_ids: set[str] = self._get_sample_ids_for_case(case)
         files: Iterable[Path] = self._get_case_files_from_version(
             version=version, sample_ids=sample_ids, pipeline=pipeline
@@ -191,7 +189,7 @@ class DeliveryAPI:
         """Fetch files for a sample from a version that are tagged with sample tags."""
         file_obj: File
         for file_obj in version.files:
-            if not include_file_sample(file=file_obj, sample_id=sample_id, pipeline=pipeline):
+            if not should_include_file_sample(file=file_obj, sample_id=sample_id, pipeline=pipeline):
                 continue
             yield Path(file_obj.full_path)
 
@@ -205,13 +203,7 @@ class DeliveryAPI:
             elif not skip_missing:
                 raise SyntaxError(f"Could not find any version for {case.internal_id}")
             return False
-        return self._case_has_samples(case)
-
-    def _case_has_samples(self, case: Case) -> bool:
-        if self.store.get_case_samples_by_case_id(case.internal_id):
-            return True
-        LOG.warning(f"Could not find any samples linked to case {case.internal_id}")
-        return False
+        return True
 
     def _is_sample_deliverable(self, link: CaseSample, case: Case, pipeline: str) -> bool:
         sample_is_external: bool = link.sample.application_version.application.is_external
