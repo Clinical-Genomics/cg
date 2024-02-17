@@ -96,7 +96,7 @@ class DeliveryAPI:
         return sample_ids
 
     def _create_delivery_directory(self, case: Case) -> Path:
-        delivery_base = get_delivery_dir_path(
+        delivery_base: Path = get_delivery_dir_path(
             case_name=case.name,
             customer_id=case.customer.internal_id,
             ticket=case.latest_ticket,
@@ -111,7 +111,9 @@ class DeliveryAPI:
         if not get_sample_tags_for_pipeline(pipeline):
             return
 
-        deliverable_samples = self._get_deliverable_samples(case=case, pipeline=pipeline)
+        deliverable_samples: list[CaseSample] = self._get_deliverable_samples(
+            case=case, pipeline=pipeline
+        )
         case_name: str | None = get_delivery_case_name(case=case, pipeline=pipeline)
         for link in deliverable_samples:
             sample_target_directory: Path = self._create_sample_delivery_directory(
@@ -138,7 +140,7 @@ class DeliveryAPI:
 
     def _create_sample_delivery_directory(self, case: Case, sample: Sample, pipeline: str) -> Path:
         case_name: str | None = get_delivery_case_name(case=case, pipeline=pipeline)
-        delivery_base = get_delivery_dir_path(
+        delivery_base: Path = get_delivery_dir_path(
             case_name=case_name,
             sample_name=sample.name,
             customer_id=case.customer.internal_id,
@@ -152,7 +154,7 @@ class DeliveryAPI:
 
     def _get_deliverable_samples(self, case: Case, pipeline: str) -> Iterable[CaseSample]:
         return filter(
-            lambda link: self._sample_is_deliverable(link=link, case=case, pipeline=pipeline),
+            lambda link: self._is_sample_deliverable(link=link, case=case, pipeline=pipeline),
             self.store.get_case_samples_by_case_id(case.internal_id),
         )
 
@@ -211,7 +213,7 @@ class DeliveryAPI:
         LOG.warning(f"Could not find any samples linked to case {case.internal_id}")
         return False
 
-    def _sample_is_deliverable(self, link: CaseSample, case: Case, pipeline: str) -> bool:
+    def _is_sample_deliverable(self, link: CaseSample, case: Case, pipeline: str) -> bool:
         sample_is_external: bool = link.sample.application_version.application.is_external
         deliver_failed_samples: bool = self.deliver_failed_samples
         sample_passes_qc: bool = link.sample.sequencing_qc
