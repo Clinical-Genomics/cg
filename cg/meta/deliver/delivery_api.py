@@ -83,12 +83,6 @@ class DeliveryAPI:
             out_file: Path = get_out_path(out_dir=out_dir, file=file, case=case)
             create_link(source=file, destination=out_file, dry_run=self.dry_run)
 
-    def _get_sample_ids_for_case(self, case: Case) -> set[str]:
-        links = self.store.get_case_samples_by_case_id(case.internal_id)
-        samples: list[Sample] = [link.sample for link in links]
-        sample_ids: set[str] = {sample.internal_id for sample in samples}
-        return sample_ids
-
     def _create_delivery_directory(self, case: Case) -> Path:
         delivery_base: Path = get_delivery_dir_path(
             case_name=case.name,
@@ -170,6 +164,12 @@ class DeliveryAPI:
             if include_file_case(file=file, sample_ids=sample_ids, workflow=workflow):
                 case_files.append(Path(file.full_path))
         return case_files
+
+    def _get_sample_ids_for_case(self, case: Case) -> set[str]:
+        links = self.store.get_case_samples_by_case_id(case.internal_id)
+        samples: list[Sample] = [link.sample for link in links]
+        sample_ids: set[str] = {sample.internal_id for sample in samples}
+        return sample_ids
 
     def _get_sample_files_from_version(
         self,
