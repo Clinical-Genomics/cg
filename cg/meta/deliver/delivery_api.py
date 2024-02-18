@@ -142,7 +142,8 @@ class DeliveryAPI:
         deliverable_samples: list[Sample] = []
         samples: list[Sample] = self.store.get_samples_by_case_id(case.internal_id)
         for sample in samples:
-            bundle_exists: bool = self._bundle_exists(case=case, sample=sample, workflow=workflow)
+            bundle_name: str = get_bundle_name(case=case, sample=sample, workflow=workflow)
+            bundle_exists: bool = self._bundle_exists(bundle_name=bundle_name, workflow=workflow)
             sample_is_deliverable: bool = self._is_sample_deliverable(sample)
             if bundle_exists and sample_is_deliverable:
                 deliverable_samples.append(sample)
@@ -183,15 +184,8 @@ class DeliveryAPI:
         return sample_files
 
     def _is_case_deliverable(self, case: Case, workflow: str) -> bool:
-        last_version = self.hk_api.last_version(case.internal_id)
-        if not last_version:
-            case_tags = get_case_tags_for_workflow(workflow)
-            if not case_tags:
-                LOG.info(f"Could not find any version for {case.internal_id}")
-            elif not self.ignore_missing_bundle(workflow):
-                raise SyntaxError(f"Could not find any version for {case.internal_id}")
-            return False
-        return True
+        bundle_name: str = case.internal_id
+        return self._bundle_exists(bundle_name=bundle_name, workflow=workflow)
 
     def _is_sample_deliverable(self, sample: Sample) -> bool:
         return (
@@ -200,8 +194,7 @@ class DeliveryAPI:
             or sample.application_version.application.is_external
         )
 
-    def _bundle_exists(self, case: Case, sample: Sample, workflow: str) -> bool:
-        bundle_name: str = get_bundle_name(case=case, sample=sample, workflow=workflow)
+    def _bundle_exists(self, bundle_name: str, workflow: str) -> bool:
         if self.hk_api.last_version(bundle_name):
             return True
         if self.ignore_missing_bundle(workflow):
