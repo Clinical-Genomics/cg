@@ -121,3 +121,7 @@ def create_link(source: Path, destination: Path, dry_run: bool = False) -> bool:
     except FileExistsError:
         LOG.info(f"Path {destination} exists, skipping")
         return False
+
+
+def get_bundle_name(case: Case, sample: Sample, workflow: str) -> str:
+    return sample.internal_id if workflow == Workflow.FASTQ else case.internal_id

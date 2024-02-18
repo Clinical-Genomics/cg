@@ -8,6 +8,7 @@ from cg.constants.constants import DataDelivery
 from cg.exc import MissingFilesError
 from cg.meta.deliver.utils import (
     create_link,
+    get_bundle_name,
     get_delivery_case_name,
     get_delivery_dir_path,
     get_case_tags_for_workflow,
@@ -18,7 +19,7 @@ from cg.meta.deliver.utils import (
     should_include_file_sample,
 )
 from cg.store.store import Store
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -66,7 +67,7 @@ class DeliveryAPI:
     def deliver_files(self, case: Case, workflow: str):
         if self._is_case_deliverable(case=case, workflow=workflow):
             self._deliver_case_files(case=case, workflow=workflow)
-            self._link_sample_files(case=case, workflow=workflow)
+            self._deliver_sample_files(case=case, workflow=workflow)
 
     def _deliver_case_files(self, case: Case, workflow: str) -> None:
         LOG.debug(f"Deliver case files for {case.internal_id}")
@@ -93,7 +94,7 @@ class DeliveryAPI:
             case_target_directory.mkdir(parents=True, exist_ok=True)
         return case_target_directory
 
-    def _link_sample_files(self, case: Case, workflow: str) -> None:
+    def _deliver_sample_files(self, case: Case, workflow: str) -> None:
         if not get_sample_tags_for_workflow(workflow):
             return
 
@@ -138,11 +139,13 @@ class DeliveryAPI:
         return sample_directory
 
     def _get_deliverable_samples(self, case: Case, workflow: str) -> list[Sample]:
-        deliverable_samples: list[CaseSample] = []
-        case_samples: list[CaseSample] = self.store.get_case_samples_by_case_id(case.internal_id)
-        for link in case_samples:
-            if self._is_sample_deliverable(link=link, case=case, workflow=workflow):
-                deliverable_samples.append(link.sample)
+        deliverable_samples: list[Sample] = []
+        samples: list[Sample] = self.store.get_samples_by_case_id(case.internal_id)
+        for sample in samples:
+            bundle_exists: bool = self._bundle_exists(case=case, sample=sample, workflow=workflow)
+            sample_is_deliverable: bool = self._is_sample_deliverable(sample)
+            if bundle_exists and sample_is_deliverable:
+                deliverable_samples.append(sample)
         return deliverable_samples
 
     def _get_version_for_sample(self, sample: Sample, case: Case, workflow: str) -> Version:
@@ -163,8 +166,7 @@ class DeliveryAPI:
         return case_files
 
     def _get_sample_ids_for_case(self, case: Case) -> set[str]:
-        links = self.store.get_case_samples_by_case_id(case.internal_id)
-        samples: list[Sample] = [link.sample for link in links]
+        samples: list[Sample] = self.store.get_case_samples_by_case_id(case.internal_id)
         sample_ids: set[str] = {sample.internal_id for sample in samples}
         return sample_ids
 
@@ -186,29 +188,25 @@ class DeliveryAPI:
             case_tags = get_case_tags_for_workflow(workflow)
             if not case_tags:
                 LOG.info(f"Could not find any version for {case.internal_id}")
-            elif not self.ignore_missing_version(workflow):
+            elif not self.ignore_missing_bundle(workflow):
                 raise SyntaxError(f"Could not find any version for {case.internal_id}")
             return False
         return True
 
-    def _is_sample_deliverable(self, link: CaseSample, case: Case, workflow: str) -> bool:
-        sample_is_external: bool = link.sample.application_version.application.is_external
-        deliver_failed_samples: bool = self.deliver_failed_samples
-        sample_passes_qc: bool = link.sample.sequencing_qc
-        sample_is_deliverable: bool = (
-            sample_passes_qc or deliver_failed_samples or sample_is_external
+    def _is_sample_deliverable(self, sample: Sample) -> bool:
+        return (
+            sample.sequencing_qc
+            or self.deliver_failed_samples
+            or sample.application_version.application.is_external
         )
-        last_version: Version = self.hk_api.last_version(case.internal_id)
-        if workflow == DataDelivery.FASTQ:
-            last_version = self.hk_api.last_version(link.sample.internal_id)
-        if not last_version:
-            if self.ignore_missing_version(workflow):
-                LOG.info(f"Could not find any version for {link.sample.internal_id}")
-                return False
-            raise SyntaxError(f"Could not find any version for {link.sample.internal_id}")
-        if not sample_is_deliverable:
-            LOG.warning(f"Sample {link.sample.internal_id} is not deliverable.")
-        return sample_is_deliverable
 
-    def ignore_missing_version(self, workflow: str) -> bool:
+    def _bundle_exists(self, case: Case, sample: Sample, workflow: str) -> bool:
+        bundle_name: str = get_bundle_name(case=case, sample=sample, workflow=workflow)
+        if self.hk_api.last_version(bundle_name):
+            return True
+        if self.ignore_missing_bundle(workflow):
+            return False
+        raise SyntaxError(f"Could not find any version for {bundle_name}")
+
+    def ignore_missing_bundle(self, workflow: str) -> bool:
         return workflow in constants.SKIP_MISSING or self.ignore_missing_bundles
