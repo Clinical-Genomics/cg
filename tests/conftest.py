@@ -72,6 +72,7 @@ pytest_plugins = [
     "tests.fixture_plugins.demultiplex_fixtures.path_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_fixtures",
+    "tests.fixture_plugins.demultiplex_fixtures.sample_sheet_fixtures",
 ]
 
 # Case fixtures

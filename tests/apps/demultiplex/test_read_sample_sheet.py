@@ -8,7 +8,6 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_raw_samples,
     get_sample_type,
     get_samples_by_lane,
-    get_validated_sample_sheet,
     validate_samples_are_unique,
 )
 from cg.apps.demultiplex.sample_sheet.sample_models import (
@@ -16,7 +15,6 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants.constants import FileFormat
 from cg.exc import SampleSheetError
 from cg.io.controller import ReadFile
@@ -119,33 +117,6 @@ def test_get_raw_samples_no_samples(sample_sheet_bcl2fastq_data_header: list[lis
     assert "Could not find any samples in sample sheet" in caplog.text
 
 
-def test_get_sample_sheet_bcl2fastq_duplicate_same_lane(
-    sample_sheet_bcl2fastq_duplicate_same_lane: list[list[str]],
-):
-    """Test that creating a Bcl2fastq sample sheet with duplicated samples in a lane fails."""
-    # GIVEN a Bcl2fastq sample sheet with a sample duplicated in a lane
-
-    # WHEN creating the sample sheet object
-    with pytest.raises(SampleSheetError):
-        # THEN a sample sheet error is raised
-        get_validated_sample_sheet(sample_sheet_bcl2fastq_duplicate_same_lane)
-
-
-def test_get_sample_sheet_bcl2fastq_duplicate_different_lanes(
-    sample_sheet_bcl2fastq_duplicate_different_lane: list[list[str]],
-):
-    """Test that Bcl2fastq a sample sheet created with duplicated samples in different lanes has samples."""
-    # GIVEN a Bcl2fastq sample sheet with same sample duplicated in different lanes
-
-    # WHEN creating the sample sheet object
-    sample_sheet: SampleSheet = get_validated_sample_sheet(
-        sample_sheet_bcl2fastq_duplicate_different_lane
-    )
-
-    # THEN a sample sheet is returned with samples in it
-    assert sample_sheet.samples
-
-
 def test_get_sample_type_for_bcl_convert(bcl_convert_sample_sheet_path: Path):
     # GIVEN a bcl convert sample sheet path
 
@@ -170,3 +141,25 @@ def test_get_sample_type_for_bcl2fastq(bcl2fastq_sample_sheet_path: Path):
 
     # THEN the sample type is FlowCellSampleBCLConvert
     assert sample_type is FlowCellSampleBcl2Fastq
+
+
+def test_validate_sample_sheet_bcl2fastq_duplicate_same_lane(
+    sample_sheet_bcl2fastq_duplicate_same_lane: list[list[str]],
+):
+    """Test that creating a Bcl2fastq sample sheet with duplicated samples in a lane fails."""
+    # GIVEN a Bcl2fastq sample sheet with a sample duplicated in a lane
+
+    # WHEN creating the sample sheet object
+
+    # THEN a sample sheet error is raised
+
+
+def test_validate_sample_sheet_bcl2fastq_duplicate_different_lanes(
+    sample_sheet_bcl2fastq_duplicate_different_lane: list[list[str]],
+):
+    """Test that Bcl2fastq a sample sheet created with duplicated samples in different lanes has samples."""
+    # GIVEN a Bcl2fastq sample sheet with same sample duplicated in different lanes
+
+    # WHEN creating the sample sheet object
+
+    # THEN a sample sheet is returned with samples in it

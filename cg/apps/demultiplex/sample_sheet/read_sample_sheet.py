@@ -8,7 +8,6 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
 from cg.exc import SampleSheetError
 
@@ -105,12 +104,3 @@ def get_flow_cell_samples_from_content(
     raw_samples: list[dict[str, str]] = get_raw_samples(sample_sheet_content=sample_sheet_content)
     adapter = TypeAdapter(list[sample_type])
     return adapter.validate_python(raw_samples)
-
-
-def get_validated_sample_sheet(
-    sample_sheet_content: list[list[str]],
-) -> SampleSheet:
-    """Return a validated sample sheet object."""
-    samples: list[FlowCellSample] = get_flow_cell_samples_from_content(sample_sheet_content)
-    validate_samples_unique_per_lane(samples=samples)
-    return SampleSheet(samples=samples)

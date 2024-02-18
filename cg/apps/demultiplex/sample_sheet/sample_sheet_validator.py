@@ -34,7 +34,7 @@ class SampleSheetValidator:
         self.index2_cycles: int | None = None
         self.is_index2_reverse_complement: bool | None = None
 
-    def set_sample_content(self, content: list[list[str]]) -> None:
+    def set_sample_sheet_content(self, content: list[list[str]]) -> None:
         """Set the sample sheet content."""
         self.content = content
 
@@ -145,7 +145,7 @@ class SampleSheetValidator:
 
     def validate_sample_sheet_from_content(self, content: list[list[str]]) -> None:
         """Call the proper validation depending of the sample sheet type."""
-        self.set_sample_content(content)
+        self.set_sample_sheet_content(content)
         self.set_sample_type()
         if self.sample_type is FlowCellSampleBCLConvert:
             self.validate_bcl_convert()

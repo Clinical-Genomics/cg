@@ -298,12 +298,44 @@ def hiseq_x_single_index_flow_cell_dir(
     return Path(illumina_flow_cells_directory, hiseq_x_single_index_flow_cell_name)
 
 
+@pytest.fixture
+def hiseq_x_single_index_sample_sheet_path(hiseq_x_single_index_flow_cell_dir: Path) -> Path:
+    """Return the path to a single-index HiSeqX sample sheet."""
+    return Path(
+        hiseq_x_single_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+
+
+@pytest.fixture
+def hiseq_x_single_index_bcl2fastq_sample_sheet_path(
+    hiseq_x_single_index_flow_cell_dir: Path,
+    bcl2fastq_sample_sheet_file_name: str,
+) -> Path:
+    """Return the path to a single-index HiSeqX Bcl2fastq sample sheet."""
+    return Path(hiseq_x_single_index_flow_cell_dir, bcl2fastq_sample_sheet_file_name)
+
+
 @pytest.fixture(scope="session")
 def hiseq_x_dual_index_flow_cell_dir(
     illumina_flow_cells_directory, hiseq_x_dual_index_flow_cell_name: str
 ) -> Path:
-    """Return the path to a HiSeqX flow cell."""
+    """Return the path to a dual-index HiSeqX flow cell."""
     return Path(illumina_flow_cells_directory, hiseq_x_dual_index_flow_cell_name)
+
+
+@pytest.fixture
+def hiseq_x_dual_index_sample_sheet_path(hiseq_x_dual_index_flow_cell_dir: Path) -> Path:
+    """Return the path to a dual-index HiSeqX sample sheet."""
+    return Path(hiseq_x_dual_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+
+
+@pytest.fixture
+def hiseq_x_dual_index_bcl2fastq_sample_sheet_path(
+    hiseq_x_dual_index_flow_cell_dir: Path,
+    bcl2fastq_sample_sheet_file_name: str,
+) -> Path:
+    """Return the path to a dual-index HiSeqX Bcl2fastq sample sheet."""
+    return Path(hiseq_x_dual_index_flow_cell_dir, bcl2fastq_sample_sheet_file_name)
 
 
 @pytest.fixture(scope="session")
@@ -314,12 +346,46 @@ def hiseq_2500_dual_index_flow_cell_dir(
     return Path(illumina_flow_cells_directory, hiseq_2500_dual_index_flow_cell_name)
 
 
+@pytest.fixture
+def hiseq_2500_dual_index_sample_sheet_path(hiseq_2500_dual_index_flow_cell_dir: Path) -> Path:
+    """Return the path to a dual-index HiSeq2500 sample sheet."""
+    return Path(
+        hiseq_2500_dual_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+
+
+@pytest.fixture
+def hiseq_2500_dual_index_bcl2fastq_sample_sheet_path(
+    hiseq_2500_dual_index_flow_cell_dir: Path,
+    bcl2fastq_sample_sheet_file_name: str,
+) -> Path:
+    """Return the path to a dual-index HiSeq2500 Bcl2fastq sample sheet."""
+    return Path(hiseq_2500_dual_index_flow_cell_dir, bcl2fastq_sample_sheet_file_name)
+
+
 @pytest.fixture(scope="session")
 def hiseq_2500_custom_index_flow_cell_dir(
     illumina_flow_cells_directory, hiseq_2500_custom_index_flow_cell_name: str
 ) -> Path:
     """Return the path to a HiSeq2500 flow cell."""
     return Path(illumina_flow_cells_directory, hiseq_2500_custom_index_flow_cell_name)
+
+
+@pytest.fixture
+def hiseq_2500_custom_index_sample_sheet_path(hiseq_2500_custom_index_flow_cell_dir: Path) -> Path:
+    """Return the path to a custom-index HiSeq2500 sample sheet."""
+    return Path(
+        hiseq_2500_custom_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+
+
+@pytest.fixture
+def hiseq_2500_custom_index_bcl2fastq_sample_sheet_path(
+    hiseq_2500_custom_index_flow_cell_dir: Path,
+    bcl2fastq_sample_sheet_file_name: str,
+) -> Path:
+    """Return the path to a custom-index HiSeq2500 Bcl2fastq sample sheet."""
+    return Path(hiseq_2500_custom_index_flow_cell_dir, bcl2fastq_sample_sheet_file_name)
 
 
 @pytest.fixture
