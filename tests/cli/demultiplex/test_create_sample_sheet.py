@@ -10,6 +10,8 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
@@ -23,7 +25,7 @@ FLOW_CELL_FUNCTION_NAME: str = "cg.apps.demultiplex.sample_sheet.api.get_flow_ce
 def test_create_sample_sheet_no_run_parameters_fails(
     cli_runner: testing.CliRunner,
     tmp_flow_cell_without_run_parameters_path: Path,
-    sample_sheet_context: CGConfig,
+    sample_sheet_context_broken_flow_cells: CGConfig,
     hiseq_2500_custom_index_bcl_convert_lims_samples: list[FlowCellSampleBCLConvert],
     caplog,
     mocker,
@@ -34,20 +36,21 @@ def test_create_sample_sheet_no_run_parameters_fails(
         flow_cell_path=tmp_flow_cell_without_run_parameters_path
     )
 
+    # GIVEN that the context's flow cell directory holds the given flow cell
+    assert (
+        sample_sheet_context_broken_flow_cells.illumina_demultiplexed_runs_directory
+        == flow_cell.path.parent.as_posix()
+    )
+
     # GIVEN flow cell samples
     mocker.patch(
         FLOW_CELL_FUNCTION_NAME,
         return_value=hiseq_2500_custom_index_bcl_convert_lims_samples,
     )
 
-    # GIVEN that the context's flow cell directory holds the given flow cell
-    sample_sheet_context.illumina_flow_cells_directory = (
-        tmp_flow_cell_without_run_parameters_path.parent.as_posix()
-    )
-
     # WHEN running the create sample sheet command
     result: testing.Result = cli_runner.invoke(
-        create_sheet, [flow_cell.full_name], obj=sample_sheet_context
+        create_sheet, [flow_cell.full_name], obj=sample_sheet_context_broken_flow_cells
     )
 
     # THEN the process exits with a non-zero exit code
@@ -85,7 +88,8 @@ def test_create_bcl2fastq_sample_sheet(
         FLOW_CELL_FUNCTION_NAME,
         return_value=novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples,
     )
-    # GIVEN a lims api that returns some samples
+    # GIVEN a sample sheet API and a lims API that returns some samples
+    sample_sheet_api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
 
     # WHEN creating a sample sheet
     result = cli_runner.invoke(
@@ -105,7 +109,7 @@ def test_create_bcl2fastq_sample_sheet(
     assert flow_cell.sample_sheet_exists()
 
     # THEN the sample sheet passes validation
-    SampleSheetAPI(sample_sheet_context).validate(flow_cell.sample_sheet_path)
+    sample_sheet_api.validate(flow_cell.sample_sheet_path)
 
     # THEN the sample sheet is in Housekeeper
     assert sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(flow_cell.id)
@@ -146,8 +150,11 @@ def test_create_v2_sample_sheet(
     request: FixtureRequest,
 ):
     """Test that creating a v2 sample sheet works."""
-    flow_cell_directory: Path = request.getfixturevalue(scenario.flow_cell_directory)
+    # GIVEN a sample sheet context with a sample sheet api
+    sample_sheet_api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
+
     # GIVEN a flow cell directory with some run parameters
+    flow_cell_directory: Path = request.getfixturevalue(scenario.flow_cell_directory)
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_directory)
     assert flow_cell.run_parameters_path.exists()
 
@@ -180,7 +187,7 @@ def test_create_v2_sample_sheet(
     assert flow_cell.sample_sheet_exists()
 
     # THEN the sample sheet passes validation
-    SampleSheetAPI(sample_sheet_context).validate(flow_cell.sample_sheet_path)
+    sample_sheet_api.validate(flow_cell.sample_sheet_path)
 
     # THEN the sample sheet is in Housekeeper
     assert sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(flow_cell.id)
@@ -207,7 +214,7 @@ def test_incorrect_bcl2fastq_samplesheet_is_regenerated(
     )
 
     # GIVEN a sample sheet API and an invalid sample sheet
-    sample_sheet_api: SampleSheetAPI = SampleSheetAPI(sample_sheet_context)
+    sample_sheet_api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
     with pytest.raises(ValidationError):
         sample_sheet_api.validate(flow_cell.sample_sheet_path)
 

@@ -24,7 +24,7 @@ def sample_sheet_commands():
 def validate_sample_sheet(context: CGConfig, sheet: click.Path):
     """Validate a sample sheet."""
     LOG.info(f"Validating {sheet} sample sheet")
-    sample_sheet_api = SampleSheetAPI(config=context)
+    sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     try:
         sample_sheet_api.validate(Path(sheet))
     except (SampleSheetError, ValidationError) as error:
@@ -49,7 +49,7 @@ def create_sheet(
     Search the flow cell in the directory specified in config.
     """
     LOG.info(f"Creating sample sheet for flow cell {flow_cell_name}")
-    sample_sheet_api = SampleSheetAPI(context)
+    sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     sample_sheet_api.set_dry_run(dry_run)
     sample_sheet_api.set_force(force)
     sample_sheet_api.get_or_create_sample_sheet(
@@ -66,7 +66,7 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
     Search flow cell directories for run parameters and create a sample sheets based on the
     information.
     """
-    sample_sheet_api = SampleSheetAPI(context)
+    sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     sample_sheet_api.set_dry_run(dry_run)
     sample_sheet_api.set_force(force=False)
     sample_sheet_api.get_or_create_all_sample_sheets()

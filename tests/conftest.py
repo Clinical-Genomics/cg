@@ -17,6 +17,7 @@ from requests import Response
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
@@ -436,11 +437,38 @@ def gens_config() -> dict[str, dict[str, str]]:
 
 @pytest.fixture(name="sample_sheet_context")
 def sample_sheet_context(
-    cg_context: CGConfig, lims_api: LimsAPI, populated_housekeeper_api: HousekeeperAPI
+    cg_context: CGConfig,
+    lims_api: LimsAPI,
+    populated_housekeeper_api: HousekeeperAPI,
+    tmp_illumina_flow_cells_directory: Path,
 ) -> CGConfig:
     """Return cg context with added Lims and Housekeeper API."""
     cg_context.lims_api_ = lims_api
     cg_context.housekeeper_api_ = populated_housekeeper_api
+    cg_context.sample_sheet_api_ = SampleSheetAPI(
+        flow_cell_dir=tmp_illumina_flow_cells_directory.as_posix(),
+        hk_api=cg_context.housekeeper_api,
+        lims_api=cg_context.lims_api,
+    )
+    return cg_context
+
+
+@pytest.fixture
+def sample_sheet_context_broken_flow_cells(
+    cg_context: CGConfig,
+    lims_api: LimsAPI,
+    populated_housekeeper_api: HousekeeperAPI,
+    tmp_broken_flow_cells_directory: Path,
+) -> CGConfig:
+    """Return cg context with broken flow cells."""
+    cg_context.illumina_demultiplexed_runs_directory = tmp_broken_flow_cells_directory.as_posix()
+    cg_context.lims_api_ = lims_api
+    cg_context.housekeeper_api_ = populated_housekeeper_api
+    cg_context.sample_sheet_api_ = SampleSheetAPI(
+        flow_cell_dir=tmp_broken_flow_cells_directory.as_posix(),
+        hk_api=cg_context.housekeeper_api,
+        lims_api=cg_context.lims_api,
+    )
     return cg_context
 
 

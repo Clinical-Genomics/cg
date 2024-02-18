@@ -37,7 +37,7 @@ DRY_RUN = click.option("--dry-run", is_flag=True)
 def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run: bool):
     """Demultiplex all flow cells that are ready under the flow cells directory."""
     LOG.info("Running cg demultiplex all ...")
-    sample_sheet_api = SampleSheetAPI(context)
+    sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
     if flow_cells_directory:
@@ -94,7 +94,7 @@ def demultiplex_flow_cell(
     """
 
     LOG.info(f"Running cg demultiplex flow cell, using {bcl_converter}")
-    sample_sheet_api = SampleSheetAPI(context)
+    sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     flow_cell_directory: Path = Path(context.demultiplex_api.flow_cells_dir, flow_cell_name)
     demultiplex_api.set_dry_run(dry_run=dry_run)

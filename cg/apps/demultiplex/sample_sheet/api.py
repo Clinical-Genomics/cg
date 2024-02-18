@@ -18,7 +18,6 @@ from cg.io.controller import WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
-from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
@@ -27,11 +26,10 @@ LOG = logging.getLogger(__name__)
 class SampleSheetAPI:
     """Sample Sheet API class."""
 
-    def __init__(self, config: CGConfig) -> None:
-        self.config: CGConfig = config
-        self.flow_cell_runs_dir = Path(config.illumina_flow_cells_directory)
-        self.hk_api: HousekeeperAPI = config.housekeeper_api
-        self.lims_api: LimsAPI = config.lims_api
+    def __init__(self, flow_cell_dir: str, hk_api: HousekeeperAPI, lims_api: LimsAPI) -> None:
+        self.flow_cell_runs_dir = Path(flow_cell_dir)
+        self.hk_api: HousekeeperAPI = hk_api
+        self.lims_api: LimsAPI = lims_api
         self.dry_run: bool = False
         self.force: bool = False
         self.validator = SampleSheetValidator()
