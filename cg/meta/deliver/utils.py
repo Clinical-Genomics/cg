@@ -100,25 +100,14 @@ def include_file_case(file: File, sample_ids: set[str], workflow: str) -> bool:
     return False
 
 
-def should_include_file_sample(file: File, sample_id: str, workflow: str) -> bool:
+def should_include_file_sample(file: File, workflow: str) -> bool:
     """Check if file should be included in sample bundle.
 
-    At least one tag should match between file and tags.
-    Only include files with sample tag.
-
-    For fastq delivery we know that we want to deliver all files of bundle.
+    At least one tag should match between file and the sample tags.
     """
     file_tags = {tag.name for tag in file.tags}
-    tags: set[str]
-    # Check if any of the file tags matches the sample tags
     sample_tags = get_sample_tags_for_workflow(workflow)
-    for tags in sample_tags:
-        working_copy = deepcopy(tags)
-        if workflow != Workflow.FASTQ:
-            working_copy.add(sample_id)
-        if working_copy.issubset(file_tags):
-            return True
-    return False
+    return any(tags.issubset(file_tags) for tags in sample_tags)
 
 
 def create_link(source: Path, destination: Path, dry_run: bool = False) -> bool:

@@ -1,9 +1,7 @@
 import logging
 from pathlib import Path
-from typing import Iterable
 
-from housekeeper.store.models import File, Version
-
+from housekeeper.store.models import Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
@@ -111,9 +109,8 @@ class DeliveryAPI:
             version: Version = self._get_version_for_sample(
                 sample=sample, case=case, workflow=workflow
             )
-            sample_id = sample.internal_id
-            files: Iterable[Path] = self._get_sample_files_from_version(
-                version=version, sample_id=sample_id, workflow=workflow
+            files: list[Path] = self._get_sample_files_from_version(
+                version=version, workflow=workflow
             )
             for file_path in files:
                 file_name: str = get_sample_out_file_name(file=file_path, sample=sample)
@@ -124,7 +121,7 @@ class DeliveryAPI:
                     number_linked_files += 1
 
             if not files and number_linked_files == 0:
-                raise MissingFilesError(f"Could not find any files for sample {sample_id}")
+                raise MissingFilesError(f"Could not find any files for sample {sample.internal_id}")
 
     def _create_sample_delivery_directory(self, case: Case, sample: Sample, workflow: str) -> Path:
         case_name: str | None = get_delivery_case_name(case=case, workflow=workflow)
@@ -152,7 +149,7 @@ class DeliveryAPI:
         bundle: str = sample.internal_id if workflow == DataDelivery.FASTQ else case.internal_id
         return self.hk_api.last_version(bundle)
 
-    def _get_case_files(self, case: Case, workflow: str) -> Iterable[Path]:
+    def _get_case_files(self, case: Case, workflow: str) -> list[Path]:
         version: Version = self.hk_api.last_version(case.internal_id)
         sample_ids: set[str] = self._get_sample_ids_for_case(case)
 
@@ -174,17 +171,14 @@ class DeliveryAPI:
     def _get_sample_files_from_version(
         self,
         version: Version,
-        sample_id: str,
         workflow: str,
-    ) -> Iterable[Path]:
+    ) -> list[Path]:
         """Fetch files for a sample from a version that are tagged with sample tags."""
-        file_obj: File
-        for file_obj in version.files:
-            if not should_include_file_sample(
-                file=file_obj, sample_id=sample_id, workflow=workflow
-            ):
-                continue
-            yield Path(file_obj.full_path)
+        sample_files: list[Path] = []
+        for file in version.files:
+            if should_include_file_sample(file=file, workflow=workflow):
+                sample_files.append(Path(file.full_path))
+        return sample_files
 
     def _is_case_deliverable(self, case: Case, workflow: str) -> bool:
         last_version = self.hk_api.last_version(case.internal_id)
