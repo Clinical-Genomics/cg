@@ -25,7 +25,7 @@ LOG = logging.getLogger(__name__)
 
 
 class DeliveryAPI:
-    """Deliver API for workflows files."""
+    """In this module, delivery means linking files in a bundle to the customers folder on the compute cluster."""
 
     def __init__(
         self,
