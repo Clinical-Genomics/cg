@@ -66,7 +66,7 @@ class DeliveryAPI:
     def deliver_files(self, case: Case, workflow: str):
         if self._is_case_deliverable(case=case, workflow=workflow):
             self._deliver_case_files(case=case, workflow=workflow)
-            self._deliver_sample_files(case=case, workflow=workflow)
+            self._link_sample_files(case=case, workflow=workflow)
 
     def _deliver_case_files(self, case: Case, workflow: str) -> None:
         LOG.debug(f"Deliver case files for {case.internal_id}")
@@ -75,25 +75,25 @@ class DeliveryAPI:
         self._link_case_files(case=case, workflow=workflow)
 
     def _link_case_files(self, case: Case, workflow: str):
-        out_dir: Path = self._create_delivery_directory(case)
+        out_dir: Path = self._create_case_delivery_directory(case)
         files: list[Path] = self._get_case_files(workflow=workflow, case=case)
         for file in files:
             out_file: Path = get_out_path(out_dir=out_dir, file=file, case=case)
             create_link(source=file, destination=out_file, dry_run=self.dry_run)
 
-    def _create_delivery_directory(self, case: Case) -> Path:
-        delivery_base: Path = get_delivery_dir_path(
+    def _create_case_delivery_directory(self, case: Case) -> Path:
+        case_target_directory: Path = get_delivery_dir_path(
             case_name=case.name,
             customer_id=case.customer.internal_id,
             ticket=case.latest_ticket,
             base_path=self.customers_folder,
         )
         if not self.dry_run:
-            LOG.debug(f"Creating project path {delivery_base}")
-            delivery_base.mkdir(parents=True, exist_ok=True)
-        return delivery_base
+            LOG.debug(f"Creating delivery directory for case {case_target_directory}")
+            case_target_directory.mkdir(parents=True, exist_ok=True)
+        return case_target_directory
 
-    def _deliver_sample_files(self, case: Case, workflow: str) -> None:
+    def _link_sample_files(self, case: Case, workflow: str) -> None:
         if not get_sample_tags_for_workflow(workflow):
             return
 
@@ -102,7 +102,7 @@ class DeliveryAPI:
         )
         case_name: str | None = get_delivery_case_name(case=case, workflow=workflow)
         for sample in deliverable_samples:
-            sample_target_directory: Path = self._create_sample_delivery_directory(
+            sample_directory: Path = self._create_sample_delivery_directory(
                 case=case, sample=sample, workflow=workflow
             )
             number_linked_files: int = 0
@@ -116,7 +116,7 @@ class DeliveryAPI:
                 file_name: str = get_sample_out_file_name(file=file_path, sample=sample)
                 if case_name:
                     file_name: str = file_name.replace(case.internal_id, case.name)
-                out_path = Path(sample_target_directory, file_name)
+                out_path = Path(sample_directory, file_name)
                 if create_link(source=file_path, destination=out_path, dry_run=self.dry_run):
                     number_linked_files += 1
 
@@ -125,7 +125,7 @@ class DeliveryAPI:
 
     def _create_sample_delivery_directory(self, case: Case, sample: Sample, workflow: str) -> Path:
         case_name: str | None = get_delivery_case_name(case=case, workflow=workflow)
-        delivery_base: Path = get_delivery_dir_path(
+        sample_directory: Path = get_delivery_dir_path(
             case_name=case_name,
             sample_name=sample.name,
             customer_id=case.customer.internal_id,
@@ -133,9 +133,9 @@ class DeliveryAPI:
             base_path=self.customers_folder,
         )
         if not self.dry_run:
-            LOG.debug(f"Creating project path {delivery_base}")
-            delivery_base.mkdir(parents=True, exist_ok=True)
-        return delivery_base
+            LOG.debug(f"Creating sample delivery directory {sample_directory}")
+            sample_directory.mkdir(parents=True, exist_ok=True)
+        return sample_directory
 
     def _get_deliverable_samples(self, case: Case, workflow: str) -> list[Sample]:
         deliverable_samples: list[CaseSample] = []

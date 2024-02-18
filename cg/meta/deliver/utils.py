@@ -83,12 +83,6 @@ def should_include_file_case(file: File, sample_ids: set[str], workflow: str) ->
     """
     tags_on_file = {tag.name for tag in file.tags}
     case_tags = get_case_tags_for_workflow(workflow)
-    all_case_tags: set[str] = {tag for tags in case_tags for tag in tags}
-    if all_case_tags.isdisjoint(tags_on_file):
-        LOG.debug("No tags are matching")
-        return False
-
-    LOG.debug(f"Found file tags {', '.join(tags_on_file)}")
 
     # Check if any of the sample tags exist
     if sample_ids.intersection(tags_on_file):
