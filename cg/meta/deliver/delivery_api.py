@@ -184,10 +184,9 @@ class DeliveryAPI:
         last_version = self.hk_api.last_version(case.internal_id)
         if not last_version:
             case_tags = get_case_tags_for_workflow(workflow)
-            skip_missing = workflow in constants.SKIP_MISSING or self.ignore_missing_bundles
             if not case_tags:
                 LOG.info(f"Could not find any version for {case.internal_id}")
-            elif not skip_missing:
+            elif not self.ignore_missing_version(workflow):
                 raise SyntaxError(f"Could not find any version for {case.internal_id}")
             return False
         return True
@@ -203,11 +202,13 @@ class DeliveryAPI:
         if workflow == DataDelivery.FASTQ:
             last_version = self.hk_api.last_version(link.sample.internal_id)
         if not last_version:
-            skip_missing = workflow in constants.SKIP_MISSING or self.ignore_missing_bundles
-            if skip_missing:
+            if self.ignore_missing_version(workflow):
                 LOG.info(f"Could not find any version for {link.sample.internal_id}")
                 return False
             raise SyntaxError(f"Could not find any version for {link.sample.internal_id}")
         if not sample_is_deliverable:
             LOG.warning(f"Sample {link.sample.internal_id} is not deliverable.")
         return sample_is_deliverable
+
+    def ignore_missing_version(self, workflow: str) -> bool:
+        return workflow in constants.SKIP_MISSING or self.ignore_missing_bundles
