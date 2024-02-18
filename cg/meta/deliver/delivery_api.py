@@ -14,7 +14,7 @@ from cg.meta.deliver.utils import (
     get_out_path,
     get_sample_out_file_name,
     get_sample_tags_for_workflow,
-    include_file_case,
+    should_include_file_case,
     should_include_file_sample,
 )
 from cg.store.store import Store
@@ -158,7 +158,7 @@ class DeliveryAPI:
 
         case_files: list[Path] = []
         for file in version.files:
-            if include_file_case(file=file, sample_ids=sample_ids, workflow=workflow):
+            if should_include_file_case(file=file, sample_ids=sample_ids, workflow=workflow):
                 case_files.append(Path(file.full_path))
         return case_files
 

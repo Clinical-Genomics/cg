@@ -75,7 +75,7 @@ def get_sample_out_file_name(file: Path, sample: Sample) -> str:
     return file.name.replace(sample.internal_id, sample.name)
 
 
-def include_file_case(file: File, sample_ids: set[str], workflow: str) -> bool:
+def should_include_file_case(file: File, sample_ids: set[str], workflow: str) -> bool:
     """Check if file should be included in case bundle.
 
     At least one tag should match between file and tags.
