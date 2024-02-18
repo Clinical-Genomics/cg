@@ -166,7 +166,7 @@ class DeliveryAPI:
         return case_files
 
     def _get_sample_ids_for_case(self, case: Case) -> set[str]:
-        samples: list[Sample] = self.store.get_case_samples_by_case_id(case.internal_id)
+        samples: list[Sample] = self.store.get_samples_by_case_id(case.internal_id)
         sample_ids: set[str] = {sample.internal_id for sample in samples}
         return sample_ids
 
