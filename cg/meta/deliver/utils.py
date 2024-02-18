@@ -1,11 +1,10 @@
-from copy import deepcopy
 import logging
 import os
 from pathlib import Path
 from cg.constants import delivery as constants
 from cg.constants.constants import Workflow
 from cg.store.models import Case, Sample
-from housekeeper.store.models import File, Version
+from housekeeper.store.models import File
 
 LOG = logging.getLogger(__name__)
 
