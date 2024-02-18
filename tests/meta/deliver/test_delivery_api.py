@@ -10,7 +10,7 @@ from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliveryAPI
 from cg.meta.deliver.utils import get_delivery_dir_path, get_delivery_scope
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.cli.deliver.conftest import fastq_delivery_bundle, mip_delivery_bundle
 from tests.store.conftest import case_obj

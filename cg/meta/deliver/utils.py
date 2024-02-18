@@ -14,15 +14,16 @@ def get_delivery_scope(delivery_arguments: set[str]) -> tuple[bool, bool]:
     case_delivery: bool = False
     sample_delivery: bool = False
     for delivery in delivery_arguments:
-        if (
-            constants.PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"]
-            and delivery in constants.ONLY_ONE_CASE_PER_TICKET
-        ):
-            sample_delivery = True
-        if constants.PIPELINE_ANALYSIS_TAG_MAP[delivery]["case_tags"]:
-            case_delivery = True
+        sample_delivery: bool = is_sample_delivery(delivery)
+        case_delivery: bool = is_case_delivery(delivery)
     return sample_delivery, case_delivery
 
+
+def is_sample_delivery(workflow: str) -> bool:
+    return get_sample_tags_for_workflow(workflow) and workflow_has_one_case_per_ticket(workflow)
+
+def is_case_delivery(workflow: str) -> bool:
+    return get_case_tags_for_workflow(workflow)
 
 def get_delivery_dir_path(
     base_path: Path,
@@ -41,6 +42,10 @@ def get_delivery_dir_path(
     if sample_name:
         delivery_path = Path(delivery_path, sample_name)
     return delivery_path
+
+
+def workflow_has_one_case_per_ticket(workflow: Workflow) -> bool:
+    return workflow in constants.ONLY_ONE_CASE_PER_TICKET
 
 
 def get_case_tags_for_workflow(workflow: Workflow) -> list[set[str]]:
