@@ -22,8 +22,10 @@ def get_delivery_scope(delivery_arguments: set[str]) -> tuple[bool, bool]:
 def is_sample_delivery(workflow: str) -> bool:
     return get_sample_tags_for_workflow(workflow) and workflow_has_one_case_per_ticket(workflow)
 
+
 def is_case_delivery(workflow: str) -> bool:
     return get_case_tags_for_workflow(workflow)
+
 
 def get_delivery_dir_path(
     base_path: Path,
