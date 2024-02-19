@@ -65,7 +65,7 @@ class OverrideCyclesValidator:
         characters (N) specified in the index cycle string is equal to the number of run cycles
         and the length of the index sequence is equal to the number of index characters (I).
         """
-        match = re.match(pattern, index_cycle)
+        match = re.fullmatch(pattern, index_cycle)
         if match:
             if pattern == FORWARD_INDEX_CYCLE_PATTERN:
                 index_chars, ignored_chars = map(int, match.groups())

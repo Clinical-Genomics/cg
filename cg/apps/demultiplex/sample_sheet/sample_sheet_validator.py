@@ -106,7 +106,7 @@ class SampleSheetValidator:
 
     def _validate_samples(self) -> None:
         """
-        Determine if the samples have the correct attributes and are not unique per lane.
+        Determine if the samples have the correct attributes and are unique per lane.
             Raises:
             ValidationError if the samples do not have the correct attributes based on their model.
             SampleSheetError if the samples are not unique per lane.
