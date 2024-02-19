@@ -1,6 +1,3 @@
-from pathlib import Path
-from typing import Type
-
 import pytest
 from _pytest.fixtures import FixtureRequest
 
@@ -230,11 +227,24 @@ def test_set_cycles(
     assert sample_sheet_validator.index2_cycles == expected_cycles[3]
 
 
-@pytest.mark.skip("Not implemented")
-def test_validate_override_cycles():
-    """.Determine if the samples' override cycles are valid."""
-    # TODO Implement test
-    pass
+@pytest.mark.parametrize(
+    "sample_sheet_content",
+    [
+        "novaseq_6000_sample_sheet_with_reversed_cycles_content",
+        "novaseq_x_sample_sheet_with_forward_cycles_content",
+    ],
+)
+def test_validate_override_cycles_incorrect_cycles(
+    sample_sheet_validator: SampleSheetValidator, sample_sheet_content: str, request: FixtureRequest
+):
+    """Test that a sample sheets with incorrect override cycles raise an error."""
+    # GIVEN a sample sheet with incorrect override cycles
+    sample_sheet_validator.set_sample_sheet_content(request.getfixturevalue(sample_sheet_content))
+
+    # WHEN validating the override cycles
+    with pytest.raises(SampleSheetError):
+        # THEN a SampleSheetError is raised
+        sample_sheet_validator.validate_override_cycles()
 
 
 @pytest.mark.parametrize(

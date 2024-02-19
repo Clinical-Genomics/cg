@@ -58,18 +58,14 @@ def test_get_non_pooled_samples_when_multiple_lanes_one_single():
 
 def test_get_sample_internal_ids_from_sample_sheet(
     sample_sheet_validator: SampleSheetValidator,
-    novaseq_6000_post_1_5_kits_correct_sample_sheet_path: Path,
+    novaseq_6000_post_1_5_kits_sample_sheet_object: SampleSheet,
 ):
     """Test that getting sample internal ids from a sample sheet returns a unique list of strings."""
 
     # GIVEN a sample sheet with only valid samples
-    # TODO: Replace for fixture
-    sample_sheet: SampleSheet = sample_sheet_validator.get_sample_sheet_object_from_file(
-        novaseq_6000_post_1_5_kits_correct_sample_sheet_path
-    )
 
     # WHEN getting the valid sample internal ids
-    sample_internal_ids: list[str] = sample_sheet.get_sample_ids()
+    sample_internal_ids: list[str] = novaseq_6000_post_1_5_kits_sample_sheet_object.get_sample_ids()
 
     # THEN the returned value is a list
     assert isinstance(sample_internal_ids, list)
