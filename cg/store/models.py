@@ -92,7 +92,7 @@ class Application(Base):
 
     id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
     tag: Mapped[str] = mapped_column(types.String(32), unique=True, nullable=False)
-    prep_category: Mapped[str] = mapped_column(types.Enum(*PrepCategory), nullable=False)
+    prep_category: Mapped[PrepCategory]
     is_external: Mapped[bool] = mapped_column(types.Boolean, nullable=False, default=False)
     description: Mapped[str] = mapped_column(types.String(256), nullable=False)
     is_accredited: Mapped[bool] = mapped_column(types.Boolean, nullable=False)
@@ -397,14 +397,14 @@ class Case(Base, PriorityMixin):
     __tablename__ = "case"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
-    action: Mapped[Optional[CaseActions]] = mapped_column(types.Enum(*CaseActions.actions()))
+    action: Mapped[Optional[CaseActions]]
     _cohorts: Mapped[Optional[str]] = mapped_column(types.Text)
     comment: Mapped[Optional[str]] = mapped_column(types.Text)
     created_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, default=datetime.now)
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped["Customer"] = orm.relationship(foreign_keys=[customer_id])
-    data_analysis: Mapped[Optional[Workflow]] = mapped_column(types.Enum(*list(Workflow)))
-    data_delivery: Mapped[Optional[DataDelivery]] = mapped_column(types.Enum(*list(DataDelivery)))
+    data_analysis: Mapped[Optional[Workflow]]
+    data_delivery: Mapped[Optional[DataDelivery]]
     id: Mapped[int] = mapped_column(primary_key=True)
     internal_id: Mapped[str] = mapped_column(types.String(32), unique=True)
     is_compressible: Mapped[bool] = mapped_column(default=True)
