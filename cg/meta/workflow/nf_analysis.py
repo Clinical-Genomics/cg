@@ -351,6 +351,16 @@ class NfAnalysisAPI(AnalysisAPI):
 
         return PipelineDeliverables(files=files)
 
+    def get_multiqc_json_path(self, case_id: str) -> Path:
+        """Return the path of the multiqc_data.json file."""
+        return Path(
+            self.root_dir,
+            case_id,
+            MultiQC.MULTIQC,
+            MultiQC.MULTIQC_DATA,
+            MultiQC.MULTIQC_DATA + FileExtensions.JSON,
+        )
+
     def get_workflow_metrics(self) -> dict:
         """Get nf-core workflow metrics constants."""
         return {}
