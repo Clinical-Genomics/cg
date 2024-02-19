@@ -74,7 +74,6 @@ class SampleSheetAPI:
             return sample_sheet_path
         else:
             LOG.warning(f"Sample sheet with path {sample_sheet_path} does not exist")
-            return
 
     def get_valid_sample_sheet_path_from_hk(self, flow_cell_id: str) -> Path | None:
         """Return the sample sheet path from Housekeeper if is valid and exists."""

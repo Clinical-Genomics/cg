@@ -98,10 +98,10 @@ def test_get_index_settings_name_missing_index_settings(
     # GIVEN the content of a sample sheet without index settings
     novaseq_x_sample_sheet_content.pop(5)
     sample_sheet_validator.set_sample_sheet_content(novaseq_x_sample_sheet_content)
-    assert (
-        not [SampleSheetBCLConvertSections.Header.INDEX_SETTINGS.value, "NovaSeqX"]
-        in sample_sheet_validator.content
-    )
+    assert [
+        SampleSheetBCLConvertSections.Header.INDEX_SETTINGS.value,
+        "NovaSeqX",
+    ] not in sample_sheet_validator.content
 
     # WHEN getting the index settings name
     with pytest.raises(SampleSheetError):

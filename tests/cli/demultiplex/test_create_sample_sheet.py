@@ -10,8 +10,6 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS

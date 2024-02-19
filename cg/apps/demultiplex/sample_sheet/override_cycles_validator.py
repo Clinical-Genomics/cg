@@ -16,20 +16,43 @@ class OverrideCyclesValidator:
 
     def __init__(
         self,
-        run_read1_cycles: int,
-        run_read2_cycles: int,
-        run_index1_cycles: int,
-        run_index2_cycles: int | None,
-        is_reverse_complement: bool,
+        run_read1_cycles: int | None = None,
+        run_read2_cycles: int | None = None,
+        run_index1_cycles: int | None = None,
+        run_index2_cycles: int | None = None,
+        is_reverse_complement: bool | None = None,
     ):
         self.sample: dict[str, str] | None = None
         self.sample_cycles: list[str] | None = None
         self.sample_id: str | None = None
-        self.run_read1_cycles: int = run_read1_cycles
-        self.run_read2_cycles: int = run_read2_cycles
-        self.run_index1_cycles: int = run_index1_cycles
+        self.run_read1_cycles: int | None = run_read1_cycles
+        self.run_read2_cycles: int | None = run_read2_cycles
+        self.run_index1_cycles: int | None = run_index1_cycles
         self.run_index2_cycles: int | None = run_index2_cycles
-        self.is_reverse_complement: bool = is_reverse_complement
+        self.is_reverse_complement: bool | None = is_reverse_complement
+
+    def set_run_cycles(
+        self,
+        read1_cycles: int | None = None,
+        read2_cycles: int | None = None,
+        index1_cycles: int | None = None,
+        index2_cycles: int | None = None,
+    ) -> None:
+        """Set the run cycles."""
+        self.run_read1_cycles = read1_cycles
+        self.run_read2_cycles = read2_cycles
+        self.run_index1_cycles = index1_cycles
+        self.run_index2_cycles = index2_cycles
+
+    def set_reverse_complement(self, is_reverse_complement: bool) -> None:
+        """Set the reverse complement."""
+        self.is_reverse_complement = is_reverse_complement
+
+    def set_attributes_from_sample(self, sample: dict[str, str]) -> None:
+        """Set the sample, override cycles and sample id."""
+        self.sample = sample
+        self.sample_cycles = sample[SampleSheetBCLConvertSections.Data.OVERRIDE_CYCLES].split(";")
+        self.sample_id = sample[SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID]
 
     @staticmethod
     def is_index_cycle_value_following_pattern(
@@ -143,9 +166,7 @@ class OverrideCyclesValidator:
         sample: dict[str, str],
     ) -> None:
         """Determine if the override cycles are valid for a given sample."""
-        self.sample = sample
-        self.sample_cycles = sample[SampleSheetBCLConvertSections.Data.OVERRIDE_CYCLES].split(";")
-        self.sample_id = sample[SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID]
+        self.set_attributes_from_sample(sample)
         self._validate_reads_cycles()
         self._validate_index1_cycles()
         self._validate_index2_cycles()

@@ -69,6 +69,7 @@ pytest_plugins = [
     "tests.fixture_plugins.timestamp_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.flow_cell_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.name_fixtures",
+    "tests.fixture_plugins.demultiplex_fixtures.override_cycles_validator_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.path_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_fixtures",
