@@ -213,7 +213,7 @@ class ApplicationVersion(Base):
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=datetime.now)
     application_id: Mapped[int] = mapped_column(ForeignKey(Application.id))
 
-    application: Mapped["Application"] = orm.relationship(back_populates="versions")
+    application: Mapped[Application] = orm.relationship(back_populates="versions")
 
     def __str__(self) -> str:
         return f"{self.application.tag} ({self.version})"
@@ -237,7 +237,7 @@ class ApplicationLimitations(Base):
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=datetime.now)
 
-    application: Mapped["Application"] = orm.relationship(back_populates="pipeline_limitations")
+    application: Mapped[Application] = orm.relationship(back_populates="pipeline_limitations")
 
     def __str__(self):
         return f"{self.application.tag} – {self.pipeline}"
@@ -318,7 +318,7 @@ class BedVersion(Base):
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=datetime.now)
     bed_id: Mapped[int] = mapped_column(ForeignKey(Bed.id))
 
-    bed: Mapped["Bed"] = orm.relationship(back_populates="versions")
+    bed: Mapped[Bed] = orm.relationship(back_populates="versions")
 
     def __str__(self) -> str:
         return f"{self.bed.name} ({self.version})"
@@ -396,7 +396,7 @@ class Collaboration(Base):
         unique=True,
     )
     name: Mapped[str128]
-    customers: Mapped[list["Customer"]] = orm.relationship(
+    customers: Mapped[list[Customer]] = orm.relationship(
         secondary="customer_collaboration", back_populates="collaborations"
     )
 
@@ -455,7 +455,7 @@ class Case(Base, PriorityMixin):
     synopsis: Mapped[text | None]
     tickets: Mapped[varchar128 | None]
 
-    analyses: Mapped[list["Analysis"]] = orm.relationship(
+    analyses: Mapped[list[Analysis]] = orm.relationship(
         back_populates="case", order_by="-Analysis.completed_at"
     )
     links: Mapped[list["CaseSample"]] = orm.relationship(back_populates="case")
@@ -594,7 +594,7 @@ class CaseSample(Base):
     mother_id: Mapped[int | None] = mapped_column(ForeignKey("sample.id"))
     father_id: Mapped[int | None] = mapped_column(ForeignKey("sample.id"))
 
-    case: Mapped["Case"] = orm.relationship(back_populates="links")
+    case: Mapped[Case] = orm.relationship(back_populates="links")
     sample: Mapped["Sample"] = orm.relationship(foreign_keys=[sample_id], back_populates="links")
     mother: Mapped["Sample | None"] = orm.relationship(
         foreign_keys=[mother_id], back_populates="mother_links"
@@ -678,7 +678,7 @@ class Panel(Base):
     abbrev: Mapped[str32 | None] = mapped_column(unique=True)
     current_version: Mapped[float]
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
-    customer: Mapped["Customer"] = orm.relationship(back_populates="panels")
+    customer: Mapped[Customer] = orm.relationship(back_populates="panels")
     date: Mapped[datetime]
     gene_count: Mapped[int | None]
     id: Mapped[intpk]
@@ -702,9 +702,9 @@ class Pool(Base):
     comment: Mapped[text | None]
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
-    customer: Mapped["Customer"] = orm.relationship(foreign_keys=[customer_id])
+    customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     delivered_at: Mapped[datetime | None]
-    deliveries: Mapped[list["Delivery"]] = orm.relationship(backref="pool")
+    deliveries: Mapped[list[Delivery]] = orm.relationship(backref="pool")
     id: Mapped[intpk]
     invoice_id: Mapped[int | None] = mapped_column(ForeignKey("invoice.id"))
     name: Mapped[str32]
@@ -724,7 +724,7 @@ class Sample(Base, PriorityMixin):
     __tablename__ = "sample"
     age_at_sampling: Mapped[float | None]
     application_version_id: Mapped[int] = mapped_column(ForeignKey("application_version.id"))
-    application_version: Mapped["ApplicationVersion"] = orm.relationship(
+    application_version: Mapped[ApplicationVersion] = orm.relationship(
         foreign_keys=[application_version_id]
     )
     capture_kit: Mapped[str64 | None]
@@ -732,9 +732,9 @@ class Sample(Base, PriorityMixin):
     control: Mapped[ControlOptions | None]
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
-    customer: Mapped["Customer"] = orm.relationship(foreign_keys=[customer_id])
+    customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     delivered_at: Mapped[datetime | None]
-    deliveries: Mapped[list["Delivery"]] = orm.relationship(backref="sample")
+    deliveries: Mapped[list[Delivery]] = orm.relationship(backref="sample")
     downsampled_to: Mapped[bigint | None]
     from_sample: Mapped[str128 | None]
     id: Mapped[intpk]
@@ -764,16 +764,16 @@ class Sample(Base, PriorityMixin):
     sex: Mapped[SexOptions]
     subject_id: Mapped[str128 | None]
 
-    links: Mapped[list["CaseSample"]] = orm.relationship(
+    links: Mapped[list[CaseSample]] = orm.relationship(
         foreign_keys=[CaseSample.sample_id], back_populates="sample"
     )
-    mother_links: Mapped[list["CaseSample"]] = orm.relationship(
+    mother_links: Mapped[list[CaseSample]] = orm.relationship(
         foreign_keys=[CaseSample.mother_id], back_populates="mother"
     )
-    father_links: Mapped[list["CaseSample"]] = orm.relationship(
+    father_links: Mapped[list[CaseSample]] = orm.relationship(
         foreign_keys=[CaseSample.father_id], back_populates="father"
     )
-    flowcells: Mapped[list["Flowcell"]] = orm.relationship(
+    flowcells: Mapped[list[Flowcell]] = orm.relationship(
         secondary=flowcell_sample, back_populates="samples"
     )
     sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
@@ -869,7 +869,7 @@ class Invoice(Base):
     __tablename__ = "invoice"
     id: Mapped[intpk]
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"))
-    customer: Mapped["Customer"] = orm.relationship(foreign_keys=[customer_id])
+    customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=datetime.now)
     invoiced_at: Mapped[datetime | None]
@@ -899,7 +899,7 @@ class User(Base):
     is_admin: Mapped[bool | None] = mapped_column(default=False)
     order_portal_login: Mapped[bool | None] = mapped_column(default=False)
 
-    customers: Mapped[list["Customer"]] = orm.relationship(
+    customers: Mapped[list[Customer]] = orm.relationship(
         secondary=customer_user, back_populates="users"
     )
 
@@ -929,8 +929,8 @@ class SampleLaneSequencingMetrics(Base):
 
     created_at: Mapped[datetime | None]
 
-    flowcell: Mapped["Flowcell"] = orm.relationship(back_populates="sequencing_metrics")
-    sample: Mapped["Sample"] = orm.relationship(back_populates="sequencing_metrics")
+    flowcell: Mapped[Flowcell] = orm.relationship(back_populates="sequencing_metrics")
+    sample: Mapped[Sample] = orm.relationship(back_populates="sequencing_metrics")
 
     __table_args__ = (
         UniqueConstraint(
@@ -952,7 +952,7 @@ class Order(Base):
 
     id: Mapped[intpk]
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"))
-    customer: Mapped["Customer"] = orm.relationship(foreign_keys=[customer_id])
+    customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     order_date: Mapped[datetime] = mapped_column(default=datetime.now())
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
     workflow: Mapped[Workflow]
