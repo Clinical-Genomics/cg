@@ -24,7 +24,7 @@ class TrailblazerAnalysis(BaseModel):
     type: str | None = None
     user_id: int | None = None
     progress: float | None = 0.0
-    data_analysis: str | None = None
+    workflow: str | None = None
     ticket: str | None = None
     uploaded_at: str | None = None
 
