@@ -9,13 +9,13 @@ from housekeeper.store.models import File
 LOG = logging.getLogger(__name__)
 
 
-def get_delivery_scope(delivery_arguments: set[str]) -> tuple[bool, bool]:
+def get_delivery_scope(workflows: list[str]) -> tuple[bool, bool]:
     """Returns the scope of the delivery, ie whether sample and/or case files were delivered."""
     case_delivery: bool = False
     sample_delivery: bool = False
-    for delivery in delivery_arguments:
-        sample_delivery: bool = is_sample_delivery(delivery)
-        case_delivery: bool = is_case_delivery(delivery)
+    for workflow in workflows:
+        sample_delivery: bool = is_sample_delivery(workflow)
+        case_delivery: bool = is_case_delivery(workflow)
     return sample_delivery, case_delivery
 
 

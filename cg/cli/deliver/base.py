@@ -77,8 +77,8 @@ def deliver_analysis(
     delivery_api.deliver_failed_samples = force_all
     delivery_api.ignore_missing_bundles = ignore_missing_bundles
 
-    for delivery in delivery_type:
-        delivery_api.deliver(case_id=case_id, ticket=ticket, workflow=delivery)
+    for workflow in delivery_type:
+        delivery_api.deliver(case_id=case_id, ticket=ticket, workflow=workflow)
 
 
 @deliver.command(name="rsync")

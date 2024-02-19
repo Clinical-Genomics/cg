@@ -30,18 +30,18 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
     click.echo(click.style("----------------- Clinical-delivery -----------------"))
 
     case: Case = context.obj.status_db.get_case_by_internal_id(case_id)
-    delivery_types: set[str] = case.get_delivery_arguments()
+    workflows: set[str] = case.get_delivery_arguments()
     is_sample_delivery: bool
     is_case_delivery: bool
     is_complete_delivery: bool
     job_id: int
-    is_sample_delivery, is_case_delivery = get_delivery_scope(delivery_types)
-    if not delivery_types:
+    is_sample_delivery, is_case_delivery = get_delivery_scope(workflows)
+    if not workflows:
         LOG.info(f"No delivery of files requested for case {case_id}")
         return
 
-    LOG.debug(f"Delivery types are: {delivery_types}")
-    for delivery_type in delivery_types:
+    LOG.debug(f"Delivery types are: {workflows}")
+    for delivery_type in workflows:
         context.obj.delivery_api.deliver_files(case=case, workflow=delivery_type)
 
     rsync_api = RsyncAPI(context.obj)
