@@ -43,7 +43,7 @@ Text = Annotated[str, None]
 VarChar128 = Annotated[str, 128]
 
 IntPrimaryKey = Annotated[int, mapped_column(primary_key=True)]
-StrUniq = Annotated[str, mapped_column(String(32), unique=True)]
+UniqueStr = Annotated[str, mapped_column(String(32), unique=True)]
 
 
 class Base(DeclarativeBase):
@@ -131,7 +131,7 @@ class Application(Base):
 
     id: Mapped[IntPrimaryKey]
 
-    tag: Mapped[StrUniq]
+    tag: Mapped[UniqueStr]
     prep_category: Mapped[PrepCategory]
     is_external: Mapped[bool] = mapped_column(default=False)
     description: Mapped[Str256]
@@ -281,7 +281,7 @@ class Bed(Base):
 
     __tablename__ = "bed"
     id: Mapped[IntPrimaryKey]
-    name: Mapped[StrUniq]
+    name: Mapped[UniqueStr]
     comment: Mapped[Text | None]
     is_archived: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
@@ -336,7 +336,7 @@ class Customer(Base):
     agreement_registration: Mapped[Str32 | None]
     comment: Mapped[Text | None]
     id: Mapped[IntPrimaryKey]
-    internal_id: Mapped[StrUniq]
+    internal_id: Mapped[UniqueStr]
     invoice_address: Mapped[Text]
     invoice_reference: Mapped[Str32]
     is_trusted: Mapped[bool] = mapped_column(default=False)
@@ -441,7 +441,7 @@ class Case(Base, PriorityMixin):
     data_analysis: Mapped[Workflow | None]
     data_delivery: Mapped[DataDelivery | None]
     id: Mapped[IntPrimaryKey]
-    internal_id: Mapped[StrUniq]
+    internal_id: Mapped[UniqueStr]
     is_compressible: Mapped[bool] = mapped_column(default=True)
     name: Mapped[Str128]
     order_id: Mapped[int | None] = mapped_column(ForeignKey("order.id"))
@@ -623,7 +623,7 @@ class CaseSample(Base):
 class Flowcell(Base):
     __tablename__ = "flowcell"
     id: Mapped[IntPrimaryKey]
-    name: Mapped[StrUniq]
+    name: Mapped[UniqueStr]
     sequencer_type: Mapped[str | None] = mapped_column(
         types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx")
     )
@@ -656,7 +656,7 @@ class Flowcell(Base):
 class Organism(Base):
     __tablename__ = "organism"
     id: Mapped[IntPrimaryKey]
-    internal_id: Mapped[StrUniq]
+    internal_id: Mapped[UniqueStr]
     name: Mapped[Str255] = mapped_column(unique=True)
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=datetime.now)
@@ -674,7 +674,7 @@ class Organism(Base):
 
 class Panel(Base):
     __tablename__ = "panel"
-    abbrev: Mapped[StrUniq | None]
+    abbrev: Mapped[UniqueStr | None]
     current_version: Mapped[float]
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped[Customer] = orm.relationship(back_populates="panels")
@@ -737,7 +737,7 @@ class Sample(Base, PriorityMixin):
     downsampled_to: Mapped[BigInt | None]
     from_sample: Mapped[Str128 | None]
     id: Mapped[IntPrimaryKey]
-    internal_id: Mapped[StrUniq]
+    internal_id: Mapped[UniqueStr]
     invoice_id: Mapped[int | None] = mapped_column(ForeignKey("invoice.id"))
     invoiced_at: Mapped[datetime | None]  # DEPRECATED
     _is_external: Mapped[bool | None] = mapped_column("is_external")  # DEPRECATED
