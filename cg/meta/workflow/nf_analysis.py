@@ -313,53 +313,43 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return deliverables file template content."""
         raise NotImplementedError
 
+    def get_deliverables_for_sample(
+        self, sample: Sample, case_id: str, template: list[dict]
+    ) -> list[FileDeliverable]:
+        """Return a list of FileDeliverables for each sample."""
+        sample_id: str = sample.internal_id
+        sample_name: str = sample.name
+        case_path = str(self.get_case_path(case_id=case_id))
+        files: list[FileDeliverable] = []
+
+        for file in template:
+            deliverables = file.copy()
+            for deliverable_field, deliverable_value in file.items():
+                if deliverable_value is None:
+                    continue
+                deliverables[deliverable_field] = (
+                    deliverables[deliverable_field]
+                    .replace("CASEID", case_id)
+                    .replace("SAMPLEID", sample_id)
+                    .replace("SAMPLENAME", sample_name)
+                    .replace("CASEPATH", case_path)
+                )
+            files.append(FileDeliverable(**deliverables))
+        return files
+
     def get_deliverables_for_case(self, case_id: str) -> PipelineDeliverables:
         """Return PipelineDeliverables for a given case."""
         deliverable_template: list[dict] = self.get_deliverables_template_content()
         samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
-        case_path = str(self.get_case_path(case_id=case_id))
         files: list[FileDeliverable] = []
 
         for sample in samples:
-            sample_id: str = sample.internal_id
-            sample_name: str = sample.name
-
-            for file in deliverable_template:
-                deliverables = dict(file)
-                for deliverable_field, deliverable_value in file.items():
-                    if deliverable_value is None:
-                        continue
-
-                    deliverables[deliverable_field] = deliverables[deliverable_field].replace(
-                        "CASEID", case_id
-                    )
-                    deliverables[deliverable_field] = deliverables[deliverable_field].replace(
-                        "SAMPLEID", sample_id
-                    )
-                    deliverables[deliverable_field] = deliverables[deliverable_field].replace(
-                        "SAMPLENAME", str(sample_name)
-                    )
-                    deliverables[deliverable_field] = deliverables[deliverable_field].replace(
-                        "PATHTOCASE", case_path
-                    )
-
-                (
-                    files.append(FileDeliverable(**deliverables))
-                    if deliverables not in files
-                    else files
-                )
+            bundles_per_sample = self.get_deliverables_for_sample(
+                sample=sample, case_id=case_id, template=deliverable_template
+            )
+            files.extend(bundle for bundle in bundles_per_sample if bundle not in files)
 
         return PipelineDeliverables(files=files)
-
-    def get_multiqc_json_path(self, case_id: str) -> Path:
-        """Return the path of the multiqc_data.json file."""
-        return Path(
-            self.root_dir,
-            case_id,
-            MultiQC.MULTIQC,
-            MultiQC.MULTIQC_DATA,
-            MultiQC.MULTIQC_DATA + FileExtensions.JSON,
-        )
 
     def get_workflow_metrics(self) -> dict:
         """Get nf-core workflow metrics constants."""
