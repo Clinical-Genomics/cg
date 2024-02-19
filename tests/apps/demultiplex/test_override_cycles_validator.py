@@ -36,7 +36,7 @@ def test_is_index_cycle_value_following_pattern(
     # GIVEN an override cycles validator, an index sequence
 
     # WHEN checking if the index cycle value follows a pattern
-    result: bool = override_cycles_validator.is_index_cycle_value_following_pattern(
+    result: bool = override_cycles_validator._is_index_cycle_value_following_pattern(
         pattern=pattern,
         index_cycle=index_cycle,
         run_cycles=run_cycles,

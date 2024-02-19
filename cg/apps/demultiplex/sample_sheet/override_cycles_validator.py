@@ -55,7 +55,7 @@ class OverrideCyclesValidator:
         self.sample_id = sample[SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID]
 
     @staticmethod
-    def is_index_cycle_value_following_pattern(
+    def _is_index_cycle_value_following_pattern(
         pattern: str, index_cycle: str, run_cycles: int, index_sequence: str
     ) -> bool:
         """
@@ -111,7 +111,7 @@ class OverrideCyclesValidator:
             and index1_cycle == f"I{self.run_index1_cycles}"
         ):
             return
-        if self.is_index_cycle_value_following_pattern(
+        if self._is_index_cycle_value_following_pattern(
             pattern=FORWARD_INDEX_CYCLE_PATTERN,
             index_cycle=index1_cycle,
             run_cycles=self.run_index1_cycles,
@@ -143,14 +143,14 @@ class OverrideCyclesValidator:
             and index2_cycle == f"I{self.run_index2_cycles}"
         ):
             return
-        if self.is_reverse_complement and self.is_index_cycle_value_following_pattern(
+        if self.is_reverse_complement and self._is_index_cycle_value_following_pattern(
             pattern=REVERSE_INDEX_CYCLE_PATTERN,
             index_cycle=index2_cycle,
             run_cycles=self.run_index2_cycles,
             index_sequence=self.sample[SampleSheetBCLConvertSections.Data.INDEX_2],
         ):
             return
-        if not self.is_reverse_complement and self.is_index_cycle_value_following_pattern(
+        if not self.is_reverse_complement and self._is_index_cycle_value_following_pattern(
             pattern=FORWARD_INDEX_CYCLE_PATTERN,
             index_cycle=index2_cycle,
             run_cycles=self.run_index2_cycles,
