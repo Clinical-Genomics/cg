@@ -474,16 +474,6 @@ class Case(Model, PriorityMixin):
         return [link.sample for link in self.links]
 
     @property
-    def orders(self) -> list["Order"]:
-        """Return case samples."""
-        return self._get_orders
-
-    @property
-    def _get_orders(self) -> list["Order"]:
-        """Extract samples from a case."""
-        return [order_link.order for order_link in self.order_links]
-
-    @property
     def tumour_samples(self) -> list["Sample"]:
         """Return tumour samples."""
         return self._get_tumour_samples
