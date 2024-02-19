@@ -42,7 +42,7 @@ Str256 = Annotated[str, 256]
 Text = Annotated[str, None]
 VarChar128 = Annotated[str, 128]
 
-IntPrimaryKey = Annotated[int, mapped_column(primary_key=True)]
+PrimaryKeyInt = Annotated[int, mapped_column(primary_key=True)]
 UniqueStr = Annotated[str, mapped_column(String(32), unique=True)]
 
 
@@ -129,7 +129,7 @@ class PriorityMixin:
 class Application(Base):
     __tablename__ = "application"
 
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
 
     tag: Mapped[UniqueStr]
     prep_category: Mapped[PrepCategory]
@@ -197,7 +197,7 @@ class ApplicationVersion(Base):
     __tablename__ = "application_version"
     __table_args__ = (UniqueConstraint("application_id", "version", name="_app_version_uc"),)
 
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     version: Mapped[int]
 
     valid_from: Mapped[datetime | None] = mapped_column(default=datetime.now)
@@ -228,7 +228,7 @@ class ApplicationVersion(Base):
 class ApplicationLimitations(Base):
     __tablename__ = "application_limitations"
 
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     application_id: Mapped[int] = mapped_column(ForeignKey(Application.id))
     pipeline: Mapped[Workflow]
     limitations: Mapped[Text | None]
@@ -248,7 +248,7 @@ class ApplicationLimitations(Base):
 class Analysis(Base):
     __tablename__ = "analysis"
 
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     pipeline: Mapped[Workflow | None]
     pipeline_version: Mapped[Str32 | None]
     started_at: Mapped[datetime | None]
@@ -280,7 +280,7 @@ class Bed(Base):
     """Model for bed target captures"""
 
     __tablename__ = "bed"
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     name: Mapped[UniqueStr]
     comment: Mapped[Text | None]
     is_archived: Mapped[bool] = mapped_column(default=False)
@@ -304,7 +304,7 @@ class BedVersion(Base):
     __tablename__ = "bed_version"
     __table_args__ = (UniqueConstraint("bed_id", "version", name="_app_version_uc"),)
 
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     shortname: Mapped[Str64 | None]
     version: Mapped[int]
     filename: Mapped[Str256]
@@ -335,7 +335,7 @@ class Customer(Base):
     agreement_date: Mapped[datetime | None]
     agreement_registration: Mapped[Str32 | None]
     comment: Mapped[Text | None]
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     internal_id: Mapped[UniqueStr]
     invoice_address: Mapped[Text]
     invoice_reference: Mapped[Str32]
@@ -390,7 +390,7 @@ class Customer(Base):
 
 class Collaboration(Base):
     __tablename__ = "collaboration"
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     internal_id: Mapped[Str32] = mapped_column(
         unique=True,
     )
@@ -414,7 +414,7 @@ class Collaboration(Base):
 
 class Delivery(Base):
     __tablename__ = "delivery"
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     delivered_at: Mapped[datetime | None]
     removed_at: Mapped[datetime | None]
     destination: Mapped[str | None] = mapped_column(
@@ -440,7 +440,7 @@ class Case(Base, PriorityMixin):
     customer: Mapped["Customer"] = orm.relationship(foreign_keys=[customer_id])
     data_analysis: Mapped[Workflow | None]
     data_delivery: Mapped[DataDelivery | None]
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     internal_id: Mapped[UniqueStr]
     is_compressible: Mapped[bool] = mapped_column(default=True)
     name: Mapped[Str128]
@@ -582,7 +582,7 @@ class CaseSample(Base):
     __tablename__ = "case_sample"
     __table_args__ = (UniqueConstraint("case_id", "sample_id", name="_case_sample_uc"),)
 
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     case_id: Mapped[str] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
     sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id", ondelete="CASCADE"))
     status: Mapped[StatusOptions] = mapped_column(default=SexOptions.UNKNOWN)
@@ -622,7 +622,7 @@ class CaseSample(Base):
 
 class Flowcell(Base):
     __tablename__ = "flowcell"
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     name: Mapped[UniqueStr]
     sequencer_type: Mapped[str | None] = mapped_column(
         types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx")
@@ -655,7 +655,7 @@ class Flowcell(Base):
 
 class Organism(Base):
     __tablename__ = "organism"
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     internal_id: Mapped[UniqueStr]
     name: Mapped[Str255] = mapped_column(unique=True)
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
@@ -680,7 +680,7 @@ class Panel(Base):
     customer: Mapped[Customer] = orm.relationship(back_populates="panels")
     date: Mapped[datetime]
     gene_count: Mapped[int | None]
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     name: Mapped[Str64 | None] = mapped_column(unique=True)
 
     def __str__(self):
@@ -704,7 +704,7 @@ class Pool(Base):
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     delivered_at: Mapped[datetime | None]
     deliveries: Mapped[list[Delivery]] = orm.relationship(backref="pool")
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     invoice_id: Mapped[int | None] = mapped_column(ForeignKey("invoice.id"))
     name: Mapped[Str32]
     no_invoice: Mapped[bool | None] = mapped_column(default=False)
@@ -736,7 +736,7 @@ class Sample(Base, PriorityMixin):
     deliveries: Mapped[list[Delivery]] = orm.relationship(backref="sample")
     downsampled_to: Mapped[BigInt | None]
     from_sample: Mapped[Str128 | None]
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     internal_id: Mapped[UniqueStr]
     invoice_id: Mapped[int | None] = mapped_column(ForeignKey("invoice.id"))
     invoiced_at: Mapped[datetime | None]  # DEPRECATED
@@ -866,7 +866,7 @@ class Sample(Base, PriorityMixin):
 
 class Invoice(Base):
     __tablename__ = "invoice"
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
@@ -892,7 +892,7 @@ class Invoice(Base):
 
 class User(Base):
     __tablename__ = "user"
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     name: Mapped[Str128]
     email: Mapped[Str128] = mapped_column(unique=True)
     is_admin: Mapped[bool | None] = mapped_column(default=False)
@@ -917,7 +917,7 @@ class SampleLaneSequencingMetrics(Base):
 
     __tablename__ = "sample_lane_sequencing_metrics"
 
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     flow_cell_name: Mapped[Str32] = mapped_column(ForeignKey("flowcell.name"))
     flow_cell_lane_number: Mapped[int | None]
 
@@ -949,7 +949,7 @@ class Order(Base):
 
     __tablename__ = "order"
 
-    id: Mapped[IntPrimaryKey]
+    id: Mapped[PrimaryKeyInt]
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     order_date: Mapped[datetime] = mapped_column(default=datetime.now())
