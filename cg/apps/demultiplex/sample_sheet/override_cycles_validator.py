@@ -1,11 +1,14 @@
 import logging
 import re
 
+from cg.constants.demultiplexing import (
+    FORWARD_INDEX_CYCLE_PATTERN,
+    REVERSE_INDEX_CYCLE_PATTERN,
+    SampleSheetBCLConvertSections,
+)
 from cg.exc import OverrideCyclesError
 
 LOG = logging.getLogger(__name__)
-FORWARD_INDEX_CYCLE_PATTERN: str = r"I(\d+)N(\d+)"
-REVERSE_INDEX_CYCLE_PATTERN: str = r"N(\d+)I(\d+)"
 
 
 class OverrideCyclesValidator:
@@ -81,7 +84,7 @@ class OverrideCyclesValidator:
         """
         index1_cycle: str = self.sample_cycles[1]
         if (
-            self.run_index1_cycles == len(self.sample["Index"])
+            self.run_index1_cycles == len(self.sample[SampleSheetBCLConvertSections.Data.INDEX_1])
             and index1_cycle == f"I{self.run_index1_cycles}"
         ):
             return
@@ -89,7 +92,7 @@ class OverrideCyclesValidator:
             pattern=FORWARD_INDEX_CYCLE_PATTERN,
             index_cycle=index1_cycle,
             run_cycles=self.run_index1_cycles,
-            index_sequence=self.sample["Index"],
+            index_sequence=self.sample[SampleSheetBCLConvertSections.Data.INDEX_1],
         ):
             return
         message: str = f"Incorrect index1 cycle {index1_cycle} for sample {self.sample_id}"
@@ -107,10 +110,13 @@ class OverrideCyclesValidator:
         if not self.run_index2_cycles and len(self.sample_cycles) == 3:
             return
         index2_cycle: str = self.sample_cycles[2]
-        if not self.sample["Index2"] and index2_cycle == f"N{self.run_index2_cycles}":
+        if (
+            not self.sample[SampleSheetBCLConvertSections.Data.INDEX_2]
+            and index2_cycle == f"N{self.run_index2_cycles}"
+        ):
             return
         if (
-            self.run_index2_cycles == len(self.sample["Index2"])
+            self.run_index2_cycles == len(self.sample[SampleSheetBCLConvertSections.Data.INDEX_2])
             and index2_cycle == f"I{self.run_index2_cycles}"
         ):
             return
@@ -118,14 +124,14 @@ class OverrideCyclesValidator:
             pattern=REVERSE_INDEX_CYCLE_PATTERN,
             index_cycle=index2_cycle,
             run_cycles=self.run_index2_cycles,
-            index_sequence=self.sample["Index2"],
+            index_sequence=self.sample[SampleSheetBCLConvertSections.Data.INDEX_2],
         ):
             return
         if not self.is_reverse_complement and self.is_index_cycle_value_following_pattern(
             pattern=FORWARD_INDEX_CYCLE_PATTERN,
             index_cycle=index2_cycle,
             run_cycles=self.run_index2_cycles,
-            index_sequence=self.sample["Index2"],
+            index_sequence=self.sample[SampleSheetBCLConvertSections.Data.INDEX_2],
         ):
             return
         message: str = f"Incorrect index2 cycle {index2_cycle} for sample {self.sample_id}"
@@ -138,8 +144,8 @@ class OverrideCyclesValidator:
     ) -> None:
         """Determine if the override cycles are valid for a given sample."""
         self.sample = sample
-        self.sample_cycles = sample["OverrideCycles"].split(";")
-        self.sample_id = sample["Sample_ID"]
+        self.sample_cycles = sample[SampleSheetBCLConvertSections.Data.OVERRIDE_CYCLES].split(";")
+        self.sample_id = sample[SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID]
         self._validate_reads_cycles()
         self._validate_index1_cycles()
         self._validate_index2_cycles()

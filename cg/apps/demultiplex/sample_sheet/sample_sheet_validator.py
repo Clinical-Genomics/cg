@@ -61,7 +61,11 @@ class SampleSheetValidator:
             raise SampleSheetError(message)
 
     def _get_index_settings_name(self) -> str:
-        """Return the index settings from the sample sheet's header."""
+        """
+        Find the entry in the sample sheet holding the index settings name, which has the form:
+        `IndexSettings,<index_setting_name>`, and extract its value.
+        """
+
         for row in self.content:
             if SampleSheetBCLConvertSections.Header.INDEX_SETTINGS in row:
                 return row[1]

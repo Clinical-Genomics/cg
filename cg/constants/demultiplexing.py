@@ -237,6 +237,9 @@ UNDETERMINED: str = "Undetermined"
 NEW_NOVASEQ_CONTROL_SOFTWARE_VERSION: str = "1.7.0"
 NEW_NOVASEQ_REAGENT_KIT_VERSION: str = "1.5"
 
+FORWARD_INDEX_CYCLE_PATTERN: str = r"I(\d+)N(\d+)"
+REVERSE_INDEX_CYCLE_PATTERN: str = r"N(\d+)I(\d+)"
+
 
 class IndexSettings(BaseModel):
     """

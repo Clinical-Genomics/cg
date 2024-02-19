@@ -7,7 +7,6 @@ import pytest
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.nanopore_files import NanoporeDirsAndFiles
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 CORRECT_SAMPLE_SHEET: str = "CorrectSampleSheet.csv"
 
