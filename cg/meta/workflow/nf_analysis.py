@@ -19,7 +19,7 @@ from cg.models.deliverables.metric_deliverables import (
     MetricsDeliverablesCondition,
 )
 from cg.models.fastq import FastqFileMeta
-from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
+from cg.models.nf_analysis import FileDeliverable, WorkflowDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.utils import Process
 from cg.store.models import Sample
@@ -337,8 +337,8 @@ class NfAnalysisAPI(AnalysisAPI):
             files.append(FileDeliverable(**deliverables))
         return files
 
-    def get_deliverables_for_case(self, case_id: str) -> PipelineDeliverables:
-        """Return PipelineDeliverables for a given case."""
+    def get_deliverables_for_case(self, case_id: str) -> WorkflowDeliverables:
+        """Return WorkflowDeliverables for a given case."""
         deliverable_template: list[dict] = self.get_deliverables_template_content()
         samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
         files: list[FileDeliverable] = []
@@ -349,7 +349,7 @@ class NfAnalysisAPI(AnalysisAPI):
             )
             files.extend(bundle for bundle in bundles_per_sample if bundle not in files)
 
-        return PipelineDeliverables(files=files)
+        return WorkflowDeliverables(files=files)
 
     def get_multiqc_json_path(self, case_id: str) -> Path:
         """Return the path of the multiqc_data.json file."""
@@ -439,10 +439,10 @@ class NfAnalysisAPI(AnalysisAPI):
         self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
 
     def report_deliver(self, case_id: str) -> None:
-        """Create deliverables file."""
-        deliverables_content: PipelineDeliverables = self.get_deliverables_for_case(case_id=case_id)
+        """Write deliverables file."""
+        workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
         self.write_deliverables_file(
-            deliverables_content=deliverables_content.dict(),
+            deliverables_content=workflow_content.dict(),
             file_path=self.get_deliverables_file_path(case_id=case_id),
         )
         LOG.info(
