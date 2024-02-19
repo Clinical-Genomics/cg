@@ -62,11 +62,11 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
 
         try:
             sample_sheet_api.validate(flow_cell.sample_sheet_path)
-        except (SampleSheetError, ValidationError) as error:
+        except (SampleSheetError, ValidationError):
             LOG.warning(
                 f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}"
             )
-            raise click.Abort from error
+            continue
 
         if not dry_run:
             demultiplex_api.prepare_output_directory(flow_cell)
