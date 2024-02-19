@@ -38,10 +38,10 @@ class FastqService:
         self.trailblazer_api.add_pending_analysis(
             case_id=case.internal_id,
             analysis_type=AnalysisType.OTHER,
-            data_analysis=Workflow.FASTQ,
             config_path="",
             out_dir="",
             slurm_quality_of_service=case.slurm_priority,
+            workflow=Workflow.FASTQ,
             ticket=case.latest_ticket,
         )
         self.trailblazer_api.set_analysis_status(
