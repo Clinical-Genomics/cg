@@ -922,4 +922,4 @@ class OrderCase(Model):
     order_id = Column(ForeignKey("order.id", ondelete="CASCADE"), nullable=False)
     case_id = Column(ForeignKey("case.id", ondelete="CASCADE"), nullable=False)
     case = orm.relationship(Case, back_populates="order_links")
-    sample = orm.relationship(Order, back_populates="links")
+    order = orm.relationship(Order, back_populates="links")
