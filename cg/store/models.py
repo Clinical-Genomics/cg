@@ -55,6 +55,14 @@ customer_collaboration = Table(
     UniqueConstraint("customer_id", "collaboration_id", name="_customer_collaboration_uc"),
 )
 
+order_case = Table(
+    "order_case",
+    Model.metadata,
+    Column("order_id", ForeignKey("order.id", ondelete="CASCADE"), nullable=False),
+    Column("case_id", ForeignKey("case.id", ondelete="CASCADE"), nullable=False),
+    UniqueConstraint("order_id", "case_id", name="_order_case_uc"),
+)
+
 
 class PriorityMixin:
     @property
@@ -403,7 +411,7 @@ class Case(Model, PriorityMixin):
 
     analyses = orm.relationship(Analysis, back_populates="case", order_by="-Analysis.completed_at")
     links = orm.relationship("CaseSample", back_populates="case")
-    order_links = orm.relationship("OrderCase", back_populates="case")
+    orders = orm.relationship("Order", secondary=order_case, back_populates="cases")
 
     @property
     def cohorts(self) -> list[str]:
@@ -893,33 +901,12 @@ class Order(Model):
     __tablename__ = "order"
 
     id = Column(types.Integer, primary_key=True, unique=True)
+    cases = orm.relationship("Case", secondary=order_case, back_populates="orders")
     customer_id = Column(ForeignKey("customer.id"), nullable=False)
     customer = orm.relationship(Customer, foreign_keys=[customer_id])
-    links = orm.relationship("OrderCase", back_populates="order")
     order_date = Column(types.DateTime, nullable=False, default=dt.datetime.now())
     ticket_id = Column(types.Integer, nullable=False, unique=True, index=True)
     workflow = Column(types.Enum(*tuple(Workflow)), nullable=False)
 
-    @property
-    def cases(self) -> list[Case]:
-        """Return case samples."""
-        return self._get_cases
-
-    @property
-    def _get_cases(self) -> list[Case]:
-        """Extract samples from a case."""
-        return [link.case for link in self.links]
-
     def to_dict(self):
         return to_dict(model_instance=self)
-
-
-class OrderCase(Model):
-    __tablename__ = "order_case"
-    __table_args__ = (UniqueConstraint("order_id", "case_id", name="_order_case_uc"),)
-
-    id = Column(types.Integer, primary_key=True, unique=True, nullable=False)
-    order_id = Column(ForeignKey("order.id", ondelete="CASCADE"), nullable=False)
-    case_id = Column(ForeignKey("case.id", ondelete="CASCADE"), nullable=False)
-    case = orm.relationship(Case, back_populates="order_links")
-    order = orm.relationship(Order, back_populates="links")
