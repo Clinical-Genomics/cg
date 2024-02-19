@@ -1,8 +1,8 @@
 import re
 from datetime import datetime
-from typing import Any, Optional
+from typing import Annotated, Any, Optional
 
-from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
+from sqlalchemy import Column, ForeignKey, String, Table, UniqueConstraint, orm, types
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.util import deprecated
@@ -18,9 +18,21 @@ from cg.constants.constants import (
 )
 from cg.constants.priority import SlurmQos
 
+str32 = Annotated[str, 32]
+str128 = Annotated[str, 128]
+str256 = Annotated[str, 256]
+dec = Annotated[float, "SQL DECIMAL"]
+text = Annotated[str, "SQL TEXT"]
+
 
 class Base(DeclarativeBase):
-    pass
+    type_annotation_map = {
+        str32: String(32),
+        str128: String(128),
+        str256: String(256),
+        dec: types.DECIMAL,
+        text: types.Text,
+    }
 
 
 def to_dict(model_instance):
@@ -91,40 +103,42 @@ class Application(Base):
     __tablename__ = "application"
 
     id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
-    tag: Mapped[str] = mapped_column(types.String(32), unique=True, nullable=False)
+    tag: Mapped[str32] = mapped_column(unique=True)
     prep_category: Mapped[PrepCategory]
-    is_external: Mapped[bool] = mapped_column(types.Boolean, nullable=False, default=False)
-    description: Mapped[str] = mapped_column(types.String(256), nullable=False)
+    is_external: Mapped[bool] = mapped_column(types.Boolean, default=False)
+    description: Mapped[str256]
     is_accredited: Mapped[bool] = mapped_column(types.Boolean, nullable=False)
 
     turnaround_time: Mapped[Optional[int]] = mapped_column(types.Integer)
     minimum_order: Mapped[Optional[int]] = mapped_column(types.Integer, default=1)
     sequencing_depth: Mapped[Optional[int]] = mapped_column(types.Integer)
-    min_sequencing_depth: Mapped[int] = mapped_column(types.Integer, default=0, nullable=False)
+    min_sequencing_depth: Mapped[int] = mapped_column(types.Integer, default=0)
     target_reads: Mapped[Optional[int]] = mapped_column(types.BigInteger, default=0)
-    percent_reads_guaranteed: Mapped[int] = mapped_column(types.Integer, nullable=False)
+    percent_reads_guaranteed: Mapped[int] = mapped_column(
+        types.Integer,
+    )
     sample_amount: Mapped[Optional[int]] = mapped_column(types.Integer)
-    sample_volume: Mapped[Optional[str]] = mapped_column(types.Text)
-    sample_concentration: Mapped[Optional[str]] = mapped_column(types.Text)
-    sample_concentration_minimum: Mapped[Optional[float]] = mapped_column(types.DECIMAL)
-    sample_concentration_maximum: Mapped[Optional[float]] = mapped_column(types.DECIMAL)
-    sample_concentration_minimum_cfdna: Mapped[Optional[float]] = mapped_column(types.DECIMAL)
-    sample_concentration_maximum_cfdna: Mapped[Optional[float]] = mapped_column(types.DECIMAL)
+    sample_volume: Mapped[Optional[text]]
+    sample_concentration: Mapped[Optional[text]]
+    sample_concentration_minimum: Mapped[Optional[dec]]
+    sample_concentration_maximum: Mapped[Optional[dec]]
+    sample_concentration_minimum_cfdna: Mapped[Optional[dec]]
+    sample_concentration_maximum_cfdna: Mapped[Optional[dec]]
     priority_processing: Mapped[bool] = mapped_column(types.Boolean, default=False)
-    details: Mapped[Optional[str]] = mapped_column(types.Text)
-    limitations: Mapped[Optional[str]] = mapped_column(types.Text)
-    percent_kth: Mapped[int] = mapped_column(types.Integer, nullable=False)
-    comment: Mapped[Optional[str]] = mapped_column(types.Text)
-    is_archived: Mapped[bool] = mapped_column(types.Boolean, default=False)
+    details: Mapped[Optional[text]]
+    limitations: Mapped[Optional[text]]
+    percent_kth: Mapped[int]
+    comment: Mapped[Optional[text]]
+    is_archived: Mapped[bool] = mapped_column(default=False)
 
-    created_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, default=datetime.now)
-    updated_at: Mapped[Optional[datetime]] = mapped_column(types.DateTime, onupdate=datetime.now)
+    created_at: Mapped[Optional[datetime]] = mapped_column(default=datetime.now)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(onupdate=datetime.now)
 
     versions: Mapped[list["ApplicationVersion"]] = orm.relationship(
-        "ApplicationVersion", order_by="ApplicationVersion.version", back_populates="application"
+        order_by="ApplicationVersion.version", back_populates="application"
     )
     pipeline_limitations: Mapped[list["ApplicationLimitations"]] = orm.relationship(
-        "ApplicationLimitations", back_populates="application"
+        back_populates="application"
     )
 
     def __str__(self) -> str:
@@ -166,7 +180,7 @@ class ApplicationVersion(Base):
     price_express: Mapped[Optional[int]]
     price_research: Mapped[Optional[int]]
     price_clinical_trials: Mapped[Optional[int]]
-    comment: Mapped[Optional[str]] = mapped_column(types.Text)
+    comment: Mapped[Optional[text]]
 
     created_at: Mapped[Optional[datetime]] = mapped_column(default=datetime.now)
     updated_at: Mapped[Optional[datetime]] = mapped_column(onupdate=datetime.now)
@@ -210,7 +224,7 @@ class Analysis(Base):
 
     id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
     pipeline: Mapped[Optional[Workflow]]
-    pipeline_version: Mapped[Optional[str]] = mapped_column(types.String(32))
+    pipeline_version: Mapped[Optional[str32]]
     started_at: Mapped[Optional[datetime]]
     completed_at: Mapped[Optional[datetime]]
     delivery_report_created_at: Mapped[Optional[datetime]]
@@ -241,7 +255,7 @@ class Bed(Base):
 
     __tablename__ = "bed"
     id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(types.String(32), unique=True)
+    name: Mapped[str32] = mapped_column(unique=True)
     comment: Mapped[Optional[str]] = mapped_column(types.Text)
     is_archived: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[Optional[datetime]] = mapped_column(default=datetime.now)
@@ -267,11 +281,11 @@ class BedVersion(Base):
     id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
     shortname: Mapped[Optional[str]] = mapped_column(types.String(64))
     version: Mapped[int]
-    filename: Mapped[str] = mapped_column(types.String(256))
-    checksum: Mapped[Optional[str]] = mapped_column(types.String(32))
+    filename: Mapped[str256]
+    checksum: Mapped[Optional[str32]]
     panel_size: Mapped[Optional[int]]
-    genome_version: Mapped[Optional[str]] = mapped_column(types.String(32))
-    designer: Mapped[Optional[str]] = mapped_column(types.String(256))
+    genome_version: Mapped[Optional[str32]]
+    designer: Mapped[Optional[str256]]
     comment: Mapped[Optional[str]] = mapped_column(types.Text)
     created_at: Mapped[Optional[datetime]] = mapped_column(default=datetime.now)
     updated_at: Mapped[Optional[datetime]] = mapped_column(onupdate=datetime.now)
@@ -293,27 +307,25 @@ class BedVersion(Base):
 class Customer(Base):
     __tablename__ = "customer"
     agreement_date: Mapped[Optional[datetime]]
-    agreement_registration: Mapped[Optional[str]] = mapped_column(types.String(32))
+    agreement_registration: Mapped[Optional[str32]]
     comment: Mapped[Optional[str]] = mapped_column(types.Text)
     id: Mapped[int] = mapped_column(types.Integer, primary_key=True)
-    internal_id: Mapped[str] = mapped_column(types.String(32), unique=True)
+    internal_id: Mapped[str32] = mapped_column(unique=True)
     invoice_address: Mapped[str] = mapped_column(types.Text)
-    invoice_reference: Mapped[str] = mapped_column(types.String(32))
+    invoice_reference: Mapped[str32]
     is_trusted: Mapped[bool] = mapped_column(default=False)
     lab_contact_id: Mapped[Optional[int]] = mapped_column(ForeignKey("user.id"))
     lab_contact: Mapped[Optional["User"]] = orm.relationship(foreign_keys=[lab_contact_id])
     loqus_upload: Mapped[bool] = mapped_column(default=False)
-    name: Mapped[str] = mapped_column(types.String(128))
-    organisation_number: Mapped[Optional[str]] = mapped_column(types.String(32))
+    name: Mapped[str128]
+    organisation_number: Mapped[Optional[str32]]
     priority: Mapped[Optional[str]] = mapped_column(types.Enum("diagnostic", "research"))
-    project_account_ki: Mapped[Optional[str]] = mapped_column(types.String(32))
-    project_account_kth: Mapped[Optional[str]] = mapped_column(types.String(32))
-    return_samples: Mapped[bool] = mapped_column(types.Boolean, default=False)
-    scout_access: Mapped[bool] = mapped_column(types.Boolean, default=False)
-    uppmax_account: Mapped[Optional[str]] = mapped_column(types.String(32))
-    data_archive_location: Mapped[str] = mapped_column(
-        types.String(32), default=PDC_ARCHIVE_LOCATION
-    )
+    project_account_ki: Mapped[Optional[str32]]
+    project_account_kth: Mapped[Optional[str32]]
+    return_samples: Mapped[bool] = mapped_column(default=False)
+    scout_access: Mapped[bool] = mapped_column(default=False)
+    uppmax_account: Mapped[Optional[str32]]
+    data_archive_location: Mapped[str32] = mapped_column(default=PDC_ARCHIVE_LOCATION)
     is_clinical: Mapped[bool] = mapped_column(types.Boolean, default=False)
 
     collaborations: Mapped[list["Collaboration"]] = orm.relationship(
@@ -355,11 +367,10 @@ class Customer(Base):
 class Collaboration(Base):
     __tablename__ = "collaboration"
     id: Mapped[int] = mapped_column(primary_key=True)
-    internal_id: Mapped[str] = mapped_column(
-        types.String(32),
+    internal_id: Mapped[str32] = mapped_column(
         unique=True,
     )
-    name: Mapped[str] = mapped_column(types.String(128))
+    name: Mapped[str128]
     customers: Mapped[list["Customer"]] = orm.relationship(
         secondary="customer_collaboration", back_populates="collaborations"
     )
@@ -406,9 +417,9 @@ class Case(Base, PriorityMixin):
     data_analysis: Mapped[Optional[Workflow]]
     data_delivery: Mapped[Optional[DataDelivery]]
     id: Mapped[int] = mapped_column(primary_key=True)
-    internal_id: Mapped[str] = mapped_column(types.String(32), unique=True)
+    internal_id: Mapped[str32] = mapped_column(unique=True)
     is_compressible: Mapped[bool] = mapped_column(default=True)
-    name: Mapped[str] = mapped_column(types.String(128))
+    name: Mapped[str128]
     order_id: Mapped[Optional[int]] = mapped_column(ForeignKey("order.id"))
     ordered_at: Mapped[Optional[datetime]] = mapped_column(default=datetime.now)
     _panels: Mapped[Optional[str]] = mapped_column(types.Text)
@@ -588,11 +599,11 @@ class CaseSample(Base):
 class Flowcell(Base):
     __tablename__ = "flowcell"
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(types.String(32), unique=True)
+    name: Mapped[str32] = mapped_column(unique=True)
     sequencer_type: Mapped[Optional[str]] = mapped_column(
         types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx")
     )
-    sequencer_name: Mapped[Optional[str]] = mapped_column(types.String(32))
+    sequencer_name: Mapped[Optional[str32]]
     sequenced_at: Mapped[Optional[datetime]]
     status: Mapped[Optional[FlowCellStatus]] = mapped_column(default="ondisk")
     archived_at: Mapped[Optional[datetime]]
@@ -621,7 +632,7 @@ class Flowcell(Base):
 class Organism(Base):
     __tablename__ = "organism"
     id: Mapped[int] = mapped_column(primary_key=True)
-    internal_id: Mapped[str] = mapped_column(types.String(32), unique=True)
+    internal_id: Mapped[str32] = mapped_column(unique=True)
     name: Mapped[str] = mapped_column(types.String(255), unique=True)
     created_at: Mapped[Optional[datetime]] = mapped_column(default=datetime.now)
     updated_at: Mapped[Optional[datetime]] = mapped_column(onupdate=datetime.now)
@@ -639,7 +650,7 @@ class Organism(Base):
 
 class Panel(Base):
     __tablename__ = "panel"
-    abbrev: Mapped[Optional[str]] = mapped_column(types.String(32), unique=True)
+    abbrev: Mapped[Optional[str32]] = mapped_column(unique=True)
     current_version: Mapped[float]
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped["Customer"] = orm.relationship(back_populates="panels")
@@ -671,12 +682,12 @@ class Pool(Base):
     deliveries: Mapped[list["Delivery"]] = orm.relationship(backref="pool")
     id: Mapped[int] = mapped_column(primary_key=True)
     invoice_id: Mapped[Optional[int]] = mapped_column(ForeignKey("invoice.id"))
-    name: Mapped[str] = mapped_column(types.String(32))
+    name: Mapped[str32]
     no_invoice: Mapped[Optional[bool]] = mapped_column(default=False)
     order: Mapped[str] = mapped_column(types.String(64))
     ordered_at: Mapped[datetime]
     received_at: Mapped[Optional[datetime]]
-    ticket: Mapped[Optional[str]] = mapped_column(types.String(32))
+    ticket: Mapped[Optional[str32]]
 
     invoice: Mapped[Optional["Invoice"]] = orm.relationship(back_populates="pools")
 
@@ -700,21 +711,21 @@ class Sample(Base, PriorityMixin):
     delivered_at: Mapped[Optional[datetime]]
     deliveries: Mapped[list["Delivery"]] = orm.relationship(backref="sample")
     downsampled_to: Mapped[Optional[int]] = mapped_column(types.BigInteger)
-    from_sample: Mapped[Optional[str]] = mapped_column(types.String(128))
+    from_sample: Mapped[Optional[str128]]
     id: Mapped[int] = mapped_column(primary_key=True)
-    internal_id: Mapped[str] = mapped_column(types.String(32), unique=True)
+    internal_id: Mapped[str32] = mapped_column(unique=True)
     invoice_id: Mapped[Optional[int]] = mapped_column(ForeignKey("invoice.id"))
     invoiced_at: Mapped[Optional[datetime]]  # DEPRECATED
     _is_external: Mapped[Optional[bool]] = mapped_column("is_external")  # DEPRECATED
     is_tumour: Mapped[Optional[bool]] = mapped_column(default=False)
     loqusdb_id: Mapped[Optional[str]] = mapped_column(types.String(64))
-    name: Mapped[str] = mapped_column(types.String(128))
+    name: Mapped[str128]
     no_invoice: Mapped[bool] = mapped_column(default=False)
     order: Mapped[Optional[str]] = mapped_column(types.String(64))
     ordered_at: Mapped[datetime]
     organism_id: Mapped[Optional[int]] = mapped_column(ForeignKey("organism.id"))
     organism: Mapped[Optional["Organism"]] = orm.relationship(foreign_keys=[organism_id])
-    original_ticket: Mapped[Optional[str]] = mapped_column(types.String(32))
+    original_ticket: Mapped[Optional[str32]]
     _phenotype_groups: Mapped[Optional[str]] = mapped_column(types.Text)
     _phenotype_terms: Mapped[Optional[str]] = mapped_column(types.Text)
     prepared_at: Mapped[Optional[datetime]]
@@ -726,7 +737,7 @@ class Sample(Base, PriorityMixin):
     reference_genome: Mapped[Optional[str]] = mapped_column(types.String(255))
     sequence_start: Mapped[Optional[datetime]]
     sex: Mapped[SexOptions]
-    subject_id: Mapped[Optional[str]] = mapped_column(types.String(128))
+    subject_id: Mapped[Optional[str128]]
 
     links: Mapped[list["CaseSample"]] = orm.relationship(
         foreign_keys=[CaseSample.sample_id], back_populates="sample"
@@ -858,8 +869,8 @@ class Invoice(Base):
 class User(Base):
     __tablename__ = "user"
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(types.String(128))
-    email: Mapped[str] = mapped_column(types.String(128), unique=True)
+    name: Mapped[str128]
+    email: Mapped[str128] = mapped_column(unique=True)
     is_admin: Mapped[Optional[bool]] = mapped_column(default=False)
     order_portal_login: Mapped[Optional[bool]] = mapped_column(default=False)
 
@@ -883,12 +894,10 @@ class SampleLaneSequencingMetrics(Base):
     __tablename__ = "sample_lane_sequencing_metrics"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    flow_cell_name: Mapped[str] = mapped_column(types.String(32), ForeignKey("flowcell.name"))
+    flow_cell_name: Mapped[str32] = mapped_column(ForeignKey("flowcell.name"))
     flow_cell_lane_number: Mapped[Optional[int]]
 
-    sample_internal_id: Mapped[int] = mapped_column(
-        types.String(32), ForeignKey("sample.internal_id")
-    )
+    sample_internal_id: Mapped[str32] = mapped_column(ForeignKey("sample.internal_id"))
     sample_total_reads_in_lane: Mapped[Optional[int]] = mapped_column(types.BigInteger)
     sample_base_percentage_passing_q30: Mapped[Optional[float]] = mapped_column(types.Numeric(6, 2))
     sample_base_mean_quality_score: Mapped[Optional[float]] = mapped_column(types.Numeric(6, 2))

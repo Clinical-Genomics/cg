@@ -580,7 +580,7 @@ def test_add_rna_sample(
     # GIVEN an RNA case and the associated RNA samples
     rna_case: Case = rna_store.get_case_by_internal_id(internal_id=rna_case_id)
     rna_sample_list: list[Sample] = (
-        rna_store._get_query(table=Sample).filter(Sample.internal_id.like("rna")).all()
+        rna_store._get_query(table=Sample).filter(Sample.internal_id.contains("rna")).all()
     )
 
     # WHEN running the method to create a list of RNADNACollections
@@ -592,7 +592,7 @@ def test_add_rna_sample(
     # THEN the resulting RNADNACollections should contain all RNA samples in the case
     for sample in rna_sample_list:
         assert sample.internal_id in [
-            rna_dna_collection.rna_sample_id for rna_dna_collection in rna_dna_collections
+            rna_dna_collection.rna_sample_internal_id for rna_dna_collection in rna_dna_collections
         ]
 
 
