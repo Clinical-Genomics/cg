@@ -21,8 +21,10 @@ def upgrade():
     op.create_table(
         "order_case",
         sa.Column("id", sa.Integer, nullable=False),
-        sa.Column("order_id", sa.ForeignKey("order.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("case_id", sa.ForeignKey("case.id", ondelete="CASCADE"), nullable=False),
+        sa.Column("order_id", sa.Integer, nullable=False),
+        sa.Column("case_id", sa.Integer, nullable=False),
+        sa.ForeignKeyConstraint(["order_id"], ["order.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["case_id"], ["case.id"], ondelete="CASCADE"),
         sa.UniqueConstraint("order_id", "case_id", name="_order_case_uc"),
     )
 
