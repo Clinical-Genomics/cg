@@ -403,6 +403,7 @@ class Case(Model, PriorityMixin):
 
     analyses = orm.relationship(Analysis, back_populates="case", order_by="-Analysis.completed_at")
     links = orm.relationship("CaseSample", back_populates="case")
+    order_links = orm.relationship("OrderCase", back_populates="case")
 
     @property
     def cohorts(self) -> list[str]:
@@ -463,6 +464,16 @@ class Case(Model, PriorityMixin):
     def _get_samples(self) -> list["Sample"]:
         """Extract samples from a case."""
         return [link.sample for link in self.links]
+
+    @property
+    def orders(self) -> list["Order"]:
+        """Return case samples."""
+        return self._get_orders
+
+    @property
+    def _get_orders(self) -> list["Order"]:
+        """Extract samples from a case."""
+        return [order_link.order for order_link in self.order_links]
 
     @property
     def tumour_samples(self) -> list["Sample"]:
@@ -884,9 +895,31 @@ class Order(Model):
     id = Column(types.Integer, primary_key=True, unique=True)
     customer_id = Column(ForeignKey("customer.id"), nullable=False)
     customer = orm.relationship(Customer, foreign_keys=[customer_id])
+    links = orm.relationship("OrderCase", back_populates="order")
     order_date = Column(types.DateTime, nullable=False, default=dt.datetime.now())
     ticket_id = Column(types.Integer, nullable=False, unique=True, index=True)
     workflow = Column(types.Enum(*tuple(Workflow)), nullable=False)
 
+    @property
+    def cases(self) -> list[Case]:
+        """Return case samples."""
+        return self._get_cases
+
+    @property
+    def _get_cases(self) -> list[Case]:
+        """Extract samples from a case."""
+        return [link.case for link in self.links]
+
     def to_dict(self):
         return to_dict(model_instance=self)
+
+
+class OrderCase(Model):
+    __tablename__ = "order_case"
+    __table_args__ = (UniqueConstraint("order_id", "case_id", name="_order_case_uc"),)
+
+    id = Column(types.Integer, primary_key=True, unique=True, nullable=False)
+    order_id = Column(ForeignKey("order.id", ondelete="CASCADE"), nullable=False)
+    case_id = Column(ForeignKey("case.id", ondelete="CASCADE"), nullable=False)
+    case = orm.relationship(Case, back_populates="order_links")
+    sample = orm.relationship(Order, back_populates="links")
