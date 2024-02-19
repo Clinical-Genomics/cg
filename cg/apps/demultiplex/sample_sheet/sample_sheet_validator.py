@@ -42,7 +42,7 @@ class SampleSheetValidator:
         """Set the local attribute sample type identified from the sample sheet content."""
         self.sample_type = get_sample_type(self.content)
 
-    def validate_all_sections_present(self) -> None:
+    def _validate_all_sections_present(self) -> None:
         """
         Returns whether the sample sheet has the four mandatory sections:
             - Header
@@ -73,7 +73,7 @@ class SampleSheetValidator:
         LOG.error(message)
         raise SampleSheetError(message)
 
-    def set_is_index2_reverse_complement(self) -> None:
+    def _set_is_index2_reverse_complement(self) -> None:
         """Return whether the index2 override cycles value is reverse-complemented."""
         settings_name: str = self._get_index_settings_name()
         self.is_index2_reverse_complement = NAME_TO_INDEX_SETTINGS[
@@ -95,7 +95,7 @@ class SampleSheetValidator:
             LOG.error(message)
             raise SampleSheetError(message)
 
-    def set_cycles(self):
+    def _set_cycles(self):
         """Set values to the run cycle attributes."""
         self.read1_cycles = self._get_cycle(SampleSheetBCLConvertSections.Reads.READ_CYCLES_1)
         self.read2_cycles = self._get_cycle(SampleSheetBCLConvertSections.Reads.READ_CYCLES_2)
@@ -104,7 +104,7 @@ class SampleSheetValidator:
             cycle_name=SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2, nullable=True
         )
 
-    def validate_samples(self) -> None:
+    def _validate_samples(self) -> None:
         """
         Determine if the samples have the correct attributes and are not unique per lane.
             Raises:
@@ -114,7 +114,7 @@ class SampleSheetValidator:
         validated_samples: list[FlowCellSample] = get_flow_cell_samples_from_content(self.content)
         validate_samples_unique_per_lane(validated_samples)
 
-    def validate_override_cycles(self) -> None:
+    def _validate_override_cycles(self) -> None:
         """Determine if the samples' override cycles are valid.
         Raises:
             SampleSheetError if any of the samples' override cycles are not valid.
@@ -133,7 +133,7 @@ class SampleSheetValidator:
             except OverrideCyclesError as error:
                 raise SampleSheetError from error
 
-    def validate_bcl_convert(self):
+    def _validate_bcl_convert(self):
         """Determine if the BCLConvert sample sheet is valid, which means:
         - All sections are present
         - The index settings are specified in the sample sheet header
@@ -141,20 +141,20 @@ class SampleSheetValidator:
         - The samples have the correct attributes
         - The override cycles are valid
         """
-        self.validate_all_sections_present()
-        self.set_is_index2_reverse_complement()
-        self.set_cycles()
-        self.validate_samples()
-        self.validate_override_cycles()
+        self._validate_all_sections_present()
+        self._set_is_index2_reverse_complement()
+        self._set_cycles()
+        self._validate_samples()
+        self._validate_override_cycles()
 
     def validate_sample_sheet_from_content(self, content: list[list[str]]) -> None:
         """Call the proper validation depending of the sample sheet type."""
         self.set_sample_sheet_content(content)
         self.set_sample_type()
         if self.sample_type is FlowCellSampleBCLConvert:
-            self.validate_bcl_convert()
+            self._validate_bcl_convert()
         else:
-            self.validate_samples()
+            self._validate_samples()
 
     def validate_sample_sheet_from_file(self, file_path: Path) -> None:
         """Validate a sample sheet given the path to the file."""

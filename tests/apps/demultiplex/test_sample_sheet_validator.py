@@ -38,7 +38,7 @@ def test_validate_all_sections_present(
     sample_sheet_validator.set_sample_sheet_content(content)
 
     # WHEN validating the sections of the sample sheet
-    sample_sheet_validator.validate_all_sections_present()
+    sample_sheet_validator._validate_all_sections_present()
 
     # THEN no error is raised
 
@@ -56,7 +56,7 @@ def test_validate_all_sections_present_missing_section(
     # WHEN validating the sections of the sample sheet
     with pytest.raises(SampleSheetError):
         # THEN a SampleSheetError is raised
-        sample_sheet_validator.validate_all_sections_present()
+        sample_sheet_validator._validate_all_sections_present()
     assert "Sample sheet does not have all the necessary sections" in caplog.text
 
 
@@ -127,7 +127,7 @@ def test_set_is_index2_reverse_complement(
     sample_sheet_validator.set_sample_sheet_content(request.getfixturevalue(sample_sheet_content))
 
     # WHEN setting the index2 reverse complement value
-    sample_sheet_validator.set_is_index2_reverse_complement()
+    sample_sheet_validator._set_is_index2_reverse_complement()
 
     # THEN the correct value is set
     assert sample_sheet_validator.is_index2_reverse_complement == expected_reverse_complement
@@ -218,7 +218,7 @@ def test_set_cycles(
     assert sample_sheet_validator.index2_cycles is None
 
     # WHEN setting the cycles
-    sample_sheet_validator.set_cycles()
+    sample_sheet_validator._set_cycles()
 
     # THEN the correct values set as expected
     assert sample_sheet_validator.read1_cycles == expected_cycles[0]
@@ -244,7 +244,7 @@ def test_validate_override_cycles_incorrect_cycles(
     # WHEN validating the override cycles
     with pytest.raises(SampleSheetError):
         # THEN a SampleSheetError is raised
-        sample_sheet_validator.validate_override_cycles()
+        sample_sheet_validator._validate_override_cycles()
 
 
 @pytest.mark.parametrize(
