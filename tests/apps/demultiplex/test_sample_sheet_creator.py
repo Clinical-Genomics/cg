@@ -64,9 +64,9 @@ def test_construct_bcl_convert_sheet(
     assert bcl_convert_sample_sheet_creator.lims_samples
 
     # WHEN building the sample sheet
-    sample_sheet_content: list[
-        list[str]
-    ] = bcl_convert_sample_sheet_creator.construct_sample_sheet()
+    sample_sheet_content: list[list[str]] = (
+        bcl_convert_sample_sheet_creator.construct_sample_sheet()
+    )
 
     # THEN a correctly formatted sample sheet was created
     samples: list[FlowCellSample] = get_flow_cell_samples_from_content(sample_sheet_content)
