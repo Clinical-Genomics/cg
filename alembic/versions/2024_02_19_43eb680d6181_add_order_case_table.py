@@ -20,7 +20,6 @@ depends_on = None
 def upgrade():
     op.create_table(
         "order_case",
-        sa.Column("id", sa.Integer, nullable=False),
         sa.Column("order_id", sa.Integer, nullable=False, index=True),
         sa.Column("case_id", sa.Integer, nullable=False, index=True),
         sa.ForeignKeyConstraint(["order_id"], ["order.id"], ondelete="CASCADE"),
