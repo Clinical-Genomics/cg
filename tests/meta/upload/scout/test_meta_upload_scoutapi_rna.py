@@ -590,6 +590,7 @@ def test_add_rna_sample(
     )
 
     # THEN the resulting RNADNACollections should contain all RNA samples in the case
+    assert rna_sample_list
     for sample in rna_sample_list:
         assert sample.internal_id in [
             rna_dna_collection.rna_sample_internal_id for rna_dna_collection in rna_dna_collections
