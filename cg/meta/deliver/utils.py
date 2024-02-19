@@ -14,8 +14,10 @@ def get_delivery_scope(workflows: list[str]) -> tuple[bool, bool]:
     case_delivery: bool = False
     sample_delivery: bool = False
     for workflow in workflows:
-        sample_delivery: bool = is_sample_delivery(workflow)
-        case_delivery: bool = is_case_delivery(workflow)
+        if is_sample_delivery(workflow):
+            sample_delivery = True
+        if is_case_delivery(workflow):
+            case_delivery = True
     return sample_delivery, case_delivery
 
 
