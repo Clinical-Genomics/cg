@@ -37,6 +37,7 @@ from cg.server.dto.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.ext import db, lims, osticket
+from cg.server.utils import parse_orders_request
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.orders.order_service import OrderService
 from cg.store.models import (
@@ -480,9 +481,9 @@ def get_application_pipeline_limitations(tag: str):
 @BLUEPRINT.route("/orders")
 def get_orders():
     """Return the latest orders."""
-    orders_request: OrdersRequest = OrdersRequest.model_validate(request.args.to_dict())
     order_service = OrderService(db)
-    response: OrdersResponse = order_service.get_orders(orders_request)
+    data: OrdersRequest = parse_orders_request(request)
+    response: OrdersResponse = order_service.get_orders(data)
     return make_response(response.model_dump())
 
 

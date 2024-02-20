@@ -19,14 +19,8 @@ class OrderService:
         return create_order_response(order)
 
     def get_orders(self, orders_request: OrdersRequest) -> OrdersResponse:
-        orders: list[Order] = self._get_orders(orders_request)
+        orders: list[Order] = self.store.get_orders(orders_request)
         return create_orders_response(orders)
-
-    def _get_orders(self, orders_request: OrdersRequest) -> list[Order]:
-        """Returns a list of entries in the table Order."""
-        return self.store.get_orders_by_workflow(
-            workflow=orders_request.workflow, limit=orders_request.limit
-        )
 
     def create_order(self, order_data: OrderIn) -> OrderResponse:
         order: Order = self.store.add_order(order_data)

@@ -11,6 +11,7 @@ from sqlalchemy.orm import Query, Session
 from cg.constants import FlowCellStatus, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError
+from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.store.base import BaseHandler
 from cg.store.filters.status_analysis_filters import (
     AnalysisFilter,
@@ -1729,23 +1730,24 @@ class ReadHandler(BaseHandler):
         )
         return records.all()
 
-    def get_orders_by_workflow(
-        self, workflow: str | None = None, limit: int | None = None
-    ) -> list[Order]:
-        """Returns a list of entries in Order. The output is filtered on workflow and limited, if given."""
-        orders: Query = self._get_query(table=Order)
-        order_filter_functions: list[Callable] = [OrderFilter.FILTER_ORDERS_BY_WORKFLOW]
-        orders: Query = apply_order_filters(
-            orders=orders, filter_functions=order_filter_functions, workflow=workflow
+    def get_orders(self, order_request: OrdersRequest) -> list[Order]:
+        filters: list[OrderFilter] = [
+            OrderFilter.BY_WORKFLOW,
+            OrderFilter.APPLY_LIMIT,
+        ]
+        return apply_order_filters(
+            orders=self._get_query(Order),
+            filters=filters,
+            workflow=order_request.workflow,
+            limit=order_request.limit,
         )
-        return orders.limit(limit).all()
 
     def get_order_by_id(self, order_id: int) -> Order | None:
         """Returns the entry in Order matching the given id."""
         orders: Query = self._get_query(table=Order)
-        order_filter_functions: list[Callable] = [OrderFilter.FILTER_ORDERS_BY_ID]
+        order_filter_functions: list[Callable] = [OrderFilter.BY_ID]
         orders: Query = apply_order_filters(
-            orders=orders, filter_functions=order_filter_functions, id=order_id
+            orders=orders, filters=order_filter_functions, id=order_id
         )
         return orders.first()
 
