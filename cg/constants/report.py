@@ -3,6 +3,8 @@
 from cg.constants import DataDelivery
 from cg.constants.constants import Workflow
 
+DELIVERY_REPORT_FILE_NAME: str = "delivery-report.html"
+
 BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]
 
 REPORT_SUPPORTED_WORKFLOW: tuple[Workflow, ...] = (
