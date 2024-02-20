@@ -24,8 +24,7 @@ class OrderService:
     def get_orders(self, orders_request: OrdersRequest) -> OrdersResponse:
         orders: list[Order] = self.store.get_orders(orders_request)
         summaries: list[Summary] = self.analysis_client.get_summaries(orders)
-        return create_orders_response(orders=orders, summaries=summaries)
-
+        return create_orders_response(database_orders=orders, summaries=summaries)
 
     def create_order(self, order_data: OrderIn) -> OrderResponse:
         order: Order = self.store.add_order(order_data)
