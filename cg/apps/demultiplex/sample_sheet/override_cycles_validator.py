@@ -157,7 +157,10 @@ class OverrideCyclesValidator:
             index_sequence=self.sample[SampleSheetBCLConvertSections.Data.INDEX_2],
         ):
             return
-        message: str = f"Incorrect index2 cycle {index2_cycle} for sample {self.sample_id}"
+        message: str = (
+            f"Index2 cycle {index2_cycle} of sample {self.sample_id} "
+            f"does not match with run cycle {self.run_index2_cycles}"
+        )
         LOG.error(message)
         raise OverrideCyclesError(message)
 

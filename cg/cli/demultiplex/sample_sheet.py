@@ -28,7 +28,7 @@ def validate_sample_sheet(context: CGConfig, sheet: click.Path):
     try:
         sample_sheet_api.validate(Path(sheet))
     except (SampleSheetError, ValidationError) as error:
-        LOG.warning(error)
+        LOG.error("Sample sheet failed validation")
         raise click.Abort from error
     LOG.info("Sample sheet passed validation")
 
