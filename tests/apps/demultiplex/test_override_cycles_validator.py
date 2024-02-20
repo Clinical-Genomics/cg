@@ -227,7 +227,7 @@ def test_validate_index2_cycles_incorrect_cycles(
     # WHEN validating the index 2 cycles
     with pytest.raises(OverrideCyclesError):
         override_cycles_validator._validate_index2_cycles()
-    assert "Incorrect index2 cycle" in caplog.text
+    assert "does not match with run cycle" in caplog.text
 
 
 @pytest.mark.parametrize(
