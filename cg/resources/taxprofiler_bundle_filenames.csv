@@ -76,4 +76,29 @@
   path_index: ~
   step: qc-metrics
   tag: qc-metrics
+- format: json
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_general_stats.json
+  path_index: ~
+  step: multiqc-json
+  tag: multiqc-general-stats
+- format: json
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_fastp.json
+  path_index: ~
+  step: multiqc-json
+  tag: multiqc-fastp
+- format: json
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_samtools_stats.json
+  path_index: ~
+  step: multiqc-json
+  tag: multiqc-samtools-stats
+- format: json
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_kraken.json
+  path_index: ~
+  step: multiqc-json
+  tag: multiqc-kraken
+
 
