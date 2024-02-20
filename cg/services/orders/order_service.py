@@ -4,7 +4,7 @@ from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order as OrderResponse
 from cg.server.dto.orders.orders_response import OrdersResponse
 from cg.services.orders.utils import create_order_response, create_orders_response
-from cg.store.models import Order
+from cg.store.models import Case, Order, order_case
 from cg.store.store import Store
 
 
@@ -28,6 +28,11 @@ class OrderService:
             workflow=orders_request.workflow, limit=orders_request.limit
         )
 
-    def create_order(self, order_data: OrderIn) -> OrderResponse:
+    def create_order(self, order_data: OrderIn, cases: list[Case]) -> OrderResponse:
+        """Creates an order and links it to the given cases."""
         order: Order = self.store.add_order(order_data)
+        for case in cases:
+            insert_statement = order_case.insert().values(order_id=order.id, case_id=case)
+            self.store.session.execute(insert_statement)
+        self.store.session.commit()
         return create_order_response(order)

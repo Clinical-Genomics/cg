@@ -136,11 +136,8 @@ def submit_order(order_type):
             user_mail=g.current_user.email,
         )
         order_service = OrderService(db)
-        order: Order = order_service.create_order(order_in)
-        for case in result["records"]:
-            case.order_id = order.id
-            db.session.add(case)
-        db.session.commit()
+        order_service.create_order(order_data=order_in, cases=result["records"])
+
     except (  # user misbehaviour
         OrderError,
         OrderFormError,
