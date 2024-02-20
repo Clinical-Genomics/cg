@@ -1,0 +1,19 @@
+{% from "bootstrap.html" import css, custom_css %}
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  {{ css() }}
+  {{ custom_css() }}
+  <title>Leveransrapport Clinical Genomics - {{ case.name }}</title>
+</head>
+<body>
+{% include "header.html" %}
+{% include "footer.html" %}
+</body>
+</html>
+
+
+
