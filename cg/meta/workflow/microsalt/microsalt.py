@@ -101,7 +101,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return job_ids_path
 
     def _ensure_old_job_ids_are_removed(self, job_ids_path: Path) -> None:
-        if job_ids_path.exists():
+        is_yaml_file: bool = job_ids_path.suffix == FileExtensions.YAML
+        if job_ids_path.exists() and is_yaml_file:
             job_ids_path.unlink()
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
