@@ -1,16 +1,18 @@
-from cg.exc import OrderNotFoundError
+from cg.apps.tb.api import TrailblazerAPI
 from cg.models.orders.order import OrderIn
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order as OrderResponse
 from cg.server.dto.orders.orders_response import OrdersResponse
-from cg.services.orders.utils import create_order_response, create_orders_response
+from cg.services.order_service.exceptions import OrderNotFoundError
+from cg.services.order_service.utils import create_order_response, create_orders_response
 from cg.store.models import Order
 from cg.store.store import Store
 
 
 class OrderService:
-    def __init__(self, store: Store) -> None:
+    def __init__(self, store: Store, analysis_client: TrailblazerAPI) -> None:
         self.store = store
+        self.analysis_client = analysis_client
 
     def get_order(self, order_id: int) -> OrderResponse:
         order: Order | None = self.store.get_order_by_id(order_id)

@@ -26,7 +26,6 @@ from cg.exc import (
     CaseNotFoundError,
     OrderError,
     OrderFormError,
-    OrderNotFoundError,
     TicketCreationError,
 )
 from cg.io.controller import WriteStream
@@ -39,7 +38,8 @@ from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.ext import db, lims, osticket
 from cg.server.utils import parse_orders_request
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
-from cg.services.orders.order_service import OrderService
+from cg.services.order_service.exceptions import OrderNotFoundError
+from cg.services.order_service.order_service import OrderService
 from cg.store.models import (
     Analysis,
     Application,

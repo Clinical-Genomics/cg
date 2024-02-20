@@ -18,17 +18,19 @@ def filter_by_limit(orders: Query, limit: int | None, **kwargs) -> Query:
     return orders.limit(limit) if limit else orders
 
 
+class OrderFilter(Enum):
+    BY_ID: Callable = filter_orders_by_id
+    BY_WORKFLOW: Callable = filter_orders_by_workflow
+    APPLY_LIMIT: Callable = filter_by_limit
+
+
 def apply_order_filters(
-    filters: list[Callable], orders: Query, id: int = None, workflow: str = None, limit: int = None
+    filters: list[OrderFilter],
+    orders: Query,
+    id: int = None,
+    workflow: str = None,
+    limit: int = None,
 ) -> Query:
     for filter in filters:
         orders: Query = filter(orders=orders, id=id, workflow=workflow, limit=limit)
     return orders
-
-
-class OrderFilter(Enum):
-    """Define order filter functions."""
-
-    BY_ID: Callable = filter_orders_by_id
-    BY_WORKFLOW: Callable = filter_orders_by_workflow
-    APPLY_LIMIT: Callable = filter_by_limit
