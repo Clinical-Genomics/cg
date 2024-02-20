@@ -13,22 +13,19 @@ def parse_order(order: DatabaseOrder) -> Order:
     )
 
 
-def _get_summary_for_order(order: Order, summaries: list[Summary]) -> Summary:
-    for summary in summaries:
-        if order.order_id == summary.order_id:
-            return summary
-
-
 def create_orders_response(
     database_orders: list[DatabaseOrder], summaries: list[Summary]
 ) -> OrdersResponse:
     orders: list[Order] = [parse_order(order) for order in database_orders]
-    for order in orders:
-        summary: Summary = _get_summary_for_order(order, summaries)
-        if summary:
-            order.summary = summary
+    _add_summaries_to_orders(orders=orders, summaries=summaries)
     return OrdersResponse(orders=orders)
 
+def _add_summaries_to_orders(orders: list[Order], summaries: list[Summary]) -> list[Order]:
+    summary_mapping: dict = {summary.order_id: summary for summary in summaries}
+    for order in orders:
+        if summary := summary_mapping.get(order.order_id):
+            order.summary = summary
+    return orders
 
 def create_order_response(order: DatabaseOrder) -> Order:
     return parse_order(order)
