@@ -20,6 +20,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     delete_file_from_housekeeper,
 )
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.utils.files import link_or_overwrite_file
 
 LOG = logging.getLogger(__name__)
 
@@ -92,7 +93,8 @@ class SampleSheetAPI:
             LOG.warning(
                 f"Deleting invalid sample sheet from Housekeeper for flow cell {flow_cell_id}"
             )
-            delete_file_from_housekeeper(file_path=sample_sheet_path, hk_api=self.hk_api)
+            if not self.dry_run:
+                delete_file_from_housekeeper(file_path=sample_sheet_path, hk_api=self.hk_api)
 
     def get_sample_sheet_content(self, flow_cell: FlowCellDirectoryData) -> list[list[str]]:
         """Return the sample sheet content for a flow cell."""
@@ -151,7 +153,7 @@ class SampleSheetAPI:
                 "Sample sheet already exists in Housekeeper. Hard-linking it to flow cell directory"
             )
             if not self.dry_run:
-                os.link(src=hk_sample_sheet_path, dst=flow_cell.sample_sheet_path)
+                link_or_overwrite_file(src=hk_sample_sheet_path, dst=flow_cell.sample_sheet_path)
         elif self.get_valid_sample_sheet_path(flow_cell.sample_sheet_path):
             LOG.info("Sample sheet already exists in flow cell directory. Adding to Housekeeper")
             if not self.dry_run:

@@ -79,3 +79,12 @@ def get_directories_in_path(path: Path) -> list[Path]:
     if not path.exists():
         raise FileNotFoundError(f"Path {path} does not exist.")
     return [entry for entry in path.iterdir() if entry.is_dir()]
+
+
+def link_or_overwrite_file(src: Path, dst: Path) -> None:
+    """Copy a file from src to dst, overwriting the destination if it exists."""
+    if dst.exists():
+        LOG.info(f"{dst} already exists. Overwriting with {src}")
+        dst.unlink()
+    os.link(src=src, dst=dst)
+    LOG.info(f"Linked {src} to {dst}")
