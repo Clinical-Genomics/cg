@@ -96,10 +96,10 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             "trailblazer",
             f"{project_id}_slurm_ids{FileExtensions.YAML}",
         )
-        self._ensure_old_job_ids_file_removed(job_ids_path)
+        self._ensure_old_job_ids_are_removed(job_ids_path)
         return job_ids_path
 
-    def _ensure_old_job_ids_file_removed(self, job_ids_path: Path) -> None:
+    def _ensure_old_job_ids_are_removed(self, job_ids_path: Path) -> None:
         if job_ids_path.exists():
             job_ids_path.unlink()
 
