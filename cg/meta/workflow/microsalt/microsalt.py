@@ -96,9 +96,12 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             "trailblazer",
             f"{project_id}_slurm_ids{FileExtensions.YAML}",
         )
+        self._ensure_old_job_ids_file_removed(job_ids_path)
+        return job_ids_path
+
+    def _ensure_old_job_ids_file_removed(self, job_ids_path: Path) -> None:
         if job_ids_path.exists():
             job_ids_path.unlink()
-        return job_ids_path
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
