@@ -213,20 +213,6 @@ class FlowCellDirectoryData:
         LOG.info("Check if sample sheet exists")
         return self.sample_sheet_path.exists()
 
-    def validate_sample_sheet(self) -> bool:
-        """Validate if sample sheet is on correct format."""
-        try:
-            self.sample_sheet_validator.validate_sample_sheet_from_file(self.sample_sheet_path)
-        except (SampleSheetError, ValidationError) as error:
-            LOG.warning("Invalid sample sheet")
-            LOG.warning(error)
-            LOG.warning(
-                f"Ensure that the headers in the sample sheet follows the allowed structure for {self.bcl_converter} i.e. \n"
-                + SAMPLE_SHEET_HEADER[self.bcl_converter]
-            )
-            return False
-        return True
-
     @property
     def sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
