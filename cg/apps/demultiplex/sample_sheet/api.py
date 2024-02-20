@@ -17,6 +17,7 @@ from cg.exc import FlowCellError, HousekeeperFileMissingError, SampleSheetError
 from cg.io.controller import WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
+    delete_file_from_housekeeper,
 )
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
@@ -76,13 +77,24 @@ class SampleSheetAPI:
             LOG.warning(f"Sample sheet with path {sample_sheet_path} does not exist")
 
     def get_valid_sample_sheet_path_from_hk(self, flow_cell_id: str) -> Path | None:
-        """Return the sample sheet path from Housekeeper if is valid and exists."""
+        """
+        Return the sample sheet path from Housekeeper if is valid and exists. If it is invalid,
+        deletes it from Housekeeper database and bundle.
+        """
+        LOG.info("Getting sample sheet from Housekeeper")
         try:
             sample_sheet_path: Path | None = self.hk_api.get_sample_sheet_path(flow_cell_id)
         except HousekeeperFileMissingError:
             LOG.warning(f"Sample sheet for flow cell {flow_cell_id} not found in Housekeeper")
             return
-        return self.get_valid_sample_sheet_path(sample_sheet_path)
+        if correct_sheet_path := self.get_valid_sample_sheet_path(sample_sheet_path):
+            return correct_sheet_path
+        else:
+            LOG.warning(
+                f"Sample sheet for flow cell {flow_cell_id} in Housekeeper is not valid. "
+                f"Deleting invalid sample sheet from Housekeeper"
+            )
+            delete_file_from_housekeeper(file_path=sample_sheet_path, hk_api=self.hk_api)
 
     def get_sample_sheet_content(self, flow_cell: FlowCellDirectoryData) -> list[list[str]]:
         """Return the sample sheet content for a flow cell."""
