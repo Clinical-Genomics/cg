@@ -116,9 +116,7 @@ class SampleSheetValidator:
             SampleSheetError if the samples are not unique per lane.
         """
         LOG.debug("Validating samples")
-        validated_samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
-            sample_sheet_content=self.content, sample_type=self.sample_type
-        )
+        validated_samples: list[FlowCellSample] = get_flow_cell_samples_from_content(self.content)
         validate_samples_unique_per_lane(validated_samples)
 
     def _validate_override_cycles(self) -> None:
@@ -156,7 +154,7 @@ class SampleSheetValidator:
         self._validate_override_cycles()
 
     def validate_sample_sheet_from_content(self, content: list[list[str]]) -> None:
-        """Call the proper validation depending of the sample sheet type."""
+        """Call the proper validation depending on the sample sheet type."""
         self.set_sample_sheet_content(content)
         self.set_sample_type()
         if self.sample_type is FlowCellSampleBCLConvert:
@@ -178,7 +176,5 @@ class SampleSheetValidator:
             SampleSheetError: If the sample sheet is not valid.
         """
         self.validate_sample_sheet_from_file(file_path)
-        samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
-            sample_sheet_content=self.content, sample_type=self.sample_type
-        )
+        samples: list[FlowCellSample] = get_flow_cell_samples_from_content(self.content)
         return SampleSheet(samples=samples)

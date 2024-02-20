@@ -76,6 +76,15 @@ class SampleSheetAPI:
         else:
             LOG.warning(f"Sample sheet with path {sample_sheet_path} does not exist")
 
+    def get_existing_sample_sheet_in_housekeeper(self, flow_cell_id: str) -> Path | None:
+        """Return the sample sheet path from Housekeeper if it exists."""
+        LOG.info("Getting sample sheet from Housekeeper")
+        try:
+            return self.hk_api.get_sample_sheet_path(flow_cell_id)
+        except HousekeeperFileMissingError:
+            LOG.warning(f"Sample sheet for flow cell {flow_cell_id} does not exist in Housekeeper")
+            return
+
     def get_valid_sample_sheet_path_from_hk(self, flow_cell_id: str) -> Path | None:
         """
         Return the sample sheet path from Housekeeper if is valid and exists. If it is invalid,
@@ -147,6 +156,13 @@ class SampleSheetAPI:
         flow_cell: FlowCellDirectoryData = self.get_flow_cell(
             flow_cell_name=flow_cell_name, bcl_converter=bcl_converter
         )
+        if hk_sample_sheet := self.get_existing_sample_sheet_in_housekeeper(flow_cell.id):
+            if correct_sheet_path := self.get_valid_sample_sheet_path(hk_sample_sheet):
+                LOG.info(
+                    "Sample sheet already exists in Housekeeper. Copying it to flow cell directory"
+                )
+                if not self.dry_run:
+                    link_or_overwrite_file(src=correct_sheet_path, dst=flow_cell.sample_sheet_path)
         if hk_sample_sheet_path := self.get_valid_sample_sheet_path_from_hk(flow_cell.id):
             LOG.info(
                 "Sample sheet already exists in Housekeeper. Hard-linking it to flow cell directory"

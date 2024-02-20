@@ -6,7 +6,6 @@ import os
 from pathlib import Path
 from typing import Type
 
-from pydantic import ValidationError
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.sample_models import (
@@ -16,12 +15,11 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
-from cg.constants.bcl_convert_metrics import SAMPLE_SHEET_HEADER
 from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
 from cg.constants.symbols import EMPTY_STRING
-from cg.exc import FlowCellError, SampleSheetError
+from cg.exc import FlowCellError
 from cg.models.demultiplex.run_parameters import (
     RunParameters,
     RunParametersHiSeq,

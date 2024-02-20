@@ -1,14 +1,10 @@
 """Tests for the SampleSheetCreator classes."""
 
 from pathlib import Path
-from typing import Type
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_flow_cell_samples_from_content,
-    get_sample_type_from_content,
-)
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_flow_cell_samples_from_content
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSample,
     FlowCellSampleBcl2Fastq,
@@ -56,10 +52,7 @@ def test_construct_bcl2fastq_sheet(
     content: list[list[str]] = bcl2fastq_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
-    sample_type: Type[FlowCellSample] = get_sample_type_from_content(content)
-    samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
-        sample_sheet_content=content, sample_type=sample_type
-    )
+    samples: list[FlowCellSample] = get_flow_cell_samples_from_content(content)
     assert samples
 
 
@@ -74,10 +67,7 @@ def test_construct_bcl_convert_sheet(
     content: list[list[str]] = bcl_convert_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
-    sample_type: Type[FlowCellSample] = get_sample_type_from_content(content)
-    samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
-        sample_sheet_content=content, sample_type=sample_type
-    )
+    samples: list[FlowCellSample] = get_flow_cell_samples_from_content(content)
     assert samples
 
 
