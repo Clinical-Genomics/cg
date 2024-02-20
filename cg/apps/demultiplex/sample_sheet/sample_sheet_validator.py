@@ -41,7 +41,6 @@ class SampleSheetValidator:
     def set_sample_type(self) -> None:
         """Set the local attribute sample type identified from the sample sheet content."""
         self.sample_type = get_sample_type_from_content(self.content)
-        LOG.debug(f"Found samples of type: {self.sample_type}")
 
     def _validate_all_sections_present(self) -> None:
         """
@@ -52,6 +51,7 @@ class SampleSheetValidator:
             - BCLConvert Data
         Raises: SampleSheetError if the sample sheet does not have all the sections.
         """
+        LOG.debug("Validating that the sample sheet has all the necessary sections")
         has_header: bool = [SampleSheetBCLConvertSections.Header.HEADER] in self.content
         has_cycles: bool = [SampleSheetBCLConvertSections.Reads.HEADER] in self.content
         has_settings: bool = [SampleSheetBCLConvertSections.Settings.HEADER] in self.content
@@ -69,6 +69,7 @@ class SampleSheetValidator:
 
         for row in self.content:
             if SampleSheetBCLConvertSections.Header.INDEX_SETTINGS in row:
+                LOG.debug(f"Found index settings: {row[1]}")
                 return row[1]
         message: str = "No index settings found in sample sheet"
         LOG.error(message)
@@ -76,6 +77,7 @@ class SampleSheetValidator:
 
     def _set_is_index2_reverse_complement(self) -> None:
         """Return whether the index2 override cycles value is reverse-complemented."""
+        LOG.debug("Looking for index settings in the sample sheet")
         settings_name: str = self._get_index_settings_name()
         self.is_index2_reverse_complement = NAME_TO_INDEX_SETTINGS[
             settings_name
@@ -98,6 +100,7 @@ class SampleSheetValidator:
 
     def _set_cycles(self):
         """Set values to the run cycle attributes."""
+        LOG.debug("Looking for read and index run cycles in the sample sheet")
         self.read1_cycles = self._get_cycle(SampleSheetBCLConvertSections.Reads.READ_CYCLES_1)
         self.read2_cycles = self._get_cycle(SampleSheetBCLConvertSections.Reads.READ_CYCLES_2)
         self.index1_cycles = self._get_cycle(SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_1)
@@ -112,6 +115,7 @@ class SampleSheetValidator:
             ValidationError if the samples do not have the correct attributes based on their model.
             SampleSheetError if the samples are not unique per lane.
         """
+        LOG.debug("Validating samples")
         validated_samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
             sample_sheet_content=self.content, sample_type=self.sample_type
         )
@@ -122,7 +126,7 @@ class SampleSheetValidator:
         Raises:
             SampleSheetError if any of the samples' override cycles are not valid.
         """
-        samples: list[dict[str, str]] = get_raw_samples_from_content(self.content)
+        LOG.debug("Validating override cycles for all samples")
         validator = OverrideCyclesValidator(
             run_read1_cycles=self.read1_cycles,
             run_read2_cycles=self.read2_cycles,
@@ -130,6 +134,7 @@ class SampleSheetValidator:
             run_index2_cycles=self.index2_cycles,
             is_reverse_complement=self.is_index2_reverse_complement,
         )
+        samples: list[dict[str, str]] = get_raw_samples_from_content(self.content)
         for sample in samples:
             try:
                 validator.validate_sample(sample)
@@ -155,8 +160,10 @@ class SampleSheetValidator:
         self.set_sample_sheet_content(content)
         self.set_sample_type()
         if self.sample_type is FlowCellSampleBCLConvert:
+            LOG.debug("Validating BCLConvert sample sheet")
             self._validate_bcl_convert()
         else:
+            LOG.debug("Validating Bcl2fastq sample sheet")
             self._validate_samples()
 
     def validate_sample_sheet_from_file(self, file_path: Path) -> None:
