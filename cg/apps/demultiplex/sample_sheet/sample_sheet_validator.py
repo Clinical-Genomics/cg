@@ -7,8 +7,8 @@ from typing import Type
 from cg.apps.demultiplex.sample_sheet.override_cycles_validator import OverrideCyclesValidator
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_flow_cell_samples_from_content,
-    get_raw_samples,
-    get_sample_type,
+    get_raw_samples_from_content,
+    get_sample_type_from_content,
     validate_samples_unique_per_lane,
 )
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample, FlowCellSampleBCLConvert
@@ -40,7 +40,8 @@ class SampleSheetValidator:
 
     def set_sample_type(self) -> None:
         """Set the local attribute sample type identified from the sample sheet content."""
-        self.sample_type = get_sample_type(self.content)
+        self.sample_type = get_sample_type_from_content(self.content)
+        LOG.debug(f"Found samples of type: {self.sample_type}")
 
     def _validate_all_sections_present(self) -> None:
         """
@@ -111,7 +112,9 @@ class SampleSheetValidator:
             ValidationError if the samples do not have the correct attributes based on their model.
             SampleSheetError if the samples are not unique per lane.
         """
-        validated_samples: list[FlowCellSample] = get_flow_cell_samples_from_content(self.content)
+        validated_samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
+            sample_sheet_content=self.content, sample_type=self.sample_type
+        )
         validate_samples_unique_per_lane(validated_samples)
 
     def _validate_override_cycles(self) -> None:
@@ -119,7 +122,7 @@ class SampleSheetValidator:
         Raises:
             SampleSheetError if any of the samples' override cycles are not valid.
         """
-        samples: list[dict[str, str]] = get_raw_samples(self.content)
+        samples: list[dict[str, str]] = get_raw_samples_from_content(self.content)
         validator = OverrideCyclesValidator(
             run_read1_cycles=self.read1_cycles,
             run_read2_cycles=self.read2_cycles,
@@ -168,5 +171,7 @@ class SampleSheetValidator:
             SampleSheetError: If the sample sheet is not valid.
         """
         self.validate_sample_sheet_from_file(file_path)
-        samples: list[FlowCellSample] = get_flow_cell_samples_from_content(self.content)
+        samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
+            sample_sheet_content=self.content, sample_type=self.sample_type
+        )
         return SampleSheet(samples=samples)

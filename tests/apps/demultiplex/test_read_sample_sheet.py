@@ -5,8 +5,8 @@ from typing import Type
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_raw_samples,
-    get_sample_type,
+    get_raw_samples_from_content,
+    get_sample_type_from_content,
     get_samples_by_lane,
     validate_samples_are_unique,
 )
@@ -79,7 +79,7 @@ def test_get_raw_samples_valid_sample_sheet(valid_sample_sheet_bcl2fastq: list[l
     # GIVEN a valid sample sheet
 
     # WHEN getting the list of raw samples from it
-    raw_samples: list[dict[str, str]] = get_raw_samples(
+    raw_samples: list[dict[str, str]] = get_raw_samples_from_content(
         sample_sheet_content=valid_sample_sheet_bcl2fastq
     )
 
@@ -98,7 +98,7 @@ def test_get_raw_samples_no_header(sample_sheet_samples_no_header: list[list[str
 
     # WHEN trying to get the samples from the sample sheet
     with pytest.raises(SampleSheetError):
-        get_raw_samples(sample_sheet_content=sample_sheet_samples_no_header)
+        get_raw_samples_from_content(sample_sheet_content=sample_sheet_samples_no_header)
 
     # THEN an exception is raised because of the missing header
     assert "Could not find header in sample sheet" in caplog.text
@@ -111,7 +111,7 @@ def test_get_raw_samples_no_samples(sample_sheet_bcl2fastq_data_header: list[lis
 
     # WHEN trying to get the samples from the sample sheet
     with pytest.raises(SampleSheetError):
-        get_raw_samples(sample_sheet_content=sample_sheet_bcl2fastq_data_header)
+        get_raw_samples_from_content(sample_sheet_content=sample_sheet_bcl2fastq_data_header)
 
     # THEN an exception is raised because of the missing samples
     assert "Could not find any samples in sample sheet" in caplog.text
@@ -124,7 +124,7 @@ def test_get_sample_type_for_bcl_convert(bcl_convert_sample_sheet_path: Path):
     content: list[list[str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.CSV, file_path=bcl_convert_sample_sheet_path
     )
-    sample_type: Type[FlowCellSample] = get_sample_type(content)
+    sample_type: Type[FlowCellSample] = get_sample_type_from_content(content)
 
     # THEN the sample type is FlowCellSampleBCLConvert
     assert sample_type is FlowCellSampleBCLConvert
@@ -137,7 +137,7 @@ def test_get_sample_type_for_bcl2fastq(bcl2fastq_sample_sheet_path: Path):
     content: list[list[str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.CSV, file_path=bcl2fastq_sample_sheet_path
     )
-    sample_type: Type[FlowCellSample] = get_sample_type(content)
+    sample_type: Type[FlowCellSample] = get_sample_type_from_content(content)
 
     # THEN the sample type is FlowCellSampleBCLConvert
     assert sample_type is FlowCellSampleBcl2Fastq

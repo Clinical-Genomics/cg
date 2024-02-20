@@ -1,10 +1,14 @@
 """Tests for the SampleSheetCreator classes."""
 
 from pathlib import Path
+from typing import Type
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_flow_cell_samples_from_content
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_flow_cell_samples_from_content,
+    get_sample_type_from_content,
+)
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSample,
     FlowCellSampleBcl2Fastq,
@@ -48,11 +52,14 @@ def test_construct_bcl2fastq_sheet(
     # GIVEN a Bcl2fastq sample sheet creator populated with Bcl2fastq samples
     assert bcl2fastq_sample_sheet_creator.lims_samples
 
-    # WHEN building the sample sheet
-    sample_sheet_content: list[list[str]] = bcl2fastq_sample_sheet_creator.construct_sample_sheet()
+    # WHEN building the sample sheet content
+    content: list[list[str]] = bcl2fastq_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
-    samples: list[FlowCellSample] = get_flow_cell_samples_from_content(sample_sheet_content)
+    sample_type: Type[FlowCellSample] = get_sample_type_from_content(content)
+    samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
+        sample_sheet_content=content, sample_type=sample_type
+    )
     assert samples
 
 
@@ -63,13 +70,14 @@ def test_construct_bcl_convert_sheet(
     # GIVEN a BCL convert sample sheet creator populated with BCL convert samples
     assert bcl_convert_sample_sheet_creator.lims_samples
 
-    # WHEN building the sample sheet
-    sample_sheet_content: list[list[str]] = (
-        bcl_convert_sample_sheet_creator.construct_sample_sheet()
-    )
+    # WHEN building the sample sheet content
+    content: list[list[str]] = bcl_convert_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
-    samples: list[FlowCellSample] = get_flow_cell_samples_from_content(sample_sheet_content)
+    sample_type: Type[FlowCellSample] = get_sample_type_from_content(content)
+    samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
+        sample_sheet_content=content, sample_type=sample_type
+    )
     assert samples
 
 

@@ -34,7 +34,7 @@ def validate_samples_unique_per_lane(samples: list[FlowCellSample]) -> None:
         validate_samples_are_unique(samples=lane_samples)
 
 
-def get_sample_type(sample_sheet_content: list[list[str]]) -> Type[FlowCellSample]:
+def get_sample_type_from_content(sample_sheet_content: list[list[str]]) -> Type[FlowCellSample]:
     """Returns the sample type identified from the sample sheet content."""
     for row in sample_sheet_content:
         if not row:
@@ -50,7 +50,7 @@ def get_sample_type(sample_sheet_content: list[list[str]]) -> Type[FlowCellSampl
     raise SampleSheetError(message)
 
 
-def get_raw_samples(sample_sheet_content: list[list[str]]) -> list[dict[str, str]]:
+def get_raw_samples_from_content(sample_sheet_content: list[list[str]]) -> list[dict[str, str]]:
     """Return the samples in a sample sheet as a list of dictionaries."""
     header: list[str] = []
     raw_samples: list[dict[str, str]] = []
@@ -94,13 +94,15 @@ def get_samples_by_lane(
 
 def get_flow_cell_samples_from_content(
     sample_sheet_content: list[list[str]],
+    sample_type: Type[FlowCellSample],
 ) -> list[FlowCellSample]:
     """
     Return the samples in a sample sheet as a list of FlowCellSample objects.
     Raises:
             ValidationError: if the samples do not have the correct attributes based on their model.
     """
-    sample_type: Type[FlowCellSample] = get_sample_type(sample_sheet_content)
-    raw_samples: list[dict[str, str]] = get_raw_samples(sample_sheet_content=sample_sheet_content)
+    raw_samples: list[dict[str, str]] = get_raw_samples_from_content(
+        sample_sheet_content=sample_sheet_content
+    )
     adapter = TypeAdapter(list[sample_type])
     return adapter.validate_python(raw_samples)
