@@ -332,7 +332,7 @@ class NfAnalysisAPI(AnalysisAPI):
                     .replace("CASEID", case_id)
                     .replace("SAMPLEID", sample_id)
                     .replace("SAMPLENAME", sample_name)
-                    .replace("CASEPATH", case_path)
+                    .replace("PATHTOCASE", case_path)
                 )
             files.append(FileDeliverable(**deliverables))
         return files
