@@ -1,3 +1,4 @@
+from cg.apps.tb.dto.summary_response import Summary
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.store.models import Order as DatabaseOrder
 
@@ -12,9 +13,21 @@ def parse_order(order: DatabaseOrder) -> Order:
     )
 
 
-def create_orders_response(database_orders: list[DatabaseOrder]) -> OrdersResponse:
-    parsed_database_orders: list[Order] = [parse_order(order) for order in database_orders]
-    return OrdersResponse(orders=parsed_database_orders)
+def _get_summary_for_order(order: Order, summaries: list[Summary]) -> Summary:
+    for summary in summaries:
+        if order.order_id == summary.order_id:
+            return summary
+
+
+def create_orders_response(
+    database_orders: list[DatabaseOrder], summaries: list[Summary]
+) -> OrdersResponse:
+    orders: list[Order] = [parse_order(order) for order in database_orders]
+    for order in orders:
+        summary: Summary = _get_summary_for_order(order, summaries)
+        if summary:
+            order.summary = summary
+    return OrdersResponse(orders=orders)
 
 
 def create_order_response(order: DatabaseOrder) -> Order:

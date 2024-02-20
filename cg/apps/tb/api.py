@@ -8,6 +8,7 @@ from google.auth import jwt
 from google.auth.crypt import RSASigner
 
 from cg.apps.tb.dto.create_job_request import CreateJobRequest
+from cg.apps.tb.dto.summary_response import SummariesResponse, Summary
 from cg.apps.tb.models import AnalysesResponse, TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
@@ -168,3 +169,10 @@ class TrailblazerAPI:
             request_body=request_body,
             method=APIMethods.POST,
         )
+
+    def get_summaries(self, order_ids: list[str]) -> list[Summary]:
+        orders_param = "order_ids[]=".join([f"{order_id}," for order_id in order_ids]).strip(",")
+        endpoint = f"summaries?{orders_param}"
+        response = self.query_trailblazer(command=endpoint, request_body={}, method=APIMethods.GET)
+        response_data = SummariesResponse.model_validate(response)
+        return response_data.summaries

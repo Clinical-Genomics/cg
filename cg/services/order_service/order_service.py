@@ -1,4 +1,5 @@
 from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.dto.summary_response import Summary
 from cg.models.orders.order import OrderIn
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order as OrderResponse
@@ -22,7 +23,9 @@ class OrderService:
 
     def get_orders(self, orders_request: OrdersRequest) -> OrdersResponse:
         orders: list[Order] = self.store.get_orders(orders_request)
-        return create_orders_response(orders)
+        summaries: list[Summary] = self.analysis_client.get_summaries(orders)
+        return create_orders_response(orders=orders, summaries=summaries)
+
 
     def create_order(self, order_data: OrderIn) -> OrderResponse:
         order: Order = self.store.add_order(order_data)
