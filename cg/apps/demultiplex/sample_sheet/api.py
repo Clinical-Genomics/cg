@@ -85,14 +85,12 @@ class SampleSheetAPI:
         try:
             sample_sheet_path: Path | None = self.hk_api.get_sample_sheet_path(flow_cell_id)
         except HousekeeperFileMissingError:
-            LOG.warning(f"Sample sheet for flow cell {flow_cell_id} not found in Housekeeper")
             return
         if correct_sheet_path := self.get_valid_sample_sheet_path(sample_sheet_path):
             return correct_sheet_path
         else:
             LOG.warning(
-                f"Sample sheet for flow cell {flow_cell_id} in Housekeeper is not valid. "
-                f"Deleting invalid sample sheet from Housekeeper"
+                f"Deleting invalid sample sheet from Housekeeper for flow cell {flow_cell_id}"
             )
             delete_file_from_housekeeper(file_path=sample_sheet_path, hk_api=self.hk_api)
 

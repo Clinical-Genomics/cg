@@ -178,7 +178,7 @@ def add_and_include_sample_sheet_path_to_housekeeper(
 
 def delete_file_from_housekeeper(file_path: Path, hk_api: HousekeeperAPI) -> None:
     """Delete a file from Housekeeper database and disk given its path."""
-    file: File = hk_api.files(path=file_path.as_posix()).first()
+    file: File = hk_api.get_file_insensitive_path(file_path)
     hk_api.delete_file(file_id=file.id)
 
 
