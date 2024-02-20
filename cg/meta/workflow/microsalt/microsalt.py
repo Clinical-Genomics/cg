@@ -89,13 +89,16 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_job_ids_path(self, case_id: str) -> Path:
         project_id: str = self.get_project_id(case_id)
-        return Path(
+        job_ids_path = Path(
             self.root_dir,
             "results",
             "reports",
             "trailblazer",
             f"{project_id}_slurm_ids{FileExtensions.YAML}",
         )
+        if job_ids_path.exists():
+            job_ids_path.unlink()
+        return job_ids_path
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
