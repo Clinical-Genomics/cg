@@ -96,6 +96,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             "trailblazer",
             f"{project_id}_slurm_ids{FileExtensions.YAML}",
         )
+        # Necessary due to how microsalt structures its output
         self._ensure_old_job_ids_are_removed(job_ids_path)
         return job_ids_path
 
