@@ -4,6 +4,8 @@ import logging
 from pathlib import Path
 from typing import Type
 
+from pydantic import ValidationError
+
 from cg.apps.demultiplex.sample_sheet.override_cycles_validator import OverrideCyclesValidator
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_flow_cell_samples_from_content,
@@ -49,7 +51,8 @@ class SampleSheetValidator:
             - Reads
             - BCLConvert Settings
             - BCLConvert Data
-        Raises: SampleSheetError if the sample sheet does not have all the sections.
+        Raises:
+            SampleSheetError if the sample sheet does not have all the sections.
         """
         LOG.debug("Validating that the sample sheet has all the necessary sections")
         has_header: bool = [SampleSheetBCLConvertSections.Header.HEADER] in self.content
@@ -111,12 +114,17 @@ class SampleSheetValidator:
     def _validate_samples(self) -> None:
         """
         Determine if the samples have the correct attributes and are unique per lane.
-            Raises:
-            ValidationError if the samples do not have the correct attributes based on their model.
-            SampleSheetError if the samples are not unique per lane.
+        Raises:
+            SampleSheetError if the samples do not have the correct attributes based on their model
+            or are not unique per lane.
         """
         LOG.debug("Validating samples")
-        validated_samples: list[FlowCellSample] = get_flow_cell_samples_from_content(self.content)
+        try:
+            validated_samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
+                self.content
+            )
+        except ValidationError as error:
+            raise SampleSheetError from error
         validate_samples_unique_per_lane(validated_samples)
 
     def _validate_override_cycles(self) -> None:
@@ -154,7 +162,11 @@ class SampleSheetValidator:
         self._validate_override_cycles()
 
     def validate_sample_sheet_from_content(self, content: list[list[str]]) -> None:
-        """Call the proper validation depending on the sample sheet type."""
+        """
+        Call the proper validation depending on the sample sheet type.
+        Raises:
+            SampleSheetError: If the sample sheet is not valid.
+        """
         self.set_sample_sheet_content(content)
         self.set_sample_type()
         if self.sample_type is FlowCellSampleBCLConvert:
@@ -165,7 +177,11 @@ class SampleSheetValidator:
             self._validate_samples()
 
     def validate_sample_sheet_from_file(self, file_path: Path) -> None:
-        """Validate a sample sheet given the path to the file."""
+        """
+        Validate a sample sheet given the path to the file.
+        Raises:
+            SampleSheetError: If the sample sheet is not valid.
+        """
         self.validate_sample_sheet_from_content(
             ReadFile.get_content_from_file(file_format=FileFormat.CSV, file_path=file_path)
         )

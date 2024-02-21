@@ -13,6 +13,7 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
+from cg.exc import SampleSheetError
 from cg.io.txt import read_txt
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -107,7 +108,7 @@ def test_create_bcl2fastq_sample_sheet(
     assert flow_cell.sample_sheet_exists()
 
     # THEN the sample sheet passes validation
-    sample_sheet_api.validate(flow_cell.sample_sheet_path)
+    sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
 
     # THEN the sample sheet is in Housekeeper
     assert sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(flow_cell.id)
@@ -185,7 +186,7 @@ def test_create_v2_sample_sheet(
     assert flow_cell.sample_sheet_exists()
 
     # THEN the sample sheet passes validation
-    sample_sheet_api.validate(flow_cell.sample_sheet_path)
+    sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
 
     # THEN the sample sheet is in Housekeeper
     assert sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(flow_cell.id)
@@ -213,8 +214,8 @@ def test_incorrect_bcl2fastq_samplesheet_is_regenerated(
 
     # GIVEN a sample sheet API and an invalid sample sheet
     sample_sheet_api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
-    with pytest.raises(ValidationError):
-        sample_sheet_api.validate(flow_cell.sample_sheet_path)
+    with pytest.raises(SampleSheetError):
+        sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
 
     # GIVEN flow cell samples
     mocker.patch(
@@ -235,4 +236,4 @@ def test_incorrect_bcl2fastq_samplesheet_is_regenerated(
     )
 
     # THEN the sample sheet was re-created and passes validation
-    sample_sheet_api.validate(flow_cell.sample_sheet_path)
+    sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)

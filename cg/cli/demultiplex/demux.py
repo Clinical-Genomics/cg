@@ -61,7 +61,7 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
             continue
 
         try:
-            sample_sheet_api.validate(flow_cell.sample_sheet_path)
+            sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
         except (SampleSheetError, ValidationError):
             LOG.warning(
                 f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}"
@@ -113,7 +113,7 @@ def demultiplex_flow_cell(
         return
 
     try:
-        sample_sheet_api.validate(flow_cell.sample_sheet_path)
+        sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
     except (SampleSheetError, ValidationError) as error:
         LOG.warning(
             f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}"
@@ -132,7 +132,7 @@ def demultiplex_flow_cell(
 @click.command(name="copy-completed-flow-cell")
 @click.pass_obj
 def copy_novaseqx_flow_cells(context: CGConfig):
-    """Copy Novaseqx flow cells ready for post processing to demultiplexed runs."""
+    """Copy NovaSeq X flow cells ready for post-processing to demultiplexed runs."""
     flow_cells_dir: Path = Path(context.illumina_flow_cells_directory)
     demultiplexed_runs_dir: Path = Path(context.illumina_demultiplexed_runs_directory)
 
