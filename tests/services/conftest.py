@@ -5,7 +5,7 @@ from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 
 
 @pytest.fixture
-def fastq_service():
+def fastq_file_service():
     return FastqFileService()
 
 

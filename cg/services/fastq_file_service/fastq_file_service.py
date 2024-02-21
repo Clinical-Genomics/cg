@@ -16,12 +16,15 @@ class FastqFileService:
         reverse_output: Path,
         remove_raw: bool = False,
     ):
-        concatenate_forward_reads(directory=fastq_directory, output_file=forward_output)
-        concatenate_reverse_reads(directory=fastq_directory, output_file=reverse_output)
+        temp_forward: Path = concatenate_forward_reads(fastq_directory)
+        temp_reverse: Path = concatenate_reverse_reads(fastq_directory)
 
         if remove_raw:
             remove_raw_fastqs(
                 fastq_directory=fastq_directory,
-                forward_file=forward_output,
-                reverse_file=reverse_output,
+                forward_file=temp_forward,
+                reverse_file=temp_reverse,
             )
+
+        temp_forward.rename(forward_output)
+        temp_reverse.rename(reverse_output)

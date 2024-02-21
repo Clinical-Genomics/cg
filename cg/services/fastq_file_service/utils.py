@@ -1,24 +1,34 @@
 from pathlib import Path
 import re
 import shutil
+import uuid
 
 from cg.services.fastq_file_service.exceptions import ConcatenationError
 
 
-def concatenate_forward_reads(directory: Path, output_file: Path) -> None:
+def concatenate_forward_reads(directory: Path) -> Path:
     fastqs = get_forward_read_fastqs(directory)
     if not fastqs:
         return
+    output_file: Path = get_new_unique_file(directory)
     concatenate(input_files=fastqs, output_file=output_file)
     validate_concatenation(input_files=fastqs, output_file=output_file)
+    return output_file
 
 
-def concatenate_reverse_reads(directory: Path, output_file: Path) -> None:
+def concatenate_reverse_reads(directory: Path) -> Path:
     fastqs: list[Path] = get_reverse_read_fastqs(directory)
     if not fastqs:
         return
-    concatenate(input_files=fastqs, output_file=output_file)
-    validate_concatenation(input_files=fastqs, output_file=output_file)
+    file: Path = get_new_unique_file(directory)
+    concatenate(input_files=fastqs, output_file=file)
+    validate_concatenation(input_files=fastqs, output_file=file)
+    return file
+
+
+def get_new_unique_file(directory: Path) -> Path:
+    unique_id  = uuid.uuid4()
+    return Path(directory, f"{unique_id}.fastq.gz")
 
 
 def get_forward_read_fastqs(fastq_directory: Path) -> list[Path]:
