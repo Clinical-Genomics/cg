@@ -233,7 +233,7 @@ class AnalysisAPI(MetaAPI):
 
     def _get_order_id_from_case_id(self, case_id) -> int:
         case: Case = self.status_db.get_case_by_internal_id(case_id)
-        return case.order_id
+        return case.latest_order.id
 
     def get_hermes_transformed_deliverables(self, case_id: str) -> dict:
         return self.hermes_api.create_housekeeper_bundle(
