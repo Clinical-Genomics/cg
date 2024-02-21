@@ -60,3 +60,13 @@ def sort_files_by_name(files: list[Path]) -> list[Path]:
     files_map = {file.name: file for file in files}
     sorted_names = sorted(files_map.keys())
     return [files_map[name] for name in sorted_names]
+
+
+def file_can_be_removed(file: Path, forward_file: Path, reverse_file: Path) -> bool:
+    return file.suffix == ".fastq.gz" and file != forward_file and file != reverse_file
+
+
+def remove_raw_fastqs(fastq_directory: Path, forward_file: Path, reverse_file: Path) -> None:
+    for file in fastq_directory.iterdir():
+        if file_can_be_removed(file=file, forward_file=forward_file, reverse_file=reverse_file):
+            file.unlink()

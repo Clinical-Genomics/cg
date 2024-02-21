@@ -10,8 +10,9 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
-from cg.constants.constants import DataDelivery
+from cg.constants.constants import DataDelivery, Workflow
 from cg.exc import MissingFilesError
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
@@ -29,6 +30,7 @@ class DeliverAPI:
         sample_tags: list[set[str]],
         project_base_path: Path,
         delivery_type: str,
+        fastq_file_service: FastqFileService,
         force_all: bool = False,
         ignore_missing_bundles: bool = False,
     ):
@@ -55,6 +57,7 @@ class DeliverAPI:
             self.delivery_type in constants.SKIP_MISSING or ignore_missing_bundles
         )
         self.deliver_failed_samples = force_all
+        self.fastq_file_service = fastq_file_service
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run."""
@@ -208,6 +211,19 @@ class DeliverAPI:
 
         LOG.info(
             f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case_id}"
+        )
+
+        if self.delivery_type == Workflow.MICROSALT:
+            self.concatenate_fastqs(sample_directory=delivery_base, sample_name=sample_name)
+
+    def concatenate_fastqs(self, sample_directory: Path, sample_name: str):
+        forward_out_path = Path(sample_directory, f"{sample_name}_R1.fastq.gz")
+        reverse_out_path = Path(sample_directory, f"{sample_name}_R2.fastq.gz")
+        self.fastq_file_service.concatenate(
+            fastq_directory=sample_directory,
+            forward_output=forward_out_path,
+            reverse_output=reverse_out_path,
+            remove_raw=True,
         )
 
     def get_case_files_from_version(self, version: Version, sample_ids: set[str]) -> Iterable[Path]:
