@@ -115,8 +115,7 @@ class DeliverAPI:
                         continue
                     raise SyntaxError(f"Could not find any version for {sample_id}")
                 self.deliver_sample_files(
-                    case_id=case_id,
-                    case_name=case_name,
+                    case=case_obj,
                     sample_id=sample_id,
                     sample_name=sample_name,
                     version_obj=last_version,
@@ -166,14 +165,16 @@ class DeliverAPI:
 
     def deliver_sample_files(
         self,
-        case_id: str,
-        case_name: str,
+        case: Case,
         sample_id: str,
         sample_name: str,
         version_obj: Version,
     ) -> None:
         """Deliver files on sample level."""
         # Make sure that the directory exists
+        case_name: str = case.name
+        case_id: str = case.internal_id
+
         if self.delivery_type in constants.ONLY_ONE_CASE_PER_TICKET:
             case_name = None
         delivery_base: Path = self.create_delivery_dir_path(
@@ -213,7 +214,7 @@ class DeliverAPI:
             f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case_id}"
         )
 
-        if self.delivery_type == Workflow.MICROSALT:
+        if self.delivery_type == Workflow.FASTQ and case.data_analysis == Workflow.MICROSALT:
             self.concatenate_fastqs(sample_directory=delivery_base, sample_name=sample_name)
 
     def concatenate_fastqs(self, sample_directory: Path, sample_name: str):
