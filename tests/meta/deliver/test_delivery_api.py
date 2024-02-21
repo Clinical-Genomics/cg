@@ -29,7 +29,7 @@ def test_get_delivery_path(
         sample_tags=["sample-tag"],
         project_base_path=project_dir,
         delivery_type="balsamic",
-        fastq_file_service=FastqFileService()
+        fastq_file_service=FastqFileService(),
     )
     customer_id = "cust000"
     ticket = "1234"
@@ -87,7 +87,7 @@ def test_get_case_files_from_version(
         sample_tags=[{"sample-tag"}],
         project_base_path=project_dir,
         delivery_type="balsamic",
-        fastq_file_service=FastqFileService()
+        fastq_file_service=FastqFileService(),
     )
 
     # GIVEN a housekeeper db populated with a bundle including a case specific file and a sample specific file
