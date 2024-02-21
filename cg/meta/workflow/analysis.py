@@ -211,7 +211,7 @@ class AnalysisAPI(MetaAPI):
             self.status_db.get_case_by_internal_id(case_id).links[0].sample
         )
         config_path: str = self.get_job_ids_path(case_id).as_posix()
-        data_analysis: str = str(self.workflow)
+        workflow: Workflow = self.workflow
         email: str = environ_email()
         order_id: str = str(self._get_order_id_from_case_id(case_id))
         out_dir: str = self.get_job_ids_path(case_id).parent.as_posix()
@@ -221,17 +221,14 @@ class AnalysisAPI(MetaAPI):
         self.trailblazer_api.add_pending_analysis(
             analysis_type=application_type,
             case_id=case_id,
-            analysis_type=self.get_application_type(
-                self.status_db.get_case_by_internal_id(case_id).links[0].sample
-            ),
-            config_path=self.get_job_ids_path(case_id).as_posix(),
+            config_path=config_path,
+            email=email,
             order_id=order_id,
-            out_dir=self.get_job_ids_path(case_id).parent.as_posix(),
-            slurm_quality_of_service=self.get_slurm_qos_for_case(case_id),
-            email=environ_email(),
-            workflow=self.workflow,
-            ticket=self.status_db.get_latest_ticket_from_case(case_id),
-            workflow_manager=self.get_workflow_manager(),
+            out_dir=out_dir,
+            slurm_quality_of_service=slurm_quality_of_service,
+            ticket=ticket,
+            workflow=workflow,
+            workflow_manager=workflow_manager,
         )
 
     def _get_order_id_from_case_id(self, case_id) -> int:

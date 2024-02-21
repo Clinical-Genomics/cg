@@ -437,6 +437,12 @@ class Case(Model, PriorityMixin):
         return self.tickets.split(sep=",")[-1] if self.tickets else None
 
     @property
+    def latest_order(self) -> "Order":
+        """Returns the latest order this case was included in."""
+        sorted_orders: list[Order] = sorted(self.orders, key=lambda order: order.ordered_at)
+        return sorted_orders[0]
+
+    @property
     def latest_analyzed(self) -> dt.datetime | None:
         return self.analyses[0].completed_at if self.analyses else None
 
