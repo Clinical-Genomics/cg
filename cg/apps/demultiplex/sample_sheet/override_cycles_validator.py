@@ -157,7 +157,8 @@ class OverrideCyclesValidator:
             return
         message: str = (
             f"Index2 cycle {index2_cycle} of sample {self.sample_id} "
-            f"does not match with run cycle {self.run_index2_cycles}"
+            f"does not match with run cycle {self.run_index2_cycles} "
+            f"and reverse complement set to {self.is_reverse_complement}"
         )
         LOG.error(message)
         raise OverrideCyclesError(message)

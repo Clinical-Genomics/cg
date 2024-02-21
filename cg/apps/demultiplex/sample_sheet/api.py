@@ -33,6 +33,7 @@ class SampleSheetAPI:
         self.dry_run: bool = False
         self.force: bool = False
         self.validator = SampleSheetValidator()
+        self.bcl_converter: str | None = None
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run."""
@@ -92,7 +93,7 @@ class SampleSheetAPI:
             )
         try:
             self.validate_sample_sheet(
-                sample_sheet_path=sample_sheet_path, bcl_converter=flow_cell.bcl_converter
+                sample_sheet_path=sample_sheet_path, bcl_converter=self.bcl_converter
             )
             LOG.info("Sample sheet from Housekeeper is valid. Copying it to flow cell directory")
             if not self.dry_run:
@@ -108,7 +109,7 @@ class SampleSheetAPI:
     def _use_flow_cell_sample_sheet(self, flow_cell: FlowCellDirectoryData) -> None:
         """Use the sample sheet from the flow cell directory if it is valid."""
         self.validate_sample_sheet(
-            sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=flow_cell.bcl_converter
+            sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=self.bcl_converter
         )
         LOG.info("Sample sheet from flow cell directory is valid. Adding it to Housekeeper")
         if not self.dry_run:
@@ -162,6 +163,7 @@ class SampleSheetAPI:
         Ensure that a valid sample sheet is present in the flow cell directory by fetching it from
         housekeeper or creating it if there is not a valid sample sheet.
         """
+        self.bcl_converter = bcl_converter
         flow_cell: FlowCellDirectoryData = self._get_flow_cell(
             flow_cell_name=flow_cell_name, bcl_converter=bcl_converter
         )
@@ -178,7 +180,7 @@ class SampleSheetAPI:
             self._use_flow_cell_sample_sheet(flow_cell)
             return
         except SampleSheetError:
-            LOG.info(
+            LOG.warning(
                 "It was not possible to use sample sheet from flow cell, creating new sample sheet"
             )
         self._create_sample_sheet_file(flow_cell)
@@ -188,7 +190,7 @@ class SampleSheetAPI:
         for flow_cell_dir in self.flow_cell_runs_dir.iterdir():
             try:
                 self.get_or_create_sample_sheet(
-                    flow_cell_dir.name, bcl_converter=BclConverter.BCLCONVERT
+                    flow_cell_name=flow_cell_dir.name, bcl_converter=None
                 )
             except Exception as error:
                 LOG.error(f"Could not create sample sheet for {flow_cell_dir.name}: {error}")

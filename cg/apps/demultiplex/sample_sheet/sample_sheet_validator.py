@@ -187,9 +187,11 @@ class SampleSheetValidator:
         if sample_type is FlowCellSampleBCLConvert:
             LOG.debug("Validating BCLConvert sample sheet")
             self._validate_bcl_convert()
+            LOG.info("Samplesheet passed BCLConvert validation")
         else:
             LOG.debug("Validating Bcl2fastq sample sheet")
             self._validate_samples(sample_type=FlowCellSampleBcl2Fastq)
+            LOG.info("Samplesheet passed Bcl2Fastq validation")
 
     def validate_sample_sheet_from_file(
         self, file_path: Path, bcl_converter: str | None = None
