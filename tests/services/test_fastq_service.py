@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from cg.services.fastq_service.fastq_service import FastqService
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 
 
-def test_empty_directory(fastq_service: FastqService, tmp_path):
+def test_empty_directory(fastq_service: FastqFileService, tmp_path):
     # GIVEN an empty directory
 
     # GIVEN output files
@@ -22,7 +22,7 @@ def test_empty_directory(fastq_service: FastqService, tmp_path):
     assert not reverse_output.exists()
 
 
-def test_concatenate(fastq_service: FastqService, fastqs_dir: Path, tmp_path):
+def test_concatenate(fastq_service: FastqFileService, fastqs_dir: Path, tmp_path):
     # GIVEN a directory with forward and reverse reads
 
     # GIVEN output files for the concatenated reads
@@ -45,7 +45,7 @@ def test_concatenate(fastq_service: FastqService, fastqs_dir: Path, tmp_path):
     assert concatenated_reverse.read_text()
 
 
-def test_concatenate_missing_reverse(fastq_service: FastqService, fastqs_forward: Path, tmp_path):
+def test_concatenate_missing_reverse(fastq_service: FastqFileService, fastqs_forward: Path, tmp_path):
     # GIVEN a directory with forward reads only
 
     # GIVEN output files for the concatenated reads

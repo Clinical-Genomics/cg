@@ -2,7 +2,7 @@ from pathlib import Path
 import re
 import shutil
 
-from cg.services.fastq_service.exceptions import ConcatenationError
+from cg.services.fastq_file_service.exceptions import ConcatenationError
 
 
 def concatenate_forward_reads(directory: Path, output_file: Path) -> None:
