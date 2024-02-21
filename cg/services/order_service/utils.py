@@ -16,8 +16,9 @@ def parse_order(order: DatabaseOrder) -> Order:
 def create_orders_response(
     database_orders: list[DatabaseOrder], summaries: list[Summary]
 ) -> OrdersResponse:
-    orders: list[Order] = [parse_order(order) for order in database_orders]
-    _add_summaries_to_orders(orders=orders, summaries=summaries)
+    orders = [parse_order(order) for order in database_orders]
+    if summaries:
+        _add_summaries_to_orders(orders=orders, summaries=summaries)
     return OrdersResponse(orders=orders)
 
 
