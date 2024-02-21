@@ -35,7 +35,7 @@ from cg.models.orders.orderform_schema import Orderform
 from cg.server.dto.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
-from cg.server.ext import db, lims, osticket
+from cg.server.ext import db, lims, osticket, order_service
 from cg.server.utils import parse_orders_request
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.order_service.exceptions import OrderNotFoundError
@@ -136,7 +136,6 @@ def submit_order(order_type):
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )
-        order_service = OrderService(db)
         order_service.create_order(order_in)
     except (  # user misbehaviour
         OrderError,
@@ -481,7 +480,6 @@ def get_application_pipeline_limitations(tag: str):
 @BLUEPRINT.route("/orders")
 def get_orders():
     """Return the latest orders."""
-    order_service = OrderService(db)
     data: OrdersRequest = parse_orders_request(request)
     response: OrdersResponse = order_service.get_orders(data)
     return make_response(response.model_dump())
@@ -490,7 +488,6 @@ def get_orders():
 @BLUEPRINT.route("/orders/<order_id>")
 def get_order(order_id: int):
     """Return an order."""
-    order_service = OrderService(db)
     try:
         response: Order = order_service.get_order(order_id)
         response_dict: dict = response.model_dump()
