@@ -1740,7 +1740,7 @@ class ReadHandler(BaseHandler):
             filters=filters,
             workflow=workflow,
             limit=limit,
-        )
+        ).all()
 
     def get_order_by_id(self, order_id: int) -> Order | None:
         """Returns the entry in Order matching the given id."""
