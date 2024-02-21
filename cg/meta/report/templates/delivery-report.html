@@ -1,4 +1,4 @@
-{% from "components.html" import footer %}
+{% from "components.html" import footer, header %}
 
 <!doctype html>
 <html lang="en">
@@ -18,7 +18,7 @@
 		</div>
 		<div class="card-body">
 			<div class="container mb-4">
-				Test
+				{{ header(customer_name=customer.name, case_name=case.name, report_version=version, report_date=date) }}
 			</div>
 			<div class="container mb-4">
 				Test
