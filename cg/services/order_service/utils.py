@@ -1,5 +1,5 @@
 from cg.apps.tb.dto.summary_response import Summary
-from cg.server.dto.orders.orders_response import Order, OrdersResponse
+from cg.server.dto.orders.orders_response import Order, OrderSummary, OrdersResponse
 from cg.store.models import Order as DatabaseOrder
 
 
@@ -25,8 +25,15 @@ def create_orders_response(
 def _add_summaries_to_orders(orders: list[Order], summaries: list[Summary]) -> list[Order]:
     summary_mapping: dict = {summary.order_id: summary for summary in summaries}
     for order in orders:
-        if summary := summary_mapping.get(order.order_id):
-            order.summary = summary
+        summary: Summary = summary_mapping.get(order.order_id)
+        if summary:
+            order.summary = OrderSummary(
+                total=summary.total,
+                delivered=summary.delivered,
+                running=summary.running,
+                cancelled=summary.cancelled,
+                failed=summary.failed,
+            )
     return orders
 
 
