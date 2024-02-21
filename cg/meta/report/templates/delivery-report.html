@@ -1,3 +1,5 @@
+{% from "components.html" import footer %}
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -12,10 +14,18 @@
 <div class="container">
 	<div class="card">
 		<div class="card-header text-center">
-			<h4>Leveransrapport Clinical Genomics</h4>
+			<h3>Leveransrapport Clinical Genomics</h3>
 		</div>
 		<div class="card-body">
-
+			<div class="container mb-4">
+				Test
+			</div>
+			<div class="container mb-4">
+				Test
+			</div>
+			<div class="container">
+				{{ footer() }}
+			</div>
 		</div>
 		<div class="card-footer text-center text-body-secondary">
 			Slut på rapport
