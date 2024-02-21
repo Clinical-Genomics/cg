@@ -132,6 +132,7 @@ class SampleSheetValidator:
                 sample_sheet_content=self.content, sample_type=sample_type
             )
         except ValidationError as error:
+            LOG.error("Sample sheet failed validation: samples are not in the correct format")
             raise SampleSheetError from error
         validate_samples_unique_per_lane(validated_samples)
 

@@ -21,7 +21,7 @@ def validate_samples_are_unique(samples: list[FlowCellSample]) -> None:
         sample_id: str = sample.sample_id.split("_")[0]
         if sample_id in sample_ids:
             message: str = f"Sample {sample.sample_id} exists multiple times in sample sheet"
-            LOG.warning(message)
+            LOG.error(message)
             raise SampleSheetError(message)
         sample_ids.add(sample_id)
 

@@ -110,6 +110,7 @@ class SampleSheetAPI:
         self.validate_sample_sheet(
             sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=flow_cell.bcl_converter
         )
+        LOG.info("Sample sheet from flow cell directory is valid. Adding it to Housekeeper")
         if not self.dry_run:
             add_and_include_sample_sheet_path_to_housekeeper(
                 flow_cell_directory=flow_cell.path,

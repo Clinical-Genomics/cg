@@ -48,9 +48,9 @@ def store_undetermined_fastq_files(
     flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, store: Store
 ) -> None:
     """Store undetermined fastq files for non-pooled samples in Housekeeper."""
-    non_pooled_lanes_and_samples: list[tuple[int, str]] = (
-        flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
-    )
+    non_pooled_lanes_and_samples: list[
+        tuple[int, str]
+    ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
 
     for lane, sample_id in non_pooled_lanes_and_samples:
         undetermined_fastqs: list[Path] = get_undetermined_fastqs(
@@ -165,7 +165,7 @@ def add_and_include_sample_sheet_path_to_housekeeper(
     Raises:
         FileNotFoundError: If the sample sheet file is not found.
     """
-    LOG.info("Adding sample sheet to Housekeeper")
+    LOG.debug("Adding sample sheet to Housekeeper")
     try:
         sample_sheet_file_path: Path = get_sample_sheet_path_from_flow_cell_dir(flow_cell_directory)
         hk_api.add_bundle_and_version_if_non_existent(flow_cell_name)
