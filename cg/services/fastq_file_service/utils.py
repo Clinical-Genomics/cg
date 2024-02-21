@@ -63,7 +63,7 @@ def sort_files_by_name(files: list[Path]) -> list[Path]:
 
 
 def file_can_be_removed(file: Path, forward_file: Path, reverse_file: Path) -> bool:
-    return file.suffix == ".fastq.gz" and file != forward_file and file != reverse_file
+    return file.suffix == ".gz" and file != forward_file and file != reverse_file
 
 
 def remove_raw_fastqs(fastq_directory: Path, forward_file: Path, reverse_file: Path) -> None:
