@@ -72,7 +72,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
             case_id=analysis_name,
             analysis_type=AnalysisTypes.OTHER,
             config_path=rsync_api.trailblazer_config_path.as_posix(),
-            order_id=str(order_id),
+            order_id=order_id,
             out_dir=rsync_api.log_dir.as_posix(),
             slurm_quality_of_service=Priority.priority_to_slurm_qos().get(case.priority),
             workflow=Workflow.RSYNC,

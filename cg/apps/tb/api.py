@@ -109,7 +109,7 @@ class TrailblazerAPI:
         out_dir: str,
         slurm_quality_of_service: SlurmQos,
         email: str = None,
-        order_id: str | None = None,
+        order_id: int | None = None,
         workflow: Workflow = None,
         ticket: str = None,
         workflow_manager: str = WorkflowManager.Slurm,
