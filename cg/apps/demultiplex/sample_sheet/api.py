@@ -147,11 +147,8 @@ class SampleSheetAPI:
 
     def get_or_create_sample_sheet(self, flow_cell_name: str, bcl_converter: str) -> None:
         """
-        Ensure that a valid sample sheet is present in the flow cell directory.
-        If a valid sample sheet for the flow cell is present in Housekeeper, the function hard-links
-        it to the flow cell directory. If not and if the flow cell directory has a valid sample
-        sheet, the function adds and includes it to Housekeeper. If neither is present, the
-        function creates a sample sheet for the flow cell and adds and includes it to Housekeeper.
+        Ensure that a valid sample sheet is present in the flow cell directory by fetching it from
+        housekeeper or creating it if there is no valid one.
         """
         flow_cell: FlowCellDirectoryData = self.get_flow_cell(
             flow_cell_name=flow_cell_name, bcl_converter=bcl_converter

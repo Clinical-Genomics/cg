@@ -98,10 +98,8 @@ class OverrideCyclesValidator:
 
     def _validate_index1_cycles(self) -> None:
         """
-        Determine if the sample index 1 cycle is valid, i.e., if the number of index characters in
-        the override cycles coincides with the length of the index sequence and if the number of
-        ignored characters in the override cycles matches the difference between the length of the
-        index sequence and the number of run index1 cycles.
+        Determine if the sample index 1 cycle is valid, i.e., if the number of index cycles is
+        coherent with the run cycles and the index sequence length.
         Raises:
             OverrideCyclesError if the index 1 cycle is not valid.
         """
