@@ -9,6 +9,7 @@ from cg.constants.constants import Workflow
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 from tests.cli.deliver.conftest import fastq_delivery_bundle, mip_delivery_bundle
@@ -28,6 +29,7 @@ def test_get_delivery_path(
         sample_tags=["sample-tag"],
         project_base_path=project_dir,
         delivery_type="balsamic",
+        fastq_file_service=FastqFileService()
     )
     customer_id = "cust000"
     ticket = "1234"
@@ -85,6 +87,7 @@ def test_get_case_files_from_version(
         sample_tags=[{"sample-tag"}],
         project_base_path=project_dir,
         delivery_type="balsamic",
+        fastq_file_service=FastqFileService()
     )
 
     # GIVEN a housekeeper db populated with a bundle including a case specific file and a sample specific file
