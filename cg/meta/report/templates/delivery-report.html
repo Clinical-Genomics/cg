@@ -1,4 +1,4 @@
-{% from "components.html" import footer, header %}
+{% from "components.html" import header, contact_data, footer %}
 
 <!doctype html>
 <html lang="en">
@@ -21,7 +21,7 @@
 				{{ header(customer_name=customer.name, case_name=case.name, report_version=version, report_date=date) }}
 			</div>
 			<div class="container mb-4">
-				Test
+				{{ contact_data(customer_name=customer.name, customer_address=customer.invoice_address, is_accredited=accredited) }}
 			</div>
 			<div class="container">
 				{{ footer() }}
