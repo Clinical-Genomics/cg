@@ -20,4 +20,8 @@ class FastqFileService:
         concatenate_reverse_reads(directory=fastq_directory, output_file=reverse_output)
 
         if remove_raw:
-            remove_raw_fastqs()
+            remove_raw_fastqs(
+                fastq_directory=fastq_directory,
+                forward_file=forward_output,
+                reverse_file=reverse_output,
+            )
