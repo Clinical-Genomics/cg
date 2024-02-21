@@ -19,7 +19,7 @@ def filter_orders_by_id(orders: Query, id: int, **kwargs) -> Query:
 def apply_order_filters(
     filter_functions: list[Callable],
     orders: Query,
-    id: int = None,
+    id: int | None = None,
     workflow: str = None,
 ) -> Query:
     """Apply filtering functions to the order queries and return filtered results."""
