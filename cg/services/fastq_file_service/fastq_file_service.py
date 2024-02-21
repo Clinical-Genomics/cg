@@ -1,6 +1,9 @@
 from pathlib import Path
 
-from cg.services.fastq_file_service.utils import concatenate_forward_reads, concatenate_reverse_reads
+from cg.services.fastq_file_service.utils import (
+    concatenate_forward_reads,
+    concatenate_reverse_reads,
+)
 
 
 class FastqFileService:

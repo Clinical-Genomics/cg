@@ -45,7 +45,9 @@ def test_concatenate(fastq_service: FastqFileService, fastqs_dir: Path, tmp_path
     assert concatenated_reverse.read_text()
 
 
-def test_concatenate_missing_reverse(fastq_service: FastqFileService, fastqs_forward: Path, tmp_path):
+def test_concatenate_missing_reverse(
+    fastq_service: FastqFileService, fastqs_forward: Path, tmp_path
+):
     # GIVEN a directory with forward reads only
 
     # GIVEN output files for the concatenated reads
