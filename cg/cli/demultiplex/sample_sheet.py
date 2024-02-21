@@ -42,7 +42,11 @@ def validate_sample_sheet(context: CGConfig, sheet: click.Path):
 @click.option("--force", is_flag=True, help="Skips the validation of the sample sheet")
 @click.pass_obj
 def create_sheet(
-    context: CGConfig, flow_cell_name: str, bcl_converter: str, dry_run: bool, force: bool = False
+    context: CGConfig,
+    flow_cell_name: str,
+    bcl_converter: str | None,
+    dry_run: bool,
+    force: bool = False,
 ):
     """Create a sample sheet or hard-link it from Housekeeper in the flow cell directory.
 
@@ -50,7 +54,7 @@ def create_sheet(
 
     Search the flow cell in the directory specified in config.
     """
-    LOG.info(f"Creating sample sheet for flow cell {flow_cell_name}")
+    LOG.info(f"Getting a valid sample sheet for flow cell {flow_cell_name}")
     sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     sample_sheet_api.set_dry_run(dry_run)
     sample_sheet_api.set_force(force)

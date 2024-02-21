@@ -119,7 +119,7 @@ class SampleSheetValidator:
             cycle_name=SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2, nullable=True
         )
 
-    def _validate_samples(self) -> None:
+    def _validate_samples(self, sample_type: Type[FlowCellSample] | None = None) -> None:
         """
         Determine if the samples have the correct attributes and are unique per lane.
         Raises:
@@ -129,7 +129,7 @@ class SampleSheetValidator:
         LOG.debug("Validating samples")
         try:
             validated_samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
-                self.content
+                sample_sheet_content=self.content, sample_type=sample_type
             )
         except ValidationError as error:
             raise SampleSheetError from error
@@ -166,7 +166,7 @@ class SampleSheetValidator:
         self._validate_all_sections_present()
         self._set_is_index2_reverse_complement()
         self._set_cycles()
-        self._validate_samples()
+        self._validate_samples(sample_type=FlowCellSampleBCLConvert)
         self._validate_override_cycles()
 
     def validate_sample_sheet_from_content(
@@ -188,10 +188,10 @@ class SampleSheetValidator:
             self._validate_bcl_convert()
         else:
             LOG.debug("Validating Bcl2fastq sample sheet")
-            self._validate_samples()
+            self._validate_samples(sample_type=FlowCellSampleBcl2Fastq)
 
     def validate_sample_sheet_from_file(
-        self, file_path: Path, bcl_convert: str | None = None
+        self, file_path: Path, bcl_converter: str | None = None
     ) -> None:
         """
         Validate a sample sheet given the path to the file.
@@ -200,16 +200,22 @@ class SampleSheetValidator:
         """
         self.validate_sample_sheet_from_content(
             content=ReadFile.get_content_from_file(file_format=FileFormat.CSV, file_path=file_path),
-            bcl_convert=bcl_convert,
+            bcl_convert=bcl_converter,
         )
 
     def get_sample_sheet_object_from_file(
-        self, file_path: Path, bcl_convert: str | None = None
+        self, file_path: Path, bcl_converter: str | None = None
     ) -> SampleSheet:
         """Return a sample sheet object given the path to the file.
         Raises:
             SampleSheetError: If the sample sheet is not valid.
         """
-        self.validate_sample_sheet_from_file(file_path=file_path, bcl_convert=bcl_convert)
-        samples: list[FlowCellSample] = get_flow_cell_samples_from_content(self.content)
+        sample_type: Type[FlowCellSample] | None = (
+            BCL_CONVERTER_TO_FLOW_CELL_SAMPLE[bcl_converter] if bcl_converter else None
+        )
+        self.validate_sample_sheet_from_file(file_path=file_path, bcl_converter=bcl_converter)
+        samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
+            sample_sheet_content=self.content,
+            sample_type=sample_type,
+        )
         return SampleSheet(samples=samples)

@@ -94,13 +94,15 @@ def get_samples_by_lane(
 
 def get_flow_cell_samples_from_content(
     sample_sheet_content: list[list[str]],
+    sample_type: Type[FlowCellSample] | None = None,
 ) -> list[FlowCellSample]:
     """
     Return the samples in a sample sheet as a list of FlowCellSample objects.
     Raises:
         ValidationError: if the samples do not have the correct attributes based on their model.
     """
-    sample_type: Type[FlowCellSample] = get_sample_type_from_content(sample_sheet_content)
+    if not sample_type:
+        sample_type: Type[FlowCellSample] = get_sample_type_from_content(sample_sheet_content)
     raw_samples: list[dict[str, str]] = get_raw_samples_from_content(
         sample_sheet_content=sample_sheet_content
     )

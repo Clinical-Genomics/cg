@@ -84,7 +84,7 @@ def get_directories_in_path(path: Path) -> list[Path]:
 def link_or_overwrite_file(src: Path, dst: Path) -> None:
     """Copy a file from src to dst, overwriting the destination if it exists."""
     if dst.exists():
-        LOG.info(f"{dst} already exists. Overwriting with {src}")
+        LOG.warning(f"{dst} already exists. Overwriting with {src}")
         dst.unlink()
     os.link(src=src, dst=dst)
-    LOG.info(f"Linked {src} to {dst}")
+    LOG.debug(f"Linked {src} to {dst}")

@@ -52,7 +52,9 @@ def test_construct_bcl2fastq_sheet(
     content: list[list[str]] = bcl2fastq_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
-    samples: list[FlowCellSample] = get_flow_cell_samples_from_content(content)
+    samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
+        sample_sheet_content=content, sample_type=FlowCellSampleBcl2Fastq
+    )
     assert samples
 
 
@@ -67,7 +69,9 @@ def test_construct_bcl_convert_sheet(
     content: list[list[str]] = bcl_convert_sample_sheet_creator.construct_sample_sheet()
 
     # THEN a correctly formatted sample sheet was created
-    samples: list[FlowCellSample] = get_flow_cell_samples_from_content(content)
+    samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
+        sample_sheet_content=content, sample_type=FlowCellSampleBCLConvert
+    )
     assert samples
 
 

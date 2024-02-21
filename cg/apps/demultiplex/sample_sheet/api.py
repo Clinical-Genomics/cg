@@ -44,7 +44,9 @@ class SampleSheetAPI:
         LOG.debug(f"Set force to {force}")
         self.force = force
 
-    def _get_flow_cell(self, flow_cell_name: str, bcl_converter: str) -> FlowCellDirectoryData:
+    def _get_flow_cell(
+        self, flow_cell_name: str, bcl_converter: str | None
+    ) -> FlowCellDirectoryData:
         """
         Return a flow cell given a path and the bcl converter.
         Raises:
@@ -64,7 +66,7 @@ class SampleSheetAPI:
         return flow_cell
 
     def validate_sample_sheet(
-        self, sample_sheet_path: Path, bcl_convert: str | None = None
+        self, sample_sheet_path: Path, bcl_converter: str | None = None
     ) -> None:
         """Return the sample sheet path if it exists and if it passes validation.
         Raises:
@@ -75,7 +77,7 @@ class SampleSheetAPI:
             LOG.error(message)
             raise SampleSheetError(message)
         self.validator.validate_sample_sheet_from_file(
-            file_path=sample_sheet_path, bcl_convert=bcl_convert
+            file_path=sample_sheet_path, bcl_converter=bcl_converter
         )
 
     def _use_sample_sheet_from_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:
@@ -90,8 +92,9 @@ class SampleSheetAPI:
             )
         try:
             self.validate_sample_sheet(
-                sample_sheet_path=sample_sheet_path, bcl_convert=flow_cell.bcl_converter
+                sample_sheet_path=sample_sheet_path, bcl_converter=flow_cell.bcl_converter
             )
+            LOG.info("Sample sheet from Housekeeper is valid. Copying it to flow cell directory")
             if not self.dry_run:
                 link_or_overwrite_file(src=sample_sheet_path, dst=flow_cell.sample_sheet_path)
         except SampleSheetError:
@@ -105,7 +108,7 @@ class SampleSheetAPI:
     def _use_flow_cell_sample_sheet(self, flow_cell: FlowCellDirectoryData) -> None:
         """Use the sample sheet from the flow cell directory if it is valid."""
         self.validate_sample_sheet(
-            sample_sheet_path=flow_cell.sample_sheet_path, bcl_convert=flow_cell.bcl_converter
+            sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=flow_cell.bcl_converter
         )
         if not self.dry_run:
             add_and_include_sample_sheet_path_to_housekeeper(
@@ -153,7 +156,7 @@ class SampleSheetAPI:
             flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id, hk_api=self.hk_api
         )
 
-    def get_or_create_sample_sheet(self, flow_cell_name: str, bcl_converter: str) -> None:
+    def get_or_create_sample_sheet(self, flow_cell_name: str, bcl_converter: str | None) -> None:
         """
         Ensure that a valid sample sheet is present in the flow cell directory by fetching it from
         housekeeper or creating it if there is not a valid sample sheet.

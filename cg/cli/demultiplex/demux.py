@@ -66,7 +66,7 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
 
         try:
             sample_sheet_api.validate_sample_sheet(
-                sample_sheet_path=flow_cell.sample_sheet_path, bcl_convert=BclConverter.BCLCONVERT
+                sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCLCONVERT
             )
         except (SampleSheetError, ValidationError):
             LOG.warning(
@@ -120,7 +120,7 @@ def demultiplex_flow_cell(
 
     try:
         sample_sheet_api.validate_sample_sheet(
-            sample_sheet_path=flow_cell.sample_sheet_path, bcl_convert=bcl_converter
+            sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=bcl_converter
         )
     except (SampleSheetError, ValidationError) as error:
         LOG.warning(

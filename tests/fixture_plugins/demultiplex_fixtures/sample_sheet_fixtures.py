@@ -157,5 +157,5 @@ def novaseq_6000_post_1_5_kits_sample_sheet_object(
     """Return a NovaSeq 6000 sample sheet object."""
     return sample_sheet_validator.get_sample_sheet_object_from_file(
         file_path=novaseq_6000_post_1_5_kits_correct_sample_sheet_path,
-        bcl_convert=BclConverter.BCLCONVERT,
+        bcl_converter=BclConverter.BCLCONVERT,
     )

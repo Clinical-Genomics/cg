@@ -109,7 +109,7 @@ def test_create_bcl2fastq_sample_sheet(
 
     # THEN the sample sheet passes validation
     sample_sheet_api.validate_sample_sheet(
-        sample_sheet_path=flow_cell.sample_sheet_path, bcl_convert=BclConverter.BCL2FASTQ
+        sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCL2FASTQ
     )
 
     # THEN the sample sheet is in Housekeeper
@@ -191,7 +191,7 @@ def test_create_v2_sample_sheet(
 
     # THEN the sample sheet passes validation
     sample_sheet_api.validate_sample_sheet(
-        sample_sheet_path=flow_cell.sample_sheet_path, bcl_convert=BclConverter.BCLCONVERT
+        sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCLCONVERT
     )
 
     # THEN the sample sheet is in Housekeeper
@@ -222,7 +222,7 @@ def test_incorrect_bcl2fastq_samplesheet_is_regenerated(
     sample_sheet_api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
     with pytest.raises(SampleSheetError):
         sample_sheet_api.validate_sample_sheet(
-            sample_sheet_path=flow_cell.sample_sheet_path, bcl_convert=BclConverter.BCL2FASTQ
+            sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCL2FASTQ
         )
 
     # GIVEN flow cell samples
@@ -245,5 +245,5 @@ def test_incorrect_bcl2fastq_samplesheet_is_regenerated(
 
     # THEN the sample sheet was re-created and passes validation
     sample_sheet_api.validate_sample_sheet(
-        sample_sheet_path=flow_cell.sample_sheet_path, bcl_convert=BclConverter.BCL2FASTQ
+        sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCL2FASTQ
     )

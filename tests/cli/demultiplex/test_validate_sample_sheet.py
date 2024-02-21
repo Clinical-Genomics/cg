@@ -72,7 +72,7 @@ def test_validate_correct_bcl2fastq_sample_sheet(
 
     # GIVEN that the sample sheet is correct
     SampleSheetValidator().validate_sample_sheet_from_file(
-        file_path=sample_sheet, bcl_convert=BclConverter.BCL2FASTQ
+        file_path=sample_sheet, bcl_converter=BclConverter.BCL2FASTQ
     )
 
     # WHEN validating the sample sheet
@@ -99,7 +99,7 @@ def test_validate_correct_dragen_sample_sheet(
 
     # GIVEN that the sample sheet is correct
     SampleSheetValidator().validate_sample_sheet_from_file(
-        file_path=sample_sheet, bcl_convert=BclConverter.BCLCONVERT
+        file_path=sample_sheet, bcl_converter=BclConverter.BCLCONVERT
     )
 
     # WHEN validating the sample sheet
