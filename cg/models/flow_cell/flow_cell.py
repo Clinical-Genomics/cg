@@ -217,7 +217,7 @@ class FlowCellDirectoryData:
         if not self._sample_sheet_path_hk:
             raise FlowCellError("Sample sheet path has not been assigned yet")
         return self.sample_sheet_validator.get_sample_sheet_object_from_file(
-            self._sample_sheet_path_hk
+            file_path=self._sample_sheet_path_hk, bcl_convert=self.bcl_converter
         )
 
     def is_sequencing_done(self) -> bool:

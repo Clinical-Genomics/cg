@@ -22,7 +22,9 @@ def sample_sheet_commands():
 @click.argument("sheet", type=click.Path(exists=True, dir_okay=False))
 @click.pass_obj
 def validate_sample_sheet(context: CGConfig, sheet: click.Path):
-    """Validate a sample sheet."""
+    """
+    Validate a sample sheet. The bcl converter would be determined from the sample sheet content.
+    """
     LOG.info(f"Validating {sheet} sample sheet")
     sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     try:

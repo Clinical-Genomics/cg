@@ -5,6 +5,7 @@ from click.testing import CliRunner, Result
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.cli.demultiplex.sample_sheet import validate_sample_sheet
 from cg.constants import EXIT_SUCCESS, FileExtensions
+from cg.constants.demultiplexing import BclConverter
 from cg.models.cg_config import CGConfig
 
 
@@ -70,7 +71,9 @@ def test_validate_correct_bcl2fastq_sample_sheet(
     assert sample_sheet.exists()
 
     # GIVEN that the sample sheet is correct
-    SampleSheetValidator().validate_sample_sheet_from_file(sample_sheet)
+    SampleSheetValidator().validate_sample_sheet_from_file(
+        file_path=sample_sheet, bcl_convert=BclConverter.BCL2FASTQ
+    )
 
     # WHEN validating the sample sheet
     result: Result = cli_runner.invoke(
@@ -95,7 +98,9 @@ def test_validate_correct_dragen_sample_sheet(
     assert sample_sheet.exists()
 
     # GIVEN that the sample sheet is correct
-    SampleSheetValidator().validate_sample_sheet_from_file(sample_sheet)
+    SampleSheetValidator().validate_sample_sheet_from_file(
+        file_path=sample_sheet, bcl_convert=BclConverter.BCLCONVERT
+    )
 
     # WHEN validating the sample sheet
     result: Result = cli_runner.invoke(

@@ -5,6 +5,7 @@ import pytest
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.constants.constants import FileFormat
+from cg.constants.demultiplexing import BclConverter
 from cg.io.controller import ReadFile
 
 
@@ -155,5 +156,6 @@ def novaseq_6000_post_1_5_kits_sample_sheet_object(
 ) -> SampleSheet:
     """Return a NovaSeq 6000 sample sheet object."""
     return sample_sheet_validator.get_sample_sheet_object_from_file(
-        novaseq_6000_post_1_5_kits_correct_sample_sheet_path
+        file_path=novaseq_6000_post_1_5_kits_correct_sample_sheet_path,
+        bcl_convert=BclConverter.BCLCONVERT,
     )

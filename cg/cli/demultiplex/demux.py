@@ -14,7 +14,11 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     mark_as_demultiplexed,
     mark_flow_cell_as_queued_for_post_processing,
 )
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import (
+    OPTION_BCL_CONVERTER,
+    BclConverter,
+    DemultiplexingDirsAndFiles,
+)
 from cg.exc import FlowCellError, SampleSheetError
 from cg.meta.demultiplex.utils import (
     create_manifest_file,
@@ -61,7 +65,9 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
             continue
 
         try:
-            sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
+            sample_sheet_api.validate_sample_sheet(
+                sample_sheet_path=flow_cell.sample_sheet_path, bcl_convert=BclConverter.BCLCONVERT
+            )
         except (SampleSheetError, ValidationError):
             LOG.warning(
                 f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}"
@@ -113,7 +119,9 @@ def demultiplex_flow_cell(
         return
 
     try:
-        sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
+        sample_sheet_api.validate_sample_sheet(
+            sample_sheet_path=flow_cell.sample_sheet_path, bcl_convert=bcl_converter
+        )
     except (SampleSheetError, ValidationError) as error:
         LOG.warning(
             f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}"

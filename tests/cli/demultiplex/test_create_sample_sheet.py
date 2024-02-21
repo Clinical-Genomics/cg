@@ -108,7 +108,9 @@ def test_create_bcl2fastq_sample_sheet(
     assert flow_cell.sample_sheet_exists()
 
     # THEN the sample sheet passes validation
-    sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
+    sample_sheet_api.validate_sample_sheet(
+        sample_sheet_path=flow_cell.sample_sheet_path, bcl_convert=BclConverter.BCL2FASTQ
+    )
 
     # THEN the sample sheet is in Housekeeper
     assert sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(flow_cell.id)
@@ -154,7 +156,9 @@ def test_create_v2_sample_sheet(
 
     # GIVEN a flow cell directory with some run parameters
     flow_cell_directory: Path = request.getfixturevalue(scenario.flow_cell_directory)
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_directory)
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=flow_cell_directory, bcl_converter=BclConverter.BCLCONVERT
+    )
     assert flow_cell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet in the flow cell dir
@@ -186,7 +190,9 @@ def test_create_v2_sample_sheet(
     assert flow_cell.sample_sheet_exists()
 
     # THEN the sample sheet passes validation
-    sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
+    sample_sheet_api.validate_sample_sheet(
+        sample_sheet_path=flow_cell.sample_sheet_path, bcl_convert=BclConverter.BCLCONVERT
+    )
 
     # THEN the sample sheet is in Housekeeper
     assert sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(flow_cell.id)
@@ -215,7 +221,9 @@ def test_incorrect_bcl2fastq_samplesheet_is_regenerated(
     # GIVEN a sample sheet API and an invalid sample sheet
     sample_sheet_api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
     with pytest.raises(SampleSheetError):
-        sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
+        sample_sheet_api.validate_sample_sheet(
+            sample_sheet_path=flow_cell.sample_sheet_path, bcl_convert=BclConverter.BCL2FASTQ
+        )
 
     # GIVEN flow cell samples
     mocker.patch(
@@ -236,4 +244,6 @@ def test_incorrect_bcl2fastq_samplesheet_is_regenerated(
     )
 
     # THEN the sample sheet was re-created and passes validation
-    sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
+    sample_sheet_api.validate_sample_sheet(
+        sample_sheet_path=flow_cell.sample_sheet_path, bcl_convert=BclConverter.BCL2FASTQ
+    )
