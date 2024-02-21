@@ -108,9 +108,9 @@ class TrailblazerAPI:
         config_path: str,
         out_dir: str,
         slurm_quality_of_service: SlurmQos,
-        data_analysis: Workflow = None,
         email: str = None,
         order_id: str | None = None,
+        workflow: Workflow = None,
         ticket: str = None,
         workflow_manager: str = WorkflowManager.Slurm,
     ) -> TrailblazerAnalysis:
@@ -122,13 +122,14 @@ class TrailblazerAPI:
             "order_id": order_id,
             "out_dir": out_dir,
             "priority": slurm_quality_of_service,
-            "data_analysis": str(data_analysis).upper(),
+            "workflow": workflow.upper(),
             "ticket": ticket,
             "workflow_manager": workflow_manager,
         }
         LOG.debug(f"Submitting job to Trailblazer: {request_body}")
-        response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
-        if response:
+        if response := self.query_trailblazer(
+            command="add-pending-analysis", request_body=request_body
+        ):
             return TrailblazerAnalysis.model_validate(response)
 
     def set_analysis_uploaded(self, case_id: str, uploaded_at: datetime) -> None:

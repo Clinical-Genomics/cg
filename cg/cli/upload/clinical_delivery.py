@@ -75,7 +75,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
             order_id=str(order_id),
             out_dir=rsync_api.log_dir.as_posix(),
             slurm_quality_of_service=Priority.priority_to_slurm_qos().get(case.priority),
-            data_analysis=Workflow.RSYNC,
+            workflow=Workflow.RSYNC,
             ticket=case.latest_ticket,
         )
         trailblazer_api.add_upload_job_to_analysis(analysis_id=analysis.id, slurm_id=job_id)
