@@ -22,7 +22,9 @@ class OrderService:
         return create_order_response(order)
 
     def get_orders(self, orders_request: OrdersRequest) -> OrdersResponse:
-        orders: list[Order] = self.store.get_orders(orders_request)
+        orders: list[Order] = self.store.get_orders(
+            workflow=orders_request.workflow, limit=orders_request.limit
+        )
         summaries: list[Summary] = []
         if orders_request.include_summary:
             summaries = self.analysis_client.get_summaries(orders)
