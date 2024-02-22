@@ -17,7 +17,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     delete_file_from_housekeeper,
 )
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.utils.files import link_or_overwrite_file
+from cg.utils.files import get_directories_in_path, link_or_overwrite_file
 
 LOG = logging.getLogger(__name__)
 
@@ -186,7 +186,7 @@ class SampleSheetAPI:
 
     def get_or_create_all_sample_sheets(self):
         """Ensure that a valid sample sheet is present in all flow cell directories."""
-        for flow_cell_dir in self.flow_cell_runs_dir.iterdir():
+        for flow_cell_dir in get_directories_in_path(self.flow_cell_runs_dir):
             try:
                 self.get_or_create_sample_sheet(
                     flow_cell_name=flow_cell_dir.name, bcl_converter=None
