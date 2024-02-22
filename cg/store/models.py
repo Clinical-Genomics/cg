@@ -439,7 +439,9 @@ class Case(Model, PriorityMixin):
     @property
     def latest_order(self) -> "Order":
         """Returns the latest order this case was included in."""
-        sorted_orders: list[Order] = sorted(self.orders, key=lambda order: order.ordered_at)
+        sorted_orders: list[Order] = sorted(
+            self.orders, key=lambda order: order.ordered_at, reverse=True
+        )
         return sorted_orders[0]
 
     @property
