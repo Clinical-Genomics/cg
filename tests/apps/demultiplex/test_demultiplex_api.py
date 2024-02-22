@@ -7,7 +7,7 @@ import pytest
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_sample_sheet_path_to_housekeeper,
+    add_and_include_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -24,7 +24,7 @@ def test_is_sample_sheet_in_housekeeper_exists(
     )
 
     # GIVEN that the sample sheet is in Housekeeper
-    add_sample_sheet_path_to_housekeeper(
+    add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_bcl2fastq_flow_cell.path,
         flow_cell_name=tmp_bcl2fastq_flow_cell.id,
         hk_api=demultiplexing_context_for_demux.housekeeper_api,
@@ -110,7 +110,7 @@ def test_is_demultiplexing_possible_true(
     tmp_bcl_convert_flow_cell: FlowCellDirectoryData,
 ):
     """Test demultiplexing pre-check when all criteria are fulfilled."""
-    add_sample_sheet_path_to_housekeeper(
+    add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_bcl_convert_flow_cell.path,
         flow_cell_name=tmp_bcl_convert_flow_cell.id,
         hk_api=demultiplexing_api.hk_api,
@@ -133,7 +133,7 @@ def test_is_demultiplexing_possible_missing_files(
 ):
     """Test demultiplexing pre-check when files are missing in flow cell directory."""
     # GIVEN a flow cell with a sample sheet in Housekeeper
-    add_sample_sheet_path_to_housekeeper(
+    add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_bcl_convert_flow_cell.path,
         flow_cell_name=tmp_bcl_convert_flow_cell.id,
         hk_api=demultiplexing_api.hk_api,
@@ -180,7 +180,7 @@ def test_is_demultiplexing_possible_already_started(
 ):
     """Test demultiplexing pre-check demultiplexing has already started."""
     # GIVEN a flow cell with a sample sheet in Housekeeper
-    add_sample_sheet_path_to_housekeeper(
+    add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_bcl_convert_flow_cell.path,
         flow_cell_name=tmp_bcl_convert_flow_cell.id,
         hk_api=demultiplexing_api.hk_api,

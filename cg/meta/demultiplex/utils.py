@@ -3,13 +3,10 @@ import os
 import re
 from pathlib import Path
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_sample_sheet_from_file
-from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.io.csv import read_csv, write_csv
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.utils.files import (
     get_file_in_directory,
     get_files_matching_pattern,
@@ -173,13 +170,6 @@ def rename_fastq_file_if_needed(fastq_file_path: Path, flow_cell_name: str) -> P
     if fastq_file_path != renamed_fastq_file_path:
         rename_file(file_path=fastq_file_path, renamed_file_path=renamed_fastq_file_path)
     return renamed_fastq_file_path
-
-
-def get_sample_sheet(flow_cell: FlowCellDirectoryData) -> SampleSheet:
-    """Return sample sheet associated with flowcell."""
-    sample_sheet_path: Path = flow_cell.get_sample_sheet_path_hk()
-    sample_sheet: SampleSheet = get_sample_sheet_from_file(sample_sheet_path)
-    return sample_sheet
 
 
 def get_undetermined_fastqs(lane: int, flow_cell_path: Path) -> list[Path]:
