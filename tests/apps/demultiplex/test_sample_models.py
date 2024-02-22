@@ -75,7 +75,7 @@ def test_separate_indexes_dual_run(lims_index: str, expected_index_1: str, expec
 
 
 def test_separate_indexes_single_run(
-    index1_sequence_from_lims: str, bcl_convert_flow_cell_sample: FlowCellSampleBCLConvert
+    index1_8_nt_sequence_from_lims: str, bcl_convert_flow_cell_sample: FlowCellSampleBCLConvert
 ):
     """Test index2 is ignored when parsing a double index in a single index run."""
     # GIVEN a sample with a double index
@@ -84,7 +84,7 @@ def test_separate_indexes_single_run(
     bcl_convert_flow_cell_sample.separate_indexes(is_run_single_index=True)
 
     # THEN the index should be separated
-    assert bcl_convert_flow_cell_sample.index == index1_sequence_from_lims
+    assert bcl_convert_flow_cell_sample.index == index1_8_nt_sequence_from_lims
     assert bcl_convert_flow_cell_sample.index2 == EMPTY_STRING
 
 
