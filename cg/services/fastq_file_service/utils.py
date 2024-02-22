@@ -6,7 +6,7 @@ import uuid
 from cg.services.fastq_file_service.exceptions import ConcatenationError
 
 
-def concatenate_forward_reads(directory: Path) -> Path:
+def concatenate_forward_reads(directory: Path) -> Path | None:
     fastqs: list[Path] = get_forward_read_fastqs(directory)
     if not fastqs:
         return
@@ -16,7 +16,7 @@ def concatenate_forward_reads(directory: Path) -> Path:
     return output_file
 
 
-def concatenate_reverse_reads(directory: Path) -> Path:
+def concatenate_reverse_reads(directory: Path) -> Path | None:
     fastqs: list[Path] = get_reverse_read_fastqs(directory)
     if not fastqs:
         return
