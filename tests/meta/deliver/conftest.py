@@ -7,7 +7,7 @@ import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
 from cg.meta.deliver import DeliveryAPI
-from cg.constants.housekeeper_tags import AlignmentFileTag
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.store.models import Case
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -26,6 +26,7 @@ def deliver_api(
         store=analysis_store,
         hk_api=real_housekeeper_api,
         customers_folder=project_dir,
+        fastq_file_service=FastqFileService(),
     )
 
 
@@ -50,6 +51,7 @@ def populated_deliver_api(
         store=analysis_store,
         hk_api=delivery_hk_api,
         customers_folder=project_dir,
+        fastq_file_service=FastqFileService(),
     )
 
 

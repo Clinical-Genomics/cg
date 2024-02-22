@@ -5,10 +5,7 @@ from abc import abstractmethod
 from typing import Type
 
 from cg.apps.demultiplex.sample_sheet.index import Index, get_valid_indexes, is_dual_index
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_samples_by_lane,
-    get_validated_sample_sheet,
-)
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_by_lane
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
@@ -33,7 +30,6 @@ class SampleSheetCreator:
         self,
         flow_cell: FlowCellDirectoryData,
         lims_samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq],
-        force: bool = False,
     ):
         self.flow_cell: FlowCellDirectoryData = flow_cell
         self.flow_cell_id: str = flow_cell.id
@@ -42,7 +38,6 @@ class SampleSheetCreator:
         self.sample_type: Type[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq] = (
             flow_cell.sample_type
         )
-        self.force: bool = force
         self.index_settings: IndexSettings = self.run_parameters.index_settings
 
     @property
@@ -120,15 +115,6 @@ class SampleSheetCreator:
         """Construct and validate the sample sheet."""
         self.process_samples_for_sample_sheet()
         sample_sheet_content: list[list[str]] = self.create_sample_sheet_content()
-        if self.force:
-            LOG.info("Skipping validation of sample sheet due to force flag")
-            return sample_sheet_content
-        LOG.info("Validating sample sheet")
-        get_validated_sample_sheet(
-            sample_sheet_content=sample_sheet_content,
-            sample_type=self.sample_type,
-        )
-        LOG.info("Sample sheet passed validation")
         return sample_sheet_content
 
 
@@ -172,9 +158,8 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         self,
         flow_cell: FlowCellDirectoryData,
         lims_samples: list[FlowCellSampleBCLConvert],
-        force: bool = False,
     ):
-        super().__init__(flow_cell, lims_samples, force)
+        super().__init__(flow_cell, lims_samples)
         if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
             raise SampleSheetError(f"Can't use {BclConverter.BCL2FASTQ} with sample sheet v2")
 

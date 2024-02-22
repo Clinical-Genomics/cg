@@ -4,7 +4,7 @@ from pathlib import Path
 from housekeeper.store.models import Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
-from cg.constants.constants import DataDelivery
+from cg.constants.constants import DataDelivery, Workflow
 from cg.exc import MissingFilesError
 from cg.meta.deliver.utils import (
     create_link,
@@ -18,6 +18,7 @@ from cg.meta.deliver.utils import (
     should_include_file_case,
     should_include_file_sample,
 )
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.store.store import Store
 from cg.store.models import Case, Sample
 
@@ -32,6 +33,7 @@ class DeliveryAPI:
         store: Store,
         hk_api: HousekeeperAPI,
         customers_folder: Path,
+        fastq_file_service: FastqFileService,
         force_all: bool = False,
         ignore_missing_bundles: bool = False,
         dry_run: bool = False,
@@ -42,6 +44,7 @@ class DeliveryAPI:
         self.ignore_missing_bundles = ignore_missing_bundles
         self.deliver_failed_samples = force_all
         self.dry_run = dry_run
+        self.fastq_file_service = fastq_file_service
 
     def deliver(self, ticket: str | None, case_id: str | None, workflow: str) -> None:
         if ticket:
@@ -123,6 +126,8 @@ class DeliveryAPI:
 
             if not files and number_linked_files == 0:
                 raise MissingFilesError(f"Could not find any files for sample {sample.internal_id}")
+            if workflow == Workflow.FASTQ and case.data_analysis == Workflow.MICROSALT:
+                self.concatenate_fastqs(sample_directory=sample_directory, sample_name=sample.name)
 
     def _create_sample_delivery_directory(self, case: Case, sample: Sample, workflow: str) -> Path:
         case_name: str | None = get_delivery_case_name(case=case, workflow=workflow)
@@ -203,3 +208,15 @@ class DeliveryAPI:
 
     def ignore_missing_bundle(self, workflow: str) -> bool:
         return workflow in constants.SKIP_MISSING or self.ignore_missing_bundles
+
+    def concatenate_fastqs(self, sample_directory: Path, sample_name: str):
+        if self.dry_run:
+            return
+        forward_out_path = Path(sample_directory, f"{sample_name}_R1.fastq.gz")
+        reverse_out_path = Path(sample_directory, f"{sample_name}_R2.fastq.gz")
+        self.fastq_file_service.concatenate(
+            fastq_directory=sample_directory,
+            forward_output=forward_out_path,
+            reverse_output=reverse_out_path,
+            remove_raw=True,
+        )

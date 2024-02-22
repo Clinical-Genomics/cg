@@ -6,6 +6,7 @@ from typing_extensions import Literal
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -20,6 +21,7 @@ from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.deliver.delivery_api import DeliveryAPI
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
@@ -308,6 +310,7 @@ class CGConfig(BaseModel):
     pigz: CommonAppConfig | None = None
     pdc: CommonAppConfig | None = None
     pdc_api_: PdcAPI | None
+    sample_sheet_api_: SampleSheetAPI | None = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
     tar: CommonAppConfig | None = None
@@ -466,6 +469,19 @@ class CGConfig(BaseModel):
         return api
 
     @property
+    def sample_sheet_api(self) -> SampleSheetAPI:
+        sample_sheet_api = self.__dict__.get("sample_sheet_api_")
+        if sample_sheet_api is None:
+            LOG.debug("Instantiating sample sheet API")
+            sample_sheet_api = SampleSheetAPI(
+                flow_cell_dir=self.illumina_flow_cells_directory,
+                hk_api=self.housekeeper_api,
+                lims_api=self.lims_api,
+            )
+            self.sample_sheet_api_ = sample_sheet_api
+        return sample_sheet_api
+
+    @property
     def slurm_service(self) -> SlurmService:
         return SlurmCLIService()
 
@@ -511,6 +527,10 @@ class CGConfig(BaseModel):
         return api
 
     @property
+    def fastq_file_service(self) -> FastqFileService:
+        return FastqFileService()
+
+    @property
     def delivery_api(self) -> DeliveryAPI:
         api = self.__dict__.get("delivery_api_")
         if api is None:
@@ -519,6 +539,7 @@ class CGConfig(BaseModel):
                 store=self.status_db,
                 hk_api=self.housekeeper_api,
                 customers_folder=self.delivery_path,
+                fastq_file_service=self.fastq_file_service,
             )
             self.delivery_api_ = api
         return api
