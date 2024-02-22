@@ -1,6 +1,7 @@
 """The JanusAPIClient."""
+
 import requests
-from requests import Request, Response
+from requests import Response
 
 from cg.apps.janus.dto.collect_qc_request import CollectQCRequest
 from cg.exc import JanusAPIError

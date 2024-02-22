@@ -4,7 +4,11 @@ import logging
 from abc import abstractmethod
 from typing import Type
 
-from cg.apps.demultiplex.sample_sheet.index import Index, get_valid_indexes, is_dual_index
+from cg.apps.demultiplex.sample_sheet.index import (
+    Index,
+    get_valid_indexes,
+    is_dual_index,
+)
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_by_lane
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
