@@ -24,46 +24,10 @@ def test_empty_directory(fastq_file_service: FastqFileService, tmp_path):
 
 def test_concatenate(fastq_file_service: FastqFileService, fastqs_dir: Path):
     # GIVEN a directory with forward and reverse reads
-    existing_fastq_files = list(fastqs_dir.iterdir())
-    existing_forward: Path = existing_fastq_files[0]
-    existing_reverse: Path = existing_fastq_files[1]
-
-    existing_forward.write_text("unique forward read")
-    existing_reverse.write_text("unique reverse read")
 
     # GIVEN output files for the concatenated reads
-    concatenated_forward = Path(fastqs_dir, "forward.fastq.gz")
-    concatenated_reverse = Path(fastqs_dir, "reverse.fastq.gz")
-
-    # WHEN concatenating the reads
-    fastq_file_service.concatenate(
-        fastq_directory=fastqs_dir,
-        forward_output=concatenated_forward,
-        reverse_output=concatenated_reverse,
-        remove_raw=True,
-    )
-
-    # THEN the output files should exist
-    assert concatenated_forward.exists()
-    assert concatenated_reverse.exists()
-
-    # THEN the output files should contain the concatenated reads
-    assert "unique forward read" in concatenated_forward.read_text()
-    assert "unique reverse read" in concatenated_reverse.read_text()
-
-
-def test_concatenate_when_output_exists(fastq_file_service: FastqFileService, fastqs_dir: Path):
-    # GIVEN a directory with forward and reverse reads
-    existing_fastq_files = list(fastqs_dir.iterdir())
-    existing_forward: Path = existing_fastq_files[0]
-    existing_reverse: Path = existing_fastq_files[1]
-
-    existing_forward.write_text("unique forward read")
-    existing_reverse.write_text("unique reverse read")
-
-    # GIVEN output files for the concatenated reads that already exist
-    forward_output = existing_forward
-    reverse_output = existing_reverse
+    forward_output = Path(fastqs_dir, "forward.fastq.gz")
+    reverse_output = Path(fastqs_dir, "reverse.fastq.gz")
 
     # WHEN concatenating the reads
     fastq_file_service.concatenate(
@@ -77,9 +41,43 @@ def test_concatenate_when_output_exists(fastq_file_service: FastqFileService, fa
     assert forward_output.exists()
     assert reverse_output.exists()
 
-    # THEN the output files should contain the concatenated reads
-    assert "unique forward read" in forward_output.read_text()
-    assert "unique reverse read" in reverse_output.read_text()
+    # THEN the concatenated forward reads only contain forward reads
+    assert "forward" in forward_output.read_text()
+    assert "reverse" not in forward_output.read_text()
+
+    # THEN the concatenated reverse reads only contain reverse reads
+    assert "reverse" in reverse_output.read_text()
+    assert "forward" not in reverse_output.read_text()
+
+
+def test_concatenate_when_output_exists(fastq_file_service: FastqFileService, fastqs_dir: Path):
+    # GIVEN a directory with forward and reverse reads
+    existing_fastq_files = list(fastqs_dir.iterdir())
+    existing_forward: Path = existing_fastq_files[0]
+
+    # GIVEN that the forward output file already exists
+    forward_output = existing_forward
+    reverse_output = Path(fastqs_dir, "reverse.fastq.gz")
+
+    # WHEN concatenating the reads
+    fastq_file_service.concatenate(
+        fastq_directory=fastqs_dir,
+        forward_output=forward_output,
+        reverse_output=reverse_output,
+        remove_raw=True,
+    )
+
+    # THEN the output files should exist
+    assert forward_output.exists()
+    assert reverse_output.exists()
+
+    # THEN the concatenated forward reads only contain forward reads
+    assert "forward" in forward_output.read_text()
+    assert "reverse" not in forward_output.read_text()
+
+    # THEN the concatenated reverse reads only contain reverse reads
+    assert "reverse" in reverse_output.read_text()
+    assert "forward" not in reverse_output.read_text()
 
 
 def test_concatenate_missing_reverse(
@@ -88,18 +86,18 @@ def test_concatenate_missing_reverse(
     # GIVEN a directory with forward reads only
 
     # GIVEN output files for the concatenated reads
-    concatenated_forward = Path(tmp_path, "forward.fastq.gz")
-    concatenated_reverse = Path(tmp_path, "reverse.fastq.gz")
+    forward_output = Path(tmp_path, "forward.fastq.gz")
+    reverse_output = Path(tmp_path, "reverse.fastq.gz")
 
     # WHEN concatenating the reads
     fastq_file_service.concatenate(
         fastq_directory=fastqs_forward,
-        forward_output=concatenated_forward,
-        reverse_output=concatenated_reverse,
+        forward_output=forward_output,
+        reverse_output=reverse_output,
     )
 
     # THEN forward reads should be concatenated
-    assert concatenated_forward.exists()
+    assert forward_output.exists()
 
     # THEN reverse reads should not exist
-    assert not concatenated_reverse.exists()
+    assert not reverse_output.exists()
