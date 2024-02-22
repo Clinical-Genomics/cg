@@ -86,20 +86,10 @@ def should_include_file_case(file: File, sample_ids: set[str], workflow: str) ->
     tags_on_file = {tag.name for tag in file.tags}
     case_tags = get_case_tags_for_workflow(workflow)
 
-    # Check if any of the sample tags exist
     if sample_ids.intersection(tags_on_file):
-        LOG.debug(f"Found sample tag, skipping {file.path}")
         return False
 
-    # Check if any of the file tags matches the case tags
-    tags: set[str]
-    for tags in case_tags:
-        LOG.debug(f"check if {tags} is a subset of {tags_on_file}")
-        if tags.issubset(tags_on_file):
-            return True
-    LOG.debug(f"Could not find any tags matching file {file.path} with tags {tags_on_file}")
-
-    return False
+    return any(tags.issubset(tags_on_file) for tags in case_tags)
 
 
 def should_include_file_sample(file: File, workflow: str) -> bool:
