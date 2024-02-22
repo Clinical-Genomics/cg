@@ -157,11 +157,15 @@ def check_if_fastq_path_should_be_stored_in_housekeeper(
     return False
 
 
-def add_sample_sheet_path_to_housekeeper(
+def add_and_include_sample_sheet_path_to_housekeeper(
     flow_cell_directory: Path, flow_cell_name: str, hk_api: HousekeeperAPI
 ) -> None:
-    """Add sample sheet path to Housekeeper."""
-
+    """
+    Add sample sheet path to Housekeeper.
+    Raises:
+        FileNotFoundError: If the sample sheet file is not found.
+    """
+    LOG.debug("Adding sample sheet to Housekeeper")
     try:
         sample_sheet_file_path: Path = get_sample_sheet_path_from_flow_cell_dir(flow_cell_directory)
         hk_api.add_bundle_and_version_if_non_existent(flow_cell_name)
@@ -174,6 +178,12 @@ def add_sample_sheet_path_to_housekeeper(
         LOG.error(
             f"Sample sheet for flow cell {flow_cell_name} in {flow_cell_directory} was not found, error: {e}"
         )
+
+
+def delete_file_from_housekeeper(file_path: Path, hk_api: HousekeeperAPI) -> None:
+    """Delete a file from Housekeeper database and disk given its path."""
+    file: File = hk_api.get_file_insensitive_path(file_path)
+    hk_api.delete_file(file_id=file.id)
 
 
 def delete_sequencing_data_from_housekeeper(flow_cell_id: str, hk_api: HousekeeperAPI) -> None:
