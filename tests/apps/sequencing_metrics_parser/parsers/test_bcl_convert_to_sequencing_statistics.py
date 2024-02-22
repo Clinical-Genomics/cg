@@ -20,10 +20,10 @@ def test_create_sequencing_statistics_from_bcl_convert_metrics(
     # GIVEN a parsed bcl convert metrics file
 
     # WHEN creating sequencing statistics from bcl convert metrics
-    sequencing_statistics_list: list[SampleLaneSequencingMetrics] = (
-        create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell(
-            flow_cell_dir=bcl_convert_metrics_dir_path,
-        )
+    sequencing_statistics_list: list[
+        SampleLaneSequencingMetrics
+    ] = create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell(
+        flow_cell_dir=bcl_convert_metrics_dir_path,
     )
 
     # THEN assert that Sequencing statistics are created

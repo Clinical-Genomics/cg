@@ -21,10 +21,10 @@ def test_get_latest_nipt_analysis_to_upload(
     # GIVEN an analysis that is not delivery reported but there exists a newer analysis
 
     # WHEN fetching the latest analysis to upload to nipt
-    analyses: list[Analysis] = (
-        store_with_analyses_for_cases_not_uploaded_fluffy.get_latest_analysis_to_upload_for_workflow(
-            workflow=workflow
-        )
+    analyses: list[
+        Analysis
+    ] = store_with_analyses_for_cases_not_uploaded_fluffy.get_latest_analysis_to_upload_for_workflow(
+        workflow=workflow
     )
 
     # THEN only the newest analysis should be returned
@@ -43,10 +43,10 @@ def test_get_latest_microsalt_analysis_to_upload(
     # GIVEN an analysis that is not delivery reported but there exists a newer analysis
 
     # WHEN fetching the latest analysis to upload to microsalt
-    analyses: list[Analysis] = (
-        store_with_analyses_for_cases_not_uploaded_microsalt.get_latest_analysis_to_upload_for_workflow(
-            workflow=workflow
-        )
+    analyses: list[
+        Analysis
+    ] = store_with_analyses_for_cases_not_uploaded_microsalt.get_latest_analysis_to_upload_for_workflow(
+        workflow=workflow
     )
 
     # THEN only the newest analysis should be returned
@@ -427,10 +427,10 @@ def test_get_analyses_for_case_and_pipeline_before(
     # GIVEN a database with a number of analyses
 
     # WHEN getting all analyses before a given date
-    analyses: list[Analysis] = (
-        store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_case_and_workflow_started_at_before(
-            workflow=workflow, started_at_before=timestamp_now, case_internal_id=case_id
-        )
+    analyses: list[
+        Analysis
+    ] = store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_case_and_workflow_started_at_before(
+        workflow=workflow, started_at_before=timestamp_now, case_internal_id=case_id
     )
 
     # THEN assert that the analyses before the given date are returned
@@ -450,11 +450,11 @@ def test_get_analyses_for_case_before(
     # GIVEN a database with a number of analyses
 
     # WHEN getting all analyses before a given date
-    analyses: list[Analysis] = (
-        store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_case_started_at_before(
-            case_internal_id=case_id,
-            started_at_before=timestamp_now,
-        )
+    analyses: list[
+        Analysis
+    ] = store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_case_started_at_before(
+        case_internal_id=case_id,
+        started_at_before=timestamp_now,
     )
 
     # THEN assert that the analyses before the given date are returned
@@ -473,10 +473,10 @@ def test_get_analyses_for_pipeline_before(
     # GIVEN a database with a number of analyses
 
     # WHEN getting all analyses before a given date
-    analyses: list[Analysis] = (
-        store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_workflow_started_at_before(
-            workflow=workflow, started_at_before=timestamp_now
-        )
+    analyses: list[
+        Analysis
+    ] = store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_workflow_started_at_before(
+        workflow=workflow, started_at_before=timestamp_now
     )
 
     # THEN assert that the analyses before the given date are returned
@@ -494,10 +494,10 @@ def test_get_analyses_before(
     # GIVEN a database with a number of analyses
 
     # WHEN getting all analyses before a given date
-    analyses: list[Analysis] = (
-        store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_started_at_before(
-            started_at_before=timestamp_now
-        )
+    analyses: list[
+        Analysis
+    ] = store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_started_at_before(
+        started_at_before=timestamp_now
     )
 
     # THEN assert that the analyses before the given date are returned

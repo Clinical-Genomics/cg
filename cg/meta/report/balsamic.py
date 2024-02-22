@@ -184,20 +184,20 @@ class BalsamicReportAPI(ReportAPI):
         )
         required_sample_metadata_fields: list[str] = []
         if BALSAMIC_ANALYSIS_TYPE["tumor_wgs"] in analysis_type:
-            required_sample_metadata_fields: list[str] = (
-                REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
-            )
+            required_sample_metadata_fields: list[
+                str
+            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
         elif BALSAMIC_ANALYSIS_TYPE["tumor_normal_wgs"] in analysis_type:
-            required_sample_metadata_fields: list[str] = (
-                REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS
-            )
+            required_sample_metadata_fields: list[
+                str
+            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS
         elif (
             BALSAMIC_ANALYSIS_TYPE["tumor_panel"] in analysis_type
             or BALSAMIC_ANALYSIS_TYPE["tumor_normal_panel"] in analysis_type
         ):
-            required_sample_metadata_fields: list[str] = (
-                REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
-            )
+            required_sample_metadata_fields: list[
+                str
+            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
         return {
             "report": REQUIRED_REPORT_FIELDS,
             "customer": REQUIRED_CUSTOMER_FIELDS,
