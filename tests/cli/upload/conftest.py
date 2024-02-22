@@ -11,15 +11,14 @@ from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.constants import FileFormat, Workflow
-from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
+from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import (
     HK_DELIVERY_REPORT_TAG,
     GensAnalysisTag,
     HkMipAnalysisTag,
 )
 from cg.io.controller import ReadFile
-from cg.meta.deliver import DeliverAPI
+from cg.meta.deliver import DeliveryAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -195,13 +194,11 @@ def fastq_context(
 ) -> CGConfig:
     """Fastq context to use in cli"""
 
-    base_context.meta_apis["delivery_api"] = DeliverAPI(
+    base_context.delivery_api = DeliveryAPI(
         store=base_context.status_db,
         hk_api=base_context.housekeeper_api,
-        case_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.FASTQ]["case_tags"],
-        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.FASTQ]["sample_tags"],
-        delivery_type="fastq",
-        project_base_path=Path(base_context.delivery_path),
+        pipeline="fastq",
+        customers_folder=Path(base_context.delivery_path),
         fastq_file_service=FastqFileService(),
     )
     base_context.meta_apis["rsync_api"] = RsyncAPI(cg_context)
