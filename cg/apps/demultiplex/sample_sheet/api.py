@@ -187,6 +187,8 @@ class SampleSheetAPI:
     def get_or_create_all_sample_sheets(self):
         """Ensure that a valid sample sheet is present in all flow cell directories."""
         for flow_cell_dir in self.flow_cell_runs_dir.iterdir():
+            if not flow_cell_dir.is_dir():
+                continue
             try:
                 self.get_or_create_sample_sheet(
                     flow_cell_name=flow_cell_dir.name, bcl_converter=None
