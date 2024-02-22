@@ -6,6 +6,7 @@ from typing_extensions import Literal
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -307,6 +308,7 @@ class CGConfig(BaseModel):
     pigz: CommonAppConfig | None = None
     pdc: CommonAppConfig | None = None
     pdc_api_: PdcAPI | None
+    sample_sheet_api_: SampleSheetAPI | None = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
     tar: CommonAppConfig | None = None
@@ -462,6 +464,19 @@ class CGConfig(BaseModel):
             api = PdcAPI(binary_path=self.pdc.binary_path)
             self.pdc_api_ = api
         return api
+
+    @property
+    def sample_sheet_api(self) -> SampleSheetAPI:
+        sample_sheet_api = self.__dict__.get("sample_sheet_api_")
+        if sample_sheet_api is None:
+            LOG.debug("Instantiating sample sheet API")
+            sample_sheet_api = SampleSheetAPI(
+                flow_cell_dir=self.illumina_flow_cells_directory,
+                hk_api=self.housekeeper_api,
+                lims_api=self.lims_api,
+            )
+            self.sample_sheet_api_ = sample_sheet_api
+        return sample_sheet_api
 
     @property
     def slurm_service(self) -> SlurmService:
