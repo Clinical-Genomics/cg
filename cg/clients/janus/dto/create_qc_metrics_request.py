@@ -10,7 +10,7 @@ class FilePathAndTag(BaseModel):
     tag: str
 
 
-class CreateCollectQCRequest(BaseModel):
+class CreateQCMetricsRequest(BaseModel):
     """Model for the qc collection request."""
 
     case_id: str
