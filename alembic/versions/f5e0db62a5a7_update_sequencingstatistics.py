@@ -21,12 +21,29 @@ def upgrade():
     op.create_table(
         "sample_lane_sequencing_metrics",
         sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("flow_cell_name", sa.String(128), nullable=False),
+        sa.Column(
+            "flow_cell_name",
+            sa.String(128),
+            nullable=False,
+        ),
         sa.Column("flow_cell_lane_number", sa.Integer),
-        sa.Column("sample_internal_id", sa.String(128), nullable=False),
-        sa.Column("sample_total_reads_in_lane", sa.Integer),
-        sa.Column("sample_base_fraction_passing_q30", sa.Numeric(10, 5)),
-        sa.Column("sample_base_mean_quality_score", sa.Numeric(10, 5)),
+        sa.Column(
+            "sample_internal_id",
+            sa.String(128),
+            nullable=False,
+        ),
+        sa.Column(
+            "sample_total_reads_in_lane",
+            sa.Integer,
+        ),
+        sa.Column(
+            "sample_base_fraction_passing_q30",
+            sa.Numeric(10, 5),
+        ),
+        sa.Column(
+            "sample_base_mean_quality_score",
+            sa.Numeric(10, 5),
+        ),
         sa.Column("created_at", sa.DateTime),
     )
 
@@ -52,16 +69,39 @@ def downgrade():
     op.create_table(
         "sequencing_statistics",
         sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("flow_cell_name", sa.String(128), nullable=False),
-        sa.Column("sample_internal_id", sa.String(128), nullable=False),
+        sa.Column(
+            "flow_cell_name",
+            sa.String(128),
+            nullable=False,
+        ),
+        sa.Column(
+            "sample_internal_id",
+            sa.String(128),
+            nullable=False,
+        ),
         sa.Column("lane", sa.Integer),
         sa.Column("yield_in_megabases", sa.Integer),
         sa.Column("read_counts", sa.Integer),
-        sa.Column("passed_filter_percent", sa.Numeric(10, 5)),
-        sa.Column("raw_clusters_per_lane_percent", sa.Numeric(10, 5)),
-        sa.Column("perfect_index_reads_percent", sa.Numeric(10, 5)),
-        sa.Column("bases_with_q30_percent", sa.Numeric(10, 5)),
-        sa.Column("lanes_mean_quality_score", sa.Numeric(10, 5)),
+        sa.Column(
+            "passed_filter_percent",
+            sa.Numeric(10, 5),
+        ),
+        sa.Column(
+            "raw_clusters_per_lane_percent",
+            sa.Numeric(10, 5),
+        ),
+        sa.Column(
+            "perfect_index_reads_percent",
+            sa.Numeric(10, 5),
+        ),
+        sa.Column(
+            "bases_with_q30_percent",
+            sa.Numeric(10, 5),
+        ),
+        sa.Column(
+            "lanes_mean_quality_score",
+            sa.Numeric(10, 5),
+        ),
         sa.Column("started_at", sa.DateTime),
     )
 

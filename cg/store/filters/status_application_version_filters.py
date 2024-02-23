@@ -8,14 +8,18 @@ from cg.store.models import ApplicationVersion
 
 
 def filter_application_versions_by_application_entry_id(
-    application_versions: Query, application_entry_id: int, **kwargs
+    application_versions: Query,
+    application_entry_id: int,
+    **kwargs,
 ) -> Query:
     """Return the application versions given an application entry id."""
     return application_versions.filter(ApplicationVersion.application_id == application_entry_id)
 
 
 def filter_application_versions_before_valid_from(
-    application_versions: Query, valid_from: datetime, **kwargs
+    application_versions: Query,
+    valid_from: datetime,
+    **kwargs,
 ) -> Query:
     """Return the application versions with valid_from before a given valid_from date."""
     return application_versions.filter(ApplicationVersion.valid_from < valid_from)

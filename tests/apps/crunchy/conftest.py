@@ -14,13 +14,21 @@ LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def real_spring_metadata_path(apps_dir: Path) -> Path:
+def real_spring_metadata_path(
+    apps_dir: Path,
+) -> Path:
     """Return the path to a SPRING metadata file."""
-    return Path(apps_dir, "crunchy", "spring_metadata.json")
+    return Path(
+        apps_dir,
+        "crunchy",
+        "spring_metadata.json",
+    )
 
 
 @pytest.fixture
-def spring_metadata(compression_object: CompressionData) -> list[dict]:
+def spring_metadata(
+    compression_object: CompressionData,
+) -> list[dict]:
     """Return meta data information."""
     return [
         {
@@ -35,21 +43,31 @@ def spring_metadata(compression_object: CompressionData) -> list[dict]:
             "checksum": "checksum_second_read",
             "algorithm": "sha256",
         },
-        {"path": compression_object.spring_path.as_posix(), "file": "spring"},
+        {
+            "path": compression_object.spring_path.as_posix(),
+            "file": "spring",
+        },
     ]
 
 
 @pytest.fixture
-def crunchy_metadata_object(spring_metadata: list[dict]) -> CrunchyMetadata:
+def crunchy_metadata_object(
+    spring_metadata: list[dict],
+) -> CrunchyMetadata:
     """Return Crunchy metadata."""
     return CrunchyMetadata(files=spring_metadata)
 
 
 @pytest.fixture
-def spring_metadata_file(compression_object: CompressionData, spring_metadata: list[dict]) -> Path:
+def spring_metadata_file(
+    compression_object: CompressionData,
+    spring_metadata: list[dict],
+) -> Path:
     """Return the path to a populated SPRING metadata file."""
     metadata_path = compression_object.spring_metadata_path
     WriteFile.write_file_from_content(
-        content=spring_metadata, file_format=FileFormat.JSON, file_path=metadata_path
+        content=spring_metadata,
+        file_format=FileFormat.JSON,
+        file_path=metadata_path,
     )
     return metadata_path

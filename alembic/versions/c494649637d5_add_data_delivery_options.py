@@ -16,7 +16,14 @@ down_revision = "c081458ff180"
 branch_labels = None
 depends_on = None
 
-old_options = ("analysis", "analysis-bam", "fastq", "fastq_qc", "nipt-viewer", "scout")
+old_options = (
+    "analysis",
+    "analysis-bam",
+    "fastq",
+    "fastq_qc",
+    "nipt-viewer",
+    "scout",
+)
 new_options = sorted(
     old_options
     + (

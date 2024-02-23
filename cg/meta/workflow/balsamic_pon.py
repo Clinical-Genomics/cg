@@ -5,7 +5,9 @@ from pathlib import Path
 
 from cg.constants.constants import Workflow
 from cg.exc import BalsamicStartError
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.balsamic import (
+    BalsamicAnalysisAPI,
+)
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from cg.utils.utils import build_command_from_dict
@@ -36,12 +38,16 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
     ) -> None:
         """Creates a config file for BALSAMIC PON analysis."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_parameters: dict = self.get_sample_params(case_id=case_id, panel_bed=panel_bed)
+        sample_parameters: dict = self.get_sample_params(
+            case_id=case_id,
+            panel_bed=panel_bed,
+        )
         if not sample_parameters:
             LOG.error(f"{case_id} has no samples tagged for Balsamic PON analysis")
             raise BalsamicStartError()
         verified_panel_bed: str = self.get_verified_bed(
-            panel_bed=panel_bed, sample_data=sample_parameters
+            panel_bed=panel_bed,
+            sample_data=sample_parameters,
         )
         options: list[str] = build_command_from_dict(
             {
@@ -55,12 +61,19 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
                 "--version": self.get_next_pon_version(verified_panel_bed),
             }
         )
-        parameters: list[str] = ["config", "pon"] + options
+        parameters: list[str] = [
+            "config",
+            "pon",
+        ] + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def get_case_config_path(self, case_id: str) -> Path:
         """Returns the BALSAMIC PON config path."""
-        return Path(self.root_dir, case_id, case_id + "_PON.json")
+        return Path(
+            self.root_dir,
+            case_id,
+            case_id + "_PON.json",
+        )
 
     def get_next_pon_version(self, panel_bed: str) -> str:
         """Returns the next PON version to be generated."""

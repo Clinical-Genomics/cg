@@ -29,7 +29,9 @@ def application_tag() -> str:
 
 @pytest.fixture
 def base_context(
-    base_store: Store, housekeeper_api: HousekeeperAPI, cg_config_object: CGConfig
+    base_store: Store,
+    housekeeper_api: HousekeeperAPI,
+    cg_config_object: CGConfig,
 ) -> CGConfig:
     """context to use in CLI."""
     cg_config_object.status_db_ = base_store
@@ -54,7 +56,11 @@ class MockCompressAPI(CompressAPI):
 
     def __init__(self):
         """initialize mock"""
-        super().__init__(hk_api=None, crunchy_api=None, demux_root="")
+        super().__init__(
+            hk_api=None,
+            crunchy_api=None,
+            demux_root="",
+        )
         self.ntasks = 12
         self.mem = 50
         self.fastq_compression_success = True
@@ -65,12 +71,20 @@ class MockCompressAPI(CompressAPI):
         """Update dry run."""
         self.dry_run = dry_run
 
-    def compress_fastq(self, sample_id: str, dry_run: bool = False):
+    def compress_fastq(
+        self,
+        sample_id: str,
+        dry_run: bool = False,
+    ):
         """Return if compression was successful."""
         _ = sample_id, dry_run
         return self.fastq_compression_success
 
-    def decompress_spring(self, sample_id: str, dry_run: bool = False):
+    def decompress_spring(
+        self,
+        sample_id: str,
+        dry_run: bool = False,
+    ):
         """Return if decompression was succesful."""
         _ = sample_id, dry_run
         return self.spring_decompression_success
@@ -84,7 +98,9 @@ def compress_api():
 
 @pytest.fixture
 def compress_context(
-    compress_api: CompressAPI, store: Store, cg_config_object: CGConfig
+    compress_api: CompressAPI,
+    store: Store,
+    cg_config_object: CGConfig,
 ) -> CGConfig:
     """Return a compress context."""
     cg_config_object.meta_apis["compress_api"] = compress_api
@@ -111,7 +127,12 @@ def compress_case_info(
 
 
 @pytest.fixture
-def populated_compress_store(store, helpers, compress_case_info, analysis_family):
+def populated_compress_store(
+    store,
+    helpers,
+    compress_case_info,
+    analysis_family,
+):
     """Return a store populated with a completed analysis."""
     # Make sure that there is a case where analysis is completed
     helpers.ensure_case_from_dict(
@@ -126,7 +147,9 @@ def populated_compress_store(store, helpers, compress_case_info, analysis_family
 
 @pytest.fixture
 def populated_compress_context(
-    compress_api: CompressAPI, populated_compress_store: Store, cg_config_object: CGConfig
+    compress_api: CompressAPI,
+    populated_compress_store: Store,
+    cg_config_object: CGConfig,
 ) -> CGConfig:
     """Return a compress context populated with a completed analysis."""
     # Make sure that there is a case where analysis is completed
@@ -159,10 +182,15 @@ def real_compress_api(
 
 @pytest.fixture
 def real_populated_compress_fastq_api(
-    real_compress_api: CompressAPI, compress_hk_fastq_bundle: dict, helpers: StoreHelpers
+    real_compress_api: CompressAPI,
+    compress_hk_fastq_bundle: dict,
+    helpers: StoreHelpers,
 ) -> CompressAPI:
     """Return real populated compress API."""
-    helpers.ensure_hk_bundle(real_compress_api.hk_api, compress_hk_fastq_bundle)
+    helpers.ensure_hk_bundle(
+        real_compress_api.hk_api,
+        compress_hk_fastq_bundle,
+    )
 
     return real_compress_api
 

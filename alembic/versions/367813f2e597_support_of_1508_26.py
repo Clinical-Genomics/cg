@@ -18,7 +18,15 @@ branch_labels = None
 depends_on = None
 
 
-old_options = ("balsamic", "fastq", "fluffy", "microsalt", "mip-dna", "mip-rna", "sars-cov-2")
+old_options = (
+    "balsamic",
+    "fastq",
+    "fluffy",
+    "microsalt",
+    "mip-dna",
+    "mip-rna",
+    "sars-cov-2",
+)
 new_options = sorted(old_options + ("balsamic-umi",))
 
 old_enum = mysql.ENUM(*old_options)
@@ -32,6 +40,9 @@ def upgrade():
 
 
 def downgrade():
-    op.add_column("sample", sa.Column("time_point", sa.Integer))
+    op.add_column(
+        "sample",
+        sa.Column("time_point", sa.Integer),
+    )
     op.alter_column("family", "data_analysis", type_=old_enum)
     op.alter_column("analysis", "pipeline", type_=old_enum)

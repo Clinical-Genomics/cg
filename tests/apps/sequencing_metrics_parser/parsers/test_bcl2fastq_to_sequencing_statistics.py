@@ -3,10 +3,14 @@ from pathlib import Path
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq_to_sequencing_statistics import (
     create_bcl2fastq_undetermined_metrics,
 )
-from cg.store.models import SampleLaneSequencingMetrics
+from cg.store.models import (
+    SampleLaneSequencingMetrics,
+)
 
 
-def test_create_sequencing_statistics_from_bcl2fastq_flow_cell(bcl2fastq_flow_cell_path: Path):
+def test_create_sequencing_statistics_from_bcl2fastq_flow_cell(
+    bcl2fastq_flow_cell_path: Path,
+):
     """Test creating metrics for undetermined reads on a flow cell demultiplexed with bcl2fastq."""
     # GIVEN a flow cell demultiplexed with bcl2fastq with one lane, one sample and two undetermined reads
 
@@ -29,7 +33,9 @@ def test_create_sequencing_statistics_from_bcl2fastq_flow_cell(bcl2fastq_flow_ce
     assert metrics[0].sample_total_reads_in_lane == 4
 
 
-def test_create_undetermined_metrics_for_invalid_lane(bcl2fastq_flow_cell_path: Path):
+def test_create_undetermined_metrics_for_invalid_lane(
+    bcl2fastq_flow_cell_path: Path,
+):
     """Test creating metrics for undetrmined reads on a flow cell demultiplexed with bcl2fastq with an invalid lane."""
     # GIVEN a flow cell demultiplexed with bcl2fastq
 

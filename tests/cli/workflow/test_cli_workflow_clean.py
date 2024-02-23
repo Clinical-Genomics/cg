@@ -25,7 +25,11 @@ def test_cli_workflow_clean_balsamic(
     # GIVEN a before string
 
     # WHEN running command
-    result = cli_runner.invoke(balsamic_past_run_dirs, [before_date], obj=base_context)
+    result = cli_runner.invoke(
+        balsamic_past_run_dirs,
+        [before_date],
+        obj=base_context,
+    )
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -39,7 +43,11 @@ def test_cli_workflow_clean_balsamic_qc(
     # GIVEN a before string
 
     # WHEN running command in dry-run
-    result = cli_runner.invoke(balsamic_qc_past_run_dirs, [before_date], obj=base_context)
+    result = cli_runner.invoke(
+        balsamic_qc_past_run_dirs,
+        [before_date],
+        obj=base_context,
+    )
 
     # THEN command should terminate successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -53,7 +61,11 @@ def test_cli_workflow_clean_balsamic_pon(
     # GIVEN a before string
 
     # WHEN running command in dry-run
-    result = cli_runner.invoke(balsamic_pon_past_run_dirs, [before_date], obj=base_context)
+    result = cli_runner.invoke(
+        balsamic_pon_past_run_dirs,
+        [before_date],
+        obj=base_context,
+    )
 
     # THEN command should terminate successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -67,7 +79,11 @@ def test_cli_workflow_clean_balsamic_umi(
     # GIVEN a before string
 
     # WHEN running command in dry-run
-    result = cli_runner.invoke(balsamic_umi_past_run_dirs, [before_date], obj=base_context)
+    result = cli_runner.invoke(
+        balsamic_umi_past_run_dirs,
+        [before_date],
+        obj=base_context,
+    )
 
     # THEN command should terminate successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -82,7 +98,11 @@ def test_cli_workflow_clean_fluffy(
     # GIVEN a before string
 
     # WHEN running command
-    result = cli_runner.invoke(fluffy_past_run_dirs, [before_date], obj=base_context)
+    result = cli_runner.invoke(
+        fluffy_past_run_dirs,
+        [before_date],
+        obj=base_context,
+    )
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -97,7 +117,11 @@ def test_cli_workflow_clean_mip_dna(
     # GIVEN a before string
 
     # WHEN running command
-    result = cli_runner.invoke(mip_dna_past_run_dirs, [before_date], obj=base_context)
+    result = cli_runner.invoke(
+        mip_dna_past_run_dirs,
+        [before_date],
+        obj=base_context,
+    )
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -112,7 +136,11 @@ def test_cli_workflow_clean_mip_rna(
     # GIVEN a before string
 
     # WHEN running command
-    result = cli_runner.invoke(mip_rna_past_run_dirs, [before_date], obj=base_context)
+    result = cli_runner.invoke(
+        mip_rna_past_run_dirs,
+        [before_date],
+        obj=base_context,
+    )
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -127,7 +155,11 @@ def test_cli_workflow_clean_mutant(
     # GIVEN a before string
 
     # WHEN running command
-    result = cli_runner.invoke(mutant_past_run_dirs, [before_date], obj=base_context)
+    result = cli_runner.invoke(
+        mutant_past_run_dirs,
+        [before_date],
+        obj=base_context,
+    )
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -142,7 +174,11 @@ def test_cli_workflow_clean_rnafusion(
     # GIVEN a before string
 
     # WHEN running command
-    result = cli_runner.invoke(rnafusion_past_run_dirs, [before_date], obj=base_context)
+    result = cli_runner.invoke(
+        rnafusion_past_run_dirs,
+        [before_date],
+        obj=base_context,
+    )
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -157,7 +193,11 @@ def test_cli_workflow_clean_microsalt(
     # Given a before string
 
     # WHEN running command
-    result = cli_runner.invoke(microsalt_past_run_dirs, [before_date], obj=base_context)
+    result = cli_runner.invoke(
+        microsalt_past_run_dirs,
+        [before_date],
+        obj=base_context,
+    )
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS

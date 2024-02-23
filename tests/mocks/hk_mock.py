@@ -7,11 +7,17 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Set
 
-from housekeeper.store.models import Bundle, File, Version
+from housekeeper.store.models import (
+    Bundle,
+    File,
+    Version,
+)
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.exc import HousekeeperBundleVersionMissingError
+from cg.exc import (
+    HousekeeperBundleVersionMissingError,
+)
 
 ROOT_PATH = tempfile.TemporaryDirectory().name
 
@@ -237,10 +243,14 @@ class MockHousekeeperAPI:
     # Mocked functions from original API
     def add_bundle(self, bundle_data):
         """Build a new bundle version of files"""
-        bundle_obj = self.new_bundle(name=bundle_data["name"], created_at=bundle_data["created"])
+        bundle_obj = self.new_bundle(
+            name=bundle_data["name"],
+            created_at=bundle_data["created"],
+        )
 
         version_obj = self.new_version(
-            created_at=bundle_data["created"], expires_at=bundle_data.get("expires")
+            created_at=bundle_data["created"],
+            expires_at=bundle_data.get("expires"),
         )
 
         tag_names = set(
@@ -255,7 +265,11 @@ class MockHousekeeperAPI:
             for path in paths:
                 tags = [tag_map[tag_name] for tag_name in file_data["tags"]]
 
-                new_file = self.new_file(path, to_archive=file_data["archive"], tags=tags)
+                new_file = self.new_file(
+                    path,
+                    to_archive=file_data["archive"],
+                    tags=tags,
+                )
                 self._files.append(new_file)
                 self._file_added = True
                 version_obj.files.append(new_file)
@@ -294,10 +308,18 @@ class MockHousekeeperAPI:
         """Fetch bundles"""
         return self._bundles
 
-    def new_bundle(self, name: str, created_at: datetime.datetime = None):
+    def new_bundle(
+        self,
+        name: str,
+        created_at: datetime.datetime = None,
+    ):
         """Create a new file bundle"""
         self.update_id_counter()
-        bundle_obj = MockBundle(id=self._id_counter, name=name, created_at=created_at)
+        bundle_obj = MockBundle(
+            id=self._id_counter,
+            name=name,
+            created_at=created_at,
+        )
         self._bundle_obj = bundle_obj
         self._bundles.append(bundle_obj)
         return bundle_obj
@@ -335,7 +357,11 @@ class MockHousekeeperAPI:
     def new_tag(self, name: str, category: str = None):
         """Create a new tag"""
         self.update_id_counter()
-        tag_obj = MockTag(id=self._id_counter, name=name, category=category)
+        tag_obj = MockTag(
+            id=self._id_counter,
+            name=name,
+            category=category,
+        )
         if not self.tag_exists(name):
             self._tags.append(tag_obj)
 
@@ -348,12 +374,20 @@ class MockHousekeeperAPI:
             self._tags.append(tag_obj)
         return tag_obj
 
-    def new_version(self, created_at: datetime.datetime, expires_at: datetime.datetime = None):
+    def new_version(
+        self,
+        created_at: datetime.datetime,
+        expires_at: datetime.datetime = None,
+    ):
         """Create a new bundle version"""
         self.update_id_counter()
         created_at = created_at or datetime.datetime.now()
         expires_at = expires_at or datetime.datetime.now()
-        version_obj = MockVersion(id=self._id_counter, created_at=created_at, expires_at=expires_at)
+        version_obj = MockVersion(
+            id=self._id_counter,
+            created_at=created_at,
+            expires_at=expires_at,
+        )
         self._version_obj = version_obj
         return version_obj
 
@@ -450,7 +484,13 @@ class MockHousekeeperAPI:
                 file = self.files(path=self.root_path + str(path)).first()
         return file
 
-    def add_file(self, path, version_obj, tags, to_archive=False):
+    def add_file(
+        self,
+        path,
+        version_obj,
+        tags,
+        to_archive=False,
+    ):
         """Add a file to housekeeper."""
         tags = tags or []
         if isinstance(tags, str):
@@ -474,10 +514,18 @@ class MockHousekeeperAPI:
         return new_file
 
     def check_bundle_files(
-        self, bundle_name: str, file_paths: list[Path], last_version, tags: list | None = None
+        self,
+        bundle_name: str,
+        file_paths: list[Path],
+        last_version,
+        tags: list | None = None,
     ) -> list[Path]:
         """Checks if any of the files in the provided list are already added to the provided bundle. Returns a list of files that have not been added"""
-        for file in self.get_files(bundle=bundle_name, tags=tags, version=last_version.id):
+        for file in self.get_files(
+            bundle=bundle_name,
+            tags=tags,
+            version=last_version.id,
+        ):
             if Path(file.path) in file_paths:
                 file_paths.remove(Path(file.path))
                 LOG.info(
@@ -493,18 +541,28 @@ class MockHousekeeperAPI:
         new_version = self.new_version(created_at=new_bundle.created_at)
         new_bundle.versions.append(new_version)
         self.commit()
-        LOG.info("New bundle created with name %s", new_bundle.name)
+        LOG.info(
+            "New bundle created with name %s",
+            new_bundle.name,
+        )
         return new_bundle
 
     def add_and_include_file_to_latest_version(
-        self, bundle_name: str, file: Path, tags: list
+        self,
+        bundle_name: str,
+        file: Path,
+        tags: list,
     ) -> None:
         """Adds and includes a file in the latest version of a bundle."""
         version: Version = self.last_version(bundle_name)
         if not version:
             LOG.info(f"Bundle: {bundle_name} not found in housekeeper")
             raise HousekeeperBundleVersionMissingError
-        hk_file: File = self.add_file(version_obj=version, tags=tags, path=str(file.absolute()))
+        hk_file: File = self.add_file(
+            version_obj=version,
+            tags=tags,
+            path=str(file.absolute()),
+        )
         self.include_file(version_obj=version, file_obj=hk_file)
         self.commit()
 
@@ -519,10 +577,14 @@ class MockHousekeeperAPI:
         sequencing_files_in_hk: dict[str, bool] = {}
         for bundle_name in bundle_names:
             sequencing_files_in_hk[bundle_name] = False
-            for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
+            for tag in [
+                SequencingFileTag.FASTQ,
+                SequencingFileTag.SPRING_METADATA,
+            ]:
                 sample_file_in_hk: list[bool] = []
                 hk_files: list[File] | None = self.get_files_from_latest_version(
-                    bundle_name=bundle_name, tags=[tag]
+                    bundle_name=bundle_name,
+                    tags=[tag],
                 )
                 sample_file_in_hk += [True for hk_file in hk_files if hk_file.is_included]
                 if sample_file_in_hk:
@@ -555,13 +617,17 @@ class MockHousekeeperAPI:
         return None
 
     def get_non_archived_files_for_bundle(
-        self, bundle_name: str, tags: list | None = None
+        self,
+        bundle_name: str,
+        tags: list | None = None,
     ) -> list[File]:
         """Returns all non-archived files from a given bundle, tagged with the given tags."""
         pass
 
     def get_archived_files_for_bundle(
-        self, bundle_name: str, tags: list | None = None
+        self,
+        bundle_name: str,
+        tags: list | None = None,
     ) -> list[File]:
         """Returns all archived files from a given bundle, tagged with the given tags."""
         pass

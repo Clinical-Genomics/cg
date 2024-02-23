@@ -13,7 +13,12 @@ from tests.mocks.hk_mock import MockHousekeeperAPI
 @pytest.fixture
 def hk_config(root_path: Path) -> dict:
     """Return a dictionary with housekeeper api configs for testing."""
-    return {"housekeeper": {"database": "sqlite:///:memory:", "root": root_path.as_posix()}}
+    return {
+        "housekeeper": {
+            "database": "sqlite:///:memory:",
+            "root": root_path.as_posix(),
+        }
+    }
 
 
 @pytest.fixture(scope="function")
@@ -33,7 +38,9 @@ def new_bundle_name() -> str:
 
 @pytest.fixture
 def minimal_bundle_obj(
-    timestamp: datetime.datetime, case_id: str, housekeeper_api: MockHousekeeperAPI
+    timestamp: datetime.datetime,
+    case_id: str,
+    housekeeper_api: MockHousekeeperAPI,
 ) -> Bundle:
     """Return a bundle object with minimal information (name and created_at)."""
     return housekeeper_api.new_bundle(name=case_id, created_at=timestamp)

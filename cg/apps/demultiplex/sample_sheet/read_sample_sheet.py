@@ -8,13 +8,18 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
+from cg.constants.demultiplexing import (
+    SampleSheetBcl2FastqSections,
+    SampleSheetBCLConvertSections,
+)
 from cg.exc import SampleSheetError
 
 LOG = logging.getLogger(__name__)
 
 
-def validate_samples_are_unique(samples: list[FlowCellSample]) -> None:
+def validate_samples_are_unique(
+    samples: list[FlowCellSample],
+) -> None:
     """Validate that each sample only exists once."""
     sample_ids: set = set()
     for sample in samples:
@@ -26,15 +31,22 @@ def validate_samples_are_unique(samples: list[FlowCellSample]) -> None:
         sample_ids.add(sample_id)
 
 
-def validate_samples_unique_per_lane(samples: list[FlowCellSample]) -> None:
+def validate_samples_unique_per_lane(
+    samples: list[FlowCellSample],
+) -> None:
     """Validate that each sample only exists once per lane in a sample sheet."""
     sample_by_lane: dict[int, list[FlowCellSample]] = get_samples_by_lane(samples)
-    for lane, lane_samples in sample_by_lane.items():
+    for (
+        lane,
+        lane_samples,
+    ) in sample_by_lane.items():
         LOG.debug(f"Validate that samples are unique in lane: {lane}")
         validate_samples_are_unique(samples=lane_samples)
 
 
-def get_sample_type_from_content(sample_sheet_content: list[list[str]]) -> Type[FlowCellSample]:
+def get_sample_type_from_content(
+    sample_sheet_content: list[list[str]],
+) -> Type[FlowCellSample]:
     """Returns the sample type identified from the sample sheet content."""
     for row in sample_sheet_content:
         if not row:
@@ -50,7 +62,9 @@ def get_sample_type_from_content(sample_sheet_content: list[list[str]]) -> Type[
     raise SampleSheetError(message)
 
 
-def get_raw_samples_from_content(sample_sheet_content: list[list[str]]) -> list[dict[str, str]]:
+def get_raw_samples_from_content(
+    sample_sheet_content: list[list[str]],
+) -> list[dict[str, str]]:
     """Return the samples in a sample sheet as a list of dictionaries."""
     header: list[str] = []
     raw_samples: list[dict[str, str]] = []

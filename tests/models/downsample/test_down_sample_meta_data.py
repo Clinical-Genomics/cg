@@ -1,7 +1,9 @@
 """Test for the DownSampleMetaData class."""
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.models.downsample.downsample_data import DownsampleData
+from cg.models.downsample.downsample_data import (
+    DownsampleData,
+)
 from cg.store.models import Sample
 from cg.store.store import Store
 

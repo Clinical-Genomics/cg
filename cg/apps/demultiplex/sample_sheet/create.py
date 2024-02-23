@@ -8,8 +8,12 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreatorBcl2Fastq,
     SampleSheetCreatorBCLConvert,
 )
-from cg.constants.demultiplexing import BclConverter
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.constants.demultiplexing import (
+    BclConverter,
+)
+from cg.models.flow_cell.flow_cell import (
+    FlowCellDirectoryData,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -20,8 +24,14 @@ def get_sample_sheet_creator(
 ) -> SampleSheetCreatorBcl2Fastq | SampleSheetCreatorBCLConvert:
     """Returns an initialised sample sheet creator according to the demultiplexing software."""
     if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
-        return SampleSheetCreatorBcl2Fastq(flow_cell=flow_cell, lims_samples=lims_samples)
-    return SampleSheetCreatorBCLConvert(flow_cell=flow_cell, lims_samples=lims_samples)
+        return SampleSheetCreatorBcl2Fastq(
+            flow_cell=flow_cell,
+            lims_samples=lims_samples,
+        )
+    return SampleSheetCreatorBCLConvert(
+        flow_cell=flow_cell,
+        lims_samples=lims_samples,
+    )
 
 
 def create_sample_sheet_content(
@@ -30,7 +40,10 @@ def create_sample_sheet_content(
 ) -> list[list[str]]:
     """Create a sample sheet for a flow cell."""
     sample_sheet_creator: SampleSheetCreatorBcl2Fastq | SampleSheetCreatorBCLConvert = (
-        get_sample_sheet_creator(flow_cell=flow_cell, lims_samples=lims_samples)
+        get_sample_sheet_creator(
+            flow_cell=flow_cell,
+            lims_samples=lims_samples,
+        )
     )
     LOG.info(
         f"Constructing a {flow_cell.bcl_converter} sample sheet "

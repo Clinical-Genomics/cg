@@ -2,10 +2,14 @@ import pytest
 from pydantic import ValidationError
 
 from cg.constants import DataDelivery
-from cg.models.orders.excel_sample import ExcelSample
+from cg.models.orders.excel_sample import (
+    ExcelSample,
+)
 
 
-def test_excel_minimal_sample_schema(minimal_excel_sample: dict):
+def test_excel_minimal_sample_schema(
+    minimal_excel_sample: dict,
+):
     """Test instantiate a minimal sample"""
     # GIVEN some simple sample info from the simplest sample possible
 
@@ -16,7 +20,9 @@ def test_excel_minimal_sample_schema(minimal_excel_sample: dict):
     assert excel_sample.name == minimal_excel_sample["Sample/Name"]
 
 
-def test_excel_swedish_priority(minimal_excel_sample: dict):
+def test_excel_swedish_priority(
+    minimal_excel_sample: dict,
+):
     """Test instantiate a sample with swedish priority"""
     # GIVEN some sample where the priority is in swedish
     minimal_excel_sample["UDF/priority"] = "förtur"
@@ -28,7 +34,9 @@ def test_excel_swedish_priority(minimal_excel_sample: dict):
     assert excel_sample.priority == "priority"
 
 
-def test_excel_source_type(minimal_excel_sample: dict):
+def test_excel_source_type(
+    minimal_excel_sample: dict,
+):
     """Test instantiate a sample with source type"""
     # GIVEN some sample with a known source type
     source_type = "blood"
@@ -41,7 +49,9 @@ def test_excel_source_type(minimal_excel_sample: dict):
     assert excel_sample.source == source_type
 
 
-def test_excel_unknown_source_type(minimal_excel_sample: dict):
+def test_excel_unknown_source_type(
+    minimal_excel_sample: dict,
+):
     """Test instantiate a sample with a unknown source type
 
     ValidationError should be raised since the source type does not exist
@@ -56,7 +66,9 @@ def test_excel_unknown_source_type(minimal_excel_sample: dict):
         excel_sample: ExcelSample = ExcelSample(**minimal_excel_sample)
 
 
-def test_excel_datetime_to_date_conversion(minimal_excel_sample: dict):
+def test_excel_datetime_to_date_conversion(
+    minimal_excel_sample: dict,
+):
     """Test instantiate a sample with a datetime collection date
 
     Datetime string should be converted to date
@@ -72,7 +84,9 @@ def test_excel_datetime_to_date_conversion(minimal_excel_sample: dict):
     assert str(excel_sample.collection_date) == "2021-05-05"
 
 
-def test_excel_with_panels(minimal_excel_sample: dict):
+def test_excel_with_panels(
+    minimal_excel_sample: dict,
+):
     """Test instantiate a sample with some gene panels set"""
     # GIVEN some sample with two gene panels in a semi colon separated string
     panel_1 = "OMIM"
@@ -86,7 +100,9 @@ def test_excel_with_panels(minimal_excel_sample: dict):
     assert set(excel_sample.panels) == set([panel_1, panel_2])
 
 
-def test_mip_rna_sample_is_correct(mip_rna_orderform_sample: dict):
+def test_mip_rna_sample_is_correct(
+    mip_rna_orderform_sample: dict,
+):
     """Test that a mip rna orderform sample in parsed correct
 
     This will test if the aliases are mapped to the correct field in the pydantic model

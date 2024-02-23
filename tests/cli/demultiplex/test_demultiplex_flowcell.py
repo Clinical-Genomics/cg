@@ -5,14 +5,24 @@ from pathlib import Path
 
 from click import testing
 
-from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.apps.demultiplex.demultiplex_api import (
+    DemultiplexingAPI,
+)
+from cg.cli.demultiplex.demux import (
+    demultiplex_all,
+    demultiplex_flow_cell,
+)
+from cg.constants.demultiplexing import (
+    BclConverter,
+    DemultiplexingDirsAndFiles,
+)
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import (
+    FlowCellDirectoryData,
+)
 
 
 def test_demultiplex_bcl2fastq_flow_cell_dry_run(
@@ -38,7 +48,10 @@ def test_demultiplex_bcl2fastq_flow_cell_dry_run(
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
-    unaligned_dir: Path = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
+    unaligned_dir: Path = Path(
+        demux_dir,
+        DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
+    )
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
 
@@ -85,7 +98,10 @@ def test_demultiplex_bcl2fastq_flow_cell(
     # GIVEN a flow cell that is ready for demultiplexing
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
-    unaligned_dir: Path = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
+    unaligned_dir: Path = Path(
+        demux_dir,
+        DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
+    )
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
 
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
@@ -125,7 +141,8 @@ def test_demultiplex_dragen_flowcell(
     # GIVEN that all files are present for Dragen demultiplexing
 
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_directory_bclconvert, bcl_converter=BclConverter.BCLCONVERT
+        flow_cell_path=tmp_flow_cell_directory_bclconvert,
+        bcl_converter=BclConverter.BCLCONVERT,
     )
     add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_flow_cell_directory_bclconvert,
@@ -148,7 +165,11 @@ def test_demultiplex_dragen_flowcell(
     # WHEN starting demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
         demultiplex_flow_cell,
-        [str(tmp_flow_cell_directory_bclconvert), "-b", BclConverter.BCLCONVERT],
+        [
+            str(tmp_flow_cell_directory_bclconvert),
+            "-b",
+            BclConverter.BCLCONVERT,
+        ],
         obj=demultiplexing_context_for_demux,
     )
 
@@ -191,7 +212,11 @@ def test_demultiplex_all_novaseq(
     # WHEN running the demultiplex all command
     result: testing.Result = cli_runner.invoke(
         demultiplex_all,
-        ["--flow-cells-directory", str(demux_api.flow_cells_dir), "--dry-run"],
+        [
+            "--flow-cells-directory",
+            str(demux_api.flow_cells_dir),
+            "--dry-run",
+        ],
         obj=demultiplexing_context_for_demux,
     )
 
@@ -205,7 +230,9 @@ def test_demultiplex_all_novaseq(
     assert f"Flow cell {flow_cell.id} is ready for downstream processing" in caplog.text
 
 
-def test_is_demultiplexing_complete(tmp_flow_cell_directory_bcl2fastq: Path):
+def test_is_demultiplexing_complete(
+    tmp_flow_cell_directory_bcl2fastq: Path,
+):
     """Tests the is_demultiplexing_complete property of FlowCellDirectoryData."""
 
     # GIVEN a demultiplexing directory with no demuxcomplete.txt file
@@ -215,7 +242,10 @@ def test_is_demultiplexing_complete(tmp_flow_cell_directory_bcl2fastq: Path):
     assert not flow_cell.is_demultiplexing_complete
 
     # WHEN creating the demuxcomplete.txt file
-    Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
+    Path(
+        flow_cell.path,
+        DemultiplexingDirsAndFiles.DEMUX_COMPLETE,
+    ).touch()
 
     # THEN the property should return true
     assert flow_cell.is_demultiplexing_complete

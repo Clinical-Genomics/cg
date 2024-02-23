@@ -8,9 +8,15 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.constants.constants import CaseActions, FileFormat, PrepCategory
+from cg.constants.constants import (
+    CaseActions,
+    FileFormat,
+    PrepCategory,
+)
 from cg.io.controller import WriteFile
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.balsamic import (
+    BalsamicAnalysisAPI,
+)
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 from tests.mocks.limsmock import MockLimsAPI
@@ -37,30 +43,42 @@ def balsamic_housekeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
 
 
 @pytest.fixture
-def balsamic_pon_1_path(balsamic_dir: Path) -> str:
-    balsamic_reference_path = Path(balsamic_dir, "balsamic_bed_1_case_PON_reference.cnn")
+def balsamic_pon_1_path(
+    balsamic_dir: Path,
+) -> str:
+    balsamic_reference_path = Path(
+        balsamic_dir,
+        "balsamic_bed_1_case_PON_reference.cnn",
+    )
     balsamic_reference_path.touch(exist_ok=True)
     return balsamic_reference_path.as_posix()
 
 
 @pytest.fixture
-def balsamic_bed_1_path(balsamic_dir: Path) -> str:
+def balsamic_bed_1_path(
+    balsamic_dir: Path,
+) -> str:
     balsamic_bed_1_path = Path(balsamic_dir, "balsamic_bed_1.bed")
     balsamic_bed_1_path.touch(exist_ok=True)
     return balsamic_bed_1_path.as_posix()
 
 
 @pytest.fixture
-def balsamic_bed_2_path(balsamic_dir: Path) -> str:
+def balsamic_bed_2_path(
+    balsamic_dir: Path,
+) -> str:
     balsamic_bed_2_path = Path(balsamic_dir, "balsamic_bed_2.bed")
     balsamic_bed_2_path.touch(exist_ok=True)
     return balsamic_bed_2_path.as_posix()
 
 
 @pytest.fixture
-def fastq_file_l_1_r_1(balsamic_housekeeper_dir: Path) -> str:
+def fastq_file_l_1_r_1(
+    balsamic_housekeeper_dir: Path,
+) -> str:
     fastq_filename = Path(
-        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz"
+        balsamic_housekeeper_dir,
+        "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz",
     ).as_posix()
     with gzip.open(fastq_filename, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
@@ -68,9 +86,12 @@ def fastq_file_l_1_r_1(balsamic_housekeeper_dir: Path) -> str:
 
 
 @pytest.fixture
-def fastq_file_l_2_r_1(balsamic_housekeeper_dir: Path) -> str:
+def fastq_file_l_2_r_1(
+    balsamic_housekeeper_dir: Path,
+) -> str:
     fastq_filename = Path(
-        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L002_R1_001.fastq.gz"
+        balsamic_housekeeper_dir,
+        "XXXXXXXXX_000000_S000_L002_R1_001.fastq.gz",
     ).as_posix()
     with gzip.open(fastq_filename, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:2:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
@@ -78,9 +99,12 @@ def fastq_file_l_2_r_1(balsamic_housekeeper_dir: Path) -> str:
 
 
 @pytest.fixture
-def fastq_file_l_3_r_1(balsamic_housekeeper_dir: Path) -> str:
+def fastq_file_l_3_r_1(
+    balsamic_housekeeper_dir: Path,
+) -> str:
     fastq_filename = Path(
-        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L003_R1_001.fastq.gz"
+        balsamic_housekeeper_dir,
+        "XXXXXXXXX_000000_S000_L003_R1_001.fastq.gz",
     ).as_posix()
     with gzip.open(fastq_filename, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:3:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
@@ -88,9 +112,12 @@ def fastq_file_l_3_r_1(balsamic_housekeeper_dir: Path) -> str:
 
 
 @pytest.fixture
-def fastq_file_l_4_r_1(balsamic_housekeeper_dir: Path) -> str:
+def fastq_file_l_4_r_1(
+    balsamic_housekeeper_dir: Path,
+) -> str:
     fastq_filename = Path(
-        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L004_R1_001.fastq.gz"
+        balsamic_housekeeper_dir,
+        "XXXXXXXXX_000000_S000_L004_R1_001.fastq.gz",
     ).as_posix()
     with gzip.open(fastq_filename, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:4:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
@@ -98,9 +125,12 @@ def fastq_file_l_4_r_1(balsamic_housekeeper_dir: Path) -> str:
 
 
 @pytest.fixture
-def fastq_file_l_1_r_2(balsamic_housekeeper_dir: Path) -> str:
+def fastq_file_l_1_r_2(
+    balsamic_housekeeper_dir: Path,
+) -> str:
     fastq_filename = Path(
-        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
+        balsamic_housekeeper_dir,
+        "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz",
     ).as_posix()
     with gzip.open(fastq_filename, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
@@ -108,9 +138,12 @@ def fastq_file_l_1_r_2(balsamic_housekeeper_dir: Path) -> str:
 
 
 @pytest.fixture
-def fastq_file_l_2_r_2(balsamic_housekeeper_dir: Path) -> str:
+def fastq_file_l_2_r_2(
+    balsamic_housekeeper_dir: Path,
+) -> str:
     fastq_filename = Path(
-        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L002_R2_001.fastq.gz"
+        balsamic_housekeeper_dir,
+        "XXXXXXXXX_000000_S000_L002_R2_001.fastq.gz",
     ).as_posix()
     with gzip.open(fastq_filename, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:2:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
@@ -118,9 +151,12 @@ def fastq_file_l_2_r_2(balsamic_housekeeper_dir: Path) -> str:
 
 
 @pytest.fixture
-def fastq_file_l_3_r_2(balsamic_housekeeper_dir: Path) -> str:
+def fastq_file_l_3_r_2(
+    balsamic_housekeeper_dir: Path,
+) -> str:
     fastq_filename = Path(
-        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L003_R2_001.fastq.gz"
+        balsamic_housekeeper_dir,
+        "XXXXXXXXX_000000_S000_L003_R2_001.fastq.gz",
     ).as_posix()
     with gzip.open(fastq_filename, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:3:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
@@ -128,9 +164,12 @@ def fastq_file_l_3_r_2(balsamic_housekeeper_dir: Path) -> str:
 
 
 @pytest.fixture
-def fastq_file_l_4_r_2(balsamic_housekeeper_dir: Path) -> str:
+def fastq_file_l_4_r_2(
+    balsamic_housekeeper_dir: Path,
+) -> str:
     fastq_filename = Path(
-        balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L004_R2_001.fastq.gz"
+        balsamic_housekeeper_dir,
+        "XXXXXXXXX_000000_S000_L004_R2_001.fastq.gz",
     ).as_posix()
     with gzip.open(fastq_filename, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:4:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
@@ -162,7 +201,11 @@ def balsamic_mock_fastq_files(
 
 
 @pytest.fixture(scope="function")
-def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files: list):
+def balsamic_housekeeper(
+    housekeeper_api,
+    helpers,
+    balsamic_mock_fastq_files: list,
+):
     """Create populated housekeeper that holds files for all mock samples"""
 
     samples = [
@@ -194,15 +237,25 @@ def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files: li
             "created": dt.datetime.now(),
             "version": "1.0",
             "files": [
-                {"path": f, "tags": ["fastq"], "archive": False} for f in balsamic_mock_fastq_files
+                {
+                    "path": f,
+                    "tags": ["fastq"],
+                    "archive": False,
+                }
+                for f in balsamic_mock_fastq_files
             ],
         }
-        helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
+        helpers.ensure_hk_bundle(
+            store=housekeeper_api,
+            bundle_data=bundle_data,
+        )
     return housekeeper_api
 
 
 @pytest.fixture
-def balsamic_lims(context_config: dict) -> MockLimsAPI:
+def balsamic_lims(
+    context_config: dict,
+) -> MockLimsAPI:
     """Create populated mock LIMS api to mimic all functionality of LIMS used by BALSAMIC"""
 
     balsamic_lims = MockLimsAPI(context_config)
@@ -376,8 +429,16 @@ def balsamic_context(
         reads=10,
         last_sequenced_at=dt.datetime.now(),
     )
-    helpers.add_relationship(status_db, case=case_wgs_paired, sample=sample_case_wgs_paired_tumor)
-    helpers.add_relationship(status_db, case=case_wgs_paired, sample=sample_case_wgs_paired_normal)
+    helpers.add_relationship(
+        status_db,
+        case=case_wgs_paired,
+        sample=sample_case_wgs_paired_tumor,
+    )
+    helpers.add_relationship(
+        status_db,
+        case=case_wgs_paired,
+        sample=sample_case_wgs_paired_normal,
+    )
 
     # Create textbook case for TGS PAIRED without enough reads
     case_tgs_paired = helpers.add_case(
@@ -404,8 +465,16 @@ def balsamic_context(
         reads=0,
         last_sequenced_at=dt.datetime.now(),
     )
-    helpers.add_relationship(status_db, case=case_tgs_paired, sample=sample_case_tgs_paired_tumor)
-    helpers.add_relationship(status_db, case=case_tgs_paired, sample=sample_case_tgs_paired_normal)
+    helpers.add_relationship(
+        status_db,
+        case=case_tgs_paired,
+        sample=sample_case_tgs_paired_tumor,
+    )
+    helpers.add_relationship(
+        status_db,
+        case=case_tgs_paired,
+        sample=sample_case_tgs_paired_normal,
+    )
 
     # Create textbook case for WGS TUMOR ONLY
     case_wgs_single = helpers.add_case(
@@ -422,7 +491,11 @@ def balsamic_context(
         reads=100,
         last_sequenced_at=dt.datetime.now(),
     )
-    helpers.add_relationship(status_db, case=case_wgs_single, sample=sample_case_wgs_single_tumor)
+    helpers.add_relationship(
+        status_db,
+        case=case_wgs_single,
+        sample=sample_case_wgs_single_tumor,
+    )
 
     # Create textbook case for TGS TUMOR ONLY
     case_tgs_single = helpers.add_case(
@@ -439,7 +512,11 @@ def balsamic_context(
         internal_id="sample_case_tgs_single_tumor",
         last_sequenced_at=dt.datetime.now(),
     )
-    helpers.add_relationship(status_db, case=case_tgs_single, sample=sample_case_tgs_single_tumor)
+    helpers.add_relationship(
+        status_db,
+        case=case_tgs_single,
+        sample=sample_case_tgs_single_tumor,
+    )
 
     # Create ERROR case for TGS NORMAL ONLY
     case_tgs_single_error = helpers.add_case(
@@ -691,7 +768,11 @@ def balsamic_context(
         internal_id="sample_case_wes_tumor",
         last_sequenced_at=dt.datetime.now(),
     )
-    helpers.add_relationship(status_db, case=case_wes_tumor, sample=sample_case_wes_tumor)
+    helpers.add_relationship(
+        status_db,
+        case=case_wes_tumor,
+        sample=sample_case_wes_tumor,
+    )
 
     # Create ERROR case for WES when no panel is found
     case_wes_panel_error = helpers.add_case(
@@ -709,11 +790,17 @@ def balsamic_context(
         last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
-        status_db, case=case_wes_panel_error, sample=sample_case_wes_panel_error
+        status_db,
+        case=case_wes_panel_error,
+        sample=sample_case_wes_panel_error,
     )
 
     # Create ERROR case with NO SAMPLES
-    helpers.add_case(status_db, internal_id="no_sample_case", name="no_sample_case")
+    helpers.add_case(
+        status_db,
+        internal_id="no_sample_case",
+        name="no_sample_case",
+    )
 
     # Create BED1 version 1
     bed1_name = "BalsamicBed1"
@@ -722,7 +809,10 @@ def balsamic_context(
     bed1 = status_db.add_bed(name=bed1_name)
     status_db.session.add(bed1)
     version1 = status_db.add_bed_version(
-        bed=bed1, version=1, filename=bed1_filename, shortname=bed1_name
+        bed=bed1,
+        version=1,
+        filename=bed1_filename,
+        shortname=bed1_name,
     )
     status_db.session.add(version1)
 
@@ -733,7 +823,10 @@ def balsamic_context(
     bed2 = status_db.add_bed(name=bed2_name)
     status_db.session.add(bed2)
     version2 = status_db.add_bed_version(
-        bed=bed2, version=1, filename=bed2_filename, shortname=bed2_name
+        bed=bed2,
+        version=1,
+        filename=bed2_filename,
+        shortname=bed2_name,
     )
     status_db.session.add(version2)
     status_db.session.commit()
@@ -760,11 +853,19 @@ def mock_config(balsamic_dir: Path, balsamic_case_id: str) -> None:
             "config_creation_date": "2020-07-15 17:35",
         }
     }
-    Path.mkdir(Path(balsamic_dir, balsamic_case_id), parents=True, exist_ok=True)
+    Path.mkdir(
+        Path(balsamic_dir, balsamic_case_id),
+        parents=True,
+        exist_ok=True,
+    )
     WriteFile.write_file_from_content(
         content=config_data,
         file_format=FileFormat.JSON,
-        file_path=Path(balsamic_dir, balsamic_case_id, balsamic_case_id + ".json"),
+        file_path=Path(
+            balsamic_dir,
+            balsamic_case_id,
+            balsamic_case_id + ".json",
+        ),
     )
 
 
@@ -789,7 +890,10 @@ def deliverable_data(balsamic_dir: Path, balsamic_case_id: str) -> dict:
                 "path": f"{balsamic_dir}/{balsamic_case_id}/concatenated_{samples[0]}_R_1.fp.fastq.gz",
                 "path_index": "",
                 "step": "fastp",
-                "tag": [f"concatenated_{samples[0]}_R", "qc"],
+                "tag": [
+                    f"concatenated_{samples[0]}_R",
+                    "qc",
+                ],
                 "id": f"concatenated_{samples[0]}_R",
                 "format": "fastq.gz",
                 "mandatory": True,
@@ -815,10 +919,19 @@ def deliverable_data(balsamic_dir: Path, balsamic_case_id: str) -> dict:
 
 
 @pytest.fixture
-def mock_deliverable(balsamic_dir: Path, deliverable_data: dict, balsamic_case_id: str) -> None:
+def mock_deliverable(
+    balsamic_dir: Path,
+    deliverable_data: dict,
+    balsamic_case_id: str,
+) -> None:
     """Create deliverable file with dummy data and files to deliver"""
     Path.mkdir(
-        Path(balsamic_dir, balsamic_case_id, "analysis", "delivery_report"),
+        Path(
+            balsamic_dir,
+            balsamic_case_id,
+            "analysis",
+            "delivery_report",
+        ),
         parents=True,
         exist_ok=True,
     )
@@ -828,14 +941,22 @@ def mock_deliverable(balsamic_dir: Path, deliverable_data: dict, balsamic_case_i
         content=deliverable_data,
         file_format=FileFormat.JSON,
         file_path=Path(
-            balsamic_dir, balsamic_case_id, "analysis", "delivery_report", balsamic_case_id + ".hk"
+            balsamic_dir,
+            balsamic_case_id,
+            "analysis",
+            "delivery_report",
+            balsamic_case_id + ".hk",
         ),
     )
 
 
 @pytest.fixture
 def hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -> dict:
-    hermes_output: dict = {"workflow": "balsamic", "bundle_id": balsamic_case_id, "files": []}
+    hermes_output: dict = {
+        "workflow": "balsamic",
+        "bundle_id": balsamic_case_id,
+        "files": [],
+    }
     for file_info in deliverable_data["files"]:
         tags: list[str] = []
         if "html" in file_info["format"]:
@@ -843,13 +964,27 @@ def hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -> dict:
         elif "fastq" in file_info["format"]:
             tags.append("fastq")
         elif "vcf" in file_info["format"]:
-            tags.extend(["vcf-snv-clinical", "cnvkit", "filtered"])
-        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
+            tags.extend(
+                [
+                    "vcf-snv-clinical",
+                    "cnvkit",
+                    "filtered",
+                ]
+            )
+        hermes_output["files"].append(
+            {
+                "path": file_info["path"],
+                "tags": tags,
+                "mandatory": True,
+            }
+        )
     return hermes_output
 
 
 @pytest.fixture
-def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
+def malformed_hermes_deliverables(
+    hermes_deliverables: dict,
+) -> dict:
     malformed_deliverable = hermes_deliverables.copy()
     malformed_deliverable.pop("workflow")
 
@@ -859,5 +994,18 @@ def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
 @pytest.fixture
 def mock_analysis_finish(balsamic_dir: Path, balsamic_case_id: str) -> None:
     """Create analysis_finish file for testing"""
-    Path.mkdir(Path(balsamic_dir, balsamic_case_id, "analysis"), parents=True, exist_ok=True)
-    Path(balsamic_dir, balsamic_case_id, "analysis", "analysis_finish").touch(exist_ok=True)
+    Path.mkdir(
+        Path(
+            balsamic_dir,
+            balsamic_case_id,
+            "analysis",
+        ),
+        parents=True,
+        exist_ok=True,
+    )
+    Path(
+        balsamic_dir,
+        balsamic_case_id,
+        "analysis",
+        "analysis_finish",
+    ).touch(exist_ok=True)

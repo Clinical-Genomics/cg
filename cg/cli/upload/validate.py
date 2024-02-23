@@ -30,7 +30,12 @@ def validate(context: CGConfig, family_id: str | None):
         sample_id = link_obj.sample.internal_id
         chanjo_sample = chanjo_api.sample(sample_id)
         if chanjo_sample is None:
-            click.echo(click.style(f"upload coverage for {sample_id}", fg="yellow"))
+            click.echo(
+                click.style(
+                    f"upload coverage for {sample_id}",
+                    fg="yellow",
+                )
+            )
             continue
         chanjo_samples.append(chanjo_sample)
 
@@ -45,4 +50,9 @@ def validate(context: CGConfig, family_id: str | None):
             mean_coverage = coverage_results[sample_id]["mean_coverage"]
             click.echo(f"{sample_id}: {mean_coverage:.2f}X - {completeness:.2f}%")
         else:
-            click.echo(click.style(f"{sample_id}: sample not found in chanjo", fg="yellow"))
+            click.echo(
+                click.style(
+                    f"{sample_id}: sample not found in chanjo",
+                    fg="yellow",
+                )
+            )

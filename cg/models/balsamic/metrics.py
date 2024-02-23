@@ -1,6 +1,9 @@
 from pydantic.v1 import BaseModel, validator
 
-from cg.models.deliverables.metric_deliverables import MetricCondition, MetricsBase
+from cg.models.deliverables.metric_deliverables import (
+    MetricCondition,
+    MetricsBase,
+)
 
 
 def percent_value_validation(cls, value: float) -> float:

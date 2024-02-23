@@ -3,12 +3,21 @@
 from datetime import datetime, timedelta
 
 from cg.constants import DataDelivery, Priority
-from cg.constants.constants import CaseActions, Workflow
-from cg.store.models import Analysis, Case, CaseSample
+from cg.constants.constants import (
+    CaseActions,
+    Workflow,
+)
+from cg.store.models import (
+    Analysis,
+    Case,
+    CaseSample,
+)
 from cg.store.store import Store
 
 
-def test_get_cases_by_customer_and_case_name_search(store_with_cases_and_customers: Store):
+def test_get_cases_by_customer_and_case_name_search(
+    store_with_cases_and_customers: Store,
+):
     """Test that only cases with the specified customer and case name search pattern are returned."""
     # GIVEN a store with some cases and customers
     case = store_with_cases_and_customers._get_query(table=Case).first()
@@ -17,7 +26,8 @@ def test_get_cases_by_customer_and_case_name_search(store_with_cases_and_custome
 
     # WHEN calling filtering with the customer and case_name_search
     filtered_cases = store_with_cases_and_customers.get_cases_by_customer_and_case_name_search(
-        customer=customer, case_name_search=case_name_search
+        customer=customer,
+        case_name_search=case_name_search,
     )
 
     # THEN cases with the specified customer and case name search pattern should be returned
@@ -40,7 +50,9 @@ def test_get_cases_by_customers_action_and_case_search_pattern(
 
     # WHEN calling get_cases_by_customers_action_and_case_search_pattern with customers, action, and case_search
     cases = store_with_cases_and_customers.get_cases_by_customers_action_and_case_search(
-        customers=[customer], action=action, case_search=case_search
+        customers=[customer],
+        action=action,
+        case_search=case_search,
     )
 
     # THEN cases with the specified customers, action, and case search pattern should be returned
@@ -64,7 +76,9 @@ def test_get_cases_by_customer_workflow_and_case_search_pattern(
 
     # WHEN calling get_cases_by_customer_workflow_and_case_search_pattern with customer, workflow, and case_search
     cases = store_with_cases_and_customers.get_cases_by_customer_workflow_and_case_search(
-        customer=customer, workflow=workflow, case_search=case_search
+        customer=customer,
+        workflow=workflow,
+        case_search=case_search,
     )
 
     # THEN cases with the specified customer, workflow, and case search pattern should be returned
@@ -74,7 +88,9 @@ def test_get_cases_by_customer_workflow_and_case_search_pattern(
         assert case_search in case.name
 
 
-def test_get_running_cases_in_workflow(store_with_cases_and_customers: Store):
+def test_get_running_cases_in_workflow(
+    store_with_cases_and_customers: Store,
+):
     """Test that only cases with the specified workflow, and have action "running" are returned."""
     # GIVEN a store with some cases
 
@@ -149,7 +165,10 @@ def test_prepared_at_affects_tat(base_store: Store, helpers):
     new_case = add_case(helpers, base_store, ordered_days_ago=7)
     one_week_ago = datetime.now() - timedelta(days=7)
     one_week_old_sample = helpers.add_sample(
-        base_store, ordered_at=one_week_ago, received_at=one_week_ago, prepared_at=one_week_ago
+        base_store,
+        ordered_at=one_week_ago,
+        received_at=one_week_ago,
+        prepared_at=one_week_ago,
     )
     link = base_store.relate_sample(new_case, one_week_old_sample, "unknown")
     base_store.session.add(link)
@@ -170,7 +189,9 @@ def test_received_at_affects_tat(base_store: Store, helpers):
     new_case = add_case(helpers, base_store, ordered_days_ago=7)
     one_week_ago = datetime.now() - timedelta(days=7)
     one_week_old_sample = helpers.add_sample(
-        base_store, ordered_at=one_week_ago, received_at=one_week_ago
+        base_store,
+        ordered_at=one_week_ago,
+        received_at=one_week_ago,
     )
     link = base_store.relate_sample(new_case, one_week_old_sample, "unknown")
     base_store.session.add(link)
@@ -191,11 +212,19 @@ def test_samples_flowcell(base_store: Store, helpers):
     # and a sample not yet on a flowcell
     new_case = add_case(helpers, base_store)
     sample_on_flowcell = helpers.add_sample(base_store)
-    flowcell = helpers.add_flow_cell(base_store, samples=[sample_on_flowcell], status="ondisk")
+    flowcell = helpers.add_flow_cell(
+        base_store,
+        samples=[sample_on_flowcell],
+        status="ondisk",
+    )
     link_1: CaseSample = base_store.relate_sample(new_case, sample_on_flowcell, "unknown")
     base_store.session.add(link_1)
     sample_not_on_flowcell = helpers.add_sample(base_store)
-    link_2: CaseSample = base_store.relate_sample(new_case, sample_not_on_flowcell, "unknown")
+    link_2: CaseSample = base_store.relate_sample(
+        new_case,
+        sample_not_on_flowcell,
+        "unknown",
+    )
     base_store.session.add(link_2)
 
     # WHEN getting active cases
@@ -217,7 +246,11 @@ def test_sample_flowcell(base_store: Store, helpers):
     sample = helpers.add_sample(base_store)
     link = base_store.relate_sample(new_case, sample, "unknown")
     base_store.session.add(link)
-    flowcell = helpers.add_flow_cell(base_store, samples=[sample], status="ondisk")
+    flowcell = helpers.add_flow_cell(
+        base_store,
+        samples=[sample],
+        status="ondisk",
+    )
     assert flowcell.status
 
     # WHEN getting active cases
@@ -236,7 +269,9 @@ def test_case_action(base_store: Store, helpers):
 
     # GIVEN a database with an analysis that was completed but has an active rerun in progress
     analysis = helpers.add_analysis(
-        base_store, completed_at=datetime.now(), uploaded_at=datetime.now()
+        base_store,
+        completed_at=datetime.now(),
+        uploaded_at=datetime.now(),
     )
     analysis.case.action = "analyze"
 
@@ -254,7 +289,9 @@ def test_analysis_dates_for_rerun(base_store: Store, helpers):
 
     # GIVEN a database with an analysis that was completed but has an active rerun in progress
     analysis = helpers.add_analysis(
-        base_store, completed_at=datetime.now(), uploaded_at=datetime.now()
+        base_store,
+        completed_at=datetime.now(),
+        uploaded_at=datetime.now(),
     )
     analysis.case.action = "analyze"
 
@@ -427,7 +464,10 @@ def test_sequenced_at(base_store: Store, helpers):
 
     # GIVEN a database with a case and a sequenced date
     new_case = add_case(helpers, base_store)
-    sample = helpers.add_sample(base_store, last_sequenced_at=datetime.now())
+    sample = helpers.add_sample(
+        base_store,
+        last_sequenced_at=datetime.now(),
+    )
     link = base_store.relate_sample(new_case, sample, "unknown")
     base_store.session.add(link)
 
@@ -600,7 +640,11 @@ def test_include_case_by_exclude_customer(base_store: Store, helpers):
 
     # GIVEN a database with a case and a customer
     customer_id = "cust000"
-    new_case = add_case(helpers, base_store, customer_id=customer_id)
+    new_case = add_case(
+        helpers,
+        base_store,
+        customer_id=customer_id,
+    )
 
     # WHEN getting active cases by customer
     cases = base_store.cases(exclude_customer_id="dummy_customer")
@@ -616,7 +660,11 @@ def test_exclude_case_by_exclude_customer(base_store: Store, helpers):
 
     # GIVEN a database with a case and a customer
     customer_id = "cust000"
-    add_case(helpers, base_store, customer_id=customer_id)
+    add_case(
+        helpers,
+        base_store,
+        customer_id=customer_id,
+    )
 
     # WHEN getting active cases by customer
     cases = base_store.cases(exclude_customer_id=customer_id)
@@ -630,7 +678,11 @@ def test_include_case_by_case_uppercase_data_analysis(base_store: Store, helpers
 
     # GIVEN a database with a case with data analysis set
     data_analysis = Workflow.BALSAMIC
-    new_case = add_case(helpers, base_store, data_analysis=data_analysis)
+    new_case = add_case(
+        helpers,
+        base_store,
+        data_analysis=data_analysis,
+    )
 
     # WHEN getting active cases by data_analysis
     cases = base_store.cases(data_analysis=new_case.data_analysis.upper())
@@ -645,7 +697,11 @@ def test_exclude_case_by_data_analysis(base_store: Store, helpers):
     """Test to that cases can be excluded by data_analysis"""
 
     # GIVEN a database with a case with data analysis set
-    add_case(helpers, base_store, data_analysis=Workflow.BALSAMIC)
+    add_case(
+        helpers,
+        base_store,
+        data_analysis=Workflow.BALSAMIC,
+    )
 
     # WHEN getting active cases by data_analysis
     cases = base_store.cases(data_analysis="dummy_analysis")
@@ -659,7 +715,11 @@ def test_include_case_by_partial_data_analysis(base_store: Store, helpers):
 
     # GIVEN a database with a case with data analysis set
     data_analysis = Workflow.BALSAMIC
-    new_case = add_case(helpers, base_store, data_analysis=data_analysis)
+    new_case = add_case(
+        helpers,
+        base_store,
+        data_analysis=data_analysis,
+    )
 
     # WHEN getting active cases by partial data_analysis
     cases = base_store.cases(data_analysis=str(data_analysis)[:-1])
@@ -675,11 +735,20 @@ def test_show_multiple_data_analysis(base_store: Store, helpers):
 
     # GIVEN a database with a case with data analysis set
     data_analysis = Workflow.BALSAMIC
-    new_case = add_case(helpers, base_store, data_analysis=data_analysis)
+    new_case = add_case(
+        helpers,
+        base_store,
+        data_analysis=data_analysis,
+    )
     sample1 = helpers.add_sample(base_store)
     link_1: CaseSample = base_store.relate_sample(new_case, sample1, "unknown")
     base_store.session.add(link_1)
-    new_case2 = add_case(helpers, base_store, case_id="new_case2", data_analysis=data_analysis)
+    new_case2 = add_case(
+        helpers,
+        base_store,
+        case_id="new_case2",
+        data_analysis=data_analysis,
+    )
     sample2 = helpers.add_sample(base_store)
     link_2: CaseSample = base_store.relate_sample(new_case, sample2, "unknown")
     link_3: CaseSample = base_store.relate_sample(new_case2, sample2, "unknown")
@@ -700,7 +769,11 @@ def test_show_data_analysis(base_store: Store, helpers):
 
     # GIVEN a database with a case with data analysis set
     data_analysis = Workflow.BALSAMIC
-    new_case = add_case(helpers, base_store, data_analysis=data_analysis)
+    new_case = add_case(
+        helpers,
+        base_store,
+        data_analysis=data_analysis,
+    )
 
     # WHEN getting active cases by data_analysis
     cases = base_store.cases(data_analysis=str(data_analysis))
@@ -716,7 +789,11 @@ def test_include_case_by_data_analysis(base_store: Store, helpers):
 
     # GIVEN a database with a case with data analysis set
     data_analysis = Workflow.BALSAMIC
-    new_case = add_case(helpers, base_store, data_analysis=data_analysis)
+    new_case = add_case(
+        helpers,
+        base_store,
+        data_analysis=data_analysis,
+    )
 
     # WHEN getting active cases by data_analysis
     cases = base_store.cases(data_analysis=new_case.data_analysis)
@@ -745,7 +822,11 @@ def test_include_case_by_customer(base_store: Store, helpers):
 
     # GIVEN a database with a case
     customer_id = "cust000"
-    new_case = add_case(helpers, base_store, customer_id=customer_id)
+    new_case = add_case(
+        helpers,
+        base_store,
+        customer_id=customer_id,
+    )
 
     # WHEN getting active cases by customer
     cases = base_store.cases(customer_id=customer_id)
@@ -803,7 +884,11 @@ def test_excluded_by_priority(base_store: Store, helpers):
     """Test to that cases can be excluded by priority"""
 
     # GIVEN a database with a case with a priority
-    add_case(helpers, base_store, priority=Priority.research)
+    add_case(
+        helpers,
+        base_store,
+        priority=Priority.research,
+    )
 
     # WHEN getting active cases by another priority
     cases = base_store.cases(priority=Priority.standard)
@@ -816,7 +901,11 @@ def test_included_by_priority(base_store: Store, helpers):
     """Test to that cases can be included by priority"""
 
     # GIVEN a database with a case with a priority
-    new_case = add_case(helpers, base_store, priority=Priority.research)
+    new_case = add_case(
+        helpers,
+        base_store,
+        priority=Priority.research,
+    )
 
     # WHEN getting active cases by priority
     cases = base_store.cases(priority=new_case.priority)
@@ -831,7 +920,11 @@ def test_excluded_by_action(base_store: Store, helpers):
     """Test to that cases can be excluded by action"""
 
     # GIVEN a database with a case with an action
-    add_case(helpers, base_store, action=CaseActions.actions()[0])
+    add_case(
+        helpers,
+        base_store,
+        action=CaseActions.actions()[0],
+    )
 
     # WHEN getting active cases by action
     cases = base_store.cases(case_action=CaseActions.actions()[1])
@@ -844,7 +937,11 @@ def test_included_by_action(base_store: Store, helpers):
     """Test to that cases can be included by action"""
 
     # GIVEN a database with a case with an action
-    new_case = add_case(helpers, base_store, action=CaseActions.actions()[0])
+    new_case = add_case(
+        helpers,
+        base_store,
+        action=CaseActions.actions()[0],
+    )
 
     # WHEN getting active cases by action
     cases = base_store.cases(case_action=new_case.action)
@@ -947,7 +1044,10 @@ def test_only_sequenced_cases(base_store: Store, helpers):
 
     # GIVEN a database with an sequenced case
     new_case = add_case(helpers, base_store)
-    sample = helpers.add_sample(base_store, last_sequenced_at=datetime.now())
+    sample = helpers.add_sample(
+        base_store,
+        last_sequenced_at=datetime.now(),
+    )
     link = base_store.relate_sample(new_case, sample, "unknown")
     base_store.session.add(link)
     neg_new_case = add_case(helpers, base_store, "neg_new_case")
@@ -1009,7 +1109,10 @@ def test_only_delivery_reported_cases(base_store: Store, helpers):
     """Test to that delivery-reported cases can be included"""
 
     # GIVEN a database with an delivery-reported analysis
-    helpers.add_analysis(base_store, delivery_reported_at=datetime.now())
+    helpers.add_analysis(
+        base_store,
+        delivery_reported_at=datetime.now(),
+    )
     neg_new_case = add_case(helpers, base_store, "neg_new_case")
     neg_sample = helpers.add_sample(base_store, name="neg_sample")
     link = base_store.relate_sample(neg_new_case, neg_sample, "unknown")
@@ -1104,7 +1207,10 @@ def test_exclude_sequenced_cases(base_store: Store, helpers):
 
     # GIVEN a database with an sequenced case
     new_case = add_case(helpers, base_store)
-    sample = helpers.add_sample(base_store, last_sequenced_at=datetime.now())
+    sample = helpers.add_sample(
+        base_store,
+        last_sequenced_at=datetime.now(),
+    )
     link = base_store.relate_sample(new_case, sample, "unknown")
     base_store.session.add(link)
 
@@ -1148,7 +1254,10 @@ def test_exclude_delivery_reported_cases(base_store: Store, helpers):
     """Test to that delivery-reported cases can be excluded"""
 
     # GIVEN a database with an delivery-reported analysis
-    helpers.add_analysis(base_store, delivery_reported_at=datetime.now())
+    helpers.add_analysis(
+        base_store,
+        delivery_reported_at=datetime.now(),
+    )
 
     # WHEN getting active cases excluding delivery-reported
     cases = base_store.cases(exclude_delivery_reported=True)
@@ -1235,7 +1344,11 @@ def test_analysis_bool_true(base_store: Store, helpers):
     """Test to that cases displays correct booleans for samples"""
 
     # GIVEN a database with a case
-    helpers.add_analysis(base_store, completed_at=datetime.now(), uploaded_at=datetime.now())
+    helpers.add_analysis(
+        base_store,
+        completed_at=datetime.now(),
+        uploaded_at=datetime.now(),
+    )
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -1419,8 +1532,16 @@ def test_one_of_two_samples_received(base_store: Store, helpers):
 
     # GIVEN a database with a case with a received sample and one not received
     new_case = add_case(helpers, base_store)
-    sample_received = helpers.add_sample(base_store, "sample_received", received_at=datetime.now())
-    sample_not_received = helpers.add_sample(base_store, "sample_not_received", received_at=None)
+    sample_received = helpers.add_sample(
+        base_store,
+        "sample_received",
+        received_at=datetime.now(),
+    )
+    sample_not_received = helpers.add_sample(
+        base_store,
+        "sample_not_received",
+        received_at=None,
+    )
     link_1: CaseSample = base_store.relate_sample(new_case, sample_received, "unknown")
     link_2: CaseSample = base_store.relate_sample(new_case, sample_not_received, "unknown")
     base_store.session.add_all([link_1, link_2])
@@ -1442,7 +1563,10 @@ def test_one_sequenced_sample(base_store: Store, helpers):
 
     # GIVEN a database with a case with a sequenced sample
     new_case = add_case(helpers, base_store)
-    sample = helpers.add_sample(base_store, last_sequenced_at=datetime.now())
+    sample = helpers.add_sample(
+        base_store,
+        last_sequenced_at=datetime.now(),
+    )
     link = base_store.relate_sample(new_case, sample, "unknown")
     base_store.session.add(link)
     assert sample.last_sequenced_at is not None

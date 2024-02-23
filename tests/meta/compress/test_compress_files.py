@@ -17,12 +17,27 @@ def test_get_fastq_files(populated_compress_fastq_api, sample):
     run = list(fastq_dict.keys())[0]
 
     # THEN the fastq files will be in the dictionary
-    assert set(fastq_dict[run].keys()) == set(["compression_data", "hk_first", "hk_second"])
+    assert set(fastq_dict[run].keys()) == set(
+        [
+            "compression_data",
+            "hk_first",
+            "hk_second",
+        ]
+    )
     # THEN assert that a CompressionData object was returned
-    assert isinstance(fastq_dict[run]["compression_data"], CompressionData)
+    assert isinstance(
+        fastq_dict[run]["compression_data"],
+        CompressionData,
+    )
 
 
-def test_get_fastq_files_no_files(compress_api, sample_hk_bundle_no_files, sample, helpers, caplog):
+def test_get_fastq_files_no_files(
+    compress_api,
+    sample_hk_bundle_no_files,
+    sample,
+    helpers,
+    caplog,
+):
     """Test get_fastq_files method when no FASTQ files are found"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a sample_id
@@ -34,7 +49,10 @@ def test_get_fastq_files_no_files(compress_api, sample_hk_bundle_no_files, sampl
 
     # WHEN fetching the fastq files
     version_obj = compress_api.hk_api.get_latest_bundle_version(bundle_name=sample)
-    fastq_dict = files.get_fastq_files(sample_id=sample_id, version_obj=version_obj)
+    fastq_dict = files.get_fastq_files(
+        sample_id=sample_id,
+        version_obj=version_obj,
+    )
 
     # THEN assert that None is returned since there where not two files
     assert fastq_dict is None

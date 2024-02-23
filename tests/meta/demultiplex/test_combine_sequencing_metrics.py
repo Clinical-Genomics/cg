@@ -5,7 +5,9 @@ from cg.meta.demultiplex.combine_sequencing_metrics import (
     combine_metrics,
     weighted_average,
 )
-from cg.store.models import SampleLaneSequencingMetrics
+from cg.store.models import (
+    SampleLaneSequencingMetrics,
+)
 
 
 def test_calculates_simple_weighted_average():
@@ -15,7 +17,10 @@ def test_calculates_simple_weighted_average():
 
     # WHEN Calculating the weighted average
     result: float = weighted_average(
-        total_1=total_1, percentage_1=percentage_1, total_2=total_2, percentage_2=percentage_2
+        total_1=total_1,
+        percentage_1=percentage_1,
+        total_2=total_2,
+        percentage_2=percentage_2,
     )
 
     # THEN The weighted average should be 0.8
@@ -29,7 +34,10 @@ def test_handles_zero_counts():
 
     # WHEN Calculating the weighted average
     result: float = weighted_average(
-        total_1=total_1, percentage_1=percentage_1, total_2=total_2, percentage_2=percentage_2
+        total_1=total_1,
+        percentage_1=percentage_1,
+        total_2=total_2,
+        percentage_2=percentage_2,
     )
 
     # THEN The weighted average should be zero
@@ -50,12 +58,23 @@ def test_combine_metrics():
     )
 
     # WHEN Combining the metrics
-    combine_metrics(existing_metric=existing_metric, new_metric=new_metric)
+    combine_metrics(
+        existing_metric=existing_metric,
+        new_metric=new_metric,
+    )
 
     # THEN The existing metric should be updated
     assert existing_metric.sample_total_reads_in_lane == 200
-    assert math.isclose(existing_metric.sample_base_percentage_passing_q30, 0.85, rel_tol=1e-9)
-    assert math.isclose(existing_metric.sample_base_mean_quality_score, 27.5, rel_tol=1e-9)
+    assert math.isclose(
+        existing_metric.sample_base_percentage_passing_q30,
+        0.85,
+        rel_tol=1e-9,
+    )
+    assert math.isclose(
+        existing_metric.sample_base_mean_quality_score,
+        27.5,
+        rel_tol=1e-9,
+    )
 
 
 def test_combine_empty_metrics():
@@ -65,7 +84,8 @@ def test_combine_empty_metrics():
 
     # WHEN combining them
     combined_metrics = combine_mapped_metrics_with_undetermined(
-        mapped_metrics=mapped_metrics, undetermined_metrics=undetermined_metrics
+        mapped_metrics=mapped_metrics,
+        undetermined_metrics=undetermined_metrics,
     )
 
     # THEN the result should be an empty list
@@ -79,7 +99,8 @@ def test_combine_metrics_with_only_mapped_metrics():
 
     # WHEN combining them
     combined_metrics = combine_mapped_metrics_with_undetermined(
-        mapped_metrics=mapped_metrics, undetermined_metrics=undetermined_metrics
+        mapped_metrics=mapped_metrics,
+        undetermined_metrics=undetermined_metrics,
     )
 
     # THEN the result should be the mapped metrics
@@ -93,7 +114,8 @@ def test_combine_metrics_with_only_undetermined_metrics():
 
     # WHEN combining them
     combined_metrics = combine_mapped_metrics_with_undetermined(
-        mapped_metrics=mapped_metrics, undetermined_metrics=undetermined_metrics
+        mapped_metrics=mapped_metrics,
+        undetermined_metrics=undetermined_metrics,
     )
 
     # THEN the result should be the undetermined metrics
@@ -103,15 +125,22 @@ def test_combine_metrics_with_only_undetermined_metrics():
 def test_combine_metrics_with_both_mapped_and_undetermined_metrics_different_lanes():
     # GIVEN one mapped and one undetermined metric in different lanes for a sample
     mapped_metrics = [
-        SampleLaneSequencingMetrics(flow_cell_lane_number=1, sample_internal_id="sample")
+        SampleLaneSequencingMetrics(
+            flow_cell_lane_number=1,
+            sample_internal_id="sample",
+        )
     ]
     undetermined_metrics = [
-        SampleLaneSequencingMetrics(flow_cell_lane_number=2, sample_internal_id="sample")
+        SampleLaneSequencingMetrics(
+            flow_cell_lane_number=2,
+            sample_internal_id="sample",
+        )
     ]
 
     # WHEN combining them
     combined_metrics = combine_mapped_metrics_with_undetermined(
-        mapped_metrics=mapped_metrics, undetermined_metrics=undetermined_metrics
+        mapped_metrics=mapped_metrics,
+        undetermined_metrics=undetermined_metrics,
     )
 
     # THEN two metrics should be returned
@@ -139,7 +168,8 @@ def test_combine_metrics_with_both_mapped_and_undetermined_metrics_same_lane():
 
     # WHEN combining them
     combined_metrics = combine_mapped_metrics_with_undetermined(
-        mapped_metrics=[mapped_metric], undetermined_metrics=[undetermined_metric]
+        mapped_metrics=[mapped_metric],
+        undetermined_metrics=[undetermined_metric],
     )
 
     # THEN the combined metrics should be a single metric
@@ -148,5 +178,9 @@ def test_combine_metrics_with_both_mapped_and_undetermined_metrics_same_lane():
     # THEN the metrics should be a weighted average of the mapped and undetermined metrics
     metric: SampleLaneSequencingMetrics = combined_metrics[0]
     assert metric.sample_total_reads_in_lane == 200
-    assert math.isclose(metric.sample_base_percentage_passing_q30, 0.85, rel_tol=1e-9)
+    assert math.isclose(
+        metric.sample_base_percentage_passing_q30,
+        0.85,
+        rel_tol=1e-9,
+    )
     assert metric.sample_base_mean_quality_score == 25

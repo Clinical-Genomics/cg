@@ -19,8 +19,12 @@ from cg.cli.workflow.commands import (
 )
 from cg.constants.constants import Workflow
 from cg.exc import CaseNotFoundError, LoqusdbError
-from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
-from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.meta.observations.balsamic_observations_api import (
+    BalsamicObservationsAPI,
+)
+from cg.meta.observations.mip_dna_observations_api import (
+    MipDNAObservationsAPI,
+)
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from cg.store.store import Store
@@ -32,7 +36,11 @@ LOG = logging.getLogger(__name__)
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_obj
-def upload_observations_to_loqusdb(context: CGConfig, case_id: str | None, dry_run: bool):
+def upload_observations_to_loqusdb(
+    context: CGConfig,
+    case_id: str | None,
+    dry_run: bool,
+):
     """Upload observations from an analysis to Loqusdb."""
 
     click.echo(click.style("----------------- OBSERVATIONS -----------------"))
@@ -55,7 +63,9 @@ def upload_observations_to_loqusdb(context: CGConfig, case_id: str | None, dry_r
 @OPTION_DRY
 @click.pass_context
 def upload_available_observations_to_loqusdb(
-    context: click.Context, workflow: Workflow | None, dry_run: bool
+    context: click.Context,
+    workflow: Workflow | None,
+    dry_run: bool,
 ):
     """Uploads the available observations to Loqusdb."""
 
@@ -73,8 +83,14 @@ def upload_available_observations_to_loqusdb(
         try:
             LOG.info(f"Will upload observations for {case.internal_id}")
             context.invoke(
-                upload_observations_to_loqusdb, case_id=case.internal_id, dry_run=dry_run
+                upload_observations_to_loqusdb,
+                case_id=case.internal_id,
+                dry_run=dry_run,
             )
-        except (CaseNotFoundError, FileNotFoundError, ValidationError) as error:
+        except (
+            CaseNotFoundError,
+            FileNotFoundError,
+            ValidationError,
+        ) as error:
             LOG.error(f"Error uploading observations for {case.internal_id}: {error}")
             continue

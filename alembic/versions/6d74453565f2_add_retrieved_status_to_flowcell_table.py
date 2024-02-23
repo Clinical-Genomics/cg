@@ -16,7 +16,12 @@ down_revision = None
 branch_labels = None
 depends_on = None
 
-old_options = ("ondisk", "removed", "requested", "processing")
+old_options = (
+    "ondisk",
+    "removed",
+    "requested",
+    "processing",
+)
 new_options = sorted(old_options + ("retrieved",))
 
 old_enum = mysql.ENUM(*old_options)

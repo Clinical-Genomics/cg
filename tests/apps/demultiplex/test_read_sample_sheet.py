@@ -30,14 +30,18 @@ def test_validate_samples_are_unique(
 
     # WHEN validating the samples
     validate_samples_are_unique(
-        samples=[novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_2]
+        samples=[
+            novaseq6000_flow_cell_sample_1,
+            novaseq6000_flow_cell_sample_2,
+        ]
     )
 
     # THEN no error is raised
 
 
 def test_validate_samples_are_unique_when_not_unique(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq, caplog
+    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
+    caplog,
 ):
     """Test that validating two identical samples fails."""
     # GIVEN two identical NovaSeq samples
@@ -46,7 +50,10 @@ def test_validate_samples_are_unique_when_not_unique(
     # WHEN validating the samples
     with pytest.raises(SampleSheetError):
         validate_samples_are_unique(
-            samples=[novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_1]
+            samples=[
+                novaseq6000_flow_cell_sample_1,
+                novaseq6000_flow_cell_sample_1,
+            ]
         )
 
     # THEN a sample sheet error is raised due to the samples being identical
@@ -65,7 +72,10 @@ def test_get_samples_by_lane(
 
     # WHEN getting the samples per lane
     samples_per_lane: dict[int, list[FlowCellSample]] = get_samples_by_lane(
-        samples=[novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_2]
+        samples=[
+            novaseq6000_flow_cell_sample_1,
+            novaseq6000_flow_cell_sample_2,
+        ]
     )
 
     # THEN the returned value is a dictionary
@@ -74,7 +84,9 @@ def test_get_samples_by_lane(
     assert len(samples_per_lane) == 2
 
 
-def test_get_raw_samples_valid_sample_sheet(valid_sample_sheet_bcl2fastq: list[list[str]]):
+def test_get_raw_samples_valid_sample_sheet(
+    valid_sample_sheet_bcl2fastq: list[list[str]],
+):
     """Test that getting raw samples from a valid sample sheet gets a correct list of dictionaries."""
     # GIVEN a valid sample sheet
 
@@ -91,7 +103,10 @@ def test_get_raw_samples_valid_sample_sheet(valid_sample_sheet_bcl2fastq: list[l
     assert "Lane" in raw_samples[0].keys()
 
 
-def test_get_raw_samples_no_header(sample_sheet_samples_no_header: list[list[str]], caplog):
+def test_get_raw_samples_no_header(
+    sample_sheet_samples_no_header: list[list[str]],
+    caplog,
+):
     """Test that getting samples from a sample sheet without header fails."""
     # GIVEN a sample sheet without header
     caplog.set_level(logging.INFO)
@@ -104,7 +119,10 @@ def test_get_raw_samples_no_header(sample_sheet_samples_no_header: list[list[str
     assert "Could not find header in sample sheet" in caplog.text
 
 
-def test_get_raw_samples_no_samples(sample_sheet_bcl2fastq_data_header: list[list[str]], caplog):
+def test_get_raw_samples_no_samples(
+    sample_sheet_bcl2fastq_data_header: list[list[str]],
+    caplog,
+):
     """Test that getting samples from a sample sheet without samples fails."""
     # GIVEN a sample sheet without samples
     caplog.set_level(logging.INFO)
@@ -117,12 +135,15 @@ def test_get_raw_samples_no_samples(sample_sheet_bcl2fastq_data_header: list[lis
     assert "Could not find any samples in sample sheet" in caplog.text
 
 
-def test_get_sample_type_for_bcl_convert(bcl_convert_sample_sheet_path: Path):
+def test_get_sample_type_for_bcl_convert(
+    bcl_convert_sample_sheet_path: Path,
+):
     # GIVEN a bcl convert sample sheet path
 
     # WHEN getting the sample type
     content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=bcl_convert_sample_sheet_path
+        file_format=FileFormat.CSV,
+        file_path=bcl_convert_sample_sheet_path,
     )
     sample_type: Type[FlowCellSample] = get_sample_type_from_content(content)
 
@@ -130,12 +151,15 @@ def test_get_sample_type_for_bcl_convert(bcl_convert_sample_sheet_path: Path):
     assert sample_type is FlowCellSampleBCLConvert
 
 
-def test_get_sample_type_for_bcl2fastq(bcl2fastq_sample_sheet_path: Path):
+def test_get_sample_type_for_bcl2fastq(
+    bcl2fastq_sample_sheet_path: Path,
+):
     # GIVEN a bcl convert sample sheet path
 
     # WHEN getting the sample type
     content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=bcl2fastq_sample_sheet_path
+        file_format=FileFormat.CSV,
+        file_path=bcl2fastq_sample_sheet_path,
     )
     sample_type: Type[FlowCellSample] = get_sample_type_from_content(content)
 

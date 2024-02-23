@@ -4,8 +4,13 @@ from pathlib import Path
 
 import pytest
 
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.constants.demultiplexing import (
+    BclConverter,
+    DemultiplexingDirsAndFiles,
+)
+from cg.models.flow_cell.flow_cell import (
+    FlowCellDirectoryData,
+)
 
 # Functional flow cell runs
 
@@ -48,7 +53,10 @@ def novaseq_6000_pre_1_5_kits_flow_cell(
 ) -> FlowCellDirectoryData:
     """Return a Novaseq6000 flow cell with index settings pre 1.5 kits."""
     return FlowCellDirectoryData(
-        Path(illumina_flow_cells_directory, "190927_A00689_0069_BHLYWYDSXX")
+        Path(
+            illumina_flow_cells_directory,
+            "190927_A00689_0069_BHLYWYDSXX",
+        )
     )
 
 
@@ -58,7 +66,10 @@ def novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq(
 ) -> FlowCellDirectoryData:
     """Return a Novaseq6000 flow cell with index settings pre 1.5 kits set as Bcl2Fastq."""
     return FlowCellDirectoryData(
-        Path(illumina_flow_cells_directory, "190927_A00689_0069_BHLYWYDSXX"),
+        Path(
+            illumina_flow_cells_directory,
+            "190927_A00689_0069_BHLYWYDSXX",
+        ),
         bcl_converter=BclConverter.BCL2FASTQ,
     )
 
@@ -69,12 +80,17 @@ def novaseq_6000_post_1_5_kits_flow_cell(
 ) -> FlowCellDirectoryData:
     """Return a Novaseq6000 flow cell with index settings post 1.5 kits."""
     return FlowCellDirectoryData(
-        Path(illumina_flow_cells_directory, "230912_A00187_1009_AHK33MDRX3")
+        Path(
+            illumina_flow_cells_directory,
+            "230912_A00187_1009_AHK33MDRX3",
+        )
     )
 
 
 @pytest.fixture
-def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
+def novaseq_x_flow_cell(
+    novaseq_x_flow_cell_dir: Path,
+) -> FlowCellDirectoryData:
     """Return a NovaSeqX flow cell."""
     return FlowCellDirectoryData(novaseq_x_flow_cell_dir)
 
@@ -84,13 +100,15 @@ def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
 
 @pytest.fixture
 def novaseqx_flow_cell_with_sample_sheet_no_fastq(
-    novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
+    novaseqx_flow_cell_directory: Path,
+    novaseqx_demultiplexed_flow_cell: Path,
 ) -> FlowCellDirectoryData:
     """Return a flow cell from a tmp dir with a sample sheet and no sample fastq files."""
     novaseqx_flow_cell_directory.mkdir(parents=True, exist_ok=True)
     flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_directory)
     sample_sheet_path = Path(
-        novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        novaseqx_demultiplexed_flow_cell,
+        DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
     )
     flow_cell._sample_sheet_path_hk = sample_sheet_path
     return flow_cell
@@ -141,6 +159,8 @@ def bcl2fastq_flow_cell_id(
 
 
 @pytest.fixture
-def bcl_convert_flow_cell_id(novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData) -> str:
+def bcl_convert_flow_cell_id(
+    novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData,
+) -> str:
     """Return flow cell id from bcl_convert flow cell object."""
     return novaseq_6000_post_1_5_kits_flow_cell.id

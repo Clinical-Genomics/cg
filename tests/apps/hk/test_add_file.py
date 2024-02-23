@@ -42,7 +42,10 @@ def test_add_file_with_list_of_tags(
     version_obj = helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
 
     # GIVEN a list of tags that does not exist
-    tags = [not_existing_hk_tag, not_existing_hk_tag + "_2"]
+    tags = [
+        not_existing_hk_tag,
+        not_existing_hk_tag + "_2",
+    ]
     for tag_name in tags:
         assert housekeeper_api.get_tag(tag_name) is None
 

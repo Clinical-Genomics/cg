@@ -20,7 +20,9 @@ from tests.cli.workflow.balsamic.conftest import (
 )
 
 
-def test_genotype_check_wgs_normal(balsamic_context: CGConfig):
+def test_genotype_check_wgs_normal(
+    balsamic_context: CGConfig,
+):
     """Test a cancer case with WGS and normal sample that is Genotype compatible."""
     # GIVEN a balsamic case with WGS tag and a normal sample
     internal_id = "balsamic_case_wgs_paired_enough_reads"
@@ -33,7 +35,9 @@ def test_genotype_check_wgs_normal(balsamic_context: CGConfig):
     assert passed_check
 
 
-def test_genotype_check_non_wgs_normal(balsamic_context: CGConfig):
+def test_genotype_check_non_wgs_normal(
+    balsamic_context: CGConfig,
+):
     """Test a cancer case with no WGS sample that is not Genotype compatible."""
     # GIVEN a balsamic case with a normal sample, but no WGS tag
     internal_id = "balsamic_case_tgs_paired"
@@ -46,7 +50,9 @@ def test_genotype_check_non_wgs_normal(balsamic_context: CGConfig):
     assert not passed_check
 
 
-def test_genotype_check_only_tumour(balsamic_context: CGConfig):
+def test_genotype_check_only_tumour(
+    balsamic_context: CGConfig,
+):
     """Test a cancer case with only a tumour sample that is not Genotype compatible."""
     # GIVEN a balsamic case with only tumour sample
     internal_id = "balsamic_case_wgs_single"

@@ -1,9 +1,18 @@
 from cg.exc import OrderNotFoundError
 from cg.models.orders.order import OrderIn
-from cg.server.dto.orders.orders_request import OrdersRequest
-from cg.server.dto.orders.orders_response import Order as OrderResponse
-from cg.server.dto.orders.orders_response import OrdersResponse
-from cg.services.orders.utils import create_order_response, create_orders_response
+from cg.server.dto.orders.orders_request import (
+    OrdersRequest,
+)
+from cg.server.dto.orders.orders_response import (
+    Order as OrderResponse,
+)
+from cg.server.dto.orders.orders_response import (
+    OrdersResponse,
+)
+from cg.services.orders.utils import (
+    create_order_response,
+    create_orders_response,
+)
 from cg.store.models import Case, Order
 from cg.store.store import Store
 
@@ -25,10 +34,15 @@ class OrderService:
     def _get_orders(self, orders_request: OrdersRequest) -> list[Order]:
         """Returns a list of entries in the table Order."""
         return self.store.get_orders_by_workflow(
-            workflow=orders_request.workflow, limit=orders_request.limit
+            workflow=orders_request.workflow,
+            limit=orders_request.limit,
         )
 
-    def create_order(self, order_data: OrderIn, cases: list[Case]) -> OrderResponse:
+    def create_order(
+        self,
+        order_data: OrderIn,
+        cases: list[Case],
+    ) -> OrderResponse:
         """Creates an order and links it to the given cases."""
         order: Order = self.store.add_order(order_data)
         for case in cases:

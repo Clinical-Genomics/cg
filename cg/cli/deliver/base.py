@@ -6,9 +6,14 @@ from pathlib import Path
 import click
 
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
+from cg.constants.delivery import (
+    PIPELINE_ANALYSIS_OPTIONS,
+    PIPELINE_ANALYSIS_TAG_MAP,
+)
 from cg.meta.deliver import DeliverAPI
-from cg.meta.deliver_ticket import DeliverTicketAPI
+from cg.meta.deliver_ticket import (
+    DeliverTicketAPI,
+)
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
@@ -52,9 +57,16 @@ def deliver():
 @deliver.command(name="analysis")
 @DRY_RUN
 @DELIVERY_TYPE
-@click.option("-c", "--case-id", help="Deliver the files for a specific case")
 @click.option(
-    "-t", "--ticket", type=str, help="Deliver the files for ALL cases connected to a ticket"
+    "-c",
+    "--case-id",
+    help="Deliver the files for a specific case",
+)
+@click.option(
+    "-t",
+    "--ticket",
+    type=str,
+    help="Deliver the files for ALL cases connected to a ticket",
 )
 @FORCE_ALL
 @IGNORE_MISSING_BUNDLES
@@ -125,7 +137,10 @@ def rsync(context: CGConfig, ticket: str, dry_run: bool):
     slurm_id = rsync_api.run_rsync_on_slurm(ticket=ticket, dry_run=dry_run)
     LOG.info(f"Rsync to the delivery server running as job {slurm_id}")
     rsync_api.add_to_trailblazer_api(
-        tb_api=tb_api, slurm_job_id=slurm_id, ticket=ticket, dry_run=dry_run
+        tb_api=tb_api,
+        slurm_job_id=slurm_id,
+        ticket=ticket,
+        dry_run=dry_run,
     )
 
 
@@ -133,7 +148,11 @@ def rsync(context: CGConfig, ticket: str, dry_run: bool):
 @DRY_RUN
 @TICKET_ID_ARG
 @click.pass_context
-def concatenate(context: click.Context, ticket: str, dry_run: bool):
+def concatenate(
+    context: click.Context,
+    ticket: str,
+    dry_run: bool,
+):
     """The fastq files in the folder generated using "cg deliver analysis"
     will be concatenated into one forward and one reverse fastq file
     """
@@ -187,6 +206,10 @@ def deliver_ticket(
         ticket=ticket
     )
     if is_concatenation_needed and "fastq" in delivery_type:
-        context.invoke(concatenate, ticket=ticket, dry_run=dry_run)
+        context.invoke(
+            concatenate,
+            ticket=ticket,
+            dry_run=dry_run,
+        )
     deliver_ticket_api.report_missing_samples(ticket=ticket, dry_run=dry_run)
     context.invoke(rsync, ticket=ticket, dry_run=dry_run)

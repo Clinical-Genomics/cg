@@ -24,7 +24,13 @@ def raw_bcl2fastq_tile_metrics() -> dict:
                         "SampleId": "S1",
                         "NumberReads": 1,
                         "Yield": 100,
-                        "ReadMetrics": [{"Yield": 100, "YieldQ30": 90, "QualityScoreSum": 100}],
+                        "ReadMetrics": [
+                            {
+                                "Yield": 100,
+                                "YieldQ30": 90,
+                                "QualityScoreSum": 100,
+                            }
+                        ],
                     }
                 ],
                 "Undetermined": {
@@ -52,11 +58,19 @@ def bcl2fastq_flow_cell_path(
 ) -> Path:
     """Flow cell with one sample in one lane, two tiles, two paired reads and two undetermined paired reads."""
 
-    tile_1 = Path(tmp_path, "l1t1", BCL2FASTQ_METRICS_DIRECTORY_NAME)
+    tile_1 = Path(
+        tmp_path,
+        "l1t1",
+        BCL2FASTQ_METRICS_DIRECTORY_NAME,
+    )
     tile_1.mkdir(parents=True)
     tile_1_stats_json_path = Path(tile_1, BCL2FASTQ_METRICS_FILE_NAME)
 
-    tile_2 = Path(tmp_path, "l1t2", BCL2FASTQ_METRICS_DIRECTORY_NAME)
+    tile_2 = Path(
+        tmp_path,
+        "l1t2",
+        BCL2FASTQ_METRICS_DIRECTORY_NAME,
+    )
     tile_2.mkdir(parents=True)
     tile_2_stats_json_path = Path(tile_2, BCL2FASTQ_METRICS_FILE_NAME)
 

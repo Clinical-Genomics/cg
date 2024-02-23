@@ -19,5 +19,7 @@ OPTION_STRANDEDNESS = click.option(
 )
 
 OPTION_REFERENCES = click.option(
-    "--genomes_base", type=click.Path(), help="Path to references folder"
+    "--genomes_base",
+    type=click.Path(),
+    help="Path to references folder",
 )

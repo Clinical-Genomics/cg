@@ -1,7 +1,12 @@
 import datetime as dt
 
 from openpyxl import Workbook, load_workbook
-from openpyxl.styles import Border, Font, PatternFill, Side
+from openpyxl.styles import (
+    Border,
+    Font,
+    PatternFill,
+    Side,
+)
 from pkg_resources import resource_filename
 
 
@@ -37,7 +42,10 @@ def render_xlsx(data: dict) -> Workbook:
     pkg_dir = __name__.rpartition(".")[0]
     sample_type = "pool" if data["pooled_samples"] else "sample"
     costcenter = data["cost_center"]
-    template_path = resource_filename(pkg_dir, f"templates/{costcenter}_{sample_type}_invoice.xlsx")
+    template_path = resource_filename(
+        pkg_dir,
+        f"templates/{costcenter}_{sample_type}_invoice.xlsx",
+    )
     workbook = load_workbook(template_path)
     if data["pooled_samples"]:
         worksheet = workbook["Bilaga Prover"]
@@ -60,8 +68,14 @@ def render_xlsx(data: dict) -> Workbook:
             cell = worksheet[f"{column}{6}"]
             cell.font = Font(bold=True)
             cell.border = Border(
-                top=Side(border_style="thin", color="000000"),
-                bottom=Side(border_style="thin", color="000000"),
+                top=Side(
+                    border_style="thin",
+                    color="000000",
+                ),
+                bottom=Side(
+                    border_style="thin",
+                    color="000000",
+                ),
             )
             cell.fill = PatternFill("solid", fgColor="E5E8E8")
 
@@ -117,8 +131,14 @@ def render_xlsx(data: dict) -> Workbook:
             cell = worksheet[f"{column}{header_row}"]
             cell.font = Font(bold=True, size=14)
             cell.border = Border(
-                top=Side(border_style="thin", color="000000"),
-                bottom=Side(border_style="thin", color="000000"),
+                top=Side(
+                    border_style="thin",
+                    color="000000",
+                ),
+                bottom=Side(
+                    border_style="thin",
+                    color="000000",
+                ),
             )
             cell.fill = PatternFill("solid", fgColor="E5E8E8")
 

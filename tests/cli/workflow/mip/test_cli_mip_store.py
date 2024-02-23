@@ -1,9 +1,14 @@
 from click.testing import CliRunner
 
 from cg.apps.hermes.hermes_api import HermesApi
-from cg.cli.workflow.mip_dna.base import store, store_available
+from cg.cli.workflow.mip_dna.base import (
+    store,
+    store_available,
+)
 from cg.constants import EXIT_SUCCESS
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_dna import (
+    MipDNAAnalysisAPI,
+)
 from cg.models.cg_config import CGConfig
 
 
@@ -18,7 +23,11 @@ def test_cli_store_dry_no_case(
     # GIVEN a case_id that does not exist in database
 
     # WHEN running command in dry-run mode
-    result = cli_runner.invoke(store, [mip_case_id_non_existing, "--dry-run"], obj=mip_dna_context)
+    result = cli_runner.invoke(
+        store,
+        [mip_case_id_non_existing, "--dry-run"],
+        obj=mip_dna_context,
+    )
 
     # THEN command does not terminate successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -48,11 +57,17 @@ def test_cli_store(
     mip_analysis_api.set_statusdb_action(case_id=mip_case_id, action="running")
 
     # GIVEN deliverables were generated and could be found
-    mocker.patch.object(MipDNAAnalysisAPI, "get_deliverables_file_path")
+    mocker.patch.object(
+        MipDNAAnalysisAPI,
+        "get_deliverables_file_path",
+    )
     MipDNAAnalysisAPI.get_deliverables_file_path.return_value = mip_deliverables_file
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
-    mocker.patch.object(MipDNAAnalysisAPI, "get_date_from_file_path")
+    mocker.patch.object(
+        MipDNAAnalysisAPI,
+        "get_date_from_file_path",
+    )
     MipDNAAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
 
     # GIVEN Hermes parses deliverables and generates a valid response
@@ -96,11 +111,17 @@ def test_cli_store_bundle_already_added(
     mip_analysis_api.set_statusdb_action(case_id=mip_case_id, action="running")
 
     # GIVEN deliverables were generated and could be found
-    mocker.patch.object(MipDNAAnalysisAPI, "get_deliverables_file_path")
+    mocker.patch.object(
+        MipDNAAnalysisAPI,
+        "get_deliverables_file_path",
+    )
     MipDNAAnalysisAPI.get_deliverables_file_path.return_value = mip_deliverables_file
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
-    mocker.patch.object(MipDNAAnalysisAPI, "get_date_from_file_path")
+    mocker.patch.object(
+        MipDNAAnalysisAPI,
+        "get_date_from_file_path",
+    )
     MipDNAAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
 
     # GIVEN Hermes parses deliverables and generates a valid response
@@ -140,11 +161,17 @@ def test_cli_store_available_case_is_running(
     mip_analysis_api.set_statusdb_action(case_id=mip_case_id, action="running")
 
     # GIVEN deliverables were generated and could be found
-    mocker.patch.object(MipDNAAnalysisAPI, "get_deliverables_file_path")
+    mocker.patch.object(
+        MipDNAAnalysisAPI,
+        "get_deliverables_file_path",
+    )
     MipDNAAnalysisAPI.get_deliverables_file_path.return_value = mip_deliverables_file
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
-    mocker.patch.object(MipDNAAnalysisAPI, "get_date_from_file_path")
+    mocker.patch.object(
+        MipDNAAnalysisAPI,
+        "get_date_from_file_path",
+    )
     MipDNAAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
 
     # GIVEN Hermes parses deliverables and generates a valid response
@@ -198,11 +225,17 @@ def test_cli_store_available_case_not_running(
     mip_analysis_api.status_db.session.commit()
 
     # GIVEN deliverables were generated and could be found
-    mocker.patch.object(MipDNAAnalysisAPI, "get_deliverables_file_path")
+    mocker.patch.object(
+        MipDNAAnalysisAPI,
+        "get_deliverables_file_path",
+    )
     MipDNAAnalysisAPI.get_deliverables_file_path.return_value = mip_deliverables_file
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
-    mocker.patch.object(MipDNAAnalysisAPI, "get_date_from_file_path")
+    mocker.patch.object(
+        MipDNAAnalysisAPI,
+        "get_date_from_file_path",
+    )
     MipDNAAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
 
     # GIVEN Hermes parses deliverables and generates a valid response

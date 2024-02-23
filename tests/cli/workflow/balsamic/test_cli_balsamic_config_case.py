@@ -6,13 +6,18 @@ from pathlib import Path
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
-from cg.cli.workflow.balsamic.base import config_case
+from cg.cli.workflow.balsamic.base import (
+    config_case,
+)
 from cg.models.cg_config import CGConfig
 
 EXIT_SUCCESS = 0
 
 
-def test_without_options(cli_runner: CliRunner, balsamic_context: CGConfig):
+def test_without_options(
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+):
     """Test command without case_id."""
     # GIVEN NO case_id
     # WHEN dry running without anything specified
@@ -23,7 +28,9 @@ def test_without_options(cli_runner: CliRunner, balsamic_context: CGConfig):
 
 
 def test_with_missing_case(
-    cli_runner: CliRunner, balsamic_context: CGConfig, caplog: LogCaptureFixture
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+    caplog: LogCaptureFixture,
 ):
     """Test command with invalid case to start with."""
     caplog.set_level(logging.ERROR)
@@ -31,7 +38,11 @@ def test_with_missing_case(
     case_id = "soberelephant"
     assert not balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id)
     # WHEN running
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run"],
+        obj=balsamic_context,
+    )
     # THEN command should NOT successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
     # THEN ERROR log should be printed containing invalid case_id
@@ -39,14 +50,20 @@ def test_with_missing_case(
 
 
 def test_without_samples(
-    cli_runner: CliRunner, balsamic_context: CGConfig, caplog: LogCaptureFixture
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+    caplog: LogCaptureFixture,
 ):
     """Test command with case_id and no samples."""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
     case_id = "no_sample_case"
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run"],
+        obj=balsamic_context,
+    )
     # THEN command should print the balsamic command-string
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
@@ -55,7 +72,9 @@ def test_without_samples(
 
 
 def test_genome_version(
-    cli_runner: CliRunner, balsamic_context: CGConfig, caplog: LogCaptureFixture
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+    caplog: LogCaptureFixture,
 ):
     """Test command with --genome-version option."""
     caplog.set_level(logging.INFO)
@@ -65,7 +84,14 @@ def test_genome_version(
     option_value = "canfam3"
     # WHEN dry running with genome option specified
     result = cli_runner.invoke(
-        config_case, [case_id, option_key, option_value, "--dry-run"], obj=balsamic_context
+        config_case,
+        [
+            case_id,
+            option_key,
+            option_value,
+            "--dry-run",
+        ],
+        obj=balsamic_context,
     )
     # THEN command should be generated successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -88,7 +114,14 @@ def test_target_bed(
     option_value = balsamic_bed_2_path
     # WHEN dry running with PANEL BED option specified
     result = cli_runner.invoke(
-        config_case, [case_id, option_key, option_value, "--dry-run"], obj=balsamic_context
+        config_case,
+        [
+            case_id,
+            option_key,
+            option_value,
+            "--dry-run",
+        ],
+        obj=balsamic_context,
     )
     # THEN command should be generated successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -98,7 +131,9 @@ def test_target_bed(
 
 
 def test_target_bed_from_lims(
-    cli_runner: CliRunner, balsamic_context: CGConfig, caplog: LogCaptureFixture
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+    caplog: LogCaptureFixture,
 ):
     """Test command without --target-bed option when BED can be retrieved from LIMS."""
     caplog.set_level(logging.INFO)
@@ -106,7 +141,11 @@ def test_target_bed_from_lims(
     case_id = "balsamic_case_tgs_single"
 
     # WHEN dry running
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run"],
+        obj=balsamic_context,
+    )
 
     # THEN command should be generated successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -116,13 +155,21 @@ def test_target_bed_from_lims(
     assert ".bed" in caplog.text
 
 
-def test_paired_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture):
+def test_paired_wgs(
+    balsamic_context: CGConfig,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
+):
     """Test with case_id that requires PAIRED WGS analysis."""
     caplog.set_level(logging.INFO)
     # GIVEN case_id containing ONE tumor, ONE normal, WGS application
     case_id = "balsamic_case_wgs_paired"
     # WHEN dry running
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run"],
+        obj=balsamic_context,
+    )
     # THEN command is generated successfully
     assert result.exit_code == EXIT_SUCCESS
     # THEN dry-print should not include panel bed
@@ -132,13 +179,21 @@ def test_paired_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
     assert "--normal" in caplog.text
 
 
-def test_paired_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture):
+def test_paired_panel(
+    balsamic_context: CGConfig,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
+):
     """Test with case_id that requires PAIRED TGS analysis."""
     caplog.set_level(logging.INFO)
     # GIVEN case_id containing ONE tumor, ONE normal, TGS application
     case_id = "balsamic_case_tgs_paired"
     # WHEN dry running
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run"],
+        obj=balsamic_context,
+    )
     # THEN command is generated successfully
     assert result.exit_code == EXIT_SUCCESS
     # THEN dry-print should include panel bed
@@ -166,7 +221,14 @@ def test_pon_cnn(
     # WHEN dry running with PANEL BED and PON CNN options specified
     result = cli_runner.invoke(
         config_case,
-        [case_id, panel_key, panel_value, pon_key, pon_value, "--dry-run"],
+        [
+            case_id,
+            panel_key,
+            panel_value,
+            pon_key,
+            pon_value,
+            "--dry-run",
+        ],
         obj=balsamic_context,
     )
     # THEN command should be generated successfully
@@ -176,13 +238,21 @@ def test_pon_cnn(
     assert pon_value in caplog.text
 
 
-def test_single_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture):
+def test_single_wgs(
+    balsamic_context: CGConfig,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
+):
     """Test with case_id that requires SINGLE WGS analysis."""
     caplog.set_level(logging.INFO)
     # GIVEN case_id containing ONE tumor, WGS application
     case_id = "balsamic_case_wgs_single"
     # WHEN dry running
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run"],
+        obj=balsamic_context,
+    )
     # THEN command is generated successfully
     assert result.exit_code == EXIT_SUCCESS
     # THEN dry-print should NOT include panel bed
@@ -193,13 +263,21 @@ def test_single_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
     assert "--normal" not in caplog.text
 
 
-def test_single_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture):
+def test_single_panel(
+    balsamic_context: CGConfig,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
+):
     """Test with case_id that requires SINGLE TGS analysis."""
     caplog.set_level(logging.INFO)
     # GIVEN case_id containing ONE tumor, TGS application
     case_id = "balsamic_case_tgs_single"
     # WHEN dry running
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run"],
+        obj=balsamic_context,
+    )
     # THEN command is generated successfully
     assert result.exit_code == EXIT_SUCCESS
     # THEN dry-print should include panel bed
@@ -211,7 +289,10 @@ def test_single_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog:
 
 
 def test_error_single_wgs_panel_arg(
-    balsamic_context: CGConfig, cg_dir: Path, cli_runner: CliRunner, caplog: LogCaptureFixture
+    balsamic_context: CGConfig,
+    cg_dir: Path,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
 ):
     """Test with case_id that requires SINGLE WGS analysis and --panel-bed argument."""
     caplog.set_level(logging.ERROR)
@@ -221,7 +302,12 @@ def test_error_single_wgs_panel_arg(
     # WHEN dry running
     result = cli_runner.invoke(
         config_case,
-        [case_id, "--panel-bed", panel_bed, "--dry-run"],
+        [
+            case_id,
+            "--panel-bed",
+            panel_bed,
+            "--dry-run",
+        ],
         obj=balsamic_context,
     )
     # THEN command is NOT generated successfully
@@ -231,7 +317,9 @@ def test_error_single_wgs_panel_arg(
 
 
 def test_single_normal_only(
-    balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
+    balsamic_context: CGConfig,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
 ):
     """Test with case_id that has only one normal sample."""
     caplog.set_level(logging.WARNING)
@@ -240,7 +328,11 @@ def test_single_normal_only(
     case_id = "balsamic_case_tgs_single_error"
 
     # WHEN dry running
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run"],
+        obj=balsamic_context,
+    )
 
     # THEN command should be generated successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -253,14 +345,20 @@ def test_single_normal_only(
 
 
 def test_error_two_tumor(
-    balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
+    balsamic_context: CGConfig,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
 ):
     """Test with case_id that requires WGS analysis but has TWO tumor ONE normal samples."""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id containing TWO tumor, ONE normal, TGS application
     case_id = "balsamic_case_tgs_paired_error"
     # WHEN dry running
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run"],
+        obj=balsamic_context,
+    )
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
@@ -268,13 +366,19 @@ def test_error_two_tumor(
 
 
 def test_error_mixed_application(
-    balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
+    balsamic_context: CGConfig,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
 ):
     """Test with case_id that has ONE tumor ONE normal samples marked for WGS and TGS analysis."""
     caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_mixed_paired_error"
     # WHEN dry running
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run"],
+        obj=balsamic_context,
+    )
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
@@ -282,13 +386,19 @@ def test_error_mixed_application(
 
 
 def test_error_not_balsamic_application(
-    balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
+    balsamic_context: CGConfig,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
 ):
     """Test with case_id that has PAIRED samples marked for WGS and MIC analysis."""
     caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_mixed_wgs_mic_paired_error"
     # WHEN dry running
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run"],
+        obj=balsamic_context,
+    )
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
@@ -296,7 +406,9 @@ def test_error_not_balsamic_application(
 
 
 def test_error_mixed_panel_bed_resque(
-    balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
+    balsamic_context: CGConfig,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
 ):
     """
     Test with case_id marked for PAIRED TGS analysis but different BED files in LIMS
@@ -309,7 +421,12 @@ def test_error_mixed_panel_bed_resque(
     # WHEN dry running
     result = cli_runner.invoke(
         config_case,
-        [case_id, "--panel-bed", panel_bed, "--dry-run"],
+        [
+            case_id,
+            "--panel-bed",
+            panel_bed,
+            "--dry-run",
+        ],
         obj=balsamic_context,
     )
     # THEN command is generated successfully
@@ -320,13 +437,19 @@ def test_error_mixed_panel_bed_resque(
 
 
 def test_error_two_normal(
-    balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
+    balsamic_context: CGConfig,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
 ):
     """Test with case_id containing ONE tumor and TWO normal samples."""
     caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_wgs_paired_two_normal_error"
     # WHEN dry running
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run"],
+        obj=balsamic_context,
+    )
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
@@ -334,13 +457,19 @@ def test_error_two_normal(
 
 
 def test_error_wes_panel(
-    balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
+    balsamic_context: CGConfig,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
 ):
     """Test with case_id containing ONE tumor and TWO normal samples."""
     caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_wes_panel_error"
     # WHEN dry running
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run"],
+        obj=balsamic_context,
+    )
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed

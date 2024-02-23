@@ -1,7 +1,9 @@
 from pathlib import Path
 
 import pytest
-from pydantic.v1 import ValidationError as PydanticValidationError
+from pydantic.v1 import (
+    ValidationError as PydanticValidationError,
+)
 
 from cg.constants.constants import FileFormat
 from cg.exc import ValidationError

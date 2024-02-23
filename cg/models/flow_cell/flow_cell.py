@@ -12,12 +12,26 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
-from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
-from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
-from cg.constants.constants import LENGTH_LONG_DATE
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
-from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
+from cg.apps.demultiplex.sample_sheet.sample_sheet_models import (
+    SampleSheet,
+)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import (
+    SampleSheetValidator,
+)
+from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
+    get_latest_analysis_path,
+)
+from cg.constants.constants import (
+    LENGTH_LONG_DATE,
+)
+from cg.constants.demultiplexing import (
+    BclConverter,
+    DemultiplexingDirsAndFiles,
+)
+from cg.constants.sequencing import (
+    SEQUENCER_TYPES,
+    Sequencers,
+)
 from cg.constants.symbols import EMPTY_STRING
 from cg.exc import FlowCellError
 from cg.models.demultiplex.run_parameters import (
@@ -40,7 +54,11 @@ RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
 class FlowCellDirectoryData:
     """Class to collect information about flow cell directories and their particular files."""
 
-    def __init__(self, flow_cell_path: Path, bcl_converter: str | None = None):
+    def __init__(
+        self,
+        flow_cell_path: Path,
+        bcl_converter: str | None = None,
+    ):
         LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
         self.path: Path = flow_cell_path
         self.machine_name: str = EMPTY_STRING
@@ -93,7 +111,10 @@ class FlowCellDirectoryData:
         """
         Return sample sheet path.
         """
-        return Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+        return Path(
+            self.path,
+            DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
+        )
 
     def set_sample_sheet_path_hk(self, hk_path: Path):
         self._sample_sheet_path_hk = hk_path
@@ -107,11 +128,18 @@ class FlowCellDirectoryData:
     def run_parameters_path(self) -> Path:
         """Return path to run parameters file if it exists.
         Raises:
-            FlowCellError if the flow cell has no run parameters file."""
+            FlowCellError if the flow cell has no run parameters file.
+        """
         if DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE in os.listdir(self.path):
-            return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
+            return Path(
+                self.path,
+                DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE,
+            )
         elif DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE in os.listdir(self.path):
-            return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE)
+            return Path(
+                self.path,
+                DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE,
+            )
         else:
             message: str = f"No run parameters file found in flow cell {self.path}"
             LOG.error(message)
@@ -138,34 +166,51 @@ class FlowCellDirectoryData:
     @property
     def sequencer_type(
         self,
-    ) -> Literal[Sequencers.HISEQX, Sequencers.HISEQGA, Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
+    ) -> Literal[Sequencers.HISEQX, Sequencers.HISEQGA, Sequencers.NOVASEQ, Sequencers.NOVASEQX,]:
         """Return the sequencer type."""
         return SEQUENCER_TYPES[self.machine_name]
 
     @property
     def rta_complete_path(self) -> Path:
         """Return RTAComplete path."""
-        return Path(self.path, DemultiplexingDirsAndFiles.RTACOMPLETE)
+        return Path(
+            self.path,
+            DemultiplexingDirsAndFiles.RTACOMPLETE,
+        )
 
     @property
     def copy_complete_path(self) -> Path:
         """Return copy complete path."""
-        return Path(self.path, DemultiplexingDirsAndFiles.COPY_COMPLETE)
+        return Path(
+            self.path,
+            DemultiplexingDirsAndFiles.COPY_COMPLETE,
+        )
 
     @property
     def hiseq_x_copy_complete_path(self) -> Path:
         """Return copy complete path for HiSeqX."""
-        return Path(self.path, DemultiplexingDirsAndFiles.HISEQ_X_COPY_COMPLETE)
+        return Path(
+            self.path,
+            DemultiplexingDirsAndFiles.HISEQ_X_COPY_COMPLETE,
+        )
 
     @property
-    def hiseq_x_delivery_started_path(self) -> Path:
+    def hiseq_x_delivery_started_path(
+        self,
+    ) -> Path:
         """Return delivery started path for HiSeqX."""
-        return Path(self.path, DemultiplexingDirsAndFiles.DELIVERY)
+        return Path(
+            self.path,
+            DemultiplexingDirsAndFiles.DELIVERY,
+        )
 
     @property
     def demultiplexing_started_path(self) -> Path:
         """Return demux started path."""
-        return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_STARTED)
+        return Path(
+            self.path,
+            DemultiplexingDirsAndFiles.DEMUX_STARTED,
+        )
 
     @property
     def trailblazer_config_path(self) -> Path:
@@ -174,12 +219,18 @@ class FlowCellDirectoryData:
 
     @property
     def is_demultiplexing_complete(self) -> bool:
-        return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
+        return Path(
+            self.path,
+            DemultiplexingDirsAndFiles.DEMUX_COMPLETE,
+        ).exists()
 
     def _parse_date(self):
         """Return the parsed date in the correct format."""
         if len(self.split_flow_cell_name[0]) == LENGTH_LONG_DATE:
-            return datetime.datetime.strptime(self.split_flow_cell_name[0], "%Y%m%d")
+            return datetime.datetime.strptime(
+                self.split_flow_cell_name[0],
+                "%Y%m%d",
+            )
         return datetime.datetime.strptime(self.split_flow_cell_name[0], "%y%m%d")
 
     def validate_flow_cell_dir_name(self) -> None:
@@ -193,17 +244,23 @@ class FlowCellDirectoryData:
             LOG.warning(message)
             raise FlowCellError(message)
 
-    def has_demultiplexing_started_locally(self) -> bool:
+    def has_demultiplexing_started_locally(
+        self,
+    ) -> bool:
         """Check if demultiplexing has started path exists on the cluster."""
         return self.demultiplexing_started_path.exists()
 
-    def has_demultiplexing_started_on_sequencer(self) -> bool:
+    def has_demultiplexing_started_on_sequencer(
+        self,
+    ) -> bool:
         """Check if demultiplexing has started on the NovaSeqX machine."""
         latest_analysis: Path = get_latest_analysis_path(self.path)
         if not latest_analysis:
             return False
         return Path(
-            latest_analysis, DemultiplexingDirsAndFiles.DATA, DemultiplexingDirsAndFiles.BCL_CONVERT
+            latest_analysis,
+            DemultiplexingDirsAndFiles.DATA,
+            DemultiplexingDirsAndFiles.BCL_CONVERT,
         ).exists()
 
     def sample_sheet_exists(self) -> bool:
@@ -217,7 +274,8 @@ class FlowCellDirectoryData:
         if not self._sample_sheet_path_hk:
             raise FlowCellError("Sample sheet path has not been assigned yet")
         return self.sample_sheet_validator.get_sample_sheet_object_from_file(
-            file_path=self._sample_sheet_path_hk, bcl_converter=self.bcl_converter
+            file_path=self._sample_sheet_path_hk,
+            bcl_converter=self.bcl_converter,
         )
 
     def is_sequencing_done(self) -> bool:
@@ -256,7 +314,9 @@ class FlowCellDirectoryData:
         return f"FlowCell(path={self.path},run_parameters_path={self.run_parameters_path})"
 
 
-def get_flow_cells_from_path(flow_cells_dir: Path) -> list[FlowCellDirectoryData]:
+def get_flow_cells_from_path(
+    flow_cells_dir: Path,
+) -> list[FlowCellDirectoryData]:
     """Return flow cell objects from flow cell dir."""
     flow_cells: list[FlowCellDirectoryData] = []
     LOG.debug(f"Search for flow cells ready to encrypt in {flow_cells_dir}")

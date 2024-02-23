@@ -8,7 +8,9 @@ import click
 from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.scout.scout_export import ScoutExportCase
+from cg.apps.scout.scout_export import (
+    ScoutExportCase,
+)
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
@@ -23,16 +25,33 @@ from cg.cli.workflow.commands import (
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
 )
-from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Workflow
-from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
-from cg.exc import CleanFlowCellFailedError, FlowCellError
+from cg.constants.constants import (
+    DRY_RUN,
+    SKIP_CONFIRMATION,
+    Workflow,
+)
+from cg.constants.housekeeper_tags import (
+    AlignmentFileTag,
+    ScoutTag,
+)
+from cg.exc import (
+    CleanFlowCellFailedError,
+    FlowCellError,
+)
 from cg.meta.clean.api import CleanAPI
-from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
-from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
+from cg.meta.clean.clean_flow_cells import (
+    CleanFlowCellAPI,
+)
+from cg.meta.clean.clean_retrieved_spring_files import (
+    CleanRetrievedSpringFilesAPI,
+)
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis
 from cg.store.store import Store
-from cg.utils.date import get_date_days_ago, get_timedelta_from_date
+from cg.utils.date import (
+    get_date_days_ago,
+    get_timedelta_from_date,
+)
 from cg.utils.dispatcher import Dispatcher
 from cg.utils.files import get_directories_in_path
 
@@ -78,7 +97,10 @@ for sub_cmd in [
 @SKIP_CONFIRMATION
 @click.pass_obj
 def hk_alignment_files(
-    context: CGConfig, bundle: str, yes: bool = False, dry_run: bool = False
+    context: CGConfig,
+    bundle: str,
+    yes: bool = False,
+    dry_run: bool = False,
 ) -> None:
     """Clean up alignment files in Housekeeper bundle."""
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
@@ -117,12 +139,18 @@ def hk_alignment_files(
 @DRY_RUN
 @click.pass_context
 def scout_finished_cases(
-    context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
+    context: click.Context,
+    days_old: int,
+    yes: bool = False,
+    dry_run: bool = False,
 ) -> None:
     """Clean up of solved and archived Scout cases."""
     scout_api: ScoutAPI = context.obj.scout_api
     bundles: list[str] = []
-    for status in [ScoutTag.ARCHIVED, ScoutTag.SOLVED]:
+    for status in [
+        ScoutTag.ARCHIVED,
+        ScoutTag.SOLVED,
+    ]:
         cases: list[ScoutExportCase] = scout_api.get_cases(status=status, reruns=False)
         cases_added: int = 0
         for case in cases:
@@ -133,7 +161,12 @@ def scout_finished_cases(
         LOG.info(f"{cases_added} cases marked for alignment files removal")
 
     for bundle in bundles:
-        context.invoke(hk_alignment_files, bundle=bundle, yes=yes, dry_run=dry_run)
+        context.invoke(
+            hk_alignment_files,
+            bundle=bundle,
+            yes=yes,
+            dry_run=dry_run,
+        )
 
 
 @clean.command("hk-case-bundle-files")
@@ -145,10 +178,17 @@ def scout_finished_cases(
 )
 @DRY_RUN
 @click.pass_context
-def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False) -> None:
+def hk_case_bundle_files(
+    context: CGConfig,
+    days_old: int,
+    dry_run: bool = False,
+) -> None:
     """Clean up all non-protected files for all workflows."""
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
-    clean_api: CleanAPI = CleanAPI(status_db=context.obj.status_db, housekeeper_api=housekeeper_api)
+    clean_api: CleanAPI = CleanAPI(
+        status_db=context.obj.status_db,
+        housekeeper_api=housekeeper_api,
+    )
 
     size_cleaned: int = 0
     version_file: File
@@ -172,7 +212,12 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
 
 @clean.command("hk-bundle-files")
 @click.option("-c", "--case-id", type=str, required=False)
-@click.option("-w", "--workflow", type=Workflow, required=False)
+@click.option(
+    "-w",
+    "--workflow",
+    type=Workflow,
+    required=False,
+)
 @click.option("-t", "--tags", multiple=True, required=True)
 @click.option("-o", "--days-old", type=int, default=30)
 @DRY_RUN
@@ -212,7 +257,8 @@ def hk_bundle_files(
         LOG.info(f"Cleaning analysis {analysis}")
         bundle_name: str = analysis.case.internal_id
         hk_bundle_version: Version | None = housekeeper_api.version(
-            bundle=bundle_name, date=analysis.started_at
+            bundle=bundle_name,
+            date=analysis.started_at,
         )
         if not hk_bundle_version:
             LOG.warning(
@@ -230,7 +276,9 @@ def hk_bundle_files(
             f"date {analysis.started_at}"
         )
         version_files: list[File] = housekeeper_api.get_files(
-            bundle=analysis.case.internal_id, tags=tags, version=hk_bundle_version.id
+            bundle=analysis.case.internal_id,
+            tags=tags,
+            version=hk_bundle_version.id,
         ).all()
         for version_file in version_files:
             file_path: Path = Path(version_file.full_path)
@@ -274,7 +322,10 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
                 dry_run=dry_run,
             )
             clean_flow_cell_api.delete_flow_cell_directory()
-        except (CleanFlowCellFailedError, FlowCellError) as error:
+        except (
+            CleanFlowCellFailedError,
+            FlowCellError,
+        ) as error:
             LOG.error(repr(error))
             continue
 
@@ -289,10 +340,15 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
 )
 @DRY_RUN
 @click.pass_obj
-def clean_retrieved_spring_files(context: CGConfig, age_limit: int, dry_run: bool):
+def clean_retrieved_spring_files(
+    context: CGConfig,
+    age_limit: int,
+    dry_run: bool,
+):
     """Clean Spring files which were retrieved more than given amount of days ago."""
     clean_retrieved_spring_files_api = CleanRetrievedSpringFilesAPI(
-        housekeeper_api=context.housekeeper_api, dry_run=dry_run
+        housekeeper_api=context.housekeeper_api,
+        dry_run=dry_run,
     )
     clean_retrieved_spring_files_api.clean_retrieved_spring_files(age_limit)
 

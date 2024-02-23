@@ -15,23 +15,47 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
-def delivery_inbox(project_dir: Path, customer_id: Path, ticket_id: str) -> Path:
-    return Path(project_dir, customer_id, INBOX_NAME, ticket_id)
+def delivery_inbox(
+    project_dir: Path,
+    customer_id: Path,
+    ticket_id: str,
+) -> Path:
+    return Path(
+        project_dir,
+        customer_id,
+        INBOX_NAME,
+        ticket_id,
+    )
 
 
 @pytest.fixture
-def deliver_vcf_path(delivery_inbox: Path, family_name: str, case_id: str, vcf_file: Path) -> Path:
-    return Path(delivery_inbox, family_name, vcf_file.name.replace(case_id, family_name))
+def deliver_vcf_path(
+    delivery_inbox: Path,
+    family_name: str,
+    case_id: str,
+    vcf_file: Path,
+) -> Path:
+    return Path(
+        delivery_inbox,
+        family_name,
+        vcf_file.name.replace(case_id, family_name),
+    )
 
 
 @pytest.fixture
 def deliver_fastq_path(delivery_inbox: Path, cust_sample_id: str) -> Path:
-    return Path(delivery_inbox, cust_sample_id, "dummy_run_R1_001.fastq.gz")
+    return Path(
+        delivery_inbox,
+        cust_sample_id,
+        "dummy_run_R1_001.fastq.gz",
+    )
 
 
 @pytest.fixture
 def base_context(
-    base_context: CGConfig, project_dir: Path, real_housekeeper_api: HousekeeperAPI
+    base_context: CGConfig,
+    project_dir: Path,
+    real_housekeeper_api: HousekeeperAPI,
 ) -> CGConfig:
     base_context.housekeeper_api_ = real_housekeeper_api
     base_context.delivery_path: str = project_dir.as_posix()
@@ -47,23 +71,37 @@ def mip_delivery_bundle(
 ) -> dict:
     """Return a bundle that includes files used when delivering MIP analysis data"""
     case_hk_bundle_no_files["files"] = [
-        {"path": str(vcf_file), "archive": False, "tags": ["vcf-snv-clinical"]},
+        {
+            "path": str(vcf_file),
+            "archive": False,
+            "tags": ["vcf-snv-clinical"],
+        },
     ]
     for index, sample_id in enumerate(sample_ids):
         case_hk_bundle_no_files["files"].append(
-            {"path": str(sample_cram_files[index]), "archive": False, "tags": [sample_id, "cram"]}
+            {
+                "path": str(sample_cram_files[index]),
+                "archive": False,
+                "tags": [sample_id, "cram"],
+            }
         )
     return case_hk_bundle_no_files
 
 
 @pytest.fixture
 def fastq_delivery_bundle(
-    sample_hk_bundle_no_files: dict, fastq_file: Path, sample_id: str
+    sample_hk_bundle_no_files: dict,
+    fastq_file: Path,
+    sample_id: str,
 ) -> dict:
     """Return a sample bundle that includes a fastq file"""
     sample_hk_bundle_no_files["name"] = sample_id
     sample_hk_bundle_no_files["files"] = [
-        {"path": str(fastq_file), "archive": False, "tags": ["fastq", "deliver", "ADM1"]},
+        {
+            "path": str(fastq_file),
+            "archive": False,
+            "tags": ["fastq", "deliver", "ADM1"],
+        },
     ]
     return sample_hk_bundle_no_files
 
@@ -75,8 +113,14 @@ def mip_dna_housekeeper(
     fastq_delivery_bundle: dict,
     helpers: StoreHelpers,
 ) -> HousekeeperAPI:
-    helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=mip_delivery_bundle)
-    helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=fastq_delivery_bundle)
+    helpers.ensure_hk_bundle(
+        real_housekeeper_api,
+        bundle_data=mip_delivery_bundle,
+    )
+    helpers.ensure_hk_bundle(
+        real_housekeeper_api,
+        bundle_data=fastq_delivery_bundle,
+    )
     # assert that the files exists
     version_obj_mip: Version = real_housekeeper_api.last_version(mip_delivery_bundle["name"])
     version_obj_fastq: Version = real_housekeeper_api.last_version(fastq_delivery_bundle["name"])

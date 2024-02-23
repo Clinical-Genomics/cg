@@ -2,11 +2,17 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+)
 from typing_extensions import Annotated, Literal
 
 from cg.constants.scout import UploadTrack
-from cg.models.scout.validators import field_not_none
+from cg.models.scout.validators import (
+    field_not_none,
+)
 
 
 class ChromographImages(BaseModel):
@@ -47,7 +53,10 @@ class ScoutIndividual(BaseModel):
     phenotype: str | None = None
     sample_id: Annotated[str, BeforeValidator(field_not_none)] = None
     sample_name: str | None = None
-    sex: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    sex: Annotated[
+        str | None,
+        BeforeValidator(field_not_none),
+    ] = None
     subject_id: str | None = None
     tissue_type: str | None = None
 
@@ -97,7 +106,8 @@ class ScoutLoadConfig(BaseModel):
     cnv_report: str | None = None
     multiqc: str | None = None
     track: Literal[
-        UploadTrack.RARE_DISEASE.value, UploadTrack.CANCER.value
+        UploadTrack.RARE_DISEASE.value,
+        UploadTrack.CANCER.value,
     ] = UploadTrack.RARE_DISEASE.value
 
     model_config = ConfigDict(validate_assignment=True)
@@ -129,10 +139,19 @@ class MipLoadConfig(ScoutLoadConfig):
     vcf_mei: str | None = None
     vcf_mei_research: str | None = None
     vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None
-    vcf_snv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    vcf_snv_research: Annotated[
+        str | None,
+        BeforeValidator(field_not_none),
+    ] = None
     vcf_str: str | None = None
-    vcf_sv: Annotated[str | None, BeforeValidator(field_not_none)] = None
-    vcf_sv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    vcf_sv: Annotated[
+        str | None,
+        BeforeValidator(field_not_none),
+    ] = None
+    vcf_sv_research: Annotated[
+        str | None,
+        BeforeValidator(field_not_none),
+    ] = None
 
 
 class RnafusionLoadConfig(ScoutLoadConfig):

@@ -1,14 +1,29 @@
 import datetime as dt
 
-from cg.constants import DataDelivery, GenePanelMasterList
-from cg.constants.constants import CustomerId, PrepCategory, Workflow
+from cg.constants import (
+    DataDelivery,
+    GenePanelMasterList,
+)
+from cg.constants.constants import (
+    CustomerId,
+    PrepCategory,
+    Workflow,
+)
 from cg.constants.priority import Priority
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
-from cg.models.orders.sample_base import StatusEnum
-from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Sample
+from cg.models.orders.sample_base import (
+    StatusEnum,
+)
+from cg.store.models import (
+    ApplicationVersion,
+    Case,
+    CaseSample,
+    Customer,
+    Sample,
+)
 
 
 class FastqSubmitter(Submitter):
@@ -16,10 +31,15 @@ class FastqSubmitter(Submitter):
         """Submit a batch of samples for FASTQ delivery."""
 
         project_data, lims_map = process_lims(
-            lims_api=self.lims, lims_order=order, new_samples=order.samples
+            lims_api=self.lims,
+            lims_order=order,
+            new_samples=order.samples,
         )
         status_data = self.order_to_status(order)
-        self._fill_in_sample_ids(samples=status_data["samples"], lims_map=lims_map)
+        self._fill_in_sample_ids(
+            samples=status_data["samples"],
+            lims_map=lims_map,
+        )
         new_samples = self.store_items_in_status(
             customer_id=status_data["customer"],
             order=status_data["order"],
@@ -28,7 +48,10 @@ class FastqSubmitter(Submitter):
             items=status_data["samples"],
         )
         self._add_missing_reads(new_samples)
-        return {"project": project_data, "records": new_samples}
+        return {
+            "project": project_data,
+            "records": new_samples,
+        }
 
     @staticmethod
     def order_to_status(order: OrderIn) -> dict:
@@ -69,12 +92,19 @@ class FastqSubmitter(Submitter):
             customer_internal_id=CustomerId.CG_INTERNAL_CUSTOMER
         )
         relationship: CaseSample = self.status.relate_sample(
-            case=case, sample=sample_obj, status=StatusEnum.unknown
+            case=case,
+            sample=sample_obj,
+            status=StatusEnum.unknown,
         )
         self.status.session.add_all([case, relationship])
 
     def store_items_in_status(
-        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: list[dict]
+        self,
+        customer_id: str,
+        order: str,
+        ordered: dt.datetime,
+        ticket_id: str,
+        items: list[dict],
     ) -> list[Sample]:
         """Store fastq samples in the status database including family connection and delivery"""
         customer: Customer = self.status.get_customer_by_internal_id(
@@ -127,10 +157,21 @@ class FastqSubmitter(Submitter):
                     self.create_maf_case(sample_obj=new_sample)
                 case.customer = customer
                 new_relationship = self.status.relate_sample(
-                    case=case, sample=new_sample, status=StatusEnum.unknown
+                    case=case,
+                    sample=new_sample,
+                    status=StatusEnum.unknown,
                 )
-                new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
-                self.status.session.add_all([case, new_relationship, new_delivery])
+                new_delivery = self.status.add_delivery(
+                    destination="caesar",
+                    sample=new_sample,
+                )
+                self.status.session.add_all(
+                    [
+                        case,
+                        new_relationship,
+                        new_delivery,
+                    ]
+                )
 
         self.status.session.add_all(new_samples)
         self.status.session.commit()

@@ -17,7 +17,11 @@ def test_get_cases_no_case(scout_api: ScoutAPI, case_id: str):
     assert result == []
 
 
-def test_get_cases_one_case(scout_api: ScoutAPI, case_id: str, export_cases_output: str):
+def test_get_cases_one_case(
+    scout_api: ScoutAPI,
+    case_id: str,
+    export_cases_output: str,
+):
     """Test to get get a case based on case_id when there is a case in scout"""
     scout_api.process.set_stdout(export_cases_output)
     # GIVEN a scout api and a process that returns some relevant input

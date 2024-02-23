@@ -12,21 +12,33 @@ class FastqFileMeta(BaseModel):
     flow_cell_id: str
 
 
-def _get_header_meta_casava_five_parts(parts: list[str]) -> FastqFileMeta:
+def _get_header_meta_casava_five_parts(
+    parts: list[str],
+) -> FastqFileMeta:
     return FastqFileMeta(
-        lane=parts[1], flow_cell_id="XXXXXX", read_direction=parts[-1].split("/")[-1]
+        lane=parts[1],
+        flow_cell_id="XXXXXX",
+        read_direction=parts[-1].split("/")[-1],
     )
 
 
-def _get_header_meta_casava_ten_parts(parts: list[str]) -> FastqFileMeta:
+def _get_header_meta_casava_ten_parts(
+    parts: list[str],
+) -> FastqFileMeta:
     return FastqFileMeta(
-        lane=parts[3], flow_cell_id=parts[2], read_direction=parts[6].split(" ")[-1]
+        lane=parts[3],
+        flow_cell_id=parts[2],
+        read_direction=parts[6].split(" ")[-1],
     )
 
 
-def _get_header_meta_casava_seven_parts(parts: list[str]) -> FastqFileMeta:
+def _get_header_meta_casava_seven_parts(
+    parts: list[str],
+) -> FastqFileMeta:
     return FastqFileMeta(
-        lane=parts[3], flow_cell_id=parts[2], read_direction=parts[-1].split("/")[-1]
+        lane=parts[3],
+        flow_cell_id=parts[2],
+        read_direction=parts[-1].split("/")[-1],
     )
 
 

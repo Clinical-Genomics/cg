@@ -11,13 +11,19 @@ CONFIRM = "Continue?"
 LOG = logging.getLogger(__name__)
 
 
-def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Store) -> [Sample]:
+def _get_samples_by_identifiers(
+    identifiers: click.Tuple([str, str]),
+    store: Store,
+) -> [Sample]:
     """Get samples matched by given set of identifiers"""
     identifier_args = dict(identifiers)
     return store.get_samples_by_any_id(**identifier_args)
 
 
-def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [Case]:
+def _get_cases(
+    identifiers: click.Tuple([str, str]),
+    store: Store,
+) -> [Case]:
     """Get cases that have samples that match identifiers if given"""
     samples_by_id = _get_samples_by_identifiers(identifiers, store)
     _cases = set()

@@ -4,10 +4,20 @@ from pathlib import Path
 from click.testing import CliRunner
 from psutil import Process
 
-from cg.cli.backup import backup_flow_cells, encrypt_flow_cells, fetch_flow_cell
-from cg.constants import EXIT_SUCCESS, FileExtensions, FlowCellStatus
+from cg.cli.backup import (
+    backup_flow_cells,
+    encrypt_flow_cells,
+    fetch_flow_cell,
+)
+from cg.constants import (
+    EXIT_SUCCESS,
+    FileExtensions,
+    FlowCellStatus,
+)
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import (
+    FlowCellDirectoryData,
+)
 from tests.store_helpers import StoreHelpers
 
 
@@ -26,16 +36,25 @@ def test_backup_flow_cells(
 
     # Given a flow cell with no back-up
     helpers.add_flow_cell(
-        store=cg_context.status_db, flow_cell_name=flow_cell_name, has_backup=False
+        store=cg_context.status_db,
+        flow_cell_name=flow_cell_name,
+        has_backup=False,
     )
 
     # GIVEN an encrypted flow cell
-    flow_cells_encrypt_dir = Path(cg_context.encryption.encryption_dir, flow_cell_full_name)
+    flow_cells_encrypt_dir = Path(
+        cg_context.encryption.encryption_dir,
+        flow_cell_full_name,
+    )
     flow_cells_encrypt_dir.mkdir(parents=True, exist_ok=True)
     Path(flow_cells_encrypt_dir, flow_cell_name).with_suffix(FileExtensions.COMPLETE).touch()
 
     # WHEN backing up flow cells in dry run mode
-    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(
+        backup_flow_cells,
+        ["--dry-run"],
+        obj=cg_context,
+    )
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -58,7 +77,11 @@ def test_backup_flow_cells_when_dsmc_is_running(
     mocker.patch.object(Process, "name", return_value="dsmc")
 
     # WHEN backing up flow cells in dry run mode
-    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(
+        backup_flow_cells,
+        ["--dry-run"],
+        obj=cg_context,
+    )
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -82,11 +105,17 @@ def test_backup_flow_cells_when_flow_cell_already_has_backup(
 
     # GIVEN a flow cell with a back-up
     helpers.add_flow_cell(
-        store=cg_context.status_db, flow_cell_name=flow_cell_name, has_backup=True
+        store=cg_context.status_db,
+        flow_cell_name=flow_cell_name,
+        has_backup=True,
     )
 
     # WHEN backing up flow cells in dry run mode
-    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(
+        backup_flow_cells,
+        ["--dry-run"],
+        obj=cg_context,
+    )
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -108,7 +137,11 @@ def test_backup_flow_cells_when_encryption_is_not_completed(
     # GIVEN a flow cells directory
 
     # WHEN backing up flow cells in dry run mode
-    result = cli_runner.invoke(backup_flow_cells, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(
+        backup_flow_cells,
+        ["--dry-run"],
+        obj=cg_context,
+    )
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -118,7 +151,10 @@ def test_backup_flow_cells_when_encryption_is_not_completed(
 
 
 def test_encrypt_flow_cells(
-    cli_runner: CliRunner, cg_context: CGConfig, caplog, sbatch_job_number: str
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    caplog,
+    sbatch_job_number: str,
 ):
     """Test encrypt flow cell in dry run mode."""
     caplog.set_level(logging.INFO)
@@ -126,7 +162,11 @@ def test_encrypt_flow_cells(
     # GIVEN a flow cells directory
 
     # WHEN encrypting flow cells in dry run mode
-    result = cli_runner.invoke(encrypt_flow_cells, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(
+        encrypt_flow_cells,
+        ["--dry-run"],
+        obj=cg_context,
+    )
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -147,13 +187,19 @@ def test_encrypt_flow_cells_when_already_backed_up(
 
     # Given a flow cell with a back-up
     helpers.add_flow_cell(
-        store=cg_context.status_db, flow_cell_name=flow_cell_name, has_backup=True
+        store=cg_context.status_db,
+        flow_cell_name=flow_cell_name,
+        has_backup=True,
     )
 
     # GIVEN a flow cells directory
 
     # WHEN encrypting flow cells in dry run mode
-    result = cli_runner.invoke(encrypt_flow_cells, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(
+        encrypt_flow_cells,
+        ["--dry-run"],
+        obj=cg_context,
+    )
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -173,13 +219,20 @@ def test_encrypt_flow_cells_when_sequencing_not_done(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN flow cells that are being sequenced
-    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    mocker.patch.object(
+        FlowCellDirectoryData,
+        "is_flow_cell_ready",
+    )
     FlowCellDirectoryData.is_flow_cell_ready.return_value = False
 
     # GIVEN a flow cells directory
 
     # WHEN encrypting flow cells in dry run mode
-    result = cli_runner.invoke(encrypt_flow_cells, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(
+        encrypt_flow_cells,
+        ["--dry-run"],
+        obj=cg_context,
+    )
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -201,18 +254,28 @@ def test_encrypt_flow_cell_when_encryption_already_started(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN flow cells that are ready
-    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    mocker.patch.object(
+        FlowCellDirectoryData,
+        "is_flow_cell_ready",
+    )
     FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # GIVEN a pending flag file
-    flow_cells_encrypt_dir = Path(cg_context.encryption.encryption_dir, flow_cell_full_name)
+    flow_cells_encrypt_dir = Path(
+        cg_context.encryption.encryption_dir,
+        flow_cell_full_name,
+    )
     flow_cells_encrypt_dir.mkdir(parents=True, exist_ok=True)
     Path(flow_cells_encrypt_dir, flow_cell_name).with_suffix(FileExtensions.PENDING).touch()
 
     # GIVEN a flow cells directory
 
     # WHEN encrypting flow cells in dry run mode
-    result = cli_runner.invoke(encrypt_flow_cells, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(
+        encrypt_flow_cells,
+        ["--dry-run"],
+        obj=cg_context,
+    )
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -234,18 +297,28 @@ def test_encrypt_flow_cell_when_encryption_already_completed(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN flow cells that are ready
-    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
+    mocker.patch.object(
+        FlowCellDirectoryData,
+        "is_flow_cell_ready",
+    )
     FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # GIVEN a complete flag file
-    flow_cells_encrypt_dir = Path(cg_context.encryption.encryption_dir, flow_cell_full_name)
+    flow_cells_encrypt_dir = Path(
+        cg_context.encryption.encryption_dir,
+        flow_cell_full_name,
+    )
     flow_cells_encrypt_dir.mkdir(parents=True, exist_ok=True)
     Path(flow_cells_encrypt_dir, flow_cell_name).with_suffix(FileExtensions.COMPLETE).touch()
 
     # GIVEN a flow cells directory
 
     # WHEN encrypting flow cells in dry run mode
-    result = cli_runner.invoke(encrypt_flow_cells, ["--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(
+        encrypt_flow_cells,
+        ["--dry-run"],
+        obj=cg_context,
+    )
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
@@ -255,7 +328,9 @@ def test_encrypt_flow_cell_when_encryption_already_completed(
 
 
 def test_run_fetch_flow_cell_dry_run_no_flow_cell_specified(
-    cli_runner: CliRunner, backup_context: CGConfig, caplog
+    cli_runner: CliRunner,
+    backup_context: CGConfig,
+    caplog,
 ):
     """Test fetching flow cell when no flow cells with correct status."""
     caplog.set_level(logging.INFO)
@@ -269,7 +344,11 @@ def test_run_fetch_flow_cell_dry_run_no_flow_cell_specified(
     )
 
     # WHEN running the fetch flow cell command without specifying any flow cell in dry run mode
-    result = cli_runner.invoke(fetch_flow_cell, ["--dry-run"], obj=backup_context)
+    result = cli_runner.invoke(
+        fetch_flow_cell,
+        ["--dry-run"],
+        obj=backup_context,
+    )
 
     # THEN assert that it exits without any problems
     assert result.exit_code == EXIT_SUCCESS
@@ -279,7 +358,10 @@ def test_run_fetch_flow_cell_dry_run_no_flow_cell_specified(
 
 
 def test_run_fetch_flow_cell_dry_run_retrieval_time(
-    cli_runner: CliRunner, backup_context: CGConfig, caplog, mocker
+    cli_runner: CliRunner,
+    backup_context: CGConfig,
+    caplog,
+    mocker,
 ):
     """Test fetching flow cell retrieval time."""
     caplog.set_level(logging.INFO)
@@ -294,10 +376,17 @@ def test_run_fetch_flow_cell_dry_run_retrieval_time(
 
     # GIVEN that the backup api returns a retrieval time
     expected_time = 60
-    mocker.patch("cg.meta.backup.backup.BackupAPI.fetch_flow_cell", return_value=expected_time)
+    mocker.patch(
+        "cg.meta.backup.backup.BackupAPI.fetch_flow_cell",
+        return_value=expected_time,
+    )
 
     # WHEN running the fetch flow cell command without specifying any flow cell in dry run mode
-    result = cli_runner.invoke(fetch_flow_cell, ["--dry-run"], obj=backup_context)
+    result = cli_runner.invoke(
+        fetch_flow_cell,
+        ["--dry-run"],
+        obj=backup_context,
+    )
 
     # THEN assert that it exits without any problems
     assert result.exit_code == EXIT_SUCCESS
@@ -307,7 +396,9 @@ def test_run_fetch_flow_cell_dry_run_retrieval_time(
 
 
 def test_run_fetch_flow_cell_non_existing_flow_cell(
-    cli_runner: CliRunner, backup_context: CGConfig, caplog
+    cli_runner: CliRunner,
+    backup_context: CGConfig,
+    caplog,
 ):
     # GIVEN a context with a backup api
     # GIVEN a non-existing flow cell id
@@ -316,7 +407,9 @@ def test_run_fetch_flow_cell_non_existing_flow_cell(
 
     # WHEN running the command with the non-existing flow cell id
     result = cli_runner.invoke(
-        fetch_flow_cell, ["--flow-cell-id", flow_cell_id], obj=backup_context
+        fetch_flow_cell,
+        ["--flow-cell-id", flow_cell_id],
+        obj=backup_context,
     )
 
     # THEN assert that it exits with a non-zero exit code

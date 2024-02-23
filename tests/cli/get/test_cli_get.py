@@ -8,7 +8,11 @@ from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
-def test_get_case_by_name(cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers):
+def test_get_case_by_name(
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    helpers: StoreHelpers,
+):
     # GIVEN A database with a customer in it
     status_db: Store = base_context.status_db
     customer: Customer = helpers.ensure_customer(store=status_db)

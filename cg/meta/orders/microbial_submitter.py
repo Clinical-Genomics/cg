@@ -6,7 +6,9 @@ from cg.constants.subject import Sex
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
-from cg.models.orders.samples import MicrobialSample
+from cg.models.orders.samples import (
+    MicrobialSample,
+)
 from cg.store.models import (
     ApplicationVersion,
     Case,
@@ -48,12 +50,16 @@ class MicrobialSubmitter(Submitter):
         self._fill_in_sample_verified_organism(order.samples)
         # submit samples to LIMS
         project_data, lims_map = process_lims(
-            lims_api=self.lims, lims_order=order, new_samples=order.samples
+            lims_api=self.lims,
+            lims_order=order,
+            new_samples=order.samples,
         )
         # prepare order for status database
         status_data = self.order_to_status(order)
         self._fill_in_sample_ids(
-            samples=status_data["samples"], lims_map=lims_map, id_key="internal_id"
+            samples=status_data["samples"],
+            lims_map=lims_map,
+            id_key="internal_id",
         )
 
         # submit samples to Status
@@ -67,7 +73,10 @@ class MicrobialSubmitter(Submitter):
             data_analysis=Workflow(status_data["data_analysis"]),
             data_delivery=DataDelivery(status_data["data_delivery"]),
         )
-        return {"project": project_data, "records": samples}
+        return {
+            "project": project_data,
+            "records": samples,
+        }
 
     def store_items_in_status(
         self,
@@ -92,7 +101,8 @@ class MicrobialSubmitter(Submitter):
         with self.status.session.no_autoflush:
             for sample_data in items:
                 case: Case = self.status.get_case_by_name_and_customer(
-                    customer=customer, case_name=ticket_id
+                    customer=customer,
+                    case_name=ticket_id,
                 )
 
                 if not case:
@@ -146,7 +156,9 @@ class MicrobialSubmitter(Submitter):
                 priority = new_sample.priority
                 sample_objs.append(new_sample)
                 link: CaseSample = self.status.relate_sample(
-                    case=case, sample=new_sample, status="unknown"
+                    case=case,
+                    sample=new_sample,
+                    status="unknown",
                 )
                 self.status.session.add(link)
                 new_samples.append(new_sample)

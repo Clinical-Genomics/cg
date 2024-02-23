@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 
-from cg.constants.constants import HastaSlurmPartitions
+from cg.constants.constants import (
+    HastaSlurmPartitions,
+)
 from cg.constants.priority import SlurmQos
 
 

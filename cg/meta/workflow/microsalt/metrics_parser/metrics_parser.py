@@ -1,7 +1,9 @@
 from pathlib import Path
 
 from cg.io.json import read_json
-from cg.meta.workflow.microsalt.metrics_parser.models import QualityMetrics
+from cg.meta.workflow.microsalt.metrics_parser.models import (
+    QualityMetrics,
+)
 
 
 class MetricsParser:

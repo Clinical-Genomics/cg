@@ -13,7 +13,10 @@ def test_osticket_respone_500(monkeypatch, caplog, response):
 
     # GIVEN a ticket server always gives a failure in response
     osticket_api = OsTicket()
-    monkeypatch.setattr("requests.post", lambda *args, **kwargs: response)
+    monkeypatch.setattr(
+        "requests.post",
+        lambda *args, **kwargs: response,
+    )
 
     # WHEN we call open_ticket with ok ticket data
     caplog.set_level(logging.ERROR)

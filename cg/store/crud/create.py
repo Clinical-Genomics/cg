@@ -4,8 +4,15 @@ from datetime import datetime
 import petname
 from sqlalchemy import Insert
 
-from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
-from cg.constants.archiving import PDC_ARCHIVE_LOCATION
+from cg.constants import (
+    DataDelivery,
+    FlowCellStatus,
+    Priority,
+    Workflow,
+)
+from cg.constants.archiving import (
+    PDC_ARCHIVE_LOCATION,
+)
 from cg.models.orders.order import OrderIn
 from cg.store.base import BaseHandler
 from cg.store.database import get_session
@@ -77,15 +84,34 @@ class CreateHandler(BaseHandler):
             **kwargs,
         )
 
-    def add_collaboration(self, internal_id: str, name: str, **kwargs) -> Collaboration:
+    def add_collaboration(
+        self,
+        internal_id: str,
+        name: str,
+        **kwargs,
+    ) -> Collaboration:
         """Build a new customer group record."""
 
-        return Collaboration(internal_id=internal_id, name=name, **kwargs)
+        return Collaboration(
+            internal_id=internal_id,
+            name=name,
+            **kwargs,
+        )
 
-    def add_user(self, customer: Customer, email: str, name: str, is_admin: bool = False) -> User:
+    def add_user(
+        self,
+        customer: Customer,
+        email: str,
+        name: str,
+        is_admin: bool = False,
+    ) -> User:
         """Build a new user record."""
 
-        new_user = User(name=name, email=email, is_admin=is_admin)
+        new_user = User(
+            name=name,
+            email=email,
+            is_admin=is_admin,
+        )
         new_user.customers.append(customer)
         return new_user
 
@@ -123,14 +149,22 @@ class CreateHandler(BaseHandler):
     ) -> ApplicationVersion:
         """Build a new application version record."""
 
-        new_record = ApplicationVersion(version=version, valid_from=valid_from, **kwargs)
+        new_record = ApplicationVersion(
+            version=version,
+            valid_from=valid_from,
+            **kwargs,
+        )
         for price_key in [
             Priority.standard.name,
             Priority.priority.name,
             Priority.express.name,
             Priority.research.name,
         ]:
-            setattr(new_record, f"price_{price_key}", prices[price_key])
+            setattr(
+                new_record,
+                f"price_{price_key}",
+                prices[price_key],
+            )
         new_record.application = application
         return new_record
 
@@ -159,10 +193,18 @@ class CreateHandler(BaseHandler):
         """Build a new bed record."""
         return Bed(name=name)
 
-    def add_bed_version(self, bed: Bed, version: int, filename: str, shortname: str) -> BedVersion:
+    def add_bed_version(
+        self,
+        bed: Bed,
+        version: int,
+        filename: str,
+        shortname: str,
+    ) -> BedVersion:
         """Build a new bed version record."""
         bed_version: BedVersion = BedVersion(
-            version=version, filename=filename, shortname=shortname
+            version=version,
+            filename=filename,
+            shortname=shortname,
         )
         bed_version.bed = bed
         return bed_version
@@ -300,7 +342,11 @@ class CreateHandler(BaseHandler):
         """Build a new panel record."""
 
         new_record = Panel(
-            name=name, abbrev=abbrev, current_version=version, date=date, gene_count=genes
+            name=name,
+            abbrev=abbrev,
+            current_version=version,
+            date=date,
+            gene_count=genes,
         )
         new_record.customer = customer
         return new_record
@@ -347,7 +393,10 @@ class CreateHandler(BaseHandler):
 
         if not any([sample, pool]):
             raise ValueError("you have to provide a sample or a pool")
-        new_record: Delivery = Delivery(destination=destination, comment=comment)
+        new_record: Delivery = Delivery(
+            destination=destination,
+            comment=comment,
+        )
         new_record.sample = sample
         new_record.pool = pool
         return new_record
@@ -400,7 +449,10 @@ class CreateHandler(BaseHandler):
         )
 
     def add_sample_lane_sequencing_metrics(
-        self, flow_cell_name: str, sample_internal_id: str, **kwargs
+        self,
+        flow_cell_name: str,
+        sample_internal_id: str,
+        **kwargs,
     ) -> SampleLaneSequencingMetrics:
         """Add a new SampleLaneSequencingMetrics record."""
         return SampleLaneSequencingMetrics(

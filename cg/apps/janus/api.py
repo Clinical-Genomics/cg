@@ -3,7 +3,9 @@
 import requests
 from requests import Response
 
-from cg.apps.janus.dto.collect_qc_request import CollectQCRequest
+from cg.apps.janus.dto.collect_qc_request import (
+    CollectQCRequest,
+)
 from cg.exc import JanusAPIError
 
 

@@ -10,12 +10,22 @@ from housekeeper.store.models import Bundle, File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import CustomerId
-from cg.constants.housekeeper_tags import HkMipAnalysisTag, SequencingFileTag
+from cg.constants.housekeeper_tags import (
+    HkMipAnalysisTag,
+    SequencingFileTag,
+)
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import Sex
 from cg.meta.invoice import InvoiceAPI
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-from cg.store.models import ApplicationVersion, Customer, Invoice, Sample
+from cg.meta.workflow.mip_dna import (
+    MipDNAAnalysisAPI,
+)
+from cg.store.models import (
+    ApplicationVersion,
+    Customer,
+    Invoice,
+    Sample,
+)
 from cg.store.store import Store
 from tests.mocks.limsmock import MockLimsAPI
 from tests.store_helpers import StoreHelpers
@@ -60,7 +70,11 @@ def mip_hk_store(
             },
         ],
     }
-    helpers.ensure_hk_bundle(real_housekeeper_api, deliver_hk_bundle_data, include=True)
+    helpers.ensure_hk_bundle(
+        real_housekeeper_api,
+        deliver_hk_bundle_data,
+        include=True,
+    )
 
     empty_deliver_hk_bundle_data = {
         "name": "case_missing_data",
@@ -94,7 +108,11 @@ def mip_hk_store(
             },
         ],
     }
-    helpers.ensure_hk_bundle(real_housekeeper_api, empty_deliver_hk_bundle_data, include=True)
+    helpers.ensure_hk_bundle(
+        real_housekeeper_api,
+        empty_deliver_hk_bundle_data,
+        include=True,
+    )
 
     return real_housekeeper_api
 
@@ -147,7 +165,9 @@ def flowcell_store(base_store: Store, stats_sample_data: dict) -> Generator[Stor
             "WGSPCFC030"
         ).versions[0]
         sample: Sample = base_store.add_sample(
-            name="NA", sex=Sex.MALE, internal_id=sample_data["name"]
+            name="NA",
+            sex=Sex.MALE,
+            internal_id=sample_data["name"],
         )
         sample.customer = customer
         sample.application_version = application_version
@@ -230,7 +250,10 @@ def archived_spring_file(
         tags=[SequencingFileTag.SPRING],
     )
     file.id = 1234
-    real_housekeeper_api.add_archives(files=[file], archive_task_id=archival_job_id_miria)
+    real_housekeeper_api.add_archives(
+        files=[file],
+        archive_task_id=archival_job_id_miria,
+    )
     return file
 
 

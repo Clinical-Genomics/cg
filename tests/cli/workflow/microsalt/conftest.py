@@ -2,7 +2,9 @@
 
 import pytest
 
-from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
+from cg.meta.workflow.microsalt import (
+    MicrosaltAnalysisAPI,
+)
 from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
 
@@ -76,7 +78,11 @@ def lims_api():
 
 
 @pytest.fixture(scope="function")
-def base_context(cg_context: CGConfig, helpers: StoreHelpers, lims_api):
+def base_context(
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    lims_api,
+):
     """The click context for the microsalt cli"""
     helpers.add_microbial_sample(cg_context.status_db)
     cg_context.lims_api_ = lims_api

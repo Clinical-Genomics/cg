@@ -35,7 +35,10 @@ new_enum = mysql.ENUM(*new_options)
 
 def upgrade():
     op.alter_column("family", "data_delivery", type_=new_enum)
-    print("setting family.data_delivery to statina where currently nipt-viewer", flush=True)
+    print(
+        "setting family.data_delivery to statina where currently nipt-viewer",
+        flush=True,
+    )
     bind = op.get_bind()
     bind.execute(
         "update family "
@@ -46,7 +49,10 @@ def upgrade():
 
 def downgrade():
     bind = op.get_bind()
-    print("setting family.data_delivery to nipt-viewer where currently statina", flush=True)
+    print(
+        "setting family.data_delivery to nipt-viewer where currently statina",
+        flush=True,
+    )
     bind.execute(
         "update family "
         "set family.data_delivery = 'nipt-viewer' "

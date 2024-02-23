@@ -1,6 +1,8 @@
 import pytest
 
-from cg.constants.constants import MicrosaltAppTags
+from cg.constants.constants import (
+    MicrosaltAppTags,
+)
 from cg.meta.workflow.microsalt.metrics_parser.models import (
     MicrosaltSamtoolsStats,
     PicardMarkduplicate,
@@ -32,7 +34,8 @@ def create_sample_metrics(
             coverage_10x=coverage_10x,
         ),
         picard_markduplicate=PicardMarkduplicate(
-            insert_size=insert_size, duplication_rate=duplication_rate
+            insert_size=insert_size,
+            duplication_rate=duplication_rate,
         ),
     )
 
@@ -116,5 +119,7 @@ def case_result():
 
 
 @pytest.fixture
-def quality_controller(store: Store) -> QualityController:
+def quality_controller(
+    store: Store,
+) -> QualityController:
     return QualityController(store)

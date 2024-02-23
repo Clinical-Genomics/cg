@@ -57,8 +57,16 @@ class Case(Base):
 
 
 def upgrade():
-    op.alter_column("family", "data_analysis", type_=new_analysis_enum)
-    op.alter_column("analysis", "pipeline", type_=new_analysis_enum)
+    op.alter_column(
+        "family",
+        "data_analysis",
+        type_=new_analysis_enum,
+    )
+    op.alter_column(
+        "analysis",
+        "pipeline",
+        type_=new_analysis_enum,
+    )
 
 
 def downgrade():
@@ -72,6 +80,14 @@ def downgrade():
     for family in session.query(Case).filter(Case.data_analysis == "raredisease"):
         print(f"Changing data_analysis for Case {family.internal_id} to mip-dna")
         family.data_analysis = "mip-dna"
-    op.alter_column("family", "data_analysis", type_=old_analysis_enum)
-    op.alter_column("analysis", "pipeline", type_=old_analysis_enum)
+    op.alter_column(
+        "family",
+        "data_analysis",
+        type_=old_analysis_enum,
+    )
+    op.alter_column(
+        "analysis",
+        "pipeline",
+        type_=old_analysis_enum,
+    )
     session.commit()

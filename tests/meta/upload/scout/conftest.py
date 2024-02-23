@@ -9,18 +9,33 @@ import pytest
 from housekeeper.store.models import Version
 
 from cg.constants import DataDelivery, Workflow
-from cg.constants.constants import FileFormat, PrepCategory
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.constants import (
+    FileFormat,
+    PrepCategory,
+)
+from cg.constants.housekeeper_tags import (
+    HK_DELIVERY_REPORT_TAG,
+)
 from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack
-from cg.constants.sequencing import SequencingMethod
+from cg.constants.sequencing import (
+    SequencingMethod,
+)
 from cg.constants.subject import PhenotypeStatus
 from cg.io.controller import ReadFile
-from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
-from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
-from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
+from cg.meta.upload.scout.balsamic_config_builder import (
+    BalsamicConfigBuilder,
+)
+from cg.meta.upload.scout.mip_config_builder import (
+    MipConfigBuilder,
+)
+from cg.meta.upload.scout.uploadscoutapi import (
+    UploadScoutAPI,
+)
 from cg.models.cg_config import CGConfig
-from cg.models.scout.scout_load_config import MipLoadConfig
+from cg.models.scout.scout_load_config import (
+    MipLoadConfig,
+)
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
 
@@ -28,7 +43,9 @@ from cg.store.store import Store
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
-from tests.mocks.mip_analysis_mock import MockMipAnalysis
+from tests.mocks.mip_analysis_mock import (
+    MockMipAnalysis,
+)
 from tests.mocks.scout import MockScoutAPI
 from tests.store_helpers import StoreHelpers
 
@@ -177,10 +194,16 @@ def rna_store(
         status=PhenotypeStatus.UNAFFECTED,
     )
     helpers.add_relationship(
-        store=store, sample=rna_sample_mother, case=rna_case, status=PhenotypeStatus.UNAFFECTED
+        store=store,
+        sample=rna_sample_mother,
+        case=rna_case,
+        status=PhenotypeStatus.UNAFFECTED,
     )
     helpers.add_relationship(
-        store=store, sample=rna_sample_father, case=rna_case, status=PhenotypeStatus.AFFECTED
+        store=store,
+        sample=rna_sample_father,
+        case=rna_case,
+        status=PhenotypeStatus.AFFECTED,
     )
 
     for link in rna_case.links:
@@ -241,16 +264,26 @@ def rna_store(
         status=PhenotypeStatus.UNAFFECTED,
     )
     helpers.add_relationship(
-        store=store, sample=dna_sample_mother, case=dna_case, status=PhenotypeStatus.UNAFFECTED
+        store=store,
+        sample=dna_sample_mother,
+        case=dna_case,
+        status=PhenotypeStatus.UNAFFECTED,
     )
     helpers.add_relationship(
-        store=store, sample=dna_sample_father, case=dna_case, status=PhenotypeStatus.AFFECTED
+        store=store,
+        sample=dna_sample_father,
+        case=dna_case,
+        status=PhenotypeStatus.AFFECTED,
     )
 
     for link in dna_case.links:
         link.sample.internal_id = link.sample.name
 
-    helpers.add_analysis(store=store, case=dna_case, uploaded_at=datetime.now())
+    helpers.add_analysis(
+        store=store,
+        case=dna_case,
+        uploaded_at=datetime.now(),
+    )
 
     store.session.commit()
     return store
@@ -260,7 +293,12 @@ def rna_store(
 def lims_family(fixtures_dir) -> dict:
     """Returns a LIMS-like case of samples."""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(fixtures_dir, "report", "lims_family.json")
+        file_format=FileFormat.JSON,
+        file_path=Path(
+            fixtures_dir,
+            "report",
+            "lims_family.json",
+        ),
     )
 
 
@@ -289,59 +327,98 @@ def mip_dna_analysis_hk_bundle_data(
         "expires": timestamp,
         "files": [
             {
-                "path": Path(mip_dna_analysis_dir, snv_vcf_file).as_posix(),
+                "path": Path(
+                    mip_dna_analysis_dir,
+                    snv_vcf_file,
+                ).as_posix(),
                 "archive": False,
                 "tags": ["vcf-snv-clinical"],
             },
             {
-                "path": Path(mip_dna_analysis_dir, sv_vcf_file).as_posix(),
+                "path": Path(
+                    mip_dna_analysis_dir,
+                    sv_vcf_file,
+                ).as_posix(),
                 "archive": False,
                 "tags": ["vcf-sv-clinical"],
             },
             {
-                "path": Path(mip_dna_analysis_dir, snv_research_vcf_file).as_posix(),
+                "path": Path(
+                    mip_dna_analysis_dir,
+                    snv_research_vcf_file,
+                ).as_posix(),
                 "archive": False,
                 "tags": ["vcf-snv-research"],
             },
             {
-                "path": Path(mip_dna_analysis_dir, sv_research_vcf_file).as_posix(),
+                "path": Path(
+                    mip_dna_analysis_dir,
+                    sv_research_vcf_file,
+                ).as_posix(),
                 "archive": False,
                 "tags": ["vcf-sv-research"],
             },
             {
-                "path": Path(mip_dna_analysis_dir, "str.vcf").as_posix(),
+                "path": Path(
+                    mip_dna_analysis_dir,
+                    "str.vcf",
+                ).as_posix(),
                 "archive": False,
                 "tags": ["vcf-str"],
             },
             {
-                "path": Path(mip_dna_analysis_dir, "smn.vcf").as_posix(),
+                "path": Path(
+                    mip_dna_analysis_dir,
+                    "smn.vcf",
+                ).as_posix(),
                 "archive": False,
                 "tags": ["smn-calling"],
             },
             {
-                "path": Path(mip_dna_analysis_dir, "adm1.cram").as_posix(),
+                "path": Path(
+                    mip_dna_analysis_dir,
+                    "adm1.cram",
+                ).as_posix(),
                 "archive": False,
                 "tags": ["cram", sample_id],
             },
             {
-                "path": Path(mip_dna_analysis_dir, "report.pdf").as_posix(),
+                "path": Path(
+                    mip_dna_analysis_dir,
+                    "report.pdf",
+                ).as_posix(),
                 "archive": False,
                 "tags": ["delivery-report"],
             },
             {
-                "path": Path(mip_dna_analysis_dir, "adm1.mt.bam").as_posix(),
+                "path": Path(
+                    mip_dna_analysis_dir,
+                    "adm1.mt.bam",
+                ).as_posix(),
                 "archive": False,
                 "tags": ["bam-mt", sample_id],
             },
             {
-                "path": Path(mip_dna_analysis_dir, "vcf2cytosure.txt").as_posix(),
+                "path": Path(
+                    mip_dna_analysis_dir,
+                    "vcf2cytosure.txt",
+                ).as_posix(),
                 "archive": False,
-                "tags": ["vcf2cytosure", sample_id],
+                "tags": [
+                    "vcf2cytosure",
+                    sample_id,
+                ],
             },
             {
-                "path": Path(mip_dna_analysis_dir, "multiqc.html").as_posix(),
+                "path": Path(
+                    mip_dna_analysis_dir,
+                    "multiqc.html",
+                ).as_posix(),
                 "archive": False,
-                "tags": ["multiqc-html", sample_id],
+                "tags": [
+                    "multiqc-html",
+                    sample_id,
+                ],
             },
         ],
     }
@@ -361,19 +438,38 @@ def mip_rna_analysis_hk_bundle_data(
 
     files: list[dict] = [
         {
-            "path": Path(mip_dna_analysis_dir, f"{rna_case_id}.cram").as_posix(),
+            "path": Path(
+                mip_dna_analysis_dir,
+                f"{rna_case_id}.cram",
+            ).as_posix(),
             "archive": False,
             "tags": ["cram", rna_case_id],
         },
         {
-            "path": Path(mip_dna_analysis_dir, f"{rna_case_id}_report.selected.pdf").as_posix(),
+            "path": Path(
+                mip_dna_analysis_dir,
+                f"{rna_case_id}_report.selected.pdf",
+            ).as_posix(),
             "archive": False,
-            "tags": ["fusion", "pdf", "clinical", rna_case_id],
+            "tags": [
+                "fusion",
+                "pdf",
+                "clinical",
+                rna_case_id,
+            ],
         },
         {
-            "path": Path(mip_dna_analysis_dir, f"{rna_case_id}_report.pdf").as_posix(),
+            "path": Path(
+                mip_dna_analysis_dir,
+                f"{rna_case_id}_report.pdf",
+            ).as_posix(),
             "archive": False,
-            "tags": ["fusion", "pdf", "research", rna_case_id],
+            "tags": [
+                "fusion",
+                "pdf",
+                "research",
+                rna_case_id,
+            ],
         },
     ]
     for sample_id in [
@@ -386,17 +482,29 @@ def mip_rna_analysis_hk_bundle_data(
             [
                 {
                     "path": Path(
-                        mip_dna_analysis_dir, f"{sample_id}_lanes_1_star_sorted_sj.bigWig"
+                        mip_dna_analysis_dir,
+                        f"{sample_id}_lanes_1_star_sorted_sj.bigWig",
                     ).as_posix(),
                     "archive": False,
-                    "tags": ["coverage", "bigwig", "scout", sample_id],
+                    "tags": [
+                        "coverage",
+                        "bigwig",
+                        "scout",
+                        sample_id,
+                    ],
                 },
                 {
                     "path": Path(
-                        mip_dna_analysis_dir, f"{sample_id}_lanes_1234_star_sorted_sj.bed.gz.tbi"
+                        mip_dna_analysis_dir,
+                        f"{sample_id}_lanes_1234_star_sorted_sj.bed.gz.tbi",
                     ).as_posix(),
                     "archive": False,
-                    "tags": ["bed", "scout", "junction", sample_id],
+                    "tags": [
+                        "bed",
+                        "scout",
+                        "junction",
+                        sample_id,
+                    ],
                 },
             ]
         )
@@ -425,32 +533,54 @@ def balsamic_analysis_hk_bundle_data(
         "expires": timestamp,
         "files": [
             {
-                "path": Path(balsamic_wgs_analysis_dir, snv_vcf_file).as_posix(),
+                "path": Path(
+                    balsamic_wgs_analysis_dir,
+                    snv_vcf_file,
+                ).as_posix(),
                 "archive": False,
                 "tags": ["vcf-snv-clinical"],
             },
             {
-                "path": Path(balsamic_wgs_analysis_dir, sv_vcf_file).as_posix(),
+                "path": Path(
+                    balsamic_wgs_analysis_dir,
+                    sv_vcf_file,
+                ).as_posix(),
                 "archive": False,
                 "tags": ["vcf-sv-clinical"],
             },
             {
-                "path": Path(balsamic_wgs_analysis_dir, "umi.sv.vcf").as_posix(),
+                "path": Path(
+                    balsamic_wgs_analysis_dir,
+                    "umi.sv.vcf",
+                ).as_posix(),
                 "archive": False,
                 "tags": ["vcf-umi-snv-clinical"],
             },
             {
-                "path": Path(balsamic_wgs_analysis_dir, "adm1.cram").as_posix(),
+                "path": Path(
+                    balsamic_wgs_analysis_dir,
+                    "adm1.cram",
+                ).as_posix(),
                 "archive": False,
                 "tags": ["cram", sample_id],
             },
             {
-                "path": Path(balsamic_wgs_analysis_dir, "ascat.output.pdf").as_posix(),
+                "path": Path(
+                    balsamic_wgs_analysis_dir,
+                    "ascat.output.pdf",
+                ).as_posix(),
                 "archive": False,
-                "tags": ["ascatngs", "visualization", sample_id],
+                "tags": [
+                    "ascatngs",
+                    "visualization",
+                    sample_id,
+                ],
             },
             {
-                "path": Path(balsamic_wgs_analysis_dir, "coverage_qc_report.pdf").as_posix(),
+                "path": Path(
+                    balsamic_wgs_analysis_dir,
+                    "coverage_qc_report.pdf",
+                ).as_posix(),
                 "archive": False,
                 "tags": ["delivery-report"],
             },
@@ -460,7 +590,10 @@ def balsamic_analysis_hk_bundle_data(
 
 @pytest.fixture(scope="function")
 def rnafusion_analysis_hk_bundle_data(
-    case_id: str, timestamp: datetime, rnafusion_analysis_dir: Path, delivery_report_html: Path
+    case_id: str,
+    timestamp: datetime,
+    rnafusion_analysis_dir: Path,
+    delivery_report_html: Path,
 ) -> dict:
     """Get some bundle data for housekeeper."""
     return {
@@ -474,9 +607,15 @@ def rnafusion_analysis_hk_bundle_data(
                 "tags": ["multiqc-html", "rna"],
             },
             {
-                "path": Path(rnafusion_analysis_dir, "rnafusion_report.html").as_posix(),
+                "path": Path(
+                    rnafusion_analysis_dir,
+                    "rnafusion_report.html",
+                ).as_posix(),
                 "archive": False,
-                "tags": ["fusionreport", "research"],
+                "tags": [
+                    "fusionreport",
+                    "research",
+                ],
             },
             {
                 "path": delivery_report_html.as_posix(),
@@ -489,59 +628,92 @@ def rnafusion_analysis_hk_bundle_data(
 
 @pytest.fixture
 def balsamic_analysis_hk_version(
-    housekeeper_api: MockHousekeeperAPI, balsamic_analysis_hk_bundle_data: dict, helpers
+    housekeeper_api: MockHousekeeperAPI,
+    balsamic_analysis_hk_bundle_data: dict,
+    helpers,
 ) -> MockHousekeeperAPI:
     """Return Housekeeper version for a Balsamic bundle."""
-    return helpers.ensure_hk_version(housekeeper_api, balsamic_analysis_hk_bundle_data)
+    return helpers.ensure_hk_version(
+        housekeeper_api,
+        balsamic_analysis_hk_bundle_data,
+    )
 
 
 @pytest.fixture
 def mip_dna_analysis_hk_version(
-    housekeeper_api: MockHousekeeperAPI, mip_dna_analysis_hk_bundle_data: dict, helpers
+    housekeeper_api: MockHousekeeperAPI,
+    mip_dna_analysis_hk_bundle_data: dict,
+    helpers,
 ) -> MockHousekeeperAPI:
     """Return Housekeeper version for a MIP DNA bundle."""
-    return helpers.ensure_hk_version(housekeeper_api, mip_dna_analysis_hk_bundle_data)
+    return helpers.ensure_hk_version(
+        housekeeper_api,
+        mip_dna_analysis_hk_bundle_data,
+    )
 
 
 @pytest.fixture
 def mip_dna_analysis_hk_api(
-    housekeeper_api: MockHousekeeperAPI, mip_dna_analysis_hk_bundle_data: dict, helpers
+    housekeeper_api: MockHousekeeperAPI,
+    mip_dna_analysis_hk_bundle_data: dict,
+    helpers,
 ) -> MockHousekeeperAPI:
     """Return a Housekeeper API populated with MIP DNA analysis files."""
-    helpers.ensure_hk_version(housekeeper_api, mip_dna_analysis_hk_bundle_data)
+    helpers.ensure_hk_version(
+        housekeeper_api,
+        mip_dna_analysis_hk_bundle_data,
+    )
     return housekeeper_api
 
 
 @pytest.fixture
 def mip_rna_analysis_hk_api(
-    housekeeper_api: MockHousekeeperAPI, mip_rna_analysis_hk_bundle_data: dict, helpers
+    housekeeper_api: MockHousekeeperAPI,
+    mip_rna_analysis_hk_bundle_data: dict,
+    helpers,
 ) -> MockHousekeeperAPI:
     """Return a Housekeeper API populated with MIP RNA analysis files."""
-    helpers.ensure_hk_version(housekeeper_api, mip_rna_analysis_hk_bundle_data)
+    helpers.ensure_hk_version(
+        housekeeper_api,
+        mip_rna_analysis_hk_bundle_data,
+    )
     return housekeeper_api
 
 
 @pytest.fixture
 def balsamic_analysis_hk_api(
-    housekeeper_api: MockHousekeeperAPI, balsamic_analysis_hk_bundle_data: dict, helpers
+    housekeeper_api: MockHousekeeperAPI,
+    balsamic_analysis_hk_bundle_data: dict,
+    helpers,
 ) -> MockHousekeeperAPI:
     """Return a Housekeeper API populated with Balsamic analysis files."""
-    helpers.ensure_hk_version(housekeeper_api, balsamic_analysis_hk_bundle_data)
+    helpers.ensure_hk_version(
+        housekeeper_api,
+        balsamic_analysis_hk_bundle_data,
+    )
     return housekeeper_api
 
 
 @pytest.fixture
 def rnafusion_analysis_hk_api(
-    housekeeper_api: MockHousekeeperAPI, rnafusion_analysis_hk_bundle_data: dict, helpers
+    housekeeper_api: MockHousekeeperAPI,
+    rnafusion_analysis_hk_bundle_data: dict,
+    helpers,
 ) -> MockHousekeeperAPI:
     """Return a housekeeper api populated with some rnafusion analysis files"""
-    helpers.ensure_hk_version(housekeeper_api, rnafusion_analysis_hk_bundle_data)
+    helpers.ensure_hk_version(
+        housekeeper_api,
+        rnafusion_analysis_hk_bundle_data,
+    )
     return housekeeper_api
 
 
 @pytest.fixture
 def mip_dna_analysis(
-    analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers: StoreHelpers
+    analysis_store_trio: Store,
+    case_id: str,
+    timestamp: datetime,
+    helpers: StoreHelpers,
 ) -> Analysis:
     """Return a MIP DNA analysis object."""
     helpers.add_synopsis_to_case(store=analysis_store_trio, case_id=case_id)
@@ -555,19 +727,24 @@ def mip_dna_analysis(
     )
     for link in case.links:
         helpers.add_phenotype_groups_to_sample(
-            store=analysis_store_trio, sample_id=link.sample.internal_id
+            store=analysis_store_trio,
+            sample_id=link.sample.internal_id,
         )
         helpers.add_phenotype_terms_to_sample(
-            store=analysis_store_trio, sample_id=link.sample.internal_id
+            store=analysis_store_trio,
+            sample_id=link.sample.internal_id,
         )
         helpers.add_subject_id_to_sample(
-            store=analysis_store_trio, sample_id=link.sample.internal_id
+            store=analysis_store_trio,
+            sample_id=link.sample.internal_id,
         )
     return analysis
 
 
 @pytest.fixture
-def balsamic_analysis_obj(analysis_obj: Analysis) -> Analysis:
+def balsamic_analysis_obj(
+    analysis_obj: Analysis,
+) -> Analysis:
     """Return a Balsamic analysis object."""
     analysis_obj.pipeline = Workflow.BALSAMIC
     for link_object in analysis_obj.case.links:
@@ -579,7 +756,9 @@ def balsamic_analysis_obj(analysis_obj: Analysis) -> Analysis:
 
 
 @pytest.fixture
-def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
+def balsamic_umi_analysis_obj(
+    analysis_obj: Analysis,
+) -> Analysis:
     """Return a Balsamic UMI analysis object."""
     analysis_obj.pipeline = Workflow.BALSAMIC_UMI
     for link_object in analysis_obj.case.links:
@@ -592,7 +771,9 @@ def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
 
 
 @pytest.fixture
-def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
+def rnafusion_analysis_obj(
+    analysis_obj: Analysis,
+) -> Analysis:
     """Return a RNAfusion analysis object."""
     analysis_obj.pipeline = Workflow.RNAFUSION
     for link_object in analysis_obj.case.links:
@@ -655,15 +836,22 @@ def mip_load_config(
 
 
 @pytest.fixture
-def lims_api(lims_samples: list[dict]) -> MockLimsAPI:
+def lims_api(
+    lims_samples: list[dict],
+) -> MockLimsAPI:
     """Return a LIMS API."""
     return MockLimsAPI(samples=lims_samples)
 
 
 @pytest.fixture
-def mip_analysis_api(cg_context: CGConfig) -> MockMipAnalysis:
+def mip_analysis_api(
+    cg_context: CGConfig,
+) -> MockMipAnalysis:
     """Return a MIP analysis API."""
-    return MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+    return MockMipAnalysis(
+        config=cg_context,
+        workflow=Workflow.MIP_DNA,
+    )
 
 
 @pytest.fixture
@@ -676,7 +864,10 @@ def upload_scout_api(
     store: Store,
 ) -> UploadScoutAPI:
     """Return upload Scout API."""
-    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+    analysis_mock = MockMipAnalysis(
+        config=cg_context,
+        workflow=Workflow.MIP_DNA,
+    )
     lims_api = MockLimsAPI(samples=lims_samples)
 
     return UploadScoutAPI(
@@ -699,7 +890,10 @@ def upload_mip_analysis_scout_api(
     store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
     """Return MIP upload Scout API."""
-    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+    analysis_mock = MockMipAnalysis(
+        config=cg_context,
+        workflow=Workflow.MIP_DNA,
+    )
     lims_api = MockLimsAPI(samples=lims_samples)
 
     yield UploadScoutAPI(
@@ -722,7 +916,10 @@ def upload_balsamic_analysis_scout_api(
     store: Store,
 ) -> Generator[UploadScoutAPI, None, None]:
     """Return Balsamic upload Scout API."""
-    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+    analysis_mock = MockMipAnalysis(
+        config=cg_context,
+        workflow=Workflow.MIP_DNA,
+    )
     lims_api = MockLimsAPI(samples=lims_samples)
 
     yield UploadScoutAPI(
@@ -747,7 +944,8 @@ def rna_dna_sample_case_map(
     # WHEN adding the RNA sample rna_dna_case_map
     rna_dna_sample_case_map: dict[str, dict[str, list[str]]] = {}
     upload_scout_api._map_dna_samples_related_to_rna_sample(
-        rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_sample_case_map
+        rna_sample=rna_sample,
+        rna_dna_sample_case_map=rna_dna_sample_case_map,
     )
 
     return rna_dna_sample_case_map
@@ -763,7 +961,10 @@ def upload_rnafusion_analysis_scout_api(
     store: Store,
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api."""
-    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
+    analysis_mock = MockMipAnalysis(
+        config=cg_context,
+        workflow=Workflow.MIP_DNA,
+    )
     lims_api = MockLimsAPI(samples=lims_samples)
 
     _api = UploadScoutAPI(

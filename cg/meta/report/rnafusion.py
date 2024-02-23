@@ -19,25 +19,45 @@ from cg.meta.report.field_validators import (
     get_million_read_pairs,
 )
 from cg.meta.report.report_api import ReportAPI
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.rnafusion import (
+    RnafusionAnalysisAPI,
+)
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
-from cg.models.report.metadata import RnafusionSampleMetadataModel
-from cg.models.report.report import CaseModel, ScoutReportFiles
+from cg.models.report.metadata import (
+    RnafusionSampleMetadataModel,
+)
+from cg.models.report.report import (
+    CaseModel,
+    ScoutReportFiles,
+)
 from cg.models.report.sample import SampleModel
-from cg.models.rnafusion.rnafusion import RnafusionAnalysis, RnafusionQCMetrics
+from cg.models.rnafusion.rnafusion import (
+    RnafusionAnalysis,
+    RnafusionQCMetrics,
+)
 from cg.store.models import Case, Sample
 
 
 class RnafusionReportAPI(ReportAPI):
     """API to create RNAfusion delivery reports."""
 
-    def __init__(self, config: CGConfig, analysis_api: RnafusionAnalysisAPI):
-        super().__init__(config=config, analysis_api=analysis_api)
+    def __init__(
+        self,
+        config: CGConfig,
+        analysis_api: RnafusionAnalysisAPI,
+    ):
+        super().__init__(
+            config=config,
+            analysis_api=analysis_api,
+        )
         self.analysis_api: RnafusionAnalysisAPI = analysis_api
 
     def get_sample_metadata(
-        self, case: Case, sample: Sample, analysis_metadata: RnafusionAnalysis
+        self,
+        case: Case,
+        sample: Sample,
+        analysis_metadata: RnafusionAnalysis,
     ) -> RnafusionSampleMetadataModel:
         """Return sample metadata to include in the report."""
         sample_metrics: RnafusionQCMetrics = analysis_metadata.sample_metrics[sample.internal_id]
@@ -79,7 +99,9 @@ class RnafusionReportAPI(ReportAPI):
         return GenomeVersion.hg38.value
 
     def is_report_accredited(
-        self, samples: list[SampleModel], analysis_metadata: AnalysisModel
+        self,
+        samples: list[SampleModel],
+        analysis_metadata: AnalysisModel,
     ) -> bool:
         """Check if the report is accredited. Rnafusion is an accredited workflow."""
         return True
@@ -92,7 +114,8 @@ class RnafusionReportAPI(ReportAPI):
         """Return files that will be uploaded to Scout."""
         return ScoutReportFiles(
             vcf_fusion=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="vcf_fusion"
+                case_id=case.internal_id,
+                scout_tag="vcf_fusion",
             )
         )
 
@@ -103,20 +126,25 @@ class RnafusionReportAPI(ReportAPI):
             "customer": REQUIRED_CUSTOMER_FIELDS,
             "case": REQUIRED_CASE_FIELDS,
             "applications": self.get_application_required_fields(
-                case=case, required_fields=REQUIRED_APPLICATION_FIELDS
+                case=case,
+                required_fields=REQUIRED_APPLICATION_FIELDS,
             ),
             "data_analysis": REQUIRED_DATA_ANALYSIS_RNAFUSION_FIELDS,
             "samples": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_RNAFUSION_FIELDS
+                case=case,
+                required_fields=REQUIRED_SAMPLE_RNAFUSION_FIELDS,
             ),
             "methods": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
+                case=case,
+                required_fields=REQUIRED_SAMPLE_METHODS_FIELDS,
             ),
             "timestamps": self.get_timestamp_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
+                case=case,
+                required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
             ),
             "metadata": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS
+                case=case,
+                required_fields=REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS,
             ),
         }
 

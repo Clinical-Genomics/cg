@@ -16,7 +16,10 @@ def test_get_delivery_arguments(case: Case):
     delivery_types: set[str] = case.get_delivery_arguments()
 
     # THEN the correct delivery types should be returned
-    assert delivery_types == {Workflow.MIP_DNA, Workflow.FASTQ}
+    assert delivery_types == {
+        Workflow.MIP_DNA,
+        Workflow.FASTQ,
+    }
 
 
 def test_list_samples_to_deliver(base_store, helpers):
@@ -32,7 +35,10 @@ def test_list_samples_to_deliver(base_store, helpers):
     samples_to_deliver: list[Sample] = store.get_samples_to_deliver()
     # THEN it should return the sample which is ready to deliver
     assert len(samples_to_deliver) == 1
-    assert isinstance(samples_to_deliver[0].last_sequenced_at, dt.datetime)
+    assert isinstance(
+        samples_to_deliver[0].last_sequenced_at,
+        dt.datetime,
+    )
 
 
 def test_list_samples_to_deliver_multiple_samples(base_store, helpers):
@@ -41,7 +47,10 @@ def test_list_samples_to_deliver_multiple_samples(base_store, helpers):
     # GIVEN a populated store with two samples where one is scheduled for delivery
     helpers.add_sample(store, last_sequenced_at=dt.datetime.now())
     helpers.add_sample(
-        store, name="delivered", last_sequenced_at=dt.datetime.now(), delivered_at=dt.datetime.now()
+        store,
+        name="delivered",
+        last_sequenced_at=dt.datetime.now(),
+        delivered_at=dt.datetime.now(),
     )
     assert len(store._get_query(table=Sample).all()) == 2
 
@@ -49,4 +58,7 @@ def test_list_samples_to_deliver_multiple_samples(base_store, helpers):
     samples_to_deliver: list[Sample] = store.get_samples_to_deliver()
     # THEN it should return the sample which is ready to deliver
     assert len(samples_to_deliver) == 1
-    assert isinstance(samples_to_deliver[0].last_sequenced_at, dt.datetime)
+    assert isinstance(
+        samples_to_deliver[0].last_sequenced_at,
+        dt.datetime,
+    )

@@ -3,7 +3,9 @@
 import logging
 from pathlib import Path
 
-from cg.constants.extraction import FlowCellExtractionParameters
+from cg.constants.extraction import (
+    FlowCellExtractionParameters,
+)
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -12,7 +14,11 @@ LOG = logging.getLogger(__name__)
 class TarAPI:
     """Class that uses tar for various archiving and archive extraction functionality"""
 
-    def __init__(self, binary_path: str, dry_run: bool = False):
+    def __init__(
+        self,
+        binary_path: str,
+        dry_run: bool = False,
+    ):
         self.binary_path: str = binary_path
         self.process: Process = Process(binary=self.binary_path)
         self.dry_run: bool = dry_run
@@ -37,4 +43,11 @@ class TarAPI:
 
     def get_compress_cmd(self, input_path: Path) -> str:
         """Return compression command of input path."""
-        return " ".join([self.binary_path, "-cf", "-", input_path.as_posix()])
+        return " ".join(
+            [
+                self.binary_path,
+                "-cf",
+                "-",
+                input_path.as_posix(),
+            ]
+        )

@@ -11,7 +11,9 @@ from cg.models.observations.input_files import (
 )
 
 
-def test_instantiate_input_files(observations_input_files_raw: dict):
+def test_instantiate_input_files(
+    observations_input_files_raw: dict,
+):
     """Tests input files against a pydantic MipDNAObservationsInputFiles."""
 
     # GIVEN a dictionary with the basic input files
@@ -24,7 +26,8 @@ def test_instantiate_input_files(observations_input_files_raw: dict):
 
 
 def test_instantiate_input_files_missing_field(
-    observations_input_files_raw: dict, file_does_not_exist: Path
+    observations_input_files_raw: dict,
+    file_does_not_exist: Path,
 ):
     """Tests input files against a pydantic MipDNAObservationsInputFiles with not existent field."""
 
@@ -39,7 +42,9 @@ def test_instantiate_input_files_missing_field(
         MipDNAObservationsInputFiles(**observations_input_files_raw)
 
 
-def test_instantiate_balsamic_input_files(balsamic_observations_input_files_raw: dict):
+def test_instantiate_balsamic_input_files(
+    balsamic_observations_input_files_raw: dict,
+):
     """Tests input files against a pydantic BalsamicObservationsInputFiles."""
 
     # GIVEN balsamic input files
@@ -48,11 +53,15 @@ def test_instantiate_balsamic_input_files(balsamic_observations_input_files_raw:
     input_files = BalsamicObservationsInputFiles(**balsamic_observations_input_files_raw)
 
     # THEN assert that it was successfully created
-    assert isinstance(input_files, BalsamicObservationsInputFiles)
+    assert isinstance(
+        input_files,
+        BalsamicObservationsInputFiles,
+    )
 
 
 def test_instantiate_balsamic_input_files_missing_field(
-    balsamic_observations_input_files_raw: dict, file_does_not_exist: Path
+    balsamic_observations_input_files_raw: dict,
+    file_does_not_exist: Path,
 ):
     """Tests input files against a pydantic BalsamicObservationsInputFiles with not existent field."""
 

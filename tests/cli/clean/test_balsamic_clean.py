@@ -7,7 +7,10 @@ from pathlib import Path
 from click.testing import CliRunner
 
 from cg.apps.tb import TrailblazerAPI
-from cg.cli.workflow.commands import clean_run_dir, past_run_dirs
+from cg.cli.workflow.commands import (
+    clean_run_dir,
+    past_run_dirs,
+)
 from cg.constants import Workflow
 from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
@@ -54,11 +57,18 @@ def test_with_yes(
     case_path = analysis_api.get_case_path(balsamic_case_clean)
     Path(case_path).mkdir(exist_ok=True, parents=True)
 
-    mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
+    mocker.patch.object(
+        TrailblazerAPI,
+        "is_latest_analysis_ongoing",
+    )
     TrailblazerAPI.is_latest_analysis_ongoing.return_value = False
 
     # WHEN running with yes and remove stuff from before today
-    result = cli_runner.invoke(past_run_dirs, ["-y", str(timestamp_now)], obj=clean_context)
+    result = cli_runner.invoke(
+        past_run_dirs,
+        ["-y", str(timestamp_now)],
+        obj=clean_context,
+    )
     # THEN the analysis should have been cleaned
     assert result.exit_code == EXIT_SUCCESS
     assert analysis_to_clean.cleaned_at
@@ -92,11 +102,18 @@ def test_dry_run(
     case_path = clean_context.meta_apis["analysis_api"].get_case_path(balsamic_case_clean)
     Path(case_path).mkdir(exist_ok=True, parents=True)
 
-    mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
+    mocker.patch.object(
+        TrailblazerAPI,
+        "is_latest_analysis_ongoing",
+    )
     TrailblazerAPI.is_latest_analysis_ongoing.return_value = False
 
     # WHEN dry running with dry run specified
-    result = cli_runner.invoke(clean_run_dir, [balsamic_case_clean, "-d", "-y"], obj=clean_context)
+    result = cli_runner.invoke(
+        clean_run_dir,
+        [balsamic_case_clean, "-d", "-y"],
+        obj=clean_context,
+    )
     # THEN command should say it would have deleted
     assert result.exit_code == EXIT_SUCCESS
     assert "Would have deleted" in caplog.text
@@ -105,7 +122,11 @@ def test_dry_run(
 
 
 def test_cleaned_at_valid(
-    balsamic_case_clean: str, cli_runner: CliRunner, clean_context: CGConfig, caplog, mocker
+    balsamic_case_clean: str,
+    cli_runner: CliRunner,
+    clean_context: CGConfig,
+    caplog,
+    mocker,
 ):
     """Test command with dry run options"""
     # GIVEN a case on disk that could be deleted
@@ -113,11 +134,18 @@ def test_cleaned_at_valid(
     case_path = clean_context.meta_apis["analysis_api"].get_case_path(balsamic_case_clean)
     Path(case_path).mkdir(exist_ok=True, parents=True)
 
-    mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
+    mocker.patch.object(
+        TrailblazerAPI,
+        "is_latest_analysis_ongoing",
+    )
     TrailblazerAPI.is_latest_analysis_ongoing.return_value = False
 
     # WHEN dry running with dry run specified
-    result = cli_runner.invoke(clean_run_dir, [balsamic_case_clean, "-y"], obj=clean_context)
+    result = cli_runner.invoke(
+        clean_run_dir,
+        [balsamic_case_clean, "-y"],
+        obj=clean_context,
+    )
 
     # THEN command should say it would have deleted
     assert result.exit_code == EXIT_SUCCESS
@@ -126,7 +154,10 @@ def test_cleaned_at_valid(
 
 
 def test_cleaned_at_invalid(
-    balsamic_case_not_clean: str, cli_runner: CliRunner, clean_context: CGConfig, caplog
+    balsamic_case_not_clean: str,
+    cli_runner: CliRunner,
+    clean_context: CGConfig,
+    caplog,
 ):
     """Test command with dry run options"""
     # GIVEN a case on disk that could be deleted
@@ -136,7 +167,11 @@ def test_cleaned_at_invalid(
     assert not base_store.get_case_by_internal_id(balsamic_case_not_clean).analyses[0].cleaned_at
     # WHEN dry running with dry run specified
 
-    result = cli_runner.invoke(past_run_dirs, ["2020-12-01", "-d", "-y"], obj=clean_context)
+    result = cli_runner.invoke(
+        past_run_dirs,
+        ["2020-12-01", "-d", "-y"],
+        obj=clean_context,
+    )
 
     # THEN case directory should not have been cleaned
     assert result.exit_code == EXIT_SUCCESS

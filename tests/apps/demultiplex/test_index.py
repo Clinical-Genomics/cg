@@ -93,7 +93,11 @@ def test_get_reverse_complement_not_dna(caplog):
         "Different sequences, same length",
     ],
 )
-def test_get_hamming_distance_index_1(sequence_1: str, sequence_2: str, expected_distance: int):
+def test_get_hamming_distance_index_1(
+    sequence_1: str,
+    sequence_2: str,
+    expected_distance: int,
+):
     """
     Test that Hamming distances are calculated correctly for different sets of index 1 sequences.
     This is, that the operation is commutative and aligns sequences from the left.
@@ -104,11 +108,17 @@ def test_get_hamming_distance_index_1(sequence_1: str, sequence_2: str, expected
 
     # THEN the distance is zero
     assert (
-        get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_2)
+        get_hamming_distance_index_1(
+            sequence_1=sequence_1,
+            sequence_2=sequence_2,
+        )
         == expected_distance
     )
     assert (
-        get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_1)
+        get_hamming_distance_index_1(
+            sequence_1=sequence_2,
+            sequence_2=sequence_1,
+        )
         == expected_distance
     )
 
@@ -129,7 +139,9 @@ def test_get_hamming_distance_index_1(sequence_1: str, sequence_2: str, expected
     ],
 )
 def test_get_hamming_distance_index_2_reverse_complement(
-    sequence_1: str, sequence_2: str, expected_distance: int
+    sequence_1: str,
+    sequence_2: str,
+    expected_distance: int,
 ):
     """
     Test that Hamming distances are calculated correctly for different sets of index 2 sequences
@@ -143,13 +155,17 @@ def test_get_hamming_distance_index_2_reverse_complement(
     # THEN the distance is zero
     assert (
         get_hamming_distance_index_2(
-            sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=True
+            sequence_1=sequence_1,
+            sequence_2=sequence_2,
+            is_reverse_complement=True,
         )
         == expected_distance
     )
     assert (
         get_hamming_distance_index_2(
-            sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=True
+            sequence_1=sequence_2,
+            sequence_2=sequence_1,
+            is_reverse_complement=True,
         )
         == expected_distance
     )
@@ -171,7 +187,9 @@ def test_get_hamming_distance_index_2_reverse_complement(
     ],
 )
 def test_get_hamming_distance_index_2_no_reverse_complement(
-    sequence_1: str, sequence_2: str, expected_distance: int
+    sequence_1: str,
+    sequence_2: str,
+    expected_distance: int,
 ):
     """
     Test that Hamming distances are calculated correctly for different sets of index 2 sequences
@@ -185,13 +203,17 @@ def test_get_hamming_distance_index_2_no_reverse_complement(
     # THEN the distance is zero
     assert (
         get_hamming_distance_index_2(
-            sequence_1=sequence_1, sequence_2=sequence_2, is_reverse_complement=False
+            sequence_1=sequence_1,
+            sequence_2=sequence_2,
+            is_reverse_complement=False,
         )
         == expected_distance
     )
     assert (
         get_hamming_distance_index_2(
-            sequence_1=sequence_2, sequence_2=sequence_1, is_reverse_complement=False
+            sequence_1=sequence_2,
+            sequence_2=sequence_1,
+            is_reverse_complement=False,
         )
         == expected_distance
     )

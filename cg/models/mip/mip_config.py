@@ -1,6 +1,11 @@
 """Model MIP config"""
 
-from pydantic.v1 import BaseModel, EmailStr, Field, validator
+from pydantic.v1 import (
+    BaseModel,
+    EmailStr,
+    Field,
+    validator,
+)
 
 from cg.constants.priority import SlurmQos
 
@@ -37,6 +42,9 @@ class MipBaseConfig(BaseModel):
         """Set samples analysis type"""
         raw_samples: dict = values.get("analysis_type_")
         return [
-            AnalysisType(sample_id=sample_id, analysis_type=analysis_type)
+            AnalysisType(
+                sample_id=sample_id,
+                analysis_type=analysis_type,
+            )
             for sample_id, analysis_type in raw_samples.items()
         ]

@@ -10,15 +10,28 @@ from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.constants.time import TWENTY_ONE_DAYS_IN_SECONDS
-from cg.exc import CleanFlowCellFailedError, HousekeeperFileMissingError
-from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
-from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
+from cg.constants.time import (
+    TWENTY_ONE_DAYS_IN_SECONDS,
+)
+from cg.exc import (
+    CleanFlowCellFailedError,
+    HousekeeperFileMissingError,
+)
+from cg.meta.clean.clean_flow_cells import (
+    CleanFlowCellAPI,
+)
+from cg.store.models import (
+    Flowcell,
+    Sample,
+    SampleLaneSequencingMetrics,
+)
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
-def test_get_flow_cell_from_statusdb(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
+def test_get_flow_cell_from_statusdb(
+    flow_cell_clean_api_can_be_removed: CleanFlowCellAPI,
+):
     """Test to get a flow cell from statusdb."""
 
     # GIVEN a clean flow cell api with a store that contains a flow cell
@@ -30,7 +43,9 @@ def test_get_flow_cell_from_statusdb(flow_cell_clean_api_can_be_removed: CleanFl
     assert isinstance(flow_cell, Flowcell)
 
 
-def test_is_flow_cell_in_statusdb(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
+def test_is_flow_cell_in_statusdb(
+    flow_cell_clean_api_can_be_removed: CleanFlowCellAPI,
+):
     """Test to check that a flow cell is in statusdb."""
     # GIVEN a clean flow cell api with a store that contains a flow cell
 
@@ -41,7 +56,9 @@ def test_is_flow_cell_in_statusdb(flow_cell_clean_api_can_be_removed: CleanFlowC
     assert is_in_statusdb
 
 
-def test_is_flow_cell_backed_up(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
+def test_is_flow_cell_backed_up(
+    flow_cell_clean_api_can_be_removed: CleanFlowCellAPI,
+):
     """Test to check that a flow cell has been backed up."""
     # GIVEN a clean flow cell api with a flow cell that has been backed up
 
@@ -52,7 +69,9 @@ def test_is_flow_cell_backed_up(flow_cell_clean_api_can_be_removed: CleanFlowCel
     assert is_backed_up
 
 
-def test_is_not_flow_cell_backed_up(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
+def test_is_not_flow_cell_backed_up(
+    flow_cell_clean_api_can_be_removed: CleanFlowCellAPI,
+):
     """Test to check that a flow cell has been backed up."""
     # GIVEN a clean flow cell api with a flow cell that has not been backed up
     flow_cell_clean_api_can_be_removed.get_flow_cell_from_status_db().has_backup = False
@@ -80,7 +99,9 @@ def test_get_sequencing_metrics_for_flow_cell_from_statusdb(
     assert isinstance(metrics[0], SampleLaneSequencingMetrics)
 
 
-def test_has_sequencing_metrics_in_statusdb(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
+def test_has_sequencing_metrics_in_statusdb(
+    flow_cell_clean_api_can_be_removed: CleanFlowCellAPI,
+):
     """Test to check that a flow cell has SampleLaneSequencingMetrics entries in statusdb."""
 
     # GIVEN a clean flow cell api with a store that contains a flow cell with SampleLaneSequencingMetrics entries
@@ -113,7 +134,9 @@ def test_is_directory_older_than_21_days_pass(
     assert is_older_that_21_days
 
 
-def test_is_directory_older_than_21_days_fail(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
+def test_is_directory_older_than_21_days_fail(
+    flow_cell_clean_api_can_be_removed: CleanFlowCellAPI,
+):
     """Test to check whether a directory is older than 21 days."""
 
     # GIVEN a clean flow cell api with a current time that is set to now.
@@ -127,7 +150,9 @@ def test_is_directory_older_than_21_days_fail(flow_cell_clean_api_can_be_removed
     assert not is_older_than_21_days
 
 
-def test_has_sample_sheet_in_housekeeper(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
+def test_has_sample_sheet_in_housekeeper(
+    flow_cell_clean_api_can_be_removed: CleanFlowCellAPI,
+):
     """Test to check whether a flow cell has a sample sheet in housekeeper."""
 
     # GIVEN a clean flow cell api with a flow cell that has a sample sheet in housekeeper
@@ -141,11 +166,16 @@ def test_has_sample_sheet_in_housekeeper(flow_cell_clean_api_can_be_removed: Cle
 
 @pytest.mark.parametrize(
     "tag",
-    [SequencingFileTag.FASTQ, SequencingFileTag.SPRING, SequencingFileTag.SPRING_METADATA],
+    [
+        SequencingFileTag.FASTQ,
+        SequencingFileTag.SPRING,
+        SequencingFileTag.SPRING_METADATA,
+    ],
     ids=["fastq", "spring", "spring_metadata"],
 )
 def test_get_files_for_flow_cell_bundle(
-    flow_cell_clean_api_can_be_removed: CleanFlowCellAPI, tag: str
+    flow_cell_clean_api_can_be_removed: CleanFlowCellAPI,
+    tag: str,
 ):
     """Test to get files for a flow cell bundle from housekeeper."""
 
@@ -162,7 +192,11 @@ def test_get_files_for_flow_cell_bundle(
 
 @pytest.mark.parametrize(
     "tag",
-    [SequencingFileTag.FASTQ, SequencingFileTag.SPRING, SequencingFileTag.SPRING_METADATA],
+    [
+        SequencingFileTag.FASTQ,
+        SequencingFileTag.SPRING,
+        SequencingFileTag.SPRING_METADATA,
+    ],
     ids=["fastq", "spring", "spring_metadata"],
 )
 def test_get_files_for_samples_on_flow_cell_with_tag_missing_sample(
@@ -180,7 +214,10 @@ def test_get_files_for_samples_on_flow_cell_with_tag_missing_sample(
 
     # GIVEN that the flow cell has two samples
     sample: Sample = helpers.add_sample(
-        store=store, customer_id="cust500", internal_id="123", name="123"
+        store=store,
+        customer_id="cust500",
+        internal_id="123",
+        name="123",
     )
     flow_cell.samples.append(sample)
     assert len(flow_cell.samples) == 2
@@ -203,7 +240,9 @@ def test_get_files_for_samples_on_flow_cell_with_tag_missing_sample(
     assert f"Bundle: {sample.internal_id} not found in Housekeeper" in caplog.text
 
 
-def test_can_flow_cell_be_deleted(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
+def test_can_flow_cell_be_deleted(
+    flow_cell_clean_api_can_be_removed: CleanFlowCellAPI,
+):
     """Test the flow cell can be deleted check."""
     # GIVEN a flow cell that can be deleted
 
@@ -291,7 +330,9 @@ def test_can_flow_cell_be_deleted_no_spring_no_fastq(
                     flow_cell_clean_api_can_be_removed.can_flow_cell_directory_be_deleted()
 
 
-def test_delete_flow_cell_directory(flow_cell_clean_api_can_be_removed: CleanFlowCellAPI):
+def test_delete_flow_cell_directory(
+    flow_cell_clean_api_can_be_removed: CleanFlowCellAPI,
+):
     """Test that a flow cell directory is removed."""
     # GIVEN a flow cell that can be removed
 

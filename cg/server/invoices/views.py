@@ -21,9 +21,18 @@ from cg.apps.invoice.render import render_xlsx
 from cg.constants.invoice import CostCenters
 from cg.meta.invoice import InvoiceAPI
 from cg.server.ext import db, lims
-from cg.store.models import Customer, Invoice, Pool, Sample
+from cg.store.models import (
+    Customer,
+    Invoice,
+    Pool,
+    Sample,
+)
 
-BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
+BLUEPRINT = Blueprint(
+    "invoices",
+    __name__,
+    template_folder="templates",
+)
 
 
 @BLUEPRINT.before_request
@@ -180,7 +189,10 @@ def invoice(invoice_id):
     return render_template(
         "invoices/invoice.html",
         invoice=invoice_obj,
-        invoice_dict={"KTH": kth_inv, "KI": ki_inv},
+        invoice_dict={
+            "KTH": kth_inv,
+            "KI": ki_inv,
+        },
         default_price=api.total_price(),
         final_price=final_price,
         record_type=invoice_obj.record_type,
@@ -201,7 +213,11 @@ def invoice_template(invoice_id):
     excel_path = os.path.join(temp_dir, filename)
     workbook.save(excel_path)
 
-    return send_from_directory(directory=temp_dir, path=filename, as_attachment=True)
+    return send_from_directory(
+        directory=temp_dir,
+        path=filename,
+        as_attachment=True,
+    )
 
 
 @BLUEPRINT.route("/<int:invoice_id>/invoice_file/<cost_center>")
@@ -219,4 +235,8 @@ def modified_invoice(invoice_id, cost_center):
             file_object.write(invoice_obj.excel_kth)
         elif cost_center == "KI":
             file_object.write(invoice_obj.excel_ki)
-    return send_from_directory(directory=temp_dir, path=file_name, as_attachment=True)
+    return send_from_directory(
+        directory=temp_dir,
+        path=file_name,
+        as_attachment=True,
+    )

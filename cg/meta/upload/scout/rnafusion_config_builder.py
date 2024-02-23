@@ -4,10 +4,22 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import PrepCategory
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
-from cg.constants.scout import RNAFUSION_CASE_TAGS, RNAFUSION_SAMPLE_TAGS, GenomeBuild, UploadTrack
-from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
-from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
+from cg.constants.housekeeper_tags import (
+    HK_DELIVERY_REPORT_TAG,
+)
+from cg.constants.scout import (
+    RNAFUSION_CASE_TAGS,
+    RNAFUSION_SAMPLE_TAGS,
+    GenomeBuild,
+    UploadTrack,
+)
+from cg.meta.upload.scout.hk_tags import (
+    CaseTags,
+    SampleTags,
+)
+from cg.meta.upload.scout.scout_config_builder import (
+    ScoutConfigBuilder,
+)
 from cg.models.scout.scout_load_config import (
     RnafusionLoadConfig,
     ScoutCancerIndividual,
@@ -21,9 +33,16 @@ LOG = logging.getLogger(__name__)
 class RnafusionConfigBuilder(ScoutConfigBuilder):
     """Class for handling rnafusion information and files to be included in Scout upload."""
 
-    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI):
+    def __init__(
+        self,
+        hk_version_obj: Version,
+        analysis_obj: Analysis,
+        lims_api: LimsAPI,
+    ):
         super().__init__(
-            hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api
+            hk_version_obj=hk_version_obj,
+            analysis_obj=analysis_obj,
+            lims_api=lims_api,
         )
         self.case_tags: CaseTags = CaseTags(**RNAFUSION_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**RNAFUSION_SAMPLE_TAGS)
@@ -63,14 +82,21 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
     def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
         """Include the RNA sample alignment file."""
         config_sample.rna_alignment_path = self.get_sample_file(
-            hk_tags=self.sample_tags.alignment_file, sample_id=config_sample.sample_id
+            hk_tags=self.sample_tags.alignment_file,
+            sample_id=config_sample.sample_id,
         )
 
     def build_config_sample(self, case_sample: CaseSample) -> ScoutCancerIndividual:
         """Build a sample with rnafusion specific information."""
         config_sample = ScoutCancerIndividual()
-        self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
-        self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
+        self.add_common_sample_info(
+            config_sample=config_sample,
+            case_sample=case_sample,
+        )
+        self.add_common_sample_files(
+            config_sample=config_sample,
+            case_sample=case_sample,
+        )
         config_sample.analysis_type = PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
 
         # Replace sample_id with internal case id, as rnafusion currently uses case ids instead of sample ids

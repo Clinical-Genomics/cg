@@ -21,7 +21,11 @@ class MutaccAutoAPI:
         self.mutacc_auto_config = config["mutacc_auto"]["config_path"]
         self.mutacc_auto_binary = config["mutacc_auto"]["binary_path"]
         self.mutacc_padding = config["mutacc_auto"]["padding"]
-        self.base_call = [self.mutacc_auto_binary, "--config-file", self.mutacc_auto_config]
+        self.base_call = [
+            self.mutacc_auto_binary,
+            "--config-file",
+            self.mutacc_auto_config,
+        ]
 
     def extract_reads(self, case: dict, variants: dict):
         """
@@ -42,10 +46,14 @@ class MutaccAutoAPI:
                 "extract",
                 "--variants",
                 WriteStream.write_stream_from_content(
-                    content=variants, file_format=FileFormat.JSON
+                    content=variants,
+                    file_format=FileFormat.JSON,
                 ),
                 "--case",
-                WriteStream.write_stream_from_content(content=case, file_format=FileFormat.JSON),
+                WriteStream.write_stream_from_content(
+                    content=case,
+                    file_format=FileFormat.JSON,
+                ),
                 "--padding",
                 str(self.mutacc_padding),
             ]

@@ -3,7 +3,9 @@ from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 
 
-def test_instantiate_mip_analysis(mip_analysis_raw: dict):
+def test_instantiate_mip_analysis(
+    mip_analysis_raw: dict,
+):
     """
     Tests raw mip analysis against a pydantic MipAnalysis
     """

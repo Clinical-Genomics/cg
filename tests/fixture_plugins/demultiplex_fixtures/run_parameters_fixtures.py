@@ -10,9 +10,14 @@ from cg.models.demultiplex.run_parameters import (
 
 
 @pytest.fixture(scope="function")
-def run_parameters_hiseq_different_index(run_parameters_dir: Path) -> RunParametersHiSeq:
+def run_parameters_hiseq_different_index(
+    run_parameters_dir: Path,
+) -> RunParametersHiSeq:
     """Return a HiSeq RunParameters object with different index cycles."""
-    path = Path(run_parameters_dir, "RunParameters_hiseq_2500_different_index_cycles.xml")
+    path = Path(
+        run_parameters_dir,
+        "RunParameters_hiseq_2500_different_index_cycles.xml",
+    )
     return RunParametersHiSeq(run_parameters_path=path)
 
 
@@ -21,14 +26,22 @@ def run_parameters_novaseq_6000_different_index(
     run_parameters_dir: Path,
 ) -> RunParametersNovaSeq6000:
     """Return a NovaSeq6000 RunParameters object with different index cycles."""
-    path = Path(run_parameters_dir, "RunParameters_novaseq_6000_different_index_cycles.xml")
+    path = Path(
+        run_parameters_dir,
+        "RunParameters_novaseq_6000_different_index_cycles.xml",
+    )
     return RunParametersNovaSeq6000(run_parameters_path=path)
 
 
 @pytest.fixture(scope="function")
-def run_parameters_novaseq_x_different_index(run_parameters_dir: Path) -> RunParametersNovaSeqX:
+def run_parameters_novaseq_x_different_index(
+    run_parameters_dir: Path,
+) -> RunParametersNovaSeqX:
     """Return a NovaSeqX RunParameters object with different index cycles."""
-    path = Path(run_parameters_dir, "RunParameters_novaseq_X_different_index_cycles.xml")
+    path = Path(
+        run_parameters_dir,
+        "RunParameters_novaseq_X_different_index_cycles.xml",
+    )
     return RunParametersNovaSeqX(run_parameters_path=path)
 
 
@@ -83,7 +96,9 @@ def novaseq_6000_run_parameters_pre_1_5_kits(
 
 
 @pytest.fixture
-def novaseq_6000_run_parameters_post_1_5_kits(novaseq_6000_run_parameters_post_1_5_kits_path: Path):
+def novaseq_6000_run_parameters_post_1_5_kits(
+    novaseq_6000_run_parameters_post_1_5_kits_path: Path,
+):
     """Return a NovaSeq6000 run parameters post 1.5 kit object."""
     return RunParametersNovaSeq6000(
         run_parameters_path=novaseq_6000_run_parameters_post_1_5_kits_path

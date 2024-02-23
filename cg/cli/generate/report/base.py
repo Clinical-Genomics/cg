@@ -21,7 +21,11 @@ from cg.cli.generate.report.utils import (
     get_report_api_workflow,
     get_report_case,
 )
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
+from cg.constants import (
+    EXIT_FAIL,
+    EXIT_SUCCESS,
+    Workflow,
+)
 from cg.exc import CgError
 from cg.meta.report.report_api import ReportAPI
 from cg.store.models import Case
@@ -51,7 +55,9 @@ def generate_delivery_report(
     # Dry run: prints the HTML report to console
     if dry_run:
         delivery_report_html: str = report_api.create_delivery_report(
-            case_id, analysis_date, force_report
+            case_id,
+            analysis_date,
+            force_report,
         )
         click.echo(delivery_report_html)
         return
@@ -62,18 +68,26 @@ def generate_delivery_report(
     )
     if delivery_report:
         click.echo(
-            click.style(f"Delivery report already in housekeeper: {delivery_report}", fg="yellow")
+            click.style(
+                f"Delivery report already in housekeeper: {delivery_report}",
+                fg="yellow",
+            )
         )
         return
 
     created_delivery_report: Path = report_api.create_delivery_report_file(
         case_id=case_id,
-        directory=Path(report_api.analysis_api.root, case_id),
+        directory=Path(
+            report_api.analysis_api.root,
+            case_id,
+        ),
         analysis_date=analysis_date,
         force_report=force_report,
     )
     report_api.add_delivery_report_to_hk(
-        case_id=case_id, delivery_report_file=created_delivery_report, version=version
+        case_id=case_id,
+        delivery_report_file=created_delivery_report,
+        version=version,
     )
     click.echo(
         click.style(
@@ -90,7 +104,10 @@ def generate_delivery_report(
 @OPTION_DRY_RUN
 @click.pass_context
 def generate_available_delivery_reports(
-    context: click.Context, workflow: Workflow, force_report: bool, dry_run: bool
+    context: click.Context,
+    workflow: Workflow,
+    force_report: bool,
+    dry_run: bool,
 ) -> None:
     """Generates delivery reports for all cases that need one and stores them in Housekeeper."""
 

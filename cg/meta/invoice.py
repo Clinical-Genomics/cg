@@ -15,12 +15,23 @@ from cg.models.invoice.invoice import (
 )
 from cg.server.ext import FlaskLims
 from cg.server.ext import lims as genologics_lims
-from cg.store.models import Customer, Invoice, Pool, Sample, User
+from cg.store.models import (
+    Customer,
+    Invoice,
+    Pool,
+    Sample,
+    User,
+)
 from cg.store.store import Store
 
 
 class InvoiceAPI:
-    def __init__(self, db: Store, lims_api: LimsAPI, invoice_obj: Invoice):
+    def __init__(
+        self,
+        db: Store,
+        lims_api: LimsAPI,
+        invoice_obj: Invoice,
+    ):
         self.db = db
         self.lims_api = lims_api
         self.log = []
@@ -58,7 +69,10 @@ class InvoiceAPI:
         return customer.invoice_contact
 
     def get_contact(
-        self, customer: Customer, customer_invoice_contact: User | None, msg: str
+        self,
+        customer: Customer,
+        customer_invoice_contact: User | None,
+        msg: str,
     ) -> InvoiceContact | None:
         """Return the contact information."""
         try:
@@ -85,7 +99,9 @@ class InvoiceAPI:
         customer = self.get_customer_by_cost_center(cost_center=cost_center)
         customer_invoice_contact = self.get_customer_invoice_contact(customer=customer, msg=msg)
         return self.get_contact(
-            customer_invoice_contact=customer_invoice_contact, customer=customer, msg=msg
+            customer_invoice_contact=customer_invoice_contact,
+            customer=customer,
+            msg=msg,
         )
 
     def get_invoice_report(self, cost_center: str) -> dict | None:
@@ -97,7 +113,8 @@ class InvoiceAPI:
         for raw_record in self.raw_records:
             if self.record_type == RecordType.Pool:
                 pooled_samples += self.genologics_lims.samples_in_pools(
-                    raw_record.name, raw_record.ticket
+                    raw_record.name,
+                    raw_record.ticket,
                 )
             record = self.get_invoice_entity_record(
                 cost_center=cost_center.lower(),
@@ -117,7 +134,10 @@ class InvoiceAPI:
         try:
             invoice_report = InvoiceReport(
                 cost_center=cost_center,
-                project_number=getattr(customer_obj, f"project_account_{cost_center.lower()}"),
+                project_number=getattr(
+                    customer_obj,
+                    f"project_account_{cost_center.lower()}",
+                ),
                 customer_id=customer_obj.internal_id,
                 customer_name=customer_obj.name,
                 agreement=customer_obj.agreement_registration,
@@ -132,17 +152,29 @@ class InvoiceAPI:
             self.log.append("ValidationError in InvoiceReport class.")
             return None
 
-    def _discount_price(self, record: Sample or Pool, discount: int = 0) -> int | None:
+    def _discount_price(
+        self,
+        record: Sample or Pool,
+        discount: int = 0,
+    ) -> int | None:
         """Return discount price for a sample or pool."""
         priority = self.get_priority(record, for_discount_price=True)
-        full_price = getattr(record.application_version, f"price_{priority}")
+        full_price = getattr(
+            record.application_version,
+            f"price_{priority}",
+        )
         discount_factor = 1 - discount / 100
         if not full_price:
             return None
         return round(full_price * discount_factor)
 
     def _cost_center_split_factor(
-        self, price: int, cost_center: str, percent_kth: int, tag: str, version: str
+        self,
+        price: int,
+        cost_center: str,
+        percent_kth: int,
+        tag: str,
+        version: str,
     ) -> int | None:
         """Return split price based on cost center."""
         if price:
@@ -166,7 +198,10 @@ class InvoiceAPI:
         return split_price
 
     def get_invoice_entity_record(
-        self, cost_center: str, discount: int, record: Sample or Pool
+        self,
+        cost_center: str,
+        discount: int,
+        record: Sample or Pool,
     ) -> InvoiceInfo:
         """Return invoice information for a specific sample or pool."""
         application = self.get_application(record=record, discount=discount)
@@ -187,7 +222,11 @@ class InvoiceAPI:
 
         return invoice_info
 
-    def get_application(self, record: Sample or Pool, discount: int) -> InvoiceApplication | None:
+    def get_application(
+        self,
+        record: Sample or Pool,
+        discount: int,
+    ) -> InvoiceApplication | None:
         """Return the application information."""
         try:
             application = InvoiceApplication(
@@ -211,7 +250,11 @@ class InvoiceAPI:
         """Return Lims id."""
         return None if self.record_type == RecordType.Pool else record.internal_id
 
-    def get_priority(self, record: Sample or Pool, for_discount_price: bool = False) -> str:
+    def get_priority(
+        self,
+        record: Sample or Pool,
+        for_discount_price: bool = False,
+    ) -> str:
         """Return the priority."""
         if self.customer_obj.internal_id == CustomerId.CUST032:
             priority = PriorityTerms.STANDARD
@@ -224,7 +267,11 @@ class InvoiceAPI:
         return priority
 
     def get_invoice_info(
-        self, record, split_discounted_price: int, cost_center: str, application: InvoiceApplication
+        self,
+        record,
+        split_discounted_price: int,
+        cost_center: str,
+        application: InvoiceApplication,
     ) -> InvoiceInfo:
         """Return the invoice_info to be used in the invoice report."""
         order = record.order

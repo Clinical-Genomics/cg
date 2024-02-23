@@ -45,7 +45,10 @@ class CustomJSONEncoder(JSONEncoder):
         return super().default(obj)
 
 
-cors = CORS(resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+cors = CORS(
+    resources={r"/api/*": {"origins": "*"}},
+    supports_credentials=True,
+)
 csrf = CSRFProtect()
 db = FlaskStore()
 

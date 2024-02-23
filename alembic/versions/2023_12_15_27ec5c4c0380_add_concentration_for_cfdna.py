@@ -35,5 +35,11 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_column(table_name="application", column_name="sample_concentration_maximum_cfdna")
-    op.drop_column(table_name="application", column_name="sample_concentration_minimum_cfdna")
+    op.drop_column(
+        table_name="application",
+        column_name="sample_concentration_maximum_cfdna",
+    )
+    op.drop_column(
+        table_name="application",
+        column_name="sample_concentration_minimum_cfdna",
+    )

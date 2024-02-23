@@ -19,7 +19,10 @@ depends_on = None
 
 
 def upgrade():
-    op.add_column(table_name="customer", column=sa.Column("data_archive_location", sa.String(32)))
+    op.add_column(
+        table_name="customer",
+        column=sa.Column("data_archive_location", sa.String(32)),
+    )
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
     for customer in session.query(Customer):
@@ -34,4 +37,7 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_column(table_name="customer", column_name="data_archive_location")
+    op.drop_column(
+        table_name="customer",
+        column_name="data_archive_location",
+    )

@@ -7,7 +7,9 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import Workflow
-from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
+from cg.constants.housekeeper_tags import (
+    WORKFLOW_PROTECTED_TAGS,
+)
 from cg.store.models import Analysis
 from cg.store.store import Store
 
@@ -15,7 +17,11 @@ LOG = logging.getLogger(__name__)
 
 
 class CleanAPI:
-    def __init__(self, status_db: Store, housekeeper_api: HousekeeperAPI):
+    def __init__(
+        self,
+        status_db: Store,
+        housekeeper_api: HousekeeperAPI,
+    ):
         self.status_db = status_db
         self.housekeeper_api = housekeeper_api
 
@@ -28,12 +34,14 @@ class CleanAPI:
         )
 
         for analysis in self.status_db.get_analyses_for_workflow_started_at_before(
-            workflow=workflow, started_at_before=before
+            workflow=workflow,
+            started_at_before=before,
         ):
             bundle_name = analysis.case.internal_id
 
             hk_bundle_version: Version | None = self.housekeeper_api.version(
-                bundle=bundle_name, date=analysis.started_at
+                bundle=bundle_name,
+                date=analysis.started_at,
             )
             if not hk_bundle_version:
                 LOG.warning(
@@ -51,11 +59,15 @@ class CleanAPI:
                 f"date {analysis.started_at}"
             )
             yield self.housekeeper_api.get_files(
-                bundle=bundle_name, version=hk_bundle_version.id
+                bundle=bundle_name,
+                version=hk_bundle_version.id,
             ).all()
 
     @staticmethod
-    def has_protected_tags(file: File, protected_tags_lists: list[list[str]]) -> bool:
+    def has_protected_tags(
+        file: File,
+        protected_tags_lists: list[list[str]],
+    ) -> bool:
         """Check if a file has any protected tags"""
 
         LOG.info(f"File {file.full_path} has the tags {file.tags}")
@@ -88,7 +100,10 @@ class CleanAPI:
             for hk_files in self.get_bundle_files(before=before, workflow=workflow):
                 hk_file: File
                 for hk_file in hk_files:
-                    if self.has_protected_tags(hk_file, protected_tags_lists=protected_tags_lists):
+                    if self.has_protected_tags(
+                        hk_file,
+                        protected_tags_lists=protected_tags_lists,
+                    ):
                         continue
 
                     file_path: Path = Path(hk_file.full_path)

@@ -3,23 +3,41 @@
 import logging
 
 from cg.cli.workflow.mip_dna.base import run
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_dna import (
+    MipDNAAnalysisAPI,
+)
 
 
 def test_cg_dry_run(
-    cli_runner, mocker, caplog, case_id, email_address, mip_dna_context, mip_dna_config_path
+    cli_runner,
+    mocker,
+    caplog,
+    case_id,
+    email_address,
+    mip_dna_context,
+    mip_dna_config_path,
 ):
     """Test print the MIP run to console"""
 
     caplog.set_level(logging.INFO)
 
-    mocker.patch.object(MipDNAAnalysisAPI, "get_target_bed_from_lims")
+    mocker.patch.object(
+        MipDNAAnalysisAPI,
+        "get_target_bed_from_lims",
+    )
     MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = mip_dna_config_path
 
     # GIVEN a cli function
     # WHEN we run a case in dry run mode
     result = cli_runner.invoke(
-        run, ["--dry-run", "--email", email_address, case_id], obj=mip_dna_context
+        run,
+        [
+            "--dry-run",
+            "--email",
+            email_address,
+            case_id,
+        ],
+        obj=mip_dna_context,
     )
     # THEN command is run successfully
     assert result.exit_code == 0
@@ -29,13 +47,22 @@ def test_cg_dry_run(
 
 
 def test_mip_dry_run(
-    cli_runner, mocker, caplog, case_id, email_address, mip_dna_context, mip_dna_config_path
+    cli_runner,
+    mocker,
+    caplog,
+    case_id,
+    email_address,
+    mip_dna_context,
+    mip_dna_config_path,
 ):
     """Test print the MIP run to console"""
 
     caplog.set_level(logging.INFO)
 
-    mocker.patch.object(MipDNAAnalysisAPI, "get_target_bed_from_lims")
+    mocker.patch.object(
+        MipDNAAnalysisAPI,
+        "get_target_bed_from_lims",
+    )
     MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = mip_dna_config_path
     mocker.patch.object(MipDNAAnalysisAPI, "run_analysis")
     MipDNAAnalysisAPI.run_analysis.return_value = 0
@@ -43,7 +70,14 @@ def test_mip_dry_run(
     # GIVEN a cli function
     # WHEN we run a case in dry run mode
     result = cli_runner.invoke(
-        run, ["--mip-dry-run", "--email", email_address, case_id], obj=mip_dna_context
+        run,
+        [
+            "--mip-dry-run",
+            "--email",
+            email_address,
+            case_id,
+        ],
+        obj=mip_dna_context,
     )
 
     # THEN command is run successfully
@@ -67,17 +101,27 @@ def test_mip_run(
 
     caplog.set_level(logging.INFO)
 
-    mocker.patch.object(MipDNAAnalysisAPI, "get_target_bed_from_lims")
+    mocker.patch.object(
+        MipDNAAnalysisAPI,
+        "get_target_bed_from_lims",
+    )
     MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = mip_dna_config_path
     mocker.patch.object(MipDNAAnalysisAPI, "run_analysis")
     MipDNAAnalysisAPI.run_analysis.return_value = 0
 
-    mocker.patch.object(MipDNAAnalysisAPI, "add_pending_trailblazer_analysis")
+    mocker.patch.object(
+        MipDNAAnalysisAPI,
+        "add_pending_trailblazer_analysis",
+    )
     MipDNAAnalysisAPI.add_pending_trailblazer_analysis.return_value = True
 
     # GIVEN a cli function
     # WHEN we run a case
-    result = cli_runner.invoke(run, ["--email", email_address, case_id], obj=mip_dna_context)
+    result = cli_runner.invoke(
+        run,
+        ["--email", email_address, case_id],
+        obj=mip_dna_context,
+    )
 
     # THEN command is run successfully
     assert result.exit_code == 0
@@ -100,7 +144,10 @@ def test_mip_run_fail(
 
     caplog.set_level(logging.INFO)
 
-    mocker.patch.object(MipDNAAnalysisAPI, "get_target_bed_from_lims")
+    mocker.patch.object(
+        MipDNAAnalysisAPI,
+        "get_target_bed_from_lims",
+    )
     MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = mip_dna_config_path
     mocker.patch.object(MipDNAAnalysisAPI, "run_analysis")
     MipDNAAnalysisAPI.run_analysis.return_value = 0
@@ -110,7 +157,11 @@ def test_mip_run_fail(
 
     # GIVEN a cli function
     # WHEN we run a case
-    result = cli_runner.invoke(run, ["--email", email_address, case_id], obj=mip_dna_context)
+    result = cli_runner.invoke(
+        run,
+        ["--email", email_address, case_id],
+        obj=mip_dna_context,
+    )
 
     # THEN command should return an exit fail code
     assert result.exit_code == 1

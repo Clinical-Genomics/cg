@@ -7,7 +7,9 @@ from cg.store.filters.status_metrics_filters import (
     filter_by_sample_internal_id,
     filter_total_read_count_for_sample,
 )
-from cg.store.models import SampleLaneSequencingMetrics
+from cg.store.models import (
+    SampleLaneSequencingMetrics,
+)
 from cg.store.store import Store
 from tests.meta.demultiplex.conftest import (
     flow_cell_name_demultiplexed_with_bcl_convert,
@@ -15,14 +17,17 @@ from tests.meta.demultiplex.conftest import (
 
 
 def test_filter_total_read_count_for_sample(
-    store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads: int
+    store_with_sequencing_metrics: Store,
+    sample_id: str,
+    expected_total_reads: int,
 ):
     # GIVEN a Store with sequencing metrics
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
 
     # WHEN getting total read counts for a sample
     total_reads_query: Query = filter_total_read_count_for_sample(
-        metrics=metrics, sample_internal_id=sample_id
+        metrics=metrics,
+        sample_internal_id=sample_id,
     )
 
     # THEN assert that the returned object is a Query
@@ -37,7 +42,9 @@ def test_filter_total_read_count_for_sample(
 
 
 def test_filter_metrics_for_flow_cell_sample_internal_id_and_lane(
-    store_with_sequencing_metrics: Store, sample_id: str, flow_cell_name: str
+    store_with_sequencing_metrics: Store,
+    sample_id: str,
+    flow_cell_name: str,
 ):
     # GIVEN a Store with sequencing metrics
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
@@ -66,13 +73,17 @@ def test_filter_metrics_for_flow_cell_sample_internal_id_and_lane(
 
 
 def test_filter_metrics_by_flow_cell_name(
-    store_with_sequencing_metrics: Store, flow_cell_name: str
+    store_with_sequencing_metrics: Store,
+    flow_cell_name: str,
 ):
     # GIVEN a Store with sequencing metrics
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
 
     # WHEN getting metrics for a flow cell name
-    metrics_query: Query = filter_by_flow_cell_name(metrics=metrics, flow_cell_name=flow_cell_name)
+    metrics_query: Query = filter_by_flow_cell_name(
+        metrics=metrics,
+        flow_cell_name=flow_cell_name,
+    )
 
     # THEN assert that the returned object is a Query
     assert isinstance(metrics_query, Query)
@@ -88,13 +99,17 @@ def test_filter_metrics_by_flow_cell_name(
         assert metric.flow_cell_name == flow_cell_name
 
 
-def test_filter_metrics_by_sample_internal_id(store_with_sequencing_metrics: Store, sample_id: str):
+def test_filter_metrics_by_sample_internal_id(
+    store_with_sequencing_metrics: Store,
+    sample_id: str,
+):
     # GIVEN a Store with sequencing metrics
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
 
     # WHEN getting metrics for a sample internal id
     metrics_query: Query = filter_by_sample_internal_id(
-        sample_internal_id=sample_id, metrics=metrics
+        sample_internal_id=sample_id,
+        metrics=metrics,
     )
 
     # THEN assert that the returned object is a Query
@@ -111,7 +126,9 @@ def test_filter_metrics_by_sample_internal_id(store_with_sequencing_metrics: Sto
         assert metric.sample_internal_id == sample_id
 
 
-def test_filter_above_q30_threshold(store_with_sequencing_metrics: Store):
+def test_filter_above_q30_threshold(
+    store_with_sequencing_metrics: Store,
+):
     # GIVEN a Store with sequencing metrics
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
     metric: SampleLaneSequencingMetrics | None = metrics.first()
@@ -138,14 +155,16 @@ def test_filter_above_q30_threshold(store_with_sequencing_metrics: Store):
 
 
 def test_filter_metrics_by_flow_cell_name(
-    store_with_sequencing_metrics: Store, flow_cell_name: str
+    store_with_sequencing_metrics: Store,
+    flow_cell_name: str,
 ):
     # GIVEN a Store with sequencing metrics
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
 
     # WHEN filtering metrics by flow cell name
     filtered_metrics: Query = filter_by_flow_cell_name(
-        metrics=metrics, flow_cell_name=flow_cell_name
+        metrics=metrics,
+        flow_cell_name=flow_cell_name,
     )
 
     # THEN assert that the returned object is a Query

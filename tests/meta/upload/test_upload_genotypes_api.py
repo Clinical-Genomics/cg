@@ -4,24 +4,32 @@ from datetime import datetime
 from pathlib import Path
 
 from cg.meta.upload.gt import UploadGenotypesAPI
-from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
+from cg.models.mip.mip_metrics_deliverables import (
+    MIPMetricsDeliverables,
+)
 from cg.store.models import Analysis
 
 
-def test_get_analysis_sex(case_qc_metrics_deliverables: Path, genotype_analysis_sex: dict):
+def test_get_analysis_sex(
+    case_qc_metrics_deliverables: Path,
+    genotype_analysis_sex: dict,
+):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI some qcmetrics data
 
     # WHEN fetching the predicted sex by the analysis
     sex: dict = UploadGenotypesAPI.analysis_sex(
-        self=UploadGenotypesAPI, qc_metrics_file=case_qc_metrics_deliverables
+        self=UploadGenotypesAPI,
+        qc_metrics_file=case_qc_metrics_deliverables,
     )
 
     # THEN assert that the the predicted sex per sample_id is returned
     assert sex == genotype_analysis_sex
 
 
-def test_get_parsed_qc_metrics_data(case_qc_metrics_deliverables: Path):
+def test_get_parsed_qc_metrics_data(
+    case_qc_metrics_deliverables: Path,
+):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI and the path to a qc_metrics file with case data
 
@@ -34,7 +42,11 @@ def test_get_parsed_qc_metrics_data(case_qc_metrics_deliverables: Path):
     assert isinstance(metrics_object, MIPMetricsDeliverables)
 
 
-def test_get_bcf_file(upload_genotypes_api: UploadGenotypesAPI, case_id: str, timestamp: datetime):
+def test_get_bcf_file(
+    upload_genotypes_api: UploadGenotypesAPI,
+    case_id: str,
+    timestamp: datetime,
+):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI populated with some data in housekeeper
     hk_version = upload_genotypes_api.hk.version(case_id, timestamp)

@@ -8,9 +8,15 @@ from cg.apps.sequencing_metrics_parser.parsers.bcl_convert_to_sequencing_statist
     create_bcl_convert_undetermined_metrics,
     create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell,
 )
-from cg.constants.demultiplexing import BclConverter
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.store.models import SampleLaneSequencingMetrics
+from cg.constants.demultiplexing import (
+    BclConverter,
+)
+from cg.models.flow_cell.flow_cell import (
+    FlowCellDirectoryData,
+)
+from cg.store.models import (
+    SampleLaneSequencingMetrics,
+)
 
 
 def create_sample_lane_sequencing_metrics_for_flow_cell(

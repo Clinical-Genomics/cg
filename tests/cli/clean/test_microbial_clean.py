@@ -43,12 +43,17 @@ def test_dry_run(
     for path in case_path_list:
         Path(path).mkdir(exist_ok=True, parents=True)
 
-    mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
+    mocker.patch.object(
+        TrailblazerAPI,
+        "is_latest_analysis_ongoing",
+    )
     TrailblazerAPI.is_latest_analysis_ongoing.return_value = False
 
     # WHEN dry running with dry run specified
     result = cli_runner.invoke(
-        clean_run_dir, [microsalt_case_clean_dry, "-d", "-y"], obj=clean_context_microsalt
+        clean_run_dir,
+        [microsalt_case_clean_dry, "-d", "-y"],
+        obj=clean_context_microsalt,
     )
 
     # THEN command should say it would have deleted
@@ -91,12 +96,17 @@ def test_clean_run(
     for path in case_path_list:
         Path(path).mkdir(exist_ok=True, parents=True)
 
-    mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
+    mocker.patch.object(
+        TrailblazerAPI,
+        "is_latest_analysis_ongoing",
+    )
     TrailblazerAPI.is_latest_analysis_ongoing.return_value = False
 
     # WHEN dry running with dry run specified
     result = cli_runner.invoke(
-        clean_run_dir, [microsalt_case_clean, "-y"], obj=clean_context_microsalt
+        clean_run_dir,
+        [microsalt_case_clean, "-y"],
+        obj=clean_context_microsalt,
     )
 
     # THEN command should say it would have deleted

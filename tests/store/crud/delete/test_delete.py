@@ -1,9 +1,19 @@
-from cg.store.models import Case, CaseSample, Flowcell, Sample
+from cg.store.models import (
+    Case,
+    CaseSample,
+    Flowcell,
+    Sample,
+)
 from cg.store.store import Store
-from tests.meta.demultiplex.conftest import populated_flow_cell_store
+from tests.meta.demultiplex.conftest import (
+    populated_flow_cell_store,
+)
 
 
-def test_delete_flow_cell(bcl2fastq_flow_cell_id: str, populated_flow_cell_store: Store):
+def test_delete_flow_cell(
+    bcl2fastq_flow_cell_id: str,
+    populated_flow_cell_store: Store,
+):
     """Test deleting a flow cell in Store."""
 
     # GIVEN a database containing a flow cell
@@ -87,7 +97,10 @@ def test_store_api_delete_all_empty_cases(
 
     # WHEN removing empty cases
     store_with_multiple_cases_and_samples.delete_cases_without_samples(
-        [case_id_without_samples, case_id_with_multiple_samples]
+        [
+            case_id_without_samples,
+            case_id_with_multiple_samples,
+        ]
     )
 
     # THEN no entry should be found for the empty case, but the one with samples should remain.
@@ -105,7 +118,8 @@ def test_store_api_delete_all_empty_cases(
 
 
 def test_store_api_delete_non_existing_case(
-    case_id_does_not_exist: str, store_with_multiple_cases_and_samples: Store
+    case_id_does_not_exist: str,
+    store_with_multiple_cases_and_samples: Store,
 ):
     """Test that nothing happens when trying to delete a case that does not exist."""
 
@@ -130,7 +144,8 @@ def test_store_api_delete_non_existing_case(
 
 
 def test_delete_flow_cell_entries_in_sample_lane_sequencing_metrics(
-    store_with_sequencing_metrics: Store, flow_cell_name: str
+    store_with_sequencing_metrics: Store,
+    flow_cell_name: str,
 ):
     """Test function to delete flow cell entries in sample_lane_sequencing_metrics table"""
 

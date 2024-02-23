@@ -16,7 +16,11 @@ LOG = logging.getLogger(__name__)
 class UploadToMutaccAPI:
     """API to upload finished cases to mutacc"""
 
-    def __init__(self, scout_api: ScoutAPI, mutacc_auto_api: MutaccAutoAPI):
+    def __init__(
+        self,
+        scout_api: ScoutAPI,
+        mutacc_auto_api: MutaccAutoAPI,
+    ):
         self.scout = scout_api
         self.mutacc_auto = mutacc_auto_api
 
@@ -25,7 +29,10 @@ class UploadToMutaccAPI:
         data: dict = self.data(case)
         if data:
             LOG.info(f"Extracting reads from case {case.id}")
-            self.mutacc_auto.extract_reads(case=data["case"], variants=data["causatives"])
+            self.mutacc_auto.extract_reads(
+                case=data["case"],
+                variants=data["causatives"],
+            )
 
     def data(self, case: scout_export.ScoutExportCase) -> dict[str, dict]:
         """
@@ -38,17 +45,34 @@ class UploadToMutaccAPI:
             data (dict): dictionary with case data, and data on causative variants
         """
 
-        if all([self._has_bam(case), self._has_causatives(case)]):
-            causatives = self.scout.get_causative_variants(case_id=case.id)
-            mutacc_case = remap(case.model_dump(), SCOUT_TO_MUTACC_CASE)
-            mutacc_variants = [
-                remap(variant.model_dump(), SCOUT_TO_MUTACC_VARIANTS) for variant in causatives
+        if all(
+            [
+                self._has_bam(case),
+                self._has_causatives(case),
             ]
-            return {"case": mutacc_case, "causatives": mutacc_variants}
+        ):
+            causatives = self.scout.get_causative_variants(case_id=case.id)
+            mutacc_case = remap(
+                case.model_dump(),
+                SCOUT_TO_MUTACC_CASE,
+            )
+            mutacc_variants = [
+                remap(
+                    variant.model_dump(),
+                    SCOUT_TO_MUTACC_VARIANTS,
+                )
+                for variant in causatives
+            ]
+            return {
+                "case": mutacc_case,
+                "causatives": mutacc_variants,
+            }
         return {}
 
     @staticmethod
-    def _has_bam(case: scout_export.ScoutExportCase) -> bool:
+    def _has_bam(
+        case: scout_export.ScoutExportCase,
+    ) -> bool:
         """
         Check that all samples in case has a given path to a bam file,
         and that the file exists
@@ -81,7 +105,9 @@ class UploadToMutaccAPI:
         return True
 
     @staticmethod
-    def _has_causatives(case: scout_export.ScoutExportCase) -> bool:
+    def _has_causatives(
+        case: scout_export.ScoutExportCase,
+    ) -> bool:
         """
         Check that the case has marked causative variants in scout
 
@@ -94,13 +120,19 @@ class UploadToMutaccAPI:
         if case.causatives:
             return True
 
-        LOG.info("case %s has no marked causatives in scout", case.id)
+        LOG.info(
+            "case %s has no marked causatives in scout",
+            case.id,
+        )
         return False
 
 
 # Reformat scout noutput to mutacc input
 
-MAPPER = namedtuple("mapper", ["field_name_1", "field_name_2", "conv"])
+MAPPER = namedtuple(
+    "mapper",
+    ["field_name_1", "field_name_2", "conv"],
+)
 
 
 def remap(input_dict: dict, mapper_list: tuple) -> dict:
@@ -142,7 +174,9 @@ def resolve_parent(scout_parent: str) -> str:
     return mutacc_parent
 
 
-def resolve_phenotype(scout_phenotype: int) -> str:
+def resolve_phenotype(
+    scout_phenotype: int,
+) -> str:
     """Convert scout phenotype to mutacc phenotype"""
     mutacc_phenotype = "unknown"
     if scout_phenotype == 1:
@@ -177,7 +211,11 @@ def get_gene_string(genes):
 SCOUT_TO_MUTACC_SAMPLE = (
     MAPPER("individual_id", "sample_id", str),
     MAPPER("sex", "sex", resolve_sex),
-    MAPPER("phenotype", "phenotype", resolve_phenotype),
+    MAPPER(
+        "phenotype",
+        "phenotype",
+        resolve_phenotype,
+    ),
     MAPPER("father", "father", resolve_parent),
     MAPPER("mother", "mother", resolve_parent),
     MAPPER("analysis_type", "analysis_type", str),
@@ -187,13 +225,37 @@ SCOUT_TO_MUTACC_SAMPLE = (
 SCOUT_TO_MUTACC_CASE = (
     MAPPER("id", "case_id", str),
     MAPPER("genome_build", "genome_build", str),
-    MAPPER("panels", "panels", lambda panels: [panel["panel_name"] for panel in panels]),
-    MAPPER("rank_model_version", "rank_model_version", str),
-    MAPPER("sv_rank_model_version", "sv_rank_model_version", str),
-    MAPPER("rank_score_threshold", "rank_score_threshold", int),
+    MAPPER(
+        "panels",
+        "panels",
+        lambda panels: [panel["panel_name"] for panel in panels],
+    ),
+    MAPPER(
+        "rank_model_version",
+        "rank_model_version",
+        str,
+    ),
+    MAPPER(
+        "sv_rank_model_version",
+        "sv_rank_model_version",
+        str,
+    ),
+    MAPPER(
+        "rank_score_threshold",
+        "rank_score_threshold",
+        int,
+    ),
     MAPPER("phenotype_terms", "phenotype_terms", list),
-    MAPPER("phenotype_groups", "phenotype_groups", list),
-    MAPPER("diagnosis_phenotypes", "diagnosis_phenotypes", list),
+    MAPPER(
+        "phenotype_groups",
+        "phenotype_groups",
+        list,
+    ),
+    MAPPER(
+        "diagnosis_phenotypes",
+        "diagnosis_phenotypes",
+        list,
+    ),
     MAPPER("diagnosis_genes", "diagnosis_genes", list),
     MAPPER(
         "individuals",
@@ -204,7 +266,11 @@ SCOUT_TO_MUTACC_CASE = (
 
 SCOUT_TO_MUTACC_FORMAT = (
     MAPPER("genotype_call", "GT", str),
-    MAPPER("allele_depths", "AD", lambda AD: ",".join([str(element) for element in AD])),
+    MAPPER(
+        "allele_depths",
+        "AD",
+        lambda AD: ",".join([str(element) for element in AD]),
+    ),
     MAPPER("read_depth", "DP", int),
     MAPPER("genotype_quality", "GQ", int),
     MAPPER("sample_id", "sample_id", str),
@@ -218,7 +284,11 @@ SCOUT_TO_MUTACC_VARIANTS = (
     MAPPER("reference", "REF", str),
     MAPPER("alternative", "ALT", str),
     MAPPER("quality", "QUAL", float),
-    MAPPER("filters", "FILTER", lambda filters: ",".join([str(filter) for filter in filters])),
+    MAPPER(
+        "filters",
+        "FILTER",
+        lambda filters: ",".join([str(filter) for filter in filters]),
+    ),
     MAPPER("end", "END", int),
     MAPPER("rank_score", "RankScore", int),
     MAPPER("category", "category", str),

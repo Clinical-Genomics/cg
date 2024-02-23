@@ -4,11 +4,18 @@ from cg.store.models import Customer
 from cg.store.store import Store
 
 
-@pytest.mark.parametrize("contact_type", ["delivery", "primary", "invoice"])
+@pytest.mark.parametrize(
+    "contact_type",
+    ["delivery", "primary", "invoice"],
+)
 def test_contact_storing(store: Store, contact_type, helpers):
     # GIVEN an empty database
     assert store._get_query(table=Customer).first() is None
-    internal_id, name, scout_access = "cust000", "Test customer", True
+    internal_id, name, scout_access = (
+        "cust000",
+        "Test customer",
+        True,
+    )
     contact_email = f"{contact_type}.contact@customer.se"
     contact_name = contact_type
 
@@ -29,12 +36,18 @@ def test_contact_storing(store: Store, contact_type, helpers):
 
     # THEN contact should be stored on the customer
     assert (
-        getattr(store.get_customer_by_internal_id(customer_internal_id=internal_id), contact_field)
+        getattr(
+            store.get_customer_by_internal_id(customer_internal_id=internal_id),
+            contact_field,
+        )
         == new_user
     )
 
 
-@pytest.mark.parametrize("contact_type", ["delivery", "primary", "invoice"])
+@pytest.mark.parametrize(
+    "contact_type",
+    ["delivery", "primary", "invoice"],
+)
 def test_contact_structure(store: Store, contact_type):
     # GIVEN the Customer model
 
@@ -52,7 +65,11 @@ def test_contact_structure(store: Store, contact_type):
 def test_add_basic(store: Store):
     # GIVEN an empty database
     assert (store._get_query(table=Customer)).first() is None
-    internal_id, name, scout_access = "cust000", "Test customer", True
+    internal_id, name, scout_access = (
+        "cust000",
+        "Test customer",
+        True,
+    )
     collaboration = store.add_collaboration("dummy_group", "dummy group")
 
     # WHEN adding a new customer

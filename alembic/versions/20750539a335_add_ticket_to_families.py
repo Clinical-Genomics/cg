@@ -35,11 +35,21 @@ class FamilySample(Base):
     __tablename__ = "family_sample"
 
     id = sa.Column(sa.types.Integer, primary_key=True)
-    family_id = sa.Column(sa.ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
-    sample_id = sa.Column(sa.ForeignKey("sample.id", ondelete="CASCADE"), nullable=False)
+    family_id = sa.Column(
+        sa.ForeignKey("family.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    sample_id = sa.Column(
+        sa.ForeignKey("sample.id", ondelete="CASCADE"),
+        nullable=False,
+    )
 
     family = sa.orm.relationship("Case", backref="links")
-    sample = sa.orm.relationship("Sample", foreign_keys=[sample_id], backref="links")
+    sample = sa.orm.relationship(
+        "Sample",
+        foreign_keys=[sample_id],
+        backref="links",
+    )
 
 
 class Sample(Base):
@@ -56,26 +66,51 @@ class Pool(Base):
 
 def upgrade():
     op.alter_column(
-        "sample", "ticket_number", new_column_name="original_ticket", type_=mysql.VARCHAR(32)
+        "sample",
+        "ticket_number",
+        new_column_name="original_ticket",
+        type_=mysql.VARCHAR(32),
     )
-    op.add_column("family", sa.Column("tickets", type_=mysql.VARCHAR(128), nullable=True))
+    op.add_column(
+        "family",
+        sa.Column(
+            "tickets",
+            type_=mysql.VARCHAR(128),
+            nullable=True,
+        ),
+    )
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
     for family in session.query(Case):
         if len(family.links) == 0:
             continue
         family.tickets = sorted(
-            family.links, key=lambda fam_samp: fam_samp.sample.created_at, reverse=True
+            family.links,
+            key=lambda fam_samp: fam_samp.sample.created_at,
+            reverse=True,
         )[0].sample.original_ticket
     session.commit()
 
-    op.alter_column("pool", "ticket_number", new_column_name="ticket", type_=mysql.VARCHAR(32))
+    op.alter_column(
+        "pool",
+        "ticket_number",
+        new_column_name="ticket",
+        type_=mysql.VARCHAR(32),
+    )
 
 
 def downgrade():
     op.alter_column(
-        "sample", "original_ticket", new_column_name="ticket_number", type_=mysql.INTEGER
+        "sample",
+        "original_ticket",
+        new_column_name="ticket_number",
+        type_=mysql.INTEGER,
     )
     op.drop_column("family", "tickets")
 
-    op.alter_column("pool", "ticket", new_column_name="ticket_number", type_=mysql.INTEGER)
+    op.alter_column(
+        "pool",
+        "ticket",
+        new_column_name="ticket_number",
+        type_=mysql.INTEGER,
+    )

@@ -12,7 +12,12 @@ from cg.cli.set.cases import set_cases
 from cg.constants import FlowCellStatus
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
-from cg.store.models import ApplicationVersion, Customer, Flowcell, Sample
+from cg.store.models import (
+    ApplicationVersion,
+    Customer,
+    Flowcell,
+    Sample,
+)
 from cg.store.store import Store
 
 CONFIRM = "Continue?"
@@ -67,8 +72,17 @@ def set_cmd():
     multiple=True,
     help="Give a property on sample and the value to set it to, e.g. -kv name Prov52",
 )
-@click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
-@click.option("-y", "--yes", is_flag=True, help="Answer yes on all confirmations")
+@click.option(
+    "--skip-lims",
+    is_flag=True,
+    help="Skip setting value in LIMS",
+)
+@click.option(
+    "-y",
+    "--yes",
+    is_flag=True,
+    help="Answer yes on all confirmations",
+)
 @click.argument("case_id", required=False)
 @click.pass_context
 def samples(
@@ -81,7 +95,11 @@ def samples(
 ):
     """Set values on many samples at the same time."""
     store: Store = context.obj.status_db
-    sample_objs: list[Sample] = _get_samples(case_id=case_id, identifiers=identifiers, store=store)
+    sample_objs: list[Sample] = _get_samples(
+        case_id=case_id,
+        identifiers=identifiers,
+        store=store,
+    )
 
     if not sample_objs:
         LOG.error("No samples to alter!")
@@ -97,11 +115,19 @@ def samples(
 
     for sample_obj in sample_objs:
         context.invoke(
-            sample, sample_id=sample_obj.internal_id, kwargs=kwargs, yes=yes, skip_lims=skip_lims
+            sample,
+            sample_id=sample_obj.internal_id,
+            kwargs=kwargs,
+            yes=yes,
+            skip_lims=skip_lims,
         )
 
 
-def _get_samples(case_id: str, identifiers: click.Tuple([str, str]), store: Store) -> list[Sample]:
+def _get_samples(
+    case_id: str,
+    identifiers: click.Tuple([str, str]),
+    store: Store,
+) -> list[Sample]:
     """Get samples that match both case_id and identifiers if given."""
     samples_by_case_id = None
     samples_by_id = None
@@ -120,7 +146,10 @@ def _get_samples(case_id: str, identifiers: click.Tuple([str, str]), store: Stor
     return sample_objs
 
 
-def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Store) -> list[Sample]:
+def _get_samples_by_identifiers(
+    identifiers: click.Tuple([str, str]),
+    store: Store,
+) -> list[Sample]:
     """Get samples matched by given set of identifiers."""
     identifier_args = {
         identifier_name: identifier_value for identifier_name, identifier_value in identifiers
@@ -140,7 +169,8 @@ def is_private_attribute(key: str) -> bool:
 
 
 def list_changeable_sample_attributes(
-    sample: Sample | None = None, skip_attributes: list[str] = []
+    sample: Sample | None = None,
+    skip_attributes: list[str] = [],
 ) -> None:
     """List changeable attributes on sample and its current value."""
     LOG.info("Below is a set of changeable sample attributes, to combine with -kv flag:\n")
@@ -156,7 +186,11 @@ def list_changeable_sample_attributes(
 
 
 @set_cmd.command()
-@click.option("-s", "--sample_id", help="List all available modifiable keys for sample")
+@click.option(
+    "-s",
+    "--sample_id",
+    help="List all available modifiable keys for sample",
+)
 @click.pass_obj
 def list_keys(
     context: CGConfig,
@@ -166,7 +200,8 @@ def list_keys(
     status_db: Store = context.status_db
     sample: Sample = status_db.get_sample_by_internal_id(internal_id=sample_id)
     list_changeable_sample_attributes(
-        sample=sample, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES
+        sample=sample,
+        skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES,
     )
 
 
@@ -181,8 +216,17 @@ def list_keys(
     multiple=True,
     help=HELP_KEY_VALUE,
 )
-@click.option(OPTION_LONG_SKIP_LIMS, is_flag=True, help=HELP_SKIP_LIMS)
-@click.option(OPTION_SHORT_YES, OPTION_LONG_YES, is_flag=True, help=HELP_YES)
+@click.option(
+    OPTION_LONG_SKIP_LIMS,
+    is_flag=True,
+    help=HELP_SKIP_LIMS,
+)
+@click.option(
+    OPTION_SHORT_YES,
+    OPTION_LONG_YES,
+    is_flag=True,
+    help=HELP_YES,
+)
 @click.pass_obj
 def sample(
     context: CGConfig,
@@ -220,7 +264,11 @@ def sample(
         else:
             new_value: str = value
 
-        if key in ["customer", "application_version", "priority"]:
+        if key in [
+            "customer",
+            "application_version",
+            "priority",
+        ]:
             if key == "priority":
                 if isinstance(value, str) and not value.isdigit():
                     new_key = "priority_human"
@@ -248,7 +296,10 @@ def sample(
             _update_comment(new_value, sample)
         else:
             setattr(sample, new_key, new_value)
-            _update_comment(_generate_comment(new_key, old_value, new_value), sample)
+            _update_comment(
+                _generate_comment(new_key, old_value, new_value),
+                sample,
+            )
 
         status_db.session.commit()
 
@@ -262,7 +313,10 @@ def sample(
                 raise click.Abort
 
             try:
-                context.lims_api.update_sample(lims_id=sample_id, **{new_key: new_value})
+                context.lims_api.update_sample(
+                    lims_id=sample_id,
+                    **{new_key: new_value},
+                )
                 LOG.info(f"Set LIMS/{new_key} to {new_value}")
             except LimsDataError as error:
                 LOG.error(f"Failed to set LIMS/{new_key} to {new_value}, {error}")
@@ -284,10 +338,18 @@ def _update_comment(comment, obj):
 
 
 @set_cmd.command()
-@click.option("-s", "--status", type=click.Choice(FlowCellStatus.statuses()))
+@click.option(
+    "-s",
+    "--status",
+    type=click.Choice(FlowCellStatus.statuses()),
+)
 @click.argument("flow_cell_name")
 @click.pass_obj
-def flowcell(context: CGConfig, flow_cell_name: str, status: str | None):
+def flowcell(
+    context: CGConfig,
+    flow_cell_name: str,
+    status: str | None,
+):
     """Update information about a flow cell."""
     status_db: Store = context.status_db
     flowcell_obj: Flowcell = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell_name)

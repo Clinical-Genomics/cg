@@ -1,6 +1,11 @@
-from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
+from cg.constants import (
+    DEFAULT_CAPTURE_KIT,
+    Workflow,
+)
 from cg.constants.constants import AnalysisType
-from cg.constants.gene_panel import GENOME_BUILD_37
+from cg.constants.gene_panel import (
+    GENOME_BUILD_37,
+)
 from cg.constants.pedigree import Pedigree
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -9,7 +14,11 @@ from cg.utils import Process
 
 
 class MipDNAAnalysisAPI(MipAnalysisAPI):
-    def __init__(self, config: CGConfig, workflow: Workflow = Workflow.MIP_DNA):
+    def __init__(
+        self,
+        config: CGConfig,
+        workflow: Workflow = Workflow.MIP_DNA,
+    ):
         super().__init__(config, workflow)
 
     @property
@@ -48,7 +57,9 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
         return self._process
 
     def config_sample(
-        self, link_obj: CaseSample, panel_bed: str | None
+        self,
+        link_obj: CaseSample,
+        panel_bed: str | None,
     ) -> dict[str, str | int | None]:
         """Return config sample data."""
         sample_data: dict[str, str | int] = self.get_sample_data(link_obj=link_obj)
@@ -66,7 +77,10 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
 
     def get_gene_panel(self, case_id: str) -> list[str]:
         """Create and return the aggregated gene panel file."""
-        return self._get_gene_panel(case_id=case_id, genome_build=GENOME_BUILD_37)
+        return self._get_gene_panel(
+            case_id=case_id,
+            genome_build=GENOME_BUILD_37,
+        )
 
     def get_managed_variants(self) -> list[str]:
         """Create and return the managed variants."""

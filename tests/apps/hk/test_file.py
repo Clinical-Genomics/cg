@@ -8,13 +8,19 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from tests.meta.compress.conftest import MockCompressionData
+from tests.meta.compress.conftest import (
+    MockCompressionData,
+)
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.small_helpers import SmallHelpers
 from tests.store_helpers import StoreHelpers
 
 
-def test_new_file(bed_file: Path, housekeeper_api: MockHousekeeperAPI, small_helpers: SmallHelpers):
+def test_new_file(
+    bed_file: Path,
+    housekeeper_api: MockHousekeeperAPI,
+    small_helpers: SmallHelpers,
+):
     """Test to create a new file with the Housekeeper API"""
     # GIVEN a housekeeper api without files and the path to an existing file
     assert small_helpers.length_of_iterable(housekeeper_api.files()) == 0
@@ -33,7 +39,9 @@ def test_new_file(bed_file: Path, housekeeper_api: MockHousekeeperAPI, small_hel
     assert small_helpers.length_of_iterable(housekeeper_api.files()) == 0
 
 
-def test_new_file_non_existing_path(housekeeper_api: MockHousekeeperAPI):
+def test_new_file_non_existing_path(
+    housekeeper_api: MockHousekeeperAPI,
+):
     """Test to create a new file with the Housekeeper API."""
     # GIVEN a housekeeper api without files and the path to a not existing file
     file_name = Path("a_file.hello")
@@ -71,7 +79,9 @@ def test_add_new_file(
 
     # WHEN creating a new file
     new_file: File = populated_housekeeper_api.add_file(
-        path=madeline_output, version_obj=version, tags=not_existing_hk_tag
+        path=madeline_output,
+        version_obj=version,
+        tags=not_existing_hk_tag,
     )
 
     # THEN assert a file object was created
@@ -85,7 +95,9 @@ def test_add_new_file(
     assert new_nr_files == nr_files_in_db + 1
 
 
-def test_get_file(populated_housekeeper_api: HousekeeperAPI):
+def test_get_file(
+    populated_housekeeper_api: HousekeeperAPI,
+):
     """Test to get a file from the database."""
     # GIVEN a housekeeper api with a file
     hk_file: File = populated_housekeeper_api.files().first()
@@ -113,10 +125,14 @@ def test_get_files_from_version(
     # GIVEN a Housekeeper API with some files
     version: Version = helpers.ensure_hk_version(real_housekeeper_api, hk_bundle_data)
     first_file: File = real_housekeeper_api.add_file(
-        path=observations_clinical_snv_file_path, version_obj=version, tags=hk_tag
+        path=observations_clinical_snv_file_path,
+        version_obj=version,
+        tags=hk_tag,
     )
     second_file: File = real_housekeeper_api.add_file(
-        path=observations_clinical_sv_file_path, version_obj=version, tags=hk_tag
+        path=observations_clinical_sv_file_path,
+        version_obj=version,
+        tags=hk_tag,
     )
 
     # GIVEN that the files exist in the version object
@@ -144,10 +160,14 @@ def test_get_latest_file_from_version(
     # GIVEN a Housekeeper API with some files
     version: Version = helpers.ensure_hk_version(real_housekeeper_api, hk_bundle_data)
     first_file: File = real_housekeeper_api.add_file(
-        path=observations_clinical_snv_file_path, version_obj=version, tags=hk_tag
+        path=observations_clinical_snv_file_path,
+        version_obj=version,
+        tags=hk_tag,
     )
     second_file: File = real_housekeeper_api.add_file(
-        path=observations_clinical_sv_file_path, version_obj=version, tags=hk_tag
+        path=observations_clinical_sv_file_path,
+        version_obj=version,
+        tags=hk_tag,
     )
 
     # GIVEN that the files exist in the version object
@@ -163,7 +183,10 @@ def test_get_latest_file_from_version(
     assert latest_file == second_file
 
 
-def test_get_file_from_latest_version(case_id: str, populated_housekeeper_api: HousekeeperAPI):
+def test_get_file_from_latest_version(
+    case_id: str,
+    populated_housekeeper_api: HousekeeperAPI,
+):
     """Test to get a file from the database from the latest version."""
     # GIVEN a housekeeper api with a file
     hk_file: File = populated_housekeeper_api.files().first()
@@ -173,7 +196,8 @@ def test_get_file_from_latest_version(case_id: str, populated_housekeeper_api: H
 
     # WHEN fetching the file
     hk_file: File = populated_housekeeper_api.get_file_from_latest_version(
-        bundle_name=case_id, tags=[hk_file.tags[0].name]
+        bundle_name=case_id,
+        tags=[hk_file.tags[0].name],
     )
 
     # THEN assert a file was returned
@@ -181,7 +205,9 @@ def test_get_file_from_latest_version(case_id: str, populated_housekeeper_api: H
 
 
 def test_get_files_from_latest_version(
-    case_id: str, populated_housekeeper_api: HousekeeperAPI, small_helpers: SmallHelpers
+    case_id: str,
+    populated_housekeeper_api: HousekeeperAPI,
+    small_helpers: SmallHelpers,
 ):
     """Test to get files from the database from the latest version."""
 
@@ -196,19 +222,24 @@ def test_get_files_from_latest_version(
 
     # GIVEN another file with the same tag
     populated_housekeeper_api.add_file(
-        path=Path("a_new_file.bed").as_posix(), tags=[hk_file.tags[0].name], version_obj=version
+        path=Path("a_new_file.bed").as_posix(),
+        tags=[hk_file.tags[0].name],
+        version_obj=version,
     )
 
     # WHEN fetching the files
     hk_files: list[File] = populated_housekeeper_api.get_files_from_latest_version(
-        bundle_name=case_id, tags=[hk_file.tags[0].name]
+        bundle_name=case_id,
+        tags=[hk_file.tags[0].name],
     )
 
     # THEN assert 2 files were returned
     assert small_helpers.length_of_iterable(hk_files) == 2
 
 
-def test_delete_file(populated_housekeeper_api: HousekeeperAPI):
+def test_delete_file(
+    populated_housekeeper_api: HousekeeperAPI,
+):
     """Test to delete a file from the database."""
     # GIVEN a housekeeper api with a file
     hk_file: File = populated_housekeeper_api.files().first()
@@ -223,7 +254,10 @@ def test_delete_file(populated_housekeeper_api: HousekeeperAPI):
     assert populated_housekeeper_api.get_file(hk_file.id) is None
 
 
-def test_get_included_path(populated_housekeeper_api: HousekeeperAPI, case_id: str):
+def test_get_included_path(
+    populated_housekeeper_api: HousekeeperAPI,
+    case_id: str,
+):
     """Test to get the included path for a file."""
     # GIVEN a populated housekeeper api and the root dir
     root_dir: Path = Path(populated_housekeeper_api.get_root_dir())
@@ -234,24 +268,37 @@ def test_get_included_path(populated_housekeeper_api: HousekeeperAPI, case_id: s
 
     # WHEN fetching the included path
     included_path: Path = populated_housekeeper_api.get_included_path(
-        root_dir=root_dir, version_obj=version, file_obj=hk_file
+        root_dir=root_dir,
+        version_obj=version,
+        file_obj=hk_file,
     )
 
     # THEN assert that there is no file existing in the included path
     assert included_path.exists() is False
 
     # THEN assert that the correct path was created
-    assert included_path == Path(root_dir, version.relative_root_dir, Path(hk_file.path).name)
+    assert included_path == Path(
+        root_dir,
+        version.relative_root_dir,
+        Path(hk_file.path).name,
+    )
 
 
-def test_get_include_file(populated_housekeeper_api: HousekeeperAPI, case_id: str):
+def test_get_include_file(
+    populated_housekeeper_api: HousekeeperAPI,
+    case_id: str,
+):
     """Test to get the included path for a file."""
     # GIVEN a populated housekeeper api and the root dir
     root_dir: Path = Path(populated_housekeeper_api.get_root_dir())
     version: Version = populated_housekeeper_api.last_version(case_id)
     hk_file: File = version.files[0]
     original_path: Path = Path(hk_file.path)
-    included_path: Path = Path(root_dir, version.relative_root_dir, original_path.name)
+    included_path: Path = Path(
+        root_dir,
+        version.relative_root_dir,
+        original_path.name,
+    )
 
     # GIVEN that the included file does not exist
     assert included_path.exists() is False
@@ -267,7 +314,9 @@ def test_get_include_file(populated_housekeeper_api: HousekeeperAPI, case_id: st
 
 
 def test_include_files_to_latest_version_when_included(
-    caplog, case_id: str, populated_housekeeper_api: HousekeeperAPI
+    caplog,
+    case_id: str,
+    populated_housekeeper_api: HousekeeperAPI,
 ):
     """Test to include files for a bundle."""
     # GIVEN a populated Housekeeper API and the root dir
@@ -310,13 +359,19 @@ def test_include_files_to_latest_version(
     version: Version = populated_housekeeper_api.last_version(case_id)
     hk_file: File = version.files[0]
     original_path: Path = Path(hk_file.path)
-    included_path: Path = Path(root_dir, version.relative_root_dir, original_path.name)
+    included_path: Path = Path(
+        root_dir,
+        version.relative_root_dir,
+        original_path.name,
+    )
 
     # GIVEN that the included file does not exist
     assert included_path.exists() is False
 
     new_file: File = populated_housekeeper_api.add_file(
-        path=madeline_output, version_obj=version, tags=not_existing_hk_tag
+        path=madeline_output,
+        version_obj=version,
+        tags=not_existing_hk_tag,
     )
     populated_housekeeper_api.commit()
 
@@ -347,7 +402,10 @@ def test_check_bundle_files(
 ):
     """Test to see if the function correctly identifies a file that is present and returns a lis without it."""
     # GIVEN a housekeeper version with a file
-    version: Version = populated_housekeeper_api.version(bundle=case_id, date=timestamp_yesterday)
+    version: Version = populated_housekeeper_api.version(
+        bundle=case_id,
+        date=timestamp_yesterday,
+    )
 
     # WHEN attempting to add two files, one existing and one new
     files_to_add: list[Path] = populated_housekeeper_api.check_bundle_files(
@@ -360,7 +418,9 @@ def test_check_bundle_files(
     assert files_to_add == [fastq_file]
 
 
-def test_get_tag_names_from_file(populated_housekeeper_api: HousekeeperAPI):
+def test_get_tag_names_from_file(
+    populated_housekeeper_api: HousekeeperAPI,
+):
     """Test get tag names on a file."""
     # GIVEN a housekeeper api with a file
     hk_file = populated_housekeeper_api.files().first()
@@ -403,7 +463,9 @@ def test_is_fastq_or_spring_in_all_bundles(
 
     # GIVEN a FASTQ file tag with a file included the bundle
     populated_housekeeper_api.add_and_include_file_to_latest_version(
-        file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
+        file=madeline_output,
+        bundle_name=case_id,
+        tags=[SequencingFileTag.FASTQ],
     )
 
     # WHEN fetching all files
@@ -426,7 +488,9 @@ def test_is_fastq_or_spring_in_all_bundles_when_missing(
 
     # GIVEN a FASTQ file tag in the bundle
     populated_housekeeper_api.add_file(
-        path=madeline_output, version_obj=version, tags=[SequencingFileTag.FASTQ]
+        path=madeline_output,
+        version_obj=version,
+        tags=[SequencingFileTag.FASTQ],
     )
 
     # GIVEN an empty bundle
@@ -456,7 +520,9 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles(
 
     # GIVEN a FASTQ file tag with a file included the bundle
     populated_housekeeper_api.add_and_include_file_to_latest_version(
-        file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
+        file=madeline_output,
+        bundle_name=case_id,
+        tags=[SequencingFileTag.FASTQ],
     )
 
     # GIVEN an empty bundle
@@ -497,7 +563,9 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles_and_files(
 
     # GIVEN a FASTQ file tag with a file included in the bundle
     populated_housekeeper_api.add_and_include_file_to_latest_version(
-        file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
+        file=madeline_output,
+        bundle_name=case_id,
+        tags=[SequencingFileTag.FASTQ],
     )
 
     # GIVEN an empty bundle
@@ -550,7 +618,9 @@ def test_is_fastq_or_spring_on_disk_in_all_bundles(
 
     # GIVEN a FASTQ file tag with a file on disk the bundle
     populated_housekeeper_api.add_and_include_file_to_latest_version(
-        file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
+        file=madeline_output,
+        bundle_name=case_id,
+        tags=[SequencingFileTag.FASTQ],
     )
 
     # WHEN fetching all files
@@ -576,7 +646,9 @@ def test_is_fastq_or_spring_on_disk_in_all_bundles_when_missing_file(
 
     # GIVEN a FASTQ file tag in the bundle
     populated_housekeeper_api.add_file(
-        path=madeline_output, version_obj=version, tags=[SequencingFileTag.FASTQ]
+        path=madeline_output,
+        version_obj=version,
+        tags=[SequencingFileTag.FASTQ],
     )
 
     # GIVEN an empty bundle
@@ -584,7 +656,9 @@ def test_is_fastq_or_spring_on_disk_in_all_bundles_when_missing_file(
 
     # GIVEN a FASTQ file tag in the bundle, but not on disk
     populated_housekeeper_api.add_file(
-        path="does_not_exist_on_disk", version_obj=version, tags=[SequencingFileTag.FASTQ]
+        path="does_not_exist_on_disk",
+        version_obj=version,
+        tags=[SequencingFileTag.FASTQ],
     )
 
     populated_housekeeper_api.commit()
@@ -611,7 +685,9 @@ def testis_fastq_or_spring_on_disk_in_all_bundles_when_multiple_bundles(
 
     # GIVEN a FASTQ file tag with a file included the bundle
     populated_housekeeper_api.add_and_include_file_to_latest_version(
-        file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
+        file=madeline_output,
+        bundle_name=case_id,
+        tags=[SequencingFileTag.FASTQ],
     )
 
     # GIVEN an empty bundle
@@ -636,7 +712,9 @@ def testis_fastq_or_spring_on_disk_in_all_bundles_when_multiple_bundles(
     assert was_true
 
 
-def test_get_non_archived_spring_path_and_bundle_name(populated_housekeeper_api: HousekeeperAPI):
+def test_get_non_archived_spring_path_and_bundle_name(
+    populated_housekeeper_api: HousekeeperAPI,
+):
     """Test fetching the path and associated bundle for each non-archived SPRING file."""
     # GIVEN a housekeeper_api containing spring_files which are not archived
 
@@ -648,14 +726,20 @@ def test_get_non_archived_spring_path_and_bundle_name(populated_housekeeper_api:
     # THEN each file should be a spring file
     # THEN none of the files should have an archive
     # THEN each of the files should have a corresponding bundle name
-    for bundle_name, file in files_and_bundle_names:
+    for (
+        bundle_name,
+        file,
+    ) in files_and_bundle_names:
         housekeeper_file: File = populated_housekeeper_api.files(path=file).first()
         assert SequencingFileTag.SPRING in [tag.name for tag in housekeeper_file.tags]
         assert not housekeeper_file.archive
         assert bundle_name == housekeeper_file.version.bundle.name
 
 
-def test_get_file_insensitive_path(bed_file: Path, populated_housekeeper_api: HousekeeperAPI):
+def test_get_file_insensitive_path(
+    bed_file: Path,
+    populated_housekeeper_api: HousekeeperAPI,
+):
     """Test that a file is fetched given its path."""
     # GIVEN the path of a file in Housekeeper API
 

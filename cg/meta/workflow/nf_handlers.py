@@ -5,7 +5,10 @@ from pathlib import Path
 from typing import Iterable
 
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.constants.constants import FileExtensions, FileFormat
+from cg.constants.constants import (
+    FileExtensions,
+    FileFormat,
+)
 from cg.constants.nextflow import (
     JAVA_MEMORY_HEADJOB,
     NXF_JVM_ARGS_ENV,
@@ -30,7 +33,11 @@ class NfTowerHandler(NfBaseHandler):
     """
 
     @classmethod
-    def get_tower_launch_parameters(cls, tower_workflow: str, command_args: dict) -> list[str]:
+    def get_tower_launch_parameters(
+        cls,
+        tower_workflow: str,
+        command_args: dict,
+    ) -> list[str]:
         """Returns a tower launch command given a dictionary with arguments."""
 
         tower_options: list[str] = build_command_from_dict(
@@ -51,7 +58,11 @@ class NfTowerHandler(NfBaseHandler):
         return ["launch"] + tower_options + [tower_workflow]
 
     @classmethod
-    def get_tower_relaunch_parameters(cls, from_tower_id: int, command_args: dict) -> list[str]:
+    def get_tower_relaunch_parameters(
+        cls,
+        from_tower_id: int,
+        command_args: dict,
+    ) -> list[str]:
         """Returns a tower relaunch command given a dictionary with arguments."""
 
         tower_options: list[str] = build_command_from_dict(
@@ -77,7 +88,9 @@ class NfTowerHandler(NfBaseHandler):
         ] + tower_options
 
     @staticmethod
-    def get_tower_id(stdout_lines: Iterable) -> str:
+    def get_tower_id(
+        stdout_lines: Iterable,
+    ) -> str:
         """Parse the stdout and return a workflow id. An example of the output to parse is:
         Case <CASE_ID> exists in status db
         Running RNAFUSION analysis for <CASE_ID>
@@ -93,12 +106,17 @@ class NfTowerHandler(NfBaseHandler):
                 return line.strip().split()[1]
 
     @classmethod
-    def get_last_tower_id(cls, case_id: str, trailblazer_config: Path) -> int:
+    def get_last_tower_id(
+        cls,
+        case_id: str,
+        trailblazer_config: Path,
+    ) -> int:
         """Return the previously-stored NF-Tower ID."""
         if not trailblazer_config.exists():
             raise FileNotFoundError(f"No NF-Tower ID found for case {case_id}.")
         return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML, file_path=trailblazer_config
+            file_format=FileFormat.YAML,
+            file_path=trailblazer_config,
         ).get(case_id)[-1]
 
 
@@ -114,17 +132,30 @@ class NextflowHandler(NfBaseHandler):
 
     @classmethod
     def get_nextflow_run_parameters(
-        cls, case_id: str, workflow_path: str, root_dir: str, command_args: dict
+        cls,
+        case_id: str,
+        workflow_path: str,
+        root_dir: str,
+        command_args: dict,
     ) -> list[str]:
         """Returns a Nextflow run command given a dictionary with arguments."""
 
         nextflow_options: list[str] = build_command_from_dict(
-            options=dict((f"-{arg}", command_args.get(arg, True)) for arg in ("log", "config")),
+            options=dict(
+                (
+                    f"-{arg}",
+                    command_args.get(arg, True),
+                )
+                for arg in ("log", "config")
+            ),
             exclude_true=True,
         )
         run_options: list[str] = build_command_from_dict(
             options=dict(
-                (f"-{arg.replace('_', '-')}", command_args.get(arg, None))
+                (
+                    f"-{arg.replace('_', '-')}",
+                    command_args.get(arg, None),
+                )
                 for arg in (
                     "work_dir",
                     "resume",
@@ -138,7 +169,9 @@ class NextflowHandler(NfBaseHandler):
         return nextflow_options + ["run", workflow_path] + run_options
 
     @staticmethod
-    def get_head_job_sbatch_path(case_directory: Path) -> Path:
+    def get_head_job_sbatch_path(
+        case_directory: Path,
+    ) -> Path:
         """Path to Nextflow sbatch for the head job."""
         return Path(case_directory, "nextflow_head_job").with_suffix(FileExtensions.SBATCH)
 
@@ -175,6 +208,7 @@ class NextflowHandler(NfBaseHandler):
         sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
         sbatch_path: Path = cls.get_head_job_sbatch_path(case_directory=case_directory)
         sbatch_number: int = slurm_api.submit_sbatch(
-            sbatch_content=sbatch_content, sbatch_path=sbatch_path
+            sbatch_content=sbatch_content,
+            sbatch_path=sbatch_path,
         )
         return sbatch_number

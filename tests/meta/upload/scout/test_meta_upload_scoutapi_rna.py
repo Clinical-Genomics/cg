@@ -10,10 +10,17 @@ from housekeeper.store.models import File
 import cg.store as Store
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.constants.scout import ScoutCustomCaseReportTags
-from cg.constants.sequencing import SequencingMethod
+from cg.constants.scout import (
+    ScoutCustomCaseReportTags,
+)
+from cg.constants.sequencing import (
+    SequencingMethod,
+)
 from cg.exc import CgDataError
-from cg.meta.upload.scout.uploadscoutapi import RNADNACollection, UploadScoutAPI
+from cg.meta.upload.scout.uploadscoutapi import (
+    RNADNACollection,
+    UploadScoutAPI,
+)
 from cg.store.models import Case, Sample
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
@@ -37,11 +44,20 @@ def ensure_two_dna_tumour_matches(
     rna_store: Store,
 ) -> None:
     """Ensures that we have one RNA case that has two matching DNA cases via subject id and tumour state."""
-    set_is_tumour_on_case(store=rna_store, case_id=rna_case_id, is_tumour=True)
+    set_is_tumour_on_case(
+        store=rna_store,
+        case_id=rna_case_id,
+        is_tumour=True,
+    )
     subject_id: str = get_subject_id_from_case(store=rna_store, case_id=rna_case_id)
-    set_is_tumour_on_case(store=rna_store, case_id=dna_case_id, is_tumour=True)
+    set_is_tumour_on_case(
+        store=rna_store,
+        case_id=dna_case_id,
+        is_tumour=True,
+    )
     dna_extra_case = helpers.ensure_case(
-        store=rna_store, customer=rna_store.get_case_by_internal_id(dna_case_id).customer
+        store=rna_store,
+        customer=rna_store.get_case_by_internal_id(dna_case_id).customer,
     )
     another_sample_id = helpers.add_sample(
         store=rna_store,
@@ -51,7 +67,11 @@ def ensure_two_dna_tumour_matches(
         name=another_sample_id,
         subject_id=subject_id,
     )
-    helpers.add_relationship(store=rna_store, sample=another_sample_id, case=dna_extra_case)
+    helpers.add_relationship(
+        store=rna_store,
+        sample=another_sample_id,
+        case=dna_extra_case,
+    )
     rna_store.session.commit()
 
 
@@ -75,7 +95,11 @@ def ensure_extra_rna_case_match(
         internal_id=another_rna_sample_id,
         subject_id=subject_id,
     )
-    helpers.add_relationship(store=rna_store, sample=another_rna_sample_id, case=rna_extra_case)
+    helpers.add_relationship(
+        store=rna_store,
+        sample=another_rna_sample_id,
+        case=rna_extra_case,
+    )
 
 
 def test_upload_rna_alignment_file_to_scout(
@@ -263,7 +287,11 @@ def test_upload_research_rna_fusion_report_to_scout(
 
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
-    upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True, research=True)
+    upload_scout_api.upload_fusion_report_to_scout(
+        case_id=rna_case_id,
+        dry_run=True,
+        research=True,
+    )
 
     # THEN the fusion report file should have been uploaded to the connected sample on the dna case in scout
     assert "Upload Research fusion report finished!" in caplog.text
@@ -372,8 +400,16 @@ def test_upload_rna_fusion_report_to_scout_tumour_non_matching(
     """Test that an RNA case's gene fusion report is not uploaded if the is_tumour is not matching"""
 
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via is_tumour (i.e. different is_tumour)
-    set_is_tumour_on_case(store=rna_store, case_id=rna_case_id, is_tumour=True)
-    set_is_tumour_on_case(store=rna_store, case_id=dna_case_id, is_tumour=False)
+    set_is_tumour_on_case(
+        store=rna_store,
+        case_id=rna_case_id,
+        is_tumour=True,
+    )
+    set_is_tumour_on_case(
+        store=rna_store,
+        case_id=dna_case_id,
+        is_tumour=False,
+    )
     rna_store.session.commit()
     upload_scout_api.status_db = rna_store
 
@@ -398,8 +434,16 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_non_matching(
     """Test that A RNA case's gene fusion report and junction splice files for all samples is not uploaded if the is_tumour is not matching"""
 
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via is_tumour (i.e. different is_tumour)
-    set_is_tumour_on_case(store=rna_store, case_id=rna_case_id, is_tumour=True)
-    set_is_tumour_on_case(store=rna_store, case_id=dna_case_id, is_tumour=False)
+    set_is_tumour_on_case(
+        store=rna_store,
+        case_id=rna_case_id,
+        is_tumour=True,
+    )
+    set_is_tumour_on_case(
+        store=rna_store,
+        case_id=dna_case_id,
+        is_tumour=False,
+    )
     rna_store.session.commit()
     upload_scout_api.status_db = rna_store
 
@@ -424,8 +468,16 @@ def test_upload_splice_junctions_bed_to_scout_tumour_non_matching(
     """Test that A RNA case's junction splice files for all samples is not uploaded if the is_tumour is not matching"""
 
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via is_tumour (i.e. different is_tumour)
-    set_is_tumour_on_case(store=rna_store, case_id=rna_case_id, is_tumour=True)
-    set_is_tumour_on_case(store=rna_store, case_id=dna_case_id, is_tumour=False)
+    set_is_tumour_on_case(
+        store=rna_store,
+        case_id=rna_case_id,
+        is_tumour=True,
+    )
+    set_is_tumour_on_case(
+        store=rna_store,
+        case_id=dna_case_id,
+        is_tumour=False,
+    )
     rna_store.session.commit()
     upload_scout_api.status_db = rna_store
 
@@ -452,7 +504,13 @@ def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
     """Test that an RNA case's gene fusion report is not uploaded if the is_tumour has too many DNA-matches"""
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
-    ensure_two_dna_tumour_matches(dna_case_id, another_sample_id, helpers, rna_case_id, rna_store)
+    ensure_two_dna_tumour_matches(
+        dna_case_id,
+        another_sample_id,
+        helpers,
+        rna_case_id,
+        rna_store,
+    )
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA case has a research fusion report in Housekeeper
@@ -478,7 +536,13 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
     """Test that A RNA case's gene fusion report and junction splice files for all samples is not uploaded if the RNA-sample has too many DNA-matches"""
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
-    ensure_two_dna_tumour_matches(dna_case_id, another_sample_id, helpers, rna_case_id, rna_store)
+    ensure_two_dna_tumour_matches(
+        dna_case_id,
+        another_sample_id,
+        helpers,
+        rna_case_id,
+        rna_store,
+    )
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA sample has a bigWig in Housekeeper
@@ -504,7 +568,13 @@ def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
     """Test that A RNA case's junction splice files for all samples is not uploaded if the RNA-sample has too many DNA-matches"""
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
-    ensure_two_dna_tumour_matches(dna_case_id, another_sample_id, helpers, rna_case_id, rna_store)
+    ensure_two_dna_tumour_matches(
+        dna_case_id,
+        another_sample_id,
+        helpers,
+        rna_case_id,
+        rna_store,
+    )
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA sample has a junction bed in Housekeeper
@@ -530,12 +600,20 @@ def test_get_application_prep_category(
 
     # GIVEN an RNA sample that is connected by subject ID to one RNA and one DNA sample in other cases
 
-    ensure_extra_rna_case_match(another_rna_sample_id, helpers, rna_case_id, rna_store)
+    ensure_extra_rna_case_match(
+        another_rna_sample_id,
+        helpers,
+        rna_case_id,
+        rna_store,
+    )
     upload_scout_api.status_db = rna_store
 
     dna_sample: Sample = rna_store.get_sample_by_internal_id(dna_sample_son_id)
     another_rna_sample_id: Sample = rna_store.get_sample_by_internal_id(another_rna_sample_id)
-    all_son_rna_dna_samples: list[Sample] = [dna_sample, another_rna_sample_id]
+    all_son_rna_dna_samples: list[Sample] = [
+        dna_sample,
+        another_rna_sample_id,
+    ]
 
     # WHEN running the method to filter a list of Sample objects containing RNA and DNA samples connected by subject_id
     only_son_dna_samples = upload_scout_api._get_application_prep_category(all_son_rna_dna_samples)
@@ -705,12 +783,17 @@ def test_get_multiqc_html_report(
     # GIVEN a DNA case with a multiqc-htlml report
     case: Case = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
     multiqc_file: File = mip_dna_analysis_hk_api.files(
-        bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
+        bundle=dna_case_id,
+        tags=[ScoutCustomCaseReportTags.MULTIQC],
     )[0]
 
     # WHEN getting the multiqc html report
-    report_type, multiqc_report = upload_mip_analysis_scout_api.get_multiqc_html_report(
-        case_id=dna_case_id, workflow=case.data_analysis
+    (
+        report_type,
+        multiqc_report,
+    ) = upload_mip_analysis_scout_api.get_multiqc_html_report(
+        case_id=dna_case_id,
+        workflow=case.data_analysis,
     )
 
     # THEN the multiqc html report should be returned and the correct report type
@@ -730,7 +813,8 @@ def test_upload_report_to_scout(
 
     # GIVEN a DNA case with a multiqc-htlml report
     multiqc_file: File = mip_dna_analysis_hk_api.files(
-        bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
+        bundle=dna_case_id,
+        tags=[ScoutCustomCaseReportTags.MULTIQC],
     )[0]
     assert multiqc_file
 
@@ -764,7 +848,8 @@ def test_upload_rna_report_to_successful_dna_case_in_scout(
 
     # GIVEN an RNA case with a multiqc-htlml report
     multiqc_file: File = mip_rna_analysis_hk_api.files(
-        bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
+        bundle=rna_case_id,
+        tags=[ScoutCustomCaseReportTags.MULTIQC],
     )[0]
 
     # WHEN uploading a report to a completed DNA case in Scout
@@ -807,7 +892,8 @@ def test_upload_rna_report_to_not_yet_uploaded_dna_case_in_scout(
 
     # GIVEN an RNA case with a multiqc-htlml report
     multiqc_file: File = mip_rna_analysis_hk_api.files(
-        bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
+        bundle=rna_case_id,
+        tags=[ScoutCustomCaseReportTags.MULTIQC],
     )[0]
 
     # WHEN finding the related DNA case with no successful upload

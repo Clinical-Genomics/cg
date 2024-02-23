@@ -6,15 +6,22 @@ from pathlib import Path
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
-from cg.cli.workflow.rnafusion.base import report_deliver
+from cg.cli.workflow.rnafusion.base import (
+    report_deliver,
+)
 from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.rnafusion import (
+    RnafusionAnalysisAPI,
+)
 from cg.models.cg_config import CGConfig
 
 
-def test_without_options(cli_runner: CliRunner, rnafusion_context: CGConfig):
+def test_without_options(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+):
     """Test command without case_id argument."""
     # GIVEN no case_id
 
@@ -43,7 +50,11 @@ def test_with_missing_case(
     )
 
     # WHEN running
-    result = cli_runner.invoke(report_deliver, [case_id_does_not_exist], obj=rnafusion_context)
+    result = cli_runner.invoke(
+        report_deliver,
+        [case_id_does_not_exist],
+        obj=rnafusion_context,
+    )
 
     # THEN command should NOT successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
@@ -65,7 +76,11 @@ def test_without_samples(
     case_id: str = no_sample_case_id
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(report_deliver, [case_id, "--dry-run"], obj=rnafusion_context)
+    result = cli_runner.invoke(
+        report_deliver,
+        [case_id, "--dry-run"],
+        obj=rnafusion_context,
+    )
 
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -97,7 +112,11 @@ def test_report_deliver_successful(
     )
 
     # WHEN running
-    result = cli_runner.invoke(report_deliver, [rnafusion_case_id], obj=rnafusion_context)
+    result = cli_runner.invoke(
+        report_deliver,
+        [rnafusion_case_id],
+        obj=rnafusion_context,
+    )
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -107,7 +126,9 @@ def test_report_deliver_successful(
 
     # THEN deliverables content should match the expected values
     deliverables_content: str = ReadFile.get_content_from_file(
-        file_format=FileFormat.TXT, file_path=rnafusion_deliverables_file_path, read_to_string=True
+        file_format=FileFormat.TXT,
+        file_path=rnafusion_deliverables_file_path,
+        read_to_string=True,
     )
     for field in deliverables_template_content[0].keys():
         assert field in deliverables_content

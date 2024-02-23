@@ -122,7 +122,12 @@ class MockScoutAPI(ScoutAPI):
 
         return self._cases
 
-    def upload_delivery_report(self, report_path: str, case_id: str, update: bool = False):
+    def upload_delivery_report(
+        self,
+        report_path: str,
+        case_id: str,
+        update: bool = False,
+    ):
         """Load a delivery report into a case in the database
 
         If the report already exists the function will exit.

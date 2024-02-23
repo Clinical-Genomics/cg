@@ -16,7 +16,10 @@ from pathlib import Path
 
 from cg.constants import FileExtensions
 from cg.io.gzip import read_gzip_first_line
-from cg.models.fastq import FastqFileMeta, GetFastqFileMeta
+from cg.models.fastq import (
+    FastqFileMeta,
+    GetFastqFileMeta,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -28,7 +31,9 @@ DEFAULT_INDEX = (
 )
 
 
-def _is_undetermined_in_path(file_path: Path) -> bool:
+def _is_undetermined_in_path(
+    file_path: Path,
+) -> bool:
     return "Undetermined" in file_path
 
 
@@ -43,7 +48,10 @@ class FastqHandler:
         with open(concat_file, "wb") as write_file_obj:
             for filename in files:
                 with open(filename, "rb") as file_descriptor:
-                    shutil.copyfileobj(file_descriptor, write_file_obj)
+                    shutil.copyfileobj(
+                        file_descriptor,
+                        write_file_obj,
+                    )
 
         size_before = FastqHandler.size_before(files)
         size_after = FastqHandler.size_after(concat_file)
@@ -94,12 +102,16 @@ class FastqHandler:
             file_path.unlink()
 
     @staticmethod
-    def get_concatenated_name(linked_fastq_name: str) -> str:
+    def get_concatenated_name(
+        linked_fastq_name: str,
+    ) -> str:
         """ "create a name for the concatenated file for some read files"""
         return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
 
     @staticmethod
-    def parse_fastq_header(line: str) -> FastqFileMeta | None:
+    def parse_fastq_header(
+        line: str,
+    ) -> FastqFileMeta | None:
         """Parse and return fastq header metadata.
         Handle Illumina's two different header formats
         @see https://en.wikipedia.org/wiki/FASTQ_format
@@ -114,12 +126,17 @@ class FastqHandler:
             raise exception
 
     @staticmethod
-    def parse_file_data(fastq_path: Path) -> FastqFileMeta:
+    def parse_file_data(
+        fastq_path: Path,
+    ) -> FastqFileMeta:
         header_line: str = read_gzip_first_line(file_path=fastq_path)
         fastq_file_meta: FastqFileMeta = FastqHandler.parse_fastq_header(header_line)
         fastq_file_meta.path = fastq_path
         fastq_file_meta.undetermined = _is_undetermined_in_path(fastq_path)
-        matches = re.findall(r"-l[1-9]t([1-9]{2})_", str(fastq_path))
+        matches = re.findall(
+            r"-l[1-9]t([1-9]{2})_",
+            str(fastq_path),
+        )
         if len(matches) > 0:
             fastq_file_meta.flow_cell_id = f"{fastq_file_meta.flow_cell_id}-{matches[0]}"
         return fastq_file_meta
@@ -214,12 +231,16 @@ class MutantFastqHandler(FastqHandler):
         return f"{flow_cell}_L{lane}_{meta}_{read_direction}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
     @staticmethod
-    def get_concatenated_name(linked_fastq_name: str) -> str:
+    def get_concatenated_name(
+        linked_fastq_name: str,
+    ) -> str:
         """ "Create a name for the concatenated file from multiple lanes"""
         return "_".join(linked_fastq_name.split("_")[2:])
 
     @staticmethod
-    def get_nanopore_header_info(line: str) -> dict:
+    def get_nanopore_header_info(
+        line: str,
+    ) -> dict:
         fastq_meta = {"flowcell": None}
         header_metadata: list = line.split(" ")
         flowcell = header_metadata[5].split("=")
@@ -236,7 +257,9 @@ class MutantFastqHandler(FastqHandler):
         return f"{flowcell}_{sample}_{meta}_{filenr}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
     @staticmethod
-    def parse_nanopore_file_data(fastq_path: Path) -> dict:
+    def parse_nanopore_file_data(
+        fastq_path: Path,
+    ) -> dict:
         with gzip.open(fastq_path) as handle:
             header_line = handle.readline().decode()
             header_info: dict = MutantFastqHandler.get_nanopore_header_info(line=header_line)

@@ -5,7 +5,10 @@ from pathlib import Path
 from subprocess import CalledProcessError
 
 from cg.constants.constants import FileFormat
-from cg.exc import CaseNotFoundError, LoqusdbDeleteCaseError
+from cg.exc import (
+    CaseNotFoundError,
+    LoqusdbDeleteCaseError,
+)
 from cg.io.controller import ReadStream
 from cg.utils import Process
 from cg.utils.dict import get_list_from_dictionary
@@ -19,7 +22,10 @@ class LoqusdbAPI:
     def __init__(self, binary_path: str, config_path: str):
         self.binary_path = binary_path
         self.config_path = config_path
-        self.process = Process(binary=self.binary_path, config=self.config_path)
+        self.process = Process(
+            binary=self.binary_path,
+            config=self.config_path,
+        )
 
     def load(
         self,
@@ -53,17 +59,27 @@ class LoqusdbAPI:
 
     def get_case(self, case_id: str) -> dict | None:
         """Return a case found in Loqusdb."""
-        cases_parameters = ["cases", "-c", case_id, "--to-json"]
+        cases_parameters = [
+            "cases",
+            "-c",
+            case_id,
+            "--to-json",
+        ]
         self.process.run_command(parameters=cases_parameters)
         if not self.process.stdout:  # Case not in loqusdb, stdout of loqusdb command will be empty.
             LOG.info(f"Case {case_id} not found in {repr(self)}")
             return None
 
         return ReadStream.get_content_from_stream(
-            file_format=FileFormat.JSON, stream=self.process.stdout
+            file_format=FileFormat.JSON,
+            stream=self.process.stdout,
         )[0]
 
-    def get_duplicate(self, profile_vcf_path: Path, profile_threshold: float) -> dict | None:
+    def get_duplicate(
+        self,
+        profile_vcf_path: Path,
+        profile_threshold: float,
+    ) -> dict | None:
         """Find matching profiles in Loqusdb."""
         duplicates_params = {
             "--check-vcf": profile_vcf_path.as_posix(),
@@ -81,12 +97,17 @@ class LoqusdbAPI:
             return None
 
         return ReadStream.get_content_from_stream(
-            file_format=FileFormat.JSON, stream=self.process.stdout
+            file_format=FileFormat.JSON,
+            stream=self.process.stdout,
         )
 
     def delete_case(self, case_id: str) -> None:
         """Remove a case from Loqusdb."""
-        delete_call_parameters = ["delete", "-c", case_id]
+        delete_call_parameters = [
+            "delete",
+            "-c",
+            case_id,
+        ]
         self.process.run_command(parameters=delete_call_parameters)
         for line in self.process.stderr_lines():
             if f"INFO Removing case {case_id}" in line:
@@ -99,7 +120,9 @@ class LoqusdbAPI:
         LOG.error(f"Could not delete case {case_id} from {repr(self)}")
         raise LoqusdbDeleteCaseError
 
-    def get_nr_of_variants_in_file(self) -> dict[str, int]:
+    def get_nr_of_variants_in_file(
+        self,
+    ) -> dict[str, int]:
         """Return the number of variants in the uploaded to Loqusdb file."""
         nr_of_variants: int = 0
         for line in self.process.stderr_lines():

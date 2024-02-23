@@ -5,7 +5,11 @@ import logging
 import click
 
 from cg.apps.lims import LimsAPI
-from cg.meta.transfer import PoolState, SampleState, TransferLims
+from cg.meta.transfer import (
+    PoolState,
+    SampleState,
+    TransferLims,
+)
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
@@ -23,23 +27,44 @@ def transfer_group(context: CGConfig):
 
 @transfer_group.command("lims")
 @click.option(
-    "-s", "--status", type=click.Choice(["received", "prepared", "delivered"]), default="received"
+    "-s",
+    "--status",
+    type=click.Choice(["received", "prepared", "delivered"]),
+    default="received",
 )
 @click.option(
-    "-i", "--include", type=click.Choice(["unset", "not-invoiced", "all"]), default="unset"
+    "-i",
+    "--include",
+    type=click.Choice(["unset", "not-invoiced", "all"]),
+    default="unset",
 )
-@click.option("--sample-id", help="Lims Submitted Sample id. use together with status.")
+@click.option(
+    "--sample-id",
+    help="Lims Submitted Sample id. use together with status.",
+)
 @click.pass_obj
-def check_samples_in_lims(context: CGConfig, status: str, include: str, sample_id: str):
+def check_samples_in_lims(
+    context: CGConfig,
+    status: str,
+    include: str,
+    sample_id: str,
+):
     """Check if samples have been updated in LIMS."""
     transfer_api: TransferLims = context.meta_apis["transfer_lims_api"]
     transfer_api.transfer_samples(
-        status_type=SampleState[status.upper()], include=include, sample_id=sample_id
+        status_type=SampleState[status.upper()],
+        include=include,
+        sample_id=sample_id,
     )
 
 
 @transfer_group.command("pools")
-@click.option("-s", "--status", type=click.Choice(["received", "delivered"]), default="delivered")
+@click.option(
+    "-s",
+    "--status",
+    type=click.Choice(["received", "delivered"]),
+    default="delivered",
+)
 @click.pass_obj
 def set_dates_of_pools(context: CGConfig, status: str):
     """

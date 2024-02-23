@@ -4,9 +4,13 @@ from pathlib import Path
 import click
 from pydantic import ValidationError
 
-from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
+from cg.apps.demultiplex.sample_sheet.api import (
+    SampleSheetAPI,
+)
 from cg.constants.constants import DRY_RUN
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
+from cg.constants.demultiplexing import (
+    OPTION_BCL_CONVERTER,
+)
 from cg.exc import SampleSheetError
 from cg.models.cg_config import CGConfig
 
@@ -19,7 +23,10 @@ def sample_sheet_commands():
 
 
 @sample_sheet_commands.command(name="validate")
-@click.argument("sheet", type=click.Path(exists=True, dir_okay=False))
+@click.argument(
+    "sheet",
+    type=click.Path(exists=True, dir_okay=False),
+)
 @click.pass_obj
 def validate_sample_sheet(context: CGConfig, sheet: click.Path):
     """
@@ -29,7 +36,10 @@ def validate_sample_sheet(context: CGConfig, sheet: click.Path):
     sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     try:
         sample_sheet_api.validate_sample_sheet(Path(sheet))
-    except (SampleSheetError, ValidationError) as error:
+    except (
+        SampleSheetError,
+        ValidationError,
+    ) as error:
         LOG.error("Sample sheet failed validation")
         raise click.Abort from error
     LOG.info("Sample sheet passed validation")
@@ -39,7 +49,11 @@ def validate_sample_sheet(context: CGConfig, sheet: click.Path):
 @click.argument("flow-cell-name")
 @OPTION_BCL_CONVERTER
 @DRY_RUN
-@click.option("--force", is_flag=True, help="Skips the validation of the sample sheet")
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Skips the validation of the sample sheet",
+)
 @click.pass_obj
 def create_sheet(
     context: CGConfig,
@@ -59,7 +73,8 @@ def create_sheet(
     sample_sheet_api.set_dry_run(dry_run)
     sample_sheet_api.set_force(force)
     sample_sheet_api.get_or_create_sample_sheet(
-        flow_cell_name=flow_cell_name, bcl_converter=bcl_converter
+        flow_cell_name=flow_cell_name,
+        bcl_converter=bcl_converter,
     )
 
 

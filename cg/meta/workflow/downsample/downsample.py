@@ -2,7 +2,9 @@ import logging
 from pathlib import Path
 
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.meta.workflow.downsample.sbatch import WORKFLOW_TEMPLATE
+from cg.meta.workflow.downsample.sbatch import (
+    WORKFLOW_TEMPLATE,
+)
 from cg.models.cg_config import CGConfig
 from cg.store.models import Sample
 
@@ -111,8 +113,13 @@ class DownsampleWorkflow:
         LOG.info(f"Time for down sampling: {self._time}")
         return self._time
 
-    def write_and_submit_sbatch_script(self) -> int:
-        sbatch_path = Path(self.output_fastq_dir, self.sbatch_name)
+    def write_and_submit_sbatch_script(
+        self,
+    ) -> int:
+        sbatch_path = Path(
+            self.output_fastq_dir,
+            self.sbatch_name,
+        )
         self.slurm_api.set_dry_run(dry_run=self.dry_run)
 
         return self.slurm_api.submit_sbatch(

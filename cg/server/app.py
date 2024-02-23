@@ -1,12 +1,22 @@
 import coloredlogs
 import requests
-from flask import Flask, redirect, session, url_for
+from flask import (
+    Flask,
+    redirect,
+    session,
+    url_for,
+)
 from flask_admin.base import AdminIndexView
 from flask_dance.consumer import oauth_authorized
-from flask_dance.contrib.google import google, make_google_blueprint
+from flask_dance.contrib.google import (
+    google,
+    make_google_blueprint,
+)
 from sqlalchemy.orm import scoped_session
 
-from cg.store.database import get_scoped_session_registry
+from cg.store.database import (
+    get_scoped_session_registry,
+)
 from cg.store.models import (
     Analysis,
     Application,
@@ -58,7 +68,10 @@ def _configure_extensions(app: Flask):
     ext.lims.init_app(app)
     if app.config["OSTICKET_API_KEY"]:
         ext.osticket.init_app(app)
-    ext.admin.init_app(app, index_view=AdminIndexView(endpoint="admin"))
+    ext.admin.init_app(
+        app,
+        index_view=AdminIndexView(endpoint="admin"),
+    )
     app.json_provider_class = ext.CustomJSONEncoder
 
 
@@ -73,7 +86,10 @@ def _register_blueprints(app: Flask):
     oauth_bp = make_google_blueprint(
         client_id=app.config["GOOGLE_OAUTH_CLIENT_ID"],
         client_secret=app.config["GOOGLE_OAUTH_CLIENT_SECRET"],
-        scope=["openid", "https://www.googleapis.com/auth/userinfo.email"],
+        scope=[
+            "openid",
+            "https://www.googleapis.com/auth/userinfo.email",
+        ],
     )
 
     @oauth_authorized.connect_via(oauth_bp)
@@ -115,7 +131,10 @@ def _register_admin_views():
     ext.admin.add_view(admin.PanelView(Panel, ext.db.session))
     ext.admin.add_view(admin.UserView(User, ext.db.session))
     ext.admin.add_view(
-        admin.SampleLaneSequencingMetricsView(SampleLaneSequencingMetrics, ext.db.session)
+        admin.SampleLaneSequencingMetricsView(
+            SampleLaneSequencingMetrics,
+            ext.db.session,
+        )
     )
 
     # Business data views

@@ -5,10 +5,15 @@ import logging
 import click
 
 from cg.cli.utils import echo_lines
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
+from cg.cli.workflow.commands import (
+    ARGUMENT_CASE_ID,
+    OPTION_DRY,
+)
 from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
+from cg.meta.workflow.raredisease import (
+    RarediseaseAnalysisAPI,
+)
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)

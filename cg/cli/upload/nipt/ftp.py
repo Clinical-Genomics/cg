@@ -20,15 +20,25 @@ def ftp():
 @ftp.command("case")
 @click.argument("case_id", required=True)
 @click.option("--dry-run", is_flag=True)
-@click.option("--force", is_flag=True, help="Force upload of case to databases, despite qc")
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Force upload of case to databases, despite qc",
+)
 @click.pass_obj
-def nipt_upload_case(context: CGConfig, case_id: str, dry_run: bool, force: bool):
+def nipt_upload_case(
+    context: CGConfig,
+    case_id: str,
+    dry_run: bool,
+    force: bool,
+):
     """Upload the results file of a NIPT case"""
     nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context)
     nipt_upload_api.set_dry_run(dry_run=dry_run)
 
     if force or nipt_upload_api.flowcell_passed_qc_value(
-        case_id=case_id, q30_threshold=Q30_THRESHOLD
+        case_id=case_id,
+        q30_threshold=Q30_THRESHOLD,
     ):
         LOG.info("*** NIPT FTP UPLOAD START ***")
 
@@ -66,4 +76,8 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
 
     for analysis in analyses:
         case_id = analysis.case.internal_id
-        context.invoke(nipt_upload_case, case_id=case_id, dry_run=dry_run)
+        context.invoke(
+            nipt_upload_case,
+            case_id=case_id,
+            dry_run=dry_run,
+        )

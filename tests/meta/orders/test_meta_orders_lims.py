@@ -9,9 +9,15 @@ from cg.models.orders.order import OrderIn
 
 def test_to_lims_mip(mip_order_to_submit):
     # GIVEN a scout order for a trio
-    order_data = OrderIn.parse_obj(obj=mip_order_to_submit, project=OrderType.MIP_DNA)
+    order_data = OrderIn.parse_obj(
+        obj=mip_order_to_submit,
+        project=OrderType.MIP_DNA,
+    )
     # WHEN parsing the order to format for LIMS import
-    samples: list[LimsSample] = build_lims_sample(customer="cust003", samples=order_data.samples)
+    samples: list[LimsSample] = build_lims_sample(
+        customer="cust003",
+        samples=order_data.samples,
+    )
 
     # THEN it should list all samples
     assert len(samples) == 4
@@ -40,10 +46,16 @@ def test_to_lims_mip(mip_order_to_submit):
 
 def test_to_lims_fastq(fastq_order_to_submit):
     # GIVEN a fastq order for two samples; normal vs. tumour
-    order_data = OrderIn.parse_obj(obj=fastq_order_to_submit, project=OrderType.FASTQ)
+    order_data = OrderIn.parse_obj(
+        obj=fastq_order_to_submit,
+        project=OrderType.FASTQ,
+    )
 
     # WHEN parsing the order to format for LIMS
-    samples: list[LimsSample] = build_lims_sample(customer="dummyCust", samples=order_data.samples)
+    samples: list[LimsSample] = build_lims_sample(
+        customer="dummyCust",
+        samples=order_data.samples,
+    )
 
     # THEN should "work"
     assert len(samples) == 2
@@ -57,10 +69,16 @@ def test_to_lims_fastq(fastq_order_to_submit):
 
 def test_to_lims_rml(rml_order_to_submit):
     # GIVEN a rml order for four samples
-    order_data = OrderIn.parse_obj(obj=rml_order_to_submit, project=OrderType.RML)
+    order_data = OrderIn.parse_obj(
+        obj=rml_order_to_submit,
+        project=OrderType.RML,
+    )
 
     # WHEN parsing for LIMS
-    samples: list[LimsSample] = build_lims_sample(customer="dummyCust", samples=order_data.samples)
+    samples: list[LimsSample] = build_lims_sample(
+        customer="dummyCust",
+        samples=order_data.samples,
+    )
 
     # THEN it should have found the same number of samples
     assert len(samples) == 4
@@ -73,12 +91,20 @@ def test_to_lims_rml(rml_order_to_submit):
     assert first_sample.udfs.index_number == "1"
 
 
-def test_to_lims_microbial(microbial_order_to_submit):
+def test_to_lims_microbial(
+    microbial_order_to_submit,
+):
     # GIVEN a microbial order for three samples
-    order_data = OrderIn.parse_obj(obj=microbial_order_to_submit, project=OrderType.MICROSALT)
+    order_data = OrderIn.parse_obj(
+        obj=microbial_order_to_submit,
+        project=OrderType.MICROSALT,
+    )
 
     # WHEN parsing for LIMS
-    samples: list[LimsSample] = build_lims_sample(customer="cust000", samples=order_data.samples)
+    samples: list[LimsSample] = build_lims_sample(
+        customer="cust000",
+        samples=order_data.samples,
+    )
     # THEN it should "work"
 
     assert len(samples) == 5
@@ -94,12 +120,20 @@ def test_to_lims_microbial(microbial_order_to_submit):
     assert first_sample["udfs"]["volume"] == "1"
 
 
-def test_to_lims_sarscov2(sarscov2_order_to_submit):
+def test_to_lims_sarscov2(
+    sarscov2_order_to_submit,
+):
     # GIVEN a sarscov2 order for samples
-    order_data = OrderIn.parse_obj(obj=sarscov2_order_to_submit, project=OrderType.SARS_COV_2)
+    order_data = OrderIn.parse_obj(
+        obj=sarscov2_order_to_submit,
+        project=OrderType.SARS_COV_2,
+    )
 
     # WHEN parsing for LIMS
-    samples: list[LimsSample] = build_lims_sample(customer="cust000", samples=order_data.samples)
+    samples: list[LimsSample] = build_lims_sample(
+        customer="cust000",
+        samples=order_data.samples,
+    )
 
     # THEN it should have found the same number of samples
     assert len(samples) == 5
@@ -121,14 +155,25 @@ def test_to_lims_sarscov2(sarscov2_order_to_submit):
 
 
 @pytest.mark.parametrize(
-    "project", [OrderType.BALSAMIC, OrderType.BALSAMIC_UMI, OrderType.BALSAMIC_QC]
+    "project",
+    [
+        OrderType.BALSAMIC,
+        OrderType.BALSAMIC_UMI,
+        OrderType.BALSAMIC_QC,
+    ],
 )
 def test_to_lims_balsamic(balsamic_order_to_submit, project):
     # GIVEN a cancer order for a sample
-    order_data = OrderIn.parse_obj(obj=balsamic_order_to_submit, project=project)
+    order_data = OrderIn.parse_obj(
+        obj=balsamic_order_to_submit,
+        project=project,
+    )
 
     # WHEN parsing the order to format for LIMS import
-    samples: list[LimsSample] = build_lims_sample(customer="cust000", samples=order_data.samples)
+    samples: list[LimsSample] = build_lims_sample(
+        customer="cust000",
+        samples=order_data.samples,
+    )
     # THEN it should list all samples
 
     assert len(samples) == 1

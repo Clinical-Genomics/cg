@@ -20,10 +20,18 @@ def upgrade():
     op.create_unique_constraint(
         "uix_flowcell_sample_lane",
         "sample_lane_sequencing_metrics",
-        ["flow_cell_name", "sample_internal_id", "flow_cell_lane_number"],
+        [
+            "flow_cell_name",
+            "sample_internal_id",
+            "flow_cell_lane_number",
+        ],
     )
 
 
 def downgrade():
     # Drop the unique constraint
-    op.drop_constraint("uix_flowcell_sample_lane", "sample_lane_sequencing_metrics", type_="unique")
+    op.drop_constraint(
+        "uix_flowcell_sample_lane",
+        "sample_lane_sequencing_metrics",
+        type_="unique",
+    )

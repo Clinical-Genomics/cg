@@ -3,7 +3,12 @@
 import logging
 
 
-def test_decompress_spring(populated_decompress_spring_api, compression_files, sample, caplog):
+def test_decompress_spring(
+    populated_decompress_spring_api,
+    compression_files,
+    sample,
+    caplog,
+):
     """Test to compress all fastq files for a sample"""
     caplog.set_level(logging.DEBUG)
     compress_api = populated_decompress_spring_api

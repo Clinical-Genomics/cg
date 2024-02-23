@@ -6,7 +6,9 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
-from cg.cli.workflow.rnafusion.base import config_case
+from cg.cli.workflow.rnafusion.base import (
+    config_case,
+)
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
@@ -17,7 +19,11 @@ LOG = logging.getLogger(__name__)
     "context",
     ["rnafusion_context", "taxprofiler_context"],
 )
-def test_config_case_without_options(cli_runner: CliRunner, context: CGConfig, request):
+def test_config_case_without_options(
+    cli_runner: CliRunner,
+    context: CGConfig,
+    request,
+):
     """Test config_case for Taxprofiler and Rnafusion without options."""
     context = request.getfixturevalue(context)
 
@@ -50,7 +56,11 @@ def test_config_case_with_missing_case(
     assert not context.status_db.get_case_by_internal_id(internal_id=case_id_does_not_exist)
 
     # WHEN running
-    result = cli_runner.invoke(config_case, [case_id_does_not_exist], obj=context)
+    result = cli_runner.invoke(
+        config_case,
+        [case_id_does_not_exist],
+        obj=context,
+    )
 
     # THEN command should not exit successfully
     assert result.exit_code != EXIT_SUCCESS

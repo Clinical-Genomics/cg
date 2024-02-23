@@ -4,9 +4,18 @@ import logging
 
 import click
 
-from cg.cli.workflow.balsamic.base import config_case, run, start
-from cg.cli.workflow.commands import link, resolve_compression
-from cg.meta.workflow.balsamic_pon import BalsamicPonAnalysisAPI
+from cg.cli.workflow.balsamic.base import (
+    config_case,
+    run,
+    start,
+)
+from cg.cli.workflow.commands import (
+    link,
+    resolve_compression,
+)
+from cg.meta.workflow.balsamic_pon import (
+    BalsamicPonAnalysisAPI,
+)
 
 LOG = logging.getLogger(__name__)
 

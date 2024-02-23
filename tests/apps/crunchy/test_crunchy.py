@@ -5,20 +5,29 @@ from pathlib import Path
 from typing import Any
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.crunchy.files import get_tmp_dir, update_metadata_date
+from cg.apps.crunchy.files import (
+    get_tmp_dir,
+    update_metadata_date,
+)
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, WriteFile
 from cg.models import CompressionData
 
 
-def test_get_tmp_path_correct_place(project_dir: Path):
+def test_get_tmp_path_correct_place(
+    project_dir: Path,
+):
     """Test to get the path to a temporary directory"""
     # GIVEN a crunchy API
     prefix = "spring_"
     suffix = "fastq_"
 
     # WHEN creating a tmpdir path
-    tmp_dir = get_tmp_dir(prefix=prefix, suffix=suffix, base=str(project_dir))
+    tmp_dir = get_tmp_dir(
+        prefix=prefix,
+        suffix=suffix,
+        base=str(project_dir),
+    )
 
     # THEN assert that the path is correct
     assert isinstance(tmp_dir, str)
@@ -41,7 +50,9 @@ def test_set_dry_run(crunchy_config: dict[str, dict[str, Any]]):
 
 
 def test_is_fastq_compression_possible(
-    crunchy_config: dict[str, dict[str, Any]], compression_object: CompressionData, caplog
+    crunchy_config: dict[str, dict[str, Any]],
+    compression_object: CompressionData,
+    caplog,
 ):
     """Test if FASTQ compression is possible under correct circumstances
 
@@ -66,7 +77,9 @@ def test_is_fastq_compression_possible(
 
 
 def test_is_fastq_compression_possible_compression_pending(
-    crunchy_config: dict[str, dict[str, Any]], compression_object: CompressionData, caplog
+    crunchy_config: dict[str, dict[str, Any]],
+    compression_object: CompressionData,
+    caplog,
 ):
     """Test if FASTQ compression is possible when FASTQ compression is pending
 
@@ -93,7 +106,9 @@ def test_is_fastq_compression_possible_compression_pending(
 
 
 def test_is_fastq_compression_possible_spring_exists(
-    crunchy_config: dict[str, dict[str, Any]], compression_object: CompressionData, caplog
+    crunchy_config: dict[str, dict[str, Any]],
+    compression_object: CompressionData,
+    caplog,
 ):
     """Test if FASTQ compression is possible when FASTQ compression is done
 
@@ -140,7 +155,9 @@ def test_is_compression_done(
 
 
 def test_is_compression_done_no_spring(
-    real_crunchy_api: CrunchyAPI, compression_object: CompressionData, caplog
+    real_crunchy_api: CrunchyAPI,
+    compression_object: CompressionData,
+    caplog,
 ):
     """Test if compression is done when no SPRING archive"""
     caplog.set_level(logging.DEBUG)
@@ -159,7 +176,9 @@ def test_is_compression_done_no_spring(
 
 
 def test_is_compression_done_no_flag_spring(
-    real_crunchy_api: CrunchyAPI, compression_object: CompressionData, caplog
+    real_crunchy_api: CrunchyAPI,
+    compression_object: CompressionData,
+    caplog,
 ):
     """Test if SPRING compression is done when no metadata file"""
     caplog.set_level(logging.DEBUG)
@@ -227,7 +246,8 @@ def test_is_compression_done_spring_new_files(
     # GIVEN that the files where updated less than three weeks ago
     update_metadata_date(metadata_file)
     content: list[dict[str, str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=metadata_file
+        file_format=FileFormat.JSON,
+        file_path=metadata_file,
     )
     for file_info in content:
         assert "updated" in file_info
@@ -263,12 +283,17 @@ def test_is_compression_done_spring_old_files(
 
     # GIVEN that the files where updated less than three weeks ago
     update_metadata_date(metadata_file)
-    content = ReadFile.get_content_from_file(file_format=FileFormat.JSON, file_path=metadata_file)
+    content = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON,
+        file_path=metadata_file,
+    )
     for file_info in content:
         file_info["updated"] = "2019-01-01"
 
     WriteFile.write_file_from_content(
-        content=content, file_format=FileFormat.JSON, file_path=metadata_file
+        content=content,
+        file_format=FileFormat.JSON,
+        file_path=metadata_file,
     )
 
     # WHEN checking if SPRING compression is done
@@ -281,7 +306,9 @@ def test_is_compression_done_spring_old_files(
 
 
 def test_is_spring_decompression_possible_no_fastq(
-    real_crunchy_api: CrunchyAPI, compression_object: CompressionData, caplog
+    real_crunchy_api: CrunchyAPI,
+    compression_object: CompressionData,
+    caplog,
 ):
     """Test if decompression is possible when there are no FASTQ files
 
@@ -308,7 +335,9 @@ def test_is_spring_decompression_possible_no_fastq(
 
 
 def test_is_spring_decompression_possible_no_spring(
-    real_crunchy_api: CrunchyAPI, compression_object: CompressionData, caplog
+    real_crunchy_api: CrunchyAPI,
+    compression_object: CompressionData,
+    caplog,
 ):
     """Test if decompression is possible when there are no SPRING archive
 
@@ -327,7 +356,9 @@ def test_is_spring_decompression_possible_no_spring(
 
 
 def test_is_spring_decompression_possible_fastq(
-    real_crunchy_api: CrunchyAPI, compression_object: CompressionData, caplog
+    real_crunchy_api: CrunchyAPI,
+    compression_object: CompressionData,
+    caplog,
 ):
     """Test if decompression is possible when there are existing FASTQ files
 
@@ -351,7 +382,8 @@ def test_is_spring_decompression_possible_fastq(
 
 
 def test_is_not_pending_when_no_flag_file(
-    real_crunchy_api: CrunchyAPI, compression_object: CompressionData
+    real_crunchy_api: CrunchyAPI,
+    compression_object: CompressionData,
 ):
     """Test if SPRING compression is pending when no flag file"""
     # GIVEN a crunchy-api, and a FASTQ file
@@ -365,7 +397,10 @@ def test_is_not_pending_when_no_flag_file(
     assert result is False
 
 
-def test_is_pending(real_crunchy_api: CrunchyAPI, compression_object: CompressionData):
+def test_is_pending(
+    real_crunchy_api: CrunchyAPI,
+    compression_object: CompressionData,
+):
     """Test if SPRING compression is pending when pending file exists"""
     # GIVEN a crunchy-api, and FASTQ files
     # GIVEN a existing pending flag

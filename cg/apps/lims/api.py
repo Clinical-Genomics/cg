@@ -4,7 +4,11 @@ import datetime as dt
 import logging
 
 from dateutil.parser import parse as parse_date
-from genologics.entities import Artifact, Process, Sample
+from genologics.entities import (
+    Artifact,
+    Process,
+    Sample,
+)
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
@@ -19,7 +23,12 @@ from cg.exc import LimsDataError
 from ...constants import Priority
 from .order import OrderHandler
 
-SEX_MAP = {"F": "female", "M": "male", "Unknown": "unknown", "unknown": "unknown"}
+SEX_MAP = {
+    "F": "female",
+    "M": "male",
+    "Unknown": "unknown",
+    "unknown": "unknown",
+}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 AM_METHODS = {
     "1464": "Automated TruSeq DNA PCR-free library preparation method",
@@ -37,7 +46,12 @@ AM_METHODS = {
     "1830": "NovaSeq 6000 Sequencing method",
     "2234": "Method - Illumina Stranded mRNA Library Preparation",
 }
-METHOD_INDEX, METHOD_DOCUMENT_INDEX, METHOD_VERSION_INDEX, METHOD_TYPE_INDEX = 0, 1, 2, 3
+(
+    METHOD_INDEX,
+    METHOD_DOCUMENT_INDEX,
+    METHOD_VERSION_INDEX,
+    METHOD_TYPE_INDEX,
+) = (0, 1, 2, 3)
 
 LOG = logging.getLogger(__name__)
 
@@ -47,7 +61,11 @@ class LimsAPI(Lims, OrderHandler):
 
     def __init__(self, config):
         lconf = config["lims"]
-        super(LimsAPI, self).__init__(lconf["host"], lconf["username"], lconf["password"])
+        super(LimsAPI, self).__init__(
+            lconf["host"],
+            lconf["username"],
+            lconf["password"],
+        )
 
     def sample(self, lims_id: str):
         """Fetch a sample from the LIMS database."""
@@ -56,7 +74,10 @@ class LimsAPI(Lims, OrderHandler):
 
     def samples_in_pools(self, pool_name, projectname):
         """Fetch all samples from a pool"""
-        return self.get_samples(udf={"pool name": str(pool_name)}, projectname=projectname)
+        return self.get_samples(
+            udf={"pool name": str(pool_name)},
+            projectname=projectname,
+        )
 
     @staticmethod
     def _export_project(lims_project) -> dict:
@@ -138,7 +159,9 @@ class LimsAPI(Lims, OrderHandler):
 
         for process_type in step_names_udfs:
             artifacts = self.get_artifacts(
-                samplelimsid=lims_id, process_type=process_type, type="Analyte"
+                samplelimsid=lims_id,
+                process_type=process_type,
+                type="Analyte",
             )
             udf_key = step_names_udfs[process_type]
             capture_kits = capture_kits.union(
@@ -165,11 +188,18 @@ class LimsAPI(Lims, OrderHandler):
 
     def family(self, customer: str, family: str):
         """Fetch information about a family of samples."""
-        filters = {"customer": customer, "familyID": family}
+        filters = {
+            "customer": customer,
+            "familyID": family,
+        }
         lims_samples = self.get_samples(udf=filters)
         samples_data = [self._export_sample(lims_sample) for lims_sample in lims_samples]
         # get family level data
-        family_data = {"family": family, "customer": customer, "samples": []}
+        family_data = {
+            "family": family,
+            "customer": customer,
+            "samples": [],
+        }
         priorities = set()
         panels = set()
 
@@ -202,7 +232,12 @@ class LimsAPI(Lims, OrderHandler):
         return Process(self, id=process_id)
 
     def update_sample(
-        self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs
+        self,
+        lims_id: str,
+        sex=None,
+        target_reads: int = None,
+        name: str = None,
+        **kwargs,
     ):
         """Update information about a sample."""
         lims_sample = Sample(self, id=lims_id)
@@ -260,7 +295,11 @@ class LimsAPI(Lims, OrderHandler):
         Returns:
             sorted list of tuples
         """
-        return sorted(sort_list, key=lambda sort_tuple: sort_tuple[0], reverse=True)
+        return sorted(
+            sort_list,
+            key=lambda sort_tuple: sort_tuple[0],
+            reverse=True,
+        )
 
     def _get_methods(self, step_names_udfs, lims_id):
         """
@@ -270,22 +309,38 @@ class LimsAPI(Lims, OrderHandler):
         methods = []
 
         for process_name in step_names_udfs:
-            artifacts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
+            artifacts = self.get_artifacts(
+                process_type=process_name,
+                samplelimsid=lims_id,
+            )
             if not artifacts:
                 continue
             # Get a list of parent processes for the artifacts
             processes: list[Process] = self.get_processes_from_artifacts(artifacts=artifacts)
             for process in processes:
                 # Check which type of method document has been used
-                method_type: str = self.get_method_type(process, step_names_udfs[process_name])
-                udf_key_method_doc, udf_key_version = self.get_method_udf_values(
-                    step_names_udfs[process_name], method_type
+                method_type: str = self.get_method_type(
+                    process,
+                    step_names_udfs[process_name],
+                )
+                (
+                    udf_key_method_doc,
+                    udf_key_version,
+                ) = self.get_method_udf_values(
+                    step_names_udfs[process_name],
+                    method_type,
                 )
                 methods.append(
                     (
                         process.date_run,
-                        self.get_method_document(process, udf_key_method_doc),
-                        self.get_method_version(process, udf_key_version),
+                        self.get_method_document(
+                            process,
+                            udf_key_method_doc,
+                        ),
+                        self.get_method_version(
+                            process,
+                            udf_key_version,
+                        ),
                         method_type,
                     )
                 )
@@ -313,7 +368,9 @@ class LimsAPI(Lims, OrderHandler):
         return None
 
     @staticmethod
-    def get_processes_from_artifacts(artifacts: list[Artifact]) -> list[Process]:
+    def get_processes_from_artifacts(
+        artifacts: list[Artifact],
+    ) -> list[Process]:
         """
         Get a list of parent processes from a set of given artifacts.
         """
@@ -404,7 +461,9 @@ class LimsAPI(Lims, OrderHandler):
 
         for process_type in step_names_udfs:
             artifacts: list[Artifact] = self.get_artifacts(
-                samplelimsid=sample_id, process_type=process_type, type=LimsArtifactTypes.ANALYTE
+                samplelimsid=sample_id,
+                process_type=process_type,
+                type=LimsArtifactTypes.ANALYTE,
             )
 
             udf_key: str = step_names_udfs[process_type]
@@ -418,7 +477,8 @@ class LimsAPI(Lims, OrderHandler):
         return input_amounts
 
     def _get_last_used_input_amount(
-        self, input_amounts: list[tuple[dt.datetime, float]]
+        self,
+        input_amounts: list[tuple[dt.datetime, float]],
     ) -> float | None:
         """Return the latest used input amount."""
         sorted_input_amounts: list[tuple[dt.datetime, float]] = self._sort_by_date_run(

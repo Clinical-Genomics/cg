@@ -2,7 +2,9 @@
 
 import click
 
-from cg.meta.upload.coverage import UploadCoverageApi
+from cg.meta.upload.coverage import (
+    UploadCoverageApi,
+)
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from cg.store.store import Store

@@ -2,10 +2,15 @@
 
 import click
 
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
+from cg.cli.workflow.commands import (
+    ARGUMENT_CASE_ID,
+    OPTION_DRY,
+)
 from cg.constants.constants import MetaApis
 from cg.exc import CgError
-from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.workflow.nf_analysis import (
+    NfAnalysisAPI,
+)
 from cg.models.cg_config import CGConfig
 
 OPTION_WORKDIR = click.option(
@@ -81,7 +86,8 @@ OPTION_TOWER_RUN_ID = click.option(
 def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Create and validate a metrics deliverables file for given case id.
     If QC metrics are met it sets the status in Trailblazer to complete.
-    If failed, it sets it as failed and adds a comment with information of the failed metrics."""
+    If failed, it sets it as failed and adds a comment with information of the failed metrics.
+    """
 
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 

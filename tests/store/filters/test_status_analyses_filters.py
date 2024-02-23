@@ -34,9 +34,14 @@ def test_filter_valid_analyses_in_production(
     """Test that an expected analysis is returned when it has a production valid completed_at date."""
 
     # GIVEN a set of mock analyses
-    analysis: Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
+    analysis: Analysis = helpers.add_analysis(
+        store=base_store,
+        completed_at=timestamp_now,
+    )
     outdated_analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=case, completed_at=old_timestamp
+        store=base_store,
+        case=case,
+        completed_at=old_timestamp,
     )
 
     # WHEN retrieving valid in production analyses
@@ -52,18 +57,28 @@ def test_filter_valid_analyses_in_production(
     assert outdated_analysis not in analyses
 
 
-def test_filter_analyses_with_workflow(base_store: Store, helpers: StoreHelpers, case: Case):
+def test_filter_analyses_with_workflow(
+    base_store: Store,
+    helpers: StoreHelpers,
+    case: Case,
+):
     """Test analyses filtering by workflow."""
 
     # GIVEN a set of mock analyses
-    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, workflow=Workflow.BALSAMIC)
+    balsamic_analysis: Analysis = helpers.add_analysis(
+        store=base_store,
+        workflow=Workflow.BALSAMIC,
+    )
     mip_analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=case, workflow=Workflow.MIP_DNA
+        store=base_store,
+        case=case,
+        workflow=Workflow.MIP_DNA,
     )
 
     # WHEN extracting the analyses
     analyses: Query = filter_analyses_with_workflow(
-        analyses=base_store._get_query(table=Analysis), workflow=Workflow.BALSAMIC
+        analyses=base_store._get_query(table=Analysis),
+        workflow=Workflow.BALSAMIC,
     )
 
     # ASSERT that analyses is a query
@@ -75,12 +90,17 @@ def test_filter_analyses_with_workflow(base_store: Store, helpers: StoreHelpers,
 
 
 def test_filter_completed_analyses(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+    base_store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: datetime,
 ):
     """Test filtering of completed analyses."""
 
     # GIVEN a mock analysis
-    analysis: Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
+    analysis: Analysis = helpers.add_analysis(
+        store=base_store,
+        completed_at=timestamp_now,
+    )
 
     # WHEN retrieving the completed analyses
     analyses: Query = filter_completed_analyses(analyses=base_store._get_query(table=Analysis))
@@ -93,12 +113,17 @@ def test_filter_completed_analyses(
 
 
 def test_filter_filter_uploaded_analyses(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+    base_store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: datetime,
 ):
     """Test filtering of analysis with an uploaded_at field."""
 
     # GIVEN a mock uploaded analysis
-    analysis: Analysis = helpers.add_analysis(store=base_store, uploaded_at=timestamp_now)
+    analysis: Analysis = helpers.add_analysis(
+        store=base_store,
+        uploaded_at=timestamp_now,
+    )
 
     # WHEN calling the upload filtering function
     analyses: Query = filter_uploaded_analyses(analyses=base_store._get_query(table=Analysis))
@@ -127,12 +152,17 @@ def test_filter_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
 
 
 def test_filter_analyses_with_delivery_report(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+    base_store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: datetime,
 ):
     """Test filtering of analysis with a delivery report generated."""
 
     # GIVEN an analysis with a delivery report
-    analysis: Analysis = helpers.add_analysis(store=base_store, delivery_reported_at=timestamp_now)
+    analysis: Analysis = helpers.add_analysis(
+        store=base_store,
+        delivery_reported_at=timestamp_now,
+    )
 
     # WHEN calling the delivery report analysis filtering function
     analyses: Query = filter_analyses_with_delivery_report(
@@ -151,7 +181,8 @@ def test_filter_analyses_without_delivery_report(base_store: Store, helpers: Sto
 
     # GIVEN an analysis with a delivery report
     analysis_without_delivery_report: Analysis = helpers.add_analysis(
-        store=base_store, delivery_reported_at=None
+        store=base_store,
+        delivery_reported_at=None,
     )
 
     # WHEN calling the delivery report analysis filtering function
@@ -166,18 +197,28 @@ def test_filter_analyses_without_delivery_report(base_store: Store, helpers: Sto
     assert analysis_without_delivery_report in analyses
 
 
-def test_filter_report_analyses_by_workflow(base_store: Store, helpers: StoreHelpers, case: Case):
+def test_filter_report_analyses_by_workflow(
+    base_store: Store,
+    helpers: StoreHelpers,
+    case: Case,
+):
     """Test filtering delivery report related analysis by workflow."""
 
     # GIVEN a set of mock analysis
-    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, workflow=Workflow.BALSAMIC)
+    balsamic_analysis: Analysis = helpers.add_analysis(
+        store=base_store,
+        workflow=Workflow.BALSAMIC,
+    )
     fluffy_analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=case, workflow=Workflow.FLUFFY
+        store=base_store,
+        case=case,
+        workflow=Workflow.FLUFFY,
     )
 
     # WHEN filtering delivery report related analyses
     analyses: Query = filter_report_analyses_by_workflow(
-        analyses=base_store._get_query(table=Analysis), workflow=Workflow.BALSAMIC
+        analyses=base_store._get_query(table=Analysis),
+        workflow=Workflow.BALSAMIC,
     )
 
     # ASSERT that analyses is a query
@@ -199,7 +240,11 @@ def test_order_analyses_by_completed_at_asc(
 
     # GIVEN a set of mock analyses
     helpers.add_analysis(store=store, completed_at=timestamp_now)
-    helpers.add_analysis(store=store, case=case, completed_at=timestamp_yesterday)
+    helpers.add_analysis(
+        store=store,
+        case=case,
+        completed_at=timestamp_yesterday,
+    )
 
     # WHEN ordering the analyses by the completed_at field
     analyses: Query = order_analyses_by_completed_at_asc(analyses=store._get_query(table=Analysis))
@@ -231,7 +276,11 @@ def test_order_analyses_by_uploaded_at_asc(
         assert analyses.all()[index].uploaded_at <= analyses.all()[index + 1].uploaded_at
 
 
-def test_filter_analysis_by_case(base_store: Store, helpers: StoreHelpers, case: Case):
+def test_filter_analysis_by_case(
+    base_store: Store,
+    helpers: StoreHelpers,
+    case: Case,
+):
     """Test filtering of analyses by case."""
 
     # GIVEN a set of mock analyses
@@ -240,7 +289,8 @@ def test_filter_analysis_by_case(base_store: Store, helpers: StoreHelpers, case:
 
     # WHEN filtering the analyses by case
     analyses: Query = filter_analyses_by_case_entry_id(
-        analyses=base_store._get_query(table=Analysis), case_entry_id=case.id
+        analyses=base_store._get_query(table=Analysis),
+        case_entry_id=case.id,
     )
 
     # ASSERT that analyses is a query
@@ -253,21 +303,27 @@ def test_filter_analysis_by_case(base_store: Store, helpers: StoreHelpers, case:
 
 
 def test_filter_analysis_started_before(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+    base_store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: datetime,
 ):
     """Test filtering of analyses started before a given date."""
 
     # GIVEN a set of mock analyses
     analysis_old: Analysis = helpers.add_analysis(
-        store=base_store, started_at=timestamp_now - timedelta(days=1)
+        store=base_store,
+        started_at=timestamp_now - timedelta(days=1),
     )
     analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=analysis_old.case, started_at=timestamp_now
+        store=base_store,
+        case=analysis_old.case,
+        started_at=timestamp_now,
     )
 
     # WHEN filtering the analyses by started_at
     analyses: Query = filter_analyses_started_before(
-        analyses=base_store._get_query(table=Analysis), started_at_date=timestamp_now
+        analyses=base_store._get_query(table=Analysis),
+        started_at_date=timestamp_now,
     )
 
     # ASSERT that analyses is a query
@@ -279,14 +335,21 @@ def test_filter_analysis_started_before(
 
 
 def test_filter_analysis_not_cleaned(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+    base_store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: datetime,
 ):
     """Test filtering of analyses that have not been cleaned."""
 
     # GIVEN a set of mock analyses
-    analysis_cleaned: Analysis = helpers.add_analysis(store=base_store, cleaned_at=timestamp_now)
+    analysis_cleaned: Analysis = helpers.add_analysis(
+        store=base_store,
+        cleaned_at=timestamp_now,
+    )
     analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=analysis_cleaned.case, cleaned_at=None
+        store=base_store,
+        case=analysis_cleaned.case,
+        cleaned_at=None,
     )
 
     # WHEN filtering the analyses by cleaned_at
@@ -301,21 +364,28 @@ def test_filter_analysis_not_cleaned(
 
 
 def test_filter_analyses_by_started_at(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
+    base_store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: datetime,
+    timestamp_yesterday: datetime,
 ):
     """Test filtering of analyses by started at."""
 
     # GIVEN a set of mock analyses
     analysis_started_now: Analysis = helpers.add_analysis(
-        store=base_store, started_at=timestamp_now
+        store=base_store,
+        started_at=timestamp_now,
     )
     analysis_started_old: Analysis = helpers.add_analysis(
-        store=base_store, case=analysis_started_now.case, started_at=timestamp_yesterday
+        store=base_store,
+        case=analysis_started_now.case,
+        started_at=timestamp_yesterday,
     )
 
     # WHEN filtering the analyses by started_at
     analyses: Query = filter_analyses_by_started_at(
-        analyses=base_store._get_query(table=Analysis), started_at_date=timestamp_yesterday
+        analyses=base_store._get_query(table=Analysis),
+        started_at_date=timestamp_yesterday,
     )
 
     # ASSERT that analyses is a query

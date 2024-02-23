@@ -1,9 +1,13 @@
 import click
 from click.core import ParameterSource
 
-from cg.constants.archiving import DEFAULT_SPRING_ARCHIVE_COUNT
+from cg.constants.archiving import (
+    DEFAULT_SPRING_ARCHIVE_COUNT,
+)
 from cg.constants.constants import DRY_RUN
-from cg.meta.archive.archive import SpringArchiveAPI
+from cg.meta.archive.archive import (
+    SpringArchiveAPI,
+)
 from cg.models.cg_config import CGConfig
 
 
@@ -29,7 +33,11 @@ def archive():
     show_default=True,
 )
 @click.pass_obj
-def archive_spring_files(context: CGConfig, limit: int | None, archive_all: bool):
+def archive_spring_files(
+    context: CGConfig,
+    limit: int | None,
+    archive_all: bool,
+):
     """Archives non-archived spring files.
     Raises:
         click.Abort if both a limit to the number of spring files to archive and archive_all is specified.
@@ -71,7 +79,11 @@ def update_job_statuses(context: CGConfig):
 @DRY_RUN
 @click.pass_obj
 @click.argument("file_path", required=True)
-def delete_file(context: CGConfig, dry_run: bool, file_path: str):
+def delete_file(
+    context: CGConfig,
+    dry_run: bool,
+    file_path: str,
+):
     """Delete an archived file and remove it from Housekeeper.
     The file will not be deleted if it is not confirmed archived.
     The file will not be deleted if its archive location can not be determined from the file tags.

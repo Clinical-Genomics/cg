@@ -8,14 +8,22 @@ from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
 
 
-def test_clean_hk_alignment_files_no_files(cli_runner: CliRunner, cg_context: CGConfig, caplog):
+def test_clean_hk_alignment_files_no_files(
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    caplog,
+):
     # GIVEN a housekeeper api and a bundle without files
     bundle_name = "non_existing"
     assert not cg_context.housekeeper_api.bundle(bundle_name)
 
     # WHEN running the clean hk alignment files command
     caplog.set_level(logging.INFO)
-    result = cli_runner.invoke(hk_alignment_files, [bundle_name], obj=cg_context)
+    result = cli_runner.invoke(
+        hk_alignment_files,
+        [bundle_name],
+        obj=cg_context,
+    )
 
     # THEN assert it exits with success
     assert result.exit_code == 0
@@ -38,14 +46,25 @@ def test_clean_hk_alignment_files_dry_run(
         "created": timestamp,
         "expires": timestamp,
         "files": [
-            {"path": file_path, "archive": False, "tags": [case_id, "cram"]},
+            {
+                "path": file_path,
+                "archive": False,
+                "tags": [case_id, "cram"],
+            },
         ],
     }
-    helpers.ensure_hk_bundle(cg_context.housekeeper_api, bundle_data=hk_bundle_data)
+    helpers.ensure_hk_bundle(
+        cg_context.housekeeper_api,
+        bundle_data=hk_bundle_data,
+    )
 
     # WHEN running the clean command in dry run mode
     caplog.set_level(logging.INFO)
-    result = cli_runner.invoke(hk_alignment_files, [case_id, "--yes", "--dry-run"], obj=cg_context)
+    result = cli_runner.invoke(
+        hk_alignment_files,
+        [case_id, "--yes", "--dry-run"],
+        obj=cg_context,
+    )
 
     # THEN assert it exits with success
     assert result.exit_code == 0

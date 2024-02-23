@@ -7,8 +7,12 @@ from pathlib import Path
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_flow_cell_samples_from_content
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_flow_cell_samples_from_content,
+)
+from cg.apps.demultiplex.sample_sheet.sample_models import (
+    FlowCellSample,
+)
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, WriteFile
@@ -75,7 +79,10 @@ class FluffyAnalysisAPI(AnalysisAPI):
         workflow: Workflow = Workflow.FLUFFY,
     ):
         self.root_dir = Path(config.fluffy.root_dir)
-        LOG.info("Set root dir to %s", config.fluffy.root_dir)
+        LOG.info(
+            "Set root dir to %s",
+            config.fluffy.root_dir,
+        )
         self.fluffy_config = Path(config.fluffy.config_path)
         super().__init__(workflow, config)
 
@@ -100,7 +107,11 @@ class FluffyAnalysisAPI(AnalysisAPI):
         starlims_id: str = (
             self.status_db.get_case_by_internal_id(internal_id=case_id).links[0].sample.order
         )
-        return Path(self.root_dir, case_id, f"SampleSheet_{starlims_id}.csv")
+        return Path(
+            self.root_dir,
+            case_id,
+            f"SampleSheet_{starlims_id}.csv",
+        )
 
     def get_workdir_path(self, case_id: str) -> Path:
         """
@@ -112,7 +123,10 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         Location in working directory to which fastq files are saved for each sample separately
         """
-        return Path(self.get_workdir_path(case_id), sample_id)
+        return Path(
+            self.get_workdir_path(case_id),
+            sample_id,
+        )
 
     def get_output_path(self, case_id: str) -> Path:
         """
@@ -125,7 +139,10 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Location in working directory where deliverables file will be stored upon completion of analysis.
         Deliverables file is used to communicate paths and tag definitions for files in a finished analysis
         """
-        return Path(self.get_output_path(case_id), "deliverables.yaml")
+        return Path(
+            self.get_output_path(case_id),
+            "deliverables.yaml",
+        )
 
     def get_job_ids_path(self, case_id: str) -> Path:
         """
@@ -133,10 +150,17 @@ class FluffyAnalysisAPI(AnalysisAPI):
         This file contains SLURM ID of jobs associated with current analysis ,
         is used as a config to be submitted to Trailblazer and track job progress in SLURM
         """
-        return Path(self.get_output_path(case_id), "sacct", "submitted_jobs.yaml")
+        return Path(
+            self.get_output_path(case_id),
+            "sacct",
+            "submitted_jobs.yaml",
+        )
 
     def get_analysis_finish_path(self, case_id: str) -> Path:
-        return Path(self.get_output_path(case_id), "COMPLETE")
+        return Path(
+            self.get_output_path(case_id),
+            "COMPLETE",
+        )
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         """
@@ -152,19 +176,33 @@ class FluffyAnalysisAPI(AnalysisAPI):
         for family_sample in case_obj.links:
             sample_id = family_sample.sample.internal_id
             files: Query = self.housekeeper_api.files(
-                bundle=sample_id, tags=["fastq", latest_flow_cell.name]
+                bundle=sample_id,
+                tags=[
+                    "fastq",
+                    latest_flow_cell.name,
+                ],
             )
 
-            sample_path: Path = self.get_fastq_path(case_id=case_id, sample_id=sample_id)
+            sample_path: Path = self.get_fastq_path(
+                case_id=case_id,
+                sample_id=sample_id,
+            )
             for file in files:
                 if not dry_run:
-                    Path.mkdir(sample_path, exist_ok=True, parents=True)
+                    Path.mkdir(
+                        sample_path,
+                        exist_ok=True,
+                        parents=True,
+                    )
                     Path(sample_path / Path(file.full_path).name).symlink_to(file.full_path)
                 LOG.info(f"Linking {file.full_path} to {sample_path / Path(file.full_path).name}")
 
     def get_concentrations_from_lims(self, sample_id: str) -> str:
         """Get sample concentration from LIMS"""
-        return self.lims_api.get_sample_attribute(lims_id=sample_id, key="concentration_sample")
+        return self.lims_api.get_sample_attribute(
+            lims_id=sample_id,
+            key="concentration_sample",
+        )
 
     def get_sample_sequenced_date(self, sample_id: str) -> dt.date | None:
         sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
@@ -210,7 +248,8 @@ class FluffyAnalysisAPI(AnalysisAPI):
         flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(case_id)
         sample_sheet_path: Path = self.housekeeper_api.get_sample_sheet_path(flow_cell.name)
         sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
-            file_format=FileFormat.CSV, file_path=sample_sheet_path
+            file_format=FileFormat.CSV,
+            file_path=sample_sheet_path,
         )
         samples: list[FlowCellSample] = get_flow_cell_samples_from_content(sample_sheet_content)
 
@@ -225,7 +264,11 @@ class FluffyAnalysisAPI(AnalysisAPI):
             fluffy_sample_sheet.write_sample_sheet(sample_sheet_out_path)
 
     def run_fluffy(
-        self, case_id: str, dry_run: bool, workflow_config: str, external_ref: bool = False
+        self,
+        case_id: str,
+        dry_run: bool,
+        workflow_config: str,
+        external_ref: bool = False,
     ) -> None:
         """
         Call fluffy with the configured command-line arguments
@@ -234,7 +277,10 @@ class FluffyAnalysisAPI(AnalysisAPI):
         if output_path.exists():
             LOG.info("Old working directory found, cleaning!")
             if not dry_run:
-                shutil.rmtree(output_path, ignore_errors=True)
+                shutil.rmtree(
+                    output_path,
+                    ignore_errors=True,
+                )
         if not workflow_config:
             workflow_config = self.fluffy_config.as_posix()
         if not external_ref:
@@ -259,7 +305,8 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,
-        and is ready to be stored in Housekeeper."""
+        and is ready to be stored in Housekeeper.
+        """
         return [
             case
             for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)

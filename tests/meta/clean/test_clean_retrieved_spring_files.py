@@ -3,7 +3,9 @@ from pathlib import Path
 
 from housekeeper.store.models import File
 
-from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
+from cg.meta.clean.clean_retrieved_spring_files import (
+    CleanRetrievedSpringFilesAPI,
+)
 
 
 def test_get_files_to_remove(

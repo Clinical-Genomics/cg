@@ -32,7 +32,9 @@ def test_filter_get_invoices_by_invoice_id(
     assert invoice.all() and len(invoice.all()) == 1
 
 
-def test_filter_get_invoices_invoiced(store_with_an_invoice_with_and_without_attributes: Store):
+def test_filter_get_invoices_invoiced(
+    store_with_an_invoice_with_and_without_attributes: Store,
+):
     """Test to get invoice by invoice id."""
 
     # GIVEN an Store with two invoices of which one is invoiced
@@ -50,7 +52,8 @@ def test_filter_get_invoices_invoiced(store_with_an_invoice_with_and_without_att
 
 
 def test_filter_get_invoices_not_invoiced(
-    store_with_an_invoice_with_and_without_attributes: Store, helpers: StoreHelpers
+    store_with_an_invoice_with_and_without_attributes: Store,
+    helpers: StoreHelpers,
 ):
     """Test to get invoice by invoice id."""
 

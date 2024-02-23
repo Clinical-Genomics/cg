@@ -8,13 +8,18 @@ import pytest
 
 
 @pytest.fixture(name="non_existing_gzipped_file_path")
-def non_existing_gzipped_file_path(non_existing_file_path: Path) -> Path:
+def non_existing_gzipped_file_path(
+    non_existing_file_path: Path,
+) -> Path:
     """Return the path to a non existing file with gzipped ending"""
     return non_existing_file_path.with_suffix(".gz")
 
 
 @pytest.fixture(name="filled_gzip_file")
-def filled_gzip_file(non_existing_gzipped_file_path: Path, content: str) -> Path:
+def filled_gzip_file(
+    non_existing_gzipped_file_path: Path,
+    content: str,
+) -> Path:
     """Return the path to a existing file with some content that is gzipped"""
     with gzip.open(non_existing_gzipped_file_path, "wb") as outfile:
         with io.TextIOWrapper(outfile, encoding="utf-8") as enc:

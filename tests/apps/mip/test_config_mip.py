@@ -1,6 +1,8 @@
 import pytest
 
-from cg.apps.mip.confighandler import ConfigHandler
+from cg.apps.mip.confighandler import (
+    ConfigHandler,
+)
 from cg.exc import PedigreeConfigError
 
 
@@ -18,7 +20,9 @@ def test_validate_config(valid_config):
     assert errors == {}
 
 
-def test_validate_config_invalid_analysis_type(invalid_config_analysis_type):
+def test_validate_config_invalid_analysis_type(
+    invalid_config_analysis_type,
+):
     """Test to validate a invalid config with wrong analysis type"""
     # GIVEN invalid config, where nalaysis type is not correct
 
@@ -28,7 +32,9 @@ def test_validate_config_invalid_analysis_type(invalid_config_analysis_type):
         ConfigHandler.validate_config(invalid_config_analysis_type)
 
 
-def test_validate_config_unknown_field(invalid_config_unknown_field):
+def test_validate_config_unknown_field(
+    invalid_config_unknown_field,
+):
     """Test to validate a config with a unspecified field.
 
     This should work since we allow unspecified fields

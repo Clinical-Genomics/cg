@@ -10,7 +10,9 @@ from cg.io.controller import WriteStream
 
 
 @pytest.fixture
-def genotype_export_sample_output(genotype_config: dict) -> str:
+def genotype_export_sample_output(
+    genotype_config: dict,
+) -> str:
     """
     genotype API fixture
     """
@@ -28,7 +30,10 @@ def genotype_export_sample_output(genotype_config: dict) -> str:
             "comment": None,
         },
     }
-    return WriteStream.write_stream_from_content(content=sample_output, file_format=FileFormat.JSON)
+    return WriteStream.write_stream_from_content(
+        content=sample_output,
+        file_format=FileFormat.JSON,
+    )
 
 
 @pytest.fixture
@@ -63,5 +68,6 @@ def genotype_export_sample_analysis_output() -> str:
         },
     }
     return WriteStream.write_stream_from_content(
-        content=sample_analysis_output, file_format=FileFormat.JSON
+        content=sample_analysis_output,
+        file_format=FileFormat.JSON,
     )

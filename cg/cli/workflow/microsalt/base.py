@@ -6,13 +6,22 @@ from typing import Any
 
 import click
 
-from cg.cli.workflow.commands import resolve_compression, store, store_available
+from cg.cli.workflow.commands import (
+    resolve_compression,
+    store,
+    store_available,
+)
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.exc import AnalysisNotReadyError, CgError
-from cg.io.controller import WriteFile, WriteStream
+from cg.io.controller import (
+    WriteFile,
+    WriteStream,
+)
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
+from cg.meta.workflow.microsalt import (
+    MicrosaltAnalysisAPI,
+)
 from cg.models.cg_config import CGConfig
 from cg.store.models import Sample
 
@@ -58,13 +67,24 @@ microsalt.add_command(resolve_compression)
 @OPTION_DRY_RUN
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_obj
-def link(context: CGConfig, ticket: bool, sample: bool, unique_id: str, dry_run: bool) -> None:
+def link(
+    context: CGConfig,
+    ticket: bool,
+    sample: bool,
+    unique_id: str,
+    dry_run: bool,
+) -> None:
     """Link microbial FASTQ files to dedicated analysis folder for a given case, ticket or sample"""
     if dry_run:
         return
     analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
-    case_id, sample_id = analysis_api.resolve_case_sample_id(
-        sample=sample, ticket=ticket, unique_id=unique_id
+    (
+        case_id,
+        sample_id,
+    ) = analysis_api.resolve_case_sample_id(
+        sample=sample,
+        ticket=ticket,
+        unique_id=unique_id,
     )
     analysis_api.link_fastq_files(
         case_id=case_id,
@@ -79,13 +99,22 @@ def link(context: CGConfig, ticket: bool, sample: bool, unique_id: str, dry_run:
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_obj
 def config_case(
-    context: CGConfig, dry_run: bool, ticket: bool, sample: bool, unique_id: str
+    context: CGConfig,
+    dry_run: bool,
+    ticket: bool,
+    sample: bool,
+    unique_id: str,
 ) -> None:
     """Create a config file for a case or a sample analysis in microSALT"""
 
     analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
-    case_id, sample_id = analysis_api.resolve_case_sample_id(
-        sample=sample, ticket=ticket, unique_id=unique_id
+    (
+        case_id,
+        sample_id,
+    ) = analysis_api.resolve_case_sample_id(
+        sample=sample,
+        ticket=ticket,
+        unique_id=unique_id,
     )
     sample_objs: list[Sample] = analysis_api.get_samples(case_id=case_id, sample_id=sample_id)
 
@@ -98,11 +127,16 @@ def config_case(
     config_case_path: Path = analysis_api.get_config_path(filename=filename)
     if dry_run:
         click.echo(
-            WriteStream.write_stream_from_content(content=parameters, file_format=FileFormat.JSON)
+            WriteStream.write_stream_from_content(
+                content=parameters,
+                file_format=FileFormat.JSON,
+            )
         )
         return
     WriteFile.write_file_from_content(
-        content=parameters, file_format=FileFormat.JSON, file_path=config_case_path
+        content=parameters,
+        file_format=FileFormat.JSON,
+        file_path=config_case_path,
     )
     LOG.info(f"Saved config {config_case_path}")
 
@@ -117,7 +151,12 @@ def config_case(
     "--config-case",
     "config_case_path",
     required=False,
-    type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
+    type=click.Path(
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        resolve_path=True,
+    ),
     help="optionally change the config-case",
 )
 @click.pass_obj
@@ -132,8 +171,13 @@ def run(
     """Start microSALT workflow by providing case, ticket or sample id"""
 
     analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
-    case_id, sample_id = analysis_api.resolve_case_sample_id(
-        sample=sample, ticket=ticket, unique_id=unique_id
+    (
+        case_id,
+        sample_id,
+    ) = analysis_api.resolve_case_sample_id(
+        sample=sample,
+        ticket=ticket,
+        unique_id=unique_id,
     )
     fastq_path: Path = analysis_api.get_case_fastq_path(case_id=case_id)
     if not config_case_path:
@@ -156,7 +200,10 @@ def run(
         ]
 
     if sample_id or dry_run:
-        analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
+        analysis_api.process.run_command(
+            parameters=analyse_command,
+            dry_run=dry_run,
+        )
         return
     try:
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
@@ -166,7 +213,10 @@ def run(
         )
     try:
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
-        analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
+        analysis_api.process.run_command(
+            parameters=analyse_command,
+            dry_run=dry_run,
+        )
     except:
         LOG.error("Failed to run analysis!")
         analysis_api.set_statusdb_action(case_id=case_id, action=None)
@@ -180,16 +230,38 @@ def run(
 @OPTION_SAMPLE
 @click.pass_context
 def start(
-    context: click.Context, ticket: bool, sample: bool, unique_id: str, dry_run: bool
+    context: click.Context,
+    ticket: bool,
+    sample: bool,
+    unique_id: str,
+    dry_run: bool,
 ) -> None:
     """Start whole microSALT workflow by providing case, ticket or sample id"""
     LOG.info(f"Starting Microsalt workflow for {unique_id}")
     if not (sample or ticket):
         analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
         analysis_api.prepare_fastq_files(case_id=unique_id, dry_run=dry_run)
-    context.invoke(link, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
-    context.invoke(config_case, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
-    context.invoke(run, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
+    context.invoke(
+        link,
+        ticket=ticket,
+        sample=sample,
+        unique_id=unique_id,
+        dry_run=dry_run,
+    )
+    context.invoke(
+        config_case,
+        ticket=ticket,
+        sample=sample,
+        unique_id=unique_id,
+        dry_run=dry_run,
+    )
+    context.invoke(
+        run,
+        ticket=ticket,
+        sample=sample,
+        unique_id=unique_id,
+        dry_run=dry_run,
+    )
 
 
 @microsalt.command("start-available")
@@ -203,7 +275,11 @@ def start_available(context: click.Context, dry_run: bool = False):
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
-            context.invoke(start, unique_id=case_obj.internal_id, dry_run=dry_run)
+            context.invoke(
+                start,
+                unique_id=case_obj.internal_id,
+                dry_run=dry_run,
+            )
         except AnalysisNotReadyError as error:
             LOG.error(error)
         except CgError as error:

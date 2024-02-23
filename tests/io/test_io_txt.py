@@ -18,7 +18,11 @@ def test_read_txt_to_list(txt_file_path: Path):
     assert isinstance(content, list)
 
     # THEN the content should match the expected lines
-    expected_lines: list[str] = ["Line 1\n", "Line 2\n", "Line 3"]
+    expected_lines: list[str] = [
+        "Line 1\n",
+        "Line 2\n",
+        "Line 3",
+    ]
     assert content == expected_lines
 
 
@@ -29,7 +33,10 @@ def test_read_txt_to_string(txt_file_path: Path):
     # GIVEN a txt file
 
     # WHEN reading the file as a string
-    content: str = read_txt(file_path=txt_file_path, read_to_string=True)
+    content: str = read_txt(
+        file_path=txt_file_path,
+        read_to_string=True,
+    )
 
     # THEN assert a string is returned
     assert isinstance(content, str)
@@ -39,7 +46,9 @@ def test_read_txt_to_string(txt_file_path: Path):
     assert content == expected_content
 
 
-def test_non_existent_file(non_existing_file_path: Path):
+def test_non_existent_file(
+    non_existing_file_path: Path,
+):
     """
     Test handling a non-existent file.
     """

@@ -4,7 +4,10 @@ from typing import Generator
 import pytest
 
 from cg.constants import Workflow
-from cg.constants.constants import CustomerId, PrepCategory
+from cg.constants.constants import (
+    CustomerId,
+    PrepCategory,
+)
 from cg.constants.subject import PhenotypeStatus
 from cg.store.models import CaseSample, Order
 from cg.store.store import Store
@@ -89,7 +92,11 @@ def store_with_samples_customer_id_and_subject_id_and_tumour_status(
         ("2", "test_subject", True),
         ("2", "test_subject_2", False),
     ]
-    for customer_id, subject_id, is_tumour in samples_data:
+    for (
+        customer_id,
+        subject_id,
+        is_tumour,
+    ) in samples_data:
         helpers.add_sample(
             store=store,
             customer_id=customer_id,
@@ -106,7 +113,9 @@ def store_with_samples_that_have_names(store: Store, helpers: StoreHelpers) -> S
     """Return a store with two samples of which one has a name"""
     for index in range(1, 4):
         helpers.add_sample(
-            store=store, internal_id=f"test_sample_{index}", name=f"test_sample_{index}"
+            store=store,
+            internal_id=f"test_sample_{index}",
+            name=f"test_sample_{index}",
         )
 
     helpers.add_sample(
@@ -125,10 +134,15 @@ def store_with_active_sample_analyze(
     """Return a store with an active sample with action analyze."""
     # GIVEN a store with a sample that is active
     case = helpers.add_case(
-        store=store, name="test_case", internal_id="test_case_internal_id", action="analyze"
+        store=store,
+        name="test_case",
+        internal_id="test_case_internal_id",
+        action="analyze",
     )
     sample = helpers.add_sample(
-        store=store, internal_id="test_sample_internal_id", name="test_sample"
+        store=store,
+        internal_id="test_sample_internal_id",
+        name="test_sample",
     )
     helpers.add_relationship(store=store, sample=sample, case=case)
 
@@ -142,10 +156,15 @@ def store_with_active_sample_running(
     """Return a store with an active sample with action running."""
     # GIVEN a store with a sample that is active
     case = helpers.add_case(
-        store=store, name="test_case", internal_id="test_case_internal_id", action="running"
+        store=store,
+        name="test_case",
+        internal_id="test_case_internal_id",
+        action="running",
     )
     sample = helpers.add_sample(
-        store=store, internal_id="test_sample_internal_id", name="test_sample"
+        store=store,
+        internal_id="test_sample_internal_id",
+        name="test_sample",
     )
     helpers.add_relationship(store=store, sample=sample, case=case)
 
@@ -182,9 +201,14 @@ def store_with_analyses_for_cases_not_uploaded_microsalt(
             delivery_reported_at=None,
             workflow=Workflow.MICROSALT,
         )
-        sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
+        sample = helpers.add_sample(
+            analysis_store,
+            delivered_at=timestamp_now,
+        )
         link: CaseSample = analysis_store.relate_sample(
-            case=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
+            case=oldest_analysis.case,
+            sample=sample,
+            status=PhenotypeStatus.UNKNOWN,
         )
         analysis_store.session.add(link)
     return analysis_store
@@ -223,7 +247,9 @@ def store_with_analyses_for_cases_to_deliver(
         )
         sample = helpers.add_sample(analysis_store, delivered_at=None)
         link: CaseSample = analysis_store.relate_sample(
-            case=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
+            case=oldest_analysis.case,
+            sample=sample,
+            status=PhenotypeStatus.UNKNOWN,
         )
         analysis_store.session.add(link)
 
@@ -294,7 +320,11 @@ def re_sequenced_sample_store(
         date=one_day_ahead_of_now,
     )
 
-    helpers.add_relationship(store=re_sequenced_sample_store, case=store_case, sample=store_sample)
+    helpers.add_relationship(
+        store=re_sequenced_sample_store,
+        case=store_case,
+        sample=store_sample,
+    )
     helpers.add_sample_lane_sequencing_metrics(
         store=re_sequenced_sample_store,
         sample_internal_id=store_sample.internal_id,
@@ -333,14 +363,33 @@ def expected_number_of_applications() -> int:
 @pytest.fixture
 def microbial_store(store: Store, helpers: StoreHelpers) -> Generator[Store, None, None]:
     """Populate a store with microbial application tags"""
-    microbial_active_apptags = ["MWRNXTR003", "MWGNXTR003", "MWMNXTR003", "MWLNXTR003"]
-    microbial_inactive_apptags = ["MWXNXTR003", "VWGNXTR001", "VWLNXTR001"]
+    microbial_active_apptags = [
+        "MWRNXTR003",
+        "MWGNXTR003",
+        "MWMNXTR003",
+        "MWLNXTR003",
+    ]
+    microbial_inactive_apptags = [
+        "MWXNXTR003",
+        "VWGNXTR001",
+        "VWLNXTR001",
+    ]
 
     for app_tag in microbial_active_apptags:
-        helpers.ensure_application(store=store, tag=app_tag, prep_category="mic", is_archived=False)
+        helpers.ensure_application(
+            store=store,
+            tag=app_tag,
+            prep_category="mic",
+            is_archived=False,
+        )
 
     for app_tag in microbial_inactive_apptags:
-        helpers.ensure_application(store=store, tag=app_tag, prep_category="mic", is_archived=True)
+        helpers.ensure_application(
+            store=store,
+            tag=app_tag,
+            prep_category="mic",
+            is_archived=True,
+        )
 
     return store
 
@@ -365,7 +414,9 @@ def three_customer_ids() -> list[str]:
 
 @pytest.fixture
 def store_with_pools_for_multiple_customers(
-    store: Store, helpers: StoreHelpers, timestamp_now: datetime
+    store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: datetime,
 ) -> Generator[Store, None, None]:
     """Return a store with two samples for three different customers."""
     for number in range(3):
@@ -388,7 +439,10 @@ def three_pool_names() -> list[str]:
 @pytest.fixture
 def order(helpers: StoreHelpers, store: Store) -> Order:
     order: Order = helpers.add_order(
-        store=store, customer_id=1, ticket_id=1, order_date=datetime.now()
+        store=store,
+        customer_id=1,
+        ticket_id=1,
+        order_date=datetime.now(),
     )
     return order
 
@@ -396,7 +450,10 @@ def order(helpers: StoreHelpers, store: Store) -> Order:
 @pytest.fixture
 def order_another(helpers: StoreHelpers, store: Store) -> Order:
     order: Order = helpers.add_order(
-        store=store, customer_id=2, ticket_id=2, order_date=datetime.now()
+        store=store,
+        customer_id=2,
+        ticket_id=2,
+        order_date=datetime.now(),
     )
     return order
 

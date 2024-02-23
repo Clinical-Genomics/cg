@@ -1,10 +1,19 @@
 from pathlib import Path
 
-from cg.io.yaml import read_yaml, read_yaml_stream, write_yaml, write_yaml_stream
-from cg.models.mip.mip_sample_info import MipBaseSampleInfo
+from cg.io.yaml import (
+    read_yaml,
+    read_yaml_stream,
+    write_yaml,
+    write_yaml_stream,
+)
+from cg.models.mip.mip_sample_info import (
+    MipBaseSampleInfo,
+)
 
 
-def test_get_content_from_file(case_qc_sample_info_path: Path):
+def test_get_content_from_file(
+    case_qc_sample_info_path: Path,
+):
     """
     Tests read_yaml
     """
@@ -23,7 +32,9 @@ def test_get_content_from_file(case_qc_sample_info_path: Path):
     assert isinstance(sample_info_object, MipBaseSampleInfo)
 
 
-def test_get_content_from_stream(yaml_stream: str):
+def test_get_content_from_stream(
+    yaml_stream: str,
+):
     """
     Tests read_yaml_stream
     """
@@ -49,7 +60,10 @@ def test_write_yaml(case_qc_sample_info_path: Path, cg_dir: Path):
     raw_sample_info: dict = read_yaml(file_path=case_qc_sample_info_path)
 
     # WHEN writing the yaml file from dict
-    write_yaml(content=raw_sample_info, file_path=yaml_file)
+    write_yaml(
+        content=raw_sample_info,
+        file_path=yaml_file,
+    )
 
     # THEN assert that a file was successfully created
     assert Path.exists(yaml_file)

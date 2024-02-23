@@ -18,12 +18,36 @@ depends_on = None
 
 
 def upgrade():
-    op.alter_column("family", "_synopsis", new_column_name="synopsis", existing_type=sa.Text())
-    op.add_column("sample", sa.Column("_phenotype_groups", sa.Text(), nullable=True))
-    op.add_column("sample", sa.Column("subject_id", sa.String(length=128), nullable=True))
+    op.alter_column(
+        "family",
+        "_synopsis",
+        new_column_name="synopsis",
+        existing_type=sa.Text(),
+    )
+    op.add_column(
+        "sample",
+        sa.Column(
+            "_phenotype_groups",
+            sa.Text(),
+            nullable=True,
+        ),
+    )
+    op.add_column(
+        "sample",
+        sa.Column(
+            "subject_id",
+            sa.String(length=128),
+            nullable=True,
+        ),
+    )
 
 
 def downgrade():
-    op.alter_column("family", "synopsis", new_column_name="_synopsis", existing_type=sa.Text())
+    op.alter_column(
+        "family",
+        "synopsis",
+        new_column_name="_synopsis",
+        existing_type=sa.Text(),
+    )
     op.drop_column("sample", "_phenotype_groups")
     op.drop_column("sample", "subject_id")

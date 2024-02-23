@@ -27,14 +27,29 @@ def upgrade():
         sa.Column(
             "application_id",
             sa.Integer(),
-            sa.ForeignKey("application.id", ondelete="CASCADE"),
+            sa.ForeignKey(
+                "application.id",
+                ondelete="CASCADE",
+            ),
             nullable=False,
         ),
-        sa.Column("pipeline", sa.Enum(*list(Workflow)), nullable=False),
+        sa.Column(
+            "pipeline",
+            sa.Enum(*list(Workflow)),
+            nullable=False,
+        ),
         sa.Column("limitations", sa.Text()),
         sa.Column("comment", sa.Text()),
-        sa.Column("created_at", sa.DateTime(), server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(), server_onupdate=sa.func.now()),
+        sa.Column(
+            "created_at",
+            sa.DateTime(),
+            server_default=sa.func.now(),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(),
+            server_onupdate=sa.func.now(),
+        ),
     )
 
 

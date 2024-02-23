@@ -5,8 +5,12 @@ from typing import Iterable
 import click
 from housekeeper.store.models import File
 
-from cg.apps.crunchy.files import update_metadata_paths
-from cg.cli.compress.helpers import update_compress_api
+from cg.apps.crunchy.files import (
+    update_metadata_paths,
+)
+from cg.cli.compress.helpers import (
+    update_compress_api,
+)
 from cg.constants import SequencingFileTag
 from cg.constants.constants import DRY_RUN
 from cg.exc import CaseNotFoundError
@@ -22,7 +26,11 @@ LOG = logging.getLogger(__name__)
 @click.argument("sample-id", type=str)
 @DRY_RUN
 @click.pass_obj
-def store_sample(context: CGConfig, sample_id: str, dry_run: bool) -> int:
+def store_sample(
+    context: CGConfig,
+    sample_id: str,
+    dry_run: bool,
+) -> int:
     """Include links to decompressed FASTQ files belonging to this sample in Housekeeper."""
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     status_db: Store = context.status_db
@@ -39,11 +47,19 @@ def store_sample(context: CGConfig, sample_id: str, dry_run: bool) -> int:
     return 1
 
 
-def invoke_store_samples(context: click.Context, sample_ids: list[str], dry_run: bool) -> int:
+def invoke_store_samples(
+    context: click.Context,
+    sample_ids: list[str],
+    dry_run: bool,
+) -> int:
     """Invoke store sample for sample ids."""
     stored_individuals: int = 0
     for sample_id in sample_ids:
-        stored_count: int = context.invoke(store_sample, sample_id=sample_id, dry_run=dry_run)
+        stored_count: int = context.invoke(
+            store_sample,
+            sample_id=sample_id,
+            dry_run=dry_run,
+        )
         stored_individuals += stored_count
     return stored_individuals
 
@@ -52,14 +68,20 @@ def invoke_store_samples(context: click.Context, sample_ids: list[str], dry_run:
 @click.argument("case-id", type=str)
 @DRY_RUN
 @click.pass_context
-def store_case(context: click.Context, case_id: str, dry_run: bool) -> None:
+def store_case(
+    context: click.Context,
+    case_id: str,
+    dry_run: bool,
+) -> None:
     """Include links to decompressed FASTQ files belonging to this case in Housekeeper."""
 
     status_db: Store = context.obj.status_db
     try:
         sample_ids: Iterable[str] = status_db.get_sample_ids_by_case_id(case_id=case_id)
         stored_individuals: int = invoke_store_samples(
-            context=context, dry_run=dry_run, sample_ids=sample_ids
+            context=context,
+            dry_run=dry_run,
+            sample_ids=sample_ids,
         )
     except CaseNotFoundError:
         return
@@ -70,13 +92,19 @@ def store_case(context: click.Context, case_id: str, dry_run: bool) -> None:
 @click.argument("flow-cell-id", type=str)
 @DRY_RUN
 @click.pass_context
-def store_flow_cell(context: click.Context, flow_cell_id: str, dry_run: bool) -> None:
+def store_flow_cell(
+    context: click.Context,
+    flow_cell_id: str,
+    dry_run: bool,
+) -> None:
     """Include links to decompressed FASTQ files belonging to this flow cell in Housekeeper."""
 
     status_db: Store = context.obj.status_db
     samples: list[Sample] = status_db.get_samples_from_flow_cell(flow_cell_id=flow_cell_id)
     stored_individuals: int = invoke_store_samples(
-        context=context, dry_run=dry_run, sample_ids=[sample.internal_id for sample in samples]
+        context=context,
+        dry_run=dry_run,
+        sample_ids=[sample.internal_id for sample in samples],
     )
     LOG.info(f"Stored fastq files for {stored_individuals} samples")
 
@@ -85,12 +113,18 @@ def store_flow_cell(context: click.Context, flow_cell_id: str, dry_run: bool) ->
 @click.argument("ticket", type=str)
 @DRY_RUN
 @click.pass_context
-def store_ticket(context: click.Context, ticket: str, dry_run: bool) -> None:
+def store_ticket(
+    context: click.Context,
+    ticket: str,
+    dry_run: bool,
+) -> None:
     """Include links to decompressed FASTQ files belonging to a ticket in Housekeeper."""
     status_db: Store = context.obj.status_db
     samples: list[Sample] = status_db.get_samples_from_ticket(ticket=ticket)
     stored_individuals: int = invoke_store_samples(
-        context=context, dry_run=dry_run, sample_ids=[sample.internal_id for sample in samples]
+        context=context,
+        dry_run=dry_run,
+        sample_ids=[sample.internal_id for sample in samples],
     )
     LOG.info(f"Stored fastq files for {stored_individuals} samples")
 
@@ -99,7 +133,11 @@ def store_ticket(context: click.Context, ticket: str, dry_run: bool) -> None:
 @click.argument("flow-cell-id", type=str)
 @DRY_RUN
 @click.pass_obj
-def store_demultiplexed_flow_cell(context: click.Context, flow_cell_id: str, dry_run: bool) -> None:
+def store_demultiplexed_flow_cell(
+    context: click.Context,
+    flow_cell_id: str,
+    dry_run: bool,
+) -> None:
     """Include all files in a flow cell bundle and its corresponding sequencing files. Updates SPRING metadata file"""
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     status_db: Store = context.status_db
@@ -119,7 +157,8 @@ def store_demultiplexed_flow_cell(context: click.Context, flow_cell_id: str, dry
         return
     for sample in samples:
         spring_metadata_files: list[File] = compress_api.hk_api.get_files_from_latest_version(
-            bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING_METADATA]
+            bundle_name=sample.internal_id,
+            tags=[SequencingFileTag.SPRING_METADATA],
         )
         if spring_metadata_files:
             for spring_metadata_file in spring_metadata_files:

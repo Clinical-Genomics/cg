@@ -2,14 +2,25 @@ import logging
 import shutil
 from pathlib import Path
 
-from cg.constants import SequencingFileTag, Workflow
+from cg.constants import (
+    SequencingFileTag,
+    Workflow,
+)
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fastq import MutantFastqHandler
+from cg.meta.workflow.fastq import (
+    MutantFastqHandler,
+)
 from cg.models.cg_config import CGConfig
-from cg.models.workflow.mutant import MutantSampleConfig
-from cg.store.models import Application, Case, Sample
+from cg.models.workflow.mutant import (
+    MutantSampleConfig,
+)
+from cg.store.models import (
+    Application,
+    Case,
+    Sample,
+)
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -50,13 +61,22 @@ class MutantAnalysisAPI(AnalysisAPI):
         return Path(self.root_dir, case_id)
 
     def get_case_output_path(self, case_id: str) -> Path:
-        return Path(self.get_case_path(case_id=case_id), "results")
+        return Path(
+            self.get_case_path(case_id=case_id),
+            "results",
+        )
 
     def get_case_fastq_dir(self, case_id: str) -> Path:
-        return Path(self.get_case_path(case_id=case_id), "fastq")
+        return Path(
+            self.get_case_path(case_id=case_id),
+            "fastq",
+        )
 
     def get_job_ids_path(self, case_id: str) -> Path:
-        return Path(self.get_case_output_path(case_id=case_id), "trailblazer_config.yaml")
+        return Path(
+            self.get_case_output_path(case_id=case_id),
+            "trailblazer_config.yaml",
+        )
 
     def _is_nanopore(self, application: Application) -> bool:
         return application.tag[3:6] == "ONT"
@@ -65,14 +85,27 @@ class MutantAnalysisAPI(AnalysisAPI):
         """Return the path to the FASTQ destination directory."""
         application: str = sample.application_version.application
         if self._is_nanopore(application=application):
-            return Path(self.get_case_path(case_id=case.internal_id), FileFormat.FASTQ, sample.name)
-        return Path(self.get_case_path(case_id=case.internal_id), FileFormat.FASTQ)
+            return Path(
+                self.get_case_path(case_id=case.internal_id),
+                FileFormat.FASTQ,
+                sample.name,
+            )
+        return Path(
+            self.get_case_path(case_id=case.internal_id),
+            FileFormat.FASTQ,
+        )
 
     def get_case_config_path(self, case_id: str) -> Path:
-        return Path(self.get_case_path(case_id=case_id), "case_config.json")
+        return Path(
+            self.get_case_path(case_id=case_id),
+            "case_config.json",
+        )
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
-        return Path(self.get_case_output_path(case_id=case_id), f"{case_id}_deliverables.yaml")
+        return Path(
+            self.get_case_output_path(case_id=case_id),
+            f"{case_id}_deliverables.yaml",
+        )
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -81,14 +114,23 @@ class MutantAnalysisAPI(AnalysisAPI):
             application = sample_obj.application_version.application
             if self._is_nanopore(application):
                 self.link_nanopore_fastq_for_sample(
-                    case=case_obj, sample=sample_obj, concatenate=True
+                    case=case_obj,
+                    sample=sample_obj,
+                    concatenate=True,
                 )
                 continue
             if not sample_obj.sequencing_qc:
-                LOG.info("Sample %s read count below threshold, skipping!", sample_obj.internal_id)
+                LOG.info(
+                    "Sample %s read count below threshold, skipping!",
+                    sample_obj.internal_id,
+                )
                 continue
             else:
-                self.link_fastq_files_for_sample(case=case_obj, sample=sample_obj, concatenate=True)
+                self.link_fastq_files_for_sample(
+                    case=case_obj,
+                    sample=sample_obj,
+                    concatenate=True,
+                )
 
     def get_sample_parameters(self, sample_obj: Sample) -> MutantSampleConfig:
         return MutantSampleConfig(
@@ -108,18 +150,25 @@ class MutantAnalysisAPI(AnalysisAPI):
             date_libprep=str(sample_obj.prepared_at),
             date_sequencing=str(sample_obj.last_sequenced_at),
             selection_criteria=self.lims_api.get_sample_attribute(
-                lims_id=sample_obj.internal_id, key="selection_criteria"
+                lims_id=sample_obj.internal_id,
+                key="selection_criteria",
             ),
             priority=self.lims_api.get_sample_attribute(
-                lims_id=sample_obj.internal_id, key="priority"
+                lims_id=sample_obj.internal_id,
+                key="priority",
             ),
             region_code=self.lims_api.get_sample_attribute(
-                lims_id=sample_obj.internal_id, key="region_code"
+                lims_id=sample_obj.internal_id,
+                key="region_code",
             ),
             lab_code=self.lims_api.get_sample_attribute(
-                lims_id=sample_obj.internal_id, key="lab_code"
+                lims_id=sample_obj.internal_id,
+                key="lab_code",
             ),
-            primer=self.lims_api.get_sample_attribute(lims_id=sample_obj.internal_id, key="primer"),
+            primer=self.lims_api.get_sample_attribute(
+                lims_id=sample_obj.internal_id,
+                key="primer",
+            ),
         )
 
     def create_case_config(self, case_id: str, dry_run: bool) -> None:
@@ -130,28 +179,43 @@ class MutantAnalysisAPI(AnalysisAPI):
         ]
         config_path = self.get_case_config_path(case_id=case_id)
         if dry_run:
-            LOG.info("Dry-run, would have created config at path %s, with content:", config_path)
+            LOG.info(
+                "Dry-run, would have created config at path %s, with content:",
+                config_path,
+            )
             LOG.info(case_config_list)
         config_path.parent.mkdir(parents=True, exist_ok=True)
         WriteFile.write_file_from_content(
-            content=case_config_list, file_format=FileFormat.JSON, file_path=config_path
+            content=case_config_list,
+            file_format=FileFormat.JSON,
+            file_path=config_path,
         )
         LOG.info("Saved config to %s", config_path)
 
     def get_lims_naming_metadata(self, sample: Sample) -> str | None:
         region_code = self.lims_api.get_sample_attribute(
-            lims_id=sample.internal_id, key="region_code"
+            lims_id=sample.internal_id,
+            key="region_code",
         ).split(" ")[0]
         lab_code = self.lims_api.get_sample_attribute(
-            lims_id=sample.internal_id, key="lab_code"
+            lims_id=sample.internal_id,
+            key="lab_code",
         ).split(" ")[0]
 
         return f"{region_code}_{lab_code}_{sample.name}"
 
-    def run_analysis(self, case_id: str, dry_run: bool, config_artic: str = None) -> None:
+    def run_analysis(
+        self,
+        case_id: str,
+        dry_run: bool,
+        config_artic: str = None,
+    ) -> None:
         if self.get_case_output_path(case_id=case_id).exists():
             LOG.info("Found old output files, directory will be cleaned!")
-            shutil.rmtree(self.get_case_output_path(case_id=case_id), ignore_errors=True)
+            shutil.rmtree(
+                self.get_case_output_path(case_id=case_id),
+                ignore_errors=True,
+            )
 
         if config_artic:
             self.process.run_command(
@@ -184,7 +248,8 @@ class MutantAnalysisAPI(AnalysisAPI):
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis has a deliverables file,
-        and is ready to be stored in Housekeeper."""
+        and is ready to be stored in Housekeeper.
+        """
         return [
             case
             for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
@@ -195,12 +260,16 @@ class MutantAnalysisAPI(AnalysisAPI):
         return [
             self.fastq_handler.parse_nanopore_file_data(file_obj.full_path)
             for file_obj in self.housekeeper_api.files(
-                bundle=sample.internal_id, tags={SequencingFileTag.FASTQ}
+                bundle=sample.internal_id,
+                tags={SequencingFileTag.FASTQ},
             )
         ]
 
     def link_nanopore_fastq_for_sample(
-        self, case: Case, sample: Sample, concatenate: bool = False
+        self,
+        case: Case,
+        sample: Sample,
+        concatenate: bool = False,
     ) -> None:
         """
         Link FASTQ files for a nanopore sample to working directory.

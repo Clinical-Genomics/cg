@@ -6,12 +6,18 @@ from typing import Callable, Type
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Query, Session
 
-from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
+from cg.store.filters.status_case_filters import (
+    CaseFilter,
+    apply_case_filter,
+)
 from cg.store.filters.status_customer_filters import (
     CustomerFilter,
     apply_customer_filter,
 )
-from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
+from cg.store.filters.status_sample_filters import (
+    SampleFilter,
+    apply_sample_filter,
+)
 from cg.store.models import (
     Analysis,
     Application,
@@ -38,7 +44,9 @@ class BaseHandler:
         """Return a query for the given table."""
         return self.session.query(table)
 
-    def _get_outer_join_cases_with_analyses_query(self) -> Query:
+    def _get_outer_join_cases_with_analyses_query(
+        self,
+    ) -> Query:
         """Return a query for all cases in the database with an analysis."""
         return (
             self._get_query(table=Case)
@@ -49,37 +57,53 @@ class BaseHandler:
             .join(Application)
         )
 
-    def _get_join_cases_with_samples_query(self) -> Query:
+    def _get_join_cases_with_samples_query(
+        self,
+    ) -> Query:
         """Return a join query for all cases in the database with samples."""
         return (
             self._get_query(table=Case).join(Case.links).join(CaseSample.sample).join(Case.customer)
         )
 
-    def _get_join_analysis_case_query(self) -> Query:
+    def _get_join_analysis_case_query(
+        self,
+    ) -> Query:
         """Return join analysis case query."""
         return self._get_query(table=Analysis).join(Analysis.case)
 
-    def _get_join_case_sample_query(self) -> Query:
+    def _get_join_case_sample_query(
+        self,
+    ) -> Query:
         """Return join case sample query."""
         return self._get_query(table=CaseSample).join(CaseSample.case).join(CaseSample.sample)
 
-    def _get_join_case_and_sample_query(self) -> Query:
+    def _get_join_case_and_sample_query(
+        self,
+    ) -> Query:
         """Return join case sample query."""
         return self._get_query(table=Case).join(Case.links).join(CaseSample.sample)
 
-    def _get_join_sample_and_customer_query(self) -> Query:
+    def _get_join_sample_and_customer_query(
+        self,
+    ) -> Query:
         """Return join sample and customer query."""
         return self._get_query(table=Sample).join(Customer)
 
-    def _get_join_flow_cell_sample_links_query(self) -> Query:
+    def _get_join_flow_cell_sample_links_query(
+        self,
+    ) -> Query:
         """Return join flow cell samples and relationship query."""
         return self._get_query(table=Flowcell).join(Flowcell.samples).join(Sample.links)
 
-    def _get_join_sample_family_query(self) -> Query:
+    def _get_join_sample_family_query(
+        self,
+    ) -> Query:
         """Return a join sample case relationship query."""
         return self._get_query(table=Sample).join(Case.links).join(CaseSample.sample)
 
-    def _get_join_sample_application_version_query(self) -> Query:
+    def _get_join_sample_application_version_query(
+        self,
+    ) -> Query:
         """Return join sample to application version query."""
         return (
             self._get_query(table=Sample)
@@ -87,21 +111,30 @@ class BaseHandler:
             .join(ApplicationVersion.application)
         )
 
-    def _get_join_analysis_sample_family_query(self) -> Query:
+    def _get_join_analysis_sample_family_query(
+        self,
+    ) -> Query:
         """Return join analysis to sample to case query."""
         return self._get_query(table=Analysis).join(Case).join(Case.links).join(CaseSample.sample)
 
-    def _get_subquery_with_latest_case_analysis_date(self) -> Query:
+    def _get_subquery_with_latest_case_analysis_date(
+        self,
+    ) -> Query:
         """Return a subquery with the case internal id and the date of its latest analysis."""
         case_and_date: Query = (
             self._get_join_analysis_case_query()
             .group_by(Case.id)
-            .with_entities(Analysis.case_id, func.max(Analysis.started_at).label("started_at"))
+            .with_entities(
+                Analysis.case_id,
+                func.max(Analysis.started_at).label("started_at"),
+            )
             .subquery()
         )
         return case_and_date
 
-    def _get_latest_analyses_for_cases_query(self) -> Query:
+    def _get_latest_analyses_for_cases_query(
+        self,
+    ) -> Query:
         """Return a join query for the latest analysis for each case."""
         analyses: Query = self._get_query(table=Analysis)
         case_and_date_subquery: Query = self._get_subquery_with_latest_case_analysis_date()
@@ -191,7 +224,9 @@ class BaseHandler:
         )
         return cases_query
 
-    def _get_join_application_limitations_query(self) -> Query:
+    def _get_join_application_limitations_query(
+        self,
+    ) -> Query:
         """Return a join query for all application limitations."""
         return self._get_query(table=ApplicationLimitations).join(
             ApplicationLimitations.application

@@ -10,7 +10,10 @@ Create Date: 2023-04-12 11:13:37.585551
 import sqlalchemy as sa
 from sqlalchemy import Column, orm, types
 from sqlalchemy.engine import Connection
-from sqlalchemy.orm import Session, declarative_base
+from sqlalchemy.orm import (
+    Session,
+    declarative_base,
+)
 
 from alembic import op
 
@@ -26,7 +29,11 @@ Base = declarative_base()
 class Customer(Base):
     __tablename__ = "customer"
     id = Column(types.Integer, primary_key=True)
-    internal_id = Column(types.String(32), unique=True, nullable=False)
+    internal_id = Column(
+        types.String(32),
+        unique=True,
+        nullable=False,
+    )
     is_trusted = Column(type_=types.Boolean)
 
 
@@ -34,7 +41,10 @@ TRUSTED_CUSTOMERS = ["cust153"]
 
 
 def upgrade():
-    op.add_column(table_name="customer", column=Column(name="is_trusted", type_=types.Boolean))
+    op.add_column(
+        table_name="customer",
+        column=Column(name="is_trusted", type_=types.Boolean),
+    )
     bind: Connection = op.get_bind()
     session: Session = sa.orm.Session(bind=bind)
     for customer in session.query(Customer):
@@ -44,9 +54,15 @@ def upgrade():
         customer.is_trusted = False
     session.commit()
     op.alter_column(
-        table_name="customer", column_name="is_trusted", nullable=False, existing_type=types.Boolean
+        table_name="customer",
+        column_name="is_trusted",
+        nullable=False,
+        existing_type=types.Boolean,
     )
 
 
 def downgrade():
-    op.drop_column(table_name="customer", column_name="is_trusted")
+    op.drop_column(
+        table_name="customer",
+        column_name="is_trusted",
+    )

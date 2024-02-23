@@ -8,11 +8,15 @@ from _pytest.logging import LogCaptureFixture
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import FileFormat
-from cg.constants.observations import MipDNALoadParameters
+from cg.constants.observations import (
+    MipDNALoadParameters,
+)
 from cg.exc import CaseNotFoundError
 from cg.io.controller import ReadStream
 from cg.models.cg_config import CGConfig
-from cg.models.observations.input_files import MipDNAObservationsInputFiles
+from cg.models.observations.input_files import (
+    MipDNAObservationsInputFiles,
+)
 
 
 def test_instantiate(cg_config_locusdb: CGConfig):
@@ -23,7 +27,10 @@ def test_instantiate(cg_config_locusdb: CGConfig):
     config_path: str = cg_config_locusdb.loqusdb.config_path
 
     # WHEN instantiating a Loqusdb api
-    loqusdb_api = LoqusdbAPI(binary_path=binary_path, config_path=config_path)
+    loqusdb_api = LoqusdbAPI(
+        binary_path=binary_path,
+        config_path=config_path,
+    )
 
     # THEN assert that the API was properly initialised
     assert loqusdb_api.binary_path == binary_path
@@ -109,10 +116,17 @@ def test_load_exception(
 
     # THEN an error should be raised
     with pytest.raises(CalledProcessError):
-        loqusdb_api_exception.load(case_id, observations_input_files.snv_vcf_path)
+        loqusdb_api_exception.load(
+            case_id,
+            observations_input_files.snv_vcf_path,
+        )
 
 
-def test_get_case(case_id: str, loqusdb_api: LoqusdbAPI, loqusdb_case_output: bytes):
+def test_get_case(
+    case_id: str,
+    loqusdb_api: LoqusdbAPI,
+    loqusdb_case_output: bytes,
+):
     """Test get case from Loqusdb API."""
 
     # GIVEN a Loqusdb instance containing a case
@@ -125,7 +139,11 @@ def test_get_case(case_id: str, loqusdb_api: LoqusdbAPI, loqusdb_case_output: by
     assert case["case_id"] == case_id
 
 
-def test_get_case_non_existing(case_id: str, loqusdb_api: LoqusdbAPI, caplog: LogCaptureFixture):
+def test_get_case_non_existing(
+    case_id: str,
+    loqusdb_api: LoqusdbAPI,
+    caplog: LogCaptureFixture,
+):
     """Test get non existent case from Loqusdb API."""
     caplog.set_level(logging.DEBUG)
 
@@ -152,7 +170,8 @@ def test_get_duplicate(
 
     # GIVEN the expected duplicated output
     expected_duplicate: dict = ReadStream.get_content_from_stream(
-        file_format=FileFormat.JSON, stream=loqusdb_duplicate_output.decode("utf-8")
+        file_format=FileFormat.JSON,
+        stream=loqusdb_duplicate_output.decode("utf-8"),
     )
 
     # WHEN retrieving the duplicated entry
@@ -190,7 +209,10 @@ def test_get_duplicate_non_existing(
 
 
 def test_delete_case(
-    case_id: str, loqusdb_api: LoqusdbAPI, loqusdb_delete_stderr: bytes, caplog: LogCaptureFixture
+    case_id: str,
+    loqusdb_api: LoqusdbAPI,
+    loqusdb_delete_stderr: bytes,
+    caplog: LogCaptureFixture,
 ):
     """Test case deletion from Loqusdb."""
     caplog.set_level(logging.DEBUG)
@@ -229,7 +251,9 @@ def test_delete_case_non_existing(
 
 
 def test_get_nr_of_variants_in_file(
-    loqusdb_api: LoqusdbAPI, loqusdb_load_stderr: bytes, nr_of_loaded_variants: int
+    loqusdb_api: LoqusdbAPI,
+    loqusdb_load_stderr: bytes,
+    nr_of_loaded_variants: int,
 ):
     """Test getting the number of variants from a Loqusdb uploaded file."""
 
@@ -243,7 +267,11 @@ def test_get_nr_of_variants_in_file(
     assert output["variants"] == nr_of_loaded_variants
 
 
-def test_repr_string(loqusdb_api: LoqusdbAPI, loqusdb_binary_path: str, loqusdb_config_path: str):
+def test_repr_string(
+    loqusdb_api: LoqusdbAPI,
+    loqusdb_binary_path: str,
+    loqusdb_config_path: str,
+):
     """Test __repr__ of the Loqusdb API."""
 
     # GIVEN a Loqusdb API

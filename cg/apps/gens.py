@@ -17,7 +17,9 @@ class GensAPI:
         self.binary_path: str = config["gens"]["binary_path"]
         self.config_path: str = config["gens"]["config_path"]
         self.process: Process = Process(
-            binary=self.binary_path, config=self.config_path, config_parameter="--env-file"
+            binary=self.binary_path,
+            config=self.config_path,
+            config_parameter="--env-file",
         )
         self.dry_run: bool = False
 
@@ -41,11 +43,19 @@ class GensAPI:
             "--coverage": coverage_path,
             "--case-id": case_id,
         }
-        load_call_params: list[str] = ["load", "sample"] + get_list_from_dictionary(load_params)
-        self.process.run_command(parameters=load_call_params, dry_run=self.dry_run)
+        load_call_params: list[str] = [
+            "load",
+            "sample",
+        ] + get_list_from_dictionary(load_params)
+        self.process.run_command(
+            parameters=load_call_params,
+            dry_run=self.dry_run,
+        )
 
     @staticmethod
-    def is_suitable_for_upload(case: Case) -> bool:
+    def is_suitable_for_upload(
+        case: Case,
+    ) -> bool:
         """Check if a cancer case supports Gens upload."""
         return all(
             sample.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING for sample in case.samples

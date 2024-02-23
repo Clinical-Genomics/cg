@@ -4,7 +4,10 @@ import subprocess
 
 import pytest
 
-from cg.apps.mutacc_auto import MutaccAutoAPI, run_command
+from cg.apps.mutacc_auto import (
+    MutaccAutoAPI,
+    run_command,
+)
 
 
 def test_instatiate(mutacc_config):

@@ -2,7 +2,10 @@ from pathlib import Path
 
 import pytest
 
-from cg.constants.encryption import CipherAlgorithm, EncryptionUserID
+from cg.constants.encryption import (
+    CipherAlgorithm,
+    EncryptionUserID,
+)
 
 
 @pytest.fixture
@@ -128,7 +131,9 @@ def symmetric_decryption_command(
 
 @pytest.fixture
 def spring_symmetric_encryption_command(
-    temporary_passphrase: Path, encrypted_spring_file_path: Path, spring_file_path: Path
+    temporary_passphrase: Path,
+    encrypted_spring_file_path: Path,
+    spring_file_path: Path,
 ) -> list[str]:
     """Return symmetric encryption command."""
     return [
@@ -149,7 +154,8 @@ def spring_symmetric_encryption_command(
 
 @pytest.fixture
 def key_asymmetric_encryption_command(
-    encrypted_key_file: Path, temporary_passphrase: Path
+    encrypted_key_file: Path,
+    temporary_passphrase: Path,
 ) -> list[str]:
     """Return asymmetric encryption command."""
     return [
@@ -186,7 +192,8 @@ def spring_symmetric_decryption_command(
 
 @pytest.fixture
 def key_asymmetric_decryption_command(
-    encrypted_key_file: Path, encryption_key_file: Path
+    encrypted_key_file: Path,
+    encryption_key_file: Path,
 ) -> list[str]:
     """Return asymmetric encryption command."""
     return [

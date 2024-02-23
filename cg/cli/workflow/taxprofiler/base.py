@@ -5,7 +5,10 @@ import logging
 import click
 from pydantic.v1 import ValidationError
 
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
+from cg.cli.workflow.commands import (
+    ARGUMENT_CASE_ID,
+    resolve_compression,
+)
 from cg.cli.workflow.nf_analysis import (
     OPTION_COMPUTE_ENV,
     OPTION_CONFIG,
@@ -18,16 +21,32 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_WORKDIR,
     metrics_deliver,
 )
-from cg.cli.workflow.taxprofiler.options import OPTION_FROM_START, OPTION_INSTRUMENT_PLATFORM
+from cg.cli.workflow.taxprofiler.options import (
+    OPTION_FROM_START,
+    OPTION_INSTRUMENT_PLATFORM,
+)
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
+from cg.constants.constants import (
+    DRY_RUN,
+    CaseActions,
+    MetaApis,
+)
 from cg.constants.nf_analysis import NfTowerStatus
-from cg.constants.sequencing import SequencingPlatform
-from cg.exc import CgError, DecompressionNeededError
+from cg.constants.sequencing import (
+    SequencingPlatform,
+)
+from cg.exc import (
+    CgError,
+    DecompressionNeededError,
+)
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
+from cg.meta.workflow.taxprofiler import (
+    TaxprofilerAnalysisAPI,
+)
 from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.rnafusion import CommandArgs
+from cg.models.rnafusion.rnafusion import (
+    CommandArgs,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -50,14 +69,19 @@ taxprofiler.add_command(metrics_deliver)
 @DRY_RUN
 @click.pass_obj
 def config_case(
-    context: CGConfig, case_id: str, instrument_platform: SequencingPlatform, dry_run: bool
+    context: CGConfig,
+    case_id: str,
+    instrument_platform: SequencingPlatform,
+    dry_run: bool,
 ) -> None:
     """Create sample sheet and parameter file for Taxprofiler analysis for a given case."""
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.config_case(
-            case_id=case_id, instrument_platform=instrument_platform, dry_run=dry_run
+            case_id=case_id,
+            instrument_platform=instrument_platform,
+            dry_run=dry_run,
         )
 
     except (CgError, ValidationError) as error:
@@ -101,16 +125,20 @@ def run(
     command_args: CommandArgs = CommandArgs(
         **{
             "log": analysis_api.get_log_path(
-                case_id=case_id, workflow=analysis_api.workflow, log=log
+                case_id=case_id,
+                workflow=analysis_api.workflow,
+                log=log,
             ),
             "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
             "config": analysis_api.get_nextflow_config_path(
-                case_id=case_id, nextflow_config=config
+                case_id=case_id,
+                nextflow_config=config,
             ),
             "params_file": analysis_api.get_params_file_path(
-                case_id=case_id, params_file=params_file
+                case_id=case_id,
+                params_file=params_file,
             ),
             "name": case_id,
             "compute_env": compute_env or analysis_api.get_compute_env(case_id=case_id),
@@ -124,10 +152,15 @@ def run(
         analysis_api.check_analysis_ongoing(case_id)
         LOG.info(f"Running Taxprofiler analysis for {case_id}")
         analysis_api.run_analysis(
-            case_id=case_id, command_args=command_args, use_nextflow=use_nextflow, dry_run=dry_run
+            case_id=case_id,
+            command_args=command_args,
+            use_nextflow=use_nextflow,
+            dry_run=dry_run,
         )
         analysis_api.set_statusdb_action(
-            case_id=case_id, action=CaseActions.RUNNING, dry_run=dry_run
+            case_id=case_id,
+            action=CaseActions.RUNNING,
+            dry_run=dry_run,
         )
     except Exception as error:
         LOG.error(f"Could not run analysis: {error}")
@@ -167,11 +200,19 @@ def start(
     LOG.info(f"Starting analysis for {case_id}")
 
     try:
-        context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
+        context.invoke(
+            resolve_compression,
+            case_id=case_id,
+            dry_run=dry_run,
+        )
     except DecompressionNeededError as error:
         LOG.error(error)
         raise click.Abort() from error
-    context.invoke(config_case, case_id=case_id, dry_run=dry_run)
+    context.invoke(
+        config_case,
+        case_id=case_id,
+        dry_run=dry_run,
+    )
     context.invoke(
         run,
         case_id=case_id,
@@ -200,7 +241,11 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
     exit_code: int = EXIT_SUCCESS
     for case in analysis_api.get_cases_to_analyze():
         try:
-            context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
+            context.invoke(
+                start,
+                case_id=case.internal_id,
+                dry_run=dry_run,
+            )
         except Exception as error:
             LOG.error(error)
             exit_code = EXIT_FAIL

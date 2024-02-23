@@ -2,7 +2,9 @@
 
 from mock import MagicMock
 
-from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
+from cg.meta.demultiplex.demux_post_processing import (
+    DemuxPostProcessingAPI,
+)
 from cg.meta.demultiplex.status_db_storage_functions import (
     add_samples_to_flow_cell_in_status_db,
     add_sequencing_metrics_to_statusdb,
@@ -11,7 +13,11 @@ from cg.meta.demultiplex.status_db_storage_functions import (
     update_sample_read_count,
 )
 from cg.models.cg_config import CGConfig
-from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
+from cg.store.models import (
+    Flowcell,
+    Sample,
+    SampleLaneSequencingMetrics,
+)
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -28,7 +34,9 @@ def test_add_single_sequencing_metrics_entry_to_statusdb(
 
     # GIVEN a sequencing metrics entry
     sequencing_metrics_entry = store_with_sequencing_metrics.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-        flow_cell_name=flow_cell_name, sample_internal_id=sample_id, lane=lane
+        flow_cell_name=flow_cell_name,
+        sample_internal_id=sample_id,
+        lane=lane,
     )
 
     # WHEN adding the sequencing metrics entry to the statusdb
@@ -39,7 +47,9 @@ def test_add_single_sequencing_metrics_entry_to_statusdb(
 
     # THEN the sequencing metrics entry was added to the statusdb
     assert demux_post_processing_api.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-        flow_cell_name=flow_cell_name, sample_internal_id=sample_id, lane=lane
+        flow_cell_name=flow_cell_name,
+        sample_internal_id=sample_id,
+        lane=lane,
     )
 
 
@@ -63,7 +73,9 @@ def test_update_sample_read_count():
     assert sample.reads == read_count
 
 
-def test_metric_has_sample_in_statusdb(demultiplex_context: CGConfig):
+def test_metric_has_sample_in_statusdb(
+    demultiplex_context: CGConfig,
+):
     # GIVEN a store with a sample and a sequencing metric
 
     # GIVEN a DemuxPostProcessing API
@@ -74,12 +86,15 @@ def test_metric_has_sample_in_statusdb(demultiplex_context: CGConfig):
 
     # WHEN checking if the sample exists in statusdb
     assert not metric_has_sample_in_statusdb(
-        sample_internal_id=sample_internal_id, store=demux_post_processing_api.status_db
+        sample_internal_id=sample_internal_id,
+        store=demux_post_processing_api.status_db,
     )
 
 
 def test_add_samples_to_flow_cell_in_status_db(
-    store_with_sequencing_metrics: Store, flow_cell_name: str, sample_id: str
+    store_with_sequencing_metrics: Store,
+    flow_cell_name: str,
+    sample_id: str,
 ):
     # GIVEN a store with sequencing metrics
     store = store_with_sequencing_metrics
@@ -89,7 +104,9 @@ def test_add_samples_to_flow_cell_in_status_db(
 
     # WHEN adding samples to flow cell
     add_samples_to_flow_cell_in_status_db(
-        flow_cell=flow_cell, sample_internal_ids=[sample_id], store=store
+        flow_cell=flow_cell,
+        sample_internal_ids=[sample_id],
+        store=store,
     )
 
     # THEN the samples are added to the flow cell in statusdb and FlowcellSamples are updated
@@ -99,7 +116,8 @@ def test_add_samples_to_flow_cell_in_status_db(
 
 
 def test_delete_sequencing_metrics_from_statusdb_existing_metrics(
-    store_with_sequencing_metrics: Store, flow_cell_name: str
+    store_with_sequencing_metrics: Store,
+    flow_cell_name: str,
 ):
     # GIVEN a store with sequencing metrics
     store = store_with_sequencing_metrics

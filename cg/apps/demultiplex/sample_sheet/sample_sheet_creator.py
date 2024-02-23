@@ -9,7 +9,9 @@ from cg.apps.demultiplex.sample_sheet.index import (
     get_valid_indexes,
     is_dual_index,
 )
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_by_lane
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_samples_by_lane,
+)
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
@@ -21,8 +23,12 @@ from cg.constants.demultiplexing import (
     SampleSheetBCLConvertSections,
 )
 from cg.exc import SampleSheetError
-from cg.models.demultiplex.run_parameters import RunParameters
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.demultiplex.run_parameters import (
+    RunParameters,
+)
+from cg.models.flow_cell.flow_cell import (
+    FlowCellDirectoryData,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -54,7 +60,9 @@ class SampleSheetCreator:
         return get_valid_indexes(dual_indexes_only=True)
 
     @abstractmethod
-    def remove_samples_with_simple_index(self) -> None:
+    def remove_samples_with_simple_index(
+        self,
+    ) -> None:
         """Filter out samples with single indexes."""
         pass
 
@@ -66,22 +74,32 @@ class SampleSheetCreator:
         """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
         if self.run_parameters.is_single_index:
             sample_serialisation: dict = sample.model_dump(
-                by_alias=True, exclude={"index2", "barcode_mismatches_2"}
+                by_alias=True,
+                exclude={
+                    "index2",
+                    "barcode_mismatches_2",
+                },
             )
         else:
             sample_serialisation: dict = sample.model_dump(by_alias=True)
 
         return [str(sample_serialisation[column_name]) for column_name in data_column_names]
 
-    def get_additional_sections_sample_sheet(self) -> list | None:
+    def get_additional_sections_sample_sheet(
+        self,
+    ) -> list | None:
         """Return all sections of the sample sheet that are not the data section."""
         raise NotImplementedError("Impossible to get sample sheet sections from parent class")
 
-    def get_data_section_header_and_columns(self) -> list[list[str]] | None:
+    def get_data_section_header_and_columns(
+        self,
+    ) -> list[list[str]] | None:
         """Return the header and column names of the data section of the sample sheet."""
         raise NotImplementedError("Impossible to get sample sheet sections from parent class")
 
-    def create_sample_sheet_content(self) -> list[list[str]]:
+    def create_sample_sheet_content(
+        self,
+    ) -> list[list[str]]:
         """Create sample sheet content with samples."""
         LOG.info("Creating sample sheet content")
         complete_data_section: list[list[str]] = self.get_data_section_header_and_columns()
@@ -98,7 +116,9 @@ class SampleSheetCreator:
             )
         return sample_sheet_content
 
-    def process_samples_for_sample_sheet(self) -> None:
+    def process_samples_for_sample_sheet(
+        self,
+    ) -> None:
         """Remove unwanted samples and adapt remaining samples."""
         self.remove_samples_with_simple_index()
         for lims_sample in self.lims_samples:
@@ -106,7 +126,10 @@ class SampleSheetCreator:
         is_reverse_complement: bool = (
             self.index_settings.are_i5_override_cycles_reverse_complemented
         )
-        for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
+        for (
+            lane,
+            samples_in_lane,
+        ) in get_samples_by_lane(self.lims_samples).items():
             LOG.info(f"Updating barcode mismatch values for samples in lane {lane}")
             for lims_sample in samples_in_lane:
                 lims_sample.update_barcode_mismatches(
@@ -115,7 +138,9 @@ class SampleSheetCreator:
                     is_reverse_complement=is_reverse_complement,
                 )
 
-    def construct_sample_sheet(self) -> list[list[str]]:
+    def construct_sample_sheet(
+        self,
+    ) -> list[list[str]]:
         """Construct and validate the sample sheet."""
         self.process_samples_for_sample_sheet()
         sample_sheet_content: list[list[str]] = self.create_sample_sheet_content()
@@ -125,7 +150,9 @@ class SampleSheetCreator:
 class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
     """Create a raw sample sheet for flow cells."""
 
-    def remove_samples_with_simple_index(self) -> None:
+    def remove_samples_with_simple_index(
+        self,
+    ) -> None:
         """Filter out samples with single indexes."""
         LOG.info("Removing all samples without dual indexes")
         samples_to_keep: list[FlowCellSampleBcl2Fastq] = []
@@ -136,7 +163,9 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
             samples_to_keep.append(sample)
         self.lims_samples = samples_to_keep
 
-    def get_additional_sections_sample_sheet(self) -> list[list[str]]:
+    def get_additional_sections_sample_sheet(
+        self,
+    ) -> list[list[str]]:
         """Return all sections of the sample sheet that are not the data section."""
         return [
             [SampleSheetBcl2FastqSections.Settings.HEADER],
@@ -144,7 +173,9 @@ class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
             SampleSheetBcl2FastqSections.Settings.barcode_mismatch_index_2(),
         ]
 
-    def get_data_section_header_and_columns(self) -> list[list[str]]:
+    def get_data_section_header_and_columns(
+        self,
+    ) -> list[list[str]]:
         """Return the header and column names of the data section of the sample sheet."""
         column_names: list[str] = SampleSheetBcl2FastqSections.Data.column_names()
         if self.run_parameters.is_single_index:
@@ -167,16 +198,23 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
             raise SampleSheetError(f"Can't use {BclConverter.BCL2FASTQ} with sample sheet v2")
 
-    def remove_samples_with_simple_index(self) -> None:
+    def remove_samples_with_simple_index(
+        self,
+    ) -> None:
         """Filter out samples with single indexes."""
         LOG.info("Removing of single index samples is not required for V2 sample sheet")
 
-    def get_additional_sections_sample_sheet(self) -> list[list[str]]:
+    def get_additional_sections_sample_sheet(
+        self,
+    ) -> list[list[str]]:
         """Return all sections of the sample sheet that are not the data section."""
         header_section: list[list[str]] = [
             [SampleSheetBCLConvertSections.Header.HEADER.value],
             SampleSheetBCLConvertSections.Header.file_format(),
-            [SampleSheetBCLConvertSections.Header.RUN_NAME.value, self.flow_cell_id],
+            [
+                SampleSheetBCLConvertSections.Header.RUN_NAME.value,
+                self.flow_cell_id,
+            ],
             [
                 SampleSheetBCLConvertSections.Header.INSTRUMENT_PLATFORM_TITLE.value,
                 SampleSheetBCLConvertSections.Header.instrument_platform_sequencer().get(
@@ -184,7 +222,10 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
                 ),
             ],
             SampleSheetBCLConvertSections.Header.index_orientation_forward(),
-            [SampleSheetBCLConvertSections.Header.INDEX_SETTINGS.value, self.index_settings.name],
+            [
+                SampleSheetBCLConvertSections.Header.INDEX_SETTINGS.value,
+                self.index_settings.name,
+            ],
         ]
         reads_section: list[list[str]] = [
             [SampleSheetBCLConvertSections.Reads.HEADER],
@@ -215,7 +256,9 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         ]
         return header_section + reads_section + settings_section
 
-    def get_data_section_header_and_columns(self) -> list[list[str]]:
+    def get_data_section_header_and_columns(
+        self,
+    ) -> list[list[str]]:
         """Return the header and column names of the data section of the sample sheet."""
         column_names: list[str] = SampleSheetBCLConvertSections.Data.column_names()
         if self.run_parameters.is_single_index:

@@ -3,7 +3,9 @@
 from pathlib import Path
 
 from cg.apps.gens import GensAPI
-from cg.constants.gene_panel import GENOME_BUILD_37
+from cg.constants.gene_panel import (
+    GENOME_BUILD_37,
+)
 from cg.utils.commands import Process
 
 

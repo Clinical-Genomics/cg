@@ -14,7 +14,9 @@ from cg.exc import (
     PdcError,
 )
 from cg.meta.backup.pdc import PdcAPI
-from cg.meta.encryption.encryption import FlowCellEncryptionAPI
+from cg.meta.encryption.encryption import (
+    FlowCellEncryptionAPI,
+)
 from cg.models.cg_config import CGConfig
 from cg.store.models import Flowcell
 from cg.store.store import Store
@@ -64,7 +66,8 @@ def test_validate_is_flow_cell_backup_possible(
 
     # WHEN checking if back-up is possible
     pdc_api.validate_is_flow_cell_backup_possible(
-        db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
+        db_flow_cell=db_flow_cell,
+        flow_cell_encryption_api=flow_cell_encryption_api,
     )
 
     # THEN communicate that it passed
@@ -84,7 +87,11 @@ def test_validate_is_flow_cell_backup_when_dsmc_is_already_running(
     pdc_api = cg_context.pdc_api
 
     # GIVEN a Dsmc process is already running
-    mocker.patch.object(PdcAPI, "validate_is_dsmc_running", return_value=True)
+    mocker.patch.object(
+        PdcAPI,
+        "validate_is_dsmc_running",
+        return_value=True,
+    )
 
     # GIVEN a database flow cell which is not backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
@@ -95,7 +102,8 @@ def test_validate_is_flow_cell_backup_when_dsmc_is_already_running(
     # WHEN checking if back-up is possible
     with pytest.raises(DsmcAlreadyRunningError):
         pdc_api.validate_is_flow_cell_backup_possible(
-            db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
+            db_flow_cell=db_flow_cell,
+            flow_cell_encryption_api=flow_cell_encryption_api,
         )
 
         # THEN error should be raised
@@ -114,13 +122,16 @@ def test_validate_is_flow_cell_backup_when_already_backed_up(
 
     # GIVEN a database flow cell which is backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
-        flow_cell_name=flow_cell_encryption_api.flow_cell.id, store=base_store, has_backup=True
+        flow_cell_name=flow_cell_encryption_api.flow_cell.id,
+        store=base_store,
+        has_backup=True,
     )
 
     # WHEN checking if back-up is possible
     with pytest.raises(FlowCellAlreadyBackedUpError):
         pdc_api.validate_is_flow_cell_backup_possible(
-            db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
+            db_flow_cell=db_flow_cell,
+            flow_cell_encryption_api=flow_cell_encryption_api,
         )
 
         # THEN error should be raised
@@ -146,7 +157,8 @@ def test_validate_is_flow_cell_backup_when_encryption_is_not_complete(
     # WHEN checking if back-up is possible
     with pytest.raises(FlowCellEncryptionError):
         pdc_api.validate_is_flow_cell_backup_possible(
-            db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
+            db_flow_cell=db_flow_cell,
+            flow_cell_encryption_api=flow_cell_encryption_api,
         )
 
         # THEN error should be raised
@@ -165,7 +177,11 @@ def test_backup_flow_cell(
     pdc_api = cg_context.pdc_api
 
     # GIVEN a mocked archiving call
-    mocker.patch.object(PdcAPI, "archive_file_to_pdc", return_value=None)
+    mocker.patch.object(
+        PdcAPI,
+        "archive_file_to_pdc",
+        return_value=None,
+    )
 
     # GIVEN a database flow cell which is not backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
@@ -227,7 +243,12 @@ def test_backup_flow_cell_when_unable_to_archive(
 
 
 @mock.patch("cg.meta.backup.pdc.Process")
-def test_archive_file_to_pdc(mock_process, cg_context: CGConfig, binary_path, backup_file_path):
+def test_archive_file_to_pdc(
+    mock_process,
+    cg_context: CGConfig,
+    binary_path,
+    backup_file_path,
+):
     """Tests execution command to archive file to PDC"""
     # GIVEN an instance of the PDC API
     pdc_api = cg_context.pdc_api
@@ -238,12 +259,18 @@ def test_archive_file_to_pdc(mock_process, cg_context: CGConfig, binary_path, ba
 
     # THEN a dsmc process should be started with the parameter 'archive'
     mock_process.run_command.assert_called_once_with(
-        parameters=["archive", backup_file_path], dry_run=False
+        parameters=["archive", backup_file_path],
+        dry_run=False,
     )
 
 
 @mock.patch("cg.meta.backup.pdc.Process")
-def test_query_pdc(mock_process, cg_context: CGConfig, binary_path, backup_file_path):
+def test_query_pdc(
+    mock_process,
+    cg_context: CGConfig,
+    binary_path,
+    backup_file_path,
+):
     """Tests execution command to query files to PDC"""
     # GIVEN an instance of the PDC API
     pdc_api = cg_context.pdc_api
@@ -254,12 +281,22 @@ def test_query_pdc(mock_process, cg_context: CGConfig, binary_path, backup_file_
 
     # THEN a dsmc process should be started with parameters 'q archive'
     mock_process.run_command.assert_called_once_with(
-        parameters=["q", "archive", backup_file_path], dry_run=False
+        parameters=[
+            "q",
+            "archive",
+            backup_file_path,
+        ],
+        dry_run=False,
     )
 
 
 @mock.patch("cg.meta.backup.pdc.Process")
-def test_retrieve_file_from_pdc(mock_process, cg_context: CGConfig, binary_path, backup_file_path):
+def test_retrieve_file_from_pdc(
+    mock_process,
+    cg_context: CGConfig,
+    binary_path,
+    backup_file_path,
+):
     """Tests execution command to retrieve files from PDC"""
     # GIVEN an instance of the PDC API
     pdc_api = cg_context.pdc_api
@@ -270,11 +307,18 @@ def test_retrieve_file_from_pdc(mock_process, cg_context: CGConfig, binary_path,
 
     # THEN a dsmc process should be started with parameters 'retrieve -replace=yes'
     mock_process.run_command.assert_called_once_with(
-        parameters=["retrieve", "-replace=yes", backup_file_path], dry_run=False
+        parameters=[
+            "retrieve",
+            "-replace=yes",
+            backup_file_path,
+        ],
+        dry_run=False,
     )
 
 
-def test_run_dsmc_command_fail(cg_context: CGConfig):
+def test_run_dsmc_command_fail(
+    cg_context: CGConfig,
+):
     """Test that non-zero, non-warning exit-codes raise an error."""
     # GIVEN an instance of the PDC API
     pdc_api = cg_context.pdc_api

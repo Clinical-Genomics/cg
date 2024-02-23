@@ -1,7 +1,9 @@
 """Report field validation helper"""
 
 from cg.constants import NA_FIELD
-from cg.constants.constants import SCALE_TO_MILLION_READ_PAIRS
+from cg.constants.constants import (
+    SCALE_TO_MILLION_READ_PAIRS,
+)
 from cg.models.report.report import ReportModel
 
 
@@ -9,7 +11,9 @@ def get_mapped_reads_fraction(mapped_reads: float, total_reads: float) -> float 
     return mapped_reads / total_reads if mapped_reads and total_reads else None
 
 
-def get_million_read_pairs(reads: int) -> float | None:
+def get_million_read_pairs(
+    reads: int,
+) -> float | None:
     """Return number of sequencing reads as millions of read pairs."""
     return (
         round(reads / SCALE_TO_MILLION_READ_PAIRS, 1) if reads or isinstance(reads, int) else None
@@ -36,7 +40,9 @@ def get_empty_fields(report_data: dict) -> list:
     return empty_fields
 
 
-def get_empty_report_data(report_data: ReportModel) -> dict:
+def get_empty_report_data(
+    report_data: ReportModel,
+) -> dict:
     """Return empty fields from a report data model."""
     empty_fields = {
         "report": get_empty_fields(report_data=report_data.model_dump()),
@@ -76,7 +82,13 @@ def get_empty_report_data(report_data: ReportModel) -> dict:
 
 def get_missing_report_data(empty_fields: dict, required_fields: dict) -> dict:
     """Return missing required fields from a report data model."""
-    nested_sources = ["applications", "samples", "methods", "timestamps", "metadata"]
+    nested_sources = [
+        "applications",
+        "samples",
+        "methods",
+        "timestamps",
+        "metadata",
+    ]
     missing_fields = dict()
     for source in empty_fields:
         if source in nested_sources:
@@ -94,7 +106,8 @@ def get_missing_report_data(empty_fields: dict, required_fields: dict) -> dict:
             }
         else:
             missing_data = get_missing_fields(
-                empty_fields=empty_fields[source], required_fields=required_fields[source]
+                empty_fields=empty_fields[source],
+                required_fields=required_fields[source],
             )
         if missing_data:
             missing_fields.update({source: missing_data})

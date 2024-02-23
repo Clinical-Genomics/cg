@@ -19,7 +19,9 @@ def send_mail(email_info: EmailInfo) -> None:
         if email_info.file:
             file_attachment = MIMEApplication(open(email_info.file, "rb").read())
             file_attachment.add_header(
-                "Content-Disposition", "attachment", filename=email_info.file.name
+                "Content-Disposition",
+                "attachment",
+                filename=email_info.file.name,
             )
             msg.attach(file_attachment)
         try:

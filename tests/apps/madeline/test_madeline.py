@@ -11,7 +11,11 @@ def get_ind_info(columns, line):
     return ind_info
 
 
-def test_run_madeline(trio: dict, populated_madeline_api: MadelineAPI, project_dir: Path):
+def test_run_madeline(
+    trio: dict,
+    populated_madeline_api: MadelineAPI,
+    project_dir: Path,
+):
     """Test to run the madeline call from api"""
     # GIVEN a populated madeline api
     madeline_api = populated_madeline_api
@@ -73,7 +77,10 @@ def test_generate_madeline_input(madeline_columns, proband):
     # Skip the header line
     next(madeline_lines)
     # Convert line to dict
-    ind_info = get_ind_info(madeline_columns.keys(), next(madeline_lines))
+    ind_info = get_ind_info(
+        madeline_columns.keys(),
+        next(madeline_lines),
+    )
 
     # THEN assert that the case id is included
     assert ind_info["case"] == case_id
@@ -95,7 +102,10 @@ def test_generate_madeline_input_none_status(madeline_columns, proband):
     # Skip the header line
     next(madeline_lines)
     # Convert line to dict
-    ind_info = get_ind_info(madeline_columns.keys(), next(madeline_lines))
+    ind_info = get_ind_info(
+        madeline_columns.keys(),
+        next(madeline_lines),
+    )
 
     # THEN assert that the status is "."
     assert ind_info["status"] == "."
@@ -115,13 +125,18 @@ def test_generate_madeline_input_non_existing_status(madeline_columns, proband):
     # Skip the header line
     next(madeline_lines)
     # Convert line to dict
-    ind_info = get_ind_info(madeline_columns.keys(), next(madeline_lines))
+    ind_info = get_ind_info(
+        madeline_columns.keys(),
+        next(madeline_lines),
+    )
 
     # THEN assert that the status is "."
     assert ind_info["status"] == "."
 
 
-def test_generate_madeline_input_no_inds(madeline_columns):
+def test_generate_madeline_input_no_inds(
+    madeline_columns,
+):
     """Test generate input for madeline when no individuals"""
 
     # GIVEN a case id and a empty list of inds

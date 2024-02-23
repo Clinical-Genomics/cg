@@ -8,7 +8,10 @@ from cg.models.cg_config import CGConfig
 EXIT_SUCCESS = 0
 
 
-def test_without_options(cli_runner: CliRunner, balsamic_context: CGConfig):
+def test_without_options(
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+):
     """Test command without case_id"""
     # GIVEN NO case_id
     # WHEN dry running without anything specified
@@ -18,7 +21,11 @@ def test_without_options(cli_runner: CliRunner, balsamic_context: CGConfig):
     assert "Missing argument" in result.output
 
 
-def test_with_missing_case(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
+def test_with_missing_case(
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+    caplog,
+):
     """Test command with invalid case to start with"""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
@@ -32,7 +39,11 @@ def test_with_missing_case(cli_runner: CliRunner, balsamic_context: CGConfig, ca
     assert "could not be found in Status DB!" in caplog.text
 
 
-def test_without_samples(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
+def test_without_samples(
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+    caplog,
+):
     """Test command with case_id and no samples"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -46,7 +57,11 @@ def test_without_samples(cli_runner: CliRunner, balsamic_context: CGConfig, capl
     assert "no samples" in caplog.text
 
 
-def test_single_panel(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
+def test_single_panel(
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+    caplog,
+):
     """Test with case_id that requires SINGLE TGS analysis"""
     caplog.set_level(logging.INFO)
     # GIVEN case_id containing ONE tumor, TGS application

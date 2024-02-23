@@ -30,7 +30,9 @@ def test_process_run_invalid_command():
         process.run_command()
 
 
-def test_process_run_command_no_params(ls_process):
+def test_process_run_command_no_params(
+    ls_process,
+):
     # GIVEN a proces with 'ls' as binary
     process = ls_process
     # WHEN running the command without parameters
@@ -39,7 +41,9 @@ def test_process_run_command_no_params(ls_process):
     assert "README" in process.stdout
 
 
-def test_process_run_command_with_params(ls_process):
+def test_process_run_command_with_params(
+    ls_process,
+):
     # GIVEN a process with 'ls' as binary
     process = ls_process
     # WHEN running the command with parameters

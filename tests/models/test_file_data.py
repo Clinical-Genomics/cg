@@ -35,7 +35,9 @@ def test_is_gzipped_non_zipped(filled_file):
     assert res is False
 
 
-def test_is_gzipped_non_existing(non_existing_gzipped_file_path):
+def test_is_gzipped_non_existing(
+    non_existing_gzipped_file_path,
+):
     """Test if a file that does not exist is gzipped"""
     # GIVEN an non existing file
     assert not non_existing_gzipped_file_path.exists()
@@ -46,7 +48,9 @@ def test_is_gzipped_non_existing(non_existing_gzipped_file_path):
         FileData.is_gzipped(non_existing_gzipped_file_path)
 
 
-def test_is_gzipped_empty_gzipped_file(gzipped_empty_file):
+def test_is_gzipped_empty_gzipped_file(
+    gzipped_empty_file,
+):
     """Test if a gzipped file that does exists but is empty"""
     # GIVEN an existing file
     gzipped_file_path = gzipped_empty_file
@@ -80,7 +84,9 @@ def test_is_empty_file(gzipped_empty_file):
     assert res is True
 
 
-def test_is_empty_file_not_empty(filled_gzip_file):
+def test_is_empty_file_not_empty(
+    filled_gzip_file,
+):
     """Test if a file that is not empty is evaluated as empty"""
     # GIVEN a gzipped file with content
     assert filled_gzip_file.stat().st_size > 0

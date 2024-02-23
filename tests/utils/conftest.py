@@ -52,7 +52,9 @@ def nested_directory_with_file(tmp_path_factory, some_file: str) -> Path:
 
 @pytest.fixture(scope="session")
 def path_with_directories_and_a_file(
-    tmp_path_factory, sub_dir_names: list[str], some_file: str
+    tmp_path_factory,
+    sub_dir_names: list[str],
+    some_file: str,
 ) -> Path:
     """Return a path with directories and a file in it."""
     directory: Path = tmp_path_factory.mktemp("tmp_dir")

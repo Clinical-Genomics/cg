@@ -20,11 +20,21 @@ depends_on = None
 def upgrade():
     bind = op.get_bind()
     op.add_column(
-        "application_version", sa.Column("price_clinical_trials", sa.Integer(), nullable=True)
+        "application_version",
+        sa.Column(
+            "price_clinical_trials",
+            sa.Integer(),
+            nullable=True,
+        ),
     )
 
 
 def downgrade():
     op.drop_column(
-        "application_version", sa.Column("price_clinical_trials", sa.Integer(), nullable=True)
+        "application_version",
+        sa.Column(
+            "price_clinical_trials",
+            sa.Integer(),
+            nullable=True,
+        ),
     )

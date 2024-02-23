@@ -13,7 +13,10 @@ from cg.apps.crunchy.files import (
     get_log_dir,
     get_spring_archive_files,
 )
-from cg.apps.crunchy.models import CrunchyFile, CrunchyMetadata
+from cg.apps.crunchy.models import (
+    CrunchyFile,
+    CrunchyMetadata,
+)
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
@@ -21,7 +24,9 @@ from cg.models import CompressionData
 from cg.utils import Process
 
 
-def test_get_spring_metadata(spring_metadata_file: Path):
+def test_get_spring_metadata(
+    spring_metadata_file: Path,
+):
     """Test the method that fetches the SPRING metadata from a file"""
     # GIVEN a SPRING path and the path to a populated SPRING metadata file
     assert spring_metadata_file.is_file()
@@ -36,7 +41,9 @@ def test_get_spring_metadata(spring_metadata_file: Path):
     assert isinstance(parsed_content.files, list)
 
 
-def test_get_spring_archive_files(crunchy_metadata_object: CrunchyMetadata):
+def test_get_spring_archive_files(
+    crunchy_metadata_object: CrunchyMetadata,
+):
     """Test the method that sorts the SPRING metadata into a dictionary"""
     # GIVEN a SPRING metadata content in its raw format
     assert isinstance(crunchy_metadata_object.files, list)
@@ -49,18 +56,25 @@ def test_get_spring_archive_files(crunchy_metadata_object: CrunchyMetadata):
     # THEN assert a dictionary with the files is returned
     assert isinstance(sorted_content, dict)
     # THEN assert that the correct files are there
-    for file_name in ["fastq_first", "fastq_second", "spring"]:
+    for file_name in [
+        "fastq_first",
+        "fastq_second",
+        "spring",
+    ]:
         assert file_name in sorted_content
 
 
 def test_get_spring_metadata_malformed_info(
-    spring_metadata_file: Path, spring_metadata: list[dict]
+    spring_metadata_file: Path,
+    spring_metadata: list[dict],
 ):
     """Test the method that fetches the SPRING metadata from a file when file is malformed"""
     # GIVEN a SPRING metadata file with missing information
     spring_metadata[0].pop("path")
     WriteFile.write_file_from_content(
-        content=spring_metadata, file_format=FileFormat.JSON, file_path=spring_metadata_file
+        content=spring_metadata,
+        file_format=FileFormat.JSON,
+        file_path=spring_metadata_file,
     )
 
     # WHEN fetching the content of the file
@@ -70,13 +84,16 @@ def test_get_spring_metadata_malformed_info(
 
 
 def test_get_spring_metadata_wrong_number_files(
-    spring_metadata_file: Path, spring_metadata: list[dict]
+    spring_metadata_file: Path,
+    spring_metadata: list[dict],
 ):
     """Test the method that fetches the SPRING metadata from a file when a file is missing"""
     # GIVEN a SPRING metadata file with missing file
     spring_metadata = spring_metadata[1:]
     WriteFile.write_file_from_content(
-        content=spring_metadata, file_format=FileFormat.JSON, file_path=spring_metadata_file
+        content=spring_metadata,
+        file_format=FileFormat.JSON,
+        file_path=spring_metadata_file,
     )
 
     # WHEN fetching the content of the file

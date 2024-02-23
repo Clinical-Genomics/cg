@@ -1,9 +1,16 @@
 from pathlib import Path
 
-from cg.io.json import read_json, read_json_stream, write_json, write_json_stream
+from cg.io.json import (
+    read_json,
+    read_json_stream,
+    write_json,
+    write_json_stream,
+)
 
 
-def test_get_content_from_file(json_file_path: Path):
+def test_get_content_from_file(
+    json_file_path: Path,
+):
     """
     Tests read_json
     """
@@ -16,7 +23,9 @@ def test_get_content_from_file(json_file_path: Path):
     assert isinstance(raw_json_content, dict)
 
 
-def test_get_content_from_stream(json_stream: str):
+def test_get_content_from_stream(
+    json_stream: str,
+):
     """
     Tests read_json_stream
     """
@@ -41,7 +50,10 @@ def test_write_json(json_file_path: Path, json_temp_path: Path):
     raw_json_content: dict = read_json(file_path=json_file_path)
 
     # WHEN writing the json file from dict
-    write_json(content=raw_json_content, file_path=json_temp_path)
+    write_json(
+        content=raw_json_content,
+        file_path=json_temp_path,
+    )
 
     # THEN assert that a file was successfully created
     assert Path.exists(json_temp_path)

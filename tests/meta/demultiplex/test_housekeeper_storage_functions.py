@@ -7,8 +7,12 @@ from housekeeper.store.models import File
 from mock import MagicMock, call
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
+from cg.constants.housekeeper_tags import (
+    SequencingFileTag,
+)
+from cg.meta.demultiplex.demux_post_processing import (
+    DemuxPostProcessingAPI,
+)
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
     add_demux_logs_to_housekeeper,
@@ -16,11 +20,15 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     delete_sequencing_data_from_housekeeper,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import (
+    FlowCellDirectoryData,
+)
 from tests.store_helpers import StoreHelpers
 
 
-def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
+def test_add_bundle_and_version_if_non_existent(
+    demultiplex_context: CGConfig,
+):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
@@ -38,7 +46,9 @@ def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
     )
 
 
-def test_add_bundle_and_version_if_already_exists(demultiplex_context: CGConfig):
+def test_add_bundle_and_version_if_already_exists(
+    demultiplex_context: CGConfig,
+):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
@@ -56,7 +66,9 @@ def test_add_bundle_and_version_if_already_exists(demultiplex_context: CGConfig)
     demux_post_processing_api.hk_api.create_new_bundle_and_version.assert_not_called()
 
 
-def test_add_tags_if_non_existent(demultiplex_context: CGConfig):
+def test_add_tags_if_non_existent(
+    demultiplex_context: CGConfig,
+):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
@@ -77,7 +89,9 @@ def test_add_tags_if_non_existent(demultiplex_context: CGConfig):
     )
 
 
-def test_add_tags_if_all_exist(demultiplex_context: CGConfig):
+def test_add_tags_if_all_exist(
+    demultiplex_context: CGConfig,
+):
     # Given a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
@@ -97,7 +111,8 @@ def test_add_tags_if_all_exist(demultiplex_context: CGConfig):
 
 
 def test_add_fastq_files_without_sample_id(
-    demultiplex_context: CGConfig, novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData
+    demultiplex_context: CGConfig,
+    novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData,
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
@@ -136,7 +151,8 @@ def test_add_existing_sample_sheet(
 
     # GIVEN a flow cell directory and name
     flow_cell_directory = Path(
-        tmp_illumina_flow_cells_directory, novaseq_6000_post_1_5_kits_flow_cell.full_name
+        tmp_illumina_flow_cells_directory,
+        novaseq_6000_post_1_5_kits_flow_cell.full_name,
     )
 
     # GIVEN that a flow cell bundle exists in Housekeeper
@@ -152,16 +168,21 @@ def test_add_existing_sample_sheet(
     )
 
     # THEN a sample sheet file was added to the bundle
-    expected_tag_names = [SequencingFileTag.SAMPLE_SHEET, novaseq_6000_post_1_5_kits_flow_cell.id]
+    expected_tag_names = [
+        SequencingFileTag.SAMPLE_SHEET,
+        novaseq_6000_post_1_5_kits_flow_cell.id,
+    ]
 
     files = demux_post_processing_api.hk_api.get_files(
-        bundle=novaseq_6000_post_1_5_kits_flow_cell.id, tags=expected_tag_names
+        bundle=novaseq_6000_post_1_5_kits_flow_cell.id,
+        tags=expected_tag_names,
     ).all()
     assert len(files) == 1
 
 
 def test_add_demux_logs_to_housekeeper(
-    demultiplex_context: CGConfig, novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData
+    demultiplex_context: CGConfig,
+    novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData,
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
@@ -230,13 +251,21 @@ def test_store_fastq_path_in_housekeeper_correct_tags(
 
     # THEN the file was added to Housekeeper with the correct tags
     file: File = populated_housekeeper_api.get_files(bundle=sample_id).first()
-    expected_tags: set[str] = {SequencingFileTag.FASTQ.value, bcl_convert_flow_cell_id, sample_id}
+    expected_tags: set[str] = {
+        SequencingFileTag.FASTQ.value,
+        bcl_convert_flow_cell_id,
+        sample_id,
+    }
     assert {tag.name for tag in file.tags} == expected_tags
 
 
 @pytest.mark.parametrize(
     "file_tag",
-    [SequencingFileTag.FASTQ, SequencingFileTag.SPRING, SequencingFileTag.SPRING_METADATA],
+    [
+        SequencingFileTag.FASTQ,
+        SequencingFileTag.SPRING,
+        SequencingFileTag.SPRING_METADATA,
+    ],
 )
 def test_delete_sequencing_data_from_housekeeper(
     file_tag: str,
@@ -258,7 +287,8 @@ def test_delete_sequencing_data_from_housekeeper(
 
     # WHEN deleting the sequencing data from housekeeper
     delete_sequencing_data_from_housekeeper(
-        flow_cell_id=flow_cell_name, hk_api=populated_housekeeper_api
+        flow_cell_id=flow_cell_name,
+        hk_api=populated_housekeeper_api,
     )
 
     # THEN the sequencing data is deleted from housekeeper
@@ -272,7 +302,8 @@ def test_delete_sequencing_data_from_housekeeper_two_flow_cells(
     helpers: StoreHelpers,
 ):
     """Tests that the delete_sequencing_data_from_housekeeper function deletes the correct files
-    from housekeeper when there are files from two flow cells."""
+    from housekeeper when there are files from two flow cells.
+    """
     # GIVEN a sample with sequencing files from two flow cells
     sample_id: str = "new_sample"
     second_file: Path = tmp_path.with_suffix(".2.fastq.gz")
@@ -283,17 +314,32 @@ def test_delete_sequencing_data_from_housekeeper_two_flow_cells(
         bundle_name=sample_id,
         files=[tmp_path, second_file],
         tags=[
-            [SequencingFileTag.FASTQ, flow_cell_name, sample_id],
-            [SequencingFileTag.FASTQ, second_flow_cell_name, sample_id],
+            [
+                SequencingFileTag.FASTQ,
+                flow_cell_name,
+                sample_id,
+            ],
+            [
+                SequencingFileTag.FASTQ,
+                second_flow_cell_name,
+                sample_id,
+            ],
         ],
     )
     assert (
-        len(real_housekeeper_api.files(bundle=sample_id, tags={SequencingFileTag.FASTQ}).all()) == 2
+        len(
+            real_housekeeper_api.files(
+                bundle=sample_id,
+                tags={SequencingFileTag.FASTQ},
+            ).all()
+        )
+        == 2
     )
 
     # WHEN deleting the sequencing data of one flow cell from housekeeper
     delete_sequencing_data_from_housekeeper(
-        flow_cell_id=flow_cell_name, hk_api=real_housekeeper_api
+        flow_cell_id=flow_cell_name,
+        hk_api=real_housekeeper_api,
     )
 
     # THEN the sequencing data the first flow cell is deleted from housekeeper

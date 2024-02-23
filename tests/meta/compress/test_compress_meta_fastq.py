@@ -14,7 +14,11 @@ def test_compress_case_fastq_one_sample(populated_compress_fastq_api, sample, ca
     # GIVEN a populated compress api
 
     # WHEN Compressing the bam files for the case
-    with mock.patch.object(CompressAPI, "_is_spring_archived", return_value=False):
+    with mock.patch.object(
+        CompressAPI,
+        "_is_spring_archived",
+        return_value=False,
+    ):
         result = compress_api.compress_fastq(sample)
 
         # THEN assert compression succeded
@@ -26,7 +30,10 @@ def test_compress_case_fastq_one_sample(populated_compress_fastq_api, sample, ca
 
 
 def test_compress_fastq_compression_done(
-    populated_compress_fastq_api, compression_object, sample, caplog
+    populated_compress_fastq_api,
+    compression_object,
+    sample,
+    caplog,
 ):
     """Test to compress all FASTQ files for a sample when compression is already completed
 
@@ -39,7 +46,11 @@ def test_compress_fastq_compression_done(
     compression_object.spring_path.touch()
 
     # WHEN Compressing the bam files for the case
-    with mock.patch.object(CompressAPI, "_is_spring_archived", return_value=False):
+    with mock.patch.object(
+        CompressAPI,
+        "_is_spring_archived",
+        return_value=False,
+    ):
         result = compress_api.compress_fastq(sample)
 
         # THEN assert compression succeded
@@ -49,7 +60,10 @@ def test_compress_fastq_compression_done(
 
 
 def test_compress_sample_fastq_compression_pending(
-    populated_compress_fastq_api, sample, compression_object, caplog
+    populated_compress_fastq_api,
+    sample,
+    compression_object,
+    caplog,
 ):
     """Test to compress all FASTQ files for a sample when compression is pending
 
@@ -61,7 +75,11 @@ def test_compress_sample_fastq_compression_pending(
     compression_object.pending_path.touch()
 
     # WHEN compressing the FASTQ files for the case
-    with mock.patch.object(CompressAPI, "_is_spring_archived", return_value=False):
+    with mock.patch.object(
+        CompressAPI,
+        "_is_spring_archived",
+        return_value=False,
+    ):
         result = compress_api.compress_fastq(sample)
 
         # THEN assert compression returns False
@@ -71,7 +89,10 @@ def test_compress_sample_fastq_compression_pending(
 
 
 def test_compress_sample_fastq_archived_spring_file(
-    populated_compress_fastq_api, sample, compression_object, caplog
+    populated_compress_fastq_api,
+    sample,
+    compression_object,
+    caplog,
 ):
     """Test to compress all FASTQ files for a sample when the Spring file is archived
 
@@ -83,7 +104,11 @@ def test_compress_sample_fastq_archived_spring_file(
     compression_object.pending_path.touch()
 
     # WHEN compressing the FASTQ files for the case
-    with mock.patch.object(CompressAPI, "_is_spring_archived", return_value=True):
+    with mock.patch.object(
+        CompressAPI,
+        "_is_spring_archived",
+        return_value=True,
+    ):
         result = compress_api.compress_fastq(sample)
 
         # THEN assert compression returns False

@@ -72,18 +72,32 @@ class AnalysisTag(StrEnum):
 
 class HkMipAnalysisTag:
     CONFIG: list[str] = ["mip-config"]
-    QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
+    QC_METRICS: list[str] = [
+        "qc-metrics",
+        "deliverable",
+    ]
     SAMPLE_INFO: list[str] = ["sample-info"]
 
 
 class BalsamicAnalysisTag:
     CONFIG: list[str] = ["balsamic-config"]
-    QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
+    QC_METRICS: list[str] = [
+        "qc-metrics",
+        "deliverable",
+    ]
 
 
 class GensAnalysisTag:
-    COVERAGE: list[str] = ["gens", "coverage", "bed"]
-    FRACSNP: list[str] = ["gens", "fracsnp", "bed"]
+    COVERAGE: list[str] = [
+        "gens",
+        "coverage",
+        "bed",
+    ]
+    FRACSNP: list[str] = [
+        "gens",
+        "fracsnp",
+        "bed",
+    ]
 
 
 class BalsamicProtectedTags:
@@ -178,31 +192,77 @@ WORKFLOW_PROTECTED_TAGS = {
         ["salmon-quant"],
     ],
     Workflow.MUTANT: [
-        ["fohm-delivery", "instrument-properties"],
-        ["fohm-delivery", "pangolin-typing-fohm", "csv"],
+        [
+            "fohm-delivery",
+            "instrument-properties",
+        ],
+        [
+            "fohm-delivery",
+            "pangolin-typing-fohm",
+            "csv",
+        ],
         ["vcf", "vcf-report", "fohm-delivery"],
         ["mutant-log"],
         ["metrics"],
         ["config"],
         ["mutant-config"],
         ["software-versions"],
-        ["fohm-delivery", "komplettering", "visualization"],
-        ["fohm-delivery", "pangolin-typing", "csv", "visualization"],
-        ["ks-delivery", "ks-results", "typing-report", "visualization", "csv"],
-        ["ks-delivery", "ks-aux-results", "typing-report", "visualization", "csv"],
+        [
+            "fohm-delivery",
+            "komplettering",
+            "visualization",
+        ],
+        [
+            "fohm-delivery",
+            "pangolin-typing",
+            "csv",
+            "visualization",
+        ],
+        [
+            "ks-delivery",
+            "ks-results",
+            "typing-report",
+            "visualization",
+            "csv",
+        ],
+        [
+            "ks-delivery",
+            "ks-aux-results",
+            "typing-report",
+            "visualization",
+            "csv",
+        ],
         ["multiqc-json"],
         ["gisaid-log"],
         ["gisaid-csv"],
     ],
     Workflow.RNAFUSION: [
         [AnalysisTag.FUSION, AnalysisTag.ARRIBA],
-        [AnalysisTag.FUSION, AnalysisTag.STARFUSION],
-        [AnalysisTag.FUSION, AnalysisTag.FUSIONCATCHER],
+        [
+            AnalysisTag.FUSION,
+            AnalysisTag.STARFUSION,
+        ],
+        [
+            AnalysisTag.FUSION,
+            AnalysisTag.FUSIONCATCHER,
+        ],
         [AnalysisTag.FUSIONINSPECTOR],
-        [AnalysisTag.FUSIONREPORT, AnalysisTag.RESEARCH],
-        [AnalysisTag.FUSIONINSPECTOR_HTML, AnalysisTag.RESEARCH],
-        [AnalysisTag.ARRIBA_VISUALIZATION, AnalysisTag.RESEARCH],
-        [AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA],
+        [
+            AnalysisTag.FUSIONREPORT,
+            AnalysisTag.RESEARCH,
+        ],
+        [
+            AnalysisTag.FUSIONINSPECTOR_HTML,
+            AnalysisTag.RESEARCH,
+        ],
+        [
+            AnalysisTag.ARRIBA_VISUALIZATION,
+            AnalysisTag.RESEARCH,
+        ],
+        [
+            AnalysisTag.MULTIQC_HTML,
+            AnalysisTag.RNA,
+        ],
         [HK_DELIVERY_REPORT_TAG],
         [AnalysisTag.VCF_FUSION],
         [AnalysisTag.GENE_COUNTS],

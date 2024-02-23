@@ -9,7 +9,9 @@ from cg.apps.sequencing_metrics_parser.parsers.bcl_convert_to_sequencing_statist
     create_bcl_convert_undetermined_metrics,
     create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell,
 )
-from cg.store.models import SampleLaneSequencingMetrics
+from cg.store.models import (
+    SampleLaneSequencingMetrics,
+)
 
 
 def test_create_sequencing_statistics_from_bcl_convert_metrics(
@@ -28,7 +30,10 @@ def test_create_sequencing_statistics_from_bcl_convert_metrics(
 
     # THEN assert that Sequencing statistics are created
     for sequencing_statistics in sequencing_statistics_list:
-        assert isinstance(sequencing_statistics, SampleLaneSequencingMetrics)
+        assert isinstance(
+            sequencing_statistics,
+            SampleLaneSequencingMetrics,
+        )
 
     # THEN assert that the number of sequencing statistics created is correct
     assert (

@@ -8,23 +8,38 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import SexEnum
 from cg.models.orders.samples import RmlSample
-from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Pool, Sample
+from cg.store.models import (
+    ApplicationVersion,
+    Case,
+    CaseSample,
+    Customer,
+    Pool,
+    Sample,
+)
 
 
 class PoolSubmitter(Submitter):
     def validate_order(self, order: OrderIn) -> None:
         super().validate_order(order=order)
         self._validate_case_names_are_available(
-            customer_id=order.customer, samples=order.samples, ticket=order.ticket
+            customer_id=order.customer,
+            samples=order.samples,
+            ticket=order.ticket,
         )
 
     def submit_order(self, order: OrderIn) -> dict:
         status_data = self.order_to_status(order)
         project_data, lims_map = process_lims(
-            lims_api=self.lims, lims_order=order, new_samples=order.samples
+            lims_api=self.lims,
+            lims_order=order,
+            new_samples=order.samples,
         )
         samples = [sample for pool in status_data["pools"] for sample in pool["samples"]]
-        self._fill_in_sample_ids(samples=samples, lims_map=lims_map, id_key="internal_id")
+        self._fill_in_sample_ids(
+            samples=samples,
+            lims_map=lims_map,
+            id_key="internal_id",
+        )
         new_records = self.store_items_in_status(
             customer_id=status_data["customer"],
             order=status_data["order"],
@@ -32,7 +47,10 @@ class PoolSubmitter(Submitter):
             ticket_id=order.ticket,
             items=status_data["pools"],
         )
-        return {"project": project_data, "records": new_records}
+        return {
+            "project": project_data,
+            "records": new_records,
+        }
 
     @staticmethod
     def order_to_status(order: OrderIn) -> dict:
@@ -104,7 +122,12 @@ class PoolSubmitter(Submitter):
         return status_data
 
     def store_items_in_status(
-        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: list[dict]
+        self,
+        customer_id: str,
+        order: str,
+        ordered: dt.datetime,
+        ticket_id: str,
+        items: list[dict],
     ) -> list[Pool]:
         """Store pools in the status database."""
         customer: Customer = self.status.get_customer_by_internal_id(
@@ -118,9 +141,13 @@ class PoolSubmitter(Submitter):
                     self.status.get_current_application_version_by_tag(tag=pool["application"])
                 )
             priority: str = pool["priority"]
-            case_name: str = self.create_case_name(ticket=ticket_id, pool_name=pool["name"])
+            case_name: str = self.create_case_name(
+                ticket=ticket_id,
+                pool_name=pool["name"],
+            )
             case: Case = self.status.get_case_by_name_and_customer(
-                customer=customer, case_name=case_name
+                customer=customer,
+                case_name=case_name,
             )
             if not case:
                 data_analysis: Workflow = Workflow(pool["data_analysis"])
@@ -162,10 +189,15 @@ class PoolSubmitter(Submitter):
                 )
                 new_samples.append(new_sample)
                 link: CaseSample = self.status.relate_sample(
-                    case=case, sample=new_sample, status="unknown"
+                    case=case,
+                    sample=new_sample,
+                    status="unknown",
                 )
                 self.status.session.add(link)
-            new_delivery = self.status.add_delivery(destination="caesar", pool=new_pool)
+            new_delivery = self.status.add_delivery(
+                destination="caesar",
+                pool=new_pool,
+            )
             self.status.session.add(new_delivery)
             new_pools.append(new_pool)
         self.status.session.add_all(new_pools)
@@ -173,15 +205,24 @@ class PoolSubmitter(Submitter):
         return new_pools
 
     def _validate_case_names_are_available(
-        self, customer_id: str, samples: list[RmlSample], ticket: str
+        self,
+        customer_id: str,
+        samples: list[RmlSample],
+        ticket: str,
     ):
         """Validate names of all samples are not already in use."""
         customer: Customer = self.status.get_customer_by_internal_id(
             customer_internal_id=customer_id
         )
         for sample in samples:
-            case_name: str = self.create_case_name(pool_name=sample.pool, ticket=ticket)
-            if self.status.get_case_by_name_and_customer(customer=customer, case_name=case_name):
+            case_name: str = self.create_case_name(
+                pool_name=sample.pool,
+                ticket=ticket,
+            )
+            if self.status.get_case_by_name_and_customer(
+                customer=customer,
+                case_name=case_name,
+            ):
                 raise OrderError(
                     f"Case name {case_name} already in use for customer {customer.name}"
                 )

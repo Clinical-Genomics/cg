@@ -1,26 +1,45 @@
 import logging
 
-from genologics.entities import Container, Containertype, Project, Researcher, Sample
+from genologics.entities import (
+    Container,
+    Containertype,
+    Project,
+    Researcher,
+    Sample,
+)
 from lxml import etree
 from lxml.objectify import ObjectifiedElement
 
-from cg.constants.lims import PROP2UDF, YES_NO_LIMS_BOOLEANS
+from cg.constants.lims import (
+    PROP2UDF,
+    YES_NO_LIMS_BOOLEANS,
+)
 from cg.exc import OrderError
 
 from . import batch
 
 LOG = logging.getLogger(__name__)
-CONTAINER_TYPE_MAP = {"Tube": 2, "96 well plate": 1}
+CONTAINER_TYPE_MAP = {
+    "Tube": 2,
+    "96 well plate": 1,
+}
 
 
 class OrderHandler:
-    def save_xml(self, uri: str, document: ObjectifiedElement):
+    def save_xml(
+        self,
+        uri: str,
+        document: ObjectifiedElement,
+    ):
         """Post the data to the server."""
         data = etree.tostring(document, xml_declaration=True)
         result = self.post(uri, data)
         return result
 
-    def save_containers(self, container_details: ObjectifiedElement):
+    def save_containers(
+        self,
+        container_details: ObjectifiedElement,
+    ):
         """Save a batch of containers."""
         container_uri = f"{self.get_uri()}/containers/batch/create"
         results = self.save_xml(container_uri, container_details)
@@ -30,7 +49,11 @@ class OrderHandler:
             container_map[lims_container.name] = lims_container
         return container_map
 
-    def save_samples(self, sample_details: ObjectifiedElement, map_samples=False):
+    def save_samples(
+        self,
+        sample_details: ObjectifiedElement,
+        map_samples=False,
+    ):
         """Save a batch of samples."""
         sample_uri = f"{self.get_uri()}/samples/batch/create"
         results = self.save_xml(sample_uri, sample_details)
@@ -48,18 +71,29 @@ class OrderHandler:
         results = self.save_xml(artifact_uri, artifact_details)
         return results
 
-    def submit_project(self, project_name: str, samples: list[dict], researcher_id: str = "3"):
+    def submit_project(
+        self,
+        project_name: str,
+        samples: list[dict],
+        researcher_id: str = "3",
+    ):
         """Parse Scout project."""
         containers = self.prepare(samples)
 
         lims_project = Project.create(
-            self, researcher=Researcher(self, id=researcher_id), name=project_name
+            self,
+            researcher=Researcher(self, id=researcher_id),
+            name=project_name,
         )
         LOG.info(f"{lims_project.id}: created new LIMS project")
 
         containers_data = [
             batch.build_container(
-                name=container["name"], con_type=Containertype(lims=self, id=container["type"])
+                name=container["name"],
+                con_type=Containertype(
+                    lims=self,
+                    id=container["type"],
+                ),
             )
             for container in containers
         ]
@@ -89,7 +123,10 @@ class OrderHandler:
                 samples_data.append(sample_data)
         sample_details = batch.build_sample_batch(samples_data)
         process_reagentlabels = len(reagentlabel_samples) > 0
-        sample_map = self.save_samples(sample_details, map_samples=process_reagentlabels)
+        sample_map = self.save_samples(
+            sample_details,
+            map_samples=process_reagentlabels,
+        )
 
         if process_reagentlabels:
             artifacts_data = [
@@ -109,11 +146,26 @@ class OrderHandler:
     def prepare(cls, samples):
         """Convert API input to LIMS input data."""
         lims_containers = []
-        tubes, plates, no_container = cls.group_containers(samples)
+        (
+            tubes,
+            plates,
+            no_container,
+        ) = cls.group_containers(samples)
         # "96 well plate" = container type "1"; Tube = container type "2"; "No container" = container type "3"
-        for container_type, containers in [("1", plates), ("2", tubes), ("3", no_container)]:
-            for container_name, samples in containers.items():
-                new_container = {"name": container_name, "type": container_type, "samples": []}
+        for container_type, containers in [
+            ("1", plates),
+            ("2", tubes),
+            ("3", no_container),
+        ]:
+            for (
+                container_name,
+                samples,
+            ) in containers.items():
+                new_container = {
+                    "name": container_name,
+                    "type": container_type,
+                    "samples": [],
+                }
                 # check that positions in plate are unique
                 well_positions = {}
                 for sample_data in samples:

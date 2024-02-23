@@ -10,17 +10,35 @@ from cg.constants import (
     REPORT_SUPPORTED_WORKFLOW,
     Workflow,
 )
-from cg.meta.report.balsamic import BalsamicReportAPI
-from cg.meta.report.balsamic_qc import BalsamicQCReportAPI
-from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
+from cg.meta.report.balsamic import (
+    BalsamicReportAPI,
+)
+from cg.meta.report.balsamic_qc import (
+    BalsamicQCReportAPI,
+)
+from cg.meta.report.balsamic_umi import (
+    BalsamicUmiReportAPI,
+)
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.report.report_api import ReportAPI
-from cg.meta.report.rnafusion import RnafusionReportAPI
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
-from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.report.rnafusion import (
+    RnafusionReportAPI,
+)
+from cg.meta.workflow.balsamic import (
+    BalsamicAnalysisAPI,
+)
+from cg.meta.workflow.balsamic_qc import (
+    BalsamicQCAnalysisAPI,
+)
+from cg.meta.workflow.balsamic_umi import (
+    BalsamicUmiAnalysisAPI,
+)
+from cg.meta.workflow.mip_dna import (
+    MipDNAAnalysisAPI,
+)
+from cg.meta.workflow.rnafusion import (
+    RnafusionAnalysisAPI,
+)
 from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
@@ -32,7 +50,10 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
     report_api: ReportAPI = (
         context.obj.meta_apis.get("report_api")
         if context.obj.meta_apis.get("report_api")
-        else MipDNAReportAPI(config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj))
+        else MipDNAReportAPI(
+            config=context.obj,
+            analysis_api=MipDNAAnalysisAPI(config=context.obj),
+        )
     )
     case: Case = report_api.status_db.get_case_by_internal_id(internal_id=case_id)
     # Missing or not valid internal case ID
@@ -49,7 +70,8 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
         if not cases_without_delivery_report:
             click.echo(
                 click.style(
-                    "There are no valid cases to perform delivery report actions", fg="green"
+                    "There are no valid cases to perform delivery report actions",
+                    fg="green",
                 )
             )
         else:
@@ -83,26 +105,33 @@ def get_report_api_workflow(context: click.Context, workflow: Workflow) -> Repor
     workflow: Workflow = workflow if workflow else Workflow.MIP_DNA
     dispatch_report_api: dict[Workflow, ReportAPI] = {
         Workflow.BALSAMIC: BalsamicReportAPI(
-            config=context.obj, analysis_api=BalsamicAnalysisAPI(config=context.obj)
+            config=context.obj,
+            analysis_api=BalsamicAnalysisAPI(config=context.obj),
         ),
         Workflow.BALSAMIC_UMI: BalsamicUmiReportAPI(
-            config=context.obj, analysis_api=BalsamicUmiAnalysisAPI(config=context.obj)
+            config=context.obj,
+            analysis_api=BalsamicUmiAnalysisAPI(config=context.obj),
         ),
         Workflow.BALSAMIC_QC: BalsamicQCReportAPI(
-            config=context.obj, analysis_api=BalsamicQCAnalysisAPI(config=context.obj)
+            config=context.obj,
+            analysis_api=BalsamicQCAnalysisAPI(config=context.obj),
         ),
         Workflow.MIP_DNA: MipDNAReportAPI(
-            config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
+            config=context.obj,
+            analysis_api=MipDNAAnalysisAPI(config=context.obj),
         ),
         Workflow.RNAFUSION: RnafusionReportAPI(
-            config=context.obj, analysis_api=RnafusionAnalysisAPI(config=context.obj)
+            config=context.obj,
+            analysis_api=RnafusionAnalysisAPI(config=context.obj),
         ),
     }
     return dispatch_report_api.get(workflow)
 
 
 def get_report_analysis_started(
-    case: Case, report_api: ReportAPI, analysis_started_at: str | None
+    case: Case,
+    report_api: ReportAPI,
+    analysis_started_at: str | None,
 ) -> datetime:
     """Resolves and returns a valid analysis date."""
     if not analysis_started_at:
@@ -113,7 +142,8 @@ def get_report_analysis_started(
         )
     # If there is no analysis for the provided date
     if not report_api.status_db.get_analysis_by_case_entry_id_and_started_at(
-        case_entry_id=case.id, started_at_date=analysis_started_at
+        case_entry_id=case.id,
+        started_at_date=analysis_started_at,
     ):
         LOG.error(f"There is no analysis started at {analysis_started_at}")
         raise click.Abort

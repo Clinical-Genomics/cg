@@ -18,7 +18,9 @@ def test_instantiate_slurm_api():
     assert api.process.binary == "sbatch"
 
 
-def test_generate_sbatch_header(sbatch_parameters: Sbatch):
+def test_generate_sbatch_header(
+    sbatch_parameters: Sbatch,
+):
     # GIVEN a Sbatch object with some parameters
 
     # WHEN building a sbatch header
@@ -28,7 +30,9 @@ def test_generate_sbatch_header(sbatch_parameters: Sbatch):
     assert f"#SBATCH --mail-user={sbatch_parameters.email}" in sbatch_header
 
 
-def test_generate_sbatch_body_no_error_function(sbatch_parameters: Sbatch):
+def test_generate_sbatch_body_no_error_function(
+    sbatch_parameters: Sbatch,
+):
     # GIVEN a Sbatch object with some parameters
 
     # WHEN building a sbatch header
@@ -38,7 +42,9 @@ def test_generate_sbatch_body_no_error_function(sbatch_parameters: Sbatch):
     assert "log 'Something went wrong, aborting'" in sbatch_body
 
 
-def test_generate_sbatch_script(sbatch_parameters: Sbatch):
+def test_generate_sbatch_script(
+    sbatch_parameters: Sbatch,
+):
     # GIVEN a SlurmAPI
     api = SlurmAPI()
     # GIVEN a Sbatch object with some parameters
@@ -50,7 +56,9 @@ def test_generate_sbatch_script(sbatch_parameters: Sbatch):
     assert sbatch_parameters.commands in sbatch_content
 
 
-def test_submit_sbatch_script_dry_run(sbatch_content: str):
+def test_submit_sbatch_script_dry_run(
+    sbatch_content: str,
+):
     # GIVEN a sbatch file
     # GIVEN a slurm api in dry run
     api = SlurmAPI()
@@ -59,20 +67,28 @@ def test_submit_sbatch_script_dry_run(sbatch_content: str):
     outfile = Path("hello")
 
     # WHEN submitting the sbatch job
-    job_number: int = api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=outfile)
+    job_number: int = api.submit_sbatch(
+        sbatch_content=sbatch_content,
+        sbatch_path=outfile,
+    )
 
     # THEN assert that a job number is returned
     assert isinstance(job_number, int)
 
 
-def test_submit_sbatch_script(sbatch_content: str, slurm_api: SlurmAPI, sbatch_path: Path):
+def test_submit_sbatch_script(
+    sbatch_content: str,
+    slurm_api: SlurmAPI,
+    sbatch_path: Path,
+):
     # GIVEN a slurm api
     # GIVEN some sbatch content
     # GIVEN the path to a sbatch file
 
     # WHEN submitting the job
     job_number: int = slurm_api.submit_sbatch(
-        sbatch_content=sbatch_content, sbatch_path=sbatch_path
+        sbatch_content=sbatch_content,
+        sbatch_path=sbatch_path,
     )
 
     # THEN assert that a job number is returned
@@ -80,7 +96,11 @@ def test_submit_sbatch_script(sbatch_content: str, slurm_api: SlurmAPI, sbatch_p
 
 
 def test_submit_sbatch_script_std_error_output(
-    sbatch_content: str, slurm_api: SlurmAPI, sbatch_path: Path, sbatch_job_number: int, caplog
+    sbatch_content: str,
+    slurm_api: SlurmAPI,
+    sbatch_path: Path,
+    sbatch_job_number: int,
+    caplog,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN a slurm api
@@ -92,7 +112,8 @@ def test_submit_sbatch_script_std_error_output(
 
     # WHEN submitting the job
     job_number: int = slurm_api.submit_sbatch(
-        sbatch_content=sbatch_content, sbatch_path=sbatch_path
+        sbatch_content=sbatch_content,
+        sbatch_path=sbatch_path,
     )
 
     # THEN assert that the message was logged
@@ -103,7 +124,10 @@ def test_submit_sbatch_script_std_error_output(
 
 
 def test_submit_sbatch_script_alternative_sbatch_response(
-    sbatch_content: str, slurm_api: SlurmAPI, sbatch_path: Path, sbatch_job_number: int
+    sbatch_content: str,
+    slurm_api: SlurmAPI,
+    sbatch_path: Path,
+    sbatch_job_number: int,
 ):
     # GIVEN a slurm api
     # GIVEN some sbatch content
@@ -113,7 +137,8 @@ def test_submit_sbatch_script_alternative_sbatch_response(
 
     # WHEN submitting the job
     job_number: int = slurm_api.submit_sbatch(
-        sbatch_content=sbatch_content, sbatch_path=sbatch_path
+        sbatch_content=sbatch_content,
+        sbatch_path=sbatch_path,
     )
 
     # THEN assert that a job number is returned
@@ -121,7 +146,9 @@ def test_submit_sbatch_script_alternative_sbatch_response(
 
 
 def test_submit_sbatch_script_invalid_sbatch_response(
-    sbatch_content: str, slurm_api: SlurmAPI, sbatch_path: Path
+    sbatch_content: str,
+    slurm_api: SlurmAPI,
+    sbatch_path: Path,
 ):
     # GIVEN a slurm api
     # GIVEN some sbatch content
@@ -131,7 +158,8 @@ def test_submit_sbatch_script_invalid_sbatch_response(
 
     # WHEN submitting the job
     job_number: int = slurm_api.submit_sbatch(
-        sbatch_content=sbatch_content, sbatch_path=sbatch_path
+        sbatch_content=sbatch_content,
+        sbatch_path=sbatch_path,
     )
 
     # THEN assert that a job number 0 indicating malfunction

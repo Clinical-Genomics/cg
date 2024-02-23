@@ -3,7 +3,9 @@
 import logging
 
 from cg.constants import Workflow
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.balsamic import (
+    BalsamicAnalysisAPI,
+)
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)

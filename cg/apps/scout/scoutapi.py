@@ -4,14 +4,25 @@ import logging
 from pathlib import Path
 from subprocess import CalledProcessError
 
-from cg.apps.scout.scout_export import ScoutExportCase, Variant
+from cg.apps.scout.scout_export import (
+    ScoutExportCase,
+    Variant,
+)
 from cg.constants.constants import FileFormat
-from cg.constants.gene_panel import GENOME_BUILD_37
-from cg.constants.scout import ScoutCustomCaseReportTags
+from cg.constants.gene_panel import (
+    GENOME_BUILD_37,
+)
+from cg.constants.scout import (
+    ScoutCustomCaseReportTags,
+)
 from cg.exc import ScoutUploadError
 from cg.io.controller import ReadFile, ReadStream
-from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.services.slurm_upload_service.slurm_upload_service import SlurmUploadService
+from cg.models.scout.scout_load_config import (
+    ScoutLoadConfig,
+)
+from cg.services.slurm_upload_service.slurm_upload_service import (
+    SlurmUploadService,
+)
 from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
@@ -20,23 +31,36 @@ LOG = logging.getLogger(__name__)
 class ScoutAPI:
     """Interface to Scout."""
 
-    def __init__(self, config, slurm_upload_service: SlurmUploadService):
+    def __init__(
+        self,
+        config,
+        slurm_upload_service: SlurmUploadService,
+    ):
         binary_path = config["scout"]["binary_path"]
         config_path = config["scout"]["config_path"]
         self.process = Process(binary=binary_path, config=config_path)
         self.slurm_upload_service = slurm_upload_service
         self.scout_base_command = f"{binary_path} --config {config_path}"
 
-    def upload(self, scout_load_config: Path, force: bool = False) -> None:
+    def upload(
+        self,
+        scout_load_config: Path,
+        force: bool = False,
+    ) -> None:
         """Load analysis of a new family into Scout."""
 
         scout_config: dict = ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML, file_path=scout_load_config
+            file_format=FileFormat.YAML,
+            file_path=scout_load_config,
         )
         scout_load_config_object = ScoutLoadConfig(**scout_config)
         case_id: str = scout_load_config_object.family
         existing_case: ScoutExportCase | None = self.get_case(case_id)
-        load_command = ["load", "case", str(scout_load_config)]
+        load_command = [
+            "load",
+            "case",
+            str(scout_load_config),
+        ]
         if existing_case:
             if force or scout_load_config_object.analysis_date > existing_case.analysis_date:
                 load_command.append("--update")
@@ -49,12 +73,20 @@ class ScoutAPI:
         self.process.run_command(load_command)
         LOG.debug("Case loaded successfully to Scout")
 
-    def export_panels(self, panels: list[str], build: str = GENOME_BUILD_37) -> list[str]:
+    def export_panels(
+        self,
+        panels: list[str],
+        build: str = GENOME_BUILD_37,
+    ) -> list[str]:
         """Pass through to export of a list of gene panels.
 
         Return list of lines in bed format
         """
-        export_panels_command = ["export", "panel", "--bed"]
+        export_panels_command = [
+            "export",
+            "panel",
+            "--bed",
+        ]
         export_panels_command.extend(iter(panels))
 
         if build:
@@ -86,7 +118,11 @@ class ScoutAPI:
 
     def get_genes(self, panel_id: str, build: str = None) -> list[dict]:
         """Return panel genes."""
-        export_panel_command = ["export", "panel", panel_id]
+        export_panel_command = [
+            "export",
+            "panel",
+            panel_id,
+        ]
         if build:
             export_panel_command.extend(["--build", build])
 
@@ -105,7 +141,12 @@ class ScoutAPI:
             gene_info = gene_line.strip().split("\t")
             if len(gene_info) <= 1:
                 continue
-            panel_genes.append({"hgnc_id": int(gene_info[0]), "hgnc_symbol": gene_info[1]})
+            panel_genes.append(
+                {
+                    "hgnc_id": int(gene_info[0]),
+                    "hgnc_symbol": gene_info[1],
+                }
+            )
 
         return panel_genes
 
@@ -113,7 +154,13 @@ class ScoutAPI:
         """
         Get causative variants for a case.
         """
-        get_causatives_command = ["export", "variants", "--json", "--case-id", case_id]
+        get_causatives_command = [
+            "export",
+            "variants",
+            "--json",
+            "--case-id",
+            case_id,
+        ]
         try:
             self.process.run_command(get_causatives_command)
             if not self.process.stdout:
@@ -124,7 +171,8 @@ class ScoutAPI:
         variants: list[Variant] = [
             Variant(**variant_info)
             for variant_info in ReadStream.get_content_from_stream(
-                file_format=FileFormat.JSON, stream=self.process.stdout
+                file_format=FileFormat.JSON,
+                stream=self.process.stdout,
             )
         ]
 
@@ -144,7 +192,11 @@ class ScoutAPI:
         days_ago: int = None,
     ) -> list[ScoutExportCase]:
         """Interact with cases existing in the database."""
-        get_cases_command = ["export", "cases", "--json"]
+        get_cases_command = [
+            "export",
+            "cases",
+            "--json",
+        ]
         if case_id:
             get_cases_command.extend(["--case-id", case_id])
 
@@ -171,7 +223,8 @@ class ScoutAPI:
 
         cases: list[ScoutExportCase] = []
         for case_export in ReadStream.get_content_from_stream(
-            file_format=FileFormat.JSON, stream=self.process.stdout
+            file_format=FileFormat.JSON,
+            stream=self.process.stdout,
         ):
             LOG.info(f"Validating case {case_export.get('_id')}")
             cases.append(ScoutExportCase.model_validate(case_export))
@@ -183,13 +236,23 @@ class ScoutAPI:
         """
         return self.get_cases(status="solved", days_ago=days_ago)
 
-    def upload_delivery_report(self, report_path: str, case_id: str, update: bool = False) -> None:
+    def upload_delivery_report(
+        self,
+        report_path: str,
+        case_id: str,
+        update: bool = False,
+    ) -> None:
         """Load a delivery report into a case in the database.
         If the report already exists the function will exit.
         If the user want to load a report that is already in the database
         'update' has to be 'True'."""
 
-        upload_command: list[str] = ["load", "delivery-report", case_id, report_path]
+        upload_command: list[str] = [
+            "load",
+            "delivery-report",
+            case_id,
+            report_path,
+        ]
 
         if update:
             upload_command.append("--update")
@@ -200,7 +263,12 @@ class ScoutAPI:
         except CalledProcessError:
             LOG.warning("Something went wrong when uploading delivery report")
 
-    def upload_report(self, case_id: str, report_path: str, report_type: str) -> None:
+    def upload_report(
+        self,
+        case_id: str,
+        report_path: str,
+        report_type: str,
+    ) -> None:
         """Load report into a case in the database."""
 
         upload_report_command: list[str] = [
@@ -218,7 +286,12 @@ class ScoutAPI:
         except CalledProcessError:
             LOG.warning(f"Something went wrong when uploading {report_type} for case {case_id}")
 
-    def upload_fusion_report(self, case_id: str, report_path: str, research: bool) -> None:
+    def upload_fusion_report(
+        self,
+        case_id: str,
+        report_path: str,
+        research: bool,
+    ) -> None:
         """Load a fusion report into a case in the database."""
 
         report_type: str = (
@@ -226,10 +299,17 @@ class ScoutAPI:
             if research
             else ScoutCustomCaseReportTags.GENE_FUSION
         )
-        self.upload_report(case_id=case_id, report_path=report_path, report_type=report_type)
+        self.upload_report(
+            case_id=case_id,
+            report_path=report_path,
+            report_type=report_type,
+        )
 
     def upload_splice_junctions_bed(
-        self, file_path: str, case_id: str, customer_sample_id: str
+        self,
+        file_path: str,
+        case_id: str,
+        customer_sample_id: str,
     ) -> None:
         """Load a splice junctions bed file into a case in the database."""
 
@@ -253,7 +333,10 @@ class ScoutAPI:
             ) from error
 
     def upload_rna_coverage_bigwig(
-        self, file_path: str, case_id: str, customer_sample_id: str
+        self,
+        file_path: str,
+        case_id: str,
+        customer_sample_id: str,
     ) -> None:
         """Load a rna coverage bigwig file into a case in the database."""
 
@@ -277,7 +360,10 @@ class ScoutAPI:
             ) from error
 
     def upload_rna_alignment_file(
-        self, case_id: str, customer_sample_id: str, file_path: str
+        self,
+        case_id: str,
+        customer_sample_id: str,
+        file_path: str,
     ) -> None:
         """Load an RNA alignment CRAM file into a case in the database."""
 

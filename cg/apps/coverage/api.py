@@ -16,10 +16,18 @@ class ChanjoAPI:
     def __init__(self, config: dict):
         self.chanjo_config = config["chanjo"]["config_path"]
         self.chanjo_binary = config["chanjo"]["binary_path"]
-        self.process = Process(binary=self.chanjo_binary, config=self.chanjo_config)
+        self.process = Process(
+            binary=self.chanjo_binary,
+            config=self.chanjo_config,
+        )
 
     def upload(
-        self, sample_id: str, sample_name: str, group_id: str, group_name: str, bed_file: str
+        self,
+        sample_id: str,
+        sample_name: str,
+        group_id: str,
+        group_name: str,
+        bed_file: str,
     ):
         """Upload coverage for a sample"""
 
@@ -43,10 +51,16 @@ class ChanjoAPI:
     def sample(self, sample_id: str) -> dict | None:
         """Fetch sample from the database"""
 
-        sample_parameters = ["db", "samples", "-s", sample_id]
+        sample_parameters = [
+            "db",
+            "samples",
+            "-s",
+            sample_id,
+        ]
         self.process.run_command(parameters=sample_parameters)
         samples: list = ReadStream.get_content_from_stream(
-            file_format=FileFormat.JSON, stream=self.process.stdout
+            file_format=FileFormat.JSON,
+            stream=self.process.stdout,
         )
         for sample in samples:
             if sample["id"] == sample_id:
@@ -55,18 +69,27 @@ class ChanjoAPI:
 
     def delete_sample(self, sample_id: str):
         """Delete sample from database"""
-        delete_parameters = ["db", "remove", sample_id]
+        delete_parameters = [
+            "db",
+            "remove",
+            sample_id,
+        ]
         self.process.run_command(parameters=delete_parameters)
 
     def omim_coverage(self, samples: list[dict]) -> dict:
         """Calculate OMIM coverage for samples"""
 
-        omim_parameters = ["calculate", "coverage", "--omim"]
+        omim_parameters = [
+            "calculate",
+            "coverage",
+            "--omim",
+        ]
         for sample in samples:
             omim_parameters.extend(["-s", sample["id"]])
         self.process.run_command(parameters=omim_parameters)
         return ReadStream.get_content_from_stream(
-            file_format=FileFormat.JSON, stream=self.process.stdout
+            file_format=FileFormat.JSON,
+            stream=self.process.stdout,
         )
 
     def sample_coverage(self, sample_id: str, panel_genes: list) -> dict:
@@ -85,5 +108,6 @@ class ChanjoAPI:
             ]
             self.process.run_command(parameters=coverage_parameters)
         return ReadStream.get_content_from_stream(
-            file_format=FileFormat.JSON, stream=self.process.stdout
+            file_format=FileFormat.JSON,
+            stream=self.process.stdout,
         ).get(sample_id)

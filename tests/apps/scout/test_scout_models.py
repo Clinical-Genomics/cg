@@ -1,15 +1,29 @@
 """Tests for the Scout serialisation models"""
 
-from cg.apps.scout.scout_export import DiagnosisPhenotypes, ScoutExportCase
-from cg.apps.scout.validators import set_parent_if_missing, set_sex_if_other
+from cg.apps.scout.scout_export import (
+    DiagnosisPhenotypes,
+    ScoutExportCase,
+)
+from cg.apps.scout.validators import (
+    set_parent_if_missing,
+    set_sex_if_other,
+)
 from cg.constants.constants import FileFormat
-from cg.constants.gene_panel import GENOME_BUILD_37
+from cg.constants.gene_panel import (
+    GENOME_BUILD_37,
+)
 from cg.constants.pedigree import Pedigree
-from cg.constants.subject import PlinkSex, RelationshipStatus, Sex
+from cg.constants.subject import (
+    PlinkSex,
+    RelationshipStatus,
+    Sex,
+)
 from cg.io.controller import ReadStream
 
 
-def test_validate_case_father_none(none_case_raw: dict):
+def test_validate_case_father_none(
+    none_case_raw: dict,
+):
     """Test to validate a case when there are mandatory fields with the value None"""
 
     # GIVEN a case that has parent set to None
@@ -28,7 +42,9 @@ def test_validate_case_father_none(none_case_raw: dict):
     assert "id" in case_dict
 
 
-def test_validate_case_father_int(none_case_raw: dict):
+def test_validate_case_father_int(
+    none_case_raw: dict,
+):
     """Test to validate string coercion when the father is set to 0."""
 
     # GIVEN a case that has parent set to 0
@@ -47,7 +63,9 @@ def test_validate_case_father_int(none_case_raw: dict):
     assert "id" in case_dict
 
 
-def test_validate_case_parents_none(none_case_raw: dict):
+def test_validate_case_parents_none(
+    none_case_raw: dict,
+):
     """Test to validate a case when there are mandatory fields with the value None"""
 
     # GIVEN a case that has parent set to None
@@ -69,7 +87,8 @@ def test_validate_case_parents_none(none_case_raw: dict):
 def test_get_diagnosis_phenotypes(export_cases_output: str, omim_disease_nr: int):
     """Test getting diagnosis phenotypes from cases export"""
     cases: list = ReadStream.get_content_from_stream(
-        file_format=FileFormat.JSON, stream=export_cases_output
+        file_format=FileFormat.JSON,
+        stream=export_cases_output,
     )
     case = cases[0]
 
@@ -80,13 +99,18 @@ def test_get_diagnosis_phenotypes(export_cases_output: str, omim_disease_nr: int
     case_obj = ScoutExportCase.model_validate(case)
 
     # THEN assert that it was successfully created
-    assert isinstance(case_obj.diagnosis_phenotypes[0], DiagnosisPhenotypes)
+    assert isinstance(
+        case_obj.diagnosis_phenotypes[0],
+        DiagnosisPhenotypes,
+    )
 
     # THEN assert that the disease nr is set
     assert case_obj.diagnosis_phenotypes[0].disease_nr == omim_disease_nr
 
 
-def test_validate_empty_diagnosis_phenotypes(none_case_raw: dict):
+def test_validate_empty_diagnosis_phenotypes(
+    none_case_raw: dict,
+):
     """Test to validate a case when the diagnosis phenotypes is an empty list"""
 
     # GIVEN a case that has parent set to None
@@ -99,10 +123,13 @@ def test_validate_empty_diagnosis_phenotypes(none_case_raw: dict):
     assert case_obj.model_dump()["diagnosis_phenotypes"] == []
 
 
-def test_convert_other_sex(other_sex_case_output: str):
+def test_convert_other_sex(
+    other_sex_case_output: str,
+):
     """Test to validate a case when the is set to 'other'"""
     cases: list = ReadStream.get_content_from_stream(
-        file_format=FileFormat.JSON, stream=other_sex_case_output
+        file_format=FileFormat.JSON,
+        stream=other_sex_case_output,
     )
     case = cases[0]
     # GIVEN a case that has parent set to None
@@ -115,10 +142,13 @@ def test_convert_other_sex(other_sex_case_output: str):
     assert case_obj.model_dump()["individuals"][0][Pedigree.SEX] == PlinkSex.UNKNOWN
 
 
-def test_validate_rank_score_model_float(other_sex_case_output: str):
+def test_validate_rank_score_model_float(
+    other_sex_case_output: str,
+):
     """Test to validate a case when the is set to 'other'."""
     cases: list = ReadStream.get_content_from_stream(
-        file_format=FileFormat.JSON, stream=other_sex_case_output
+        file_format=FileFormat.JSON,
+        stream=other_sex_case_output,
     )
     case = cases[0]
 
@@ -132,10 +162,13 @@ def test_validate_rank_score_model_float(other_sex_case_output: str):
     assert case_obj.rank_model_version == "1.2"
 
 
-def test_validate_missing_genome_build(other_sex_case_output: str):
+def test_validate_missing_genome_build(
+    other_sex_case_output: str,
+):
     """Test to validate a case when the is set to 'other'"""
     cases: list = ReadStream.get_content_from_stream(
-        file_format=FileFormat.JSON, stream=other_sex_case_output
+        file_format=FileFormat.JSON,
+        stream=other_sex_case_output,
     )
     case = cases[0]
     # GIVEN a case that has a float value as rank_model_version

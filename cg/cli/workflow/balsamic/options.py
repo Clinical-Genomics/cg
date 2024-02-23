@@ -14,7 +14,13 @@ OPTION_GENOME_VERSION = click.option(
     "--genome-version",
     show_default=True,
     default=GenomeVersion.hg19,
-    type=click.Choice([GenomeVersion.hg19, GenomeVersion.hg38, GenomeVersion.canfam3]),
+    type=click.Choice(
+        [
+            GenomeVersion.hg19,
+            GenomeVersion.hg38,
+            GenomeVersion.canfam3,
+        ]
+    ),
     help="Type and build version of the reference genome. Set this option to override the default.",
 )
 OPTION_PANEL_BED = click.option(
@@ -26,7 +32,14 @@ OPTION_PANEL_BED = click.option(
 OPTION_QOS = click.option(
     "-qos",
     "--slurm-quality-of-service",
-    type=click.Choice([SlurmQos.LOW, SlurmQos.NORMAL, SlurmQos.HIGH, SlurmQos.EXPRESS]),
+    type=click.Choice(
+        [
+            SlurmQos.LOW,
+            SlurmQos.NORMAL,
+            SlurmQos.HIGH,
+            SlurmQos.EXPRESS,
+        ]
+    ),
     help="Job priority in SLURM. Setting this option will override the StatusDB case priority.",
 )
 OPTION_PON_CNN = click.option(

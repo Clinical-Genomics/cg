@@ -5,11 +5,22 @@ import logging
 from sqlalchemy.orm import Query
 
 from cg.constants.constants import Workflow
-from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
-from cg.constants.sequencing import SequencingMethod
-from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
-from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
-from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.constants.observations import (
+    LOQUSDB_SUPPORTED_WORKFLOWS,
+)
+from cg.constants.sequencing import (
+    SequencingMethod,
+)
+from cg.exc import (
+    CaseNotFoundError,
+    LoqusdbUploadCaseError,
+)
+from cg.meta.observations.balsamic_observations_api import (
+    BalsamicObservationsAPI,
+)
+from cg.meta.observations.mip_dna_observations_api import (
+    MipDNAObservationsAPI,
+)
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from cg.store.store import Store
@@ -60,7 +71,9 @@ def get_observations_api(
     return observations_apis[case.data_analysis]
 
 
-def get_sequencing_method(case: Case) -> SequencingMethod:
+def get_sequencing_method(
+    case: Case,
+) -> SequencingMethod:
     """Returns the sequencing method for the given case object."""
     analysis_types = [
         link.sample.application_version.application.analysis_type for link in case.links

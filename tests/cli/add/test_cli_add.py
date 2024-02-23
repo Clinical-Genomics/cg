@@ -25,8 +25,15 @@ def test_add_user(cli_runner: CliRunner, base_context: CGConfig):
     nr_users = user_query.count()
 
     # WHEN adding a new user
-    name, email = "Paul T. Anderson", "paul.anderson@magnolia.com"
-    result = cli_runner.invoke(add, ["user", "-c", customer_id, email, name], obj=base_context)
+    name, email = (
+        "Paul T. Anderson",
+        "paul.anderson@magnolia.com",
+    )
+    result = cli_runner.invoke(
+        add,
+        ["user", "-c", customer_id, email, name],
+        obj=base_context,
+    )
 
     # THEN exit successfully
     assert result.exit_code == EXIT_SUCCESS

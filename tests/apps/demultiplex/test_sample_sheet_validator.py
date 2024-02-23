@@ -1,8 +1,12 @@
 import pytest
 from _pytest.fixtures import FixtureRequest
 
-from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
-from cg.constants.demultiplexing import SampleSheetBCLConvertSections
+from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import (
+    SampleSheetValidator,
+)
+from cg.constants.demultiplexing import (
+    SampleSheetBCLConvertSections,
+)
 from cg.exc import SampleSheetError
 
 
@@ -63,11 +67,24 @@ def test_validate_all_sections_present_missing_section(
 @pytest.mark.parametrize(
     "sample_sheet_content, expected_index_settings_name",
     [
-        ("novaseq_6000_pre_1_5_kits_sample_sheet_content", "NoReverseComplements"),
-        ("novaseq_6000_post_1_5_kits_sample_sheet_content", "NovaSeq6000Post1.5Kits"),
-        ("novaseq_x_sample_sheet_content", "NovaSeqX"),
+        (
+            "novaseq_6000_pre_1_5_kits_sample_sheet_content",
+            "NoReverseComplements",
+        ),
+        (
+            "novaseq_6000_post_1_5_kits_sample_sheet_content",
+            "NovaSeq6000Post1.5Kits",
+        ),
+        (
+            "novaseq_x_sample_sheet_content",
+            "NovaSeqX",
+        ),
     ],
-    ids=["NovaSeq6000Pre1.5Kits", "NovaSeq6000Post1.5Kits", "NovaSeqX"],
+    ids=[
+        "NovaSeq6000Pre1.5Kits",
+        "NovaSeq6000Post1.5Kits",
+        "NovaSeqX",
+    ],
 )
 def test_get_index_settings_name(
     sample_sheet_validator: SampleSheetValidator,
@@ -110,11 +127,21 @@ def test_get_index_settings_name_missing_index_settings(
 @pytest.mark.parametrize(
     "sample_sheet_content, expected_reverse_complement",
     [
-        ("novaseq_6000_pre_1_5_kits_sample_sheet_content", False),
-        ("novaseq_6000_post_1_5_kits_sample_sheet_content", False),
+        (
+            "novaseq_6000_pre_1_5_kits_sample_sheet_content",
+            False,
+        ),
+        (
+            "novaseq_6000_post_1_5_kits_sample_sheet_content",
+            False,
+        ),
         ("novaseq_x_sample_sheet_content", True),
     ],
-    ids=["NovaSeq6000Pre1.5Kits", "NovaSeq6000Post1.5Kits", "NovaSeqX"],
+    ids=[
+        "NovaSeq6000Pre1.5Kits",
+        "NovaSeq6000Post1.5Kits",
+        "NovaSeqX",
+    ],
 )
 def test_set_is_index2_reverse_complement(
     sample_sheet_validator: SampleSheetValidator,
@@ -136,11 +163,33 @@ def test_set_is_index2_reverse_complement(
 @pytest.mark.parametrize(
     "sample_sheet_content, nullable, expected",
     [
-        ([[SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2, 10]], False, 10),
-        ([[SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2, 10]], True, 10),
+        (
+            [
+                [
+                    SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2,
+                    10,
+                ]
+            ],
+            False,
+            10,
+        ),
+        (
+            [
+                [
+                    SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2,
+                    10,
+                ]
+            ],
+            True,
+            10,
+        ),
         ([["not_a_cycle", 10]], True, None),
     ],
-    ids=["index2_cycles", "index2_cycles_nullable", "not_a_cycle_nullable"],
+    ids=[
+        "index2_cycles",
+        "index2_cycles_nullable",
+        "not_a_cycle_nullable",
+    ],
 )
 def test_get_cycle(
     sample_sheet_validator: SampleSheetValidator,
@@ -154,14 +203,18 @@ def test_get_cycle(
 
     # WHEN fetching the cycle value
     result = sample_sheet_validator._get_cycle(
-        cycle_name=SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2, nullable=nullable
+        cycle_name=SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2,
+        nullable=nullable,
     )
 
     # THEN the correct value is returned
     assert result == expected
 
 
-def test_get_cycle_missing_cycle(sample_sheet_validator: SampleSheetValidator, caplog):
+def test_get_cycle_missing_cycle(
+    sample_sheet_validator: SampleSheetValidator,
+    caplog,
+):
     """Test that fetching a missing cycle value when nullable is False fails."""
     # GIVEN a sample sheet validator with a modified sample sheet content
     sample_sheet_validator.set_sample_sheet_content([["not_a_cycle", 10]])
@@ -170,7 +223,8 @@ def test_get_cycle_missing_cycle(sample_sheet_validator: SampleSheetValidator, c
     with pytest.raises(SampleSheetError):
         # THEN a SampleSheetError is raised
         sample_sheet_validator._get_cycle(
-            cycle_name=SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2, nullable=False
+            cycle_name=SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2,
+            nullable=False,
         )
     assert (
         f"No {SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2} found in sample sheet"
@@ -181,13 +235,34 @@ def test_get_cycle_missing_cycle(sample_sheet_validator: SampleSheetValidator, c
 @pytest.mark.parametrize(
     "sample_sheet_content, expected_cycles",
     [
-        ("hiseq_x_single_index_sample_sheet_content", [151, 151, 8, None]),
-        ("hiseq_x_dual_index_sample_sheet_content", [151, 151, 8, 8]),
-        ("hiseq_2500_dual_index_sample_sheet_content", [101, 101, 8, 8]),
-        ("hiseq_2500_custom_index_sample_sheet_content", [101, 101, 17, 8]),
-        ("novaseq_6000_pre_1_5_kits_sample_sheet_content", [151, 151, 10, 10]),
-        ("novaseq_6000_post_1_5_kits_sample_sheet_content", [151, 151, 10, 10]),
-        ("novaseq_x_sample_sheet_content", [151, 151, 10, 10]),
+        (
+            "hiseq_x_single_index_sample_sheet_content",
+            [151, 151, 8, None],
+        ),
+        (
+            "hiseq_x_dual_index_sample_sheet_content",
+            [151, 151, 8, 8],
+        ),
+        (
+            "hiseq_2500_dual_index_sample_sheet_content",
+            [101, 101, 8, 8],
+        ),
+        (
+            "hiseq_2500_custom_index_sample_sheet_content",
+            [101, 101, 17, 8],
+        ),
+        (
+            "novaseq_6000_pre_1_5_kits_sample_sheet_content",
+            [151, 151, 10, 10],
+        ),
+        (
+            "novaseq_6000_post_1_5_kits_sample_sheet_content",
+            [151, 151, 10, 10],
+        ),
+        (
+            "novaseq_x_sample_sheet_content",
+            [151, 151, 10, 10],
+        ),
     ],
     ids=[
         "HiSeqXSingleIndex",
@@ -235,7 +310,9 @@ def test_set_cycles(
     ],
 )
 def test_validate_override_cycles_incorrect_cycles(
-    sample_sheet_validator: SampleSheetValidator, sample_sheet_content: str, request: FixtureRequest
+    sample_sheet_validator: SampleSheetValidator,
+    sample_sheet_content: str,
+    request: FixtureRequest,
 ):
     """Test that a sample sheets with incorrect override cycles raise an error."""
     # GIVEN a sample sheet with incorrect override cycles
@@ -277,7 +354,9 @@ def test_validate_override_cycles_incorrect_cycles(
     ],
 )
 def test_validate_sample_sheet_from_content(
-    sample_sheet_validator: SampleSheetValidator, sample_sheet_content: str, request: FixtureRequest
+    sample_sheet_validator: SampleSheetValidator,
+    sample_sheet_content: str,
+    request: FixtureRequest,
 ):
     """Test that a correct sample sheet passes validation."""
     # GIVEN sample sheet validator and a correct sample sheet content

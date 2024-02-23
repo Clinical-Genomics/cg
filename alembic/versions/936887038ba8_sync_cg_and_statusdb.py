@@ -22,31 +22,76 @@ def upgrade():
     op.alter_column(
         "application",
         "prep_category",
-        existing_type=mysql.ENUM("cov", "mic", "rml", "tgs", "wes", "wgs", "wts"),
+        existing_type=mysql.ENUM(
+            "cov",
+            "mic",
+            "rml",
+            "tgs",
+            "wes",
+            "wgs",
+            "wts",
+        ),
         nullable=False,
     )
     op.alter_column(
         "family",
         "priority",
-        existing_type=mysql.ENUM("research", "standard", "priority", "express", "clinical_trials"),
+        existing_type=mysql.ENUM(
+            "research",
+            "standard",
+            "priority",
+            "express",
+            "clinical_trials",
+        ),
         nullable=False,
     )
-    op.alter_column("invoice", "customer_id", existing_type=mysql.INTEGER(), nullable=False)
-    op.alter_column("invoice", "comment", existing_type=mysql.TEXT(), nullable=True)
+    op.alter_column(
+        "invoice",
+        "customer_id",
+        existing_type=mysql.INTEGER(),
+        nullable=False,
+    )
+    op.alter_column(
+        "invoice",
+        "comment",
+        existing_type=mysql.TEXT(),
+        nullable=True,
+    )
 
-    op.drop_index("customer_invoice_pk", table_name="invoice")
-    op.create_foreign_key("invoice_customer_ibfk_1", "invoice", "customer", ["customer_id"], ["id"])
+    op.drop_index(
+        "customer_invoice_pk",
+        table_name="invoice",
+    )
+    op.create_foreign_key(
+        "invoice_customer_ibfk_1",
+        "invoice",
+        "customer",
+        ["customer_id"],
+        ["id"],
+    )
     op.alter_column(
         table_name="pool",
         column_name="invoice_id",
         existing_type=mysql.INTEGER(),
         type_=mysql.INTEGER(unsigned=True),
     )
-    op.create_foreign_key("pool_invoice_ibfk_1", "pool", "invoice", ["invoice_id"], ["id"])
+    op.create_foreign_key(
+        "pool_invoice_ibfk_1",
+        "pool",
+        "invoice",
+        ["invoice_id"],
+        ["id"],
+    )
     op.alter_column(
         "sample",
         "priority",
-        existing_type=mysql.ENUM("research", "standard", "priority", "express", "clinical_trials"),
+        existing_type=mysql.ENUM(
+            "research",
+            "standard",
+            "priority",
+            "express",
+            "clinical_trials",
+        ),
         nullable=False,
     )
     op.alter_column(
@@ -62,10 +107,20 @@ def downgrade():
     op.alter_column(
         "sample",
         "priority",
-        existing_type=mysql.ENUM("research", "standard", "priority", "express", "clinical_trials"),
+        existing_type=mysql.ENUM(
+            "research",
+            "standard",
+            "priority",
+            "express",
+            "clinical_trials",
+        ),
         nullable=True,
     )
-    op.drop_constraint(constraint_name="pool_invoice_ibfk_1", table_name="pool", type_="foreignkey")
+    op.drop_constraint(
+        constraint_name="pool_invoice_ibfk_1",
+        table_name="pool",
+        type_="foreignkey",
+    )
     op.alter_column(
         table_name="pool",
         column_name="invoice_id",
@@ -73,20 +128,51 @@ def downgrade():
         type_=mysql.INTEGER(),
     )
     op.drop_constraint(
-        constraint_name="invoice_customer_ibfk_1", table_name="invoice", type_="foreignkey"
+        constraint_name="invoice_customer_ibfk_1",
+        table_name="invoice",
+        type_="foreignkey",
     )
-    op.create_index("customer_invoice_pk", "invoice", ["customer_id"], unique=False)
-    op.alter_column("invoice", "comment", existing_type=mysql.TEXT(), nullable=False)
-    op.alter_column("invoice", "customer_id", existing_type=mysql.INTEGER(), nullable=True)
+    op.create_index(
+        "customer_invoice_pk",
+        "invoice",
+        ["customer_id"],
+        unique=False,
+    )
+    op.alter_column(
+        "invoice",
+        "comment",
+        existing_type=mysql.TEXT(),
+        nullable=False,
+    )
+    op.alter_column(
+        "invoice",
+        "customer_id",
+        existing_type=mysql.INTEGER(),
+        nullable=True,
+    )
     op.alter_column(
         "family",
         "priority",
-        existing_type=mysql.ENUM("research", "standard", "priority", "express", "clinical_trials"),
+        existing_type=mysql.ENUM(
+            "research",
+            "standard",
+            "priority",
+            "express",
+            "clinical_trials",
+        ),
         nullable=True,
     )
     op.alter_column(
         "application",
         "prep_category",
-        existing_type=mysql.ENUM("cov", "mic", "rml", "tgs", "wes", "wgs", "wts"),
+        existing_type=mysql.ENUM(
+            "cov",
+            "mic",
+            "rml",
+            "tgs",
+            "wes",
+            "wgs",
+            "wts",
+        ),
         nullable=True,
     )

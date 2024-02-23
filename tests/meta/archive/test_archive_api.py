@@ -5,26 +5,45 @@ import pytest
 from housekeeper.store.models import File
 from requests import HTTPError, Response
 
-from cg.constants.archiving import ArchiveLocations
+from cg.constants.archiving import (
+    ArchiveLocations,
+)
 from cg.constants.constants import APIMethods
-from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.constants.housekeeper_tags import (
+    SequencingFileTag,
+)
 from cg.io.controller import APIRequest
-from cg.meta.archive.archive import ARCHIVE_HANDLERS, FileAndSample, SpringArchiveAPI
+from cg.meta.archive.archive import (
+    ARCHIVE_HANDLERS,
+    FileAndSample,
+    SpringArchiveAPI,
+)
 from cg.meta.archive.ddn.constants import (
     FAILED_JOB_STATUSES,
     METADATA_LIST,
     ONGOING_JOB_STATUSES,
     JobStatus,
 )
-from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
-from cg.meta.archive.ddn.models import AuthToken, GetJobStatusResponse, MiriaObject
+from cg.meta.archive.ddn.ddn_data_flow_client import (
+    DDNDataFlowClient,
+)
+from cg.meta.archive.ddn.models import (
+    AuthToken,
+    GetJobStatusResponse,
+    MiriaObject,
+)
 from cg.meta.archive.ddn.utils import get_metadata
-from cg.meta.archive.models import ArchiveHandler, FileTransferData
+from cg.meta.archive.models import (
+    ArchiveHandler,
+    FileTransferData,
+)
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
 
 
-def test_add_samples_to_files(spring_archive_api: SpringArchiveAPI):
+def test_add_samples_to_files(
+    spring_archive_api: SpringArchiveAPI,
+):
     """Tests matching Files to Samples when both files have a matching sample."""
     # GIVEN a list of SPRING Files to archive
     files_to_archive: list[
@@ -43,7 +62,9 @@ def test_add_samples_to_files(spring_archive_api: SpringArchiveAPI):
         assert file_and_sample.file.version.bundle.name == file_and_sample.sample.internal_id
 
 
-def test_add_samples_to_files_missing_sample(spring_archive_api: SpringArchiveAPI):
+def test_add_samples_to_files_missing_sample(
+    spring_archive_api: SpringArchiveAPI,
+):
     """Tests matching Files to Samples when one of the files does not match a Sample."""
     # GIVEN a list of SPRING Files to archive
     files_to_archive: list[
@@ -63,7 +84,10 @@ def test_add_samples_to_files_missing_sample(spring_archive_api: SpringArchiveAP
         assert file_and_sample.file.version.bundle.name == file_and_sample.sample.internal_id
 
 
-def test_get_sample_exists(sample_id: str, spring_archive_api: SpringArchiveAPI):
+def test_get_sample_exists(
+    sample_id: str,
+    spring_archive_api: SpringArchiveAPI,
+):
     """Tests fetching a sample when the sample exists."""
     # GIVEN a sample that exists in the database
     file: File = spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first()
@@ -97,7 +121,9 @@ def test_get_sample_not_exists(
 
 
 def test_convert_into_transfer_data(
-    sample_id: str, spring_archive_api: SpringArchiveAPI, ddn_dataflow_config: DataFlowConfig
+    sample_id: str,
+    spring_archive_api: SpringArchiveAPI,
+    ddn_dataflow_config: DataFlowConfig,
 ):
     """Tests instantiating the correct dataclass for a sample."""
     # GIVEN file and Sample
@@ -124,7 +150,9 @@ def test_convert_into_transfer_data(
 
 
 def test_call_corresponding_archiving_method(
-    spring_archive_api: SpringArchiveAPI, sample_id: str, ddn_dataflow_client: DDNDataFlowClient
+    spring_archive_api: SpringArchiveAPI,
+    sample_id: str,
+    ddn_dataflow_client: DDNDataFlowClient,
 ):
     """Tests so that the correct archiving function is used when providing a Karolinska customer."""
     # GIVEN a file to be transferred
@@ -145,7 +173,8 @@ def test_call_corresponding_archiving_method(
     ) as mock_request_submitter:
         # WHEN calling the corresponding archive method
         spring_archive_api.archive_file_to_location(
-            file_and_sample=file_and_sample, archive_handler=ddn_dataflow_client
+            file_and_sample=file_and_sample,
+            archive_handler=ddn_dataflow_client,
         )
 
     # THEN the correct archive function should have been called once
@@ -230,7 +259,10 @@ def test_get_archival_status(
 ):
     # GIVEN a file with an ongoing archival
     file: File = spring_archive_api.housekeeper_api.files().first()
-    spring_archive_api.housekeeper_api.add_archives(files=[file], archive_task_id=archival_job_id)
+    spring_archive_api.housekeeper_api.add_archives(
+        files=[file],
+        archive_task_id=archival_job_id,
+    )
 
     # WHEN querying the task id and getting a "COMPLETED" response
     with mock.patch.object(
@@ -281,13 +313,18 @@ def test_get_retrieval_status(
     should_date_be_set,
 ):
     """Tests that the three different categories of retrieval statuses we have identified,
-    i.e. failed, ongoing and successful, are handled correctly."""
+    i.e. failed, ongoing and successful, are handled correctly.
+    """
 
     # GIVEN a file with an ongoing archival
     file: File = spring_archive_api.housekeeper_api.files().first()
-    spring_archive_api.housekeeper_api.add_archives(files=[file], archive_task_id=archival_job_id)
+    spring_archive_api.housekeeper_api.add_archives(
+        files=[file],
+        archive_task_id=archival_job_id,
+    )
     spring_archive_api.housekeeper_api.set_archive_retrieval_task_id(
-        file_id=file.id, retrieval_task_id=retrieval_job_id
+        file_id=file.id,
+        retrieval_task_id=retrieval_job_id,
     )
 
     # WHEN querying the task id
@@ -333,11 +370,13 @@ def test_retrieve_case(
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
     # with the DDN customer having two samples, and the non-DDN having one sample.
     files: list[File] = spring_archive_api.housekeeper_api.get_files(
-        bundle=sample_with_spring_file, tags=[SequencingFileTag.SPRING]
+        bundle=sample_with_spring_file,
+        tags=[SequencingFileTag.SPRING],
     ).all()
     for file in files:
         spring_archive_api.housekeeper_api.add_archives(
-            files=[file], archive_task_id=archival_job_id
+            files=[file],
+            archive_task_id=archival_job_id,
         )
         assert not file.archive.retrieval_task_id
         assert file.archive
@@ -379,19 +418,25 @@ def test_delete_file_raises_http_error(
     archival_job_id: int,
 ):
     """Tests that an HTTP error is raised when the Miria response is unsuccessful for a delete file request,
-    and that the file is not removed from Housekeeper."""
+    and that the file is not removed from Housekeeper.
+    """
 
     # GIVEN a spring file which is archived via Miria
     spring_file: File = spring_archive_api.housekeeper_api.files(
-        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET}
+        tags={
+            SequencingFileTag.SPRING,
+            ArchiveLocations.KAROLINSKA_BUCKET,
+        }
     ).first()
     spring_file_path: str = spring_file.path
     if not spring_file.archive:
         spring_archive_api.housekeeper_api.add_archives(
-            files=[spring_file], archive_task_id=archival_job_id
+            files=[spring_file],
+            archive_task_id=archival_job_id,
         )
     spring_archive_api.housekeeper_api.set_archive_archived_at(
-        file_id=spring_file.id, archiving_task_id=archival_job_id
+        file_id=spring_file.id,
+        archiving_task_id=archival_job_id,
     )
 
     # GIVEN that the request returns a failed response
@@ -425,15 +470,20 @@ def test_delete_file_success(
 
     # GIVEN a spring file which is archived via Miria
     spring_file: File = spring_archive_api.housekeeper_api.files(
-        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET}
+        tags={
+            SequencingFileTag.SPRING,
+            ArchiveLocations.KAROLINSKA_BUCKET,
+        }
     ).first()
     spring_file_id: int = spring_file.id
     if not spring_file.archive:
         spring_archive_api.housekeeper_api.add_archives(
-            files=[spring_file], archive_task_id=archival_job_id
+            files=[spring_file],
+            archive_task_id=archival_job_id,
         )
     spring_archive_api.housekeeper_api.set_archive_archived_at(
-        file_id=spring_file.id, archiving_task_id=archival_job_id
+        file_id=spring_file.id,
+        archiving_task_id=archival_job_id,
     )
 
     # GIVEN that the delete request returns a successful response

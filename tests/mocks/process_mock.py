@@ -28,24 +28,45 @@ class ProcessMock(Process):
             environment(str): Activate conda environment before executing binary
         """
         super(ProcessMock, self).__init__(
-            binary=binary, config=config, config_parameter=config_parameter, environment=environment
+            binary=binary,
+            config=config,
+            config_parameter=config_parameter,
+            environment=environment,
         )
         self.config_parameter = config_parameter
-        LOG.debug("Initialising Process with binary: %s", self.binary)
+        LOG.debug(
+            "Initialising Process with binary: %s",
+            self.binary,
+        )
         self.base_call = []
         if self.binary:
             self.base_call.append(self.binary)
             if self.environment:
-                LOG.debug("Activating environment with: %s", self.environment)
-                self.base_call.insert(0, f"source activate {self.environment};")
+                LOG.debug(
+                    "Activating environment with: %s",
+                    self.environment,
+                )
+                self.base_call.insert(
+                    0,
+                    f"source activate {self.environment};",
+                )
             if self.config:
-                self.base_call.extend([self.config_parameter, self.config])
+                self.base_call.extend(
+                    [
+                        self.config_parameter,
+                        self.config,
+                    ]
+                )
             LOG.debug("Use base call %s", self.base_call)
         self._exit_code: int = EXIT_SUCCESS
         if error:
             self._exit_code = 1
 
-    def run_command(self, parameters: list = None, dry_run: bool = False) -> int:
+    def run_command(
+        self,
+        parameters: list = None,
+        dry_run: bool = False,
+    ) -> int:
         """Execute a command in the shell.
         If environment is supplied - shell=True has to be supplied to enable passing as a string for executing multiple
          commands
@@ -60,12 +81,18 @@ class ProcessMock(Process):
         if parameters:
             command.extend(parameters)
 
-        LOG.info("Running command %s", " ".join(command))
+        LOG.info(
+            "Running command %s",
+            " ".join(command),
+        )
         if dry_run:
             return EXIT_SUCCESS
 
         if self._exit_code != EXIT_SUCCESS:
-            LOG.critical("Call %s exit with a non zero exit code", command)
+            LOG.critical(
+                "Call %s exit with a non zero exit code",
+                command,
+            )
             LOG.critical(self.stderr)
             raise CalledProcessError(self._exit_code, command)
 
@@ -88,8 +115,19 @@ class ProcessMock(Process):
         self.binary = binary_path
         self.base_call.append(self.binary)
         if self.environment:
-            LOG.debug("Activating environment with: %s", self.environment)
-            self.base_call.insert(0, f"source activate {self.environment};")
+            LOG.debug(
+                "Activating environment with: %s",
+                self.environment,
+            )
+            self.base_call.insert(
+                0,
+                f"source activate {self.environment};",
+            )
         if self.config:
-            self.base_call.extend([self.config_parameter, self.config])
+            self.base_call.extend(
+                [
+                    self.config_parameter,
+                    self.config,
+                ]
+            )
         LOG.debug("Use base call %s", self.base_call)

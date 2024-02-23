@@ -20,7 +20,12 @@ depends_on = None
 def upgrade():
     op.add_column(
         "family",
-        sa.Column("is_compressible", sa.Boolean(), nullable=False, server_default=sa.text("1")),
+        sa.Column(
+            "is_compressible",
+            sa.Boolean(),
+            nullable=False,
+            server_default=sa.text("1"),
+        ),
     )
 
 

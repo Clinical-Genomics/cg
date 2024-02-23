@@ -25,9 +25,15 @@ def test_parse_bcl_convert_metrics(
 
     # THEN assert that the metrics are parsed
     assert bcl_convert_metrics_parser.quality_metrics
-    assert isinstance(bcl_convert_metrics_parser.quality_metrics[0], BclConvertQualityMetrics)
+    assert isinstance(
+        bcl_convert_metrics_parser.quality_metrics[0],
+        BclConvertQualityMetrics,
+    )
     assert bcl_convert_metrics_parser.demux_metrics
-    assert isinstance(bcl_convert_metrics_parser.demux_metrics[0], BclConvertDemuxMetrics)
+    assert isinstance(
+        bcl_convert_metrics_parser.demux_metrics[0],
+        BclConvertDemuxMetrics,
+    )
 
 
 def test_parse_metrics_files_not_existing():
@@ -49,11 +55,23 @@ def test_parse_bcl_convert_quality_metrics(
     quality_metrics_model: BclConvertQualityMetrics = parsed_bcl_convert_metrics.quality_metrics[0]
 
     # ASSERT that the parsed quality metrics are of the correct type
-    assert isinstance(quality_metrics_model, BclConvertQualityMetrics)
+    assert isinstance(
+        quality_metrics_model,
+        BclConvertQualityMetrics,
+    )
 
     # ASSERT that the parsed quality metrics has the correct values
-    for attr_name, attr_value in quality_metrics_model.model_dump().items():
-        assert getattr(bcl_convert_quality_metric_model_with_data, attr_name) == attr_value
+    for (
+        attr_name,
+        attr_value,
+    ) in quality_metrics_model.model_dump().items():
+        assert (
+            getattr(
+                bcl_convert_quality_metric_model_with_data,
+                attr_name,
+            )
+            == attr_value
+        )
 
 
 def test_parse_bcl_convert_demux_metrics(
@@ -67,11 +85,23 @@ def test_parse_bcl_convert_demux_metrics(
     demux_metrics_model: BclConvertDemuxMetrics = parsed_bcl_convert_metrics.demux_metrics[0]
 
     # ASSERT that the parsed demux metrics are of the correct type
-    assert isinstance(demux_metrics_model, BclConvertDemuxMetrics)
+    assert isinstance(
+        demux_metrics_model,
+        BclConvertDemuxMetrics,
+    )
 
     # ASSERT that the parsed demux metrics has the correct values
-    for attr_name, attr_value in demux_metrics_model.model_dump().items():
-        assert getattr(bcl_convert_demux_metric_model_with_data, attr_name) == attr_value
+    for (
+        attr_name,
+        attr_value,
+    ) in demux_metrics_model.model_dump().items():
+        assert (
+            getattr(
+                bcl_convert_demux_metric_model_with_data,
+                attr_name,
+            )
+            == attr_value
+        )
 
 
 def test_get_sample_internal_ids(
@@ -95,7 +125,8 @@ def test_get_sample_internal_ids(
 
 
 def test_get_lanes_for_sample_internal_id(
-    parsed_bcl_convert_metrics: BclConvertMetricsParser, test_sample_internal_id: str
+    parsed_bcl_convert_metrics: BclConvertMetricsParser,
+    test_sample_internal_id: str,
 ):
     """Test to get lanes for a sample internal id from BclConvertMetricsParser."""
     # GIVEN a parsed BCLConvert metrics
@@ -113,7 +144,8 @@ def test_get_lanes_for_sample_internal_id(
 
 
 def test_get_metrics_for_sample_internal_id_and_lane(
-    parsed_bcl_convert_metrics: BclConvertMetricsParser, test_sample_internal_id: str
+    parsed_bcl_convert_metrics: BclConvertMetricsParser,
+    test_sample_internal_id: str,
 ):
     """Test to get metrics for a sample internal id and lane from BclConvertMetricsParser."""
 
@@ -143,7 +175,8 @@ def test_calculate_total_reads_per_lane(
 
     # WHEN calculating total reads per lane
     total_reads_per_lane: int = parsed_bcl_convert_metrics.calculate_total_reads_for_sample_in_lane(
-        sample_internal_id=test_sample_internal_id, lane=test_lane
+        sample_internal_id=test_sample_internal_id,
+        lane=test_lane,
     )
     expected_total_reads_per_lane: int = bcl_convert_reads_for_test_sample * 2
     # THEN assert that the total reads per lane is correct
@@ -162,7 +195,8 @@ def test_get_q30_bases_percent_per_lane(
     # WHEN getting q30 bases percent per lane
     q30_bases_percent_per_lane: float = (
         parsed_bcl_convert_metrics.get_q30_bases_percent_for_sample_in_lane(
-            sample_internal_id=test_sample_internal_id, lane=test_lane
+            sample_internal_id=test_sample_internal_id,
+            lane=test_lane,
         )
     )
 
@@ -182,7 +216,8 @@ def test_get_mean_quality_score_per_lane(
     # WHEN getting mean quality score per lane
     mean_quality_score_per_lane: float = (
         parsed_bcl_convert_metrics.get_mean_quality_score_for_sample_in_lane(
-            sample_internal_id=test_sample_internal_id, lane=test_lane
+            sample_internal_id=test_sample_internal_id,
+            lane=test_lane,
         )
     )
 

@@ -15,7 +15,13 @@ from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
-PREFIX_TO_CONCATENATE = ["MWG", "MWL", "MWM", "MWR", "MWX"]
+PREFIX_TO_CONCATENATE = [
+    "MWG",
+    "MWL",
+    "MWM",
+    "MWR",
+    "MWX",
+]
 
 
 class DeliverTicketAPI(MetaAPI):
@@ -33,7 +39,12 @@ class DeliverTicketAPI(MetaAPI):
                 f"The customer id was not identified since no cases for ticket {ticket} was found"
             )
         customer_id: str = cases[0].customer.internal_id
-        return Path(self.delivery_path, customer_id, INBOX_NAME, ticket)
+        return Path(
+            self.delivery_path,
+            customer_id,
+            INBOX_NAME,
+            ticket,
+        )
 
     def check_if_upload_is_needed(self, ticket: str) -> bool:
         customer_inbox: Path = self.get_inbox_path(ticket=ticket)
@@ -49,16 +60,35 @@ class DeliverTicketAPI(MetaAPI):
         return cases[0].ordered_at
 
     def generate_output_filename(
-        self, date: datetime.datetime, dir_path: Path, read_direction: int
+        self,
+        date: datetime.datetime,
+        dir_path: Path,
+        read_direction: int,
     ) -> Path:
-        base_name = Path("_".join([dir_path.name, str(read_direction)]))
+        base_name = Path(
+            "_".join(
+                [
+                    dir_path.name,
+                    str(read_direction),
+                ]
+            )
+        )
         if date:
-            base_name = Path("_".join([str(date.strftime("%y%m%d")), str(base_name)]))
+            base_name = Path(
+                "_".join(
+                    [
+                        str(date.strftime("%y%m%d")),
+                        str(base_name),
+                    ]
+                )
+            )
         fastq_file_name = base_name.with_suffix(".fastq.gz")
         return Path(dir_path, fastq_file_name)
 
     @staticmethod
-    def sort_files(files: list[Path]) -> list[Path]:
+    def sort_files(
+        files: list[Path],
+    ) -> list[Path]:
         files_map = {file_path.name: file_path for file_path in files}
         sorted_names = sorted(list(files_map.keys()))
         return [files_map[file_name] for file_name in sorted_names]
@@ -83,7 +113,10 @@ class DeliverTicketAPI(MetaAPI):
         with open(output, "wb") as write_file_obj:
             for file in reads:
                 with open(file, "rb") as file_descriptor:
-                    shutil.copyfileobj(file_descriptor, write_file_obj)
+                    shutil.copyfileobj(
+                        file_descriptor,
+                        write_file_obj,
+                    )
 
     def remove_files(self, reads: list[Path]) -> None:
         for file in reads:
@@ -137,18 +170,24 @@ class DeliverTicketAPI(MetaAPI):
                 continue
             for read_direction in [1, 2]:
                 same_direction: list[Path] = self.get_current_read_direction(
-                    dir_path=dir_path, read_direction=read_direction
+                    dir_path=dir_path,
+                    read_direction=read_direction,
                 )
                 total_size: int = self.get_total_size(files=same_direction)
                 output: Path = self.generate_output_filename(
-                    date=date, dir_path=dir_path, read_direction=read_direction
+                    date=date,
+                    dir_path=dir_path,
+                    read_direction=read_direction,
                 )
                 if dry_run:
                     for file in same_direction:
                         LOG.info(f"Dry run activated, {file} will not be appended to {output}")
                 else:
                     LOG.info(f"Concatenating sample: {dir_path.name}")
-                    self.concatenate_same_read_direction(reads=same_direction, output=output)
+                    self.concatenate_same_read_direction(
+                        reads=same_direction,
+                        output=output,
+                    )
                 if dry_run:
                     continue
                 concatenated_size = output.stat().st_size

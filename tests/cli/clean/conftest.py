@@ -7,8 +7,12 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
+from cg.meta.workflow.balsamic import (
+    BalsamicAnalysisAPI,
+)
+from cg.meta.workflow.microsalt import (
+    MicrosaltAnalysisAPI,
+)
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 from tests.meta.clean.conftest import (
@@ -56,9 +60,16 @@ def clean_context(
         data_analysis=Workflow.BALSAMIC,
     )
     sample_case_to_clean = helpers.add_sample(
-        store, application_type="wgs", is_tumour=True, internal_id=balsamic_case_clean
+        store,
+        application_type="wgs",
+        is_tumour=True,
+        internal_id=balsamic_case_clean,
     )
-    helpers.add_relationship(store, case=case_to_clean, sample=sample_case_to_clean)
+    helpers.add_relationship(
+        store,
+        case=case_to_clean,
+        sample=sample_case_to_clean,
+    )
 
     helpers.add_analysis(
         store,
@@ -81,9 +92,16 @@ def clean_context(
     store.session.commit()
 
     sample_case_to_not_clean = helpers.add_sample(
-        store, application_type="wgs", is_tumour=True, internal_id=balsamic_case_not_clean
+        store,
+        application_type="wgs",
+        is_tumour=True,
+        internal_id=balsamic_case_not_clean,
     )
-    helpers.add_relationship(store, case=case_to_not_clean, sample=sample_case_to_not_clean)
+    helpers.add_relationship(
+        store,
+        case=case_to_not_clean,
+        sample=sample_case_to_not_clean,
+    )
 
     helpers.add_analysis(
         store,
@@ -143,7 +161,10 @@ def clean_context_microsalt(
 
     # Create textbook case for cleaning
     MicrosaltAnalysisAPI.get_case_path.return_value = [
-        Path("home/proj/production/microbial/test/result", microsalt_case_clean)
+        Path(
+            "home/proj/production/microbial/test/result",
+            microsalt_case_clean,
+        )
     ]
 
     case_to_clean = helpers.add_case(
@@ -154,7 +175,11 @@ def clean_context_microsalt(
     )
     sample_case_to_clean = helpers.add_sample(store, internal_id=microsalt_case_clean)
 
-    helpers.add_relationship(store, case=case_to_clean, sample=sample_case_to_clean)
+    helpers.add_relationship(
+        store,
+        case=case_to_clean,
+        sample=sample_case_to_clean,
+    )
 
     helpers.add_analysis(
         store,
@@ -170,7 +195,10 @@ def clean_context_microsalt(
 
     # Create textbook case for cleaning in dry run
     MicrosaltAnalysisAPI.get_case_path.return_value = [
-        Path("home/proj/production/microbial/test/result", microsalt_case_clean_dry)
+        Path(
+            "home/proj/production/microbial/test/result",
+            microsalt_case_clean_dry,
+        )
     ]
 
     case_to_clean_dry_run = helpers.add_case(
@@ -180,8 +208,15 @@ def clean_context_microsalt(
         data_analysis=Workflow.MICROSALT,
     )
 
-    sample_case_to_not_clean = helpers.add_sample(store, internal_id=microsalt_case_clean_dry)
-    helpers.add_relationship(store, case=case_to_clean_dry_run, sample=sample_case_to_not_clean)
+    sample_case_to_not_clean = helpers.add_sample(
+        store,
+        internal_id=microsalt_case_clean_dry,
+    )
+    helpers.add_relationship(
+        store,
+        case=case_to_clean_dry_run,
+        sample=sample_case_to_not_clean,
+    )
 
     helpers.add_analysis(
         store,

@@ -6,7 +6,10 @@ import logging
 import click
 
 from cg.cli.get import get_case as print_case
-from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
+from cg.constants.constants import (
+    DRY_RUN,
+    SKIP_CONFIRMATION,
+)
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -18,7 +21,12 @@ LOG = logging.getLogger(__name__)
 @DRY_RUN
 @SKIP_CONFIRMATION
 @click.pass_context
-def delete_case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
+def delete_case(
+    context: click.Context,
+    case_id: str,
+    dry_run: bool,
+    yes: bool,
+):
     """Delete case with links and samples.
 
     The command will stop if the case has any analyses made on it.
@@ -44,7 +52,12 @@ def delete_case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
     ):
         raise click.Abort
 
-    _delete_links_and_samples(case_obj=case, dry_run=dry_run, status_db=status_db, yes=yes)
+    _delete_links_and_samples(
+        case_obj=case,
+        dry_run=dry_run,
+        status_db=status_db,
+        yes=yes,
+    )
 
     if not (yes or click.confirm(f"Do you want to DELETE case: {case}?")):
         raise click.Abort
@@ -58,7 +71,12 @@ def delete_case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
     status_db.session.commit()
 
 
-def _delete_links_and_samples(case_obj: Case, dry_run: bool, status_db: Store, yes: bool):
+def _delete_links_and_samples(
+    case_obj: Case,
+    dry_run: bool,
+    status_db: Store,
+    yes: bool,
+):
     """Delete all links from a case to samples"""
     samples_to_delete: list[Sample] = []
     for case_link in case_obj.links:
@@ -75,10 +93,20 @@ def _delete_links_and_samples(case_obj: Case, dry_run: bool, status_db: Store, y
             status_db.session.commit()
 
     for sample in samples_to_delete:
-        _delete_sample(dry_run=dry_run, sample=sample, status_db=status_db, yes=yes)
+        _delete_sample(
+            dry_run=dry_run,
+            sample=sample,
+            status_db=status_db,
+            yes=yes,
+        )
 
 
-def _delete_sample(dry_run: bool, sample: Sample, status_db: Store, yes: bool):
+def _delete_sample(
+    dry_run: bool,
+    sample: Sample,
+    status_db: Store,
+    yes: bool,
+):
     if _has_sample_been_lab_processed(sample):
         _log_sample_process_information(sample)
         return
@@ -106,7 +134,9 @@ def _delete_sample(dry_run: bool, sample: Sample, status_db: Store, yes: bool):
     status_db.session.delete(sample)
 
 
-def _log_sample_process_information(sample: Sample):
+def _log_sample_process_information(
+    sample: Sample,
+):
     LOG.info(f"Can NOT delete processed sample: {sample.internal_id}")
     LOG.info(f"Sample was received: {sample.received_at}")
     LOG.info(f"Sample was prepared: {sample.prepared_at}")
@@ -124,7 +154,9 @@ def _log_sample_links(sample: Sample):
         LOG.info(f"Sample is linked as father to: {sample_link.father.internal_id}")
 
 
-def _has_sample_been_lab_processed(sample: Sample) -> datetime.datetime:
+def _has_sample_been_lab_processed(
+    sample: Sample,
+) -> datetime.datetime:
     return (
         sample.received_at
         or sample.prepared_at

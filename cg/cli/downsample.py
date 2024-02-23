@@ -6,8 +6,12 @@ from typing import Tuple
 
 import click
 
-from cg.apps.downsample.downsample import DownsampleAPI
-from cg.apps.downsample.utils import store_downsampled_sample_bundle
+from cg.apps.downsample.downsample import (
+    DownsampleAPI,
+)
+from cg.apps.downsample.utils import (
+    store_downsampled_sample_bundle,
+)
 from cg.constants.constants import DRY_RUN
 from cg.models.cg_config import CGConfig
 
@@ -49,7 +53,11 @@ def downsample():
 @DRY_RUN
 @click.pass_obj
 def downsample_sample(
-    context: CGConfig, case_id: str, case_name: str, input_data: Tuple[str, float], dry_run: bool
+    context: CGConfig,
+    case_id: str,
+    case_name: str,
+    input_data: Tuple[str, float],
+    dry_run: bool,
 ):
     """Downsample reads in one or multiple samples."""
     downsample_api = DownsampleAPI(config=context, dry_run=dry_run)

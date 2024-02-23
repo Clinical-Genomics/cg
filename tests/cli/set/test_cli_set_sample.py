@@ -22,7 +22,12 @@ def test_invalid_sample(cli_runner: CliRunner, base_context: CGConfig):
     assert result.exit_code != EXIT_SUCCESS
 
 
-def test_skip_lims(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
+def test_skip_lims(
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers,
+):
     # GIVEN a database with a sample
 
     db_sample = helpers.add_sample(base_store, sex=Sex.FEMALE)
@@ -32,7 +37,14 @@ def test_skip_lims(cli_runner: CliRunner, base_context: CGConfig, base_store: St
     # WHEN setting sample but skipping lims
     result = cli_runner.invoke(
         sample,
-        [db_sample.internal_id, "-kv", "name", "dummy_value", "-y", "--skip-lims"],
+        [
+            db_sample.internal_id,
+            "-kv",
+            "name",
+            "dummy_value",
+            "-y",
+            "--skip-lims",
+        ],
         obj=base_context,
     )
 
@@ -43,7 +55,13 @@ def test_skip_lims(cli_runner: CliRunner, base_context: CGConfig, base_store: St
 
 
 @pytest.mark.parametrize("key", ["name", "capture_kit"])
-def test_set_sample(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, key, helpers):
+def test_set_sample(
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    key,
+    helpers,
+):
     # GIVEN a database with a sample
 
     db_sample = helpers.add_sample(base_store, sex=Sex.FEMALE)
@@ -53,7 +71,13 @@ def test_set_sample(cli_runner: CliRunner, base_context: CGConfig, base_store: S
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
         sample,
-        [db_sample.internal_id, "-kv", key, new_value, "-y"],
+        [
+            db_sample.internal_id,
+            "-kv",
+            key,
+            new_value,
+            "-y",
+        ],
         obj=base_context,
     )
 
@@ -64,9 +88,16 @@ def test_set_sample(cli_runner: CliRunner, base_context: CGConfig, base_store: S
     assert base_context.lims_api.get_updated_sample_value() == new_value
 
 
-@pytest.mark.parametrize("new_value", ["false", "true", "True", "False"])
+@pytest.mark.parametrize(
+    "new_value",
+    ["false", "true", "True", "False"],
+)
 def test_set_boolean_sample(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, new_value, helpers
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    new_value,
+    helpers,
 ):
     # GIVEN a database with a sample
 
@@ -76,7 +107,14 @@ def test_set_boolean_sample(
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
         sample,
-        [db_sample.internal_id, "-kv", "no_invoice", new_value, "-y", "--skip-lims"],
+        [
+            db_sample.internal_id,
+            "-kv",
+            "no_invoice",
+            new_value,
+            "-y",
+            "--skip-lims",
+        ],
         obj=base_context,
     )
 
@@ -85,7 +123,12 @@ def test_set_boolean_sample(
     assert getattr(db_sample, "no_invoice") == value
 
 
-def test_sex(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
+def test_sex(
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers,
+):
     # GIVEN a database with a sample
 
     db_sample = helpers.add_sample(base_store, sex=Sex.FEMALE)
@@ -95,7 +138,15 @@ def test_sex(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, h
 
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
-        sample, [db_sample.internal_id, "-kv", key, new_value, "-y"], obj=base_context
+        sample,
+        [
+            db_sample.internal_id,
+            "-kv",
+            key,
+            new_value,
+            "-y",
+        ],
+        obj=base_context,
     )
 
     # THEN it should have new_value as attribute key on the sample and in LIMS
@@ -105,7 +156,12 @@ def test_sex(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, h
     assert base_context.lims_api.get_updated_sample_value() == new_value
 
 
-def test_priority_text(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
+def test_priority_text(
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers,
+):
     # GIVEN a database with a sample
     db_sample = helpers.add_sample(base_store, sex=Sex.FEMALE)
     key = "priority"
@@ -114,7 +170,15 @@ def test_priority_text(cli_runner: CliRunner, base_context: CGConfig, base_store
 
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
-        sample, [db_sample.internal_id, "-kv", key, new_value, "-y"], obj=base_context
+        sample,
+        [
+            db_sample.internal_id,
+            "-kv",
+            key,
+            new_value,
+            "-y",
+        ],
+        obj=base_context,
     )
 
     # THEN it should have new_value as attribute key on the sample and in LIMS
@@ -124,7 +188,12 @@ def test_priority_text(cli_runner: CliRunner, base_context: CGConfig, base_store
     assert base_context.lims_api.get_updated_sample_value() == db_sample.priority_human
 
 
-def test_priority_number(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
+def test_priority_number(
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers,
+):
     # GIVEN a database with a sample
     db_sample = helpers.add_sample(base_store, sex=Sex.FEMALE)
     key = "priority"
@@ -134,7 +203,13 @@ def test_priority_number(cli_runner: CliRunner, base_context: CGConfig, base_sto
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
         sample,
-        [db_sample.internal_id, "-kv", key, new_value.name, "-y"],
+        [
+            db_sample.internal_id,
+            "-kv",
+            key,
+            new_value.name,
+            "-y",
+        ],
         obj=base_context,
     )
 
@@ -145,7 +220,12 @@ def test_priority_number(cli_runner: CliRunner, base_context: CGConfig, base_sto
     assert base_context.lims_api.get_updated_sample_value() == db_sample.priority_human
 
 
-def test_sample_comment(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
+def test_sample_comment(
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers,
+):
     # GIVEN a database with a sample without comment
     db_sample = helpers.add_sample(base_store, sex=Sex.FEMALE)
     key = "comment"
@@ -153,7 +233,15 @@ def test_sample_comment(cli_runner: CliRunner, base_context: CGConfig, base_stor
     # WHEN setting key on sample to new_value
     new_value = "test comment"
     result = cli_runner.invoke(
-        sample, [db_sample.internal_id, "-kv", key, new_value, "-y"], obj=base_context
+        sample,
+        [
+            db_sample.internal_id,
+            "-kv",
+            key,
+            new_value,
+            "-y",
+        ],
+        obj=base_context,
     )
 
     # THEN it should have new_value as attribute key on the sample and in LIMS
@@ -164,19 +252,32 @@ def test_sample_comment(cli_runner: CliRunner, base_context: CGConfig, base_stor
 
 
 def test_sample_comment_append(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers,
 ):
     # GIVEN a database with a sample with a comment
     old_value = "test comment"
     sample_obj = helpers.add_sample(
-        base_store, sex=Sex.FEMALE, comment=f"2022-06-13 10:16-test.user: {old_value}"
+        base_store,
+        sex=Sex.FEMALE,
+        comment=f"2022-06-13 10:16-test.user: {old_value}",
     )
     key = "comment"
 
     # WHEN setting key again on sample this time to new_value
     new_value = "another test comment"
     result = cli_runner.invoke(
-        sample, [sample_obj.internal_id, "-kv", key, new_value, "-y"], obj=base_context
+        sample,
+        [
+            sample_obj.internal_id,
+            "-kv",
+            key,
+            new_value,
+            "-y",
+        ],
+        obj=base_context,
     )
 
     # THEN it should have new_value above old_value as attribute key on the sample and in LIMS
@@ -189,7 +290,10 @@ def test_sample_comment_append(
 
 
 def test_invalid_customer(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers,
 ):
     # GIVEN a database with a sample
     sample_id = helpers.add_sample(base_store).internal_id
@@ -200,7 +304,16 @@ def test_invalid_customer(
 
     # WHEN calling set sample with an invalid customer
     result = cli_runner.invoke(
-        sample, [sample_id, "-kv", "customer", customer_id, "-y", "--skip-lims"], obj=base_context
+        sample,
+        [
+            sample_id,
+            "-kv",
+            "customer",
+            customer_id,
+            "-y",
+            "--skip-lims",
+        ],
+        obj=base_context,
     )
 
     # THEN it should error about missing customer instead of setting the value
@@ -208,7 +321,12 @@ def test_invalid_customer(
     assert sample_query.first().customer.internal_id != customer_id
 
 
-def test_customer(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
+def test_customer(
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers,
+):
     # GIVEN a database with a sample and two customers
     sample_id = helpers.add_sample(base_store).internal_id
     customer_id = helpers.ensure_customer(base_store, "another_customer").internal_id
@@ -218,7 +336,16 @@ def test_customer(cli_runner: CliRunner, base_context: CGConfig, base_store: Sto
 
     # WHEN calling set sample with a valid customer
     result = cli_runner.invoke(
-        sample, [sample_id, "-kv", "customer", customer_id, "-y", "--skip-lims"], obj=base_context
+        sample,
+        [
+            sample_id,
+            "-kv",
+            "customer",
+            customer_id,
+            "-y",
+            "--skip-lims",
+        ],
+        obj=base_context,
     )
 
     # THEN it should set the customer of the sample
@@ -232,14 +359,27 @@ def test_invalid_downsampled_to(cli_runner: CliRunner, base_context: CGConfig):
 
     # WHEN calling set sample with an invalid value of downsampled to
     result = cli_runner.invoke(
-        sample, ["dummy_sample_id", "-kv", "downsampled_to", downsampled_to, "-y"], obj=base_context
+        sample,
+        [
+            "dummy_sample_id",
+            "-kv",
+            "downsampled_to",
+            downsampled_to,
+            "-y",
+        ],
+        obj=base_context,
     )
 
     # THEN wrong data type
     assert result.exit_code != EXIT_SUCCESS
 
 
-def test_downsampled_to(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
+def test_downsampled_to(
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers,
+):
     # GIVEN a database with a sample
     sample_id = helpers.add_sample(base_store).internal_id
     downsampled_to = 111111
@@ -249,7 +389,15 @@ def test_downsampled_to(cli_runner: CliRunner, base_context: CGConfig, base_stor
 
     # WHEN calling set sample with a valid value of downsampled to
     result = cli_runner.invoke(
-        sample, [sample_id, "-kv", "downsampled_to", downsampled_to, "-y"], obj=base_context
+        sample,
+        [
+            sample_id,
+            "-kv",
+            "downsampled_to",
+            downsampled_to,
+            "-y",
+        ],
+        obj=base_context,
     )
 
     # THEN the value should have been set on the sample
@@ -258,7 +406,10 @@ def test_downsampled_to(cli_runner: CliRunner, base_context: CGConfig, base_stor
 
 
 def test_reset_downsampled_to(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers,
 ):
     # GIVEN a database with a sample
     sample_id = helpers.add_sample(base_store).internal_id
@@ -269,7 +420,15 @@ def test_reset_downsampled_to(
 
     # WHEN calling set sample with a valid reset value of downsampled to
     result = cli_runner.invoke(
-        sample, [sample_id, "-kv", "downsampled_to", "", "-y"], obj=base_context
+        sample,
+        [
+            sample_id,
+            "-kv",
+            "downsampled_to",
+            "",
+            "-y",
+        ],
+        obj=base_context,
     )
 
     # THEN the value should have been set on the sample
@@ -278,7 +437,10 @@ def test_reset_downsampled_to(
 
 
 def test_invalid_application(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers,
 ):
     # GIVEN a database with a sample
     sample_id = helpers.add_sample(base_store).internal_id
@@ -290,7 +452,14 @@ def test_invalid_application(
     # WHEN calling set sample with an invalid application
     result = cli_runner.invoke(
         sample,
-        [sample_id, "-kv", "application_version", application_tag, "-y", "--skip-lims"],
+        [
+            sample_id,
+            "-kv",
+            "application_version",
+            application_tag,
+            "-y",
+            "--skip-lims",
+        ],
         obj=base_context,
     )
 
@@ -299,7 +468,12 @@ def test_invalid_application(
     assert sample_query.first().application_version.application.tag != application_tag
 
 
-def test_application(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
+def test_application(
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers,
+):
     # GIVEN a database with a sample and two applications
     sample_obj = helpers.add_sample(base_store)
     application_tag = helpers.ensure_application_version(

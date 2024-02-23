@@ -28,7 +28,9 @@ def get_files_matching_pattern(directory: Path, pattern: str) -> list[Path]:
     return list(directory.glob(pattern))
 
 
-def get_all_files_in_dir(base_path: Path) -> set[Path]:
+def get_all_files_in_dir(
+    base_path: Path,
+) -> set[Path]:
     """Get a set of all files relative to the given base path."""
     return {file.relative_to(base_path) for file in base_path.rglob("*") if file.is_file()}
 
@@ -44,7 +46,9 @@ def is_pattern_in_file_path_name(file_path: Path, pattern: str) -> bool:
     return pattern in file_path.name
 
 
-def get_directory_creation_time_stamp(directory_path: Path) -> float:
+def get_directory_creation_time_stamp(
+    directory_path: Path,
+) -> float:
     """
     Return time stamp that a directory is created.
     Raises:
@@ -72,7 +76,9 @@ def remove_directory_and_contents(directory_path):
         raise OSError(f"Failed to remove the directory {directory_path} and its contents: {error}")
 
 
-def get_directories_in_path(path: Path) -> list[Path]:
+def get_directories_in_path(
+    path: Path,
+) -> list[Path]:
     """Get all directories for a specified path.
     Raises FileNotFoundError if the path does not exist.
     """

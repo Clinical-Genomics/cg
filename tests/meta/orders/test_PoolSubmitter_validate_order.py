@@ -3,7 +3,9 @@ import pytest
 from cg.constants import DataDelivery
 from cg.constants.constants import Workflow
 from cg.exc import OrderError
-from cg.meta.orders.pool_submitter import PoolSubmitter
+from cg.meta.orders.pool_submitter import (
+    PoolSubmitter,
+)
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import RmlSample
@@ -21,16 +23,26 @@ def test_validate_normal_order(rml_order_to_submit: dict, base_store: Store):
     # THEN it should be regarded as valid
 
 
-def test_validate_case_name(rml_order_to_submit: dict, base_store: Store, helpers: StoreHelpers):
+def test_validate_case_name(
+    rml_order_to_submit: dict,
+    base_store: Store,
+    helpers: StoreHelpers,
+):
     # GIVEN pool order with a case already all in the database
     order: OrderIn = OrderIn.parse_obj(rml_order_to_submit, OrderType.RML)
 
     sample: RmlSample
-    customer: Customer = helpers.ensure_customer(store=base_store, customer_id=order.customer)
+    customer: Customer = helpers.ensure_customer(
+        store=base_store,
+        customer_id=order.customer,
+    )
     for sample in order.samples:
         case = helpers.ensure_case(
             store=base_store,
-            case_name=PoolSubmitter.create_case_name(ticket=order.ticket, pool_name=sample.pool),
+            case_name=PoolSubmitter.create_case_name(
+                ticket=order.ticket,
+                pool_name=sample.pool,
+            ),
             customer=customer,
             data_analysis=Workflow.FLUFFY,
             data_delivery=DataDelivery.STATINA,

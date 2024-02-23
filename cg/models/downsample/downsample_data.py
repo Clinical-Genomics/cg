@@ -5,9 +5,15 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Priority
-from cg.store.models import ApplicationVersion, Case, Sample
+from cg.store.models import (
+    ApplicationVersion,
+    Case,
+    Sample,
+)
 from cg.store.store import Store
-from cg.utils.calculations import multiply_by_million
+from cg.utils.calculations import (
+    multiply_by_million,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -55,7 +61,9 @@ class DownsampleData:
         return f"{self.case_name}_downsampled"
 
     @property
-    def convert_number_of_reads_to_string(self) -> str:
+    def convert_number_of_reads_to_string(
+        self,
+    ) -> str:
         """Convert the number of reads to a string."""
         return str(self.number_of_reads).replace(".", "C")
 
@@ -120,7 +128,9 @@ class DownsampleData:
         downsampled_case.customer = self.original_case.customer
         return downsampled_case
 
-    def validate_enough_reads_to_downsample(self) -> None:
+    def validate_enough_reads_to_downsample(
+        self,
+    ) -> None:
         """
         Check if the sample has enough reads to downsample.
         Raises:
@@ -145,7 +155,10 @@ class DownsampleData:
     @property
     def fastq_file_output_directory(self):
         """Get the output directory for the downsampled sample."""
-        return Path(self.out_dir, self.downsampled_sample.internal_id)
+        return Path(
+            self.out_dir,
+            self.downsampled_sample.internal_id,
+        )
 
     def get_sample_status(
         self,
@@ -153,11 +166,15 @@ class DownsampleData:
         """Return the status of a sample."""
         return self.original_sample.links[0].status if self.original_sample.links else "unknown"
 
-    def get_application_version(self) -> ApplicationVersion:
+    def get_application_version(
+        self,
+    ) -> ApplicationVersion:
         """Return the application version for a sample."""
         return self.original_sample.application_version
 
-    def create_down_sampling_working_directory(self) -> Path:
+    def create_down_sampling_working_directory(
+        self,
+    ) -> Path:
         """
         Create a working directory for the downsample job.
         Raises:

@@ -8,7 +8,13 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from pydantic import ValidationInfo
 
-from cg.constants import NA_FIELD, NO_FIELD, REPORT_GENDER, YES_FIELD, Workflow
+from cg.constants import (
+    NA_FIELD,
+    NO_FIELD,
+    REPORT_GENDER,
+    YES_FIELD,
+    Workflow,
+)
 from cg.constants.constants import AnalysisType
 from cg.constants.subject import Sex
 from cg.models.orders.constants import OrderType
@@ -113,7 +119,9 @@ def test_get_float_as_percentage_zero_input():
     assert validated_pct_value == "0.0"
 
 
-def test_get_date_as_string(timestamp_now: datetime):
+def test_get_date_as_string(
+    timestamp_now: datetime,
+):
     """Test the validation of a datetime object."""
 
     # GIVEN a datetime object
@@ -166,7 +174,9 @@ def test_get_gender_as_string():
     assert validated_invalid_gender == NA_FIELD
 
 
-def test_get_prep_category_as_string(caplog: LogCaptureFixture):
+def test_get_prep_category_as_string(
+    caplog: LogCaptureFixture,
+):
     """Test validation on a preparation category."""
 
     # GIVEN an invalid prep category
@@ -190,7 +200,8 @@ def test_get_analysis_type_as_string():
 
     # WHEN performing the validation
     validated_analysis_type: str = get_analysis_type_as_string(
-        analysis_type=analysis_type, info=model_info
+        analysis_type=analysis_type,
+        info=model_info,
     )
 
     # THEN check if the input value was formatted correctly
@@ -207,7 +218,8 @@ def test_get_analysis_type_as_string_balsamic():
 
     # WHEN performing the validation
     validated_analysis_type: str = get_analysis_type_as_string(
-        analysis_type=analysis_type, info=model_info
+        analysis_type=analysis_type,
+        info=model_info,
     )
 
     # THEN check if the input value was formatted correctly

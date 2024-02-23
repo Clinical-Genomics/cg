@@ -10,7 +10,10 @@ from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.constants.constants import SARS_COV_REGEX, FileFormat
+from cg.constants.constants import (
+    SARS_COV_REGEX,
+    FileFormat,
+)
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.cg_config import CGConfig
@@ -48,7 +51,8 @@ class GisaidAPI:
         """Find completon file in Housekeeper and return it"""
 
         completion_file: File | None = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=case_id, tags=["komplettering"]
+            bundle_name=case_id,
+            tags=["komplettering"],
         )
         if not completion_file:
             msg = f"completion file missing for bundle {case_id}"
@@ -57,7 +61,11 @@ class GisaidAPI:
 
     def get_completion_dataframe(self, completion_file: File) -> pd.DataFrame:
         """Read completion file in to dataframe, drop duplicates, and return the dataframe"""
-        completion_df = pd.read_csv(completion_file.full_path, index_col=None, header=0)
+        completion_df = pd.read_csv(
+            completion_file.full_path,
+            index_col=None,
+            header=0,
+        )
         completion_df.drop_duplicates(inplace=True)
         completion_df = completion_df[completion_df["provnummer"].str.contains(SARS_COV_REGEX)]
         return completion_df
@@ -65,7 +73,8 @@ class GisaidAPI:
     def get_gisaid_sample_list(self, case_id: str) -> list[Sample]:
         """Get list of Sample objects eligeble for upload.
         The criteria is that the sample reached 20x coverage for >95% bases.
-        The sample will be included in completion file."""
+        The sample will be included in completion file.
+        """
 
         completion_file = self.get_completion_file_from_hk(case_id=case_id)
         completion_df = self.get_completion_dataframe(completion_file=completion_file)
@@ -74,11 +83,21 @@ class GisaidAPI:
 
     def get_gisaid_fasta_path(self, case_id: str) -> Path:
         """Get path to gisaid fasta"""
-        return Path(self.mutant_root_dir, case_id, "results", f"{case_id}.fasta")
+        return Path(
+            self.mutant_root_dir,
+            case_id,
+            "results",
+            f"{case_id}.fasta",
+        )
 
     def get_gisaid_csv_path(self, case_id: str) -> Path:
         """Get path to gisaid csv"""
-        return Path(self.mutant_root_dir, case_id, "results", f"{case_id}.csv")
+        return Path(
+            self.mutant_root_dir,
+            case_id,
+            "results",
+            f"{case_id}.csv",
+        )
 
     def get_gisaid_samples(self, case_id: str) -> list[GisaidSample]:
         """Get list of Gisaid sample objects."""
@@ -95,27 +114,41 @@ class GisaidAPI:
                 submitter=self.gisaid_submitter,
                 fn=f"{case_id}.fasta",
                 covv_collection_date=str(
-                    self.lims_api.get_sample_attribute(lims_id=sample_id, key="collection_date")
+                    self.lims_api.get_sample_attribute(
+                        lims_id=sample_id,
+                        key="collection_date",
+                    )
                 ),
-                region=self.lims_api.get_sample_attribute(lims_id=sample_id, key="region"),
+                region=self.lims_api.get_sample_attribute(
+                    lims_id=sample_id,
+                    key="region",
+                ),
                 region_code=self.lims_api.get_sample_attribute(
-                    lims_id=sample_id, key="region_code"
+                    lims_id=sample_id,
+                    key="region_code",
                 ),
                 covv_orig_lab=self.lims_api.get_sample_attribute(
-                    lims_id=sample_id, key="original_lab"
+                    lims_id=sample_id,
+                    key="original_lab",
                 ),
                 covv_orig_lab_addr=self.lims_api.get_sample_attribute(
-                    lims_id=sample_id, key="original_lab_address"
+                    lims_id=sample_id,
+                    key="original_lab_address",
                 ),
             )
             gisaid_samples.append(gisaid_sample)
         return gisaid_samples
 
-    def create_gisaid_fasta(self, gisaid_samples: list[GisaidSample], case_id: str) -> None:
+    def create_gisaid_fasta(
+        self,
+        gisaid_samples: list[GisaidSample],
+        case_id: str,
+    ) -> None:
         """Writing a new fasta with headers adjusted for gisaid upload_results_to_gisaid"""
 
         gisaid_fasta_file = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=case_id, tags=["gisaid-fasta", case_id]
+            bundle_name=case_id,
+            tags=["gisaid-fasta", case_id],
         )
         if gisaid_fasta_file:
             gisaid_fasta_path = gisaid_fasta_file.full_path
@@ -126,7 +159,11 @@ class GisaidAPI:
 
         for sample in gisaid_samples:
             fasta_file: File = self.housekeeper_api.get_file_from_latest_version(
-                bundle_name=case_id, tags=[sample.cg_lims_id, "consensus-sample"]
+                bundle_name=case_id,
+                tags=[
+                    sample.cg_lims_id,
+                    "consensus-sample",
+                ],
             )
             if not fasta_file:
                 raise HousekeeperFileMissingError(
@@ -146,10 +183,16 @@ class GisaidAPI:
             return
 
         self.housekeeper_api.add_and_include_file_to_latest_version(
-            bundle_name=case_id, file=gisaid_fasta_path, tags=["gisaid-fasta", case_id]
+            bundle_name=case_id,
+            file=gisaid_fasta_path,
+            tags=["gisaid-fasta", case_id],
         )
 
-    def create_gisaid_csv(self, gisaid_samples: list[GisaidSample], case_id: str) -> None:
+    def create_gisaid_csv(
+        self,
+        gisaid_samples: list[GisaidSample],
+        case_id: str,
+    ) -> None:
         """Create csv file for gisaid upload"""
         samples_df = pd.DataFrame(
             data=[gisaid_sample.model_dump() for gisaid_sample in gisaid_samples],
@@ -157,7 +200,8 @@ class GisaidAPI:
         )
 
         gisaid_csv_file = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=case_id, tags=["gisaid-csv", case_id]
+            bundle_name=case_id,
+            tags=["gisaid-csv", case_id],
         )
         if gisaid_csv_file:
             LOG.info(f"GISAID CSV for case {case_id} exists, will be replaced")
@@ -170,13 +214,16 @@ class GisaidAPI:
             return
 
         self.housekeeper_api.add_and_include_file_to_latest_version(
-            bundle_name=case_id, file=gisaid_csv_path, tags=["gisaid-csv", case_id]
+            bundle_name=case_id,
+            file=gisaid_csv_path,
+            tags=["gisaid-csv", case_id],
         )
 
     def create_gisaid_log_file(self, case_id: str) -> None:
         """Path for gisaid bundle log"""
         gisaid_log_file = self.housekeeper_api.get_files(
-            bundle=case_id, tags=["gisaid-log", case_id]
+            bundle=case_id,
+            tags=["gisaid-log", case_id],
         ).first()
         if gisaid_log_file:
             LOG.info("GISAID log exists in case bundle in Housekeeper")
@@ -188,14 +235,22 @@ class GisaidAPI:
         if not log_file_path.exists():
             log_file_path.touch()
         self.housekeeper_api.add_and_include_file_to_latest_version(
-            bundle_name=case_id, file=log_file_path, tags=["gisaid-log", case_id]
+            bundle_name=case_id,
+            file=log_file_path,
+            tags=["gisaid-log", case_id],
         )
 
     def create_gisaid_files_in_housekeeper(self, case_id: str) -> None:
         """Create all gisaid files in Housekeeper, if needed."""
         gisaid_samples = self.get_gisaid_samples(case_id=case_id)
-        self.create_gisaid_csv(gisaid_samples=gisaid_samples, case_id=case_id)
-        self.create_gisaid_fasta(gisaid_samples=gisaid_samples, case_id=case_id)
+        self.create_gisaid_csv(
+            gisaid_samples=gisaid_samples,
+            case_id=case_id,
+        )
+        self.create_gisaid_fasta(
+            gisaid_samples=gisaid_samples,
+            case_id=case_id,
+        )
         self.create_gisaid_log_file(case_id=case_id)
 
     def authenticate_gisaid(self):
@@ -215,18 +270,25 @@ class GisaidAPI:
         """Load batch data to GISAID using the gisiad cli."""
 
         temp_log_file = tempfile.NamedTemporaryFile(
-            dir=self.gisaid_log_dir, mode="w+", delete=False
+            dir=self.gisaid_log_dir,
+            mode="w+",
+            delete=False,
         )
         gisaid_csv_path = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=case_id, tags=["gisaid-csv", case_id]
+            bundle_name=case_id,
+            tags=["gisaid-csv", case_id],
         ).full_path
 
         gisaid_fasta_path = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=case_id, tags=["gisaid-fasta", case_id]
+            bundle_name=case_id,
+            tags=["gisaid-fasta", case_id],
         ).full_path
 
         gisaid_log_path = (
-            self.housekeeper_api.get_files(bundle=case_id, tags=["gisaid-log", case_id])
+            self.housekeeper_api.get_files(
+                bundle=case_id,
+                tags=["gisaid-log", case_id],
+            )
             .first()
             .full_path
         )
@@ -243,7 +305,10 @@ class GisaidAPI:
             gisaid_fasta_path,
         ]
         self.process.run_command(parameters=load_call)
-        self.append_log(temp_log=Path(temp_log_file.name), gisaid_log=Path(gisaid_log_path))
+        self.append_log(
+            temp_log=Path(temp_log_file.name),
+            gisaid_log=Path(gisaid_log_path),
+        )
         temp_log_file.close()
         if self.process.stderr:
             LOG.info(f"gisaid stderr:\n{self.process.stderr}")
@@ -253,16 +318,20 @@ class GisaidAPI:
     def append_log(self, temp_log: Path, gisaid_log: Path) -> None:
         """Appends temp log to gisaid log and delete temp file"""
         new_log_data = ReadFile.get_content_from_file(
-            file_format=FileFormat.JSON, file_path=temp_log.absolute()
+            file_format=FileFormat.JSON,
+            file_path=temp_log.absolute(),
         )
         if gisaid_log.stat().st_size != 0:
             old_log_data = ReadFile.get_content_from_file(
-                file_format=FileFormat.JSON, file_path=gisaid_log.absolute()
+                file_format=FileFormat.JSON,
+                file_path=gisaid_log.absolute(),
             )
             new_log_data.extend(old_log_data)
 
         WriteFile.write_file_from_content(
-            content=new_log_data, file_format=FileFormat.JSON, file_path=gisaid_log.absolute()
+            content=new_log_data,
+            file_format=FileFormat.JSON,
+            file_path=gisaid_log.absolute(),
         )
         temp_log.unlink()
 
@@ -272,13 +341,17 @@ class GisaidAPI:
         LOG.info("Parsing accession numbers from log file")
         accession_numbers = {}
         log_file = Path(
-            self.housekeeper_api.get_files(bundle=case_id, tags=["gisaid-log", case_id])
+            self.housekeeper_api.get_files(
+                bundle=case_id,
+                tags=["gisaid-log", case_id],
+            )
             .first()
             .full_path
         )
         if log_file.stat().st_size != 0:
             log_data = ReadFile.get_content_from_file(
-                file_format=FileFormat.JSON, file_path=log_file.absolute()
+                file_format=FileFormat.JSON,
+                file_path=log_file.absolute(),
             )
             for log in log_data:
                 if log.get("code") == "epi_isl_id":

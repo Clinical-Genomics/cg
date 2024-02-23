@@ -12,7 +12,11 @@ from cg.store.store import Store
 
 
 def test_list_keys_without_sample(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers, caplog
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers,
+    caplog,
 ):
     # GIVEN a database with no sample
 
@@ -31,7 +35,11 @@ def test_list_keys_without_sample(
 
 
 def test_list_keys_with_sample(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers, caplog
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers,
+    caplog,
 ):
     # GIVEN a database with a sample
 
@@ -39,7 +47,11 @@ def test_list_keys_with_sample(
 
     # WHEN setting sample but skipping lims
     with caplog.at_level(logging.INFO):
-        result = cli_runner.invoke(list_keys, ["--sample_id", sample.internal_id], obj=base_context)
+        result = cli_runner.invoke(
+            list_keys,
+            ["--sample_id", sample.internal_id],
+            obj=base_context,
+        )
 
     # THEN it should not fail on having a sample as argument
     assert result.exit_code == EXIT_SUCCESS

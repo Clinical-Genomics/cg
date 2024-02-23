@@ -4,7 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_flow_cell_samples_from_content
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_flow_cell_samples_from_content,
+)
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSample,
     FlowCellSampleBcl2Fastq,
@@ -15,9 +17,13 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreatorBcl2Fastq,
     SampleSheetCreatorBCLConvert,
 )
-from cg.constants.demultiplexing import BclConverter
+from cg.constants.demultiplexing import (
+    BclConverter,
+)
 from cg.exc import SampleSheetError
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.flow_cell.flow_cell import (
+    FlowCellDirectoryData,
+)
 
 
 def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(
@@ -42,7 +48,8 @@ def test_bcl_convert_sample_sheet_fails_with_bcl2fastq(
 
 
 def test_construct_bcl2fastq_sheet(
-    bcl2fastq_sample_sheet_creator: SampleSheetCreatorBcl2Fastq, project_dir: Path
+    bcl2fastq_sample_sheet_creator: SampleSheetCreatorBcl2Fastq,
+    project_dir: Path,
 ):
     """Test that a created Bcl2fastq sample sheet has samples."""
     # GIVEN a Bcl2fastq sample sheet creator populated with Bcl2fastq samples
@@ -53,13 +60,15 @@ def test_construct_bcl2fastq_sheet(
 
     # THEN a correctly formatted sample sheet was created
     samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
-        sample_sheet_content=content, sample_type=FlowCellSampleBcl2Fastq
+        sample_sheet_content=content,
+        sample_type=FlowCellSampleBcl2Fastq,
     )
     assert samples
 
 
 def test_construct_bcl_convert_sheet(
-    bcl_convert_sample_sheet_creator: SampleSheetCreator, project_dir: Path
+    bcl_convert_sample_sheet_creator: SampleSheetCreator,
+    project_dir: Path,
 ):
     """Test that a created BCL Convert sample sheet has samples."""
     # GIVEN a BCL convert sample sheet creator populated with BCL convert samples
@@ -70,7 +79,8 @@ def test_construct_bcl_convert_sheet(
 
     # THEN a correctly formatted sample sheet was created
     samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
-        sample_sheet_content=content, sample_type=FlowCellSampleBCLConvert
+        sample_sheet_content=content,
+        sample_type=FlowCellSampleBCLConvert,
     )
     assert samples
 

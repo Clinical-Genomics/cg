@@ -27,7 +27,12 @@ def test_genotype_api_upload(genotype_api: GenotypeAPI, caplog):
     caplog.set_level(logging.DEBUG)
     # GIVEN a genotype api and a samples sex dictionary and a bcf_path
     sample_id = "a_sample_id"
-    samples_sex = {sample_id: {"pedigree": "Female", "analysis": "Female"}}
+    samples_sex = {
+        sample_id: {
+            "pedigree": "Female",
+            "analysis": "Female",
+        }
+    }
     bcf_path = "path_to_file.bcf"
 
     # WHEN running the update command
@@ -65,7 +70,11 @@ def test_update_analysis_sex(genotype_api: GenotypeAPI, caplog):
     assert f"Set predicted sex for sample {sample} to {sex} for the sequence analysis"
 
 
-def test_export_sample(genotype_api: GenotypeAPI, genotype_export_sample_output: str, caplog):
+def test_export_sample(
+    genotype_api: GenotypeAPI,
+    genotype_export_sample_output: str,
+    caplog,
+):
     """Test that get_trending calls the genotype API with correct command."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a genotype api and argument days
@@ -77,7 +86,12 @@ def test_export_sample(genotype_api: GenotypeAPI, genotype_export_sample_output:
     genotype_api.export_sample(days=days)
 
     # THEN assert subprocess is running the GenotypeAPI with correct command
-    call = ["config/path", "export-sample", "-d", str(days)]
+    call = [
+        "config/path",
+        "export-sample",
+        "-d",
+        str(days),
+    ]
     assert " ".join(call) in caplog.text
 
 
@@ -95,7 +109,9 @@ def test_export_sample_no_output(genotype_api: GenotypeAPI, caplog):
 
 
 def test_export_sample_analysis(
-    genotype_api: GenotypeAPI, genotype_export_sample_analysis_output: str, caplog
+    genotype_api: GenotypeAPI,
+    genotype_export_sample_analysis_output: str,
+    caplog,
 ):
     """Test that get_trending calls the genotype API with correct command."""
     caplog.set_level(logging.DEBUG)
@@ -108,12 +124,19 @@ def test_export_sample_analysis(
     genotype_api.export_sample_analysis(days=days)
 
     # THEN assert subprocess is running the GenotypeAPI with correct command
-    call = ["config/path", "export-sample-analysis", "-d", str(days)]
+    call = [
+        "config/path",
+        "export-sample-analysis",
+        "-d",
+        str(days),
+    ]
     print(genotype_api)
     assert " ".join(call) in caplog.text
 
 
-def test_export_sample_analysis_no_output(genotype_api: GenotypeAPI):
+def test_export_sample_analysis_no_output(
+    genotype_api: GenotypeAPI,
+):
     """Test to get case data via the api"""
 
     # GIVEN a genotype api

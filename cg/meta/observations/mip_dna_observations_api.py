@@ -13,15 +13,21 @@ from cg.constants.observations import (
     MipDNALoadParameters,
     MipDNAObservationsAnalysisTag,
 )
-from cg.constants.sequencing import SequencingMethod
+from cg.constants.sequencing import (
+    SequencingMethod,
+)
 from cg.exc import (
     CaseNotFoundError,
     LoqusdbDuplicateRecordError,
     LoqusdbUploadCaseError,
 )
-from cg.meta.observations.observations_api import ObservationsAPI
+from cg.meta.observations.observations_api import (
+    ObservationsAPI,
+)
 from cg.models.cg_config import CGConfig
-from cg.models.observations.input_files import MipDNAObservationsInputFiles
+from cg.models.observations.input_files import (
+    MipDNAObservationsInputFiles,
+)
 from cg.store.models import Case
 from cg.utils.dict import get_full_path_dictionary
 
@@ -31,12 +37,18 @@ LOG = logging.getLogger(__name__)
 class MipDNAObservationsAPI(ObservationsAPI):
     """API to manage MIP-DNA observations."""
 
-    def __init__(self, config: CGConfig, sequencing_method: SequencingMethod):
+    def __init__(
+        self,
+        config: CGConfig,
+        sequencing_method: SequencingMethod,
+    ):
         super().__init__(config)
         self.sequencing_method: SequencingMethod = sequencing_method
         self.loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(self.get_loqusdb_instance())
 
-    def get_loqusdb_instance(self) -> LoqusdbInstance:
+    def get_loqusdb_instance(
+        self,
+    ) -> LoqusdbInstance:
         """Return the Loqusdb instance associated to the sequencing method."""
         if self.sequencing_method not in LOQUSDB_MIP_SEQUENCING_METHODS:
             LOG.error(
@@ -50,7 +62,11 @@ class MipDNAObservationsAPI(ObservationsAPI):
         }
         return loqusdb_instances[self.sequencing_method]
 
-    def load_observations(self, case: Case, input_files: MipDNAObservationsInputFiles) -> None:
+    def load_observations(
+        self,
+        case: Case,
+        input_files: MipDNAObservationsInputFiles,
+    ) -> None:
         """Load observation counts to Loqusdb for a MIP-DNA case."""
         if case.tumour_samples:
             LOG.error(f"Case {case.internal_id} has tumour samples. Cancelling upload.")
@@ -78,7 +94,10 @@ class MipDNAObservationsAPI(ObservationsAPI):
             soft_threshold=MipDNALoadParameters.SOFT_THRESHOLD.value,
         )
         loqusdb_id: str = str(self.loqusdb_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
-        self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
+        self.update_statusdb_loqusdb_id(
+            samples=case.samples,
+            loqusdb_id=loqusdb_id,
+        )
         LOG.info(f"Uploaded {load_output['variants']} variants to {repr(self.loqusdb_api)}")
 
     def extract_observations_files_from_hk(
@@ -87,20 +106,24 @@ class MipDNAObservationsAPI(ObservationsAPI):
         """Extract observations files given a housekeeper version for rare diseases."""
         input_files: dict[str, File] = {
             "snv_vcf_path": self.housekeeper_api.files(
-                version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SNV_VCF]
+                version=hk_version.id,
+                tags=[MipDNAObservationsAnalysisTag.SNV_VCF],
             ).first(),
             "sv_vcf_path": (
                 self.housekeeper_api.files(
-                    version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SV_VCF]
+                    version=hk_version.id,
+                    tags=[MipDNAObservationsAnalysisTag.SV_VCF],
                 ).first()
                 if self.sequencing_method == SequencingMethod.WGS
                 else None
             ),
             "profile_vcf_path": self.housekeeper_api.files(
-                version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.PROFILE_GBCF]
+                version=hk_version.id,
+                tags=[MipDNAObservationsAnalysisTag.PROFILE_GBCF],
             ).first(),
             "family_ped_path": self.housekeeper_api.files(
-                version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.FAMILY_PED]
+                version=hk_version.id,
+                tags=[MipDNAObservationsAnalysisTag.FAMILY_PED],
             ).first(),
         }
         return MipDNAObservationsInputFiles(**get_full_path_dictionary(input_files))
@@ -117,6 +140,8 @@ class MipDNAObservationsAPI(ObservationsAPI):
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case.internal_id} from {repr(self.loqusdb_api)}")
 
-    def get_loqusdb_customers(self) -> LoqusdbMipCustomers:
+    def get_loqusdb_customers(
+        self,
+    ) -> LoqusdbMipCustomers:
         """Returns the customers that are entitled to Rare Disease Loqusdb uploads."""
         return LoqusdbMipCustomers

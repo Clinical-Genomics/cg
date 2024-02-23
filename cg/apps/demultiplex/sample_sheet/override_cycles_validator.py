@@ -56,7 +56,10 @@ class OverrideCyclesValidator:
 
     @staticmethod
     def _is_index_cycle_value_following_pattern(
-        pattern: str, index_cycle: str, run_cycles: int, index_sequence: str
+        pattern: str,
+        index_cycle: str,
+        run_cycles: int,
+        index_sequence: str,
     ) -> bool:
         """
         Returns whether an index cycle string is following a valid cycle regex pattern and has

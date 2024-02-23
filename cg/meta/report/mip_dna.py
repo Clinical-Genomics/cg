@@ -17,14 +17,25 @@ from cg.constants import (
     Workflow,
 )
 from cg.constants.scout import MIP_CASE_TAGS
-from cg.meta.report.field_validators import get_million_read_pairs
+from cg.meta.report.field_validators import (
+    get_million_read_pairs,
+)
 from cg.meta.report.report_api import ReportAPI
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_dna import (
+    MipDNAAnalysisAPI,
+)
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
-from cg.models.report.metadata import MipDNASampleMetadataModel
-from cg.models.report.report import CaseModel, ScoutReportFiles
+from cg.models.mip.mip_metrics_deliverables import (
+    get_sample_id_metric,
+)
+from cg.models.report.metadata import (
+    MipDNASampleMetadataModel,
+)
+from cg.models.report.report import (
+    CaseModel,
+    ScoutReportFiles,
+)
 from cg.models.report.sample import SampleModel
 from cg.store.models import Case, Sample
 
@@ -34,16 +45,27 @@ LOG = logging.getLogger(__name__)
 class MipDNAReportAPI(ReportAPI):
     """API to create Rare disease DNA delivery reports."""
 
-    def __init__(self, config: CGConfig, analysis_api: MipDNAAnalysisAPI):
-        super().__init__(config=config, analysis_api=analysis_api)
+    def __init__(
+        self,
+        config: CGConfig,
+        analysis_api: MipDNAAnalysisAPI,
+    ):
+        super().__init__(
+            config=config,
+            analysis_api=analysis_api,
+        )
         self.analysis_api: MipDNAAnalysisAPI = analysis_api
 
     def get_sample_metadata(
-        self, case: Case, sample: Sample, analysis_metadata: MipAnalysis
+        self,
+        case: Case,
+        sample: Sample,
+        analysis_metadata: MipAnalysis,
     ) -> MipDNASampleMetadataModel:
         """Return MIP DNA sample metadata to include in the report."""
         parsed_metrics = get_sample_id_metric(
-            sample_id=sample.internal_id, sample_id_metrics=analysis_metadata.sample_id_metrics
+            sample_id=sample.internal_id,
+            sample_id_metrics=analysis_metadata.sample_id_metrics,
         )
         sample_coverage: dict = self.get_sample_coverage(sample=sample, case=case)
         return MipDNASampleMetadataModel(
@@ -60,7 +82,8 @@ class MipDNAReportAPI(ReportAPI):
         """Return coverage values for a specific sample."""
         genes = self.get_genes_from_scout(panels=case.panels)
         sample_coverage = self.chanjo_api.sample_coverage(
-            sample_id=sample.internal_id, panel_genes=genes
+            sample_id=sample.internal_id,
+            panel_genes=genes,
         )
         if sample_coverage:
             return sample_coverage
@@ -80,7 +103,9 @@ class MipDNAReportAPI(ReportAPI):
         return analysis_metadata.genome_build
 
     def is_report_accredited(
-        self, samples: list[SampleModel], analysis_metadata: MipAnalysis = None
+        self,
+        samples: list[SampleModel],
+        analysis_metadata: MipAnalysis = None,
     ) -> bool:
         """Check if the MIP-DNA report is accredited by evaluating each of the sample process accreditations."""
         for sample in samples:
@@ -92,16 +117,20 @@ class MipDNAReportAPI(ReportAPI):
         """Return files that will be uploaded to Scout."""
         return ScoutReportFiles(
             snv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="snv_vcf"
+                case_id=case.internal_id,
+                scout_tag="snv_vcf",
             ),
             sv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="sv_vcf"
+                case_id=case.internal_id,
+                scout_tag="sv_vcf",
             ),
             vcf_str=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="vcf_str"
+                case_id=case.internal_id,
+                scout_tag="vcf_str",
             ),
             smn_tsv=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="smn_tsv"
+                case_id=case.internal_id,
+                scout_tag="smn_tsv",
             ),
         )
 
@@ -112,23 +141,29 @@ class MipDNAReportAPI(ReportAPI):
             "customer": REQUIRED_CUSTOMER_FIELDS,
             "case": REQUIRED_CASE_FIELDS,
             "applications": self.get_application_required_fields(
-                case=case, required_fields=REQUIRED_APPLICATION_FIELDS
+                case=case,
+                required_fields=REQUIRED_APPLICATION_FIELDS,
             ),
             "data_analysis": REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS,
             "samples": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_MIP_DNA_FIELDS
+                case=case,
+                required_fields=REQUIRED_SAMPLE_MIP_DNA_FIELDS,
             ),
             "methods": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
+                case=case,
+                required_fields=REQUIRED_SAMPLE_METHODS_FIELDS,
             ),
             "timestamps": self.get_timestamp_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
+                case=case,
+                required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
             ),
             "metadata": self.get_sample_metadata_required_fields(case=case),
         }
 
     @staticmethod
-    def get_sample_metadata_required_fields(case: CaseModel) -> dict:
+    def get_sample_metadata_required_fields(
+        case: CaseModel,
+    ) -> dict:
         """Return sample metadata required fields associated to a specific sample ID."""
         required_sample_metadata_fields = dict()
         for sample in case.samples:
@@ -153,7 +188,9 @@ class MipDNAReportAPI(ReportAPI):
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
         tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
         uploaded_files: Iterable[File] = self.housekeeper_api.get_files(
-            bundle=case_id, tags=tags, version=version.id
+            bundle=case_id,
+            tags=tags,
+            version=version.id,
         )
         if not tags or not any(uploaded_files):
             LOG.info(

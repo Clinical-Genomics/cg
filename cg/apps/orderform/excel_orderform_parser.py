@@ -7,12 +7,18 @@ from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from pydantic import ConfigDict, TypeAdapter
 
-from cg.apps.orderform.orderform_parser import OrderformParser
-from cg.apps.orderform.utils import are_all_samples_metagenome
+from cg.apps.orderform.orderform_parser import (
+    OrderformParser,
+)
+from cg.apps.orderform.utils import (
+    are_all_samples_metagenome,
+)
 from cg.constants import DataDelivery
 from cg.constants.orderforms import Orderform
 from cg.exc import OrderFormError
-from cg.models.orders.excel_sample import ExcelSample
+from cg.models.orders.excel_sample import (
+    ExcelSample,
+)
 from cg.models.orders.order import OrderType
 
 LOG = logging.getLogger(__name__)
@@ -22,7 +28,11 @@ class ExcelOrderformParser(OrderformParser):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     NO_ANALYSIS: str = "no-analysis"
     NO_VALUE: str = "no_value"
-    SHEET_NAMES: list[str] = ["Orderform", "orderform", "order form"]
+    SHEET_NAMES: list[str] = [
+        "Orderform",
+        "orderform",
+        "order form",
+    ]
     VALID_ORDERFORMS: list[str] = [
         f"{Orderform.MIP_DNA}:{Orderform.get_current_orderform_version(Orderform.MIP_DNA)}",  # Orderform MIP-DNA, Balsamic, sequencing only, MIP-RNA
         f"{Orderform.MICROSALT}:{Orderform.get_current_orderform_version(Orderform.MICROSALT)}",  # Microbial WGS
@@ -50,7 +60,10 @@ class ExcelOrderformParser(OrderformParser):
         raise OrderFormError("'orderform' sheet not found in Excel file")
 
     @staticmethod
-    def get_document_title(workbook: Workbook, orderform_sheet: Worksheet) -> str:
+    def get_document_title(
+        workbook: Workbook,
+        orderform_sheet: Worksheet,
+    ) -> str:
         """Get the document title for the order form.
 
         Openpyxl use 1 based counting
@@ -69,7 +82,9 @@ class ExcelOrderformParser(OrderformParser):
 
     @staticmethod
     def get_sample_row_info(
-        row: tuple[Cell], header_row: list[str], empty_row_found: bool
+        row: tuple[Cell],
+        header_row: list[str],
+        empty_row_found: bool,
     ) -> dict | None:
         """Convert an Excel row with sample data into a dict with sample info"""
         values = []
@@ -95,7 +110,9 @@ class ExcelOrderformParser(OrderformParser):
         return sample_dict
 
     @staticmethod
-    def get_header(rows: list[tuple[Cell]]) -> list[str]:
+    def get_header(
+        rows: list[tuple[Cell]],
+    ) -> list[str]:
         header_row: list[str] = []
         header = False
         for row in rows:
@@ -107,7 +124,10 @@ class ExcelOrderformParser(OrderformParser):
         return header_row
 
     @staticmethod
-    def get_raw_samples(rows: list[tuple[Cell]], header_row: list[str]) -> list[dict]:
+    def get_raw_samples(
+        rows: list[tuple[Cell]],
+        header_row: list[str],
+    ) -> list[dict]:
         raw_samples: list[dict] = []
         sample_rows = False
         empty_row_found = False
@@ -118,7 +138,9 @@ class ExcelOrderformParser(OrderformParser):
 
             if sample_rows:
                 sample_dict: dict | None = ExcelOrderformParser.get_sample_row_info(
-                    row=row, header_row=header_row, empty_row_found=empty_row_found
+                    row=row,
+                    header_row=header_row,
+                    empty_row_found=empty_row_found,
                 )
                 if sample_dict:
                     raw_samples.append(sample_dict)
@@ -131,7 +153,9 @@ class ExcelOrderformParser(OrderformParser):
         return raw_samples
 
     @staticmethod
-    def relevant_rows(orderform_sheet: Worksheet) -> list[dict[str, str]]:
+    def relevant_rows(
+        orderform_sheet: Worksheet,
+    ) -> list[dict[str, str]]:
         """Get the relevant rows from an order form sheet."""
         # orderform_sheet.rows is a generator. Convert to list to be able to iterate multiple times
         rows = list(orderform_sheet.rows)
@@ -144,7 +168,10 @@ class ExcelOrderformParser(OrderformParser):
             Orderform.MICROSALT: OrderType.MICROSALT,
             Orderform.SARS_COV_2: OrderType.SARS_COV_2,
         }
-        for document_number, value in document_number_to_project_type.items():
+        for (
+            document_number,
+            value,
+        ) in document_number_to_project_type.items():
             if document_number in document_title:
                 return value
 
@@ -203,14 +230,17 @@ class ExcelOrderformParser(OrderformParser):
 
         LOG.info(f"Open excel workbook from file {excel_path}")
         workbook: Workbook = openpyxl.load_workbook(
-            filename=excel_path, read_only=True, data_only=True
+            filename=excel_path,
+            read_only=True,
+            data_only=True,
         )
 
         sheet_name: str = self.get_sheet_name(workbook.sheetnames)
 
         orderform_sheet: Worksheet = workbook[sheet_name]
         document_title: str = self.get_document_title(
-            workbook=workbook, orderform_sheet=orderform_sheet
+            workbook=workbook,
+            orderform_sheet=orderform_sheet,
         )
         self.check_orderform_version(document_title)
 
@@ -228,6 +258,8 @@ class ExcelOrderformParser(OrderformParser):
         self.order_name = Path(excel_path).stem
 
     @staticmethod
-    def _transform_data_delivery(data_delivery: str) -> str:
+    def _transform_data_delivery(
+        data_delivery: str,
+    ) -> str:
         """Transforms the data-delivery parsed in the excel file, to the ones used in cg"""
         return data_delivery.lower().replace(" + ", "-").replace(" ", "_")

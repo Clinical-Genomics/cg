@@ -11,12 +11,19 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.delivery import INBOX_NAME
-from cg.constants.priority import SlurmAccount, SlurmQos
+from cg.constants.priority import (
+    SlurmAccount,
+    SlurmQos,
+)
 from cg.constants.tb import AnalysisTypes
 from cg.exc import CgError
 from cg.io.controller import WriteFile
 from cg.meta.meta import MetaAPI
-from cg.meta.rsync.sbatch import COVID_RSYNC, ERROR_RSYNC_FUNCTION, RSYNC_COMMAND
+from cg.meta.rsync.sbatch import (
+    COVID_RSYNC,
+    ERROR_RSYNC_FUNCTION,
+    RSYNC_COMMAND,
+)
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store.models import Case
@@ -54,13 +61,16 @@ class RsyncAPI(MetaAPI):
 
     @staticmethod
     def format_covid_destination_path(
-        covid_destination_path: str, customer_internal_id: str
+        covid_destination_path: str,
+        customer_internal_id: str,
     ) -> str:
         """Return destination path of covid report."""
         return covid_destination_path % customer_internal_id
 
     @staticmethod
-    def get_trailblazer_config(slurm_job_id: int) -> dict[str, list[str]]:
+    def get_trailblazer_config(
+        slurm_job_id: int,
+    ) -> dict[str, list[str]]:
         """Return dictionary of slurm job IDs."""
         return {"jobs": [str(slurm_job_id)]}
 
@@ -69,7 +79,9 @@ class RsyncAPI(MetaAPI):
         """Write slurm job IDs to a .YAML file used as the trailblazer config."""
         LOG.info(f"Writing slurm jobs to {config_path.as_posix()}")
         WriteFile.write_file_from_content(
-            content=content, file_format=FileFormat.YAML, file_path=config_path
+            content=content,
+            file_format=FileFormat.YAML,
+            file_path=config_path,
         )
 
     @staticmethod
@@ -82,17 +94,24 @@ class RsyncAPI(MetaAPI):
 
     @staticmethod
     def concatenate_rsync_commands(
-        folder_list: list[str], source_and_destination_paths: dict[str, Path], ticket: str
+        folder_list: list[str],
+        source_and_destination_paths: dict[str, Path],
+        ticket: str,
     ) -> str:
         """Concatenates the rsync commands for each folder to be transferred."""
         commands = ""
         for folder in folder_list:
-            source_path: Path = Path(source_and_destination_paths["delivery_source_path"], folder)
+            source_path: Path = Path(
+                source_and_destination_paths["delivery_source_path"],
+                folder,
+            )
             destination_path: Path = Path(
-                source_and_destination_paths["rsync_destination_path"], ticket
+                source_and_destination_paths["rsync_destination_path"],
+                ticket,
             )
             commands += RSYNC_COMMAND.format(
-                source_path=source_path, destination_path=destination_path
+                source_path=source_path,
+                destination_path=destination_path,
             )
         return commands
 
@@ -108,19 +127,32 @@ class RsyncAPI(MetaAPI):
         return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
 
     def get_source_and_destination_paths(
-        self, ticket: str, customer_internal_id: str
+        self,
+        ticket: str,
+        customer_internal_id: str,
     ) -> dict[str, Path]:
         """Return the source and destination paths."""
         source_and_destination_paths: dict[str, Path] = {
             "delivery_source_path": Path(
-                self.delivery_path, customer_internal_id, INBOX_NAME, ticket
+                self.delivery_path,
+                customer_internal_id,
+                INBOX_NAME,
+                ticket,
             ),
-            "rsync_destination_path": Path(self.destination_path, customer_internal_id, INBOX_NAME),
+            "rsync_destination_path": Path(
+                self.destination_path,
+                customer_internal_id,
+                INBOX_NAME,
+            ),
         }
         return source_and_destination_paths
 
     def add_to_trailblazer_api(
-        self, tb_api: TrailblazerAPI, slurm_job_id: int, ticket: str, dry_run: bool
+        self,
+        tb_api: TrailblazerAPI,
+        slurm_job_id: int,
+        ticket: str,
+        dry_run: bool,
     ) -> None:
         """Add rsync process to trailblazer."""
         if dry_run:
@@ -165,7 +197,10 @@ class RsyncAPI(MetaAPI):
             log_dir.mkdir(parents=True, exist_ok=True)
 
     def get_folders_to_deliver(
-        self, case_id: str, sample_files_present: bool, case_files_present: bool
+        self,
+        case_id: str,
+        sample_files_present: bool,
+        case_files_present: bool,
     ) -> list[str]:
         """Returns a list of all the folder names depending if sample and/or case data is to be
         transferred."""
@@ -194,7 +229,8 @@ class RsyncAPI(MetaAPI):
 
         ticket: str = self.status_db.get_latest_ticket_from_case(case_id=case_id)
         source_and_destination_paths: dict[str, Path] = self.get_source_and_destination_paths(
-            ticket=ticket, customer_internal_id=case.customer.internal_id
+            ticket=ticket,
+            customer_internal_id=case.customer.internal_id,
         )
         self.set_log_dir(folder_prefix=case_id)
         self.create_log_dir(dry_run=dry_run)
@@ -207,7 +243,10 @@ class RsyncAPI(MetaAPI):
         existing_folders: list[str] = [
             folder
             for folder in folders
-            if Path(source_and_destination_paths["delivery_source_path"], folder).exists()
+            if Path(
+                source_and_destination_paths["delivery_source_path"],
+                folder,
+            ).exists()
         ]
         commands: str = RsyncAPI.concatenate_rsync_commands(
             folder_list=existing_folders,
@@ -215,8 +254,13 @@ class RsyncAPI(MetaAPI):
             ticket=ticket,
         )
         is_complete_delivery: bool = folders == existing_folders
-        return is_complete_delivery, self.sbatch_rsync_commands(
-            commands=commands, job_prefix=case_id, dry_run=dry_run
+        return (
+            is_complete_delivery,
+            self.sbatch_rsync_commands(
+                commands=commands,
+                job_prefix=case_id,
+                dry_run=dry_run,
+            ),
         )
 
     def run_rsync_on_slurm(self, ticket: str, dry_run: bool) -> int:
@@ -229,7 +273,8 @@ class RsyncAPI(MetaAPI):
             raise CgError()
         customer_internal_id: str = cases[0].customer.internal_id
         source_and_destination_paths: dict[str, Path] = self.get_source_and_destination_paths(
-            ticket=ticket, customer_internal_id=customer_internal_id
+            ticket=ticket,
+            customer_internal_id=customer_internal_id,
         )
         if cases[0].data_analysis == Workflow.MUTANT:
             LOG.info("Delivering report for SARS-COV-2 analysis")
@@ -238,7 +283,8 @@ class RsyncAPI(MetaAPI):
                 destination_path=source_and_destination_paths["rsync_destination_path"],
                 covid_report_path=self.format_covid_report_path(case=cases[0], ticket=ticket),
                 covid_destination_path=self.format_covid_destination_path(
-                    self.covid_destination_path, customer_internal_id=customer_internal_id
+                    self.covid_destination_path,
+                    customer_internal_id=customer_internal_id,
                 ),
                 log_dir=self.log_dir,
             )
@@ -247,7 +293,11 @@ class RsyncAPI(MetaAPI):
                 source_path=source_and_destination_paths["delivery_source_path"],
                 destination_path=source_and_destination_paths["rsync_destination_path"],
             )
-        return self.sbatch_rsync_commands(commands=commands, job_prefix=ticket, dry_run=dry_run)
+        return self.sbatch_rsync_commands(
+            commands=commands,
+            job_prefix=ticket,
+            dry_run=dry_run,
+        )
 
     def sbatch_rsync_commands(
         self,
@@ -281,6 +331,7 @@ class RsyncAPI(MetaAPI):
         sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
         sbatch_path = self.log_dir / "_".join([job_prefix, "rsync.sh"])
         sbatch_number: int = slurm_api.submit_sbatch(
-            sbatch_content=sbatch_content, sbatch_path=sbatch_path
+            sbatch_content=sbatch_content,
+            sbatch_path=sbatch_path,
         )
         return sbatch_number

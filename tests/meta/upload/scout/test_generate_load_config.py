@@ -3,8 +3,12 @@
 import pytest
 
 from cg.constants import Workflow
-from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
-from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
+from cg.meta.upload.scout.mip_config_builder import (
+    MipConfigBuilder,
+)
+from cg.meta.upload.scout.uploadscoutapi import (
+    UploadScoutAPI,
+)
 from cg.models.scout.scout_load_config import (
     BalsamicLoadConfig,
     BalsamicUmiLoadConfig,
@@ -21,11 +25,16 @@ RESULT_KEYS = [
     "sv_rank_model_version",
 ]
 
-SAMPLE_FILE_PATHS = ["alignment_path", "chromograph", "vcf2cytosure"]
+SAMPLE_FILE_PATHS = [
+    "alignment_path",
+    "chromograph",
+    "vcf2cytosure",
+]
 
 
 def test_add_mandatory_info_to_mip_config(
-    analysis_obj: Analysis, mip_config_builder: MipConfigBuilder
+    analysis_obj: Analysis,
+    mip_config_builder: MipConfigBuilder,
 ):
     # GIVEN an cg analysis object
 
@@ -41,7 +50,8 @@ def test_add_mandatory_info_to_mip_config(
 
 
 def test_generate_balsamic_load_config(
-    balsamic_analysis_obj: Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
+    balsamic_analysis_obj: Analysis,
+    upload_balsamic_analysis_scout_api: UploadScoutAPI,
 ):
     # GIVEN an analysis object that have been run with balsamic
     assert balsamic_analysis_obj.pipeline == Workflow.BALSAMIC
@@ -56,7 +66,8 @@ def test_generate_balsamic_load_config(
 
 
 def test_generate_balsamic_umi_load_config(
-    balsamic_umi_analysis_obj: Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
+    balsamic_umi_analysis_obj: Analysis,
+    upload_balsamic_analysis_scout_api: UploadScoutAPI,
 ):
     # GIVEN an analysis object that have been run with balsamic-umi
     assert balsamic_umi_analysis_obj.pipeline == Workflow.BALSAMIC_UMI
@@ -71,7 +82,8 @@ def test_generate_balsamic_umi_load_config(
 
 
 def test_generate_rnafusion_load_config(
-    rnafusion_analysis_obj: Analysis, upload_rnafusion_analysis_scout_api: UploadScoutAPI
+    rnafusion_analysis_obj: Analysis,
+    upload_rnafusion_analysis_scout_api: UploadScoutAPI,
 ):
     """Test that a rnafusion config is generated."""
     # GIVEN an analysis object that have been run with rnafusion

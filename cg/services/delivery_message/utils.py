@@ -1,4 +1,8 @@
-from cg.constants.constants import DataDelivery, MicrosaltAppTags, Workflow
+from cg.constants.constants import (
+    DataDelivery,
+    MicrosaltAppTags,
+    Workflow,
+)
 from cg.services.delivery_message.messages import (
     AnalysisScoutMessage,
     CovidMessage,
@@ -9,7 +13,9 @@ from cg.services.delivery_message.messages import (
     ScoutMessage,
     StatinaMessage,
 )
-from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
+from cg.services.delivery_message.messages.delivery_message import (
+    DeliveryMessage,
+)
 from cg.services.delivery_message.messages.microsalt_mwx_message import (
     MicrosaltMwxMessage,
 )
@@ -21,7 +27,9 @@ def get_message(case: Case) -> str:
     return message_strategy.create_message(case)
 
 
-def get_message_strategy(case: Case) -> DeliveryMessage:
+def get_message_strategy(
+    case: Case,
+) -> DeliveryMessage:
     if case.data_analysis == Workflow.MICROSALT:
         return get_microsalt_message_strategy(case)
 
@@ -32,7 +40,9 @@ def get_message_strategy(case: Case) -> DeliveryMessage:
     return message_strategy
 
 
-def get_message_strategy_from_data_delivery(case: Case) -> DeliveryMessage:
+def get_message_strategy_from_data_delivery(
+    case: Case,
+) -> DeliveryMessage:
     message_strategy: DeliveryMessage = message_map[case.data_delivery]()
     return message_strategy
 
@@ -47,7 +57,9 @@ message_map = {
 }
 
 
-def get_microsalt_message_strategy(case: Case) -> DeliveryMessage:
+def get_microsalt_message_strategy(
+    case: Case,
+) -> DeliveryMessage:
     if has_mwx_samples(case):
         return MicrosaltMwxMessage()
 

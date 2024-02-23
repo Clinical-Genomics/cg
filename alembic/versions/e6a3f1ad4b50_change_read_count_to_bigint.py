@@ -21,12 +21,16 @@ depends_on = None
 def upgrade():
     # Alter the column to use BigInteger
     op.alter_column(
-        "sample_lane_sequencing_metrics", "sample_total_reads_in_lane", type_=sa.BigInteger
+        "sample_lane_sequencing_metrics",
+        "sample_total_reads_in_lane",
+        type_=sa.BigInteger,
     )
 
 
 def downgrade():
     # Alter the column to use Integer
     op.alter_column(
-        "sample_lane_sequencing_metrics", "sample_total_reads_in_lane", type_=sa.Integer
+        "sample_lane_sequencing_metrics",
+        "sample_total_reads_in_lane",
+        type_=sa.Integer,
     )

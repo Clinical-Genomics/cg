@@ -4,10 +4,16 @@ import logging
 import re
 from typing import Iterable, Type
 
-from genologics.entities import Artifact, Container, Sample
+from genologics.entities import (
+    Artifact,
+    Container,
+    Sample,
+)
 from genologics.lims import Lims
 
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.sample_models import (
+    FlowCellSample,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -17,7 +23,9 @@ def get_placement_lane(lane: str) -> int:
     return int(lane.split(":")[0])
 
 
-def get_non_pooled_artifacts(artifact: Artifact) -> list[Artifact]:
+def get_non_pooled_artifacts(
+    artifact: Artifact,
+) -> list[Artifact]:
     """Find the parent artifact of the sample. Should hold the reagent_label."""
     artifacts = []
 
@@ -39,7 +47,9 @@ def get_reagent_label(artifact) -> str | None:
     return labels[0] if labels else None
 
 
-def extract_sequence_in_parentheses(label: str) -> str | None:
+def extract_sequence_in_parentheses(
+    label: str,
+) -> str | None:
     """Return the sequence in parentheses from the reagent label or None if not found."""
     match = re.match(r"^[^(]+ \(([^)]+)\)$", label)
     return match.group(1) if match else None

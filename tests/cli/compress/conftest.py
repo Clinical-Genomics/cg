@@ -9,7 +9,10 @@ import pytest
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import FileExtensions, SequencingFileTag
+from cg.constants import (
+    FileExtensions,
+    SequencingFileTag,
+)
 from cg.constants.pedigree import Pedigree
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
@@ -22,7 +25,11 @@ class MockCompressAPI(CompressAPI):
 
     def __init__(self):
         """initialize mock."""
-        super().__init__(hk_api=None, crunchy_api=None, demux_root="")
+        super().__init__(
+            hk_api=None,
+            crunchy_api=None,
+            demux_root="",
+        )
         self.fastq_compression_success: bool = True
         self.spring_decompression_success: bool = True
         self.dry_run: bool = False
@@ -31,12 +38,20 @@ class MockCompressAPI(CompressAPI):
         """Update dry run."""
         self.dry_run = dry_run
 
-    def compress_fastq(self, sample_id: str, dry_run: bool = False) -> None:
+    def compress_fastq(
+        self,
+        sample_id: str,
+        dry_run: bool = False,
+    ) -> None:
         """Return if compression was successful."""
         _ = sample_id, dry_run
         return self.fastq_compression_success
 
-    def decompress_spring(self, sample_id: str, dry_run: bool = False) -> None:
+    def decompress_spring(
+        self,
+        sample_id: str,
+        dry_run: bool = False,
+    ) -> None:
         """Return if decompression was successful."""
         _ = sample_id, dry_run
         return self.spring_decompression_success
@@ -60,20 +75,29 @@ def real_crunchy_api(
 
 @pytest.fixture
 def real_compress_api(
-    demultiplex_runs: Path, housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
+    demultiplex_runs: Path,
+    housekeeper_api: HousekeeperAPI,
+    real_crunchy_api: CrunchyAPI,
 ) -> CompressAPI:
     """Return a Compress context."""
     return CompressAPI(
-        crunchy_api=real_crunchy_api, hk_api=housekeeper_api, demux_root=demultiplex_runs.as_posix()
+        crunchy_api=real_crunchy_api,
+        hk_api=housekeeper_api,
+        demux_root=demultiplex_runs.as_posix(),
     )
 
 
 @pytest.fixture
 def real_populated_compress_fastq_api(
-    real_compress_api: CompressAPI, compress_hk_fastq_bundle: dict, helpers: StoreHelpers
+    real_compress_api: CompressAPI,
+    compress_hk_fastq_bundle: dict,
+    helpers: StoreHelpers,
 ) -> CompressAPI:
     """Return populated Compress API."""
-    helpers.ensure_hk_bundle(real_compress_api.hk_api, compress_hk_fastq_bundle)
+    helpers.ensure_hk_bundle(
+        real_compress_api.hk_api,
+        compress_hk_fastq_bundle,
+    )
     return real_compress_api
 
 
@@ -111,7 +135,10 @@ def compress_case_info(
 
 @pytest.fixture
 def populated_compress_store(
-    store: Store, helpers: StoreHelpers, compress_case_info, analysis_family
+    store: Store,
+    helpers: StoreHelpers,
+    compress_case_info,
+    analysis_family,
 ):
     """Return a store populated with a completed analysis."""
     helpers.ensure_case_from_dict(
@@ -139,15 +166,24 @@ def populated_compress_multiple_store(
         analysis_family["name"]: str = "_".join([str(number), family_name])
         for ind, sample in enumerate(analysis_family["samples"]):
             analysis_family["samples"][ind]["internal_id"]: str = "_".join(
-                [str(number), sample["internal_id"]]
+                [
+                    str(number),
+                    sample["internal_id"],
+                ]
             )
             if Pedigree.FATHER in analysis_family["samples"][ind]:
                 analysis_family["samples"][ind][Pedigree.FATHER]: str = "_".join(
-                    [str(number), analysis_family["samples"][ind][Pedigree.FATHER]]
+                    [
+                        str(number),
+                        analysis_family["samples"][ind][Pedigree.FATHER],
+                    ]
                 )
             if Pedigree.MOTHER in analysis_family["samples"][ind]:
                 analysis_family["samples"][ind][Pedigree.MOTHER]: str = "_".join(
-                    [str(number), analysis_family["samples"][ind][Pedigree.MOTHER]]
+                    [
+                        str(number),
+                        analysis_family["samples"][ind][Pedigree.MOTHER],
+                    ]
                 )
 
         helpers.ensure_case_from_dict(
@@ -164,7 +200,9 @@ def populated_compress_multiple_store(
 # Context fixtures
 @pytest.fixture
 def base_compress_context(
-    compress_api: CompressAPI, store: Store, cg_config_object: CGConfig
+    compress_api: CompressAPI,
+    store: Store,
+    cg_config_object: CGConfig,
 ) -> CGConfig:
     """Return a Compress context."""
     cg_config_object.meta_apis["compress_api"] = compress_api
@@ -174,7 +212,9 @@ def base_compress_context(
 
 @pytest.fixture
 def populated_multiple_compress_context(
-    compress_api: CompressAPI, populated_compress_multiple_store: Store, cg_config_object: CGConfig
+    compress_api: CompressAPI,
+    populated_compress_multiple_store: Store,
+    cg_config_object: CGConfig,
 ) -> CGConfig:
     """Return a Compress context populated with a completed analysis."""
     cg_config_object.meta_apis["compress_api"]: CompressAPI = compress_api
@@ -184,7 +224,9 @@ def populated_multiple_compress_context(
 
 @pytest.fixture
 def populated_compress_context(
-    compress_api: CompressAPI, populated_compress_store: Store, cg_config_object: CGConfig
+    compress_api: CompressAPI,
+    populated_compress_store: Store,
+    cg_config_object: CGConfig,
 ) -> CGConfig:
     """Return a Compress context populated with a completed analysis."""
     cg_config_object.meta_apis["compress_api"]: CompressAPI = compress_api
@@ -222,9 +264,16 @@ def new_dir(project_dir: Path) -> Path:
 
 
 @pytest.fixture
-def spring_bundle(project_dir: Path, timestamp: datetime, sample: str) -> dict:
+def spring_bundle(
+    project_dir: Path,
+    timestamp: datetime,
+    sample: str,
+) -> dict:
     """Return a bundle with spring files."""
-    spring_file: Path = Path(project_dir, f"file{FileExtensions.SPRING}")
+    spring_file: Path = Path(
+        project_dir,
+        f"file{FileExtensions.SPRING}",
+    )
     spring_file.touch()
     spring_meta_file: Path = Path(project_dir, f"file{FileExtensions.JSON}")
     spring_meta_file.touch()
@@ -236,12 +285,18 @@ def spring_bundle(project_dir: Path, timestamp: datetime, sample: str) -> dict:
             {
                 "path": str(spring_file),
                 "archive": False,
-                "tags": [sample, SequencingFileTag.SPRING],
+                "tags": [
+                    sample,
+                    SequencingFileTag.SPRING,
+                ],
             },
             {
                 "path": str(spring_meta_file),
                 "archive": False,
-                "tags": [sample, SequencingFileTag.SPRING_METADATA],
+                "tags": [
+                    sample,
+                    SequencingFileTag.SPRING_METADATA,
+                ],
             },
         ],
     }
@@ -249,7 +304,10 @@ def spring_bundle(project_dir: Path, timestamp: datetime, sample: str) -> dict:
 
 @pytest.fixture
 def spring_bundle_symlink_problem(
-    project_dir: Path, new_dir: Path, timestamp: datetime, sample: str
+    project_dir: Path,
+    new_dir: Path,
+    timestamp: datetime,
+    sample: str,
 ):
     """Return Housekeeper bundle with SPRING files having symlinks."""
     spring_file: Path = Path(project_dir, "file.spring")
@@ -266,12 +324,18 @@ def spring_bundle_symlink_problem(
             {
                 "path": str(wrong_spring_file),
                 "archive": False,
-                "tags": [sample, SequencingFileTag.SPRING],
+                "tags": [
+                    sample,
+                    SequencingFileTag.SPRING,
+                ],
             },
             {
                 "path": str(wrong_spring_meta_file),
                 "archive": False,
-                "tags": [sample, SequencingFileTag.SPRING_METADATA],
+                "tags": [
+                    sample,
+                    SequencingFileTag.SPRING_METADATA,
+                ],
             },
         ],
     }

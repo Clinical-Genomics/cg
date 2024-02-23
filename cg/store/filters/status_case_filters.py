@@ -5,14 +5,26 @@ from typing import Callable
 from sqlalchemy import and_, not_, or_
 from sqlalchemy.orm import Query
 
-from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
-from cg.constants.constants import CaseActions, DataDelivery, Workflow
+from cg.constants import (
+    REPORT_SUPPORTED_DATA_DELIVERY,
+)
+from cg.constants.constants import (
+    CaseActions,
+    DataDelivery,
+    Workflow,
+)
 from cg.constants.observations import (
     LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
     LOQUSDB_MIP_SEQUENCING_METHODS,
     LOQUSDB_SUPPORTED_WORKFLOWS,
 )
-from cg.store.models import Analysis, Application, Case, Customer, Sample
+from cg.store.models import (
+    Analysis,
+    Application,
+    Case,
+    Customer,
+    Sample,
+)
 
 
 def filter_cases_by_action(cases: Query, action: str, **kwargs) -> Query:
@@ -110,7 +122,12 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
 
 def filter_cases_has_sequence(cases: Query, **kwargs) -> Query:
     """Filter cases that are not sequenced according to record in StatusDB."""
-    return cases.filter(or_(Application.is_external, Sample.last_sequenced_at.isnot(None)))
+    return cases.filter(
+        or_(
+            Application.is_external,
+            Sample.last_sequenced_at.isnot(None),
+        )
+    )
 
 
 def filter_cases_not_analysed(cases: Query, **kwargs) -> Query:
@@ -118,7 +135,12 @@ def filter_cases_not_analysed(cases: Query, **kwargs) -> Query:
     not_analyzed_condition = not_(Case.analyses.any(Analysis.completed_at.isnot(None)))
     not_in_progress_condition = Case.action != CaseActions.ANALYZE
 
-    return cases.filter(and_(not_analyzed_condition, not_in_progress_condition))
+    return cases.filter(
+        and_(
+            not_analyzed_condition,
+            not_in_progress_condition,
+        )
+    )
 
 
 def filter_cases_with_workflow(cases: Query, workflow: Workflow = None, **kwargs) -> Query:

@@ -3,7 +3,11 @@
 from click.testing import CliRunner
 
 from cg.cli.set.case import set_case
-from cg.constants import EXIT_SUCCESS, DataDelivery, Workflow
+from cg.constants import (
+    EXIT_SUCCESS,
+    DataDelivery,
+    Workflow,
+)
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from cg.store.store import Store
@@ -29,20 +33,29 @@ def test_set_case_without_options(
 
 
 def test_set_case_bad_family(
-    cli_runner: CliRunner, base_context: CGConfig, case_id_does_not_exist: str
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    case_id_does_not_exist: str,
 ):
     """Test to set a case using a non-existing case id."""
     # GIVEN an empty database
 
     # WHEN setting a case
-    result = cli_runner.invoke(set_case, [case_id_does_not_exist], obj=base_context)
+    result = cli_runner.invoke(
+        set_case,
+        [case_id_does_not_exist],
+        obj=base_context,
+    )
 
     # THEN it should complain on missing case
     assert result.exit_code != EXIT_SUCCESS
 
 
 def test_set_case_bad_panel(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers: StoreHelpers,
 ):
     """Test to set a case using a non-existing panel."""
     # GIVEN a database with a case
@@ -50,7 +63,11 @@ def test_set_case_bad_panel(
     # WHEN setting a case
     panel_id: str = "dummy_panel"
     case_id: str = helpers.add_case(store=base_store).internal_id
-    result = cli_runner.invoke(set_case, [case_id, "--panel", panel_id], obj=base_context)
+    result = cli_runner.invoke(
+        set_case,
+        [case_id, "--panel", panel_id],
+        obj=base_context,
+    )
 
     # THEN it should complain in missing panel instead of setting a value
     assert result.exit_code != EXIT_SUCCESS
@@ -58,18 +75,28 @@ def test_set_case_bad_panel(
 
 
 def test_set_case_panel(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers: StoreHelpers,
 ):
     """Test to set a case using an existing panel."""
     # GIVEN a database with a case and a panel not yet added to the case
-    panel_id: str = helpers.ensure_panel(store=base_store, panel_abbreviation="a_panel").name
+    panel_id: str = helpers.ensure_panel(
+        store=base_store,
+        panel_abbreviation="a_panel",
+    ).name
     case_id: str = helpers.add_case(store=base_store).internal_id
     case_query = base_store._get_query(table=Case)
 
     assert panel_id not in case_query.first().panels
 
     # WHEN setting a panel of a case
-    result = cli_runner.invoke(set_case, [case_id, "--panel", panel_id], obj=base_context)
+    result = cli_runner.invoke(
+        set_case,
+        [case_id, "--panel", panel_id],
+        obj=base_context,
+    )
 
     # THEN it should set panel on the case
     assert result.exit_code == EXIT_SUCCESS
@@ -77,7 +104,10 @@ def test_set_case_panel(
 
 
 def test_set_case_priority(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers: StoreHelpers,
 ):
     """Test that the added case gets the priority we send in."""
     # GIVEN a database with a case
@@ -89,7 +119,10 @@ def test_set_case_priority(
 
     # WHEN setting a case
     result = cli_runner.invoke(
-        set_case, [case_id, "--priority", priority], obj=base_context, catch_exceptions=False
+        set_case,
+        [case_id, "--priority", priority],
+        obj=base_context,
+        catch_exceptions=False,
     )
 
     # THEN it should have been set
@@ -99,7 +132,10 @@ def test_set_case_priority(
 
 
 def test_set_case_customer(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers: StoreHelpers,
 ):
     """Test to set a case using an existing customer."""
     # GIVEN a database with a case and a customer not yet on the case
@@ -111,7 +147,13 @@ def test_set_case_customer(
 
     # WHEN setting a customer of a case
     result = cli_runner.invoke(
-        set_case, [case_to_alter.internal_id, "--customer-id", customer_id], obj=base_context
+        set_case,
+        [
+            case_to_alter.internal_id,
+            "--customer-id",
+            customer_id,
+        ],
+        obj=base_context,
     )
 
     # THEN it should set customer on the case
@@ -120,7 +162,10 @@ def test_set_case_customer(
 
 
 def test_set_case_bad_data_analysis(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers: StoreHelpers,
 ):
     """Test to set a case using a non-existing data_analysis."""
     # GIVEN a database with a case
@@ -129,7 +174,13 @@ def test_set_case_bad_data_analysis(
     data_analysis: str = "dummy_workflow"
     case_id: str = helpers.add_case(store=base_store).internal_id
     result = cli_runner.invoke(
-        set_case, [case_id, "--data-analysis", data_analysis], obj=base_context
+        set_case,
+        [
+            case_id,
+            "--data-analysis",
+            data_analysis,
+        ],
+        obj=base_context,
     )
 
     # THEN it should complain in invalid data_analysis instead of setting a value
@@ -138,7 +189,10 @@ def test_set_case_bad_data_analysis(
 
 
 def test_set_case_data_analysis(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers: StoreHelpers,
 ):
     """Test to set a case using an existing data_analysis."""
 
@@ -150,7 +204,11 @@ def test_set_case_data_analysis(
     # WHEN setting a data_analysis of a case
     result = cli_runner.invoke(
         set_case,
-        [case_to_alter.internal_id, "--data-analysis", str(data_analysis)],
+        [
+            case_to_alter.internal_id,
+            "--data-analysis",
+            str(data_analysis),
+        ],
         obj=base_context,
     )
 
@@ -160,7 +218,10 @@ def test_set_case_data_analysis(
 
 
 def test_set_case_bad_data_delivery(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers: StoreHelpers,
 ):
     """Test to set a case using a non-existing data_delivery."""
     # GIVEN a database with a case
@@ -169,7 +230,13 @@ def test_set_case_bad_data_delivery(
     data_delivery: str = "dummy_delivery"
     case_id: str = helpers.add_case(base_store).internal_id
     result = cli_runner.invoke(
-        set_case, [case_id, "--data-delivery", data_delivery], obj=base_context
+        set_case,
+        [
+            case_id,
+            "--data-delivery",
+            data_delivery,
+        ],
+        obj=base_context,
     )
 
     # THEN it should complain in invalid data_delivery instead of setting a value
@@ -178,7 +245,10 @@ def test_set_case_bad_data_delivery(
 
 
 def test_set_case_data_delivery(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    base_store: Store,
+    helpers: StoreHelpers,
 ):
     """Test to set a case using an existing data_delivery."""
 
@@ -190,7 +260,11 @@ def test_set_case_data_delivery(
     # WHEN setting a data_delivery of a case
     result = cli_runner.invoke(
         set_case,
-        [case_to_alter.internal_id, "--data-delivery", str(data_delivery)],
+        [
+            case_to_alter.internal_id,
+            "--data-delivery",
+            str(data_delivery),
+        ],
         obj=base_context,
     )
 

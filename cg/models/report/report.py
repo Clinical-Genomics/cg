@@ -1,10 +1,20 @@
 import logging
 
-from pydantic import BaseModel, BeforeValidator, model_validator
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    model_validator,
+)
 from typing_extensions import Annotated
 
-from cg.constants import NA_FIELD, REPORT_SUPPORTED_WORKFLOW
-from cg.models.report.sample import ApplicationModel, SampleModel
+from cg.constants import (
+    NA_FIELD,
+    REPORT_SUPPORTED_WORKFLOW,
+)
+from cg.models.report.sample import (
+    ApplicationModel,
+    SampleModel,
+)
 from cg.models.report.validators import (
     get_analysis_type_as_string,
     get_date_as_string,
@@ -76,14 +86,19 @@ class DataAnalysisModel(BaseModel):
     data_delivery: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     workflow: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     workflow_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    type: Annotated[str, BeforeValidator(get_analysis_type_as_string)] = NA_FIELD
+    type: Annotated[
+        str,
+        BeforeValidator(get_analysis_type_as_string),
+    ] = NA_FIELD
     genome_build: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     variant_callers: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
     panels: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
     scout_files: ScoutReportFiles
 
     @model_validator(mode="after")
-    def check_supported_workflow(self) -> "DataAnalysisModel":
+    def check_supported_workflow(
+        self,
+    ) -> "DataAnalysisModel":
         """Check if the report generation supports a specific workflow and analysis type."""
         if self.workflow != self.customer_workflow:
             LOG.error(

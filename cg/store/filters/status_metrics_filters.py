@@ -4,7 +4,9 @@ from typing import Callable
 from sqlalchemy import func
 from sqlalchemy.orm import Query
 
-from cg.store.models import SampleLaneSequencingMetrics
+from cg.store.models import (
+    SampleLaneSequencingMetrics,
+)
 
 
 def filter_total_read_count_for_sample(metrics: Query, sample_internal_id: str, **kwargs) -> Query:

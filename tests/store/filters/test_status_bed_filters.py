@@ -16,7 +16,8 @@ def test_get_bed_by_entry_id(base_store: Store, entry_id: int = 1):
 
     # WHEN retrieving a bed by id
     bed: Bed = get_bed_by_entry_id(
-        beds=base_store._get_query(table=Bed), bed_entry_id=entry_id
+        beds=base_store._get_query(table=Bed),
+        bed_entry_id=entry_id,
     ).first()
 
     # THEN panel bed should be returned
@@ -26,12 +27,17 @@ def test_get_bed_by_entry_id(base_store: Store, entry_id: int = 1):
     assert bed.id == entry_id
 
 
-def test_get_bed_by_entry_id_no_id(base_store: Store):
+def test_get_bed_by_entry_id_no_id(
+    base_store: Store,
+):
     """Test return panel bed by entry id when invalid id."""
     # GIVEN a store containing bed
 
     # WHEN retrieving a bed by an invalid id
-    bed: Bed = get_bed_by_entry_id(beds=base_store._get_query(table=Bed), bed_entry_id=999).first()
+    bed: Bed = get_bed_by_entry_id(
+        beds=base_store._get_query(table=Bed),
+        bed_entry_id=999,
+    ).first()
 
     # THEN bed should not be returned
     assert not bed
@@ -42,7 +48,10 @@ def test_get_bed_by_name(base_store: Store, bed_name: str):
     # GIVEN a store containing bed
 
     # WHEN retrieving a bed by name
-    bed: Bed = get_bed_by_name(beds=base_store._get_query(table=Bed), bed_name=bed_name).first()
+    bed: Bed = get_bed_by_name(
+        beds=base_store._get_query(table=Bed),
+        bed_name=bed_name,
+    ).first()
 
     # THEN panel bed should be returned
     assert bed
@@ -51,12 +60,17 @@ def test_get_bed_by_name(base_store: Store, bed_name: str):
     assert bed.name == bed_name
 
 
-def test_get_bed_by_name_no_name(base_store: Store):
+def test_get_bed_by_name_no_name(
+    base_store: Store,
+):
     """Test return bed by name when no valid name is provided."""
     # GIVEN a store containing bed
 
     # WHEN retrieving a bed by name
-    bed: Bed = get_bed_by_name(beds=base_store._get_query(table=Bed), bed_name="not_a_name").first()
+    bed: Bed = get_bed_by_name(
+        beds=base_store._get_query(table=Bed),
+        bed_name="not_a_name",
+    ).first()
 
     # THEN panel bed should not be returned
     assert not bed

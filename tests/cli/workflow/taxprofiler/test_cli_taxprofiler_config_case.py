@@ -6,12 +6,17 @@ from pathlib import Path
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
-from cg.cli.workflow.taxprofiler.base import config_case
+from cg.cli.workflow.taxprofiler.base import (
+    config_case,
+)
 from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
+from cg.models.taxprofiler.taxprofiler import (
+    TaxprofilerParameters,
+    TaxprofilerSampleSheetEntry,
+)
 
 
 def test_config_case_default_parameters(
@@ -30,7 +35,11 @@ def test_config_case_default_parameters(
     # GIVEN a valid case
 
     # WHEN running config case
-    result = cli_runner.invoke(config_case, [taxprofiler_case_id], obj=taxprofiler_context)
+    result = cli_runner.invoke(
+        config_case,
+        [taxprofiler_case_id],
+        obj=taxprofiler_context,
+    )
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -51,7 +60,9 @@ def test_config_case_default_parameters(
 
     # THEN the sample sheet content should match the expected values
     sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.TXT, file_path=taxprofiler_sample_sheet_path, read_to_string=True
+        file_format=FileFormat.TXT,
+        file_path=taxprofiler_sample_sheet_path,
+        read_to_string=True,
     )
 
     assert ",".join(TaxprofilerSampleSheetEntry.headers()) in sample_sheet_content
@@ -59,7 +70,9 @@ def test_config_case_default_parameters(
 
     # THEN the params file should contain all parameters
     params_content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.TXT, file_path=taxprofiler_params_file_path, read_to_string=True
+        file_format=FileFormat.TXT,
+        file_path=taxprofiler_params_file_path,
+        read_to_string=True,
     )
     for parameter in vars(taxprofiler_parameters_default).keys():
         assert parameter in params_content
@@ -77,7 +90,11 @@ def test_config_case_dry_run(
     # GIVEN a valid case
 
     # WHEN performing a dry-run
-    result = cli_runner.invoke(config_case, [taxprofiler_case_id, "-d"], obj=taxprofiler_context)
+    result = cli_runner.invoke(
+        config_case,
+        [taxprofiler_case_id, "-d"],
+        obj=taxprofiler_context,
+    )
 
     # THEN command should exit succesfully
     assert result.exit_code == EXIT_SUCCESS

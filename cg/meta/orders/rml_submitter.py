@@ -1,4 +1,6 @@
-from cg.meta.orders.pool_submitter import PoolSubmitter
+from cg.meta.orders.pool_submitter import (
+    PoolSubmitter,
+)
 
 
 class RmlSubmitter(PoolSubmitter):

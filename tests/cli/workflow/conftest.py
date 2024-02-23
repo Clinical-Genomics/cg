@@ -6,7 +6,11 @@ from unittest.mock import Mock
 
 import pytest
 
-from cg.constants import DataDelivery, FlowCellStatus, Workflow
+from cg.constants import (
+    DataDelivery,
+    FlowCellStatus,
+    Workflow,
+)
 from cg.models.cg_config import CGConfig
 from cg.store.crud.read import ReadHandler
 from cg.store.models import Case
@@ -28,24 +32,48 @@ def workflow_case_id() -> str:
 
 
 @pytest.fixture(scope="function")
-def analysis_store(base_store: Store, workflow_case_id: str, helpers: StoreHelpers) -> Store:
+def analysis_store(
+    base_store: Store,
+    workflow_case_id: str,
+    helpers: StoreHelpers,
+) -> Store:
     """Store to be used in tests"""
     _store = base_store
 
-    case = helpers.add_case(_store, workflow_case_id, data_analysis=Workflow.MIP_DNA)
+    case = helpers.add_case(
+        _store,
+        workflow_case_id,
+        data_analysis=Workflow.MIP_DNA,
+    )
 
     dna_sample = helpers.add_sample(
-        _store, "dna_sample", is_rna=False, reads=10000000, last_sequenced_at=datetime.now()
+        _store,
+        "dna_sample",
+        is_rna=False,
+        reads=10000000,
+        last_sequenced_at=datetime.now(),
     )
     helpers.add_relationship(_store, sample=dna_sample, case=case)
 
-    case = helpers.add_case(_store, "rna_case", data_analysis=Workflow.MIP_RNA)
+    case = helpers.add_case(
+        _store,
+        "rna_case",
+        data_analysis=Workflow.MIP_RNA,
+    )
     rna_sample = helpers.add_sample(
-        _store, "rna_sample", is_rna=True, reads=10000000, last_sequenced_at=datetime.now()
+        _store,
+        "rna_sample",
+        is_rna=True,
+        reads=10000000,
+        last_sequenced_at=datetime.now(),
     )
     helpers.add_relationship(_store, sample=rna_sample, case=case)
 
-    case = helpers.add_case(_store, "dna_rna_mix_case", data_analysis=Workflow.MIP_DNA)
+    case = helpers.add_case(
+        _store,
+        "dna_rna_mix_case",
+        data_analysis=Workflow.MIP_DNA,
+    )
     helpers.add_relationship(_store, sample=rna_sample, case=case)
     helpers.add_relationship(_store, sample=dna_sample, case=case)
 
@@ -70,7 +98,13 @@ def fastq_context(
 
 
 @pytest.fixture
-def fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_id: str) -> dict:
+def fastq_case(
+    case_id,
+    family_name,
+    sample_id,
+    cust_sample_id,
+    ticket_id: str,
+) -> dict:
     """Returns a dict describing a fastq case"""
     return {
         "name": family_name,
@@ -112,11 +146,16 @@ def rna_case(analysis_store, helpers) -> Case:
 def dna_rna_mix_case(analysis_store, helpers) -> Case:
     """Case with MIP analysis type DNA and RNA application"""
     cust = helpers.ensure_customer(analysis_store)
-    return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="dna_rna_mix_case")
+    return analysis_store.get_case_by_name_and_customer(
+        customer=cust,
+        case_name="dna_rna_mix_case",
+    )
 
 
 @pytest.fixture
-def create_multiqc_html_file(tmpdir_factory) -> Path:
+def create_multiqc_html_file(
+    tmpdir_factory,
+) -> Path:
     output_dir = tmpdir_factory.mktemp("output")
     file_path = Path(output_dir, "multiqc_report.html")
     file_path.touch(exist_ok=True)
@@ -124,7 +163,9 @@ def create_multiqc_html_file(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def create_multiqc_json_file(tmpdir_factory) -> Path:
+def create_multiqc_json_file(
+    tmpdir_factory,
+) -> Path:
     output_dir = tmpdir_factory.mktemp("output")
     file_path = Path(output_dir, "multiqc_report.json")
     file_path.touch(exist_ok=True)

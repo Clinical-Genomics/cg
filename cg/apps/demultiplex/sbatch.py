@@ -1,6 +1,8 @@
 # This one needs run_dir, out_dir, basemask and sample_sheet
 
-from cg.constants.demultiplexing import BclConverter
+from cg.constants.demultiplexing import (
+    BclConverter,
+)
 
 DEMULTIPLEX_COMMAND = {
     BclConverter.BCL2FASTQ: """

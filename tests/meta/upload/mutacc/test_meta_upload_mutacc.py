@@ -2,7 +2,9 @@
 
 import os
 
-from cg.apps.scout.scout_export import ScoutExportCase
+from cg.apps.scout.scout_export import (
+    ScoutExportCase,
+)
 from cg.meta.upload.mutacc import (
     UploadToMutaccAPI,
     resolve_parent,
@@ -28,7 +30,11 @@ def test_instantiate():
     assert mutacc_upload_api.mutacc_auto == mutacc_auto_api
 
 
-def test_data(mutacc_upload_api, scout_export_case: ScoutExportCase, mocker):
+def test_data(
+    mutacc_upload_api,
+    scout_export_case: ScoutExportCase,
+    mocker,
+):
     """
     Test the data method
     """
@@ -41,10 +47,17 @@ def test_data(mutacc_upload_api, scout_export_case: ScoutExportCase, mocker):
     result = mutacc_upload_api.data(scout_export_case)
 
     # THEN data dict should have keys 'case', and 'causatives'
-    assert set(result.keys()) == {"case", "causatives"}
+    assert set(result.keys()) == {
+        "case",
+        "causatives",
+    }
 
 
-def test_data_no_bam(mutacc_upload_api, scout_export_case_missing_bam: ScoutExportCase, mocker):
+def test_data_no_bam(
+    mutacc_upload_api,
+    scout_export_case_missing_bam: ScoutExportCase,
+    mocker,
+):
     """
     Test get data when no bam_file field is given for one of the samples
     """
@@ -63,7 +76,11 @@ def test_data_no_bam(mutacc_upload_api, scout_export_case_missing_bam: ScoutExpo
     assert result == {}
 
 
-def test_data_bam_path_not_exists(mutacc_upload_api, scout_export_case: ScoutExportCase, mocker):
+def test_data_bam_path_not_exists(
+    mutacc_upload_api,
+    scout_export_case: ScoutExportCase,
+    mocker,
+):
     """
     Test get data when bam file does not exist
     """
@@ -82,7 +99,9 @@ def test_data_bam_path_not_exists(mutacc_upload_api, scout_export_case: ScoutExp
 
 
 def test_data_no_causatives(
-    mutacc_upload_api, scout_export_case_no_causatives: ScoutExportCase, mocker
+    mutacc_upload_api,
+    scout_export_case_no_causatives: ScoutExportCase,
+    mocker,
 ):
     """
     Test get data when no causatives are given

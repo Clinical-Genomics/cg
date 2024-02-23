@@ -11,7 +11,10 @@ from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
 
-def test_without_options(cli_runner: CliRunner, rnafusion_context: CGConfig):
+def test_without_options(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+):
     """Test command without case_id argument."""
     # GIVEN no case_id
     # WHEN dry running without anything specified
@@ -35,7 +38,11 @@ def test_with_missing_case(
         internal_id=case_id_does_not_exist
     )
     # WHEN running
-    result = cli_runner.invoke(run, [case_id_does_not_exist], obj=rnafusion_context)
+    result = cli_runner.invoke(
+        run,
+        [case_id_does_not_exist],
+        obj=rnafusion_context,
+    )
     # THEN command should NOT successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
     # THEN ERROR log should be printed containing invalid case_id
@@ -54,7 +61,11 @@ def test_without_samples(
     # GIVEN case-id
     case_id: str = no_sample_case_id
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=rnafusion_context)
+    result = cli_runner.invoke(
+        run,
+        [case_id, "--dry-run"],
+        obj=rnafusion_context,
+    )
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
@@ -73,7 +84,11 @@ def test_without_config_dry_run(
     # GIVEN case-id
     case_id: str = rnafusion_case_id
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=rnafusion_context)
+    result = cli_runner.invoke(
+        run,
+        [case_id, "--from-start", "--dry-run"],
+        obj=rnafusion_context,
+    )
     # THEN command should execute successfully (dry-run)
     assert result.exit_code == EXIT_SUCCESS
 
@@ -111,7 +126,11 @@ def test_with_config_use_nextflow(
     # GIVEN a mocked config
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run", "--use-nextflow"], obj=rnafusion_context)
+    result = cli_runner.invoke(
+        run,
+        [case_id, "--dry-run", "--use-nextflow"],
+        obj=rnafusion_context,
+    )
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -140,7 +159,11 @@ def test_with_config(
     # GIVEN a mocked config
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=rnafusion_context)
+    result = cli_runner.invoke(
+        run,
+        [case_id, "--from-start", "--dry-run"],
+        obj=rnafusion_context,
+    )
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -167,7 +190,15 @@ def test_with_revision(
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(
-        run, [case_id, "--dry-run", "--from-start", "--revision", "2.1.0"], obj=rnafusion_context
+        run,
+        [
+            case_id,
+            "--dry-run",
+            "--from-start",
+            "--revision",
+            "2.1.0",
+        ],
+        obj=rnafusion_context,
     )
 
     # THEN command should execute successfully
@@ -194,7 +225,14 @@ def test_resume_with_id(
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(
-        run, [rnafusion_case_id, "--nf-tower-id", tower_id, "--dry-run"], obj=rnafusion_context
+        run,
+        [
+            rnafusion_case_id,
+            "--nf-tower-id",
+            tower_id,
+            "--dry-run",
+        ],
+        obj=rnafusion_context,
     )
 
     # THEN command should execute successfully
@@ -222,7 +260,11 @@ def test_resume_without_id(
     # GIVEN a mocked config
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [rnafusion_case_id, "--dry-run"], obj=rnafusion_context)
+    result = cli_runner.invoke(
+        run,
+        [rnafusion_case_id, "--dry-run"],
+        obj=rnafusion_context,
+    )
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -247,7 +289,11 @@ def test_resume_without_id_error(
     # GIVEN a mocked config
 
     # WHEN dry running with dry specified
-    cli_runner.invoke(run, [rnafusion_case_id, "--dry-run"], obj=rnafusion_context)
+    cli_runner.invoke(
+        run,
+        [rnafusion_case_id, "--dry-run"],
+        obj=rnafusion_context,
+    )
 
     # THEN command should raise error
     assert "Could not resume analysis: No NF-Tower ID found for case" in caplog.text

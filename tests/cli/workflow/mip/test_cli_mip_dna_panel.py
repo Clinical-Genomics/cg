@@ -14,7 +14,10 @@ from tests.conftest import create_process_response
 
 
 def test_panel_file_is_written(
-    case_id: str, cli_runner: CliRunner, mip_dna_context: CGConfig, scout_panel_output: str
+    case_id: str,
+    cli_runner: CliRunner,
+    mip_dna_context: CGConfig,
+    scout_panel_output: str,
 ):
     # GIVEN an analysis API
     analysis_api: MipAnalysisAPI = mip_dna_context.meta_apis["analysis_api"]
@@ -29,7 +32,11 @@ def test_panel_file_is_written(
         # WHEN creating a panel file
         cli_runner.invoke(panel, [case_id], obj=mip_dna_context)
 
-    panel_file = Path(analysis_api.root, case_id, ScoutExportFileName.PANELS)
+    panel_file = Path(
+        analysis_api.root,
+        case_id,
+        ScoutExportFileName.PANELS,
+    )
 
     # THEN the file should exist
     assert panel_file.exists()

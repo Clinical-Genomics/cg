@@ -22,9 +22,21 @@ def upgrade():
     op.create_table(
         "order",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("customer_id", sa.Integer(), nullable=False),
-        sa.Column("order_date", sa.DateTime(), nullable=False),
-        sa.Column("ticket_id", sa.Integer(), nullable=False),
+        sa.Column(
+            "customer_id",
+            sa.Integer(),
+            nullable=False,
+        ),
+        sa.Column(
+            "order_date",
+            sa.DateTime(),
+            nullable=False,
+        ),
+        sa.Column(
+            "ticket_id",
+            sa.Integer(),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(
             ["customer_id"],
             ["customer.id"],
@@ -32,18 +44,33 @@ def upgrade():
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("id"),
     )
-    op.create_index(op.f("ix_order_ticket_id"), "order", ["ticket_id"], unique=True)
+    op.create_index(
+        op.f("ix_order_ticket_id"),
+        "order",
+        ["ticket_id"],
+        unique=True,
+    )
     op.add_column(
         "case",
         sa.Column(
-            "order_id", sa.Integer(), sa.ForeignKey("order.id", name="case_ibfk_2"), nullable=True
+            "order_id",
+            sa.Integer(),
+            sa.ForeignKey("order.id", name="case_ibfk_2"),
+            nullable=True,
         ),
     )
 
 
 def downgrade():
-    op.drop_constraint(table_name="case", constraint_name="case_ibfk_2", type_="foreignkey")
+    op.drop_constraint(
+        table_name="case",
+        constraint_name="case_ibfk_2",
+        type_="foreignkey",
+    )
     op.drop_column("case", "order_id")
-    op.drop_index(index_name="ix_order_ticket_id", table_name="order")
+    op.drop_index(
+        index_name="ix_order_ticket_id",
+        table_name="order",
+    )
     op.drop_table("order")
     # ### end Alembic commands ###
