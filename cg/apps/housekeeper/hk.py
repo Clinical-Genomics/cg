@@ -7,7 +7,7 @@ from pathlib import Path
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
-from housekeeper.store import Store
+from housekeeper.store.store import Store
 from housekeeper.store.database import (
     create_all_tables,
     drop_all_tables,
