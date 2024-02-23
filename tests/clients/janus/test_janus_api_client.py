@@ -17,7 +17,7 @@ def test_qc_metrics_successful(
     collect_qc_request_balsamic_wgs: CreateQCMetricsRequest,
     janus_response: dict,
 ):
-    # GIVEN a mocked response from the requests.post method that is successfull
+    # GIVEN a mocked response from the requests.post method that is successful
     mocked_post = mocker.patch.object(requests, "post")
     mocked_response = mocker.Mock()
     mocked_response.status_code = HTTPStatus.OK
@@ -44,7 +44,7 @@ def test_qc_metrics_not_successful(
     collect_qc_request_balsamic_wgs: CreateQCMetricsRequest,
     janus_response: dict,
 ):
-    # GIVEN a mocked response from the requests.post method that is not successfull
+    # GIVEN a mocked response from the requests.post method that is not successful
     mocked_post = mocker.patch.object(requests, "post")
     mocked_response = mocker.Mock()
     mocked_response.status_code = HTTPStatus.NOT_FOUND

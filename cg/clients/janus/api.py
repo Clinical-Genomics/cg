@@ -15,7 +15,8 @@ class JanusAPIClient:
 
     def qc_metrics(self, collect_qc_request: CreateQCMetricsRequest) -> dict:
         endpoint: str = f"{self.host}/collect_qc_metrics"
-        response = requests.post(endpoint, data=collect_qc_request.model_dump_json())
+        post_request_data: str = collect_qc_request.model_dump_json()
+        response = requests.post(endpoint, data=post_request_data)
         if response.status_code == HTTPStatus.OK:
             return response.json()
         self._handle_errors(response)
