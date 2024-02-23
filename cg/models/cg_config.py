@@ -11,6 +11,7 @@ from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.janus.api import JanusAPIClient
 from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.apps.madeline.api import MadelineAPI
@@ -75,6 +76,10 @@ class HousekeeperConfig(BaseModel):
 
 class DemultiplexConfig(BaseModel):
     slurm: SlurmConfig
+
+
+class JanusConfig(BaseModel):
+    host: str
 
 
 class TrailblazerConfig(BaseModel):
@@ -317,6 +322,8 @@ class CGConfig(BaseModel):
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
     delivery_api_: DeliveryAPI | None = None
+    janus: JanusConfig = None
+    janus_api_: JanusAPIClient = None
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
@@ -353,6 +360,7 @@ class CGConfig(BaseModel):
             "scout_api_": "scout_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
+            "janus_api_": "janus_api",
         }
 
     @property
@@ -420,6 +428,15 @@ class CGConfig(BaseModel):
             housekeeper_api = HousekeeperAPI(config=self.dict())
             self.housekeeper_api_ = housekeeper_api
         return housekeeper_api
+
+    @property
+    def janus_api(self) -> JanusAPIClient:
+        janus_api = self.__dict__.get("janus_api_")
+        if janus_api is None:
+            LOG.debug("Instantiating housekeeper api")
+            janus_api = JanusAPIClient(config=self.dict())
+            self.janus_api_ = janus_api
+        return janus_api
 
     @property
     def lims_api(self) -> LimsAPI:

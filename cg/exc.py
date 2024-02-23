@@ -264,3 +264,7 @@ class OrderNotFoundError(CgError):
 
 class OverrideCyclesError(CgError):
     """Exception raised when the override cycles are not correct."""
+
+
+class JanusAPIError(CgError):
+    """Exception raised when there is an error returned from the janus api."""
