@@ -1,4 +1,5 @@
 """Post request model for JanusAPI."""
+
 from enum import StrEnum
 
 from pydantic import BaseModel
