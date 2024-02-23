@@ -139,7 +139,7 @@ def test_report_deliver_successful(
         return_value=deliverables_template_content,
     )
 
-    # WHEN running
+    # WHEN running the command
     result = cli_runner.invoke(report_deliver, [case_id], obj=context)
 
     # THEN command should execute successfully
