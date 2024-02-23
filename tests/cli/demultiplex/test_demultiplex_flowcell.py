@@ -9,7 +9,7 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_sample_sheet_path_to_housekeeper,
+    add_and_include_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -28,7 +28,7 @@ def test_demultiplex_bcl2fastq_flow_cell_dry_run(
         tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq,
         bcl_converter=BclConverter.BCL2FASTQ,
     )
-    add_sample_sheet_path_to_housekeeper(
+    add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq,
         flow_cell_name=flow_cell.id,
         hk_api=demultiplexing_context_for_demux.housekeeper_api,
@@ -76,7 +76,7 @@ def test_demultiplex_bcl2fastq_flow_cell(
         tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq,
         bcl_converter=BclConverter.BCL2FASTQ,
     )
-    add_sample_sheet_path_to_housekeeper(
+    add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq,
         flow_cell_name=flow_cell.id,
         hk_api=demultiplexing_context_for_demux.housekeeper_api,
@@ -127,7 +127,7 @@ def test_demultiplex_dragen_flowcell(
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=tmp_flow_cell_directory_bclconvert, bcl_converter=BclConverter.BCLCONVERT
     )
-    add_sample_sheet_path_to_housekeeper(
+    add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_flow_cell_directory_bclconvert,
         flow_cell_name=flow_cell.id,
         hk_api=demultiplexing_context_for_demux.housekeeper_api,
@@ -181,7 +181,7 @@ def test_demultiplex_all_novaseq(
     # GIVEN sequenced flow cells with their sample sheet in Housekeeper
     for flow_cell_dir in tmp_illumina_flow_cells_demux_all_directory.iterdir():
         flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=flow_cell_dir)
-        add_sample_sheet_path_to_housekeeper(
+        add_and_include_sample_sheet_path_to_housekeeper(
             flow_cell_directory=flow_cell_dir,
             flow_cell_name=flow_cell.id,
             hk_api=demultiplexing_context_for_demux.housekeeper_api,

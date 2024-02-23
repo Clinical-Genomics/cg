@@ -13,7 +13,7 @@ from cg.constants import Workflow
 from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
-from cg.exc import TrailblazerAPIHTTPError, TrailblazerAnalysisNotFound
+from cg.exc import TrailblazerAnalysisNotFound, TrailblazerAPIHTTPError
 from cg.io.controller import APIRequest, ReadStream
 
 LOG = logging.getLogger(__name__)
@@ -109,7 +109,7 @@ class TrailblazerAPI:
         out_dir: str,
         slurm_quality_of_service: SlurmQos,
         email: str = None,
-        data_analysis: Workflow = None,
+        workflow: Workflow = None,
         ticket: str = None,
         workflow_manager: str = WorkflowManager.Slurm,
     ) -> TrailblazerAnalysis:
@@ -120,13 +120,14 @@ class TrailblazerAPI:
             "config_path": config_path,
             "out_dir": out_dir,
             "priority": slurm_quality_of_service,
-            "data_analysis": str(data_analysis).upper(),
+            "workflow": workflow.upper(),
             "ticket": ticket,
             "workflow_manager": workflow_manager,
         }
         LOG.debug(f"Submitting job to Trailblazer: {request_body}")
-        response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
-        if response:
+        if response := self.query_trailblazer(
+            command="add-pending-analysis", request_body=request_body
+        ):
             return TrailblazerAnalysis.model_validate(response)
 
     def set_analysis_uploaded(self, case_id: str, uploaded_at: datetime) -> None:

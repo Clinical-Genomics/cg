@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 import petname
+from sqlalchemy import Insert
 
 from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
@@ -29,6 +30,7 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
     User,
+    order_case,
 )
 
 LOG = logging.getLogger(__name__)
@@ -419,3 +421,10 @@ class CreateHandler(BaseHandler):
         session.add(order)
         session.commit()
         return order
+
+    @staticmethod
+    def link_case_to_order(order_id: int, case_id: int):
+        insert_statement: Insert = order_case.insert().values(order_id=order_id, case_id=case_id)
+        session = get_session()
+        session.execute(insert_statement)
+        session.commit()

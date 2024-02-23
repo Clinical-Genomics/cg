@@ -169,7 +169,7 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
     LOG.info("Getting all spring files from Housekeeper.")
     spring_files: Iterable[hk_models.File] = housekeeper_api.files(
         tags=[SequencingFileTag.SPRING]
-    ).filter(hk_models.File.path.like(f"%{config.environment}/{config.demultiplex.out_dir}%"))
+    ).filter(hk_models.File.path.contains(f"{config.environment}/{config.demultiplex.out_dir}"))
     for spring_file in spring_files:
         LOG.info(f"Attempting encryption and PDC archiving for file {spring_file.path}")
         if Path(spring_file.path).exists():

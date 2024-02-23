@@ -13,12 +13,12 @@ def filter_pools_by_customer_id(pools: Query, customer_ids: list[int], **kwargs)
 
 def filter_pools_by_name_enquiry(pools: Query, name_enquiry: str, **kwargs) -> Query:
     """Return pools by name enquiry."""
-    return pools.filter(Pool.name.like(f"%{name_enquiry}%"))
+    return pools.filter(Pool.name.contains(name_enquiry))
 
 
 def filter_pools_by_order_enquiry(pools: Query, order_enquiry: str, **kwargs) -> Query:
     """Return pools by order enquiry."""
-    return pools.filter(Pool.order.like(f"%{order_enquiry}%"))
+    return pools.filter(Pool.order.contains(order_enquiry))
 
 
 def filter_pools_by_entry_id(pools: Query, entry_id: int, **kwargs) -> Query:

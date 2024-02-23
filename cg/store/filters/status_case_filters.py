@@ -25,8 +25,8 @@ def filter_cases_by_case_search(cases: Query, case_search: str, **kwargs) -> Que
     return (
         cases.filter(
             or_(
-                Case.internal_id.like(f"%{case_search}%"),
-                Case.name.like(f"%{case_search}%"),
+                Case.internal_id.contains(case_search),
+                Case.name.contains(case_search),
             )
         )
         if case_search
@@ -58,7 +58,7 @@ def filter_case_by_internal_id(cases: Query, internal_id: str, **kwargs) -> Quer
 
 def filter_cases_by_internal_id_search(cases: Query, internal_id_search: str, **kwargs) -> Query:
     """Filter cases with internal ids matching the search pattern."""
-    return cases.filter(Case.internal_id.like(f"%{internal_id_search}%"))
+    return cases.filter(Case.internal_id.contains(internal_id_search))
 
 
 def filter_cases_by_name(cases: Query, name: str, **kwargs) -> Query:
@@ -68,12 +68,12 @@ def filter_cases_by_name(cases: Query, name: str, **kwargs) -> Query:
 
 def filter_cases_by_name_search(cases: Query, name_search: str, **kwargs) -> Query:
     """Filter cases with names matching the search pattern."""
-    return cases.filter(Case.name.like(f"%{name_search}%"))
+    return cases.filter(Case.name.contains(name_search))
 
 
 def filter_cases_by_workflow_search(cases: Query, workflow_search: str, **kwargs) -> Query:
     """Filter cases with a workflow search pattern."""
-    return cases.filter(Case.data_analysis.ilike(f"%{workflow_search}%"))
+    return cases.filter(Case.data_analysis.contains(workflow_search))
 
 
 def filter_cases_by_priority(cases: Query, priority: str, **kwargs) -> Query:

@@ -18,7 +18,7 @@ def filter_flow_cell_by_name(flow_cells: Query, flow_cell_name: str, **kwargs) -
 
 def filter_flow_cell_by_name_search(flow_cells: Query, name_search: str, **kwargs) -> Query:
     """Return flow cell by flow cell id enquiry."""
-    return flow_cells.filter(Flowcell.name.like(f"%{name_search}%"))
+    return flow_cells.filter(Flowcell.name.contains(name_search))
 
 
 def filter_flow_cells_with_statuses(

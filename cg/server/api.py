@@ -9,9 +9,9 @@ from typing import Any
 import cachecontrol
 import requests
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
+from google.auth import exceptions
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
-from google.auth import exceptions
 from pydantic.v1 import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.exc import IntegrityError
@@ -129,7 +129,7 @@ def submit_order(order_type):
         project = OrderType(order_type)
         order_in = OrderIn.parse_obj(request_json, project=project)
 
-        result = api.submit(
+        result: dict = api.submit(
             project=project,
             order_in=order_in,
             user_name=g.current_user.name,
@@ -137,6 +137,7 @@ def submit_order(order_type):
         )
         order_service = OrderService(db)
         order_service.create_order(order_in)
+
     except (  # user misbehaviour
         OrderError,
         OrderFormError,

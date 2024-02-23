@@ -136,7 +136,7 @@ class RsyncAPI(MetaAPI):
             out_dir=self.log_dir.as_posix(),
             slurm_quality_of_service=self.slurm_quality_of_service,
             email=self.mail_user,
-            data_analysis=Workflow.RSYNC,
+            workflow=Workflow.RSYNC,
             ticket=ticket,
         )
 

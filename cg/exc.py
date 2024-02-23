@@ -260,3 +260,7 @@ class XMLError(CgError):
 
 class OrderNotFoundError(CgError):
     """Exception raised when an order is not found."""
+
+
+class OverrideCyclesError(CgError):
+    """Exception raised when the override cycles are not correct."""

@@ -4,15 +4,8 @@ import logging
 from abc import abstractmethod
 from typing import Type
 
-from cg.apps.demultiplex.sample_sheet.index import (
-    Index,
-    get_valid_indexes,
-    is_dual_index,
-)
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_samples_by_lane,
-    get_validated_sample_sheet,
-)
+from cg.apps.demultiplex.sample_sheet.index import Index, get_valid_indexes, is_dual_index
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_by_lane
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
@@ -37,7 +30,6 @@ class SampleSheetCreator:
         self,
         flow_cell: FlowCellDirectoryData,
         lims_samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq],
-        force: bool = False,
     ):
         self.flow_cell: FlowCellDirectoryData = flow_cell
         self.flow_cell_id: str = flow_cell.id
@@ -46,7 +38,6 @@ class SampleSheetCreator:
         self.sample_type: Type[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq] = (
             flow_cell.sample_type
         )
-        self.force: bool = force
         self.index_settings: IndexSettings = self.run_parameters.index_settings
 
     @property
@@ -108,28 +99,22 @@ class SampleSheetCreator:
         self.remove_samples_with_simple_index()
         for lims_sample in self.lims_samples:
             lims_sample.process_indexes(run_parameters=self.run_parameters)
+        is_reverse_complement: bool = (
+            self.index_settings.are_i5_override_cycles_reverse_complemented
+        )
         for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
             LOG.info(f"Updating barcode mismatch values for samples in lane {lane}")
             for lims_sample in samples_in_lane:
                 lims_sample.update_barcode_mismatches(
                     samples_to_compare=samples_in_lane,
                     is_run_single_index=self.run_parameters.is_single_index,
-                    is_reverse_complement=self.index_settings.are_i5_override_cycles_reverse_complemented,
+                    is_reverse_complement=is_reverse_complement,
                 )
 
     def construct_sample_sheet(self) -> list[list[str]]:
         """Construct and validate the sample sheet."""
         self.process_samples_for_sample_sheet()
         sample_sheet_content: list[list[str]] = self.create_sample_sheet_content()
-        if self.force:
-            LOG.info("Skipping validation of sample sheet due to force flag")
-            return sample_sheet_content
-        LOG.info("Validating sample sheet")
-        get_validated_sample_sheet(
-            sample_sheet_content=sample_sheet_content,
-            sample_type=self.sample_type,
-        )
-        LOG.info("Sample sheet passed validation")
         return sample_sheet_content
 
 
@@ -173,9 +158,8 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
         self,
         flow_cell: FlowCellDirectoryData,
         lims_samples: list[FlowCellSampleBCLConvert],
-        force: bool = False,
     ):
-        super().__init__(flow_cell, lims_samples, force)
+        super().__init__(flow_cell, lims_samples)
         if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
             raise SampleSheetError(f"Can't use {BclConverter.BCL2FASTQ} with sample sheet v2")
 
@@ -196,6 +180,7 @@ class SampleSheetCreatorBCLConvert(SampleSheetCreator):
                 ),
             ],
             SampleSheetBCLConvertSections.Header.index_orientation_forward(),
+            [SampleSheetBCLConvertSections.Header.INDEX_SETTINGS.value, self.index_settings.name],
         ]
         reads_section: list[list[str]] = [
             [SampleSheetBCLConvertSections.Reads.HEADER],

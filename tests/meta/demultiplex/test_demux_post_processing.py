@@ -8,7 +8,7 @@ from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_sample_sheet_path_to_housekeeper,
+    add_and_include_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
 from cg.store.models import Sample
@@ -93,7 +93,7 @@ def test_post_processing_of_flow_cell(
     )
 
     # GIVEN that the sample sheet is in housekeeper
-    add_sample_sheet_path_to_housekeeper(
+    add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=Path(
             tmp_illumina_demultiplexed_flow_cells_directory,
             flow_cell_demultiplexing_directory,

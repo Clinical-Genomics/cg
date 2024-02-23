@@ -3,6 +3,7 @@ FileFormatVersion,2
 RunName,HY7FFDRX2
 InstrumentPlatform,NovaSeq6000
 IndexOrientation,Forward
+IndexSettings,NovaSeq6000Post1.5Kits
 [Reads]
 Read1Cycles,51
 Read2Cycles,51
