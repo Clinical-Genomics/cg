@@ -322,8 +322,8 @@ class CGConfig(BaseModel):
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
     delivery_api_: DeliveryAPI | None = None
-    janus: JanusConfig = None
-    janus_api_: JanusAPIClient = None
+    janus: JanusConfig | None = None
+    janus_api_: JanusAPIClient | None = None
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None

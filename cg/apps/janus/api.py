@@ -13,7 +13,7 @@ class JanusAPIClient:
     def __init__(self, config: dict[str]):
         self.host = config["janus"]["host"]
 
-    def get_qc_metrics(self, collect_qc_request: CreateCollectQCRequest):
+    def qc_metrics(self, collect_qc_request: CreateCollectQCRequest):
         endpoint: str = f"{self.host}/collect_qc_metrics"
         response = requests.post(endpoint, data=collect_qc_request)
         if response.status_code == HTTPStatus.OK:
