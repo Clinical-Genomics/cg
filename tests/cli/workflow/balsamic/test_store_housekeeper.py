@@ -8,23 +8,16 @@ from pydantic import ValidationError
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.workflow.balsamic.base import (
-    store_housekeeper,
-)
+from cg.cli.workflow.balsamic.base import store_housekeeper
 from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteStream
-from cg.meta.workflow.balsamic import (
-    BalsamicAnalysisAPI,
-)
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
 
 
-def test_without_options(
-    cli_runner: CliRunner,
-    balsamic_context: CGConfig,
-):
+def test_without_options(cli_runner: CliRunner, balsamic_context: CGConfig):
     """Test command without case_id argument"""
     # GIVEN no case_id
 
@@ -38,11 +31,7 @@ def test_without_options(
     assert "Missing argument" in result.output
 
 
-def test_with_missing_case(
-    cli_runner: CliRunner,
-    balsamic_context: CGConfig,
-    caplog,
-):
+def test_with_missing_case(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with invalid case to start with"""
     caplog.set_level(logging.ERROR)
 
@@ -51,11 +40,7 @@ def test_with_missing_case(
     assert not balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id)
 
     # WHEN running
-    result = cli_runner.invoke(
-        store_housekeeper,
-        [case_id],
-        obj=balsamic_context,
-    )
+    result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
 
     # THEN command should NOT successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
@@ -65,22 +50,14 @@ def test_with_missing_case(
     assert "could not be found" in caplog.text
 
 
-def test_without_config(
-    cli_runner: CliRunner,
-    balsamic_context: CGConfig,
-    caplog,
-):
+def test_without_config(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with case_id and no config file"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
     case_id = "balsamic_case_wgs_single"
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(
-        store_housekeeper,
-        [case_id],
-        obj=balsamic_context,
-    )
+    result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
 
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -90,10 +67,7 @@ def test_without_config(
 
 
 def test_case_without_deliverables_file(
-    cli_runner: CliRunner,
-    balsamic_context: CGConfig,
-    mock_config,
-    caplog,
+    cli_runner: CliRunner, balsamic_context: CGConfig, mock_config, caplog
 ):
     """Test command with case_id and config file but no analysis_finish"""
     caplog.set_level(logging.ERROR)
@@ -101,11 +75,7 @@ def test_case_without_deliverables_file(
     case_id = "balsamic_case_wgs_single"
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(
-        store_housekeeper,
-        [case_id],
-        obj=balsamic_context,
-    )
+    result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
 
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -129,26 +99,20 @@ def test_case_with_malformed_deliverables_file(
     # GIVEN that HermesAPI returns a malformed deliverables output
     mocker.patch.object(Process, "run_command")
     Process.run_command.return_value = WriteStream.write_stream_from_content(
-        content=malformed_hermes_deliverables,
-        file_format=FileFormat.JSON,
+        content=malformed_hermes_deliverables, file_format=FileFormat.JSON
     )
 
     # GIVEN that the output is malformed
     with pytest.raises(ValidationError):
         analysis_api.hermes_api.convert_deliverables(
-            deliverables_file=Path("a_file"),
-            workflow="balsamic",
+            deliverables_file=Path("a_file"), workflow="balsamic"
         )
 
         # GIVEN case-id
         case_id = "balsamic_case_wgs_single"
 
         # WHEN dry running with dry specified
-        result = cli_runner.invoke(
-            store_housekeeper,
-            [case_id],
-            obj=balsamic_context,
-        )
+        result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
 
         # THEN command should NOT execute successfully
         assert result.exit_code != EXIT_SUCCESS
@@ -181,11 +145,7 @@ def test_valid_case(
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
     # WHEN running command
-    result = cli_runner.invoke(
-        store_housekeeper,
-        [case_id],
-        obj=balsamic_context,
-    )
+    result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
 
     # THEN bundle should be successfully added to HK and STATUS
     assert result.exit_code == EXIT_SUCCESS
@@ -221,18 +181,10 @@ def test_valid_case_already_added(
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
     # Ensure bundles exist by creating them first
-    cli_runner.invoke(
-        store_housekeeper,
-        [case_id],
-        obj=balsamic_context,
-    )
+    cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
 
     # WHEN running command
-    result = cli_runner.invoke(
-        store_housekeeper,
-        [case_id],
-        obj=balsamic_context,
-    )
+    result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
 
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS

@@ -6,19 +6,12 @@ from typing import Any
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from cg.meta.workflow.nf_analysis import (
-    NfAnalysisAPI,
-)
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 
 @pytest.mark.parametrize(
-    (
-        "context",
-        "metrics_deliverables",
-        "case_id",
-        "analysis_finish",
-    ),
+    ("context", "metrics_deliverables", "case_id", "analysis_finish"),
     [
         (
             "rnafusion_context",

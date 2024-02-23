@@ -7,28 +7,15 @@ from typing import Any
 
 import click
 
-from cg.constants import (
-    EXIT_FAIL,
-    EXIT_SUCCESS,
-    Priority,
-    Workflow,
-)
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, Workflow
 from cg.constants.constants import FileExtensions
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgDataError
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fastq import (
-    MicrosaltFastqHandler,
-)
-from cg.meta.workflow.microsalt.quality_controller import (
-    QualityController,
-)
-from cg.meta.workflow.microsalt.quality_controller.models import (
-    QualityResult,
-)
-from cg.meta.workflow.microsalt.utils import (
-    get_most_recent_project_directory,
-)
+from cg.meta.workflow.fastq import MicrosaltFastqHandler
+from cg.meta.workflow.microsalt.quality_controller import QualityController
+from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
+from cg.meta.workflow.microsalt.utils import get_most_recent_project_directory
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Sample
 from cg.utils import Process
@@ -39,11 +26,7 @@ LOG = logging.getLogger(__name__)
 class MicrosaltAnalysisAPI(AnalysisAPI):
     """API to manage Microsalt Analyses"""
 
-    def __init__(
-        self,
-        config: CGConfig,
-        workflow: Workflow = Workflow.MICROSALT,
-    ):
+    def __init__(self, config: CGConfig, workflow: Workflow = Workflow.MICROSALT):
         super().__init__(workflow, config)
         self.root_dir = config.microsalt.root
         self.queries_path = config.microsalt.queries_path
@@ -71,12 +54,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
         return self._process
 
-    def clean_run_dir(
-        self,
-        case_id: str,
-        yes: bool,
-        case_path: list[Path] | Path,
-    ) -> int:
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
         """Remove workflow run directories for a MicroSALT case."""
 
         if not case_path:
@@ -96,10 +74,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                     )
                     return EXIT_FAIL
 
-                shutil.rmtree(
-                    analysis_path,
-                    ignore_errors=True,
-                )
+                shutil.rmtree(analysis_path, ignore_errors=True)
                 LOG.info(f"Cleaned {analysis_path}")
 
         self.clean_analyses(case_id=case_id)
@@ -143,38 +118,22 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             f"{order_id}_deliverables.yaml",
         )
         if deliverables_file_path.exists():
-            LOG.info(
-                "Found deliverables file %s",
-                deliverables_file_path,
-            )
+            LOG.info("Found deliverables file %s", deliverables_file_path)
         return deliverables_file_path
 
     def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
-        return Path(
-            self.get_case_fastq_path(case_id=case.internal_id),
-            sample.internal_id,
-        )
+        return Path(self.get_case_fastq_path(case_id=case.internal_id), sample.internal_id)
 
-    def link_fastq_files(
-        self,
-        case_id: str,
-        sample_id: str | None,
-        dry_run: bool = False,
-    ) -> None:
+    def link_fastq_files(self, case_id: str, sample_id: str | None, dry_run: bool = False) -> None:
         case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         samples: list[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
         for sample_obj in samples:
             self.link_fastq_files_for_sample(case=case_obj, sample=sample_obj)
 
-    def get_samples(
-        self,
-        case_id: str,
-        sample_id: str | None = None,
-    ) -> list[Sample]:
+    def get_samples(self, case_id: str, sample_id: str | None = None) -> list[Sample]:
         """Returns a list of samples to configure
         If sample_id is specified, will return a list with only this sample_id.
-        Otherwise, returns all samples in given case
-        """
+        Otherwise, returns all samples in given case"""
         if sample_id:
             return [self.status_db.get_sample_by_internal_id(internal_id=sample_id)]
 
@@ -247,10 +206,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return self.lims_api.get_sample_project(sample_id)
 
     def resolve_case_sample_id(
-        self,
-        sample: bool,
-        ticket: bool,
-        unique_id: Any,
+        self, sample: bool, ticket: bool, unique_id: Any
     ) -> tuple[str, str | None]:
         """Resolve case_id and sample_id w based on input arguments."""
         if ticket and sample:
@@ -258,29 +214,19 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             raise click.Abort
 
         if ticket:
-            (
-                case_id,
-                sample_id,
-            ) = self.get_case_id_from_ticket(unique_id)
+            case_id, sample_id = self.get_case_id_from_ticket(unique_id)
 
         elif sample:
-            (
-                case_id,
-                sample_id,
-            ) = self.get_case_id_from_sample(unique_id)
+            case_id, sample_id = self.get_case_id_from_sample(unique_id)
 
         else:
-            (
-                case_id,
-                sample_id,
-            ) = self.get_case_id_from_case(unique_id)
+            case_id, sample_id = self.get_case_id_from_case(unique_id)
 
         return case_id, sample_id
 
     def get_case_id_from_ticket(self, unique_id: str) -> tuple[str, None]:
         """If ticked is provided as argument, finds the corresponding case_id and returns it.
-        Since sample_id is not specified, nothing is returned as sample_id
-        """
+        Since sample_id is not specified, nothing is returned as sample_id"""
         case: Case = self.status_db.get_case_by_name(name=unique_id)
         if not case:
             LOG.error(f"No case found for ticket number:  {unique_id}")
@@ -326,16 +272,12 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                     continue
 
                 result: QualityResult = self.quality_checker.quality_control(metrics_file_path)
-                self.trailblazer_api.add_comment(
-                    case_id=case.internal_id,
-                    comment=result.summary,
-                )
+                self.trailblazer_api.add_comment(case_id=case.internal_id, comment=result.summary)
                 if result.passes_qc:
                     cases_to_store.append(case)
                 else:
                     self.trailblazer_api.set_analysis_status(
-                        case_id=case.internal_id,
-                        status=AnalysisStatus.FAILED,
+                        case_id=case.internal_id, status=AnalysisStatus.FAILED
                     )
             else:
                 cases_to_store.append(case)
@@ -354,10 +296,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Return path to metrics file for a case."""
         project_id: str = self.get_project_id(case_id)
         case_run_dir: Path = self.get_case_path(case_id)
-        return Path(
-            case_run_dir,
-            f"{project_id}{FileExtensions.JSON}",
-        )
+        return Path(case_run_dir, f"{project_id}{FileExtensions.JSON}")
 
     def extract_project_id(self, sample_id: str) -> str:
         return sample_id.rsplit("A", maxsplit=1)[0]
@@ -373,7 +312,4 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_case_path(self, case_id: str) -> Path:
         project_id: str = self.get_project_id(case_id)
         results_dir: Path = self.get_results_dir()
-        return get_most_recent_project_directory(
-            project_id=project_id,
-            directory=results_dir,
-        )
+        return get_most_recent_project_directory(project_id=project_id, directory=results_dir)

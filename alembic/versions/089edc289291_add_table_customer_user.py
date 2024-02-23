@@ -25,23 +25,9 @@ Base = declarative_base()
 customer_user = sa.Table(
     "customer_user",
     Base.metadata,
-    sa.Column(
-        "customer_id",
-        sa.types.Integer,
-        sa.ForeignKey("customer.id"),
-        nullable=False,
-    ),
-    sa.Column(
-        "user_id",
-        sa.types.Integer,
-        sa.ForeignKey("user.id"),
-        nullable=False,
-    ),
-    sa.UniqueConstraint(
-        "customer_id",
-        "user_id",
-        name="_customer_user_uc",
-    ),
+    sa.Column("customer_id", sa.types.Integer, sa.ForeignKey("customer.id"), nullable=False),
+    sa.Column("user_id", sa.types.Integer, sa.ForeignKey("user.id"), nullable=False),
+    sa.UniqueConstraint("customer_id", "user_id", name="_customer_user_uc"),
 )
 
 
@@ -49,11 +35,7 @@ class Customer(Base):
     __tablename__ = "customer"
     id = sa.Column(sa.types.Integer, primary_key=True)
 
-    users = sa.orm.relationship(
-        "User",
-        secondary="customer_user",
-        backref="customers",
-    )
+    users = sa.orm.relationship("User", secondary="customer_user", backref="customers")
 
 
 class User(Base):
@@ -61,12 +43,7 @@ class User(Base):
     id = sa.Column(sa.types.Integer, primary_key=True)
 
     customer_id = sa.Column(
-        sa.ForeignKey(
-            "customer.id",
-            ondelete="CASCADE",
-            use_alter=True,
-        ),
-        nullable=False,
+        sa.ForeignKey("customer.id", ondelete="CASCADE", use_alter=True), nullable=False
     )
     customer = sa.orm.relationship("Customer", foreign_keys=[customer_id])
 
@@ -77,16 +54,8 @@ def upgrade():
 
     op.create_table(
         "customer_user",
-        sa.Column(
-            "customer_id",
-            sa.Integer(),
-            nullable=False,
-        ),
-        sa.Column(
-            "user_id",
-            sa.Integer(),
-            nullable=False,
-        ),
+        sa.Column("customer_id", sa.Integer(), nullable=False),
+        sa.Column("user_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["customer_id"],
             ["customer.id"],
@@ -95,11 +64,7 @@ def upgrade():
             ["user_id"],
             ["user.id"],
         ),
-        sa.UniqueConstraint(
-            "customer_id",
-            "user_id",
-            name="_customer_user_uc",
-        ),
+        sa.UniqueConstraint("customer_id", "user_id", name="_customer_user_uc"),
     )
 
     # Change direct connection user->customer into user<-user_customer->customer
@@ -117,10 +82,7 @@ def downgrade():
     op.add_column(
         "user",
         sa.Column(
-            "customer_id",
-            mysql.INTEGER(display_width=11),
-            autoincrement=False,
-            nullable=False,
+            "customer_id", mysql.INTEGER(display_width=11), autoincrement=False, nullable=False
         ),
     )
 
@@ -136,12 +98,7 @@ def downgrade():
     session.commit()
 
     op.create_foreign_key(
-        "user_ibfk_1",
-        "user",
-        "customer",
-        ["customer_id"],
-        ["id"],
-        ondelete="CASCADE",
+        "user_ibfk_1", "user", "customer", ["customer_id"], ["id"], ondelete="CASCADE"
     )
 
     op.drop_table("customer_user")

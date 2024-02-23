@@ -29,9 +29,7 @@ class SlurmAPI:
         self.dry_run = dry_run
 
     @staticmethod
-    def generate_sbatch_content(
-        sbatch_parameters: Sbatch,
-    ) -> str:
+    def generate_sbatch_content(sbatch_parameters: Sbatch) -> str:
         """Take a parameters object and generate a string with sbatch information."""
         if hasattr(sbatch_parameters, Slurm.PARTITION):
             sbatch_header: str = SlurmAPI.generate_dragen_sbatch_header(
@@ -42,44 +40,27 @@ class SlurmAPI:
                 sbatch_parameters=sbatch_parameters
             )
         sbatch_body: str = SlurmAPI.generate_sbatch_body(
-            commands=sbatch_parameters.commands,
-            error_function=sbatch_parameters.error,
+            commands=sbatch_parameters.commands, error_function=sbatch_parameters.error
         )
         return "\n".join([sbatch_header, sbatch_body])
 
     @staticmethod
-    def generate_sbatch_header(
-        sbatch_parameters: Sbatch,
-    ) -> str:
+    def generate_sbatch_header(sbatch_parameters: Sbatch) -> str:
         return SBATCH_HEADER_TEMPLATE.format(**sbatch_parameters.model_dump())
 
     @staticmethod
-    def generate_dragen_sbatch_header(
-        sbatch_parameters: Sbatch,
-    ) -> str:
+    def generate_dragen_sbatch_header(sbatch_parameters: Sbatch) -> str:
         return DRAGEN_SBATCH_HEADER_TEMPLATE.format(**sbatch_parameters.model_dump())
 
     @staticmethod
-    def generate_sbatch_body(
-        commands: str,
-        error_function: str | None = None,
-    ) -> str:
+    def generate_sbatch_body(commands: str, error_function: str | None = None) -> str:
         if not error_function:
             error_function = "log 'Something went wrong, aborting'"
 
-        return SBATCH_BODY_TEMPLATE.format(
-            **{
-                "error_body": error_function,
-                "commands": commands,
-            }
-        )
+        return SBATCH_BODY_TEMPLATE.format(**{"error_body": error_function, "commands": commands})
 
     @staticmethod
-    def write_sbatch_file(
-        sbatch_content: str,
-        sbatch_path: Path,
-        dry_run: bool,
-    ) -> None:
+    def write_sbatch_file(sbatch_content: str, sbatch_path: Path, dry_run: bool) -> None:
         if dry_run:
             LOG.info(f"Write sbatch content to path {sbatch_path}: \n{sbatch_content}")
             return
@@ -90,10 +71,7 @@ class SlurmAPI:
     def submit_sbatch_job(self, sbatch_path: Path) -> int:
         LOG.info(f"Submit sbatch {sbatch_path}")
         sbatch_parameters: list[str] = [str(sbatch_path)]
-        self.process.run_command(
-            parameters=sbatch_parameters,
-            dry_run=self.dry_run,
-        )
+        self.process.run_command(parameters=sbatch_parameters, dry_run=self.dry_run)
         if self.process.stderr:
             LOG.info(self.process.stderr)
         LOG.info(self.process.stdout)
@@ -106,18 +84,12 @@ class SlurmAPI:
                 job_number = 123456
         return job_number
 
-    def submit_sbatch(
-        self,
-        sbatch_content: str,
-        sbatch_path: Path,
-    ) -> int:
+    def submit_sbatch(self, sbatch_content: str, sbatch_path: Path) -> int:
         """Submit sbatch file to slurm.
 
         Return the slurm job id
         """
         SlurmAPI.write_sbatch_file(
-            sbatch_content=sbatch_content,
-            sbatch_path=sbatch_path,
-            dry_run=self.dry_run,
+            sbatch_content=sbatch_content, sbatch_path=sbatch_path, dry_run=self.dry_run
         )
         return self.submit_sbatch_job(sbatch_path=sbatch_path)

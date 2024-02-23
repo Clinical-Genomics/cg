@@ -2,13 +2,8 @@ from pydantic import BeforeValidator, constr
 from typing_extensions import Annotated
 
 from cg.constants import DataDelivery, Workflow
-from cg.models.orders.sample_base import (
-    OrderSample,
-)
-from cg.models.orders.validators.json_sample_validators import (
-    convert_well,
-    join_list,
-)
+from cg.models.orders.sample_base import OrderSample
+from cg.models.orders.validators.json_sample_validators import convert_well, join_list
 
 
 class JsonSample(OrderSample):
@@ -24,6 +19,5 @@ class JsonSample(OrderSample):
     quantity: str | None = None
     synopsis: Annotated[str | None, BeforeValidator(join_list)] = None
     well_position: Annotated[
-        constr(pattern=r"^[A-H]:(1[0-2]|[1-9])$") | None,
-        BeforeValidator(convert_well),
+        constr(pattern=r"^[A-H]:(1[0-2]|[1-9])$") | None, BeforeValidator(convert_well)
     ] = None

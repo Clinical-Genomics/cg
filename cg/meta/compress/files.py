@@ -6,10 +6,7 @@ from pathlib import Path
 
 from housekeeper.store.models import File, Version
 
-from cg.constants import (
-    HK_FASTQ_TAGS,
-    SequencingFileTag,
-)
+from cg.constants import HK_FASTQ_TAGS, SequencingFileTag
 from cg.constants.compression import (
     FASTQ_DATETIME_DELTA,
     FASTQ_FIRST_READ_SUFFIX,
@@ -44,13 +41,10 @@ def is_file_in_version(version_obj: Version, path: Path) -> bool:
 # Functions to get FASTQ like files
 
 
-def get_spring_paths(
-    version_obj: Version,
-) -> list[CompressionData]:
+def get_spring_paths(version_obj: Version) -> list[CompressionData]:
     """Get all SPRING paths for a sample."""
     hk_files_dict: dict[Path, File] = get_hk_files_dict(
-        tags=[SequencingFileTag.SPRING],
-        version_obj=version_obj,
+        tags=[SequencingFileTag.SPRING], version_obj=version_obj
     )
     spring_paths: list = []
 
@@ -76,9 +70,7 @@ def get_fastq_stub(fastq_path: Path) -> Path:
     return None
 
 
-def get_compression_data(
-    fastq_files: list[Path],
-) -> list[CompressionData]:
+def get_compression_data(fastq_files: list[Path]) -> list[CompressionData]:
     """Return a list of compression data objects.
 
     Each object has information about a pair of FASTQ files from the same run.
@@ -100,10 +92,7 @@ def get_compression_data(
 
 def get_fastq_files(sample_id: str, version_obj: Version) -> dict[str, dict]:
     """Get FASTQ files for sample."""
-    hk_files_dict = get_hk_files_dict(
-        tags=HK_FASTQ_TAGS,
-        version_obj=version_obj,
-    )
+    hk_files_dict = get_hk_files_dict(tags=HK_FASTQ_TAGS, version_obj=version_obj)
     if hk_files_dict is None:
         return None
 
@@ -126,9 +115,7 @@ def get_fastq_files(sample_id: str, version_obj: Version) -> dict[str, dict]:
     return fastq_dict
 
 
-def check_fastqs(
-    compression_obj: CompressionData,
-) -> bool:
+def check_fastqs(compression_obj: CompressionData) -> bool:
     """Check if FASTQ files has the correct status.
 
     More specific this means to check

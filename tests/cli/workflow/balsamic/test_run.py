@@ -11,10 +11,7 @@ from cg.constants.priority import SlurmQos
 from cg.models.cg_config import CGConfig
 
 
-def test_without_options(
-    cli_runner: CliRunner,
-    balsamic_context: CGConfig,
-):
+def test_without_options(cli_runner: CliRunner, balsamic_context: CGConfig):
     """Test command without case_id argument"""
     # GIVEN no case_id
     # WHEN dry running without anything specified
@@ -25,11 +22,7 @@ def test_without_options(
     assert "Missing argument" in result.output
 
 
-def test_with_missing_case(
-    cli_runner: CliRunner,
-    balsamic_context: CGConfig,
-    caplog,
-):
+def test_with_missing_case(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with invalid case to start with"""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
@@ -44,21 +37,13 @@ def test_with_missing_case(
     assert "could not be found" in caplog.text
 
 
-def test_without_samples(
-    cli_runner: CliRunner,
-    balsamic_context: CGConfig,
-    caplog,
-):
+def test_without_samples(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with case_id and no samples"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
     case_id = "no_sample_case"
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(
-        run,
-        [case_id, "--dry-run"],
-        obj=balsamic_context,
-    )
+    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
@@ -66,11 +51,7 @@ def test_without_samples(
     assert "no samples" in caplog.text
 
 
-def test_without_config(
-    cli_runner: CliRunner,
-    balsamic_context: CGConfig,
-    caplog,
-):
+def test_without_config(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with case_id and no config file"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -83,12 +64,7 @@ def test_without_config(
     assert "No config file found" in caplog.text
 
 
-def test_with_config(
-    tmpdir_factory,
-    cli_runner: CliRunner,
-    balsamic_context: CGConfig,
-    caplog,
-):
+def test_with_config(tmpdir_factory, cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with case_id and config file"""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
@@ -102,22 +78,14 @@ def test_with_config(
         exist_ok=True
     )
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(
-        run,
-        [case_id, "--dry-run"],
-        obj=balsamic_context,
-    )
+    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
     # THEN command should NOT execute successfully
     assert result.exit_code == EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
     assert "balsamic" in caplog.text
 
 
-def test_run_analysis(
-    cli_runner: CliRunner,
-    balsamic_context: CGConfig,
-    caplog,
-):
+def test_run_analysis(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with dry run option"""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
@@ -131,20 +99,12 @@ def test_run_analysis(
         exist_ok=True
     )
     # WHEN dry running
-    result = cli_runner.invoke(
-        run,
-        [case_id, "--dry-run"],
-        obj=balsamic_context,
-    )
+    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_priority_custom(
-    cli_runner: CliRunner,
-    balsamic_context: CGConfig,
-    caplog,
-):
+def test_priority_custom(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with priority option"""
     caplog.set_level(logging.INFO)
     # GIVEN valid case-id
@@ -161,14 +121,7 @@ def test_priority_custom(
     )
     # WHEN dry running with option specified
     result = cli_runner.invoke(
-        run,
-        [
-            case_id,
-            "--dry-run",
-            qos_key,
-            qos_value,
-        ],
-        obj=balsamic_context,
+        run, [case_id, "--dry-run", qos_key, qos_value], obj=balsamic_context
     )
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -177,11 +130,7 @@ def test_priority_custom(
     assert qos_value in caplog.text
 
 
-def test_priority_clinical(
-    cli_runner: CliRunner,
-    balsamic_context: CGConfig,
-    caplog,
-):
+def test_priority_clinical(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with case_id set to default NORMAL priority, when priority is not set manually"""
     caplog.set_level(logging.INFO)
 
@@ -199,11 +148,7 @@ def test_priority_clinical(
     )
 
     # WHEN dry running with option specified
-    result = cli_runner.invoke(
-        run,
-        [case_id, "--dry-run"],
-        obj=balsamic_context,
-    )
+    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS

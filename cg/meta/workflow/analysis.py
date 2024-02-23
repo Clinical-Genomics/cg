@@ -6,19 +6,10 @@ from pathlib import Path
 from subprocess import CalledProcessError
 
 import click
-from housekeeper.store.models import (
-    Bundle,
-    Version,
-)
+from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.constants import (
-    EXIT_FAIL,
-    EXIT_SUCCESS,
-    Priority,
-    SequencingFileTag,
-    Workflow,
-)
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
     AnalysisType,
     CaseActions,
@@ -27,35 +18,20 @@ from cg.constants.constants import (
 )
 from cg.constants.gene_panel import GenePanelCombo
 from cg.constants.scout import ScoutExportFileName
-from cg.exc import (
-    AnalysisNotReadyError,
-    BundleAlreadyAddedError,
-    CgDataError,
-    CgError,
-)
+from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.io.controller import WriteFile
-from cg.meta.archive.archive import (
-    SpringArchiveAPI,
-)
+from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.store.models import (
-    Analysis,
-    BedVersion,
-    Case,
-    CaseSample,
-    Sample,
-)
+from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
 
-def add_gene_panel_combo(
-    default_panels: set[str],
-) -> set[str]:
+def add_gene_panel_combo(default_panels: set[str]) -> set[str]:
     """Add gene panels combinations for gene panels being part of gene panel combination and return updated gene panels."""
     additional_panels = set()
     for panel in default_panels:
@@ -82,8 +58,7 @@ class AnalysisAPI(MetaAPI):
     @property
     def use_read_count_threshold(self) -> bool:
         """Defines whether the threshold for adequate read count should be passed for all samples
-        when determining if the analysis for a case should be automatically started
-        """
+        when determining if the analysis for a case should be automatically started"""
         return False
 
     @property
@@ -162,9 +137,7 @@ class AnalysisAPI(MetaAPI):
         return None
 
     @staticmethod
-    def get_application_type(
-        sample_obj: Sample,
-    ) -> str:
+    def get_application_type(sample_obj: Sample) -> str:
         """
         Gets application type for sample. Only application types supported by trailblazer (or other)
         are valid outputs.
@@ -189,10 +162,7 @@ class AnalysisAPI(MetaAPI):
         if not bundle_result:
             LOG.info("Bundle already added to Housekeeper!")
             raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
-        (
-            bundle_object,
-            bundle_version,
-        ) = bundle_result
+        bundle_object, bundle_version = bundle_result
         if dry_run:
             LOG.info("Dry-run: Housekeeper changes will not be commited")
             LOG.info(
@@ -274,30 +244,18 @@ class AnalysisAPI(MetaAPI):
             LOG.warning(f"Could not retrieve {self.workflow} workflow version!")
             return "0.0.0"
 
-    def set_statusdb_action(
-        self,
-        case_id: str,
-        action: str | None,
-        dry_run: bool = False,
-    ) -> None:
+    def set_statusdb_action(self, case_id: str, action: str | None, dry_run: bool = False) -> None:
         """
         Set one of the allowed actions on a case in StatusDB.
         """
         if dry_run:
             LOG.info(f"Dry-run: Action {action} would be set for case {case_id}")
             return
-        if action in [
-            None,
-            *CaseActions.actions(),
-        ]:
+        if action in [None, *CaseActions.actions()]:
             case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
             case.action = action
             self.status_db.session.commit()
-            LOG.info(
-                "Action %s set for case %s",
-                action,
-                case_id,
-            )
+            LOG.info("Action %s set for case %s", action, case_id)
             return
         LOG.warning(
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
@@ -305,21 +263,18 @@ class AnalysisAPI(MetaAPI):
 
     def get_analyses_to_clean(self, before: dt.datetime) -> list[Analysis]:
         analyses_to_clean = self.status_db.get_analyses_to_clean(
-            before=before,
-            workflow=self.workflow,
+            before=before, workflow=self.workflow
         )
         return analyses_to_clean
 
     def get_cases_to_analyze(self) -> list[Case]:
         return self.status_db.cases_to_analyze(
-            workflow=self.workflow,
-            threshold=self.use_read_count_threshold,
+            workflow=self.workflow, threshold=self.use_read_count_threshold
         )
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,
-        and is ready to be stored in Housekeeper.
-        """
+        and is ready to be stored in Housekeeper."""
         return [
             case
             for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
@@ -343,26 +298,19 @@ class AnalysisAPI(MetaAPI):
         return [
             self.fastq_handler.parse_file_data(hk_file.full_path)
             for hk_file in self.housekeeper_api.files(
-                bundle=sample.internal_id,
-                tags={SequencingFileTag.FASTQ},
+                bundle=sample.internal_id, tags={SequencingFileTag.FASTQ}
             )
         ]
 
     def link_fastq_files_for_sample(
-        self,
-        case: Case,
-        sample: Sample,
-        concatenate: bool = False,
+        self, case: Case, sample: Sample, concatenate: bool = False
     ) -> None:
         """
         Link FASTQ files for a sample to the work directory.
         If workflow input requires concatenated fastq, files can also be concatenated
         """
         linked_reads_paths: dict[int, list[Path]] = {1: [], 2: []}
-        concatenated_paths: dict[int, str] = {
-            1: "",
-            2: "",
-        }
+        concatenated_paths: dict[int, str] = {1: "", 2: ""}
         fastq_files_meta: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
         sorted_fastq_files_meta: list[FastqFileMeta] = sorted(
             fastq_files_meta, key=lambda k: k.path
@@ -395,14 +343,8 @@ class AnalysisAPI(MetaAPI):
             return
 
         LOG.info(f"Concatenation in progress for sample: {sample.internal_id}")
-        for (
-            read,
-            value,
-        ) in linked_reads_paths.items():
-            self.fastq_handler.concatenate(
-                linked_reads_paths[read],
-                concatenated_paths[read],
-            )
+        for read, value in linked_reads_paths.items():
+            self.fastq_handler.concatenate(linked_reads_paths[read], concatenated_paths[read])
             self.fastq_handler.remove_files(value)
 
     def get_target_bed_from_lims(self, case_id: str) -> str | None:
@@ -469,17 +411,11 @@ class AnalysisAPI(MetaAPI):
                 any_decompression_started = True
 
         if not any_decompression_started:
-            LOG.warning(
-                "Decompression failed to start for %s",
-                case_id,
-            )
+            LOG.warning("Decompression failed to start for %s", case_id)
             return
         if not dry_run:
             self.set_statusdb_action(case_id=case_id, action="analyze")
-        LOG.info(
-            "Decompression started for %s",
-            case_id,
-        )
+        LOG.info("Decompression started for %s", case_id)
 
     def resolve_decompression(self, case_id: str, dry_run: bool) -> None:
         """
@@ -490,18 +426,13 @@ class AnalysisAPI(MetaAPI):
             return
 
         if self.prepare_fastq_api.is_spring_decompression_running(case_id):
-            self.set_statusdb_action(
-                case_id=case_id,
-                action=CaseActions.ANALYZE,
-            )
+            self.set_statusdb_action(case_id=case_id, action=CaseActions.ANALYZE)
             return
 
         self.prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
 
     @staticmethod
-    def get_date_from_file_path(
-        file_path: Path,
-    ) -> dt.datetime.date:
+    def get_date_from_file_path(file_path: Path) -> dt.datetime.date:
         """
         Get date from deliverables path using date created metadata.
         """
@@ -516,10 +447,7 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     def parse_analysis(
-        self,
-        config_raw: dict,
-        qc_metrics_raw: dict,
-        sample_info_raw: dict,
+        self, config_raw: dict, qc_metrics_raw: dict, sample_info_raw: dict
     ) -> AnalysisModel:
         """Parses output analysis files"""
 
@@ -533,12 +461,7 @@ class AnalysisAPI(MetaAPI):
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
             self.status_db.session.commit()
 
-    def clean_run_dir(
-        self,
-        case_id: str,
-        yes: bool,
-        case_path: list[Path] | Path,
-    ) -> int:
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
         """Remove workflow run directory."""
 
         try:
@@ -610,8 +533,7 @@ class AnalysisAPI(MetaAPI):
 
     def ensure_files_are_present(self, case_id: str):
         """Checks if any flow cells need to be retrieved and submits a job if that is the case.
-        Also checks if any spring files are archived and submits a job to retrieve any which are.
-        """
+        Also checks if any spring files are archived and submits a job to retrieve any which are."""
         self.ensure_flow_cells_on_disk(case_id)
         if not self.are_all_spring_files_present(case_id):
             LOG.warning(f"Files are archived for case {case_id}")
@@ -628,8 +550,7 @@ class AnalysisAPI(MetaAPI):
         for sample in [link.sample for link in case.links]:
             if (
                 files := self.housekeeper_api.get_archived_files_for_bundle(
-                    bundle_name=sample.internal_id,
-                    tags=[SequencingFileTag.SPRING],
+                    bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING]
                 )
             ) and not all(file.archive.retrieved_at for file in files):
                 return False
@@ -645,10 +566,7 @@ class AnalysisAPI(MetaAPI):
         WriteFile.write_file_from_content(
             content="\n".join(content),
             file_format=FileFormat.TXT,
-            file_path=Path(
-                out_dir,
-                ScoutExportFileName.MANAGED_VARIANTS,
-            ),
+            file_path=Path(out_dir, ScoutExportFileName.MANAGED_VARIANTS),
         )
 
     @staticmethod
@@ -658,18 +576,14 @@ class AnalysisAPI(MetaAPI):
         WriteFile.write_file_from_content(
             content="\n".join(content),
             file_format=FileFormat.TXT,
-            file_path=Path(
-                out_dir,
-                ScoutExportFileName.PANELS,
-            ),
+            file_path=Path(out_dir, ScoutExportFileName.PANELS),
         )
 
     def _get_gene_panel(self, case_id: str, genome_build: str) -> list[str]:
         """Create and return the aggregated gene panel file."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         all_panels: list[str] = self.get_aggregated_panels(
-            customer_id=case.customer.internal_id,
-            default_panels=set(case.panels),
+            customer_id=case.customer.internal_id, default_panels=set(case.panels)
         )
         return self.scout_api.export_panels(build=genome_build, panels=all_panels)
 

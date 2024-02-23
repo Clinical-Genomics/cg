@@ -14,9 +14,7 @@ from cg.cli.workflow.commands import (
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.mutant import (
-    MutantAnalysisAPI,
-)
+from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
@@ -50,12 +48,7 @@ def config_case(context: CGConfig, dry_run: bool, case_id: str) -> None:
 @OPTION_DRY
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def run(
-    context: CGConfig,
-    dry_run: bool,
-    case_id: str,
-    config_artic: str = None,
-) -> None:
+def run(context: CGConfig, dry_run: bool, case_id: str, config_artic: str = None) -> None:
     """Run mutant analysis command for a case"""
     analysis_api: MutantAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.check_analysis_ongoing(case_id=case_id)
@@ -63,11 +56,7 @@ def run(
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
     try:
-        analysis_api.run_analysis(
-            case_id=case_id,
-            dry_run=dry_run,
-            config_artic=config_artic,
-        )
+        analysis_api.run_analysis(case_id=case_id, dry_run=dry_run, config_artic=config_artic)
     except:
         analysis_api.set_statusdb_action(case_id=case_id, action=None)
         raise
@@ -78,27 +67,13 @@ def run(
 @ARGUMENT_CASE_ID
 @OPTION_ANALYSIS_PARAMETERS_CONFIG
 @click.pass_context
-def start(
-    context: click.Context,
-    dry_run: bool,
-    case_id: str,
-    config_artic: str,
-) -> None:
+def start(context: click.Context, dry_run: bool, case_id: str, config_artic: str) -> None:
     """Start full analysis workflow for a case"""
     analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
     analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
     context.invoke(link, case_id=case_id, dry_run=dry_run)
-    context.invoke(
-        config_case,
-        case_id=case_id,
-        dry_run=dry_run,
-    )
-    context.invoke(
-        run,
-        case_id=case_id,
-        dry_run=dry_run,
-        config_artic=config_artic,
-    )
+    context.invoke(config_case, case_id=case_id, dry_run=dry_run)
+    context.invoke(run, case_id=case_id, dry_run=dry_run, config_artic=config_artic)
     context.invoke(store, case_id=case_id, dry_run=dry_run)
 
 
@@ -113,11 +88,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
-            context.invoke(
-                start,
-                case_id=case_obj.internal_id,
-                dry_run=dry_run,
-            )
+            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
             LOG.error(error)
         except CgError as error:

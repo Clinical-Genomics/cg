@@ -8,63 +8,31 @@ from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.observations import (
-    LOQUSDB_SUPPORTED_WORKFLOWS,
-)
+from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.exc import FlowCellsNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.balsamic import (
-    BalsamicAnalysisAPI,
-)
-from cg.meta.workflow.balsamic_pon import (
-    BalsamicPonAnalysisAPI,
-)
-from cg.meta.workflow.balsamic_qc import (
-    BalsamicQCAnalysisAPI,
-)
-from cg.meta.workflow.balsamic_umi import (
-    BalsamicUmiAnalysisAPI,
-)
-from cg.meta.workflow.fluffy import (
-    FluffyAnalysisAPI,
-)
-from cg.meta.workflow.microsalt import (
-    MicrosaltAnalysisAPI,
-)
-from cg.meta.workflow.mip_dna import (
-    MipDNAAnalysisAPI,
-)
-from cg.meta.workflow.mip_rna import (
-    MipRNAAnalysisAPI,
-)
-from cg.meta.workflow.mutant import (
-    MutantAnalysisAPI,
-)
-from cg.meta.workflow.rnafusion import (
-    RnafusionAnalysisAPI,
-)
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.balsamic_pon import BalsamicPonAnalysisAPI
+from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
+from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
+from cg.meta.workflow.fluffy import FluffyAnalysisAPI
+from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
+from cg.meta.workflow.mutant import MutantAnalysisAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
 OPTION_DRY = click.option(
-    "-d",
-    "--dry-run",
-    help="Simulate process without executing",
-    is_flag=True,
+    "-d", "--dry-run", help="Simulate process without executing", is_flag=True
 )
-OPTION_YES = click.option(
-    "-y",
-    "--yes",
-    is_flag=True,
-    help="Skip confirmation",
-)
+OPTION_YES = click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_ANALYSIS_PARAMETERS_CONFIG = click.option(
-    "--config-artic",
-    type=str,
-    help="Config with computational and lab related settings",
+    "--config-artic", type=str, help="Config with computational and lab related settings"
 )
 OPTION_LOQUSDB_SUPPORTED_WORKFLOW = click.option(
     "--workflow",
@@ -159,11 +127,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
     for case_obj in analysis_api.get_cases_to_store():
         LOG.info(f"Storing deliverables for {case_obj.internal_id}")
         try:
-            context.invoke(
-                store,
-                case_id=case_obj.internal_id,
-                dry_run=dry_run,
-            )
+            context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
         except Exception as exception_object:
             LOG.error(f"Error storing {case_obj.internal_id}: {exception_object}")
             exit_code = EXIT_FAIL
@@ -176,12 +140,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 @OPTION_DRY
 @ARGUMENT_BEFORE_STR
 @click.pass_obj
-def rsync_past_run_dirs(
-    context: CGConfig,
-    before_str: str,
-    dry_run: bool,
-    yes: bool,
-) -> None:
+def rsync_past_run_dirs(context: CGConfig, before_str: str, dry_run: bool, yes: bool) -> None:
     """Remove deliver workflow commands."""
 
     rsync_api: RsyncAPI = RsyncAPI(config=context)
@@ -205,12 +164,7 @@ def rsync_past_run_dirs(
 @OPTION_DRY
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def clean_run_dir(
-    context: CGConfig,
-    yes: bool,
-    case_id: str,
-    dry_run: bool = False,
-):
+def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = False):
     """Remove workflow run directory."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
@@ -222,11 +176,7 @@ def clean_run_dir(
         LOG.info(f"Would have deleted: {analysis_path}")
         return EXIT_SUCCESS
 
-    analysis_api.clean_run_dir(
-        case_id=case_id,
-        yes=yes,
-        case_path=analysis_path,
-    )
+    analysis_api.clean_run_dir(case_id=case_id, yes=yes, case_path=analysis_path)
 
 
 @click.command("past-run-dirs")
@@ -235,10 +185,7 @@ def clean_run_dir(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def past_run_dirs(
-    context: click.Context,
-    before_str: str,
-    yes: bool = False,
-    dry_run: bool = False,
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of old case run dirs."""
 
@@ -253,12 +200,7 @@ def past_run_dirs(
         case_id = analysis.case.internal_id
         try:
             LOG.info(f"Cleaning {analysis_api.workflow} output for {case_id}")
-            context.invoke(
-                clean_run_dir,
-                yes=yes,
-                case_id=case_id,
-                dry_run=dry_run,
-            )
+            context.invoke(clean_run_dir, yes=yes, case_id=case_id, dry_run=dry_run)
         except FileNotFoundError:
             continue
         except Exception as error:
@@ -276,20 +218,12 @@ def past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def balsamic_past_run_dirs(
-    context: click.Context,
-    before_str: str,
-    yes: bool = False,
-    dry_run: bool = False,
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" Balsamic case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(context.obj)
-    context.invoke(
-        past_run_dirs,
-        yes=yes,
-        dry_run=dry_run,
-        before_str=before_str,
-    )
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
 @click.command("balsamic-qc-past-run-dirs")
@@ -298,20 +232,12 @@ def balsamic_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def balsamic_qc_past_run_dirs(
-    context: click.Context,
-    before_str: str,
-    yes: bool = False,
-    dry_run: bool = False,
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" Balsamic qc case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = BalsamicQCAnalysisAPI(context.obj)
-    context.invoke(
-        past_run_dirs,
-        yes=yes,
-        dry_run=dry_run,
-        before_str=before_str,
-    )
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
 @click.command("balsamic-umi-past-run-dirs")
@@ -320,20 +246,12 @@ def balsamic_qc_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def balsamic_umi_past_run_dirs(
-    context: click.Context,
-    before_str: str,
-    yes: bool = False,
-    dry_run: bool = False,
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" Balsamic umi case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = BalsamicUmiAnalysisAPI(context.obj)
-    context.invoke(
-        past_run_dirs,
-        yes=yes,
-        dry_run=dry_run,
-        before_str=before_str,
-    )
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
 @click.command("balsamic-pon-past-run-dirs")
@@ -342,20 +260,12 @@ def balsamic_umi_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def balsamic_pon_past_run_dirs(
-    context: click.Context,
-    before_str: str,
-    yes: bool = False,
-    dry_run: bool = False,
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" Balsamic pon case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = BalsamicPonAnalysisAPI(context.obj)
-    context.invoke(
-        past_run_dirs,
-        yes=yes,
-        dry_run=dry_run,
-        before_str=before_str,
-    )
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
 @click.command("fluffy-past-run-dirs")
@@ -364,20 +274,12 @@ def balsamic_pon_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def fluffy_past_run_dirs(
-    context: click.Context,
-    before_str: str,
-    yes: bool = False,
-    dry_run: bool = False,
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" Fluffy case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = FluffyAnalysisAPI(context.obj)
-    context.invoke(
-        past_run_dirs,
-        yes=yes,
-        dry_run=dry_run,
-        before_str=before_str,
-    )
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
 @click.command("mip-dna-past-run-dirs")
@@ -386,20 +288,12 @@ def fluffy_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def mip_dna_past_run_dirs(
-    context: click.Context,
-    before_str: str,
-    yes: bool = False,
-    dry_run: bool = False,
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" MIP_DNA case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    context.invoke(
-        past_run_dirs,
-        yes=yes,
-        dry_run=dry_run,
-        before_str=before_str,
-    )
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
 @click.command("mip-rna-past-run-dirs")
@@ -408,20 +302,12 @@ def mip_dna_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def mip_rna_past_run_dirs(
-    context: click.Context,
-    before_str: str,
-    yes: bool = False,
-    dry_run: bool = False,
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" MIP_RNA case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = MipRNAAnalysisAPI(context.obj)
-    context.invoke(
-        past_run_dirs,
-        yes=yes,
-        dry_run=dry_run,
-        before_str=before_str,
-    )
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
 @click.command("mutant-past-run-dirs")
@@ -430,20 +316,12 @@ def mip_rna_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def mutant_past_run_dirs(
-    context: click.Context,
-    before_str: str,
-    yes: bool = False,
-    dry_run: bool = False,
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" MUTANT case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = MutantAnalysisAPI(context.obj)
-    context.invoke(
-        past_run_dirs,
-        yes=yes,
-        dry_run=dry_run,
-        before_str=before_str,
-    )
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
 @click.command("rnafusion-past-run-dirs")
@@ -452,20 +330,12 @@ def mutant_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def rnafusion_past_run_dirs(
-    context: click.Context,
-    before_str: str,
-    yes: bool = False,
-    dry_run: bool = False,
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" RNAFUSION case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = RnafusionAnalysisAPI(context.obj)
-    context.invoke(
-        past_run_dirs,
-        yes=yes,
-        dry_run=dry_run,
-        before_str=before_str,
-    )
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
 @click.command("microsalt-past-run-dirs")
@@ -474,17 +344,9 @@ def rnafusion_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def microsalt_past_run_dirs(
-    context: click.Context,
-    before_str: str,
-    yes: bool = False,
-    dry_run: bool = False,
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" microSALT case run dirs."""
 
     context.obj.meta_apis["analysis_api"]: MicrosaltAnalysisAPI = MicrosaltAnalysisAPI(context.obj)
-    context.invoke(
-        past_run_dirs,
-        yes=yes,
-        dry_run=dry_run,
-        before_str=before_str,
-    )
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)

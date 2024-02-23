@@ -23,21 +23,13 @@ def upgrade():
         column=sa.Column(
             "lab_contact_id",
             sa.INTEGER,
-            sa.ForeignKey(
-                name="customer_lab_contact_fk_1",
-                column="user.id",
-            ),
+            sa.ForeignKey(name="customer_lab_contact_fk_1", column="user.id"),
         ),
     )
 
 
 def downgrade():
     op.drop_constraint(
-        constraint_name="customer_lab_contact_fk_1",
-        table_name="customer",
-        type_="foreignkey",
+        constraint_name="customer_lab_contact_fk_1", table_name="customer", type_="foreignkey"
     )
-    op.drop_column(
-        table_name="customer",
-        column_name="lab_contact_id",
-    )
+    op.drop_column(table_name="customer", column_name="lab_contact_id")

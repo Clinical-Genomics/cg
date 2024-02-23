@@ -2,11 +2,7 @@
 
 import datetime
 
-from cg.store.models import (
-    Analysis,
-    Case,
-    Customer,
-)
+from cg.store.models import Analysis, Case, Customer
 
 
 class Customer(Customer):

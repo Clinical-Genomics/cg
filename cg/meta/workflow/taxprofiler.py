@@ -5,21 +5,12 @@ from pathlib import Path
 from typing import Any
 
 from cg.constants import Workflow
-from cg.constants.nf_analysis import (
-    MULTIQC_NEXFLOW_CONFIG,
-)
-from cg.constants.sequencing import (
-    SequencingPlatform,
-)
+from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG
+from cg.constants.sequencing import SequencingPlatform
 from cg.io.json import read_json
-from cg.meta.workflow.nf_analysis import (
-    NfAnalysisAPI,
-)
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import (
-    MetricsBase,
-    MultiqcDataJson,
-)
+from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.fastq import FastqFileMeta
 from cg.models.taxprofiler.taxprofiler import (
     TaxprofilerParameters,
@@ -60,21 +51,16 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         return MULTIQC_NEXFLOW_CONFIG
 
     def get_sample_sheet_content_per_sample(
-        self,
-        sample: Sample,
-        instrument_platform: SequencingPlatform.ILLUMINA,
-        fasta: str = "",
+        self, sample: Sample, instrument_platform: SequencingPlatform.ILLUMINA, fasta: str = ""
     ) -> list[list[str]]:
         """Get sample sheet content per sample."""
         sample_name: str = sample.name
         sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample)
         fastq_forward_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata,
-            forward_read=True,
+            metadata=sample_metadata, forward_read=True
         )
         fastq_reverse_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata,
-            reverse_read=True,
+            metadata=sample_metadata, reverse_read=True
         )
         sample_sheet_entry = TaxprofilerSampleSheetEntry(
             name=sample_name,
@@ -100,9 +86,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         for link in case.links:
             sample_sheet_content.extend(
                 self.get_sample_sheet_content_per_sample(
-                    sample=link.sample,
-                    instrument_platform=instrument_platform,
-                    fasta=fasta,
+                    sample=link.sample, instrument_platform=instrument_platform, fasta=fasta
                 )
             )
         return sample_sheet_content
@@ -142,10 +126,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             file_path=self.get_sample_sheet_path(case_id=case_id),
             header=TaxprofilerSampleSheetEntry.headers(),
         )
-        self.write_params_file(
-            case_id=case_id,
-            workflow_parameters=workflow_parameters.dict(),
-        )
+        self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
         self.write_nextflow_config(case_id=case_id)
 
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
@@ -158,12 +139,10 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         for sample in samples:
             sample_id: str = sample.internal_id
             metrics_values: dict = self.parse_multiqc_json_for_sample(
-                sample_name=sample.name,
-                multiqc_json=multiqc_json,
+                sample_name=sample.name, multiqc_json=multiqc_json
             )
             metric_base_list: list = self.get_metric_base_list(
-                sample_id=sample_id,
-                metrics_values=metrics_values,
+                sample_id=sample_id, metrics_values=metrics_values
             )
             metrics_list.extend(metric_base_list)
         return metrics_list
@@ -173,10 +152,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """Parse a multiqc_data.json and returns a dictionary with metric name and metric values for each sample."""
         metrics_values: dict = {}
         for stat_dict in multiqc_json:
-            for (
-                sample_key,
-                sample_values,
-            ) in stat_dict.items():
+            for sample_key, sample_values in stat_dict.items():
                 if sample_key == f"{sample_name}_{sample_name}":
                     LOG.info(f"Key: {sample_key}, Values: {sample_values}")
                     metrics_values.update(sample_values)

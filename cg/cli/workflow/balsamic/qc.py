@@ -14,13 +14,8 @@ from cg.cli.workflow.balsamic.base import (
     store_available,
     store_housekeeper,
 )
-from cg.cli.workflow.commands import (
-    link,
-    resolve_compression,
-)
-from cg.meta.workflow.balsamic_qc import (
-    BalsamicQCAnalysisAPI,
-)
+from cg.cli.workflow.commands import link, resolve_compression
+from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 

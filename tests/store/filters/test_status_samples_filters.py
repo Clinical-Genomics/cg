@@ -3,10 +3,7 @@ from typing import Any
 from sqlalchemy.orm import Query
 
 from cg.constants.constants import SampleType
-from cg.constants.subject import (
-    PhenotypeStatus,
-    Sex,
-)
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.store.filters.status_sample_filters import (
     filter_samples_by_entry_customer_ids,
     filter_samples_by_entry_id,
@@ -37,13 +34,7 @@ from tests.store.conftest import StoreConstants
 from tests.store_helpers import StoreHelpers
 
 
-def test_get_samples_with_loqusdb_id(
-    helpers,
-    store,
-    sample_store,
-    sample_id,
-    loqusdb_id,
-):
+def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, loqusdb_id):
     """Test sample extraction with Loqusdb ID."""
 
     # GIVEN a sample observations that has been uploaded to Loqusdb
@@ -51,14 +42,10 @@ def test_get_samples_with_loqusdb_id(
     sample = helpers.add_sample(store, loqusdb_id=loqusdb_id)
     sample_not_uploaded = helpers.add_sample(store, internal_id=sample_id)
     link_1: CaseSample = sample_store.relate_sample(
-        case=case,
-        sample=sample,
-        status=PhenotypeStatus.UNKNOWN,
+        case=case, sample=sample, status=PhenotypeStatus.UNKNOWN
     )
     link_2: CaseSample = sample_store.relate_sample(
-        case=case,
-        sample=sample_not_uploaded,
-        status=PhenotypeStatus.UNKNOWN,
+        case=case, sample=sample_not_uploaded, status=PhenotypeStatus.UNKNOWN
     )
     sample_store.session.add_all([link_1, link_2])
 
@@ -74,19 +61,14 @@ def test_get_samples_with_loqusdb_id(
 
 
 def test_get_samples_without_loqusdb_id(
-    helpers: StoreHelpers,
-    sample_store: Store,
-    sample_id,
-    loqusdb_id,
+    helpers: StoreHelpers, sample_store: Store, sample_id, loqusdb_id
 ):
     """Test sample extraction without Loqusdb ID."""
 
     # GIVEN a sample observations that has not been uploaded to Loqusdb
     sample = helpers.add_sample(sample_store)
     sample_uploaded = helpers.add_sample(
-        store=sample_store,
-        internal_id=sample_id,
-        loqusdb_id=loqusdb_id,
+        store=sample_store, internal_id=sample_id, loqusdb_id=loqusdb_id
     )
 
     # GIVEN a sample query
@@ -680,9 +662,7 @@ def test_filter_samples_by_identifier_name_and_value_unique_sample(
         assert getattr(filtered_sample_query.first(), key) == value
 
 
-def test_filter_samples_by_identifier_name_and_value_two_samples(
-    sample_store: Store,
-):
+def test_filter_samples_by_identifier_name_and_value_two_samples(sample_store: Store):
     """."""
     # GIVEN a store with more than 2 samples
     sample_query: Query = sample_store._get_query(table=Sample)

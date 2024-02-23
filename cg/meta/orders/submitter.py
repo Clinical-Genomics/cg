@@ -29,21 +29,12 @@ class Submitter(ABC):
 
     @abstractmethod
     def store_items_in_status(
-        self,
-        customer_id: str,
-        order: str,
-        ordered: dt.datetime,
-        ticket_id: int,
-        items: list[dict],
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: int, items: list[dict]
     ) -> list[Model]:
         pass
 
     @staticmethod
-    def _fill_in_sample_ids(
-        samples: list[dict],
-        lims_map: dict,
-        id_key: str = "internal_id",
-    ):
+    def _fill_in_sample_ids(samples: list[dict], lims_map: dict, id_key: str = "internal_id"):
         """Fill in LIMS sample ids."""
         for sample in samples:
             LOG.debug(f"{sample['name']}: link sample to LIMS")
@@ -57,7 +48,4 @@ class Submitter(ABC):
         for sample_obj in samples:
             LOG.info(f"{sample_obj.internal_id}: add missing reads in LIMS")
             target_reads = sample_obj.application_version.application.target_reads / 1000000
-            self.lims.update_sample(
-                sample_obj.internal_id,
-                target_reads=target_reads,
-            )
+            self.lims.update_sample(sample_obj.internal_id, target_reads=target_reads)

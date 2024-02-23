@@ -1,17 +1,9 @@
 import pytest
 
-from cg.apps.scout.scout_export import (
-    ScoutExportCase,
-)
+from cg.apps.scout.scout_export import ScoutExportCase
 from cg.constants.pedigree import Pedigree
-from cg.constants.subject import (
-    PlinkPhenotypeStatus,
-    PlinkSex,
-    RelationshipStatus,
-)
-from cg.meta.upload.mutacc import (
-    UploadToMutaccAPI,
-)
+from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex, RelationshipStatus
+from cg.meta.upload.mutacc import UploadToMutaccAPI
 
 
 class MockMutaccAuto:
@@ -57,9 +49,7 @@ class MockScoutApi:
 
 
 @pytest.fixture(name="scout_export_case_data")
-def scout_export_case_data(
-    customer_id: str,
-) -> dict:
+def scout_export_case_data(customer_id: str) -> dict:
     """Return information in the form of a scout export case"""
     case_data = {
         "_id": "internal_id",
@@ -97,18 +87,14 @@ def scout_export_case_data(
 
 
 @pytest.fixture(name="scout_export_case")
-def scout_export_case(
-    scout_export_case_data: dict,
-) -> ScoutExportCase:
+def scout_export_case(scout_export_case_data: dict) -> ScoutExportCase:
     """Returns a export case object"""
 
     return ScoutExportCase.model_validate(scout_export_case_data)
 
 
 @pytest.fixture(name="scout_export_case_missing_bam")
-def scout_export_case_missing_bam(
-    scout_export_case_data: dict,
-) -> ScoutExportCase:
+def scout_export_case_missing_bam(scout_export_case_data: dict) -> ScoutExportCase:
     """Returns a export case object where one individual is missing bam file"""
     scout_export_case_data["individuals"][1].pop("bam_file")
 
@@ -116,9 +102,7 @@ def scout_export_case_missing_bam(
 
 
 @pytest.fixture(name="scout_export_case_no_causatives")
-def scout_export_case_no_causatives(
-    scout_export_case_data: dict,
-) -> ScoutExportCase:
+def scout_export_case_no_causatives(scout_export_case_data: dict) -> ScoutExportCase:
     """Returns a export case object without causatives"""
     scout_export_case_data.pop("causatives")
 
@@ -134,9 +118,6 @@ def mutacc_upload_api():
     scout_api = MockScoutApi()
     mutacc_auto_api = MockMutaccAuto()
 
-    _api = UploadToMutaccAPI(
-        scout_api=scout_api,
-        mutacc_auto_api=mutacc_auto_api,
-    )
+    _api = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
     return _api

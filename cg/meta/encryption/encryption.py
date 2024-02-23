@@ -8,29 +8,18 @@ from tempfile import NamedTemporaryFile
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import SPACE, FileExtensions
-from cg.constants.encryption import (
-    EncryptionUserID,
-    GPGParameters,
-)
+from cg.constants.encryption import EncryptionUserID, GPGParameters
 from cg.constants.priority import SlurmQos
-from cg.exc import (
-    ChecksumFailedError,
-    FlowCellEncryptionError,
-    FlowCellError,
-)
+from cg.exc import ChecksumFailedError, FlowCellEncryptionError, FlowCellError
 from cg.meta.encryption.sbatch import (
     FLOW_CELL_ENCRYPT_COMMANDS,
     FLOW_CELL_ENCRYPT_ERROR,
 )
 from cg.meta.tar.tar import TarAPI
-from cg.models.flow_cell.flow_cell import (
-    FlowCellDirectoryData,
-)
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.slurm.sbatch import Sbatch
 from cg.utils import Process
-from cg.utils.checksum.checksum import (
-    sha512_checksum,
-)
+from cg.utils.checksum.checksum import sha512_checksum
 
 LOG = logging.getLogger(__name__)
 LIMIT_PIGZ_TASK: int = 3
@@ -39,11 +28,7 @@ LIMIT_PIGZ_TASK: int = 3
 class EncryptionAPI:
     """Class that uses gpg for various encryption and decryption functionality"""
 
-    def __init__(
-        self,
-        binary_path: str,
-        dry_run: bool = False,
-    ):
+    def __init__(self, binary_path: str, dry_run: bool = False):
         self.binary_path: str = binary_path
         self.process: Process = Process(binary=binary_path)
         self.dry_run: bool = dry_run
@@ -55,10 +40,7 @@ class EncryptionAPI:
         self.process.run_command(command, dry_run=self.dry_run)
 
     def run_passhprase_process(
-        self,
-        quality_level: int,
-        count: int,
-        passphrase_file: TextIOWrapper,
+        self, quality_level: int, count: int, passphrase_file: TextIOWrapper
     ) -> None:
         with open(passphrase_file.name, "w") as f:
             process = subprocess.Popen(
@@ -72,30 +54,20 @@ class EncryptionAPI:
             )
         process.wait()
 
-    def generate_temporary_passphrase_file(
-        self,
-        quality_level: int = 2,
-        count: int = 256,
-    ) -> Path:
+    def generate_temporary_passphrase_file(self, quality_level: int = 2, count: int = 256) -> Path:
         """Generates a temporary file with random bytes. The default values are based on the
-        encryption parameters as used on the NAS:es connected to the sequencers
-        """
+        encryption parameters as used on the NAS:es connected to the sequencers"""
         LOG.debug("Generate temporary passphrase file:")
         passphrase_file = NamedTemporaryFile(delete=False)
         self.run_passhprase_process(
-            passphrase_file=passphrase_file,
-            quality_level=quality_level,
-            count=count,
+            passphrase_file=passphrase_file, quality_level=quality_level, count=count
         )
         LOG.debug(f"Temporary passphrase file generated: {passphrase_file.name}")
 
         return Path(passphrase_file.name)
 
     def get_symmetric_passphrase_cmd(
-        self,
-        passphrase_file_path: Path,
-        quality_level: int = 2,
-        count: int = 256,
+        self, passphrase_file_path: Path, quality_level: int = 2, count: int = 256
     ) -> str:
         """Return command to generate a symmetrical passphrase file."""
         return " ".join(
@@ -150,10 +122,7 @@ class EncryptionAPI:
         return decryption_parameters
 
     def get_symmetric_decryption_command(
-        self,
-        input_file: Path,
-        output_file: Path,
-        encryption_key: Path,
+        self, input_file: Path, output_file: Path, encryption_key: Path
     ) -> list[str]:
         """Generates the gpg command for symmetric decryption"""
         decryption_parameters: list = GPGParameters.SYMMETRIC_DECRYPTION.copy()
@@ -185,10 +154,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         tar_api: TarAPI,
         dry_run: bool = False,
     ):
-        super().__init__(
-            binary_path=binary_path,
-            dry_run=dry_run,
-        )
+        super().__init__(binary_path=binary_path, dry_run=dry_run)
         self.flow_cell: FlowCellDirectoryData = flow_cell
         self.encryption_dir: Path = encryption_dir
         self.tar_api: TarAPI = tar_api
@@ -203,19 +169,11 @@ class FlowCellEncryptionAPI(EncryptionAPI):
 
     @property
     def flow_cell_encryption_dir(self) -> Path:
-        return Path(
-            self.encryption_dir,
-            self.flow_cell.full_name,
-        )
+        return Path(self.encryption_dir, self.flow_cell.full_name)
 
     @property
-    def flow_cell_encrypt_file_path_prefix(
-        self,
-    ) -> Path:
-        return Path(
-            self.flow_cell_encryption_dir,
-            self.flow_cell.id,
-        )
+    def flow_cell_encrypt_file_path_prefix(self) -> Path:
+        return Path(self.flow_cell_encryption_dir, self.flow_cell.id)
 
     @property
     def pending_file_path(self) -> Path:
@@ -250,9 +208,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         )
 
     @property
-    def symmetric_passphrase_file_path(
-        self,
-    ) -> Path:
+    def symmetric_passphrase_file_path(self) -> Path:
         return Path(self.flow_cell_encrypt_file_path_prefix.with_suffix(FileExtensions.PASS_PHRASE))
 
     @property
@@ -262,9 +218,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         )
 
     def get_flow_cell_symmetric_encryption_command(
-        self,
-        output_file: Path,
-        passphrase_file_path: Path,
+        self, output_file: Path, passphrase_file_path: Path
     ) -> str:
         """Generates the Gpg command for symmetric encryption of file."""
         encryption_parameters: list[str] = (
@@ -277,24 +231,17 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         return SPACE.join(encryption_parameters)
 
     def get_flow_cell_symmetric_decryption_command(
-        self,
-        input_file: Path,
-        passphrase_file_path: Path,
+        self, input_file: Path, passphrase_file_path: Path
     ) -> str:
         """Generates the Gpg command for symmetric decryption."""
         decryption_parameters: list[str] = (
             [self.binary_path]
             + GPGParameters.SYMMETRIC_DECRYPTION
-            + [
-                passphrase_file_path.as_posix(),
-                input_file.as_posix(),
-            ]
+            + [passphrase_file_path.as_posix(), input_file.as_posix()]
         )
         return SPACE.join(decryption_parameters)
 
-    def is_encryption_possible(
-        self,
-    ) -> bool | None:
+    def is_encryption_possible(self) -> bool | None:
         """Check if requirements for encryption are meet.
         Raises:
             FlowCellError if sequencing is not ready, encryption is pending or complete.
@@ -348,12 +295,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             email=self.slurm_mail_user,
             error=error_function,
             hours=self.slurm_hours,
-            job_name="_".join(
-                [
-                    self.flow_cell.id,
-                    "flow_cell_encryption",
-                ]
-            ),
+            job_name="_".join([self.flow_cell.id, "flow_cell_encryption"]),
             log_dir=self.flow_cell_encryption_dir.as_posix(),
             memory=self.slurm_memory,
             number_tasks=self.slurm_number_tasks,
@@ -364,8 +306,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             self.flow_cell_encrypt_file_path_prefix.with_suffix(FileExtensions.SBATCH)
         )
         sbatch_number: int = self.slurm_api.submit_sbatch(
-            sbatch_content=sbatch_content,
-            sbatch_path=sbatch_path,
+            sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
         LOG.info(f"Flow cell encryption running as job {sbatch_number}")
 
@@ -385,10 +326,7 @@ class SpringEncryptionAPI(EncryptionAPI):
         binary_path: str,
         dry_run: bool = False,
     ):
-        super().__init__(
-            binary_path=binary_path,
-            dry_run=dry_run,
-        )
+        super().__init__(binary_path=binary_path, dry_run=dry_run)
         self._temporary_passphrase = None
 
     def spring_symmetric_encryption(self, spring_file_path: Path) -> None:
@@ -398,8 +336,7 @@ class SpringEncryptionAPI(EncryptionAPI):
         LOG.info(f"Encrypt spring file: {spring_file_path}")
         LOG.info(f"to output file     : {output_file}")
         encryption_command: list = self.get_symmetric_encryption_command(
-            input_file=spring_file_path,
-            output_file=output_file,
+            input_file=spring_file_path, output_file=output_file
         )
         self.run_gpg_command(encryption_command)
 
@@ -410,16 +347,11 @@ class SpringEncryptionAPI(EncryptionAPI):
         LOG.info(f"Encrypt key file: {self.temporary_passphrase}")
         LOG.info(f"to target file  : {output_file}")
         encryption_command: list = self.get_asymmetric_encryption_command(
-            input_file=self.temporary_passphrase,
-            output_file=output_file,
+            input_file=self.temporary_passphrase, output_file=output_file
         )
         self.run_gpg_command(encryption_command)
 
-    def spring_symmetric_decryption(
-        self,
-        spring_file_path: Path,
-        output_file: Path,
-    ) -> None:
+    def spring_symmetric_decryption(self, spring_file_path: Path, output_file: Path) -> None:
         """decrypt a spring file"""
         input_file = self.encrypted_spring_file_path(spring_file_path)
         LOG.debug("*** DECRYPTING SPRING FILE ***")
@@ -440,15 +372,13 @@ class SpringEncryptionAPI(EncryptionAPI):
         LOG.info(f"Decrypt key file: {input_file}")
         LOG.info(f"to target file  : {output_file}")
         decryption_command: list = self.get_asymmetric_decryption_command(
-            input_file=input_file,
-            output_file=output_file,
+            input_file=input_file, output_file=output_file
         )
         self.run_gpg_command(decryption_command)
 
     def cleanup(self, spring_file_path: Path) -> None:
         """Removes any existing encrypted key file, key file and encrypted spring file before
-        attempting encryption or after an error has occurred
-        """
+        attempting encryption or after an error has occurred"""
         LOG.debug("*** PRE OR POST ENCRYPTION CLEANUP ***")
         try:
             self.decrypted_spring_file_checksum(spring_file_path).unlink()

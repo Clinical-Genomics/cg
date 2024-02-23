@@ -3,22 +3,14 @@ from typing import Any
 from pydantic.v1 import BaseModel, conlist, constr
 
 from cg.models.orders.constants import OrderType
-from cg.models.orders.samples import (
-    sample_class_for,
-)
+from cg.models.orders.samples import sample_class_for
 from cg.store.models import Customer, Sample
 
 
 class OrderIn(BaseModel):
-    name: constr(
-        min_length=2,
-        max_length=Sample.order.property.columns[0].type.length,
-    )
+    name: constr(min_length=2, max_length=Sample.order.property.columns[0].type.length)
     comment: str | None
-    customer: constr(
-        min_length=1,
-        max_length=Customer.internal_id.property.columns[0].type.length,
-    )
+    customer: constr(min_length=1, max_length=Customer.internal_id.property.columns[0].type.length)
     samples: conlist(Any, min_items=1)
     skip_reception_control: bool | None = None
     ticket: str | None

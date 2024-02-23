@@ -12,11 +12,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
 from cg.exc import MissingFilesError
-from cg.store.models import (
-    Case,
-    CaseSample,
-    Sample,
-)
+from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -134,11 +130,7 @@ class DeliverAPI:
         return sample_passes_qc or deliver_failed_samples or sample_is_external
 
     def deliver_case_files(
-        self,
-        case_id: str,
-        case_name: str,
-        version: Version,
-        sample_ids: set[str],
+        self, case_id: str, case_name: str, version: Version, sample_ids: set[str]
     ) -> None:
         """Deliver files on case level."""
         LOG.debug(f"Deliver case files for {case_id}")
@@ -182,8 +174,7 @@ class DeliverAPI:
         if self.delivery_type in constants.ONLY_ONE_CASE_PER_TICKET:
             case_name = None
         delivery_base: Path = self.create_delivery_dir_path(
-            case_name=case_name,
-            sample_name=sample_name,
+            case_name=case_name, sample_name=sample_name
         )
         LOG.debug(f"Creating project path {delivery_base}")
         if not self.dry_run:
@@ -192,8 +183,7 @@ class DeliverAPI:
         number_linked_files_now: int = 0
         number_previously_linked_files: int = 0
         for file_path in self.get_sample_files_from_version(
-            version_obj=version_obj,
-            sample_id=sample_id,
+            version_obj=version_obj, sample_id=sample_id
         ):
             # Out path should include customer names
             file_name: str = file_path.name.replace(sample_id, sample_name)
@@ -220,11 +210,7 @@ class DeliverAPI:
             f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case_id}"
         )
 
-    def get_case_files_from_version(
-        self,
-        version: Version,
-        sample_ids: set[str],
-    ) -> Iterable[Path]:
+    def get_case_files_from_version(self, version: Version, sample_ids: set[str]) -> Iterable[Path]:
         """Fetch all case files from a version that are tagged with any of the case tags."""
 
         if not version:
@@ -237,10 +223,7 @@ class DeliverAPI:
 
         version_file: File
         for version_file in version.files:
-            if not self.include_file_case(
-                file=version_file,
-                sample_ids=sample_ids,
-            ):
+            if not self.include_file_case(file=version_file, sample_ids=sample_ids):
                 LOG.debug(f"Skipping file {version_file.path}")
                 continue
             yield Path(version_file.full_path)
@@ -315,20 +298,13 @@ class DeliverAPI:
         LOG.info(f"Setting ticket to {ticket}")
         self.ticket = ticket
 
-    def create_delivery_dir_path(
-        self,
-        case_name: str = None,
-        sample_name: str = None,
-    ) -> Path:
+    def create_delivery_dir_path(self, case_name: str = None, sample_name: str = None) -> Path:
         """Create a path for delivering files.
 
         Note that case name and sample name needs to be the identifiers sent from customer.
         """
         delivery_path: Path = Path(
-            self.project_base_path,
-            self.customer_id,
-            constants.INBOX_NAME,
-            self.ticket,
+            self.project_base_path, self.customer_id, constants.INBOX_NAME, self.ticket
         )
         if case_name:
             delivery_path = delivery_path / case_name
@@ -338,9 +314,7 @@ class DeliverAPI:
         return delivery_path
 
     @staticmethod
-    def get_delivery_scope(
-        delivery_arguments: set[str],
-    ) -> tuple[bool, bool]:
+    def get_delivery_scope(delivery_arguments: set[str]) -> tuple[bool, bool]:
         """Returns the scope of the delivery, ie whether sample and/or case files were delivered."""
         case_delivery: bool = False
         sample_delivery: bool = False

@@ -20,23 +20,14 @@ def test_rsync_help(cli_runner):
     assert "The folder generated using the" in result.output
 
 
-def test_run_rsync_command_no_case(
-    cg_context: CGConfig,
-    cli_runner,
-    helpers,
-    caplog,
-):
+def test_run_rsync_command_no_case(cg_context: CGConfig, cli_runner, helpers, caplog):
     """Test generating the rsync command for ticket that doesnt exist"""
     caplog.set_level(logging.INFO)
 
     # Given an invalid ticket id where case was not created
 
     # WHEN running deliver rsync command
-    result = cli_runner.invoke(
-        rsync,
-        ["--dry-run", "9898989898"],
-        obj=cg_context,
-    )
+    result = cli_runner.invoke(rsync, ["--dry-run", "9898989898"], obj=cg_context)
 
     # THEN command failed successfully
     assert result.exit_code != EXIT_SUCCESS

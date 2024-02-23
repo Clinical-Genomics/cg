@@ -7,22 +7,10 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.constants.housekeeper_tags import (
-    HK_DELIVERY_REPORT_TAG,
-)
-from cg.meta.upload.scout.hk_tags import (
-    CaseTags,
-    SampleTags,
-)
-from cg.models.scout.scout_load_config import (
-    ScoutIndividual,
-    ScoutLoadConfig,
-)
-from cg.store.models import (
-    Analysis,
-    CaseSample,
-    Sample,
-)
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
+from cg.models.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
+from cg.store.models import Analysis, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -33,12 +21,7 @@ LOG = logging.getLogger(__name__)
 class ScoutConfigBuilder:
     """Base class for handling files that should be included in Scout upload"""
 
-    def __init__(
-        self,
-        hk_version_obj: Version,
-        analysis_obj: Analysis,
-        lims_api: LimsAPI,
-    ):
+    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI):
         self.hk_version_obj: Version = hk_version_obj
         self.analysis_obj: Analysis = analysis_obj
         self.lims_api: LimsAPI = lims_api
@@ -48,9 +31,7 @@ class ScoutConfigBuilder:
             delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG})
         )
 
-    def add_common_info_to_load_config(
-        self,
-    ) -> None:
+    def add_common_info_to_load_config(self) -> None:
         """Add the mandatory common information to a scout load config object"""
         self.load_config.analysis_date = self.analysis_obj.completed_at
         self.load_config.default_gene_panels = self.analysis_obj.case.panels
@@ -63,9 +44,7 @@ class ScoutConfigBuilder:
         self.include_phenotype_terms()
 
     def add_common_sample_info(
-        self,
-        config_sample: ScoutIndividual,
-        case_sample: CaseSample,
+        self, config_sample: ScoutIndividual, case_sample: CaseSample
     ) -> None:
         """Add the information to a sample that is common for different analysis types"""
         sample_id: str = case_sample.sample.internal_id
@@ -74,11 +53,7 @@ class ScoutConfigBuilder:
         try:
             lims_sample = self.lims_api.sample(sample_id) or {}
         except requests.exceptions.HTTPError as ex:
-            LOG.info(
-                "Could not fetch sample %s from LIMS: %s",
-                sample_id,
-                ex,
-            )
+            LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
 
         config_sample.sample_id = sample_id
         config_sample.sex = case_sample.sample.sex
@@ -104,9 +79,7 @@ class ScoutConfigBuilder:
         """Build a sample for the scout load config"""
         raise NotImplementedError
 
-    def build_load_config(
-        self,
-    ) -> ScoutLoadConfig:
+    def build_load_config(self) -> ScoutLoadConfig:
         """Build a load config for uploading a case to scout"""
         raise NotImplementedError
 
@@ -154,24 +127,19 @@ class ScoutConfigBuilder:
         LOG.info("Including cohorts to scout load config")
         cohorts: list[str] = self.analysis_obj.case.cohorts
         if cohorts:
-            LOG.debug(
-                "Adding cohorts %s",
-                ", ".join(cohorts),
-            )
+            LOG.debug("Adding cohorts %s", ", ".join(cohorts))
             self.load_config.cohorts = cohorts
 
     def include_cnv_report(self) -> None:
         LOG.info("Include CNV report to case")
         self.load_config.cnv_report = self.get_file_from_hk(
-            hk_tags=self.case_tags.cnv_report,
-            latest=True,
+            hk_tags=self.case_tags.cnv_report, latest=True
         )
 
     def include_multiqc_report(self) -> None:
         LOG.info("Include MultiQC report to case")
         self.load_config.multiqc = self.get_file_from_hk(
-            hk_tags=self.case_tags.multiqc_report,
-            latest=True,
+            hk_tags=self.case_tags.multiqc_report, latest=True
         )
 
     def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
@@ -182,13 +150,11 @@ class ScoutConfigBuilder:
         """
         sample_id: str = config_sample.sample_id
         config_sample.alignment_path = self.get_sample_file(
-            hk_tags=self.sample_tags.bam_file,
-            sample_id=sample_id,
+            hk_tags=self.sample_tags.bam_file, sample_id=sample_id
         )
 
         config_sample.alignment_path = self.get_sample_file(
-            hk_tags=self.sample_tags.alignment_file,
-            sample_id=sample_id,
+            hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
         )
 
     def get_sample_file(self, hk_tags: set[str], sample_id: str) -> str | None:
@@ -197,25 +163,15 @@ class ScoutConfigBuilder:
         tags.add(sample_id)
         return self.get_file_from_hk(hk_tags=tags)
 
-    def get_file_from_hk(
-        self,
-        hk_tags: set[str],
-        latest: bool | None = False,
-    ) -> str | None:
+    def get_file_from_hk(self, hk_tags: set[str], latest: bool | None = False) -> str | None:
         """Get a file from housekeeper and return the path as a string."""
         LOG.info(f"Get file with tags {hk_tags}")
         if not hk_tags:
             LOG.debug("No tags provided, skipping")
             return None
         hk_file: File | None = (
-            HousekeeperAPI.get_latest_file_from_version(
-                version=self.hk_version_obj,
-                tags=hk_tags,
-            )
+            HousekeeperAPI.get_latest_file_from_version(version=self.hk_version_obj, tags=hk_tags)
             if latest
-            else HousekeeperAPI.get_file_from_version(
-                version=self.hk_version_obj,
-                tags=hk_tags,
-            )
+            else HousekeeperAPI.get_file_from_version(version=self.hk_version_obj, tags=hk_tags)
         )
         return hk_file.full_path if hk_file else None

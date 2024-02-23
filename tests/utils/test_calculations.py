@@ -1,8 +1,6 @@
 """Tests for the calculations module."""
 
-from cg.utils.calculations import (
-    multiply_by_million,
-)
+from cg.utils.calculations import multiply_by_million
 
 
 def test_multiple_by_a_million():

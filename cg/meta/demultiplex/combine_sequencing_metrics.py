@@ -1,6 +1,4 @@
-from cg.store.models import (
-    SampleLaneSequencingMetrics,
-)
+from cg.store.models import SampleLaneSequencingMetrics
 
 
 def combine_mapped_metrics_with_undetermined(
@@ -9,27 +7,17 @@ def combine_mapped_metrics_with_undetermined(
 ) -> list[SampleLaneSequencingMetrics]:
     """Combine metrics for mapped and undetermined reads."""
 
-    metrics: dict[
-        tuple[str, int],
-        SampleLaneSequencingMetrics,
-    ] = {
-        (
-            metric.sample_internal_id,
-            metric.flow_cell_lane_number,
-        ): metric
+    metrics: dict[tuple[str, int], SampleLaneSequencingMetrics] = {
+        (metric.sample_internal_id, metric.flow_cell_lane_number): metric
         for metric in mapped_metrics
     }
     for undetermined_metric in undetermined_metrics:
-        key = (
-            undetermined_metric.sample_internal_id,
-            undetermined_metric.flow_cell_lane_number,
-        )
+        key = (undetermined_metric.sample_internal_id, undetermined_metric.flow_cell_lane_number)
         existing_metric: SampleLaneSequencingMetrics = metrics.get(key)
 
         if existing_metric:
             combined_metric: SampleLaneSequencingMetrics = combine_metrics(
-                existing_metric=existing_metric,
-                new_metric=undetermined_metric,
+                existing_metric=existing_metric, new_metric=undetermined_metric
             )
             metrics[key] = combined_metric
         else:
@@ -38,8 +26,7 @@ def combine_mapped_metrics_with_undetermined(
 
 
 def combine_metrics(
-    existing_metric: SampleLaneSequencingMetrics,
-    new_metric: SampleLaneSequencingMetrics,
+    existing_metric: SampleLaneSequencingMetrics, new_metric: SampleLaneSequencingMetrics
 ) -> SampleLaneSequencingMetrics:
     """Update an existing metric with data from a new metric."""
 
@@ -66,12 +53,7 @@ def combine_metrics(
     return existing_metric
 
 
-def weighted_average(
-    total_1: int,
-    percentage_1: float,
-    total_2: int,
-    percentage_2: float,
-) -> float:
+def weighted_average(total_1: int, percentage_1: float, total_2: int, percentage_2: float) -> float:
     """Calculate the weighted average of two percentages."""
     if total_1 == 0 and total_2 == 0:
         return 0

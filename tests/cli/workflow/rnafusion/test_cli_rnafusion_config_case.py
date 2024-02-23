@@ -6,17 +6,12 @@ from pathlib import Path
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
-from cg.cli.workflow.rnafusion.base import (
-    config_case,
-)
+from cg.cli.workflow.rnafusion.base import config_case
 from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.rnafusion import (
-    RnafusionParameters,
-    RnafusionSampleSheetEntry,
-)
+from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 
 LOG = logging.getLogger(__name__)
 
@@ -32,11 +27,7 @@ def test_config_case_without_samples(
     # GIVEN a case
 
     # WHEN running config case
-    result = cli_runner.invoke(
-        config_case,
-        [no_sample_case_id],
-        obj=rnafusion_context,
-    )
+    result = cli_runner.invoke(config_case, [no_sample_case_id], obj=rnafusion_context)
 
     # THEN command should not exit successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -61,11 +52,7 @@ def test_config_case_wrong_strandedness(
     # WHEN running with strandedness option specified
     result = cli_runner.invoke(
         config_case,
-        [
-            rnafusion_case_id,
-            "--strandedness",
-            strandedness_not_permitted,
-        ],
+        [rnafusion_case_id, "--strandedness", strandedness_not_permitted],
         obj=rnafusion_context,
     )
 
@@ -92,11 +79,7 @@ def test_config_case_default_parameters(
     # GIVEN a valid case
 
     # WHEN running config case
-    result = cli_runner.invoke(
-        config_case,
-        [rnafusion_case_id],
-        obj=rnafusion_context,
-    )
+    result = cli_runner.invoke(config_case, [rnafusion_case_id], obj=rnafusion_context)
 
     # THEN command should exit succesfully
     assert result.exit_code == EXIT_SUCCESS
@@ -119,18 +102,14 @@ def test_config_case_default_parameters(
 
     # THEN the sample sheet content should match the expected values
     sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.TXT,
-        file_path=rnafusion_sample_sheet_path,
-        read_to_string=True,
+        file_format=FileFormat.TXT, file_path=rnafusion_sample_sheet_path, read_to_string=True
     )
     assert ",".join(RnafusionSampleSheetEntry.headers()) in sample_sheet_content
     assert rnafusion_sample_sheet_content in sample_sheet_content
 
     # THEN the params file should contain all parameters
     params_content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.TXT,
-        file_path=rnafusion_params_file_path,
-        read_to_string=True,
+        file_format=FileFormat.TXT, file_path=rnafusion_params_file_path, read_to_string=True
     )
     for parameter in vars(rnafusion_parameters_default).keys():
         assert parameter in params_content
@@ -148,11 +127,7 @@ def test_config_case_dry_run(
     # GIVEN a valid case
 
     # WHEN performing a dry-run
-    result = cli_runner.invoke(
-        config_case,
-        [rnafusion_case_id, "-d"],
-        obj=rnafusion_context,
-    )
+    result = cli_runner.invoke(config_case, [rnafusion_case_id, "-d"], obj=rnafusion_context)
 
     # THEN command should should exit succesfully
     assert result.exit_code == EXIT_SUCCESS
@@ -178,22 +153,12 @@ def test_config_case_with_reference(
     caplog.set_level(logging.INFO)
 
     # GIVEN a valid case and reference dir
-    reference_dir: str = Path(
-        "non",
-        "default",
-        "path",
-        "to",
-        "references",
-    ).as_posix()
+    reference_dir: str = Path("non", "default", "path", "to", "references").as_posix()
 
     # WHEN running config case
     result = cli_runner.invoke(
         config_case,
-        [
-            rnafusion_case_id,
-            "--genomes_base",
-            reference_dir,
-        ],
+        [rnafusion_case_id, "--genomes_base", reference_dir],
         obj=rnafusion_context,
     )
 
@@ -205,8 +170,6 @@ def test_config_case_with_reference(
 
     # THEN the given reference directory should be written
     params_content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.TXT,
-        file_path=rnafusion_params_file_path,
-        read_to_string=True,
+        file_format=FileFormat.TXT, file_path=rnafusion_params_file_path, read_to_string=True
     )
     assert reference_dir in params_content

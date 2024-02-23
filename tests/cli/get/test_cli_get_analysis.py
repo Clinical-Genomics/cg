@@ -23,10 +23,7 @@ def test_get_analysis_bad_case(cli_runner: CliRunner, base_context: CGConfig):
 
 
 def test_get_analysis_required(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test to get a analysis using only the required argument"""
     # GIVEN a database with an analysis
@@ -35,11 +32,7 @@ def test_get_analysis_required(
     assert disk_store._get_query(table=Analysis).count() == 1
 
     # WHEN getting a analysis
-    result = cli_runner.invoke(
-        get,
-        ["analysis", internal_id],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["analysis", internal_id], obj=base_context)
 
     # THEN it should have been gotten
     assert result.exit_code == EXIT_SUCCESS

@@ -16,10 +16,7 @@ def test_add_collaboration(store: Store):
     # GIVEN an empty database
     collaboration_query = store._get_query(table=Collaboration)
     assert collaboration_query.first() is None
-    internal_id, name = (
-        "cust_group",
-        "Test customer group",
-    )
+    internal_id, name = "cust_group", "Test customer group"
 
     # WHEN adding a new customer group
     new_collaboration = store.add_collaboration(internal_id=internal_id, name=name)
@@ -42,10 +39,7 @@ def test_add_user(store: Store):
     store.session.add(customer)
 
     # WHEN adding a new user
-    name, email = (
-        "Paul T. Anderson",
-        "paul.anderson@magnolia.com",
-    )
+    name, email = "Paul T. Anderson", "paul.anderson@magnolia.com"
     new_user = store.add_user(customer=customer, email=email, name=name)
 
     store.session.add(new_user)
@@ -67,11 +61,7 @@ def test_add_microbial_sample(base_store: Store, helpers):
     reference_genome = "ref_gen"
     priority = "research"
     application_version = base_store._get_query(table=ApplicationVersion).first()
-    base_store.add_organism(
-        organism_name,
-        organism_name,
-        reference_genome,
-    )
+    base_store.add_organism(organism_name, organism_name, reference_genome)
     organism = base_store._get_query(table=Organism).first()
 
     # WHEN adding a new microbial sample

@@ -20,9 +20,7 @@ from cg.cli.workflow.mip.base import (
     start_available,
 )
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.mip_dna import (
-    MipDNAAnalysisAPI,
-)
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 

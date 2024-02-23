@@ -5,14 +5,9 @@ from datetime import datetime, timedelta
 
 import click
 
-from cg.exc import (
-    AnalysisAlreadyUploadedError,
-    AnalysisUploadError,
-)
+from cg.exc import AnalysisAlreadyUploadedError, AnalysisUploadError
 from cg.meta.meta import MetaAPI
-from cg.meta.upload.scout.uploadscoutapi import (
-    UploadScoutAPI,
-)
+from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Case
@@ -23,11 +18,7 @@ LOG = logging.getLogger(__name__)
 class UploadAPI(MetaAPI):
     """Upload API"""
 
-    def __init__(
-        self,
-        config: CGConfig,
-        analysis_api: AnalysisAPI,
-    ):
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
         super().__init__(config=config)
         self.analysis_api: AnalysisAPI = analysis_api
         self.scout_upload_api: UploadScoutAPI = UploadScoutAPI(
@@ -39,12 +30,7 @@ class UploadAPI(MetaAPI):
             status_db=config.status_db,
         )
 
-    def upload(
-        self,
-        ctx: click.Context,
-        case: Case,
-        restart: bool,
-    ) -> None:
+    def upload(self, ctx: click.Context, case: Case, restart: bool) -> None:
         """Uploads workflow specific analysis data and files."""
 
         raise NotImplementedError
@@ -62,8 +48,7 @@ class UploadAPI(MetaAPI):
 
         self.status_db.session.commit()
         self.trailblazer_api.set_analysis_uploaded(
-            case_id=analysis.case.internal_id,
-            uploaded_at=analysis.uploaded_at,
+            case_id=analysis.case.internal_id, uploaded_at=analysis.uploaded_at
         )
 
     @staticmethod

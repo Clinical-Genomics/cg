@@ -6,26 +6,13 @@ from pathlib import Path
 
 import pytest
 
-from cg.constants.constants import (
-    CaseActions,
-    MicrosaltAppTags,
-    MicrosaltQC,
-    Workflow,
-)
+from cg.constants.constants import CaseActions, MicrosaltAppTags, MicrosaltQC, Workflow
 from cg.meta.compress.compress import CompressAPI
-from cg.meta.workflow.microsalt import (
-    MicrosaltAnalysisAPI,
-)
-from cg.meta.workflow.mip_dna import (
-    MipDNAAnalysisAPI,
-)
+from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.compression_data import (
-    CompressionData,
-)
-from cg.models.orders.sample_base import (
-    ControlEnum,
-)
+from cg.models.compression_data import CompressionData
+from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Case, Sample
 from tests.cli.workflow.balsamic.conftest import (
     balsamic_housekeeper_dir,
@@ -33,22 +20,15 @@ from tests.cli.workflow.balsamic.conftest import (
     fastq_file_l_2_r_1,
     fastq_file_l_2_r_2,
 )
-from tests.meta.compress.conftest import (
-    compress_api,
-    real_crunchy_api,
-)
-from tests.meta.upload.scout.conftest import (
-    another_sample_id,
-)
+from tests.meta.compress.conftest import compress_api, real_crunchy_api
+from tests.meta.upload.scout.conftest import another_sample_id
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(scope="function")
 def populated_compress_spring_api(
-    compress_api: CompressAPI,
-    only_spring_bundle: dict,
-    helpers,
+    compress_api: CompressAPI, only_spring_bundle: dict, helpers
 ) -> CompressAPI:
     """Populated compress api fixture with only spring compressed fastq."""
     helpers.ensure_hk_bundle(compress_api.hk_api, only_spring_bundle)
@@ -58,9 +38,7 @@ def populated_compress_spring_api(
 
 @pytest.fixture(scope="function")
 def populated_compress_api_fastq_spring(
-    compress_api: CompressAPI,
-    spring_fastq_mix: dict,
-    helpers,
+    compress_api: CompressAPI, spring_fastq_mix: dict, helpers
 ) -> CompressAPI:
     """Populated compress api fixture with both spring and fastq."""
     helpers.ensure_hk_bundle(compress_api.hk_api, spring_fastq_mix)
@@ -85,9 +63,7 @@ def only_spring_bundle() -> dict:
 
 
 @pytest.fixture(name="spring_fastq_mix")
-def spring_fastq_mix(
-    compression_object: CompressionData,
-) -> dict:
+def spring_fastq_mix(compression_object: CompressionData) -> dict:
     """Return a dictionary with bundle info including both fastq and spring files."""
 
     return {
@@ -115,26 +91,18 @@ def spring_fastq_mix(
 
 @pytest.fixture(name="microsalt_qc_pass_run_dir_path")
 def microsalt_qc_pass_run_dir_path(
-    microsalt_qc_pass_lims_project: str,
-    microsalt_analysis_dir: Path,
+    microsalt_qc_pass_lims_project: str, microsalt_analysis_dir: Path
 ) -> Path:
     """Return a microsalt run dir path fixture that passes QC."""
-    return Path(
-        microsalt_analysis_dir,
-        microsalt_qc_pass_lims_project,
-    )
+    return Path(microsalt_analysis_dir, microsalt_qc_pass_lims_project)
 
 
 @pytest.fixture(name="microsalt_qc_fail_run_dir_path")
 def microsalt_qc_fail_run_dir_path(
-    microsalt_qc_fail_lims_project: str,
-    microsalt_analysis_dir: Path,
+    microsalt_qc_fail_lims_project: str, microsalt_analysis_dir: Path
 ) -> Path:
     """Return a microsalt run dir path fixture that fails QC."""
-    return Path(
-        microsalt_analysis_dir,
-        microsalt_qc_fail_lims_project,
-    )
+    return Path(microsalt_analysis_dir, microsalt_qc_fail_lims_project)
 
 
 @pytest.fixture(name="microsalt_qc_pass_lims_project")
@@ -156,10 +124,7 @@ def metrics_file_failing_qc(
     tmp_path: Path,
 ) -> Path:
     """Return a metrics file that fails QC with corresponding samples in the database."""
-    metrics_path = Path(
-        microsalt_qc_fail_run_dir_path,
-        f"{microsalt_qc_fail_lims_project}.json",
-    )
+    metrics_path = Path(microsalt_qc_fail_run_dir_path, f"{microsalt_qc_fail_lims_project}.json")
     temp_metrics_path = Path(tmp_path, metrics_path.name)
     shutil.copy(metrics_path, temp_metrics_path)
     return temp_metrics_path
@@ -172,10 +137,7 @@ def metrics_file_passing_qc(
     tmp_path: Path,
 ) -> Path:
     """Return a metrics file that pass QC with corresponding samples in the database."""
-    metrics_path = Path(
-        microsalt_qc_pass_run_dir_path,
-        f"{microsalt_qc_pass_lims_project}.json",
-    )
+    metrics_path = Path(microsalt_qc_pass_run_dir_path, f"{microsalt_qc_pass_lims_project}.json")
     temp_metrics_path = Path(tmp_path, metrics_path.name)
     shutil.copy(metrics_path, temp_metrics_path)
     return temp_metrics_path
@@ -183,13 +145,9 @@ def metrics_file_passing_qc(
 
 @pytest.fixture
 def microsalt_metrics_file(
-    microsalt_qc_fail_run_dir_path: Path,
-    microsalt_qc_fail_lims_project: str,
+    microsalt_qc_fail_run_dir_path: Path, microsalt_qc_fail_lims_project: str
 ) -> Path:
-    return Path(
-        microsalt_qc_fail_run_dir_path,
-        f"{microsalt_qc_fail_lims_project}.json",
-    )
+    return Path(microsalt_qc_fail_run_dir_path, f"{microsalt_qc_fail_lims_project}.json")
 
 
 @pytest.fixture(name="microsalt_case_qc_pass")
@@ -249,11 +207,7 @@ def qc_microsalt_context(
             last_sequenced_at=datetime.datetime.now(),
         )
 
-        helpers.add_relationship(
-            store=store,
-            case=microsalt_case_qc_pass,
-            sample=sample_to_add,
-        )
+        helpers.add_relationship(store=store, case=microsalt_case_qc_pass, sample=sample_to_add)
 
     # Add a negative control sample that passes the qc
     negative_control_sample: Sample = helpers.add_sample(
@@ -266,9 +220,7 @@ def qc_microsalt_context(
         control=ControlEnum.negative,
     )
     helpers.add_relationship(
-        store=store,
-        case=microsalt_case_qc_pass,
-        sample=negative_control_sample,
+        store=store, case=microsalt_case_qc_pass, sample=negative_control_sample
     )
 
     # Create a microsalt MWX case that fails QC
@@ -290,11 +242,7 @@ def qc_microsalt_context(
             control=ControlEnum.negative,
         )
 
-        helpers.add_relationship(
-            store=store,
-            case=microsalt_case_qc_fail,
-            sample=sample_to_add,
-        )
+        helpers.add_relationship(store=store, case=microsalt_case_qc_fail, sample=sample_to_add)
 
     # Setting the target reads to correspond with statusDB
     store.get_application_by_tag(
@@ -331,9 +279,7 @@ def rnafusion_metrics() -> dict[str, float]:
 
 @pytest.fixture(name="mip_analysis_api")
 def fixture_mip_analysis_api(
-    cg_context: CGConfig,
-    mip_hk_store,
-    analysis_store,
+    cg_context: CGConfig, mip_hk_store, analysis_store
 ) -> MipDNAAnalysisAPI:
     """Return a MIP analysis API."""
     analysis_api = MipDNAAnalysisAPI(cg_context)

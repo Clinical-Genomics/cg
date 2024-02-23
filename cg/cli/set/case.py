@@ -4,11 +4,7 @@ import logging
 
 import click
 
-from cg.constants import (
-    DataDelivery,
-    Priority,
-    Workflow,
-)
+from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.constants import CaseActions
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Customer, Panel
@@ -19,18 +15,8 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command("case")
-@click.option(
-    "-a",
-    "--action",
-    type=click.Choice(CaseActions.actions()),
-    help="update case action",
-)
-@click.option(
-    "-c",
-    "--customer-id",
-    type=click.STRING,
-    help="update customer",
-)
+@click.option("-a", "--action", type=click.Choice(CaseActions.actions()), help="update case action")
+@click.option("-c", "--customer-id", type=click.STRING, help="update customer")
 @click.option(
     "-d",
     "--data-analysis",
@@ -45,18 +31,9 @@ LOG = logging.getLogger(__name__)
     type=EnumChoice(DataDelivery),
     help="Update case data delivery",
 )
+@click.option("-g", "--panel", "panel_abbreviations", multiple=True, help="update gene panels")
 @click.option(
-    "-g",
-    "--panel",
-    "panel_abbreviations",
-    multiple=True,
-    help="update gene panels",
-)
-@click.option(
-    "-p",
-    "--priority",
-    type=EnumChoice(Priority, use_value=False),
-    help="update priority",
+    "-p", "--priority", type=EnumChoice(Priority, use_value=False), help="update priority"
 )
 @click.argument("case_id")
 @click.pass_obj
@@ -89,11 +66,7 @@ def set_case(
         update_action(case=case, action=action)
 
     if customer_id:
-        update_customer(
-            case=case,
-            customer_id=customer_id,
-            status_db=status_db,
-        )
+        update_customer(case=case, customer_id=customer_id, status_db=status_db)
 
     if data_analysis:
         update_data_analysis(case=case, data_analysis=data_analysis)
@@ -102,11 +75,7 @@ def set_case(
         update_data_delivery(case=case, data_delivery=data_delivery)
 
     if panel_abbreviations:
-        update_panels(
-            case=case,
-            panel_abbreviations=panel_abbreviations,
-            status_db=status_db,
-        )
+        update_panels(case=case, panel_abbreviations=panel_abbreviations, status_db=status_db)
 
     if priority:
         update_priority(case=case, priority=priority)
@@ -114,9 +83,7 @@ def set_case(
     status_db.session.commit()
 
 
-def abort_on_empty_options(
-    options: list[str],
-) -> None:
+def abort_on_empty_options(options: list[str]) -> None:
     if not any(options):
         LOG.error("Nothing to change")
         raise click.Abort
@@ -159,11 +126,7 @@ def update_data_delivery(case: Case, data_delivery: DataDelivery) -> None:
     case.data_delivery = data_delivery
 
 
-def update_panels(
-    case: Case,
-    panel_abbreviations: list[str],
-    status_db: Store,
-) -> None:
+def update_panels(case: Case, panel_abbreviations: list[str], status_db: Store) -> None:
     for panel_abbreviation in panel_abbreviations:
         panel: Panel = status_db.get_panel_by_abbreviation(abbreviation=panel_abbreviation)
         if panel is None:

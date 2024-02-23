@@ -6,10 +6,7 @@ from click.testing import CliRunner, Result
 import cg
 from cg.cli.base import base, init
 from cg.models.cg_config import CGConfig
-from cg.store.database import (
-    get_tables,
-    initialize_database,
-)
+from cg.store.database import get_tables, initialize_database
 from cg.store.store import Store
 
 
@@ -37,12 +34,7 @@ def test_missing_command(cli_runner: CliRunner):
     assert result.exit_code != 0
 
 
-def test_cli_init(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    caplog,
-    tmp_path: Path,
-):
+def test_cli_init(cli_runner: CliRunner, base_context: CGConfig, caplog, tmp_path: Path):
     caplog.set_level(logging.INFO)
     # GIVEN you want to setup a new database using the CLI
     database = Path(tmp_path, "test_db.sqlite3")
@@ -71,12 +63,7 @@ def test_cli_init(
 
     # GIVEN the database already exists
     # WHEN calling "init" with "--reset"
-    result = cli_runner.invoke(
-        init,
-        ["--reset"],
-        input="Yes",
-        obj=base_context,
-    )
+    result = cli_runner.invoke(init, ["--reset"], input="Yes", obj=base_context)
 
     # THEN it should re-setup the tables and print new tables
     assert result.exit_code == 0

@@ -21,11 +21,7 @@ depends_on = None
 def upgrade():
     op.add_column(
         table_name="order",
-        column=sa.Column(
-            "workflow",
-            sa.Enum(*tuple(Workflow)),
-            nullable=False,
-        ),
+        column=sa.Column("workflow", sa.Enum(*tuple(Workflow)), nullable=False),
     )
 
 

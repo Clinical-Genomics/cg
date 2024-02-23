@@ -42,20 +42,11 @@ class MockOsTicket(OsTicket):
         self.url = os.path.join(domain, "api/tickets.json")
 
     def open_ticket(
-        self,
-        attachment: dict,
-        email: str,
-        message: str,
-        name: str,
-        subject: str,
+        self, attachment: dict, email: str, message: str, name: str, subject: str
     ) -> str | None:
         """Open a new ticket through the REST API."""
         if self._should_fail:
-            LOG.error(
-                "res.text: %s, reason: %s",
-                self._ticket_nr,
-                "Unknown reason",
-            )
+            LOG.error("res.text: %s, reason: %s", self._ticket_nr, "Unknown reason")
             raise TicketCreationError("FAIL")
         if self._return_none:
             return None

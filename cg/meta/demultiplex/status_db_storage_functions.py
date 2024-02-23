@@ -11,17 +11,9 @@ from cg.constants import FlowCellStatus
 from cg.meta.demultiplex.combine_sequencing_metrics import (
     combine_mapped_metrics_with_undetermined,
 )
-from cg.meta.demultiplex.utils import (
-    get_q30_threshold,
-)
-from cg.models.flow_cell.flow_cell import (
-    FlowCellDirectoryData,
-)
-from cg.store.models import (
-    Flowcell,
-    Sample,
-    SampleLaneSequencingMetrics,
-)
+from cg.meta.demultiplex.utils import get_q30_threshold
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -60,9 +52,7 @@ def store_flow_cell_data_in_status_db(
 
 
 def add_samples_to_flow_cell_in_status_db(
-    flow_cell: Flowcell,
-    sample_internal_ids: list[str],
-    store: Store,
+    flow_cell: Flowcell, sample_internal_ids: list[str], store: Store
 ) -> Flowcell:
     """Adds samples to a flow cell in status db."""
     samples: set[Sample] = {
@@ -91,22 +81,17 @@ def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, stor
         undetermined_metrics=undetermined_metrics,
     )
 
-    add_sequencing_metrics_to_statusdb(
-        sample_lane_sequencing_metrics=combined_metrics,
-        store=store,
-    )
+    add_sequencing_metrics_to_statusdb(sample_lane_sequencing_metrics=combined_metrics, store=store)
     LOG.info(f"Added sequencing metrics to status db for: {flow_cell.id}")
 
 
 def add_sequencing_metrics_to_statusdb(
-    sample_lane_sequencing_metrics: list[SampleLaneSequencingMetrics],
-    store: Store,
+    sample_lane_sequencing_metrics: list[SampleLaneSequencingMetrics], store: Store
 ) -> None:
     for metric in sample_lane_sequencing_metrics:
         metric_exists: bool = metric_exists_in_status_db(metric=metric, store=store)
         metric_has_sample: bool = metric_has_sample_in_statusdb(
-            sample_internal_id=metric.sample_internal_id,
-            store=store,
+            sample_internal_id=metric.sample_internal_id, store=store
         )
         if not metric_exists and metric_has_sample:
             LOG.debug(
@@ -125,10 +110,7 @@ def metric_has_sample_in_statusdb(sample_internal_id: str, store: Store) -> bool
     return False
 
 
-def metric_exists_in_status_db(
-    metric: SampleLaneSequencingMetrics,
-    store: Store,
-) -> bool:
+def metric_exists_in_status_db(metric: SampleLaneSequencingMetrics, store: Store) -> bool:
     existing_metrics_entry: SampleLaneSequencingMetrics | None = (
         store.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
             flow_cell_name=metric.flow_cell_name,
@@ -156,24 +138,13 @@ def store_sample_data_in_status_db(flow_cell: FlowCellDirectoryData, store: Stor
             LOG.warning(f"Cannot find {sample_id}. Skipping.")
             continue
 
-        update_sample_read_count(
-            sample=sample,
-            q30_threshold=q30_threshold,
-            store=store,
-        )
-        update_sample_sequencing_date(
-            sample=sample,
-            sequenced_at=sequenced_at,
-        )
+        update_sample_read_count(sample=sample, q30_threshold=q30_threshold, store=store)
+        update_sample_sequencing_date(sample=sample, sequenced_at=sequenced_at)
 
     store.session.commit()
 
 
-def update_sample_read_count(
-    sample: Sample,
-    q30_threshold: int,
-    store: Store,
-) -> None:
+def update_sample_read_count(sample: Sample, q30_threshold: int, store: Store) -> None:
     """Update the read count with reads passing the q30 threshold."""
     sample_read_count: int = store.get_number_of_reads_for_sample_passing_q30_threshold(
         sample_internal_id=sample.internal_id,

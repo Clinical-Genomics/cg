@@ -8,41 +8,20 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.cli.upload.utils import (
-    suggest_cases_to_upload,
-)
+from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.constants import Workflow
-from cg.constants.constants import (
-    DRY_RUN,
-    FileFormat,
-)
-from cg.constants.scout import (
-    ScoutCustomCaseReportTags,
-)
+from cg.constants.constants import DRY_RUN, FileFormat
+from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.io.controller import WriteStream
-from cg.meta.upload.scout.uploadscoutapi import (
-    UploadScoutAPI,
-)
+from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.upload.upload_api import UploadAPI
-from cg.meta.workflow.balsamic import (
-    BalsamicAnalysisAPI,
-)
-from cg.meta.workflow.balsamic_umi import (
-    BalsamicUmiAnalysisAPI,
-)
-from cg.meta.workflow.mip_dna import (
-    MipDNAAnalysisAPI,
-)
-from cg.meta.workflow.mip_rna import (
-    MipRNAAnalysisAPI,
-)
-from cg.meta.workflow.rnafusion import (
-    RnafusionAnalysisAPI,
-)
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.scout.scout_load_config import (
-    ScoutLoadConfig,
-)
+from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -56,21 +35,10 @@ LOG = logging.getLogger(__name__)
     is_flag=True,
     help="re-upload existing analysis",
 )
-@click.option(
-    "-p",
-    "--print",
-    "print_console",
-    is_flag=True,
-    help="print config values",
-)
+@click.option("-p", "--print", "print_console", is_flag=True, help="print config values")
 @click.argument("case_id", required=False)
 @click.pass_context
-def upload_to_scout(
-    context,
-    re_upload: bool,
-    print_console: bool,
-    case_id: str,
-):
+def upload_to_scout(context, re_upload: bool, print_console: bool, case_id: str):
     """Upload variants from analysis to Scout."""
     status_db: Store = context.obj.status_db
 
@@ -81,41 +49,18 @@ def upload_to_scout(
         return
 
     context.invoke(
-        create_scout_load_config,
-        case_id=case_id,
-        print_console=print_console,
-        re_upload=re_upload,
+        create_scout_load_config, case_id=case_id, print_console=print_console, re_upload=re_upload
     )
     if not print_console:
-        context.invoke(
-            upload_case_to_scout,
-            case_id=case_id,
-            re_upload=re_upload,
-        )
+        context.invoke(upload_case_to_scout, case_id=case_id, re_upload=re_upload)
 
 
 @click.command(name="create-scout-load-config")
 @click.argument("case-id")
-@click.option(
-    "-p",
-    "--print",
-    "print_console",
-    is_flag=True,
-    help="Only print config",
-)
-@click.option(
-    "-r",
-    "--re-upload",
-    is_flag=True,
-    help="Overwrite existing load configs",
-)
+@click.option("-p", "--print", "print_console", is_flag=True, help="Only print config")
+@click.option("-r", "--re-upload", is_flag=True, help="Overwrite existing load configs")
 @click.pass_obj
-def create_scout_load_config(
-    context: CGConfig,
-    case_id: str,
-    print_console: bool,
-    re_upload: bool,
-):
+def create_scout_load_config(context: CGConfig, case_id: str, print_console: bool, re_upload: bool):
     """Create a load config for a case in scout and add it to housekeeper"""
 
     status_db: Store = context.status_db
@@ -146,8 +91,7 @@ def create_scout_load_config(
     if print_console:
         click.echo(
             WriteStream.write_stream_from_content(
-                content=scout_load_config.dict(exclude_none=True),
-                file_format=FileFormat.YAML,
+                content=scout_load_config.dict(exclude_none=True), file_format=FileFormat.YAML
             )
         )
         LOG.info(f"Would save file to {file_path}")
@@ -164,17 +108,12 @@ def create_scout_load_config(
             )
             raise click.Abort
     LOG.info("Saving config file to disc")
-    scout_upload_api.save_config_file(
-        upload_config=scout_load_config,
-        file_path=file_path,
-    )
+    scout_upload_api.save_config_file(upload_config=scout_load_config, file_path=file_path)
 
     try:
         LOG.info("Add config file to housekeeper")
         scout_upload_api.add_scout_config_to_hk(
-            config_file_path=file_path,
-            case_id=case_id,
-            delete=re_upload,
+            config_file_path=file_path, case_id=case_id, delete=re_upload
         )
     except FileExistsError as error:
         LOG.warning(f"{error}, consider removing the file from housekeeper and try again")
@@ -191,12 +130,7 @@ def create_scout_load_config(
 @DRY_RUN
 @click.argument("case_id")
 @click.pass_obj
-def upload_case_to_scout(
-    context: CGConfig,
-    re_upload: bool,
-    dry_run: bool,
-    case_id: str,
-):
+def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case_id: str):
     """Upload variants and case from analysis to Scout."""
 
     LOG.info("----------------- UPLOAD -----------------------")
@@ -216,10 +150,7 @@ def upload_case_to_scout(
     LOG.info(f"Uploading case {case_id} to scout")
 
     if not dry_run:
-        scout_api.upload(
-            scout_load_config=scout_config_file.full_path,
-            force=re_upload,
-        )
+        scout_api.upload(scout_load_config=scout_config_file.full_path, force=re_upload)
 
     LOG.info(f"Uploaded to scout using load config {scout_config_file.full_path}")
     LOG.info("Case loaded successfully to Scout")
@@ -227,45 +158,20 @@ def upload_case_to_scout(
 
 @click.command(name="rna-to-scout")
 @DRY_RUN
-@click.option(
-    "-r",
-    "--research",
-    is_flag=True,
-    help="Upload research report instead of clinical",
-)
+@click.option("-r", "--research", is_flag=True, help="Upload research report instead of clinical")
 @click.argument("case_id")
 @click.pass_context
-def upload_rna_to_scout(
-    context,
-    case_id: str,
-    dry_run: bool,
-    research: bool,
-) -> None:
+def upload_rna_to_scout(context, case_id: str, dry_run: bool, research: bool) -> None:
     """Upload an RNA case's gene fusion report and junction splice files for all samples connect via subject_id."""
 
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
+    context.invoke(upload_rna_alignment_file_to_scout, case_id=case_id, dry_run=dry_run)
+    context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(
-        upload_rna_alignment_file_to_scout,
-        case_id=case_id,
-        dry_run=dry_run,
+        upload_rna_fusion_report_to_scout, case_id=case_id, dry_run=dry_run, research=research
     )
-    context.invoke(
-        upload_multiqc_to_scout,
-        case_id=case_id,
-        dry_run=dry_run,
-    )
-    context.invoke(
-        upload_rna_fusion_report_to_scout,
-        case_id=case_id,
-        dry_run=dry_run,
-        research=research,
-    )
-    context.invoke(
-        upload_rna_junctions_to_scout,
-        case_id=case_id,
-        dry_run=dry_run,
-    )
+    context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
 
 
 @click.command(name="rna-alignment-file-to-scout")
@@ -285,10 +191,7 @@ def upload_rna_alignment_file_to_scout(context: CGConfig, case_id: str, dry_run:
 @click.argument("case_id")
 @click.pass_obj
 def upload_rna_fusion_report_to_scout(
-    context: CGConfig,
-    dry_run: bool,
-    case_id: str,
-    research: bool,
+    context: CGConfig, dry_run: bool, case_id: str, research: bool
 ) -> None:
     """Upload fusion report file for a case to Scout."""
 
@@ -296,9 +199,7 @@ def upload_rna_fusion_report_to_scout(
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
     scout_upload_api.upload_fusion_report_to_scout(
-        dry_run=dry_run,
-        research=research,
-        case_id=case_id,
+        dry_run=dry_run, research=research, case_id=case_id
     )
 
 
@@ -326,12 +227,8 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
     status_db: Store = context.status_db
     case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
-    (
-        scout_report_type,
-        multiqc_report,
-    ) = scout_upload_api.get_multiqc_html_report(
-        case_id=case_id,
-        workflow=case.data_analysis,
+    scout_report_type, multiqc_report = scout_upload_api.get_multiqc_html_report(
+        case_id=case_id, workflow=case.data_analysis
     )
     if scout_report_type == ScoutCustomCaseReportTags.MULTIQC_RNA:
         scout_upload_api.upload_rna_report_to_dna_case_in_scout(
@@ -361,6 +258,5 @@ def get_upload_api(case: Case, cg_config: CGConfig) -> UploadAPI:
     }
 
     return UploadAPI(
-        config=cg_config,
-        analysis_api=analysis_apis.get(case.data_analysis)(cg_config),
+        config=cg_config, analysis_api=analysis_apis.get(case.data_analysis)(cg_config)
     )

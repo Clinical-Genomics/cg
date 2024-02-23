@@ -32,13 +32,7 @@ class MockTB:
     def __init__(self):
         self._link_was_called = False
 
-    def link(
-        self,
-        family: str,
-        sample: str,
-        analysis_type: str,
-        files: list[dict],
-    ):
+    def link(self, family: str, sample: str, analysis_type: str, files: list[dict]):
         """Link files mock"""
 
         del family, sample, analysis_type, files
@@ -144,8 +138,4 @@ def invalid_config_unknown_field_analysis_type():
         expected_coverage=15,
         capture_kit="agilent_sureselect_cre.v1",
     )
-    return dict(
-        case="a_case",
-        default_gene_panels=["a_panel"],
-        samples=[sample],
-    )
+    return dict(case="a_case", default_gene_panels=["a_panel"], samples=[sample])

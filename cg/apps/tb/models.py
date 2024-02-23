@@ -1,45 +1,23 @@
 import datetime as dt
 from pathlib import Path
 
-from pydantic import (
-    BaseModel,
-    BeforeValidator,
-    ConfigDict,
-)
+from pydantic import BaseModel, BeforeValidator, ConfigDict
 from typing_extensions import Annotated
 
-from cg.apps.tb.validators import (
-    parse_str_to_datetime,
-    parse_str_to_path,
-)
+from cg.apps.tb.validators import parse_str_to_datetime, parse_str_to_path
 
 
 class TrailblazerAnalysis(BaseModel):
     id: int
     case_id: str | None = None
     version: str | None = None
-    logged_at: Annotated[
-        dt.datetime | None,
-        BeforeValidator(parse_str_to_datetime),
-    ]
-    started_at: Annotated[
-        dt.datetime | None,
-        BeforeValidator(parse_str_to_datetime),
-    ]
-    completed_at: Annotated[
-        dt.datetime | None,
-        BeforeValidator(parse_str_to_datetime),
-    ]
+    logged_at: Annotated[dt.datetime | None, BeforeValidator(parse_str_to_datetime)]
+    started_at: Annotated[dt.datetime | None, BeforeValidator(parse_str_to_datetime)]
+    completed_at: Annotated[dt.datetime | None, BeforeValidator(parse_str_to_datetime)]
     status: str | None = None
     priority: str | None = None
-    out_dir: Annotated[
-        Path | None,
-        BeforeValidator(parse_str_to_path),
-    ]
-    config_path: Annotated[
-        Path | None,
-        BeforeValidator(parse_str_to_path),
-    ]
+    out_dir: Annotated[Path | None, BeforeValidator(parse_str_to_path)]
+    config_path: Annotated[Path | None, BeforeValidator(parse_str_to_path)]
     comment: str | None = None
     is_deleted: bool | None = None
     is_visible: bool | None = None

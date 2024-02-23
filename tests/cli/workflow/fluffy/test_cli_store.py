@@ -1,14 +1,9 @@
 from click.testing import CliRunner
 
 from cg.apps.hermes.hermes_api import HermesApi
-from cg.cli.workflow.fluffy.base import (
-    store,
-    store_available,
-)
+from cg.cli.workflow.fluffy.base import store, store_available
 from cg.constants import EXIT_SUCCESS
-from cg.meta.workflow.fluffy import (
-    FluffyAnalysisAPI,
-)
+from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 
@@ -24,12 +19,7 @@ def test_cli_store_dry_no_case(
 
     # WHEN running command in dry-run mode
     result = cli_runner.invoke(
-        store,
-        [
-            fluffy_case_id_non_existing,
-            "--dry-run",
-        ],
-        obj=fluffy_context,
+        store, [fluffy_case_id_non_existing, "--dry-run"], obj=fluffy_context
     )
 
     # THEN command does not terminate successfully
@@ -56,23 +46,14 @@ def test_cli_store(
     # GIVEN a case_id that does exist in database
 
     # GIVEN that case action is "running"
-    fluffy_analysis_api.set_statusdb_action(
-        case_id=fluffy_case_id_existing,
-        action="running",
-    )
+    fluffy_analysis_api.set_statusdb_action(case_id=fluffy_case_id_existing, action="running")
 
     # GIVEN deliverables were generated and could be found
-    mocker.patch.object(
-        FluffyAnalysisAPI,
-        "get_deliverables_file_path",
-    )
+    mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_file_path")
     FluffyAnalysisAPI.get_deliverables_file_path.return_value = deliverables_yaml_path
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
-    mocker.patch.object(
-        FluffyAnalysisAPI,
-        "get_date_from_file_path",
-    )
+    mocker.patch.object(FluffyAnalysisAPI, "get_date_from_file_path")
     FluffyAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
 
     # GIVEN Hermes parses deliverables and generates a valid response
@@ -80,11 +61,7 @@ def test_cli_store(
     HermesApi.create_housekeeper_bundle.return_value = fluffy_hermes_deliverables_response_data
 
     # WHEN running command
-    result = cli_runner.invoke(
-        store,
-        [fluffy_case_id_existing],
-        obj=fluffy_context,
-    )
+    result = cli_runner.invoke(store, [fluffy_case_id_existing], obj=fluffy_context)
 
     # THEN command terminates successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -113,17 +90,11 @@ def test_cli_store_bundle_already_added(
     # GIVEN a case_id that does exist in database
 
     # GIVEN deliverables were generated and could be found
-    mocker.patch.object(
-        FluffyAnalysisAPI,
-        "get_deliverables_file_path",
-    )
+    mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_file_path")
     FluffyAnalysisAPI.get_deliverables_file_path.return_value = deliverables_yaml_path
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
-    mocker.patch.object(
-        FluffyAnalysisAPI,
-        "get_date_from_file_path",
-    )
+    mocker.patch.object(FluffyAnalysisAPI, "get_date_from_file_path")
     FluffyAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
 
     # GIVEN Hermes parses deliverables and generates a valid response
@@ -131,18 +102,10 @@ def test_cli_store_bundle_already_added(
     HermesApi.create_housekeeper_bundle.return_value = fluffy_hermes_deliverables_response_data
 
     # GIVEN deliverables have already been stored in Housekeeper
-    cli_runner.invoke(
-        store,
-        [fluffy_case_id_existing],
-        obj=fluffy_context,
-    )
+    cli_runner.invoke(store, [fluffy_case_id_existing], obj=fluffy_context)
 
     # WHEN running command
-    result = cli_runner.invoke(
-        store,
-        [fluffy_case_id_existing],
-        obj=fluffy_context,
-    )
+    result = cli_runner.invoke(store, [fluffy_case_id_existing], obj=fluffy_context)
 
     # THEN command does not terminate successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -167,23 +130,14 @@ def test_cli_store_available_case_is_running(
     # GIVEN a case_id that does exist in database
 
     # GIVEN that case action is "running"
-    fluffy_analysis_api.set_statusdb_action(
-        case_id=fluffy_case_id_existing,
-        action="running",
-    )
+    fluffy_analysis_api.set_statusdb_action(case_id=fluffy_case_id_existing, action="running")
 
     # GIVEN deliverables were generated and could be found
-    mocker.patch.object(
-        FluffyAnalysisAPI,
-        "get_analysis_finish_path",
-    )
+    mocker.patch.object(FluffyAnalysisAPI, "get_analysis_finish_path")
     FluffyAnalysisAPI.get_analysis_finish_path.return_value = deliverables_yaml_path
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
-    mocker.patch.object(
-        FluffyAnalysisAPI,
-        "get_date_from_file_path",
-    )
+    mocker.patch.object(FluffyAnalysisAPI, "get_date_from_file_path")
     FluffyAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
 
     # GIVEN Hermes parses deliverables and generates a valid response
@@ -231,17 +185,11 @@ def test_cli_store_available_case_not_running(
     fluffy_analysis_api.status_db.session.commit()
 
     # GIVEN deliverables were generated and could be found
-    mocker.patch.object(
-        FluffyAnalysisAPI,
-        "get_deliverables_file_path",
-    )
+    mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_file_path")
     FluffyAnalysisAPI.get_deliverables_file_path.return_value = deliverables_yaml_path
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
-    mocker.patch.object(
-        FluffyAnalysisAPI,
-        "get_date_from_file_path",
-    )
+    mocker.patch.object(FluffyAnalysisAPI, "get_date_from_file_path")
     FluffyAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
 
     # GIVEN Hermes parses deliverables and generates a valid response

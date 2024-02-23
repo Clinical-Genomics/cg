@@ -2,19 +2,10 @@ from pathlib import Path
 
 from click.testing import CliRunner, Result
 
-from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import (
-    SampleSheetValidator,
-)
-from cg.cli.demultiplex.sample_sheet import (
-    validate_sample_sheet,
-)
-from cg.constants import (
-    EXIT_SUCCESS,
-    FileExtensions,
-)
-from cg.constants.demultiplexing import (
-    BclConverter,
-)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
+from cg.cli.demultiplex.sample_sheet import validate_sample_sheet
+from cg.constants import EXIT_SUCCESS, FileExtensions
+from cg.constants.demultiplexing import BclConverter
 from cg.models.cg_config import CGConfig
 
 
@@ -81,8 +72,7 @@ def test_validate_correct_bcl2fastq_sample_sheet(
 
     # GIVEN that the sample sheet is correct
     SampleSheetValidator().validate_sample_sheet_from_file(
-        file_path=sample_sheet,
-        bcl_converter=BclConverter.BCL2FASTQ,
+        file_path=sample_sheet, bcl_converter=BclConverter.BCL2FASTQ
     )
 
     # WHEN validating the sample sheet
@@ -109,15 +99,12 @@ def test_validate_correct_dragen_sample_sheet(
 
     # GIVEN that the sample sheet is correct
     SampleSheetValidator().validate_sample_sheet_from_file(
-        file_path=sample_sheet,
-        bcl_converter=BclConverter.BCLCONVERT,
+        file_path=sample_sheet, bcl_converter=BclConverter.BCLCONVERT
     )
 
     # WHEN validating the sample sheet
     result: Result = cli_runner.invoke(
-        validate_sample_sheet,
-        [str(sample_sheet)],
-        obj=sample_sheet_context,
+        validate_sample_sheet, [str(sample_sheet)], obj=sample_sheet_context
     )
 
     # THEN assert that it exits successfully

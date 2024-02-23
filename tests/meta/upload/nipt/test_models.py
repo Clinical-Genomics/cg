@@ -3,10 +3,7 @@ import math
 import pytest
 from pydantic import ValidationError
 
-from cg.meta.upload.nipt.models import (
-    FlowCellQ30AndReads,
-    StatinaUploadFiles,
-)
+from cg.meta.upload.nipt.models import FlowCellQ30AndReads, StatinaUploadFiles
 
 
 def test_statina_upload_files_required_field():
@@ -33,31 +30,18 @@ def test_statina_upload_files_optional_fields():
 
 
 def test_flow_cell_q30_and_reads_init():
-    flow_cell = FlowCellQ30AndReads(
-        total_reads_on_flow_cell=5000,
-        average_q30_across_samples=90.5,
-    )
+    flow_cell = FlowCellQ30AndReads(total_reads_on_flow_cell=5000, average_q30_across_samples=90.5)
     assert flow_cell.total_reads_on_flow_cell == 5000
-    assert math.isclose(
-        flow_cell.average_q30_across_samples,
-        90.5,
-        rel_tol=1e-9,
-    )
+    assert math.isclose(flow_cell.average_q30_across_samples, 90.5, rel_tol=1e-9)
 
 
 def test_passes_read_threshold():
-    flow_cell = FlowCellQ30AndReads(
-        total_reads_on_flow_cell=5000,
-        average_q30_across_samples=90.5,
-    )
+    flow_cell = FlowCellQ30AndReads(total_reads_on_flow_cell=5000, average_q30_across_samples=90.5)
     assert flow_cell.passes_read_threshold(4000) is True
     assert flow_cell.passes_read_threshold(6000) is False
 
 
 def test_passes_q30_threshold():
-    flow_cell = FlowCellQ30AndReads(
-        total_reads_on_flow_cell=5000,
-        average_q30_across_samples=90.5,
-    )
+    flow_cell = FlowCellQ30AndReads(total_reads_on_flow_cell=5000, average_q30_across_samples=90.5)
     assert flow_cell.passes_q30_threshold(80.0) is True
     assert flow_cell.passes_q30_threshold(95.0) is False

@@ -7,15 +7,9 @@ import pytest
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants.constants import FileFormat
 from cg.constants.pedigree import Pedigree
-from cg.constants.subject import (
-    PhenotypeStatus,
-    RelationshipStatus,
-    Sex,
-)
+from cg.constants.subject import PhenotypeStatus, RelationshipStatus, Sex
 from cg.io.controller import ReadFile
-from cg.models.scout.scout_load_config import (
-    Reviewer,
-)
+from cg.models.scout.scout_load_config import Reviewer
 from tests.mocks.process_mock import ProcessMock
 
 SCOUT_INDIVIDUAL: dict = {
@@ -26,11 +20,7 @@ SCOUT_INDIVIDUAL: dict = {
     "mt_bam": Path("path", "to", "reduced_mt.bam").as_posix(),
     "reviewer": Reviewer(
         alignment=Path("path", "to", "expansionhunter.bam").as_posix(),
-        alignment_index=Path(
-            "path",
-            "to",
-            "expansionhunter.bam.bai",
-        ).as_posix(),
+        alignment_index=Path("path", "to", "expansionhunter.bam.bai").as_posix(),
         catalog=Path("path", "to", "variant_catalog.json").as_posix(),
         vcf=Path("path", "to", "expansionhunter.vcf").as_posix(),
     ),
@@ -96,16 +86,13 @@ def other_sex_case_file(scout_dir: Path) -> Path:
 def none_case_raw(none_case_file: Path) -> dict:
     """Return a single case of a export causatives run with scout"""
     cases: list = ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON,
-        file_path=none_case_file,
+        file_format=FileFormat.JSON, file_path=none_case_file
     )
     return cases[0]
 
 
 @pytest.fixture
-def other_sex_case_output(
-    other_sex_case_file: Path,
-) -> str:
+def other_sex_case_output(other_sex_case_file: Path) -> str:
     """Return the content of a export causatives run with scout"""
     with open(other_sex_case_file, "r") as infile:
         content = infile.read()
@@ -113,9 +100,7 @@ def other_sex_case_output(
 
 
 @pytest.fixture
-def causative_output(
-    causatives_file: Path,
-) -> str:
+def causative_output(causatives_file: Path) -> str:
     """Return the content of a export causatives run with scout"""
     with open(causatives_file, "r") as infile:
         content = infile.read()

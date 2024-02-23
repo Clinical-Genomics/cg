@@ -1,10 +1,6 @@
 from cg.models.analysis import AnalysisModel
-from cg.models.balsamic.config import (
-    BalsamicConfigJSON,
-)
-from cg.models.balsamic.metrics import (
-    BalsamicQCMetrics,
-)
+from cg.models.balsamic.config import BalsamicConfigJSON
+from cg.models.balsamic.metrics import BalsamicQCMetrics
 
 
 class BalsamicAnalysis(AnalysisModel):

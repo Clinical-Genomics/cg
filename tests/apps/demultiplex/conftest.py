@@ -2,44 +2,27 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.override_cycles_validator import (
-    OverrideCyclesValidator,
-)
+from cg.apps.demultiplex.sample_sheet.override_cycles_validator import OverrideCyclesValidator
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
-    SampleSheetCreatorBcl2Fastq,
-)
-from cg.constants.demultiplexing import (
-    SampleSheetBcl2FastqSections,
-)
-from cg.models.flow_cell.flow_cell import (
-    FlowCellDirectoryData,
-)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreatorBcl2Fastq
+from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 @pytest.fixture
 def bcl_convert_samples_similar_index1() -> list[FlowCellSampleBCLConvert]:
     """Return a list of three FlowCellSampleBCLConvert with updated indexes."""
     sample_1 = FlowCellSampleBCLConvert(
-        lane=1,
-        sample_id="ACC123",
-        index="CAGAAGAT",
-        index2="GCGCAAGC",
+        lane=1, sample_id="ACC123", index="CAGAAGAT", index2="GCGCAAGC"
     )
     sample_2 = FlowCellSampleBCLConvert(
-        lane=1,
-        sample_id="ACC456",
-        index="CAGAAGAG",
-        index2="CAATGTAT",
+        lane=1, sample_id="ACC456", index="CAGAAGAG", index2="CAATGTAT"
     )
     sample_3 = FlowCellSampleBCLConvert(
-        lane=2,
-        sample_id="ACC789",
-        index="AAGCGATA",
-        index2="AACCGCAA",
+        lane=2, sample_id="ACC789", index="AAGCGATA", index2="AACCGCAA"
     )
     return [sample_1, sample_2, sample_3]
 
@@ -48,22 +31,13 @@ def bcl_convert_samples_similar_index1() -> list[FlowCellSampleBCLConvert]:
 def bcl_convert_samples_similar_index2() -> list[FlowCellSampleBCLConvert]:
     """Return a list of three FlowCellSampleBCLConvert with updated indexes."""
     sample_1 = FlowCellSampleBCLConvert(
-        lane=1,
-        sample_id="ACC123",
-        index="GCGCAAGC",
-        index2="CAATGTAC",
+        lane=1, sample_id="ACC123", index="GCGCAAGC", index2="CAATGTAC"
     )
     sample_2 = FlowCellSampleBCLConvert(
-        lane=1,
-        sample_id="ACC456",
-        index="CAATGTAT",
-        index2="CAATGTAT",
+        lane=1, sample_id="ACC456", index="CAATGTAT", index2="CAATGTAT"
     )
     sample_3 = FlowCellSampleBCLConvert(
-        lane=2,
-        sample_id="ACC789",
-        index="AAGCGATA",
-        index2="AACCGCAA",
+        lane=2, sample_id="ACC789", index="AAGCGATA", index2="AACCGCAA"
     )
     return [sample_1, sample_2, sample_3]
 
@@ -142,8 +116,7 @@ def sample_sheet_bcl2fastq_data_header() -> list[list[str]]:
 
 @pytest.fixture
 def sample_sheet_samples_no_header(
-    sample_sheet_line_sample_1: list[str],
-    sample_sheet_line_sample_2: list[str],
+    sample_sheet_line_sample_1: list[str], sample_sheet_line_sample_2: list[str]
 ) -> list[list[str]]:
     """Return the content of a sample sheet with samples but without a sample header."""
     return [
@@ -168,8 +141,7 @@ def valid_sample_sheet_bcl2fastq(
 
 @pytest.fixture
 def sample_sheet_bcl2fastq_duplicate_same_lane(
-    valid_sample_sheet_bcl2fastq: list[list[str]],
-    sample_sheet_line_sample_2: list[str],
+    valid_sample_sheet_bcl2fastq: list[list[str]], sample_sheet_line_sample_2: list[str]
 ) -> list[list[str]]:
     """Return the content of a Bcl2fastq sample sheet with a duplicated sample in the same lane."""
     valid_sample_sheet_bcl2fastq.append(sample_sheet_line_sample_2)
@@ -287,29 +259,20 @@ def index2_10_nt_sequence_from_lims() -> str:
 
 @pytest.fixture
 def raw_index_sequence(
-    index1_8_nt_sequence_from_lims: str,
-    index2_8_nt_sequence_from_lims: str,
+    index1_8_nt_sequence_from_lims: str, index2_8_nt_sequence_from_lims: str
 ) -> str:
     """Return a raw index."""
     return f"{index1_8_nt_sequence_from_lims}-{index2_8_nt_sequence_from_lims}"
 
 
 @pytest.fixture
-def bcl_convert_flow_cell_sample(
-    raw_index_sequence: str,
-) -> FlowCellSampleBCLConvert:
+def bcl_convert_flow_cell_sample(raw_index_sequence: str) -> FlowCellSampleBCLConvert:
     """Return a BCL Convert sample."""
-    return FlowCellSampleBCLConvert(
-        lane=1,
-        index=raw_index_sequence,
-        sample_id="ACC123",
-    )
+    return FlowCellSampleBCLConvert(lane=1, index=raw_index_sequence, sample_id="ACC123")
 
 
 @pytest.fixture
-def bcl_convert_sample_sheet_path(
-    illumina_demultiplexed_runs_directory,
-):
+def bcl_convert_sample_sheet_path(illumina_demultiplexed_runs_directory):
     return Path(
         illumina_demultiplexed_runs_directory,
         "230504_A00689_0804_BHY7FFDRX2",
@@ -318,9 +281,7 @@ def bcl_convert_sample_sheet_path(
 
 
 @pytest.fixture
-def bcl2fastq_sample_sheet_path(
-    illumina_demultiplexed_runs_directory,
-):
+def bcl2fastq_sample_sheet_path(illumina_demultiplexed_runs_directory):
     return Path(
         illumina_demultiplexed_runs_directory,
         "170407_ST-E00198_0209_BHHKVCALXX",
@@ -336,8 +297,7 @@ def override_cycles_validator() -> OverrideCyclesValidator:
 
 @pytest.fixture
 def processed_flow_cell_sample_8_index(
-    index1_8_nt_sequence_from_lims: str,
-    index2_8_nt_sequence_from_lims: str,
+    index1_8_nt_sequence_from_lims: str, index2_8_nt_sequence_from_lims: str
 ) -> dict[str, str]:
     """Return a BCL Convert sample with processed 8-nt indexes and no override cycles."""
     return {
@@ -350,8 +310,7 @@ def processed_flow_cell_sample_8_index(
 
 @pytest.fixture
 def processed_flow_cell_sample_10_index(
-    index1_10_nt_sequence_from_lims: str,
-    index2_10_nt_sequence_from_lims: str,
+    index1_10_nt_sequence_from_lims: str, index2_10_nt_sequence_from_lims: str
 ) -> dict[str, str]:
     """Return a BCL Convert sample with processed 10-nt indexes and no override cycles."""
     return {

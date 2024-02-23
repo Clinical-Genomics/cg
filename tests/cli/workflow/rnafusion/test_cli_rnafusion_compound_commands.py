@@ -14,19 +14,12 @@ from cg.cli.workflow.rnafusion.base import (
     store_available,
 )
 from cg.constants import EXIT_SUCCESS
-from cg.meta.workflow.rnafusion import (
-    RnafusionAnalysisAPI,
-)
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from tests.cli.workflow.conftest import (
-    mock_analysis_flow_cell,
-)
+from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
 
-def test_rnafusion_no_args(
-    cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
-):
+def test_rnafusion_no_args(cli_runner: CliRunner, rnafusion_context: CGConfig):
     """Test to see that running BALSAMIC without options prints help and doesn't result in an error."""
     # GIVEN no arguments or options besides the command call
 
@@ -61,11 +54,7 @@ def test_start(
     RnafusionAnalysisAPI.resolve_decompression.return_value = None
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(
-        start,
-        [case_id, "--dry-run"],
-        obj=rnafusion_context,
-    )
+    result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=rnafusion_context)
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -116,11 +105,7 @@ def test_store_success(
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
     # WHEN running command
-    result = cli_runner.invoke(
-        store,
-        [rnafusion_case_id],
-        obj=rnafusion_context,
-    )
+    result = cli_runner.invoke(store, [rnafusion_case_id], obj=rnafusion_context)
 
     # THEN bundle should be successfully added to Housekeeper and StatusDB
     assert result.exit_code == EXIT_SUCCESS
@@ -162,11 +147,7 @@ def test_store_fail(
     assert not rnafusion_context.housekeeper_api.bundle(case_id_fail)
 
     # WHEN running command
-    result_fail = cli_runner.invoke(
-        store,
-        [case_id_fail],
-        obj=rnafusion_context,
-    )
+    result_fail = cli_runner.invoke(store, [case_id_fail], obj=rnafusion_context)
 
     # THEN bundle exist status should be
     assert result_fail.exit_code != EXIT_SUCCESS
@@ -181,8 +162,7 @@ def test_start_available(
     mock_analysis_flow_cell,
 ):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
-    Test that start-available picks up eligible cases and does not pick up ineligible ones.
-    """
+    Test that start-available picks up eligible cases and does not pick up ineligible ones."""
     caplog.set_level(logging.INFO)
 
     # GIVEN CASE ID of sample where read counts pass threshold
@@ -191,18 +171,11 @@ def test_start_available(
     # GIVEN a mocked config
 
     # GIVEN decompression is not needed
-    mocker.patch.object(
-        RnafusionAnalysisAPI,
-        "resolve_decompression",
-    )
+    mocker.patch.object(RnafusionAnalysisAPI, "resolve_decompression")
     RnafusionAnalysisAPI.resolve_decompression.return_value = None
 
     # WHEN running command
-    result = cli_runner.invoke(
-        start_available,
-        ["--dry-run"],
-        obj=rnafusion_context,
-    )
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
 
     # THEN command exits with 0
     assert result.exit_code == EXIT_SUCCESS
@@ -225,8 +198,7 @@ def test_store_available(
     caplog: LogCaptureFixture,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
-    Test that store-available picks up eligible cases and does not pick up ineligible ones.
-    """
+    Test that store-available picks up eligible cases and does not pick up ineligible ones."""
     caplog.set_level(logging.INFO)
 
     # GIVEN CASE ID of sample where read counts pass threshold
@@ -246,11 +218,7 @@ def test_store_available(
     # GIVEN a mocked config
 
     # Ensure case was successfully picked up by start-available and status set to running
-    result = cli_runner.invoke(
-        start_available,
-        ["--dry-run"],
-        obj=rnafusion_context,
-    )
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
     rnafusion_context.status_db.get_case_by_internal_id(case_id_success).action = "running"
     rnafusion_context.status_db.session.commit()
 
@@ -290,8 +258,7 @@ def test_start_available(
     case_id_not_enough_reads: str,
 ):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
-    Test that start-available picks up eligible cases and does not pick up ineligible ones.
-    """
+    Test that start-available picks up eligible cases and does not pick up ineligible ones."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a case passing read counts threshold and another one not passing
@@ -299,18 +266,11 @@ def test_start_available(
     # GIVEN a mocked config
 
     # GIVEN decompression is not needed
-    mocker.patch.object(
-        RnafusionAnalysisAPI,
-        "resolve_decompression",
-    )
+    mocker.patch.object(RnafusionAnalysisAPI, "resolve_decompression")
     RnafusionAnalysisAPI.resolve_decompression.return_value = None
 
     # WHEN running command
-    result = cli_runner.invoke(
-        start_available,
-        ["--dry-run"],
-        obj=rnafusion_context,
-    )
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
 
     # THEN command exits with 0
     assert result.exit_code == EXIT_SUCCESS

@@ -35,8 +35,7 @@ def test_filter_customer_by_exclude_customer_internal_id_exclude_one(
 
     # WHEN filtering customers by excluding a specific customer internal ID
     filtered_customers = filter_customer_by_exclude_customer_internal_id(
-        customers=customers_query,
-        exclude_customer_internal_id=exclude_internal_id,
+        customers=customers_query, exclude_customer_internal_id=exclude_internal_id
     )
 
     # THEN the query should return all customers except the one with the excluded internal ID
@@ -55,8 +54,7 @@ def test_filter_customer_by_exclude_customer_internal_id_exclude_nonexistent(
 
     # WHEN filtering customers by excluding a nonexistent customer internal ID
     filtered_customers = filter_customer_by_exclude_customer_internal_id(
-        customers=customers_query,
-        exclude_customer_internal_id=exclude_internal_id,
+        customers=customers_query, exclude_customer_internal_id=exclude_internal_id
     )
 
     # THEN the query should return all customers

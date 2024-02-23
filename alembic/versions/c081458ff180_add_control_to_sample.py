@@ -6,13 +6,7 @@ Create Date: 2021-09-10 13:33:51.083517
 
 """
 
-from sqlalchemy import (
-    Column,
-    ForeignKey,
-    String,
-    orm,
-    types,
-)
+from sqlalchemy import Column, ForeignKey, String, orm, types
 from sqlalchemy.dialects import mysql
 
 from alembic import op
@@ -28,10 +22,7 @@ control_enum = mysql.ENUM(*control_options)
 
 
 def upgrade():
-    op.add_column(
-        "sample",
-        Column("control", control_enum, nullable=True),
-    )
+    op.add_column("sample", Column("control", control_enum, nullable=True))
 
 
 def downgrade():

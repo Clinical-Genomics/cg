@@ -6,9 +6,7 @@ import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
 from cg.constants import Workflow
-from cg.meta.workflow.fluffy import (
-    FluffyAnalysisAPI,
-)
+from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Sample
 from tests.store_helpers import StoreHelpers
@@ -38,26 +36,16 @@ def fluffy_success_output_summary(tmpdir_factory):
 
 
 @pytest.fixture(scope="function")
-def fluffy_success_output_aberrations(
-    tmpdir_factory,
-):
+def fluffy_success_output_aberrations(tmpdir_factory):
     output_dir = tmpdir_factory.mktemp("output")
-    file_path = Path(
-        output_dir,
-        "WCXpredict_aberrations.filt.bed",
-    )
+    file_path = Path(output_dir, "WCXpredict_aberrations.filt.bed")
     file_path.touch(exist_ok=True)
     return file_path
 
 
 @pytest.fixture
 def bcl_convert_samplesheet_path() -> Path:
-    return Path(
-        "tests",
-        "fixtures",
-        "data",
-        "bcl_convert_sample_sheet.csv",
-    )
+    return Path("tests", "fixtures", "data", "bcl_convert_sample_sheet.csv")
 
 
 @pytest.fixture
@@ -103,28 +91,15 @@ def fluffy_hermes_deliverables_response_data(
             "files": [
                 {
                     "path": fluffy_success_output_summary.as_posix(),
-                    "tags": [
-                        "metrics",
-                        fluffy_case_id_existing,
-                        "nipt",
-                    ],
+                    "tags": ["metrics", fluffy_case_id_existing, "nipt"],
                 },
                 {
                     "path": create_multiqc_html_file.as_posix(),
-                    "tags": [
-                        "multiqc-html",
-                        fluffy_case_id_existing,
-                        "nipt",
-                    ],
+                    "tags": ["multiqc-html", fluffy_case_id_existing, "nipt"],
                 },
                 {
                     "path": fluffy_success_output_aberrations.as_posix(),
-                    "tags": [
-                        "wisecondor",
-                        "cnv",
-                        fluffy_sample_lims_id,
-                        "nipt",
-                    ],
+                    "tags": ["wisecondor", "cnv", fluffy_sample_lims_id, "nipt"],
                 },
             ],
             "created": timestamp_yesterday,
@@ -150,9 +125,7 @@ def fluffy_fastq_hk_bundle_data(fluffy_fastq_file_path, fluffy_sample_lims_id) -
 
 
 @pytest.fixture(scope="function")
-def fluffy_samplesheet_bundle_data(
-    samplesheet_path,
-) -> dict:
+def fluffy_samplesheet_bundle_data(samplesheet_path) -> dict:
     return {
         "name": "flowcell",
         "created": dt.datetime.now(),
@@ -160,10 +133,7 @@ def fluffy_samplesheet_bundle_data(
         "files": [
             {
                 "path": str(samplesheet_path),
-                "tags": [
-                    "flowcell",
-                    "samplesheet",
-                ],
+                "tags": ["flowcell", "samplesheet"],
                 "archive": False,
             }
         ],
@@ -183,13 +153,9 @@ def fluffy_context(
     cg_context.housekeeper_api_ = real_housekeeper_api
     fluffy_analysis_api = FluffyAnalysisAPI(config=cg_context)
     helpers.ensure_hk_version(
-        fluffy_analysis_api.housekeeper_api,
-        bundle_data=fluffy_samplesheet_bundle_data,
+        fluffy_analysis_api.housekeeper_api, bundle_data=fluffy_samplesheet_bundle_data
     )
-    helpers.ensure_hk_version(
-        fluffy_analysis_api.housekeeper_api,
-        fluffy_fastq_hk_bundle_data,
-    )
+    helpers.ensure_hk_version(fluffy_analysis_api.housekeeper_api, fluffy_fastq_hk_bundle_data)
     example_fluffy_case = helpers.add_case(
         fluffy_analysis_api.status_db,
         internal_id=fluffy_case_id_existing,
@@ -205,14 +171,10 @@ def fluffy_context(
         last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_flow_cell(
-        fluffy_analysis_api.status_db,
-        flow_cell_name="flowcell",
-        samples=[example_fluffy_sample],
+        fluffy_analysis_api.status_db, flow_cell_name="flowcell", samples=[example_fluffy_sample]
     )
     helpers.add_relationship(
-        fluffy_analysis_api.status_db,
-        case=example_fluffy_case,
-        sample=example_fluffy_sample,
+        fluffy_analysis_api.status_db, case=example_fluffy_case, sample=example_fluffy_sample
     )
     cg_context.meta_apis["analysis_api"] = fluffy_analysis_api
     return cg_context

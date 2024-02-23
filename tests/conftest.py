@@ -16,92 +16,40 @@ from housekeeper.store.models import File, Version
 from requests import Response
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.demultiplex.demultiplex_api import (
-    DemultiplexingAPI,
-)
-from cg.apps.demultiplex.sample_sheet.api import (
-    SampleSheetAPI,
-)
-from cg.apps.downsample.downsample import (
-    DownsampleAPI,
-)
+from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
+from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.constants import (
-    FileExtensions,
-    SequencingFileTag,
-    Workflow,
-)
-from cg.constants.constants import (
-    CaseActions,
-    FileFormat,
-    Strandedness,
-)
-from cg.constants.demultiplexing import (
-    DemultiplexingDirsAndFiles,
-)
-from cg.constants.housekeeper_tags import (
-    HK_DELIVERY_REPORT_TAG,
-)
+from cg.constants import FileExtensions, SequencingFileTag, Workflow
+from cg.constants.constants import CaseActions, FileFormat, Strandedness
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
-from cg.constants.sequencing import (
-    SequencingPlatform,
-)
+from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
 from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
-from cg.meta.encryption.encryption import (
-    FlowCellEncryptionAPI,
-)
+from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
-from cg.meta.transfer.external_data import (
-    ExternalDataAPI,
-)
-from cg.meta.workflow.raredisease import (
-    RarediseaseAnalysisAPI,
-)
-from cg.meta.workflow.rnafusion import (
-    RnafusionAnalysisAPI,
-)
-from cg.meta.workflow.taxprofiler import (
-    TaxprofilerAnalysisAPI,
-)
+from cg.meta.transfer.external_data import ExternalDataAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
-from cg.models.cg_config import (
-    CGConfig,
-    PDCArchivingDirectory,
-)
-from cg.models.downsample.downsample_data import (
-    DownsampleData,
-)
-from cg.models.flow_cell.flow_cell import (
-    FlowCellDirectoryData,
-)
-from cg.models.rnafusion.rnafusion import (
-    RnafusionParameters,
-)
-from cg.models.taxprofiler.taxprofiler import (
-    TaxprofilerParameters,
-)
-from cg.store.database import (
-    create_all_tables,
-    drop_all_tables,
-    initialize_database,
-)
-from cg.store.models import (
-    Bed,
-    BedVersion,
-    Case,
-    Customer,
-    Organism,
-    Sample,
-)
+from cg.models.cg_config import CGConfig, PDCArchivingDirectory
+from cg.models.downsample.downsample_data import DownsampleData
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.rnafusion.rnafusion import RnafusionParameters
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
+from cg.store.database import create_all_tables, drop_all_tables, initialize_database
+from cg.store.models import Bed, BedVersion, Case, Customer, Organism, Sample
 from cg.store.store import Store
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
@@ -202,17 +150,9 @@ def invalid_sample_id() -> str:
 
 
 @pytest.fixture(scope="session")
-def sample_ids(
-    sample_id: str,
-    father_sample_id: str,
-    mother_sample_id: str,
-) -> list[str]:
+def sample_ids(sample_id: str, father_sample_id: str, mother_sample_id: str) -> list[str]:
     """Return a list with three samples of a family."""
-    return [
-        sample_id,
-        father_sample_id,
-        mother_sample_id,
-    ]
+    return [sample_id, father_sample_id, mother_sample_id]
 
 
 @pytest.fixture(scope="session")
@@ -251,9 +191,7 @@ def sbatch_job_number() -> int:
 
 
 @pytest.fixture(scope="session")
-def sbatch_process(
-    sbatch_job_number: int,
-) -> ProcessMock:
+def sbatch_process(sbatch_job_number: int) -> ProcessMock:
     """Return a mocked process object."""
     slurm_process = ProcessMock(binary="sbatch")
     slurm_process.set_stdout(text=str(sbatch_job_number))
@@ -262,10 +200,7 @@ def sbatch_process(
 
 @pytest.fixture
 def analysis_family_single_case(
-    case_id: str,
-    family_name: str,
-    sample_id: str,
-    ticket_id: str,
+    case_id: str, family_name: str, sample_id: str, ticket_id: str
 ) -> dict:
     """Build an example case."""
     return {
@@ -290,12 +225,7 @@ def analysis_family_single_case(
 
 
 @pytest.fixture
-def analysis_family(
-    case_id: str,
-    family_name: str,
-    sample_id: str,
-    ticket_id: str,
-) -> dict:
+def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: str) -> dict:
     """Return a dictionary with information from a analysis case."""
     return {
         "name": family_name,
@@ -384,9 +314,7 @@ def base_config_dict() -> dict:
 
 
 @pytest.fixture
-def cg_config_object(
-    base_config_dict: dict,
-) -> CGConfig:
+def cg_config_object(base_config_dict: dict) -> CGConfig:
     """Return a CG config."""
     return CGConfig(**base_config_dict)
 
@@ -394,12 +322,7 @@ def cg_config_object(
 @pytest.fixture
 def chanjo_config() -> dict[str, dict[str, str]]:
     """Return Chanjo config."""
-    return {
-        "chanjo": {
-            "config_path": "chanjo_config",
-            "binary_path": "chanjo",
-        }
-    }
+    return {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 
 
 @pytest.fixture
@@ -457,12 +380,7 @@ def demultiplex_configs_for_demux(
     return {
         "illumina_flow_cells_directory": tmp_illumina_flow_cells_demux_all_directory.as_posix(),
         "illumina_demultiplexed_runs_directory": tmp_empty_demultiplexed_runs_directory.as_posix(),
-        "demultiplex": {
-            "slurm": {
-                "account": "test",
-                "mail_user": "testuser@github.se",
-            }
-        },
+        "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
 
 
@@ -475,19 +393,12 @@ def demultiplex_configs(
     return {
         "illumina_flow_cells_directory": tmp_illumina_flow_cells_directory.as_posix(),
         "illumina_demultiplexed_runs_directory": tmp_illumina_demultiplexed_flow_cells_directory.as_posix(),
-        "demultiplex": {
-            "slurm": {
-                "account": "test",
-                "mail_user": "testuser@github.se",
-            }
-        },
+        "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
 
 
 @pytest.fixture
-def real_crunchy_api(
-    crunchy_config,
-) -> CrunchyAPI:
+def real_crunchy_api(crunchy_config) -> CrunchyAPI:
     return CrunchyAPI(crunchy_config)
 
 
@@ -582,14 +493,11 @@ def demultiplexing_api_for_demux(
 
 @pytest.fixture
 def demultiplexing_api(
-    demultiplex_configs: dict,
-    sbatch_process: Process,
-    populated_housekeeper_api: HousekeeperAPI,
+    demultiplex_configs: dict, sbatch_process: Process, populated_housekeeper_api: HousekeeperAPI
 ) -> DemultiplexingAPI:
     """Return demultiplex API."""
     demux_api = DemultiplexingAPI(
-        config=demultiplex_configs,
-        housekeeper_api=populated_housekeeper_api,
+        config=demultiplex_configs, housekeeper_api=populated_housekeeper_api
     )
     demux_api.slurm_api.process = sbatch_process
     return demux_api
@@ -608,9 +516,7 @@ def external_data_api(analysis_store, cg_context: CGConfig) -> ExternalDataAPI:
 
 
 @pytest.fixture
-def genotype_api(
-    genotype_config: dict,
-) -> GenotypeAPI:
+def genotype_api(genotype_config: dict) -> GenotypeAPI:
     """Genotype API fixture."""
     _genotype_api = GenotypeAPI(genotype_config)
     _genotype_api.set_dry_run(True)
@@ -626,9 +532,7 @@ def gens_api(gens_config: dict) -> GensAPI:
 
 
 @pytest.fixture
-def madeline_api(
-    madeline_output: Path,
-) -> MockMadelineAPI:
+def madeline_api(madeline_output: Path) -> MockMadelineAPI:
     """madeline_api fixture."""
     _api = MockMadelineAPI()
     _api.set_outpath(out_path=madeline_output.as_posix())
@@ -699,9 +603,7 @@ def analysis_dir(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
-def microsalt_analysis_dir(
-    analysis_dir: Path,
-) -> Path:
+def microsalt_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the analysis dir."""
     return Path(analysis_dir, "microsalt")
 
@@ -731,17 +633,13 @@ def fastq_dir(demultiplex_fixtures: Path) -> Path:
 
 
 @pytest.fixture
-def spring_dir(
-    demultiplex_fixtures: Path,
-) -> Path:
+def spring_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the fastq files dir."""
     return Path(demultiplex_fixtures, "spring")
 
 
 @pytest.fixture
-def project_dir(
-    tmpdir_factory,
-) -> Generator[Path, None, None]:
+def project_dir(tmpdir_factory) -> Generator[Path, None, None]:
     """Path to a temporary directory where intermediate files can be stored."""
     yield Path(tmpdir_factory.mktemp("data"))
 
@@ -753,9 +651,7 @@ def tmp_file(project_dir) -> Path:
 
 
 @pytest.fixture
-def non_existing_file_path(
-    project_dir: Path,
-) -> Path:
+def non_existing_file_path(project_dir: Path) -> Path:
     """Return the path to a non-existing file."""
     return Path(project_dir, "a_file.txt")
 
@@ -799,48 +695,27 @@ def mip_dna_store_files(apps_dir: Path) -> Path:
 
 
 @pytest.fixture
-def case_qc_sample_info_path(
-    mip_dna_store_files: Path,
-) -> Path:
+def case_qc_sample_info_path(mip_dna_store_files: Path) -> Path:
     """Return path to case_qc_sample_info.yaml."""
-    return Path(
-        mip_dna_store_files,
-        "case_qc_sample_info.yaml",
-    )
+    return Path(mip_dna_store_files, "case_qc_sample_info.yaml")
 
 
 @pytest.fixture
-def delivery_report_html(
-    mip_dna_store_files: Path,
-) -> Path:
+def delivery_report_html(mip_dna_store_files: Path) -> Path:
     """Return the path to a qc metrics deliverables file with case data."""
-    return Path(
-        mip_dna_store_files,
-        "empty_delivery_report.html",
-    )
+    return Path(mip_dna_store_files, "empty_delivery_report.html")
 
 
 @pytest.fixture
-def mip_deliverables_file(
-    mip_dna_store_files: Path,
-) -> Path:
+def mip_deliverables_file(mip_dna_store_files: Path) -> Path:
     """Fixture for general deliverables file in mip."""
-    return Path(
-        mip_dna_store_files,
-        "case_id_deliverables.yaml",
-    )
+    return Path(mip_dna_store_files, "case_id_deliverables.yaml")
 
 
 @pytest.fixture
-def case_qc_metrics_deliverables(
-    apps_dir: Path,
-) -> Path:
+def case_qc_metrics_deliverables(apps_dir: Path) -> Path:
     """Return the path to a qc metrics deliverables file with case data."""
-    return Path(
-        apps_dir,
-        "mip",
-        "case_metrics_deliverables.yaml",
-    )
+    return Path(apps_dir, "mip", "case_metrics_deliverables.yaml")
 
 
 @pytest.fixture
@@ -850,49 +725,37 @@ def mip_analysis_dir(analysis_dir: Path) -> Path:
 
 
 @pytest.fixture
-def balsamic_analysis_dir(
-    analysis_dir: Path,
-) -> Path:
+def balsamic_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files."""
     return Path(analysis_dir, "balsamic")
 
 
 @pytest.fixture
-def balsamic_wgs_analysis_dir(
-    balsamic_analysis_dir: Path,
-) -> Path:
+def balsamic_wgs_analysis_dir(balsamic_analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files."""
     return Path(balsamic_analysis_dir, "tn_wgs")
 
 
 @pytest.fixture
-def mip_dna_analysis_dir(
-    mip_analysis_dir: Path,
-) -> Path:
+def mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
     """Return the path to the directory with mip dna analysis files."""
     return Path(mip_analysis_dir, "dna")
 
 
 @pytest.fixture
-def rnafusion_analysis_dir(
-    analysis_dir: Path,
-) -> Path:
+def rnafusion_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with rnafusion analysis files."""
     return Path(analysis_dir, "rnafusion")
 
 
 @pytest.fixture
-def taxprofiler_analysis_dir(
-    analysis_dir: Path,
-) -> Path:
+def taxprofiler_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with taxprofiler analysis files."""
     return Path(analysis_dir, "taxprofiler")
 
 
 @pytest.fixture
-def sample_cram(
-    mip_dna_analysis_dir: Path,
-) -> Path:
+def sample_cram(mip_dna_analysis_dir: Path) -> Path:
     """Return the path to the cram file for a sample."""
     return Path(mip_dna_analysis_dir, "adm1.cram")
 
@@ -903,45 +766,27 @@ def father_sample_cram(
     father_sample_id: str,
 ) -> Path:
     """Return the path to the cram file for the father sample."""
-    return Path(
-        mip_dna_analysis_dir,
-        father_sample_id + FileExtensions.CRAM,
-    )
+    return Path(mip_dna_analysis_dir, father_sample_id + FileExtensions.CRAM)
 
 
 @pytest.fixture(name="mother_sample_cram")
-def mother_sample_cram(
-    mip_dna_analysis_dir: Path,
-    mother_sample_id: str,
-) -> Path:
+def mother_sample_cram(mip_dna_analysis_dir: Path, mother_sample_id: str) -> Path:
     """Return the path to the cram file for the mother sample."""
-    return Path(
-        mip_dna_analysis_dir,
-        mother_sample_id + FileExtensions.CRAM,
-    )
+    return Path(mip_dna_analysis_dir, mother_sample_id + FileExtensions.CRAM)
 
 
 @pytest.fixture(name="sample_cram_files")
 def sample_crams(
-    sample_cram: Path,
-    father_sample_cram: Path,
-    mother_sample_cram: Path,
+    sample_cram: Path, father_sample_cram: Path, mother_sample_cram: Path
 ) -> list[Path]:
     """Return a list of cram paths for three samples."""
-    return [
-        sample_cram,
-        father_sample_cram,
-        mother_sample_cram,
-    ]
+    return [sample_cram, father_sample_cram, mother_sample_cram]
 
 
 @pytest.fixture(name="vcf_file")
 def vcf_file(mip_dna_store_files: Path) -> Path:
     """Return the path to a VCF file."""
-    return Path(
-        mip_dna_store_files,
-        "yellowhog_clinical_selected.vcf",
-    )
+    return Path(mip_dna_store_files, "yellowhog_clinical_selected.vcf")
 
 
 @pytest.fixture(name="fastq_file")
@@ -963,9 +808,7 @@ def spring_file(spring_dir: Path) -> Path:
 
 
 @pytest.fixture(name="spring_meta_data_file")
-def spring_meta_data_file(
-    spring_dir: Path,
-) -> Path:
+def spring_meta_data_file(spring_dir: Path) -> Path:
     """Return the path to an existing spring file."""
     return Path(spring_dir, "dummy_spring_meta_data.json")
 
@@ -1010,20 +853,14 @@ def fastq_stub(project_dir: Path, run_name: str) -> Path:
 
 
 @pytest.fixture(name="compression_object")
-def compression_object(
-    fastq_stub: Path,
-    original_fastq_data: CompressionData,
-) -> CompressionData:
+def compression_object(fastq_stub: Path, original_fastq_data: CompressionData) -> CompressionData:
     """Creates compression data object with information about files used in fastq compression."""
     working_files: CompressionData = CompressionData(fastq_stub)
     working_file_map: dict[str, str] = {
         original_fastq_data.fastq_first.as_posix(): working_files.fastq_first.as_posix(),
         original_fastq_data.fastq_second.as_posix(): working_files.fastq_second.as_posix(),
     }
-    for (
-        original_file,
-        working_file,
-    ) in working_file_map.items():
+    for original_file, working_file in working_file_map.items():
         shutil.copy(original_file, working_file)
     return working_files
 
@@ -1043,19 +880,13 @@ def bcf_file(apps_dir: Path) -> Path:
 @pytest.fixture(name="gens_fracsnp_path")
 def gens_fracsnp_path(mip_dna_analysis_dir: Path, sample_id: str) -> Path:
     """Path to Gens fracsnp/baf bed file."""
-    return Path(
-        mip_dna_analysis_dir,
-        f"{sample_id}.baf.bed.gz",
-    )
+    return Path(mip_dna_analysis_dir, f"{sample_id}.baf.bed.gz")
 
 
 @pytest.fixture(name="gens_coverage_path")
 def gens_coverage_path(mip_dna_analysis_dir: Path, sample_id: str) -> Path:
     """Path to Gens coverage bed file."""
-    return Path(
-        mip_dna_analysis_dir,
-        f"{sample_id}.cov.bed.gz",
-    )
+    return Path(mip_dna_analysis_dir, f"{sample_id}.cov.bed.gz")
 
 
 # Housekeeper, Chanjo file fixtures
@@ -1118,13 +949,7 @@ def hk_bundle_data(
             {
                 "path": bed_file.as_posix(),
                 "archive": False,
-                "tags": [
-                    "bed",
-                    sample_id,
-                    father_sample_id,
-                    mother_sample_id,
-                    "coverage",
-                ],
+                "tags": ["bed", sample_id, father_sample_id, mother_sample_id, "coverage"],
             },
             {
                 "path": delivery_report_html.as_posix(),
@@ -1147,18 +972,12 @@ def hk_sample_bundle(
         {
             "path": spring_file.as_posix(),
             "archive": False,
-            "tags": [
-                SequencingFileTag.SPRING,
-                sample_id,
-            ],
+            "tags": [SequencingFileTag.SPRING, sample_id],
         },
         {
             "path": fastq_file.as_posix(),
             "archive": False,
-            "tags": [
-                SequencingFileTag.FASTQ,
-                sample_id,
-            ],
+            "tags": [SequencingFileTag.FASTQ, sample_id],
         },
     ]
     return sample_hk_bundle_no_files
@@ -1179,18 +998,12 @@ def hk_father_sample_bundle(
         {
             "path": spring_file_father.as_posix(),
             "archive": False,
-            "tags": [
-                SequencingFileTag.SPRING,
-                father_sample_id,
-            ],
+            "tags": [SequencingFileTag.SPRING, father_sample_id],
         },
         {
             "path": fastq_file_father.as_posix(),
             "archive": False,
-            "tags": [
-                SequencingFileTag.FASTQ,
-                father_sample_id,
-            ],
+            "tags": [SequencingFileTag.FASTQ, father_sample_id],
         },
     ]
     return father_sample_bundle
@@ -1220,8 +1033,7 @@ def case_hk_bundle_no_files(case_id: str, timestamp: datetime) -> dict:
 
 @pytest.fixture(name="compress_hk_fastq_bundle")
 def compress_hk_fastq_bundle(
-    compression_object: CompressionData,
-    sample_hk_bundle_no_files: dict,
+    compression_object: CompressionData, sample_hk_bundle_no_files: dict
 ) -> dict:
     """Create a complete bundle mock for testing compression
     This bundle contains a pair of fastq files.
@@ -1237,32 +1049,21 @@ def compress_hk_fastq_bundle(
         # Convert the date to a float
         before_timestamp = datetime.timestamp(datetime(2020, 1, 1))
         # Update the utime so file looks old
-        os.utime(
-            fastq_file,
-            (before_timestamp, before_timestamp),
-        )
-        fastq_file_info = {
-            "path": str(fastq_file),
-            "archive": False,
-            "tags": ["fastq"],
-        }
+        os.utime(fastq_file, (before_timestamp, before_timestamp))
+        fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
 
         hk_bundle_data["files"].append(fastq_file_info)
     return hk_bundle_data
 
 
 @pytest.fixture(name="housekeeper_api")
-def housekeeper_api(
-    hk_config_dict: dict,
-) -> MockHousekeeperAPI:
+def housekeeper_api(hk_config_dict: dict) -> MockHousekeeperAPI:
     """Setup Housekeeper store."""
     return MockHousekeeperAPI(hk_config_dict)
 
 
 @pytest.fixture(name="real_housekeeper_api")
-def real_housekeeper_api(
-    hk_config_dict: dict,
-) -> Generator[HousekeeperAPI, None, None]:
+def real_housekeeper_api(hk_config_dict: dict) -> Generator[HousekeeperAPI, None, None]:
     """Set up a real Housekeeper store."""
     _api = HousekeeperAPI(hk_config_dict)
     _api.initialise_db()
@@ -1281,19 +1082,12 @@ def populated_housekeeper_api(
     hk_api = real_housekeeper_api
     helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_bundle_data)
     helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_sample_bundle)
-    helpers.ensure_hk_bundle(
-        store=hk_api,
-        bundle_data=hk_father_sample_bundle,
-    )
+    helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_father_sample_bundle)
     return hk_api
 
 
 @pytest.fixture(name="hk_version")
-def hk_version(
-    housekeeper_api: MockHousekeeperAPI,
-    hk_bundle_data: dict,
-    helpers,
-) -> Version:
+def hk_version(housekeeper_api: MockHousekeeperAPI, hk_bundle_data: dict, helpers) -> Version:
     """Get a Housekeeper version object."""
     return helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
 
@@ -1317,9 +1111,7 @@ def hermes_process() -> ProcessMock:
 
 
 @pytest.fixture(name="hermes_api")
-def hermes_api(
-    hermes_process: ProcessMock,
-) -> HermesApi:
+def hermes_api(hermes_process: ProcessMock) -> HermesApi:
     """Return a Hermes API with a mocked process."""
     hermes_config = {"hermes": {"binary_path": "/bin/true"}}
     hermes_api = HermesApi(config=hermes_config)
@@ -1367,24 +1159,17 @@ def analysis_store(
 
 
 @pytest.fixture(name="analysis_store_trio")
-def analysis_store_trio(
-    analysis_store: Store,
-) -> Generator[Store, None, None]:
+def analysis_store_trio(analysis_store: Store) -> Generator[Store, None, None]:
     """Setup a store instance with a trio loaded for testing analysis API."""
     yield analysis_store
 
 
 @pytest.fixture
 def analysis_store_single_case(
-    base_store: Store,
-    analysis_family_single_case: Store,
-    helpers: StoreHelpers,
+    base_store: Store, analysis_family_single_case: Store, helpers: StoreHelpers
 ):
     """Set up a store instance with a single ind case for testing analysis API."""
-    helpers.ensure_case_from_dict(
-        base_store,
-        case_info=analysis_family_single_case,
-    )
+    helpers.ensure_case_from_dict(base_store, case_info=analysis_family_single_case)
     yield base_store
 
 
@@ -1399,21 +1184,13 @@ def store_with_demultiplexed_samples(
 ) -> Store:
     """Return a store with samples that have been demultiplexed with BCL Convert and BCL2Fastq."""
     helpers.add_flow_cell(
-        store,
-        flow_cell_name_demultiplexed_with_bcl_convert,
-        sequencer_type="novaseq",
+        store, flow_cell_name_demultiplexed_with_bcl_convert, sequencer_type="novaseq"
     )
     helpers.add_flow_cell(
-        store,
-        flow_cell_name_demultiplexed_with_bcl2fastq,
-        sequencer_type="hiseqx",
+        store, flow_cell_name_demultiplexed_with_bcl2fastq, sequencer_type="hiseqx"
     )
     for i, sample_internal_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_internal_ids):
-        helpers.add_sample(
-            store,
-            internal_id=sample_internal_id,
-            name=f"sample_bcl_convert_{i}",
-        )
+        helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl_convert_{i}")
         helpers.add_sample_lane_sequencing_metrics(
             store,
             sample_internal_id=sample_internal_id,
@@ -1421,11 +1198,7 @@ def store_with_demultiplexed_samples(
         )
 
     for i, sample_internal_id in enumerate(bcl2fastq_demultiplexed_flow_cell_sample_internal_ids):
-        helpers.add_sample(
-            store,
-            internal_id=sample_internal_id,
-            name=f"sample_bcl2fastq_{i}",
-        )
+        helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl2fastq_{i}")
         helpers.add_sample_lane_sequencing_metrics(
             store,
             sample_internal_id=sample_internal_id,
@@ -1521,12 +1294,7 @@ def invoice_reference() -> str:
 @pytest.fixture(name="prices")
 def prices() -> dict[str, int]:
     """Return dictionary with prices for each priority status."""
-    return {
-        "standard": 10,
-        "priority": 20,
-        "express": 30,
-        "research": 5,
-    }
+    return {"standard": 10, "priority": 20, "express": 30, "research": 5}
 
 
 @pytest.fixture
@@ -1542,10 +1310,7 @@ def base_store(
     prices: dict[str, int],
 ) -> Generator[Store, None, None]:
     """Setup and example store."""
-    collaboration = store.add_collaboration(
-        internal_id=collaboration_id,
-        name=collaboration_id,
-    )
+    collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
 
     store.session.add(collaboration)
     customers: list[Customer] = []
@@ -1555,10 +1320,7 @@ def base_store(
         "cust002": "Karolinska",
         "cust003": "CMMS",
     }
-    for (
-        new_customer_id,
-        new_customer_name,
-    ) in customer_map.items():
+    for new_customer_id, new_customer_name in customer_map.items():
         customers.append(
             store.add_customer(
                 internal_id=new_customer_id,
@@ -1677,10 +1439,7 @@ def base_store(
 
     versions = [
         store.add_application_version(
-            application=application,
-            version=1,
-            valid_from=datetime.now(),
-            prices=prices,
+            application=application, version=1, valid_from=datetime.now(), prices=prices
         )
         for application in applications
     ]
@@ -1710,16 +1469,8 @@ def base_store(
 def sample_store(base_store: Store) -> Store:
     """Populate store with samples."""
     new_samples = [
-        base_store.add_sample(
-            name="ordered",
-            sex=Sex.MALE,
-            internal_id="test_internal_id",
-        ),
-        base_store.add_sample(
-            name="received",
-            sex=Sex.UNKNOWN,
-            received=datetime.now(),
-        ),
+        base_store.add_sample(name="ordered", sex=Sex.MALE, internal_id="test_internal_id"),
+        base_store.add_sample(name="received", sex=Sex.UNKNOWN, received=datetime.now()),
         base_store.add_sample(
             name="received-prepared",
             sex=Sex.UNKNOWN,
@@ -1727,11 +1478,7 @@ def sample_store(base_store: Store) -> Store:
             prepared_at=datetime.now(),
         ),
         base_store.add_sample(name="external", sex=Sex.FEMALE),
-        base_store.add_sample(
-            name="external-received",
-            sex=Sex.FEMALE,
-            received=datetime.now(),
-        ),
+        base_store.add_sample(name="external-received", sex=Sex.FEMALE, received=datetime.now()),
         base_store.add_sample(
             name="sequenced",
             sex=Sex.MALE,
@@ -1832,14 +1579,9 @@ def swegen_dir(tmpdir_factory, tmp_path) -> Path:
 
 
 @pytest.fixture(name="swegen_snv_reference")
-def swegen_snv_reference_path(
-    swegen_dir: Path,
-) -> Path:
+def swegen_snv_reference_path(swegen_dir: Path) -> Path:
     """Return a temporary path to a SweGen SNV reference file."""
-    mock_file = Path(
-        swegen_dir,
-        "grch37_swegen_10k_snv_-20220101-.vcf.gz",
-    )
+    mock_file = Path(swegen_dir, "grch37_swegen_10k_snv_-20220101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
 
@@ -1851,66 +1593,41 @@ def observations_dir(tmpdir_factory, tmp_path) -> Path:
 
 
 @pytest.fixture(name="observations_clinical_snv_file_path")
-def observations_clinical_snv_file_path(
-    observations_dir: Path,
-) -> Path:
+def observations_clinical_snv_file_path(observations_dir: Path) -> Path:
     """Return a temporary path to a clinical SNV file."""
-    mock_file = Path(
-        observations_dir,
-        "loqusdb_clinical_snv_export-20220101-.vcf.gz",
-    )
+    mock_file = Path(observations_dir, "loqusdb_clinical_snv_export-20220101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
 
 
 @pytest.fixture(name="observations_clinical_sv_file_path")
-def observations_clinical_sv_file_path(
-    observations_dir: Path,
-) -> Path:
+def observations_clinical_sv_file_path(observations_dir: Path) -> Path:
     """Return a temporary path to a clinical SV file."""
-    mock_file = Path(
-        observations_dir,
-        "loqusdb_clinical_sv_export-20220101-.vcf.gz",
-    )
+    mock_file = Path(observations_dir, "loqusdb_clinical_sv_export-20220101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
 
 
 @pytest.fixture(name="observations_somatic_snv_file_path")
-def observations_somatic_snv_file_path(
-    observations_dir: Path,
-) -> Path:
+def observations_somatic_snv_file_path(observations_dir: Path) -> Path:
     """Return a temporary path to a cancer somatic SNV file."""
-    mock_file = Path(
-        observations_dir,
-        "loqusdb_cancer_somatic_snv_export-20220101-.vcf.gz",
-    )
+    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20220101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
 
 
 @pytest.fixture(name="outdated_observations_somatic_snv_file_path")
-def outdated_observations_somatic_snv_file_path(
-    observations_dir: Path,
-) -> Path:
+def outdated_observations_somatic_snv_file_path(observations_dir: Path) -> Path:
     """Return a temporary path to an outdated cancer somatic SNV file."""
-    mock_file = Path(
-        observations_dir,
-        "loqusdb_cancer_somatic_snv_export-20180101-.vcf.gz",
-    )
+    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20180101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
 
 
 @pytest.fixture(name="custom_observations_clinical_snv_file_path")
-def custom_observations_clinical_snv_file_path(
-    observations_dir: Path,
-) -> Path:
+def custom_observations_clinical_snv_file_path(observations_dir: Path) -> Path:
     """Return a custom path for the clinical SNV observations file."""
-    return Path(
-        observations_dir,
-        "clinical_snv_export-19990101-.vcf.gz",
-    )
+    return Path(observations_dir, "clinical_snv_export-19990101-.vcf.gz")
 
 
 @pytest.fixture(scope="session")
@@ -1920,22 +1637,16 @@ def microsalt_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def pdc_archiving_dir(
-    tmp_flow_cell_without_run_parameters_path: Path,
-) -> Path:
+def pdc_archiving_dir(tmp_flow_cell_without_run_parameters_path: Path) -> Path:
     """Return a temporary directory for PDC archiving testing."""
     return tmp_flow_cell_without_run_parameters_path
 
 
 @pytest.fixture
-def pdc_archiving_directory(
-    pdc_archiving_dir: Path,
-) -> PDCArchivingDirectory:
+def pdc_archiving_directory(pdc_archiving_dir: Path) -> PDCArchivingDirectory:
     """Returns different PDC archiving directories."""
     return PDCArchivingDirectory(
-        current=f"/{pdc_archiving_dir.as_posix()}/",
-        nas="/ENCRYPT/",
-        pre_nas="/OLD_ENCRYPT/",
+        current=f"/{pdc_archiving_dir.as_posix()}/", nas="/ENCRYPT/", pre_nas="/OLD_ENCRYPT/"
     )
 
 
@@ -2025,10 +1736,7 @@ def context_config(
             },
             "swegen_path": str(cg_dir),
         },
-        "chanjo": {
-            "binary_path": "echo",
-            "config_path": "chanjo-stage.yaml",
-        },
+        "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
         "crunchy": {
             "conda_binary": "a_conda_binary",
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
@@ -2091,31 +1799,16 @@ def context_config(
             "submitter": "s.submitter",
         },
         "hermes": {"binary_path": "hermes"},
-        "housekeeper": {
-            "database": hk_uri,
-            "root": str(housekeeper_dir),
-        },
+        "housekeeper": {"database": hk_uri, "root": str(housekeeper_dir)},
         "lims": {
             "host": "https://lims.scilifelab.se",
             "password": "password",
             "username": "user",
         },
-        "loqusdb": {
-            "binary_path": "loqusdb",
-            "config_path": "loqusdb-stage.yaml",
-        },
-        "loqusdb-wes": {
-            "binary_path": "loqusdb",
-            "config_path": "loqusdb-wes-stage.yaml",
-        },
-        "loqusdb-somatic": {
-            "binary_path": "loqusdb",
-            "config_path": "loqusdb-somatic-stage.yaml",
-        },
-        "loqusdb-tumor": {
-            "binary_path": "loqusdb",
-            "config_path": "loqusdb-tumor-stage.yaml",
-        },
+        "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb-stage.yaml"},
+        "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
+        "loqusdb-somatic": {"binary_path": "loqusdb", "config_path": "loqusdb-somatic-stage.yaml"},
+        "loqusdb-tumor": {"binary_path": "loqusdb", "config_path": "loqusdb-tumor-stage.yaml"},
         "microsalt": {
             "binary_path": "echo",
             "conda_binary": "a_conda_binary",
@@ -2195,11 +1888,7 @@ def context_config(
             "workflow_path": Path("workflow", "path").as_posix(),
             "databases": Path("path", "to", "databases").as_posix(),
             "profile": "myprofile",
-            "hostremoval_reference": Path(
-                "path",
-                "to",
-                "hostremoval_reference",
-            ).as_posix(),
+            "hostremoval_reference": Path("path", "to", "hostremoval_reference").as_posix(),
             "revision": "1.0.1",
             "slurm": {
                 "account": "development",
@@ -2230,9 +1919,7 @@ def context_config(
 
 @pytest.fixture(name="cg_context")
 def cg_context(
-    context_config: dict,
-    base_store: Store,
-    housekeeper_api: MockHousekeeperAPI,
+    context_config: dict, base_store: Store, housekeeper_api: MockHousekeeperAPI
 ) -> CGConfig:
     """Return a cg config."""
     cg_config = CGConfig(**context_config)
@@ -2298,57 +1985,30 @@ def store_with_multiple_cases_and_samples(
     """Return a store containing multiple cases and samples."""
 
     helpers.add_case(
-        store=store,
-        internal_id=case_id_without_samples,
-        ticket=ticket_id,
-        action="running",
+        store=store, internal_id=case_id_without_samples, ticket=ticket_id, action="running"
     )
     helpers.add_case_with_samples(
-        base_store=store,
-        case_id=case_id_with_multiple_samples,
-        nr_samples=5,
+        base_store=store, case_id=case_id_with_multiple_samples, nr_samples=5
     )
 
     case_samples: list[tuple[str, str]] = [
-        (
-            case_id_with_multiple_samples,
-            sample_id_in_multiple_cases,
-        ),
+        (case_id_with_multiple_samples, sample_id_in_multiple_cases),
         (case_id, sample_id_in_multiple_cases),
-        (
-            case_id_with_single_sample,
-            sample_id_in_single_case,
-        ),
+        (case_id_with_single_sample, sample_id_in_single_case),
     ]
 
     for case_sample in case_samples:
         case_id, sample_id = case_sample
-        helpers.add_case_with_sample(
-            base_store=store,
-            case_id=case_id,
-            sample_id=sample_id,
-        )
+        helpers.add_case_with_sample(base_store=store, case_id=case_id, sample_id=sample_id)
 
     yield store
 
 
 @pytest.fixture(name="store_with_panels")
 def store_with_panels(store: Store, helpers: StoreHelpers):
-    helpers.ensure_panel(
-        store=store,
-        panel_abbreviation="panel1",
-        customer_id="cust000",
-    )
-    helpers.ensure_panel(
-        store=store,
-        panel_abbreviation="panel2",
-        customer_id="cust000",
-    )
-    helpers.ensure_panel(
-        store=store,
-        panel_abbreviation="panel3",
-        customer_id="cust000",
-    )
+    helpers.ensure_panel(store=store, panel_abbreviation="panel1", customer_id="cust000")
+    helpers.ensure_panel(store=store, panel_abbreviation="panel2", customer_id="cust000")
+    helpers.ensure_panel(store=store, panel_abbreviation="panel3", customer_id="cust000")
     yield store
 
 
@@ -2364,11 +2024,7 @@ def store_with_organisms(store: Store, helpers: StoreHelpers) -> Generator[Store
 
     organisms: list[Organism] = []
     for internal_id, name in organism_details:
-        organism: Organism = helpers.add_organism(
-            store,
-            internal_id=internal_id,
-            name=name,
-        )
+        organism: Organism = helpers.add_organism(store, internal_id=internal_id, name=name)
         organisms.append(organism)
 
     store.session.add_all(organisms)
@@ -2413,20 +2069,11 @@ def store_with_users(store: Store, helpers: StoreHelpers) -> Generator[Store, No
     user_details = [
         ("user1@example.com", "User One", False),
         ("user2@example.com", "User Two", True),
-        (
-            "user3@example.com",
-            "User Three",
-            False,
-        ),
+        ("user3@example.com", "User Three", False),
     ]
 
     for email, name, is_admin in user_details:
-        user = store.add_user(
-            customer=customer,
-            email=email,
-            name=name,
-            is_admin=is_admin,
-        )
+        user = store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
         store.session.add(user)
 
     store.session.commit()
@@ -2447,11 +2094,7 @@ def store_with_cases_and_customers(
     ]
     customers = []
 
-    for (
-        customer_id,
-        customer_name,
-        scout_access,
-    ) in customer_details:
+    for customer_id, customer_name, scout_access in customer_details:
         customer: Customer = helpers.ensure_customer(
             store=store,
             customer_id=customer_id,
@@ -2460,66 +2103,16 @@ def store_with_cases_and_customers(
         )
         customers.append(customer)
 
-    case_details: list[
-        tuple[
-            str,
-            str,
-            Workflow,
-            CaseActions,
-            Customer,
-        ]
-    ] = [
-        (
-            "case 1",
-            "flyingwhale",
-            Workflow.BALSAMIC,
-            CaseActions.RUNNING,
-            customers[0],
-        ),
-        (
-            "case 2",
-            "swimmingtiger",
-            Workflow.FLUFFY,
-            CaseActions.ANALYZE,
-            customers[0],
-        ),
-        (
-            "case 3",
-            "sadbaboon",
-            Workflow.MUTANT,
-            CaseActions.HOLD,
-            customers[1],
-        ),
-        (
-            "case 4",
-            "funkysloth",
-            Workflow.MIP_DNA,
-            CaseActions.ANALYZE,
-            customers[1],
-        ),
-        (
-            "case 5",
-            "deadparrot",
-            Workflow.MICROSALT,
-            CaseActions.RUNNING,
-            customers[2],
-        ),
-        (
-            "case 6",
-            "anxiousbeetle",
-            Workflow.DEMULTIPLEX,
-            CaseActions.RUNNING,
-            customers[2],
-        ),
+    case_details: list[tuple[str, str, Workflow, CaseActions, Customer]] = [
+        ("case 1", "flyingwhale", Workflow.BALSAMIC, CaseActions.RUNNING, customers[0]),
+        ("case 2", "swimmingtiger", Workflow.FLUFFY, CaseActions.ANALYZE, customers[0]),
+        ("case 3", "sadbaboon", Workflow.MUTANT, CaseActions.HOLD, customers[1]),
+        ("case 4", "funkysloth", Workflow.MIP_DNA, CaseActions.ANALYZE, customers[1]),
+        ("case 5", "deadparrot", Workflow.MICROSALT, CaseActions.RUNNING, customers[2]),
+        ("case 6", "anxiousbeetle", Workflow.DEMULTIPLEX, CaseActions.RUNNING, customers[2]),
     ]
 
-    for (
-        case_name,
-        case_id,
-        pipeline,
-        action,
-        customer,
-    ) in case_details:
+    for case_name, case_id, pipeline, action, customer in case_details:
         helpers.ensure_case(
             store=store,
             case_name=case_name,
@@ -2560,27 +2153,21 @@ def workflow_version() -> str:
 
 
 @pytest.fixture(scope="session")
-def fastq_forward_read_path(
-    housekeeper_dir: Path,
-) -> Path:
+def fastq_forward_read_path(housekeeper_dir: Path) -> Path:
     """Path to existing fastq forward read file."""
-    fastq_file_path = Path(
-        housekeeper_dir,
-        "XXXXXXXXX_000000_S000_L001_R1_001",
-    ).with_suffix(f"{FileExtensions.FASTQ}{FileExtensions.GZIP}")
+    fastq_file_path = Path(housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001").with_suffix(
+        f"{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    )
     with gzip.open(fastq_file_path, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
     return fastq_file_path
 
 
 @pytest.fixture(scope="session")
-def fastq_reverse_read_path(
-    housekeeper_dir: Path,
-) -> Path:
+def fastq_reverse_read_path(housekeeper_dir: Path) -> Path:
     """Path to existing fastq reverse read file."""
     fastq_file_path = Path(
-        housekeeper_dir,
-        "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz",
+        housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
     ).with_suffix(f"{FileExtensions.FASTQ}{FileExtensions.GZIP}")
     with gzip.open(fastq_file_path, "wb") as wh:
         wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
@@ -2588,15 +2175,9 @@ def fastq_reverse_read_path(
 
 
 @pytest.fixture(scope="session")
-def mock_fastq_files(
-    fastq_forward_read_path: Path,
-    fastq_reverse_read_path: Path,
-) -> list[Path]:
+def mock_fastq_files(fastq_forward_read_path: Path, fastq_reverse_read_path: Path) -> list[Path]:
     """Return list of all mock fastq files to commit to mock housekeeper."""
-    return [
-        fastq_forward_read_path,
-        fastq_reverse_read_path,
-    ]
+    return [fastq_forward_read_path, fastq_reverse_read_path]
 
 
 @pytest.fixture(scope="session")
@@ -2648,29 +2229,17 @@ def rnafusion_sample_sheet_content(
 
 @pytest.fixture(scope="function")
 def hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
-    hermes_output: dict = {
-        "workflow": "rnafusion",
-        "bundle_id": rnafusion_case_id,
-        "files": [],
-    }
+    hermes_output: dict = {"workflow": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
     for file_info in deliverable_data["files"]:
         tags: list[str] = []
         if "html" in file_info["format"]:
             tags.append("multiqc-html")
-        hermes_output["files"].append(
-            {
-                "path": file_info["path"],
-                "tags": tags,
-                "mandatory": True,
-            }
-        )
+        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
     return hermes_output
 
 
 @pytest.fixture(scope="function")
-def malformed_hermes_deliverables(
-    hermes_deliverables: dict,
-) -> dict:
+def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
     malformed_deliverable: dict = hermes_deliverables.copy()
     malformed_deliverable.pop("workflow")
 
@@ -2678,57 +2247,41 @@ def malformed_hermes_deliverables(
 
 
 @pytest.fixture(scope="function")
-def rnafusion_multiqc_json_metrics(
-    rnafusion_analysis_dir,
-) -> dict:
+def rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
     """Returns the content of a mock Multiqc JSON file."""
-    return read_json(
-        file_path=Path(
-            rnafusion_analysis_dir,
-            "multiqc_data.json",
-        )
-    )
+    return read_json(file_path=Path(rnafusion_analysis_dir, "multiqc_data.json"))
 
 
 @pytest.fixture(scope="function")
 def rnafusion_sample_sheet_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to sample sheet."""
-    return Path(
-        rnafusion_dir,
-        rnafusion_case_id,
-        f"{rnafusion_case_id}_samplesheet",
-    ).with_suffix(FileExtensions.CSV)
+    return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    )
 
 
 @pytest.fixture(scope="function")
 def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to parameters file."""
-    return Path(
-        rnafusion_dir,
-        rnafusion_case_id,
-        f"{rnafusion_case_id}_params_file",
-    ).with_suffix(FileExtensions.YAML)
+    return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_params_file").with_suffix(
+        FileExtensions.YAML
+    )
 
 
 @pytest.fixture(scope="function")
 def rnafusion_nexflow_config_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to config file."""
     return Path(
-        rnafusion_dir,
-        rnafusion_case_id,
-        f"{rnafusion_case_id}_nextflow_config",
+        rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_nextflow_config"
     ).with_suffix(FileExtensions.JSON)
 
 
 @pytest.fixture(scope="function")
-def rnafusion_metrics_deliverables(
-    rnafusion_analysis_dir: Path,
-) -> list[dict]:
+def rnafusion_metrics_deliverables(rnafusion_analysis_dir: Path) -> list[dict]:
     """Returns the content of a mock metrics deliverables file."""
     return read_yaml(
         file_path=Path(
-            rnafusion_analysis_dir,
-            "rnafusion_case_enough_reads_metrics_deliverables.yaml",
+            rnafusion_analysis_dir, "rnafusion_case_enough_reads_metrics_deliverables.yaml"
         )
     )
 
@@ -2736,11 +2289,9 @@ def rnafusion_metrics_deliverables(
 @pytest.fixture(scope="function")
 def rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to deliverables file."""
-    return Path(
-        rnafusion_dir,
-        rnafusion_case_id,
-        f"{rnafusion_case_id}_deliverables",
-    ).with_suffix(FileExtensions.YAML)
+    return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_deliverables").with_suffix(
+        FileExtensions.YAML
+    )
 
 
 @pytest.fixture(scope="session")
@@ -2806,11 +2357,7 @@ def rnafusion_context(
     status_db: Store = cg_context.status_db
 
     # Create ERROR case with NO SAMPLES
-    helpers.add_case(
-        status_db,
-        internal_id=no_sample_case_id,
-        name=no_sample_case_id,
-    )
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
     # Create textbook case with enough reads
     case_enough_reads: Case = helpers.add_case(
@@ -2850,21 +2397,13 @@ def rnafusion_context(
         last_sequenced_at=datetime.now(),
     )
 
-    helpers.add_relationship(
-        status_db,
-        case=case_not_enough_reads,
-        sample=sample_not_enough_reads,
-    )
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     return cg_context
 
 
 @pytest.fixture(scope="function")
-def deliverable_data(
-    rnafusion_dir: Path,
-    rnafusion_case_id: str,
-    sample_id: str,
-) -> dict:
+def deliverable_data(rnafusion_dir: Path, rnafusion_case_id: str, sample_id: str) -> dict:
     return {
         "files": [
             {
@@ -2881,11 +2420,7 @@ def deliverable_data(
 
 
 @pytest.fixture(scope="function")
-def mock_deliverable(
-    rnafusion_dir: Path,
-    deliverable_data: dict,
-    rnafusion_case_id: str,
-) -> None:
+def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, rnafusion_case_id: str) -> None:
     """Create deliverable file with dummy data and files to deliver."""
     Path.mkdir(
         Path(rnafusion_dir, rnafusion_case_id),
@@ -2893,11 +2428,7 @@ def mock_deliverable(
         exist_ok=True,
     )
     Path.mkdir(
-        Path(
-            rnafusion_dir,
-            rnafusion_case_id,
-            "multiqc",
-        ),
+        Path(rnafusion_dir, rnafusion_case_id, "multiqc"),
         parents=True,
         exist_ok=True,
     )
@@ -2906,49 +2437,24 @@ def mock_deliverable(
     WriteFile.write_file_from_content(
         content=deliverable_data,
         file_format=FileFormat.JSON,
-        file_path=Path(
-            rnafusion_dir,
-            rnafusion_case_id,
-            rnafusion_case_id + "_deliverables.yaml",
-        ),
+        file_path=Path(rnafusion_dir, rnafusion_case_id, rnafusion_case_id + "_deliverables.yaml"),
     )
 
 
 @pytest.fixture(scope="function")
 def rnafusion_mock_analysis_finish(
-    rnafusion_dir: Path,
-    rnafusion_case_id: str,
-    rnafusion_multiqc_json_metrics: dict,
-    tower_id: int,
+    rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_multiqc_json_metrics: dict, tower_id: int
 ) -> None:
     """Create analysis_finish file for testing."""
-    Path.mkdir(
-        Path(
-            rnafusion_dir,
-            rnafusion_case_id,
-            "pipeline_info",
-        ),
-        parents=True,
-        exist_ok=True,
+    Path.mkdir(Path(rnafusion_dir, rnafusion_case_id, "pipeline_info"), parents=True, exist_ok=True)
+    Path(rnafusion_dir, rnafusion_case_id, "pipeline_info", "software_versions.yml").touch(
+        exist_ok=True
     )
-    Path(
-        rnafusion_dir,
-        rnafusion_case_id,
-        "pipeline_info",
-        "software_versions.yml",
-    ).touch(exist_ok=True)
-    Path(
-        rnafusion_dir,
-        rnafusion_case_id,
-        f"{rnafusion_case_id}_samplesheet.csv",
-    ).touch(exist_ok=True)
+    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
+        exist_ok=True
+    )
     Path.mkdir(
-        Path(
-            rnafusion_dir,
-            rnafusion_case_id,
-            "multiqc",
-            "multiqc_data",
-        ),
+        Path(rnafusion_dir, rnafusion_case_id, "multiqc", "multiqc_data"),
         parents=True,
         exist_ok=True,
     )
@@ -2975,37 +2481,20 @@ def rnafusion_mock_analysis_finish(
 @pytest.fixture(scope="function")
 def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
-    Path.mkdir(
-        Path(rnafusion_dir, rnafusion_case_id),
-        parents=True,
-        exist_ok=True,
+    Path.mkdir(Path(rnafusion_dir, rnafusion_case_id), parents=True, exist_ok=True)
+    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
+        exist_ok=True
     )
-    Path(
-        rnafusion_dir,
-        rnafusion_case_id,
-        f"{rnafusion_case_id}_samplesheet.csv",
-    ).touch(exist_ok=True)
 
 
 # Taxprofiler fixtures
 
 
 @pytest.fixture(scope="session")
-def taxprofiler_config(
-    taxprofiler_dir: Path,
-    taxprofiler_case_id: str,
-) -> None:
+def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
     """Create CSV sample sheet file for testing."""
-    Path.mkdir(
-        Path(taxprofiler_dir, taxprofiler_case_id),
-        parents=True,
-        exist_ok=True,
-    )
-    Path(
-        taxprofiler_dir,
-        taxprofiler_case_id,
-        f"{taxprofiler_case_id}_samplesheet",
-    ).with_suffix(
+    Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
+    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(
         FileExtensions.CSV
     ).touch(exist_ok=True)
 
@@ -3027,9 +2516,7 @@ def taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> Path:
 def taxprofiler_sample_sheet_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
     """Path to sample sheet."""
     return Path(
-        taxprofiler_dir,
-        taxprofiler_case_id,
-        f"{taxprofiler_case_id}_samplesheet",
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet"
     ).with_suffix(FileExtensions.CSV)
 
 
@@ -3037,9 +2524,7 @@ def taxprofiler_sample_sheet_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
 def taxprofiler_params_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
     """Path to parameters file."""
     return Path(
-        taxprofiler_dir,
-        taxprofiler_case_id,
-        f"{taxprofiler_case_id}_params_file",
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_params_file"
     ).with_suffix(FileExtensions.YAML)
 
 
@@ -3082,41 +2567,24 @@ def taxprofiler_parameters_default(
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_multiqc_json_metrics(
-    taxprofiler_analysis_dir: Path,
-) -> list[dict]:
+def taxprofiler_multiqc_json_metrics(taxprofiler_analysis_dir: Path) -> list[dict]:
     """Returns the content of a mock Multiqc JSON file."""
-    return read_json(
-        file_path=Path(
-            taxprofiler_analysis_dir,
-            "multiqc_data.json",
-        )
-    )
+    return read_json(file_path=Path(taxprofiler_analysis_dir, "multiqc_data.json"))
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_metrics_deliverables(
-    taxprofiler_analysis_dir: Path,
-) -> dict:
+def taxprofiler_metrics_deliverables(taxprofiler_analysis_dir: Path) -> dict:
     """Returns the content of a mock metrics deliverables file."""
     return read_yaml(
-        file_path=Path(
-            taxprofiler_analysis_dir,
-            "taxprofiler_case_metrics_deliverables.yaml",
-        )
+        file_path=Path(taxprofiler_analysis_dir, "taxprofiler_case_metrics_deliverables.yaml")
     )
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_metrics_deliverables_path(
-    taxprofiler_dir: Path,
-    taxprofiler_case_id: str,
-) -> Path:
+def taxprofiler_metrics_deliverables_path(taxprofiler_dir: Path, taxprofiler_case_id: str) -> Path:
     """Path to deliverables file."""
     return Path(
-        taxprofiler_dir,
-        taxprofiler_case_id,
-        f"{taxprofiler_case_id}_metrics_deliverables",
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_metrics_deliverables"
     ).with_suffix(FileExtensions.YAML)
 
 
@@ -3143,10 +2611,7 @@ def nf_analysis_housekeeper(
             for fastq_file_path in mock_fastq_files
         ],
     }
-    helpers.ensure_hk_bundle(
-        store=housekeeper_api,
-        bundle_data=bundle_data,
-    )
+    helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
     return housekeeper_api
 
 
@@ -3218,32 +2683,16 @@ def taxprofiler_mock_analysis_finish(
 ) -> None:
     """Create analysis finish file for testing."""
     Path.mkdir(
-        Path(
-            taxprofiler_dir,
-            taxprofiler_case_id,
-            "pipeline_info",
-        ),
-        parents=True,
-        exist_ok=True,
+        Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info"), parents=True, exist_ok=True
     )
-    Path(
-        taxprofiler_dir,
-        taxprofiler_case_id,
-        "pipeline_info",
-        "software_versions.yml",
-    ).touch(exist_ok=True)
-    Path(
-        taxprofiler_dir,
-        taxprofiler_case_id,
-        f"{taxprofiler_case_id}_samplesheet.csv",
-    ).touch(exist_ok=True)
+    Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info", "software_versions.yml").touch(
+        exist_ok=True
+    )
+    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet.csv").touch(
+        exist_ok=True
+    )
     Path.mkdir(
-        Path(
-            taxprofiler_dir,
-            taxprofiler_case_id,
-            "multiqc",
-            "multiqc_data",
-        ),
+        Path(taxprofiler_dir, taxprofiler_case_id, "multiqc", "multiqc_data"),
         parents=True,
         exist_ok=True,
     )
@@ -3279,9 +2728,7 @@ def flow_cell_name() -> str:
 
 
 @pytest.fixture
-def flow_cell_full_name(
-    flow_cell_name: str,
-) -> str:
+def flow_cell_full_name(flow_cell_name: str) -> str:
     """Return flow cell full name."""
     return f"201203_D00483_0200_A{flow_cell_name}"
 
@@ -3317,82 +2764,21 @@ def store_with_sequencing_metrics(
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
     sample_sequencing_metrics_details: list[str | int | float] = [
-        (
-            sample_id,
-            flow_cell_name,
-            1,
-            expected_total_reads / 2,
-            90.5,
-            32,
-        ),
-        (
-            sample_id,
-            flow_cell_name,
-            2,
-            expected_total_reads / 2,
-            90.4,
-            31,
-        ),
-        (
-            mother_sample_id,
-            flow_cell_name_demultiplexed_with_bcl2fastq,
-            2,
-            2_000_000,
-            85.5,
-            30,
-        ),
-        (
-            mother_sample_id,
-            flow_cell_name_demultiplexed_with_bcl2fastq,
-            1,
-            2_000_000,
-            80.5,
-            30,
-        ),
-        (
-            father_sample_id,
-            flow_cell_name_demultiplexed_with_bcl2fastq,
-            2,
-            2_000_000,
-            83.5,
-            30,
-        ),
-        (
-            father_sample_id,
-            flow_cell_name_demultiplexed_with_bcl2fastq,
-            1,
-            2_000_000,
-            81.5,
-            30,
-        ),
-        (
-            mother_sample_id,
-            flow_cell_name_demultiplexed_with_bcl_convert,
-            3,
-            1_500_000,
-            80.5,
-            33,
-        ),
-        (
-            mother_sample_id,
-            flow_cell_name_demultiplexed_with_bcl_convert,
-            2,
-            1_500_000,
-            80.5,
-            33,
-        ),
+        (sample_id, flow_cell_name, 1, expected_total_reads / 2, 90.5, 32),
+        (sample_id, flow_cell_name, 2, expected_total_reads / 2, 90.4, 31),
+        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 2, 2_000_000, 85.5, 30),
+        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 1, 2_000_000, 80.5, 30),
+        (father_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 2, 2_000_000, 83.5, 30),
+        (father_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 1, 2_000_000, 81.5, 30),
+        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 3, 1_500_000, 80.5, 33),
+        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 2, 1_500_000, 80.5, 33),
     ]
     helpers.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
     helpers.add_sample(
-        store=store,
-        customer_id="cust500",
-        internal_id=sample_id,
-        name=sample_id,
-        sex=Sex.MALE,
+        store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
-        metrics_data=sample_sequencing_metrics_details,
-        store=store,
+        metrics_data=sample_sequencing_metrics_details, store=store
     )
     return store
 
@@ -3404,36 +2790,25 @@ def novaseqx_latest_analysis_version() -> str:
 
 
 @pytest.fixture(scope="function")
-def novaseqx_flow_cell_directory(
-    tmp_path: Path,
-    novaseq_x_flow_cell_full_name: str,
-) -> Path:
+def novaseqx_flow_cell_directory(tmp_path: Path, novaseq_x_flow_cell_full_name: str) -> Path:
     """Return the path to a NovaseqX flow cell directory."""
     return Path(tmp_path, novaseq_x_flow_cell_full_name)
 
 
 @pytest.fixture(scope="function")
-def demultiplexed_runs_flow_cell_directory(
-    tmp_path: Path,
-) -> Path:
+def demultiplexed_runs_flow_cell_directory(tmp_path: Path) -> Path:
     """Return the path to a demultiplexed flow cell run directory."""
     demultiplexed_runs = Path(
-        tmp_path,
-        DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME,
+        tmp_path, DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME
     )
     demultiplexed_runs.mkdir()
     return demultiplexed_runs
 
 
-def add_novaseqx_analysis_data(
-    novaseqx_flow_cell_directory: Path,
-    analysis_version: str,
-):
+def add_novaseqx_analysis_data(novaseqx_flow_cell_directory: Path, analysis_version: str):
     """Add NovaseqX analysis data to a flow cell directory."""
     analysis_path: Path = Path(
-        novaseqx_flow_cell_directory,
-        DemultiplexingDirsAndFiles.ANALYSIS,
-        analysis_version,
+        novaseqx_flow_cell_directory, DemultiplexingDirsAndFiles.ANALYSIS, analysis_version
     )
     analysis_path.mkdir(parents=True)
     analysis_path.joinpath(DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
@@ -3445,23 +2820,17 @@ def add_novaseqx_analysis_data(
 
 @pytest.fixture(scope="function")
 def novaseqx_flow_cell_dir_with_analysis_data(
-    novaseqx_flow_cell_directory: Path,
-    novaseqx_latest_analysis_version: str,
+    novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
 ) -> Path:
     """Return the path to a NovaseqX flow cell directory with multiple analysis data directories."""
     add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "0")
     add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "1")
-    add_novaseqx_analysis_data(
-        novaseqx_flow_cell_directory,
-        novaseqx_latest_analysis_version,
-    )
+    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, novaseqx_latest_analysis_version)
     return novaseqx_flow_cell_directory
 
 
 @pytest.fixture(scope="function")
-def post_processed_novaseqx_flow_cell(
-    novaseqx_flow_cell_dir_with_analysis_data: Path,
-) -> Path:
+def post_processed_novaseqx_flow_cell(novaseqx_flow_cell_dir_with_analysis_data: Path) -> Path:
     """Return the path to a NovaseqX flow cell that is post processed."""
     Path(
         novaseqx_flow_cell_dir_with_analysis_data,
@@ -3472,8 +2841,7 @@ def post_processed_novaseqx_flow_cell(
 
 @pytest.fixture(scope="function")
 def novaseqx_flow_cell_analysis_incomplete(
-    novaseqx_flow_cell_directory: Path,
-    novaseqx_latest_analysis_version: str,
+    novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
 ) -> Path:
     """
     Return the path to a flow cell for which the analysis is not complete.
@@ -3494,9 +2862,7 @@ def novaseqx_flow_cell_analysis_incomplete(
 
 
 @pytest.fixture(scope="function")
-def demultiplex_not_complete_novaseqx_flow_cell(
-    tmp_file: Path,
-) -> Path:
+def demultiplex_not_complete_novaseqx_flow_cell(tmp_file: Path) -> Path:
     """Return the path to a NovaseqX flow cell for which demultiplexing is not complete."""
     return tmp_file
 
@@ -3510,28 +2876,19 @@ def flow_cell_encryption_api(
         encryption_dir=Path(cg_context.backup.pdc_archiving_directory.current),
         dry_run=True,
         flow_cell=FlowCellDirectoryData(
-            flow_cell_path=Path(
-                cg_context.illumina_flow_cells_directory,
-                flow_cell_full_name,
-            )
+            flow_cell_path=Path(cg_context.illumina_flow_cells_directory, flow_cell_full_name)
         ),
         pigz_binary_path=cg_context.pigz.binary_path,
         slurm_api=SlurmAPI(),
         sbatch_parameter=cg_context.backup.slurm_flow_cell_encryption.dict(),
-        tar_api=TarAPI(
-            binary_path=cg_context.tar.binary_path,
-            dry_run=True,
-        ),
+        tar_api=TarAPI(binary_path=cg_context.tar.binary_path, dry_run=True),
     )
     flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=True)
     return flow_cell_encryption_api
 
 
 def create_process_response(
-    return_code: int = 0,
-    args: str = "",
-    std_out: str = "",
-    std_err: str = "",
+    return_code: int = 0, args: str = "", std_out: str = "", std_err: str = ""
 ) -> CompletedProcess:
     """Returns a CompletedProcess object with default parameters."""
     return CompletedProcess(
@@ -3553,15 +2910,10 @@ def store_with_case_and_sample_with_reads(
 ) -> Store:
     """Return a store with a case and a sample with reads."""
     case: Case = helpers.add_case(
-        store=store,
-        internal_id=downsample_case_internal_id,
-        name=downsample_case_internal_id,
+        store=store, internal_id=downsample_case_internal_id, name=downsample_case_internal_id
     )
 
-    for sample_internal_id in [
-        downsample_sample_internal_id_1,
-        downsample_sample_internal_id_2,
-    ]:
+    for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
         helpers.add_sample(
             store=store,
             customer_id=case.customer_id,
@@ -3609,10 +2961,7 @@ def downsample_hk_api(
     tmp_path_factory,
 ) -> HousekeeperAPI:
     """Return a Housekeeper API with a real database."""
-    for sample_internal_id in [
-        downsample_sample_internal_id_1,
-        downsample_sample_internal_id_2,
-    ]:
+    for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
         tmp_fastq_file = tmp_path_factory.mktemp(f"{sample_internal_id}.fastq.gz")
         downsample_bundle: dict = {
             "name": sample_internal_id,
@@ -3622,17 +2971,11 @@ def downsample_hk_api(
                 {
                     "path": tmp_fastq_file.as_posix(),
                     "archive": False,
-                    "tags": [
-                        SequencingFileTag.FASTQ,
-                        sample_internal_id,
-                    ],
+                    "tags": [SequencingFileTag.FASTQ, sample_internal_id],
                 }
             ],
         }
-        helpers.ensure_hk_bundle(
-            store=real_housekeeper_api,
-            bundle_data=downsample_bundle,
-        )
+        helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=downsample_bundle)
     return real_housekeeper_api
 
 
@@ -3708,11 +3051,7 @@ def raredisease_context(
     status_db: Store = cg_context.status_db
 
     # Create ERROR case with NO SAMPLES
-    helpers.add_case(
-        status_db,
-        internal_id=no_sample_case_id,
-        name=no_sample_case_id,
-    )
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
     # Create a textbook case with enough reads
     case_enough_reads: Case = helpers.add_case(
@@ -3752,24 +3091,15 @@ def raredisease_context(
         last_sequenced_at=datetime.now(),
     )
 
-    helpers.add_relationship(
-        status_db,
-        case=case_not_enough_reads,
-        sample=sample_not_enough_reads,
-    )
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     return cg_context
 
 
 @pytest.fixture
-def fastq_file_meta_raw(
-    flow_cell_name: str,
-) -> dict:
+def fastq_file_meta_raw(flow_cell_name: str) -> dict:
     return {
-        "path": Path(
-            "a",
-            f"file{FileExtensions.FASTQ}{FileExtensions.GZIP}",
-        ),
+        "path": Path("a", f"file{FileExtensions.FASTQ}{FileExtensions.GZIP}"),
         "lane": str(1),
         "read_direction": str(2),
         "flow_cell_id": flow_cell_name,

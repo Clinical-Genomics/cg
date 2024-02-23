@@ -2,12 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.io.csv import (
-    read_csv,
-    read_csv_stream,
-    write_csv,
-    write_csv_stream,
-)
+from cg.io.csv import read_csv, read_csv_stream, write_csv, write_csv_stream
 from tests.io.conftest import FileRepresentation
 
 
@@ -18,10 +13,7 @@ from tests.io.conftest import FileRepresentation
         "\t",
     ],
 )
-def test_get_content_from_file(
-    delimiter: str,
-    delimiter_map: dict[str, FileRepresentation],
-):
+def test_get_content_from_file(delimiter: str, delimiter_map: dict[str, FileRepresentation]):
     """
     Tests reading a file with the given separator.
     """
@@ -46,8 +38,7 @@ def test_get_content_from_file(
     ],
 )
 def test_get_content_from_file_to_dict(
-    delimiter: str,
-    delimiter_map: dict[str, FileRepresentation],
+    delimiter: str, delimiter_map: dict[str, FileRepresentation]
 ):
     """
     Tests reading a delimited file into a list of dictionaries.
@@ -57,9 +48,7 @@ def test_get_content_from_file_to_dict(
 
     # WHEN reading the file
     raw_csv_content: list[list[str]] = read_csv(
-        file_path=file_path,
-        delimiter=delimiter,
-        read_to_dict=True,
+        file_path=file_path, delimiter=delimiter, read_to_dict=True
     )
 
     # THEN assert a list is returned and that the first element is a dict
@@ -77,10 +66,7 @@ def test_get_content_from_file_to_dict(
         "\t",
     ],
 )
-def test_get_content_from_stream(
-    delimiter: str,
-    delimiter_map: dict[str, FileRepresentation],
-):
+def test_get_content_from_stream(delimiter: str, delimiter_map: dict[str, FileRepresentation]):
     """
     Tests reading a delimited stream.
     """
@@ -105,10 +91,7 @@ def test_get_content_from_stream(
         "\t",
     ],
 )
-def test_write_csv(
-    delimiter: str,
-    delimiter_map: dict[str, FileRepresentation],
-):
+def test_write_csv(delimiter: str, delimiter_map: dict[str, FileRepresentation]):
     """
     Tests writing content to a file with each delimiter.
     """
@@ -121,11 +104,7 @@ def test_write_csv(
     raw_csv_content: list[list[str]] = read_csv(file_path=file_path, delimiter=delimiter)
 
     # WHEN writing the content
-    write_csv(
-        content=raw_csv_content,
-        file_path=output_file,
-        delimiter=delimiter,
-    )
+    write_csv(content=raw_csv_content, file_path=output_file, delimiter=delimiter)
 
     # THEN a file was successfully created
     assert Path.exists(output_file)
@@ -144,10 +123,7 @@ def test_write_csv(
         "\t",
     ],
 )
-def test_write_csv_stream(
-    delimiter: str,
-    delimiter_map: dict[str, FileRepresentation],
-):
+def test_write_csv_stream(delimiter: str, delimiter_map: dict[str, FileRepresentation]):
     """
     Tests writing content to a stream with each delimiter.
     """
@@ -155,8 +131,7 @@ def test_write_csv_stream(
     stream = delimiter_map[delimiter].content
     # WHEN writing the stream
     written_stream: str = write_csv_stream(
-        content=[["Lorem", "ipsum", "sit", "amet"]],
-        delimiter=delimiter,
+        content=[["Lorem", "ipsum", "sit", "amet"]], delimiter=delimiter
     )
 
     # THEN assert that the stream is correct

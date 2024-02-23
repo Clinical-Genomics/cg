@@ -2,10 +2,7 @@ import datetime as dt
 
 from cg.apps.lims import LimsAPI
 from cg.meta.transfer import TransferLims
-from cg.meta.transfer.lims import (
-    IncludeOptions,
-    SampleState,
-)
+from cg.meta.transfer.lims import IncludeOptions, SampleState
 from cg.store.models import Sample
 from cg.store.store import Store
 
@@ -16,8 +13,7 @@ def has_same_received_at(lims, sample_obj):
 
 
 def test_transfer_samples_received_at_overwriteable(
-    transfer_lims_api: TransferLims,
-    timestamp_now: dt.datetime,
+    transfer_lims_api: TransferLims, timestamp_now: dt.datetime
 ):
     # GIVEN a sample that exists in statusdb and it has a received_at date but no delivered_at date,
     # there is a sample in lims with the same internal id and another received_at date
@@ -28,10 +24,7 @@ def test_transfer_samples_received_at_overwriteable(
     assert sample.received_at
     lims_samples = [
         sample_store.add_sample(
-            name=sample.name,
-            sex=sample.sex,
-            internal_id=sample.internal_id,
-            received=timestamp_now,
+            name=sample.name, sex=sample.sex, internal_id=sample.internal_id, received=timestamp_now
         )
     ]
 
@@ -39,19 +32,13 @@ def test_transfer_samples_received_at_overwriteable(
     assert not has_same_received_at(lims_api, sample)
 
     # WHEN transfer_samples has been called
-    transfer_lims_api.transfer_samples(
-        SampleState.RECEIVED,
-        IncludeOptions.NOTINVOICED.value,
-    )
+    transfer_lims_api.transfer_samples(SampleState.RECEIVED, IncludeOptions.NOTINVOICED.value)
 
     # THEN the samples should have the same received_at as in lims
     assert has_same_received_at(lims_api, sample)
 
 
-def test_transfer_samples_all(
-    transfer_lims_api: TransferLims,
-    timestamp_now: dt.datetime,
-):
+def test_transfer_samples_all(transfer_lims_api: TransferLims, timestamp_now: dt.datetime):
     # GIVEN a sample exists in statusdb and it has a received_at date but no delivered_at date,
     # there is a sample in lims with the same internal id and another received_at date
     lims_api = transfer_lims_api.lims
@@ -61,28 +48,20 @@ def test_transfer_samples_all(
     assert sample.received_at
     lims_samples = [
         sample_store.add_sample(
-            name=sample.name,
-            sex=sample.sex,
-            internal_id=sample.internal_id,
-            received=timestamp_now,
+            name=sample.name, sex=sample.sex, internal_id=sample.internal_id, received=timestamp_now
         )
     ]
     lims_api.set_samples(lims_samples)
     assert not has_same_received_at(lims_api, sample)
 
     # WHEN transfer_samples has been called
-    transfer_lims_api.transfer_samples(
-        SampleState.RECEIVED,
-        IncludeOptions.ALL.value,
-    )
+    transfer_lims_api.transfer_samples(SampleState.RECEIVED, IncludeOptions.ALL.value)
 
     # THEN the samples should have the same received_at as in lims
     assert has_same_received_at(lims_api, sample)
 
 
-def test_transfer_samples_include_unset_received_at(
-    transfer_lims_api: TransferLims,
-):
+def test_transfer_samples_include_unset_received_at(transfer_lims_api: TransferLims):
     sample_store = transfer_lims_api.status
     samples = sample_store._get_query(table=Sample).all()
     assert len(samples) >= 2
@@ -122,10 +101,7 @@ def test_transfer_samples_include_unset_received_at(
     lims_api.set_samples(lims_samples)
 
     # WHEN calling transfer lims with include unset received_at
-    transfer_lims_api.transfer_samples(
-        SampleState.RECEIVED,
-        IncludeOptions.UNSET.value,
-    )
+    transfer_lims_api.transfer_samples(SampleState.RECEIVED, IncludeOptions.UNSET.value)
 
     # THEN the sample that was not set has been set and the other sample was not touched
     assert has_same_received_at(lims_api, untransfered_sample)

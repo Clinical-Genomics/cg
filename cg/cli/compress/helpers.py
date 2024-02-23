@@ -7,22 +7,14 @@ from math import ceil
 from pathlib import Path
 from typing import Iterator
 
-from housekeeper.store.models import (
-    Bundle,
-    Version,
-)
+from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.compression import (
-    CRUNCHY_MIN_GB_PER_PROCESS,
-    MAX_READS_PER_GB,
-)
+from cg.constants.compression import CRUNCHY_MIN_GB_PER_PROCESS, MAX_READS_PER_GB
 from cg.constants.slurm import SlurmProcessing
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
-from cg.meta.compress.files import (
-    get_spring_paths,
-)
+from cg.meta.compress.files import get_spring_paths
 from cg.store.models import Case
 from cg.store.store import Store
 from cg.utils.date import get_date_days_ago
@@ -30,11 +22,7 @@ from cg.utils.date import get_date_days_ago
 LOG = logging.getLogger(__name__)
 
 
-def get_cases_to_process(
-    days_back: int,
-    store: Store,
-    case_id: str | None = None,
-) -> list[Case]:
+def get_cases_to_process(days_back: int, store: Store, case_id: str | None = None) -> list[Case]:
     """Return cases to process."""
     cases: list[Case] = []
     if case_id:
@@ -62,9 +50,7 @@ def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
 
 
 def set_memory_according_to_reads(
-    sample_id: str,
-    sample_reads: int | None = None,
-    sample_process_mem: int | None = None,
+    sample_id: str, sample_reads: int | None = None, sample_process_mem: int | None = None
 ) -> int | None:
     """Set SLURM sample process memory depending on the number of sample reads if sample_process_mem is not set."""
     if sample_process_mem:
@@ -81,11 +67,7 @@ def set_memory_according_to_reads(
 
 
 def update_compress_api(
-    compress_api: CompressAPI,
-    dry_run: bool,
-    hours: int = None,
-    mem: int = None,
-    ntasks: int = None,
+    compress_api: CompressAPI, dry_run: bool, hours: int = None, mem: int = None, ntasks: int = None
 ) -> None:
     """Update parameters in Compress API."""
 
@@ -104,10 +86,7 @@ def update_compress_api(
 # Functions to fix problematic spring files
 
 
-def get_versions(
-    hk_api: HousekeeperAPI,
-    bundle_name: str = None,
-) -> Iterator[Version]:
+def get_versions(hk_api: HousekeeperAPI, bundle_name: str = None) -> Iterator[Version]:
     """Generates versions from hk bundles.
 
     If no bundle name is given generate latest version for every bundle.
@@ -192,9 +171,7 @@ def compress_sample_fastqs_in_cases(
 
 
 def correct_spring_paths(
-    hk_api: HousekeeperAPI,
-    bundle_name: str = None,
-    dry_run: bool = False,
+    hk_api: HousekeeperAPI, bundle_name: str = None, dry_run: bool = False
 ) -> None:
     """Function that will be used as a one off thing.
 

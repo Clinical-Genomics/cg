@@ -1,13 +1,8 @@
-from cg.store.models import (
-    Application,
-    ApplicationVersion,
-)
+from cg.store.models import Application, ApplicationVersion
 from cg.store.store import Store
 
 
-def test_get_current_application_version_by_tag_existing_tag(
-    base_store: Store,
-):
+def test_get_current_application_version_by_tag_existing_tag(base_store: Store):
     """Test that giving an existing tag returns the correct application version."""
     # GIVEN an application in store with a valid tag
     application: Application = base_store.get_applications()[0]

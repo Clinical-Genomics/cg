@@ -7,9 +7,7 @@ from cg.models.cg_config import CGConfig
 
 
 @pytest.fixture
-def base_context(
-    cg_context: CGConfig,
-) -> CGConfig:
+def base_context(cg_context: CGConfig) -> CGConfig:
     """context to use in cli"""
     cg_context.lims_api_ = MockLims()
     return cg_context

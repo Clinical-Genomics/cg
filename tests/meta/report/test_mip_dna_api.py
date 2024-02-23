@@ -3,11 +3,7 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_get_sample_metadata(
-    report_api_mip_dna,
-    mip_analysis_api,
-    case_mip_dna,
-    sample_store,
-    helpers: StoreHelpers,
+    report_api_mip_dna, mip_analysis_api, case_mip_dna, sample_store, helpers: StoreHelpers
 ):
     """Tests sample metadata extraction."""
 
@@ -34,12 +30,7 @@ def test_get_sample_metadata(
     assert sample_metadata.model_dump() == expected_metadata
 
 
-def test_get_sample_coverage(
-    report_api_mip_dna,
-    sample_store,
-    helpers: StoreHelpers,
-    case_mip_dna,
-):
+def test_get_sample_coverage(report_api_mip_dna, sample_store, helpers: StoreHelpers, case_mip_dna):
     """Checks the sample coverage retrieval from Chanjo."""
 
     # GIVEN a case and a sample with a specific ID
@@ -50,17 +41,10 @@ def test_get_sample_coverage(
     sample_coverage = report_api_mip_dna.get_sample_coverage(sample, case_mip_dna)
 
     # THEN assert that the extracted values are the expected ones
-    assert sample_coverage == {
-        "mean_coverage": 37.342,
-        "mean_completeness": 97.1,
-    }
+    assert sample_coverage == {"mean_coverage": 37.342, "mean_completeness": 97.1}
 
 
-def test_is_report_accredited(
-    report_api_mip_dna,
-    mip_analysis_api,
-    case_mip_dna,
-):
+def test_is_report_accredited(report_api_mip_dna, mip_analysis_api, case_mip_dna):
     """Test report accreditation extraction workflow."""
 
     # GIVEN a list of accredited samples
@@ -74,11 +58,7 @@ def test_is_report_accredited(
     assert accredited
 
 
-def test_is_report_accredited_false(
-    report_api_mip_dna,
-    mip_analysis_api,
-    case_mip_dna,
-):
+def test_is_report_accredited_false(report_api_mip_dna, mip_analysis_api, case_mip_dna):
     """Test that the report is not accredited if it contains a sample application that is not accredited."""
 
     # GIVEN a list of samples when one of them is not accredited

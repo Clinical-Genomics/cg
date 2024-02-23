@@ -14,14 +14,12 @@ from cg.io.controller import ReadFile
 
 
 def test_get_spring_metadata_real_file(
-    real_spring_metadata_path: Path,
-    crunchy_config: dict[str, dict[str, Any]],
+    real_spring_metadata_path: Path, crunchy_config: dict[str, dict[str, Any]]
 ):
     """Test to parse the content of a real spring metadata file."""
     # GIVEN the path to a file with spring metadata content
     content: list = ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON,
-        file_path=real_spring_metadata_path,
+        file_format=FileFormat.JSON, file_path=real_spring_metadata_path
     )
 
     # WHEN parsing the content
@@ -52,10 +50,7 @@ def test_update_metadata_paths(spring_metadata_file: Path, fixtures_dir: Path):
     # GIVEN the path to a metadata file without any "updated" information and a crunchy api
 
     # WHEN running the update date function
-    update_metadata_paths(
-        spring_metadata_path=spring_metadata_file,
-        new_parent_path=fixtures_dir,
-    )
+    update_metadata_paths(spring_metadata_path=spring_metadata_file, new_parent_path=fixtures_dir)
 
     # THEN assert that the parent path has been switched
     updated_spring_metadata: CrunchyMetadata = get_crunchy_metadata(spring_metadata_file)

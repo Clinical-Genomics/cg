@@ -4,9 +4,7 @@ from copy import deepcopy
 from marshmallow import Schema, fields, validate
 
 from cg.constants import DEFAULT_CAPTURE_KIT
-from cg.constants.subject import (
-    RelationshipStatus,
-)
+from cg.constants.subject import RelationshipStatus
 from cg.exc import PedigreeConfigError
 
 LOG = logging.getLogger(__name__)
@@ -30,18 +28,9 @@ class SampleSchema(Schema):
     mother = fields.Str(dump_default=RelationshipStatus.HAS_NO_PARENT)
     phenotype = fields.Str(
         required=True,
-        validate=validate.OneOf(
-            choices=[
-                "affected",
-                "unaffected",
-                "unknown",
-            ]
-        ),
+        validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
     )
-    sex = fields.Str(
-        required=True,
-        validate=validate.OneOf(choices=["female", "male", "unknown"]),
-    )
+    sex = fields.Str(required=True, validate=validate.OneOf(choices=["female", "male", "unknown"]))
     expected_coverage = fields.Float()
     capture_kit = fields.Str(dump_default=DEFAULT_CAPTURE_KIT)
 
@@ -66,18 +55,12 @@ class ConfigHandler:
         fatal_error = False
         for field, messages in errors.items():
             if isinstance(messages, dict):
-                for (
-                    sample_index,
-                    sample_errors,
-                ) in messages.items():
+                for sample_index, sample_errors in messages.items():
                     try:
                         sample_id = data["samples"][sample_index]["sample_id"]
                     except KeyError:
                         raise PedigreeConfigError("missing sample id")
-                    for (
-                        sample_key,
-                        sub_messages,
-                    ) in sample_errors.items():
+                    for sample_key, sub_messages in sample_errors.items():
                         if sub_messages != ["Unknown field."]:
                             fatal_error = True
                         LOG.error(f"{sample_id} -> {sample_key}: {', '.join(sub_messages)}")
@@ -85,10 +68,7 @@ class ConfigHandler:
                 fatal_error = True
                 LOG.error(f"{field}: {', '.join(messages)}")
         if fatal_error:
-            raise PedigreeConfigError(
-                "invalid config input",
-                errors=errors,
-            )
+            raise PedigreeConfigError("invalid config input", errors=errors)
         return errors
 
     @staticmethod

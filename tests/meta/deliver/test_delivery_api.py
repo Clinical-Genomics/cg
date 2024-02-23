@@ -7,29 +7,17 @@ from housekeeper.store.models import Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import Workflow
 from cg.constants.delivery import INBOX_NAME
-from cg.constants.housekeeper_tags import (
-    AlignmentFileTag,
-)
+from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
-from cg.store.models import (
-    Case,
-    CaseSample,
-    Sample,
-)
+from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
-from tests.cli.deliver.conftest import (
-    fastq_delivery_bundle,
-    mip_delivery_bundle,
-)
+from tests.cli.deliver.conftest import fastq_delivery_bundle, mip_delivery_bundle
 from tests.store.conftest import case_obj
 from tests.store_helpers import StoreHelpers
 
 
 def test_get_delivery_path(
-    base_store: Store,
-    real_housekeeper_api: HousekeeperAPI,
-    project_dir: Path,
-    case_id: str,
+    base_store: Store, real_housekeeper_api: HousekeeperAPI, project_dir: Path, case_id: str
 ):
     """Test to create the delivery path."""
     # GIVEN a deliver api
@@ -50,19 +38,10 @@ def test_get_delivery_path(
     deliver_path = deliver_api.create_delivery_dir_path(case_name=case_id)
 
     # THEN assert that the path looks like expected
-    assert deliver_path == Path(
-        project_dir,
-        customer_id,
-        INBOX_NAME,
-        ticket,
-        case_id,
-    )
+    assert deliver_path == Path(project_dir, customer_id, INBOX_NAME, ticket, case_id)
 
 
-def test_get_case_analysis_files(
-    populated_deliver_api: DeliverAPI,
-    case_id: str,
-):
+def test_get_case_analysis_files(populated_deliver_api: DeliverAPI, case_id: str):
     """Test to fetch case specific files for a case that exists in housekeeper."""
     deliver_api: DeliverAPI = populated_deliver_api
     # GIVEN a case which exist as bundle in hk with a version
@@ -110,21 +89,10 @@ def test_get_case_files_from_version(
 
     # GIVEN a housekeeper db populated with a bundle including a case specific file and a sample specific file
     case_hk_bundle_no_files["files"] = [
-        {
-            "path": bed_file.as_posix(),
-            "archive": False,
-            "tags": ["case-tag"],
-        },
-        {
-            "path": str(vcf_file),
-            "archive": False,
-            "tags": ["sample-tag", "ADM1"],
-        },
+        {"path": bed_file.as_posix(), "archive": False, "tags": ["case-tag"]},
+        {"path": str(vcf_file), "archive": False, "tags": ["sample-tag", "ADM1"]},
     ]
-    helpers.ensure_hk_bundle(
-        real_housekeeper_api,
-        bundle_data=case_hk_bundle_no_files,
-    )
+    helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=case_hk_bundle_no_files)
 
     # GIVEN a version object where two file exists
     version: Version = real_housekeeper_api.last_version(bundle=case_id)
@@ -164,24 +132,10 @@ def test_get_sample_files_from_version(
     # GIVEN a housekeeper db populated with a bundle including a case specific file and a sample specific file
     hk_api = deliver_api.hk_api
     case_hk_bundle_no_files["files"] = [
-        {
-            "path": bed_file.as_posix(),
-            "archive": False,
-            "tags": ["case-tag"],
-        },
-        {
-            "path": str(vcf_file),
-            "archive": False,
-            "tags": [
-                AlignmentFileTag.CRAM,
-                "ADM1",
-            ],
-        },
+        {"path": bed_file.as_posix(), "archive": False, "tags": ["case-tag"]},
+        {"path": str(vcf_file), "archive": False, "tags": [AlignmentFileTag.CRAM, "ADM1"]},
     ]
-    helpers.ensure_hk_bundle(
-        hk_api,
-        bundle_data=case_hk_bundle_no_files,
-    )
+    helpers.ensure_hk_bundle(hk_api, bundle_data=case_hk_bundle_no_files)
     # GIVEN a version object with some files
     version: Version = hk_api.last_version(case_id)
     assert len(version.files) == 2
@@ -204,10 +158,7 @@ def test_get_delivery_scope_case_only():
     delivery_type: set[str] = {Workflow.MIP_DNA}
 
     # WHEN getting the delivery scope
-    (
-        sample_delivery,
-        case_delivery,
-    ) = DeliverAPI.get_delivery_scope(delivery_type)
+    sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
 
     # THEN a case_delivery should be True while sample_delivery False
     assert case_delivery
@@ -220,10 +171,7 @@ def test_get_delivery_scope_sample_only():
     delivery_type = {Workflow.FASTQ}
 
     # WHEN getting the delivery scope
-    (
-        sample_delivery,
-        case_delivery,
-    ) = DeliverAPI.get_delivery_scope(delivery_type)
+    sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
 
     # THEN a sample_delivery should be True while case_delivery False
     assert not case_delivery
@@ -236,10 +184,7 @@ def test_get_delivery_scope_case_and_sample():
     delivery_type = {Workflow.MUTANT}
 
     # WHEN getting the delivery scope
-    (
-        sample_delivery,
-        case_delivery,
-    ) = DeliverAPI.get_delivery_scope(delivery_type)
+    sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
 
     # THEN both case_delivery and sample_delivery should be True
     assert case_delivery
@@ -260,26 +205,14 @@ def test_deliver_files_enough_reads(
     # GIVEN a case to be delivered and a sample with enough reads
     case: Case = deliver_api.store.get_case_by_internal_id(internal_id=case_id)
     sample: Sample = deliver_api.store.get_sample_by_internal_id(sample_id)
-    helpers.ensure_hk_bundle(
-        deliver_api.hk_api,
-        fastq_delivery_bundle,
-        include=True,
-    )
-    helpers.ensure_hk_bundle(
-        deliver_api.hk_api,
-        mip_delivery_bundle,
-        include=True,
-    )
+    helpers.ensure_hk_bundle(deliver_api.hk_api, fastq_delivery_bundle, include=True)
+    helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
 
     # WHEN delivering files for the case
     deliver_api.deliver_files(case_obj=case)
 
     # THEN the sample folder should be created
-    assert Path(
-        deliver_api.project_base_path,
-        deliver_api_destination_path,
-        sample.name,
-    ).exists()
+    assert Path(deliver_api.project_base_path, deliver_api_destination_path, sample.name).exists()
 
 
 def test_deliver_files_not_enough_reads(
@@ -297,25 +230,15 @@ def test_deliver_files_not_enough_reads(
     case: Case = deliver_api.store.get_case_by_internal_id(internal_id=case_id)
     sample: Sample = deliver_api.store.get_sample_by_internal_id(sample_id)
     sample.reads = 1
-    helpers.ensure_hk_bundle(
-        deliver_api.hk_api,
-        fastq_delivery_bundle,
-        include=True,
-    )
-    helpers.ensure_hk_bundle(
-        deliver_api.hk_api,
-        mip_delivery_bundle,
-        include=True,
-    )
+    helpers.ensure_hk_bundle(deliver_api.hk_api, fastq_delivery_bundle, include=True)
+    helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
 
     # WHEN delivering files for the case
     deliver_api.deliver_files(case_obj=case)
 
     # THEN the sample folder should not be created
     assert not Path(
-        deliver_api.project_base_path,
-        deliver_api_destination_path,
-        sample.name,
+        deliver_api.project_base_path, deliver_api_destination_path, sample.name
     ).exists()
 
 
@@ -334,16 +257,8 @@ def test_deliver_files_not_enough_reads_force(
     case: Case = deliver_api.store.get_case_by_internal_id(internal_id=case_id)
     sample: Sample = deliver_api.store.get_sample_by_internal_id(sample_id)
     sample.reads = 1
-    helpers.ensure_hk_bundle(
-        deliver_api.hk_api,
-        fastq_delivery_bundle,
-        include=True,
-    )
-    helpers.ensure_hk_bundle(
-        deliver_api.hk_api,
-        mip_delivery_bundle,
-        include=True,
-    )
+    helpers.ensure_hk_bundle(deliver_api.hk_api, fastq_delivery_bundle, include=True)
+    helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
 
     # Given that the API was created with force_all=True
     deliver_api.deliver_failed_samples = True
@@ -354,8 +269,4 @@ def test_deliver_files_not_enough_reads_force(
     )
 
     # THEN the sample folder should be created
-    assert Path(
-        deliver_api.project_base_path,
-        deliver_api_destination_path,
-        sample.name,
-    ).exists()
+    assert Path(deliver_api.project_base_path, deliver_api_destination_path, sample.name).exists()

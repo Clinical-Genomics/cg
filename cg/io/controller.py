@@ -3,37 +3,13 @@ from typing import Any
 
 from requests import Response
 
-from cg.constants.constants import (
-    APIMethods,
-    FileFormat,
-)
-from cg.io.api import (
-    delete,
-    get,
-    patch,
-    post,
-    put,
-)
-from cg.io.csv import (
-    read_csv,
-    read_csv_stream,
-    write_csv,
-    write_csv_stream,
-)
-from cg.io.json import (
-    read_json,
-    read_json_stream,
-    write_json,
-    write_json_stream,
-)
+from cg.constants.constants import APIMethods, FileFormat
+from cg.io.api import delete, get, patch, post, put
+from cg.io.csv import read_csv, read_csv_stream, write_csv, write_csv_stream
+from cg.io.json import read_json, read_json_stream, write_json, write_json_stream
 from cg.io.txt import read_txt, write_txt
 from cg.io.xml import read_xml, write_xml
-from cg.io.yaml import (
-    read_yaml,
-    read_yaml_stream,
-    write_yaml,
-    write_yaml_stream,
-)
+from cg.io.yaml import read_yaml, read_yaml_stream, write_yaml, write_yaml_stream
 
 
 class ReadFile:
@@ -80,12 +56,7 @@ class WriteFile:
     }
 
     @classmethod
-    def write_file_from_content(
-        cls,
-        content: Any,
-        file_format: str,
-        file_path: Path,
-    ) -> None:
+    def write_file_from_content(cls, content: Any, file_format: str, file_path: Path) -> None:
         """Write file using file format dispatch table."""
         cls.write_file[file_format](content=content, file_path=file_path)
 
@@ -118,16 +89,6 @@ class APIRequest:
 
     @classmethod
     def api_request_from_content(
-        cls,
-        api_method: str,
-        url: str,
-        headers: dict,
-        json: dict,
-        verify: bool = True,
+        cls, api_method: str, url: str, headers: dict, json: dict, verify: bool = True
     ) -> Response:
-        return cls.api_request[api_method](
-            url=url,
-            headers=headers,
-            json=json,
-            verify=verify,
-        )
+        return cls.api_request[api_method](url=url, headers=headers, json=json, verify=verify)

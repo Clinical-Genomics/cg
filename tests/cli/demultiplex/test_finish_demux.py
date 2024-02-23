@@ -4,10 +4,7 @@ import logging
 
 from click import testing
 
-from cg.cli.demultiplex.finish import (
-    finish_all_cmd,
-    finish_flow_cell,
-)
+from cg.cli.demultiplex.finish import finish_all_cmd, finish_flow_cell
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
@@ -53,10 +50,7 @@ def test_finish_flow_cell_dry_run(
     # WHEN starting post-processing for new demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
         finish_flow_cell,
-        [
-            "--dry-run",
-            bcl2fastq_flow_cell_full_name,
-        ],
+        ["--dry-run", bcl2fastq_flow_cell_full_name],
         obj=demultiplex_context,
     )
 

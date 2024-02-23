@@ -4,9 +4,7 @@ import time
 from pathlib import Path
 
 from cg.constants.time import SECONDS_IN_A_DAY
-from cg.utils.files import (
-    get_directory_creation_time_stamp,
-)
+from cg.utils.files import get_directory_creation_time_stamp
 
 
 def get_start_time() -> float:

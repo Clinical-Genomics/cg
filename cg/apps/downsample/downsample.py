@@ -3,26 +3,14 @@
 import logging
 from pathlib import Path
 
-from cg.apps.demultiplex.sample_sheet.validators import (
-    validate_sample_id,
-)
+from cg.apps.demultiplex.sample_sheet.validators import validate_sample_id
 from cg.exc import DownsampleFailedError
 from cg.meta.meta import MetaAPI
-from cg.meta.workflow.downsample.downsample import (
-    DownsampleWorkflow,
-)
+from cg.meta.workflow.downsample.downsample import DownsampleWorkflow
 from cg.models.cg_config import CGConfig
-from cg.models.downsample.downsample_data import (
-    DownsampleData,
-)
-from cg.store.models import (
-    Case,
-    CaseSample,
-    Sample,
-)
-from cg.utils.calculations import (
-    multiply_by_million,
-)
+from cg.models.downsample.downsample_data import DownsampleData
+from cg.store.models import Case, CaseSample, Sample
+from cg.utils.calculations import multiply_by_million
 
 LOG = logging.getLogger(__name__)
 
@@ -38,11 +26,7 @@ class DownsampleAPI(MetaAPI):
         self.dry_run: bool = dry_run
 
     def get_downsample_data(
-        self,
-        sample_id: str,
-        number_of_reads: float,
-        case_id: str,
-        case_name: str,
+        self, sample_id: str, number_of_reads: float, case_id: str, case_name: str
     ) -> DownsampleData:
         """Return the DownSampleData.
         Raises:
@@ -94,10 +78,7 @@ class DownsampleAPI(MetaAPI):
             LOG.info(f"New down sampled case created: {downsampled_case.internal_id}")
 
     def _link_downsampled_sample_to_case(
-        self,
-        downsample_data: DownsampleData,
-        sample: Sample,
-        case: Case,
+        self, downsample_data: DownsampleData, sample: Sample, case: Case
     ) -> None:
         """Create a link between sample and case in statusDB."""
         sample_case_link: CaseSample = self.status_db.relate_sample(
@@ -144,11 +125,7 @@ class DownsampleAPI(MetaAPI):
         return downsample_work_flow.write_and_submit_sbatch_script()
 
     def downsample_sample(
-        self,
-        sample_id: str,
-        case_name: str,
-        case_id: str,
-        number_of_reads: float,
+        self, sample_id: str, case_name: str, case_id: str, number_of_reads: float
     ) -> int | None:
         """Downsample a sample."""
         LOG.info(f"Starting Downsampling for sample {sample_id}.")

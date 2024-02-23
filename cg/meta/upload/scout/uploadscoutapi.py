@@ -10,50 +10,20 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.constants import (
-    HK_MULTIQC_HTML_TAG,
-    Workflow,
-)
-from cg.constants.constants import (
-    FileFormat,
-    PrepCategory,
-)
-from cg.constants.housekeeper_tags import (
-    AlignmentFileTag,
-)
-from cg.constants.scout import (
-    ScoutCustomCaseReportTags,
-)
-from cg.exc import (
-    CgDataError,
-    HousekeeperBundleVersionMissingError,
-)
+from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
+from cg.constants.constants import FileFormat, PrepCategory
+from cg.constants.housekeeper_tags import AlignmentFileTag
+from cg.constants.scout import ScoutCustomCaseReportTags
+from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
-from cg.meta.upload.scout.balsamic_config_builder import (
-    BalsamicConfigBuilder,
-)
-from cg.meta.upload.scout.balsamic_umi_config_builder import (
-    BalsamicUmiConfigBuilder,
-)
-from cg.meta.upload.scout.mip_config_builder import (
-    MipConfigBuilder,
-)
-from cg.meta.upload.scout.rnafusion_config_builder import (
-    RnafusionConfigBuilder,
-)
-from cg.meta.upload.scout.scout_config_builder import (
-    ScoutConfigBuilder,
-)
+from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
+from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBuilder
+from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
+from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.models.scout.scout_load_config import (
-    ScoutLoadConfig,
-)
-from cg.store.models import (
-    Analysis,
-    Case,
-    Customer,
-    Sample,
-)
+from cg.models.scout.scout_load_config import ScoutLoadConfig
+from cg.store.models import Analysis, Case, Customer, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -62,8 +32,7 @@ LOG = logging.getLogger(__name__)
 @dataclass
 class RNADNACollection:
     """Contains the id for an RNA sample, the name of its connected DNA sample,
-    and a list of connected, uploaded DNA cases.
-    """
+    and a list of connected, uploaded DNA cases."""
 
     rna_sample_internal_id: str
     dna_sample_name: str
@@ -99,10 +68,7 @@ class UploadScoutAPI:
         LOG.debug(f"Found housekeeper version {hk_version_obj.id}")
 
         LOG.info(f"Found workflow {analysis.pipeline}")
-        config_builder = self.get_config_builder(
-            analysis=analysis,
-            hk_version=hk_version_obj,
-        )
+        config_builder = self.get_config_builder(analysis=analysis, hk_version=hk_version_obj)
 
         config_builder.build_load_config()
 
@@ -114,10 +80,7 @@ class UploadScoutAPI:
         return "scout-load-config"
 
     @staticmethod
-    def save_config_file(
-        upload_config: ScoutLoadConfig,
-        file_path: Path,
-    ) -> None:
+    def save_config_file(upload_config: ScoutLoadConfig, file_path: Path) -> None:
         """Save a Scout load config file to the supplied file path."""
 
         LOG.info(f"Save Scout load config to {file_path.as_posix()}.")
@@ -128,10 +91,7 @@ class UploadScoutAPI:
         )
 
     def add_scout_config_to_hk(
-        self,
-        config_file_path: Path,
-        case_id: str,
-        delete: bool = False,
+        self, config_file_path: Path, case_id: str, delete: bool = False
     ) -> File:
         """Add Scout load config to Housekeeper bundle."""
         LOG.info(f"Adding load config {config_file_path} to Housekeeper.")
@@ -147,9 +107,7 @@ class UploadScoutAPI:
             self.housekeeper.delete_file(uploaded_config_file.id)
 
         file_obj: File = self.housekeeper.add_file(
-            path=str(config_file_path),
-            version_obj=version,
-            tags=[tag_name],
+            path=str(config_file_path), version_obj=version, tags=[tag_name]
         )
         self.housekeeper.include_file(file_obj=file_obj, version_obj=version)
         self.housekeeper.add_commit(file_obj)
@@ -164,17 +122,11 @@ class UploadScoutAPI:
         if workflow == Workflow.MIP_RNA:
             return (
                 ScoutCustomCaseReportTags.MULTIQC_RNA,
-                self.housekeeper.files(
-                    bundle=case_id,
-                    tags=HK_MULTIQC_HTML_TAG,
-                ).first(),
+                self.housekeeper.files(bundle=case_id, tags=HK_MULTIQC_HTML_TAG).first(),
             )
         return (
             ScoutCustomCaseReportTags.MULTIQC,
-            self.housekeeper.files(
-                bundle=case_id,
-                tags=HK_MULTIQC_HTML_TAG,
-            ).first(),
+            self.housekeeper.files(bundle=case_id, tags=HK_MULTIQC_HTML_TAG).first(),
         )
 
     def get_fusion_report(self, case_id: str, research: bool) -> File | None:
@@ -191,32 +143,21 @@ class UploadScoutAPI:
     def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> File | None:
         """Return a splice junctions bed file for a case in Housekeeper."""
 
-        tags: set[str] = {
-            "junction",
-            "bed",
-            sample_id,
-        }
+        tags: set[str] = {"junction", "bed", sample_id}
         splice_junctions_bed: File | None = None
         try:
             splice_junctions_bed = self.housekeeper.get_file_from_latest_version(
                 bundle_name=case_id, tags=tags
             )
         except HousekeeperBundleVersionMissingError:
-            LOG.debug(
-                "Could not find bundle for case %s",
-                case_id,
-            )
+            LOG.debug("Could not find bundle for case %s", case_id)
 
         return splice_junctions_bed
 
     def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> File | None:
         """Return an RNA coverage bigwig file for a case in Housekeeper."""
 
-        tags: set[str] = {
-            "coverage",
-            "bigwig",
-            sample_id,
-        }
+        tags: set[str] = {"coverage", "bigwig", sample_id}
 
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
@@ -231,10 +172,7 @@ class UploadScoutAPI:
 
     def get_rna_alignment_cram(self, case_id: str, sample_id: str) -> File | None:
         """Return an RNA alignment CRAM file for a case in Housekeeper."""
-        tags: set[str] = {
-            AlignmentFileTag.CRAM,
-            sample_id,
-        }
+        tags: set[str] = {AlignmentFileTag.CRAM, sample_id}
         rna_alignment_cram: File | None = None
         try:
             rna_alignment_cram = self.housekeeper.get_file_from_latest_version(
@@ -252,8 +190,7 @@ class UploadScoutAPI:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             rna_alignment_cram: File | None = self.get_rna_alignment_cram(
-                case_id=case_id,
-                sample_id=rna_sample_internal_id,
+                case_id=case_id, sample_id=rna_sample_internal_id
             )
             if not rna_alignment_cram:
                 raise FileNotFoundError(
@@ -276,10 +213,7 @@ class UploadScoutAPI:
         LOG.info("Upload RNA alignment CRAM file finished!")
 
     def upload_fusion_report_to_scout(
-        self,
-        dry_run: bool,
-        case_id: str,
-        research: bool = False,
+        self, dry_run: bool, case_id: str, research: bool = False
     ) -> None:
         """Upload fusion report file for a case to Scout."""
 
@@ -365,8 +299,7 @@ class UploadScoutAPI:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             rna_coverage_bigwig: File | None = self.get_rna_coverage_bigwig(
-                case_id=case_id,
-                sample_id=rna_sample_internal_id,
+                case_id=case_id, sample_id=rna_sample_internal_id
             )
 
             if not rna_coverage_bigwig:
@@ -404,8 +337,7 @@ class UploadScoutAPI:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             splice_junctions_bed: File | None = self.get_splice_junctions_bed(
-                case_id=case_id,
-                sample_id=rna_sample_internal_id,
+                case_id=case_id, sample_id=rna_sample_internal_id
             )
 
             if not splice_junctions_bed:
@@ -476,14 +408,10 @@ class UploadScoutAPI:
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
         config_builders = {
             Workflow.BALSAMIC: BalsamicConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
-                lims_api=self.lims,
+                hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
             Workflow.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
-                lims_api=self.lims,
+                hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
             Workflow.MIP_DNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
@@ -500,9 +428,7 @@ class UploadScoutAPI:
                 madeline_api=self.madeline_api,
             ),
             Workflow.RNAFUSION: RnafusionConfigBuilder(
-                hk_version_obj=hk_version,
-                analysis_obj=analysis,
-                lims_api=self.lims,
+                hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
         }
 
@@ -513,8 +439,7 @@ class UploadScoutAPI:
 
     def create_rna_dna_collection(self, rna_sample: Sample) -> RNADNACollection:
         """Creates a collection containing the given RNA sample id, its related DNA sample name, and
-        a list of ids for the DNA cases connected to the DNA sample.
-        """
+        a list of ids for the DNA cases connected to the DNA sample."""
         if not rna_sample.subject_id:
             raise CgDataError(
                 f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
@@ -540,8 +465,7 @@ class UploadScoutAPI:
             )
         dna_sample: Sample = subject_id_dna_samples[0]
         dna_cases: list[str] = self._dna_cases_related_to_dna_sample(
-            dna_sample=dna_sample,
-            collaborators=collaborators,
+            dna_sample=dna_sample, collaborators=collaborators
         )
         return RNADNACollection(
             rna_sample_internal_id=rna_sample.internal_id,
@@ -550,25 +474,20 @@ class UploadScoutAPI:
         )
 
     def _dna_cases_related_to_dna_sample(
-        self,
-        dna_sample: Sample,
-        collaborators: set[Customer],
+        self, dna_sample: Sample, collaborators: set[Customer]
     ) -> list[str]:
         """Maps a list of uploaded DNA cases linked to DNA sample."""
         potential_cases_related_to_dna_sample: list[Case] = [link.case for link in dna_sample.links]
         return self.filter_cases_related_to_dna_sample(
-            list_of_dna_cases=potential_cases_related_to_dna_sample,
-            collaborators=collaborators,
+            list_of_dna_cases=potential_cases_related_to_dna_sample, collaborators=collaborators
         )
 
     @staticmethod
     def filter_cases_related_to_dna_sample(
-        list_of_dna_cases: list[Case],
-        collaborators: set[Customer],
+        list_of_dna_cases: list[Case], collaborators: set[Customer]
     ) -> list[str]:
         """Filters the given list of DNA samples and returns a subset of uploaded cases ordered by customers in the
-        specified list of collaborators and within the correct workflow.
-        """
+        specified list of collaborators and within the correct workflow."""
         filtered_dna_cases: list[str] = []
         for case in list_of_dna_cases:
             if (

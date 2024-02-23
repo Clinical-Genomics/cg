@@ -3,34 +3,18 @@ from pathlib import Path
 
 import pytest
 
-FileRepresentation = namedtuple(
-    "FileRepresentation",
-    "filepath content output_file",
-)
+FileRepresentation = namedtuple("FileRepresentation", "filepath content output_file")
 
 
 @pytest.fixture
 def delimiter_map(
-    csv_file_path,
-    csv_stream,
-    csv_temp_path,
-    tsv_file_path,
-    tsv_stream,
-    tsv_temp_path,
+    csv_file_path, csv_stream, csv_temp_path, tsv_file_path, tsv_stream, tsv_temp_path
 ):
     """Returns a dict where each entry links a delimeter linked to named tuple containing
     relevant fixtures for that delimter."""
     return {
-        ",": FileRepresentation(
-            csv_file_path,
-            csv_stream,
-            csv_temp_path,
-        ),
-        "\t": FileRepresentation(
-            tsv_file_path,
-            tsv_stream,
-            tsv_temp_path,
-        ),
+        ",": FileRepresentation(csv_file_path, csv_stream, csv_temp_path),
+        "\t": FileRepresentation(tsv_file_path, tsv_stream, tsv_temp_path),
     }
 
 

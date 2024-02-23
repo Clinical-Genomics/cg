@@ -6,9 +6,7 @@ from pathlib import Path
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
-from cg.cli.workflow.taxprofiler.base import (
-    metrics_deliver,
-)
+from cg.cli.workflow.taxprofiler.base import metrics_deliver
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.io.yaml import read_yaml
@@ -26,11 +24,7 @@ def test_metrics_deliver(
     caplog.set_level(logging.INFO)
 
     # GIVEN case id
-    result = cli_runner.invoke(
-        metrics_deliver,
-        [taxprofiler_case_id],
-        obj=taxprofiler_context,
-    )
+    result = cli_runner.invoke(metrics_deliver, [taxprofiler_case_id], obj=taxprofiler_context)
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS

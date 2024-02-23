@@ -3,18 +3,11 @@ import logging
 import mock
 from click.testing import CliRunner, Result
 
-from cg.cli.upload.scout import (
-    create_scout_load_config,
-    get_upload_api,
-)
+from cg.cli.upload.scout import create_scout_load_config, get_upload_api
 from cg.constants import EXIT_SUCCESS, Workflow
-from cg.meta.upload.scout.uploadscoutapi import (
-    UploadScoutAPI,
-)
+from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.upload.upload_api import UploadAPI
-from cg.meta.workflow.balsamic import (
-    BalsamicAnalysisAPI,
-)
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from cg.store.store import Store
@@ -22,25 +15,15 @@ from tests.mocks.scout import MockScoutLoadConfig
 from tests.store_helpers import StoreHelpers
 
 
-def test_get_upload_api(
-    cg_context: CGConfig,
-    case_id: str,
-    helpers: StoreHelpers,
-):
+def test_get_upload_api(cg_context: CGConfig, case_id: str, helpers: StoreHelpers):
     """Test to get the correct upload API for a BALSAMIC case."""
     status_db: Store = cg_context.status_db
 
     # GIVEN a case with a balsamic analysis
     case: Case = helpers.ensure_case(
-        store=status_db,
-        data_analysis=Workflow.BALSAMIC,
-        case_id=case_id,
+        store=status_db, data_analysis=Workflow.BALSAMIC, case_id=case_id
     )
-    helpers.add_analysis(
-        store=status_db,
-        case=case,
-        workflow=Workflow.BALSAMIC,
-    )
+    helpers.add_analysis(store=status_db, case=case, workflow=Workflow.BALSAMIC)
 
     # WHEN getting the upload API
     upload_api: UploadAPI = get_upload_api(cg_config=cg_context, case=case)
@@ -62,26 +45,14 @@ def test_create_scout_load_config(
 
     # GIVEN a case with a balsamic analysis
     case: Case = helpers.ensure_case(
-        store=status_db,
-        data_analysis=Workflow.BALSAMIC,
-        case_id=case_id,
+        store=status_db, data_analysis=Workflow.BALSAMIC, case_id=case_id
     )
-    helpers.add_analysis(
-        store=status_db,
-        case=case,
-        workflow=Workflow.BALSAMIC,
-    )
+    helpers.add_analysis(store=status_db, case=case, workflow=Workflow.BALSAMIC)
 
-    with mock.patch.object(
-        UploadScoutAPI,
-        "generate_config",
-        return_value=MockScoutLoadConfig(),
-    ):
+    with mock.patch.object(UploadScoutAPI, "generate_config", return_value=MockScoutLoadConfig()):
         # WHEN creating the scout load config
         result: Result = cli_runner.invoke(
-            create_scout_load_config,
-            ["--print", case_id],
-            obj=cg_context,
+            create_scout_load_config, ["--print", case_id], obj=cg_context
         )
 
         # THEN assert that the code exits with success

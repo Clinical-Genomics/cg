@@ -1,8 +1,6 @@
 """Tests for the creation of the sample sheet"""
 
-from cg.apps.demultiplex.sample_sheet.create import (
-    get_sample_sheet_creator,
-)
+from cg.apps.demultiplex.sample_sheet.create import get_sample_sheet_creator
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
@@ -12,12 +10,8 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreatorBcl2Fastq,
     SampleSheetCreatorBCLConvert,
 )
-from cg.constants.demultiplexing import (
-    BclConverter,
-)
-from cg.models.flow_cell.flow_cell import (
-    FlowCellDirectoryData,
-)
+from cg.constants.demultiplexing import BclConverter
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 def test_sample_sheet_creator_factory_novaseq_6000(
@@ -37,10 +31,7 @@ def test_sample_sheet_creator_factory_novaseq_6000(
     )
 
     # THEN no error is raised and the sample sheet creator is a Bcl2Fastq sample sheet creator
-    assert isinstance(
-        sample_sheet_creator,
-        SampleSheetCreatorBcl2Fastq,
-    )
+    assert isinstance(sample_sheet_creator, SampleSheetCreatorBcl2Fastq)
 
 
 def test_sample_sheet_creator_factory_bcl_convert(
@@ -59,7 +50,4 @@ def test_sample_sheet_creator_factory_bcl_convert(
     )
 
     # THEN the sample sheet creator is a BCL Convert sample sheet creator
-    assert isinstance(
-        sample_sheet_creator,
-        SampleSheetCreatorBCLConvert,
-    )
+    assert isinstance(sample_sheet_creator, SampleSheetCreatorBCLConvert)

@@ -16,9 +16,7 @@ from cg.cli.compress.fastq import (
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.compress import CompressAPI
-from cg.meta.encryption.encryption import (
-    SpringEncryptionAPI,
-)
+from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)

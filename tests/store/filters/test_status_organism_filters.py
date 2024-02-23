@@ -1,15 +1,11 @@
 from sqlalchemy.orm import Query
 
-from cg.store.filters.status_organism_filters import (
-    filter_organism_by_internal_id,
-)
+from cg.store.filters.status_organism_filters import filter_organism_by_internal_id
 from cg.store.models import Organism
 from cg.store.store import Store
 
 
-def test_filter_organism_by_internal_id_returns_correct_organism(
-    store_with_organisms: Store,
-):
+def test_filter_organism_by_internal_id_returns_correct_organism(store_with_organisms: Store):
     """Test filtering an organism by internal ID when the ID exists."""
 
     # GIVEN a store with multiple organisms
@@ -22,8 +18,7 @@ def test_filter_organism_by_internal_id_returns_correct_organism(
 
     # WHEN filtering the organisms by internal ID
     filtered_organisms: list[Organism] = filter_organism_by_internal_id(
-        organisms=organisms,
-        internal_id=organism.internal_id,
+        organisms=organisms, internal_id=organism.internal_id
     ).all()
 
     # THEN only one organism should be returned
@@ -35,8 +30,7 @@ def test_filter_organism_by_internal_id_returns_correct_organism(
 
 
 def test_filter_organism_by_internal_id_returns_empty_list_when_id_does_not_exist(
-    store_with_organisms: Store,
-    non_existent_id: str,
+    store_with_organisms: Store, non_existent_id: str
 ):
     """Test filtering an organism by internal ID when the ID does not exist."""
 
@@ -46,8 +40,7 @@ def test_filter_organism_by_internal_id_returns_empty_list_when_id_does_not_exis
 
     # WHEN filtering the organisms by internal ID
     filtered_organisms: list[Organism] = filter_organism_by_internal_id(
-        organisms=organisms,
-        internal_id=non_existent_id,
+        organisms=organisms, internal_id=non_existent_id
     ).all()
 
     # THEN the filtered organisms should be an empty list

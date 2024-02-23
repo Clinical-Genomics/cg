@@ -5,9 +5,7 @@ from click.testing import CliRunner
 
 from cg.cli.clean import hk_case_bundle_files
 from cg.constants.constants import Workflow
-from cg.constants.housekeeper_tags import (
-    WORKFLOW_PROTECTED_TAGS,
-)
+from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis
 from cg.store.store import Store
@@ -39,11 +37,7 @@ def test_date_days_ago_one_days():
     assert result.date() == yesterday.date()
 
 
-def test_clean_hk_case_files_too_old(
-    cli_runner: CliRunner,
-    clean_context: CGConfig,
-    caplog,
-):
+def test_clean_hk_case_files_too_old(cli_runner: CliRunner, clean_context: CGConfig, caplog):
     # GIVEN no analysis in database
     days_ago = 365 * 100
     date_one_year_ago = get_date_days_ago(days_ago)
@@ -81,26 +75,18 @@ def test_clean_hk_case_files_single_analysis(
     workflow: Workflow = Workflow.MIP_DNA
 
     analysis: Analysis = helpers.add_analysis(
-        store=store,
-        started_at=date_days_ago,
-        completed_at=date_days_ago,
-        workflow=workflow,
+        store=store, started_at=date_days_ago, completed_at=date_days_ago, workflow=workflow
     )
     bundle_name: str = analysis.case.internal_id
 
     # GIVEN a housekeeper api with some files
     hk_bundle_data["name"] = bundle_name
-    helpers.ensure_hk_bundle(
-        cg_context.housekeeper_api,
-        bundle_data=hk_bundle_data,
-    )
+    helpers.ensure_hk_bundle(cg_context.housekeeper_api, bundle_data=hk_bundle_data)
 
     # WHEN running the clean command
     caplog.set_level(logging.DEBUG)
     result = cli_runner.invoke(
-        hk_case_bundle_files,
-        ["--days-old", days_ago, "--dry-run"],
-        obj=context,
+        hk_case_bundle_files, ["--days-old", days_ago, "--dry-run"], obj=context
     )
 
     # THEN it should be successful
@@ -128,10 +114,7 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     workflow: Workflow = Workflow.MIP_DNA
 
     analysis: Analysis = helpers.add_analysis(
-        store=store,
-        started_at=date_days_ago,
-        completed_at=date_days_ago,
-        workflow=workflow,
+        store=store, started_at=date_days_ago, completed_at=date_days_ago, workflow=workflow
     )
     bundle_name: str = analysis.case.internal_id
 
@@ -139,10 +122,7 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     protected_tags = WORKFLOW_PROTECTED_TAGS[workflow][0]
     hk_bundle_data["name"] = bundle_name
     hk_bundle_data["files"][0]["tags"] = protected_tags
-    helpers.ensure_hk_bundle(
-        cg_context.housekeeper_api,
-        bundle_data=hk_bundle_data,
-    )
+    helpers.ensure_hk_bundle(cg_context.housekeeper_api, bundle_data=hk_bundle_data)
 
     # WHEN running the clean command
     caplog.set_level(logging.DEBUG)

@@ -51,9 +51,7 @@ def test_add_bundle(
 
 
 def test_add_bundle_and_commit(
-    housekeeper_api: MockHousekeeperAPI,
-    minimal_bundle_obj,
-    small_helpers: SmallHelpers,
+    housekeeper_api: MockHousekeeperAPI, minimal_bundle_obj, small_helpers: SmallHelpers
 ):
     """Test to add a housekeeper bundle and make it persistent."""
     # GIVEN a empty housekeeper api and a bundle object
@@ -66,10 +64,7 @@ def test_add_bundle_and_commit(
     assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 1
 
 
-def test_get_bundle(
-    housekeeper_api: MockHousekeeperAPI,
-    minimal_bundle_obj: Bundle,
-):
+def test_get_bundle(housekeeper_api: MockHousekeeperAPI, minimal_bundle_obj: Bundle):
     """Test to add a housekeeper bundle and fetch it back."""
     # GIVEN a housekeeper api with a bundle object
     assert housekeeper_api.bundle(minimal_bundle_obj.name) is None

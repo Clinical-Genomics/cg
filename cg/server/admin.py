@@ -3,24 +3,13 @@
 from datetime import datetime
 from gettext import gettext
 
-from flask import (
-    flash,
-    redirect,
-    request,
-    session,
-    url_for,
-)
+from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 
-from cg.constants.constants import (
-    NG_UL_SUFFIX,
-    CaseActions,
-    DataDelivery,
-    Workflow,
-)
+from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.server.ext import db
 from cg.store.models import Sample
 from cg.utils.flask.enum import SelectEnumField
@@ -51,13 +40,7 @@ def view_case_sample_link(unused1, unused2, model, unused3):
 
     return Markup(
         "<a href='%s'>%s</a>"
-        % (
-            url_for(
-                "casesample.index_view",
-                search=model.internal_id,
-            ),
-            model.internal_id,
-        )
+        % (url_for("casesample.index_view", search=model.internal_id), model.internal_id)
     )
 
 
@@ -145,18 +128,9 @@ class ApplicationView(BaseView):
         "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
         "sample_concentration_maximum_cfdna": view_sample_concentration_maximum_cfdna,
     }
-    column_filters = [
-        "prep_category",
-        "is_accredited",
-    ]
-    column_searchable_list = [
-        "tag",
-        "prep_category",
-    ]
-    form_excluded_columns = [
-        "category",
-        "versions",
-    ]
+    column_filters = ["prep_category", "is_accredited"]
+    column_searchable_list = ["tag", "prep_category"]
+    form_excluded_columns = ["category", "versions"]
 
     @staticmethod
     def view_application_link(unused1, unused2, model, unused3):
@@ -166,10 +140,7 @@ class ApplicationView(BaseView):
             Markup(
                 "<a href='%s'>%s</a>"
                 % (
-                    url_for(
-                        "application.index_view",
-                        search=model.application.tag,
-                    ),
+                    url_for("application.index_view", search=model.application.tag),
                     model.application.tag,
                 )
             )
@@ -201,23 +172,13 @@ class ApplicationVersionView(BaseView):
         "price_research",
         "comment",
     )
-    column_exclude_list = [
-        "created_at",
-        "updated_at",
-    ]
-    column_filters = [
-        "version",
-        "application.tag",
-    ]
+    column_exclude_list = ["created_at", "updated_at"]
+    column_filters = ["version", "application.tag"]
     column_formatters = {"application": ApplicationView.view_application_link}
     column_searchable_list = ["application.tag"]
     edit_modal = True
     create_modal = True
-    form_excluded_columns = [
-        "samples",
-        "pools",
-        "microbial_samples",
-    ]
+    form_excluded_columns = ["samples", "pools", "microbial_samples"]
 
 
 class ApplicationLimitationsView(BaseView):
@@ -232,16 +193,10 @@ class ApplicationLimitationsView(BaseView):
         "updated_at",
     )
     column_formatters = {"application": ApplicationView.view_application_link}
-    column_filters = [
-        "application.tag",
-        "pipeline",
-    ]
+    column_filters = ["application.tag", "pipeline"]
     column_searchable_list = ["application.tag"]
     column_editable_list = ["comment"]
-    form_excluded_columns = [
-        "created_at",
-        "updated_at",
-    ]
+    form_excluded_columns = ["created_at", "updated_at"]
     form_extra_fields = {"pipeline": SelectEnumField(enum_class=Workflow)}
     create_modal = True
     edit_modal = True
@@ -255,10 +210,7 @@ class BedView(BaseView):
     column_exclude_list = ["created_at"]
     column_filters = []
     column_searchable_list = ["name"]
-    form_excluded_columns = [
-        "created_at",
-        "updated_at",
-    ]
+    form_excluded_columns = ["created_at", "updated_at"]
 
     @staticmethod
     def view_bed_link(unused1, unused2, model, unused3):
@@ -267,13 +219,7 @@ class BedView(BaseView):
         return (
             Markup(
                 "<a href='%s'>%s</a>"
-                % (
-                    url_for(
-                        "bed.index_view",
-                        search=model.bed.name,
-                    ),
-                    model.bed.name,
-                )
+                % (url_for("bed.index_view", search=model.bed.name), model.bed.name)
             )
             if model.bed
             else ""
@@ -284,19 +230,9 @@ class BedVersionView(BaseView):
     """Admin view for Model.BedVersion"""
 
     column_default_sort = ("updated_at", True)
-    column_editable_list = [
-        "shortname",
-        "filename",
-        "comment",
-        "designer",
-        "checksum",
-    ]
+    column_editable_list = ["shortname", "filename", "comment", "designer", "checksum"]
     column_exclude_list = ["created_at"]
-    form_excluded_columns = [
-        "created_at",
-        "updated_at",
-        "samples",
-    ]
+    form_excluded_columns = ["created_at", "updated_at", "samples"]
     column_filters = []
     column_formatters = {"bed": BedView.view_bed_link}
     column_searchable_list = ["bed.name"]
@@ -331,17 +267,8 @@ class CustomerView(BaseView):
         "scout_access",
     ]
     column_filters = ["priority", "scout_access"]
-    column_searchable_list = [
-        "internal_id",
-        "name",
-    ]
-    form_excluded_columns = [
-        "families",
-        "samples",
-        "pools",
-        "orders",
-        "invoices",
-    ]
+    column_searchable_list = ["internal_id", "name"]
+    form_excluded_columns = ["families", "samples", "pools", "orders", "invoices"]
 
 
 class CollaborationView(BaseView):
@@ -350,15 +277,8 @@ class CollaborationView(BaseView):
     column_editable_list = ["name"]
     column_filters = []
     column_hide_backrefs = False
-    column_list = (
-        "internal_id",
-        "name",
-        "customers",
-    )
-    column_searchable_list = [
-        "internal_id",
-        "name",
-    ]
+    column_list = ("internal_id", "name", "customers")
+    column_searchable_list = ["internal_id", "name"]
 
 
 class CaseView(BaseView):
@@ -366,11 +286,7 @@ class CaseView(BaseView):
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["action", "comment"]
-    column_exclude_list = [
-        "created_at",
-        "_cohorts",
-        "synopsis",
-    ]
+    column_exclude_list = ["created_at", "_cohorts", "synopsis"]
     column_filters = [
         "customer.internal_id",
         "priority",
@@ -408,13 +324,7 @@ class CaseView(BaseView):
         if model.case:
             markup += Markup(
                 " <a href='%s'>%s</a>"
-                % (
-                    url_for(
-                        "case.index_view",
-                        search=model.case.internal_id,
-                    ),
-                    model.case,
-                )
+                % (url_for("case.index_view", search=model.case.internal_id), model.case)
             )
 
         return markup
@@ -425,10 +335,7 @@ class CaseView(BaseView):
         "Are you sure you want to set the action for selected families to hold?",
     )
     def action_set_hold(self, ids: list[str]):
-        self.set_action_for_cases(
-            action=CaseActions.HOLD,
-            case_entry_ids=ids,
-        )
+        self.set_action_for_cases(action=CaseActions.HOLD, case_entry_ids=ids)
 
     @action(
         "set_empty",
@@ -438,11 +345,7 @@ class CaseView(BaseView):
     def action_set_empty(self, ids: list[str]):
         self.set_action_for_cases(action=None, case_entry_ids=ids)
 
-    def set_action_for_cases(
-        self,
-        action: CaseActions | None,
-        case_entry_ids: list[str],
-    ):
+    def set_action_for_cases(self, action: CaseActions | None, case_entry_ids: list[str]):
         try:
             for entry_id in case_entry_ids:
                 case = db.get_case_by_entry_id(entry_id=entry_id)
@@ -472,11 +375,7 @@ class FlowcellView(BaseView):
     column_default_sort = ("sequenced_at", True)
     column_editable_list = ["status"]
     column_exclude_list = ["archived_at"]
-    column_filters = [
-        "sequencer_type",
-        "sequencer_name",
-        "status",
-    ]
+    column_filters = ["sequencer_type", "sequencer_name", "status"]
     column_searchable_list = ["name"]
 
     @staticmethod
@@ -485,13 +384,7 @@ class FlowcellView(BaseView):
         del unused1, unused2, unused3
         return Markup(
             "<a href='%s'>%s</a>"
-            % (
-                url_for(
-                    "flowcell.index_view",
-                    search=model.flowcell.name,
-                ),
-                model.flowcell.name,
-            )
+            % (url_for("flowcell.index_view", search=model.flowcell.name), model.flowcell.name)
         )
 
 
@@ -510,11 +403,7 @@ class InvoiceView(BaseView):
         "discount",
         "price",
     )
-    column_searchable_list = [
-        "customer.internal_id",
-        "customer.name",
-        "id",
-    ]
+    column_searchable_list = ["customer.internal_id", "customer.name", "id"]
 
     @staticmethod
     def view_invoice_link(unused1, unused2, model, unused3):
@@ -524,10 +413,7 @@ class InvoiceView(BaseView):
             Markup(
                 "<a href='%s'>%s</a>"
                 % (
-                    url_for(
-                        "invoice.index_view",
-                        search=model.invoice.id,
-                    ),
+                    url_for("invoice.index_view", search=model.invoice.id),
                     (
                         model.invoice.invoiced_at.date()
                         if model.invoice.invoiced_at
@@ -545,11 +431,7 @@ class AnalysisView(BaseView):
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["is_primary"]
-    column_filters = [
-        "pipeline",
-        "pipeline_version",
-        "is_primary",
-    ]
+    column_filters = ["pipeline", "pipeline_version", "is_primary"]
     column_formatters = {"case": CaseView.view_case_link}
     column_searchable_list = [
         "case.internal_id",
@@ -562,32 +444,16 @@ class OrganismView(BaseView):
     """Admin view for Model.Organism"""
 
     column_default_sort = ("created_at", True)
-    column_editable_list = [
-        "internal_id",
-        "name",
-        "reference_genome",
-        "comment",
-    ]
-    column_searchable_list = [
-        "internal_id",
-        "name",
-        "reference_genome",
-    ]
+    column_editable_list = ["internal_id", "name", "reference_genome", "comment"]
+    column_searchable_list = ["internal_id", "name", "reference_genome"]
 
 
 class PanelView(BaseView):
     """Admin view for Model.Panel"""
 
-    column_editable_list = [
-        "current_version",
-        "name",
-    ]
+    column_editable_list = ["current_version", "name"]
     column_filters = ["customer.internal_id"]
-    column_searchable_list = [
-        "customer.internal_id",
-        "name",
-        "abbrev",
-    ]
+    column_searchable_list = ["customer.internal_id", "name", "abbrev"]
     create_modal = True
     edit_modal = True
 
@@ -597,17 +463,9 @@ class PoolView(BaseView):
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["ticket"]
-    column_filters = [
-        "customer.internal_id",
-        "application_version.application",
-    ]
+    column_filters = ["customer.internal_id", "application_version.application"]
     column_formatters = {"invoice": InvoiceView.view_invoice_link}
-    column_searchable_list = [
-        "name",
-        "order",
-        "ticket",
-        "customer.internal_id",
-    ]
+    column_searchable_list = ["name", "order", "ticket", "customer.internal_id"]
 
 
 class SampleView(BaseView):
@@ -627,12 +485,7 @@ class SampleView(BaseView):
         "last_sequenced_at",
         "sex",
     ]
-    column_filters = [
-        "customer.internal_id",
-        "priority",
-        "sex",
-        "application_version.application",
-    ]
+    column_filters = ["customer.internal_id", "priority", "sex", "application_version.application"]
     column_formatters = {
         "is_external": is_external_application,
         "internal_id": view_case_sample_link,
@@ -667,13 +520,7 @@ class SampleView(BaseView):
         return (
             Markup(
                 "<a href='%s'>%s</a>"
-                % (
-                    url_for(
-                        "sample.index_view",
-                        search=model.sample.internal_id,
-                    ),
-                    model.sample,
-                )
+                % (url_for("sample.index_view", search=model.sample.internal_id), model.sample)
             )
             if model.sample
             else ""
@@ -709,8 +556,7 @@ class SampleView(BaseView):
         cases_with_remaining_samples: list[str] = db.filter_cases_with_samples(case_ids=case_ids)
 
         self.display_cancel_confirmation(
-            sample_entry_ids=entry_ids,
-            remaining_cases=cases_with_remaining_samples,
+            sample_entry_ids=entry_ids, remaining_cases=cases_with_remaining_samples
         )
 
     def write_cancel_comment(self, sample: Sample) -> None:
@@ -722,9 +568,7 @@ class SampleView(BaseView):
         db.update_sample_comment(sample=sample, comment=comment)
 
     def display_cancel_confirmation(
-        self,
-        sample_entry_ids: list[str],
-        remaining_cases: list[str],
+        self, sample_entry_ids: list[str], remaining_cases: list[str]
     ) -> None:
         """Show a summary of the cancelled samples and any cases in which other samples were present."""
         samples: str = "sample" if len(sample_entry_ids) == 1 else "samples"
@@ -769,11 +613,7 @@ class CaseSampleView(BaseView):
         "case": CaseView.view_case_link,
         "sample": SampleView.view_sample_link,
     }
-    column_searchable_list = [
-        "case.internal_id",
-        "case.name",
-        "sample.internal_id",
-    ]
+    column_searchable_list = ["case.internal_id", "case.name", "sample.internal_id"]
     create_modal = True
     edit_modal = True
 
@@ -783,19 +623,9 @@ class UserView(BaseView):
 
     column_default_sort = "name"
     column_editable_list = ["order_portal_login"]
-    column_filters = [
-        "is_admin",
-        "order_portal_login",
-        "customers",
-    ]
+    column_filters = ["is_admin", "order_portal_login", "customers"]
     column_hide_backrefs = False
-    column_list = (
-        "name",
-        "email",
-        "is_admin",
-        "order_portal_login",
-        "customers",
-    )
+    column_list = ("name", "email", "is_admin", "order_portal_login", "customers")
     column_searchable_list = ["name", "email"]
     create_modal = True
     edit_modal = True
@@ -804,14 +634,8 @@ class UserView(BaseView):
 class SampleLaneSequencingMetricsView(BaseView):
     """Admin view for the Model.SampleLaneSequencingMetrics."""
 
-    column_filters = [
-        "sample_internal_id",
-        "flow_cell_name",
-    ]
-    column_searchable_list = [
-        "sample_internal_id",
-        "flow_cell_name",
-    ]
+    column_filters = ["sample_internal_id", "flow_cell_name"]
+    column_searchable_list = ["sample_internal_id", "flow_cell_name"]
     create_modal = True
     edit_modal = True
 

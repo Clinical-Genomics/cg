@@ -11,10 +11,7 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_dispatch_table_generation(
-    param1: str = None,
-    param2: str = None,
-    param3: str = None,
-    param4: str = None,
+    param1: str = None, param2: str = None, param3: str = None, param4: str = None
 ):
     """Test that the dispatch table is generated correctly."""
 
@@ -33,28 +30,14 @@ def test_dispatch_table_generation(
 
     # When generating the dispatch table
     dispatcher = Dispatcher(
-        [
-            test_function_one,
-            test_function_two,
-            test_function_three,
-            test_function_four,
-        ],
-        {
-            "param1": param1,
-            "param2": param2,
-            "param3": param3,
-            "param4": param4,
-        },
+        [test_function_one, test_function_two, test_function_three, test_function_four],
+        {"param1": param1, "param2": param2, "param3": param3, "param4": param4},
     )
 
     expected_table = {
         ("param1",): test_function_one,
         ("param1", "param2"): test_function_two,
-        (
-            "param1",
-            "param2",
-            "param3",
-        ): test_function_three,
+        ("param1", "param2", "param3"): test_function_three,
         ("param4",): test_function_four,
     }
     # Then the dispatch table should contain the correct keys and values
@@ -64,11 +47,7 @@ def test_dispatch_table_generation(
 
 
 def test_call_matching_function(
-    a: int = None,
-    b: int = None,
-    c: int = None,
-    x: int = 5,
-    y: int = 4,
+    a: int = None, b: int = None, c: int = None, x: int = 5, y: int = 4
 ):
     """Test that the dispatcher can be called with a dictionary that matches one of the functions."""
 
@@ -80,28 +59,13 @@ def test_call_matching_function(
         return x * y
 
     # When calling the dispatcher with a dictionary that matches one of the functions
-    dispatcher = Dispatcher(
-        [foo, bar],
-        input_dict={
-            "a": a,
-            "b": b,
-            "c": c,
-            "x": x,
-            "y": y,
-        },
-    )
+    dispatcher = Dispatcher([foo, bar], input_dict={"a": a, "b": b, "c": c, "x": x, "y": y})
 
     # Then the dispatcher should return the correct result
     assert dispatcher() == 20
 
 
-def test_call_non_matching_function(
-    a: int = 1,
-    b: int = 2,
-    c: int = 3,
-    x: int = 5,
-    y: int = 4,
-):
+def test_call_non_matching_function(a: int = 1, b: int = 2, c: int = 3, x: int = 5, y: int = 4):
     """Test that the dispatcher raises an error when called with a dictionary that does not match any of the functions."""
 
     # Given two functions
@@ -112,16 +76,7 @@ def test_call_non_matching_function(
         return x * y
 
     # When calling the dispatcher with a dictionary that does not match any of the functions
-    dispatcher = Dispatcher(
-        [foo, bar],
-        input_dict={
-            "a": a,
-            "b": b,
-            "c": c,
-            "x": x,
-            "y": y,
-        },
-    )
+    dispatcher = Dispatcher([foo, bar], input_dict={"a": a, "b": b, "c": c, "x": x, "y": y})
 
     # Then the dispatcher should raise an error
     with pytest.raises(ValueError):
@@ -153,26 +108,14 @@ def test_call_for_function_with_same_number_of_parameters(a=1, b=2, c=None, d=No
         return c * d
 
     # WHEN calling the dispatcher with a dictionary that has the same number of parameters as the functions
-    dispatcher = Dispatcher(
-        [foo, bar],
-        input_dict={
-            "a": a,
-            "b": b,
-            "c": c,
-            "d": d,
-        },
-    )
+    dispatcher = Dispatcher([foo, bar], input_dict={"a": a, "b": b, "c": c, "d": d})
 
     # THEN the dispatcher should return the correct result for each function
     assert dispatcher() == 3
 
 
 def test_call_dictionary_extra_parameters_not_in_functions(
-    a: int = 1,
-    b: int = 2,
-    c: int = 3,
-    d: int = None,
-    e: int = None,
+    a: int = 1, b: int = 2, c: int = 3, d: int = None, e: int = None
 ):
     """Test that the dispatcher can be called with a dictionary that has extra parameters that are not in the functions."""
 
@@ -184,16 +127,7 @@ def test_call_dictionary_extra_parameters_not_in_functions(
         return c * d
 
     # WHEN calling the dispatcher with a dictionary that has extra parameters
-    dispatcher = Dispatcher(
-        [foo, bar],
-        input_dict={
-            "a": a,
-            "b": b,
-            "c": c,
-            "d": d,
-            "e": e,
-        },
-    )
+    dispatcher = Dispatcher([foo, bar], input_dict={"a": a, "b": b, "c": c, "d": d, "e": e})
 
     # THEN the dispatcher should return a value error
     with pytest.raises(ValueError):
@@ -211,11 +145,7 @@ def test_call_with_status_db_functions(
 
     # GIVEN a database with a customer, a subject and two samples
     helpers.add_sample(store, subject_id=test_subject)
-    helpers.add_sample(
-        store,
-        is_tumour=False,
-        subject_id=test_subject,
-    )
+    helpers.add_sample(store, is_tumour=False, subject_id=test_subject)
 
     # WHEN calling the dispatcher with the customer and subject id
     dispatcher = Dispatcher(
@@ -246,24 +176,9 @@ def test_dispatcher_on_other_functions(
 
     # GIVEN a database with a case and an analysis
     case = helpers.add_case(store, internal_id=case_internal_id)
-    helpers.add_analysis(
-        store,
-        case=case,
-        started_at=timestamp_yesterday,
-        workflow=workflow,
-    )
-    helpers.add_analysis(
-        store,
-        case=case,
-        started_at=timestamp_now,
-        workflow=Workflow.FLUFFY,
-    )
-    helpers.add_analysis(
-        store,
-        case=case,
-        started_at=timestamp_yesterday,
-        workflow=Workflow.FLUFFY,
-    )
+    helpers.add_analysis(store, case=case, started_at=timestamp_yesterday, workflow=workflow)
+    helpers.add_analysis(store, case=case, started_at=timestamp_now, workflow=Workflow.FLUFFY)
+    helpers.add_analysis(store, case=case, started_at=timestamp_yesterday, workflow=Workflow.FLUFFY)
 
     # WHEN calling the dispatcher with the to get analyses
     function_dispatcher: Dispatcher = Dispatcher(

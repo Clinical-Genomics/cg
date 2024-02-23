@@ -4,9 +4,7 @@ from pathlib import Path
 
 from click.testing import CliRunner, Result
 
-from cg.cli.downsample import (
-    store_downsampled_samples,
-)
+from cg.cli.downsample import store_downsampled_samples
 from cg.models.cg_config import CGConfig
 
 
@@ -25,18 +23,11 @@ def test_store_downsampled_fastq_files(
         f"{downsample_sample_internal_id_2}_5M",
     ]:
         Path(downsample_dir, f"{sample_id}").mkdir()
-        Path(
-            downsample_dir,
-            f"{sample_id}",
-            f"{sample_id}.fastq.gz",
-        ).touch()
+        Path(downsample_dir, f"{sample_id}", f"{sample_id}.fastq.gz").touch()
     # WHEN calling the cli command to store the fastq files
     result: Result = cli_runner.invoke(
         store_downsampled_samples,
-        args=[
-            f"{downsample_sample_internal_id_1}_5M",
-            f"{downsample_sample_internal_id_2}_5M",
-        ],
+        args=[f"{downsample_sample_internal_id_1}_5M", f"{downsample_sample_internal_id_2}_5M"],
         obj=downsample_context,
     )
 

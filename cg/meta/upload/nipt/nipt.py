@@ -12,20 +12,10 @@ from requests import Response
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow
-from cg.exc import (
-    HousekeeperFileMissingError,
-    StatinaAPIHTTPError,
-)
-from cg.meta.upload.nipt.models import (
-    FlowCellQ30AndReads,
-    StatinaUploadFiles,
-)
+from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
+from cg.meta.upload.nipt.models import FlowCellQ30AndReads, StatinaUploadFiles
 from cg.models.cg_config import CGConfig
-from cg.store.models import (
-    Analysis,
-    Case,
-    Flowcell,
-)
+from cg.store.models import Analysis, Case, Flowcell
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -86,11 +76,7 @@ class NiptUploadAPI:
         LOG.debug(f"Flow cell {flow_cell.name} passed QC for case {case_id}.")
         return True
 
-    def get_housekeeper_results_file(
-        self,
-        case_id: str,
-        tags: list | None = None,
-    ) -> str:
+    def get_housekeeper_results_file(self, case_id: str, tags: list | None = None) -> str:
         """Get the result file for a NIPT analysis from Housekeeper"""
 
         if not tags:
@@ -117,9 +103,7 @@ class NiptUploadAPI:
 
         return results_file
 
-    def get_all_upload_analyses(
-        self,
-    ) -> list[Analysis]:
+    def get_all_upload_analyses(self) -> list[Analysis]:
         """Gets all nipt analyses that are ready to be uploaded"""
         return self.status_db.get_latest_analysis_to_upload_for_workflow(workflow=Workflow.FLUFFY)
 
@@ -130,10 +114,7 @@ class NiptUploadAPI:
             return
         transport: paramiko.Transport = paramiko.Transport((self.sftp_host, self.sftp_port))
         LOG.info(f"Connecting to SFTP server {self.sftp_host}")
-        transport.connect(
-            username=self.sftp_user,
-            password=self.sftp_password,
-        )
+        transport.connect(username=self.sftp_user, password=self.sftp_password)
         sftp: paramiko.SFTPClient = paramiko.SFTPClient.from_transport(transport)
         LOG.info(
             f"Uploading file {results_file} to remote path {self.sftp_remote_path}/{results_file.name}"
@@ -157,8 +138,7 @@ class NiptUploadAPI:
             analysis_obj.uploaded_at = dt.datetime.now()
             self.status_db.session.commit()
             self.trailblazer_api.set_analysis_uploaded(
-                case_id=case_id,
-                uploaded_at=analysis_obj.uploaded_at,
+                case_id=case_id, uploaded_at=analysis_obj.uploaded_at
             )
 
         return analysis_obj
@@ -179,20 +159,17 @@ class NiptUploadAPI:
         """Get statina files from housekeeper."""
 
         hk_results_file: str = self.get_housekeeper_results_file(
-            case_id=case_id,
-            tags=["nipt", "metrics"],
+            case_id=case_id, tags=["nipt", "metrics"]
         )
         results_file: Path = self.get_results_file_path(hk_results_file)
 
         hk_multiqc_file: str = self.get_housekeeper_results_file(
-            case_id=case_id,
-            tags=["nipt", "multiqc-html"],
+            case_id=case_id, tags=["nipt", "multiqc-html"]
         )
         multiqc_file: Path = self.get_results_file_path(hk_multiqc_file)
 
         hk_segmental_calls_file: str = self.get_housekeeper_results_file(
-            case_id=case_id,
-            tags=["nipt", "wisecondor"],
+            case_id=case_id, tags=["nipt", "wisecondor"]
         )
         segmental_calls_file: Path = self.get_results_file_path(hk_segmental_calls_file)
 
@@ -208,10 +185,7 @@ class NiptUploadAPI:
         token: str = (
             requests.post(
                 self.statina_auth_url,
-                data={
-                    "username": self.statina_user,
-                    "password": self.statina_password,
-                },
+                data={"username": self.statina_user, "password": self.statina_password},
             )
             .json()
             .get("access_token")

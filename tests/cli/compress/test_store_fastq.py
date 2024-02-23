@@ -8,11 +8,7 @@ from cg.cli.store.fastq import store_case
 from cg.models.cg_config import CGConfig
 
 
-def test_store_fastq_cli_no_family(
-    compress_context: CGConfig,
-    cli_runner: CliRunner,
-    caplog,
-):
+def test_store_fastq_cli_no_family(compress_context: CGConfig, cli_runner: CliRunner, caplog):
     """Test to run the compress command without providing any case id"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context
@@ -25,9 +21,7 @@ def test_store_fastq_cli_no_family(
 
 
 def test_store_fastq_cli_non_existing_family(
-    compress_context: CGConfig,
-    cli_runner: CliRunner,
-    caplog,
+    compress_context: CGConfig, cli_runner: CliRunner, caplog
 ):
     """Test to run the compress command with a non-existing case"""
     caplog.set_level(logging.DEBUG)
@@ -35,11 +29,7 @@ def test_store_fastq_cli_non_existing_family(
     case_id = "happychap"
 
     # WHEN running the store fastq command
-    res = cli_runner.invoke(
-        store_case,
-        [case_id],
-        obj=compress_context,
-    )
+    res = cli_runner.invoke(store_case, [case_id], obj=compress_context)
 
     # THEN assert the program exits without a problem
     assert res.exit_code == 0

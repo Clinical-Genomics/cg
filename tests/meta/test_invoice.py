@@ -8,9 +8,7 @@ from cg.models.invoice.invoice import InvoiceInfo
 from cg.store.models import Pool, Sample
 
 
-def test_instantiate_invoice_api(
-    get_invoice_api_sample,
-):
+def test_instantiate_invoice_api(get_invoice_api_sample):
     # GIVEN a sample invoice api
 
     # When instantiating
@@ -20,9 +18,7 @@ def test_instantiate_invoice_api(
     assert isinstance(sample_invoice_api, InvoiceAPI)
 
 
-def test_assert_invoice_api(
-    get_invoice_api_sample,
-):
+def test_assert_invoice_api(get_invoice_api_sample):
     # GIVEN an invoice API
     api: InvoiceAPI = get_invoice_api_sample
     # THEN a report should be generated
@@ -30,10 +26,7 @@ def test_assert_invoice_api(
     assert type(report) == dict
 
 
-def test_invoice_api_sample(
-    get_invoice_api_sample,
-    record_type: str = RecordType.Sample,
-):
+def test_invoice_api_sample(get_invoice_api_sample, record_type: str = RecordType.Sample):
     """Test that the invoice records the right record_type"""
     # THEN calling InvoiceAPI should return an API
     api: InvoiceAPI = get_invoice_api_sample
@@ -59,8 +52,7 @@ def test_invoice_api_sample(
 
 
 def test_invoice_api_nipt_customer(
-    get_invoice_api_nipt_customer,
-    record_type: str = RecordType.Pool,
+    get_invoice_api_nipt_customer, record_type: str = RecordType.Pool
 ):
     # GIVEN an invoice api with NIPT customer
     api: InvoiceAPI = get_invoice_api_nipt_customer
@@ -84,8 +76,7 @@ def test_invoice_api_nipt_customer(
 
 
 def test_invoice_pool_generic_customer(
-    get_invoice_api_pool_generic_customer,
-    record_type: str = RecordType.Pool,
+    get_invoice_api_pool_generic_customer, record_type: str = RecordType.Pool
 ):
     # GIVEN an invoice API with a pool and a generic customer
     api: InvoiceAPI = get_invoice_api_pool_generic_customer

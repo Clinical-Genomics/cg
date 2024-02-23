@@ -5,12 +5,8 @@ import logging
 import click
 
 from cg.constants.constants import DRY_RUN
-from cg.constants.demultiplexing import (
-    OPTION_BCL_CONVERTER,
-)
-from cg.meta.demultiplex.demux_post_processing import (
-    DemuxPostProcessingAPI,
-)
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
+from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
@@ -28,11 +24,7 @@ def finish_group():
 @DRY_RUN
 @click.pass_obj
 def finish_flow_cell(
-    context: CGConfig,
-    flow_cell_directory_name: str,
-    bcl_converter: str,
-    force: bool,
-    dry_run: bool,
+    context: CGConfig, flow_cell_directory_name: str, bcl_converter: str, force: bool, dry_run: bool
 ):
     """Command to finish up a flow cell after demultiplexing.
 

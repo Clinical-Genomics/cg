@@ -9,10 +9,7 @@ from cg.store.filters.status_application_version_filters import (
     filter_application_versions_by_application_version_entry_id,
     order_application_versions_by_valid_from_desc,
 )
-from cg.store.models import (
-    Application,
-    ApplicationVersion,
-)
+from cg.store.models import Application, ApplicationVersion
 from cg.store.store import Store
 
 
@@ -125,8 +122,7 @@ def test_filter_application_versions_before_valid_from_future_date(
 
     # THEN the filtered query has the same elements as the unfiltered query
     app_version_pair: Iterable[tuple[ApplicationVersion, ApplicationVersion]] = zip(
-        app_version_query.all(),
-        filtered_app_version_query.all(),
+        app_version_query.all(), filtered_app_version_query.all()
     )
     assert all(non_filtered == filtered for non_filtered, filtered in app_version_pair)
 
@@ -189,9 +185,7 @@ def test_order_application_versions_by_valid_from_desc(
     )
 
 
-def test_order_application_versions_by_valid_from_desc_empty_query(
-    store: Store,
-):
+def test_order_application_versions_by_valid_from_desc_empty_query(store: Store):
     """Test that ordering an empty query by valid_from returns an empty query."""
     # GIVEN a store without any application version
     app_version_query: Query = store._get_query(table=ApplicationVersion)

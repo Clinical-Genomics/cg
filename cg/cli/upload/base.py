@@ -6,24 +6,14 @@ import traceback
 
 import click
 
-from cg.cli.upload.clinical_delivery import (
-    auto_fastq,
-    upload_clinical_delivery,
-)
+from cg.cli.upload.clinical_delivery import auto_fastq, upload_clinical_delivery
 from cg.cli.upload.coverage import upload_coverage
-from cg.cli.upload.delivery_report import (
-    upload_delivery_report_to_scout,
-)
+from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
 from cg.cli.upload.fohm import fohm
-from cg.cli.upload.genotype import (
-    upload_genotypes,
-)
+from cg.cli.upload.genotype import upload_genotypes
 from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.gisaid import upload_to_gisaid
-from cg.cli.upload.mutacc import (
-    process_solved,
-    processed_solved,
-)
+from cg.cli.upload.mutacc import process_solved, processed_solved
 from cg.cli.upload.nipt import nipt
 from cg.cli.upload.observations import (
     upload_available_observations_to_loqusdb,
@@ -39,27 +29,15 @@ from cg.cli.upload.scout import (
     upload_rna_to_scout,
     upload_to_scout,
 )
-from cg.cli.upload.utils import (
-    suggest_cases_to_upload,
-)
+from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.cli.upload.validate import validate
 from cg.constants import Workflow
 from cg.exc import AnalysisAlreadyUploadedError
-from cg.meta.upload.balsamic.balsamic import (
-    BalsamicUploadAPI,
-)
-from cg.meta.upload.microsalt.microsalt_upload_api import (
-    MicrosaltUploadAPI,
-)
-from cg.meta.upload.mip.mip_dna import (
-    MipDNAUploadAPI,
-)
-from cg.meta.upload.mip.mip_rna import (
-    MipRNAUploadAPI,
-)
-from cg.meta.upload.rnafusion.rnafusion import (
-    RnafusionUploadAPI,
-)
+from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
+from cg.meta.upload.microsalt.microsalt_upload_api import MicrosaltUploadAPI
+from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
+from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
+from cg.meta.upload.rnafusion.rnafusion import RnafusionUploadAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
@@ -70,12 +48,7 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group(invoke_without_command=True)
-@click.option(
-    "-c",
-    "--case",
-    "case_id",
-    help="Upload to all apps",
-)
+@click.option("-c", "--case", "case_id", help="Upload to all apps")
 @click.option(
     "-r",
     "--restart",
@@ -83,11 +56,7 @@ LOG = logging.getLogger(__name__)
     help="Force upload of an analysis that has already been uploaded or marked as started",
 )
 @click.pass_context
-def upload(
-    context: click.Context,
-    case_id: str | None,
-    restart: bool,
-):
+def upload(context: click.Context, case_id: str | None, restart: bool):
     """Upload results from analyses"""
 
     config_object: CGConfig = context.obj
@@ -116,33 +85,17 @@ def upload(
             upload_api = MicrosaltUploadAPI(config_object)
 
         context.obj.meta_apis["upload_api"] = upload_api
-        upload_api.upload(
-            ctx=context,
-            case=case,
-            restart=restart,
-        )
-        click.echo(
-            click.style(
-                f"{case_id} analysis has been successfully uploaded",
-                fg="green",
-            )
-        )
+        upload_api.upload(ctx=context, case=case, restart=restart)
+        click.echo(click.style(f"{case_id} analysis has been successfully uploaded", fg="green"))
     else:
         suggest_cases_to_upload(status_db=upload_api.status_db)
         raise click.Abort()
 
 
 @upload.command("auto")
-@click.option(
-    "--workflow",
-    type=EnumChoice(Workflow),
-    help="Limit to specific workflow",
-)
+@click.option("--workflow", type=EnumChoice(Workflow), help="Limit to specific workflow")
 @click.pass_context
-def upload_all_completed_analyses(
-    context: click.Context,
-    workflow: Workflow = None,
-):
+def upload_all_completed_analyses(context: click.Context, workflow: Workflow = None):
     """Upload all completed analyses."""
 
     LOG.info("----------------- AUTO -----------------")

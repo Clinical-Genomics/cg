@@ -12,10 +12,7 @@ from cg.utils.files import (
 )
 
 
-def test_get_file_in_directory(
-    nested_directory_with_file: Path,
-    some_file: str,
-):
+def test_get_file_in_directory(nested_directory_with_file: Path, some_file: str):
     """Test function to get a file in a directory and subdirectories."""
     # GIVEN a directory with subdirectories with a file
     # WHEN getting the file
@@ -37,10 +34,7 @@ def test_rename_file(tmp_path: Path):
     assert not renamed_file_path.exists()
 
     # WHEN renaming the file
-    rename_file(
-        file_path=file_path,
-        renamed_file_path=renamed_file_path,
-    )
+    rename_file(file_path=file_path, renamed_file_path=renamed_file_path)
 
     # THEN the renamed file path should exist
     assert renamed_file_path.exists()
@@ -60,18 +54,13 @@ def test_rename_file_exists(tmp_path: Path):
     assert renamed_file_path.exists()
 
     # WHEN renaming the file
-    rename_file(
-        file_path=file_path,
-        renamed_file_path=renamed_file_path,
-    )
+    rename_file(file_path=file_path, renamed_file_path=renamed_file_path)
 
     # THEN the renamed file path should exist
     assert renamed_file_path.exists()
 
 
-def test_rename_file_original_does_not_exist(
-    tmp_path: Path,
-):
+def test_rename_file_original_does_not_exist(tmp_path: Path):
     # GIVEN a file path and a renamed file path
 
     file_path: Path = Path(tmp_path, "dummy_path")
@@ -83,10 +72,7 @@ def test_rename_file_original_does_not_exist(
     # WHEN renaming the file
     # THEN a FileNotFoundError should be raised
     with pytest.raises(FileNotFoundError):
-        rename_file(
-            file_path=file_path,
-            renamed_file_path=renamed_file_path,
-        )
+        rename_file(file_path=file_path, renamed_file_path=renamed_file_path)
 
 
 def test_get_creation_date(tmp_path_factory, timestamp_now: datetime):
@@ -103,17 +89,12 @@ def test_get_creation_date(tmp_path_factory, timestamp_now: datetime):
 
 
 def test_get_all_directories_in_path(
-    path_with_directories_and_a_file: Path,
-    sub_dir_names: list[str],
-    some_file: str,
+    path_with_directories_and_a_file: Path, sub_dir_names: list[str], some_file: str
 ):
     """Test that get all directories in path only returns directories."""
 
     # GIVEN a path that contains directories and a file
-    assert Path(
-        path_with_directories_and_a_file,
-        some_file,
-    ).exists()
+    assert Path(path_with_directories_and_a_file, some_file).exists()
 
     # WHEN retrieving all directories in the path
     directories: list[Path] = get_directories_in_path(path=path_with_directories_and_a_file)
@@ -126,10 +107,7 @@ def test_get_all_directories_in_path(
     assert some_file not in [directory.name for directory in directories]
 
 
-def test_remove_directory_and_contents(
-    path_with_directories_and_a_file: Path,
-    some_file: str,
-):
+def test_remove_directory_and_contents(path_with_directories_and_a_file: Path, some_file: str):
     """Test to remove a directory and all its contents."""
 
     # GIVEN a path to a directory
@@ -140,7 +118,4 @@ def test_remove_directory_and_contents(
 
     # THEN the directory and its contents should no longer exist
     assert not path_with_directories_and_a_file.exists()
-    assert not Path(
-        path_with_directories_and_a_file,
-        some_file,
-    ).exists()
+    assert not Path(path_with_directories_and_a_file, some_file).exists()

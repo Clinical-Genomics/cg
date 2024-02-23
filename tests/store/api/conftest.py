@@ -45,11 +45,7 @@ def store_failing_sequencing_qc(
         date=timestamp_now,
     )
 
-    helpers.add_relationship(
-        store=store,
-        case=store_case,
-        sample=store_sample,
-    )
+    helpers.add_relationship(store=store, case=store_case, sample=store_sample)
     helpers.add_sample_lane_sequencing_metrics(
         store=store,
         sample_internal_id=store_sample.internal_id,
@@ -90,14 +86,9 @@ def store_with_analyses_for_cases(
             uploaded_at=timestamp_now,
             delivery_reported_at=None,
         )
-        sample = helpers.add_sample(
-            analysis_store,
-            delivered_at=timestamp_now,
-        )
+        sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: CaseSample = analysis_store.relate_sample(
-            case=oldest_analysis.case,
-            sample=sample,
-            status=PhenotypeStatus.UNKNOWN,
+            case=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
         analysis_store.session.add(link)
 

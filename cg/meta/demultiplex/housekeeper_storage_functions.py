@@ -7,9 +7,7 @@ from typing import Iterable
 from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.housekeeper_tags import (
-    SequencingFileTag,
-)
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.sequencing import Sequencers
 from cg.meta.demultiplex.utils import (
     get_lane_from_sample_fastq,
@@ -19,13 +17,9 @@ from cg.meta.demultiplex.utils import (
     get_undetermined_fastqs,
     rename_fastq_file_if_needed,
 )
-from cg.models.flow_cell.flow_cell import (
-    FlowCellDirectoryData,
-)
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.store import Store
-from cg.utils.files import (
-    get_files_matching_pattern,
-)
+from cg.utils.files import get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
 
@@ -40,46 +34,27 @@ def store_flow_cell_data_in_housekeeper(
 
     hk_api.add_bundle_and_version_if_non_existent(flow_cell.id)
 
-    tags: list[str] = [
-        SequencingFileTag.FASTQ,
-        flow_cell.id,
-    ]
+    tags: list[str] = [SequencingFileTag.FASTQ, flow_cell.id]
     hk_api.add_tags_if_non_existent(tags)
 
-    add_sample_fastq_files_to_housekeeper(
-        flow_cell=flow_cell,
-        hk_api=hk_api,
-        store=store,
-    )
-    store_undetermined_fastq_files(
-        flow_cell=flow_cell,
-        hk_api=hk_api,
-        store=store,
-    )
+    add_sample_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api, store=store)
+    store_undetermined_fastq_files(flow_cell=flow_cell, hk_api=hk_api, store=store)
     add_demux_logs_to_housekeeper(
-        flow_cell=flow_cell,
-        hk_api=hk_api,
-        flow_cell_run_dir=flow_cell_run_dir,
+        flow_cell=flow_cell, hk_api=hk_api, flow_cell_run_dir=flow_cell_run_dir
     )
 
 
 def store_undetermined_fastq_files(
-    flow_cell: FlowCellDirectoryData,
-    hk_api: HousekeeperAPI,
-    store: Store,
+    flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, store: Store
 ) -> None:
     """Store undetermined fastq files for non-pooled samples in Housekeeper."""
     non_pooled_lanes_and_samples: list[
         tuple[int, str]
     ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
 
-    for (
-        lane,
-        sample_id,
-    ) in non_pooled_lanes_and_samples:
+    for lane, sample_id in non_pooled_lanes_and_samples:
         undetermined_fastqs: list[Path] = get_undetermined_fastqs(
-            lane=lane,
-            flow_cell_path=flow_cell.path,
+            lane=lane, flow_cell_path=flow_cell.path
         )
 
         for fastq_path in undetermined_fastqs:
@@ -98,27 +73,19 @@ def store_undetermined_fastq_files(
 
 
 def add_demux_logs_to_housekeeper(
-    flow_cell: FlowCellDirectoryData,
-    hk_api: HousekeeperAPI,
-    flow_cell_run_dir: Path,
+    flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, flow_cell_run_dir: Path
 ) -> None:
     """Add demux logs to Housekeeper."""
     log_file_name_pattern: str = r"*_demultiplex.std*"
     demux_log_file_paths: list[Path] = get_files_matching_pattern(
-        directory=Path(flow_cell_run_dir, flow_cell.full_name),
-        pattern=log_file_name_pattern,
+        directory=Path(flow_cell_run_dir, flow_cell.full_name), pattern=log_file_name_pattern
     )
 
-    tag_names: list[str] = [
-        SequencingFileTag.DEMUX_LOG,
-        flow_cell.id,
-    ]
+    tag_names: list[str] = [SequencingFileTag.DEMUX_LOG, flow_cell.id]
     for log_file_path in demux_log_file_paths:
         try:
             hk_api.add_file_to_bundle_if_non_existent(
-                file_path=log_file_path,
-                bundle_name=flow_cell.id,
-                tag_names=tag_names,
+                file_path=log_file_path, bundle_name=flow_cell.id, tag_names=tag_names
             )
             LOG.info(f"Added demux log file {log_file_path} to Housekeeper.")
         except FileNotFoundError as e:
@@ -126,17 +93,14 @@ def add_demux_logs_to_housekeeper(
 
 
 def add_sample_fastq_files_to_housekeeper(
-    flow_cell: FlowCellDirectoryData,
-    hk_api: HousekeeperAPI,
-    store: Store,
+    flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, store: Store
 ) -> None:
     """Add sample fastq files from flow cell to Housekeeper."""
     sample_internal_ids: list[str] = flow_cell.sample_sheet.get_sample_ids()
 
     for sample_internal_id in sample_internal_ids:
         sample_fastq_paths: list[Path] | None = get_sample_fastqs_from_flow_cell(
-            flow_cell_directory=flow_cell.path,
-            sample_internal_id=sample_internal_id,
+            flow_cell_directory=flow_cell.path, sample_internal_id=sample_internal_id
         )
 
         if not sample_fastq_paths:
@@ -147,8 +111,7 @@ def add_sample_fastq_files_to_housekeeper(
 
         for sample_fastq_path in sample_fastq_paths:
             sample_fastq_path: Path = rename_fastq_file_if_needed(
-                fastq_file_path=sample_fastq_path,
-                flow_cell_name=flow_cell.id,
+                fastq_file_path=sample_fastq_path, flow_cell_name=flow_cell.id
             )
             if check_if_fastq_path_should_be_stored_in_housekeeper(
                 sample_id=sample_internal_id,
@@ -195,9 +158,7 @@ def check_if_fastq_path_should_be_stored_in_housekeeper(
 
 
 def add_and_include_sample_sheet_path_to_housekeeper(
-    flow_cell_directory: Path,
-    flow_cell_name: str,
-    hk_api: HousekeeperAPI,
+    flow_cell_directory: Path, flow_cell_name: str, hk_api: HousekeeperAPI
 ) -> None:
     """
     Add sample sheet path to Housekeeper.
@@ -211,10 +172,7 @@ def add_and_include_sample_sheet_path_to_housekeeper(
         hk_api.add_file_to_bundle_if_non_existent(
             file_path=sample_sheet_file_path,
             bundle_name=flow_cell_name,
-            tag_names=[
-                SequencingFileTag.SAMPLE_SHEET,
-                flow_cell_name,
-            ],
+            tag_names=[SequencingFileTag.SAMPLE_SHEET, flow_cell_name],
         )
     except FileNotFoundError as e:
         LOG.error(
@@ -233,10 +191,7 @@ def delete_sequencing_data_from_housekeeper(flow_cell_id: str, hk_api: Housekeep
     tag_combinations: list[set[str]] = [
         {SequencingFileTag.FASTQ, flow_cell_id},
         {SequencingFileTag.SPRING, flow_cell_id},
-        {
-            SequencingFileTag.SPRING_METADATA,
-            flow_cell_id,
-        },
+        {SequencingFileTag.SPRING_METADATA, flow_cell_id},
     ]
     for tags in tag_combinations:
         housekeeper_files: Iterable[File] = hk_api.files(tags=tags)

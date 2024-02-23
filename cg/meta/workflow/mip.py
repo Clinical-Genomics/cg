@@ -4,40 +4,20 @@ from typing import Any
 
 from pydantic.v1 import ValidationError
 
-from cg.apps.mip.confighandler import (
-    ConfigHandler,
-)
-from cg.constants import (
-    FileExtensions,
-    GenePanelMasterList,
-    Workflow,
-)
+from cg.apps.mip.confighandler import ConfigHandler
+from cg.constants import FileExtensions, GenePanelMasterList, Workflow
 from cg.constants.constants import FileFormat
-from cg.constants.housekeeper_tags import (
-    HkMipAnalysisTag,
-)
+from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
-from cg.meta.workflow.analysis import (
-    AnalysisAPI,
-    add_gene_panel_combo,
-)
+from cg.meta.workflow.analysis import AnalysisAPI, add_gene_panel_combo
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_config import MipBaseConfig
-from cg.models.mip.mip_metrics_deliverables import (
-    MIPMetricsDeliverables,
-)
-from cg.models.mip.mip_sample_info import (
-    MipBaseSampleInfo,
-)
-from cg.store.models import (
-    BedVersion,
-    Case,
-    CaseSample,
-    Sample,
-)
+from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
+from cg.models.mip.mip_sample_info import MipBaseSampleInfo
+from cg.store.models import BedVersion, Case, CaseSample, Sample
 
 CLI_OPTIONS = {
     "config": {"option": "--config_file"},
@@ -57,8 +37,7 @@ LOG = logging.getLogger(__name__)
 
 class MipAnalysisAPI(AnalysisAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
-    hooks into the status database that makes managing analyses simpler
-    """
+    hooks into the status database that makes managing analyses simpler"""
 
     def __init__(self, config: CGConfig, workflow: Workflow):
         super().__init__(workflow, config)
@@ -87,33 +66,18 @@ class MipAnalysisAPI(AnalysisAPI):
         return Path(self.root, case_id, "pedigree.yaml")
 
     def get_case_config_path(self, case_id: str) -> Path:
-        return Path(
-            self.root,
-            case_id,
-            "analysis",
-            f"{case_id}_config.yaml",
-        )
+        return Path(self.root, case_id, "analysis", f"{case_id}_config.yaml")
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """
         Location in working directory where deliverables file will be stored upon completion of analysis.
         Deliverables file is used to communicate paths and tag definitions for files in a finished analysis
         """
-        return Path(
-            self.root,
-            case_id,
-            "analysis",
-            f"{case_id}_deliverables.yaml",
-        )
+        return Path(self.root, case_id, "analysis", f"{case_id}_deliverables.yaml")
 
     def get_sample_info_path(self, case_id: str) -> Path:
         """Get case analysis sample info path"""
-        return Path(
-            self.root,
-            case_id,
-            "analysis",
-            f"{case_id}_qc_sample_info.yaml",
-        )
+        return Path(self.root, case_id, "analysis", f"{case_id}_qc_sample_info.yaml")
 
     def get_panel_bed(self, panel_bed: str = None) -> str | None:
         """Check and return BED gene panel."""
@@ -140,10 +104,7 @@ class MipAnalysisAPI(AnalysisAPI):
                 "case": case_obj.internal_id,
                 "default_gene_panels": case_obj.panels,
                 "samples": [
-                    self.config_sample(
-                        link_obj=link_obj,
-                        panel_bed=panel_bed,
-                    )
+                    self.config_sample(link_obj=link_obj, panel_bed=panel_bed)
                     for link_obj in case_obj.links
                 ],
             }
@@ -155,19 +116,12 @@ class MipAnalysisAPI(AnalysisAPI):
         out_dir.mkdir(parents=True, exist_ok=True)
         pedigree_config_path: Path = self.get_pedigree_config_path(case_id=case_id)
         WriteFile.write_file_from_content(
-            content=data,
-            file_format=FileFormat.YAML,
-            file_path=pedigree_config_path,
+            content=data, file_format=FileFormat.YAML, file_path=pedigree_config_path
         )
-        LOG.info(
-            "Config file saved to %s",
-            pedigree_config_path,
-        )
+        LOG.info("Config file saved to %s", pedigree_config_path)
 
     @staticmethod
-    def get_sample_data(
-        link_obj: CaseSample,
-    ) -> dict[str, str | int]:
+    def get_sample_data(link_obj: CaseSample) -> dict[str, str | int]:
         """Return sample specific data."""
         return {
             "sample_id": link_obj.sample.internal_id,
@@ -195,10 +149,7 @@ class MipAnalysisAPI(AnalysisAPI):
 
     def write_panel(self, case_id: str, content: list[str]) -> None:
         """Write the gene panel to case dir."""
-        self._write_panel(
-            out_dir=Path(self.root, case_id),
-            content=content,
-        )
+        self._write_panel(out_dir=Path(self.root, case_id), content=content)
 
     @staticmethod
     def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
@@ -212,10 +163,7 @@ class MipAnalysisAPI(AnalysisAPI):
         ):
             return master_list
         all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
-        all_panels |= {
-            GenePanelMasterList.OMIM_AUTO,
-            GenePanelMasterList.PANELAPP_GREEN,
-        }
+        all_panels |= {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
         return list(all_panels)
 
     def _get_latest_raw_file(self, family_id: str, tags: list[str]) -> Any:
@@ -224,9 +172,7 @@ class MipAnalysisAPI(AnalysisAPI):
         last_version = self.housekeeper_api.last_version(bundle=family_id)
 
         analysis_files = self.housekeeper_api.files(
-            bundle=family_id,
-            version=last_version.id,
-            tags=tags,
+            bundle=family_id, version=last_version.id, tags=tags
         ).all()
 
         if analysis_files:
@@ -245,25 +191,19 @@ class MipAnalysisAPI(AnalysisAPI):
         full_file_path: Path = Path(self.housekeeper_api.get_root_dir()).joinpath(
             relative_file_path
         )
-        return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=full_file_path,
-        )
+        return ReadFile.get_content_from_file(file_format=FileFormat.YAML, file_path=full_file_path)
 
     def get_latest_metadata(self, family_id: str) -> MipAnalysis:
         """Get the latest trending data for a family"""
 
         mip_config_raw = self._get_latest_raw_file(
-            family_id=family_id,
-            tags=HkMipAnalysisTag.CONFIG,
+            family_id=family_id, tags=HkMipAnalysisTag.CONFIG
         )
         qc_metrics_raw = self._get_latest_raw_file(
-            family_id=family_id,
-            tags=HkMipAnalysisTag.QC_METRICS,
+            family_id=family_id, tags=HkMipAnalysisTag.QC_METRICS
         )
         sample_info_raw = self._get_latest_raw_file(
-            family_id=family_id,
-            tags=HkMipAnalysisTag.SAMPLE_INFO,
+            family_id=family_id, tags=HkMipAnalysisTag.SAMPLE_INFO
         )
         if mip_config_raw and qc_metrics_raw and sample_info_raw:
             try:
@@ -285,10 +225,7 @@ class MipAnalysisAPI(AnalysisAPI):
             raise CgError
 
     def parse_analysis(
-        self,
-        config_raw: dict,
-        qc_metrics_raw: dict,
-        sample_info_raw: dict,
+        self, config_raw: dict, qc_metrics_raw: dict, sample_info_raw: dict
     ) -> MipAnalysis:
         """Parses the output analysis files from MIP
 
@@ -319,10 +256,7 @@ class MipAnalysisAPI(AnalysisAPI):
             return True
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link_obj in case_obj.links:
-            downsampled = isinstance(
-                link_obj.sample.downsampled_to,
-                int,
-            )
+            downsampled = isinstance(link_obj.sample.downsampled_to, int)
             external = link_obj.sample.application_version.application.is_external
             if downsampled or external:
                 LOG.info(
@@ -335,8 +269,7 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_cases_to_analyze(self) -> list[Case]:
         """Return cases to analyze."""
         cases_query: list[Case] = self.status_db.cases_to_analyze(
-            workflow=self.workflow,
-            threshold=self.use_read_count_threshold,
+            workflow=self.workflow, threshold=self.use_read_count_threshold
         )
         cases_to_analyze = []
         for case_obj in cases_query:
@@ -360,12 +293,7 @@ class MipAnalysisAPI(AnalysisAPI):
         """Map cg options to MIP option syntax"""
         parameters.append(CLI_OPTIONS[mip_key]["option"])
 
-    def run_analysis(
-        self,
-        case_id: str,
-        command_args: dict,
-        dry_run: bool,
-    ) -> None:
+    def run_analysis(self, case_id: str, command_args: dict, dry_run: bool) -> None:
         parameters = [
             case_id,
         ]
@@ -385,11 +313,7 @@ class MipAnalysisAPI(AnalysisAPI):
         return Path(self.root, case_id)
 
     def get_job_ids_path(self, case_id: str) -> Path:
-        return Path(
-            self.get_case_path(case_id=case_id),
-            "analysis",
-            "slurm_job_ids.yaml",
-        )
+        return Path(self.get_case_path(case_id=case_id), "analysis", "slurm_job_ids.yaml")
 
     def config_sample(self, link_obj: CaseSample, panel_bed: str) -> dict:
         raise NotImplementedError
@@ -398,14 +322,10 @@ class MipAnalysisAPI(AnalysisAPI):
         """Get MIP version from sample info file"""
         LOG.debug("Fetch workflow version")
         sample_info_raw: dict = ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=self.get_sample_info_path(case_id),
+            file_format=FileFormat.YAML, file_path=self.get_sample_info_path(case_id)
         )
         sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sample_info_raw)
         return sample_info.mip_version
 
     def write_managed_variants(self, case_id: str, content: list[str]) -> None:
-        self._write_managed_variants(
-            out_dir=Path(self.root, case_id),
-            content=content,
-        )
+        self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)

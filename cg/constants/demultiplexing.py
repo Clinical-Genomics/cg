@@ -85,22 +85,12 @@ class SampleSheetBcl2FastqSections:
         HEADER: str = "[Settings]"
 
         @classmethod
-        def barcode_mismatch_index_1(
-            cls,
-        ) -> list[str]:
-            return [
-                "BarcodeMismatchesIndex1",
-                "0",
-            ]
+        def barcode_mismatch_index_1(cls) -> list[str]:
+            return ["BarcodeMismatchesIndex1", "0"]
 
         @classmethod
-        def barcode_mismatch_index_2(
-            cls,
-        ) -> list[str]:
-            return [
-                "BarcodeMismatchesIndex2",
-                "0",
-            ]
+        def barcode_mismatch_index_2(cls) -> list[str]:
+            return ["BarcodeMismatchesIndex2", "0"]
 
     class Data(StrEnum):
         HEADER: str = "[Data]"
@@ -147,9 +137,7 @@ class SampleSheetBCLConvertSections:
             return ["FileFormatVersion", "2"]
 
         @classmethod
-        def instrument_platform_sequencer(
-            cls,
-        ) -> dict[str, str]:
+        def instrument_platform_sequencer(cls) -> dict[str, str]:
             return {
                 Sequencers.NOVASEQ: "NovaSeq6000",
                 Sequencers.NOVASEQX: "NovaSeqXSeries",
@@ -158,9 +146,7 @@ class SampleSheetBCLConvertSections:
             }
 
         @classmethod
-        def index_orientation_forward(
-            cls,
-        ) -> list[str]:
+        def index_orientation_forward(cls) -> list[str]:
             return ["IndexOrientation", "Forward"]
 
     class Reads(StrEnum):
@@ -178,13 +164,8 @@ class SampleSheetBCLConvertSections:
             return ["SoftwareVersion", "4.1.7"]
 
         @classmethod
-        def fastq_compression_format(
-            cls,
-        ) -> list[str]:
-            return [
-                "FastqCompressionFormat",
-                "gzip",
-            ]
+        def fastq_compression_format(cls) -> list[str]:
+            return ["FastqCompressionFormat", "gzip"]
 
     class Data(StrEnum):
         HEADER: str = "[BCLConvert_Data]"
@@ -223,12 +204,7 @@ class IndexOverrideCycles(StrEnum):
 OPTION_BCL_CONVERTER = click.option(
     "-b",
     "--bcl-converter",
-    type=click.Choice(
-        [
-            BclConverter.BCL2FASTQ,
-            BclConverter.BCLCONVERT,
-        ]
-    ),
+    type=click.Choice([BclConverter.BCL2FASTQ, BclConverter.BCLCONVERT]),
     default=None,
     help="Specify bcl conversion software. Choose between bcl2fastq and dragen. "
     "If not specified, the software will be determined automatically using the sequencer type.",

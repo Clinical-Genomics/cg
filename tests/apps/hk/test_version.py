@@ -7,10 +7,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from tests.small_helpers import SmallHelpers
 
 
-def test_new_version(
-    housekeeper_api: HousekeeperAPI,
-    timestamp: datetime.datetime,
-):
+def test_new_version(housekeeper_api: HousekeeperAPI, timestamp: datetime.datetime):
     """Test to create a new version with the API."""
     # GIVEN a housekeeper api and a date
 
@@ -36,10 +33,7 @@ def test_new_version(
     assert version_obj.bundle_id is None
 
 
-def test_get_version_non_existing(
-    housekeeper_api: HousekeeperAPI,
-    timestamp: datetime.datetime,
-):
+def test_get_version_non_existing(housekeeper_api: HousekeeperAPI, timestamp: datetime.datetime):
     """Test to get a version when there are no existing version."""
     # GIVEN a empty housekeeper_api
 
@@ -57,18 +51,12 @@ def test_get_version_existing(
 ):
     """Test to get a version when there is a bundle and a version."""
     # GIVEN a populated housekeeper_api
-    (
-        bundle_obj,
-        version_obj,
-    ) = housekeeper_api.add_bundle(hk_bundle_data)
+    bundle_obj, version_obj = housekeeper_api.add_bundle(hk_bundle_data)
     housekeeper_api.add_commit(bundle_obj)
     housekeeper_api.add_commit(version_obj)
 
     # WHEN fetching a version
-    fetched_version = housekeeper_api.version(
-        bundle=bundle_obj.name,
-        date=timestamp_yesterday,
-    )
+    fetched_version = housekeeper_api.version(bundle=bundle_obj.name, date=timestamp_yesterday)
 
     # THEN assert that the function returns True
     assert fetched_version
@@ -100,9 +88,7 @@ def test_add_version_existing_bundle(
 
 
 def test_get_last_version(
-    case_id: str,
-    populated_housekeeper_api: HousekeeperAPI,
-    timestamp_now: datetime.datetime,
+    case_id: str, populated_housekeeper_api: HousekeeperAPI, timestamp_now: datetime.datetime
 ):
     """Test to get a version when there is a bundle and a version."""
     # GIVEN a populated housekeeper_api and a bundle with two versions
@@ -119,9 +105,7 @@ def test_get_last_version(
 
 
 def test_get_latest_bundle_version_no_housekeeper_bundle(
-    case_id: str,
-    housekeeper_api: HousekeeperAPI,
-    caplog,
+    case_id: str, housekeeper_api: HousekeeperAPI, caplog
 ):
     """Test get_latest_bundle_version function when there is no case bundle in Housekeeper."""
 

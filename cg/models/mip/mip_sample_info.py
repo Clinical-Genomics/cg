@@ -2,11 +2,7 @@
 
 import datetime
 
-from pydantic.v1 import (
-    BaseModel,
-    Field,
-    validator,
-)
+from pydantic.v1 import BaseModel, Field, validator
 
 
 class MipBaseSampleInfo(BaseModel):

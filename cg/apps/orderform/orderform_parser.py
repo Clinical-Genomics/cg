@@ -7,14 +7,8 @@ from pydantic import BaseModel, ConfigDict, constr
 from cg.constants import DataDelivery
 from cg.exc import OrderFormError
 from cg.models.orders.order import OrderType
-from cg.models.orders.orderform_schema import (
-    OrderCase,
-    Orderform,
-    OrderPool,
-)
-from cg.models.orders.sample_base import (
-    OrderSample,
-)
+from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool
+from cg.models.orders.sample_base import OrderSample
 from cg.store.models import Customer
 
 LOG = logging.getLogger(__name__)
@@ -28,8 +22,7 @@ class OrderformParser(BaseModel):
     project_type: OrderType | None = None
     delivery_type: DataDelivery | None = None
     customer_id: constr(
-        min_length=1,
-        max_length=Customer.internal_id.property.columns[0].type.length,
+        min_length=1, max_length=Customer.internal_id.property.columns[0].type.length
     ) = None
     order_comment: str | None = None
     order_name: str | None = None
@@ -38,9 +31,7 @@ class OrderformParser(BaseModel):
         """Parse the orderform information"""
         raise NotImplementedError
 
-    def group_cases(
-        self,
-    ) -> dict[str, list[OrderSample]]:
+    def group_cases(self) -> dict[str, list[OrderSample]]:
         """Group samples in cases."""
         LOG.info("Group samples under respective case")
         cases = {}
@@ -90,10 +81,7 @@ class OrderformParser(BaseModel):
 
     @staticmethod
     def _get_single_value(
-        items_id: str,
-        items: Iterable,
-        attr: str,
-        default_value: Hashable = None,
+        items_id: str, items: Iterable, attr: str, default_value: Hashable = None
     ) -> Hashable:
         """
         Get single value from a bunch of items, will raise if value not same on all items
@@ -127,31 +115,20 @@ class OrderformParser(BaseModel):
         return values
 
     @staticmethod
-    def expand_case(
-        case_id: str,
-        case_samples: list[OrderSample],
-    ) -> OrderCase:
+    def expand_case(case_id: str, case_samples: list[OrderSample]) -> OrderCase:
         """Fill-in information about case."""
 
         priority: Hashable[str] = OrderformParser._get_single_value(
-            items_id=case_id,
-            items=case_samples,
-            attr="priority",
+            items_id=case_id, items=case_samples, attr="priority"
         )
         synopsis: Hashable[str] = OrderformParser._get_single_value(
-            items_id=case_id,
-            items=case_samples,
-            attr="synopsis",
+            items_id=case_id, items=case_samples, attr="synopsis"
         )
         cohorts: set[Hashable[str]] = OrderformParser._get_single_set(
-            items_id=case_id,
-            items=case_samples,
-            attr="cohorts",
+            items_id=case_id, items=case_samples, attr="cohorts"
         )
         panels: set[Hashable[str]] = OrderformParser._get_single_set(
-            items_id=case_id,
-            items=case_samples,
-            attr="panels",
+            items_id=case_id, items=case_samples, attr="panels"
         )
 
         return OrderCase(
@@ -168,12 +145,7 @@ class OrderformParser(BaseModel):
         cases_map: dict[str, list[OrderSample]] = self.group_cases()
         case_objs: list[OrderCase] = []
         for case_id in cases_map:
-            case_objs.append(
-                self.expand_case(
-                    case_id=case_id,
-                    case_samples=cases_map[case_id],
-                )
-            )
+            case_objs.append(self.expand_case(case_id=case_id, case_samples=cases_map[case_id]))
         return Orderform(
             comment=self.order_comment,
             samples=self.samples,

@@ -29,10 +29,7 @@ def test_clean_flow_cells_cmd(
         "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.is_directory_older_than_21_days",
         return_value=True,
     ):
-        result = cli_runner.invoke(
-            clean_flow_cells,
-            obj=clean_flow_cells_context,
-        )
+        result = cli_runner.invoke(clean_flow_cells, obj=clean_flow_cells_context)
 
     # THEN assert it exits with success
     assert result.exit_code == 0
@@ -65,11 +62,7 @@ def test_clean_flow_cells_cmd_dry_run(
         "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.is_directory_older_than_21_days",
         return_value=True,
     ):
-        result = cli_runner.invoke(
-            clean_flow_cells,
-            ["-d"],
-            obj=clean_flow_cells_context,
-        )
+        result = cli_runner.invoke(clean_flow_cells, ["-d"], obj=clean_flow_cells_context)
 
     # THEN assert it exits with success
     assert result.exit_code == 0

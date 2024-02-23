@@ -40,24 +40,15 @@ class Process:
         self.config: str = config
         self.environment: str = environment
         self.launch_directory: str = launch_directory
-        LOG.debug(
-            "Initialising Process with binary: %s",
-            self.binary,
-        )
+        LOG.debug("Initialising Process with binary: %s", self.binary)
         self.base_call: list[str] = [self.binary]
 
         if conda_binary:
             LOG.debug(f"Activating environment with conda run for binary: {self.conda_binary}")
-            self.base_call.insert(
-                0,
-                f"{self.conda_binary} run --name {self.environment}",
-            )
+            self.base_call.insert(0, f"{self.conda_binary} run --name {self.environment}")
         elif environment:
             LOG.debug(f"Activating environment with: {self.environment}")
-            self.base_call.insert(
-                0,
-                f"source activate {self.environment};",
-            )
+            self.base_call.insert(0, f"source activate {self.environment};")
         if config:
             self.base_call.extend([config_parameter, config])
         if launch_directory:
@@ -71,15 +62,10 @@ class Process:
         """Export variables prior to execution."""
         if export:
             self.base_call.insert(
-                0,
-                " ".join([f"export {variable}={value};" for variable, value in export.items()]),
+                0, " ".join([f"export {variable}={value};" for variable, value in export.items()])
             )
 
-    def run_command(
-        self,
-        parameters: list = None,
-        dry_run: bool = False,
-    ) -> int:
+    def run_command(self, parameters: list = None, dry_run: bool = False) -> int:
         """Execute a command in the shell.
         If environment is supplied - shell=True has to be supplied to enable passing as a string for executing multiple
          commands
@@ -94,10 +80,7 @@ class Process:
         if parameters:
             command.extend(parameters)
 
-        LOG.info(
-            "Running command %s",
-            " ".join(command),
-        )
+        LOG.info("Running command %s", " ".join(command))
         if dry_run:
             LOG.info("Dry run: process call will not be executed!!")
             return EXIT_SUCCESS
@@ -112,19 +95,13 @@ class Process:
             )
         else:
             res = subprocess.run(
-                command,
-                check=False,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE
             )
 
         self.stdout = res.stdout.decode("utf-8").rstrip()
         self.stderr = res.stderr.decode("utf-8").rstrip()
         if res.returncode != EXIT_SUCCESS:
-            LOG.critical(
-                "Call %s exit with a non zero exit code",
-                command,
-            )
+            LOG.critical("Call %s exit with a non zero exit code", command)
             LOG.critical(self.stderr)
             raise CalledProcessError(res.returncode, command)
 

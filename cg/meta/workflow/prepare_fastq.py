@@ -7,9 +7,7 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import (
-    PIPELINES_USING_PARTIAL_ANALYSES,
-)
+from cg.constants.constants import PIPELINES_USING_PARTIAL_ANALYSES
 from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
 from cg.models import CompressionData
@@ -20,11 +18,7 @@ LOG = logging.getLogger(__name__)
 
 
 class PrepareFastqAPI:
-    def __init__(
-        self,
-        store: Store,
-        compress_api: CompressAPI,
-    ):
+    def __init__(self, store: Store, compress_api: CompressAPI):
         self.store: Store = store
         self.hk_api: HousekeeperAPI = compress_api.hk_api
         self.compress_api: CompressAPI = compress_api
@@ -117,24 +111,16 @@ class PrepareFastqAPI:
         compressions: list[CompressionData] = files.get_spring_paths(version)
         for compression in compressions:
             self.add_decompressed_spring_object(
-                compression=compression,
-                fastq_files=fastq_files,
-                sample=sample,
+                compression=compression, fastq_files=fastq_files, sample=sample
             )
 
     def add_decompressed_spring_object(
-        self,
-        compression: CompressionData,
-        fastq_files: dict[Path, File],
-        sample: Case,
+        self, compression: CompressionData, fastq_files: dict[Path, File], sample: Case
     ) -> None:
         """Adds decompressed FASTQ files to Housekeeper related to a single spring file."""
         result = True
         sample_id: str = sample.internal_id
-        if not self.are_fastqs_in_housekeeper(
-            compression=compression,
-            fastq_files=fastq_files,
-        ):
+        if not self.are_fastqs_in_housekeeper(compression=compression, fastq_files=fastq_files):
             LOG.info(f"Adding FASTQ files to sample {sample_id} in Housekeeper")
             result: bool = self.compress_api.add_decompressed_fastq(sample)
         else:
@@ -146,8 +132,5 @@ class PrepareFastqAPI:
             LOG.warning("Files were not added to fastq!")
 
     @staticmethod
-    def are_fastqs_in_housekeeper(
-        compression: CompressionData,
-        fastq_files: dict[Path, File],
-    ):
+    def are_fastqs_in_housekeeper(compression: CompressionData, fastq_files: dict[Path, File]):
         return compression.fastq_first in fastq_files and compression.fastq_second in fastq_files

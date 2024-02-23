@@ -1,10 +1,5 @@
-from cg.constants.orderforms import (
-    REV_SEX_MAP,
-    SOURCE_TYPES,
-)
-from cg.models.orders.sample_base import (
-    PriorityEnum,
-)
+from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
+from cg.models.orders.sample_base import PriorityEnum
 
 
 def parse_panels(panels: str) -> list[str] | None:
@@ -35,9 +30,7 @@ def validate_data_analysis(data_analysis):
     return data_analysis
 
 
-def numeric_value(
-    value: str | None,
-) -> str | None:
+def numeric_value(value: str | None) -> str | None:
     """Validates that the given string can be given as either an integer or a float. Also converts floats of the
     type x.00 to x."""
     if not value:
@@ -72,20 +65,14 @@ def convert_to_lower(value: str) -> str:
     return value.lower()
 
 
-def replace_spaces_with_underscores(
-    value: str,
-) -> str:
+def replace_spaces_with_underscores(value: str) -> str:
     return value.replace(" ", "_")
 
 
-def convert_to_priority(
-    priority: str | None,
-) -> str | None:
+def convert_to_priority(priority: str | None) -> str | None:
     """Translates the Swedish 'förtur' to 'priority' if specified in the order."""
     return PriorityEnum.priority if priority == "förtur" else priority
 
 
-def convert_to_date(
-    date: str | None,
-) -> str | None:
+def convert_to_date(date: str | None) -> str | None:
     return date[:10] if date else None

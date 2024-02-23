@@ -6,29 +6,16 @@ from typing import Any
 
 from cg import resources
 from cg.constants import Workflow
-from cg.constants.constants import (
-    FileFormat,
-    Strandedness,
-)
-from cg.constants.nf_analysis import (
-    MULTIQC_NEXFLOW_CONFIG,
-    RNAFUSION_METRIC_CONDITIONS,
-)
+from cg.constants.constants import FileFormat, Strandedness
+from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
 from cg.exc import MissingMetrics
 from cg.io.controller import ReadFile
 from cg.io.json import read_json
-from cg.meta.workflow.nf_analysis import (
-    NfAnalysisAPI,
-)
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import (
-    MetricsBase,
-    MultiqcDataJson,
-)
+from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.fastq import FastqFileMeta
-from cg.models.nf_analysis import (
-    PipelineDeliverables,
-)
+from cg.models.nf_analysis import PipelineDeliverables
 from cg.models.rnafusion.rnafusion import (
     RnafusionAnalysis,
     RnafusionParameters,
@@ -66,8 +53,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     @property
     def use_read_count_threshold(self) -> bool:
         """Defines whether the threshold for adequate read count should be passed for all samples
-        when determining if the analysis for a case should be automatically started.
-        """
+        when determining if the analysis for a case should be automatically started."""
         return True
 
     @staticmethod
@@ -83,20 +69,15 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         return MULTIQC_NEXFLOW_CONFIG
 
     def get_sample_sheet_content_per_sample(
-        self,
-        sample: Sample,
-        case_id: str,
-        strandedness: Strandedness,
+        self, sample: Sample, case_id: str, strandedness: Strandedness
     ) -> list[list[str]]:
         """Get sample sheet content per sample."""
         sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
         fastq_forward_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata,
-            forward_read=True,
+            metadata=sample_metadata, forward_read=True
         )
         fastq_reverse_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata,
-            reverse_read=True,
+            metadata=sample_metadata, reverse_read=True
         )
 
         sample_sheet_entry = RnafusionSampleSheetEntry(
@@ -107,11 +88,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content()
 
-    def get_sample_sheet_content(
-        self,
-        case_id: str,
-        strandedness: Strandedness,
-    ) -> list[list[Any]]:
+    def get_sample_sheet_content(self, case_id: str, strandedness: Strandedness) -> list[list[Any]]:
         """Returns content for sample sheet."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         if len(case.links) != 1:
@@ -121,16 +98,12 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         LOG.debug("Getting sample sheet information")
         for link in case.links:
             content_per_sample = self.get_sample_sheet_content_per_sample(
-                sample=link.sample,
-                case_id=case_id,
-                strandedness=strandedness,
+                sample=link.sample, case_id=case_id, strandedness=strandedness
             )
             return content_per_sample
 
     def get_workflow_parameters(
-        self,
-        case_id: str,
-        genomes_base: Path | None = None,
+        self, case_id: str, genomes_base: Path | None = None
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
         LOG.debug("Getting parameters information")
@@ -157,12 +130,10 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Create config files (parameters and sample sheet) for Rnafusion analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(
-            case_id=case_id,
-            strandedness=strandedness,
+            case_id=case_id, strandedness=strandedness
         )
         workflow_parameters: RnafusionParameters = self.get_workflow_parameters(
-            case_id=case_id,
-            genomes_base=genomes_base,
+            case_id=case_id, genomes_base=genomes_base
         )
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
@@ -172,10 +143,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             file_path=self.get_sample_sheet_path(case_id=case_id),
             header=RnafusionSampleSheetEntry.headers(),
         )
-        self.write_params_file(
-            case_id=case_id,
-            workflow_parameters=workflow_parameters.dict(),
-        )
+        self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
         self.write_nextflow_config(case_id=case_id)
 
     def parse_multiqc_json_for_case(self, case_id: str) -> dict:
@@ -196,8 +164,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         sample_id: str = case.links[0].sample.internal_id
         metric_values: dict = self.parse_multiqc_json_for_case(case_id=case_id)
         metric_base_list: list = self.get_metric_base_list(
-            sample_id=sample_id,
-            metrics_values=metric_values,
+            sample_id=sample_id, metrics_values=metric_values
         )
         return metric_base_list
 
@@ -213,9 +180,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         )
 
     @staticmethod
-    def ensure_mandatory_metrics_present(
-        metrics: list[MetricsBase],
-    ) -> None:
+    def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
         """Check that all mandatory metrics are present. Raise error if missing."""
         given_metrics: set = {metric.name for metric in metrics}
         mandatory_metrics: set = set(RNAFUSION_METRIC_CONDITIONS.keys())
@@ -227,11 +192,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             LOG.error(f"Some mandatory metrics are missing: {', '.join(missing_metrics)}")
             raise MissingMetrics()
 
-    def parse_analysis(
-        self,
-        qc_metrics_raw: list[MetricsBase],
-        **kwargs,
-    ) -> RnafusionAnalysis:
+    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> RnafusionAnalysis:
         """Parse Rnafusion output analysis files and return analysis model."""
         sample_metrics: dict[str, dict] = {}
         for metric in qc_metrics_raw:

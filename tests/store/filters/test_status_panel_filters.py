@@ -1,15 +1,11 @@
 from sqlalchemy.orm import Query
 
-from cg.store.filters.status_panel_filters import (
-    filter_panel_by_abbrev,
-)
+from cg.store.filters.status_panel_filters import filter_panel_by_abbrev
 from cg.store.models import Panel
 from cg.store.store import Store
 
 
-def test_filter_panel_by_abbrev_returns_correct_panel(
-    store_with_panels: Store,
-):
+def test_filter_panel_by_abbrev_returns_correct_panel(store_with_panels: Store):
     """Test finding a panel by abbreviation when the abbreviation exists."""
 
     # GIVEN a store with multiple panels
@@ -37,9 +33,7 @@ def test_filter_panel_by_abbrev_returns_correct_panel(
     assert filtered_panel.abbrev == panel.abbrev
 
 
-def test_filter_panel_by_abbrev_returns_none_when_abbrev_does_not_exist(
-    store_with_panels: Store,
-):
+def test_filter_panel_by_abbrev_returns_none_when_abbrev_does_not_exist(store_with_panels: Store):
     """Test finding a panel by abbreviation when the abbreviation does not exist in the store."""
 
     # GIVEN a store with panels
@@ -48,8 +42,7 @@ def test_filter_panel_by_abbrev_returns_none_when_abbrev_does_not_exist(
 
     # WHEN finding a panel by an abbreviation that does not exist
     filtered_panels_query: Query = filter_panel_by_abbrev(
-        panels=panel_query,
-        abbreviation="nonexistent_abbrev",
+        panels=panel_query, abbreviation="nonexistent_abbrev"
     )
 
     # THEN the result is a query

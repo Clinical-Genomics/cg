@@ -31,10 +31,7 @@ class MadelineAPI:
             "status": "Affected",
         }
         sex_gender = {"male": "M", "female": "F"}
-        status_affected = {
-            "affected": "Y",
-            "unaffected": "N",
-        }
+        status_affected = {"affected": "Y", "unaffected": "N"}
         LOG.info("Generating madeline input lines")
 
         yield "\t".join(columns.values())
@@ -60,12 +57,7 @@ class MadelineAPI:
         )
         return content.replace(script_tag, "")
 
-    def run(
-        self,
-        family_id: str,
-        samples: list[dict],
-        out_path: str = None,
-    ) -> pathlib.Path:
+    def run(self, family_id: str, samples: list[dict], out_path: str = None) -> pathlib.Path:
         """Run madeline and generate a file with the results."""
         if out_path:
             out_path = pathlib.Path(out_path)

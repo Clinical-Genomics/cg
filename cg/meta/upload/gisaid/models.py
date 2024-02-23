@@ -2,15 +2,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    model_validator,
-)
+from pydantic import BaseModel, ConfigDict, model_validator
 
-from cg.meta.upload.gisaid.constants import (
-    AUTHORS,
-)
+from cg.meta.upload.gisaid.constants import AUTHORS
 
 
 class FastaFile(BaseModel):
@@ -28,14 +22,8 @@ class GisaidAccession(BaseModel):
     def set_generated_fields(cls, data: Any) -> Any:
         """Constructs the fields that are generated from other fields."""
         if isinstance(data, dict):
-            data.setdefault(
-                "accession_nr",
-                _parse_accession_nr(data["log_message"]),
-            )
-            data.setdefault(
-                "sample_id",
-                _parse_sample_id_from_log(data["log_message"]),
-            )
+            data.setdefault("accession_nr", _parse_accession_nr(data["log_message"]))
+            data.setdefault("sample_id", _parse_sample_id_from_log(data["log_message"]))
         return data
 
 
@@ -43,9 +31,7 @@ def _parse_accession_nr(log_message: str) -> str:
     return log_message.split(";")[-1]
 
 
-def _parse_sample_id_from_log(
-    log_message: str,
-) -> str:
+def _parse_sample_id_from_log(log_message: str) -> str:
     return log_message.split("/")[2].split("_")[2]
 
 
@@ -85,10 +71,7 @@ class GisaidSample(BaseModel):
     def set_generated_fields(cls, data: Any) -> Any:
         """Constructs the fields that are generated from other fields."""
         if isinstance(data, dict):
-            data.setdefault(
-                "covv_location",
-                _generate_covv_location(data.get("region")),
-            )
+            data.setdefault("covv_location", _generate_covv_location(data.get("region")))
             data["covv_subm_sample_id"] = _generate_covv_subm_sample_id(
                 subm_sample_id=data.get(
                     "covv_subm_sample_id",
@@ -113,9 +96,6 @@ def _generate_covv_subm_sample_id(subm_sample_id: str, region_code: str) -> str:
     return f"{region_code}_SE100_{subm_sample_id}"
 
 
-def _generate_covv_virus_name(
-    covv_subm_sample_id: str,
-    covv_collection_date: str,
-) -> str:
+def _generate_covv_virus_name(covv_subm_sample_id: str, covv_collection_date: str) -> str:
     datetime_date: datetime = datetime.strptime(covv_collection_date, "%Y-%m-%d")
     return f"hCoV-19/Sweden/{covv_subm_sample_id}/{datetime_date.year}"

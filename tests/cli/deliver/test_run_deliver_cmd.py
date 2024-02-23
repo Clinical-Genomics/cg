@@ -5,10 +5,7 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from cg.cli.deliver.base import (
-    deliver_analysis,
-    deliver_ticket,
-)
+from cg.cli.deliver.base import deliver_analysis, deliver_ticket
 from cg.constants.process import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
@@ -17,11 +14,7 @@ from cg.store.store import Store
 def test_run_deliver_with_help(cli_runner: CliRunner, base_context: CGConfig):
     # GIVEN a cli runner and a base context
     # WHEN running the deliver command with help text
-    result = cli_runner.invoke(
-        deliver_analysis,
-        ["--help"],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(deliver_analysis, ["--help"], obj=base_context)
 
     # THEN assert the command exits without problems
     assert result.exit_code == 0
@@ -30,18 +23,12 @@ def test_run_deliver_with_help(cli_runner: CliRunner, base_context: CGConfig):
 
 
 def test_run_deliver_without_specifying_case_or_ticket(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    caplog,
+    cli_runner: CliRunner, base_context: CGConfig, caplog
 ):
     caplog.set_level(logging.INFO)
     # GIVEN a cli runner and a base context
     # WHEN running the deliver command with help text
-    result = cli_runner.invoke(
-        deliver_analysis,
-        ["--delivery-type", "mip-dna"],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(deliver_analysis, ["--delivery-type", "mip-dna"], obj=base_context)
 
     # THEN assert the command exits without problems
     assert result.exit_code == 0
@@ -50,10 +37,7 @@ def test_run_deliver_without_specifying_case_or_ticket(
 
 
 def test_run_deliver_non_existing_case(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    case_id: str,
-    caplog,
+    cli_runner: CliRunner, base_context: CGConfig, case_id: str, caplog
 ):
     """Test to run the deliver command when the provided case does not exist"""
     caplog.set_level(logging.WARNING)
@@ -64,14 +48,7 @@ def test_run_deliver_non_existing_case(
 
     # WHEN running the deliver command with the non existing case
     result = cli_runner.invoke(
-        deliver_analysis,
-        [
-            "--case-id",
-            case_id,
-            "--delivery-type",
-            "mip-dna",
-        ],
-        obj=base_context,
+        deliver_analysis, ["--case-id", case_id, "--delivery-type", "mip-dna"], obj=base_context
     )
 
     # THEN assert the command exits without problems
@@ -97,13 +74,7 @@ def test_delivery_with_dry_run(
     # WHEN running the deliver analysis command in dry run mode
     cli_runner.invoke(
         deliver_analysis,
-        [
-            "--case-id",
-            case_id,
-            "--delivery-type",
-            "mip-dna",
-            "--dry-run",
-        ],
+        ["--case-id", case_id, "--delivery-type", "mip-dna", "--dry-run"],
         obj=populated_mip_context,
     )
 
@@ -115,10 +86,7 @@ def test_delivery_with_dry_run(
 
 
 def test_delivery_path_created(
-    cli_runner: CliRunner,
-    populated_mip_context: CGConfig,
-    case_id: str,
-    delivery_inbox: Path,
+    cli_runner: CliRunner, populated_mip_context: CGConfig, case_id: str, delivery_inbox: Path
 ):
     """Test that the delivery path is created when running the deliver analysis command"""
     # GIVEN a context with a case that have files in housekeeper to deliver
@@ -129,12 +97,7 @@ def test_delivery_path_created(
     # WHEN running the deliver analysis command
     cli_runner.invoke(
         deliver_analysis,
-        [
-            "--case-id",
-            case_id,
-            "--delivery-type",
-            "mip-dna",
-        ],
+        ["--case-id", case_id, "--delivery-type", "mip-dna"],
         obj=populated_mip_context,
     )
 
@@ -157,12 +120,7 @@ def test_delivery_ticket_id(
     # WHEN running the deliver analysis command
     cli_runner.invoke(
         deliver_analysis,
-        [
-            "--ticket",
-            ticket_id,
-            "--delivery-type",
-            "mip-dna",
-        ],
+        ["--ticket", ticket_id, "--delivery-type", "mip-dna"],
         obj=populated_mip_context,
     )
 
@@ -189,14 +147,7 @@ def test_run_deliver_multiple_delivery_flags(
 
     result = cli_runner.invoke(
         deliver_analysis,
-        [
-            "--case-id",
-            case_id,
-            "--delivery-type",
-            "fastq",
-            "--delivery-type",
-            "mip-dna",
-        ],
+        ["--case-id", case_id, "--delivery-type", "fastq", "--delivery-type", "mip-dna"],
         obj=populated_mip_context,
     )
 
@@ -209,10 +160,7 @@ def test_run_deliver_multiple_delivery_flags(
 
 
 def test_case_file_is_delivered(
-    populated_mip_context: CGConfig,
-    case_id: str,
-    deliver_vcf_path: Path,
-    cli_runner: CliRunner,
+    populated_mip_context: CGConfig, case_id: str, deliver_vcf_path: Path, cli_runner: CliRunner
 ):
     """Test that the a case file is delivered when running the delivery command"""
     # GIVEN a context with a case that have files in housekeeper to deliver
@@ -223,12 +171,7 @@ def test_case_file_is_delivered(
     # WHEN running the deliver analysis command
     cli_runner.invoke(
         deliver_analysis,
-        [
-            "--case-id",
-            case_id,
-            "--delivery-type",
-            "mip-dna",
-        ],
+        ["--case-id", case_id, "--delivery-type", "mip-dna"],
         obj=populated_mip_context,
     )
 
@@ -247,12 +190,7 @@ def test_delivering_analysis_with_missing_bundle_errors(
     # WHEN running the deliver analysis command
     result = cli_runner.invoke(
         deliver_analysis,
-        [
-            "--ticket",
-            ticket_id,
-            "--delivery-type",
-            "mip-dna",
-        ],
+        ["--ticket", ticket_id, "--delivery-type", "mip-dna"],
         obj=context_with_missing_bundle,
     )
 
@@ -275,13 +213,7 @@ def test_delivering_analysis_with_missing_bundle_ignoring_errors(
     # WHEN running the deliver analysis command
     cli_runner.invoke(
         deliver_analysis,
-        [
-            "--ticket",
-            ticket_id,
-            "--ignore-missing-bundles",
-            "--delivery-type",
-            "mip-dna",
-        ],
+        ["--ticket", ticket_id, "--ignore-missing-bundles", "--delivery-type", "mip-dna"],
         obj=context_with_missing_bundle,
     )
 
@@ -290,10 +222,7 @@ def test_delivering_analysis_with_missing_bundle_ignoring_errors(
 
 
 def test_deliver_ticket_with_missing_bundle(
-    cli_runner: CliRunner,
-    context_with_missing_bundle: CGConfig,
-    caplog,
-    ticket_id,
+    cli_runner: CliRunner, context_with_missing_bundle: CGConfig, caplog, ticket_id
 ):
     caplog.set_level(logging.INFO)
 

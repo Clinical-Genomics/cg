@@ -17,53 +17,35 @@ def test_get_flow_cell_bad_flow_cell(cli_runner: CliRunner, base_context: CGConf
     # GIVEN an empty database
 
     # WHEN getting a flow cell
-    result = cli_runner.invoke(
-        get,
-        ["flow-cell", "does_not_exist"],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["flow-cell", "does_not_exist"], obj=base_context)
 
     # THEN it should complain about missing flow cell instead of getting a flow cell
     assert result.exit_code == EXIT_FAIL
 
 
 def test_get_flow_cell_required(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test to get a flow cell using only the required arguments."""
     # GIVEN a database with a flow cell
     flow_cell: Flowcell = helpers.add_flow_cell(store=disk_store)
 
     # WHEN getting a flow cell
-    result = cli_runner.invoke(
-        get,
-        ["flow-cell", flow_cell.name],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["flow-cell", flow_cell.name], obj=base_context)
 
     # THEN exist successfully
     assert result.exit_code == EXIT_SUCCESS
 
 
 def test_get_flow_cell_output(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output has the data of the flow cell."""
     # GIVEN a database with a flow cell with data
     flow_cell: Flowcell = helpers.add_flow_cell(disk_store)
 
     # WHEN getting a flow cell
-    result = cli_runner.invoke(
-        get,
-        ["flow-cell", flow_cell.name],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["flow-cell", flow_cell.name], obj=base_context)
 
     # THEN exist successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -77,21 +59,14 @@ def test_get_flow_cell_output(
 
 
 def test_get_flow_cell_archived_at_none(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output when archived at is none."""
     # GIVEN a database with a flow cell with data
     flow_cell: Flowcell = helpers.add_flow_cell(store=disk_store, archived_at=None)
 
     # WHEN getting a flow cell
-    result = cli_runner.invoke(
-        get,
-        ["flow-cell", flow_cell.name],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["flow-cell", flow_cell.name], obj=base_context)
 
     # THEN exist successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -112,11 +87,7 @@ def test_get_flow_cell_archived_at_date(
     flow_cell: Flowcell = helpers.add_flow_cell(store=disk_store, archived_at=timestamp)
 
     # WHEN getting a flow cell
-    result = cli_runner.invoke(
-        get,
-        ["flow-cell", flow_cell.name],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["flow-cell", flow_cell.name], obj=base_context)
 
     # THEN exist successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -126,26 +97,14 @@ def test_get_flow_cell_archived_at_date(
 
 
 def test_get_flow_cell_samples_without_samples(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
-    caplog,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers, caplog
 ):
     """Test that the output without samples."""
     # GIVEN a database with a flow cell without related samples
     flow_cell: Flowcell = helpers.add_flow_cell(disk_store)
 
     # WHEN getting a flow cell with the --samples flag
-    result = cli_runner.invoke(
-        get,
-        [
-            "flow-cell",
-            flow_cell.name,
-            "--samples",
-        ],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["flow-cell", flow_cell.name, "--samples"], obj=base_context)
 
     # THEN exist successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -155,10 +114,7 @@ def test_get_flow_cell_samples_without_samples(
 
 
 def test_get_flow_cell_samples(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output has the samples of the flow cell."""
     # GIVEN a database with a flow cell with related samples
@@ -166,15 +122,7 @@ def test_get_flow_cell_samples(
     flow_cell: Flowcell = helpers.add_flow_cell(store=disk_store, samples=samples)
 
     # WHEN getting a flow cell with the --samples flag
-    result = cli_runner.invoke(
-        get,
-        [
-            "flow-cell",
-            flow_cell.name,
-            "--samples",
-        ],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["flow-cell", flow_cell.name, "--samples"], obj=base_context)
 
     # THEN exist successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -185,35 +133,21 @@ def test_get_flow_cell_samples(
 
 
 def test_get_flow_cell_no_samples_without_samples(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output shows no samples of the flow cell."""
     # GIVEN a database with a flow cell without related samples
     flow_cell: Flowcell = helpers.add_flow_cell(disk_store)
 
     # WHEN getting a flow cell with the --no-samples flag
-    result = cli_runner.invoke(
-        get,
-        [
-            "flow-cell",
-            flow_cell.name,
-            "--no-samples",
-        ],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["flow-cell", flow_cell.name, "--no-samples"], obj=base_context)
 
     # THEN exist successfully
     assert result.exit_code == EXIT_SUCCESS
 
 
 def test_get_flow_cell_no_samples_with_samples(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output has the data of the flow cell."""
     # GIVEN a database with a flow cell with related samples
@@ -221,15 +155,7 @@ def test_get_flow_cell_no_samples_with_samples(
     flow_cell: Flowcell = helpers.add_flow_cell(store=disk_store, samples=samples)
 
     # WHEN getting a flow cell with the --no-samples flag
-    result = cli_runner.invoke(
-        get,
-        [
-            "flow-cell",
-            flow_cell.name,
-            "--no-samples",
-        ],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["flow-cell", flow_cell.name, "--no-samples"], obj=base_context)
 
     # THEN exist successfully
     assert result.exit_code == EXIT_SUCCESS

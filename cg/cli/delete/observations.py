@@ -5,26 +5,12 @@ import logging
 import click
 from sqlalchemy.orm import Query
 
-from cg.cli.upload.observations.utils import (
-    get_observations_api,
-    get_observations_case,
-)
-from cg.cli.workflow.commands import (
-    ARGUMENT_CASE_ID,
-    OPTION_LOQUSDB_SUPPORTED_WORKFLOW,
-)
-from cg.constants.constants import (
-    DRY_RUN,
-    SKIP_CONFIRMATION,
-    Workflow,
-)
+from cg.cli.upload.observations.utils import get_observations_api, get_observations_case
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_LOQUSDB_SUPPORTED_WORKFLOW
+from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Workflow
 from cg.exc import CaseNotFoundError, LoqusdbError
-from cg.meta.observations.balsamic_observations_api import (
-    BalsamicObservationsAPI,
-)
-from cg.meta.observations.mip_dna_observations_api import (
-    MipDNAObservationsAPI,
-)
+from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
+from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from cg.store.store import Store
@@ -37,12 +23,7 @@ LOG = logging.getLogger(__name__)
 @SKIP_CONFIRMATION
 @DRY_RUN
 @click.pass_obj
-def delete_observations(
-    context: CGConfig,
-    case_id: str,
-    dry_run: bool,
-    yes: bool,
-):
+def delete_observations(context: CGConfig, case_id: str, dry_run: bool, yes: bool):
     """Delete a case from Loqusdb and reset the Loqusdb IDs in StatusDB."""
 
     case: Case = get_observations_case(context, case_id, upload=False)
@@ -65,10 +46,7 @@ def delete_observations(
 @DRY_RUN
 @click.pass_context
 def delete_available_observations(
-    context: click.Context,
-    workflow: Workflow | None,
-    dry_run: bool,
-    yes: bool,
+    context: click.Context, workflow: Workflow | None, dry_run: bool, yes: bool
 ):
     """Delete available observation from Loqusdb."""
 
@@ -88,9 +66,6 @@ def delete_available_observations(
                     dry_run=dry_run,
                     yes=yes,
                 )
-            except (
-                CaseNotFoundError,
-                LoqusdbError,
-            ) as error:
+            except (CaseNotFoundError, LoqusdbError) as error:
                 LOG.error(f"Error deleting observations for {case.internal_id}: {error}")
                 continue

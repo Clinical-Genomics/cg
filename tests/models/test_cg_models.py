@@ -4,9 +4,7 @@ from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
 
-def test_instantiate_correct_configs(
-    base_config_dict: dict,
-):
+def test_instantiate_correct_configs(base_config_dict: dict):
     # GIVEN a dictionary with the basic configs
 
     # WHEN instantiating a CGConfig object

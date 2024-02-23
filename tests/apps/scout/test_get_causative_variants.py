@@ -21,9 +21,7 @@ def test_get_causative_variants_no_variants(scout_api: ScoutAPI, case_id: str):
 
 
 def test_get_causative_variants_one_variant(
-    scout_api: ScoutAPI,
-    case_id: str,
-    causative_output: str,
+    scout_api: ScoutAPI, case_id: str, causative_output: str
 ):
     """Test to get causative variants when there is one variant"""
     scout_api.process.set_stdout(causative_output)
@@ -32,8 +30,7 @@ def test_get_causative_variants_one_variant(
 
     # WHEN reading the yaml formatted string
     raw_info: dict = ReadStream.get_content_from_stream(
-        file_format=FileFormat.YAML,
-        stream=causative_output,
+        file_format=FileFormat.YAML, stream=causative_output
     )
 
     # WHEN querying for causative variants
@@ -51,10 +48,7 @@ def test_get_causative_variants_one_variant(
 
 
 def test_get_causative_variants_non_existing_case(
-    scout_api: ScoutAPI,
-    case_id: str,
-    causative_output: str,
-    caplog,
+    scout_api: ScoutAPI, case_id: str, causative_output: str, caplog
 ):
     """Test to get causative variants when the case does not exist"""
     caplog.set_level(logging.INFO)

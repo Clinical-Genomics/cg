@@ -8,13 +8,8 @@ from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress import helpers
-from cg.cli.compress.helpers import (
-    set_memory_according_to_reads,
-)
-from cg.constants.compression import (
-    CRUNCHY_MIN_GB_PER_PROCESS,
-    MAX_READS_PER_GB,
-)
+from cg.cli.compress.helpers import set_memory_according_to_reads
+from cg.constants.compression import CRUNCHY_MIN_GB_PER_PROCESS, MAX_READS_PER_GB
 
 
 def test_set_memory_according_to_reads_when_no_reads(caplog, sample_id: str):
@@ -33,9 +28,7 @@ def test_set_memory_according_to_reads_when_no_reads(caplog, sample_id: str):
     assert memory is None
 
 
-def test_set_memory_according_to_reads_when_few_reads(
-    sample_id: str,
-):
+def test_set_memory_according_to_reads_when_few_reads(sample_id: str):
     """Test setting memory according to reads when few reads."""
     # GIVEN a sample id and reads
 
@@ -46,41 +39,33 @@ def test_set_memory_according_to_reads_when_few_reads(
     assert memory == CRUNCHY_MIN_GB_PER_PROCESS
 
 
-def test_set_memory_according_to_reads_when_many_reads(
-    sample_id: str,
-):
+def test_set_memory_according_to_reads_when_many_reads(sample_id: str):
     """Test setting memory according to reads when many reads."""
     # GIVEN a sample id and reads
 
     # WHEN setting memory according to reads
     memory: int = set_memory_according_to_reads(
-        sample_id=sample_id,
-        sample_reads=MAX_READS_PER_GB**10,
+        sample_id=sample_id, sample_reads=MAX_READS_PER_GB**10
     )
 
     # THEN memory should be limited to what is available on the node
     assert memory == 180
 
 
-def test_set_memory_according_to_reads(
-    sample_id: str,
-):
+def test_set_memory_according_to_reads(sample_id: str):
     """Test setting memory according to reads."""
     # GIVEN a sample id and reads
 
     # WHEN setting memory according to reads
     memory: int = set_memory_according_to_reads(
-        sample_id=sample_id,
-        sample_reads=MAX_READS_PER_GB * 100,
+        sample_id=sample_id, sample_reads=MAX_READS_PER_GB * 100
     )
 
     # THEN memory should be adjusted
     assert memory == 100
 
 
-def test_get_true_dir_no_symlinks(
-    project_dir: Path,
-):
+def test_get_true_dir_no_symlinks(project_dir: Path):
     """Test to get a true dir when there are no symlinks."""
     # GIVEN a directory with some files but no symlinked files
     a_file: Path = Path(project_dir, "hello.txt")
@@ -94,9 +79,7 @@ def test_get_true_dir_no_symlinks(
     assert true_dir is None
 
 
-def test_get_true_dir_when_symlinks(
-    project_dir: Path,
-):
+def test_get_true_dir_when_symlinks(project_dir: Path):
     """Test to get a true dir when there are symlinks to another directory.
 
     The function should return the path to another directory when there are symlinks in one.
@@ -123,9 +106,7 @@ def test_get_true_dir_when_symlinks(
     assert true_dir == project_dir
 
 
-def test_get_versions_no_bundle(
-    housekeeper_api: HousekeeperAPI,
-):
+def test_get_versions_no_bundle(housekeeper_api: HousekeeperAPI):
     """Test to get latest versions of bundles when no bundles exists."""
     # GIVEN a empty housekeeper_api
 
@@ -136,10 +117,7 @@ def test_get_versions_no_bundle(
     assert sum(1 for version in versions) == 0
 
 
-def test_get_versions_one_bundle(
-    housekeeper_api: HousekeeperAPI,
-    spring_bundle: dict,
-):
+def test_get_versions_one_bundle(housekeeper_api: HousekeeperAPI, spring_bundle: dict):
     """Test to get latest versions of bundles when no bundles exists."""
     # GIVEN a populated housekeeper_api
     housekeeper_api.add_bundle(spring_bundle)

@@ -36,11 +36,7 @@ def test_set_cases_by_sample_identifiers(
     # WHEN calling set families with valid sample identifiers
     cli_runner.invoke(
         set_cases,
-        [
-            "--sample-identifier",
-            identifier_key,
-            identifier_value,
-        ],
+        ["--sample-identifier", identifier_key, identifier_value],
         obj=base_context,
     )
 

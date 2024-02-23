@@ -15,12 +15,7 @@ MAX_ITEMS_TO_RETRIEVE = 50
 SCALE_TO_MILLION_READ_PAIRS = 2_000_000
 SCALE_TO_READ_PAIRS = 2
 
-ANALYSIS_TYPES = [
-    "tumor_wgs",
-    "tumor_normal_wgs",
-    "tumor_panel",
-    "tumor_normal_panel",
-]
+ANALYSIS_TYPES = ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
 
 CAPTUREKIT_CANCER_OPTIONS = (
     "GIcfDNA",
@@ -53,11 +48,7 @@ class CaseActions(StrEnum):
         return list(map(lambda action: action.value, cls))
 
 
-CONTAINER_OPTIONS = (
-    "Tube",
-    "96 well plate",
-    "No container",
-)
+CONTAINER_OPTIONS = ("Tube", "96 well plate", "No container")
 
 CONTROL_OPTIONS = ("", "negative", "positive")
 
@@ -106,25 +97,13 @@ class PrepCategory(StrEnum):
     WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
 
 
-PREP_CATEGORIES = (
-    "cov",
-    "mic",
-    "rml",
-    "tgs",
-    "wes",
-    "wgs",
-    "wts",
-)
+PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
 
 SEX_OPTIONS = ("male", "female", "unknown")
 
 SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 
-STATUS_OPTIONS = (
-    "affected",
-    "unaffected",
-    "unknown",
-)
+STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
 class Workflow(StrEnum):

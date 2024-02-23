@@ -14,10 +14,7 @@ CLI_OPTION_DELIVERY = DataDelivery.FASTQ_QC
 
 
 def test_add_case_required(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    helpers: StoreHelpers,
-    ticket_id: str,
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket_id: str
 ):
     """Test to add a case using only the required arguments"""
     # GIVEN a database with a customer and an panel
@@ -57,10 +54,7 @@ def test_add_case_required(
 
 
 def test_add_case_bad_workflow(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    helpers: StoreHelpers,
-    ticket_id: str,
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket_id: str
 ):
     """Test to add a case using only the required arguments"""
     # GIVEN a database with a customer and a panel
@@ -98,9 +92,7 @@ def test_add_case_bad_workflow(
 
 
 def test_add_case_bad_data_delivery(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
 ):
     """Test to add a case using only the required arguments"""
     # GIVEN a database with a customer and an panel
@@ -136,11 +128,7 @@ def test_add_case_bad_data_delivery(
     assert disk_store._get_query(table=Case).count() == 0
 
 
-def test_add_case_bad_customer(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    ticket_id: str,
-):
+def test_add_case_bad_customer(cli_runner: CliRunner, base_context: CGConfig, ticket_id: str):
     """Test to add a case using a non-existing customer"""
     # GIVEN an empty database
     disk_store: Store = base_context.status_db
@@ -172,10 +160,7 @@ def test_add_case_bad_customer(
 
 
 def test_add_case_bad_panel(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    helpers: StoreHelpers,
-    ticket_id: str,
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket_id: str
 ):
     """Test to add a case using a non-existing panel"""
     # GIVEN a database with a customer
@@ -209,10 +194,7 @@ def test_add_case_bad_panel(
 
 
 def test_add_case_priority(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    helpers: StoreHelpers,
-    ticket_id: str,
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket_id: str
 ):
     """Test that the added case get the priority we send in"""
     # GIVEN a database with a customer and an panel

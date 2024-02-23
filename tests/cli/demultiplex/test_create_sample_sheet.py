@@ -5,26 +5,18 @@ from _pytest.fixtures import FixtureRequest
 from click import testing
 from pydantic import BaseModel, ValidationError
 
-from cg.apps.demultiplex.sample_sheet.api import (
-    SampleSheetAPI,
-)
+from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.cli.demultiplex.sample_sheet import (
-    create_sheet,
-)
-from cg.constants.demultiplexing import (
-    BclConverter,
-)
+from cg.cli.demultiplex.sample_sheet import create_sheet
+from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
 from cg.exc import SampleSheetError
 from cg.io.txt import read_txt
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import (
-    FlowCellDirectoryData,
-)
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 FLOW_CELL_FUNCTION_NAME: str = "cg.apps.demultiplex.sample_sheet.api.get_flow_cell_samples"
 
@@ -57,9 +49,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
 
     # WHEN running the create sample sheet command
     result: testing.Result = cli_runner.invoke(
-        create_sheet,
-        [flow_cell.full_name],
-        obj=sample_sheet_context_broken_flow_cells,
+        create_sheet, [flow_cell.full_name], obj=sample_sheet_context_broken_flow_cells
     )
 
     # THEN the process exits with a non-zero exit code
@@ -119,8 +109,7 @@ def test_create_bcl2fastq_sample_sheet(
 
     # THEN the sample sheet passes validation
     sample_sheet_api.validate_sample_sheet(
-        sample_sheet_path=flow_cell.sample_sheet_path,
-        bcl_converter=BclConverter.BCL2FASTQ,
+        sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCL2FASTQ
     )
 
     # THEN the sample sheet is in Housekeeper
@@ -152,11 +141,7 @@ class SampleSheetScenario(BaseModel):
             correct_sample_sheet="novaseq_x_correct_sample_sheet",
         ),
     ],
-    ids=[
-        "Old NovaSeq 6000 flow cell",
-        "New NovaSeq 6000 flow cell",
-        "NovaSeq X flow cell",
-    ],
+    ids=["Old NovaSeq 6000 flow cell", "New NovaSeq 6000 flow cell", "NovaSeq X flow cell"],
 )
 def test_create_v2_sample_sheet(
     cli_runner: testing.CliRunner,
@@ -172,8 +157,7 @@ def test_create_v2_sample_sheet(
     # GIVEN a flow cell directory with some run parameters
     flow_cell_directory: Path = request.getfixturevalue(scenario.flow_cell_directory)
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=flow_cell_directory,
-        bcl_converter=BclConverter.BCLCONVERT,
+        flow_cell_path=flow_cell_directory, bcl_converter=BclConverter.BCLCONVERT
     )
     assert flow_cell.run_parameters_path.exists()
 
@@ -195,11 +179,7 @@ def test_create_v2_sample_sheet(
     # WHEN creating a sample sheet
     result = cli_runner.invoke(
         create_sheet,
-        [
-            str(flow_cell_directory),
-            "-b",
-            BclConverter.BCLCONVERT,
-        ],
+        [str(flow_cell_directory), "-b", BclConverter.BCLCONVERT],
         obj=sample_sheet_context,
     )
 
@@ -211,8 +191,7 @@ def test_create_v2_sample_sheet(
 
     # THEN the sample sheet passes validation
     sample_sheet_api.validate_sample_sheet(
-        sample_sheet_path=flow_cell.sample_sheet_path,
-        bcl_converter=BclConverter.BCLCONVERT,
+        sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCLCONVERT
     )
 
     # THEN the sample sheet is in Housekeeper
@@ -243,8 +222,7 @@ def test_incorrect_bcl2fastq_samplesheet_is_regenerated(
     sample_sheet_api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
     with pytest.raises(SampleSheetError):
         sample_sheet_api.validate_sample_sheet(
-            sample_sheet_path=flow_cell.sample_sheet_path,
-            bcl_converter=BclConverter.BCL2FASTQ,
+            sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCL2FASTQ
         )
 
     # GIVEN flow cell samples
@@ -267,6 +245,5 @@ def test_incorrect_bcl2fastq_samplesheet_is_regenerated(
 
     # THEN the sample sheet was re-created and passes validation
     sample_sheet_api.validate_sample_sheet(
-        sample_sheet_path=flow_cell.sample_sheet_path,
-        bcl_converter=BclConverter.BCL2FASTQ,
+        sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCL2FASTQ
     )

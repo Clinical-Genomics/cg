@@ -1,48 +1,18 @@
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.override_cycles_validator import (
-    OverrideCyclesValidator,
-)
-from cg.constants.demultiplexing import (
-    FORWARD_INDEX_CYCLE_PATTERN,
-    REVERSE_INDEX_CYCLE_PATTERN,
-)
+from cg.apps.demultiplex.sample_sheet.override_cycles_validator import OverrideCyclesValidator
+from cg.constants.demultiplexing import FORWARD_INDEX_CYCLE_PATTERN, REVERSE_INDEX_CYCLE_PATTERN
 from cg.exc import OverrideCyclesError
 
 
 @pytest.mark.parametrize(
     "pattern, index_cycle, run_cycles, expected",
     [
-        (
-            FORWARD_INDEX_CYCLE_PATTERN,
-            "I8N2",
-            10,
-            True,
-        ),
-        (
-            REVERSE_INDEX_CYCLE_PATTERN,
-            "I8N2",
-            10,
-            False,
-        ),
-        (
-            FORWARD_INDEX_CYCLE_PATTERN,
-            "N2I8",
-            10,
-            False,
-        ),
-        (
-            REVERSE_INDEX_CYCLE_PATTERN,
-            "N2I8",
-            10,
-            True,
-        ),
-        (
-            FORWARD_INDEX_CYCLE_PATTERN,
-            "NOT_A_CYCLE6N8",
-            10,
-            False,
-        ),
+        (FORWARD_INDEX_CYCLE_PATTERN, "I8N2", 10, True),
+        (REVERSE_INDEX_CYCLE_PATTERN, "I8N2", 10, False),
+        (FORWARD_INDEX_CYCLE_PATTERN, "N2I8", 10, False),
+        (REVERSE_INDEX_CYCLE_PATTERN, "N2I8", 10, True),
+        (FORWARD_INDEX_CYCLE_PATTERN, "NOT_A_CYCLE6N8", 10, False),
         (r"(\d+)", "I8N2", 10, False),
     ],
     ids=[
@@ -104,12 +74,7 @@ def test_validate_reads_cycles_correct_cycles(
         "Y151;I8N2;",
         "NotAValidCycle",
     ],
-    ids=[
-        "wrong_values",
-        "wrong_separator",
-        "missing_cycle",
-        "not_a_valid_cycle",
-    ],
+    ids=["wrong_values", "wrong_separator", "missing_cycle", "not_a_valid_cycle"],
 )
 def test_validate_reads_cycles_incorrect_cycles(
     override_cycles_validator: OverrideCyclesValidator,
@@ -139,9 +104,7 @@ def test_validate_reads_cycles_incorrect_cycles(
     ],
 )
 def test_validate_index1_cycles_correct_cycles(
-    override_cycles_validator: OverrideCyclesValidator,
-    sample: str,
-    request: pytest.FixtureRequest,
+    override_cycles_validator: OverrideCyclesValidator, sample: str, request: pytest.FixtureRequest
 ):
     """Test that a sample with correct index 1 cycle values passes validation."""
     # GIVEN an override cycles validator with index 1 cycles set
@@ -199,14 +162,8 @@ def test_validate_index1_cycles_incorrect_cycles(
 @pytest.mark.parametrize(
     "sample, reverse_complement",
     [
-        (
-            "forward_index2_cycle_processed_flow_cell_8_nt_sample",
-            False,
-        ),
-        (
-            "reverse_index2_cycle_processed_flow_cell_8_nt_sample",
-            True,
-        ),
+        ("forward_index2_cycle_processed_flow_cell_8_nt_sample", False),
+        ("reverse_index2_cycle_processed_flow_cell_8_nt_sample", True),
     ],
 )
 def test_validate_index2_cycles_correct_cycles(
@@ -276,18 +233,9 @@ def test_validate_index2_cycles_incorrect_cycles(
 @pytest.mark.parametrize(
     "sample, reverse_complement",
     [
-        (
-            "forward_index2_cycle_processed_flow_cell_8_nt_sample",
-            False,
-        ),
-        (
-            "reverse_index2_cycle_processed_flow_cell_8_nt_sample",
-            True,
-        ),
-        (
-            "processed_flow_cell_10_nt_sample",
-            False,
-        ),
+        ("forward_index2_cycle_processed_flow_cell_8_nt_sample", False),
+        ("reverse_index2_cycle_processed_flow_cell_8_nt_sample", True),
+        ("processed_flow_cell_10_nt_sample", False),
     ],
     ids=["forward_8_nt", "reverse_8_nt", "10_nt"],
 )
@@ -302,10 +250,7 @@ def test_validate_sample(
 
     # GIVEN an override cycles validator with all parameters set
     override_cycles_validator.set_run_cycles(
-        read1_cycles=151,
-        read2_cycles=151,
-        index1_cycles=10,
-        index2_cycles=10,
+        read1_cycles=151, read2_cycles=151, index1_cycles=10, index2_cycles=10
     )
     override_cycles_validator.set_reverse_complement(reverse_complement)
     override_cycles_validator.set_attributes_from_sample(request.getfixturevalue(sample))

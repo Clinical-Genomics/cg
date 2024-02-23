@@ -2,19 +2,10 @@ import logging
 
 import click
 
-from cg.constants import (
-    STATUS_OPTIONS,
-    DataDelivery,
-    Priority,
-    Workflow,
-)
-from cg.constants.archiving import (
-    PDC_ARCHIVE_LOCATION,
-)
+from cg.constants import STATUS_OPTIONS, DataDelivery, Priority, Workflow
+from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.subject import Sex
-from cg.meta.transfer.external_data import (
-    ExternalDataAPI,
-)
+from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import (
     Application,
@@ -127,12 +118,7 @@ def add_customer(
 
 
 @add.command("user")
-@click.option(
-    "-a",
-    "--admin",
-    is_flag=True,
-    help="make the user an admin",
-)
+@click.option("-a", "--admin", is_flag=True, help="make the user an admin")
 @click.option(
     "-c",
     "--customer",
@@ -143,13 +129,7 @@ def add_customer(
 @click.argument("email")
 @click.argument("name")
 @click.pass_obj
-def add_user(
-    context: CGConfig,
-    admin: bool,
-    customer_id: str,
-    email: str,
-    name: str,
-):
+def add_user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str):
     """Add a new user with an EMAIL (login) and a NAME (full)."""
     status_db: Store = context.status_db
 
@@ -160,10 +140,7 @@ def add_user(
         raise click.Abort
 
     new_user: User = status_db.add_user(
-        customer=customer_obj,
-        email=email,
-        name=name,
-        is_admin=admin,
+        customer=customer_obj, email=email, name=name, is_admin=admin
     )
     status_db.session.add(new_user)
     status_db.session.commit()
@@ -171,23 +148,11 @@ def add_user(
 
 
 @add.command("sample")
+@click.option("-l", "--lims", "lims_id", help="LIMS id for the sample")
 @click.option(
-    "-l",
-    "--lims",
-    "lims_id",
-    help="LIMS id for the sample",
+    "-d", "--down-sampled", type=int, help="How many reads is the sample down sampled to?"
 )
-@click.option(
-    "-d",
-    "--down-sampled",
-    type=int,
-    help="How many reads is the sample down sampled to?",
-)
-@click.option(
-    "-o",
-    "--order",
-    help="Name of the order the sample belongs to",
-)
+@click.option("-o", "--order", help="Name of the order the sample belongs to")
 @click.option(
     "-s",
     "--sex",
@@ -195,12 +160,7 @@ def add_user(
     required=True,
     help="Sample pedigree sex",
 )
-@click.option(
-    "-a",
-    "--application-tag",
-    required=True,
-    help="application tag name",
-)
+@click.option("-a", "--application-tag", required=True, help="application tag name")
 @click.option(
     "-p",
     "--priority",
@@ -258,13 +218,7 @@ def add_sample(
     default="standard",
     help="analysis priority",
 )
-@click.option(
-    "-p",
-    "--panel",
-    "panel_abbreviations",
-    multiple=True,
-    help="default gene panels",
-)
+@click.option("-p", "--panel", "panel_abbreviations", multiple=True, help="default gene panels")
 @click.option(
     "-a",
     "--analysis",
@@ -281,12 +235,7 @@ def add_sample(
     required=True,
     type=EnumChoice(DataDelivery),
 )
-@click.option(
-    "-t",
-    "--ticket",
-    help="Ticket number",
-    required=True,
-)
+@click.option("-t", "--ticket", help="Ticket number", required=True)
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_obj
@@ -331,22 +280,9 @@ def add_case(
 
 
 @add.command("relationship")
-@click.option(
-    "-m",
-    "--mother-id",
-    help="Sample ID for mother of sample",
-)
-@click.option(
-    "-f",
-    "--father-id",
-    help="Sample ID for father of sample",
-)
-@click.option(
-    "-s",
-    "--status",
-    type=click.Choice(STATUS_OPTIONS),
-    required=True,
-)
+@click.option("-m", "--mother-id", help="Sample ID for mother of sample")
+@click.option("-f", "--father-id", help="Sample ID for father of sample")
+@click.option("-s", "--status", type=click.Choice(STATUS_OPTIONS), required=True)
 @click.argument("case-id")
 @click.argument("sample-id")
 @click.pass_obj
@@ -385,11 +321,7 @@ def link_sample_to_case(
             raise click.Abort
 
     new_record: CaseSample = status_db.relate_sample(
-        case=case_obj,
-        sample=sample,
-        status=status,
-        mother=mother,
-        father=father,
+        case=case_obj, sample=sample, status=status, mother=mother, father=father
     )
     status_db.session.add(new_record)
     status_db.session.commit()
@@ -423,21 +355,10 @@ def download_external_delivery_data_to_hpc(context: CGConfig, ticket: str, dry_r
 )
 @click.option("--dry-run", is_flag=True)
 @click.option(
-    "--force",
-    help="Overwrites any any previous samples in the customer directory",
-    is_flag=True,
+    "--force", help="Overwrites any any previous samples in the customer directory", is_flag=True
 )
 @click.pass_obj
-def add_external_data_to_hk(
-    context: CGConfig,
-    ticket: str,
-    dry_run: bool,
-    force,
-):
+def add_external_data_to_hk(context: CGConfig, ticket: str, dry_run: bool, force):
     """Adds external data to Housekeeper"""
     external_data_api = ExternalDataAPI(config=context)
-    external_data_api.add_transfer_to_housekeeper(
-        dry_run=dry_run,
-        ticket=ticket,
-        force=force,
-    )
+    external_data_api.add_transfer_to_housekeeper(dry_run=dry_run, ticket=ticket, force=force)

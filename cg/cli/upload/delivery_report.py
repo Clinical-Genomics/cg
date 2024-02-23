@@ -5,13 +5,8 @@ import logging
 import click
 from housekeeper.store.models import Version
 
-from cg.cli.generate.report.options import (
-    ARGUMENT_CASE_ID,
-)
-from cg.cli.generate.report.utils import (
-    get_report_api,
-    get_report_case,
-)
+from cg.cli.generate.report.options import ARGUMENT_CASE_ID
+from cg.cli.generate.report.utils import get_report_api, get_report_case
 from cg.meta.report.report_api import ReportAPI
 from cg.store.models import Case
 
@@ -21,25 +16,14 @@ LOG = logging.getLogger(__name__)
 @click.command("delivery-report-to-scout")
 @ARGUMENT_CASE_ID
 @click.option(
-    "-r",
-    "--re-upload",
-    is_flag=True,
-    default=False,
-    help="Re-upload existing delivery report",
+    "-r", "--re-upload", is_flag=True, default=False, help="Re-upload existing delivery report"
 )
 @click.option(
-    "-d",
-    "--dry-run",
-    is_flag=True,
-    default=False,
-    help="Run command without uploading to Scout",
+    "-d", "--dry-run", is_flag=True, default=False, help="Run command without uploading to Scout"
 )
 @click.pass_context
 def upload_delivery_report_to_scout(
-    context: click.Context,
-    case_id: str,
-    re_upload: bool,
-    dry_run: bool,
+    context: click.Context, case_id: str, re_upload: bool, dry_run: bool
 ) -> None:
     """Fetches a delivery report from Housekeeper and uploads it to Scout."""
     click.echo(click.style("--------------- DELIVERY REPORT UPLOAD ---------------"))
@@ -51,9 +35,7 @@ def upload_delivery_report_to_scout(
     )
     if delivery_report and not dry_run:
         report_api.scout_api.upload_delivery_report(
-            report_path=delivery_report,
-            case_id=case.internal_id,
-            update=re_upload,
+            report_path=delivery_report, case_id=case.internal_id, update=re_upload
         )
         return
     LOG.error("Delivery report not uploaded to Scout")

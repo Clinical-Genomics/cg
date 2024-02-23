@@ -19,32 +19,18 @@ depends_on = None
 
 
 def upgrade():
-    op.create_foreign_key(
-        "sample_invoice_ibfk_1",
-        "sample",
-        "invoice",
-        ["invoice_id"],
-        ["id"],
-    )
+    op.create_foreign_key("sample_invoice_ibfk_1", "sample", "invoice", ["invoice_id"], ["id"])
     op.drop_column("sample", "beaconized_at")
     op.alter_column(
         "sample_lane_sequencing_metrics",
         "flow_cell_name",
-        existing_type=mysql.VARCHAR(
-            charset="latin1",
-            collation="latin1_swedish_ci",
-            length=32,
-        ),
+        existing_type=mysql.VARCHAR(charset="latin1", collation="latin1_swedish_ci", length=32),
         nullable=False,
     )
     op.alter_column(
         "sample_lane_sequencing_metrics",
         "sample_internal_id",
-        existing_type=mysql.VARCHAR(
-            charset="latin1",
-            collation="latin1_swedish_ci",
-            length=32,
-        ),
+        existing_type=mysql.VARCHAR(charset="latin1", collation="latin1_swedish_ci", length=32),
         nullable=False,
     )
 
@@ -53,33 +39,16 @@ def downgrade():
     op.alter_column(
         "sample_lane_sequencing_metrics",
         "sample_internal_id",
-        existing_type=mysql.VARCHAR(
-            charset="latin1",
-            collation="latin1_swedish_ci",
-            length=32,
-        ),
+        existing_type=mysql.VARCHAR(charset="latin1", collation="latin1_swedish_ci", length=32),
         nullable=True,
     )
     op.alter_column(
         "sample_lane_sequencing_metrics",
         "flow_cell_name",
-        existing_type=mysql.VARCHAR(
-            charset="latin1",
-            collation="latin1_swedish_ci",
-            length=32,
-        ),
+        existing_type=mysql.VARCHAR(charset="latin1", collation="latin1_swedish_ci", length=32),
         nullable=True,
     )
-    op.add_column(
-        "sample",
-        sa.Column(
-            "beaconized_at",
-            mysql.TEXT(),
-            nullable=True,
-        ),
-    )
+    op.add_column("sample", sa.Column("beaconized_at", mysql.TEXT(), nullable=True))
     op.drop_constraint(
-        constraint_name="sample_invoice_ibfk_1",
-        table_name="sample",
-        type_="foreignkey",
+        constraint_name="sample_invoice_ibfk_1", table_name="sample", type_="foreignkey"
     )

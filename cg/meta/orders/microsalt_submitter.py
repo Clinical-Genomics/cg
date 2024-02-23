@@ -1,6 +1,4 @@
-from cg.meta.orders.microbial_submitter import (
-    MicrobialSubmitter,
-)
+from cg.meta.orders.microbial_submitter import MicrobialSubmitter
 
 
 class MicrosaltSubmitter(MicrobialSubmitter):

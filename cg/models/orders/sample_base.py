@@ -1,24 +1,11 @@
 from enum import StrEnum
 
-from pydantic import (
-    BaseModel,
-    BeforeValidator,
-    ConfigDict,
-    constr,
-)
+from pydantic import BaseModel, BeforeValidator, ConfigDict, constr
 from typing_extensions import Annotated
 
 from cg.constants import DataDelivery, Workflow
-from cg.models.orders.validators.sample_base_validators import (
-    snake_case,
-)
-from cg.store.models import (
-    Application,
-    Case,
-    Customer,
-    Pool,
-    Sample,
-)
+from cg.models.orders.validators.sample_base_validators import snake_case
+from cg.store.models import Application, Case, Customer, Pool, Sample
 
 
 class ControlEnum(StrEnum):
@@ -58,9 +45,7 @@ NAME_PATTERN = r"^[A-Za-z0-9-]*$"
 
 class OrderSample(BaseModel):
     model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        populate_by_name=True,
-        coerce_numbers_to_str=True,
+        arbitrary_types_allowed=True, populate_by_name=True, coerce_numbers_to_str=True
     )
     age_at_sampling: str | None = None
     application: constr(max_length=Application.tag.property.columns[0].type.length)
@@ -88,11 +73,7 @@ class OrderSample(BaseModel):
         | None
     ) = None
     father: (
-        constr(
-            pattern=NAME_PATTERN,
-            max_length=Sample.name.property.columns[0].type.length,
-        )
-        | None
+        constr(pattern=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length) | None
     ) = None
     formalin_fixation_time: int | None = None
     index: str | None = None
@@ -101,11 +82,7 @@ class OrderSample(BaseModel):
     internal_id: constr(max_length=Sample.internal_id.property.columns[0].type.length) | None = None
     lab_code: str | None = None
     mother: (
-        constr(
-            pattern=NAME_PATTERN,
-            max_length=Sample.name.property.columns[0].type.length,
-        )
-        | None
+        constr(pattern=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length) | None
     ) = None
     name: constr(
         pattern=NAME_PATTERN,
@@ -137,10 +114,7 @@ class OrderSample(BaseModel):
     source: str | None = None
     status: StatusEnum = StatusEnum.unknown
     subject_id: (
-        constr(
-            pattern=NAME_PATTERN,
-            max_length=Sample.subject_id.property.columns[0].type.length,
-        )
+        constr(pattern=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length)
         | None
     ) = None
     tissue_block_size: str | None = None

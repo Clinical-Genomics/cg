@@ -6,22 +6,12 @@ from pathlib import Path
 
 import requests
 from housekeeper.store.models import File, Version
-from jinja2 import (
-    Environment,
-    PackageLoader,
-    Template,
-    select_autoescape,
-)
+from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sqlalchemy.orm import Query
 
 from cg.constants import Workflow
-from cg.constants.constants import (
-    MAX_ITEMS_TO_RETRIEVE,
-    FileFormat,
-)
-from cg.constants.housekeeper_tags import (
-    HK_DELIVERY_REPORT_TAG,
-)
+from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.exc import DeliveryReportError
 from cg.io.controller import WriteStream
 from cg.meta.meta import MetaAPI
@@ -32,9 +22,7 @@ from cg.meta.report.field_validators import (
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
-from cg.models.report.metadata import (
-    SampleMetadataModel,
-)
+from cg.models.report.metadata import SampleMetadataModel
 from cg.models.report.report import (
     CaseModel,
     CustomerModel,
@@ -63,46 +51,30 @@ LOG = logging.getLogger(__name__)
 class ReportAPI(MetaAPI):
     """Common Delivery Report API."""
 
-    def __init__(
-        self,
-        config: CGConfig,
-        analysis_api: AnalysisAPI,
-    ):
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
         super().__init__(config=config)
         self.analysis_api: AnalysisAPI = analysis_api
 
     def create_delivery_report(
-        self,
-        case_id: str,
-        analysis_date: datetime,
-        force_report: bool,
+        self, case_id: str, analysis_date: datetime, force_report: bool
     ) -> str:
         """Generates the html contents of a delivery report."""
         report_data: ReportModel = self.get_report_data(
-            case_id=case_id,
-            analysis_date=analysis_date,
+            case_id=case_id, analysis_date=analysis_date
         )
         report_data: ReportModel = self.validate_report_fields(
-            case_id=case_id,
-            report_data=report_data,
-            force_report=force_report,
+            case_id=case_id, report_data=report_data, force_report=force_report
         )
         rendered_report: str = self.render_delivery_report(report_data=report_data.model_dump())
         return rendered_report
 
     def create_delivery_report_file(
-        self,
-        case_id: str,
-        directory: Path,
-        analysis_date: datetime,
-        force_report: bool,
+        self, case_id: str, directory: Path, analysis_date: datetime, force_report: bool
     ) -> Path:
         """Generates a file containing the delivery report content."""
         directory.mkdir(parents=True, exist_ok=True)
         delivery_report: str = self.create_delivery_report(
-            case_id=case_id,
-            analysis_date=analysis_date,
-            force_report=force_report,
+            case_id=case_id, analysis_date=analysis_date, force_report=force_report
         )
         report_file_path: Path = Path(directory, "delivery-report.html")
         with open(report_file_path, "w") as delivery_report_stream:
@@ -110,20 +82,12 @@ class ReportAPI(MetaAPI):
         return report_file_path
 
     def add_delivery_report_to_hk(
-        self,
-        case_id: str,
-        delivery_report_file: Path,
-        version: Version,
+        self, case_id: str, delivery_report_file: Path, version: Version
     ) -> File | None:
         """Add a delivery report file to a case bundle and return its file object."""
         LOG.info(f"Adding a new delivery report to housekeeper for {case_id}")
         file: File = self.housekeeper_api.add_file(
-            path=delivery_report_file,
-            version_obj=version,
-            tags=[
-                case_id,
-                HK_DELIVERY_REPORT_TAG,
-            ],
+            path=delivery_report_file, version_obj=version, tags=[case_id, HK_DELIVERY_REPORT_TAG]
         )
         self.housekeeper_api.include_file(file, version)
         self.housekeeper_api.add_commit(file)
@@ -132,9 +96,7 @@ class ReportAPI(MetaAPI):
     def get_delivery_report_from_hk(self, case_id: str, version: Version) -> str | None:
         """Return path of a delivery report stored in HK."""
         delivery_report: File = self.housekeeper_api.get_latest_file(
-            bundle=case_id,
-            tags=[HK_DELIVERY_REPORT_TAG],
-            version=version.id,
+            bundle=case_id, tags=[HK_DELIVERY_REPORT_TAG], version=version.id
         )
         if not delivery_report:
             LOG.warning(f"No delivery report found in housekeeper for {case_id}")
@@ -146,9 +108,7 @@ class ReportAPI(MetaAPI):
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
         tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
         uploaded_file: File = self.housekeeper_api.get_latest_file(
-            bundle=case_id,
-            tags=tags,
-            version=version.id,
+            bundle=case_id, tags=tags, version=version.id
         )
         if not tags or not uploaded_file:
             LOG.warning(
@@ -176,8 +136,7 @@ class ReportAPI(MetaAPI):
             case: Case = analysis.case
             last_version: Version = self.housekeeper_api.last_version(bundle=case.internal_id)
             hk_file: File = self.housekeeper_api.get_files(
-                bundle=case.internal_id,
-                version=last_version.id if last_version else None,
+                bundle=case.internal_id, version=last_version.id if last_version else None
             ).first()
 
             if hk_file and Path(hk_file.full_path).is_file():
@@ -198,22 +157,16 @@ class ReportAPI(MetaAPI):
     def update_delivery_report_date(self, case: Case, analysis_date: datetime) -> None:
         """Updates the date when a delivery report was created."""
         analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_started_at(
-            case_entry_id=case.id,
-            started_at_date=analysis_date,
+            case_entry_id=case.id, started_at_date=analysis_date
         )
         analysis.delivery_report_created_at = datetime.now()
         self.status_db.session.commit()
 
-    def get_report_data(
-        self,
-        case_id: str,
-        analysis_date: datetime,
-    ) -> ReportModel:
+    def get_report_data(self, case_id: str, analysis_date: datetime) -> ReportModel:
         """Fetches all the data needed to generate a delivery report."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_started_at(
-            case_entry_id=case.id,
-            started_at_date=analysis_date,
+            case_entry_id=case.id, started_at_date=analysis_date
         )
         analysis_metadata: AnalysisModel = self.analysis_api.get_latest_metadata(case.internal_id)
         case_model: CaseModel = self.get_case_data(case, analysis, analysis_metadata)
@@ -223,23 +176,18 @@ class ReportAPI(MetaAPI):
             date=datetime.today(),
             case=case_model,
             accredited=self.is_report_accredited(
-                samples=case_model.samples,
-                analysis_metadata=analysis_metadata,
+                samples=case_model.samples, analysis_metadata=analysis_metadata
             ),
         )
 
     def validate_report_fields(
-        self,
-        case_id: str,
-        report_data: ReportModel,
-        force_report,
+        self, case_id: str, report_data: ReportModel, force_report
     ) -> ReportModel:
         """Verifies that the required report fields are not empty."""
         required_fields: dict = self.get_required_fields(case=report_data.case)
         empty_report_fields: dict = get_empty_report_data(report_data=report_data)
         missing_report_fields: dict = get_missing_report_data(
-            empty_fields=empty_report_fields,
-            required_fields=required_fields,
+            empty_fields=empty_report_fields, required_fields=required_fields
         )
         if missing_report_fields and not force_report:
             LOG.error(
@@ -254,9 +202,7 @@ class ReportAPI(MetaAPI):
         return report_data
 
     @staticmethod
-    def get_customer_data(
-        case: Case,
-    ) -> CustomerModel:
+    def get_customer_data(case: Case) -> CustomerModel:
         """Returns customer validated attributes retrieved from status DB."""
         return CustomerModel(
             name=case.customer.name,
@@ -266,9 +212,7 @@ class ReportAPI(MetaAPI):
         )
 
     @staticmethod
-    def get_report_version(
-        analysis: Analysis,
-    ) -> int:
+    def get_report_version(analysis: Analysis) -> int:
         """
         Returns the version of the given analysis. The version of the first analysis is 1 and subsequent reruns
         increase it by 1.
@@ -286,27 +230,20 @@ class ReportAPI(MetaAPI):
     ) -> CaseModel:
         """Returns case associated validated attributes."""
         samples: list[SampleModel] = self.get_samples_data(
-            case=case,
-            analysis_metadata=analysis_metadata,
+            case=case, analysis_metadata=analysis_metadata
         )
         unique_applications: list[ApplicationModel] = self.get_unique_applications(samples=samples)
         return CaseModel(
             name=case.name,
             id=case.internal_id,
             data_analysis=self.get_case_analysis_data(
-                case=case,
-                analysis=analysis,
-                analysis_metadata=analysis_metadata,
+                case=case, analysis=analysis, analysis_metadata=analysis_metadata
             ),
             samples=samples,
             applications=unique_applications,
         )
 
-    def get_samples_data(
-        self,
-        case: Case,
-        analysis_metadata: AnalysisModel,
-    ) -> list[SampleModel]:
+    def get_samples_data(self, case: Case, analysis_metadata: AnalysisModel) -> list[SampleModel]:
         """Extracts all the samples associated to a specific case and their attributes."""
         samples = list()
         case_samples: list[CaseSample] = self.status_db.get_case_samples_by_case_id(
@@ -324,15 +261,12 @@ class ReportAPI(MetaAPI):
                     source=lims_sample.get("source") if lims_sample else None,
                     tumour=sample.is_tumour,
                     application=self.get_sample_application_data(
-                        sample=sample,
-                        lims_sample=lims_sample,
+                        sample=sample, lims_sample=lims_sample
                     ),
                     methods=self.get_sample_methods_data(sample_id=sample.internal_id),
                     status=case_sample.status,
                     metadata=self.get_sample_metadata(
-                        case=case,
-                        sample=sample,
-                        analysis_metadata=analysis_metadata,
+                        case=case, sample=sample, analysis_metadata=analysis_metadata
                     ),
                     timestamps=self.get_sample_timestamp_data(sample=sample),
                 )
@@ -352,8 +286,7 @@ class ReportAPI(MetaAPI):
         """Return workflow specific limitations given an application tag."""
         application_limitation: ApplicationLimitations = (
             self.status_db.get_application_limitation_by_tag_and_workflow(
-                tag=application_tag,
-                workflow=self.analysis_api.workflow,
+                tag=application_tag, workflow=self.analysis_api.workflow
             )
         )
         return application_limitation.limitations if application_limitation else None
@@ -380,9 +313,7 @@ class ReportAPI(MetaAPI):
         )
 
     @staticmethod
-    def get_unique_applications(
-        samples: list[SampleModel],
-    ) -> list[ApplicationModel]:
+    def get_unique_applications(samples: list[SampleModel]) -> list[ApplicationModel]:
         """Returns the unique case associated applications."""
         applications = list()
         for sample in samples:
@@ -400,10 +331,7 @@ class ReportAPI(MetaAPI):
         except requests.exceptions.HTTPError as ex:
             LOG.info(f"Could not fetch sample ({sample_id}) methods from LIMS: {ex}")
 
-        return MethodsModel(
-            library_prep=library_prep,
-            sequencing=sequencing,
-        )
+        return MethodsModel(library_prep=library_prep, sequencing=sequencing)
 
     def get_case_analysis_data(
         self,
@@ -429,9 +357,7 @@ class ReportAPI(MetaAPI):
         raise NotImplementedError
 
     @staticmethod
-    def get_sample_timestamp_data(
-        sample: Sample,
-    ) -> TimestampModel:
+    def get_sample_timestamp_data(sample: Sample) -> TimestampModel:
         """Return sample processing dates."""
         return TimestampModel(
             ordered_at=sample.ordered_at,
@@ -469,9 +395,7 @@ class ReportAPI(MetaAPI):
         return []
 
     def is_report_accredited(
-        self,
-        samples: list[SampleModel],
-        analysis_metadata: AnalysisModel,
+        self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
         """Check if the report is accredited."""
         raise NotImplementedError
@@ -507,10 +431,7 @@ class ReportAPI(MetaAPI):
             if sample.application.external:
                 required_fields.remove("received_at")
                 break
-        return ReportAPI.get_sample_required_fields(
-            case=case,
-            required_fields=required_fields,
-        )
+        return ReportAPI.get_sample_required_fields(case=case, required_fields=required_fields)
 
     def get_hk_scout_file_tags(self, scout_tag: str) -> list | None:
         """Return workflow specific uploaded to Scout Housekeeper file tags given a Scout key."""

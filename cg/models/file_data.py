@@ -66,9 +66,7 @@ class FileData:
         return True
 
     @staticmethod
-    def get_file_handle(
-        path: Path,
-    ) -> Iterable[str]:
+    def get_file_handle(path: Path) -> Iterable[str]:
         """Return the file handle of a path"""
         if FileData.is_gzipped(path):
             return gzip.open(path, "r")

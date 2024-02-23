@@ -1,12 +1,6 @@
-from cg.constants.constants import (
-    MicrosaltAppTags,
-)
-from cg.meta.workflow.microsalt.metrics_parser.models import (
-    SampleMetrics,
-)
-from cg.meta.workflow.microsalt.quality_controller.models import (
-    SampleQualityResult,
-)
+from cg.constants.constants import MicrosaltAppTags
+from cg.meta.workflow.microsalt.metrics_parser.models import SampleMetrics
+from cg.meta.workflow.microsalt.quality_controller.models import SampleQualityResult
 from cg.meta.workflow.microsalt.quality_controller.utils import (
     get_non_urgent_results,
     get_urgent_results,
@@ -26,10 +20,7 @@ from cg.meta.workflow.microsalt.quality_controller.utils import (
     non_urgent_samples_pass_qc,
     urgent_samples_pass_qc,
 )
-from tests.meta.workflow.microsalt.conftest import (
-    create_quality_result,
-    create_sample_metrics,
-)
+from tests.meta.workflow.microsalt.conftest import create_quality_result, create_sample_metrics
 
 
 def test_sample_total_reads_passing():
@@ -39,9 +30,7 @@ def test_sample_total_reads_passing():
 
     # WHEN checking if the sample has sufficient reads
     passes_reads_threshold: bool = is_valid_total_reads(
-        reads=sample_reads,
-        target_reads=target_reads,
-        threshold_percentage=90,
+        reads=sample_reads, target_reads=target_reads, threshold_percentage=90
     )
 
     # THEN it passes
@@ -55,9 +44,7 @@ def test_sample_total_reads_failing():
 
     # WHEN checking if the sample has sufficient reads
     passes_reads_threshold: bool = is_valid_total_reads(
-        reads=sample_reads,
-        target_reads=target_reads,
-        threshold_percentage=90,
+        reads=sample_reads, target_reads=target_reads, threshold_percentage=90
     )
 
     # THEN it fails
@@ -71,9 +58,7 @@ def test_sample_total_reads_failing_without_reads():
 
     # WHEN checking if the sample has sufficient reads
     passes_reads_threshold: bool = is_valid_total_reads(
-        reads=sample_reads,
-        target_reads=target_reads,
-        threshold_percentage=90,
+        reads=sample_reads, target_reads=target_reads, threshold_percentage=90
     )
 
     # THEN it fails
@@ -87,8 +72,7 @@ def test_control_total_reads_passing():
 
     # WHEN checking if the control read count is valid
     passes_reads_threshold: bool = is_valid_total_reads_for_negative_control(
-        reads=sample_reads,
-        target_reads=target_reads,
+        reads=sample_reads, target_reads=target_reads
     )
 
     # THEN it passes
@@ -102,8 +86,7 @@ def test_control_total_reads_failing():
 
     # WHEN checking if the control read count is valid
     passes_reads_threshold: bool = is_valid_total_reads_for_negative_control(
-        reads=sample_reads,
-        target_reads=target_reads,
+        reads=sample_reads, target_reads=target_reads
     )
 
     # THEN it fails
@@ -117,8 +100,7 @@ def test_control_total_reads_passing_without_reads():
 
     # WHEN checking if the control read count is valid
     passes_reads_threshold: bool = is_valid_total_reads_for_negative_control(
-        reads=sample_reads,
-        target_reads=target_reads,
+        reads=sample_reads, target_reads=target_reads
     )
 
     # THEN it passes
@@ -372,17 +354,12 @@ def test_negative_control_fails_qc():
 def test_get_urgent_results():
     # GIVEN quality results with urgent and non-urgent samples
     urgent_result: SampleQualityResult = create_quality_result(
-        application_tag=MicrosaltAppTags.MWRNXTR003,
-        passes_qc=True,
+        application_tag=MicrosaltAppTags.MWRNXTR003, passes_qc=True
     )
     non_urgent_result: SampleQualityResult = create_quality_result(
-        application_tag=MicrosaltAppTags.MWXNXTR003,
-        passes_qc=True,
+        application_tag=MicrosaltAppTags.MWXNXTR003, passes_qc=True
     )
-    quality_results: list[SampleQualityResult] = [
-        urgent_result,
-        non_urgent_result,
-    ]
+    quality_results: list[SampleQualityResult] = [urgent_result, non_urgent_result]
 
     # WHEN getting the urgent results
     urgent_results: list[SampleQualityResult] = get_urgent_results(quality_results)
@@ -394,18 +371,12 @@ def test_get_urgent_results():
 def test_urgent_samples_pass_qc():
     # GIVEN quality results with urgent samples that pass quality control
     urgent_result: SampleQualityResult = create_quality_result(
-        application_tag=MicrosaltAppTags.MWRNXTR003,
-        passes_qc=True,
+        application_tag=MicrosaltAppTags.MWRNXTR003, passes_qc=True
     )
     urgent_result_control: SampleQualityResult = create_quality_result(
-        application_tag=MicrosaltAppTags.MWRNXTR003,
-        passes_qc=True,
-        is_control=True,
+        application_tag=MicrosaltAppTags.MWRNXTR003, passes_qc=True, is_control=True
     )
-    urgent_results: list[SampleQualityResult] = [
-        urgent_result,
-        urgent_result_control,
-    ]
+    urgent_results: list[SampleQualityResult] = [urgent_result, urgent_result_control]
 
     # WHEN checking if the urgent samples pass quality control
     urgent_pass_qc: bool = urgent_samples_pass_qc(urgent_results)
@@ -417,18 +388,12 @@ def test_urgent_samples_pass_qc():
 def test_urgent_samples_fail_qc():
     # GIVEN quality results with urgent samples that fail quality control
     urgent_result: SampleQualityResult = create_quality_result(
-        application_tag=MicrosaltAppTags.MWRNXTR003,
-        passes_qc=False,
+        application_tag=MicrosaltAppTags.MWRNXTR003, passes_qc=False
     )
     urgent_result_control: SampleQualityResult = create_quality_result(
-        application_tag=MicrosaltAppTags.MWRNXTR003,
-        passes_qc=True,
-        is_control=True,
+        application_tag=MicrosaltAppTags.MWRNXTR003, passes_qc=True, is_control=True
     )
-    urgent_results: list[SampleQualityResult] = [
-        urgent_result,
-        urgent_result_control,
-    ]
+    urgent_results: list[SampleQualityResult] = [urgent_result, urgent_result_control]
 
     # WHEN checking if the urgent samples pass quality control
     urgent_pass_qc: bool = urgent_samples_pass_qc(urgent_results)
@@ -440,17 +405,12 @@ def test_urgent_samples_fail_qc():
 def test_get_non_urgent_results():
     # GIVEN quality results with urgent and non-urgent samples
     urgent_result: SampleQualityResult = create_quality_result(
-        application_tag=MicrosaltAppTags.MWRNXTR003,
-        passes_qc=True,
+        application_tag=MicrosaltAppTags.MWRNXTR003, passes_qc=True
     )
     non_urgent_result: SampleQualityResult = create_quality_result(
-        application_tag=MicrosaltAppTags.MWXNXTR003,
-        passes_qc=True,
+        application_tag=MicrosaltAppTags.MWXNXTR003, passes_qc=True
     )
-    quality_results: list[SampleQualityResult] = [
-        urgent_result,
-        non_urgent_result,
-    ]
+    quality_results: list[SampleQualityResult] = [urgent_result, non_urgent_result]
 
     # WHEN getting the non-urgent results
     non_urgent_results: list[SampleQualityResult] = get_non_urgent_results(quality_results)
@@ -462,18 +422,12 @@ def test_get_non_urgent_results():
 def test_non_urgent_samples_pass_qc():
     # GIVEN quality results with non-urgent samples that pass quality control
     non_urgent_result: SampleQualityResult = create_quality_result(
-        application_tag=MicrosaltAppTags.MWXNXTR003,
-        passes_qc=True,
+        application_tag=MicrosaltAppTags.MWXNXTR003, passes_qc=True
     )
     non_urgent_result_control: SampleQualityResult = create_quality_result(
-        application_tag=MicrosaltAppTags.MWXNXTR003,
-        passes_qc=True,
-        is_control=True,
+        application_tag=MicrosaltAppTags.MWXNXTR003, passes_qc=True, is_control=True
     )
-    non_urgent_results: list[SampleQualityResult] = [
-        non_urgent_result,
-        non_urgent_result_control,
-    ]
+    non_urgent_results: list[SampleQualityResult] = [non_urgent_result, non_urgent_result_control]
 
     # WHEN checking if the non-urgent samples pass quality control
     non_urgent_pass_qc: bool = non_urgent_samples_pass_qc(non_urgent_results)

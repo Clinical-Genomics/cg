@@ -1,9 +1,6 @@
 from datetime import datetime
 
-from cg.store.models import (
-    Application,
-    ApplicationVersion,
-)
+from cg.store.models import Application, ApplicationVersion
 from cg.store.store import Store
 
 
@@ -32,10 +29,7 @@ def test_add_application_version(
     # WHEN adding a new application version
     version: ApplicationVersion = (
         store_with_an_application_with_and_without_attributes.add_application_version(
-            application=applications[0],
-            version=version,
-            valid_from=timestamp,
-            prices=prices,
+            application=applications[0], version=version, valid_from=timestamp, prices=prices
         )
     )
     store_with_an_application_with_and_without_attributes.session.add(version)

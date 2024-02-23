@@ -1,3 +1,1 @@
-from cg.meta.workflow.microsalt.microsalt import (
-    MicrosaltAnalysisAPI,
-)
+from cg.meta.workflow.microsalt.microsalt import MicrosaltAnalysisAPI

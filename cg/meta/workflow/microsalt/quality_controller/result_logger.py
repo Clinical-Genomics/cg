@@ -11,9 +11,7 @@ LOG = logging.getLogger(__name__)
 class ResultLogger:
     @staticmethod
     def log_results(
-        samples: list[SampleQualityResult],
-        case: CaseQualityResult,
-        report: Path,
+        samples: list[SampleQualityResult], case: CaseQualityResult, report: Path
     ) -> None:
         if case.passes_qc:
             LOG.info(f"QC passed, see {report} for details.")
@@ -25,9 +23,7 @@ class ResultLogger:
         LOG.info(message)
 
     @staticmethod
-    def log_sample_result(
-        result: SampleQualityResult,
-    ) -> None:
+    def log_sample_result(result: SampleQualityResult) -> None:
         control_message = "Control sample " if result.is_control else ""
         if result.passes_qc:
             message = f"{control_message}{result.sample_id} passed QC."
@@ -37,16 +33,12 @@ class ResultLogger:
             LOG.warning(message)
 
     @staticmethod
-    def log_case_result(
-        result: CaseQualityResult,
-    ) -> None:
+    def log_case_result(result: CaseQualityResult) -> None:
         if not result.passes_qc:
             LOG.warning("Case failed QC.")
 
 
-def get_case_fail_message(
-    case: CaseQualityResult,
-) -> str:
+def get_case_fail_message(case: CaseQualityResult) -> str:
     fail_reasons = []
 
     if not case.control_passes_qc:
@@ -59,9 +51,7 @@ def get_case_fail_message(
     return fail_message + "".join(fail_reasons)
 
 
-def sample_result_message(
-    samples: list[SampleQualityResult],
-) -> str:
+def sample_result_message(samples: list[SampleQualityResult]) -> str:
     failed_samples: list[SampleQualityResult] = get_failed_results(samples)
     passed_samples: list[SampleQualityResult] = get_passed_results(samples)
 
@@ -72,13 +62,9 @@ def sample_result_message(
     return f"Sample results: {failed_count} failed, {passed_count} passed, {total_count} total."
 
 
-def get_failed_results(
-    samples: list[SampleQualityResult],
-) -> list[str]:
+def get_failed_results(samples: list[SampleQualityResult]) -> list[str]:
     return [result for result in samples if not result.passes_qc]
 
 
-def get_passed_results(
-    samples: list[SampleQualityResult],
-) -> list[str]:
+def get_passed_results(samples: list[SampleQualityResult]) -> list[str]:
     return [result for result in samples if result.passes_qc]

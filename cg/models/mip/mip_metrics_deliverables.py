@@ -81,10 +81,7 @@ class MIPMetricsDeliverables(MetricsDeliverables):
     @validator("duplicate_reads", always=True)
     def set_duplicate_reads(cls, _, values: dict) -> list[DuplicateReads]:
         """Set duplicate_reads"""
-        return add_metric(
-            name="fraction_duplicates",
-            values=values,
-        )
+        return add_metric(name="fraction_duplicates", values=values)
 
     @validator("mapped_reads", always=True)
     def set_mapped_reads(cls, _, values: dict) -> list[MIPMappedReads]:
@@ -106,11 +103,7 @@ class MIPMetricsDeliverables(MetricsDeliverables):
         for sample_id in sample_ids:
             fraction_mapped_read = reads_mapped[sample_id] / total_sequences[sample_id]
             mapped_reads.append(
-                MIPMappedReads(
-                    sample_id=sample_id,
-                    step=metric_step,
-                    value=fraction_mapped_read,
-                )
+                MIPMappedReads(sample_id=sample_id, step=metric_step, value=fraction_mapped_read)
             )
         return mapped_reads
 
@@ -122,10 +115,7 @@ class MIPMetricsDeliverables(MetricsDeliverables):
     @validator("median_target_coverage", always=True)
     def set_median_target_coverage(cls, _, values: dict) -> list[MedianTargetCoverage]:
         """Set median target coverage"""
-        return add_metric(
-            name="MEDIAN_TARGET_COVERAGE",
-            values=values,
-        )
+        return add_metric(name="MEDIAN_TARGET_COVERAGE", values=values)
 
     @validator("predicted_sex", always=True)
     def set_predicted_sex(cls, _, values: dict) -> list[SexCheck]:
@@ -135,15 +125,11 @@ class MIPMetricsDeliverables(MetricsDeliverables):
     @validator("sample_id_metrics", always=True)
     def set_sample_id_metrics(cls, _, values: dict) -> list[MIPParsedMetrics]:
         """Set parsed sample_id metrics gathered from all metrics"""
-        return add_sample_id_metrics(
-            parsed_metric=MIPParsedMetrics,
-            values=values,
-        )
+        return add_sample_id_metrics(parsed_metric=MIPParsedMetrics, values=values)
 
 
 def get_sample_id_metric(
-    sample_id_metrics: list[MIPParsedMetrics],
-    sample_id: str,
+    sample_id_metrics: list[MIPParsedMetrics], sample_id: str
 ) -> MIPParsedMetrics:
     """Get parsed metrics for an sample_id"""
     for sample_id_metric in sample_id_metrics:

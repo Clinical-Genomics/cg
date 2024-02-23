@@ -7,12 +7,7 @@ Create Date: 2023-05-04 09:29:09.945895
 """
 
 import sqlalchemy as sa
-from sqlalchemy import (
-    Column,
-    ForeignKey,
-    orm,
-    types,
-)
+from sqlalchemy import Column, ForeignKey, orm, types
 from sqlalchemy.orm import declarative_base
 
 from alembic import op
@@ -30,57 +25,17 @@ def upgrade():
     op.create_table(
         "sequencing_statistics",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column(
-            "flow_cell_name",
-            sa.String(128),
-            nullable=False,
-        ),
-        sa.Column(
-            "sample_internal_id",
-            sa.String(128),
-            nullable=False,
-        ),
+        sa.Column("flow_cell_name", sa.String(128), nullable=False),
+        sa.Column("sample_internal_id", sa.String(128), nullable=False),
         sa.Column("lane", sa.Integer(), nullable=False),
-        sa.Column(
-            "yield_in_megabases",
-            sa.Integer(),
-            nullable=False,
-        ),
-        sa.Column(
-            "read_counts",
-            sa.Integer(),
-            nullable=False,
-        ),
-        sa.Column(
-            "passed_filter_percent",
-            sa.Numeric(10, 5),
-            nullable=False,
-        ),
-        sa.Column(
-            "raw_clusters_per_lane_percent",
-            sa.Numeric(10, 5),
-            nullable=False,
-        ),
-        sa.Column(
-            "bases_with_q30_percent",
-            sa.Numeric(10, 5),
-            nullable=False,
-        ),
-        sa.Column(
-            "perfect_index_reads_percent",
-            sa.Numeric(10, 5),
-            nullable=False,
-        ),
-        sa.Column(
-            "lanes_mean_quality_score",
-            sa.Numeric(10, 5),
-            nullable=False,
-        ),
-        sa.Column(
-            "started_at",
-            sa.DateTime(),
-            nullable=False,
-        ),
+        sa.Column("yield_in_megabases", sa.Integer(), nullable=False),
+        sa.Column("read_counts", sa.Integer(), nullable=False),
+        sa.Column("passed_filter_percent", sa.Numeric(10, 5), nullable=False),
+        sa.Column("raw_clusters_per_lane_percent", sa.Numeric(10, 5), nullable=False),
+        sa.Column("bases_with_q30_percent", sa.Numeric(10, 5), nullable=False),
+        sa.Column("perfect_index_reads_percent", sa.Numeric(10, 5), nullable=False),
+        sa.Column("lanes_mean_quality_score", sa.Numeric(10, 5), nullable=False),
+        sa.Column("started_at", sa.DateTime(), nullable=False),
     )
 
 

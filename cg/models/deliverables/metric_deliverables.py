@@ -1,11 +1,7 @@
 import operator
 from typing import Any, Callable
 
-from pydantic.v1 import (
-    BaseModel,
-    Field,
-    validator,
-)
+from pydantic.v1 import BaseModel, Field, validator
 
 from cg.constants import PRECISION
 from cg.exc import CgError, MetricsQCError
@@ -27,9 +23,7 @@ def add_metric(name: str, values: dict) -> list[Any]:
         if name == metric.name and metric.name in metrics_validator:
             found_metrics.append(
                 metrics_validator[metric.name](
-                    sample_id=metric.id,
-                    step=metric.step,
-                    value=metric.value,
+                    sample_id=metric.id, step=metric.step, value=metric.value
                 )
             )
     return found_metrics
@@ -44,13 +38,9 @@ def add_sample_id_metrics(parsed_metric: Any, values: dict) -> list[Any]:
         metric_per_sample_id_map.update({metric_name: values.get(metric_name)})
     for sample_id in sample_ids:
         metric_per_sample_id: dict = {"sample_id": sample_id}
-        for (
-            metric_name,
-            metric_objs,
-        ) in metric_per_sample_id_map.items():
+        for metric_name, metric_objs in metric_per_sample_id_map.items():
             sample_metric: Any = _get_metric_per_sample_id(
-                sample_id=sample_id,
-                metric_objs=metric_objs,
+                sample_id=sample_id, metric_objs=metric_objs
             )
             if sample_metric.value:
                 metric_per_sample_id[metric_name]: Any = sample_metric.value
@@ -155,19 +145,10 @@ class MetricsDeliverablesCondition(BaseModel):
         failed_metrics = []
         for metric in metrics:
             if metric.condition is not None:
-                qc_function: Callable = getattr(
-                    operator,
-                    metric.condition.norm,
-                )
-                if not qc_function(
-                    metric.value,
-                    metric.condition.threshold,
-                ):
+                qc_function: Callable = getattr(operator, metric.condition.norm)
+                if not qc_function(metric.value, metric.condition.threshold):
                     metric_value = (
-                        round(
-                            metric.value,
-                            PRECISION,
-                        )
+                        round(metric.value, PRECISION)
                         if isinstance(metric.value, float)
                         else metric.value
                     )

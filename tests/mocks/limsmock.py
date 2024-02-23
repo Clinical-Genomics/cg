@@ -38,11 +38,7 @@ class LimsSample(BaseModel):
 class MockLimsAPI(LimsAPI):
     """Mock LIMS API to get target bed from LIMS."""
 
-    def __init__(
-        self,
-        config: dict = None,
-        samples: list[dict] = None,
-    ):
+    def __init__(self, config: dict = None, samples: list[dict] = None):
         if samples is None:
             samples = []
         self.config = config
@@ -58,25 +54,16 @@ class MockLimsAPI(LimsAPI):
         self._sequencing_method = "CG002 - Cluster Generation (HiSeq X)"
         self._delivery_method = "CG002 - Delivery"
 
-    def set_prep_method(
-        self,
-        method: str = "1337:00 Test prep method",
-    ):
+    def set_prep_method(self, method: str = "1337:00 Test prep method"):
         """Mock function"""
         self._prep_method = method
 
-    def set_sequencing_method(
-        self,
-        method: str = "1338:00 Test sequencing method",
-    ):
+    def set_sequencing_method(self, method: str = "1338:00 Test sequencing method"):
         """Mock function"""
         self._prep_method = method
 
     def sample(self, sample_id: str) -> dict | None:
-        return next(
-            (sample for sample in self._samples if sample["id"] == sample_id),
-            None,
-        )
+        return next((sample for sample in self._samples if sample["id"] == sample_id), None)
 
     def add_sample(self, internal_id: str):
         self.sample_vars[internal_id] = {}

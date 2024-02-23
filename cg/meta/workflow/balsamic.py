@@ -7,44 +7,26 @@ from housekeeper.store.models import File, Version
 from pydantic.v1 import EmailStr, ValidationError
 
 from cg.constants import Workflow
-from cg.constants.constants import (
-    FileFormat,
-    SampleType,
-)
-from cg.constants.housekeeper_tags import (
-    BalsamicAnalysisTag,
-)
-from cg.constants.observations import (
-    ObservationsFileWildcards,
-)
+from cg.constants.constants import FileFormat, SampleType
+from cg.constants.housekeeper_tags import BalsamicAnalysisTag
+from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Sex
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fastq import (
-    BalsamicFastqHandler,
-)
-from cg.models.balsamic.analysis import (
-    BalsamicAnalysis,
-)
+from cg.meta.workflow.fastq import BalsamicFastqHandler
+from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.metrics import (
     BalsamicMetricsBase,
     BalsamicTargetedQCMetrics,
     BalsamicWGSQCMetrics,
 )
 from cg.models.cg_config import CGConfig
-from cg.store.models import (
-    Case,
-    CaseSample,
-    Sample,
-)
+from cg.store.models import Case, CaseSample, Sample
 from cg.utils import Process
-from cg.utils.utils import (
-    build_command_from_dict,
-    get_string_from_list_by_pattern,
-)
+from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
 
 LOG = logging.getLogger(__name__)
 
@@ -53,11 +35,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     """Handles communication between BALSAMIC processes
     and the rest of CG infrastructure"""
 
-    __BALSAMIC_APPLICATIONS = {
-        "wgs",
-        "wes",
-        "tgs",
-    }
+    __BALSAMIC_APPLICATIONS = {"wgs", "wes", "tgs"}
     __BALSAMIC_BED_APPLICATIONS = {"wes", "tgs"}
 
     def __init__(
@@ -100,9 +78,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def process(self):
         if not self._process:
             self._process = Process(
-                binary=self.binary_path,
-                conda_binary=self.conda_binary,
-                environment=self.conda_env,
+                binary=self.binary_path, conda_binary=self.conda_binary, environment=self.conda_env
             )
         return self._process
 
@@ -118,8 +94,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_cases_to_analyze(self) -> list[Case]:
         cases_query: list[Case] = self.status_db.cases_to_analyze(
-            workflow=self.workflow,
-            threshold=self.use_read_count_threshold,
+            workflow=self.workflow, threshold=self.use_read_count_threshold
         )
         cases_to_analyze = []
         for case_obj in cases_query:
@@ -150,19 +125,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         (Optional) Checks if config file exists.
         """
-        return Path(
-            self.root_dir,
-            case_id,
-            case_id + ".json",
-        )
+        return Path(self.root_dir, case_id, case_id + ".json")
 
     def get_job_ids_path(self, case_id: str) -> Path:
-        return Path(
-            self.root_dir,
-            case_id,
-            "analysis",
-            "slurm_jobids.yaml",
-        )
+        return Path(self.root_dir, case_id, "analysis", "slurm_jobids.yaml")
 
     def get_bundle_deliverables_type(self, case_id: str) -> str:
         """Return the analysis type for a case
@@ -183,18 +149,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if application_type != "wgs":
             application_type = "panel"
         analysis_type = "_".join([sample_type, application_type])
-        LOG.info(
-            "Found analysis type %s",
-            analysis_type,
-        )
+        LOG.info("Found analysis type %s", analysis_type)
         return analysis_type
 
     def get_sample_fastq_destination_dir(self, case: Case, sample: Sample = None) -> Path:
         """Return the path to the FASTQ destination directory."""
-        return Path(
-            self.get_case_path(case.internal_id),
-            FileFormat.FASTQ,
-        )
+        return Path(self.get_case_path(case.internal_id), FileFormat.FASTQ)
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         """Link fastq files from Housekeeper to Balsamic case working directory."""
@@ -203,9 +163,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             self.link_fastq_files_for_sample(case=case, sample=link.sample)
 
     @staticmethod
-    def get_sample_type(
-        sample_obj: Sample,
-    ) -> SampleType:
+    def get_sample_type(sample_obj: Sample) -> SampleType:
         """Return the tissue type of the sample."""
         if sample_obj.is_tumour:
             return SampleType.TUMOR
@@ -305,9 +263,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return sorted_pon_files[0].as_posix() if sorted_pon_files else None
 
     @staticmethod
-    def get_verified_sex(
-        sample_data: dict,
-    ) -> Sex:
+    def get_verified_sex(sample_data: dict) -> Sex:
         """Takes a dict with samples and attributes, and returns a verified case sex provided by the customer."""
         sex: Sex = next(iter(sample_data.values()))["sex"]
         if all(val["sex"] == sex for val in sample_data.values()) and sex in set(
@@ -325,12 +281,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_verified_samples(self, case_id: str) -> dict[str, str]:
         """Return a verified tumor and normal sample dictionary."""
         tumor_samples: list[Sample] = self.status_db.get_samples_by_type(
-            case_id=case_id,
-            sample_type=SampleType.TUMOR,
+            case_id=case_id, sample_type=SampleType.TUMOR
         )
         normal_samples: list[Sample] = self.status_db.get_samples_by_type(
-            case_id=case_id,
-            sample_type=SampleType.NORMAL,
+            case_id=case_id, sample_type=SampleType.NORMAL
         )
         if (
             not tumor_samples
@@ -348,23 +302,15 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 f"Only a normal sample was found for case {case_id}. "
                 f"Balsamic analysis will treat it as a tumor sample."
             )
-            tumor_sample_id, normal_sample_id = (
-                normal_sample_id,
-                None,
-            )
-        return {
-            "tumor_sample_name": tumor_sample_id,
-            "normal_sample_name": normal_sample_id,
-        }
+            tumor_sample_id, normal_sample_id = normal_sample_id, None
+        return {"tumor_sample_name": tumor_sample_id, "normal_sample_name": normal_sample_id}
 
     def get_latest_raw_file_data(self, case_id: str, tags: list) -> dict | list:
         """Retrieves the data of the latest file associated to a specific case ID and a list of tags."""
 
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
         raw_file: File = self.housekeeper_api.get_latest_file(
-            bundle=case_id,
-            version=version.id,
-            tags=tags,
+            bundle=case_id, version=version.id, tags=tags
         )
 
         if not raw_file:
@@ -372,27 +318,19 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 f"No file associated to {tags} was found in housekeeper for {case_id}"
             )
         return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=Path(raw_file.full_path),
+            file_format=FileFormat.YAML, file_path=Path(raw_file.full_path)
         )
 
     def get_latest_metadata(self, case_id: str) -> BalsamicAnalysis:
         """Get the latest metadata of a specific BALSAMIC case"""
 
-        config_raw_data = self.get_latest_raw_file_data(
-            case_id,
-            BalsamicAnalysisTag.CONFIG,
-        )
-        metrics_raw_data = self.get_latest_raw_file_data(
-            case_id,
-            BalsamicAnalysisTag.QC_METRICS,
-        )
+        config_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.CONFIG)
+        metrics_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.QC_METRICS)
 
         if config_raw_data and metrics_raw_data:
             try:
                 balsamic_analysis = self.parse_analysis(
-                    config_raw=config_raw_data,
-                    qc_metrics_raw=metrics_raw_data,
+                    config_raw=config_raw_data, qc_metrics_raw=metrics_raw_data
                 )
                 return balsamic_analysis
             except ValidationError as error:
@@ -406,12 +344,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve the latest metadata for {case_id}")
             raise CgError
 
-    def parse_analysis(
-        self,
-        config_raw: dict,
-        qc_metrics_raw: dict,
-        **kwargs,
-    ) -> BalsamicAnalysis:
+    def parse_analysis(self, config_raw: dict, qc_metrics_raw: dict, **kwargs) -> BalsamicAnalysis:
         """Returns a formatted BalsamicAnalysis object"""
 
         sequencing_type = config_raw["analysis"]["sequencing_type"]
@@ -468,8 +401,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                         file_path
                         if file_path
                         else self.get_latest_file_by_pattern(
-                            directory=self.loqusdb_path,
-                            pattern=wildcard,
+                            directory=self.loqusdb_path, pattern=wildcard
                         )
                     )
                 }
@@ -492,8 +424,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_swegen_verified_path(self, variants: Variants) -> str | None:
         """Return verified SweGen path."""
         swegen_file: str = self.get_latest_file_by_pattern(
-            directory=self.swegen_path,
-            pattern=variants,
+            directory=self.swegen_path, pattern=variants
         )
         return swegen_file
 
@@ -515,15 +446,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if len(sample_data) == 0:
             raise BalsamicStartError(f"{case_id} has no samples tagged for BALSAMIC analysis!")
 
-        verified_panel_bed = self.get_verified_bed(
-            panel_bed=panel_bed,
-            sample_data=sample_data,
-        )
+        verified_panel_bed = self.get_verified_bed(panel_bed=panel_bed, sample_data=sample_data)
         verified_pon = (
-            self.get_verified_pon(
-                pon_cnn=pon_cnn,
-                panel_bed=verified_panel_bed,
-            )
+            self.get_verified_pon(pon_cnn=pon_cnn, panel_bed=verified_panel_bed)
             if verified_panel_bed
             else None
         )
@@ -556,10 +481,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         LOG.info(f"Case {case_id} has following BALSAMIC samples:")
         LOG.info(
             "{:<20} {:<20} {:<20} {:<20}".format(
-                "SAMPLE ID",
-                "TISSUE TYPE",
-                "APPLICATION",
-                "BED VERSION",
+                "SAMPLE ID", "TISSUE TYPE", "APPLICATION", "BED VERSION"
             )
         )
         for key in sample_data:
@@ -582,18 +504,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "sex": link_object.sample.sex,
                 "tissue_type": self.get_sample_type(link_object.sample).value,
                 "application_type": self.get_application_type(link_object.sample),
-                "target_bed": self.resolve_target_bed(
-                    panel_bed=panel_bed,
-                    link_object=link_object,
-                ),
+                "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
             }
             for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
         }
 
-        self.print_sample_params(
-            case_id=case_id,
-            sample_data=sample_data,
-        )
+        self.print_sample_params(case_id=case_id, sample_data=sample_data)
         return sample_data
 
     def get_case_application_type(self, case_id: str) -> str:
@@ -605,11 +521,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if application_types:
             return application_types.pop().lower()
 
-    def resolve_target_bed(
-        self,
-        panel_bed: str | None,
-        link_object: CaseSample,
-    ) -> str | None:
+    def resolve_target_bed(self, panel_bed: str | None, link_object: CaseSample) -> str | None:
         if panel_bed:
             return panel_bed
         if self.get_application_type(link_object.sample) not in self.__BALSAMIC_BED_APPLICATIONS:
@@ -619,8 +531,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_workflow_version(self, case_id: str) -> str:
         LOG.debug("Fetch workflow version")
         config_data: dict = ReadFile.get_content_from_file(
-            file_format=FileFormat.JSON,
-            file_path=self.get_case_config_path(case_id=case_id),
+            file_format=FileFormat.JSON, file_path=self.get_case_config_path(case_id=case_id)
         )
         return config_data["analysis"]["BALSAMIC_version"]
 

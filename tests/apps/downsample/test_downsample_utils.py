@@ -1,28 +1,18 @@
 from pathlib import Path
 
-from cg.apps.downsample.downsample import (
-    DownsampleAPI,
-)
-from cg.apps.downsample.utils import (
-    store_downsampled_sample_bundle,
-)
-from cg.models.downsample.downsample_data import (
-    DownsampleData,
-)
+from cg.apps.downsample.downsample import DownsampleAPI
+from cg.apps.downsample.utils import store_downsampled_sample_bundle
+from cg.models.downsample.downsample_data import DownsampleData
 
 
 def test_add_fastq_files_to_housekeeper(
-    downsample_api: DownsampleAPI,
-    downsample_data: DownsampleData,
-    tmp_path,
-    downsample_dir: Path,
+    downsample_api: DownsampleAPI, downsample_data: DownsampleData, tmp_path, downsample_dir: Path
 ):
     """Test to add downsampled fastq files to housekeeper."""
 
     # GIVEN a downsample api and downsampled fastq files
     downsampled_sample_dir = Path(
-        downsample_dir,
-        f"{downsample_data.downsampled_sample.internal_id}",
+        downsample_dir, f"{downsample_data.downsampled_sample.internal_id}"
     )
     downsampled_sample_dir.mkdir()
     Path(
@@ -43,6 +33,5 @@ def test_add_fastq_files_to_housekeeper(
     )
 
     assert downsample_api.housekeeper_api.get_files(
-        downsample_data.downsampled_sample.internal_id,
-        tags=["fastq"],
+        downsample_data.downsampled_sample.internal_id, tags=["fastq"]
     )

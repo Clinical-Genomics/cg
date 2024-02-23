@@ -1,7 +1,4 @@
-from cg.server.dto.orders.orders_response import (
-    Order,
-    OrdersResponse,
-)
+from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.store.models import Order as DatabaseOrder
 
 
@@ -15,14 +12,10 @@ def parse_order(order: DatabaseOrder) -> Order:
     )
 
 
-def create_orders_response(
-    database_orders: list[DatabaseOrder],
-) -> OrdersResponse:
+def create_orders_response(database_orders: list[DatabaseOrder]) -> OrdersResponse:
     parsed_database_orders: list[Order] = [parse_order(order) for order in database_orders]
     return OrdersResponse(orders=parsed_database_orders)
 
 
-def create_order_response(
-    order: DatabaseOrder,
-) -> Order:
+def create_order_response(order: DatabaseOrder) -> Order:
     return parse_order(order)

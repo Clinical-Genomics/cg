@@ -1,23 +1,12 @@
 from functools import partial
 from typing import Any
 
-from genologics.entities import (
-    Artifact,
-    Container,
-    Containertype,
-    Project,
-)
-from lxml.objectify import (
-    ElementMaker,
-    ObjectifiedElement,
-)
+from genologics.entities import Artifact, Container, Containertype, Project
+from lxml.objectify import ElementMaker, ObjectifiedElement
 
 SMP_MAKER = ElementMaker(
     namespace="http://genologics.com/ri/sample",
-    nsmap={
-        "smp": "http://genologics.com/ri/sample",
-        "udf": "http://genologics.com/ri/userdefined",
-    },
+    nsmap={"smp": "http://genologics.com/ri/sample", "udf": "http://genologics.com/ri/userdefined"},
 )
 SMP_DETAILS = partial(SMP_MAKER, "details")
 SMP_SAMPLECREATION = partial(SMP_MAKER, "samplecreation")
@@ -29,10 +18,7 @@ CON_MAKER = ElementMaker(
 CON_DETAILS = partial(CON_MAKER, "details")
 CON_CONTAINER = partial(CON_MAKER, "container")
 
-UDF_MAKER = ElementMaker(
-    namespace="http://genologics.com/ri/userdefined",
-    annotate=False,
-)
+UDF_MAKER = ElementMaker(namespace="http://genologics.com/ri/userdefined", annotate=False)
 UDF_FIELD = partial(UDF_MAKER, "field")
 
 ART_MAKER = ElementMaker(
@@ -50,9 +36,7 @@ def build_container(name: str, con_type: Containertype) -> ObjectifiedElement:
     return CON_CONTAINER(XML.name(name), XML.type(uri=con_type.uri))
 
 
-def build_container_batch(
-    containers: list[ObjectifiedElement],
-) -> ObjectifiedElement:
+def build_container_batch(containers: list[ObjectifiedElement]) -> ObjectifiedElement:
     """Build batch with containers."""
     root = CON_DETAILS()
     for container in containers:
@@ -61,29 +45,20 @@ def build_container_batch(
 
 
 def build_sample(
-    name: str,
-    project: Project,
-    container: Container,
-    location: str,
-    udfs: dict[str, Any],
+    name: str, project: Project, container: Container, location: str, udfs: dict[str, Any]
 ) -> ObjectifiedElement:
     """Build sample in XML."""
     xml_sample = SMP_SAMPLECREATION(
         XML.name(name),
         XML.project(uri=project.uri),
-        XML.location(
-            XML.container(uri=container.uri),
-            XML.value(location),
-        ),
+        XML.location(XML.container(uri=container.uri), XML.value(location)),
     )
     for udf_name, udf_value in udfs.items():
         xml_sample.append(UDF_FIELD(udf_value, name=udf_name))
     return xml_sample
 
 
-def build_sample_batch(
-    samples: list[ObjectifiedElement],
-) -> ObjectifiedElement:
+def build_sample_batch(samples: list[ObjectifiedElement]) -> ObjectifiedElement:
     """Build batch with samples."""
     root = SMP_DETAILS()
     for sample in samples:
@@ -94,15 +69,11 @@ def build_sample_batch(
 def build_artifact(artifact: Artifact, reagent_label: str):
     """Build artifact in XML."""
     return ART_ARTIFACT(
-        XML("reagent-label", name=reagent_label),
-        XML.name(artifact.name),
-        uri=artifact.uri,
+        XML("reagent-label", name=reagent_label), XML.name(artifact.name), uri=artifact.uri
     )
 
 
-def build_artifact_batch(
-    artifacts: list[ObjectifiedElement],
-) -> ObjectifiedElement:
+def build_artifact_batch(artifacts: list[ObjectifiedElement]) -> ObjectifiedElement:
     """Build bathch with artifacts."""
     root = ART_DETAILS()
     for artifact in artifacts:

@@ -5,12 +5,8 @@ from typing_extensions import Literal
 
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.demultiplex.demultiplex_api import (
-    DemultiplexingAPI,
-)
-from cg.apps.demultiplex.sample_sheet.api import (
-    SampleSheetAPI,
-)
+from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -22,23 +18,13 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.observations import (
-    LoqusdbInstance,
-)
+from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
-from cg.services.slurm_service.slurm_cli_service import (
-    SlurmCLIService,
-)
-from cg.services.slurm_service.slurm_service import (
-    SlurmService,
-)
-from cg.services.slurm_upload_service.slurm_upload_config import (
-    SlurmUploadConfig,
-)
-from cg.services.slurm_upload_service.slurm_upload_service import (
-    SlurmUploadService,
-)
+from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
+from cg.services.slurm_service.slurm_service import SlurmService
+from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
+from cg.services.slurm_upload_service.slurm_upload_service import SlurmUploadService
 from cg.store.database import initialize_database
 from cg.store.store import Store
 
@@ -393,15 +379,12 @@ class CGConfig(BaseModel):
         return api
 
     @property
-    def demultiplex_api(
-        self,
-    ) -> DemultiplexingAPI:
+    def demultiplex_api(self) -> DemultiplexingAPI:
         demultiplex_api = self.__dict__.get("demultiplex_api_")
         if demultiplex_api is None:
             LOG.debug("Instantiating demultiplexing api")
             demultiplex_api = DemultiplexingAPI(
-                config=self.dict(),
-                housekeeper_api=self.housekeeper_api,
+                config=self.dict(), housekeeper_api=self.housekeeper_api
             )
             self.demultiplex_api_ = demultiplex_api
         return demultiplex_api
@@ -467,8 +450,7 @@ class CGConfig(BaseModel):
         if api is None:
             LOG.debug("Instantiating loqusdb api")
             api: LoqusdbAPI = LoqusdbAPI(
-                binary_path=self.loqusdb.binary_path,
-                config_path=self.loqusdb.config_path,
+                binary_path=self.loqusdb.binary_path, config_path=self.loqusdb.config_path
             )
             self.loqusdb_api_ = api
         return api
@@ -518,9 +500,7 @@ class CGConfig(BaseModel):
         return SlurmCLIService()
 
     @property
-    def slurm_upload_service(
-        self,
-    ) -> SlurmUploadService:
+    def slurm_upload_service(self) -> SlurmUploadService:
         slurm_upload_config = SlurmUploadConfig(
             email=self.data_delivery.mail_user,
             account=self.data_delivery.account,
@@ -537,10 +517,7 @@ class CGConfig(BaseModel):
         api = self.__dict__.get("scout_api_")
         if api is None:
             LOG.debug("Instantiating scout api")
-            api = ScoutAPI(
-                config=self.dict(),
-                slurm_upload_service=self.slurm_upload_service,
-            )
+            api = ScoutAPI(config=self.dict(), slurm_upload_service=self.slurm_upload_service)
             self.scout_api_ = api
         return api
 

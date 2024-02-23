@@ -4,16 +4,9 @@ import pytest
 from housekeeper.store.models import File
 from pydantic import BaseModel
 
-from cg.constants.demultiplexing import (
-    BclConverter,
-    DemultiplexingDirsAndFiles,
-)
-from cg.constants.housekeeper_tags import (
-    SequencingFileTag,
-)
-from cg.meta.demultiplex.demux_post_processing import (
-    DemuxPostProcessingAPI,
-)
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
@@ -71,12 +64,7 @@ class DemultiplexingScenario(BaseModel):
             samples_ids="bcl_convert_demultiplexed_flow_cell_sample_internal_ids",
         ),
     ],
-    ids=[
-        "BCLConvert tree",
-        "BCL2FASTQ",
-        "BCLConvert on sequencer",
-        "BCLConvert flat",
-    ],
+    ids=["BCLConvert tree", "BCL2FASTQ", "BCLConvert on sequencer", "BCLConvert flat"],
 )
 def test_post_processing_of_flow_cell(
     scenario: DemultiplexingScenario,
@@ -116,8 +104,7 @@ def test_post_processing_of_flow_cell(
 
     # THEN the sample sheet is in housekeeper
     assert demux_post_processing_api.hk_api.get_files(
-        bundle=flow_cell_name,
-        tags=[SequencingFileTag.SAMPLE_SHEET],
+        bundle=flow_cell_name, tags=[SequencingFileTag.SAMPLE_SHEET]
     ).all()
     # WHEN post-processing the demultiplexed flow cell
     demux_post_processing_api.finish_flow_cell(
@@ -155,10 +142,7 @@ def test_post_processing_of_flow_cell(
     # THEN sample fastq files were added to Housekeeper tagged with FASTQ and the flow cell name
     for sample_internal_id in sample_internal_ids:
         assert demux_post_processing_api.hk_api.get_files(
-            tags=[
-                SequencingFileTag.FASTQ,
-                flow_cell_name,
-            ],
+            tags=[SequencingFileTag.FASTQ, flow_cell_name],
             bundle=sample_internal_id,
         ).all()
 
@@ -201,8 +185,7 @@ def test_post_processing_tracks_undetermined_fastqs_for_bcl2fastq(
 
     # WHEN post processing the flow cell
     demux_post_processing_api.finish_flow_cell(
-        flow_cell_directory_name=bcl2fastq_flow_cell_dir_name,
-        bcl_converter=BclConverter.BCL2FASTQ,
+        flow_cell_directory_name=bcl2fastq_flow_cell_dir_name, bcl_converter=BclConverter.BCL2FASTQ
     )
 
     # THEN the undetermined fastqs were stored in housekeeper
@@ -262,8 +245,7 @@ def test_sample_read_count_update_is_idempotent(
 
     # WHEN post processing the flow cell twice
     demux_post_processing_api.finish_flow_cell(
-        flow_cell_directory_name=bcl2fastq_flow_cell_dir_name,
-        bcl_converter=BclConverter.BCL2FASTQ,
+        flow_cell_directory_name=bcl2fastq_flow_cell_dir_name, bcl_converter=BclConverter.BCL2FASTQ
     )
     first_sample_read_count: int = demux_post_processing_api.status_db.get_sample_by_internal_id(
         bcl2fastq_sample_id_with_non_pooled_undetermined_reads

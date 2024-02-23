@@ -2,9 +2,7 @@
 
 from click.testing import CliRunner
 
-from cg.cli.workflow.base import (
-    workflow as workflow_cmd,
-)
+from cg.cli.workflow.base import workflow as workflow_cmd
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 

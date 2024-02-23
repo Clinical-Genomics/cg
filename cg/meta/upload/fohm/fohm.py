@@ -23,12 +23,7 @@ LOG = logging.getLogger(__name__)
 
 
 class FOHMUploadAPI:
-    def __init__(
-        self,
-        config: CGConfig,
-        dry_run: bool = False,
-        datestr: str | None = None,
-    ):
+    def __init__(self, config: CGConfig, dry_run: bool = False, datestr: str | None = None):
         self.config: CGConfig = config
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.lims_api: LimsAPI = config.lims_api
@@ -55,9 +50,7 @@ class FOHMUploadAPI:
     def daily_bundle_path(self) -> Path:
         if not self._daily_bundle_path:
             self._daily_bundle_path: Path = Path(
-                Path(self.config.mutant.root).parent,
-                "fohm",
-                self.current_datestr,
+                Path(self.config.mutant.root).parent, "fohm", self.current_datestr
             )
         return self._daily_bundle_path
 
@@ -100,15 +93,10 @@ class FOHMUploadAPI:
         return self._pangolin_dataframe
 
     @property
-    def aggregation_dataframe(
-        self,
-    ) -> pd.DataFrame:
+    def aggregation_dataframe(self) -> pd.DataFrame:
         """Dataframe with all 'komplettering' rows from multiple cases, and additional rows to be
         used for aggregation."""
-        if not isinstance(
-            self._aggregation_dataframe,
-            pd.DataFrame,
-        ):
+        if not isinstance(self._aggregation_dataframe, pd.DataFrame):
             self._aggregation_dataframe = self.reports_dataframe.copy()
         return self._aggregation_dataframe
 
@@ -118,8 +106,7 @@ class FOHMUploadAPI:
             for case_id in self._cases_to_aggregate:
                 self._daily_reports_list.append(
                     self.housekeeper_api.get_file_from_latest_version(
-                        bundle_name=case_id,
-                        tags=["komplettering"],
+                        bundle_name=case_id, tags=["komplettering"]
                     ).full_path
                 )
         return self._daily_reports_list
@@ -130,8 +117,7 @@ class FOHMUploadAPI:
             for case_id in self._cases_to_aggregate:
                 self._daily_pangolin_list.append(
                     self.housekeeper_api.get_file_from_latest_version(
-                        bundle_name=case_id,
-                        tags=["pangolin-typing-fohm"],
+                        bundle_name=case_id, tags=["pangolin-typing-fohm"]
                     ).full_path
                 )
         return self._daily_pangolin_list
@@ -153,9 +139,7 @@ class FOHMUploadAPI:
         LOG.info(f"Preparing aggregated delivery for {cases}")
         self._cases_to_aggregate = cases
 
-    def create_daily_delivery_folders(
-        self,
-    ) -> None:
+    def create_daily_delivery_folders(self) -> None:
         LOG.info(f"Creating directory: {self.daily_rawdata_path}")
         LOG.info(f"Creating directory: {self.daily_report_path}")
         if self._dry_run:
@@ -164,20 +148,12 @@ class FOHMUploadAPI:
         self.daily_report_path.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
-    def create_joined_dataframe(
-        file_list: list[Path],
-    ) -> pd.DataFrame:
+    def create_joined_dataframe(file_list: list[Path]) -> pd.DataFrame:
         """Creates dataframe with all csv files used in daily delivery"""
         dataframe_list = [pd.read_csv(filename, index_col=None, header=0) for filename in file_list]
-        return pd.concat(
-            dataframe_list,
-            axis=0,
-            ignore_index=True,
-        )
+        return pd.concat(dataframe_list, axis=0, ignore_index=True)
 
-    def append_metadata_to_aggregation_df(
-        self,
-    ) -> None:
+    def append_metadata_to_aggregation_df(self) -> None:
         """
         Add fields with internal_id and region_lab to dataframe
         """
@@ -196,20 +172,14 @@ class FOHMUploadAPI:
             sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
             bundle_name = sample.links[0].case.internal_id
             version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
-            files = self.housekeeper_api.files(
-                version=version_obj.id,
-                tags=[sample_id],
-            ).all()
+            files = self.housekeeper_api.files(version=version_obj.id, tags=[sample_id]).all()
             for file in files:
                 if self._dry_run:
                     LOG.info(
                         f"Would have copied {file.full_path} to {Path(self.daily_rawdata_path)}"
                     )
                     continue
-                shutil.copy(
-                    file.full_path,
-                    Path(self.daily_rawdata_path),
-                )
+                shutil.copy(file.full_path, Path(self.daily_rawdata_path))
 
     def create_pangolin_reports(self) -> None:
         LOG.info("Creating pangolin reports")
@@ -234,9 +204,7 @@ class FOHMUploadAPI:
             )
             pangolin_path.chmod(0o0777)
 
-    def create_komplettering_reports(
-        self,
-    ) -> None:
+    def create_komplettering_reports(self) -> None:
         LOG.info("Creating komplettering reports")
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
         LOG.info(f"Regions in batch: {unique_regionlabs}")
@@ -286,17 +254,9 @@ class FOHMUploadAPI:
 
     def sync_files_sftp(self) -> None:
         self.check_username()
-        transport = paramiko.Transport(
-            (
-                self.config.fohm.host,
-                self.config.fohm.port,
-            )
-        )
+        transport = paramiko.Transport((self.config.fohm.host, self.config.fohm.port))
         ed_key = paramiko.Ed25519Key.from_private_key_file(self.config.fohm.key)
-        transport.connect(
-            username=self.config.fohm.username,
-            pkey=ed_key,
-        )
+        transport.connect(username=self.config.fohm.username, pkey=ed_key)
         sftp = paramiko.SFTPClient.from_transport(transport)
         for file in self.daily_rawdata_path.iterdir():
             LOG.info(f"Sending {file} via SFTP, dry-run {self.dry_run}")
@@ -304,10 +264,7 @@ class FOHMUploadAPI:
                 continue
 
             try:
-                sftp.put(
-                    file.as_posix(),
-                    f"/till-fohm/{file.name}",
-                )
+                sftp.put(file.as_posix(), f"/till-fohm/{file.name}")
                 LOG.info(f"Finished sending {file}")
                 file.unlink()
             except Exception as ex:

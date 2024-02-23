@@ -11,20 +11,14 @@ from cg.constants.observations import (
     LoqusdbMipCustomers,
     MipDNALoadParameters,
 )
-from cg.constants.sequencing import (
-    SequencingMethod,
-)
+from cg.constants.sequencing import SequencingMethod
 from cg.exc import (
     CaseNotFoundError,
     LoqusdbDuplicateRecordError,
     LoqusdbUploadCaseError,
 )
-from cg.meta.observations.balsamic_observations_api import (
-    BalsamicObservationsAPI,
-)
-from cg.meta.observations.mip_dna_observations_api import (
-    MipDNAObservationsAPI,
-)
+from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
+from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
     MipDNAObservationsInputFiles,
@@ -52,11 +46,7 @@ def test_observations_upload(
         "get_observations_input_files",
         return_value=observations_input_files,
     )
-    mocker.patch.object(
-        mip_dna_observations_api,
-        "is_duplicate",
-        return_value=False,
-    )
+    mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=False)
 
     # WHEN uploading the case observations to Loqusdb
     mip_dna_observations_api.upload(case)
@@ -95,16 +85,8 @@ def test_is_duplicate(
 
     # GIVEN a Loqusdb instance with no case duplicates
     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
-    mocker.patch.object(
-        mip_dna_observations_api.loqusdb_api,
-        "get_case",
-        return_value=None,
-    )
-    mocker.patch.object(
-        mip_dna_observations_api.loqusdb_api,
-        "get_duplicate",
-        return_value=False,
-    )
+    mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_case", return_value=None)
+    mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_duplicate", return_value=False)
 
     # WHEN checking that a case has not been uploaded to Loqusdb
     is_duplicate: bool = mip_dna_observations_api.is_duplicate(
@@ -152,16 +134,8 @@ def test_is_duplicate_loqusdb_id(
     # GIVEN a Loqusdb instance with a duplicated case and whose samples already have a Loqusdb ID
     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
     case.links[0].sample.loqusdb_id = loqusdb_id
-    mocker.patch.object(
-        mip_dna_observations_api.loqusdb_api,
-        "get_case",
-        return_value=None,
-    )
-    mocker.patch.object(
-        mip_dna_observations_api.loqusdb_api,
-        "get_duplicate",
-        return_value=False,
-    )
+    mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_case", return_value=None)
+    mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_duplicate", return_value=False)
 
     # WHEN checking that the sample observations have already been uploaded
     is_duplicate: bool = mip_dna_observations_api.is_duplicate(
@@ -195,9 +169,7 @@ def test_check_customer_loqusdb_permissions(
         mip_dna_observations_api.check_customer_loqusdb_permissions(customer_balsamic)
 
 
-def test_mip_dna_get_loqusdb_instance(
-    mip_dna_observations_api: MipDNAObservationsAPI,
-):
+def test_mip_dna_get_loqusdb_instance(mip_dna_observations_api: MipDNAObservationsAPI):
     """Test Loqusdb instance retrieval given a sequencing method."""
 
     # GIVEN a rare disease observations API with a WES as sequencing method
@@ -211,8 +183,7 @@ def test_mip_dna_get_loqusdb_instance(
 
 
 def test_mip_dna_get_loqusdb_instance_not_supported(
-    mip_dna_observations_api: MipDNAObservationsAPI,
-    caplog: LogCaptureFixture,
+    mip_dna_observations_api: MipDNAObservationsAPI, caplog: LogCaptureFixture
 ):
     """Test Loqusdb instance retrieval given a not supported sequencing method."""
 
@@ -243,11 +214,7 @@ def test_mip_dna_load_observations(
 
     # GIVEN a mock MIP DNA observations API and a list of observations input files
     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
-    mocker.patch.object(
-        mip_dna_observations_api,
-        "is_duplicate",
-        return_value=False,
-    )
+    mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=False)
 
     # WHEN loading the case to Loqusdb
     mip_dna_observations_api.load_observations(case, observations_input_files)
@@ -268,11 +235,7 @@ def test_mip_dna_load_observations_duplicate(
 
     # GIVEN a mocked observations API and a case object that has already been uploaded to Loqusdb
     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
-    mocker.patch.object(
-        mip_dna_observations_api,
-        "is_duplicate",
-        return_value=True,
-    )
+    mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=True)
 
     # WHEN uploading the case observations to Loqusdb
     with pytest.raises(LoqusdbDuplicateRecordError):
@@ -294,11 +257,7 @@ def test_mip_dna_load_observations_tumor_case(
 
     # GIVEN a MIP DNA observations API and a case object with a tumour sample
     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
-    mocker.patch.object(
-        mip_dna_observations_api,
-        "is_duplicate",
-        return_value=False,
-    )
+    mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=False)
     case.links[0].sample.is_tumour = True
 
     # WHEN getting the Loqusdb API
@@ -364,11 +323,7 @@ def test_balsamic_load_observations(
 
     # GIVEN a mock BALSAMIC observations API and a list of observations input files
     case: Case = balsamic_observations_api.store.get_case_by_internal_id(internal_id=case_id)
-    mocker.patch.object(
-        balsamic_observations_api,
-        "is_duplicate",
-        return_value=False,
-    )
+    mocker.patch.object(balsamic_observations_api, "is_duplicate", return_value=False)
 
     # WHEN loading the case to Loqusdb
     balsamic_observations_api.load_observations(case, balsamic_observations_input_files)
@@ -389,11 +344,7 @@ def test_balsamic_load_observations_duplicate(
 
     # GIVEN a balsamic observations API and a case object that has already been uploaded to Loqusdb
     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
-    mocker.patch.object(
-        mip_dna_observations_api,
-        "is_duplicate",
-        return_value=True,
-    )
+    mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=True)
 
     # WHEN uploading the case observations to Loqusdb
     with pytest.raises(LoqusdbDuplicateRecordError):
@@ -418,9 +369,7 @@ def test_balsamic_load_cancer_observations(
 
     # WHEN loading the case to a somatic Loqusdb instance
     balsamic_observations_api.load_cancer_observations(
-        case,
-        balsamic_observations_input_files,
-        balsamic_observations_api.loqusdb_somatic_api,
+        case, balsamic_observations_input_files, balsamic_observations_api.loqusdb_somatic_api
     )
 
     # THEN the observations should be loaded successfully

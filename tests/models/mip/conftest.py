@@ -3,22 +3,13 @@ from pathlib import Path
 import pytest
 
 from cg.constants.priority import SlurmQos
-from cg.models.mip.mip_metrics_deliverables import (
-    MIPMetricsDeliverables,
-)
+from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 
 
 @pytest.fixture(name="mip_case_config_dna")
 def mip_case_config_dna(fixtures_dir) -> Path:
     """Return path to MIP DNA case_config.yaml"""
-    return Path(
-        fixtures_dir,
-        "apps",
-        "mip",
-        "dna",
-        "store",
-        "case_config.yaml",
-    )
+    return Path(fixtures_dir, "apps", "mip", "dna", "store", "case_config.yaml")
 
 
 @pytest.fixture(name="mip_analysis_config_dna_raw")
@@ -53,20 +44,14 @@ def mip_sv_rank_model_version() -> str:
 
 
 @pytest.fixture(name="sample_info_dna_raw")
-def sample_info_dna_raw(
-    mip_rank_model_version: str,
-    mip_sv_rank_model_version: str,
-) -> dict:
+def sample_info_dna_raw(mip_rank_model_version: str, mip_sv_rank_model_version: str) -> dict:
     """Raw sample_info fixture"""
     return {
         "analysisrunstatus": "finished",
         "analysis_date": "2021-05-05T16:16:01",
         "case_id": "yellowhog",
         "family_id": "a_family_id",
-        "human_genome_build": {
-            "version": 37,
-            "source": "grch",
-        },
+        "human_genome_build": {"version": 37, "source": "grch"},
         "mip_version": "v9.0.0",
         "recipe": {
             "genmod": {
@@ -201,9 +186,7 @@ def mip_metrics_deliverables_raw() -> dict:
 
 
 @pytest.fixture(name="mip_metrics_deliverables")
-def mip_metrics_deliverables(
-    mip_metrics_deliverables_raw: dict,
-) -> MIPMetricsDeliverables:
+def mip_metrics_deliverables(mip_metrics_deliverables_raw: dict) -> MIPMetricsDeliverables:
     return MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
 
 

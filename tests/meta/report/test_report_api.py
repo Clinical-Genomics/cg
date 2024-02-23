@@ -10,9 +10,7 @@ from _pytest.logging import LogCaptureFixture
 from cg.constants import REPORT_GENDER, Workflow
 from cg.exc import DeliveryReportError
 from cg.meta.report.mip_dna import MipDNAReportAPI
-from cg.meta.workflow.mip_dna import (
-    MipDNAAnalysisAPI,
-)
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.report.report import (
     CaseModel,
@@ -26,23 +24,13 @@ from cg.models.report.sample import (
     SampleModel,
     TimestampModel,
 )
-from cg.store.models import (
-    Analysis,
-    Case,
-    CaseSample,
-    Sample,
-)
+from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.store.store import Store
-from tests.meta.report.helper import (
-    recursive_assert,
-)
+from tests.meta.report.helper import recursive_assert
 from tests.store_helpers import StoreHelpers
 
 
-def test_create_delivery_report(
-    report_api_mip_dna: MipDNAReportAPI,
-    case_mip_dna: Case,
-):
+def test_create_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case):
     """Tests the creation of the rendered delivery report."""
 
     # GIVEN a pre-built case
@@ -59,9 +47,7 @@ def test_create_delivery_report(
 
 
 def test_create_delivery_report_file(
-    report_api_mip_dna: MipDNAReportAPI,
-    case_mip_dna: Case,
-    tmp_path: Path,
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case, tmp_path: Path
 ):
     """Tests file generation containing the delivery report data."""
 
@@ -80,16 +66,12 @@ def test_create_delivery_report_file(
     assert created_report_file.exists()
 
 
-def test_render_delivery_report(
-    report_api_mip_dna: MipDNAReportAPI,
-    case_mip_dna: Case,
-):
+def test_render_delivery_report(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case):
     """Tests delivery report rendering."""
 
     # GIVEN a generated report
     report_data: ReportModel = report_api_mip_dna.get_report_data(
-        case_mip_dna.internal_id,
-        case_mip_dna.analyses[0].started_at,
+        case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
 
     # WHEN rendering the report
@@ -100,10 +82,7 @@ def test_render_delivery_report(
     assert "html" in rendered_report
 
 
-def test_get_validated_report_data(
-    report_api_mip_dna: MipDNAReportAPI,
-    case_mip_dna: Case,
-):
+def test_get_validated_report_data(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case):
     """Tests report data retrieval."""
 
     # GIVEN a valid case
@@ -113,31 +92,25 @@ def test_get_validated_report_data(
 
     # WHEN collecting the delivery data
     report_data: ReportModel = report_api_mip_dna.get_report_data(
-        case_mip_dna.internal_id,
-        case_mip_dna.analyses[0].started_at,
+        case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
 
     # THEN check collection of the nested report data and that the required fields are not empty
     report_data: ReportModel = report_api_mip_dna.validate_report_fields(
-        case_mip_dna.internal_id,
-        report_data,
-        force_report=False,
+        case_mip_dna.internal_id, report_data, force_report=False
     )
     recursive_assert(report_data.model_dump())
 
 
 def test_validate_report_empty_fields(
-    report_api_mip_dna: MipDNAReportAPI,
-    case_mip_dna: Case,
-    caplog: LogCaptureFixture,
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case, caplog: LogCaptureFixture
 ):
     """Tests the validations of allowed empty report fields."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a delivery report
     report_data: ReportModel = report_api_mip_dna.get_report_data(
-        case_mip_dna.internal_id,
-        case_mip_dna.analyses[0].started_at,
+        case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
 
     # WHEN the report has some allowed empty fields
@@ -147,9 +120,7 @@ def test_validate_report_empty_fields(
 
     # THEN check if the empty fields are identified
     report_data: ReportModel = report_api_mip_dna.validate_report_fields(
-        case_mip_dna.internal_id,
-        report_data,
-        force_report=False,
+        case_mip_dna.internal_id, report_data, force_report=False
     )
     assert report_data
     assert "version" in caplog.text
@@ -158,16 +129,13 @@ def test_validate_report_empty_fields(
 
 
 def test_validate_report_missing_fields(
-    report_api_mip_dna: MipDNAReportAPI,
-    case_mip_dna: Case,
-    caplog: LogCaptureFixture,
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case, caplog: LogCaptureFixture
 ):
     """Tests the validations of empty required report fields."""
 
     # GIVEN a delivery report
     report_data: ReportModel = report_api_mip_dna.get_report_data(
-        case_mip_dna.internal_id,
-        case_mip_dna.analyses[0].started_at,
+        case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
 
     # WHEN the report contains some required empty fields
@@ -178,9 +146,7 @@ def test_validate_report_missing_fields(
     # THEN test that the DeliveryReportError is raised when the report generation is not forced
     try:
         report_api_mip_dna.validate_report_fields(
-            case_mip_dna.internal_id,
-            report_data,
-            force_report=False,
+            case_mip_dna.internal_id, report_data, force_report=False
         )
     except DeliveryReportError:
         assert "accredited" in caplog.text
@@ -189,34 +155,27 @@ def test_validate_report_missing_fields(
 
 
 def test_get_validated_report_data_external_sample(
-    report_api_mip_dna: MipDNAReportAPI,
-    case_mip_dna: Case,
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case
 ):
     """Tests report data retrieval."""
 
     # GIVEN a delivery report with external sample data
     report_data: ReportModel = report_api_mip_dna.get_report_data(
-        case_mip_dna.internal_id,
-        case_mip_dna.analyses[0].started_at,
+        case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
     report_data.case.samples[0].timestamps.received_at = None
     report_data.case.samples[0].application.external = True
 
     # WHEN validating report fields
     report_data: ReportModel = report_api_mip_dna.validate_report_fields(
-        case_mip_dna.internal_id,
-        report_data,
-        force_report=False,
+        case_mip_dna.internal_id, report_data, force_report=False
     )
 
     # THEN the validation should have been completed successfully
     assert report_data
 
 
-def test_get_customer_data(
-    report_api_mip_dna: MipDNAReportAPI,
-    case_mip_dna: Case,
-):
+def test_get_customer_data(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case):
     """Checks that the retrieved customer data is the expected one."""
 
     # GIVEN a pre-built case
@@ -247,9 +206,7 @@ def test_get_report_version_version(
     # GIVEN a specific set of analyses
     last_analysis: Analysis = helpers.add_analysis(store, completed_at=datetime.now())
     first_analysis: Analysis = helpers.add_analysis(
-        store,
-        last_analysis.case,
-        completed_at=timestamp_yesterday,
+        store, last_analysis.case, completed_at=timestamp_yesterday
     )
 
     # WHEN retrieving the version
@@ -276,9 +233,7 @@ def test_get_case_data(
 
     # WHEN retrieving case specific information
     case_data: CaseModel = report_api_mip_dna.get_case_data(
-        case_mip_dna,
-        case_mip_dna.analyses[0],
-        mip_metadata,
+        case_mip_dna, case_mip_dna.analyses[0], mip_metadata
     )
 
     # THEN check if the case data is the expected one
@@ -370,9 +325,7 @@ def test_get_sample_application_data(
 
 
 def test_get_unique_applications(
-    report_api_mip_dna: MipDNAReportAPI,
-    mip_analysis_api: MipDNAAnalysisAPI,
-    case_mip_dna: Case,
+    report_api_mip_dna: MipDNAReportAPI, mip_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Case
 ):
     """Tests unique applications filtering."""
 
@@ -390,8 +343,7 @@ def test_get_unique_applications(
 
 
 def test_get_sample_methods_data(
-    report_api_mip_dna: MipDNAReportAPI,
-    case_samples_data: list[CaseSample],
+    report_api_mip_dna: MipDNAReportAPI, case_samples_data: list[CaseSample]
 ):
     """Tests sample methods retrieval from lims."""
 
@@ -412,9 +364,7 @@ def test_get_sample_methods_data(
 
 
 def test_get_case_analysis_data(
-    report_api_mip_dna: MipDNAReportAPI,
-    mip_analysis_api: MipDNAAnalysisAPI,
-    case_mip_dna: Case,
+    report_api_mip_dna: MipDNAReportAPI, mip_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Case
 ):
     """Tests data analysis parameters retrieval."""
 
@@ -425,9 +375,7 @@ def test_get_case_analysis_data(
 
     # WHEN retrieving analysis information
     case_analysis_data: DataAnalysisModel = report_api_mip_dna.get_case_analysis_data(
-        case_mip_dna,
-        case_mip_dna.analyses[0],
-        mip_metadata,
+        case_mip_dna, case_mip_dna.analyses[0], mip_metadata
     )
 
     # THEN check if the retrieved analysis data is correct
@@ -456,9 +404,7 @@ def test_get_case_analysis_data_workflow_match_error(
     # THEN a validation error should be raised
     with pytest.raises(ValueError):
         report_api_mip_dna.get_case_analysis_data(
-            case=case_mip_dna,
-            analysis=mip_analysis,
-            analysis_metadata=mip_metadata,
+            case=case_mip_dna, analysis=mip_analysis, analysis_metadata=mip_metadata
         )
     assert (
         f"The analysis requested by the customer ({Workflow.MIP_DNA}) does not match the one executed "
@@ -487,9 +433,7 @@ def test_get_case_analysis_data_workflow_not_supported(
     # THEN a validation error should be raised
     with pytest.raises(ValueError):
         report_api_mip_dna.get_case_analysis_data(
-            case=case_mip_dna,
-            analysis=mip_analysis,
-            analysis_metadata=mip_metadata,
+            case=case_mip_dna, analysis=mip_analysis, analysis_metadata=mip_metadata
         )
     assert (
         f"The workflow {case_mip_dna.data_analysis} does not support delivery report generation"

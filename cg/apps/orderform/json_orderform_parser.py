@@ -1,11 +1,7 @@
-from cg.apps.orderform.orderform_parser import (
-    OrderformParser,
-)
+from cg.apps.orderform.orderform_parser import OrderformParser
 from cg.constants import DataDelivery, Workflow
 from cg.exc import OrderFormError
-from cg.models.orders.json_sample import (
-    JsonSample,
-)
+from cg.models.orders.json_sample import JsonSample
 from cg.models.orders.order import OrderType
 
 
@@ -33,9 +29,7 @@ class JsonOrderformParser(OrderformParser):
         raise OrderFormError(f"Unsupported data_analysis: {data_analyses} for json data")
 
     @staticmethod
-    def project_type_to_order_type(
-        project_type: str,
-    ) -> str:
+    def project_type_to_order_type(project_type: str) -> str:
         """In the case where data delivery was not defined we map from project type"""
         project_to_order = {
             OrderType.METAGENOME: DataDelivery.FASTQ,

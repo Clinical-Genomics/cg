@@ -21,12 +21,7 @@ def upgrade():
     op.alter_column(
         table_name="flowcell",
         column_name="sequencer_type",
-        type_=sa.Enum(
-            "hiseqga",
-            "hiseqx",
-            "novaseq",
-            "novaseqx",
-        ),
+        type_=sa.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx"),
     )
 
 

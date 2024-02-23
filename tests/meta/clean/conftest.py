@@ -8,15 +8,9 @@ import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.subject import Sex
-from cg.meta.clean.clean_flow_cells import (
-    CleanFlowCellAPI,
-)
-from cg.meta.clean.clean_retrieved_spring_files import (
-    CleanRetrievedSpringFilesAPI,
-)
-from cg.models.flow_cell.flow_cell import (
-    FlowCellDirectoryData,
-)
+from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
+from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.models import Flowcell, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -56,41 +50,31 @@ def flow_cell_clean_api_can_not_be_removed(
 
 
 @pytest.fixture(scope="function")
-def tmp_flow_cell_to_clean_path(
-    tmp_flow_cell_directory_bclconvert: Path,
-):
+def tmp_flow_cell_to_clean_path(tmp_flow_cell_directory_bclconvert: Path):
     """Returns the path to a flow cell fulfilling all cleaning criteria."""
     return tmp_flow_cell_directory_bclconvert
 
 
 @pytest.fixture(scope="function")
-def tmp_flow_cell_to_clean(
-    tmp_flow_cell_to_clean_path: Path,
-) -> FlowCellDirectoryData:
+def tmp_flow_cell_to_clean(tmp_flow_cell_to_clean_path: Path) -> FlowCellDirectoryData:
     """Returns a flow cell directory object for a flow cell that fulfills all cleaning criteria."""
     return FlowCellDirectoryData(tmp_flow_cell_to_clean_path)
 
 
 @pytest.fixture(scope="function")
-def tmp_flow_cell_not_to_clean_path(
-    tmp_flow_cell_directory_bcl2fastq: Path,
-):
+def tmp_flow_cell_not_to_clean_path(tmp_flow_cell_directory_bcl2fastq: Path):
     """Return the path to a flow cell not fulfilling all cleaning criteria."""
     return tmp_flow_cell_directory_bcl2fastq
 
 
 @pytest.fixture(scope="function")
-def tmp_flow_cell_not_to_clean(
-    tmp_flow_cell_not_to_clean_path: Path,
-) -> FlowCellDirectoryData:
+def tmp_flow_cell_not_to_clean(tmp_flow_cell_not_to_clean_path: Path) -> FlowCellDirectoryData:
     """Returns a flow cell directory object for a flow cell that does not fulfill all cleaning criteria."""
     return FlowCellDirectoryData(tmp_flow_cell_not_to_clean_path)
 
 
 @pytest.fixture(scope="session")
-def tmp_sample_sheet_clean_flow_cell_path(
-    tmp_path_factory,
-) -> Path:
+def tmp_sample_sheet_clean_flow_cell_path(tmp_path_factory) -> Path:
     sample_sheet_path = tmp_path_factory.mktemp("SampleSheet.csv")
     return sample_sheet_path
 
@@ -104,22 +88,8 @@ def store_with_flow_cell_to_clean(
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
     sample_sequencing_metrics_details: list[tuple] = [
-        (
-            sample_id,
-            tmp_flow_cell_to_clean.id,
-            1,
-            50_000_0000,
-            90.5,
-            32,
-        ),
-        (
-            sample_id,
-            tmp_flow_cell_to_clean.id,
-            2,
-            50_000_0000,
-            90.4,
-            31,
-        ),
+        (sample_id, tmp_flow_cell_to_clean.id, 1, 50_000_0000, 90.5, 32),
+        (sample_id, tmp_flow_cell_to_clean.id, 2, 50_000_0000, 90.4, 31),
     ]
     flow_cell: Flowcell = helpers.add_flow_cell(
         flow_cell_name=tmp_flow_cell_to_clean.id,
@@ -127,15 +97,10 @@ def store_with_flow_cell_to_clean(
         has_backup=True,
     )
     sample: Sample = helpers.add_sample(
-        store=store,
-        customer_id="cust500",
-        internal_id=sample_id,
-        name=sample_id,
-        sex=Sex.MALE,
+        store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
-        metrics_data=sample_sequencing_metrics_details,
-        store=store,
+        metrics_data=sample_sequencing_metrics_details, store=store
     )
     flow_cell.samples = [sample]
     store.session.add(flow_cell)
@@ -152,22 +117,8 @@ def store_with_flow_cell_not_to_clean(
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
     sample_sequencing_metrics_details: list[str | int | float] = [
-        (
-            sample_id,
-            tmp_flow_cell_not_to_clean.id,
-            1,
-            50_000_0000,
-            90.5,
-            32,
-        ),
-        (
-            sample_id,
-            tmp_flow_cell_not_to_clean.id,
-            2,
-            50_000_0000,
-            90.4,
-            31,
-        ),
+        (sample_id, tmp_flow_cell_not_to_clean.id, 1, 50_000_0000, 90.5, 32),
+        (sample_id, tmp_flow_cell_not_to_clean.id, 2, 50_000_0000, 90.4, 31),
     ]
     flow_cell: Flowcell = helpers.add_flow_cell(
         flow_cell_name=tmp_flow_cell_not_to_clean.id,
@@ -175,15 +126,10 @@ def store_with_flow_cell_not_to_clean(
         has_backup=True,
     )
     sample: Sample = helpers.add_sample(
-        store=store,
-        customer_id="cust500",
-        internal_id=sample_id,
-        name=sample_id,
-        sex=Sex.MALE,
+        store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
-        metrics_data=sample_sequencing_metrics_details,
-        store=store,
+        metrics_data=sample_sequencing_metrics_details, store=store
     )
     flow_cell.samples = [sample]
     store.session.add(flow_cell)
@@ -202,13 +148,9 @@ def housekeeper_api_with_flow_cell_to_clean(
     Return a housekeeper api that contains a flow cell bundle with sample sheet,
     a sample bundle with a fastq and a SPRING file that are tagged with the flow cell.
     """
+    helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=hk_flow_cell_to_clean_bundle)
     helpers.ensure_hk_bundle(
-        store=real_housekeeper_api,
-        bundle_data=hk_flow_cell_to_clean_bundle,
-    )
-    helpers.ensure_hk_bundle(
-        store=real_housekeeper_api,
-        bundle_data=hk_sample_bundle_for_flow_cell_to_clean,
+        store=real_housekeeper_api, bundle_data=hk_sample_bundle_for_flow_cell_to_clean
     )
     return real_housekeeper_api
 
@@ -224,8 +166,7 @@ def housekeeper_api_with_flow_cell_not_to_clean(
     a sample bundle with a fastq and a SPRING file that are tagged with the flow cell.
     """
     helpers.ensure_hk_bundle(
-        store=real_housekeeper_api,
-        bundle_data=hk_sample_bundle_for_flow_cell_not_to_clean,
+        store=real_housekeeper_api, bundle_data=hk_sample_bundle_for_flow_cell_not_to_clean
     )
     return real_housekeeper_api
 
@@ -245,10 +186,7 @@ def hk_flow_cell_to_clean_bundle(
             {
                 "path": str(tmp_sample_sheet_clean_flow_cell_path),
                 "archive": False,
-                "tags": [
-                    "samplesheet",
-                    tmp_flow_cell_to_clean.id,
-                ],
+                "tags": ["samplesheet", tmp_flow_cell_to_clean.id],
             }
         ],
     }
@@ -271,29 +209,17 @@ def hk_sample_bundle_for_flow_cell_to_clean(
             {
                 "path": spring_file.as_posix(),
                 "archive": False,
-                "tags": [
-                    SequencingFileTag.SPRING,
-                    sample_id,
-                    tmp_flow_cell_to_clean.id,
-                ],
+                "tags": [SequencingFileTag.SPRING, sample_id, tmp_flow_cell_to_clean.id],
             },
             {
                 "path": fastq_file.as_posix(),
                 "archive": False,
-                "tags": [
-                    SequencingFileTag.FASTQ,
-                    sample_id,
-                    tmp_flow_cell_to_clean.id,
-                ],
+                "tags": [SequencingFileTag.FASTQ, sample_id, tmp_flow_cell_to_clean.id],
             },
             {
                 "path": spring_meta_data_file.as_posix(),
                 "archive": False,
-                "tags": [
-                    SequencingFileTag.SPRING_METADATA,
-                    sample_id,
-                    tmp_flow_cell_to_clean.id,
-                ],
+                "tags": [SequencingFileTag.SPRING_METADATA, sample_id, tmp_flow_cell_to_clean.id],
             },
         ],
     }
@@ -318,10 +244,7 @@ def clean_retrieved_spring_files_api(
 ) -> CleanRetrievedSpringFilesAPI:
     """Returns a CleanRetrievedSpringFilesAPI."""
     real_housekeeper_api.root_dir = tmp_path
-    return CleanRetrievedSpringFilesAPI(
-        housekeeper_api=real_housekeeper_api,
-        dry_run=False,
-    )
+    return CleanRetrievedSpringFilesAPI(housekeeper_api=real_housekeeper_api, dry_run=False)
 
 
 @pytest.fixture
@@ -331,11 +254,7 @@ def path_to_old_retrieved_spring_file() -> str:
 
 @pytest.fixture
 def path_to_newly_retrieved_spring_file() -> str:
-    return Path(
-        "path",
-        "to",
-        "newly_retrieved_spring_file",
-    ).as_posix()
+    return Path("path", "to", "newly_retrieved_spring_file").as_posix()
 
 
 @pytest.fixture
@@ -370,8 +289,7 @@ def retrieved_test_bundle_name() -> str:
 
 @pytest.fixture
 def path_to_old_spring_file_in_housekeeper(
-    retrieved_test_bundle_name: str,
-    path_to_old_retrieved_spring_file,
+    retrieved_test_bundle_name: str, path_to_old_retrieved_spring_file
 ) -> str:
     return Path(
         retrieved_test_bundle_name,
@@ -413,9 +331,7 @@ def populated_clean_retrieved_spring_files_api(
         file_to_add = Path(tmp_path, path)
         file_to_add.touch()
         clean_retrieved_spring_files_api.housekeeper_api.add_and_include_file_to_latest_version(
-            file=file_to_add,
-            bundle_name=retrieved_test_bundle_name,
-            tags=tags,
+            file=file_to_add, bundle_name=retrieved_test_bundle_name, tags=tags
         )
     for file in clean_retrieved_spring_files_api.housekeeper_api.get_files(
         bundle=retrieved_test_bundle_name
@@ -424,8 +340,7 @@ def populated_clean_retrieved_spring_files_api(
         Path(file.full_path).touch()
         if "spring" in file.path:
             clean_retrieved_spring_files_api.housekeeper_api.add_archives(
-                files=[file],
-                archive_task_id=archival_job_id_miria,
+                files=[file], archive_task_id=archival_job_id_miria
             )
             file.archive.archived_at = timestamp
             if "retrieved" in file.path:

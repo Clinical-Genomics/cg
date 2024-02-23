@@ -4,22 +4,14 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.mip.mip_metrics_deliverables import (
-    MIPMetricsDeliverables,
-)
+from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 
 
 def create_mip_metrics_deliverables():
     """Get an mip_metrics_deliverables object."""
     metrics_deliverables: dict = ReadFile.get_content_from_file(
         file_format=FileFormat.YAML,
-        file_path=Path(
-            "tests",
-            "fixtures",
-            "apps",
-            "mip",
-            "case_metrics_deliverables.yaml",
-        ),
+        file_path=Path("tests", "fixtures", "apps", "mip", "case_metrics_deliverables.yaml"),
     )
     return MIPMetricsDeliverables(**metrics_deliverables)
 
@@ -39,9 +31,6 @@ class MockMipAnalysis(MipAnalysisAPI):
             sample_id_metrics=metrics.sample_id_metrics,
             mip_version="v4.0.20",
             rank_model_version="1.18",
-            sample_ids=[
-                "2018-20203",
-                "2018-20204",
-            ],
+            sample_ids=["2018-20203", "2018-20204"],
             sv_rank_model_version="1.08",
         )

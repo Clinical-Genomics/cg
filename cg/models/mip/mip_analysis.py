@@ -1,7 +1,5 @@
 from cg.models.analysis import AnalysisModel
-from cg.models.mip.mip_metrics_deliverables import (
-    MIPParsedMetrics,
-)
+from cg.models.mip.mip_metrics_deliverables import MIPParsedMetrics
 
 
 class MipAnalysis(AnalysisModel):

@@ -2,9 +2,7 @@ from pathlib import Path
 
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
-from cg.meta.workflow.balsamic import (
-    BalsamicAnalysisAPI,
-)
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 
 
 def get_balsamic_raw_data() -> tuple[dict, dict]:
@@ -12,24 +10,12 @@ def get_balsamic_raw_data() -> tuple[dict, dict]:
 
     config: dict = ReadFile.get_content_from_file(
         file_format=FileFormat.YAML,
-        file_path=Path(
-            "tests",
-            "fixtures",
-            "apps",
-            "balsamic",
-            "case",
-            "config.json",
-        ),
+        file_path=Path("tests", "fixtures", "apps", "balsamic", "case", "config.json"),
     )
     metrics: dict = ReadFile.get_content_from_file(
         file_format=FileFormat.YAML,
         file_path=Path(
-            "tests",
-            "fixtures",
-            "apps",
-            "balsamic",
-            "case",
-            "metrics_deliverables.yaml",
+            "tests", "fixtures", "apps", "balsamic", "case", "metrics_deliverables.yaml"
         ),
     )
     return config, metrics

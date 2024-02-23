@@ -9,15 +9,9 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow
 from cg.constants.subject import Sex
 from cg.meta.compress import CompressAPI
-from cg.meta.workflow.mip_dna import (
-    MipDNAAnalysisAPI,
-)
-from cg.meta.workflow.mip_rna import (
-    MipRNAAnalysisAPI,
-)
-from cg.meta.workflow.prepare_fastq import (
-    PrepareFastqAPI,
-)
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.store.crud.read import ReadHandler
 from cg.store.models import Case
@@ -88,19 +82,11 @@ def mip_hermes_dna_deliverables_response_data(
             "files": [
                 {
                     "path": create_multiqc_json_file.as_posix(),
-                    "tags": [
-                        "multiqc-json",
-                        mip_case_id,
-                        "mip-dna",
-                    ],
+                    "tags": ["multiqc-json", mip_case_id, "mip-dna"],
                 },
                 {
                     "path": create_multiqc_html_file.as_posix(),
-                    "tags": [
-                        "multiqc-html",
-                        mip_case_id,
-                        "mip-dna",
-                    ],
+                    "tags": ["multiqc-html", mip_case_id, "mip-dna"],
                 },
             ],
             "created": timestamp_yesterday,
@@ -124,9 +110,7 @@ def mip_rna_context(
     analysis_family_single_case["data_analysis"] = Workflow.MIP_RNA
     if not cg_context.status_db.get_case_by_internal_id(internal_id=case_id):
         helpers.ensure_case_from_dict(
-            cg_context.status_db,
-            case_info=analysis_family_single_case,
-            app_tag=apptag_rna,
+            cg_context.status_db, case_info=analysis_family_single_case, app_tag=apptag_rna
         )
     cg_context.meta_apis["analysis_api"] = MipRNAAnalysisAPI(cg_context)
     return cg_context
@@ -146,11 +130,7 @@ def mip_dna_context(
     mip_analysis_api = MipDNAAnalysisAPI(config=cg_context)
 
     # Add apptag to db
-    helpers.ensure_application_version(
-        store=_store,
-        application_tag="WGSA",
-        prep_category="wgs",
-    )
+    helpers.ensure_application_version(store=_store, application_tag="WGSA", prep_category="wgs")
 
     # Add sample, cases and relationships to db
 
@@ -169,12 +149,7 @@ def mip_dna_context(
                 customer_id="cust000",
                 sex=Sex.UNKNOWN,
             )
-            helpers.add_relationship(
-                store=_store,
-                sample=sample,
-                case=case_obj,
-                status="affected",
-            )
+            helpers.add_relationship(store=_store, sample=sample, case=case_obj, status="affected")
     cg_context.meta_apis["analysis_api"] = mip_analysis_api
     return cg_context
 
@@ -192,22 +167,13 @@ def setup_mocks(
     mocker.patch.object(ReadHandler, "cases_to_analyze")
     ReadHandler.cases_to_analyze.return_value = [case_to_analyze]
 
-    mocker.patch.object(
-        PrepareFastqAPI,
-        "is_spring_decompression_needed",
-    )
+    mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
     PrepareFastqAPI.is_spring_decompression_needed.return_value = is_spring_decompression_needed
 
-    mocker.patch.object(
-        TrailblazerAPI,
-        "has_latest_analysis_started",
-    )
+    mocker.patch.object(TrailblazerAPI, "has_latest_analysis_started")
     TrailblazerAPI.has_latest_analysis_started.return_value = has_latest_analysis_started
 
-    mocker.patch.object(
-        PrepareFastqAPI,
-        "can_at_least_one_sample_be_decompressed",
-    )
+    mocker.patch.object(PrepareFastqAPI, "can_at_least_one_sample_be_decompressed")
     PrepareFastqAPI.can_at_least_one_sample_be_decompressed.return_value = (
         can_at_least_one_sample_be_decompressed
     )
@@ -215,16 +181,10 @@ def setup_mocks(
     mocker.patch.object(CompressAPI, "decompress_spring")
     CompressAPI.decompress_spring.return_value = decompress_spring
 
-    mocker.patch.object(
-        PrepareFastqAPI,
-        "is_spring_decompression_running",
-    )
+    mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_running")
     PrepareFastqAPI.is_spring_decompression_running.return_value = is_spring_decompression_running
 
-    mocker.patch.object(
-        PrepareFastqAPI,
-        "add_decompressed_fastq_files_to_housekeeper",
-    )
+    mocker.patch.object(PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper")
     PrepareFastqAPI.add_decompressed_fastq_files_to_housekeeper.return_value = None
 
     mocker.patch.object(MipDNAAnalysisAPI, "get_panel_bed")

@@ -12,8 +12,7 @@ def test_get_empty_report_data(report_api_mip_dna, case_mip_dna):
 
     # GIVEN a report data model
     report_data = report_api_mip_dna.get_report_data(
-        case_mip_dna.internal_id,
-        case_mip_dna.analyses[0].started_at,
+        case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
 
     # GIVEN some empty fields
@@ -45,8 +44,7 @@ def test_get_missing_report_data(report_api_mip_dna, case_mip_dna):
 
     # GIVEN a report data model
     report_data = report_api_mip_dna.get_report_data(
-        case_mip_dna.internal_id,
-        case_mip_dna.analyses[0].started_at,
+        case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
     report_data.case.samples[0].application.prep_category = "wgs"  # ADM1 sample (WGS)
     report_data.case.samples[1].application.prep_category = "wes"  # ADM2 sample (WES)
@@ -57,11 +55,7 @@ def test_get_missing_report_data(report_api_mip_dna, case_mip_dna):
         "customer": ["id"],
         "methods": {"ADM1": ["library_prep"]},
         "metadata": {
-            "ADM1": [
-                "bait_set",
-                "million_read_pairs",
-                "duplicates",
-            ],
+            "ADM1": ["bait_set", "million_read_pairs", "duplicates"],
             "ADM2": ["bait_set", "duplicates"],
         },
     }

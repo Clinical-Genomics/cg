@@ -14,9 +14,7 @@ from cg.exc import (
     FlowCellEncryptionError,
     PdcError,
 )
-from cg.meta.encryption.encryption import (
-    FlowCellEncryptionAPI,
-)
+from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.store.models import Flowcell
 from cg.store.store import Store
 from cg.utils import Process
@@ -31,11 +29,7 @@ MAX_NR_OF_DSMC_PROCESSES: int = 3
 class PdcAPI:
     """Group PDC related commands"""
 
-    def __init__(
-        self,
-        binary_path: str,
-        dry_run: bool = False,
-    ):
+    def __init__(self, binary_path: str, dry_run: bool = False):
         self.process: Process = Process(binary=binary_path)
         self.dry_run: bool = dry_run
 
@@ -69,11 +63,7 @@ class PdcAPI:
         command.append(search_pattern)
         self.run_dsmc_command(command=command)
 
-    def retrieve_file_from_pdc(
-        self,
-        file_path: str,
-        target_path: str = None,
-    ) -> None:
+    def retrieve_file_from_pdc(self, file_path: str, target_path: str = None) -> None:
         """Retrieve a file from PDC"""
         command: list = DSMCParameters.RETRIEVE_COMMAND.copy()
         command.append(file_path)
@@ -89,10 +79,7 @@ class PdcAPI:
         LOG.debug("Starting DSMC command:")
         LOG.debug(f"{self.process.binary} {' '.join(command)}")
         try:
-            self.process.run_command(
-                parameters=command,
-                dry_run=self.dry_run,
-            )
+            self.process.run_command(parameters=command, dry_run=self.dry_run)
         except CalledProcessError as error:
             if error.returncode == EXIT_WARNING:
                 LOG.warning(f"{error}")
@@ -100,9 +87,7 @@ class PdcAPI:
             raise PdcError(message=f"{error}") from error
 
     def validate_is_flow_cell_backup_possible(
-        self,
-        db_flow_cell: Flowcell,
-        flow_cell_encryption_api: FlowCellEncryptionAPI,
+        self, db_flow_cell: Flowcell, flow_cell_encryption_api: FlowCellEncryptionAPI
     ) -> bool:
         """Check if back-up of flow cell is possible.
         Raises:
@@ -123,20 +108,14 @@ class PdcAPI:
         LOG.debug("Flow cell can be backed up")
 
     def backup_flow_cell(
-        self,
-        files_to_archive: list[Path],
-        store: Store,
-        db_flow_cell: Flowcell,
+        self, files_to_archive: list[Path], store: Store, db_flow_cell: Flowcell
     ) -> None:
         """Back-up flow cell files."""
         for encrypted_file in files_to_archive:
             if not self.dry_run:
                 self.archive_file_to_pdc(file_path=encrypted_file.as_posix())
         if not self.dry_run:
-            store.update_flow_cell_has_backup(
-                flow_cell=db_flow_cell,
-                has_backup=True,
-            )
+            store.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
             LOG.info(f"Flow cell: {db_flow_cell.name} has been backed up")
 
     def start_flow_cell_backup(
@@ -147,8 +126,7 @@ class PdcAPI:
     ) -> None:
         """Check if back-up of flow cell is possible and if so starts it."""
         self.validate_is_flow_cell_backup_possible(
-            db_flow_cell=db_flow_cell,
-            flow_cell_encryption_api=flow_cell_encryption_api,
+            db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
         )
         self.backup_flow_cell(
             files_to_archive=[

@@ -1,14 +1,7 @@
-from pydantic.v1 import (
-    BaseModel,
-    constr,
-    validator,
-)
+from pydantic.v1 import BaseModel, constr, validator
 
 from cg.constants import DataDelivery
-from cg.constants.constants import (
-    GenomeVersion,
-    Workflow,
-)
+from cg.constants.constants import GenomeVersion, Workflow
 from cg.models.orders.order import OrderType
 from cg.models.orders.sample_base import (
     NAME_PATTERN,
@@ -18,14 +11,7 @@ from cg.models.orders.sample_base import (
     SexEnum,
     StatusEnum,
 )
-from cg.store.models import (
-    Application,
-    Case,
-    Organism,
-    Panel,
-    Pool,
-    Sample,
-)
+from cg.store.models import Application, Case, Organism, Panel, Pool, Sample
 
 
 class OptionalIntValidator:
@@ -97,18 +83,10 @@ class Of1508Sample(OrderInSample):
     well_position: str | None
     # "Required if samples are part of trio/family"
     mother: (
-        constr(
-            regex=NAME_PATTERN,
-            max_length=Sample.name.property.columns[0].type.length,
-        )
-        | None
+        constr(regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length) | None
     )
     father: (
-        constr(
-            regex=NAME_PATTERN,
-            max_length=Sample.name.property.columns[0].type.length,
-        )
-        | None
+        constr(regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length) | None
     )
     # This information is required for panel analysis
     capture_kit: str | None
@@ -126,22 +104,12 @@ class Of1508Sample(OrderInSample):
     require_qc_ok: bool = False
     quantity: int | None
     subject_id: (
-        constr(
-            regex=NAME_PATTERN,
-            max_length=Sample.subject_id.property.columns[0].type.length,
-        )
+        constr(regex=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length)
         | None
     )
     synopsis: str | None
 
-    @validator(
-        "container",
-        "container_name",
-        "name",
-        "source",
-        "subject_id",
-        "volume",
-    )
+    @validator("container", "container_name", "name", "source", "subject_id", "volume")
     def required_for_new_samples(cls, value, values, **kwargs):
         if not value and not values.get("internal_id"):
             raise ValueError(f"required for new sample {values.get('name')}")
@@ -169,12 +137,7 @@ class Of1508Sample(OrderInSample):
 class MipDnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_DNA
     # "Required if data analysis in Scout or vcf delivery"
-    panels: list[
-        constr(
-            min_length=1,
-            max_length=Panel.abbrev.property.columns[0].type.length,
-        )
-    ]
+    panels: list[constr(min_length=1, max_length=Panel.abbrev.property.columns[0].type.length)]
     status: StatusEnum
 
 

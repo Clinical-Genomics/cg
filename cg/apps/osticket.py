@@ -8,10 +8,7 @@ from flask import Flask
 
 from cg.constants.constants import FileFormat
 from cg.exc import TicketCreationError
-from cg.io.controller import (
-    WriteFile,
-    WriteStream,
-)
+from cg.io.controller import WriteFile, WriteStream
 
 LOG = logging.getLogger(__name__)
 TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
@@ -49,12 +46,7 @@ class OsTicket(object):
         self.email_uri = email_uri
 
     def open_ticket(
-        self,
-        attachment: dict,
-        email: str,
-        message: str,
-        name: str,
-        subject: str,
+        self, attachment: dict, email: str, message: str, name: str, subject: str
     ) -> str:
         """Open a new ticket through the REST API"""
         data = dict(
@@ -64,11 +56,7 @@ class OsTicket(object):
             message=message,
             attachments=[attachment],
         )
-        res = requests.post(
-            self.url,
-            json=data,
-            headers=self.headers,
-        )
+        res = requests.post(self.url, json=data, headers=self.headers)
         if res.ok:
             return res.text
         LOG.error(f"res.text: {res.text}, reason: {res.reason}")
@@ -79,16 +67,13 @@ class OsTicket(object):
         return {
             file_name: TEXT_FILE_ATTACH_PARAMS.format(
                 content=WriteStream.write_stream_from_content(
-                    content=content,
-                    file_format=FileFormat.JSON,
+                    content=content, file_format=FileFormat.JSON
                 )
             )
         }
 
     @staticmethod
-    def create_connecting_ticket_attachment(
-        content: dict,
-    ) -> TemporaryDirectory:
+    def create_connecting_ticket_attachment(content: dict) -> TemporaryDirectory:
         directory = TemporaryDirectory()
         WriteFile.write_file_from_content(
             content=content,

@@ -21,17 +21,8 @@ branch_labels = None
 depends_on = None
 
 Base = declarative_base()
-added_options = (
-    "fastq-analysis",
-    "fastq-analysis-scout",
-    "analysis-scout",
-    "fastq-scout",
-)
-removed_options = (
-    "analysis-bam",
-    "fastq_qc-analysis-cram",
-    "fastq_qc-analysis-cram-scout",
-)
+added_options = ("fastq-analysis", "fastq-analysis-scout", "analysis-scout", "fastq-scout")
+removed_options = ("analysis-bam", "fastq_qc-analysis-cram", "fastq_qc-analysis-cram-scout")
 
 old_options = (
     "analysis",
@@ -46,14 +37,7 @@ old_options = (
     "statina",
 )
 new_options = sorted(
-    (
-        "analysis" "fastq",
-        "fastq_qc",
-        "fastq_qc-analysis",
-        "nipt-viewer",
-        "scout",
-    )
-    + added_options
+    ("analysis" "fastq", "fastq_qc", "fastq_qc-analysis", "nipt-viewer", "scout") + added_options
 )
 old_enum = mysql.ENUM(*old_options)
 new_enum = mysql.ENUM(*new_options)
@@ -74,19 +58,11 @@ class Case(Base):
     __tablename__ = "family"
     id = Column(types.Integer, primary_key=True)
     data_delivery = Column(types.VARCHAR(64))
-    internal_id = Column(
-        types.String(32),
-        unique=True,
-        nullable=False,
-    )
+    internal_id = Column(types.String(32), unique=True, nullable=False)
 
 
 def upgrade():
-    op.alter_column(
-        "family",
-        "data_delivery",
-        type_=types.VARCHAR(64),
-    )
+    op.alter_column("family", "data_delivery", type_=types.VARCHAR(64))
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
     for case in session.query(Case):

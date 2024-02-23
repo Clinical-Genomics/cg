@@ -4,12 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from cg.constants import Workflow
-from cg.constants.constants import (
-    FileExtensions,
-    FileFormat,
-    MultiQC,
-    WorkflowManager,
-)
+from cg.constants.constants import FileExtensions, FileFormat, MultiQC, WorkflowManager
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, MetricsQCError
@@ -17,23 +12,15 @@ from cg.io.controller import ReadFile, WriteFile
 from cg.io.txt import write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.nf_handlers import (
-    NextflowHandler,
-    NfTowerHandler,
-)
+from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
     MetricsDeliverablesCondition,
 )
 from cg.models.fastq import FastqFileMeta
-from cg.models.nf_analysis import (
-    FileDeliverable,
-    PipelineDeliverables,
-)
-from cg.models.rnafusion.rnafusion import (
-    CommandArgs,
-)
+from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
+from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -87,9 +74,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get workflow version from config."""
         return self.revision
 
-    def get_nextflow_config_content(
-        self,
-    ) -> str | None:
+    def get_nextflow_config_content(self) -> str | None:
         """Return nextflow config content."""
         return None
 
@@ -99,27 +84,23 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_sample_sheet_path(self, case_id: str) -> Path:
         """Path to sample sheet."""
-        return Path(
-            self.get_case_path(case_id),
-            f"{case_id}_samplesheet",
-        ).with_suffix(FileExtensions.CSV)
+        return Path(self.get_case_path(case_id), f"{case_id}_samplesheet").with_suffix(
+            FileExtensions.CSV
+        )
 
     def get_compute_env(self, case_id: str) -> str:
         """Get the compute environment for the head job based on the case priority."""
         return f"{self.compute_env_base}-{self.get_slurm_qos_for_case(case_id=case_id)}"
 
     def get_nextflow_config_path(
-        self,
-        case_id: str,
-        nextflow_config: Path | str | None = None,
+        self, case_id: str, nextflow_config: Path | str | None = None
     ) -> Path:
         """Path to nextflow config file."""
         if nextflow_config:
             return Path(nextflow_config).absolute()
-        return Path(
-            (self.get_case_path(case_id)),
-            f"{case_id}_nextflow_config",
-        ).with_suffix(FileExtensions.JSON)
+        return Path((self.get_case_path(case_id)), f"{case_id}_nextflow_config").with_suffix(
+            FileExtensions.JSON
+        )
 
     def get_job_ids_path(self, case_id: str) -> Path:
         """Return the path to a Trailblazer config file containing Tower IDs."""
@@ -127,43 +108,30 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Path to deliverables file for a case."""
-        return Path(
-            self.get_case_path(case_id),
-            f"{case_id}_deliverables",
-        ).with_suffix(FileExtensions.YAML)
+        return Path(self.get_case_path(case_id), f"{case_id}_deliverables").with_suffix(
+            FileExtensions.YAML
+        )
 
     def get_metrics_deliverables_path(self, case_id: str) -> Path:
         """Return a path where the <case>_metrics_deliverables.yaml file should be located."""
-        return Path(
-            self.root_dir,
-            case_id,
-            f"{case_id}_metrics_deliverables",
-        ).with_suffix(FileExtensions.YAML)
+        return Path(self.root_dir, case_id, f"{case_id}_metrics_deliverables").with_suffix(
+            FileExtensions.YAML
+        )
 
-    def get_params_file_path(
-        self,
-        case_id: str,
-        params_file: Path | None = None,
-    ) -> Path:
+    def get_params_file_path(self, case_id: str, params_file: Path | None = None) -> Path:
         """Return parameters file or a path where the default parameters file for a case id should be located."""
         if params_file:
             return Path(params_file).absolute()
-        return Path(
-            (self.get_case_path(case_id)),
-            f"{case_id}_params_file",
-        ).with_suffix(FileExtensions.YAML)
+        return Path((self.get_case_path(case_id)), f"{case_id}_params_file").with_suffix(
+            FileExtensions.YAML
+        )
 
     def create_case_directory(self, case_id: str, dry_run: bool = False) -> None:
         """Create case directory."""
         if not dry_run:
             Path(self.get_case_path(case_id=case_id)).mkdir(parents=True, exist_ok=True)
 
-    def get_log_path(
-        self,
-        case_id: str,
-        workflow: str,
-        log: str = None,
-    ) -> Path:
+    def get_log_path(self, case_id: str, workflow: str, log: str = None) -> Path:
         """Path to NF log."""
         if log:
             return log
@@ -173,24 +141,15 @@ class NfAnalysisAPI(AnalysisAPI):
             f"{case_id}_{workflow}_nextflow_{launch_time}",
         ).with_suffix(FileExtensions.LOG)
 
-    def get_workdir_path(
-        self,
-        case_id: str,
-        work_dir: Path | None = None,
-    ) -> Path:
+    def get_workdir_path(self, case_id: str, work_dir: Path | None = None) -> Path:
         """Path to NF work directory."""
         if work_dir:
             return work_dir.absolute()
-        return Path(
-            self.get_case_path(case_id),
-            NFX_WORK_DIR,
-        )
+        return Path(self.get_case_path(case_id), NFX_WORK_DIR)
 
     @staticmethod
     def extract_read_files(
-        metadata: list[FastqFileMeta],
-        forward_read: bool = False,
-        reverse_read: bool = False,
+        metadata: list[FastqFileMeta], forward_read: bool = False, reverse_read: bool = False
     ) -> list[str]:
         """Extract a list of fastq file paths for either forward or reverse reads."""
         if forward_read and not reverse_read:
@@ -216,11 +175,7 @@ class NfAnalysisAPI(AnalysisAPI):
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
-    def write_params_file(
-        self,
-        case_id: str,
-        workflow_parameters: dict,
-    ) -> None:
+    def write_params_file(self, case_id: str, workflow_parameters: dict) -> None:
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")
         write_yaml_nextflow_style(
@@ -255,15 +210,11 @@ class NfAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def write_deliverables_file(
-        deliverables_content: dict,
-        file_path: Path,
-        file_format=FileFormat.YAML,
+        deliverables_content: dict, file_path: Path, file_format=FileFormat.YAML
     ) -> None:
         """Write deliverables file."""
         WriteFile.write_file_from_content(
-            content=deliverables_content,
-            file_format=file_format,
-            file_path=file_path,
+            content=deliverables_content, file_format=file_format, file_path=file_path
         )
 
     def write_trailblazer_config(self, case_id: str, tower_id: str) -> None:
@@ -277,10 +228,7 @@ class NfAnalysisAPI(AnalysisAPI):
         )
 
     def _run_analysis_with_nextflow(
-        self,
-        case_id: str,
-        command_args: CommandArgs,
-        dry_run: bool,
+        self, case_id: str, command_args: CommandArgs, dry_run: bool
     ) -> None:
         """Run analysis with given options using Nextflow."""
         self.process = Process(
@@ -313,10 +261,7 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.info(f"Nextflow head job running as job: {sbatch_number}")
 
     def _run_analysis_with_tower(
-        self,
-        case_id: str,
-        command_args: CommandArgs,
-        dry_run: bool,
+        self, case_id: str, command_args: CommandArgs, dry_run: bool
     ) -> None:
         """Run analysis with given options using NF-Tower."""
         LOG.info("Workflow will be executed using Tower")
@@ -327,13 +272,11 @@ class NfAnalysisAPI(AnalysisAPI):
             )
             LOG.info(f"Workflow will be resumed from run with Tower id: {from_tower_id}.")
             parameters: list[str] = NfTowerHandler.get_tower_relaunch_parameters(
-                from_tower_id=from_tower_id,
-                command_args=command_args.dict(),
+                from_tower_id=from_tower_id, command_args=command_args.dict()
             )
         else:
             parameters: list[str] = NfTowerHandler.get_tower_launch_parameters(
-                tower_workflow=self.tower_workflow,
-                command_args=command_args.dict(),
+                tower_workflow=self.tower_workflow, command_args=command_args.dict()
             )
         self.process.run_command(parameters=parameters, dry_run=dry_run)
         if self.process.stderr:
@@ -375,17 +318,13 @@ class NfAnalysisAPI(AnalysisAPI):
         sample_id: str = self.status_db.get_samples_by_case_id(case_id).pop().internal_id
         files: list[FileDeliverable] = []
         for file in deliverable_template:
-            for (
-                deliverable_field,
-                deliverable_value,
-            ) in file.items():
+            for deliverable_field, deliverable_value in file.items():
                 if deliverable_value is None:
                     continue
                 file[deliverable_field] = file[deliverable_field].replace("CASEID", case_id)
                 file[deliverable_field] = file[deliverable_field].replace("SAMPLEID", sample_id)
                 file[deliverable_field] = file[deliverable_field].replace(
-                    "PATHTOCASE",
-                    str(self.get_case_path(case_id=case_id)),
+                    "PATHTOCASE", str(self.get_case_path(case_id=case_id))
                 )
             files.append(FileDeliverable(**file))
         return PipelineDeliverables(files=files)
@@ -411,10 +350,7 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_metric_base_list(self, sample_id: str, metrics_values: dict) -> list[MetricsBase]:
         """Return a list of MetricsBase objects for a given sample."""
         metric_base_list: list[MetricsBase] = []
-        for (
-            metric_name,
-            metric_value,
-        ) in metrics_values.items():
+        for metric_name, metric_value in metrics_values.items():
             metric_base_list.append(
                 MetricsBase(
                     header=None,
@@ -429,9 +365,7 @@ class NfAnalysisAPI(AnalysisAPI):
         return metric_base_list
 
     @staticmethod
-    def ensure_mandatory_metrics_present(
-        metrics: list[MetricsBase],
-    ) -> None:
+    def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
         return None
 
     def create_metrics_deliverables_content(self, case_id: str) -> dict[str, list[dict[str, Any]]]:
@@ -468,29 +402,16 @@ class NfAnalysisAPI(AnalysisAPI):
         try:
             metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
             qc_metrics_raw: dict = ReadFile.get_content_from_file(
-                file_format=FileFormat.YAML,
-                file_path=metrics_deliverables_path,
+                file_format=FileFormat.YAML, file_path=metrics_deliverables_path
             )
             MetricsDeliverablesCondition(**qc_metrics_raw)
         except MetricsQCError as error:
             LOG.error(f"QC metrics failed for {case_id}")
-            self.trailblazer_api.set_analysis_status(
-                case_id=case_id,
-                status=AnalysisStatus.FAILED,
-            )
-            self.trailblazer_api.add_comment(
-                case_id=case_id,
-                comment=str(error),
-            )
+            self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)
+            self.trailblazer_api.add_comment(case_id=case_id, comment=str(error))
             raise MetricsQCError from error
         except CgError as error:
             LOG.error(f"Could not create metrics deliverables file: {error}")
-            self.trailblazer_api.set_analysis_status(
-                case_id=case_id,
-                status=AnalysisStatus.ERROR,
-            )
+            self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.ERROR)
             raise CgError from error
-        self.trailblazer_api.set_analysis_status(
-            case_id=case_id,
-            status=AnalysisStatus.COMPLETED,
-        )
+        self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)

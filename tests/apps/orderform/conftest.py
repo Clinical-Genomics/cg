@@ -7,24 +7,18 @@ import pytest
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from cg.apps.orderform.excel_orderform_parser import (
-    ExcelOrderformParser,
-)
+from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.constants.constants import FileFormat
 from cg.constants.orderforms import Orderform
 from cg.io.controller import ReadFile
 from cg.models.orders.constants import OrderType
 
 
-def get_nr_samples_excel(
-    orderform_path: str,
-) -> int:
+def get_nr_samples_excel(orderform_path: str) -> int:
     """Parse a excel orderform file and return the number of sample rows."""
     orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
     workbook: Workbook = openpyxl.load_workbook(
-        filename=orderform_path,
-        read_only=True,
-        data_only=True,
+        filename=orderform_path, read_only=True, data_only=True
     )
     sheet_name: str = orderform_parser.get_sheet_name(workbook.sheetnames)
     orderform_sheet: Worksheet = workbook[sheet_name]
@@ -63,9 +57,7 @@ def minimal_excel_sample() -> dict:
 
 
 @pytest.fixture(scope="session")
-def mip_order_parser(
-    mip_orderform: str,
-) -> ExcelOrderformParser:
+def mip_order_parser(mip_orderform: str) -> ExcelOrderformParser:
     """Return a orderform parser that have parsed a mip orderform in excel format."""
     order_form_parser: ExcelOrderformParser = ExcelOrderformParser()
     order_form_parser.parse_orderform(excel_path=mip_orderform)
@@ -73,9 +65,7 @@ def mip_order_parser(
 
 
 @pytest.fixture(scope="session")
-def rml_order_parser(
-    rml_orderform: str,
-) -> ExcelOrderformParser:
+def rml_order_parser(rml_orderform: str) -> ExcelOrderformParser:
     """Return a orderform parser that have parsed an orderform in excel format."""
     order_form_parser: ExcelOrderformParser = ExcelOrderformParser()
     order_form_parser.parse_orderform(excel_path=rml_orderform)
@@ -83,9 +73,7 @@ def rml_order_parser(
 
 
 @pytest.fixture(scope="session")
-def fastq_order_parser(
-    fastq_orderform: str,
-) -> ExcelOrderformParser:
+def fastq_order_parser(fastq_orderform: str) -> ExcelOrderformParser:
     """Return a orderform parser that have parsed an orderform in excel format."""
     order_form_parser: ExcelOrderformParser = ExcelOrderformParser()
     order_form_parser.parse_orderform(excel_path=fastq_orderform)
@@ -93,9 +81,7 @@ def fastq_order_parser(
 
 
 @pytest.fixture(scope="session")
-def microbial_order_parser(
-    microbial_orderform: str,
-) -> ExcelOrderformParser:
+def microbial_order_parser(microbial_orderform: str) -> ExcelOrderformParser:
     """Return a orderform parser that have parsed an orderform in excel format."""
     order_form_parser: ExcelOrderformParser = ExcelOrderformParser()
     order_form_parser.parse_orderform(excel_path=microbial_orderform)
@@ -103,25 +89,19 @@ def microbial_order_parser(
 
 
 @pytest.fixture
-def nr_samples_mip_orderform(
-    mip_orderform: str,
-) -> int:
+def nr_samples_mip_orderform(mip_orderform: str) -> int:
     """Return the number of samples in the mip orderform."""
     return get_nr_samples_excel(mip_orderform)
 
 
 @pytest.fixture
-def nr_samples_rml_orderform(
-    rml_orderform: str,
-) -> int:
+def nr_samples_rml_orderform(rml_orderform: str) -> int:
     """Return the number of samples in the RML orderform."""
     return get_nr_samples_excel(rml_orderform)
 
 
 @pytest.fixture
-def nr_samples_fastq_orderform(
-    fastq_orderform: str,
-) -> int:
+def nr_samples_fastq_orderform(fastq_orderform: str) -> int:
     """Return the number of samples in the RML orderform."""
     return get_nr_samples_excel(fastq_orderform)
 
@@ -192,101 +172,74 @@ def rml_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture(scope="session")
-def mip_order_to_submit(
-    cgweb_orders_dir: Path,
-) -> dict:
+def mip_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example MIP order."""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON,
-        file_path=Path(cgweb_orders_dir, "mip.json"),
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "mip.json")
     )
 
 
 @pytest.fixture(scope="session")
-def mip_rna_order_to_submit(
-    cgweb_orders_dir: Path,
-) -> dict:
+def mip_rna_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example RNA order."""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON,
-        file_path=Path(cgweb_orders_dir, "mip_rna.json"),
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "mip_rna.json")
     )
 
 
 @pytest.fixture(scope="session")
-def rnafusion_order_to_submit(
-    cgweb_orders_dir: Path,
-) -> dict:
+def rnafusion_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example RNA order."""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON,
-        file_path=Path(cgweb_orders_dir, "rnafusion.json"),
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "rnafusion.json")
     )
 
 
 @pytest.fixture(scope="session")
-def fastq_order_to_submit(
-    cgweb_orders_dir,
-) -> dict:
+def fastq_order_to_submit(cgweb_orders_dir) -> dict:
     """Load an example FASTQ order."""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON,
-        file_path=Path(cgweb_orders_dir, "fastq.json"),
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "fastq.json")
     )
 
 
 @pytest.fixture(scope="session")
-def rml_order_to_submit(
-    cgweb_orders_dir: Path,
-) -> dict:
+def rml_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example RML order."""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON,
-        file_path=Path(cgweb_orders_dir, "rml.json"),
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "rml.json")
     )
 
 
 @pytest.fixture(scope="session")
-def metagenome_order_to_submit(
-    cgweb_orders_dir: Path,
-) -> dict:
+def metagenome_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example metagenome order."""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON,
-        file_path=Path(cgweb_orders_dir, "metagenome.json"),
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "metagenome.json")
     )
 
 
 @pytest.fixture(scope="session")
-def microbial_order_to_submit(
-    cgweb_orders_dir: Path,
-) -> dict:
+def microbial_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example microbial order."""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON,
-        file_path=Path(cgweb_orders_dir, "microsalt.json"),
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "microsalt.json")
     )
 
 
 @pytest.fixture(scope="session")
-def sarscov2_order_to_submit(
-    cgweb_orders_dir: Path,
-) -> dict:
+def sarscov2_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example sarscov2 order."""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON,
-        file_path=Path(cgweb_orders_dir, "sarscov2.json"),
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "sarscov2.json")
     )
 
 
 @pytest.fixture(scope="session")
-def balsamic_order_to_submit(
-    cgweb_orders_dir: Path,
-) -> dict:
+def balsamic_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example cancer order."""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON,
-        file_path=Path(cgweb_orders_dir, "balsamic.json"),
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "balsamic.json")
     )
 
 
@@ -300,9 +253,7 @@ def balsamic_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture(scope="session")
-def balsamic_qc_orderform(
-    orderforms: Path,
-) -> str:
+def balsamic_qc_orderform(orderforms: Path) -> str:
     """Orderform fixture for Balsamic QC samples."""
     return Path(
         orderforms,
@@ -311,9 +262,7 @@ def balsamic_qc_orderform(
 
 
 @pytest.fixture(scope="session")
-def balsamic_umi_orderform(
-    orderforms: Path,
-) -> str:
+def balsamic_umi_orderform(orderforms: Path) -> str:
     """Orderform fixture for Balsamic UMI samples."""
     return Path(
         orderforms,
@@ -367,41 +316,27 @@ def rnafusion_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture(scope="session")
-def mip_uploaded_json_order(
-    orderforms: Path,
-) -> str:
+def mip_uploaded_json_order(orderforms: Path) -> str:
     """JSON orderform fixture for MIP DNA samples."""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON,
-        file_path=Path(
-            orderforms,
-            "mip_uploaded_json_orderform.json",
-        ),
+        file_format=FileFormat.JSON, file_path=Path(orderforms, "mip_uploaded_json_orderform.json")
     )
 
 
 @pytest.fixture(scope="session")
-def balsamic_uploaded_json_order(
-    orderforms: Path,
-) -> str:
+def balsamic_uploaded_json_order(orderforms: Path) -> str:
     """JSON orderform fixture for BALSAMIC samples."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON,
-        file_path=Path(
-            orderforms,
-            "balsamic_uploaded_json_orderform.json",
-        ),
+        file_path=Path(orderforms, "balsamic_uploaded_json_orderform.json"),
     )
 
 
 @pytest.fixture(scope="session")
-def fluffy_uploaded_json_order(
-    orderforms: Path,
-) -> dict:
+def fluffy_uploaded_json_order(orderforms: Path) -> dict:
     """Load an example Fluffy order."""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON,
-        file_path=Path(orderforms, "NIPT-json.json"),
+        file_format=FileFormat.JSON, file_path=Path(orderforms, "NIPT-json.json")
     )
 
 

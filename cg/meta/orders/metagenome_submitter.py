@@ -7,32 +7,17 @@ from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
-from cg.models.orders.sample_base import (
-    StatusEnum,
-)
-from cg.models.orders.samples import (
-    MetagenomeSample,
-)
-from cg.store.models import (
-    ApplicationVersion,
-    Case,
-    CaseSample,
-    Customer,
-    Sample,
-)
+from cg.models.orders.sample_base import StatusEnum
+from cg.models.orders.samples import MetagenomeSample
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Sample
 
 
 class MetagenomeSubmitter(Submitter):
     def validate_order(self, order: OrderIn) -> None:
-        self._validate_sample_names_are_unique(
-            samples=order.samples,
-            customer_id=order.customer,
-        )
+        self._validate_sample_names_are_unique(samples=order.samples, customer_id=order.customer)
 
     def _validate_sample_names_are_unique(
-        self,
-        samples: list[MetagenomeSample],
-        customer_id: str,
+        self, samples: list[MetagenomeSample], customer_id: str
     ) -> None:
         """Validate that the names of all samples are unused."""
         customer: Customer = self.status.get_customer_by_internal_id(
@@ -42,23 +27,17 @@ class MetagenomeSubmitter(Submitter):
             if sample.control:
                 continue
             if self.status.get_sample_by_customer_and_name(
-                customer_entry_id=[customer.id],
-                sample_name=sample.name,
+                customer_entry_id=[customer.id], sample_name=sample.name
             ):
                 raise OrderError(f"Sample name {sample.name} already in use")
 
     def submit_order(self, order: OrderIn) -> dict:
         """Submit a batch of metagenome samples."""
         project_data, lims_map = process_lims(
-            lims_api=self.lims,
-            lims_order=order,
-            new_samples=order.samples,
+            lims_api=self.lims, lims_order=order, new_samples=order.samples
         )
         status_data = self.order_to_status(order)
-        self._fill_in_sample_ids(
-            samples=status_data["families"][0]["samples"],
-            lims_map=lims_map,
-        )
+        self._fill_in_sample_ids(samples=status_data["families"][0]["samples"], lims_map=lims_map)
         new_samples = self.store_items_in_status(
             customer_id=status_data["customer"],
             order=status_data["order"],
@@ -67,10 +46,7 @@ class MetagenomeSubmitter(Submitter):
             items=status_data["families"],
         )
         self._add_missing_reads(new_samples)
-        return {
-            "project": project_data,
-            "records": new_samples,
-        }
+        return {"project": project_data, "records": new_samples}
 
     @staticmethod
     def order_to_status(order: OrderIn) -> dict:
@@ -114,8 +90,7 @@ class MetagenomeSubmitter(Submitter):
             raise OrderError(f"unknown customer: {customer_id}")
         new_samples = []
         case: Case = self.status.get_case_by_name_and_customer(
-            customer=customer,
-            case_name=str(ticket_id),
+            customer=customer, case_name=str(ticket_id)
         )
         case_dict: dict = items[0]
         with self.status.session.no_autoflush:
@@ -155,9 +130,7 @@ class MetagenomeSubmitter(Submitter):
                     self.status.session.commit()
 
                 new_relationship: CaseSample = self.status.relate_sample(
-                    case=case,
-                    sample=new_sample,
-                    status=StatusEnum.unknown,
+                    case=case, sample=new_sample, status=StatusEnum.unknown
                 )
                 self.status.session.add(new_relationship)
 

@@ -38,9 +38,7 @@ def test_add_sample_missing_customer(cli_runner: CliRunner, base_context: CGConf
 
 
 def test_add_sample_bad_application(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
 ):
     """Test adding a sample when application tag supplied does not match an application tag in the database."""
     # GIVEN a database with a customer
@@ -69,20 +67,13 @@ def test_add_sample_bad_application(
     assert disk_store._get_query(table=Sample).count() == 0
 
 
-def test_add_sample_required(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    helpers: StoreHelpers,
-):
+def test_add_sample_required(cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers):
     """Test adding a sample."""
     # GIVEN a database with a customer and an application
     disk_store: Store = base_context.status_db
     application_tag = "dummy_tag"
     helpers.ensure_application(store=disk_store, tag=application_tag)
-    helpers.ensure_application_version(
-        store=disk_store,
-        application_tag=application_tag,
-    )
+    helpers.ensure_application_version(store=disk_store, application_tag=application_tag)
     customer: Customer = helpers.ensure_customer(store=disk_store)
     name = "sample_name"
 
@@ -109,20 +100,13 @@ def test_add_sample_required(
     assert sample_query.first().sex == Sex.MALE
 
 
-def test_add_sample_lims_id(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    helpers: StoreHelpers,
-):
+def test_add_sample_lims_id(cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers):
     """Test adding a sample using a LIMS id."""
     # GIVEN a database with a customer and an application
     disk_store: Store = base_context.status_db
     application_tag = "dummy_tag"
     helpers.ensure_application(store=disk_store, tag=application_tag)
-    helpers.ensure_application_version(
-        store=disk_store,
-        application_tag=application_tag,
-    )
+    helpers.ensure_application_version(store=disk_store, application_tag=application_tag)
     # WHEN adding a sample
     customer: Customer = helpers.ensure_customer(store=disk_store)
     name = "sample_name"
@@ -161,10 +145,7 @@ def test_add_sample_order(
     """Test adding a sample using an external sample id."""
     # GIVEN a database with a customer and an application
     helpers.ensure_application(store=disk_store, tag=application_tag)
-    helpers.ensure_application_version(
-        store=disk_store,
-        application_tag=application_tag,
-    )
+    helpers.ensure_application_version(store=disk_store, application_tag=application_tag)
     customer: Customer = helpers.ensure_customer(store=disk_store)
     name = "sample_name"
     order = "sample_order"
@@ -203,10 +184,7 @@ def test_add_sample_when_down_sampled(
     """Test adding a sample when down sampled"""
     # GIVEN a database with a customer and an application
     helpers.ensure_application(store=disk_store, tag=application_tag)
-    helpers.ensure_application_version(
-        store=disk_store,
-        application_tag=application_tag,
-    )
+    helpers.ensure_application_version(store=disk_store, application_tag=application_tag)
     customer: Customer = helpers.ensure_customer(store=disk_store)
     name = "sample_name"
     down_sampled_to = "123"
@@ -245,10 +223,7 @@ def test_add_sample_priority(
     """Test adding a sample with priority."""
     # GIVEN a database with a customer and an application
     helpers.ensure_application(store=disk_store, tag=application_tag)
-    helpers.ensure_application_version(
-        store=disk_store,
-        application_tag=application_tag,
-    )
+    helpers.ensure_application_version(store=disk_store, application_tag=application_tag)
     customer: Customer = helpers.ensure_customer(store=disk_store)
     name = "sample_name"
 

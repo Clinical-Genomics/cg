@@ -22,11 +22,4 @@ def upgrade():
 
 
 def downgrade():
-    op.add_column(
-        "analysis",
-        sa.Column(
-            "uploaded_to_vogue_at",
-            sa.DateTime(),
-            nullable=True,
-        ),
-    )
+    op.add_column("analysis", sa.Column("uploaded_to_vogue_at", sa.DateTime(), nullable=True))

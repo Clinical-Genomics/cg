@@ -87,10 +87,7 @@ def madeline_api() -> MadelineAPI:
 
 
 @pytest.fixture
-def populated_madeline_api(
-    madeline_output: Path,
-    madeline_api: MadelineAPI,
-) -> MadelineAPI:
+def populated_madeline_api(madeline_output: Path, madeline_api: MadelineAPI) -> MadelineAPI:
     """Return a madeline API populated with some output"""
     with open(madeline_output, "r") as output:
         madeline_content = output.read()

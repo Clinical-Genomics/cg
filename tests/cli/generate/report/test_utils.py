@@ -12,9 +12,7 @@ from cg.cli.generate.report.utils import (
     get_report_case,
 )
 from cg.constants import Workflow
-from cg.meta.report.balsamic_umi import (
-    BalsamicUmiReportAPI,
-)
+from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
 from tests.mocks.report import MockMipDNAReportAPI
 
 
@@ -37,19 +35,12 @@ def test_get_report_case(delivery_report_click_context, caplog):
 
     # WHEN resolving an incorrect case ID, an exception should be raised
     with pytest.raises(click.exceptions.Abort):
-        get_report_case(
-            delivery_report_click_context,
-            "not a case ID",
-        )
+        get_report_case(delivery_report_click_context, "not a case ID")
 
     assert "Invalid case ID" in caplog.text
 
 
-def test_get_report_api(
-    delivery_report_click_context,
-    cg_context,
-    case_id,
-):
+def test_get_report_api(delivery_report_click_context, cg_context, case_id):
     """Tests report API extraction"""
 
     # GIVEN a case object
@@ -63,9 +54,7 @@ def test_get_report_api(
     assert isinstance(report_api, MockMipDNAReportAPI)
 
 
-def test_get_report_api_workflow(
-    delivery_report_click_context,
-):
+def test_get_report_api_workflow(delivery_report_click_context):
     """Tests API assignment given a specific workflow."""
 
     # GIVEN a click context and a specific workflow

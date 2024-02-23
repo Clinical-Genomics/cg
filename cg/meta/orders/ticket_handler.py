@@ -20,18 +20,12 @@ class TicketHandler:
 
     NEW_LINE = "<br />"
 
-    def __init__(
-        self,
-        osticket_api: OsTicket,
-        status_db: Store,
-    ):
+    def __init__(self, osticket_api: OsTicket, status_db: Store):
         self.osticket: OsTicket = osticket_api
         self.status_db: Store = status_db
 
     @staticmethod
-    def parse_ticket_number(
-        name: str,
-    ) -> str | None:
+    def parse_ticket_number(name: str) -> str | None:
         """Try to parse a ticket number from a string"""
         # detect manual ticket assignment
         ticket_match = re.fullmatch(r"#([0-9]{6})", name)
@@ -43,11 +37,7 @@ class TicketHandler:
         return None
 
     def create_ticket(
-        self,
-        order: OrderIn,
-        user_name: str,
-        user_mail: str,
-        project: str,
+        self, order: OrderIn, user_name: str, user_mail: str, project: str
     ) -> int | None:
         """Create a ticket and return the ticket number"""
         message: str = self.create_new_ticket_header(
@@ -69,50 +59,30 @@ class TicketHandler:
 
     def create_attachment(self, order: OrderIn):
         return self.osticket.create_new_ticket_attachment(
-            content=self.replace_empty_string_with_none(obj=order.dict()),
-            file_name="order.json",
+            content=self.replace_empty_string_with_none(obj=order.dict()), file_name="order.json"
         )
 
     def create_xml_sample_list(self, order: OrderIn, user_name: str) -> str:
         message = ""
         for sample in order.samples:
-            message = self.add_sample_name_to_message(
-                message=message,
-                sample_name=sample.name,
-            )
+            message = self.add_sample_name_to_message(message=message, sample_name=sample.name)
             message = self.add_sample_apptag_to_message(
-                message=message,
-                application=sample.application,
+                message=message, application=sample.application
             )
             if isinstance(sample, Of1508Sample):
                 message = self.add_sample_case_name_to_message(
-                    message=message,
-                    case_name=sample.family_name,
+                    message=message, case_name=sample.family_name
                 )
                 message = self.add_existing_sample_info_to_message(
-                    message=message,
-                    customer_id=order.customer,
-                    internal_id=sample.internal_id,
+                    message=message, customer_id=order.customer, internal_id=sample.internal_id
                 )
-            message = self.add_sample_priority_to_message(
-                message=message,
-                priority=sample.priority,
-            )
-            message = self.add_sample_comment_to_message(
-                message=message,
-                comment=sample.comment,
-            )
+            message = self.add_sample_priority_to_message(message=message, priority=sample.priority)
+            message = self.add_sample_comment_to_message(message=message, comment=sample.comment)
 
         message += self.NEW_LINE
-        message = self.add_order_comment_to_message(
-            message=message,
-            comment=order.comment,
-        )
+        message = self.add_order_comment_to_message(message=message, comment=order.comment)
         message = self.add_user_name_to_message(message=message, name=user_name)
-        message = self.add_customer_to_message(
-            message=message,
-            customer_id=order.customer,
-        )
+        message = self.add_customer_to_message(message=message, customer_id=order.customer)
 
         return message
 
@@ -147,10 +117,7 @@ class TicketHandler:
         return message
 
     def add_existing_sample_info_to_message(
-        self,
-        message: str,
-        customer_id: str,
-        internal_id: str | None,
+        self, message: str, customer_id: str, internal_id: str | None
     ) -> str:
         if not internal_id:
             return message
@@ -211,12 +178,7 @@ class TicketHandler:
         return obj
 
     def connect_to_ticket(
-        self,
-        order: OrderIn,
-        user_name: str,
-        user_mail: str,
-        project: str,
-        ticket_number: str,
+        self, order: OrderIn, user_name: str, user_mail: str, project: str, ticket_number: str
     ) -> None:
         """Appends a new order message to the ticket selected by the customer"""
         LOG.info(f"Connecting order to ticket {ticket_number}")
@@ -225,10 +187,7 @@ class TicketHandler:
             order=order,
             project=project,
         )
-        (
-            sender_prefix,
-            email_server_alias,
-        ) = user_mail.split("@")
+        sender_prefix, email_server_alias = user_mail.split("@")
         temp_dir: TemporaryDirectory = self.osticket.create_connecting_ticket_attachment(
             content=self.replace_empty_string_with_none(obj=order.dict())
         )

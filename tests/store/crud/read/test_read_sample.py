@@ -5,11 +5,7 @@ from typing import Any
 import pytest
 from sqlalchemy.orm import Query
 
-from cg.store.models import (
-    Customer,
-    Invoice,
-    Sample,
-)
+from cg.store.models import Customer, Invoice, Sample
 from cg.store.store import Store
 from tests.meta.demultiplex.conftest import (
     flow_cell_name_demultiplexed_with_bcl_convert,
@@ -25,11 +21,7 @@ def test_get_all_pools_and_samples_for_invoice_by_invoice_id(store: Store, helpe
     sample = helpers.add_sample(store=store, name="sample_1")
 
     # AND an invoice with the pool and sample
-    invoice: Invoice = helpers.ensure_invoice(
-        store=store,
-        pools=[pool],
-        samples=[sample],
-    )
+    invoice: Invoice = helpers.ensure_invoice(store=store, pools=[pool], samples=[sample])
 
     # ASSERT that there is an invoice with a pool and a sample
     assert len(invoice.pools) == 1
@@ -60,8 +52,7 @@ def test_get_samples_by_customer_and_subject_id_query(
 
     # WHEN fetching the sample by subject id and customer_id
     samples = store_with_samples_subject_id_and_tumour_status._get_samples_by_customer_and_subject_id_query(
-        subject_id=test_subject,
-        customer_internal_id=cust123,
+        subject_id=test_subject, customer_internal_id=cust123
     )
 
     # THEN two samples should be returned
@@ -91,8 +82,7 @@ def test_get_samples_by_customer_and_subject_id_query_missing_subject_id(
 
     # WHEN fetching the sample by subject id and customer_id
     samples = store_with_samples_and_tumour_status_missing_subject_id._get_samples_by_customer_and_subject_id_query(
-        subject_id=test_subject,
-        customer_internal_id=cust123,
+        subject_id=test_subject, customer_internal_id=cust123
     )
 
     # THEN two samples should be returned
@@ -118,8 +108,7 @@ def test_get_samples_by_subject_id(
     # WHEN fetching the sample by subject id and customer_id
     samples = (
         store_with_samples_subject_id_and_tumour_status.get_samples_by_customer_and_subject_id(
-            subject_id=test_subject,
-            customer_internal_id=cust123,
+            subject_id=test_subject, customer_internal_id=cust123
         )
     )
 
@@ -144,9 +133,7 @@ def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
 
     # WHEN fetching the samples by customer ID list, subject ID, and tumour status
     samples = store_with_samples_customer_id_and_subject_id_and_tumour_status.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
-        customer_ids=customer_ids,
-        subject_id=subject_id,
-        is_tumour=is_tumour,
+        customer_ids=customer_ids, subject_id=subject_id, is_tumour=is_tumour
     )
 
     # THEN two samples should be returned, one for each customer ID, with the specified subject ID and tumour status
@@ -186,9 +173,7 @@ def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour_with_non_e
     # WHEN fetching the samples by customer ID list, subject ID, and tumour status
     non_existing_customer_id = [3]
     samples = store_with_samples_customer_id_and_subject_id_and_tumour_status.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
-        customer_ids=non_existing_customer_id,
-        subject_id="test_subject",
-        is_tumour=True,
+        customer_ids=non_existing_customer_id, subject_id="test_subject", is_tumour=True
     )
 
     # THEN no samples should be returned
@@ -196,10 +181,7 @@ def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour_with_non_e
     assert len(samples) == 0
 
 
-def test_get_sample_by_name(
-    store_with_samples_that_have_names: Store,
-    name="test_sample_1",
-):
+def test_get_sample_by_name(store_with_samples_that_have_names: Store, name="test_sample_1"):
     """Test that samples can be fetched by name."""
     # GIVEN a database with two samples of which one has a name
 
@@ -255,8 +237,7 @@ def test_get_samples_by_customer_and_name(
     assert customer
     # WHEN fetching the sample by name
     sample: Sample = store_with_samples_that_have_names.get_sample_by_customer_and_name(
-        customer_entry_id=[customer.id],
-        sample_name=name,
+        customer_entry_id=[customer.id], sample_name=name
     )
 
     # THEN one sample should be returned
@@ -280,8 +261,7 @@ def test_get_samples_by_customer_and_name_invalid_customer(
     assert customer
     # WHEN fetching the sample by name
     sample: Sample = store_with_samples_that_have_names.get_sample_by_customer_and_name(
-        customer_entry_id=[customer.id],
-        sample_name=name,
+        customer_entry_id=[customer.id], sample_name=name
     )
 
     # THEN one sample should be returned
@@ -344,9 +324,7 @@ def test_get_samples_by_any_id_exclusive_filtering_gives_empty_query(
 
 
 def test_get_number_of_reads_for_sample_passing_q30_from_metrics(
-    store_with_sequencing_metrics: Store,
-    sample_id: str,
-    expected_total_reads: int,
+    store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads: int
 ):
     """Test if get_number_of_reads_for_sample_from_metrics function returns correct total reads."""
 
@@ -355,8 +333,7 @@ def test_get_number_of_reads_for_sample_passing_q30_from_metrics(
     # WHEN getting number of reads for a specific sample
     actual_total_reads = (
         store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
-            sample_internal_id=sample_id,
-            q30_threshold=0,
+            sample_internal_id=sample_id, q30_threshold=0
         )
     )
 
@@ -386,9 +363,7 @@ def test_samples_to_receive_external(sample_store: Store, helpers: StoreHelpers)
     assert first_sample.received_at is None
 
 
-def test_get_samples_to_receive_internal(
-    sample_store,
-):
+def test_get_samples_to_receive_internal(sample_store):
     """Test fetching internal samples."""
     # GIVEN a store with samples in a mix of states
     assert len(sample_store._get_query(table=Sample).all()) > 1
@@ -513,9 +488,7 @@ def test_get_samples_to_deliver(sample_store):
     assert {sample.name for sample in samples} == set(["to-deliver", "sequenced"])
 
 
-def test_get_samples_to_invoice_query(
-    sample_store,
-):
+def test_get_samples_to_invoice_query(sample_store):
     """Test fetching samples to invoice."""
     # GIVEN a store with a sample
     assert len(sample_store._get_query(table=Sample).all()) > 1
@@ -547,11 +520,7 @@ def test_get_samples_not_invoiced(sample_store):
     assert len(samples) == len(sample_store._get_query(table=Sample).all())
 
 
-def test_get_samples_not_down_sampled(
-    sample_store: Store,
-    helpers: StoreHelpers,
-    sample_id: int,
-):
+def test_get_samples_not_down_sampled(sample_store: Store, helpers: StoreHelpers, sample_id: int):
     """Test getting samples not down sampled."""
     # GIVEN a store with a sample
     assert len(sample_store._get_query(table=Sample).all()) > 1

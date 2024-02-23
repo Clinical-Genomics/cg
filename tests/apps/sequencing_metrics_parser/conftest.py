@@ -21,11 +21,7 @@ from cg.constants.bcl_convert_metrics import (
 def bcl_convert_metrics_dir_path() -> Path:
     """Return a path to a BCLConvert metrics directory."""
     return Path(
-        "tests",
-        "fixtures",
-        "apps",
-        "sequencing_metrics_parser",
-        "230622_A00621_0864_AHY7FFDRX2",
+        "tests", "fixtures", "apps", "sequencing_metrics_parser", "230622_A00621_0864_AHY7FFDRX2"
     )
 
 
@@ -90,8 +86,6 @@ def bcl_convert_quality_metric_model_with_data(
 
 
 @pytest.fixture(scope="session")
-def parsed_bcl_convert_metrics(
-    bcl_convert_metrics_dir_path,
-) -> BclConvertMetricsParser:
+def parsed_bcl_convert_metrics(bcl_convert_metrics_dir_path) -> BclConvertMetricsParser:
     """Return an object with parsed BCLConvert metrics."""
     return BclConvertMetricsParser(bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path)

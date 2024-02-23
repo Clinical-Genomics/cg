@@ -8,10 +8,7 @@ from cg.store.store import Store
 
 
 def test_analysis_included(
-    analysis_store: Store,
-    helpers,
-    timestamp_now: datetime,
-    timestamp_yesterday: datetime,
+    analysis_store: Store, helpers, timestamp_now: datetime, timestamp_yesterday: datetime
 ):
     """Tests that analyses that are uploaded are returned."""
 
@@ -22,14 +19,9 @@ def test_analysis_included(
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
     )
-    sample = helpers.add_sample(
-        analysis_store,
-        delivered_at=timestamp_yesterday,
-    )
+    sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: CaseSample = analysis_store.relate_sample(
-        case=analysis.case,
-        sample=sample,
-        status="unknown",
+        case=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
 
@@ -40,25 +32,16 @@ def test_analysis_included(
     assert analysis in analyses_to_clean
 
 
-def test_analysis_excluded(
-    analysis_store: Store,
-    helpers,
-    timestamp_now: datetime,
-):
+def test_analysis_excluded(analysis_store: Store, helpers, timestamp_now: datetime):
     """Tests that analyses that are completed but lacks delivery report are returned."""
 
     # GIVEN an analysis that is not uploaded
     analysis = helpers.add_analysis(
-        analysis_store,
-        started_at=timestamp_now,
-        uploaded_at=None,
-        cleaned_at=None,
+        analysis_store, started_at=timestamp_now, uploaded_at=None, cleaned_at=None
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     link: CaseSample = analysis_store.relate_sample(
-        case=analysis.case,
-        sample=sample,
-        status="unknown",
+        case=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
 
@@ -70,10 +53,7 @@ def test_analysis_excluded(
 
 
 def test_workflow_included(
-    analysis_store: Store,
-    helpers,
-    timestamp_now: datetime,
-    timestamp_yesterday: datetime,
+    analysis_store: Store, helpers, timestamp_now: datetime, timestamp_yesterday: datetime
 ):
     """Tests that analyses that are included depending on workflow."""
 
@@ -86,32 +66,22 @@ def test_workflow_included(
         cleaned_at=None,
         workflow=workflow,
     )
-    sample = helpers.add_sample(
-        analysis_store,
-        delivered_at=timestamp_yesterday,
-    )
+    sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: CaseSample = analysis_store.relate_sample(
-        case=analysis.case,
-        sample=sample,
-        status="unknown",
+        case=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_clean specifying the used workflow
     analyses_to_clean = analysis_store.get_analyses_to_clean(
-        before=timestamp_now,
-        workflow=workflow,
+        before=timestamp_now, workflow=workflow
     )
 
     # THEN this analysis should be returned
     assert analysis in analyses_to_clean
 
 
-def test_workflow_excluded(
-    analysis_store: Store,
-    helpers,
-    timestamp_now: datetime,
-):
+def test_workflow_excluded(analysis_store: Store, helpers, timestamp_now: datetime):
     """Tests that analyses are excluded depending on workflow."""
 
     # GIVEN an analysis that is uploaded
@@ -127,9 +97,7 @@ def test_workflow_excluded(
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     link: CaseSample = analysis_store.relate_sample(
-        case=analysis.case,
-        sample=sample,
-        status="unknown",
+        case=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
 
@@ -141,10 +109,7 @@ def test_workflow_excluded(
 
 
 def test_non_cleaned_included(
-    analysis_store: Store,
-    helpers,
-    timestamp_now: datetime,
-    timestamp_yesterday: datetime,
+    analysis_store: Store, helpers, timestamp_now: datetime, timestamp_yesterday: datetime
 ):
     """Tests that analyses that are included depending on cleaned_at."""
 
@@ -155,14 +120,9 @@ def test_non_cleaned_included(
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
     )
-    sample = helpers.add_sample(
-        analysis_store,
-        delivered_at=timestamp_yesterday,
-    )
+    sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: CaseSample = analysis_store.relate_sample(
-        case=analysis.case,
-        sample=sample,
-        status="unknown",
+        case=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
 
@@ -173,11 +133,7 @@ def test_non_cleaned_included(
     assert analysis in analyses_to_clean
 
 
-def test_cleaned_excluded(
-    analysis_store: Store,
-    helpers,
-    timestamp_now: datetime,
-):
+def test_cleaned_excluded(analysis_store: Store, helpers, timestamp_now: datetime):
     """Tests that analyses are excluded depending on cleaned_at."""
 
     # GIVEN an analysis that is cleaned
@@ -189,9 +145,7 @@ def test_cleaned_excluded(
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     link: CaseSample = analysis_store.relate_sample(
-        case=analysis.case,
-        sample=sample,
-        status="unknown",
+        case=analysis.case, sample=sample, status="unknown"
     )
     analysis_store.session.add(link)
 

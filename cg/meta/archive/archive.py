@@ -7,17 +7,10 @@ from pydantic import BaseModel, ConfigDict
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.constants.archiving import (
-    ArchiveLocations,
-)
+from cg.constants.archiving import ArchiveLocations
 from cg.exc import ArchiveJobFailedError
-from cg.meta.archive.ddn.ddn_data_flow_client import (
-    DDNDataFlowClient,
-)
-from cg.meta.archive.models import (
-    ArchiveHandler,
-    FileAndSample,
-)
+from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
+from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Case, Sample
 from cg.store.store import Store
@@ -41,19 +34,14 @@ class SpringArchiveAPI:
     term storage."""
 
     def __init__(
-        self,
-        housekeeper_api: HousekeeperAPI,
-        status_db: Store,
-        data_flow_config: DataFlowConfig,
+        self, housekeeper_api: HousekeeperAPI, status_db: Store, data_flow_config: DataFlowConfig
     ):
         self.housekeeper_api: HousekeeperAPI = housekeeper_api
         self.status_db: Store = status_db
         self.data_flow_config: DataFlowConfig = data_flow_config
 
     def archive_file_to_location(
-        self,
-        file_and_sample: FileAndSample,
-        archive_handler: ArchiveHandler,
+        self, file_and_sample: FileAndSample, archive_handler: ArchiveHandler
     ) -> int:
         return archive_handler.archive_file(file_and_sample=file_and_sample)
 
@@ -67,15 +55,10 @@ class SpringArchiveAPI:
             return
         for archive_location in ArchiveLocations:
             self.archive_files_to_location(
-                archive_location=archive_location,
-                file_limit=spring_file_count_limit,
+                archive_location=archive_location, file_limit=spring_file_count_limit
             )
 
-    def archive_files_to_location(
-        self,
-        archive_location: str,
-        file_limit: int | None,
-    ) -> None:
+    def archive_files_to_location(self, archive_location: str, file_limit: int | None) -> None:
         """Archives up to spring file count limit number of files to the provided archive location."""
         files_to_archive: list[File] = self.housekeeper_api.get_non_archived_spring_files(
             tags=[archive_location],
@@ -87,19 +70,12 @@ class SpringArchiveAPI:
                 self.data_flow_config
             )
             for file_and_sample in files_and_samples_for_location:
-                self.archive_file(
-                    file_and_sample=file_and_sample,
-                    archive_handler=archive_handler,
-                )
+                self.archive_file(file_and_sample=file_and_sample, archive_handler=archive_handler)
 
         else:
             LOG.info(f"No files to archive for location {archive_location}.")
 
-    def archive_file(
-        self,
-        file_and_sample: FileAndSample,
-        archive_handler: ArchiveHandler,
-    ) -> None:
+    def archive_file(self, file_and_sample: FileAndSample, archive_handler: ArchiveHandler) -> None:
         job_id: int = archive_handler.archive_file(file_and_sample)
         self.housekeeper_api.add_archives(
             files=[file_and_sample.file],
@@ -135,9 +111,7 @@ class SpringArchiveAPI:
         return archived_files
 
     def retrieve_files_from_archive_location(
-        self,
-        files_and_samples: list[FileAndSample],
-        archive_location: str,
+        self, files_and_samples: list[FileAndSample], archive_location: str
     ) -> None:
         """Retrieves the archived spring files for a list of samples and sets retrieval ids in Housekeeper."""
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
@@ -154,21 +128,15 @@ class SpringArchiveAPI:
         for sample in samples:
             files.extend(
                 self.housekeeper_api.get_archived_files_for_bundle(
-                    bundle_name=sample.internal_id,
-                    tags=[SequencingFileTag.SPRING],
+                    bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING]
                 )
             )
         return files
 
-    def set_archive_retrieval_task_ids(
-        self,
-        retrieval_task_id: int,
-        files: list[File],
-    ) -> None:
+    def set_archive_retrieval_task_ids(self, retrieval_task_id: int, files: list[File]) -> None:
         for file in files:
             self.housekeeper_api.set_archive_retrieval_task_id(
-                file_id=file.id,
-                retrieval_task_id=retrieval_task_id,
+                file_id=file.id, retrieval_task_id=retrieval_task_id
             )
 
     def get_sample(self, file: File) -> Sample | None:
@@ -190,9 +158,7 @@ class SpringArchiveAPI:
                 files_and_samples.append(FileAndSample(file=file, sample=sample))
         return files_and_samples
 
-    def update_statuses_for_ongoing_tasks(
-        self,
-    ) -> None:
+    def update_statuses_for_ongoing_tasks(self) -> None:
         """Updates any completed jobs with a finished timestamp."""
         self.update_ongoing_archivals()
         self.update_ongoing_retrievals()
@@ -228,34 +194,23 @@ class SpringArchiveAPI:
                 )
 
     def update_archival_jobs_for_archive_location(
-        self,
-        archive_handler: ArchiveHandler,
-        job_ids: list[int],
+        self, archive_handler: ArchiveHandler, job_ids: list[int]
     ) -> None:
         for job_id in job_ids:
             self.update_ongoing_task(
-                task_id=job_id,
-                archive_handler=archive_handler,
-                is_archival=True,
+                task_id=job_id, archive_handler=archive_handler, is_archival=True
             )
 
     def update_retrieval_jobs_for_archive_location(
-        self,
-        archive_handler: ArchiveHandler,
-        job_ids: list[int],
+        self, archive_handler: ArchiveHandler, job_ids: list[int]
     ) -> None:
         for job_id in job_ids:
             self.update_ongoing_task(
-                task_id=job_id,
-                archive_handler=archive_handler,
-                is_archival=False,
+                task_id=job_id, archive_handler=archive_handler, is_archival=False
             )
 
     def update_ongoing_task(
-        self,
-        task_id: int,
-        archive_handler: ArchiveHandler,
-        is_archival: bool,
+        self, task_id: int, archive_handler: ArchiveHandler, is_archival: bool
     ) -> None:
         """Fetches info on an ongoing job and updates the Archive entry in Housekeeper."""
         try:
@@ -277,16 +232,14 @@ class SpringArchiveAPI:
             else:
                 LOG.warning("Will set retrieval task id to null.")
                 self.housekeeper_api.update_archive_retrieved_at(
-                    old_retrieval_job_id=task_id,
-                    new_retrieval_job_id=None,
+                    old_retrieval_job_id=task_id, new_retrieval_job_id=None
                 )
 
     def sort_archival_ids_on_archive_location(
         self, archive_entries: list[Archive]
     ) -> dict[ArchiveLocations, list[int]]:
         """Returns a dictionary with keys being ArchiveLocations and the values being the subset of the given
-        archival jobs which should be archived there.
-        """
+        archival jobs which should be archived there."""
 
         jobs_per_location: dict[ArchiveLocations, list[int]] = {}
         jobs_and_locations: set[
@@ -307,20 +260,14 @@ class SpringArchiveAPI:
         ids_and_locations: set[tuple[int, ArchiveLocations]] = set()
         for archive in archive_entries:
             if location := self.get_archive_location_from_file(archive.file):
-                ids_and_locations.add(
-                    (
-                        archive.archiving_task_id,
-                        location,
-                    )
-                )
+                ids_and_locations.add((archive.archiving_task_id, location))
         return ids_and_locations
 
     def sort_retrieval_ids_on_archive_location(
         self, archive_entries: list[Archive]
     ) -> dict[ArchiveLocations, list[int]]:
         """Returns a dictionary with keys being ArchiveLocations and the values being the subset of the given
-        retrieval jobs which should be archived there.
-        """
+        retrieval jobs which should be archived there."""
         jobs_per_location: dict[ArchiveLocations, list[int]] = {}
         jobs_and_locations: set[
             tuple[int, ArchiveLocations]
@@ -339,12 +286,7 @@ class SpringArchiveAPI:
         ids_and_locations: set[tuple[int, ArchiveLocations]] = set()
         for archive in archive_entries:
             if location := self.get_archive_location_from_file(archive.file):
-                ids_and_locations.add(
-                    (
-                        archive.retrieval_task_id,
-                        location,
-                    )
-                )
+                ids_and_locations.add((archive.retrieval_task_id, location))
         return ids_and_locations
 
     @staticmethod
@@ -352,9 +294,7 @@ class SpringArchiveAPI:
         return file.archive and file.archive.archived_at
 
     @staticmethod
-    def get_archive_location_from_file(
-        file: File,
-    ) -> ArchiveLocations | None:
+    def get_archive_location_from_file(file: File) -> ArchiveLocations | None:
         for tag_name in [tag.name for tag in file.tags]:
             if tag_name in iter(ArchiveLocations):
                 LOG.debug(f"Found archive location {tag_name}")
@@ -363,22 +303,15 @@ class SpringArchiveAPI:
         return None
 
     def delete_file_from_archive_location(
-        self,
-        file_and_sample: FileAndSample,
-        archive_location: ArchiveLocations,
+        self, file_and_sample: FileAndSample, archive_location: ArchiveLocations
     ) -> None:
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
         archive_handler.delete_file(file_and_sample)
 
-    def delete_file(
-        self,
-        file_path: str,
-        dry_run: bool = False,
-    ) -> None:
+    def delete_file(self, file_path: str, dry_run: bool = False) -> None:
         """Deletes the specified file where it is archived and deletes the Housekeeper record.
         Raises:
-            Click.Abort if yes is not specified or the user does not confirm the deletion.
-        """
+            Click.Abort if yes is not specified or the user does not confirm the deletion."""
         file: File = self.housekeeper_api.files(path=file_path).first()
         if not self.is_file_archived(file):
             LOG.warning(f"No archived file found for file {file_path} - exiting")
@@ -392,7 +325,6 @@ class SpringArchiveAPI:
             return
         file_and_sample: FileAndSample = self.add_samples_to_files([file])[0]
         self.delete_file_from_archive_location(
-            file_and_sample=file_and_sample,
-            archive_location=archive_location,
+            file_and_sample=file_and_sample, archive_location=archive_location
         )
         self.housekeeper_api.delete_file(file.id)

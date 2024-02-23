@@ -8,26 +8,15 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
-    get_latest_analysis_path,
-)
-from cg.constants.demultiplexing import (
-    BclConverter,
-    DemultiplexingDirsAndFiles,
-)
+from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers
 from cg.exc import FlowCellError
-from cg.models.demultiplex.run_parameters import (
-    RunParameters,
-)
-from cg.models.flow_cell.flow_cell import (
-    FlowCellDirectoryData,
-)
+from cg.models.demultiplex.run_parameters import RunParameters
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
-def test_flow_cell_id(
-    bcl2fastq_flow_cell_dir: Path,
-):
+def test_flow_cell_id(bcl2fastq_flow_cell_dir: Path):
     """Test parsing of flow cell id."""
     # GIVEN the path to a finished flow cell run
     # GIVEN the flow cell id
@@ -40,9 +29,7 @@ def test_flow_cell_id(
     assert flowcell_obj.id == flowcell_id
 
 
-def test_flow_cell_position(
-    bcl2fastq_flow_cell_dir: Path,
-):
+def test_flow_cell_position(bcl2fastq_flow_cell_dir: Path):
     """Test getting flow cell position."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
@@ -55,9 +42,7 @@ def test_flow_cell_position(
     assert position in ["A", "B"]
 
 
-def test_rta_exists(
-    novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq: FlowCellDirectoryData,
-):
+def test_rta_exists(novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq: FlowCellDirectoryData):
     """Test return of RTS file."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
@@ -72,18 +57,9 @@ def test_rta_exists(
 @pytest.mark.parametrize(
     "flow_cell_fixture_name, model",
     [
-        (
-            "novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq",
-            FlowCellSampleBcl2Fastq,
-        ),
-        (
-            "novaseq_6000_post_1_5_kits_flow_cell",
-            FlowCellSampleBCLConvert,
-        ),
-        (
-            "novaseq_x_flow_cell",
-            FlowCellSampleBCLConvert,
-        ),
+        ("novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq", FlowCellSampleBcl2Fastq),
+        ("novaseq_6000_post_1_5_kits_flow_cell", FlowCellSampleBCLConvert),
+        ("novaseq_x_flow_cell", FlowCellSampleBCLConvert),
     ],
 )
 def test_get_sample_model(
@@ -140,10 +116,7 @@ def test_get_bcl_converter_bcl2fastq_flow_cell(
         "hiseq_2500_custom_index_flow_cell",
     ],
 )
-def test_run_parameters_path(
-    flow_cell_fixture: str,
-    request: FixtureRequest,
-):
+def test_run_parameters_path(flow_cell_fixture: str, request: FixtureRequest):
     """Test that the run parameters file is being fetched correctly for the HiSeq flow cells."""
     # GIVEN a flow cell with a run parameters
     flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture)
@@ -159,9 +132,7 @@ def test_run_parameters_path(
     )
 
 
-def test_run_parameters_path_when_non_existing(
-    tmp_flow_cell_without_run_parameters_path: Path,
-):
+def test_run_parameters_path_when_non_existing(tmp_flow_cell_without_run_parameters_path: Path):
     """Test that getting the path of the run parameters path fails if the file does not exist."""
     # GIVEN a flowcell object with a directory without a run parameters file
     flow_cell = FlowCellDirectoryData(flow_cell_path=tmp_flow_cell_without_run_parameters_path)
@@ -176,28 +147,14 @@ def test_run_parameters_path_when_non_existing(
 @pytest.mark.parametrize(
     "flow_cell_fixture, expected_sequencer",
     [
-        (
-            "hiseq_2500_custom_index_flow_cell",
-            Sequencers.HISEQGA,
-        ),
-        (
-            "hiseq_x_single_index_flow_cell",
-            Sequencers.HISEQX,
-        ),
-        (
-            "novaseq_6000_post_1_5_kits_flow_cell",
-            Sequencers.NOVASEQ,
-        ),
-        (
-            "novaseq_x_flow_cell",
-            Sequencers.NOVASEQX,
-        ),
+        ("hiseq_2500_custom_index_flow_cell", Sequencers.HISEQGA),
+        ("hiseq_x_single_index_flow_cell", Sequencers.HISEQX),
+        ("novaseq_6000_post_1_5_kits_flow_cell", Sequencers.NOVASEQ),
+        ("novaseq_x_flow_cell", Sequencers.NOVASEQX),
     ],
 )
 def test_flow_cell_run_parameters_type(
-    flow_cell_fixture: str,
-    expected_sequencer: str,
-    request: FixtureRequest,
+    flow_cell_fixture: str, expected_sequencer: str, request: FixtureRequest
 ):
     """Test that the run parameters of the flow cell is of the expected type."""
     # GIVEN a flow cell without _run_parameters
@@ -211,15 +168,10 @@ def test_flow_cell_run_parameters_type(
     assert run_parameters.sequencer == expected_sequencer
 
 
-def test_has_demultiplexing_started_locally_false(
-    tmp_flow_cell_directory_bclconvert: Path,
-):
+def test_has_demultiplexing_started_locally_false(tmp_flow_cell_directory_bclconvert: Path):
     # GIVEN a flow cell without a demuxstarted.txt file
     flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
-    assert not Path(
-        flow_cell.path,
-        DemultiplexingDirsAndFiles.DEMUX_STARTED,
-    ).exists()
+    assert not Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).exists()
 
     # WHEN checking if the flow cell has started demultiplexing
     has_demux_started: bool = flow_cell.has_demultiplexing_started_locally()
@@ -233,10 +185,7 @@ def test_has_demultiplexing_started_locally_true(
 ):
     # GIVEN a flow cell with a demuxstarted.txt file
     flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
-    Path(
-        flow_cell.path,
-        DemultiplexingDirsAndFiles.DEMUX_STARTED,
-    ).touch()
+    Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).touch()
 
     # WHEN checking if the flow cell has started demultiplexing
     has_demux_started: bool = flow_cell.has_demultiplexing_started_locally()

@@ -5,20 +5,14 @@ from pathlib import Path
 
 from cg.constants.constants import Workflow
 from cg.constants.delivery import INBOX_NAME
-from cg.meta.deliver_ticket import (
-    DeliverTicketAPI,
-)
+from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
 def test_get_inbox_path(
-    cg_context: CGConfig,
-    customer_id: str,
-    helpers: StoreHelpers,
-    mocker,
-    ticket_id: str,
+    cg_context: CGConfig, customer_id: str, helpers: StoreHelpers, mocker, ticket_id: str
 ):
     """Test to get the path to customer inbox on the HPC."""
     # GIVEN a deliver_ticket API
@@ -32,21 +26,14 @@ def test_get_inbox_path(
         data_analysis=Workflow.MUTANT,
     )
 
-    mocker.patch.object(
-        DeliverTicketAPI,
-        "get_all_cases_from_ticket",
-    )
+    mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case]
 
     # WHEN running get_inbox_path
     inbox = deliver_ticket_api.get_inbox_path(ticket=ticket_id)
 
     # THEN a path is returned for cust000 with the folder ticket in the inbox
-    assert inbox.parts[-3:] == (
-        customer_id,
-        INBOX_NAME,
-        ticket_id,
-    )
+    assert inbox.parts[-3:] == (customer_id, INBOX_NAME, ticket_id)
 
 
 def test_check_if_upload_is_needed(cg_context: CGConfig, mocker, ticket_id: str):
@@ -83,13 +70,7 @@ def test_check_if_upload_is_needed_part_deux(cg_context: CGConfig, mocker, ticke
     assert is_upload_needed is False
 
 
-def test_generate_date_tag(
-    cg_context: CGConfig,
-    mocker,
-    helpers,
-    ticket_id: str,
-    timestamp_now,
-):
+def test_generate_date_tag(cg_context: CGConfig, mocker, helpers, ticket_id: str, timestamp_now):
     """Test to generate the date tag."""
     # GIVEN a deliver_ticket API
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
@@ -104,10 +85,7 @@ def test_generate_date_tag(
 
     case.ordered_at = timestamp_now
 
-    mocker.patch.object(
-        DeliverTicketAPI,
-        "get_all_cases_from_ticket",
-    )
+    mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case]
 
     # WHEN running generate_date_tag
@@ -136,12 +114,7 @@ def test_sort_files(cg_context: CGConfig):
 
 
 def test_check_if_concatenation_is_needed(
-    cg_context: CGConfig,
-    mocker,
-    helpers,
-    analysis_store: Store,
-    case_id,
-    ticket_id: str,
+    cg_context: CGConfig, mocker, helpers, analysis_store: Store, case_id, ticket_id: str
 ):
     """Test to check if concatenation is needed when it is not needed"""
     # GIVEN a deliver_ticket API
@@ -150,10 +123,7 @@ def test_check_if_concatenation_is_needed(
     # GIVEN a case object
     case_obj = analysis_store.get_case_by_internal_id(internal_id=case_id)
 
-    mocker.patch.object(
-        DeliverTicketAPI,
-        "get_all_cases_from_ticket",
-    )
+    mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case_obj]
 
     # GIVEN an application tag that is not a micro application
@@ -168,12 +138,7 @@ def test_check_if_concatenation_is_needed(
 
 
 def test_check_if_concatenation_is_needed_part_deux(
-    cg_context: CGConfig,
-    mocker,
-    helpers,
-    analysis_store: Store,
-    case_id,
-    ticket_id: str,
+    cg_context: CGConfig, mocker, helpers, analysis_store: Store, case_id, ticket_id: str
 ):
     """Test to check if concatenation is needed when it is needed"""
     # GIVEN a deliver_ticket API
@@ -182,10 +147,7 @@ def test_check_if_concatenation_is_needed_part_deux(
     # GIVEN a case object
     case_obj = analysis_store.get_case_by_internal_id(internal_id=case_id)
 
-    mocker.patch.object(
-        DeliverTicketAPI,
-        "get_all_cases_from_ticket",
-    )
+    mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case_obj]
 
     # GIVEN an application tag that is a micro application
@@ -200,12 +162,7 @@ def test_check_if_concatenation_is_needed_part_deux(
 
 
 def test_get_samples_from_ticket(
-    cg_context: CGConfig,
-    mocker,
-    helpers,
-    analysis_store: Store,
-    case_id,
-    ticket_id: str,
+    cg_context: CGConfig, mocker, helpers, analysis_store: Store, case_id, ticket_id: str
 ):
     """Test to get all samples from a ticket"""
     # GIVEN a deliver_ticket API
@@ -214,10 +171,7 @@ def test_get_samples_from_ticket(
     # GIVEN a case object
     case_obj = analysis_store.get_case_by_internal_id(internal_id=case_id)
 
-    mocker.patch.object(
-        DeliverTicketAPI,
-        "get_all_cases_from_ticket",
-    )
+    mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case_obj]
 
     # WHEN checking which samples there are in the ticket
@@ -230,11 +184,7 @@ def test_get_samples_from_ticket(
 
 
 def test_all_samples_in_cust_inbox(
-    cg_context: CGConfig,
-    mocker,
-    caplog,
-    ticket_id: str,
-    all_samples_in_inbox,
+    cg_context: CGConfig, mocker, caplog, ticket_id: str, all_samples_in_inbox
 ):
     """Test that no samples will be reported as missing when all samples in inbox"""
     caplog.set_level(logging.INFO)
@@ -247,14 +197,8 @@ def test_all_samples_in_cust_inbox(
     DeliverTicketAPI.get_inbox_path.return_value = all_samples_in_inbox
 
     # GIVEN a ticket with certain samples
-    mocker.patch.object(
-        DeliverTicketAPI,
-        "get_samples_from_ticket",
-    )
-    DeliverTicketAPI.get_samples_from_ticket.return_value = [
-        "ACC1",
-        "ACC2",
-    ]
+    mocker.patch.object(DeliverTicketAPI, "get_samples_from_ticket")
+    DeliverTicketAPI.get_samples_from_ticket.return_value = ["ACC1", "ACC2"]
 
     # WHEN checking if a sample is missing
     deliver_ticket_api.report_missing_samples(ticket=ticket_id, dry_run=False)
@@ -282,10 +226,7 @@ def test_samples_missing_in_inbox(
     DeliverTicketAPI.get_inbox_path.return_value = samples_missing_in_inbox
 
     # GIVEN a ticket with certain samples
-    mocker.patch.object(
-        DeliverTicketAPI,
-        "get_samples_from_ticket",
-    )
+    mocker.patch.object(DeliverTicketAPI, "get_samples_from_ticket")
     DeliverTicketAPI.get_samples_from_ticket.return_value = [
         sample["name"] for sample in analysis_family["samples"]
     ]

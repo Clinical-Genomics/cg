@@ -5,23 +5,15 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.downsample.downsample import (
-    DownsampleAPI,
-)
-from cg.meta.workflow.prepare_fastq import (
-    PrepareFastqAPI,
-)
+from cg.apps.downsample.downsample import DownsampleAPI
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
-from cg.models.downsample.downsample_data import (
-    DownsampleData,
-)
+from cg.models.downsample.downsample_data import DownsampleData
 from cg.store.models import Sample
 
 
 def test_add_downsampled_case_entry_to_statusdb(
-    downsample_api: DownsampleAPI,
-    downsample_data: DownsampleData,
-    caplog,
+    downsample_api: DownsampleAPI, downsample_data: DownsampleData, caplog
 ) -> None:
     """Test to add the downsampled case entry to StatusDB."""
     # GIVEN a DownsampleAPI
@@ -42,8 +34,7 @@ def test_add_downsampled_case_entry_to_statusdb(
 
 
 def test_add_downsampled_sample_entry_to_statusdb(
-    downsample_api: DownsampleAPI,
-    downsample_data: DownsampleData,
+    downsample_api: DownsampleAPI, downsample_data: DownsampleData
 ) -> None:
     """Test to add the downsampled sample entry to StatusDB."""
     # GIVEN a DownsampleAPI
@@ -63,10 +54,7 @@ def test_add_downsampled_sample_entry_to_statusdb(
         downsample_api.store_downsampled_sample(downsample_data)
 
 
-def test_add_sample_case_links(
-    downsample_api: DownsampleAPI,
-    downsample_data: DownsampleData,
-):
+def test_add_sample_case_links(downsample_api: DownsampleAPI, downsample_data: DownsampleData):
     """Test to link samples to cases in StatusDB."""
 
     # GIVEN a DownsampleAPI and a downsampled case and sample in StatusDB
@@ -140,10 +128,7 @@ def test_start_downsample_job(
     # GIVEN a DownsampleAPI
     downsample_api.dry_run = True
     # WHEN starting a downsample job
-    mocker.patch.object(
-        PrepareFastqAPI,
-        "is_sample_decompression_needed",
-    )
+    mocker.patch.object(PrepareFastqAPI, "is_sample_decompression_needed")
     PrepareFastqAPI.is_sample_decompression_needed.return_value = False
     submitted_job: int = downsample_api.downsample_sample(
         sample_id=downsample_sample_internal_id_1,

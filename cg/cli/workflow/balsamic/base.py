@@ -15,18 +15,12 @@ from cg.cli.workflow.balsamic.options import (
     OPTION_PON_CNN,
     OPTION_QOS,
 )
-from cg.cli.workflow.commands import (
-    ARGUMENT_CASE_ID,
-    link,
-    resolve_compression,
-)
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.balsamic import (
-    BalsamicAnalysisAPI,
-)
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
@@ -236,11 +230,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
-            context.invoke(
-                start,
-                case_id=case_obj.internal_id,
-                dry_run=dry_run,
-            )
+            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
             LOG.error(error)
         except CgError as error:
@@ -257,18 +247,10 @@ def start_available(context: click.Context, dry_run: bool = False):
 @ARGUMENT_CASE_ID
 @DRY_RUN
 @click.pass_context
-def store(
-    context: click.Context,
-    case_id: str,
-    dry_run: bool,
-):
+def store(context: click.Context, case_id: str, dry_run: bool):
     """Generate Housekeeper report for CASE ID and store in Housekeeper"""
     LOG.info(f"Storing analysis for {case_id}")
-    context.invoke(
-        report_deliver,
-        case_id=case_id,
-        dry_run=dry_run,
-    )
+    context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
     context.invoke(store_housekeeper, case_id=case_id)
 
 
@@ -284,11 +266,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
     for case_obj in analysis_api.get_cases_to_store():
         LOG.info(f"Storing deliverables for {case_obj.internal_id}")
         try:
-            context.invoke(
-                store,
-                case_id=case_obj.internal_id,
-                dry_run=dry_run,
-            )
+            context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
         except Exception as exception_object:
             LOG.error(f"Error storing {case_obj.internal_id}: {exception_object}")
             exit_code = EXIT_FAIL

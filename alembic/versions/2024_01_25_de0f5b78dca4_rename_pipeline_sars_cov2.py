@@ -47,18 +47,8 @@ new_enum = mysql.ENUM(*list(new_options))
 def upgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
-    op.alter_column(
-        "case",
-        "data_analysis",
-        type_=mysql.VARCHAR(64),
-        existing_nullable=True,
-    )
-    op.alter_column(
-        "analysis",
-        "pipeline",
-        type_=mysql.VARCHAR(64),
-        existing_nullable=True,
-    )
+    op.alter_column("case", "data_analysis", type_=mysql.VARCHAR(64), existing_nullable=True)
+    op.alter_column("analysis", "pipeline", type_=mysql.VARCHAR(64), existing_nullable=True)
 
     for case in session.query(Case).filter(Case.data_analysis == ""):
         print(f"Altering case: {str(case)}")
@@ -77,35 +67,15 @@ def upgrade():
         print(f"Altered analysis: {str(analysis)}")
 
     session.commit()
-    op.alter_column(
-        "case",
-        "data_analysis",
-        type_=new_enum,
-        existing_nullable=True,
-    )
-    op.alter_column(
-        "analysis",
-        "pipeline",
-        type_=new_enum,
-        existing_nullable=True,
-    )
+    op.alter_column("case", "data_analysis", type_=new_enum, existing_nullable=True)
+    op.alter_column("analysis", "pipeline", type_=new_enum, existing_nullable=True)
 
 
 def downgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
-    op.alter_column(
-        "case",
-        "data_analysis",
-        type_=mysql.VARCHAR(64),
-        existing_nullable=True,
-    )
-    op.alter_column(
-        "analysis",
-        "pipeline",
-        type_=mysql.VARCHAR(64),
-        existing_nullable=True,
-    )
+    op.alter_column("case", "data_analysis", type_=mysql.VARCHAR(64), existing_nullable=True)
+    op.alter_column("analysis", "pipeline", type_=mysql.VARCHAR(64), existing_nullable=True)
 
     for case in session.query(Case).filter(Case.data_analysis == "mutant"):
         print(f"Altering case: {str(case)}")
@@ -118,15 +88,5 @@ def downgrade():
         print(f"Altered analysis: {str(analysis)}")
 
     session.commit()
-    op.alter_column(
-        "case",
-        "data_analysis",
-        type_=old_enum,
-        existing_nullable=True,
-    )
-    op.alter_column(
-        "analysis",
-        "pipeline",
-        type_=old_enum,
-        existing_nullable=True,
-    )
+    op.alter_column("case", "data_analysis", type_=old_enum, existing_nullable=True)
+    op.alter_column("analysis", "pipeline", type_=old_enum, existing_nullable=True)

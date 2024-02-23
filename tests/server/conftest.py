@@ -11,10 +11,7 @@ from mock import patch
 
 from cg.constants import DataDelivery, Workflow
 from cg.server.ext import db as store
-from cg.store.database import (
-    create_all_tables,
-    drop_all_tables,
-)
+from cg.store.database import create_all_tables, drop_all_tables
 from cg.store.models import Case, Customer, Order
 from tests.store_helpers import StoreHelpers
 
@@ -57,9 +54,7 @@ def customer(helpers: StoreHelpers) -> Customer:
 
 
 @pytest.fixture
-def customer_another(
-    helpers: StoreHelpers,
-) -> Customer:
+def customer_another(helpers: StoreHelpers) -> Customer:
     customer: Customer = helpers.ensure_customer(store=store, customer_id="test_customer_2")
     return customer
 
@@ -76,24 +71,15 @@ def order(helpers: StoreHelpers, customer: Customer) -> Order:
 
 
 @pytest.fixture
-def order_another(
-    helpers: StoreHelpers,
-    customer_another: Customer,
-) -> Order:
+def order_another(helpers: StoreHelpers, customer_another: Customer) -> Order:
     order: Order = helpers.add_order(
-        store=store,
-        customer_id=customer_another.id,
-        ticket_id=2,
-        order_date=datetime.now(),
+        store=store, customer_id=customer_another.id, ticket_id=2, order_date=datetime.now()
     )
     return order
 
 
 @pytest.fixture
-def order_balsamic(
-    helpers: StoreHelpers,
-    customer_another: Customer,
-) -> Order:
+def order_balsamic(helpers: StoreHelpers, customer_another: Customer) -> Order:
     order: Order = helpers.add_order(
         store=store,
         customer_id=customer_another.id,
@@ -110,9 +96,7 @@ def non_existent_order_id() -> int:
 
 
 @pytest.fixture
-def client(
-    app: Flask,
-) -> Generator[FlaskClient, None, None]:
+def client(app: Flask) -> Generator[FlaskClient, None, None]:
     # Bypass authentication
     with patch.object(app, "before_request_funcs", new={}):
         yield app.test_client()

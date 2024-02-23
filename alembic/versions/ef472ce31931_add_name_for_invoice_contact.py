@@ -37,39 +37,14 @@ class Customer(Base):
 class User(Base):
     __tablename__ = "user"
     id = Column(types.Integer, primary_key=True)
-    email = Column(
-        types.String(128),
-        unique=True,
-        nullable=False,
-    )
+    email = Column(types.String(128), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
 
 
 def upgrade():
-    op.add_column(
-        "customer",
-        Column(
-            "delivery_contact_name",
-            String(128),
-            nullable=True,
-        ),
-    )
-    op.add_column(
-        "customer",
-        Column(
-            "invoice_contact_name",
-            String(128),
-            nullable=True,
-        ),
-    )
-    op.add_column(
-        "customer",
-        Column(
-            "primary_contact_name",
-            String(128),
-            nullable=True,
-        ),
-    )
+    op.add_column("customer", Column("delivery_contact_name", String(128), nullable=True))
+    op.add_column("customer", Column("invoice_contact_name", String(128), nullable=True))
+    op.add_column("customer", Column("primary_contact_name", String(128), nullable=True))
 
     bind = op.get_bind()
     session = orm.Session(bind=bind)

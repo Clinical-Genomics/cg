@@ -13,9 +13,7 @@ from cg.apps.demultiplex.sample_sheet.index import (
     pad_index_one,
     pad_index_two,
 )
-from cg.apps.demultiplex.sample_sheet.validators import (
-    SampleId,
-)
+from cg.apps.demultiplex.sample_sheet.validators import SampleId
 from cg.constants.constants import GenomeVersion
 from cg.constants.demultiplexing import (
     CUSTOM_INDEX_TAIL,
@@ -24,9 +22,7 @@ from cg.constants.demultiplexing import (
 )
 from cg.constants.symbols import EMPTY_STRING
 from cg.exc import SampleSheetError
-from cg.models.demultiplex.run_parameters import (
-    RunParameters,
-)
+from cg.models.demultiplex.run_parameters import RunParameters
 
 LOG = logging.getLogger(__name__)
 
@@ -54,10 +50,7 @@ class FlowCellSample(BaseModel):
 
     @abstractmethod
     def update_barcode_mismatches(
-        self,
-        samples_to_compare: list,
-        is_run_single_index: bool,
-        is_reverse_complement: bool,
+        self, samples_to_compare: list, is_run_single_index: bool, is_reverse_complement: bool
     ) -> None:
         """Update the barcode_mismatches_1 and barcode_mismatches_2 attributes."""
         pass
@@ -66,51 +59,22 @@ class FlowCellSample(BaseModel):
 class FlowCellSampleBcl2Fastq(FlowCellSample):
     """Class that represents a Bcl2Fastq sample."""
 
-    flowcell_id: str = Field(
-        "",
-        alias=SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID,
-    )
-    lane: int = Field(
-        ...,
-        alias=SampleSheetBcl2FastqSections.Data.LANE,
-    )
+    flowcell_id: str = Field("", alias=SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID)
+    lane: int = Field(..., alias=SampleSheetBcl2FastqSections.Data.LANE)
     sample_ref: str = Field(
-        GenomeVersion.hg19,
-        alias=SampleSheetBcl2FastqSections.Data.SAMPLE_REFERENCE,
+        GenomeVersion.hg19, alias=SampleSheetBcl2FastqSections.Data.SAMPLE_REFERENCE
     )
-    index: str = Field(
-        ...,
-        alias=SampleSheetBcl2FastqSections.Data.INDEX_1,
-    )
-    index2: str = Field(
-        "",
-        alias=SampleSheetBcl2FastqSections.Data.INDEX_2,
-    )
-    sample_name: str = Field(
-        ...,
-        alias=SampleSheetBcl2FastqSections.Data.SAMPLE_NAME,
-    )
-    control: str = Field(
-        "N",
-        alias=SampleSheetBcl2FastqSections.Data.CONTROL,
-    )
-    recipe: str = Field(
-        "R1",
-        alias=SampleSheetBcl2FastqSections.Data.RECIPE,
-    )
-    operator: str = Field(
-        "script",
-        alias=SampleSheetBcl2FastqSections.Data.OPERATOR,
-    )
+    index: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.INDEX_1)
+    index2: str = Field("", alias=SampleSheetBcl2FastqSections.Data.INDEX_2)
+    sample_name: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_NAME)
+    control: str = Field("N", alias=SampleSheetBcl2FastqSections.Data.CONTROL)
+    recipe: str = Field("R1", alias=SampleSheetBcl2FastqSections.Data.RECIPE)
+    operator: str = Field("script", alias=SampleSheetBcl2FastqSections.Data.OPERATOR)
 
     sample_id: SampleId = Field(
-        ...,
-        alias=SampleSheetBcl2FastqSections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ,
+        ..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ
     )
-    project: str = Field(
-        ...,
-        alias=SampleSheetBcl2FastqSections.Data.SAMPLE_PROJECT_BCL2FASTQ,
-    )
+    project: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_PROJECT_BCL2FASTQ)
 
     def _pad_indexes_if_necessary(self, run_parameters: RunParameters) -> None:
         index_length: int = len(self.index)
@@ -137,10 +101,7 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
             self.index2 = get_reverse_complement_dna_seq(self.index2)
 
     def update_barcode_mismatches(
-        self,
-        samples_to_compare: list,
-        is_run_single_index: bool,
-        is_reverse_complement: bool,
+        self, samples_to_compare: list, is_run_single_index: bool, is_reverse_complement: bool
     ) -> None:
         """No updating of barcode mismatch values for Bcl2Fastq samples."""
         LOG.debug(f"No updating of barcode mismatch values for Bcl2Fastq sample {self.sample_id}")
@@ -149,33 +110,18 @@ class FlowCellSampleBcl2Fastq(FlowCellSample):
 class FlowCellSampleBCLConvert(FlowCellSample):
     """Class that represents a BCLConvert sample."""
 
-    lane: int = Field(
-        ...,
-        alias=SampleSheetBCLConvertSections.Data.LANE,
-    )
-    sample_id: SampleId = Field(
-        ...,
-        alias=SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID,
-    )
-    index: str = Field(
-        ...,
-        alias=SampleSheetBCLConvertSections.Data.INDEX_1,
-    )
-    index2: str = Field(
-        EMPTY_STRING,
-        alias=SampleSheetBCLConvertSections.Data.INDEX_2,
-    )
+    lane: int = Field(..., alias=SampleSheetBCLConvertSections.Data.LANE)
+    sample_id: SampleId = Field(..., alias=SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID)
+    index: str = Field(..., alias=SampleSheetBCLConvertSections.Data.INDEX_1)
+    index2: str = Field(EMPTY_STRING, alias=SampleSheetBCLConvertSections.Data.INDEX_2)
     override_cycles: str = Field(
-        EMPTY_STRING,
-        alias=SampleSheetBCLConvertSections.Data.OVERRIDE_CYCLES,
+        EMPTY_STRING, alias=SampleSheetBCLConvertSections.Data.OVERRIDE_CYCLES
     )
     barcode_mismatches_1: int = Field(
-        1,
-        alias=SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_1,
+        1, alias=SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_1
     )
     barcode_mismatches_2: int | str = Field(
-        1,
-        alias=SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_2,
+        1, alias=SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_2
     )
 
     def _get_index1_override_cycles(self, len_index1_cycles: int) -> str:
@@ -186,11 +132,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
             cycles_format = f"I{len_index_1_sample}N{len_index1_cycles - len_index_1_sample};"
         return cycles_format
 
-    def _get_index2_override_cycles(
-        self,
-        len_index2_cycles: int,
-        reverse_cycle: bool,
-    ) -> str:
+    def _get_index2_override_cycles(self, len_index2_cycles: int, reverse_cycle: bool) -> str:
         """Create the index 2 sub-string for the override cycles attribute."""
         len_index_2_sample: int = len(self.index2)
         cycles_format: str = f"I{len_index2_cycles};"
@@ -221,20 +163,15 @@ class FlowCellSampleBCLConvert(FlowCellSample):
         self.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
     def _update_barcode_mismatches_1(
-        self,
-        samples_to_compare: list["FlowCellSampleBCLConvert"],
+        self, samples_to_compare: list["FlowCellSampleBCLConvert"]
     ) -> None:
         """Assign zero to barcode_mismatches_1 if the hamming distance between self.index
-        and the index1 of any sample in the lane is below the minimum threshold.
-        """
+        and the index1 of any sample in the lane is below the minimum threshold."""
         for sample in samples_to_compare:
             if self.sample_id == sample.sample_id:
                 continue
             if (
-                get_hamming_distance_index_1(
-                    sequence_1=self.index,
-                    sequence_2=sample.index,
-                )
+                get_hamming_distance_index_1(sequence_1=self.index, sequence_2=sample.index)
                 < MINIMUM_HAMMING_DISTANCE
             ):
                 LOG.debug(f"Turning barcode mismatch for index 1 to 0 for sample {self.sample_id}")
@@ -248,8 +185,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
     ) -> None:
         """Assign zero to barcode_mismatches_2 if the hamming distance between self.index2
         and the index2 of any sample in the lane is below the minimum threshold.
-        If the sample is single-indexed, assign 'na'.
-        """
+        If the sample is single-indexed, assign 'na'."""
         if self.index2 == EMPTY_STRING and "-" not in self.index:
             LOG.debug(f"Turning barcode mismatch for index 2 to 'na' for sample {self.sample_id}")
             self.barcode_mismatches_2 = "na"
@@ -290,6 +226,5 @@ class FlowCellSampleBCLConvert(FlowCellSample):
             LOG.debug("Run is single-indexed, skipping barcode mismatch update for index 2")
             return
         self._update_barcode_mismatches_2(
-            samples_to_compare=samples_to_compare,
-            is_reverse_complement=is_reverse_complement,
+            samples_to_compare=samples_to_compare, is_reverse_complement=is_reverse_complement
         )

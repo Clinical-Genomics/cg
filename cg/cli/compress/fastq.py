@@ -31,30 +31,10 @@ LOG = logging.getLogger(__name__)
     show_default=True,
     help="Threshold for how long ago was the case created",
 )
-@click.option(
-    "--hours",
-    type=int,
-    help="Hours to allocate for slurm job",
-)
-@click.option(
-    "-m",
-    "--mem",
-    type=int,
-    help="Memory for slurm job",
-)
-@click.option(
-    "-t",
-    "--ntasks",
-    type=int,
-    help="Number of tasks for slurm job",
-)
-@click.option(
-    "-n",
-    "--number-of-conversions",
-    default=5,
-    type=int,
-    show_default=True,
-)
+@click.option("--hours", type=int, help="Hours to allocate for slurm job")
+@click.option("-m", "--mem", type=int, help="Memory for slurm job")
+@click.option("-t", "--ntasks", type=int, help="Number of tasks for slurm job")
+@click.option("-n", "--number-of-conversions", default=5, type=int, show_default=True)
 @DRY_RUN
 @click.pass_obj
 def fastq_cmd(
@@ -71,11 +51,7 @@ def fastq_cmd(
     LOG.info("Running compress FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
-    cases: list[Case] = get_cases_to_process(
-        case_id=case_id,
-        days_back=days_back,
-        store=store,
-    )
+    cases: list[Case] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
     if not cases:
         LOG.info("No cases to compress")
         return None
@@ -101,23 +77,14 @@ def fastq_cmd(
 )
 @DRY_RUN
 @click.pass_obj
-def clean_fastq(
-    context: CGConfig,
-    case_id: str | None,
-    days_back: int,
-    dry_run: bool,
-):
+def clean_fastq(context: CGConfig, case_id: str | None, days_back: int, dry_run: bool):
     """Remove compressed FASTQ files, and update links in Housekeeper to SPRING files."""
     LOG.info("Running compress clean FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run)
 
-    cases: list[Case] = get_cases_to_process(
-        case_id=case_id,
-        days_back=days_back,
-        store=store,
-    )
+    cases: list[Case] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
     if not cases:
         return
 
@@ -127,8 +94,7 @@ def clean_fastq(
         for sample_id in sample_ids:
             archive_location: str = store.get_sample_by_internal_id(sample_id).archive_location
             was_cleaned: bool = compress_api.clean_fastq(
-                sample_id=sample_id,
-                archive_location=archive_location,
+                sample_id=sample_id, archive_location=archive_location
             )
             if not was_cleaned:
                 LOG.info(f"Skipping individual {sample_id}")
@@ -142,32 +108,20 @@ def clean_fastq(
 @click.option("-b", "--bundle-name")
 @DRY_RUN
 @click.pass_obj
-def fix_spring(
-    context: CGConfig,
-    bundle_name: str | None,
-    dry_run: bool,
-):
+def fix_spring(context: CGConfig, bundle_name: str | None, dry_run: bool):
     """Check if bundle(s) have non-existing SPRING files and correct these."""
     LOG.info("Running fix spring")
     compress_api = context.meta_apis["compress_api"]
     update_compress_api(compress_api, dry_run=dry_run)
     hk_api: HousekeeperAPI = compress_api.hk_api
-    correct_spring_paths(
-        hk_api=hk_api,
-        bundle_name=bundle_name,
-        dry_run=dry_run,
-    )
+    correct_spring_paths(hk_api=hk_api, bundle_name=bundle_name, dry_run=dry_run)
 
 
 @click.command("sample")
 @click.argument("sample-id", type=str)
 @DRY_RUN
 @click.pass_obj
-def decompress_sample(
-    context: CGConfig,
-    sample_id: str,
-    dry_run: bool,
-):
+def decompress_sample(context: CGConfig, sample_id: str, dry_run: bool):
     """Decompress SPRING file for sample, and include links to FASTQ files in Housekeeper."""
 
     compress_api: CompressAPI = context.meta_apis["compress_api"]
@@ -194,9 +148,7 @@ def decompress_case(context: click.Context, case_id, dry_run):
         decompressed_individuals = 0
         for sample_id in samples:
             decompressed_count: int = context.invoke(
-                decompress_sample,
-                sample_id=sample_id,
-                dry_run=dry_run,
+                decompress_sample, sample_id=sample_id, dry_run=dry_run
             )
             decompressed_individuals += decompressed_count
     except CaseNotFoundError:
@@ -208,11 +160,7 @@ def decompress_case(context: click.Context, case_id, dry_run):
 @click.argument("flow-cell-id", type=str)
 @DRY_RUN
 @click.pass_obj
-def decompress_flowcell(
-    context: click.Context,
-    flow_cell_id: str,
-    dry_run: bool,
-):
+def decompress_flowcell(context: click.Context, flow_cell_id: str, dry_run: bool):
     """Decompress SPRING files for flow cell, and include links to FASTQ files in Housekeeper."""
 
     store: Store = context.obj.status_db
@@ -220,9 +168,7 @@ def decompress_flowcell(
     decompressed_individuals = 0
     for sample in samples:
         decompressed_count = context.invoke(
-            decompress_sample,
-            sample_id=sample.internal_id,
-            dry_run=dry_run,
+            decompress_sample, sample_id=sample.internal_id, dry_run=dry_run
         )
         decompressed_individuals += decompressed_count
     LOG.info(f"Decompressed spring archives in {decompressed_individuals} samples")
@@ -232,20 +178,14 @@ def decompress_flowcell(
 @click.argument("ticket", type=str)
 @DRY_RUN
 @click.pass_context
-def decompress_ticket(
-    context: click.Context,
-    ticket: str,
-    dry_run: bool,
-):
+def decompress_ticket(context: click.Context, ticket: str, dry_run: bool):
     """Decompress SPRING file for ticket, and include links to FASTQ files in Housekeeper."""
     store: Store = context.obj.status_db
     samples: Iterable[Sample] = store.get_samples_from_ticket(ticket=ticket)
     decompressed_individuals = 0
     for sample in samples:
         decompressed_count = context.invoke(
-            decompress_sample,
-            sample_id=sample.internal_id,
-            dry_run=dry_run,
+            decompress_sample, sample_id=sample.internal_id, dry_run=dry_run
         )
         decompressed_individuals += decompressed_count
     LOG.info(f"Decompressed spring archives in {decompressed_individuals} samples")

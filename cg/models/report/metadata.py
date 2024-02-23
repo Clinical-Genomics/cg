@@ -109,32 +109,17 @@ class RnafusionSampleMetadataModel(SampleMetadataModel):
     """
 
     bias_5_3: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
-    gc_content: Annotated[
-        str,
-        BeforeValidator(get_float_as_percentage),
-    ] = NA_FIELD
+    gc_content: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
     input_amount: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     insert_size: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     insert_size_peak: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
-    mapped_reads: Annotated[
-        str,
-        BeforeValidator(get_float_as_percentage),
-    ] = NA_FIELD
+    mapped_reads: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
     mean_length_r1: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     mrna_bases: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     pct_adapter: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     pct_surviving: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
-    q20_rate: Annotated[
-        str,
-        BeforeValidator(get_float_as_percentage),
-    ] = NA_FIELD
-    q30_rate: Annotated[
-        str,
-        BeforeValidator(get_float_as_percentage),
-    ] = NA_FIELD
-    ribosomal_bases: Annotated[
-        str,
-        BeforeValidator(get_float_as_percentage),
-    ] = NA_FIELD
+    q20_rate: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
+    q30_rate: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
+    ribosomal_bases: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
     rin: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     uniquely_mapped_reads: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD

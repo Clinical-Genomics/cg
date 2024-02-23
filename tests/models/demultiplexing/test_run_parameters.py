@@ -21,9 +21,7 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
-from cg.models.flow_cell.flow_cell import (
-    FlowCellDirectoryData,
-)
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 @pytest.mark.parametrize(
@@ -36,8 +34,7 @@ from cg.models.flow_cell.flow_cell import (
     ],
 )
 def test_run_parameters_parent_class_fails(
-    run_parameters_path_fixture: str,
-    request: FixtureRequest,
+    run_parameters_path_fixture: str, request: FixtureRequest
 ):
     """Test that trying to instantiate the parent RunParameters class raises an error."""
     # GIVEN a valid path for a run parameters file
@@ -53,26 +50,10 @@ def test_run_parameters_parent_class_fails(
 @pytest.mark.parametrize(
     "run_parameters_path, constructor, sequencer",
     [
-        (
-            "hiseq_x_single_index_run_parameters_path",
-            RunParametersHiSeq,
-            Sequencers.HISEQX,
-        ),
-        (
-            "hiseq_2500_dual_index_run_parameters_path",
-            RunParametersHiSeq,
-            Sequencers.HISEQGA,
-        ),
-        (
-            "novaseq_6000_run_parameters_path",
-            RunParametersNovaSeq6000,
-            Sequencers.NOVASEQ,
-        ),
-        (
-            "novaseq_x_run_parameters_path",
-            RunParametersNovaSeqX,
-            Sequencers.NOVASEQX,
-        ),
+        ("hiseq_x_single_index_run_parameters_path", RunParametersHiSeq, Sequencers.HISEQX),
+        ("hiseq_2500_dual_index_run_parameters_path", RunParametersHiSeq, Sequencers.HISEQGA),
+        ("novaseq_6000_run_parameters_path", RunParametersNovaSeq6000, Sequencers.NOVASEQ),
+        ("novaseq_x_run_parameters_path", RunParametersNovaSeqX, Sequencers.NOVASEQX),
     ],
 )
 def test_run_parameters_init(
@@ -143,10 +124,7 @@ class RunParametersScenario(BaseModel):
         "NovaSeq6000 constructor, NovaSeqX constructor",
     ],
 )
-def test_run_parameters_wrong_file(
-    scenario: RunParametersScenario,
-    request: FixtureRequest,
-):
+def test_run_parameters_wrong_file(scenario: RunParametersScenario, request: FixtureRequest):
     """Test that creating a RunParameters object with a wrong file fails."""
     # GIVEN a run parameters path from an instrument different from the expected
     wrong_run_parameters_path: Path = request.getfixturevalue(
@@ -167,15 +145,10 @@ def test_run_parameters_wrong_file(
         "hiseq_x_single_index_run_parameters",
         "novaseq_x_run_parameters",
     ],
-    ids=[
-        "HiSeq 2500 dual index",
-        "HiSeq X single index",
-        "NovaSeq X",
-    ],
+    ids=["HiSeq 2500 dual index", "HiSeq X single index", "NovaSeq X"],
 )
 def test_reagent_kit_version_hiseq_and_novaseq_x(
-    run_parameters_fixture: str,
-    request: FixtureRequest,
+    run_parameters_fixture: str, request: FixtureRequest
 ):
     """Test that getting reagent kit version from a HiSeq or NovaSeqX RunParameters returns None."""
     # GIVEN a valid RunParameters object
@@ -187,9 +160,7 @@ def test_reagent_kit_version_hiseq_and_novaseq_x(
     assert not run_parameters.reagent_kit_version
 
 
-def test_reagent_kit_version_novaseq_6000(
-    novaseq_6000_run_parameters: RunParametersNovaSeq6000,
-):
+def test_reagent_kit_version_novaseq_6000(novaseq_6000_run_parameters: RunParametersNovaSeq6000):
     """Test that getting reagent kit version from a correct file returns an expected value."""
     # GIVEN a valid RunParameters object for NovaSeq6000
 
@@ -210,8 +181,7 @@ def test_reagent_kit_version_novaseq_6000(
     ],
 )
 def test_control_software_version_hiseq_and_novaseq_x(
-    run_parameters_fixture: str,
-    request: FixtureRequest,
+    run_parameters_fixture: str, request: FixtureRequest
 ):
     """Test that getting control software version from HiSeq/NovaSeqX RunParameters returns None."""
     # GIVEN a valid RunParameters object
@@ -237,10 +207,7 @@ def test_control_software_version_novaseq_6000(
     assert control_software_version != ""
 
 
-def test_novaseq_6000_no_version(
-    run_parameters_missing_versions_path: Path,
-    caplog,
-):
+def test_novaseq_6000_no_version(run_parameters_missing_versions_path: Path, caplog):
     """Test that creating a Run Parameters object from a file without version fails."""
     caplog.set_level(logging.INFO)
     # GIVEN the path of a RunParameters file without control software version
@@ -265,10 +232,7 @@ def test_novaseq_6000_no_version(
         "novaseq_x_run_parameters",
     ],
 )
-def test_get_cycles(
-    run_parameters_fixture: str,
-    request: FixtureRequest,
-):
+def test_get_cycles(run_parameters_fixture: str, request: FixtureRequest):
     """Test that the read and index cycles are read correctly for any RunParameters object."""
     # GIVEN a RunParameters object
     run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
@@ -290,20 +254,12 @@ def test_get_cycles(
 @pytest.mark.parametrize(
     "flow_cell_fixture, expected_result",
     [
-        (
-            "novaseq_6000_pre_1_5_kits_flow_cell",
-            False,
-        ),
-        (
-            "novaseq_6000_post_1_5_kits_flow_cell",
-            True,
-        ),
+        ("novaseq_6000_pre_1_5_kits_flow_cell", False),
+        ("novaseq_6000_post_1_5_kits_flow_cell", True),
     ],
 )
 def test_is_novaseq6000_post_1_5_kit(
-    flow_cell_fixture: str,
-    expected_result: bool,
-    request: FixtureRequest,
+    flow_cell_fixture: str, expected_result: bool, request: FixtureRequest
 ):
     """Test that the correct index settings are returned for each NovaSeq flow cell type."""
     # GIVEN run parameters from a flow cell
@@ -317,18 +273,9 @@ def test_is_novaseq6000_post_1_5_kit(
 @pytest.mark.parametrize(
     "flow_cell, correct_settings",
     [
-        (
-            "novaseq_6000_pre_1_5_kits_flow_cell",
-            NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS,
-        ),
-        (
-            "novaseq_6000_post_1_5_kits_flow_cell",
-            NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS,
-        ),
-        (
-            "novaseq_x_flow_cell",
-            NOVASEQ_X_INDEX_SETTINGS,
-        ),
+        ("novaseq_6000_pre_1_5_kits_flow_cell", NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS),
+        ("novaseq_6000_post_1_5_kits_flow_cell", NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS),
+        ("novaseq_x_flow_cell", NOVASEQ_X_INDEX_SETTINGS),
     ],
 )
 def test_get_index_settings(

@@ -4,13 +4,9 @@ import logging
 
 from click.testing import CliRunner
 
-from cg.cli.deliver.base import (
-    deliver as deliver_cmd,
-)
+from cg.cli.deliver.base import deliver as deliver_cmd
 from cg.constants import EXIT_SUCCESS
-from cg.meta.deliver_ticket import (
-    DeliverTicketAPI,
-)
+from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.models.cg_config import CGConfig
 
 
@@ -33,11 +29,7 @@ def test_run_deliver_analysis_help(cli_runner: CliRunner, base_context: CGConfig
     # GIVEN a context with store and housekeeper information
 
     # WHEN running cg deliver help
-    result = cli_runner.invoke(
-        deliver_cmd,
-        ["analysis", "--help"],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(deliver_cmd, ["analysis", "--help"], obj=base_context)
 
     # THEN assert the command exists without problems
     assert result.exit_code == EXIT_SUCCESS
@@ -51,11 +43,7 @@ def test_run_deliver_ticket_help(cli_runner: CliRunner, base_context: CGConfig):
     # GIVEN a context with store and housekeeper information
 
     # WHEN running cg deliver help
-    result = cli_runner.invoke(
-        deliver_cmd,
-        ["ticket", "--help"],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(deliver_cmd, ["ticket", "--help"], obj=base_context)
 
     # THEN assert the command exists without problems
     assert result.exit_code == EXIT_SUCCESS
@@ -64,11 +52,7 @@ def test_run_deliver_ticket_help(cli_runner: CliRunner, base_context: CGConfig):
 
 
 def test_run_deliver_delivered_ticket(
-    cli_runner: CliRunner,
-    cg_context: CGConfig,
-    mocker,
-    caplog,
-    ticket_id,
+    cli_runner: CliRunner, cg_context: CGConfig, mocker, caplog, ticket_id
 ):
     """Test for when files are already delivered to customer inbox the HPC"""
     caplog.set_level(logging.INFO)
@@ -76,23 +60,13 @@ def test_run_deliver_delivered_ticket(
     # GIVEN a cli runner
 
     # GIVEN uploading data to the delivery server is not needed
-    mocker.patch.object(
-        DeliverTicketAPI,
-        "check_if_upload_is_needed",
-    )
+    mocker.patch.object(DeliverTicketAPI, "check_if_upload_is_needed")
     DeliverTicketAPI.check_if_upload_is_needed.return_value = False
 
     # WHEN running cg deliver ticket
     result = cli_runner.invoke(
         deliver_cmd,
-        [
-            "ticket",
-            "--dry-run",
-            "--ticket",
-            ticket_id,
-            "--delivery-type",
-            "fastq",
-        ],
+        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", "fastq"],
         obj=cg_context,
     )
 
@@ -104,38 +78,22 @@ def test_run_deliver_delivered_ticket(
 
 
 def test_deliver_ticket_with_force_all_flag(
-    cli_runner: CliRunner,
-    cg_context: CGConfig,
-    mocker,
-    caplog,
-    ticket_id,
+    cli_runner: CliRunner, cg_context: CGConfig, mocker, caplog, ticket_id
 ):
     """Test that when the --force-all flag is used,
-    the files are delivered to the customer inbox on the HPC
-    """
+    the files are delivered to the customer inbox on the HPC"""
     caplog.set_level(logging.INFO)
 
     # GIVEN a cli runner
 
     # GIVEN uploading data to the delivery server is not needed
-    mocker.patch.object(
-        DeliverTicketAPI,
-        "check_if_upload_is_needed",
-    )
+    mocker.patch.object(DeliverTicketAPI, "check_if_upload_is_needed")
     DeliverTicketAPI.check_if_upload_is_needed.return_value = False
 
     # WHEN running cg deliver ticket with --force-all flag
     cli_runner.invoke(
         deliver_cmd,
-        [
-            "ticket",
-            "--dry-run",
-            "--ticket",
-            ticket_id,
-            "--delivery-type",
-            "fastq",
-            "--force-all",
-        ],
+        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", "fastq", "--force-all"],
         obj=cg_context,
     )
 
@@ -144,43 +102,24 @@ def test_deliver_ticket_with_force_all_flag(
     assert "Delivering files to customer inbox on the HPC" in caplog.text
 
 
-def test_run_deliver_ticket(
-    cli_runner: CliRunner,
-    cg_context: CGConfig,
-    mocker,
-    caplog,
-    ticket_id,
-):
+def test_run_deliver_ticket(cli_runner: CliRunner, cg_context: CGConfig, mocker, caplog, ticket_id):
     """Test for delivering tu customer inbox"""
     caplog.set_level(logging.INFO)
 
     # GIVEN a cli runner
 
     # GIVEN uploading data to the delivery server is needed
-    mocker.patch.object(
-        DeliverTicketAPI,
-        "check_if_upload_is_needed",
-    )
+    mocker.patch.object(DeliverTicketAPI, "check_if_upload_is_needed")
     DeliverTicketAPI.check_if_upload_is_needed.return_value = True
 
     # GIVEN data needs to be concatenated
-    mocker.patch.object(
-        DeliverTicketAPI,
-        "check_if_concatenation_is_needed",
-    )
+    mocker.patch.object(DeliverTicketAPI, "check_if_concatenation_is_needed")
     DeliverTicketAPI.check_if_concatenation_is_needed.return_value = True
 
     # WHEN running cg deliver ticket
     cli_runner.invoke(
         deliver_cmd,
-        [
-            "ticket",
-            "--dry-run",
-            "--ticket",
-            ticket_id,
-            "--delivery-type",
-            "fastq",
-        ],
+        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", "fastq"],
         obj=cg_context,
     )
 

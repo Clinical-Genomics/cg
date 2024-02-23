@@ -1,15 +1,9 @@
 """Test module for the Rnafusion delivery report API."""
 
 from cg.constants import NA_FIELD
-from cg.meta.report.rnafusion import (
-    RnafusionReportAPI,
-)
-from cg.models.report.metadata import (
-    RnafusionSampleMetadataModel,
-)
-from cg.models.rnafusion.rnafusion import (
-    RnafusionAnalysis,
-)
+from cg.meta.report.rnafusion import RnafusionReportAPI
+from cg.models.report.metadata import RnafusionSampleMetadataModel
+from cg.models.rnafusion.rnafusion import RnafusionAnalysis
 from cg.store.models import Case, Sample
 
 
@@ -35,9 +29,7 @@ def test_get_sample_metadata(
 
     # WHEN getting the sample metadata
     sample_metadata: RnafusionSampleMetadataModel = report_api_rnafusion.get_sample_metadata(
-        case=case,
-        sample=sample,
-        analysis_metadata=latest_metadata,
+        case=case, sample=sample, analysis_metadata=latest_metadata
     )
 
     # THEN the sample metadata should be correctly retrieved and match the expected validated metrics
@@ -67,9 +59,7 @@ def test_get_down_sample_metadata(
 
     # WHEN getting the sample metadata
     sample_metadata: RnafusionSampleMetadataModel = report_api_rnafusion.get_sample_metadata(
-        case=case,
-        sample=sample,
-        analysis_metadata=latest_metadata,
+        case=case, sample=sample, analysis_metadata=latest_metadata
     )
 
     # THEN the rin and input_amount should be N/A

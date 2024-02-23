@@ -11,10 +11,7 @@ class EnumField:
     default_label_function = get_value
 
     def apply_choices(
-        self,
-        enum_class: EnumMeta,
-        label_function=default_label_function,
-        kwargs=None,
+        self, enum_class: EnumMeta, label_function=default_label_function, kwargs=None
     ):
         if not kwargs:
             kwargs = dict()

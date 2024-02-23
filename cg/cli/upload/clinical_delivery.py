@@ -8,16 +8,9 @@ import click
 
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.constants import (
-    EXIT_FAIL,
-    EXIT_SUCCESS,
-    Priority,
-    Workflow,
-)
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, Workflow
 from cg.constants.constants import DRY_RUN
-from cg.constants.delivery import (
-    PIPELINE_ANALYSIS_TAG_MAP,
-)
+from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.tb import AnalysisTypes
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
@@ -31,14 +24,9 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 @click.argument("case_id", required=True)
 @DRY_RUN
-def upload_clinical_delivery(
-    context: click.Context,
-    case_id: str,
-    dry_run: bool,
-):
+def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
     """Links the appropriate files for a case, based on the data_delivery, to the customer folder
-    and subsequently uses rsync to upload it to caesar.
-    """
+    and subsequently uses rsync to upload it to caesar."""
 
     click.echo(click.style("----------------- Clinical-delivery -----------------"))
 
@@ -48,10 +36,9 @@ def upload_clinical_delivery(
     is_case_delivery: bool
     is_complete_delivery: bool
     job_id: int
-    (
-        is_sample_delivery,
-        is_case_delivery,
-    ) = DeliverAPI.get_delivery_scope(delivery_arguments=delivery_types)
+    is_sample_delivery, is_case_delivery = DeliverAPI.get_delivery_scope(
+        delivery_arguments=delivery_types
+    )
     if not delivery_types:
         LOG.info(f"No delivery of files requested for case {case_id}")
         return
@@ -68,18 +55,14 @@ def upload_clinical_delivery(
         ).deliver_files(case_obj=case)
 
     rsync_api: RsyncAPI = RsyncAPI(context.obj)
-    (
-        is_complete_delivery,
-        job_id,
-    ) = rsync_api.slurm_rsync_single_case(
+    is_complete_delivery, job_id = rsync_api.slurm_rsync_single_case(
         case=case,
         dry_run=dry_run,
         sample_files_present=is_sample_delivery,
         case_files_present=is_case_delivery,
     )
     RsyncAPI.write_trailblazer_config(
-        {"jobs": [str(job_id)]},
-        config_path=rsync_api.trailblazer_config_path,
+        {"jobs": [str(job_id)]}, config_path=rsync_api.trailblazer_config_path
     )
     analysis_name: str = f"{case_id}_rsync" if is_complete_delivery else f"{case_id}_partial"
     if not dry_run:
@@ -93,10 +76,7 @@ def upload_clinical_delivery(
             workflow=Workflow.RSYNC,
             ticket=case.latest_ticket,
         )
-        trailblazer_api.add_upload_job_to_analysis(
-            analysis_id=analysis.id,
-            slurm_id=job_id,
-        )
+        trailblazer_api.add_upload_job_to_analysis(analysis_id=analysis.id, slurm_id=job_id)
     LOG.info(f"Transfer of case {case_id} started with SLURM job id {job_id}")
 
 
@@ -130,11 +110,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
         LOG.info(f"Uploading family: {case.internal_id}")
         analysis_obj.upload_started_at = dt.datetime.now()
         try:
-            context.invoke(
-                upload_clinical_delivery,
-                case_id=case.internal_id,
-                dry_run=dry_run,
-            )
+            context.invoke(upload_clinical_delivery, case_id=case.internal_id, dry_run=dry_run)
         except Exception as error:
             LOG.error(f"Upload of case {case.internal_id} failed")
             LOG.error(error)

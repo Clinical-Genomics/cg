@@ -16,10 +16,7 @@ from cg.constants.demultiplexing import (
     IndexSettings,
     RunParametersXMLNodes,
 )
-from cg.constants.sequencing import (
-    SEQUENCER_TYPES,
-    Sequencers,
-)
+from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
 from cg.exc import RunParametersError, XMLError
 from cg.io.xml import get_tree_node, read_xml
 
@@ -45,12 +42,10 @@ class RunParameters:
     def _validate_instrument(self, node_name: str, node_value: str):
         """Fetches the node from an XML file and compares it with the expected value.
         Raises:
-            RunParametersError if the node does not have the expected value.
-        """
+            RunParametersError if the node does not have the expected value."""
         try:
             application: ElementTree.Element | None = get_tree_node(
-                tree=self.tree,
-                node_name=node_name,
+                tree=self.tree, node_name=node_name
             )
         except XMLError:
             raise RunParametersError(
@@ -70,9 +65,7 @@ class RunParameters:
 
     @property
     @abstractmethod
-    def control_software_version(
-        self,
-    ) -> str | None:
+    def control_software_version(self) -> str | None:
         """Return the control software version if existent."""
         pass
 
@@ -113,9 +106,7 @@ class RunParameters:
         """Returns true if the sequencing run is single-index."""
         return self.get_index_2_cycles() == 0
 
-    def _is_novaseq6000_post_1_5_kit(
-        self,
-    ) -> bool:
+    def _is_novaseq6000_post_1_5_kit(self) -> bool:
         """
         Returns whether sequencing was performed after the 1.5 consumables kits were introduced.
         This is indicated by the software version and the reagent kit fields in the run parameters.
@@ -128,9 +119,7 @@ class RunParameters:
             return False
         return True
 
-    def _get_index_settings(
-        self,
-    ) -> IndexSettings:
+    def _get_index_settings(self) -> IndexSettings:
         """Returns the correct index-related settings for the run in question."""
         if self.sequencer == Sequencers.NOVASEQX:
             LOG.debug("Using NovaSeqX index settings")
@@ -284,8 +273,7 @@ class RunParametersNovaSeqX(RunParameters):
         """Return read and index cycle values parsed as a dictionary."""
         cycle_mapping: dict[str, int] = {}
         planned_reads_tree: ElementTree.Element = get_tree_node(
-            tree=self.tree,
-            node_name=RunParametersXMLNodes.PLANNED_READS_NOVASEQ_X,
+            tree=self.tree, node_name=RunParametersXMLNodes.PLANNED_READS_NOVASEQ_X
         )
         planned_reads: list[ElementTree.Element] = planned_reads_tree.findall(
             RunParametersXMLNodes.INNER_READ

@@ -2,11 +2,7 @@
 
 from enum import StrEnum
 
-YES_NO_LIMS_BOOLEANS = [
-    "require_qc_ok",
-    "tumour",
-    "verified_organism",
-]
+YES_NO_LIMS_BOOLEANS = ["require_qc_ok", "tumour", "verified_organism"]
 
 PROP2UDF = {
     "application": "Sequencing Analysis",

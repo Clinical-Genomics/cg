@@ -11,12 +11,8 @@ from cg.apps.tb import TrailblazerAPI
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.compress import CompressAPI
-from cg.meta.encryption.encryption import (
-    SpringEncryptionAPI,
-)
-from cg.meta.workflow.prepare_fastq import (
-    PrepareFastqAPI,
-)
+from cg.meta.encryption.encryption import SpringEncryptionAPI
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 

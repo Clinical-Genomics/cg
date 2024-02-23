@@ -4,10 +4,7 @@ from typing import Callable
 from sqlalchemy.orm import Query
 
 from cg.constants import Workflow
-from cg.store.models import (
-    Application,
-    ApplicationLimitations,
-)
+from cg.store.models import Application, ApplicationLimitations
 
 
 def filter_application_limitations_by_tag(

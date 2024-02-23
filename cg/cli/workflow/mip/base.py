@@ -32,22 +32,14 @@ LOG = logging.getLogger(__name__)
 @OPTION_PANEL_BED
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def config_case(
-    context: CGConfig,
-    case_id: str,
-    panel_bed: str,
-    dry_run: bool,
-):
+def config_case(context: CGConfig, case_id: str, panel_bed: str, dry_run: bool):
     """Generate a config for the case id."""
 
     analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         panel_bed: str | None = analysis_api.get_panel_bed(panel_bed=panel_bed)
-        config_data: dict = analysis_api.pedigree_config(
-            case_id=case_id,
-            panel_bed=panel_bed,
-        )
+        config_data: dict = analysis_api.pedigree_config(case_id=case_id, panel_bed=panel_bed)
     except CgError as error:
         LOG.error(error)
         raise click.Abort()
@@ -126,8 +118,7 @@ def run(
         start_after=start_after,
         start_with=start_with,
         skip_evaluation=analysis_api.get_skip_evaluation_flag(
-            case_id=case_id,
-            skip_evaluation=skip_evaluation,
+            case_id=case_id, skip_evaluation=skip_evaluation
         ),
         use_bwa_mem=use_bwa_mem,
     )
@@ -137,11 +128,7 @@ def run(
     except CgError as error:
         LOG.error(error)
         raise click.Abort
-    analysis_api.run_analysis(
-        case_id=case_id,
-        dry_run=dry_run,
-        command_args=command_args,
-    )
+    analysis_api.run_analysis(case_id=case_id, dry_run=dry_run, command_args=command_args)
 
     if dry_run:
         LOG.info("Running in dry-run mode.")
@@ -194,17 +181,8 @@ def start(
     analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
     context.invoke(link, case_id=case_id, dry_run=dry_run)
     context.invoke(panel, case_id=case_id, dry_run=dry_run)
-    context.invoke(
-        managed_variants,
-        case_id=case_id,
-        dry_run=dry_run,
-    )
-    context.invoke(
-        config_case,
-        case_id=case_id,
-        panel_bed=panel_bed,
-        dry_run=dry_run,
-    )
+    context.invoke(managed_variants, case_id=case_id, dry_run=dry_run)
+    context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
     context.invoke(
         run,
         case_id=case_id,
@@ -230,11 +208,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
-            context.invoke(
-                start,
-                case_id=case_obj.internal_id,
-                dry_run=dry_run,
-            )
+            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
             LOG.error(error)
         except CgError as error:

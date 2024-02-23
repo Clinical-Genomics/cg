@@ -12,9 +12,7 @@ from cg.cli.demultiplex.demux import (
     demultiplex_flow_cell,
 )
 from cg.cli.demultiplex.finish import finish_group
-from cg.cli.demultiplex.sample_sheet import (
-    sample_sheet_commands,
-)
+from cg.cli.demultiplex.sample_sheet import sample_sheet_commands
 
 LOG = logging.getLogger(__name__)
 

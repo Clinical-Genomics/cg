@@ -52,10 +52,7 @@ class TransferLims(object):
         }
 
     def transfer_samples(
-        self,
-        status_type: SampleState,
-        include: str = "unset",
-        sample_id: str = None,
+        self, status_type: SampleState, include: str = "unset", sample_id: str = None
     ):
         """Transfer information about samples."""
 
@@ -72,10 +69,7 @@ class TransferLims(object):
 
         for sample_obj in samples:
             lims_date = self._date_functions[status_type](sample_obj.internal_id)
-            statusdb_date = getattr(
-                sample_obj,
-                f"{status_type.value}_at",
-            )
+            statusdb_date = getattr(sample_obj, f"{status_type.value}_at")
             if lims_date:
                 if statusdb_date and statusdb_date.date() == lims_date:
                     continue
@@ -85,11 +79,7 @@ class TransferLims(object):
                     f"{lims_date}, old value: {statusdb_date} "
                 )
 
-                setattr(
-                    sample_obj,
-                    f"{status_type.value}_at",
-                    lims_date,
-                )
+                setattr(sample_obj, f"{status_type.value}_at", lims_date)
                 self.status.session.commit()
             else:
                 LOG.debug(f"no {status_type.value} date found for {sample_obj.internal_id}")
@@ -111,11 +101,7 @@ class TransferLims(object):
         for pool_obj in pools:
             ticket: str = pool_obj.ticket
             number_of_samples: int = self.lims.get_sample_number(projectname=ticket)
-            if not self._is_pool_valid(
-                pool_obj,
-                ticket,
-                number_of_samples,
-            ):
+            if not self._is_pool_valid(pool_obj, ticket, number_of_samples):
                 continue
 
             samples_in_pool: dict[str, str] | list[genologics.Sample] = self.lims.get_samples(
@@ -129,11 +115,7 @@ class TransferLims(object):
                     continue
 
                 LOG.info(f"Found {status_type.value} date for pool id {pool_obj.id}: {status_date}")
-                setattr(
-                    pool_obj,
-                    f"{status_type.value}_at",
-                    status_date,
-                )
+                setattr(pool_obj, f"{status_type.value}_at", status_date)
                 self.status.session.commit()
                 break
 
@@ -141,11 +123,7 @@ class TransferLims(object):
         return self._sample_functions[status_type]()
 
     @staticmethod
-    def _is_pool_valid(
-        pool_obj: Pool,
-        ticket: str,
-        number_of_samples: int,
-    ) -> bool:
+    def _is_pool_valid(pool_obj: Pool, ticket: str, number_of_samples: int) -> bool:
         """Checks if a pool object can be transferred. A pool needs to have a ticket number and at least one sample"""
 
         if ticket is None:
@@ -157,10 +135,7 @@ class TransferLims(object):
         return True
 
     @staticmethod
-    def _is_sample_valid(
-        pool_obj: Pool,
-        sample_obj: genologics.entities.Sample,
-    ) -> bool:
+    def _is_sample_valid(pool_obj: Pool, sample_obj: genologics.entities.Sample) -> bool:
         """Checks if a sample can have the status date set. A sample needs to have a udf "pool name" that matches the
         name of the pool object it's part of"""
         if sample_obj.udf.get("pool name") is None:

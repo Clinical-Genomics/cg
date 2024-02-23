@@ -7,37 +7,18 @@ from pathlib import Path
 from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.backup import (
-    MAX_PROCESSING_FLOW_CELLS,
-)
-from cg.constants.constants import (
-    FileExtensions,
-    FlowCellStatus,
-)
-from cg.constants.demultiplexing import (
-    DemultiplexingDirsAndFiles,
-)
-from cg.exc import (
-    ChecksumFailedError,
-    PdcError,
-    PdcNoFilesMatchingSearchError,
-)
+from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS
+from cg.constants.constants import FileExtensions, FlowCellStatus
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.exc import ChecksumFailedError, PdcError, PdcNoFilesMatchingSearchError
 from cg.meta.backup.pdc import PdcAPI
-from cg.meta.encryption.encryption import (
-    EncryptionAPI,
-    SpringEncryptionAPI,
-)
+from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models import CompressionData
-from cg.models.cg_config import (
-    PDCArchivingDirectory,
-)
+from cg.models.cg_config import PDCArchivingDirectory
 from cg.store.models import Flowcell
 from cg.store.store import Store
-from cg.utils.time import (
-    get_elapsed_time,
-    get_start_time,
-)
+from cg.utils.time import get_elapsed_time, get_start_time
 
 LOG = logging.getLogger(__name__)
 
@@ -71,9 +52,7 @@ class BackupAPI:
         LOG.debug(f"Processing flow cells: {processing_flow_cells_count}")
         return processing_flow_cells_count < MAX_PROCESSING_FLOW_CELLS
 
-    def get_first_flow_cell(
-        self,
-    ) -> Flowcell | None:
+    def get_first_flow_cell(self) -> Flowcell | None:
         """Get the first flow cell from the requested queue."""
         flow_cell: Flowcell | None = self.status.get_flow_cells_by_statuses(
             flow_cell_statuses=[FlowCellStatus.REQUESTED]
@@ -115,23 +94,14 @@ class BackupAPI:
             )
 
     def _process_flow_cell(
-        self,
-        flow_cell: Flowcell,
-        archived_key: Path,
-        archived_flow_cell: Path,
+        self, flow_cell: Flowcell, archived_key: Path, archived_flow_cell: Path
     ) -> float:
         """Process a flow cell from backup. Return elapsed time."""
         start_time: float = get_start_time()
         run_dir: Path = Path(self.flow_cells_dir)
-        self.retrieve_archived_key(
-            archived_key=archived_key,
-            flow_cell=flow_cell,
-            run_dir=run_dir,
-        )
+        self.retrieve_archived_key(archived_key=archived_key, flow_cell=flow_cell, run_dir=run_dir)
         self.retrieve_archived_flow_cell(
-            archived_flow_cell=archived_flow_cell,
-            flow_cell=flow_cell,
-            run_dir=run_dir,
+            archived_flow_cell=archived_flow_cell, flow_cell=flow_cell, run_dir=run_dir
         )
 
         try:
@@ -140,20 +110,13 @@ class BackupAPI:
                 encryption_key,
                 retrieved_flow_cell,
                 retrieved_key,
-            ) = self.decrypt_flow_cell(
-                archived_flow_cell,
-                archived_key,
-                run_dir,
-            )
+            ) = self.decrypt_flow_cell(archived_flow_cell, archived_key, run_dir)
 
             self.extract_flow_cell(decrypted_flow_cell, run_dir)
             self.create_rta_complete(decrypted_flow_cell, run_dir)
             self.create_copy_complete(decrypted_flow_cell, run_dir)
             self.unlink_files(
-                decrypted_flow_cell,
-                encryption_key,
-                retrieved_flow_cell,
-                retrieved_key,
+                decrypted_flow_cell, encryption_key, retrieved_flow_cell, retrieved_key
             )
         except subprocess.CalledProcessError as error:
             LOG.error(f"Decryption failed: {error.stderr}")
@@ -197,9 +160,7 @@ class BackupAPI:
     def create_rta_complete(decrypted_flow_cell: Path, run_dir: Path):
         """Create an RTAComplete.txt file in the flow cell run directory."""
         rta_complete_file = Path(
-            run_dir,
-            decrypted_flow_cell.stem,
-            DemultiplexingDirsAndFiles.RTACOMPLETE,
+            run_dir, decrypted_flow_cell.stem, DemultiplexingDirsAndFiles.RTACOMPLETE
         )
         rta_complete_file.touch()
 
@@ -207,33 +168,26 @@ class BackupAPI:
     def create_copy_complete(decrypted_flow_cell: Path, run_dir: Path):
         """Create a CopyComplete.txt file in the flow cell run directory."""
         copy_complete_file = Path(
-            run_dir,
-            decrypted_flow_cell.stem,
-            DemultiplexingDirsAndFiles.COPY_COMPLETE,
+            run_dir, decrypted_flow_cell.stem, DemultiplexingDirsAndFiles.COPY_COMPLETE
         )
         copy_complete_file.touch()
 
     def extract_flow_cell(self, decrypted_flow_cell, run_dir):
         """Extract the flow cell tar archive."""
         extraction_command = self.tar_api.get_extract_file_command(
-            input_file=decrypted_flow_cell,
-            output_dir=run_dir,
+            input_file=decrypted_flow_cell, output_dir=run_dir
         )
         LOG.debug(f"Extract flow cell command: {extraction_command}")
         self.tar_api.run_tar_command(extraction_command)
 
     def decrypt_flow_cell(
-        self,
-        archived_flow_cell: Path,
-        archived_key: Path,
-        run_dir: Path,
+        self, archived_flow_cell: Path, archived_key: Path, run_dir: Path
     ) -> tuple[Path, Path, Path, Path]:
         """Decrypt the flow cell."""
         retrieved_key: Path = run_dir / archived_key.name
         encryption_key: Path = retrieved_key.with_suffix(FileExtensions.NO_EXTENSION)
         decryption_command: list[str] = self.encryption_api.get_asymmetric_decryption_command(
-            input_file=retrieved_key,
-            output_file=encryption_key,
+            input_file=retrieved_key, output_file=encryption_key
         )
         LOG.debug(f"Decrypt key command: {decryption_command}")
         self.encryption_api.run_gpg_command(decryption_command)
@@ -246,19 +200,9 @@ class BackupAPI:
         )
         LOG.debug(f"Decrypt flow cell command: {decryption_command}")
         self.encryption_api.run_gpg_command(decryption_command)
-        return (
-            decrypted_flow_cell,
-            encryption_key,
-            retrieved_flow_cell,
-            retrieved_key,
-        )
+        return decrypted_flow_cell, encryption_key, retrieved_flow_cell, retrieved_key
 
-    def retrieve_archived_key(
-        self,
-        archived_key: Path,
-        flow_cell: Flowcell,
-        run_dir: Path,
-    ) -> None:
+    def retrieve_archived_key(self, archived_key: Path, flow_cell: Flowcell, run_dir: Path) -> None:
         """Attempt to retrieve an archived key."""
         try:
             self.retrieve_archived_file(
@@ -273,10 +217,7 @@ class BackupAPI:
             raise error
 
     def retrieve_archived_flow_cell(
-        self,
-        archived_flow_cell: Path,
-        flow_cell: Flowcell,
-        run_dir: Path,
+        self, archived_flow_cell: Path, flow_cell: Flowcell, run_dir: Path
     ):
         """Attempt to retrieve an archived flow cell."""
         try:
@@ -303,10 +244,7 @@ class BackupAPI:
         Raise:
             PdcNoFilesMatchingSearchError if no files are found.
         """
-        for (
-            _,
-            encryption_directory,
-        ) in self.pdc_archiving_directory:
+        for _, encryption_directory in self.pdc_archiving_directory:
             search_pattern = f"{encryption_directory}*{flow_cell_id}*{FileExtensions.GPG}"
             self.pdc.query_pdc(search_pattern)
             if self.pdc.was_file_found(self.pdc.process.stderr):
@@ -323,8 +261,7 @@ class BackupAPI:
         retrieved_file = Path(run_dir, archived_file.name)
         LOG.debug(f"Retrieving file {archived_file} to {retrieved_file}")
         self.pdc.retrieve_file_from_pdc(
-            file_path=str(archived_file),
-            target_path=str(retrieved_file),
+            file_path=str(archived_file), target_path=str(retrieved_file)
         )
 
     @classmethod
@@ -426,8 +363,7 @@ class SpringBackupAPI:
             )
             self.encryption_api.key_asymmetric_decryption(spring_file_path)
             self.encryption_api.spring_symmetric_decryption(
-                spring_file_path,
-                output_file=spring_file_path,
+                spring_file_path, output_file=spring_file_path
             )
         except subprocess.CalledProcessError as error:
             LOG.error(f"Decryption failed: {error.stderr}")
@@ -469,8 +405,6 @@ class SpringBackupAPI:
         return False
 
     @staticmethod
-    def is_compression_ongoing(
-        spring_file_path: Path,
-    ) -> bool:
+    def is_compression_ongoing(spring_file_path: Path) -> bool:
         """Determines if (de)compression of the spring file ongoing."""
         return CompressionData(spring_file_path).pending_exists()

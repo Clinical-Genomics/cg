@@ -2,20 +2,12 @@ import pytest
 
 from cg.constants import METAGENOME_SOURCES
 from cg.constants.orderforms import REV_SEX_MAP
-from cg.models.orders.constants import (
-    ExcelSampleAliases,
-)
-from cg.models.orders.excel_sample import (
-    ExcelSample,
-)
-from cg.models.orders.sample_base import (
-    PriorityEnum,
-)
+from cg.models.orders.constants import ExcelSampleAliases
+from cg.models.orders.excel_sample import ExcelSample
+from cg.models.orders.sample_base import PriorityEnum
 
 
-def test_collection_date_conversion(
-    mip_rna_orderform_sample: dict,
-):
+def test_collection_date_conversion(mip_rna_orderform_sample: dict):
     """Tests that a sample with Collection Date set to YYYY-MM-DD HH:MM:SS is converted to YYYY-MM-DD."""
 
     # GIVEN a parsed order form in Excel format with Collection Date set
@@ -28,9 +20,7 @@ def test_collection_date_conversion(
     assert excel_sample.collection_date == "2023-09-29"
 
 
-def test_collection_date_none(
-    mip_rna_orderform_sample: dict,
-):
+def test_collection_date_none(mip_rna_orderform_sample: dict):
     """Tests that a sample with no Collection Date set is allowed."""
 
     # GIVEN a parsed order form in Excel format with no Collection Date set (Note that these are parsed as empty strings
@@ -41,9 +31,7 @@ def test_collection_date_none(
     assert ExcelSample.model_validate(mip_rna_orderform_sample)
 
 
-def test_concentration_numeric(
-    mip_rna_orderform_sample: dict,
-):
+def test_concentration_numeric(mip_rna_orderform_sample: dict):
     """Tests that a sample with concentration set to a natural number is allowed."""
 
     # GIVEN a parsed order form in Excel format with concentration set to a natural number
@@ -55,9 +43,7 @@ def test_concentration_numeric(
     assert excel_sample.concentration == "2"
 
 
-def test_concentration_fraction(
-    mip_rna_orderform_sample: dict,
-):
+def test_concentration_fraction(mip_rna_orderform_sample: dict):
     """Tests that a sample with concentration set as a fraction is allowed."""
 
     # GIVEN a parsed order form in Excel format with concentration set to a fraction
@@ -70,9 +56,7 @@ def test_concentration_fraction(
     assert excel_sample.concentration == "0.23"
 
 
-def test_concentration_numeric_fraction(
-    mip_rna_orderform_sample: dict,
-):
+def test_concentration_numeric_fraction(mip_rna_orderform_sample: dict):
     """Tests that a sample with numeric concentration set as a float is allowed and converted."""
 
     # GIVEN a parsed order form in Excel format with concentration set as a float with only zeroes
@@ -85,9 +69,7 @@ def test_concentration_numeric_fraction(
     assert excel_sample.concentration == "2"
 
 
-def test_concentration_alphabetical_fail(
-    mip_rna_orderform_sample: dict,
-):
+def test_concentration_alphabetical_fail(mip_rna_orderform_sample: dict):
     """Tests that a sample with non-numeric concentration raises an AttributeError."""
 
     # GIVEN a parsed order form in Excel format with concentration set with alphabetical characters
@@ -98,9 +80,7 @@ def test_concentration_alphabetical_fail(
         ExcelSample.model_validate(mip_rna_orderform_sample)
 
 
-def test_concentration_sample_numeric(
-    mip_rna_orderform_sample: dict,
-):
+def test_concentration_sample_numeric(mip_rna_orderform_sample: dict):
     """Tests that a sample with concentration_sample set to a natural number is allowed."""
 
     # GIVEN a parsed order form in Excel format with sample concentration set to a natural number
@@ -113,9 +93,7 @@ def test_concentration_sample_numeric(
     assert excel_sample.concentration_sample == "2"
 
 
-def test_concentration_sample_fraction(
-    mip_rna_orderform_sample: dict,
-):
+def test_concentration_sample_fraction(mip_rna_orderform_sample: dict):
     """Tests that a sample with concentration sample set as a fraction is allowed."""
 
     # GIVEN a parsed order form in Excel format with concentration sample set to a fraction
@@ -128,9 +106,7 @@ def test_concentration_sample_fraction(
     assert excel_sample.concentration_sample == "0.23"
 
 
-def test_concentration_sample_numeric_fraction(
-    mip_rna_orderform_sample: dict,
-):
+def test_concentration_sample_numeric_fraction(mip_rna_orderform_sample: dict):
     """Tests that a sample with numeric concentration sample set as a float is allowed and converted."""
 
     # GIVEN a parsed order form in Excel format with concentration sample set as a float with only zeroes
@@ -143,9 +119,7 @@ def test_concentration_sample_numeric_fraction(
     assert excel_sample.concentration_sample == "2"
 
 
-def test_concentration_sample_alphabetical_fail(
-    mip_rna_orderform_sample: dict,
-):
+def test_concentration_sample_alphabetical_fail(mip_rna_orderform_sample: dict):
     """Tests that a sample with non-numeric concentration sample raises an AttributeError."""
 
     # GIVEN a parsed order form in Excel format with concentration sample set with alphabetical characters
@@ -156,9 +130,7 @@ def test_concentration_sample_alphabetical_fail(
         ExcelSample.model_validate(mip_rna_orderform_sample)
 
 
-def test_data_analysis_valid(
-    mip_rna_orderform_sample: dict,
-):
+def test_data_analysis_valid(mip_rna_orderform_sample: dict):
     """Tests that a sample with a valid data analysis set is allowed."""
 
     # GIVEN a parsed order form in Excel format with data analysis set to MIP RNA
@@ -167,9 +139,7 @@ def test_data_analysis_valid(
     assert ExcelSample.model_validate(mip_rna_orderform_sample)
 
 
-def test_data_analysis_invalid(
-    mip_rna_orderform_sample: dict,
-):
+def test_data_analysis_invalid(mip_rna_orderform_sample: dict):
     """Tests that a sample with an invalid data analysis set is not allowed."""
 
     # GIVEN a parsed order form in Excel format with data analysis set to an invalid value
@@ -180,9 +150,7 @@ def test_data_analysis_invalid(
         ExcelSample.model_validate(mip_rna_orderform_sample)
 
 
-def test_data_delivery_convert_to_lower(
-    mip_rna_orderform_sample: dict,
-):
+def test_data_delivery_convert_to_lower(mip_rna_orderform_sample: dict):
     """Tests that a sample with a data delivery which is not all lower case is converted correctly."""
 
     # GIVEN a parsed order form in Excel format with data delivery set in all caps
@@ -195,9 +163,7 @@ def test_data_delivery_convert_to_lower(
     assert excel_sample.data_delivery == "analysis"
 
 
-def test_father_convert_zeroes(
-    mip_rna_orderform_sample: dict,
-):
+def test_father_convert_zeroes(mip_rna_orderform_sample: dict):
     """Tests that if 0.0 is provided as father, then None is set instead."""
 
     # GIVEN a parsed order form in Excel format with 'father' set to 0.0
@@ -210,9 +176,7 @@ def test_father_convert_zeroes(
     assert excel_sample.father is None
 
 
-def test_parse_panels_none(
-    mip_rna_orderform_sample: dict,
-):
+def test_parse_panels_none(mip_rna_orderform_sample: dict):
     """Tests that the UDF/Gene List is allowed to be none for a sample in an order form."""
 
     # GIVEN a parsed order form in Excel format with no panels set (Note that these are parsed as empty strings
@@ -223,9 +187,7 @@ def test_parse_panels_none(
     ExcelSample.model_validate(mip_rna_orderform_sample)
 
 
-def test_parse_panels_semicolon_separator(
-    mip_rna_orderform_sample: dict,
-):
+def test_parse_panels_semicolon_separator(mip_rna_orderform_sample: dict):
     """Tests that the panel list is split when given with a semicolon separated string."""
 
     # GIVEN a parsed order form in Excel format with panels separated with a semicolon
@@ -234,15 +196,10 @@ def test_parse_panels_semicolon_separator(
     # WHEN converting to an ExcelSample object
     excel_sample: ExcelSample = ExcelSample.model_validate(mip_rna_orderform_sample)
 
-    assert excel_sample.panels == [
-        "gene_1",
-        "gene_2",
-    ]
+    assert excel_sample.panels == ["gene_1", "gene_2"]
 
 
-def test_parse_panels_colon_separator(
-    mip_rna_orderform_sample: dict,
-):
+def test_parse_panels_colon_separator(mip_rna_orderform_sample: dict):
     """Tests that the panel list is split when given with a colon separated string."""
 
     # GIVEN a parsed order form in Excel format with panels separated with a colon
@@ -251,15 +208,10 @@ def test_parse_panels_colon_separator(
     # WHEN converting to an ExcelSample object
     excel_sample: ExcelSample = ExcelSample.model_validate(mip_rna_orderform_sample)
 
-    assert excel_sample.panels == [
-        "gene_1",
-        "gene_2",
-    ]
+    assert excel_sample.panels == ["gene_1", "gene_2"]
 
 
-def test_priority_foertur(
-    mip_rna_orderform_sample: dict,
-):
+def test_priority_foertur(mip_rna_orderform_sample: dict):
     """Tests that a sample with priority specified to 'förtur', then the validation converts the value to English."""
 
     # GIVEN a parsed order form in Excel format with priority set to 'förtur'
@@ -272,9 +224,7 @@ def test_priority_foertur(
     assert excel_sample.priority == PriorityEnum.priority
 
 
-def test_valid_priority_all_caps(
-    mip_rna_orderform_sample: dict,
-):
+def test_valid_priority_all_caps(mip_rna_orderform_sample: dict):
     """Tests that a sample with a valid priority specified in all caps is converted to lower case."""
 
     # GIVEN a parsed order form in Excel format with priority set to "PRIORITY"
@@ -287,12 +237,9 @@ def test_valid_priority_all_caps(
     assert excel_sample.priority == PriorityEnum.priority
 
 
-def test_priority_foertur_all_caps(
-    mip_rna_orderform_sample: dict,
-):
+def test_priority_foertur_all_caps(mip_rna_orderform_sample: dict):
     """Tests that a sample with priority specified to 'FÖRTUR',
-    then the validation converts the value to English and lower case.
-    """
+    then the validation converts the value to English and lower case."""
 
     # GIVEN a parsed order form in Excel format with priority set to 'FÖRTUR'
     mip_rna_orderform_sample[ExcelSampleAliases.PRIORITY] = "FÖRTUR"
@@ -304,9 +251,7 @@ def test_priority_foertur_all_caps(
     assert excel_sample.priority == PriorityEnum.priority
 
 
-def test_valid_priority_with_spaces(
-    mip_rna_orderform_sample: dict,
-):
+def test_valid_priority_with_spaces(mip_rna_orderform_sample: dict):
     """Tests that a sample with a valid priority has its spaces replaced by underscores."""
 
     # GIVEN a parsed order form in Excel format with priority set to "Clinical trials"
@@ -319,9 +264,7 @@ def test_valid_priority_with_spaces(
     assert excel_sample.priority == PriorityEnum.clinical_trials
 
 
-def test_convert_sex_m(
-    mip_rna_orderform_sample: dict,
-):
+def test_convert_sex_m(mip_rna_orderform_sample: dict):
     """Tests that sex is converted to 'male' if set as 'M'."""
 
     # GIVEN a parsed order form in Excel format with sex set to 'M'
@@ -333,9 +276,7 @@ def test_convert_sex_m(
     assert excel_sample.sex == REV_SEX_MAP["M"]
 
 
-def test_convert_sex_strip(
-    mip_rna_orderform_sample: dict,
-):
+def test_convert_sex_strip(mip_rna_orderform_sample: dict):
     """Tests that sex is stripped from any trailing spaces."""
 
     # GIVEN a parsed order form in Excel format with sex set to 'M '
@@ -348,9 +289,7 @@ def test_convert_sex_strip(
     assert excel_sample.sex == REV_SEX_MAP["M"]
 
 
-def test_invalid_source(
-    mip_rna_orderform_sample: dict,
-):
+def test_invalid_source(mip_rna_orderform_sample: dict):
     """Tests that a ValueError is raised when an invalid source is specified."""
 
     # GIVEN a parsed order form in Excel format with an invalid source specified
@@ -363,9 +302,7 @@ def test_invalid_source(
         ExcelSample.model_validate(mip_rna_orderform_sample)
 
 
-def test_valid_source(
-    mip_rna_orderform_sample: dict,
-):
+def test_valid_source(mip_rna_orderform_sample: dict):
     """Tests that no ValueError is raised when a valid source is specified."""
 
     # GIVEN a parsed order form in Excel format with a valid source specified
@@ -377,9 +314,7 @@ def test_valid_source(
     ExcelSample.model_validate(mip_rna_orderform_sample)
 
 
-def test_status_convert_to_lower(
-    mip_rna_orderform_sample: dict,
-):
+def test_status_convert_to_lower(mip_rna_orderform_sample: dict):
     """Tests that the given status value is converted to lower case."""
 
     # GIVEN a parsed order form in Excel format with a valid source specified
@@ -394,9 +329,7 @@ def test_status_convert_to_lower(
     assert excel_sample.status == "analysis"
 
 
-def test_volume_non_numeric(
-    mip_rna_orderform_sample: dict,
-):
+def test_volume_non_numeric(mip_rna_orderform_sample: dict):
     """Tests that an error is raised when specifying a non-numeric volume."""
 
     # GIVEN a parsed order form in Excel format with non-numeric volume specified
@@ -409,9 +342,7 @@ def test_volume_non_numeric(
         ExcelSample.model_validate(mip_rna_orderform_sample)
 
 
-def test_volume_positive_integer(
-    mip_rna_orderform_sample: dict,
-):
+def test_volume_positive_integer(mip_rna_orderform_sample: dict):
     """Tests that no error is raised when parsing a volume set to a positive integer."""
 
     # GIVEN a parsed order form in Excel format with a positive integer volume
@@ -426,9 +357,7 @@ def test_volume_positive_integer(
     assert excel_sample.volume == "2"
 
 
-def test_volume_decimal_integer(
-    mip_rna_orderform_sample: dict,
-):
+def test_volume_decimal_integer(mip_rna_orderform_sample: dict):
     """Tests that an integer given in float format, i.e. 2.0 instead of 2 and so on, is converted to integer format."""
 
     # GIVEN a parsed order form in Excel format with an integer volume in float format

@@ -11,13 +11,8 @@ from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.constants import (
-    FileFormat,
-    Workflow,
-)
-from cg.constants.delivery import (
-    PIPELINE_ANALYSIS_TAG_MAP,
-)
+from cg.constants.constants import FileFormat, Workflow
+from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.housekeeper_tags import (
     HK_DELIVERY_REPORT_TAG,
     GensAnalysisTag,
@@ -26,22 +21,14 @@ from cg.constants.housekeeper_tags import (
 from cg.io.controller import ReadFile
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
-from cg.meta.upload.scout.uploadscoutapi import (
-    UploadScoutAPI,
-)
+from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
-from cg.meta.workflow.mip_dna import (
-    MipDNAAnalysisAPI,
-)
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.scout.scout_load_config import (
-    ScoutLoadConfig,
-)
+from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Analysis
 from cg.store.store import Store
-from tests.meta.upload.scout.conftest import (
-    mip_load_config,
-)
+from tests.meta.upload.scout.conftest import mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.report import MockMipDNAReportAPI
@@ -52,10 +39,7 @@ LOG = logging.getLogger(__name__)
 
 @pytest.fixture
 def upload_genotypes_hk_bundle(
-    case_id: str,
-    timestamp,
-    case_qc_metrics_deliverables: Path,
-    bcf_file: Path,
+    case_id: str, timestamp, case_qc_metrics_deliverables: Path, bcf_file: Path
 ) -> dict:
     """Returns a dictionary in hk format with files used in upload gt process"""
     return {
@@ -68,21 +52,14 @@ def upload_genotypes_hk_bundle(
                 "archive": False,
                 "tags": HkMipAnalysisTag.QC_METRICS,
             },
-            {
-                "path": str(bcf_file),
-                "archive": False,
-                "tags": ["snv-gbcf", "genotype"],
-            },
+            {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf", "genotype"]},
         ],
     }
 
 
 @pytest.fixture
 def analysis_obj(
-    analysis_store_trio: Store,
-    case_id: str,
-    timestamp: datetime,
-    helpers,
+    analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers
 ) -> Analysis:
     """Return a analysis object with a trio"""
     return analysis_store_trio.get_case_by_internal_id(internal_id=case_id).analyses[0]
@@ -96,10 +73,7 @@ def upload_genotypes_hk_api(
     helpers,
 ) -> HousekeeperAPI:
     """Add and include files from upload genotypes hk bundle"""
-    helpers.ensure_hk_bundle(
-        real_housekeeper_api,
-        upload_genotypes_hk_bundle,
-    )
+    helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle)
     hk_version = real_housekeeper_api.last_version(analysis_obj.case.internal_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
@@ -142,10 +116,7 @@ def upload_gens_hk_api(
     upload_gens_hk_bundle: dict,
 ) -> HousekeeperAPI:
     """Add and include files from upload_gens_hk_bundle."""
-    helpers.ensure_hk_bundle(
-        store=real_housekeeper_api,
-        bundle_data=upload_gens_hk_bundle,
-    )
+    helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=upload_gens_hk_bundle)
     hk_version = real_housekeeper_api.last_version(bundle=case_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
@@ -166,22 +137,14 @@ def upload_gens_context(
 
 
 @pytest.fixture
-def upload_report_hk_bundle(
-    case_id: str,
-    delivery_report_html: Path,
-    timestamp,
-) -> dict:
+def upload_report_hk_bundle(case_id: str, delivery_report_html: Path, timestamp) -> dict:
     """Returns a dictionary including the delivery report html file"""
 
     return {
         "name": case_id,
         "created": datetime.now(),
         "files": [
-            {
-                "path": str(delivery_report_html),
-                "archive": False,
-                "tags": [HK_DELIVERY_REPORT_TAG],
-            }
+            {"path": str(delivery_report_html), "archive": False, "tags": [HK_DELIVERY_REPORT_TAG]}
         ],
     }
 
@@ -195,10 +158,7 @@ def upload_report_hk_api(
 ) -> HousekeeperAPI:
     """Add and include files from upload reports hk bundle"""
 
-    helpers.ensure_hk_bundle(
-        real_housekeeper_api,
-        upload_report_hk_bundle,
-    )
+    helpers.ensure_hk_bundle(real_housekeeper_api, upload_report_hk_bundle)
     hk_version = real_housekeeper_api.last_version(analysis_obj.case.internal_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
@@ -248,10 +208,7 @@ def fastq_context(
 
 
 @pytest.fixture(scope="function")
-def upload_scout_api(
-    housekeeper_api: MockHousekeeperAPI,
-    mip_load_config: ScoutLoadConfig,
-):
+def upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_config: ScoutLoadConfig):
     """Return a upload scout api"""
     api = MockScoutUploadApi()
     api.housekeeper = housekeeper_api
@@ -264,11 +221,7 @@ class MockScoutApi(ScoutAPI):
     def __init__(self):
         """docstring for __init__"""
 
-    def upload(
-        self,
-        scout_load_config: Path,
-        force: bool = False,
-    ):
+    def upload(self, scout_load_config: Path, force: bool = False):
         """docstring for upload"""
         LOG.info("Case loaded successfully to Scout")
 
@@ -290,11 +243,7 @@ class MockScoutUploadApi(UploadScoutAPI):
         self.madeline_api = MockMadelineAPI()
         self.analysis = MockAnalysisApi()
         self.config = ScoutLoadConfig(
-            delivery_report=Path(
-                "path",
-                "to",
-                "delivery-report.html",
-            ).as_posix()
+            delivery_report=Path("path", "to", "delivery-report.html").as_posix()
         )
         self.file_exists = False
         self.lims = MockLims()
@@ -315,12 +264,7 @@ class MockScoutUploadApi(UploadScoutAPI):
         """docstring for save_config_file"""
         return
 
-    def add_scout_config_to_hk(
-        self,
-        config_file_path: str,
-        case_id: str,
-        delete: bool = False,
-    ):
+    def add_scout_config_to_hk(self, config_file_path: str, case_id: str, delete: bool = False):
         """docstring for add_scout_config_to_hk"""
         LOG.info("Use mock to upload file")
         if self.file_exists:
@@ -340,12 +284,7 @@ class MockLims:
         """Return LIMS-like case samples"""
         lims_case: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON,
-            file_path=Path(
-                "tests",
-                "fixtures",
-                "report",
-                "lims_family.json",
-            ),
+            file_path=Path("tests", "fixtures", "report", "lims_family.json"),
         )
         return lims_case["samples"]
 
@@ -358,9 +297,7 @@ class MockLims:
 
 
 @pytest.fixture
-def upload_context(
-    cg_context: CGConfig,
-) -> CGConfig:
+def upload_context(cg_context: CGConfig) -> CGConfig:
     analysis_api = MipDNAAnalysisAPI(config=cg_context)
     cg_context.meta_apis["analysis_api"] = analysis_api
     cg_context.meta_apis["report_api"] = MockMipDNAReportAPI(cg_context, analysis_api)

@@ -1,11 +1,7 @@
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.engine.reflection import Inspector
-from sqlalchemy.orm import (
-    Session,
-    scoped_session,
-    sessionmaker,
-)
+from sqlalchemy.orm import Session, scoped_session, sessionmaker
 
 from cg.exc import CgError
 from cg.store.models import Model

@@ -36,16 +36,12 @@ def timestamp_now() -> datetime:
 
 
 @pytest.fixture(scope="session")
-def timestamp_yesterday(
-    timestamp_now: datetime,
-) -> datetime:
+def timestamp_yesterday(timestamp_now: datetime) -> datetime:
     """Return a time stamp of yesterday's date in date time format."""
     return timestamp_now - timedelta(days=1)
 
 
 @pytest.fixture(scope="session")
-def timestamp_in_2_weeks(
-    timestamp_now: datetime,
-) -> datetime:
+def timestamp_in_2_weeks(timestamp_now: datetime) -> datetime:
     """Return a time stamp 14 days ahead in time."""
     return timestamp_now + timedelta(days=14)

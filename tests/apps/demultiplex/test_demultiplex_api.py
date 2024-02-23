@@ -4,24 +4,17 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.demultiplex.demultiplex_api import (
-    DemultiplexingAPI,
-)
-from cg.constants.demultiplexing import (
-    DemultiplexingDirsAndFiles,
-)
+from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import (
-    FlowCellDirectoryData,
-)
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 def test_is_sample_sheet_in_housekeeper_exists(
-    demultiplexing_context_for_demux: CGConfig,
-    tmp_bcl2fastq_flow_cell: FlowCellDirectoryData,
+    demultiplexing_context_for_demux: CGConfig, tmp_bcl2fastq_flow_cell: FlowCellDirectoryData
 ):
     """Test that checking the existence of an existing sample sheet in Housekeeper returns True."""
     # GIVEN a DemultiplexAPI and a flow cell with a sample sheet
@@ -45,8 +38,7 @@ def test_is_sample_sheet_in_housekeeper_exists(
 
 
 def test_is_sample_sheet_in_housekeeper_not_in_hk(
-    demultiplexing_context_for_demux: CGConfig,
-    tmp_bcl2fastq_flow_cell: FlowCellDirectoryData,
+    demultiplexing_context_for_demux: CGConfig, tmp_bcl2fastq_flow_cell: FlowCellDirectoryData
 ):
     """Test that checking the existence of a non-existing sample sheet in Housekeeper returns False."""
     # GIVEN a DemultiplexAPI and a flow cell with a sample sheet
@@ -133,14 +125,7 @@ def test_is_demultiplexing_possible_true(
     assert result is True
 
 
-@pytest.mark.parametrize(
-    "missing_file",
-    [
-        "RTAComplete.txt",
-        "CopyComplete.txt",
-        "SampleSheet.csv",
-    ],
-)
+@pytest.mark.parametrize("missing_file", ["RTAComplete.txt", "CopyComplete.txt", "SampleSheet.csv"])
 def test_is_demultiplexing_possible_missing_files(
     demultiplexing_api: DemultiplexingAPI,
     missing_file: str,
@@ -160,10 +145,7 @@ def test_is_demultiplexing_possible_missing_files(
     )
 
     # GIVEN a flow cell with a missing file
-    Path(
-        tmp_bcl_convert_flow_cell.path,
-        missing_file,
-    ).unlink()
+    Path(tmp_bcl_convert_flow_cell.path, missing_file).unlink()
 
     # WHEN checking if demultiplexing is possible
     result: bool = demultiplexing_api.is_demultiplexing_possible(
@@ -209,10 +191,7 @@ def test_is_demultiplexing_possible_already_started(
     )
 
     # GIVEN a flow cell where demultiplexing has already started
-    Path(
-        tmp_bcl_convert_flow_cell.path,
-        DemultiplexingDirsAndFiles.DEMUX_STARTED,
-    ).touch()
+    Path(tmp_bcl_convert_flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).touch()
 
     # WHEN checking if demultiplexing is possible
     result: bool = demultiplexing_api.is_demultiplexing_possible(

@@ -30,8 +30,7 @@ class CGDeliverables(BaseModel):
     def remove_missing_files(cls, files: list[CGTag]) -> list[CGTag]:
         """Validates that the files in a suggested CGDeliverables object are correct.
         I.e., if a file doesn't exist, an error is raised if the file was mandatory,
-        otherwise it is simply removed from the list of files.
-        """
+        otherwise it is simply removed from the list of files."""
         filtered_files: list[CGTag] = files.copy()
         for file in files:
             if file.mandatory and not Path(file.path).exists():

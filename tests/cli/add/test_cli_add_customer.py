@@ -13,10 +13,7 @@ NEW_TEST_CUST_INTERNAL_ID: str = "new_test_cust_internal_id"
 
 
 def test_add_customer(
-    base_context: CGConfig,
-    cli_runner: CliRunner,
-    invoice_address: str,
-    invoice_reference: str,
+    base_context: CGConfig, cli_runner: CliRunner, invoice_address: str, invoice_reference: str
 ):
     """Test add customer command."""
     # GIVEN database with some customers

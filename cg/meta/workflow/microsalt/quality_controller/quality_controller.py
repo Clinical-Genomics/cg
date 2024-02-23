@@ -1,9 +1,7 @@
 import logging
 from pathlib import Path
 
-from cg.meta.workflow.microsalt.constants import (
-    QUALITY_REPORT_FILE_NAME,
-)
+from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
 from cg.meta.workflow.microsalt.metrics_parser import (
     MetricsParser,
     QualityMetrics,
@@ -17,9 +15,7 @@ from cg.meta.workflow.microsalt.quality_controller.models import (
 from cg.meta.workflow.microsalt.quality_controller.report_generator import (
     ReportGenerator,
 )
-from cg.meta.workflow.microsalt.quality_controller.result_logger import (
-    ResultLogger,
-)
+from cg.meta.workflow.microsalt.quality_controller.result_logger import ResultLogger
 from cg.meta.workflow.microsalt.quality_controller.utils import (
     get_application_tag,
     get_percent_reads_guaranteed,
@@ -51,45 +47,21 @@ class QualityController:
         sample_results: list[SampleQualityResult] = self.quality_control_samples(quality_metrics)
         case_result: CaseQualityResult = quality_control_case(sample_results)
         report_file: Path = get_report_path(case_metrics_file_path)
-        ReportGenerator.report(
-            out_file=report_file,
-            samples=sample_results,
-            case=case_result,
-        )
-        ResultLogger.log_results(
-            case=case_result,
-            samples=sample_results,
-            report=report_file,
-        )
+        ReportGenerator.report(out_file=report_file, samples=sample_results, case=case_result)
+        ResultLogger.log_results(case=case_result, samples=sample_results, report=report_file)
         summary: str = ReportGenerator.get_summary(
-            case=case_result,
-            samples=sample_results,
-            report_path=report_file,
+            case=case_result, samples=sample_results, report_path=report_file
         )
-        return QualityResult(
-            case=case_result,
-            samples=sample_results,
-            summary=summary,
-        )
+        return QualityResult(case=case_result, samples=sample_results, summary=summary)
 
     def quality_control_samples(self, quality_metrics: QualityMetrics) -> list[SampleQualityResult]:
         sample_results: list[SampleQualityResult] = []
-        for (
-            sample_id,
-            metrics,
-        ) in quality_metrics.samples.items():
-            result = self.quality_control_sample(
-                sample_id=sample_id,
-                metrics=metrics,
-            )
+        for sample_id, metrics in quality_metrics.samples.items():
+            result = self.quality_control_sample(sample_id=sample_id, metrics=metrics)
             sample_results.append(result)
         return sample_results
 
-    def quality_control_sample(
-        self,
-        sample_id: str,
-        metrics: SampleMetrics,
-    ) -> SampleQualityResult:
+    def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> SampleQualityResult:
         """Perform a quality control of a sample given its metrics."""
         valid_read_count: bool = self.has_valid_total_reads(sample_id)
         valid_mapping: bool = has_valid_mapping_rate(metrics)
@@ -157,8 +129,7 @@ class QualityController:
 
         if is_sample_negative_control(sample):
             return is_valid_total_reads_for_negative_control(
-                reads=sample_reads,
-                target_reads=target_reads,
+                reads=sample_reads, target_reads=target_reads
             )
 
         return is_valid_total_reads(

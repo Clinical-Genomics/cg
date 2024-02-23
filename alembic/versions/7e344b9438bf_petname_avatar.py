@@ -27,11 +27,7 @@ class Case(Base):
     __tablename__ = "family"
 
     id = sa.Column(sa.types.Integer, primary_key=True)
-    internal_id = sa.Column(
-        sa.types.String(32),
-        unique=True,
-        nullable=False,
-    )
+    internal_id = sa.Column(sa.types.String(32), unique=True, nullable=False)
     name = sa.Column(sa.types.String(128), nullable=False)
     avatar_url = sa.Column(sa.types.TEXT)
     ordered_at = sa.Column(sa.types.DateTime, default=datetime.now)

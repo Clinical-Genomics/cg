@@ -9,13 +9,8 @@ import pytest
 
 from cg.constants import Workflow
 from cg.constants.priority import PriorityTerms
-from cg.constants.subject import (
-    PhenotypeStatus,
-    Sex,
-)
-from cg.meta.orders.pool_submitter import (
-    PoolSubmitter,
-)
+from cg.constants.subject import PhenotypeStatus, Sex
+from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.store.models import (
     Analysis,
     Application,
@@ -85,12 +80,7 @@ class StoreConstants(enum.Enum):
 def microbial_submitted_order() -> dict:
     """Build an example order as it looks after submission to."""
 
-    def _get_item(
-        name: str,
-        internal_id: str,
-        well_position: str,
-        organism: str,
-    ) -> dict:
+    def _get_item(name: str, internal_id: str, well_position: str, organism: str) -> dict:
         """Return a item."""
         ref_genomes = {
             "C. Jejuni": "NC_111",
@@ -140,12 +130,7 @@ def microbial_submitted_order() -> dict:
         "items": [
             _get_item("Jag", "ms1", "D:5", "C. Jejuni"),
             _get_item("testar", "ms2", "H:5", "M. upium"),
-            _get_item(
-                "list",
-                "ms3",
-                "A:6",
-                "C. difficile",
-            ),
+            _get_item("list", "ms3", "A:6", "C. difficile"),
         ],
         "project_type": "microbial",
     }
@@ -153,8 +138,7 @@ def microbial_submitted_order() -> dict:
 
 @pytest.fixture(name="microbial_store")
 def microbial_store(
-    base_store: Store,
-    microbial_submitted_order: dict,
+    base_store: Store, microbial_submitted_order: dict
 ) -> Generator[Store, None, None]:
     """Set up a microbial store instance."""
     customer: Customer = base_store.get_customer_by_internal_id(
@@ -166,8 +150,7 @@ def microbial_store(
             sample_data["application"]
         ).versions[0]
         organism: Organism = Organism(
-            internal_id=sample_data["organism"],
-            name=sample_data["organism"],
+            internal_id=sample_data["organism"], name=sample_data["organism"]
         )
         base_store.session.add(organism)
         sample = base_store.add_sample(
@@ -335,8 +318,7 @@ def store_with_an_application_with_and_without_attributes(
 
 @pytest.fixture(name="store_with_application_limitations")
 def store_with_application_limitations(
-    store_with_an_application_with_and_without_attributes: Store,
-    helpers: StoreHelpers,
+    store_with_an_application_with_and_without_attributes: Store, helpers: StoreHelpers
 ) -> Store:
     """Return a store with different application limitations."""
     helpers.ensure_application_limitation(
@@ -346,10 +328,7 @@ def store_with_application_limitations(
         ),
         workflow=Workflow.MIP_DNA,
     )
-    for workflow in [
-        Workflow.MIP_DNA,
-        Workflow.BALSAMIC,
-    ]:
+    for workflow in [Workflow.MIP_DNA, Workflow.BALSAMIC]:
         helpers.ensure_application_limitation(
             store=store_with_an_application_with_and_without_attributes,
             application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
@@ -363,11 +342,7 @@ def store_with_application_limitations(
 @pytest.fixture(name="applications_store")
 def applications_store(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store populated with applications from excel file"""
-    app_tags: list[str] = [
-        "PGOTTTR020",
-        "PGOTTTR030",
-        "PGOTTTR040",
-    ]
+    app_tags: list[str] = ["PGOTTTR020", "PGOTTTR030", "PGOTTTR040"]
     for app_tag in app_tags:
         helpers.ensure_application(store=store, tag=app_tag)
     return store
@@ -435,11 +410,7 @@ def store_with_older_and_newer_analyses(
     analysis.completed_at = timestamp_now
     base_store.session.add(analysis)
     base_store.session.commit()
-    times = [
-        timestamp_now,
-        timestamp_yesterday,
-        old_timestamp,
-    ]
+    times = [timestamp_now, timestamp_yesterday, old_timestamp]
     for time in times:
         helpers.add_analysis(
             store=base_store,
@@ -481,14 +452,9 @@ def store_with_analyses_for_cases(
             uploaded_at=timestamp_now,
             delivery_reported_at=None,
         )
-        sample = helpers.add_sample(
-            analysis_store,
-            delivered_at=timestamp_now,
-        )
+        sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: CaseSample = analysis_store.relate_sample(
-            case=oldest_analysis.case,
-            sample=sample,
-            status=PhenotypeStatus.UNKNOWN,
+            case=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
         analysis_store.session.add(link)
     return analysis_store
@@ -601,14 +567,9 @@ def store_with_analyses_for_cases_not_uploaded_fluffy(
             delivery_reported_at=None,
             workflow=Workflow.FLUFFY,
         )
-        sample = helpers.add_sample(
-            analysis_store,
-            delivered_at=timestamp_now,
-        )
+        sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: CaseSample = analysis_store.relate_sample(
-            case=oldest_analysis.case,
-            sample=sample,
-            status=PhenotypeStatus.UNKNOWN,
+            case=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
         analysis_store.session.add(link)
     return analysis_store
@@ -616,9 +577,7 @@ def store_with_analyses_for_cases_not_uploaded_fluffy(
 
 @pytest.fixture
 def store_with_samples_for_multiple_customers(
-    store: Store,
-    helpers: StoreHelpers,
-    timestamp_now: datetime,
+    store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ) -> Generator[Store, None, None]:
     """Return a store with two samples for three different customers."""
     for number in range(3):

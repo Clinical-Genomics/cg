@@ -4,9 +4,7 @@ import pytest
 from flask.testing import FlaskClient
 
 from cg.constants import Workflow
-from cg.services.orders.utils import (
-    create_order_response,
-)
+from cg.services.orders.utils import create_order_response
 from cg.store.models import Order
 
 
@@ -35,13 +33,7 @@ def test_orders_endpoint(
 
     # WHEN a request is made to get all orders
     endpoint: str = "/api/v1/orders"
-    response = client.get(
-        endpoint,
-        query_string={
-            "limit": limit,
-            "workflow": workflow,
-        },
-    )
+    response = client.get(endpoint, query_string={"limit": limit, "workflow": workflow})
 
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
@@ -72,10 +64,7 @@ def test_order_endpoint(
 
 
 def test_order_endpoint_not_found(
-    client: FlaskClient,
-    order: Order,
-    order_another: Order,
-    non_existent_order_id: int,
+    client: FlaskClient, order: Order, order_another: Order, non_existent_order_id: int
 ):
     """Tests that the order endpoint returns the order with matching id"""
     # GIVEN a store with two orders

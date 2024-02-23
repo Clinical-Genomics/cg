@@ -4,9 +4,7 @@ from datetime import datetime
 
 from cg.apps.coverage.api import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.meta.upload.coverage import (
-    UploadCoverageApi,
-)
+from cg.meta.upload.coverage import UploadCoverageApi
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -36,10 +34,7 @@ def test_data(
     coverage_api = coverage_upload_api
     case_name = case_id
     case_obj = analysis_store.get_case_by_internal_id(internal_id=case_name)
-    analysis_obj = MockAnalysis(
-        case_obj=case_obj,
-        started_at=timestamp_yesterday,
-    )
+    analysis_obj = MockAnalysis(case_obj=case_obj, started_at=timestamp_yesterday)
 
     # WHEN using the data method
     results = coverage_api.data(analysis_obj=analysis_obj)
@@ -65,17 +60,10 @@ def test_upload(
     mocker.patch.object(ChanjoAPI, "delete_sample")
     hk_api = populated_housekeeper_api
     chanjo_api = ChanjoAPI(config=chanjo_config)
-    coverage_api = UploadCoverageApi(
-        status_api=None,
-        hk_api=hk_api,
-        chanjo_api=chanjo_api,
-    )
+    coverage_api = UploadCoverageApi(status_api=None, hk_api=hk_api, chanjo_api=chanjo_api)
     family_name = case_id
     case_obj = analysis_store.get_case_by_internal_id(family_name)
-    analysis_obj = MockAnalysis(
-        case_obj=case_obj,
-        started_at=timestamp_yesterday,
-    )
+    analysis_obj = MockAnalysis(case_obj=case_obj, started_at=timestamp_yesterday)
     data = coverage_api.data(analysis_obj=analysis_obj)
 
     # WHEN uploading samples in data dictionary

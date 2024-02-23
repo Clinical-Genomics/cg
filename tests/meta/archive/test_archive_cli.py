@@ -6,39 +6,23 @@ from click.testing import CliRunner
 from housekeeper.store.models import Archive, File
 from requests import HTTPError, Response
 
-from cg.cli.archive import (
-    archive_spring_files,
-    delete_file,
-    update_job_statuses,
-)
-from cg.constants import (
-    EXIT_SUCCESS,
-    SequencingFileTag,
-)
-from cg.constants.archiving import (
-    ArchiveLocations,
-)
+from cg.cli.archive import archive_spring_files, delete_file, update_job_statuses
+from cg.constants import EXIT_SUCCESS, SequencingFileTag
+from cg.constants.archiving import ArchiveLocations
 from cg.io.controller import APIRequest
 from cg.meta.archive.ddn.constants import (
     FAILED_JOB_STATUSES,
     ONGOING_JOB_STATUSES,
     JobStatus,
 )
-from cg.meta.archive.ddn.ddn_data_flow_client import (
-    DDNDataFlowClient,
-)
-from cg.meta.archive.ddn.models import (
-    ArchivalResponse,
-    AuthToken,
-    GetJobStatusResponse,
-)
+from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
+from cg.meta.archive.ddn.models import ArchivalResponse, AuthToken, GetJobStatusResponse
 from cg.models.cg_config import CGConfig
 
 
 def test_limit_and_archive_all_fails(cli_runner: CliRunner, cg_context: CGConfig):
     """Tests that when invoking archive-spring-files in the Archive CLI module, the command is
-    aborted if both a limit and the --archive-all flag is provided.
-    """
+    aborted if both a limit and the --archive-all flag is provided."""
 
     # GIVEN a CLI runner and a context
 
@@ -65,8 +49,7 @@ def test_archive_spring_files_success(
     ok_miria_response: Response,
 ):
     """Tests that the CLI command 'cg archive archive-spring-files' adds an archive with the correct
-    job_id when an archiving job is launched via Miria.
-    """
+    job_id when an archiving job is launched via Miria."""
 
     # GIVEN a CLI runner and a context
 
@@ -87,9 +70,7 @@ def test_archive_spring_files_success(
         "api_request_from_content",
         return_value=ok_miria_response,
     ), mock.patch.object(
-        DDNDataFlowClient,
-        "_archive_file",
-        return_value=ArchivalResponse(jobId=archival_job_id),
+        DDNDataFlowClient, "_archive_file", return_value=ArchivalResponse(jobId=archival_job_id)
     ):
         result = cli_runner.invoke(
             archive_spring_files,
@@ -103,12 +84,7 @@ def test_archive_spring_files_success(
 
 
 @pytest.mark.parametrize(
-    "job_status",
-    [
-        JobStatus.COMPLETED,
-        FAILED_JOB_STATUSES[0],
-        ONGOING_JOB_STATUSES[0],
-    ],
+    "job_status", [JobStatus.COMPLETED, FAILED_JOB_STATUSES[0], ONGOING_JOB_STATUSES[0]]
 )
 def test_get_archival_job_status(
     cli_runner: CliRunner,
@@ -164,12 +140,7 @@ def test_get_archival_job_status(
 
 
 @pytest.mark.parametrize(
-    "job_status",
-    [
-        JobStatus.COMPLETED,
-        FAILED_JOB_STATUSES[0],
-        ONGOING_JOB_STATUSES[0],
-    ],
+    "job_status", [JobStatus.COMPLETED, FAILED_JOB_STATUSES[0], ONGOING_JOB_STATUSES[0]]
 )
 def test_get_retrieval_job_status(
     cli_runner: CliRunner,
@@ -233,25 +204,19 @@ def test_delete_file_raises_http_error(
     archival_job_id: int,
 ):
     """Tests that an HTTP error is raised when the Miria response is unsuccessful for a delete file request,
-    and that the file is not removed from Housekeeper.
-    """
+    and that the file is not removed from Housekeeper."""
 
     # GIVEN a spring file which is archived via Miria
     spring_file: File = archive_context.housekeeper_api.files(
-        tags={
-            SequencingFileTag.SPRING,
-            ArchiveLocations.KAROLINSKA_BUCKET,
-        }
+        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET}
     ).first()
     spring_file_path: str = spring_file.path
     if not spring_file.archive:
         archive_context.housekeeper_api.add_archives(
-            files=[spring_file],
-            archive_task_id=archival_job_id,
+            files=[spring_file], archive_task_id=archival_job_id
         )
     archive_context.housekeeper_api.set_archive_archived_at(
-        file_id=spring_file.id,
-        archiving_task_id=archival_job_id,
+        file_id=spring_file.id, archiving_task_id=archival_job_id
     )
 
     # GIVEN that the request returns a failed response
@@ -270,10 +235,7 @@ def test_delete_file_raises_http_error(
 
         # THEN an HTTPError should be raised
         cli_runner.invoke(
-            delete_file,
-            [spring_file.path],
-            obj=archive_context,
-            catch_exceptions=False,
+            delete_file, [spring_file.path], obj=archive_context, catch_exceptions=False
         )
 
     # THEN the file should still be in Housekeeper
@@ -291,20 +253,15 @@ def test_delete_file_success(
 
     # GIVEN a spring file which is archived via Miria
     spring_file: File = archive_context.housekeeper_api.files(
-        tags={
-            SequencingFileTag.SPRING,
-            ArchiveLocations.KAROLINSKA_BUCKET,
-        }
+        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET}
     ).first()
     spring_file_id: int = spring_file.id
     if not spring_file.archive:
         archive_context.housekeeper_api.add_archives(
-            files=[spring_file],
-            archive_task_id=archival_job_id,
+            files=[spring_file], archive_task_id=archival_job_id
         )
     archive_context.housekeeper_api.set_archive_archived_at(
-        file_id=spring_file.id,
-        archiving_task_id=archival_job_id,
+        file_id=spring_file.id, archiving_task_id=archival_job_id
     )
 
     # GIVEN that the delete request returns a successful response
@@ -321,10 +278,7 @@ def test_delete_file_success(
 
         # THEN no error is raised
         cli_runner.invoke(
-            delete_file,
-            [spring_file.path],
-            obj=archive_context,
-            catch_exceptions=False,
+            delete_file, [spring_file.path], obj=archive_context, catch_exceptions=False
         )
 
     # THEN the file is removed from Housekeeper

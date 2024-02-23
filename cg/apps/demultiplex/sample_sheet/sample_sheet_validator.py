@@ -6,9 +6,7 @@ from typing import Type
 
 from pydantic import ValidationError
 
-from cg.apps.demultiplex.sample_sheet.override_cycles_validator import (
-    OverrideCyclesValidator,
-)
+from cg.apps.demultiplex.sample_sheet.override_cycles_validator import OverrideCyclesValidator
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_flow_cell_samples_from_content,
     get_raw_samples_from_content,
@@ -20,19 +18,14 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.apps.demultiplex.sample_sheet.sample_sheet_models import (
-    SampleSheet,
-)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import (
     NAME_TO_INDEX_SETTINGS,
     BclConverter,
     SampleSheetBCLConvertSections,
 )
-from cg.exc import (
-    OverrideCyclesError,
-    SampleSheetError,
-)
+from cg.exc import OverrideCyclesError, SampleSheetError
 from cg.io.controller import ReadFile
 
 BCL_CONVERTER_TO_FLOW_CELL_SAMPLE: dict[str, Type[FlowCellSample]] = {
@@ -59,9 +52,7 @@ class SampleSheetValidator:
         """Set the sample sheet content."""
         self.content = content
 
-    def _validate_all_sections_present(
-        self,
-    ) -> None:
+    def _validate_all_sections_present(self) -> None:
         """
         Returns whether the sample sheet has the four mandatory sections:
             - Header
@@ -76,14 +67,7 @@ class SampleSheetValidator:
         has_cycles: bool = [SampleSheetBCLConvertSections.Reads.HEADER] in self.content
         has_settings: bool = [SampleSheetBCLConvertSections.Settings.HEADER] in self.content
         has_data: bool = [SampleSheetBCLConvertSections.Data.HEADER] in self.content
-        if not all(
-            [
-                has_header,
-                has_cycles,
-                has_settings,
-                has_data,
-            ]
-        ):
+        if not all([has_header, has_cycles, has_settings, has_data]):
             message: str = "Sample sheet does not have all the necessary sections"
             LOG.error(message)
             raise SampleSheetError(message)
@@ -102,9 +86,7 @@ class SampleSheetValidator:
         LOG.error(message)
         raise SampleSheetError(message)
 
-    def _set_is_index2_reverse_complement(
-        self,
-    ) -> None:
+    def _set_is_index2_reverse_complement(self) -> None:
         """Return whether the index2 override cycles value is reverse-complemented."""
         LOG.debug("Looking for index settings in the sample sheet")
         settings_name: str = self._get_index_settings_name()
@@ -112,11 +94,7 @@ class SampleSheetValidator:
             settings_name
         ].are_i5_override_cycles_reverse_complemented
 
-    def _get_cycle(
-        self,
-        cycle_name: str,
-        nullable: bool = False,
-    ) -> int | None:
+    def _get_cycle(self, cycle_name: str, nullable: bool = False) -> int | None:
         """
         Return the cycle from the sample sheet given the cycle name. Set nullable to True to
         return None if the cycle is not found.
@@ -138,14 +116,10 @@ class SampleSheetValidator:
         self.read2_cycles = self._get_cycle(SampleSheetBCLConvertSections.Reads.READ_CYCLES_2)
         self.index1_cycles = self._get_cycle(SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_1)
         self.index2_cycles = self._get_cycle(
-            cycle_name=SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2,
-            nullable=True,
+            cycle_name=SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2, nullable=True
         )
 
-    def _validate_samples(
-        self,
-        sample_type: Type[FlowCellSample] | None = None,
-    ) -> None:
+    def _validate_samples(self, sample_type: Type[FlowCellSample] | None = None) -> None:
         """
         Determine if the samples have the correct attributes and are unique per lane.
         Raises:
@@ -155,8 +129,7 @@ class SampleSheetValidator:
         LOG.debug("Validating samples")
         try:
             validated_samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
-                sample_sheet_content=self.content,
-                sample_type=sample_type,
+                sample_sheet_content=self.content, sample_type=sample_type
             )
         except ValidationError as error:
             LOG.error("Sample sheet failed validation: samples are not in the correct format")
@@ -198,9 +171,7 @@ class SampleSheetValidator:
         self._validate_override_cycles()
 
     def validate_sample_sheet_from_content(
-        self,
-        content: list[list[str]],
-        bcl_convert: str | None = None,
+        self, content: list[list[str]], bcl_convert: str | None = None
     ) -> None:
         """
         Call the proper validation depending on the sample sheet type or the given bcl converter.
@@ -223,9 +194,7 @@ class SampleSheetValidator:
             LOG.info("Samplesheet passed Bcl2Fastq validation")
 
     def validate_sample_sheet_from_file(
-        self,
-        file_path: Path,
-        bcl_converter: str | None = None,
+        self, file_path: Path, bcl_converter: str | None = None
     ) -> None:
         """
         Validate a sample sheet given the path to the file.
@@ -233,17 +202,12 @@ class SampleSheetValidator:
             SampleSheetError: If the sample sheet is not valid.
         """
         self.validate_sample_sheet_from_content(
-            content=ReadFile.get_content_from_file(
-                file_format=FileFormat.CSV,
-                file_path=file_path,
-            ),
+            content=ReadFile.get_content_from_file(file_format=FileFormat.CSV, file_path=file_path),
             bcl_convert=bcl_converter,
         )
 
     def get_sample_sheet_object_from_file(
-        self,
-        file_path: Path,
-        bcl_converter: str | None = None,
+        self, file_path: Path, bcl_converter: str | None = None
     ) -> SampleSheet:
         """Return a sample sheet object given the path to the file.
         Raises:
@@ -252,10 +216,7 @@ class SampleSheetValidator:
         sample_type: Type[FlowCellSample] | None = (
             BCL_CONVERTER_TO_FLOW_CELL_SAMPLE[bcl_converter] if bcl_converter else None
         )
-        self.validate_sample_sheet_from_file(
-            file_path=file_path,
-            bcl_converter=bcl_converter,
-        )
+        self.validate_sample_sheet_from_file(file_path=file_path, bcl_converter=bcl_converter)
         samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
             sample_sheet_content=self.content,
             sample_type=sample_type,

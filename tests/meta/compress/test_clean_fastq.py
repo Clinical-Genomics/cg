@@ -9,17 +9,11 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.constants.archiving import (
-    PDC_ARCHIVE_LOCATION,
-)
+from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.meta.compress import files
 from cg.models import CompressionData
-from tests.cli.compress.conftest import (
-    MockCompressAPI,
-)
-from tests.meta.compress.conftest import (
-    MockCompressionData,
-)
+from tests.cli.compress.conftest import MockCompressAPI
+from tests.meta.compress.conftest import MockCompressionData
 from tests.store_helpers import StoreHelpers
 
 
@@ -39,10 +33,7 @@ def test_remove_fastqs(
     compression_object.spring_metadata_path.touch()
 
     # WHEN calling remove_fastq
-    compress_api.remove_fastq(
-        fastq_first=fastq_first,
-        fastq_second=fastq_second,
-    )
+    compress_api.remove_fastq(fastq_first=fastq_first, fastq_second=fastq_second)
 
     # THEN assert that the FASTQ-files are deleted
     assert not fastq_first.exists()
@@ -81,18 +72,12 @@ def test_update_hk_fastq(
     assert compression_files.spring_metadata_file.exists()
     hk_spring_files: list = list(hk_api.files(tags=[SequencingFileTag.SPRING]))
     hk_spring_metadata_files: list = list(hk_api.files(tags=[SequencingFileTag.SPRING_METADATA]))
-    for spring_file in [
-        hk_spring_files,
-        hk_spring_metadata_files,
-    ]:
+    for spring_file in [hk_spring_files, hk_spring_metadata_files]:
         assert not spring_file
 
     # GIVEN a Housekeeper version and a compression object
     hk_version: Version = compress_api.hk_api.get_latest_bundle_version(bundle_name=sample_id)
-    fastq: dict[str, dict] = files.get_fastq_files(
-        sample_id=sample_id,
-        version_obj=hk_version,
-    )
+    fastq: dict[str, dict] = files.get_fastq_files(sample_id=sample_id, version_obj=hk_version)
     run: str = list(fastq.keys())[0]
     compression: CompressionData = fastq[run]["compression_data"]
 
@@ -112,10 +97,7 @@ def test_update_hk_fastq(
     )
 
     # THEN assert that the Spring files and Spring metadata files have had the fastq file tags transferred
-    for spring_file in [
-        hk_spring_files,
-        hk_spring_metadata_files,
-    ]:
+    for spring_file in [hk_spring_files, hk_spring_metadata_files]:
         assert spring_file
         for tag_name in [tag.name for tag in fastq[run]["hk_first"].tags]:
             if tag_name != SequencingFileTag.FASTQ:
@@ -126,10 +108,7 @@ def test_update_hk_fastq(
         assert PDC_ARCHIVE_LOCATION in [tag.name for tag in spring_file.tags]
 
     # THEN assert that the SPRING files have been added to bundles directory
-    for spring_file in [
-        hk_spring_files[0].path,
-        hk_spring_metadata_files[0].path,
-    ]:
+    for spring_file in [hk_spring_files[0].path, hk_spring_metadata_files[0].path]:
         assert Path(root_path, spring_file).exists()
 
     # THEN assert that the FASTQ files are removed from Housekeeper
@@ -158,8 +137,7 @@ def test_cli_clean_fastqs_removed(
 
     # WHEN running the clean command
     populated_compress_fastq_api.clean_fastq(
-        sample_id=sample,
-        archive_location=PDC_ARCHIVE_LOCATION,
+        sample_id=sample, archive_location=PDC_ARCHIVE_LOCATION
     )
 
     # THEN assert SPRING files exists
@@ -190,8 +168,7 @@ def test_cli_clean_fastqs_no_spring_metadata(
 
     # WHEN running the clean command
     populated_compress_fastq_api.clean_fastq(
-        sample_id=sample,
-        archive_location=PDC_ARCHIVE_LOCATION,
+        sample_id=sample, archive_location=PDC_ARCHIVE_LOCATION
     )
 
     # THEN assert SPRING file exists
@@ -219,8 +196,7 @@ def test_cli_clean_fastqs_pending_compression_metadata(
 
     # WHEN running the clean command
     populated_compress_fastq_api.clean_fastq(
-        sample_id=sample,
-        archive_location=PDC_ARCHIVE_LOCATION,
+        sample_id=sample, archive_location=PDC_ARCHIVE_LOCATION
     )
 
     # THEN assert SPRING file exists

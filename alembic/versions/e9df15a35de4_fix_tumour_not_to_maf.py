@@ -13,11 +13,7 @@ from sqlalchemy import orm
 from sqlalchemy.orm import declarative_base
 
 from alembic import op
-from cg.constants import (
-    PREP_CATEGORIES,
-    DataDelivery,
-    Workflow,
-)
+from cg.constants import PREP_CATEGORIES, DataDelivery, Workflow
 
 # revision identifiers, used by Alembic.
 revision = "e9df15a35de4"
@@ -38,24 +34,13 @@ class Case(Base):
     __tablename__ = "family"
 
     id = sa.Column(sa.types.Integer, primary_key=True)
-    internal_id = sa.Column(
-        sa.types.String(32),
-        unique=True,
-        nullable=False,
-    )
+    internal_id = sa.Column(sa.types.String(32), unique=True, nullable=False)
     name = sa.Column(sa.types.String(128), nullable=False)
-    customer_id = sa.Column(
-        sa.ForeignKey("customer.id", ondelete="CASCADE"),
-        nullable=False,
-    )
+    customer_id = sa.Column(sa.ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship(Customer, foreign_keys=[customer_id])
     data_analysis = sa.Column(sa.types.Enum(*list(Workflow)))
     data_delivery = sa.Column(sa.types.Enum(*list(DataDelivery)))
-    priority = sa.Column(
-        sa.types.Integer,
-        default=1,
-        nullable=False,
-    )
+    priority = sa.Column(sa.types.Integer, default=1, nullable=False)
     _panels = sa.Column(sa.types.Text)
     ordered_at = sa.Column(sa.types.DateTime, default=datetime.now)
 
@@ -70,61 +55,28 @@ class Case(Base):
 
 class FamilySample(Base):
     __tablename__ = "family_sample"
-    __table_args__ = (
-        sa.UniqueConstraint(
-            "family_id",
-            "sample_id",
-            name="_family_sample_uc",
-        ),
-    )
+    __table_args__ = (sa.UniqueConstraint("family_id", "sample_id", name="_family_sample_uc"),)
 
     id = sa.Column(sa.types.Integer, primary_key=True)
-    family_id = sa.Column(
-        sa.ForeignKey("family.id", ondelete="CASCADE"),
-        nullable=False,
-    )
-    sample_id = sa.Column(
-        sa.ForeignKey("sample.id", ondelete="CASCADE"),
-        nullable=False,
-    )
+    family_id = sa.Column(sa.ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
+    sample_id = sa.Column(sa.ForeignKey("sample.id", ondelete="CASCADE"), nullable=False)
 
     mother_id = sa.Column(sa.ForeignKey("sample.id"))
     father_id = sa.Column(sa.ForeignKey("sample.id"))
 
     family = orm.relationship("Case", backref="links")
-    sample = orm.relationship(
-        "Sample",
-        foreign_keys=[sample_id],
-        backref="links",
-    )
-    mother = orm.relationship(
-        "Sample",
-        foreign_keys=[mother_id],
-        backref="mother_links",
-    )
-    father = orm.relationship(
-        "Sample",
-        foreign_keys=[father_id],
-        backref="father_links",
-    )
+    sample = orm.relationship("Sample", foreign_keys=[sample_id], backref="links")
+    mother = orm.relationship("Sample", foreign_keys=[mother_id], backref="mother_links")
+    father = orm.relationship("Sample", foreign_keys=[father_id], backref="father_links")
 
 
 class Application(Base):
     __tablename__ = "application"
     id = sa.Column(sa.types.Integer, primary_key=True)
-    tag = sa.Column(
-        sa.types.String(32),
-        unique=True,
-        nullable=False,
-    )
-    prep_category = sa.Column(
-        sa.types.Enum(*PREP_CATEGORIES),
-        nullable=False,
-    )
+    tag = sa.Column(sa.types.String(32), unique=True, nullable=False)
+    prep_category = sa.Column(sa.types.Enum(*PREP_CATEGORIES), nullable=False)
     versions = orm.relationship(
-        "ApplicationVersion",
-        order_by="ApplicationVersion.version",
-        backref="application",
+        "ApplicationVersion", order_by="ApplicationVersion.version", backref="application"
     )
 
 
@@ -133,30 +85,19 @@ class ApplicationVersion(Base):
 
     id = sa.Column(sa.types.Integer, primary_key=True)
     version = sa.Column(sa.types.Integer, nullable=False)
-    application_id = sa.Column(
-        sa.ForeignKey(Application.id),
-        nullable=False,
-    )
+    application_id = sa.Column(sa.ForeignKey(Application.id), nullable=False)
 
 
 class Sample(Base):
     __tablename__ = "sample"
 
     id = sa.Column(sa.types.Integer, primary_key=True)
-    internal_id = sa.Column(
-        sa.types.String(32),
-        nullable=False,
-        unique=True,
-    )
+    internal_id = sa.Column(sa.types.String(32), nullable=False, unique=True)
     name = sa.Column(sa.types.String(128), nullable=False)
 
-    application_version_id = sa.Column(
-        sa.ForeignKey("application_version.id"),
-        nullable=False,
-    )
+    application_version_id = sa.Column(sa.ForeignKey("application_version.id"), nullable=False)
     application_version = orm.relationship(
-        ApplicationVersion,
-        foreign_keys=[application_version_id],
+        ApplicationVersion, foreign_keys=[application_version_id]
     )
     is_tumour = sa.Column(sa.types.Boolean, default=False)
 

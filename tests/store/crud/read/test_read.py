@@ -5,11 +5,7 @@ import pytest
 from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus, Priority
-from cg.constants.constants import (
-    CaseActions,
-    MicrosaltAppTags,
-    Workflow,
-)
+from cg.constants.constants import CaseActions, MicrosaltAppTags, Workflow
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CgError
 from cg.store.models import (
@@ -77,9 +73,7 @@ def test_get_active_beds(base_store: Store):
         assert bed.is_archived is False
 
 
-def test_get_active_beds_when_archived(
-    base_store: Store,
-):
+def test_get_active_beds_when_archived(base_store: Store):
     """Test returning not archived bed records from the database when archived."""
 
     # GIVEN a store with beds
@@ -96,10 +90,7 @@ def test_get_active_beds_when_archived(
     assert not list(active_beds)
 
 
-def test_get_application_by_tag(
-    microbial_store: Store,
-    tag: str = MicrosaltAppTags.MWRNXTR003,
-):
+def test_get_application_by_tag(microbial_store: Store, tag: str = MicrosaltAppTags.MWRNXTR003):
     """Test function to return the application by tag."""
 
     # GIVEN a store with application records
@@ -112,8 +103,7 @@ def test_get_application_by_tag(
 
 
 def test_get_applications_is_not_archived(
-    microbial_store: Store,
-    expected_number_of_not_archived_applications,
+    microbial_store: Store, expected_number_of_not_archived_applications
 ):
     """Test function to return the application when not archived."""
 
@@ -128,25 +118,14 @@ def test_get_applications_is_not_archived(
         assert not application.is_archived
 
 
-def test_case_in_uploaded_observations(
-    helpers: StoreHelpers,
-    sample_store: Store,
-    loqusdb_id: str,
-):
+def test_case_in_uploaded_observations(helpers: StoreHelpers, sample_store: Store, loqusdb_id: str):
     """Test retrieval of uploaded observations."""
 
     # GIVEN a case with observations that has been uploaded to Loqusdb
-    analysis: Analysis = helpers.add_analysis(
-        store=sample_store,
-        workflow=Workflow.MIP_DNA,
-    )
+    analysis: Analysis = helpers.add_analysis(store=sample_store, workflow=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
-    link = sample_store.relate_sample(
-        analysis.case,
-        sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
     sample_store.session.add(link)
     assert analysis.case.analyses
     for link in analysis.case.links:
@@ -163,17 +142,10 @@ def test_case_not_in_uploaded_observations(helpers: StoreHelpers, sample_store: 
     """Test retrieval of uploaded observations that have not been uploaded to Loqusdb."""
 
     # GIVEN a case with observations that has not been uploaded to loqusdb
-    analysis: Analysis = helpers.add_analysis(
-        store=sample_store,
-        workflow=Workflow.MIP_DNA,
-    )
+    analysis: Analysis = helpers.add_analysis(store=sample_store, workflow=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store)
-    link = sample_store.relate_sample(
-        analysis.case,
-        sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
     sample_store.session.add(link)
     assert analysis.case.analyses
     for link in analysis.case.links:
@@ -190,17 +162,10 @@ def test_case_in_observations_to_upload(helpers: StoreHelpers, sample_store: Sto
     """Test extraction of ready to be uploaded to Loqusdb cases."""
 
     # GIVEN a case with completed analysis and samples w/o loqusdb_id
-    analysis: Analysis = helpers.add_analysis(
-        store=sample_store,
-        workflow=Workflow.MIP_DNA,
-    )
+    analysis: Analysis = helpers.add_analysis(store=sample_store, workflow=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store)
-    link = sample_store.relate_sample(
-        analysis.case,
-        sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
     sample_store.session.add(link)
     assert analysis.case.analyses
     for link in analysis.case.links:
@@ -214,24 +179,15 @@ def test_case_in_observations_to_upload(helpers: StoreHelpers, sample_store: Sto
 
 
 def test_case_not_in_observations_to_upload(
-    helpers: StoreHelpers,
-    sample_store: Store,
-    loqusdb_id: str,
+    helpers: StoreHelpers, sample_store: Store, loqusdb_id: str
 ):
     """Test case extraction that should not be uploaded to Loqusdb."""
 
     # GIVEN a case with completed analysis and samples with a Loqusdb ID
-    analysis: Analysis = helpers.add_analysis(
-        store=sample_store,
-        workflow=Workflow.MIP_DNA,
-    )
+    analysis: Analysis = helpers.add_analysis(store=sample_store, workflow=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
-    link = sample_store.relate_sample(
-        analysis.case,
-        sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
     sample_store.session.add(link)
     assert analysis.case.analyses
     for link in analysis.case.links:
@@ -275,11 +231,7 @@ def test_analyses_to_upload_when_no_workflow(helpers, sample_store, timestamp):
 def test_analyses_to_upload_when_analysis_has_workflow(helpers, sample_store, timestamp):
     """Test analyses to upload to when existing workflow."""
     # GIVEN a store with an analysis that has been run with MIP
-    helpers.add_analysis(
-        store=sample_store,
-        completed_at=timestamp,
-        workflow=Workflow.MIP_DNA,
-    )
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=Workflow.MIP_DNA)
 
     # WHEN fetching all analyses that are ready for upload and analysed with MIP
     records: list[Analysis] = [
@@ -294,11 +246,7 @@ def test_analyses_to_upload_when_filtering_with_workflow(helpers, sample_store, 
     """Test analyses to upload to when existing workflow and using it in filtering."""
     # GIVEN a store with an analysis that is analysed with MIP
     pipeline = Workflow.MIP_DNA
-    helpers.add_analysis(
-        store=sample_store,
-        completed_at=timestamp,
-        workflow=pipeline,
-    )
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=pipeline)
 
     # WHEN fetching all pipelines that are analysed with MIP
     records: list[Analysis] = [
@@ -314,11 +262,7 @@ def test_analyses_to_upload_with_workflow_and_no_complete_at(helpers, sample_sto
     """Test analyses to upload to when existing workflow and using it in filtering."""
     # GIVEN a store with an analysis that is analysed with MIP but does not have a completed_at
     pipeline = Workflow.MIP_DNA
-    helpers.add_analysis(
-        store=sample_store,
-        completed_at=None,
-        workflow=pipeline,
-    )
+    helpers.add_analysis(store=sample_store, completed_at=None, workflow=pipeline)
 
     # WHEN fetching all analyses that are ready for upload and analysed by MIP
     records: list[Analysis] = [
@@ -332,11 +276,7 @@ def test_analyses_to_upload_with_workflow_and_no_complete_at(helpers, sample_sto
 def test_analyses_to_upload_when_filtering_with_missing_workflow(helpers, sample_store, timestamp):
     """Test analyses to upload to when missing workflow and using it in filtering."""
     # GIVEN a store with an analysis that has been analysed with "missing_pipeline"
-    helpers.add_analysis(
-        store=sample_store,
-        completed_at=timestamp,
-        workflow=Workflow.MIP_DNA,
-    )
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=Workflow.MIP_DNA)
 
     # WHEN fetching all analyses that was analysed with MIP
     records: list[Analysis] = [
@@ -369,10 +309,7 @@ def test_sequencing_qc_priority_express_sample_with_one_half_of_the_reads(
     """Test if priority express sample(s), having more than 50% of the application target reads, pass sample QC."""
 
     # GIVEN a database with a case which has an express sample with half the number of reads
-    sample: Sample = helpers.add_sample(
-        base_store,
-        last_sequenced_at=timestamp_now,
-    )
+    sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
     application: Application = sample.application_version.application
     application.target_reads = 40
     sample.reads = 20
@@ -391,10 +328,7 @@ def test_sequencing_qc_priority_standard_sample_with_one_half_of_the_reads(
     """Test if priority standard sample(s), having more than 50% of the application target reads, pass sample QC."""
 
     # GIVEN a database with a case which has a normal sample with half the number of reads
-    sample: Sample = helpers.add_sample(
-        base_store,
-        last_sequenced_at=timestamp_now,
-    )
+    sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
     application: Application = sample.application_version.application
     application.target_reads = 40
     sample.reads = 20
@@ -407,10 +341,7 @@ def test_sequencing_qc_priority_standard_sample_with_one_half_of_the_reads(
     assert not sequencing_qc_ok
 
 
-def test_get_applications(
-    microbial_store: Store,
-    expected_number_of_applications,
-):
+def test_get_applications(microbial_store: Store, expected_number_of_applications):
     """Test function to return the applications."""
 
     # GIVEN a store with application records
@@ -503,9 +434,7 @@ def test_get_collaboration_by_internal_id(base_store: Store, collaboration_id: s
     assert collaboration.internal_id == collaboration_id
 
 
-def test_get_organism_by_internal_id_returns_correct_organism(
-    store_with_organisms: Store,
-):
+def test_get_organism_by_internal_id_returns_correct_organism(store_with_organisms: Store):
     """Test finding an organism by internal ID when the ID exists."""
 
     # GIVEN a store with multiple organisms
@@ -561,9 +490,7 @@ def test_get_organism_by_internal_id_returns_none_when_id_is_none(
     assert filtered_organism is None
 
 
-def test_get_user_by_email_returns_correct_user(
-    store_with_users: Store,
-):
+def test_get_user_by_email_returns_correct_user(store_with_users: Store):
     """Test fetching a user by email."""
 
     # GIVEN a store with multiple users
@@ -585,8 +512,7 @@ def test_get_user_by_email_returns_correct_user(
 
 
 def test_get_user_by_email_returns_none_for_nonexisting_email(
-    store_with_users: Store,
-    non_existent_email: str,
+    store_with_users: Store, non_existent_email: str
 ):
     """Test getting user by email when the email does not exist."""
 
@@ -599,9 +525,7 @@ def test_get_user_by_email_returns_none_for_nonexisting_email(
     assert filtered_user is None
 
 
-def test_get_user_when_email_is_none_returns_none(
-    store_with_users: Store,
-):
+def test_get_user_when_email_is_none_returns_none(store_with_users: Store):
     """Test getting user by email when the email is None."""
 
     # WHEN retrieving filtering by email None
@@ -612,31 +536,23 @@ def test_get_user_when_email_is_none_returns_none(
 
 
 def test_get_analysis_by_case_entry_id_and_started_at(
-    sample_store: Store,
-    helpers: StoreHelpers,
-    timestamp_now: datetime,
+    sample_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test returning an analysis using a date."""
     # GIVEN a case with an analysis with a start date in the database
-    analysis = helpers.add_analysis(
-        store=sample_store,
-        started_at=timestamp_now,
-    )
+    analysis = helpers.add_analysis(store=sample_store, started_at=timestamp_now)
     assert analysis.started_at
 
     # WHEN getting analysis via case_id and start date
     db_analysis = sample_store.get_analysis_by_case_entry_id_and_started_at(
-        case_entry_id=analysis.case.id,
-        started_at_date=analysis.started_at,
+        case_entry_id=analysis.case.id, started_at_date=analysis.started_at
     )
 
     # THEN the analysis should have been retrieved
     assert db_analysis == analysis
 
 
-def test_get_flow_cell_sample_links_query(
-    re_sequenced_sample_store: Store,
-):
+def test_get_flow_cell_sample_links_query(re_sequenced_sample_store: Store):
     """Test function to return the flow cell sample links query from the database."""
 
     # GIVEN a store with two flow cells
@@ -648,9 +564,7 @@ def test_get_flow_cell_sample_links_query(
     assert isinstance(flow_cell_query, Query)
 
 
-def test_get_flow_cells(
-    re_sequenced_sample_store: Store,
-):
+def test_get_flow_cells(re_sequenced_sample_store: Store):
     """Test function to return the flow cells from the database."""
 
     # GIVEN a store with two flow cells
@@ -665,10 +579,7 @@ def test_get_flow_cells(
     assert isinstance(flow_cells[0], Flowcell)
 
 
-def test_get_flow_cell(
-    bcl2fastq_flow_cell_id: str,
-    re_sequenced_sample_store: Store,
-):
+def test_get_flow_cell(bcl2fastq_flow_cell_id: str, re_sequenced_sample_store: Store):
     """Test returning the latest flow cell from the database."""
 
     # GIVEN a store with two flow cells
@@ -693,16 +604,9 @@ def test_get_flow_cells_by_case(
     """Test returning the latest flow cell from the database by case."""
 
     # GIVEN a store with two flow cell
-    helpers.add_flow_cell(
-        store=base_store,
-        flow_cell_name=bcl2fastq_flow_cell_id,
-        samples=[sample],
-    )
+    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
 
-    helpers.add_flow_cell(
-        store=base_store,
-        flow_cell_name=bcl_convert_flow_cell_id,
-    )
+    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl_convert_flow_cell_id)
 
     # WHEN fetching the latest flow cell
     flow_cells: list[Flowcell] = base_store.get_flow_cells_by_case(case=case)
@@ -717,8 +621,7 @@ def test_get_flow_cells_by_case(
 
 
 def test_get_flow_cells_by_statuses(
-    bcl_convert_flow_cell_id: str,
-    re_sequenced_sample_store: Store,
+    bcl_convert_flow_cell_id: str, re_sequenced_sample_store: Store
 ):
     """Test returning the latest flow cell from the database by statuses."""
 
@@ -726,10 +629,7 @@ def test_get_flow_cells_by_statuses(
 
     # WHEN fetching the latest flow cell
     flow_cells: list[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
-        flow_cell_statuses=[
-            FlowCellStatus.ON_DISK,
-            FlowCellStatus.REQUESTED,
-        ]
+        flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.REQUESTED]
     )
 
     # THEN the flow cell status should be "ondisk"
@@ -740,9 +640,7 @@ def test_get_flow_cells_by_statuses(
     assert flow_cells[0].name == bcl_convert_flow_cell_id
 
 
-def test_get_flow_cells_by_statuses_when_multiple_matches(
-    re_sequenced_sample_store: Store,
-):
+def test_get_flow_cells_by_statuses_when_multiple_matches(re_sequenced_sample_store: Store):
     """Test returning the latest flow cell from the database by statuses when multiple matches."""
 
     # GIVEN a store with two flow cells
@@ -755,18 +653,12 @@ def test_get_flow_cells_by_statuses_when_multiple_matches(
 
     # WHEN fetching the latest flow cell
     flow_cells: list[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
-        flow_cell_statuses=[
-            FlowCellStatus.ON_DISK,
-            FlowCellStatus.REQUESTED,
-        ]
+        flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.REQUESTED]
     )
 
     # THEN the flow cell status should be "ondisk" or "requested"
     for flow_cell in flow_cells:
-        assert flow_cell.status in [
-            FlowCellStatus.ON_DISK,
-            FlowCellStatus.REQUESTED,
-        ]
+        assert flow_cell.status in [FlowCellStatus.ON_DISK, FlowCellStatus.REQUESTED]
 
     # THEN the returned flow cell should have the same status as the ones in the database
     assert flow_cells[0].status == FlowCellStatus.REQUESTED
@@ -774,9 +666,7 @@ def test_get_flow_cells_by_statuses_when_multiple_matches(
     assert flow_cells[1].status == FlowCellStatus.ON_DISK
 
 
-def test_get_flow_cells_by_statuses_when_incorrect_status(
-    re_sequenced_sample_store: Store,
-):
+def test_get_flow_cells_by_statuses_when_incorrect_status(re_sequenced_sample_store: Store):
     """Test returning the latest flow cell from the database when no flow cell with incorrect status."""
 
     # GIVEN a store with two flow cells
@@ -791,8 +681,7 @@ def test_get_flow_cells_by_statuses_when_incorrect_status(
 
 
 def test_get_flow_cell_by_enquiry_and_status(
-    bcl2fastq_flow_cell_id: str,
-    re_sequenced_sample_store: Store,
+    bcl2fastq_flow_cell_id: str, re_sequenced_sample_store: Store
 ):
     """Test returning the latest flow cell from the database by enquiry and status."""
 
@@ -800,8 +689,7 @@ def test_get_flow_cell_by_enquiry_and_status(
 
     # WHEN fetching the latest flow cell
     flow_cell: list[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_name_pattern_and_status(
-        flow_cell_statuses=[FlowCellStatus.ON_DISK],
-        name_pattern=bcl2fastq_flow_cell_id[:4],
+        flow_cell_statuses=[FlowCellStatus.ON_DISK], name_pattern=bcl2fastq_flow_cell_id[:4]
     )
 
     # THEN the returned flow cell should have the same name as the one in the database
@@ -812,9 +700,7 @@ def test_get_flow_cell_by_enquiry_and_status(
 
 
 def test_get_samples_from_flow_cell(
-    bcl2fastq_flow_cell_id: str,
-    sample_id: str,
-    re_sequenced_sample_store: Store,
+    bcl2fastq_flow_cell_id: str, sample_id: str, re_sequenced_sample_store: Store
 ):
     """Test returning samples present on the latest flow cell from the database."""
 
@@ -830,9 +716,7 @@ def test_get_samples_from_flow_cell(
 
 
 def test_get_latest_flow_cell_on_case(
-    re_sequenced_sample_store: Store,
-    case_id: str,
-    bcl2fastq_flow_cell_id: str,
+    re_sequenced_sample_store: Store, case_id: str, bcl2fastq_flow_cell_id: str
 ):
     """Test returning the latest sequenced flow cell on a case."""
 
@@ -947,15 +831,8 @@ def test_are_all_flow_cells_on_disk(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a store with two flow cell
-    helpers.add_flow_cell(
-        store=base_store,
-        flow_cell_name=bcl2fastq_flow_cell_id,
-        samples=[sample],
-    )
-    helpers.add_flow_cell(
-        store=base_store,
-        flow_cell_name=bcl_convert_flow_cell_id,
-    )
+    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
+    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl_convert_flow_cell_id)
 
     # WHEN fetching the latest flow cell
     is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
@@ -972,11 +849,7 @@ def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket_id: str
     assert analysis_store.get_customer_id_from_ticket(ticket_id) == customer_id
 
 
-def test_get_latest_ticket_from_case(
-    case_id: str,
-    analysis_store_single_case,
-    ticket_id: str,
-):
+def test_get_latest_ticket_from_case(case_id: str, analysis_store_single_case, ticket_id: str):
     """Tests if the correct ticket is returned for the given case."""
     # GIVEN a populated store with a case
 
@@ -1108,9 +981,7 @@ def test_get_case_sample_link(
     assert case_sample.sample.internal_id == sample_id
 
 
-def test_find_cases_for_non_existing_case(
-    store_with_multiple_cases_and_samples: Store,
-):
+def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples: Store):
     """Test that nothing happens when trying to find a case that does not exist."""
 
     # GIVEN a database containing some cases but not a specific case
@@ -1127,9 +998,7 @@ def test_find_cases_for_non_existing_case(
 
 
 def test_verify_case_exists(
-    caplog,
-    case_id_with_multiple_samples: str,
-    store_with_multiple_cases_and_samples: Store,
+    caplog, case_id_with_multiple_samples: str, store_with_multiple_cases_and_samples: Store
 ):
     """Test validating a case that exists in the database."""
 
@@ -1147,8 +1016,7 @@ def test_verify_case_exists(
 
 
 def test_verify_case_exists_with_non_existing_case(
-    case_id_does_not_exist: str,
-    store_with_multiple_cases_and_samples: Store,
+    case_id_does_not_exist: str, store_with_multiple_cases_and_samples: Store
 ):
     """Test validating a case that does not exist in the database."""
 
@@ -1164,8 +1032,7 @@ def test_verify_case_exists_with_non_existing_case(
 
 
 def test_verify_case_exists_with_no_case_samples(
-    case_id_without_samples: str,
-    store_with_multiple_cases_and_samples: Store,
+    case_id_without_samples: str, store_with_multiple_cases_and_samples: Store
 ):
     """Test validating a case without samples that exist in the database."""
 
@@ -1208,10 +1075,7 @@ def test_is_case_down_sampled_false(base_store: Store, case: Case, sample_id: st
 
 
 def test_is_case_external_true(
-    base_store: Store,
-    case: Case,
-    helpers: StoreHelpers,
-    sample_id: str,
+    base_store: Store, case: Case, helpers: StoreHelpers, sample_id: str
 ):
     """Tests the external case check when all the samples are external."""
     # GIVEN a case where all samples are not external
@@ -1242,9 +1106,7 @@ def test_is_case_external_false(base_store: Store, case: Case, sample_id: str):
     assert not is_external
 
 
-def test_get_invoice_by_status(
-    store_with_an_invoice_with_and_without_attributes: Store,
-):
+def test_get_invoice_by_status(store_with_an_invoice_with_and_without_attributes: Store):
     """Test that invoices can be fetched by status."""
     # GIVEN a database with two invoices of which one has attributes
 
@@ -1263,9 +1125,7 @@ def test_get_invoice_by_status(
     assert invoices[0].invoiced_at
 
 
-def test_get_invoice_by_id(
-    store_with_an_invoice_with_and_without_attributes: Store,
-):
+def test_get_invoice_by_id(store_with_an_invoice_with_and_without_attributes: Store):
     """Test that invoices can be fetched by invoice id."""
     # GIVEN a database with two invoices of which one has attributes
 
@@ -1281,9 +1141,7 @@ def test_get_invoice_by_id(
     assert invoice.id == 1
 
 
-def test_get_pools(
-    store_with_multiple_pools_for_customer: Store,
-):
+def test_get_pools(store_with_multiple_pools_for_customer: Store):
     """Test that pools can be fetched from the store."""
     # GIVEN a database with two pools
 
@@ -1294,9 +1152,7 @@ def test_get_pools(
     assert len(pools) == 2
 
 
-def test_get_pools_by_customer_id(
-    store_with_multiple_pools_for_customer: Store,
-):
+def test_get_pools_by_customer_id(store_with_multiple_pools_for_customer: Store):
     """Test that pools can be fetched from the store by customer id."""
     # GIVEN a database with two pools
 
@@ -1309,10 +1165,7 @@ def test_get_pools_by_customer_id(
     assert len(pools) == 2
 
 
-def test_get_pools_by_name_enquiry(
-    store_with_multiple_pools_for_customer: Store,
-    pool_name_1: str,
-):
+def test_get_pools_by_name_enquiry(store_with_multiple_pools_for_customer: Store, pool_name_1: str):
     """Test that pools can be fetched from the store by customer id."""
     # GIVEN a database with two pools
 
@@ -1326,8 +1179,7 @@ def test_get_pools_by_name_enquiry(
 
 
 def test_get_pools_by_order_enquiry(
-    store_with_multiple_pools_for_customer: Store,
-    pool_order_1: str,
+    store_with_multiple_pools_for_customer: Store, pool_order_1: str
 ):
     """Test that pools can be fetched from the store by customer id."""
     # GIVEN a database with two pools
@@ -1377,8 +1229,7 @@ def test_get_pools_to_render_with_customer_and_name_enquiry(
     # GIVEN a database with two pools
     # WHEN fetching pools by customer id and name enquiry
     pools: list[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
-        customers=store_with_multiple_pools_for_customer.get_customers(),
-        enquiry=pool_name_1,
+        customers=store_with_multiple_pools_for_customer.get_customers(), enquiry=pool_name_1
     )
 
     # THEN one pools should be returned
@@ -1395,17 +1246,14 @@ def test_get_pools_to_render_with_customer_and_order_enquiry(
     # WHEN fetching pools by customer id and order enquiry
 
     pools: list[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
-        customers=store_with_multiple_pools_for_customer.get_customers(),
-        enquiry=pool_order_1,
+        customers=store_with_multiple_pools_for_customer.get_customers(), enquiry=pool_order_1
     )
 
     # THEN one pools should be returned
     assert len(pools) == 1
 
 
-def test_get_case_by_name_and_customer_case_found(
-    store_with_multiple_cases_and_samples: Store,
-):
+def test_get_case_by_name_and_customer_case_found(store_with_multiple_cases_and_samples: Store):
     """Test that a case can be found by customer and case name."""
     # GIVEN a database with multiple cases for a customer
     case: Case = store_with_multiple_cases_and_samples._get_query(table=Case).first()
@@ -1426,8 +1274,7 @@ def test_get_case_by_name_and_customer_case_found(
 
 
 def test_get_cases_not_analysed_by_sample_internal_id_empty_query(
-    store_with_multiple_cases_and_samples: Store,
-    non_existent_id: str,
+    store_with_multiple_cases_and_samples: Store, non_existent_id: str
 ):
     """Test that an empty query is returned if no cases match the sample internal id."""
     # GIVEN a store
@@ -1467,16 +1314,13 @@ def test_get_cases_not_analysed_by_sample_internal_id_multiple_cases(
 
 
 def test_get_total_counts_passing_q30(
-    store_with_sequencing_metrics: Store,
-    sample_id: str,
-    expected_total_reads: int,
+    store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads: int
 ):
     # GIVEN a store with sequencing metrics
 
     total_reads_count_passing_q30 = (
         store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
-            sample_internal_id=sample_id,
-            q30_threshold=0,
+            sample_internal_id=sample_id, q30_threshold=0
         )
     )
     # THEN assert that the total read count is correct
@@ -1484,18 +1328,13 @@ def test_get_total_counts_passing_q30(
 
 
 def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-    store_with_sequencing_metrics: Store,
-    sample_id: str,
-    flow_cell_name: str,
-    lane: int = 1,
+    store_with_sequencing_metrics: Store, sample_id: str, flow_cell_name: str, lane: int = 1
 ):
     # GIVEN a store with sequencing metrics
 
     # WHEN getting a metrics entry by flow cell name, sample internal id and lane
     metrics_entry: SampleLaneSequencingMetrics = store_with_sequencing_metrics.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-        sample_internal_id=sample_id,
-        flow_cell_name=flow_cell_name,
-        lane=lane,
+        sample_internal_id=sample_id, flow_cell_name=flow_cell_name, lane=lane
     )
 
     assert metrics_entry is not None
@@ -1573,8 +1412,7 @@ def test_get_number_of_reads_for_sample_passing_q30_threshold(
     # WHEN getting the number of reads for the sample that pass the Q30 threshold
     number_of_reads: int = (
         store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
-            sample_internal_id=sample_id,
-            q30_threshold=q30_threshold,
+            sample_internal_id=sample_id, q30_threshold=q30_threshold
         )
     )
 
@@ -1586,8 +1424,7 @@ def test_get_number_of_reads_for_sample_passing_q30_threshold(
 
 
 def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
-    store_with_sequencing_metrics: Store,
-    sample_id: str,
+    store_with_sequencing_metrics: Store, sample_id: str
 ):
     # GIVEN a store with sequencing metrics
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
@@ -1606,8 +1443,7 @@ def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
     # WHEN getting the number of reads for the sample that pass the Q30 threshold
     number_of_reads: int = (
         store_with_sequencing_metrics.get_number_of_reads_for_sample_passing_q30_threshold(
-            sample_internal_id=sample_id,
-            q30_threshold=q30_threshold,
+            sample_internal_id=sample_id, q30_threshold=q30_threshold
         )
     )
 
@@ -1617,8 +1453,7 @@ def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
 
 
 def test_get_sample_lane_sequencing_metrics_by_flow_cell_name(
-    store_with_sequencing_metrics: Store,
-    flow_cell_name: str,
+    store_with_sequencing_metrics: Store, flow_cell_name: str
 ):
     # GIVEN a store with sequencing metrics
 
@@ -1636,8 +1471,7 @@ def test_get_sample_lane_sequencing_metrics_by_flow_cell_name(
 
 
 def test_case_with_name_exists(
-    store_with_case_and_sample_with_reads: Store,
-    downsample_case_internal_id: str,
+    store_with_case_and_sample_with_reads: Store, downsample_case_internal_id: str
 ):
     # GIVEN a store with a case and a sample
 
@@ -1663,8 +1497,7 @@ def test_case_with_name_does_not_exist(
 
 
 def test_sample_with_id_does_exist(
-    store_with_case_and_sample_with_reads: Store,
-    downsample_sample_internal_id_1: str,
+    store_with_case_and_sample_with_reads: Store, downsample_sample_internal_id_1: str
 ):
     # GIVEN a store with a sample
 
@@ -1677,9 +1510,7 @@ def test_sample_with_id_does_exist(
     assert does_exist
 
 
-def test_sample_with_id_does_not_exist(
-    store_with_case_and_sample_with_reads: Store,
-):
+def test_sample_with_id_does_not_exist(store_with_case_and_sample_with_reads: Store):
     # GIVEN a store with a sample
 
     # WHEN checking if a sample that is not in the store exists
@@ -1699,11 +1530,7 @@ def test_get_orders_empty_store(store: Store):
     assert not store.get_orders_by_workflow()
 
 
-def test_get_orders_populated_store(
-    store: Store,
-    order: Order,
-    order_another: Order,
-):
+def test_get_orders_populated_store(store: Store, order: Order, order_another: Order):
     # GIVEN a store with two orders
 
     # WHEN fetching orders
@@ -1711,11 +1538,7 @@ def test_get_orders_populated_store(
     assert len(store.get_orders_by_workflow()) == 2
 
 
-def test_get_orders_limited(
-    store: Store,
-    order: Order,
-    order_another: Order,
-):
+def test_get_orders_limited(store: Store, order: Order, order_another: Order):
     # GIVEN a store with two orders
 
     # WHEN fetching a limited amount of orders
@@ -1724,10 +1547,7 @@ def test_get_orders_limited(
 
 
 def test_get_orders_workflow_filter(
-    store: Store,
-    order: Order,
-    order_another: Order,
-    order_balsamic: Order,
+    store: Store, order: Order, order_another: Order, order_balsamic: Order
 ):
     # GIVEN a store with three orders, one of which is a Balsamic order
 

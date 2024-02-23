@@ -1,8 +1,6 @@
 from pydantic import BaseModel
 
-from cg.models.orders.sample_base import (
-    OrderSample,
-)
+from cg.models.orders.sample_base import OrderSample
 
 
 # Class for holding information about cases in order

@@ -1,17 +1,9 @@
 from pathlib import Path
 
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSampleBCLConvert,
-)
-from cg.apps.demultiplex.sample_sheet.sample_sheet_models import (
-    SampleSheet,
-)
-from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import (
-    SampleSheetValidator,
-)
-from cg.apps.demultiplex.sample_sheet.validators import (
-    is_valid_sample_internal_id,
-)
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSampleBCLConvert
+from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
+from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
+from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 
 
 def test_get_non_pooled_samples_when_no_samples():
@@ -55,13 +47,7 @@ def test_get_non_pooled_samples_when_multiple_lanes_one_single():
     sample1 = FlowCellSampleBCLConvert(lane=1, sample_id="ACC123", index="A")
     sample2 = FlowCellSampleBCLConvert(lane=1, sample_id="ACC456", index="A")
     non_pooled_sample = FlowCellSampleBCLConvert(lane=2, sample_id="ACC789", index="A")
-    sample_sheet = SampleSheet(
-        samples=[
-            sample1,
-            sample2,
-            non_pooled_sample,
-        ]
-    )
+    sample_sheet = SampleSheet(samples=[sample1, sample2, non_pooled_sample])
 
     # WHEN retrieving any non pooled samples
     samples = sample_sheet.get_non_pooled_samples()

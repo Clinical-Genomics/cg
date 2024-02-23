@@ -11,35 +11,16 @@ from requests import Response
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.constants.archiving import (
-    ArchiveLocations,
-)
-from cg.constants.constants import (
-    DataDelivery,
-    FileFormat,
-    Workflow,
-)
+from cg.constants.archiving import ArchiveLocations
+from cg.constants.constants import DataDelivery, FileFormat, Workflow
 from cg.constants.subject import Sex
 from cg.io.controller import WriteStream
-from cg.meta.archive.archive import (
-    SpringArchiveAPI,
-)
-from cg.meta.archive.ddn.constants import (
-    ROOT_TO_TRIM,
-)
-from cg.meta.archive.ddn.ddn_data_flow_client import (
-    DDNDataFlowClient,
-)
-from cg.meta.archive.ddn.models import (
-    AuthToken,
-    MiriaObject,
-    TransferPayload,
-)
+from cg.meta.archive.archive import SpringArchiveAPI
+from cg.meta.archive.ddn.constants import ROOT_TO_TRIM
+from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
+from cg.meta.archive.ddn.models import AuthToken, MiriaObject, TransferPayload
 from cg.meta.archive.models import FileAndSample
-from cg.models.cg_config import (
-    CGConfig,
-    DataFlowConfig,
-)
+from cg.models.cg_config import CGConfig, DataFlowConfig
 from cg.store.models import Case, Customer, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -47,8 +28,7 @@ from tests.store_helpers import StoreHelpers
 
 @pytest.fixture(name="ddn_dataflow_config")
 def ddn_dataflow_config(
-    local_storage_repository: str,
-    remote_storage_repository: str,
+    local_storage_repository: str, remote_storage_repository: str
 ) -> DataFlowConfig:
     """Returns a mock DDN Dataflow config."""
     return DataFlowConfig(
@@ -68,18 +48,14 @@ def ok_miria_response(ok_response: Response):
 
 
 @pytest.fixture
-def ok_miria_job_status_response(
-    ok_response: Response,
-):
+def ok_miria_job_status_response(ok_response: Response):
     ok_response._content = b'{"id": "123", "status": "Completed"}'
     return ok_response
 
 
 @pytest.fixture
 def archive_request_json(
-    remote_storage_repository: str,
-    local_storage_repository: str,
-    trimmed_local_path: str,
+    remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
 ) -> dict:
     return {
         "osType": "Unix/MacOS",
@@ -97,9 +73,7 @@ def archive_request_json(
 
 @pytest.fixture
 def retrieve_request_json(
-    remote_storage_repository: str,
-    local_storage_repository: str,
-    trimmed_local_path: str,
+    remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
 ) -> dict[str, Any]:
     """Returns the body for a retrieval http post towards the DDN Miria API."""
     return {
@@ -127,9 +101,7 @@ def header_with_test_auth_token() -> dict:
 
 
 @pytest.fixture
-def miria_auth_token_response(
-    ok_response: Response,
-):
+def miria_auth_token_response(ok_response: Response):
     ok_response._content = b'{"access": "test_auth_token", "expire":15, "test_refresh_token":""}'
     return ok_response
 
@@ -154,9 +126,7 @@ def retrieval_job_id() -> int:
 
 
 @pytest.fixture
-def ddn_dataflow_client(
-    ddn_dataflow_config: DataFlowConfig,
-) -> DDNDataFlowClient:
+def ddn_dataflow_client(ddn_dataflow_config: DataFlowConfig) -> DDNDataFlowClient:
     """Returns a DDNApi without tokens being set."""
     mock_ddn_auth_success_response = Response()
     mock_ddn_auth_success_response.status_code = 200
@@ -178,17 +148,11 @@ def ddn_dataflow_client(
 @pytest.fixture
 def miria_file_archive(local_directory: Path, remote_path: Path) -> MiriaObject:
     """Return a MiriaObject for archiving."""
-    return MiriaObject(
-        source=local_directory.as_posix(),
-        destination=remote_path.as_posix(),
-    )
+    return MiriaObject(source=local_directory.as_posix(), destination=remote_path.as_posix())
 
 
 @pytest.fixture
-def file_and_sample(
-    spring_archive_api: SpringArchiveAPI,
-    sample_id: str,
-):
+def file_and_sample(spring_archive_api: SpringArchiveAPI, sample_id: str):
     return FileAndSample(
         file=spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first(),
         sample=spring_archive_api.status_db.get_sample_by_internal_id(sample_id),
@@ -196,10 +160,7 @@ def file_and_sample(
 
 
 @pytest.fixture
-def trimmed_local_path(
-    spring_archive_api: SpringArchiveAPI,
-    sample_id: str,
-):
+def trimmed_local_path(spring_archive_api: SpringArchiveAPI, sample_id: str):
     file: File = spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first()
     return file.path[5:]
 
@@ -207,22 +168,14 @@ def trimmed_local_path(
 @pytest.fixture
 def miria_file_retrieve(local_directory: Path, remote_path: Path) -> MiriaObject:
     """Return a MiriaObject for retrieval."""
-    return MiriaObject(
-        source=remote_path.as_posix(),
-        destination=local_directory.as_posix(),
-    )
+    return MiriaObject(source=remote_path.as_posix(), destination=local_directory.as_posix())
 
 
 @pytest.fixture
-def transfer_payload(
-    miria_file_archive: MiriaObject,
-) -> TransferPayload:
+def transfer_payload(miria_file_archive: MiriaObject) -> TransferPayload:
     """Return a TransferPayload object containing two identical MiriaObject object."""
     return TransferPayload(
-        files_to_transfer=[
-            miria_file_archive,
-            miria_file_archive.model_copy(deep=True),
-        ]
+        files_to_transfer=[miria_file_archive, miria_file_archive.model_copy(deep=True)]
     )
 
 
@@ -239,9 +192,7 @@ def local_directory() -> Path:
 
 
 @pytest.fixture
-def trimmed_local_directory(
-    local_directory: Path,
-) -> Path:
+def trimmed_local_directory(local_directory: Path) -> Path:
     """Returns the trimmed local directory."""
     return Path(f"/{local_directory.relative_to(ROOT_TO_TRIM)}")
 
@@ -259,10 +210,7 @@ def remote_storage_repository() -> str:
 
 
 @pytest.fixture
-def full_remote_path(
-    remote_storage_repository: str,
-    remote_path: Path,
-) -> str:
+def full_remote_path(remote_storage_repository: str, remote_path: Path) -> str:
     """Returns the merged remote repository and path."""
     return remote_storage_repository + remote_path.as_posix()
 
@@ -331,11 +279,7 @@ def archive_store(
         ticket="123",
         customer_id=customer_ddn.id,
     )
-    base_store.relate_sample(
-        case=case,
-        sample=new_samples[0],
-        status="unknown",
-    )
+    base_store.relate_sample(case=case, sample=new_samples[0], status="unknown")
     base_store.session.add(case)
     base_store.session.commit()
     return base_store
@@ -356,8 +300,7 @@ def spring_archive_api(
     helpers,
 ) -> SpringArchiveAPI:
     """Returns an ArchiveAPI with a populated housekeeper store and a DDNDataFlowClient.
-    Also adds /home/ as a prefix for each SPRING file for the DDNDataFlowClient to accept them.
-    """
+    Also adds /home/ as a prefix for each SPRING file for the DDNDataFlowClient to accept them."""
     populated_housekeeper_api.add_tags_if_non_existent(
         tag_names=[ArchiveLocations.KAROLINSKA_BUCKET]
     )
@@ -384,9 +327,7 @@ def cli_runner() -> CliRunner:
 
 @pytest.fixture
 def base_context(
-    base_store: Store,
-    housekeeper_api: HousekeeperAPI,
-    cg_config_object: CGConfig,
+    base_store: Store, housekeeper_api: HousekeeperAPI, cg_config_object: CGConfig
 ) -> CGConfig:
     """context to use in CLI."""
     cg_config_object.status_db_ = base_store
@@ -408,9 +349,7 @@ def archive_context(
     base_context.data_flow = ddn_dataflow_config
 
     customer = helpers.ensure_customer(
-        store=base_context.status_db,
-        customer_id="miria_customer",
-        customer_name="Miriam",
+        store=base_context.status_db, customer_id="miria_customer", customer_name="Miriam"
     )
     customer.data_archive_location = ArchiveLocations.KAROLINSKA_BUCKET
 
@@ -421,32 +360,21 @@ def archive_context(
         **{"customer": "MiriaCustomer"},
     )
     helpers.add_sample(
-        store=base_context.status_db,
-        customer_id="miria_customer",
-        internal_id="miria_sample",
+        store=base_context.status_db, customer_id="miria_customer", internal_id="miria_sample"
     )
     bundle: Bundle = real_housekeeper_api.create_new_bundle_and_version(name="miria_sample")
     real_housekeeper_api.add_file(
         path=path_to_spring_file_to_archive,
         version_obj=bundle.versions[0],
-        tags=[
-            SequencingFileTag.SPRING,
-            ArchiveLocations.KAROLINSKA_BUCKET,
-        ],
+        tags=[SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET],
     )
     file: File = real_housekeeper_api.add_file(
         path=path_to_spring_file_with_ongoing_archival,
         version_obj=bundle.versions[0],
-        tags=[
-            SequencingFileTag.SPRING,
-            ArchiveLocations.KAROLINSKA_BUCKET,
-        ],
+        tags=[SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET],
     )
     file.id = 1234
-    real_housekeeper_api.add_archives(
-        files=[file],
-        archive_task_id=archival_job_id,
-    )
+    real_housekeeper_api.add_archives(files=[file], archive_task_id=archival_job_id)
 
     return base_context
 
@@ -469,16 +397,12 @@ def failed_response() -> Response:
 
 
 @pytest.fixture
-def failed_delete_file_response(
-    failed_response: Response,
-) -> Response:
+def failed_delete_file_response(failed_response: Response) -> Response:
     failed_response._content = b'{"detail":"Given token not valid for any token type","code":"token_not_valid","messages":[{"tokenClass":"AccessToken","tokenType":"access","message":"Token is invalid or expired"}]}'
     return failed_response
 
 
 @pytest.fixture
-def ok_delete_file_response(
-    ok_response: Response,
-) -> Response:
+def ok_delete_file_response(ok_response: Response) -> Response:
     ok_response._content = b'{"message":"Object has been deleted"}'
     return ok_response

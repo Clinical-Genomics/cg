@@ -10,9 +10,7 @@ from cg.constants import (
     FASTQ_SECOND_READ_SUFFIX,
     FileExtensions,
 )
-from cg.constants.compression import (
-    PENDING_PATH_SUFFIX,
-)
+from cg.constants.compression import PENDING_PATH_SUFFIX
 
 LOG = logging.getLogger(__name__)
 
@@ -79,27 +77,19 @@ class CompressionData:
     def is_absolute(file_path: Path) -> bool:
         """Check if file path can be resolved"""
         if not file_path.is_absolute():
-            LOG.info(
-                "Could not resolve full path from HK to %s",
-                file_path,
-            )
+            LOG.info("Could not resolve full path from HK to %s", file_path)
             return False
         return True
 
     @staticmethod
-    def file_exists_and_is_accessible(
-        file_path: Path,
-    ) -> bool:
+    def file_exists_and_is_accessible(file_path: Path) -> bool:
         """Check if file exists and is accesible"""
         try:
             if not file_path.exists():
                 LOG.info("%s does not exist", file_path)
                 return False
         except PermissionError:
-            LOG.warning(
-                "Not permitted to access %s. Skipping",
-                file_path,
-            )
+            LOG.warning("Not permitted to access %s. Skipping", file_path)
             return False
         return True
 
@@ -110,16 +100,10 @@ class CompressionData:
         return os.path.islink(file_path)
 
     @staticmethod
-    def get_change_date(
-        file_path: Path,
-    ) -> datetime:
+    def get_change_date(file_path: Path) -> datetime:
         """Return the time when this file was changed"""
         changed_date = datetime.fromtimestamp(file_path.stat().st_mtime)
-        LOG.info(
-            "File %s was changed %s",
-            file_path,
-            changed_date,
-        )
+        LOG.info("File %s was changed %s", file_path, changed_date)
         return changed_date
 
     def spring_exists(self) -> bool:

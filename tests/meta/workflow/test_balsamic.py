@@ -4,15 +4,11 @@ from pathlib import Path
 
 import pytest
 
-from cg.constants.observations import (
-    ObservationsFileWildcards,
-)
+from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Sex
 from cg.exc import BalsamicStartError
-from cg.meta.workflow.balsamic import (
-    BalsamicAnalysisAPI,
-)
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 
@@ -81,9 +77,7 @@ def test_get_verified_pon():
 
 
 def test_get_latest_file_by_pattern(
-    cg_context: CGConfig,
-    observations_dir: Path,
-    observations_somatic_snv_file_path: Path,
+    cg_context: CGConfig, observations_dir: Path, observations_somatic_snv_file_path: Path
 ):
     """Test latest observations extraction."""
 
@@ -92,8 +86,7 @@ def test_get_latest_file_by_pattern(
 
     # WHEN getting the latest observations file
     observation: str = balsamic_analysis_api.get_latest_file_by_pattern(
-        directory=observations_dir,
-        pattern=ObservationsFileWildcards.CANCER_SOMATIC_SNV,
+        directory=observations_dir, pattern=ObservationsFileWildcards.CANCER_SOMATIC_SNV
     )
 
     # THEN the extracted observation should match the latest file
@@ -163,9 +156,7 @@ def test_get_parsed_observation_file_paths_overwrite_input(
 
 
 def test_get_swegen_verified_path(
-    cg_context: CGConfig,
-    swegen_dir: Path,
-    swegen_snv_reference: Path,
+    cg_context: CGConfig, swegen_dir: Path, swegen_snv_reference: Path
 ):
     """Test verified SweGen path return."""
 

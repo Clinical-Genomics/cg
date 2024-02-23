@@ -2,12 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import (
-    BaseModel,
-    BeforeValidator,
-    ConfigDict,
-    Field,
-)
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 from typing_extensions import Annotated, Literal
 
 from cg.apps.scout.validators import (
@@ -15,15 +10,8 @@ from cg.apps.scout.validators import (
     set_parent_if_missing,
     set_sex_if_other,
 )
-from cg.constants.gene_panel import (
-    GENOME_BUILD_37,
-)
-from cg.constants.subject import (
-    PlinkPhenotypeStatus,
-    PlinkSex,
-    RelationshipStatus,
-    Sex,
-)
+from cg.constants.gene_panel import GENOME_BUILD_37
+from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex, RelationshipStatus, Sex
 
 
 class Individual(BaseModel):
@@ -31,21 +19,14 @@ class Individual(BaseModel):
     bam_file: str | None = None
     individual_id: str
     sex: Annotated[
-        Literal[
-            PlinkSex.UNKNOWN,
-            PlinkSex.MALE,
-            PlinkSex.FEMALE,
-            Sex.OTHER,
-        ],
+        Literal[PlinkSex.UNKNOWN, PlinkSex.MALE, PlinkSex.FEMALE, Sex.OTHER],
         BeforeValidator(set_sex_if_other),
     ]
     father: Annotated[
-        str,
-        BeforeValidator(set_parent_if_missing),
+        str, BeforeValidator(set_parent_if_missing)
     ] = RelationshipStatus.HAS_NO_PARENT
     mother: Annotated[
-        str,
-        BeforeValidator(set_parent_if_missing),
+        str, BeforeValidator(set_parent_if_missing)
     ] = RelationshipStatus.HAS_NO_PARENT
     phenotype: PlinkPhenotypeStatus
     analysis_type: str = "wgs"

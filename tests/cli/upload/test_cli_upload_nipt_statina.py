@@ -14,12 +14,7 @@ class MockStatinaUploadFiles:
         return ""
 
 
-def test_nipt_statina_upload_case(
-    upload_context: CGConfig,
-    cli_runner: CliRunner,
-    caplog,
-    mocker,
-):
+def test_nipt_statina_upload_case(upload_context: CGConfig, cli_runner: CliRunner, caplog, mocker):
     """Tests CLI command to upload a single case"""
 
     caplog.set_level(logging.DEBUG)
@@ -27,20 +22,9 @@ def test_nipt_statina_upload_case(
     case_id = "angrybird"
 
     # WHEN adding a result file of a specified NIPT case
-    mocker.patch.object(
-        NiptUploadAPI,
-        "get_statina_files",
-        return_value=MockStatinaUploadFiles(),
-    )
-    mocker.patch.object(
-        NiptUploadAPI,
-        "upload_to_statina_database",
-    )
-    mocker.patch.object(
-        NiptUploadAPI,
-        "flowcell_passed_qc_value",
-        return_value=True,
-    )
+    mocker.patch.object(NiptUploadAPI, "get_statina_files", return_value=MockStatinaUploadFiles())
+    mocker.patch.object(NiptUploadAPI, "upload_to_statina_database")
+    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=True)
     result = cli_runner.invoke(batch, [case_id], obj=upload_context)
 
     # THEN the nipt upload should start and exit without errors
@@ -49,10 +33,7 @@ def test_nipt_statina_upload_case(
 
 
 def test_nipt_statina_upload_case_dry(
-    upload_context: CGConfig,
-    cli_runner: CliRunner,
-    caplog,
-    mocker,
+    upload_context: CGConfig, cli_runner: CliRunner, caplog, mocker
 ):
     """Tests CLI command to upload a single case"""
 
@@ -61,20 +42,9 @@ def test_nipt_statina_upload_case_dry(
     case_id = "angrybird"
 
     # WHEN adding a result file of a specified NIPT case (dry run)
-    mocker.patch.object(
-        NiptUploadAPI,
-        "get_statina_files",
-        return_value=MockStatinaUploadFiles(),
-    )
-    mocker.patch.object(
-        NiptUploadAPI,
-        "upload_to_statina_database",
-    )
-    result = cli_runner.invoke(
-        batch,
-        ["--dry-run", case_id],
-        obj=upload_context,
-    )
+    mocker.patch.object(NiptUploadAPI, "get_statina_files", return_value=MockStatinaUploadFiles())
+    mocker.patch.object(NiptUploadAPI, "upload_to_statina_database")
+    result = cli_runner.invoke(batch, ["--dry-run", case_id], obj=upload_context)
 
     # THEN the nipt upload should start and exit without errors
     assert "*** Statina UPLOAD START ***" in caplog.text

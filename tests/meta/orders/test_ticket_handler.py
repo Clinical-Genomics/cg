@@ -1,6 +1,4 @@
-from cg.meta.orders.ticket_handler import (
-    TicketHandler,
-)
+from cg.meta.orders.ticket_handler import TicketHandler
 
 
 def test_parse_ticket_number(ticket_id: str):
@@ -14,9 +12,7 @@ def test_parse_ticket_number(ticket_id: str):
     assert result == ticket_id
 
 
-def test_add_user_name_message(
-    ticket_handler: TicketHandler,
-):
+def test_add_user_name_message(ticket_handler: TicketHandler):
     # GIVEN a message string
     message = ""
     application: str = "apptag"
@@ -28,9 +24,7 @@ def test_add_user_name_message(
     assert application in message
 
 
-def test_add_sample_priority_message(
-    ticket_handler: TicketHandler,
-):
+def test_add_sample_priority_message(ticket_handler: TicketHandler):
     # GIVEN a message string
     message = ""
     priority: str = "prio"

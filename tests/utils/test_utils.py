@@ -2,10 +2,7 @@
 
 import pytest
 
-from cg.utils.utils import (
-    get_hamming_distance,
-    get_string_from_list_by_pattern,
-)
+from cg.utils.utils import get_hamming_distance, get_string_from_list_by_pattern
 
 
 def test_get_string_from_list_by_pattern():
@@ -13,11 +10,7 @@ def test_get_string_from_list_by_pattern():
 
     # GIVEN a specific pattern and a list containing it
     pattern = "pattern"
-    list_of_string = [
-        "I do contain the pattern",
-        "test string",
-        "another random string",
-    ]
+    list_of_string = ["I do contain the pattern", "test string", "another random string"]
 
     # WHEN calling the filtering method
     extracted_string: str = get_string_from_list_by_pattern(list_of_string, pattern)
@@ -31,13 +24,7 @@ def test_get_string_from_list_by_pattern_not_found():
 
     # GIVEN a specific pattern and a list not containing it
     pattern = "I am not in the list"
-    list_of_string = [
-        "This",
-        "is",
-        "a",
-        "random",
-        "list",
-    ]
+    list_of_string = ["This", "is", "a", "random", "list"]
 
     # WHEN calling the filtering method
     extracted_string: str = get_string_from_list_by_pattern(list_of_string, pattern)

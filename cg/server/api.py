@@ -8,39 +8,19 @@ from typing import Any
 
 import cachecontrol
 import requests
-from flask import (
-    Blueprint,
-    abort,
-    current_app,
-    g,
-    jsonify,
-    make_response,
-    request,
-)
+from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import exceptions
-from google.auth.transport import (
-    requests as google_requests,
-)
+from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 from pydantic.v1 import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.exc import IntegrityError
-from urllib3.exceptions import (
-    MaxRetryError,
-    NewConnectionError,
-)
+from urllib3.exceptions import MaxRetryError, NewConnectionError
 from werkzeug.utils import secure_filename
 
-from cg.apps.orderform.excel_orderform_parser import (
-    ExcelOrderformParser,
-)
-from cg.apps.orderform.json_orderform_parser import (
-    JsonOrderformParser,
-)
-from cg.constants import (
-    ANALYSIS_SOURCES,
-    METAGENOME_SOURCES,
-)
+from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
+from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.constants import FileFormat
 from cg.exc import (
     CaseNotFoundError,
@@ -51,30 +31,14 @@ from cg.exc import (
 )
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.models.orders.order import (
-    OrderIn,
-    OrderType,
-)
-from cg.models.orders.orderform_schema import (
-    Orderform,
-)
-from cg.server.dto.delivery_message_response import (
-    DeliveryMessageResponse,
-)
-from cg.server.dto.orders.orders_request import (
-    OrdersRequest,
-)
-from cg.server.dto.orders.orders_response import (
-    Order,
-    OrdersResponse,
-)
+from cg.models.orders.order import OrderIn, OrderType
+from cg.models.orders.orderform_schema import Orderform
+from cg.server.dto.delivery_message_response import DeliveryMessageResponse
+from cg.server.dto.orders.orders_request import OrdersRequest
+from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.ext import db, lims, osticket
-from cg.services.delivery_message.delivery_message_service import (
-    DeliveryMessageService,
-)
-from cg.services.orders.order_service import (
-    OrderService,
-)
+from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
+from cg.services.orders.order_service import OrderService
 from cg.store.models import (
     Analysis,
     Application,
@@ -115,17 +79,11 @@ def before_request():
     """Authorize API routes with JSON Web Tokens."""
     if not request.is_secure:
         return abort(
-            make_response(
-                jsonify(message="Only https requests accepted"),
-                HTTPStatus.FORBIDDEN,
-            )
+            make_response(jsonify(message="Only https requests accepted"), HTTPStatus.FORBIDDEN)
         )
 
     if request.method == "OPTIONS":
-        return make_response(
-            jsonify(ok=True),
-            HTTPStatus.NO_CONTENT,
-        )
+        return make_response(jsonify(ok=True), HTTPStatus.NO_CONTENT)
 
     endpoint_func = current_app.view_functions[request.endpoint]
     if getattr(endpoint_func, "is_public", None):
@@ -134,37 +92,23 @@ def before_request():
     auth_header = request.headers.get("Authorization")
     if not auth_header:
         return abort(
-            make_response(
-                jsonify(message="no JWT token found on request"),
-                HTTPStatus.UNAUTHORIZED,
-            )
+            make_response(jsonify(message="no JWT token found on request"), HTTPStatus.UNAUTHORIZED)
         )
 
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
         user_data = verify_google_token(jwt_token)
-    except (
-        exceptions.OAuthError,
-        ValueError,
-    ) as e:
+    except (exceptions.OAuthError, ValueError) as e:
         LOG.error(f"Error {e} occurred while decoding JWT token: {jwt_token}")
         return abort(
-            make_response(
-                jsonify(message="outdated login certificate"),
-                HTTPStatus.UNAUTHORIZED,
-            )
+            make_response(jsonify(message="outdated login certificate"), HTTPStatus.UNAUTHORIZED)
         )
 
     user: User = db.get_user_by_email(user_data["email"])
     if user is None or not user.order_portal_login:
         message = f"{user_data['email']} doesn't have access"
         LOG.error(message)
-        return abort(
-            make_response(
-                jsonify(message=message),
-                HTTPStatus.FORBIDDEN,
-            )
-        )
+        return abort(make_response(jsonify(message=message), HTTPStatus.FORBIDDEN))
 
     g.current_user = user
 
@@ -179,8 +123,7 @@ def submit_order(order_type):
         LOG.info(
             "processing order: %s",
             WriteStream.write_stream_from_content(
-                content=request_json,
-                file_format=FileFormat.JSON,
+                content=request_json, file_format=FileFormat.JSON
             ),
         )
         project = OrderType(order_type)
@@ -193,10 +136,7 @@ def submit_order(order_type):
             user_mail=g.current_user.email,
         )
         order_service = OrderService(db)
-        order_service.create_order(
-            order_data=order_in,
-            cases=result["records"],
-        )
+        order_service.create_order(order_data=order_in, cases=result["records"])
 
     except (  # user misbehaviour
         OrderError,
@@ -224,17 +164,11 @@ def submit_order(order_type):
         http_error_response = HTTPStatus.INTERNAL_SERVER_ERROR
     else:
         return jsonify(
-            project=result["project"],
-            records=[record.to_dict() for record in result["records"]],
+            project=result["project"], records=[record.to_dict() for record in result["records"]]
         )
 
     if error_message:
-        return abort(
-            make_response(
-                jsonify(message=error_message),
-                http_error_response,
-            )
-        )
+        return abort(make_response(jsonify(message=error_message), http_error_response))
 
 
 @BLUEPRINT.route("/cases")
@@ -244,11 +178,7 @@ def get_cases():
     action: str = request.args.get("action")
 
     customers: list[Customer] = _get_current_customers()
-    cases: list[Case] = _get_cases(
-        enquiry=enquiry,
-        action=action,
-        customers=customers,
-    )
+    cases: list[Case] = _get_cases(enquiry=enquiry, action=action, customers=customers)
 
     nr_cases: int = len(cases)
     cases_with_links: list[dict] = [case.to_dict(links=True) for case in cases]
@@ -261,9 +191,7 @@ def _get_current_customers() -> list[Customer] | None:
 
 
 def _get_cases(
-    enquiry: str | None,
-    action: str | None,
-    customers: list[Customer] | None,
+    enquiry: str | None, action: str | None, customers: list[Customer] | None
 ) -> list[Case]:
     """Get cases based on the provided filters."""
     return db.get_cases_by_customers_action_and_case_search(
@@ -284,23 +212,14 @@ def parse_case(case_id):
     return jsonify(**case.to_dict(links=True, analyses=True))
 
 
-@BLUEPRINT.route(
-    "/cases/<case_id>/delivery_message",
-    methods=["GET"],
-)
+@BLUEPRINT.route("/cases/<case_id>/delivery_message", methods=["GET"])
 def get_case_delivery_message(case_id: str):
     service = DeliveryMessageService(db)
     try:
         response: DeliveryMessageResponse = service.get_delivery_message(case_id)
-        return (
-            jsonify(response.model_dump()),
-            HTTPStatus.OK,
-        )
+        return jsonify(response.model_dump()), HTTPStatus.OK
     except CaseNotFoundError as error:
-        return (
-            jsonify({"error": str(error)}),
-            HTTPStatus.BAD_REQUEST,
-        )
+        return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
 
 
 @BLUEPRINT.route("/families_in_collaboration")
@@ -314,9 +233,7 @@ def parse_families_in_collaboration():
     customer = db.get_customer_by_internal_id(customer_internal_id=customer_internal_id)
 
     cases = db.get_cases_by_customer_workflow_and_case_search(
-        customer=customer,
-        workflow=workflow,
-        case_search=case_search_pattern,
+        customer=customer, workflow=workflow, case_search=case_search_pattern
     )
 
     case_dicts = [case.to_dict(links=True) for case in cases]
@@ -351,8 +268,7 @@ def parse_samples():
             None if g.current_user.is_admin else g.current_user.customers
         )
         samples: list[Sample] = db.get_samples_by_customer_id_and_pattern(
-            pattern=request.args.get("enquiry"),
-            customers=customers,
+            pattern=request.args.get("enquiry"), customers=customers
         )
     limit = int(request.args.get("limit", 50))
     parsed_samples: list[dict] = [sample.to_dict() for sample in samples[:limit]]
@@ -366,8 +282,7 @@ def parse_samples_in_collaboration():
         customer_internal_id=request.args.get("customer")
     )
     samples: list[Sample] = db.get_samples_by_customer_id_and_pattern(
-        pattern=request.args.get("enquiry"),
-        customers=customer.collaborators,
+        pattern=request.args.get("enquiry"), customers=customer.collaborators
     )
     limit = int(request.args.get("limit", 50))
     parsed_samples: list[dict] = [sample.to_dict() for sample in samples[:limit]]
@@ -404,8 +319,7 @@ def parse_pools():
         g.current_user.customers if not g.current_user.is_admin else None
     )
     pools: list[Pool] = db.get_pools_to_render(
-        customers=customers,
-        enquiry=request.args.get("enquiry"),
+        customers=customers, enquiry=request.args.get("enquiry")
     )
     parsed_pools: list[dict] = [pool_obj.to_dict() for pool_obj in pools[:30]]
     return jsonify(pools=parsed_pools, total=len(pools))
@@ -430,10 +344,7 @@ def parse_flow_cells() -> Any:
         name_pattern=request.args.get("enquiry"),
     )
     parsed_flow_cells: list[dict] = [flow_cell.to_dict() for flow_cell in flow_cells[:50]]
-    return jsonify(
-        flowcells=parsed_flow_cells,
-        total=len(flow_cells),
-    )
+    return jsonify(flowcells=parsed_flow_cells, total=len(flow_cells))
 
 
 @BLUEPRINT.route("/flowcells/<flowcell_id>")
@@ -445,18 +356,12 @@ def parse_flow_cell(flowcell_id):
     return jsonify(**flow_cell.to_dict(samples=True))
 
 
-@BLUEPRINT.route(
-    "/flowcells/<flow_cell_name>/sequencing_metrics",
-    methods=["GET"],
-)
+@BLUEPRINT.route("/flowcells/<flow_cell_name>/sequencing_metrics", methods=["GET"])
 def get_sequencing_metrics(flow_cell_name: str):
     """Return sample lane sequencing metrics for a flow cell."""
 
     if not flow_cell_name:
-        return (
-            jsonify({"error": "Invalid or missing flow cell id"}),
-            HTTPStatus.BAD_REQUEST,
-        )
+        return jsonify({"error": "Invalid or missing flow cell id"}), HTTPStatus.BAD_REQUEST
 
     sequencing_metrics: list[
         SampleLaneSequencingMetrics
@@ -481,10 +386,7 @@ def parse_analyses():
     else:
         analyses: list[Analysis] = db.get_analyses()
     parsed_analysis: list[dict] = [analysis_obj.to_dict() for analysis_obj in analyses[:30]]
-    return jsonify(
-        analyses=parsed_analysis,
-        total=len(analyses),
-    )
+    return jsonify(analyses=parsed_analysis, total=len(analyses))
 
 
 @BLUEPRINT.route("/options")
@@ -506,10 +408,7 @@ def parse_options():
             app_tag_groups[application.prep_category]: list[str] = []
         app_tag_groups[application.prep_category].append(application.tag)
 
-    source_groups = {
-        "metagenome": METAGENOME_SOURCES,
-        "analysis": ANALYSIS_SOURCES,
-    }
+    source_groups = {"metagenome": METAGENOME_SOURCES, "analysis": ANALYSIS_SOURCES}
 
     return jsonify(
         applications=app_tag_groups,
@@ -541,8 +440,7 @@ def parse_current_user_information():
     """Return information about current user."""
     if not g.current_user.is_admin and not g.current_user.customers:
         LOG.error(
-            "%s is not admin and is not connected to any customers, aborting",
-            g.current_user.email,
+            "%s is not admin and is not connected to any customers, aborting", g.current_user.email
         )
         return abort(HTTPStatus.FORBIDDEN)
 
@@ -564,29 +462,19 @@ def parse_application(tag: str):
     """Return an application tag."""
     application: Application = db.get_application_by_tag(tag=tag)
     if not application:
-        return abort(
-            make_response(
-                jsonify(message="Application not found"),
-                HTTPStatus.NOT_FOUND,
-            )
-        )
+        return abort(make_response(jsonify(message="Application not found"), HTTPStatus.NOT_FOUND))
     return jsonify(**application.to_dict())
 
 
 @BLUEPRINT.route("/applications/<tag>/pipeline_limitations")
 @is_public
-def get_application_pipeline_limitations(
-    tag: str,
-):
+def get_application_pipeline_limitations(tag: str):
     """Return application pipeline specific limitations."""
     application_limitations: list[ApplicationLimitations] = db.get_application_limitations_by_tag(
         tag
     )
     if not application_limitations:
-        return (
-            jsonify(message="Application limitations not found"),
-            HTTPStatus.NOT_FOUND,
-        )
+        return jsonify(message="Application limitations not found"), HTTPStatus.NOT_FOUND
     return jsonify([limitation.to_dict() for limitation in application_limitations])
 
 
@@ -608,10 +496,7 @@ def get_order(order_id: int):
         response_dict: dict = response.model_dump()
         return make_response(response_dict)
     except OrderNotFoundError as error:
-        return make_response(
-            jsonify(error=str(error)),
-            HTTPStatus.NOT_FOUND,
-        )
+        return make_response(jsonify(error=str(error)), HTTPStatus.NOT_FOUND)
 
 
 @BLUEPRINT.route("/orderform", methods=["POST"])
@@ -656,9 +541,4 @@ def parse_orderform():
         return jsonify(**parsed_order.model_dump())
 
     if error_message:
-        return abort(
-            make_response(
-                jsonify(message=error_message),
-                http_error_response,
-            )
-        )
+        return abort(make_response(jsonify(message=error_message), http_error_response))

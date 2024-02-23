@@ -1,18 +1,10 @@
-from cg.store.models import (
-    Application,
-    ApplicationVersion,
-    Customer,
-)
+from cg.store.models import Application, ApplicationVersion, Customer
 from cg.store.store import Store
 from tests.cli.conftest import application_tag
 from tests.store_helpers import StoreHelpers
 
 
-def test_application_version_has_application(
-    store: Store,
-    helpers: StoreHelpers,
-    application_tag,
-):
+def test_application_version_has_application(store: Store, helpers: StoreHelpers, application_tag):
     """Test that an Application version has the application that was instantiated to."""
     # GIVEN an application
     application: Application = helpers.ensure_application(store=store, tag=application_tag)
@@ -98,10 +90,7 @@ def test_collaborators(base_store, customer_id):
 
 def test_multiple_collaborations(base_store, customer_id):
     # Given a customer in two collaborations
-    collaboration = base_store.add_collaboration(
-        "small_collaboration",
-        "small collaboration",
-    )
+    collaboration = base_store.add_collaboration("small_collaboration", "small collaboration")
     new_customer_id = "cust004"
     new_customer = base_store.add_customer(
         new_customer_id,
@@ -122,13 +111,6 @@ def test_multiple_collaborations(base_store, customer_id):
     # THEN all customers in both collaborations should be returned
     assert len(collaborators) == 5
     assert all(
-        collaborator.internal_id
-        in [
-            "cust001",
-            new_customer_id,
-            "cust002",
-            "cust003",
-            customer_id,
-        ]
+        collaborator.internal_id in ["cust001", new_customer_id, "cust002", "cust003", customer_id]
         for collaborator in collaborators
     )

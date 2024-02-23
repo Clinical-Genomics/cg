@@ -8,12 +8,7 @@ from cg.store.models import Case
 
 
 @pytest.fixture
-def mutant_case(
-    cg_context: CGConfig,
-    case_id: str,
-    ticket_id: str,
-    helpers,
-) -> Case:
+def mutant_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> Case:
     """Return mutant case"""
     case = helpers.add_case(
         store=cg_context.status_db,
@@ -25,12 +20,7 @@ def mutant_case(
 
 
 @pytest.fixture
-def microsalt_case(
-    cg_context: CGConfig,
-    case_id: str,
-    ticket_id: str,
-    helpers,
-) -> Case:
+def microsalt_case(cg_context: CGConfig, case_id: str, ticket_id: str, helpers) -> Case:
     """Return mutant case"""
     case = helpers.add_case(
         store=cg_context.status_db,

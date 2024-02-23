@@ -7,9 +7,7 @@ import pytest
 from cg.apps.crunchy import CrunchyAPI, crunchy
 from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
-from cg.meta.workflow.prepare_fastq import (
-    PrepareFastqAPI,
-)
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models import CompressionData
 from cg.store.models import Case
 from cg.store.store import Store
@@ -25,8 +23,7 @@ def test_is_spring_decompression_needed_when_true(
 
     # GIVEN a populated prepare_fastq_api
     prepare_fastq_api = PrepareFastqAPI(
-        store=analysis_store_single_case,
-        compress_api=populated_compress_spring_api,
+        store=analysis_store_single_case, compress_api=populated_compress_spring_api
     )
     # GIVEN a store with a case that has linked samples
     case_obj: Case = analysis_store_single_case.get_case_by_internal_id(internal_id=case_id)
@@ -57,8 +54,7 @@ def test_is_spring_decompression_needed_when_false(
 
     # GIVEN a populated prepare_fastq_api
     prepare_fastq_api = PrepareFastqAPI(
-        store=analysis_store_single_case,
-        compress_api=populated_compress_api_fastq_spring,
+        store=analysis_store_single_case, compress_api=populated_compress_api_fastq_spring
     )
     # GIVEN a store with a case that has linked samples
     case_obj: Case = analysis_store_single_case.get_case_by_internal_id(internal_id=case_id)
@@ -81,16 +77,12 @@ def test_at_least_one_sample_be_decompressed(
     mocker,
 ):
     # GIVEN spring decompression is possible
-    mocker.patch.object(
-        CrunchyAPI,
-        "is_spring_decompression_possible",
-    )
+    mocker.patch.object(CrunchyAPI, "is_spring_decompression_possible")
     CrunchyAPI.is_spring_decompression_possible.return_value = True
 
     # GIVEN a populated prepare_fastq_api
     prepare_fastq_api = PrepareFastqAPI(
-        store=analysis_store_single_case,
-        compress_api=populated_compress_spring_api,
+        store=analysis_store_single_case, compress_api=populated_compress_spring_api
     )
 
     # WHEN checking if spring decompression is possible
@@ -107,16 +99,12 @@ def test_no_samples_can_be_decompressed(
     mocker,
 ):
     # GIVEN spring decompression is not possible
-    mocker.patch.object(
-        CrunchyAPI,
-        "is_spring_decompression_possible",
-    )
+    mocker.patch.object(CrunchyAPI, "is_spring_decompression_possible")
     CrunchyAPI.is_spring_decompression_possible.return_value = False
 
     # GIVEN a populated prepare_fastq_api
     prepare_fastq_api = PrepareFastqAPI(
-        store=analysis_store_single_case,
-        compress_api=populated_compress_spring_api,
+        store=analysis_store_single_case, compress_api=populated_compress_spring_api
     )
 
     # WHEN checking if spring decompression is possible
@@ -138,8 +126,7 @@ def test_fastq_should_be_added_to_housekeeper(
 
     # GIVEN a populated prepare_fastq_api and a case that has linked samples
     prepare_fastq_api = PrepareFastqAPI(
-        store=analysis_store_single_case,
-        compress_api=populated_compress_spring_api,
+        store=analysis_store_single_case, compress_api=populated_compress_spring_api
     )
 
     # GIVEN that there exists nr_of_files_before files in Housekeeper before adding any
@@ -150,14 +137,8 @@ def test_fastq_should_be_added_to_housekeeper(
 
     # GIVEN that the decompressed files exist
     with mock.patch.object(
-        CompressionData,
-        "file_exists_and_is_accessible",
-        return_value=file_exists_and_is_accessible,
-    ), mock.patch.object(
-        crunchy.files,
-        "get_crunchy_metadata",
-        returnvalue=[],
-    ):
+        CompressionData, "file_exists_and_is_accessible", return_value=file_exists_and_is_accessible
+    ), mock.patch.object(crunchy.files, "get_crunchy_metadata", returnvalue=[]):
         # WHEN adding decompressed fastq files
         prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
 
@@ -173,21 +154,16 @@ def test_fastq_should_be_added_to_housekeeper(
 
 
 def test_add_decompressed_fastqs_loops_through_samples(
-    case_id: str,
-    analysis_store: Store,
-    populated_compress_spring_api: CompressAPI,
+    case_id: str, analysis_store: Store, populated_compress_spring_api: CompressAPI
 ):
     """Tests that given a case id, add_decompressed_fastq_files_to_housekeeper loops through all related samples."""
 
     # GIVEN a case with three samples and a PrepareFastqAPI
     prepare_fastq_api = PrepareFastqAPI(
-        store=analysis_store,
-        compress_api=populated_compress_spring_api,
+        store=analysis_store, compress_api=populated_compress_spring_api
     )
     with mock.patch.object(
-        PrepareFastqAPI,
-        "add_decompressed_sample",
-        return_value=True,
+        PrepareFastqAPI, "add_decompressed_sample", return_value=True
     ) as request_counter:
         # WHEN adding decompressed fastq files to Housekeeper
         prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
@@ -209,8 +185,7 @@ def test_add_decompressed_sample_loops_through_spring(
 
     # GIVEN a case and one of its samples, which in turn has a spring file in Housekeeper but no fastq files
     prepare_fastq_api = PrepareFastqAPI(
-        store=analysis_store,
-        compress_api=populated_compress_spring_api,
+        store=analysis_store, compress_api=populated_compress_spring_api
     )
     case = analysis_store.get_case_by_internal_id(case_id)
     sample = case.samples[0]
@@ -224,9 +199,7 @@ def test_add_decompressed_sample_loops_through_spring(
         "get_spring_paths",
         return_value=[CompressionData(spring_file.with_suffix(""))],
     ), mock.patch.object(
-        CompressAPI,
-        "add_decompressed_fastq",
-        return_value=True,
+        CompressAPI, "add_decompressed_fastq", return_value=True
     ) as request_submitter:
         # WHEN adding decompressed fastq files to Housekeeper
         prepare_fastq_api.add_decompressed_sample(case=case, sample=sample)

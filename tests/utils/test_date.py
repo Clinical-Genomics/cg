@@ -1,14 +1,9 @@
 from datetime import datetime, timedelta
 
-from cg.utils.date import (
-    get_date_days_ago,
-    get_timedelta_from_date,
-)
+from cg.utils.date import get_date_days_ago, get_timedelta_from_date
 
 
-def test_get_date_days_ago(
-    timestamp_now: datetime,
-):
+def test_get_date_days_ago(timestamp_now: datetime):
     """Test returning a date corresponding to number of days ago."""
 
     # GIVEN days ago
@@ -23,9 +18,7 @@ def test_get_date_days_ago(
     assert date < timestamp_now
 
 
-def test_get_timedelta_from_date(
-    timestamp_yesterday: datetime,
-):
+def test_get_timedelta_from_date(timestamp_yesterday: datetime):
     """Test returning the number of days ago corresponding to a given date."""
 
     # GIVEN a date

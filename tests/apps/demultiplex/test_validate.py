@@ -1,9 +1,5 @@
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSampleBcl2Fastq,
-)
-from cg.apps.demultiplex.sample_sheet.validators import (
-    is_valid_sample_internal_id,
-)
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSampleBcl2Fastq
+from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
 
 
 def test_is_valid_sample_internal_id(
@@ -14,10 +10,7 @@ def test_is_valid_sample_internal_id(
     # GIVEN two different NovaSeq samples with valid internal IDs
 
     # WHEN validating the sample internal ids
-    for sample in [
-        novaseq6000_flow_cell_sample_1,
-        novaseq6000_flow_cell_sample_2,
-    ]:
+    for sample in [novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_2]:
         # THEN no error is raised
         assert is_valid_sample_internal_id(sample_internal_id=sample.sample_id)
 
@@ -35,8 +28,5 @@ def test_is_valid_sample_internal_id_invalid_sample_internal_ids(
 
     # WHEN validating the sample internal ids
     # THEN no error is raised
-    for sample in [
-        novaseq6000_flow_cell_sample_1,
-        novaseq6000_flow_cell_sample_2,
-    ]:
+    for sample in [novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_2]:
         assert not is_valid_sample_internal_id(sample_internal_id=sample.sample_id)

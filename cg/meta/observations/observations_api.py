@@ -14,19 +14,12 @@ from cg.constants.observations import (
     LoqusdbMipCustomers,
 )
 from cg.exc import LoqusdbUploadCaseError
-from cg.models.cg_config import (
-    CGConfig,
-    CommonAppConfig,
-)
+from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
     MipDNAObservationsInputFiles,
 )
-from cg.store.models import (
-    Analysis,
-    Case,
-    Customer,
-)
+from cg.store.models import Analysis, Case, Customer
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -57,10 +50,7 @@ class ObservationsAPI:
         """Fetch input files from a case to upload to Loqusdb."""
         analysis: Analysis = case.analyses[0]
         analysis_date: datetime = analysis.started_at or analysis.completed_at
-        hk_version: Version = self.housekeeper_api.version(
-            analysis.case.internal_id,
-            analysis_date,
-        )
+        hk_version: Version = self.housekeeper_api.version(analysis.case.internal_id, analysis_date)
         return self.extract_observations_files_from_hk(hk_version)
 
     def get_loqusdb_api(self, loqusdb_instance: LoqusdbInstance) -> LoqusdbAPI:
@@ -96,19 +86,14 @@ class ObservationsAPI:
         loqusdb_case: dict = loqusdb_api.get_case(case_id=case.internal_id)
         duplicate = (
             loqusdb_api.get_duplicate(
-                profile_vcf_path=profile_vcf_path,
-                profile_threshold=profile_threshold,
+                profile_vcf_path=profile_vcf_path, profile_threshold=profile_threshold
             )
             if profile_vcf_path and profile_threshold
             else None
         )
         return bool(loqusdb_case or duplicate or case.loqusdb_uploaded_samples)
 
-    def update_statusdb_loqusdb_id(
-        self,
-        samples: list[Case],
-        loqusdb_id: str | None,
-    ) -> None:
+    def update_statusdb_loqusdb_id(self, samples: list[Case], loqusdb_id: str | None) -> None:
         """Update Loqusdb ID field in StatusDB for each of the provided samples."""
         for sample in samples:
             sample.loqusdb_id = loqusdb_id
@@ -123,9 +108,7 @@ class ObservationsAPI:
             raise LoqusdbUploadCaseError
         LOG.info(f"Valid customer {customer.internal_id} for Loqusdb uploads")
 
-    def get_loqusdb_customers(
-        self,
-    ) -> LoqusdbMipCustomers | LoqusdbBalsamicCustomers:
+    def get_loqusdb_customers(self) -> LoqusdbMipCustomers | LoqusdbBalsamicCustomers:
         """Returns the customers that are entitled to Loqusdb uploads."""
         raise NotImplementedError
 

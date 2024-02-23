@@ -5,10 +5,7 @@ from typing import Callable
 from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_WORKFLOW
-from cg.constants.constants import (
-    VALID_DATA_IN_PRODUCTION,
-    Workflow,
-)
+from cg.constants.constants import VALID_DATA_IN_PRODUCTION, Workflow
 from cg.store.models import Analysis, Case
 
 

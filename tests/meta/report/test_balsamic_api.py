@@ -1,19 +1,9 @@
 import copy
 
-from cg.meta.report.balsamic import (
-    BalsamicReportAPI,
-)
-from cg.models.balsamic.analysis import (
-    BalsamicAnalysis,
-)
-from cg.models.report.metadata import (
-    BalsamicTargetedSampleMetadataModel,
-)
-from cg.store.models import (
-    BedVersion,
-    Case,
-    Sample,
-)
+from cg.meta.report.balsamic import BalsamicReportAPI
+from cg.models.balsamic.analysis import BalsamicAnalysis
+from cg.models.report.metadata import BalsamicTargetedSampleMetadataModel
+from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -53,9 +43,7 @@ def test_get_sample_metadata(
 
     # WHEN retrieving the sample metadata
     sample_metadata: BalsamicTargetedSampleMetadataModel = report_api_balsamic.get_sample_metadata(
-        case=case_balsamic,
-        sample=sample,
-        analysis_metadata=balsamic_metadata,
+        case=case_balsamic, sample=sample, analysis_metadata=balsamic_metadata
     )
 
     # THEN check that the sample metadata is correctly retrieved

@@ -1,10 +1,7 @@
 import datetime as dt
 
 from cg.apps.tb.api import TrailblazerAPI
-from cg.constants.constants import (
-    AnalysisType,
-    Workflow,
-)
+from cg.constants.constants import AnalysisType, Workflow
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CaseNotFoundError
 from cg.store.models import Analysis, Case
@@ -12,11 +9,7 @@ from cg.store.store import Store
 
 
 class FastqService:
-    def __init__(
-        self,
-        store: Store,
-        trailblazer_api: TrailblazerAPI,
-    ):
+    def __init__(self, store: Store, trailblazer_api: TrailblazerAPI):
         self.store = store
         self.trailblazer_api = trailblazer_api
 
@@ -52,6 +45,5 @@ class FastqService:
             ticket=case.latest_ticket,
         )
         self.trailblazer_api.set_analysis_status(
-            case_id=case.internal_id,
-            status=AnalysisStatus.COMPLETED,
+            case_id=case.internal_id, status=AnalysisStatus.COMPLETED
         )

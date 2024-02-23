@@ -13,29 +13,18 @@ from cg.cli.add import add as add_cmd
 from cg.cli.archive import archive
 from cg.cli.backup import backup
 from cg.cli.clean import clean
-from cg.cli.compress.base import (
-    compress,
-    decompress,
-)
+from cg.cli.compress.base import compress, decompress
 from cg.cli.delete.base import delete
-from cg.cli.deliver.base import (
-    deliver as deliver_cmd,
-)
-from cg.cli.demultiplex.base import (
-    demultiplex_cmd_group as demultiplex_cmd,
-)
+from cg.cli.deliver.base import deliver as deliver_cmd
+from cg.cli.demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
 from cg.cli.downsample import downsample
-from cg.cli.generate.base import (
-    generate as generate_cmd,
-)
+from cg.cli.generate.base import generate as generate_cmd
 from cg.cli.get import get
 from cg.cli.set.base import set_cmd
 from cg.cli.store.store import store as store_cmd
 from cg.cli.transfer import transfer_group
 from cg.cli.upload.base import upload
-from cg.cli.workflow.base import (
-    workflow as workflow_cmd,
-)
+from cg.cli.workflow.base import workflow as workflow_cmd
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
@@ -58,29 +47,12 @@ def teardown_session():
 
 
 @click.group()
+@click.option("-c", "--config", type=click.Path(exists=True), help="path to config file")
+@click.option("-d", "--database", help="path/URI of the SQL database")
 @click.option(
-    "-c",
-    "--config",
-    type=click.Path(exists=True),
-    help="path to config file",
+    "-l", "--log-level", type=click.Choice(LEVELS), default="INFO", help="lowest level to log at"
 )
-@click.option(
-    "-d",
-    "--database",
-    help="path/URI of the SQL database",
-)
-@click.option(
-    "-l",
-    "--log-level",
-    type=click.Choice(LEVELS),
-    default="INFO",
-    help="lowest level to log at",
-)
-@click.option(
-    "--verbose",
-    is_flag=True,
-    help="Show full log information, time stamp etc",
-)
+@click.option("--verbose", is_flag=True, help="Show full log information, time stamp etc")
 @click.version_option(cg.__version__, prog_name=cg.__title__)
 @click.pass_context
 def base(
@@ -98,10 +70,7 @@ def base(
 
     coloredlogs.install(level=log_level, fmt=log_format)
     raw_config: dict = (
-        ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=Path(config),
-        )
+        ReadFile.get_content_from_file(file_format=FileFormat.YAML, file_path=Path(config))
         if config
         else {"database": database}
     )
@@ -110,16 +79,8 @@ def base(
 
 
 @base.command()
-@click.option(
-    "--reset",
-    is_flag=True,
-    help="reset database before setting up tables",
-)
-@click.option(
-    "--force",
-    is_flag=True,
-    help="bypass manual confirmations",
-)
+@click.option("--reset", is_flag=True, help="reset database before setting up tables")
+@click.option("--force", is_flag=True, help="bypass manual confirmations")
 @click.pass_obj
 def init(context: CGConfig, reset: bool, force: bool):
     """Setup the database."""
@@ -127,10 +88,7 @@ def init(context: CGConfig, reset: bool, force: bool):
     if force or reset:
         if existing_tables and not force:
             message = f"Delete existing tables? [{', '.join(existing_tables)}]"
-            click.confirm(
-                click.style(message, fg="yellow"),
-                abort=True,
-            )
+            click.confirm(click.style(message, fg="yellow"), abort=True)
         drop_all_tables()
     elif existing_tables:
         LOG.error("Database already exists, use '--reset'")

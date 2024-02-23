@@ -24,10 +24,7 @@ def test_get_sample_bad_sample(cli_runner: CliRunner, base_context: CGConfig):
 
 
 def test_get_sample_required(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test to get a sample using only the required argument"""
     # GIVEN a database with a sample
@@ -36,11 +33,7 @@ def test_get_sample_required(
     assert disk_store._get_query(table=Sample).count() == 1
 
     # WHEN getting a sample
-    result = cli_runner.invoke(
-        get,
-        ["sample", sample_id],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["sample", sample_id], obj=base_context)
 
     # THEN it should have been get
     assert result.exit_code == 0
@@ -48,10 +41,7 @@ def test_get_sample_required(
 
 
 def test_get_samples_required(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test to get several samples using only the required arguments"""
     # GIVEN a database with two samples
@@ -63,11 +53,7 @@ def test_get_samples_required(
     assert disk_store._get_query(table=Sample).count() == 2
 
     # WHEN getting a sample
-    result = cli_runner.invoke(
-        get,
-        ["sample", sample_id1, sample_id2],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["sample", sample_id1, sample_id2], obj=base_context)
 
     # THEN it should have been get
     assert result.exit_code == 0
@@ -76,10 +62,7 @@ def test_get_samples_required(
 
 
 def test_get_sample_output(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output has the data of the sample"""
     # GIVEN a database with a sample with data
@@ -92,11 +75,7 @@ def test_get_sample_output(
     priority_human = sample.priority_human
 
     # WHEN getting a sample
-    result = cli_runner.invoke(
-        get,
-        ["sample", sample_id],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["sample", sample_id], obj=base_context)
 
     # THEN it should have been get
     assert result.exit_code == 0
@@ -109,10 +88,7 @@ def test_get_sample_output(
 
 
 def test_get_sample_external_false(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output has the external-value of the sample"""
     # GIVEN a database with a sample with data
@@ -122,11 +98,7 @@ def test_get_sample_external_false(
     is_external_true = "Yes"
 
     # WHEN getting a sample
-    result = cli_runner.invoke(
-        get,
-        ["sample", sample_id],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["sample", sample_id], obj=base_context)
 
     # THEN it should have been get
     assert result.exit_code == 0
@@ -135,10 +107,7 @@ def test_get_sample_external_false(
 
 
 def test_get_sample_external_true(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output has the external-value of the sample"""
     # GIVEN a database with a sample with data
@@ -148,11 +117,7 @@ def test_get_sample_external_true(
     is_external_true = "Yes"
 
     # WHEN getting a sample
-    result = cli_runner.invoke(
-        get,
-        ["sample", sample_id],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["sample", sample_id], obj=base_context)
 
     # THEN it should have been get
     assert result.exit_code == 0
@@ -161,35 +126,21 @@ def test_get_sample_external_true(
 
 
 def test_get_sample_no_cases_without_case(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the --no-cases flag works without cases."""
     # GIVEN a database with a sample without related samples
     sample: Sample = helpers.add_sample(disk_store)
 
     # WHEN getting a sample with the --no-families flag
-    result = cli_runner.invoke(
-        get,
-        [
-            "sample",
-            sample.internal_id,
-            "--no-cases",
-        ],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["sample", sample.internal_id, "--no-cases"], obj=base_context)
 
     # THEN everything is fine
     assert result.exit_code == EXIT_SUCCESS
 
 
 def test_get_sample_no_cases_with_case(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the --no-cases flag does not show case info"""
     # GIVEN a database with a sample with related samples
@@ -198,15 +149,7 @@ def test_get_sample_no_cases_with_case(
     helpers.add_relationship(disk_store, sample=sample, case=case)
 
     # WHEN getting a sample with the --no-families flag
-    result = cli_runner.invoke(
-        get,
-        [
-            "sample",
-            sample.internal_id,
-            "--no-cases",
-        ],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["sample", sample.internal_id, "--no-cases"], obj=base_context)
 
     # THEN all related cases should be listed in the output
     assert result.exit_code == EXIT_SUCCESS
@@ -215,10 +158,7 @@ def test_get_sample_no_cases_with_case(
 
 
 def test_get_sample_cases_without_case(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the --cases flag works without cases"""
     # GIVEN a database with a sample without related samples
@@ -226,21 +166,14 @@ def test_get_sample_cases_without_case(
     assert not disk_store._get_query(table=Sample).first().links
 
     # WHEN getting a sample with the --cases flag
-    result = cli_runner.invoke(
-        get,
-        ["sample", sample.internal_id, "--cases"],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["sample", sample.internal_id, "--cases"], obj=base_context)
 
     # THEN everything is fine
     assert result.exit_code == EXIT_SUCCESS
 
 
 def test_get_sample_cases_with_case(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the --cases flag does show case info"""
     # GIVEN a database with a sample with related samples
@@ -249,11 +182,7 @@ def test_get_sample_cases_with_case(
     helpers.add_relationship(disk_store, sample=sample, case=case)
 
     # WHEN getting a sample with the --families flag
-    result = cli_runner.invoke(
-        get,
-        ["sample", sample.internal_id, "--cases"],
-        obj=base_context,
-    )
+    result = cli_runner.invoke(get, ["sample", sample.internal_id, "--cases"], obj=base_context)
 
     # THEN all related families should be listed in the output
     assert result.exit_code == EXIT_SUCCESS
@@ -262,10 +191,7 @@ def test_get_sample_cases_with_case(
 
 
 def test_hide_sample_flowcells_without_flowcell(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that we can query samples and hide flow cell even when there are none."""
     # GIVEN a database with a sample without related flow cell
@@ -275,13 +201,7 @@ def test_hide_sample_flowcells_without_flowcell(
 
     # WHEN getting a sample with the --hide-flow-cell flag
     result = cli_runner.invoke(
-        get,
-        [
-            "sample",
-            sample.internal_id,
-            "--hide-flow-cell",
-        ],
-        obj=base_context,
+        get, ["sample", sample.internal_id, "--hide-flow-cell"], obj=base_context
     )
 
     # THEN process should exit successfully
@@ -289,10 +209,7 @@ def test_hide_sample_flowcells_without_flowcell(
 
 
 def test_get_sample_flowcells_with_flowcell(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test query samples and hide flow cell, ensuring that no flow cell name is in the output."""
     # GIVEN a database with a sample and a related flow cell
@@ -303,13 +220,7 @@ def test_get_sample_flowcells_with_flowcell(
 
     # WHEN getting a sample with the --hide-flow-cell flag
     result = cli_runner.invoke(
-        get,
-        [
-            "sample",
-            sample.internal_id,
-            "--hide-flow-cell",
-        ],
-        obj=base_context,
+        get, ["sample", sample.internal_id, "--hide-flow-cell"], obj=base_context
     )
 
     # THEN the process should exit successfully

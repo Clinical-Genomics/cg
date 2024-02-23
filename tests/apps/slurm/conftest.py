@@ -24,18 +24,14 @@ def sbatch_parameters(email_address: str, slurm_account: str) -> Sbatch:
 
 
 @pytest.fixture
-def sbatch_content(
-    sbatch_parameters: Sbatch,
-) -> str:
+def sbatch_content(sbatch_parameters: Sbatch) -> str:
     """Return sbatch content."""
     api = SlurmAPI()
     return api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
 
 
 @pytest.fixture
-def slurm_api(
-    sbatch_process: ProcessMock,
-) -> SlurmAPI:
+def slurm_api(sbatch_process: ProcessMock) -> SlurmAPI:
     """Return a slurm API with the process mocked."""
     api = SlurmAPI()
     api.process = sbatch_process

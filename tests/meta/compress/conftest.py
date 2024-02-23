@@ -14,9 +14,7 @@ from cg.constants import SequencingFileTag
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.compress import CompressAPI
-from tests.cli.compress.conftest import (
-    MockCompressAPI,
-)
+from tests.cli.compress.conftest import MockCompressAPI
 from tests.store_helpers import StoreHelpers
 
 
@@ -64,10 +62,7 @@ class MockCompressionData:
                 "checksum": "checksum_second_read",
                 "algorithm": "sha256",
             },
-            {
-                "path": str(spring_path.resolve()),
-                "file": "spring",
-            },
+            {"path": str(spring_path.resolve()), "file": "spring"},
         ]
         if updated:
             for file_info in metadata:
@@ -79,9 +74,7 @@ class MockCompressionData:
         """Return the path to an existing SPRING metadata file."""
 
         spring_metadata: list[dict] = MockCompressionData._spring_metadata(
-            self.fastq_first,
-            self.fastq_second,
-            self.spring_path,
+            self.fastq_first, self.fastq_second, self.spring_path
         )
         WriteFile.write_file_from_content(
             content=spring_metadata,
@@ -91,15 +84,10 @@ class MockCompressionData:
         return self.spring_metadata_path
 
     @property
-    def updated_spring_metadata_file(
-        self,
-    ) -> Path:
+    def updated_spring_metadata_file(self) -> Path:
         """Return the path to an existing updated SPRING metadata file."""
         spring_metadata: list[dict] = MockCompressionData._spring_metadata(
-            self.fastq_first,
-            self.fastq_second,
-            self.spring_path,
-            True,
+            self.fastq_first, self.fastq_second, self.spring_path, True
         )
         WriteFile.write_file_from_content(
             content=spring_metadata,
@@ -112,10 +100,7 @@ class MockCompressionData:
     def make_old(file_path: Path):
         """Convert the modifying date making the file old."""
         before_timestamp = datetime.timestamp(datetime(2020, 1, 1))
-        os.utime(
-            file_path,
-            (before_timestamp, before_timestamp),
-        )
+        os.utime(file_path, (before_timestamp, before_timestamp))
 
     @property
     def fastq_first_file(self, old: bool = True) -> Path:
@@ -135,9 +120,7 @@ class MockCompressionData:
 
 
 @pytest.fixture(name="compression_files")
-def compression_files(
-    compression_object: MockCompressionData,
-) -> MockCompressionData:
+def compression_files(compression_object: MockCompressionData) -> MockCompressionData:
     """Return a CompressionData class with files."""
     return MockCompressionData(
         spring_path=compression_object.spring_path,
@@ -165,37 +148,25 @@ def compress_api(
 ) -> Generator[CompressAPI, None, None]:
     """Return Compress API."""
     yield CompressAPI(
-        crunchy_api=real_crunchy_api,
-        hk_api=housekeeper_api,
-        demux_root=project_dir.as_posix(),
+        crunchy_api=real_crunchy_api, hk_api=housekeeper_api, demux_root=project_dir.as_posix()
     )
 
 
 @pytest.fixture(name="populated_compress_fastq_api")
 def populated_compress_fastq_api(
-    compress_api: MockCompressAPI,
-    compress_hk_fastq_bundle: dict,
-    helpers: StoreHelpers,
+    compress_api: MockCompressAPI, compress_hk_fastq_bundle: dict, helpers: StoreHelpers
 ) -> MockCompressAPI:
     """Return populated Compress API."""
-    helpers.ensure_hk_bundle(
-        compress_api.hk_api,
-        compress_hk_fastq_bundle,
-    )
+    helpers.ensure_hk_bundle(compress_api.hk_api, compress_hk_fastq_bundle)
     return compress_api
 
 
 @pytest.fixture(name="populated_decompress_spring_api")
 def populated_decompress_spring_api(
-    compress_api: MockCompressAPI,
-    decompress_hk_spring_bundle: dict,
-    helpers: StoreHelpers,
+    compress_api: MockCompressAPI, decompress_hk_spring_bundle: dict, helpers: StoreHelpers
 ) -> MockCompressAPI:
     """Return populated Compress API with a Housekeeper bundle containing SPRING files."""
-    helpers.ensure_hk_bundle(
-        compress_api.hk_api,
-        decompress_hk_spring_bundle,
-    )
+    helpers.ensure_hk_bundle(compress_api.hk_api, decompress_hk_spring_bundle)
     return compress_api
 
 
@@ -206,25 +177,19 @@ def sample():
 
 
 @pytest.fixture(name="spring_path")
-def spring_path(
-    compression_object: MockCompressionData,
-) -> Path:
+def spring_path(compression_object: MockCompressionData) -> Path:
     """Return the path to a non-existing spring file."""
     return compression_object.spring_path
 
 
 @pytest.fixture(name="spring_metadata_path")
-def spring_metadata_path(
-    compression_object: MockCompressionData,
-) -> Path:
+def spring_metadata_path(compression_object: MockCompressionData) -> Path:
     """Return the path to a non-existing spring metadata file."""
     return compression_object.spring_metadata_path
 
 
 @pytest.fixture(name="fastq_flag_file")
-def fastq_flag_file(
-    spring_metadata_path: Path,
-) -> Path:
+def fastq_flag_file(spring_metadata_path: Path) -> Path:
     """Return the path to an existing fastq flag file."""
     spring_metadata_path.touch()
     return spring_metadata_path
@@ -242,10 +207,7 @@ def spring_file(spring_path: Path) -> Path:
 
 @pytest.fixture(name="decompress_hk_spring_bundle")
 def decompress_hk_spring_bundle(
-    sample_hk_bundle_no_files: dict,
-    spring_file: Path,
-    fastq_flag_file: Path,
-    sample: str,
+    sample_hk_bundle_no_files: dict, spring_file: Path, fastq_flag_file: Path, sample: str
 ) -> dict:
     """Create a complete bundle mock for testing decompression.
 
@@ -256,18 +218,12 @@ def decompress_hk_spring_bundle(
     spring_file_info: dict = {
         "path": spring_file.as_posix(),
         "archive": False,
-        "tags": [
-            sample,
-            SequencingFileTag.SPRING,
-        ],
+        "tags": [sample, SequencingFileTag.SPRING],
     }
     spring_meta_info: dict = {
         "path": fastq_flag_file.as_posix(),
         "archive": False,
-        "tags": [
-            sample,
-            SequencingFileTag.SPRING_METADATA,
-        ],
+        "tags": [sample, SequencingFileTag.SPRING_METADATA],
     }
 
     hk_spring_bundle["files"].extend([spring_file_info, spring_meta_info])

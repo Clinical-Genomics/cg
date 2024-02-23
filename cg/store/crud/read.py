@@ -9,12 +9,7 @@ from typing import Callable, Iterator, Literal
 from sqlalchemy.orm import Query, Session
 
 from cg.constants import FlowCellStatus, Workflow
-from cg.constants.constants import (
-    CaseActions,
-    CustomerId,
-    PrepCategory,
-    SampleType,
-)
+from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError
 from cg.store.base import BaseHandler
 from cg.store.filters.status_analysis_filters import (
@@ -33,18 +28,12 @@ from cg.store.filters.status_application_version_filters import (
     ApplicationVersionFilter,
     apply_application_versions_filter,
 )
-from cg.store.filters.status_bed_filters import (
-    BedFilter,
-    apply_bed_filter,
-)
+from cg.store.filters.status_bed_filters import BedFilter, apply_bed_filter
 from cg.store.filters.status_bed_version_filters import (
     BedVersionFilter,
     apply_bed_version_filter,
 )
-from cg.store.filters.status_case_filters import (
-    CaseFilter,
-    apply_case_filter,
-)
+from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
 from cg.store.filters.status_case_sample_filters import (
     CaseSampleFilter,
     apply_case_sample_filter,
@@ -61,38 +50,20 @@ from cg.store.filters.status_flow_cell_filters import (
     FlowCellFilter,
     apply_flow_cell_filter,
 )
-from cg.store.filters.status_invoice_filters import (
-    InvoiceFilter,
-    apply_invoice_filter,
-)
+from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
 from cg.store.filters.status_metrics_filters import (
     SequencingMetricsFilter,
     apply_metrics_filter,
 )
-from cg.store.filters.status_order_filters import (
-    OrderFilter,
-    apply_order_filters,
-)
+from cg.store.filters.status_order_filters import OrderFilter, apply_order_filters
 from cg.store.filters.status_organism_filters import (
     OrganismFilter,
     apply_organism_filter,
 )
-from cg.store.filters.status_panel_filters import (
-    PanelFilter,
-    apply_panel_filter,
-)
-from cg.store.filters.status_pool_filters import (
-    PoolFilter,
-    apply_pool_filter,
-)
-from cg.store.filters.status_sample_filters import (
-    SampleFilter,
-    apply_sample_filter,
-)
-from cg.store.filters.status_user_filters import (
-    UserFilter,
-    apply_user_filter,
-)
+from cg.store.filters.status_panel_filters import PanelFilter, apply_panel_filter
+from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
+from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
+from cg.store.filters.status_user_filters import UserFilter, apply_user_filter
 from cg.store.models import (
     Analysis,
     Application,
@@ -128,9 +99,7 @@ class ReadHandler(BaseHandler):
         """Return a case by entry id."""
         cases_query: Query = self._get_query(table=Case)
         return apply_case_filter(
-            cases=cases_query,
-            filter_functions=[CaseFilter.FILTER_BY_ENTRY_ID],
-            entry_id=entry_id,
+            cases=cases_query, filter_functions=[CaseFilter.FILTER_BY_ENTRY_ID], entry_id=entry_id
         ).first()
 
     def has_active_cases_for_sample(self, internal_id: str) -> bool:
@@ -190,9 +159,7 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_analysis_by_case_entry_id_and_started_at(
-        self,
-        case_entry_id: int,
-        started_at_date: dt.datetime,
+        self, case_entry_id: int, started_at_date: dt.datetime
     ) -> Analysis:
         """Fetch an analysis."""
         filter_functions: list[AnalysisFilter] = [
@@ -208,9 +175,7 @@ class ReadHandler(BaseHandler):
         ).first()
 
     def get_cases_by_customer_and_case_name_search(
-        self,
-        customer: Customer,
-        case_name_search: str,
+        self, customer: Customer, case_name_search: str
     ) -> list[Case]:
         """
         Retrieve a list of cases filtered by a customer and matching names.
@@ -382,10 +347,7 @@ class ReadHandler(BaseHandler):
         """Find a case by case name within a customer."""
         return apply_case_filter(
             cases=self._get_query(table=Case),
-            filter_functions=[
-                CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
-                CaseFilter.FILTER_BY_NAME,
-            ],
+            filter_functions=[CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID, CaseFilter.FILTER_BY_NAME],
             customer_entry_id=customer.id,
             name=case_name,
         ).first()
@@ -399,9 +361,7 @@ class ReadHandler(BaseHandler):
         ).first()
 
     def get_sample_by_customer_and_name(
-        self,
-        customer_entry_id: list[int],
-        sample_name: str,
+        self, customer_entry_id: list[int], sample_name: str
     ) -> Sample:
         """Get samples within a customer."""
         filter_functions = [
@@ -417,9 +377,7 @@ class ReadHandler(BaseHandler):
         ).first()
 
     def get_number_of_reads_for_sample_passing_q30_threshold(
-        self,
-        sample_internal_id: str,
-        q30_threshold: int,
+        self, sample_internal_id: str, q30_threshold: int
     ) -> int:
         """Get number of reads above q30 threshold for sample from sample lane sequencing metrics."""
         total_reads_query: Query = apply_metrics_filter(
@@ -435,9 +393,7 @@ class ReadHandler(BaseHandler):
         return reads_count if reads_count else 0
 
     def get_average_q30_for_sample_on_flow_cell(
-        self,
-        sample_internal_id: str,
-        flow_cell_name: str,
+        self, sample_internal_id: str, flow_cell_name: str
     ) -> float:
         """Calculates the average q30 across lanes for a sample on a flow cell."""
         sample_lanes: list[SampleLaneSequencingMetrics] = apply_metrics_filter(
@@ -496,10 +452,7 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-        self,
-        flow_cell_name: str,
-        sample_internal_id: str,
-        lane: int,
+        self, flow_cell_name: str, sample_internal_id: str, lane: int
     ) -> SampleLaneSequencingMetrics:
         """Get metrics entry by flow cell name, sample internal id and lane."""
         return apply_metrics_filter(
@@ -529,9 +482,7 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_flow_cell_by_name_pattern_and_status(
-        self,
-        flow_cell_statuses: list[str],
-        name_pattern: str,
+        self, flow_cell_statuses: list[str], name_pattern: str
     ) -> list[Flowcell]:
         """Return flow cell by name pattern and status."""
         filter_functions: list[FlowCellFilter] = [
@@ -585,13 +536,11 @@ class ReadHandler(BaseHandler):
         invoices: Query = self._get_query(table=Invoice)
         if is_invoiced:
             return apply_invoice_filter(
-                invoices=invoices,
-                filter_functions=[InvoiceFilter.FILTER_BY_INVOICED],
+                invoices=invoices, filter_functions=[InvoiceFilter.FILTER_BY_INVOICED]
             ).all()
         else:
             return apply_invoice_filter(
-                invoices=invoices,
-                filter_functions=[InvoiceFilter.FILTER_BY_NOT_INVOICED],
+                invoices=invoices, filter_functions=[InvoiceFilter.FILTER_BY_NOT_INVOICED]
             ).all()
 
     def get_invoice_by_entry_id(self, entry_id: int) -> Invoice:
@@ -619,11 +568,7 @@ class ReadHandler(BaseHandler):
         ).all()
         return pools + samples
 
-    def get_case_sample_link(
-        self,
-        case_internal_id: str,
-        sample_internal_id: str,
-    ) -> CaseSample:
+    def get_case_sample_link(self, case_internal_id: str, sample_internal_id: str) -> CaseSample:
         """Return a case-sample link between a family and a sample."""
         filter_functions: list[CaseSampleFilter] = [
             CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID,
@@ -642,11 +587,7 @@ class ReadHandler(BaseHandler):
         ids = [inv.id for inv in query]
         return max(ids) + 1 if ids else 0
 
-    def get_pools_by_customer_id(
-        self,
-        *,
-        customers: list[Customer] | None = None,
-    ) -> list[Pool]:
+    def get_pools_by_customer_id(self, *, customers: list[Customer] | None = None) -> list[Pool]:
         """Return all the pools for a customer."""
         customer_ids = [customer.id for customer in customers]
         return apply_pool_filter(
@@ -679,15 +620,11 @@ class ReadHandler(BaseHandler):
         """Return a pool by entry id."""
         pools = self._get_query(table=Pool)
         return apply_pool_filter(
-            pools=pools,
-            entry_id=entry_id,
-            filter_functions=[PoolFilter.FILTER_BY_ENTRY_ID],
+            pools=pools, entry_id=entry_id, filter_functions=[PoolFilter.FILTER_BY_ENTRY_ID]
         ).first()
 
     def get_pools_to_render(
-        self,
-        customers: list[Customer] | None = None,
-        enquiry: str = None,
+        self, customers: list[Customer] | None = None, enquiry: str = None
     ) -> list[Pool]:
         pools: list[Pool] = (
             self.get_pools_by_customer_id(customers=customers) if customers else self.get_pools()
@@ -714,10 +651,7 @@ class ReadHandler(BaseHandler):
         return application.expected_reads
 
     def get_samples_by_customer_id_and_pattern(
-        self,
-        *,
-        customers: list[Customer] | None = None,
-        pattern: str = None,
+        self, *, customers: list[Customer] | None = None, pattern: str = None
     ) -> list[Sample]:
         """Get samples by customer and sample internal id  or sample name pattern."""
         samples: Query = self._get_query(table=Sample)
@@ -739,9 +673,7 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def _get_samples_by_customer_and_subject_id_query(
-        self,
-        customer_internal_id: str,
-        subject_id: str,
+        self, customer_internal_id: str, subject_id: str
     ) -> Query:
         """Return query of samples of customer with given subject id."""
         records: Query = apply_customer_filter(
@@ -756,21 +688,15 @@ class ReadHandler(BaseHandler):
         )
 
     def get_samples_by_customer_and_subject_id(
-        self,
-        customer_internal_id: str,
-        subject_id: str,
+        self, customer_internal_id: str, subject_id: str
     ) -> list[Sample]:
         """Get samples of customer with given subject id."""
         return self._get_samples_by_customer_and_subject_id_query(
-            customer_internal_id=customer_internal_id,
-            subject_id=subject_id,
+            customer_internal_id=customer_internal_id, subject_id=subject_id
         ).all()
 
     def get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
-        self,
-        customer_ids: list[int],
-        subject_id: str,
-        is_tumour: bool,
+        self, customer_ids: list[int], subject_id: str, is_tumour: bool
     ) -> list[Sample]:
         """Return a list of samples matching a list of customers with given subject id and is a tumour or not."""
         samples = self._get_query(table=Sample)
@@ -793,10 +719,7 @@ class ReadHandler(BaseHandler):
     def get_samples_by_any_id(self, **identifiers: dict) -> Query:
         """Return a sample query filtered by the given names and values of Sample attributes."""
         samples: Query = self._get_query(table=Sample).order_by(Sample.internal_id.desc())
-        for (
-            identifier_name,
-            identifier_value,
-        ) in identifiers.items():
+        for identifier_name, identifier_value in identifiers.items():
             samples: Query = apply_sample_filter(
                 filter_functions=[SampleFilter.FILTER_BY_IDENTIFIER_NAME_AND_VALUE],
                 samples=samples,
@@ -809,16 +732,10 @@ class ReadHandler(BaseHandler):
         """Get sample by name."""
         samples = self._get_query(table=Sample)
         return apply_sample_filter(
-            samples=samples,
-            filter_functions=[SampleFilter.FILTER_BY_SAMPLE_NAME],
-            name=name,
+            samples=samples, filter_functions=[SampleFilter.FILTER_BY_SAMPLE_NAME], name=name
         ).first()
 
-    def get_samples_by_type(
-        self,
-        case_id: str,
-        sample_type: SampleType,
-    ) -> list[Sample] | None:
+    def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> list[Sample] | None:
         """Get samples given a tissue type."""
         samples: Query = apply_case_sample_filter(
             filter_functions=[CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID],
@@ -866,10 +783,7 @@ class ReadHandler(BaseHandler):
         """Return all running cases in a workflow."""
         return apply_case_filter(
             cases=self._get_query(table=Case),
-            filter_functions=[
-                CaseFilter.FILTER_WITH_WORKFLOW,
-                CaseFilter.FILTER_IS_RUNNING,
-            ],
+            filter_functions=[CaseFilter.FILTER_WITH_WORKFLOW, CaseFilter.FILTER_IS_RUNNING],
             workflow=workflow,
         ).all()
 
@@ -910,32 +824,22 @@ class ReadHandler(BaseHandler):
             tag=tag,
         ).first()
 
-    def get_applications_is_not_archived(
-        self,
-    ) -> list[Application]:
+    def get_applications_is_not_archived(self) -> list[Application]:
         """Return applications that are not archived."""
         return (
             apply_application_filter(
                 applications=self._get_query(table=Application),
                 filter_functions=[ApplicationFilter.FILTER_IS_NOT_ARCHIVED],
             )
-            .order_by(
-                Application.prep_category,
-                Application.tag,
-            )
+            .order_by(Application.prep_category, Application.tag)
             .all()
         )
 
-    def get_applications(
-        self,
-    ) -> list[Application]:
+    def get_applications(self) -> list[Application]:
         """Return all applications."""
         return (
             self._get_query(table=Application)
-            .order_by(
-                Application.prep_category,
-                Application.tag,
-            )
+            .order_by(Application.prep_category, Application.tag)
             .all()
         )
 
@@ -994,8 +898,7 @@ class ReadHandler(BaseHandler):
             BedFilter.ORDER_BY_NAME,
         ]
         return apply_bed_filter(
-            beds=self._get_query(table=Bed),
-            filter_functions=bed_filter_functions,
+            beds=self._get_query(table=Bed), filter_functions=bed_filter_functions
         )
 
     def get_customer_by_internal_id(self, customer_internal_id: str) -> Customer:
@@ -1058,13 +961,11 @@ class ReadHandler(BaseHandler):
             SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
         ]
         records: Query = apply_sample_filter(
-            samples=records,
-            filter_functions=sample_filter_functions,
+            samples=records, filter_functions=sample_filter_functions
         )
         if external:
             records: Query = apply_application_filter(
-                applications=records,
-                filter_functions=[ApplicationFilter.FILTER_IS_EXTERNAL],
+                applications=records, filter_functions=[ApplicationFilter.FILTER_IS_EXTERNAL]
             )
         else:
             records: Query = apply_application_filter(
@@ -1073,9 +974,7 @@ class ReadHandler(BaseHandler):
             )
         return records.order_by(Sample.ordered_at).all()
 
-    def get_samples_to_prepare(
-        self,
-    ) -> list[Sample]:
+    def get_samples_to_prepare(self) -> list[Sample]:
         """Return samples to prepare."""
         records: Query = self._get_join_sample_application_version_query()
         sample_filter_functions: list[SampleFilter] = [
@@ -1085,19 +984,15 @@ class ReadHandler(BaseHandler):
             SampleFilter.FILTER_IS_NOT_SEQUENCED,
         ]
         records: Query = apply_sample_filter(
-            samples=records,
-            filter_functions=sample_filter_functions,
+            samples=records, filter_functions=sample_filter_functions
         )
         records: Query = apply_application_filter(
-            applications=records,
-            filter_functions=[ApplicationFilter.FILTER_IS_NOT_EXTERNAL],
+            applications=records, filter_functions=[ApplicationFilter.FILTER_IS_NOT_EXTERNAL]
         )
 
         return records.order_by(Sample.received_at).all()
 
-    def get_samples_to_sequence(
-        self,
-    ) -> list[Sample]:
+    def get_samples_to_sequence(self) -> list[Sample]:
         """Return samples in sequencing."""
         records: Query = self._get_join_sample_application_version_query()
         sample_filter_functions: list[SampleFilter] = [
@@ -1106,12 +1001,10 @@ class ReadHandler(BaseHandler):
             SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
         ]
         records: Query = apply_sample_filter(
-            samples=records,
-            filter_functions=sample_filter_functions,
+            samples=records, filter_functions=sample_filter_functions
         )
         records: Query = apply_application_filter(
-            applications=records,
-            filter_functions=[ApplicationFilter.FILTER_IS_NOT_EXTERNAL],
+            applications=records, filter_functions=[ApplicationFilter.FILTER_IS_NOT_EXTERNAL]
         )
         return records.order_by(Sample.prepared_at).all()
 
@@ -1124,10 +1017,7 @@ class ReadHandler(BaseHandler):
         return self._get_join_cases_with_samples_query()
 
     def cases_to_analyze(
-        self,
-        workflow: Workflow = None,
-        threshold: bool = False,
-        limit: int = None,
+        self, workflow: Workflow = None, threshold: bool = False, limit: int = None
     ) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
         case_filter_functions: list[CaseFilter] = [
@@ -1230,16 +1120,10 @@ class ReadHandler(BaseHandler):
 
             cases.append(case_output)
 
-        return sorted(
-            cases,
-            key=lambda k: k["tat"],
-            reverse=True,
-        )
+        return sorted(cases, key=lambda k: k["tat"], reverse=True)
 
     def set_case_action(
-        self,
-        action: Literal[CaseActions.actions()],
-        case_internal_id: str,
+        self, action: Literal[CaseActions.actions()], case_internal_id: str
     ) -> None:
         """Sets the action of provided cases to None or the given action."""
         case: Case = self.get_case_by_internal_id(internal_id=case_internal_id)
@@ -1284,9 +1168,7 @@ class ReadHandler(BaseHandler):
         ).all()
 
     @staticmethod
-    def _get_case_output(
-        case_data: SimpleNamespace,
-    ) -> dict:
+    def _get_case_output(case_data: SimpleNamespace) -> dict:
         return {
             "data_analysis": case_data.data_analysis,
             "internal_id": case_data.internal_id,
@@ -1580,9 +1462,7 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_analyses_to_clean(
-        self,
-        before: datetime = datetime.now(),
-        workflow: Workflow = None,
+        self, before: datetime = datetime.now(), workflow: Workflow = None
     ) -> list[Analysis]:
         """Return analyses that haven't been cleaned."""
         filter_functions: list[AnalysisFilter] = [
@@ -1642,9 +1522,7 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_analyses_for_workflow_started_at_before(
-        self,
-        workflow: Workflow,
-        started_at_before: datetime,
+        self, workflow: Workflow, started_at_before: datetime
     ) -> list[Analysis]:
         """Return all analyses for a workflow started before a certain date."""
         filter_functions: list[AnalysisFilter] = [
@@ -1678,8 +1556,7 @@ class ReadHandler(BaseHandler):
             workflow=workflow,
         )
         return apply_sample_filter(
-            filter_functions=[SampleFilter.FILTER_WITHOUT_LOQUSDB_ID],
-            samples=records,
+            filter_functions=[SampleFilter.FILTER_WITHOUT_LOQUSDB_ID], samples=records
         )
 
     def observations_uploaded(self, workflow: Workflow = None) -> Query:
@@ -1690,8 +1567,7 @@ class ReadHandler(BaseHandler):
             workflow=workflow,
         )
         records: Query = apply_sample_filter(
-            filter_functions=[SampleFilter.FILTER_WITH_LOQUSDB_ID],
-            samples=records,
+            filter_functions=[SampleFilter.FILTER_WITH_LOQUSDB_ID], samples=records
         )
         return records
 
@@ -1710,9 +1586,7 @@ class ReadHandler(BaseHandler):
             AnalysisFilter.ORDER_BY_UPLOADED_AT,
         ]
         return apply_analysis_filter(
-            filter_functions=filter_functions,
-            analyses=analyses,
-            workflow=workflow,
+            filter_functions=filter_functions, analyses=analyses, workflow=workflow
         ).all()
 
     def analyses_to_delivery_report(self, workflow: Workflow | None = None) -> Query:
@@ -1728,9 +1602,7 @@ class ReadHandler(BaseHandler):
             AnalysisFilter.ORDER_BY_COMPLETED_AT,
         ]
         return apply_analysis_filter(
-            filter_functions=analysis_filter_functions,
-            analyses=records,
-            workflow=workflow,
+            filter_functions=analysis_filter_functions, analyses=records, workflow=workflow
         )
 
     def analyses_to_upload_delivery_reports(self, workflow: Workflow = None) -> Query:
@@ -1747,14 +1619,10 @@ class ReadHandler(BaseHandler):
             AnalysisFilter.ORDER_BY_COMPLETED_AT,
         ]
         return apply_analysis_filter(
-            filter_functions=analysis_filter_functions,
-            analyses=records,
-            workflow=workflow,
+            filter_functions=analysis_filter_functions, analyses=records, workflow=workflow
         )
 
-    def get_samples_to_deliver(
-        self,
-    ) -> list[Sample]:
+    def get_samples_to_deliver(self) -> list[Sample]:
         """Return all samples not delivered."""
         records = self._get_query(table=Sample)
         sample_filter_functions: list[SampleFilter] = [
@@ -1770,9 +1638,7 @@ class ReadHandler(BaseHandler):
 
         return records.all()
 
-    def get_samples_not_invoiced(
-        self,
-    ) -> list[Sample]:
+    def get_samples_not_invoiced(self) -> list[Sample]:
         """Return all samples that have not been invoiced, excluding those that
         have been down sampled."""
         records = self._get_query(table=Sample)
@@ -1787,18 +1653,14 @@ class ReadHandler(BaseHandler):
         )
         return records.all()
 
-    def get_samples_not_down_sampled(
-        self,
-    ) -> list[Sample]:
+    def get_samples_not_down_sampled(self) -> list[Sample]:
         """Return all samples that have not been down sampled."""
         return apply_sample_filter(
             filter_functions=[SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED],
             samples=self._get_query(table=Sample),
         ).all()
 
-    def get_samples_to_invoice_query(
-        self,
-    ) -> Query:
+    def get_samples_to_invoice_query(self) -> Query:
         """Return all samples that should be invoiced."""
         sample_filter_functions: list[SampleFilter] = [
             SampleFilter.FILTER_IS_DELIVERED,
@@ -1850,13 +1712,10 @@ class ReadHandler(BaseHandler):
     def get_pools_to_receive(self) -> list[Pool]:
         """Return all pools that have been not yet been received."""
         return apply_pool_filter(
-            filter_functions=[PoolFilter.FILTER_IS_NOT_RECEIVED],
-            pools=self._get_query(table=Pool),
+            filter_functions=[PoolFilter.FILTER_IS_NOT_RECEIVED], pools=self._get_query(table=Pool)
         ).all()
 
-    def get_all_pools_to_deliver(
-        self,
-    ) -> list[Pool]:
+    def get_all_pools_to_deliver(self) -> list[Pool]:
         """Return all pools that are received but have not yet been delivered."""
         records = self._get_query(table=Pool)
         pool_filter_functions: list[PoolFilter] = [
@@ -1871,17 +1730,13 @@ class ReadHandler(BaseHandler):
         return records.all()
 
     def get_orders_by_workflow(
-        self,
-        workflow: str | None = None,
-        limit: int | None = None,
+        self, workflow: str | None = None, limit: int | None = None
     ) -> list[Order]:
         """Returns a list of entries in Order. The output is filtered on workflow and limited, if given."""
         orders: Query = self._get_query(table=Order)
         order_filter_functions: list[Callable] = [OrderFilter.FILTER_ORDERS_BY_WORKFLOW]
         orders: Query = apply_order_filters(
-            orders=orders,
-            filter_functions=order_filter_functions,
-            workflow=workflow,
+            orders=orders, filter_functions=order_filter_functions, workflow=workflow
         )
         return orders.limit(limit).all()
 
@@ -1890,9 +1745,7 @@ class ReadHandler(BaseHandler):
         orders: Query = self._get_query(table=Order)
         order_filter_functions: list[Callable] = [OrderFilter.FILTER_ORDERS_BY_ID]
         orders: Query = apply_order_filters(
-            orders=orders,
-            filter_functions=order_filter_functions,
-            id=order_id,
+            orders=orders, filter_functions=order_filter_functions, id=order_id
         )
         return orders.first()
 
@@ -1910,58 +1763,22 @@ class ReadHandler(BaseHandler):
     ) -> timedelta:
         """Calculated estimated turnaround-time."""
         if samples_received_at and samples_delivered_at:
-            return self._calculate_date_delta(
-                None,
-                samples_received_at,
-                samples_delivered_at,
-            )
+            return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
 
-        o_a = self._calculate_date_delta(
-            5,
-            analysis_ordered_at,
-            analysis_completed_at,
-        )
-        r_p = self._calculate_date_delta(
-            4,
-            samples_received_at,
-            samples_prepared_at,
-        )
-        p_s = self._calculate_date_delta(
-            5,
-            samples_prepared_at,
-            samples_sequenced_at,
-        )
-        s_a = self._calculate_date_delta(
-            4,
-            samples_sequenced_at,
-            analysis_completed_at,
-        )
-        a_u = self._calculate_date_delta(
-            1,
-            analysis_completed_at,
-            analysis_uploaded_at,
-        )
-        u_d = self._calculate_date_delta(
-            2,
-            analysis_uploaded_at,
-            samples_delivered_at,
-        )
+        o_a = self._calculate_date_delta(5, analysis_ordered_at, analysis_completed_at)
+        r_p = self._calculate_date_delta(4, samples_received_at, samples_prepared_at)
+        p_s = self._calculate_date_delta(5, samples_prepared_at, samples_sequenced_at)
+        s_a = self._calculate_date_delta(4, samples_sequenced_at, analysis_completed_at)
+        a_u = self._calculate_date_delta(1, analysis_completed_at, analysis_uploaded_at)
+        u_d = self._calculate_date_delta(2, analysis_uploaded_at, samples_delivered_at)
 
         if is_rerun:
-            o_a = self._calculate_date_delta(
-                1,
-                analysis_ordered_at,
-                analysis_completed_at,
-            )
+            o_a = self._calculate_date_delta(1, analysis_ordered_at, analysis_completed_at)
             return o_a + a_u
 
         if external_case_bool:
             if analysis_ordered_at and analysis_uploaded_at:
-                return self._calculate_date_delta(
-                    None,
-                    analysis_ordered_at,
-                    analysis_uploaded_at,
-                )
+                return self._calculate_date_delta(None, analysis_ordered_at, analysis_uploaded_at)
 
             return o_a + a_u
 
@@ -1982,10 +1799,7 @@ class ReadHandler(BaseHandler):
         max_tat = 0
         for link in links:
             if link.sample.application_version.application.turnaround_time:
-                max_tat = max(
-                    0,
-                    link.sample.application_version.application.turnaround_time,
-                )
+                max_tat = max(0, link.sample.application_version.application.turnaround_time)
         return max_tat
 
     @staticmethod

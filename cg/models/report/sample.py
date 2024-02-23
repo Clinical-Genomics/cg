@@ -33,10 +33,7 @@ class ApplicationModel(BaseModel):
 
     tag: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    prep_category: Annotated[
-        str,
-        BeforeValidator(get_prep_category_as_string),
-    ] = NA_FIELD
+    prep_category: Annotated[str, BeforeValidator(get_prep_category_as_string)] = NA_FIELD
     description: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     details: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     limitations: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
@@ -99,10 +96,7 @@ class SampleModel(BaseModel):
     status: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     gender: Annotated[str, BeforeValidator(get_gender_as_string)] = NA_FIELD
     source: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    tumour: Annotated[
-        str,
-        BeforeValidator(get_boolean_as_string),
-    ] = NA_FIELD
+    tumour: Annotated[str, BeforeValidator(get_boolean_as_string)] = NA_FIELD
     application: ApplicationModel
     methods: MethodsModel
     metadata: (

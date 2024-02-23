@@ -6,13 +6,7 @@ Create Date: 2021-04-19 17:43:37.671078
 
 """
 
-from sqlalchemy import (
-    Column,
-    ForeignKey,
-    String,
-    orm,
-    types,
-)
+from sqlalchemy import Column, ForeignKey, String, orm, types
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import declarative_base
 
@@ -48,38 +42,13 @@ class Customer(Base):
 class User(Base):
     __tablename__ = "user"
     id = Column(types.Integer, primary_key=True)
-    email = Column(
-        types.String(128),
-        unique=True,
-        nullable=False,
-    )
+    email = Column(types.String(128), unique=True, nullable=False)
 
 
 def upgrade():
-    op.add_column(
-        "customer",
-        Column(
-            "delivery_contact_email",
-            String(128),
-            nullable=True,
-        ),
-    )
-    op.add_column(
-        "customer",
-        Column(
-            "invoice_contact_email",
-            String(128),
-            nullable=True,
-        ),
-    )
-    op.add_column(
-        "customer",
-        Column(
-            "primary_contact_email",
-            String(128),
-            nullable=True,
-        ),
-    )
+    op.add_column("customer", Column("delivery_contact_email", String(128), nullable=True))
+    op.add_column("customer", Column("invoice_contact_email", String(128), nullable=True))
+    op.add_column("customer", Column("primary_contact_email", String(128), nullable=True))
 
     bind = op.get_bind()
     session = orm.Session(bind=bind)
@@ -109,50 +78,26 @@ def upgrade():
     session.commit()
     print(f"Changed {count} connections")
 
-    op.drop_constraint(
-        "delivery_contact_ibfk_1",
-        "customer",
-        type_="foreignkey",
-    )
+    op.drop_constraint("delivery_contact_ibfk_1", "customer", type_="foreignkey")
     op.drop_column("customer", "delivery_contact_id")
-    op.drop_constraint(
-        "invoice_contact_ibfk_1",
-        "customer",
-        type_="foreignkey",
-    )
+    op.drop_constraint("invoice_contact_ibfk_1", "customer", type_="foreignkey")
     op.drop_column("customer", "invoice_contact_id")
-    op.drop_constraint(
-        "primary_contact_ibfk_1",
-        "customer",
-        type_="foreignkey",
-    )
+    op.drop_constraint("primary_contact_ibfk_1", "customer", type_="foreignkey")
     op.drop_column("customer", "primary_contact_id")
 
 
 def downgrade():
     op.add_column(
         "customer",
-        Column(
-            "delivery_contact_id",
-            mysql.INTEGER(display_width=11),
-            autoincrement=False,
-        ),
+        Column("delivery_contact_id", mysql.INTEGER(display_width=11), autoincrement=False),
     )
     op.add_column(
         "customer",
-        Column(
-            "invoice_contact_id",
-            mysql.INTEGER(display_width=11),
-            autoincrement=False,
-        ),
+        Column("invoice_contact_id", mysql.INTEGER(display_width=11), autoincrement=False),
     )
     op.add_column(
         "customer",
-        Column(
-            "primary_contact_id",
-            mysql.INTEGER(display_width=11),
-            autoincrement=False,
-        ),
+        Column("primary_contact_id", mysql.INTEGER(display_width=11), autoincrement=False),
     )
 
     bind = op.get_bind()

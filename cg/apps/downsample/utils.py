@@ -5,17 +5,13 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.utils.files import (
-    get_files_matching_pattern,
-)
+from cg.utils.files import get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
 
 
 def store_downsampled_sample_bundle(
-    fastq_file_output_directory: str,
-    sample_id: str,
-    housekeeper_api: HousekeeperAPI,
+    fastq_file_output_directory: str, sample_id: str, housekeeper_api: HousekeeperAPI
 ) -> None:
     """
     Add a downsampled sample bundle to housekeeper and include the fastq files.
@@ -24,10 +20,7 @@ def store_downsampled_sample_bundle(
     """
     if not Path(fastq_file_output_directory).exists():
         raise FileExistsError(f"Cannot find: {fastq_file_output_directory}")
-    create_downsampled_sample_bundle(
-        sample_id=sample_id,
-        housekeeper_api=housekeeper_api,
-    )
+    create_downsampled_sample_bundle(sample_id=sample_id, housekeeper_api=housekeeper_api)
     store_downsampled_fastq_files_from_dir(
         sample_id=sample_id,
         housekeeper_api=housekeeper_api,
@@ -36,9 +29,7 @@ def store_downsampled_sample_bundle(
 
 
 def store_downsampled_fastq_files_from_dir(
-    fastq_file_output_directory: str,
-    sample_id: str,
-    housekeeper_api: HousekeeperAPI,
+    fastq_file_output_directory: str, sample_id: str, housekeeper_api: HousekeeperAPI
 ) -> None:
     """
     Add downsampled fastq files from the given directory to housekeeper.
@@ -58,16 +49,10 @@ def store_downsampled_fastq_files_from_dir(
         housekeeper_api.add_and_include_file_to_latest_version(
             bundle_name=sample_id,
             file=fastq_file_path,
-            tags=[
-                SequencingFileTag.FASTQ,
-                sample_id,
-            ],
+            tags=[SequencingFileTag.FASTQ, sample_id],
         )
 
 
-def create_downsampled_sample_bundle(
-    housekeeper_api: HousekeeperAPI,
-    sample_id: str,
-) -> None:
+def create_downsampled_sample_bundle(housekeeper_api: HousekeeperAPI, sample_id: str) -> None:
     """Create a new bundle for the downsampled sample in housekeeper."""
     housekeeper_api.create_new_bundle_and_version(name=sample_id)

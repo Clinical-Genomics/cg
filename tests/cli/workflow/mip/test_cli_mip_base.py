@@ -7,19 +7,12 @@ from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 from pytest_mock import MockFixture
 
-from cg.cli.workflow.mip_dna.base import (
-    start,
-    start_available,
-)
+from cg.cli.workflow.mip_dna.base import start, start_available
 from cg.constants.process import EXIT_SUCCESS
-from cg.meta.workflow.prepare_fastq import (
-    PrepareFastqAPI,
-)
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
-from tests.cli.workflow.mip.conftest import (
-    setup_mocks,
-)
+from tests.cli.workflow.mip.conftest import setup_mocks
 from tests.store.conftest import case_obj
 
 
@@ -202,11 +195,7 @@ def test_case_needs_to_be_stored(
         return_value=["OMIM-AUTO"],
     ):
         # WHEN MIP analysis is started
-        result = cli_runner.invoke(
-            start,
-            [case.internal_id, "--dry-run"],
-            obj=mip_dna_context,
-        )
+        result = cli_runner.invoke(start, [case.internal_id, "--dry-run"], obj=mip_dna_context)
 
     # THEN command should run without errors
     assert result.exit_code == 0

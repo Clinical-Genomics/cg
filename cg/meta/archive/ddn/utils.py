@@ -1,6 +1,4 @@
-from cg.meta.archive.ddn.constants import (
-    MetadataFields,
-)
+from cg.meta.archive.ddn.constants import MetadataFields
 from cg.store.models import Sample
 
 

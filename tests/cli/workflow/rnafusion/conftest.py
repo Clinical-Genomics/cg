@@ -11,11 +11,7 @@ def deliverables_template_content() -> list[dict]:
         {
             "format": "yml",
             "id": "CASEID",
-            "path": Path(
-                "PATHTOCASE",
-                "pipeline_info",
-                "software_versions.yml",
-            ).as_posix(),
+            "path": Path("PATHTOCASE", "pipeline_info", "software_versions.yml").as_posix(),
             "path_index": None,
             "step": "software-versions",
             "tag": "software-versions",
@@ -23,12 +19,7 @@ def deliverables_template_content() -> list[dict]:
         {
             "format": "json",
             "id": "CASEID",
-            "path": Path(
-                "PATHTOCASE",
-                "multiqc",
-                "multiqc_data",
-                "multiqc_data",
-            )
+            "path": Path("PATHTOCASE", "multiqc", "multiqc_data", "multiqc_data")
             .with_suffix(FileExtensions.JSON)
             .as_posix(),
             "path_index": None,

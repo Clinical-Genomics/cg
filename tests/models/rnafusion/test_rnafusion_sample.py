@@ -4,9 +4,7 @@ import pytest
 from pydantic.v1 import ValidationError
 
 from cg.exc import SampleSheetError
-from cg.models.rnafusion.rnafusion import (
-    RnafusionSampleSheetEntry,
-)
+from cg.models.rnafusion.rnafusion import RnafusionSampleSheetEntry
 
 
 def test_instantiate_rnafusion_sample(
@@ -23,22 +21,13 @@ def test_instantiate_rnafusion_sample(
     # WHEN instantiating a rnafusion sample object
     rnafusion_sample_object = RnafusionSampleSheetEntry(
         name=sample_name,
-        fastq_forward_read_paths=[
-            fastq_forward_read_path,
-            fastq_forward_read_path,
-        ],
-        fastq_reverse_read_paths=[
-            fastq_reverse_read_path,
-            fastq_reverse_read_path,
-        ],
+        fastq_forward_read_paths=[fastq_forward_read_path, fastq_forward_read_path],
+        fastq_reverse_read_paths=[fastq_reverse_read_path, fastq_reverse_read_path],
         strandedness=strandedness,
     )
 
     # THEN assert that it was successfully created
-    assert isinstance(
-        rnafusion_sample_object,
-        RnafusionSampleSheetEntry,
-    )
+    assert isinstance(rnafusion_sample_object, RnafusionSampleSheetEntry)
 
 
 def test_incomplete_fastq_file_pairs(
@@ -58,10 +47,7 @@ def test_incomplete_fastq_file_pairs(
     with pytest.raises(SampleSheetError) as error:
         RnafusionSampleSheetEntry(
             name=sample_name,
-            fastq_forward_read_paths=[
-                fastq_forward_read_path,
-                fastq_forward_read_path,
-            ],
+            fastq_forward_read_paths=[fastq_forward_read_path, fastq_forward_read_path],
             fastq_reverse_read_paths=[fastq_reverse_read_path],
             strandedness=strandedness,
         )
@@ -86,10 +72,7 @@ def test_fastq_empty_list(
     with pytest.raises(ValidationError) as error:
         RnafusionSampleSheetEntry(
             name=sample_name,
-            fastq_forward_read_paths=[
-                fastq_forward_read_path,
-                fastq_forward_read_path,
-            ],
+            fastq_forward_read_paths=[fastq_forward_read_path, fastq_forward_read_path],
             fastq_reverse_read_paths=[],
             strandedness=strandedness,
         )

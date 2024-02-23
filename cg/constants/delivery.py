@@ -128,10 +128,7 @@ MIP_RNA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"salmon-quant"},
 ]
 
-MICROSALT_ANALYSIS_CASE_TAGS = [
-    {"qc-report"},
-    {"typing-report"},
-]
+MICROSALT_ANALYSIS_CASE_TAGS = [{"qc-report"}, {"typing-report"}]
 
 MICROSALT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = []
 
@@ -154,24 +151,12 @@ MUTANT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 RNAFUSION_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {AnalysisTag.FUSION, AnalysisTag.ARRIBA},
     {AnalysisTag.FUSION, AnalysisTag.STARFUSION},
-    {
-        AnalysisTag.FUSION,
-        AnalysisTag.FUSIONCATCHER,
-    },
+    {AnalysisTag.FUSION, AnalysisTag.FUSIONCATCHER},
     {AnalysisTag.FUSIONCATCHER_SUMMARY},
     {AnalysisTag.FUSIONINSPECTOR},
-    {
-        AnalysisTag.FUSIONREPORT,
-        AnalysisTag.RESEARCH,
-    },
-    {
-        AnalysisTag.FUSIONINSPECTOR_HTML,
-        AnalysisTag.RESEARCH,
-    },
-    {
-        AnalysisTag.ARRIBA_VISUALIZATION,
-        AnalysisTag.RESEARCH,
-    },
+    {AnalysisTag.FUSIONREPORT, AnalysisTag.RESEARCH},
+    {AnalysisTag.FUSIONINSPECTOR_HTML, AnalysisTag.RESEARCH},
+    {AnalysisTag.ARRIBA_VISUALIZATION, AnalysisTag.RESEARCH},
     {AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA},
     {HK_DELIVERY_REPORT_TAG},
     {AnalysisTag.VCF_FUSION},

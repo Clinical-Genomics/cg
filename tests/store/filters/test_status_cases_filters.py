@@ -2,14 +2,8 @@ from datetime import datetime
 
 from sqlalchemy.orm import Query
 
-from cg.constants.constants import (
-    CaseActions,
-    DataDelivery,
-    Workflow,
-)
-from cg.constants.sequencing import (
-    SequencingMethod,
-)
+from cg.constants.constants import CaseActions, DataDelivery, Workflow
+from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.store.filters.status_case_filters import (
     filter_case_by_internal_id,
@@ -33,38 +27,24 @@ from cg.store.filters.status_case_filters import (
     filter_report_supported_data_delivery_cases,
     filter_running_cases,
 )
-from cg.store.models import (
-    Analysis,
-    Case,
-    CaseSample,
-    Sample,
-)
+from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
 def test_filter_cases_has_sequence(
-    base_store: Store,
-    helpers: StoreHelpers,
-    timestamp_now: datetime,
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned when there is a cases with a sequenced sample."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(
-        base_store,
-        last_sequenced_at=timestamp_now,
-    )
+    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link = base_store.relate_sample(
-        test_case,
-        test_sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN a cases Query
@@ -84,21 +64,13 @@ def test_filter_cases_has_sequence_when_external(base_store: Store, helpers: Sto
     """Test that a case is returned when there is a case with an externally sequenced sample."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(
-        base_store,
-        is_external=True,
-        last_sequenced_at=None,
-    )
+    test_sample: Sample = helpers.add_sample(base_store, is_external=True, last_sequenced_at=None)
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link = base_store.relate_sample(
-        test_case,
-        test_sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN a cases Query
@@ -124,11 +96,7 @@ def test_filter_cases_has_sequence_when_not_sequenced(base_store: Store, helpers
     test_case = helpers.add_case(base_store)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link = base_store.relate_sample(
-        test_case,
-        test_sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN a cases Query
@@ -150,21 +118,13 @@ def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
     """Test that no case is returned when there is a cases with sample that has not been sequenced nor is external."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(
-        base_store,
-        is_external=False,
-        last_sequenced_at=None,
-    )
+    test_sample: Sample = helpers.add_sample(base_store, is_external=False, last_sequenced_at=None)
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link = base_store.relate_sample(
-        test_case,
-        test_sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN a cases Query
@@ -181,72 +141,43 @@ def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
 
 
 def test_filter_cases_with_workflow_when_correct_workflow(
-    base_store: Store,
-    helpers: StoreHelpers,
-    timestamp_now: datetime,
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that no case is returned when there are no cases with the specified workflow."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(
-        base_store,
-        last_sequenced_at=timestamp_now,
-    )
+    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a cancer case
-    test_case = helpers.add_case(
-        base_store,
-        data_analysis=Workflow.BALSAMIC,
-    )
+    test_case = helpers.add_case(base_store, data_analysis=Workflow.BALSAMIC)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link = base_store.relate_sample(
-        test_case,
-        test_sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another workflow
-    cases: list[Query] = list(
-        filter_cases_with_workflow(
-            cases=cases,
-            workflow=Workflow.BALSAMIC,
-        )
-    )
+    cases: list[Query] = list(filter_cases_with_workflow(cases=cases, workflow=Workflow.BALSAMIC))
 
     # THEN cases should contain the test case
     assert cases
 
 
 def test_filter_cases_with_workflow_when_incorrect_pipline(
-    base_store: Store,
-    helpers: StoreHelpers,
-    timestamp_now: datetime,
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that no case is returned when there are no cases with the specified workflow."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(
-        base_store,
-        last_sequenced_at=timestamp_now,
-    )
+    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a cancer case
-    test_case: Case = helpers.add_case(
-        base_store,
-        data_analysis=Workflow.BALSAMIC,
-    )
+    test_case: Case = helpers.add_case(base_store, data_analysis=Workflow.BALSAMIC)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link = base_store.relate_sample(
-        test_case,
-        test_sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN a cases Query
@@ -260,38 +191,27 @@ def test_filter_cases_with_workflow_when_incorrect_pipline(
 
 
 def test_filter_cases_with_loqusdb_supported_workflow(
-    base_store: Store,
-    helpers: StoreHelpers,
-    timestamp_now: datetime,
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test retrieval of cases that support Loqusdb upload."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(
-        base_store,
-        last_sequenced_at=timestamp_now,
-    )
+    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a MIP-DNA and a FLUFFY case
     test_mip_case: Case = helpers.add_case(base_store, data_analysis=Workflow.MIP_DNA)
     test_mip_case.customer.loqus_upload = True
     test_fluffy_case: Case = helpers.add_case(
-        base_store,
-        name="test",
-        data_analysis=Workflow.FLUFFY,
+        base_store, name="test", data_analysis=Workflow.FLUFFY
     )
     test_fluffy_case.customer.loqus_upload = True
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
     link_1: CaseSample = base_store.relate_sample(
-        test_mip_case,
-        test_sample,
-        PhenotypeStatus.UNKNOWN,
+        test_mip_case, test_sample, PhenotypeStatus.UNKNOWN
     )
     link_2: CaseSample = base_store.relate_sample(
-        test_fluffy_case,
-        test_sample,
-        PhenotypeStatus.UNKNOWN,
+        test_fluffy_case, test_sample, PhenotypeStatus.UNKNOWN
     )
     base_store.session.add_all([link_1, link_2])
 
@@ -307,26 +227,18 @@ def test_filter_cases_with_loqusdb_supported_workflow(
 
 
 def test_filter_cases_with_loqusdb_supported_sequencing_method(
-    base_store: Store,
-    helpers: StoreHelpers,
-    timestamp_now: datetime,
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test retrieval of cases with a valid Loqusdb sequencing method."""
 
     # GIVEN a sample with a valid Loqusdb sequencing method
     test_sample_wes: Sample = helpers.add_sample(
-        base_store,
-        application_type=SequencingMethod.WES,
-        last_sequenced_at=timestamp_now,
+        base_store, application_type=SequencingMethod.WES, last_sequenced_at=timestamp_now
     )
 
     # GIVEN a MIP-DNA associated test case
     test_case_wes: Case = helpers.add_case(base_store, data_analysis=Workflow.MIP_DNA)
-    link = base_store.relate_sample(
-        test_case_wes,
-        test_sample_wes,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = base_store.relate_sample(test_case_wes, test_sample_wes, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN a cases Query
@@ -345,27 +257,18 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method(
 
 
 def test_filter_cases_with_loqusdb_supported_sequencing_method_empty(
-    base_store: Store,
-    helpers: StoreHelpers,
-    timestamp_now: datetime,
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test retrieval of cases with a valid Loqusdb sequencing method."""
 
     # GIVEN a not supported loqusdb sample
     test_sample_wts: Sample = helpers.add_sample(
-        base_store,
-        is_rna=True,
-        name="sample_wts",
-        last_sequenced_at=timestamp_now,
+        base_store, is_rna=True, name="sample_wts", last_sequenced_at=timestamp_now
     )
 
     # GIVEN a MIP-DNA associated test case
     test_case_wts: Case = helpers.add_case(base_store, data_analysis=Workflow.MIP_DNA)
-    link = base_store.relate_sample(
-        test_case_wts,
-        test_sample_wts,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = base_store.relate_sample(test_case_wts, test_sample_wts, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN a cases Query
@@ -384,34 +287,23 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method_empty(
 
 
 def test_filter_cases_for_analysis(
-    base_store: Store,
-    helpers: StoreHelpers,
-    timestamp_now: datetime,
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned when there is a cases with an action set to analyse."""
 
     # GIVEN a sequenced sample
-    test_sample: Sample = helpers.add_sample(
-        base_store,
-        last_sequenced_at=timestamp_now,
-    )
+    test_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(
-        base_store,
-        completed_at=timestamp_now,
-        workflow=Workflow.MIP_DNA,
+        base_store, completed_at=timestamp_now, workflow=Workflow.MIP_DNA
     )
 
     # Given an action set to analyze
     test_analysis.case.action: str = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link = base_store.relate_sample(
-        test_analysis.case,
-        test_sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN a cases Query
@@ -428,28 +320,20 @@ def test_filter_cases_for_analysis(
 
 
 def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
-    base_store: Store,
-    helpers: StoreHelpers,
-    timestamp_now: datetime,
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned when there are internally created cases with no action set and no prior analysis."""
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(
-        base_store,
-        is_external=False,
-        last_sequenced_at=timestamp_now,
+        base_store, is_external=False, last_sequenced_at=timestamp_now
     )
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link = base_store.relate_sample(
-        test_case,
-        test_sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN a cases Query
@@ -475,9 +359,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(
-        base_store,
-        is_external=False,
-        last_sequenced_at=timestamp_now,
+        base_store, is_external=False, last_sequenced_at=timestamp_now
     )
 
     # GIVEN a completed analysis
@@ -487,11 +369,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
     test_analysis.case.action = None
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link = base_store.relate_sample(
-        test_analysis.case,
-        test_sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN an old analysis
@@ -511,17 +389,13 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
 
 
 def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_data(
-    base_store: Store,
-    helpers: StoreHelpers,
-    timestamp_yesterday: datetime,
+    base_store: Store, helpers: StoreHelpers, timestamp_yesterday: datetime
 ):
     """Test that a case is not returned when cases with no action, but old sequence data."""
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(
-        base_store,
-        is_external=True,
-        last_sequenced_at=timestamp_yesterday,
+        base_store, is_external=True, last_sequenced_at=timestamp_yesterday
     )
 
     # GIVEN a completed analysis
@@ -531,11 +405,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
     test_analysis.case.action: str | None = None
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link = base_store.relate_sample(
-        test_analysis.case,
-        test_sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = base_store.relate_sample(test_analysis.case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN a cases Query
@@ -552,9 +422,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
 
 
 def test_filter_cases_with_scout_data_delivery(
-    base_store: Store,
-    helpers: StoreHelpers,
-    timestamp_now: datetime,
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned when Scout is specified as a data delivery option."""
 
@@ -562,17 +430,10 @@ def test_filter_cases_with_scout_data_delivery(
     test_sample: Sample = helpers.add_sample(base_store)
 
     # GIVEN a case with Scout as data delivery
-    test_case = helpers.add_case(
-        base_store,
-        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
-    )
+    test_case = helpers.add_case(base_store, data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    link = base_store.relate_sample(
-        test_case,
-        test_sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
     base_store.session.add(link)
 
     # GIVEN a cases Query
@@ -589,9 +450,7 @@ def test_filter_cases_with_scout_data_delivery(
 
 
 def test_filter_report_supported_data_delivery_cases(
-    base_store: Store,
-    helpers: StoreHelpers,
-    timestamp_now: datetime,
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned for a delivery report supported data delivery option."""
 
@@ -599,26 +458,13 @@ def test_filter_report_supported_data_delivery_cases(
     test_sample: Sample = helpers.add_sample(base_store)
 
     # GIVEN a case with Scout and a not supported option as data deliveries
-    test_case = helpers.add_case(
-        base_store,
-        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
-    )
-    test_invalid_case = helpers.add_case(
-        base_store,
-        name="test",
-        data_delivery=DataDelivery.FASTQ,
-    )
+    test_case = helpers.add_case(base_store, data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT)
+    test_invalid_case = helpers.add_case(base_store, name="test", data_delivery=DataDelivery.FASTQ)
 
     # GIVEN a database with the test cases
-    link_1: CaseSample = base_store.relate_sample(
-        test_case,
-        test_sample,
-        PhenotypeStatus.UNKNOWN,
-    )
+    link_1: CaseSample = base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
     link_2: CaseSample = base_store.relate_sample(
-        test_invalid_case,
-        test_sample,
-        PhenotypeStatus.UNKNOWN,
+        test_invalid_case, test_sample, PhenotypeStatus.UNKNOWN
     )
     base_store.session.add_all([link_1, link_2])
 
@@ -699,11 +545,7 @@ def test_filter_inactive_analysis_cases_when_not_completed(
     assert not cases.all()
 
 
-def test_get_old_cases(
-    base_store: Store,
-    helpers: StoreHelpers,
-    timestamp_in_2_weeks: datetime,
-):
+def test_get_old_cases(base_store: Store, helpers: StoreHelpers, timestamp_in_2_weeks: datetime):
     """Test that an old case is returned when a future date is supplied."""
 
     # GIVEN a case
@@ -714,8 +556,7 @@ def test_get_old_cases(
 
     # WHEN getting completed cases
     cases: Query = filter_older_cases_by_creation_date(
-        cases=cases,
-        creation_date=timestamp_in_2_weeks,
+        cases=cases, creation_date=timestamp_in_2_weeks
     )
 
     # ASSERT that cases is a query
@@ -728,9 +569,7 @@ def test_get_old_cases(
 
 
 def test_get_old_cases_none_when_all_cases_are_too_new(
-    base_store: Store,
-    helpers: StoreHelpers,
-    timestamp_yesterday: datetime,
+    base_store: Store, helpers: StoreHelpers, timestamp_yesterday: datetime
 ):
     """No cases are returned when all cases in the store are too new."""
 
@@ -742,8 +581,7 @@ def test_get_old_cases_none_when_all_cases_are_too_new(
 
     # WHEN getting completed cases
     cases: Query = filter_older_cases_by_creation_date(
-        cases=cases,
-        creation_date=timestamp_yesterday,
+        cases=cases, creation_date=timestamp_yesterday
     )
 
     # ASSERT that cases is a query
@@ -753,9 +591,7 @@ def test_get_old_cases_none_when_all_cases_are_too_new(
     assert not cases.all()
 
 
-def test_filter_case_by_existing_entry_id(
-    store_with_multiple_cases_and_samples: Store,
-):
+def test_filter_case_by_existing_entry_id(store_with_multiple_cases_and_samples: Store):
     # GIVEN a store containing a case with an entry id
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
     entry_id: int = cases_query.first().id
@@ -769,8 +605,7 @@ def test_filter_case_by_existing_entry_id(
 
 
 def test_filter_cases_by_non_existing_entry_id(
-    store_with_multiple_cases_and_samples: Store,
-    non_existent_id: str,
+    store_with_multiple_cases_and_samples: Store, non_existent_id: str
 ):
     # GIVEN a store containing cases without a specific entry id
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
@@ -778,18 +613,14 @@ def test_filter_cases_by_non_existing_entry_id(
     assert non_existent_id not in entry_ids
 
     # WHEN filtering for cases with the non existing entry id
-    cases: Query = filter_cases_by_entry_id(
-        cases=cases_query,
-        entry_id=non_existent_id,
-    )
+    cases: Query = filter_cases_by_entry_id(cases=cases_query, entry_id=non_existent_id)
 
     # THEN the query should contain no cases
     assert cases.count() == 0
 
 
 def test_filter_case_by_existing_internal_id(
-    store_with_multiple_cases_and_samples: Store,
-    case_id: str,
+    store_with_multiple_cases_and_samples: Store, case_id: str
 ):
     # GIVEN a store containing a case with an internal id case_id
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
@@ -807,8 +638,7 @@ def test_filter_case_by_existing_internal_id(
 
 
 def test_filter_cases_by_non_existing_internal_id(
-    store_with_multiple_cases_and_samples: Store,
-    non_existent_id: str,
+    store_with_multiple_cases_and_samples: Store, non_existent_id: str
 ):
     # GIVEN a store containing a case with an internal id case_id
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
@@ -816,18 +646,13 @@ def test_filter_cases_by_non_existing_internal_id(
     assert non_existent_id not in internal_ids
 
     # WHEN filtering for cases with the internal id case_id
-    cases: Query = filter_case_by_internal_id(
-        cases=cases_query,
-        internal_id=non_existent_id,
-    )
+    cases: Query = filter_case_by_internal_id(cases=cases_query, internal_id=non_existent_id)
 
     # THEN the query should contain no cases
     assert cases.count() == 0
 
 
-def test_filter_case_by_empty_internal_id(
-    store_with_multiple_cases_and_samples: Store,
-):
+def test_filter_case_by_empty_internal_id(store_with_multiple_cases_and_samples: Store):
     # GIVEN a store containing cases
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
 
@@ -838,9 +663,7 @@ def test_filter_case_by_empty_internal_id(
     assert cases.count() == 0
 
 
-def test_filter_running_cases_no_running_cases(
-    store_with_multiple_cases_and_samples: Store,
-):
+def test_filter_running_cases_no_running_cases(store_with_multiple_cases_and_samples: Store):
     """Test that no cases are returned when no cases have a running action."""
     # GIVEN a store containing cases with no "running" action
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
@@ -853,9 +676,7 @@ def test_filter_running_cases_no_running_cases(
     assert active_cases.count() == 0
 
 
-def test_filter_running_cases_with_running_cases(
-    store_with_multiple_cases_and_samples: Store,
-):
+def test_filter_running_cases_with_running_cases(store_with_multiple_cases_and_samples: Store):
     """Test that at least one case is returned when at least one case has a running action."""
     # GIVEN a store containing cases with at least one "running" action
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
@@ -869,9 +690,7 @@ def test_filter_running_cases_with_running_cases(
     assert active_cases.count() >= 1
 
 
-def test_filter_running_cases_only_running_cases(
-    store_with_multiple_cases_and_samples: Store,
-):
+def test_filter_running_cases_only_running_cases(store_with_multiple_cases_and_samples: Store):
     """Test that all cases are returned when all cases have a running action."""
     # GIVEN a store containing only cases with "running" action
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
@@ -886,26 +705,21 @@ def test_filter_running_cases_only_running_cases(
 
 
 def test_filter_cases_by_ticket_no_matching_ticket(
-    store_with_multiple_cases_and_samples: Store,
-    non_existent_id: str,
+    store_with_multiple_cases_and_samples: Store, non_existent_id: str
 ):
     """Test that no cases are returned when filtering by a non-existent ticket."""
     # GIVEN a store containing cases with no matching ticket id
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
 
     # WHEN filtering cases by a non-existent ticket
-    filtered_cases: Query = filter_cases_by_ticket_id(
-        cases=cases_query,
-        ticket_id=non_existent_id,
-    )
+    filtered_cases: Query = filter_cases_by_ticket_id(cases=cases_query, ticket_id=non_existent_id)
 
     # THEN the query should return no cases
     assert filtered_cases.count() == 0
 
 
 def test_filter_cases_by_ticket_matching_ticket(
-    store_with_multiple_cases_and_samples: Store,
-    ticket_id: str,
+    store_with_multiple_cases_and_samples: Store, ticket_id: str
 ):
     """Test that cases are returned when filtering by an existing ticket id."""
     # GIVEN a store containing cases with a matching ticket id
@@ -920,9 +734,7 @@ def test_filter_cases_by_ticket_matching_ticket(
         assert ticket_id in case.tickets
 
 
-def test_filter_cases_by_customer_entry_ids(
-    store_with_multiple_cases_and_samples: Store,
-):
+def test_filter_cases_by_customer_entry_ids(store_with_multiple_cases_and_samples: Store):
     """Test that cases are returned when filtering by customer entry ids."""
     # GIVEN a store containing cases with customer ids
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
@@ -931,8 +743,7 @@ def test_filter_cases_by_customer_entry_ids(
 
     # WHEN filtering cases by customer ids
     filtered_cases: Query = filter_cases_by_customer_entry_ids(
-        cases=cases_query,
-        customer_entry_ids=customer_ids,
+        cases=cases_query, customer_entry_ids=customer_ids
     )
 
     # THEN the filtered_cases should have the same count as cases_query
@@ -943,9 +754,7 @@ def test_filter_cases_by_customer_entry_ids(
         assert case.customer_id in customer_ids
 
 
-def test_filter_cases_by_name(
-    store_with_multiple_cases_and_samples: Store,
-):
+def test_filter_cases_by_name(store_with_multiple_cases_and_samples: Store):
     """Test that cases are returned when filtering by name."""
     # GIVEN a store containing cases with various names
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
@@ -959,9 +768,7 @@ def test_filter_cases_by_name(
         assert case.name == test_name
 
 
-def test_filter_cases_by_search_pattern(
-    store_with_multiple_cases_and_samples: Store,
-):
+def test_filter_cases_by_search_pattern(store_with_multiple_cases_and_samples: Store):
     """Test that cases are returned when filtering by matching internal ids."""
     # GIVEN a store containing cases with internal ids and names
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
@@ -1043,8 +850,7 @@ def test_filter_cases_by_workflow_search_no_matching_workflow(
 
     # WHEN filtering cases by a non-matching workflow search
     filtered_cases: Query = filter_cases_by_workflow_search(
-        cases=cases_query,
-        workflow_search=workflow_search,
+        cases=cases_query, workflow_search=workflow_search
     )
 
     # THEN the query should return no cases
@@ -1061,8 +867,7 @@ def test_filter_cases_by_workflow_search_partial_match(
 
     # WHEN filtering cases by a partially matching workflow search
     filtered_cases: Query = filter_cases_by_workflow_search(
-        cases=cases_query,
-        workflow_search=workflow_search,
+        cases=cases_query, workflow_search=workflow_search
     )
 
     # THEN the query should return the cases with partially matching workflow names
@@ -1081,8 +886,7 @@ def test_filter_cases_by_workflow_search_exact_match(
 
     # WHEN filtering cases by an exactly matching workflow search
     filtered_cases: Query = filter_cases_by_workflow_search(
-        cases=cases_query,
-        workflow_search=workflow_search,
+        cases=cases_query, workflow_search=workflow_search
     )
 
     # THEN the query should return the cases with exactly matching workflow names
@@ -1101,8 +905,7 @@ def test_filter_cases_by_priority_no_matching_priority(
 
     # WHEN filtering cases by a non-matching priority
     filtered_cases: Query = filter_cases_by_priority(
-        cases=cases_query,
-        priority=non_existent_priority,
+        cases=cases_query, priority=non_existent_priority
     )
 
     # THEN the query should return no cases
@@ -1118,10 +921,7 @@ def test_filter_cases_by_priority_matching_priority(
     existing_priority = cases_query.first().priority
 
     # WHEN filtering cases by a matching priority
-    filtered_cases: Query = filter_cases_by_priority(
-        cases=cases_query,
-        priority=existing_priority,
-    )
+    filtered_cases: Query = filter_cases_by_priority(cases=cases_query, priority=existing_priority)
 
     # THEN the query should return the cases with matching priority
     assert filtered_cases.count() > 0
@@ -1140,12 +940,7 @@ def test_filter_cases_by_priority_all_priorities(
     # WHEN filtering cases by all available priorities
     filtered_cases = []
     for priority in all_priorities:
-        filtered_cases.extend(
-            filter_cases_by_priority(
-                cases=cases_query,
-                priority=priority,
-            ).all()
-        )
+        filtered_cases.extend(filter_cases_by_priority(cases=cases_query, priority=priority).all())
 
     # THEN the query should return all cases
     assert len(filtered_cases) == cases_query.count()
@@ -1161,8 +956,7 @@ def test_filter_newer_cases_by_order_date_no_newer_cases(
 
     # WHEN filtering cases by a date that is later than the latest order date
     filtered_cases: Query = filter_newer_cases_by_order_date(
-        cases=cases_query,
-        order_date=latest_order_date,
+        cases=cases_query, order_date=latest_order_date
     )
 
     # THEN the query should return no cases
@@ -1183,8 +977,7 @@ def test_filter_newer_cases_by_order_date_some_newer_cases(
 
     # WHEN filtering cases by a date that is earlier than some order dates
     filtered_cases: Query = filter_newer_cases_by_order_date(
-        cases=cases_query,
-        order_date=some_order_date,
+        cases=cases_query, order_date=some_order_date
     )
 
     # THEN the query should return the cases with order dates newer than the given date
@@ -1203,8 +996,7 @@ def test_get_older_cases_by_created_date_no_older_cases(
 
     # WHEN filtering cases by a date that is later than the oldest order date
     filtered_cases: Query = filter_older_cases_by_creation_date(
-        cases=cases_query,
-        creation_date=oldest_created_date,
+        cases=cases_query, creation_date=oldest_created_date
     )
 
     # THEN the query should return no cases
@@ -1225,8 +1017,7 @@ def test_filter_runningfilter_older_cases_by_creation_date_some_newer_cases(
 
     # WHEN filtering cases by a date that is earlier than some creation dates
     filtered_cases: Query = filter_older_cases_by_creation_date(
-        cases=cases_query,
-        creation_date=some_creation_date,
+        cases=cases_query, creation_date=some_creation_date
     )
 
     # THEN the query should return the cases with creation dates older than the given date

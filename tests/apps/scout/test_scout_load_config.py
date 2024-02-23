@@ -7,13 +7,8 @@ import pytest
 from pydantic import ValidationError
 
 from cg.models.scout import scout_load_config
-from cg.models.scout.scout_load_config import (
-    MipLoadConfig,
-    ScoutMipIndividual,
-)
-from tests.apps.scout.conftest import (
-    SCOUT_INDIVIDUAL,
-)
+from cg.models.scout.scout_load_config import MipLoadConfig, ScoutMipIndividual
+from tests.apps.scout.conftest import SCOUT_INDIVIDUAL
 
 
 @pytest.mark.parametrize("key, value", list(SCOUT_INDIVIDUAL.items()))
@@ -29,9 +24,7 @@ def test_validate_scout_individual_attributes(scout_individual: dict, key: str, 
     assert getattr(ind_obj, key) == value
 
 
-def test_instantiate_empty_mip_config(
-    delivery_report_html: Path,
-):
+def test_instantiate_empty_mip_config(delivery_report_html: Path):
     """Tests whether a MipLoadConfig can be instantiated only with mandatory arguments."""
 
     # GIVEN a delivery report file
@@ -45,9 +38,7 @@ def test_instantiate_empty_mip_config(
     assert isinstance(config, scout_load_config.ScoutLoadConfig)
 
 
-def test_set_mandatory_to_none(
-    delivery_report_html: Path,
-):
+def test_set_mandatory_to_none(delivery_report_html: Path):
     """Test that a value error is raised when a mandatory field is set to None."""
 
     # GIVEN a load config object

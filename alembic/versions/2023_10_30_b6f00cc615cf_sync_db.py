@@ -29,20 +29,8 @@ def upgrade():
     op.alter_column(
         "flowcell",
         "status",
-        existing_type=mysql.ENUM(
-            "ondisk",
-            "processing",
-            "removed",
-            "requested",
-            "retrieved",
-        ),
-        type_=sa.Enum(
-            "ondisk",
-            "removed",
-            "requested",
-            "processing",
-            "retrieved",
-        ),
+        existing_type=mysql.ENUM("ondisk", "processing", "removed", "requested", "retrieved"),
+        type_=sa.Enum("ondisk", "removed", "requested", "processing", "retrieved"),
         existing_nullable=True,
     )
 
@@ -51,20 +39,8 @@ def downgrade():
     op.alter_column(
         "flowcell",
         "status",
-        existing_type=sa.Enum(
-            "ondisk",
-            "removed",
-            "requested",
-            "processing",
-            "retrieved",
-        ),
-        type_=mysql.ENUM(
-            "ondisk",
-            "processing",
-            "removed",
-            "requested",
-            "retrieved",
-        ),
+        existing_type=sa.Enum("ondisk", "removed", "requested", "processing", "retrieved"),
+        type_=mysql.ENUM("ondisk", "processing", "removed", "requested", "retrieved"),
         existing_nullable=True,
     )
     op.alter_column(

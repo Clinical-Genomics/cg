@@ -12,18 +12,13 @@ from cg.cli.workflow.balsamic.base import (
     store,
     store_available,
 )
-from cg.meta.workflow.balsamic import (
-    BalsamicAnalysisAPI,
-)
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 EXIT_SUCCESS = 0
 
 
-def test_balsamic_no_args(
-    cli_runner: CliRunner,
-    balsamic_context: CGConfig,
-):
+def test_balsamic_no_args(cli_runner: CliRunner, balsamic_context: CGConfig):
     """Test to see that running BALSAMIC without options prints help and doesn't result in an error"""
     # GIVEN no arguments or options besides the command call
 
@@ -53,15 +48,8 @@ def test_start(
     case_id = "balsamic_case_wgs_single"
 
     # WHEN dry running and config case already exists
-    mocker.patch(
-        "cg.meta.workflow.balsamic.BalsamicAnalysisAPI.config_case",
-        return_value=None,
-    )
-    result = cli_runner.invoke(
-        start,
-        [case_id, "--dry-run"],
-        obj=balsamic_context,
-    )
+    mocker.patch("cg.meta.workflow.balsamic.BalsamicAnalysisAPI.config_case", return_value=None)
+    result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=balsamic_context)
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -99,11 +87,7 @@ def test_store(
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
     # WHEN running command
-    result = cli_runner.invoke(
-        store,
-        [case_id, "--dry-run"],
-        obj=balsamic_context,
-    )
+    result = cli_runner.invoke(store, [case_id, "--dry-run"], obj=balsamic_context)
 
     # THEN bundle should be successfully added to HK and STATUS
     assert result.exit_code == EXIT_SUCCESS
@@ -114,15 +98,10 @@ def test_store(
 
 
 def test_start_available(
-    cli_runner: CliRunner,
-    balsamic_context: CGConfig,
-    caplog,
-    mocker,
-    mock_analysis_flow_cell,
+    cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker, mock_analysis_flow_cell
 ):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
-    Test that start-available picks up eligible cases and does not pick up ineligible ones
-    """
+    Test that start-available picks up eligible cases and does not pick up ineligible ones"""
     caplog.set_level(logging.INFO)
 
     # GIVEN CASE ID of sample where read counts pass threshold
@@ -144,20 +123,12 @@ def test_start_available(
 
     # GIVEN decompression is not needed and config case performed
     mocker.patch(
-        "cg.meta.workflow.balsamic.BalsamicAnalysisAPI.resolve_decompression",
-        return_value=None,
+        "cg.meta.workflow.balsamic.BalsamicAnalysisAPI.resolve_decompression", return_value=None
     )
-    mocker.patch(
-        "cg.meta.workflow.balsamic.BalsamicAnalysisAPI.config_case",
-        return_value=None,
-    )
+    mocker.patch("cg.meta.workflow.balsamic.BalsamicAnalysisAPI.config_case", return_value=None)
 
     # WHEN running command
-    result = cli_runner.invoke(
-        start_available,
-        ["--dry-run"],
-        obj=balsamic_context,
-    )
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
 
     # THEN command exits with a successful exit code
     assert result.exit_code == EXIT_SUCCESS
@@ -181,8 +152,7 @@ def test_store_available(
     mock_analysis_flow_cell,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
-    Test that sore-available picks up eligible cases and does not pick up ineligible ones
-    """
+    Test that sore-available picks up eligible cases and does not pick up ineligible ones"""
     caplog.set_level(logging.INFO)
 
     # GIVEN CASE ID of sample where read counts pass threshold
@@ -206,17 +176,10 @@ def test_store_available(
         "cg.apps.hermes.hermes_api.HermesApi.convert_deliverables",
         return_value=CGDeliverables(**hermes_deliverables),
     )
-    mocker.patch(
-        "cg.meta.workflow.balsamic.BalsamicAnalysisAPI.config_case",
-        return_value=None,
-    )
+    mocker.patch("cg.meta.workflow.balsamic.BalsamicAnalysisAPI.config_case", return_value=None)
 
     # Ensure case was successfully picked up by start-available and status set to running
-    result = cli_runner.invoke(
-        start_available,
-        ["--dry-run"],
-        obj=balsamic_context,
-    )
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
     balsamic_context.status_db.get_case_by_internal_id(case_id_success).action = "running"
     balsamic_context.status_db.session.commit()
 
@@ -230,11 +193,7 @@ def test_store_available(
     balsamic_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # GIVEN a mocked report deliver command
-    mocker.patch.object(
-        BalsamicAnalysisAPI,
-        "report_deliver",
-        return_value=None,
-    )
+    mocker.patch.object(BalsamicAnalysisAPI, "report_deliver", return_value=None)
 
     # WHEN running command
     result = cli_runner.invoke(store_available, obj=balsamic_context)

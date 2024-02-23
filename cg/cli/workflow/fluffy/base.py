@@ -2,26 +2,15 @@ import logging
 
 import click
 
-from cg.cli.workflow.commands import (
-    link,
-    resolve_compression,
-    store,
-    store_available,
-)
+from cg.cli.workflow.commands import link, resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fluffy import (
-    FluffyAnalysisAPI,
-)
+from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 OPTION_DRY = click.option(
-    "-d",
-    "--dry-run",
-    "dry_run",
-    help="Print command to console without executing",
-    is_flag=True,
+    "-d", "--dry-run", "dry_run", help="Print command to console without executing", is_flag=True
 )
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_EXTERNAL_REF = click.option("-e", "--external-ref", is_flag=True)
@@ -61,30 +50,17 @@ def create_samplesheet(context: CGConfig, case_id: str, dry_run: bool):
 @fluffy.command()
 @ARGUMENT_CASE_ID
 @OPTION_DRY
-@click.option(
-    "-c",
-    "--config",
-    help="Path to fluffy config in .json format",
-)
+@click.option("-c", "--config", help="Path to fluffy config in .json format")
 @OPTION_EXTERNAL_REF
 @click.pass_obj
-def run(
-    context: CGConfig,
-    case_id: str,
-    dry_run: bool,
-    config: str,
-    external_ref: bool = False,
-):
+def run(context: CGConfig, case_id: str, dry_run: bool, config: str, external_ref: bool = False):
     """
     Run Fluffy analysis
     """
     analysis_api: FluffyAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     analysis_api.run_fluffy(
-        case_id=case_id,
-        workflow_config=config,
-        dry_run=dry_run,
-        external_ref=external_ref,
+        case_id=case_id, workflow_config=config, dry_run=dry_run, external_ref=external_ref
     )
     if dry_run:
         return
@@ -101,11 +77,7 @@ def run(
 @fluffy.command()
 @ARGUMENT_CASE_ID
 @OPTION_DRY
-@click.option(
-    "-c",
-    "--config",
-    help="Path to fluffy config in .json format",
-)
+@click.option("-c", "--config", help="Path to fluffy config in .json format")
 @OPTION_EXTERNAL_REF
 @click.pass_context
 def start(
@@ -124,18 +96,8 @@ def start(
     analysis_api: FluffyAnalysisAPI = context.obj.meta_apis["analysis_api"]
     analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
     context.invoke(link, case_id=case_id, dry_run=dry_run)
-    context.invoke(
-        create_samplesheet,
-        case_id=case_id,
-        dry_run=dry_run,
-    )
-    context.invoke(
-        run,
-        case_id=case_id,
-        config=config,
-        dry_run=dry_run,
-        external_ref=external_ref,
-    )
+    context.invoke(create_samplesheet, case_id=case_id, dry_run=dry_run)
+    context.invoke(run, case_id=case_id, config=config, dry_run=dry_run, external_ref=external_ref)
 
 
 @fluffy.command("start-available")
@@ -149,11 +111,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
-            context.invoke(
-                start,
-                case_id=case_obj.internal_id,
-                dry_run=dry_run,
-            )
+            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
             LOG.error(error)
         except CgError as error:

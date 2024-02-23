@@ -10,12 +10,7 @@ from cg.resources import VALID_INDEXES_PATH
 from cg.utils.utils import get_hamming_distance
 
 LOG = logging.getLogger(__name__)
-DNA_COMPLEMENTS: dict[str, str] = {
-    "A": "T",
-    "C": "G",
-    "G": "C",
-    "T": "A",
-}
+DNA_COMPLEMENTS: dict[str, str] = {"A": "T", "C": "G", "G": "C", "T": "A"}
 INDEX_ONE_PAD_SEQUENCE: str = "AT"
 INDEX_TWO_PAD_SEQUENCE: str = "AC"
 LONG_INDEX_CYCLE_NR: int = 10
@@ -35,35 +30,23 @@ class Index(BaseModel):
     sequence: str
 
 
-def get_valid_indexes(
-    dual_indexes_only: bool = True,
-) -> list[Index]:
+def get_valid_indexes(dual_indexes_only: bool = True) -> list[Index]:
     """Return a list of valid indexes from the valid indexes file."""
     LOG.info(f"Fetch valid indexes from {VALID_INDEXES_PATH}")
     indexes: list[Index] = []
     indexes_csv: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV,
-        file_path=VALID_INDEXES_PATH,
+        file_format=FileFormat.CSV, file_path=VALID_INDEXES_PATH
     )
     for row in indexes_csv:
         index_name: str = row[0]
         index_sequence: str = row[1]
         if dual_indexes_only and not is_dual_index(index=index_sequence):
             continue
-        indexes.append(
-            Index(
-                name=index_name,
-                sequence=index_sequence,
-            )
-        )
+        indexes.append(Index(name=index_name, sequence=index_sequence))
     return indexes
 
 
-def is_padding_needed(
-    index1_cycles: int,
-    index2_cycles: int,
-    sample_index_length: int,
-) -> bool:
+def is_padding_needed(index1_cycles: int, index2_cycles: int, sample_index_length: int) -> bool:
     """Returns whether a sample needs padding or not given the sample index length.
     A sample from a NovaSeq6000 flow cell needs padding if its adapted index lengths are shorter
     than the number of index cycles reads stated in the run parameters file for both indexes.
@@ -74,9 +57,7 @@ def is_padding_needed(
     return index_cycles == LONG_INDEX_CYCLE_NR and sample_index_length == SHORT_SAMPLE_INDEX_LENGTH
 
 
-def get_reverse_complement_dna_seq(
-    dna: str,
-) -> str:
+def get_reverse_complement_dna_seq(dna: str) -> str:
     """Generates the reverse complement of a DNA sequence."""
     LOG.debug(f"Reverse complement string {dna}")
 
@@ -103,15 +84,12 @@ def get_hamming_distance_index_1(sequence_1: str, sequence_2: str) -> int:
     """
     shortest_index_length: int = min(len(sequence_1), len(sequence_2))
     return get_hamming_distance(
-        str_1=sequence_1[:shortest_index_length],
-        str_2=sequence_2[:shortest_index_length],
+        str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
     )
 
 
 def get_hamming_distance_index_2(
-    sequence_1: str,
-    sequence_2: str,
-    is_reverse_complement: bool,
+    sequence_1: str, sequence_2: str, is_reverse_complement: bool
 ) -> int:
     """
     Get the hamming distance between two index 2 sequences.
@@ -122,12 +100,10 @@ def get_hamming_distance_index_2(
     shortest_index_length: int = min(len(sequence_1), len(sequence_2))
     return (
         get_hamming_distance(
-            str_1=sequence_1[-shortest_index_length:],
-            str_2=sequence_2[-shortest_index_length:],
+            str_1=sequence_1[-shortest_index_length:], str_2=sequence_2[-shortest_index_length:]
         )
         if is_reverse_complement
         else get_hamming_distance(
-            str_1=sequence_1[:shortest_index_length],
-            str_2=sequence_2[:shortest_index_length],
+            str_1=sequence_1[:shortest_index_length], str_2=sequence_2[:shortest_index_length]
         )
     )

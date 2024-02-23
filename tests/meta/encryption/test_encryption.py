@@ -8,26 +8,17 @@ from pathlib import Path
 import mock
 import pytest
 
-from cg.exc import (
-    FlowCellEncryptionError,
-    FlowCellError,
-)
+from cg.exc import FlowCellEncryptionError, FlowCellError
 from cg.meta.encryption.encryption import (
     EncryptionAPI,
     FlowCellEncryptionAPI,
     SpringEncryptionAPI,
 )
-from cg.models.flow_cell.flow_cell import (
-    FlowCellDirectoryData,
-)
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 @mock.patch("cg.utils.Process")
-def test_run_gpg_command(
-    mock_process,
-    binary_path: str,
-    test_command: list[str],
-):
+def test_run_gpg_command(mock_process, binary_path: str, test_command: list[str]):
     """Tests the run_gpg_command method"""
     # GIVEN a CLI command input for the Process API
     command = test_command
@@ -43,11 +34,7 @@ def test_run_gpg_command(
 
 
 @mock.patch("cg.utils.Process")
-def test_run_gpg_command_dry_run(
-    mock_process,
-    binary_path: str,
-    test_command: list[str],
-):
+def test_run_gpg_command_dry_run(mock_process, binary_path: str, test_command: list[str]):
     """Tests the run_gpg_command method"""
     # GIVEN a CLI command input for the Process API
     command = test_command
@@ -87,8 +74,7 @@ def test_get_asymmetric_encryption_command(
 
     # WHEN generating the GPG command for asymmetric_encryption
     result = encryption_api.get_asymmetric_encryption_command(
-        input_file=input_file_path,
-        output_file=output_file_path,
+        input_file=input_file_path, output_file=output_file_path
     )
 
     # THEN the correct parameters should be returned
@@ -107,8 +93,7 @@ def test_get_asymmetric_decryption_command(
 
     # WHEN generating the GPG command for asymmetric_decryption
     result = encryption_api.get_asymmetric_decryption_command(
-        input_file=input_file_path,
-        output_file=output_file_path,
+        input_file=input_file_path, output_file=output_file_path
     )
 
     # THEN the correct parameters should be returned
@@ -131,8 +116,7 @@ def test_get_symmetric_encryption_command(
 
     # WHEN generating the GPG command for symmetric_encryption
     result = encryption_api.get_symmetric_encryption_command(
-        input_file=input_file_path,
-        output_file=output_file_path,
+        input_file=input_file_path, output_file=output_file_path
     )
 
     # THEN the correct parameters should be returned
@@ -152,9 +136,7 @@ def test_get_symmetric_decryption_command(
 
     # WHEN generating the GPG command for symmetric_decryption
     result = encryption_api.get_symmetric_decryption_command(
-        input_file=input_file_path,
-        output_file=output_file_path,
-        encryption_key=encryption_key_file,
+        input_file=input_file_path, output_file=output_file_path, encryption_key=encryption_key_file
     )
 
     # THEN the correct parameters should be returned
@@ -236,8 +218,7 @@ def test_spring_symmetric_decryption(
 
     # WHEN symmetrically decrypting the spring file
     encryption_api.spring_symmetric_decryption(
-        spring_file_path=spring_file_path,
-        output_file=spring_file_path,
+        spring_file_path=spring_file_path, output_file=spring_file_path
     )
 
     # THEN the gpg command should be run with the correct decryption command
@@ -271,11 +252,7 @@ def test_key_asymmetric_decryption(
 @mock.patch("pathlib.Path.unlink")
 @mock.patch("cg.utils.Process")
 def test_cleanup_all_files(
-    mock_process,
-    mock_unlink,
-    binary_path: str,
-    spring_file_path: Path,
-    caplog,
+    mock_process, mock_unlink, binary_path: str, spring_file_path: Path, caplog
 ):
     """ """
     # GIVEN there are files to clean up: decrypted spring file, encrypted spring file, encrypted
@@ -326,19 +303,14 @@ def test_cleanup_no_files(
     assert "No existing key file to clean up, cleanup process completed" in caplog.text
 
 
-def test_flow_cell_encryption_api(
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
-):
+def test_flow_cell_encryption_api(flow_cell_encryption_api: FlowCellEncryptionAPI):
     """Tests instantiating flow cell encryption API."""
     # GIVEN a FlowCellEncryptionAPI
 
     # WHEN instantiating the API
 
     # THEN return a FlowCellEncryptionAPI object
-    assert isinstance(
-        flow_cell_encryption_api,
-        FlowCellEncryptionAPI,
-    )
+    assert isinstance(flow_cell_encryption_api, FlowCellEncryptionAPI)
 
 
 def test_get_flow_cell_symmetric_encryption_command(
@@ -350,8 +322,7 @@ def test_get_flow_cell_symmetric_encryption_command(
 
     # WHEN getting the command
     command: str = flow_cell_encryption_api.get_flow_cell_symmetric_encryption_command(
-        output_file=output_file_path,
-        passphrase_file_path=temporary_passphrase,
+        output_file=output_file_path, passphrase_file_path=temporary_passphrase
     )
 
     # THEN return a string
@@ -367,8 +338,7 @@ def test_get_flow_cell_symmetric_decryption_command(
 
     # WHEN getting the command
     command: str = flow_cell_encryption_api.get_flow_cell_symmetric_decryption_command(
-        input_file=input_file_path,
-        passphrase_file_path=temporary_passphrase,
+        input_file=input_file_path, passphrase_file_path=temporary_passphrase
     )
 
     # THEN return a string
@@ -408,17 +378,11 @@ def test_create_pending_file_when_dry_run(
     assert not flow_cell_encryption_api.pending_file_path.exists()
 
 
-def test_is_encryption_possible(
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
-    mocker,
-):
+def test_is_encryption_possible(flow_cell_encryption_api: FlowCellEncryptionAPI, mocker):
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
-    mocker.patch.object(
-        FlowCellDirectoryData,
-        "is_flow_cell_ready",
-    )
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
     FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # WHEN checking if encryption is possible
@@ -429,20 +393,14 @@ def test_is_encryption_possible(
 
 
 def test_is_encryption_possible_when_sequencing_not_ready(
-    caplog,
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
-    flow_cell_name: str,
-    mocker,
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str, mocker
 ):
     caplog.set_level(logging.ERROR)
 
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is not ready
-    mocker.patch.object(
-        FlowCellDirectoryData,
-        "is_flow_cell_ready",
-    )
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
     FlowCellDirectoryData.is_flow_cell_ready.return_value = False
 
     # WHEN checking if encryption is possible
@@ -454,18 +412,12 @@ def test_is_encryption_possible_when_sequencing_not_ready(
 
 
 def test_is_encryption_possible_when_encryption_is_completed(
-    caplog,
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
-    flow_cell_name: str,
-    mocker,
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str, mocker
 ):
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
-    mocker.patch.object(
-        FlowCellDirectoryData,
-        "is_flow_cell_ready",
-    )
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
     FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # GIVEN that encryption is completed
@@ -484,18 +436,12 @@ def test_is_encryption_possible_when_encryption_is_completed(
 
 
 def test_is_encryption_possible_when_encryption_is_pending(
-    caplog,
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
-    flow_cell_name: str,
-    mocker,
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str, mocker
 ):
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
-    mocker.patch.object(
-        FlowCellDirectoryData,
-        "is_flow_cell_ready",
-    )
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
     FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # GIVEN that encryption is pending
@@ -514,19 +460,13 @@ def test_is_encryption_possible_when_encryption_is_pending(
 
 
 def test_encrypt_flow_cell(
-    caplog,
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
-    mocker,
-    sbatch_job_number: int,
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, mocker, sbatch_job_number: int
 ):
     caplog.set_level(logging.INFO)
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
-    mocker.patch.object(
-        FlowCellDirectoryData,
-        "is_flow_cell_ready",
-    )
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
     FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # WHEN encrypting flow cell
@@ -537,19 +477,13 @@ def test_encrypt_flow_cell(
 
 
 def test_start_encryption(
-    caplog,
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
-    mocker,
-    sbatch_job_number: int,
+    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, mocker, sbatch_job_number: int
 ):
     caplog.set_level(logging.INFO)
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
-    mocker.patch.object(
-        FlowCellDirectoryData,
-        "is_flow_cell_ready",
-    )
+    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
     FlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # WHEN trying to start encrypting flow cell

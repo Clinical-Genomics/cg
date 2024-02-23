@@ -12,9 +12,7 @@ from cg.models.mip.mip_metrics_deliverables import (
 )
 
 
-def test_instantiate_mip_metrics_deliverables(
-    mip_metrics_deliverables_raw: dict,
-):
+def test_instantiate_mip_metrics_deliverables(mip_metrics_deliverables_raw: dict):
     """
     Tests raw data deliverable against a pydantic MIPMetricsDeliverables
     """
@@ -27,9 +25,7 @@ def test_instantiate_mip_metrics_deliverables(
     assert isinstance(metrics_object, MIPMetricsDeliverables)
 
 
-def test_instantiate_mip_metrics_sample_ids(
-    mip_metrics_deliverables_raw: dict,
-):
+def test_instantiate_mip_metrics_sample_ids(mip_metrics_deliverables_raw: dict):
     """
     Tests set sample_ids
     """
@@ -39,15 +35,10 @@ def test_instantiate_mip_metrics_sample_ids(
     metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
 
     # THEN assert that sample_ids was successfully created
-    assert metrics_object.sample_ids == {
-        "an_id",
-        "another_id",
-    }
+    assert metrics_object.sample_ids == {"an_id", "another_id"}
 
 
-def test_mip_metrics_set_duplicate_reads(
-    mip_metrics_deliverables_raw: dict,
-):
+def test_mip_metrics_set_duplicate_reads(mip_metrics_deliverables_raw: dict):
     """
     Tests set duplicates read
     """
@@ -75,9 +66,7 @@ def test_mip_metrics_set_duplicate_reads(
     assert duplicate_read.step == expected_duplicate_read["step"]
 
 
-def test_mip_metrics_set_mapped_reads(
-    mip_metrics_deliverables_raw: dict,
-):
+def test_mip_metrics_set_mapped_reads(mip_metrics_deliverables_raw: dict):
     """
     Tests set mapped reads
     """
@@ -95,9 +84,7 @@ def test_mip_metrics_set_mapped_reads(
     assert isinstance(mapped_reads, MIPMappedReads)
 
 
-def test_mip_metrics_set_mean_insert_size(
-    mip_metrics_deliverables_raw: dict,
-):
+def test_mip_metrics_set_mean_insert_size(mip_metrics_deliverables_raw: dict):
     """
     Tests set mean insert size
     """
@@ -115,9 +102,7 @@ def test_mip_metrics_set_mean_insert_size(
     assert isinstance(mean_insert_size, MeanInsertSize)
 
 
-def test_mip_metrics_set_meadian_target_coverage(
-    mip_metrics_deliverables_raw: dict,
-):
+def test_mip_metrics_set_meadian_target_coverage(mip_metrics_deliverables_raw: dict):
     """
     Tests set median target coverage
     """
@@ -132,15 +117,10 @@ def test_mip_metrics_set_meadian_target_coverage(
     median_target_coverage: MedianTargetCoverage = metrics_object.median_target_coverage.pop()
 
     # THEN assert that it was successfully created
-    assert isinstance(
-        median_target_coverage,
-        MedianTargetCoverage,
-    )
+    assert isinstance(median_target_coverage, MedianTargetCoverage)
 
 
-def test_mip_metrics_set_predicted_sex(
-    mip_metrics_deliverables_raw: dict,
-):
+def test_mip_metrics_set_predicted_sex(mip_metrics_deliverables_raw: dict):
     """
     Tests set predicted sex
     """
@@ -158,9 +138,7 @@ def test_mip_metrics_set_predicted_sex(
     assert isinstance(predicted_sex, SexCheck)
 
 
-def test_instantiate_mip_metrics_set_sample_id_metrics(
-    mip_metrics_deliverables_raw: dict,
-):
+def test_instantiate_mip_metrics_set_sample_id_metrics(mip_metrics_deliverables_raw: dict):
     """
     Tests set sample_id metrics
     """
@@ -189,9 +167,7 @@ def test_instantiate_mip_metrics_set_sample_id_metrics(
             assert sample_id_metric.predicted_sex_step == "chanjo_sexcheck"
 
 
-def test_get_sample_id_metric(
-    mip_metrics_deliverables_raw: dict,
-):
+def test_get_sample_id_metric(mip_metrics_deliverables_raw: dict):
     """
     Tests get sample_id metrics
     """
@@ -202,8 +178,7 @@ def test_get_sample_id_metric(
 
     # When getting an sample_id_metric
     sample_id_metric = get_sample_id_metric(
-        sample_id="an_id",
-        sample_id_metrics=metrics_object.sample_id_metrics,
+        sample_id="an_id", sample_id_metrics=metrics_object.sample_id_metrics
     )
 
     # THEN assert that sample_id metric for sample_id was returned
