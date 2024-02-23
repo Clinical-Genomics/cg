@@ -14,7 +14,7 @@ from cg.exc import FlowCellError, HousekeeperFileMissingError, SampleSheetError
 from cg.io.controller import WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
-    delete_file_from_housekeeper,
+    delete_sample_sheet_from_housekeeper,
 )
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.utils.files import get_directories_in_path, link_or_overwrite_file
@@ -90,20 +90,12 @@ class SampleSheetAPI:
             raise SampleSheetError(
                 f"Sample sheet for flow cell {flow_cell.id} does not exist in Housekeeper"
             )
-        try:
-            self.validate_sample_sheet(
-                sample_sheet_path=sample_sheet_path, bcl_converter=self.bcl_converter
-            )
-            LOG.info("Sample sheet from Housekeeper is valid. Copying it to flow cell directory")
-            if not self.dry_run:
-                link_or_overwrite_file(src=sample_sheet_path, dst=flow_cell.sample_sheet_path)
-        except SampleSheetError:
-            LOG.info(
-                f"Sample sheet {sample_sheet_path} failed validation, deleting from Housekeeper"
-            )
-            if not self.dry_run:
-                delete_file_from_housekeeper(file_path=sample_sheet_path, hk_api=self.hk_api)
-            raise SampleSheetError()
+        self.validate_sample_sheet(
+            sample_sheet_path=sample_sheet_path, bcl_converter=self.bcl_converter
+        )
+        LOG.info("Sample sheet from Housekeeper is valid. Copying it to flow cell directory")
+        if not self.dry_run:
+            link_or_overwrite_file(src=sample_sheet_path, dst=flow_cell.sample_sheet_path)
 
     def _use_flow_cell_sample_sheet(self, flow_cell: FlowCellDirectoryData) -> None:
         """Use the sample sheet from the flow cell directory if it is valid."""
@@ -112,6 +104,10 @@ class SampleSheetAPI:
         )
         LOG.info("Sample sheet from flow cell directory is valid. Adding it to Housekeeper")
         if not self.dry_run:
+            try:
+                delete_sample_sheet_from_housekeeper(flow_cell_id=flow_cell.id, hk_api=self.hk_api)
+            except HousekeeperFileMissingError:
+                pass
             add_and_include_sample_sheet_path_to_housekeeper(
                 flow_cell_directory=flow_cell.path,
                 flow_cell_name=flow_cell.id,
@@ -153,6 +149,10 @@ class SampleSheetAPI:
             file_format=FileFormat.CSV,
             file_path=flow_cell.sample_sheet_path,
         )
+        try:
+            delete_sample_sheet_from_housekeeper(flow_cell_id=flow_cell.id, hk_api=self.hk_api)
+        except HousekeeperFileMissingError:
+            pass
         add_and_include_sample_sheet_path_to_housekeeper(
             flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id, hk_api=self.hk_api
         )
