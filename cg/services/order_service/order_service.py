@@ -7,7 +7,6 @@ from cg.server.dto.orders.orders_response import OrdersResponse
 from cg.services.order_service.exceptions import OrderNotFoundError
 from cg.services.order_service.utils import create_order_response, create_orders_response
 from cg.store.models import Order
-from cg.store.models import Case, Order
 from cg.store.store import Store
 
 
@@ -29,9 +28,10 @@ class OrderService:
             summaries = self.analysis_client.get_summaries(orders)
         return create_orders_response(database_orders=orders, summaries=summaries)
 
-    def create_order(self, order_data: OrderIn, cases: list[Case]) -> OrderResponse:
+    def create_order(self, order_data: OrderIn) -> OrderResponse:
         """Creates an order and links it to the given cases."""
         order: Order = self.store.add_order(order_data)
+        cases = self.store.get_cases_by_ticket_id(order_data.ticket)
         for case in cases:
             self.store.link_case_to_order(order_id=order.id, case_id=case.id)
         return create_order_response(order)

@@ -76,9 +76,9 @@ class HkMipAnalysisTag:
     SAMPLE_INFO: list[str] = ["sample-info"]
 
 
-class BalsamicAnalysisTag(StrEnum):
-    CONFIG: str = "balsamic-config"
-    QC_METRICS: str = "qc-metrics"
+class BalsamicAnalysisTag:
+    CONFIG: list[str] = ["balsamic-config"]
+    QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
 
 
 class GensAnalysisTag:
