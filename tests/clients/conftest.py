@@ -2,7 +2,10 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 
 from cg.clients.janus.api import JanusAPIClient
-from cg.clients.janus.dto.create_qc_metrics_request import FilePathAndTag, CreateQCMetricsRequest
+from cg.clients.janus.dto.create_qc_metrics_request import (
+    CreateQCMetricsRequest,
+    FilePathAndTag,
+)
 
 
 @pytest.fixture

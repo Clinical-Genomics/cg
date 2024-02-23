@@ -1,13 +1,13 @@
 """Module to test Janus API client."""
+
 from http import HTTPStatus
 
 import pytest
+import requests
 from pytest_mock import MockFixture
 
 from cg.clients.janus.api import JanusAPIClient
 from cg.clients.janus.dto.create_qc_metrics_request import CreateQCMetricsRequest
-import requests
-
 from cg.clients.janus.exceptions import JanusClientError
 
 

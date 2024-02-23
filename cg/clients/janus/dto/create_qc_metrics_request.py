@@ -1,6 +1,18 @@
 """Post request model for JanusAPI."""
+from enum import StrEnum
 
 from pydantic import BaseModel
+
+from cg.constants import Workflow
+
+
+class SupportedWorkflow(StrEnum):
+    BALSAMIC: str = Workflow.BALSAMIC
+
+
+class SupportedPrepCategory(StrEnum):
+    TGA: str = "tga"
+    WGS: str = "wgs"
 
 
 class FilePathAndTag(BaseModel):
@@ -16,5 +28,5 @@ class CreateQCMetricsRequest(BaseModel):
     case_id: str
     sample_ids: list[str]
     files: list[FilePathAndTag]
-    workflow: str
-    prep_category: str
+    workflow: SupportedWorkflow
+    prep_category: SupportedPrepCategory | None
