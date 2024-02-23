@@ -319,7 +319,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return a list of FileDeliverables for each sample."""
         sample_id: str = sample.internal_id
         sample_name: str = sample.name
-        case_path = str(self.get_case_path(case_id=case_id))
+        case_path = self.get_case_path(case_id=case_id).as_posix()
         files: list[FileDeliverable] = []
 
         for file in template:
