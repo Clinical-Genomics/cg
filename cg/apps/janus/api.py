@@ -1,5 +1,7 @@
 """The JanusAPIClient."""
 
+from http import HTTPStatus
+
 import requests
 from requests import Response
 
@@ -14,9 +16,9 @@ class JanusAPIClient:
     def get_qc_metrics(self, collect_qc_request: CreateCollectQCRequest):
         endpoint: str = f"{self.host}/collect_qc_metrics"
         response = requests.post(endpoint, data=collect_qc_request)
-        if response.status_code != 200:
-            self._handle_errors(response)
-        return response.json()
+        if response.status_code == HTTPStatus.OK:
+            return response.json()
+        self._handle_errors(response)
 
     @staticmethod
     def _handle_errors(response: Response):
