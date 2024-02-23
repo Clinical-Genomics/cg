@@ -433,7 +433,7 @@ class CGConfig(BaseModel):
     def janus_api(self) -> JanusAPIClient:
         janus_api = self.__dict__.get("janus_api_")
         if janus_api is None:
-            LOG.debug("Instantiating housekeeper api")
+            LOG.debug("Instantiating janus api")
             janus_api = JanusAPIClient(config=self.dict())
             self.janus_api_ = janus_api
         return janus_api
