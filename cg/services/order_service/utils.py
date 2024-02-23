@@ -28,13 +28,17 @@ def _add_summaries_to_orders(orders: list[Order], summaries: list[Summary]) -> l
         summary: Summary = summary_mapping.get(order.order_id)
         if summary:
             order.summary = OrderSummary(
-                total=summary.total,
+                total=get_total_cases_in_order(order),
                 delivered=summary.delivered,
                 running=summary.running,
                 cancelled=summary.cancelled,
                 failed=summary.failed,
             )
     return orders
+
+
+def get_total_cases_in_order(order: DatabaseOrder) -> int:
+    return len(order.cases)
 
 
 def create_order_response(order: DatabaseOrder) -> Order:
