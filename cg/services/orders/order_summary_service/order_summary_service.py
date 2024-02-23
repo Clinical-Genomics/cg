@@ -1,6 +1,6 @@
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary
-from cg.server.dto.orders.orders_response import OrderSummary
+from cg.services.orders.order_summary_service.summary import OrderSummary
 from cg.services.orders.order_summary_service.utils import create_order_summaries, update_summaries
 from cg.store.models import Order
 from cg.store.store import Store
