@@ -15,19 +15,20 @@ def test_qc_metrics_successful(
     mocker: MockFixture,
     client: JanusAPIClient,
     collect_qc_request_balsamic_wgs: CreateQCMetricsRequest,
+    janus_response: dict,
 ):
     # GIVEN a mocked response from the requests.post method that is successfull
     mocked_post = mocker.patch.object(requests, "post")
     mocked_response = mocker.Mock()
     mocked_response.status_code = HTTPStatus.OK
-    mocked_response.json.return_value = {"data": "returned"}
+    mocked_response.json.return_value = janus_response
     mocked_post.return_value = mocked_response
 
     # WHEN retrieving the qc metrics
     jobs_response: dict = client.qc_metrics(collect_qc_request_balsamic_wgs)
 
     # THEN the qc metrics are deserialized without error
-    assert jobs_response == {"data": "returned"}
+    assert jobs_response == janus_response
 
     # Additional assertions for the mocked requests.post
     mocked_post.assert_called_once_with(
@@ -41,12 +42,13 @@ def test_qc_metrics_not_successful(
     mocker: MockFixture,
     client: JanusAPIClient,
     collect_qc_request_balsamic_wgs: CreateQCMetricsRequest,
+    janus_response: dict,
 ):
     # GIVEN a mocked response from the requests.post method that is not successfull
     mocked_post = mocker.patch.object(requests, "post")
     mocked_response = mocker.Mock()
     mocked_response.status_code = HTTPStatus.NOT_FOUND
-    mocked_response.json.return_value = {"data": "returned"}
+    mocked_response.json.return_value = janus_response
     mocked_post.return_value = mocked_response
 
     # WHEN retrieving the qc metrics

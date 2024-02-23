@@ -48,3 +48,8 @@ def collect_qc_request_balsamic_wgs(
         workflow="balsamic",
         prep_category="wgs",
     )
+
+
+@pytest.fixture
+def janus_response() -> dict:
+    return {"some": "data"}
