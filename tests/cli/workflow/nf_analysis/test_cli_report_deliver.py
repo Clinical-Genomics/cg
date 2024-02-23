@@ -23,6 +23,7 @@ LOG = logging.getLogger(__name__)
 )
 def test_report_deliver_without_options(cli_runner: CliRunner, context: CGConfig, request):
     """Test report-deliver for workflow without options."""
+    # GIVEN a NextFlow analysis context
     context = request.getfixturevalue(context)
 
     # WHEN dry running without anything specified
