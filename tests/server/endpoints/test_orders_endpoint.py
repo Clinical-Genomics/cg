@@ -4,7 +4,7 @@ import pytest
 from flask.testing import FlaskClient
 
 from cg.constants import Workflow
-from cg.services.order_service.utils import create_order_response
+from cg.services.orders.order_service.utils import create_order_response
 from cg.store.models import Order
 
 

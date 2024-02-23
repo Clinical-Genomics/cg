@@ -1746,6 +1746,14 @@ class ReadHandler(BaseHandler):
             limit=orders_request.limit,
         ).all()
 
+    def get_orders_by_ids(self, order_ids: list[int]) -> list[Order]:
+        """Return all orders with the provided ids."""
+        return apply_order_filters(
+            orders=self._get_query(Order),
+            filters=[OrderFilter.BY_IDS],
+            ids=order_ids,
+        ).all()
+
     def get_order_by_id(self, order_id: int) -> Order | None:
         """Returns the entry in Order matching the given id."""
         orders: Query = self._get_query(table=Order)

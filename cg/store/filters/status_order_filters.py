@@ -14,12 +14,17 @@ def filter_orders_by_id(orders: Query, id: int | None, **kwargs) -> Query:
     return orders.filter(Order.id == id) if id else orders
 
 
+def filter_orders_by_ids(orders: Query, ids: list[int] | None, **kwargs) -> Query:
+    return orders.filter(Order.id.in_(ids)) if ids else orders
+
+
 def apply_limit(orders: Query, limit: int | None, **kwargs) -> Query:
     return orders.limit(limit) if limit else orders
 
 
 class OrderFilter(Enum):
     BY_ID: Callable = filter_orders_by_id
+    BY_IDS: Callable = filter_orders_by_ids
     BY_WORKFLOW: Callable = filter_orders_by_workflow
     APPLY_LIMIT: Callable = apply_limit
 
@@ -28,9 +33,10 @@ def apply_order_filters(
     filters: list[OrderFilter],
     orders: Query,
     id: int = None,
+    ids: list[int] = None,
     workflow: str = None,
     limit: int = None,
 ) -> Query:
     for filter in filters:
-        orders: Query = filter(orders=orders, id=id, workflow=workflow, limit=limit)
+        orders: Query = filter(orders=orders, id=id, ids=ids, workflow=workflow, limit=limit)
     return orders

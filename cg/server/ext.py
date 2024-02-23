@@ -7,10 +7,11 @@ from flask_wtf.csrf import CSRFProtect
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
+from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
 from cg.store.database import initialize_database
 from cg.store.store import Store
 from cg.apps.tb.api import TrailblazerAPI
-from cg.services.order_service.order_service import OrderService
+from cg.services.orders.order_service.order_service import OrderService
 
 
 class FlaskLims(LimsAPI):
@@ -74,4 +75,5 @@ admin = Admin(name="Clinical Genomics")
 lims = FlaskLims()
 osticket = OsTicket()
 analysis_client = AnalysisClient()
-order_service = OrderService(store=db, analysis_client=analysis_client)
+summary_service = OrderSummaryService(store=db, analysis_client=analysis_client)
+order_service = OrderService(store=db, summary_service=summary_service)

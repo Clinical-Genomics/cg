@@ -38,7 +38,7 @@ from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.ext import db, lims, osticket, order_service
 from cg.server.utils import parse_orders_request
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
-from cg.services.order_service.exceptions import OrderNotFoundError
+from cg.services.orders.order_service.exceptions import OrderNotFoundError
 from cg.store.models import (
     Analysis,
     Application,

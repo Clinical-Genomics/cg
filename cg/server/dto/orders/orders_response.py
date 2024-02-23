@@ -1,14 +1,7 @@
 from pydantic import BaseModel
 
 from cg.constants import Workflow
-
-
-class OrderSummary(BaseModel):
-    total: int
-    delivered: int | None = None
-    running: int | None = None
-    cancelled: int | None = None
-    failed: int | None = None
+from cg.services.orders.order_summary_service.summary import OrderSummary
 
 
 class Order(BaseModel):

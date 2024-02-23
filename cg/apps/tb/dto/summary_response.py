@@ -1,9 +1,8 @@
 from pydantic import BaseModel
 
 
-class Summary(BaseModel):
+class AnalysisSummary(BaseModel):
     order_id: int
-    total: int
     delivered: int
     running: int
     cancelled: int
@@ -11,4 +10,4 @@ class Summary(BaseModel):
 
 
 class SummariesResponse(BaseModel):
-    summaries: list[Summary]
+    summaries: list[AnalysisSummary]
