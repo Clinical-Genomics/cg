@@ -1730,7 +1730,7 @@ class ReadHandler(BaseHandler):
         )
         return records.all()
 
-    def get_orders(self, workflow: Workflow | None = None, limit: int | None = None) -> list[Order]:
+    def get_orders(self, orders_request: OrdersRequest) -> list[Order]:
         filters: list[OrderFilter] = [
             OrderFilter.BY_WORKFLOW,
             OrderFilter.APPLY_LIMIT,
@@ -1738,8 +1738,8 @@ class ReadHandler(BaseHandler):
         return apply_order_filters(
             orders=self._get_query(Order),
             filters=filters,
-            workflow=workflow,
-            limit=limit,
+            workflow=orders_request.workflow,
+            limit=orders_request.limit,
         ).all()
 
     def get_order_by_id(self, order_id: int) -> Order | None:

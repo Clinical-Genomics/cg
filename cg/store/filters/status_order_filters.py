@@ -14,14 +14,14 @@ def filter_orders_by_id(orders: Query, id: int | None, **kwargs) -> Query:
     return orders.filter(Order.id == id) if id else orders
 
 
-def filter_by_limit(orders: Query, limit: int | None, **kwargs) -> Query:
+def apply_limit(orders: Query, limit: int | None, **kwargs) -> Query:
     return orders.limit(limit) if limit else orders
 
 
 class OrderFilter(Enum):
     BY_ID: Callable = filter_orders_by_id
     BY_WORKFLOW: Callable = filter_orders_by_workflow
-    APPLY_LIMIT: Callable = filter_by_limit
+    APPLY_LIMIT: Callable = apply_limit
 
 
 def apply_order_filters(
