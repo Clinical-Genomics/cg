@@ -6,17 +6,17 @@ from sqlalchemy.orm import Query
 from cg.store.models import Bed
 
 
-def get_bed_by_entry_id(beds: Query, bed_entry_id: int, **kwargs) -> Query:
+def filter_bed_by_entry_id(beds: Query, bed_entry_id: int, **kwargs) -> Query:
     """Return bed by foreign key."""
     return beds.filter(Bed.id == bed_entry_id)
 
 
-def get_bed_by_name(beds: Query, bed_name: str, **kwargs) -> Query:
+def filter_bed_by_name(beds: Query, bed_name: str, **kwargs) -> Query:
     """Return bed by name."""
     return beds.filter(Bed.name == bed_name)
 
 
-def get_not_archived_beds(beds: Query, **kwargs) -> Query:
+def filter_not_archived_beds(beds: Query, **kwargs) -> Query:
     """Return beds not archived."""
     return beds.filter(Bed.is_archived.is_(False))
 
@@ -29,9 +29,9 @@ def order_beds_by_name(beds: Query, **kwargs) -> Query:
 class BedFilter(Enum):
     """Define BED filter functions."""
 
-    BY_ENTRY_ID: Callable = get_bed_by_entry_id
-    BY_NAME: Callable = get_bed_by_name
-    NOT_ARCHIVED: Callable = get_not_archived_beds
+    BY_ENTRY_ID: Callable = filter_bed_by_entry_id
+    BY_NAME: Callable = filter_bed_by_name
+    NOT_ARCHIVED: Callable = filter_not_archived_beds
     ORDER_BY_NAME: Callable = order_beds_by_name
 
 
