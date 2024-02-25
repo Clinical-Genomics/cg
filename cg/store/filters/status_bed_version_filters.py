@@ -23,8 +23,8 @@ def get_bed_version_by_short_name(
 class BedVersionFilter(Enum):
     """Define BED version filter functions."""
 
-    FILTER_BY_FILE_NAME: Callable = get_bed_version_by_file_name
-    FILTER_BY_SHORT_NAME: Callable = get_bed_version_by_short_name
+    BY_FILE_NAME: Callable = get_bed_version_by_file_name
+    BY_SHORT_NAME: Callable = get_bed_version_by_short_name
 
 
 def apply_bed_version_filter(

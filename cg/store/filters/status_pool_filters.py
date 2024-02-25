@@ -101,16 +101,16 @@ def apply_pool_filter(
 class PoolFilter(Enum):
     """Define Pool filter functions."""
 
-    FILTER_BY_ENTRY_ID: Callable = filter_pools_by_entry_id
-    FILTER_BY_NAME: Callable = filter_pools_by_name
-    FILTER_IS_RECEIVED: Callable = filter_pools_is_received
-    FILTER_IS_NOT_RECEIVED: Callable = filter_pools_is_not_received
-    FILTER_IS_DELIVERED: Callable = filter_pools_is_delivered
-    FILTER_IS_NOT_DELIVERED: Callable = filter_pools_is_not_delivered
-    FILTER_BY_INVOICE_ID: Callable = filter_pools_by_invoice_id
-    FILTER_WITHOUT_INVOICE_ID: Callable = filter_pools_without_invoice_id
-    FILTER_DO_INVOICE: Callable = filter_pools_do_invoice
-    FILTER_BY_CUSTOMER_ID: Callable = filter_pools_by_customer_id
-    FILTER_BY_NAME_ENQUIRY: Callable = filter_pools_by_name_enquiry
-    FILTER_BY_ORDER_ENQUIRY: Callable = filter_pools_by_order_enquiry
-    FILTER_BY_CUSTOMER: Callable = filter_pools_by_customer
+    BY_ENTRY_ID: Callable = filter_pools_by_entry_id
+    BY_NAME: Callable = filter_pools_by_name
+    IS_RECEIVED: Callable = filter_pools_is_received
+    IS_NOT_RECEIVED: Callable = filter_pools_is_not_received
+    IS_DELIVERED: Callable = filter_pools_is_delivered
+    IS_NOT_DELIVERED: Callable = filter_pools_is_not_delivered
+    BY_INVOICE_ID: Callable = filter_pools_by_invoice_id
+    WITHOUT_INVOICE_ID: Callable = filter_pools_without_invoice_id
+    DO_INVOICE: Callable = filter_pools_do_invoice
+    BY_CUSTOMER_ID: Callable = filter_pools_by_customer_id
+    BY_NAME_ENQUIRY: Callable = filter_pools_by_name_enquiry
+    BY_ORDER_ENQUIRY: Callable = filter_pools_by_order_enquiry
+    BY_CUSTOMER: Callable = filter_pools_by_customer
