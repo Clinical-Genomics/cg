@@ -155,7 +155,7 @@ def test_valid_case(
     assert (
         rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id)
         .analyses[0]
-        .pipeline_version
+        .workflow_version
         == workflow_version
     )
 

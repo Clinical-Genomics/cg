@@ -215,7 +215,7 @@ class Analysis(Model):
 
     id = Column(types.Integer, primary_key=True)
     pipeline = Column(types.Enum(*list(Workflow)))
-    pipeline_version = Column(types.String(32))
+    workflow_version = Column(types.String(32))
     started_at = Column(types.DateTime)
     completed_at = Column(types.DateTime)
     delivery_report_created_at = Column(types.DateTime)

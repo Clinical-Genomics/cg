@@ -280,7 +280,7 @@ class CreateHandler(BaseHandler):
         """Build a new Analysis record."""
         return Analysis(
             pipeline=workflow,
-            pipeline_version=version,
+            workflow_version=version,
             completed_at=completed_at,
             is_primary=primary,
             uploaded_at=uploaded,

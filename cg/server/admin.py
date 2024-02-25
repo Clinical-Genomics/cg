@@ -431,7 +431,7 @@ class AnalysisView(BaseView):
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["is_primary"]
-    column_filters = ["pipeline", "pipeline_version", "is_primary"]
+    column_filters = ["pipeline", "workflow_version", "is_primary"]
     column_formatters = {"case": CaseView.view_case_link}
     column_searchable_list = [
         "case.internal_id",

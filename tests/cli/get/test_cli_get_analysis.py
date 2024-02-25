@@ -27,7 +27,7 @@ def test_get_analysis_required(
 ):
     """Test to get a analysis using only the required argument"""
     # GIVEN a database with an analysis
-    analysis: Analysis = helpers.add_analysis(disk_store, pipeline_version="9.3")
+    analysis: Analysis = helpers.add_analysis(disk_store, workflow_version="9.3")
     internal_id = analysis.case.internal_id
     assert disk_store._get_query(table=Analysis).count() == 1
 
@@ -38,4 +38,4 @@ def test_get_analysis_required(
     assert result.exit_code == EXIT_SUCCESS
     assert str(analysis.started_at) in result.output
     assert analysis.pipeline in result.output
-    assert analysis.pipeline_version in result.output
+    assert analysis.workflow_version in result.output
