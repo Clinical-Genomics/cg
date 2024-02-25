@@ -255,7 +255,7 @@ def test_analyses_to_upload_when_filtering_with_workflow(helpers, sample_store, 
 
     for analysis_obj in records:
         # THEN the workflow should be MIP in the analysis object
-        assert analysis_obj.pipeline == str(pipeline)
+        assert analysis_obj.workflow == str(pipeline)
 
 
 def test_analyses_to_upload_with_workflow_and_no_complete_at(helpers, sample_store, timestamp):

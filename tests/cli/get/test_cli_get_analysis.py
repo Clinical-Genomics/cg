@@ -37,5 +37,5 @@ def test_get_analysis_required(
     # THEN it should have been gotten
     assert result.exit_code == EXIT_SUCCESS
     assert str(analysis.started_at) in result.output
-    assert analysis.pipeline in result.output
+    assert analysis.workflow in result.output
     assert analysis.workflow_version in result.output

@@ -431,13 +431,13 @@ class AnalysisView(BaseView):
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["is_primary"]
-    column_filters = ["pipeline", "workflow_version", "is_primary"]
+    column_filters = ["workflow", "workflow_version", "is_primary"]
     column_formatters = {"case": CaseView.view_case_link}
     column_searchable_list = [
         "case.internal_id",
         "case.name",
     ]
-    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Workflow)}
+    form_extra_fields = {"workflow": SelectEnumField(enum_class=Workflow)}
 
 
 class OrganismView(BaseView):

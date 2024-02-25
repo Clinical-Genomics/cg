@@ -279,10 +279,6 @@ class ReadHandler(BaseHandler):
             case_samples=self._get_join_case_sample_query(),
         ).all()
 
-    def get_samples_by_case_id(self, case_internal_id: str) -> list[Sample]:
-        links: list[CaseSample] = self.get_case_samples_by_case_id(case_internal_id)
-        return [link.sample for link in links]
-
     def filter_cases_with_samples(self, case_ids: list[str]) -> list[str]:
         """Return case id:s associated with samples."""
         cases_with_samples = set()
@@ -1405,7 +1401,7 @@ class ReadHandler(BaseHandler):
             case_data.analysis_delivery_reported_at = case_obj.analyses[
                 0
             ].delivery_report_created_at
-            case_data.analysis_pipeline = case_obj.analyses[0].pipeline
+            case_data.analysis_pipeline = case_obj.analyses[0].workflow
             case_data.analysis_completed_bool = case_data.analysis_completed_at is not None
             case_data.analysis_uploaded_bool = case_data.analysis_uploaded_at is not None
             case_data.analysis_delivery_reported_bool = (

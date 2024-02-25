@@ -343,7 +343,7 @@ class ReportAPI(MetaAPI):
         return DataAnalysisModel(
             customer_workflow=case.data_analysis,
             data_delivery=case.data_delivery,
-            workflow=analysis.pipeline,
+            workflow=analysis.workflow,
             workflow_version=analysis.workflow_version,
             type=self.get_data_analysis_type(case=case),
             genome_build=self.get_genome_build(analysis_metadata=analysis_metadata),

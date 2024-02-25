@@ -343,7 +343,7 @@ class StoreHelpers:
         if config_path:
             analysis.config_path = config_path
         if workflow:
-            analysis.pipeline = str(workflow)
+            analysis.workflow = str(workflow)
 
         analysis.limitations = "A limitation"
         analysis.case = case

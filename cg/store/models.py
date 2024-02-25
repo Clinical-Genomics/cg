@@ -214,7 +214,7 @@ class Analysis(Model):
     __tablename__ = "analysis"
 
     id = Column(types.Integer, primary_key=True)
-    pipeline = Column(types.Enum(*list(Workflow)))
+    workflow = Column(types.Enum(*list(Workflow)))
     workflow_version = Column(types.String(32))
     started_at = Column(types.DateTime)
     completed_at = Column(types.DateTime)
