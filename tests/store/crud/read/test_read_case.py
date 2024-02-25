@@ -1358,7 +1358,7 @@ def test_analysis_workflow(base_store: Store, helpers):
     # THEN cases should contain info on workflow
     assert cases
     for case in cases:
-        assert case.get("analysis_pipeline") == str(workflow)
+        assert case.get("analysis_workflow") == str(workflow)
 
 
 def test_samples_delivered(base_store: Store, helpers):
@@ -1540,7 +1540,7 @@ def test_case_without_samples(base_store: Store, helpers):
         assert case.get("samples_prepared") is None
         assert case.get("samples_sequenced") is None
         assert case.get("analysis_completed_at") is None
-        assert case.get("analysis_pipeline") is None
+        assert case.get("analysis_workflow") is None
         assert case.get("analysis_uploaded_at") is None
         assert case.get("samples_delivered") is None
         assert case.get("samples_invoiced") is None
@@ -1586,7 +1586,7 @@ def test_structure(base_store: Store, helpers):
     #   samples_prepared,
     #   samples_sequenced,
     #   analysis_completed_at
-    #   analysis_pipeline
+    #   analysis_workflow
     #   samples_delivered
     assert cases
     for case in cases:
@@ -1599,7 +1599,7 @@ def test_structure(base_store: Store, helpers):
         assert "samples_prepared" in case.keys()
         assert "samples_sequenced" in case.keys()
         assert "analysis_completed_at" in case.keys()
-        assert "analysis_pipeline" in case.keys()
+        assert "analysis_workflow" in case.keys()
         assert "samples_delivered" in case.keys()
         assert "samples_invoiced" in case.keys()
 
