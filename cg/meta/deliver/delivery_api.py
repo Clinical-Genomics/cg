@@ -211,7 +211,7 @@ class DeliveryAPI:
         )
 
     def _bundle_exists(self, bundle_name: str) -> bool:
-        return self.hk_api.last_version(bundle_name)
+        return bool(self.hk_api.last_version(bundle_name))
 
     def ignore_missing_bundle(self, workflow: str) -> bool:
         return workflow in constants.SKIP_MISSING or self.ignore_missing_bundles
