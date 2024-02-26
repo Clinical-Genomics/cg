@@ -140,7 +140,9 @@ class Application(Base):
     id: Mapped[PrimaryKeyInt]
 
     tag: Mapped[UniqueStr]
-    prep_category: Mapped[PrepCategory]
+    prep_category: Mapped[str] = mapped_column(
+        types.Enum(*(category.value for category in PrepCategory))
+    )
     is_external: Mapped[bool] = mapped_column(default=False)
     description: Mapped[Str256]
     is_accredited: Mapped[bool]
@@ -238,7 +240,7 @@ class ApplicationLimitations(Base):
 
     id: Mapped[PrimaryKeyInt]
     application_id: Mapped[int] = mapped_column(ForeignKey(Application.id))
-    pipeline: Mapped[Workflow]
+    pipeline: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
     limitations: Mapped[Text | None]
     comment: Mapped[Text | None]
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
@@ -257,7 +259,9 @@ class Analysis(Base):
     __tablename__ = "analysis"
 
     id: Mapped[PrimaryKeyInt]
-    pipeline: Mapped[Workflow | None]
+    pipeline: Mapped[str | None] = mapped_column(
+        types.Enum(*(workflow.value for workflow in Workflow))
+    )
     pipeline_version: Mapped[Str32 | None]
     started_at: Mapped[datetime | None]
     completed_at: Mapped[datetime | None]
@@ -440,14 +444,20 @@ class Case(Base, PriorityMixin):
     __tablename__ = "case"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
-    action: Mapped[CaseActions | None]
+    action: Mapped[str | None] = mapped_column(
+        types.Enum(*(action.value for action in CaseActions))
+    )
     _cohorts: Mapped[Text | None]
     comment: Mapped[Text | None]
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped["Customer"] = orm.relationship(foreign_keys=[customer_id])
-    data_analysis: Mapped[Workflow | None]
-    data_delivery: Mapped[DataDelivery | None]
+    data_analysis: Mapped[str | None] = mapped_column(
+        types.Enum(*(workflow.value for workflow in Workflow))
+    )
+    data_delivery: Mapped[str | None] = mapped_column(
+        types.Enum(*(delivery.value for delivery in DataDelivery))
+    )
     id: Mapped[PrimaryKeyInt]
     internal_id: Mapped[UniqueStr]
     is_compressible: Mapped[bool] = mapped_column(default=True)
@@ -594,7 +604,9 @@ class CaseSample(Base):
     id: Mapped[PrimaryKeyInt]
     case_id: Mapped[str] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
     sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id", ondelete="CASCADE"))
-    status: Mapped[StatusOptions] = mapped_column(default=SexOptions.UNKNOWN)
+    status: Mapped[str] = mapped_column(
+        types.Enum(*(status.value for status in StatusOptions)), default=StatusOptions.UNKNOWN.value
+    )
 
     created_at: Mapped[datetime | None]
     updated_at: Mapped[datetime | None]
@@ -638,7 +650,9 @@ class Flowcell(Base):
     )
     sequencer_name: Mapped[Str32 | None]
     sequenced_at: Mapped[datetime | None]
-    status: Mapped[FlowCellStatus | None] = mapped_column(default="ondisk")
+    status: Mapped[str | None] = mapped_column(
+        types.Enum(*(status.value for status in FlowCellStatus), default="ondisk")
+    )
     archived_at: Mapped[datetime | None]
     has_backup: Mapped[bool] = mapped_column(default=False)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=datetime.now)
@@ -737,7 +751,9 @@ class Sample(Base, PriorityMixin):
     )
     capture_kit: Mapped[Str64 | None]
     comment: Mapped[Text | None]
-    control: Mapped[ControlOptions | None]
+    control: Mapped[str | None] = mapped_column(
+        types.Enum(*(option.value for option in ControlOptions))
+    )
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
@@ -769,7 +785,7 @@ class Sample(Base, PriorityMixin):
     received_at: Mapped[datetime | None]
     reference_genome: Mapped[Str255 | None]
     sequence_start: Mapped[datetime | None]
-    sex: Mapped[SexOptions]
+    sex: Mapped[str] = mapped_column(types.Enum(*(option.value for option in SexOptions)))
     subject_id: Mapped[Str128 | None]
 
     links: Mapped[list[CaseSample]] = orm.relationship(
@@ -964,7 +980,7 @@ class Order(Base):
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     order_date: Mapped[datetime] = mapped_column(default=datetime.now())
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
-    workflow: Mapped[Workflow]
+    workflow: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
 
     def to_dict(self):
         return to_dict(model_instance=self)
