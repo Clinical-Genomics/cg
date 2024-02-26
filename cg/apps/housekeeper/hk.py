@@ -389,7 +389,9 @@ class HousekeeperAPI:
             raise HousekeeperBundleVersionMissingError
         return self.files(version=version.id, tags=tags).first()
 
-    def get_files_from_latest_version(self, bundle_name: str, tags: list[str]) -> Query:
+    def get_files_from_latest_version(
+        self, bundle_name: str, tags: list[str] | None = None
+    ) -> list[File] | None:
         """Return files in the latest version of a bundle.
 
         Raises HousekeeperBundleVersionMissingError:
@@ -399,7 +401,7 @@ class HousekeeperAPI:
         if not version:
             LOG.warning(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperBundleVersionMissingError
-        return self.files(version=version.id, tags=tags)
+        return self.files(version=version.id, tags=tags).all()
 
     def is_fastq_or_spring_in_all_bundles(self, bundle_names: list[str]) -> bool:
         """Return whether all FASTQ/SPRING files are included for the given bundles."""
@@ -515,7 +517,7 @@ class HousekeeperAPI:
         try:
             sample_sheet_files: list[File] = self.get_files_from_latest_version(
                 bundle_name=flow_cell_id, tags=[flow_cell_id, SequencingFileTag.SAMPLE_SHEET]
-            ).all()
+            )
         except HousekeeperBundleVersionMissingError:
             sample_sheet_files = []
         return sample_sheet_files
