@@ -155,9 +155,12 @@ class DeliveryAPI:
         bundle_name: str = get_bundle_name(case=case, sample=sample, workflow=workflow)
         bundle_exists: bool = self._bundle_exists(bundle_name)
         ignore_missing_bundle: bool = self.ignore_missing_bundle(workflow)
-        sample_bundle_is_deliverable: bool = bundle_exists or ignore_missing_bundle
+
+        if not bundle_exists and not ignore_missing_bundle:
+            raise SyntaxError(f"Could not find bundle {bundle_name}")
+
         sample_passes_qc: bool = self._sample_passes_quality_check(sample)
-        return sample_bundle_is_deliverable and sample_passes_qc
+        return bundle_exists and sample_passes_qc
 
     def _get_version_for_sample(self, sample: Sample, case: Case, workflow: str) -> Version:
         bundle: str = sample.internal_id if workflow == DataDelivery.FASTQ else case.internal_id
@@ -196,6 +199,8 @@ class DeliveryAPI:
     def _is_case_deliverable(self, case: Case, workflow: str) -> bool:
         bundle_exist: bool = self._bundle_exists(case.internal_id)
         ignore_missing_bundle: bool = self.ignore_missing_bundle(workflow)
+        if not bundle_exist and not ignore_missing_bundle:
+            raise SyntaxError(f"Could not find bundle {case.internal_id}")
         return bundle_exist or ignore_missing_bundle
 
     def _sample_passes_quality_check(self, sample: Sample) -> bool:
