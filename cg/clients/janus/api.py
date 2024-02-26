@@ -13,7 +13,7 @@ class JanusAPIClient:
     def __init__(self, config: dict[str]):
         self.host = config["janus"]["host"]
 
-    def qc_metrics(self, collect_qc_request: CreateQCMetricsRequest) -> dict:
+    def qc_metrics(self, collect_qc_request: CreateQCMetricsRequest) -> dict | None:
         endpoint: str = f"{self.host}/collect_qc_metrics"
         post_request_data: str = collect_qc_request.model_dump_json()
         response = requests.post(endpoint, data=post_request_data)
