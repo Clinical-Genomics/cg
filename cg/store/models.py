@@ -95,6 +95,14 @@ customer_collaboration = Table(
     UniqueConstraint("customer_id", "collaboration_id", name="_customer_collaboration_uc"),
 )
 
+order_case = Table(
+    "order_case",
+    Base.metadata,
+    Column("order_id", ForeignKey("order.id", ondelete="CASCADE"), nullable=False),
+    Column("case_id", ForeignKey("case.id", ondelete="CASCADE"), nullable=False),
+    UniqueConstraint("order_id", "case_id", name="_order_case_uc"),
+)
+
 
 class PriorityMixin:
     @property
@@ -458,6 +466,7 @@ class Case(Base, PriorityMixin):
         back_populates="case", order_by="-Analysis.completed_at"
     )
     links: Mapped[list["CaseSample"]] = orm.relationship(back_populates="case")
+    orders: Mapped[list["Order"]] = orm.relationship(secondary=order_case, back_populates="cases")
 
     @property
     def cohorts(self) -> list[str]:
@@ -950,6 +959,7 @@ class Order(Base):
     __tablename__ = "order"
 
     id: Mapped[PrimaryKeyInt]
+    cases: Mapped[list[Case]] = orm.relationship(secondary=order_case, back_populates="orders")
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     order_date: Mapped[datetime] = mapped_column(default=datetime.now())
