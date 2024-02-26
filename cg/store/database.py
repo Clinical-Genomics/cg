@@ -4,7 +4,7 @@ from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy.orm import Session, scoped_session, sessionmaker
 
 from cg.exc import CgError
-from cg.store.models import Model
+from cg.store.models import Base
 
 SESSION: scoped_session | None = None
 ENGINE: Engine | None = None
@@ -41,13 +41,13 @@ def get_engine() -> Engine:
 def create_all_tables() -> None:
     """Create all tables in status db."""
     session: Session = get_session()
-    Model.metadata.create_all(bind=session.get_bind())
+    Base.metadata.create_all(bind=session.get_bind())
 
 
 def drop_all_tables() -> None:
     """Drop all tables in status db."""
     session: Session = get_session()
-    Model.metadata.drop_all(bind=session.get_bind())
+    Base.metadata.drop_all(bind=session.get_bind())
 
 
 def get_tables() -> list[str]:

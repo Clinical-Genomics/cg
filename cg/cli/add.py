@@ -2,8 +2,9 @@ import logging
 
 import click
 
-from cg.constants import STATUS_OPTIONS, DataDelivery, Priority, Workflow
+from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
+from cg.constants.constants import StatusOptions
 from cg.constants.subject import Sex
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
@@ -282,7 +283,7 @@ def add_case(
 @add.command("relationship")
 @click.option("-m", "--mother-id", help="Sample ID for mother of sample")
 @click.option("-f", "--father-id", help="Sample ID for father of sample")
-@click.option("-s", "--status", type=click.Choice(STATUS_OPTIONS), required=True)
+@click.option("-s", "--status", type=EnumChoice(StatusOptions), required=True)
 @click.argument("case-id")
 @click.argument("sample-id")
 @click.pass_obj
