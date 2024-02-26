@@ -147,19 +147,17 @@ class DeliveryAPI:
         deliverable_samples: list[Sample] = []
         samples: list[Sample] = self.store.get_samples_by_case_id(case.internal_id)
         for sample in samples:
-            sample_bundle_is_deliverable: bool = self.is_sample_bundle_deliverable(
-                case=case, sample=sample, workflow=workflow
-            )
-            sample_passes_qc: bool = self._sample_passes_quality_check(sample)
-            if sample_bundle_is_deliverable and sample_passes_qc:
+            if self.is_sample_deliverable(case=case, sample=sample, workflow=workflow):
                 deliverable_samples.append(sample)
         return deliverable_samples
 
-    def is_sample_bundle_deliverable(self, case: Case, sample: Sample, workflow: str) -> bool:
+    def is_sample_deliverable(self, case: Case, sample: Sample, workflow: str) -> bool:
         bundle_name: str = get_bundle_name(case=case, sample=sample, workflow=workflow)
         bundle_exists: bool = self._bundle_exists(bundle_name)
         ignore_missing_bundle: bool = self.ignore_missing_bundle(workflow)
-        return bundle_exists or ignore_missing_bundle
+        sample_bundle_is_deliverable: bool = bundle_exists or ignore_missing_bundle
+        sample_passes_qc: bool = self._sample_passes_quality_check(sample)
+        return sample_bundle_is_deliverable and sample_passes_qc
 
     def _get_version_for_sample(self, sample: Sample, case: Case, workflow: str) -> Version:
         bundle: str = sample.internal_id if workflow == DataDelivery.FASTQ else case.internal_id
