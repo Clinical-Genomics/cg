@@ -7,7 +7,7 @@ def create_status_summaries(orders: list[Order]) -> list[OrderStatusSummary]:
     summaries: list[OrderStatusSummary] = []
     for order in orders:
         case_count: int = get_total_cases_in_order(order)
-        summary = OrderStatusSummary(total=case_count)
+        summary = OrderStatusSummary(order_id=order.id, total=case_count)
         summaries.append(summary)
     return summaries
 

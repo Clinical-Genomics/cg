@@ -170,7 +170,7 @@ class TrailblazerAPI:
             method=APIMethods.POST,
         )
 
-    def get_summaries(self, order_ids: list[str]) -> list[AnalysisSummary]:
+    def get_summaries(self, order_ids: list[int]) -> list[AnalysisSummary]:
         orders_param = "orderIds=".join([f"{order_id}," for order_id in order_ids]).strip(",")
         endpoint = f"summaries?{orders_param}"
         response = self.query_trailblazer(command=endpoint, request_body={}, method=APIMethods.GET)
