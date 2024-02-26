@@ -39,6 +39,7 @@ class FastqService:
             case_id=case.internal_id,
             analysis_type=AnalysisType.OTHER,
             config_path="",
+            order_id=case.latest_order.id,
             out_dir="",
             slurm_quality_of_service=case.slurm_priority,
             workflow=Workflow.FASTQ,

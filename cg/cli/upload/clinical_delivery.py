@@ -54,12 +54,14 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
         {"jobs": [str(job_id)]}, config_path=rsync_api.trailblazer_config_path
     )
     analysis_name: str = f"{case_id}_rsync" if is_complete_delivery else f"{case_id}_partial"
+    order_id: int = case.latest_order.id
     if not dry_run:
         trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
         analysis: TrailblazerAnalysis = trailblazer_api.add_pending_analysis(
             case_id=analysis_name,
             analysis_type=AnalysisTypes.OTHER,
             config_path=rsync_api.trailblazer_config_path.as_posix(),
+            order_id=order_id,
             out_dir=rsync_api.log_dir.as_posix(),
             slurm_quality_of_service=Priority.priority_to_slurm_qos().get(case.priority),
             workflow=Workflow.RSYNC,
