@@ -40,7 +40,6 @@ class Sequencers(BaseModel):
 
 
 class ArnoldConfig(BaseModel):
-    uri: str
     host: str
 
 
