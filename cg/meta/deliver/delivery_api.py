@@ -197,11 +197,11 @@ class DeliveryAPI:
         return sample_files
 
     def _is_case_deliverable(self, case: Case, workflow: str) -> bool:
-        bundle_exist: bool = self._bundle_exists(case.internal_id)
+        bundle_exists: bool = self._bundle_exists(case.internal_id)
         ignore_missing_bundle: bool = self.ignore_missing_bundle(workflow)
-        if not bundle_exist and not ignore_missing_bundle:
+        if not bundle_exists and not ignore_missing_bundle:
             raise SyntaxError(f"Could not find bundle {case.internal_id}")
-        return bundle_exist or ignore_missing_bundle
+        return bundle_exists or ignore_missing_bundle
 
     def _sample_passes_quality_check(self, sample: Sample) -> bool:
         return (
