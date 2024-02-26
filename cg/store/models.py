@@ -510,7 +510,7 @@ class Case(Base, PriorityMixin):
         return sorted_orders[0]
 
     @property
-    def latest_analyzed(self) -> dt.datetime | None:
+    def latest_analyzed(self) -> datetime | None:
         return self.analyses[0].completed_at if self.analyses else None
 
     @property
