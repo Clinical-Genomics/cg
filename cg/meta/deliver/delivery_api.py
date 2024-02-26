@@ -147,12 +147,19 @@ class DeliveryAPI:
         deliverable_samples: list[Sample] = []
         samples: list[Sample] = self.store.get_samples_by_case_id(case.internal_id)
         for sample in samples:
-            bundle_name: str = get_bundle_name(case=case, sample=sample, workflow=workflow)
-            bundle_exists: bool = self._bundle_exists(bundle_name)
-            sample_is_deliverable: bool = self._is_sample_deliverable(sample)
-            if bundle_exists and sample_is_deliverable:
+            sample_bundle_is_deliverable: bool = self.is_sample_bundle_deliverable(
+                case=case, sample=sample, workflow=workflow
+            )
+            sample_passes_qc: bool = self._sample_passes_quality_check(sample)
+            if sample_bundle_is_deliverable and sample_passes_qc:
                 deliverable_samples.append(sample)
         return deliverable_samples
+
+    def is_sample_bundle_deliverable(self, case: Case, sample: Sample, workflow: str) -> bool:
+        bundle_name: str = get_bundle_name(case=case, sample=sample, workflow=workflow)
+        bundle_exists: bool = self._bundle_exists(bundle_name)
+        ignore_missing_bundle: bool = self.ignore_missing_bundle(workflow)
+        return bundle_exists or ignore_missing_bundle
 
     def _get_version_for_sample(self, sample: Sample, case: Case, workflow: str) -> Version:
         bundle: str = sample.internal_id if workflow == DataDelivery.FASTQ else case.internal_id
@@ -189,10 +196,11 @@ class DeliveryAPI:
         return sample_files
 
     def _is_case_deliverable(self, case: Case, workflow: str) -> bool:
-        bundle_name: str = case.internal_id
-        return self._bundle_exists(bundle_name)
+        bundle_exist: bool = self._bundle_exists(case.internal_id)
+        ignore_missing_bundle: bool = self.ignore_missing_bundle(workflow)
+        return bundle_exist or ignore_missing_bundle
 
-    def _is_sample_deliverable(self, sample: Sample) -> bool:
+    def _sample_passes_quality_check(self, sample: Sample) -> bool:
         return (
             sample.sequencing_qc
             or self.deliver_failed_samples
