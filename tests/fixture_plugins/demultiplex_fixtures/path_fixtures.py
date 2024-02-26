@@ -7,7 +7,6 @@ import pytest
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.nanopore_files import NanoporeDirsAndFiles
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 CORRECT_SAMPLE_SHEET: str = "CorrectSampleSheet.csv"
 
@@ -212,6 +211,12 @@ def run_parameters_dir(demultiplex_fixtures: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
+def sample_sheet_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to the sample sheet fixture directory."""
+    return Path(demultiplex_fixtures, "sample_sheets")
+
+
+@pytest.fixture(scope="session")
 def illumina_demultiplexed_runs_directory(demultiplex_fixtures: Path) -> Path:
     """Return the path to the demultiplexed flow cells fixture directory."""
     return Path(demultiplex_fixtures, "demultiplexed-runs")
@@ -298,12 +303,44 @@ def hiseq_x_single_index_flow_cell_dir(
     return Path(illumina_flow_cells_directory, hiseq_x_single_index_flow_cell_name)
 
 
+@pytest.fixture
+def hiseq_x_single_index_sample_sheet_path(hiseq_x_single_index_flow_cell_dir: Path) -> Path:
+    """Return the path to a single-index HiSeqX sample sheet."""
+    return Path(
+        hiseq_x_single_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+
+
+@pytest.fixture
+def hiseq_x_single_index_bcl2fastq_sample_sheet_path(
+    hiseq_x_single_index_flow_cell_dir: Path,
+    bcl2fastq_sample_sheet_file_name: str,
+) -> Path:
+    """Return the path to a single-index HiSeqX Bcl2fastq sample sheet."""
+    return Path(hiseq_x_single_index_flow_cell_dir, bcl2fastq_sample_sheet_file_name)
+
+
 @pytest.fixture(scope="session")
 def hiseq_x_dual_index_flow_cell_dir(
     illumina_flow_cells_directory, hiseq_x_dual_index_flow_cell_name: str
 ) -> Path:
-    """Return the path to a HiSeqX flow cell."""
+    """Return the path to a dual-index HiSeqX flow cell."""
     return Path(illumina_flow_cells_directory, hiseq_x_dual_index_flow_cell_name)
+
+
+@pytest.fixture
+def hiseq_x_dual_index_sample_sheet_path(hiseq_x_dual_index_flow_cell_dir: Path) -> Path:
+    """Return the path to a dual-index HiSeqX sample sheet."""
+    return Path(hiseq_x_dual_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+
+
+@pytest.fixture
+def hiseq_x_dual_index_bcl2fastq_sample_sheet_path(
+    hiseq_x_dual_index_flow_cell_dir: Path,
+    bcl2fastq_sample_sheet_file_name: str,
+) -> Path:
+    """Return the path to a dual-index HiSeqX Bcl2fastq sample sheet."""
+    return Path(hiseq_x_dual_index_flow_cell_dir, bcl2fastq_sample_sheet_file_name)
 
 
 @pytest.fixture(scope="session")
@@ -314,12 +351,46 @@ def hiseq_2500_dual_index_flow_cell_dir(
     return Path(illumina_flow_cells_directory, hiseq_2500_dual_index_flow_cell_name)
 
 
+@pytest.fixture
+def hiseq_2500_dual_index_sample_sheet_path(hiseq_2500_dual_index_flow_cell_dir: Path) -> Path:
+    """Return the path to a dual-index HiSeq2500 sample sheet."""
+    return Path(
+        hiseq_2500_dual_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+
+
+@pytest.fixture
+def hiseq_2500_dual_index_bcl2fastq_sample_sheet_path(
+    hiseq_2500_dual_index_flow_cell_dir: Path,
+    bcl2fastq_sample_sheet_file_name: str,
+) -> Path:
+    """Return the path to a dual-index HiSeq2500 Bcl2fastq sample sheet."""
+    return Path(hiseq_2500_dual_index_flow_cell_dir, bcl2fastq_sample_sheet_file_name)
+
+
 @pytest.fixture(scope="session")
 def hiseq_2500_custom_index_flow_cell_dir(
     illumina_flow_cells_directory, hiseq_2500_custom_index_flow_cell_name: str
 ) -> Path:
     """Return the path to a HiSeq2500 flow cell."""
     return Path(illumina_flow_cells_directory, hiseq_2500_custom_index_flow_cell_name)
+
+
+@pytest.fixture
+def hiseq_2500_custom_index_sample_sheet_path(hiseq_2500_custom_index_flow_cell_dir: Path) -> Path:
+    """Return the path to a custom-index HiSeq2500 sample sheet."""
+    return Path(
+        hiseq_2500_custom_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+
+
+@pytest.fixture
+def hiseq_2500_custom_index_bcl2fastq_sample_sheet_path(
+    hiseq_2500_custom_index_flow_cell_dir: Path,
+    bcl2fastq_sample_sheet_file_name: str,
+) -> Path:
+    """Return the path to a custom-index HiSeq2500 Bcl2fastq sample sheet."""
+    return Path(hiseq_2500_custom_index_flow_cell_dir, bcl2fastq_sample_sheet_file_name)
 
 
 @pytest.fixture
@@ -354,6 +425,18 @@ def novaseq_bcl2fastq_sample_sheet_path(bcl2fastq_flow_cell_dir: Path) -> Path:
 def novaseq_bcl_convert_sample_sheet_path(bcl_convert_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeq6000 bcl_convert sample sheet."""
     return Path(bcl_convert_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+
+
+@pytest.fixture
+def novaseq_6000_sample_sheet_with_reversed_cycles(sample_sheet_dir: Path) -> Path:
+    """Return the path to a NovaSeq6000 sample sheet with reversed index2 cycles."""
+    return Path(sample_sheet_dir, "novaseq_6000_sample_sheet_with_reversed_cycles.csv")
+
+
+@pytest.fixture
+def novaseq_x_sample_sheet_with_forward_cycles(sample_sheet_dir: Path) -> Path:
+    """Return the path to a NovaSeqX sample sheet with forward index2 cycles."""
+    return Path(sample_sheet_dir, "novaseq_x_sample_sheet_with_forward_cycles.csv")
 
 
 @pytest.fixture(scope="session")

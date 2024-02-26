@@ -2,13 +2,12 @@ from pathlib import Path
 
 import pytest
 
+from cg.apps.demultiplex.sample_sheet.override_cycles_validator import OverrideCyclesValidator
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
-    SampleSheetCreatorBcl2Fastq,
-)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreatorBcl2Fastq
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
@@ -173,63 +172,6 @@ def sample_sheet_bcl2fastq_duplicate_different_lane(
 
 
 @pytest.fixture
-def valid_sample_sheet_dragen(
-    sample_sheet_line_sample_1: list[str], sample_sheet_line_sample_2: list[str]
-) -> list[list[str]]:
-    """Return the content of a valid Dragen sample sheet."""
-    return [
-        [SampleSheetBcl2FastqSections.Data.HEADER],
-        [
-            SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID.value,
-            "Lane",
-            "Sample_ID",
-            "SampleRef",
-            "index",
-            "index2",
-            "SampleName",
-            "Control",
-            "Recipe",
-            "Operator",
-            "Sample_Project",
-        ],
-        sample_sheet_line_sample_1,
-        sample_sheet_line_sample_2,
-    ]
-
-
-@pytest.fixture
-def sample_sheet_dragen_duplicate_same_lane(
-    valid_sample_sheet_dragen: list[list[str]], sample_sheet_line_sample_2: list[str]
-) -> list[list[str]]:
-    """Return the content of a Dragen sample sheet with a duplicated sample in the same lane."""
-    valid_sample_sheet_dragen.append(sample_sheet_line_sample_2)
-    return valid_sample_sheet_dragen
-
-
-@pytest.fixture
-def sample_sheet_dragen_duplicate_different_lane(
-    valid_sample_sheet_dragen: list[list[str]],
-) -> list[list[str]]:
-    """Return the content of a Dragen sample sheet with a duplicated sample in a different lane."""
-    valid_sample_sheet_dragen.append(
-        [
-            "HWHMWDMXX",
-            "2",
-            "ACC7628A1",
-            "hg19",
-            "AGTTAGCTGG",
-            "GATGAGAATG",
-            "814206",
-            "N",
-            "R1",
-            "script",
-            "814206",
-        ]
-    )
-    return valid_sample_sheet_dragen
-
-
-@pytest.fixture
 def novaseq6000_flow_cell_sample_1() -> FlowCellSampleBcl2Fastq:
     """Return a NovaSeq sample."""
     return FlowCellSampleBcl2Fastq(
@@ -292,21 +234,35 @@ def novaseq6000_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleBcl2Fas
 
 
 @pytest.fixture
-def index1_sequence_from_lims() -> str:
+def index1_8_nt_sequence_from_lims() -> str:
     """Return an index 1 sequence."""
     return "GTCTACAC"
 
 
 @pytest.fixture
-def index2_sequence_from_lims() -> str:
+def index2_8_nt_sequence_from_lims() -> str:
     """Return an index 2 sequence."""
     return "GCCAAGGT"
 
 
 @pytest.fixture
-def raw_index_sequence(index1_sequence_from_lims: str, index2_sequence_from_lims: str) -> str:
+def index1_10_nt_sequence_from_lims() -> str:
+    """Return an index 1 sequence."""
+    return "CCGGTTCATG"
+
+
+@pytest.fixture
+def index2_10_nt_sequence_from_lims() -> str:
+    """Return an index 2 sequence."""
+    return "CAAGACGTCT"
+
+
+@pytest.fixture
+def raw_index_sequence(
+    index1_8_nt_sequence_from_lims: str, index2_8_nt_sequence_from_lims: str
+) -> str:
     """Return a raw index."""
-    return f"{index1_sequence_from_lims}-{index2_sequence_from_lims}"
+    return f"{index1_8_nt_sequence_from_lims}-{index2_8_nt_sequence_from_lims}"
 
 
 @pytest.fixture
@@ -331,3 +287,62 @@ def bcl2fastq_sample_sheet_path(illumina_demultiplexed_runs_directory):
         "170407_ST-E00198_0209_BHHKVCALXX",
         "SampleSheet.csv",
     )
+
+
+@pytest.fixture
+def override_cycles_validator() -> OverrideCyclesValidator:
+    """Return an override cycles validator without any initialised attribute."""
+    return OverrideCyclesValidator()
+
+
+@pytest.fixture
+def processed_flow_cell_sample_8_index(
+    index1_8_nt_sequence_from_lims: str, index2_8_nt_sequence_from_lims: str
+) -> dict[str, str]:
+    """Return a BCL Convert sample with processed 8-nt indexes and no override cycles."""
+    return {
+        "Lane": 1,
+        "Sample_ID": "ACC123",
+        "Index": index1_8_nt_sequence_from_lims,
+        "Index2": index2_8_nt_sequence_from_lims,
+    }
+
+
+@pytest.fixture
+def processed_flow_cell_sample_10_index(
+    index1_10_nt_sequence_from_lims: str, index2_10_nt_sequence_from_lims: str
+) -> dict[str, str]:
+    """Return a BCL Convert sample with processed 10-nt indexes and no override cycles."""
+    return {
+        "Lane": 1,
+        "Sample_ID": "ACC123",
+        "Index": index1_10_nt_sequence_from_lims,
+        "Index2": index2_10_nt_sequence_from_lims,
+    }
+
+
+@pytest.fixture
+def forward_index2_cycle_processed_flow_cell_8_nt_sample(
+    processed_flow_cell_sample_8_index: dict[str, str],
+) -> dict[str, str]:
+    """Return a BCL Convert sample with processed 8-nt indexes and forward index 2 cycle."""
+    processed_flow_cell_sample_8_index["OverrideCycles"] = "Y151;I8N2;I8N2;Y151"
+    return processed_flow_cell_sample_8_index
+
+
+@pytest.fixture
+def reverse_index2_cycle_processed_flow_cell_8_nt_sample(
+    processed_flow_cell_sample_8_index: dict[str, str],
+) -> dict[str, str]:
+    """Return a BCL Convert sample with processed 8-nt indexes and reversed index 2 cycle."""
+    processed_flow_cell_sample_8_index["OverrideCycles"] = "Y151;I8N2;N2I8;Y151"
+    return processed_flow_cell_sample_8_index
+
+
+@pytest.fixture
+def processed_flow_cell_10_nt_sample(
+    processed_flow_cell_sample_10_index: dict[str, str],
+) -> dict[str, str]:
+    """Return a BCL Convert sample with processed 10-nt indexes."""
+    processed_flow_cell_sample_10_index["OverrideCycles"] = "Y151;I10;I10;Y151"
+    return processed_flow_cell_sample_10_index
