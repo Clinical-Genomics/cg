@@ -1,10 +1,12 @@
 import logging
 import os
 from pathlib import Path
+
+from housekeeper.store.models import File
+
 from cg.constants import delivery as constants
 from cg.constants.constants import Workflow
 from cg.store.models import Case, Sample
-from housekeeper.store.models import File
 
 LOG = logging.getLogger(__name__)
 
@@ -98,6 +100,7 @@ def should_include_file_sample(file: File, workflow: str) -> bool:
     At least one tag should match between file and the sample tags.
     """
     file_tags = {tag.name for tag in file.tags}
+    file_tags.add(file.version.bundle.name)
     sample_tags = get_sample_tags_for_workflow(workflow)
     return any(tags.issubset(file_tags) for tags in sample_tags)
 
