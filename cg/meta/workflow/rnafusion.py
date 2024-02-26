@@ -8,6 +8,7 @@ from cg import resources
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat, Strandedness
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
+from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
 from cg.exc import MissingMetrics
 from cg.io.controller import ReadFile
 from cg.io.json import read_json
@@ -55,17 +56,21 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         when determining if the analysis for a case should be automatically started."""
         return True
 
-    @staticmethod
-    def get_deliverables_template_content() -> list[dict]:
+    def get_deliverables_template_content(self) -> list[dict]:
         """Return deliverables file template content."""
         return ReadFile.get_content_from_file(
             file_format=FileFormat.YAML,
-            file_path=resources.RNAFUSION_BUNDLE_FILENAMES_PATH,
+            file_path=self.get_bundle_filenames_path(),
         )
 
     def get_nextflow_config_content(self) -> str:
         """Return nextflow config content."""
         return MULTIQC_NEXFLOW_CONFIG
+
+    @staticmethod
+    def get_bundle_filenames_path() -> Path:
+        """Return Rnafusion bundle filenames path."""
+        return RNAFUSION_BUNDLE_FILENAMES_PATH
 
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, case_id: str, strandedness: Strandedness

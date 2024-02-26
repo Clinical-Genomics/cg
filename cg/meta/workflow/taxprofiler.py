@@ -7,7 +7,7 @@ from typing import Any
 from cg.constants import Workflow
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG
 from cg.io.json import read_json
-from cg import resources
+from cg.resources import TAXPROFILER_BUNDLE_FILENAMES_PATH
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.constants import FileFormat
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -52,6 +52,10 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def get_nextflow_config_content(self) -> str:
         """Return nextflow config content."""
         return MULTIQC_NEXFLOW_CONFIG
+
+    def get_bundle_filenames_path(self) -> Path:
+        """Return Taxprofiler bundle filenames path."""
+        return TAXPROFILER_BUNDLE_FILENAMES_PATH
 
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, instrument_platform: SequencingPlatform.ILLUMINA, fasta: str = ""
@@ -162,10 +166,9 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
 
         return metrics_values
 
-    @staticmethod
-    def get_deliverables_template_content() -> list[dict]:
+    def get_deliverables_template_content(self) -> list[dict]:
         """Return deliverables file template content."""
         return ReadFile.get_content_from_file(
             file_format=FileFormat.YAML,
-            file_path=resources.TAXPROFILER_BUNDLE_FILENAMES_PATH,
+            file_path=self.get_bundle_filenames_path(),
         )

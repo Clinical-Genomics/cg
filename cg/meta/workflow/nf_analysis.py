@@ -309,9 +309,36 @@ class NfAnalysisAPI(AnalysisAPI):
             )
 
     @staticmethod
-    def get_deliverables_template_content() -> list[dict]:
+    def get_deliverables_template_content(self) -> list[dict]:
         """Return deliverables file template content."""
         raise NotImplementedError
+
+    @staticmethod
+    def get_bundle_filenames_path(self) -> Path | None:
+        """Return bundle filenames path."""
+        return None
+
+    @staticmethod
+    def get_formatted_file_deliverable(
+        file_template: dict[str | None, str | None],
+        case_id: str,
+        sample_id: str,
+        sample_name: str,
+        case_path: str,
+    ) -> FileDeliverable:
+        """Return the formatted file deliverable with the case and sample attributes."""
+        deliverables = file_template.copy()
+        for deliverable_field, deliverable_value in file_template.items():
+            if deliverable_value is None:
+                continue
+            deliverables[deliverable_field] = (
+                deliverables[deliverable_field]
+                .replace("CASEID", case_id)
+                .replace("SAMPLEID", sample_id)
+                .replace("SAMPLENAME", sample_name)
+                .replace("PATHTOCASE", case_path)
+            )
+        return FileDeliverable(**deliverables)
 
     def get_deliverables_for_sample(
         self, sample: Sample, case_id: str, template: list[dict]
@@ -319,22 +346,18 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return a list of FileDeliverables for each sample."""
         sample_id: str = sample.internal_id
         sample_name: str = sample.name
-        case_path = self.get_case_path(case_id=case_id).as_posix()
+        case_path = str(self.get_case_path(case_id=case_id))
         files: list[FileDeliverable] = []
-
         for file in template:
-            deliverables = file.copy()
-            for deliverable_field, deliverable_value in file.items():
-                if deliverable_value is None:
-                    continue
-                deliverables[deliverable_field] = (
-                    deliverables[deliverable_field]
-                    .replace("CASEID", case_id)
-                    .replace("SAMPLEID", sample_id)
-                    .replace("SAMPLENAME", sample_name)
-                    .replace("PATHTOCASE", case_path)
+            files.append(
+                self.get_formatted_file_deliverable(
+                    file_template=file,
+                    case_id=case_id,
+                    sample_id=sample_id,
+                    sample_name=sample_name,
+                    case_path=case_path,
                 )
-            files.append(FileDeliverable(**deliverables))
+            )
         return files
 
     def get_deliverables_for_case(self, case_id: str) -> WorkflowDeliverables:
