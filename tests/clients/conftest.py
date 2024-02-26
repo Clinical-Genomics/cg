@@ -17,7 +17,7 @@ def janus_config() -> dict:
 
 
 @pytest.fixture
-def client(janus_config: dict) -> JanusAPIClient:
+def janus_client(janus_config: dict) -> JanusAPIClient:
     return JanusAPIClient(janus_config)
 
 
