@@ -200,10 +200,8 @@ class DeliveryAPI:
         )
 
     def _bundle_exists(self, bundle_name: str, workflow: str) -> bool:
-        if self.hk_api.last_version(bundle_name):
+        if self.hk_api.last_version(bundle_name) or self.ignore_missing_bundle(workflow):
             return True
-        if self.ignore_missing_bundle(workflow):
-            return False
         raise SyntaxError(f"Could not find any version for {bundle_name}")
 
     def ignore_missing_bundle(self, workflow: str) -> bool:
