@@ -365,7 +365,7 @@ class CGConfig(BaseModel):
         }
 
     @property
-    def arnold_api(self) -> ChanjoAPI:
+    def arnold_api(self) -> ArnoldAPIClient:
         api = self.__dict__.get("arnold_api_")
         if api is None:
             LOG.debug("Instantiating arnold api")
