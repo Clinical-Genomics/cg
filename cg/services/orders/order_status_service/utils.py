@@ -3,7 +3,7 @@ from cg.services.orders.order_status_service.summary import OrderStatusSummary
 from cg.store.models import Order
 
 
-def create_order_summaries(orders: list[Order]) -> list[OrderStatusSummary]:
+def create_status_summaries(orders: list[Order]) -> list[OrderStatusSummary]:
     summaries: list[OrderStatusSummary] = []
     for order in orders:
         case_count: int = get_total_cases_in_order(order)
