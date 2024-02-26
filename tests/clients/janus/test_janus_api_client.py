@@ -1,7 +1,5 @@
 """Module to test Janus API client."""
 
-from http import HTTPStatus
-
 import pytest
 import requests
 from pytest_mock import MockFixture
@@ -16,13 +14,11 @@ def test_qc_metrics_successful(
     client: JanusAPIClient,
     collect_qc_request_balsamic_wgs: CreateQCMetricsRequest,
     janus_response: dict,
+    mock_post_request_ok: MockFixture,
 ):
     # GIVEN a mocked response from the requests.post method that is successful
     mocked_post = mocker.patch.object(requests, "post")
-    mocked_response = mocker.Mock()
-    mocked_response.status_code = HTTPStatus.OK
-    mocked_response.json.return_value = janus_response
-    mocked_post.return_value = mocked_response
+    mocked_post.return_value = mock_post_request_ok
 
     # WHEN retrieving the qc metrics
     jobs_response: dict = client.qc_metrics(collect_qc_request_balsamic_wgs)
@@ -35,7 +31,7 @@ def test_qc_metrics_successful(
         f"{client.host}/collect_qc_metrics",
         data=collect_qc_request_balsamic_wgs.model_dump_json(),
     )
-    mocked_response.json.assert_called_once()
+    mock_post_request_ok.json.assert_called_once()
 
 
 def test_qc_metrics_not_successful(
@@ -43,13 +39,11 @@ def test_qc_metrics_not_successful(
     client: JanusAPIClient,
     collect_qc_request_balsamic_wgs: CreateQCMetricsRequest,
     janus_response: dict,
+    mock_post_request_not_found: MockFixture,
 ):
     # GIVEN a mocked response from the requests.post method that is not successful
     mocked_post = mocker.patch.object(requests, "post")
-    mocked_response = mocker.Mock()
-    mocked_response.status_code = HTTPStatus.NOT_FOUND
-    mocked_response.json.return_value = janus_response
-    mocked_post.return_value = mocked_response
+    mocked_post.return_value = mock_post_request_not_found
 
     # WHEN retrieving the qc metrics
 

@@ -1,5 +1,8 @@
+from http import HTTPStatus
+
 import pytest
 from _pytest.fixtures import FixtureRequest
+from pytest_mock import MockFixture
 
 from cg.clients.janus.api import JanusAPIClient
 from cg.clients.janus.dto.create_qc_metrics_request import (
@@ -53,3 +56,19 @@ def collect_qc_request_balsamic_wgs(
 @pytest.fixture
 def janus_response() -> dict:
     return {"some": "data"}
+
+
+@pytest.fixture
+def mock_post_request_ok(janus_response: dict, mocker: MockFixture) -> MockFixture:
+    mocked_response = mocker.Mock()
+    mocked_response.status_code = HTTPStatus.OK
+    mocked_response.json.return_value = janus_response
+    return mocked_response
+
+
+@pytest.fixture
+def mock_post_request_not_found(janus_response: dict, mocker: MockFixture) -> MockFixture:
+    mocked_response = mocker.Mock()
+    mocked_response.status_code = HTTPStatus.NOT_FOUND
+    mocked_response.json.return_value = janus_response
+    return mocked_response
