@@ -40,7 +40,7 @@ class Sequencers(BaseModel):
 
 
 class ArnoldConfig(BaseModel):
-    host: str
+    api_url: str
 
 
 class SlurmConfig(BaseModel):
