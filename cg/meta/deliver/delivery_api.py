@@ -147,12 +147,20 @@ class DeliveryAPI:
         deliverable_samples: list[Sample] = []
         samples: list[Sample] = self.store.get_samples_by_case_id(case.internal_id)
         for sample in samples:
-            bundle_name: str = get_bundle_name(case=case, sample=sample, workflow=workflow)
-            bundle_exists: bool = self._bundle_exists(bundle_name=bundle_name, workflow=workflow)
-            sample_is_deliverable: bool = self._is_sample_deliverable(sample)
-            if bundle_exists and sample_is_deliverable:
+            if self.is_sample_deliverable(case=case, sample=sample, workflow=workflow):
                 deliverable_samples.append(sample)
         return deliverable_samples
+
+    def is_sample_deliverable(self, case: Case, sample: Sample, workflow: str) -> bool:
+        bundle_name: str = get_bundle_name(case=case, sample=sample, workflow=workflow)
+        bundle_exists: bool = self._bundle_exists(bundle_name)
+        ignore_missing_bundle: bool = self.ignore_missing_bundle(workflow)
+
+        if not bundle_exists and not ignore_missing_bundle:
+            raise SyntaxError(f"Could not find bundle {bundle_name}")
+
+        sample_passes_qc: bool = self._sample_passes_quality_check(sample)
+        return bundle_exists and sample_passes_qc
 
     def _get_version_for_sample(self, sample: Sample, case: Case, workflow: str) -> Version:
         bundle: str = sample.internal_id if workflow == DataDelivery.FASTQ else case.internal_id
@@ -189,22 +197,21 @@ class DeliveryAPI:
         return sample_files
 
     def _is_case_deliverable(self, case: Case, workflow: str) -> bool:
-        bundle_name: str = case.internal_id
-        return self._bundle_exists(bundle_name=bundle_name, workflow=workflow)
+        bundle_exists: bool = self._bundle_exists(case.internal_id)
+        ignore_missing_bundle: bool = self.ignore_missing_bundle(workflow)
+        if not bundle_exists and not ignore_missing_bundle:
+            raise SyntaxError(f"Could not find bundle {case.internal_id}")
+        return bundle_exists or ignore_missing_bundle
 
-    def _is_sample_deliverable(self, sample: Sample) -> bool:
+    def _sample_passes_quality_check(self, sample: Sample) -> bool:
         return (
             sample.sequencing_qc
             or self.deliver_failed_samples
             or sample.application_version.application.is_external
         )
 
-    def _bundle_exists(self, bundle_name: str, workflow: str) -> bool:
-        if self.hk_api.last_version(bundle_name):
-            return True
-        if self.ignore_missing_bundle(workflow):
-            return False
-        raise SyntaxError(f"Could not find any version for {bundle_name}")
+    def _bundle_exists(self, bundle_name: str) -> bool:
+        return bool(self.hk_api.last_version(bundle_name))
 
     def ignore_missing_bundle(self, workflow: str) -> bool:
         return workflow in constants.SKIP_MISSING or self.ignore_missing_bundles
