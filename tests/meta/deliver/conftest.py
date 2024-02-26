@@ -6,7 +6,8 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
-from cg.meta.deliver import DeliveryAPI
+from cg.constants.housekeeper_tags import AlignmentFileTag
+from cg.meta.deliver import DeliverAPI
 from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.store.models import Case
 from cg.store.store import Store
@@ -16,18 +17,22 @@ from tests.store_helpers import StoreHelpers
 @pytest.fixture(scope="function")
 def deliver_api(
     analysis_store: Store, real_housekeeper_api: HousekeeperAPI, project_dir: Path
-) -> DeliveryAPI:
+) -> DeliverAPI:
     """Fixture for deliver_api
 
     The fixture will return a delivery api where the store is populated with a case with three individuals.
     The housekeeper database is empty
     """
-    yield DeliveryAPI(
+    _deliver_api = DeliverAPI(
         store=analysis_store,
         hk_api=real_housekeeper_api,
-        customers_folder=project_dir,
+        case_tags=[{"case-tag"}],
+        sample_tags=[{AlignmentFileTag.CRAM}],
+        project_base_path=project_dir,
+        delivery_type="balsamic",
         fastq_file_service=FastqFileService(),
     )
+    yield _deliver_api
 
 
 @pytest.fixture(name="delivery_hk_api")
@@ -45,14 +50,18 @@ def delivery_hk_api(
 @pytest.fixture(name="populated_deliver_api")
 def populated_deliver_api(
     analysis_store: Store, delivery_hk_api: HousekeeperAPI, project_dir: Path
-) -> DeliveryAPI:
+) -> DeliverAPI:
     """Return a delivery api where housekeeper is populated with some files"""
-    return DeliveryAPI(
+    _deliver_api = DeliverAPI(
         store=analysis_store,
         hk_api=delivery_hk_api,
-        customers_folder=project_dir,
+        case_tags=[{"case-tag"}],
+        sample_tags=[{AlignmentFileTag.CRAM}],
+        project_base_path=project_dir,
+        delivery_type="balsamic",
         fastq_file_service=FastqFileService(),
     )
+    return _deliver_api
 
 
 @pytest.fixture(name="dummy_file_name")
