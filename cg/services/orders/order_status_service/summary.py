@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class OrderSummary(BaseModel):
+class OrderStatusSummary(BaseModel):
     order_id: int
     total: int
     delivered: int | None = None

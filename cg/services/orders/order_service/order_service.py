@@ -7,14 +7,14 @@ from cg.services.orders.order_service.utils import (
     create_order_response,
     create_orders_response,
 )
-from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
-from cg.services.orders.order_summary_service.summary import OrderSummary
+from cg.services.orders.order_status_service import OrderStatusService
+from cg.services.orders.order_status_service.summary import OrderStatusSummary
 from cg.store.models import Order
 from cg.store.store import Store
 
 
 class OrderService:
-    def __init__(self, store: Store, summary_service: OrderSummaryService) -> None:
+    def __init__(self, store: Store, summary_service: OrderStatusService) -> None:
         self.store = store
         self.summary_service = summary_service
 
@@ -27,10 +27,10 @@ class OrderService:
     def get_orders(self, orders_request: OrdersRequest) -> OrdersResponse:
         orders: list[Order] = self.store.get_orders(orders_request)
 
-        summaries: list[OrderSummary] = []
+        summaries: list[OrderStatusSummary] = []
         if orders_request.include_summary:
             order_ids: list[int] = [order.id for order in orders]
-            summaries = self.summary_service.get_summaries(order_ids)
+            summaries = self.summary_service.get_status_summaries(order_ids)
 
         return create_orders_response(orders=orders, summaries=summaries)
 

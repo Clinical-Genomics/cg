@@ -1,19 +1,19 @@
 from cg.apps.tb.dto.summary_response import AnalysisSummary
-from cg.services.orders.order_summary_service.summary import OrderSummary
+from cg.services.orders.order_status_service.summary import OrderStatusSummary
 from cg.store.models import Order
 
 
-def create_order_summaries(orders: list[Order]) -> list[OrderSummary]:
-    summaries: list[OrderSummary] = []
+def create_order_summaries(orders: list[Order]) -> list[OrderStatusSummary]:
+    summaries: list[OrderStatusSummary] = []
     for order in orders:
         case_count: int = get_total_cases_in_order(order)
-        summary = OrderSummary(total=case_count)
+        summary = OrderStatusSummary(total=case_count)
         summaries.append(summary)
     return summaries
 
 
 def update_summaries(
-    order_summaries: list[OrderSummary], analysis_summaries: list[AnalysisSummary]
+    order_summaries: list[OrderStatusSummary], analysis_summaries: list[AnalysisSummary]
 ) -> None:
     order_summary_map = {summary.order_id: summary for summary in order_summaries}
     for analysis_summary in analysis_summaries:

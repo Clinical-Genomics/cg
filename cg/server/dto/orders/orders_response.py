@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 from cg.constants import Workflow
-from cg.services.orders.order_summary_service.summary import OrderSummary
+from cg.services.orders.order_status_service.summary import OrderStatusSummary
 
 
 class Order(BaseModel):
@@ -10,7 +10,7 @@ class Order(BaseModel):
     order_date: str
     order_id: int
     workflow: Workflow
-    summary: OrderSummary | None = None
+    summary: OrderStatusSummary | None = None
 
 
 class OrdersResponse(BaseModel):
