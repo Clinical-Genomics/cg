@@ -18,6 +18,7 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.clients.janus.api import JanusAPIClient
+from cg.clients.arnold.api import ArnoldAPIClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
@@ -35,6 +36,10 @@ class Sequencers(BaseModel):
     hiseqx: str
     hiseqga: str
     novaseq: str
+
+
+class ArnoldConfig(BaseModel):
+    api_url: str
 
 
 class SlurmConfig(BaseModel):
@@ -283,6 +288,8 @@ class CGConfig(BaseModel):
     housekeeper_api_: HousekeeperAPI = None
 
     # App APIs that can be instantiated in CGConfig
+    arnold: ArnoldConfig = Field(None, alias="arnold")
+    arnold_api_: ArnoldAPIClient | None = None
     backup: BackupConfig = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
@@ -344,6 +351,7 @@ class CGConfig(BaseModel):
     class Config:
         arbitrary_types_allowed = True
         fields = {
+            "arnold_api_": "arnold_api",
             "chanjo_api_": "chanjo_api",
             "crunchy_api_": "crunchy_api",
             "demultiplex_api_": "demultiplex_api",
@@ -361,6 +369,15 @@ class CGConfig(BaseModel):
             "trailblazer_api_": "trailblazer_api",
             "janus_api_": "janus_api",
         }
+
+    @property
+    def arnold_api(self) -> ArnoldAPIClient:
+        api = self.__dict__.get("arnold_api_")
+        if api is None:
+            LOG.debug("Instantiating arnold api")
+            api = ArnoldAPIClient(config=self.dict())
+            self.arnold_api_ = api
+        return api
 
     @property
     def chanjo_api(self) -> ChanjoAPI:
