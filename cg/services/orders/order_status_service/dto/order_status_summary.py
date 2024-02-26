@@ -1,10 +1,12 @@
 from pydantic import BaseModel
 
 
-class OrderStatusSummary(BaseModel):
+class OrderSummary(BaseModel):
     order_id: int
     total: int
     delivered: int | None = None
     running: int | None = None
     cancelled: int | None = None
     failed: int | None = None
+    in_sequencing: int | None = None
+    in_preparation: int | None = None
