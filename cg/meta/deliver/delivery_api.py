@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from housekeeper.store.models import Version
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery, Workflow
@@ -9,9 +10,9 @@ from cg.exc import MissingFilesError
 from cg.meta.deliver.utils import (
     create_link,
     get_bundle_name,
+    get_case_tags_for_workflow,
     get_delivery_case_name,
     get_delivery_dir_path,
-    get_case_tags_for_workflow,
     get_out_path,
     get_sample_out_file_name,
     get_sample_tags_for_workflow,
@@ -19,8 +20,8 @@ from cg.meta.deliver.utils import (
     should_include_file_sample,
 )
 from cg.services.fastq_file_service.fastq_file_service import FastqFileService
-from cg.store.store import Store
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -114,7 +115,7 @@ class DeliveryAPI:
                 sample=sample, case=case, workflow=workflow
             )
             files: list[Path] = self._get_sample_files_from_version(
-                version=version, workflow=workflow
+                sample_internal_id=sample.internal_id, version=version, workflow=workflow
             )
             for file_path in files:
                 file_name: str = get_sample_out_file_name(file=file_path, sample=sample)
@@ -186,13 +187,16 @@ class DeliveryAPI:
 
     def _get_sample_files_from_version(
         self,
+        sample_internal_id: str,
         version: Version,
         workflow: str,
     ) -> list[Path]:
         """Fetch files for a sample from a version that are tagged with sample tags."""
         sample_files: list[Path] = []
         for file in version.files:
-            if should_include_file_sample(file=file, workflow=workflow):
+            if should_include_file_sample(
+                file=file, workflow=workflow, sample_internal_id=sample_internal_id
+            ):
                 sample_files.append(Path(file.full_path))
         return sample_files
 

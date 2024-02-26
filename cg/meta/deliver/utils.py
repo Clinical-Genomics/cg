@@ -94,13 +94,13 @@ def should_include_file_case(file: File, sample_ids: set[str], workflow: str) ->
     return any(tags.issubset(tags_on_file) for tags in case_tags)
 
 
-def should_include_file_sample(file: File, workflow: str) -> bool:
+def should_include_file_sample(file: File, workflow: str, sample_internal_id: str) -> bool:
     """Check if file should be included in sample bundle.
 
     At least one tag should match between file and the sample tags.
     """
     file_tags = {tag.name for tag in file.tags}
-    file_tags.add(file.version.bundle.name)
+    file_tags.add(sample_internal_id)
     sample_tags = get_sample_tags_for_workflow(workflow)
     return any(tags.issubset(file_tags) for tags in sample_tags)
 

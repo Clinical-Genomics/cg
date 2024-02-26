@@ -123,7 +123,7 @@ def test_get_sample_files_from_version(
 
     # WHEN fetching the sample specific files
     sample_files = deliver_api._get_sample_files_from_version(
-        version=version, workflow=Workflow.MIP_DNA
+        version=version, workflow=Workflow.MIP_DNA, sample_internal_id="ADM1"
     )
 
     # THEN assert that only the sample specific file was returned
