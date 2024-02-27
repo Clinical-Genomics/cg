@@ -274,7 +274,7 @@ class ReadHandler(BaseHandler):
     def get_case_samples_by_case_id(self, case_internal_id: str) -> list[CaseSample]:
         """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID],
+            filter_functions=[CaseSampleFilter.SAMPLES_IN_CASE_BY_INTERNAL_ID],
             case_internal_id=case_internal_id,
             case_samples=self._get_join_case_sample_query(),
         ).all()
@@ -569,8 +569,8 @@ class ReadHandler(BaseHandler):
     def get_case_sample_link(self, case_internal_id: str, sample_internal_id: str) -> CaseSample:
         """Return a case-sample link between a family and a sample."""
         filter_functions: list[CaseSampleFilter] = [
-            CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID,
-            CaseSampleFilter.GET_CASES_WITH_SAMPLE_BY_INTERNAL_ID,
+            CaseSampleFilter.SAMPLES_IN_CASE_BY_INTERNAL_ID,
+            CaseSampleFilter.CASES_WITH_SAMPLE_BY_INTERNAL_ID,
         ]
         return apply_case_sample_filter(
             filter_functions=filter_functions,
@@ -736,7 +736,7 @@ class ReadHandler(BaseHandler):
     def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> list[Sample] | None:
         """Get samples given a tissue type."""
         samples: Query = apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID],
+            filter_functions=[CaseSampleFilter.SAMPLES_IN_CASE_BY_INTERNAL_ID],
             case_samples=self._get_join_sample_family_query(),
             case_internal_id=case_id,
         )

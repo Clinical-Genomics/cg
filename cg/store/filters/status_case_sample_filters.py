@@ -40,5 +40,5 @@ def apply_case_sample_filter(
 class CaseSampleFilter(Enum):
     """Define CaseSample filter functions."""
 
-    GET_SAMPLES_IN_CASE_BY_INTERNAL_ID: Callable = filter_samples_in_case_by_internal_id
-    GET_CASES_WITH_SAMPLE_BY_INTERNAL_ID: Callable = filter_cases_with_sample_by_internal_id
+    SAMPLES_IN_CASE_BY_INTERNAL_ID: Callable = filter_samples_in_case_by_internal_id
+    CASES_WITH_SAMPLE_BY_INTERNAL_ID: Callable = filter_cases_with_sample_by_internal_id
