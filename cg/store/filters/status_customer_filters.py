@@ -23,7 +23,7 @@ def filter_customer_by_exclude_customer_internal_id(
 class CustomerFilter(Enum):
     """Define customer filter functions."""
 
-    FILTER_BY_INTERNAL_ID: Callable = filter_customer_by_customer_internal_id
+    BY_INTERNAL_ID: Callable = filter_customer_by_customer_internal_id
     EXCLUDE_INTERNAL_ID: Callable = filter_customer_by_exclude_customer_internal_id
 
 

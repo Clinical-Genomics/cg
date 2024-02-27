@@ -17,7 +17,10 @@ def filter_orders_by_id(orders: Query, id: int, **kwargs) -> Query:
 
 
 def apply_order_filters(
-    filter_functions: list[Callable], orders: Query, id: int = None, workflow: str = None
+    filter_functions: list[Callable],
+    orders: Query,
+    id: int | None = None,
+    workflow: str | None = None,
 ) -> Query:
     """Apply filtering functions to the order queries and return filtered results."""
     for filter_function in filter_functions:
@@ -28,5 +31,5 @@ def apply_order_filters(
 class OrderFilter(Enum):
     """Define order filter functions."""
 
-    FILTER_ORDERS_BY_ID: Callable = filter_orders_by_id
-    FILTER_ORDERS_BY_WORKFLOW: Callable = filter_orders_by_workflow
+    ORDERS_BY_ID: Callable = filter_orders_by_id
+    ORDERS_BY_WORKFLOW: Callable = filter_orders_by_workflow
