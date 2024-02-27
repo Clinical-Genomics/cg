@@ -1,4 +1,5 @@
 """Module for the collect qc metrics meta api."""
+
 from cg.meta.meta import MetaAPI
 
 
