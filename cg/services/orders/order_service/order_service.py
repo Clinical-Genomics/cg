@@ -14,9 +14,9 @@ from cg.store.store import Store
 
 
 class OrderService:
-    def __init__(self, store: Store, summary_service: OrderStatusService) -> None:
+    def __init__(self, store: Store, status_service: OrderStatusService) -> None:
         self.store = store
-        self.summary_service = summary_service
+        self.summary_service = status_service
 
     def get_order(self, order_id: int) -> OrderResponse:
         order: Order | None = self.store.get_order_by_id(order_id)
