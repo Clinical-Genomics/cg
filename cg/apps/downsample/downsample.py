@@ -9,7 +9,7 @@ from cg.meta.meta import MetaAPI
 from cg.meta.workflow.downsample.downsample import DownsampleWorkflow
 from cg.models.cg_config import CGConfig
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.store.models import Case, CaseSample, Order, Sample
+from cg.store.models import Case, CaseSample, Sample
 from cg.utils.calculations import multiply_by_million
 
 LOG = logging.getLogger(__name__)
@@ -69,13 +69,10 @@ class DownsampleAPI(MetaAPI):
         Add a down sampled case entry to StatusDB.
         """
         downsampled_case: Case = downsample_data.downsampled_case
-        original_case: Case = downsample_data.original_case
         if self.status_db.case_with_name_exists(case_name=downsampled_case.name):
             LOG.info(f"Case with name {downsampled_case.name} already exists in StatusDB.")
             return
         if not self.dry_run:
-            order: Order = original_case.latest_order
-            downsampled_case.orders.append(order)
             self.status_db.session.add(downsampled_case)
             self.status_db.session.commit()
             LOG.info(f"New down sampled case created: {downsampled_case.internal_id}")
