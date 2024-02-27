@@ -502,6 +502,14 @@ class Case(Base, PriorityMixin):
         return self.tickets.split(sep=",")[-1] if self.tickets else None
 
     @property
+    def latest_order(self) -> "Order":
+        """Returns the latest order this case was included in."""
+        sorted_orders: list[Order] = sorted(
+            self.orders, key=lambda order: order.order_date, reverse=True
+        )
+        return sorted_orders[0]
+
+    @property
     def latest_analyzed(self) -> datetime | None:
         return self.analyses[0].completed_at if self.analyses else None
 

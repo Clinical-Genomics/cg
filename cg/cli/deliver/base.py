@@ -1,14 +1,19 @@
 """CLI for delivering files with CG"""
 
 import logging
+from pathlib import Path
+
 import click
 
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS
-from cg.meta.deliver import DeliveryAPI
+from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
+from cg.meta.deliver import DeliverAPI
 from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.store.models import Case
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -64,21 +69,49 @@ def deliver_analysis(
     force_all: bool,
     ignore_missing_bundles: bool,
 ):
-    """Deliver analysis files to customer inbox.
+    """Deliver analysis files to customer inbox
+
     Files can be delivered either on case level or for all cases connected to a ticket.
+    Any of those needs to be specified.
     """
     if not (case_id or ticket):
         LOG.info("Please provide a case-id or ticket-id")
         return
 
-    delivery_api: DeliveryAPI = context.delivery_api
+    inbox: str = context.delivery_path
+    if not inbox:
+        LOG.info("Please specify the root path for where files should be delivered")
+        return
 
-    delivery_api.dry_run = dry_run
-    delivery_api.deliver_failed_samples = force_all
-    delivery_api.ignore_missing_bundles = ignore_missing_bundles
+    status_db: Store = context.status_db
+    for delivery in delivery_type:
+        deliver_api = DeliverAPI(
+            store=status_db,
+            hk_api=context.housekeeper_api,
+            case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["case_tags"],
+            sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"],
+            project_base_path=Path(inbox),
+            delivery_type=delivery,
+            force_all=force_all,
+            ignore_missing_bundles=ignore_missing_bundles,
+            fastq_file_service=FastqFileService(),
+        )
+        deliver_api.set_dry_run(dry_run)
+        cases: list[Case] = []
+        if case_id:
+            case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
+            if not case_obj:
+                LOG.warning(f"Could not find case {case_id}")
+                return
+            cases.append(case_obj)
+        else:
+            cases: list[Case] = status_db.get_cases_by_ticket_id(ticket_id=ticket)
+            if not cases:
+                LOG.warning(f"Could not find cases for ticket {ticket}")
+                return
 
-    for workflow in delivery_type:
-        delivery_api.deliver(case_id=case_id, ticket=ticket, workflow=workflow)
+        for case_obj in cases:
+            deliver_api.deliver_files(case_obj=case_obj)
 
 
 @deliver.command(name="rsync")
