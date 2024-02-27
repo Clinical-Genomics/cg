@@ -34,7 +34,7 @@ def add_case_summaries(
     for case_summary in case_summaries:
         order_summary = order_summary_map[case_summary.order_id]
         order_summary.in_sequencing = case_summary.in_sequencing
-        order_summary.in_preparation = case_summary.in_preparation
+        order_summary.in_preparation = case_summary.in_lab_preparation
 
 
 def get_total_cases_in_order(order: Order) -> int:
@@ -55,7 +55,7 @@ def get_case_status_summary(order: Order) -> CaseSummary:
     return CaseSummary(
         order_id=order.id,
         in_sequencing=in_sequencing,
-        in_preparation=in_preparation,
+        in_lab_preparation=in_preparation,
     )
 
 
@@ -67,7 +67,7 @@ def get_cases_with_samples_in_sequencing_count(order: Order) -> int:
     return sequencing_count
 
 
-def has_samples_in_sequencing(case: Case) -> int:
+def has_samples_in_sequencing(case: Case) -> bool:
     for sample in case.samples:
         if not sample.last_sequenced_at:
             return True
@@ -81,7 +81,7 @@ def get_cases_with_samples_in_preparation_count(order: Order) -> int:
     return preparation_count
 
 
-def has_samples_in_preparation(case: Case) -> int:
+def has_samples_in_preparation(case: Case) -> bool:
     for sample in case.samples:
         if not sample.prepared_at:
             return True
