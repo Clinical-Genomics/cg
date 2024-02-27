@@ -17,13 +17,9 @@ from cg.store.models import (
     Application,
     ApplicationLimitations,
     ApplicationVersion,
-    Case,
-    CaseSample,
-    Customer,
-    Flowcell,
 )
-from cg.store.models import Model as ModelBase
-from cg.store.models import Sample
+from cg.store.models import Base as ModelBase
+from cg.store.models import Case, CaseSample, Customer, Flowcell, Sample
 from cg.utils.date import get_date_days_ago
 
 

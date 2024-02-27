@@ -14,6 +14,7 @@ from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.tb import AnalysisTypes
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -52,6 +53,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
             sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
             delivery_type=delivery_type,
             project_base_path=Path(context.obj.delivery_path),
+            fastq_file_service=FastqFileService(),
         ).deliver_files(case_obj=case)
 
     rsync_api: RsyncAPI = RsyncAPI(context.obj)
@@ -65,12 +67,14 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
         {"jobs": [str(job_id)]}, config_path=rsync_api.trailblazer_config_path
     )
     analysis_name: str = f"{case_id}_rsync" if is_complete_delivery else f"{case_id}_partial"
+    order_id: int = case.latest_order.id
     if not dry_run:
         trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
         analysis: TrailblazerAnalysis = trailblazer_api.add_pending_analysis(
             case_id=analysis_name,
             analysis_type=AnalysisTypes.OTHER,
             config_path=rsync_api.trailblazer_config_path.as_posix(),
+            order_id=order_id,
             out_dir=rsync_api.log_dir.as_posix(),
             slurm_quality_of_service=Priority.priority_to_slurm_qos().get(case.priority),
             workflow=Workflow.RSYNC,

@@ -125,7 +125,7 @@ def filter_samples_by_internal_id_pattern(
     samples: Query, internal_id_pattern: str, **kwargs
 ) -> Query:
     """Return samples matching the internal id pattern."""
-    return samples.filter(Sample.internal_id.like(f"%{internal_id_pattern}%"))
+    return samples.filter(Sample.internal_id.contains(internal_id_pattern))
 
 
 def filter_samples_by_internal_id_or_name_search(
@@ -134,8 +134,8 @@ def filter_samples_by_internal_id_or_name_search(
     """Return samples matching the internal id or name search."""
     return samples.filter(
         or_(
-            Sample.name.like(f"%{search_pattern}%"),
-            Sample.internal_id.like(f"%{search_pattern}%"),
+            Sample.name.contains(search_pattern),
+            Sample.internal_id.contains(search_pattern),
         )
     )
 
