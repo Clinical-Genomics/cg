@@ -17,11 +17,11 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.clients.janus.api import JanusAPIClient
+from cg.clients.arnold.api import ArnoldAPIClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
-from cg.meta.deliver.delivery_api import DeliveryAPI
-from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
@@ -36,6 +36,10 @@ class Sequencers(BaseModel):
     hiseqx: str
     hiseqga: str
     novaseq: str
+
+
+class ArnoldConfig(BaseModel):
+    api_url: str
 
 
 class SlurmConfig(BaseModel):
@@ -75,6 +79,10 @@ class HousekeeperConfig(BaseModel):
 
 class DemultiplexConfig(BaseModel):
     slurm: SlurmConfig
+
+
+class JanusConfig(BaseModel):
+    host: str
 
 
 class TrailblazerConfig(BaseModel):
@@ -280,6 +288,8 @@ class CGConfig(BaseModel):
     housekeeper_api_: HousekeeperAPI = None
 
     # App APIs that can be instantiated in CGConfig
+    arnold: ArnoldConfig = Field(None, alias="arnold")
+    arnold_api_: ArnoldAPIClient | None = None
     backup: BackupConfig = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
@@ -316,7 +326,8 @@ class CGConfig(BaseModel):
     tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
-    delivery_api_: DeliveryAPI | None = None
+    janus: JanusConfig | None = None
+    janus_api_: JanusAPIClient | None = None
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
@@ -338,6 +349,7 @@ class CGConfig(BaseModel):
     class Config:
         arbitrary_types_allowed = True
         fields = {
+            "arnold_api_": "arnold_api",
             "chanjo_api_": "chanjo_api",
             "crunchy_api_": "crunchy_api",
             "demultiplex_api_": "demultiplex_api",
@@ -353,7 +365,17 @@ class CGConfig(BaseModel):
             "scout_api_": "scout_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
+            "janus_api_": "janus_api",
         }
+
+    @property
+    def arnold_api(self) -> ArnoldAPIClient:
+        api = self.__dict__.get("arnold_api_")
+        if api is None:
+            LOG.debug("Instantiating arnold api")
+            api = ArnoldAPIClient(config=self.dict())
+            self.arnold_api_ = api
+        return api
 
     @property
     def chanjo_api(self) -> ChanjoAPI:
@@ -420,6 +442,15 @@ class CGConfig(BaseModel):
             housekeeper_api = HousekeeperAPI(config=self.dict())
             self.housekeeper_api_ = housekeeper_api
         return housekeeper_api
+
+    @property
+    def janus_api(self) -> JanusAPIClient:
+        janus_api = self.__dict__.get("janus_api_")
+        if janus_api is None:
+            LOG.debug("Instantiating janus api")
+            janus_api = JanusAPIClient(config=self.dict())
+            self.janus_api_ = janus_api
+        return janus_api
 
     @property
     def lims_api(self) -> LimsAPI:
@@ -524,22 +555,4 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating trailblazer api")
             api = TrailblazerAPI(config=self.dict())
             self.trailblazer_api_ = api
-        return api
-
-    @property
-    def fastq_file_service(self) -> FastqFileService:
-        return FastqFileService()
-
-    @property
-    def delivery_api(self) -> DeliveryAPI:
-        api = self.__dict__.get("delivery_api_")
-        if api is None:
-            LOG.debug("Instantiating delivery api")
-            api = DeliveryAPI(
-                store=self.status_db,
-                hk_api=self.housekeeper_api,
-                customers_folder=self.delivery_path,
-                fastq_file_service=self.fastq_file_service,
-            )
-            self.delivery_api_ = api
         return api

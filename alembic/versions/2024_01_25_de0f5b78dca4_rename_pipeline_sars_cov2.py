@@ -6,12 +6,33 @@ Create Date: 2024-01-25 09:24:36.338102
 
 """
 
-from sqlalchemy import orm
+from enum import StrEnum
+
+from sqlalchemy import orm, types
 from sqlalchemy.dialects import mysql
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from alembic import op
-from cg.constants import Workflow
-from cg.store.models import Analysis, Case
+
+
+class Workflow(StrEnum):
+    BALSAMIC: str = "balsamic"
+    BALSAMIC_PON: str = "balsamic-pon"
+    BALSAMIC_QC: str = "balsamic-qc"
+    BALSAMIC_UMI: str = "balsamic-umi"
+    DEMULTIPLEX: str = "demultiplex"
+    FASTQ: str = "fastq"
+    FLUFFY: str = "fluffy"
+    MICROSALT: str = "microsalt"
+    MIP_DNA: str = "mip-dna"
+    MIP_RNA: str = "mip-rna"
+    MUTANT: str = "mutant"
+    RAREDISEASE: str = "raredisease"
+    RNAFUSION: str = "rnafusion"
+    RSYNC: str = "rsync"
+    SPRING: str = "spring"
+    TAXPROFILER: str = "taxprofiler"
+
 
 # revision identifiers, used by Alembic.
 revision = "de0f5b78dca4"
@@ -42,6 +63,23 @@ new_options.remove("sars-cov-2")
 
 old_enum = mysql.ENUM(*list(old_options))
 new_enum = mysql.ENUM(*list(new_options))
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+class Analysis(Base):
+    __tablename__ = "analysis"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    pipeline: Mapped[str]
+
+
+class Case(Base):
+    __tablename__ = "case"
+    data_analysis: Mapped[str]
+    id: Mapped[int] = mapped_column(primary_key=True)
 
 
 def upgrade():
