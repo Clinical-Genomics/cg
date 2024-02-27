@@ -173,7 +173,7 @@ class TrailblazerAPI:
         )
 
     def get_summaries(self, order_ids: list[int]) -> list[AnalysisSummary]:
-        orders_param = "orderIds=".join([f"{order_id}," for order_id in order_ids]).strip(",")
+        orders_param = "orderIds=" + ",".join(map(str, order_ids))
         endpoint = f"summary?{orders_param}"
         response = self.query_trailblazer(command=endpoint, request_body={}, method=APIMethods.GET)
         response_data = SummariesResponse.model_validate(response)
