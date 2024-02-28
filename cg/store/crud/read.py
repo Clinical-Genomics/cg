@@ -1195,7 +1195,7 @@ class ReadHandler(BaseHandler):
             "samples_delivered": case_data.samples_delivered,
             "analysis_delivery_reported_at": case_data.analysis_delivery_reported_at,
             "samples_invoiced": case_data.samples_invoiced,
-            "analysis_pipeline": case_data.analysis_pipeline,
+            "analysis_workflow": case_data.analysis_workflow,
             "samples_received_bool": case_data.samples_received_bool,
             "samples_prepared_bool": case_data.samples_prepared_bool,
             "samples_sequenced_bool": case_data.samples_sequenced_bool,
@@ -1399,7 +1399,7 @@ class ReadHandler(BaseHandler):
             case_data.analysis_delivery_reported_at = case_obj.analyses[
                 0
             ].delivery_report_created_at
-            case_data.analysis_pipeline = case_obj.analyses[0].pipeline
+            case_data.analysis_workflow = case_obj.analyses[0].workflow
             case_data.analysis_completed_bool = case_data.analysis_completed_at is not None
             case_data.analysis_uploaded_bool = case_data.analysis_uploaded_at is not None
             case_data.analysis_delivery_reported_bool = (
@@ -1831,7 +1831,7 @@ class ReadHandler(BaseHandler):
         case_data.analysis_delivery_reported_at = None
 
         case_data.samples_invoiced = None
-        case_data.analysis_pipeline = None
+        case_data.analysis_workflow = None
         case_data.samples_received_bool = None
         case_data.samples_prepared_bool = None
         case_data.samples_sequenced_bool = None

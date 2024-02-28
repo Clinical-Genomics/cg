@@ -394,7 +394,7 @@ def test_get_case_analysis_data_workflow_match_error(
 
     # GIVEN a pre-built case and a MIP-DNA analysis that has been started as Balsamic
     mip_analysis: Analysis = case_mip_dna.analyses[0]
-    mip_analysis.pipeline = Workflow.BALSAMIC
+    mip_analysis.workflow = Workflow.BALSAMIC
 
     # GIVEN a mip analysis mock metadata
     mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
@@ -408,7 +408,7 @@ def test_get_case_analysis_data_workflow_match_error(
         )
     assert (
         f"The analysis requested by the customer ({Workflow.MIP_DNA}) does not match the one executed "
-        f"({mip_analysis.pipeline})" in caplog.text
+        f"({mip_analysis.workflow})" in caplog.text
     )
 
 
@@ -423,7 +423,7 @@ def test_get_case_analysis_data_workflow_not_supported(
     # GIVEN a pre-built case with Fluffy as data analysis
     case_mip_dna.data_analysis = Workflow.FLUFFY
     mip_analysis: Analysis = case_mip_dna.analyses[0]
-    mip_analysis.pipeline = Workflow.FLUFFY
+    mip_analysis.workflow = Workflow.FLUFFY
 
     # GIVEN a mip analysis mock metadata
     mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
