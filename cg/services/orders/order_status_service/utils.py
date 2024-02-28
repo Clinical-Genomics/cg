@@ -18,7 +18,7 @@ def initialise_order_summaries(case_summaries: list[CaseSummary]) -> list[OrderS
     for case_summary in case_summaries:
         summary: OrderSummary = OrderSummary(
             order_id=case_summary.order_id,
-            total_cases=case_summary.total,
+            total=case_summary.total,
             in_sequencing=case_summary.in_sequencing,
             in_preparation=case_summary.in_lab_preparation,
         )
