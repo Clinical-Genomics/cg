@@ -16,7 +16,7 @@ def filter_valid_analyses_in_production(analyses: Query, **kwargs) -> Query:
 
 def filter_analyses_with_workflow(analyses: Query, workflow: Workflow = None, **kwargs) -> Query:
     """Return analyses with supplied workflow."""
-    return analyses.filter(Analysis.pipeline == workflow) if workflow else analyses
+    return analyses.filter(Analysis.workflow == workflow) if workflow else analyses
 
 
 def filter_completed_analyses(analyses: Query, **kwargs) -> Query:
@@ -49,9 +49,9 @@ def filter_report_analyses_by_workflow(
 ) -> Query:
     """Return the delivery report related analyses associated to the provided or supported workflows."""
     return (
-        analyses.filter(Analysis.pipeline == workflow)
+        analyses.filter(Analysis.workflow == workflow)
         if workflow
-        else analyses.filter(Analysis.pipeline.in_(REPORT_SUPPORTED_WORKFLOW))
+        else analyses.filter(Analysis.workflow.in_(REPORT_SUPPORTED_WORKFLOW))
     )
 
 
