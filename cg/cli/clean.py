@@ -218,7 +218,7 @@ def hk_bundle_files(
             LOG.warning(
                 f"Version not found for "
                 f"bundle:{bundle_name}; "
-                f"workflow: {analysis.pipeline}; "
+                f"workflow: {analysis.workflow}; "
                 f"date {analysis.started_at}"
             )
             continue
@@ -226,7 +226,7 @@ def hk_bundle_files(
         LOG.info(
             f"Version found for "
             f"bundle:{bundle_name}; "
-            f"workflow: {analysis.pipeline}; "
+            f"workflow: {analysis.workflow}; "
             f"date {analysis.started_at}"
         )
         version_files: list[File] = housekeeper_api.get_files(
