@@ -12,7 +12,9 @@ from cg.clients.janus.api import JanusAPIClient
 from cg.clients.janus.dto.create_qc_metrics_request import (
     CreateQCMetricsRequest,
     FilePathAndTag,
+    WorkflowInfo,
 )
+
 from cg.constants.housekeeper_tags import JanusTags
 from cg.meta.qc_metrics.collect_qc_metrics import CollectQCMetricsAPI
 from cg.store.models import Case, Sample
@@ -66,7 +68,13 @@ def janus_hk_store(
 
 
 @pytest.fixture(scope="function")
-def janus_store(store_with_multiple_cases_and_samples: Store) -> Store:
+def janus_store(
+    store_with_multiple_cases_and_samples: Store, helpers: StoreHelpers, case_id_with_single_sample
+) -> Store:
+    case: Case = store_with_multiple_cases_and_samples.get_case_by_internal_id(
+        case_id_with_single_sample
+    )
+    helpers.add_analysis(store_with_multiple_cases_and_samples, case=case)
     return store_with_multiple_cases_and_samples
 
 
@@ -111,7 +119,9 @@ def expected_request(
     return CreateQCMetricsRequest(
         case_id=case_id_with_single_sample,
         sample_ids=[sample.internal_id],
-        workflow=case.data_analysis,
+        workflow_info=WorkflowInfo(
+            workflow=case.data_analysis, version=case.analyses[0].workflow_version
+        ),
         files=[file_path_and_tag],
         prep_category=sample.prep_category,
     )
