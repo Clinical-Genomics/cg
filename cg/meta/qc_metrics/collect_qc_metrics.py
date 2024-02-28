@@ -12,6 +12,7 @@ from cg.clients.janus.dto.create_qc_metrics_request import (
     FilePathAndTag,
 )
 from cg.clients.janus.exceptions import JanusClientError, JanusServerError
+from cg.constants.housekeeper_tags import JanusTags
 from cg.exc import HousekeeperFileMissingError
 from cg.meta.meta import MetaAPI
 from cg.models.cg_config import CGConfig
@@ -31,7 +32,7 @@ class CollectQCMetricsAPI(MetaAPI):
     def get_qc_metrics_file_paths_for_case(self, case_id: str) -> list[File]:
         """Get the multiqc metrics files for a case."""
         files: list[File] = self.housekeeper_api.get_files(
-            bundle=case_id, tags=["qc-metrics", "janus"]
+            bundle=case_id, tags=JanusTags.tags_to_retrieve
         ).all()
         if not files:
             raise HousekeeperFileMissingError(f"No qc metrics files found for {case_id}.")
@@ -40,9 +41,8 @@ class CollectQCMetricsAPI(MetaAPI):
     @staticmethod
     def get_tag_to_include(tags: list[Tag]) -> str:
         """Get the multiqc module file tag."""
-        tags_to_exclude: list[str] = ["qc-metrics", "janus", "multiqc"]
         for tag in tags:
-            if tag.name not in tags_to_exclude:
+            if tag.name in JanusTags.multi_qc_file_tags:
                 return tag.name
 
     def get_file_paths_and_tags(self, files: list[File]) -> list[FilePathAndTag]:
@@ -54,9 +54,9 @@ class CollectQCMetricsAPI(MetaAPI):
             file_paths_and_tags.append(FilePathAndTag(file_path=file_path, tag=tag))
         return file_paths_and_tags
 
-    def get_prep_category(self, case_id: str):
-        """Get the prep category for a sample."""
-        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
+    def get_prep_category(self, case_id: str) -> str:
+        """Get the prep category."""
+        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id)
         return samples[0].prep_category
 
     def create_qc_metrics_request(self, case_id: str) -> CreateQCMetricsRequest:
@@ -66,7 +66,7 @@ class CollectQCMetricsAPI(MetaAPI):
         case: Case = self.status_db.get_case_by_internal_id(case_id)
         workflow: str = case.data_analysis
         sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id)
-        prep_category: str = self.get_prep_category(case.internal_id)
+        prep_category: str = self.get_prep_category(case_id)
         return CreateQCMetricsRequest(
             case_id=case_id,
             sample_ids=sample_ids,

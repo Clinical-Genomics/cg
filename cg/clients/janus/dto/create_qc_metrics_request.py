@@ -2,6 +2,8 @@
 
 from pydantic import BaseModel
 
+from cg.constants import PrepCategory, Workflow
+
 
 class FilePathAndTag(BaseModel):
     """Model for the file path and its associated tag."""
@@ -16,5 +18,5 @@ class CreateQCMetricsRequest(BaseModel):
     case_id: str
     sample_ids: list[str]
     files: list[FilePathAndTag]
-    workflow: str
-    prep_category: str
+    workflow: Workflow
+    prep_category: PrepCategory

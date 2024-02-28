@@ -208,3 +208,17 @@ WORKFLOW_PROTECTED_TAGS = {
         [AnalysisTag.GENE_COUNTS],
     ],
 }
+
+
+class JanusTags:
+    tags_to_retrieve: list[str] = ["qc-metrics", "janus"]
+    multi_qc_file_tags: list[str] = [
+        "hsmetrics",
+        "dups",
+        "stats",
+        "alignmentsummarymetrics",
+        "fastp",
+        "somalier",
+        "insertsize",
+        "wgsmetrics",
+    ]
