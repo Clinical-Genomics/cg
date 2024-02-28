@@ -9,4 +9,4 @@ class OrderSummary(BaseModel):
     cancelled: int | None = None
     failed: int | None = None
     in_sequencing: int | None = None
-    in_preparation: int | None = None
+    in_lab_preparation: int | None = None

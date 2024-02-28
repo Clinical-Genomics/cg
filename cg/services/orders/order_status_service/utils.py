@@ -4,6 +4,17 @@ from cg.services.orders.order_status_service.dto.order_status_summary import Ord
 from cg.store.models import Case, Order
 
 
+def create_summaries(
+    orders: list[Order], analysis_summaries: list[AnalysisSummary]
+) -> list[OrderSummary]:
+    summaries: list[OrderSummary] = []
+    for order in orders:
+        summary: OrderSummary = create_order_summary(order)
+        summaries.append(summary)
+    add_analysis_summaries(order_summaries=summaries, analysis_summaries=analysis_summaries)
+    return summaries
+
+
 def add_analysis_summaries(
     order_summaries: list[OrderSummary],
     analysis_summaries: list[AnalysisSummary],
@@ -17,24 +28,13 @@ def add_analysis_summaries(
         order_summary.failed = analysis_summary.failed
 
 
-def create_summaries(
-    orders: list[Order], analysis_summaries: list[AnalysisSummary]
-) -> list[OrderSummary]:
-    summaries: list[OrderSummary] = []
-    for order in orders:
-        summary: OrderSummary = get_case_status_summary(order)
-        summaries.append(summary)
-    add_analysis_summaries(order_summaries=summaries, analysis_summaries=analysis_summaries)
-    return summaries
-
-
 class CaseStatus(Enum):
     SEQUENCING = 1
     LAB_PREPARATION = 2
     OTHER = 3
 
 
-def get_case_status_summary(order: Order) -> OrderSummary:
+def create_order_summary(order: Order) -> OrderSummary:
     in_sequencing: int = 0
     in_preparation: int = 0
 
