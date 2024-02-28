@@ -1,29 +1,7 @@
 from enum import Enum
 from cg.apps.tb.dto.summary_response import AnalysisSummary
 from cg.services.orders.order_status_service.dto.order_status_summary import OrderSummary
-from cg.services.orders.order_status_service.dto.case_status_summary import CaseSummary
 from cg.store.models import Case, Order
-
-
-def create_summaries(
-    case_summaries: list[CaseSummary], analysis_summaries: list[AnalysisSummary]
-) -> list[OrderSummary]:
-    summaries: list[OrderSummary] = initialise_order_summaries(case_summaries)
-    add_analysis_summaries(summaries, analysis_summaries)
-    return summaries
-
-
-def initialise_order_summaries(case_summaries: list[CaseSummary]) -> list[OrderSummary]:
-    summaries: list[OrderSummary] = []
-    for case_summary in case_summaries:
-        summary: OrderSummary = OrderSummary(
-            order_id=case_summary.order_id,
-            total=case_summary.total,
-            in_sequencing=case_summary.in_sequencing,
-            in_preparation=case_summary.in_lab_preparation,
-        )
-        summaries.append(summary)
-    return summaries
 
 
 def add_analysis_summaries(
@@ -39,11 +17,14 @@ def add_analysis_summaries(
         order_summary.failed = analysis_summary.failed
 
 
-def create_case_status_summaries(orders: list[Order]) -> list[CaseSummary]:
-    summaries: list[CaseSummary] = []
+def create_summaries(
+    orders: list[Order], analysis_summaries: list[AnalysisSummary]
+) -> list[OrderSummary]:
+    summaries: list[OrderSummary] = []
     for order in orders:
-        summary: CaseSummary = get_case_status_summary(order)
+        summary: OrderSummary = get_case_status_summary(order)
         summaries.append(summary)
+    add_analysis_summaries(order_summaries=summaries, analysis_summaries=analysis_summaries)
     return summaries
 
 
@@ -53,7 +34,7 @@ class CaseStatus(Enum):
     OTHER = 3
 
 
-def get_case_status_summary(order: Order) -> CaseSummary:
+def get_case_status_summary(order: Order) -> OrderSummary:
     in_sequencing: int = 0
     in_preparation: int = 0
 
@@ -64,7 +45,7 @@ def get_case_status_summary(order: Order) -> CaseSummary:
         if status == CaseStatus.LAB_PREPARATION:
             in_preparation += 1
 
-    return CaseSummary(
+    return OrderSummary(
         order_id=order.id,
         total=len(order.cases),
         in_sequencing=in_sequencing,
