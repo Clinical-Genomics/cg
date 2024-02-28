@@ -339,7 +339,7 @@ class NfAnalysisAPI(AnalysisAPI):
         return FileDeliverable(**deliverables)
 
     def get_deliverables_for_sample(
-        self, sample: Sample, case_id: str, template: list[dict]
+        self, sample: Sample, case_id: str, template: list[dict[str, str]]
     ) -> list[FileDeliverable]:
         """Return a list of FileDeliverables for each sample."""
         sample_id: str = sample.internal_id
