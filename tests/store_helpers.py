@@ -502,6 +502,7 @@ class StoreHelpers:
         data_analysis: Workflow = Workflow.MIP_DNA,
         data_delivery: DataDelivery = DataDelivery.SCOUT,
         action: str = None,
+        order: Order = None,
     ):
         """Load a case with samples and link relations."""
         if not customer:
@@ -519,6 +520,8 @@ class StoreHelpers:
                 action=action,
             )
             case.customer = customer
+        if order:
+            order.cases = [case]
         return case
 
     @staticmethod
