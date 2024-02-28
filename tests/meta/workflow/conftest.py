@@ -14,6 +14,14 @@ from cg.models.cg_config import CGConfig
 from cg.models.compression_data import CompressionData
 from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Case, Sample
+from tests.cli.workflow.balsamic.conftest import (
+    balsamic_housekeeper_dir,
+    fastq_file_l_1_r_1,
+    fastq_file_l_2_r_1,
+    fastq_file_l_2_r_2,
+)
+from tests.meta.compress.conftest import compress_api, real_crunchy_api
+from tests.meta.upload.scout.conftest import another_sample_id
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
 
