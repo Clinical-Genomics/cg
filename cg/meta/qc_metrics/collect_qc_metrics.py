@@ -5,6 +5,7 @@ from typing import Iterator
 
 from housekeeper.store.models import File, Tag
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.clients.arnold.api import ArnoldAPIClient
 from cg.clients.janus.api import JanusAPIClient
 from cg.clients.janus.dto.create_qc_metrics_request import (
@@ -14,24 +15,30 @@ from cg.clients.janus.dto.create_qc_metrics_request import (
 from cg.clients.janus.exceptions import JanusClientError, JanusServerError
 from cg.constants.housekeeper_tags import JanusTags
 from cg.exc import HousekeeperFileMissingError
-from cg.meta.meta import MetaAPI
-from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
 
-class CollectQCMetricsAPI(MetaAPI):
+class CollectQCMetricsAPI:
     """Collect qc metrics API."""
 
-    def __init__(self, config: CGConfig):
-        super().__init__(config)
-        self.janus_api: JanusAPIClient = config.janus_api
-        self.arnold_api: ArnoldAPIClient = config.arnold_api
+    def __init__(
+        self,
+        hk_api: HousekeeperAPI,
+        status_db: Store,
+        janus_api: JanusAPIClient,
+        arnold_api: ArnoldAPIClient,
+    ):
+        self.hk_api: HousekeeperAPI = hk_api
+        self.status_db: Store = status_db
+        self.janus_api: JanusAPIClient = janus_api
+        self.arnold_api: ArnoldAPIClient = arnold_api
 
     def get_qc_metrics_file_paths_for_case(self, case_id: str) -> list[File]:
         """Get the multiqc metrics files for a case."""
-        files: list[File] = self.housekeeper_api.get_files(
+        files: list[File] = self.hk_api.get_files(
             bundle=case_id, tags=JanusTags.tags_to_retrieve
         ).all()
         if not files:

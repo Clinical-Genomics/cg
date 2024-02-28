@@ -4,12 +4,18 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
+from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.clients.arnold.api import ArnoldAPIClient
 from cg.clients.janus.api import JanusAPIClient
+from cg.clients.janus.dto.create_qc_metrics_request import (
+    CreateQCMetricsRequest,
+    FilePathAndTag,
+)
+from cg.constants.housekeeper_tags import JanusTags
 from cg.meta.qc_metrics.collect_qc_metrics import CollectQCMetricsAPI
-from cg.models.cg_config import CGConfig
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -75,22 +81,37 @@ def mock_arnold_api() -> ArnoldAPIClient:
 
 
 @pytest.fixture(scope="function")
-def janus_context(
-    context_config: dict,
+def collect_qc_metrics_api(
     janus_store: Store,
     janus_hk_store: HousekeeperAPI,
     mock_janus_api: JanusAPIClient,
     mock_arnold_api: ArnoldAPIClient,
-) -> CGConfig:
-    """Return a cg config."""
-    cg_config = CGConfig(**context_config)
-    cg_config.status_db_ = janus_store
-    cg_config.housekeeper_api_ = janus_hk_store
-    cg_config.janus_api_ = mock_janus_api
-    cg_config.arnold_api_ = mock_arnold_api
-    return cg_config
+):
+    return CollectQCMetricsAPI(
+        hk_api=janus_hk_store,
+        status_db=janus_store,
+        janus_api=mock_janus_api,
+        arnold_api=mock_arnold_api,
+    )
 
 
-@pytest.fixture(scope="function")
-def collect_qc_metrics_api(janus_context):
-    return CollectQCMetricsAPI(config=janus_context)
+@pytest.fixture
+def expected_request(
+    case_id_with_single_sample: str,
+    sample_id_in_single_case: str,
+    janus_hk_store: HousekeeperAPI,
+    janus_store: Store,
+) -> CreateQCMetricsRequest:
+    hk_file: File = janus_hk_store.get_files(
+        case_id_with_single_sample, tags=JanusTags.tags_to_retrieve
+    ).first()
+    sample: Sample = janus_store.get_samples_by_case_id(case_id_with_single_sample)[0]
+    case: Case = janus_store.get_case_by_internal_id(case_id_with_single_sample)
+    file_path_and_tag = FilePathAndTag(file_path=hk_file.full_path, tag="hsmetrics")
+    return CreateQCMetricsRequest(
+        case_id=case_id_with_single_sample,
+        sample_ids=[sample.internal_id],
+        workflow=case.data_analysis,
+        files=[file_path_and_tag],
+        prep_category=sample.prep_category,
+    )
