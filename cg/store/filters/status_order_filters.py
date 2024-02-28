@@ -31,5 +31,5 @@ def apply_order_filters(
 class OrderFilter(Enum):
     """Define order filter functions."""
 
-    FILTER_ORDERS_BY_ID: Callable = filter_orders_by_id
-    FILTER_ORDERS_BY_WORKFLOW: Callable = filter_orders_by_workflow
+    ORDERS_BY_ID: Callable = filter_orders_by_id
+    ORDERS_BY_WORKFLOW: Callable = filter_orders_by_workflow
