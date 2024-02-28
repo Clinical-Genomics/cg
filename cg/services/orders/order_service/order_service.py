@@ -1,16 +1,22 @@
-from cg.exc import OrderNotFoundError
 from cg.models.orders.order import OrderIn
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order as OrderResponse
 from cg.server.dto.orders.orders_response import OrdersResponse
-from cg.services.orders.utils import create_order_response, create_orders_response
+from cg.services.orders.order_service.exceptions import OrderNotFoundError
+from cg.services.orders.order_service.utils import (
+    create_order_response,
+    create_orders_response,
+)
+from cg.services.orders.order_status_service import OrderStatusService
+from cg.services.orders.order_status_service.dto.order_status_summary import OrderSummary
 from cg.store.models import Order
 from cg.store.store import Store
 
 
 class OrderService:
-    def __init__(self, store: Store) -> None:
+    def __init__(self, store: Store, status_service: OrderStatusService) -> None:
         self.store = store
+        self.summary_service = status_service
 
     def get_order(self, order_id: int) -> OrderResponse:
         order: Order | None = self.store.get_order_by_id(order_id)
@@ -19,14 +25,14 @@ class OrderService:
         return create_order_response(order)
 
     def get_orders(self, orders_request: OrdersRequest) -> OrdersResponse:
-        orders: list[Order] = self._get_orders(orders_request)
-        return create_orders_response(orders)
+        orders: list[Order] = self.store.get_orders(orders_request)
 
-    def _get_orders(self, orders_request: OrdersRequest) -> list[Order]:
-        """Returns a list of entries in the table Order."""
-        return self.store.get_orders_by_workflow(
-            workflow=orders_request.workflow, limit=orders_request.limit
-        )
+        summaries: list[OrderSummary] = []
+        if orders_request.include_summary:
+            order_ids: list[int] = [order.id for order in orders]
+            summaries = self.summary_service.get_status_summaries(order_ids)
+
+        return create_orders_response(orders=orders, summaries=summaries)
 
     def create_order(self, order_data: OrderIn) -> OrderResponse:
         """Creates an order and links it to the given cases."""
