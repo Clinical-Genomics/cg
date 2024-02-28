@@ -245,7 +245,7 @@ class StoreHelpers:
         limitations: str = "Dummy limitations",
         **kwargs,
     ) -> ApplicationLimitations:
-        """Ensure that application limitations exists in store."""
+        """Ensure that application limitations exist in store."""
         application_limitation: ApplicationLimitations = (
             store.get_application_limitation_by_tag_and_workflow(
                 tag=application.tag, workflow=workflow

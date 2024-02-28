@@ -42,7 +42,6 @@ from cg.services.orders.order_service import OrderService
 from cg.store.models import (
     Analysis,
     Application,
-    ApplicationLimitations,
     Case,
     Customer,
     Flowcell,
@@ -466,16 +465,14 @@ def parse_application(tag: str):
     return jsonify(**application.to_dict())
 
 
-@BLUEPRINT.route("/applications/<tag>/pipeline_limitations")
+@BLUEPRINT.route("/applications/<tag>/workflow_limitations")
 @is_public
-def get_application_pipeline_limitations(tag: str):
-    """Return application pipeline specific limitations."""
-    application_limitations: list[ApplicationLimitations] = db.get_application_limitations_by_tag(
-        tag
-    )
-    if not application_limitations:
+def get_application_workflow_limitations(tag: str):
+    """Return application workflow specific limitations."""
+    if application_limitations := db.get_application_limitations_by_tag(tag):
+        return jsonify([limitation.to_dict() for limitation in application_limitations])
+    else:
         return jsonify(message="Application limitations not found"), HTTPStatus.NOT_FOUND
-    return jsonify([limitation.to_dict() for limitation in application_limitations])
 
 
 @BLUEPRINT.route("/orders")

@@ -937,7 +937,7 @@ def test_get_application_limitation_by_tag_and_workflow(
     assert (
         application_limitation
         and application_limitation.application.tag == tag
-        and application_limitation.pipeline == workflow
+        and application_limitation.workflow == workflow
     )
 
 

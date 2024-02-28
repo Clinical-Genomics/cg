@@ -240,7 +240,7 @@ class ApplicationLimitations(Base):
 
     id: Mapped[PrimaryKeyInt]
     application_id: Mapped[int] = mapped_column(ForeignKey(Application.id))
-    pipeline: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
+    workflow: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
     limitations: Mapped[Text | None]
     comment: Mapped[Text | None]
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
@@ -249,7 +249,7 @@ class ApplicationLimitations(Base):
     application: Mapped[Application] = orm.relationship(back_populates="pipeline_limitations")
 
     def __str__(self):
-        return f"{self.application.tag} – {self.pipeline}"
+        return f"{self.application.tag} – {self.workflow}"
 
     def to_dict(self):
         return to_dict(model_instance=self)

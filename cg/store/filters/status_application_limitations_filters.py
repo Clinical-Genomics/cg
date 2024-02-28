@@ -18,7 +18,7 @@ def filter_application_limitations_by_workflow(
     application_limitations: Query, workflow: Workflow, **kwargs
 ) -> Query:
     """Return application limitations by workflow."""
-    return application_limitations.filter(ApplicationLimitations.pipeline == workflow)
+    return application_limitations.filter(ApplicationLimitations.workflow == workflow)
 
 
 def apply_application_limitations_filter(
