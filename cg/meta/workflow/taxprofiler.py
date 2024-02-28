@@ -166,7 +166,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
 
         return metrics_values
 
-    def get_deliverables_template_content(self) -> list[dict]:
+    def get_deliverables_template_content(self) -> list[dict[str, str]]:
         """Return deliverables file template content."""
         return ReadFile.get_content_from_file(
             file_format=FileFormat.YAML,
