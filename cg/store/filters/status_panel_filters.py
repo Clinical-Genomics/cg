@@ -14,7 +14,7 @@ def filter_panel_by_abbrev(panels: Query, abbreviation: str, **kwargs) -> Query:
 class PanelFilter(Enum):
     """Define Panel filter functions."""
 
-    FILTER_BY_ABBREVIATION: Callable = filter_panel_by_abbrev
+    BY_ABBREVIATION: Callable = filter_panel_by_abbrev
 
 
 def apply_panel_filter(

@@ -317,7 +317,7 @@ class StoreHelpers:
         delivery_reported_at: datetime = None,
         cleaned_at: datetime = None,
         workflow: Workflow = Workflow.BALSAMIC,
-        pipeline_version: str = "1.0",
+        workflow_version: str = "1.0",
         data_delivery: DataDelivery = DataDelivery.FASTQ_QC,
         uploading: bool = False,
         config_path: str = None,
@@ -327,7 +327,7 @@ class StoreHelpers:
         if not case:
             case = StoreHelpers.add_case(store, data_analysis=workflow, data_delivery=data_delivery)
 
-        analysis = store.add_analysis(workflow=workflow, version=pipeline_version, case_id=case.id)
+        analysis = store.add_analysis(workflow=workflow, version=workflow_version, case_id=case.id)
 
         analysis.started_at = started_at or datetime.now()
         if completed_at:
@@ -343,7 +343,7 @@ class StoreHelpers:
         if config_path:
             analysis.config_path = config_path
         if workflow:
-            analysis.pipeline = str(workflow)
+            analysis.workflow = str(workflow)
 
         analysis.limitations = "A limitation"
         analysis.case = case

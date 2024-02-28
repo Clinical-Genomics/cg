@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Query
 
 from cg.store.filters.status_case_sample_filters import (
-    get_cases_with_sample_by_internal_id,
-    get_samples_in_case_by_internal_id,
+    filter_cases_with_sample_by_internal_id,
+    filter_samples_in_case_by_internal_id,
 )
 from cg.store.store import Store
 
@@ -16,7 +16,7 @@ def test_get_samples_in_case_by_internal_id_valid_id(
     case_sample_query: Query = store_with_analyses_for_cases._get_join_case_sample_query()
 
     # WHEN filtering by the chosen case internal id
-    filtered_query: Query = get_samples_in_case_by_internal_id(
+    filtered_query: Query = filter_samples_in_case_by_internal_id(
         case_samples=case_sample_query, case_internal_id=case_id
     )
 
@@ -36,7 +36,7 @@ def test_get_samples_in_case_by_internal_id_nonexistent_id(
     assert case_sample_query.count() > 0
 
     # WHEN filtering using a non-existent id
-    filtered_query: Query = get_samples_in_case_by_internal_id(
+    filtered_query: Query = filter_samples_in_case_by_internal_id(
         case_samples=case_sample_query, case_internal_id=case_id_does_not_exist
     )
 
@@ -53,7 +53,7 @@ def test_get_cases_with_sample_by_internal_id_valid_id(
     case_sample_query: Query = store_with_analyses_for_cases._get_join_case_sample_query()
 
     # WHEN filtering using a sample internal id
-    filtered_query: Query = get_cases_with_sample_by_internal_id(
+    filtered_query: Query = filter_cases_with_sample_by_internal_id(
         case_samples=case_sample_query, sample_internal_id=sample_id
     )
 
@@ -73,7 +73,7 @@ def test_get_cases_with_sample_by_internal_id_invalid_id(
     assert case_sample_query.count() > 0
 
     # WHEN filtering using an invalid sample internal id
-    filtered_query: Query = get_cases_with_sample_by_internal_id(
+    filtered_query: Query = filter_cases_with_sample_by_internal_id(
         case_samples=case_sample_query, sample_internal_id=invalid_sample_id
     )
 
