@@ -308,12 +308,10 @@ class NfAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
 
-    @staticmethod
     def get_deliverables_template_content(self) -> list[dict]:
         """Return deliverables file template content."""
         raise NotImplementedError
 
-    @staticmethod
     def get_bundle_filenames_path(self) -> Path | None:
         """Return bundle filenames path."""
         return None
