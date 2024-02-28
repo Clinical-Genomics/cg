@@ -2,9 +2,12 @@
 
 from housekeeper.store.models import File
 
-from cg.clients.janus.dto.create_qc_metrics_request import CreateQCMetricsRequest, FilePathAndTag
+from cg.clients.janus.dto.create_qc_metrics_request import (
+    CreateQCMetricsRequest,
+    FilePathAndTag,
+)
 from cg.meta.qc_metrics.collect_qc_metrics import CollectQCMetricsAPI
-from cg.store.models import Sample, Case
+from cg.store.models import Case, Sample
 
 
 def test_get_qc_metrics_file_paths_for_case(

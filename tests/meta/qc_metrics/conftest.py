@@ -51,7 +51,7 @@ def janus_hk_store(
             {
                 "path": file_without_right_tags,
                 "archive": False,
-                "tags": ["wrong", "tags"],
+                "tags": ["not", "the", "tags", "you", "are", "looking", "for"],
             },
         ],
     }
