@@ -67,7 +67,7 @@ class UploadScoutAPI:
         hk_version_obj: Version = self.housekeeper.last_version(analysis.case.internal_id)
         LOG.debug(f"Found housekeeper version {hk_version_obj.id}")
 
-        LOG.info(f"Found workflow {analysis.pipeline}")
+        LOG.info(f"Found workflow {analysis.workflow}")
         config_builder = self.get_config_builder(analysis=analysis, hk_version=hk_version_obj)
 
         config_builder.build_load_config()
@@ -432,7 +432,7 @@ class UploadScoutAPI:
             ),
         }
 
-        return config_builders[analysis.pipeline]
+        return config_builders[analysis.workflow]
 
     def create_rna_dna_collections(self, rna_case: Case) -> list[RNADNACollection]:
         return [self.create_rna_dna_collection(link.sample) for link in rna_case.links]

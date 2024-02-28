@@ -245,17 +245,17 @@ def test_analyses_to_upload_when_analysis_has_workflow(helpers, sample_store, ti
 def test_analyses_to_upload_when_filtering_with_workflow(helpers, sample_store, timestamp):
     """Test analyses to upload to when existing workflow and using it in filtering."""
     # GIVEN a store with an analysis that is analysed with MIP
-    pipeline = Workflow.MIP_DNA
-    helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=pipeline)
+    workflow = Workflow.MIP_DNA
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=workflow)
 
-    # WHEN fetching all pipelines that are analysed with MIP
+    # WHEN fetching all workflows that are analysed with MIP
     records: list[Analysis] = [
-        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=pipeline)
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=workflow)
     ]
 
     for analysis_obj in records:
         # THEN the workflow should be MIP in the analysis object
-        assert analysis_obj.pipeline == str(pipeline)
+        assert analysis_obj.workflow == workflow
 
 
 def test_analyses_to_upload_with_workflow_and_no_complete_at(helpers, sample_store, timestamp):

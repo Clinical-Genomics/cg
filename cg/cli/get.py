@@ -84,8 +84,8 @@ def get_analysis(context: CGConfig, case_id: str):
     for case_analysis in case.analyses:
         row = [
             case_analysis.started_at,
-            case_analysis.pipeline,
-            case_analysis.pipeline_version,
+            case_analysis.workflow,
+            case_analysis.workflow_version,
         ]
         click.echo(tabulate([row], headers=ANALYSIS_HEADERS, tablefmt="psql"))
 
