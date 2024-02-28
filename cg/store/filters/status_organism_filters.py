@@ -14,7 +14,7 @@ def filter_organism_by_internal_id(organisms: Query, internal_id: str, **kwargs)
 class OrganismFilter(Enum):
     """Define Organism filter functions."""
 
-    FILTER_BY_INTERNAL_ID: Callable = filter_organism_by_internal_id
+    BY_INTERNAL_ID: Callable = filter_organism_by_internal_id
 
 
 def apply_organism_filter(
