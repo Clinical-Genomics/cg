@@ -359,7 +359,7 @@ class NfAnalysisAPI(AnalysisAPI):
         return files
 
     def get_deliverables_for_case(self, case_id: str) -> WorkflowDeliverables:
-        """Return WorkflowDeliverables for a given case."""
+        """Return workflow deliverables for a given case."""
         deliverable_template: list[dict] = self.get_deliverables_template_content()
         samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
         files: list[FileDeliverable] = []
