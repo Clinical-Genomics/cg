@@ -48,9 +48,9 @@ class DeleteDataHandler(BaseHandler):
         self, flow_cell_name: str
     ) -> None:
         """Delete all entries in sample_lane_sequencing_metrics for a flow cell."""
-        metrics: list[
-            SampleLaneSequencingMetrics
-        ] = self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
+        metrics: list[SampleLaneSequencingMetrics] = (
+            self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
+        )
         for metric in metrics:
             if metric:
                 self.session.delete(metric)
