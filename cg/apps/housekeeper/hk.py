@@ -411,6 +411,8 @@ class HousekeeperAPI:
         any tag sets specified in the exclude_tags list will be excluded from the output.
         """
         filtered_files: list[File] = []
+        if not tags:
+            return filtered_files
         files: list[File] = self.get_files_from_latest_version(bundle_name=bundle_name)
         for file in files:
             file_tags: set[str] = {tag.name for tag in file.tags}
