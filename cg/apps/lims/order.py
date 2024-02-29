@@ -1,6 +1,6 @@
 import logging
 
-from genologics.entities import Container, Containertype, Project, Researcher, Sample
+from genologics.entities import Container, Containertype, Project, Sample
 from lxml import etree
 from lxml.objectify import ObjectifiedElement
 
@@ -48,13 +48,11 @@ class OrderHandler:
         results = self.save_xml(artifact_uri, artifact_details)
         return results
 
-    def submit_project(self, project_name: str, samples: list[dict], researcher_id: str = "3"):
+    def submit_project(self, project_name: str, samples: list[dict]):
         """Parse Scout project."""
         containers = self.prepare(samples)
 
-        lims_project = Project.create(
-            self, researcher=Researcher(self, id=researcher_id), name=project_name
-        )
+        lims_project = Project.create(self, researcher=self.user, name=project_name)
         LOG.info(f"{lims_project.id}: created new LIMS project")
 
         containers_data = [

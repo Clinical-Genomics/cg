@@ -8,6 +8,7 @@ from cg import resources
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat, Strandedness
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
+from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
 from cg.exc import MissingMetrics
 from cg.io.controller import ReadFile
 from cg.io.json import read_json
@@ -15,7 +16,6 @@ from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.fastq import FastqFileMeta
-from cg.models.nf_analysis import PipelineDeliverables
 from cg.models.rnafusion.rnafusion import (
     RnafusionAnalysis,
     RnafusionParameters,
@@ -56,17 +56,21 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         when determining if the analysis for a case should be automatically started."""
         return True
 
-    @staticmethod
-    def get_deliverables_template_content() -> list[dict]:
+    def get_deliverables_template_content(self) -> list[dict]:
         """Return deliverables file template content."""
         return ReadFile.get_content_from_file(
             file_format=FileFormat.YAML,
-            file_path=resources.RNAFUSION_BUNDLE_FILENAMES_PATH,
+            file_path=self.get_bundle_filenames_path(),
         )
 
     def get_nextflow_config_content(self) -> str:
         """Return nextflow config content."""
         return MULTIQC_NEXFLOW_CONFIG
+
+    @staticmethod
+    def get_bundle_filenames_path() -> Path:
+        """Return Rnafusion bundle filenames path."""
+        return RNAFUSION_BUNDLE_FILENAMES_PATH
 
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, case_id: str, strandedness: Strandedness
@@ -167,17 +171,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             sample_id=sample_id, metrics_values=metric_values
         )
         return metric_base_list
-
-    def report_deliver(self, case_id: str) -> None:
-        """Create deliverables file."""
-        deliverables_content: PipelineDeliverables = self.get_deliverables_for_case(case_id=case_id)
-        self.write_deliverables_file(
-            deliverables_content=deliverables_content.dict(),
-            file_path=self.get_deliverables_file_path(case_id=case_id),
-        )
-        LOG.info(
-            f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
-        )
 
     @staticmethod
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:

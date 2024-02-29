@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel
 
-from cg.constants import PrepCategory, Workflow
+from cg.constants import Workflow
 
 
 class WorkflowInfo(BaseModel):
@@ -24,4 +24,3 @@ class CreateQCMetricsRequest(BaseModel):
     sample_ids: list[str]
     files: list[FilePathAndTag]
     workflow_info: WorkflowInfo
-    prep_category: PrepCategory
