@@ -90,7 +90,7 @@ def test_concat_txt_with_string(
     concat_txt(
         file_paths=[txt_file_path, txt_file_path_2],
         target_file=txt_temp_path,
-        str_content=csv_stream,
+        str_content=[csv_stream],
     )
 
     # THEN the target file should exist
