@@ -1,14 +1,15 @@
-from cg.server.dto.orders.orders_response import Order, OrderSummary, OrdersResponse
+from cg.server.dto.orders.orders_response import Order, OrdersResponse, OrderSummary
 from cg.store.models import Order as DatabaseOrder
 
 
-def create_order_response(order: DatabaseOrder) -> Order:
+def create_order_response(order: DatabaseOrder, summary: OrderSummary | None = None) -> Order:
     return Order(
         customer_id=order.customer.internal_id,
         ticket_id=order.ticket_id,
         order_date=str(order.order_date.date()),
         order_id=order.id,
         workflow=order.workflow,
+        summary=summary,
     )
 
 

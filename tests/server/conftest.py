@@ -9,6 +9,7 @@ from flask import Flask
 from flask.testing import FlaskClient
 from mock import patch
 
+from cg.apps.tb.dto.summary_response import AnalysisSummary
 from cg.constants import DataDelivery, Workflow
 from cg.server.ext import db as store
 from cg.store.database import create_all_tables, drop_all_tables
@@ -103,3 +104,13 @@ def client(app: Flask) -> Generator[FlaskClient, None, None]:
     # Bypass authentication
     with patch.object(app, "before_request_funcs", new={}):
         yield app.test_client()
+
+
+@pytest.fixture
+def analysis_summary():
+    return AnalysisSummary(
+        order_id=1,
+        total=2,
+        delivered=1,
+        failed=1,
+    )
