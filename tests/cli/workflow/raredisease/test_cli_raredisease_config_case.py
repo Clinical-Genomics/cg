@@ -76,7 +76,7 @@ def test_config_case(
     result = cli_runner.invoke(config_case, [raredisease_case_id], obj=raredisease_context)
 
     # THEN command should should exit successfully
-    # assert result.exit_code == EXIT_SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
 
     # THEN sample sheet and parameters information should be collected
     assert "Getting sample sheet information" in caplog.text
