@@ -593,7 +593,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def run_analysis(
         self,
         case_id: str,
-        cluster_config: Path | None,
+        cluster_config: Path | None = None,
         slurm_quality_of_service: str | None = None,
         dry_run: bool = False,
     ) -> None:
