@@ -52,6 +52,7 @@ def test_config_case(
     # WHEN performing a dry-run
     result = cli_runner.invoke(config_case, [raredisease_case_id], obj=raredisease_context)
 
+    caplog.LOG.info(result)
     # THEN command should should exit successfully
     assert result.exit_code == EXIT_SUCCESS
 
@@ -59,10 +60,10 @@ def test_config_case(
     assert "Getting sample sheet information" in caplog.text
     assert "Getting parameters information" in caplog.text
 
-    # THEN sample sheet and parameters information files should not be written
+    # THEN sample sheet and parameters information files should be written
 
     assert (
         "Dry run: nextflow sample sheet and parameter file will not be written" not in caplog.text
     )
-    assert "Writing sample sheet" not in caplog.text
-    assert "Writing parameters file" not in caplog.text
+    assert "Writing sample sheet" in caplog.text
+    assert "Writing parameters file" in caplog.text
