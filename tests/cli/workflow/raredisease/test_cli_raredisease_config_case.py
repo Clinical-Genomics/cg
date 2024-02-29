@@ -52,7 +52,7 @@ def test_config_case(
     # WHEN performing a dry-run
     result = cli_runner.invoke(config_case, [raredisease_case_id], obj=raredisease_context)
 
-    print(caplog.text)
+    assert caplog.text == "something"
     # THEN command should should exit successfully
     assert result.exit_code == EXIT_SUCCESS
 
