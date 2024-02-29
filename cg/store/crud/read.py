@@ -1746,7 +1746,7 @@ class ReadHandler(BaseHandler):
             workflow=orders_request.workflow,
         )
 
-    def sort_orders(self, orders: Query, orders_request: OrdersRequest) ->Query:
+    def sort_orders(self, orders: Query, orders_request: OrdersRequest) -> Query:
         return apply_order_filters(
             orders=orders,
             filters=[OrderFilter.SORT],
