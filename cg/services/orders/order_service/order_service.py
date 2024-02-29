@@ -47,5 +47,6 @@ class OrderService:
             order = self.store.add_order(order_data)
         cases = self.store.get_cases_by_ticket_id(order_data.ticket)
         for case in cases:
-            self.store.link_case_to_order(order_id=order.id, case_id=case.id)
+            if case not in order.cases:
+                self.store.link_case_to_order(order_id=order.id, case_id=case.id)
         return create_order_response(order)
