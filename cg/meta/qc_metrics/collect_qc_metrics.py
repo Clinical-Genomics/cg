@@ -56,9 +56,9 @@ class CollectQCMetricsAPI:
     def get_file_paths_and_tags(self, files: list[File]) -> list[FilePathAndTag]:
         """Get the file path and tag for the multiqc files."""
         file_paths_and_tags: list[FilePathAndTag] = []
-        for file_path_and_tags in files:
-            file_path: str = file_path_and_tags.full_path
-            tag: str = self.get_tag_to_include(file_path_and_tags.tags)
+        for hk_file in files:
+            file_path: str = hk_file.full_path
+            tag: str = self.get_tag_to_include(hk_file.tags)
             file_paths_and_tags.append(FilePathAndTag(file_path=file_path, tag=tag))
         return file_paths_and_tags
 
