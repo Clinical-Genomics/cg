@@ -56,6 +56,7 @@ def _configure_extensions(app: Flask):
     ext.csrf.init_app(app)
     ext.db.init_app(app)
     ext.lims.init_app(app)
+    ext.analysis_client.init_app(app)
     if app.config["OSTICKET_API_KEY"]:
         ext.osticket.init_app(app)
     ext.admin.init_app(app, index_view=AdminIndexView(endpoint="admin"))
