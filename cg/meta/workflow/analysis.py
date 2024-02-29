@@ -604,3 +604,6 @@ class AnalysisAPI(MetaAPI):
     def _get_managed_variants(self, genome_build: str) -> list[str]:
         """Create and return the managed variants."""
         return self.scout_api.export_managed_variants(genome_build=genome_build)
+
+    def run_analysis(self, *args, **kwargs):
+        raise NotImplementedError
