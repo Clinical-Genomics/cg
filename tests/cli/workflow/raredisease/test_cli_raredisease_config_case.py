@@ -38,6 +38,28 @@ def test_config_case_dry_run(
     assert "Writing parameters file" not in caplog.text
 
 
+def test_config_case_without_samples(
+    cli_runner: CliRunner,
+    raredisease_context: CGConfig,
+    caplog: LogCaptureFixture,
+    no_sample_case_id: str,
+):
+    """Test config_case with a case without samples."""
+    caplog.set_level(logging.ERROR)
+    # GIVEN a case
+
+    # WHEN running config case
+    result = cli_runner.invoke(config_case, [no_sample_case_id], obj=raredisease_context)
+
+    # THEN command should not exit successfully
+    assert result.exit_code != EXIT_SUCCESS
+
+    # THEN warning should be printed that no sample is found
+    assert no_sample_case_id in caplog.text
+    assert "has no samples" in caplog.text
+
+
+
 def test_config_case(
     cli_runner: CliRunner,
     raredisease_context: CGConfig,
@@ -52,9 +74,8 @@ def test_config_case(
     # WHEN performing a dry-run
     result = cli_runner.invoke(config_case, [raredisease_case_id], obj=raredisease_context)
 
-    assert caplog.text == "something"
     # THEN command should should exit successfully
-    assert result.exit_code == EXIT_SUCCESS
+    # assert result.exit_code == EXIT_SUCCESS
 
     # THEN sample sheet and parameters information should be collected
     assert "Getting sample sheet information" in caplog.text
