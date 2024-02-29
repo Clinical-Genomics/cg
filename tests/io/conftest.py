@@ -77,6 +77,7 @@ def tsv_stream() -> str:
     """Return string with TSV format."""
     return """Lorem	ipsum	sit	amet"""
 
+
 @pytest.fixture
 def config_stream() -> str:
     """Return string with TSV format."""
