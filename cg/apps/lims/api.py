@@ -48,7 +48,10 @@ class LimsAPI(Lims, OrderHandler):
     def __init__(self, config):
         lconf = config["lims"]
         super(LimsAPI, self).__init__(lconf["host"], lconf["username"], lconf["password"])
-        self.user: Researcher = self.get_researchers(username=lconf["username"])[0]
+
+    @property
+    def user(self) -> Researcher:
+        return self.get_researchers(username=self.username)[0]
 
     def sample(self, lims_id: str):
         """Fetch a sample from the LIMS database."""
