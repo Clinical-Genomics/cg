@@ -4,8 +4,8 @@ from pydantic import BaseModel, Field
 
 class SortField(StrEnum):
     ORDER_DATE: str = "order_date"
-    WORKFLOW: str = "workflow"
     ID: str = "id"
+    CUSTOMER_ID: str = "customer_id"
 
 
 class SortOrder(StrEnum):
