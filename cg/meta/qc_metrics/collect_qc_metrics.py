@@ -5,7 +5,6 @@ from typing import Iterator
 
 from housekeeper.store.models import File, Tag
 
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.clients.arnold.api import ArnoldAPIClient
 from cg.clients.arnold.dto.create_case_request import CreateCaseRequest

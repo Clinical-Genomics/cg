@@ -5,4 +5,4 @@ from pydantic import BaseModel
 
 class CreateCaseRequest(BaseModel):
     case_id: str
-    case_info: any
+    case_info: dict
