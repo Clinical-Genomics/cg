@@ -1543,11 +1543,13 @@ def test_get_orders_populated_store(store: Store, order: Order, order_another: O
 
 def test_get_orders_limited(store: Store, order: Order, order_another: Order):
     # GIVEN a store with two orders
-    orders_request = OrdersRequest(limit=1)
+    orders_request = OrdersRequest(pageSize=1, page=1)
+
     # WHEN fetching a limited amount of orders
+    orders: list[Order] = store.get_orders(orders_request)
 
     # THEN only one should be returned
-    assert len(store.get_orders(orders_request)) == 1
+    assert len(orders) == 1
 
 
 def test_get_orders_workflow_filter(
@@ -1555,8 +1557,10 @@ def test_get_orders_workflow_filter(
 ):
     # GIVEN a store with three orders, one of which is a Balsamic order
     orders_request = OrdersRequest(workflow=Workflow.BALSAMIC)
+
     # WHEN fetching only balsamic orders
     orders: list[Order] = store.get_orders(orders_request)
+
     # THEN only one should be returned
     assert len(orders) == 1 and orders[0].workflow == Workflow.BALSAMIC
 
@@ -1579,7 +1583,7 @@ def test_get_orders_mip_dna_and_limit_filter(
     expected_returned: int,
 ):
     # GIVEN a store with three orders, two of which are MIP-DNA orders
-    orders_request = OrdersRequest(workflow=Workflow.MIP_DNA, limit=limit)
+    orders_request = OrdersRequest(workflow=Workflow.MIP_DNA, pageSize=limit)
     # WHEN fetching only MIP-DNA orders
     orders: list[Order] = store.get_orders(orders_request)
 

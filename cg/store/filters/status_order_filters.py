@@ -19,7 +19,7 @@ def filter_orders_by_ids(orders: Query, ids: list[int] | None, **kwargs) -> Quer
 
 
 def apply_pagination(orders: Query, page: int | None, page_size: int | None, **kwargs) -> Query:
-    return orders.offset((page - 1) * page_size).limit(page_size) if page and page_size else orders
+    return orders.limit(page_size).offset((page - 1) * page_size) if page and page_size else orders
 
 
 class OrderFilter(Enum):
