@@ -77,6 +77,11 @@ def txt_temp_path(cg_dir: Path) -> Path:
     """Return a temp file path to use when writing text files."""
     return Path(cg_dir, "write.txt")
 
+@pytest.fixture
+def txt_temp_path_2(cg_dir: Path) -> Path:
+    """Return a temp file path to use when writing text files, 2 files needed to test concatenation."""
+    return Path(cg_dir, "write2.txt")
+
 
 @pytest.fixture
 def csv_stream() -> str:
