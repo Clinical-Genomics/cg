@@ -5,10 +5,10 @@ import pytest
 from cg.io.config import write_config_nextflow_style
 
 
-def test_write_config_nextflow_style(config_stream: Path):
+def test_write_config_nextflow_style(config_dict: Path):
     """
     Test output content from stream into nextflow config format.
     """
 
     # THEN assert a config format is returned
-    assert write_config_nextflow_style(content=[config_stream]) == 'Lorem = "ipsum"\n'
+    assert write_config_nextflow_style(content=config_dict) == "input =input_path\noutput=output_path"

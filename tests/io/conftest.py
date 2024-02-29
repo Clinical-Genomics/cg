@@ -79,10 +79,12 @@ def tsv_stream() -> str:
 
 
 @pytest.fixture
-def config_stream() -> str:
-    """Return string with TSV format."""
-    return """Lorem ipsum\n"""
-
+def config_dict() -> dict:
+    """Return dictionary format."""
+    return {
+        input: "input_path",
+        output: "output_path"
+    }
 
 @pytest.fixture
 def txt_temp_path(cg_dir: Path) -> Path:
