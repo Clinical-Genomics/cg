@@ -65,6 +65,10 @@ def txt_file_path(fixtures_dir: Path) -> Path:
     """Return a file path to example TXT file."""
     return Path(fixtures_dir, "io", "example.txt")
 
+@pytest.fixture
+def txt_file_path_2(fixtures_dir: Path) -> Path:
+    """Return a file path to example TXT file, 2 files needed to test concatenation."""
+    return Path(fixtures_dir, "io", "example2.txt")
 
 @pytest.fixture
 def tsv_stream() -> str:
@@ -76,11 +80,6 @@ def tsv_stream() -> str:
 def txt_temp_path(cg_dir: Path) -> Path:
     """Return a temp file path to use when writing text files."""
     return Path(cg_dir, "write.txt")
-
-@pytest.fixture
-def txt_temp_path_2(cg_dir: Path) -> Path:
-    """Return a temp file path to use when writing text files, 2 files needed to test concatenation."""
-    return Path(cg_dir, "write2.txt")
 
 
 @pytest.fixture

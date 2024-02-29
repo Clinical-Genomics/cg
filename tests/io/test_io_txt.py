@@ -66,13 +66,28 @@ def test_write_txt(txt_temp_path: Path, txt_file_path: Path):
     # THEN the content should match the original content
     assert content == read_txt(file_path=txt_temp_path)
 
-def test_concat_txt(txt_temp_path: Path, txt_temp_path_2: Path, txt_file_path: Path):
+def test_concat_txt(txt_file_path: Path, txt_file_path_2: Path, txt_temp_path: Path):
     """Test concatenating two files, no optional string content"""
     # GIVEN a list of file paths to concatenate
 
     #WHEN concatenating two files
-    concat_txt(file_paths=[txt_temp_path, txt_temp_path_2], target_file=txt_file_path, str_content=None)
+    concat_txt(file_paths=[txt_file_path, txt_file_path_2], target_file=txt_temp_path, str_content=None)
 
     #THEN the target file should exist
     assert txt_temp_path.exists()
+
+
+def test_concat_txt_with_string(txt_file_path: Path, txt_file_path_2: Path, txt_temp_path: Path, csv_stream: str):
+    """Test concatenating two files, no optional string content"""
+    # GIVEN a list of file paths to concatenate
+
+    #WHEN concatenating two files
+    concat_txt(file_paths=[txt_file_path, txt_file_path_2], target_file=txt_temp_path, str_content=csv_stream)
+
+    #THEN the target file should exist
+    assert txt_temp_path.exists()
+
+    #THEN the content should match the input string
+    assert csv_stream == read_txt(file_path=txt_temp_path)
+
 
