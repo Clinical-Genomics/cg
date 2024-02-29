@@ -5,8 +5,11 @@ from typing import Iterator
 
 from housekeeper.store.models import File, Tag
 
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.clients.arnold.api import ArnoldAPIClient
+from cg.clients.arnold.dto.create_case_request import CreateCaseRequest
+from cg.clients.arnold.exceptions import ArnoldClientError, ArnoldServerError
 from cg.clients.janus.api import JanusAPIClient
 from cg.clients.janus.dto.create_qc_metrics_request import (
     CreateQCMetricsRequest,
@@ -83,7 +86,7 @@ class CollectQCMetricsAPI:
             files=file_paths_and_tags,
         )
 
-    def get_qc_metrics(self, case_id) -> dict:
+    def get_case_qc_metrics(self, case_id) -> dict:
         """Get the qc metrics for a case."""
         qc_metrics_request: CreateQCMetricsRequest = self.create_qc_metrics_request(case_id)
         try:
@@ -91,3 +94,12 @@ class CollectQCMetricsAPI:
             return qc_metrics
         except (JanusClientError, JanusServerError) as error:
             LOG.info(f"Cannot collect qc metrics from Janus: {error}")
+
+    def create_case(self, case_id: str):
+        case_qc_metrics: dict = self.get_case_qc_metrics(case_id)
+        case_request: CreateCaseRequest = CreateCaseRequest.model_validate(**case_qc_metrics)
+        try:
+            self.arnold_api.create_case(case_request)
+        except (ArnoldClientError, ArnoldServerError) as error:
+            LOG.info(f"Failed to create case in arnold: {error}.")
+            return

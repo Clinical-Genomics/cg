@@ -1,7 +1,8 @@
-"""Module for the create case request for arnold."""
+"""Create case request for the arnold api client."""
 
 from pydantic import BaseModel
 
 
-class CreateCase(BaseModel):
-    pass
+class CreateCaseRequest(BaseModel):
+    case_id: str
+    case_info: any
