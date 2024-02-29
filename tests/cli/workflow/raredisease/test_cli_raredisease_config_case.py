@@ -59,7 +59,6 @@ def test_config_case_without_samples(
     assert "has no samples" in caplog.text
 
 
-
 def test_config_case(
     cli_runner: CliRunner,
     raredisease_context: CGConfig,
