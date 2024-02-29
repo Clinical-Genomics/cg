@@ -61,6 +61,8 @@ def test_config_case(
 
     # THEN sample sheet and parameters information files should not be written
 
-    assert "Dry run: nextflow sample sheet and parameter file will not be written" not in caplog.text
+    assert (
+        "Dry run: nextflow sample sheet and parameter file will not be written" not in caplog.text
+    )
     assert "Writing sample sheet" not in caplog.text
     assert "Writing parameters file" not in caplog.text
