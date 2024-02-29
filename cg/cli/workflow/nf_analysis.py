@@ -1,12 +1,17 @@
 """CLI options for Nextflow and NF-Tower."""
 
+import logging
+
 import click
+from pydantic.v1 import ValidationError
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
 from cg.constants.constants import MetaApis
 from cg.exc import CgError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
+
+LOG = logging.getLogger(__name__)
 
 OPTION_WORKDIR = click.option(
     "--work-dir",
@@ -91,3 +96,24 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
         analysis_api.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
     except CgError as error:
         raise click.Abort() from error
+
+
+@click.command("report-deliver")
+@ARGUMENT_CASE_ID
+@OPTION_DRY
+@click.pass_obj
+def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
+    """Create a Housekeeper deliverables file for given case id."""
+
+    analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+
+    try:
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
+        analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+        if not dry_run:
+            analysis_api.report_deliver(case_id=case_id)
+        else:
+            LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
+    except Exception as error:
+        LOG.error(f"Could not create report file: {error}")
+        raise click.Abort()
