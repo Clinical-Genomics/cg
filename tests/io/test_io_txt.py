@@ -104,5 +104,5 @@ def test_concat_txt_with_string(
         "Line 3\n",
         "Line 4\n",
         "Line 5\n",
-        "Line 6",
+        "Line 6\n",
     ]
