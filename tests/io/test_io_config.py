@@ -2,10 +2,10 @@ from pathlib import Path
 
 import pytest
 
-from cg.io.txt import read_txt, write_txt, concat_txt
+from cg.io.config import write_config_nextflow_style
 
 
-def test_read_txt_to_list(txt_file_path: Path):
+def test_write_config_nextflow_style(config_stream: Path):
     """
     Test reading content from a TXT file into a list.
     """
@@ -97,4 +97,4 @@ def test_concat_txt_with_string(
     assert txt_temp_path.exists()
 
     # THEN the content should match the input string
-    assert read_txt(file_path=txt_temp_path) = ["Line 1", "Line 2", "Line 3", "Line 4", "Line 5", "Line 6", "Lorem,ipsum,sit,amet"]
+    assert csv_stream == read_txt(file_path=txt_temp_path)

@@ -2142,6 +2142,7 @@ def no_sample_case_id() -> str:
     """Returns a case id of a case with no samples."""
     return "no_sample_case"
 
+
 @pytest.fixture(scope="session")
 def workflow_version() -> str:
     """Return a workflow version."""
@@ -2181,6 +2182,7 @@ def sequencing_platform() -> str:
     """Return a default sequencing platform."""
     return SequencingPlatform.ILLUMINA
 
+
 @pytest.fixture(scope="function")
 def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
     """Return the path to the raredisease apps dir."""
@@ -2188,8 +2190,8 @@ def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
     return Path(raredisease_dir).absolute().as_posix()
 
 
-
 # Raredisease fixtures
+
 
 @pytest.fixture(scope="function")
 def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
@@ -2230,6 +2232,7 @@ def rnafusion_sample_sheet_content(
             strandedness,
         ]
     )
+
 
 @pytest.fixture(scope="session")
 def strandedness() -> str:

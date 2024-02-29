@@ -65,15 +65,22 @@ def txt_file_path(fixtures_dir: Path) -> Path:
     """Return a file path to example TXT file."""
     return Path(fixtures_dir, "io", "example.txt")
 
+
 @pytest.fixture
 def txt_file_path_2(fixtures_dir: Path) -> Path:
     """Return a file path to example TXT file, 2 files needed to test concatenation."""
     return Path(fixtures_dir, "io", "example2.txt")
 
+
 @pytest.fixture
 def tsv_stream() -> str:
     """Return string with TSV format."""
     return """Lorem	ipsum	sit	amet"""
+
+@pytest.fixture
+def config_stream() -> str:
+    """Return string with TSV format."""
+    return """Lorem ipsum"""
 
 
 @pytest.fixture
