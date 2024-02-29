@@ -81,7 +81,7 @@ def test_concat_txt(txt_file_path: Path, txt_file_path_2: Path, txt_temp_path: P
 
 
 def test_concat_txt_with_string(
-    txt_file_path: Path, txt_file_path_2: Path, txt_temp_path: Path, config_stream: str
+    txt_file_path: Path, txt_file_path_2: Path, txt_temp_path: Path, csv_stream: str
 ):
     """Test concatenating two files, no optional string content"""
     # GIVEN a list of file paths to concatenate
@@ -90,7 +90,7 @@ def test_concat_txt_with_string(
     concat_txt(
         file_paths=[txt_file_path, txt_file_path_2],
         target_file=txt_temp_path,
-        str_content=config_stream,
+        str_content=csv_stream,
     )
 
     # THEN the target file should exist
@@ -98,7 +98,7 @@ def test_concat_txt_with_string(
 
     # THEN the content should match the input string
     assert read_txt(file_path=txt_temp_path) == [
-        "Lorem ipsum\n",
+        "Lorem,ipsum,sit,amet\n",
         "Line 1\n",
         "Line 2\n",
         "Line 3\n",
