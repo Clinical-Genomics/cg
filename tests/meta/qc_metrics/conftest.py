@@ -122,5 +122,4 @@ def expected_request(
             workflow=case.data_analysis, version=case.analyses[0].workflow_version
         ),
         files=[file_path_and_tag],
-        prep_category=sample.prep_category,
     )
