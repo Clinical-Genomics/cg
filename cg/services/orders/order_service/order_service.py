@@ -1,4 +1,3 @@
-from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order as OrderResponse
@@ -39,14 +38,8 @@ class OrderService:
 
     def create_order(self, order_data: OrderIn) -> OrderResponse:
         """Creates an order and links it to the given cases."""
-        existing_ticket: int | None = TicketHandler.parse_ticket_number(order_data.name)
-        order: Order
-        if existing_ticket:
-            order = self.store.get_order_by_ticket_id(existing_ticket)
-        else:
-            order = self.store.add_order(order_data)
+        order = self.store.add_order(order_data)
         cases = self.store.get_cases_by_ticket_id(order_data.ticket)
         for case in cases:
-            if case not in order.cases:
-                self.store.link_case_to_order(order_id=order.id, case_id=case.id)
+            self.store.link_case_to_order(order_id=order.id, case_id=case.id)
         return create_order_response(order)
