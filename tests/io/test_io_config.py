@@ -11,10 +11,8 @@ def test_write_config_nextflow_style(config_stream: Path):
     """
     # GIVEN content
 
-
     # WHEN reading the file
-    content: str =  write_config_nextflow_style(content=config_stream)
+    content: str = write_config_nextflow_style(content=config_stream)
 
     # THEN assert a config format is returned
     assert content == 'Lorem = "ipsum"'
-

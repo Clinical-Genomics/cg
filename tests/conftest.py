@@ -1853,7 +1853,7 @@ def context_config(
             "compute_env": "nf_tower_compute_env",
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_raredisease",
-            "config_platform": Path("path", "to", "hasta", "config").as_posix(),
+            # "config_platform": Path(fixtures_dir, "io", "example_json.json"),
             "config_params": Path("path", "to", "params", "config").as_posix(),
             "config_resources": Path("path", "to", "resources", "config").as_posix(),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
