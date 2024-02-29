@@ -3063,8 +3063,6 @@ def raredisease_context(
     helpers: StoreHelpers,
     nf_analysis_housekeeper: HousekeeperAPI,
     trailblazer_api: MockTB,
-    hermes_api: HermesApi,
-    cg_dir: Path,
     raredisease_case_id: str,
     sample_id: str,
     no_sample_case_id: str,
