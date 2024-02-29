@@ -22,6 +22,9 @@ os.environ["LIMS_PASSWORD"] = "dummy_value"
 os.environ["GOOGLE_OAUTH_CLIENT_ID"] = "dummy_value"
 os.environ["GOOGLE_OAUTH_CLIENT_SECRET"] = "dummy_value"
 os.environ["CG_ENABLE_ADMIN"] = "1"
+os.environ["TRAILBLAZER_SERVICE_ACCOUNT"] = "dummy_value"
+os.environ["TRAILBLAZER_SERVICE_ACCOUNT_AUTH_FILE"] = "dummy_value"
+os.environ["TRAILBLAZER_HOST"] = "dummy_value"
 
 
 @pytest.fixture

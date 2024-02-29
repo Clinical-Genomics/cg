@@ -17,13 +17,9 @@ from cg.store.models import (
     Application,
     ApplicationLimitations,
     ApplicationVersion,
-    Case,
-    CaseSample,
-    Customer,
-    Flowcell,
 )
-from cg.store.models import Model as ModelBase
-from cg.store.models import Sample
+from cg.store.models import Base as ModelBase
+from cg.store.models import Case, CaseSample, Customer, Flowcell, Sample
 from cg.utils.date import get_date_days_ago
 
 
@@ -131,17 +127,17 @@ class BaseHandler:
         filter_case_order_date = None
         if days != 0:
             filter_case_order_date = get_date_days_ago(days_ago=days)
-            filter_functions.append(CaseFilter.FILTER_NEW_BY_ORDER_DATE)
+            filter_functions.append(CaseFilter.NEW_BY_ORDER_DATE)
         if case_action:
-            filter_functions.append(CaseFilter.FILTER_BY_ACTION)
+            filter_functions.append(CaseFilter.BY_ACTION)
         if priority:
-            filter_functions.append(CaseFilter.FILTER_BY_PRIORITY)
+            filter_functions.append(CaseFilter.BY_PRIORITY)
         if internal_id:
-            filter_functions.append(CaseFilter.FILTER_BY_INTERNAL_ID_SEARCH)
+            filter_functions.append(CaseFilter.BY_INTERNAL_ID_SEARCH)
         if name:
-            filter_functions.append(CaseFilter.FILTER_BY_NAME_SEARCH)
+            filter_functions.append(CaseFilter.BY_NAME_SEARCH)
         if data_analysis:
-            filter_functions.append(CaseFilter.FILTER_BY_WORKFLOW_SEARCH)
+            filter_functions.append(CaseFilter.BY_WORKFLOW_SEARCH)
 
         cases_query = apply_case_filter(
             cases=cases_query,
@@ -160,7 +156,7 @@ class BaseHandler:
             cases_query = cases_query.join(Case.customer)
 
         if customer_id:
-            customer_filters.append(CustomerFilter.FILTER_BY_INTERNAL_ID)
+            customer_filters.append(CustomerFilter.BY_INTERNAL_ID)
 
         if exclude_customer_id:
             customer_filters.append(CustomerFilter.EXCLUDE_INTERNAL_ID)
@@ -177,7 +173,7 @@ class BaseHandler:
             cases_query = cases_query.join(Case.links).join(CaseSample.sample)
             cases_query = apply_sample_filter(
                 samples=cases_query,
-                filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID_PATTERN],
+                filter_functions=[SampleFilter.BY_INTERNAL_ID_PATTERN],
                 internal_id_pattern=sample_id,
             )
         else:

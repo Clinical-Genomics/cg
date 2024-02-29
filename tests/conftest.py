@@ -17,6 +17,7 @@ from requests import Response
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
@@ -48,7 +49,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
-from cg.store.models import Bed, BedVersion, Case, Customer, Organism, Sample
+from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
 from cg.store.store import Store
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
@@ -71,6 +72,7 @@ pytest_plugins = [
     "tests.fixture_plugins.demultiplex_fixtures.path_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_fixtures",
+    "tests.fixture_plugins.demultiplex_fixtures.sample_sheet_fixtures",
 ]
 
 # Case fixtures
@@ -436,11 +438,38 @@ def gens_config() -> dict[str, dict[str, str]]:
 
 @pytest.fixture(name="sample_sheet_context")
 def sample_sheet_context(
-    cg_context: CGConfig, lims_api: LimsAPI, populated_housekeeper_api: HousekeeperAPI
+    cg_context: CGConfig,
+    lims_api: LimsAPI,
+    populated_housekeeper_api: HousekeeperAPI,
+    tmp_illumina_flow_cells_directory: Path,
 ) -> CGConfig:
     """Return cg context with added Lims and Housekeeper API."""
     cg_context.lims_api_ = lims_api
     cg_context.housekeeper_api_ = populated_housekeeper_api
+    cg_context.sample_sheet_api_ = SampleSheetAPI(
+        flow_cell_dir=tmp_illumina_flow_cells_directory.as_posix(),
+        hk_api=cg_context.housekeeper_api,
+        lims_api=cg_context.lims_api,
+    )
+    return cg_context
+
+
+@pytest.fixture
+def sample_sheet_context_broken_flow_cells(
+    cg_context: CGConfig,
+    lims_api: LimsAPI,
+    populated_housekeeper_api: HousekeeperAPI,
+    tmp_broken_flow_cells_directory: Path,
+) -> CGConfig:
+    """Return cg context with broken flow cells."""
+    cg_context.illumina_demultiplexed_runs_directory = tmp_broken_flow_cells_directory.as_posix()
+    cg_context.lims_api_ = lims_api
+    cg_context.housekeeper_api_ = populated_housekeeper_api
+    cg_context.sample_sheet_api_ = SampleSheetAPI(
+        flow_cell_dir=tmp_broken_flow_cells_directory.as_posix(),
+        hk_api=cg_context.housekeeper_api,
+        lims_api=cg_context.lims_api,
+    )
     return cg_context
 
 
@@ -2892,7 +2921,14 @@ def store_with_case_and_sample_with_reads(
     case: Case = helpers.add_case(
         store=store, internal_id=downsample_case_internal_id, name=downsample_case_internal_id
     )
-
+    order: Order = helpers.add_order(
+        store=store,
+        customer_id=case.customer_id,
+        ticket_id=case.latest_ticket,
+        order_date=case.ordered_at,
+        workflow=case.data_analysis,
+    )
+    case.orders.append(order)
     for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
         helpers.add_sample(
             store=store,

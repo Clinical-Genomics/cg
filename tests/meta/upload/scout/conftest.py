@@ -569,7 +569,7 @@ def mip_dna_analysis(
 @pytest.fixture
 def balsamic_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a Balsamic analysis object."""
-    analysis_obj.pipeline = Workflow.BALSAMIC
+    analysis_obj.workflow = Workflow.BALSAMIC
     for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
             PrepCategory.WHOLE_EXOME_SEQUENCING
@@ -581,7 +581,7 @@ def balsamic_analysis_obj(analysis_obj: Analysis) -> Analysis:
 @pytest.fixture
 def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a Balsamic UMI analysis object."""
-    analysis_obj.pipeline = Workflow.BALSAMIC_UMI
+    analysis_obj.workflow = Workflow.BALSAMIC_UMI
     for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
             PrepCategory.WHOLE_EXOME_SEQUENCING
@@ -594,7 +594,7 @@ def balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
 @pytest.fixture
 def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a RNAfusion analysis object."""
-    analysis_obj.pipeline = Workflow.RNAFUSION
+    analysis_obj.workflow = Workflow.RNAFUSION
     for link_object in analysis_obj.case.links:
         link_object.sample.application_version.application.prep_category = (
             PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING
