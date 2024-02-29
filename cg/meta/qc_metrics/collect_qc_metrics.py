@@ -16,7 +16,7 @@ from cg.clients.janus.dto.create_qc_metrics_request import (
 from cg.clients.janus.exceptions import JanusClientError, JanusServerError
 from cg.constants.housekeeper_tags import JanusTags
 from cg.exc import HousekeeperFileMissingError
-from cg.store.models import Case, Sample
+from cg.store.models import Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -62,11 +62,6 @@ class CollectQCMetricsAPI:
             file_paths_and_tags.append(FilePathAndTag(file_path=file_path, tag=tag))
         return file_paths_and_tags
 
-    def get_prep_category(self, case_id: str) -> str:
-        """Get the prep category."""
-        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id)
-        return samples[0].prep_category
-
     @staticmethod
     def get_workflow_info(case: Case) -> WorkflowInfo:
         workflow: str = case.data_analysis
@@ -80,12 +75,11 @@ class CollectQCMetricsAPI:
         case: Case = self.status_db.get_case_by_internal_id(case_id)
         workflow_info: WorkflowInfo = self.get_workflow_info(case)
         sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id)
-        prep_category: str = self.get_prep_category(case_id)
+
         return CreateQCMetricsRequest(
             case_id=case_id,
             sample_ids=sample_ids,
             workflow_info=workflow_info,
-            prep_category=prep_category,
             files=file_paths_and_tags,
         )
 

@@ -58,7 +58,7 @@ class FileDeliverable(BaseModel):
         return None
 
 
-class PipelineDeliverables(BaseModel):
+class WorkflowDeliverables(BaseModel):
     """Specification for workflow deliverables."""
 
     files: list[FileDeliverable]
