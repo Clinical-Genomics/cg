@@ -2199,6 +2199,13 @@ def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
     raredisease_dir = tmpdir_factory.mktemp("raredisease")
     return Path(raredisease_dir).absolute().as_posix()
 
+@pytest.fixture(scope="session")
+def raredisease_case_id() -> str:
+    """Returns a rnafusion case id."""
+    return "raredisease_case_enough_reads"
+
+
+
 
 # Rnafusion fixtures
 
