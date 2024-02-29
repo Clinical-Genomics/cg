@@ -8,7 +8,9 @@ from cg.services.orders.order_service.utils import (
     create_orders_response,
 )
 from cg.services.orders.order_status_service import OrderStatusService
-from cg.services.orders.order_status_service.dto.order_status_summary import OrderSummary
+from cg.services.orders.order_status_service.dto.order_status_summary import (
+    OrderSummary,
+)
 from cg.store.models import Order
 from cg.store.store import Store
 
@@ -22,7 +24,8 @@ class OrderService:
         order: Order | None = self.store.get_order_by_id(order_id)
         if not order:
             raise OrderNotFoundError(f"Order {order_id} not found.")
-        return create_order_response(order)
+        summary: OrderSummary = self.summary_service.get_status_summaries([order_id])[0]
+        return create_order_response(order=order, summary=summary)
 
     def get_orders(self, orders_request: OrdersRequest) -> OrdersResponse:
         orders: list[Order] = self.store.get_orders(orders_request)
@@ -30,7 +33,7 @@ class OrderService:
         summaries: list[OrderSummary] = []
         if orders_request.include_summary:
             order_ids: list[int] = [order.id for order in orders]
-            summaries = self.summary_service.get_status_summaries(order_ids)
+            summaries: list[OrderSummary] = self.summary_service.get_status_summaries(order_ids)
 
         return create_orders_response(orders=orders, summaries=summaries)
 
