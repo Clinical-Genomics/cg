@@ -1566,7 +1566,7 @@ def test_get_orders_workflow_filter(
     orders_request = OrdersRequest(workflow=Workflow.BALSAMIC)
 
     # WHEN fetching only balsamic orders
-    orders, total = store.get_orders(orders_request)
+    orders, _ = store.get_orders(orders_request)
 
     # THEN only one should be returned
     assert len(orders) == 1 and orders[0].workflow == Workflow.BALSAMIC
