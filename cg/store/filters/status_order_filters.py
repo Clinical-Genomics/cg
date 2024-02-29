@@ -18,15 +18,15 @@ def filter_orders_by_ids(orders: Query, ids: list[int] | None, **kwargs) -> Quer
     return orders.filter(Order.id.in_(ids)) if ids else orders
 
 
-def apply_limit(orders: Query, limit: int | None, **kwargs) -> Query:
-    return orders.limit(limit) if limit else orders
+def apply_pagination(orders: Query, page: int | None, page_size: int | None, **kwargs) -> Query:
+    return orders.offset((page - 1) * page_size).limit(page_size) if page and page_size else orders
 
 
 class OrderFilter(Enum):
     BY_ID: Callable = filter_orders_by_id
     BY_IDS: Callable = filter_orders_by_ids
     BY_WORKFLOW: Callable = filter_orders_by_workflow
-    APPLY_LIMIT: Callable = apply_limit
+    PAGINATION: Callable = apply_pagination
 
 
 def apply_order_filters(
@@ -35,8 +35,11 @@ def apply_order_filters(
     id: int = None,
     ids: list[int] = None,
     workflow: str = None,
-    limit: int = None,
+    page: int = None,
+    page_size: int = None,
 ) -> Query:
     for filter in filters:
-        orders: Query = filter(orders=orders, id=id, ids=ids, workflow=workflow, limit=limit)
+        orders: Query = filter(
+            orders=orders, id=id, ids=ids, workflow=workflow, page=page, page_size=page_size
+        )
     return orders

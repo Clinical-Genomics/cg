@@ -1729,15 +1729,13 @@ class ReadHandler(BaseHandler):
         return records.all()
 
     def get_orders(self, orders_request: OrdersRequest) -> list[Order]:
-        filters: list[OrderFilter] = [
-            OrderFilter.BY_WORKFLOW,
-            OrderFilter.APPLY_LIMIT,
-        ]
+        filters: list[OrderFilter] = [OrderFilter.BY_WORKFLOW, OrderFilter.PAGINATION]
         return apply_order_filters(
             orders=self._get_query(Order),
             filters=filters,
             workflow=orders_request.workflow,
-            limit=orders_request.limit,
+            page=orders_request.page,
+            page_size=orders_request.page_size,
         ).all()
 
     def get_orders_by_ids(self, order_ids: list[int]) -> list[Order]:

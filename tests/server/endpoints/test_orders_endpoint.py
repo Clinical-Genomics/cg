@@ -33,7 +33,7 @@ def test_orders_endpoint(
 
     # WHEN a request is made to get all orders
     endpoint: str = "/api/v1/orders"
-    response = client.get(endpoint, query_string={"limit": limit, "workflow": workflow})
+    response = client.get(endpoint, query_string={"pageSize": limit, "workflow": workflow})
 
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
