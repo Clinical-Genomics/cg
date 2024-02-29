@@ -25,14 +25,14 @@ class OrderService:
         return create_order_response(order)
 
     def get_orders(self, orders_request: OrdersRequest) -> OrdersResponse:
-        orders: list[Order] = self.store.get_orders(orders_request)
+        orders, total_count = self.store.get_orders(orders_request)
 
         summaries: list[OrderSummary] = []
         if orders_request.include_summary:
             order_ids: list[int] = [order.id for order in orders]
             summaries = self.summary_service.get_status_summaries(order_ids)
 
-        return create_orders_response(orders=orders, summaries=summaries)
+        return create_orders_response(orders=orders, summaries=summaries, total=total_count)
 
     def create_order(self, order_data: OrderIn) -> OrderResponse:
         """Creates an order and links it to the given cases."""

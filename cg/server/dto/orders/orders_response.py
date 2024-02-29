@@ -15,3 +15,4 @@ class Order(BaseModel):
 
 class OrdersResponse(BaseModel):
     orders: list[Order]
+    total_count: int

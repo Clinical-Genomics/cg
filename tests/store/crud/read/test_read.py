@@ -1529,16 +1529,22 @@ def test_get_orders_empty_store(store: Store):
     # GIVEN a store without any orders
 
     # WHEN fetching orders
+    orders, total = store.get_orders(OrdersRequest())
+
     # THEN none should be returned
-    assert not store.get_orders(OrdersRequest())
+    assert not orders
+    assert not total
 
 
 def test_get_orders_populated_store(store: Store, order: Order, order_another: Order):
     # GIVEN a store with two orders
 
     # WHEN fetching orders
+    orders, total = store.get_orders(OrdersRequest())
+
     # THEN both should be returned
-    assert len(store.get_orders(OrdersRequest())) == 2
+    assert len(orders) == 2
+    assert total == 2
 
 
 def test_get_orders_limited(store: Store, order: Order, order_another: Order):
@@ -1546,9 +1552,10 @@ def test_get_orders_limited(store: Store, order: Order, order_another: Order):
     orders_request = OrdersRequest(pageSize=1, page=1)
 
     # WHEN fetching a limited amount of orders
-    orders: list[Order] = store.get_orders(orders_request)
+    orders, total = store.get_orders(orders_request)
 
     # THEN only one should be returned
+    assert total == 2
     assert len(orders) == 1
 
 
@@ -1559,7 +1566,7 @@ def test_get_orders_workflow_filter(
     orders_request = OrdersRequest(workflow=Workflow.BALSAMIC)
 
     # WHEN fetching only balsamic orders
-    orders: list[Order] = store.get_orders(orders_request)
+    orders, total = store.get_orders(orders_request)
 
     # THEN only one should be returned
     assert len(orders) == 1 and orders[0].workflow == Workflow.BALSAMIC
@@ -1585,7 +1592,7 @@ def test_get_orders_mip_dna_and_limit_filter(
     # GIVEN a store with three orders, two of which are MIP-DNA orders
     orders_request = OrdersRequest(workflow=Workflow.MIP_DNA, pageSize=limit)
     # WHEN fetching only MIP-DNA orders
-    orders: list[Order] = store.get_orders(orders_request)
+    orders, _ = store.get_orders(orders_request)
 
     # THEN we should get the expected number of orders returned
     assert len(orders) == expected_returned

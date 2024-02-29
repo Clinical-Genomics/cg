@@ -1728,15 +1728,20 @@ class ReadHandler(BaseHandler):
         )
         return records.all()
 
-    def get_orders(self, orders_request: OrdersRequest) -> list[Order]:
-        filters: list[OrderFilter] = [OrderFilter.BY_WORKFLOW, OrderFilter.PAGINATION]
-        return apply_order_filters(
+    def get_orders(self, orders_request: OrdersRequest) -> tuple[list[Order], int]:
+        order_query: Query = apply_order_filters(
             orders=self._get_query(Order),
-            filters=filters,
+            filters=[OrderFilter.BY_WORKFLOW],
             workflow=orders_request.workflow,
+        )
+        total_count: int = order_query.count()
+        orders: list[Order] = apply_order_filters(
+            orders=order_query,
+            filters=[OrderFilter.PAGINATION],
             page=orders_request.page,
             page_size=orders_request.page_size,
         ).all()
+        return orders, total_count
 
     def get_orders_by_ids(self, order_ids: list[int]) -> list[Order]:
         """Return all orders with the provided ids."""

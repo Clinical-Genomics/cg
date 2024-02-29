@@ -13,11 +13,11 @@ def create_order_response(order: DatabaseOrder) -> Order:
 
 
 def create_orders_response(
-    orders: list[DatabaseOrder], summaries: list[OrderSummary]
+    orders: list[DatabaseOrder], summaries: list[OrderSummary], total: int
 ) -> OrdersResponse:
     orders: list[Order] = [create_order_response(order) for order in orders]
     _add_summaries(orders=orders, summaries=summaries)
-    return OrdersResponse(orders=orders)
+    return OrdersResponse(orders=orders, total_count=total)
 
 
 def _add_summaries(orders: list[Order], summaries: list[OrderSummary]) -> list[Order]:
