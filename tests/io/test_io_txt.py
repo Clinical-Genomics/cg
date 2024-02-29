@@ -97,4 +97,4 @@ def test_concat_txt_with_string(
     assert txt_temp_path.exists()
 
     # THEN the content should match the input string
-    assert read_txt(file_path=txt_temp_path) = ["Line 1", "Line 2", "Line 3", "Line 4", "Line 5", "Line 6", "Lorem,ipsum,sit,amet"]
+    assert read_txt(file_path=txt_temp_path) == ["Line 1", "Line 2", "Line 3", "Line 4", "Line 5", "Line 6", "Lorem,ipsum,sit,amet"]
