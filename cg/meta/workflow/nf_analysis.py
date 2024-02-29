@@ -19,9 +19,10 @@ from cg.models.deliverables.metric_deliverables import (
     MetricsDeliverablesCondition,
 )
 from cg.models.fastq import FastqFileMeta
-from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
+from cg.models.nf_analysis import FileDeliverable, WorkflowDeliverables
 from cg.models.rnafusion.rnafusion import CommandArgs
 from cg.utils import Process
+from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -310,27 +311,69 @@ class NfAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
 
-    @staticmethod
-    def get_deliverables_template_content() -> list[dict]:
+    def get_deliverables_template_content(self) -> list[dict]:
         """Return deliverables file template content."""
         raise NotImplementedError
 
-    def get_deliverables_for_case(self, case_id: str) -> PipelineDeliverables:
-        """Return PipelineDeliverables for a given case."""
-        deliverable_template: list[dict] = self.get_deliverables_template_content()
-        sample_id: str = self.status_db.get_samples_by_case_id(case_id).pop().internal_id
+    def get_bundle_filenames_path(self) -> Path | None:
+        """Return bundle filenames path."""
+        return None
+
+    @staticmethod
+    def get_formatted_file_deliverable(
+        file_template: dict[str | None, str | None],
+        case_id: str,
+        sample_id: str,
+        sample_name: str,
+        case_path: str,
+    ) -> FileDeliverable:
+        """Return the formatted file deliverable with the case and sample attributes."""
+        deliverables = file_template.copy()
+        for deliverable_field, deliverable_value in file_template.items():
+            if deliverable_value is None:
+                continue
+            deliverables[deliverable_field] = (
+                deliverables[deliverable_field]
+                .replace("CASEID", case_id)
+                .replace("SAMPLEID", sample_id)
+                .replace("SAMPLENAME", sample_name)
+                .replace("PATHTOCASE", case_path)
+            )
+        return FileDeliverable(**deliverables)
+
+    def get_deliverables_for_sample(
+        self, sample: Sample, case_id: str, template: list[dict[str, str]]
+    ) -> list[FileDeliverable]:
+        """Return a list of FileDeliverables for each sample."""
+        sample_id: str = sample.internal_id
+        sample_name: str = sample.name
+        case_path = str(self.get_case_path(case_id=case_id))
         files: list[FileDeliverable] = []
-        for file in deliverable_template:
-            for deliverable_field, deliverable_value in file.items():
-                if deliverable_value is None:
-                    continue
-                file[deliverable_field] = file[deliverable_field].replace("CASEID", case_id)
-                file[deliverable_field] = file[deliverable_field].replace("SAMPLEID", sample_id)
-                file[deliverable_field] = file[deliverable_field].replace(
-                    "PATHTOCASE", str(self.get_case_path(case_id=case_id))
+        for file in template:
+            files.append(
+                self.get_formatted_file_deliverable(
+                    file_template=file,
+                    case_id=case_id,
+                    sample_id=sample_id,
+                    sample_name=sample_name,
+                    case_path=case_path,
                 )
-            files.append(FileDeliverable(**file))
-        return PipelineDeliverables(files=files)
+            )
+        return files
+
+    def get_deliverables_for_case(self, case_id: str) -> WorkflowDeliverables:
+        """Return workflow deliverables for a given case."""
+        deliverable_template: list[dict] = self.get_deliverables_template_content()
+        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
+        files: list[FileDeliverable] = []
+
+        for sample in samples:
+            bundles_per_sample = self.get_deliverables_for_sample(
+                sample=sample, case_id=case_id, template=deliverable_template
+            )
+            files.extend(bundle for bundle in bundles_per_sample if bundle not in files)
+
+        return WorkflowDeliverables(files=files)
 
     def get_multiqc_json_path(self, case_id: str) -> Path:
         """Return the path of the multiqc_data.json file."""
@@ -418,3 +461,14 @@ class NfAnalysisAPI(AnalysisAPI):
             self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.ERROR)
             raise CgError from error
         self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
+
+    def report_deliver(self, case_id: str) -> None:
+        """Write deliverables file."""
+        workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
+        self.write_deliverables_file(
+            deliverables_content=workflow_content.dict(),
+            file_path=self.get_deliverables_file_path(case_id=case_id),
+        )
+        LOG.info(
+            f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
+        )
