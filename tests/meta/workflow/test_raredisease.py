@@ -18,5 +18,5 @@ def test_get_sample_sheet_content(
 
 
     # THEN the process should exit successfully
-    assert result.exit_code == EXIT_SUCCESS
+    assert result == ["raredisease_case_enough_reads","nbasdfas"]
 
