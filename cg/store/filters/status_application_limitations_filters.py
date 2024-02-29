@@ -40,5 +40,5 @@ def apply_application_limitations_filter(
 class ApplicationLimitationsFilter(Enum):
     """Define ApplicationLimitations filter functions."""
 
-    FILTER_BY_TAG = filter_application_limitations_by_tag
-    FILTER_BY_WORKFLOW = filter_application_limitations_by_workflow
+    BY_TAG = filter_application_limitations_by_tag
+    BY_WORKFLOW = filter_application_limitations_by_workflow

@@ -44,7 +44,7 @@ def test_generate_balsamic_load_config(
     balsamic_analysis_obj: Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
 ):
     # GIVEN an analysis object that have been run with balsamic
-    assert balsamic_analysis_obj.pipeline == Workflow.BALSAMIC
+    assert balsamic_analysis_obj.workflow == Workflow.BALSAMIC
 
     # GIVEN an upload scout api with some balsamic information
 
@@ -59,7 +59,7 @@ def test_generate_balsamic_umi_load_config(
     balsamic_umi_analysis_obj: Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
 ):
     # GIVEN an analysis object that have been run with balsamic-umi
-    assert balsamic_umi_analysis_obj.pipeline == Workflow.BALSAMIC_UMI
+    assert balsamic_umi_analysis_obj.workflow == Workflow.BALSAMIC_UMI
 
     # GIVEN an upload scout api with some balsamic information
 
@@ -75,7 +75,7 @@ def test_generate_rnafusion_load_config(
 ):
     """Test that a rnafusion config is generated."""
     # GIVEN an analysis object that have been run with rnafusion
-    assert rnafusion_analysis_obj.pipeline == Workflow.RNAFUSION
+    assert rnafusion_analysis_obj.workflow == Workflow.RNAFUSION
 
     # GIVEN an upload scout api with some rnafusion information
 

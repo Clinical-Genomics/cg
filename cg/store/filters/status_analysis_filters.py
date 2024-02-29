@@ -16,7 +16,7 @@ def filter_valid_analyses_in_production(analyses: Query, **kwargs) -> Query:
 
 def filter_analyses_with_workflow(analyses: Query, workflow: Workflow = None, **kwargs) -> Query:
     """Return analyses with supplied workflow."""
-    return analyses.filter(Analysis.pipeline == workflow) if workflow else analyses
+    return analyses.filter(Analysis.workflow == workflow) if workflow else analyses
 
 
 def filter_completed_analyses(analyses: Query, **kwargs) -> Query:
@@ -49,9 +49,9 @@ def filter_report_analyses_by_workflow(
 ) -> Query:
     """Return the delivery report related analyses associated to the provided or supported workflows."""
     return (
-        analyses.filter(Analysis.pipeline == workflow)
+        analyses.filter(Analysis.workflow == workflow)
         if workflow
-        else analyses.filter(Analysis.pipeline.in_(REPORT_SUPPORTED_WORKFLOW))
+        else analyses.filter(Analysis.workflow.in_(REPORT_SUPPORTED_WORKFLOW))
     )
 
 
@@ -114,18 +114,18 @@ def apply_analysis_filter(
 class AnalysisFilter(Enum):
     """Define Analysis filter functions."""
 
-    FILTER_VALID_IN_PRODUCTION: Callable = filter_valid_analyses_in_production
-    FILTER_WITH_WORKFLOW: Callable = filter_analyses_with_workflow
-    FILTER_COMPLETED: Callable = filter_completed_analyses
-    FILTER_IS_UPLOADED: Callable = filter_uploaded_analyses
-    FILTER_IS_NOT_UPLOADED: Callable = filter_not_uploaded_analyses
-    FILTER_WITH_DELIVERY_REPORT: Callable = filter_analyses_with_delivery_report
-    FILTER_WITHOUT_DELIVERY_REPORT: Callable = filter_analyses_without_delivery_report
-    FILTER_REPORT_BY_WORKFLOW: Callable = filter_report_analyses_by_workflow
-    FILTER_BY_CASE_ENTRY_ID: Callable = filter_analyses_by_case_entry_id
-    FILTER_IS_NOT_CLEANED: Callable = filter_analyses_not_cleaned
-    FILTER_STARTED_AT_BEFORE: Callable = filter_analyses_started_before
-    FILTER_BY_STARTED_AT: Callable = filter_analyses_by_started_at
-    FILTER_CASE_ACTION_IS_NONE: Callable = filter_analysis_case_action_is_none
+    VALID_IN_PRODUCTION: Callable = filter_valid_analyses_in_production
+    WITH_WORKFLOW: Callable = filter_analyses_with_workflow
+    COMPLETED: Callable = filter_completed_analyses
+    IS_UPLOADED: Callable = filter_uploaded_analyses
+    IS_NOT_UPLOADED: Callable = filter_not_uploaded_analyses
+    WITH_DELIVERY_REPORT: Callable = filter_analyses_with_delivery_report
+    WITHOUT_DELIVERY_REPORT: Callable = filter_analyses_without_delivery_report
+    REPORT_BY_WORKFLOW: Callable = filter_report_analyses_by_workflow
+    BY_CASE_ENTRY_ID: Callable = filter_analyses_by_case_entry_id
+    IS_NOT_CLEANED: Callable = filter_analyses_not_cleaned
+    STARTED_AT_BEFORE: Callable = filter_analyses_started_before
+    BY_STARTED_AT: Callable = filter_analyses_by_started_at
+    CASE_ACTION_IS_NONE: Callable = filter_analysis_case_action_is_none
     ORDER_BY_UPLOADED_AT: Callable = order_analyses_by_uploaded_at_asc
     ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at_asc
