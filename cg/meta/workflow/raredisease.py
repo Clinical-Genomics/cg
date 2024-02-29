@@ -14,7 +14,10 @@ from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.models.raredisease.raredisease import RarediseaseSampleSheetEntry, RarediseaseSampleSheetHeaders
+from cg.models.raredisease.raredisease import (
+    RarediseaseSampleSheetEntry,
+    RarediseaseSampleSheetHeaders,
+)
 from cg.models.nf_analysis import WorkflowParameters
 from cg.store.models import Case, Sample, CaseSample
 
@@ -70,7 +73,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self, case: Case = "", case_sample: CaseSample = ""
     ) -> list[list[str]]:
         """Get sample sheet content per sample."""
-        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(case_sample.sample)
+        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(
+            case_sample.sample
+        )
         fastq_forward_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, forward_read=True
         )
@@ -100,9 +105,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
         for link in case.links:
             sample_sheet_content.extend(
-                self.get_sample_sheet_content_per_sample(
-                    case=case, case_sample=link
-                )
+                self.get_sample_sheet_content_per_sample(case=case, case_sample=link)
             )
         return sample_sheet_content
 
@@ -121,17 +124,18 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         return Path((self.get_case_path(case_id)), f"{case_id}_params_file{FileExtensions.CONFIG}")
         # This function should be moved to nf-analysis to replace the current one when all nextflow pipelines are using the same config files approach
 
-
     def write_params_file(self, case_id: str, workflow_parameters: dict) -> None:
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")
         config_files_list = [self.config_platform, self.config_params, self.config_resources]
-        extra_parameters_str = [write_config_nextflow_style(workflow_parameters),
-                                self.set_cluster_options(case_id=case_id)]
+        extra_parameters_str = [
+            write_config_nextflow_style(workflow_parameters),
+            self.set_cluster_options(case_id=case_id),
+        ]
         concat_txt(
-            file_paths = config_files_list,
+            file_paths=config_files_list,
             target_file=self.get_params_file_path(case_id=case_id),
-            str_content=extra_parameters_str
+            str_content=extra_parameters_str,
         )
 
     @staticmethod

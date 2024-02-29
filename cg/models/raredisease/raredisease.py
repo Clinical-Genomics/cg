@@ -36,6 +36,7 @@ class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
             )
         ]
 
+
 class RarediseaseSampleSheetHeaders(StrEnum):
     sample: str = "sample"
     lane: str = "lane"
@@ -50,5 +51,3 @@ class RarediseaseSampleSheetHeaders(StrEnum):
     @classmethod
     def headers(cls) -> list[str]:
         return list(map(lambda header: header.value, cls))
-
-

@@ -568,6 +568,7 @@ class CaseSample(Model):
         """Return parental id."""
         return father.internal_id if father else ""
 
+
 class Flowcell(Model):
     __tablename__ = "flowcell"
     id = Column(types.Integer, primary_key=True)
