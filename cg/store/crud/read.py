@@ -1760,7 +1760,7 @@ class ReadHandler(BaseHandler):
             filters=[OrderFilter.PAGINATE],
             page=orders_request.page,
             page_size=orders_request.page_size,
-        )
+        ).all()
 
     def get_orders_by_ids(self, order_ids: list[int]) -> list[Order]:
         """Return all orders with the provided ids."""
