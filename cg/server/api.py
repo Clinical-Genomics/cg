@@ -144,6 +144,7 @@ def submit_order(order_type):
 
     except (  # user misbehaviour
         OrderError,
+        OrderExistsError,
         OrderFormError,
         ValidationError,
         ValueError,
