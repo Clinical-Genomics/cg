@@ -62,6 +62,8 @@ def test_config_case_without_samples(
 def test_config_case(
     cli_runner: CliRunner,
     raredisease_context: CGConfig,
+    # rnafusion_sample_sheet_path: Path,
+    # rnafusion_params_file_path: Path,
     caplog: LogCaptureFixture,
     raredisease_case_id: str,
 ):

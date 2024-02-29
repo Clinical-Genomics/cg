@@ -3052,6 +3052,9 @@ def raredisease_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
     nf_analysis_housekeeper: HousekeeperAPI,
+    trailblazer_api: MockTB,
+    hermes_api: HermesApi,
+    cg_dir: Path,
     raredisease_case_id: str,
     sample_id: str,
     no_sample_case_id: str,
@@ -3063,6 +3066,7 @@ def raredisease_context(
 ) -> CGConfig:
     """Raredisease context to use in CLI."""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
+    cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
