@@ -11,4 +11,6 @@ def test_write_config_nextflow_style(config_dict: Path):
     """
 
     # THEN assert a config format is returned
-    assert write_config_nextflow_style(content=config_dict) == "input =input_path\noutput=output_path"
+    assert (
+        write_config_nextflow_style(content=config_dict) == "input =input_path\noutput=output_path"
+    )
