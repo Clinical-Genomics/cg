@@ -31,7 +31,7 @@ class OrderFilter(Enum):
     BY_IDS: Callable = filter_orders_by_ids
     BY_TICKET_ID: Callable = filter_orders_by_ticket_id
     BY_WORKFLOW: Callable = filter_orders_by_workflow
-    PAGINATION: Callable = apply_pagination
+    PAGINATE: Callable = apply_pagination
 
 
 def apply_order_filters(

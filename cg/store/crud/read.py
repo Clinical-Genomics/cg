@@ -1737,7 +1737,7 @@ class ReadHandler(BaseHandler):
         total_count: int = order_query.count()
         orders: list[Order] = apply_order_filters(
             orders=order_query,
-            filters=[OrderFilter.PAGINATION],
+            filters=[OrderFilter.PAGINATE],
             page=orders_request.page,
             page_size=orders_request.page_size,
         ).all()
