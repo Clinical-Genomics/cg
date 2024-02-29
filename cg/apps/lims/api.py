@@ -4,7 +4,7 @@ import datetime as dt
 import logging
 
 from dateutil.parser import parse as parse_date
-from genologics.entities import Artifact, Process, Sample
+from genologics.entities import Artifact, Process, Researcher, Sample
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
@@ -48,6 +48,7 @@ class LimsAPI(Lims, OrderHandler):
     def __init__(self, config):
         lconf = config["lims"]
         super(LimsAPI, self).__init__(lconf["host"], lconf["username"], lconf["password"])
+        self.user: Researcher = self.get_researchers(username=lconf["username"])[0]
 
     def sample(self, lims_id: str):
         """Fetch a sample from the LIMS database."""
