@@ -211,14 +211,19 @@ WORKFLOW_PROTECTED_TAGS = {
 
 
 class JanusTags:
+    """Tags to communicate with the JanusAPI."""
+
     tags_to_retrieve: list[str] = ["qc-metrics", "janus"]
     multi_qc_file_tags: list[str] = [
-        "hsmetrics",
-        "dups",
-        "stats",
-        "alignmentsummarymetrics",
-        "fastp",
+        "picard-alignment",
+        "picard-duplicates",
+        "picard-hs",
+        "picard-insert-size",
+        "picard-wgs",
+        "samtools-stats",
         "somalier",
-        "insertsize",
-        "wgsmetrics",
+        "picard-rnaseq",
+        "fastp",
+        "star",
+        "general-stats",
     ]

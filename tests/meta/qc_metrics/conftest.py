@@ -14,7 +14,6 @@ from cg.clients.janus.dto.create_qc_metrics_request import (
     FilePathAndTag,
     WorkflowInfo,
 )
-
 from cg.constants.housekeeper_tags import JanusTags
 from cg.meta.qc_metrics.collect_qc_metrics import CollectQCMetricsAPI
 from cg.store.models import Case, Sample
@@ -54,7 +53,7 @@ def janus_hk_store(
             {
                 "path": file_with_right_tags,
                 "archive": False,
-                "tags": ["qc-metrics", "janus", "multiqc", "hsmetrics"],
+                "tags": ["qc-metrics", "janus", "multiqc", "picard-hs"],
             },
             {
                 "path": file_without_right_tags,
@@ -115,7 +114,7 @@ def expected_request(
     ).first()
     sample: Sample = janus_store.get_samples_by_case_id(case_id_with_single_sample)[0]
     case: Case = janus_store.get_case_by_internal_id(case_id_with_single_sample)
-    file_path_and_tag = FilePathAndTag(file_path=hk_file.full_path, tag="hsmetrics")
+    file_path_and_tag = FilePathAndTag(file_path=hk_file.full_path, tag="picard-hs")
     return CreateQCMetricsRequest(
         case_id=case_id_with_single_sample,
         sample_ids=[sample.internal_id],
