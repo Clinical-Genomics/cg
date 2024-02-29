@@ -15,4 +15,4 @@ def test_write_config_nextflow_style(config_stream: Path):
     content: dict[str] = write_config_nextflow_style(content=config_stream)
 
     # THEN assert a config format is returned
-    assert content == 'Lorem = "ipsum"'
+    assert content == 'Lorem = "ipsum"\n'

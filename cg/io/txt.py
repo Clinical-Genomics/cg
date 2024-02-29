@@ -32,6 +32,6 @@ def concat_txt(
             content += txt
     for file_path in file_paths:
         content += read_txt(file_path, read_to_string=True)
-        content += '\n'  # Add newline after each file content
+        content += "\n"  # Add newline after each file content
 
     write_txt(content=content, file_path=target_file)
