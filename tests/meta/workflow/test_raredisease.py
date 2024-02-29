@@ -3,6 +3,7 @@
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 
+
 def test_get_sample_sheet_content_per_sample(
     raredisease_context: CGConfig,
     rnafusion_case_id: str,
