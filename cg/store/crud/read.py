@@ -1729,6 +1729,7 @@ class ReadHandler(BaseHandler):
         return records.all()
 
     def get_orders(self, orders_request: OrdersRequest) -> tuple[list[Order], int]:
+        """Filter, sort and paginate orders based on the provided request."""
         orders: Query = self.filter_orders(orders_request)
         total_count: int = orders.count()
         orders: list[Order] = self.sort_and_paginate_orders(
