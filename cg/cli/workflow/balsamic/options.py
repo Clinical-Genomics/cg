@@ -50,3 +50,10 @@ OPTION_CACHE_VERSION = click.option(
     required=False,
     help="Cache version to be used for init or analysis. Use 'develop' or 'X.X.X'.",
 )
+
+OPTION_CLUSTER_CONFIG = click.option(
+    "--cluster-config",
+    type=click.Path(exists=True),
+    required=False,
+    help="Cluster resources configuration JSON file path used for analysis.",
+)

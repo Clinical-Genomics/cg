@@ -12,6 +12,7 @@ from cg.store.crud.read import ReadHandler
 from cg.store.models import Case
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
+from cg.constants import FileExtensions
 
 
 @pytest.fixture
@@ -242,3 +243,27 @@ def mock_analysis_flow_cell(mocker) -> None:
     flow_cell.status = FlowCellStatus.ON_DISK
     mocker.patch.object(ReadHandler, "get_flow_cells_by_case")
     ReadHandler.get_flow_cells_by_case.return_value = [flow_cell]
+
+
+@pytest.fixture(scope="session")
+def deliverables_template_content() -> list[dict]:
+    return [
+        {
+            "format": "yml",
+            "id": "CASEID",
+            "path": Path("PATHTOCASE", "pipeline_info", "software_versions.yml").as_posix(),
+            "path_index": None,
+            "step": "software-versions",
+            "tag": "software-versions",
+        },
+        {
+            "format": "json",
+            "id": "CASEID",
+            "path": Path("PATHTOCASE", "multiqc", "multiqc_data", "multiqc_data")
+            .with_suffix(FileExtensions.JSON)
+            .as_posix(),
+            "path_index": None,
+            "step": "multiqc-json",
+            "tag": "multiqc-json",
+        },
+    ]

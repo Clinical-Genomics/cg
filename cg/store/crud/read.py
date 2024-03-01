@@ -11,6 +11,7 @@ from sqlalchemy.orm import Query, Session
 from cg.constants import FlowCellStatus, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
 from cg.exc import CaseNotFoundError, CgError
+from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.store.base import BaseHandler
 from cg.store.filters.status_analysis_filters import (
     AnalysisFilter,
@@ -1727,23 +1728,52 @@ class ReadHandler(BaseHandler):
         )
         return records.all()
 
-    def get_orders_by_workflow(
-        self, workflow: str | None = None, limit: int | None = None
-    ) -> list[Order]:
-        """Returns a list of entries in Order. The output is filtered on workflow and limited, if given."""
-        orders: Query = self._get_query(table=Order)
-        order_filter_functions: list[Callable] = [OrderFilter.ORDERS_BY_WORKFLOW]
+    def get_orders(self, orders_request: OrdersRequest) -> tuple[list[Order], int]:
+        """Filter, sort and paginate orders based on the provided request."""
         orders: Query = apply_order_filters(
-            orders=orders, filter_functions=order_filter_functions, workflow=workflow
+            orders=self._get_query(Order),
+            filters=[OrderFilter.BY_WORKFLOW],
+            workflow=orders_request.workflow,
         )
-        return orders.limit(limit).all()
+        total_count: int = orders.count()
+        orders: list[Order] = self.sort_and_paginate_orders(
+            orders=orders, orders_request=orders_request
+        )
+        return orders, total_count
+
+    def sort_and_paginate_orders(self, orders: Query, orders_request: OrdersRequest) -> list[Order]:
+        return apply_order_filters(
+            orders=orders,
+            filters=[OrderFilter.SORT, OrderFilter.PAGINATE],
+            sort_field=orders_request.sort_field,
+            sort_order=orders_request.sort_order,
+            page=orders_request.page,
+            page_size=orders_request.page_size,
+        ).all()
+
+    def get_orders_by_ids(self, order_ids: list[int]) -> list[Order]:
+        """Return all orders with the provided ids."""
+        return apply_order_filters(
+            orders=self._get_query(Order),
+            filters=[OrderFilter.BY_IDS],
+            ids=order_ids,
+        ).all()
 
     def get_order_by_id(self, order_id: int) -> Order | None:
         """Returns the entry in Order matching the given id."""
         orders: Query = self._get_query(table=Order)
-        order_filter_functions: list[Callable] = [OrderFilter.ORDERS_BY_ID]
+        order_filter_functions: list[Callable] = [OrderFilter.BY_ID]
         orders: Query = apply_order_filters(
-            orders=orders, filter_functions=order_filter_functions, id=order_id
+            orders=orders, filters=order_filter_functions, id=order_id
+        )
+        return orders.first()
+
+    def get_order_by_ticket_id(self, ticket_id: int) -> Order | None:
+        """Returns the entry in Order matching the given id."""
+        orders: Query = self._get_query(table=Order)
+        order_filter_functions: list[Callable] = [OrderFilter.BY_TICKET_ID]
+        orders: Query = apply_order_filters(
+            orders=orders, filters=order_filter_functions, ticket_id=ticket_id
         )
         return orders.first()
 
