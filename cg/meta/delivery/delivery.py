@@ -1,4 +1,4 @@
-"""Delivery API for handling file delivery to Caesar."""
+"""Delivery API for handling file delivery to customer's inbox."""
 
 import logging
 from pathlib import Path
@@ -7,7 +7,12 @@ from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Workflow
-from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
+from cg.constants.delivery import (
+    INBOX_NAME,
+    ONLY_ONE_CASE_PER_TICKET,
+    PIPELINE_ANALYSIS_TAG_MAP,
+)
+from cg.models.delivery.delivery import DeliveryFile
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -32,31 +37,35 @@ class DeliveryAPI:
         # TODO: logging
         raise NotImplementedError
 
-    def get_files_to_deliver(self, case: Case, force: bool) -> list[Path]:
+    def get_delivery_files(self, case: Case, force: bool = False) -> list[DeliveryFile]:
         """Return a complete list of files to be delivered to the customer's inbox."""
-        files_to_deliver: list[Path] = []
+        delivery_files: list[DeliveryFile] = []
         if DataDelivery.FASTQ in case.data_delivery:
-            fastq_files: list[Path] = self.get_fastq_files_to_deliver(case=case, force=force)
-            files_to_deliver.extend(fastq_files)
+            fastq_files: list[DeliveryFile] = self.get_fastq_delivery_files(case=case, force=force)
+            delivery_files.extend(fastq_files)
         if DataDelivery.ANALYSIS_FILES in case.data_delivery:
-            analysis_case_files: list[Path] = self.get_analysis_case_files_to_deliver(case)
-            analysis_sample_files: list[Path] = self.get_analysis_sample_files_to_deliver(case=case)
-            files_to_deliver.extend(analysis_case_files + analysis_sample_files)
-        return files_to_deliver
-
-    def get_fastq_files_to_deliver(self, case: Case, force: bool) -> list[Path]:
-        """Return a complete list of fastq sample files to be delivered."""
-        fastq_files: list[Path] = []
-        for sample in case.samples:
-            fastq_sample_files: list[Path] = self.get_fastq_files_to_deliver_by_sample(
-                sample=sample, force=force
+            analysis_case_files: list[DeliveryFile] = self.get_analysis_case_delivery_files(case)
+            analysis_sample_files: list[DeliveryFile] = self.get_analysis_sample_delivery_files(
+                case=case
             )
-            fastq_files.append(fastq_sample_files)
-        return fastq_files
+            delivery_files.extend(analysis_case_files + analysis_sample_files)
+        return delivery_files
 
-    def get_fastq_files_to_deliver_by_sample(self, sample: Sample, force: bool) -> list[Path]:
+    def get_fastq_delivery_files(self, case: Case, force: bool = False) -> list[DeliveryFile]:
+        """Return a complete list of fastq sample files to be delivered."""
+        delivery_files: list[DeliveryFile] = []
+        for sample in case.samples:
+            fastq_delivery_files: list[DeliveryFile] = self.get_fastq_delivery_files_by_sample(
+                case=case, sample=sample, force=force
+            )
+            delivery_files.append(fastq_delivery_files)
+        return delivery_files
+
+    def get_fastq_delivery_files_by_sample(
+        self, case: Case, sample: Sample, force: bool = False
+    ) -> list[DeliveryFile]:
         """Return a list of fastq files to be delivered for a specific sample."""
-        fastq_files: list[File] = []
+        delivery_files: list[DeliveryFile] = []
         fastq_tags: list[set[str]] = self.get_analysis_sample_tags_for_workflow(Workflow.FASTQ)
         if self.is_sample_deliverable(sample=sample, force=force):
             fastq_files: list[File] = (
@@ -64,9 +73,16 @@ class DeliveryAPI:
                     bundle_name=sample.internal_id, tags=fastq_tags
                 )
             )
-        return fastq_files
+            delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
+                files=fastq_files,
+                case=case,
+                source_id=sample.internal_id,
+                destination_id=sample.name,
+                sample_files=True,
+            )
+        return delivery_files
 
-    def get_analysis_case_files_to_deliver(self, case: Case) -> list[Path]:
+    def get_analysis_case_delivery_files(self, case: Case) -> list[DeliveryFile]:
         """
         Return a complete list of analysis case files to be delivered and ignore analysis sample
         files.
@@ -76,18 +92,22 @@ class DeliveryAPI:
         case_files: list[File] = self.housekeeper_api.get_files_from_latest_version_by_list_of_tags(
             bundle_name=case.internal_id, tags=case_tags, exclude_tags=sample_ids
         )
-        return case_files
+        delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
+            files=case_files, case=case, source_id=case.internal_id, destination_id=case.name
+        )
+        return delivery_files
 
-    def get_analysis_sample_files_to_deliver(self, case: Case) -> list[Path]:
+    def get_analysis_sample_delivery_files(self, case: Case) -> list[DeliveryFile]:
         """Return a complete list of analysis sample files to be delivered."""
-        sample_files: list[Path] = []
+        delivery_files: list[DeliveryFile] = []
         for sample in case.samples:
-            sample_files: list[Path] = self.get_analysis_sample_files_to_deliver_by_sample(
-                case=case, sample=sample
+            sample_delivery_files: list[DeliveryFile] = (
+                self.get_analysis_sample_delivery_files_by_sample(case=case, sample=sample)
             )
-        return sample_files
+            delivery_files.append(sample_delivery_files)
+        return delivery_files
 
-    def get_analysis_sample_files_to_deliver_by_sample(
+    def get_analysis_sample_delivery_files_by_sample(
         self, case: Case, sample: Sample
     ) -> list[Path]:
         """Return a list of analysis files to be delivered for a specific sample."""
@@ -99,7 +119,41 @@ class DeliveryAPI:
                 bundle_name=case.internal_id, tags=sample_tags
             )
         )
-        return sample_files
+        delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
+            files=sample_files,
+            case=case,
+            source_id=sample.internal_id,
+            destination_id=sample.name,
+            sample_files=True,
+        )
+        return delivery_files
+
+    def convert_files_to_delivery_files(
+        self,
+        files: list[File],
+        case: Case,
+        source_id: str,
+        destination_id: str,
+        sample_files: bool = False,
+    ) -> list[DeliveryFile]:
+        """Return a delivery file model given a list of housekeeper files."""
+        delivery_files: list[DeliveryFile] = []
+        destination_path: Path = Path(
+            self.delivery_path, case.customer_id, INBOX_NAME, case.latest_ticket
+        )
+        subfolder: Path = Path(destination_id)
+        if sample_files and case.data_analysis not in ONLY_ONE_CASE_PER_TICKET:
+            subfolder: Path = Path(case.name, destination_id)
+        for file in files:
+            destination_file_name: str = Path(file.full_path).name.replace(
+                source_id, destination_id
+            )
+            destination_path: Path = Path(destination_path, subfolder, destination_file_name)
+            delivery_file = DeliveryFile(
+                source_path=Path(file.full_path), destination_path=destination_path
+            )
+            delivery_files.append(delivery_file)
+        return delivery_files
 
     @staticmethod
     def get_analysis_case_tags_for_workflow(workflow: Workflow) -> list[set[str]]:
