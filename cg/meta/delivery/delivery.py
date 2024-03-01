@@ -30,7 +30,7 @@ class DeliveryAPI:
         self.housekeeper_api = housekeeper_api
         self.store = store
 
-    def link_files_to_inbox(self) -> None:
+    def link_delivery_files_to_inbox(self) -> None:
         """Link files from Housekeeper bundle to the customer's inbox."""
         # TODO: dry-run
         # TODO: force flag
