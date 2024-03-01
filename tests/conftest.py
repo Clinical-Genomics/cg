@@ -743,9 +743,9 @@ def mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
 
 
 @pytest.fixture
-def nf_analysis_analysis_dir(analysis_dir: Path) -> Path:
+def nf_analysis_analysis_dir(fixtures_dir: Path) -> Path:
     """Return the path to the directory with rnafusion analysis files."""
-    return Path(analysis_dir, "nf-analysis")
+    return Path(fixtures_dir, "nf-analysis")
 
 
 @pytest.fixture
