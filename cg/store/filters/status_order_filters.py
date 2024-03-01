@@ -5,7 +5,7 @@ from sqlalchemy import asc, desc, or_
 from sqlalchemy.orm import Query
 from cg.server.dto.orders.orders_request import OrderSortField, SortOrder
 
-from cg.store.models import Order
+from cg.store.models import Customer, Order
 
 
 def filter_orders_by_workflow(orders: Query, workflow: str | None, **kwargs) -> Query:
@@ -29,17 +29,16 @@ def filter_orders_by_ticket_id(orders: Query, ticket_id: int | None, **kwargs) -
 
 
 def filter_orders_by_search(orders: Query, search: str | None, **kwargs) -> Query:
-    return (
+    if search:
+        orders = orders.join(Order.customer)
         orders.filter(
             or_(
                 Order.id.startswith(search),
-                Order.customer.name.ilike(f"%{search}%"),
+                Customer.name.ilike(f"%{search}%"),
                 Order.ticket_id.ilike(f"%{search}%"),
             )
         )
-        if search
-        else orders
-    )
+    return orders
 
 
 def apply_sorting(
