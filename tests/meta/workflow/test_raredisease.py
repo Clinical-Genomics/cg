@@ -64,5 +64,3 @@ def test_write_params_file(raredisease_context: CGConfig, raredisease_case_id: s
     in_out = {"input": "input_path", "output": "output_path"}
 
     analysis_api.write_params_file(case_id=raredisease_case_id, workflow_parameters=in_out)
-
-
