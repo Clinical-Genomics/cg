@@ -3,6 +3,7 @@ from typing import Callable
 from sqlalchemy import asc, desc
 
 from sqlalchemy.orm import Query
+from cg.server.dto.orders.orders_request import OrderSortField, SortOrder
 
 from cg.store.models import Order
 
@@ -27,7 +28,9 @@ def filter_orders_by_ticket_id(orders: Query, ticket_id: int | None, **kwargs) -
     return orders.filter(Order.ticket_id == ticket_id) if ticket_id else orders
 
 
-def apply_sorting(orders: Query, sort_field: str | None, sort_order: str | None, **kwargs) -> Query:
+def apply_sorting(
+    orders: Query, sort_field: OrderSortField | None, sort_order: SortOrder | None, **kwargs
+) -> Query:
     if sort_field:
         column = getattr(Order, sort_field)
         if sort_order == "asc":
@@ -51,7 +54,7 @@ def apply_order_filters(
     id: int = None,
     ids: list[int] = None,
     ticket_id: int = None,
-    workflow: str = None,
+    workflow: SortOrder = None,
     page: int = None,
     page_size: int = None,
     sort_field: str = None,
