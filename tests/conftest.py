@@ -3106,6 +3106,7 @@ def raredisease_context(
     total_sequenced_reads_pass: int,
     apptag_rna: str,
     raredisease_case_id: str,
+    case_id_not_enough_reads: str,
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
 ) -> CGConfig:
