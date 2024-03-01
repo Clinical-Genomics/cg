@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Callable
-from sqlalchemy import asc, desc
+from sqlalchemy import asc, desc, or_
 
 from sqlalchemy.orm import Query
 from cg.server.dto.orders.orders_request import OrderSortField, SortOrder
@@ -28,6 +28,20 @@ def filter_orders_by_ticket_id(orders: Query, ticket_id: int | None, **kwargs) -
     return orders.filter(Order.ticket_id == ticket_id) if ticket_id else orders
 
 
+def filter_orders_by_search(orders: Query, search: str | None, **kwargs) -> Query:
+    return (
+        orders.filter(
+            or_(
+                Order.id.ilike(f"%{search}%"),
+                Order.customer.name.ilike(f"%{search}%"),
+                Order.ticket_id.ilike(f"%{search}%"),
+            )
+        )
+        if search
+        else orders
+    )
+
+
 def apply_sorting(
     orders: Query, sort_field: OrderSortField | None, sort_order: SortOrder | None, **kwargs
 ) -> Query:
@@ -42,6 +56,7 @@ def apply_sorting(
 class OrderFilter(Enum):
     BY_ID: Callable = filter_orders_by_id
     BY_IDS: Callable = filter_orders_by_ids
+    BY_SEARCH: Callable = filter_orders_by_search
     BY_TICKET_ID: Callable = filter_orders_by_ticket_id
     BY_WORKFLOW: Callable = filter_orders_by_workflow
     PAGINATE: Callable = apply_pagination
