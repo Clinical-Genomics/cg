@@ -95,9 +95,12 @@ class CollectQCMetricsAPI:
         except (JanusClientError, JanusServerError) as error:
             LOG.info(f"Cannot collect qc metrics from Janus: {error}")
 
-    def create_case(self, case_id: str):
+    def get_create_case_request(self, case_id) -> CreateCaseRequest:
         case_qc_metrics: dict = self.get_case_qc_metrics(case_id)
-        case_request: CreateCaseRequest = CreateCaseRequest.model_validate(**case_qc_metrics)
+        return CreateCaseRequest(**case_qc_metrics)
+
+    def create_case(self, case_id: str):
+        case_request: CreateCaseRequest = self.get_create_case_request(case_id)
         try:
             response: Response = self.arnold_api.create_case(case_request)
             LOG.info(f"Created case for {case_id} in arnold. {response.status_code}")

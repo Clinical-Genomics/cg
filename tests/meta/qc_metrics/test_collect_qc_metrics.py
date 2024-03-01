@@ -2,6 +2,7 @@
 
 from housekeeper.store.models import File
 
+from cg.clients.arnold.dto.create_case_request import CreateCaseRequest
 from cg.clients.janus.dto.create_qc_metrics_request import CreateQCMetricsRequest
 from cg.meta.qc_metrics.collect_qc_metrics import CollectQCMetricsAPI
 
@@ -38,3 +39,24 @@ def test_create_qc_metrics_request(
 
     # THEN a qc metrics request is created
     assert qc_metrics_request == expected_request
+
+
+def test_create_case_request(
+    collect_qc_metrics_api: CollectQCMetricsAPI,
+    mock_case_qc_metrics: dict,
+    mock_case_id: str,
+    expected_create_case_request: CreateCaseRequest,
+    mocker,
+):
+
+    # GIVEN  mock case qc metrics
+    mocker.patch.object(CollectQCMetricsAPI, "get_case_qc_metrics")
+    CollectQCMetricsAPI.get_case_qc_metrics.return_value = mock_case_qc_metrics
+
+    # WHEN creating a case request
+    create_case_request: CreateCaseRequest = collect_qc_metrics_api.get_create_case_request(
+        mock_case_id
+    )
+
+    # THEN a create case request is returned
+    assert create_case_request == expected_create_case_request
