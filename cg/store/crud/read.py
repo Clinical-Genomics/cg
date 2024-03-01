@@ -1729,19 +1729,27 @@ class ReadHandler(BaseHandler):
         return records.all()
 
     def get_orders(self, orders_request: OrdersRequest) -> tuple[list[Order], int]:
-        order_query: Query = apply_order_filters(
+        """Filter, sort and paginate orders based on the provided request."""
+        orders: Query = apply_order_filters(
             orders=self._get_query(Order),
             filters=[OrderFilter.BY_WORKFLOW],
             workflow=orders_request.workflow,
         )
-        total_count: int = order_query.count()
-        orders: list[Order] = apply_order_filters(
-            orders=order_query,
-            filters=[OrderFilter.PAGINATE],
+        total_count: int = orders.count()
+        orders: list[Order] = self.sort_and_paginate_orders(
+            orders=orders, orders_request=orders_request
+        )
+        return orders, total_count
+
+    def sort_and_paginate_orders(self, orders: Query, orders_request: OrdersRequest) -> list[Order]:
+        return apply_order_filters(
+            orders=orders,
+            filters=[OrderFilter.SORT, OrderFilter.PAGINATE],
+            sort_field=orders_request.sort_field,
+            sort_order=orders_request.sort_order,
             page=orders_request.page,
             page_size=orders_request.page_size,
         ).all()
-        return orders, total_count
 
     def get_orders_by_ids(self, order_ids: list[int]) -> list[Order]:
         """Return all orders with the provided ids."""
