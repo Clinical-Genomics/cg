@@ -744,7 +744,7 @@ def mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
 
 @pytest.fixture
 def nf_analysis_analysis_dir(fixtures_dir: Path) -> Path:
-    """Return the path to the directory with rnafusion analysis files."""
+    """Return the path to the directory with nf-analysis files."""
     return Path(fixtures_dir, "analysis", "nf-analysis")
 
 
@@ -2330,20 +2330,20 @@ def rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
 
 @pytest.fixture(scope="function")
 def nf_analysis_platform_config_path(nf_analysis_analysis_dir) -> Path:
-    """Path to deliverables file."""
+    """Path to platform config file."""
     return Path(nf_analysis_analysis_dir, f"platform").with_suffix(FileExtensions.CONFIG)
 
 
 @pytest.fixture(scope="function")
 def nf_analysis_pipeline_params_path(nf_analysis_analysis_dir) -> Path:
-    """Path to deliverables file."""
+    """Path to pipeline params file."""
     return Path(nf_analysis_analysis_dir, f"pipeline_params").with_suffix(FileExtensions.CONFIG)
 
 
 @pytest.fixture(scope="function")
 def nf_analysis_pipeline_resource_optimisation_path(nf_analysis_analysis_dir) -> Path:
-    """Path to deliverables file."""
-    return Path(nf_analysis_analysis_dir, f"pipeline_params").with_suffix(FileExtensions.CONFIG)
+    """Path to pipeline resource optimisation file."""
+    return Path(nf_analysis_analysis_dir, f"pipeline_resource_optimisation").with_suffix(FileExtensions.CONFIG)
 
 
 @pytest.fixture(scope="session")
