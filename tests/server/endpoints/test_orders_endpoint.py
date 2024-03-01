@@ -34,7 +34,7 @@ def test_orders_endpoint(
     limit: int | None,
     workflow: str,
     expected_orders: int,
-    analysis_summary
+    analysis_summary,
 ):
     """Tests that orders are returned from the orders endpoint"""
     # GIVEN a store with three orders, two of which are MIP-DNA and the last is BALSAMIC
