@@ -1,8 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class OrderSummary(BaseModel):
-    order_id: int
+    order_id: int = Field(exclude=True)
     total: int
     delivered: int | None = None
     running: int | None = None
