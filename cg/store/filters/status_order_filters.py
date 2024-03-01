@@ -32,7 +32,7 @@ def filter_orders_by_search(orders: Query, search: str | None, **kwargs) -> Quer
     return (
         orders.filter(
             or_(
-                Order.id.ilike(f"%{search}%"),
+                Order.id.startswith(search),
                 Order.customer.name.ilike(f"%{search}%"),
                 Order.ticket_id.ilike(f"%{search}%"),
             )
