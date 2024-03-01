@@ -8,7 +8,7 @@ class Order(BaseModel):
     customer_id: str
     ticket_id: int
     order_date: str
-    order_id: int
+    id: int
     workflow: Workflow
     summary: OrderSummary | None = None
 
