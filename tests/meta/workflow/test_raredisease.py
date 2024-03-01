@@ -19,7 +19,7 @@ def test_get_sample_sheet_content(
     result = analysis_api.get_sample_sheet_content(case_id=raredisease_case_id)
 
     expected = [
-            [
+        [
             "ADM1",
             1,
             Path(
@@ -29,12 +29,12 @@ def test_get_sample_sheet_content(
                 "/tmp/pytest-of-runner/pytest-0/popen-gw1/housekeeper0/XXXXXXXXX_000000_S000_L001_R2_001.fastq.fastq.gz"
             ),
             2,
-            <PlinkPhenotypeStatus.UNKNOWN: 0>,
+            0,
             "",
             "",
             "raredisease_case_enough_reads",
-            ],
-            [
+        ],
+        [
             "ADM1",
             2,
             Path(
@@ -44,12 +44,12 @@ def test_get_sample_sheet_content(
                 "/tmp/pytest-of-runner/pytest-0/popen-gw1/housekeeper0/XXXXXXXXX_000000_S000_L001_R2_001.fastq.fastq.gz"
             ),
             2,
-            <PlinkPhenotypeStatus.UNKNOWN: 0>,
+            0,
             "",
             "",
             "raredisease_case_enough_reads",
-            ]
-        ]
+        ],
+    ]
 
     # THEN the process should exit successfully
     assert result == expected
