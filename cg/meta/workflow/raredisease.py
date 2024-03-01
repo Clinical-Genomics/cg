@@ -19,7 +19,7 @@ from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetHeaders,
 )
 from cg.models.nf_analysis import WorkflowParameters
-from cg.store.models import Case, Sample, CaseSample
+from cg.store.models import Case, CaseSample
 
 
 LOG = logging.getLogger(__name__)
