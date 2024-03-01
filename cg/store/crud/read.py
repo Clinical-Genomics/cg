@@ -1731,12 +1731,14 @@ class ReadHandler(BaseHandler):
     def get_orders(self, orders_request: OrdersRequest) -> tuple[list[Order], int]:
         filtered_orders: Query = self.filter_orders(orders_request)
         total_count: int = filtered_orders.count()
-        sorted_orders: Query = self.sort_orders(
-            orders=filtered_orders, orders_request=orders_request
-        )
-        orders: list[Order] = self.paginate_orders(
-            orders=sorted_orders, orders_request=orders_request
-        )
+        orders: list[Order] = apply_order_filters(
+            orders=filtered_orders,
+            filters=[OrderFilter.SORT, OrderFilter.PAGINATE],
+            sort_field=orders_request.sort_field,
+            sort_order=orders_request.sort_order,
+            page=orders_request.page,
+            page_size=orders_request.page_size,
+        ).all()
         return orders, total_count
 
     def filter_orders(self, orders_request: OrdersRequest) -> Query:
@@ -1745,22 +1747,6 @@ class ReadHandler(BaseHandler):
             filters=[OrderFilter.BY_WORKFLOW],
             workflow=orders_request.workflow,
         )
-
-    def sort_orders(self, orders: Query, orders_request: OrdersRequest) -> Query:
-        return apply_order_filters(
-            orders=orders,
-            filters=[OrderFilter.SORT],
-            sort_field=orders_request.sort_field,
-            sort_order=orders_request.sort_order,
-        )
-
-    def paginate_orders(self, orders: Query, orders_request: OrdersRequest) -> list[Order]:
-        return apply_order_filters(
-            orders=orders,
-            filters=[OrderFilter.PAGINATE],
-            page=orders_request.page,
-            page_size=orders_request.page_size,
-        ).all()
 
     def get_orders_by_ids(self, order_ids: list[int]) -> list[Order]:
         """Return all orders with the provided ids."""
