@@ -72,8 +72,9 @@ def apply_order_filters(
     workflow: SortOrder = None,
     page: int = None,
     page_size: int = None,
-    sort_field: str = None,
-    sort_order: str = None,
+    sort_field: OrderSortField = None,
+    sort_order: SortOrder = None,
+    search: str = None,
 ) -> Query:
     for filter in filters:
         orders: Query = filter(
@@ -86,5 +87,6 @@ def apply_order_filters(
             ticket_id=ticket_id,
             sort_field=sort_field,
             sort_order=sort_order,
+            search=search,
         )
     return orders
