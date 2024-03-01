@@ -22,10 +22,10 @@ def test_create_case_successful(
     mocked_post = mocker.patch.object(requests, "post")
     mocked_post.return_value = mock_post_request_ok
 
-    # WHEN retrieving the qc metrics
+    # WHEN creating a case
     jobs_response: Response = arnold_client.create_case(create_case_request)
 
-    # THEN the qc metrics are deserialized without error
+    # THEN  a case request is sent
     assert jobs_response.status_code == HTTPStatus.OK
     mocked_post.assert_called_once_with(
         f"{arnold_client.api_url}/case/",
@@ -43,7 +43,7 @@ def test_create_case_not_successful(
     mocked_post = mocker.patch.object(requests, "post")
     mocked_post.return_value = mock_post_request_not_found
 
-    # WHEN retrieving the qc metrics
+    # WHEN creating a case
 
     # THEN the request raises an error
     with pytest.raises(ArnoldClientError):
