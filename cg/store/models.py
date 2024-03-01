@@ -259,10 +259,10 @@ class Analysis(Base):
     __tablename__ = "analysis"
 
     id: Mapped[PrimaryKeyInt]
-    pipeline: Mapped[str | None] = mapped_column(
+    workflow: Mapped[str | None] = mapped_column(
         types.Enum(*(workflow.value for workflow in Workflow))
     )
-    pipeline_version: Mapped[Str32 | None]
+    workflow_version: Mapped[Str32 | None]
     started_at: Mapped[datetime | None]
     completed_at: Mapped[datetime | None]
     delivery_report_created_at: Mapped[datetime | None]
@@ -664,7 +664,7 @@ class Flowcell(Base):
     sequencer_name: Mapped[Str32 | None]
     sequenced_at: Mapped[datetime | None]
     status: Mapped[str | None] = mapped_column(
-        types.Enum(*(status.value for status in FlowCellStatus), default="ondisk")
+        types.Enum(*(status.value for status in FlowCellStatus)), default="ondisk"
     )
     archived_at: Mapped[datetime | None]
     has_backup: Mapped[bool] = mapped_column(default=False)

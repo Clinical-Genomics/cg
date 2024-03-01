@@ -9,6 +9,7 @@ from flask import Flask
 from flask.testing import FlaskClient
 from mock import patch
 
+from cg.apps.tb.dto.summary_response import AnalysisSummary
 from cg.constants import DataDelivery, Workflow
 from cg.server.ext import db as store
 from cg.store.database import create_all_tables, drop_all_tables
@@ -22,6 +23,9 @@ os.environ["LIMS_PASSWORD"] = "dummy_value"
 os.environ["GOOGLE_OAUTH_CLIENT_ID"] = "dummy_value"
 os.environ["GOOGLE_OAUTH_CLIENT_SECRET"] = "dummy_value"
 os.environ["CG_ENABLE_ADMIN"] = "1"
+os.environ["TRAILBLAZER_SERVICE_ACCOUNT"] = "dummy_value"
+os.environ["TRAILBLAZER_SERVICE_ACCOUNT_AUTH_FILE"] = "dummy_value"
+os.environ["TRAILBLAZER_HOST"] = "dummy_value"
 
 
 @pytest.fixture
@@ -100,3 +104,13 @@ def client(app: Flask) -> Generator[FlaskClient, None, None]:
     # Bypass authentication
     with patch.object(app, "before_request_funcs", new={}):
         yield app.test_client()
+
+
+@pytest.fixture
+def analysis_summary():
+    return AnalysisSummary(
+        order_id=1,
+        total=2,
+        delivered=1,
+        failed=1,
+    )

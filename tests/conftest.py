@@ -49,7 +49,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
-from cg.store.models import Bed, BedVersion, Case, Customer, Organism, Sample
+from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
 from cg.store.store import Store
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
@@ -1889,7 +1889,7 @@ def context_config(
             "databases": Path("path", "to", "databases").as_posix(),
             "profile": "myprofile",
             "hostremoval_reference": Path("path", "to", "hostremoval_reference").as_posix(),
-            "revision": "1.0.1",
+            "revision": "1.1.4",
             "slurm": {
                 "account": "development",
                 "mail_user": "taxprofiler.email@scilifelab.se",
@@ -2589,6 +2589,14 @@ def taxprofiler_metrics_deliverables_path(taxprofiler_dir: Path, taxprofiler_cas
 
 
 @pytest.fixture(scope="function")
+def taxprofiler_deliverables_file_path(taxprofiler_dir: Path, taxprofiler_case_id: str) -> Path:
+    """Path to deliverables file."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_deliverables"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
 def nf_analysis_housekeeper(
     housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
@@ -2635,6 +2643,9 @@ def taxprofiler_context(
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
     taxprofiler_case: Case = helpers.add_case(
         store=status_db,
@@ -2912,7 +2923,14 @@ def store_with_case_and_sample_with_reads(
     case: Case = helpers.add_case(
         store=store, internal_id=downsample_case_internal_id, name=downsample_case_internal_id
     )
-
+    order: Order = helpers.add_order(
+        store=store,
+        customer_id=case.customer_id,
+        ticket_id=case.latest_ticket,
+        order_date=case.ordered_at,
+        workflow=case.data_analysis,
+    )
+    case.orders.append(order)
     for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
         helpers.add_sample(
             store=store,

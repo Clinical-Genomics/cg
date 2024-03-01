@@ -63,8 +63,8 @@ class DataAnalysisModel(BaseModel):
     Attributes:
         customer_workflow: data analysis requested by the customer; source: StatusDB/family/data_analysis
         data_delivery: data delivery requested by the customer; source: StatusDB/family/data_delivery
-        workflow: actual workflow used for analysis; source: statusDB/analysis/pipeline
-        workflow_version: workflow version; source: statusDB/analysis/pipeline_version
+        workflow: actual workflow used for analysis; source: statusDB/analysis/workflow
+        workflow_version: workflow version; source: statusDB/analysis/workflow_version
         type: analysis type carried out; source: workflow
         genome_build: build version of the genome reference; source: workflow
         variant_callers: variant-calling filters; source: workflow
