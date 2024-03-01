@@ -18,6 +18,9 @@ def test_get_sample_sheet_content(
     # WHEN getting the sample sheet content
     result = analysis_api.get_sample_sheet_content(case_id=raredisease_case_id)
 
+
+    # THEN return should be the expected
+
     expected = [
         [
             "ADM1",
@@ -51,5 +54,21 @@ def test_get_sample_sheet_content(
         ],
     ]
 
-    # THEN the process should exit successfully
     assert result == expected
+
+
+def test_write_params_file(
+    raredisease_context: CGConfig,
+    raredisease_case_id: str
+):
+
+    # GIVEN Raredisease analysis API
+    analysis_api: RarediseaseAnalysisAPI = raredisease_context.meta_apis["analysis_api"]
+
+    in_out = {"input": "input_path", "output": "output_path"}
+
+    analysis_api.write_params_file(case_id=raredisease_case_id, workflow_parameters=in_out)
+
+
+
+    assert result.exit_code == EXIT_SUCCESS

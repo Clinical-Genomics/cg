@@ -741,6 +741,11 @@ def mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
     """Return the path to the directory with mip dna analysis files."""
     return Path(mip_analysis_dir, "dna")
 
+@pytest.fixture
+def nf_analysis_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with rnafusion analysis files."""
+    return Path(analysis_dir, "nf-analysis")
+
 
 @pytest.fixture
 def raredisease_analysis_dir(analysis_dir: Path) -> Path:
@@ -1692,6 +1697,9 @@ def context_config(
     illumina_demultiplexed_runs_directory: Path,
     downsample_dir: Path,
     pdc_archiving_directory: PDCArchivingDirectory,
+    nf_analysis_platform_config_path: Path,
+    nf_analysis_pipeline_params_path: Path,
+    nf_analysis_pipeline_resource_optimisation_path: Path,
 ) -> dict:
     """Return a context config."""
     return {
@@ -1853,9 +1861,9 @@ def context_config(
             "compute_env": "nf_tower_compute_env",
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_raredisease",
-            "config_platform": Path("path", "to", "hasta", "config").as_posix(),
-            "config_params": Path("path", "to", "params", "config").as_posix(),
-            "config_resources": Path("path", "to", "resources", "config").as_posix(),
+            "config_platform": nf_analysis_platform_config_path,
+            "config_params": nf_analysis_pipeline_params_path,
+            "config_resources": nf_analysis_pipeline_resource_optimisation_path,
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
@@ -2200,12 +2208,6 @@ def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
     return Path(raredisease_dir).absolute().as_posix()
 
 
-@pytest.fixture(scope="session")
-def raredisease_case_id() -> str:
-    """Returns a rnafusion case id."""
-    return "raredisease_case_enough_reads"
-
-
 # Rnafusion fixtures
 
 
@@ -2317,6 +2319,31 @@ def rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_deliverables").with_suffix(
         FileExtensions.YAML
     )
+
+
+@pytest.fixture(scope="function")
+def nf_analysis_platform_config_path(nf_analysis_analysis_dir) -> Path:
+    """Path to deliverables file."""
+    return Path(nf_analysis_analysis_dir, f"platform").with_suffix(
+        FileExtensions.CONFIG
+    )
+
+
+@pytest.fixture(scope="function")
+def nf_analysis_pipeline_params_path(nf_analysis_analysis_dir) -> Path:
+    """Path to deliverables file."""
+    return Path(nf_analysis_analysis_dir, f"pipeline_params").with_suffix(
+        FileExtensions.CONFIG
+    )
+
+
+@pytest.fixture(scope="function")
+def nf_analysis_pipeline_resource_optimisation_path(nf_analysis_analysis_dir) -> Path:
+    """Path to deliverables file."""
+    return Path(nf_analysis_analysis_dir, f"pipeline_params").with_suffix(
+        FileExtensions.CONFIG
+    )
+
 
 
 @pytest.fixture(scope="session")
@@ -3067,25 +3094,20 @@ def downsample_api(
         config=downsample_context,
     )
 
-
-@pytest.fixture(scope="session")
-def raredisease_case_id() -> str:
-    """Returns a raredisease case id."""
-    return "raredisease_case_enough_reads"
-
-
 @pytest.fixture(scope="function")
 def raredisease_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
     nf_analysis_housekeeper: HousekeeperAPI,
     trailblazer_api: MockTB,
-    raredisease_case_id: str,
     sample_id: str,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
     apptag_rna: str,
-    case_id_not_enough_reads: str,
+    nf_analysis_platform_config_path: Path,
+    nf_analysis_pipeline_params_path: Path,
+    nf_analysis_pipeline_resource_optimisation_path: Path,
+    case_id: str,
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
 ) -> CGConfig:
@@ -3101,8 +3123,8 @@ def raredisease_context(
     # Create a textbook case with enough reads
     case_enough_reads: Case = helpers.add_case(
         store=status_db,
-        internal_id=raredisease_case_id,
-        name=raredisease_case_id,
+        internal_id=case_id,
+        name=case_id,
         data_analysis=Workflow.RAREDISEASE,
     )
 
