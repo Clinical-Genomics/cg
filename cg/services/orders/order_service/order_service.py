@@ -29,12 +29,8 @@ class OrderService:
 
     def get_orders(self, orders_request: OrdersRequest) -> OrdersResponse:
         orders, total_count = self.store.get_orders(orders_request)
-
-        summaries: list[OrderSummary] = []
-        if orders_request.include_summary:
-            order_ids: list[int] = [order.id for order in orders]
-            summaries: list[OrderSummary] = self.summary_service.get_status_summaries(order_ids)
-
+        order_ids: list[int] = [order.id for order in orders]
+        summaries: list[OrderSummary] = self.summary_service.get_status_summaries(order_ids)
         return create_orders_response(orders=orders, summaries=summaries, total=total_count)
 
     def create_order(self, order_data: OrderIn) -> OrderResponse:

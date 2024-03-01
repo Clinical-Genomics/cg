@@ -19,4 +19,3 @@ class OrdersRequest(BaseModel):
     sort_field: OrderSortField | None = Field(alias="sortField", default=OrderSortField.ORDER_DATE)
     sort_order: SortOrder | None = Field(alias="sortOrder", default=SortOrder.DESC)
     workflow: str | None = None
-    include_summary: bool = Field(default=False, alias="includeSummary")
