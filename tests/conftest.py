@@ -2209,6 +2209,12 @@ def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
     return Path(raredisease_dir).absolute().as_posix()
 
 
+@pytest.fixture(scope="session")
+def raredisease_case_id() -> str:
+    """Returns a rnafusion case id."""
+    return "raredisease_case_enough_reads"
+
+
 # Rnafusion fixtures
 
 
@@ -3099,7 +3105,7 @@ def raredisease_context(
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
     apptag_rna: str,
-    case_id: str,
+    raredisease_case_id: str,
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
 ) -> CGConfig:
@@ -3115,8 +3121,8 @@ def raredisease_context(
     # Create a textbook case with enough reads
     case_enough_reads: Case = helpers.add_case(
         store=status_db,
-        internal_id=case_id,
-        name=case_id,
+        internal_id=raredisease_case_id,
+        name=raredisease_case_id,
         data_analysis=Workflow.RAREDISEASE,
     )
 

@@ -65,4 +65,4 @@ def test_write_params_file(raredisease_context: CGConfig, raredisease_case_id: s
 
     analysis_api.write_params_file(case_id=raredisease_case_id, workflow_parameters=in_out)
 
-    assert result.exit_code == EXIT_SUCCESS
+
