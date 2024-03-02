@@ -33,9 +33,9 @@ def filter_orders_by_search(orders: Query, search: str | None, **kwargs) -> Quer
         orders = orders.join(Order.customer)
         orders.filter(
             or_(
-                Order.id.startswith(search),
-                Customer.name.ilike(f"%{search}%"),
-                Order.ticket_id.ilike(f"%{search}%"),
+                Order.id == search,
+                Order.ticket_id == search,
+                Customer.internal_id.icontains(search),
             )
         )
     return orders
