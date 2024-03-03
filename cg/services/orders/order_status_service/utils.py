@@ -21,14 +21,12 @@ def add_analysis_summaries(
 ) -> None:
     order_summary_map = {summary.order_id: summary for summary in order_summaries}
     for analysis_summary in analysis_summaries:
-        try:
-            order_summary = order_summary_map[analysis_summary.order_id]
-            order_summary.delivered = analysis_summary.delivered
-            order_summary.running = analysis_summary.running
-            order_summary.cancelled = analysis_summary.cancelled
-            order_summary.failed = analysis_summary.failed
-        except KeyError:
-            continue
+        order_summary = order_summary_map[analysis_summary.order_id]
+        order_summary.delivered = analysis_summary.delivered
+        order_summary.running = analysis_summary.running
+        order_summary.cancelled = analysis_summary.cancelled
+        order_summary.failed = analysis_summary.failed
+
 
 
 class CaseStatus(Enum):
