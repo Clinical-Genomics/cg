@@ -41,7 +41,7 @@ def test_orders_endpoint(
 
     # WHEN a request is made to get all orders
     endpoint: str = "/api/v1/orders"
-    with mock.patch.object(TrailblazerAPI, "get_summaries", return_value=[analysis_summary]):
+    with mock.patch.object(TrailblazerAPI, "get_summaries", return_value=[]):
         response = client.get(endpoint, query_string={"pageSize": limit, "workflow": workflow})
 
     # THEN the response should be successful

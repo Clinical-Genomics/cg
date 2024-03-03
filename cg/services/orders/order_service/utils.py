@@ -24,9 +24,6 @@ def create_orders_response(
 def _add_summaries(orders: list[Order], summaries: list[OrderSummary]) -> list[Order]:
     order_map = {order.id: order for order in orders}
     for summary in summaries:
-        try:
-            order = order_map[summary.order_id]
-            order.summary = summary
-        except KeyError:
-            continue
+        order = order_map[summary.order_id]
+        order.summary = summary
     return orders
