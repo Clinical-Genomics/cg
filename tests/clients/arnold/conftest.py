@@ -25,9 +25,15 @@ def mock_post_request_ok(mocker: MockFixture) -> MockFixture:
 
 
 @pytest.fixture
-def mock_post_request_not_found(mocker: MockFixture) -> MockFixture:
+def error_content() -> str:
+    return "Test content."
+
+
+@pytest.fixture
+def mock_post_request_not_found(mocker: MockFixture, error_content: str) -> MockFixture:
     mocked_response = mocker.Mock()
     mocked_response.status_code = HTTPStatus.NOT_FOUND
+    mocked_response.content = error_content
     return mocked_response
 
 

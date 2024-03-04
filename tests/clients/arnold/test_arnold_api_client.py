@@ -38,6 +38,7 @@ def test_create_case_not_successful(
     arnold_client: ArnoldAPIClient,
     create_case_request: CreateCaseRequest,
     mock_post_request_not_found: MockFixture,
+    error_content: str,
 ):
     # GIVEN a mocked response from the requests.post method that is not successful
     mocked_post = mocker.patch.object(requests, "post")
@@ -47,4 +48,5 @@ def test_create_case_not_successful(
 
     # THEN the request raises an error
     with pytest.raises(ArnoldClientError):
-        arnold_client.create_case(create_case_request)
+        response = arnold_client.create_case(create_case_request)
+        assert response.content == error_content
