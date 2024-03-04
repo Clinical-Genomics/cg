@@ -67,7 +67,7 @@ def test_write_params_file(raredisease_context: CGConfig, raredisease_case_id: s
     analysis_api.create_case_directory(case_id=raredisease_case_id, dry_run=False)
 
     # THEN care directory is created
-    assert os.path.exists(analysis_api.get_case_path)
+    assert os.path.exists(analysis_api.get_case_path(case_id=raredisease_case_id))
 
     # WHEN writing parameters file
     analysis_api.write_params_file(case_id=raredisease_case_id, workflow_parameters=in_out)
