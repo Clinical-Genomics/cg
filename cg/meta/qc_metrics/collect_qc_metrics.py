@@ -99,8 +99,10 @@ class CollectQCMetricsAPI:
         case_qc_metrics: dict = self.get_case_qc_metrics(case_id)
         return CreateCaseRequest(**case_qc_metrics)
 
-    def create_case(self, case_id: str):
+    def create_case(self, case_id: str, dry_run: bool = False):
         case_request: CreateCaseRequest = self.get_create_case_request(case_id)
+        if dry_run:
+            LOG.info(f"Would have sent create case request to Arnold with: {case_request}")
         try:
             response: Response = self.arnold_api.create_case(case_request)
             LOG.info(f"Created case for {case_id} in arnold. {response.status_code}")
