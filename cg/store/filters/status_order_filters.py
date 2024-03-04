@@ -17,7 +17,7 @@ def filter_orders_by_id(orders: Query, id: int | None, **kwargs) -> Query:
 
 
 def filter_orders_by_ids(orders: Query, ids: list[int] | None, **kwargs) -> Query:
-    return orders.filter(Order.id.in_(ids)) if ids else orders
+    return orders.filter(Order.id.in_(ids))
 
 
 def apply_pagination(orders: Query, page: int | None, page_size: int | None, **kwargs) -> Query:

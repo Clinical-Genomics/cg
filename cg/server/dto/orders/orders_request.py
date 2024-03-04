@@ -20,4 +20,3 @@ class OrdersRequest(BaseModel):
     sort_order: SortOrder | None = Field(alias="sortOrder", default=SortOrder.DESC)
     search: str | None = None
     workflow: str | None = None
-    include_summary: bool = Field(default=False, alias="includeSummary")
