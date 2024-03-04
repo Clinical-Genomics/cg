@@ -31,7 +31,7 @@ def filter_orders_by_ticket_id(orders: Query, ticket_id: int | None, **kwargs) -
 def filter_orders_by_search(orders: Query, search: str | None, **kwargs) -> Query:
     if search:
         orders = orders.join(Order.customer)
-        orders.filter(
+        return orders.filter(
             or_(
                 Order.id == search,
                 Order.ticket_id == search,
