@@ -651,13 +651,12 @@ class CaseSample(Base):
     @property
     def get_maternal_sample_id(self) -> str | None:
         """Return parental id."""
-        return self.mother.internal_id if self.mother else None
+        return self.mother.internal_id if self.mother_links else None
 
     @property
     def get_paternal_sample_id(self) -> str | None:
         """Return parental id."""
-        return self.father.internal_id if self.father else None
-
+        return self.father.internal_id if self.father_links else None
 
 class Flowcell(Base):
     __tablename__ = "flowcell"
