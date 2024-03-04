@@ -745,15 +745,12 @@ def mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
 
 
 @pytest.fixture
-<<<<<<< HEAD
-=======
 def nf_analysis_analysis_dir(fixtures_dir: Path) -> Path:
     """Return the path to the directory with nf-analysis files."""
     return Path(fixtures_dir, "analysis", "nf-analysis")
 
 
 @pytest.fixture
->>>>>>> master
 def raredisease_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with raredisease analysis files."""
     return Path(analysis_dir, "raredisease")
@@ -2208,7 +2205,6 @@ def raredisease_dir(tmpdir_factory: Path) -> str:
 
 @pytest.fixture(scope="session")
 def raredisease_case_id() -> str:
-<<<<<<< HEAD
     """Returns a raredisease case id."""
     return "raredisease_case_enough_reads"
 
