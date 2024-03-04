@@ -140,7 +140,7 @@ def store_demultiplexed_flow_cell(context: click.Context, flow_cell_id: str, dry
 @DRY_RUN
 @click.pass_obj
 def store_qc_metrics(config: CGConfig, case_id: str, dry_run: bool = False) -> None:
-    """Fetch  the QC metrics for a case from Janus and Store them in Arnold."""
+    """Fetch the QC metrics for a case from Janus and Store them in Arnold."""
     metrics_api = CollectQCMetricsAPI(
         hk_api=config.housekeeper_api,
         status_db=config.status_db,
