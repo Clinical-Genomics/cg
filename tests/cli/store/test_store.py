@@ -196,7 +196,7 @@ def test_store_store_demultiplexed_flow_cell(
     Store.get_samples_from_flow_cell.return_value = [sample]
 
     # GIVEN an updated metadata file
-    mocker.patch("cg.cli.store.fastq.update_metadata_paths", return_value=None)
+    mocker.patch("cg.cli.store.store.update_metadata_paths", return_value=None)
 
     # WHEN running the store demultiplexed flow cell command
     res = cli_runner.invoke(
