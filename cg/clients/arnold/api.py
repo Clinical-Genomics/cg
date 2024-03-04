@@ -27,11 +27,11 @@ class ArnoldAPIClient:
 
     @staticmethod
     def _handle_errors(response: Response):
-        if 400 <= response.status_code < 500:
+        if HTTPStatus.BAD_REQUEST <= response.status_code < HTTPStatus.INTERNAL_SERVER_ERROR:
             raise ArnoldClientError(
                 f"Client error: {response.status_code}. Reason {response.content}"
             )
-        elif 500 <= response.status_code:
+        elif HTTPStatus.INTERNAL_SERVER_ERROR <= response.status_code:
             raise ArnoldServerError(
                 f"Server error: {response.status_code}. Reason {response.content}"
             )
