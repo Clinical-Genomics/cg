@@ -50,7 +50,9 @@ def raredisease(context: click.Context) -> None:
 
     context.obj.meta_apis[MetaApis.ANALYSIS_API] = RarediseaseAnalysisAPI(config=context.obj)
 
+
 raredisease.add_command(resolve_compression)
+
 
 @raredisease.command("config-case")
 @ARGUMENT_CASE_ID
