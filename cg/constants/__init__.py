@@ -8,16 +8,14 @@ from cg.constants.compression import (
 from cg.constants.constants import (
     CAPTUREKIT_CANCER_OPTIONS,
     CAPTUREKIT_OPTIONS,
-    COLLABORATORS,
-    COMBOS,
     CONTAINER_OPTIONS,
     DEFAULT_CAPTURE_KIT,
-    PREP_CATEGORIES,
-    SEX_OPTIONS,
     STATUS_OPTIONS,
     DataDelivery,
     FileExtensions,
     FlowCellStatus,
+    PrepCategory,
+    SexOptions,
 )
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import (
@@ -31,4 +29,4 @@ from cg.constants.process import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.report import *
 from cg.constants.sample_sources import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD
-from cg.constants.symbols import SINGLE_QUOTE, SPACE
+from cg.constants.symbols import SPACE

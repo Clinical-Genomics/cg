@@ -1,7 +1,7 @@
 """This module tests the run CLI command."""
+
 import logging
 
-import pytest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
@@ -65,7 +65,7 @@ def test_with_config_use_nextflow(
     assert result.exit_code == EXIT_SUCCESS
 
     for message in [
-        "using nextflow",
+        "using Nextflow",
         "path/to/bin/nextflow",
         "-work-dir",
         "-params-file",
@@ -97,7 +97,7 @@ def test_with_config_use_tower(
     # THEN command should use tower
 
     for message in [
-        "using tower",
+        "using Tower",
         "path/to/bin/tw launch",
     ]:
         assert message in caplog.text
@@ -125,5 +125,5 @@ def test_with_config_use_tower_resume(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN command should use tower for relaunch
-    assert "Pipeline will be resumed from run" in caplog.text
+    assert "Workflow will be resumed from run" in caplog.text
     assert "path/to/bin/tw runs relaunch" in caplog.text

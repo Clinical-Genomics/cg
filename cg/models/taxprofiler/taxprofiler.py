@@ -1,12 +1,21 @@
 from pathlib import Path
 
-from pydantic.v1 import Field
+from pydantic import Field, BaseModel
 
 from cg.constants.sequencing import SequencingPlatform
-from cg.models.nf_analysis import NextflowSampleSheetEntry, PipelineParameters
+from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 
 
-class TaxprofilerParameters(PipelineParameters):
+class TaxprofilerQCMetrics(BaseModel):
+    """Taxprofiler QC metrics."""
+
+    after_filtering_total_reads: float | None
+    reads_mapped: float | None
+    before_filtering_total_reads: float | None
+    paired_aligned_none: float | None
+
+
+class TaxprofilerParameters(WorkflowParameters):
     """Model for Taxprofiler parameters."""
 
     input: Path = Field(..., alias="sample_sheet_path")
@@ -25,6 +34,9 @@ class TaxprofilerParameters(PipelineParameters):
     run_kraken2: bool = True
     kraken2_save_reads: bool = True
     kraken2_save_readclassification: bool = True
+    run_bracken: bool = True
+    run_centrifuge: bool = True
+    centrifuge_save_reads: bool = True
     run_krona: bool = True
     run_profile_standardisation: bool = True
 

@@ -5,18 +5,12 @@ from typing import Any
 from pydantic.v1 import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import (
-    COLLABORATORS,
-    COMBOS,
-    FileExtensions,
-    GenePanelMasterList,
-    Pipeline,
-)
+from cg.constants import FileExtensions, GenePanelMasterList, Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
-from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.analysis import AnalysisAPI, add_gene_panel_combo
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
@@ -45,8 +39,8 @@ class MipAnalysisAPI(AnalysisAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
     hooks into the status database that makes managing analyses simpler"""
 
-    def __init__(self, config: CGConfig, pipeline: Pipeline):
-        super().__init__(pipeline, config)
+    def __init__(self, config: CGConfig, workflow: Workflow):
+        super().__init__(workflow, config)
 
     @property
     def root(self) -> str:
@@ -57,7 +51,7 @@ class MipAnalysisAPI(AnalysisAPI):
         raise NotImplementedError
 
     @property
-    def mip_pipeline(self) -> str:
+    def mip_workflow(self) -> str:
         raise NotImplementedError
 
     @property
@@ -149,41 +143,27 @@ class MipAnalysisAPI(AnalysisAPI):
         )
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
-        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        for link in case_obj.links:
-            self.link_fastq_files_for_sample(
-                case_obj=case_obj,
-                sample_obj=link.sample,
-            )
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        for link in case.links:
+            self.link_fastq_files_for_sample(case=case, sample=link.sample)
 
-    def write_panel(self, case_id: str, content: list[str]):
-        """Write the gene panel to case dir"""
-        out_dir = Path(self.root, case_id)
-        out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = Path(out_dir, "gene_panels.bed")
-        with out_path.open("w") as out_handle:
-            out_handle.write("\n".join(content))
+    def write_panel(self, case_id: str, content: list[str]) -> None:
+        """Write the gene panel to case dir."""
+        self._write_panel(out_dir=Path(self.root, case_id), content=content)
 
     @staticmethod
-    def convert_panels(customer: str, default_panels: list[str]) -> list[str]:
-        """Convert between default panels and all panels included in gene list."""
-        # check if all default panels are part of master list
+    def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
+        """Check if customer should use the gene panel master list
+        and if all default panels are included in the gene panel master list.
+        If not, add gene panel combo and OMIM-AUTO.
+        Return an aggregated gene panel."""
         master_list: list[str] = GenePanelMasterList.get_panel_names()
-        if customer in COLLABORATORS and set(default_panels).issubset(master_list):
+        if customer_id in GenePanelMasterList.collaborators() and default_panels.issubset(
+            master_list
+        ):
             return master_list
-
-        # the rest are handled the same way
-        all_panels = set(default_panels)
-
-        # fill in extra panels if selection is part of a combo
-        for panel in default_panels:
-            if panel in COMBOS:
-                for extra_panel in COMBOS[panel]:
-                    all_panels.add(extra_panel)
-
-        # add OMIM to every panel choice
-        all_panels.add(GenePanelMasterList.OMIM_AUTO)
-
+        all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
+        all_panels |= {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
         return list(all_panels)
 
     def _get_latest_raw_file(self, family_id: str, tags: list[str]) -> Any:
@@ -289,7 +269,7 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_cases_to_analyze(self) -> list[Case]:
         """Return cases to analyze."""
         cases_query: list[Case] = self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.use_read_count_threshold
+            workflow=self.workflow, threshold=self.use_read_count_threshold
         )
         cases_to_analyze = []
         for case_obj in cases_query:
@@ -332,17 +312,20 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_case_path(self, case_id: str) -> Path:
         return Path(self.root, case_id)
 
-    def get_trailblazer_config_path(self, case_id: str) -> Path:
+    def get_job_ids_path(self, case_id: str) -> Path:
         return Path(self.get_case_path(case_id=case_id), "analysis", "slurm_job_ids.yaml")
 
     def config_sample(self, link_obj: CaseSample, panel_bed: str) -> dict:
         raise NotImplementedError
 
-    def get_pipeline_version(self, case_id: str) -> str:
+    def get_workflow_version(self, case_id: str) -> str:
         """Get MIP version from sample info file"""
-        LOG.debug("Fetch pipeline version")
+        LOG.debug("Fetch workflow version")
         sample_info_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=self.get_sample_info_path(case_id)
         )
         sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sample_info_raw)
         return sample_info.mip_version
+
+    def write_managed_variants(self, case_id: str, content: list[str]) -> None:
+        self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)

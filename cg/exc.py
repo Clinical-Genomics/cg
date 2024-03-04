@@ -132,6 +132,18 @@ class LimsDataError(CgError):
     """
 
 
+class MicrosaltError(CgError):
+    """
+    Error related to Microsalt analysis.
+    """
+
+
+class MissingAnalysisRunDirectory(CgError):
+    """
+    Error related to missing analysis.
+    """
+
+
 class OrderError(CgError):
     """
     Exception related to orders.
@@ -180,6 +192,10 @@ class TrailblazerAPIHTTPError(CgError):
     """Raised when Trailblazer REST API response code is not 200."""
 
 
+class TrailblazerAnalysisNotFound(CgError):
+    """Raised when a Trailblazer analysis is not found."""
+
+
 class ValidationError(CgError):
     """
     Exception related to delivery report validation.
@@ -218,6 +234,10 @@ class DdnDataflowAuthenticationError(CgError):
     """Exception raised when the DDN Dataflow authentication fails."""
 
 
+class DdnDataflowDeleteFileError(CgError):
+    """Exception raised when the deletion via DDN Dataflow fails."""
+
+
 class MissingFilesError(CgError):
     """Exception raised when there are missing files."""
 
@@ -236,3 +256,15 @@ class ArchiveJobFailedError(CgError):
 
 class XMLError(CgError):
     """Exception raised when something is wrong with the content of an XML file."""
+
+
+class OrderNotFoundError(CgError):
+    """Exception raised when an order is not found."""
+
+
+class OrderExistsError(CgError):
+    """Exception raised when cases and samples are added to a pre-existing order."""
+
+
+class OverrideCyclesError(CgError):
+    """Exception raised when the override cycles are not correct."""

@@ -1,14 +1,15 @@
 import datetime as dt
 
 from cg.constants import DataDelivery
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
+from cg.constants.subject import Sex
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.models.orders.samples import MetagenomeSample
-from cg.store.models import ApplicationVersion, Customer, Case, CaseSample, Sample
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Sample
 
 
 class MetagenomeSubmitter(Submitter):
@@ -96,7 +97,7 @@ class MetagenomeSubmitter(Submitter):
             for sample in case_dict["samples"]:
                 new_sample = self.status.add_sample(
                     name=sample["name"],
-                    sex="unknown",
+                    sex=Sex.UNKNOWN,
                     comment=sample["comment"],
                     control=sample["control"],
                     internal_id=sample.get("internal_id"),
@@ -117,7 +118,7 @@ class MetagenomeSubmitter(Submitter):
 
                 if not case:
                     case = self.status.add_case(
-                        data_analysis=Pipeline(case_dict["data_analysis"]),
+                        data_analysis=Workflow(case_dict["data_analysis"]),
                         data_delivery=DataDelivery(case_dict["data_delivery"]),
                         name=str(ticket_id),
                         panels=None,

@@ -3,15 +3,10 @@ import os
 import re
 from pathlib import Path
 
-from cg.apps.demultiplex.sample_sheet.models import SampleSheet
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_sheet_from_file,
-)
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.io.csv import read_csv, write_csv
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.utils.files import (
     get_file_in_directory,
     get_files_matching_pattern,
@@ -20,6 +15,8 @@ from cg.utils.files import (
 )
 
 LOG = logging.getLogger(__name__)
+
+NANOPORE_SEQUENCING_SUMMARY_PATTERN: str = r"final_summary_*.txt"
 
 
 def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
@@ -175,13 +172,6 @@ def rename_fastq_file_if_needed(fastq_file_path: Path, flow_cell_name: str) -> P
     return renamed_fastq_file_path
 
 
-def get_sample_sheet(flow_cell: FlowCellDirectoryData) -> SampleSheet:
-    """Return sample sheet associated with flowcell."""
-    sample_sheet_path: Path = flow_cell.get_sample_sheet_path_hk()
-    sample_sheet: SampleSheet = get_sample_sheet_from_file(sample_sheet_path)
-    return sample_sheet
-
-
 def get_undetermined_fastqs(lane: int, flow_cell_path: Path) -> list[Path]:
     """Get the undetermined fastq files for a specific lane on a flow cell."""
     undetermined_pattern = f"Undetermined*_L00{lane}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
@@ -258,9 +248,12 @@ def is_manifest_file_required(flow_cell_dir: Path) -> bool:
     illumina_manifest_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST)
     custom_manifest_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)
     copy_complete_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE)
+    sequencing_finished: bool = copy_complete_file.exists() or is_nanopore_sequencing_complete(
+        flow_cell_dir
+    )
     return (
         not any((illumina_manifest_file.exists(), custom_manifest_file.exists()))
-        and copy_complete_file.exists()
+        and sequencing_finished
     )
 
 
@@ -285,3 +278,17 @@ def create_manifest_file(flow_cell_dir_name: Path) -> Path:
 
 def is_flow_cell_sync_confirmed(target_flow_cell_dir: Path) -> bool:
     return Path(target_flow_cell_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE).exists()
+
+
+def get_nanopore_summary_file(flow_cell_directory: Path) -> bool | None:
+    """Returns the summary file for a Nanopore run if found."""
+    try:
+        file = Path(next(flow_cell_directory.glob(NANOPORE_SEQUENCING_SUMMARY_PATTERN)))
+    except StopIteration:
+        file = None
+    return file
+
+
+def is_nanopore_sequencing_complete(flow_cell_directory: Path) -> bool:
+    """Returns whether the sequencing is complete for a Nanopore run."""
+    return bool(get_nanopore_summary_file(flow_cell_directory))

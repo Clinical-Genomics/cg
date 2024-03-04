@@ -5,14 +5,15 @@ Revises: 998be2e367cf
 Create Date: 2021-03-24 07:50:31.774381
 
 """
+
 from datetime import datetime
+from enum import StrEnum
 
 import sqlalchemy as sa
 from sqlalchemy import orm
 from sqlalchemy.orm import declarative_base
 
 from alembic import op
-from cg.constants import PREP_CATEGORIES, DataDelivery, Pipeline
 
 # revision identifiers, used by Alembic.
 revision = "e9df15a35de4"
@@ -21,6 +22,28 @@ branch_labels = None
 depends_on = None
 
 Base = declarative_base()
+
+
+class Pipeline(StrEnum):
+    BALSAMIC: str = "balsamic"
+    FASTQ: str = "fastq"
+    FLUFFY: str = "fluffy"
+    MICROSALT: str = "microsalt"
+    MIP_DNA: str = "mip-dna"
+    MIP_RNA: str = "mip-rna"
+    SARS_COV_2: str = "sars-cov-2"
+
+
+class DataDelivery(StrEnum):
+    ANALYSIS_FILES: str = "analysis"
+    ANALYSIS_BAM_FILES: str = "analysis-bam"
+    FASTQ: str = "fastq"
+    NIPT_VIEWER: str = "nipt-viewer"
+    FASTQ_QC: str = "fastq_qc"
+    SCOUT: str = "scout"
+
+
+PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
 
 
 class Customer(Base):

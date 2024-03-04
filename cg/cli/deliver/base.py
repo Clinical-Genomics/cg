@@ -1,4 +1,5 @@
 """CLI for delivering files with CG"""
+
 import logging
 from pathlib import Path
 
@@ -10,8 +11,9 @@ from cg.meta.deliver import DeliverAPI
 from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.store.models import Case
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -92,6 +94,7 @@ def deliver_analysis(
             delivery_type=delivery,
             force_all=force_all,
             ignore_missing_bundles=ignore_missing_bundles,
+            fastq_file_service=FastqFileService(),
         )
         deliver_api.set_dry_run(dry_run)
         cases: list[Case] = []

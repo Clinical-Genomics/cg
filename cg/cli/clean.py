@@ -1,4 +1,5 @@
 """cg module for cleaning databases and files."""
+
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -22,15 +23,15 @@ from cg.cli.workflow.commands import (
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
 )
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Pipeline
+from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
-from cg.exc import CleanFlowCellFailedError
+from cg.exc import CleanFlowCellFailedError, FlowCellError
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
+from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Analysis
+from cg.store.store import Store
 from cg.utils.date import get_date_days_ago, get_timedelta_from_date
 from cg.utils.dispatcher import Dispatcher
 from cg.utils.files import get_directories_in_path
@@ -145,7 +146,7 @@ def scout_finished_cases(
 @DRY_RUN
 @click.pass_context
 def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False) -> None:
-    """Clean up all non-protected files for all pipelines."""
+    """Clean up all non-protected files for all workflows."""
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
     clean_api: CleanAPI = CleanAPI(status_db=context.obj.status_db, housekeeper_api=housekeeper_api)
 
@@ -171,7 +172,7 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
 
 @clean.command("hk-bundle-files")
 @click.option("-c", "--case-id", type=str, required=False)
-@click.option("-p", "--pipeline", type=Pipeline, required=False)
+@click.option("-w", "--workflow", type=Workflow, required=False)
 @click.option("-t", "--tags", multiple=True, required=True)
 @click.option("-o", "--days-old", type=int, default=30)
 @DRY_RUN
@@ -181,7 +182,7 @@ def hk_bundle_files(
     case_id: str | None,
     tags: list,
     days_old: int | None,
-    pipeline: Pipeline | None,
+    workflow: Workflow | None,
     dry_run: bool,
 ):
     """Remove files found in Housekeeper bundles."""
@@ -194,13 +195,13 @@ def hk_bundle_files(
     function_dispatcher: Dispatcher = Dispatcher(
         functions=[
             status_db.get_analyses_started_at_before,
-            status_db.get_analyses_for_case_and_pipeline_started_at_before,
-            status_db.get_analyses_for_pipeline_started_at_before,
+            status_db.get_analyses_for_case_and_workflow_started_at_before,
+            status_db.get_analyses_for_workflow_started_at_before,
             status_db.get_analyses_for_case_started_at_before,
         ],
         input_dict={
             "case_internal_id": case_id,
-            "pipeline": pipeline,
+            "workflow": workflow,
             "started_at_before": date_threshold,
         },
     )
@@ -217,7 +218,7 @@ def hk_bundle_files(
             LOG.warning(
                 f"Version not found for "
                 f"bundle:{bundle_name}; "
-                f"pipeline: {analysis.pipeline}; "
+                f"workflow: {analysis.workflow}; "
                 f"date {analysis.started_at}"
             )
             continue
@@ -225,7 +226,7 @@ def hk_bundle_files(
         LOG.info(
             f"Version found for "
             f"bundle:{bundle_name}; "
-            f"pipeline: {analysis.pipeline}; "
+            f"workflow: {analysis.workflow}; "
             f"date {analysis.started_at}"
         )
         version_files: list[File] = housekeeper_api.get_files(
@@ -259,12 +260,11 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
     directories_to_check: list[Path] = []
     for path in [
         Path(context.data_input.input_dir_path),
-        Path(context.flow_cells_dir),
-        Path(context.demultiplexed_flow_cells_dir),
+        Path(context.illumina_flow_cells_directory),
+        Path(context.illumina_demultiplexed_runs_directory),
         Path(context.encryption.encryption_dir),
     ]:
         directories_to_check.extend(get_directories_in_path(path))
-    exit_code = EXIT_SUCCESS
     for flow_cell_directory in directories_to_check:
         try:
             clean_flow_cell_api = CleanFlowCellAPI(
@@ -274,11 +274,27 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
                 dry_run=dry_run,
             )
             clean_flow_cell_api.delete_flow_cell_directory()
-        except CleanFlowCellFailedError as error:
+        except (CleanFlowCellFailedError, FlowCellError) as error:
             LOG.error(repr(error))
-            exit_code = EXIT_FAIL
-    if exit_code:
-        click.Abort
+            continue
+
+
+@clean.command("retrieved-spring-files")
+@click.option(
+    "--age-limit",
+    type=int,
+    default=7,
+    help="Clean all Spring files which were retrieved more than given amount of days ago.",
+    show_default=True,
+)
+@DRY_RUN
+@click.pass_obj
+def clean_retrieved_spring_files(context: CGConfig, age_limit: int, dry_run: bool):
+    """Clean Spring files which were retrieved more than given amount of days ago."""
+    clean_retrieved_spring_files_api = CleanRetrievedSpringFilesAPI(
+        housekeeper_api=context.housekeeper_api, dry_run=dry_run
+    )
+    clean_retrieved_spring_files_api.clean_retrieved_spring_files(age_limit)
 
 
 def _get_confirm_question(bundle, file_obj) -> str:

@@ -1,4 +1,5 @@
 """Helper functions for compress cli."""
+
 import datetime as dt
 import logging
 import os
@@ -14,8 +15,8 @@ from cg.constants.slurm import SlurmProcessing
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
-from cg.store import Store
 from cg.store.models import Case
+from cg.store.store import Store
 from cg.utils.date import get_date_days_ago
 
 LOG = logging.getLogger(__name__)

@@ -161,7 +161,7 @@ def test_write_file_from_content_when_json(json_file_path: Path, json_temp_path:
         file_format=FileFormat.JSON, file_path=json_file_path
     )
 
-    # WHEN writing the json file from list
+    # WHEN writing the json file from a list
     WriteFile.write_file_from_content(
         content=raw_json_content, file_format=FileFormat.JSON, file_path=json_temp_path
     )
@@ -170,12 +170,12 @@ def test_write_file_from_content_when_json(json_file_path: Path, json_temp_path:
     assert Path.exists(json_temp_path)
 
     # WHEN reading it as a yaml
-    written_raw_sample_info: list = ReadFile.get_content_from_file(
+    written_raw_json_content: list = ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=json_temp_path
     )
 
     # THEN assert that all data is kept
-    assert raw_json_content == written_raw_sample_info
+    assert raw_json_content == written_raw_json_content
 
 
 def test_write_file_from_content_when_csv(csv_file_path: Path, csv_temp_path: Path):
@@ -191,7 +191,7 @@ def test_write_file_from_content_when_csv(csv_file_path: Path, csv_temp_path: Pa
         file_format=FileFormat.CSV, file_path=csv_file_path
     )
 
-    # WHEN writing the csv file from list
+    # WHEN writing the csv file from a list
     WriteFile.write_file_from_content(
         content=raw_csv_content, file_format=FileFormat.CSV, file_path=csv_temp_path
     )
@@ -200,12 +200,40 @@ def test_write_file_from_content_when_csv(csv_file_path: Path, csv_temp_path: Pa
     assert Path.exists(csv_temp_path)
 
     # WHEN reading it as a csv
-    written_raw_sample_info: list = ReadFile.get_content_from_file(
+    written_raw_csv_content: list = ReadFile.get_content_from_file(
         file_format=FileFormat.CSV, file_path=csv_temp_path
     )
 
     # THEN assert that all data is kept
-    assert raw_csv_content == written_raw_sample_info
+    assert raw_csv_content == written_raw_csv_content
+
+
+def test_write_file_from_content_when_txt(txt_file_path: Path, txt_temp_path: Path):
+    """Tests write file from content when TXT."""
+    # GIVEN a text file
+
+    # GIVEN a file path to write to
+
+    # WHEN reading the TXT file
+    raw_txt_content: list = ReadFile.get_content_from_file(
+        file_format=FileFormat.TXT, file_path=txt_file_path
+    )
+
+    # WHEN writing the text file from a list
+    WriteFile.write_file_from_content(
+        content=raw_txt_content, file_format=FileFormat.TXT, file_path=txt_temp_path
+    )
+
+    # THEN assert that a file was successfully created
+    assert Path.exists(txt_temp_path)
+
+    # WHEN reading it as a TXT
+    written_raw_text_content: list = ReadFile.get_content_from_file(
+        file_format=FileFormat.TXT, file_path=txt_temp_path
+    )
+
+    # THEN assert that all data is kept
+    assert raw_txt_content == written_raw_text_content
 
 
 def test_write_yaml_stream_from_content(yaml_stream: str):

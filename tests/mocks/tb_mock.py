@@ -12,9 +12,6 @@ class MockTB:
     def add_pending_analysis(self, *args, **kwargs) -> None:
         return None
 
-    def mark_analyses_deleted(self, *args, **kwargs) -> None:
-        return None
-
     def add_commit(self, *args, **kwargs) -> None:
         return None
 
@@ -33,9 +30,9 @@ class MockTB:
         ]
 
     def ensure_get_latest_analysis_response(self, analysis_dict: dict) -> None:
-        self.get_latest_analysis_response[
-            analysis_dict["family"]
-        ] = TrailblazerAnalysis.model_validate(analysis_dict)
+        self.get_latest_analysis_response[analysis_dict["family"]] = (
+            TrailblazerAnalysis.model_validate(analysis_dict)
+        )
 
     def is_latest_analysis_completed(self, case_id: str):
         return True
@@ -45,3 +42,9 @@ class MockTB:
 
     def set_analysis_status(self, case_id: str, status: str):
         return
+
+    def add_comment(self, case_id: str, comment: str):
+        return
+
+    def get_summaries(self, order_ids: list[int]):
+        return []

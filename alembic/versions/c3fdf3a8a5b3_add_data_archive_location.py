@@ -5,16 +5,28 @@ Revises: ffb9f8ab8e62
 Create Date: 2023-07-04 15:29:48.507215
 
 """
+
 import sqlalchemy as sa
+from sqlalchemy import Column, types
+from sqlalchemy.orm import DeclarativeBase
 
 from alembic import op
-from cg.store.models import Customer
 
 # revision identifiers, used by Alembic.
 revision = "c3fdf3a8a5b3"
 down_revision = "ffb9f8ab8e62"
 branch_labels = None
 depends_on = None
+
+
+class Model(DeclarativeBase):
+    pass
+
+
+class Customer(Model):
+    __tablename__ = "customer"
+    id = Column(types.Integer, primary_key=True)
+    data_archive_location = Column(types.String(32), nullable=False, default="PDC")
 
 
 def upgrade():

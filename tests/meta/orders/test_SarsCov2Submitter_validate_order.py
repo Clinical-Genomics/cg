@@ -6,7 +6,7 @@ from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import ControlEnum
 from cg.models.orders.samples import SarsCov2Sample
-from cg.store import Store
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -27,7 +27,7 @@ def test_validate_submitted_order(
 
     sample: SarsCov2Sample
     for sample in order.samples:
-        helpers.add_sample(store=base_store, name=sample.name, customer_id=order.customer)
+        helpers.add_sample(store=base_store, customer_id=order.customer, name=sample.name)
 
     # WHEN validating the order
     # THEN it should be regarded as invalid
@@ -43,7 +43,7 @@ def test_validate_submitted_control_order(
 
     sample: SarsCov2Sample
     for sample in order.samples:
-        helpers.add_sample(store=base_store, name=sample.name, customer_id=order.customer)
+        helpers.add_sample(store=base_store, customer_id=order.customer, name=sample.name)
         sample.control = ControlEnum.positive
 
     # WHEN validating the order

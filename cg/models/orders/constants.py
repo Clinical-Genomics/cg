@@ -1,21 +1,21 @@
 from enum import StrEnum
 
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 
 
 class OrderType(StrEnum):
-    BALSAMIC: str = str(Pipeline.BALSAMIC)
-    BALSAMIC_QC: str = str(Pipeline.BALSAMIC_QC)
-    BALSAMIC_UMI: str = str(Pipeline.BALSAMIC_UMI)
-    FASTQ: str = str(Pipeline.FASTQ)
-    FLUFFY: str = str(Pipeline.FLUFFY)
+    BALSAMIC: str = Workflow.BALSAMIC
+    BALSAMIC_QC: str = Workflow.BALSAMIC_QC
+    BALSAMIC_UMI: str = Workflow.BALSAMIC_UMI
+    FASTQ: str = Workflow.FASTQ
+    FLUFFY: str = Workflow.FLUFFY
     METAGENOME: str = "metagenome"
-    MICROSALT: str = str(Pipeline.MICROSALT)
-    MIP_DNA: str = str(Pipeline.MIP_DNA)
-    MIP_RNA: str = str(Pipeline.MIP_RNA)
+    MICROSALT: str = Workflow.MICROSALT
+    MIP_DNA: str = Workflow.MIP_DNA
+    MIP_RNA: str = Workflow.MIP_RNA
     RML: str = "rml"
-    RNAFUSION: str = str(Pipeline.RNAFUSION)
-    SARS_COV_2: str = str(Pipeline.SARS_COV_2)
+    RNAFUSION: str = Workflow.RNAFUSION
+    SARS_COV_2: str = "sars-cov-2"
 
 
 class ExcelSampleAliases(StrEnum):
@@ -26,6 +26,7 @@ class ExcelSampleAliases(StrEnum):
     COLLECTION_DATE = "UDF/Collection Date"
     COMMENT = "UDF/Comment"
     CONCENTRATION = "UDF/Concentration (nM)"
+    CONCENTRATION_NG_UL = "UDF/Concentration (ng/ul)"
     CONCENTRATION_SAMPLE = "UDF/Sample Conc."
     CONTAINER = "Container/Type"
     CONTAINER_NAME = "Container/Name"

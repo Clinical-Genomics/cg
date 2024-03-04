@@ -1,14 +1,26 @@
 """Fixtures for store tests."""
+
 import datetime as dt
 import enum
+from datetime import datetime
 from typing import Generator
 
 import pytest
 
-from cg.constants import Pipeline
-from cg.constants.subject import Gender, PhenotypeStatus
-from cg.store import Store
-from cg.store.models import Analysis, Application, Customer, Case, CaseSample, Organism, Sample
+from cg.constants import Workflow
+from cg.constants.priority import PriorityTerms
+from cg.constants.subject import PhenotypeStatus, Sex
+from cg.meta.orders.pool_submitter import PoolSubmitter
+from cg.store.models import (
+    Analysis,
+    Application,
+    Case,
+    CaseSample,
+    Customer,
+    Organism,
+    Sample,
+)
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -103,7 +115,7 @@ def microbial_submitted_order() -> dict:
             organism=organism,
             reference_genome=ref_genomes[organism],
             extraction_method="MagNaPure 96 (contact Clinical Genomics before " "submission)",
-            analysis=str(Pipeline.FASTQ),
+            analysis=Workflow.FASTQ,
             concentration_sample="1",
             mother=None,
             father=None,
@@ -143,7 +155,7 @@ def microbial_store(
         base_store.session.add(organism)
         sample = base_store.add_sample(
             name=sample_data["name"],
-            sex=Gender.UNKNOWN,
+            sex=Sex.UNKNOWN,
             comment=sample_data["comment"],
             priority=sample_data["priority"],
             reads=sample_data["reads"],
@@ -197,10 +209,14 @@ def store_with_a_sample_that_has_many_attributes_and_one_without(
     """Return a store with a sample that has many attributes and one without."""
     helpers.add_sample(
         store=store,
-        internal_id=StoreConstants.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        name=StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+        control=StoreConstants.CONTROL_SAMPLE_WITH_ATTRIBUTES.value,
+        customer_id=StoreConstants.CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES.value,
         is_external=True,
         is_tumour=True,
+        internal_id=StoreConstants.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        reads=StoreConstants.READS_SAMPLE_WITH_ATTRIBUTES.value,
+        name=StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+        original_ticket=StoreConstants.ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES.value,
         ordered_at=timestamp_now,
         created_at=timestamp_now,
         sequence_start=timestamp_now,
@@ -210,19 +226,15 @@ def store_with_a_sample_that_has_many_attributes_and_one_without(
         prepared_at=timestamp_now,
         invoiced_at=timestamp_now,
         application_version_id=StoreConstants.APPLICATION_VERSION_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        customer_id=StoreConstants.CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES.value,
         subject_id=StoreConstants.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
         invoice_id=StoreConstants.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
         organism_id=StoreConstants.ORGANISM_ID_SAMPLE_WITH_ATTRIBUTES.value,
         loqusdb_id=StoreConstants.LOCUSDB_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        reads=StoreConstants.READS_SAMPLE_WITH_ATTRIBUTES.value,
         downsampled_to=StoreConstants.DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES.value,
         no_invoice=False,
-        original_ticket=StoreConstants.ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES.value,
         age_at_sampling=StoreConstants.AGE_AT_SAMPLING_SAMPLE_WITH_ATTRIBUTES.value,
         capture_kit=StoreConstants.CAPTURE_KIT_SAMPLE_WITH_ATTRIBUTES.value,
         comment=StoreConstants.COMMENT_SAMPLE_WITH_ATTRIBUTES.value,
-        control=StoreConstants.CONTROL_SAMPLE_WITH_ATTRIBUTES.value,
         from_sample=StoreConstants.FROM_SAMPLE_SAMPLE_WITH_ATTRIBUTES.value,
         order=StoreConstants.ORDER_SAMPLE_WITH_ATTRIBUTES.value,
         priority=StoreConstants.PRIORITY_SAMPLE_WITH_ATTRIBUTES.value,
@@ -232,10 +244,10 @@ def store_with_a_sample_that_has_many_attributes_and_one_without(
 
     helpers.add_sample(
         store=store,
-        internal_id=StoreConstants.INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES.value,
-        name=StoreConstants.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
         is_external=False,
         is_tumour=False,
+        internal_id=StoreConstants.INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES.value,
+        name=StoreConstants.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
         delivered_at=None,
         received_at=None,
         last_sequenced_at=None,
@@ -314,15 +326,15 @@ def store_with_application_limitations(
         application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
             StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value
         ),
-        pipeline=Pipeline.MIP_DNA,
+        workflow=Workflow.MIP_DNA,
     )
-    for pipeline in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]:
+    for workflow in [Workflow.MIP_DNA, Workflow.BALSAMIC]:
         helpers.ensure_application_limitation(
             store=store_with_an_application_with_and_without_attributes,
             application=store_with_an_application_with_and_without_attributes.get_application_by_tag(
                 StoreConstants.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value
             ),
-            pipeline=pipeline,
+            workflow=workflow,
         )
     return store_with_an_application_with_and_without_attributes
 
@@ -381,7 +393,7 @@ def store_with_an_invoice_with_and_without_attributes(
     return store
 
 
-@pytest.fixture(name="store_with_older_and_newer_analyses")
+@pytest.fixture
 def store_with_older_and_newer_analyses(
     base_store: Store,
     helpers: StoreHelpers,
@@ -389,11 +401,10 @@ def store_with_older_and_newer_analyses(
     timestamp_now: dt.datetime,
     timestamp_yesterday: dt.datetime,
     old_timestamp: dt.datetime,
-) -> Store:
-    """Return a store with  older and newer analyses."""
+) -> Generator[Store, None, None]:
+    """Return a store with older and newer analyses."""
     analysis = base_store._get_query(table=Analysis).first()
     analysis.uploaded_at = timestamp_now
-    analysis.uploaded_to_vogue_at = timestamp_now
     analysis.cleaned_at = timestamp_now
     analysis.started_at = timestamp_now
     analysis.completed_at = timestamp_now
@@ -404,12 +415,11 @@ def store_with_older_and_newer_analyses(
         helpers.add_analysis(
             store=base_store,
             case=case,
-            pipeline=Pipeline.BALSAMIC,
             started_at=time,
             completed_at=time,
             uploaded_at=time,
-            uploaded_to_vogue_at=time,
             cleaned_at=time,
+            workflow=Workflow.BALSAMIC,
         )
 
     yield base_store
@@ -434,7 +444,6 @@ def store_with_analyses_for_cases(
             started_at=timestamp_yesterday,
             uploaded_at=timestamp_yesterday,
             delivery_reported_at=None,
-            uploaded_to_vogue_at=timestamp_yesterday,
         )
         helpers.add_analysis(
             analysis_store,
@@ -442,7 +451,6 @@ def store_with_analyses_for_cases(
             started_at=timestamp_now,
             uploaded_at=timestamp_now,
             delivery_reported_at=None,
-            uploaded_to_vogue_at=timestamp_now,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: CaseSample = analysis_store.relate_sample(
@@ -450,3 +458,134 @@ def store_with_analyses_for_cases(
         )
         analysis_store.session.add(link)
     return analysis_store
+
+
+@pytest.fixture
+def rml_pool_store(
+    case_id: str,
+    customer_id: str,
+    helpers,
+    sample_id: str,
+    store: Store,
+    ticket_id: str,
+    timestamp_now: datetime,
+):
+    new_customer = store.add_customer(
+        internal_id=customer_id,
+        name="Test customer",
+        scout_access=True,
+        invoice_address="skolgatan 15",
+        invoice_reference="abc",
+    )
+    store.session.add(new_customer)
+
+    application = store.add_application(
+        tag="RMLP05R800",
+        prep_category="rml",
+        description="Ready-made",
+        percent_kth=80,
+        percent_reads_guaranteed=75,
+        sequencing_depth=0,
+        target_reads=800,
+    )
+    store.session.add(application)
+
+    app_version = store.add_application_version(
+        application=application,
+        version=1,
+        valid_from=timestamp_now,
+        prices={
+            PriorityTerms.STANDARD: 12,
+            PriorityTerms.PRIORITY: 222,
+            PriorityTerms.EXPRESS: 123,
+            PriorityTerms.RESEARCH: 12,
+        },
+    )
+    store.session.add(app_version)
+
+    new_pool = store.add_pool(
+        customer=new_customer,
+        name="Test",
+        order="Test",
+        ordered=dt.datetime.now(),
+        application_version=app_version,
+    )
+    store.session.add(new_pool)
+    new_case = helpers.add_case(
+        store=store,
+        internal_id=case_id,
+        name=PoolSubmitter.create_case_name(ticket=ticket_id, pool_name="Test"),
+    )
+    store.session.add(new_case)
+
+    new_sample = helpers.add_sample(
+        store=store,
+        application_tag=application.tag,
+        application_type=application.prep_category,
+        customer_id=new_customer.id,
+        internal_id=sample_id,
+    )
+    new_sample.application_version = app_version
+    store.session.add(new_sample)
+    store.session.commit()
+
+    helpers.add_relationship(
+        store=store,
+        sample=new_sample,
+        case=new_case,
+    )
+
+    yield store
+
+
+@pytest.fixture
+def store_with_analyses_for_cases_not_uploaded_fluffy(
+    analysis_store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: datetime,
+    timestamp_yesterday: datetime,
+) -> Store:
+    """Return a store with two analyses for two cases and workflow."""
+    case_one = analysis_store.get_case_by_internal_id("yellowhog")
+    case_two = helpers.add_case(analysis_store, internal_id="test_case_1")
+
+    cases = [case_one, case_two]
+    for case in cases:
+        oldest_analysis = helpers.add_analysis(
+            analysis_store,
+            case=case,
+            started_at=timestamp_yesterday,
+            uploaded_at=timestamp_yesterday,
+            delivery_reported_at=None,
+            workflow=Workflow.FLUFFY,
+        )
+        helpers.add_analysis(
+            analysis_store,
+            case=case,
+            started_at=timestamp_now,
+            uploaded_at=None,
+            delivery_reported_at=None,
+            workflow=Workflow.FLUFFY,
+        )
+        sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
+        link: CaseSample = analysis_store.relate_sample(
+            case=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
+        )
+        analysis_store.session.add(link)
+    return analysis_store
+
+
+@pytest.fixture
+def store_with_samples_for_multiple_customers(
+    store: Store, helpers: StoreHelpers, timestamp_now: datetime
+) -> Generator[Store, None, None]:
+    """Return a store with two samples for three different customers."""
+    for number in range(3):
+        helpers.add_sample(
+            store=store,
+            customer_id="".join(["cust00", str(number)]),
+            internal_id="_".join(["test_sample", str(number)]),
+            no_invoice=False,
+            delivered_at=timestamp_now,
+        )
+    yield store

@@ -2,14 +2,14 @@ import datetime as dt
 import logging
 
 from cg.constants import DataDelivery, Priority
-from cg.constants.constants import CaseActions, Pipeline
+from cg.constants.constants import CaseActions, Workflow
 from cg.constants.pedigree import Pedigree
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
-from cg.store.models import ApplicationVersion, Customer, Case, CaseSample, Sample
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -171,7 +171,7 @@ class CaseSubmitter(Submitter):
             )
 
             panels: set[str] = set()
-            if data_analysis == Pipeline.MIP_DNA:
+            if data_analysis == Workflow.MIP_DNA:
                 panels: set[str] = {
                     panel for sample in case_samples for panel in sample.panels if panel
                 }
@@ -202,9 +202,9 @@ class CaseSubmitter(Submitter):
                         "name": sample.name,
                         "phenotype_groups": list(sample.phenotype_groups),
                         "phenotype_terms": list(sample.phenotype_terms),
-                        "reference_genome": sample.reference_genome
-                        if hasattr(sample, "reference_genome")
-                        else None,
+                        "reference_genome": (
+                            sample.reference_genome if hasattr(sample, "reference_genome") else None
+                        ),
                         "sex": sample.sex,
                         "status": sample.status if hasattr(sample, "status") else None,
                         "subject_id": sample.subject_id,
@@ -353,7 +353,7 @@ class CaseSubmitter(Submitter):
     def _create_case(self, case: dict, customer_obj: Customer, ticket: str):
         case_obj = self.status.add_case(
             cohorts=case["cohorts"],
-            data_analysis=Pipeline(case["data_analysis"]),
+            data_analysis=Workflow(case["data_analysis"]),
             data_delivery=DataDelivery(case["data_delivery"]),
             name=case["name"],
             priority=case["priority"],

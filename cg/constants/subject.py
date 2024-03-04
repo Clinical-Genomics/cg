@@ -1,7 +1,7 @@
 from enum import IntEnum, StrEnum
 
 
-class Gender(StrEnum):
+class Sex(StrEnum):
     FEMALE = "female"
     MALE = "male"
     UNKNOWN = "unknown"
@@ -22,7 +22,7 @@ class PlinkPhenotypeStatus(IntEnum):
     AFFECTED = 2
 
 
-class PlinkGender(StrEnum):
+class PlinkSex(StrEnum):
     UNKNOWN = str(0)
     MALE = str(1)
     FEMALE = str(2)

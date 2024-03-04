@@ -1,24 +1,29 @@
 """Constants for delivery."""
 
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
+from cg.constants.housekeeper_tags import (
+    HK_DELIVERY_REPORT_TAG,
+    AlignmentFileTag,
+    AnalysisTag,
+)
 
-ONLY_ONE_CASE_PER_TICKET: list[Pipeline] = [
-    Pipeline.FASTQ,
-    Pipeline.MICROSALT,
-    Pipeline.SARS_COV_2,
+ONLY_ONE_CASE_PER_TICKET: list[Workflow] = [
+    Workflow.FASTQ,
+    Workflow.MICROSALT,
+    Workflow.MUTANT,
 ]
 
-SKIP_MISSING: list[Pipeline] = [
-    Pipeline.FASTQ,
-    Pipeline.MICROSALT,
-    Pipeline.SARS_COV_2,
+SKIP_MISSING: list[Workflow] = [
+    Workflow.FASTQ,
+    Workflow.MICROSALT,
+    Workflow.MUTANT,
 ]
 
 BALSAMIC_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"delivery-report"},
     {"multiqc-html"},
     {"metrics"},
-    {"visualization"},
+    {"cnv-report"},
     {"coverage"},
     {"germline"},
     {"vcf-sv"},
@@ -37,8 +42,8 @@ BALSAMIC_ANALYSIS_CASE_TAGS: list[set[str]] = [
 ]
 
 BALSAMIC_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {"cram"},
-    {"cram-index"},
+    {AlignmentFileTag.CRAM},
+    {AlignmentFileTag.CRAM_INDEX},
 ]
 
 BALSAMIC_QC_ANALYSIS_CASE_TAGS: list[set[str]] = [
@@ -95,10 +100,10 @@ MIP_DNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
 ]
 
 MIP_DNA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {"bam"},
-    {"bam-index"},
-    {"cram"},
-    {"cram-index"},
+    {AlignmentFileTag.BAM},
+    {AlignmentFileTag.BAM_BAI},
+    {AlignmentFileTag.CRAM},
+    {AlignmentFileTag.CRAM_INDEX},
 ]
 
 MIP_RNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
@@ -114,23 +119,16 @@ MIP_RNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
 ]
 
 MIP_RNA_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {"fusion", "star-fusion"},
-    {"fusion", "arriba"},
-    {"cram"},
-    {"cram-index"},
-    {"fusion", "vcf"},
-    {"fusion", "vcf-index"},
+    {AnalysisTag.FUSION, AnalysisTag.STARFUSION},
+    {AnalysisTag.FUSION, AnalysisTag.ARRIBA},
+    {AlignmentFileTag.CRAM},
+    {AlignmentFileTag.CRAM_INDEX},
+    {AnalysisTag.FUSION, "vcf"},
+    {AnalysisTag.FUSION, "vcf-index"},
     {"salmon-quant"},
 ]
 
-MICROSALT_ANALYSIS_CASE_TAGS: list[set[str]] = [
-    {"microsalt-qc"},
-    {"microsalt-type"},
-    {"assembly"},
-    {"trimmed-forward-reads"},
-    {"trimmed-reverse-reads"},
-    {"reference-alignment-deduplicated"},
-]
+MICROSALT_ANALYSIS_CASE_TAGS = [{"qc-report"}, {"typing-report"}]
 
 MICROSALT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = []
 
@@ -140,69 +138,71 @@ FASTQ_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"fastq"},
 ]
 
-SARSCOV2_ANALYSIS_CASE_TAGS: list[set[str]] = [
+MUTANT_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"pangolin"},
     {"ks-delivery"},
 ]
 
-SARSCOV2_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
+MUTANT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"fastq"},
+    {"vcf", "vcf-report", "fohm-delivery"},
 ]
 
 RNAFUSION_ANALYSIS_CASE_TAGS: list[set[str]] = [
-    {"fusion", "arriba"},
-    {"fusion", "star-fusion"},
-    {"fusion", "fusioncatcher"},
-    {"cram"},
-    {"fusioncatcher-summary"},
-    {"fusioninspector"},
-    {"fusionreport", "research"},
-    {"fusioninspector-html", "research"},
-    {"arriba-visualisation", "research"},
-    {"multiqc-html", "rna"},
-    {"software-versions"},
-    {"qc-metrics"},
-    {"multiqc-json"},
-    {"delivery-report"},
+    {AnalysisTag.FUSION, AnalysisTag.ARRIBA},
+    {AnalysisTag.FUSION, AnalysisTag.STARFUSION},
+    {AnalysisTag.FUSION, AnalysisTag.FUSIONCATCHER},
+    {AnalysisTag.FUSIONCATCHER_SUMMARY},
+    {AnalysisTag.FUSIONINSPECTOR},
+    {AnalysisTag.FUSIONREPORT, AnalysisTag.RESEARCH},
+    {AnalysisTag.FUSIONINSPECTOR_HTML, AnalysisTag.RESEARCH},
+    {AnalysisTag.ARRIBA_VISUALIZATION, AnalysisTag.RESEARCH},
+    {AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA},
+    {HK_DELIVERY_REPORT_TAG},
+    {AnalysisTag.VCF_FUSION},
+    {AnalysisTag.GENE_COUNTS},
 ]
 
-RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = []
+RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
+    {AlignmentFileTag.CRAM},
+    {AlignmentFileTag.CRAM_INDEX},
+]
 
 
-PIPELINE_ANALYSIS_TAG_MAP: dict[Pipeline, dict] = {
-    Pipeline.BALSAMIC: {
+PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
+    Workflow.BALSAMIC: {
         "case_tags": BALSAMIC_ANALYSIS_CASE_TAGS,
         "sample_tags": BALSAMIC_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.BALSAMIC_QC: {
+    Workflow.BALSAMIC_QC: {
         "case_tags": BALSAMIC_QC_ANALYSIS_CASE_TAGS,
         "sample_tags": BALSAMIC_QC_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.BALSAMIC_UMI: {
+    Workflow.BALSAMIC_UMI: {
         "case_tags": BALSAMIC_UMI_ANALYSIS_CASE_TAGS,
         "sample_tags": BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.MIP_DNA: {
+    Workflow.MIP_DNA: {
         "case_tags": MIP_DNA_ANALYSIS_CASE_TAGS,
         "sample_tags": MIP_DNA_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.MIP_RNA: {
+    Workflow.MIP_RNA: {
         "case_tags": MIP_RNA_ANALYSIS_CASE_TAGS,
         "sample_tags": MIP_RNA_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.MICROSALT: {
+    Workflow.MICROSALT: {
         "case_tags": MICROSALT_ANALYSIS_CASE_TAGS,
         "sample_tags": MICROSALT_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.FASTQ: {
+    Workflow.FASTQ: {
         "case_tags": FASTQ_ANALYSIS_CASE_TAGS,
         "sample_tags": FASTQ_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.SARS_COV_2: {
-        "case_tags": SARSCOV2_ANALYSIS_CASE_TAGS,
-        "sample_tags": SARSCOV2_ANALYSIS_SAMPLE_TAGS,
+    Workflow.MUTANT: {
+        "case_tags": MUTANT_ANALYSIS_CASE_TAGS,
+        "sample_tags": MUTANT_ANALYSIS_SAMPLE_TAGS,
     },
-    Pipeline.RNAFUSION: {
+    Workflow.RNAFUSION: {
         "case_tags": RNAFUSION_ANALYSIS_CASE_TAGS,
         "sample_tags": RNAFUSION_ANALYSIS_SAMPLE_TAGS,
     },

@@ -1,4 +1,5 @@
 """Code that handles CLI commands to upload"""
+
 import datetime as dt
 import logging
 from pathlib import Path
@@ -6,14 +7,16 @@ from pathlib import Path
 import click
 
 from cg.apps.tb import TrailblazerAPI
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
+from cg.apps.tb.models import TrailblazerAnalysis
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, Workflow
 from cg.constants.constants import DRY_RUN
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.tb import AnalysisTypes
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
-from cg.store import Store
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.store.models import Case
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -50,6 +53,7 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
             sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
             delivery_type=delivery_type,
             project_base_path=Path(context.obj.delivery_path),
+            fastq_file_service=FastqFileService(),
         ).deliver_files(case_obj=case)
 
     rsync_api: RsyncAPI = RsyncAPI(context.obj)
@@ -63,16 +67,20 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
         {"jobs": [str(job_id)]}, config_path=rsync_api.trailblazer_config_path
     )
     analysis_name: str = f"{case_id}_rsync" if is_complete_delivery else f"{case_id}_partial"
+    order_id: int = case.latest_order.id
     if not dry_run:
-        context.obj.trailblazer_api.add_pending_analysis(
+        trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
+        analysis: TrailblazerAnalysis = trailblazer_api.add_pending_analysis(
             case_id=analysis_name,
             analysis_type=AnalysisTypes.OTHER,
             config_path=rsync_api.trailblazer_config_path.as_posix(),
+            order_id=order_id,
             out_dir=rsync_api.log_dir.as_posix(),
             slurm_quality_of_service=Priority.priority_to_slurm_qos().get(case.priority),
-            data_analysis=Pipeline.RSYNC,
+            workflow=Workflow.RSYNC,
             ticket=case.latest_ticket,
         )
+        trailblazer_api.add_upload_job_to_analysis(analysis_id=analysis.id, slurm_id=job_id)
     LOG.info(f"Transfer of case {case_id} started with SLURM job id {job_id}")
 
 
@@ -85,7 +93,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
     exit_code: int = EXIT_SUCCESS
     status_db: Store = context.obj.status_db
     trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
-    for analysis_obj in status_db.get_analyses_to_upload(pipeline=Pipeline.FASTQ):
+    for analysis_obj in status_db.get_analyses_to_upload(workflow=Workflow.FASTQ):
         if analysis_obj.case.analyses[0].uploaded_at:
             LOG.debug(
                 f"Newer analysis already uploaded for {analysis_obj.case.internal_id}, skipping"

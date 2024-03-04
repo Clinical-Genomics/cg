@@ -11,6 +11,7 @@ from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
     OPTION_COMPUTE_ENV,
     OPTION_CONFIG,
+    OPTION_FROM_START,
     OPTION_LOG,
     OPTION_PARAMS_FILE,
     OPTION_PROFILE,
@@ -18,7 +19,8 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
-    OPTION_FROM_START,
+    metrics_deliver,
+    report_deliver,
 )
 from cg.cli.workflow.rnafusion.options import (
     OPTION_REFERENCES,
@@ -42,9 +44,7 @@ LOG = logging.getLogger(__name__)
 def rnafusion(context: click.Context) -> None:
     """nf-core/rnafusion analysis workflow."""
     AnalysisAPI.get_help(context)
-    context.obj.meta_apis[MetaApis.ANALYSIS_API] = RnafusionAnalysisAPI(
-        config=context.obj,
-    )
+    context.obj.meta_apis[MetaApis.ANALYSIS_API] = RnafusionAnalysisAPI(config=context.obj)
 
 
 rnafusion.add_command(resolve_compression)
@@ -108,19 +108,19 @@ def run(
     command_args: NfCommandArgs = NfCommandArgs(
         **{
             "log": analysis_api.get_log_path(
-                case_id=case_id,
-                pipeline=analysis_api.pipeline,
-                log=log,
+                case_id=case_id, workflow=analysis_api.workflow, log=log
             ),
             "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
-            "config": analysis_api.get_nextflow_config_path(nextflow_config=config),
+            "config": analysis_api.get_nextflow_config_path(
+                case_id=case_id, nextflow_config=config
+            ),
             "params_file": analysis_api.get_params_file_path(
                 case_id=case_id, params_file=params_file
             ),
             "name": case_id,
-            "compute_env": compute_env or analysis_api.compute_env,
+            "compute_env": compute_env or analysis_api.get_compute_env(case_id=case_id),
             "revision": revision or analysis_api.revision,
             "wait": NfTowerStatus.SUBMITTED,
             "id": nf_tower_id,
@@ -223,51 +223,8 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
         raise click.Abort
 
 
-@rnafusion.command("metrics-deliver")
-@ARGUMENT_CASE_ID
-@DRY_RUN
-@click.pass_obj
-def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Create and validate a metrics deliverables file for given case id.
-    If QC metrics are met it sets the status in Trailblazer to complete.
-    If failed, it sets it as failed and adds a comment with information of the failed metrics."""
-
-    analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-
-    try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-    except CgError as error:
-        raise click.Abort() from error
-
-    analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
-    try:
-        analysis_api.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
-    except CgError as error:
-        raise click.Abort() from error
-
-
-@rnafusion.command("report-deliver")
-@ARGUMENT_CASE_ID
-@DRY_RUN
-@click.pass_obj
-def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Create a housekeeper deliverables file for given CASE ID."""
-
-    analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-
-    try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
-        if not dry_run:
-            analysis_api.report_deliver(case_id=case_id)
-        else:
-            LOG.info("Dry-run")
-    except (CgError, ValidationError) as error:
-        LOG.error(f"Could not create report file: {error}")
-        raise click.Abort()
-    except Exception as error:
-        LOG.error(f"Could not create report file: {error}")
-        raise click.Abort()
+rnafusion.add_command(metrics_deliver)
+rnafusion.add_command(report_deliver)
 
 
 @rnafusion.command("store-housekeeper")

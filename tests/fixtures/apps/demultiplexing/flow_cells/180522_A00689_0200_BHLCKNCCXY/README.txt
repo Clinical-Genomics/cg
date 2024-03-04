@@ -1,1 +1,0 @@
-This folder is required in a test without this file it would not work.

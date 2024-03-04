@@ -3,7 +3,7 @@
 import datetime as dt
 
 from cg.constants import DataDelivery
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.store.models import Case, Sample
 
 
@@ -16,7 +16,7 @@ def test_get_delivery_arguments(case: Case):
     delivery_types: set[str] = case.get_delivery_arguments()
 
     # THEN the correct delivery types should be returned
-    assert delivery_types == {Pipeline.MIP_DNA, Pipeline.FASTQ}
+    assert delivery_types == {Workflow.MIP_DNA, Workflow.FASTQ}
 
 
 def test_list_samples_to_deliver(base_store, helpers):
@@ -41,10 +41,7 @@ def test_list_samples_to_deliver_multiple_samples(base_store, helpers):
     # GIVEN a populated store with two samples where one is scheduled for delivery
     helpers.add_sample(store, last_sequenced_at=dt.datetime.now())
     helpers.add_sample(
-        store,
-        name="delivered",
-        last_sequenced_at=dt.datetime.now(),
-        delivered_at=dt.datetime.now(),
+        store, name="delivered", last_sequenced_at=dt.datetime.now(), delivered_at=dt.datetime.now()
     )
     assert len(store._get_query(table=Sample).all()) == 2
 

@@ -4,7 +4,7 @@ from cg.exc import OrderError
 from cg.meta.orders.rnafusion_submitter import RnafusionSubmitter
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
-from cg.store import Store
+from cg.store.store import Store
 
 
 def test__validate_one_sample_per_case_multiple_samples(

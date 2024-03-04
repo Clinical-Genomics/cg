@@ -1,11 +1,12 @@
 """Conftest file for pytest fixtures that needs to be shared for multiple tests."""
+
 import gzip
 import http
 import logging
 import os
 import shutil
 from copy import deepcopy
-from datetime import MAXYEAR, datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from subprocess import CompletedProcess
 from typing import Any, Generator
@@ -14,27 +15,26 @@ import pytest
 from housekeeper.store.models import File, Version
 from requests import Response
 
+from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
+from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims.api import LimsAPI
+from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.constants import FileExtensions, Pipeline, SequencingFileTag
+from cg.constants import FileExtensions, SequencingFileTag, Workflow
 from cg.constants.constants import CaseActions, FileFormat, Strandedness
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SequencingPlatform
-from cg.constants.subject import Gender
-from cg.io.controller import ReadFile, WriteFile
+from cg.constants.subject import Sex
+from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
-from cg.io.yaml import write_yaml
+from cg.io.yaml import read_yaml, write_yaml
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
@@ -44,20 +44,15 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
-from cg.models.demultiplex.run_parameters import (
-    RunParametersHiSeq,
-    RunParametersNovaSeq6000,
-    RunParametersNovaSeqX,
-)
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 # from cg.models.raredisease.raredisease import RarediseaseParameters
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
-from cg.store import Store
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
-from cg.store.models import Bed, BedVersion, Case, Customer, Organism, Sample
+from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
+from cg.store.store import Store
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -72,51 +67,15 @@ from tests.store_helpers import StoreHelpers
 
 LOG = logging.getLogger(__name__)
 
-
-# Timestamp fixture
-
-
-@pytest.fixture(scope="session")
-def old_timestamp() -> datetime:
-    """Return a time stamp in date time format."""
-    return datetime(1900, 1, 1)
-
-
-@pytest.fixture(scope="session")
-def timestamp() -> datetime:
-    """Return a time stamp in date time format."""
-    return datetime(2020, 5, 1)
-
-
-@pytest.fixture(scope="session")
-def later_timestamp() -> datetime:
-    """Return a time stamp in date time format."""
-    return datetime(2020, 6, 1)
-
-
-@pytest.fixture(scope="session")
-def future_date() -> datetime:
-    """Return a distant date in the future for which no events happen later."""
-    return datetime(MAXYEAR, 1, 1, 1, 1, 1)
-
-
-@pytest.fixture(scope="session")
-def timestamp_now() -> datetime:
-    """Return a time stamp of today's date in date time format."""
-    return datetime.now()
-
-
-@pytest.fixture(scope="session")
-def timestamp_yesterday(timestamp_now: datetime) -> datetime:
-    """Return a time stamp of yesterday's date in date time format."""
-    return timestamp_now - timedelta(days=1)
-
-
-@pytest.fixture(scope="session")
-def timestamp_in_2_weeks(timestamp_now: datetime) -> datetime:
-    """Return a time stamp 14 days ahead in time."""
-    return timestamp_now + timedelta(days=14)
-
+pytest_plugins = [
+    "tests.fixture_plugins.timestamp_fixtures",
+    "tests.fixture_plugins.demultiplex_fixtures.flow_cell_fixtures",
+    "tests.fixture_plugins.demultiplex_fixtures.name_fixtures",
+    "tests.fixture_plugins.demultiplex_fixtures.path_fixtures",
+    "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
+    "tests.fixture_plugins.demultiplex_fixtures.sample_fixtures",
+    "tests.fixture_plugins.demultiplex_fixtures.sample_sheet_fixtures",
+]
 
 # Case fixtures
 
@@ -205,6 +164,12 @@ def sample_name() -> str:
 
 
 @pytest.fixture(scope="session")
+def another_sample_name() -> str:
+    """Returns a sample name."""
+    return "another_sample_name"
+
+
+@pytest.fixture(scope="session")
 def cust_sample_id() -> str:
     """Returns a customer sample id."""
     return "child"
@@ -243,14 +208,14 @@ def analysis_family_single_case(
     return {
         "name": family_name,
         "internal_id": case_id,
-        "data_analysis": str(Pipeline.MIP_DNA),
+        "data_analysis": Workflow.MIP_DNA,
         "application_type": "wgs",
         "panels": ["IEM", "EP"],
         "tickets": ticket_id,
         "samples": [
             {
                 "name": "proband",
-                "sex": Gender.MALE,
+                "sex": Sex.MALE,
                 "internal_id": sample_id,
                 "status": "affected",
                 "original_ticket": ticket_id,
@@ -267,14 +232,14 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
     return {
         "name": family_name,
         "internal_id": case_id,
-        "data_analysis": str(Pipeline.MIP_DNA),
+        "data_analysis": Workflow.MIP_DNA,
         "application_type": "wgs",
         "tickets": ticket_id,
         "panels": ["IEM", "EP"],
         "samples": [
             {
                 "name": "child",
-                "sex": Gender.MALE,
+                "sex": Sex.MALE,
                 "internal_id": sample_id,
                 "father": "ADM2",
                 "mother": "ADM3",
@@ -285,7 +250,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
             },
             {
                 "name": "father",
-                "sex": Gender.MALE,
+                "sex": Sex.MALE,
                 "internal_id": "ADM2",
                 "status": "unaffected",
                 "original_ticket": ticket_id,
@@ -294,7 +259,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
             },
             {
                 "name": "mother",
-                "sex": Gender.FEMALE,
+                "sex": Sex.FEMALE,
                 "internal_id": "ADM3",
                 "status": "unaffected",
                 "original_ticket": ticket_id,
@@ -314,9 +279,11 @@ def base_config_dict() -> dict:
     return {
         "database": "sqlite:///",
         "madeline_exe": "path/to/madeline",
+        "tower_binary_path": "path/to/tower",
         "delivery_path": "path/to/delivery",
-        "flow_cells_dir": "path/to/flow_cells",
-        "demultiplexed_flow_cells_dir": "path/to/demultiplexed_flow_cells_dir",
+        "illumina_flow_cells_directory": "path/to/flow_cells",
+        "illumina_demultiplexed_runs_directory": "path/to/demultiplexed_flow_cells_dir",
+        "nanopore_data_directory": "path/to/nanopore_data_directory",
         "downsample_dir": "path/to/downsample_dir",
         "downsample_script": "downsample.sh",
         "housekeeper": {
@@ -380,6 +347,64 @@ def crunchy_config() -> dict[str, dict[str, Any]]:
 
 
 @pytest.fixture
+def demultiplexing_context_for_demux(
+    demultiplexing_api_for_demux: DemultiplexingAPI,
+    cg_context: CGConfig,
+    store_with_demultiplexed_samples: Store,
+) -> CGConfig:
+    """Return cg context with a demultiplex context."""
+    cg_context.demultiplex_api_ = demultiplexing_api_for_demux
+    cg_context.housekeeper_api_ = demultiplexing_api_for_demux.hk_api
+    cg_context.status_db_ = store_with_demultiplexed_samples
+    return cg_context
+
+
+@pytest.fixture(name="demultiplex_context")
+def demultiplex_context(
+    demultiplexing_api: DemultiplexingAPI,
+    real_housekeeper_api: HousekeeperAPI,
+    cg_context: CGConfig,
+    store_with_demultiplexed_samples: Store,
+) -> CGConfig:
+    """Return cg context with a demultiplex context."""
+    cg_context.demultiplex_api_ = demultiplexing_api
+    cg_context.housekeeper_api_ = real_housekeeper_api
+    cg_context.status_db_ = store_with_demultiplexed_samples
+    return cg_context
+
+
+@pytest.fixture(name="demultiplex_configs_for_demux")
+def demultiplex_configs_for_demux(
+    tmp_illumina_flow_cells_demux_all_directory,
+    tmp_empty_demultiplexed_runs_directory: Path,
+) -> dict:
+    """Return demultiplex configs."""
+    return {
+        "illumina_flow_cells_directory": tmp_illumina_flow_cells_demux_all_directory.as_posix(),
+        "illumina_demultiplexed_runs_directory": tmp_empty_demultiplexed_runs_directory.as_posix(),
+        "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
+    }
+
+
+@pytest.fixture(name="demultiplex_configs")
+def demultiplex_configs(
+    tmp_illumina_flow_cells_directory,
+    tmp_illumina_demultiplexed_flow_cells_directory,
+) -> dict:
+    """Return demultiplex configs."""
+    return {
+        "illumina_flow_cells_directory": tmp_illumina_flow_cells_directory.as_posix(),
+        "illumina_demultiplexed_runs_directory": tmp_illumina_demultiplexed_flow_cells_directory.as_posix(),
+        "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
+    }
+
+
+@pytest.fixture
+def real_crunchy_api(crunchy_config) -> CrunchyAPI:
+    return CrunchyAPI(crunchy_config)
+
+
+@pytest.fixture
 def hk_config_dict(root_path: Path):
     """Housekeeper configs."""
     return {
@@ -413,7 +438,71 @@ def gens_config() -> dict[str, dict[str, str]]:
     }
 
 
+@pytest.fixture(name="sample_sheet_context")
+def sample_sheet_context(
+    cg_context: CGConfig,
+    lims_api: LimsAPI,
+    populated_housekeeper_api: HousekeeperAPI,
+    tmp_illumina_flow_cells_directory: Path,
+) -> CGConfig:
+    """Return cg context with added Lims and Housekeeper API."""
+    cg_context.lims_api_ = lims_api
+    cg_context.housekeeper_api_ = populated_housekeeper_api
+    cg_context.sample_sheet_api_ = SampleSheetAPI(
+        flow_cell_dir=tmp_illumina_flow_cells_directory.as_posix(),
+        hk_api=cg_context.housekeeper_api,
+        lims_api=cg_context.lims_api,
+    )
+    return cg_context
+
+
+@pytest.fixture
+def sample_sheet_context_broken_flow_cells(
+    cg_context: CGConfig,
+    lims_api: LimsAPI,
+    populated_housekeeper_api: HousekeeperAPI,
+    tmp_broken_flow_cells_directory: Path,
+) -> CGConfig:
+    """Return cg context with broken flow cells."""
+    cg_context.illumina_demultiplexed_runs_directory = tmp_broken_flow_cells_directory.as_posix()
+    cg_context.lims_api_ = lims_api
+    cg_context.housekeeper_api_ = populated_housekeeper_api
+    cg_context.sample_sheet_api_ = SampleSheetAPI(
+        flow_cell_dir=tmp_broken_flow_cells_directory.as_posix(),
+        hk_api=cg_context.housekeeper_api,
+        lims_api=cg_context.lims_api,
+    )
+    return cg_context
+
+
 # Api fixtures
+
+
+@pytest.fixture(name="demultiplexing_api_for_demux")
+def demultiplexing_api_for_demux(
+    demultiplex_configs_for_demux: dict,
+    sbatch_process: Process,
+    populated_housekeeper_api: HousekeeperAPI,
+) -> DemultiplexingAPI:
+    """Return demultiplex API."""
+    demux_api = DemultiplexingAPI(
+        config=demultiplex_configs_for_demux,
+        housekeeper_api=populated_housekeeper_api,
+    )
+    demux_api.slurm_api.process = sbatch_process
+    return demux_api
+
+
+@pytest.fixture
+def demultiplexing_api(
+    demultiplex_configs: dict, sbatch_process: Process, populated_housekeeper_api: HousekeeperAPI
+) -> DemultiplexingAPI:
+    """Return demultiplex API."""
+    demux_api = DemultiplexingAPI(
+        config=demultiplex_configs, housekeeper_api=populated_housekeeper_api
+    )
+    demux_api.slurm_api.process = sbatch_process
+    return demux_api
 
 
 @pytest.fixture
@@ -656,6 +745,15 @@ def mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
 
 
 @pytest.fixture
+<<<<<<< HEAD
+=======
+def nf_analysis_analysis_dir(fixtures_dir: Path) -> Path:
+    """Return the path to the directory with nf-analysis files."""
+    return Path(fixtures_dir, "analysis", "nf-analysis")
+
+
+@pytest.fixture
+>>>>>>> master
 def raredisease_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with raredisease analysis files."""
     return Path(analysis_dir, "raredisease")
@@ -665,6 +763,12 @@ def raredisease_analysis_dir(analysis_dir: Path) -> Path:
 def rnafusion_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with rnafusion analysis files."""
     return Path(analysis_dir, "rnafusion")
+
+
+@pytest.fixture
+def taxprofiler_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with taxprofiler analysis files."""
+    return Path(analysis_dir, "taxprofiler")
 
 
 @pytest.fixture
@@ -778,759 +882,6 @@ def compression_object(fastq_stub: Path, original_fastq_data: CompressionData) -
     return working_files
 
 
-# Demultiplex fixtures
-
-
-@pytest.fixture
-def lims_novaseq_bcl_convert_samples(
-    lims_novaseq_samples_raw: list[dict],
-) -> list[FlowCellSampleBCLConvert]:
-    """Return a list of parsed flow cell samples demultiplexed with BCL convert."""
-    return [FlowCellSampleBCLConvert(**sample) for sample in lims_novaseq_samples_raw]
-
-
-@pytest.fixture
-def lims_novaseq_bcl2fastq_samples(
-    lims_novaseq_samples_raw: list[dict],
-) -> list[FlowCellSampleBcl2Fastq]:
-    """Return a list of parsed Bcl2fastq flow cell samples"""
-    return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
-
-
-@pytest.fixture(name="tmp_flow_cells_directory")
-def tmp_flow_cells_directory(tmp_path: Path, flow_cells_dir: Path) -> Path:
-    """
-    Return the path to a temporary flow cells directory with flow cells ready for demultiplexing.
-    Generates a copy of the original flow cells directory
-    """
-    original_dir = flow_cells_dir
-    tmp_dir = Path(tmp_path, "flow_cells")
-
-    return Path(shutil.copytree(original_dir, tmp_dir))
-
-
-@pytest.fixture(name="tmp_flow_cells_demux_all_directory")
-def tmp_flow_cells_demux_all_directory(tmp_path: Path, flow_cells_demux_all_dir: Path) -> Path:
-    """
-    Return the path to a temporary flow cells directory with flow cells ready for demultiplexing.
-    Generates a copy of the original flow cells directory.
-    This fixture is used for testing of the cg demutliplex all cmd.
-    """
-    original_dir = flow_cells_demux_all_dir
-    tmp_dir = Path(tmp_path, "flow_cells_demux_all")
-
-    return Path(shutil.copytree(original_dir, tmp_dir))
-
-
-@pytest.fixture(name="tmp_flow_cell_directory_bcl2fastq")
-def flow_cell_working_directory_bcl2fastq(
-    bcl2fastq_flow_cell_dir: Path, tmp_flow_cells_directory: Path
-) -> Path:
-    """Return the path to a working directory that will be deleted after test is run.
-
-    This is a path to a flow cell directory with the run parameters present.
-    """
-    return Path(tmp_flow_cells_directory, bcl2fastq_flow_cell_dir.name)
-
-
-@pytest.fixture(name="tmp_flow_cell_directory_bclconvert")
-def flow_cell_working_directory_bclconvert(
-    bcl_convert_flow_cell_dir: Path, tmp_flow_cells_directory: Path
-) -> Path:
-    """Return the path to a working directory that will be deleted after test is run.
-    This is a path to a flow cell directory with the run parameters present.
-    """
-    return Path(tmp_flow_cells_directory, bcl_convert_flow_cell_dir.name)
-
-
-@pytest.fixture(name="tmp_flow_cell_name_no_run_parameters")
-def tmp_flow_cell_name_no_run_parameters() -> str:
-    """This is the name of a flow cell directory with the run parameters missing."""
-    return "180522_A00689_0200_BHLCKNCCXY"
-
-
-@pytest.fixture(name="tmp_flow_cell_name_malformed_sample_sheet")
-def fixture_tmp_flow_cell_name_malformed_sample_sheet() -> str:
-    """ "Returns the name of a flow cell directory ready for demultiplexing with BCL convert.
-    Contains a sample sheet with malformed headers.
-    """
-    return "201203_A00689_0200_AHVKJCDRXY"
-
-
-@pytest.fixture(name="tmp_flow_cell_name_no_sample_sheet")
-def tmp_flow_cell_name_no_sample_sheet() -> str:
-    """Return the name of a flow cell directory with the run parameters and sample sheet missing."""
-    return "170407_A00689_0209_BHHKVCALXX"
-
-
-@pytest.fixture(name="tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq")
-def tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq() -> str:
-    """Returns the name of a flow cell directory ready for demultiplexing with bcl2fastq."""
-    return "211101_D00483_0615_AHLG5GDRXY"
-
-
-@pytest.fixture
-def tmp_flow_cells_directory_no_run_parameters(
-    tmp_flow_cell_name_no_run_parameters: str, tmp_flow_cells_directory: Path
-) -> Path:
-    """This is a path to a flow cell directory with the run parameters missing."""
-    return Path(tmp_flow_cells_directory, tmp_flow_cell_name_no_run_parameters)
-
-
-@pytest.fixture(name="tmp_flow_cells_directory_no_sample_sheet")
-def tmp_flow_cells_directory_no_sample_sheet(
-    tmp_flow_cell_name_no_sample_sheet: str, tmp_flow_cells_directory: Path
-) -> Path:
-    """This is a path to a flow cell directory with the sample sheet and run parameters missing."""
-    return Path(tmp_flow_cells_directory, tmp_flow_cell_name_no_sample_sheet)
-
-
-@pytest.fixture(name="tmp_flow_cells_directory_malformed_sample_sheet")
-def fixture_tmp_flow_cells_directory_malformed_sample_sheet(
-    tmp_flow_cell_name_malformed_sample_sheet: str, tmp_flow_cells_directory: Path
-) -> Path:
-    """This is a path to a flow cell directory with a sample sheet with malformed headers."""
-    return Path(tmp_flow_cells_directory, tmp_flow_cell_name_malformed_sample_sheet)
-
-
-@pytest.fixture(name="tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert")
-def fixture_tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert(
-    bcl_convert_flow_cell_full_name: str, tmp_flow_cells_directory: Path
-) -> Path:
-    """This is a path to a flow cell directory with the run parameters missing."""
-    return Path(tmp_flow_cells_directory, bcl_convert_flow_cell_full_name)
-
-
-@pytest.fixture(name="tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq")
-def tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq(
-    tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq: str, tmp_flow_cells_directory: Path
-) -> Path:
-    """This is a path to a flow cell directory with the run parameters missing."""
-    return Path(tmp_flow_cells_directory, tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq)
-
-
-# Temporary demultiplexed runs fixtures
-@pytest.fixture(name="tmp_demultiplexed_runs_directory")
-def tmp_demultiplexed_flow_cells_directory(tmp_path: Path, demultiplexed_runs: Path) -> Path:
-    """Return the path to a temporary demultiplex-runs directory.
-    Generates a copy of the original demultiplexed-runs
-    """
-    original_dir = demultiplexed_runs
-    tmp_dir = Path(tmp_path, "demultiplexed-runs")
-    return Path(shutil.copytree(original_dir, tmp_dir))
-
-
-@pytest.fixture(name="tmp_demultiplexed_runs_bcl2fastq_directory")
-def tmp_demultiplexed_runs_bcl2fastq_directory(
-    tmp_demultiplexed_runs_directory: Path, bcl2fastq_flow_cell_dir: Path
-) -> Path:
-    """Return the path to a temporary demultiplex-runs bcl2fastq flow cell directory."""
-    return Path(tmp_demultiplexed_runs_directory, bcl2fastq_flow_cell_dir.name)
-
-
-@pytest.fixture(name="tmp_bcl2fastq_flow_cell")
-def tmp_bcl2fastq_flow_cell(
-    tmp_demultiplexed_runs_bcl2fastq_directory: Path,
-) -> FlowCellDirectoryData:
-    """Create a flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
-        flow_cell_path=tmp_demultiplexed_runs_bcl2fastq_directory,
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
-
-
-@pytest.fixture
-def novaseq6000_flow_cell(
-    tmp_flow_cells_directory_malformed_sample_sheet: Path,
-) -> FlowCellDirectoryData:
-    """Return a NovaSeq6000 flow cell."""
-    return FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cells_directory_malformed_sample_sheet,
-        bcl_converter=BclConverter.BCLCONVERT,
-    )
-
-
-@pytest.fixture(name="tmp_bcl_convert_flow_cell")
-def tmp_bcl_convert_flow_cell(
-    tmp_flow_cell_directory_bclconvert: Path,
-) -> FlowCellDirectoryData:
-    """Create a flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_directory_bclconvert,
-        bcl_converter=BclConverter.DRAGEN,
-    )
-
-
-@pytest.fixture(name="tmp_demultiplexed_runs_not_finished_directory")
-def tmp_demultiplexed_runs_not_finished_flow_cells_directory(
-    tmp_path: Path, demux_results_not_finished_dir: Path
-) -> Path:
-    """
-    Return a temporary demultiplex-runs-unfinished path with an unfinished flow cell directory.
-    Generates a copy of the original demultiplexed-runs-unfinished directory.
-    """
-    original_dir = demux_results_not_finished_dir
-    tmp_dir = Path(tmp_path, "demultiplexed-runs-unfinished")
-    return Path(shutil.copytree(original_dir, tmp_dir))
-
-
-@pytest.fixture(name="demultiplexed_runs_unfinished_bcl2fastq_flow_cell_directory")
-def demultiplexed_runs_bcl2fastq_flow_cell_directory(
-    tmp_demultiplexed_runs_not_finished_directory: Path,
-    bcl2fastq_flow_cell_full_name: str,
-) -> Path:
-    """Copy the content of a demultiplexed but not finished directory to a temporary location."""
-    return Path(tmp_demultiplexed_runs_not_finished_directory, bcl2fastq_flow_cell_full_name)
-
-
-@pytest.fixture(name="tmp_unfinished_bcl2fastq_flow_cell")
-def unfinished_bcl2fastq_flow_cell(
-    demultiplexed_runs_unfinished_bcl2fastq_flow_cell_directory: Path,
-    bcl2fastq_flow_cell_full_name: str,
-) -> FlowCellDirectoryData:
-    """Copy the content of a demultiplexed but not finished directory to a temporary location."""
-    return FlowCellDirectoryData(
-        flow_cell_path=demultiplexed_runs_unfinished_bcl2fastq_flow_cell_directory,
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
-
-
-@pytest.fixture(name="sample_sheet_context")
-def sample_sheet_context(
-    cg_context: CGConfig, lims_api: LimsAPI, populated_housekeeper_api: HousekeeperAPI
-) -> CGConfig:
-    """Return cg context with added Lims and Housekeeper API."""
-    cg_context.lims_api_ = lims_api
-    cg_context.housekeeper_api_ = populated_housekeeper_api
-    return cg_context
-
-
-@pytest.fixture(scope="session")
-def bcl_convert_demultiplexed_flow_cell_sample_internal_ids() -> list[str]:
-    """
-    Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
-    cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/230504_A00689_0804_BHY7FFDRX2.
-    """
-    return ["ACC11927A2", "ACC11927A5"]
-
-
-@pytest.fixture(scope="session")
-def bcl2fastq_demultiplexed_flow_cell_sample_internal_ids() -> list[str]:
-    """
-    Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
-    cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/170407_A00689_0209_BHHKVCALXX.
-    """
-    return ["SVE2528A1"]
-
-
-@pytest.fixture(scope="session")
-def flow_cell_name_demultiplexed_with_bcl2fastq() -> str:
-    """Return the name of a flow cell that has been demultiplexed with BCL2Fastq."""
-    return "HHKVCALXX"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl2fastq(
-    flow_cell_name_demultiplexed_with_bcl2fastq: str,
-):
-    """Return the name of a flow cell directory that has been demultiplexed with BCL2Fastq."""
-    return f"170407_ST-E00198_0209_B{flow_cell_name_demultiplexed_with_bcl2fastq}"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
-    return "HY7FFDRX2"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl_convert(
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-):
-    return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
-
-
-# Fixtures for test demultiplex flow cell
-@pytest.fixture(name="tmp_empty_demultiplexed_runs_directory")
-def tmp_empty_demultiplexed_runs_directory(tmp_demultiplexed_runs_directory) -> Path:
-    return Path(tmp_demultiplexed_runs_directory, "empty")
-
-
-@pytest.fixture
-def store_with_demultiplexed_samples(
-    store: Store,
-    helpers: StoreHelpers,
-    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: list[str],
-    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: list[str],
-    flow_cell_name_demultiplexed_with_bcl2fastq: str,
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-) -> Store:
-    """Return a store with samples that have been demultiplexed with BCL Convert and BCL2Fastq."""
-    helpers.add_flow_cell(
-        store, flow_cell_name_demultiplexed_with_bcl_convert, sequencer_type="novaseq"
-    )
-    helpers.add_flow_cell(
-        store, flow_cell_name_demultiplexed_with_bcl2fastq, sequencer_type="hiseqx"
-    )
-    for i, sample_internal_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_internal_ids):
-        helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl_convert_{i}")
-        helpers.add_sample_lane_sequencing_metrics(
-            store,
-            sample_internal_id=sample_internal_id,
-            flow_cell_name=flow_cell_name_demultiplexed_with_bcl_convert,
-        )
-
-    for i, sample_internal_id in enumerate(bcl2fastq_demultiplexed_flow_cell_sample_internal_ids):
-        helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl2fastq_{i}")
-        helpers.add_sample_lane_sequencing_metrics(
-            store,
-            sample_internal_id=sample_internal_id,
-            flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
-        )
-    return store
-
-
-@pytest.fixture(name="demultiplexing_context_for_demux")
-def demultiplexing_context_for_demux(
-    demultiplexing_api_for_demux: DemultiplexingAPI,
-    cg_context: CGConfig,
-    store_with_demultiplexed_samples: Store,
-) -> CGConfig:
-    """Return cg context with a demultiplex context."""
-    cg_context.demultiplex_api_ = demultiplexing_api_for_demux
-    cg_context.housekeeper_api_ = demultiplexing_api_for_demux.hk_api
-    cg_context.status_db_ = store_with_demultiplexed_samples
-    return cg_context
-
-
-@pytest.fixture(name="demultiplex_context")
-def demultiplex_context(
-    demultiplexing_api: DemultiplexingAPI,
-    real_housekeeper_api: HousekeeperAPI,
-    cg_context: CGConfig,
-    store_with_demultiplexed_samples: Store,
-) -> CGConfig:
-    """Return cg context with a demultiplex context."""
-    cg_context.demultiplex_api_ = demultiplexing_api
-    cg_context.housekeeper_api_ = real_housekeeper_api
-    cg_context.status_db_ = store_with_demultiplexed_samples
-    return cg_context
-
-
-@pytest.fixture(name="demultiplex_configs_for_demux")
-def demultiplex_configs_for_demux(
-    tmp_flow_cells_demux_all_directory: Path,
-    tmp_empty_demultiplexed_runs_directory: Path,
-) -> dict:
-    """Return demultiplex configs."""
-    return {
-        "flow_cells_dir": tmp_flow_cells_demux_all_directory.as_posix(),
-        "demultiplexed_flow_cells_dir": tmp_empty_demultiplexed_runs_directory.as_posix(),
-        "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
-    }
-
-
-@pytest.fixture(name="demultiplex_configs")
-def demultiplex_configs(
-    tmp_flow_cells_directory: Path,
-    tmp_demultiplexed_runs_directory: Path,
-) -> dict:
-    """Return demultiplex configs."""
-    return {
-        "flow_cells_dir": tmp_flow_cells_directory.as_posix(),
-        "demultiplexed_flow_cells_dir": tmp_demultiplexed_runs_directory.as_posix(),
-        "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
-    }
-
-
-@pytest.fixture(name="demultiplexing_api_for_demux")
-def demultiplexing_api_for_demux(
-    demultiplex_configs_for_demux: dict,
-    sbatch_process: Process,
-    populated_housekeeper_api: HousekeeperAPI,
-) -> DemultiplexingAPI:
-    """Return demultiplex API."""
-    demux_api = DemultiplexingAPI(
-        config=demultiplex_configs_for_demux,
-        housekeeper_api=populated_housekeeper_api,
-    )
-    demux_api.slurm_api.process = sbatch_process
-    return demux_api
-
-
-@pytest.fixture(name="demultiplexing_api")
-def demultiplexing_api(
-    demultiplex_configs: dict, sbatch_process: Process, populated_housekeeper_api: HousekeeperAPI
-) -> DemultiplexingAPI:
-    """Return demultiplex API."""
-    demux_api = DemultiplexingAPI(
-        config=demultiplex_configs, housekeeper_api=populated_housekeeper_api
-    )
-    demux_api.slurm_api.process = sbatch_process
-    return demux_api
-
-
-@pytest.fixture(name="novaseq6000_bcl_convert_sample_sheet_path")
-def novaseq6000_sample_sheet_path() -> Path:
-    """Return the path to a NovaSeq 6000 BCL convert sample sheet."""
-    return Path(
-        "tests",
-        "fixtures",
-        "apps",
-        "sequencing_metrics_parser",
-        "230622_A00621_0864_AHY7FFDRX2",
-        "Unaligned",
-        "Reports",
-        "SampleSheet.csv",
-    )
-
-
-@pytest.fixture(scope="session")
-def demultiplex_fixtures(apps_dir: Path) -> Path:
-    """Return the path to the demultiplex fixture directory."""
-    return Path(apps_dir, "demultiplexing")
-
-
-@pytest.fixture(scope="session")
-def raw_lims_sample_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the raw samples fixture directory."""
-    return Path(demultiplex_fixtures, "raw_lims_samples")
-
-
-@pytest.fixture(scope="session")
-def run_parameters_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the run parameters fixture directory."""
-    return Path(demultiplex_fixtures, "run_parameters")
-
-
-@pytest.fixture(scope="session")
-def demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the demultiplexed flow cells fixture directory."""
-    return Path(demultiplex_fixtures, "demultiplexed-runs")
-
-
-@pytest.fixture(scope="session")
-def flow_cells_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the sequenced flow cells fixture directory."""
-    return Path(demultiplex_fixtures, DemultiplexingDirsAndFiles.FLOW_CELLS_DIRECTORY_NAME)
-
-
-@pytest.fixture(scope="session")
-def flow_cells_demux_all_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the sequenced flow cells fixture directory."""
-    return Path(demultiplex_fixtures, "flow_cells_demux_all")
-
-
-@pytest.fixture(scope="session")
-def demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a dir with demultiplexing results where nothing has been cleaned."""
-    return Path(demultiplex_fixtures, "demultiplexed-runs-unfinished")
-
-
-@pytest.fixture(scope="session")
-def hiseq_x_flow_cell_name() -> str:
-    """Return the full name of a HiSeq2500 flow cell with only one index."""
-    return "160202_ST-E00266_0064_AHKHHGCCXX"
-
-
-@pytest.fixture(scope="session")
-def hiseq_2500_flow_cell_name() -> str:
-    """Return the full name of a HiSeq2500 flow cell with double indexes."""
-    return "180504_D00410_0608_BHGYGYBCX2"
-
-
-@pytest.fixture(scope="session")
-def bcl2fastq_flow_cell_full_name() -> str:
-    """Return full flow cell name."""
-    return "201203_D00483_0200_AHVKJCDRXX"
-
-
-@pytest.fixture(scope="session")
-def bcl_convert_flow_cell_full_name() -> str:
-    """Return the full name of a bcl_convert flow cell."""
-    return "211101_A00187_0615_AHLG5GDRZZ"
-
-
-@pytest.fixture(scope="session")
-def novaseq_x_flow_cell_full_name() -> str:
-    """Return the full name of a NovaSeqX flow cell."""
-    return "20230508_LH00188_0003_A22522YLT3"
-
-
-@pytest.fixture(scope="session")
-def novaseq_x_manifest_file(novaseq_x_flow_cell_dir: Path) -> Path:
-    """Return the path to a NovaSeqX manifest file."""
-    return Path(novaseq_x_flow_cell_dir, "Manifest.tsv")
-
-
-@pytest.fixture(scope="session")
-def hiseq_x_flow_cell_dir(flow_cells_dir: Path, hiseq_x_flow_cell_name: str) -> Path:
-    """Return the path to a HiSeqX flow cell."""
-    return Path(flow_cells_dir, hiseq_x_flow_cell_name)
-
-
-@pytest.fixture(scope="session")
-def hiseq_2500_flow_cell_dir(flow_cells_dir: Path, hiseq_2500_flow_cell_name: str) -> Path:
-    """Return the path to a HiSeq2500 flow cell."""
-    return Path(flow_cells_dir, hiseq_2500_flow_cell_name)
-
-
-@pytest.fixture(scope="session")
-def bcl2fastq_flow_cell_dir(flow_cells_dir: Path, bcl2fastq_flow_cell_full_name: str) -> Path:
-    """Return the path to the bcl2fastq flow cell demultiplex fixture directory."""
-    return Path(flow_cells_dir, bcl2fastq_flow_cell_full_name)
-
-
-@pytest.fixture(scope="session")
-def bcl_convert_flow_cell_dir(flow_cells_dir: Path, bcl_convert_flow_cell_full_name: str) -> Path:
-    """Return the path to the bcl_convert flow cell demultiplex fixture directory."""
-    return Path(flow_cells_dir, bcl_convert_flow_cell_full_name)
-
-
-@pytest.fixture(scope="session")
-def novaseq_x_flow_cell_dir(flow_cells_dir: Path, novaseq_x_flow_cell_full_name: str) -> Path:
-    """Return the path to the NovaSeqX flow cell demultiplex fixture directory."""
-    return Path(flow_cells_dir, novaseq_x_flow_cell_full_name)
-
-
-@pytest.fixture(scope="session")
-def novaseq_bcl2fastq_sample_sheet_path(bcl2fastq_flow_cell_dir: Path) -> Path:
-    """Return the path to a NovaSeq6000 Bcl2fastq sample sheet."""
-    return Path(bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
-
-
-@pytest.fixture(scope="session")
-def novaseq_bcl_convert_sample_sheet_path(bcl_convert_flow_cell_dir: Path) -> Path:
-    """Return the path to a NovaSeq6000 bcl_convert sample sheet."""
-    return Path(bcl_convert_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
-
-
-@pytest.fixture(scope="session")
-def run_parameters_missing_versions_path(run_parameters_dir: Path) -> Path:
-    """Return a NovaSeq6000 run parameters file path without software and reagent kit versions."""
-    return Path(run_parameters_dir, "RunParameters_novaseq_no_software_nor_reagent_version.xml")
-
-
-@pytest.fixture(scope="session")
-def run_parameters_wrong_instrument(run_parameters_dir: Path) -> Path:
-    """Return a NovaSeqX run parameters file path with a wrong instrument value."""
-    return Path(run_parameters_dir, "RunParameters_novaseq_X_wrong_instrument.xml")
-
-
-@pytest.fixture(scope="session")
-def hiseq_x_single_index_run_parameters_path(
-    hiseq_x_flow_cell_dir: Path,
-) -> Path:
-    """Return the path to a HiSeqX run parameters file with single index."""
-    return Path(hiseq_x_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE)
-
-
-@pytest.fixture(scope="session")
-def hiseq_2500_double_index_run_parameters_path(
-    hiseq_2500_flow_cell_dir: Path,
-) -> Path:
-    """Return the path to a HiSeqX run parameters file with single index."""
-    return Path(hiseq_2500_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
-
-
-@pytest.fixture(scope="session")
-def novaseq_6000_run_parameters_path(bcl2fastq_flow_cell_dir: Path) -> Path:
-    """Return the path to a NovaSeq6000 run parameters file."""
-    return Path(bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
-
-
-@pytest.fixture(scope="session")
-def novaseq_x_run_parameters_path(novaseq_x_flow_cell_dir: Path) -> Path:
-    """Return the path to a NovaSeqX run parameters file."""
-    return Path(novaseq_x_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
-
-
-@pytest.fixture(scope="function")
-def run_parameters_hiseq_different_index(run_parameters_dir: Path) -> RunParametersHiSeq:
-    """Return a HiSeq RunParameters object with different index cycles."""
-    path = Path(run_parameters_dir, "RunParameters_hiseq_2500_different_index_cycles.xml")
-    return RunParametersHiSeq(run_parameters_path=path)
-
-
-@pytest.fixture(scope="function")
-def run_parameters_novaseq_6000_different_index(
-    run_parameters_dir: Path,
-) -> RunParametersNovaSeq6000:
-    """Return a NovaSeq6000 RunParameters object with different index cycles."""
-    path = Path(run_parameters_dir, "RunParameters_novaseq_6000_different_index_cycles.xml")
-    return RunParametersNovaSeq6000(run_parameters_path=path)
-
-
-@pytest.fixture(scope="function")
-def run_parameters_novaseq_x_different_index(run_parameters_dir: Path) -> RunParametersNovaSeqX:
-    """Return a NovaSeqX RunParameters object with different index cycles."""
-    path = Path(run_parameters_dir, "RunParameters_novaseq_X_different_index_cycles.xml")
-    return RunParametersNovaSeqX(run_parameters_path=path)
-
-
-@pytest.fixture(scope="module")
-def run_parameters_missing_versions(
-    run_parameters_missing_versions_path: Path,
-) -> RunParametersNovaSeq6000:
-    """Return a NovaSeq6000 run parameters object without software and reagent kit versions."""
-    return RunParametersNovaSeq6000(run_parameters_path=run_parameters_missing_versions_path)
-
-
-@pytest.fixture(scope="session")
-def hiseq_2500_run_parameters_double_index(
-    hiseq_2500_double_index_run_parameters_path: Path,
-) -> RunParametersHiSeq:
-    """Return a NovaSeq6000 run parameters object."""
-    return RunParametersHiSeq(run_parameters_path=hiseq_2500_double_index_run_parameters_path)
-
-
-@pytest.fixture(scope="session")
-def hiseq_x_run_parameters_single_index(
-    hiseq_x_single_index_run_parameters_path: Path,
-) -> RunParametersHiSeq:
-    """Return a NovaSeq6000 run parameters object."""
-    return RunParametersHiSeq(run_parameters_path=hiseq_x_single_index_run_parameters_path)
-
-
-@pytest.fixture(scope="session")
-def novaseq_6000_run_parameters(
-    novaseq_6000_run_parameters_path: Path,
-) -> RunParametersNovaSeq6000:
-    """Return a NovaSeq6000 run parameters object."""
-    return RunParametersNovaSeq6000(run_parameters_path=novaseq_6000_run_parameters_path)
-
-
-@pytest.fixture(scope="session")
-def novaseq_x_run_parameters(
-    novaseq_x_run_parameters_path: Path,
-) -> RunParametersNovaSeqX:
-    """Return a NovaSeqX run parameters object."""
-    return RunParametersNovaSeqX(run_parameters_path=novaseq_x_run_parameters_path)
-
-
-@pytest.fixture(scope="module")
-def hiseq_2500_flow_cell(hiseq_2500_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """Return a HiSeq2500 flow cell."""
-    return FlowCellDirectoryData(flow_cell_path=hiseq_2500_flow_cell_dir)
-
-
-@pytest.fixture(scope="module")
-def hiseq_x_flow_cell(hiseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """Return a HiSeq2500 flow cell."""
-    return FlowCellDirectoryData(flow_cell_path=hiseq_x_flow_cell_dir)
-
-
-@pytest.fixture(scope="session")
-def bcl2fastq_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """Create a flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
-        flow_cell_path=bcl2fastq_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
-    )
-
-
-@pytest.fixture(scope="session")
-def novaseq_flow_cell_demultiplexed_with_bcl2fastq(
-    bcl_convert_flow_cell_dir: Path,
-) -> FlowCellDirectoryData:
-    """Return a Novaseq6000 flow cell object demultiplexed using Bcl2fastq."""
-    return FlowCellDirectoryData(
-        flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
-    )
-
-
-@pytest.fixture(scope="module")
-def bcl_convert_flow_cell(bcl_convert_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """Create a bcl_convert flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
-        flow_cell_path=bcl_convert_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
-    )
-
-
-@pytest.fixture(scope="function")
-def novaseq_6000_flow_cell(bcl_convert_flow_cell: FlowCellDirectoryData) -> FlowCellDirectoryData:
-    """Return a NovaSeq6000 flow cell object."""
-    return bcl_convert_flow_cell
-
-
-@pytest.fixture(scope="function")
-def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
-    """Create a NovaSeqX flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
-        flow_cell_path=novaseq_x_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
-    )
-
-
-@pytest.fixture(scope="session")
-def bcl2fastq_flow_cell_id(bcl2fastq_flow_cell: FlowCellDirectoryData) -> str:
-    """Return flow cell id from bcl2fastq flow cell object."""
-    return bcl2fastq_flow_cell.id
-
-
-@pytest.fixture(scope="module")
-def bcl_convert_flow_cell_id(bcl_convert_flow_cell: FlowCellDirectoryData) -> str:
-    """Return flow cell id from bcl_convert flow cell object."""
-    return bcl_convert_flow_cell.id
-
-
-@pytest.fixture(name="demultiplexing_delivery_file")
-def demultiplexing_delivery_file(bcl2fastq_flow_cell: FlowCellDirectoryData) -> Path:
-    """Return demultiplexing delivery started file."""
-    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.DELIVERY)
-
-
-@pytest.fixture(name="hiseq_x_tile_dir")
-def hiseq_x_tile_dir(bcl2fastq_flow_cell: FlowCellDirectoryData) -> Path:
-    """Return HiSeqX tile dir."""
-    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.HISEQ_X_TILE_DIR)
-
-
-@pytest.fixture(name="lims_novaseq_samples_file")
-def lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
-    """Return the path to a file with sample info in lims format."""
-    return Path(raw_lims_sample_dir, "raw_samplesheet_novaseq.json")
-
-
-@pytest.fixture
-def lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> list[dict]:
-    """Return a list of raw flow cell samples."""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=lims_novaseq_samples_file
-    )
-
-
-@pytest.fixture(name="demultiplexed_flow_cell")
-def demultiplexed_flow_cell(demultiplexed_runs: Path, bcl2fastq_flow_cell_full_name: str) -> Path:
-    """Return the path to a demultiplexed flow cell with bcl2fastq."""
-    return Path(demultiplexed_runs, bcl2fastq_flow_cell_full_name)
-
-
-@pytest.fixture(name="bcl_convert_demultiplexed_flow_cell")
-def bcl_convert_demultiplexed_flow_cell(
-    demultiplexed_runs: Path, bcl_convert_flow_cell_full_name: str
-) -> Path:
-    """Return the path to a demultiplexed flow cell with BCLConvert."""
-    return Path(demultiplexed_runs, bcl_convert_flow_cell_full_name)
-
-
-@pytest.fixture(name="novaseqx_demultiplexed_flow_cell")
-def novaseqx_demultiplexed_flow_cell(demultiplexed_runs: Path, novaseq_x_flow_cell_full_name: str):
-    """Return the path to a demultiplexed NovaSeqX flow cell."""
-    return Path(demultiplexed_runs, novaseq_x_flow_cell_full_name)
-
-
-@pytest.fixture()
-def novaseqx_flow_cell_with_sample_sheet_no_fastq(
-    novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
-) -> FlowCellDirectoryData:
-    """Return a flow cell from a tmp dir with a sample sheet and no sample fastq files."""
-    novaseqx_flow_cell_directory.mkdir(parents=True, exist_ok=True)
-    flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_directory)
-    sample_sheet_path = Path(
-        novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-    )
-    flow_cell._sample_sheet_path_hk = sample_sheet_path
-    return flow_cell
-
-
 # Genotype file fixture
 
 
@@ -1600,6 +951,7 @@ def hk_bundle_sample_path(sample_id: str, timestamp: datetime) -> Path:
 def hk_bundle_data(
     case_id: str,
     bed_file: Path,
+    delivery_report_html: Path,
     timestamp_yesterday: datetime,
     sample_id: str,
     father_sample_id: str,
@@ -1615,7 +967,12 @@ def hk_bundle_data(
                 "path": bed_file.as_posix(),
                 "archive": False,
                 "tags": ["bed", sample_id, father_sample_id, mother_sample_id, "coverage"],
-            }
+            },
+            {
+                "path": delivery_report_html.as_posix(),
+                "archive": False,
+                "tags": [HK_DELIVERY_REPORT_TAG],
+            },
         ],
     }
 
@@ -1833,6 +1190,40 @@ def analysis_store_single_case(
     yield base_store
 
 
+@pytest.fixture
+def store_with_demultiplexed_samples(
+    store: Store,
+    helpers: StoreHelpers,
+    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: list[str],
+    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: list[str],
+    flow_cell_name_demultiplexed_with_bcl2fastq: str,
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
+) -> Store:
+    """Return a store with samples that have been demultiplexed with BCL Convert and BCL2Fastq."""
+    helpers.add_flow_cell(
+        store, flow_cell_name_demultiplexed_with_bcl_convert, sequencer_type="novaseq"
+    )
+    helpers.add_flow_cell(
+        store, flow_cell_name_demultiplexed_with_bcl2fastq, sequencer_type="hiseqx"
+    )
+    for i, sample_internal_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_internal_ids):
+        helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl_convert_{i}")
+        helpers.add_sample_lane_sequencing_metrics(
+            store,
+            sample_internal_id=sample_internal_id,
+            flow_cell_name=flow_cell_name_demultiplexed_with_bcl_convert,
+        )
+
+    for i, sample_internal_id in enumerate(bcl2fastq_demultiplexed_flow_cell_sample_internal_ids):
+        helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl2fastq_{i}")
+        helpers.add_sample_lane_sequencing_metrics(
+            store,
+            sample_internal_id=sample_internal_id,
+            flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
+        )
+    return store
+
+
 @pytest.fixture(name="collaboration_id")
 def collaboration_id() -> str:
     """Return a default customer group."""
@@ -1871,8 +1262,8 @@ def wgs_application_tag() -> str:
     return "WGSPCFC030"
 
 
-@pytest.fixture(name="store")
-def store() -> Store:
+@pytest.fixture
+def store() -> Generator[Store, None, None]:
     """Return a CG store."""
     initialize_database("sqlite:///")
     _store = Store()
@@ -1923,7 +1314,7 @@ def prices() -> dict[str, int]:
     return {"standard": 10, "priority": 20, "express": 30, "research": 5}
 
 
-@pytest.fixture(name="base_store")
+@pytest.fixture
 def base_store(
     apptag_rna: str,
     bed_name: str,
@@ -1934,7 +1325,7 @@ def base_store(
     invoice_reference: str,
     store: Store,
     prices: dict[str, int],
-) -> Store:
+) -> Generator[Store, None, None]:
     """Setup and example store."""
     collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
 
@@ -2095,19 +1486,19 @@ def base_store(
 def sample_store(base_store: Store) -> Store:
     """Populate store with samples."""
     new_samples = [
-        base_store.add_sample(name="ordered", sex=Gender.MALE, internal_id="test_internal_id"),
-        base_store.add_sample(name="received", sex=Gender.UNKNOWN, received=datetime.now()),
+        base_store.add_sample(name="ordered", sex=Sex.MALE, internal_id="test_internal_id"),
+        base_store.add_sample(name="received", sex=Sex.UNKNOWN, received=datetime.now()),
         base_store.add_sample(
             name="received-prepared",
-            sex=Gender.UNKNOWN,
+            sex=Sex.UNKNOWN,
             received=datetime.now(),
             prepared_at=datetime.now(),
         ),
-        base_store.add_sample(name="external", sex=Gender.FEMALE),
-        base_store.add_sample(name="external-received", sex=Gender.FEMALE, received=datetime.now()),
+        base_store.add_sample(name="external", sex=Sex.FEMALE),
+        base_store.add_sample(name="external-received", sex=Sex.FEMALE, received=datetime.now()),
         base_store.add_sample(
             name="sequenced",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             received=datetime.now(),
             prepared_at=datetime.now(),
             last_sequenced_at=datetime.now(),
@@ -2115,19 +1506,19 @@ def sample_store(base_store: Store) -> Store:
         ),
         base_store.add_sample(
             name="sequenced-partly",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             received=datetime.now(),
             prepared_at=datetime.now(),
             reads=(250 * 1000000),
         ),
         base_store.add_sample(
             name="to-deliver",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             last_sequenced_at=datetime.now(),
         ),
         base_store.add_sample(
             name="delivered",
-            sex=Gender.MALE,
+            sex=Sex.MALE,
             last_sequenced_at=datetime.now(),
             delivered_at=datetime.now(),
             no_invoice=False,
@@ -2263,11 +1654,9 @@ def microsalt_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def pdc_archiving_dir(
-    tmp_flow_cell_name_no_run_parameters: str, tmp_flow_cells_directory: Path, tmp_path
-) -> Path:
+def pdc_archiving_dir(tmp_flow_cell_without_run_parameters_path: Path) -> Path:
     """Return a temporary directory for PDC archiving testing."""
-    return Path(tmp_flow_cells_directory, tmp_flow_cell_name_no_run_parameters)
+    return tmp_flow_cell_without_run_parameters_path
 
 
 @pytest.fixture
@@ -2307,19 +1696,24 @@ def context_config(
     cg_dir: Path,
     balsamic_dir: Path,
     microsalt_dir: Path,
+    raredisease_dir: Path,
     rnafusion_dir: Path,
     taxprofiler_dir: Path,
-    flow_cells_dir: Path,
-    demultiplexed_runs: Path,
+    illumina_flow_cells_directory: Path,
+    illumina_demultiplexed_runs_directory: Path,
     downsample_dir: Path,
     pdc_archiving_directory: PDCArchivingDirectory,
+    nf_analysis_platform_config_path: Path,
+    nf_analysis_pipeline_params_path: Path,
+    nf_analysis_pipeline_resource_optimisation_path: Path,
 ) -> dict:
     """Return a context config."""
     return {
         "database": cg_uri,
         "delivery_path": str(cg_dir),
-        "flow_cells_dir": str(flow_cells_dir),
-        "demultiplexed_flow_cells_dir": str(demultiplexed_runs),
+        "illumina_flow_cells_directory": str(illumina_flow_cells_directory),
+        "illumina_demultiplexed_runs_directory": str(illumina_demultiplexed_runs_directory),
+        "nanopore_data_directory": "path/to/nanopore_data_directory",
         "downsample_dir": str(downsample_dir),
         "downsample_script": "downsample.sh",
         "email_base_settings": {
@@ -2329,6 +1723,7 @@ def context_config(
             "sender_password": "",
         },
         "madeline_exe": "echo",
+        "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
         "pon_path": str(cg_dir),
         "backup": {
             "pdc_archiving_directory": pdc_archiving_directory.dict(),
@@ -2344,7 +1739,13 @@ def context_config(
             "balsamic_cache": "hello",
             "bed_path": str(cg_dir),
             "binary_path": "echo",
-            "conda_env": "S_Balsamic",
+            "cadd_path": str(cg_dir),
+            "genome_interval_path": str(cg_dir),
+            "gnomad_af5_path": str(cg_dir),
+            "gens_coverage_female_path": str(cg_dir),
+            "gens_coverage_male_path": str(cg_dir),
+            "conda_binary": "a_conda_binary",
+            "conda_env": "S_balsamic",
             "loqusdb_path": str(cg_dir),
             "pon_path": str(cg_dir),
             "root": str(balsamic_dir),
@@ -2439,7 +1840,7 @@ def context_config(
             "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-dna-stage.yaml",
-            "pipeline": "analyse rd_dna",
+            "workflow": "analyse rd_dna",
             "root": str(mip_dir),
             "script": "mip",
         },
@@ -2447,7 +1848,7 @@ def context_config(
             "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-rna-stage.yaml",
-            "pipeline": "analyse rd_rna",
+            "workflow": "analyse rd_rna",
             "root": str(mip_dir),
             "script": "mip",
         },
@@ -2463,22 +1864,24 @@ def context_config(
             "root": str(mip_dir),
         },
         "raredisease": {
-            "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
             "compute_env": "nf_tower_compute_env",
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
-            "conda_env": "S_RNAFUSION",
+            "conda_env": "S_raredisease",
+            "config_platform": str(nf_analysis_platform_config_path),
+            "config_params": str(nf_analysis_pipeline_params_path),
+            "config_resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "workflow_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
             "revision": "2.2.0",
             "root": str(raredisease_dir),
             "slurm": {
                 "account": "development",
-                "mail_user": "test.raredisease.email@scilifelab.se",
+                "mail_user": "test.email@scilifelab.se",
             },
             "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
-            "tower_pipeline": "raredisease",
+            "tower_workflow": "raredisease",
         },
         "rnafusion": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
@@ -2486,7 +1889,7 @@ def context_config(
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_RNAFUSION",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "workflow_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
             "revision": "2.2.0",
@@ -2495,8 +1898,7 @@ def context_config(
                 "account": "development",
                 "mail_user": "test.rnafusion.email@scilifelab.se",
             },
-            "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
-            "tower_pipeline": "rnafusion",
+            "tower_workflow": "rnafusion",
         },
         "pigz": {"binary_path": "/bin/pigz"},
         "pdc": {"binary_path": "/bin/dsmc"},
@@ -2507,17 +1909,16 @@ def context_config(
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_taxprofiler",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "workflow_path": Path("workflow", "path").as_posix(),
             "databases": Path("path", "to", "databases").as_posix(),
             "profile": "myprofile",
             "hostremoval_reference": Path("path", "to", "hostremoval_reference").as_posix(),
-            "revision": "1.0.1",
+            "revision": "1.1.4",
             "slurm": {
                 "account": "development",
                 "mail_user": "taxprofiler.email@scilifelab.se",
             },
-            "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
-            "tower_pipeline": "taxprofiler",
+            "tower_workflow": "taxprofiler",
         },
         "scout": {
             "binary_path": "bin/scout",
@@ -2635,8 +2036,8 @@ def store_with_panels(store: Store, helpers: StoreHelpers):
     yield store
 
 
-@pytest.fixture(name="store_with_organisms")
-def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
+@pytest.fixture
+def store_with_organisms(store: Store, helpers: StoreHelpers) -> Generator[Store, None, None]:
     """Return a store with multiple organisms."""
 
     organism_details = [
@@ -2683,8 +2084,8 @@ def non_existent_id():
     return "non_existent_entity_id"
 
 
-@pytest.fixture(name="store_with_users")
-def store_with_users(store: Store, helpers: StoreHelpers) -> Store:
+@pytest.fixture
+def store_with_users(store: Store, helpers: StoreHelpers) -> Generator[Store, None, None]:
     """Return a store with multiple users."""
 
     customer: Customer = helpers.ensure_customer(store=store)
@@ -2704,8 +2105,10 @@ def store_with_users(store: Store, helpers: StoreHelpers) -> Store:
     yield store
 
 
-@pytest.fixture(name="store_with_cases_and_customers")
-def store_with_cases_and_customers(store: Store, helpers: StoreHelpers) -> Store:
+@pytest.fixture
+def store_with_cases_and_customers(
+    store: Store, helpers: StoreHelpers
+) -> Generator[Store, None, None]:
     """Return a store with cases and customers."""
 
     customer_details: list[tuple[str, str, bool]] = [
@@ -2724,13 +2127,13 @@ def store_with_cases_and_customers(store: Store, helpers: StoreHelpers) -> Store
         )
         customers.append(customer)
 
-    case_details: list[tuple[str, str, Pipeline, CaseActions, Customer]] = [
-        ("case 1", "flyingwhale", Pipeline.BALSAMIC, CaseActions.RUNNING, customers[0]),
-        ("case 2", "swimmingtiger", Pipeline.FLUFFY, CaseActions.ANALYZE, customers[0]),
-        ("case 3", "sadbaboon", Pipeline.SARS_COV_2, CaseActions.HOLD, customers[1]),
-        ("case 4", "funkysloth", Pipeline.MIP_DNA, CaseActions.ANALYZE, customers[1]),
-        ("case 5", "deadparrot", Pipeline.MICROSALT, CaseActions.RUNNING, customers[2]),
-        ("case 6", "anxiousbeetle", Pipeline.DEMULTIPLEX, CaseActions.RUNNING, customers[2]),
+    case_details: list[tuple[str, str, Workflow, CaseActions, Customer]] = [
+        ("case 1", "flyingwhale", Workflow.BALSAMIC, CaseActions.RUNNING, customers[0]),
+        ("case 2", "swimmingtiger", Workflow.FLUFFY, CaseActions.ANALYZE, customers[0]),
+        ("case 3", "sadbaboon", Workflow.MUTANT, CaseActions.HOLD, customers[1]),
+        ("case 4", "funkysloth", Workflow.MIP_DNA, CaseActions.ANALYZE, customers[1]),
+        ("case 5", "deadparrot", Workflow.MICROSALT, CaseActions.RUNNING, customers[2]),
+        ("case 6", "anxiousbeetle", Workflow.DEMULTIPLEX, CaseActions.RUNNING, customers[2]),
     ]
 
     for case_name, case_id, pipeline, action, customer in case_details:
@@ -2756,20 +2159,8 @@ def no_sample_case_id() -> str:
 
 
 @pytest.fixture(scope="session")
-def strandedness() -> str:
-    """Return a default strandedness."""
-    return Strandedness.REVERSE
-
-
-@pytest.fixture(scope="session")
-def strandedness_not_permitted() -> str:
-    """Return a not permitted strandedness."""
-    return "double_stranded"
-
-
-@pytest.fixture(scope="session")
-def pipeline_version() -> str:
-    """Return a pipeline version."""
+def workflow_version() -> str:
+    """Return a workflow version."""
     return "2.2.0"
 
 
@@ -2809,7 +2200,7 @@ def sequencing_platform() -> str:
 
 # Raredisease fixtures
 @pytest.fixture(scope="function")
-def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
+def raredisease_dir(tmpdir_factory: Path) -> str:
     """Return the path to the raredisease apps dir."""
     raredisease_dir = tmpdir_factory.mktemp("raredisease")
     return Path(raredisease_dir).absolute().as_posix()
@@ -2817,6 +2208,7 @@ def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
 
 @pytest.fixture(scope="session")
 def raredisease_case_id() -> str:
+<<<<<<< HEAD
     """Returns a raredisease case id."""
     return "raredisease_case_enough_reads"
 
@@ -3019,7 +2411,7 @@ def mock_deliverable(
 
 
 @pytest.fixture(scope="function")
-def mock_analysis_finish(
+def raredisease_mock_analysis_finish(
     raredisease_dir: Path,
     raredisease_case_id: str,
     raredisease_multiqc_json_metrics: dict,
@@ -3103,9 +2495,21 @@ def rnafusion_sample_sheet_content(
     )
 
 
+@pytest.fixture(scope="session")
+def strandedness() -> str:
+    """Return a default strandedness."""
+    return Strandedness.REVERSE
+
+
+@pytest.fixture(scope="session")
+def strandedness_not_permitted() -> str:
+    """Return a not permitted strandedness."""
+    return "double_stranded"
+
+
 @pytest.fixture(scope="function")
 def hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
-    hermes_output: dict = {"pipeline": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
+    hermes_output: dict = {"workflow": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
     for file_info in deliverable_data["files"]:
         tags: list[str] = []
         if "html" in file_info["format"]:
@@ -3117,7 +2521,7 @@ def hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
 @pytest.fixture(scope="function")
 def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
     malformed_deliverable: dict = hermes_deliverables.copy()
-    malformed_deliverable.pop("pipeline")
+    malformed_deliverable.pop("workflow")
 
     return malformed_deliverable
 
@@ -3145,10 +2549,48 @@ def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
+def rnafusion_nexflow_config_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
+    """Path to config file."""
+    return Path(
+        rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_nextflow_config"
+    ).with_suffix(FileExtensions.JSON)
+
+
+@pytest.fixture(scope="function")
+def rnafusion_metrics_deliverables(rnafusion_analysis_dir: Path) -> list[dict]:
+    """Returns the content of a mock metrics deliverables file."""
+    return read_yaml(
+        file_path=Path(
+            rnafusion_analysis_dir, "rnafusion_case_enough_reads_metrics_deliverables.yaml"
+        )
+    )
+
+
+@pytest.fixture(scope="function")
 def rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to deliverables file."""
     return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_deliverables").with_suffix(
         FileExtensions.YAML
+    )
+
+
+@pytest.fixture(scope="function")
+def nf_analysis_platform_config_path(nf_analysis_analysis_dir) -> Path:
+    """Path to platform config file."""
+    return Path(nf_analysis_analysis_dir, "platform").with_suffix(FileExtensions.CONFIG)
+
+
+@pytest.fixture(scope="function")
+def nf_analysis_pipeline_params_path(nf_analysis_analysis_dir) -> Path:
+    """Path to pipeline params file."""
+    return Path(nf_analysis_analysis_dir, "pipeline_params").with_suffix(FileExtensions.CONFIG)
+
+
+@pytest.fixture(scope="function")
+def nf_analysis_pipeline_resource_optimisation_path(nf_analysis_analysis_dir) -> Path:
+    """Path to pipeline resource optimisation file."""
+    return Path(nf_analysis_analysis_dir, "pipeline_resource_optimisation").with_suffix(
+        FileExtensions.CONFIG
     )
 
 
@@ -3207,7 +2649,6 @@ def rnafusion_context(
     case_id_not_enough_reads: str,
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
-    timestamp_yesterday: datetime,
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
@@ -3223,15 +2664,15 @@ def rnafusion_context(
         store=status_db,
         internal_id=rnafusion_case_id,
         name=rnafusion_case_id,
-        data_analysis=Pipeline.RNAFUSION,
+        data_analysis=Workflow.RNAFUSION,
     )
 
     sample_rnafusion_case_enough_reads: Sample = helpers.add_sample(
         status_db,
-        internal_id=sample_id,
-        last_sequenced_at=datetime.now(),
-        reads=total_sequenced_reads_pass,
         application_tag=apptag_rna,
+        internal_id=sample_id,
+        reads=total_sequenced_reads_pass,
+        last_sequenced_at=datetime.now(),
     )
 
     helpers.add_relationship(
@@ -3245,15 +2686,15 @@ def rnafusion_context(
         store=status_db,
         internal_id=case_id_not_enough_reads,
         name=case_id_not_enough_reads,
-        data_analysis=Pipeline.RNAFUSION,
+        data_analysis=Workflow.RNAFUSION,
     )
 
     sample_not_enough_reads: Sample = helpers.add_sample(
         status_db,
-        internal_id=sample_id_not_enough_reads,
-        last_sequenced_at=datetime.now(),
-        reads=total_sequenced_reads_not_pass,
         application_tag=apptag_rna,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
     )
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
@@ -3301,7 +2742,7 @@ def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, rnafusion_case
 
 
 @pytest.fixture(scope="function")
-def mock_analysis_finish(
+def rnafusion_mock_analysis_finish(
     rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_multiqc_json_metrics: dict, tower_id: int
 ) -> None:
     """Create analysis_finish file for testing."""
@@ -3426,11 +2867,42 @@ def taxprofiler_parameters_default(
 
 
 @pytest.fixture(scope="function")
+def taxprofiler_multiqc_json_metrics(taxprofiler_analysis_dir: Path) -> list[dict]:
+    """Returns the content of a mock Multiqc JSON file."""
+    return read_json(file_path=Path(taxprofiler_analysis_dir, "multiqc_data.json"))
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_metrics_deliverables(taxprofiler_analysis_dir: Path) -> dict:
+    """Returns the content of a mock metrics deliverables file."""
+    return read_yaml(
+        file_path=Path(taxprofiler_analysis_dir, "taxprofiler_case_metrics_deliverables.yaml")
+    )
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_metrics_deliverables_path(taxprofiler_dir: Path, taxprofiler_case_id: str) -> Path:
+    """Path to deliverables file."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_metrics_deliverables"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_deliverables_file_path(taxprofiler_dir: Path, taxprofiler_case_id: str) -> Path:
+    """Path to deliverables file."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_deliverables"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
 def nf_analysis_housekeeper(
     housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
     mock_fastq_files: list[Path],
     sample_id: str,
+    timestamp_now: datetime,
 ):
     """Create populated Housekeeper sample bundle mock."""
 
@@ -3458,30 +2930,43 @@ def taxprofiler_context(
     helpers: StoreHelpers,
     taxprofiler_case_id: str,
     sample_id: str,
+    father_sample_id: str,
     sample_name: str,
+    another_sample_name: str,
     trailblazer_api: MockTB,
     nf_analysis_housekeeper: HousekeeperAPI,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
 ) -> CGConfig:
     """Context to use in cli."""
-    cg_context.housekeeper_api_: HousekeeperAPI = nf_analysis_housekeeper
-    cg_context.trailblazer_api_: MockTB = trailblazer_api
+    cg_context.housekeeper_api_ = nf_analysis_housekeeper
+    cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
     taxprofiler_case: Case = helpers.add_case(
         store=status_db,
         internal_id=taxprofiler_case_id,
         name=taxprofiler_case_id,
-        data_analysis=Pipeline.TAXPROFILER,
+        data_analysis=Workflow.TAXPROFILER,
     )
 
     taxprofiler_sample: Sample = helpers.add_sample(
         status_db,
         internal_id=sample_id,
-        last_sequenced_at=datetime.now(),
+        reads=total_sequenced_reads_pass,
         name=sample_name,
+        last_sequenced_at=datetime.now(),
+    )
+
+    taxprofiler_another_sample: Sample = helpers.add_sample(
+        status_db,
+        internal_id=father_sample_id,
+        last_sequenced_at=datetime.now(),
+        name=another_sample_name,
         reads=total_sequenced_reads_pass,
     )
 
@@ -3491,7 +2976,55 @@ def taxprofiler_context(
         sample=taxprofiler_sample,
     )
 
+    helpers.add_relationship(
+        status_db,
+        case=taxprofiler_case,
+        sample=taxprofiler_another_sample,
+    )
+
     return cg_context
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_mock_analysis_finish(
+    taxprofiler_dir: Path,
+    taxprofiler_case_id: str,
+    taxprofiler_multiqc_json_metrics: dict,
+    tower_id: int,
+) -> None:
+    """Create analysis finish file for testing."""
+    Path.mkdir(
+        Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info"), parents=True, exist_ok=True
+    )
+    Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info", "software_versions.yml").touch(
+        exist_ok=True
+    )
+    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet.csv").touch(
+        exist_ok=True
+    )
+    Path.mkdir(
+        Path(taxprofiler_dir, taxprofiler_case_id, "multiqc", "multiqc_data"),
+        parents=True,
+        exist_ok=True,
+    )
+    write_json(
+        content=taxprofiler_multiqc_json_metrics,
+        file_path=Path(
+            taxprofiler_dir,
+            taxprofiler_case_id,
+            "multiqc",
+            "multiqc_data",
+            "multiqc_data",
+        ).with_suffix(FileExtensions.JSON),
+    )
+    write_yaml(
+        content={taxprofiler_case_id: [tower_id]},
+        file_path=Path(
+            taxprofiler_dir,
+            taxprofiler_case_id,
+            "tower_ids",
+        ).with_suffix(FileExtensions.YAML),
+    )
 
 
 @pytest.fixture(scope="session")
@@ -3553,7 +3086,7 @@ def store_with_sequencing_metrics(
     ]
     helpers.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
     helpers.add_sample(
-        name=sample_id, internal_id=sample_id, sex="male", store=store, customer_id="cust500"
+        store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
@@ -3654,7 +3187,7 @@ def flow_cell_encryption_api(
         encryption_dir=Path(cg_context.backup.pdc_archiving_directory.current),
         dry_run=True,
         flow_cell=FlowCellDirectoryData(
-            flow_cell_path=Path(cg_context.flow_cells_dir, flow_cell_full_name)
+            flow_cell_path=Path(cg_context.illumina_flow_cells_directory, flow_cell_full_name)
         ),
         pigz_binary_path=cg_context.pigz.binary_path,
         slurm_api=SlurmAPI(),
@@ -3678,7 +3211,7 @@ def create_process_response(
 
 
 # Downsample
-@pytest.fixture()
+@pytest.fixture
 def store_with_case_and_sample_with_reads(
     store: Store,
     helpers: StoreHelpers,
@@ -3690,12 +3223,19 @@ def store_with_case_and_sample_with_reads(
     case: Case = helpers.add_case(
         store=store, internal_id=downsample_case_internal_id, name=downsample_case_internal_id
     )
-
+    order: Order = helpers.add_order(
+        store=store,
+        customer_id=case.customer_id,
+        ticket_id=case.latest_ticket,
+        order_date=case.ordered_at,
+        workflow=case.data_analysis,
+    )
+    case.orders.append(order)
     for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
         helpers.add_sample(
             store=store,
-            internal_id=sample_internal_id,
             customer_id=case.customer_id,
+            internal_id=sample_internal_id,
             reads=100_000_000,
         )
         sample: Sample = store.get_sample_by_internal_id(internal_id=sample_internal_id)
@@ -3704,31 +3244,31 @@ def store_with_case_and_sample_with_reads(
     return store
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_case_internal_id() -> str:
     """Return a case internal id."""
     return "supersonicturtle"
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_sample_internal_id_1() -> str:
     """Return a sample internal id."""
     return "ACC12345675213"
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_sample_internal_id_2() -> str:
     """Return a sample internal id."""
     return "ACC12345684213"
 
 
-@pytest.fixture()
+@pytest.fixture
 def number_of_reads_in_millions() -> int:
     """Return a number of reads in millions."""
     return 50
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     fastq_file: Path,
@@ -3801,3 +3341,81 @@ def downsample_api(
     return DownsampleAPI(
         config=downsample_context,
     )
+
+
+@pytest.fixture(scope="function")
+def raredisease_context(
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    nf_analysis_housekeeper: HousekeeperAPI,
+    trailblazer_api: MockTB,
+    sample_id: str,
+    no_sample_case_id: str,
+    total_sequenced_reads_pass: int,
+    apptag_rna: str,
+    raredisease_case_id: str,
+    case_id_not_enough_reads: str,
+    sample_id_not_enough_reads: str,
+    total_sequenced_reads_not_pass: int,
+) -> CGConfig:
+    """Raredisease context to use in CLI."""
+    cg_context.housekeeper_api_ = nf_analysis_housekeeper
+    cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
+    status_db: Store = cg_context.status_db
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+
+    # Create a textbook case with enough reads
+    case_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=raredisease_case_id,
+        name=raredisease_case_id,
+        data_analysis=Workflow.RAREDISEASE,
+    )
+
+    sample_raredisease_case_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=apptag_rna,
+        internal_id=sample_id,
+        reads=total_sequenced_reads_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=case_enough_reads,
+        sample=sample_raredisease_case_enough_reads,
+    )
+
+    # Create a case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Workflow.RAREDISEASE,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=apptag_rna,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
+    return cg_context
+
+
+@pytest.fixture
+def fastq_file_meta_raw(flow_cell_name: str) -> dict:
+    return {
+        "path": Path("a", f"file{FileExtensions.FASTQ}{FileExtensions.GZIP}"),
+        "lane": str(1),
+        "read_direction": str(2),
+        "flow_cell_id": flow_cell_name,
+        "undetermined": None,
+    }

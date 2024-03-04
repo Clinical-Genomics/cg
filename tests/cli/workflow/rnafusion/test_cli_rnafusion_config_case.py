@@ -68,6 +68,7 @@ def test_config_case_default_parameters(
     rnafusion_case_id: str,
     rnafusion_sample_sheet_path: Path,
     rnafusion_params_file_path: Path,
+    rnafusion_nexflow_config_file_path: Path,
     rnafusion_sample_sheet_content: str,
     rnafusion_parameters_default: RnafusionParameters,
     caplog: LogCaptureFixture,
@@ -80,7 +81,7 @@ def test_config_case_default_parameters(
     # WHEN running config case
     result = cli_runner.invoke(config_case, [rnafusion_case_id], obj=rnafusion_context)
 
-    # THEN command should exit succesfully
+    # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN logs should be as expected
@@ -89,13 +90,15 @@ def test_config_case_default_parameters(
         "Writing sample sheet",
         "Getting parameters information",
         "Writing parameters file",
+        "Writing nextflow config file",
     ]
     for expected_log in expected_logs:
-        assert expected_log in expected_logs
+        assert expected_log in caplog.text
 
     # THEN files should be generated
     assert rnafusion_sample_sheet_path.is_file()
     assert rnafusion_params_file_path.is_file()
+    assert rnafusion_nexflow_config_file_path.is_file()
 
     # THEN the sample sheet content should match the expected values
     sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(

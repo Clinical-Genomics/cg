@@ -306,7 +306,7 @@ class MockHousekeeperAPI:
         """Fetch a version"""
         return self._version_obj
 
-    def get_create_version(self, bundle_name: str):
+    def get_or_create_version(self, bundle_name: str):
         """Returns the latest version of a bundle if it exists. If no creates a bundle and returns its version"""
         last_version = self.last_version(bundle=bundle_name)
         if not last_version:
@@ -553,6 +553,18 @@ class MockHousekeeperAPI:
             if file_obj.id == file_id:
                 return file_obj
         return None
+
+    def get_non_archived_files_for_bundle(
+        self, bundle_name: str, tags: list | None = None
+    ) -> list[File]:
+        """Returns all non-archived files from a given bundle, tagged with the given tags."""
+        pass
+
+    def get_archived_files_for_bundle(
+        self, bundle_name: str, tags: list | None = None
+    ) -> list[File]:
+        """Returns all archived files from a given bundle, tagged with the given tags."""
+        pass
 
     @staticmethod
     def get_tag_names_from_file(file) -> [str]:

@@ -7,13 +7,11 @@ from pathlib import Path
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
-from cg.apps.demultiplex.sample_sheet.models import SampleSheet
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_sheet_from_file,
-)
-from cg.constants import Pipeline
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_flow_cell_samples_from_content
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.constants import Workflow
 from cg.constants.constants import FileFormat
-from cg.io.controller import WriteFile
+from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Flowcell, Sample
@@ -40,7 +38,7 @@ class FluffySampleSheetHeaders(StrEnum):
 
     @classmethod
     def headers(cls) -> list[str]:
-        return list(cls)
+        return list(map(lambda header: header.value, cls))
 
 
 class FluffySample(BaseModel):
@@ -74,15 +72,12 @@ class FluffyAnalysisAPI(AnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.FLUFFY,
+        workflow: Workflow = Workflow.FLUFFY,
     ):
         self.root_dir = Path(config.fluffy.root_dir)
         LOG.info("Set root dir to %s", config.fluffy.root_dir)
         self.fluffy_config = Path(config.fluffy.config_path)
-        super().__init__(
-            pipeline,
-            config,
-        )
+        super().__init__(workflow, config)
 
     @property
     def use_read_count_threshold(self) -> bool:
@@ -132,7 +127,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         return Path(self.get_output_path(case_id), "deliverables.yaml")
 
-    def get_trailblazer_config_path(self, case_id: str) -> Path:
+    def get_job_ids_path(self, case_id: str) -> Path:
         """
         Location in working directory where SLURM job id file is to be stored.
         This file contains SLURM ID of jobs associated with current analysis ,
@@ -183,12 +178,12 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
     def create_fluffy_sample_sheet(
         self,
-        sample_sheet: SampleSheet,
+        samples: list[FlowCellSample],
         flow_cell_id: str,
     ) -> FluffySampleSheet:
         fluffy_sample_sheet_rows = []
 
-        for sample in sample_sheet.samples:
+        for sample in samples:
             sample_id: str = sample.sample_id
             db_sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
 
@@ -214,12 +209,15 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(case_id)
         sample_sheet_path: Path = self.housekeeper_api.get_sample_sheet_path(flow_cell.name)
-        sample_sheet: SampleSheet = get_sample_sheet_from_file(sample_sheet_path)
+        sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
+            file_format=FileFormat.CSV, file_path=sample_sheet_path
+        )
+        samples: list[FlowCellSample] = get_flow_cell_samples_from_content(sample_sheet_content)
 
         if not dry_run:
             Path(self.root_dir, case_id).mkdir(parents=True, exist_ok=True)
             fluffy_sample_sheet: FluffySampleSheet = self.create_fluffy_sample_sheet(
-                sample_sheet=sample_sheet,
+                samples=samples,
                 flow_cell_id=flow_cell.name,
             )
 
@@ -264,7 +262,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         and is ready to be stored in Housekeeper."""
         return [
             case
-            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
+            for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
             if Path(self.get_analysis_finish_path(case_id=case.internal_id)).exists()
         ]
 

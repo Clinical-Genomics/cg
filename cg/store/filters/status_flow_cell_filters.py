@@ -18,7 +18,7 @@ def filter_flow_cell_by_name(flow_cells: Query, flow_cell_name: str, **kwargs) -
 
 def filter_flow_cell_by_name_search(flow_cells: Query, name_search: str, **kwargs) -> Query:
     """Return flow cell by flow cell id enquiry."""
-    return flow_cells.filter(Flowcell.name.like(f"%{name_search}%"))
+    return flow_cells.filter(Flowcell.name.contains(name_search))
 
 
 def filter_flow_cells_with_statuses(
@@ -51,7 +51,7 @@ def apply_flow_cell_filter(
 class FlowCellFilter(Enum):
     """Define FlowCell filter functions."""
 
-    FILTER_BY_CASE: Callable = filter_flow_cells_by_case
-    FILTER_BY_NAME: Callable = filter_flow_cell_by_name
-    FILTER_BY_NAME_SEARCH: Callable = filter_flow_cell_by_name_search
-    FILTER_WITH_STATUSES: Callable = filter_flow_cells_with_statuses
+    BY_CASE: Callable = filter_flow_cells_by_case
+    BY_NAME: Callable = filter_flow_cell_by_name
+    BY_NAME_SEARCH: Callable = filter_flow_cell_by_name_search
+    WITH_STATUSES: Callable = filter_flow_cells_with_statuses

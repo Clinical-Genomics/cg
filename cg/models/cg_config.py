@@ -6,6 +6,7 @@ from typing_extensions import Literal
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -16,11 +17,17 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.clients.janus.api import JanusAPIClient
+from cg.clients.arnold.api import ArnoldAPIClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
-from cg.store import Store
+from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
+from cg.services.slurm_service.slurm_service import SlurmService
+from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
+from cg.services.slurm_upload_service.slurm_upload_service import SlurmUploadService
 from cg.store.database import initialize_database
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -29,6 +36,10 @@ class Sequencers(BaseModel):
     hiseqx: str
     hiseqga: str
     novaseq: str
+
+
+class ArnoldConfig(BaseModel):
+    api_url: str
 
 
 class SlurmConfig(BaseModel):
@@ -70,6 +81,10 @@ class DemultiplexConfig(BaseModel):
     slurm: SlurmConfig
 
 
+class JanusConfig(BaseModel):
+    host: str
+
+
 class TrailblazerConfig(BaseModel):
     service_account: str
     service_account_auth_file: str
@@ -86,7 +101,7 @@ class StatinaConfig(BaseModel):
 
 
 class CommonAppConfig(BaseModel):
-    binary_path: str
+    binary_path: str | None
     config_path: str | None
 
 
@@ -123,6 +138,12 @@ class BalsamicConfig(CommonAppConfig):
     balsamic_cache: str
     bed_path: str
     binary_path: str
+    cadd_path: str
+    genome_interval_path: str
+    gnomad_af5_path: str
+    gens_coverage_female_path: str
+    gens_coverage_male_path: str
+    conda_binary: str
     conda_env: str
     loqusdb_path: str
     pon_path: str
@@ -142,16 +163,34 @@ class MipConfig(BaseModel):
     conda_binary: str | None = None
     conda_env: str
     mip_config: str
-    pipeline: str
+    workflow: str
     root: str
     script: str
+
+
+class RarediseaseConfig(CommonAppConfig):
+    binary_path: str | None = None
+    compute_env: str
+    conda_binary: str | None = None
+    conda_env: str
+    config_platform: str
+    config_params: str
+    config_resources: str
+    launch_directory: str
+    workflow_path: str
+    profile: str
+    references: str
+    revision: str
+    root: str
+    slurm: SlurmConfig
+    tower_workflow: str
 
 
 class RnafusionConfig(CommonAppConfig):
     root: str
     references: str
     binary_path: str
-    pipeline_path: str
+    workflow_path: str
     conda_env: str
     compute_env: str
     profile: str
@@ -159,23 +198,22 @@ class RnafusionConfig(CommonAppConfig):
     launch_directory: str
     revision: str
     slurm: SlurmConfig
-    tower_binary_path: str
-    tower_pipeline: str
+    tower_workflow: str
 
 
 class TaxprofilerConfig(CommonAppConfig):
-    root: str
     binary_path: str
-    conda_env: str
-    profile: str
-    pipeline_path: str
-    revision: str
     conda_binary: str | None = None
-    hostremoval_reference: str
+    conda_env: str
+    compute_env: str
     databases: str
+    hostremoval_reference: str
+    workflow_path: str
+    profile: str
+    revision: str
+    root: str
     slurm: SlurmConfig
-    tower_binary_path: str
-    tower_pipeline: str
+    tower_workflow: str
 
 
 class MicrosaltConfig(BaseModel):
@@ -237,28 +275,32 @@ class DataFlowConfig(BaseModel):
 class CGConfig(BaseModel):
     database: str
     delivery_path: str
-    demultiplexed_flow_cells_dir: str
+    illumina_demultiplexed_runs_directory: str
     downsample_dir: str
     downsample_script: str
     email_base_settings: EmailBaseSettings
     environment: Literal["production", "stage"] = "stage"
-    flow_cells_dir: str
+    illumina_flow_cells_directory: str
     madeline_exe: str
+    nanopore_data_directory: str
+    tower_binary_path: str
     max_flowcells: int | None
     data_input: DataInput | None = None
     # Base APIs that always should exist
-    status_db_: Store = None
+    status_db_: Store | None = None
     housekeeper: HousekeeperConfig
     housekeeper_api_: HousekeeperAPI = None
 
     # App APIs that can be instantiated in CGConfig
+    arnold: ArnoldConfig = Field(None, alias="arnold")
+    arnold_api_: ArnoldAPIClient | None = None
     backup: BackupConfig = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
-    data_flow_config: DataFlowConfig | None = None
+    data_flow: DataFlowConfig | None = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
@@ -282,11 +324,14 @@ class CGConfig(BaseModel):
     pigz: CommonAppConfig | None = None
     pdc: CommonAppConfig | None = None
     pdc_api_: PdcAPI | None
+    sample_sheet_api_: SampleSheetAPI | None = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
     tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
+    janus: JanusConfig | None = None
+    janus_api_: JanusAPIClient | None = None
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
@@ -298,6 +343,7 @@ class CGConfig(BaseModel):
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig = None
+    raredisease: RarediseaseConfig = Field(None, alias="raredisease")
     rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
     taxprofiler: TaxprofilerConfig = Field(None, alias="taxprofiler")
 
@@ -307,6 +353,7 @@ class CGConfig(BaseModel):
     class Config:
         arbitrary_types_allowed = True
         fields = {
+            "arnold_api_": "arnold_api",
             "chanjo_api_": "chanjo_api",
             "crunchy_api_": "crunchy_api",
             "demultiplex_api_": "demultiplex_api",
@@ -322,7 +369,17 @@ class CGConfig(BaseModel):
             "scout_api_": "scout_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
+            "janus_api_": "janus_api",
         }
+
+    @property
+    def arnold_api(self) -> ArnoldAPIClient:
+        api = self.__dict__.get("arnold_api_")
+        if api is None:
+            LOG.debug("Instantiating arnold api")
+            api = ArnoldAPIClient(config=self.dict())
+            self.arnold_api_ = api
+        return api
 
     @property
     def chanjo_api(self) -> ChanjoAPI:
@@ -391,6 +448,15 @@ class CGConfig(BaseModel):
         return housekeeper_api
 
     @property
+    def janus_api(self) -> JanusAPIClient:
+        janus_api = self.__dict__.get("janus_api_")
+        if janus_api is None:
+            LOG.debug("Instantiating janus api")
+            janus_api = JanusAPIClient(config=self.dict())
+            self.janus_api_ = janus_api
+        return janus_api
+
+    @property
     def lims_api(self) -> LimsAPI:
         api = self.__dict__.get("lims_api_")
         if api is None:
@@ -438,11 +504,41 @@ class CGConfig(BaseModel):
         return api
 
     @property
+    def sample_sheet_api(self) -> SampleSheetAPI:
+        sample_sheet_api = self.__dict__.get("sample_sheet_api_")
+        if sample_sheet_api is None:
+            LOG.debug("Instantiating sample sheet API")
+            sample_sheet_api = SampleSheetAPI(
+                flow_cell_dir=self.illumina_flow_cells_directory,
+                hk_api=self.housekeeper_api,
+                lims_api=self.lims_api,
+            )
+            self.sample_sheet_api_ = sample_sheet_api
+        return sample_sheet_api
+
+    @property
+    def slurm_service(self) -> SlurmService:
+        return SlurmCLIService()
+
+    @property
+    def slurm_upload_service(self) -> SlurmUploadService:
+        slurm_upload_config = SlurmUploadConfig(
+            email=self.data_delivery.mail_user,
+            account=self.data_delivery.account,
+            log_dir=self.data_delivery.base_path,
+        )
+        return SlurmUploadService(
+            slurm_service=self.slurm_service,
+            trailblazer_api=self.trailblazer_api,
+            config=slurm_upload_config,
+        )
+
+    @property
     def scout_api(self) -> ScoutAPI:
         api = self.__dict__.get("scout_api_")
         if api is None:
             LOG.debug("Instantiating scout api")
-            api = ScoutAPI(config=self.dict())
+            api = ScoutAPI(config=self.dict(), slurm_upload_service=self.slurm_upload_service)
             self.scout_api_ = api
         return api
 

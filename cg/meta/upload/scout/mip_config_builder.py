@@ -6,17 +6,14 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.constants.scout_upload import MIP_CASE_TAGS, MIP_SAMPLE_TAGS
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.scout import MIP_CASE_TAGS, MIP_SAMPLE_TAGS, UploadTrack
 from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.scout.scout_load_config import (
-    MipLoadConfig,
-    ScoutLoadConfig,
-    ScoutMipIndividual,
-)
+from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig, ScoutMipIndividual
 from cg.store.models import Analysis, Case, CaseSample
 
 LOG = logging.getLogger(__name__)
@@ -36,7 +33,10 @@ class MipConfigBuilder(ScoutConfigBuilder):
         )
         self.case_tags: CaseTags = CaseTags(**MIP_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**MIP_SAMPLE_TAGS)
-        self.load_config: MipLoadConfig = MipLoadConfig(track="rare")
+        self.load_config: MipLoadConfig = MipLoadConfig(
+            track=UploadTrack.RARE_DISEASE.value,
+            delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
+        )
         self.mip_analysis_api: MipAnalysisAPI = mip_analysis_api
         self.lims_api: LimsAPI = lims_api
         self.madeline_api: MadelineAPI = madeline_api
@@ -56,9 +56,10 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.load_config.rank_model_version = mip_analysis_data.rank_model_version
         self.load_config.sv_rank_model_version = mip_analysis_data.sv_rank_model_version
 
-        self.load_config.gene_panels = (
-            self.mip_analysis_api.convert_panels(
-                self.analysis_obj.case.customer.internal_id, self.analysis_obj.case.panels
+        self.load_config.gene_panels: list[str] | None = (
+            self.mip_analysis_api.get_aggregated_panels(
+                customer_id=self.analysis_obj.case.customer.internal_id,
+                default_panels=set(self.analysis_obj.case.panels),
             )
             or None
         )
@@ -115,7 +116,6 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.load_config.vcf_sv = self.get_file_from_hk(self.case_tags.sv_vcf)
         self.load_config.vcf_sv_research = self.get_file_from_hk(self.case_tags.sv_research_vcf)
         self.include_multiqc_report()
-        self.include_delivery_report()
 
     def include_sample_files(self, config_sample: ScoutMipIndividual) -> None:
         """Include sample level files that are optional for mip samples"""

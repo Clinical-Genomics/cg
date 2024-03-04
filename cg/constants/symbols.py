@@ -1,12 +1,4 @@
 """Symbol constants."""
 
-ASTERISK = "*"
-COMMA = ","
-DASH = "-"
-DOT = "."
-FWD_SLASH = "/"
-NEW_LINE = "\n"
-PERIOD = "."
-SINGLE_QUOTE = "'"
+EMPTY_STRING = ""
 SPACE = " "
-UNDERSCORE = "_"

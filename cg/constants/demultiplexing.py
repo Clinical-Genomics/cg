@@ -1,8 +1,10 @@
 """Constants related to demultiplexing."""
+
 from enum import StrEnum
 from pathlib import Path
 
 import click
+from pydantic import BaseModel
 
 from cg.constants.sequencing import Sequencers
 
@@ -10,7 +12,6 @@ from cg.constants.sequencing import Sequencers
 class BclConverter(StrEnum):
     """Define the BCL converter."""
 
-    DRAGEN: str = "dragen"
     BCL2FASTQ: str = "bcl2fastq"
     BCLCONVERT: str = "bcl_convert"
 
@@ -129,6 +130,7 @@ class SampleSheetBCLConvertSections:
         HEADER: str = "[Header]"
         RUN_NAME: str = "RunName"
         INSTRUMENT_PLATFORM_TITLE: str = "InstrumentPlatform"
+        INDEX_SETTINGS: str = "IndexSettings"
 
         @classmethod
         def file_format(cls) -> list[str]:
@@ -139,6 +141,8 @@ class SampleSheetBCLConvertSections:
             return {
                 Sequencers.NOVASEQ: "NovaSeq6000",
                 Sequencers.NOVASEQX: "NovaSeqXSeries",
+                Sequencers.HISEQX: "HiSeqXSeries",
+                Sequencers.HISEQGA: "HiSeq2500",
             }
 
         @classmethod
@@ -170,8 +174,6 @@ class SampleSheetBCLConvertSections:
         INDEX_1: str = "Index"
         INDEX_2: str = "Index2"
         OVERRIDE_CYCLES: str = "OverrideCycles"
-        ADAPTER_READ_1: str = "AdapterRead1"
-        ADAPTER_READ_2: str = "AdapterRead2"
         BARCODE_MISMATCHES_1: str = "BarcodeMismatchesIndex1"
         BARCODE_MISMATCHES_2: str = "BarcodeMismatchesIndex2"
 
@@ -183,17 +185,26 @@ class SampleSheetBCLConvertSections:
                 cls.INDEX_1,
                 cls.INDEX_2,
                 cls.OVERRIDE_CYCLES,
-                cls.ADAPTER_READ_1,
-                cls.ADAPTER_READ_2,
                 cls.BARCODE_MISMATCHES_1,
                 cls.BARCODE_MISMATCHES_2,
             ]
 
 
+class IndexOverrideCycles(StrEnum):
+    """Class with the possible values that index cycles can take."""
+
+    FULL_10_INDEX: str = "I10;"
+    FULL_8_INDEX: str = "I8;"
+    IGNORED_10_INDEX: str = "N10;"
+    IGNORED_8_INDEX: str = "N8;"
+    INDEX_8_IGNORED_2: str = "I8N2;"
+    INDEX_8_IGNORED_2_REVERSED: str = "N2I8;"
+
+
 OPTION_BCL_CONVERTER = click.option(
     "-b",
     "--bcl-converter",
-    type=click.Choice(["bcl2fastq", "dragen"]),
+    type=click.Choice([BclConverter.BCL2FASTQ, BclConverter.BCLCONVERT]),
     default=None,
     help="Specify bcl conversion software. Choose between bcl2fastq and dragen. "
     "If not specified, the software will be determined automatically using the sequencer type.",
@@ -201,12 +212,12 @@ OPTION_BCL_CONVERTER = click.option(
 
 
 DEMUX_STATS_PATH: dict[str, dict[str, Path | None]] = {
-    "bcl2fastq": {
+    BclConverter.BCL2FASTQ: {
         "demultiplexing_stats": Path("Stats", "DemultiplexingStats.xml"),
         "conversion_stats": Path("Stats", "ConversionStats.xml"),
         "runinfo": None,
     },
-    "dragen": {
+    BclConverter.BCLCONVERT: {
         "demultiplexing_stats": Path("Reports", "Demultiplex_Stats.csv"),
         "conversion_stats": Path("Reports", "Demultiplex_Stats.csv"),
         "adapter_metrics_stats": Path("Reports", "Adapter_Metrics.csv"),
@@ -217,7 +228,56 @@ DEMUX_STATS_PATH: dict[str, dict[str, Path | None]] = {
 
 BCL2FASTQ_METRICS_DIRECTORY_NAME: str = "Stats"
 BCL2FASTQ_METRICS_FILE_NAME: str = "Stats.json"
+CUSTOM_INDEX_TAIL = "NNNNNNNNN"
 DRAGEN_PASSED_FILTER_PCT: float = 100.00000
 FASTQ_FILE_SUFFIXES: list[str] = [".fastq", ".gz"]
 INDEX_CHECK: str = "indexcheck"
 UNDETERMINED: str = "Undetermined"
+
+NEW_NOVASEQ_CONTROL_SOFTWARE_VERSION: str = "1.7.0"
+NEW_NOVASEQ_REAGENT_KIT_VERSION: str = "1.5"
+
+FORWARD_INDEX_CYCLE_PATTERN: str = r"I(\d+)N(\d+)"
+REVERSE_INDEX_CYCLE_PATTERN: str = r"N(\d+)I(\d+)"
+
+
+class IndexSettings(BaseModel):
+    """
+    Holds the settings defining how the sample indexes should be handled in the sample sheet.
+    These vary between machines and versions.
+
+        Attributes:
+            should_i5_be_reverse_complemented (bool): Whether the i5 index should be reverse complemented.
+            are_i5_override_cycles_reverse_complemented (bool): Whether the override cycles for i5 should be written in as NXIX.
+
+    """
+
+    name: str
+    should_i5_be_reverse_complemented: bool
+    are_i5_override_cycles_reverse_complemented: bool
+
+
+# The logic for the settings below are acquired empirically, any changes should be well motivated
+# and rigorously tested.
+
+NOVASEQ_X_INDEX_SETTINGS = IndexSettings(
+    name="NovaSeqX",
+    should_i5_be_reverse_complemented=False,
+    are_i5_override_cycles_reverse_complemented=True,
+)
+NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS = IndexSettings(
+    name="NovaSeq6000Post1.5Kits",
+    should_i5_be_reverse_complemented=True,
+    are_i5_override_cycles_reverse_complemented=False,
+)
+NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS = IndexSettings(
+    name="NoReverseComplements",
+    should_i5_be_reverse_complemented=False,
+    are_i5_override_cycles_reverse_complemented=False,
+)
+
+NAME_TO_INDEX_SETTINGS: dict[str, IndexSettings] = {
+    "NovaSeqX": NOVASEQ_X_INDEX_SETTINGS,
+    "NovaSeq6000Post1.5Kits": NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS,
+    "NoReverseComplements": NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS,
+}

@@ -3,13 +3,13 @@
 from click.testing import CliRunner
 
 from cg.cli.add import add
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import DataDelivery, Workflow
 from cg.models.cg_config import CGConfig
-from cg.store import Store
-from cg.store.models import Customer, Case, Panel
+from cg.store.models import Case, Customer, Panel
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
-CLI_OPTION_ANALYSIS = Pipeline.BALSAMIC_UMI
+CLI_OPTION_ANALYSIS = Workflow.BALSAMIC_UMI
 CLI_OPTION_DELIVERY = DataDelivery.FASTQ_QC
 
 
@@ -53,11 +53,11 @@ def test_add_case_required(
     assert case_query.first().panels == [panel_id]
 
 
-def test_add_case_bad_pipeline(
+def test_add_case_bad_workflow(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket_id: str
 ):
     """Test to add a case using only the required arguments"""
-    # GIVEN a database with a customer and an panel
+    # GIVEN a database with a customer and a panel
 
     # WHEN adding a case
     disk_store: Store = base_context.status_db

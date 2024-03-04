@@ -4,15 +4,15 @@ import logging
 
 from sqlalchemy.orm import Query
 
-from cg.constants.constants import Pipeline
-from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
+from cg.constants.constants import Workflow
+from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Case
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ def get_observations_case(context: CGConfig, case_id: str, upload: bool) -> Case
     """Return a verified Loqusdb case."""
     status_db: Store = context.status_db
     case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
-    if not case or case.data_analysis not in LOQUSDB_SUPPORTED_PIPELINES:
+    if not case or case.data_analysis not in LOQUSDB_SUPPORTED_WORKFLOWS:
         LOG.error("Invalid case ID. Retrieving available cases for Loqusdb actions.")
         cases_to_process: Query = (
             status_db.observations_to_upload() if upload else status_db.observations_uploaded()
@@ -54,8 +54,8 @@ def get_observations_api(
 ) -> MipDNAObservationsAPI | BalsamicObservationsAPI:
     """Return an observations API given a specific case object."""
     observations_apis = {
-        Pipeline.MIP_DNA: MipDNAObservationsAPI(context, get_sequencing_method(case)),
-        Pipeline.BALSAMIC: BalsamicObservationsAPI(context, get_sequencing_method(case)),
+        Workflow.MIP_DNA: MipDNAObservationsAPI(context, get_sequencing_method(case)),
+        Workflow.BALSAMIC: BalsamicObservationsAPI(context, get_sequencing_method(case)),
     }
     return observations_apis[case.data_analysis]
 

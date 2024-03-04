@@ -5,12 +5,14 @@ Revises: df1b3dd317d0
 Create Date: 2023-04-19 13:46:29.137152
 
 """
+
+from enum import StrEnum
+
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import declarative_base
 
 from alembic import op
-from cg.constants import Pipeline
 
 # revision identifiers, used by Alembic.
 revision = "9008aa5065b4"
@@ -42,16 +44,35 @@ old_enum = mysql.ENUM(*old_options)
 new_enum = mysql.ENUM(*new_options)
 
 
+class Workflow(StrEnum):
+    BALSAMIC: str = "balsamic"
+    BALSAMIC_PON: str = "balsamic-pon"
+    BALSAMIC_QC: str = "balsamic-qc"
+    BALSAMIC_UMI: str = "balsamic-umi"
+    DEMULTIPLEX: str = "demultiplex"
+    FASTQ: str = "fastq"
+    FLUFFY: str = "fluffy"
+    MICROSALT: str = "microsalt"
+    MIP_DNA: str = "mip-dna"
+    MIP_RNA: str = "mip-rna"
+    MUTANT: str = "mutant"
+    RAREDISEASE: str = "raredisease"
+    RNAFUSION: str = "rnafusion"
+    RSYNC: str = "rsync"
+    SPRING: str = "spring"
+    TAXPROFILER: str = "taxprofiler"
+
+
 class Analysis(Base):
     __tablename__ = "analysis"
     id = sa.Column(sa.types.Integer, primary_key=True)
-    pipeline = sa.Column(sa.types.Enum(*list(Pipeline)))
+    pipeline = sa.Column(sa.types.Enum(*list(Workflow)))
 
 
 class Case(Base):
     __tablename__ = "family"
     id = sa.Column(sa.types.Integer, primary_key=True)
-    data_analysis = sa.Column(sa.types.Enum(*list(Pipeline)))
+    data_analysis = sa.Column(sa.types.Enum(*list(Workflow)))
 
 
 def upgrade():

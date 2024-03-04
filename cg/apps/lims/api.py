@@ -1,9 +1,10 @@
 """Contains API to communicate with LIMS"""
+
 import datetime as dt
 import logging
 
 from dateutil.parser import parse as parse_date
-from genologics.entities import Artifact, Process, Sample
+from genologics.entities import Artifact, Process, Researcher, Sample
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
@@ -48,6 +49,10 @@ class LimsAPI(Lims, OrderHandler):
         lconf = config["lims"]
         super(LimsAPI, self).__init__(lconf["host"], lconf["username"], lconf["password"])
 
+    @property
+    def user(self) -> Researcher:
+        return self.get_researchers(username=self.username)[0]
+
     def sample(self, lims_id: str):
         """Fetch a sample from the LIMS database."""
         lims_sample = Sample(self, id=lims_id)
@@ -90,6 +95,7 @@ class LimsAPI(Lims, OrderHandler):
                 else None
             ),
             "comment": udfs.get("comment"),
+            "concentration_ng_ul": udfs.get("Concentration (ng/ul)"),
         }
 
     def get_received_date(self, lims_id: str) -> dt.date:

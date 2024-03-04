@@ -37,7 +37,7 @@ class ApplicationModel(BaseModel):
     description: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     details: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     limitations: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    pipeline_limitations: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    workflow_limitations: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     accredited: bool | None = None
     external: bool | None = None
 
@@ -99,5 +99,10 @@ class SampleModel(BaseModel):
     tumour: Annotated[str, BeforeValidator(get_boolean_as_string)] = NA_FIELD
     application: ApplicationModel
     methods: MethodsModel
-    metadata: MipDNASampleMetadataModel | BalsamicTargetedSampleMetadataModel | BalsamicWGSSampleMetadataModel | RnafusionSampleMetadataModel
+    metadata: (
+        MipDNASampleMetadataModel
+        | BalsamicTargetedSampleMetadataModel
+        | BalsamicWGSSampleMetadataModel
+        | RnafusionSampleMetadataModel
+    )
     timestamps: TimestampModel

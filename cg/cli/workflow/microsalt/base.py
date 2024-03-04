@@ -44,9 +44,7 @@ ARGUMENT_UNIQUE_IDENTIFIER = click.argument("unique_id", required=True, type=cli
 def microsalt(context: click.Context) -> None:
     """Microbial workflow"""
     AnalysisAPI.get_help(context)
-    context.obj.meta_apis["analysis_api"] = MicrosaltAnalysisAPI(
-        config=context.obj,
-    )
+    context.obj.meta_apis["analysis_api"] = MicrosaltAnalysisAPI(config=context.obj)
 
 
 microsalt.add_command(store)
@@ -218,21 +216,15 @@ def start_available(context: click.Context, dry_run: bool = False):
         raise click.Abort
 
 
-@microsalt.command("qc-microsalt")
+@microsalt.command("qc")
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_context
 def qc_microsalt(context: click.Context, unique_id: str) -> None:
     """Perform QC on a microsalt case."""
     analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
+    metrics_file_path: Path = analysis_api.get_metrics_file_path(unique_id)
     try:
-        analysis_api.microsalt_qc(
-            case_id=unique_id,
-            run_dir_path=analysis_api.get_latest_case_path(case_id=unique_id),
-            lims_project=analysis_api.get_project(
-                analysis_api.status_db.get_case_by_internal_id(internal_id=unique_id)
-                .samples[0]
-                .internal_id
-            ),
-        )
+        LOG.info(f"Performing QC on case {unique_id}")
+        analysis_api.quality_checker.quality_control(metrics_file_path)
     except IndexError:
         LOG.error(f"No existing analysis directories found for case {unique_id}.")

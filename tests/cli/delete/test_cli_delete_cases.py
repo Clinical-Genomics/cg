@@ -1,10 +1,11 @@
 """Test methods for cg/cli/delete/cases"""
+
 import logging
 
 import pytest
 
 from cg.cli.delete.cases import delete_cases
-from cg.store import Store
+from cg.store.store import Store
 
 SUCCESS = 0
 

@@ -23,21 +23,14 @@ SAMPLE_SHEET_HEADER: dict[str, str] = {
         [
             column
             for column in SampleSheetBcl2FastqSections.Data.column_names()
-            if column != "index2"
+            if column != SampleSheetBcl2FastqSections.Data.INDEX_2.value
         ]
     ),
     BclConverter.BCLCONVERT: ",".join(
         [
             column
             for column in SampleSheetBCLConvertSections.Data.column_names()
-            if column != "index2"
-        ]
-    ),
-    BclConverter.DRAGEN: ",".join(
-        [
-            column
-            for column in SampleSheetBCLConvertSections.Data.column_names()
-            if column != "index2"
+            if column != SampleSheetBcl2FastqSections.Data.INDEX_2.value
         ]
     ),
 }

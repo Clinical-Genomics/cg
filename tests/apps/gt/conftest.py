@@ -5,7 +5,7 @@
 import pytest
 
 from cg.constants.constants import FileFormat
-from cg.constants.subject import Gender
+from cg.constants.subject import Sex
 from cg.io.controller import WriteStream
 
 
@@ -18,13 +18,13 @@ def genotype_export_sample_output(genotype_config: dict) -> str:
         "ACC6987A15": {
             "status": None,
             "sample_created_in_genotype_db": "2020-07-15",
-            "sex": Gender.FEMALE,
+            "sex": Sex.FEMALE,
             "comment": None,
         },
         "ACC6987A16": {
             "status": None,
             "sample_created_in_genotype_db": "2020-07-15",
-            "sex": Gender.FEMALE,
+            "sex": Sex.FEMALE,
             "comment": None,
         },
     }

@@ -5,12 +5,14 @@ Revises: d0aa961845b9
 Create Date: 2023-09-22 11:10:14.616339
 
 """
+
+from enum import StrEnum
+
 import sqlalchemy as sa
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, types
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from alembic import op
-from cg.constants.sequencing import Sequencers
-from cg.store.models import Flowcell
 
 # revision identifiers, used by Alembic.
 revision = "c3da223e60d8"
@@ -19,6 +21,29 @@ branch_labels = None
 depends_on = None
 
 Session = sessionmaker()
+
+
+class Model(DeclarativeBase):
+    pass
+
+
+class Flowcell(Model):
+    __tablename__ = "flowcell"
+    id = Column(types.Integer, primary_key=True)
+    sequencer_type = Column(types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx"))
+    sequenced_at = Column(types.DateTime)
+    has_backup = Column(types.Boolean, nullable=False, default=False)
+
+
+class Sequencers(StrEnum):
+    """Sequencer instruments."""
+
+    ALL: str = "all"
+    HISEQX: str = "hiseqx"
+    HISEQGA: str = "hiseqga"
+    NOVASEQ: str = "novaseq"
+    NOVASEQX: str = "novaseqx"
+    OTHER: str = "other"
 
 
 def upgrade():

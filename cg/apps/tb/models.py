@@ -1,13 +1,7 @@
 import datetime as dt
 from pathlib import Path
 
-from pydantic import (
-    BaseModel,
-    BeforeValidator,
-    ConfigDict,
-    FieldValidationInfo,
-    field_validator,
-)
+from pydantic import BaseModel, BeforeValidator, ConfigDict
 from typing_extensions import Annotated
 
 from cg.apps.tb.validators import parse_str_to_datetime, parse_str_to_path
@@ -15,14 +9,7 @@ from cg.apps.tb.validators import parse_str_to_datetime, parse_str_to_path
 
 class TrailblazerAnalysis(BaseModel):
     id: int
-    family: str
     case_id: str | None = None
-
-    @field_validator("case_id")
-    @classmethod
-    def inherit_family_value(cls, value: str, info: FieldValidationInfo) -> str:
-        return info.data.get("family")
-
     version: str | None = None
     logged_at: Annotated[dt.datetime | None, BeforeValidator(parse_str_to_datetime)]
     started_at: Annotated[dt.datetime | None, BeforeValidator(parse_str_to_datetime)]
@@ -37,7 +24,7 @@ class TrailblazerAnalysis(BaseModel):
     type: str | None = None
     user_id: int | None = None
     progress: float | None = 0.0
-    data_analysis: str | None = None
+    workflow: str | None = None
     ticket: str | None = None
     uploaded_at: str | None = None
 
@@ -46,3 +33,7 @@ class TrailblazerAnalysis(BaseModel):
         validate_default=True,
         extra="ignore",
     )
+
+
+class AnalysesResponse(BaseModel):
+    analyses: list[TrailblazerAnalysis]

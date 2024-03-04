@@ -1,7 +1,5 @@
 import logging
 
-from housekeeper.store.models import File, Version
-
 from cg.constants import (
     BALSAMIC_ANALYSIS_TYPE,
     BALSAMIC_REPORT_ACCREDITED_PANELS,
@@ -17,9 +15,9 @@ from cg.constants import (
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS,
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
-    Pipeline,
+    Workflow,
 )
-from cg.constants.scout_upload import BALSAMIC_CASE_TAGS
+from cg.constants.scout import BALSAMIC_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -35,7 +33,7 @@ from cg.models.report.metadata import (
     BalsamicTargetedSampleMetadataModel,
     BalsamicWGSSampleMetadataModel,
 )
-from cg.models.report.report import CaseModel
+from cg.models.report.report import CaseModel, ScoutReportFiles
 from cg.models.report.sample import SampleModel
 from cg.store.models import Bed, BedVersion, Case, Sample
 
@@ -82,9 +80,9 @@ class BalsamicReportAPI(ReportAPI):
             bait_set=bed.name if bed else None,
             bait_set_version=analysis_metadata.config.panel.capture_kit_version,
             million_read_pairs=million_read_pairs,
-            median_target_coverage=sample_metrics.median_target_coverage
-            if sample_metrics
-            else None,
+            median_target_coverage=(
+                sample_metrics.median_target_coverage if sample_metrics else None
+            ),
             pct_250x=sample_metrics.pct_target_bases_250x if sample_metrics else None,
             pct_500x=sample_metrics.pct_target_bases_500x if sample_metrics else None,
             duplicates=sample_metrics.percent_duplication if sample_metrics else None,
@@ -93,8 +91,9 @@ class BalsamicReportAPI(ReportAPI):
             gc_dropout=sample_metrics.gc_dropout if sample_metrics else None,
         )
 
+    @staticmethod
     def get_wgs_metadata(
-        self, million_read_pairs: float, sample_metrics: BalsamicWGSQCMetrics
+        million_read_pairs: float, sample_metrics: BalsamicWGSQCMetrics
     ) -> BalsamicWGSSampleMetadataModel:
         """Return report metadata for Balsamic WGS analysis."""
         return BalsamicWGSSampleMetadataModel(
@@ -102,21 +101,12 @@ class BalsamicReportAPI(ReportAPI):
             median_coverage=sample_metrics.median_coverage if sample_metrics else None,
             pct_15x=sample_metrics.pct_15x if sample_metrics else None,
             pct_60x=sample_metrics.pct_60x if sample_metrics else None,
-            duplicates=self.get_wgs_percent_duplication(sample_metrics=sample_metrics),
+            duplicates=sample_metrics.percent_duplication if sample_metrics else None,
             mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
-            pct_reads_improper_pairs=sample_metrics.pct_pf_reads_improper_pairs
-            if sample_metrics
-            else None,
-        )
-
-    @staticmethod
-    def get_wgs_percent_duplication(sample_metrics: BalsamicWGSQCMetrics):
-        """Return duplication percentage taking into account both reads."""
-        return (
-            (sample_metrics.percent_duplication_r1 + sample_metrics.percent_duplication_r2) / 2
-            if sample_metrics
-            else None
+            pct_reads_improper_pairs=(
+                sample_metrics.pct_pf_reads_improper_pairs if sample_metrics else None
+            ),
         )
 
     def get_data_analysis_type(self, case: Case) -> str | None:
@@ -158,10 +148,10 @@ class BalsamicReportAPI(ReportAPI):
                 return versions[0]
         return None
 
-    def get_report_accreditation(
+    def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: BalsamicAnalysis
     ) -> bool:
-        """Checks if the report is accredited or not."""
+        """Check if the Balsamic report is accredited."""
         if analysis_metadata.config.analysis.sequencing_type == "targeted" and next(
             (
                 panel
@@ -173,30 +163,41 @@ class BalsamicReportAPI(ReportAPI):
             return True
         return False
 
+    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
+        """Return files that will be uploaded to Scout."""
+        return ScoutReportFiles(
+            snv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="snv_vcf"
+            ),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="sv_vcf"
+            ),
+        )
+
     def get_required_fields(self, case: CaseModel) -> dict:
         """Return a dictionary with the delivery report required fields for Balsamic."""
         analysis_type: str = case.data_analysis.type
         required_data_analysis_fields: list[str] = (
             REQUIRED_DATA_ANALYSIS_FIELDS
-            if self.analysis_api.pipeline == Pipeline.BALSAMIC_QC
+            if self.analysis_api.workflow == Workflow.BALSAMIC_QC
             else REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS
         )
         required_sample_metadata_fields: list[str] = []
         if BALSAMIC_ANALYSIS_TYPE["tumor_wgs"] in analysis_type:
-            required_sample_metadata_fields: list[
-                str
-            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
+            required_sample_metadata_fields: list[str] = (
+                REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
+            )
         elif BALSAMIC_ANALYSIS_TYPE["tumor_normal_wgs"] in analysis_type:
-            required_sample_metadata_fields: list[
-                str
-            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS
+            required_sample_metadata_fields: list[str] = (
+                REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS
+            )
         elif (
             BALSAMIC_ANALYSIS_TYPE["tumor_panel"] in analysis_type
             or BALSAMIC_ANALYSIS_TYPE["tumor_normal_panel"] in analysis_type
         ):
-            required_sample_metadata_fields: list[
-                str
-            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
+            required_sample_metadata_fields: list[str] = (
+                REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
+            )
         return {
             "report": REQUIRED_REPORT_FIELDS,
             "customer": REQUIRED_CUSTOMER_FIELDS,
@@ -221,22 +222,8 @@ class BalsamicReportAPI(ReportAPI):
 
     def get_template_name(self) -> str:
         """Return template name to render the delivery report."""
-        return Pipeline.BALSAMIC + "_report.html"
+        return Workflow.BALSAMIC + "_report.html"
 
     def get_upload_case_tags(self) -> dict:
         """Return Balsamic upload case tags."""
         return BALSAMIC_CASE_TAGS
-
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
-        """Return file path of the uploaded to Scout file given its tag."""
-        version: Version = self.housekeeper_api.last_version(bundle=case_id)
-        tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
-        uploaded_file: File = self.housekeeper_api.get_latest_file(
-            bundle=case_id, tags=tags, version=version.id
-        )
-        if not tags or not uploaded_file:
-            LOG.warning(
-                f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
-            )
-            return None
-        return uploaded_file.full_path

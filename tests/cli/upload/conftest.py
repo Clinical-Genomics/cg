@@ -11,7 +11,7 @@ from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.constants import FileFormat, Pipeline
+from cg.constants.constants import FileFormat, Workflow
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.housekeeper_tags import (
     HK_DELIVERY_REPORT_TAG,
@@ -26,14 +26,9 @@ from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.store import Store
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.store.models import Analysis
-from tests.cli.workflow.mip.conftest import (
-    mip_case_id,
-    mip_case_ids,
-    mip_dna_context,
-    mip_rna_context,
-)
+from cg.store.store import Store
 from tests.meta.upload.scout.conftest import mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
@@ -203,10 +198,11 @@ def fastq_context(
     base_context.meta_apis["delivery_api"] = DeliverAPI(
         store=base_context.status_db,
         hk_api=base_context.housekeeper_api,
-        case_tags=PIPELINE_ANALYSIS_TAG_MAP[Pipeline.FASTQ]["case_tags"],
-        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[Pipeline.FASTQ]["sample_tags"],
+        case_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.FASTQ]["case_tags"],
+        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.FASTQ]["sample_tags"],
         delivery_type="fastq",
         project_base_path=Path(base_context.delivery_path),
+        fastq_file_service=FastqFileService(),
     )
     base_context.meta_apis["rsync_api"] = RsyncAPI(cg_context)
     base_context.trailblazer_api_ = trailblazer_api
@@ -248,7 +244,9 @@ class MockScoutUploadApi(UploadScoutAPI):
         self.housekeeper = None
         self.madeline_api = MockMadelineAPI()
         self.analysis = MockAnalysisApi()
-        self.config = ScoutLoadConfig()
+        self.config = ScoutLoadConfig(
+            delivery_report=Path("path", "to", "delivery-report.html").as_posix()
+        )
         self.file_exists = False
         self.lims = MockLims()
         self.missing_mandatory_field = False
@@ -257,7 +255,7 @@ class MockScoutUploadApi(UploadScoutAPI):
     def _request_analysis(self, analysis_store_single_case):
         self.analysis = analysis_store_single_case
 
-    def generate_config(self, analysis_obj, **kwargs):
+    def generate_config(self, analysis, **kwargs):
         """Mock the generate config"""
         if self.missing_mandatory_field:
             self.config.vcf_snv = None

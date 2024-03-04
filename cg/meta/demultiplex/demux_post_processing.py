@@ -1,13 +1,16 @@
 """Post-processing Demultiplex API."""
+
 import logging
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import FlowCellError, MissingFilesError
 from cg.meta.demultiplex.housekeeper_storage_functions import (
+    delete_sequencing_data_from_housekeeper,
     store_flow_cell_data_in_housekeeper,
 )
 from cg.meta.demultiplex.status_db_storage_functions import (
+    delete_sequencing_metrics_from_statusdb,
     store_flow_cell_data_in_status_db,
     store_sample_data_in_status_db,
     store_sequencing_metrics_in_status_db,
@@ -16,7 +19,7 @@ from cg.meta.demultiplex.utils import create_delivery_file_in_flow_cell_director
 from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.store import Store
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -25,8 +28,9 @@ class DemuxPostProcessingAPI:
     """Post demultiplexing API class."""
 
     def __init__(self, config: CGConfig) -> None:
-        self.flow_cells_dir: Path = Path(config.flow_cells_dir)
-        self.demultiplexed_runs_dir: Path = Path(config.demultiplexed_flow_cells_dir)
+        self.config: CGConfig = config
+        self.flow_cells_dir: Path = Path(config.illumina_flow_cells_directory)
+        self.demultiplexed_runs_dir: Path = Path(config.illumina_demultiplexed_runs_directory)
         self.status_db: Store = config.status_db
         self.hk_api: HousekeeperAPI = config.housekeeper_api
         self.dry_run: bool = False
@@ -82,6 +86,8 @@ class DemuxPostProcessingAPI:
             LOG.warning(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
             return
 
+        self.delete_flow_cell_data(flow_cell.id)
+
         try:
             self.store_flow_cell_data(flow_cell)
         except Exception as e:
@@ -125,3 +131,8 @@ class DemuxPostProcessingAPI:
                 LOG.debug(f"Found directory {flow_cell_dir}")
                 demultiplex_flow_cells.append(flow_cell_dir)
         return demultiplex_flow_cells
+
+    def delete_flow_cell_data(self, flow_cell_id: str) -> None:
+        """Delete flow cell data from status db and housekeeper."""
+        delete_sequencing_metrics_from_statusdb(flow_cell_id=flow_cell_id, store=self.status_db)
+        delete_sequencing_data_from_housekeeper(flow_cell_id=flow_cell_id, hk_api=self.hk_api)

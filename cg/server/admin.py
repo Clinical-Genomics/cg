@@ -1,4 +1,5 @@
 """Module for Flask-Admin views"""
+
 from datetime import datetime
 from gettext import gettext
 
@@ -8,7 +9,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 
-from cg.constants.constants import CaseActions, DataDelivery, Pipeline
+from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.server.ext import db
 from cg.store.models import Sample
 from cg.utils.flask.enum import SelectEnumField
@@ -53,7 +54,7 @@ def view_sample_concentration_minimum(unused1, unused2, model, unused3):
     """Column formatter to append unit"""
     del unused1, unused2, unused3
     return (
-        str(model.sample_concentration_minimum) + " ng/uL"
+        str(model.sample_concentration_minimum) + NG_UL_SUFFIX
         if model.sample_concentration_minimum
         else None
     )
@@ -63,8 +64,28 @@ def view_sample_concentration_maximum(unused1, unused2, model, unused3):
     """Column formatter to append unit"""
     del unused1, unused2, unused3
     return (
-        str(model.sample_concentration_maximum) + " ng/uL"
+        str(model.sample_concentration_maximum) + NG_UL_SUFFIX
         if model.sample_concentration_maximum
+        else None
+    )
+
+
+def view_sample_concentration_minimum_cfdna(unused1, unused2, model, unused3):
+    """Column formatter to append unit"""
+    del unused1, unused2, unused3
+    return (
+        str(model.sample_concentration_minimum_cfdna) + NG_UL_SUFFIX
+        if model.sample_concentration_minimum_cfdna
+        else None
+    )
+
+
+def view_sample_concentration_maximum_cfdna(unused1, unused2, model, unused3):
+    """Column formatter to append unit"""
+    del unused1, unused2, unused3
+    return (
+        str(model.sample_concentration_maximum_cfdna) + NG_UL_SUFFIX
+        if model.sample_concentration_maximum_cfdna
         else None
     )
 
@@ -84,6 +105,10 @@ class ApplicationView(BaseView):
         "is_external",
         "turnaround_time",
         "sample_concentration",
+        "sample_concentration_minimum",
+        "sample_concentration_maximum",
+        "sample_concentration_minimum_cfdna",
+        "sample_concentration_maximum_cfdna",
         "priority_processing",
         "is_archived",
     ]
@@ -100,6 +125,8 @@ class ApplicationView(BaseView):
     column_formatters = {
         "sample_concentration_minimum": view_sample_concentration_minimum,
         "sample_concentration_maximum": view_sample_concentration_maximum,
+        "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
+        "sample_concentration_maximum_cfdna": view_sample_concentration_maximum_cfdna,
     }
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
@@ -170,7 +197,7 @@ class ApplicationLimitationsView(BaseView):
     column_searchable_list = ["application.tag"]
     column_editable_list = ["comment"]
     form_excluded_columns = ["created_at", "updated_at"]
-    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Pipeline)}
+    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Workflow)}
     create_modal = True
     edit_modal = True
 
@@ -285,7 +312,7 @@ class CaseView(BaseView):
         "synopsis",
     ]
     form_extra_fields = {
-        "data_analysis": SelectEnumField(enum_class=Pipeline),
+        "data_analysis": SelectEnumField(enum_class=Workflow),
         "data_delivery": SelectEnumField(enum_class=DataDelivery),
     }
 
@@ -387,9 +414,11 @@ class InvoiceView(BaseView):
                 "<a href='%s'>%s</a>"
                 % (
                     url_for("invoice.index_view", search=model.invoice.id),
-                    model.invoice.invoiced_at.date()
-                    if model.invoice.invoiced_at
-                    else "In progress",
+                    (
+                        model.invoice.invoiced_at.date()
+                        if model.invoice.invoiced_at
+                        else "In progress"
+                    ),
                 )
             )
             if model.invoice
@@ -402,13 +431,13 @@ class AnalysisView(BaseView):
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["is_primary"]
-    column_filters = ["pipeline", "pipeline_version", "is_primary"]
+    column_filters = ["workflow", "workflow_version", "is_primary"]
     column_formatters = {"case": CaseView.view_case_link}
     column_searchable_list = [
         "case.internal_id",
         "case.name",
     ]
-    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Pipeline)}
+    form_extra_fields = {"workflow": SelectEnumField(enum_class=Workflow)}
 
 
 class OrganismView(BaseView):
@@ -536,7 +565,7 @@ class SampleView(BaseView):
         date: str = datetime.now().strftime("%Y-%m-%d")
         comment: str = f"Cancelled {date} by {user_name}"
 
-        db.add_sample_comment(sample=sample, comment=comment)
+        db.update_sample_comment(sample=sample, comment=comment)
 
     def display_cancel_confirmation(
         self, sample_entry_ids: list[str], remaining_cases: list[str]

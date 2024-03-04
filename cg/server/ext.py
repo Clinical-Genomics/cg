@@ -7,8 +7,11 @@ from flask_wtf.csrf import CSRFProtect
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
-from cg.store.api.core import Store
+from cg.services.orders.order_status_service.order_status_service import OrderStatusService
 from cg.store.database import initialize_database
+from cg.store.store import Store
+from cg.apps.tb.api import TrailblazerAPI
+from cg.services.orders.order_service.order_service import OrderService
 
 
 class FlaskLims(LimsAPI):
@@ -45,6 +48,25 @@ class CustomJSONEncoder(JSONEncoder):
         return super().default(obj)
 
 
+class AnalysisClient(TrailblazerAPI):
+    def __init__(self, app=None):
+        if app:
+            self.init_app(app)
+
+    def init_app(self, app):
+        service_account: str = app.config["TRAILBLAZER_SERVICE_ACCOUNT"]
+        service_account_auth_file: str = app.config["TRAILBLAZER_SERVICE_ACCOUNT_AUTH_FILE"]
+        host: str = app.config["TRAILBLAZER_HOST"]
+        config = {
+            "trailblazer": {
+                "service_account": service_account,
+                "service_account_auth_file": service_account_auth_file,
+                "host": host,
+            }
+        }
+        super(AnalysisClient, self).__init__(config)
+
+
 cors = CORS(resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 csrf = CSRFProtect()
 db = FlaskStore()
@@ -52,3 +74,6 @@ db = FlaskStore()
 admin = Admin(name="Clinical Genomics")
 lims = FlaskLims()
 osticket = OsTicket()
+analysis_client = AnalysisClient()
+summary_service = OrderStatusService(store=db, analysis_client=analysis_client)
+order_service = OrderService(store=db, status_service=summary_service)

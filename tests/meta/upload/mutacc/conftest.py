@@ -2,7 +2,7 @@ import pytest
 
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.constants.pedigree import Pedigree
-from cg.constants.subject import PlinkGender, PlinkPhenotypeStatus, RelationshipStatus
+from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex, RelationshipStatus
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 
 
@@ -60,7 +60,7 @@ def scout_export_case_data(customer_id: str) -> dict:
             {
                 "individual_id": "individual_1",
                 "bam_file": "",
-                Pedigree.SEX: PlinkGender.MALE,
+                Pedigree.SEX: PlinkSex.MALE,
                 Pedigree.FATHER: "individual_2",
                 Pedigree.MOTHER: "individual_3",
                 Pedigree.PHENOTYPE: PlinkPhenotypeStatus.AFFECTED,
@@ -68,7 +68,7 @@ def scout_export_case_data(customer_id: str) -> dict:
             {
                 "individual_id": "individual_2",
                 "bam_file": "",
-                Pedigree.SEX: PlinkGender.MALE,
+                Pedigree.SEX: PlinkSex.MALE,
                 Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
                 Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,
                 Pedigree.PHENOTYPE: PlinkPhenotypeStatus.UNAFFECTED,
@@ -76,7 +76,7 @@ def scout_export_case_data(customer_id: str) -> dict:
             {
                 "individual_id": "individual_3",
                 "bam_file": "",
-                Pedigree.SEX: PlinkGender.FEMALE,
+                Pedigree.SEX: PlinkSex.FEMALE,
                 Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
                 Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,
                 Pedigree.PHENOTYPE: PlinkPhenotypeStatus.UNAFFECTED,

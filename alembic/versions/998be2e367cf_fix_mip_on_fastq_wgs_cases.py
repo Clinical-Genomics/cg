@@ -5,14 +5,15 @@ Revises: fab30255b84f
 Create Date: 2021-02-26 10:03:23.560737
 
 """
+
 from datetime import datetime
+from enum import StrEnum
 
 import sqlalchemy as sa
 from sqlalchemy import orm
 from sqlalchemy.orm import declarative_base
 
 from alembic import op
-from cg.constants import PREP_CATEGORIES, DataDelivery, Pipeline
 
 Base = declarative_base()
 
@@ -21,6 +22,27 @@ revision = "998be2e367cf"
 down_revision = "fab30255b84f"
 branch_labels = None
 depends_on = None
+
+PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
+
+
+class DataDelivery(StrEnum):
+    ANALYSIS_FILES: str = "analysis"
+    ANALYSIS_BAM_FILES: str = "analysis-bam"
+    FASTQ: str = "fastq"
+    NIPT_VIEWER: str = "nipt-viewer"
+    FASTQ_QC: str = "fastq_qc"
+    SCOUT: str = "scout"
+
+
+class Pipeline(StrEnum):
+    BALSAMIC: str = "balsamic"
+    FASTQ: str = "fastq"
+    FLUFFY: str = "fluffy"
+    MICROSALT: str = "microsalt"
+    MIP_DNA: str = "mip-dna"
+    MIP_RNA: str = "mip-rna"
+    SARS_COV_2: str = "sars-cov-2"
 
 
 class Customer(Base):

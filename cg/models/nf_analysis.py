@@ -2,12 +2,12 @@ from pathlib import Path
 
 from pydantic.v1 import BaseModel, Field, conlist, validator
 
-from cg.exc import SampleSheetError, ValidationError
+from cg.exc import SampleSheetError
 
 
-class PipelineParameters(BaseModel):
-    clusterOptions: str = Field(..., alias="cluster_options")
-    priority: str
+class WorkflowParameters(BaseModel):
+    input: Path = Field(..., alias="sample_sheet_path")
+    outdir: Path = Field(..., alias="outdir")
 
 
 class NfCommandArgs(BaseModel):
@@ -30,10 +30,10 @@ class NfCommandArgs(BaseModel):
 
 
 class NextflowSampleSheetEntry(BaseModel):
-    """Nextflow samplesheet model.
+    """Nextflow sample sheet model.
 
     Attributes:
-        name: sample name, corresponds to case_id
+        name: sample name, or case id
         fastq_forward_read_paths: list of all fastq read1 file paths corresponding to sample
         fastq_reverse_read_paths: list of all fastq read2 file paths corresponding to sample
     """
@@ -71,16 +71,13 @@ class FileDeliverable(BaseModel):
     tag: str
 
     @validator("path", "path_index", pre=True)
-    def path_exist(cls, file_path: str | Path) -> str | None:
-        if file_path is not None:
-            path = Path(file_path)
-            if not path.exists():
-                raise ValidationError(f"Path {file_path} does not exist")
-            return str(path)
+    def set_path_as_string(cls, file_path: str | Path) -> str | None:
+        if file_path:
+            return str(Path(file_path))
         return None
 
 
-class PipelineDeliverables(BaseModel):
-    """Specification for pipeline deliverables."""
+class WorkflowDeliverables(BaseModel):
+    """Specification for workflow deliverables."""
 
     files: list[FileDeliverable]

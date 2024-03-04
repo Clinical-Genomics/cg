@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.exc import BalsamicStartError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -19,9 +19,9 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.BALSAMIC_PON,
+        workflow: Workflow = Workflow.BALSAMIC_PON,
     ):
-        super().__init__(config=config, pipeline=pipeline)
+        super().__init__(config=config, workflow=workflow)
 
     def config_case(
         self,
@@ -31,6 +31,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
         panel_bed: str,
         pon_cnn: str,
         observations: list[str],
+        cache_version: str,
         dry_run: bool = False,
     ) -> None:
         """Creates a config file for BALSAMIC PON analysis."""
@@ -50,6 +51,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
                 "--panel-bed": verified_panel_bed,
                 "--genome-version": genome_version,
                 "--balsamic-cache": self.balsamic_cache,
+                "--cache-version": cache_version,
                 "--version": self.get_next_pon_version(verified_panel_bed),
             }
         )

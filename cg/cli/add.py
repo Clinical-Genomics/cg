@@ -2,12 +2,12 @@ import logging
 
 import click
 
-from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline, Priority
+from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
-from cg.constants.subject import Gender
+from cg.constants.constants import StatusOptions
+from cg.constants.subject import Sex
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import (
     Application,
     ApplicationVersion,
@@ -19,6 +19,7 @@ from cg.store.models import (
     Sample,
     User,
 )
+from cg.store.store import Store
 from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)
@@ -156,7 +157,7 @@ def add_user(context: CGConfig, admin: bool, customer_id: str, email: str, name:
 @click.option(
     "-s",
     "--sex",
-    type=EnumChoice(Gender, use_value=False),
+    type=EnumChoice(Sex, use_value=False),
     required=True,
     help="Sample pedigree sex",
 )
@@ -175,7 +176,7 @@ def add_sample(
     context: CGConfig,
     lims_id: str | None,
     down_sampled: int | None,
-    sex: Gender,
+    sex: Sex,
     order: str | None,
     application_tag: str,
     priority: Priority,
@@ -225,7 +226,7 @@ def add_sample(
     "data_analysis",
     help="Analysis workflow",
     required=True,
-    type=EnumChoice(Pipeline),
+    type=EnumChoice(Workflow),
 )
 @click.option(
     "-dd",
@@ -243,7 +244,7 @@ def add_case(
     context: CGConfig,
     priority: Priority,
     panel_abbreviations: tuple[str],
-    data_analysis: Pipeline,
+    data_analysis: Workflow,
     data_delivery: DataDelivery,
     customer_id: str,
     name: str,
@@ -282,7 +283,7 @@ def add_case(
 @add.command("relationship")
 @click.option("-m", "--mother-id", help="Sample ID for mother of sample")
 @click.option("-f", "--father-id", help="Sample ID for father of sample")
-@click.option("-s", "--status", type=click.Choice(STATUS_OPTIONS), required=True)
+@click.option("-s", "--status", type=EnumChoice(StatusOptions), required=True)
 @click.argument("case-id")
 @click.argument("sample-id")
 @click.pass_obj

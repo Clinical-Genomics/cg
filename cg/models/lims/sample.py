@@ -13,13 +13,14 @@ class Udf(BaseModel):
     comment: str | None
     concentration: str | None
     concentration_sample: str | None
+    concentration_ng_ul: str | None
     customer: str
     control: str | None
     data_analysis: str | None
     data_delivery: str | None
     elution_buffer: str | None
     extraction_method: str | None
-    family_name: str = "NA"
+    family_name: str | None = "NA"
     formalin_fixation_time: str | None
     index: str | None
     index_number: str | None

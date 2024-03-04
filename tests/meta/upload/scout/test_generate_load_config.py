@@ -2,7 +2,7 @@
 
 import pytest
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import (
@@ -44,12 +44,12 @@ def test_generate_balsamic_load_config(
     balsamic_analysis_obj: Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
 ):
     # GIVEN an analysis object that have been run with balsamic
-    assert balsamic_analysis_obj.pipeline == Pipeline.BALSAMIC
+    assert balsamic_analysis_obj.workflow == Workflow.BALSAMIC
 
     # GIVEN an upload scout api with some balsamic information
 
     # WHEN generating a load config
-    config = upload_balsamic_analysis_scout_api.generate_config(analysis_obj=balsamic_analysis_obj)
+    config = upload_balsamic_analysis_scout_api.generate_config(analysis=balsamic_analysis_obj)
 
     # THEN assert that the config is a balsamic config
     assert isinstance(config, BalsamicLoadConfig)
@@ -59,14 +59,12 @@ def test_generate_balsamic_umi_load_config(
     balsamic_umi_analysis_obj: Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
 ):
     # GIVEN an analysis object that have been run with balsamic-umi
-    assert balsamic_umi_analysis_obj.pipeline == Pipeline.BALSAMIC_UMI
+    assert balsamic_umi_analysis_obj.workflow == Workflow.BALSAMIC_UMI
 
     # GIVEN an upload scout api with some balsamic information
 
     # WHEN generating a load config
-    config = upload_balsamic_analysis_scout_api.generate_config(
-        analysis_obj=balsamic_umi_analysis_obj
-    )
+    config = upload_balsamic_analysis_scout_api.generate_config(analysis=balsamic_umi_analysis_obj)
 
     # THEN assert that the config is a balsamic-umi config
     assert isinstance(config, BalsamicUmiLoadConfig)
@@ -77,13 +75,13 @@ def test_generate_rnafusion_load_config(
 ):
     """Test that a rnafusion config is generated."""
     # GIVEN an analysis object that have been run with rnafusion
-    assert rnafusion_analysis_obj.pipeline == Pipeline.RNAFUSION
+    assert rnafusion_analysis_obj.workflow == Workflow.RNAFUSION
 
     # GIVEN an upload scout api with some rnafusion information
 
     # WHEN generating a load config
     config: ScoutLoadConfig = upload_rnafusion_analysis_scout_api.generate_config(
-        analysis_obj=rnafusion_analysis_obj
+        analysis=rnafusion_analysis_obj
     )
 
     # THEN assert that the config is a rnafusion config
@@ -102,7 +100,7 @@ def test_generate_config_adds_meta_result_key(
 
     # WHEN generating the scout config for the analysis
     result_data: ScoutLoadConfig = upload_mip_analysis_scout_api.generate_config(
-        analysis_obj=mip_dna_analysis
+        analysis=mip_dna_analysis
     )
 
     # THEN the config should contain the rank model version used

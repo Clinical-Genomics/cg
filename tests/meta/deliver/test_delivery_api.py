@@ -5,12 +5,13 @@ from pathlib import Path
 from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
-from cg.store import Store
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.store.models import Case, CaseSample, Sample
+from cg.store.store import Store
 from tests.cli.deliver.conftest import fastq_delivery_bundle, mip_delivery_bundle
 from tests.store.conftest import case_obj
 from tests.store_helpers import StoreHelpers
@@ -28,6 +29,7 @@ def test_get_delivery_path(
         sample_tags=["sample-tag"],
         project_base_path=project_dir,
         delivery_type="balsamic",
+        fastq_file_service=FastqFileService(),
     )
     customer_id = "cust000"
     ticket = "1234"
@@ -85,6 +87,7 @@ def test_get_case_files_from_version(
         sample_tags=[{"sample-tag"}],
         project_base_path=project_dir,
         delivery_type="balsamic",
+        fastq_file_service=FastqFileService(),
     )
 
     # GIVEN a housekeeper db populated with a bundle including a case specific file and a sample specific file
@@ -155,7 +158,7 @@ def test_get_sample_files_from_version(
 def test_get_delivery_scope_case_only():
     """Testing the delivery scope of a case only delivery."""
     # GIVEN a case only delivery type
-    delivery_type: set[str] = {Pipeline.MIP_DNA}
+    delivery_type: set[str] = {Workflow.MIP_DNA}
 
     # WHEN getting the delivery scope
     sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
@@ -168,7 +171,7 @@ def test_get_delivery_scope_case_only():
 def test_get_delivery_scope_sample_only():
     """Testing the delivery scope of a sample only delivery."""
     # GIVEN a sample only delivery type
-    delivery_type = {Pipeline.FASTQ}
+    delivery_type = {Workflow.FASTQ}
 
     # WHEN getting the delivery scope
     sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
@@ -181,7 +184,7 @@ def test_get_delivery_scope_sample_only():
 def test_get_delivery_scope_case_and_sample():
     """Testing the delivery scope of a case and sample delivery."""
     # GIVEN a case and sample delivery type
-    delivery_type = {Pipeline.SARS_COV_2}
+    delivery_type = {Workflow.MUTANT}
 
     # WHEN getting the delivery scope
     sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)

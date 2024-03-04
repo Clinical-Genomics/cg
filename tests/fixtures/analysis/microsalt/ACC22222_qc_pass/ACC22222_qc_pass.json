@@ -32,28 +32,33 @@
   },
   "ACC22222A2": {
     "blast_pubmlst": {
-      "sequence_type": "",
-      "thresholds": ""
+      "sequence_type": "8",
+      "thresholds": "Passed"
     },
     "quast_assembly": {
-      "estimated_genome_length": "",
-      "gc_percentage": "",
-      "n50": "",
-      "necessary_contigs": ""
+      "estimated_genome_length": 2869750,
+      "gc_percentage": "32.6000000000",
+      "n50": 209899,
+      "necessary_contigs": 33
     },
-    "blast_resfinder_resistence": [],
+    "blast_resfinder_resistence": [
+      "aph(3')-III",
+      "mecA",
+      "mph(C)",
+      "msr(A)"
+    ],
     "picard_markduplicate": {
-      "insert_size": "",
-      "duplication_rate": ""
+      "insert_size": 215,
+      "duplication_rate": 0.105372
     },
     "microsalt_samtools_stats": {
-      "total_reads": 42,
-      "mapped_rate": "",
-      "average_coverage": "",
-      "coverage_10x": "",
-      "coverage_30x": "",
-      "coverage_50x": "",
-      "coverage_100x": ""
+      "total_reads": 3079934,
+      "mapped_rate": 0.8400670274103276,
+      "average_coverage": 120.99379962716425,
+      "coverage_10x": 0.9365702921426038,
+      "coverage_30x": 0.9330515081968174,
+      "coverage_50x": 0.9282236223103506,
+      "coverage_100x": 0.8010769589265144
     }
   },
   "ACC22222A3": {

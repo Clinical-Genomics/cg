@@ -11,10 +11,7 @@ from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
-from cg.models.taxprofiler.taxprofiler import (
-    TaxprofilerParameters,
-    TaxprofilerSampleSheetEntry,
-)
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 
 
 def test_config_case_default_parameters(
@@ -46,7 +43,7 @@ def test_config_case_default_parameters(
         "Writing parameters file",
     ]
     for expected_log in expected_logs:
-        assert expected_log in expected_logs
+        assert expected_log in caplog.text
 
     # THEN files should be generated
     assert taxprofiler_sample_sheet_path.is_file()
@@ -56,6 +53,7 @@ def test_config_case_default_parameters(
     sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.TXT, file_path=taxprofiler_sample_sheet_path, read_to_string=True
     )
+
     assert ",".join(TaxprofilerSampleSheetEntry.headers()) in sample_sheet_content
     assert taxprofiler_sample_sheet_content in sample_sheet_content
 
@@ -81,7 +79,7 @@ def test_config_case_dry_run(
     # WHEN performing a dry-run
     result = cli_runner.invoke(config_case, [taxprofiler_case_id, "-d"], obj=taxprofiler_context)
 
-    # THEN command should should exit succesfully
+    # THEN command should exit succesfully
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN sample sheet and parameters information should be collected

@@ -1,7 +1,7 @@
 from pydantic.v1 import BaseModel, constr, validator
 
 from cg.constants import DataDelivery
-from cg.constants.constants import GenomeVersion, Pipeline
+from cg.constants.constants import GenomeVersion, Workflow
 from cg.models.orders.order import OrderType
 from cg.models.orders.sample_base import (
     NAME_PATTERN,
@@ -33,7 +33,7 @@ class OrderInSample(BaseModel):
     application: constr(max_length=Application.tag.property.columns[0].type.length)
     comment: constr(max_length=Sample.comment.property.columns[0].type.length) | None
     skip_reception_control: bool | None = None
-    data_analysis: Pipeline
+    data_analysis: Workflow
     data_delivery: DataDelivery
     name: constr(
         regex=NAME_PATTERN,
@@ -43,6 +43,7 @@ class OrderInSample(BaseModel):
     priority: PriorityEnum = PriorityEnum.standard
     require_qc_ok: bool = False
     volume: str
+    concentration_ng_ul: str | None
 
     @classmethod
     def is_sample_for(cls, project: OrderType):
@@ -54,11 +55,14 @@ class Of1508Sample(OrderInSample):
     # Order portal specific
     internal_id: constr(max_length=Sample.internal_id.property.columns[0].type.length) | None
     # "required for new samples"
-    name: constr(
-        regex=NAME_PATTERN,
-        min_length=2,
-        max_length=Sample.name.property.columns[0].type.length,
-    ) | None
+    name: (
+        constr(
+            regex=NAME_PATTERN,
+            min_length=2,
+            max_length=Sample.name.property.columns[0].type.length,
+        )
+        | None
+    )
 
     # customer
     age_at_sampling: float | None
@@ -71,19 +75,19 @@ class Of1508Sample(OrderInSample):
     sex: SexEnum = SexEnum.unknown
     tumour: bool = False
     source: str | None
-    control: str | None
+    control: ControlEnum | None
     volume: str | None
     container: ContainerEnum | None
     # "required if plate for new samples"
     container_name: str | None
     well_position: str | None
     # "Required if samples are part of trio/family"
-    mother: constr(
-        regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length
-    ) | None
-    father: constr(
-        regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length
-    ) | None
+    mother: (
+        constr(regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length) | None
+    )
+    father: (
+        constr(regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length) | None
+    )
     # This information is required for panel analysis
     capture_kit: str | None
     # This information is required for panel- or exome analysis
@@ -99,9 +103,10 @@ class Of1508Sample(OrderInSample):
     phenotype_terms: list[str] | None
     require_qc_ok: bool = False
     quantity: int | None
-    subject_id: constr(
-        regex=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length
-    ) | None
+    subject_id: (
+        constr(regex=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length)
+        | None
+    )
     synopsis: str | None
 
     @validator("container", "container_name", "name", "source", "subject_id", "volume")
@@ -174,6 +179,7 @@ class FastqSample(OrderInSample):
     capture_kit: str | None
     # "Not Required"
     quantity: int | None
+    subject_id: str | None
 
     @validator("quantity", pre=True)
     def str_to_int(cls, v: str) -> int | None:
@@ -209,30 +215,23 @@ class FluffySample(RmlSample):
     # 1604 Orderform Ready made libraries (RML)
 
 
-class MetagenomeSample(OrderInSample):
+class MetagenomeSample(Of1508Sample):
     _suitable_project = OrderType.METAGENOME
-
-    # 1605 Orderform Microbial Metagenomes- 16S
     # "This information is required"
-    container: ContainerEnum | None
-    elution_buffer: str
     source: str
-    # "Required if Plate"
-    container_name: str | None
-    well_position: str | None
     # "This information is not required"
     concentration_sample: float | None
-    quantity: int | None
-    extraction_method: str | None
-    control: ControlEnum | None
-
-    @validator("quantity", pre=True)
-    def str_to_int(cls, v: str) -> int | None:
-        return OptionalIntValidator.str_to_int(v=v)
+    family_name: None = None
+    subject_id: None = None
 
     @validator("concentration_sample", pre=True)
     def str_to_float(cls, v: str) -> float | None:
         return OptionalFloatValidator.str_to_float(v=v)
+
+    @validator("subject_id", pre=True)
+    def required_for_new_samples(cls, v: str) -> None:
+        """Overrides the parent validator since subject_id is optional for these samples."""
+        return None
 
 
 class MicrobialSample(OrderInSample):

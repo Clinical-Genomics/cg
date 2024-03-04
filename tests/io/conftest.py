@@ -67,9 +67,27 @@ def txt_file_path(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture
+def txt_file_path_2(fixtures_dir: Path) -> Path:
+    """Return a file path to example TXT file, 2 files needed to test concatenation."""
+    return Path(fixtures_dir, "io", "example2.txt")
+
+
+@pytest.fixture
 def tsv_stream() -> str:
     """Return string with TSV format."""
     return """Lorem	ipsum	sit	amet"""
+
+
+@pytest.fixture
+def config_dict() -> dict:
+    """Return dictionary format."""
+    return {"input": "input_path", "output": "output_path"}
+
+
+@pytest.fixture
+def txt_temp_path(cg_dir: Path) -> Path:
+    """Return a temp file path to use when writing text files."""
+    return Path(cg_dir, "write.txt")
 
 
 @pytest.fixture
@@ -100,3 +118,9 @@ def xml_file_path(fixtures_dir: Path) -> Path:
 def xml_temp_path(cg_dir: Path) -> Path:
     """Return a temp file path to use when writing xml."""
     return Path(cg_dir, "write_xml.xml")
+
+
+@pytest.fixture
+def gzip_file_path(fixtures_dir: Path) -> Path:
+    """Return a file path to example Gzip file."""
+    return Path(fixtures_dir, "io", "example.gz")

@@ -1,9 +1,9 @@
-from cg.store import Store
 from cg.store.filters.status_bed_version_filters import (
-    get_bed_version_by_file_name,
-    get_bed_version_by_short_name,
+    filter_bed_version_by_file_name,
+    filter_bed_version_by_short_name,
 )
 from cg.store.models import BedVersion
+from cg.store.store import Store
 
 
 def test_get_bed_version_by_file_name(base_store: Store, bed_version_file_name: str):
@@ -11,7 +11,7 @@ def test_get_bed_version_by_file_name(base_store: Store, bed_version_file_name: 
     # GIVEN a store containing bed version
 
     # WHEN retrieving bed version
-    bed_version: BedVersion = get_bed_version_by_file_name(
+    bed_version: BedVersion = filter_bed_version_by_file_name(
         bed_versions=base_store._get_query(table=BedVersion),
         bed_version_file_name=bed_version_file_name,
     ).first()
@@ -28,9 +28,8 @@ def test_get_bed_version_by_file_name_when_no_file(base_store: Store):
     # GIVEN a store containing bed version
 
     # WHEN retrieving bed version
-    bed_version: BedVersion = get_bed_version_by_file_name(
-        bed_versions=base_store._get_query(table=BedVersion),
-        bed_version_file_name="does_not_exist",
+    bed_version: BedVersion = filter_bed_version_by_file_name(
+        bed_versions=base_store._get_query(table=BedVersion), bed_version_file_name="does_not_exist"
     ).first()
 
     # THEN bed version should not be returned
@@ -42,7 +41,7 @@ def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name
     # GIVEN a store containing bed version
 
     # WHEN retrieving bed versions
-    bed_versions: list[BedVersion] = get_bed_version_by_short_name(
+    bed_versions: list[BedVersion] = filter_bed_version_by_short_name(
         bed_versions=base_store._get_query(table=BedVersion),
         bed_version_short_name=bed_version_short_name,
     )
@@ -59,7 +58,7 @@ def test_get_bed_version_by_short_name_when_no_name(base_store: Store):
     # GIVEN a store containing bed version
 
     # WHEN retrieving bed versions
-    bed_versions: list[BedVersion] = get_bed_version_by_short_name(
+    bed_versions: list[BedVersion] = filter_bed_version_by_short_name(
         bed_versions=base_store._get_query(table=BedVersion),
         bed_version_short_name="does_not_exist",
     )

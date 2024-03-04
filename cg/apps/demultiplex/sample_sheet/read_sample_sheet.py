@@ -1,22 +1,15 @@
 import logging
-from pathlib import Path
 from typing import Type
 
 from pydantic import TypeAdapter
 
-from cg.apps.demultiplex.sample_sheet.models import (
+from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSample,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
-    SampleSheet,
 )
-from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import (
-    SampleSheetBcl2FastqSections,
-    SampleSheetBCLConvertSections,
-)
+from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
 from cg.exc import SampleSheetError
-from cg.io.controller import ReadFile
 
 LOG = logging.getLogger(__name__)
 
@@ -28,7 +21,7 @@ def validate_samples_are_unique(samples: list[FlowCellSample]) -> None:
         sample_id: str = sample.sample_id.split("_")[0]
         if sample_id in sample_ids:
             message: str = f"Sample {sample.sample_id} exists multiple times in sample sheet"
-            LOG.warning(message)
+            LOG.error(message)
             raise SampleSheetError(message)
         sample_ids.add(sample_id)
 
@@ -41,24 +34,8 @@ def validate_samples_unique_per_lane(samples: list[FlowCellSample]) -> None:
         validate_samples_are_unique(samples=lane_samples)
 
 
-def get_sample_sheet_from_file(infile: Path) -> SampleSheet:
-    """Parse and validate a sample sheet from file."""
-    sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=infile
-    )
-    sample_type: Type[FlowCellSample] = get_sample_type(infile)
-
-    return get_validated_sample_sheet(
-        sample_sheet_content=sample_sheet_content,
-        sample_type=sample_type,
-    )
-
-
-def get_sample_type(sample_sheet_path: Path) -> Type[FlowCellSample]:
-    """Returns the sample type based on the header of the given sample sheet."""
-    sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=sample_sheet_path
-    )
+def get_sample_type_from_content(sample_sheet_content: list[list[str]]) -> Type[FlowCellSample]:
+    """Returns the sample type identified from the sample sheet content."""
     for row in sample_sheet_content:
         if not row:
             continue
@@ -68,29 +45,19 @@ def get_sample_type(sample_sheet_path: Path) -> Type[FlowCellSample]:
         if SampleSheetBcl2FastqSections.Data.HEADER in row[0]:
             LOG.info("Sample sheet was generated for BCL2FASTQ")
             return FlowCellSampleBcl2Fastq
-    raise SampleSheetError("Could not determine sample sheet type")
+    message: str = "Could not determine sample sheet type"
+    LOG.error(message)
+    raise SampleSheetError(message)
 
 
-def get_validated_sample_sheet(
-    sample_sheet_content: list[list[str]],
-    sample_type: Type[FlowCellSample],
-) -> SampleSheet:
-    """Return a validated sample sheet object."""
-    raw_samples: list[dict[str, str]] = get_raw_samples(sample_sheet_content=sample_sheet_content)
-    adapter = TypeAdapter(list[sample_type])
-    samples = adapter.validate_python(raw_samples)
-    validate_samples_unique_per_lane(samples=samples)
-    return SampleSheet(samples=samples)
-
-
-def get_raw_samples(sample_sheet_content: list[list[str]]) -> list[dict[str, str]]:
+def get_raw_samples_from_content(sample_sheet_content: list[list[str]]) -> list[dict[str, str]]:
     """Return the samples in a sample sheet as a list of dictionaries."""
     header: list[str] = []
     raw_samples: list[dict[str, str]] = []
 
     for line in sample_sheet_content:
         # Skip lines that are too short to contain samples
-        if len(line) <= 5:
+        if len(line) <= 4:
             continue
         if line[0] in [
             SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID.value,
@@ -123,3 +90,21 @@ def get_samples_by_lane(
             sample_by_lane[sample.lane] = []
         sample_by_lane[sample.lane].append(sample)
     return sample_by_lane
+
+
+def get_flow_cell_samples_from_content(
+    sample_sheet_content: list[list[str]],
+    sample_type: Type[FlowCellSample] | None = None,
+) -> list[FlowCellSample]:
+    """
+    Return the samples in a sample sheet as a list of FlowCellSample objects.
+    Raises:
+        ValidationError: if the samples do not have the correct attributes based on their model.
+    """
+    if not sample_type:
+        sample_type: Type[FlowCellSample] = get_sample_type_from_content(sample_sheet_content)
+    raw_samples: list[dict[str, str]] = get_raw_samples_from_content(
+        sample_sheet_content=sample_sheet_content
+    )
+    adapter = TypeAdapter(list[sample_type])
+    return adapter.validate_python(raw_samples)

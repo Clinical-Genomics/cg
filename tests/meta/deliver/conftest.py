@@ -1,4 +1,5 @@
 """Fixtures for backup tests."""
+
 from pathlib import Path
 
 import pytest
@@ -7,8 +8,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
-from cg.store import Store
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.store.models import Case
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -28,6 +30,7 @@ def deliver_api(
         sample_tags=[{AlignmentFileTag.CRAM}],
         project_base_path=project_dir,
         delivery_type="balsamic",
+        fastq_file_service=FastqFileService(),
     )
     yield _deliver_api
 
@@ -56,6 +59,7 @@ def populated_deliver_api(
         sample_tags=[{AlignmentFileTag.CRAM}],
         project_base_path=project_dir,
         delivery_type="balsamic",
+        fastq_file_service=FastqFileService(),
     )
     return _deliver_api
 

@@ -1,9 +1,12 @@
 """Report field validation helper"""
 
-
 from cg.constants import NA_FIELD
 from cg.constants.constants import SCALE_TO_MILLION_READ_PAIRS
 from cg.models.report.report import ReportModel
+
+
+def get_mapped_reads_fraction(mapped_reads: float, total_reads: float) -> float | None:
+    return mapped_reads / total_reads if mapped_reads and total_reads else None
 
 
 def get_million_read_pairs(reads: int) -> float | None:

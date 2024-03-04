@@ -1,4 +1,5 @@
 """Module to create delivery reports."""
+
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -8,7 +9,7 @@ from housekeeper.store.models import File, Version
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sqlalchemy.orm import Query
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.exc import DeliveryReportError
@@ -103,8 +104,18 @@ class ReportAPI(MetaAPI):
         return delivery_report.full_path
 
     def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
-        """Return the file path of the uploaded to Scout file given its tag."""
-        raise NotImplementedError
+        """Return file path of the uploaded to Scout file given its tag."""
+        version: Version = self.housekeeper_api.last_version(bundle=case_id)
+        tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
+        uploaded_file: File = self.housekeeper_api.get_latest_file(
+            bundle=case_id, tags=tags, version=version.id
+        )
+        if not tags or not uploaded_file:
+            LOG.warning(
+                f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
+            )
+            return None
+        return uploaded_file.full_path
 
     def render_delivery_report(self, report_data: dict) -> str:
         """Renders the report on the Jinja template."""
@@ -115,14 +126,14 @@ class ReportAPI(MetaAPI):
         template: Template = env.get_template(self.get_template_name())
         return template.render(**report_data)
 
-    def get_cases_without_delivery_report(self, pipeline: Pipeline) -> list[Case]:
+    def get_cases_without_delivery_report(self, workflow: Workflow) -> list[Case]:
         """Returns a list of cases that has been stored and need a delivery report."""
         stored_cases: list[Case] = []
-        analyses: Query = self.status_db.analyses_to_delivery_report(pipeline=pipeline)[
+        analyses: Query = self.status_db.analyses_to_delivery_report(workflow=workflow)[
             :MAX_ITEMS_TO_RETRIEVE
         ]
-        for analysis_obj in analyses:
-            case: Case = analysis_obj.case
+        for analysis in analyses:
+            case: Case = analysis.case
             last_version: Version = self.housekeeper_api.last_version(bundle=case.internal_id)
             hk_file: File = self.housekeeper_api.get_files(
                 bundle=case.internal_id, version=last_version.id if last_version else None
@@ -136,15 +147,15 @@ class ReportAPI(MetaAPI):
                 )
         return stored_cases
 
-    def get_cases_without_uploaded_delivery_report(self, pipeline: Pipeline) -> list[Case]:
+    def get_cases_without_uploaded_delivery_report(self, workflow: Workflow) -> list[Case]:
         """Returns a list of cases that need a delivery report to be uploaded."""
-        analyses: Query = self.status_db.analyses_to_upload_delivery_reports(pipeline=pipeline)[
+        analyses: Query = self.status_db.analyses_to_upload_delivery_reports(workflow=workflow)[
             :MAX_ITEMS_TO_RETRIEVE
         ]
-        return [analysis_obj.case for analysis_obj in analyses]
+        return [analysis.case for analysis in analyses]
 
     def update_delivery_report_date(self, case: Case, analysis_date: datetime) -> None:
-        """Updates the date when delivery report was created."""
+        """Updates the date when a delivery report was created."""
         analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_started_at(
             case_entry_id=case.id, started_at_date=analysis_date
         )
@@ -164,7 +175,7 @@ class ReportAPI(MetaAPI):
             version=self.get_report_version(analysis=analysis),
             date=datetime.today(),
             case=case_model,
-            accredited=self.get_report_accreditation(
+            accredited=self.is_report_accredited(
                 samples=case_model.samples, analysis_metadata=analysis_metadata
             ),
         )
@@ -249,7 +260,9 @@ class ReportAPI(MetaAPI):
                     gender=sample.sex,
                     source=lims_sample.get("source") if lims_sample else None,
                     tumour=sample.is_tumour,
-                    application=self.get_sample_application_data(lims_sample=lims_sample),
+                    application=self.get_sample_application_data(
+                        sample=sample, lims_sample=lims_sample
+                    ),
                     methods=self.get_sample_methods_data(sample_id=sample.internal_id),
                     status=case_sample.status,
                     metadata=self.get_sample_metadata(
@@ -269,16 +282,16 @@ class ReportAPI(MetaAPI):
             LOG.info(f"Could not fetch sample {sample_id} from LIMS: {ex}")
         return lims_sample
 
-    def get_pipeline_accreditation_limitation(self, application_tag: str) -> str | None:
-        """Return pipeline specific limitations given an application tag."""
+    def get_workflow_accreditation_limitation(self, application_tag: str) -> str | None:
+        """Return workflow specific limitations given an application tag."""
         application_limitation: ApplicationLimitations = (
-            self.status_db.get_application_limitation_by_tag_and_pipeline(
-                tag=application_tag, pipeline=self.analysis_api.pipeline
+            self.status_db.get_application_limitation_by_tag_and_workflow(
+                tag=application_tag, workflow=self.analysis_api.workflow
             )
         )
         return application_limitation.limitations if application_limitation else None
 
-    def get_sample_application_data(self, lims_sample: dict) -> ApplicationModel:
+    def get_sample_application_data(self, sample: Sample, lims_sample: dict) -> ApplicationModel:
         """Retrieves the analysis application attributes."""
         application: Application = self.status_db.get_application_by_tag(
             tag=lims_sample.get("application")
@@ -286,12 +299,12 @@ class ReportAPI(MetaAPI):
         return (
             ApplicationModel(
                 tag=application.tag,
-                version=lims_sample.get("application_version"),
+                version=sample.application_version.version,
                 prep_category=application.prep_category,
                 description=application.description,
                 details=application.details,
                 limitations=application.limitations,
-                pipeline_limitations=self.get_pipeline_accreditation_limitation(application.tag),
+                workflow_limitations=self.get_workflow_accreditation_limitation(application.tag),
                 accredited=application.is_accredited,
                 external=application.is_external,
             )
@@ -326,12 +339,12 @@ class ReportAPI(MetaAPI):
         analysis: Analysis,
         analysis_metadata: AnalysisModel,
     ) -> DataAnalysisModel:
-        """Return pipeline attributes used for data analysis."""
+        """Return workflow attributes used for data analysis."""
         return DataAnalysisModel(
-            customer_pipeline=case.data_analysis,
+            customer_workflow=case.data_analysis,
             data_delivery=case.data_delivery,
-            pipeline=analysis.pipeline,
-            pipeline_version=analysis.pipeline_version,
+            workflow=analysis.workflow,
+            workflow_version=analysis.workflow_version,
             type=self.get_data_analysis_type(case=case),
             genome_build=self.get_genome_build(analysis_metadata=analysis_metadata),
             variant_callers=self.get_variant_callers(_analysis_metadata=analysis_metadata),
@@ -341,20 +354,7 @@ class ReportAPI(MetaAPI):
 
     def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
-        return ScoutReportFiles(
-            snv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="snv_vcf"
-            ),
-            sv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="sv_vcf"
-            ),
-            vcf_str=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="vcf_str"
-            ),
-            smn_tsv=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="smn_tsv"
-            ),
-        )
+        raise NotImplementedError
 
     @staticmethod
     def get_sample_timestamp_data(sample: Sample) -> TimestampModel:
@@ -394,10 +394,10 @@ class ReportAPI(MetaAPI):
         """Return list of variant-calling filters used during analysis."""
         return []
 
-    def get_report_accreditation(
+    def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
-        """Checks if the report is accredited or not."""
+        """Check if the report is accredited."""
         raise NotImplementedError
 
     def get_required_fields(self, case: CaseModel) -> dict:
@@ -405,7 +405,7 @@ class ReportAPI(MetaAPI):
         raise NotImplementedError
 
     def get_template_name(self) -> str:
-        """Return pipeline specific template name."""
+        """Return workflow specific template name."""
         raise NotImplementedError
 
     @staticmethod
@@ -434,10 +434,10 @@ class ReportAPI(MetaAPI):
         return ReportAPI.get_sample_required_fields(case=case, required_fields=required_fields)
 
     def get_hk_scout_file_tags(self, scout_tag: str) -> list | None:
-        """Return pipeline specific uploaded to Scout Housekeeper file tags given a Scout key."""
+        """Return workflow specific uploaded to Scout Housekeeper file tags given a Scout key."""
         tags = self.get_upload_case_tags().get(scout_tag)
         return list(tags) if tags else None
 
     def get_upload_case_tags(self):
-        """Return pipeline specific upload case tags."""
+        """Return workflow specific upload case tags."""
         raise NotImplementedError
