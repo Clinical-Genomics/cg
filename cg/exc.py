@@ -262,5 +262,9 @@ class OrderNotFoundError(CgError):
     """Exception raised when an order is not found."""
 
 
+class OrderExistsError(CgError):
+    """Exception raised when cases and samples are added to a pre-existing order."""
+
+
 class OverrideCyclesError(CgError):
     """Exception raised when the override cycles are not correct."""
