@@ -105,5 +105,5 @@ class CollectQCMetricsAPI:
             response: Response = self.arnold_api.create_case(case_request)
             LOG.info(f"Created case for {case_id} in arnold. {response.status_code}")
         except (ArnoldClientError, ArnoldServerError) as error:
-            LOG.info(f"Failed to create case in arnold: {error}.")
+            LOG.error(f"Failed to create case in arnold: {error}.")
             return
