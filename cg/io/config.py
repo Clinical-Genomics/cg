@@ -7,8 +7,8 @@ from cg.constants.symbols import EMPTY_STRING
 
 def write_config_nextflow_style(content: dict[str, Any] | None) -> str:
     """Write content to stream accepted by Nextflow config files with non-quoted booleans and quoted strings."""
-    string = EMPTY_STRING
-    double_quotes = '"'
+    string:str  = EMPTY_STRING
+    double_quotes: str = '"'
     for key, value in content.items():
         if isinstance(value, Path):
             value: str = value.as_posix()
