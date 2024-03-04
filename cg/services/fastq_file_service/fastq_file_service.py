@@ -9,12 +9,9 @@ from cg.services.fastq_file_service.utils import (
 
 class FastqFileService:
 
+    @staticmethod
     def concatenate(
-        self,
-        fastq_directory: Path,
-        forward_output: Path,
-        reverse_output: Path,
-        remove_raw: bool = False,
+        fastq_directory: Path, forward_output: Path, reverse_output: Path, remove_raw: bool = False
     ):
         temp_forward: Path | None = concatenate_forward_reads(fastq_directory)
         temp_reverse: Path | None = concatenate_reverse_reads(fastq_directory)

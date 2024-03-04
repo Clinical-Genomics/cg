@@ -13,6 +13,7 @@ from cg.constants.delivery import (
     PIPELINE_ANALYSIS_TAG_MAP,
 )
 from cg.models.delivery.delivery import DeliveryFile
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -25,10 +26,17 @@ class DeliveryAPI:
     bundle to the customer's inbox.
     """
 
-    def __init__(self, delivery_path: Path, housekeeper_api: HousekeeperAPI, store: Store):
-        self.delivery_path = delivery_path
-        self.housekeeper_api = housekeeper_api
-        self.store = store
+    def __init__(
+        self,
+        delivery_path: Path,
+        fastq_file_service: FastqFileService,
+        housekeeper_api: HousekeeperAPI,
+        store: Store,
+    ):
+        self.delivery_path: Path = delivery_path
+        self.fastq_file_service: FastqFileService = fastq_file_service
+        self.housekeeper_api: HousekeeperAPI = housekeeper_api
+        self.store: Store = store
 
     def link_delivery_files_to_inbox(self) -> None:
         """Link files from Housekeeper bundle to the customer's inbox."""
@@ -138,6 +146,7 @@ class DeliveryAPI:
     ) -> list[DeliveryFile]:
         """Return a delivery file model given a list of housekeeper files."""
         delivery_files: list[DeliveryFile] = []
+        # TODO: concatenation
         destination_path: Path = Path(
             self.delivery_path, case.customer_id, INBOX_NAME, case.latest_ticket
         )
