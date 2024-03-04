@@ -20,7 +20,7 @@ from cg.models.deliverables.metric_deliverables import (
 )
 from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import FileDeliverable, WorkflowDeliverables
-from cg.models.rnafusion.rnafusion import NfCommandArgs
+from cg.models.nf_analysis import NfCommandArgs
 from cg.utils import Process
 from cg.store.models import Sample
 
