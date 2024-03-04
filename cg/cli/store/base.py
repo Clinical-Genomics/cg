@@ -13,6 +13,7 @@ from .store import (
     store_case,
     store_demultiplexed_flow_cell,
     store_flow_cell,
+    store_qc_metrics,
     store_sample,
     store_ticket,
 )
@@ -42,5 +43,6 @@ for sub_cmd in [
     store_flow_cell,
     store_sample,
     store_ticket,
+    store_qc_metrics,
 ]:
     store.add_command(sub_cmd)
