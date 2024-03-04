@@ -232,7 +232,7 @@ class NfAnalysisAPI(AnalysisAPI):
         )
 
     def _run_analysis_with_nextflow(
-        self, case_id: str, command_args: CommandArgs, dry_run: bool
+        self, case_id: str, command_args: NfCommandArgs, dry_run: bool
     ) -> None:
         """Run analysis with given options using Nextflow."""
         self.process = Process(
@@ -265,7 +265,7 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.info(f"Nextflow head job running as job: {sbatch_number}")
 
     def _run_analysis_with_tower(
-        self, case_id: str, command_args: CommandArgs, dry_run: bool
+        self, case_id: str, command_args: NfCommandArgs, dry_run: bool
     ) -> None:
         """Run analysis with given options using NF-Tower."""
         LOG.info("Workflow will be executed using Tower")
