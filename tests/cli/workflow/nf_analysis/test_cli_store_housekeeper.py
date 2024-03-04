@@ -86,9 +86,9 @@ def test_store_housekeeper_case_not_finished(
     case_id: str,
     request,
 ):
-    """Test store_housekeeper for workflow with case_id and config file but no analysis_finish."""
-    caplog.set_level(logging.ERROR)
-    context: CGConfig = request.getfixturevalue(context)
+    """Test command with case_id and config file but no analysis_finish."""
+    caplog.set_level(logging.WARNING)
+    context = request.getfixturevalue(context)
     # GIVEN case-id
     case_id: str = request.getfixturevalue(case_id)
 
@@ -245,7 +245,7 @@ def test_store_housekeeper_valid_case(
         ),
     ],
 )
-def test_valid_case_already_added(
+def test_store_housekeeper_valid_case_already_added(
     cli_runner,
     mocker,
     hermes_deliverables,
@@ -308,7 +308,7 @@ def test_valid_case_already_added(
         ),
     ],
 )
-def test_dry_run(
+def test_store_houseekeeper_dry_run(
     cli_runner: CliRunner,
     context: CGConfig,
     mock_deliverable,
