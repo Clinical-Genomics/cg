@@ -88,8 +88,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             fastq_reverse_read_paths=fastq_reverse_read_paths,
             sex=self.get_sex_code(case_sample.sample.sex),
             phenotype=self.get_phenotype_code(case_sample.status),
-            paternal_id=CaseSample.get_paternal_id(case_sample.father),
-            maternal_id=CaseSample.get_maternal_id(case_sample.mother),
+            paternal_id=CaseSample.get_paternal_id,
+            maternal_id=CaseSample.get_maternal_id,
             case_id=case.internal_id,
         )
         return sample_sheet_entry.reformat_sample_content

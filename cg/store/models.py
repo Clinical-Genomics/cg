@@ -648,13 +648,15 @@ class CaseSample(Base):
     def __str__(self) -> str:
         return f"{self.case.internal_id} | {self.sample.internal_id}"
 
+    @property
     def get_maternal_sample_id(self) -> str | None:
         """Return parental id."""
-        return mother.internal_id if self.mother_links else None
+        return self.mother.internal_id if self.mother_links else None
 
+    @property
     def get_paternal_sample_id(self) -> str:
         """Return parental id."""
-        return father.internal_id if self.father_links else None
+        return self.father.internal_id if self.father_links else None
 
 
 class Flowcell(Base):
