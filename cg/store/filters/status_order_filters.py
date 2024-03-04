@@ -1,11 +1,11 @@
 from enum import Enum
 from typing import Callable
-from sqlalchemy import asc, desc
+from sqlalchemy import asc, desc, or_
 
 from sqlalchemy.orm import Query
 from cg.server.dto.orders.orders_request import OrderSortField, SortOrder
 
-from cg.store.models import Order
+from cg.store.models import Customer, Order
 
 
 def filter_orders_by_workflow(orders: Query, workflow: str | None, **kwargs) -> Query:
@@ -28,6 +28,19 @@ def filter_orders_by_ticket_id(orders: Query, ticket_id: int | None, **kwargs) -
     return orders.filter(Order.ticket_id == ticket_id) if ticket_id else orders
 
 
+def filter_orders_by_search(orders: Query, search: str | None, **kwargs) -> Query:
+    if search:
+        orders = orders.join(Order.customer)
+        orders.filter(
+            or_(
+                Order.id == search,
+                Order.ticket_id == search,
+                Customer.internal_id.icontains(search),
+            )
+        )
+    return orders
+
+
 def apply_sorting(
     orders: Query, sort_field: OrderSortField | None, sort_order: SortOrder | None, **kwargs
 ) -> Query:
@@ -42,6 +55,7 @@ def apply_sorting(
 class OrderFilter(Enum):
     BY_ID: Callable = filter_orders_by_id
     BY_IDS: Callable = filter_orders_by_ids
+    BY_SEARCH: Callable = filter_orders_by_search
     BY_TICKET_ID: Callable = filter_orders_by_ticket_id
     BY_WORKFLOW: Callable = filter_orders_by_workflow
     PAGINATE: Callable = apply_pagination
@@ -57,8 +71,9 @@ def apply_order_filters(
     workflow: SortOrder = None,
     page: int = None,
     page_size: int = None,
-    sort_field: str = None,
-    sort_order: str = None,
+    sort_field: OrderSortField = None,
+    sort_order: SortOrder = None,
+    search: str = None,
 ) -> Query:
     for filter in filters:
         orders: Query = filter(
@@ -71,5 +86,6 @@ def apply_order_filters(
             ticket_id=ticket_id,
             sort_field=sort_field,
             sort_order=sort_order,
+            search=search,
         )
     return orders
