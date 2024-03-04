@@ -19,6 +19,8 @@ SKIP_MISSING: list[Workflow] = [
     Workflow.MUTANT,
 ]
 
+PREFIX_APPTAGS_TO_CONCATENATE = ["MWG", "MWL", "MWM", "MWR", "MWX"]
+
 BALSAMIC_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"delivery-report"},
     {"multiqc-html"},

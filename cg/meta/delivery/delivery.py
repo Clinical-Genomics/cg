@@ -141,10 +141,13 @@ class DeliveryAPI:
     ) -> list[DeliveryFile]:
         """Return a delivery file model given a list of housekeeper files."""
         delivery_files: list[DeliveryFile] = []
-        # TODO: concatenation
         destination_path: Path = Path(
             self.delivery_path, case.customer_id, INBOX_NAME, case.latest_ticket
         )
+        if self.fastq_file_service.is_concatenation_needed(case):
+            # TODO
+            pass
+
         subfolder: Path = Path(destination_id)
         if analysis_sample_files:
             subfolder: Path = Path(case.name, destination_id)
