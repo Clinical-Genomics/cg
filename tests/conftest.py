@@ -2343,7 +2343,9 @@ def nf_analysis_pipeline_params_path(nf_analysis_analysis_dir) -> Path:
 @pytest.fixture(scope="function")
 def nf_analysis_pipeline_resource_optimisation_path(nf_analysis_analysis_dir) -> Path:
     """Path to pipeline resource optimisation file."""
-    return Path(nf_analysis_analysis_dir, f"pipeline_resource_optimisation").with_suffix(FileExtensions.CONFIG)
+    return Path(nf_analysis_analysis_dir, f"pipeline_resource_optimisation").with_suffix(
+        FileExtensions.CONFIG
+    )
 
 
 @pytest.fixture(scope="session")

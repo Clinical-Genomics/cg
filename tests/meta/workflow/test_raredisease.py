@@ -63,14 +63,14 @@ def test_write_params_file(raredisease_context: CGConfig, raredisease_case_id: s
     analysis_api: RarediseaseAnalysisAPI = raredisease_context.meta_apis["analysis_api"]
     in_out = {"input": "input_path", "output": "output_path"}
 
-    #WHEN creating case directory
+    # WHEN creating case directory
     analysis_api.create_case_directory(case_id=raredisease_case_id, dry_run=False)
 
-    #THEN care directory is created
+    # THEN care directory is created
     assert os.path.exists(analysis_api.get_case_path)
 
-    #WHEN writing parameters file
+    # WHEN writing parameters file
     analysis_api.write_params_file(case_id=raredisease_case_id, workflow_parameters=in_out)
 
-    #THEN the file is created
+    # THEN the file is created
     assert os.path.isfile(analysis_api.get_params_file_path(case_id=raredisease_case_id))
