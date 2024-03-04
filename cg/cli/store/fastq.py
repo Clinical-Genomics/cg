@@ -11,6 +11,7 @@ from cg.constants import SequencingFileTag
 from cg.constants.constants import DRY_RUN
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
+from cg.meta.qc_metrics.collect_qc_metrics import CollectQCMetricsAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Sample
 from cg.store.store import Store
@@ -130,3 +131,17 @@ def store_demultiplexed_flow_cell(context: click.Context, flow_cell_id: str, dry
                     spring_metadata_path=spring_metadata_file.full_path,
                     new_parent_path=Path(spring_metadata_file.full_path).parent,
                 )
+
+
+@click.command("qc-metrics")
+@click.argument("case-id", type=str)
+@DRY_RUN
+@click.pass_obj
+def store_qc_metrics_for_case(config: CGConfig, case_id: str, dry_run: bool) -> None:
+    metrics_api = CollectQCMetricsAPI(
+        hk_api=config.housekeeper_api,
+        status_db=config.status_db,
+        janus_api=config.janus_api,
+        arnold_api=config.arnold_api,
+    )
+    metrics_api.create_case(case_id)
