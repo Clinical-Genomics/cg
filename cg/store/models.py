@@ -649,9 +649,28 @@ class CaseSample(Base):
         return f"{self.case.internal_id} | {self.sample.internal_id}"
 
 
-class Flowcell(Base):
-    __tablename__ = "flowcell"
+class SequencingUnit(Base):
+    __tablename__ = "sequencing_unit"
     id: Mapped[PrimaryKeyInt]
+    name: Mapped[UniqueStr]
+    type: Mapped[str] = mapped_column(types.Enum("ILLUMINA"))
+
+    samples: Mapped[list["Sample"]] = orm.relationship(
+        secondary=flowcell_sample, back_populates="flowcells"
+    )
+    sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
+        back_populates="flowcell",
+        cascade="all, delete, delete-orphan",
+    )
+    __mapper_args__ = {
+        "polymorphic_identity": "sequencing_unit",
+        "polymorphic_on": "type",
+    }
+
+
+class IlluminaFlowCell(SequencingUnit):
+    __tablename__ = "illumina_flow_cell"
+    id: Mapped[int] = mapped_column(ForeignKey("sequencing_unit.id"), primary_key=True)
     name: Mapped[UniqueStr]
     sequencer_type: Mapped[str | None] = mapped_column(
         types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx")
@@ -665,20 +684,16 @@ class Flowcell(Base):
     has_backup: Mapped[bool] = mapped_column(default=False)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=datetime.now)
 
-    samples: Mapped[list["Sample"]] = orm.relationship(
-        secondary=flowcell_sample, back_populates="flowcells"
-    )
-    sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
-        back_populates="flowcell",
-        cascade="all, delete, delete-orphan",
-    )
+    __mapper_args__ = {
+        "polymorphic_identity": "ILLUMINA",
+    }
 
     def __str__(self):
         return self.name
 
     def to_dict(self, samples: bool = False):
         """Represent as dictionary"""
-        data = to_dict(model_instance=Flowcell)
+        data = to_dict(model_instance=IlluminaFlowCell)
         if samples:
             data["samples"] = [sample.to_dict() for sample in self.samples]
         return data
@@ -805,7 +820,7 @@ class Sample(Base, PriorityMixin):
     father_links: Mapped[list[CaseSample]] = orm.relationship(
         foreign_keys=[CaseSample.father_id], back_populates="father"
     )
-    flowcells: Mapped[list[Flowcell]] = orm.relationship(
+    flowcells: Mapped[list[SequencingUnit]] = orm.relationship(
         secondary=flowcell_sample, back_populates="samples"
     )
     sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
@@ -961,7 +976,7 @@ class SampleLaneSequencingMetrics(Base):
 
     created_at: Mapped[datetime | None]
 
-    flowcell: Mapped[Flowcell] = orm.relationship(back_populates="sequencing_metrics")
+    flowcell: Mapped[SequencingUnit] = orm.relationship(back_populates="sequencing_metrics")
     sample: Mapped[Sample] = orm.relationship(back_populates="sequencing_metrics")
 
     __table_args__ = (
