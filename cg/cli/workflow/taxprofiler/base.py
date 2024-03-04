@@ -18,6 +18,7 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_WORKDIR,
     metrics_deliver,
     report_deliver,
+    store_housekeeper,
 )
 from cg.cli.workflow.taxprofiler.options import OPTION_FROM_START, OPTION_INSTRUMENT_PLATFORM
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -44,6 +45,7 @@ def taxprofiler(context: click.Context) -> None:
 taxprofiler.add_command(resolve_compression)
 taxprofiler.add_command(metrics_deliver)
 taxprofiler.add_command(report_deliver)
+taxprofiler.add_command(store_housekeeper)
 
 
 @taxprofiler.command("config-case")
