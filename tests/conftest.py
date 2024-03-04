@@ -2331,19 +2331,19 @@ def rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
 @pytest.fixture(scope="function")
 def nf_analysis_platform_config_path(nf_analysis_analysis_dir) -> Path:
     """Path to platform config file."""
-    return Path(nf_analysis_analysis_dir, f"platform").with_suffix(FileExtensions.CONFIG)
+    return Path(nf_analysis_analysis_dir, "platform").with_suffix(FileExtensions.CONFIG)
 
 
 @pytest.fixture(scope="function")
 def nf_analysis_pipeline_params_path(nf_analysis_analysis_dir) -> Path:
     """Path to pipeline params file."""
-    return Path(nf_analysis_analysis_dir, f"pipeline_params").with_suffix(FileExtensions.CONFIG)
+    return Path(nf_analysis_analysis_dir, "pipeline_params").with_suffix(FileExtensions.CONFIG)
 
 
 @pytest.fixture(scope="function")
 def nf_analysis_pipeline_resource_optimisation_path(nf_analysis_analysis_dir) -> Path:
     """Path to pipeline resource optimisation file."""
-    return Path(nf_analysis_analysis_dir, f"pipeline_resource_optimisation").with_suffix(
+    return Path(nf_analysis_analysis_dir, "pipeline_resource_optimisation").with_suffix(
         FileExtensions.CONFIG
     )
 
