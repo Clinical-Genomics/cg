@@ -4,6 +4,7 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.constants import EXIT_SUCCESS
 from pathlib import Path
+import os
 
 
 def test_get_sample_sheet_content(
@@ -58,9 +59,18 @@ def test_get_sample_sheet_content(
 
 def test_write_params_file(raredisease_context: CGConfig, raredisease_case_id: str):
 
-    # GIVEN Raredisease analysis API
+    # GIVEN Raredisease analysis API and input (nextflow sample sheet path)/output (case directory) parameters
     analysis_api: RarediseaseAnalysisAPI = raredisease_context.meta_apis["analysis_api"]
-
     in_out = {"input": "input_path", "output": "output_path"}
 
+    #WHEN creating case directory
+    analysis_api.create_case_directory(case_id=raredisease_case_id, dry_run=False)
+
+    #THEN care directory is created
+    assert os.path.exists(analysis_api.get_case_path)
+
+    #WHEN writing parameters file
     analysis_api.write_params_file(case_id=raredisease_case_id, workflow_parameters=in_out)
+
+    #THEN the file is created
+    assert os.path.isfile(analysis_api.get_params_file_path(case_id=raredisease_case_id))
