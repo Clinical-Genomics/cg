@@ -121,7 +121,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return parameters file or a path where the default parameters file for a case id should be located."""
         if params_file:
             return params_file.absolute()
-       case_path: Path =self.get_case_path(case_id)
+        case_path: Path = self.get_case_path(case_id)
         return Path(case_path, f"{case_id}_params_file{FileExtensions.CONFIG}")
         # This function should be moved to nf-analysis to replace the current one when all nextflow pipelines are using the same config files approach
 
