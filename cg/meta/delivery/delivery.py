@@ -7,11 +7,7 @@ from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Workflow
-from cg.constants.delivery import (
-    INBOX_NAME,
-    ONLY_ONE_CASE_PER_TICKET,
-    PIPELINE_ANALYSIS_TAG_MAP,
-)
+from cg.constants.delivery import INBOX_NAME, PIPELINE_ANALYSIS_TAG_MAP
 from cg.models.delivery.delivery import DeliveryFile
 from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.store.models import Case, Sample
@@ -86,7 +82,6 @@ class DeliveryAPI:
                 case=case,
                 source_id=sample.internal_id,
                 destination_id=sample.name,
-                sample_files=True,
             )
         return delivery_files
 
@@ -132,7 +127,7 @@ class DeliveryAPI:
             case=case,
             source_id=sample.internal_id,
             destination_id=sample.name,
-            sample_files=True,
+            analysis_sample_files=True,
         )
         return delivery_files
 
@@ -142,7 +137,7 @@ class DeliveryAPI:
         case: Case,
         source_id: str,
         destination_id: str,
-        sample_files: bool = False,
+        analysis_sample_files: bool = False,
     ) -> list[DeliveryFile]:
         """Return a delivery file model given a list of housekeeper files."""
         delivery_files: list[DeliveryFile] = []
@@ -151,7 +146,7 @@ class DeliveryAPI:
             self.delivery_path, case.customer_id, INBOX_NAME, case.latest_ticket
         )
         subfolder: Path = Path(destination_id)
-        if sample_files and case.data_analysis not in ONLY_ONE_CASE_PER_TICKET:
+        if analysis_sample_files:
             subfolder: Path = Path(case.name, destination_id)
         for file in files:
             destination_file_name: str = Path(file.full_path).name.replace(
