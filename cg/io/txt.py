@@ -29,10 +29,8 @@ def concat_txt(
     content: str = EMPTY_STRING
     if str_content:
         for txt in str_content:
-            content += txt
-            content += "\n"  # Add newline after each file content
+            content += f"{txt}\n"
     for file_path in file_paths:
-        content += read_txt(file_path, read_to_string=True)
-        content += "\n"  # Add newline after each file content
-
+        file_content: str = read_txt(file_path, read_to_string=True)
+        content += f"{file_content}\n"
     write_txt(content=content, file_path=target_file)
