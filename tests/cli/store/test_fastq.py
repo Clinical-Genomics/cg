@@ -2,7 +2,7 @@ import logging
 
 from click.testing import CliRunner
 
-from cg.cli.store.fastq import (
+from cg.cli.store.store import (
     store_case,
     store_demultiplexed_flow_cell,
     store_flow_cell,
