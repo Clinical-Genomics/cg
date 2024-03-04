@@ -47,6 +47,5 @@ def test_create_case_not_successful(
     # WHEN creating a case
 
     # THEN the request raises an error
-    with pytest.raises(ArnoldClientError) as error:
+    with pytest.raises(ArnoldClientError):
         arnold_client.create_case(create_case_request)
-        assert error_content in error
