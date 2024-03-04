@@ -49,7 +49,7 @@ def test_create_case_request(
     mocker,
 ):
 
-    # GIVEN  mock case qc metrics
+    # GIVEN a mock case qc metrics
     mocker.patch.object(CollectQCMetricsAPI, "get_case_qc_metrics")
     CollectQCMetricsAPI.get_case_qc_metrics.return_value = mock_case_qc_metrics
 

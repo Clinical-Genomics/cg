@@ -86,7 +86,7 @@ class CollectQCMetricsAPI:
             files=file_paths_and_tags,
         )
 
-    def get_case_qc_metrics(self, case_id) -> dict:
+    def get_case_qc_metrics(self, case_id: str) -> dict:
         """Get the qc metrics for a case."""
         qc_metrics_request: CreateQCMetricsRequest = self.create_qc_metrics_request(case_id)
         try:
@@ -95,7 +95,7 @@ class CollectQCMetricsAPI:
         except (JanusClientError, JanusServerError) as error:
             LOG.info(f"Cannot collect qc metrics from Janus: {error}")
 
-    def get_create_case_request(self, case_id) -> CreateCaseRequest:
+    def get_create_case_request(self, case_id: str) -> CreateCaseRequest:
         case_qc_metrics: dict = self.get_case_qc_metrics(case_id)
         return CreateCaseRequest(**case_qc_metrics)
 
