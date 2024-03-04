@@ -25,18 +25,19 @@ from cg.constants.constants import FileFormat
 from cg.exc import (
     CaseNotFoundError,
     OrderError,
+    OrderExistsError,
     OrderFormError,
     TicketCreationError,
 )
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
+from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from cg.server.dto.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.ext import db, lims, osticket, order_service
-from cg.server.utils import parse_orders_request
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.orders.order_service.exceptions import OrderNotFoundError
 from cg.store.models import (
@@ -128,6 +129,9 @@ def submit_order(order_type):
         )
         project = OrderType(order_type)
         order_in = OrderIn.parse_obj(request_json, project=project)
+        existing_ticket: str | None = TicketHandler.parse_ticket_number(order_in.name)
+        if existing_ticket and order_service.store.get_order_by_ticket_id(existing_ticket):
+            raise OrderExistsError(f"Order with ticket id {existing_ticket} already exists.")
 
         result: dict = api.submit(
             project=project,
@@ -139,6 +143,7 @@ def submit_order(order_type):
 
     except (  # user misbehaviour
         OrderError,
+        OrderExistsError,
         OrderFormError,
         ValidationError,
         ValueError,
@@ -480,7 +485,7 @@ def get_application_pipeline_limitations(tag: str):
 @BLUEPRINT.route("/orders")
 def get_orders():
     """Return the latest orders."""
-    data: OrdersRequest = parse_orders_request(request)
+    data = OrdersRequest.model_validate(request.args.to_dict())
     response: OrdersResponse = order_service.get_orders(data)
     return make_response(response.model_dump())
 
