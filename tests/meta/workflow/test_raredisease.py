@@ -20,9 +20,16 @@ def test_get_sample_sheet_content(
     result = analysis_api.get_sample_sheet_content(case_id=raredisease_case_id)
 
     # THEN return should contain patterns
-    patterns = ["ADM1", "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz", "raredisease_case_enough_reads"]
+    patterns = [
+        "ADM1",
+        "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz",
+        "raredisease_case_enough_reads",
+    ]
 
-    contains_pattern = any(any(any(pattern in sub_element for pattern in patterns) for sub_element in element) for element in result)
+    contains_pattern = any(
+        any(any(pattern in sub_element for pattern in patterns) for sub_element in element)
+        for element in result
+    )
     assert contains_pattern
 
 
