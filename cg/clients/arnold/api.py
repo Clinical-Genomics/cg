@@ -29,9 +29,9 @@ class ArnoldAPIClient:
     def _handle_errors(response: Response):
         if 400 <= response.status_code < 500:
             raise ArnoldClientError(
-                f"Client error: {response.status_code}. Reason {response.reason}"
+                f"Client error: {response.status_code}. Reason {response.content}"
             )
         elif 500 <= response.status_code:
             raise ArnoldServerError(
-                f"Server error: {response.status_code}. Reason {response.reason}"
+                f"Server error: {response.status_code}. Reason {response.content}"
             )
