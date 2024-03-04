@@ -658,6 +658,7 @@ class CaseSample(Base):
         """Return parental id."""
         return self.father.internal_id if self.father_links else None
 
+
 class Flowcell(Base):
     __tablename__ = "flowcell"
     id: Mapped[PrimaryKeyInt]
