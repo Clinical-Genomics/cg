@@ -28,7 +28,6 @@ def add_analysis_summaries(
         order_summary.failed = analysis_summary.failed
 
 
-
 class CaseStatus(Enum):
     SEQUENCING = 1
     LAB_PREPARATION = 2
