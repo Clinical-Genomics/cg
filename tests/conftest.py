@@ -2426,7 +2426,9 @@ def rnafusion_deliverable_data(rnafusion_dir: Path, rnafusion_case_id: str, samp
 
 
 @pytest.fixture(scope="function")
-def rnafusion_mock_deliverable(rnafusion_dir: Path, rnafusion_deliverable_data, rnafusion_case_id: str) -> None:
+def rnafusion_mock_deliverable(
+    rnafusion_dir: Path, rnafusion_deliverable_data, rnafusion_case_id: str
+) -> None:
     """Create deliverable file with dummy data and files to deliver."""
     Path.mkdir(
         Path(rnafusion_dir, rnafusion_case_id),
@@ -2702,7 +2704,9 @@ def taxprofiler_context(
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_deliverable_data(taxprofiler_dir: Path, taxprofiler_case_id: str, sample_id: str) -> dict:
+def taxprofiler_deliverable_data(
+    taxprofiler_dir: Path, taxprofiler_case_id: str, sample_id: str
+) -> dict:
     return {
         "files": [
             {
@@ -2780,7 +2784,9 @@ def taxprofiler_malformed_hermes_deliverables(taxprofiler_hermes_deliverables) -
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_deliverable_data(taxprofiler_dir: Path, taxprofiler_case_id: str, sample_id: str) -> dict:
+def taxprofiler_deliverable_data(
+    taxprofiler_dir: Path, taxprofiler_case_id: str, sample_id: str
+) -> dict:
     return {
         "files": [
             {
@@ -2797,7 +2803,9 @@ def taxprofiler_deliverable_data(taxprofiler_dir: Path, taxprofiler_case_id: str
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_mock_deliverable(taxprofiler_dir: Path, taxprofiler_deliverable_data, taxprofiler_case_id: str) -> None:
+def taxprofiler_mock_deliverable(
+    taxprofiler_dir: Path, taxprofiler_deliverable_data, taxprofiler_case_id: str
+) -> None:
     """Create taxprofiler deliverable file with dummy data and files to deliver."""
     Path.mkdir(
         Path(taxprofiler_dir, taxprofiler_case_id),
@@ -2814,7 +2822,9 @@ def taxprofiler_mock_deliverable(taxprofiler_dir: Path, taxprofiler_deliverable_
     WriteFile.write_file_from_content(
         content=taxprofiler_deliverable_data,
         file_format=FileFormat.JSON,
-        file_path=Path(taxprofiler_dir, taxprofiler_case_id, taxprofiler_case_id + "_deliverables.yaml"),
+        file_path=Path(
+            taxprofiler_dir, taxprofiler_case_id, taxprofiler_case_id + "_deliverables.yaml"
+        ),
     )
 
 

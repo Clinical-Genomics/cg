@@ -18,6 +18,7 @@ from cg.utils import Process
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from pytest_mock import MockFixture
 
+
 @pytest.mark.parametrize(
     "context",
     ["rnafusion_context", "taxprofiler_context"],
@@ -87,7 +88,7 @@ def test_store_housekeeper_case_not_finished(
     request,
 ):
     """Test command with case_id and config file but no analysis_finish."""
-    caplog.set_level(logging.WARNING)
+    caplog.set_level(logging.ERROR)
     context = request.getfixturevalue(context)
     # GIVEN case-id
     case_id: str = request.getfixturevalue(case_id)
@@ -130,7 +131,7 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
     request,
 ):
     """Test store_housekeeper command workflow with case_id and config file
-        and analysis_finish but malformed deliverables output."""
+    and analysis_finish but malformed deliverables output."""
     caplog.set_level(logging.WARNING)
     context: CGConfig = request.getfixturevalue(context)
     workflow = request.getfixturevalue(workflow)
@@ -221,9 +222,7 @@ def test_store_housekeeper_valid_case(
 
     # THEN a workflow version should be correctly stored
     assert (
-        context.status_db.get_case_by_internal_id(internal_id=case_id)
-        .analyses[0]
-        .workflow_version
+        context.status_db.get_case_by_internal_id(internal_id=case_id).analyses[0].workflow_version
         == workflow_version
     )
 
@@ -288,7 +287,6 @@ def test_store_housekeeper_valid_case_already_added(
 
     # THEN user should be informed that bundle was already added
     assert "Bundle already added" in caplog.text
-
 
 
 @pytest.mark.parametrize(
