@@ -167,7 +167,7 @@ class DeliveryAPI:
         return PIPELINE_ANALYSIS_TAG_MAP[workflow]["sample_tags"]
 
     @staticmethod
-    def is_sample_deliverable(sample: Sample, force: bool) -> bool:
+    def is_sample_deliverable(sample: Sample, force: bool = False) -> bool:
         """Return whether the sample is deliverable or not."""
         is_external: bool = sample.application_version.application.is_external
         qc_pass: bool = sample.sequencing_qc
