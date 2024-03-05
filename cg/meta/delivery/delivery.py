@@ -141,7 +141,6 @@ class DeliveryAPI:
     ) -> list[DeliveryFile]:
         """Return a delivery file model given a list of housekeeper files."""
         delivery_files: list[DeliveryFile] = []
-        # TODO: concatenation
         destination_path: Path = Path(
             self.delivery_path, case.customer_id, INBOX_NAME, case.latest_ticket
         )
