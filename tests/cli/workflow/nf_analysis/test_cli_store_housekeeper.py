@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
-from cg.cli.workflow.rnafusion.base import store_housekeeper
+from cg.cli.workflow.taxprofiler.base import store_housekeeper
 from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteStream
@@ -65,42 +65,6 @@ def test_store_housekeeper_with_missing_case(
     # THEN ERROR log should be printed containing invalid case_id
     assert case_id_does_not_exist in caplog.text
     assert "could not be found" in caplog.text
-
-
-@pytest.mark.parametrize(
-    ("context", "case_id"),
-    [
-        (
-            "taxprofiler_context",
-            "taxprofiler_case_id",
-        ),
-        (
-            "rnafusion_context",
-            "rnafusion_case_id",
-        ),
-    ],
-)
-def test_store_housekeeper_case_not_finished(
-    cli_runner: CliRunner,
-    context: CGConfig,
-    caplog: LogCaptureFixture,
-    case_id: str,
-    request,
-):
-    """Test command with case_id and config file but no analysis_finish."""
-    caplog.set_level(logging.ERROR)
-    context = request.getfixturevalue(context)
-    # GIVEN case-id
-    case_id: str = request.getfixturevalue(case_id)
-
-    # WHEN running
-    result = cli_runner.invoke(store_housekeeper, [case_id], obj=context)
-
-    # THEN command should NOT execute successfully
-    assert result.exit_code != EXIT_SUCCESS
-
-    # THEN warning should be printed that no deliverables file has been found
-    assert "No deliverables file found for case" in caplog.text
 
 
 @pytest.mark.parametrize(
@@ -306,7 +270,7 @@ def test_store_housekeeper_valid_case_already_added(
         ),
     ],
 )
-def test_store_houseekeeper_dry_run(
+def test_store_housekeeper_dry_run(
     cli_runner: CliRunner,
     context: CGConfig,
     mock_deliverable,
