@@ -142,7 +142,7 @@ class DeliveryAPI:
         """Return a delivery file model given a list of housekeeper files."""
         delivery_files: list[DeliveryFile] = []
         destination_path: Path = Path(
-            self.delivery_path, case.customer_id, INBOX_NAME, case.latest_ticket
+            self.delivery_path, case.customer.internal_id, INBOX_NAME, case.latest_ticket
         )
         subfolder: Path = Path(destination_id)
         if analysis_sample_files:
