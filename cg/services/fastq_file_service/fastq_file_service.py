@@ -5,7 +5,6 @@ from cg.services.fastq_file_service.utils import (
     concatenate_reverse_reads,
     remove_raw_fastqs,
 )
-from cg.store.models import Case
 
 
 class FastqFileService:
@@ -29,7 +28,3 @@ class FastqFileService:
 
         if temp_reverse:
             temp_reverse.rename(reverse_output)
-
-    @staticmethod
-    def is_concatenation_needed(case: Case) -> bool:
-        raise NotImplementedError
