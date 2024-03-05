@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "cg"
-version = "59.5.9"
+version = "59.10.5"
 description = "Clinical Genomics command center"
 authors = ["Clinical Genomics <support@clinicalgenomics.se>"]
 readme = "README.md"
@@ -81,15 +81,13 @@ pytest-cov = "*"
 pytest-mock = "*"
 pytest = "*"
 ruff = "*"
+pytest-xdist = "*"
 
 [tool.poetry.scripts]
 cg = "cg.cli.base:base"
 
 
 # Configurations
-
-[tool.poetry.group.dev.dependencies]
-pytest-xdist = "^3.5.0"
 
 [tool.black]
 line-length = 100
