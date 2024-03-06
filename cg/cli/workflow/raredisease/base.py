@@ -102,7 +102,7 @@ def run(
         **{
             "log": analysis_api.get_log_path(
                 case_id=case_id,
-                pipeline=analysis_api.pipeline,
+                workflow=analysis_api.workflow,
                 log=log,
             ),
             "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
