@@ -15,6 +15,7 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
+    Order,
     Panel,
     Sample,
     User,
@@ -278,6 +279,8 @@ def add_case(
         priority=priority,
         ticket=ticket,
     )
+    order: Order = status_db.get_order_by_ticket_id(int(ticket))
+    new_case.orders.append(order)
 
     new_case.customer: Customer = customer
     status_db.session.add(new_case)
