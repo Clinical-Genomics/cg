@@ -68,6 +68,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             header=RarediseaseSampleSheetHeaders.headers(),
         )
         self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
+        self.write_nextflow_config(case_id=case_id)
 
     def get_sample_sheet_content_per_sample(
         self, case: Case = "", case_sample: CaseSample = ""
@@ -148,6 +149,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         except KeyError:
             raise ValueError(f"{phenotype} is not a valid phenotype")
         return code
+
 
     @staticmethod
     def get_sex_code(sex: str) -> int:
