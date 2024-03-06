@@ -68,12 +68,31 @@ def test_get_verified_pon():
     invalid_pon_cnn = "/path/PON/gmssolid_15.2_hg19_design_CNVkit_PON_reference_v2.cnn"
 
     # WHEN validating the PON
-    validated_pon: str = BalsamicAnalysisAPI.get_verified_pon(None, panel_bed, pon_cnn)
+    validated_pon: str = BalsamicAnalysisAPI.get_verified_pon(None, panel_bed, pon_cnn, Sex.MALE)
 
     # THEN the PON verification should be performed successfully
     assert pon_cnn == validated_pon
     with pytest.raises(BalsamicStartError):
         BalsamicAnalysisAPI.get_verified_pon(None, panel_bed, invalid_pon_cnn)
+
+def test_get_verified_sex_specific_pon():
+    """Tests PON verification."""
+
+    # GIVEN specific panel bed and PON files
+    panel_bed = "/path/gmslymphoid_7.3_hg19_design.bed"
+    pon_cnn = "/path/PON/gmslymphoid_7.3_hg19_design_male_CNVkit_PON_reference_v1.cnn"
+    invalid_pon_cnn = "/path/PON/gmslymphoid_7.3_hg19_design_female_CNVkit_PON_reference_v1.cnn"
+
+    # WHEN validating the sex-specific PON using the correct PON for the sample sex
+    validated_pon: str = BalsamicAnalysisAPI.get_verified_pon(None, panel_bed, pon_cnn, Sex.MALE)
+
+    # THEN the PON verification should be performed successfully
+    assert pon_cnn == validated_pon
+
+    # WHEN validating the PON using a sex-specific PON which does not match the sample sex
+    # THEN the PON verification should fail
+    with pytest.raises(BalsamicStartError):
+        BalsamicAnalysisAPI.get_verified_pon(None, panel_bed, invalid_pon_cnn, Sex.MALE)
 
 
 def test_get_latest_file_by_pattern(
