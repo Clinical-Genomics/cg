@@ -6,7 +6,7 @@ from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 from pydantic import ValidationError
 
-from cg.cli.workflow.rnafusion.base import store_housekeeper
+from cg.cli.workflow.taxprofiler.base import store_housekeeper
 from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteStream
@@ -21,7 +21,7 @@ def test_case_with_malformed_deliverables_file(
     taxprofiler_context: CGConfig,
     taxprofiler_malformed_hermes_deliverables: dict,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    taxprofiler_case_id: str,
 ):
     """Test command with case_id and config file and analysis_finish but malformed deliverables output."""
     caplog.set_level(logging.WARNING)
@@ -37,11 +37,11 @@ def test_case_with_malformed_deliverables_file(
     # GIVEN that the output is malformed
     with pytest.raises(ValidationError):
         analysis_api.hermes_api.convert_deliverables(
-            deliverables_file=Path("a_file"), workflow="rnafusion"
+            deliverables_file=Path("a_file"), workflow="taxprofiler"
         )
 
         # GIVEN case-id
-        case_id: str = rnafusion_case_id
+        case_id: str = taxprofiler_case_id
 
         # WHEN running
         result = cli_runner.invoke(store_housekeeper, [case_id], obj=taxprofiler_context)
