@@ -37,7 +37,7 @@ from cg.models.orders.orderform_schema import Orderform
 from cg.server.dto.delivery_message_response import DeliveryMessageResponse
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
-from cg.server.ext import db, lims, osticket, order_service
+from cg.server.ext import db, lims, order_service, osticket
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.orders.order_service.exceptions import OrderNotFoundError
 from cg.store.models import (
@@ -214,6 +214,17 @@ def parse_case(case_id):
     if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
         return abort(HTTPStatus.FORBIDDEN)
     return jsonify(**case.to_dict(links=True, analyses=True))
+
+
+@BLUEPRINT.route("/cases/delivery_message", methods=["GET"])
+def get_cases_delivery_message():
+    case_ids: list[str] = request.args.get("case_ids")
+    service = DeliveryMessageService(db)
+    try:
+        response: DeliveryMessageResponse = service.get_delivery_message(case_ids)
+        return jsonify(response.model_dump()), HTTPStatus.OK
+    except CaseNotFoundError as error:
+        return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
 
 
 @BLUEPRINT.route("/cases/<case_id>/delivery_message", methods=["GET"])
