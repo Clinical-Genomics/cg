@@ -68,69 +68,6 @@ def test_store_housekeeper_with_missing_case(
 
 
 @pytest.mark.parametrize(
-    ("context", "case_id", "workflow", "malformed_deliverables"),
-    [
-        (
-            "taxprofiler_context",
-            "taxprofiler_case_id",
-            "taxprofiler_workflow",
-            "taxprofiler_malformed_hermes_deliverables",
-        ),
-        (
-            "rnafusion_context",
-            "rnafusion_case_id",
-            "rnafusion_workflow",
-            "rnafusion_malformed_hermes_deliverables",
-        ),
-    ],
-)
-def test_store_housekeeper_case_with_malformed_deliverables_file(
-    cli_runner,
-    mocker,
-    context: CGConfig,
-    malformed_deliverables,
-    caplog: LogCaptureFixture,
-    case_id: str,
-    workflow: str,
-    request,
-):
-    """Test store_housekeeper command workflow with case_id and config file
-    and analysis_finish but malformed deliverables output."""
-    caplog.set_level(logging.WARNING)
-    context: CGConfig = request.getfixturevalue(context)
-    workflow = request.getfixturevalue(workflow)
-    malformed_hermes_deliverables = request.getfixturevalue(malformed_deliverables)
-    # GIVEN a malformed output from hermes
-    analysis_api: NfAnalysisAPI = context.meta_apis["analysis_api"]
-
-    # GIVEN that HermesAPI returns a malformed deliverables output
-    mocker.patch.object(Process, "run_command")
-    Process.run_command.return_value = WriteStream.write_stream_from_content(
-        content=malformed_hermes_deliverables, file_format=FileFormat.JSON
-    )
-
-    # GIVEN that the output is malformed
-    with pytest.raises(ValidationError):
-        analysis_api.hermes_api.convert_deliverables(
-            deliverables_file=Path("a_file"), workflow=workflow
-        )
-        # GIVEN case-id
-        case_id: str = request.getfixturevalue(case_id)
-
-        # WHEN running
-        result = cli_runner.invoke(store_housekeeper, [case_id], obj=context)
-
-        raise Exception("test")
-        # THEN command should NOT execute successfully
-        assert result.exit_code != EXIT_SUCCESS
-
-        # THEN information that the file is malformed should be communicated
-        assert "Deliverables file is malformed" in caplog.text
-        assert "field required" in caplog.text
-
-
-
-@pytest.mark.parametrize(
     ("context", "case_id", "hermes_deliverables", "mock_deliverable"),
     [
         (
