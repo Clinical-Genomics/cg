@@ -169,6 +169,9 @@ def add_user(context: CGConfig, admin: bool, customer_id: str, email: str, name:
     default="standard",
     help="Set the priority for the samples",
 )
+@click.option(
+    "-t", "--original-ticket", required=True, help="Original ticket this sample is associated to."
+)
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_obj
@@ -182,6 +185,7 @@ def add_sample(
     priority: Priority,
     customer_id: str,
     name: str,
+    original_ticket: str,
 ):
     """Add a sample for CUSTOMER_ID with a NAME (display)."""
     status_db: Store = context.status_db
@@ -193,8 +197,8 @@ def add_sample(
     application: Application = status_db.get_application_by_tag(tag=application_tag)
     if not application:
         LOG.error(f"Application: {application_tag} not found")
-
         raise click.Abort
+
     new_record: Sample = status_db.add_sample(
         name=name,
         sex=sex,
@@ -202,6 +206,7 @@ def add_sample(
         internal_id=lims_id,
         order=order,
         priority=priority,
+        original_ticket=original_ticket,
     )
     new_record.application_version: ApplicationVersion = (
         status_db.get_current_application_version_by_tag(tag=application_tag)
