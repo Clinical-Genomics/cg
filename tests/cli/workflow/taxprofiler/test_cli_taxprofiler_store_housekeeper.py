@@ -34,5 +34,3 @@ def test_case_not_finished(
 
     # THEN warning should be printed that no deliverables file has been found
     assert "No deliverables file found for case" in caplog.text
-
-
