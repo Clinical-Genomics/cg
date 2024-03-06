@@ -68,6 +68,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             header=RarediseaseSampleSheetHeaders.headers(),
         )
         self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
+        LOG.info("Write nextflow config file")
         self.write_nextflow_config(case_id=case_id)
 
     def get_sample_sheet_content_per_sample(
