@@ -2563,7 +2563,9 @@ def taxprofiler_sample_sheet_content(
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_hermes_deliverables(taxprofiler_deliverable_data: dict, taxprofiler_case_id: str) -> dict:
+def taxprofiler_hermes_deliverables(
+    taxprofiler_deliverable_data: dict, taxprofiler_case_id: str
+) -> dict:
     hermes_output: dict = {"workflow": "taxprofiler", "bundle_id": taxprofiler_case_id, "files": []}
     for file_info in taxprofiler_deliverable_data["files"]:
         tags: list[str] = []
@@ -2716,7 +2718,9 @@ def taxprofiler_context(
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_deliverable_data(taxprofiler_dir: Path, taxprofiler_case_id: str, taxprofiler_id: str) -> dict:
+def taxprofiler_deliverable_data(
+    taxprofiler_dir: Path, taxprofiler_case_id: str, taxprofiler_id: str
+) -> dict:
     return {
         "files": [
             {
@@ -2760,10 +2764,15 @@ def taxprofiler_mock_deliverable(
 
 @pytest.fixture(scope="function")
 def taxprofiler_mock_analysis_finish(
-    taxprofiler_dir: Path, taxprofiler_case_id: str, taxprofiler_multiqc_json_metrics: dict, tower_id: int
+    taxprofiler_dir: Path,
+    taxprofiler_case_id: str,
+    taxprofiler_multiqc_json_metrics: dict,
+    tower_id: int,
 ) -> None:
     """Create analysis_finish file for testing."""
-    Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info"), parents=True, exist_ok=True)
+    Path.mkdir(
+        Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info"), parents=True, exist_ok=True
+    )
     Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info", "software_versions.yml").touch(
         exist_ok=True
     )

@@ -161,4 +161,3 @@ def test_report_deliver_successful(
 
     # THEN assess that missing fields are written
     assert "path_index: null" in deliverables_content
-
