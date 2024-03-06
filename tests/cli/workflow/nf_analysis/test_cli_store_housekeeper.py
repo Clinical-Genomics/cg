@@ -114,19 +114,20 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
         analysis_api.hermes_api.convert_deliverables(
             deliverables_file=Path("a_file"), workflow=workflow
         )
-
         # GIVEN case-id
         case_id: str = request.getfixturevalue(case_id)
 
         # WHEN running
         result = cli_runner.invoke(store_housekeeper, [case_id], obj=context)
 
+        raise Exception("test")
         # THEN command should NOT execute successfully
         assert result.exit_code != EXIT_SUCCESS
 
         # THEN information that the file is malformed should be communicated
         assert "Deliverables file is malformed" in caplog.text
         assert "field required" in caplog.text
+
 
 
 @pytest.mark.parametrize(

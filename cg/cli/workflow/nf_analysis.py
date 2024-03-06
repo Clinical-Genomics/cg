@@ -145,13 +145,10 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
     except ValidationError as error:
         LOG.warning("Deliverables file is malformed")
         raise error
-    # except CgError as error:
-    #    import pdb;
-    #    pdb.set_trace()
-    #    LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}")
-    #    raise click.Abort()
+    except CgError as error:
+        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}")
+        raise click.Abort()
     except Exception as error:
-        # import pdb; pdb.set_trace()
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
         housekeeper_api.rollback()
         status_db.session.rollback()
