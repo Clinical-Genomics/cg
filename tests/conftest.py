@@ -144,7 +144,7 @@ def sample_id() -> str:
     return "ADM1"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def another_sample_id() -> str:
     """Return another sample id."""
     return "another_sample_id"
@@ -621,7 +621,7 @@ def analysis_dir(fixtures_dir: Path) -> Path:
     return Path(fixtures_dir, "analysis")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def housekeeper_bundles_dir(tmp_path: Path) -> Path:
     """Return path to the Housekeeper bundles directory."""
     directory = Path(tmp_path, "housekeeper_bundles")
