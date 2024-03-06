@@ -224,6 +224,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                     f"Application type {application_types.pop()} requires a bed file to be analyzed!"
                 )
             return Path(self.bed_path, target_bed).as_posix()
+
     def get_verified_pon(self, panel_bed: str, pon_cnn: str, sex: Sex) -> str | None:
         """Returns the validated PON or extracts the latest one available if it is not provided
 
@@ -232,13 +233,17 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """
 
         if pon_cnn:
-            latest_pon = pon_cnn
-            if Path(panel_bed).stem not in Path(latest_pon).stem:
+            panel_name: str = Path(panel_bed).stem
+            pon_name: str = Path(pon_cnn).stem
+            if panel_name not in pon_name:
                 raise BalsamicStartError(
-                    f"The specified PON reference file {latest_pon} does not match the panel bed {panel_bed}"
+                    f"The PON reference file {pon_cnn} does not match the panel bed {panel_bed}"
                 )
-            latest_pon = self.get_verified_sex_pon(sample_sex=sex, pon_cnn=latest_pon)
-
+            if sex not in pon_name and (sex.MALE in pon_name or sex.FEMALE in pon_name):
+                raise BalsamicStartError(
+                    f"The PON reference file {pon_cnn} does not match the sample sex {sex}"
+                )
+            latest_pon: str = pon_cnn
         else:
             latest_pon = self.get_latest_pon_file(panel_bed=panel_bed, sex=sex)
             if latest_pon:
@@ -249,7 +254,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return latest_pon
 
     def get_latest_pon_file(self, panel_bed: str, sex: Sex) -> str | None:
-        """Returns the latest PON cnn file associated to a specific capture bed, using sex-specific PON when available"""
+        """Returns the latest PON cnn file associated to a specific capture bed, using sex-specific PON when available."""
 
         if not panel_bed:
             raise BalsamicStartError("BALSAMIC PON workflow requires a panel bed to be specified")
@@ -257,7 +262,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         pon_list = Path(self.pon_path).glob(f"*{Path(panel_bed).stem}_{sex}_{self.PON_file_suffix}")
         if not pon_list:
             LOG.info(
-                f"No fitting sex-specific PON has been found for: {panel_bed} resorting to sex-neutral PON if available."
+                f"No fitting sex-specific PON has been found for: {panel_bed}. Defaulting to use sex-neutral PON if available."
             )
             pon_list = Path(self.pon_path).glob(f"*{Path(panel_bed).stem}_{self.PON_file_suffix}")
         sorted_pon_files = sorted(
@@ -267,22 +272,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
 
         return sorted_pon_files[0].as_posix() if sorted_pon_files else None
-
-    def get_verified_sex_pon(self, sample_sex: Sex, pon_cnn: str) -> str:
-        """
-        Verifies that manually supplied sex-specific PON matches sex of sample
-
-        Raises BalsamicStartError:
-            When there is a mismatch between the sample sex and the sex of the PON
-        """
-        sex_values = [Sex.FEMALE, Sex.MALE]
-        for pon_sex in sex_values:
-            if "_{pon_sex}_" in Path(pon_cnn).stem:
-                if sample_sex != pon_sex:
-                    raise BalsamicStartError(
-                        f"The specified PON reference file {pon_cnn} does not match the sample sex: {sample_sex}"
-                    )
-        return pon_cnn
 
     @staticmethod
     def get_verified_sex(sample_data: dict) -> Sex:
