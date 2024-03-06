@@ -162,5 +162,3 @@ def test_report_deliver_successful(
     # THEN assess that missing fields are written
     assert "path_index: null" in deliverables_content
 
-    deliverables_temp_dir = pathlib.Path(deliverables_file_path).parent
-    shutil.rmtree(deliverables_temp_dir)
