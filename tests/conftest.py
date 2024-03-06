@@ -75,7 +75,7 @@ pytest_plugins = [
     "tests.fixture_plugins.demultiplex_fixtures.sample_sheet_fixtures",
     "tests.fixture_plugins.delivery_fixtures.context_fixtures",
     "tests.fixture_plugins.delivery_fixtures.bundle_fixtures",
-    "tests.fixture_plugins.delivery_fixtures.sample_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.path_fixtures",
 ]
 
 # Case fixtures
@@ -619,6 +619,14 @@ def fixtures_dir() -> Path:
 def analysis_dir(fixtures_dir: Path) -> Path:
     """Return the path to the analysis dir."""
     return Path(fixtures_dir, "analysis")
+
+
+@pytest.fixture(scope="function")
+def housekeeper_bundles_dir(tmp_path: Path) -> Path:
+    """Return path to the Housekeeper bundles directory."""
+    directory = Path(tmp_path, "housekeeper_bundles")
+    directory.mkdir(parents=True, exist_ok=True)
+    return directory
 
 
 @pytest.fixture(scope="session")

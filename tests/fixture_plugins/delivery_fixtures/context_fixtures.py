@@ -1,5 +1,7 @@
 """Delivery API context fixtures."""
 
+from typing import Any
+
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -11,11 +13,15 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
-def delivery_housekeeper_api(real_housekeeper_api: HousekeeperAPI, helpers: StoreHelpers):
+def delivery_housekeeper_api(
+    real_housekeeper_api: HousekeeperAPI,
+    helpers: StoreHelpers,
+    hk_delivery_sample_bundle: dict[str, Any],
+    hk_delivery_another_sample_bundle: dict[str, Any],
+):
     """Delivery API Housekeeper context."""
-    # TODO
-    helpers.ensure_hk_bundle(real_housekeeper_api, "")
-    helpers.ensure_hk_bundle(real_housekeeper_api, "")
+    helpers.ensure_hk_bundle(real_housekeeper_api, hk_delivery_sample_bundle)
+    helpers.ensure_hk_bundle(real_housekeeper_api, hk_delivery_another_sample_bundle)
     return real_housekeeper_api
 
 
@@ -34,6 +40,7 @@ def delivery_context(
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
     sample_name: str,
+    another_sample_name: str,
 ) -> CGConfig:
     """Delivery API context."""
     status_db: Store = cg_context.status_db
@@ -70,7 +77,7 @@ def delivery_context(
     another_sample: Sample = helpers.add_sample(
         store=status_db,
         internal_id=another_sample_id,
-        name=sample_name,
+        name=another_sample_name,
     )
 
     sample_not_enough_reads: Sample = helpers.add_sample(

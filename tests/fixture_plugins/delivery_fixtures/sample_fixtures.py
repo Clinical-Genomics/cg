@@ -1,1 +1,0 @@
-"""Delivery API sample fixtures."""
