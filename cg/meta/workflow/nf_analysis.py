@@ -192,7 +192,7 @@ class NfAnalysisAPI(AnalysisAPI):
     def write_nextflow_config(self, case_id: str) -> None:
         """Write nextflow config in json format."""
         if content := self.get_nextflow_config_content():
-            LOG.debug("Writing nextflow config file")
+            LOG.info("Writing nextflow config file")
             write_txt(
                 content=content,
                 file_path=self.get_nextflow_config_path(case_id=case_id),
