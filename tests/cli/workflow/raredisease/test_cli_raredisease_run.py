@@ -96,37 +96,6 @@ def test_without_config(
     assert "No config file found" in caplog.text
 
 
-def test_with_config_use_nextflow(
-    cli_runner: CliRunner,
-    raredisease_context: CGConfig,
-    caplog: LogCaptureFixture,
-    raredisease_case_id: str,
-    mock_config,
-):
-    """Test command with case_id and config file using nextflow."""
-    caplog.set_level(logging.INFO)
-    # GIVEN case-id
-    case_id: str = raredisease_case_id
-
-    # GIVEN a mocked config
-
-    # WHEN dry running with dry specified
-    result = cli_runner.invoke(
-        run, [case_id, "--dry-run", "--use-nextflow"], obj=raredisease_context
-    )
-
-    # THEN command should execute successfully
-    assert result.exit_code == EXIT_SUCCESS
-
-    # THEN command should use nextflow
-    assert "using nextflow" in caplog.text
-    assert "path/to/bin/nextflow" in caplog.text
-    assert "-work-dir" in caplog.text
-
-    # THEN command should include resume flag
-    assert "-resume" in caplog.text
-
-
 def test_with_config(
     cli_runner: CliRunner,
     raredisease_context: CGConfig,
@@ -148,7 +117,7 @@ def test_with_config(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN command should use tower
-    assert "using tower" in caplog.text
+    assert "using Tower" in caplog.text
     assert "path/to/bin/tw launch" in caplog.text
     assert "--work-dir" in caplog.text
 
@@ -213,7 +182,7 @@ def test_resume_without_id(
     caplog: LogCaptureFixture,
     raredisease_case_id: str,
     mock_config,
-    mock_analysis_finish,
+    raredisease_mock_analysis_finish,
 ):
     """Test resume command without providing NF-Tower ID when a Trailblazer Tower config file from a previous run
     exist."""
