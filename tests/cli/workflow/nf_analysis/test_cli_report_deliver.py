@@ -2,6 +2,9 @@
 
 import logging
 import pytest
+import shutil
+import pathlib
+
 from pathlib import Path
 
 from click.testing import CliRunner
@@ -13,6 +16,7 @@ from cg.models.cg_config import CGConfig
 from cg.constants import EXIT_SUCCESS
 from cg.io.controller import ReadFile
 from cg.constants.constants import FileFormat
+
 
 LOG = logging.getLogger(__name__)
 
@@ -157,3 +161,6 @@ def test_report_deliver_successful(
 
     # THEN assess that missing fields are written
     assert "path_index: null" in deliverables_content
+
+    deliverables_temp_dir = pathlib.Path(deliverables_file_path).parent
+    shutil.rmtree(deliverables_temp_dir)
