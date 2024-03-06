@@ -23,8 +23,6 @@ from cg.models.nf_analysis import FileDeliverable, WorkflowDeliverables
 from cg.models.nf_analysis import NfCommandArgs
 from cg.utils import Process
 from cg.store.models import Sample
-from cg.constants.symbols import EMPTY_STRING
-
 
 LOG = logging.getLogger(__name__)
 
@@ -77,9 +75,9 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get workflow version from config."""
         return self.revision
 
-    def get_nextflow_config_content(self) -> str:
+    def get_nextflow_config_content(self) -> str | None:
         """Return nextflow config content."""
-        return EMPTY_STRING
+        return None
 
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
@@ -192,7 +190,7 @@ class NfAnalysisAPI(AnalysisAPI):
     def write_nextflow_config(self, case_id: str) -> None:
         """Write nextflow config in json format."""
         if content := self.get_nextflow_config_content():
-            LOG.info("Writing nextflow config file")
+            LOG.debug("Writing nextflow config file")
             write_txt(
                 content=content,
                 file_path=self.get_nextflow_config_path(case_id=case_id),
