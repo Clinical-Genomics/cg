@@ -1,7 +1,5 @@
 """Tests the CLI methods to add cases to the status database."""
 
-import datetime
-
 from click.testing import CliRunner
 
 from cg.cli.add import add
@@ -19,19 +17,12 @@ def test_add_case_required(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket_id: str
 ):
     """Test to add a case using only the required arguments"""
-    # GIVEN a database with a customer and an order and a panel
+    # GIVEN a database with a customer and a panel
     disk_store: Store = base_context.status_db
 
     customer: Customer = helpers.ensure_customer(store=disk_store)
     customer_id = customer.internal_id
     panel: Panel = helpers.ensure_panel(store=disk_store)
-    helpers.add_order(
-        store=disk_store,
-        customer_id=customer_id,
-        ticket_id=int(ticket_id),
-        order_date=datetime.datetime.now(),
-        workflow=CLI_OPTION_ANALYSIS,
-    )
     panel_id = panel.name
     name = "case_name"
 
@@ -52,6 +43,7 @@ def test_add_case_required(
             name,
         ],
         obj=base_context,
+        input="y",
     )
 
     # THEN it should be added
@@ -93,6 +85,7 @@ def test_add_case_bad_workflow(
             customer_id,
             name,
         ],
+        input="y",
     )
 
     # THEN it should not be added
@@ -130,6 +123,7 @@ def test_add_case_bad_data_delivery(
             name,
         ],
         obj=base_context,
+        input="y",
     )
 
     # THEN it should not be added
@@ -161,6 +155,7 @@ def test_add_case_bad_customer(cli_runner: CliRunner, base_context: CGConfig, ti
             name,
         ],
         obj=base_context,
+        input="y",
     )
 
     # THEN it should complain about missing customer instead of adding a case
@@ -206,21 +201,13 @@ def test_add_case_priority(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket_id: str
 ):
     """Test that the added case get the priority we send in"""
-    # GIVEN a database with a customer and an order and a panel
+    # GIVEN a database with a customer and a panel
     disk_store: Store = base_context.status_db
     # WHEN adding a case
     customer: Customer = helpers.ensure_customer(store=disk_store)
     customer_id = customer.internal_id
     panel: Panel = helpers.ensure_panel(store=disk_store)
     panel_id = panel.name
-
-    helpers.add_order(
-        store=disk_store,
-        customer_id=customer_id,
-        ticket_id=int(ticket_id),
-        order_date=datetime.datetime.now(),
-        workflow=CLI_OPTION_ANALYSIS,
-    )
 
     name = "case_name"
     priority = "priority"
@@ -243,6 +230,7 @@ def test_add_case_priority(
             name,
         ],
         obj=base_context,
+        input="y",
     )
 
     # THEN it should be added
