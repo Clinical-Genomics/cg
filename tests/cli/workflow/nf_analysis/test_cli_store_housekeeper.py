@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
-from cg.cli.workflow.taxprofiler.base import store_housekeeper
+from cg.cli.workflow.rnafusion.base import store_housekeeper
 from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteStream
@@ -17,7 +17,6 @@ from cg.models.cg_config import CGConfig
 from cg.utils import Process
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from pytest_mock import MockFixture
-
 
 @pytest.mark.parametrize(
     "context",
@@ -65,6 +64,104 @@ def test_store_housekeeper_with_missing_case(
     # THEN ERROR log should be printed containing invalid case_id
     assert case_id_does_not_exist in caplog.text
     assert "could not be found" in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("context", "case_id"),
+    [
+        (
+            "taxprofiler_context",
+            "taxprofiler_case_id",
+        ),
+        (
+            "rnafusion_context",
+            "rnafusion_case_id",
+        ),
+    ],
+)
+def test_store_housekeeper_case_not_finished(
+    cli_runner: CliRunner,
+    context: CGConfig,
+    caplog: LogCaptureFixture,
+    case_id: str,
+    request,
+):
+    """Test store_housekeeper for workflow with case_id and config file but no analysis_finish."""
+    caplog.set_level(logging.ERROR)
+    context: CGConfig = request.getfixturevalue(context)
+    # GIVEN case-id
+    case_id: str = request.getfixturevalue(case_id)
+
+    # WHEN running
+    result = cli_runner.invoke(store_housekeeper, [case_id], obj=context)
+
+    # THEN command should NOT execute successfully
+    assert result.exit_code != EXIT_SUCCESS
+
+    # THEN warning should be printed that no deliverables file has been found
+    assert "No deliverables file found for case" in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("context", "case_id", "workflow", "malformed_deliverables"),
+    [
+        (
+            "taxprofiler_context",
+            "taxprofiler_case_id",
+            "taxprofiler_workflow",
+            "taxprofiler_malformed_hermes_deliverables",
+        ),
+        (
+            "rnafusion_context",
+            "rnafusion_case_id",
+            "rnafusion_workflow",
+            "rnafusion_malformed_hermes_deliverables",
+        ),
+    ],
+)
+def test_store_housekeeper_case_with_malformed_deliverables_file(
+    cli_runner,
+    mocker,
+    context: CGConfig,
+    malformed_deliverables,
+    caplog: LogCaptureFixture,
+    case_id: str,
+    workflow: str,
+    request,
+):
+    """Test store_housekeeper command workflow with case_id and config file
+        and analysis_finish but malformed deliverables output."""
+    caplog.set_level(logging.WARNING)
+    context: CGConfig = request.getfixturevalue(context)
+    workflow = request.getfixturevalue(workflow)
+    malformed_hermes_deliverables = request.getfixturevalue(malformed_deliverables)
+    # GIVEN a malformed output from hermes
+    analysis_api: NfAnalysisAPI = context.meta_apis["analysis_api"]
+
+    # GIVEN that HermesAPI returns a malformed deliverables output
+    mocker.patch.object(Process, "run_command")
+    Process.run_command.return_value = WriteStream.write_stream_from_content(
+        content=malformed_hermes_deliverables, file_format=FileFormat.JSON
+    )
+
+    # GIVEN that the output is malformed
+    with pytest.raises(ValidationError):
+        analysis_api.hermes_api.convert_deliverables(
+            deliverables_file=Path("a_file"), workflow=workflow
+        )
+
+        # GIVEN case-id
+        case_id: str = request.getfixturevalue(case_id)
+
+        # WHEN running
+        result = cli_runner.invoke(store_housekeeper, [case_id], obj=context)
+
+        # THEN command should NOT execute successfully
+        assert result.exit_code != EXIT_SUCCESS
+
+        # THEN information that the file is malformed should be communicated
+        assert "Deliverables file is malformed" in caplog.text
+        assert "field required" in caplog.text
 
 
 @pytest.mark.parametrize(
@@ -124,7 +221,9 @@ def test_store_housekeeper_valid_case(
 
     # THEN a workflow version should be correctly stored
     assert (
-        context.status_db.get_case_by_internal_id(internal_id=case_id).analyses[0].workflow_version
+        context.status_db.get_case_by_internal_id(internal_id=case_id)
+        .analyses[0]
+        .workflow_version
         == workflow_version
     )
 
@@ -146,7 +245,7 @@ def test_store_housekeeper_valid_case(
         ),
     ],
 )
-def test_store_housekeeper_valid_case_already_added(
+def test_valid_case_already_added(
     cli_runner,
     mocker,
     hermes_deliverables,
@@ -208,7 +307,7 @@ def test_store_housekeeper_valid_case_already_added(
         ),
     ],
 )
-def test_store_housekeeper_dry_run(
+def test_dry_run(
     cli_runner: CliRunner,
     context: CGConfig,
     mock_deliverable,

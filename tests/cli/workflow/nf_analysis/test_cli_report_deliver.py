@@ -113,11 +113,11 @@ def test_report_deliver_without_samples(
 def test_report_deliver_successful(
     cli_runner: CliRunner,
     context: CGConfig,
+    caplog: LogCaptureFixture,
     case_id: str,
     deliverables_file_path: Path,
     deliverables_template_content: list[dict],
     mock_analysis_finish,
-    caplog: LogCaptureFixture,
     mocker,
     request,
 ):
@@ -126,7 +126,7 @@ def test_report_deliver_successful(
 
     # GIVEN each fixture is being initialised
     context: CGConfig = request.getfixturevalue(context)
-    deliverables_file_path: dict = request.getfixturevalue(deliverables_file_path)
+    deliverables_file_path: Path = request.getfixturevalue(deliverables_file_path)
     case_id: str = request.getfixturevalue(case_id)
     request.getfixturevalue(mock_analysis_finish)
 
