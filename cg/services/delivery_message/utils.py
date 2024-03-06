@@ -16,9 +16,9 @@ from cg.services.delivery_message.messages.microsalt_mwx_message import (
 from cg.store.models import Case, Sample
 
 
-def get_message(case: Case) -> str:
-    message_strategy: DeliveryMessage = get_message_strategy(case)
-    return message_strategy.create_message(case)
+def get_message(cases: list[Case]) -> str:
+    message_strategy: DeliveryMessage = get_message_strategy(cases[0])
+    return message_strategy.create_message(cases)
 
 
 def get_message_strategy(case: Case) -> DeliveryMessage:
@@ -75,3 +75,7 @@ def get_case_app_tag(case: Case) -> str:
 
 def get_sample_app_tag(sample: Sample) -> str:
     return sample.application_version.application.tag
+
+
+def is_matching_order(cases: list[Case]) -> bool:
+    return all([case.latest_order == cases[0].latest_order for case in cases])

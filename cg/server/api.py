@@ -34,7 +34,12 @@ from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message_response import DeliveryMessageResponse
+from cg.server.dto.delivery_message.delivery_message_request import (
+    DeliveryMessageRequest,
+)
+from cg.server.dto.delivery_message.delivery_message_response import (
+    DeliveryMessageResponse,
+)
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.ext import db, lims, order_service, osticket
@@ -218,10 +223,12 @@ def parse_case(case_id):
 
 @BLUEPRINT.route("/cases/delivery_message", methods=["GET"])
 def get_cases_delivery_message():
-    case_ids: list[str] = request.args.get("case_ids")
+    delivery_message_request: DeliveryMessageRequest = DeliveryMessageRequest.model_validate(
+        request.args
+    )
     service = DeliveryMessageService(db)
     try:
-        response: DeliveryMessageResponse = service.get_delivery_message(case_ids)
+        response: DeliveryMessageResponse = service.get_delivery_message(delivery_message_request)
         return jsonify(response.model_dump()), HTTPStatus.OK
     except CaseNotFoundError as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
@@ -230,8 +237,9 @@ def get_cases_delivery_message():
 @BLUEPRINT.route("/cases/<case_id>/delivery_message", methods=["GET"])
 def get_case_delivery_message(case_id: str):
     service = DeliveryMessageService(db)
+    delivery_message_request = DeliveryMessageRequest(case_ids=[case_id])
     try:
-        response: DeliveryMessageResponse = service.get_delivery_message(case_id)
+        response: DeliveryMessageResponse = service.get_delivery_message(delivery_message_request)
         return jsonify(response.model_dump()), HTTPStatus.OK
     except CaseNotFoundError as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
