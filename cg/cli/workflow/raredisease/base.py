@@ -108,7 +108,7 @@ def run(
             "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
-            "config": analysis_api.get_nextflow_config_path(nextflow_config=config),
+            "config": analysis_api.get_nextflow_config_path(case_id=case_id, nextflow_config=config),
             "params_file": analysis_api.get_params_file_path(
                 case_id=case_id, params_file=params_file
             ),
