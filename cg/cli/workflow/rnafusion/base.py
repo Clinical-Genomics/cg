@@ -34,7 +34,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import NfCommandArgs
 from cg.constants.nf_analysis import NfTowerStatus
-from cg.store import Store
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
