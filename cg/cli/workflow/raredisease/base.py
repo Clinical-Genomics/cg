@@ -27,17 +27,12 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.exc import CgError
 
-
-# from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import NfCommandArgs
 from cg.constants.nf_analysis import NfTowerStatus
-
-# from cg.store import Store
-
 
 LOG = logging.getLogger(__name__)
 

@@ -47,7 +47,6 @@ from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
-# from cg.models.raredisease.raredisease import RarediseaseParameters
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
@@ -66,6 +65,8 @@ from tests.small_helpers import SmallHelpers
 from tests.store_helpers import StoreHelpers
 
 LOG = logging.getLogger(__name__)
+multiqc_json_file = "multiqc_data.json"
+software_version_file = "software_versions.yml"
 
 pytest_plugins = [
     "tests.fixture_plugins.timestamp_fixtures",
@@ -2249,7 +2250,7 @@ def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
 @pytest.fixture(scope="function")
 def rnafusion_multiqc_json_metrics(raredisease_analysis_dir) -> dict:
     """Returns the content of a mock Multiqc JSON file."""
-    return read_json(file_path=Path(raredisease_analysis_dir, "multiqc_data.json"))
+    return read_json(file_path=Path(raredisease_analysis_dir, multiqc_json_file))
 
 
 @pytest.fixture(scope="function")
@@ -2276,31 +2277,12 @@ def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> 
     ).with_suffix(FileExtensions.YAML)
 
 
-# @pytest.fixture(scope="function")
-# def raredisease_parameters_default(
-#     raredisease_dir: Path,
-#     raredisease_case_id: str,
-#     raredisease_sample_sheet_path: Path,
-#     existing_directory: Path,
-# ) -> RarediseaseParameters:
-#     """Return Raredisease parameters."""
-#     return RarediseaseParameters(
-#         cluster_options="--qos=normal",
-#         genomes_base=existing_directory,
-#         sample_sheet_path=raredisease_sample_sheet_path,
-#         outdir=Path(raredisease_dir, raredisease_case_id),
-#         priority="development",
-#     )
-
-
 @pytest.fixture(scope="function")
 def raredisease_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
     nf_analysis_housekeeper: HousekeeperAPI,
     trailblazer_api: MockTB,
-    # hermes_api: HermesApi,
-    # cg_dir: Path,
     raredisease_case_id: str,
     sample_id: str,
     no_sample_case_id: str,
@@ -2309,7 +2291,6 @@ def raredisease_context(
     case_id_not_enough_reads: str,
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
-    timestamp_yesterday: datetime,
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
@@ -2417,7 +2398,7 @@ def raredisease_mock_analysis_finish(
     Path.mkdir(
         Path(raredisease_dir, raredisease_case_id, "pipeline_info"), parents=True, exist_ok=True
     )
-    Path(raredisease_dir, raredisease_case_id, "pipeline_info", "software_versions.yml").touch(
+    Path(raredisease_dir, raredisease_case_id, "pipeline_info", software_version_file).touch(
         exist_ok=True
     )
     Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet.csv").touch(
@@ -2525,7 +2506,7 @@ def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
 @pytest.fixture(scope="function")
 def rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
     """Returns the content of a mock Multiqc JSON file."""
-    return read_json(file_path=Path(rnafusion_analysis_dir, "multiqc_data.json"))
+    return read_json(file_path=Path(rnafusion_analysis_dir, multiqc_json_file))
 
 
 @pytest.fixture(scope="function")
@@ -2743,7 +2724,7 @@ def rnafusion_mock_analysis_finish(
 ) -> None:
     """Create analysis_finish file for testing."""
     Path.mkdir(Path(rnafusion_dir, rnafusion_case_id, "pipeline_info"), parents=True, exist_ok=True)
-    Path(rnafusion_dir, rnafusion_case_id, "pipeline_info", "software_versions.yml").touch(
+    Path(rnafusion_dir, rnafusion_case_id, "pipeline_info", software_version_file).touch(
         exist_ok=True
     )
     Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
@@ -2865,7 +2846,7 @@ def taxprofiler_parameters_default(
 @pytest.fixture(scope="function")
 def taxprofiler_multiqc_json_metrics(taxprofiler_analysis_dir: Path) -> list[dict]:
     """Returns the content of a mock Multiqc JSON file."""
-    return read_json(file_path=Path(taxprofiler_analysis_dir, "multiqc_data.json"))
+    return read_json(file_path=Path(taxprofiler_analysis_dir, multiqc_json_file))
 
 
 @pytest.fixture(scope="function")
@@ -2992,7 +2973,7 @@ def taxprofiler_mock_analysis_finish(
     Path.mkdir(
         Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info"), parents=True, exist_ok=True
     )
-    Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info", "software_versions.yml").touch(
+    Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info", software_version_file).touch(
         exist_ok=True
     )
     Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet.csv").touch(
