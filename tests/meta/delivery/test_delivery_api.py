@@ -13,6 +13,33 @@ from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
+def test_get_fastq_delivery_files(
+    delivery_context_microsalt: CGConfig,
+    case_id: str,
+    delivery_fastq_file: Path,
+    delivery_another_fastq_file: Path,
+):
+    """Test get FASTQ delivery files for all samples linked to a case."""
+
+    # GIVEN a delivery context
+    delivery_api: DeliveryAPI = delivery_context_microsalt.delivery_api
+    status_db: Store = delivery_context_microsalt.status_db
+
+    # GIVEN a case object
+    case: Case = status_db.get_case_by_internal_id(case_id)
+
+    # WHEN retrieving the fastq file to deliver
+    delivery_files: list[DeliveryFile] = delivery_api.get_fastq_delivery_files(case=case)
+
+    # THEN all the fastq sample files should be returned
+    for delivery_file in delivery_files:
+        assert isinstance(delivery_file, DeliveryFile)
+        assert delivery_file.source_path.name in [
+            delivery_fastq_file.name,
+            delivery_another_fastq_file.name,
+        ]
+
+
 def test_get_fastq_delivery_files_by_sample(
     delivery_context_microsalt: CGConfig,
     case_id: str,
@@ -26,7 +53,7 @@ def test_get_fastq_delivery_files_by_sample(
     delivery_api: DeliveryAPI = delivery_context_microsalt.delivery_api
     status_db: Store = delivery_context_microsalt.status_db
 
-    # GIVEN a case object
+    # GIVEN case and sample objects
     case: Case = status_db.get_case_by_internal_id(case_id)
     sample: Sample = status_db.get_sample_by_internal_id(sample_id)
 
@@ -62,9 +89,9 @@ def test_get_analysis_case_delivery_files(
     delivery_files: list[DeliveryFile] = delivery_api.get_analysis_case_delivery_files(case=case)
 
     # THEN only case specific files should be returned, ignoring sample analysis files
-    assert isinstance(delivery_files[0], DeliveryFile)
     assert delivery_files[0].source_path.name == delivery_report_file.name
     for delivery_file in delivery_files:
+        assert isinstance(delivery_file, DeliveryFile)
         assert delivery_file.source_path.name not in [
             delivery_cram_file.name,
             delivery_another_cram_file.name,
