@@ -13,6 +13,35 @@ from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
+def test_get_fastq_delivery_files_by_sample(
+    delivery_context_microsalt: CGConfig,
+    case_id: str,
+    sample_id: str,
+    delivery_fastq_file: Path,
+    delivery_spring_file: Path,
+):
+    """Test get FASTQ delivery files for a sample."""
+
+    # GIVEN a delivery context
+    delivery_api: DeliveryAPI = delivery_context_microsalt.delivery_api
+    status_db: Store = delivery_context_microsalt.status_db
+
+    # GIVEN a case object
+    case: Case = status_db.get_case_by_internal_id(case_id)
+    sample: Sample = status_db.get_sample_by_internal_id(sample_id)
+
+    # WHEN retrieving FASTQ delivery files by sample
+    delivery_files: list[DeliveryFile] = delivery_api.get_fastq_delivery_files_by_sample(
+        case=case, sample=sample
+    )
+
+    # THEN only FASTQ files should be returned
+    assert isinstance(delivery_files[0], DeliveryFile)
+    assert delivery_files[0].source_path.name == delivery_fastq_file.name
+    for delivery_file in delivery_files:
+        assert delivery_file.source_path.name != delivery_spring_file.name
+
+
 def test_get_analysis_case_delivery_files(
     delivery_context_balsamic: CGConfig,
     case_id: str,
@@ -29,7 +58,7 @@ def test_get_analysis_case_delivery_files(
     # GIVEN a case object
     case: Case = status_db.get_case_by_internal_id(case_id)
 
-    # WHEN retrieving the case delivery files
+    # WHEN retrieving case delivery files
     delivery_files: list[DeliveryFile] = delivery_api.get_analysis_case_delivery_files(case=case)
 
     # THEN only case specific files should be returned, ignoring sample analysis files
@@ -57,7 +86,7 @@ def test_get_analysis_sample_delivery_files(
     # GIVEN a case object
     case: Case = status_db.get_case_by_internal_id(case_id)
 
-    # WHEN retrieving the sample delivery files
+    # WHEN retrieving sample delivery files
     delivery_files: list[DeliveryFile] = delivery_api.get_analysis_sample_delivery_files(case=case)
 
     # THEN the analysis cram files should be returned for all case samples
@@ -82,7 +111,7 @@ def test_get_analysis_sample_delivery_files_by_sample(
     case: Case = status_db.get_case_by_internal_id(case_id)
     sample: Sample = status_db.get_sample_by_internal_id(sample_id)
 
-    # WHEN retrieving the delivery files by sample
+    # WHEN retrieving delivery files by sample
     delivery_files: list[DeliveryFile] = delivery_api.get_analysis_sample_delivery_files_by_sample(
         case=case, sample=sample
     )
@@ -104,7 +133,7 @@ def test_convert_case_files_to_delivery_files(delivery_context_balsamic: CGConfi
     case: Case = status_db.get_case_by_internal_id(case_id)
     hk_files: list[File] = housekeeper_api.get_files(bundle=case_id, tags=[case_id]).all()
 
-    # WHEN making the case files conversion
+    # WHEN converting Housekeeper case files to delivery files
     delivery_files: list[DeliveryFile] = delivery_api.convert_files_to_delivery_files(
         files=hk_files, case=case, source_id=case.internal_id, destination_id=case.name
     )
@@ -140,7 +169,7 @@ def test_convert_sample_files_to_delivery_files(
     sample: Sample = status_db.get_sample_by_internal_id(sample_id)
     hk_sample_files: list[File] = housekeeper_api.get_files(bundle=case_id, tags=[sample_id]).all()
 
-    # WHEN making the sample files conversion
+    # WHEN converting Housekeeper sample files to delivery files
     delivery_files: list[DeliveryFile] = delivery_api.convert_files_to_delivery_files(
         files=hk_sample_files,
         case=case,
