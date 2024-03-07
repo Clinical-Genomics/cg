@@ -35,6 +35,12 @@ def get_forward_read_fastqs(fastq_directory: Path) -> list[Path]:
     return get_fastqs_by_direction(fastq_directory=fastq_directory, direction=1)
 
 
+def get_concatenated_read_output_path(
+    fastq_directory: Path, sample_name: str, direction: int
+) -> Path:
+    return Path(fastq_directory, f"{sample_name}_{direction}.fastq.gz")
+
+
 def get_reverse_read_fastqs(fastq_directory: Path) -> list[Path]:
     return get_fastqs_by_direction(fastq_directory=fastq_directory, direction=2)
 

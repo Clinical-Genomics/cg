@@ -267,6 +267,13 @@ class Strandedness(StrEnum):
     UNSTRANDED: str = "unstranded"
 
 
+class ReadDirection:
+    """Read direction types."""
+
+    FORWARD: int = 1
+    REVERSE: int = 2
+
+
 PIPELINES_USING_PARTIAL_ANALYSES: list[Workflow] = [Workflow.MICROSALT, Workflow.MUTANT]
 
 
