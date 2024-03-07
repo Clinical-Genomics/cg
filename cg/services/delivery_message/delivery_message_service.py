@@ -1,4 +1,4 @@
-from cg.exc import CaseNotFoundError
+from cg.exc import CaseNotFoundError, OrderMismatchError
 from cg.server.dto.delivery_message.delivery_message_request import (
     DeliveryMessageRequest,
 )
@@ -25,6 +25,6 @@ class DeliveryMessageService:
             else:
                 raise CaseNotFoundError
         if not is_matching_order(cases):
-            raise
+            raise OrderMismatchError
         message: str = get_message(cases)
         return DeliveryMessageResponse(message=message)

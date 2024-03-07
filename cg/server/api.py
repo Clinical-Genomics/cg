@@ -27,6 +27,7 @@ from cg.exc import (
     OrderError,
     OrderExistsError,
     OrderFormError,
+    OrderMismatchError,
     TicketCreationError,
 )
 from cg.io.controller import WriteStream
@@ -230,7 +231,7 @@ def get_cases_delivery_message():
     try:
         response: DeliveryMessageResponse = service.get_delivery_message(delivery_message_request)
         return jsonify(response.model_dump()), HTTPStatus.OK
-    except CaseNotFoundError as error:
+    except (CaseNotFoundError, OrderMismatchError) as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
 
 
