@@ -19,7 +19,7 @@ def test_case_with_malformed_deliverables_file(
     cli_runner,
     mocker,
     taxprofiler_context: CGConfig,
-    taxprofiler_malformed_hermes_deliverables: dict,
+    rnafusion_malformed_hermes_deliverables: dict,
     caplog: LogCaptureFixture,
     taxprofiler_case_id: str,
 ):
@@ -31,11 +31,11 @@ def test_case_with_malformed_deliverables_file(
     # GIVEN that HermesAPI returns a malformed deliverables output
     mocker.patch.object(Process, "run_command")
     Process.run_command.return_value = WriteStream.write_stream_from_content(
-        content=taxprofiler_malformed_hermes_deliverables, file_format=FileFormat.JSON
+        content=rnafusion_malformed_hermes_deliverables, file_format=FileFormat.JSON
     )
 
     # GIVEN that the output is malformed
-    with pytest.raises(ValidationError) as error:
+    with pytest.raises(ValidationError):
         analysis_api.hermes_api.convert_deliverables(
             deliverables_file=Path("a_file"), workflow="taxprofiler"
         )
@@ -49,6 +49,8 @@ def test_case_with_malformed_deliverables_file(
         # THEN command should NOT execute successfully
         assert result.exit_code != EXIT_SUCCESS
 
+
         # THEN information that the file is malformed should be communicated
-        assert "Deliverables file is malformed" in str(error.value)
-        assert "field required" in str(error.value)
+        assert "Deliverables file is malformed" in caplog.text
+        assert "field required" in caplog.text
+
