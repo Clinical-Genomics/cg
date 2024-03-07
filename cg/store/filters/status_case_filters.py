@@ -56,6 +56,11 @@ def filter_case_by_internal_id(cases: Query, internal_id: str, **kwargs) -> Quer
     return cases.filter(Case.internal_id == internal_id)
 
 
+def filter_cases_by_internal_ids(cases: Query, internal_ids: list[str], **kwargs) -> Query:
+    """Filter cases with internal ids."""
+    return cases.filter(Case.internal_id.in_(internal_ids))
+
+
 def filter_cases_by_internal_id_search(cases: Query, internal_id_search: str, **kwargs) -> Query:
     """Filter cases with internal ids matching the search pattern."""
     return cases.filter(Case.internal_id.contains(internal_id_search))
@@ -135,7 +140,7 @@ def filter_cases_with_loqusdb_supported_workflow(
         if workflow
         else cases.filter(Case.data_analysis.in_(LOQUSDB_SUPPORTED_WORKFLOWS))
     )
-    return records.filter(Customer.loqus_upload == True)
+    return records.filter(Customer.loqus_upload is True)
 
 
 def filter_cases_with_loqusdb_supported_sequencing_method(
@@ -210,6 +215,7 @@ def apply_case_filter(
     customer_entry_ids: list[int] | None = None,
     entry_id: int | None = None,
     internal_id: str | None = None,
+    internal_ids: list[str] | None = None,
     internal_id_search: str | None = None,
     name: str | None = None,
     name_search: str | None = None,
@@ -230,6 +236,7 @@ def apply_case_filter(
             customer_entry_ids=customer_entry_ids,
             entry_id=entry_id,
             internal_id=internal_id,
+            internal_ids=internal_ids,
             internal_id_search=internal_id_search,
             name=name,
             name_search=name_search,
@@ -251,6 +258,7 @@ class CaseFilter(Enum):
     BY_CUSTOMER_ENTRY_IDS: Callable = filter_cases_by_customer_entry_ids
     BY_ENTRY_ID: Callable = filter_cases_by_entry_id
     BY_INTERNAL_ID: Callable = filter_case_by_internal_id
+    BY_INTERNAL_IDS: Callable = filter_cases_by_internal_ids
     BY_INTERNAL_ID_SEARCH: Callable = filter_cases_by_internal_id_search
     BY_NAME: Callable = filter_cases_by_name
     BY_NAME_SEARCH: Callable = filter_cases_by_name_search

@@ -19,13 +19,13 @@ def test_get_delivery_message_single_case(client: FlaskClient, case: Case, order
 
 
 def test_get_delivery_message_matching_order(
-    client: FlaskClient, case: Case, case_in_same_order, order: Order
+    client: FlaskClient, server_case: Case, server_case_in_same_order: Case, order: Order
 ):
     # GIVEN a case
 
     # WHEN a request is made to get a delivery message for the case
     response = client.get(
-        f"/api/v1/cases/delivery_message?case_ids={case.internal_id},{case_in_same_order.internal_id}"
+        f"/api/v1/cases/delivery_message?case_ids={server_case.internal_id},{server_case_in_same_order.internal_id}"
     )
 
     # THEN the response should be successful
