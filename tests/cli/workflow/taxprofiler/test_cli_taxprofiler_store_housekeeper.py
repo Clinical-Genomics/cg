@@ -18,7 +18,7 @@ from cg.utils import Process
 def test_case_with_malformed_deliverables_file(
     cli_runner,
     mocker,
-    taxprofiler_context: CGConfig,
+    rnafusion_context: CGConfig,
     rnafusion_malformed_hermes_deliverables: dict,
     caplog: LogCaptureFixture,
     taxprofiler_case_id: str,
@@ -44,7 +44,7 @@ def test_case_with_malformed_deliverables_file(
         case_id: str = taxprofiler_case_id
 
         # WHEN running
-        result = cli_runner.invoke(store_housekeeper, [case_id], obj=taxprofiler_context)
+        result = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
 
         # THEN command should NOT execute successfully
         assert result.exit_code != EXIT_SUCCESS
