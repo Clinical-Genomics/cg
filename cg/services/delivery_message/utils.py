@@ -79,7 +79,7 @@ def get_sample_app_tag(sample: Sample) -> str:
 
 
 def validate_cases(cases: list[Case], case_ids: list[str]) -> None:
-    if not set(case_ids) == set(case.internal_id for case in cases):
+    if set(case_ids) != set(case.internal_id for case in cases):
         raise CaseNotFoundError("Internal id not found in the database")
     if not is_matching_order(cases):
         raise OrderMismatchError("Cases do not belong to the same order")
