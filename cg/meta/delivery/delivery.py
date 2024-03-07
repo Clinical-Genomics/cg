@@ -62,7 +62,7 @@ class DeliveryAPI:
             fastq_delivery_files: list[DeliveryFile] = self.get_fastq_delivery_files_by_sample(
                 case=case, sample=sample, force=force
             )
-            delivery_files.append(fastq_delivery_files)
+            delivery_files.extend(fastq_delivery_files)
         return delivery_files
 
     def get_fastq_delivery_files_by_sample(
@@ -107,19 +107,18 @@ class DeliveryAPI:
             sample_delivery_files: list[DeliveryFile] = (
                 self.get_analysis_sample_delivery_files_by_sample(case=case, sample=sample)
             )
-            delivery_files.append(sample_delivery_files)
+            delivery_files.extend(sample_delivery_files)
         return delivery_files
 
     def get_analysis_sample_delivery_files_by_sample(
         self, case: Case, sample: Sample
-    ) -> list[Path]:
+    ) -> list[DeliveryFile]:
         """Return a list of analysis files to be delivered for a specific sample."""
         sample_tags: list[set[str]] = self.get_analysis_sample_tags_for_workflow(case.data_analysis)
-        for tag in sample_tags:
-            tag.add(sample.internal_id)
+        analysis_sample_tags = [tag | {sample.internal_id} for tag in sample_tags]
         sample_files: list[File] = (
             self.housekeeper_api.get_files_from_latest_version_by_list_of_tags(
-                bundle_name=case.internal_id, tags=sample_tags
+                bundle_name=case.internal_id, tags=analysis_sample_tags
             )
         )
         delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
