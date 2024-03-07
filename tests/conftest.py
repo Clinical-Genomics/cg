@@ -2719,7 +2719,7 @@ def taxprofiler_context(
 
 @pytest.fixture(scope="function")
 def taxprofiler_deliverable_data(
-    taxprofiler_dir: Path, taxprofiler_case_id: str, taxprofiler_id: str
+    taxprofiler_dir: Path, taxprofiler_case_id: str, sample_id: str
 ) -> dict:
     return {
         "files": [
