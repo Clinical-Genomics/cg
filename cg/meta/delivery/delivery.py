@@ -93,7 +93,7 @@ class DeliveryAPI:
         case_tags: list[set[str]] = self.get_analysis_case_tags_for_workflow(case.data_analysis)
         sample_ids: list[set[str]] = [{sample_id} for sample_id in case.sample_ids]
         case_files: list[File] = self.housekeeper_api.get_files_from_latest_version_by_list_of_tags(
-            bundle_name=case.internal_id, tags=case_tags, exclude_tags=sample_ids
+            bundle_name=case.internal_id, tags=case_tags, excluded_tags=sample_ids
         )
         delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
             files=case_files, case=case, source_id=case.internal_id, destination_id=case.name

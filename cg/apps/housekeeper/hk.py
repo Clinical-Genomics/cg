@@ -404,11 +404,11 @@ class HousekeeperAPI:
         return self.files(version=version.id, tags=tags).all()
 
     def get_files_from_latest_version_by_list_of_tags(
-        self, bundle_name: str, tags: list[set[str]], exclude_tags: list[set[str]] | None = None
+        self, bundle_name: str, tags: list[set[str]], excluded_tags: list[set[str]] | None = None
     ) -> list[File]:
         """
         Return files from the latest version of a bundle matching provided tags. Files containing
-        any tag sets specified in the exclude_tags list will be excluded from the output.
+        any tag sets specified in the excluded_tags list will be excluded from the output.
         """
         filtered_files: list[File] = []
         if not tags:
@@ -417,8 +417,8 @@ class HousekeeperAPI:
         for file in files:
             file_tags: set[str] = {tag.name for tag in file.tags}
             if any(tag.issubset(file_tags) for tag in tags):
-                if exclude_tags and any(
-                    exclude_tag.issubset(file_tags) for exclude_tag in exclude_tags
+                if excluded_tags and any(
+                    exclude_tag.issubset(file_tags) for exclude_tag in excluded_tags
                 ):
                     continue
                 filtered_files.append(file)
