@@ -8,6 +8,7 @@ from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.clients.arnold.api import ArnoldAPIClient
+from cg.clients.arnold.dto.create_case_request import CreateCaseRequest
 from cg.clients.janus.api import JanusAPIClient
 from cg.clients.janus.dto.create_qc_metrics_request import (
     CreateQCMetricsRequest,
@@ -123,3 +124,18 @@ def expected_request(
         ),
         files=[file_path_and_tag],
     )
+
+
+@pytest.fixture
+def mock_case_id() -> str:
+    return "mock_id"
+
+
+@pytest.fixture
+def mock_case_qc_metrics(mock_case_id: str) -> dict:
+    return {"case_id": mock_case_id, "case_info": {}}
+
+
+@pytest.fixture
+def expected_create_case_request(mock_case_qc_metrics: dict) -> CreateCaseRequest:
+    return CreateCaseRequest(**mock_case_qc_metrics)

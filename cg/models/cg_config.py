@@ -171,10 +171,14 @@ class MipConfig(BaseModel):
     script: str
 
 
-class RareDiseaseConfig(CommonAppConfig):
+class RarediseaseConfig(CommonAppConfig):
+    binary_path: str | None = None
     compute_env: str
     conda_binary: str | None = None
     conda_env: str
+    config_platform: str
+    config_params: str
+    config_resources: str
     launch_directory: str
     workflow_path: str
     profile: str
@@ -343,7 +347,7 @@ class CGConfig(BaseModel):
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig = None
-    raredisease: RareDiseaseConfig = Field(None, alias="raredisease")
+    raredisease: RarediseaseConfig = Field(None, alias="raredisease")
     rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
     taxprofiler: TaxprofilerConfig = Field(None, alias="taxprofiler")
 
