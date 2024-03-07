@@ -18,10 +18,12 @@ def delivery_housekeeper_api(
     helpers: StoreHelpers,
     hk_delivery_sample_bundle: dict[str, Any],
     hk_delivery_another_sample_bundle: dict[str, Any],
+    hk_delivery_case_bundle: dict[str, Any],
 ):
     """Delivery API Housekeeper context."""
     helpers.ensure_hk_bundle(real_housekeeper_api, hk_delivery_sample_bundle)
     helpers.ensure_hk_bundle(real_housekeeper_api, hk_delivery_another_sample_bundle)
+    helpers.ensure_hk_bundle(real_housekeeper_api, hk_delivery_case_bundle)
     return real_housekeeper_api
 
 
@@ -49,16 +51,16 @@ def delivery_context(
     # Error case without samples
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
-    # Raredisease case with FASTQ and analysis as data delivery
-    case_raredisease: Case = helpers.add_case(
+    # MIP-DNA case with FASTQ and analysis as data delivery
+    case_mip_dna: Case = helpers.add_case(
         store=status_db,
         internal_id=case_id,
         name=case_name,
-        data_analysis=Workflow.RAREDISEASE,
+        data_analysis=Workflow.MIP_DNA,
         data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
     )
 
-    # Microsalt case with FASTQ-QC as data delivery
+    # MicroSALT case with FASTQ-QC as data delivery
     case_microsalt: Case = helpers.add_case(
         store=status_db,
         internal_id=another_case_id,
@@ -86,11 +88,11 @@ def delivery_context(
         reads=total_sequenced_reads_not_pass,
     )
 
-    # Raredisease samples
-    for sample_raredisease in [sample, another_sample]:
-        helpers.add_relationship(status_db, case=case_raredisease, sample=sample_raredisease)
+    # MIP-DNA samples
+    for sample_mip_dna in [sample, another_sample]:
+        helpers.add_relationship(status_db, case=case_mip_dna, sample=sample_mip_dna)
 
-    # Microsalt samples
+    # MicroSALT samples
     for sample_microsalt in [sample, another_sample, sample_not_enough_reads]:
         helpers.add_relationship(status_db, case=case_microsalt, sample=sample_microsalt)
 

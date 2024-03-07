@@ -621,14 +621,6 @@ def analysis_dir(fixtures_dir: Path) -> Path:
     return Path(fixtures_dir, "analysis")
 
 
-@pytest.fixture
-def housekeeper_bundles_dir(tmp_path: Path) -> Path:
-    """Return path to the Housekeeper bundles directory."""
-    directory = Path(tmp_path, "housekeeper_bundles")
-    directory.mkdir(parents=True, exist_ok=True)
-    return directory
-
-
 @pytest.fixture(scope="session")
 def microsalt_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the analysis dir."""
