@@ -43,8 +43,7 @@ from cg.server.dto.delivery_message.delivery_message_response import (
 )
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
-from cg.server.ext import db, lims, order_service, osticket
-from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
+from cg.server.ext import db, delivery_message_service, lims, order_service, osticket
 from cg.services.orders.order_service.exceptions import OrderNotFoundError
 from cg.store.models import (
     Analysis,
@@ -227,9 +226,10 @@ def get_cases_delivery_message():
     delivery_message_request: DeliveryMessageRequest = DeliveryMessageRequest.model_validate(
         request.args
     )
-    service = DeliveryMessageService(db)
     try:
-        response: DeliveryMessageResponse = service.get_delivery_message(delivery_message_request)
+        response: DeliveryMessageResponse = delivery_message_service.get_delivery_message(
+            delivery_message_request
+        )
         return jsonify(response.model_dump()), HTTPStatus.OK
     except (CaseNotFoundError, OrderMismatchError) as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
@@ -237,10 +237,11 @@ def get_cases_delivery_message():
 
 @BLUEPRINT.route("/cases/<case_id>/delivery_message", methods=["GET"])
 def get_case_delivery_message(case_id: str):
-    service = DeliveryMessageService(db)
     delivery_message_request = DeliveryMessageRequest(case_ids=[case_id])
     try:
-        response: DeliveryMessageResponse = service.get_delivery_message(delivery_message_request)
+        response: DeliveryMessageResponse = delivery_message_service.get_delivery_message(
+            delivery_message_request
+        )
         return jsonify(response.model_dump()), HTTPStatus.OK
     except CaseNotFoundError as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
