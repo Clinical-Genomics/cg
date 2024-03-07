@@ -36,9 +36,6 @@ class DeliveryAPI:
 
     def link_delivery_files_to_inbox(self) -> None:
         """Link files from Housekeeper bundle to the customer's inbox."""
-        # TODO: dry-run
-        # TODO: force flag
-        # TODO: logging
         raise NotImplementedError
 
     def get_delivery_files(self, case: Case, force: bool = False) -> list[DeliveryFile]:
