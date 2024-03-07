@@ -767,7 +767,7 @@ class ReadHandler(BaseHandler):
         ).first()
 
     def get_cases_by_internal_ids(self, internal_ids: list[str]) -> list[Case]:
-        """Get cases by internal id."""
+        """Get cases by internal ids."""
         return apply_case_filter(
             cases=self._get_query(table=Case),
             filter_functions=[CaseFilter.BY_INTERNAL_IDS],
