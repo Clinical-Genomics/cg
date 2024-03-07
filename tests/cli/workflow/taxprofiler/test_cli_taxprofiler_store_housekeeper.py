@@ -26,7 +26,7 @@ def test_case_with_malformed_deliverables_file(
     """Test command with case_id and config file and analysis_finish but malformed deliverables output."""
     caplog.set_level(logging.WARNING)
     # GIVEN a malformed output from hermes
-    analysis_api: TaxprofilerAnalysisAPI = taxprofiler_context.meta_apis["analysis_api"]
+    analysis_api: TaxprofilerAnalysisAPI = rnafusion_context.meta_apis["analysis_api"]
 
     # GIVEN that HermesAPI returns a malformed deliverables output
     mocker.patch.object(Process, "run_command")
