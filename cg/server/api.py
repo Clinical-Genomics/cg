@@ -223,9 +223,7 @@ def parse_case(case_id):
 
 @BLUEPRINT.route("/cases/delivery_message", methods=["GET"])
 def get_cases_delivery_message():
-    delivery_message_request: DeliveryMessageRequest = DeliveryMessageRequest.model_validate(
-        request.args
-    )
+    delivery_message_request = DeliveryMessageRequest.model_validate(request.args)
     try:
         response: DeliveryMessageResponse = delivery_message_service.get_delivery_message(
             delivery_message_request
