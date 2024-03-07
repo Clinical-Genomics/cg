@@ -2563,9 +2563,7 @@ def taxprofiler_sample_sheet_content(
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_hermes_deliverables(
-    taxprofiler_deliverable_data: dict, taxprofiler_case_id: str
-) -> dict:
+def taxprofiler_hermes_deliverables(taxprofiler_deliverable_data: dict, taxprofiler_case_id: str) -> dict:
     hermes_output: dict = {"workflow": "taxprofiler", "bundle_id": taxprofiler_case_id, "files": []}
     for file_info in taxprofiler_deliverable_data["files"]:
         tags: list[str] = []
@@ -2696,31 +2694,11 @@ def taxprofiler_context(
         sample=taxprofiler_another_sample,
     )
 
-    # Create case without enough reads
-    case_not_enough_reads: Case = helpers.add_case(
-        store=status_db,
-        internal_id=case_id_not_enough_reads,
-        name=case_id_not_enough_reads,
-        data_analysis=Workflow.TAXPROFILER,
-    )
-
-    sample_not_enough_reads: Sample = helpers.add_sample(
-        status_db,
-        application_tag="multiqc",
-        internal_id=sample_id_not_enough_reads,
-        reads=total_sequenced_reads_not_pass,
-        last_sequenced_at=datetime.now(),
-    )
-
-    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
-
     return cg_context
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_deliverable_data(
-    taxprofiler_dir: Path, taxprofiler_case_id: str, sample_id: str
-) -> dict:
+def taxprofiler_deliverable_data(taxprofiler_dir: Path, taxprofiler_case_id: str, sample_id: str) -> dict:
     return {
         "files": [
             {
