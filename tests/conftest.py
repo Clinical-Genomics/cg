@@ -122,11 +122,6 @@ def case_name() -> str:
 
 
 @pytest.fixture(scope="session")
-def another_case_name() -> str:
-    return "C54321"
-
-
-@pytest.fixture(scope="session")
 def case_id_does_not_exist() -> str:
     """Return a case id that should not exist."""
     return "case_does_not_exist"
