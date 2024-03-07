@@ -26,7 +26,7 @@ def test_get_delivery_files_fastq_delivery(
     delivery_api: DeliveryAPI = delivery_context_microsalt.delivery_api
     status_db: Store = delivery_context_microsalt.status_db
 
-    # GIVEN a case object
+    # GIVEN a case object with fastq data as delivery
     case: Case = status_db.get_case_by_internal_id(case_id)
 
     # WHEN retrieving the fastq delivery files
@@ -68,6 +68,39 @@ def test_get_delivery_files_analysis_delivery(
             delivery_report_file.name,
             delivery_cram_file.name,
             delivery_another_cram_file.name,
+        ]
+
+
+def test_get_delivery_files_fastq_analysis_delivery(
+    delivery_context_balsamic: CGConfig,
+    case_id: str,
+    delivery_report_file: Path,
+    delivery_cram_file: Path,
+    delivery_another_cram_file: Path,
+    delivery_fastq_file: Path,
+    delivery_another_fastq_file: Path,
+):
+    """Test get delivery files for fastq analysis data delivery."""
+
+    # GIVEN a delivery context
+    delivery_api: DeliveryAPI = delivery_context_balsamic.delivery_api
+    status_db: Store = delivery_context_balsamic.status_db
+
+    # GIVEN a case object with fastq analysis as data delivery
+    case: Case = status_db.get_case_by_internal_id(case_id)
+
+    # WHEN retrieving the fastq analysis delivery files
+    delivery_files: list[DeliveryFile] = delivery_api.get_delivery_files(case=case)
+
+    # THEN analysis case and sample files should be returned together with the fastqs
+    for delivery_file in delivery_files:
+        assert isinstance(delivery_file, DeliveryFile)
+        assert delivery_file.source_path.name in [
+            delivery_report_file.name,
+            delivery_cram_file.name,
+            delivery_another_cram_file.name,
+            delivery_fastq_file.name,
+            delivery_another_fastq_file.name,
         ]
 
 
