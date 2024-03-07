@@ -14,7 +14,7 @@ LOG = logging.getLogger(__name__)
 
 class ArnoldAPIClient:
     def __init__(self, config: dict):
-        self.api_url: str = config["api_url"]
+        self.api_url: str = config["arnold"]["api_url"]
 
     def create_case(self, case: CreateCaseRequest) -> Response:
         endpoint: str = f"{self.api_url}/case/"
