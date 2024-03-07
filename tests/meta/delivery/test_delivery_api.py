@@ -13,6 +13,33 @@ from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
+def test_get_analysis_sample_delivery_files(
+    delivery_context_balsamic: CGConfig,
+    case_id: str,
+    delivery_cram_file: Path,
+    delivery_another_cram_file: Path,
+):
+    """Test get complete list of analysis sample files."""
+
+    # GIVEN a delivery context
+    delivery_api: DeliveryAPI = delivery_context_balsamic.delivery_api
+    status_db: Store = delivery_context_balsamic.status_db
+
+    # GIVEN case object
+    case: Case = status_db.get_case_by_internal_id(case_id)
+
+    # WHEN retrieving the delivery files
+    delivery_files: list[DeliveryFile] = delivery_api.get_analysis_sample_delivery_files(case=case)
+
+    # THEN the analysis cram files should be returned for all case samples
+    for delivery_file in delivery_files:
+        assert isinstance(delivery_file, DeliveryFile)
+        assert delivery_file.source_path.name in [
+            delivery_cram_file.name,
+            delivery_another_cram_file.name,
+        ]
+
+
 def test_get_analysis_sample_delivery_files_by_sample(
     delivery_context_balsamic: CGConfig, case_id: str, sample_id: str, delivery_cram_file: Path
 ):
@@ -26,13 +53,12 @@ def test_get_analysis_sample_delivery_files_by_sample(
     case: Case = status_db.get_case_by_internal_id(case_id)
     sample: Sample = status_db.get_sample_by_internal_id(sample_id)
 
-    # WHEN retrieving the delivery files
+    # WHEN retrieving the delivery files by sample
     delivery_files: list[DeliveryFile] = delivery_api.get_analysis_sample_delivery_files_by_sample(
         case=case, sample=sample
     )
 
     # THEN the analysis cram file should be returned as a delivery file model
-    assert len(delivery_files) == 1
     assert isinstance(delivery_files[0], DeliveryFile)
     assert delivery_files[0].source_path.name == delivery_cram_file.name
 
