@@ -140,7 +140,7 @@ def filter_cases_with_loqusdb_supported_workflow(
         if workflow
         else cases.filter(Case.data_analysis.in_(LOQUSDB_SUPPORTED_WORKFLOWS))
     )
-    return records.filter(Customer.loqus_upload is True)
+    return records.filter(Customer.loqus_upload == True)
 
 
 def filter_cases_with_loqusdb_supported_sequencing_method(
