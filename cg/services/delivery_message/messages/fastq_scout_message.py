@@ -9,7 +9,7 @@ from cg.store.models import Case
 def get_case_message(scout_link: str, delivery_path) -> str:
     return (
         f"Hello,\n\n "
-        f"The results have been uploaded to Scout for the following case::\n\n"
+        f"The results have been uploaded to Scout for the following case:\n\n"
         f"{scout_link}\n\n"
         f"The fastq files are currently being uploaded to your inbox on Caesar:\n\n"
         f"{delivery_path}"
@@ -19,7 +19,7 @@ def get_case_message(scout_link: str, delivery_path) -> str:
 def get_cases_message(scout_links: str, delivery_path) -> str:
     return (
         f"Hello,\n\n "
-        f"The results have been uploaded to Scout for the following case::\n\n"
+        f"The results have been uploaded to Scout for the following case:\n\n"
         f"{scout_links}\n\n"
         f"The fastq files are currently being uploaded to your inbox on Caesar:\n\n"
         f"{delivery_path}"
