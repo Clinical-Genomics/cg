@@ -2644,9 +2644,6 @@ def taxprofiler_context(
     another_sample_name: str,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
-    case_id_not_enough_reads: str,
-    sample_id_not_enough_reads: str,
-    total_sequenced_reads_not_pass: int,
 ) -> CGConfig:
     """Context to use in cli."""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper

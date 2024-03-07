@@ -35,7 +35,7 @@ def test_case_with_malformed_deliverables_file(
     )
 
     # GIVEN that the output is malformed
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as error:
         analysis_api.hermes_api.convert_deliverables(
             deliverables_file=Path("a_file"), workflow="taxprofiler"
         )
@@ -50,5 +50,5 @@ def test_case_with_malformed_deliverables_file(
         assert result.exit_code != EXIT_SUCCESS
 
         # THEN information that the file is malformed should be communicated
-        assert "Deliverables file is malformed" in caplog.text
-        assert "field required" in caplog.text
+        assert "Deliverables file is malformed" in str(error.value)
+        assert "field required" in str(error.value)
