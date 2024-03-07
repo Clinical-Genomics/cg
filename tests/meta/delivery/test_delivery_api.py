@@ -5,6 +5,7 @@ from pathlib import Path
 from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import DataDelivery
 from cg.constants.delivery import INBOX_NAME
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.models.cg_config import CGConfig
@@ -19,7 +20,7 @@ def test_get_delivery_files_fastq_delivery(
     delivery_fastq_file: Path,
     delivery_another_fastq_file: Path,
 ):
-    """Test get delivery files for FASTQ data delivery."""
+    """Test get delivery files for fastq data delivery."""
 
     # GIVEN a delivery context
     delivery_api: DeliveryAPI = delivery_context_microsalt.delivery_api
@@ -28,7 +29,7 @@ def test_get_delivery_files_fastq_delivery(
     # GIVEN a case object
     case: Case = status_db.get_case_by_internal_id(case_id)
 
-    # WHEN retrieving the delivery files
+    # WHEN retrieving the fastq delivery files
     delivery_files: list[DeliveryFile] = delivery_api.get_delivery_files(case=case)
 
     # THEN only the fastq sample files should be returned
@@ -40,13 +41,43 @@ def test_get_delivery_files_fastq_delivery(
         ]
 
 
+def test_get_delivery_files_analysis_delivery(
+    delivery_context_balsamic: CGConfig,
+    case_id: str,
+    delivery_report_file: Path,
+    delivery_cram_file: Path,
+    delivery_another_cram_file: Path,
+):
+    """Test get delivery files for analysis data delivery."""
+
+    # GIVEN a delivery context
+    delivery_api: DeliveryAPI = delivery_context_balsamic.delivery_api
+    status_db: Store = delivery_context_balsamic.status_db
+
+    # GIVEN a case object with analysis files as data delivery
+    case: Case = status_db.get_case_by_internal_id(case_id)
+    case.data_delivery = DataDelivery.ANALYSIS_FILES
+
+    # WHEN retrieving the analysis delivery files
+    delivery_files: list[DeliveryFile] = delivery_api.get_delivery_files(case=case)
+
+    # THEN only the analysis case and sample files should be returned
+    for delivery_file in delivery_files:
+        assert isinstance(delivery_file, DeliveryFile)
+        assert delivery_file.source_path.name in [
+            delivery_report_file.name,
+            delivery_cram_file.name,
+            delivery_another_cram_file.name,
+        ]
+
+
 def test_get_fastq_delivery_files(
     delivery_context_microsalt: CGConfig,
     case_id: str,
     delivery_fastq_file: Path,
     delivery_another_fastq_file: Path,
 ):
-    """Test get FASTQ delivery files for all samples linked to a case."""
+    """Test get fastq delivery files for all samples linked to a case."""
 
     # GIVEN a delivery context
     delivery_api: DeliveryAPI = delivery_context_microsalt.delivery_api
@@ -74,7 +105,7 @@ def test_get_fastq_delivery_files_by_sample(
     delivery_fastq_file: Path,
     delivery_spring_file: Path,
 ):
-    """Test get FASTQ delivery files for a sample."""
+    """Test get fastq delivery files for a sample."""
 
     # GIVEN a delivery context
     delivery_api: DeliveryAPI = delivery_context_microsalt.delivery_api
@@ -84,12 +115,12 @@ def test_get_fastq_delivery_files_by_sample(
     case: Case = status_db.get_case_by_internal_id(case_id)
     sample: Sample = status_db.get_sample_by_internal_id(sample_id)
 
-    # WHEN retrieving FASTQ delivery files by sample
+    # WHEN retrieving fastq delivery files by sample
     delivery_files: list[DeliveryFile] = delivery_api.get_fastq_delivery_files_by_sample(
         case=case, sample=sample
     )
 
-    # THEN only FASTQ files should be returned
+    # THEN only fastq files should be returned
     assert isinstance(delivery_files[0], DeliveryFile)
     assert delivery_files[0].source_path.name == delivery_fastq_file.name
     for delivery_file in delivery_files:
