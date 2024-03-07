@@ -1265,6 +1265,12 @@ def wgs_application_tag() -> str:
 
 
 @pytest.fixture
+def microbial_application_tag() -> str:
+    """Return the WGS microbial application tag."""
+    return "MWRNXTR003"
+
+
+@pytest.fixture
 def store() -> Generator[Store, None, None]:
     """Return a CG store."""
     initialize_database("sqlite:///")

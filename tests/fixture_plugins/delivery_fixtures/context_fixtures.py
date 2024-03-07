@@ -28,7 +28,63 @@ def delivery_housekeeper_api(
 
 
 @pytest.fixture
-def delivery_context(
+def delivery_context_balsamic(
+    cg_context: CGConfig,
+    delivery_housekeeper_api: HousekeeperAPI,
+    helpers: StoreHelpers,
+    case_id: str,
+    another_case_id: str,
+    no_sample_case_id: str,
+    case_name: str,
+    another_case_name: str,
+    sample_id: str,
+    another_sample_id: str,
+    sample_name: str,
+    another_sample_name: str,
+    total_sequenced_reads_pass: int,
+    wgs_application_tag: str,
+) -> CGConfig:
+    """Delivery API context."""
+    status_db: Store = cg_context.status_db
+    cg_context.housekeeper_api_ = delivery_housekeeper_api
+
+    # Error case without samples
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+
+    # Balsamic case with FASTQ and analysis as data delivery
+    case: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id,
+        name=case_name,
+        data_analysis=Workflow.BALSAMIC,
+        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
+    )
+
+    # Balsamic samples
+    sample: Sample = helpers.add_sample(
+        store=status_db,
+        application_tag=wgs_application_tag,
+        internal_id=sample_id,
+        name=sample_name,
+        reads=total_sequenced_reads_pass,
+    )
+
+    another_sample: Sample = helpers.add_sample(
+        store=status_db,
+        application_tag=wgs_application_tag,
+        internal_id=another_sample_id,
+        name=another_sample_name,
+        reads=total_sequenced_reads_pass,
+    )
+
+    for sample_balsamic in [sample, another_sample]:
+        helpers.add_relationship(status_db, case=case, sample=sample_balsamic)
+
+    return cg_context
+
+
+@pytest.fixture
+def delivery_context_microsalt(
     cg_context: CGConfig,
     delivery_housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
@@ -40,9 +96,11 @@ def delivery_context(
     sample_id: str,
     another_sample_id: str,
     sample_id_not_enough_reads: str,
+    total_sequenced_reads_pass: int,
     total_sequenced_reads_not_pass: int,
     sample_name: str,
     another_sample_name: str,
+    microbial_application_tag: str,
 ) -> CGConfig:
     """Delivery API context."""
     status_db: Store = cg_context.status_db
@@ -51,17 +109,8 @@ def delivery_context(
     # Error case without samples
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
-    # MIP-DNA case with FASTQ and analysis as data delivery
-    case_mip_dna: Case = helpers.add_case(
-        store=status_db,
-        internal_id=case_id,
-        name=case_name,
-        data_analysis=Workflow.MIP_DNA,
-        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
-    )
-
     # MicroSALT case with FASTQ-QC as data delivery
-    case_microsalt: Case = helpers.add_case(
+    case: Case = helpers.add_case(
         store=status_db,
         internal_id=another_case_id,
         name=another_case_name,
@@ -69,31 +118,31 @@ def delivery_context(
         data_delivery=DataDelivery.FASTQ_QC,
     )
 
-    # Shared samples
+    # MicroSALT samples
     sample: Sample = helpers.add_sample(
         store=status_db,
+        application_tag=microbial_application_tag,
         internal_id=sample_id,
         name=sample_name,
+        reads=total_sequenced_reads_pass,
     )
 
     another_sample: Sample = helpers.add_sample(
         store=status_db,
+        application_tag=microbial_application_tag,
         internal_id=another_sample_id,
         name=another_sample_name,
+        reads=total_sequenced_reads_pass,
     )
 
     sample_not_enough_reads: Sample = helpers.add_sample(
         store=status_db,
+        application_tag=microbial_application_tag,
         internal_id=sample_id_not_enough_reads,
         reads=total_sequenced_reads_not_pass,
     )
 
-    # MIP-DNA samples
-    for sample_mip_dna in [sample, another_sample]:
-        helpers.add_relationship(status_db, case=case_mip_dna, sample=sample_mip_dna)
-
-    # MicroSALT samples
     for sample_microsalt in [sample, another_sample, sample_not_enough_reads]:
-        helpers.add_relationship(status_db, case=case_microsalt, sample=sample_microsalt)
+        helpers.add_relationship(status_db, case=case, sample=sample_microsalt)
 
     return cg_context
