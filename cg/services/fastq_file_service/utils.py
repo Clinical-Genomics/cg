@@ -4,6 +4,7 @@ import shutil
 import uuid
 
 from cg.services.fastq_file_service.exceptions import ConcatenationError
+from cg.constants.constants import ReadDirection
 
 
 def concatenate_forward_reads(directory: Path) -> Path | None:
@@ -32,7 +33,7 @@ def get_new_unique_file(directory: Path) -> Path:
 
 
 def get_forward_read_fastqs(fastq_directory: Path) -> list[Path]:
-    return get_fastqs_by_direction(fastq_directory=fastq_directory, direction=1)
+    return get_fastqs_by_direction(fastq_directory=fastq_directory, direction=ReadDirection.FORWARD)
 
 
 def get_concatenated_read_output_path(
@@ -42,7 +43,7 @@ def get_concatenated_read_output_path(
 
 
 def get_reverse_read_fastqs(fastq_directory: Path) -> list[Path]:
-    return get_fastqs_by_direction(fastq_directory=fastq_directory, direction=2)
+    return get_fastqs_by_direction(fastq_directory=fastq_directory, direction=ReadDirection.REVERSE)
 
 
 def get_fastqs_by_direction(fastq_directory: Path, direction: int) -> list[Path]:
