@@ -13,6 +13,30 @@ from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
+def test_get_analysis_sample_delivery_files_by_sample(
+    delivery_context_balsamic: CGConfig, case_id: str, sample_id: str, delivery_cram_file: Path
+):
+    """Test get analysis files to deliver by sample."""
+
+    # GIVEN a delivery context
+    delivery_api: DeliveryAPI = delivery_context_balsamic.delivery_api
+    status_db: Store = delivery_context_balsamic.status_db
+
+    # GIVEN case and sample analysis objects
+    case: Case = status_db.get_case_by_internal_id(case_id)
+    sample: Sample = status_db.get_sample_by_internal_id(sample_id)
+
+    # WHEN retrieving the delivery files
+    delivery_files: list[DeliveryFile] = delivery_api.get_analysis_sample_delivery_files_by_sample(
+        case=case, sample=sample
+    )
+
+    # THEN the analysis cram file should be returned as a delivery file model
+    assert len(delivery_files) == 1
+    assert isinstance(delivery_files[0], DeliveryFile)
+    assert delivery_files[0].source_path.name == delivery_cram_file.name
+
+
 def test_convert_case_files_to_delivery_files(delivery_context_balsamic: CGConfig, case_id: str):
     """Test Housekeeper case files conversion to delivery files."""
 
