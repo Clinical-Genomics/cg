@@ -34,7 +34,7 @@ class FastqFileService:
             temp_reverse.rename(reverse_output)
 
     @staticmethod
-    def generate_forward_output_path(fastq_directory: Path, sample_name: str) -> Path:
+    def get_concatenated_forward_read_output_path(fastq_directory: Path, sample_name: str) -> Path:
         return get_concatenated_read_output_path(
             fastq_directory=fastq_directory,
             sample_name=sample_name,
@@ -42,7 +42,7 @@ class FastqFileService:
         )
 
     @staticmethod
-    def generate_reverse_output_path(fastq_directory: Path, sample_name: str) -> Path:
+    def get_concatenated_reverse_read_output_path(fastq_directory: Path, sample_name: str) -> Path:
         return get_concatenated_read_output_path(
             fastq_directory=fastq_directory,
             sample_name=sample_name,

@@ -220,10 +220,10 @@ class DeliverAPI:
     def concatenate_fastqs(self, sample_directory: Path, sample_name: str):
         if self.dry_run:
             return
-        forward_out_path = self.fastq_file_service.generate_forward_output_path(
+        forward_out_path = self.fastq_file_service.get_concatenated_forward_read_output_path(
             fastq_directory=sample_directory, sample_name=sample_name
         )
-        reverse_out_path = self.fastq_file_service.generate_reverse_output_path(
+        reverse_out_path = self.fastq_file_service.get_concatenated_reverse_read_output_path(
             fastq_directory=sample_directory, sample_name=sample_name
         )
         self.fastq_file_service.concatenate(

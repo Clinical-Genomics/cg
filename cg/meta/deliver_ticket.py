@@ -88,10 +88,10 @@ class DeliverTicketAPI(MetaAPI):
                 continue
             if not dir_path.is_dir():
                 continue
-            forward_out_path = self.fastq_file_service.generate_forward_output_path(
+            forward_out_path = self.fastq_file_service.get_concatenated_forward_read_output_path(
                 fastq_directory=dir_path, sample_name=dir_path.name
             )
-            reverse_out_path = self.fastq_file_service.generate_reverse_output_path(
+            reverse_out_path = self.fastq_file_service.get_concatenated_reverse_read_output_path(
                 fastq_directory=dir_path, sample_name=dir_path.name
             )
             self.fastq_file_service.concatenate(
