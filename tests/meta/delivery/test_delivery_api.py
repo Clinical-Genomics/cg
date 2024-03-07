@@ -13,6 +13,33 @@ from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
+def test_get_delivery_files_fastq_delivery(
+    delivery_context_microsalt: CGConfig,
+    case_id: str,
+    delivery_fastq_file: Path,
+    delivery_another_fastq_file: Path,
+):
+    """Test get delivery files for FASTQ data delivery."""
+
+    # GIVEN a delivery context
+    delivery_api: DeliveryAPI = delivery_context_microsalt.delivery_api
+    status_db: Store = delivery_context_microsalt.status_db
+
+    # GIVEN a case object
+    case: Case = status_db.get_case_by_internal_id(case_id)
+
+    # WHEN retrieving the delivery files
+    delivery_files: list[DeliveryFile] = delivery_api.get_delivery_files(case=case)
+
+    # THEN only the fastq sample files should be returned
+    for delivery_file in delivery_files:
+        assert isinstance(delivery_file, DeliveryFile)
+        assert delivery_file.source_path.name in [
+            delivery_fastq_file.name,
+            delivery_another_fastq_file.name,
+        ]
+
+
 def test_get_fastq_delivery_files(
     delivery_context_microsalt: CGConfig,
     case_id: str,
