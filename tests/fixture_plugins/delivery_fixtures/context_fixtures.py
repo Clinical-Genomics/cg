@@ -39,7 +39,6 @@ def delivery_context_balsamic(
     another_sample_id: str,
     sample_name: str,
     another_sample_name: str,
-    total_sequenced_reads_pass: int,
     wgs_application_tag: str,
 ) -> CGConfig:
     """Delivery API context."""
@@ -64,7 +63,6 @@ def delivery_context_balsamic(
         application_tag=wgs_application_tag,
         internal_id=sample_id,
         name=sample_name,
-        reads=total_sequenced_reads_pass,
     )
 
     another_sample: Sample = helpers.add_sample(
@@ -72,7 +70,6 @@ def delivery_context_balsamic(
         application_tag=wgs_application_tag,
         internal_id=another_sample_id,
         name=another_sample_name,
-        reads=total_sequenced_reads_pass,
     )
 
     for sample_balsamic in [sample, another_sample]:

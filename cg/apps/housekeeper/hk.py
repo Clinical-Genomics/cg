@@ -403,7 +403,7 @@ class HousekeeperAPI:
             raise HousekeeperBundleVersionMissingError
         return self.files(version=version.id, tags=tags).all()
 
-    def get_files_from_latest_version_by_list_of_tags(
+    def get_files_from_latest_version_by_tags(
         self, bundle_name: str, tags: list[set[str]], excluded_tags: list[set[str]] | None = None
     ) -> list[File]:
         """
