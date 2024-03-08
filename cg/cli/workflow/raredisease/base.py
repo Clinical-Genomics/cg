@@ -42,7 +42,6 @@ LOG = logging.getLogger(__name__)
 def raredisease(context: click.Context) -> None:
     """NF-core/raredisease analysis workflow."""
     AnalysisAPI.get_help(context)
-
     context.obj.meta_apis[MetaApis.ANALYSIS_API] = RarediseaseAnalysisAPI(config=context.obj)
 
 
@@ -108,7 +107,9 @@ def run(
             "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
-            "config": analysis_api.get_params_file_path(case_id=case_id, params_file=params_file),
+            "config": analysis_api.get_params_file_path(
+                case_id=case_id, params_file=params_file
+            ),
             "name": case_id,
             "compute_env": compute_env or analysis_api.get_compute_env(case_id=case_id),
             "revision": revision or analysis_api.revision,
@@ -116,32 +117,11 @@ def run(
             "id": nf_tower_id,
         }
     )
+    LOG.info(f"Launching nextflow analysis")
 
-    analysis_api.run_nextflow_analysis(
-        case_id=case_id, dry_run=dry_run, use_nextflow=use_nextflow, command_args=command_args
-    )
+    analysis_api.run_nextflow_analysis(case_id=case_id, dry_run=dry_run, use_nextflow=use_nextflow, command_args=command_args)
 
-    try:
-        analysis_api.verify_sample_sheet_exists(case_id=case_id, dry_run=dry_run)
-        analysis_api.check_analysis_ongoing(case_id)
-        LOG.info(f"Running RAREDISEASE analysis for {case_id}")
-        analysis_api.run_analysis(
-            case_id=case_id, command_args=command_args, use_nextflow=use_nextflow, dry_run=dry_run
-        )
-        analysis_api.set_statusdb_action(
-            case_id=case_id, action=CaseActions.RUNNING, dry_run=dry_run
-        )
-    except FileNotFoundError as error:
-        LOG.error(f"Could not resume analysis: {error}")
-        raise click.Abort() from error
-    except (CgError, ValueError) as error:
-        LOG.error(f"Could not run analysis: {error}")
-        raise click.Abort() from error
-    except Exception as error:
-        LOG.error(f"Could not run analysis: {error}")
-        raise click.Abort() from error
-    if not dry_run:
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
+    LOG.info(f"Finishing nextflow analysis")
 
 
 @raredisease.command("panel")
