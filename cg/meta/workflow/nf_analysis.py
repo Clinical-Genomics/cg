@@ -23,6 +23,7 @@ from cg.models.nf_analysis import FileDeliverable, WorkflowDeliverables
 from cg.models.nf_analysis import NfCommandArgs
 from cg.utils import Process
 from cg.store.models import Sample
+from cg.constants.constants import CaseActions
 
 LOG = logging.getLogger(__name__)
 

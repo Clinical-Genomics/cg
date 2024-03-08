@@ -2409,16 +2409,16 @@ def raredisease_mock_analysis_finish(
         parents=True,
         exist_ok=True,
     )
-    write_json(
-        content=raredisease_multiqc_json_metrics,
-        file_path=Path(
-            raredisease_dir,
-            raredisease_case_id,
-            "multiqc",
-            "multiqc_data",
-            "multiqc_data",
-        ).with_suffix(FileExtensions.JSON),
-    )
+    # write_json(
+    #     content=raredisease_multiqc_json_metrics,
+    #     file_path=Path(
+    #         raredisease_dir,
+    #         raredisease_case_id,
+    #         "multiqc",
+    #         "multiqc_data",
+    #         "multiqc_data",
+    #     ).with_suffix(FileExtensions.JSON),
+    # )
     write_yaml(
         content={raredisease_case_id: [tower_id]},
         file_path=Path(
