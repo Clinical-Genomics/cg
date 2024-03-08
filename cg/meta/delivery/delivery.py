@@ -110,9 +110,11 @@ class DeliveryAPI:
     ) -> list[DeliveryFile]:
         """Return a list of analysis files to be delivered for a specific sample."""
         sample_tags: list[set[str]] = self.get_analysis_sample_tags_for_workflow(case.data_analysis)
-        analysis_sample_tags = [tag | {sample.internal_id} for tag in sample_tags]
+        sample_tags_with_sample_id: list[set[str]] = [
+            tag | {sample.internal_id} for tag in sample_tags
+        ]
         sample_files: list[File] = self.housekeeper_api.get_files_from_latest_version_by_tags(
-            bundle_name=case.internal_id, tags=analysis_sample_tags
+            bundle_name=case.internal_id, tags=sample_tags_with_sample_id
         )
         delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
             files=sample_files,
