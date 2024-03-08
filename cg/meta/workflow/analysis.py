@@ -104,7 +104,6 @@ class AnalysisAPI(MetaAPI):
     def get_slurm_qos_for_case(self, case_id: str) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
         priority: int = self.get_priority_for_case(case_id=case_id)
-        LOG.info(f"Get slurm qos: {Priority.priority_to_slurm_qos().get(priority)}")
         return Priority.priority_to_slurm_qos().get(priority)
 
     def get_workflow_manager(self) -> str:
