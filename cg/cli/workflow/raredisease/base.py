@@ -115,13 +115,9 @@ def run(
             "id": nf_tower_id,
         }
     )
-    LOG.info(f"Launching nextflow analysis")
-
     analysis_api.run_nextflow_analysis(
         case_id=case_id, dry_run=dry_run, use_nextflow=use_nextflow, command_args=command_args
     )
-
-    LOG.info(f"Finishing nextflow analysis")
 
 
 @raredisease.command("panel")
