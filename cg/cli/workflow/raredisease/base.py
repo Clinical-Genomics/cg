@@ -107,9 +107,7 @@ def run(
             "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
-            "config": analysis_api.get_params_file_path(
-                case_id=case_id, params_file=params_file
-            ),
+            "config": analysis_api.get_params_file_path(case_id=case_id, params_file=params_file),
             "name": case_id,
             "compute_env": compute_env or analysis_api.get_compute_env(case_id=case_id),
             "revision": revision or analysis_api.revision,
@@ -119,7 +117,9 @@ def run(
     )
     LOG.info(f"Launching nextflow analysis")
 
-    analysis_api.run_nextflow_analysis(case_id=case_id, dry_run=dry_run, use_nextflow=use_nextflow, command_args=command_args)
+    analysis_api.run_nextflow_analysis(
+        case_id=case_id, dry_run=dry_run, use_nextflow=use_nextflow, command_args=command_args
+    )
 
     LOG.info(f"Finishing nextflow analysis")
 
