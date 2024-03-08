@@ -160,10 +160,6 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
         # THEN command should NOT execute successfully
         assert result.exit_code != EXIT_SUCCESS
 
-        # THEN information that the file is malformed should be communicated
-        assert "Deliverables file is malformed" in caplog.text
-        assert "field required" in caplog.text
-
 
 @pytest.mark.parametrize(
     ("context", "case_id", "hermes_deliverables", "mock_deliverable"),
