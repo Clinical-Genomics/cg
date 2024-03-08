@@ -39,7 +39,8 @@ class TaxprofilerParameters(WorkflowParameters):
     centrifuge_save_reads: bool = True
     run_krona: bool = True
     run_profile_standardisation: bool = True
-
+    clusterOptions: str = Field(..., alias="cluster_options")
+    priority: str
 
 class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
     """Taxprofiler sample model is used when building the sample sheet."""
