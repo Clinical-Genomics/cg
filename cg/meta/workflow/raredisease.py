@@ -149,7 +149,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             raise ValueError(f"{phenotype} is not a valid phenotype")
         return code
 
-
     @staticmethod
     def get_sex_code(sex: str) -> int:
         """Return Raredisease sex code."""
