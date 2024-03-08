@@ -290,6 +290,36 @@ class NfAnalysisAPI(AnalysisAPI):
             self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
         LOG.info(self.process.stdout)
 
+    def run_nextflow_analysis(self,
+            case_id: str,
+            use_nextflow: bool,
+            command_args=NfCommandArgs,
+            dry_run: bool = False
+            ) -> None:
+        try:
+            self.verify_sample_sheet_exists(case_id=case_id, dry_run=dry_run)
+            self.check_analysis_ongoing(case_id)
+            LOG.info(f"Running RAREDISEASE analysis for {case_id}")
+            self.run_analysis(
+                case_id=case_id, command_args=command_args, use_nextflow=use_nextflow, dry_run=dry_run
+            )
+            self.set_statusdb_action(
+                case_id=case_id, action=CaseActions.RUNNING, dry_run=dry_run
+            )
+        except FileNotFoundError as error:
+            LOG.error(f"Could not resume analysis: {error}")
+            raise click.Abort() from error
+        except (CgError, ValueError) as error:
+            LOG.error(f"Could not run analysis: {error}")
+            raise click.Abort() from error
+        except Exception as error:
+            LOG.error(f"Could not run analysis: {error}")
+            raise click.Abort() from error
+        if not dry_run:
+            self.add_pending_trailblazer_analysis(case_id=case_id)
+
+
+
     def run_analysis(
         self,
         case_id: str,

@@ -108,7 +108,7 @@ def run(
             "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
             "resume": not from_start,
             "profile": analysis_api.get_profile(profile=profile),
-            "params_file": analysis_api.get_params_file_path(
+            "config": analysis_api.get_params_file_path(
                 case_id=case_id, params_file=params_file
             ),
             "name": case_id,
@@ -118,6 +118,8 @@ def run(
             "id": nf_tower_id,
         }
     )
+
+    analysis_api.run_nextflow_analysis(case_id=case_id, dry_run=dry_run, use_nextflow=use_nextflow, command_args=command_args)
 
     try:
         analysis_api.verify_sample_sheet_exists(case_id=case_id, dry_run=dry_run)
