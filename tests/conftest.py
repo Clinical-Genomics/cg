@@ -2563,7 +2563,9 @@ def taxprofiler_sample_sheet_content(
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_hermes_deliverables(taxprofiler_deliverable_data: dict, taxprofiler_case_id: str) -> dict:
+def taxprofiler_hermes_deliverables(
+    taxprofiler_deliverable_data: dict, taxprofiler_case_id: str
+) -> dict:
     hermes_output: dict = {"workflow": "taxprofiler", "bundle_id": taxprofiler_case_id, "files": []}
     for file_info in taxprofiler_deliverable_data["files"]:
         tags: list[str] = []
@@ -2695,7 +2697,9 @@ def taxprofiler_context(
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_deliverable_data(taxprofiler_dir: Path, taxprofiler_case_id: str, sample_id: str) -> dict:
+def taxprofiler_deliverable_data(
+    taxprofiler_dir: Path, taxprofiler_case_id: str, sample_id: str
+) -> dict:
     return {
         "files": [
             {
