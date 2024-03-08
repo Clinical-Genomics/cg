@@ -520,6 +520,21 @@ def get_order(order_id: int):
         return make_response(jsonify(error=str(error)), HTTPStatus.NOT_FOUND)
 
 
+@BLUEPRINT.route("/orders/<order_id>/delivery_message")
+def get_delivery_message_for_order(order_id: int):
+    """Return the delivery message for an order."""
+    try:
+        response: DeliveryMessageResponse = delivery_message_service.get_delivery_message_for_order(
+            order_id
+        )
+        response_dict: dict = response.model_dump()
+        return make_response(response_dict)
+    except IndexError as error:
+        return make_response(jsonify(error=str(error)), HTTPStatus.PRECONDITION_FAILED)
+    except OrderNotFoundError as error:
+        return make_response(jsonify(error=str(error))), HTTPStatus.NOT_FOUND
+
+
 @BLUEPRINT.route("/orderform", methods=["POST"])
 def parse_orderform():
     """Parse an orderform/JSON export."""

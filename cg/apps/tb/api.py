@@ -8,7 +8,7 @@ from google.auth import jwt
 from google.auth.crypt import RSASigner
 
 from cg.apps.tb.dto.create_job_request import CreateJobRequest
-from cg.apps.tb.dto.summary_response import SummariesResponse, AnalysisSummary
+from cg.apps.tb.dto.summary_response import AnalysisSummary, SummariesResponse
 from cg.apps.tb.models import AnalysesResponse, TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
