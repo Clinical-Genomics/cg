@@ -269,6 +269,12 @@ class ReportAPI(MetaAPI):
                         case=case, sample=sample, analysis_metadata=analysis_metadata
                     ),
                     timestamps=self.get_sample_timestamp_data(sample=sample),
+                    delivered_files=self.delivery_api.get_analysis_sample_delivery_files_by_sample(
+                        case=case, sample=sample
+                    ),
+                    delivered_fastq_files=self.delivery_api.get_fastq_delivery_files_by_sample(
+                        case=case, sample=sample
+                    ),
                 )
             )
         return samples
@@ -350,6 +356,7 @@ class ReportAPI(MetaAPI):
             variant_callers=self.get_variant_callers(_analysis_metadata=analysis_metadata),
             panels=case.panels,
             scout_files=self.get_scout_uploaded_files(case=case),
+            delivered_files=self.delivery_api.get_analysis_case_delivery_files(case=case),
         )
 
     def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:

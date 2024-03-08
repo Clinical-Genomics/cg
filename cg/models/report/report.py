@@ -8,6 +8,7 @@ from cg.models.report.sample import ApplicationModel, SampleModel
 from cg.models.report.validators import (
     get_analysis_type_as_string,
     get_date_as_string,
+    get_delivered_files_as_file_names,
     get_list_as_string,
     get_path_as_string,
     get_report_string,
@@ -70,6 +71,7 @@ class DataAnalysisModel(BaseModel):
         variant_callers: variant-calling filters; source: workflow
         panels: list of case specific panels; source: StatusDB/family/panels
         scout_files: list of file names uploaded to Scout
+        delivered_files: list of analysis case files to be delivered
     """
 
     customer_workflow: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
@@ -81,6 +83,9 @@ class DataAnalysisModel(BaseModel):
     variant_callers: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
     panels: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
     scout_files: ScoutReportFiles
+    delivered_files: Annotated[
+        list[str] | None, BeforeValidator(get_delivered_files_as_file_names)
+    ] = None
 
     @model_validator(mode="after")
     def check_supported_workflow(self) -> "DataAnalysisModel":

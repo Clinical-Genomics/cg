@@ -15,6 +15,7 @@ from cg.constants import (
 )
 from cg.constants.constants import PrepCategory, Workflow
 from cg.constants.subject import Sex
+from cg.models.delivery.delivery import DeliveryFile
 from cg.models.orders.constants import OrderType
 
 LOG = logging.getLogger(__name__)
@@ -50,6 +51,13 @@ def get_date_as_string(date: datetime | None) -> str:
 def get_list_as_string(value: list[str] | None) -> str:
     """Return list elements as comma separated individual string values."""
     return ", ".join(v for v in value) if value else NA_FIELD
+
+
+def get_delivered_files_as_file_names(
+    delivery_files: list[DeliveryFile] | None,
+) -> list[str] | None:
+    """Return a list of validated file names given a list of delivery files."""
+    return [file.destination_path.name for file in delivery_files] if delivery_files else None
 
 
 def get_path_as_string(file_path: str | None) -> str:
