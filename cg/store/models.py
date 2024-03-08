@@ -544,7 +544,7 @@ class Case(Base, PriorityMixin):
 
     @property
     def sample_ids(self) -> list[str]:
-        """Return case sample IDs."""
+        """Return a list of internal ids of the case samples."""
         return [sample.internal_id for sample in self._get_samples]
 
     @property
