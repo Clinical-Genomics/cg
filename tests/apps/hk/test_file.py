@@ -669,12 +669,12 @@ def test_get_file_insensitive_path(bed_file: Path, populated_housekeeper_api: Ho
 def test_get_files_from_latest_version_by_tags(
     populated_housekeeper_api: HousekeeperAPI, sample_id: str, fastq_file: Path, spring_file: Path
 ):
-    """Test that a list of files are retrieved given a list of tags."""
+    """Test that a list of files are retrieved by tags."""
 
     # GIVEN a populated Housekeeper API and a list of sample tags
     sample_tags: list[set[str]] = [{SequencingFileTag.FASTQ}, {SequencingFileTag.SPRING}]
 
-    # WHEN getting a list of files by list of tags
+    # WHEN getting a list of files by tags
     files: list[File] = populated_housekeeper_api.get_files_from_latest_version_by_tags(
         bundle_name=sample_id, tags=sample_tags
     )
@@ -690,7 +690,7 @@ def test_get_files_from_latest_version_by_tags_excluding_tags(
 ):
     """Test that a list of files is retrieved from the latest version, excluding specific tags."""
 
-    # GIVEN a populated Housekeeper API and a list of tags to exclude
+    # GIVEN a populated Housekeeper API and tags to exclude
     sample_tags: list[set[str]] = [{sample_id}]
     tags_to_exclude: list[set[str]] = [{SequencingFileTag.SPRING}]
 
