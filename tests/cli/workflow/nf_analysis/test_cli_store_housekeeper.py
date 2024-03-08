@@ -154,8 +154,8 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
         # GIVEN case-id
         case_id: str = request.getfixturevalue(case_id)
 
-        # WHEN running
-        result = cli_runner.invoke(store_housekeeper, [case_id], obj=context)
+    # WHEN running
+    result = cli_runner.invoke(store_housekeeper, [case_id], obj=context)
 
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
