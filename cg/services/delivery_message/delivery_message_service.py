@@ -30,8 +30,6 @@ class DeliveryMessageService:
         order: Order = self.store.get_order_by_id(order_id)
         if not order:
             raise OrderNotFoundError(f"Order with ID {order_id} not found.")
-        analyses_ready_for_delivery: list[TrailblazerAnalysis] = (
-            self.trailblazer_api.get_analyses_to_deliver(order_id)
-        )
-        case_ids: list[str] = [analysis.case_id for analysis in analyses_ready_for_delivery]
+        analyses: list[TrailblazerAnalysis] = self.trailblazer_api.get_analyses_to_deliver(order_id)
+        case_ids: list[str] = [analysis.case_id for analysis in analyses]
         return self.get_delivery_message(DeliveryMessageRequest(case_ids=case_ids))
