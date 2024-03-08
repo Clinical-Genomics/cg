@@ -68,16 +68,18 @@ class DeliveryAPI:
         """Return a list of fastq files to be delivered for a specific sample."""
         delivery_files: list[DeliveryFile] = []
         fastq_tags: list[set[str]] = self.get_analysis_sample_tags_for_workflow(Workflow.FASTQ)
-        if self.is_sample_deliverable(sample=sample, force=force):
-            fastq_files: list[File] = self.housekeeper_api.get_files_from_latest_version_by_tags(
-                bundle_name=sample.internal_id, tags=fastq_tags
-            )
-            delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
-                files=fastq_files,
-                case=case,
-                internal_id=sample.internal_id,
-                external_id=sample.name,
-            )
+        if not self.is_sample_deliverable(sample=sample, force=force):
+            LOG.warning(f"Sample {sample.internal_id} is not deliverable")
+            return delivery_files
+        fastq_files: list[File] = self.housekeeper_api.get_files_from_latest_version_by_tags(
+            bundle_name=sample.internal_id, tags=fastq_tags
+        )
+        delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
+            files=fastq_files,
+            case=case,
+            internal_id=sample.internal_id,
+            external_id=sample.name,
+        )
         return delivery_files
 
     def get_analysis_case_delivery_files(self, case: Case) -> list[DeliveryFile]:

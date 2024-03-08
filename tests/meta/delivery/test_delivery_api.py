@@ -1,7 +1,9 @@
 """Test delivery API methods."""
 
+import logging
 from pathlib import Path
 
+from _pytest.logging import LogCaptureFixture
 from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -158,6 +160,33 @@ def test_get_fastq_delivery_files_by_sample(
     assert delivery_files[0].source_path.name == delivery_fastq_file.name
     for delivery_file in delivery_files:
         assert delivery_file.source_path.name != delivery_spring_file.name
+
+
+def test_get_fastq_delivery_files_by_sample_not_deliverable(
+    delivery_context_microsalt: CGConfig,
+    case_id: str,
+    sample_id_not_enough_reads: str,
+    caplog: LogCaptureFixture,
+):
+    """Test get fastq delivery files for a sample that is not deliverable."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a delivery context
+    delivery_api: DeliveryAPI = delivery_context_microsalt.delivery_api
+    status_db: Store = delivery_context_microsalt.status_db
+
+    # GIVEN case and sample objects
+    case: Case = status_db.get_case_by_internal_id(case_id)
+    sample: Sample = status_db.get_sample_by_internal_id(sample_id_not_enough_reads)
+
+    # WHEN retrieving fastq delivery files by a sample that is not deliverable
+    delivery_files: list[DeliveryFile] = delivery_api.get_fastq_delivery_files_by_sample(
+        case=case, sample=sample
+    )
+
+    # THEN no delivery files should be returned
+    assert not delivery_files
+    assert f"Sample {sample_id_not_enough_reads} is not deliverable" in caplog.text
 
 
 def test_get_analysis_case_delivery_files(
