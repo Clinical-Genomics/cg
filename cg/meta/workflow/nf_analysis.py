@@ -296,7 +296,7 @@ class NfAnalysisAPI(AnalysisAPI):
         try:
             self.verify_sample_sheet_exists(case_id=case_id, dry_run=dry_run)
             self.check_analysis_ongoing(case_id)
-            LOG.info(f"Running RAREDISEASE analysis for {case_id}")
+            LOG.info(f"Running analysis for {case_id}")
             self.run_analysis(
                 case_id=case_id,
                 command_args=command_args,
