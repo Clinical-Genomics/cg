@@ -1,6 +1,4 @@
-from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import DataDelivery, MicrosaltAppTags, Workflow
-from cg.constants.tb import AnalysisStatus
 from cg.exc import CaseNotFoundError, OrderMismatchError
 from cg.services.delivery_message.messages import (
     AnalysisScoutMessage,
@@ -16,7 +14,7 @@ from cg.services.delivery_message.messages.delivery_message import DeliveryMessa
 from cg.services.delivery_message.messages.microsalt_mwx_message import (
     MicrosaltMwxMessage,
 )
-from cg.store.models import Case, Order, Sample
+from cg.store.models import Case, Sample
 
 
 def get_message(cases: list[Case]) -> str:
@@ -89,11 +87,3 @@ def validate_cases(cases: list[Case], case_ids: list[str]) -> None:
 
 def is_matching_order(cases: list[Case]) -> bool:
     return all([case.latest_order == cases[0].latest_order for case in cases])
-
-
-def get_cases_ready_for_delivery(trailblazer_api: TrailblazerAPI, order: Order) -> list[Case]:
-    return [
-        case
-        for case in order.cases
-        if trailblazer_api.get_latest_analysis_status(case.id) == AnalysisStatus.COMPLETED
-    ]

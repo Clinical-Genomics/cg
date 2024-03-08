@@ -1,4 +1,5 @@
 from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.exc import OrderNotFoundError
 from cg.server.dto.delivery_message.delivery_message_request import (
     DeliveryMessageRequest,
@@ -6,11 +7,7 @@ from cg.server.dto.delivery_message.delivery_message_request import (
 from cg.server.dto.delivery_message.delivery_message_response import (
     DeliveryMessageResponse,
 )
-from cg.services.delivery_message.utils import (
-    get_cases_ready_for_delivery,
-    get_message,
-    validate_cases,
-)
+from cg.services.delivery_message.utils import get_message, validate_cases
 from cg.store.models import Case, Order
 from cg.store.store import Store
 
@@ -33,8 +30,8 @@ class DeliveryMessageService:
         order: Order = self.store.get_order_by_id(order_id)
         if not order:
             raise OrderNotFoundError(f"Order with ID {order_id} not found.")
-        cases_ready_for_delivery: list[Case] = get_cases_ready_for_delivery(
-            order=order, trailblazer_api=self.trailblazer_api
+        analyses_ready_for_delivery: list[TrailblazerAnalysis] = (
+            self.trailblazer_api.get_analyses_to_deliver(order_id)
         )
-        case_ids: list[str] = [case.internal_id for case in cases_ready_for_delivery]
+        case_ids: list[str] = [analysis.case_id for analysis in analyses_ready_for_delivery]
         return self.get_delivery_message(DeliveryMessageRequest(case_ids=case_ids))

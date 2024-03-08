@@ -178,3 +178,12 @@ class TrailblazerAPI:
         response = self.query_trailblazer(command=endpoint, request_body={}, method=APIMethods.GET)
         response_data = SummariesResponse.model_validate(response)
         return response_data.summaries
+
+    def get_analyses_to_deliver(self, order_id: int) -> list[TrailblazerAnalysis]:
+        """Return the analyses in the order which have a 'Completed' status."""
+        endpoint = f"analyses?order_id={order_id}&status[]={AnalysisStatus.COMPLETED}"
+        raw_response = self.query_trailblazer(
+            command=endpoint, request_body={}, method=APIMethods.GET
+        )
+        validated_response = AnalysesResponse.model_validate(raw_response)
+        return validated_response.analyses
