@@ -157,8 +157,8 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
         # WHEN running
         result = cli_runner.invoke(store_housekeeper, [case_id], obj=context)
 
-        # THEN command should NOT execute successfully
-        assert result.exit_code != EXIT_SUCCESS
+    # THEN command should NOT execute successfully
+    assert result.exit_code != EXIT_SUCCESS
 
 
 @pytest.mark.parametrize(
