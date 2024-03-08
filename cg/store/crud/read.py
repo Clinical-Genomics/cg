@@ -766,6 +766,14 @@ class ReadHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
+    def get_cases_by_internal_ids(self, internal_ids: list[str]) -> list[Case]:
+        """Get cases by internal ids."""
+        return apply_case_filter(
+            cases=self._get_query(table=Case),
+            filter_functions=[CaseFilter.BY_INTERNAL_IDS],
+            internal_ids=internal_ids,
+        ).all()
+
     def verify_case_exists(self, case_internal_id: str) -> None:
         """Passes silently if case exists in Status DB, raises error if no case or case samples."""
 

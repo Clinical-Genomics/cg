@@ -148,6 +148,9 @@ class NfAnalysisAPI(AnalysisAPI):
             return work_dir.absolute()
         return Path(self.get_case_path(case_id), NFX_WORK_DIR)
 
+    def set_cluster_options(self, case_id: str) -> str:
+        return f'process.clusterOptions = "-A {self.account} --qos={self.get_slurm_qos_for_case(case_id=case_id)}"\n'
+
     @staticmethod
     def extract_read_files(
         metadata: list[FastqFileMeta], forward_read: bool = False, reverse_read: bool = False

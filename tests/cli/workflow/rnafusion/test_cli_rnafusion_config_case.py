@@ -81,7 +81,7 @@ def test_config_case_default_parameters(
     # WHEN running config case
     result = cli_runner.invoke(config_case, [rnafusion_case_id], obj=rnafusion_context)
 
-    # THEN command should exit succesfully
+    # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN logs should be as expected
