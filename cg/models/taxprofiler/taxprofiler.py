@@ -42,6 +42,7 @@ class TaxprofilerParameters(WorkflowParameters):
     clusterOptions: str = Field(..., alias="cluster_options")
     priority: str
 
+
 class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
     """Taxprofiler sample model is used when building the sample sheet."""
 

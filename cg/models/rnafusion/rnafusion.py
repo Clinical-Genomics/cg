@@ -41,6 +41,7 @@ class RnafusionParameters(WorkflowParameters):
     clusterOptions: str = Field(..., alias="cluster_options")
     priority: str
 
+
 class CommandArgs(BaseModel):
     """Model for arguments and options supported."""
 
