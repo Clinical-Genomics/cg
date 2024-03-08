@@ -1,4 +1,5 @@
 from cg.apps.tb import TrailblazerAPI
+from cg.exc import OrderNotFoundError
 from cg.server.dto.delivery_message.delivery_message_request import (
     DeliveryMessageRequest,
 )
@@ -30,6 +31,8 @@ class DeliveryMessageService:
 
     def get_delivery_message_for_order(self, order_id: int) -> DeliveryMessageResponse:
         order: Order = self.store.get_order_by_id(order_id)
+        if not order:
+            raise OrderNotFoundError(f"Order with ID {order_id} not found.")
         cases_ready_for_delivery: list[Case] = get_cases_ready_for_delivery(
             order=order, trailblazer_api=self.trailblazer_api
         )
