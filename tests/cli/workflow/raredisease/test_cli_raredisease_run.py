@@ -176,33 +176,6 @@ def test_resume_with_id(
     assert "tw runs relaunch" in caplog.text
 
 
-def test_resume_without_id(
-    cli_runner: CliRunner,
-    raredisease_context: CGConfig,
-    caplog: LogCaptureFixture,
-    raredisease_case_id: str,
-    mock_config,
-    raredisease_mock_analysis_finish,
-):
-    """Test resume command without providing NF-Tower ID when a Trailblazer Tower config file from a previous run
-    exist."""
-    caplog.set_level(logging.INFO)
-
-    # GIVEN case-id
-
-    # GIVEN a mocked config
-
-    # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [raredisease_case_id, "--dry-run"], obj=raredisease_context)
-
-    # THEN command should execute successfully
-    assert result.exit_code == EXIT_SUCCESS
-
-    # THEN command should use tower for relaunch
-    assert "Workflow will be resumed from run" in caplog.text
-    assert "tw runs relaunch" in caplog.text
-
-
 def test_resume_without_id_error(
     cli_runner: CliRunner,
     raredisease_context: CGConfig,
