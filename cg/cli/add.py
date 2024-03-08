@@ -15,6 +15,7 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
+    Order,
     Panel,
     Sample,
     User,
@@ -278,6 +279,16 @@ def add_case(
         priority=priority,
         ticket=ticket,
     )
+    order: Order = status_db.get_order_by_ticket_id(int(ticket))
+    if not order:
+        LOG.warning(f"No order found with ticket_id {ticket}")
+        click.confirm("No order found for the given ticket, proceed?", default=False, abort=True)
+        order = Order(
+            customer_id=customer.id,
+            ticket_id=int(ticket),
+            workflow=data_analysis,
+        )
+    new_case.orders.append(order)
 
     new_case.customer: Customer = customer
     status_db.session.add(new_case)
