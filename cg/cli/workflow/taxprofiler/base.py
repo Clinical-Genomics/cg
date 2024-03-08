@@ -125,7 +125,9 @@ def run(
         }
     )
 
-    analysis_api.run_nextflow_analysis(case_id=case_id, dry_run=dry_run, use_nextflow=use_nextflow, command_args=command_args)
+    analysis_api.run_nextflow_analysis(
+        case_id=case_id, dry_run=dry_run, use_nextflow=use_nextflow, command_args=command_args
+    )
 
 
 @taxprofiler.command("start")
