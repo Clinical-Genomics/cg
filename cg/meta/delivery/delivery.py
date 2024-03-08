@@ -75,8 +75,8 @@ class DeliveryAPI:
             delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
                 files=fastq_files,
                 case=case,
-                source_id=sample.internal_id,
-                destination_id=sample.name,
+                internal_id=sample.internal_id,
+                external_id=sample.name,
             )
         return delivery_files
 
@@ -91,7 +91,7 @@ class DeliveryAPI:
             bundle_name=case.internal_id, tags=case_tags, excluded_tags=sample_ids
         )
         delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
-            files=case_files, case=case, source_id=case.internal_id, destination_id=case.name
+            files=case_files, case=case, internal_id=case.internal_id, external_id=case.name
         )
         return delivery_files
 
@@ -117,8 +117,8 @@ class DeliveryAPI:
         delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
             files=sample_files,
             case=case,
-            source_id=sample.internal_id,
-            destination_id=sample.name,
+            internal_id=sample.internal_id,
+            external_id=sample.name,
             analysis_sample_files=True,
         )
         return delivery_files
@@ -127,8 +127,8 @@ class DeliveryAPI:
         self,
         files: list[File],
         case: Case,
-        source_id: str,
-        destination_id: str,
+        internal_id: str,
+        external_id: str,
         analysis_sample_files: bool = False,
     ) -> list[DeliveryFile]:
         """Return a delivery file model given a list of housekeeper files."""
@@ -136,13 +136,11 @@ class DeliveryAPI:
         destination_path: Path = Path(
             self.delivery_path, case.customer.internal_id, INBOX_NAME, case.latest_ticket
         )
-        subfolder: Path = Path(destination_id)
+        subfolder: Path = Path(external_id)
         if analysis_sample_files:
-            subfolder: Path = Path(case.name, destination_id)
+            subfolder: Path = Path(case.name, external_id)
         for file in files:
-            destination_file_name: str = Path(file.full_path).name.replace(
-                source_id, destination_id
-            )
+            destination_file_name: str = Path(file.full_path).name.replace(internal_id, external_id)
             destination_path: Path = Path(destination_path, subfolder, destination_file_name)
             delivery_file = DeliveryFile(
                 source_path=Path(file.full_path), destination_path=destination_path

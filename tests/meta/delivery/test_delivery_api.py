@@ -253,7 +253,7 @@ def test_convert_case_files_to_delivery_files(delivery_context_balsamic: CGConfi
 
     # WHEN converting Housekeeper case files to delivery files
     delivery_files: list[DeliveryFile] = delivery_api.convert_files_to_delivery_files(
-        files=hk_files, case=case, source_id=case.internal_id, destination_id=case.name
+        files=hk_files, case=case, internal_id=case.internal_id, external_id=case.name
     )
 
     # THEN the delivery files should be correctly formatted
@@ -291,8 +291,8 @@ def test_convert_sample_files_to_delivery_files(
     delivery_files: list[DeliveryFile] = delivery_api.convert_files_to_delivery_files(
         files=hk_sample_files,
         case=case,
-        source_id=sample.internal_id,
-        destination_id=sample.name,
+        internal_id=sample.internal_id,
+        external_id=sample.name,
         analysis_sample_files=True,
     )
 
