@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import Field, BaseModel
+from pydantic.v1 import Field, BaseModel
 
 from cg.constants.sequencing import SequencingPlatform
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
@@ -18,7 +18,7 @@ class TaxprofilerQCMetrics(BaseModel):
 class TaxprofilerParameters(WorkflowParameters):
     """Model for Taxprofiler parameters."""
 
-    input: Path
+    input: Path = Field(..., alias="sample_sheet_path")
     outdir: Path
     databases: Path
     save_preprocessed_reads: bool = True
