@@ -18,7 +18,7 @@ class TaxprofilerQCMetrics(BaseModel):
 class TaxprofilerParameters(WorkflowParameters):
     """Model for Taxprofiler parameters."""
 
-    input: Path = Field(..., alias="sample_sheet_path")
+    input: Path
     outdir: Path
     databases: Path
     save_preprocessed_reads: bool = True
