@@ -77,20 +77,26 @@ def test_without_samples(
     assert "no samples" in caplog.text
 
 
-# def test_without_config_dry_run(
-#     cli_runner: CliRunner,
-#     raredisease_context: CGConfig,
-#     caplog: LogCaptureFixture,
-#     raredisease_case_id: str,
-# ):
-#     """Test command dry-run with case_id and no config file."""
-#     caplog.set_level(logging.ERROR)
-#     # GIVEN case-id
-#     case_id: str = raredisease_case_id
-#     # WHEN dry running with dry specified
-#     result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=raredisease_context)
-#     # THEN command should execute successfully (dry-run)
-#     assert result.exit_code == EXIT_SUCCESS
+@pytest.mark.parametrize(
+    "context", ["raredisease_context", "rnafusion_context", "taxprofiler_context"]
+)
+def test_without_config_dry_run(
+    cli_runner: CliRunner,
+    raredisease_context: CGConfig,
+    caplog: LogCaptureFixture,
+    raredisease_case_id: str,
+    request,
+):
+    """Test command dry-run with case_id and no config file."""
+    caplog.set_level(logging.ERROR)
+    context = request.getfixturevalue(context)
+
+    # GIVEN case-id
+    case_id: str = raredisease_case_id
+    # WHEN dry running with dry specified
+    result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=raredisease_context)
+    # THEN command should execute successfully (dry-run)
+    assert result.exit_code == EXIT_SUCCESS
 
 
 # def test_without_config(
