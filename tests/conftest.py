@@ -2724,7 +2724,6 @@ def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
 # Taxprofiler fixtures
 
 
-
 @pytest.fixture(scope="session")
 def taxprofiler_case_id() -> str:
     """Returns a taxprofiler case id."""
@@ -2780,7 +2779,6 @@ def taxprofiler_nexflow_config_file_path(taxprofiler_dir, taxprofiler_case_id) -
     return Path(
         taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_nextflow_config"
     ).with_suffix(FileExtensions.JSON)
-
 
 
 @pytest.fixture(scope="session")
@@ -2968,7 +2966,6 @@ def mock_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
     Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(
         FileExtensions.CSV
     ).touch(exist_ok=True)
-
 
 
 @pytest.fixture(scope="session")
