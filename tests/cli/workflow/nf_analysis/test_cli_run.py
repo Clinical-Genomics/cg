@@ -35,9 +35,12 @@ def test_with_missing_case(
     context: CGConfig,
     caplog: LogCaptureFixture,
     case_id_does_not_exist: str,
+    request,
 ):
     """Test command with invalid case to start with."""
     caplog.set_level(logging.ERROR)
+    context = request.getfixturevalue(context)
+
     # GIVEN case_id not in database
     assert not context.status_db.get_case_by_internal_id(internal_id=case_id_does_not_exist)
     # WHEN running
