@@ -57,8 +57,8 @@ def test_get_delivery_message_order(
         "query_trailblazer",
         return_value={
             "analyses": [
-                trailblazer_analysis_for_server_case,
-                trailblazer_analysis_for_server_case_in_same_order,
+                trailblazer_analysis_for_server_case.model_dump(),
+                trailblazer_analysis_for_server_case_in_same_order.model_dump(),
             ]
         },
     ):

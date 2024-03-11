@@ -17,16 +17,13 @@ class DeliveryMessageService:
         self.store = store
         self.trailblazer_api = trailblazer_api
 
-    def get_delivery_message(
+    def get_cases_message(
         self, delivery_message_request: DeliveryMessageRequest
     ) -> DeliveryMessageResponse:
         case_ids: list[str] = delivery_message_request.case_ids
-        cases: list[Case] = self.store.get_cases_by_internal_ids(case_ids)
-        validate_cases(cases=cases, case_ids=case_ids)
-        message: str = get_message(cases)
-        return DeliveryMessageResponse(message=message)
+        return self._get_delivery_message(case_ids)
 
-    def get_delivery_message_for_order(self, order_id: int) -> DeliveryMessageResponse:
+    def get_order_message(self, order_id: int) -> DeliveryMessageResponse:
         order: Order = self.store.get_order_by_id(order_id)
         if not order:
             raise OrderNotFoundError(f"Order with ID {order_id} not found.")
@@ -36,4 +33,10 @@ class DeliveryMessageService:
                 f"No analyses ready to be delivered for order {order_id}"
             )
         case_ids: list[str] = [analysis.case_id for analysis in analyses]
-        return self.get_delivery_message(DeliveryMessageRequest(case_ids=case_ids))
+        return self._get_delivery_message(case_ids)
+
+    def _get_delivery_message(self, case_ids: list[str]):
+        cases: list[Case] = self.store.get_cases_by_internal_ids(case_ids)
+        validate_cases(cases=cases, case_ids=case_ids)
+        message: str = get_message(cases)
+        return DeliveryMessageResponse(message=message)
