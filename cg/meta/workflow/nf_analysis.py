@@ -352,7 +352,6 @@ class NfAnalysisAPI(AnalysisAPI):
             params_file=params_file,
             revision=revision,
             compute_env=compute_env,
-            use_nextflow=use_nextflow,
             nf_tower_id=nf_tower_id,
         )
 
