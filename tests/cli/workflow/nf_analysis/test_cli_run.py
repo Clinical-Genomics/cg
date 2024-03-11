@@ -13,9 +13,9 @@ from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
 
-
-
-@pytest.mark.parametrize("context", ["raredisease_context", "rnafusion_context", "taxprofiler_context"])
+@pytest.mark.parametrize(
+    "context", ["raredisease_context", "rnafusion_context", "taxprofiler_context"]
+)
 def test_without_options(cli_runner: CliRunner, context: CGConfig):
     """Test command without case_id argument."""
     # GIVEN no case_id
