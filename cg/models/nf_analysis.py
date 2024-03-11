@@ -6,8 +6,8 @@ from cg.exc import SampleSheetError
 
 
 class WorkflowParameters(BaseModel):
-    input: Path = Field(..., alias="sample_sheet_path")
-    outdir: Path = Field(..., alias="outdir")
+    input: Path
+    outdir: Path
 
 
 class NfCommandArgs(BaseModel):

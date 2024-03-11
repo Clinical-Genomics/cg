@@ -2552,7 +2552,7 @@ def rnafusion_parameters_default(
     return RnafusionParameters(
         cluster_options="--qos=normal",
         genomes_base=existing_directory,
-        sample_sheet_path=rnafusion_sample_sheet_path,
+        input=rnafusion_sample_sheet_path,
         outdir=Path(rnafusion_dir, rnafusion_case_id),
         priority="development",
     )
@@ -2793,7 +2793,7 @@ def taxprofiler_parameters_default(
     """Return Taxprofiler parameters."""
     return TaxprofilerParameters(
         cluster_options="--qos=normal",
-        sample_sheet_path=taxprofiler_sample_sheet_path,
+        input=taxprofiler_sample_sheet_path,
         outdir=Path(taxprofiler_dir, taxprofiler_case_id),
         databases=existing_directory,
         hostremoval_reference=existing_directory,
