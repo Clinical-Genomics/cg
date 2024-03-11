@@ -16,6 +16,7 @@ from .store import (
     store_qc_metrics,
     store_sample,
     store_ticket,
+    get_qc_metrics,
 )
 
 LOG = logging.getLogger(__name__)
@@ -44,5 +45,6 @@ for sub_cmd in [
     store_sample,
     store_ticket,
     store_qc_metrics,
+    get_qc_metrics,
 ]:
     store.add_command(sub_cmd)
