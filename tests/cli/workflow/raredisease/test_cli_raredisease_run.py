@@ -11,57 +11,6 @@ from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
 
-def test_without_options(cli_runner: CliRunner, raredisease_context: CGConfig):
-    """Test command without case_id argument."""
-    # GIVEN no case_id
-    # WHEN dry running without anything specified
-    result = cli_runner.invoke(run, obj=raredisease_context)
-    # THEN command should NOT execute successfully
-    assert result.exit_code != EXIT_SUCCESS
-    # THEN command should mention argument
-    assert "Missing argument" in result.output
-
-
-def test_with_missing_case(
-    cli_runner: CliRunner,
-    raredisease_context: CGConfig,
-    caplog: LogCaptureFixture,
-    case_id_does_not_exist: str,
-):
-    """Test command with invalid case to start with."""
-    caplog.set_level(logging.ERROR)
-    # GIVEN case_id not in database
-    assert not raredisease_context.status_db.get_case_by_internal_id(
-        internal_id=case_id_does_not_exist
-    )
-    # WHEN running
-    result = cli_runner.invoke(run, [case_id_does_not_exist], obj=raredisease_context)
-    # THEN command should NOT successfully call the command it creates
-    assert result.exit_code != EXIT_SUCCESS
-    # THEN ERROR log should be printed containing invalid case_id
-    assert case_id_does_not_exist in caplog.text
-    assert "could not be found" in caplog.text
-
-
-def test_without_samples(
-    cli_runner: CliRunner,
-    raredisease_context: CGConfig,
-    caplog: LogCaptureFixture,
-    no_sample_case_id: str,
-):
-    """Test command with case_id and no samples."""
-    caplog.set_level(logging.ERROR)
-    # GIVEN case-id
-    case_id: str = no_sample_case_id
-    # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=raredisease_context)
-    # THEN command should NOT execute successfully
-    assert result.exit_code != EXIT_SUCCESS
-    # THEN warning should be printed that no config file is found
-    assert case_id in caplog.text
-    assert "no samples" in caplog.text
-
-
 def test_without_config_dry_run(
     cli_runner: CliRunner,
     raredisease_context: CGConfig,

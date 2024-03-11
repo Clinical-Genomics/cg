@@ -52,23 +52,29 @@ def test_with_missing_case(
     assert "could not be found" in caplog.text
 
 
-# def test_without_samples(
-#     cli_runner: CliRunner,
-#     raredisease_context: CGConfig,
-#     caplog: LogCaptureFixture,
-#     no_sample_case_id: str,
-# ):
-#     """Test command with case_id and no samples."""
-#     caplog.set_level(logging.ERROR)
-#     # GIVEN case-id
-#     case_id: str = no_sample_case_id
-#     # WHEN dry running with dry specified
-#     result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=raredisease_context)
-#     # THEN command should NOT execute successfully
-#     assert result.exit_code != EXIT_SUCCESS
-#     # THEN warning should be printed that no config file is found
-#     assert case_id in caplog.text
-#     assert "no samples" in caplog.text
+@pytest.mark.parametrize(
+    "context", ["raredisease_context", "rnafusion_context", "taxprofiler_context"]
+)
+def test_without_samples(
+    cli_runner: CliRunner,
+    context: CGConfig,
+    caplog: LogCaptureFixture,
+    no_sample_case_id: str,
+    request,
+):
+    """Test command with case_id and no samples."""
+    caplog.set_level(logging.ERROR)
+    context = request.getfixturevalue(context)
+
+    # GIVEN case-id
+    case_id: str = no_sample_case_id
+    # WHEN dry running with dry specified
+    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=context)
+    # THEN command should NOT execute successfully
+    assert result.exit_code != EXIT_SUCCESS
+    # THEN warning should be printed that no config file is found
+    assert case_id in caplog.text
+    assert "no samples" in caplog.text
 
 
 # def test_without_config_dry_run(
