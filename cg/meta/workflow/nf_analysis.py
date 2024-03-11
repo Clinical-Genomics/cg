@@ -489,7 +489,6 @@ class NfAnalysisAPI(AnalysisAPI):
             LOG.warning("Deliverables file is malformed")
             raise error
         except CgError as error:
-            LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}")
             self.housekeeper_api.rollback()
             self.status_db.session.rollback()
             raise StoreHouseKeeperError(f"Could not store bundle in Housekeeper and StatusDB: {error}")
