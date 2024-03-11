@@ -90,7 +90,7 @@ def test_store_housekeeper_case_not_finished(
     """Test store_housekeeper for workflow with case_id and config file but no analysis_finish."""
     caplog.set_level(logging.ERROR)
     context: CGConfig = request.getfixturevalue(context)
-    # GIVEN case-id
+    # GIVEN a case id
     case_id: str = request.getfixturevalue(case_id)
 
     # WHEN running
