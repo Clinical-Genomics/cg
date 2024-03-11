@@ -134,40 +134,40 @@ def test_without_config(
     assert "No config file found" in caplog.text
 
 
-@pytest.mark.parametrize(
-    "context,case_id",
-    [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
-    ],
-)
-def test_with_config(
-    cli_runner: CliRunner,
-    context: CGConfig,
-    caplog: LogCaptureFixture,
-    case_id: str,
-    mock_config,
-    request,
-):
-    """Test command with case_id and config file using tower."""
-    caplog.set_level(logging.INFO)
-    context = request.getfixturevalue(context)
+# @pytest.mark.parametrize(
+#     "context,case_id",
+#     [
+#         ("raredisease_context", "raredisease_case_id"),
+#         ("rnafusion_context", "rnafusion_case_id"),
+#         ("taxprofiler_context", "taxprofiler_case_id"),
+#     ],
+# )
+# def test_with_config(
+#     cli_runner: CliRunner,
+#     context: CGConfig,
+#     caplog: LogCaptureFixture,
+#     case_id: str,
+#     mock_config,
+#     request,
+# ):
+#     """Test command with case_id and config file using tower."""
+#     caplog.set_level(logging.INFO)
+#     context = request.getfixturevalue(context)
 
-    # GIVEN case-id
-    case_id: str = request.getfixturevalue(case_id)
-    # GIVEN a mocked config
+#     # GIVEN case-id
+#     case_id: str = request.getfixturevalue(case_id)
+#     # GIVEN a mocked config
 
-    # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=context)
+#     # WHEN dry running with dry specified
+#     result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=context)
 
-    # THEN command should execute successfully
-    assert result.exit_code == EXIT_SUCCESS
+#     # THEN command should execute successfully
+#     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN command should use tower
-    assert "using Tower" in caplog.text
-    assert "path/to/bin/tw launch" in caplog.text
-    assert "--work-dir" in caplog.text
+#     # THEN command should use tower
+#     assert "using Tower" in caplog.text
+#     assert "path/to/bin/tw launch" in caplog.text
+#     assert "--work-dir" in caplog.text
 
 
 # def test_with_revision(

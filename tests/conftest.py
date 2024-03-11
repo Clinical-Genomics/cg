@@ -1878,7 +1878,6 @@ def context_config(
                 "account": "development",
                 "mail_user": "test.email@scilifelab.se",
             },
-            "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
             "tower_workflow": "raredisease",
         },
         "rnafusion": {
