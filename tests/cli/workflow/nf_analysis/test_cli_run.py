@@ -206,6 +206,7 @@ def test_with_revision(
     # THEN command should use tower
     assert "--revision 2.1.0" in caplog.text
 
+
 @pytest.mark.parametrize(
     "context,case_id",
     [
@@ -233,9 +234,7 @@ def test_resume_with_id(
     # GIVEN a mocked config
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(
-        run, [case_id, "--nf-tower-id", tower_id, "--dry-run"], obj=context
-    )
+    result = cli_runner.invoke(run, [case_id, "--nf-tower-id", tower_id, "--dry-run"], obj=context)
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -243,6 +242,7 @@ def test_resume_with_id(
     # THEN command should use tower for relaunch
     assert "Workflow will be resumed from run" in caplog.text
     assert "tw runs relaunch" in caplog.text
+
 
 @pytest.mark.parametrize(
     "context,case_id",
@@ -258,7 +258,7 @@ def test_resume_without_id_error(
     caplog: LogCaptureFixture,
     case_id: str,
     mock_config,
-    request
+    request,
 ):
     """Test resume command without providing NF-Tower ID and without existing Trailblazer Tower config file."""
     caplog.set_level(logging.INFO)
