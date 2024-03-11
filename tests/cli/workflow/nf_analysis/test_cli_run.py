@@ -8,7 +8,7 @@ from click.testing import CliRunner
 
 from cg.cli.workflow.raredisease.base import run
 from cg.cli.workflow.rnafusion.base import run
-from cg.cli.workflow.taxprofiler import run
+from cg.cli.workflow.taxprofiler.base import run
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
@@ -26,26 +26,28 @@ def test_without_options(cli_runner: CliRunner, context: CGConfig):
     # THEN command should mention argument
     assert "Missing argument" in result.output
 
-
-# def test_with_missing_case(
-#     cli_runner: CliRunner,
-#     raredisease_context: CGConfig,
-#     caplog: LogCaptureFixture,
-#     case_id_does_not_exist: str,
-# ):
-#     """Test command with invalid case to start with."""
-#     caplog.set_level(logging.ERROR)
-#     # GIVEN case_id not in database
-#     assert not raredisease_context.status_db.get_case_by_internal_id(
-#         internal_id=case_id_does_not_exist
-#     )
-#     # WHEN running
-#     result = cli_runner.invoke(run, [case_id_does_not_exist], obj=raredisease_context)
-#     # THEN command should NOT successfully call the command it creates
-#     assert result.exit_code != EXIT_SUCCESS
-#     # THEN ERROR log should be printed containing invalid case_id
-#     assert case_id_does_not_exist in caplog.text
-#     assert "could not be found" in caplog.text
+@pytest.mark.parametrize(
+    "context", ["raredisease_context", "rnafusion_context", "taxprofiler_context"]
+)
+def test_with_missing_case(
+    cli_runner: CliRunner,
+    context: CGConfig,
+    caplog: LogCaptureFixture,
+    case_id_does_not_exist: str,
+):
+    """Test command with invalid case to start with."""
+    caplog.set_level(logging.ERROR)
+    # GIVEN case_id not in database
+    assert not context.status_db.get_case_by_internal_id(
+        internal_id=case_id_does_not_exist
+    )
+    # WHEN running
+    result = cli_runner.invoke(run, [case_id_does_not_exist], obj=context)
+    # THEN command should NOT successfully call the command it creates
+    assert result.exit_code != EXIT_SUCCESS
+    # THEN ERROR log should be printed containing invalid case_id
+    assert case_id_does_not_exist in caplog.text
+    assert "could not be found" in caplog.text
 
 
 # def test_without_samples(
