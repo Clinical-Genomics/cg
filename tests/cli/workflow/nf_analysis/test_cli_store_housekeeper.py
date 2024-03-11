@@ -132,7 +132,7 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
 ):
     """Test store_housekeeper command workflow with case_id and config file
     and analysis_finish but malformed deliverables output."""
-    caplog.set_level(logging.WARNING)
+
     context: CGConfig = request.getfixturevalue(context)
     workflow = request.getfixturevalue(workflow)
     malformed_hermes_deliverables = request.getfixturevalue(malformed_deliverables)
@@ -153,7 +153,7 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
 
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
-
+    assert "Could not store bundle in Housekeeper and StatusDB" in caplog.text
 
 @pytest.mark.parametrize(
     ("context", "case_id", "hermes_deliverables", "mock_deliverable"),
