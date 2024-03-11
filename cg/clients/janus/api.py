@@ -14,7 +14,7 @@ class JanusAPIClient:
         self.host = config["janus"]["host"]
 
     def qc_metrics(self, collect_qc_request: CreateQCMetricsRequest) -> dict | None:
-        endpoint: str = f"{self.host}/collect_qc_metrics"
+        endpoint: str = f"{self.host}/collect_qc"
         post_request_data: str = collect_qc_request.model_dump_json()
         response = requests.post(endpoint, data=post_request_data, verify=False)
         if response.status_code == HTTPStatus.OK:
