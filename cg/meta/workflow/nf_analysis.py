@@ -486,10 +486,10 @@ class NfAnalysisAPI(AnalysisAPI):
             self.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
             self.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
         except ValidationError as error:
-            LOG.warning("Deliverables file is malformed")
             raise HousekeeperStoreError(f"Deliverables file is malformed: {error}")
         except CgError as error:
-            LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}")
+            raise HousekeeperStoreError(f"Could not store bundle in Housekeeper and StatusDB: {error}")
+        except Exception as error:
             self.housekeeper_api.rollback()
             self.status_db.session.rollback()
-            raise click.Abort() from error
+            raise HousekeeperStoreError(f"Could not store bundle in Housekeeper and StatusDB: {error}")
