@@ -19,7 +19,7 @@ class ArnoldAPIClient:
     def create_case(self, case: CreateCaseRequest) -> Response:
         endpoint: str = f"{self.api_url}/case/"
         post_request_data: CreateCaseRequest = case
-        response: Response = requests.post(endpoint, data=post_request_data)
+        response: Response = requests.post(endpoint, data=post_request_data.model_dump_json())
         if response.status_code == HTTPStatus.OK:
             LOG.info(f"Successfully created case for {case.case_id} in Arnold.")
             return response
