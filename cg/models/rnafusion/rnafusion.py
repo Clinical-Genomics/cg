@@ -29,8 +29,6 @@ class RnafusionParameters(WorkflowParameters):
     """Rnafusion parameters."""
 
     genomes_base: Path
-    input: Path = Field(..., alias="sample_sheet_path")
-    outdir: Path
     all: bool = False
     arriba: bool = True
     cram: str = "arriba,starfusion"
