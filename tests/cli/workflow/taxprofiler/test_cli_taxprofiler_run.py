@@ -47,7 +47,7 @@ def test_with_config_use_tower(
     taxprofiler_context: CGConfig,
     caplog: LogCaptureFixture,
     taxprofiler_case_id: str,
-    taxprofiler_config,
+    mock_config,
 ):
     """Test command with case_id and config file using tower."""
     caplog.set_level(logging.INFO)

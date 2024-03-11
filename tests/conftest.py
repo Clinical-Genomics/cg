@@ -2391,9 +2391,9 @@ def mock_deliverable(
 def mock_config(raredisease_dir: Path, raredisease_case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
     Path.mkdir(Path(raredisease_dir, raredisease_case_id), parents=True, exist_ok=True)
-    Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet.csv").touch(
-        exist_ok=True
-    )
+    Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    ).touch(exist_ok=True)
 
 
 # Rnafusion fixtures
@@ -2717,16 +2717,16 @@ def rnafusion_mock_analysis_finish(
 def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
     Path.mkdir(Path(rnafusion_dir, rnafusion_case_id), parents=True, exist_ok=True)
-    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
-        exist_ok=True
-    )
+    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").with_suffix(
+        FileExtensions.CSV
+    ).touch(exist_ok=True)
 
 
 # Taxprofiler fixtures
 
 
 @pytest.fixture(scope="session")
-def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
+def mock_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
     """Create CSV sample sheet file for testing."""
     Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
     Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(
@@ -2861,15 +2861,14 @@ def nf_analysis_housekeeper(
 @pytest.fixture(scope="function")
 def taxprofiler_context(
     cg_context: CGConfig,
-    cg_dir: Path,
     helpers: StoreHelpers,
+    nf_analysis_housekeeper: HousekeeperAPI,
+    trailblazer_api: MockTB,
     taxprofiler_case_id: str,
     sample_id: str,
     father_sample_id: str,
     sample_name: str,
     another_sample_name: str,
-    trailblazer_api: MockTB,
-    nf_analysis_housekeeper: HousekeeperAPI,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
 ) -> CGConfig:
