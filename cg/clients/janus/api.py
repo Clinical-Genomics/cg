@@ -19,6 +19,7 @@ class JanusAPIClient:
         response = requests.post(endpoint, data=post_request_data, verify=False)
         if response.status_code == HTTPStatus.OK:
             return response.json()
+        print(repr(response.content))
         self._handle_errors(response)
 
     @staticmethod
