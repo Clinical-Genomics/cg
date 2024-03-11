@@ -4,7 +4,6 @@ from pathlib import Path
 import pytest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
-from pydantic import ValidationError
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
@@ -12,11 +11,11 @@ from cg.cli.workflow.rnafusion.base import store_housekeeper
 from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteStream
-from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from pytest_mock import MockFixture
+from cg.store.store import Store
 
 
 @pytest.mark.parametrize(
@@ -176,6 +175,7 @@ def test_store_housekeeper_valid_case(
     caplog: LogCaptureFixture,
     case_id: str,
     workflow_version: str,
+    housekeeper_api: HousekeeperAPI,
     request,
 ):
     """Test store_housekeeper command for workflow with valid case_id."""
@@ -183,13 +183,15 @@ def test_store_housekeeper_valid_case(
     context: CGConfig = request.getfixturevalue(context)
     hermes_deliverables = request.getfixturevalue(hermes_deliverables)
     request.getfixturevalue(mock_deliverable)
+    store: Store = context.status_db
+
     # GIVEN case-id
     case_id: str = request.getfixturevalue(case_id)
 
     # Make sure nothing is currently stored in Housekeeper
 
     # Make sure analysis not already stored in StatusDB
-    assert not context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
+    assert not store.get_case_by_internal_id(internal_id=case_id).analyses
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -202,12 +204,12 @@ def test_store_housekeeper_valid_case(
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
     assert "Analysis successfully stored in StatusDB" in caplog.text
-    assert context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
+    assert store.get_case_by_internal_id(internal_id=case_id).analyses
     assert context.meta_apis["analysis_api"].housekeeper_api.bundle(case_id)
 
     # THEN a workflow version should be correctly stored
     assert (
-        context.status_db.get_case_by_internal_id(internal_id=case_id).analyses[0].workflow_version
+        store.get_case_by_internal_id(internal_id=case_id).analyses[0].workflow_version
         == workflow_version
     )
 
