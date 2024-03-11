@@ -376,7 +376,6 @@ class NfAnalysisAPI(AnalysisAPI):
         if not dry_run:
             self.add_pending_trailblazer_analysis(case_id=case_id)
 
-
     def run_analysis(
         self,
         case_id: str,
