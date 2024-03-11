@@ -117,14 +117,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             outdir=self.get_case_path(case_id=case_id),
         )
 
-    def get_params_file_path(self, case_id: str, params_file: Path | None = None) -> Path:
-        """Return parameters file or a path where the default parameters file for a case id should be located."""
-        if params_file:
-            return params_file.absolute()
-        case_path: Path = self.get_case_path(case_id)
-        return Path(case_path, f"{case_id}_params_file{FileExtensions.CONFIG}")
-        # This function should be moved to nf-analysis to replace the current one when all nextflow workflows are using the same config files approach
-
     def write_params_file(self, case_id: str, workflow_parameters: dict) -> None:
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")

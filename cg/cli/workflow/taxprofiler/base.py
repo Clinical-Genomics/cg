@@ -25,7 +25,6 @@ from cg.cli.workflow.taxprofiler.options import (
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
-from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.sequencing import SequencingPlatform
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -101,32 +100,19 @@ def run(
 ) -> None:
     """Run taxprofiler analysis for a case."""
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-
-    command_args: NfCommandArgs = NfCommandArgs(
-        **{
-            "log": analysis_api.get_log_path(
-                case_id=case_id, workflow=analysis_api.workflow, log=log
-            ),
-            "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
-            "resume": not from_start,
-            "profile": analysis_api.get_profile(profile=profile),
-            "config": analysis_api.get_nextflow_config_path(
-                case_id=case_id, nextflow_config=config
-            ),
-            "params_file": analysis_api.get_params_file_path(
-                case_id=case_id, params_file=params_file
-            ),
-            "name": case_id,
-            "compute_env": compute_env or analysis_api.get_compute_env(case_id=case_id),
-            "revision": revision or analysis_api.revision,
-            "wait": NfTowerStatus.SUBMITTED,
-            "id": nf_tower_id,
-        }
-    )
-
     analysis_api.run_nextflow_analysis(
-        case_id=case_id, dry_run=dry_run, use_nextflow=use_nextflow, command_args=command_args
+        case_id=case_id,
+        dry_run=dry_run,
+        log=log,
+        work_dir=work_dir,
+        from_start=from_start,
+        profile=profile,
+        config=config,
+        params_file=params_file,
+        revision=revision,
+        compute_env=compute_env,
+        use_nextflow=use_nextflow,
+        nf_tower_id=nf_tower_id,
     )
 
 
