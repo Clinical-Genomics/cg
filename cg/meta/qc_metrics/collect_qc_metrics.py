@@ -97,6 +97,8 @@ class CollectQCMetricsAPI:
 
     def get_create_case_request(self, case_id: str) -> CreateCaseRequest:
         case_qc_metrics: dict = self.get_case_qc_metrics(case_id)
+        if not case_qc_metrics:
+            raise ValueError(f"Could not retrieve qc metrics from Janus for case {case_id}")
         return CreateCaseRequest(**case_qc_metrics)
 
     def create_case(self, case_id: str, dry_run: bool = False):

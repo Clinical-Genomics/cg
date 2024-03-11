@@ -151,3 +151,23 @@ def store_qc_metrics(config: CGConfig, case_id: str, dry_run: bool = False) -> N
         metrics_api.create_case(case_id=case_id, dry_run=dry_run)
     except (JanusServerError, JanusClientError, ArnoldClientError, ArnoldServerError) as error:
         LOG.info(f"Could not store qc metrics in arnold. Reason {error}")
+
+
+@click.command("get-metrics")
+@click.argument("case-id", type=str)
+@DRY_RUN
+@click.pass_obj
+def get_qc_metrics(config: CGConfig, case_id: str, dry_run: bool = False) -> None:
+    """Fetch the QC metrics for a case from Janus and Store them in Arnold."""
+    metrics_api = CollectQCMetricsAPI(
+        hk_api=config.housekeeper_api,
+        status_db=config.status_db,
+        janus_api=config.janus_api,
+        arnold_api=config.arnold_api,
+    )
+    try:
+        request = metrics_api.create_qc_metrics_request(case_id)
+        response = metrics_api.janus_api.qc_metrics(request)
+        LOG.info(f"{response}")
+    except (JanusServerError, JanusClientError, ArnoldClientError, ArnoldServerError) as error:
+        LOG.info(f"Could not store qc metrics in arnold. Reason {error}")
