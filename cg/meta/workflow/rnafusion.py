@@ -114,7 +114,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         return RnafusionParameters(
             cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
             genomes_base=genomes_base or self.get_references_path(),
-            sample_sheet_path=self.get_sample_sheet_path(case_id=case_id),
+            input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             priority=self.account,
         )

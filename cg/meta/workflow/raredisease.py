@@ -113,7 +113,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return parameters."""
         LOG.info("Getting parameters information")
         return WorkflowParameters(
-            sample_sheet_path=self.get_sample_sheet_path(case_id=case_id),
+            input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
         )
 
