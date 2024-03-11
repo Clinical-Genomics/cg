@@ -30,7 +30,7 @@ def concatenate_reverse_reads(directory: Path) -> Path | None:
 
 def get_new_unique_file(directory: Path) -> Path:
     unique_id = uuid.uuid4()
-    return Path(directory, f"{unique_id}.fastq.gz")
+    return Path(directory, f"{unique_id}{FileExtensions.FASTQ}{FileExtensions.GZIP}")
 
 
 def get_forward_read_fastqs(fastq_directory: Path) -> list[Path]:
@@ -66,7 +66,7 @@ def get_reverse_read_fastqs(fastq_directory: Path) -> list[Path]:
 
 
 def get_fastqs_by_direction(fastq_directory: Path, direction: int) -> list[Path]:
-    pattern = f".+_R{direction}_[0-9]+.fastq.gz"
+    pattern = f".+_R{direction}_[0-9]+{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     fastqs: list[Path] = []
     for file in fastq_directory.iterdir():
         if re.match(pattern, file.name):
@@ -97,7 +97,7 @@ def sort_files_by_name(files: list[Path]) -> list[Path]:
 
 
 def file_can_be_removed(file: Path, forward_file: Path, reverse_file: Path) -> bool:
-    return file.suffix == ".gz" and file != forward_file and file != reverse_file
+    return file.suffix == FileExtensions.GZIP and file != forward_file and file != reverse_file
 
 
 def remove_raw_fastqs(fastq_directory: Path, forward_file: Path, reverse_file: Path) -> None:

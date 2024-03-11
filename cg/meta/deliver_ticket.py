@@ -10,6 +10,10 @@ from cg.exc import CgError
 from cg.meta.meta import MetaAPI
 from cg.models.cg_config import CGConfig
 from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.fastq_file_service.utils import (
+    get_concatenated_forward_read_output_path,
+    get_concatenated_reverse_read_output_path,
+)
 from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
@@ -88,15 +92,15 @@ class DeliverTicketAPI(MetaAPI):
                 continue
             if not dir_path.is_dir():
                 continue
-            forward_out_path = self.fastq_file_service.get_concatenated_forward_read_output_path(
+            forward_output_path = get_concatenated_forward_read_output_path(
                 fastq_directory=dir_path, sample_name=dir_path.name
             )
-            reverse_out_path = self.fastq_file_service.get_concatenated_reverse_read_output_path(
+            reverse_output_path = get_concatenated_reverse_read_output_path(
                 fastq_directory=dir_path, sample_name=dir_path.name
             )
             self.fastq_file_service.concatenate(
                 fastq_directory=dir_path,
-                forward_output=forward_out_path,
-                reverse_output=reverse_out_path,
+                forward_output_path=forward_output_path,
+                reverse_output_path=reverse_output_path,
                 remove_raw=True,
             )
