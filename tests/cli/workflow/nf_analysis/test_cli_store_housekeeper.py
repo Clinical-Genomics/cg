@@ -206,7 +206,7 @@ def test_store_housekeeper_valid_case(
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
-    # WHEN running command
+    # WHEN running the store housekeeper command
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=context)
 
     # THEN a bundle should be successfully added to HK and StatusDB
