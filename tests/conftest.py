@@ -1902,7 +1902,7 @@ def context_config(
         "taxprofiler": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
             "compute_env": "nf_tower_compute_env",
-            "root": taxprofiler_dir.as_posix(),
+            "root": str(taxprofiler_dir),
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_taxprofiler",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
@@ -2731,14 +2731,14 @@ def taxprofiler_case_id() -> str:
     return "taxprofiler_case"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> Path:
     """Return the path to the Taxprofiler directory."""
     taxprofiler_dir = tmpdir_factory.mktemp("taxprofiler")
-    return Path(taxprofiler_dir).absolute()
+    return Path(taxprofiler_dir).absolute().as_posix()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def taxprofiler_sample_sheet_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
     """Path to sample sheet."""
     return Path(
@@ -2746,15 +2746,7 @@ def taxprofiler_sample_sheet_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
     ).with_suffix(FileExtensions.CSV)
 
 
-@pytest.fixture(scope="session")
-def taxprofiler_params_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
-    """Path to parameters file."""
-    return Path(
-        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_params_file"
-    ).with_suffix(FileExtensions.YAML)
-
-
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def taxprofiler_sample_sheet_content(
     sample_name: str,
     sequencing_platform: str,
@@ -2772,6 +2764,23 @@ def taxprofiler_sample_sheet_content(
             "",
         ]
     )
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_params_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
+    """Path to parameters file."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_params_file"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_nexflow_config_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
+    """Path to config file."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_nextflow_config"
+    ).with_suffix(FileExtensions.JSON)
+
 
 
 @pytest.fixture(scope="session")
