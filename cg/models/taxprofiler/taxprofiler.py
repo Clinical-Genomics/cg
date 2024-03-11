@@ -18,7 +18,7 @@ class TaxprofilerQCMetrics(BaseModel):
 class TaxprofilerParameters(WorkflowParameters):
     """Model for Taxprofiler parameters."""
 
-    input: Path = Field(..., alias="sample_sheet_path")
+    input: Path
     outdir: Path
     databases: Path
     save_preprocessed_reads: bool = True
@@ -39,7 +39,7 @@ class TaxprofilerParameters(WorkflowParameters):
     centrifuge_save_reads: bool = True
     run_krona: bool = True
     run_profile_standardisation: bool = True
-    clusterOptions: str = Field(..., alias="cluster_options")
+    cluster_options: str
     priority: str
 
 

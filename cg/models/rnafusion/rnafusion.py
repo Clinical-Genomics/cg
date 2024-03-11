@@ -29,7 +29,7 @@ class RnafusionParameters(WorkflowParameters):
     """Rnafusion parameters."""
 
     genomes_base: Path
-    input: Path = Field(..., alias="sample_sheet_path")
+    input: Path
     outdir: Path
     all: bool = False
     arriba: bool = True
@@ -38,7 +38,7 @@ class RnafusionParameters(WorkflowParameters):
     fusioncatcher: bool = True
     starfusion: bool = True
     trim_tail: int = 50
-    clusterOptions: str = Field(..., alias="cluster_options")
+    cluster_options: str
     priority: str
 
 
