@@ -166,5 +166,5 @@ def get_qc_metrics(config: CGConfig, case_id: str, dry_run: bool = False) -> Non
         arnold_api=config.arnold_api,
     )
 
-    request = metrics_api.create_qc_metrics_request(case_id)
+    request = metrics_api.create_qc_metrics_request(case_id).model_dump_json()
     LOG.info(request)
