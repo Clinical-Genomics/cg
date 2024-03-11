@@ -167,5 +167,4 @@ def get_qc_metrics(config: CGConfig, case_id: str, dry_run: bool = False) -> Non
     )
 
     request = metrics_api.create_qc_metrics_request(case_id)
-    response = metrics_api.janus_api.qc_metrics(request)
-    LOG.info(f"{response}")
+    LOG.info(request)
