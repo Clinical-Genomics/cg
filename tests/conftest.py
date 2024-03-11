@@ -2781,7 +2781,7 @@ def taxprofiler_nexflow_config_file_path(taxprofiler_dir, taxprofiler_case_id) -
     ).with_suffix(FileExtensions.JSON)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def taxprofiler_parameters_default(
     taxprofiler_dir: Path,
     taxprofiler_case_id: str,
