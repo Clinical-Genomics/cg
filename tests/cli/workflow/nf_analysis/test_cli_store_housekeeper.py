@@ -104,18 +104,16 @@ def test_store_housekeeper_case_not_finished(
 
 
 @pytest.mark.parametrize(
-    ("context", "case_id", "workflow", "malformed_deliverables"),
+    ("context", "case_id", "malformed_deliverables"),
     [
         (
             "taxprofiler_context",
             "taxprofiler_case_id",
-            "taxprofiler_workflow",
             "taxprofiler_malformed_hermes_deliverables",
         ),
         (
             "rnafusion_context",
             "rnafusion_case_id",
-            "rnafusion_workflow",
             "rnafusion_malformed_hermes_deliverables",
         ),
     ],
@@ -127,17 +125,13 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
     malformed_deliverables,
     caplog: LogCaptureFixture,
     case_id: str,
-    workflow: str,
     request,
 ):
     """Test store_housekeeper command workflow with case_id and config file
     and analysis_finish but malformed deliverables output."""
 
     context: CGConfig = request.getfixturevalue(context)
-    workflow = request.getfixturevalue(workflow)
     malformed_hermes_deliverables = request.getfixturevalue(malformed_deliverables)
-    # GIVEN a malformed output from hermes
-    analysis_api: NfAnalysisAPI = context.meta_apis["analysis_api"]
 
     # GIVEN that HermesAPI returns a malformed deliverables output
     mocker.patch.object(Process, "run_command")
