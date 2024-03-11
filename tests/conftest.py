@@ -2269,6 +2269,14 @@ def raredisease_params_file_path(raredisease_dir, raredisease_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
+def raredisease_nexflow_config_file_path(raredisease_dir, raredisease_case_id) -> Path:
+    """Path to config file."""
+    return Path(
+        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_nextflow_config"
+    ).with_suffix(FileExtensions.JSON)
+
+
+@pytest.fixture(scope="function")
 def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> Path:
     """Path to deliverables file."""
     return Path(
