@@ -256,7 +256,7 @@ def test_valid_case_already_added(
     context: CGConfig = request.getfixturevalue(context)
     hermes_deliverables = request.getfixturevalue(hermes_deliverables)
     request.getfixturevalue(mock_deliverable)
-    # GIVEN case-id
+    # GIVEN a case id
     case_id: str = request.getfixturevalue(case_id)
 
     # Make sure nothing is currently stored in Housekeeper
