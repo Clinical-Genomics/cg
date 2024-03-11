@@ -666,40 +666,81 @@ def test_get_file_insensitive_path(bed_file: Path, populated_housekeeper_api: Ho
     assert file
 
 
-def test_get_files_from_latest_version_by_tags(
+def test_get_files_with_tags(
     populated_housekeeper_api: HousekeeperAPI, sample_id: str, fastq_file: Path, spring_file: Path
 ):
-    """Test that a list of files are retrieved by tags."""
+    """Test get files containing specific tags."""
 
-    # GIVEN a populated Housekeeper API and a list of sample tags
-    sample_tags: list[set[str]] = [{SequencingFileTag.FASTQ}, {SequencingFileTag.SPRING}]
+    # GIVEN a populated Housekeeper API and a list of sample files
+    files: list[File] = populated_housekeeper_api.get_files_from_latest_version(sample_id)
+    files_names: list[str] = [Path(file.full_path).name for file in files]
+    assert spring_file.name in files_names
+    assert fastq_file.name in files_names
 
-    # WHEN getting a list of files by tags
-    files: list[File] = populated_housekeeper_api.get_files_from_latest_version_by_tags(
-        bundle_name=sample_id, tags=sample_tags
+    # GIVEN a list of fastq file tags
+    tags: list[set[str]] = [{SequencingFileTag.FASTQ}]
+
+    # WHEN getting a list of files with tags
+    filtered_files: list[File] = populated_housekeeper_api.get_files_with_tags(
+        files=files, tags=tags
     )
 
-    # THEN the expected sample files should be retrieved
-    file_names: list[str] = [Path(file.full_path).name for file in files]
-    assert fastq_file.name in file_names
-    assert spring_file.name in file_names
+    # THEN only the expected fastq sample files should be retrieved
+    filtered_files_names: list[str] = [Path(file.full_path).name for file in filtered_files]
+    assert spring_file.name not in filtered_files_names
+    assert fastq_file.name in filtered_files_names
 
 
-def test_get_files_from_latest_version_by_tags_excluding_tags(
+def test_get_files_with_empty_tags(populated_housekeeper_api: HousekeeperAPI, sample_id: str):
+    """Test get files containing an empty list of tags."""
+
+    # GIVEN a populated Housekeeper API and a list of sample files
+    files: list[File] = populated_housekeeper_api.get_files_from_latest_version(sample_id)
+
+    # WHEN getting a list of files providing an empty list of tags
+    filtered_files: list[File] = populated_housekeeper_api.get_files_with_tags(files=files, tags=[])
+
+    # THEN an empty list should be returned
+    assert filtered_files == []
+
+
+def test_get_files_without_tags(
     populated_housekeeper_api: HousekeeperAPI, sample_id: str, fastq_file: Path, spring_file: Path
 ):
-    """Test that a list of files is retrieved from the latest version, excluding specific tags."""
+    """Test get files without specific tags."""
 
-    # GIVEN a populated Housekeeper API and tags to exclude
-    sample_tags: list[set[str]] = [{sample_id}]
-    tags_to_exclude: list[set[str]] = [{SequencingFileTag.SPRING}]
+    # GIVEN a populated Housekeeper API and a list of sample files
+    files: list[File] = populated_housekeeper_api.get_files_from_latest_version(sample_id)
+    files_names: list[str] = [Path(file.full_path).name for file in files]
+    assert spring_file.name in files_names
+    assert fastq_file.name in files_names
 
-    # WHEN getting a list of files from latest version
-    files: list[File] = populated_housekeeper_api.get_files_from_latest_version_by_tags(
-        bundle_name=sample_id, tags=sample_tags, excluded_tags=tags_to_exclude
+    # GIVEN a list of fastq file tags to exclude
+    excluded_tags: list[set[str]] = [{SequencingFileTag.FASTQ}]
+
+    # WHEN getting a list of files without tags
+    filtered_files: list[File] = populated_housekeeper_api.get_files_without_tags(
+        files=files, tags=excluded_tags
     )
 
-    # THEN only the FASTQ files should be returned
-    file_names: list[str] = [Path(file.full_path).name for file in files]
-    assert fastq_file.name in file_names
-    assert spring_file.name not in file_names
+    # THEN only the expected sample spring files should be retrieved
+    filtered_files_names: list[str] = [Path(file.full_path).name for file in filtered_files]
+    assert spring_file.name in filtered_files_names
+    assert fastq_file.name not in filtered_files_names
+
+
+def test_get_files_without_tags_empty_tags(
+    populated_housekeeper_api: HousekeeperAPI, sample_id: str, fastq_file: Path, spring_file: Path
+):
+    """Test get files without tags for an empty tag input."""
+
+    # GIVEN a populated Housekeeper API and a list of sample files
+    files: list[File] = populated_housekeeper_api.get_files_from_latest_version(sample_id)
+
+    # WHEN getting a list of files without tags when providing an empty list of tags
+    filtered_files: list[File] = populated_housekeeper_api.get_files_without_tags(
+        files=files, tags=[]
+    )
+
+    # THEN the complete list of original files should be returned
+    assert filtered_files == files

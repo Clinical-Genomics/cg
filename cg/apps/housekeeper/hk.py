@@ -403,27 +403,6 @@ class HousekeeperAPI:
             raise HousekeeperBundleVersionMissingError
         return self.files(version=version.id, tags=tags).all()
 
-    def get_files_from_latest_version_by_tags(
-        self, bundle_name: str, tags: list[set[str]], excluded_tags: list[set[str]] | None = None
-    ) -> list[File]:
-        """
-        Return files from the latest version of a bundle matching provided tags. Files containing
-        any tag sets specified in the excluded_tags list will be excluded from the output.
-        """
-        filtered_files: list[File] = []
-        if not tags:
-            return filtered_files
-        files: list[File] = self.get_files_from_latest_version(bundle_name=bundle_name)
-        for file in files:
-            file_tags: set[str] = {tag.name for tag in file.tags}
-            if any(tag.issubset(file_tags) for tag in tags):
-                if excluded_tags and any(
-                    exclude_tag.issubset(file_tags) for exclude_tag in excluded_tags
-                ):
-                    continue
-                filtered_files.append(file)
-        return filtered_files
-
     def is_fastq_or_spring_in_all_bundles(self, bundle_names: list[str]) -> bool:
         """Return whether all FASTQ/SPRING files are included for the given bundles."""
         sequencing_files_in_hk: dict[str, bool] = {}
@@ -685,3 +664,23 @@ class HousekeeperAPI:
             file.archive.retrieval_task_id = None
             file.archive.retrieved_at = None
         self.commit()
+
+    @staticmethod
+    def get_files_with_tags(files: list[File], tags: list[set[str]]) -> list[File]:
+        """Return files containing specified tags."""
+        filtered_files: list[File] = []
+        for file in files:
+            file_tags: set[str] = {tag.name for tag in file.tags}
+            if any(tag.issubset(file_tags) for tag in tags):
+                filtered_files.append(file)
+        return filtered_files
+
+    @staticmethod
+    def get_files_without_tags(files: list[File], tags: list[set[str]]) -> list[File]:
+        """Return files excluding specified tags."""
+        filtered_files: list[File] = []
+        for file in files:
+            file_tags: set[str] = {tag.name for tag in file.tags}
+            if all(not tag.issubset(file_tags) for tag in tags):
+                filtered_files.append(file)
+        return filtered_files
