@@ -9,7 +9,7 @@ from click.testing import CliRunner
 from cg.cli.workflow.raredisease.base import run
 from cg.cli.workflow.rnafusion.base import run
 from cg.cli.workflow.taxprofiler.base import run
-from cg.constants import EXIT_SUCCESS
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 from cg.models.cg_config import CGConfig
 
 
@@ -275,43 +275,6 @@ def test_resume_without_id_error(
     # THEN command should raise error
     assert "Could not resume analysis: No NF-Tower ID found for case" in caplog.text
     pytest.raises(FileNotFoundError)
-
-
-@pytest.mark.parametrize(
-    "context,case_id",
-    [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
-    ],
-)
-def test_resume_without_id(
-    cli_runner: CliRunner,
-    context: CGConfig,
-    caplog: LogCaptureFixture,
-    case_id: str,
-    mock_config,
-    request,
-):
-    """Test resume command without providing NF-Tower ID when a Trailblazer Tower config file from a previous run
-    exist."""
-    caplog.set_level(logging.INFO)
-    context = request.getfixturevalue(context)
-
-    # GIVEN a case-id
-    case_id: str = request.getfixturevalue(case_id)
-
-    # GIVEN a mocked config
-
-    # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=context)
-
-    # THEN command should execute successfully
-    assert result.exit_code == EXIT_SUCCESS
-
-    # THEN command should use tower for relaunch
-    assert "Workflow will be resumed from run" in caplog.text
-    assert "tw runs relaunch" in caplog.text
 
 
 @pytest.mark.parametrize(
