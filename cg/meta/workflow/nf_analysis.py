@@ -487,7 +487,7 @@ class NfAnalysisAPI(AnalysisAPI):
             self.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
         except ValidationError as error:
             LOG.warning("Deliverables file is malformed")
-            raise error
+            raise StoreHouseKeeperError(""Deliverables file is malformed")
         except CgError as error:
             self.housekeeper_api.rollback()
             self.status_db.session.rollback()
