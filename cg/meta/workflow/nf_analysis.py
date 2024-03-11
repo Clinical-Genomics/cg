@@ -9,7 +9,7 @@ from cg.constants import Workflow
 from cg.constants.constants import FileExtensions, FileFormat, MultiQC, WorkflowManager
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.tb import AnalysisStatus
-from cg.exc import CgError, MetricsQCError
+from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.txt import write_txt
 from cg.io.yaml import write_yaml_nextflow_style
@@ -487,8 +487,9 @@ class NfAnalysisAPI(AnalysisAPI):
             self.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
         except ValidationError as error:
             LOG.warning("Deliverables file is malformed")
-            raise StoreHouseKeeperError(""Deliverables file is malformed")
+            raise HousekeeperStoreError(f"Deliverables file is malformed: {error}")
         except CgError as error:
+            LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}")
             self.housekeeper_api.rollback()
             self.status_db.session.rollback()
-            raise StoreHouseKeeperError(f"Could not store bundle in Housekeeper and StatusDB: {error}")
+            raise click.Abort() from error

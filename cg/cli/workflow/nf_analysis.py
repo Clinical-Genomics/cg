@@ -7,7 +7,7 @@ import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
 from cg.constants.constants import MetaApis
-from cg.exc import CgError
+from cg.exc import CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
@@ -137,13 +137,8 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Store a finished RNAFUSION and TAXPROFILER analysis in Housekeeper and StatusDB."""
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    status_db: Store = context.status_db
 
     try:
         analysis_api.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run)
-    except Exception as error:
+    except HousekeeperStoreError as error:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
-        housekeeper_api.rollback()
-        status_db.session.rollback()
-        raise click.Abort()
