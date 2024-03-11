@@ -90,10 +90,10 @@ def test_store_housekeeper_case_not_finished(
     """Test store_housekeeper for workflow with case_id and config file but no analysis_finish."""
     caplog.set_level(logging.ERROR)
     context: CGConfig = request.getfixturevalue(context)
-    # GIVEN case-id
+    # GIVEN a case id
     case_id: str = request.getfixturevalue(case_id)
 
-    # WHEN running
+    # WHEN running the store-housekeeper command
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=context)
 
     # THEN command should NOT execute successfully
@@ -151,10 +151,10 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
             deliverables_file=Path("a_file"), workflow=workflow
         )
 
-        # GIVEN case-id
+        # GIVEN a case id
         case_id: str = request.getfixturevalue(case_id)
 
-    # WHEN running
+    # WHEN running the store-housekeeper command
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=context)
 
     # THEN command should NOT execute successfully
@@ -206,7 +206,7 @@ def test_store_housekeeper_valid_case(
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
-    # WHEN running command
+    # WHEN running the store housekeeper command
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=context)
 
     # THEN a bundle should be successfully added to HK and StatusDB
@@ -256,7 +256,7 @@ def test_valid_case_already_added(
     context: CGConfig = request.getfixturevalue(context)
     hermes_deliverables = request.getfixturevalue(hermes_deliverables)
     request.getfixturevalue(mock_deliverable)
-    # GIVEN case-id
+    # GIVEN a case id
     case_id: str = request.getfixturevalue(case_id)
 
     # Make sure nothing is currently stored in Housekeeper
