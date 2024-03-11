@@ -295,7 +295,6 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_command_args(
         self,
-        context: CGConfig,
         case_id: str,
         log: str,
         work_dir: str,
