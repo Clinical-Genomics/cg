@@ -2724,14 +2724,6 @@ def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
 # Taxprofiler fixtures
 
 
-@pytest.fixture(scope="function")
-def mock_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
-    """Create CSV sample sheet file for testing."""
-    Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
-    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(
-        FileExtensions.CSV
-    ).touch(exist_ok=True)
-
 
 @pytest.fixture(scope="session")
 def taxprofiler_case_id() -> str:
@@ -2958,6 +2950,16 @@ def taxprofiler_mock_analysis_finish(
             "tower_ids",
         ).with_suffix(FileExtensions.YAML),
     )
+
+
+@pytest.fixture(scope="function")
+def mock_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
+    """Create CSV sample sheet file for testing."""
+    Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
+    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    ).touch(exist_ok=True)
+
 
 
 @pytest.fixture(scope="session")
