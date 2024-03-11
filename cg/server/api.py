@@ -28,6 +28,7 @@ from cg.exc import (
     OrderExistsError,
     OrderFormError,
     OrderMismatchError,
+    OrderNotDeliverableError,
     TicketCreationError,
 )
 from cg.io.controller import WriteStream
@@ -529,7 +530,7 @@ def get_delivery_message_for_order(order_id: int):
         )
         response_dict: dict = response.model_dump()
         return make_response(response_dict)
-    except IndexError as error:
+    except OrderNotDeliverableError as error:
         return make_response(jsonify(error=str(error)), HTTPStatus.PRECONDITION_FAILED)
     except OrderNotFoundError as error:
         return make_response(jsonify(error=str(error))), HTTPStatus.NOT_FOUND
