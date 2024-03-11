@@ -151,7 +151,7 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
             deliverables_file=Path("a_file"), workflow=workflow
         )
 
-        # GIVEN case-id
+        # GIVEN a case id
         case_id: str = request.getfixturevalue(case_id)
 
     # WHEN running
