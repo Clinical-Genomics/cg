@@ -4,8 +4,8 @@ from cg.store.models import Case
 
 
 class FastqMessage(DeliveryMessage):
-    def create_message(self, case: Case) -> str:
-        delivery_path: str = get_fastq_delivery_path(case)
+    def create_message(self, cases: list[Case]) -> str:
+        delivery_path: str = get_fastq_delivery_path(cases[0])
         return (
             f"Hello,\n\n "
             f"The fastq files for this order have been uploaded to your inbox on Caesar at:\n\n"

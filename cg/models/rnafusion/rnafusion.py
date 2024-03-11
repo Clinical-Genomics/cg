@@ -38,6 +38,8 @@ class RnafusionParameters(WorkflowParameters):
     fusioncatcher: bool = True
     starfusion: bool = True
     trim_tail: int = 50
+    clusterOptions: str = Field(..., alias="cluster_options")
+    priority: str
 
 
 class CommandArgs(BaseModel):
