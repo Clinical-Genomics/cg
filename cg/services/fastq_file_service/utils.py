@@ -5,6 +5,7 @@ import uuid
 
 from cg.services.fastq_file_service.exceptions import ConcatenationError
 from cg.constants.constants import ReadDirection
+from cg.constants import FileExtensions
 
 
 def concatenate_forward_reads(directory: Path) -> Path | None:
@@ -39,7 +40,25 @@ def get_forward_read_fastqs(fastq_directory: Path) -> list[Path]:
 def get_concatenated_read_output_path(
     fastq_directory: Path, sample_name: str, direction: int
 ) -> Path:
-    return Path(fastq_directory, f"{sample_name}_{direction}.fastq.gz")
+    return Path(
+        fastq_directory, f"{sample_name}_{direction}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    )
+
+
+def get_concatenated_forward_read_output_path(fastq_directory: Path, sample_name: str) -> Path:
+    return get_concatenated_read_output_path(
+        fastq_directory=fastq_directory,
+        sample_name=sample_name,
+        direction=ReadDirection.FORWARD,
+    )
+
+
+def get_concatenated_reverse_read_output_path(fastq_directory: Path, sample_name: str) -> Path:
+    return get_concatenated_read_output_path(
+        fastq_directory=fastq_directory,
+        sample_name=sample_name,
+        direction=ReadDirection.REVERSE,
+    )
 
 
 def get_reverse_read_fastqs(fastq_directory: Path) -> list[Path]:
