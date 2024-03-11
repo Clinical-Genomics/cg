@@ -17,6 +17,7 @@ from requests import Response
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
@@ -48,7 +49,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
-from cg.store.models import Bed, BedVersion, Case, Customer, Organism, Sample
+from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
 from cg.store.store import Store
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
@@ -71,6 +72,7 @@ pytest_plugins = [
     "tests.fixture_plugins.demultiplex_fixtures.path_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_fixtures",
+    "tests.fixture_plugins.demultiplex_fixtures.sample_sheet_fixtures",
 ]
 
 # Case fixtures
@@ -277,8 +279,9 @@ def base_config_dict() -> dict:
         "madeline_exe": "path/to/madeline",
         "tower_binary_path": "path/to/tower",
         "delivery_path": "path/to/delivery",
-        "flow_cells_dir": "path/to/flow_cells",
-        "demultiplexed_flow_cells_dir": "path/to/demultiplexed_flow_cells_dir",
+        "illumina_flow_cells_directory": "path/to/flow_cells",
+        "illumina_demultiplexed_runs_directory": "path/to/demultiplexed_flow_cells_dir",
+        "nanopore_data_directory": "path/to/nanopore_data_directory",
         "downsample_dir": "path/to/downsample_dir",
         "downsample_script": "downsample.sh",
         "housekeeper": {
@@ -370,26 +373,26 @@ def demultiplex_context(
 
 @pytest.fixture(name="demultiplex_configs_for_demux")
 def demultiplex_configs_for_demux(
-    tmp_flow_cells_demux_all_directory: Path,
+    tmp_illumina_flow_cells_demux_all_directory,
     tmp_empty_demultiplexed_runs_directory: Path,
 ) -> dict:
     """Return demultiplex configs."""
     return {
-        "flow_cells_dir": tmp_flow_cells_demux_all_directory.as_posix(),
-        "demultiplexed_flow_cells_dir": tmp_empty_demultiplexed_runs_directory.as_posix(),
+        "illumina_flow_cells_directory": tmp_illumina_flow_cells_demux_all_directory.as_posix(),
+        "illumina_demultiplexed_runs_directory": tmp_empty_demultiplexed_runs_directory.as_posix(),
         "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
 
 
 @pytest.fixture(name="demultiplex_configs")
 def demultiplex_configs(
-    tmp_flow_cells_directory: Path,
-    tmp_demultiplexed_runs_directory: Path,
+    tmp_illumina_flow_cells_directory,
+    tmp_illumina_demultiplexed_flow_cells_directory,
 ) -> dict:
     """Return demultiplex configs."""
     return {
-        "flow_cells_dir": tmp_flow_cells_directory.as_posix(),
-        "demultiplexed_flow_cells_dir": tmp_demultiplexed_runs_directory.as_posix(),
+        "illumina_flow_cells_directory": tmp_illumina_flow_cells_directory.as_posix(),
+        "illumina_demultiplexed_runs_directory": tmp_illumina_demultiplexed_flow_cells_directory.as_posix(),
         "demultiplex": {"slurm": {"account": "test", "mail_user": "testuser@github.se"}},
     }
 
@@ -435,11 +438,38 @@ def gens_config() -> dict[str, dict[str, str]]:
 
 @pytest.fixture(name="sample_sheet_context")
 def sample_sheet_context(
-    cg_context: CGConfig, lims_api: LimsAPI, populated_housekeeper_api: HousekeeperAPI
+    cg_context: CGConfig,
+    lims_api: LimsAPI,
+    populated_housekeeper_api: HousekeeperAPI,
+    tmp_illumina_flow_cells_directory: Path,
 ) -> CGConfig:
     """Return cg context with added Lims and Housekeeper API."""
     cg_context.lims_api_ = lims_api
     cg_context.housekeeper_api_ = populated_housekeeper_api
+    cg_context.sample_sheet_api_ = SampleSheetAPI(
+        flow_cell_dir=tmp_illumina_flow_cells_directory.as_posix(),
+        hk_api=cg_context.housekeeper_api,
+        lims_api=cg_context.lims_api,
+    )
+    return cg_context
+
+
+@pytest.fixture
+def sample_sheet_context_broken_flow_cells(
+    cg_context: CGConfig,
+    lims_api: LimsAPI,
+    populated_housekeeper_api: HousekeeperAPI,
+    tmp_broken_flow_cells_directory: Path,
+) -> CGConfig:
+    """Return cg context with broken flow cells."""
+    cg_context.illumina_demultiplexed_runs_directory = tmp_broken_flow_cells_directory.as_posix()
+    cg_context.lims_api_ = lims_api
+    cg_context.housekeeper_api_ = populated_housekeeper_api
+    cg_context.sample_sheet_api_ = SampleSheetAPI(
+        flow_cell_dir=tmp_broken_flow_cells_directory.as_posix(),
+        hk_api=cg_context.housekeeper_api,
+        lims_api=cg_context.lims_api,
+    )
     return cg_context
 
 
@@ -710,6 +740,18 @@ def balsamic_wgs_analysis_dir(balsamic_analysis_dir: Path) -> Path:
 def mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
     """Return the path to the directory with mip dna analysis files."""
     return Path(mip_analysis_dir, "dna")
+
+
+@pytest.fixture
+def nf_analysis_analysis_dir(fixtures_dir: Path) -> Path:
+    """Return the path to the directory with nf-analysis files."""
+    return Path(fixtures_dir, "analysis", "nf-analysis")
+
+
+@pytest.fixture
+def raredisease_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with raredisease analysis files."""
+    return Path(analysis_dir, "raredisease")
 
 
 @pytest.fixture
@@ -1652,17 +1694,21 @@ def context_config(
     raredisease_dir: Path,
     rnafusion_dir: Path,
     taxprofiler_dir: Path,
-    flow_cells_dir: Path,
-    demultiplexed_runs: Path,
+    illumina_flow_cells_directory: Path,
+    illumina_demultiplexed_runs_directory: Path,
     downsample_dir: Path,
     pdc_archiving_directory: PDCArchivingDirectory,
+    nf_analysis_platform_config_path: Path,
+    nf_analysis_pipeline_params_path: Path,
+    nf_analysis_pipeline_resource_optimisation_path: Path,
 ) -> dict:
     """Return a context config."""
     return {
         "database": cg_uri,
         "delivery_path": str(cg_dir),
-        "flow_cells_dir": str(flow_cells_dir),
-        "demultiplexed_flow_cells_dir": str(demultiplexed_runs),
+        "illumina_flow_cells_directory": str(illumina_flow_cells_directory),
+        "illumina_demultiplexed_runs_directory": str(illumina_demultiplexed_runs_directory),
+        "nanopore_data_directory": "path/to/nanopore_data_directory",
         "downsample_dir": str(downsample_dir),
         "downsample_script": "downsample.sh",
         "email_base_settings": {
@@ -1789,7 +1835,7 @@ def context_config(
             "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-dna-stage.yaml",
-            "pipeline": "analyse rd_dna",
+            "workflow": "analyse rd_dna",
             "root": str(mip_dir),
             "script": "mip",
         },
@@ -1797,7 +1843,7 @@ def context_config(
             "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-rna-stage.yaml",
-            "pipeline": "analyse rd_rna",
+            "workflow": "analyse rd_rna",
             "root": str(mip_dir),
             "script": "mip",
         },
@@ -1816,8 +1862,11 @@ def context_config(
             "compute_env": "nf_tower_compute_env",
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_raredisease",
+            "config_platform": str(nf_analysis_platform_config_path),
+            "config_params": str(nf_analysis_pipeline_params_path),
+            "config_resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "workflow_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
             "revision": "2.2.0",
@@ -1826,7 +1875,7 @@ def context_config(
                 "account": "development",
                 "mail_user": "test.email@scilifelab.se",
             },
-            "tower_pipeline": "raredisease",
+            "tower_workflow": "raredisease",
         },
         "rnafusion": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
@@ -1834,7 +1883,7 @@ def context_config(
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_RNAFUSION",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "workflow_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
             "revision": "2.2.0",
@@ -1843,7 +1892,7 @@ def context_config(
                 "account": "development",
                 "mail_user": "test.email@scilifelab.se",
             },
-            "tower_pipeline": "rnafusion",
+            "tower_workflow": "rnafusion",
         },
         "pigz": {"binary_path": "/bin/pigz"},
         "pdc": {"binary_path": "/bin/dsmc"},
@@ -1854,16 +1903,16 @@ def context_config(
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_taxprofiler",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "workflow_path": Path("workflow", "path").as_posix(),
             "databases": Path("path", "to", "databases").as_posix(),
             "profile": "myprofile",
             "hostremoval_reference": Path("path", "to", "hostremoval_reference").as_posix(),
-            "revision": "1.0.1",
+            "revision": "1.1.4",
             "slurm": {
                 "account": "development",
                 "mail_user": "taxprofiler.email@scilifelab.se",
             },
-            "tower_pipeline": "taxprofiler",
+            "tower_workflow": "taxprofiler",
         },
         "scout": {
             "binary_path": "bin/scout",
@@ -2104,20 +2153,8 @@ def no_sample_case_id() -> str:
 
 
 @pytest.fixture(scope="session")
-def strandedness() -> str:
-    """Return a default strandedness."""
-    return Strandedness.REVERSE
-
-
-@pytest.fixture(scope="session")
-def strandedness_not_permitted() -> str:
-    """Return a not permitted strandedness."""
-    return "double_stranded"
-
-
-@pytest.fixture(scope="session")
-def pipeline_version() -> str:
-    """Return a pipeline version."""
+def workflow_version() -> str:
+    """Return a workflow version."""
     return "2.2.0"
 
 
@@ -2162,6 +2199,22 @@ def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
     return Path(raredisease_dir).absolute().as_posix()
 
 
+# Raredisease fixtures
+
+
+@pytest.fixture(scope="function")
+def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
+    """Return the path to the raredisease apps dir."""
+    raredisease_dir = tmpdir_factory.mktemp("raredisease")
+    return Path(raredisease_dir).absolute().as_posix()
+
+
+@pytest.fixture(scope="session")
+def raredisease_case_id() -> str:
+    """Returns a rnafusion case id."""
+    return "raredisease_case_enough_reads"
+
+
 # Rnafusion fixtures
 
 
@@ -2194,6 +2247,18 @@ def rnafusion_sample_sheet_content(
             strandedness,
         ]
     )
+
+
+@pytest.fixture(scope="session")
+def strandedness() -> str:
+    """Return a default strandedness."""
+    return Strandedness.REVERSE
+
+
+@pytest.fixture(scope="session")
+def strandedness_not_permitted() -> str:
+    """Return a not permitted strandedness."""
+    return "double_stranded"
 
 
 @pytest.fixture(scope="function")
@@ -2260,6 +2325,26 @@ def rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to deliverables file."""
     return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_deliverables").with_suffix(
         FileExtensions.YAML
+    )
+
+
+@pytest.fixture(scope="function")
+def nf_analysis_platform_config_path(nf_analysis_analysis_dir) -> Path:
+    """Path to platform config file."""
+    return Path(nf_analysis_analysis_dir, "platform").with_suffix(FileExtensions.CONFIG)
+
+
+@pytest.fixture(scope="function")
+def nf_analysis_pipeline_params_path(nf_analysis_analysis_dir) -> Path:
+    """Path to pipeline params file."""
+    return Path(nf_analysis_analysis_dir, "pipeline_params").with_suffix(FileExtensions.CONFIG)
+
+
+@pytest.fixture(scope="function")
+def nf_analysis_pipeline_resource_optimisation_path(nf_analysis_analysis_dir) -> Path:
+    """Path to pipeline resource optimisation file."""
+    return Path(nf_analysis_analysis_dir, "pipeline_resource_optimisation").with_suffix(
+        FileExtensions.CONFIG
     )
 
 
@@ -2558,6 +2643,14 @@ def taxprofiler_metrics_deliverables_path(taxprofiler_dir: Path, taxprofiler_cas
 
 
 @pytest.fixture(scope="function")
+def taxprofiler_deliverables_file_path(taxprofiler_dir: Path, taxprofiler_case_id: str) -> Path:
+    """Path to deliverables file."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_deliverables"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
 def nf_analysis_housekeeper(
     housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
@@ -2604,6 +2697,9 @@ def taxprofiler_context(
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
     taxprofiler_case: Case = helpers.add_case(
         store=status_db,
@@ -2845,7 +2941,7 @@ def flow_cell_encryption_api(
         encryption_dir=Path(cg_context.backup.pdc_archiving_directory.current),
         dry_run=True,
         flow_cell=FlowCellDirectoryData(
-            flow_cell_path=Path(cg_context.flow_cells_dir, flow_cell_full_name)
+            flow_cell_path=Path(cg_context.illumina_flow_cells_directory, flow_cell_full_name)
         ),
         pigz_binary_path=cg_context.pigz.binary_path,
         slurm_api=SlurmAPI(),
@@ -2869,7 +2965,7 @@ def create_process_response(
 
 
 # Downsample
-@pytest.fixture()
+@pytest.fixture
 def store_with_case_and_sample_with_reads(
     store: Store,
     helpers: StoreHelpers,
@@ -2881,7 +2977,14 @@ def store_with_case_and_sample_with_reads(
     case: Case = helpers.add_case(
         store=store, internal_id=downsample_case_internal_id, name=downsample_case_internal_id
     )
-
+    order: Order = helpers.add_order(
+        store=store,
+        customer_id=case.customer_id,
+        ticket_id=case.latest_ticket,
+        order_date=case.ordered_at,
+        workflow=case.data_analysis,
+    )
+    case.orders.append(order)
     for sample_internal_id in [downsample_sample_internal_id_1, downsample_sample_internal_id_2]:
         helpers.add_sample(
             store=store,
@@ -2895,31 +2998,31 @@ def store_with_case_and_sample_with_reads(
     return store
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_case_internal_id() -> str:
     """Return a case internal id."""
     return "supersonicturtle"
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_sample_internal_id_1() -> str:
     """Return a sample internal id."""
     return "ACC12345675213"
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_sample_internal_id_2() -> str:
     """Return a sample internal id."""
     return "ACC12345684213"
 
 
-@pytest.fixture()
+@pytest.fixture
 def number_of_reads_in_millions() -> int:
     """Return a number of reads in millions."""
     return 50
 
 
-@pytest.fixture()
+@pytest.fixture
 def downsample_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     fastq_file: Path,
@@ -2994,28 +3097,24 @@ def downsample_api(
     )
 
 
-@pytest.fixture(scope="session")
-def raredisease_case_id() -> str:
-    """Returns a raredisease case id."""
-    return "raredisease_case_enough_reads"
-
-
 @pytest.fixture(scope="function")
 def raredisease_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
     nf_analysis_housekeeper: HousekeeperAPI,
-    raredisease_case_id: str,
+    trailblazer_api: MockTB,
     sample_id: str,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
     apptag_rna: str,
+    raredisease_case_id: str,
     case_id_not_enough_reads: str,
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
 ) -> CGConfig:
     """Raredisease context to use in CLI."""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
+    cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 

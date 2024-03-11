@@ -4,7 +4,7 @@ from pydantic.v1 import BaseModel, Field
 
 from cg.constants.constants import Strandedness
 from cg.models.analysis import AnalysisModel
-from cg.models.nf_analysis import NextflowSampleSheetEntry, PipelineParameters
+from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 
 
 class RnafusionQCMetrics(BaseModel):
@@ -25,7 +25,7 @@ class RnafusionQCMetrics(BaseModel):
     uniquely_mapped_percent: float | None
 
 
-class RnafusionParameters(PipelineParameters):
+class RnafusionParameters(WorkflowParameters):
     """Rnafusion parameters."""
 
     genomes_base: Path
@@ -38,6 +38,8 @@ class RnafusionParameters(PipelineParameters):
     fusioncatcher: bool = True
     starfusion: bool = True
     trim_tail: int = 50
+    clusterOptions: str = Field(..., alias="cluster_options")
+    priority: str
 
 
 class CommandArgs(BaseModel):

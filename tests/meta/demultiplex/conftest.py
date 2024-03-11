@@ -10,7 +10,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_sample_sheet_path_to_housekeeper,
+    add_and_include_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -22,9 +22,13 @@ FlowCellInfo = namedtuple("FlowCellInfo", "directory name sample_internal_ids")
 
 
 @pytest.fixture(name="tmp_demulitplexing_dir")
-def tmp_demulitplexing_dir(demultiplexed_runs: Path, bcl2fastq_flow_cell_full_name: str) -> Path:
+def tmp_illumina_novaseq_demulitplexing_dir(
+    illumina_demultiplexed_runs_directory: Path, bcl2fastq_flow_cell_full_name: str
+) -> Path:
     """Return a tmp directory in demultiplexed-runs."""
-    tmp_demulitplexing_dir: Path = Path(demultiplexed_runs, bcl2fastq_flow_cell_full_name)
+    tmp_demulitplexing_dir: Path = Path(
+        illumina_demultiplexed_runs_directory, bcl2fastq_flow_cell_full_name
+    )
     tmp_demulitplexing_dir.mkdir(exist_ok=True, parents=True)
     return tmp_demulitplexing_dir
 
@@ -303,10 +307,10 @@ def lsyncd_target_directory(lsyncd_source_directory: Path, tmp_path_factory) -> 
 
 @pytest.fixture
 def demux_post_processing_api(
-    demultiplex_context: CGConfig, tmp_demultiplexed_runs_directory: Path
+    demultiplex_context: CGConfig, tmp_illumina_demultiplexed_flow_cells_directory
 ) -> DemuxPostProcessingAPI:
     api = DemuxPostProcessingAPI(demultiplex_context)
-    api.demultiplexed_runs_dir = tmp_demultiplexed_runs_directory
+    api.demultiplexed_runs_dir = tmp_illumina_demultiplexed_flow_cells_directory
     return api
 
 
@@ -316,7 +320,7 @@ def bcl2fastq_flow_cell_dir_name(demux_post_processing_api) -> str:
     flow_cell_dir_name = "170407_ST-E00198_0209_BHHKVCALXX"
     flow_cell_path = Path(demux_post_processing_api.demultiplexed_runs_dir, flow_cell_dir_name)
 
-    add_sample_sheet_path_to_housekeeper(
+    add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=flow_cell_path,
         flow_cell_name="HHKVCALXX",
         hk_api=demux_post_processing_api.hk_api,
@@ -341,7 +345,7 @@ def bclconvert_flow_cell_dir_name(demux_post_processing_api) -> str:
     flow_cell_dir_name = "230504_A00689_0804_BHY7FFDRX2"
     flow_cell_path = Path(demux_post_processing_api.demultiplexed_runs_dir, flow_cell_dir_name)
 
-    add_sample_sheet_path_to_housekeeper(
+    add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=flow_cell_path,
         flow_cell_name="HY7FFDRX2",
         hk_api=demux_post_processing_api.hk_api,

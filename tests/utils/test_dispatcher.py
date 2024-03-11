@@ -200,5 +200,5 @@ def test_dispatcher_on_other_functions(
     for analysis in analyses:
         assert analysis
         assert analysis.case.internal_id == case_internal_id
-        assert analysis.pipeline == workflow
+        assert analysis.workflow == workflow
         assert analysis.started_at < timestamp_now

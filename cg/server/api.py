@@ -9,6 +9,7 @@ from typing import Any
 import cachecontrol
 import requests
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
+from google.auth import exceptions
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 from pydantic.v1 import ValidationError
@@ -24,20 +25,26 @@ from cg.constants.constants import FileFormat
 from cg.exc import (
     CaseNotFoundError,
     OrderError,
+    OrderExistsError,
     OrderFormError,
-    OrderNotFoundError,
+    OrderMismatchError,
     TicketCreationError,
 )
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
+from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message_response import DeliveryMessageResponse
+from cg.server.dto.delivery_message.delivery_message_request import (
+    DeliveryMessageRequest,
+)
+from cg.server.dto.delivery_message.delivery_message_response import (
+    DeliveryMessageResponse,
+)
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
-from cg.server.ext import db, lims, osticket
-from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
-from cg.services.orders.order_service import OrderService
+from cg.server.ext import db, delivery_message_service, lims, order_service, osticket
+from cg.services.orders.order_service.exceptions import OrderNotFoundError
 from cg.store.models import (
     Analysis,
     Application,
@@ -97,8 +104,8 @@ def before_request():
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
         user_data = verify_google_token(jwt_token)
-    except ValueError as e:
-        LOG.error(f"Error occurred while decoding JWT token: {e}")
+    except (exceptions.OAuthError, ValueError) as e:
+        LOG.error(f"Error {e} occurred while decoding JWT token: {jwt_token}")
         return abort(
             make_response(jsonify(message="outdated login certificate"), HTTPStatus.UNAUTHORIZED)
         )
@@ -127,17 +134,21 @@ def submit_order(order_type):
         )
         project = OrderType(order_type)
         order_in = OrderIn.parse_obj(request_json, project=project)
+        existing_ticket: str | None = TicketHandler.parse_ticket_number(order_in.name)
+        if existing_ticket and order_service.store.get_order_by_ticket_id(existing_ticket):
+            raise OrderExistsError(f"Order with ticket id {existing_ticket} already exists.")
 
-        result = api.submit(
+        result: dict = api.submit(
             project=project,
             order_in=order_in,
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )
-        order_service = OrderService(db)
         order_service.create_order(order_in)
+
     except (  # user misbehaviour
         OrderError,
+        OrderExistsError,
         OrderFormError,
         ValidationError,
         ValueError,
@@ -210,11 +221,25 @@ def parse_case(case_id):
     return jsonify(**case.to_dict(links=True, analyses=True))
 
 
+@BLUEPRINT.route("/cases/delivery_message", methods=["GET"])
+def get_cases_delivery_message():
+    delivery_message_request = DeliveryMessageRequest.model_validate(request.args)
+    try:
+        response: DeliveryMessageResponse = delivery_message_service.get_delivery_message(
+            delivery_message_request
+        )
+        return jsonify(response.model_dump()), HTTPStatus.OK
+    except (CaseNotFoundError, OrderMismatchError) as error:
+        return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
+
+
 @BLUEPRINT.route("/cases/<case_id>/delivery_message", methods=["GET"])
 def get_case_delivery_message(case_id: str):
-    service = DeliveryMessageService(db)
+    delivery_message_request = DeliveryMessageRequest(case_ids=[case_id])
     try:
-        response: DeliveryMessageResponse = service.get_delivery_message(case_id)
+        response: DeliveryMessageResponse = delivery_message_service.get_delivery_message(
+            delivery_message_request
+        )
         return jsonify(response.model_dump()), HTTPStatus.OK
     except CaseNotFoundError as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
@@ -479,16 +504,14 @@ def get_application_pipeline_limitations(tag: str):
 @BLUEPRINT.route("/orders")
 def get_orders():
     """Return the latest orders."""
-    orders_request: OrdersRequest = OrdersRequest.model_validate(request.args.to_dict())
-    order_service = OrderService(db)
-    response: OrdersResponse = order_service.get_orders(orders_request)
+    data = OrdersRequest.model_validate(request.args.to_dict())
+    response: OrdersResponse = order_service.get_orders(data)
     return make_response(response.model_dump())
 
 
 @BLUEPRINT.route("/orders/<order_id>")
 def get_order(order_id: int):
     """Return an order."""
-    order_service = OrderService(db)
     try:
         response: Order = order_service.get_order(order_id)
         response_dict: dict = response.model_dump()
