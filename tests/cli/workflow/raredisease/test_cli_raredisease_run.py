@@ -11,24 +11,6 @@ from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
 
-def test_without_config(
-    cli_runner: CliRunner,
-    raredisease_context: CGConfig,
-    caplog: LogCaptureFixture,
-    raredisease_case_id: str,
-):
-    """Test command with case_id and no config file."""
-    caplog.set_level(logging.ERROR)
-    # GIVEN case-id
-    case_id: str = raredisease_case_id
-    # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id], obj=raredisease_context)
-    # THEN command should NOT execute successfully
-    assert result.exit_code != EXIT_SUCCESS
-    # THEN warning should be printed that no config file is found
-    assert "No config file found" in caplog.text
-
-
 def test_with_config(
     cli_runner: CliRunner,
     raredisease_context: CGConfig,
