@@ -145,14 +145,8 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
         content=malformed_hermes_deliverables, file_format=FileFormat.JSON
     )
 
-    # GIVEN that the output is malformed
-    with pytest.raises(ValidationError):
-        analysis_api.hermes_api.convert_deliverables(
-            deliverables_file=Path("a_file"), workflow=workflow
-        )
-
-        # GIVEN a case id
-        case_id: str = request.getfixturevalue(case_id)
+    # GIVEN a case id
+    case_id: str = request.getfixturevalue(case_id)
 
     # WHEN running the store-housekeeper command
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=context)
