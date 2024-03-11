@@ -11,32 +11,6 @@ from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
 
-def test_with_config(
-    cli_runner: CliRunner,
-    raredisease_context: CGConfig,
-    caplog: LogCaptureFixture,
-    raredisease_case_id: str,
-    mock_config,
-):
-    """Test command with case_id and config file using tower."""
-    caplog.set_level(logging.INFO)
-    # GIVEN case-id
-    case_id: str = raredisease_case_id
-
-    # GIVEN a mocked config
-
-    # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=raredisease_context)
-
-    # THEN command should execute successfully
-    assert result.exit_code == EXIT_SUCCESS
-
-    # THEN command should use tower
-    assert "using Tower" in caplog.text
-    assert "path/to/bin/tw launch" in caplog.text
-    assert "--work-dir" in caplog.text
-
-
 def test_with_revision(
     cli_runner: CliRunner,
     raredisease_context: CGConfig,

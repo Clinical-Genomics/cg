@@ -78,13 +78,18 @@ def test_without_samples(
 
 
 @pytest.mark.parametrize(
-    "context", ["raredisease_context", "rnafusion_context", "taxprofiler_context"]
+    "context,case_id",
+    [
+        ("raredisease_context", "raredisease_case_id"),
+        ("rnafusion_context", "rnafusion_case_id"),
+        ("taxprofiler_context", "taxprofiler_case_id"),
+    ],
 )
 def test_without_config_dry_run(
     cli_runner: CliRunner,
-    raredisease_context: CGConfig,
+    context: CGConfig,
     caplog: LogCaptureFixture,
-    raredisease_case_id: str,
+    case_id: str,
     request,
 ):
     """Test command dry-run with case_id and no config file."""
@@ -92,7 +97,8 @@ def test_without_config_dry_run(
     context = request.getfixturevalue(context)
 
     # GIVEN case-id
-    case_id: str = raredisease_case_id
+    case_id: str = case_id
+
     # WHEN dry running with dry specified
     result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=raredisease_context)
     # THEN command should execute successfully (dry-run)
@@ -100,13 +106,18 @@ def test_without_config_dry_run(
 
 
 @pytest.mark.parametrize(
-    "context", ["raredisease_context", "rnafusion_context", "taxprofiler_context"]
+    "context,case_id",
+    [
+        ("raredisease_context", "raredisease_case_id"),
+        ("rnafusion_context", "rnafusion_case_id"),
+        ("taxprofiler_context", "taxprofiler_case_id"),
+    ],
 )
 def test_without_config(
     cli_runner: CliRunner,
-    raredisease_context: CGConfig,
+    context: CGConfig,
     caplog: LogCaptureFixture,
-    raredisease_case_id: str,
+    case_id: str,
     request,
 ):
     """Test command with case_id and no config file."""
@@ -114,39 +125,49 @@ def test_without_config(
     context = request.getfixturevalue(context)
 
     # GIVEN case-id
-    case_id: str = raredisease_case_id
+    case_id: str = case_id
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id], obj=raredisease_context)
+    result = cli_runner.invoke(run, [case_id], obj=context)
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
     assert "No config file found" in caplog.text
 
 
-# def test_with_config(
-#     cli_runner: CliRunner,
-#     raredisease_context: CGConfig,
-#     caplog: LogCaptureFixture,
-#     raredisease_case_id: str,
-#     mock_config,
-# ):
-#     """Test command with case_id and config file using tower."""
-#     caplog.set_level(logging.INFO)
-#     # GIVEN case-id
-#     case_id: str = raredisease_case_id
+@pytest.mark.parametrize(
+    "context,case_id",
+    [
+        ("raredisease_context", "raredisease_case_id"),
+        ("rnafusion_context", "rnafusion_case_id"),
+        ("taxprofiler_context", "taxprofiler_case_id"),
+    ],
+)
+def test_with_config(
+    cli_runner: CliRunner,
+    context: CGConfig,
+    caplog: LogCaptureFixture,
+    case_id: str,
+    mock_config,
+    request,
+):
+    """Test command with case_id and config file using tower."""
+    caplog.set_level(logging.INFO)
+    context = request.getfixturevalue(context)
 
-#     # GIVEN a mocked config
+    # GIVEN case-id
+    case_id: str = case_id
+    # GIVEN a mocked config
 
-#     # WHEN dry running with dry specified
-#     result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=raredisease_context)
+    # WHEN dry running with dry specified
+    result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=context)
 
-#     # THEN command should execute successfully
-#     assert result.exit_code == EXIT_SUCCESS
+    # THEN command should execute successfully
+    assert result.exit_code == EXIT_SUCCESS
 
-#     # THEN command should use tower
-#     assert "using Tower" in caplog.text
-#     assert "path/to/bin/tw launch" in caplog.text
-#     assert "--work-dir" in caplog.text
+    # THEN command should use tower
+    assert "using Tower" in caplog.text
+    assert "path/to/bin/tw launch" in caplog.text
+    assert "--work-dir" in caplog.text
 
 
 # def test_with_revision(

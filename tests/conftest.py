@@ -2306,7 +2306,7 @@ def raredisease_context(
         store=status_db,
         internal_id=raredisease_case_id,
         name=raredisease_case_id,
-        data_analysis=Pipeline.RAREDISEASE,
+        data_analysis=Workflow.RAREDISEASE,
     )
 
     sample_raredisease_case_enough_reads: Sample = helpers.add_sample(
@@ -2328,7 +2328,7 @@ def raredisease_context(
         store=status_db,
         internal_id=case_id_not_enough_reads,
         name=case_id_not_enough_reads,
-        data_analysis=Pipeline.RAREDISEASE,
+        data_analysis=Workflow.RAREDISEASE,
     )
 
     sample_not_enough_reads: Sample = helpers.add_sample(
