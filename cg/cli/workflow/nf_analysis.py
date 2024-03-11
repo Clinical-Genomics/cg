@@ -3,8 +3,6 @@
 import logging
 
 import click
-from pydantic.v1 import ValidationError
-
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
@@ -143,18 +141,7 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
     status_db: Store = context.status_db
 
     try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
-        analysis_api.verify_deliverables_file_exists(case_id=case_id)
-        analysis_api.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run)
-        analysis_api.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
-        analysis_api.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
-    except ValidationError as error:
-        LOG.warning("Deliverables file is malformed")
-        raise error
-    except CgError as error:
-        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}")
-        raise click.Abort()
+        analysis_api.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run)
     except Exception as error:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
         housekeeper_api.rollback()

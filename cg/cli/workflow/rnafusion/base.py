@@ -34,7 +34,6 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.rnafusion import CommandArgs
-from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 

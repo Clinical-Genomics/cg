@@ -1,4 +1,6 @@
 import logging
+import click
+from pydantic.v1 import ValidationError
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -472,3 +474,20 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.info(
             f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
         )
+
+    def store_analysis_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
+        """Store a finished nextflow analysis in Housekeeper and StatusDB"""
+
+        try:
+            self.status_db.verify_case_exists(case_internal_id=case_id)
+            self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+            self.verify_deliverables_file_exists(case_id=case_id)
+            self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run)
+            self.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
+            self.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
+        except ValidationError as error:
+            LOG.warning("Deliverables file is malformed")
+            raise error
+        except CgError as error:
+            LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}")
+            raise click.Abort() from error
