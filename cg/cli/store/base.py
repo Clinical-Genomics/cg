@@ -10,13 +10,13 @@ from cg.meta.compress.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 
 from .store import (
+    get_qc_metrics,
     store_case,
     store_demultiplexed_flow_cell,
     store_flow_cell,
     store_qc_metrics,
     store_sample,
     store_ticket,
-    get_qc_metrics,
 )
 
 LOG = logging.getLogger(__name__)

@@ -24,6 +24,6 @@ class JanusAPIClient:
     @staticmethod
     def _handle_errors(response: Response):
         if HTTPStatus.BAD_REQUEST <= response.status_code < HTTPStatus.INTERNAL_SERVER_ERROR:
-            raise JanusClientError(f"Client error: {response.status_code}")
+            raise JanusClientError(f"Client error: {response.content}")
         elif HTTPStatus.INTERNAL_SERVER_ERROR <= response.status_code:
-            raise JanusServerError(f"Server error: {response.status_code}")
+            raise JanusServerError(f"Server error: {response.content}")

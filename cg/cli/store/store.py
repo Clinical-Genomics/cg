@@ -165,9 +165,7 @@ def get_qc_metrics(config: CGConfig, case_id: str, dry_run: bool = False) -> Non
         janus_api=config.janus_api,
         arnold_api=config.arnold_api,
     )
-    try:
-        request = metrics_api.create_qc_metrics_request(case_id)
-        response = metrics_api.janus_api.qc_metrics(request)
-        LOG.info(f"{response}")
-    except (JanusServerError, JanusClientError, ArnoldClientError, ArnoldServerError) as error:
-        LOG.info(f"Could not store qc metrics in arnold. Reason {error}")
+
+    request = metrics_api.create_qc_metrics_request(case_id)
+    response = metrics_api.janus_api.qc_metrics(request)
+    LOG.info(f"{response}")
