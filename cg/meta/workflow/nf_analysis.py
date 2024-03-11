@@ -490,4 +490,6 @@ class NfAnalysisAPI(AnalysisAPI):
             raise error
         except CgError as error:
             LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}")
-            raise click.Abort() from error
+            self.housekeeper_api.rollback()
+            self.status_db.session.rollback()
+            raise StoreHouseKeeperError(f"Could not store bundle in Housekeeper and StatusDB: {error}")
