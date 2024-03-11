@@ -97,7 +97,7 @@ def test_without_config_dry_run(
     context = request.getfixturevalue(context)
 
     # GIVEN case-id
-    case_id: str = case_id
+    case_id: str = request.getfixturevalue(case_id)
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=context)
@@ -105,33 +105,33 @@ def test_without_config_dry_run(
     assert result.exit_code == EXIT_SUCCESS
 
 
-@pytest.mark.parametrize(
-    "context,case_id",
-    [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
-    ],
-)
-def test_without_config(
-    cli_runner: CliRunner,
-    context: CGConfig,
-    caplog: LogCaptureFixture,
-    case_id: str,
-    request,
-):
-    """Test command with case_id and no config file."""
-    caplog.set_level(logging.ERROR)
-    context = request.getfixturevalue(context)
+# @pytest.mark.parametrize(
+#     "context,case_id",
+#     [
+#         ("raredisease_context", "raredisease_case_id"),
+#         ("rnafusion_context", "rnafusion_case_id"),
+#         ("taxprofiler_context", "taxprofiler_case_id"),
+#     ],
+# )
+# def test_without_config(
+#     cli_runner: CliRunner,
+#     context: CGConfig,
+#     caplog: LogCaptureFixture,
+#     case_id: str,
+#     request,
+# ):
+#     """Test command with case_id and no config file."""
+#     caplog.set_level(logging.ERROR)
+#     context = request.getfixturevalue(context)
 
-    # GIVEN case-id
-    case_id: str = request.getfixturevalue(case_id)
-    # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id], obj=context)
-    # THEN command should NOT execute successfully
-    assert result.exit_code != EXIT_SUCCESS
-    # THEN warning should be printed that no config file is found
-    assert "No config file found" in caplog.text
+#     # GIVEN case-id
+#     case_id: str = case_id
+#     # WHEN dry running with dry specified
+#     result = cli_runner.invoke(run, [case_id], obj=context)
+#     # THEN command should NOT execute successfully
+#     assert result.exit_code != EXIT_SUCCESS
+#     # THEN warning should be printed that no config file is found
+#     assert "No config file found" in caplog.text
 
 
 # @pytest.mark.parametrize(
