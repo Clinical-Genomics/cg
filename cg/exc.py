@@ -125,7 +125,7 @@ class HousekeeperArchiveMissingError(CgError):
     Exception raised when an archive is missing in Housekeeper.
     """
 
-class HousekeeperStoreMalformedError(CgError):
+class HousekeeperStoreError(CgError):
     """
     Exception raised when a deliverable file is malformed in Housekeeper.
     """
