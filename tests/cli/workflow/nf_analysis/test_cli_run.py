@@ -314,8 +314,6 @@ def test_resume_without_id(
     assert "tw runs relaunch" in caplog.text
 
 
-
-
 @pytest.mark.parametrize(
     "context,case_id",
     [
@@ -354,4 +352,3 @@ def test_with_config_use_nextflow(
 
     # THEN command should include resume flag
     assert "-resume" in caplog.text
-
