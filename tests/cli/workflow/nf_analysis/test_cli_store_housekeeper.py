@@ -155,6 +155,7 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
     assert result.exit_code != EXIT_SUCCESS
     assert "Could not store bundle in Housekeeper and StatusDB" in caplog.text
 
+
 @pytest.mark.parametrize(
     ("context", "case_id", "hermes_deliverables", "mock_deliverable"),
     [
