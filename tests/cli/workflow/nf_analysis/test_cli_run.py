@@ -26,6 +26,7 @@ def test_without_options(cli_runner: CliRunner, context: CGConfig):
     # THEN command should mention argument
     assert "Missing argument" in result.output
 
+
 @pytest.mark.parametrize(
     "context", ["raredisease_context", "rnafusion_context", "taxprofiler_context"]
 )
@@ -38,9 +39,7 @@ def test_with_missing_case(
     """Test command with invalid case to start with."""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
-    assert not context.status_db.get_case_by_internal_id(
-        internal_id=case_id_does_not_exist
-    )
+    assert not context.status_db.get_case_by_internal_id(internal_id=case_id_does_not_exist)
     # WHEN running
     result = cli_runner.invoke(run, [case_id_does_not_exist], obj=context)
     # THEN command should NOT successfully call the command it creates
