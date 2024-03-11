@@ -309,10 +309,7 @@ class NfAnalysisAPI(AnalysisAPI):
         except FileNotFoundError as error:
             LOG.error(f"Could not resume analysis: {error}")
             raise click.Abort() from error
-        except (CgError, ValueError) as error:
-            LOG.error(f"Could not run analysis: {error}")
-            raise click.Abort() from error
-        except Exception as error:
+        except (CgError, ValueError, Exception) as error:
             LOG.error(f"Could not run analysis: {error}")
             raise click.Abort() from error
         if not dry_run:
