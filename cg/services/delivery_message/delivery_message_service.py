@@ -21,7 +21,7 @@ class DeliveryMessageService:
         self, delivery_message_request: DeliveryMessageRequest
     ) -> DeliveryMessageResponse:
         case_ids: list[str] = delivery_message_request.case_ids
-        return self._get_delivery_message(case_ids)
+        return self._get_delivery_message(set(case_ids))
 
     def get_order_message(self, order_id: int) -> DeliveryMessageResponse:
         order: Order = self.store.get_order_by_id(order_id)
@@ -32,10 +32,10 @@ class DeliveryMessageService:
             raise OrderNotDeliverableError(
                 f"No analyses ready to be delivered for order {order_id}"
             )
-        case_ids: list[str] = [analysis.case_id for analysis in analyses]
+        case_ids: set[str] = {analysis.case_id for analysis in analyses}
         return self._get_delivery_message(case_ids)
 
-    def _get_delivery_message(self, case_ids: list[str]):
+    def _get_delivery_message(self, case_ids: set[str]):
         cases: list[Case] = self.store.get_cases_by_internal_ids(case_ids)
         validate_cases(cases=cases, case_ids=case_ids)
         message: str = get_message(cases)
