@@ -2725,7 +2725,7 @@ def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
 # Taxprofiler fixtures
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def mock_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
     """Create CSV sample sheet file for testing."""
     Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
