@@ -6,7 +6,7 @@ from click.testing import CliRunner
 
 from cg.cli.deliver.base import deliver as deliver_cmd
 from cg.constants import EXIT_SUCCESS
-from cg.meta.deliver_ticket import DeliverTicketAPI
+from cg.meta.deliver import DeliverTicketAPI
 from cg.models.cg_config import CGConfig
 
 

@@ -1,6 +1,8 @@
 from pathlib import Path
 import pytest
-from cg.services.fastq_file_service.utils import get_concatenated_read_output_path
+from cg.meta.deliver.fastq_path_generator import (
+    generate_concatenated_fastq_delivery_path,
+)
 from cg.constants.constants import ReadDirection
 
 
@@ -22,11 +24,11 @@ from cg.constants.constants import ReadDirection
     ],
     ids=["forward", "reverse"],
 )
-def test_get_concatenated_read_output_path(
+def test_generate_concatenated_fastq_delivery_path(
     fastq_directory: Path, sample_name: str, direction: int, expected_output_path: Path
 ):
     assert (
-        get_concatenated_read_output_path(
+        generate_concatenated_fastq_delivery_path(
             fastq_directory=fastq_directory, sample_name=sample_name, direction=direction
         )
         == expected_output_path

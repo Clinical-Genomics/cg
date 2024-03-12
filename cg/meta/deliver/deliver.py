@@ -13,9 +13,9 @@ from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery, Workflow
 from cg.exc import MissingFilesError
 from cg.services.fastq_file_service.fastq_file_service import FastqFileService
-from cg.services.fastq_file_service.utils import (
-    get_concatenated_forward_read_output_path,
-    get_concatenated_reverse_read_output_path,
+from cg.meta.deliver.fastq_path_generator import (
+    generate_forward_concatenated_fastq_delivery_path,
+    generate_reverse_concatenated_fastq_delivery_path,
 )
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
@@ -224,10 +224,10 @@ class DeliverAPI:
     def concatenate_fastqs(self, sample_directory: Path, sample_name: str):
         if self.dry_run:
             return
-        forward_output_path: Path = get_concatenated_forward_read_output_path(
+        forward_output_path: Path = generate_forward_concatenated_fastq_delivery_path(
             fastq_directory=sample_directory, sample_name=sample_name
         )
-        reverse_output_path: Path = get_concatenated_reverse_read_output_path(
+        reverse_output_path: Path = generate_reverse_concatenated_fastq_delivery_path(
             fastq_directory=sample_directory, sample_name=sample_name
         )
         self.fastq_file_service.concatenate(

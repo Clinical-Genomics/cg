@@ -5,7 +5,7 @@ from pathlib import Path
 
 from cg.constants.constants import Workflow
 from cg.constants.delivery import INBOX_NAME
-from cg.meta.deliver_ticket import DeliverTicketAPI
+from cg.meta.deliver import DeliverTicketAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
