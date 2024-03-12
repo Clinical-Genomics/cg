@@ -112,6 +112,7 @@ class BalsamicProtectedTags:
         ["vcf2cytosure"],
     ]
 
+
 class TaxprofilerProtectedTags(StrEnum):
     """Taxprofiler workflow protected tags"""
 
@@ -221,10 +222,13 @@ WORKFLOW_PROTECTED_TAGS = {
     Workflow.TAXPROFILER: [
         [TaxprofilerProtectedTags.KRAKEN2, TaxprofilerProtectedTags.METAGENOMICS_REPORT],
         [TaxprofilerProtectedTags.KRAKEN2, TaxprofilerProtectedTags.COMBINED_REPORT],
-        [TaxprofilerProtectedTags.KRAKEN2, TaxprofilerProtectedTags.KRONA, TaxprofilerProtectedTags.VISUALIZATION],
+        [
+            TaxprofilerProtectedTags.KRAKEN2,
+            TaxprofilerProtectedTags.KRONA,
+            TaxprofilerProtectedTags.VISUALIZATION,
+        ],
         [TaxprofilerProtectedTags.MULTIQC_HTML],
         [TaxprofilerProtectedTags.MULTIQC_JSON],
-
     ],
 }
 
