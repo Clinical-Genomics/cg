@@ -4,7 +4,7 @@ import logging
 from typing import Iterator
 
 from housekeeper.store.models import File, Tag
-from requests import Response
+
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.clients.arnold.api import ArnoldAPIClient
@@ -106,8 +106,8 @@ class CollectQCMetricsAPI:
         if dry_run:
             LOG.info(f"Would have sent create case request to Arnold with: {case_request}")
         try:
-            response: Response = self.arnold_api.create_case(case_request)
-            LOG.info(f"Created case for {case_id} in arnold. {response.status_code}")
+            self.arnold_api.create_case(case_request)
+            LOG.info(f"Created case for {case_id} in arnold.")
         except (ArnoldClientError, ArnoldServerError) as error:
             LOG.error(f"Failed to create case in arnold: {error}.")
             return
