@@ -10,6 +10,7 @@ from flask.testing import FlaskClient
 from mock import patch
 
 from cg.apps.tb.dto.summary_response import AnalysisSummary
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import DataDelivery, Workflow
 from cg.server.ext import db as store
 from cg.store.database import create_all_tables, drop_all_tables
@@ -39,38 +40,17 @@ def app() -> Generator[Flask, None, None]:
 
 
 @pytest.fixture
-def case(helpers: StoreHelpers) -> Case:
-    case: Case = helpers.add_case(
-        customer_id=1,
-        data_analysis=Workflow.MIP_DNA,
-        data_delivery=DataDelivery.ANALYSIS_SCOUT,
-        name="test case",
-        ticket="123",
-        store=store,
-    )
-    return case
-
-
-@pytest.fixture
-def customer(helpers: StoreHelpers) -> Customer:
-    customer: Customer = helpers.ensure_customer(store=store, customer_id="test_customer")
-    return customer
-
-
-@pytest.fixture
-def customer_another(helpers: StoreHelpers) -> Customer:
-    customer: Customer = helpers.ensure_customer(store=store, customer_id="test_customer_2")
-    return customer
-
-
-@pytest.fixture
-def order(helpers: StoreHelpers, customer: Customer) -> Order:
+def order(
+    helpers: StoreHelpers, customer: Customer, server_case: Case, server_case_in_same_order: Case
+) -> Order:
     order: Order = helpers.add_order(
         store=store,
         customer_id=customer.id,
         ticket_id=1,
         order_date=datetime.now(),
     )
+    order.cases.append(server_case)
+    order.cases.append(server_case_in_same_order)
     return order
 
 
@@ -92,6 +72,72 @@ def order_balsamic(helpers: StoreHelpers, customer_another: Customer) -> Order:
         workflow=Workflow.BALSAMIC,
     )
     return order
+
+
+@pytest.fixture
+def server_case(helpers: StoreHelpers) -> Case:
+    case: Case = helpers.add_case(
+        customer_id=1,
+        data_analysis=Workflow.MIP_DNA,
+        internal_id="looseygoosey",
+        data_delivery=DataDelivery.ANALYSIS_SCOUT,
+        name="test case",
+        ticket="123",
+        store=store,
+    )
+    return case
+
+
+@pytest.fixture
+def server_case_in_same_order(helpers: StoreHelpers) -> Case:
+    case: Case = helpers.add_case(
+        customer_id=1,
+        data_analysis=Workflow.MIP_DNA,
+        data_delivery=DataDelivery.ANALYSIS_SCOUT,
+        internal_id="failedsnail",
+        name="test case 2",
+        ticket="123",
+        store=store,
+    )
+    return case
+
+
+@pytest.fixture
+def trailblazer_analysis_for_server_case(server_case: Case):
+    return TrailblazerAnalysis(
+        case_id=server_case.internal_id,
+        id=1,
+        logged_at="",
+        started_at="",
+        completed_at="",
+        out_dir="",
+        config_path="",
+    )
+
+
+@pytest.fixture
+def trailblazer_analysis_for_server_case_in_same_order(server_case_in_same_order: Case):
+    return TrailblazerAnalysis(
+        case_id=server_case_in_same_order.internal_id,
+        id=2,
+        logged_at="",
+        started_at="",
+        completed_at="",
+        out_dir="",
+        config_path="",
+    )
+
+
+@pytest.fixture
+def customer(helpers: StoreHelpers) -> Customer:
+    customer: Customer = helpers.ensure_customer(store=store, customer_id="test_customer")
+    return customer
+
+
+@pytest.fixture
+def customer_another(helpers: StoreHelpers) -> Customer:
+    customer: Customer = helpers.ensure_customer(store=store, customer_id="test_customer_2")
+    return customer
 
 
 @pytest.fixture
