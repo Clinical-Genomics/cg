@@ -10,6 +10,7 @@ from flask.testing import FlaskClient
 from mock import patch
 
 from cg.apps.tb.dto.summary_response import AnalysisSummary
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import DataDelivery, Workflow
 from cg.server.ext import db as store
 from cg.store.database import create_all_tables, drop_all_tables
@@ -99,6 +100,32 @@ def server_case_in_same_order(helpers: StoreHelpers) -> Case:
         store=store,
     )
     return case
+
+
+@pytest.fixture
+def trailblazer_analysis_for_server_case(server_case: Case):
+    return TrailblazerAnalysis(
+        case_id=server_case.internal_id,
+        id=1,
+        logged_at="",
+        started_at="",
+        completed_at="",
+        out_dir="",
+        config_path="",
+    )
+
+
+@pytest.fixture
+def trailblazer_analysis_for_server_case_in_same_order(server_case_in_same_order: Case):
+    return TrailblazerAnalysis(
+        case_id=server_case_in_same_order.internal_id,
+        id=2,
+        logged_at="",
+        started_at="",
+        completed_at="",
+        out_dir="",
+        config_path="",
+    )
 
 
 @pytest.fixture

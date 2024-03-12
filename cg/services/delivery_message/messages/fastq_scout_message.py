@@ -10,7 +10,7 @@ def get_case_message(case: Case) -> str:
     scout_link: str = get_scout_link(case)
     delivery_path: str = get_fastq_delivery_path(case)
     return (
-        f"Hello,\n\n "
+        f"Hello,\n\n"
         f"The results have been uploaded to Scout for the following case:\n\n"
         f"{scout_link}\n\n"
         f"The fastq files are currently being uploaded to your inbox on Caesar:\n\n"

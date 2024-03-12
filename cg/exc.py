@@ -270,5 +270,9 @@ class OrderMismatchError(CgError):
     """Exception raised when cases expected to belong to the same order are not part of the same order."""
 
 
+class OrderNotDeliverableError(CgError):
+    """Exception raised when no analysis is ready for delivery for an order."""
+
+
 class OverrideCyclesError(CgError):
     """Exception raised when the override cycles are not correct."""
