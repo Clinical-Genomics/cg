@@ -10,7 +10,6 @@ from cg.meta.compress.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 
 from .store import (
-    get_qc_metrics,
     store_case,
     store_demultiplexed_flow_cell,
     store_flow_cell,
@@ -45,6 +44,5 @@ for sub_cmd in [
     store_sample,
     store_ticket,
     store_qc_metrics,
-    get_qc_metrics,
 ]:
     store.add_command(sub_cmd)
