@@ -421,9 +421,9 @@ def test_get_case_analysis_data_workflow_not_supported(
     """Test validation error if the analysis workflow is not supported by the delivery report workflow."""
 
     # GIVEN a pre-built case with Fluffy as data analysis
-    case_mip_dna.data_analysis = Workflow.FLUFFY
+    case_mip_dna.data_analysis = Workflow.MICROSALT
     mip_analysis: Analysis = case_mip_dna.analyses[0]
-    mip_analysis.workflow = Workflow.FLUFFY
+    mip_analysis.workflow = Workflow.MICROSALT
 
     # GIVEN a mip analysis mock metadata
     mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
