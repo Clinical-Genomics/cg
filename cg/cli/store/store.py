@@ -7,8 +7,6 @@ from housekeeper.store.models import File
 
 from cg.apps.crunchy.files import update_metadata_paths
 from cg.cli.compress.helpers import update_compress_api
-from cg.clients.arnold.exceptions import ArnoldClientError, ArnoldServerError
-from cg.clients.janus.exceptions import JanusClientError, JanusServerError
 from cg.constants import SequencingFileTag
 from cg.constants.constants import DRY_RUN
 from cg.exc import CaseNotFoundError
@@ -147,10 +145,7 @@ def store_qc_metrics(config: CGConfig, case_id: str, dry_run: bool = False) -> N
         janus_api=config.janus_api,
         arnold_api=config.arnold_api,
     )
-    try:
-        metrics_api.create_case(case_id=case_id, dry_run=dry_run)
-    except (JanusServerError, JanusClientError, ArnoldClientError, ArnoldServerError) as error:
-        LOG.info(f"Could not store qc metrics in arnold. Reason {error}")
+    metrics_api.create_case(case_id=case_id, dry_run=dry_run)
 
 
 @click.command("get-metrics")

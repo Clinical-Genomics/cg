@@ -16,13 +16,13 @@ class ArnoldAPIClient:
     def __init__(self, config: dict):
         self.api_url: str = config["arnold"]["api_url"]
 
-    def create_case(self, case: CreateCaseRequest) -> Response:
+    def create_case(self, case: CreateCaseRequest) -> None:
         endpoint: str = f"{self.api_url}/case/"
         post_request_data: CreateCaseRequest = case
         response: Response = requests.post(endpoint, data=post_request_data.model_dump_json())
         if response.status_code == HTTPStatus.OK:
-            LOG.info(f"Successfully created case for {case.case_id} in Arnold.")
-            return response
+            LOG.info(f"{response.content}.")
+            return
         self._handle_errors(response)
 
     @staticmethod

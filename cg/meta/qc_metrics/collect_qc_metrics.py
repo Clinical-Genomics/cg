@@ -5,11 +5,9 @@ from typing import Iterator
 
 from housekeeper.store.models import File, Tag
 
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.clients.arnold.api import ArnoldAPIClient
 from cg.clients.arnold.dto.create_case_request import CreateCaseRequest
-from cg.clients.arnold.exceptions import ArnoldClientError, ArnoldServerError
 from cg.clients.janus.api import JanusAPIClient
 from cg.clients.janus.dto.create_qc_metrics_request import (
     CreateQCMetricsRequest,
@@ -105,9 +103,4 @@ class CollectQCMetricsAPI:
         case_request: CreateCaseRequest = self.get_create_case_request(case_id)
         if dry_run:
             LOG.info(f"Would have sent create case request to Arnold with: {case_request}")
-        try:
-            self.arnold_api.create_case(case_request)
-            LOG.info(f"Created case for {case_id} in arnold.")
-        except (ArnoldClientError, ArnoldServerError) as error:
-            LOG.error(f"Failed to create case in arnold: {error}.")
-            return
+        self.arnold_api.create_case(case_request)
