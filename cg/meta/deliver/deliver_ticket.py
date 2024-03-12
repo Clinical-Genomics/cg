@@ -1,5 +1,6 @@
-"""Module for deliver and rsync customer inbox on the HPC to customer inbox on the delivery
-server """
+"""
+Module for deliver and rsync customer inbox on the HPC to customer inbox on the delivery server.
+"""
 
 import logging
 import os
