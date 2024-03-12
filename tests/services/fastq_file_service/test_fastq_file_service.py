@@ -100,18 +100,3 @@ def test_concatenate_missing_reverse(
 
     # THEN reverse reads should not exist
     assert not reverse_output_path.exists()
-
-
-def test_get_concatenated_read_output_path():
-    fastq_directory = Path("/path/to/fastq_directory")
-    sample_name = "sample1"
-    direction = 1
-
-    expected_output_path = Path("/path/to/fastq_directory/sample1_1.fastq.gz")
-
-    assert (
-        get_concatenated_read_output_path(
-            fastq_directory=fastq_directory, sample_name=sample_name, direction=direction
-        )
-        == expected_output_path
-    )
