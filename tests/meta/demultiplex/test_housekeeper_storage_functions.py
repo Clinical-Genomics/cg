@@ -10,9 +10,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_and_include_sample_sheet_path_to_housekeeper,
     add_demux_logs_to_housekeeper,
     add_sample_fastq_files_to_housekeeper,
-    add_sample_sheet_path_to_housekeeper,
     delete_sequencing_data_from_housekeeper,
 )
 from cg.models.cg_config import CGConfig
@@ -103,7 +103,7 @@ def test_add_fastq_files_without_sample_id(
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN that the sample sheet exists in housekeeper and the path is in the flow cell
-    add_sample_sheet_path_to_housekeeper(
+    add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=novaseq_6000_post_1_5_kits_flow_cell.path,
         flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell.id,
         hk_api=demultiplex_context.housekeeper_api,
@@ -129,14 +129,14 @@ def test_add_fastq_files_without_sample_id(
 def test_add_existing_sample_sheet(
     demultiplex_context: CGConfig,
     novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData,
-    tmp_flow_cells_directory: Path,
+    tmp_illumina_flow_cells_directory: Path,
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
     # GIVEN a flow cell directory and name
     flow_cell_directory = Path(
-        tmp_flow_cells_directory, novaseq_6000_post_1_5_kits_flow_cell.full_name
+        tmp_illumina_flow_cells_directory, novaseq_6000_post_1_5_kits_flow_cell.full_name
     )
 
     # GIVEN that a flow cell bundle exists in Housekeeper
@@ -145,7 +145,7 @@ def test_add_existing_sample_sheet(
     )
 
     # WHEN a sample sheet is added
-    add_sample_sheet_path_to_housekeeper(
+    add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=flow_cell_directory,
         flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell.id,
         hk_api=demux_post_processing_api.hk_api,

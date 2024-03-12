@@ -7,13 +7,11 @@ from pathlib import Path
 from pydantic import BaseModel
 from sqlalchemy.orm import Query
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_sample_sheet_from_file,
-)
-from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_flow_cell_samples_from_content
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat
-from cg.io.controller import WriteFile
+from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Flowcell, Sample
@@ -176,12 +174,12 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
     def create_fluffy_sample_sheet(
         self,
-        sample_sheet: SampleSheet,
+        samples: list[FlowCellSample],
         flow_cell_id: str,
     ) -> FluffySampleSheet:
         fluffy_sample_sheet_rows = []
 
-        for sample in sample_sheet.samples:
+        for sample in samples:
             sample_id: str = sample.sample_id
             db_sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
 
@@ -207,12 +205,15 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(case_id)
         sample_sheet_path: Path = self.housekeeper_api.get_sample_sheet_path(flow_cell.name)
-        sample_sheet: SampleSheet = get_sample_sheet_from_file(sample_sheet_path)
+        sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
+            file_format=FileFormat.CSV, file_path=sample_sheet_path
+        )
+        samples: list[FlowCellSample] = get_flow_cell_samples_from_content(sample_sheet_content)
 
         if not dry_run:
             Path(self.root_dir, case_id).mkdir(parents=True, exist_ok=True)
             fluffy_sample_sheet: FluffySampleSheet = self.create_fluffy_sample_sheet(
-                sample_sheet=sample_sheet,
+                samples=samples,
                 flow_cell_id=flow_cell.name,
             )
 

@@ -31,7 +31,7 @@ def test_get_latest_nipt_analysis_to_upload(
     for analysis in analyses:
         assert analysis.started_at == timestamp_now
         assert analysis.uploaded_at is None
-        assert analysis.pipeline == workflow
+        assert analysis.workflow == workflow
 
 
 def test_get_latest_microsalt_analysis_to_upload(
@@ -53,7 +53,7 @@ def test_get_latest_microsalt_analysis_to_upload(
     for analysis in analyses:
         assert analysis.started_at == timestamp_now
         assert analysis.uploaded_at is None
-        assert analysis.pipeline == workflow
+        assert analysis.workflow == workflow
 
 
 def test_get_analyses_to_deliver_for_pipeline(
@@ -71,7 +71,7 @@ def test_get_analyses_to_deliver_for_pipeline(
     for analysis in analyses:
         assert analysis.case.internal_id in ["test_case_1", "yellowhog"]
         assert analysis.uploaded_at is None
-        assert analysis.pipeline == workflow
+        assert analysis.workflow == workflow
 
 
 def test_get_analyses(store_with_analyses_for_cases: Store):
@@ -114,7 +114,7 @@ def test_get_families_with_extended_models(
     assert cases
 
     # THEN analysis should be part of cases attributes
-    assert case.analyses[0].pipeline == Workflow.MIP_DNA
+    assert case.analyses[0].workflow == Workflow.MIP_DNA
 
 
 def test_get_families_with_extended_models_when_no_case(base_store: Store):
@@ -406,7 +406,7 @@ def test_get_analyses_for_case_and_pipeline_before(
     for analysis in analyses:
         assert analysis.started_at < timestamp_now
         assert analysis.case.internal_id == case_id
-        assert analysis.pipeline == workflow
+        assert analysis.workflow == workflow
 
 
 def test_get_analyses_for_case_before(
@@ -437,7 +437,7 @@ def test_get_analyses_for_pipeline_before(
     timestamp_now: datetime,
     workflow: Workflow = Workflow.FLUFFY,
 ):
-    """Test to get all analyses for a pipeline before a given date."""
+    """Test to get all analyses for a workflow before a given date."""
 
     # GIVEN a database with a number of analyses
 
@@ -451,14 +451,14 @@ def test_get_analyses_for_pipeline_before(
     # THEN assert that the analyses before the given date are returned
     for analysis in analyses:
         assert analysis.started_at < timestamp_now
-        assert analysis.pipeline == workflow
+        assert analysis.workflow == workflow
 
 
 def test_get_analyses_before(
     store_with_analyses_for_cases_not_uploaded_fluffy: Store,
     timestamp_now: datetime,
 ):
-    """Test to get all analyses for a pipeline before a given date."""
+    """Test to get all analyses for a workflow before a given date."""
 
     # GIVEN a database with a number of analyses
 

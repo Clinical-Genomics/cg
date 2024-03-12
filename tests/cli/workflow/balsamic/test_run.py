@@ -57,7 +57,7 @@ def test_without_config(cli_runner: CliRunner, balsamic_context: CGConfig, caplo
     # GIVEN case-id
     case_id = "balsamic_case_wgs_single"
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(run, [case_id], obj=balsamic_context)
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no config file is found

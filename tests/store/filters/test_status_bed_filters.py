@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Query
 
 from cg.store.filters.status_bed_filters import (
-    get_bed_by_entry_id,
-    get_bed_by_name,
-    get_not_archived_beds,
+    filter_bed_by_entry_id,
+    filter_bed_by_name,
+    filter_not_archived_beds,
     order_beds_by_name,
 )
 from cg.store.models import Bed
@@ -15,7 +15,7 @@ def test_get_bed_by_entry_id(base_store: Store, entry_id: int = 1):
     # GIVEN a store containing bed
 
     # WHEN retrieving a bed by id
-    bed: Bed = get_bed_by_entry_id(
+    bed: Bed = filter_bed_by_entry_id(
         beds=base_store._get_query(table=Bed), bed_entry_id=entry_id
     ).first()
 
@@ -31,7 +31,9 @@ def test_get_bed_by_entry_id_no_id(base_store: Store):
     # GIVEN a store containing bed
 
     # WHEN retrieving a bed by an invalid id
-    bed: Bed = get_bed_by_entry_id(beds=base_store._get_query(table=Bed), bed_entry_id=999).first()
+    bed: Bed = filter_bed_by_entry_id(
+        beds=base_store._get_query(table=Bed), bed_entry_id=999
+    ).first()
 
     # THEN bed should not be returned
     assert not bed
@@ -42,7 +44,7 @@ def test_get_bed_by_name(base_store: Store, bed_name: str):
     # GIVEN a store containing bed
 
     # WHEN retrieving a bed by name
-    bed: Bed = get_bed_by_name(beds=base_store._get_query(table=Bed), bed_name=bed_name).first()
+    bed: Bed = filter_bed_by_name(beds=base_store._get_query(table=Bed), bed_name=bed_name).first()
 
     # THEN panel bed should be returned
     assert bed
@@ -56,7 +58,9 @@ def test_get_bed_by_name_no_name(base_store: Store):
     # GIVEN a store containing bed
 
     # WHEN retrieving a bed by name
-    bed: Bed = get_bed_by_name(beds=base_store._get_query(table=Bed), bed_name="not_a_name").first()
+    bed: Bed = filter_bed_by_name(
+        beds=base_store._get_query(table=Bed), bed_name="not_a_name"
+    ).first()
 
     # THEN panel bed should not be returned
     assert not bed
@@ -67,7 +71,7 @@ def test_get_not_archived_beds(base_store: Store):
     # GIVEN a store containing bed
 
     # WHEN retrieving a beds not archived
-    beds: Query = get_not_archived_beds(beds=base_store._get_query(table=Bed))
+    beds: Query = filter_not_archived_beds(beds=base_store._get_query(table=Bed))
 
     # ASSERT that the beds is a query
     assert isinstance(beds, Query)
