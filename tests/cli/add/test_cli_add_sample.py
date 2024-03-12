@@ -18,6 +18,7 @@ def test_add_sample_missing_customer(cli_runner: CliRunner, base_context: CGConf
     application = "dummy_application"
     customer_id = "dummy_customer"
     name = "dummy_name"
+    original_ticket = "dummy ticket"
     result = cli_runner.invoke(
         add,
         [
@@ -26,6 +27,8 @@ def test_add_sample_missing_customer(cli_runner: CliRunner, base_context: CGConf
             Sex.MALE,
             "--application-tag",
             application,
+            "--original-ticket",
+            original_ticket,
             customer_id,
             name,
         ],
@@ -48,6 +51,7 @@ def test_add_sample_bad_application(
     application = "dummy_application"
     customer: Customer = helpers.ensure_customer(store=disk_store)
     name = "dummy_name"
+    original_ticket = "dummy ticket"
     result = cli_runner.invoke(
         add,
         [
@@ -56,6 +60,8 @@ def test_add_sample_bad_application(
             Sex.MALE,
             "--application-tag",
             application,
+            "--original-ticket",
+            original_ticket,
             customer.internal_id,
             name,
         ],
@@ -76,7 +82,7 @@ def test_add_sample_required(cli_runner: CliRunner, base_context: CGConfig, help
     helpers.ensure_application_version(store=disk_store, application_tag=application_tag)
     customer: Customer = helpers.ensure_customer(store=disk_store)
     name = "sample_name"
-
+    original_ticket = "dummy ticket"
     # WHEN adding a sample
     result = cli_runner.invoke(
         add,
@@ -86,6 +92,8 @@ def test_add_sample_required(cli_runner: CliRunner, base_context: CGConfig, help
             Sex.MALE,
             "--application-tag",
             application_tag,
+            "--original-ticket",
+            original_ticket,
             customer.internal_id,
             name,
         ],
@@ -111,7 +119,7 @@ def test_add_sample_lims_id(cli_runner: CliRunner, base_context: CGConfig, helpe
     customer: Customer = helpers.ensure_customer(store=disk_store)
     name = "sample_name"
     lims_id = "sample_lims_id"
-
+    original_ticket = "dummy ticket"
     result = cli_runner.invoke(
         add,
         [
@@ -120,6 +128,8 @@ def test_add_sample_lims_id(cli_runner: CliRunner, base_context: CGConfig, helpe
             Sex.MALE,
             "--application-tag",
             application_tag,
+            "--original-ticket",
+            original_ticket,
             "--lims",
             lims_id,
             customer.internal_id,
@@ -149,7 +159,7 @@ def test_add_sample_order(
     customer: Customer = helpers.ensure_customer(store=disk_store)
     name = "sample_name"
     order = "sample_order"
-
+    original_ticket = "dummy ticket"
     # WHEN adding a sample
     result = cli_runner.invoke(
         add,
@@ -159,6 +169,8 @@ def test_add_sample_order(
             Sex.MALE,
             "--application-tag",
             application_tag,
+            "--original-ticket",
+            original_ticket,
             "--order",
             order,
             customer.internal_id,
@@ -188,7 +200,7 @@ def test_add_sample_when_down_sampled(
     customer: Customer = helpers.ensure_customer(store=disk_store)
     name = "sample_name"
     down_sampled_to = "123"
-
+    original_ticket = "dummy ticket"
     # WHEN adding a sample
     result = cli_runner.invoke(
         add,
@@ -198,6 +210,8 @@ def test_add_sample_when_down_sampled(
             Sex.MALE,
             "--application-tag",
             application_tag,
+            "--original-ticket",
+            original_ticket,
             "--down-sampled",
             down_sampled_to,
             customer.internal_id,
@@ -226,7 +240,7 @@ def test_add_sample_priority(
     helpers.ensure_application_version(store=disk_store, application_tag=application_tag)
     customer: Customer = helpers.ensure_customer(store=disk_store)
     name = "sample_name"
-
+    original_ticket = "dummy ticket"
     # WHEN adding a sample
     result = cli_runner.invoke(
         add,
@@ -236,6 +250,8 @@ def test_add_sample_priority(
             Sex.MALE,
             "--application-tag",
             application_tag,
+            "--original-ticket",
+            original_ticket,
             "--priority",
             Priority.priority.name,
             customer.internal_id,

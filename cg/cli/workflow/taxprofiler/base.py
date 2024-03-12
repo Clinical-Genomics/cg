@@ -9,6 +9,7 @@ from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
     OPTION_COMPUTE_ENV,
     OPTION_CONFIG,
+    OPTION_FROM_START,
     OPTION_LOG,
     OPTION_PARAMS_FILE,
     OPTION_PROFILE,
@@ -17,8 +18,11 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
     metrics_deliver,
+    report_deliver,
 )
-from cg.cli.workflow.taxprofiler.options import OPTION_FROM_START, OPTION_INSTRUMENT_PLATFORM
+from cg.cli.workflow.taxprofiler.options import (
+    OPTION_INSTRUMENT_PLATFORM,
+)
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.constants.nf_analysis import NfTowerStatus
@@ -42,6 +46,7 @@ def taxprofiler(context: click.Context) -> None:
 
 taxprofiler.add_command(resolve_compression)
 taxprofiler.add_command(metrics_deliver)
+taxprofiler.add_command(report_deliver)
 
 
 @taxprofiler.command("config-case")

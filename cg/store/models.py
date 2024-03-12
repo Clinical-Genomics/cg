@@ -29,6 +29,7 @@ from cg.constants.constants import (
     StatusOptions,
 )
 from cg.constants.priority import SlurmQos
+from cg.constants.symbols import EMPTY_STRING
 
 BigInt = Annotated[int, None]
 Blob = Annotated[bytes, None]
@@ -647,6 +648,16 @@ class CaseSample(Base):
 
     def __str__(self) -> str:
         return f"{self.case.internal_id} | {self.sample.internal_id}"
+
+    @property
+    def get_maternal_sample_id(self) -> str:
+        """Return parental id."""
+        return self.mother.internal_id if self.mother else EMPTY_STRING
+
+    @property
+    def get_paternal_sample_id(self) -> str:
+        """Return parental id."""
+        return self.father.internal_id if self.father else EMPTY_STRING
 
 
 class Flowcell(Base):

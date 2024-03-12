@@ -743,6 +743,18 @@ def mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
 
 
 @pytest.fixture
+def nf_analysis_analysis_dir(fixtures_dir: Path) -> Path:
+    """Return the path to the directory with nf-analysis files."""
+    return Path(fixtures_dir, "analysis", "nf-analysis")
+
+
+@pytest.fixture
+def raredisease_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with raredisease analysis files."""
+    return Path(analysis_dir, "raredisease")
+
+
+@pytest.fixture
 def rnafusion_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with rnafusion analysis files."""
     return Path(analysis_dir, "rnafusion")
@@ -1686,6 +1698,9 @@ def context_config(
     illumina_demultiplexed_runs_directory: Path,
     downsample_dir: Path,
     pdc_archiving_directory: PDCArchivingDirectory,
+    nf_analysis_platform_config_path: Path,
+    nf_analysis_pipeline_params_path: Path,
+    nf_analysis_pipeline_resource_optimisation_path: Path,
 ) -> dict:
     """Return a context config."""
     return {
@@ -1847,6 +1862,9 @@ def context_config(
             "compute_env": "nf_tower_compute_env",
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_raredisease",
+            "config_platform": str(nf_analysis_platform_config_path),
+            "config_params": str(nf_analysis_pipeline_params_path),
+            "config_resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
@@ -1889,7 +1907,7 @@ def context_config(
             "databases": Path("path", "to", "databases").as_posix(),
             "profile": "myprofile",
             "hostremoval_reference": Path("path", "to", "hostremoval_reference").as_posix(),
-            "revision": "1.0.1",
+            "revision": "1.1.4",
             "slurm": {
                 "account": "development",
                 "mail_user": "taxprofiler.email@scilifelab.se",
@@ -2135,18 +2153,6 @@ def no_sample_case_id() -> str:
 
 
 @pytest.fixture(scope="session")
-def strandedness() -> str:
-    """Return a default strandedness."""
-    return Strandedness.REVERSE
-
-
-@pytest.fixture(scope="session")
-def strandedness_not_permitted() -> str:
-    """Return a not permitted strandedness."""
-    return "double_stranded"
-
-
-@pytest.fixture(scope="session")
 def workflow_version() -> str:
     """Return a workflow version."""
     return "2.2.0"
@@ -2193,6 +2199,22 @@ def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
     return Path(raredisease_dir).absolute().as_posix()
 
 
+# Raredisease fixtures
+
+
+@pytest.fixture(scope="function")
+def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
+    """Return the path to the raredisease apps dir."""
+    raredisease_dir = tmpdir_factory.mktemp("raredisease")
+    return Path(raredisease_dir).absolute().as_posix()
+
+
+@pytest.fixture(scope="session")
+def raredisease_case_id() -> str:
+    """Returns a rnafusion case id."""
+    return "raredisease_case_enough_reads"
+
+
 # Rnafusion fixtures
 
 
@@ -2225,6 +2247,18 @@ def rnafusion_sample_sheet_content(
             strandedness,
         ]
     )
+
+
+@pytest.fixture(scope="session")
+def strandedness() -> str:
+    """Return a default strandedness."""
+    return Strandedness.REVERSE
+
+
+@pytest.fixture(scope="session")
+def strandedness_not_permitted() -> str:
+    """Return a not permitted strandedness."""
+    return "double_stranded"
 
 
 @pytest.fixture(scope="function")
@@ -2294,6 +2328,26 @@ def rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     )
 
 
+@pytest.fixture(scope="function")
+def nf_analysis_platform_config_path(nf_analysis_analysis_dir) -> Path:
+    """Path to platform config file."""
+    return Path(nf_analysis_analysis_dir, "platform").with_suffix(FileExtensions.CONFIG)
+
+
+@pytest.fixture(scope="function")
+def nf_analysis_pipeline_params_path(nf_analysis_analysis_dir) -> Path:
+    """Path to pipeline params file."""
+    return Path(nf_analysis_analysis_dir, "pipeline_params").with_suffix(FileExtensions.CONFIG)
+
+
+@pytest.fixture(scope="function")
+def nf_analysis_pipeline_resource_optimisation_path(nf_analysis_analysis_dir) -> Path:
+    """Path to pipeline resource optimisation file."""
+    return Path(nf_analysis_analysis_dir, "pipeline_resource_optimisation").with_suffix(
+        FileExtensions.CONFIG
+    )
+
+
 @pytest.fixture(scope="session")
 def tower_id() -> int:
     """Returns a NF-Tower ID."""
@@ -2317,7 +2371,7 @@ def rnafusion_parameters_default(
     return RnafusionParameters(
         cluster_options="--qos=normal",
         genomes_base=existing_directory,
-        sample_sheet_path=rnafusion_sample_sheet_path,
+        input=rnafusion_sample_sheet_path,
         outdir=Path(rnafusion_dir, rnafusion_case_id),
         priority="development",
     )
@@ -2558,7 +2612,7 @@ def taxprofiler_parameters_default(
     """Return Taxprofiler parameters."""
     return TaxprofilerParameters(
         cluster_options="--qos=normal",
-        sample_sheet_path=taxprofiler_sample_sheet_path,
+        input=taxprofiler_sample_sheet_path,
         outdir=Path(taxprofiler_dir, taxprofiler_case_id),
         databases=existing_directory,
         hostremoval_reference=existing_directory,
@@ -2585,6 +2639,14 @@ def taxprofiler_metrics_deliverables_path(taxprofiler_dir: Path, taxprofiler_cas
     """Path to deliverables file."""
     return Path(
         taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_metrics_deliverables"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_deliverables_file_path(taxprofiler_dir: Path, taxprofiler_case_id: str) -> Path:
+    """Path to deliverables file."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_deliverables"
     ).with_suffix(FileExtensions.YAML)
 
 
@@ -2635,6 +2697,9 @@ def taxprofiler_context(
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
     taxprofiler_case: Case = helpers.add_case(
         store=status_db,
@@ -3032,28 +3097,24 @@ def downsample_api(
     )
 
 
-@pytest.fixture(scope="session")
-def raredisease_case_id() -> str:
-    """Returns a raredisease case id."""
-    return "raredisease_case_enough_reads"
-
-
 @pytest.fixture(scope="function")
 def raredisease_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
     nf_analysis_housekeeper: HousekeeperAPI,
-    raredisease_case_id: str,
+    trailblazer_api: MockTB,
     sample_id: str,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
     apptag_rna: str,
+    raredisease_case_id: str,
     case_id_not_enough_reads: str,
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
 ) -> CGConfig:
     """Raredisease context to use in CLI."""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
+    cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
