@@ -2,7 +2,6 @@ from pathlib import Path
 from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 
 
-
 def test_empty_directory(fastq_file_service: FastqFileService, tmp_path):
     # GIVEN an empty directory
 
@@ -103,15 +102,12 @@ def test_concatenate_missing_reverse(
     assert not reverse_output_path.exists()
 
 
-
 def test_get_concatenated_read_output_path():
     fastq_directory = Path("/path/to/fastq_directory")
     sample_name = "sample1"
     direction = 1
 
-    expected_output_path = Path(
-        "/path/to/fastq_directory/sample1_1.fastq.gz"
-    )
+    expected_output_path = Path("/path/to/fastq_directory/sample1_1.fastq.gz")
 
     assert (
         get_concatenated_read_output_path(
