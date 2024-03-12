@@ -103,4 +103,5 @@ class CollectQCMetricsAPI:
         case_request: CreateCaseRequest = self.get_create_case_request(case_id)
         if dry_run:
             LOG.info(f"Would have sent create case request to Arnold with: {case_request}")
+            return
         self.arnold_api.create_case(case_request)
