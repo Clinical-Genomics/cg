@@ -676,11 +676,11 @@ class HousekeeperAPI:
         return filtered_files
 
     @staticmethod
-    def get_files_without_tags(files: list[File], tags: list[set[str]]) -> list[File]:
+    def get_files_without_tags(files: list[File], excluded_tags: list[set[str]]) -> list[File]:
         """Return files excluding specified tags."""
         filtered_files: list[File] = []
         for file in files:
             file_tags: set[str] = {tag.name for tag in file.tags}
-            if all(not tag.issubset(file_tags) for tag in tags):
+            if all(not excluded_tag.issubset(file_tags) for excluded_tag in excluded_tags):
                 filtered_files.append(file)
         return filtered_files

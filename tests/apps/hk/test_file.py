@@ -720,7 +720,7 @@ def test_get_files_without_tags(
 
     # WHEN getting a list of files without tags
     filtered_files: list[File] = populated_housekeeper_api.get_files_without_tags(
-        files=files, tags=excluded_tags
+        files=files, excluded_tags=excluded_tags
     )
 
     # THEN only the expected sample spring files should be retrieved
@@ -739,7 +739,7 @@ def test_get_files_without_tags_empty_tags(
 
     # WHEN getting a list of files without tags when providing an empty list of tags
     filtered_files: list[File] = populated_housekeeper_api.get_files_without_tags(
-        files=files, tags=[]
+        files=files, excluded_tags=[]
     )
 
     # THEN the complete list of original files should be returned

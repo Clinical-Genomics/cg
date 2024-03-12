@@ -85,8 +85,11 @@ class DeliveryAPI:
         sample_tags_with_sample_id: list[set[str]] = [
             tag | {sample.internal_id} for tag in sample_tags
         ]
-        sample_files: list[File] = self.housekeeper_api.get_files_from_latest_version_by_tags(
-            bundle_name=case.internal_id, tags=sample_tags_with_sample_id
+        bundle_files: list[File] = self.housekeeper_api.get_files_from_latest_version(
+            bundle_name=case.internal_id
+        )
+        sample_files: list[File] = self.housekeeper_api.get_files_with_tags(
+            files=bundle_files, tags=sample_tags_with_sample_id
         )
         delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
             files=sample_files,
@@ -113,9 +116,15 @@ class DeliveryAPI:
         files.
         """
         case_tags: list[set[str]] = self.get_analysis_case_tags_for_workflow(case.data_analysis)
-        sample_ids: list[set[str]] = [{sample_id} for sample_id in case.sample_ids]
-        case_files: list[File] = self.housekeeper_api.get_files_from_latest_version_by_tags(
-            bundle_name=case.internal_id, tags=case_tags, excluded_tags=sample_ids
+        sample_id_tags: list[set[str]] = [{sample_id} for sample_id in case.sample_ids]
+        bundle_files: list[File] = self.housekeeper_api.get_files_from_latest_version(
+            bundle_name=case.internal_id
+        )
+        analysis_files: list[File] = self.housekeeper_api.get_files_with_tags(
+            files=bundle_files, tags=case_tags
+        )
+        case_files: list[File] = self.housekeeper_api.get_files_without_tags(
+            files=analysis_files, excluded_tags=sample_id_tags
         )
         delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
             files=case_files, case=case, internal_id=case.internal_id, external_id=case.name
@@ -131,8 +140,11 @@ class DeliveryAPI:
         if not self.is_sample_deliverable(sample=sample, force=force):
             LOG.warning(f"Sample {sample.internal_id} is not deliverable")
             return delivery_files
-        fastq_files: list[File] = self.housekeeper_api.get_files_from_latest_version_by_tags(
-            bundle_name=sample.internal_id, tags=fastq_tags
+        bundle_files: list[File] = self.housekeeper_api.get_files_from_latest_version(
+            bundle_name=sample.internal_id
+        )
+        fastq_files: list[File] = self.housekeeper_api.get_files_with_tags(
+            files=bundle_files, tags=fastq_tags
         )
         delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
             files=fastq_files,
