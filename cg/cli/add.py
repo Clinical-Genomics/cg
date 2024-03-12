@@ -2,8 +2,9 @@ import logging
 
 import click
 
-from cg.constants import STATUS_OPTIONS, DataDelivery, Priority, Workflow
+from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
+from cg.constants.constants import StatusOptions
 from cg.constants.subject import Sex
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
@@ -14,6 +15,7 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
+    Order,
     Panel,
     Sample,
     User,
@@ -168,6 +170,9 @@ def add_user(context: CGConfig, admin: bool, customer_id: str, email: str, name:
     default="standard",
     help="Set the priority for the samples",
 )
+@click.option(
+    "-t", "--original-ticket", required=True, help="Original ticket this sample is associated to."
+)
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_obj
@@ -181,6 +186,7 @@ def add_sample(
     priority: Priority,
     customer_id: str,
     name: str,
+    original_ticket: str,
 ):
     """Add a sample for CUSTOMER_ID with a NAME (display)."""
     status_db: Store = context.status_db
@@ -192,8 +198,8 @@ def add_sample(
     application: Application = status_db.get_application_by_tag(tag=application_tag)
     if not application:
         LOG.error(f"Application: {application_tag} not found")
-
         raise click.Abort
+
     new_record: Sample = status_db.add_sample(
         name=name,
         sex=sex,
@@ -201,6 +207,7 @@ def add_sample(
         internal_id=lims_id,
         order=order,
         priority=priority,
+        original_ticket=original_ticket,
     )
     new_record.application_version: ApplicationVersion = (
         status_db.get_current_application_version_by_tag(tag=application_tag)
@@ -272,6 +279,16 @@ def add_case(
         priority=priority,
         ticket=ticket,
     )
+    order: Order = status_db.get_order_by_ticket_id(int(ticket))
+    if not order:
+        LOG.warning(f"No order found with ticket_id {ticket}")
+        click.confirm("No order found for the given ticket, proceed?", default=False, abort=True)
+        order = Order(
+            customer_id=customer.id,
+            ticket_id=int(ticket),
+            workflow=data_analysis,
+        )
+    new_case.orders.append(order)
 
     new_case.customer: Customer = customer
     status_db.session.add(new_case)
@@ -282,7 +299,7 @@ def add_case(
 @add.command("relationship")
 @click.option("-m", "--mother-id", help="Sample ID for mother of sample")
 @click.option("-f", "--father-id", help="Sample ID for father of sample")
-@click.option("-s", "--status", type=click.Choice(STATUS_OPTIONS), required=True)
+@click.option("-s", "--status", type=EnumChoice(StatusOptions), required=True)
 @click.argument("case-id")
 @click.argument("sample-id")
 @click.pass_obj

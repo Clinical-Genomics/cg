@@ -22,7 +22,7 @@ class DeleteDataHandler(BaseHandler):
         flow_cell: Flowcell = apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
             flow_cell_name=flow_cell_id,
-            filter_functions=[FlowCellFilter.FILTER_BY_NAME],
+            filter_functions=[FlowCellFilter.BY_NAME],
         ).first()
 
         if flow_cell:

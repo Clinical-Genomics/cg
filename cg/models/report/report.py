@@ -63,11 +63,11 @@ class DataAnalysisModel(BaseModel):
     Attributes:
         customer_workflow: data analysis requested by the customer; source: StatusDB/family/data_analysis
         data_delivery: data delivery requested by the customer; source: StatusDB/family/data_delivery
-        workflow: actual workflow used for analysis; source: statusDB/analysis/pipeline
-        workflow_version: workflow version; source: statusDB/analysis/pipeline_version
-        type: analysis type carried out; source: pipeline workflow
-        genome_build: build version of the genome reference; source: pipeline workflow
-        variant_callers: variant-calling filters; source: pipeline workflow
+        workflow: actual workflow used for analysis; source: statusDB/analysis/workflow
+        workflow_version: workflow version; source: statusDB/analysis/workflow_version
+        type: analysis type carried out; source: workflow
+        genome_build: build version of the genome reference; source: workflow
+        variant_callers: variant-calling filters; source: workflow
         panels: list of case specific panels; source: StatusDB/family/panels
         scout_files: list of file names uploaded to Scout
     """
@@ -105,7 +105,7 @@ class CaseModel(BaseModel):
         name: case name; source: StatusDB/family/name
         id: case ID; source: StatusDB/family/internal_id
         samples: list of samples associated to a case/family
-        data_analysis: pipeline attributes
+        data_analysis: workflow attributes
         applications: case associated unique applications
     """
 

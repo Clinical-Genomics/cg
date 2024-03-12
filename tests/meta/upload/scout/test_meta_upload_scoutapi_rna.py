@@ -78,6 +78,39 @@ def ensure_extra_rna_case_match(
     helpers.add_relationship(store=rna_store, sample=another_rna_sample_id, case=rna_extra_case)
 
 
+def test_upload_rna_alignment_file_to_scout(
+    caplog: LogCaptureFixture,
+    dna_sample_daughter_id: str,
+    dna_sample_father_id: str,
+    dna_sample_mother_id: str,
+    dna_sample_son_id: str,
+    mip_rna_analysis_hk_api: HousekeeperAPI,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+):
+    """Test that a RNA case's alignment file can be loaded via a CG CLI command into an already existing DNA case."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN RNA and DNA cases connected via subject ID
+    upload_scout_api.status_db = rna_store
+
+    # GIVEN an RNA case with an alignment file stored in HK
+
+    # WHEN running the method to upload RNA files to Scout
+    upload_scout_api.upload_rna_alignment_file(case_id=rna_case_id, dry_run=True)
+
+    # THEN the RNA alignment file should have been uploaded to the linked DNA cases in Scout
+    assert "Upload RNA alignment CRAM file finished!" in caplog.text
+    for dna_case in [
+        dna_sample_mother_id,
+        dna_sample_father_id,
+        dna_sample_daughter_id,
+        dna_sample_son_id,
+    ]:
+        assert dna_case in caplog.text
+
+
 def test_upload_rna_junctions_to_scout(
     caplog: Generator[LogCaptureFixture, None, None],
     mip_rna_analysis_hk_api: HousekeeperAPI,
@@ -493,7 +526,7 @@ def test_get_application_prep_category(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test that RNA samples are removed when filtering sample list by pipeline"""
+    """Test that RNA samples are removed when filtering sample list by workflow."""
 
     # GIVEN an RNA sample that is connected by subject ID to one RNA and one DNA sample in other cases
 
@@ -547,7 +580,7 @@ def test_add_rna_sample(
     # GIVEN an RNA case and the associated RNA samples
     rna_case: Case = rna_store.get_case_by_internal_id(internal_id=rna_case_id)
     rna_sample_list: list[Sample] = (
-        rna_store._get_query(table=Sample).filter(Sample.internal_id.like("rna")).all()
+        rna_store._get_query(table=Sample).filter(Sample.internal_id.contains("rna")).all()
     )
 
     # WHEN running the method to create a list of RNADNACollections
@@ -557,9 +590,10 @@ def test_add_rna_sample(
     )
 
     # THEN the resulting RNADNACollections should contain all RNA samples in the case
+    assert rna_sample_list
     for sample in rna_sample_list:
         assert sample.internal_id in [
-            rna_dna_collection.rna_sample_id for rna_dna_collection in rna_dna_collections
+            rna_dna_collection.rna_sample_internal_id for rna_dna_collection in rna_dna_collections
         ]
 
 
@@ -604,7 +638,7 @@ def test_add_dna_cases_to_dna_sample(
     assert dna_case.internal_id in rna_dna_collection.dna_case_ids
 
 
-def test_map_dna_cases_to_dna_sample_incorrect_pipeline(
+def test_map_dna_cases_to_dna_sample_incorrect_workflow(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
     dna_sample_son_id: str,

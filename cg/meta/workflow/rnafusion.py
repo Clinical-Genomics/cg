@@ -8,6 +8,7 @@ from cg import resources
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat, Strandedness
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
+from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
 from cg.exc import MissingMetrics
 from cg.io.controller import ReadFile
 from cg.io.json import read_json
@@ -15,7 +16,6 @@ from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.fastq import FastqFileMeta
-from cg.models.nf_analysis import PipelineDeliverables
 from cg.models.rnafusion.rnafusion import (
     RnafusionAnalysis,
     RnafusionParameters,
@@ -37,30 +37,36 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.rnafusion.root
-        self.nfcore_workflow_path: str = config.rnafusion.pipeline_path
+        self.nfcore_workflow_path: str = config.rnafusion.workflow_path
         self.references: str = config.rnafusion.references
         self.profile: str = config.rnafusion.profile
         self.conda_env: str = config.rnafusion.conda_env
         self.conda_binary: str = config.rnafusion.conda_binary
         self.tower_binary_path: str = config.tower_binary_path
-        self.tower_workflow: str = config.rnafusion.tower_pipeline
+        self.tower_workflow: str = config.rnafusion.tower_workflow
         self.account: str = config.rnafusion.slurm.account
         self.email: str = config.rnafusion.slurm.mail_user
         self.compute_env_base: str = config.rnafusion.compute_env
         self.revision: str = config.rnafusion.revision
         self.nextflow_binary_path: str = config.rnafusion.binary_path
 
-    @staticmethod
-    def get_deliverables_template_content() -> list[dict]:
+
+
+    def get_deliverables_template_content(self) -> list[dict]:
         """Return deliverables file template content."""
         return ReadFile.get_content_from_file(
             file_format=FileFormat.YAML,
-            file_path=resources.RNAFUSION_BUNDLE_FILENAMES_PATH,
+            file_path=self.get_bundle_filenames_path(),
         )
 
     def get_nextflow_config_content(self) -> str:
         """Return nextflow config content."""
         return MULTIQC_NEXFLOW_CONFIG
+
+    @staticmethod
+    def get_bundle_filenames_path() -> Path:
+        """Return Rnafusion bundle filenames path."""
+        return RNAFUSION_BUNDLE_FILENAMES_PATH
 
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, case_id: str, strandedness: Strandedness
@@ -104,7 +110,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         return RnafusionParameters(
             cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
             genomes_base=genomes_base or self.get_references_path(),
-            sample_sheet_path=self.get_sample_sheet_path(case_id=case_id),
+            input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             priority=self.account,
         )
@@ -161,17 +167,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             sample_id=sample_id, metrics_values=metric_values
         )
         return metric_base_list
-
-    def report_deliver(self, case_id: str) -> None:
-        """Create deliverables file."""
-        deliverables_content: PipelineDeliverables = self.get_deliverables_for_case(case_id=case_id)
-        self.write_deliverables_file(
-            deliverables_content=deliverables_content.dict(),
-            file_path=self.get_deliverables_file_path(case_id=case_id),
-        )
-        LOG.info(
-            f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
-        )
 
     @staticmethod
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:

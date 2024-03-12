@@ -78,8 +78,8 @@ class AnalysisAPI(MetaAPI):
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
-    def verify_case_config_file_exists(self, case_id: str) -> None:
-        if not Path(self.get_case_config_path(case_id=case_id)).exists():
+    def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
+        if not Path(self.get_case_config_path(case_id=case_id)).exists() and not dry_run:
             raise CgError(f"No config file found for case {case_id}")
 
     def check_analysis_ongoing(self, case_id: str) -> None:
@@ -219,19 +219,33 @@ class AnalysisAPI(MetaAPI):
 
     def add_pending_trailblazer_analysis(self, case_id: str) -> None:
         self.check_analysis_ongoing(case_id)
-        self.trailblazer_api.add_pending_analysis(
-            case_id=case_id,
-            email=environ_email(),
-            analysis_type=self.get_application_type(
-                self.status_db.get_case_by_internal_id(case_id).links[0].sample
-            ),
-            out_dir=self.get_job_ids_path(case_id).parent.as_posix(),
-            config_path=self.get_job_ids_path(case_id).as_posix(),
-            slurm_quality_of_service=self.get_slurm_qos_for_case(case_id),
-            data_analysis=str(self.workflow),
-            ticket=self.status_db.get_latest_ticket_from_case(case_id),
-            workflow_manager=self.get_workflow_manager(),
+        application_type: str = self.get_application_type(
+            self.status_db.get_case_by_internal_id(case_id).links[0].sample
         )
+        config_path: str = self.get_job_ids_path(case_id).as_posix()
+        email: str = environ_email()
+        order_id: int = self._get_order_id_from_case_id(case_id)
+        out_dir: str = self.get_job_ids_path(case_id).parent.as_posix()
+        slurm_quality_of_service: str = self.get_slurm_qos_for_case(case_id)
+        ticket: str = self.status_db.get_latest_ticket_from_case(case_id)
+        workflow: Workflow = self.workflow
+        workflow_manager: str = self.get_workflow_manager()
+        self.trailblazer_api.add_pending_analysis(
+            analysis_type=application_type,
+            case_id=case_id,
+            config_path=config_path,
+            email=email,
+            order_id=order_id,
+            out_dir=out_dir,
+            slurm_quality_of_service=slurm_quality_of_service,
+            ticket=ticket,
+            workflow=workflow,
+            workflow_manager=workflow_manager,
+        )
+
+    def _get_order_id_from_case_id(self, case_id) -> int:
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        return case.latest_order.id
 
     def get_hermes_transformed_deliverables(self, case_id: str) -> dict:
         return self.hermes_api.create_housekeeper_bundle(
@@ -600,3 +614,6 @@ class AnalysisAPI(MetaAPI):
     def _get_managed_variants(self, genome_build: str) -> list[str]:
         """Create and return the managed variants."""
         return self.scout_api.export_managed_variants(genome_build=genome_build)
+
+    def run_analysis(self, *args, **kwargs):
+        raise NotImplementedError

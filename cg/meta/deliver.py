@@ -10,11 +10,12 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
-from cg.constants.constants import DataDelivery
+from cg.constants.constants import DataDelivery, Workflow
 from cg.exc import MissingFilesError
 from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import (
     run_sample_sequencing_quality_check,
 )
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
@@ -32,6 +33,7 @@ class DeliverAPI:
         sample_tags: list[set[str]],
         project_base_path: Path,
         delivery_type: str,
+        fastq_file_service: FastqFileService,
         force_all: bool = False,
         ignore_missing_bundles: bool = False,
     ):
@@ -58,6 +60,7 @@ class DeliverAPI:
             self.delivery_type in constants.SKIP_MISSING or ignore_missing_bundles
         )
         self.deliver_failed_samples = force_all
+        self.fastq_file_service = fastq_file_service
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run."""
@@ -115,8 +118,7 @@ class DeliverAPI:
                         continue
                     raise SyntaxError(f"Could not find any version for {sample_id}")
                 self.deliver_sample_files(
-                    case_id=case_id,
-                    case_name=case_name,
+                    case=case_obj,
                     sample_id=sample_id,
                     sample_name=sample_name,
                     version_obj=last_version,
@@ -166,14 +168,16 @@ class DeliverAPI:
 
     def deliver_sample_files(
         self,
-        case_id: str,
-        case_name: str,
+        case: Case,
         sample_id: str,
         sample_name: str,
         version_obj: Version,
     ) -> None:
         """Deliver files on sample level."""
         # Make sure that the directory exists
+        case_name: str = case.name
+        case_id: str = case.internal_id
+
         if self.delivery_type in constants.ONLY_ONE_CASE_PER_TICKET:
             case_name = None
         delivery_base: Path = self.create_delivery_dir_path(
@@ -211,6 +215,21 @@ class DeliverAPI:
 
         LOG.info(
             f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case_id}"
+        )
+
+        if self.delivery_type == Workflow.FASTQ and case.data_analysis == Workflow.MICROSALT:
+            self.concatenate_fastqs(sample_directory=delivery_base, sample_name=sample_name)
+
+    def concatenate_fastqs(self, sample_directory: Path, sample_name: str):
+        if self.dry_run:
+            return
+        forward_out_path = Path(sample_directory, f"{sample_name}_R1.fastq.gz")
+        reverse_out_path = Path(sample_directory, f"{sample_name}_R2.fastq.gz")
+        self.fastq_file_service.concatenate(
+            fastq_directory=sample_directory,
+            forward_output=forward_out_path,
+            reverse_output=reverse_out_path,
+            remove_raw=True,
         )
 
     def get_case_files_from_version(self, version: Version, sample_ids: set[str]) -> Iterable[Path]:

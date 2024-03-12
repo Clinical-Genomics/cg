@@ -26,7 +26,7 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
 
     @property
     def mip_workflow(self) -> str:
-        return self.config.mip_rd_dna.pipeline
+        return self.config.mip_rd_dna.workflow
 
     @property
     def script(self) -> str:
