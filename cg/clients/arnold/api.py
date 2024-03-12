@@ -21,17 +21,16 @@ class ArnoldAPIClient:
         post_request_data: CreateCaseRequest = case
         response: Response = requests.post(endpoint, data=post_request_data.model_dump_json())
         if response.status_code == HTTPStatus.OK:
-            LOG.info(f"{response.content}.")
+            LOG.info(f"Info {response.content}.")
             return
         self._handle_errors(response)
 
     @staticmethod
     def _handle_errors(response: Response):
         if HTTPStatus.BAD_REQUEST <= response.status_code < HTTPStatus.INTERNAL_SERVER_ERROR:
-            raise ArnoldClientError(
-                f"Client error: {response.status_code}. Reason {response.content}"
-            )
+            LOG.error(f"Client error: {response.status_code}. Reason {response.content}")
+            raise ArnoldClientError
+
         elif HTTPStatus.INTERNAL_SERVER_ERROR <= response.status_code:
-            raise ArnoldServerError(
-                f"Server error: {response.status_code}. Reason {response.content}"
-            )
+            LOG.error(f"Server error: {response.status_code}. Reason {response.content}")
+            raise ArnoldServerError
