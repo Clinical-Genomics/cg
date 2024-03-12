@@ -1,6 +1,6 @@
 """Constants for cg."""
 
-from enum import StrEnum
+from enum import StrEnum, IntEnum
 
 import click
 
@@ -267,7 +267,7 @@ class Strandedness(StrEnum):
     UNSTRANDED: str = "unstranded"
 
 
-class ReadDirection:
+class ReadDirection(IntEnum):
     """Read direction types."""
 
     FORWARD: int = 1
