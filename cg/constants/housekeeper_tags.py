@@ -112,6 +112,17 @@ class BalsamicProtectedTags:
         ["vcf2cytosure"],
     ]
 
+class TaxprofilerProtectedTags(StrEnum):
+    """Taxprofiler workflow protected tags"""
+
+    KRAKEN2: str = "kraken2"
+    METAGENOMICS_REPORT: str = "metagenomics-report"
+    COMBINED_REPORT: str = "combined-report"
+    KRONA: str = "krona"
+    VISUALIZATION: str = "visualization"
+    MULTIQC_HTML: str = "multiqc-html"
+    MULTIQC_JSON: str = "multiqc-json"
+
 
 WORKFLOW_PROTECTED_TAGS = {
     Workflow.BALSAMIC: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
@@ -206,6 +217,14 @@ WORKFLOW_PROTECTED_TAGS = {
         [HK_DELIVERY_REPORT_TAG],
         [AnalysisTag.VCF_FUSION],
         [AnalysisTag.GENE_COUNTS],
+    ],
+    Workflow.TAXPROFILER: [
+        [TaxprofilerProtectedTags.KRAKEN2, TaxprofilerProtectedTags.METAGENOMICS_REPORT],
+        [TaxprofilerProtectedTags.KRAKEN2, TaxprofilerProtectedTags.COMBINED_REPORT],
+        [TaxprofilerProtectedTags.KRAKEN2, TaxprofilerProtectedTags.KRONA, TaxprofilerProtectedTags.VISUALIZATION],
+        [TaxprofilerProtectedTags.MULTIQC_HTML],
+        [TaxprofilerProtectedTags.MULTIQC_JSON],
+
     ],
 }
 
