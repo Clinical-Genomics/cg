@@ -84,8 +84,8 @@ class DataAnalysisModel(BaseModel):
     panels: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
     scout_files: ScoutReportFiles
     delivered_files: Annotated[
-        list[str] | None, BeforeValidator(get_delivered_files_as_file_names)
-    ] = None
+        list[str] | str, BeforeValidator(get_delivered_files_as_file_names)
+    ] = NA_FIELD
 
     @model_validator(mode="after")
     def check_supported_workflow(self) -> "DataAnalysisModel":

@@ -53,11 +53,9 @@ def get_list_as_string(value: list[str] | None) -> str:
     return ", ".join(v for v in value) if value else NA_FIELD
 
 
-def get_delivered_files_as_file_names(
-    delivery_files: list[DeliveryFile] | None,
-) -> list[str] | None:
+def get_delivered_files_as_file_names(delivery_files: list[DeliveryFile] | None) -> list[str] | str:
     """Return a list of validated file names given a list of delivery files."""
-    return [file.destination_path.name for file in delivery_files] if delivery_files else None
+    return [file.destination_path.name for file in delivery_files] if delivery_files else NA_FIELD
 
 
 def get_path_as_string(file_path: str | None) -> str:
