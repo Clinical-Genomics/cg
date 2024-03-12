@@ -19,7 +19,7 @@ def delivery_housekeeper_api(
     hk_delivery_sample_bundle: dict[str, Any],
     hk_delivery_another_sample_bundle: dict[str, Any],
     hk_delivery_case_bundle: dict[str, Any],
-):
+) -> HousekeeperAPI:
     """Delivery API Housekeeper context."""
     helpers.ensure_hk_bundle(real_housekeeper_api, hk_delivery_sample_bundle, include=True)
     helpers.ensure_hk_bundle(real_housekeeper_api, hk_delivery_another_sample_bundle, include=True)
