@@ -27,6 +27,8 @@ from cg.exc import (
     OrderError,
     OrderExistsError,
     OrderFormError,
+    OrderMismatchError,
+    OrderNotDeliverableError,
     TicketCreationError,
 )
 from cg.io.controller import WriteStream
@@ -34,11 +36,15 @@ from cg.meta.orders import OrdersAPI
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message_response import DeliveryMessageResponse
+from cg.server.dto.delivery_message.delivery_message_request import (
+    DeliveryMessageRequest,
+)
+from cg.server.dto.delivery_message.delivery_message_response import (
+    DeliveryMessageResponse,
+)
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
-from cg.server.ext import db, lims, osticket, order_service
-from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
+from cg.server.ext import db, delivery_message_service, lims, order_service, osticket
 from cg.services.orders.order_service.exceptions import OrderNotFoundError
 from cg.store.models import (
     Analysis,
@@ -216,11 +222,25 @@ def parse_case(case_id):
     return jsonify(**case.to_dict(links=True, analyses=True))
 
 
+@BLUEPRINT.route("/cases/delivery_message", methods=["GET"])
+def get_cases_delivery_message():
+    delivery_message_request = DeliveryMessageRequest.model_validate(request.args)
+    try:
+        response: DeliveryMessageResponse = delivery_message_service.get_cases_message(
+            delivery_message_request
+        )
+        return jsonify(response.model_dump()), HTTPStatus.OK
+    except (CaseNotFoundError, OrderMismatchError) as error:
+        return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
+
+
 @BLUEPRINT.route("/cases/<case_id>/delivery_message", methods=["GET"])
 def get_case_delivery_message(case_id: str):
-    service = DeliveryMessageService(db)
+    delivery_message_request = DeliveryMessageRequest(case_ids=[case_id])
     try:
-        response: DeliveryMessageResponse = service.get_delivery_message(case_id)
+        response: DeliveryMessageResponse = delivery_message_service.get_cases_message(
+            delivery_message_request
+        )
         return jsonify(response.model_dump()), HTTPStatus.OK
     except CaseNotFoundError as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
@@ -499,6 +519,19 @@ def get_order(order_id: int):
         return make_response(response_dict)
     except OrderNotFoundError as error:
         return make_response(jsonify(error=str(error)), HTTPStatus.NOT_FOUND)
+
+
+@BLUEPRINT.route("/orders/<order_id>/delivery_message")
+def get_delivery_message_for_order(order_id: int):
+    """Return the delivery message for an order."""
+    try:
+        response: DeliveryMessageResponse = delivery_message_service.get_order_message(order_id)
+        response_dict: dict = response.model_dump()
+        return make_response(response_dict)
+    except OrderNotDeliverableError as error:
+        return make_response(jsonify(error=str(error)), HTTPStatus.PRECONDITION_FAILED)
+    except OrderNotFoundError as error:
+        return make_response(jsonify(error=str(error))), HTTPStatus.NOT_FOUND
 
 
 @BLUEPRINT.route("/orderform", methods=["POST"])
