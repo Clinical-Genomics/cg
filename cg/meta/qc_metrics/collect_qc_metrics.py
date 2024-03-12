@@ -14,7 +14,6 @@ from cg.clients.janus.dto.create_qc_metrics_request import (
     FilePathAndTag,
     WorkflowInfo,
 )
-from cg.clients.janus.exceptions import JanusClientError, JanusServerError
 from cg.constants.housekeeper_tags import JanusTags
 from cg.exc import HousekeeperFileMissingError
 from cg.store.models import Case
@@ -87,11 +86,8 @@ class CollectQCMetricsAPI:
     def get_case_qc_metrics(self, case_id: str) -> dict:
         """Get the qc metrics for a case."""
         qc_metrics_request: CreateQCMetricsRequest = self.create_qc_metrics_request(case_id)
-        try:
-            qc_metrics: dict = self.janus_api.qc_metrics(qc_metrics_request)
-            return qc_metrics
-        except (JanusClientError, JanusServerError) as error:
-            LOG.info(f"Cannot collect qc metrics from Janus: {error}")
+        qc_metrics: dict = self.janus_api.qc_metrics(qc_metrics_request)
+        return qc_metrics
 
     def get_create_case_request(self, case_id: str) -> CreateCaseRequest:
         case_qc_metrics: dict = self.get_case_qc_metrics(case_id)
