@@ -368,7 +368,7 @@ class NfAnalysisAPI(AnalysisAPI):
         except FileNotFoundError as error:
             LOG.error(f"Could not resume analysis: {error}")
             raise FileNotFoundError
-        except (Exception) as error:
+        except Exception as error:
             LOG.error(f"Could not run analysis: {error}")
             raise error
         if not dry_run:
