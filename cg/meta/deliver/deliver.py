@@ -202,7 +202,7 @@ class DeliverAPI:
                 LOG.info(f"Would hard link file {file_path} to {out_path}")
                 number_linked_files_now += 1
                 continue
-            LOG.debug(f"Hard link file {file_path} to {out_path}")
+            LOG.info(f"Hard link file {file_path} to {out_path}")
             try:
                 os.link(file_path, out_path)
                 number_linked_files_now += 1
@@ -219,7 +219,7 @@ class DeliverAPI:
         )
 
         if self.delivery_type == Workflow.FASTQ and case.data_analysis == Workflow.MICROSALT:
-            LOG.info(f"Concatenating fastqs for sample {sample_name}")
+            LOG.debug(f"Concatenating fastqs for sample {sample_name}")
             self.concatenate_fastqs(sample_directory=delivery_base, sample_name=sample_name)
 
     def concatenate_fastqs(self, sample_directory: Path, sample_name: str):

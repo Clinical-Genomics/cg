@@ -29,9 +29,9 @@ class FastqFileService:
             )
 
         if temp_forward:
-            LOG.debug(f"Concatenated forward reads to {forward_output_path}")
+            LOG.info(f"Concatenated forward reads to {forward_output_path}")
             temp_forward.rename(forward_output_path)
 
         if temp_reverse:
-            LOG.debug(f"Concatenated reverse reads to {reverse_output_path}")
+            LOG.info(f"Concatenated reverse reads to {reverse_output_path}")
             temp_reverse.rename(reverse_output_path)
