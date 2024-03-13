@@ -156,13 +156,13 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
             "taxprofiler_context",
             "taxprofiler_case_id",
             "taxprofiler_hermes_deliverables",
-            "taxprofiler_mock_deliverable",
+            "taxprofiler_mock_deliverable_dir",
         ),
         (
             "rnafusion_context",
             "rnafusion_case_id",
             "rnafusion_hermes_deliverables",
-            "rnafusion_mock_deliverable",
+            "rnafusion_mock_deliverable_dir",
         ),
     ],
 )
@@ -221,13 +221,13 @@ def test_store_housekeeper_valid_case(
             "taxprofiler_context",
             "taxprofiler_case_id",
             "taxprofiler_hermes_deliverables",
-            "taxprofiler_mock_deliverable",
+            "taxprofiler_mock_deliverable_dir",
         ),
         (
             "rnafusion_context",
             "rnafusion_case_id",
             "rnafusion_hermes_deliverables",
-            "rnafusion_mock_deliverable",
+            "rnafusion_mock_deliverable_dir",
         ),
     ],
 )
@@ -283,13 +283,13 @@ def test_valid_case_already_added(
             "taxprofiler_context",
             "taxprofiler_case_id",
             "taxprofiler_hermes_deliverables",
-            "taxprofiler_mock_deliverable",
+            "taxprofiler_mock_deliverable_dir",
         ),
         (
             "rnafusion_context",
             "rnafusion_case_id",
             "rnafusion_hermes_deliverables",
-            "rnafusion_mock_deliverable",
+            "rnafusion_mock_deliverable_dir",
         ),
     ],
 )
