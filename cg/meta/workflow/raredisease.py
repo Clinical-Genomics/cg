@@ -49,6 +49,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.account: str = config.raredisease.slurm.account
         self.compute_env_base: str = config.raredisease.compute_env
         self.revision: str = config.raredisease.revision
+        self.nextflow_binary_path: str = config.rnafusion.binary_path
+
 
     def write_config_case(
         self,
