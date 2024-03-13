@@ -164,7 +164,9 @@ class HousekeeperAPI:
     def get_file_from_version(version: Version, tags: set[str]) -> File | None:
         """Return the first file matching the given tags."""
         files: list[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
-        return None if not files else files[0]
+        if not files:
+            return None
+        return files[0]
 
     @staticmethod
     def get_latest_file_from_version(version: Version, tags: set[str]) -> File | None:
