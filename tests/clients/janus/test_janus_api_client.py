@@ -28,6 +28,7 @@ def test_qc_metrics_successful(
     mocked_post.assert_called_once_with(
         f"{janus_client.host}/collect_qc",
         data=collect_qc_request_balsamic_wgs.model_dump_json(),
+        verify=True,
     )
 
 

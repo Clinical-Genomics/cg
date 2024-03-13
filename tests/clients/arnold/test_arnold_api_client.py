@@ -24,8 +24,7 @@ def test_create_case_successful(
 
     # THEN  a case request is sent
     mocked_post.assert_called_once_with(
-        f"{arnold_client.api_url}/case/",
-        data=create_case_request.model_dump_json(),
+        f"{arnold_client.api_url}/case/", data=create_case_request.model_dump_json(), verify=True
     )
 
 
