@@ -51,6 +51,13 @@ HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]
 HK_DELIVERY_REPORT_TAG = "delivery-report"
 
 
+class HermesFileTag(StrEnum):
+    """Tags for hermes."""
+
+    DELIVER: str = "deliver"
+    STORAGE: str = "storage"
+
+
 class AnalysisTag(StrEnum):
     """Tags for analysis files."""
 
@@ -111,18 +118,6 @@ class BalsamicProtectedTags:
         ["vardict"],
         ["vcf2cytosure"],
     ]
-
-
-class TaxprofilerProtectedTags(StrEnum):
-    """Taxprofiler workflow protected tags"""
-
-    KRAKEN2: str = "kraken2"
-    METAGENOMICS_REPORT: str = "metagenomics-report"
-    COMBINED_REPORT: str = "combined-report"
-    KRONA: str = "krona"
-    VISUALIZATION: str = "visualization"
-    MULTIQC_HTML: str = "multiqc-html"
-    MULTIQC_JSON: str = "multiqc-json"
 
 
 WORKFLOW_PROTECTED_TAGS = {
@@ -220,15 +215,7 @@ WORKFLOW_PROTECTED_TAGS = {
         [AnalysisTag.GENE_COUNTS],
     ],
     Workflow.TAXPROFILER: [
-        [TaxprofilerProtectedTags.KRAKEN2, TaxprofilerProtectedTags.METAGENOMICS_REPORT],
-        [TaxprofilerProtectedTags.KRAKEN2, TaxprofilerProtectedTags.COMBINED_REPORT],
-        [
-            TaxprofilerProtectedTags.KRAKEN2,
-            TaxprofilerProtectedTags.KRONA,
-            TaxprofilerProtectedTags.VISUALIZATION,
-        ],
-        [TaxprofilerProtectedTags.MULTIQC_HTML],
-        [TaxprofilerProtectedTags.MULTIQC_JSON],
+        [HermesFileTag.STORAGE],
     ],
 }
 
