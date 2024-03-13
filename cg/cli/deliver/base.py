@@ -8,7 +8,7 @@ import click
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI
-from cg.meta.deliver_ticket import DeliverTicketAPI
+from cg.meta.deliver import DeliverTicketAPI
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.services.fastq_file_service.fastq_file_service import FastqFileService
@@ -141,7 +141,7 @@ def concatenate(context: click.Context, ticket: str, dry_run: bool):
     """
     cg_context: CGConfig = context.obj
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
-    deliver_ticket_api.concatenate(ticket=ticket, dry_run=dry_run)
+    deliver_ticket_api.concatenate_fastq_files(ticket=ticket, dry_run=dry_run)
 
 
 @deliver.command(name="ticket")
@@ -185,10 +185,6 @@ def deliver_ticket(
     else:
         LOG.info("Files already delivered to customer inbox on the HPC")
         return
-    is_concatenation_needed: bool = deliver_ticket_api.check_if_concatenation_is_needed(
-        ticket=ticket
-    )
-    if is_concatenation_needed and "fastq" in delivery_type:
-        context.invoke(concatenate, ticket=ticket, dry_run=dry_run)
+
     deliver_ticket_api.report_missing_samples(ticket=ticket, dry_run=dry_run)
     context.invoke(rsync, ticket=ticket, dry_run=dry_run)
