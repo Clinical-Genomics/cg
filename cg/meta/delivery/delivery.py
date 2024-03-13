@@ -43,6 +43,16 @@ class DeliveryAPI:
         return PIPELINE_ANALYSIS_TAG_MAP[workflow]["sample_tags"]
 
     @staticmethod
+    def is_fastq_delivery(data_delivery: DataDelivery):
+        """Return whether FASTQs should be delivered."""
+        return DataDelivery.FASTQ in data_delivery
+
+    @staticmethod
+    def is_analysis_delivery(data_delivery: DataDelivery):
+        """Return whether analysis files should be delivered."""
+        return DataDelivery.ANALYSIS_FILES in data_delivery
+
+    @staticmethod
     def is_sample_deliverable(sample: Sample, force: bool = False) -> bool:
         """
         Return whether the sample is deliverable or not. A sample is deliverable if it passes qc
@@ -155,10 +165,10 @@ class DeliveryAPI:
     def get_delivery_files(self, case: Case, force: bool = False) -> list[DeliveryFile]:
         """Return a complete list of files to be delivered to the customer's inbox."""
         delivery_files: list[DeliveryFile] = []
-        if DataDelivery.FASTQ in case.data_delivery:
+        if self.is_fastq_delivery(case.data_delivery):
             fastq_files: list[DeliveryFile] = self.get_fastq_delivery_files(case=case, force=force)
             delivery_files.extend(fastq_files)
-        if DataDelivery.ANALYSIS_FILES in case.data_delivery:
+        if self.is_analysis_delivery(case.data_delivery):
             analysis_case_files: list[DeliveryFile] = self.get_analysis_case_delivery_files(case)
             analysis_sample_files: list[DeliveryFile] = self.get_analysis_sample_delivery_files(
                 case=case
