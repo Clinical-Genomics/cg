@@ -217,6 +217,7 @@ class MicrosaltAppTags(StrEnum):
 
 
 class MutantQC:
+    EXTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD: int = 100000
     FRACTION_OF_SAMPLES_WITH_FAILED_QC_TRESHOLD: float = 0.2
    #TODO : "FAIL"
 

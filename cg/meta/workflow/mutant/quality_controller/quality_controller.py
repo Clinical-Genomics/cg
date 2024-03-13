@@ -6,6 +6,15 @@ from cg.meta.workflow.mutant.quality_controller.models import (
     QualityResult,
 )
 
+from cg.meta.workflow.mutant.quality_controller.utils import (
+    get_percent_reads_guaranteed,
+    get_sample_target_reads,
+    is_sample_external_negative_control,
+    is_sample_negative_control,
+    is_valid_total_reads,
+    is_valid_total_reads_for_external_negative_control,
+    quality_control_case,
+)
 from cg.store.api.core import Store
 from cg.store.models import Sample
 
@@ -17,7 +26,8 @@ class QualityController:
     def quality_control(self, case_results_file_path: Path) -> QualityResult:
         quality_metrics: QualityMetrics = MetricsParser.parse_sample_results(case_results_file_path)
         sample_results: list[SampleQualityResult] = self.quality_control_samples(quality_metrics)
-
+        case_result: CaseQualityResult = quality_control_case(sample_results)
+        # TODO
 
     def quality_control_samples(self, quality_metrics: QualityMetrics) -> list[SampleQualityResult]:
         sample_results: list[SampleQualityResult] = []
@@ -28,14 +38,10 @@ class QualityController:
 
     def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> SampleQualityResult:
         valid_read_count: bool = self.has_valid_total_reads(sample_id)
-        valid_mapping: bool = has_valid_mapping_rate(metrics)
-        valid_duplication: bool = has_valid_duplication_rate(metrics)
-        valid_inserts: bool = has_valid_median_insert_size(metrics)
-        valid_coverage: bool = has_valid_average_coverage(metrics)
-        valid_10x_coverage: bool = has_valid_10x_coverage(metrics)
+        # valid_10x_coverage: bool = has_valid_10x_coverage(metrics)
+        mutant_qc_pass: bool = self.sample_qc_pass(sample_id, metrics)
 
         sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
-        application_tag: str = get_application_tag(sample)
 
         if is_control := is_sample_negative_control(sample):
             sample_quality = SampleQualityResult(
@@ -43,34 +49,49 @@ class QualityController:
                 passes_qc=valid_read_count,
                 is_control=is_control,
                 passes_reads_qc=valid_read_count,
-                application_tag=application_tag,
             )
             ResultLogger.log_sample_result(sample_quality)
             return sample_quality
 
-        sample_passes_qc: bool = (
-            valid_read_count
-            and valid_mapping
-            and valid_duplication
-            and valid_inserts
-            and valid_coverage
-            and valid_10x_coverage
-        )
+        sample_passes_qc: bool = valid_read_count and mutant_qc_pass
 
         sample_quality = SampleQualityResult(
             sample_id=sample_id,
             passes_qc=sample_passes_qc,
             is_control=is_control,
-            application_tag=application_tag,
             passes_reads_qc=valid_read_count,
-            passes_mapping_qc=valid_mapping,
-            passes_duplication_qc=valid_duplication,
-            passes_inserts_qc=valid_inserts,
-            passes_coverage_qc=valid_coverage,
-            passes_10x_coverage_qc=valid_10x_coverage,
+            passes_mutant_qc=mutant_qc_pass,
         )
         ResultLogger.log_sample_result(sample_quality)
         return sample_quality
+
+    def has_valid_total_reads(self, sample_id: str) -> bool:
+        sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
+        target_reads: int = get_sample_target_reads(sample)
+        percent_reads_guaranteed: int = get_percent_reads_guaranteed(sample)
+        sample_reads: int = sample.reads
+
+        if is_sample_external_negative_control(sample):
+            if is_valid_total_reads_for_external_negative_control(
+                reads=sample_reads, target_reads=target_reads
+            ):
+                return True
+            else:
+                return None
+                # TODO: KRAKEN
+
+        return is_valid_total_reads(
+            reads=sample_reads,
+            target_reads=target_reads,
+            threshold_percentage=percent_reads_guaranteed,
+        )
+
+    def sample_qc_pass(self, sample_id: str, metrics):
+        sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
+
+        sample_metrics = metrics[sample.sample_name]
+
+        return sample_metrics.SampleResults.qc_pass
 
     # TODO
     # parse results

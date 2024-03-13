@@ -3,8 +3,9 @@ from cg.io.csv import read_csv
 from typing import Any
 from cg.meta.workflow.mutant.metrics_parser.models import QualityMetrics, SampleResults
 
+
 class MutantResultsHeaderData:
-    SAMPLE: str = "sample"
+    SAMPLE_NAME: str = "sample"
     SELECTION: str = "selection"
     REGION_CODE: str = "region_code"
     TICKET: str = "ticket"
@@ -18,7 +19,7 @@ class MutantResultsHeaderData:
 
 
 class MutantResultsHeaderRawData:
-    SAMPLE: str = "Sample"
+    SAMPLE_NAME: str = "Sample"
     SELECTION: str = "Selection"
     REGION_CODE: str = "Region Code"
     TICKET: str = "Ticket"
@@ -33,7 +34,7 @@ class MutantResultsHeaderRawData:
 
 class MetricsParser:
     KEY_MAPPING: dict[str, str] = {
-        MutantResultsHeaderRawData.SAMPLE: MutantResultsHeaderData.SAMPLE,
+        MutantResultsHeaderRawData.SAMPLE_NAME: MutantResultsHeaderData.SAMPLE_NAME,
         MutantResultsHeaderRawData.SELECTION: MutantResultsHeaderData.SELECTION,
         MutantResultsHeaderRawData.REGION_CODE: MutantResultsHeaderData.REGION_CODE,
         MutantResultsHeaderRawData.TICKET: MutantResultsHeaderData.TICKET,
@@ -54,11 +55,12 @@ class MetricsParser:
             altered_metric[new_key] = value
         return altered_metric
 
-
     @classmethod
-    def parse_sample_results(cls, file_path: Path) -> QualityMetrics: #dict[str, SampleResults]:
+    def parse_sample_results(cls, file_path: Path) -> QualityMetrics:  # dict[str, SampleResults]:
         with open(file_path, mode="r") as file:
-            raw_results: list[dict[str, Any]] = [metric for metric in read_csv(file, read_to_dict=True)]
+            raw_results: list[dict[str, Any]] = [
+                metric for metric in read_csv(file, read_to_dict=True)
+            ]
 
         results = [cls.alter_metric_keys(metric) for metric in raw_results]
 
@@ -70,3 +72,4 @@ class MetricsParser:
 
         return QualityMetrics.model_validate(validated_results)
 
+    
