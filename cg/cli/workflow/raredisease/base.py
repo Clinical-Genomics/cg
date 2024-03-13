@@ -31,8 +31,7 @@ from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.nf_analysis import NfCommandArgs
-from cg.constants.nf_analysis import NfTowerStatus
+
 
 LOG = logging.getLogger(__name__)
 
