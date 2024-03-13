@@ -1,7 +1,10 @@
 from pathlib import Path
 from cg.io.csv import read_csv
 from typing import Any
-from cg.meta.workflow.mutant.metrics_parser.models import QualityMetrics, SampleResults
+from cg.meta.workflow.mutant.metrics_parser.models import (
+    SampleResults,
+    SamplesResultsMetrics,
+)
 
 
 class MutantResultsHeaderData:
@@ -56,7 +59,7 @@ class MetricsParser:
         return altered_metric
 
     @classmethod
-    def parse_sample_results(cls, file_path: Path) -> QualityMetrics:  # dict[str, SampleResults]:
+    def parse_samples_results(cls, file_path: Path) -> SamplesResultsMetrics:
         with open(file_path, mode="r") as file:
             raw_results: list[dict[str, Any]] = [
                 metric for metric in read_csv(file, read_to_dict=True)
@@ -70,6 +73,4 @@ class MetricsParser:
                 result[MutantResultsHeaderData.SAMPLE_NAME]
             ] = SampleResults.model_validate(result)
 
-        return QualityMetrics.model_validate(validated_results)
-
-    
+        return SamplesResultsMetrics.model_validate(validated_results)

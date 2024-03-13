@@ -1,15 +1,10 @@
-from cg.constants.constants import MutantQC
+from cg.constants.constants import ControlOptions, MutantQC
 from cg.meta.workflow.mutant.quality_controller.models import CaseQualityResult, SampleQualityResult
-from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Sample
 
 
 def is_valid_total_reads(reads: int, target_reads: int, threshold_percentage: int) -> bool:
     return reads > target_reads * threshold_percentage / 100
-
-
-def is_sample_external_negative_control(sample: Sample) -> bool:
-    return sample.control == ControlEnum.negative
 
 
 def is_valid_total_reads_for_external_negative_control(reads: int, target_reads: int) -> bool:

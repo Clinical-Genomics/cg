@@ -1,6 +1,7 @@
 from typing import Annotated
 from pydantic import BaseModel, BeforeValidator, ValidationError
 
+
 def empty_str_to_none(v: str) -> str | None:
     return v or None
 
@@ -12,6 +13,7 @@ def str_to_bool(v: str) -> bool:
         return False
     else:
         raise ValidationError
+
 
 class SampleResults(BaseModel):
     sample_name: str
@@ -27,17 +29,5 @@ class SampleResults(BaseModel):
     mutations: Annotated[str | None, BeforeValidator(empty_str_to_none)]
 
 
-class SampleMetadata(BaseModel):
-    sample_internal_id: str
-    sample_name: str
-    is_control: bool
-    reads: int
-
-
-class SampleMetrics(BaseModel):
-    sample_results: SampleResults
-    sample_metadata: SampleMetadata
-
-
-class QualityMetrics(BaseModel):
-    samples: dict[str, SampleMetrics]
+class SamplesResultsMetrics(BaseModel):
+    samples: dict[str, SampleResults]

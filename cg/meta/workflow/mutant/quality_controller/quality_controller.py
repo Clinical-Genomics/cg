@@ -1,5 +1,7 @@
 from pathlib import Path
-from cg.meta.workflow.mutant.metrics_parser import MetricsParser, QualityMetrics, SampleMetrics
+from cg.meta.workflow.mutant.metadata_parser.metadata_parser import MetadataParser
+from cg.meta.workflow.mutant.metrics_parser import MetricsParser, SampleMetrics
+from cg.meta.workflow.mutant.metrics_parser.models import SampleResultsMetrics
 from cg.meta.workflow.mutant.quality_controller.models import (
     SampleQualityResult,
     CaseQualityResult,
@@ -21,11 +23,17 @@ from cg.store.models import Sample
 
 class QualityController:
     def __init__(self, status_db: Store):
-        self.status_db = status_db
+        # self.status_db = status_db
+        self.metadata_parser = MetadataParser(status_db)
 
-    def quality_control(self, case_results_file_path: Path) -> QualityResult:
-        quality_metrics: QualityMetrics = MetricsParser.parse_sample_results(case_results_file_path)
-        sample_results: list[SampleQualityResult] = self.quality_control_samples(quality_metrics)
+    def quality_control(self, case_results_file_path: Path, case: Case) -> QualityResult:
+        samples_results: SampleResultsMetrics = MetricsParser.parse_samples_results(
+            case_results_file_path
+        )
+
+        samples_metadata: 
+
+        sample_results: list[SampleQualityResult] = self.quality_control_samples()
         case_result: CaseQualityResult = self.quality_control_case(sample_results)
         # TODO
         # report_file: Path = get_report_path(case_metrics_file_path)
