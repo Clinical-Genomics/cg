@@ -28,6 +28,7 @@ from cg.exc import (
     OrderExistsError,
     OrderFormError,
     OrderMismatchError,
+    OrderNotDeliverableError,
     TicketCreationError,
 )
 from cg.io.controller import WriteStream
@@ -225,7 +226,7 @@ def parse_case(case_id):
 def get_cases_delivery_message():
     delivery_message_request = DeliveryMessageRequest.model_validate(request.args)
     try:
-        response: DeliveryMessageResponse = delivery_message_service.get_delivery_message(
+        response: DeliveryMessageResponse = delivery_message_service.get_cases_message(
             delivery_message_request
         )
         return jsonify(response.model_dump()), HTTPStatus.OK
@@ -237,7 +238,7 @@ def get_cases_delivery_message():
 def get_case_delivery_message(case_id: str):
     delivery_message_request = DeliveryMessageRequest(case_ids=[case_id])
     try:
-        response: DeliveryMessageResponse = delivery_message_service.get_delivery_message(
+        response: DeliveryMessageResponse = delivery_message_service.get_cases_message(
             delivery_message_request
         )
         return jsonify(response.model_dump()), HTTPStatus.OK
@@ -518,6 +519,19 @@ def get_order(order_id: int):
         return make_response(response_dict)
     except OrderNotFoundError as error:
         return make_response(jsonify(error=str(error)), HTTPStatus.NOT_FOUND)
+
+
+@BLUEPRINT.route("/orders/<order_id>/delivery_message")
+def get_delivery_message_for_order(order_id: int):
+    """Return the delivery message for an order."""
+    try:
+        response: DeliveryMessageResponse = delivery_message_service.get_order_message(order_id)
+        response_dict: dict = response.model_dump()
+        return make_response(response_dict)
+    except OrderNotDeliverableError as error:
+        return make_response(jsonify(error=str(error)), HTTPStatus.PRECONDITION_FAILED)
+    except OrderNotFoundError as error:
+        return make_response(jsonify(error=str(error))), HTTPStatus.NOT_FOUND
 
 
 @BLUEPRINT.route("/orderform", methods=["POST"])

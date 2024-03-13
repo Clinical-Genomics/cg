@@ -13,6 +13,10 @@ from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery, Workflow
 from cg.exc import MissingFilesError
 from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.meta.deliver.fastq_path_generator import (
+    generate_forward_concatenated_fastq_delivery_path,
+    generate_reverse_concatenated_fastq_delivery_path,
+)
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
@@ -215,17 +219,22 @@ class DeliverAPI:
         )
 
         if self.delivery_type == Workflow.FASTQ and case.data_analysis == Workflow.MICROSALT:
+            LOG.debug(f"Concatenating fastqs for sample {sample_name}")
             self.concatenate_fastqs(sample_directory=delivery_base, sample_name=sample_name)
 
     def concatenate_fastqs(self, sample_directory: Path, sample_name: str):
         if self.dry_run:
             return
-        forward_out_path = Path(sample_directory, f"{sample_name}_R1.fastq.gz")
-        reverse_out_path = Path(sample_directory, f"{sample_name}_R2.fastq.gz")
+        forward_output_path: Path = generate_forward_concatenated_fastq_delivery_path(
+            fastq_directory=sample_directory, sample_name=sample_name
+        )
+        reverse_output_path: Path = generate_reverse_concatenated_fastq_delivery_path(
+            fastq_directory=sample_directory, sample_name=sample_name
+        )
         self.fastq_file_service.concatenate(
             fastq_directory=sample_directory,
-            forward_output=forward_out_path,
-            reverse_output=reverse_out_path,
+            forward_output_path=forward_output_path,
+            reverse_output_path=reverse_output_path,
             remove_raw=True,
         )
 
