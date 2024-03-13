@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from cg.services.fastq_file_service.utils import (
@@ -6,14 +7,15 @@ from cg.services.fastq_file_service.utils import (
     remove_raw_fastqs,
 )
 
+LOG = logging.getLogger(__name__)
+
 
 class FastqFileService:
-
     def concatenate(
         self,
         fastq_directory: Path,
-        forward_output: Path,
-        reverse_output: Path,
+        forward_output_path: Path,
+        reverse_output_path: Path,
         remove_raw: bool = False,
     ):
         temp_forward: Path | None = concatenate_forward_reads(fastq_directory)
@@ -27,7 +29,9 @@ class FastqFileService:
             )
 
         if temp_forward:
-            temp_forward.rename(forward_output)
+            LOG.info(f"Concatenated forward reads to {forward_output_path}")
+            temp_forward.rename(forward_output_path)
 
         if temp_reverse:
-            temp_reverse.rename(reverse_output)
+            LOG.info(f"Concatenated reverse reads to {reverse_output_path}")
+            temp_reverse.rename(reverse_output_path)
