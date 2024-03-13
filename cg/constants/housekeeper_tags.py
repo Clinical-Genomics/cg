@@ -54,8 +54,8 @@ HK_DELIVERY_REPORT_TAG = "delivery-report"
 class HermesFileTag(StrEnum):
     """Tags for hermes."""
 
-    DELIVER: str = "deliver"
-    STORAGE: str = "storage"
+    CLINICAL_DELIVERY: str = "clinical-delivery"
+    LONG_TERM_STORAGE: str = "long-term-storage"
 
 
 class AnalysisTag(StrEnum):
@@ -215,7 +215,7 @@ WORKFLOW_PROTECTED_TAGS = {
         [AnalysisTag.GENE_COUNTS],
     ],
     Workflow.TAXPROFILER: [
-        [HermesFileTag.STORAGE],
+        [HermesFileTag.LONG_TERM_STORAGE],
     ],
 }
 
