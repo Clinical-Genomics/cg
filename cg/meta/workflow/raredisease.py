@@ -47,9 +47,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.raredisease.tower_workflow
         self.account: str = config.raredisease.slurm.account
+        self.email: str = config.raredisease.slurm.mail_user
         self.compute_env_base: str = config.raredisease.compute_env
         self.revision: str = config.raredisease.revision
-        self.nextflow_binary_path: str = config.rnafusion.binary_path
+        self.nextflow_binary_path: str = config.raredisease.binary_path
 
     def write_config_case(
         self,
