@@ -234,10 +234,10 @@ def test_store_housekeeper_valid_case(
 def test_valid_case_already_added(
     cli_runner,
     mocker,
-    hermes_deliverables,
+    hermes_deliverables: dict,
     context: CGConfig,
     real_housekeeper_api: HousekeeperAPI,
-    mock_deliverable,
+    mock_deliverable: Path,
     caplog: LogCaptureFixture,
     case_id: str,
     request,
