@@ -2480,9 +2480,9 @@ def rnafusion_deliverable_data(rnafusion_dir: Path, rnafusion_case_id: str, samp
 
 
 @pytest.fixture(scope="function")
-def rnafusion_mock_deliverable(
+def rnafusion_mock_deliverable_dir(
     rnafusion_dir: Path, rnafusion_deliverable_data: dict, rnafusion_case_id: str
-) -> None:
+) -> Path:
     """Create deliverable file with dummy data and files to deliver."""
     Path.mkdir(
         Path(rnafusion_dir, rnafusion_case_id),
@@ -2501,6 +2501,8 @@ def rnafusion_mock_deliverable(
         file_format=FileFormat.JSON,
         file_path=Path(rnafusion_dir, rnafusion_case_id, rnafusion_case_id + "_deliverables.yaml"),
     )
+
+    return rnafusion_dir
 
 
 @pytest.fixture(scope="function")
@@ -2770,9 +2772,9 @@ def taxprofiler_deliverable_data(
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_mock_deliverable(
+def taxprofiler_mock_deliverable_dir(
     taxprofiler_dir: Path, taxprofiler_deliverable_data: dict, taxprofiler_case_id: str
-) -> None:
+) -> Path:
     """Create taxprofiler deliverable file with dummy data and files to deliver."""
     Path.mkdir(
         Path(taxprofiler_dir, taxprofiler_case_id),
@@ -2793,7 +2795,7 @@ def taxprofiler_mock_deliverable(
             taxprofiler_dir, taxprofiler_case_id, taxprofiler_case_id + "_deliverables.yaml"
         ),
     )
-
+    return taxprofiler_dir
 
 @pytest.fixture(scope="function")
 def taxprofiler_mock_analysis_finish(
