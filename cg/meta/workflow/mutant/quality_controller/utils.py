@@ -36,20 +36,3 @@ def get_sample_target_reads(sample: Sample) -> int:
 
 def get_percent_reads_guaranteed(sample: Sample) -> int:
     return sample.application_version.application.percent_reads_guaranteed
-
-
-def quality_control_case(sample_results: list[SampleQualityResult]) -> CaseQualityResult:
-    external_control_pass_qc: bool = external_negative_control_pass_qc(sample_results)
-    urgent_pass_qc: bool = urgent_samples_pass_qc(sample_results)
-    non_urgent_pass_qc: bool = non_urgent_samples_pass_qc(sample_results)
-
-    case_passes_qc: bool = control_pass_qc and urgent_pass_qc and non_urgent_pass_qc
-
-    result = CaseQualityResult(
-        passes_qc=case_passes_qc,
-        control_passes_qc=control_pass_qc,
-        urgent_passes_qc=urgent_pass_qc,
-        non_urgent_passes_qc=non_urgent_pass_qc,
-    )
-    ResultLogger.log_case_result(result)
-    return result

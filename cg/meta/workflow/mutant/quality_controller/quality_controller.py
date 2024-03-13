@@ -7,13 +7,13 @@ from cg.meta.workflow.mutant.quality_controller.models import (
 )
 
 from cg.meta.workflow.mutant.quality_controller.utils import (
+    external_negative_control_pass_qc,
     get_percent_reads_guaranteed,
     get_sample_target_reads,
     is_sample_external_negative_control,
     is_sample_negative_control,
     is_valid_total_reads,
     is_valid_total_reads_for_external_negative_control,
-    quality_control_case,
 )
 from cg.store.api.core import Store
 from cg.store.models import Sample
@@ -26,8 +26,15 @@ class QualityController:
     def quality_control(self, case_results_file_path: Path) -> QualityResult:
         quality_metrics: QualityMetrics = MetricsParser.parse_sample_results(case_results_file_path)
         sample_results: list[SampleQualityResult] = self.quality_control_samples(quality_metrics)
-        case_result: CaseQualityResult = quality_control_case(sample_results)
+        case_result: CaseQualityResult = self.quality_control_case(sample_results)
         # TODO
+        # report_file: Path = get_report_path(case_metrics_file_path)
+        # ReportGenerator.report(out_file=report_file, samples=sample_results, case=case_result)
+        # ResultLogger.log_results(case=case_result, samples=sample_results, report=report_file)
+        # summary: str = ReportGenerator.get_summary(
+        #     case=case_result, samples=sample_results, report_path=report_file
+        # )
+        # return QualityResult(case=case_result, samples=sample_results, summary=summary)
 
     def quality_control_samples(self, quality_metrics: QualityMetrics) -> list[SampleQualityResult]:
         sample_results: list[SampleQualityResult] = []
@@ -93,10 +100,36 @@ class QualityController:
 
         return sample_metrics.SampleResults.qc_pass
 
+    def quality_control_case(self, sample_results: list[SampleQualityResult]) -> CaseQualityResult:
+        external_control_pass_qc: bool = external_negative_control_pass_qc(sample_results)
+        case_pass_qc: bool = self.case_qc_pass(sample_results)
+        case_passes_qc: bool = control_pass_qc and case_pass_qc
+
+        result = CaseQualityResult(
+            passes_qc=case_passes_qc,
+            control_passes_qc=external_control_pass_qc,
+        )
+        ResultLogger.log_case_result(result)
+        return result
+
+    def case_qc_pass(sample_results: list[SampleQualityResult]) -> bool:
+        total_samples: int = len(sample_results)
+
+        failed_samples: int = 0
+
+        for sample_result in sample_results:
+            if not sample_result.passes_qc:
+                failed_samples = failed_samples + 1
+
+        if failed_samples / total_samples > 0.2:
+            return False
+        else:
+            return True
+
     # TODO
-    # parse results
-    # implement the QC checks
-    # create a utils for the QC checks
+    # parse results - check
+    # implement the QC checks - check
+    # create a utils for the QC checks  - check
 
     # # Look at how the logging is done for trailblazer
 
