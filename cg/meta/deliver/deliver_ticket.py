@@ -1,5 +1,6 @@
-"""Module for deliver and rsync customer inbox on the HPC to customer inbox on the delivery
-server """
+"""
+Module for deliver and rsync customer inbox on the HPC to customer inbox on the delivery server.
+"""
 
 import logging
 import os
@@ -47,7 +48,7 @@ class DeliverTicketAPI(MetaAPI):
         LOG.info(f"Could not find path: {customer_inbox}")
         return True
 
-    def get_samples_from_ticket(self, ticket: str) -> list:
+    def get_samples_from_ticket(self, ticket: str) -> list[str]:
         all_samples = []
         cases: list[Case] = self.get_all_cases_from_ticket(ticket=ticket)
         for case in cases:
@@ -58,7 +59,7 @@ class DeliverTicketAPI(MetaAPI):
     def report_missing_samples(self, ticket: str, dry_run: bool) -> None:
         customer_inbox: Path = self.get_inbox_path(ticket=ticket)
         missing_samples = []
-        all_samples: list = self.get_samples_from_ticket(ticket=ticket)
+        all_samples: list[str] = self.get_samples_from_ticket(ticket=ticket)
         if not customer_inbox.exists() and dry_run:
             LOG.info(f"Dry run, will not search for missing data in: {customer_inbox}")
             return
