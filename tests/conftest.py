@@ -2866,7 +2866,7 @@ def nf_analysis_housekeeper(
     mock_fastq_files: list[Path],
     sample_id: str,
     timestamp_now: datetime,
-):
+) -> HousekeeperAPI:
     """Create populated Housekeeper sample bundle mock."""
 
     bundle_data: dict[str, Any] = {
