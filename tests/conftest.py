@@ -2797,6 +2797,7 @@ def taxprofiler_mock_deliverable_dir(
     )
     return taxprofiler_dir
 
+
 @pytest.fixture(scope="function")
 def taxprofiler_mock_analysis_finish(
     taxprofiler_dir: Path,
