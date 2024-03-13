@@ -5,7 +5,7 @@ from typing import Any
 from pathlib import Path
 
 from cg.io.txt import concat_txt
-from cg.io.json import write_config_nextflow_style
+from cg.io.config import write_config_nextflow_style
 from cg.constants import GenePanelMasterList, Workflow
 from cg.constants.constants import FileExtensions
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
