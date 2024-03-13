@@ -6,7 +6,7 @@ from click.testing import CliRunner
 
 from cg.cli.deliver.base import deliver as deliver_cmd
 from cg.constants import EXIT_SUCCESS
-from cg.meta.deliver_ticket import DeliverTicketAPI
+from cg.meta.deliver import DeliverTicketAPI
 from cg.models.cg_config import CGConfig
 
 
@@ -111,10 +111,6 @@ def test_run_deliver_ticket(cli_runner: CliRunner, cg_context: CGConfig, mocker,
     # GIVEN uploading data to the delivery server is needed
     mocker.patch.object(DeliverTicketAPI, "check_if_upload_is_needed")
     DeliverTicketAPI.check_if_upload_is_needed.return_value = True
-
-    # GIVEN data needs to be concatenated
-    mocker.patch.object(DeliverTicketAPI, "check_if_concatenation_is_needed")
-    DeliverTicketAPI.check_if_concatenation_is_needed.return_value = True
 
     # WHEN running cg deliver ticket
     cli_runner.invoke(
