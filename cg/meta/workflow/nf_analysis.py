@@ -251,6 +251,7 @@ class NfAnalysisAPI(AnalysisAPI):
             root_dir=self.root_dir,
             command_args=command_args.dict(),
         )
+        LOG.info(f"Parameters: {parameters}")
         self.process.export_variables(
             export=NextflowHandler.get_variables_to_export(),
         )
