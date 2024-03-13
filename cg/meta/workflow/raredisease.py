@@ -133,6 +133,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             str_content=extra_parameters_str,
         )
 
+    def write_params_file(self, case_id: str, dry_run: bool = False) -> None:
+        if not dry_run:
+            self.get_params_file_path(case_id=case_id).touch()
+
     @staticmethod
     def get_phenotype_code(phenotype: str) -> int:
         """Return Raredisease phenotype code."""
