@@ -1,6 +1,6 @@
 """Constants for cg."""
 
-from enum import StrEnum
+from enum import StrEnum, IntEnum
 
 import click
 
@@ -265,6 +265,13 @@ class Strandedness(StrEnum):
     FORWARD: str = "forward"
     REVERSE: str = "reverse"
     UNSTRANDED: str = "unstranded"
+
+
+class ReadDirection(IntEnum):
+    """Read direction types."""
+
+    FORWARD: int = 1
+    REVERSE: int = 2
 
 
 PIPELINES_USING_PARTIAL_ANALYSES: list[Workflow] = [Workflow.MICROSALT, Workflow.MUTANT]
