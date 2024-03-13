@@ -5,7 +5,7 @@ from typing import Any
 from pathlib import Path
 
 from cg.io.txt import concat_txt
-from cg.io.config import write_config_nextflow_style
+from cg.io.json import write_config_nextflow_style
 from cg.constants import GenePanelMasterList, Workflow
 from cg.constants.constants import FileExtensions
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
@@ -69,7 +69,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             file_path=self.get_sample_sheet_path(case_id=case_id),
             header=RarediseaseSampleSheetHeaders.headers(),
         )
-        self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
+        self.write_config_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
 
     def get_sample_sheet_content_per_sample(
         self, case: Case = "", case_sample: CaseSample = ""
@@ -119,7 +119,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             outdir=self.get_case_path(case_id=case_id),
         )
 
-    def write_params_file(self, case_id: str, workflow_parameters: dict) -> None:
+    def write_config_file(self, case_id: str, workflow_parameters: dict) -> None:
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")
         config_files_list = [self.config_platform, self.config_params, self.config_resources]
@@ -129,7 +129,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         ]
         concat_txt(
             file_paths=config_files_list,
-            target_file=self.get_params_file_path(case_id=case_id),
+            target_file=self.get_nextflow_config_path(case_id=case_id),
             str_content=extra_parameters_str,
         )
 
