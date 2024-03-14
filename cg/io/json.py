@@ -24,4 +24,3 @@ def write_json(content: Any, file_path: Path) -> None:
 def write_json_stream(content: Any) -> str:
     """Write content to a json stream"""
     return json.dumps(content)
-
