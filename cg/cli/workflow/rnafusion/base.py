@@ -21,6 +21,7 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_WORKDIR,
     metrics_deliver,
     report_deliver,
+    store_housekeeper,
 )
 from cg.cli.workflow.rnafusion.options import (
     OPTION_REFERENCES,
@@ -33,7 +34,6 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.rnafusion import CommandArgs
-from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -224,36 +224,7 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
 
 rnafusion.add_command(metrics_deliver)
 rnafusion.add_command(report_deliver)
-
-
-@rnafusion.command("store-housekeeper")
-@ARGUMENT_CASE_ID
-@DRY_RUN
-@click.pass_obj
-def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Store a finished RNAFUSION analysis in Housekeeper and StatusDB."""
-    analysis_api: AnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    status_db: Store = context.status_db
-
-    try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
-        analysis_api.verify_deliverables_file_exists(case_id=case_id)
-        analysis_api.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run)
-        analysis_api.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
-        analysis_api.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
-    except ValidationError as error:
-        LOG.warning("Deliverables file is malformed")
-        raise error
-    except CgError as error:
-        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}")
-        raise click.Abort()
-    except Exception as error:
-        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
-        housekeeper_api.rollback()
-        status_db.session.rollback()
-        raise click.Abort()
+rnafusion.add_command(store_housekeeper)
 
 
 @rnafusion.command("store")

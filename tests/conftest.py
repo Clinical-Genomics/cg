@@ -1907,7 +1907,7 @@ def context_config(
             "databases": Path("path", "to", "databases").as_posix(),
             "profile": "myprofile",
             "hostremoval_reference": Path("path", "to", "hostremoval_reference").as_posix(),
-            "revision": "1.1.4",
+            "revision": "2.2.0",
             "slurm": {
                 "account": "development",
                 "mail_user": "taxprofiler.email@scilifelab.se",
@@ -1932,6 +1932,8 @@ def context_config(
             "service_account": "SERVICE",
             "service_account_auth_file": "trailblazer-auth.json",
         },
+        "arnold": {"api_url": "https://arnold.scilifelab.se/"},
+        "janus": {"host": "https://janus.sys.scilifelab.se/"},
     }
 
 
@@ -2232,6 +2234,12 @@ def rnafusion_case_id() -> str:
 
 
 @pytest.fixture(scope="session")
+def rnafusion_workflow() -> str:
+    """Returns rnafusion workflow."""
+    return "rnafusion"
+
+
+@pytest.fixture(scope="session")
 def rnafusion_sample_sheet_content(
     rnafusion_case_id: str,
     fastq_forward_read_path: Path,
@@ -2262,9 +2270,9 @@ def strandedness_not_permitted() -> str:
 
 
 @pytest.fixture(scope="function")
-def hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
+def rnafusion_hermes_deliverables(rnafusion_deliverable_data: dict, rnafusion_case_id: str) -> dict:
     hermes_output: dict = {"workflow": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
-    for file_info in deliverable_data["files"]:
+    for file_info in rnafusion_deliverable_data["files"]:
         tags: list[str] = []
         if "html" in file_info["format"]:
             tags.append("multiqc-html")
@@ -2273,8 +2281,8 @@ def hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
 
 
 @pytest.fixture(scope="function")
-def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
-    malformed_deliverable: dict = hermes_deliverables.copy()
+def rnafusion_malformed_hermes_deliverables(rnafusion_hermes_deliverables: dict) -> dict:
+    malformed_deliverable: dict = rnafusion_hermes_deliverables.copy()
     malformed_deliverable.pop("workflow")
 
     return malformed_deliverable
@@ -2457,7 +2465,7 @@ def rnafusion_context(
 
 
 @pytest.fixture(scope="function")
-def deliverable_data(rnafusion_dir: Path, rnafusion_case_id: str, sample_id: str) -> dict:
+def rnafusion_deliverable_data(rnafusion_dir: Path, rnafusion_case_id: str, sample_id: str) -> dict:
     return {
         "files": [
             {
@@ -2474,7 +2482,9 @@ def deliverable_data(rnafusion_dir: Path, rnafusion_case_id: str, sample_id: str
 
 
 @pytest.fixture(scope="function")
-def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, rnafusion_case_id: str) -> None:
+def rnafusion_mock_deliverable_dir(
+    rnafusion_dir: Path, rnafusion_deliverable_data: dict, rnafusion_case_id: str
+) -> Path:
     """Create deliverable file with dummy data and files to deliver."""
     Path.mkdir(
         Path(rnafusion_dir, rnafusion_case_id),
@@ -2486,13 +2496,15 @@ def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, rnafusion_case
         parents=True,
         exist_ok=True,
     )
-    for report_entry in deliverable_data["files"]:
+    for report_entry in rnafusion_deliverable_data["files"]:
         Path(report_entry["path"]).touch(exist_ok=True)
     WriteFile.write_file_from_content(
-        content=deliverable_data,
+        content=rnafusion_deliverable_data,
         file_format=FileFormat.JSON,
         file_path=Path(rnafusion_dir, rnafusion_case_id, rnafusion_case_id + "_deliverables.yaml"),
     )
+
+    return rnafusion_dir
 
 
 @pytest.fixture(scope="function")
@@ -2544,7 +2556,7 @@ def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
 # Taxprofiler fixtures
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
     """Create CSV sample sheet file for testing."""
     Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
@@ -2560,13 +2572,19 @@ def taxprofiler_case_id() -> str:
 
 
 @pytest.fixture(scope="session")
+def taxprofiler_workflow() -> str:
+    """Returns taxprofiler workflow."""
+    return "taxprofiler"
+
+
+@pytest.fixture(scope="function")
 def taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> Path:
     """Return the path to the Taxprofiler directory."""
     taxprofiler_dir = tmpdir_factory.mktemp("taxprofiler")
     return Path(taxprofiler_dir).absolute()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def taxprofiler_sample_sheet_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
     """Path to sample sheet."""
     return Path(
@@ -2574,7 +2592,7 @@ def taxprofiler_sample_sheet_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
     ).with_suffix(FileExtensions.CSV)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def taxprofiler_params_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
     """Path to parameters file."""
     return Path(
@@ -2602,7 +2620,28 @@ def taxprofiler_sample_sheet_content(
     )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
+def taxprofiler_hermes_deliverables(
+    taxprofiler_deliverable_data: dict, taxprofiler_case_id: str
+) -> dict:
+    hermes_output: dict = {"workflow": "taxprofiler", "bundle_id": taxprofiler_case_id, "files": []}
+    for file_info in taxprofiler_deliverable_data["files"]:
+        tags: list[str] = []
+        if "html" in file_info["format"]:
+            tags.append("multiqc-html")
+        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
+    return hermes_output
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_malformed_hermes_deliverables(taxprofiler_hermes_deliverables: dict) -> dict:
+    malformed_deliverable: dict = taxprofiler_hermes_deliverables.copy()
+    malformed_deliverable.pop("workflow")
+
+    return malformed_deliverable
+
+
+@pytest.fixture(scope="function")
 def taxprofiler_parameters_default(
     taxprofiler_dir: Path,
     taxprofiler_case_id: str,
@@ -2651,44 +2690,18 @@ def taxprofiler_deliverables_file_path(taxprofiler_dir: Path, taxprofiler_case_i
 
 
 @pytest.fixture(scope="function")
-def nf_analysis_housekeeper(
-    housekeeper_api: HousekeeperAPI,
-    helpers: StoreHelpers,
-    mock_fastq_files: list[Path],
-    sample_id: str,
-    timestamp_now: datetime,
-):
-    """Create populated Housekeeper sample bundle mock."""
-
-    bundle_data: dict[str, Any] = {
-        "name": sample_id,
-        "created": timestamp_now,
-        "version": "1.0",
-        "files": [
-            {
-                "path": fastq_file_path.as_posix(),
-                "tags": [SequencingFileTag.FASTQ],
-                "archive": False,
-            }
-            for fastq_file_path in mock_fastq_files
-        ],
-    }
-    helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
-    return housekeeper_api
-
-
-@pytest.fixture(scope="function")
 def taxprofiler_context(
     cg_context: CGConfig,
-    cg_dir: Path,
     helpers: StoreHelpers,
+    trailblazer_api: MockTB,
+    hermes_api: HermesApi,
+    nf_analysis_housekeeper: HousekeeperAPI,
+    cg_dir: Path,
     taxprofiler_case_id: str,
     sample_id: str,
     father_sample_id: str,
     sample_name: str,
     another_sample_name: str,
-    trailblazer_api: MockTB,
-    nf_analysis_housekeeper: HousekeeperAPI,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
 ) -> CGConfig:
@@ -2710,6 +2723,7 @@ def taxprofiler_context(
 
     taxprofiler_sample: Sample = helpers.add_sample(
         status_db,
+        application_tag="multiqc",
         internal_id=sample_id,
         reads=total_sequenced_reads_pass,
         name=sample_name,
@@ -2718,6 +2732,7 @@ def taxprofiler_context(
 
     taxprofiler_another_sample: Sample = helpers.add_sample(
         status_db,
+        application_tag="multiqc",
         internal_id=father_sample_id,
         last_sequenced_at=datetime.now(),
         name=another_sample_name,
@@ -2740,20 +2755,66 @@ def taxprofiler_context(
 
 
 @pytest.fixture(scope="function")
+def taxprofiler_deliverable_data(
+    taxprofiler_dir: Path, taxprofiler_case_id: str, sample_id: str
+) -> dict:
+    return {
+        "files": [
+            {
+                "path": f"{taxprofiler_dir}/{taxprofiler_case_id}/multiqc/multiqc_report.html",
+                "path_index": "",
+                "step": "report",
+                "tag": ["multiqc-html", "rna"],
+                "id": taxprofiler_case_id,
+                "format": "html",
+                "mandatory": True,
+            },
+        ]
+    }
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_mock_deliverable_dir(
+    taxprofiler_dir: Path, taxprofiler_deliverable_data: dict, taxprofiler_case_id: str
+) -> Path:
+    """Create taxprofiler deliverable file with dummy data and files to deliver."""
+    Path.mkdir(
+        Path(taxprofiler_dir, taxprofiler_case_id),
+        parents=True,
+        exist_ok=True,
+    )
+    Path.mkdir(
+        Path(taxprofiler_dir, taxprofiler_case_id, "multiqc"),
+        parents=True,
+        exist_ok=True,
+    )
+    for report_entry in taxprofiler_deliverable_data["files"]:
+        Path(report_entry["path"]).touch(exist_ok=True)
+    WriteFile.write_file_from_content(
+        content=taxprofiler_deliverable_data,
+        file_format=FileFormat.JSON,
+        file_path=Path(
+            taxprofiler_dir, taxprofiler_case_id, taxprofiler_case_id + "_deliverables.yaml"
+        ),
+    )
+    return taxprofiler_dir
+
+
+@pytest.fixture(scope="function")
 def taxprofiler_mock_analysis_finish(
     taxprofiler_dir: Path,
     taxprofiler_case_id: str,
     taxprofiler_multiqc_json_metrics: dict,
     tower_id: int,
 ) -> None:
-    """Create analysis finish file for testing."""
+    """Create analysis_finish file for testing."""
     Path.mkdir(
         Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info"), parents=True, exist_ok=True
     )
     Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info", "software_versions.yml").touch(
         exist_ok=True
     )
-    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet.csv").touch(
+    Path(taxprofiler_dir, taxprofiler_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
         exist_ok=True
     )
     Path.mkdir(
@@ -2779,6 +2840,52 @@ def taxprofiler_mock_analysis_finish(
             "tower_ids",
         ).with_suffix(FileExtensions.YAML),
     )
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_deliverable_data(
+    taxprofiler_dir: Path, taxprofiler_case_id: str, sample_id: str
+) -> dict:
+    return {
+        "files": [
+            {
+                "path": f"{taxprofiler_dir}/{taxprofiler_case_id}/multiqc/multiqc_report.html",
+                "path_index": "",
+                "step": "report",
+                "tag": ["multiqc-html"],
+                "id": taxprofiler_case_id,
+                "format": "html",
+                "mandatory": True,
+            },
+        ]
+    }
+
+
+@pytest.fixture(scope="function")
+def nf_analysis_housekeeper(
+    housekeeper_api: HousekeeperAPI,
+    helpers: StoreHelpers,
+    mock_fastq_files: list[Path],
+    sample_id: str,
+    timestamp_now: datetime,
+) -> HousekeeperAPI:
+    """Create populated Housekeeper sample bundle mock."""
+
+    bundle_data: dict[str, Any] = {
+        "name": sample_id,
+        "created": timestamp_now,
+        "version": "1.0",
+        "files": [
+            {
+                "path": fastq_file_path.as_posix(),
+                "tags": [SequencingFileTag.FASTQ],
+                "archive": False,
+            }
+            for fastq_file_path in mock_fastq_files
+        ],
+    }
+    helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
+    return housekeeper_api
 
 
 @pytest.fixture(scope="session")

@@ -85,7 +85,7 @@ def mock_janus_api() -> JanusAPIClient:
 
 @pytest.fixture
 def mock_arnold_api() -> ArnoldAPIClient:
-    return ArnoldAPIClient(config={"api_url": ""})
+    return ArnoldAPIClient(config={"arnold": {"api_url": ""}})
 
 
 @pytest.fixture(scope="function")
