@@ -110,8 +110,8 @@ def run(
             use_nextflow=use_nextflow,
             nf_tower_id=nf_tower_id,
         )
-    except FileNotFoundError or Exception:
-        click.Abort()
+    except (FileNotFoundError, Exception) as error:
+        raise click.Abort() from error
 
 
 @raredisease.command("panel")
