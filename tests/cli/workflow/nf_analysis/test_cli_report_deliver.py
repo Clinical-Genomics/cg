@@ -2,6 +2,9 @@
 
 import logging
 import pytest
+import shutil
+import pathlib
+
 from pathlib import Path
 
 from click.testing import CliRunner
@@ -13,6 +16,7 @@ from cg.models.cg_config import CGConfig
 from cg.constants import EXIT_SUCCESS
 from cg.io.controller import ReadFile
 from cg.constants.constants import FileFormat
+
 
 LOG = logging.getLogger(__name__)
 
@@ -113,11 +117,11 @@ def test_report_deliver_without_samples(
 def test_report_deliver_successful(
     cli_runner: CliRunner,
     context: CGConfig,
+    caplog: LogCaptureFixture,
     case_id: str,
     deliverables_file_path: Path,
     deliverables_template_content: list[dict],
     mock_analysis_finish,
-    caplog: LogCaptureFixture,
     mocker,
     request,
 ):
@@ -126,7 +130,7 @@ def test_report_deliver_successful(
 
     # GIVEN each fixture is being initialised
     context: CGConfig = request.getfixturevalue(context)
-    deliverables_file_path: dict = request.getfixturevalue(deliverables_file_path)
+    deliverables_file_path: Path = request.getfixturevalue(deliverables_file_path)
     case_id: str = request.getfixturevalue(case_id)
     request.getfixturevalue(mock_analysis_finish)
 
