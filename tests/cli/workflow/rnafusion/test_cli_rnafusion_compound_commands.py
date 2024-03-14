@@ -68,10 +68,10 @@ def test_store_success(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     real_housekeeper_api: HousekeeperAPI,
-    mock_deliverable,
+    rnafusion_mock_deliverable_dir,
     rnafusion_mock_analysis_finish,
     caplog: LogCaptureFixture,
-    hermes_deliverables: dict,
+    rnafusion_hermes_deliverables,
     mocker,
     rnafusion_case_id: str,
     deliverables_template_content: list[dict],
@@ -102,7 +102,7 @@ def test_store_success(
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
-    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
+    HermesApi.convert_deliverables.return_value = CGDeliverables(**rnafusion_hermes_deliverables)
 
     # WHEN running command
     result = cli_runner.invoke(store, [rnafusion_case_id], obj=rnafusion_context)
@@ -188,10 +188,10 @@ def test_store_available(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     real_housekeeper_api,
-    hermes_deliverables,
+    rnafusion_hermes_deliverables,
     rnafusion_case_id: str,
     deliverables_template_content: list[dict],
-    mock_deliverable,
+    rnafusion_mock_deliverable_dir,
     rnafusion_mock_analysis_finish,
     mock_config,
     mocker,
@@ -213,7 +213,7 @@ def test_store_available(
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
-    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
+    HermesApi.convert_deliverables.return_value = CGDeliverables(**rnafusion_hermes_deliverables)
 
     # GIVEN a mocked config
 
