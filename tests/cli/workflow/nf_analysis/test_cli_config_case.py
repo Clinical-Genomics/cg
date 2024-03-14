@@ -3,6 +3,7 @@
 import logging
 
 import pytest
+from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
@@ -17,8 +18,10 @@ LOG = logging.getLogger(__name__)
     "workflow",
     [Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
-def test_config_case_without_options(cli_runner: CliRunner, workflow: Workflow, request):
-    """Test config_case for Taxprofiler and Rnafusion without options."""
+def test_config_case_without_options(
+    cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest
+):
+    """Test config_case for workflow without options."""
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
     # WHEN dry running without anything specified
@@ -40,9 +43,9 @@ def test_config_case_with_missing_case(
     caplog: LogCaptureFixture,
     case_id_does_not_exist: str,
     workflow: Workflow,
-    request,
+    request: FixtureRequest,
 ):
-    """Test config_case for Taxprofiler and Rnafusion with a missing case."""
+    """Test config_case for workflow with a missing case."""
     caplog.set_level(logging.ERROR)
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 

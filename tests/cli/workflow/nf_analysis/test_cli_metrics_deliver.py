@@ -3,6 +3,7 @@
 import logging
 
 import pytest
+from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
@@ -17,11 +18,13 @@ LOG = logging.getLogger(__name__)
     "workflow",
     [Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
-def test_metrics_deliver_without_options(cli_runner: CliRunner, workflow: Workflow, request):
-    """Test metrics-deliver for Taxprofiler and Rnafusion without options."""
+def test_metrics_deliver_without_options(
+    cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest
+):
+    """Test metrics-deliver for workflow without options."""
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
-    # WHEN dry running without anything specified
+    # WHEN invoking the command without additional parameters
     result = cli_runner.invoke(workflow_cli, [workflow, "metrics-deliver"], obj=context)
 
     # THEN command should not exit successfully
@@ -40,9 +43,9 @@ def test_metrics_deliver_with_missing_case(
     caplog: LogCaptureFixture,
     case_id_does_not_exist: str,
     workflow: Workflow,
-    request,
+    request: FixtureRequest,
 ):
-    """Test metrics-deliver for Taxprofiler and Rnafusion with a missing case."""
+    """Test metrics-deliver for workflow with a missing case."""
     caplog.set_level(logging.ERROR)
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 

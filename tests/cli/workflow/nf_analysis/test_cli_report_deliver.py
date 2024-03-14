@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 import pytest
+from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
@@ -21,12 +22,14 @@ LOG = logging.getLogger(__name__)
     "workflow",
     [Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
-def test_report_deliver_without_options(cli_runner: CliRunner, workflow: Workflow, request):
+def test_report_deliver_without_options(
+    cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest
+):
     """Test report-deliver for workflow without options."""
     # GIVEN a NextFlow analysis context
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
-    # WHEN dry running without anything specified
+    # WHEN invoking the command without additional parameters
     result = cli_runner.invoke(workflow_cli, [workflow, "report-deliver"], obj=context)
 
     # THEN command should not exit successfully
@@ -45,7 +48,7 @@ def test_report_deliver_with_missing_case(
     workflow: Workflow,
     caplog: LogCaptureFixture,
     case_id_does_not_exist: str,
-    request,
+    request: FixtureRequest,
 ):
     """Test report-deliver command for workflow with invalid case to start with."""
     caplog.set_level(logging.WARNING)
@@ -76,16 +79,16 @@ def test_report_deliver_without_samples(
     workflow: Workflow,
     caplog: LogCaptureFixture,
     no_sample_case_id: str,
-    request,
+    request: FixtureRequest,
 ):
     """Test report-deliver command for workflow with case id and no samples."""
     caplog.set_level(logging.ERROR)
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
-    # GIVEN case-id
+    # GIVEN a case id
     case_id: str = no_sample_case_id
 
-    # WHEN generating deliverables with dry specified
+    # WHEN generating deliverables with dry-run specified
     result = cli_runner.invoke(
         workflow_cli, [workflow, "report-deliver", case_id, "--dry-run"], obj=context
     )
@@ -107,12 +110,12 @@ def test_report_deliver_successful(
     caplog: LogCaptureFixture,
     deliverables_template_content: list[dict],
     mocker,
-    request,
+    request: FixtureRequest,
 ):
     """Test that deliverable files is properly created on a valid and successful run for workflow."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN each fixture is being initialised
+    # GIVEN deliverable files for a case and workflow
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     deliverables_file_path: Path = request.getfixturevalue(f"{workflow}_deliverables_file_path")
