@@ -1,33 +1,36 @@
 """Tests CLI common methods to create the report_deliver for NF analyses."""
 
 import logging
-import pytest
 from pathlib import Path
 
-from click.testing import CliRunner
+import pytest
+from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
+from click.testing import CliRunner
 
-from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-from cg.cli.workflow.rnafusion.base import report_deliver
-from cg.models.cg_config import CGConfig
-from cg.constants import EXIT_SUCCESS
-from cg.io.controller import ReadFile
+from cg.cli.workflow.base import workflow as workflow_cli
+from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
 
 @pytest.mark.parametrize(
-    "context",
-    ["rnafusion_context", "taxprofiler_context"],
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
-def test_report_deliver_without_options(cli_runner: CliRunner, context: CGConfig, request):
+def test_report_deliver_without_options(
+    cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest
+):
     """Test report-deliver for workflow without options."""
     # GIVEN a NextFlow analysis context
-    context = request.getfixturevalue(context)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
-    # WHEN dry running without anything specified
-    result = cli_runner.invoke(report_deliver, obj=context)
+    # WHEN invoking the command without additional parameters
+    result = cli_runner.invoke(workflow_cli, [workflow, "report-deliver"], obj=context)
 
     # THEN command should not exit successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -37,25 +40,27 @@ def test_report_deliver_without_options(cli_runner: CliRunner, context: CGConfig
 
 
 @pytest.mark.parametrize(
-    "context",
-    ["rnafusion_context", "taxprofiler_context"],
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 def test_report_deliver_with_missing_case(
     cli_runner: CliRunner,
-    context: CGConfig,
+    workflow: Workflow,
     caplog: LogCaptureFixture,
     case_id_does_not_exist: str,
-    request,
+    request: FixtureRequest,
 ):
     """Test report-deliver command for workflow with invalid case to start with."""
     caplog.set_level(logging.WARNING)
-    context = request.getfixturevalue(context)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
-    # GIVEN case_id not in database
+    # GIVEN a case id not present in StatusDB
     assert not context.status_db.get_case_by_internal_id(internal_id=case_id_does_not_exist)
 
     # WHEN generating deliverables file
-    result = cli_runner.invoke(report_deliver, [case_id_does_not_exist], obj=context)
+    result = cli_runner.invoke(
+        workflow_cli, [workflow, "report-deliver", case_id_does_not_exist], obj=context
+    )
 
     # THEN command should NOT succeed
     assert result.exit_code != EXIT_SUCCESS
@@ -66,25 +71,27 @@ def test_report_deliver_with_missing_case(
 
 
 @pytest.mark.parametrize(
-    "context",
-    ["rnafusion_context", "taxprofiler_context"],
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 def test_report_deliver_without_samples(
     cli_runner: CliRunner,
-    context: CGConfig,
+    workflow: Workflow,
     caplog: LogCaptureFixture,
     no_sample_case_id: str,
-    request,
+    request: FixtureRequest,
 ):
     """Test report-deliver command for workflow with case id and no samples."""
     caplog.set_level(logging.ERROR)
-    context = request.getfixturevalue(context)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
-    # GIVEN case-id
+    # GIVEN a case id
     case_id: str = no_sample_case_id
 
-    # WHEN generating deliverables with dry specified
-    result = cli_runner.invoke(report_deliver, [case_id, "--dry-run"], obj=context)
+    # WHEN generating deliverables with dry-run specified
+    result = cli_runner.invoke(
+        workflow_cli, [workflow, "report-deliver", case_id, "--dry-run"], obj=context
+    )
 
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -94,41 +101,25 @@ def test_report_deliver_without_samples(
 
 
 @pytest.mark.parametrize(
-    ("context", "case_id", "deliverables_file_path", "mock_analysis_finish"),
-    [
-        (
-            "taxprofiler_context",
-            "taxprofiler_case_id",
-            "taxprofiler_deliverables_file_path",
-            "taxprofiler_mock_analysis_finish",
-        ),
-        (
-            "rnafusion_context",
-            "rnafusion_case_id",
-            "rnafusion_deliverables_file_path",
-            "rnafusion_mock_analysis_finish",
-        ),
-    ],
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 def test_report_deliver_successful(
     cli_runner: CliRunner,
-    context: CGConfig,
-    case_id: str,
-    deliverables_file_path: Path,
-    deliverables_template_content: list[dict],
-    mock_analysis_finish,
+    workflow: Workflow,
     caplog: LogCaptureFixture,
+    deliverables_template_content: list[dict],
     mocker,
-    request,
+    request: FixtureRequest,
 ):
     """Test that deliverable files is properly created on a valid and successful run for workflow."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN each fixture is being initialised
-    context: CGConfig = request.getfixturevalue(context)
-    deliverables_file_path: dict = request.getfixturevalue(deliverables_file_path)
-    case_id: str = request.getfixturevalue(case_id)
-    request.getfixturevalue(mock_analysis_finish)
+    # GIVEN deliverable files for a case and workflow
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
+    case_id: str = request.getfixturevalue(f"{workflow}_case_id")
+    deliverables_file_path: Path = request.getfixturevalue(f"{workflow}_deliverables_file_path")
+    request.getfixturevalue(f"{workflow}_mock_analysis_finish")
 
     # GIVEN a successful run
 
@@ -140,7 +131,7 @@ def test_report_deliver_successful(
     )
 
     # WHEN running the command
-    result = cli_runner.invoke(report_deliver, [case_id], obj=context)
+    result = cli_runner.invoke(workflow_cli, [workflow, "report-deliver", case_id], obj=context)
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
