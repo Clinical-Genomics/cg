@@ -5,19 +5,20 @@ from click.testing import CliRunner
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.constants import Workflow
+from cg.cli.workflow.base import workflow as workflow_cli
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],#,  Workflow.TOMTE],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 
-def test_workflow_no_args(cli_runner: CliRunner, workflow: Workflow ):
+def test_workflow_no_args(cli_runner: CliRunner, workflow: Workflow, request ):
     """Test to see that running workflow without options prints help and doesn't result in an error."""
     context = request.getfixturevalue(f"{workflow}_context")
     # GIVEN no arguments or options besides the command call
 
     # WHEN running command
-    result = cli_runner.invoke(workflow, [], obj=context)
+    result = cli_runner.invoke(workflow_cli, [workflow], obj=context)
 
     # THEN command runs successfully
     assert result.exit_code == EXIT_SUCCESS
