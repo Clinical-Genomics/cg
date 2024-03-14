@@ -369,9 +369,16 @@ class NfAnalysisAPI(AnalysisAPI):
         except FileNotFoundError as error:
             LOG.error(f"Could not resume analysis: {error}")
             raise FileNotFoundError
+        except ValueError as error:
+            LOG.error(f"Could not run analysis: {error}")
+            raise ValueError
+        except CgError as error:
+            LOG.error(f"Could not run analysis: {error}")
+            raise CgError
         except Exception as error:
             LOG.error(f"Could not run analysis: {error}")
             raise Exception
+
         if not dry_run:
             self.add_pending_trailblazer_analysis(case_id=case_id)
 
