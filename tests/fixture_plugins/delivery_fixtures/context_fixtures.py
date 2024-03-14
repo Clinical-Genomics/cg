@@ -28,22 +28,20 @@ def delivery_housekeeper_api(
 
 
 @pytest.fixture
-def delivery_context_balsamic(
+def delivery_store_balsamic(
     cg_context: CGConfig,
-    delivery_housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
-    case_id: str,
     no_sample_case_id: str,
+    case_id: str,
     case_name: str,
     sample_id: str,
     another_sample_id: str,
     sample_name: str,
     another_sample_name: str,
     wgs_application_tag: str,
-) -> CGConfig:
-    """Delivery API context."""
+) -> Store:
+    """Delivery API StatusDB context for Balsamic."""
     status_db: Store = cg_context.status_db
-    cg_context.housekeeper_api_ = delivery_housekeeper_api
 
     # Error case without samples
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
@@ -75,13 +73,12 @@ def delivery_context_balsamic(
     for sample_balsamic in [sample, another_sample]:
         helpers.add_relationship(status_db, case=case, sample=sample_balsamic)
 
-    return cg_context
+    return status_db
 
 
 @pytest.fixture
-def delivery_context_microsalt(
+def delivery_store_microsalt(
     cg_context: CGConfig,
-    delivery_housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
     case_id: str,
     no_sample_case_id: str,
@@ -94,10 +91,9 @@ def delivery_context_microsalt(
     sample_name: str,
     another_sample_name: str,
     microbial_application_tag: str,
-) -> CGConfig:
-    """Delivery API context."""
+) -> Store:
+    """Delivery API StatusDB context for MicroSALT."""
     status_db: Store = cg_context.status_db
-    cg_context.housekeeper_api_ = delivery_housekeeper_api
 
     # Error case without samples
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
@@ -138,4 +134,28 @@ def delivery_context_microsalt(
     for sample_microsalt in [sample, another_sample, sample_not_enough_reads]:
         helpers.add_relationship(status_db, case=case, sample=sample_microsalt)
 
+    return status_db
+
+
+@pytest.fixture
+def delivery_context_balsamic(
+    cg_context: CGConfig,
+    delivery_housekeeper_api: HousekeeperAPI,
+    delivery_store_balsamic: Store,
+) -> CGConfig:
+    """Delivery API Balsamic context."""
+    cg_context.housekeeper_api_ = delivery_housekeeper_api
+    cg_context.status_db_ = delivery_store_balsamic
+    return cg_context
+
+
+@pytest.fixture
+def delivery_context_microsalt(
+    cg_context: CGConfig,
+    delivery_housekeeper_api: HousekeeperAPI,
+    delivery_store_microsalt: Store,
+) -> CGConfig:
+    """Delivery API MicroSALT context."""
+    cg_context.housekeeper_api_ = delivery_housekeeper_api
+    cg_context.status_db_ = delivery_store_microsalt
     return cg_context
