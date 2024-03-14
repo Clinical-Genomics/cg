@@ -147,7 +147,7 @@ class HousekeeperAPI:
         return file
 
     @staticmethod
-    def get_files_from_version(version: Version, tags: set[str]) -> list[File]:
+    def get_files_from_version(version: Version, tags: set[str]) -> list[File] | None:
         """Return a list of files associated with the given version and tags."""
         LOG.debug(f"Getting files from version with tags {tags}")
         files: list[File] = []
