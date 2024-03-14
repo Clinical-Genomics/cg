@@ -1,16 +1,16 @@
 from typing import Callable
 
-from cg.meta.workflow.pre_analysis_quality_check.quality_controller.quality_controller import (
+from cg.services.pre_analysis_quality_check.quality_controller.quality_controller import (
     QualityController,
 )
-from cg.meta.workflow.pre_analysis_quality_check.sequencing_quality_metrics.constants import (
+from cg.services.pre_analysis_quality_check.sequencing_quality_metrics.constants import (
     CASE_SEQUENCING_QUALITY_CHECKS,
     SAMPLE_SEQUENCING_QUALITY_CHECKS,
 )
 from cg.store.models import Case, Sample
 
 
-def _get_sequencing_quality_checks_for_case(
+def get_sequencing_quality_checks_for_case(
     data_analysis: str,
 ) -> list[Callable] | None:
     sequencing_quality_checks: list[Callable] | None = CASE_SEQUENCING_QUALITY_CHECKS.get(
@@ -33,7 +33,7 @@ def run_pre_analysis_quality_check(
 def run_case_pre_analysis_quality_check(
     case: Case,
 ) -> bool:
-    sequencing_quality_checks: list[Callable] | None = _get_sequencing_quality_checks_for_case(
+    sequencing_quality_checks: list[Callable] = get_sequencing_quality_checks_for_case(
         case.data_analysis
     )
 
