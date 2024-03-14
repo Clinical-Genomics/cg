@@ -16,7 +16,7 @@ from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.meta.workflow.microsalt.quality_controller import QualityController
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.meta.workflow.microsalt.utils import get_most_recent_project_directory
-from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import (
+from cg.services.pre_analysis_quality_check.quality_controller.utils import (
     run_sample_sequencing_quality_check,
 )
 from cg.models.cg_config import CGConfig

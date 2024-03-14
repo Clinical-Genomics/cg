@@ -244,7 +244,7 @@ def test_is_case_ready_for_analysis_true(
     ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=False):
         # WHEN running is_case_ready_for_analysis
         # THEN the result should be true
-        assert mip_analysis_api.is_case_ready_for_analysis(case_id=case.internal_id)
+        assert mip_analysis_api.is_raw_data_ready_for_analysis(case_id=case.internal_id)
 
 
 def test_is_case_ready_for_analysis_decompression_needed(
@@ -271,7 +271,7 @@ def test_is_case_ready_for_analysis_decompression_needed(
     ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=False):
         # WHEN running is_case_ready_for_analysis
         # THEN the result should be false
-        assert not mip_analysis_api.is_case_ready_for_analysis(case_id=case.internal_id)
+        assert not mip_analysis_api.is_raw_data_ready_for_analysis(case_id=case.internal_id)
 
 
 def test_is_case_ready_for_analysis_decompression_running(
@@ -301,7 +301,7 @@ def test_is_case_ready_for_analysis_decompression_running(
     ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=True):
         # WHEN running is_case_ready_for_analysis
         # THEN the result should be false
-        assert not mip_analysis_api.is_case_ready_for_analysis(case_id=case.internal_id)
+        assert not mip_analysis_api.is_raw_data_ready_for_analysis(case_id=case.internal_id)
 
 
 @pytest.mark.parametrize(

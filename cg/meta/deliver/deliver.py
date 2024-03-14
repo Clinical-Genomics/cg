@@ -13,6 +13,9 @@ from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery, Workflow
 from cg.exc import MissingFilesError
 from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.pre_analysis_quality_check.quality_controller.utils import (
+    run_sample_sequencing_quality_check,
+)
 from cg.meta.deliver.fastq_path_generator import (
     generate_forward_concatenated_fastq_delivery_path,
     generate_reverse_concatenated_fastq_delivery_path,
@@ -132,8 +135,11 @@ class DeliverAPI:
     def sample_is_deliverable(self, link: CaseSample) -> bool:
         sample_is_external: bool = link.sample.application_version.application.is_external
         deliver_failed_samples: bool = self.deliver_failed_samples
-        sample_passes_qc: bool = link.sample.sequencing_qc
-        return sample_passes_qc or deliver_failed_samples or sample_is_external
+        sample_passes_sequencing_quality_check: bool = run_sample_sequencing_quality_check(
+            sample=link.sample
+        )
+
+        return sample_passes_sequencing_quality_check or deliver_failed_samples or sample_is_external
 
     def deliver_case_files(
         self, case_id: str, case_name: str, version: Version, sample_ids: set[str]

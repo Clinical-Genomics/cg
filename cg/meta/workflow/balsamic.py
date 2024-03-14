@@ -16,7 +16,7 @@ from cg.constants.subject import Sex
 from cg.constants.tb import AnalysisStatus
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
-from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import (
+from cg.services.pre_analysis_quality_check.quality_controller.utils import (
     run_case_pre_analysis_quality_check,
 )
 from cg.meta.workflow.analysis import AnalysisAPI

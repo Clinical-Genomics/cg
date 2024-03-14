@@ -22,7 +22,7 @@ from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, 
 from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
-from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import (
+from cg.services.pre_analysis_quality_check.quality_controller.utils import (
     run_case_pre_analysis_quality_check,
 )
 from cg.meta.workflow.fastq import FastqHandler
@@ -522,7 +522,7 @@ class AnalysisAPI(MetaAPI):
         if not self.status_db.are_all_flow_cells_on_disk(case_id=case_id):
             self.status_db.request_flow_cells_for_case(case_id)
 
-    def is_case_ready_for_analysis(self, case_id: str) -> bool:
+    def is_raw_data_ready_for_analysis(self, case_id: str) -> bool:
         """Returns True if no files need to be retrieved from an external location and if all Spring files are
         decompressed."""
         if self.does_any_file_need_to_be_retrieved(case_id):
@@ -552,7 +552,7 @@ class AnalysisAPI(MetaAPI):
         is raised."""
         self.ensure_files_are_present(case_id)
         self.resolve_decompression(case_id=case_id, dry_run=dry_run)
-        if not self.is_case_ready_for_analysis(case_id):
+        if not self.is_raw_data_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
 
     def ensure_files_are_present(self, case_id: str):

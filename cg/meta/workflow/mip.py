@@ -12,7 +12,7 @@ from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI, add_gene_panel_combo
-from cg.meta.workflow.pre_analysis_quality_check.quality_controller.utils import (
+from cg.services.pre_analysis_quality_check.quality_controller.utils import (
     run_case_pre_analysis_quality_check,
 )
 from cg.meta.workflow.fastq import MipFastqHandler
