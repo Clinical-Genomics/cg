@@ -158,6 +158,7 @@ class HousekeeperAPI:
                 files.append(file)
         if not files:
             LOG.warning(f"Could not find any files matching the tags {tags}")
+            return None
         return files
 
     @staticmethod
