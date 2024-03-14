@@ -67,7 +67,7 @@ from tests.store_helpers import StoreHelpers
 LOG = logging.getLogger(__name__)
 multiqc_json_file = "multiqc_data.json"
 software_version_file = "software_versions.yml"
-
+deliverables_yaml = "_deliverables.yaml"
 pytest_plugins = [
     "tests.fixture_plugins.timestamp_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.flow_cell_fixtures",
@@ -2392,7 +2392,7 @@ def mock_deliverable(
         content=deliverable_data,
         file_format=FileFormat.JSON,
         file_path=Path(
-            raredisease_dir, raredisease_case_id, raredisease_case_id + "_deliverables.yaml"
+            raredisease_dir, raredisease_case_id, raredisease_case_id + deliverables_yaml
         ),
     )
 
@@ -2690,7 +2690,7 @@ def rnafusion_mock_deliverable_dir(
     WriteFile.write_file_from_content(
         content=rnafusion_deliverable_data,
         file_format=FileFormat.JSON,
-        file_path=Path(rnafusion_dir, rnafusion_case_id, rnafusion_case_id + "_deliverables.yaml"),
+        file_path=Path(rnafusion_dir, rnafusion_case_id, rnafusion_case_id + deliverables_yaml),
     )
 
     return rnafusion_dir
@@ -2990,7 +2990,7 @@ def taxprofiler_mock_deliverable_dir(
         content=taxprofiler_deliverable_data,
         file_format=FileFormat.JSON,
         file_path=Path(
-            taxprofiler_dir, taxprofiler_case_id, taxprofiler_case_id + "_deliverables.yaml"
+            taxprofiler_dir, taxprofiler_case_id, taxprofiler_case_id + deliverables_yaml
         ),
     )
     return taxprofiler_dir
