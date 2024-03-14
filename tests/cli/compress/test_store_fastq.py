@@ -4,7 +4,7 @@ import logging
 
 from click.testing import CliRunner
 
-from cg.cli.store.fastq import store_case
+from cg.cli.store.store import store_case
 from cg.models.cg_config import CGConfig
 
 

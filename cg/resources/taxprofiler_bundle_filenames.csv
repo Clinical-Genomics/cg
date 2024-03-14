@@ -52,12 +52,6 @@
   path_index: ~
   step: report
   tag: multiqc-html
-- format: csv
-  id: CASEID
-  path: PATHTOCASE/pipeline_info/samplesheet.valid.csv
-  path_index: ~
-  step: samplesheet-valid
-  tag: samplesheet-valid
 - format: yml
   id: CASEID
   path: PATHTOCASE/pipeline_info/software_versions.yml
