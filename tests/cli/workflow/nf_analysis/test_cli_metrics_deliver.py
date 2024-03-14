@@ -6,23 +6,23 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
-from cg.cli.workflow.rnafusion.base import metrics_deliver
-from cg.constants import EXIT_SUCCESS
+from cg.cli.workflow.base import workflow as workflow_cli
+from cg.constants import EXIT_SUCCESS, Workflow
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
 
 @pytest.mark.parametrize(
-    "context",
-    ["rnafusion_context", "taxprofiler_context"],
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
-def test_metrics_deliver_without_options(cli_runner: CliRunner, context: CGConfig, request):
+def test_metrics_deliver_without_options(cli_runner: CliRunner, workflow: Workflow, request):
     """Test metrics-deliver for Taxprofiler and Rnafusion without options."""
-    context = request.getfixturevalue(context)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
     # WHEN dry running without anything specified
-    result = cli_runner.invoke(metrics_deliver, obj=context)
+    result = cli_runner.invoke(workflow_cli, [workflow, "metrics-deliver"], obj=context)
 
     # THEN command should not exit successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -32,25 +32,27 @@ def test_metrics_deliver_without_options(cli_runner: CliRunner, context: CGConfi
 
 
 @pytest.mark.parametrize(
-    "context",
-    ["rnafusion_context", "taxprofiler_context"],
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 def test_metrics_deliver_with_missing_case(
     cli_runner: CliRunner,
     caplog: LogCaptureFixture,
     case_id_does_not_exist: str,
-    context: CGConfig,
+    workflow: Workflow,
     request,
 ):
     """Test metrics-deliver for Taxprofiler and Rnafusion with a missing case."""
     caplog.set_level(logging.ERROR)
-    context = request.getfixturevalue(context)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
     # GIVEN a case not in the StatusDB database
     assert not context.status_db.get_case_by_internal_id(internal_id=case_id_does_not_exist)
 
     # WHEN running
-    result = cli_runner.invoke(metrics_deliver, [case_id_does_not_exist], obj=context)
+    result = cli_runner.invoke(
+        workflow_cli, [workflow, "metrics-deliver", case_id_does_not_exist], obj=context
+    )
 
     # THEN command should not exit successfully
     assert result.exit_code != EXIT_SUCCESS
