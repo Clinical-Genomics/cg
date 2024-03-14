@@ -54,7 +54,7 @@ def test_report_deliver_with_missing_case(
     caplog.set_level(logging.WARNING)
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
-    # GIVEN case_id not in database
+    # GIVEN a case id not present in StatusDB
     assert not context.status_db.get_case_by_internal_id(internal_id=case_id_does_not_exist)
 
     # WHEN generating deliverables file
