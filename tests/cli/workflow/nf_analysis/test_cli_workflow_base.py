@@ -6,10 +6,11 @@ from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.constants import Workflow
 from cg.cli.workflow.base import workflow as workflow_cli
+import pytest
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 
 def test_workflow_no_args(cli_runner: CliRunner, workflow: Workflow, request ):
