@@ -1,4 +1,6 @@
 import logging
+import click
+from pydantic.v1 import ValidationError
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -7,7 +9,7 @@ from cg.constants import Workflow
 from cg.constants.constants import FileExtensions, FileFormat, MultiQC, WorkflowManager
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.tb import AnalysisStatus
-from cg.exc import CgError, MetricsQCError
+from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.txt import write_txt
 from cg.io.yaml import write_yaml_nextflow_style
@@ -472,3 +474,26 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.info(
             f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
         )
+
+    def store_analysis_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
+        """Store a finished nextflow analysis in Housekeeper and StatusDB"""
+
+        try:
+            self.status_db.verify_case_exists(case_internal_id=case_id)
+            self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+            self.verify_deliverables_file_exists(case_id=case_id)
+            self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run)
+            self.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
+            self.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
+        except ValidationError as error:
+            raise HousekeeperStoreError(f"Deliverables file is malformed: {error}")
+        except CgError as error:
+            raise HousekeeperStoreError(
+                f"Could not store bundle in Housekeeper and StatusDB: {error}"
+            )
+        except Exception as error:
+            self.housekeeper_api.rollback()
+            self.status_db.session.rollback()
+            raise HousekeeperStoreError(
+                f"Could not store bundle in Housekeeper and StatusDB: {error}"
+            )
