@@ -1,11 +1,8 @@
 """Module to test the arnold api client."""
 
-from http import HTTPStatus
-
 import pytest
 import requests
 from pytest_mock import MockFixture
-from requests import Response
 
 from cg.clients.arnold.api import ArnoldAPIClient
 from cg.clients.arnold.dto.create_case_request import CreateCaseRequest
@@ -23,13 +20,11 @@ def test_create_case_successful(
     mocked_post.return_value = mock_post_request_ok
 
     # WHEN creating a case
-    jobs_response: Response = arnold_client.create_case(create_case_request)
+    arnold_client.create_case(create_case_request)
 
     # THEN  a case request is sent
-    assert jobs_response.status_code == HTTPStatus.OK
     mocked_post.assert_called_once_with(
-        f"{arnold_client.api_url}/case/",
-        data=create_case_request,
+        f"{arnold_client.api_url}/case/", data=create_case_request.model_dump_json(), verify=True
     )
 
 
