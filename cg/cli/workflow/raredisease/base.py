@@ -95,20 +95,23 @@ def run(
 ) -> None:
     """Run raredisease analysis for given CASE ID."""
     analysis_api: RarediseaseAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    analysis_api.run_nextflow_analysis(
-        case_id=case_id,
-        dry_run=dry_run,
-        log=log,
-        work_dir=work_dir,
-        from_start=from_start,
-        profile=profile,
-        config=config,
-        params_file=params_file,
-        revision=revision,
-        compute_env=compute_env,
-        use_nextflow=use_nextflow,
-        nf_tower_id=nf_tower_id,
-    )
+    try:
+        analysis_api.run_nextflow_analysis(
+            case_id=case_id,
+            dry_run=dry_run,
+            log=log,
+            work_dir=work_dir,
+            from_start=from_start,
+            profile=profile,
+            config=config,
+            params_file=params_file,
+            revision=revision,
+            compute_env=compute_env,
+            use_nextflow=use_nextflow,
+            nf_tower_id=nf_tower_id,
+        )
+    except FileNotFoundError or Exception:
+        click.Abort()
 
 
 @raredisease.command("panel")

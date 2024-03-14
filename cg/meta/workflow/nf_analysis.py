@@ -371,7 +371,7 @@ class NfAnalysisAPI(AnalysisAPI):
             raise FileNotFoundError
         except Exception as error:
             LOG.error(f"Could not run analysis: {error}")
-            raise error
+            raise Exception
         if not dry_run:
             self.add_pending_trailblazer_analysis(case_id=case_id)
 
