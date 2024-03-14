@@ -164,13 +164,13 @@ class HousekeeperAPI:
     @staticmethod
     def get_file_from_version(version: Version, tags: set[str]) -> File | None:
         """Return the first file matching the given tags."""
-        files: list[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
+        files: list[File] | None = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
         return files[0] if files else None
 
     @staticmethod
     def get_latest_file_from_version(version: Version, tags: set[str]) -> File | None:
         """Return the latest file from Housekeeper given its version and tags."""
-        files: list[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
+        files: list[File] | None = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
         return sorted(files, key=lambda file_obj: file_obj.id)[-1] if files else None
 
     def rollback(self):
