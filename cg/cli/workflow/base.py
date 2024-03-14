@@ -15,6 +15,7 @@ from cg.cli.workflow.mutant.base import mutant
 from cg.cli.workflow.raredisease.base import raredisease
 from cg.cli.workflow.rnafusion.base import rnafusion
 from cg.cli.workflow.taxprofiler.base import taxprofiler
+from cg.cli.workflow.tomte.base import tomte
 
 
 @click.group()
@@ -35,3 +36,4 @@ workflow.add_command(rnafusion)
 workflow.add_command(raredisease)
 workflow.add_command(taxprofiler)
 workflow.add_command(fastq)
+workflow.add_command(tomte)
