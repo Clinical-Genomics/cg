@@ -31,7 +31,6 @@ from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.nf_analysis import NfCommandArgs
 
 LOG = logging.getLogger(__name__)
 
