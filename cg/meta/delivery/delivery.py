@@ -55,7 +55,7 @@ class DeliveryAPI:
     @staticmethod
     def is_sample_deliverable(sample: Sample, force: bool = False) -> bool:
         """
-        Return whether the sample is deliverable or not. A sample is deliverable if it passes qc
+        Return whether the sample is deliverable or not. A sample is deliverable if it passes QC
         or is external. The force parameter can be used to override checks.
         """
         is_external: bool = sample.application_version.application.is_external
