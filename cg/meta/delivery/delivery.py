@@ -43,12 +43,12 @@ class DeliveryAPI:
         return PIPELINE_ANALYSIS_TAG_MAP[workflow]["sample_tags"]
 
     @staticmethod
-    def is_fastq_delivery(data_delivery: DataDelivery):
+    def is_fastq_delivery(data_delivery: DataDelivery) -> bool:
         """Return whether FASTQs should be delivered."""
         return DataDelivery.FASTQ in data_delivery
 
     @staticmethod
-    def is_analysis_delivery(data_delivery: DataDelivery):
+    def is_analysis_delivery(data_delivery: DataDelivery) -> bool:
         """Return whether analysis files should be delivered."""
         return DataDelivery.ANALYSIS_FILES in data_delivery
 
