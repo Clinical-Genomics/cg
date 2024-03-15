@@ -13,6 +13,7 @@ from tests.conftest import create_process_response
 
 SUBPROCESS_RUN_FUNCTION_NAME: str = "cg.utils.commands.subprocess.run"
 
+
 def test_panel_dry_run(
     raredisease_case_id: str,
     cli_runner: CliRunner,

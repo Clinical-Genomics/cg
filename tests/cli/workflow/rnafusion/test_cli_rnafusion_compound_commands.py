@@ -18,6 +18,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
+
 def test_start(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,

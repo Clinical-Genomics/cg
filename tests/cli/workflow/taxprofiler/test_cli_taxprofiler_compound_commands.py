@@ -9,6 +9,7 @@ from cg.exc import CgError
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
 
+
 def test_taxprofiler_start(
     cli_runner: CliRunner,
     taxprofiler_context: CGConfig,
