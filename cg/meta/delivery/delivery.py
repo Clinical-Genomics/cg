@@ -70,17 +70,17 @@ class DeliveryAPI:
         external_id: str,
         analysis_sample_files: bool = False,
     ) -> list[DeliveryFile]:
-        """Return a delivery file model given a list of housekeeper files."""
+        """Return a populated delivery file object given a list of Housekeeper files."""
         delivery_files: list[DeliveryFile] = []
-        destination_path: Path = Path(
+        destination_path = Path(
             self.delivery_path, case.customer.internal_id, INBOX_NAME, case.latest_ticket
         )
-        subfolder: Path = Path(external_id)
+        subfolder = Path(external_id)
         if analysis_sample_files:
-            subfolder: Path = Path(case.name, external_id)
+            subfolder = Path(case.name, external_id)
         for file in files:
             destination_file_name: str = Path(file.full_path).name.replace(internal_id, external_id)
-            destination_path: Path = Path(destination_path, subfolder, destination_file_name)
+            destination_path = Path(destination_path, subfolder, destination_file_name)
             delivery_file = DeliveryFile(
                 source_path=Path(file.full_path), destination_path=destination_path
             )
