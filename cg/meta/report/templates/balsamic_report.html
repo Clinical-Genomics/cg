@@ -66,7 +66,7 @@
               <tr>
                 <th>Prov</th>
                 <th>Beställt</th>
-                <th>Case</th>
+                <th>Fall</th>
                 <th>Kön</th>
                 <th>Provtyp</th>
                 <th>Ticket</th>
@@ -137,7 +137,7 @@
           <table class="table table-bordered" aria-describedby="Case table">
             <thead>
               <tr>
-                <th>Case</th>
+                <th>Fall</th>
                 <th>Balsamic-version</th>
                 <th>Genomversion</th>
                 <th>Analystyp</th>
@@ -256,6 +256,53 @@
             </div>
           </div>
         {% endif %}
+
+        {% if "analysis" in case.data_analysis.data_delivery or "fastq" in case.data_analysis.data_delivery %}
+	        <div class="card-block">
+            <h4 class="card-title">Caesar</h4>
+            <div class="card-text">
+	            <p>Filer som laddats upp till din inkorg:</p>
+	            <ul>
+	              {% if "analysis" in case.data_analysis.data_delivery %}
+		              <li><b>Analysfiler</b>:</li>
+		              <ul>
+		                {% if case.data_analysis.delivered_files != 'N/A' %}
+			                <li><b>Fall</b>: {{ case.name }}</li>
+				 				      <ul>
+				 					      {% for file in case.data_analysis.delivered_files %}
+                          <li>{{ file }}</li>
+                        {% endfor %}
+				              </ul>
+		                {% endif %}
+			              {% for sample in case.samples %}
+				              {% if sample.delivered_files != 'N/A' %}
+				 				        <li><b>Prov</b>: {{ sample.name }}</li>
+				                <ul>
+				 					        {% for file in sample.delivered_files %}
+                            <li>{{ file }}</li>
+                          {% endfor %}
+				                </ul>
+				              {% endif %}
+			              {% endfor %}
+		              </ul>
+		            {% endif %}
+	              {% if "fastq" in case.data_analysis.data_delivery %}
+			            <li><b>Fastq-filer</b>:</li>
+	                <ul>
+			              {% for sample in case.samples %}
+				 				      <li><b>Prov</b>: {{ sample.name }}</li>
+				              <ul>
+				 	              {% for file in sample.delivered_fastq_files %}
+                          <li>{{ file }}</li>
+                        {% endfor %}
+				              </ul>
+			              {% endfor %}
+	                </ul>
+		            {% endif %}
+	            </ul>
+            </div>
+	        </div>
+				{% endif %}
 
         {% for application in case.applications %}
           <div class="card-block">
