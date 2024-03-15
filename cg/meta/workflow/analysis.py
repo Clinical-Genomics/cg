@@ -101,12 +101,12 @@ class AnalysisAPI(MetaAPI):
             cases_ready_for_analysis: list of cases that are ready for analysis
         """
         cases_to_analyze = self.get_cases_to_analyze()
-        cases_ready_for_analysis = []
+        cases_passing_pre_analysis_quality_check: list[Case] = []
         for case in cases_to_analyze:
             quality_check_passed: bool = run_case_pre_analysis_quality_check(case)
             if quality_check_passed:
-                cases_ready_for_analysis.append(case)
-        return cases_ready_for_analysis
+                cases_passing_pre_analysis_quality_check.append(case)
+        return cases_passing_pre_analysis_quality_check
 
     def get_priority_for_case(self, case_id: str) -> int:
         """Get priority from the status db case priority"""
@@ -353,9 +353,9 @@ class AnalysisAPI(MetaAPI):
             )
             destination_path = Path(fastq_dir, fastq_file_name)
             linked_reads_paths[fastq_file.read_direction].append(destination_path)
-            concatenated_paths[fastq_file.read_direction] = (
-                f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_file_name)}"
-            )
+            concatenated_paths[
+                fastq_file.read_direction
+            ] = f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_file_name)}"
 
             if not destination_path.exists():
                 LOG.info(f"Linking: {fastq_file.path} -> {destination_path}")

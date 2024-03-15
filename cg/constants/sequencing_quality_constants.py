@@ -1,7 +1,7 @@
 from typing import Callable
 
 from cg.constants.constants import Workflow
-from cg.services.pre_analysis_quality_check.sequencing_quality_metrics.utils import (
+from cg.services.pre_analysis_quality_check.sequencing_quality_checks.utils import (
     any_sample_in_case_has_reads,
     express_sample_has_enough_reads,
     get_express_sequencing_qc_of_case,

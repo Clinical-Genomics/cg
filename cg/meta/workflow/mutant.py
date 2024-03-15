@@ -85,7 +85,7 @@ class MutantAnalysisAPI(AnalysisAPI):
                 continue
             sequencing_qc_passed: bool = run_sample_sequencing_quality_check(sample=sample_obj)
             if not sequencing_qc_passed:
-                LOG.info("Sample %s read count below threshold, skipping!", sample_obj.internal_id)
+                LOG.info(f"Sample {sample_obj.internal_id} read count below threshold, skipping!")
                 continue
             self.link_fastq_files_for_sample(case=case_obj, sample=sample_obj, concatenate=True)
 
@@ -134,13 +134,13 @@ class MutantAnalysisAPI(AnalysisAPI):
             )
         config_path = self.get_case_config_path(case_id=case_id)
         if dry_run:
-            LOG.info("Dry-run, would have created config at path %s, with content:", config_path)
+            LOG.info(f"Dry-run, would have created config at path {config_path}, with content:")
             LOG.info(case_config_list)
         config_path.parent.mkdir(parents=True, exist_ok=True)
         WriteFile.write_file_from_content(
             content=case_config_list, file_format=FileFormat.JSON, file_path=config_path
         )
-        LOG.info("Saved config to %s", config_path)
+        LOG.info(f"Saved config to {config_path}")
 
     def get_lims_naming_metadata(self, sample: Sample) -> str | None:
         region_code = self.lims_api.get_sample_attribute(

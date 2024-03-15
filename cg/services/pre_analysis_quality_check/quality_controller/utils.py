@@ -3,7 +3,7 @@ from typing import Callable
 from cg.services.pre_analysis_quality_check.quality_controller.quality_controller import (
     QualityController,
 )
-from cg.services.pre_analysis_quality_check.sequencing_quality_metrics.constants import (
+from cg.constants.sequencing_quality_constants import (
     CASE_SEQUENCING_QUALITY_CHECKS,
     SAMPLE_SEQUENCING_QUALITY_CHECKS,
 )
