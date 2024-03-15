@@ -8,15 +8,12 @@ from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.models.cg_config import CGConfig
 
+
 @pytest.mark.parametrize(
     "workflow",
     [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
-
 )
-
-def test_workflow_no_args(
-        cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest
-):
+def test_workflow_no_args(cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest):
     """Test to assess that Nextflow workflows without options successfully print help and exits without error."""
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
