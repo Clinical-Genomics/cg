@@ -20,6 +20,7 @@ from cg.cli.workflow.nf_analysis import (
     metrics_deliver,
     report_deliver,
     store_housekeeper,
+    store,
 )
 from cg.cli.workflow.taxprofiler.options import (
     OPTION_INSTRUMENT_PLATFORM,
@@ -49,6 +50,7 @@ taxprofiler.add_command(resolve_compression)
 taxprofiler.add_command(metrics_deliver)
 taxprofiler.add_command(report_deliver)
 taxprofiler.add_command(store_housekeeper)
+taxprofiler.add_command(store)
 
 
 @taxprofiler.command("config-case")

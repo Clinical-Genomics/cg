@@ -2814,7 +2814,7 @@ def taxprofiler_mock_analysis_finish(
     Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info", "software_versions.yml").touch(
         exist_ok=True
     )
-    Path(taxprofiler_dir, taxprofiler_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
+    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet.csv").touch(
         exist_ok=True
     )
     Path.mkdir(

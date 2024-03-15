@@ -3,7 +3,7 @@ import logging
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
-from cg.cli.workflow.taxprofiler.base import start, start_available, taxprofiler
+from cg.cli.workflow.taxprofiler.base import start, start_available, taxprofiler, store
 from cg.constants import EXIT_SUCCESS
 from cg.exc import CgError
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
