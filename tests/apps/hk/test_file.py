@@ -718,7 +718,7 @@ def test_filter_files_without_tags(
     # GIVEN a list of fastq file tags to exclude
     excluded_tags: list[set[str]] = [{SequencingFileTag.FASTQ}]
 
-    # WHEN getting a list of files without tags
+    # WHEN getting a list of files lacking excluded tags
     filtered_files: list[File] = populated_housekeeper_api.get_files_without_excluded_tags(
         files=files, excluded_tags=excluded_tags
     )
@@ -729,7 +729,7 @@ def test_filter_files_without_tags(
     assert fastq_file.name not in filtered_files_names
 
 
-def test_get_files_without_excluded_tags(
+def test_get_files_without_excluded_tags_using_no_tags(
     populated_housekeeper_api: HousekeeperAPI, sample_id: str, fastq_file: Path, spring_file: Path
 ):
     """Test get files without tags for an empty tag input."""
@@ -749,7 +749,7 @@ def test_get_files_without_excluded_tags(
 def test_get_files_from_latest_version_with_tags(
     populated_housekeeper_api: HousekeeperAPI, sample_id: str, fastq_file: Path, spring_file: Path
 ):
-    """ "Test get files from latest version by tags."""
+    """Test get files from latest version by tags."""
 
     # GIVEN a populated Housekeeper API
 
@@ -767,10 +767,10 @@ def test_get_files_from_latest_version_with_tags(
     assert spring_file.name not in filtered_files_names
 
 
-def test_get_files_from_latest_version_with_empty_tags(
+def test_get_files_from_latest_version_using_no_tags(
     populated_housekeeper_api: HousekeeperAPI, sample_id: str, fastq_file: Path, spring_file: Path
 ):
-    """Test get files from latest version by empty list of tags."""
+    """Test get files from the latest version by empty list of tags."""
 
     # GIVEN a populated Housekeeper API
 
@@ -786,7 +786,7 @@ def test_get_files_from_latest_version_with_empty_tags(
 def test_get_files_from_latest_version_with_tags_and_excluded_tags(
     populated_housekeeper_api: HousekeeperAPI, sample_id: str, fastq_file: Path, spring_file: Path
 ):
-    """Test get files from latest version by tags and excluded tags."""
+    """Test get files from the latest version by tags and excluded tags."""
 
     # GIVEN a populated Housekeeper API
 
