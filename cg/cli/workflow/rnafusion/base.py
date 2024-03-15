@@ -6,17 +6,14 @@ from pathlib import Path
 import click
 from pydantic.v1 import ValidationError
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
     OPTION_COMPUTE_ENV,
     OPTION_CONFIG,
-    OPTION_FROM_START,
     OPTION_LOG,
     OPTION_PARAMS_FILE,
     OPTION_PROFILE,
     OPTION_REVISION,
-    OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
     metrics_deliver,
@@ -29,12 +26,12 @@ from cg.cli.workflow.rnafusion.options import (
     OPTION_STRANDEDNESS,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
+from cg.constants.constants import DRY_RUN, MetaApis
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.store import Store
+
 
 LOG = logging.getLogger(__name__)
 
