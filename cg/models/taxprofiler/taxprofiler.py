@@ -1,6 +1,5 @@
 from pathlib import Path
-
-from pydantic.v1 import Field, BaseModel
+from pydantic.v1 import BaseModel, Field
 
 from cg.constants.sequencing import SequencingPlatform
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
