@@ -1,4 +1,4 @@
-"""Tests CLI common methods that Nextflow workflows print help and exits without error."""
+"""Tests CLI common methods of Nextflow workflows."""
 
 import pytest
 from _pytest.fixtures import FixtureRequest
