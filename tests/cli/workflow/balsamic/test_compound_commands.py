@@ -129,7 +129,7 @@ def test_start_available(
 
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
-    
+
     # THEN command exits with a successful exit code
     assert result.exit_code == EXIT_SUCCESS
 

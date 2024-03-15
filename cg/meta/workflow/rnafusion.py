@@ -50,8 +50,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.revision: str = config.rnafusion.revision
         self.nextflow_binary_path: str = config.rnafusion.binary_path
 
-
-
     def get_deliverables_template_content(self) -> list[dict]:
         """Return deliverables file template content."""
         return ReadFile.get_content_from_file(

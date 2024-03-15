@@ -139,7 +139,9 @@ class DeliverAPI:
             sample=link.sample
         )
 
-        return sample_passes_sequencing_quality_check or deliver_failed_samples or sample_is_external
+        return (
+            sample_passes_sequencing_quality_check or deliver_failed_samples or sample_is_external
+        )
 
     def deliver_case_files(
         self, case_id: str, case_name: str, version: Version, sample_ids: set[str]
