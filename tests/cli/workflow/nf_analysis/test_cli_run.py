@@ -18,7 +18,7 @@ from cg.models.cg_config import CGConfig
 )
 def test_without_options(cli_runner: CliRunner, context: CGConfig):
     """Test command without case_id argument."""
-    # GIVEN no case_id
+    # GIVEN no case id
     # WHEN dry running without anything specified
     result = cli_runner.invoke(run, obj=context)
     # THEN command should NOT execute successfully
