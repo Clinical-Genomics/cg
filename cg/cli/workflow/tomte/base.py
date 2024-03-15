@@ -1,9 +1,11 @@
 """CLI support to create config and/or start TOMTE."""
 
 import logging
+
 import click
-from cg.meta.workflow.analysis import AnalysisAPI
+
 from cg.constants.constants import MetaApis
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 
 LOG = logging.getLogger(__name__)

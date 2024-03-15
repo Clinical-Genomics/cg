@@ -1,10 +1,12 @@
 """Module for TOMTE Analysis API."""
 import logging
-from cg.models.cg_config import CGConfig
-from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+
 from cg.constants import Workflow
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
+
 
 class TomteAnalysisAPI(NfAnalysisAPI):
     """Handles communication between TOMTE processes
