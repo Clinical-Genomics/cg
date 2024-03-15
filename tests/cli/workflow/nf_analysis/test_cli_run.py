@@ -96,10 +96,10 @@ def test_without_config_dry_run(
     caplog.set_level(logging.ERROR)
     context = request.getfixturevalue(context)
 
-    # GIVEN case-id
+    # GIVEN a case id
     case_id: str = request.getfixturevalue(case_id)
 
-    # WHEN dry running with dry specified
+    # WHEN invoking a command with dry-run specified
     result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=context)
     # THEN command should execute successfully (dry-run)
     assert result.exit_code == EXIT_SUCCESS
@@ -124,7 +124,7 @@ def test_without_config(
     caplog.set_level(logging.ERROR)
     context = request.getfixturevalue(context)
 
-    # GIVEN case-id
+    # GIVEN a case id
     case_id: str = request.getfixturevalue(case_id)
     # WHEN dry running with dry specified
     result = cli_runner.invoke(run, [case_id], obj=context)
@@ -154,11 +154,11 @@ def test_with_config(
     caplog.set_level(logging.INFO)
     context = request.getfixturevalue(context)
 
-    # GIVEN case-id
+    # GIVEN a case id
     case_id: str = request.getfixturevalue(case_id)
     # GIVEN a mocked config
 
-    # WHEN dry running with dry specified
+    # WHEN invoking a command with dry-run specified
     result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=context)
 
     # THEN command should execute successfully
@@ -190,12 +190,12 @@ def test_with_revision(
     caplog.set_level(logging.INFO)
     context = request.getfixturevalue(context)
 
-    # GIVEN case-id
+    # GIVEN a case id
     case_id: str = request.getfixturevalue(case_id)
 
     # GIVEN a mocked config
 
-    # WHEN dry running with dry specified
+    # WHEN invoking a command with dry-run specified
     result = cli_runner.invoke(
         run, [case_id, "--dry-run", "--from-start", "--revision", "2.1.0"], obj=context
     )
@@ -233,7 +233,7 @@ def test_resume_with_id(
 
     # GIVEN a mocked config
 
-    # WHEN dry running with dry specified
+    # WHEN invoking a command with dry-run specified
     result = cli_runner.invoke(run, [case_id, "--nf-tower-id", tower_id, "--dry-run"], obj=context)
 
     # THEN command should execute successfully
@@ -269,7 +269,7 @@ def test_resume_without_id_error(
 
     # GIVEN a mocked config
 
-    # WHEN dry running with dry specified
+    # WHEN invoking a command with dry-run specified
     cli_runner.invoke(run, [case_id, "--dry-run"], obj=context)
 
     # THEN command should raise error
@@ -297,7 +297,7 @@ def test_with_config_use_nextflow(
     caplog.set_level(logging.INFO)
     context = request.getfixturevalue(context)
 
-    # GIVEN a case-id
+    # GIVEN a case id
     case_id: str = request.getfixturevalue(case_id)
 
     # GIVEN a mocked config
