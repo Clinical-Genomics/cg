@@ -2456,6 +2456,7 @@ def rnafusion_context(
 
     return cg_context
 
+
 @pytest.fixture(scope="function")
 def tomte_context(
     cg_context: CGConfig,
@@ -2470,6 +2471,8 @@ def tomte_context(
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = TomteAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
+    return cg_context
+
 
 @pytest.fixture(scope="function")
 def deliverable_data(rnafusion_dir: Path, rnafusion_case_id: str, sample_id: str) -> dict:
