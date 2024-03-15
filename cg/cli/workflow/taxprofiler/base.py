@@ -19,6 +19,7 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_WORKDIR,
     metrics_deliver,
     report_deliver,
+    run,
     store_housekeeper,
 )
 from cg.cli.workflow.taxprofiler.options import (
@@ -46,6 +47,7 @@ def taxprofiler(context: click.Context) -> None:
 taxprofiler.add_command(resolve_compression)
 taxprofiler.add_command(metrics_deliver)
 taxprofiler.add_command(report_deliver)
+taxprofiler.add_command(run)
 taxprofiler.add_command(store_housekeeper)
 
 
@@ -68,53 +70,6 @@ def config_case(
     except (CgError, ValidationError) as error:
         LOG.error(f"Could not create config files for {case_id}: {error}")
         raise click.Abort() from error
-
-
-@taxprofiler.command("run")
-@ARGUMENT_CASE_ID
-@OPTION_LOG
-@OPTION_WORKDIR
-@OPTION_FROM_START
-@OPTION_PROFILE
-@OPTION_CONFIG
-@OPTION_PARAMS_FILE
-@OPTION_REVISION
-@OPTION_COMPUTE_ENV
-@OPTION_USE_NEXTFLOW
-@OPTION_TOWER_RUN_ID
-@DRY_RUN
-@click.pass_obj
-def run(
-    context: CGConfig,
-    case_id: str,
-    log: str,
-    work_dir: str,
-    from_start: bool,
-    profile: str,
-    config: str,
-    params_file: str,
-    revision: str,
-    compute_env: str,
-    use_nextflow: bool,
-    nf_tower_id: str | None,
-    dry_run: bool,
-) -> None:
-    """Run taxprofiler analysis for a case."""
-    analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    analysis_api.run_nextflow_analysis(
-        case_id=case_id,
-        dry_run=dry_run,
-        log=log,
-        work_dir=work_dir,
-        from_start=from_start,
-        profile=profile,
-        config=config,
-        params_file=params_file,
-        revision=revision,
-        compute_env=compute_env,
-        use_nextflow=use_nextflow,
-        nf_tower_id=nf_tower_id,
-    )
 
 
 @taxprofiler.command("start")
