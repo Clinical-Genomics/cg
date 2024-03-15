@@ -375,9 +375,6 @@ class NfAnalysisAPI(AnalysisAPI):
         except CgError as error:
             LOG.error(f"Could not run analysis: {error}")
             raise CgError
-        except Exception as error:
-            LOG.error(f"Could not run analysis: {error}")
-            raise Exception
 
         if not dry_run:
             self.add_pending_trailblazer_analysis(case_id=case_id)
