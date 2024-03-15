@@ -66,7 +66,7 @@ def test_without_samples(
     caplog.set_level(logging.ERROR)
     context = request.getfixturevalue(context)
 
-    # GIVEN case-id
+    # GIVEN a case id
     case_id: str = no_sample_case_id
     # WHEN dry running with dry specified
     result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=context)
