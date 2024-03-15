@@ -2,7 +2,7 @@ import pytest
 from cg.constants.constants import PrepCategory, Workflow
 from cg.constants.priority import Priority
 from cg.store.models import Case, Sample
-from cg.services.pre_analysis_quality_check.sequencing_quality_metrics.utils import (
+from cg.services.pre_analysis_quality_check.sequencing_quality_checks.utils import (
     is_sample_ready_made_library,
     case_has_express_priority,
     sample_has_express_priority,
@@ -17,7 +17,7 @@ from cg.services.pre_analysis_quality_check.sequencing_quality_metrics.utils imp
 )
 from cg.store.store import Store
 from tests.conftest import StoreHelpers
-from tests.meta.workflow.pre_analysis_quality_check.conftest import ScenariosGenerator
+from tests.services.pre_analysis_quality_check.conftest import ScenariosGenerator
 
 
 @pytest.mark.parametrize(
