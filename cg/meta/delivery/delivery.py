@@ -135,7 +135,7 @@ class DeliveryAPI:
     def get_fastq_delivery_files_by_sample(
         self, case: Case, sample: Sample, force: bool = False
     ) -> list[DeliveryFile]:
-        """Return a list of fastq files to be delivered for a specific sample."""
+        """Return a list of FASTQ files to be delivered for a specific sample."""
         delivery_files: list[DeliveryFile] = []
         fastq_tags: list[set[str]] = self.get_analysis_sample_tags_for_workflow(Workflow.FASTQ)
         if not self.is_sample_deliverable(sample=sample, force=force):
@@ -153,7 +153,7 @@ class DeliveryAPI:
         return delivery_files
 
     def get_fastq_delivery_files(self, case: Case, force: bool = False) -> list[DeliveryFile]:
-        """Return a complete list of fastq sample files to be delivered."""
+        """Return a complete list of FASTQ sample files to be delivered."""
         delivery_files: list[DeliveryFile] = []
         for sample in case.samples:
             fastq_delivery_files: list[DeliveryFile] = self.get_fastq_delivery_files_by_sample(
