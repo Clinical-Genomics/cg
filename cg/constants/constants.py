@@ -1,6 +1,6 @@
 """Constants for cg."""
 
-from enum import StrEnum, IntEnum
+from enum import IntEnum, StrEnum
 
 import click
 
@@ -185,8 +185,10 @@ class FileExtensions(StrEnum):
     CRAM: str = ".cram"
     CSV: str = ".csv"
     FASTQ: str = ".fastq"
+    FASTQ_GZ: str = ".fastq.gz"
     GPG: str = ".gpg"
     GZIP: str = ".gz"
+    HTML: str = ".html"
     JSON: str = ".json"
     KEY: str = ".key"
     LOG: str = ".log"
