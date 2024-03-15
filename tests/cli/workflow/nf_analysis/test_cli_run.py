@@ -68,7 +68,7 @@ def test_without_samples(
 
     # GIVEN a case id
     case_id: str = no_sample_case_id
-    # WHEN dry running with dry specified
+    # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=context)
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
