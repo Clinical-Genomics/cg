@@ -6,21 +6,19 @@ from pathlib import Path
 import click
 from pydantic.v1 import ValidationError
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
     OPTION_COMPUTE_ENV,
     OPTION_CONFIG,
-    OPTION_FROM_START,
     OPTION_LOG,
     OPTION_PARAMS_FILE,
     OPTION_PROFILE,
     OPTION_REVISION,
-    OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
     metrics_deliver,
     report_deliver,
+    run,
     store_housekeeper,
 )
 from cg.cli.workflow.rnafusion.options import (
@@ -28,12 +26,12 @@ from cg.cli.workflow.rnafusion.options import (
     OPTION_STRANDEDNESS,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
+from cg.constants.constants import DRY_RUN, MetaApis
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.rnafusion import CommandArgs
+
 
 LOG = logging.getLogger(__name__)
 
@@ -47,6 +45,7 @@ def rnafusion(context: click.Context) -> None:
 
 
 rnafusion.add_command(resolve_compression)
+rnafusion.add_command(run)
 
 
 @rnafusion.command("config-case")
@@ -69,84 +68,6 @@ def config_case(
     except (CgError, ValidationError) as error:
         LOG.error(f"Could not create config files for {case_id}: {error}")
         raise click.Abort() from error
-
-
-@rnafusion.command("run")
-@ARGUMENT_CASE_ID
-@OPTION_LOG
-@OPTION_WORKDIR
-@OPTION_FROM_START
-@OPTION_PROFILE
-@OPTION_CONFIG
-@OPTION_PARAMS_FILE
-@OPTION_REVISION
-@OPTION_COMPUTE_ENV
-@OPTION_USE_NEXTFLOW
-@OPTION_TOWER_RUN_ID
-@DRY_RUN
-@click.pass_obj
-def run(
-    context: CGConfig,
-    case_id: str,
-    log: str,
-    work_dir: str,
-    from_start: bool,
-    profile: str,
-    config: str,
-    params_file: str,
-    revision: str,
-    compute_env: str,
-    use_nextflow: bool,
-    nf_tower_id: str | None,
-    dry_run: bool,
-) -> None:
-    """Run rnafusion analysis for given CASE ID."""
-    analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-
-    command_args: CommandArgs = CommandArgs(
-        **{
-            "log": analysis_api.get_log_path(
-                case_id=case_id, workflow=analysis_api.workflow, log=log
-            ),
-            "work_dir": analysis_api.get_workdir_path(case_id=case_id, work_dir=work_dir),
-            "resume": not from_start,
-            "profile": analysis_api.get_profile(profile=profile),
-            "config": analysis_api.get_nextflow_config_path(
-                case_id=case_id, nextflow_config=config
-            ),
-            "params_file": analysis_api.get_params_file_path(
-                case_id=case_id, params_file=params_file
-            ),
-            "name": case_id,
-            "compute_env": compute_env or analysis_api.get_compute_env(case_id=case_id),
-            "revision": revision or analysis_api.revision,
-            "wait": "SUBMITTED",
-            "id": nf_tower_id,
-        }
-    )
-
-    try:
-        analysis_api.verify_sample_sheet_exists(case_id=case_id, dry_run=dry_run)
-        analysis_api.check_analysis_ongoing(case_id)
-        LOG.info(f"Running RNAFUSION analysis for {case_id}")
-        analysis_api.run_analysis(
-            case_id=case_id, command_args=command_args, use_nextflow=use_nextflow, dry_run=dry_run
-        )
-        analysis_api.set_statusdb_action(
-            case_id=case_id, action=CaseActions.RUNNING, dry_run=dry_run
-        )
-    except FileNotFoundError as error:
-        LOG.error(f"Could not resume analysis: {error}")
-        raise click.Abort() from error
-    except (CgError, ValueError) as error:
-        LOG.error(f"Could not run analysis: {error}")
-        raise click.Abort() from error
-    except Exception as error:
-        LOG.error(f"Could not run analysis: {error}")
-        raise click.Abort() from error
-    if not dry_run:
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
 
 
 @rnafusion.command("start")
