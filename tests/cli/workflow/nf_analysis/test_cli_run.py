@@ -18,7 +18,7 @@ from cg.models.cg_config import CGConfig
 )
 def test_without_options(cli_runner: CliRunner, context: CGConfig):
     """Test command without case_id argument."""
-    # GIVEN no case_id
+    # GIVEN no case id
     # WHEN dry running without anything specified
     result = cli_runner.invoke(run, obj=context)
     # THEN command should NOT execute successfully
@@ -41,7 +41,7 @@ def test_with_missing_case(
     caplog.set_level(logging.ERROR)
     context = request.getfixturevalue(context)
 
-    # GIVEN case_id not in database
+    # GIVEN a case id not in database
     assert not context.status_db.get_case_by_internal_id(internal_id=case_id_does_not_exist)
     # WHEN running
     result = cli_runner.invoke(run, [case_id_does_not_exist], obj=context)
@@ -264,7 +264,7 @@ def test_resume_without_id_error(
     caplog.set_level(logging.INFO)
     context = request.getfixturevalue(context)
 
-    # GIVEN a case-id
+    # GIVEN a case id
     case_id: str = request.getfixturevalue(case_id)
 
     # GIVEN a mocked config
