@@ -691,7 +691,7 @@ def test_get_files_with_tags(
     assert spring_file.name not in filtered_files_names
 
 
-def test_get_files_with_empty_tags(populated_housekeeper_api: HousekeeperAPI, sample_id: str):
+def test_get_files_when_using_no_tags(populated_housekeeper_api: HousekeeperAPI, sample_id: str):
     """Test get files containing an empty list of tags."""
 
     # GIVEN a populated Housekeeper API and a list of sample files
