@@ -66,6 +66,7 @@ def mock_post_request_ok(janus_response: dict, mocker: MockFixture) -> MockFixtu
     mocked_response = mocker.Mock()
     mocked_response.status_code = HTTPStatus.OK
     mocked_response.json.return_value = janus_response
+    mocked_response.verify = False
     return mocked_response
 
 

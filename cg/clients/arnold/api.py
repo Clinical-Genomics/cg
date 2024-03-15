@@ -14,24 +14,25 @@ LOG = logging.getLogger(__name__)
 
 class ArnoldAPIClient:
     def __init__(self, config: dict):
-        self.api_url: str = config["api_url"]
+        self.api_url: str = config["arnold"]["api_url"]
 
-    def create_case(self, case: CreateCaseRequest) -> Response:
+    def create_case(self, case: CreateCaseRequest) -> None:
         endpoint: str = f"{self.api_url}/case/"
         post_request_data: CreateCaseRequest = case
-        response: Response = requests.post(endpoint, data=post_request_data)
+        response: Response = requests.post(
+            endpoint, data=post_request_data.model_dump_json(), verify=True
+        )
         if response.status_code == HTTPStatus.OK:
-            LOG.info(f"Successfully created case for {case.case_id} in Arnold.")
-            return response
+            LOG.info(f"Info {response.content}.")
+            return
         self._handle_errors(response)
 
     @staticmethod
     def _handle_errors(response: Response):
         if HTTPStatus.BAD_REQUEST <= response.status_code < HTTPStatus.INTERNAL_SERVER_ERROR:
-            raise ArnoldClientError(
-                f"Client error: {response.status_code}. Reason {response.content}"
-            )
+            LOG.error(f"Client error: {response.status_code}. Reason {response.content}")
+            raise ArnoldClientError
+
         elif HTTPStatus.INTERNAL_SERVER_ERROR <= response.status_code:
-            raise ArnoldServerError(
-                f"Server error: {response.status_code}. Reason {response.content}"
-            )
+            LOG.error(f"Server error: {response.status_code}. Reason {response.content}")
+            raise ArnoldServerError

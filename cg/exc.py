@@ -126,6 +126,12 @@ class HousekeeperArchiveMissingError(CgError):
     """
 
 
+class HousekeeperStoreError(CgError):
+    """
+    Exception raised when a deliverable file is malformed in Housekeeper.
+    """
+
+
 class LimsDataError(CgError):
     """
     Error related to missing/incomplete data in LIMS.
@@ -141,6 +147,12 @@ class MicrosaltError(CgError):
 class MissingAnalysisRunDirectory(CgError):
     """
     Error related to missing analysis.
+    """
+
+
+class NfAnalysisError(CgError):
+    """
+    Error related to nf analysis.
     """
 
 
