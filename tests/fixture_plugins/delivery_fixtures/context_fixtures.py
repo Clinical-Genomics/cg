@@ -21,9 +21,15 @@ def delivery_housekeeper_api(
     hk_delivery_case_bundle: dict[str, Any],
 ) -> HousekeeperAPI:
     """Delivery API Housekeeper context."""
-    helpers.ensure_hk_bundle(real_housekeeper_api, hk_delivery_sample_bundle, include=True)
-    helpers.ensure_hk_bundle(real_housekeeper_api, hk_delivery_another_sample_bundle, include=True)
-    helpers.ensure_hk_bundle(real_housekeeper_api, hk_delivery_case_bundle, include=True)
+    helpers.ensure_hk_bundle(
+        store=real_housekeeper_api, bundle_data=hk_delivery_sample_bundle, include=True
+    )
+    helpers.ensure_hk_bundle(
+        store=real_housekeeper_api, bundle_data=hk_delivery_another_sample_bundle, include=True
+    )
+    helpers.ensure_hk_bundle(
+        store=real_housekeeper_api, bundle_data=hk_delivery_case_bundle, include=True
+    )
     return real_housekeeper_api
 
 
@@ -44,7 +50,7 @@ def delivery_store_balsamic(
     status_db: Store = cg_context.status_db
 
     # Error case without samples
-    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+    helpers.add_case(store=status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
     # Balsamic case with FASTQ and analysis as data delivery
     case: Case = helpers.add_case(
@@ -71,7 +77,7 @@ def delivery_store_balsamic(
     )
 
     for sample_balsamic in [sample, another_sample]:
-        helpers.add_relationship(status_db, case=case, sample=sample_balsamic)
+        helpers.add_relationship(store=status_db, case=case, sample=sample_balsamic)
 
     return status_db
 
@@ -96,7 +102,7 @@ def delivery_store_microsalt(
     status_db: Store = cg_context.status_db
 
     # Error case without samples
-    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+    helpers.add_case(store=status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
     # MicroSALT case with FASTQ-QC as data delivery
     case: Case = helpers.add_case(
@@ -132,7 +138,7 @@ def delivery_store_microsalt(
     )
 
     for sample_microsalt in [sample, another_sample, sample_not_enough_reads]:
-        helpers.add_relationship(status_db, case=case, sample=sample_microsalt)
+        helpers.add_relationship(store=status_db, case=case, sample=sample_microsalt)
 
     return status_db
 
