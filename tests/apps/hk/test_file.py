@@ -691,17 +691,21 @@ def test_get_files_with_tags(
     assert spring_file.name not in filtered_files_names
 
 
-def test_get_files_when_using_no_tags(populated_housekeeper_api: HousekeeperAPI, sample_id: str):
+def test_get_files_when_using_no_tags(
+    populated_housekeeper_api: HousekeeperAPI, sample_id: str, empty_list: list
+):
     """Test get files containing an empty list of tags."""
 
     # GIVEN a populated Housekeeper API and a list of sample files
     files: list[File] = populated_housekeeper_api.get_files_from_latest_version(sample_id)
 
     # WHEN getting a list of files providing an empty list of tags
-    filtered_files: list[File] = populated_housekeeper_api.get_files_with_tags(files=files, tags=[])
+    filtered_files: list[File] = populated_housekeeper_api.get_files_with_tags(
+        files=files, tags=empty_list
+    )
 
     # THEN an empty list should be returned
-    assert filtered_files == []
+    assert filtered_files == empty_list
 
 
 def test_filter_files_without_tags(
@@ -730,7 +734,11 @@ def test_filter_files_without_tags(
 
 
 def test_get_files_without_excluded_tags_using_no_tags(
-    populated_housekeeper_api: HousekeeperAPI, sample_id: str, fastq_file: Path, spring_file: Path
+    populated_housekeeper_api: HousekeeperAPI,
+    sample_id: str,
+    fastq_file: Path,
+    spring_file: Path,
+    empty_list: list,
 ):
     """Test get files without tags for an empty tag input."""
 
@@ -739,7 +747,7 @@ def test_get_files_without_excluded_tags_using_no_tags(
 
     # WHEN getting a list of files without tags when providing an empty list of tags
     filtered_files: list[File] = populated_housekeeper_api.get_files_without_excluded_tags(
-        files=files, excluded_tags=[]
+        files=files, excluded_tags=empty_list
     )
 
     # THEN the complete list of original files should be returned
@@ -768,7 +776,11 @@ def test_get_files_from_latest_version_with_tags(
 
 
 def test_get_files_from_latest_version_using_no_tags(
-    populated_housekeeper_api: HousekeeperAPI, sample_id: str, fastq_file: Path, spring_file: Path
+    populated_housekeeper_api: HousekeeperAPI,
+    sample_id: str,
+    fastq_file: Path,
+    spring_file: Path,
+    empty_list: list,
 ):
     """Test get files from the latest version by empty list of tags."""
 
@@ -776,11 +788,11 @@ def test_get_files_from_latest_version_using_no_tags(
 
     # WHEN getting a list of files that match empty tags
     filtered_files: list[File] = populated_housekeeper_api.get_files_from_latest_version_with_tags(
-        bundle_name=sample_id, tags=[]
+        bundle_name=sample_id, tags=empty_list
     )
 
     # THEN an empty list should be returned
-    assert filtered_files == []
+    assert filtered_files == empty_list
 
 
 def test_get_files_from_latest_version_with_tags_and_excluded_tags(
