@@ -719,7 +719,7 @@ def test_filter_files_without_tags(
     excluded_tags: list[set[str]] = [{SequencingFileTag.FASTQ}]
 
     # WHEN getting a list of files without tags
-    filtered_files: list[File] = populated_housekeeper_api.filter_files_without_tags(
+    filtered_files: list[File] = populated_housekeeper_api.get_files_without_excluded_tags(
         files=files, excluded_tags=excluded_tags
     )
 
@@ -729,7 +729,7 @@ def test_filter_files_without_tags(
     assert fastq_file.name not in filtered_files_names
 
 
-def test_filter_files_without_tags_empty_tags(
+def test_get_files_without_excluded_tags(
     populated_housekeeper_api: HousekeeperAPI, sample_id: str, fastq_file: Path, spring_file: Path
 ):
     """Test get files without tags for an empty tag input."""
@@ -738,7 +738,7 @@ def test_filter_files_without_tags_empty_tags(
     files: list[File] = populated_housekeeper_api.get_files_from_latest_version(sample_id)
 
     # WHEN getting a list of files without tags when providing an empty list of tags
-    filtered_files: list[File] = populated_housekeeper_api.filter_files_without_tags(
+    filtered_files: list[File] = populated_housekeeper_api.get_files_without_excluded_tags(
         files=files, excluded_tags=[]
     )
 

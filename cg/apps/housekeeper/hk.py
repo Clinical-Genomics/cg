@@ -676,7 +676,9 @@ class HousekeeperAPI:
         return filtered_files
 
     @staticmethod
-    def filter_files_without_tags(files: list[File], excluded_tags: list[set[str]]) -> list[File]:
+    def get_files_without_excluded_tags(
+        files: list[File], excluded_tags: list[set[str]]
+    ) -> list[File]:
         """Return files without specified tags."""
         filtered_files: list[File] = []
         for file in files:
@@ -695,7 +697,7 @@ class HousekeeperAPI:
         files: list[File] = self.get_files_from_latest_version(bundle_name=bundle_name)
         filtered_files: list[File] = self.get_files_with_tags(files=files, tags=tags)
         if excluded_tags:
-            filtered_files: list[File] = self.filter_files_without_tags(
+            filtered_files: list[File] = self.get_files_without_excluded_tags(
                 files=filtered_files, excluded_tags=excluded_tags
             )
         return filtered_files
