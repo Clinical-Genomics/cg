@@ -1,20 +1,18 @@
 """Tests CLI common methods to assess workflow base command for NF analyses."""
 
+import pytest
 from click.testing import CliRunner
 
-from cg.constants import EXIT_SUCCESS
-from cg.models.cg_config import CGConfig
-from cg.constants import Workflow
 from cg.cli.workflow.base import workflow as workflow_cli
-import pytest
+from cg.constants import EXIT_SUCCESS, Workflow
+
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
 )
-
-def test_workflow_no_args(cli_runner: CliRunner, workflow: Workflow, request ):
-    """Test to see that running workflow without options prints help and doesn't result in an error."""
+def test_workflow_no_args(cli_runner: CliRunner, workflow: Workflow, request):
+    """Test to see that workflow is added and prints help when no subcommand is specified."""
     context = request.getfixturevalue(f"{workflow}_context")
     # GIVEN no arguments or options besides the command call
 
