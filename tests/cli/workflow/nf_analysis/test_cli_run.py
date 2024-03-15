@@ -126,7 +126,7 @@ def test_without_config(
 
     # GIVEN a case id
     case_id: str = request.getfixturevalue(case_id)
-    # WHEN dry running with dry specified
+    # WHEN invoking a run command
     result = cli_runner.invoke(run, [case_id], obj=context)
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -302,7 +302,7 @@ def test_with_config_use_nextflow(
 
     # GIVEN a mocked config
 
-    # WHEN dry running with dry specified
+    # WHEN invoking a command with dry-run specified
     result = cli_runner.invoke(run, [case_id, "--dry-run", "--use-nextflow"], obj=context)
 
     # THEN command should execute successfully
