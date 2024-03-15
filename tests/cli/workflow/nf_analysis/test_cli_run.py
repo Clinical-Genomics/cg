@@ -264,7 +264,7 @@ def test_resume_without_id_error(
     caplog.set_level(logging.INFO)
     context = request.getfixturevalue(context)
 
-    # GIVEN a case-id
+    # GIVEN a case id
     case_id: str = request.getfixturevalue(case_id)
 
     # GIVEN a mocked config
