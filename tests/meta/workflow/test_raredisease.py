@@ -46,7 +46,13 @@ def test_write_params_file(raredisease_context: CGConfig, raredisease_case_id: s
     assert os.path.exists(analysis_api.get_case_path(case_id=raredisease_case_id))
 
     # WHEN writing parameters file
-    analysis_api.write_params_file(case_id=raredisease_case_id, workflow_parameters=in_out)
+    analysis_api.write_params_file(case_id=raredisease_case_id)
 
     # THEN the file is created
     assert os.path.isfile(analysis_api.get_params_file_path(case_id=raredisease_case_id))
+
+    # WHEN writing config file
+    analysis_api.write_config_file(case_id=raredisease_case_id, workflow_parameters=in_out)
+
+    # THEN the file is created
+    assert os.path.isfile(analysis_api.get_nextflow_config_path(case_id=raredisease_case_id))
