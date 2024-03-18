@@ -158,7 +158,7 @@ rnafusion.add_command(store_housekeeper)
 
 @rnafusion.command("store")
 @ARGUMENT_CASE_ID
-@DRY_RUN
+@OPTION_DRY
 @click.pass_context
 def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     """Generate deliverables files for a case and store in Housekeeper if they
@@ -189,7 +189,7 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
 
 
 @rnafusion.command("store-available")
-@DRY_RUN
+@OPTION_DRY
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool) -> None:
     """Store bundles for all finished RNAFUSION analyses in Housekeeper."""
