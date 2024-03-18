@@ -5,7 +5,7 @@ import logging
 import click
 from pydantic.v1 import ValidationError
 
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY, resolve_compression
 from cg.cli.workflow.nf_analysis import (
     OPTION_COMPUTE_ENV,
     OPTION_CONFIG,
@@ -25,7 +25,7 @@ from cg.cli.workflow.taxprofiler.options import (
     OPTION_INSTRUMENT_PLATFORM,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN, MetaApis
+from cg.constants.constants import MetaApis
 from cg.constants.sequencing import SequencingPlatform
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -54,7 +54,7 @@ taxprofiler.add_command(store_housekeeper)
 @taxprofiler.command("config-case")
 @ARGUMENT_CASE_ID
 @OPTION_INSTRUMENT_PLATFORM
-@DRY_RUN
+@OPTION_DRY
 @click.pass_obj
 def config_case(
     context: CGConfig, case_id: str, instrument_platform: SequencingPlatform, dry_run: bool
@@ -74,59 +74,56 @@ def config_case(
 
 @taxprofiler.command("start")
 @ARGUMENT_CASE_ID
-@OPTION_LOG
-@OPTION_WORKDIR
-@OPTION_PROFILE
-@OPTION_CONFIG
-@OPTION_PARAMS_FILE
-@OPTION_REVISION
 @OPTION_COMPUTE_ENV
-@OPTION_USE_NEXTFLOW
+@OPTION_CONFIG
+@OPTION_DRY
+@OPTION_LOG
+@OPTION_PARAMS_FILE
+@OPTION_PROFILE
+@OPTION_REVISION
 @OPTION_TOWER_RUN_ID
-@DRY_RUN
+@OPTION_USE_NEXTFLOW
+@OPTION_WORKDIR
 @click.pass_context
 def start(
-    context: CGConfig,
+    context: click.Context,
     case_id: str,
-    log: str,
-    work_dir: str,
-    profile: str,
-    config: str,
-    params_file: str,
-    revision: str,
     compute_env: str,
-    use_nextflow: bool,
-    nf_tower_id: str | None,
+    config: str,
     dry_run: bool,
+    log: str,
+    nf_tower_id: str | None,
+    params_file: str,
+    profile: str,
+    revision: str,
+    use_nextflow: bool,
+    work_dir: str,
 ) -> None:
     """Start full workflow for case id."""
     LOG.info(f"Starting analysis for {case_id}")
 
-    try:
-        context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
-    except DecompressionNeededError as error:
-        LOG.error(error)
-        raise click.Abort() from error
+    analysis_api: TaxprofilerAnalysisAPI = context.obj.meta_apis["analysis_api"]
+    analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
     context.invoke(config_case, case_id=case_id, dry_run=dry_run)
     context.invoke(
         run,
         case_id=case_id,
-        log=log,
-        work_dir=work_dir,
-        from_start=True,
-        profile=profile,
-        nf_tower_id=nf_tower_id,
-        config=config,
-        params_file=params_file,
-        revision=revision,
         compute_env=compute_env,
-        use_nextflow=use_nextflow,
+        config=config,
         dry_run=dry_run,
+        from_start=True,
+        log=log,
+        nf_tower_id=nf_tower_id,
+        params_file=params_file,
+        profile=profile,
+        revision=revision,
+        use_nextflow=use_nextflow,
+        work_dir=work_dir,
     )
 
 
 @taxprofiler.command("start-available")
-@DRY_RUN
+@OPTION_DRY
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False) -> None:
     """Start full workflow for all cases available for analysis."""

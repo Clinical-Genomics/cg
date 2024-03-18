@@ -6,7 +6,7 @@ from pathlib import Path
 import click
 from pydantic.v1 import ValidationError
 
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY, resolve_compression
 from cg.cli.workflow.nf_analysis import (
     OPTION_COMPUTE_ENV,
     OPTION_CONFIG,
@@ -14,6 +14,7 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_PARAMS_FILE,
     OPTION_PROFILE,
     OPTION_REVISION,
+    OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
     metrics_deliver,
@@ -26,7 +27,7 @@ from cg.cli.workflow.rnafusion.options import (
     OPTION_STRANDEDNESS,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN, MetaApis
+from cg.constants.constants import MetaApis
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
@@ -52,7 +53,7 @@ rnafusion.add_command(run)
 @ARGUMENT_CASE_ID
 @OPTION_STRANDEDNESS
 @OPTION_REFERENCES
-@DRY_RUN
+@OPTION_DRY
 @click.pass_obj
 def config_case(
     context: CGConfig, case_id: str, strandedness: str, genomes_base: Path, dry_run: bool
@@ -72,55 +73,60 @@ def config_case(
 
 @rnafusion.command("start")
 @ARGUMENT_CASE_ID
-@OPTION_LOG
-@OPTION_WORKDIR
-@OPTION_PROFILE
-@OPTION_CONFIG
-@OPTION_PARAMS_FILE
-@OPTION_REVISION
 @OPTION_COMPUTE_ENV
+@OPTION_CONFIG
+@OPTION_DRY
+@OPTION_LOG
+@OPTION_PARAMS_FILE
+@OPTION_PROFILE
+@OPTION_REVISION
+@OPTION_TOWER_RUN_ID
 @OPTION_USE_NEXTFLOW
+@OPTION_WORKDIR
 @OPTION_REFERENCES
-@DRY_RUN
+@OPTION_STRANDEDNESS
 @click.pass_context
 def start(
     context: click.Context,
     case_id: str,
-    log: str,
-    work_dir: str,
-    profile: str,
-    config: str,
-    params_file: str,
-    revision: str,
     compute_env: str,
-    use_nextflow: bool,
-    genomes_base: Path,
+    config: str,
     dry_run: bool,
+    genomes_base: Path,
+    log: str,
+    nf_tower_id: str | None,
+    params_file: str,
+    profile: str,
+    revision: str,
+    strandedness: str,
+    use_nextflow: bool,
+    work_dir: str,
 ) -> None:
     """Start full workflow for CASE ID."""
     LOG.info(f"Starting analysis for {case_id}")
 
     analysis_api: RnafusionAnalysisAPI = context.obj.meta_apis["analysis_api"]
     analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
-    context.invoke(config_case, case_id=case_id, genomes_base=genomes_base, dry_run=dry_run)
+    context.invoke(config_case, case_id=case_id, dry_run=dry_run,genomes_base=genomes_base, strandedness=strandedness)
     context.invoke(
         run,
         case_id=case_id,
-        log=log,
-        work_dir=work_dir,
-        from_start=True,
-        profile=profile,
-        config=config,
-        params_file=params_file,
-        revision=revision,
         compute_env=compute_env,
-        use_nextflow=use_nextflow,
+        config=config,
         dry_run=dry_run,
+        from_start=True,
+        log=log,
+        nf_tower_id=nf_tower_id,
+        params_file=params_file,
+        profile=profile,
+        revision=revision,
+        use_nextflow=use_nextflow,
+        work_dir=work_dir,
     )
 
 
 @rnafusion.command("start-available")
-@DRY_RUN
+@OPTION_DRY
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False) -> None:
     """Start full workflow for all cases ready for analysis."""

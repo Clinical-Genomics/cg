@@ -19,7 +19,7 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_WORKDIR,
     run,
 )
-from cg.constants.constants import DRY_RUN, MetaApis
+from cg.constants.constants import MetaApis
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -43,7 +43,7 @@ raredisease.add_command(run)
 
 @raredisease.command("config-case")
 @ARGUMENT_CASE_ID
-@DRY_RUN
+@OPTION_DRY
 @click.pass_obj
 def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Create sample sheet file and params file for a given case."""
@@ -60,29 +60,30 @@ def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
 @raredisease.command("start")
 @ARGUMENT_CASE_ID
-@OPTION_LOG
-@OPTION_WORKDIR
-@OPTION_PROFILE
-@OPTION_CONFIG
-@OPTION_PARAMS_FILE
-@OPTION_REVISION
 @OPTION_COMPUTE_ENV
-@OPTION_USE_NEXTFLOW
+@OPTION_CONFIG
+@OPTION_DRY
+@OPTION_LOG
+@OPTION_PARAMS_FILE
+@OPTION_PROFILE
+@OPTION_REVISION
 @OPTION_TOWER_RUN_ID
-@DRY_RUN
+@OPTION_USE_NEXTFLOW
+@OPTION_WORKDIR
 @click.pass_context
 def start(
     context: click.Context,
     case_id: str,
-    log: str,
-    work_dir: str,
-    profile: str,
-    config: str,
-    params_file: str,
-    revision: str,
     compute_env: str,
-    use_nextflow: bool,
+    config: str,
     dry_run: bool,
+    log: str,
+    nf_tower_id: str | None,
+    params_file: str,
+    profile: str,
+    revision: str,
+    use_nextflow: bool,
+    work_dir: str,
 ) -> None:
     """Start full workflow for CASE ID."""
     LOG.info(f"Starting analysis for {case_id}")
@@ -93,17 +94,38 @@ def start(
     context.invoke(
         run,
         case_id=case_id,
-        log=log,
-        work_dir=work_dir,
-        from_start=True,
-        profile=profile,
-        config=config,
-        params_file=params_file,
-        revision=revision,
         compute_env=compute_env,
-        use_nextflow=use_nextflow,
+        config=config,
         dry_run=dry_run,
+        from_start=True,
+        log=log,
+        nf_tower_id=nf_tower_id,
+        params_file=params_file,
+        profile=profile,
+        revision=revision,
+        use_nextflow=use_nextflow,
+        work_dir=work_dir,
     )
+
+
+@raredisease.command("start-available")
+@OPTION_DRY
+@click.pass_context
+def start_available(context: click.Context, dry_run: bool = False) -> None:
+    """Start full workflow for all cases available for analysis."""
+
+    analysis_api: AnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
+
+    exit_code: int = EXIT_SUCCESS
+    for case in analysis_api.get_cases_to_analyze():
+        try:
+            context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
+        except Exception as error:
+            LOG.error(error)
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort
+
 
 
 @raredisease.command("panel")

@@ -4,14 +4,12 @@ import logging
 
 import click
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
 from cg.constants.constants import MetaApis
 from cg.exc import CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.store import Store
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 LOG = logging.getLogger(__name__)
 
@@ -92,17 +90,17 @@ OPTION_FROM_START = click.option(
 
 @click.command("run")
 @ARGUMENT_CASE_ID
-@OPTION_LOG
-@OPTION_WORKDIR
-@OPTION_FROM_START
-@OPTION_PROFILE
-@OPTION_CONFIG
-@OPTION_PARAMS_FILE
-@OPTION_REVISION
 @OPTION_COMPUTE_ENV
-@OPTION_USE_NEXTFLOW
-@OPTION_TOWER_RUN_ID
+@OPTION_CONFIG
 @OPTION_DRY
+@OPTION_FROM_START
+@OPTION_LOG
+@OPTION_PARAMS_FILE
+@OPTION_PROFILE
+@OPTION_REVISION
+@OPTION_TOWER_RUN_ID
+@OPTION_USE_NEXTFLOW
+@OPTION_WORKDIR
 @click.pass_obj
 def run(
     context: CGConfig,
