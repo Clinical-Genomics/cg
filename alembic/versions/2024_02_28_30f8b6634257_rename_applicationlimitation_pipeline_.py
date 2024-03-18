@@ -1,7 +1,7 @@
 """rename_applicationlimitation_pipeline_to_workflow
 
 Revision ID: 30f8b6634257
-Revises: e6e6ead5b0c2
+Revises: b2fcb2ada306
 Create Date: 2024-02-28 13:39:41.688160
 
 """
@@ -12,7 +12,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "30f8b6634257"
-down_revision = "e6e6ead5b0c2"
+down_revision = "b2fcb2ada306"
 branch_labels = None
 depends_on = None
 
