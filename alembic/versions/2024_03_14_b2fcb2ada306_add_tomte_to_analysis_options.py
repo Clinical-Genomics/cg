@@ -18,7 +18,7 @@ depends_on = None
 
 new_workflow = "tomte"
 
-old_options: list[str] = [
+old_options = (
     "balsamic",
     "balsamic-pon",
     "balsamic-qc",
@@ -35,14 +35,9 @@ old_options: list[str] = [
     "rsync",
     "spring",
     "taxprofiler",
-]
-
-new_options = sorted(
-    old_options
-    + [
-        new_workflow,
-    ]
 )
+
+new_options = sorted(old_options + (new_workflow,))
 
 old_analysis_enum = mysql.ENUM(*old_options)
 new_analysis_enum = mysql.ENUM(*new_options)
