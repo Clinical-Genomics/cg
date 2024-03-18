@@ -136,6 +136,7 @@ class Workflow(StrEnum):
     RSYNC: str = "rsync"
     SPRING: str = "spring"
     TAXPROFILER: str = "taxprofiler"
+    TOMTE: str = "tomte"
 
 
 class FileFormat(StrEnum):
