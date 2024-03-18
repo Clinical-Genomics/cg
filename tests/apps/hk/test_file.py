@@ -754,7 +754,7 @@ def test_get_files_without_excluded_tags_using_no_tags(
     assert filtered_files == files
 
 
-def test_get_files_from_latest_version_with_tags(
+def test_get_files_from_latest_version_containing_tags(
     populated_housekeeper_api: HousekeeperAPI, sample_id: str, fastq_file: Path, spring_file: Path
 ):
     """Test get files from latest version by tags."""
@@ -765,8 +765,10 @@ def test_get_files_from_latest_version_with_tags(
     tags: list[set[str]] = [{SequencingFileTag.FASTQ}]
 
     # WHEN getting a list of files that match specific tags
-    filtered_files: list[File] = populated_housekeeper_api.get_files_from_latest_version_with_tags(
-        bundle_name=sample_id, tags=tags
+    filtered_files: list[File] = (
+        populated_housekeeper_api.get_files_from_latest_version_containing_tags(
+            bundle_name=sample_id, tags=tags
+        )
     )
 
     # THEN only the expected fastq sample files should be returned
@@ -787,15 +789,17 @@ def test_get_files_from_latest_version_using_no_tags(
     # GIVEN a populated Housekeeper API
 
     # WHEN getting a list of files that match empty tags
-    filtered_files: list[File] = populated_housekeeper_api.get_files_from_latest_version_with_tags(
-        bundle_name=sample_id, tags=empty_list
+    filtered_files: list[File] = (
+        populated_housekeeper_api.get_files_from_latest_version_containing_tags(
+            bundle_name=sample_id, tags=empty_list
+        )
     )
 
     # THEN an empty list should be returned
     assert filtered_files == empty_list
 
 
-def test_get_files_from_latest_version_with_tags_and_excluded_tags(
+def test_get_files_from_latest_version_containing_tags_and_excluded_tags(
     populated_housekeeper_api: HousekeeperAPI, sample_id: str, fastq_file: Path, spring_file: Path
 ):
     """Test get files from the latest version by tags and excluded tags."""
@@ -809,8 +813,10 @@ def test_get_files_from_latest_version_with_tags_and_excluded_tags(
     excluded_tags: list[set[str]] = [{SequencingFileTag.FASTQ}]
 
     # WHEN getting a list of files that match the sample ID tag and exclude the fastq files
-    filtered_files: list[File] = populated_housekeeper_api.get_files_from_latest_version_with_tags(
-        bundle_name=sample_id, tags=tags, excluded_tags=excluded_tags
+    filtered_files: list[File] = (
+        populated_housekeeper_api.get_files_from_latest_version_containing_tags(
+            bundle_name=sample_id, tags=tags, excluded_tags=excluded_tags
+        )
     )
 
     # THEN only the expected fastq sample files should be returned

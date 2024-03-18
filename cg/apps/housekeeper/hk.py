@@ -687,7 +687,7 @@ class HousekeeperAPI:
                 filtered_files.append(file)
         return filtered_files
 
-    def get_files_from_latest_version_with_tags(
+    def get_files_from_latest_version_containing_tags(
         self, bundle_name: str, tags: list[set[str]], excluded_tags: list[set[str]] | None = None
     ) -> list[File]:
         """
