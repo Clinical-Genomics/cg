@@ -1,6 +1,6 @@
 """Constants for cg."""
 
-from enum import StrEnum, IntEnum
+from enum import IntEnum, StrEnum
 
 import click
 
@@ -244,6 +244,7 @@ class MicrosaltQC:
 class MicrosaltAppTags(StrEnum):
     MWRNXTR003: str = "MWRNXTR003"
     MWXNXTR003: str = "MWXNXTR003"
+    VWGNXTR001: str = "VWGNXTR001"
     PREP_CATEGORY: str = "mic"
 
 
