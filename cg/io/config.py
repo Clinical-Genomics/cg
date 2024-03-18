@@ -1,5 +1,3 @@
-"""Module to read or write config files"""
-
 from pathlib import Path
 from typing import Any
 from cg.constants.symbols import EMPTY_STRING

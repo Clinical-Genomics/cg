@@ -46,6 +46,7 @@ from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+
 from cg.models.rnafusion.rnafusion import RnafusionParameters
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
@@ -64,7 +65,9 @@ from tests.small_helpers import SmallHelpers
 from tests.store_helpers import StoreHelpers
 
 LOG = logging.getLogger(__name__)
-
+multiqc_json_file = "multiqc_data.json"
+software_version_file = "software_versions.yml"
+deliverables_yaml = "_deliverables.yaml"
 pytest_plugins = [
     "tests.fixture_plugins.timestamp_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.flow_cell_fixtures",
@@ -1859,6 +1862,7 @@ def context_config(
             "root": str(mip_dir),
         },
         "raredisease": {
+            "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
             "compute_env": "nf_tower_compute_env",
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_raredisease",
@@ -1890,7 +1894,7 @@ def context_config(
             "root": str(rnafusion_dir),
             "slurm": {
                 "account": "development",
-                "mail_user": "test.email@scilifelab.se",
+                "mail_user": "test.rnafusion.email@scilifelab.se",
             },
             "tower_workflow": "rnafusion",
         },
@@ -1899,7 +1903,7 @@ def context_config(
         "taxprofiler": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
             "compute_env": "nf_tower_compute_env",
-            "root": taxprofiler_dir.as_posix(),
+            "root": str(taxprofiler_dir),
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_taxprofiler",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
@@ -2194,18 +2198,9 @@ def sequencing_platform() -> str:
     return SequencingPlatform.ILLUMINA
 
 
-@pytest.fixture(scope="function")
-def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
-    """Return the path to the raredisease apps dir."""
-    raredisease_dir = tmpdir_factory.mktemp("raredisease")
-    return Path(raredisease_dir).absolute().as_posix()
-
-
 # Raredisease fixtures
-
-
 @pytest.fixture(scope="function")
-def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
+def raredisease_dir(tmpdir_factory: Path) -> str:
     """Return the path to the raredisease apps dir."""
     raredisease_dir = tmpdir_factory.mktemp("raredisease")
     return Path(raredisease_dir).absolute().as_posix()
@@ -2213,8 +2208,202 @@ def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
 
 @pytest.fixture(scope="session")
 def raredisease_case_id() -> str:
-    """Returns a rnafusion case id."""
+    """Returns a raredisease case id."""
     return "raredisease_case_enough_reads"
+
+
+@pytest.fixture(scope="session")
+def raredisease_sample_sheet_content(
+    raredisease_case_id: str,
+    fastq_forward_read_path: Path,
+    fastq_reverse_read_path: Path,
+    strandedness: str,
+) -> str:
+    """Return the expected sample sheet content  for raredisease."""
+    return ",".join(
+        [
+            raredisease_case_id,
+            fastq_forward_read_path.as_posix(),
+            fastq_reverse_read_path.as_posix(),
+            strandedness,
+        ]
+    )
+
+
+@pytest.fixture(scope="function")
+def hermes_deliverables(deliverable_data: dict, raredisease_case_id: str) -> dict:
+    hermes_output: dict = {"pipeline": "raredisease", "bundle_id": raredisease_case_id, "files": []}
+    for file_info in deliverable_data["files"]:
+        tags: list[str] = []
+        if "html" in file_info["format"]:
+            tags.append("multiqc-html")
+        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
+    return hermes_output
+
+
+@pytest.fixture(scope="function")
+def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
+    malformed_deliverable: dict = hermes_deliverables.copy()
+    malformed_deliverable.pop("pipeline")
+
+    return malformed_deliverable
+
+
+@pytest.fixture(scope="function")
+def rnafusion_multiqc_json_metrics(raredisease_analysis_dir) -> dict:
+    """Returns the content of a mock Multiqc JSON file."""
+    return read_json(file_path=Path(raredisease_analysis_dir, multiqc_json_file))
+
+
+@pytest.fixture(scope="function")
+def raredisease_sample_sheet_path(raredisease_dir, raredisease_case_id) -> Path:
+    """Path to sample sheet."""
+    return Path(
+        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet"
+    ).with_suffix(FileExtensions.CSV)
+
+
+@pytest.fixture(scope="function")
+def raredisease_params_file_path(raredisease_dir, raredisease_case_id) -> Path:
+    """Path to parameters file."""
+    return Path(
+        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_params_file"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
+def raredisease_nexflow_config_file_path(raredisease_dir, raredisease_case_id) -> Path:
+    """Path to config file."""
+    return Path(
+        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_nextflow_config"
+    ).with_suffix(FileExtensions.JSON)
+
+
+@pytest.fixture(scope="function")
+def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> Path:
+    """Path to deliverables file."""
+    return Path(
+        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_deliverables"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
+def raredisease_context(
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    nf_analysis_housekeeper: HousekeeperAPI,
+    trailblazer_api: MockTB,
+    raredisease_case_id: str,
+    sample_id: str,
+    no_sample_case_id: str,
+    total_sequenced_reads_pass: int,
+    apptag_rna: str,
+    case_id_not_enough_reads: str,
+    sample_id_not_enough_reads: str,
+    total_sequenced_reads_not_pass: int,
+) -> CGConfig:
+    """context to use in cli"""
+    cg_context.housekeeper_api_ = nf_analysis_housekeeper
+    cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
+    status_db: Store = cg_context.status_db
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+
+    # Create textbook case with enough reads
+    case_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=raredisease_case_id,
+        name=raredisease_case_id,
+        data_analysis=Workflow.RAREDISEASE,
+    )
+
+    sample_raredisease_case_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=sample_id,
+        last_sequenced_at=datetime.now(),
+        reads=total_sequenced_reads_pass,
+        application_tag=apptag_rna,
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=case_enough_reads,
+        sample=sample_raredisease_case_enough_reads,
+    )
+
+    # Create case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Workflow.RAREDISEASE,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=sample_id_not_enough_reads,
+        last_sequenced_at=datetime.now(),
+        reads=total_sequenced_reads_not_pass,
+        application_tag=apptag_rna,
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
+    return cg_context
+
+
+@pytest.fixture(scope="function")
+def deliverable_data(raredisease_dir: Path, raredisease_case_id: str, sample_id: str) -> dict:
+    return {
+        "files": [
+            {
+                "path": f"{raredisease_dir}/{raredisease_case_id}/multiqc/multiqc_report.html",
+                "path_index": "",
+                "step": "report",
+                "tag": ["multiqc-html", "rna"],
+                "id": raredisease_case_id,
+                "format": "html",
+                "mandatory": True,
+            },
+        ]
+    }
+
+
+@pytest.fixture(scope="function")
+def mock_deliverable(
+    raredisease_dir: Path, deliverable_data: dict, raredisease_case_id: str
+) -> None:
+    """Create deliverable file with dummy data and files to deliver."""
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id),
+        parents=True,
+        exist_ok=True,
+    )
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id, "multiqc"),
+        parents=True,
+        exist_ok=True,
+    )
+    for report_entry in deliverable_data["files"]:
+        Path(report_entry["path"]).touch(exist_ok=True)
+    WriteFile.write_file_from_content(
+        content=deliverable_data,
+        file_format=FileFormat.JSON,
+        file_path=Path(
+            raredisease_dir, raredisease_case_id, raredisease_case_id + deliverables_yaml
+        ),
+    )
+
+
+@pytest.fixture(scope="function")
+def mock_config(raredisease_dir: Path, raredisease_case_id: str) -> None:
+    """Create samplesheet.csv file for testing"""
+    Path.mkdir(Path(raredisease_dir, raredisease_case_id), parents=True, exist_ok=True)
+    Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    ).touch(exist_ok=True)
 
 
 # Rnafusion fixtures
@@ -2291,7 +2480,7 @@ def rnafusion_malformed_hermes_deliverables(rnafusion_hermes_deliverables: dict)
 @pytest.fixture(scope="function")
 def rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
     """Returns the content of a mock Multiqc JSON file."""
-    return read_json(file_path=Path(rnafusion_analysis_dir, "multiqc_data.json"))
+    return read_json(file_path=Path(rnafusion_analysis_dir, multiqc_json_file))
 
 
 @pytest.fixture(scope="function")
@@ -2501,7 +2690,7 @@ def rnafusion_mock_deliverable_dir(
     WriteFile.write_file_from_content(
         content=rnafusion_deliverable_data,
         file_format=FileFormat.JSON,
-        file_path=Path(rnafusion_dir, rnafusion_case_id, rnafusion_case_id + "_deliverables.yaml"),
+        file_path=Path(rnafusion_dir, rnafusion_case_id, rnafusion_case_id + deliverables_yaml),
     )
 
     return rnafusion_dir
@@ -2513,7 +2702,7 @@ def rnafusion_mock_analysis_finish(
 ) -> None:
     """Create analysis_finish file for testing."""
     Path.mkdir(Path(rnafusion_dir, rnafusion_case_id, "pipeline_info"), parents=True, exist_ok=True)
-    Path(rnafusion_dir, rnafusion_case_id, "pipeline_info", "software_versions.yml").touch(
+    Path(rnafusion_dir, rnafusion_case_id, "pipeline_info", software_version_file).touch(
         exist_ok=True
     )
     Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
@@ -2548,9 +2737,9 @@ def rnafusion_mock_analysis_finish(
 def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
     Path.mkdir(Path(rnafusion_dir, rnafusion_case_id), parents=True, exist_ok=True)
-    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
-        exist_ok=True
-    )
+    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").with_suffix(
+        FileExtensions.CSV
+    ).touch(exist_ok=True)
 
 
 # Taxprofiler fixtures
@@ -2581,7 +2770,7 @@ def taxprofiler_workflow() -> str:
 def taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> Path:
     """Return the path to the Taxprofiler directory."""
     taxprofiler_dir = tmpdir_factory.mktemp("taxprofiler")
-    return Path(taxprofiler_dir).absolute()
+    return Path(taxprofiler_dir).absolute().as_posix()
 
 
 @pytest.fixture(scope="function")
@@ -2593,14 +2782,6 @@ def taxprofiler_sample_sheet_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_params_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
-    """Path to parameters file."""
-    return Path(
-        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_params_file"
-    ).with_suffix(FileExtensions.YAML)
-
-
-@pytest.fixture(scope="session")
 def taxprofiler_sample_sheet_content(
     sample_name: str,
     sequencing_platform: str,
@@ -2621,6 +2802,22 @@ def taxprofiler_sample_sheet_content(
 
 
 @pytest.fixture(scope="function")
+def taxprofiler_params_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
+    """Path to parameters file."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_params_file"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_nexflow_config_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
+    """Path to config file."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_nextflow_config"
+    ).with_suffix(FileExtensions.JSON)
+
+
+@pytest.fixture(scope="function")
 def taxprofiler_hermes_deliverables(
     taxprofiler_deliverable_data: dict, taxprofiler_case_id: str
 ) -> dict:
@@ -2637,7 +2834,6 @@ def taxprofiler_hermes_deliverables(
 def taxprofiler_malformed_hermes_deliverables(taxprofiler_hermes_deliverables: dict) -> dict:
     malformed_deliverable: dict = taxprofiler_hermes_deliverables.copy()
     malformed_deliverable.pop("workflow")
-
     return malformed_deliverable
 
 
@@ -2662,7 +2858,7 @@ def taxprofiler_parameters_default(
 @pytest.fixture(scope="function")
 def taxprofiler_multiqc_json_metrics(taxprofiler_analysis_dir: Path) -> list[dict]:
     """Returns the content of a mock Multiqc JSON file."""
-    return read_json(file_path=Path(taxprofiler_analysis_dir, "multiqc_data.json"))
+    return read_json(file_path=Path(taxprofiler_analysis_dir, multiqc_json_file))
 
 
 @pytest.fixture(scope="function")
@@ -2794,7 +2990,7 @@ def taxprofiler_mock_deliverable_dir(
         content=taxprofiler_deliverable_data,
         file_format=FileFormat.JSON,
         file_path=Path(
-            taxprofiler_dir, taxprofiler_case_id, taxprofiler_case_id + "_deliverables.yaml"
+            taxprofiler_dir, taxprofiler_case_id, taxprofiler_case_id + deliverables_yaml
         ),
     )
     return taxprofiler_dir
@@ -2811,7 +3007,7 @@ def taxprofiler_mock_analysis_finish(
     Path.mkdir(
         Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info"), parents=True, exist_ok=True
     )
-    Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info", "software_versions.yml").touch(
+    Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info", software_version_file).touch(
         exist_ok=True
     )
     Path(taxprofiler_dir, taxprofiler_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
@@ -2840,6 +3036,15 @@ def taxprofiler_mock_analysis_finish(
             "tower_ids",
         ).with_suffix(FileExtensions.YAML),
     )
+
+
+@pytest.fixture(scope="function")
+def mock_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
+    """Create CSV sample sheet file for testing."""
+    Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
+    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    ).touch(exist_ok=True)
 
 
 @pytest.fixture(scope="function")
