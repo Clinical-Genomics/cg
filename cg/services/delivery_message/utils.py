@@ -1,4 +1,5 @@
 from cg.constants.constants import DataDelivery, MicrosaltAppTags, Workflow
+from cg.exc import CaseNotFoundError, OrderMismatchError
 from cg.services.delivery_message.messages import (
     AnalysisScoutMessage,
     CovidMessage,
@@ -16,9 +17,9 @@ from cg.services.delivery_message.messages.microsalt_mwx_message import (
 from cg.store.models import Case, Sample
 
 
-def get_message(case: Case) -> str:
-    message_strategy: DeliveryMessage = get_message_strategy(case)
-    return message_strategy.create_message(case)
+def get_message(cases: list[Case]) -> str:
+    message_strategy: DeliveryMessage = get_message_strategy(cases[0])
+    return message_strategy.create_message(cases)
 
 
 def get_message_strategy(case: Case) -> DeliveryMessage:
@@ -51,7 +52,7 @@ def get_microsalt_message_strategy(case: Case) -> DeliveryMessage:
     if has_mwx_samples(case):
         return MicrosaltMwxMessage()
 
-    if has_mwr_samples(case):
+    if has_mwr_samples(case) or has_vwg_samples(case):
         return MicrosaltMwrMessage()
 
     app_tag: str = get_case_app_tag(case)
@@ -68,6 +69,11 @@ def has_mwr_samples(case: Case):
     return case_app_tag == MicrosaltAppTags.MWRNXTR003
 
 
+def has_vwg_samples(case: Case):
+    case_app_tag: str = get_case_app_tag(case)
+    return case_app_tag == MicrosaltAppTags.VWGNXTR001
+
+
 def get_case_app_tag(case: Case) -> str:
     sample: Sample = case.samples[0]
     return get_sample_app_tag(sample)
@@ -75,3 +81,14 @@ def get_case_app_tag(case: Case) -> str:
 
 def get_sample_app_tag(sample: Sample) -> str:
     return sample.application_version.application.tag
+
+
+def validate_cases(cases: list[Case], case_ids: list[str]) -> None:
+    if set(case_ids) != set(case.internal_id for case in cases):
+        raise CaseNotFoundError("Internal id not found in the database")
+    if not is_matching_order(cases):
+        raise OrderMismatchError("Cases do not belong to the same order")
+
+
+def is_matching_order(cases: list[Case]) -> bool:
+    return all([case.latest_order == cases[0].latest_order for case in cases])

@@ -11,7 +11,7 @@ from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
 
 
-def test_upload_auto_with_pipeline_as_argument(
+def test_upload_auto_with_workflow(
     cli_runner: CliRunner,
     helpers: StoreHelpers,
     timestamp: datetime.datetime,
@@ -19,9 +19,9 @@ def test_upload_auto_with_pipeline_as_argument(
     caplog,
 ):
     """Test upload auto"""
-    # GIVEN a store with a MIP analysis
-    pipeline = Workflow.MIP_DNA
-    helpers.add_analysis(store=upload_context.status_db, completed_at=timestamp, workflow=pipeline)
+    # GIVEN a store with a workflow
+    workflow = Workflow.MIP_DNA
+    helpers.add_analysis(store=upload_context.status_db, completed_at=timestamp, workflow=workflow)
 
     # WHEN uploading all analysis from workflow MIP
     caplog.set_level(logging.INFO)

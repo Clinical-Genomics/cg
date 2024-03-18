@@ -324,8 +324,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_latest_metadata(self, case_id: str) -> BalsamicAnalysis:
         """Get the latest metadata of a specific BALSAMIC case"""
 
-        config_raw_data = self.get_latest_raw_file_data(case_id, [BalsamicAnalysisTag.CONFIG])
-        metrics_raw_data = self.get_latest_raw_file_data(case_id, [BalsamicAnalysisTag.QC_METRICS])
+        config_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.CONFIG)
+        metrics_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.QC_METRICS)
 
         if config_raw_data and metrics_raw_data:
             try:
@@ -593,6 +593,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def run_analysis(
         self,
         case_id: str,
+        cluster_config: Path | None = None,
         slurm_quality_of_service: str | None = None,
         dry_run: bool = False,
     ) -> None:
@@ -607,6 +608,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--mail-user": self.email,
                 "--qos": slurm_quality_of_service or self.get_slurm_qos_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
+                "--cluster-config": cluster_config,
             }
         )
         parameters = command + options + run_analysis + benchmark

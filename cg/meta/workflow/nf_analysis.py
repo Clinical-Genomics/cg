@@ -1,4 +1,6 @@
 import logging
+import click
+from pydantic.v1 import ValidationError
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -7,8 +9,9 @@ from cg.constants import Workflow
 from cg.constants.constants import FileExtensions, FileFormat, MultiQC, WorkflowManager
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.tb import AnalysisStatus
-from cg.exc import CgError, MetricsQCError
+from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.controller import ReadFile, WriteFile
+from cg.io.txt import write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
@@ -18,9 +21,12 @@ from cg.models.deliverables.metric_deliverables import (
     MetricsDeliverablesCondition,
 )
 from cg.models.fastq import FastqFileMeta
-from cg.models.nf_analysis import FileDeliverable, PipelineDeliverables
-from cg.models.rnafusion.rnafusion import CommandArgs
+from cg.models.nf_analysis import FileDeliverable, WorkflowDeliverables
+from cg.models.nf_analysis import NfCommandArgs
 from cg.utils import Process
+from cg.store.models import Sample
+from cg.constants.constants import CaseActions
+from cg.constants.nf_analysis import NfTowerStatus
 
 LOG = logging.getLogger(__name__)
 
@@ -70,8 +76,12 @@ class NfAnalysisAPI(AnalysisAPI):
         return WorkflowManager.Tower.value
 
     def get_workflow_version(self, case_id: str) -> str:
-        """Get pipeline version from config."""
+        """Get workflow version from config."""
         return self.revision
+
+    def get_nextflow_config_content(self) -> str | None:
+        """Return nextflow config content."""
+        return None
 
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
@@ -87,11 +97,15 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get the compute environment for the head job based on the case priority."""
         return f"{self.compute_env_base}-{self.get_slurm_qos_for_case(case_id=case_id)}"
 
-    @staticmethod
-    def get_nextflow_config_path(nextflow_config: str | None = None) -> Path | None:
-        """Path to Nextflow config file."""
+    def get_nextflow_config_path(
+        self, case_id: str, nextflow_config: Path | str | None = None
+    ) -> Path:
+        """Path to nextflow config file."""
         if nextflow_config:
             return Path(nextflow_config).absolute()
+        return Path((self.get_case_path(case_id)), f"{case_id}_nextflow_config").with_suffix(
+            FileExtensions.JSON
+        )
 
     def get_job_ids_path(self, case_id: str) -> Path:
         """Return the path to a Trailblazer config file containing Tower IDs."""
@@ -138,6 +152,9 @@ class NfAnalysisAPI(AnalysisAPI):
             return work_dir.absolute()
         return Path(self.get_case_path(case_id), NFX_WORK_DIR)
 
+    def set_cluster_options(self, case_id: str) -> str:
+        return f'process.clusterOptions = "-A {self.account} --qos={self.get_slurm_qos_for_case(case_id=case_id)}"\n'
+
     @staticmethod
     def extract_read_files(
         metadata: list[FastqFileMeta], forward_read: bool = False, reverse_read: bool = False
@@ -173,6 +190,15 @@ class NfAnalysisAPI(AnalysisAPI):
             content=workflow_parameters,
             file_path=self.get_params_file_path(case_id=case_id),
         )
+
+    def write_nextflow_config(self, case_id: str) -> None:
+        """Write nextflow config in json format."""
+        if content := self.get_nextflow_config_content():
+            LOG.debug("Writing nextflow config file")
+            write_txt(
+                content=content,
+                file_path=self.get_nextflow_config_path(case_id=case_id),
+            )
 
     @staticmethod
     def write_sample_sheet(
@@ -210,7 +236,7 @@ class NfAnalysisAPI(AnalysisAPI):
         )
 
     def _run_analysis_with_nextflow(
-        self, case_id: str, command_args: CommandArgs, dry_run: bool
+        self, case_id: str, command_args: NfCommandArgs, dry_run: bool
     ) -> None:
         """Run analysis with given options using Nextflow."""
         self.process = Process(
@@ -222,7 +248,7 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.info("Workflow will be executed using Nextflow")
         parameters: list[str] = NextflowHandler.get_nextflow_run_parameters(
             case_id=case_id,
-            pipeline_path=self.nfcore_workflow_path,
+            workflow_path=self.nfcore_workflow_path,
             root_dir=self.root_dir,
             command_args=command_args.dict(),
         )
@@ -243,7 +269,7 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.info(f"Nextflow head job running as job: {sbatch_number}")
 
     def _run_analysis_with_tower(
-        self, case_id: str, command_args: CommandArgs, dry_run: bool
+        self, case_id: str, command_args: NfCommandArgs, dry_run: bool
     ) -> None:
         """Run analysis with given options using NF-Tower."""
         LOG.info("Workflow will be executed using Tower")
@@ -268,10 +294,95 @@ class NfAnalysisAPI(AnalysisAPI):
             self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
         LOG.info(self.process.stdout)
 
+    def get_command_args(
+        self,
+        case_id: str,
+        log: str,
+        work_dir: str,
+        from_start: bool,
+        profile: str,
+        config: str,
+        params_file: str | None,
+        revision: str,
+        compute_env: str,
+        nf_tower_id: str | None,
+    ) -> NfCommandArgs:
+        command_args: NfCommandArgs = NfCommandArgs(
+            **{
+                "log": self.get_log_path(case_id=case_id, workflow=self.workflow, log=log),
+                "work_dir": self.get_workdir_path(case_id=case_id, work_dir=work_dir),
+                "resume": not from_start,
+                "profile": self.get_profile(profile=profile),
+                "config": self.get_nextflow_config_path(case_id=case_id, nextflow_config=config),
+                "params_file": self.get_params_file_path(case_id=case_id, params_file=params_file),
+                "name": case_id,
+                "compute_env": compute_env or self.get_compute_env(case_id=case_id),
+                "revision": revision or self.revision,
+                "wait": NfTowerStatus.SUBMITTED,
+                "id": nf_tower_id,
+            }
+        )
+        return command_args
+
+    def run_nextflow_analysis(
+        self,
+        case_id: str,
+        use_nextflow: bool,
+        log: str,
+        work_dir: str,
+        from_start: bool,
+        profile: str,
+        config: str,
+        params_file: str | None,
+        revision: str,
+        compute_env: str,
+        nf_tower_id: str | None,
+        dry_run: bool = False,
+    ) -> None:
+        """Prepare and start run analysis: check existence of all input files generated by config-case and sync with trailblazer."""
+        self.status_db.verify_case_exists(case_internal_id=case_id)
+
+        command_args = self.get_command_args(
+            case_id=case_id,
+            log=log,
+            work_dir=work_dir,
+            from_start=from_start,
+            profile=profile,
+            config=config,
+            params_file=params_file,
+            revision=revision,
+            compute_env=compute_env,
+            nf_tower_id=nf_tower_id,
+        )
+
+        try:
+            self.verify_sample_sheet_exists(case_id=case_id, dry_run=dry_run)
+            self.check_analysis_ongoing(case_id=case_id)
+            LOG.info(f"Running analysis for {case_id}")
+            self.run_analysis(
+                case_id=case_id,
+                command_args=command_args,
+                use_nextflow=use_nextflow,
+                dry_run=dry_run,
+            )
+            self.set_statusdb_action(case_id=case_id, action=CaseActions.RUNNING, dry_run=dry_run)
+        except FileNotFoundError as error:
+            LOG.error(f"Could not resume analysis: {error}")
+            raise FileNotFoundError
+        except ValueError as error:
+            LOG.error(f"Could not run analysis: {error}")
+            raise ValueError
+        except CgError as error:
+            LOG.error(f"Could not run analysis: {error}")
+            raise CgError
+
+        if not dry_run:
+            self.add_pending_trailblazer_analysis(case_id=case_id)
+
     def run_analysis(
         self,
         case_id: str,
-        command_args: CommandArgs,
+        command_args: NfCommandArgs,
         use_nextflow: bool,
         dry_run: bool = False,
     ) -> None:
@@ -289,27 +400,69 @@ class NfAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
 
-    @staticmethod
-    def get_deliverables_template_content() -> list[dict]:
+    def get_deliverables_template_content(self) -> list[dict]:
         """Return deliverables file template content."""
         raise NotImplementedError
 
-    def get_deliverables_for_case(self, case_id: str) -> PipelineDeliverables:
-        """Return PipelineDeliverables for a given case."""
-        deliverable_template: list[dict] = self.get_deliverables_template_content()
-        sample_id: str = self.status_db.get_samples_by_case_id(case_id).pop().internal_id
+    def get_bundle_filenames_path(self) -> Path | None:
+        """Return bundle filenames path."""
+        return None
+
+    @staticmethod
+    def get_formatted_file_deliverable(
+        file_template: dict[str | None, str | None],
+        case_id: str,
+        sample_id: str,
+        sample_name: str,
+        case_path: str,
+    ) -> FileDeliverable:
+        """Return the formatted file deliverable with the case and sample attributes."""
+        deliverables = file_template.copy()
+        for deliverable_field, deliverable_value in file_template.items():
+            if deliverable_value is None:
+                continue
+            deliverables[deliverable_field] = (
+                deliverables[deliverable_field]
+                .replace("CASEID", case_id)
+                .replace("SAMPLEID", sample_id)
+                .replace("SAMPLENAME", sample_name)
+                .replace("PATHTOCASE", case_path)
+            )
+        return FileDeliverable(**deliverables)
+
+    def get_deliverables_for_sample(
+        self, sample: Sample, case_id: str, template: list[dict[str, str]]
+    ) -> list[FileDeliverable]:
+        """Return a list of FileDeliverables for each sample."""
+        sample_id: str = sample.internal_id
+        sample_name: str = sample.name
+        case_path = str(self.get_case_path(case_id=case_id))
         files: list[FileDeliverable] = []
-        for file in deliverable_template:
-            for deliverable_field, deliverable_value in file.items():
-                if deliverable_value is None:
-                    continue
-                file[deliverable_field] = file[deliverable_field].replace("CASEID", case_id)
-                file[deliverable_field] = file[deliverable_field].replace("SAMPLEID", sample_id)
-                file[deliverable_field] = file[deliverable_field].replace(
-                    "PATHTOCASE", str(self.get_case_path(case_id=case_id))
+        for file in template:
+            files.append(
+                self.get_formatted_file_deliverable(
+                    file_template=file,
+                    case_id=case_id,
+                    sample_id=sample_id,
+                    sample_name=sample_name,
+                    case_path=case_path,
                 )
-            files.append(FileDeliverable(**file))
-        return PipelineDeliverables(files=files)
+            )
+        return files
+
+    def get_deliverables_for_case(self, case_id: str) -> WorkflowDeliverables:
+        """Return workflow deliverables for a given case."""
+        deliverable_template: list[dict] = self.get_deliverables_template_content()
+        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
+        files: list[FileDeliverable] = []
+
+        for sample in samples:
+            bundles_per_sample = self.get_deliverables_for_sample(
+                sample=sample, case_id=case_id, template=deliverable_template
+            )
+            files.extend(bundle for bundle in bundles_per_sample if bundle not in files)
+
+        return WorkflowDeliverables(files=files)
 
     def get_multiqc_json_path(self, case_id: str) -> Path:
         """Return the path of the multiqc_data.json file."""
@@ -322,7 +475,7 @@ class NfAnalysisAPI(AnalysisAPI):
         )
 
     def get_workflow_metrics(self) -> dict:
-        """Get nf-core pipeline metrics constants."""
+        """Get nf-core workflow metrics constants."""
         return {}
 
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
@@ -397,3 +550,37 @@ class NfAnalysisAPI(AnalysisAPI):
             self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.ERROR)
             raise CgError from error
         self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
+
+    def report_deliver(self, case_id: str) -> None:
+        """Write deliverables file."""
+        workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
+        self.write_deliverables_file(
+            deliverables_content=workflow_content.dict(),
+            file_path=self.get_deliverables_file_path(case_id=case_id),
+        )
+        LOG.info(
+            f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
+        )
+
+    def store_analysis_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
+        """Store a finished nextflow analysis in Housekeeper and StatusDB"""
+
+        try:
+            self.status_db.verify_case_exists(case_internal_id=case_id)
+            self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+            self.verify_deliverables_file_exists(case_id=case_id)
+            self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run)
+            self.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
+            self.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
+        except ValidationError as error:
+            raise HousekeeperStoreError(f"Deliverables file is malformed: {error}")
+        except CgError as error:
+            raise HousekeeperStoreError(
+                f"Could not store bundle in Housekeeper and StatusDB: {error}"
+            )
+        except Exception as error:
+            self.housekeeper_api.rollback()
+            self.status_db.session.rollback()
+            raise HousekeeperStoreError(
+                f"Could not store bundle in Housekeeper and StatusDB: {error}"
+            )

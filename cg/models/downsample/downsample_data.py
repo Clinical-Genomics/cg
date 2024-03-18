@@ -117,6 +117,7 @@ class DownsampleData:
             priority=self.original_case.priority,
             ticket=self.original_case.latest_ticket,
         )
+        downsampled_case.orders.append(self.original_case.latest_order)
         downsampled_case.customer = self.original_case.customer
         return downsampled_case
 

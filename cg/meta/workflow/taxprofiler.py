@@ -5,12 +5,16 @@ from pathlib import Path
 from typing import Any
 
 from cg.constants import Workflow
-from cg.constants.sequencing import SequencingPlatform
+from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG
 from cg.io.json import read_json
+from cg.resources import TAXPROFILER_BUNDLE_FILENAMES_PATH
+from cg.constants.sequencing import SequencingPlatform
+from cg.constants.constants import FileFormat
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.fastq import FastqFileMeta
+from cg.io.controller import ReadFile
 from cg.models.taxprofiler.taxprofiler import (
     TaxprofilerParameters,
     TaxprofilerSampleSheetEntry,
@@ -31,7 +35,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.taxprofiler.root
-        self.nfcore_workflow_path: str = config.taxprofiler.pipeline_path
+        self.nfcore_workflow_path: str = config.taxprofiler.workflow_path
         self.conda_env: str = config.taxprofiler.conda_env
         self.conda_binary: str = config.taxprofiler.conda_binary
         self.profile: str = config.taxprofiler.profile
@@ -39,11 +43,19 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.hostremoval_reference: Path = Path(config.taxprofiler.hostremoval_reference)
         self.databases: Path = Path(config.taxprofiler.databases)
         self.tower_binary_path: str = config.tower_binary_path
-        self.tower_workflow: str = config.taxprofiler.tower_pipeline
+        self.tower_workflow: str = config.taxprofiler.tower_workflow
         self.account: str = config.taxprofiler.slurm.account
         self.email: str = config.taxprofiler.slurm.mail_user
         self.nextflow_binary_path: str = config.taxprofiler.binary_path
         self.compute_env_base: str = config.taxprofiler.compute_env
+
+    def get_nextflow_config_content(self) -> str:
+        """Return nextflow config content."""
+        return MULTIQC_NEXFLOW_CONFIG
+
+    def get_bundle_filenames_path(self) -> Path:
+        """Return Taxprofiler bundle filenames path."""
+        return TAXPROFILER_BUNDLE_FILENAMES_PATH
 
     def get_sample_sheet_content_per_sample(
         self, sample: Sample, instrument_platform: SequencingPlatform.ILLUMINA, fasta: str = ""
@@ -91,7 +103,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         LOG.debug("Getting parameters information")
         return TaxprofilerParameters(
             cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
-            sample_sheet_path=self.get_sample_sheet_path(case_id=case_id),
+            input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             databases=self.databases,
             hostremoval_reference=self.hostremoval_reference,
@@ -122,6 +134,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             header=TaxprofilerSampleSheetEntry.headers(),
         )
         self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
+        self.write_nextflow_config(case_id=case_id)
 
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Return a list of the metrics specified in a MultiQC json file for the case samples."""
@@ -152,3 +165,10 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
                     metrics_values.update(sample_values)
 
         return metrics_values
+
+    def get_deliverables_template_content(self) -> list[dict[str, str]]:
+        """Return deliverables file template content."""
+        return ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML,
+            file_path=self.get_bundle_filenames_path(),
+        )

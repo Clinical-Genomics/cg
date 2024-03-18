@@ -24,7 +24,7 @@ from cg.models.report.sample import (
     SampleModel,
     TimestampModel,
 )
-from cg.store.models import Analysis, Case, CaseSample
+from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.store.store import Store
 from tests.meta.report.helper import recursive_assert
 from tests.store_helpers import StoreHelpers
@@ -307,16 +307,17 @@ def test_get_sample_application_data(
     # GIVEN a lims sample instance
 
     # GIVEN the expected application data
-    expected_application_data: dict = case_samples_data[0].sample.to_dict().get("application")
+    sample: Sample = case_samples_data[0].sample
+    expected_application_data: dict = sample.to_dict().get("application")
 
     # WHEN retrieving application data from status DB
     application_data: ApplicationModel = report_api_mip_dna.get_sample_application_data(
-        lims_samples[0]
+        sample=sample, lims_sample=lims_samples[0]
     )
 
     # THEN verify that the application data corresponds to what is expected
     assert application_data.tag == str(expected_application_data.get("tag"))
-    assert application_data.version == str(lims_samples[0].get("application_version"))
+    assert application_data.version == str(sample.application_version.version)
     assert application_data.prep_category == str(expected_application_data.get("prep_category"))
     assert application_data.description == str(expected_application_data.get("description"))
     assert application_data.limitations == str(expected_application_data.get("limitations"))
@@ -383,17 +384,17 @@ def test_get_case_analysis_data(
     assert case_analysis_data.scout_files
 
 
-def test_get_case_analysis_data_pipeline_match_error(
+def test_get_case_analysis_data_workflow_match_error(
     report_api_mip_dna: MipDNAReportAPI,
     mip_analysis_api: MipDNAAnalysisAPI,
     case_mip_dna: Case,
     caplog: LogCaptureFixture,
 ):
-    """Test validation error if a customer requested pipeline does not match the data analysis."""
+    """Test validation error if a customer requested workflow does not match the data analysis."""
 
     # GIVEN a pre-built case and a MIP-DNA analysis that has been started as Balsamic
     mip_analysis: Analysis = case_mip_dna.analyses[0]
-    mip_analysis.pipeline = Workflow.BALSAMIC
+    mip_analysis.workflow = Workflow.BALSAMIC
 
     # GIVEN a mip analysis mock metadata
     mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
@@ -407,11 +408,11 @@ def test_get_case_analysis_data_pipeline_match_error(
         )
     assert (
         f"The analysis requested by the customer ({Workflow.MIP_DNA}) does not match the one executed "
-        f"({mip_analysis.pipeline})" in caplog.text
+        f"({mip_analysis.workflow})" in caplog.text
     )
 
 
-def test_get_case_analysis_data_pipeline_not_supported(
+def test_get_case_analysis_data_workflow_not_supported(
     report_api_mip_dna: MipDNAReportAPI,
     mip_analysis_api: MipDNAAnalysisAPI,
     case_mip_dna: Case,
@@ -422,7 +423,7 @@ def test_get_case_analysis_data_pipeline_not_supported(
     # GIVEN a pre-built case with Fluffy as data analysis
     case_mip_dna.data_analysis = Workflow.FLUFFY
     mip_analysis: Analysis = case_mip_dna.analyses[0]
-    mip_analysis.pipeline = Workflow.FLUFFY
+    mip_analysis.workflow = Workflow.FLUFFY
 
     # GIVEN a mip analysis mock metadata
     mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)

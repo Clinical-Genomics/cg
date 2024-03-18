@@ -19,12 +19,12 @@ class HermesApi:
     def convert_deliverables(
         self, deliverables_file: Path, workflow: str, analysis_type: str | None = None
     ) -> CGDeliverables:
-        """Convert deliverables file in raw workflow format to CG format with hermes"""
+        """Convert deliverables file in raw workflow format to CG format with Hermes."""
         LOG.info("Converting workflow deliverables to CG deliverables")
         convert_command = [
             "convert",
             "deliverables",
-            "--pipeline",
+            "--workflow",
             workflow,
             str(deliverables_file),
         ]

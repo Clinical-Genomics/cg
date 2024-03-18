@@ -8,6 +8,7 @@ from cg.constants import FlowCellStatus, Priority
 from cg.constants.constants import CaseActions, MicrosaltAppTags, Workflow
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CgError
+from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.store.models import (
     Analysis,
     Application,
@@ -214,8 +215,8 @@ def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
     assert len(records) == 0
 
 
-def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
-    """Test analyses to upload with no pipeline specified."""
+def test_analyses_to_upload_when_no_workflow(helpers, sample_store, timestamp):
+    """Test analyses to upload with no workflow specified."""
     # GIVEN a store with one analysis
     helpers.add_analysis(store=sample_store, completed_at=timestamp)
 
@@ -228,8 +229,8 @@ def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
     assert len(records) == 1
 
 
-def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, timestamp):
-    """Test analyses to upload to when existing pipeline."""
+def test_analyses_to_upload_when_analysis_has_workflow(helpers, sample_store, timestamp):
+    """Test analyses to upload to when existing workflow."""
     # GIVEN a store with an analysis that has been run with MIP
     helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=Workflow.MIP_DNA)
 
@@ -242,24 +243,24 @@ def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, ti
     assert len(records) == 1
 
 
-def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, timestamp):
-    """Test analyses to upload to when existing pipeline and using it in filtering."""
+def test_analyses_to_upload_when_filtering_with_workflow(helpers, sample_store, timestamp):
+    """Test analyses to upload to when existing workflow and using it in filtering."""
     # GIVEN a store with an analysis that is analysed with MIP
-    pipeline = Workflow.MIP_DNA
-    helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=pipeline)
+    workflow = Workflow.MIP_DNA
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=workflow)
 
-    # WHEN fetching all pipelines that are analysed with MIP
+    # WHEN fetching all workflows that are analysed with MIP
     records: list[Analysis] = [
-        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=pipeline)
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=workflow)
     ]
 
     for analysis_obj in records:
         # THEN the workflow should be MIP in the analysis object
-        assert analysis_obj.pipeline == str(pipeline)
+        assert analysis_obj.workflow == workflow
 
 
-def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_store, timestamp):
-    """Test analyses to upload to when existing pipeline and using it in filtering."""
+def test_analyses_to_upload_with_workflow_and_no_complete_at(helpers, sample_store, timestamp):
+    """Test analyses to upload to when existing workflow and using it in filtering."""
     # GIVEN a store with an analysis that is analysed with MIP but does not have a completed_at
     pipeline = Workflow.MIP_DNA
     helpers.add_analysis(store=sample_store, completed_at=None, workflow=pipeline)
@@ -269,12 +270,12 @@ def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_sto
         analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=pipeline)
     ]
 
-    # THEN no analysis object should be returned since they where not completed
+    # THEN no analysis object should be returned since they were not completed
     assert len(records) == 0
 
 
-def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample_store, timestamp):
-    """Test analyses to upload to when missing pipeline and using it in filtering."""
+def test_analyses_to_upload_when_filtering_with_missing_workflow(helpers, sample_store, timestamp):
+    """Test analyses to upload to when missing workflow and using it in filtering."""
     # GIVEN a store with an analysis that has been analysed with "missing_pipeline"
     helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=Workflow.MIP_DNA)
 
@@ -1528,33 +1529,45 @@ def test_get_orders_empty_store(store: Store):
     # GIVEN a store without any orders
 
     # WHEN fetching orders
+    orders, total = store.get_orders(OrdersRequest())
+
     # THEN none should be returned
-    assert not store.get_orders_by_workflow()
+    assert not orders
+    assert not total
 
 
 def test_get_orders_populated_store(store: Store, order: Order, order_another: Order):
     # GIVEN a store with two orders
 
     # WHEN fetching orders
+    orders, total = store.get_orders(OrdersRequest())
+
     # THEN both should be returned
-    assert len(store.get_orders_by_workflow()) == 2
+    assert len(orders) == 2
+    assert total == 2
 
 
 def test_get_orders_limited(store: Store, order: Order, order_another: Order):
     # GIVEN a store with two orders
+    orders_request = OrdersRequest(pageSize=1, page=1)
 
     # WHEN fetching a limited amount of orders
+    orders, total = store.get_orders(orders_request)
+
     # THEN only one should be returned
-    assert len(store.get_orders_by_workflow(limit=1)) == 1
+    assert total == 2
+    assert len(orders) == 1
 
 
 def test_get_orders_workflow_filter(
     store: Store, order: Order, order_another: Order, order_balsamic: Order
 ):
     # GIVEN a store with three orders, one of which is a Balsamic order
+    orders_request = OrdersRequest(workflow=Workflow.BALSAMIC)
 
     # WHEN fetching only balsamic orders
-    orders: list[Order] = store.get_orders_by_workflow(workflow=Workflow.BALSAMIC)
+    orders, _ = store.get_orders(orders_request)
+
     # THEN only one should be returned
     assert len(orders) == 1 and orders[0].workflow == Workflow.BALSAMIC
 
@@ -1577,9 +1590,9 @@ def test_get_orders_mip_dna_and_limit_filter(
     expected_returned: int,
 ):
     # GIVEN a store with three orders, two of which are MIP-DNA orders
-
+    orders_request = OrdersRequest(workflow=Workflow.MIP_DNA, pageSize=limit)
     # WHEN fetching only MIP-DNA orders
-    orders: list[Order] = store.get_orders_by_workflow(workflow=Workflow.MIP_DNA, limit=limit)
+    orders, _ = store.get_orders(orders_request)
 
     # THEN we should get the expected number of orders returned
     assert len(orders) == expected_returned

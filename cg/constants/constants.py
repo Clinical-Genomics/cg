@@ -1,6 +1,6 @@
 """Constants for cg."""
 
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 
 import click
 
@@ -50,7 +50,12 @@ class CaseActions(StrEnum):
 
 CONTAINER_OPTIONS = ("Tube", "96 well plate", "No container")
 
-CONTROL_OPTIONS = ("", "negative", "positive")
+
+class ControlOptions(StrEnum):
+    NEGATIVE: str = "negative"
+    POSITIVE: str = "positive"
+    EMPTY: str = ""
+
 
 DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
@@ -97,13 +102,21 @@ class PrepCategory(StrEnum):
     WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
 
 
-PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
+class SexOptions(StrEnum):
+    MALE: str = "male"
+    FEMALE: str = "female"
+    UNKNOWN: str = "unknown"
 
-SEX_OPTIONS = ("male", "female", "unknown")
 
 SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
+
+
+class StatusOptions(StrEnum):
+    AFFECTED: str = "affected"
+    UNAFFECTED: str = "unaffected"
+    UNKNOWN: str = "unknown"
 
 
 class Workflow(StrEnum):
@@ -123,6 +136,7 @@ class Workflow(StrEnum):
     RSYNC: str = "rsync"
     SPRING: str = "spring"
     TAXPROFILER: str = "taxprofiler"
+    TOMTE: str = "tomte"
 
 
 class FileFormat(StrEnum):
@@ -168,6 +182,7 @@ class HastaSlurmPartitions(StrEnum):
 class FileExtensions(StrEnum):
     BED: str = ".bed"
     COMPLETE: str = ".complete"
+    CONFIG: str = ".config"
     CRAM: str = ".cram"
     CSV: str = ".csv"
     FASTQ: str = ".fastq"
@@ -230,6 +245,7 @@ class MicrosaltQC:
 class MicrosaltAppTags(StrEnum):
     MWRNXTR003: str = "MWRNXTR003"
     MWXNXTR003: str = "MWXNXTR003"
+    VWGNXTR001: str = "VWGNXTR001"
     PREP_CATEGORY: str = "mic"
 
 
@@ -251,6 +267,13 @@ class Strandedness(StrEnum):
     FORWARD: str = "forward"
     REVERSE: str = "reverse"
     UNSTRANDED: str = "unstranded"
+
+
+class ReadDirection(IntEnum):
+    """Read direction types."""
+
+    FORWARD: int = 1
+    REVERSE: int = 2
 
 
 PIPELINES_USING_PARTIAL_ANALYSES: list[Workflow] = [Workflow.MICROSALT, Workflow.MUTANT]

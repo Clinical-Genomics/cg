@@ -8,12 +8,13 @@ from google.auth import jwt
 from google.auth.crypt import RSASigner
 
 from cg.apps.tb.dto.create_job_request import CreateJobRequest
-from cg.apps.tb.models import TrailblazerAnalysis
+from cg.apps.tb.dto.summary_response import AnalysisSummary, SummariesResponse
+from cg.apps.tb.models import AnalysesResponse, TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
-from cg.exc import TrailblazerAPIHTTPError
+from cg.exc import TrailblazerAnalysisNotFound, TrailblazerAPIHTTPError
 from cg.io.controller import APIRequest, ReadStream
 
 LOG = logging.getLogger(__name__)
@@ -68,6 +69,14 @@ class TrailblazerAPI:
         LOG.debug(f"RESPONSE BODY {response.text}")
         return ReadStream.get_content_from_stream(file_format=FileFormat.JSON, stream=response.text)
 
+    def get_latest_completed_analysis(self, case_id: str) -> TrailblazerAnalysis | None:
+        endpoint = f"analyses?case_id={case_id}&status[]={AnalysisStatus.COMPLETED}&limit=1"
+        response = self.query_trailblazer(command=endpoint, request_body={}, method=APIMethods.GET)
+        validated_response = AnalysesResponse.model_validate(response)
+        if validated_response.analyses:
+            return validated_response.analyses[0]
+        raise TrailblazerAnalysisNotFound(f"No completed analysis found for case {case_id}")
+
     def get_latest_analysis(self, case_id: str) -> TrailblazerAnalysis | None:
         request_body = {
             "case_id": case_id,
@@ -101,7 +110,8 @@ class TrailblazerAPI:
         out_dir: str,
         slurm_quality_of_service: SlurmQos,
         email: str = None,
-        data_analysis: Workflow = None,
+        order_id: int | None = None,
+        workflow: Workflow = None,
         ticket: str = None,
         workflow_manager: str = WorkflowManager.Slurm,
     ) -> TrailblazerAnalysis:
@@ -110,15 +120,17 @@ class TrailblazerAPI:
             "email": email,
             "type": analysis_type,
             "config_path": config_path,
+            "order_id": order_id,
             "out_dir": out_dir,
             "priority": slurm_quality_of_service,
-            "data_analysis": str(data_analysis).upper(),
+            "workflow": workflow.upper(),
             "ticket": ticket,
             "workflow_manager": workflow_manager,
         }
         LOG.debug(f"Submitting job to Trailblazer: {request_body}")
-        response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
-        if response:
+        if response := self.query_trailblazer(
+            command="add-pending-analysis", request_body=request_body
+        ):
             return TrailblazerAnalysis.model_validate(response)
 
     def set_analysis_uploaded(self, case_id: str, uploaded_at: datetime) -> None:
@@ -159,3 +171,19 @@ class TrailblazerAPI:
             request_body=request_body,
             method=APIMethods.POST,
         )
+
+    def get_summaries(self, order_ids: list[int]) -> list[AnalysisSummary]:
+        orders_param = "orderIds=" + ",".join(map(str, order_ids))
+        endpoint = f"summary?{orders_param}"
+        response = self.query_trailblazer(command=endpoint, request_body={}, method=APIMethods.GET)
+        response_data = SummariesResponse.model_validate(response)
+        return response_data.summaries
+
+    def get_analyses_to_deliver(self, order_id: int) -> list[TrailblazerAnalysis]:
+        """Return the analyses in the order which have a 'Completed' status."""
+        endpoint = f"analyses?orderId={order_id}&status[]={AnalysisStatus.COMPLETED}"
+        raw_response = self.query_trailblazer(
+            command=endpoint, request_body={}, method=APIMethods.GET
+        )
+        validated_response = AnalysesResponse.model_validate(raw_response)
+        return validated_response.analyses

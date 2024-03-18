@@ -126,6 +126,12 @@ class HousekeeperArchiveMissingError(CgError):
     """
 
 
+class HousekeeperStoreError(CgError):
+    """
+    Exception raised when a deliverable file is malformed in Housekeeper.
+    """
+
+
 class LimsDataError(CgError):
     """
     Error related to missing/incomplete data in LIMS.
@@ -141,6 +147,12 @@ class MicrosaltError(CgError):
 class MissingAnalysisRunDirectory(CgError):
     """
     Error related to missing analysis.
+    """
+
+
+class NfAnalysisError(CgError):
+    """
+    Error related to nf analysis.
     """
 
 
@@ -190,6 +202,10 @@ class TicketCreationError(CgError):
 
 class TrailblazerAPIHTTPError(CgError):
     """Raised when Trailblazer REST API response code is not 200."""
+
+
+class TrailblazerAnalysisNotFound(CgError):
+    """Raised when a Trailblazer analysis is not found."""
 
 
 class ValidationError(CgError):
@@ -256,3 +272,19 @@ class XMLError(CgError):
 
 class OrderNotFoundError(CgError):
     """Exception raised when an order is not found."""
+
+
+class OrderExistsError(CgError):
+    """Exception raised when cases and samples are added to a pre-existing order."""
+
+
+class OrderMismatchError(CgError):
+    """Exception raised when cases expected to belong to the same order are not part of the same order."""
+
+
+class OrderNotDeliverableError(CgError):
+    """Exception raised when no analysis is ready for delivery for an order."""
+
+
+class OverrideCyclesError(CgError):
+    """Exception raised when the override cycles are not correct."""
