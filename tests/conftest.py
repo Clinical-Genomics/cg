@@ -2754,11 +2754,10 @@ def tomte_context(
     hermes_api: HermesApi,
     cg_dir: Path,
 ) -> CGConfig:
-    """context to use in cli"""
+    """Context to use in CLI."""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = TomteAnalysisAPI(config=cg_context)
-    status_db: Store = cg_context.status_db
     return cg_context
 
 

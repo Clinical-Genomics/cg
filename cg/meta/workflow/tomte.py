@@ -10,8 +10,7 @@ LOG = logging.getLogger(__name__)
 
 
 class TomteAnalysisAPI(NfAnalysisAPI):
-    """Handles communication between Tomte processes
-    and the rest of CG infrastructure."""
+    """Handles communication between Tomte processes and the rest of CG infrastructure."""
 
     def __init__(
         self,
