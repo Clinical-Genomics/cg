@@ -1,6 +1,6 @@
 """Constants for cg."""
 
-from enum import StrEnum, IntEnum
+from enum import IntEnum, StrEnum
 
 import click
 
