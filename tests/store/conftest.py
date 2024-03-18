@@ -223,7 +223,6 @@ def store_with_a_sample_that_has_many_attributes_and_one_without(
         received_at=timestamp_now,
         last_sequenced_at=timestamp_now,
         prepared_at=timestamp_now,
-        invoiced_at=timestamp_now,
         application_version_id=StoreConstants.APPLICATION_VERSION_ID_SAMPLE_WITH_ATTRIBUTES.value,
         subject_id=StoreConstants.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
         invoice_id=StoreConstants.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
