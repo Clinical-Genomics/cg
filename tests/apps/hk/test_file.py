@@ -720,7 +720,7 @@ def test_filter_files_without_tags(
     assert fastq_file.name in files_names
 
     # GIVEN a list of fastq file tags to exclude
-    excluded_tags: list[set[str]] = [{SequencingFileTag.FASTQ}]
+    excluded_tags: list[str] = [SequencingFileTag.FASTQ]
 
     # WHEN getting a list of files lacking excluded tags
     filtered_files: list[File] = populated_housekeeper_api.get_files_without_excluded_tags(
@@ -810,7 +810,7 @@ def test_get_files_from_latest_version_containing_tags_and_excluded_tags(
     tags: list[set[str]] = [{sample_id}]
 
     # GIVEN a list of fastq file tags to exclude
-    excluded_tags: list[set[str]] = [{SequencingFileTag.FASTQ}]
+    excluded_tags: list[str] = [SequencingFileTag.FASTQ]
 
     # WHEN getting a list of files that match the sample ID tag and exclude the fastq files
     filtered_files: list[File] = (

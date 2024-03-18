@@ -125,7 +125,7 @@ class DeliveryAPI:
         files.
         """
         case_tags: list[set[str]] = self.get_analysis_case_tags_for_workflow(case.data_analysis)
-        sample_id_tags: list[set[str]] = [{sample_id} for sample_id in case.sample_ids]
+        sample_id_tags: list[str] = [sample_id for sample_id in case.sample_ids]
         case_files: list[File] = self.housekeeper_api.get_files_from_latest_version_containing_tags(
             bundle_name=case.internal_id, tags=case_tags, excluded_tags=sample_id_tags
         )

@@ -676,19 +676,17 @@ class HousekeeperAPI:
         return filtered_files
 
     @staticmethod
-    def get_files_without_excluded_tags(
-        files: list[File], excluded_tags: list[set[str]]
-    ) -> list[File]:
+    def get_files_without_excluded_tags(files: list[File], excluded_tags: list[str]) -> list[File]:
         """Return files without specified tags."""
         filtered_files: list[File] = []
         for file in files:
-            file_tags: set[str] = {tag.name for tag in file.tags}
-            if all(not excluded_tag.issubset(file_tags) for excluded_tag in excluded_tags):
+            file_tags: list[str] = [tag.name for tag in file.tags]
+            if not any(excluded_tag in file_tags for excluded_tag in excluded_tags):
                 filtered_files.append(file)
         return filtered_files
 
     def get_files_from_latest_version_containing_tags(
-        self, bundle_name: str, tags: list[set[str]], excluded_tags: list[set[str]] | None = None
+        self, bundle_name: str, tags: list[set[str]], excluded_tags: list[str] | None = None
     ) -> list[File]:
         """
         Return files from the latest version of a bundle matching provided tags. Files containing
