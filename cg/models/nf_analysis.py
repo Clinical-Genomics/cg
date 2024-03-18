@@ -5,16 +5,35 @@ from pydantic.v1 import BaseModel, Field, conlist, validator
 from cg.exc import SampleSheetError
 
 
-class PipelineParameters(BaseModel):
-    clusterOptions: str = Field(..., alias="cluster_options")
-    priority: str
+class WorkflowParameters(BaseModel):
+    input: Path
+    outdir: Path
+
+
+class NfCommandArgs(BaseModel):
+    """Model for arguments and options supported."""
+
+    log: str | Path | None
+    resume: bool | None
+    profile: str | None
+    stub: bool | None
+    config: str | Path | None
+    name: str | None
+    revision: str | None
+    wait: str | None
+    id: str | None
+    with_tower: bool | None
+    use_nextflow: bool | None
+    compute_env: str | None
+    work_dir: str | Path | None
+    params_file: str | Path | None
 
 
 class NextflowSampleSheetEntry(BaseModel):
-    """Nextflow samplesheet model.
+    """Nextflow sample sheet model.
 
     Attributes:
-        name: sample name, corresponds to case_id
+        name: sample name, or case id
         fastq_forward_read_paths: list of all fastq read1 file paths corresponding to sample
         fastq_reverse_read_paths: list of all fastq read2 file paths corresponding to sample
     """
@@ -58,7 +77,7 @@ class FileDeliverable(BaseModel):
         return None
 
 
-class PipelineDeliverables(BaseModel):
+class WorkflowDeliverables(BaseModel):
     """Specification for workflow deliverables."""
 
     files: list[FileDeliverable]

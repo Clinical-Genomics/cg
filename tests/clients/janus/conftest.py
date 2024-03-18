@@ -8,7 +8,9 @@ from cg.clients.janus.api import JanusAPIClient
 from cg.clients.janus.dto.create_qc_metrics_request import (
     CreateQCMetricsRequest,
     FilePathAndTag,
+    WorkflowInfo,
 )
+from cg.constants import PrepCategory, Workflow
 
 
 @pytest.fixture
@@ -44,12 +46,13 @@ def balsamic_files_wgs(request: FixtureRequest) -> list[FilePathAndTag]:
 def collect_qc_request_balsamic_wgs(
     balsamic_files_wgs: list[FilePathAndTag],
 ) -> CreateQCMetricsRequest:
+    workflow_info = WorkflowInfo(workflow=Workflow.BALSAMIC, version="1")
     return CreateQCMetricsRequest(
         case_id="testcase",
         sample_ids=["test_sample"],
         files=balsamic_files_wgs,
-        workflow="balsamic",
-        prep_category="wgs",
+        workflow_info=workflow_info,
+        prep_category=PrepCategory.WHOLE_GENOME_SEQUENCING,
     )
 
 
@@ -63,6 +66,7 @@ def mock_post_request_ok(janus_response: dict, mocker: MockFixture) -> MockFixtu
     mocked_response = mocker.Mock()
     mocked_response.status_code = HTTPStatus.OK
     mocked_response.json.return_value = janus_response
+    mocked_response.verify = False
     return mocked_response
 
 

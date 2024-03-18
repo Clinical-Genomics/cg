@@ -45,3 +45,6 @@ class MockTB:
 
     def add_comment(self, case_id: str, comment: str):
         return
+
+    def get_summaries(self, order_ids: list[int]):
+        return []
