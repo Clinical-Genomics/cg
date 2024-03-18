@@ -14,7 +14,6 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_PARAMS_FILE,
     OPTION_PROFILE,
     OPTION_REVISION,
-    OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
     metrics_deliver,
@@ -80,7 +79,6 @@ def config_case(
 @OPTION_PARAMS_FILE
 @OPTION_PROFILE
 @OPTION_REVISION
-@OPTION_TOWER_RUN_ID
 @OPTION_USE_NEXTFLOW
 @OPTION_WORKDIR
 @OPTION_REFERENCES
@@ -94,7 +92,6 @@ def start(
     dry_run: bool,
     genomes_base: Path,
     log: str,
-    nf_tower_id: str | None,
     params_file: str,
     profile: str,
     revision: str,
@@ -107,7 +104,13 @@ def start(
 
     analysis_api: RnafusionAnalysisAPI = context.obj.meta_apis["analysis_api"]
     analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
-    context.invoke(config_case, case_id=case_id, dry_run=dry_run,genomes_base=genomes_base, strandedness=strandedness)
+    context.invoke(
+        config_case,
+        case_id=case_id,
+        dry_run=dry_run,
+        genomes_base=genomes_base,
+        strandedness=strandedness,
+    )
     context.invoke(
         run,
         case_id=case_id,
@@ -116,7 +119,6 @@ def start(
         dry_run=dry_run,
         from_start=True,
         log=log,
-        nf_tower_id=nf_tower_id,
         params_file=params_file,
         profile=profile,
         revision=revision,

@@ -14,7 +14,6 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_PARAMS_FILE,
     OPTION_PROFILE,
     OPTION_REVISION,
-    OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
     run,
@@ -67,7 +66,6 @@ def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @OPTION_PARAMS_FILE
 @OPTION_PROFILE
 @OPTION_REVISION
-@OPTION_TOWER_RUN_ID
 @OPTION_USE_NEXTFLOW
 @OPTION_WORKDIR
 @click.pass_context
@@ -78,7 +76,6 @@ def start(
     config: str,
     dry_run: bool,
     log: str,
-    nf_tower_id: str | None,
     params_file: str,
     profile: str,
     revision: str,
@@ -99,7 +96,6 @@ def start(
         dry_run=dry_run,
         from_start=True,
         log=log,
-        nf_tower_id=nf_tower_id,
         params_file=params_file,
         profile=profile,
         revision=revision,
@@ -125,7 +121,6 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
-
 
 
 @raredisease.command("panel")
