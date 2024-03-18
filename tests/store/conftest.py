@@ -219,7 +219,6 @@ def store_with_a_sample_that_has_many_attributes_and_one_without(
         original_ticket=StoreConstants.ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES.value,
         ordered_at=timestamp_now,
         created_at=timestamp_now,
-        sequence_start=timestamp_now,
         delivered_at=timestamp_now,
         received_at=timestamp_now,
         last_sequenced_at=timestamp_now,
