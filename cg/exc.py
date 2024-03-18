@@ -150,6 +150,12 @@ class MissingAnalysisRunDirectory(CgError):
     """
 
 
+class NfAnalysisError(CgError):
+    """
+    Error related to nf analysis.
+    """
+
+
 class OrderError(CgError):
     """
     Exception related to orders.
