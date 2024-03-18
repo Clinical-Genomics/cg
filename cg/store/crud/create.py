@@ -147,7 +147,7 @@ class CreateHandler(BaseHandler):
         """Build a new application limitations record."""
         return ApplicationLimitations(
             application=application,
-            pipeline=workflow,
+            workflow=workflow,
             limitations=limitations,
             comment=comment,
             created_at=created_at,
