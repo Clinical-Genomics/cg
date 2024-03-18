@@ -7,6 +7,7 @@ from cg.utils.files import (
     get_directories_in_path,
     get_directory_creation_time_stamp,
     get_file_in_directory,
+    get_files_matching_pattern,
     remove_directory_and_contents,
     rename_file,
 )
@@ -119,3 +120,17 @@ def test_remove_directory_and_contents(path_with_directories_and_a_file: Path, s
     # THEN the directory and its contents should no longer exist
     assert not path_with_directories_and_a_file.exists()
     assert not Path(path_with_directories_and_a_file, some_file).exists()
+
+
+def test_get_all_fastq_from_folder(external_data_directory: Path):
+    """Test the finding of fastq.gz files in customer directories."""
+    # GIVEN a folder containing two folders with both fastq and md5 files
+    for folder in external_data_directory.iterdir():
+        # WHEN the list of file paths is created
+        sample_folder: Path = external_data_directory.joinpath(folder)
+        file_paths: list[Path] = [
+            sample_folder.joinpath(path)
+            for path in get_files_matching_pattern(directory=sample_folder, pattern="*.fastq.gz")
+        ]
+        # THEN only fast.gz files are returned
+        assert all(tmp.suffixes == [".fastq", ".gz"] for tmp in file_paths)

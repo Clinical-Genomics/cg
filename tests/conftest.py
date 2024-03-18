@@ -13,6 +13,7 @@ from typing import Any, Generator
 
 import pytest
 from housekeeper.store.models import File, Version
+from pytest import TempPathFactory
 from requests import Response
 
 from cg.apps.crunchy import CrunchyAPI
@@ -38,7 +39,11 @@ from cg.io.yaml import read_yaml, write_yaml
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
-from cg.meta.transfer.external_data import ExternalDataAPI
+from cg.meta.transfer.external_data import (
+    AddExternalDataAPI,
+    ExternalDataAPI,
+    TransferExternalDataAPI,
+)
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
@@ -513,9 +518,66 @@ def rsync_api(cg_context: CGConfig) -> RsyncAPI:
 
 
 @pytest.fixture
-def external_data_api(analysis_store, cg_context: CGConfig) -> ExternalDataAPI:
-    """ExternalDataAPI fixture."""
-    return ExternalDataAPI(config=cg_context)
+def real_cg_context(
+    context_config: dict, base_store: Store, real_housekeeper_api: HousekeeperAPI
+) -> CGConfig:
+    """Return a cg config."""
+    cg_config = CGConfig(**context_config)
+    cg_config.status_db_ = base_store
+    cg_config.housekeeper_api_ = real_housekeeper_api
+    return cg_config
+
+
+@pytest.fixture
+def hasta_external_dir(tmp_path) -> Path:
+    """Return the path to the external dir on hasta."""
+    return Path(tmp_path, "/path/on/hasta/")
+
+
+@pytest.fixture(scope="session")
+def external_data_directory(
+    tmpdir_factory, customer_id: str, cust_sample_id: str, ticket_id: str
+) -> Path:
+    """Returns a customer folder with fastq.gz files in sample-directories."""
+    cust_folder: Path = tmpdir_factory.mktemp(customer_id, numbered=False)
+    ticket_folder: Path = Path(cust_folder, ticket_id)
+    ticket_folder.mkdir()
+    samples: list[str] = [f"{cust_sample_id}1", f"{cust_sample_id}2"]
+    for sample in samples:
+        Path(ticket_folder, sample).mkdir(exist_ok=True, parents=True)
+        for read in [1, 2]:
+            Path(ticket_folder, sample, f"{sample}_fastq_{read}.fastq.gz").touch(exist_ok=True)
+            Path(ticket_folder, sample, f"{sample}_fastq_{read}.fastq.gz.md5").touch(exist_ok=True)
+    return Path(ticket_folder)
+
+
+@pytest.fixture
+def external_data_api(analysis_store, real_cg_context: CGConfig, ticket_id: str) -> ExternalDataAPI:
+    """Return a external data api."""
+    return ExternalDataAPI(config=real_cg_context, ticket=ticket_id, dry_run=True)
+
+
+@pytest.fixture
+def transfer_external_data_api(
+    analysis_store,
+    real_cg_context: CGConfig,
+    ticket_id: str,
+    customer_id: str,
+) -> TransferExternalDataAPI:
+    """Return a external data api."""
+    return TransferExternalDataAPI(config=real_cg_context, ticket=ticket_id, dry_run=True)
+
+
+@pytest.fixture
+def add_external_data_api(
+    analysis_store,
+    real_cg_context: CGConfig,
+    tmp_path: Path,
+    ticket_id: str,
+    customer_id: str,
+) -> AddExternalDataAPI:
+    """Return a external data api."""
+    return AddExternalDataAPI(config=real_cg_context, ticket=ticket_id, dry_run=True, force=False)
 
 
 @pytest.fixture
@@ -1077,7 +1139,7 @@ def housekeeper_api(hk_config_dict: dict) -> MockHousekeeperAPI:
     return MockHousekeeperAPI(hk_config_dict)
 
 
-@pytest.fixture(name="real_housekeeper_api")
+@pytest.fixture
 def real_housekeeper_api(hk_config_dict: dict) -> Generator[HousekeeperAPI, None, None]:
     """Set up a real Housekeeper store."""
     _api = HousekeeperAPI(hk_config_dict)
@@ -1085,7 +1147,7 @@ def real_housekeeper_api(hk_config_dict: dict) -> Generator[HousekeeperAPI, None
     yield _api
 
 
-@pytest.fixture(name="populated_housekeeper_api")
+@pytest.fixture
 def populated_housekeeper_api(
     real_housekeeper_api: HousekeeperAPI,
     hk_bundle_data: dict,
@@ -1941,7 +2003,7 @@ def context_config(
     }
 
 
-@pytest.fixture(name="cg_context")
+@pytest.fixture
 def cg_context(
     context_config: dict, base_store: Store, housekeeper_api: MockHousekeeperAPI
 ) -> CGConfig:
