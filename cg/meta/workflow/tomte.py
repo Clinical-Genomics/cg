@@ -1,4 +1,5 @@
 """Module for TOMTE Analysis API."""
+
 import logging
 
 from cg.constants import Workflow
