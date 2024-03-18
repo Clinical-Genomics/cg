@@ -1,4 +1,4 @@
-"""Module for TOMTE Analysis API."""
+"""Module for Tomte Analysis API."""
 
 import logging
 
@@ -10,7 +10,7 @@ LOG = logging.getLogger(__name__)
 
 
 class TomteAnalysisAPI(NfAnalysisAPI):
-    """Handles communication between TOMTE processes
+    """Handles communication between Tomte processes
     and the rest of CG infrastructure."""
 
     def __init__(

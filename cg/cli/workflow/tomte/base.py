@@ -1,4 +1,4 @@
-"""CLI support to create config and/or start TOMTE."""
+"""CLI support to create config and/or start Tomte."""
 
 import logging
 
