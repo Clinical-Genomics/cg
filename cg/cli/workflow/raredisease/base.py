@@ -68,7 +68,7 @@ def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @OPTION_REVISION
 @OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
-@OPTION_REFERENCES
+@OPTION_TOWER_RUN_ID
 @DRY_RUN
 @click.pass_context
 def start(
