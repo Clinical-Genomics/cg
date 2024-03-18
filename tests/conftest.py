@@ -2202,17 +2202,42 @@ def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
 # Raredisease fixtures
 
 
-@pytest.fixture(scope="function")
-def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
-    """Return the path to the raredisease apps dir."""
-    raredisease_dir = tmpdir_factory.mktemp("raredisease")
-    return Path(raredisease_dir).absolute().as_posix()
-
-
 @pytest.fixture(scope="session")
 def raredisease_case_id() -> str:
-    """Returns a rnafusion case id."""
+    """Returns a raredisease case id."""
     return "raredisease_case_enough_reads"
+
+
+@pytest.fixture(scope="function")
+def raredisease_metrics_deliverables(raredisease_analysis_dir: Path) -> list[dict]:
+    """Returns the content of a mock metrics deliverables file."""
+    return read_yaml(
+        file_path=Path(raredisease_analysis_dir, "raredisease_metrics_deliverables.yaml")
+    )
+
+
+@pytest.fixture(scope="function")
+def raredisease_metrics_deliverables_path(raredisease_dir: Path, raredisease_case_id: str) -> Path:
+    """Path to deliverables file."""
+    return Path(
+        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_metrics_deliverables"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
+def raredisease_mock_analysis_finish(
+    raredisease_dir: Path,
+    raredisease_case_id: str,
+    raredisease_multiqc_json_metrics: dict,
+    tower_id: int,
+) -> None:
+    """Create analysis_finish file for testing."""
+
+
+@pytest.fixture(scope="function")
+def raredisease_multiqc_json_metrics(raredisease_analysis_dir: Path) -> list[dict]:
+    """Returns the content of a mock Multiqc JSON file."""
+    return read_json(file_path=Path(raredisease_analysis_dir, "multiqc_data.json"))
 
 
 # Rnafusion fixtures
