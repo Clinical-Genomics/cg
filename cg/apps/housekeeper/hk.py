@@ -666,7 +666,7 @@ class HousekeeperAPI:
         self.commit()
 
     @staticmethod
-    def get_files_with_tags(files: list[File], tags: list[set[str]]) -> list[File]:
+    def get_files_containing_tags(files: list[File], tags: list[set[str]]) -> list[File]:
         """Return files containing specified tags."""
         filtered_files: list[File] = []
         for file in files:
@@ -695,7 +695,7 @@ class HousekeeperAPI:
         any tag sets specified in the excluded_tags list will be excluded from the output.
         """
         files: list[File] = self.get_files_from_latest_version(bundle_name=bundle_name)
-        filtered_files: list[File] = self.get_files_with_tags(files=files, tags=tags)
+        filtered_files: list[File] = self.get_files_containing_tags(files=files, tags=tags)
         if excluded_tags:
             filtered_files: list[File] = self.get_files_without_excluded_tags(
                 files=filtered_files, excluded_tags=excluded_tags

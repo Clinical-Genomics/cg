@@ -666,7 +666,7 @@ def test_get_file_insensitive_path(bed_file: Path, populated_housekeeper_api: Ho
     assert file
 
 
-def test_get_files_with_tags(
+def test_get_files_containing_tags(
     populated_housekeeper_api: HousekeeperAPI, sample_id: str, fastq_file: Path, spring_file: Path
 ):
     """Test get files containing specific tags."""
@@ -681,7 +681,7 @@ def test_get_files_with_tags(
     tags: list[set[str]] = [{SequencingFileTag.FASTQ}]
 
     # WHEN getting a list of files with tags
-    filtered_files: list[File] = populated_housekeeper_api.get_files_with_tags(
+    filtered_files: list[File] = populated_housekeeper_api.get_files_containing_tags(
         files=files, tags=tags
     )
 
@@ -700,7 +700,7 @@ def test_get_files_when_using_no_tags(
     files: list[File] = populated_housekeeper_api.get_files_from_latest_version(sample_id)
 
     # WHEN getting a list of files providing an empty list of tags
-    filtered_files: list[File] = populated_housekeeper_api.get_files_with_tags(
+    filtered_files: list[File] = populated_housekeeper_api.get_files_containing_tags(
         files=files, tags=empty_list
     )
 
