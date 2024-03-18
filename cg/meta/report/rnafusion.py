@@ -10,7 +10,6 @@ from cg.constants import (
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_RNAFUSION_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
-    Workflow,
 )
 from cg.constants.constants import GenomeVersion
 from cg.constants.scout import RNAFUSION_CASE_TAGS
@@ -82,10 +81,6 @@ class RnafusionReportAPI(ReportAPI):
     ) -> bool:
         """Check if the report is accredited. Rnafusion is an accredited workflow."""
         return True
-
-    def get_template_name(self) -> str:
-        """Return template name to render the delivery report."""
-        return Workflow.RNAFUSION + "_report.html"
 
     def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""

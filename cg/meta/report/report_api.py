@@ -9,7 +9,7 @@ from housekeeper.store.models import File, Version
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sqlalchemy.orm import Query
 
-from cg.constants import Workflow
+from cg.constants import DELIVERY_REPORT_FILE_NAME, Workflow
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.exc import DeliveryReportError
@@ -76,7 +76,7 @@ class ReportAPI(MetaAPI):
         delivery_report: str = self.create_delivery_report(
             case_id=case_id, analysis_date=analysis_date, force_report=force_report
         )
-        report_file_path: Path = Path(directory, "delivery-report.html")
+        report_file_path: Path = Path(directory, DELIVERY_REPORT_FILE_NAME)
         with open(report_file_path, "w") as delivery_report_stream:
             delivery_report_stream.write(delivery_report)
         return report_file_path
@@ -123,7 +123,7 @@ class ReportAPI(MetaAPI):
             loader=PackageLoader("cg", "meta/report/templates"),
             autoescape=select_autoescape(["html", "xml"]),
         )
-        template: Template = env.get_template(self.get_template_name())
+        template: Template = env.get_template(name=DELIVERY_REPORT_FILE_NAME)
         return template.render(**report_data)
 
     def get_cases_without_delivery_report(self, workflow: Workflow) -> list[Case]:
@@ -422,10 +422,6 @@ class ReportAPI(MetaAPI):
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Return dictionary with the delivery report required fields."""
-        raise NotImplementedError
-
-    def get_template_name(self) -> str:
-        """Return workflow specific template name."""
         raise NotImplementedError
 
     @staticmethod

@@ -14,7 +14,6 @@ from cg.constants import (
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_MIP_DNA_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
-    Workflow,
 )
 from cg.constants.scout import MIP_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
@@ -138,10 +137,6 @@ class MipDNAReportAPI(ReportAPI):
             )
             required_sample_metadata_fields.update({sample.id: required_fields})
         return required_sample_metadata_fields
-
-    def get_template_name(self) -> str:
-        """Return template name to render the delivery report."""
-        return Workflow.MIP_DNA + "_report.html"
 
     def get_upload_case_tags(self) -> dict:
         """Return MIP DNA upload case tags."""
