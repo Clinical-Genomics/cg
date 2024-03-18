@@ -135,9 +135,3 @@
   path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_insertSize.json
   step: multiqc
   tag: multiqc-picard-insert-size
-
-
-
-
-
-
