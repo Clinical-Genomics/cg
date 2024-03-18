@@ -200,7 +200,7 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @OPTION_DRY
 @click.pass_context
 def store(context: click.Context, case_id: str, dry_run: bool) -> None:
-    """Generate deliverables files for a case and store in Housekeeper if they
+    """Generate deliverable files for a case and store in Housekeeper if they
     pass QC metrics checks."""
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
 
