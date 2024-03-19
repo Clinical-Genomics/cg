@@ -120,7 +120,14 @@ def test_start_available_enough_reads(
     # THEN it should successfully identify the one case eligible for auto-start
     assert case_id_success in caplog.text
 
-
+@pytest.mark.parametrize(
+    "context,case_id,API",
+    [
+        (Workflow.RAREDISEASE+"_context", Workflow.RAREDISEASE+"_case_id", Workflow.RAREDISEASE+"AnalysisAPI"),
+        (Workflow.RNAFUSION+"_context", Workflow.RNAFUSION+"_case_id", Workflow.RNAFUSION+"AnalysisAPI"),
+        (Workflow.TAXPROFILER+"_context", Workflow.TAXPROFILER+"_case_id", Workflow.TAXPROFILER+"AnalysisAPI"),
+    ],
+)
 def test_start_available_not_enough_reads(
     cli_runner: CliRunner,
     context: CGConfig,
@@ -137,6 +144,7 @@ def test_start_available_not_enough_reads(
     context = request.getfixturevalue(context)
 
     # GIVEN a case passing read counts threshold and another one not passing
+    case_id: str = request.getfixturevalue(case_id)
 
     # GIVEN a mocked config
 
@@ -151,7 +159,7 @@ def test_start_available_not_enough_reads(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN it should successfully identify the one case eligible for auto-start
-    assert rnafusion_case_id in caplog.text
+    assert case_id in caplog.text
 
     # THEN the case without enough reads should not start
     assert case_id_not_enough_reads not in caplog.text
