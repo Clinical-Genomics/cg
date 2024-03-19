@@ -1887,3 +1887,17 @@ class ReadHandler(BaseHandler):
         case_data.max_tat = None
 
         return case_data
+
+    def get_not_received_case_count(self, order_id: int) -> int:
+        filters: list[CaseFilter] = [CaseFilter.BY_ORDER, CaseFilter.NOT_RECEIVED]
+        return apply_case_filter(
+            cases=self._get_query(table=Case),
+            filter_functions=filters,
+            order_id=order_id,
+        ).count()
+
+    def get_in_preparation_case_count(self, order_id: int) -> int:
+        pass
+
+    def get_in_sequencing_case_count(self, order_id: int) -> int:
+        pass

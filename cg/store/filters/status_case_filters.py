@@ -200,6 +200,14 @@ def filter_compressible_cases(cases: Query, **kwargs) -> Query:
     return cases.filter(Case.is_compressible)
 
 
+def filter_not_received_cases(cases: Query, **kwargs) -> Query:
+    return cases.join(Case.samples).filter(Sample.received_at.is_(None)).distinct()
+
+
+def filter_by_order(cases: Query, order_id: int, **kwargs) -> Query:
+    return cases.filter(Case.order_id == order_id)
+
+
 def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
     """Order cases by created at."""
     return cases.order_by(Case.created_at.desc())
@@ -224,6 +232,7 @@ def apply_case_filter(
     workflow_search: str | None = None,
     priority: str | None = None,
     ticket_id: str | None = None,
+    order_id: int | None = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
@@ -245,6 +254,7 @@ def apply_case_filter(
             workflow_search=workflow_search,
             priority=priority,
             ticket_id=ticket_id,
+            order_id=order_id,
         )
     return cases
 
@@ -262,6 +272,7 @@ class CaseFilter(Enum):
     BY_INTERNAL_ID_SEARCH: Callable = filter_cases_by_internal_id_search
     BY_NAME: Callable = filter_cases_by_name
     BY_NAME_SEARCH: Callable = filter_cases_by_name_search
+    BY_ORDER: Callable = filter_by_order
     BY_WORKFLOW_SEARCH: Callable = filter_cases_by_workflow_search
     BY_PRIORITY: Callable = filter_cases_by_priority
     BY_TICKET: Callable = filter_cases_by_ticket_id
@@ -272,6 +283,8 @@ class CaseFilter(Enum):
     IS_COMPRESSIBLE: Callable = filter_compressible_cases
     NEW_BY_ORDER_DATE: Callable = filter_newer_cases_by_order_date
     NOT_ANALYSED: Callable = filter_cases_not_analysed
+    NOT_RECEIVED: Callable = filter_not_received_cases
+    NOT_PREPARED: Callable = filter_not_prepared_cases
     OLD_BY_CREATION_DATE: Callable = filter_older_cases_by_creation_date
     REPORT_SUPPORTED: Callable = filter_report_supported_data_delivery_cases
     WITH_LOQUSDB_SUPPORTED_WORKFLOW: Callable = filter_cases_with_loqusdb_supported_workflow
