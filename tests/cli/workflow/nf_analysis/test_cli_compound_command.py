@@ -7,9 +7,9 @@ from click.testing import CliRunner
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.workflow.raredisease.base import start, start_available
-from cg.cli.workflow.rnafusion.base import start, start_available
-from cg.cli.workflow.taxprofiler.base import start, start_available
+from cg.cli.workflow.raredisease.base import raredisease, start, start_available
+from cg.cli.workflow.rnafusion.base import rnafusion, start, start_available
+from cg.cli.workflow.taxprofiler.base import taxprofiler, start, start_available
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -41,6 +41,7 @@ def test_no_args(cli_runner: CliRunner, context: CGConfig, workflow: str, reques
     """Test to see that running BALSAMIC without options prints help and doesn't result in an error."""
     # GIVEN no arguments or options besides the command call
     workflow = request.getfixturevalue(workflow)
+    context = request.getfixturevalue(context)
 
     # WHEN running command
     result = cli_runner.invoke(workflow, [], obj=context)
