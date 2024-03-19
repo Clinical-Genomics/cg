@@ -15,6 +15,7 @@ from cg.constants.tb import AnalysisTypes
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
 from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.slurm_upload_service.slurm_upload_service import SlurmUploadService
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -81,6 +82,10 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
             ticket=case.latest_ticket,
         )
         trailblazer_api.add_upload_job_to_analysis(analysis_id=analysis.id, slurm_id=job_id)
+
+        slurm_upload_service: SlurmUploadService = context.obj.slurm_upload_service
+        slurm_upload_service.add_upload_job_to_analysis(slurm_id=job_id, case_id=case_id)
+
     LOG.info(f"Transfer of case {case_id} started with SLURM job id {job_id}")
 
 
