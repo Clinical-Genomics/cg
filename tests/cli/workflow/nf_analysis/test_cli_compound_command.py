@@ -21,14 +21,23 @@ from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
 
 @pytest.mark.parametrize(
-    "workflow",
+    "workflow,context",
     [
-        Workflow.RAREDISEASE,
-        Workflow.RNAFUSION,
-        Workflow.TAXPROFILER,
-    ],
+        (
+            Workflow.RAREDISEASE,
+            Workflow.RAREDISEASE + "_context",
+        ),
+        (
+            Workflow.RNAFUSION,
+            Workflow.RNAFUSION + "_context",
+        ),
+        (
+            Workflow.TAXPROFILER,
+            Workflow.TAXPROFILER + "_context",
+        ),
+    ]
 )
-def test_no_args(cli_runner: CliRunner, context: CGConfig, request):
+def test_no_args(cli_runner: CliRunner, context: CGConfig, workflow: str, request):
     """Test to see that running BALSAMIC without options prints help and doesn't result in an error."""
     # GIVEN no arguments or options besides the command call
     workflow = request.getfixturevalue(workflow)
