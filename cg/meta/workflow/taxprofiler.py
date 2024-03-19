@@ -46,7 +46,17 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.nextflow_binary_path: str = config.taxprofiler.binary_path
         self.compute_env_base: str = config.taxprofiler.compute_env
 
-    def get_nextflow_config_content(self) -> str:
+    @property
+    def sample_sheet_headers(self) -> list[str]:
+        """Headers for sample sheet."""
+        return TaxprofilerSampleSheetEntry.headers()
+
+    @property
+    def _append_params_to_nextflow_config(self) -> bool:
+        """True if parameters should be added into the nextflow config file instead of the params file."""
+        return False
+
+    def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
         return MULTIQC_NEXFLOW_CONFIG
 
@@ -79,8 +89,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def get_sample_sheet_content(
         self,
         case_id: str,
-        instrument_platform: SequencingPlatform.ILLUMINA,
-        fasta: str = "",
     ) -> list[list[Any]]:
         """Write sample sheet for Taxprofiler analysis in case folder."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -90,7 +98,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         for link in case.links:
             sample_sheet_content.extend(
                 self.get_sample_sheet_content_per_sample(
-                    sample=link.sample, instrument_platform=instrument_platform, fasta=fasta
+                    sample=link.sample, instrument_platform=SequencingPlatform.ILLUMINA, fasta=""
                 )
             )
         return sample_sheet_content
@@ -106,30 +114,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             hostremoval_reference=self.hostremoval_reference,
             priority=self.account,
         )
-
-    def config_case(
-        self,
-        case_id: str,
-        dry_run: bool,
-    ) -> None:
-        """Create sample sheet file and parameters file for Taxprofiler analysis."""
-        self.create_case_directory(case_id=case_id, dry_run=dry_run)
-        sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(
-            case_id=case_id,
-            instrument_platform=SequencingPlatform.ILLUMINA,
-            fasta="",
-        )
-        workflow_parameters: TaxprofilerParameters = self.get_workflow_parameters(case_id=case_id)
-        if dry_run:
-            LOG.info("Dry run: Config files will not be written")
-            return
-        self.write_sample_sheet(
-            content=sample_sheet_content,
-            file_path=self.get_sample_sheet_path(case_id=case_id),
-            header=TaxprofilerSampleSheetEntry.headers(),
-        )
-        self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
-        self.write_nextflow_config(case_id=case_id)
 
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Return a list of the metrics specified in a MultiQC json file for the case samples."""

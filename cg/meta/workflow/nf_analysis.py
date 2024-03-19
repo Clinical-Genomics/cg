@@ -10,17 +10,23 @@ from cg.constants import Workflow
 from cg.constants.constants import CaseActions, FileExtensions, FileFormat, MultiQC, WorkflowManager
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.nf_analysis import NfTowerStatus
+from cg.constants.symbols import EMPTY_STRING
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.controller import ReadFile, WriteFile
-from cg.io.txt import write_txt
+from cg.io.txt import read_txt, write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MetricsDeliverablesCondition
 from cg.models.fastq import FastqFileMeta
-from cg.models.nf_analysis import FileDeliverable, NfCommandArgs, WorkflowDeliverables
+from cg.models.nf_analysis import (
+    FileDeliverable,
+    NfCommandArgs,
+    WorkflowDeliverables,
+    WorkflowParameters,
+)
 from cg.store.models import Sample
 from cg.utils import Process
 
@@ -63,6 +69,16 @@ class NfAnalysisAPI(AnalysisAPI):
     def process(self, process: Process):
         self._process = process
 
+    @property
+    def sample_sheet_headers(self) -> list[str]:
+        """Headers for sample sheet."""
+        raise NotImplementedError
+
+    @property
+    def _append_params_to_nextflow_config(self) -> bool:
+        """True if parameters should be added into the nextflow config file instead of the params file."""
+        return True
+
     def get_profile(self, profile: str | None = None) -> str:
         """Get NF profiles."""
         return profile or self.profile
@@ -75,7 +91,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get workflow version from config."""
         return self.revision
 
-    def get_nextflow_config_content(self) -> str | None:
+    def get_nextflow_config_content(self, case_id: str) -> str | None:
         """Return nextflow config content."""
         return None
 
@@ -179,22 +195,16 @@ class NfAnalysisAPI(AnalysisAPI):
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
-    def write_params_file(self, case_id: str, workflow_parameters: dict) -> None:
+    def write_params_file(self, case_id: str, workflow_parameters: dict = None) -> None:
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")
-        write_yaml_nextflow_style(
-            content=workflow_parameters,
-            file_path=self.get_params_file_path(case_id=case_id),
-        )
-
-    def write_nextflow_config(self, case_id: str) -> None:
-        """Write nextflow config in json format."""
-        if content := self.get_nextflow_config_content():
-            LOG.debug("Writing nextflow config file")
-            write_txt(
-                content=content,
-                file_path=self.get_nextflow_config_path(case_id=case_id),
+        if workflow_parameters:
+            write_yaml_nextflow_style(
+                content=workflow_parameters,
+                file_path=self.get_params_file_path(case_id=case_id),
             )
+        else:
+            self.get_params_file_path(case_id=case_id).touch()
 
     @staticmethod
     def write_sample_sheet(
@@ -231,14 +241,55 @@ class NfAnalysisAPI(AnalysisAPI):
             file_path=config_path,
         )
 
+    def create_sample_sheet(
+        self,
+        case_id: str,
+        dry_run: bool,
+    ):
+        """Create sample sheet for a case."""
+        sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
+        if not dry_run:
+            self.write_sample_sheet(
+                content=sample_sheet_content,
+                file_path=self.get_sample_sheet_path(case_id=case_id),
+                header=self.sample_sheet_headers,
+            )
+
+    def create_params_file(
+        self,
+        case_id: str,
+        dry_run: bool,
+    ):
+        """Create parameters file for a case."""
+        workflow_parameters: dict | None = self.get_workflow_parameters(case_id=case_id).dict()
+        if self._append_params_to_nextflow_config:
+            workflow_parameters = None
+        if not dry_run:
+            self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters)
+
+    def create_nextflow_config(self, case_id: str, dry_run: bool = False) -> None:
+        """Create nextflow config file."""
+        if content := self.get_nextflow_config_content(case_id=case_id):
+            LOG.debug("Writing nextflow config file")
+            if dry_run:
+                return
+            write_txt(
+                content=content,
+                file_path=self.get_nextflow_config_path(case_id=case_id),
+            )
+
     def config_case(
         self,
         case_id: str,
         dry_run: bool,
     ):
         """Create directory and config files required by a workflow for a case."""
-        self.write_config_case(case_id=case_id, dry_run=dry_run)
-        self.write_params_file(case_id=case_id, dry_run=dry_run)
+        self.create_case_directory(case_id=case_id, dry_run=dry_run)
+        self.create_sample_sheet(case_id=case_id, dry_run=dry_run)
+        self.create_params_file(case_id=case_id, dry_run=dry_run)
+        self.create_nextflow_config(case_id=case_id, dry_run=dry_run)
+        if dry_run:
+            LOG.info("Dry run: Config files will not be written")
 
     def _run_analysis_with_nextflow(
         self, case_id: str, command_args: NfCommandArgs, dry_run: bool

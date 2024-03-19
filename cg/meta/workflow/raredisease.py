@@ -51,24 +51,22 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.revision: str = config.raredisease.revision
         self.nextflow_binary_path: str = config.raredisease.binary_path
 
-    def write_config_case(
-        self,
-        case_id: str,
-        dry_run: bool,
-    ) -> None:
-        """Create a parameter (.config) files and a Nextflow sample sheet input for Raredisease analysis."""
-        self.create_case_directory(case_id=case_id, dry_run=dry_run)
-        sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
-        workflow_parameters: WorkflowParameters = self.get_workflow_parameters(case_id=case_id)
-        if dry_run:
-            LOG.info("Dry run: Config files will not be written")
-            return
-        self.write_sample_sheet(
-            content=sample_sheet_content,
-            file_path=self.get_sample_sheet_path(case_id=case_id),
-            header=RarediseaseSampleSheetHeaders.headers(),
+    @property
+    def sample_sheet_headers(self) -> list[str]:
+        """Headers for sample sheet."""
+        return RarediseaseSampleSheetHeaders.headers()
+
+    def get_nextflow_config_content(self, case_id: str) -> str:
+        """Return nextflow config content."""
+        config_files_list = [self.config_platform, self.config_params, self.config_resources]
+        extra_parameters_str = [
+            write_config_nextflow_style(self.get_workflow_parameters(case_id=case_id).dict()),
+            self.set_cluster_options(case_id=case_id),
+        ]
+        return concat_txt(
+            file_paths=config_files_list,
+            str_content=extra_parameters_str,
         )
-        self.write_config_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
 
     def get_sample_sheet_content_per_sample(
         self, case: Case = "", case_sample: CaseSample = ""
@@ -117,25 +115,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
         )
-
-    def write_config_file(self, case_id: str, workflow_parameters: dict) -> None:
-        """Write params-file for analysis."""
-        LOG.debug("Writing nextflow config file")
-        config_files_list = [self.config_platform, self.config_params, self.config_resources]
-        extra_parameters_str = [
-            write_config_nextflow_style(workflow_parameters),
-            self.set_cluster_options(case_id=case_id),
-        ]
-        concat_txt(
-            file_paths=config_files_list,
-            target_file=self.get_nextflow_config_path(case_id=case_id),
-            str_content=extra_parameters_str,
-        )
-
-    def write_params_file(self, case_id: str, dry_run: bool = False) -> None:
-        if not dry_run:
-            LOG.debug("Writing parameters file")
-            self.get_params_file_path(case_id=case_id).touch()
 
     @staticmethod
     def get_phenotype_code(phenotype: str) -> int:

@@ -56,6 +56,16 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         when determining if the analysis for a case should be automatically started."""
         return True
 
+    @property
+    def sample_sheet_headers(self) -> list[str]:
+        """Headers for sample sheet."""
+        return RnafusionSampleSheetEntry.headers()
+
+    @property
+    def _append_params_to_nextflow_config(self) -> bool:
+        """True if parameters should be added into the nextflow config file instead of the params file."""
+        return False
+
     def get_deliverables_template_content(self) -> list[dict]:
         """Return deliverables file template content."""
         return ReadFile.get_content_from_file(
@@ -63,7 +73,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             file_path=self.get_bundle_filenames_path(),
         )
 
-    def get_nextflow_config_content(self) -> str:
+    def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
         return MULTIQC_NEXFLOW_CONFIG
 
@@ -72,9 +82,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Return Rnafusion bundle filenames path."""
         return RNAFUSION_BUNDLE_FILENAMES_PATH
 
-    def get_sample_sheet_content_per_sample(
-        self, sample: Sample, case_id: str, strandedness: Strandedness
-    ) -> list[list[str]]:
+    def get_sample_sheet_content_per_sample(self, sample: Sample, case_id: str) -> list[list[str]]:
         """Get sample sheet content per sample."""
         sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
         fastq_forward_read_paths: list[str] = self.extract_read_files(
@@ -88,11 +96,11 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             name=case_id,
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
-            strandedness=strandedness,
+            strandedness=Strandedness.REVERSE,
         )
         return sample_sheet_entry.reformat_sample_content()
 
-    def get_sample_sheet_content(self, case_id: str, strandedness: Strandedness) -> list[list[Any]]:
+    def get_sample_sheet_content(self, case_id: str) -> list[list[Any]]:
         """Returns content for sample sheet."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         if len(case.links) != 1:
@@ -102,8 +110,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         LOG.debug("Getting sample sheet information")
         for link in case.links:
             content_per_sample = self.get_sample_sheet_content_per_sample(
-                sample=link.sample, case_id=case_id, strandedness=strandedness
-            )
+                sample=link.sample, case_id=case_id)
             return content_per_sample
 
     def get_workflow_parameters(
@@ -123,28 +130,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         if genomes_base:
             return genomes_base.absolute()
         return Path(self.references).absolute()
-
-    def config_case(
-        self,
-        case_id: str,
-        dry_run: bool,
-    ) -> None:
-        """Create config files (parameters and sample sheet) for Rnafusion analysis."""
-        self.create_case_directory(case_id=case_id, dry_run=dry_run)
-        sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(
-            case_id=case_id, strandedness=Strandedness.REVERSE
-        )
-        workflow_parameters: RnafusionParameters = self.get_workflow_parameters(case_id=case_id)
-        if dry_run:
-            LOG.info("Dry run: Config files will not be written")
-            return
-        self.write_sample_sheet(
-            content=sample_sheet_content,
-            file_path=self.get_sample_sheet_path(case_id=case_id),
-            header=RnafusionSampleSheetEntry.headers(),
-        )
-        self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
-        self.write_nextflow_config(case_id=case_id)
 
     def parse_multiqc_json_for_case(self, case_id: str) -> dict:
         """Parse a multiqc_data.json file and returns a dictionary with metric name and metric values for a case."""
