@@ -324,7 +324,7 @@
 			                  {% endfor %}
 		                  </ul>
 		                {% endif %}
-	                  {% if "analysis" in case.data_analysis.data_delivery %}
+	                  {% if "fastq" in case.data_analysis.data_delivery %}
 			                <li><b>Fastq-filer</b>:</li>
 	                    <ul>
 			                  {% for sample in case.samples %}
