@@ -91,7 +91,7 @@ def test_store_fail(
     # GIVEN each fixture is being initialised
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
-    # GIVEN CASE ID where analysis finish is not mocked
+    # GIVEN a case id where analysis finish is not mocked
     case_id_fail: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN a mocked deliverables template
