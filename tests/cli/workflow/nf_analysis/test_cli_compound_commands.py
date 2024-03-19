@@ -101,7 +101,7 @@ def test_store_fail(
         return_value=deliverables_template_content,
     )
 
-    # Set Housekeeper to an empty real Housekeeper store
+    # GIVEN that the Housekeeper store is empty
     context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
     context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
