@@ -1,5 +1,6 @@
 import logging
 
+import pytest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
