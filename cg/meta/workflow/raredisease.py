@@ -52,7 +52,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.revision: str = config.raredisease.revision
         self.nextflow_binary_path: str = config.raredisease.binary_path
 
-    def write_config_case(
+    def config_case(
         self,
         case_id: str,
         dry_run: bool,

@@ -50,7 +50,7 @@ def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
     LOG.info(f"Creating config files for {case_id}.")
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.write_config_case(case_id=case_id, dry_run=dry_run)
+        analysis_api.config_case(case_id=case_id, dry_run=dry_run)
         analysis_api.write_params_file(case_id=case_id, dry_run=dry_run)
     except (CgError, ValidationError) as error:
         LOG.error(f"Could not create config files for {case_id}: {error}")
