@@ -24,7 +24,9 @@ def write_txt(content: list[str] | str, file_path: Path) -> None:
 
 
 def concat_txt(
-    file_paths: list[Path|str], target_file: Path | None = None, str_content: Optional[List[str]] = None
+    file_paths: list[Path | str],
+    target_file: Path | None = None,
+    str_content: Optional[List[str]] = None,
 ) -> str | None:
     """Concatenate files and eventual string content."""
     content: str = EMPTY_STRING

@@ -20,6 +20,7 @@ class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
     def headers() -> list[str]:
         """Return sample sheet headers."""
         return ["sample", "fastq_1", "fastq_2", "strandedness"]
+
     @property
     def reformat_sample_content(self) -> list[list[str]]:
         """Reformat sample sheet content as a list of lists, where each list represents a line in the final file."""

@@ -110,7 +110,8 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         LOG.debug("Getting sample sheet information")
         for link in case.links:
             content_per_sample = self.get_sample_sheet_content_per_sample(
-                sample=link.sample, case_id=case_id)
+                sample=link.sample, case_id=case_id
+            )
             return content_per_sample
 
     def get_workflow_parameters(
