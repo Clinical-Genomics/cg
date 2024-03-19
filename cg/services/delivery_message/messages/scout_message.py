@@ -12,7 +12,7 @@ def get_cases_message(cases: list[Case]) -> str:
     scout_links: list[str] = [get_scout_link(case) for case in cases]
     scout_links_row_separated: str = "\n".join(scout_links)
     return (
-        f"Hello,\n\nThe following cases has been uploaded to Scout:\n\n{scout_links_row_separated}"
+        f"Hello,\n\nThe following cases have been uploaded to Scout:\n\n{scout_links_row_separated}"
     )
 
 
