@@ -40,7 +40,6 @@ from tests.cli.workflow.conftest import mock_analysis_flow_cell
 def test_no_args(cli_runner: CliRunner, context: CGConfig, workflow: str, request):
     """Test to see that running BALSAMIC without options prints help and doesn't result in an error."""
     # GIVEN no arguments or options besides the command call
-    workflow = request.getfixturevalue(workflow)
     context = request.getfixturevalue(context)
 
     # WHEN running command
@@ -92,8 +91,6 @@ def test_start(
     # GIVEN a mocked config
 
     # GIVEN decompression is not needed
-    case_id: str = request.getfixturevalue(case_id)
-
     request.getfixturevalue(api).resolve_decompression.return_value = None
 
     # WHEN dry running with dry specified
