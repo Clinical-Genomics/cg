@@ -213,7 +213,7 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
         LOG.error(
             "Case not stored. Trailblazer status must be either QC or COMPLETE to be able to store"
         )
-        return
+        raise click.Abort
 
     if (
         is_latest_analysis_qc
