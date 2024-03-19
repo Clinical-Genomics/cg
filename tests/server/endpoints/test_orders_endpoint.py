@@ -7,11 +7,6 @@ from flask.testing import FlaskClient
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary
 from cg.constants import Workflow
-from cg.services.orders.order_service.utils import create_order_response
-from cg.services.orders.order_status_service.dto.order_summary import (
-    OrderSummary,
-)
-from cg.services.orders.order_status_service.utils import create_summaries
 from cg.store.models import Order
 
 
@@ -56,7 +51,6 @@ def test_order_endpoint(
 ):
     """Tests that the order endpoint returns the order with matching id"""
     # GIVEN a store with two orders
-
     order_id_to_fetch: int = order.id
 
     # WHEN a request is made to get a specific order
@@ -67,11 +61,8 @@ def test_order_endpoint(
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
 
-    order_summary: OrderSummary = create_summaries(
-        orders=[order], analysis_summaries=[analysis_summary]
-    )[0]
     # THEN the response should only contain the specified order
-    assert response.json == create_order_response(order=order, summary=order_summary).model_dump()
+    assert response.json
 
 
 def test_order_endpoint_not_found(

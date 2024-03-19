@@ -12,7 +12,7 @@ from cg.constants.observations import (
     LOQUSDB_MIP_SEQUENCING_METHODS,
     LOQUSDB_SUPPORTED_WORKFLOWS,
 )
-from cg.store.models import Analysis, Application, Case, Customer, Sample
+from cg.store.models import Analysis, Application, Case, CaseSample, Customer, Sample
 
 
 def filter_cases_by_action(cases: Query, action: str, **kwargs) -> Query:
@@ -201,23 +201,48 @@ def filter_compressible_cases(cases: Query, **kwargs) -> Query:
 
 
 def get_not_received_cases(cases: Query, **kwargs) -> Query:
-    return cases.join(Case.samples).filter(Sample.received_at.is_(None)).distinct()
+    return (
+        cases.join(CaseSample, Case.links)
+        .join(Sample, CaseSample.sample)
+        .filter(Sample.received_at.is_(None))
+        .distinct()
+    )
 
 
 def get_received_cases(cases: Query, **kwargs) -> Query:
-    return cases.join(Case.samples).filter(Sample.received_at.isnot(None)).distinct()
+    return (
+        cases.join(CaseSample, Case.links)
+        .join(Sample, CaseSample.sample)
+        .filter(Sample.received_at.isnot(None))
+        .distinct()
+    )
 
 
 def get_not_prepared_cases(cases: Query, **kwargs) -> Query:
-    return cases.join(Case.samples).filter(Sample.prepared_at.is_(None)).distinct()
+    return (
+        cases.join(CaseSample, Case.links)
+        .join(Sample, CaseSample.sample)
+        .filter(Sample.prepared_at.is_(None))
+        .distinct()
+    )
 
 
 def get_prepared_cases(cases: Query, **kwargs) -> Query:
-    return cases.join(Case.samples).filter(Sample.prepared_at.isnot(None)).distinct()
+    return (
+        cases.join(CaseSample, Case.links)
+        .join(Sample, CaseSample.sample)
+        .filter(Sample.received_at.isnot(None))
+        .distinct()
+    )
 
 
 def get_not_sequenced_cases(cases: Query, **kwargs) -> Query:
-    return cases.join(Case.samples).filter(Sample.last_sequenced_at.is_(None)).distinct()
+    return (
+        cases.join(CaseSample, Case.links)
+        .join(Sample, CaseSample.sample)
+        .filter(Sample.last_sequenced_at.is_(None))
+        .distinct()
+    )
 
 
 def filter_by_order(cases: Query, order_id: int, **kwargs) -> Query:
