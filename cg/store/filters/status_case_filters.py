@@ -200,8 +200,16 @@ def filter_compressible_cases(cases: Query, **kwargs) -> Query:
     return cases.filter(Case.is_compressible)
 
 
-def filter_not_received_cases(cases: Query, **kwargs) -> Query:
+def get_not_received_cases(cases: Query, **kwargs) -> Query:
     return cases.join(Case.samples).filter(Sample.received_at.is_(None)).distinct()
+
+
+def get_received_cases(cases: Query, **kwargs) -> Query:
+    return cases.join(Case.samples).filter(Sample.received_at.isnot(None)).distinct()
+
+
+def get_not_prepared_cases(cases: Query, **kwargs) -> Query:
+    return cases.join(Case.samples).filter(Sample.prepared_at.is_(None)).distinct()
 
 
 def filter_by_order(cases: Query, order_id: int, **kwargs) -> Query:
@@ -283,8 +291,9 @@ class CaseFilter(Enum):
     IS_COMPRESSIBLE: Callable = filter_compressible_cases
     NEW_BY_ORDER_DATE: Callable = filter_newer_cases_by_order_date
     NOT_ANALYSED: Callable = filter_cases_not_analysed
-    NOT_RECEIVED: Callable = filter_not_received_cases
-    NOT_PREPARED: Callable = filter_not_prepared_cases
+    NOT_RECEIVED: Callable = get_not_received_cases
+    RECEIVED: Callable = get_received_cases
+    NOT_PREPARED: Callable = get_not_prepared_cases
     OLD_BY_CREATION_DATE: Callable = filter_older_cases_by_creation_date
     REPORT_SUPPORTED: Callable = filter_report_supported_data_delivery_cases
     WITH_LOQUSDB_SUPPORTED_WORKFLOW: Callable = filter_cases_with_loqusdb_supported_workflow
