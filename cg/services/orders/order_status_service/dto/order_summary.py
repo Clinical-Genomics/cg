@@ -10,3 +10,4 @@ class OrderSummary(BaseModel):
     failed: int | None = None
     in_sequencing: int
     in_lab_preparation: int
+    not_received: int

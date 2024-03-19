@@ -1,7 +1,7 @@
 from mock import Mock
 from cg.apps.tb.dto.summary_response import AnalysisSummary
-from cg.services.orders.order_status_service.order_status_service import OrderSummaryService
-from cg.services.orders.order_status_service.dto.order_status_summary import OrderSummary
+from cg.services.orders.order_status_service.order_summary_service import OrderSummaryService
+from cg.services.orders.order_status_service.dto.order_summary import OrderSummary
 from cg.store.models import Order
 
 

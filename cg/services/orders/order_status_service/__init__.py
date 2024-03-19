@@ -1,1 +1,1 @@
-from cg.services.orders.order_status_service.order_status_service import OrderSummaryService
+from cg.services.orders.order_status_service.order_summary_service import OrderSummaryService

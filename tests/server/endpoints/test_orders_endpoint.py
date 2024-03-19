@@ -8,7 +8,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary
 from cg.constants import Workflow
 from cg.services.orders.order_service.utils import create_order_response
-from cg.services.orders.order_status_service.dto.order_status_summary import (
+from cg.services.orders.order_status_service.dto.order_summary import (
     OrderSummary,
 )
 from cg.services.orders.order_status_service.utils import create_summaries
