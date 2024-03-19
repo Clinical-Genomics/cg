@@ -11,7 +11,7 @@ class CovidMessage(DeliveryMessage):
         delivery_path: str = get_fastq_delivery_path(cases[0])
         pangolin_delivery_path: str = get_pangolin_delivery_path(cases[0])
         return (
-            f"Hello,\n\n "
+            f"Hello,\n\n"
             f"The analysis is now complete.\n\n"
             f"The result files are being uploaded on caesar at:\n\n"
             f"{delivery_path}\n\n"

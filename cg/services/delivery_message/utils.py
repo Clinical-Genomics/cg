@@ -52,7 +52,7 @@ def get_microsalt_message_strategy(case: Case) -> DeliveryMessage:
     if has_mwx_samples(case):
         return MicrosaltMwxMessage()
 
-    if has_mwr_samples(case):
+    if has_mwr_samples(case) or has_vwg_samples(case):
         return MicrosaltMwrMessage()
 
     app_tag: str = get_case_app_tag(case)
@@ -67,6 +67,11 @@ def has_mwx_samples(case: Case):
 def has_mwr_samples(case: Case):
     case_app_tag: str = get_case_app_tag(case)
     return case_app_tag == MicrosaltAppTags.MWRNXTR003
+
+
+def has_vwg_samples(case: Case):
+    case_app_tag: str = get_case_app_tag(case)
+    return case_app_tag == MicrosaltAppTags.VWGNXTR001
 
 
 def get_case_app_tag(case: Case) -> str:

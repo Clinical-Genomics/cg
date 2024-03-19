@@ -51,6 +51,13 @@ HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]
 HK_DELIVERY_REPORT_TAG = "delivery-report"
 
 
+class HermesFileTag(StrEnum):
+    """Tags for hermes."""
+
+    CLINICAL_DELIVERY: str = "clinical-delivery"
+    LONG_TERM_STORAGE: str = "long-term-storage"
+
+
 class AnalysisTag(StrEnum):
     """Tags for analysis files."""
 
@@ -206,6 +213,9 @@ WORKFLOW_PROTECTED_TAGS = {
         [HK_DELIVERY_REPORT_TAG],
         [AnalysisTag.VCF_FUSION],
         [AnalysisTag.GENE_COUNTS],
+    ],
+    Workflow.TAXPROFILER: [
+        [HermesFileTag.LONG_TERM_STORAGE],
     ],
 }
 

@@ -9,7 +9,7 @@ from cg.clients.arnold.dto.create_case_request import CreateCaseRequest
 
 @pytest.fixture
 def arnold_config() -> dict:
-    return {"api_url": "arnold_url"}
+    return {"arnold": {"api_url": "arnold_url"}}
 
 
 @pytest.fixture

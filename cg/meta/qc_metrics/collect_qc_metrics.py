@@ -4,19 +4,16 @@ import logging
 from typing import Iterator
 
 from housekeeper.store.models import File, Tag
-from requests import Response
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.clients.arnold.api import ArnoldAPIClient
 from cg.clients.arnold.dto.create_case_request import CreateCaseRequest
-from cg.clients.arnold.exceptions import ArnoldClientError, ArnoldServerError
 from cg.clients.janus.api import JanusAPIClient
 from cg.clients.janus.dto.create_qc_metrics_request import (
     CreateQCMetricsRequest,
     FilePathAndTag,
     WorkflowInfo,
 )
-from cg.clients.janus.exceptions import JanusClientError, JanusServerError
 from cg.constants.housekeeper_tags import JanusTags
 from cg.exc import HousekeeperFileMissingError
 from cg.store.models import Case
@@ -89,21 +86,18 @@ class CollectQCMetricsAPI:
     def get_case_qc_metrics(self, case_id: str) -> dict:
         """Get the qc metrics for a case."""
         qc_metrics_request: CreateQCMetricsRequest = self.create_qc_metrics_request(case_id)
-        try:
-            qc_metrics: dict = self.janus_api.qc_metrics(qc_metrics_request)
-            return qc_metrics
-        except (JanusClientError, JanusServerError) as error:
-            LOG.info(f"Cannot collect qc metrics from Janus: {error}")
+        qc_metrics: dict = self.janus_api.qc_metrics(qc_metrics_request)
+        return qc_metrics
 
     def get_create_case_request(self, case_id: str) -> CreateCaseRequest:
         case_qc_metrics: dict = self.get_case_qc_metrics(case_id)
+        if not case_qc_metrics:
+            raise ValueError(f"Could not retrieve qc metrics from Janus for case {case_id}")
         return CreateCaseRequest(**case_qc_metrics)
 
-    def create_case(self, case_id: str):
+    def create_case(self, case_id: str, dry_run: bool = False):
         case_request: CreateCaseRequest = self.get_create_case_request(case_id)
-        try:
-            response: Response = self.arnold_api.create_case(case_request)
-            LOG.info(f"Created case for {case_id} in arnold. {response.status_code}")
-        except (ArnoldClientError, ArnoldServerError) as error:
-            LOG.error(f"Failed to create case in arnold: {error}.")
+        if dry_run:
+            LOG.info(f"Would have sent create case request to Arnold with: {case_request}")
             return
+        self.arnold_api.create_case(case_request)

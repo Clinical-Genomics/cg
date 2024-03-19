@@ -186,18 +186,18 @@ class ApplicationLimitationsView(BaseView):
 
     column_list = (
         "application",
-        "pipeline",
+        "workflow",
         "limitations",
         "comment",
         "created_at",
         "updated_at",
     )
     column_formatters = {"application": ApplicationView.view_application_link}
-    column_filters = ["application.tag", "pipeline"]
+    column_filters = ["application.tag", "workflow"]
     column_searchable_list = ["application.tag"]
     column_editable_list = ["comment"]
     form_excluded_columns = ["created_at", "updated_at"]
-    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Workflow)}
+    form_extra_fields = {"workflow": SelectEnumField(enum_class=Workflow)}
     create_modal = True
     edit_modal = True
 
@@ -473,7 +473,6 @@ class SampleView(BaseView):
 
     column_exclude_list = [
         "age_at_sampling",
-        "invoiced_at",
         "_phenotype_groups",
         "_phenotype_terms",
     ]
@@ -504,9 +503,7 @@ class SampleView(BaseView):
         "deliveries",
         "father_links",
         "flowcells",
-        "invoiced_at",
         "invoice",
-        "is_external",
         "_phenotype_groups",
         "_phenotype_terms",
         "links",

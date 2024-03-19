@@ -6,8 +6,27 @@ from cg.exc import SampleSheetError
 
 
 class WorkflowParameters(BaseModel):
-    input: Path = Field(..., alias="sample_sheet_path")
-    outdir: Path = Field(..., alias="outdir")
+    input: Path
+    outdir: Path
+
+
+class NfCommandArgs(BaseModel):
+    """Model for arguments and options supported."""
+
+    log: str | Path | None
+    resume: bool | None
+    profile: str | None
+    stub: bool | None
+    config: str | Path | None
+    name: str | None
+    revision: str | None
+    wait: str | None
+    id: str | None
+    with_tower: bool | None
+    use_nextflow: bool | None
+    compute_env: str | None
+    work_dir: str | Path | None
+    params_file: str | Path | None
 
 
 class NextflowSampleSheetEntry(BaseModel):

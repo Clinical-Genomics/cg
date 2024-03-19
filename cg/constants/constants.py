@@ -1,6 +1,6 @@
 """Constants for cg."""
 
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 
 import click
 
@@ -136,6 +136,7 @@ class Workflow(StrEnum):
     RSYNC: str = "rsync"
     SPRING: str = "spring"
     TAXPROFILER: str = "taxprofiler"
+    TOMTE: str = "tomte"
 
 
 class FileFormat(StrEnum):
@@ -244,6 +245,7 @@ class MicrosaltQC:
 class MicrosaltAppTags(StrEnum):
     MWRNXTR003: str = "MWRNXTR003"
     MWXNXTR003: str = "MWXNXTR003"
+    VWGNXTR001: str = "VWGNXTR001"
     PREP_CATEGORY: str = "mic"
 
 
@@ -265,6 +267,13 @@ class Strandedness(StrEnum):
     FORWARD: str = "forward"
     REVERSE: str = "reverse"
     UNSTRANDED: str = "unstranded"
+
+
+class ReadDirection(IntEnum):
+    """Read direction types."""
+
+    FORWARD: int = 1
+    REVERSE: int = 2
 
 
 PIPELINES_USING_PARTIAL_ANALYSES: list[Workflow] = [Workflow.MICROSALT, Workflow.MUTANT]

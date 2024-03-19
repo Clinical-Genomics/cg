@@ -55,5 +55,5 @@ def test_filter_application_limitations_by_workflow(
     assert (
         application_limitations.all()
         and len(application_limitations.all()) == 1
-        and application_limitations.all()[0].pipeline == workflow
+        and application_limitations.all()[0].workflow == workflow
     )

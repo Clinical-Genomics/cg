@@ -3,13 +3,17 @@
 import logging
 
 import click
-from pydantic.v1 import ValidationError
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
 from cg.constants.constants import MetaApis
-from cg.exc import CgError
+from cg.exc import CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store.store import Store
+from pydantic import ValidationError
+
+LOG = logging.getLogger(__name__)
 
 LOG = logging.getLogger(__name__)
 
@@ -86,6 +90,56 @@ OPTION_FROM_START = click.option(
 )
 
 
+@click.command("run")
+@ARGUMENT_CASE_ID
+@OPTION_LOG
+@OPTION_WORKDIR
+@OPTION_FROM_START
+@OPTION_PROFILE
+@OPTION_CONFIG
+@OPTION_PARAMS_FILE
+@OPTION_REVISION
+@OPTION_COMPUTE_ENV
+@OPTION_USE_NEXTFLOW
+@OPTION_TOWER_RUN_ID
+@OPTION_DRY
+@click.pass_obj
+def run(
+    context: CGConfig,
+    case_id: str,
+    log: str,
+    work_dir: str,
+    from_start: bool,
+    profile: str,
+    config: str,
+    params_file: str,
+    revision: str,
+    compute_env: str,
+    use_nextflow: bool,
+    nf_tower_id: str | None,
+    dry_run: bool,
+) -> None:
+    """Run analysis for given CASE ID."""
+    analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+    try:
+        analysis_api.run_nextflow_analysis(
+            case_id=case_id,
+            dry_run=dry_run,
+            log=log,
+            work_dir=work_dir,
+            from_start=from_start,
+            profile=profile,
+            config=config,
+            params_file=params_file,
+            revision=revision,
+            compute_env=compute_env,
+            use_nextflow=use_nextflow,
+            nf_tower_id=nf_tower_id,
+        )
+    except Exception as error:
+        raise click.Abort() from error
+
+
 @click.command("metrics-deliver")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
@@ -123,4 +177,19 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
             LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
     except Exception as error:
         LOG.error(f"Could not create report file: {error}")
+        raise click.Abort()
+
+
+@click.command("store-housekeeper")
+@ARGUMENT_CASE_ID
+@OPTION_DRY
+@click.pass_obj
+def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
+    """Store a finished RNAFUSION and TAXPROFILER analysis in Housekeeper and StatusDB."""
+    analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+
+    try:
+        analysis_api.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run)
+    except HousekeeperStoreError as error:
+        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
         raise click.Abort()

@@ -6,33 +6,11 @@ from click.testing import CliRunner
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.workflow.rnafusion.base import (
-    rnafusion,
-    start,
-    start_available,
-    store,
-    store_available,
-)
+from cg.cli.workflow.rnafusion.base import start, start_available, store, store_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from tests.cli.workflow.conftest import mock_analysis_flow_cell
-
-
-def test_rnafusion_no_args(cli_runner: CliRunner, rnafusion_context: CGConfig):
-    """Test to see that running BALSAMIC without options prints help and doesn't result in an error."""
-    # GIVEN no arguments or options besides the command call
-
-    # WHEN running command
-    result = cli_runner.invoke(rnafusion, [], obj=rnafusion_context)
-
-    # THEN command runs successfully
-    print(result.output)
-
-    assert result.exit_code == EXIT_SUCCESS
-
-    # THEN help should be printed
-    assert "help" in result.output
 
 
 def test_start(
@@ -68,10 +46,10 @@ def test_store_success(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     real_housekeeper_api: HousekeeperAPI,
-    mock_deliverable,
+    rnafusion_mock_deliverable_dir,
     rnafusion_mock_analysis_finish,
     caplog: LogCaptureFixture,
-    hermes_deliverables: dict,
+    rnafusion_hermes_deliverables,
     mocker,
     rnafusion_case_id: str,
     deliverables_template_content: list[dict],
@@ -102,7 +80,7 @@ def test_store_success(
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
-    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
+    HermesApi.convert_deliverables.return_value = CGDeliverables(**rnafusion_hermes_deliverables)
 
     # WHEN running command
     result = cli_runner.invoke(store, [rnafusion_case_id], obj=rnafusion_context)
@@ -188,10 +166,10 @@ def test_store_available(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     real_housekeeper_api,
-    hermes_deliverables,
+    rnafusion_hermes_deliverables,
     rnafusion_case_id: str,
     deliverables_template_content: list[dict],
-    mock_deliverable,
+    rnafusion_mock_deliverable_dir,
     rnafusion_mock_analysis_finish,
     mock_config,
     mocker,
@@ -213,7 +191,7 @@ def test_store_available(
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
-    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
+    HermesApi.convert_deliverables.return_value = CGDeliverables(**rnafusion_hermes_deliverables)
 
     # GIVEN a mocked config
 

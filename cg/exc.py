@@ -126,6 +126,12 @@ class HousekeeperArchiveMissingError(CgError):
     """
 
 
+class HousekeeperStoreError(CgError):
+    """
+    Exception raised when a deliverable file is malformed in Housekeeper.
+    """
+
+
 class LimsDataError(CgError):
     """
     Error related to missing/incomplete data in LIMS.
@@ -141,6 +147,12 @@ class MicrosaltError(CgError):
 class MissingAnalysisRunDirectory(CgError):
     """
     Error related to missing analysis.
+    """
+
+
+class NfAnalysisError(CgError):
+    """
+    Error related to nf analysis.
     """
 
 
@@ -268,6 +280,10 @@ class OrderExistsError(CgError):
 
 class OrderMismatchError(CgError):
     """Exception raised when cases expected to belong to the same order are not part of the same order."""
+
+
+class OrderNotDeliverableError(CgError):
+    """Exception raised when no analysis is ready for delivery for an order."""
 
 
 class OverrideCyclesError(CgError):
