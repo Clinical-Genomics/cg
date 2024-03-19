@@ -7,7 +7,7 @@ from cg.constants.constants import Strandedness
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import WorkflowParameters
-from cg.models.tomte.tomte import TomteSampleSheetEntry
+from cg.models.tomte.tomte import TomteSampleSheetEntry, TomteSampleSheetHeaders
 from cg.store.models import CaseSample
 
 LOG = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ class TomteAnalysisAPI(NfAnalysisAPI):
     @property
     def sample_sheet_headers(self) -> list[str]:
         """Headers for sample sheet."""
-        return TomteSampleSheetEntry.headers()
+        return TomteSampleSheetHeaders.list()
 
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Get sample sheet content per sample."""
@@ -57,7 +57,7 @@ class TomteAnalysisAPI(NfAnalysisAPI):
             strandedness=Strandedness.REVERSE,
         )
         return sample_sheet_entry.reformat_sample_content
-    
+
     def get_workflow_parameters(self, case_id: str) -> WorkflowParameters:
         """Return parameters."""
         LOG.info("Getting parameters information")
