@@ -171,9 +171,6 @@ def test_add_transfer_to_housekeeper(
     mocker.patch.object(ExternalDataAPI, "get_available_samples")
     ExternalDataAPI.get_available_samples.return_value = samples[:-1]
 
-    mocker.patch.object(Store, "cases")
-    Store.cases.return_value = [{"internal_id": "yellowhog"}]
-
     mocker.patch.object(Store, "set_case_action")
     Store.set_case_action.return_value = None
 
