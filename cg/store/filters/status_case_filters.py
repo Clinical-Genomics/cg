@@ -212,6 +212,14 @@ def get_not_prepared_cases(cases: Query, **kwargs) -> Query:
     return cases.join(Case.samples).filter(Sample.prepared_at.is_(None)).distinct()
 
 
+def get_prepared_cases(cases: Query, **kwargs) -> Query:
+    return cases.join(Case.samples).filter(Sample.prepared_at.isnot(None)).distinct()
+
+
+def get_not_sequenced_cases(cases: Query, **kwargs) -> Query:
+    return cases.join(Case.samples).filter(Sample.last_sequenced_at.is_(None)).distinct()
+
+
 def filter_by_order(cases: Query, order_id: int, **kwargs) -> Query:
     return cases.filter(Case.order_id == order_id)
 
@@ -294,6 +302,8 @@ class CaseFilter(Enum):
     NOT_RECEIVED: Callable = get_not_received_cases
     RECEIVED: Callable = get_received_cases
     NOT_PREPARED: Callable = get_not_prepared_cases
+    PREPARED: Callable = get_prepared_cases
+    NOT_SEQUENCED: Callable = get_not_sequenced_cases
     OLD_BY_CREATION_DATE: Callable = filter_older_cases_by_creation_date
     REPORT_SUPPORTED: Callable = filter_report_supported_data_delivery_cases
     WITH_LOQUSDB_SUPPORTED_WORKFLOW: Callable = filter_cases_with_loqusdb_supported_workflow

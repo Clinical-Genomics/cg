@@ -1907,3 +1907,15 @@ class ReadHandler(BaseHandler):
             filter_functions=filters,
             order_id=order_id,
         ).count()
+
+    def get_in_sequencing_case_count(self, order_id: int) -> int:
+        filters: list[CaseFilter] = [
+            CaseFilter.BY_ORDER,
+            CaseFilter.PREPARED,
+            CaseFilter.NOT_SEQUENCED,
+        ]
+        return apply_case_filter(
+            cases=self._get_query(table=Case),
+            filter_functions=filters,
+            order_id=order_id,
+        ).count()
