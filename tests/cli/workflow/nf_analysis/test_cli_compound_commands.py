@@ -50,7 +50,7 @@ def test_store_success(
     context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
     context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
-    # Make sure the bundle was not present in hk
+    # GIVEN that the bundle is not present in Housekeeper
     assert not context.housekeeper_api.bundle(case_id)
 
     # Make sure analysis not already stored in status_db
