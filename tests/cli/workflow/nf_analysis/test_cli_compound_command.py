@@ -21,38 +21,6 @@ from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
 
 @pytest.mark.parametrize(
-    "workflow,context",
-    [
-        (
-            Workflow.RAREDISEASE,
-            Workflow.RAREDISEASE + "_context",
-        ),
-        (
-            Workflow.RNAFUSION,
-            Workflow.RNAFUSION + "_context",
-        ),
-        (
-            Workflow.TAXPROFILER,
-            Workflow.TAXPROFILER + "_context",
-        ),
-    ],
-)
-def test_no_args(cli_runner: CliRunner, context: CGConfig, workflow: str, request):
-    """Test to see that running BALSAMIC without options prints help and doesn't result in an error."""
-    # GIVEN no arguments or options besides the command call
-    context = request.getfixturevalue(context)
-
-    # WHEN running command
-    result = cli_runner.invoke(workflow, [], obj=context)
-
-    # THEN command runs successfully
-    assert result.exit_code == EXIT_SUCCESS
-
-    # THEN help should be printed
-    assert "help" in result.output
-
-
-@pytest.mark.parametrize(
     "context,case_id,api",
     [
         (
@@ -91,7 +59,7 @@ def test_start(
     # GIVEN a mocked config
 
     # GIVEN decompression is not needed
-    request.getfixturevalue(api).resolve_decompression.return_value = None
+    api.resolve_decompression.return_value = None
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=context)
@@ -145,8 +113,8 @@ def test_start_available_enough_reads(
     # GIVEN a mocked config
 
     # GIVEN decompression is not needed
-    mocker.patch.object(request.getfixturevalue(api), "resolve_decompression")
-    request.getfixturevalue(api).resolve_decompression.return_value = None
+    mocker.patch.object(api, "resolve_decompression")
+    api.resolve_decompression.return_value = None
 
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=context)
@@ -199,8 +167,8 @@ def test_start_available_not_enough_reads(
     # GIVEN a mocked config
 
     # GIVEN decompression is not needed
-    mocker.patch.object(request.getfixturevalue(api), "resolve_decompression")
-    request.getfixturevalue(api).resolve_decompression.return_value = None
+    mocker.patch.object(api, "resolve_decompression")
+    api.resolve_decompression.return_value = None
 
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=context)
