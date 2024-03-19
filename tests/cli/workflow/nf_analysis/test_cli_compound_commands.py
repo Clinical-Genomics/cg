@@ -60,7 +60,7 @@ def test_store_success(
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
-    # WHEN running command
+    # WHEN storing the case files
     result = cli_runner.invoke(workflow_cli, [workflow, "store", case_id], obj=context)
 
     # THEN bundle should be successfully added to Housekeeper and StatusDB
