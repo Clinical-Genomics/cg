@@ -21,20 +21,20 @@ from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
 
 @pytest.mark.parametrize(
-    "context",
+    "workflow",
     [
-        Workflow.RAREDISEASE + "_context",
-        Workflow.RNAFUSION + "_context",
-        Workflow.TAXPROFILER + "_context",
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
     ],
 )
 def test_no_args(cli_runner: CliRunner, context: CGConfig, request):
     """Test to see that running BALSAMIC without options prints help and doesn't result in an error."""
     # GIVEN no arguments or options besides the command call
-    context = request.getfixturevalue(context)
+    workflow = request.getfixturevalue(workflow)
 
     # WHEN running command
-    result = cli_runner.invoke(context, [], obj=context)
+    result = cli_runner.invoke(workflow, [], obj=context)
 
     # THEN command runs successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -49,17 +49,17 @@ def test_no_args(cli_runner: CliRunner, context: CGConfig, request):
         (
             Workflow.RAREDISEASE + "_context",
             Workflow.RAREDISEASE + "_case_id",
-            Workflow.RAREDISEASE + "AnalysisAPI",
+            Workflow.RAREDISEASE.title() + "AnalysisAPI",
         ),
         (
             Workflow.RNAFUSION + "_context",
             Workflow.RNAFUSION + "_case_id",
-            Workflow.RNAFUSION + "AnalysisAPI",
+            Workflow.RNAFUSION.title() + "AnalysisAPI",
         ),
         (
             Workflow.TAXPROFILER + "_context",
             Workflow.TAXPROFILER + "_case_id",
-            Workflow.TAXPROFILER + "AnalysisAPI",
+            Workflow.TAXPROFILER.title() + "AnalysisAPI",
         ),
     ],
 )
@@ -103,17 +103,17 @@ def test_start(
         (
             Workflow.RAREDISEASE + "_context",
             Workflow.RAREDISEASE + "_case_id",
-            Workflow.RAREDISEASE + "AnalysisAPI",
+            Workflow.RAREDISEASE.title() + "AnalysisAPI",
         ),
         (
             Workflow.RNAFUSION + "_context",
             Workflow.RNAFUSION + "_case_id",
-            Workflow.RNAFUSION + "AnalysisAPI",
+            Workflow.RNAFUSION.title() + "AnalysisAPI",
         ),
         (
             Workflow.TAXPROFILER + "_context",
             Workflow.TAXPROFILER + "_case_id",
-            Workflow.TAXPROFILER + "AnalysisAPI",
+            Workflow.TAXPROFILER.title() + "AnalysisAPI",
         ),
     ],
 )
@@ -157,17 +157,17 @@ def test_start_available_enough_reads(
         (
             Workflow.RAREDISEASE + "_context",
             Workflow.RAREDISEASE + "_case_id",
-            Workflow.RAREDISEASE + "AnalysisAPI",
+            Workflow.RAREDISEASE.title() + "AnalysisAPI",
         ),
         (
             Workflow.RNAFUSION + "_context",
             Workflow.RNAFUSION + "_case_id",
-            Workflow.RNAFUSION + "AnalysisAPI",
+            Workflow.RNAFUSION.title() + "AnalysisAPI",
         ),
         (
             Workflow.TAXPROFILER + "_context",
             Workflow.TAXPROFILER + "_case_id",
-            Workflow.TAXPROFILER + "AnalysisAPI",
+            Workflow.TAXPROFILER.title() + "AnalysisAPI",
         ),
     ],
 )
