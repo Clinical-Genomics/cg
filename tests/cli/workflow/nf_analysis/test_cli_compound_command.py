@@ -43,8 +43,7 @@ def test_no_args(cli_runner: CliRunner, context: CGConfig, request):
 
 
 @pytest.mark.parametrize(
-    "context,case_id",
-    "API",
+    "context,case_id,api",
     [
         (
             Workflow.RAREDISEASE + "_context",
@@ -68,7 +67,7 @@ def test_start(
     context: CGConfig,
     caplog: LogCaptureFixture,
     case_id: str,
-    API: NfAnalysisAPI,
+    api: NfAnalysisAPI,
     mock_analysis_flow_cell,
     request,
 ):
@@ -84,7 +83,7 @@ def test_start(
     # GIVEN decompression is not needed
     case_id: str = request.getfixturevalue(case_id)
 
-    request.getfixturevalue(API).resolve_decompression.return_value = None
+    request.getfixturevalue(api).resolve_decompression.return_value = None
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=context)
@@ -98,7 +97,7 @@ def test_start(
 
 
 @pytest.mark.parametrize(
-    "context,case_id,API",
+    "context,case_id,api",
     [
         (
             Workflow.RAREDISEASE + "_context",
@@ -123,7 +122,7 @@ def test_start_available_enough_reads(
     caplog: LogCaptureFixture,
     mocker,
     case_id: str,
-    API: NfAnalysisAPI,
+    api: NfAnalysisAPI,
     mock_analysis_flow_cell,
     request,
 ):
@@ -138,8 +137,8 @@ def test_start_available_enough_reads(
     # GIVEN a mocked config
 
     # GIVEN decompression is not needed
-    mocker.patch.object(request.getfixturevalue(API), "resolve_decompression")
-    request.getfixturevalue(API).resolve_decompression.return_value = None
+    mocker.patch.object(request.getfixturevalue(api), "resolve_decompression")
+    request.getfixturevalue(api).resolve_decompression.return_value = None
 
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=context)
@@ -152,7 +151,7 @@ def test_start_available_enough_reads(
 
 
 @pytest.mark.parametrize(
-    "context,case_id,API",
+    "context,case_id,api",
     [
         (
             Workflow.RAREDISEASE + "_context",
@@ -177,7 +176,7 @@ def test_start_available_not_enough_reads(
     caplog: LogCaptureFixture,
     mocker,
     case_id: str,
-    API: NfAnalysisAPI,
+    api: NfAnalysisAPI,
     case_id_not_enough_reads: str,
     request,
 ):
@@ -192,8 +191,8 @@ def test_start_available_not_enough_reads(
     # GIVEN a mocked config
 
     # GIVEN decompression is not needed
-    mocker.patch.object(request.getfixturevalue(API), "resolve_decompression")
-    request.getfixturevalue(API).resolve_decompression.return_value = None
+    mocker.patch.object(request.getfixturevalue(api), "resolve_decompression")
+    request.getfixturevalue(api).resolve_decompression.return_value = None
 
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=context)
