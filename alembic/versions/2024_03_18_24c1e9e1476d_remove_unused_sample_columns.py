@@ -1,7 +1,7 @@
 """Remove unused sample columns
 
 Revision ID: 24c1e9e1476d
-Revises: b2fcb2ada306
+Revises: 0f1b8e10f3ce
 Create Date: 2024-03-18 14:59:13.832047
 
 """
@@ -12,7 +12,7 @@ from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
 revision = "24c1e9e1476d"
-down_revision = "b2fcb2ada306"
+down_revision = "0f1b8e10f3ce"
 branch_labels = None
 depends_on = None
 
