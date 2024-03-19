@@ -53,7 +53,7 @@ def test_store_success(
     # GIVEN that the bundle is not present in Housekeeper
     assert not context.housekeeper_api.bundle(case_id)
 
-    # Make sure analysis not already stored in status_db
+    # GIVEN that the analysis is not already stored in status_db
     assert not context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
     # GIVEN that HermesAPI returns a deliverables output
