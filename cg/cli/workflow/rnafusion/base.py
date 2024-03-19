@@ -99,7 +99,7 @@ def start(
     use_nextflow: bool,
     work_dir: str,
 ) -> None:
-    """Start full workflow for CASE ID."""
+    """Start full workflow for case id"""
     LOG.info(f"Starting analysis for {case_id}")
 
     analysis_api: RnafusionAnalysisAPI = context.obj.meta_apis["analysis_api"]
