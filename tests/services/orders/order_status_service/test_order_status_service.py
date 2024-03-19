@@ -16,7 +16,7 @@ def test_get_status_summaries(
     order_status_service.analysis_client.get_summaries.return_value = [analysis_summary]
 
     # WHEN getting status summaries
-    summaries: list[OrderSummary] = order_status_service.get_status_summaries([order.id])
+    summaries: list[OrderSummary] = order_status_service.get_summaries([order.id])
 
     # THEN the summaries should be returned
     assert summaries

@@ -24,13 +24,13 @@ class OrderService:
         order: Order | None = self.store.get_order_by_id(order_id)
         if not order:
             raise OrderNotFoundError(f"Order {order_id} not found.")
-        summary: OrderSummary = self.summary_service.get_status_summary(order_id)
+        summary: OrderSummary = self.summary_service.get_summary(order_id)
         return create_order_response(order=order, summary=summary)
 
     def get_orders(self, orders_request: OrdersRequest) -> OrdersResponse:
         orders, total_count = self.store.get_orders(orders_request)
         order_ids: list[int] = [order.id for order in orders]
-        summaries: list[OrderSummary] = self.summary_service.get_status_summaries(order_ids)
+        summaries: list[OrderSummary] = self.summary_service.get_summaries(order_ids)
         return create_orders_response(orders=orders, summaries=summaries, total=total_count)
 
     def create_order(self, order_data: OrderIn) -> OrderResponse:

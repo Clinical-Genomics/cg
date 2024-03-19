@@ -11,10 +11,10 @@ class OrderStatusService:
         self.analysis_client = analysis_client
         self.store = store
 
-    def get_status_summary(self, order_id: int) -> OrderSummary:
-        return self.get_status_summaries([order_id])[0]
+    def get_summary(self, order_id: int) -> OrderSummary:
+        return self.get_summaries([order_id])[0]
 
-    def get_status_summaries(self, order_ids: list[int]) -> list[OrderSummary]:
+    def get_summaries(self, order_ids: list[int]) -> list[OrderSummary]:
         orders: list[Order] = self.store.get_orders_by_ids(order_ids)
         analysis_summaries: list[AnalysisSummary] = self.analysis_client.get_summaries(order_ids)
         return create_summaries(orders=orders, analysis_summaries=analysis_summaries)
