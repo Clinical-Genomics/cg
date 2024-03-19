@@ -2,7 +2,7 @@ import pytest
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary
 
-from cg.services.orders.order_status_service.order_status_service import OrderStatusService
+from cg.services.orders.order_status_service.order_status_service import OrderSummaryService
 from cg.store.models import Case, Customer, Order
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -10,7 +10,7 @@ from tests.store_helpers import StoreHelpers
 
 @pytest.fixture
 def order_status_service(trailblazer_api: TrailblazerAPI, store: Store):
-    return OrderStatusService(analysis_client=trailblazer_api, store=store)
+    return OrderSummaryService(analysis_client=trailblazer_api, store=store)
 
 
 @pytest.fixture

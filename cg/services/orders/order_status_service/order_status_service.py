@@ -6,7 +6,7 @@ from cg.store.models import Order
 from cg.store.store import Store
 
 
-class OrderStatusService:
+class OrderSummaryService:
     def __init__(self, analysis_client: TrailblazerAPI, store: Store) -> None:
         self.analysis_client = analysis_client
         self.store = store

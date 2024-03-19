@@ -7,7 +7,7 @@ from cg.services.orders.order_service.utils import (
     create_order_response,
     create_orders_response,
 )
-from cg.services.orders.order_status_service import OrderStatusService
+from cg.services.orders.order_status_service import OrderSummaryService
 from cg.services.orders.order_status_service.dto.order_status_summary import (
     OrderSummary,
 )
@@ -16,7 +16,7 @@ from cg.store.store import Store
 
 
 class OrderService:
-    def __init__(self, store: Store, status_service: OrderStatusService) -> None:
+    def __init__(self, store: Store, status_service: OrderSummaryService) -> None:
         self.store = store
         self.summary_service = status_service
 
