@@ -35,7 +35,7 @@ from tests.cli.workflow.conftest import mock_analysis_flow_cell
             Workflow.TAXPROFILER,
             Workflow.TAXPROFILER + "_context",
         ),
-    ]
+    ],
 )
 def test_no_args(cli_runner: CliRunner, context: CGConfig, workflow: str, request):
     """Test to see that running BALSAMIC without options prints help and doesn't result in an error."""
