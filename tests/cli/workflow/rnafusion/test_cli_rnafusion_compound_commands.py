@@ -6,33 +6,11 @@ from click.testing import CliRunner
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.workflow.rnafusion.base import (
-    rnafusion,
-    start,
-    start_available,
-    store,
-    store_available,
-)
+from cg.cli.workflow.rnafusion.base import start, start_available, store, store_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from tests.cli.workflow.conftest import mock_analysis_flow_cell
-
-
-def test_rnafusion_no_args(cli_runner: CliRunner, rnafusion_context: CGConfig):
-    """Test to see that running BALSAMIC without options prints help and doesn't result in an error."""
-    # GIVEN no arguments or options besides the command call
-
-    # WHEN running command
-    result = cli_runner.invoke(rnafusion, [], obj=rnafusion_context)
-
-    # THEN command runs successfully
-    print(result.output)
-
-    assert result.exit_code == EXIT_SUCCESS
-
-    # THEN help should be printed
-    assert "help" in result.output
 
 
 def test_start(

@@ -288,11 +288,10 @@ def store_with_a_pool_with_and_without_attributes(
     return store
 
 
-@pytest.fixture(name="store_with_an_application_with_and_without_attributes")
+@pytest.fixture
 def store_with_an_application_with_and_without_attributes(
     store: Store,
     helpers: StoreHelpers,
-    timestamp_now=dt.datetime.now(),
 ) -> Store:
     """Return a store with an application with and without attributes."""
     helpers.ensure_application(
@@ -314,7 +313,7 @@ def store_with_an_application_with_and_without_attributes(
     return store
 
 
-@pytest.fixture(name="store_with_application_limitations")
+@pytest.fixture
 def store_with_application_limitations(
     store_with_an_application_with_and_without_attributes: Store, helpers: StoreHelpers
 ) -> Store:
