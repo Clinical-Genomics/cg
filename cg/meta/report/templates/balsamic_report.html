@@ -22,7 +22,7 @@
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
           <brief>
-            <strong>Leveransrapport</strong> {{ customer.name }}, <strong>familj</strong> {{ case.name }}
+            <strong>Leveransrapport</strong> {{ customer.name }}, <strong>fall</strong> {{ case.name }}
             {% if version != 'N/A' %}
               , <strong>version</strong>: {{ version }}
             {% endif %}
@@ -305,7 +305,7 @@
 		                  <li><b>Analysfiler</b>:</li>
 		                  <ul>
 		                    {% if case.data_analysis.delivered_files != 'N/A' %}
-			                    <li><b>Familj</b>: {{ case.name }}</li>
+			                    <li><b>Fall</b>: {{ case.name }}</li>
 				      			      <ul>
 				      				      {% for file in case.data_analysis.delivered_files %}
                               <li>{{ file }}</li>
