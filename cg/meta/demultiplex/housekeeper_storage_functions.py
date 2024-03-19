@@ -42,15 +42,16 @@ def store_flow_cell_data_in_housekeeper(
     add_demux_logs_to_housekeeper(
         flow_cell=flow_cell, hk_api=hk_api, flow_cell_run_dir=flow_cell_run_dir
     )
+    add_run_parameters_file_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api)
 
 
 def store_undetermined_fastq_files(
     flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, store: Store
 ) -> None:
     """Store undetermined fastq files for non-pooled samples in Housekeeper."""
-    non_pooled_lanes_and_samples: list[tuple[int, str]] = (
-        flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
-    )
+    non_pooled_lanes_and_samples: list[
+        tuple[int, str]
+    ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
 
     for lane, sample_id in non_pooled_lanes_and_samples:
         undetermined_fastqs: list[Path] = get_undetermined_fastqs(
@@ -90,6 +91,18 @@ def add_demux_logs_to_housekeeper(
             LOG.info(f"Added demux log file {log_file_path} to Housekeeper.")
         except FileNotFoundError as e:
             LOG.error(f"Cannot find demux log file {log_file_path}. Error: {e}.")
+
+
+def add_run_parameters_file_to_housekeeper(
+    flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI
+) -> None:
+    """Add run parameters file to Housekeeper."""
+    run_parameters_file_path: Path = flow_cell.run_parameters_path
+    tag_names: list[str] = [SequencingFileTag.RUN_PARAMETERS, flow_cell.id]
+    hk_api.add_file_to_bundle_if_non_existent(
+        file_path=run_parameters_file_path, bundle_name=flow_cell.id, tag_names=tag_names
+    )
+    LOG.info(f"Added run parameters file {run_parameters_file_path} to Housekeeper.")
 
 
 def add_sample_fastq_files_to_housekeeper(

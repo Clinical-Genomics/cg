@@ -12,6 +12,7 @@ from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
     add_demux_logs_to_housekeeper,
+    add_run_parameters_file_to_housekeeper,
     add_sample_fastq_files_to_housekeeper,
     delete_sequencing_data_from_housekeeper,
 )
@@ -209,6 +210,26 @@ def test_add_demux_logs_to_housekeeper(
     assert len(files) == 2
     for file in files:
         assert file.path.split("/")[-1] in expected_file_names
+
+
+def test_add_run_parameters_to_housekeeper(
+    demultiplex_context: CGConfig, novaseq_x_flow_cell: FlowCellDirectoryData
+):
+    """Test that the run parameters file of a flow cell is added to Housekeeper."""
+    # GIVEN a flow cell with a run parameters file and a housekeeper API
+    hk_api = demultiplex_context.housekeeper_api
+
+    # GIVEN that a run parameters file does not exist for the flow cell in housekeeper
+    assert not hk_api.files(tags=[SequencingFileTag.RUN_PARAMETERS, novaseq_x_flow_cell.id]).all()
+
+    # GIVEN that a bundle and version exists in housekeeper
+    hk_api.add_bundle_and_version_if_non_existent(bundle_name=novaseq_x_flow_cell.id)
+
+    # WHEN adding the run parameters file to housekeeper
+    add_run_parameters_file_to_housekeeper(flow_cell=novaseq_x_flow_cell, hk_api=hk_api)
+
+    # THEN the run parameters file was added to housekeeper
+    assert hk_api.files(tags=[SequencingFileTag.RUN_PARAMETERS, novaseq_x_flow_cell.id]).all()
 
 
 def test_store_fastq_path_in_housekeeper_correct_tags(
