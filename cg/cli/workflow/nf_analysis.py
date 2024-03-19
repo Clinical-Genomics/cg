@@ -215,7 +215,6 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
         )
         return
 
-    # Avoid storing a case without QC checks previously performed
     if (
         is_latest_analysis_qc
         or not analysis_api.get_metrics_deliverables_path(case_id=case_id).exists()
