@@ -26,17 +26,17 @@ from tests.cli.workflow.conftest import mock_analysis_flow_cell
         (
             Workflow.RAREDISEASE + "_context",
             Workflow.RAREDISEASE + "_case_id",
-            Workflow.RAREDISEASE.title() + "AnalysisAPI",
+            RarediseaseAnalysisAPI,
         ),
         (
             Workflow.RNAFUSION + "_context",
             Workflow.RNAFUSION + "_case_id",
-            Workflow.RNAFUSION.title() + "AnalysisAPI",
+            RnafusionAnalysisAPI,
         ),
         (
             Workflow.TAXPROFILER + "_context",
             Workflow.TAXPROFILER + "_case_id",
-            Workflow.TAXPROFILER.title() + "AnalysisAPI",
+            TaxprofilerAnalysisAPI,
         ),
     ],
 )
