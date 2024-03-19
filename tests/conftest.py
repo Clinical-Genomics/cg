@@ -50,6 +50,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.raredisease.raredisease import RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
+from cg.models.tomte.tomte import TomteSampleSheetHeaders
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
 from cg.store.store import Store
@@ -1698,6 +1699,7 @@ def context_config(
     raredisease_dir: Path,
     rnafusion_dir: Path,
     taxprofiler_dir: Path,
+    tomte_dir: Path,
     illumina_flow_cells_directory: Path,
     illumina_demultiplexed_runs_directory: Path,
     downsample_dir: Path,
@@ -1881,6 +1883,25 @@ def context_config(
                 "mail_user": "test.email@scilifelab.se",
             },
             "tower_workflow": "raredisease",
+        },
+        "tomte": {
+            "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
+            "compute_env": "nf_tower_compute_env",
+            "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
+            "conda_env": "S_tomte",
+            "config_platform": str(nf_analysis_platform_config_path),
+            "config_params": str(nf_analysis_pipeline_params_path),
+            "config_resources": str(nf_analysis_pipeline_resource_optimisation_path),
+            "workflow_path": Path("workflow", "path").as_posix(),
+            "profile": "myprofile",
+            "references": Path("path", "to", "references").as_posix(),
+            "revision": "2.2.0",
+            "root": str(tomte_dir),
+            "slurm": {
+                "account": "development",
+                "mail_user": "test.email@scilifelab.se",
+            },
+            "tower_workflow": "tomte",
         },
         "rnafusion": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
@@ -2754,6 +2775,63 @@ def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
 
 
 # Tomte fixtures
+@pytest.fixture(scope="session")
+def tomte_case_id() -> str:
+    """Returns a tomte case id."""
+    return "tomte_case_enough_reads"
+
+
+@pytest.fixture(scope="function")
+def tomte_dir(tmpdir_factory, apps_dir: Path) -> str:
+    """Return the path to the tomte apps dir."""
+    tomte_dir = tmpdir_factory.mktemp("tomte")
+    return Path(tomte_dir).absolute().as_posix()
+
+
+@pytest.fixture(scope="function")
+def tomte_sample_sheet_path(tomte_dir, tomte_case_id) -> Path:
+    """Path to sample sheet."""
+    return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    )
+
+
+@pytest.fixture(scope="function")
+def tomte_params_file_path(tomte_dir, tomte_case_id) -> Path:
+    """Path to parameters file."""
+    return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_params_file").with_suffix(
+        FileExtensions.YAML
+    )
+
+
+@pytest.fixture(scope="function")
+def tomte_nexflow_config_file_path(tomte_dir, tomte_case_id) -> Path:
+    """Path to config file."""
+    return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_nextflow_config").with_suffix(
+        FileExtensions.JSON
+    )
+
+
+@pytest.fixture(scope="function")
+def tomte_sample_sheet_content(
+    tomte_case_id: str,
+    sample_id: str,
+    fastq_forward_read_path: Path,
+    fastq_reverse_read_path: Path,
+    strandedness: str,
+) -> str:
+    """Return the expected sample sheet content for tomte."""
+    headers: str = ",".join(TomteSampleSheetHeaders.list())
+    row: str = ",".join(
+        [
+            tomte_case_id,
+            sample_id,
+            fastq_forward_read_path.as_posix(),
+            fastq_reverse_read_path.as_posix(),
+            strandedness,
+        ]
+    )
+    return "\n".join([headers, row])
 
 
 @pytest.fixture(scope="function")
@@ -2764,11 +2842,64 @@ def tomte_context(
     trailblazer_api: MockTB,
     hermes_api: HermesApi,
     cg_dir: Path,
+    tomte_case_id: str,
+    sample_id: str,
+    no_sample_case_id: str,
+    total_sequenced_reads_pass: int,
+    apptag_rna: str,
+    case_id_not_enough_reads: str,
+    sample_id_not_enough_reads: str,
+    total_sequenced_reads_not_pass: int,
 ) -> CGConfig:
     """Context to use in CLI."""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = TomteAnalysisAPI(config=cg_context)
+    status_db: Store = cg_context.status_db
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+
+    # Create a textbook case with enough reads
+    case_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=tomte_case_id,
+        name=tomte_case_id,
+        data_analysis=Workflow.TOMTE,
+    )
+
+    sample_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=apptag_rna,
+        internal_id=sample_id,
+        reads=total_sequenced_reads_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=case_enough_reads,
+        sample=sample_enough_reads,
+    )
+
+    # Create a case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Workflow.TOMTE,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=apptag_rna,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
     return cg_context
 
 

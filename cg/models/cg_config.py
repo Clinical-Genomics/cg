@@ -17,8 +17,8 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.clients.janus.api import JanusAPIClient
 from cg.clients.arnold.api import ArnoldAPIClient
+from cg.clients.janus.api import JanusAPIClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
@@ -177,6 +177,23 @@ class RarediseaseConfig(CommonAppConfig):
     config_params: str
     config_resources: str
     launch_directory: str
+    workflow_path: str
+    profile: str
+    references: str
+    revision: str
+    root: str
+    slurm: SlurmConfig
+    tower_workflow: str
+
+
+class TomteConfig(CommonAppConfig):
+    binary_path: str | None = None
+    compute_env: str
+    conda_binary: str | None = None
+    conda_env: str
+    config_platform: str
+    config_params: str
+    config_resources: str
     workflow_path: str
     profile: str
     references: str
@@ -346,6 +363,7 @@ class CGConfig(BaseModel):
     raredisease: RarediseaseConfig = Field(None, alias="raredisease")
     rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
     taxprofiler: TaxprofilerConfig = Field(None, alias="taxprofiler")
+    tomte: TomteConfig = Field(None, alias="tomte")
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
