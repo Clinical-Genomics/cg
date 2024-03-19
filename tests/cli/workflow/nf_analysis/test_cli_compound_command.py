@@ -18,9 +18,14 @@ from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
 from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
+
 @pytest.mark.parametrize(
     "context",
-    [Workflow.RAREDISEASE+"_context", Workflow.RNAFUSION+"_context", Workflow.TAXPROFILER+"_context"],
+    [
+        Workflow.RAREDISEASE + "_context",
+        Workflow.RNAFUSION + "_context",
+        Workflow.TAXPROFILER + "_context",
+    ],
 )
 def test_no_args(cli_runner: CliRunner, context: CGConfig, request):
     """Test to see that running BALSAMIC without options prints help and doesn't result in an error."""
@@ -37,13 +42,25 @@ def test_no_args(cli_runner: CliRunner, context: CGConfig, request):
     assert "help" in result.output
 
 
-
 @pytest.mark.parametrize(
-    "context,case_id","API",
+    "context,case_id",
+    "API",
     [
-        (Workflow.RAREDISEASE+"_context", Workflow.RAREDISEASE+"_case_id", Workflow.RAREDISEASE+"AnalysisAPI"),
-        (Workflow.RNAFUSION+"_context", Workflow.RNAFUSION+"_case_id", Workflow.RNAFUSION+"AnalysisAPI"),
-        (Workflow.TAXPROFILER+"_context", Workflow.TAXPROFILER+"_case_id", Workflow.TAXPROFILER+"AnalysisAPI"),
+        (
+            Workflow.RAREDISEASE + "_context",
+            Workflow.RAREDISEASE + "_case_id",
+            Workflow.RAREDISEASE + "AnalysisAPI",
+        ),
+        (
+            Workflow.RNAFUSION + "_context",
+            Workflow.RNAFUSION + "_case_id",
+            Workflow.RNAFUSION + "AnalysisAPI",
+        ),
+        (
+            Workflow.TAXPROFILER + "_context",
+            Workflow.TAXPROFILER + "_case_id",
+            Workflow.TAXPROFILER + "AnalysisAPI",
+        ),
     ],
 )
 def test_start(
@@ -79,12 +96,25 @@ def test_start(
     # THEN command should not include resume flag
     assert "-resume" not in caplog.text
 
+
 @pytest.mark.parametrize(
     "context,case_id,API",
     [
-        (Workflow.RAREDISEASE+"_context", Workflow.RAREDISEASE+"_case_id", Workflow.RAREDISEASE+"AnalysisAPI"),
-        (Workflow.RNAFUSION+"_context", Workflow.RNAFUSION+"_case_id", Workflow.RNAFUSION+"AnalysisAPI"),
-        (Workflow.TAXPROFILER+"_context", Workflow.TAXPROFILER+"_case_id", Workflow.TAXPROFILER+"AnalysisAPI"),
+        (
+            Workflow.RAREDISEASE + "_context",
+            Workflow.RAREDISEASE + "_case_id",
+            Workflow.RAREDISEASE + "AnalysisAPI",
+        ),
+        (
+            Workflow.RNAFUSION + "_context",
+            Workflow.RNAFUSION + "_case_id",
+            Workflow.RNAFUSION + "AnalysisAPI",
+        ),
+        (
+            Workflow.TAXPROFILER + "_context",
+            Workflow.TAXPROFILER + "_case_id",
+            Workflow.TAXPROFILER + "AnalysisAPI",
+        ),
     ],
 )
 def test_start_available_enough_reads(
@@ -120,12 +150,25 @@ def test_start_available_enough_reads(
     # THEN it should successfully identify the one case eligible for auto-start
     assert case_id_success in caplog.text
 
+
 @pytest.mark.parametrize(
     "context,case_id,API",
     [
-        (Workflow.RAREDISEASE+"_context", Workflow.RAREDISEASE+"_case_id", Workflow.RAREDISEASE+"AnalysisAPI"),
-        (Workflow.RNAFUSION+"_context", Workflow.RNAFUSION+"_case_id", Workflow.RNAFUSION+"AnalysisAPI"),
-        (Workflow.TAXPROFILER+"_context", Workflow.TAXPROFILER+"_case_id", Workflow.TAXPROFILER+"AnalysisAPI"),
+        (
+            Workflow.RAREDISEASE + "_context",
+            Workflow.RAREDISEASE + "_case_id",
+            Workflow.RAREDISEASE + "AnalysisAPI",
+        ),
+        (
+            Workflow.RNAFUSION + "_context",
+            Workflow.RNAFUSION + "_case_id",
+            Workflow.RNAFUSION + "AnalysisAPI",
+        ),
+        (
+            Workflow.TAXPROFILER + "_context",
+            Workflow.TAXPROFILER + "_case_id",
+            Workflow.TAXPROFILER + "AnalysisAPI",
+        ),
     ],
 )
 def test_start_available_not_enough_reads(
