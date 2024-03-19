@@ -10,9 +10,15 @@
             "a_sample_name_a_sample_name": {
                 "PCT_PF_READS_ALIGNED": 0.99966,
                 "MEDIAN_TARGET_COVERAGE": 28.0,
-                "PCT_TARGET_BASES_10X": 0.975685,
+                "PCT_TARGET_BASES_10X": 0.975685
+            }
+        }
+    ],
+    "report_saved_raw_data": {
+        "multiqc_picard_AlignmentSummaryMetrics": {
+            "a_sample_name_a_sample_name": {
                 "PCT_ADAPTER": 1e-06
             }
         }
-    ]
+    }
 }
