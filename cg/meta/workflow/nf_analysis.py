@@ -28,7 +28,7 @@ from cg.models.nf_analysis import (
     WorkflowDeliverables,
     WorkflowParameters,
 )
-from cg.store.models import Sample
+from cg.store.models import Case, CaseSample, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -88,6 +88,11 @@ class NfAnalysisAPI(AnalysisAPI):
     def _append_params_to_nextflow_config(self) -> bool:
         """True if parameters should be added into the nextflow config file instead of the params file."""
         return True
+
+    @property
+    def _multiple_samples_allowed(self) -> bool:
+        """Defines whether the analysis supports multiple samples to be linked to the case."""
+        raise NotImplementedError
 
     def get_profile(self, profile: str | None = None) -> str:
         """Get NF profiles."""
@@ -209,6 +214,35 @@ class NfAnalysisAPI(AnalysisAPI):
             for fastq_file in sorted_metadata
             if fastq_file.read_direction == read_direction
         ]
+
+    def get_paired_read_paths(self, sample=Sample) -> tuple[list[str], list[str]]:
+        """Returns a tuple of paired fastq file paths for the forward and reverse read."""
+        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
+        fastq_forward_read_paths: list[str] = self.extract_read_files(
+            metadata=sample_metadata, forward_read=True
+        )
+        fastq_reverse_read_paths: list[str] = self.extract_read_files(
+            metadata=sample_metadata, reverse_read=True
+        )
+        return fastq_forward_read_paths, fastq_reverse_read_paths
+
+    def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
+        """Get sample sheet content per sample."""
+        raise NotImplementedError
+
+    def get_sample_sheet_content(self, case_id: str) -> list[list[Any]]:
+        """Returns content for a sample sheet."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if len(case.links) == 0:
+            raise CgError(f"No samples linked to {case_id}")
+        if nlinks := len(case.links) > 1 and not self._multiple_samples_allowed:
+            raise CgError(f"Only one sample per case is allowed. {nlinks} found")
+        sample_sheet_content = []
+        LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
+        LOG.debug("Getting sample sheet information")
+        for link in case.links:
+            sample_sheet_content.extend(self.get_sample_sheet_content_per_sample(case_sample=link))
+        return sample_sheet_content
 
     def verify_sample_sheet_exists(self, case_id: str, dry_run: bool = False) -> None:
         """Raise an error if sample sheet file is not found."""

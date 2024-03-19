@@ -8,6 +8,7 @@ from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG
 from cg.constants.sequencing import SequencingPlatform
+from cg.constants.symbols import EMPTY_STRING
 from cg.io.controller import ReadFile
 from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -16,7 +17,7 @@ from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJ
 from cg.models.fastq import FastqFileMeta
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.resources import TAXPROFILER_BUNDLE_FILENAMES_PATH
-from cg.store.models import Case, Sample
+from cg.store.models import Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -56,6 +57,11 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """True if parameters should be added into the nextflow config file instead of the params file."""
         return False
 
+    @property
+    def _multiple_samples_allowed(self) -> bool:
+        """Defines whether the analysis supports multiple samples to be linked to the case."""
+        return True
+
     def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
         return MULTIQC_NEXFLOW_CONFIG
@@ -64,44 +70,21 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """Return Taxprofiler bundle filenames path."""
         return TAXPROFILER_BUNDLE_FILENAMES_PATH
 
-    def get_sample_sheet_content_per_sample(
-        self, sample: Sample, instrument_platform: SequencingPlatform.ILLUMINA, fasta: str = ""
-    ) -> list[list[str]]:
+    def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Get sample sheet content per sample."""
-        sample_name: str = sample.name
-        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample)
-        fastq_forward_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata, forward_read=True
-        )
-        fastq_reverse_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata, reverse_read=True
+        sample_name: str = case_sample.sample.name
+        fastq_forward_read_paths, fastq_reverse_read_paths = self.get_paired_read_paths(
+            sample=case_sample.sample
         )
         sample_sheet_entry = TaxprofilerSampleSheetEntry(
             name=sample_name,
             run_accession=sample_name,
-            instrument_platform=instrument_platform,
+            instrument_platform=SequencingPlatform.ILLUMINA,
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
-            fasta=fasta,
+            fasta=EMPTY_STRING,
         )
         return sample_sheet_entry.reformat_sample_content()
-
-    def get_sample_sheet_content(
-        self,
-        case_id: str,
-    ) -> list[list[Any]]:
-        """Write sample sheet for Taxprofiler analysis in case folder."""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_sheet_content = []
-        LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
-        LOG.debug("Getting sample sheet information")
-        for link in case.links:
-            sample_sheet_content.extend(
-                self.get_sample_sheet_content_per_sample(
-                    sample=link.sample, instrument_platform=SequencingPlatform.ILLUMINA, fasta=""
-                )
-            )
-        return sample_sheet_content
 
     def get_workflow_parameters(self, case_id: str) -> TaxprofilerParameters:
         """Return Taxprofiler parameters."""

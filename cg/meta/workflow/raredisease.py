@@ -56,18 +56,15 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Headers for sample sheet."""
         return RarediseaseSampleSheetHeaders.list()
 
-    def get_sample_sheet_content_per_sample(
-        self, case: Case = "", case_sample: CaseSample = ""
-    ) -> list[list[str]]:
+    @property
+    def _multiple_samples_allowed(self) -> bool:
+        """Defines whether the analysis supports multiple samples to be linked to the case."""
+        return True
+
+    def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Get sample sheet content per sample."""
-        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(
-            case_sample.sample
-        )
-        fastq_forward_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata, forward_read=True
-        )
-        fastq_reverse_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata, reverse_read=True
+        fastq_forward_read_paths, fastq_reverse_read_paths = self.get_paired_read_paths(
+            sample=case_sample.sample
         )
         sample_sheet_entry = RarediseaseSampleSheetEntry(
             name=case_sample.sample.internal_id,
@@ -77,24 +74,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             phenotype=self.get_phenotype_code(case_sample.status),
             paternal_id=case_sample.get_paternal_sample_id,
             maternal_id=case_sample.get_maternal_sample_id,
-            case_id=case.internal_id,
+            case_id=case_sample.case.internal_id,
         )
         return sample_sheet_entry.reformat_sample_content
-
-    def get_sample_sheet_content(
-        self,
-        case_id: str,
-    ) -> list[list[Any]]:
-        """Return Raredisease nextflow sample sheet content for a case."""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_sheet_content = []
-        LOG.info("Getting sample sheet information")
-        LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
-        for link in case.links:
-            sample_sheet_content.extend(
-                self.get_sample_sheet_content_per_sample(case=case, case_sample=link)
-            )
-        return sample_sheet_content
 
     def get_workflow_parameters(self, case_id: str) -> WorkflowParameters:
         """Return parameters."""

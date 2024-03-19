@@ -21,7 +21,7 @@ from cg.models.rnafusion.rnafusion import (
     RnafusionSampleSheetEntry,
 )
 from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
-from cg.store.models import Case, Sample
+from cg.store.models import Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -50,7 +50,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.revision: str = config.rnafusion.revision
         self.nextflow_binary_path: str = config.rnafusion.binary_path
 
-
     @property
     def sample_sheet_headers(self) -> list[str]:
         """Headers for sample sheet."""
@@ -59,6 +58,11 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     @property
     def _append_params_to_nextflow_config(self) -> bool:
         """True if parameters should be added into the nextflow config file instead of the params file."""
+        return False
+
+    @property
+    def _multiple_samples_allowed(self) -> bool:
+        """Defines whether the analysis supports multiple samples to be linked to the case."""
         return False
 
     def get_deliverables_template_content(self) -> list[dict]:
@@ -77,37 +81,18 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Return Rnafusion bundle filenames path."""
         return RNAFUSION_BUNDLE_FILENAMES_PATH
 
-    def get_sample_sheet_content_per_sample(self, sample: Sample, case_id: str) -> list[list[str]]:
+    def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Get sample sheet content per sample."""
-        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
-        fastq_forward_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata, forward_read=True
+        fastq_forward_read_paths, fastq_reverse_read_paths = self.get_paired_read_paths(
+            sample=case_sample.sample
         )
-        fastq_reverse_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata, reverse_read=True
-        )
-
         sample_sheet_entry = RnafusionSampleSheetEntry(
-            name=case_id,
+            name=case_sample.case.internal_id,
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
             strandedness=Strandedness.REVERSE,
         )
         return sample_sheet_entry.reformat_sample_content()
-
-    def get_sample_sheet_content(self, case_id: str) -> list[list[Any]]:
-        """Returns content for sample sheet."""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        if len(case.links) != 1:
-            raise NotImplementedError(
-                "Case objects are assumed to be related to a single sample (one link)"
-            )
-        LOG.debug("Getting sample sheet information")
-        for link in case.links:
-            content_per_sample = self.get_sample_sheet_content_per_sample(
-                sample=link.sample, case_id=case_id
-            )
-            return content_per_sample
 
     def get_workflow_parameters(
         self, case_id: str, genomes_base: Path | None = None
