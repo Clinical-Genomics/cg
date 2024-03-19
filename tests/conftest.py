@@ -47,8 +47,9 @@ from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.models.rnafusion.rnafusion import RnafusionParameters
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
+from cg.models.raredisease.raredisease import RarediseaseSampleSheetHeaders
+from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
 from cg.store.store import Store
@@ -2212,22 +2213,30 @@ def raredisease_case_id() -> str:
     return "raredisease_case_enough_reads"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def raredisease_sample_sheet_content(
+    sample_id: str,
     raredisease_case_id: str,
     fastq_forward_read_path: Path,
     fastq_reverse_read_path: Path,
     strandedness: str,
 ) -> str:
     """Return the expected sample sheet content  for raredisease."""
-    return ",".join(
+    headers: str = ",".join(RarediseaseSampleSheetHeaders.headers())
+    row: str = ",".join(
         [
-            raredisease_case_id,
+            sample_id,
+            "1",
             fastq_forward_read_path.as_posix(),
             fastq_reverse_read_path.as_posix(),
-            strandedness,
+            "2",
+            "0",
+            "",
+            "",
+            raredisease_case_id,
         ]
     )
+    return "\n".join([headers, row])
 
 
 @pytest.fixture(scope="function")
@@ -2428,7 +2437,7 @@ def rnafusion_workflow() -> str:
     return "rnafusion"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def rnafusion_sample_sheet_content(
     rnafusion_case_id: str,
     fastq_forward_read_path: Path,
@@ -2436,7 +2445,8 @@ def rnafusion_sample_sheet_content(
     strandedness: str,
 ) -> str:
     """Return the expected sample sheet content  for rnafusion."""
-    return ",".join(
+    headers: str = ",".join(RnafusionSampleSheetEntry.headers())
+    row: str = ",".join(
         [
             rnafusion_case_id,
             fastq_forward_read_path.as_posix(),
@@ -2444,6 +2454,7 @@ def rnafusion_sample_sheet_content(
             strandedness,
         ]
     )
+    return "\n".join([headers, row])
 
 
 @pytest.fixture(scope="session")
@@ -2801,6 +2812,14 @@ def taxprofiler_sample_sheet_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
+def taxprofiler_nexflow_config_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
+    """Path to config file."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_nextflow_config"
+    ).with_suffix(FileExtensions.JSON)
+
+
+@pytest.fixture(scope="function")
 def taxprofiler_sample_sheet_content(
     sample_name: str,
     sequencing_platform: str,
@@ -2808,7 +2827,8 @@ def taxprofiler_sample_sheet_content(
     fastq_reverse_read_path: Path,
 ) -> str:
     """Return the expected sample sheet content  for taxprofiler."""
-    return ",".join(
+    headers: str = ",".join(TaxprofilerSampleSheetEntry.headers())
+    row: str = ",".join(
         [
             sample_name,
             sample_name,
@@ -2818,6 +2838,7 @@ def taxprofiler_sample_sheet_content(
             "",
         ]
     )
+    return "\n".join([headers, row])
 
 
 @pytest.fixture(scope="function")

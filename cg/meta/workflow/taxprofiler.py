@@ -5,20 +5,17 @@ from pathlib import Path
 from typing import Any
 
 from cg.constants import Workflow
-from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG
-from cg.io.json import read_json
-from cg.resources import TAXPROFILER_BUNDLE_FILENAMES_PATH
-from cg.constants.sequencing import SequencingPlatform
 from cg.constants.constants import FileFormat
+from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG
+from cg.constants.sequencing import SequencingPlatform
+from cg.io.controller import ReadFile
+from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.fastq import FastqFileMeta
-from cg.io.controller import ReadFile
-from cg.models.taxprofiler.taxprofiler import (
-    TaxprofilerParameters,
-    TaxprofilerSampleSheetEntry,
-)
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
+from cg.resources import TAXPROFILER_BUNDLE_FILENAMES_PATH
 from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
@@ -113,16 +110,14 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def config_case(
         self,
         case_id: str,
-        instrument_platform: SequencingPlatform.ILLUMINA,
         dry_run: bool,
-        fasta: str = "",
     ) -> None:
         """Create sample sheet file and parameters file for Taxprofiler analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(
             case_id=case_id,
-            instrument_platform=instrument_platform,
-            fasta=fasta,
+            instrument_platform=SequencingPlatform.ILLUMINA,
+            fasta="",
         )
         workflow_parameters: TaxprofilerParameters = self.get_workflow_parameters(case_id=case_id)
         if dry_run:

@@ -1,13 +1,15 @@
 import logging
-import click
-from pydantic.v1 import ValidationError
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+import click
+from pydantic.v1 import ValidationError
+
 from cg.constants import Workflow
-from cg.constants.constants import FileExtensions, FileFormat, MultiQC, WorkflowManager
+from cg.constants.constants import CaseActions, FileExtensions, FileFormat, MultiQC, WorkflowManager
 from cg.constants.nextflow import NFX_WORK_DIR
+from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.controller import ReadFile, WriteFile
@@ -16,17 +18,11 @@ from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import (
-    MetricsBase,
-    MetricsDeliverablesCondition,
-)
+from cg.models.deliverables.metric_deliverables import MetricsBase, MetricsDeliverablesCondition
 from cg.models.fastq import FastqFileMeta
-from cg.models.nf_analysis import FileDeliverable, WorkflowDeliverables
-from cg.models.nf_analysis import NfCommandArgs
-from cg.utils import Process
+from cg.models.nf_analysis import FileDeliverable, NfCommandArgs, WorkflowDeliverables
 from cg.store.models import Sample
-from cg.constants.constants import CaseActions
-from cg.constants.nf_analysis import NfTowerStatus
+from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -234,6 +230,15 @@ class NfAnalysisAPI(AnalysisAPI):
             file_format=FileFormat.YAML,
             file_path=config_path,
         )
+
+    def config_case(
+        self,
+        case_id: str,
+        dry_run: bool,
+    ):
+        """Create directory and config files required by a workflow for a case."""
+        self.write_config_case(case_id=case_id, dry_run=dry_run)
+        self.write_params_file(case_id=case_id, dry_run=dry_run)
 
     def _run_analysis_with_nextflow(
         self, case_id: str, command_args: NfCommandArgs, dry_run: bool

@@ -8,7 +8,6 @@ from cg import resources
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat, Strandedness
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
-from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
 from cg.exc import MissingMetrics
 from cg.io.controller import ReadFile
 from cg.io.json import read_json
@@ -21,6 +20,7 @@ from cg.models.rnafusion.rnafusion import (
     RnafusionParameters,
     RnafusionSampleSheetEntry,
 )
+from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
 from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
@@ -127,18 +127,14 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def config_case(
         self,
         case_id: str,
-        strandedness: Strandedness,
-        genomes_base: Path,
         dry_run: bool,
     ) -> None:
         """Create config files (parameters and sample sheet) for Rnafusion analysis."""
         self.create_case_directory(case_id=case_id, dry_run=dry_run)
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(
-            case_id=case_id, strandedness=strandedness
+            case_id=case_id, strandedness=Strandedness.REVERSE
         )
-        workflow_parameters: RnafusionParameters = self.get_workflow_parameters(
-            case_id=case_id, genomes_base=genomes_base
-        )
+        workflow_parameters: RnafusionParameters = self.get_workflow_parameters(case_id=case_id)
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return

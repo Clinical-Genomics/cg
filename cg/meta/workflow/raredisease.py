@@ -1,26 +1,25 @@
 """Module for Raredisease Analysis API."""
 
 import logging
-from typing import Any
 from pathlib import Path
+from typing import Any
 
-from cg.io.txt import concat_txt
-from cg.io.config import write_config_nextflow_style
 from cg.constants import GenePanelMasterList, Workflow
 from cg.constants.constants import FileExtensions
-from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.constants.gene_panel import GENOME_BUILD_37
+from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
+from cg.io.config import write_config_nextflow_style
+from cg.io.txt import concat_txt
 from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
+from cg.models.nf_analysis import WorkflowParameters
 from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
 )
-from cg.models.nf_analysis import WorkflowParameters
 from cg.store.models import Case, CaseSample
-
 
 LOG = logging.getLogger(__name__)
 
@@ -62,7 +61,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
         workflow_parameters: WorkflowParameters = self.get_workflow_parameters(case_id=case_id)
         if dry_run:
-            LOG.info("Dry run: nextflow sample sheet and parameter file will not be written")
+            LOG.info("Dry run: Config files will not be written")
             return
         self.write_sample_sheet(
             content=sample_sheet_content,
@@ -121,7 +120,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def write_config_file(self, case_id: str, workflow_parameters: dict) -> None:
         """Write params-file for analysis."""
-        LOG.debug("Writing parameters file")
+        LOG.debug("Writing nextflow config file")
         config_files_list = [self.config_platform, self.config_params, self.config_resources]
         extra_parameters_str = [
             write_config_nextflow_style(workflow_parameters),
@@ -135,6 +134,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def write_params_file(self, case_id: str, dry_run: bool = False) -> None:
         if not dry_run:
+            LOG.debug("Writing parameters file")
             self.get_params_file_path(case_id=case_id).touch()
 
     @staticmethod
