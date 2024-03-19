@@ -2,4 +2,17 @@
     "report_data_sources": {},
     "report_general_stats_data": [
         {
-            "a_sample_name_a_sample_name_raw_1": {}
+            "a_sample_name_a_sample_name_raw_1": {
+                "percent_duplicates": 9.864942996595772
+            }
+        },
+        {
+            "a_sample_name_a_sample_name": {
+                "PCT_PF_READS_ALIGNED": 0.99966,
+                "MEDIAN_TARGET_COVERAGE": 28.0,
+                "PCT_TARGET_BASES_10X": 0.975685,
+                "PCT_ADAPTER": 1e-06
+            }
+        }
+    ]
+}
