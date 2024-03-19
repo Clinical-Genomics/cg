@@ -54,7 +54,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     @property
     def sample_sheet_headers(self) -> list[str]:
         """Headers for sample sheet."""
-        return RarediseaseSampleSheetHeaders.headers()
+        return RarediseaseSampleSheetHeaders.list()
 
     def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""

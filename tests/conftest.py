@@ -2222,7 +2222,7 @@ def raredisease_sample_sheet_content(
     strandedness: str,
 ) -> str:
     """Return the expected sample sheet content  for raredisease."""
-    headers: str = ",".join(RarediseaseSampleSheetHeaders.headers())
+    headers: str = ",".join(RarediseaseSampleSheetHeaders.list())
     row: str = ",".join(
         [
             sample_id,
