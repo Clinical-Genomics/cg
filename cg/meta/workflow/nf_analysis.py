@@ -13,8 +13,9 @@ from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.symbols import EMPTY_STRING
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
+from cg.io.config import write_config_nextflow_style
 from cg.io.controller import ReadFile, WriteFile
-from cg.io.txt import read_txt, write_txt
+from cg.io.txt import concat_txt, read_txt, write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
@@ -45,6 +46,9 @@ class NfAnalysisAPI(AnalysisAPI):
         self.profile: str | None = None
         self.conda_env: str | None = None
         self.conda_binary: str | None = None
+        self.config_platform: str | None = None
+        self.config_params: str | None = None
+        self.config_resources: str | None = None
         self.tower_binary_path: str | None = None
         self.tower_workflow: str | None = None
         self.account: str | None = None
@@ -70,6 +74,12 @@ class NfAnalysisAPI(AnalysisAPI):
         self._process = process
 
     @property
+    def use_read_count_threshold(self) -> bool:
+        """Defines whether the threshold for adequate read count should be passed for all samples
+        when determining if the analysis for a case should be automatically started."""
+        return True
+
+    @property
     def sample_sheet_headers(self) -> list[str]:
         """Headers for sample sheet."""
         raise NotImplementedError
@@ -91,9 +101,24 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get workflow version from config."""
         return self.revision
 
-    def get_nextflow_config_content(self, case_id: str) -> str | None:
+    def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
-        return None
+        config_files_list: list[str] = [
+            self.config_platform,
+            self.config_params,
+            self.config_resources,
+        ]
+        extra_parameters_str: list[str] = [
+            self.set_cluster_options(case_id=case_id),
+        ]
+        if self._append_params_to_nextflow_config:
+            extra_parameters_str.append(
+                write_config_nextflow_style(self.get_workflow_parameters(case_id=case_id).dict())
+            )
+        return concat_txt(
+            file_paths=config_files_list,
+            str_content=extra_parameters_str,
+        )
 
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""

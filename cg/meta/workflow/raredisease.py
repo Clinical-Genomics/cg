@@ -56,18 +56,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Headers for sample sheet."""
         return RarediseaseSampleSheetHeaders.list()
 
-    def get_nextflow_config_content(self, case_id: str) -> str:
-        """Return nextflow config content."""
-        config_files_list = [self.config_platform, self.config_params, self.config_resources]
-        extra_parameters_str = [
-            write_config_nextflow_style(self.get_workflow_parameters(case_id=case_id).dict()),
-            self.set_cluster_options(case_id=case_id),
-        ]
-        return concat_txt(
-            file_paths=config_files_list,
-            str_content=extra_parameters_str,
-        )
-
     def get_sample_sheet_content_per_sample(
         self, case: Case = "", case_sample: CaseSample = ""
     ) -> list[list[str]]:
