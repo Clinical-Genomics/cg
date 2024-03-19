@@ -473,7 +473,6 @@ class SampleView(BaseView):
 
     column_exclude_list = [
         "age_at_sampling",
-        "invoiced_at",
         "_phenotype_groups",
         "_phenotype_terms",
     ]
@@ -504,9 +503,7 @@ class SampleView(BaseView):
         "deliveries",
         "father_links",
         "flowcells",
-        "invoiced_at",
         "invoice",
-        "is_external",
         "_phenotype_groups",
         "_phenotype_terms",
         "links",
