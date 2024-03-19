@@ -5,16 +5,18 @@ import logging
 import pytest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
+from cg.cli.workflow.base import workflow as workflow_cli
 
 from cg.cli.workflow.raredisease.base import run
 from cg.cli.workflow.rnafusion.base import run
 from cg.cli.workflow.taxprofiler.base import run
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+from cg.constants import EXIT_SUCCESS, Workflow
 from cg.models.cg_config import CGConfig
 
 
 @pytest.mark.parametrize(
-    "context", ["raredisease_context", "rnafusion_context", "taxprofiler_context"]
+    "context",
+    [Workflow.RAREDISEASE+"_context", Workflow.RNAFUSION+"_context", Workflow.TAXPROFILER+"_context"],
 )
 def test_without_options(cli_runner: CliRunner, context: CGConfig):
     """Test command without case_id argument."""
@@ -28,7 +30,8 @@ def test_without_options(cli_runner: CliRunner, context: CGConfig):
 
 
 @pytest.mark.parametrize(
-    "context", ["raredisease_context", "rnafusion_context", "taxprofiler_context"]
+    "context",
+    [Workflow.RAREDISEASE+"_context", Workflow.RNAFUSION+"_context", Workflow.TAXPROFILER+"_context"],
 )
 def test_with_missing_case(
     cli_runner: CliRunner,
@@ -53,7 +56,8 @@ def test_with_missing_case(
 
 
 @pytest.mark.parametrize(
-    "context", ["raredisease_context", "rnafusion_context", "taxprofiler_context"]
+    "context",
+    [Workflow.RAREDISEASE+"_context", Workflow.RNAFUSION+"_context", Workflow.TAXPROFILER+"_context"],
 )
 def test_without_samples(
     cli_runner: CliRunner,
@@ -80,9 +84,9 @@ def test_without_samples(
 @pytest.mark.parametrize(
     "context,case_id",
     [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
+        (Workflow.RAREDISEASE+"_context", Workflow.RAREDISEASE+"_case_id"),
+        (Workflow.RNAFUSION+"_context", Workflow.RNAFUSION+"_case_id"),
+        (Workflow.TAXPROFILER+"_context", Workflow.TAXPROFILER+"_case_id"),
     ],
 )
 def test_without_config_dry_run(
@@ -108,9 +112,9 @@ def test_without_config_dry_run(
 @pytest.mark.parametrize(
     "context,case_id",
     [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
+        (Workflow.RAREDISEASE+"_context", Workflow.RAREDISEASE+"_case_id"),
+        (Workflow.RNAFUSION+"_context", Workflow.RNAFUSION+"_case_id"),
+        (Workflow.TAXPROFILER+"_context", Workflow.TAXPROFILER+"_case_id"),
     ],
 )
 def test_without_config(
@@ -137,9 +141,9 @@ def test_without_config(
 @pytest.mark.parametrize(
     "context,case_id",
     [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
+        (Workflow.RAREDISEASE+"_context", Workflow.RAREDISEASE+"_case_id"),
+        (Workflow.RNAFUSION+"_context", Workflow.RNAFUSION+"_case_id"),
+        (Workflow.TAXPROFILER+"_context", Workflow.TAXPROFILER+"_case_id"),
     ],
 )
 def test_with_config(
@@ -173,9 +177,9 @@ def test_with_config(
 @pytest.mark.parametrize(
     "context,case_id",
     [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
+        (Workflow.RAREDISEASE+"_context", Workflow.RAREDISEASE+"_case_id"),
+        (Workflow.RNAFUSION+"_context", Workflow.RNAFUSION+"_case_id"),
+        (Workflow.TAXPROFILER+"_context", Workflow.TAXPROFILER+"_case_id"),
     ],
 )
 def test_with_revision(
@@ -210,9 +214,9 @@ def test_with_revision(
 @pytest.mark.parametrize(
     "context,case_id",
     [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
+        (Workflow.RAREDISEASE+"_context", Workflow.RAREDISEASE+"_case_id"),
+        (Workflow.RNAFUSION+"_context", Workflow.RNAFUSION+"_case_id"),
+        (Workflow.TAXPROFILER+"_context", Workflow.TAXPROFILER+"_case_id"),
     ],
 )
 def test_resume_with_id(
@@ -247,9 +251,9 @@ def test_resume_with_id(
 @pytest.mark.parametrize(
     "context,case_id",
     [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
+        (Workflow.RAREDISEASE+"_context", Workflow.RAREDISEASE+"_case_id"),
+        (Workflow.RNAFUSION+"_context", Workflow.RNAFUSION+"_case_id"),
+        (Workflow.TAXPROFILER+"_context", Workflow.TAXPROFILER+"_case_id"),
     ],
 )
 def test_resume_without_id_error(
@@ -280,9 +284,9 @@ def test_resume_without_id_error(
 @pytest.mark.parametrize(
     "context,case_id",
     [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
+        (Workflow.RAREDISEASE+"_context", Workflow.RAREDISEASE+"_case_id"),
+        (Workflow.RNAFUSION+"_context", Workflow.RNAFUSION+"_case_id"),
+        (Workflow.TAXPROFILER+"_context", Workflow.TAXPROFILER+"_case_id"),
     ],
 )
 def test_with_config_use_nextflow(
