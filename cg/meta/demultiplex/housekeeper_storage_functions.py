@@ -34,7 +34,7 @@ def store_flow_cell_data_in_housekeeper(
 
     hk_api.add_bundle_and_version_if_non_existent(flow_cell.id)
 
-    tags: list[str] = [SequencingFileTag.FASTQ, flow_cell.id]
+    tags: list[str] = [SequencingFileTag.FASTQ, SequencingFileTag.RUN_PARAMETERS, flow_cell.id]
     hk_api.add_tags_if_non_existent(tags)
 
     add_sample_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api, store=store)
@@ -49,9 +49,9 @@ def store_undetermined_fastq_files(
     flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI, store: Store
 ) -> None:
     """Store undetermined fastq files for non-pooled samples in Housekeeper."""
-    non_pooled_lanes_and_samples: list[tuple[int, str]] = (
-        flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
-    )
+    non_pooled_lanes_and_samples: list[
+        tuple[int, str]
+    ] = flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
 
     for lane, sample_id in non_pooled_lanes_and_samples:
         undetermined_fastqs: list[Path] = get_undetermined_fastqs(
