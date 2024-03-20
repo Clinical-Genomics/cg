@@ -147,7 +147,7 @@ class HousekeeperAPI:
         return file
 
     @staticmethod
-    def get_files_from_version(version: Version, tags: set[str]) -> list[File] | None:
+    def get_files_from_version(version: Version, tags: set[str]) -> list[File]:
         """Return a list of files associated with the given version and tags."""
         LOG.debug(f"Getting files from version with tags {tags}")
         files: list[File] = []
@@ -164,7 +164,7 @@ class HousekeeperAPI:
     def get_file_from_version(version: Version, tags: set[str]) -> File | None:
         """Return the first file matching the given tags."""
         files: list[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
-        return files[0] if files else None
+        return next((file for file in files), None)
 
     @staticmethod
     def get_latest_file_from_version(version: Version, tags: set[str]) -> File | None:
@@ -389,7 +389,9 @@ class HousekeeperAPI:
             raise HousekeeperBundleVersionMissingError
         return self.files(version=version.id, tags=tags).first()
 
-    def get_files_from_latest_version(self, bundle_name: str, tags: list[str]) -> Query:
+    def get_files_from_latest_version(
+        self, bundle_name: str, tags: list[str] | None = None
+    ) -> list[File] | None:
         """Return files in the latest version of a bundle.
 
         Raises HousekeeperBundleVersionMissingError:
@@ -399,7 +401,7 @@ class HousekeeperAPI:
         if not version:
             LOG.warning(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperBundleVersionMissingError
-        return self.files(version=version.id, tags=tags)
+        return self.files(version=version.id, tags=tags).all()
 
     def is_fastq_or_spring_in_all_bundles(self, bundle_names: list[str]) -> bool:
         """Return whether all FASTQ/SPRING files are included for the given bundles."""
@@ -515,7 +517,7 @@ class HousekeeperAPI:
         try:
             sample_sheet_files: list[File] = self.get_files_from_latest_version(
                 bundle_name=flow_cell_id, tags=[flow_cell_id, SequencingFileTag.SAMPLE_SHEET]
-            ).all()
+            )
         except HousekeeperBundleVersionMissingError:
             sample_sheet_files = []
         return sample_sheet_files
@@ -662,3 +664,38 @@ class HousekeeperAPI:
             file.archive.retrieval_task_id = None
             file.archive.retrieved_at = None
         self.commit()
+
+    @staticmethod
+    def get_files_containing_tags(files: list[File], tags: list[set[str]]) -> list[File]:
+        """Return files containing specified tags."""
+        filtered_files: list[File] = []
+        for file in files:
+            file_tags: set[str] = {tag.name for tag in file.tags}
+            if any(tag.issubset(file_tags) for tag in tags):
+                filtered_files.append(file)
+        return filtered_files
+
+    @staticmethod
+    def get_files_without_excluded_tags(files: list[File], excluded_tags: list[str]) -> list[File]:
+        """Return files without specified tags."""
+        filtered_files: list[File] = []
+        for file in files:
+            file_tags: list[str] = [tag.name for tag in file.tags]
+            if not any(excluded_tag in file_tags for excluded_tag in excluded_tags):
+                filtered_files.append(file)
+        return filtered_files
+
+    def get_files_from_latest_version_containing_tags(
+        self, bundle_name: str, tags: list[set[str]], excluded_tags: list[str] | None = None
+    ) -> list[File]:
+        """
+        Return files from the latest version of a bundle matching provided tags. Files containing
+        any tag sets specified in the excluded_tags list will be excluded from the output.
+        """
+        files: list[File] = self.get_files_from_latest_version(bundle_name=bundle_name)
+        filtered_files: list[File] = self.get_files_containing_tags(files=files, tags=tags)
+        if excluded_tags:
+            filtered_files: list[File] = self.get_files_without_excluded_tags(
+                files=filtered_files, excluded_tags=excluded_tags
+            )
+        return filtered_files

@@ -34,7 +34,6 @@ class RnafusionReportAPI(ReportAPI):
 
     def __init__(self, config: CGConfig, analysis_api: RnafusionAnalysisAPI):
         super().__init__(config=config, analysis_api=analysis_api)
-        self.analysis_api: RnafusionAnalysisAPI = analysis_api
 
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: RnafusionAnalysis
