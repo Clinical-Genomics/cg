@@ -5,7 +5,7 @@ import logging
 import click
 
 from cg.cli.workflow.commands import resolve_compression
-from cg.cli.workflow.nf_analysis import config_case
+from cg.cli.workflow.nf_analysis import config_case, run
 from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
@@ -23,3 +23,4 @@ def tomte(context: click.Context) -> None:
 
 tomte.add_command(resolve_compression)
 tomte.add_command(config_case)
+tomte.add_command(run)
