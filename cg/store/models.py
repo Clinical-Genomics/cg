@@ -679,17 +679,13 @@ class Flowcell(Base):
     archived_at: Mapped[datetime | None]
     has_backup: Mapped[bool] = mapped_column(default=False)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=datetime.now)
-
-    samples: Mapped[list["Sample"]] = orm.relationship(
-        secondary=flowcell_sample, back_populates="flowcells"
-    )
     sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
         back_populates="flowcell",
         cascade="all, delete, delete-orphan",
     )
 
     @property
-    def samples2(self) -> list["Sample"]:
+    def samples(self) -> list["Sample"]:
         """Return samples sequenced on the flow cell."""
         return list({metric.sample for metric in self.sequencing_metrics})
 
@@ -822,9 +818,6 @@ class Sample(Base, PriorityMixin):
     father_links: Mapped[list[CaseSample]] = orm.relationship(
         foreign_keys=[CaseSample.father_id], back_populates="father"
     )
-    flowcells: Mapped[list[Flowcell]] = orm.relationship(
-        secondary=flowcell_sample, back_populates="samples"
-    )
     sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
         back_populates="sample"
     )
@@ -834,7 +827,7 @@ class Sample(Base, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
-    def flow_cells2(self) -> list[Flowcell]:
+    def flow_cells(self) -> list[Flowcell]:
         """Return the flow cells a sample has been sequenced on."""
         return list({metric.flow_cell for metric in self.sequencing_metrics})
 
@@ -904,7 +897,7 @@ class Sample(Base, PriorityMixin):
         if links:
             data["links"] = [link_obj.to_dict(family=True, parents=True) for link_obj in self.links]
         if flowcells:
-            data["flowcells"] = [flowcell_obj.to_dict() for flowcell_obj in self.flowcells]
+            data["flowcells"] = [flowcell_obj.to_dict() for flowcell_obj in self.flow_cells]
         return data
 
 

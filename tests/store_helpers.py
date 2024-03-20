@@ -401,7 +401,7 @@ class StoreHelpers:
 
         for key, value in kwargs.items():
             if key == "flowcell":
-                sample.flowcells.append(kwargs["flowcell"])
+                sample.flow_cells.append(kwargs["flowcell"])
             elif hasattr(sample, key):
                 setattr(sample, key, value)
             else:

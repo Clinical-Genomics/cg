@@ -183,7 +183,7 @@ class BaseHandler:
         cases_query = (
             cases_query.outerjoin(Case.analyses)
             .outerjoin(Sample.invoice)
-            .outerjoin(Sample.flowcells)
+            .outerjoin(Sample.flow_cells)
         )
         return cases_query
 
