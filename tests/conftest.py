@@ -2429,7 +2429,39 @@ def raredisease_mock_analysis_finish(
     raredisease_multiqc_json_metrics: dict,
     tower_id: int,
 ) -> None:
-    """Create analysis_finish file for testing."""
+    """Create analysis finish file for testing."""
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id, "pipeline_info"), parents=True, exist_ok=True
+    )
+    Path(raredisease_dir, raredisease_case_id, "pipeline_info", "software_versions.yml").touch(
+        exist_ok=True
+    )
+    Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet.csv").touch(
+        exist_ok=True
+    )
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id, "multiqc", "multiqc_data"),
+        parents=True,
+        exist_ok=True,
+    )
+    write_json(
+        content=raredisease_multiqc_json_metrics,
+        file_path=Path(
+            raredisease_dir,
+            raredisease_case_id,
+            "multiqc",
+            "multiqc_data",
+            "multiqc_data",
+        ).with_suffix(FileExtensions.JSON),
+    )
+    write_yaml(
+        content={raredisease_case_id: [tower_id]},
+        file_path=Path(
+            raredisease_dir,
+            raredisease_case_id,
+            "tower_ids",
+        ).with_suffix(FileExtensions.YAML),
+    )
 
 
 @pytest.fixture(scope="function")

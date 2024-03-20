@@ -7,7 +7,6 @@ from pathlib import Path
 from cg.io.txt import concat_txt
 from cg.io.config import write_config_nextflow_style
 from cg.constants import GenePanelMasterList, Workflow
-from cg.constants.constants import FileExtensions
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.nf_analysis import RAREDISEASE_METRIC_CONDITIONS
@@ -22,8 +21,7 @@ from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetHeaders,
 )
 from cg.models.nf_analysis import WorkflowParameters
-from cg.store.models import Case, CaseSample
-
+from cg.store.models import Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -218,7 +216,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         metrics_values: dict = {}
         for stat_dict in multiqc_json:
             for sample_key, sample_values in stat_dict.items():
-               if sample_name in sample_key:
+                if sample_name in sample_key:
                     LOG.info(f"Key: {sample_key}, Values: {sample_values}")
                     metrics_values.update(sample_values)
 
