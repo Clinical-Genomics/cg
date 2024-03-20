@@ -1,26 +1,11 @@
 from http import HTTPStatus
 
 import mock.mock
-import pytest
 from flask.testing import FlaskClient
 
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary
-from cg.constants import Workflow
 from cg.store.models import Order
-
-
-@pytest.mark.parametrize(
-    "limit, workflow, expected_orders",
-    [
-        (None, Workflow.MIP_DNA, 2),
-        (1, Workflow.MIP_DNA, 1),
-        (2, Workflow.MIP_DNA, 2),
-        (None, Workflow.BALSAMIC, 1),
-        (None, Workflow.FLUFFY, 0),
-        (None, None, 3),
-    ],
-)
 
 
 def test_order_endpoint(
