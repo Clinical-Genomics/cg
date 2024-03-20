@@ -145,9 +145,7 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Create and validate a metrics deliverables file for given case id.
     If QC metrics are met it sets the status in Trailblazer to complete.
     If failed, it sets it as failed and adds a comment with information of the failed metrics."""
-
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-
     try:
         analysis_api.metrics_deliver(case_id=case_id, dry_run=dry_run)
     except CgError as error:

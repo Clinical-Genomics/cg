@@ -480,6 +480,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Return a list of the metrics specified in a MultiQC json file."""
+        print("HI")
         raise NotImplementedError
 
     def get_metric_base_list(self, sample_id: str, metrics_values: dict) -> list[MetricsBase]:
