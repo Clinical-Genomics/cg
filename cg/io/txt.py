@@ -1,7 +1,6 @@
 """Module to read or write txt files."""
 
 from pathlib import Path
-from typing import List, Optional
 
 from cg.constants.symbols import EMPTY_STRING
 
@@ -26,7 +25,7 @@ def write_txt(content: list[str] | str, file_path: Path) -> None:
 def concat_txt(
     file_paths: list[Path | str],
     target_file: Path | None = None,
-    str_content: Optional[List[str]] = None,
+    str_content: list[str] | None = None,
 ) -> str | None:
     """Concatenate files and eventual string content."""
     content: str = EMPTY_STRING

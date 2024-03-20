@@ -5,14 +5,15 @@ from cg.models.nf_analysis import NextflowSampleSheetEntry
 
 
 class TomteSampleSheetEntry(NextflowSampleSheetEntry):
-    """Raredisease sample model is used when building the sample sheet."""
+    """Tomte sample model is used when building the sample sheet."""
 
     case_id: str
     strandedness: Strandedness
 
     @property
     def reformat_sample_content(self) -> list[list[str]]:
-        """Reformat sample sheet content as a list of lists, where each list represents a line in the final file."""
+        """Reformat sample sheet content as a list of lists, where
+        each list represents a line in the final file."""
         return [
             [
                 self.case_id,

@@ -45,7 +45,7 @@ class TomteAnalysisAPI(NfAnalysisAPI):
         return TomteSampleSheetHeaders.list()
 
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
-        """Get sample sheet content per sample."""
+        """Collect and format information required to build a sample sheet for a single sample."""
         fastq_forward_read_paths, fastq_reverse_read_paths = self.get_paired_read_paths(
             sample=case_sample.sample
         )

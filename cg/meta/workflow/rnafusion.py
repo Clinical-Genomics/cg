@@ -56,13 +56,13 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         return RnafusionSampleSheetEntry.headers()
 
     @property
-    def _append_params_to_nextflow_config(self) -> bool:
-        """True if parameters should be added into the nextflow config file instead of the params file."""
+    def is_params_appended_to_nextflow_config(self) -> bool:
+        """Return True if parameters should be added into the nextflow config file instead of the params file."""
         return False
 
     @property
-    def _multiple_samples_allowed(self) -> bool:
-        """Defines whether the analysis supports multiple samples to be linked to the case."""
+    def is_multiple_samples_allowed(self) -> bool:
+        """Return whether the analysis supports multiple samples to be linked to the case."""
         return False
 
     def get_deliverables_template_content(self) -> list[dict]:
@@ -82,7 +82,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         return RNAFUSION_BUNDLE_FILENAMES_PATH
 
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
-        """Get sample sheet content per sample."""
+        """Collect and format information required to build a sample sheet for a single sample."""
         fastq_forward_read_paths, fastq_reverse_read_paths = self.get_paired_read_paths(
             sample=case_sample.sample
         )
