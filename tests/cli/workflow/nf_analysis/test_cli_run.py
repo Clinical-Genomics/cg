@@ -8,10 +8,7 @@ from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
 from cg.cli.workflow.base import workflow as workflow_cli
-from cg.cli.workflow.raredisease.base import run
-from cg.cli.workflow.rnafusion.base import run
-from cg.cli.workflow.taxprofiler.base import run
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
+from cg.constants import EXIT_SUCCESS, Workflow
 from cg.models.cg_config import CGConfig
 
 
