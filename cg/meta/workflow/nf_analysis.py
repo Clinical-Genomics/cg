@@ -320,6 +320,7 @@ class NfAnalysisAPI(AnalysisAPI):
         dry_run: bool,
     ):
         """Create parameters file for a case."""
+        LOG.debug("Getting parameters information")
         workflow_parameters: dict | None = self.get_workflow_parameters(case_id=case_id).dict()
         if self._append_params_to_nextflow_config:
             workflow_parameters = None

@@ -98,7 +98,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self, case_id: str, genomes_base: Path | None = None
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
-        LOG.debug("Getting parameters information")
         return RnafusionParameters(
             cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
             genomes_base=genomes_base or self.get_references_path(),

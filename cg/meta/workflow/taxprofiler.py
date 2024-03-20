@@ -88,7 +88,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
 
     def get_workflow_parameters(self, case_id: str) -> TaxprofilerParameters:
         """Return Taxprofiler parameters."""
-        LOG.debug("Getting parameters information")
         return TaxprofilerParameters(
             cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
             input=self.get_sample_sheet_path(case_id=case_id),

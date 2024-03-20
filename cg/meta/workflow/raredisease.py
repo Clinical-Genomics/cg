@@ -80,7 +80,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_workflow_parameters(self, case_id: str) -> WorkflowParameters:
         """Return parameters."""
-        LOG.info("Getting parameters information")
         return WorkflowParameters(
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
