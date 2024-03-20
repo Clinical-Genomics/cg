@@ -600,7 +600,9 @@ class NfAnalysisAPI(AnalysisAPI):
             or not self.get_metrics_deliverables_path(case_id=case_id).exists()
         ):
             LOG.info(f"Generating metrics file and performing QC checks for {case_id}")
+            self.status_db.verify_case_exists(case_internal_id=case_id)
             self.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
+            self.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
         LOG.info(f"Storing analysis for {case_id}")
         self.report_deliver(case_id)
         self.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run)
