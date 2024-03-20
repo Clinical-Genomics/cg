@@ -1433,8 +1433,9 @@ class ReadHandler(BaseHandler):
 
     def get_not_received_case_count(self, order_id: int) -> int:
         filters: list[CaseFilter] = [CaseFilter.BY_ORDER, CaseFilter.NOT_RECEIVED]
+        cases: Query = self._get_join_case_and_sample_query()
         return apply_case_filter(
-            cases=self._get_query(table=Case),
+            cases=cases,
             filter_functions=filters,
             order_id=order_id,
         ).count()
@@ -1443,10 +1444,10 @@ class ReadHandler(BaseHandler):
         filters: list[CaseFilter] = [
             CaseFilter.BY_ORDER,
             CaseFilter.RECEIVED,
-            CaseFilter.NOT_PREPARED,
         ]
+        cases: Query = self._get_join_case_and_sample_query()
         return apply_case_filter(
-            cases=self._get_query(table=Case),
+            cases=cases,
             filter_functions=filters,
             order_id=order_id,
         ).count()
@@ -1457,8 +1458,9 @@ class ReadHandler(BaseHandler):
             CaseFilter.PREPARED,
             CaseFilter.NOT_SEQUENCED,
         ]
+        cases: Query = self._get_join_case_and_sample_query()
         return apply_case_filter(
-            cases=self._get_query(table=Case),
+            cases=cases,
             filter_functions=filters,
             order_id=order_id,
         ).count()

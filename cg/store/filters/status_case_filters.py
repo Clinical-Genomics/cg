@@ -201,48 +201,23 @@ def filter_compressible_cases(cases: Query, **kwargs) -> Query:
 
 
 def get_not_received_cases(cases: Query, **kwargs) -> Query:
-    return (
-        cases.join(CaseSample, Case.links)
-        .join(Sample, CaseSample.sample)
-        .filter(Sample.received_at.is_(None))
-        .distinct()
-    )
+    return cases.filter(Sample.received_at != None).distinct()
 
 
 def get_received_cases(cases: Query, **kwargs) -> Query:
-    return (
-        cases.join(CaseSample, Case.links)
-        .join(Sample, CaseSample.sample)
-        .filter(Sample.received_at.isnot(None))
-        .distinct()
-    )
+    return cases.filter(Sample.received_at != None).distinct()
 
 
 def get_not_prepared_cases(cases: Query, **kwargs) -> Query:
-    return (
-        cases.join(CaseSample, Case.links)
-        .join(Sample, CaseSample.sample)
-        .filter(Sample.prepared_at.is_(None))
-        .distinct()
-    )
+    return cases.filter(Sample.prepared_at == None).distinct()
 
 
 def get_prepared_cases(cases: Query, **kwargs) -> Query:
-    return (
-        cases.join(CaseSample, Case.links)
-        .join(Sample, CaseSample.sample)
-        .filter(Sample.received_at.isnot(None))
-        .distinct()
-    )
+    return cases.filter(Sample.prepared_at != None).distinct()
 
 
 def get_not_sequenced_cases(cases: Query, **kwargs) -> Query:
-    return (
-        cases.join(CaseSample, Case.links)
-        .join(Sample, CaseSample.sample)
-        .filter(Sample.last_sequenced_at.is_(None))
-        .distinct()
-    )
+    return cases.filter(Sample.last_sequenced_at == None).distinct()
 
 
 def filter_by_order(cases: Query, order_id: int, **kwargs) -> Query:
