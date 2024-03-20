@@ -21,7 +21,7 @@ def test_metrics_deliver(
     raredisease_metrics_deliverables_path: Path,
 ):
     """Test command with a case id and a finished analysis which should execute successfully."""
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
 
     # GIVEN case id
     result = cli_runner.invoke(metrics_deliver, [raredisease_case_id], obj=raredisease_context)

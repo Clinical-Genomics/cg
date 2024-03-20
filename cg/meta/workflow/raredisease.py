@@ -204,7 +204,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         for sample in samples:
             sample_id: str = sample.internal_id
             metrics_values: dict = self.parse_multiqc_json_for_sample(
-                sample_name=sample.name, multiqc_json=multiqc_json
+                sample_name=sample_id, multiqc_json=multiqc_json
             )
             metric_base_list: list = self.get_metric_base_list(
                 sample_id=sample_id, metrics_values=metrics_values
@@ -218,7 +218,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         metrics_values: dict = {}
         for stat_dict in multiqc_json:
             for sample_key, sample_values in stat_dict.items():
-                if sample_key == f"{sample_name}_{sample_name}":
+               if sample_name in sample_key:
                     LOG.info(f"Key: {sample_key}, Values: {sample_values}")
                     metrics_values.update(sample_values)
 
