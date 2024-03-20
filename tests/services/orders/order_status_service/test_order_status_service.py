@@ -20,3 +20,30 @@ def test_get_status_summaries(
 
     # THEN the summaries should be returned
     assert summaries
+
+
+def test_in_preparation():
+    # GIVEN an order with cases in preparation
+
+    # WHEN creating a summary for the order
+
+    # THE summary should contain the number of cases in preparation
+    pass
+
+
+def test_in_sequencing():
+    # GIVEN an order with cases in sequencing
+
+    # WHEN creating a summary for the order
+
+    # THE summary should contain the number of cases in sequencing
+    pass
+
+
+def test_not_rececved():
+    # GIVEN an order with cases not received
+
+    # WHEN creating a summary for the order
+
+    # THE summary should contain the number of cases not received
+    pass
