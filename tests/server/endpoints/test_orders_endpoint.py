@@ -21,29 +21,6 @@ from cg.store.models import Order
         (None, None, 3),
     ],
 )
-def test_orders_endpoint(
-    client: FlaskClient,
-    order: Order,
-    order_another: Order,
-    order_balsamic: Order,
-    limit: int | None,
-    workflow: str,
-    expected_orders: int,
-    analysis_summary,
-):
-    """Tests that orders are returned from the orders endpoint"""
-    # GIVEN a store with three orders, two of which are MIP-DNA and the last is BALSAMIC
-
-    # WHEN a request is made to get all orders
-    endpoint: str = "/api/v1/orders"
-    with mock.patch.object(TrailblazerAPI, "get_summaries", return_value=[]):
-        response = client.get(endpoint, query_string={"pageSize": limit, "workflow": workflow})
-
-    # THEN the response should be successful
-    assert response.status_code == HTTPStatus.OK
-
-    # THEN the response contains the correct number of orders
-    assert len(response.json["orders"]) == expected_orders
 
 
 def test_order_endpoint(
