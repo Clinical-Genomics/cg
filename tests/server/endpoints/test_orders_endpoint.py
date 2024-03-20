@@ -23,8 +23,8 @@ def test_order_endpoint(
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
 
-    # THEN the response should only contain the specified order
-    assert response.json
+    # THEN the response contains the specified order
+    assert response.json["id"] == order_id_to_fetch
 
 
 def test_order_endpoint_not_found(
