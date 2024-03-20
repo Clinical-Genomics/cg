@@ -1692,6 +1692,18 @@ def pdc_archiving_directory(pdc_archiving_dir: Path) -> PDCArchivingDirectory:
     )
 
 
+@pytest.fixture(scope="function")
+def nextflow_binary() -> Path:
+    """Return the path to the nextflow binary."""
+    return Path("path", "to", "bin", "nextflow")
+
+
+@pytest.fixture(scope="function")
+def conda_binary() -> Path:
+    """Return the path to the conda binary."""
+    return Path("path", "to", "bin", "conda")
+
+
 @pytest.fixture(name="cg_uri")
 def cg_uri() -> str:
     """Return a cg URI."""
@@ -1719,6 +1731,7 @@ def context_config(
     housekeeper_dir: Path,
     mip_dir: Path,
     cg_dir: Path,
+    conda_binary: Path,
     balsamic_dir: Path,
     microsalt_dir: Path,
     raredisease_dir: Path,
@@ -1729,6 +1742,7 @@ def context_config(
     illumina_demultiplexed_runs_directory: Path,
     downsample_dir: Path,
     pdc_archiving_directory: PDCArchivingDirectory,
+    nextflow_binary: Path,
     nf_analysis_platform_config_path: Path,
     nf_analysis_pipeline_params_path: Path,
     nf_analysis_pipeline_resource_optimisation_path: Path,
@@ -1890,9 +1904,9 @@ def context_config(
             "root": str(mip_dir),
         },
         "raredisease": {
-            "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
+            "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
-            "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
+            "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_raredisease",
             "config_platform": str(nf_analysis_platform_config_path),
             "config_params": str(nf_analysis_pipeline_params_path),
@@ -1910,9 +1924,9 @@ def context_config(
             "tower_workflow": "raredisease",
         },
         "tomte": {
-            "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
+            "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
-            "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
+            "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_tomte",
             "config_platform": str(nf_analysis_platform_config_path),
             "config_params": str(nf_analysis_pipeline_params_path),
@@ -1929,9 +1943,9 @@ def context_config(
             "tower_workflow": "tomte",
         },
         "rnafusion": {
-            "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
+            "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
-            "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
+            "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_RNAFUSION",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_path": Path("workflow", "path").as_posix(),
@@ -1948,10 +1962,10 @@ def context_config(
         "pigz": {"binary_path": "/bin/pigz"},
         "pdc": {"binary_path": "/bin/dsmc"},
         "taxprofiler": {
-            "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
+            "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
             "root": str(taxprofiler_dir),
-            "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
+            "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_taxprofiler",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_path": Path("workflow", "path").as_posix(),

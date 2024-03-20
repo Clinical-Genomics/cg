@@ -2,24 +2,19 @@
 
 import logging
 from pathlib import Path
-from typing import Any
 
 from cg.constants import GenePanelMasterList, Workflow
-from cg.constants.constants import FileExtensions
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
-from cg.io.config import write_config_nextflow_style
-from cg.io.txt import concat_txt
 from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import WorkflowParameters
 from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
 )
-from cg.store.models import Case, CaseSample
+from cg.store.models import CaseSample
 
 LOG = logging.getLogger(__name__)
 
