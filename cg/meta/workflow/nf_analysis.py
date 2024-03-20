@@ -316,9 +316,9 @@ class NfAnalysisAPI(AnalysisAPI):
     def create_params_file(self, case_id: str, dry_run: bool):
         """Create parameters file for a case."""
         LOG.debug("Getting parameters information")
-        workflow_parameters: dict | None = self.get_workflow_parameters(case_id=case_id).dict()
-        if self.is_params_appended_to_nextflow_config:
-            workflow_parameters = None
+        workflow_parameters = None
+        if not self.is_params_appended_to_nextflow_config:
+            workflow_parameters: dict | None = self.get_workflow_parameters(case_id=case_id).dict()
         if not dry_run:
             self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters)
 
@@ -512,7 +512,8 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return deliverables file template content."""
         raise NotImplementedError
 
-    def get_bundle_filenames_path(self) -> Path | None:
+    @staticmethod
+    def get_bundle_filenames_path() -> Path | None:
         """Return bundle filenames path."""
         return None
 

@@ -66,7 +66,8 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """Return nextflow config content."""
         return MULTIQC_NEXFLOW_CONFIG
 
-    def get_bundle_filenames_path(self) -> Path:
+    @staticmethod
+    def get_bundle_filenames_path() -> Path:
         """Return Taxprofiler bundle filenames path."""
         return TAXPROFILER_BUNDLE_FILENAMES_PATH
 
