@@ -149,9 +149,7 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 
     try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
-        analysis_api.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
+        analysis_api.metrics_deliver(case_id=case_id, dry_run=dry_run)
     except CgError as error:
         raise click.Abort() from error
 
@@ -162,17 +160,10 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @click.pass_obj
 def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Create a Housekeeper deliverables file for given case id."""
-
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-
     try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
-        if not dry_run:
-            analysis_api.report_deliver(case_id=case_id)
-        else:
-            LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
-    except Exception as error:
+        analysis_api.report_deliver(case_id=case_id, dry_run=dry_run)
+    except CgError as error:
         LOG.error(f"Could not create report file: {error}")
         raise click.Abort()
 
@@ -184,7 +175,6 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Store a finished RNAFUSION and TAXPROFILER analysis in Housekeeper and StatusDB."""
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-
     try:
         analysis_api.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run)
     except HousekeeperStoreError as error:
@@ -201,7 +191,7 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     pass QC metrics checks."""
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
     try:
-        analysis_api.get_deliverables_and_store_case(case_id=case_id, dry_run=dry_run)
+        analysis_api.store(case_id=case_id, dry_run=dry_run)
     except Exception as error:
         LOG.error(repr(error))
         click.Abort()
