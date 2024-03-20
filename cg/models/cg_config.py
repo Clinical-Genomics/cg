@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 from pydantic.v1 import BaseModel, EmailStr, Field
 from typing_extensions import Literal
@@ -22,6 +23,8 @@ from cg.clients.janus.api import JanusAPIClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
+from cg.meta.delivery.delivery import DeliveryAPI
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
@@ -349,6 +352,7 @@ class CGConfig(BaseModel):
     trailblazer_api_: TrailblazerAPI = None
     janus: JanusConfig | None = None
     janus_api_: JanusAPIClient | None = None
+    delivery_api_: DeliveryAPI | None = None
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
@@ -577,4 +581,22 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating trailblazer api")
             api = TrailblazerAPI(config=self.dict())
             self.trailblazer_api_ = api
+        return api
+
+    @property
+    def fastq_file_service(self) -> FastqFileService:
+        return FastqFileService()
+
+    @property
+    def delivery_api(self) -> DeliveryAPI:
+        api = self.__dict__.get("delivery_api_")
+        if api is None:
+            LOG.debug("Instantiating delivery api")
+            api = DeliveryAPI(
+                delivery_path=Path(self.delivery_path),
+                fastq_file_service=self.fastq_file_service,
+                housekeeper_api=self.housekeeper_api,
+                store=self.status_db,
+            )
+            self.delivery_api_ = api
         return api

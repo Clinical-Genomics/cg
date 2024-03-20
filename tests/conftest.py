@@ -78,6 +78,9 @@ pytest_plugins = [
     "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_sheet_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.context_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.bundle_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.path_fixtures",
 ]
 
 # Case fixtures
@@ -119,6 +122,11 @@ def case_id() -> str:
 
 
 @pytest.fixture(scope="session")
+def case_name() -> str:
+    return "C12345"
+
+
+@pytest.fixture(scope="session")
 def case_id_does_not_exist() -> str:
     """Return a case id that should not exist."""
     return "case_does_not_exist"
@@ -134,6 +142,12 @@ def another_case_id() -> str:
 def sample_id() -> str:
     """Return a sample id."""
     return "ADM1"
+
+
+@pytest.fixture(scope="session")
+def another_sample_id() -> str:
+    """Return another sample id."""
+    return "another_sample_id"
 
 
 @pytest.fixture(scope="session")
@@ -193,6 +207,11 @@ def customer_id() -> str:
 @pytest.fixture(scope="session")
 def sbatch_job_number() -> int:
     return 123456
+
+
+@pytest.fixture(scope="session")
+def empty_list() -> list:
+    return []
 
 
 @pytest.fixture(scope="session")
@@ -1260,6 +1279,12 @@ def external_wes_application_tag() -> str:
 def wgs_application_tag() -> str:
     """Return the WGS application tag."""
     return "WGSPCFC030"
+
+
+@pytest.fixture
+def microbial_application_tag() -> str:
+    """Return the WGS microbial application tag."""
+    return "MWRNXTR003"
 
 
 @pytest.fixture

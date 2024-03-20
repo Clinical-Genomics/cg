@@ -96,12 +96,6 @@ def dna_sample_father_id() -> str:
 
 
 @pytest.fixture
-def another_sample_id() -> str:
-    """Return another sample id."""
-    return "another_sample_id"
-
-
-@pytest.fixture
 def another_rna_sample_id() -> str:
     """Return another RNA sample id."""
     return "another_rna_sample_id"
