@@ -7,7 +7,7 @@ from cg.models.rnafusion.rnafusion import RnafusionAnalysis
 
 
 def test_parse_analysis(
-    context: CGConfig,
+    rnafusion_context: CGConfig,
     rnafusion_case_id: str,
     sample_id: str,
     rnafusion_multiqc_json_metrics: dict,
@@ -17,7 +17,7 @@ def test_parse_analysis(
     """Test Rnafusion output analysis files parsing."""
 
     # GIVEN a Rnafusion analysis API and a list of QC metrics
-    analysis_api: RnafusionAnalysisAPI = context.meta_apis["analysis_api"]
+    analysis_api: RnafusionAnalysisAPI = rnafusion_context.meta_apis["analysis_api"]
     qc_metrics: list[MetricsBase] = analysis_api.get_multiqc_json_metrics(case_id=rnafusion_case_id)
 
     # WHEN extracting the analysis model
@@ -28,12 +28,12 @@ def test_parse_analysis(
 
 
 def test_get_latest_metadata(
-    context: CGConfig, rnafusion_case_id: str, rnafusion_mock_analysis_finish
+    rnafusion_context: CGConfig, rnafusion_case_id: str, rnafusion_mock_analysis_finish
 ):
     """Test retrieval of Rnafusion latest metadata."""
 
     # GIVEN a Rnafusion analysis API and a list of QC metrics
-    analysis_api: RnafusionAnalysisAPI = context.meta_apis["analysis_api"]
+    analysis_api: RnafusionAnalysisAPI = rnafusion_context.meta_apis["analysis_api"]
 
     # WHEN collecting the latest metadata
     latest_metadata: RnafusionAnalysis = analysis_api.get_latest_metadata(case_id=rnafusion_case_id)

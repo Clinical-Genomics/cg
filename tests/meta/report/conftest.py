@@ -47,11 +47,13 @@ def report_api_balsamic(
 
 
 @pytest.fixture(scope="function")
-def report_api_rnafusion(context: CGConfig, lims_samples: list[dict]) -> RnafusionReportAPI:
+def report_api_rnafusion(
+    rnafusion_context: CGConfig, lims_samples: list[dict]
+) -> RnafusionReportAPI:
     """Rnafusion report API fixture."""
-    context.lims_api_ = MockLimsAPI(context, lims_samples)
-    context.scout_api_ = MockScoutApi(context)
-    return RnafusionReportAPI(context, context.meta_apis["analysis_api"])
+    rnafusion_context.lims_api_ = MockLimsAPI(rnafusion_context, lims_samples)
+    rnafusion_context.scout_api_ = MockScoutApi(rnafusion_context)
+    return RnafusionReportAPI(rnafusion_context, rnafusion_context.meta_apis["analysis_api"])
 
 
 @pytest.fixture(scope="function")

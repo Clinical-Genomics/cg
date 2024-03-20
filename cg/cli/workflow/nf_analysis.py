@@ -192,4 +192,4 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
         analysis_api.store(case_id=case_id, dry_run=dry_run)
     except Exception as error:
         LOG.error(repr(error))
-        click.Abort()
+        raise click.Abort()

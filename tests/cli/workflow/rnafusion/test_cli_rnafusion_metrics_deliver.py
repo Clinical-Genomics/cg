@@ -12,7 +12,7 @@ from cg.models.cg_config import CGConfig
 
 def test_without_samples(
     cli_runner: CliRunner,
-    context: CGConfig,
+    rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
     no_sample_case_id: str,
 ):
@@ -21,7 +21,9 @@ def test_without_samples(
     # GIVEN case-id
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(metrics_deliver, [no_sample_case_id, "--dry-run"], obj=context)
+    result = cli_runner.invoke(
+        metrics_deliver, [no_sample_case_id, "--dry-run"], obj=rnafusion_context
+    )
 
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -32,7 +34,7 @@ def test_without_samples(
 
 def test_metrics_deliver(
     cli_runner: CliRunner,
-    context: CGConfig,
+    rnafusion_context: CGConfig,
     rnafusion_mock_analysis_finish,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
@@ -42,7 +44,7 @@ def test_metrics_deliver(
     # GIVEN case-id
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(metrics_deliver, [rnafusion_case_id], obj=context)
+    result = cli_runner.invoke(metrics_deliver, [rnafusion_case_id], obj=rnafusion_context)
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
