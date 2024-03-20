@@ -5,16 +5,12 @@ import logging
 import click
 from pydantic import ValidationError
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import MetaApis
 from cg.exc import AnalysisNotReadyError, CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.store import Store
-
-LOG = logging.getLogger(__name__)
 
 LOG = logging.getLogger(__name__)
 
@@ -152,7 +148,9 @@ def run(
             nf_tower_id=nf_tower_id,
         )
     except Exception as error:
+        LOG.error(f"Unspecified error occurred: {error}")
         raise click.Abort() from error
+
 
 @click.command("start")
 @ARGUMENT_CASE_ID
@@ -165,9 +163,9 @@ def run(
 @OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
 @OPTION_DRY
-@click.pass_context
+@click.pass_obj
 def start(
-    context: click.Context,
+    context: CGConfig,
     case_id: str,
     log: str,
     work_dir: str,
@@ -181,9 +179,8 @@ def start(
 ) -> None:
     """Start full workflow for a case."""
     LOG.info(f"Starting analysis for {case_id}")
-
+    analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     try:
-        analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
         analysis_api.config_case(case_id=case_id, dry_run=dry_run)
@@ -198,10 +195,11 @@ def start(
             params_file=params_file,
             revision=revision,
             compute_env=compute_env,
-            use_nextflow=use_nextflow
+            use_nextflow=use_nextflow,
         )
     except Exception as error:
-        raise click.Abort() from error
+        LOG.error(f"Unspecified error occurred: {error}")
+        raise click.Abort from error
 
 
 @click.command("start-available")
@@ -209,7 +207,7 @@ def start(
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False) -> None:
     """Start full workflow for all cases ready for analysis."""
-    analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+    analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
@@ -224,6 +222,7 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
+
 
 @click.command("metrics-deliver")
 @ARGUMENT_CASE_ID
