@@ -189,6 +189,23 @@ class RarediseaseConfig(CommonAppConfig):
     tower_workflow: str
 
 
+class TomteConfig(CommonAppConfig):
+    binary_path: str | None = None
+    compute_env: str
+    conda_binary: str | None = None
+    conda_env: str
+    config_platform: str
+    config_params: str
+    config_resources: str
+    workflow_path: str
+    profile: str
+    references: str
+    revision: str
+    root: str
+    slurm: SlurmConfig
+    tower_workflow: str
+
+
 class RnafusionConfig(CommonAppConfig):
     root: str
     references: str
@@ -350,6 +367,7 @@ class CGConfig(BaseModel):
     raredisease: RarediseaseConfig = Field(None, alias="raredisease")
     rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
     taxprofiler: TaxprofilerConfig = Field(None, alias="taxprofiler")
+    tomte: TomteConfig = Field(None, alias="tomte")
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
