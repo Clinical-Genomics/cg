@@ -38,6 +38,7 @@ def test_store_success(
     hermes_deliverables: dict = request.getfixturevalue(f"{workflow}_hermes_deliverables")
     request.getfixturevalue(f"{workflow}_mock_deliverable_dir")
     request.getfixturevalue(f"{workflow}_mock_analysis_finish")
+    deliverables_response_data = request.getfixturevalue(f"{workflow}_deliverables_response_data")
 
     # GIVEN a mocked deliverables template
     mocker.patch.object(
@@ -59,6 +60,10 @@ def test_store_success(
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
+
+    # GIVEN Hermes parses deliverables and generates a valid response
+    mocker.patch.object(HermesApi, "create_housekeeper_bundle")
+    HermesApi.create_housekeeper_bundle.return_value = deliverables_response_data
 
     # WHEN storing the case files
     result = cli_runner.invoke(workflow_cli, [workflow, "store", case_id], obj=context)

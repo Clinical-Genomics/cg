@@ -23,6 +23,7 @@ from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.housekeeper.models import InputBundle
 from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
@@ -2538,6 +2539,31 @@ def nf_analysis_pipeline_params_path(nf_analysis_analysis_dir) -> Path:
 
 
 @pytest.fixture(scope="function")
+def rnafusion_deliverables_response_data(
+    create_multiqc_html_file,
+    create_multiqc_json_file,
+    rnafusion_case_id,
+    timestamp_yesterday,
+) -> InputBundle:
+    return InputBundle(
+        **{
+            "files": [
+                {
+                    "path": create_multiqc_json_file.as_posix(),
+                    "tags": ["multiqc-json", rnafusion_case_id],
+                },
+                {
+                    "path": create_multiqc_html_file.as_posix(),
+                    "tags": ["multiqc-html", rnafusion_case_id],
+                },
+            ],
+            "created": timestamp_yesterday,
+            "name": rnafusion_case_id,
+        }
+    )
+
+
+@pytest.fixture(scope="function")
 def nf_analysis_pipeline_resource_optimisation_path(nf_analysis_analysis_dir) -> Path:
     """Path to pipeline resource optimisation file."""
     return Path(nf_analysis_analysis_dir, "pipeline_resource_optimisation").with_suffix(
@@ -3083,6 +3109,31 @@ def taxprofiler_deliverable_data(
             },
         ]
     }
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_deliverables_response_data(
+    create_multiqc_html_file,
+    create_multiqc_json_file,
+    taxprofiler_case_id,
+    timestamp_yesterday,
+) -> InputBundle:
+    return InputBundle(
+        **{
+            "files": [
+                {
+                    "path": create_multiqc_json_file.as_posix(),
+                    "tags": ["multiqc-json", taxprofiler_case_id],
+                },
+                {
+                    "path": create_multiqc_html_file.as_posix(),
+                    "tags": ["multiqc-html", taxprofiler_case_id],
+                },
+            ],
+            "created": timestamp_yesterday,
+            "name": taxprofiler_case_id,
+        }
+    )
 
 
 @pytest.fixture(scope="function")
