@@ -17,7 +17,6 @@ from sqlalchemy import Text as SLQText
 from sqlalchemy import UniqueConstraint, orm, types
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
-from sqlalchemy.util import deprecated
 
 from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
@@ -689,6 +688,11 @@ class Flowcell(Base):
         cascade="all, delete, delete-orphan",
     )
 
+    @property
+    def samples2(self) -> list["Sample"]:
+        """Return samples sequenced on the flow cell."""
+        return list({metric.sample for metric in self.sequencing_metrics})
+
     def __str__(self):
         return self.name
 
@@ -828,6 +832,11 @@ class Sample(Base, PriorityMixin):
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
+
+    @property
+    def flow_cells2(self) -> list[Flowcell]:
+        """Return the flow cells a sample has been sequenced on."""
+        return list({metric.flow_cell for metric in self.sequencing_metrics})
 
     @property
     def sequencing_qc(self) -> bool:
