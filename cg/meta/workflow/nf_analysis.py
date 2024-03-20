@@ -1,13 +1,20 @@
 import logging
-import click
-from pydantic.v1 import ValidationError
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from pydantic.v1 import ValidationError
+
 from cg.constants import Workflow
-from cg.constants.constants import FileExtensions, FileFormat, MultiQC, WorkflowManager
+from cg.constants.constants import (
+    CaseActions,
+    FileExtensions,
+    FileFormat,
+    MultiQC,
+    WorkflowManager,
+)
 from cg.constants.nextflow import NFX_WORK_DIR
+from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.controller import ReadFile, WriteFile
@@ -21,12 +28,9 @@ from cg.models.deliverables.metric_deliverables import (
     MetricsDeliverablesCondition,
 )
 from cg.models.fastq import FastqFileMeta
-from cg.models.nf_analysis import FileDeliverable, WorkflowDeliverables
-from cg.models.nf_analysis import NfCommandArgs
-from cg.utils import Process
+from cg.models.nf_analysis import FileDeliverable, NfCommandArgs, WorkflowDeliverables
 from cg.store.models import Sample
-from cg.constants.constants import CaseActions
-from cg.constants.nf_analysis import NfTowerStatus
+from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -480,7 +484,6 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Return a list of the metrics specified in a MultiQC json file."""
-        print("HI")
         raise NotImplementedError
 
     def get_metric_base_list(self, sample_id: str, metrics_values: dict) -> list[MetricsBase]:
@@ -553,31 +556,27 @@ class NfAnalysisAPI(AnalysisAPI):
         self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
 
     def metrics_deliver(self, case_id: str, dry_run: bool):
-        """Docstring"""
+        """Create and validate a metrics deliverables file for given case id."""
         self.status_db.verify_case_exists(case_internal_id=case_id)
         self.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
         self.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
 
     def report_deliver(self, case_id: str, dry_run: bool) -> None:
         """Write deliverables file."""
-        try:
-            self.status_db.verify_case_exists(case_internal_id=case_id)
-            self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
-            if not dry_run:
-                workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(
-                    case_id=case_id
-                )
-                self.write_deliverables_file(
-                    deliverables_content=workflow_content.dict(),
-                    file_path=self.get_deliverables_file_path(case_id=case_id),
-                )
-            LOG.info(
-                f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
-            )
-            LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
 
-        except CgError as error:
-            LOG.error(f"an error has occured {error}")
+        self.status_db.verify_case_exists(case_internal_id=case_id)
+        self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+        if not dry_run:
+            workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
+            self.write_deliverables_file(
+                deliverables_content=workflow_content.dict(),
+                file_path=self.get_deliverables_file_path(case_id=case_id),
+            )
+        LOG.info(
+            f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
+        )
+
+        LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
 
     def store_analysis_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
         """Store a finished nextflow analysis in Housekeeper and StatusDB"""
@@ -603,6 +602,8 @@ class NfAnalysisAPI(AnalysisAPI):
             )
 
     def store(self, case_id: str, dry_run: bool):
+        """Generate deliverable files for a case and store in Housekeeper if they
+        pass QC metrics checks."""
         is_latest_analysis_qc: bool = self.trailblazer_api.is_latest_analysis_qc(case_id=case_id)
         if not is_latest_analysis_qc and not self.trailblazer_api.is_latest_analysis_completed(
             case_id=case_id
