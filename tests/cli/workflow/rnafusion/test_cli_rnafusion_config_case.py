@@ -18,7 +18,7 @@ LOG = logging.getLogger(__name__)
 
 def test_config_case_without_samples(
     cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
+    context: CGConfig,
     caplog: LogCaptureFixture,
     no_sample_case_id: str,
 ):
@@ -27,7 +27,7 @@ def test_config_case_without_samples(
     # GIVEN a case
 
     # WHEN running config case
-    result = cli_runner.invoke(config_case, [no_sample_case_id], obj=rnafusion_context)
+    result = cli_runner.invoke(config_case, [no_sample_case_id], obj=context)
 
     # THEN command should not exit successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -39,7 +39,7 @@ def test_config_case_without_samples(
 
 def test_config_case_wrong_strandedness(
     cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
+    context: CGConfig,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
     strandedness_not_permitted: str,
@@ -53,7 +53,7 @@ def test_config_case_wrong_strandedness(
     result = cli_runner.invoke(
         config_case,
         [rnafusion_case_id, "--strandedness", strandedness_not_permitted],
-        obj=rnafusion_context,
+        obj=context,
     )
 
     # THEN command should fail
@@ -64,7 +64,7 @@ def test_config_case_wrong_strandedness(
 
 def test_config_case_default_parameters(
     cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
+    context: CGConfig,
     rnafusion_case_id: str,
     rnafusion_sample_sheet_path: Path,
     rnafusion_params_file_path: Path,
@@ -79,7 +79,7 @@ def test_config_case_default_parameters(
     # GIVEN a valid case
 
     # WHEN running config case
-    result = cli_runner.invoke(config_case, [rnafusion_case_id], obj=rnafusion_context)
+    result = cli_runner.invoke(config_case, [rnafusion_case_id], obj=context)
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -117,7 +117,7 @@ def test_config_case_default_parameters(
 
 def test_config_case_dry_run(
     cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
+    context: CGConfig,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
 ):
@@ -127,7 +127,7 @@ def test_config_case_dry_run(
     # GIVEN a valid case
 
     # WHEN performing a dry-run
-    result = cli_runner.invoke(config_case, [rnafusion_case_id, "-d"], obj=rnafusion_context)
+    result = cli_runner.invoke(config_case, [rnafusion_case_id, "-d"], obj=context)
 
     # THEN command should should exit succesfully
     assert result.exit_code == EXIT_SUCCESS
@@ -144,7 +144,7 @@ def test_config_case_dry_run(
 
 def test_config_case_with_reference(
     cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
+    context: CGConfig,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
     rnafusion_params_file_path: Path,
@@ -159,7 +159,7 @@ def test_config_case_with_reference(
     result = cli_runner.invoke(
         config_case,
         [rnafusion_case_id, "--genomes_base", reference_dir],
-        obj=rnafusion_context,
+        obj=context,
     )
 
     # THEN command should exit successfully

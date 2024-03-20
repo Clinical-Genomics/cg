@@ -77,13 +77,13 @@ def test_store_success(
 
 
 @pytest.mark.parametrize(
-    "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    "workflow,context",
+    [(Workflow.RNAFUSION, "rnafusion_context"), (Workflow.TAXPROFILER, "taxprofiler_context")],
 )
 def test_store_fail(
     cli_runner: CliRunner,
     workflow: Workflow,
-    rnafusion_context: CGConfig,
+    context: str,
     real_housekeeper_api: HousekeeperAPI,
     deliverables_template_content: list[dict],
     caplog: LogCaptureFixture,
@@ -94,7 +94,7 @@ def test_store_fail(
     caplog.set_level(logging.INFO)
 
     # GIVEN each fixture is being initialised
-    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
+    context: CGConfig = request.getfixturevalue(context)
 
     # GIVEN a case id where analysis finish is not mocked
     case_id_fail: str = request.getfixturevalue(f"{workflow}_case_id")

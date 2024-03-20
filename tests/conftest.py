@@ -2636,7 +2636,7 @@ def total_sequenced_reads_not_pass() -> int:
 
 
 @pytest.fixture(scope="function")
-def rnafusion_context(
+def context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
     nf_analysis_housekeeper: HousekeeperAPI,

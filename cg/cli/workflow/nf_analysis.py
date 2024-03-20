@@ -4,16 +4,13 @@ import logging
 
 import click
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
+
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
 from cg.constants.constants import MetaApis
 from cg.exc import CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.store import Store
-from pydantic import ValidationError
 
-LOG = logging.getLogger(__name__)
 
 LOG = logging.getLogger(__name__)
 
@@ -203,24 +200,8 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     """Generate deliverable files for a case and store in Housekeeper if they
     pass QC metrics checks."""
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
-
-    is_latest_analysis_qc: bool = analysis_api.trailblazer_api.is_latest_analysis_qc(
-        case_id=case_id
-    )
-    if not is_latest_analysis_qc and not analysis_api.trailblazer_api.is_latest_analysis_completed(
-        case_id=case_id
-    ):
-        LOG.error(
-            "Case not stored. Trailblazer status must be either QC or COMPLETE to be able to store"
-        )
-        raise click.Abort
-
-    if (
-        is_latest_analysis_qc
-        or not analysis_api.get_metrics_deliverables_path(case_id=case_id).exists()
-    ):
-        LOG.info(f"Generating metrics file and performing QC checks for {case_id}")
-        context.invoke(metrics_deliver, case_id=case_id, dry_run=dry_run)
-    LOG.info(f"Storing analysis for {case_id}")
-    context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
-    context.invoke(store_housekeeper, case_id=case_id, dry_run=dry_run)
+    try:
+        analysis_api.get_deliverables_and_store_case(case_id=case_id, dry_run=dry_run)
+    except Exception as error:
+        LOG.error(repr(error))
+        click.Abort()

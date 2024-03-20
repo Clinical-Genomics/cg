@@ -584,3 +584,23 @@ class NfAnalysisAPI(AnalysisAPI):
             raise HousekeeperStoreError(
                 f"Could not store bundle in Housekeeper and StatusDB: {error}"
             )
+
+    def get_deliverables_and_store_case(self, case_id: str, dry_run: bool):
+        is_latest_analysis_qc: bool = self.trailblazer_api.is_latest_analysis_qc(case_id=case_id)
+        if not is_latest_analysis_qc and not self.trailblazer_api.is_latest_analysis_completed(
+            case_id=case_id
+        ):
+            LOG.error(
+                "Case not stored. Trailblazer status must be either QC or COMPLETE to be able to store"
+            )
+            raise ValueError
+
+        if (
+            is_latest_analysis_qc
+            or not self.get_metrics_deliverables_path(case_id=case_id).exists()
+        ):
+            LOG.info(f"Generating metrics file and performing QC checks for {case_id}")
+            self.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
+        LOG.info(f"Storing analysis for {case_id}")
+        self.report_deliver(case_id)
+        self.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run)

@@ -15,7 +15,7 @@ from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
 def test_start(
     cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
+    context: CGConfig,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
     mock_analysis_flow_cell,
@@ -32,7 +32,7 @@ def test_start(
     RnafusionAnalysisAPI.resolve_decompression.return_value = None
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=rnafusion_context)
+    result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=context)
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -44,7 +44,7 @@ def test_start(
 
 def test_start_available(
     cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
+    context: CGConfig,
     caplog: LogCaptureFixture,
     mocker,
     rnafusion_case_id: str,
@@ -64,7 +64,7 @@ def test_start_available(
     RnafusionAnalysisAPI.resolve_decompression.return_value = None
 
     # WHEN running command
-    result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=context)
 
     # THEN command exits with 0
     assert result.exit_code == EXIT_SUCCESS
@@ -75,7 +75,7 @@ def test_start_available(
 
 def test_store_available(
     cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
+    context: CGConfig,
     real_housekeeper_api,
     rnafusion_hermes_deliverables,
     rnafusion_case_id: str,
@@ -107,20 +107,20 @@ def test_store_available(
     # GIVEN a mocked config
 
     # Ensure case was successfully picked up by start-available and status set to running
-    result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
-    rnafusion_context.status_db.get_case_by_internal_id(case_id_success).action = "running"
-    rnafusion_context.status_db.session.commit()
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=context)
+    context.status_db.get_case_by_internal_id(case_id_success).action = "running"
+    context.status_db.session.commit()
 
     # THEN command exits with 0
     assert result.exit_code == EXIT_SUCCESS
     assert case_id_success in caplog.text
-    assert rnafusion_context.status_db.get_case_by_internal_id(case_id_success).action == "running"
+    assert context.status_db.get_case_by_internal_id(case_id_success).action == "running"
 
-    rnafusion_context.housekeeper_api_ = real_housekeeper_api
-    rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
+    context.housekeeper_api_ = real_housekeeper_api
+    context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # WHEN running command
-    result = cli_runner.invoke(store_available, obj=rnafusion_context)
+    result = cli_runner.invoke(store_available, obj=context)
 
     # THEN command exits successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -129,18 +129,18 @@ def test_store_available(
     assert case_id_success in caplog.text
 
     # THEN case has analyses
-    assert rnafusion_context.status_db.get_case_by_internal_id(case_id_success).analyses
+    assert context.status_db.get_case_by_internal_id(case_id_success).analyses
 
     # THEN bundle can be found in Housekeeper
-    assert rnafusion_context.housekeeper_api.bundle(case_id_success)
+    assert context.housekeeper_api.bundle(case_id_success)
 
     # THEN bundle added successfully and action set to None
-    assert rnafusion_context.status_db.get_case_by_internal_id(case_id_success).action is None
+    assert context.status_db.get_case_by_internal_id(case_id_success).action is None
 
 
 def test_start_available(
     cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
+    context: CGConfig,
     caplog: LogCaptureFixture,
     mocker,
     rnafusion_case_id: str,
@@ -159,7 +159,7 @@ def test_start_available(
     RnafusionAnalysisAPI.resolve_decompression.return_value = None
 
     # WHEN running command
-    result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=context)
 
     # THEN command exits with 0
     assert result.exit_code == EXIT_SUCCESS
