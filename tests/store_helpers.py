@@ -522,6 +522,10 @@ class StoreHelpers:
             case.customer = customer
         if order:
             order.cases = [case]
+            case.order_id = order.id
+        store.session.add(case)
+        store.session.add(order)
+        store.session.commit()
         return case
 
     @staticmethod
@@ -966,3 +970,6 @@ class StoreHelpers:
                 sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
                 sample_base_mean_quality_score=sample_base_mean_quality_score,
             )
+
+    def associate_case_with_order(store: Store, case: Case, order: Order):
+        pass
