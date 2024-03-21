@@ -118,30 +118,6 @@ def test_run_case_without_config_files(
     assert "No config file found" in caplog.text
 
 
-# @pytest.mark.parametrize(
-#     "workflow",
-#     [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
-# )
-# def test_run_case_from_start_dry_run2(
-#     cli_runner: CliRunner,
-#     workflow: Workflow,
-#     caplog: LogCaptureFixture,
-#     request: FixtureRequest,
-# ):
-#     """Test dry-run with an existing case."""
-#     caplog.set_level(logging.ERROR)
-#     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
-#
-#     # GIVEN a case id
-#     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
-#
-#     # WHEN invoking a command with dry-run specified
-#     result = cli_runner.invoke(workflow_cli, [workflow, "run", case_id, "--from-start", "--dry-run"], obj=context)
-#
-#     # THEN command should execute successfully (dry-run)
-#     assert result.exit_code == EXIT_SUCCESS
-
-
 @pytest.mark.parametrize(
     "workflow",
     [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
