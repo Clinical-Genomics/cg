@@ -1432,35 +1432,38 @@ class ReadHandler(BaseHandler):
         return orders.first()
 
     def get_case_not_received_count(self, order_id: int) -> int:
-        filters: list[CaseFilter] = [CaseFilter.BY_ORDER, CaseFilter.NOT_RECEIVED]
-        cases: Query = self._get_join_case_and_sample_query()
-        return apply_case_filter(
-            cases=cases,
+        filters: list[CaseSampleFilter] = [
+            CaseSampleFilter.BY_ORDER,
+            CaseSampleFilter.CASES_WITH_SAMPLES_NOT_RECEIVED,
+        ]
+        case_samples: Query = self._get_join_case_and_sample_query()
+        return apply_case_sample_filter(
+            case_samples=case_samples,
             filter_functions=filters,
             order_id=order_id,
         ).count()
 
     def get_case_in_preparation_count(self, order_id: int) -> int:
         filters: list[CaseFilter] = [
-            CaseFilter.BY_ORDER,
-            CaseFilter.RECEIVED,
+            CaseSampleFilter.BY_ORDER,
+            CaseSampleFilter.CASES_WITH_SAMPLES_RECEIVED,
         ]
-        cases: Query = self._get_join_case_and_sample_query()
-        return apply_case_filter(
-            cases=cases,
+        case_samples: Query = self._get_join_case_and_sample_query()
+        return apply_case_sample_filter(
+            case_samples=case_samples,
             filter_functions=filters,
             order_id=order_id,
         ).count()
 
     def get_case_in_sequencing_count(self, order_id: int) -> int:
-        filters: list[CaseFilter] = [
-            CaseFilter.BY_ORDER,
-            CaseFilter.PREPARED,
-            CaseFilter.NOT_SEQUENCED,
+        filters: list[CaseSampleFilter] = [
+            CaseSampleFilter.BY_ORDER,
+            CaseSampleFilter.CASES_WITH_SAMPLES_RECEIVED,
+            CaseSampleFilter.CASES_WITH_SAMPLES_NOT_SEQUENCED,
         ]
-        cases: Query = self._get_join_case_and_sample_query()
-        return apply_case_filter(
-            cases=cases,
+        case_samples: Query = self._get_join_case_and_sample_query()
+        return apply_case_sample_filter(
+            case_samples=case_samples,
             filter_functions=filters,
             order_id=order_id,
         ).count()

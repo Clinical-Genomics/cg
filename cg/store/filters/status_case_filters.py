@@ -199,36 +199,6 @@ def filter_compressible_cases(cases: Query, **kwargs) -> Query:
     """Filter cases which are running."""
     return cases.filter(Case.is_compressible)
 
-
-def get_not_received_cases(cases: Query, **kwargs) -> Query:
-    some_samples_not_received_condition = Case.links.any(Sample.received_at == None)
-    return cases.filter(some_samples_not_received_condition).distinct()
-
-
-def get_received_cases(cases: Query, **kwargs) -> Query:
-    all_samples_received_condition = not_(Case.links.any(Sample.received_at == None))
-    return cases.filter(all_samples_received_condition).distinct()
-
-
-def get_not_prepared_cases(cases: Query, **kwargs) -> Query:
-    some_samples_not_prepared_condition = Case.links.any(Sample.prepared_at == None)
-    return cases.filter(some_samples_not_prepared_condition).distinct()
-
-
-def get_prepared_cases(cases: Query, **kwargs) -> Query:
-    all_samples_prepared_condition = not_(Case.links.any(Sample.prepared_at == None))
-    return cases.filter(all_samples_prepared_condition).distinct()
-
-
-def get_not_sequenced_cases(cases: Query, **kwargs) -> Query:
-    some_samples_not_sequenced_condition = Case.links.any(Sample.last_sequenced_at == None)
-    return cases.filter(some_samples_not_sequenced_condition).distinct()
-
-
-def filter_by_order(cases: Query, order_id: int, **kwargs) -> Query:
-    return cases.filter(Case.order_id == order_id)
-
-
 def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
     """Order cases by created at."""
     return cases.order_by(Case.created_at.desc())
@@ -304,11 +274,6 @@ class CaseFilter(Enum):
     IS_COMPRESSIBLE: Callable = filter_compressible_cases
     NEW_BY_ORDER_DATE: Callable = filter_newer_cases_by_order_date
     NOT_ANALYSED: Callable = filter_cases_not_analysed
-    NOT_RECEIVED: Callable = get_not_received_cases
-    RECEIVED: Callable = get_received_cases
-    NOT_PREPARED: Callable = get_not_prepared_cases
-    PREPARED: Callable = get_prepared_cases
-    NOT_SEQUENCED: Callable = get_not_sequenced_cases
     OLD_BY_CREATION_DATE: Callable = filter_older_cases_by_creation_date
     REPORT_SUPPORTED: Callable = filter_report_supported_data_delivery_cases
     WITH_LOQUSDB_SUPPORTED_WORKFLOW: Callable = filter_cases_with_loqusdb_supported_workflow
