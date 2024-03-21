@@ -1,10 +1,8 @@
 """CLI support to create config and/or start RNAFUSION."""
 
 import logging
-from pathlib import Path
 
 import click
-from pydantic.v1 import ValidationError
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
@@ -16,23 +14,18 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_REVISION,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
+    config_case,
     metrics_deliver,
     report_deliver,
     run,
     store_housekeeper,
     store,
 )
-from cg.cli.workflow.rnafusion.options import (
-    OPTION_REFERENCES,
-    OPTION_STRANDEDNESS,
-)
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, MetaApis
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
-from cg.models.cg_config import CGConfig
-
 
 LOG = logging.getLogger(__name__)
 
@@ -46,29 +39,8 @@ def rnafusion(context: click.Context) -> None:
 
 
 rnafusion.add_command(resolve_compression)
+rnafusion.add_command(config_case)
 rnafusion.add_command(run)
-
-
-@rnafusion.command("config-case")
-@ARGUMENT_CASE_ID
-@OPTION_STRANDEDNESS
-@OPTION_REFERENCES
-@DRY_RUN
-@click.pass_obj
-def config_case(
-    context: CGConfig, case_id: str, strandedness: str, genomes_base: Path, dry_run: bool
-) -> None:
-    """Create sample sheet file and params file for a given case."""
-    analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    LOG.info(f"Creating config files for {case_id}.")
-    try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.config_case(
-            case_id=case_id, strandedness=strandedness, genomes_base=genomes_base, dry_run=dry_run
-        )
-    except (CgError, ValidationError) as error:
-        LOG.error(f"Could not create config files for {case_id}: {error}")
-        raise click.Abort() from error
 
 
 @rnafusion.command("start")
@@ -81,7 +53,6 @@ def config_case(
 @OPTION_REVISION
 @OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
-@OPTION_REFERENCES
 @DRY_RUN
 @click.pass_context
 def start(
@@ -95,7 +66,6 @@ def start(
     revision: str,
     compute_env: str,
     use_nextflow: bool,
-    genomes_base: Path,
     dry_run: bool,
 ) -> None:
     """Start full workflow for CASE ID."""
@@ -103,7 +73,7 @@ def start(
 
     analysis_api: RnafusionAnalysisAPI = context.obj.meta_apis["analysis_api"]
     analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
-    context.invoke(config_case, case_id=case_id, genomes_base=genomes_base, dry_run=dry_run)
+    context.invoke(config_case, case_id=case_id, dry_run=dry_run)
     context.invoke(
         run,
         case_id=case_id,
