@@ -16,9 +16,7 @@ def test_get_status_summaries(summary_service: OrderSummaryService, order: Order
     assert summaries
 
 
-def test_in_preparation(
-    summary_service: OrderSummaryService, order_with_cases_in_lab: Order
-):
+def test_in_preparation(summary_service: OrderSummaryService, order_with_cases_in_lab: Order):
     # GIVEN an order with cases in preparation
     order_id: int = order_with_cases_in_lab.id
 
