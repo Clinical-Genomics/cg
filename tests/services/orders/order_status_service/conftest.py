@@ -30,7 +30,7 @@ def order(store: Store, helpers: StoreHelpers) -> Order:
 def sample_not_received(store: Store, helpers: StoreHelpers) -> Sample:
     return helpers.add_sample(
         store=store,
-        internal_id="in_prep",
+        internal_id="not_received",
         received_at=None,
         prepared_at=None,
         last_sequenced_at=None,
@@ -52,7 +52,7 @@ def sample_in_preparation(store: Store, helpers: StoreHelpers) -> Sample:
 def sample_in_sequencing(store: Store, helpers: StoreHelpers) -> Sample:
     return helpers.add_sample(
         store=store,
-        internal_id="in_prep",
+        internal_id="in_sequencing",
         received_at=datetime.now(),
         prepared_at=datetime.now(),
         last_sequenced_at=None,
@@ -60,27 +60,16 @@ def sample_in_sequencing(store: Store, helpers: StoreHelpers) -> Sample:
 
 
 @pytest.fixture
-def order_with_case_in_preparation(
-    store: Store, helpers: StoreHelpers, order: Order, sample_in_preparation: Sample
+def order_with_cases_in_lab(
+    store: Store,
+    helpers: StoreHelpers,
+    order: Order,
+    sample_in_preparation: Sample,
+    sample_in_sequencing: Sample,
+    sample_not_received: Sample,
 ) -> Order:
     case = helpers.ensure_case(store=store, customer=order.customer, order=order)
     helpers.add_relationship(store=store, sample=sample_in_preparation, case=case)
-    return order
-
-
-@pytest.fixture
-def order_with_case_not_received(
-    store: Store, helpers: StoreHelpers, order: Order, sample_not_received: Sample
-) -> Order:
-    case = helpers.ensure_case(store=store, customer=order.customer, order=order)
-    helpers.add_relationship(store=store, sample=sample_not_received, case=case)
-    return order
-
-
-@pytest.fixture
-def order_with_case_in_sequencing(
-    store: Store, helpers: StoreHelpers, order: Order, sample_in_sequencing: Sample
-) -> Order:
-    case = helpers.ensure_case(store=store, customer=order.customer, order=order)
     helpers.add_relationship(store=store, sample=sample_in_sequencing, case=case)
+    helpers.add_relationship(store=store, sample=sample_not_received, case=case)
     return order
