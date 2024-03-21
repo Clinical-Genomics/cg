@@ -37,23 +37,34 @@ def test_in_preparation(
     # WHEN creating a summary for the order
     summary: OrderSummary = summary_service.get_summary(order_id)
 
-    # THE summary should contain a number of cases in preparation
+    # THEN the summary should contain a number of cases in preparation
     assert summary.in_lab_preparation
 
 
-def test_in_sequencing():
-    # GIVEN an order with cases in sequencing
+def test_not_received(summary_service: OrderSummaryService, order_with_case_not_received: Order):
+    # GIVEN an order with cases not received
+    order_id: int = order_with_case_not_received.id
+    summary_service.analysis_client = Mock()
+    summary_service.analysis_client.get_summaries.return_value = [
+        AnalysisSummary(order_id=order_id)
+    ]
 
     # WHEN creating a summary for the order
+    summary: OrderSummary = summary_service.get_summary(order_id)
+
+    # THEN the summary should contain the number of cases not received
+    assert summary.not_received
+
+def test_in_sequencing(summary_service: OrderSummaryService, order_with_case_in_sequencing: Order):
+    # GIVEN an order with cases in sequencing
+    order_id: int = order_with_case_in_sequencing.id
+    summary_service.analysis_client = Mock()
+    summary_service.analysis_client.get_summaries.return_value = [
+        AnalysisSummary(order_id=order_id)
+    ]
+
+    # WHEN creating a summary for the order
+    summary: OrderSummary = summary_service.get_summary(order_id)
 
     # THE summary should contain the number of cases in sequencing
-    pass
-
-
-def test_not_rececved():
-    # GIVEN an order with cases not received
-
-    # WHEN creating a summary for the order
-
-    # THE summary should contain the number of cases not received
-    pass
+    assert summary.in_sequencing

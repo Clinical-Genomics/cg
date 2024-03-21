@@ -36,13 +36,45 @@ def analysis_summary(order: Order) -> AnalysisSummary:
 @pytest.fixture
 def order_with_case_in_preparation(store: Store, helpers: StoreHelpers) -> Order:
     customer: Customer = helpers.ensure_customer(store)
-    order: Order = helpers.add_order(store=store, customer_id=customer.id, ticket_id="ticket_id")
+    order: Order = helpers.add_order(store=store, customer_id=customer.id, ticket_id=1)
     case = helpers.ensure_case(store=store, customer=customer, order=order)
     sample = helpers.add_sample(
         store=store,
         internal_id="in_prep",
         received_at=datetime.now(),
         prepared_at=None,
+        last_sequenced_at=None,
+    )
+    helpers.add_relationship(store=store, sample=sample, case=case)
+    return order
+
+
+@pytest.fixture
+def order_with_case_not_received(store: Store, helpers: StoreHelpers) -> Order:
+    customer: Customer = helpers.ensure_customer(store)
+    order: Order = helpers.add_order(store=store, customer_id=customer.id, ticket_id=1)
+    case = helpers.ensure_case(store=store, customer=customer, order=order)
+    sample = helpers.add_sample(
+        store=store,
+        internal_id="not_received",
+        received_at=None,
+        prepared_at=None,
+        last_sequenced_at=None,
+    )
+    helpers.add_relationship(store=store, sample=sample, case=case)
+    return order
+
+
+@pytest.fixture
+def order_with_case_in_sequencing(store: Store, helpers: StoreHelpers) -> Order:
+    customer: Customer = helpers.ensure_customer(store)
+    order: Order = helpers.add_order(store=store, customer_id=customer.id, ticket_id=1)
+    case = helpers.ensure_case(store=store, customer=customer, order=order)
+    sample = helpers.add_sample(
+        store=store,
+        internal_id="in_sequencing",
+        received_at=datetime.now(),
+        prepared_at=datetime.now(),
         last_sequenced_at=None,
     )
     helpers.add_relationship(store=store, sample=sample, case=case)
