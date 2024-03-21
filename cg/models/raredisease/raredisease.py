@@ -1,11 +1,6 @@
-
 from pydantic import BaseModel
 from enum import StrEnum
 from cg.models.nf_analysis import NextflowSampleSheetEntry
-
-from pathlib import Path
-
-from pydantic.v1 import Field
 
 
 class RarediseaseQCMetrics(BaseModel):
