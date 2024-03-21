@@ -205,19 +205,23 @@ def get_not_received_cases(cases: Query, **kwargs) -> Query:
 
 
 def get_received_cases(cases: Query, **kwargs) -> Query:
-    return cases.filter(Sample.received_at != None).distinct()
+    all_samples_received_condition = not_(Case.links.any(Sample.received_at == None))
+    return cases.filter(all_samples_received_condition)
 
 
 def get_not_prepared_cases(cases: Query, **kwargs) -> Query:
-    return cases.filter(Sample.prepared_at == None).distinct()
+    no_samples_prepared_condition = not_(Case.links.any(Sample.prepared_at))
+    return cases.filter(no_samples_prepared_condition)
 
 
 def get_prepared_cases(cases: Query, **kwargs) -> Query:
-    return cases.filter(Sample.prepared_at != None).distinct()
+    all_samples_prepared_condition = not_(Case.links.any(Sample.prepared_at == None))
+    return cases.filter(all_samples_prepared_condition)
 
 
 def get_not_sequenced_cases(cases: Query, **kwargs) -> Query:
-    return cases.filter(Sample.last_sequenced_at == None).distinct()
+    no_samples_sequenced_condition = not_(Case.links.any(Sample.last_sequenced_at))
+    return cases.filter(no_samples_sequenced_condition)
 
 
 def filter_by_order(cases: Query, order_id: int, **kwargs) -> Query:
