@@ -28,7 +28,7 @@ def test_config_case_without_options(
     """Test config_case for workflow without options."""
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
-    # WHEN dry running without anything specified
+    # WHEN invoking the command without additional parameters
     result = cli_runner.invoke(workflow_cli, [workflow, "config-case"], obj=context)
 
     # THEN command should not exit successfully
@@ -42,7 +42,7 @@ def test_config_case_without_options(
     "workflow",
     [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
-def test_config_case_with_missing_case(
+def test_config_with_missing_case(
     cli_runner: CliRunner,
     caplog: LogCaptureFixture,
     case_id_does_not_exist: str,

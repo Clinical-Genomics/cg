@@ -1,7 +1,6 @@
 """CLI support to create config and/or start RNAFUSION."""
 
 import logging
-from pathlib import Path
 
 import click
 
@@ -21,7 +20,6 @@ from cg.cli.workflow.nf_analysis import (
     run,
     store_housekeeper,
 )
-from cg.cli.workflow.rnafusion.options import OPTION_REFERENCES
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, MetaApis
 from cg.exc import AnalysisNotReadyError, CgError

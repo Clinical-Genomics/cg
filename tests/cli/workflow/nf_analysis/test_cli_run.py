@@ -3,163 +3,145 @@
 import logging
 
 import pytest
+from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
-from cg.cli.workflow.raredisease.base import run
-from cg.cli.workflow.rnafusion.base import run
-from cg.cli.workflow.taxprofiler.base import run
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+from cg.cli.workflow.base import workflow as workflow_cli
+from cg.constants import EXIT_SUCCESS, Workflow
 from cg.models.cg_config import CGConfig
 
 
 @pytest.mark.parametrize(
-    "context", ["raredisease_context", "rnafusion_context", "taxprofiler_context"]
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
 )
-def test_without_options(cli_runner: CliRunner, context: CGConfig):
-    """Test command without case_id argument."""
+def test_run_without_options(cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest):
+    """Test run command for workflow without options."""
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
+
     # GIVEN no case id
-    # WHEN dry running without anything specified
-    result = cli_runner.invoke(run, obj=context)
-    # THEN command should NOT execute successfully
+
+    # WHEN invoking the command without additional parameters
+    result = cli_runner.invoke(workflow_cli, [workflow, "run"], obj=context)
+
+    # THEN command should not exit successfully
     assert result.exit_code != EXIT_SUCCESS
-    # THEN command should mention argument
+
+    # THEN command log should inform about missing arguments
     assert "Missing argument" in result.output
 
 
 @pytest.mark.parametrize(
-    "context", ["raredisease_context", "rnafusion_context", "taxprofiler_context"]
+    "workflow",
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
-def test_with_missing_case(
+def test_run_with_missing_case(
     cli_runner: CliRunner,
-    context: CGConfig,
+    workflow: Workflow,
     caplog: LogCaptureFixture,
     case_id_does_not_exist: str,
-    request,
+    request: FixtureRequest,
 ):
-    """Test command with invalid case to start with."""
+    """Test run command for workflow with a missing case."""
     caplog.set_level(logging.ERROR)
-    context = request.getfixturevalue(context)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
-    # GIVEN a case id not in database
+    # GIVEN a case not in the StatusDB database
     assert not context.status_db.get_case_by_internal_id(internal_id=case_id_does_not_exist)
+
     # WHEN running
-    result = cli_runner.invoke(run, [case_id_does_not_exist], obj=context)
-    # THEN command should NOT successfully call the command it creates
+    result = cli_runner.invoke(workflow_cli, [workflow, "run", case_id_does_not_exist], obj=context)
+
+    # THEN command should not exit successfully
     assert result.exit_code != EXIT_SUCCESS
-    # THEN ERROR log should be printed containing invalid case_id
+
+    # THEN the error log should indicate that the case is invalid
     assert case_id_does_not_exist in caplog.text
     assert "could not be found" in caplog.text
 
 
 @pytest.mark.parametrize(
-    "context", ["raredisease_context", "rnafusion_context", "taxprofiler_context"]
+    "workflow",
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
-def test_without_samples(
+def test_run_case_without_samples(
     cli_runner: CliRunner,
-    context: CGConfig,
+    workflow: Workflow,
     caplog: LogCaptureFixture,
     no_sample_case_id: str,
-    request,
+    request: FixtureRequest,
 ):
-    """Test command with case_id and no samples."""
+    """Test command with a case lacking linked samples."""
     caplog.set_level(logging.ERROR)
-    context = request.getfixturevalue(context)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
-    # GIVEN a case id
-    case_id: str = no_sample_case_id
-    # WHEN invoking the command with dry-run specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=context)
-    # THEN command should NOT execute successfully
+    # GIVEN a case without linked samples
+
+    # WHEN invoking the command
+    result = cli_runner.invoke(
+        workflow_cli, [workflow, "run", no_sample_case_id, "--dry-run"], obj=context
+    )
+
+    # THEN command should not exit successfully
     assert result.exit_code != EXIT_SUCCESS
-    # THEN warning should be printed that no config file is found
-    assert case_id in caplog.text
+
+    # THEN warning should be printed that no sample is found
+    assert no_sample_case_id in caplog.text
     assert "no samples" in caplog.text
 
 
 @pytest.mark.parametrize(
-    "context,case_id",
-    [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
-    ],
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
 )
-def test_without_config_dry_run(
+def test_run_case_without_config_files(
     cli_runner: CliRunner,
-    context: CGConfig,
+    workflow: Workflow,
     caplog: LogCaptureFixture,
-    case_id: str,
-    request,
-):
-    """Test command dry-run with case_id and no config file."""
-    caplog.set_level(logging.ERROR)
-    context = request.getfixturevalue(context)
-
-    # GIVEN a case id
-    case_id: str = request.getfixturevalue(case_id)
-
-    # WHEN invoking a command with dry-run specified
-    result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=context)
-    # THEN command should execute successfully (dry-run)
-    assert result.exit_code == EXIT_SUCCESS
-
-
-@pytest.mark.parametrize(
-    "context,case_id",
-    [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
-    ],
-)
-def test_without_config(
-    cli_runner: CliRunner,
-    context: CGConfig,
-    caplog: LogCaptureFixture,
-    case_id: str,
-    request,
+    request: FixtureRequest,
 ):
     """Test command with case_id and no config file."""
     caplog.set_level(logging.ERROR)
-    context = request.getfixturevalue(context)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
     # GIVEN a case id
-    case_id: str = request.getfixturevalue(case_id)
+    case_id: str = request.getfixturevalue(f"{workflow}_case_id")
+
     # WHEN invoking a run command
-    result = cli_runner.invoke(run, [case_id], obj=context)
-    # THEN command should NOT execute successfully
+    result = cli_runner.invoke(workflow_cli, [workflow, "run", case_id], obj=context)
+
+    # THEN command should not exit successfully
     assert result.exit_code != EXIT_SUCCESS
-    # THEN warning should be printed that no config file is found
+
+    # THEN the error log should indicate that the config file is missing
     assert "No config file found" in caplog.text
 
 
 @pytest.mark.parametrize(
-    "context,case_id",
-    [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
-    ],
+    "workflow",
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
-def test_with_config(
+def test_run_case_from_start_dry_run(
     cli_runner: CliRunner,
-    context: CGConfig,
+    workflow: Workflow,
     caplog: LogCaptureFixture,
-    case_id: str,
     mock_config,
-    request,
+    request: FixtureRequest,
 ):
-    """Test command with case_id and config file using tower."""
+    """Test dry-run for a case with existing config files."""
     caplog.set_level(logging.INFO)
-    context = request.getfixturevalue(context)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
     # GIVEN a case id
-    case_id: str = request.getfixturevalue(case_id)
-    # GIVEN a mocked config
+    case_id: str = request.getfixturevalue(f"{workflow}_case_id")
+
+    # GIVEN mocked config files
 
     # WHEN invoking a command with dry-run specified
-    result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=context)
+    result = cli_runner.invoke(
+        workflow_cli, [workflow, "run", case_id, "--from-start", "--dry-run"], obj=context
+    )
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -171,70 +153,66 @@ def test_with_config(
 
 
 @pytest.mark.parametrize(
-    "context,case_id",
-    [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
-    ],
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
 )
-def test_with_revision(
+def test_run_case_with_revision_dry_run(
     cli_runner: CliRunner,
-    context: CGConfig,
+    workflow: Workflow,
     caplog: LogCaptureFixture,
-    case_id: str,
     mock_config,
-    request,
+    request: FixtureRequest,
 ):
-    """Test command with case_id and config file using tower and specifying a revision."""
+    """Test dry-run for a case with existing config files with a given revision."""
     caplog.set_level(logging.INFO)
-    context = request.getfixturevalue(context)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
     # GIVEN a case id
-    case_id: str = request.getfixturevalue(case_id)
+    case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN a mocked config
 
-    # WHEN invoking a command with dry-run specified
+    # WHEN invoking a command with dry-run and revision specified
     result = cli_runner.invoke(
-        run, [case_id, "--dry-run", "--from-start", "--revision", "2.1.0"], obj=context
+        workflow_cli,
+        [workflow, "run", case_id, "--dry-run", "--from-start", "--revision", "2.1.0"],
+        obj=context,
     )
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN command should use tower
+    # THEN command should use the specified revision
     assert "--revision 2.1.0" in caplog.text
 
 
 @pytest.mark.parametrize(
-    "context,case_id",
-    [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
-    ],
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
 )
-def test_resume_with_id(
+def test_resume_case_dry_run(
     cli_runner: CliRunner,
-    context: CGConfig,
+    workflow: Workflow,
     caplog: LogCaptureFixture,
-    case_id: str,
     mock_config,
     tower_id,
-    request,
+    request: FixtureRequest,
 ):
-    """Test resume command given a NF-Tower run ID using Tower."""
+    """Test dry-run to resume a case with existing config fjles."""
     caplog.set_level(logging.INFO)
-    context = request.getfixturevalue(context)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
-    # GIVEN a case-id
-    case_id: str = request.getfixturevalue(case_id)
+    # GIVEN a case id
+    case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN a mocked config
 
-    # WHEN invoking a command with dry-run specified
-    result = cli_runner.invoke(run, [case_id, "--nf-tower-id", tower_id, "--dry-run"], obj=context)
+    # WHEN invoking a command with dry-run and nf-tower-id specified
+    result = cli_runner.invoke(
+        workflow_cli,
+        [workflow, "run", case_id, "--nf-tower-id", tower_id, "--dry-run"],
+        obj=context,
+    )
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -245,32 +223,27 @@ def test_resume_with_id(
 
 
 @pytest.mark.parametrize(
-    "context,case_id",
-    [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
-    ],
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
 )
-def test_resume_without_id_error(
+def test_resume_case_with_missing_tower_id(
     cli_runner: CliRunner,
-    context: CGConfig,
+    workflow: Workflow,
     caplog: LogCaptureFixture,
-    case_id: str,
     mock_config,
-    request,
+    request: FixtureRequest,
 ):
-    """Test resume command without providing NF-Tower ID and without existing Trailblazer Tower config file."""
+    """Test resume command without providing NF-Tower ID and without existing Trailblazer config file."""
     caplog.set_level(logging.INFO)
-    context = request.getfixturevalue(context)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
     # GIVEN a case id
-    case_id: str = request.getfixturevalue(case_id)
+    case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN a mocked config
 
     # WHEN invoking a command with dry-run specified
-    cli_runner.invoke(run, [case_id, "--dry-run"], obj=context)
+    cli_runner.invoke(workflow_cli, [workflow, "run", case_id, "--dry-run"], obj=context)
 
     # THEN command should raise error
     assert "Could not resume analysis: No NF-Tower ID found for case" in caplog.text
@@ -278,32 +251,29 @@ def test_resume_without_id_error(
 
 
 @pytest.mark.parametrize(
-    "context,case_id",
-    [
-        ("raredisease_context", "raredisease_case_id"),
-        ("rnafusion_context", "rnafusion_case_id"),
-        ("taxprofiler_context", "taxprofiler_case_id"),
-    ],
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
 )
-def test_with_config_use_nextflow(
+def test_resume_using_nextflow_dry_run(
     cli_runner: CliRunner,
-    context: CGConfig,
+    workflow: Workflow,
     caplog: LogCaptureFixture,
-    case_id: str,
     mock_config,
-    request,
+    request: FixtureRequest,
 ):
     """Test command with case_id and config file using nextflow."""
     caplog.set_level(logging.INFO)
-    context = request.getfixturevalue(context)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
     # GIVEN a case id
-    case_id: str = request.getfixturevalue(case_id)
+    case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN a mocked config
 
     # WHEN invoking a command with dry-run specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run", "--use-nextflow"], obj=context)
+    result = cli_runner.invoke(
+        workflow_cli, [workflow, "run", case_id, "--dry-run", "--use-nextflow"], obj=context
+    )
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
