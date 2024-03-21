@@ -6,7 +6,7 @@ from pathlib import Path
 from housekeeper.store.models import File, Version
 from pydantic.v1 import EmailStr, ValidationError
 
-from cg.constants import Workflow
+from cg.constants import Workflow, AnalysisType
 from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
@@ -464,6 +464,14 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
         }
+
+        (
+            config_case.update({"--exome": True})
+            if verified_panel_bed
+            and sample_data["application_type"] == AnalysisType.WHOLE_EXOME_SEQUENCING
+            else None
+        )
+
         config_case.update(self.get_verified_samples(case_id=case_id))
         config_case.update(self.get_parsed_observation_file_paths(observations))
         (
@@ -585,7 +593,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--swegen-sv": arguments.get("swegen_sv"),
                 "--tumor-sample-name": arguments.get("tumor_sample_name"),
                 "--umi-trim-length": arguments.get("umi_trim_length"),
-            }
+            },
+            exclude_true = True
         )
         parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
