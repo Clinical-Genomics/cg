@@ -535,9 +535,20 @@ def rsync_api(cg_context: CGConfig) -> RsyncAPI:
 
 
 @pytest.fixture
-def external_data_api(analysis_store, cg_context: CGConfig) -> ExternalDataAPI:
-    """ExternalDataAPI fixture."""
-    return ExternalDataAPI(config=cg_context)
+def real_cg_context(
+    context_config: dict, base_store: Store, real_housekeeper_api: HousekeeperAPI
+) -> CGConfig:
+    """Return a cg config."""
+    cg_config = CGConfig(**context_config)
+    cg_config.status_db_ = base_store
+    cg_config.housekeeper_api_ = real_housekeeper_api
+    return cg_config
+
+
+@pytest.fixture
+def external_data_api(analysis_store, real_cg_context: CGConfig) -> ExternalDataAPI:
+    """Return a external data api."""
+    return ExternalDataAPI(config=real_cg_context, dry_run=True)
 
 
 @pytest.fixture
@@ -1099,7 +1110,7 @@ def housekeeper_api(hk_config_dict: dict) -> MockHousekeeperAPI:
     return MockHousekeeperAPI(hk_config_dict)
 
 
-@pytest.fixture(name="real_housekeeper_api")
+@pytest.fixture
 def real_housekeeper_api(hk_config_dict: dict) -> Generator[HousekeeperAPI, None, None]:
     """Set up a real Housekeeper store."""
     _api = HousekeeperAPI(hk_config_dict)
@@ -1107,7 +1118,7 @@ def real_housekeeper_api(hk_config_dict: dict) -> Generator[HousekeeperAPI, None
     yield _api
 
 
-@pytest.fixture(name="populated_housekeeper_api")
+@pytest.fixture
 def populated_housekeeper_api(
     real_housekeeper_api: HousekeeperAPI,
     hk_bundle_data: dict,
@@ -2003,7 +2014,7 @@ def context_config(
     }
 
 
-@pytest.fixture(name="cg_context")
+@pytest.fixture
 def cg_context(
     context_config: dict, base_store: Store, housekeeper_api: MockHousekeeperAPI
 ) -> CGConfig:

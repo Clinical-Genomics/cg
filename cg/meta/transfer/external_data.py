@@ -17,24 +17,25 @@ LOG = logging.getLogger(__name__)
 
 
 class ExternalDataAPI(MetaAPI):
-    def __init__(self, config: CGConfig):
+    def __init__(self, config: CGConfig, dry_run: bool = False):
         super().__init__(config)
         self.destination_path: str = config.external.hasta
         self.source_path: str = config.external.caesar
         self.base_path: str = config.data_delivery.base_path
         self.account: str = config.data_delivery.account
         self.mail_user: str = config.data_delivery.mail_user
+        self.dry_run: bool = dry_run
         self.slurm_api: SlurmAPI = SlurmAPI()
         self.RSYNC_FILE_POSTFIX: str = "_rsync_external_data"
 
-    def create_log_dir(self, dry_run: bool, ticket: str) -> Path:
-        """Creates a directory for log file to be stored"""
+    def create_log_dir(self, ticket: str) -> Path:
+        """Creates a directory for log file to be stored."""
         timestamp: dt.datetime = dt.datetime.now()
         timestamp_str: str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
         folder_name: Path = Path("_".join([ticket, timestamp_str]))
         log_dir: Path = Path(self.base_path, folder_name)
         LOG.info(f"Creating folder: {log_dir}")
-        if dry_run:
+        if self.dry_run:
             LOG.info(f"Would have created path {log_dir}, but this is a dry run")
             return log_dir
         log_dir.mkdir(parents=True, exist_ok=False)
@@ -46,17 +47,17 @@ class ExternalDataAPI(MetaAPI):
         ticket: str,
         cust_sample_id: str | None = "",
     ) -> Path:
-        """Returns the path to where the sample files are fetched from"""
+        """Returns the path from where the sample files are fetched."""
         return Path(self.source_path % customer, ticket, cust_sample_id)
 
     def get_destination_path(self, customer: str, lims_sample_id: str | None = "") -> Path:
-        """Returns the path to where the files are to be transferred"""
+        """Returns the path to where the files are to be transferred."""
         return Path(self.destination_path % customer, lims_sample_id)
 
-    def transfer_sample_files_from_source(self, dry_run: bool, ticket: str) -> None:
-        """Transfers all sample files, related to given ticket, from source to destination"""
+    def transfer_sample_files_from_source(self, ticket: str) -> None:
+        """Transfers all sample files, related to given ticket, from source to destination."""
         cust: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
-        log_dir: Path = self.create_log_dir(ticket=ticket, dry_run=dry_run)
+        log_dir: Path = self.create_log_dir(ticket=ticket)
         error_function: str = ERROR_RSYNC_FUNCTION.format()
         Path(self.destination_path % cust).mkdir(exist_ok=True)
 
@@ -75,7 +76,7 @@ class ExternalDataAPI(MetaAPI):
             commands=command,
             error=error_function,
         )
-        self.slurm_api.set_dry_run(dry_run=dry_run)
+        self.slurm_api.set_dry_run(dry_run=self.dry_run)
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
             sbatch_parameters=sbatch_parameters
         )
@@ -88,7 +89,7 @@ class ExternalDataAPI(MetaAPI):
         )
 
     def get_all_fastq(self, sample_folder: Path) -> list[Path]:
-        """Returns a list of all fastq.gz files in given folder"""
+        """Returns a list of all fastq.gz files in given folder."""
         all_fastqs: list[Path] = []
         for leaf in sample_folder.glob("*fastq.gz"):
             abs_path: Path = sample_folder.joinpath(leaf)
@@ -97,7 +98,7 @@ class ExternalDataAPI(MetaAPI):
         return all_fastqs
 
     def get_all_paths(self, customer: str, lims_sample_id: str) -> list[Path]:
-        """Returns the paths of all fastq files associated to the sample"""
+        """Returns the paths of all fastq files associated to the sample."""
         fastq_folder: Path = self.get_destination_path(
             lims_sample_id=lims_sample_id, customer=customer
         )
@@ -105,14 +106,14 @@ class ExternalDataAPI(MetaAPI):
         return all_fastq_in_folder
 
     def check_fastq_md5sum(self, fastq_path) -> Path | None:
-        """Returns the path of the input file if it does not match its md5sum"""
+        """Returns the path of the input file if it does not match its md5sum."""
         if Path(str(fastq_path) + ".md5").exists():
             given_md5sum: str = extract_md5sum(md5sum_file=Path(str(fastq_path) + ".md5"))
             if not check_md5sum(file_path=fastq_path, md5sum=given_md5sum):
                 return fastq_path
 
     def get_available_samples(self, folder: Path, ticket: str) -> list[Sample]:
-        """Returns the samples from given ticket that are present in the provided folder"""
+        """Returns the samples from given ticket that are present in the provided folder."""
         available_folders: list[str] = [sample_path.parts[-1] for sample_path in folder.iterdir()]
         available_samples: list[Sample] = [
             sample
@@ -121,13 +122,16 @@ class ExternalDataAPI(MetaAPI):
         ]
         return available_samples
 
-    def add_files_to_bundles(
-        self, fastq_paths: list[Path], last_version: Version, lims_sample_id: str
-    ):
-        """Adds the given fastq files to the the hk-bundle"""
+    def add_and_include_files_to_bundles(self, fastq_paths: list[Path], lims_sample_id: str):
+        """Add the given fastq files to the the hk-bundle."""
+        if self.dry_run:
+            LOG.info("No changes will be committed since this is a dry-run")
+            return
         for path in fastq_paths:
             LOG.info(f"Adding path {path} to bundle {lims_sample_id} in housekeeper")
-            self.housekeeper_api.add_file(path=path, version_obj=last_version, tags=HK_FASTQ_TAGS)
+            self.housekeeper_api.add_and_include_file_to_latest_version(
+                bundle_name=lims_sample_id, file=path, tags=HK_FASTQ_TAGS
+            )
 
     def get_failed_fastq_paths(self, fastq_paths_to_add: list[Path]) -> list[Path]:
         failed_sum_paths: list[Path] = []
@@ -149,10 +153,13 @@ class ExternalDataAPI(MetaAPI):
         )
         return fastq_paths_to_add
 
-    def curate_sample_folder(self, cust_name: str, force: bool, sample_folder: Path) -> None:
-        """Changes the name of the folder to the internal_id. If force is true replaces any previous folder."""
+    def curate_sample_folder(self, customer_id: str, force: bool, sample_folder: Path) -> None:
+        """
+        Changes the name of the folder to the sample internal_id. If force is set to True,
+        replaces any previous folder.
+        """
         customer: Customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=cust_name
+            customer_internal_id=customer_id
         )
         customer_folder: Path = sample_folder.parent
         sample: Sample = self.status_db.get_sample_by_customer_and_name(
@@ -167,19 +174,18 @@ class ExternalDataAPI(MetaAPI):
                 f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
             )
 
-    def add_transfer_to_housekeeper(
-        self, ticket: str, dry_run: bool = False, force: bool = False
-    ) -> None:
-        """Creates sample bundles in housekeeper and adds the available files corresponding to the ticket to the
-        bundle"""
-        failed_paths: list[Path] = []
-        cust: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
-        destination_folder_path: Path = self.get_destination_path(customer=cust)
+    def add_transfer_to_housekeeper(self, ticket: str, force: bool = False) -> None:
+        """Add and include available ticket files to a Housekeeper bundle."""
+        customer_id: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
+        destination_folder_path: Path = self.get_destination_path(customer=customer_id)
         for sample_folder in destination_folder_path.iterdir():
-            self.curate_sample_folder(cust_name=cust, sample_folder=sample_folder, force=force)
+            self.curate_sample_folder(
+                customer_id=customer_id, sample_folder=sample_folder, force=force
+            )
         available_samples: list[Sample] = self.get_available_samples(
             folder=destination_folder_path, ticket=ticket
         )
+        failed_paths: list[Path] = []
         cases_to_start: list[dict] = []
         for sample in available_samples:
             cases_to_start.extend(
@@ -191,11 +197,10 @@ class ExternalDataAPI(MetaAPI):
                 bundle_name=sample.internal_id
             )
             fastq_paths_to_add: list[Path] = self.get_fastq_paths_to_add(
-                customer=cust, hk_version=last_version, lims_sample_id=sample.internal_id
+                customer=customer_id, hk_version=last_version, lims_sample_id=sample.internal_id
             )
-            self.add_files_to_bundles(
+            self.add_and_include_files_to_bundles(
                 fastq_paths=fastq_paths_to_add,
-                last_version=last_version,
                 lims_sample_id=sample.internal_id,
             )
             failed_paths.extend(self.get_failed_fastq_paths(fastq_paths_to_add=fastq_paths_to_add))
@@ -206,9 +211,8 @@ class ExternalDataAPI(MetaAPI):
             )
             LOG.info("Changes in housekeeper will not be committed and no cases will be added")
             return
-        if dry_run:
-            LOG.info("No changes will be committed since this is a dry-run")
-            return
-        self.housekeeper_api.commit()
-        for case in cases_to_start:
-            self.status_db.set_case_action(case_internal_id=case["internal_id"], action="analyze")
+        if not self.dry_run:
+            for case in cases_to_start:
+                self.status_db.set_case_action(
+                    case_internal_id=case["internal_id"], action="analyze"
+                )
