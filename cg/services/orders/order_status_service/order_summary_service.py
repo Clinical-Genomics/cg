@@ -25,7 +25,7 @@ class OrderSummaryService:
         summaries: list[CaseSummary] = []
 
         for order_id in order_ids:
-            not_received: int = self.store.get_not_received_case_count(order_id)
+            not_received: int = self.store.get_case_not_received_count(order_id)
             in_preparation: int = self.store.get_in_preparation_case_count(order_id)
             in_sequencing: int = self.store.get_in_sequencing_case_count(order_id)
 

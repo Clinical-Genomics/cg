@@ -1431,7 +1431,7 @@ class ReadHandler(BaseHandler):
         )
         return orders.first()
 
-    def get_not_received_case_count(self, order_id: int) -> int:
+    def get_case_not_received_count(self, order_id: int) -> int:
         filters: list[CaseFilter] = [CaseFilter.BY_ORDER, CaseFilter.NOT_RECEIVED]
         cases: Query = self._get_join_case_and_sample_query()
         return apply_case_filter(
