@@ -1,4 +1,5 @@
 from datetime import datetime
+from mock import Mock
 import pytest
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary
@@ -10,8 +11,11 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
-def summary_service(trailblazer_api: TrailblazerAPI, store: Store):
-    return OrderSummaryService(analysis_client=trailblazer_api, store=store)
+def summary_service(trailblazer_api: TrailblazerAPI, store: Store, order: Order):
+    service = OrderSummaryService(analysis_client=trailblazer_api, store=store)
+    service.analysis_client = Mock()
+    service.analysis_client.get_summaries.return_value = [AnalysisSummary(order_id=order.id)]
+    return service
 
 
 @pytest.fixture

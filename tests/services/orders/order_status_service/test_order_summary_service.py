@@ -26,13 +26,7 @@ def test_in_preparation(
     summary_service: OrderSummaryService, order_with_case_in_preparation: Order
 ):
     # GIVEN an order with cases in preparation
-
-    # GIVEN an analysis summary mock response
-    order_id: int = order_with_case_in_preparation.id
-    summary_service.analysis_client = Mock()
-    summary_service.analysis_client.get_summaries.return_value = [
-        AnalysisSummary(order_id=order_id)
-    ]
+    order_id = order_with_case_in_preparation.id
 
     # WHEN creating a summary for the order
     summary: OrderSummary = summary_service.get_summary(order_id)
@@ -44,10 +38,6 @@ def test_in_preparation(
 def test_not_received(summary_service: OrderSummaryService, order_with_case_not_received: Order):
     # GIVEN an order with cases not received
     order_id: int = order_with_case_not_received.id
-    summary_service.analysis_client = Mock()
-    summary_service.analysis_client.get_summaries.return_value = [
-        AnalysisSummary(order_id=order_id)
-    ]
 
     # WHEN creating a summary for the order
     summary: OrderSummary = summary_service.get_summary(order_id)
@@ -55,13 +45,10 @@ def test_not_received(summary_service: OrderSummaryService, order_with_case_not_
     # THEN the summary should contain the number of cases not received
     assert summary.not_received
 
+
 def test_in_sequencing(summary_service: OrderSummaryService, order_with_case_in_sequencing: Order):
     # GIVEN an order with cases in sequencing
     order_id: int = order_with_case_in_sequencing.id
-    summary_service.analysis_client = Mock()
-    summary_service.analysis_client.get_summaries.return_value = [
-        AnalysisSummary(order_id=order_id)
-    ]
 
     # WHEN creating a summary for the order
     summary: OrderSummary = summary_service.get_summary(order_id)
