@@ -523,9 +523,6 @@ class StoreHelpers:
         if order:
             order.cases = [case]
             case.order_id = order.id
-        store.session.add(case)
-        store.session.add(order)
-        store.session.commit()
         return case
 
     @staticmethod
