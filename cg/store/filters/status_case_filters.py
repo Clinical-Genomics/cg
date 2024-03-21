@@ -199,6 +199,7 @@ def filter_compressible_cases(cases: Query, **kwargs) -> Query:
     """Filter cases which are running."""
     return cases.filter(Case.is_compressible)
 
+
 def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
     """Order cases by created at."""
     return cases.order_by(Case.created_at.desc())
@@ -263,7 +264,6 @@ class CaseFilter(Enum):
     BY_INTERNAL_ID_SEARCH: Callable = filter_cases_by_internal_id_search
     BY_NAME: Callable = filter_cases_by_name
     BY_NAME_SEARCH: Callable = filter_cases_by_name_search
-    BY_ORDER: Callable = filter_by_order
     BY_WORKFLOW_SEARCH: Callable = filter_cases_by_workflow_search
     BY_PRIORITY: Callable = filter_cases_by_priority
     BY_TICKET: Callable = filter_cases_by_ticket_id

@@ -38,14 +38,14 @@ def get_not_prepared_cases(case_samples: Query, **kwargs) -> Query:
     return case_samples.filter(some_samples_not_prepared_condition).distinct()
 
 
-def get_prepared_cases(cases: Query, **kwargs) -> Query:
+def get_prepared_cases(case_samples: Query, **kwargs) -> Query:
     all_samples_prepared_condition = not_(Case.links.any(Sample.prepared_at == None))
-    return cases.filter(all_samples_prepared_condition).distinct()
+    return case_samples.filter(all_samples_prepared_condition).distinct()
 
 
-def get_not_sequenced_cases(cases: Query, **kwargs) -> Query:
+def get_not_sequenced_cases(case_samples: Query, **kwargs) -> Query:
     some_samples_not_sequenced_condition = Case.links.any(Sample.last_sequenced_at == None)
-    return cases.filter(some_samples_not_sequenced_condition).distinct()
+    return case_samples.filter(some_samples_not_sequenced_condition).distinct()
 
 
 def apply_case_sample_filter(
