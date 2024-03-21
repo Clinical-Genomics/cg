@@ -21,7 +21,6 @@ from tests.cli.workflow.balsamic.conftest import (
     fastq_file_l_2_r_2,
 )
 from tests.meta.compress.conftest import compress_api, real_crunchy_api
-from tests.meta.upload.scout.conftest import another_sample_id
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
 

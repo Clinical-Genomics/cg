@@ -174,7 +174,7 @@ class CleanFlowCellAPI:
                 files.extend(
                     self.hk_api.get_files_from_latest_version(
                         bundle_name=bundle_name, tags=[tag, self.flow_cell.id]
-                    ).all()
+                    )
                 )
             except HousekeeperBundleVersionMissingError:
                 continue

@@ -1,11 +1,8 @@
 """Module for Raredisease Analysis API."""
 
 import logging
-from typing import Any
 from pathlib import Path
 
-from cg.io.txt import concat_txt
-from cg.io.config import write_config_nextflow_style
 from cg.constants import GenePanelMasterList, Workflow
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.constants.gene_panel import GENOME_BUILD_37
@@ -16,6 +13,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.io.json import read_json
 from cg.models.fastq import FastqFileMeta
+from cg.models.nf_analysis import WorkflowParameters
 from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
@@ -53,37 +51,20 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.revision: str = config.raredisease.revision
         self.nextflow_binary_path: str = config.raredisease.binary_path
 
-    def write_config_case(
-        self,
-        case_id: str,
-        dry_run: bool,
-    ) -> None:
-        """Create a parameter (.config) files and a Nextflow sample sheet input for Raredisease analysis."""
-        self.create_case_directory(case_id=case_id, dry_run=dry_run)
-        sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
-        workflow_parameters: WorkflowParameters = self.get_workflow_parameters(case_id=case_id)
-        if dry_run:
-            LOG.info("Dry run: nextflow sample sheet and parameter file will not be written")
-            return
-        self.write_sample_sheet(
-            content=sample_sheet_content,
-            file_path=self.get_sample_sheet_path(case_id=case_id),
-            header=RarediseaseSampleSheetHeaders.headers(),
-        )
-        self.write_config_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
+    @property
+    def sample_sheet_headers(self) -> list[str]:
+        """Headers for sample sheet."""
+        return RarediseaseSampleSheetHeaders.list()
 
-    def get_sample_sheet_content_per_sample(
-        self, case: Case = "", case_sample: CaseSample = ""
-    ) -> list[list[str]]:
-        """Get sample sheet content per sample."""
-        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(
-            case_sample.sample
-        )
-        fastq_forward_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata, forward_read=True
-        )
-        fastq_reverse_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata, reverse_read=True
+    @property
+    def is_multiple_samples_allowed(self) -> bool:
+        """Return whether the analysis supports multiple samples to be linked to the case."""
+        return True
+
+    def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
+        """Collect and format information required to build a sample sheet for a single sample."""
+        fastq_forward_read_paths, fastq_reverse_read_paths = self.get_paired_read_paths(
+            sample=case_sample.sample
         )
         sample_sheet_entry = RarediseaseSampleSheetEntry(
             name=case_sample.sample.internal_id,
@@ -93,50 +74,16 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             phenotype=self.get_phenotype_code(case_sample.status),
             paternal_id=case_sample.get_paternal_sample_id,
             maternal_id=case_sample.get_maternal_sample_id,
-            case_id=case.internal_id,
+            case_id=case_sample.case.internal_id,
         )
         return sample_sheet_entry.reformat_sample_content
 
-    def get_sample_sheet_content(
-        self,
-        case_id: str,
-    ) -> list[list[Any]]:
-        """Return Raredisease nextflow sample sheet content for a case."""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_sheet_content = []
-        LOG.info("Getting sample sheet information")
-        LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
-        for link in case.links:
-            sample_sheet_content.extend(
-                self.get_sample_sheet_content_per_sample(case=case, case_sample=link)
-            )
-        return sample_sheet_content
-
     def get_workflow_parameters(self, case_id: str) -> WorkflowParameters:
         """Return parameters."""
-        LOG.info("Getting parameters information")
         return WorkflowParameters(
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
         )
-
-    def write_config_file(self, case_id: str, workflow_parameters: dict) -> None:
-        """Write params-file for analysis."""
-        LOG.debug("Writing parameters file")
-        config_files_list = [self.config_platform, self.config_params, self.config_resources]
-        extra_parameters_str = [
-            write_config_nextflow_style(workflow_parameters),
-            self.set_cluster_options(case_id=case_id),
-        ]
-        concat_txt(
-            file_paths=config_files_list,
-            target_file=self.get_nextflow_config_path(case_id=case_id),
-            str_content=extra_parameters_str,
-        )
-
-    def write_params_file(self, case_id: str, dry_run: bool = False) -> None:
-        if not dry_run:
-            self.get_params_file_path(case_id=case_id).touch()
 
     @staticmethod
     def get_phenotype_code(phenotype: str) -> int:

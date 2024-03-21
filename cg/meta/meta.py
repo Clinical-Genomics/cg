@@ -11,6 +11,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.compress import CompressAPI
+from cg.meta.delivery.delivery import DeliveryAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
@@ -48,3 +49,4 @@ class MetaAPI:
         self.status_db: Store = config.status_db
         self.scout_api: ScoutAPI = config.scout_api
         self.trailblazer_api: TrailblazerAPI = config.trailblazer_api
+        self.delivery_api: DeliveryAPI = config.delivery_api

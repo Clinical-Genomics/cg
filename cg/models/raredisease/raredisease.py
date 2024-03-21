@@ -1,6 +1,11 @@
+
 from pydantic import BaseModel
 from enum import StrEnum
 from cg.models.nf_analysis import NextflowSampleSheetEntry
+
+from pathlib import Path
+
+from pydantic.v1 import Field
 
 
 class RarediseaseQCMetrics(BaseModel):
@@ -58,5 +63,5 @@ class RarediseaseSampleSheetHeaders(StrEnum):
     case_id: str = "case_id"
 
     @classmethod
-    def headers(cls) -> list[str]:
+    def list(cls) -> list[str]:
         return list(map(lambda header: header.value, cls))

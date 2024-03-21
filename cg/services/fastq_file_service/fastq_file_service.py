@@ -11,6 +11,7 @@ LOG = logging.getLogger(__name__)
 
 
 class FastqFileService:
+
     def concatenate(
         self,
         fastq_directory: Path,

@@ -3,19 +3,16 @@
 import logging
 
 import click
-from pydantic.v1 import ValidationError
 
 from cg.cli.utils import echo_lines
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY, resolve_compression
-from cg.cli.workflow.nf_analysis import run
-from cg.constants.constants import DRY_RUN, MetaApis
-from cg.exc import CgError
+from cg.cli.workflow.nf_analysis import config_case, run
+from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.cli.workflow.nf_analysis import metrics_deliver
 from cg.exc import CgError
-
 
 LOG = logging.getLogger(__name__)
 
@@ -30,24 +27,8 @@ def raredisease(context: click.Context) -> None:
 
 raredisease.add_command(metrics_deliver)
 raredisease.add_command(resolve_compression)
+raredisease.add_command(config_case)
 raredisease.add_command(run)
-
-
-@raredisease.command("config-case")
-@ARGUMENT_CASE_ID
-@DRY_RUN
-@click.pass_obj
-def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Create sample sheet file and params file for a given case."""
-    analysis_api: RarediseaseAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    LOG.info(f"Creating config files for {case_id}.")
-    try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.write_config_case(case_id=case_id, dry_run=dry_run)
-        analysis_api.write_params_file(case_id=case_id, dry_run=dry_run)
-    except (CgError, ValidationError) as error:
-        LOG.error(f"Could not create config files for {case_id}: {error}")
-        raise click.Abort() from error
 
 
 @raredisease.command("panel")
