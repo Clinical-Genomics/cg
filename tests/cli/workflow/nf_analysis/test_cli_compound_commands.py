@@ -118,3 +118,74 @@ def test_store_fail(
 
     # THEN bundle exist status should be
     assert result_fail.exit_code != EXIT_SUCCESS
+
+
+@pytest.mark.parametrize(
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+)
+def test_store_available(
+    cli_runner: CliRunner,
+    workflow: Workflow,
+    real_housekeeper_api: HousekeeperAPI,
+    deliverables_template_content: list[dict],
+    request: FixtureRequest,
+    caplog: LogCaptureFixture,
+    mocker,
+):
+    """Test to ensure all parts of compound store-available command are executed given ideal conditions
+    Test that store-available picks up eligible cases and does not pick up ineligible ones."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN each fixture is being initialised
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
+    hermes_deliverables: dict = request.getfixturevalue(f"{workflow}_hermes_deliverables")
+    case_id: str = request.getfixturevalue(f"{workflow}_case_id")
+    request.getfixturevalue(f"{workflow}_mock_deliverable_dir")
+    request.getfixturevalue(f"{workflow}_mock_analysis_finish")
+
+    # GIVEN a mocked deliverables template
+    mocker.patch.object(
+        NfAnalysisAPI,
+        "get_deliverables_template_content",
+        return_value=deliverables_template_content,
+    )
+
+    # GIVEN that HermesAPI returns a deliverables output
+    mocker.patch.object(HermesApi, "convert_deliverables")
+    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
+
+    # GIVEN a mocked config
+
+    # Ensure case was successfully picked up by start-available and status set to running
+    result = cli_runner.invoke(
+        workflow_cli, [workflow, "start-available", "--dry-run"], obj=context
+    )
+    context.status_db.get_case_by_internal_id(case_id).action = "running"
+    context.status_db.session.commit()
+
+    # THEN command exits with 0
+    assert result.exit_code == EXIT_SUCCESS
+    assert case_id in caplog.text
+    assert context.status_db.get_case_by_internal_id(case_id).action == "running"
+
+    context.housekeeper_api_ = real_housekeeper_api
+    context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
+
+    # WHEN running command
+    result = cli_runner.invoke(workflow_cli, [workflow, "store-available"], obj=context)
+
+    # THEN command exits successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN case id with analysis_finish gets picked up
+    assert case_id in caplog.text
+
+    # THEN case has analyses
+    assert context.status_db.get_case_by_internal_id(case_id).analyses
+
+    # THEN bundle can be found in Housekeeper
+    assert context.housekeeper_api.bundle(case_id)
+
+    # THEN bundle added successfully and action set to None
+    assert context.status_db.get_case_by_internal_id(case_id).action is None
