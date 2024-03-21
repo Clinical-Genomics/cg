@@ -1440,7 +1440,7 @@ class ReadHandler(BaseHandler):
             order_id=order_id,
         ).count()
 
-    def get_in_preparation_case_count(self, order_id: int) -> int:
+    def get_case_in_preparation_count(self, order_id: int) -> int:
         filters: list[CaseFilter] = [
             CaseFilter.BY_ORDER,
             CaseFilter.RECEIVED,
@@ -1452,7 +1452,7 @@ class ReadHandler(BaseHandler):
             order_id=order_id,
         ).count()
 
-    def get_in_sequencing_case_count(self, order_id: int) -> int:
+    def get_case_in_sequencing_count(self, order_id: int) -> int:
         filters: list[CaseFilter] = [
             CaseFilter.BY_ORDER,
             CaseFilter.PREPARED,
