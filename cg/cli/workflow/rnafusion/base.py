@@ -13,6 +13,7 @@ from cg.cli.workflow.nf_analysis import (
     start,
     start_available,
     store_housekeeper,
+    store,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, MetaApis
@@ -38,38 +39,7 @@ rnafusion.add_command(start_available)
 rnafusion.add_command(metrics_deliver)
 rnafusion.add_command(report_deliver)
 rnafusion.add_command(store_housekeeper)
-
-
-@rnafusion.command("store")
-@ARGUMENT_CASE_ID
-@DRY_RUN
-@click.pass_context
-def store(context: click.Context, case_id: str, dry_run: bool) -> None:
-    """Generate deliverables files for a case and store in Housekeeper if they
-    pass QC metrics checks."""
-    analysis_api: RnafusionAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
-
-    is_latest_analysis_qc: bool = analysis_api.trailblazer_api.is_latest_analysis_qc(
-        case_id=case_id
-    )
-    if not is_latest_analysis_qc and not analysis_api.trailblazer_api.is_latest_analysis_completed(
-        case_id=case_id
-    ):
-        LOG.error(
-            "Case not stored. Trailblazer status must be either QC or COMPLETE to be able to store"
-        )
-        return
-
-    # Avoid storing a case without QC checks previously performed
-    if (
-        is_latest_analysis_qc
-        or not analysis_api.get_metrics_deliverables_path(case_id=case_id).exists()
-    ):
-        LOG.info(f"Generating metrics file and performing QC checks for {case_id}")
-        context.invoke(metrics_deliver, case_id=case_id, dry_run=dry_run)
-    LOG.info(f"Storing analysis for {case_id}")
-    context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
-    context.invoke(store_housekeeper, case_id=case_id, dry_run=dry_run)
+rnafusion.add_command(store)
 
 
 @rnafusion.command("store-available")

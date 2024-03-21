@@ -660,16 +660,28 @@ class NfAnalysisAPI(AnalysisAPI):
             raise CgError from error
         self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
 
-    def report_deliver(self, case_id: str) -> None:
+    def metrics_deliver(self, case_id: str, dry_run: bool):
+        """Create and validate a metrics deliverables file for given case id."""
+        self.status_db.verify_case_exists(case_internal_id=case_id)
+        self.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
+        self.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
+
+    def report_deliver(self, case_id: str, dry_run: bool) -> None:
         """Write deliverables file."""
-        workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
-        self.write_deliverables_file(
-            deliverables_content=workflow_content.dict(),
-            file_path=self.get_deliverables_file_path(case_id=case_id),
-        )
+
+        self.status_db.verify_case_exists(case_internal_id=case_id)
+        self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+        if not dry_run:
+            workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
+            self.write_deliverables_file(
+                deliverables_content=workflow_content.dict(),
+                file_path=self.get_deliverables_file_path(case_id=case_id),
+            )
         LOG.info(
             f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
         )
+
+        LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
 
     def store_analysis_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
         """Store a finished nextflow analysis in Housekeeper and StatusDB"""
@@ -693,3 +705,25 @@ class NfAnalysisAPI(AnalysisAPI):
             raise HousekeeperStoreError(
                 f"Could not store bundle in Housekeeper and StatusDB: {error}"
             )
+
+    def store(self, case_id: str, dry_run: bool):
+        """Generate deliverable files for a case and store in Housekeeper if they
+        pass QC metrics checks."""
+        is_latest_analysis_qc: bool = self.trailblazer_api.is_latest_analysis_qc(case_id=case_id)
+        if not is_latest_analysis_qc and not self.trailblazer_api.is_latest_analysis_completed(
+            case_id=case_id
+        ):
+            LOG.error(
+                "Case not stored. Trailblazer status must be either QC or COMPLETE to be able to store"
+            )
+            raise ValueError
+
+        if (
+            is_latest_analysis_qc
+            or not self.get_metrics_deliverables_path(case_id=case_id).exists()
+        ):
+            LOG.info(f"Generating metrics file and performing QC checks for {case_id}")
+            self.metrics_deliver(case_id=case_id, dry_run=dry_run)
+        LOG.info(f"Storing analysis for {case_id}")
+        self.report_deliver(case_id=case_id, dry_run=dry_run)
+        self.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run)
