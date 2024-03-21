@@ -102,7 +102,6 @@ def store_with_flow_cell_to_clean(
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
     )
-    flow_cell.samples = [sample]
     store.session.add(flow_cell)
     store.session.commit()
     return store
@@ -131,7 +130,6 @@ def store_with_flow_cell_not_to_clean(
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
     )
-    flow_cell.samples = [sample]
     store.session.add(flow_cell)
     store.session.commit()
     return store

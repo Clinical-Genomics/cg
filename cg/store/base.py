@@ -19,7 +19,14 @@ from cg.store.models import (
     ApplicationVersion,
 )
 from cg.store.models import Base as ModelBase
-from cg.store.models import Case, CaseSample, Customer, Flowcell, Sample
+from cg.store.models import (
+    Case,
+    CaseSample,
+    Customer,
+    Flowcell,
+    Sample,
+    SampleLaneSequencingMetrics,
+)
 from cg.utils.date import get_date_days_ago
 
 
@@ -69,7 +76,12 @@ class BaseHandler:
 
     def _get_join_flow_cell_sample_links_query(self) -> Query:
         """Return join flow cell samples and relationship query."""
-        return self._get_query(table=Flowcell).join(Flowcell.samples).join(Sample.links)
+        return (
+            self._get_query(table=Flowcell)
+            .join(Flowcell.sequencing_metrics)
+            .join(SampleLaneSequencingMetrics.sample)
+            .join(Sample.links)
+        )
 
     def _get_join_sample_family_query(self) -> Query:
         """Return a join sample case relationship query."""

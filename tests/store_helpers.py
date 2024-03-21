@@ -399,15 +399,20 @@ class StoreHelpers:
         sample.customer = customer
         sample.ordered_at = datetime.now()
 
+        store.session.add(sample)
+        store.session.commit()
         for key, value in kwargs.items():
             if key == "flowcell":
-                sample.flow_cells.append(kwargs["flowcell"])
+                StoreHelpers.add_sample_lane_sequencing_metrics(
+                    store=store,
+                    sample_internal_id=sample.internal_id,
+                    flow_cell_name=getattr(kwargs["flowcell"], "name"),
+                )
             elif hasattr(sample, key):
                 setattr(sample, key, value)
             else:
                 raise AttributeError(f"Unknown sample attribute/feature: {key}, {value}")
 
-        store.session.add(sample)
         store.session.commit()
         return sample
 
@@ -685,12 +690,19 @@ class StoreHelpers:
             has_backup=has_backup,
         )
         flow_cell.archived_at = archived_at
-        if samples:
-            flow_cell.samples = samples
         if status:
             flow_cell.status = status
 
         store.session.add(flow_cell)
+        store.session.commit()
+
+        if samples:
+            for sample in samples:
+                StoreHelpers.add_sample_lane_sequencing_metrics(
+                    sample_internal_id=sample.internal_id,
+                    flow_cell_name=flow_cell.name,
+                    store=store,
+                )
         store.session.commit()
         return flow_cell
 
