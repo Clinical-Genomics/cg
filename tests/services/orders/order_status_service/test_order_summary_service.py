@@ -5,15 +5,9 @@ from cg.services.orders.order_status_service.dto.order_summary import OrderSumma
 from cg.store.models import Order
 
 
-def test_get_status_summaries(
-    summary_service: OrderSummaryService, order: Order, analysis_summary: AnalysisSummary
-):
+def test_get_status_summaries(summary_service: OrderSummaryService, order: Order):
 
     # GIVEN a store with orders
-
-    # GIVEN that the analysis client returns analysis summaries for the order
-    summary_service.analysis_client = Mock()
-    summary_service.analysis_client.get_summaries.return_value = [analysis_summary]
 
     # WHEN getting status summaries
     summaries: list[OrderSummary] = summary_service.get_summaries([order.id])
@@ -26,7 +20,7 @@ def test_in_preparation(
     summary_service: OrderSummaryService, order_with_case_in_preparation: Order
 ):
     # GIVEN an order with cases in preparation
-    order_id = order_with_case_in_preparation.id
+    order_id: int = order_with_case_in_preparation.id
 
     # WHEN creating a summary for the order
     summary: OrderSummary = summary_service.get_summary(order_id)

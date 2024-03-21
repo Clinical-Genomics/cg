@@ -27,18 +27,6 @@ def order(store: Store, helpers: StoreHelpers) -> Order:
 
 
 @pytest.fixture
-def analysis_summary(order: Order) -> AnalysisSummary:
-    return AnalysisSummary(
-        order_id=order.id,
-        analysis_id=1,
-        delivered=2,
-        running=3,
-        cancelled=4,
-        failed=5,
-    )
-
-
-@pytest.fixture
 def sample_not_received(store: Store, helpers: StoreHelpers) -> Sample:
     return helpers.add_sample(
         store=store,
