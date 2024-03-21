@@ -970,6 +970,3 @@ class StoreHelpers:
                 sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
                 sample_base_mean_quality_score=sample_base_mean_quality_score,
             )
-
-    def associate_case_with_order(store: Store, case: Case, order: Order):
-        pass

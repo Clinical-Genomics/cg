@@ -4,7 +4,7 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary
 
 from cg.services.orders.order_status_service.order_summary_service import OrderSummaryService
-from cg.store.models import Customer, Order, Sample
+from cg.store.models import Customer, Order
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -38,7 +38,7 @@ def order_with_case_in_preparation(store: Store, helpers: StoreHelpers) -> Order
     customer: Customer = helpers.ensure_customer(store)
     order: Order = helpers.add_order(store=store, customer_id=customer.id, ticket_id="ticket_id")
     helpers.ensure_case(store=store, customer=customer, order=order)
-    sample = helpers.add_sample(
+    helpers.add_sample(
         store=store,
         internal_id="in_prep",
         received_at=datetime.now(),
