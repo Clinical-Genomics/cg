@@ -8,7 +8,6 @@ from cg import resources
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat, Strandedness
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
-from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
 from cg.exc import MissingMetrics
 from cg.io.controller import ReadFile
 from cg.io.json import read_json
@@ -21,7 +20,8 @@ from cg.models.rnafusion.rnafusion import (
     RnafusionParameters,
     RnafusionSampleSheetEntry,
 )
-from cg.store.models import Case, Sample
+from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
+from cg.store.models import Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -51,10 +51,19 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.nextflow_binary_path: str = config.rnafusion.binary_path
 
     @property
-    def use_read_count_threshold(self) -> bool:
-        """Defines whether the threshold for adequate read count should be passed for all samples
-        when determining if the analysis for a case should be automatically started."""
-        return True
+    def sample_sheet_headers(self) -> list[str]:
+        """Headers for sample sheet."""
+        return RnafusionSampleSheetEntry.headers()
+
+    @property
+    def is_params_appended_to_nextflow_config(self) -> bool:
+        """Return True if parameters should be added into the nextflow config file instead of the params file."""
+        return False
+
+    @property
+    def is_multiple_samples_allowed(self) -> bool:
+        """Return whether the analysis supports multiple samples to be linked to the case."""
+        return False
 
     def get_deliverables_template_content(self) -> list[dict]:
         """Return deliverables file template content."""
@@ -63,7 +72,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             file_path=self.get_bundle_filenames_path(),
         )
 
-    def get_nextflow_config_content(self) -> str:
+    def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
         return MULTIQC_NEXFLOW_CONFIG
 
@@ -72,45 +81,23 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Return Rnafusion bundle filenames path."""
         return RNAFUSION_BUNDLE_FILENAMES_PATH
 
-    def get_sample_sheet_content_per_sample(
-        self, sample: Sample, case_id: str, strandedness: Strandedness
-    ) -> list[list[str]]:
-        """Get sample sheet content per sample."""
-        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
-        fastq_forward_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata, forward_read=True
+    def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
+        """Collect and format information required to build a sample sheet for a single sample."""
+        fastq_forward_read_paths, fastq_reverse_read_paths = self.get_paired_read_paths(
+            sample=case_sample.sample
         )
-        fastq_reverse_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata, reverse_read=True
-        )
-
         sample_sheet_entry = RnafusionSampleSheetEntry(
-            name=case_id,
+            name=case_sample.case.internal_id,
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
-            strandedness=strandedness,
+            strandedness=Strandedness.REVERSE,
         )
         return sample_sheet_entry.reformat_sample_content()
-
-    def get_sample_sheet_content(self, case_id: str, strandedness: Strandedness) -> list[list[Any]]:
-        """Returns content for sample sheet."""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        if len(case.links) != 1:
-            raise NotImplementedError(
-                "Case objects are assumed to be related to a single sample (one link)"
-            )
-        LOG.debug("Getting sample sheet information")
-        for link in case.links:
-            content_per_sample = self.get_sample_sheet_content_per_sample(
-                sample=link.sample, case_id=case_id, strandedness=strandedness
-            )
-            return content_per_sample
 
     def get_workflow_parameters(
         self, case_id: str, genomes_base: Path | None = None
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
-        LOG.debug("Getting parameters information")
         return RnafusionParameters(
             cluster_options=f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
             genomes_base=genomes_base or self.get_references_path(),
@@ -123,32 +110,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         if genomes_base:
             return genomes_base.absolute()
         return Path(self.references).absolute()
-
-    def config_case(
-        self,
-        case_id: str,
-        strandedness: Strandedness,
-        genomes_base: Path,
-        dry_run: bool,
-    ) -> None:
-        """Create config files (parameters and sample sheet) for Rnafusion analysis."""
-        self.create_case_directory(case_id=case_id, dry_run=dry_run)
-        sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(
-            case_id=case_id, strandedness=strandedness
-        )
-        workflow_parameters: RnafusionParameters = self.get_workflow_parameters(
-            case_id=case_id, genomes_base=genomes_base
-        )
-        if dry_run:
-            LOG.info("Dry run: Config files will not be written")
-            return
-        self.write_sample_sheet(
-            content=sample_sheet_content,
-            file_path=self.get_sample_sheet_path(case_id=case_id),
-            header=RnafusionSampleSheetEntry.headers(),
-        )
-        self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters.dict())
-        self.write_nextflow_config(case_id=case_id)
 
     def parse_multiqc_json_for_case(self, case_id: str) -> dict:
         """Parse a multiqc_data.json file and returns a dictionary with metric name and metric values for a case."""

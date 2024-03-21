@@ -3,7 +3,6 @@
 import logging
 
 import click
-from pydantic.v1 import ValidationError
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
@@ -16,22 +15,19 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_TOWER_RUN_ID,
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
+    config_case,
     metrics_deliver,
     report_deliver,
     run,
     store_housekeeper,
-)
-from cg.cli.workflow.taxprofiler.options import (
-    OPTION_INSTRUMENT_PLATFORM,
+    store,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, MetaApis
-from cg.constants.sequencing import SequencingPlatform
-from cg.exc import CgError, DecompressionNeededError
+from cg.exc import DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
-
 
 LOG = logging.getLogger(__name__)
 
@@ -45,31 +41,12 @@ def taxprofiler(context: click.Context) -> None:
 
 
 taxprofiler.add_command(resolve_compression)
+taxprofiler.add_command(config_case)
 taxprofiler.add_command(metrics_deliver)
 taxprofiler.add_command(report_deliver)
 taxprofiler.add_command(run)
 taxprofiler.add_command(store_housekeeper)
-
-
-@taxprofiler.command("config-case")
-@ARGUMENT_CASE_ID
-@OPTION_INSTRUMENT_PLATFORM
-@DRY_RUN
-@click.pass_obj
-def config_case(
-    context: CGConfig, case_id: str, instrument_platform: SequencingPlatform, dry_run: bool
-) -> None:
-    """Create sample sheet and parameter file for Taxprofiler analysis for a given case."""
-    analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.config_case(
-            case_id=case_id, instrument_platform=instrument_platform, dry_run=dry_run
-        )
-
-    except (CgError, ValidationError) as error:
-        LOG.error(f"Could not create config files for {case_id}: {error}")
-        raise click.Abort() from error
+taxprofiler.add_command(store)
 
 
 @taxprofiler.command("start")
