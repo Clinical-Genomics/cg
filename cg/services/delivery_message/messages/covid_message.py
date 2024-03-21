@@ -13,7 +13,7 @@ class CovidMessage(DeliveryMessage):
         return (
             f"Hello,\n\n"
             f"The analysis is now complete.\n\n"
-            f"The result files are being uploaded on caesar at:\n\n"
+            f"The result files are being uploaded to Caesar at:\n\n"
             f"{delivery_path}\n\n"
             f"and the .csv files with pangolin-type have been sent to\n\n"
             f"{pangolin_delivery_path}"
