@@ -11,11 +11,13 @@ from pydantic import ValidationInfo
 from cg.constants import NA_FIELD, NO_FIELD, REPORT_GENDER, YES_FIELD, Workflow
 from cg.constants.constants import AnalysisType
 from cg.constants.subject import Sex
+from cg.models.delivery.delivery import DeliveryFile
 from cg.models.orders.constants import OrderType
 from cg.models.report.validators import (
     get_analysis_type_as_string,
     get_boolean_as_string,
     get_date_as_string,
+    get_delivered_files_as_file_names,
     get_float_as_percentage,
     get_float_as_string,
     get_gender_as_string,
@@ -136,6 +138,21 @@ def test_get_list_as_string():
 
     # THEN check if the input values were formatted correctly
     assert validated_list == "I am, a, list"
+
+
+def test_get_list_paths_as_strings(filled_file: Path):
+    """Test file path name extraction from a list."""
+
+    # GIVEN a list of delivery files
+    path_list: list[DeliveryFile] = [
+        DeliveryFile(source_path=filled_file, destination_path=filled_file)
+    ]
+
+    # WHEN validating the provided list of delivery paths
+    path_name_list: list[str] = get_delivered_files_as_file_names(path_list)
+
+    # THEN the returned list should contain the file names
+    assert path_name_list.pop() == "a_file.txt"
 
 
 def test_get_path_as_string(filled_file: Path):
