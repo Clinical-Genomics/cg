@@ -160,7 +160,7 @@ def test_store_available(
 
     # GIVEN a mocked config
 
-    # Ensure case was successfully picked up by start-available and status set to running
+    # Ensure that a case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(
         workflow_cli, [workflow, "start-available", "--dry-run"], obj=context
     )
