@@ -221,12 +221,12 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
     exit_code: int = EXIT_SUCCESS
 
-    for case_obj in set([*analysis_api.get_cases_to_qc(), *analysis_api.get_cases_to_store()]):
-        LOG.info(f"Storing deliverables for {case_obj.internal_id}")
+    for case in set([*analysis_api.get_cases_to_qc(), *analysis_api.get_cases_to_store()]):
+        LOG.info(f"Storing deliverables for {case.internal_id}")
         try:
-            analysis_api.store(case_id=case_obj.internal_id, dry_run=dry_run)
+            analysis_api.store(case_id=case.internal_id, dry_run=dry_run)
         except Exception as error:
-            LOG.error(f"Error storing {case_obj.internal_id}: {error}")
+            LOG.error(f"Error storing {case.internal_id}: {error}")
             exit_code: int = EXIT_FAIL
     if exit_code:
         raise click.Abort
