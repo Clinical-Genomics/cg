@@ -1,9 +1,13 @@
 """Delivery report constants."""
 
+from pathlib import Path
+
 from cg.constants import DataDelivery
 from cg.constants.constants import Workflow
 
 DELIVERY_REPORT_FILE_NAME: str = "delivery-report.html"
+
+SWEDAC_LOGO_PATH = Path("cg", "meta", "report", "templates", "static", "images", "SWEDAC_LOGO.png")
 
 BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]
 

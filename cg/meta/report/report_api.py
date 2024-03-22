@@ -9,7 +9,7 @@ from housekeeper.store.models import File, Version
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sqlalchemy.orm import Query
 
-from cg.constants import DELIVERY_REPORT_FILE_NAME, Workflow
+from cg.constants import DELIVERY_REPORT_FILE_NAME, SWEDAC_LOGO_PATH, Workflow
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.exc import DeliveryReportError
@@ -19,6 +19,7 @@ from cg.meta.report.field_validators import (
     get_empty_report_data,
     get_missing_report_data,
 )
+from cg.meta.report.utils import get_base64_from_png
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
@@ -117,12 +118,15 @@ class ReportAPI(MetaAPI):
             return None
         return uploaded_file.full_path
 
-    def render_delivery_report(self, report_data: dict) -> str:
+    @staticmethod
+    def render_delivery_report(report_data: dict) -> str:
         """Renders the report on the Jinja template."""
-        env: Environment = Environment(
+        env = Environment(
             loader=PackageLoader("cg", "meta/report/templates"),
             autoescape=select_autoescape(["html", "xml"]),
         )
+        env.globals["get_base64_from_png"] = get_base64_from_png
+        env.globals["swedac_logo_path"] = SWEDAC_LOGO_PATH
         template: Template = env.get_template(name=DELIVERY_REPORT_FILE_NAME)
         return template.render(**report_data)
 
