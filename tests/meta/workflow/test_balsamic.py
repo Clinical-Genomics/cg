@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from cg.constants.constants import AnalysisType
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Sex
@@ -12,10 +13,6 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 
-def test_get_verified_application_type():
-
-    # GIVEN a sample object
-    pass
 
 def test_get_verified_sex():
     """Test sex extraction from a sample dictionary."""

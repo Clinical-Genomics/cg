@@ -279,21 +279,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve a valid sex from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
-    @staticmethod
-    def get_verified_application_type(sample_data: dict) -> str:
-        """Returns the application type for the samples in the case."""
-        application_types = [sample_data[sample_id]["application_type"] for sample_id in sample_data]
 
-        if len(set(application_types)) == 1:
-            return application_types[0]
-        else:
-            error_message = f"All linked samples in the case need to have the same application type: {application_types}"
-            LOG.error(error_message)
-            raise BalsamicStartError(error_message)
-
-    @staticmethod
-    def get_exome_argument_if_exome_sample(application_type: AnalysisType) -> bool:
+    def get_exome_argument_if_exome_sample(self, case_id: str) -> bool:
         """Returns the exome argument if the application type in sample_data is wes."""
+        application_type = self.get_case_application_type(case_id)
         if application_type == AnalysisType.WHOLE_EXOME_SEQUENCING:
             return True
 
@@ -474,9 +463,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         verified_sex: Sex = sex or self.get_verified_sex(sample_data=sample_data)
 
-        verified_application_type = self.get_verified_application_type(sample_data=sample_data)
-
-        verified_exome_argument: Optional[bool] = self.get_exome_argument_if_exome_sample(application_type=verified_application_type)
+        verified_exome_argument: Optional[bool] = self.get_exome_argument_if_exome_sample(case_id=case_id)
 
         config_case: dict[str, str] = {
             "case_id": case_id,
