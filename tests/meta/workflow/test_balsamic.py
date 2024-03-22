@@ -13,7 +13,6 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 
-
 def test_get_verified_sex():
     """Test sex extraction from a sample dictionary."""
 
