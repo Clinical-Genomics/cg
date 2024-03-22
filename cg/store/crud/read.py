@@ -1446,7 +1446,8 @@ class ReadHandler(BaseHandler):
     def get_case_in_preparation_count(self, order_id: int) -> int:
         filters: list[CaseFilter] = [
             CaseSampleFilter.BY_ORDER,
-            CaseSampleFilter.CASES_WITH_SAMPLES_RECEIVED,
+            CaseSampleFilter.CASES_WITH_ALL_SAMPLES_RECEIVED,
+            CaseSampleFilter.CASES_WITH_SAMPLES_NOT_PREPARED,
         ]
         case_samples: Query = self._get_join_case_and_sample_query()
         return apply_case_sample_filter(
@@ -1458,7 +1459,8 @@ class ReadHandler(BaseHandler):
     def get_case_in_sequencing_count(self, order_id: int) -> int:
         filters: list[CaseSampleFilter] = [
             CaseSampleFilter.BY_ORDER,
-            CaseSampleFilter.CASES_WITH_SAMPLES_RECEIVED,
+            CaseSampleFilter.CASES_WITH_ALL_SAMPLES_RECEIVED,
+            CaseSampleFilter.CASES_WITH_ALL_SAMPLES_PREPARED,
             CaseSampleFilter.CASES_WITH_SAMPLES_NOT_SEQUENCED,
         ]
         case_samples: Query = self._get_join_case_and_sample_query()

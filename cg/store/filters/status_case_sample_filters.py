@@ -75,8 +75,8 @@ class CaseSampleFilter(Enum):
     SAMPLES_IN_CASE_BY_INTERNAL_ID: Callable = filter_samples_in_case_by_internal_id
     CASES_WITH_SAMPLE_BY_INTERNAL_ID: Callable = filter_cases_with_sample_by_internal_id
     CASES_WITH_SAMPLES_NOT_RECEIVED: Callable = get_not_received_cases
-    CASES_WITH_SAMPLES_RECEIVED: Callable = get_received_cases
+    CASES_WITH_ALL_SAMPLES_RECEIVED: Callable = get_received_cases
     CASES_WITH_SAMPLES_NOT_PREPARED: Callable = get_not_prepared_cases
-    CASES_WITH_SAMPLES_PREPARED: Callable = get_prepared_cases
+    CASES_WITH_ALL_SAMPLES_PREPARED: Callable = get_prepared_cases
     CASES_WITH_SAMPLES_NOT_SEQUENCED: Callable = get_not_sequenced_cases
     BY_ORDER: Callable = filter_by_order
