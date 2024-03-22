@@ -399,20 +399,22 @@ class StoreHelpers:
         sample.customer = customer
         sample.ordered_at = datetime.now()
 
-        store.session.add(sample)
-        store.session.commit()
         for key, value in kwargs.items():
             if key == "flowcell":
-                StoreHelpers.add_sample_lane_sequencing_metrics(
-                    store=store,
+                flow_cell: Flowcell = kwargs["flowcell"]
+                metric: SampleLaneSequencingMetrics = store.add_sample_lane_sequencing_metrics(
                     sample_internal_id=sample.internal_id,
-                    flow_cell_name=getattr(kwargs["flowcell"], "name"),
+                    flow_cell_name=flow_cell.name,
+                    **kwargs,
                 )
+                store.session.add(metric)
+
             elif hasattr(sample, key):
                 setattr(sample, key, value)
             else:
                 raise AttributeError(f"Unknown sample attribute/feature: {key}, {value}")
 
+        store.session.add(sample)
         store.session.commit()
         return sample
 
@@ -698,7 +700,7 @@ class StoreHelpers:
 
         if samples:
             for sample in samples:
-                StoreHelpers.add_sample_lane_sequencing_metrics(
+                StoreHelpers.ensure_sample_lane_sequencing_metrics(
                     sample_internal_id=sample.internal_id,
                     flow_cell_name=flow_cell.name,
                     store=store,
@@ -927,12 +929,16 @@ class StoreHelpers:
         return case
 
     @classmethod
-    def add_sample_lane_sequencing_metrics(
+    def ensure_sample_lane_sequencing_metrics(
         cls,
         store: Store,
         sample_internal_id: str,
         flow_cell_name: str,
         customer_id: str = "some_customer_007",
+        sample_total_reads_in_lane: int = 500_000_000,
+        sample_base_percentage_passing_q30: int = 90,
+        sample_base_mean_quality_score: int = 35,
+        created_at: datetime = datetime.now(),
         **kwargs,
     ):
         """Helper function to add a sample lane sequencing metrics associated with a sample with the given ids."""
@@ -949,6 +955,10 @@ class StoreHelpers:
         metrics: SampleLaneSequencingMetrics = store.add_sample_lane_sequencing_metrics(
             sample_internal_id=sample.internal_id,
             flow_cell_name=flow_cell.name,
+            sample_total_reads_in_lane=sample_total_reads_in_lane,
+            sample_base_percentage_passing_q30=sample_base_percentage_passing_q30,
+            sample_base_mean_quality_score=sample_base_mean_quality_score,
+            created_at=created_at,
             **kwargs,
         )
         metrics.sample = sample
@@ -969,7 +979,7 @@ class StoreHelpers:
             sample_base_percentage_passing_q30,
             sample_base_mean_quality_score,
         ) in metrics_data:
-            cls.add_sample_lane_sequencing_metrics(
+            cls.ensure_sample_lane_sequencing_metrics(
                 store=store,
                 sample_internal_id=sample_internal_id,
                 flow_cell_name=flow_cell_name_,

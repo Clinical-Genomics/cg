@@ -829,7 +829,7 @@ class Sample(Base, PriorityMixin):
     @property
     def flow_cells(self) -> list[Flowcell]:
         """Return the flow cells a sample has been sequenced on."""
-        return list({metric.flow_cell for metric in self.sequencing_metrics})
+        return list({metric.flowcell for metric in self.sequencing_metrics})
 
     @property
     def sequencing_qc(self) -> bool:
