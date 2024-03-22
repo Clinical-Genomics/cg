@@ -215,7 +215,7 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
 @OPTION_DRY
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool) -> None:
-    """Store bundles for all finished nf-analyses in Housekeeper."""
+    """Store cases that are ready to be stored. The condition to be store: cases that are set as running  in StatusDB and as completed or qc in Trailblazer."""
 
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
 
