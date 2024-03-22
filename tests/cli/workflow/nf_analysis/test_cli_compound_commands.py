@@ -146,6 +146,8 @@ def test_store_available(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     request.getfixturevalue(f"{workflow}_mock_deliverable_dir")
     request.getfixturevalue(f"{workflow}_mock_analysis_finish")
+    context.housekeeper_api_ = real_housekeeper_api
+    context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # GIVEN a mocked deliverables template
     mocker.patch.object(
@@ -171,9 +173,6 @@ def test_store_available(
     assert result.exit_code == EXIT_SUCCESS
     assert case_id in caplog.text
     assert context.status_db.get_case_by_internal_id(case_id).action == "running"
-
-    context.housekeeper_api_ = real_housekeeper_api
-    context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # WHEN running command
     result = cli_runner.invoke(workflow_cli, [workflow, "store-available"], obj=context)
