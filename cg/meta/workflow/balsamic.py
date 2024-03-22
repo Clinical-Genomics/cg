@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import Optional
 
 from housekeeper.store.models import File, Version
 from pydantic.v1 import EmailStr, ValidationError
@@ -278,6 +279,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve a valid sex from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
+    @staticmethod
+    def get_exome_argument_if_exome_sample(sample_data: dict) -> str:
+        """Returns the exome argument if the application type in sample_data is wes."""
+        if sample_data["application_type"] == AnalysisType.WHOLE_EXOME_SEQUENCING:
+            return True
+
+
     def get_verified_samples(self, case_id: str) -> dict[str, str]:
         """Return a verified tumor and normal sample dictionary."""
         tumor_samples: list[Sample] = self.status_db.get_samples_by_type(
@@ -454,6 +462,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         verified_sex: Sex = sex or self.get_verified_sex(sample_data=sample_data)
 
+        verified_exome_argument: Optional[bool] = self.get_exome_argument_if_exome_sample(sample_data=sample_data)
+
         config_case: dict[str, str] = {
             "case_id": case_id,
             "analysis_workflow": self.workflow,
@@ -463,14 +473,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "pon_cnn": verified_pon,
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
+            "exome": verified_exome_argument
         }
 
-        (
-            config_case.update({"--exome": True})
-            if verified_panel_bed
-            and sample_data["application_type"] == AnalysisType.WHOLE_EXOME_SEQUENCING
-            else None
-        )
+
 
         config_case.update(self.get_verified_samples(case_id=case_id))
         config_case.update(self.get_parsed_observation_file_paths(observations))
@@ -578,6 +584,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--case-id": arguments.get("case_id"),
                 "--clinical-snv-observations": arguments.get("clinical_snv"),
                 "--clinical-sv-observations": arguments.get("clinical_sv"),
+                "--exome": arguments.get("exome")
                 "--fastq-path": self.get_sample_fastq_destination_dir(
                     self.status_db.get_case_by_internal_id(case_id)
                 ),
