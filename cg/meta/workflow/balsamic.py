@@ -7,8 +7,8 @@ from typing import Optional
 from housekeeper.store.models import File, Version
 from pydantic.v1 import EmailStr, ValidationError
 
-from cg.constants import Workflow, AnalysisType
-from cg.constants.constants import FileFormat, SampleType
+from cg.constants import Workflow
+from cg.constants.constants import FileFormat, SampleType, AnalysisType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
