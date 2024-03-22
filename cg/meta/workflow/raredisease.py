@@ -5,7 +5,7 @@ from pathlib import Path
 
 from cg.constants import GenePanelMasterList, Workflow
 from cg.constants.gene_panel import GENOME_BUILD_37
-from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
+from cg.constants.subject import PhenotypeStatus, PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -81,11 +81,11 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         )
 
     @staticmethod
-    def get_phenotype_code(phenotype: str) -> int:
+    def get_phenotype_code(phenotype: PhenotypeStatus) -> int:
         """Return Raredisease phenotype code."""
         LOG.debug("Translate phenotype to integer code")
         try:
-            code = PlinkPhenotypeStatus[phenotype.upper()]
+            code = PlinkPhenotypeStatus[phenotype.name]
         except KeyError:
             raise ValueError(f"{phenotype} is not a valid phenotype")
         return code
