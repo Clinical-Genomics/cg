@@ -279,13 +279,11 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve a valid sex from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
-
     def get_exome_argument_if_exome_sample(self, case_id: str) -> bool:
         """Returns the exome argument if the application type in sample_data is wes."""
         application_type = self.get_case_application_type(case_id)
         if application_type == AnalysisType.WHOLE_EXOME_SEQUENCING:
             return True
-
 
     def get_verified_samples(self, case_id: str) -> dict[str, str]:
         """Return a verified tumor and normal sample dictionary."""
@@ -463,7 +461,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         verified_sex: Sex = sex or self.get_verified_sex(sample_data=sample_data)
 
-        verified_exome_argument: Optional[bool] = self.get_exome_argument_if_exome_sample(case_id=case_id)
+        verified_exome_argument: Optional[bool] = self.get_exome_argument_if_exome_sample(
+            case_id=case_id
+        )
 
         config_case: dict[str, str] = {
             "case_id": case_id,
@@ -474,10 +474,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "pon_cnn": verified_pon,
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
-            "exome": verified_exome_argument
+            "exome": verified_exome_argument,
         }
-
-
 
         config_case.update(self.get_verified_samples(case_id=case_id))
         config_case.update(self.get_parsed_observation_file_paths(observations))
@@ -602,7 +600,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--tumor-sample-name": arguments.get("tumor_sample_name"),
                 "--umi-trim-length": arguments.get("umi_trim_length"),
             },
-            exclude_true = True
+            exclude_true=True,
         )
         parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
