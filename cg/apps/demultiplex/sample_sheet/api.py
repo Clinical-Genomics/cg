@@ -4,14 +4,24 @@ from pathlib import Path
 import click
 
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet_content
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_flow_cell_samples_from_content,
+    get_sample_type_from_content,
+)
+from cg.apps.demultiplex.sample_sheet.sample_models import (
+    FlowCellSample,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleBCLConvert,
+)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreatorBCLConvert
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import FileFormat
+from cg.constants.demultiplexing import BclConverter
 from cg.exc import FlowCellError, HousekeeperFileMissingError, SampleSheetError
-from cg.io.controller import WriteFile, WriteStream
+from cg.io.controller import ReadFile, WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
     delete_sample_sheet_from_housekeeper,
@@ -78,6 +88,84 @@ class SampleSheetAPI:
             raise SampleSheetError(message)
         self.validator.validate_sample_sheet_from_file(
             file_path=sample_sheet_path, bcl_converter=bcl_converter
+        )
+
+    def _is_sample_sheet_from_flow_cell_translatable(
+        self, flow_cell: FlowCellDirectoryData
+    ) -> bool:
+        """
+        Determine if the sample sheet from the flow cell directory is translatable to BCLConvert.
+        """
+        if not flow_cell.run_parameters_path.exists():
+            LOG.error(f"Run parameters file for flow cell {flow_cell.full_name} does not exist")
+            return False
+        if not flow_cell.sample_sheet_path.exists():
+            LOG.error(f"Sample sheet for flow cell {flow_cell.full_name} does not exist")
+            return False
+        sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
+            file_format=FileFormat.CSV, file_path=flow_cell.sample_sheet_path
+        )
+        if get_sample_type_from_content(sample_sheet_content) is not FlowCellSampleBcl2Fastq:
+            LOG.error(
+                f"Sample sheet for flow cell {flow_cell.full_name} is not a Bcl2Fastq sample sheet"
+            )
+            return False
+        try:
+            self.validate_sample_sheet(
+                sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCL2FASTQ
+            )
+            return True
+        except SampleSheetError:
+            LOG.error(
+                f"Bcl2fastq sample sheet for flow cell {flow_cell.full_name} failed validation"
+            )
+            return False
+
+    @staticmethod
+    def _replace_sample_header(sample_sheet_content: list[list[str]]) -> list[list[str]]:
+        """
+        Replace the old sample id header in the Bcl2Fastq sample sheet content with the new one.
+        Raises:
+            SampleSheetError: If the data header is not found in the sample sheet.
+        """
+        for line in sample_sheet_content:
+            if "SampleID" in line:
+                idx = line.index("SampleID")
+                line[idx] = "Sample_ID"
+                return sample_sheet_content
+        raise SampleSheetError("Could not find data header in sample sheet")
+
+    def translate_sample_sheet(self, flow_cell_path: Path) -> None:
+        """Translate a Bcl2Fastq sample sheet to a BCLConvert sample sheet."""
+        flow_cell = FlowCellDirectoryData(
+            flow_cell_path=flow_cell_path, bcl_converter=BclConverter.BCLCONVERT
+        )
+        if not self._is_sample_sheet_from_flow_cell_translatable(flow_cell):
+            raise SampleSheetError("Could not translate sample sheet")
+        old_content: list[list[str]] = self._replace_sample_header(
+            ReadFile.get_content_from_file(
+                file_format=FileFormat.CSV, file_path=flow_cell.sample_sheet_path
+            )
+        )
+        flow_cell_samples: list[FlowCellSampleBCLConvert] = get_flow_cell_samples_from_content(
+            sample_sheet_content=old_content, sample_type=FlowCellSampleBCLConvert
+        )
+        creator = SampleSheetCreatorBCLConvert(flow_cell=flow_cell, lims_samples=flow_cell_samples)
+        new_content = creator.construct_sample_sheet()
+        self.validator.validate_sample_sheet_from_content(
+            content=new_content, bcl_convert=BclConverter.BCLCONVERT
+        )
+        if self.dry_run:
+            click.echo(
+                WriteStream.write_stream_from_content(
+                    file_format=FileFormat.CSV, content=new_content
+                )
+            )
+            return
+        WriteFile.write_file_from_content(
+            content=new_content,
+            file_format=FileFormat.CSV,
+            file_path=flow_cell.sample_sheet_path,
         )
 
     def _use_sample_sheet_from_housekeeper(self, flow_cell: FlowCellDirectoryData) -> None:

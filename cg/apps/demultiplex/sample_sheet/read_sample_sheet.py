@@ -34,7 +34,9 @@ def validate_samples_unique_per_lane(samples: list[FlowCellSample]) -> None:
         validate_samples_are_unique(samples=lane_samples)
 
 
-def get_sample_type_from_content(sample_sheet_content: list[list[str]]) -> Type[FlowCellSample]:
+def get_sample_type_from_content(
+    sample_sheet_content: list[list[str]],
+) -> Type[FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert]:
     """Returns the sample type identified from the sample sheet content."""
     for row in sample_sheet_content:
         if not row:
@@ -95,14 +97,16 @@ def get_samples_by_lane(
 def get_flow_cell_samples_from_content(
     sample_sheet_content: list[list[str]],
     sample_type: Type[FlowCellSample] | None = None,
-) -> list[FlowCellSample]:
+) -> list[FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert]:
     """
     Return the samples in a sample sheet as a list of FlowCellSample objects.
     Raises:
         ValidationError: if the samples do not have the correct attributes based on their model.
     """
     if not sample_type:
-        sample_type: Type[FlowCellSample] = get_sample_type_from_content(sample_sheet_content)
+        sample_type: Type[
+            FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert
+        ] = get_sample_type_from_content(sample_sheet_content)
     raw_samples: list[dict[str, str]] = get_raw_samples_from_content(
         sample_sheet_content=sample_sheet_content
     )
