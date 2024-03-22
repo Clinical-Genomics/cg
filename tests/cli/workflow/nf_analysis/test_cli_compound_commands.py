@@ -146,8 +146,6 @@ def test_store_available(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     request.getfixturevalue(f"{workflow}_mock_deliverable_dir")
     request.getfixturevalue(f"{workflow}_mock_analysis_finish")
-    context.housekeeper_api_ = real_housekeeper_api
-    context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # GIVEN a mocked deliverables template
     mocker.patch.object(
@@ -168,6 +166,9 @@ def test_store_available(
     )
     context.status_db.get_case_by_internal_id(case_id).action = "running"
     context.status_db.session.commit()
+
+    context.housekeeper_api_ = real_housekeeper_api
+    context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # THEN command exits with 0
     assert result.exit_code == EXIT_SUCCESS
