@@ -2879,7 +2879,7 @@ def tomte_nexflow_config_file_path(tomte_dir, tomte_case_id) -> Path:
 
 @pytest.fixture(scope="function")
 def tomte_mock_config(tomte_dir: Path, tomte_case_id: str) -> None:
-    """Create samplesheet.csv file for testing"""
+    """Create Tomte samplesheet.csv file for testing."""
     Path.mkdir(Path(tomte_dir, tomte_case_id), parents=True, exist_ok=True)
     Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_samplesheet").with_suffix(
         FileExtensions.CSV
