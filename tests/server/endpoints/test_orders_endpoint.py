@@ -9,7 +9,7 @@ from cg.store.models import Order
 
 
 def test_order_endpoint(
-    client: FlaskClient, order: Order, order_another: Order, analysis_summary: AnalysisSummary
+    client: FlaskClient, order: Order, order_a
 ):
     """Tests that the order endpoint returns the order with matching id"""
     # GIVEN a store with two orders

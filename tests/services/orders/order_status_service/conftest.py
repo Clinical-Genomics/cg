@@ -60,7 +60,7 @@ def sample_in_sequencing(store: Store, helpers: StoreHelpers) -> Sample:
 
 
 @pytest.fixture
-def order_with_cases_in_lab(
+def order_with_case_in_lab(
     store: Store,
     helpers: StoreHelpers,
     order: Order,

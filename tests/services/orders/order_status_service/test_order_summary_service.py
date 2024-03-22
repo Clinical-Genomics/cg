@@ -16,9 +16,9 @@ def test_get_status_summaries(summary_service: OrderSummaryService, order: Order
     assert summaries
 
 
-def test_in_preparation(summary_service: OrderSummaryService, order_with_cases_in_lab: Order):
+def test_in_preparation(summary_service: OrderSummaryService, order_with_case_in_lab: Order):
     # GIVEN an order with cases in preparation
-    order_id: int = order_with_cases_in_lab.id
+    order_id: int = order_with_case_in_lab.id
 
     # WHEN creating a summary for the order
     summary: OrderSummary = summary_service.get_summary(order_id)
@@ -27,9 +27,9 @@ def test_in_preparation(summary_service: OrderSummaryService, order_with_cases_i
     assert summary.in_lab_preparation == 1
 
 
-def test_not_received(summary_service: OrderSummaryService, order_with_cases_in_lab: Order):
+def test_not_received(summary_service: OrderSummaryService, order_with_case_in_lab: Order):
     # GIVEN an order with cases not received
-    order_id: int = order_with_cases_in_lab.id
+    order_id: int = order_with_case_in_lab.id
 
     # WHEN creating a summary for the order
     summary: OrderSummary = summary_service.get_summary(order_id)
@@ -38,9 +38,9 @@ def test_not_received(summary_service: OrderSummaryService, order_with_cases_in_
     assert summary.not_received == 1
 
 
-def test_in_sequencing(summary_service: OrderSummaryService, order_with_cases_in_lab: Order):
+def test_in_sequencing(summary_service: OrderSummaryService, order_with_case_in_lab: Order):
     # GIVEN an order with cases in sequencing
-    order_id: int = order_with_cases_in_lab.id
+    order_id: int = order_with_case_in_lab.id
 
     # WHEN creating a summary for the order
     summary: OrderSummary = summary_service.get_summary(order_id)
