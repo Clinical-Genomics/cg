@@ -133,8 +133,8 @@ def test_store_available(
     caplog: LogCaptureFixture,
     mocker,
 ):
-        """
-    Test to ensure all parts of the compound store-available command are executed given ideal 
+    """
+    Test to ensure all parts of the compound store-available command are executed given ideal
     conditions.
     Test that store-available picks up eligible cases and does not pick up ineligible ones.
     """
