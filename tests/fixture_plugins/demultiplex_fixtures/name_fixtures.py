@@ -86,7 +86,7 @@ def novaseq_x_flow_cell_full_name() -> str:
 @pytest.fixture(scope="session")
 def bcl2fastq_sample_sheet_file_name() -> str:
     """Return the name of a BCL2Fastq sample sheet."""
-    return "SampleSheet.csv"
+    return "SampleSheet_bcl2fastq.csv"
 
 
 # Lists
