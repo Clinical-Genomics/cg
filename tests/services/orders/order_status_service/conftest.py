@@ -61,7 +61,7 @@ def order_with_cases(
     sample_in_preparation: Sample,
     sample_in_sequencing: Sample,
     sample_not_received: Sample,
-) -> Order:
+) -> Order: 
     case_not_received: Case = helpers.ensure_case(
         store=store,
         customer=order.customer,
@@ -83,7 +83,15 @@ def order_with_cases(
         case_name="case_in_sequencing",
         case_id="case_in_sequencing",
     )
+    # Add samples to case that has not been received
     helpers.add_relationship(store=store, sample=sample_not_received, case=case_not_received)
+    helpers.add_relationship(store=store, sample=sample_in_preparation, case=case_not_received)
+    helpers.add_relationship(store=store, sample=sample_in_sequencing, case=case_not_received)
+
+    # Add samples to case that is in preparation
     helpers.add_relationship(store=store, sample=sample_in_preparation, case=case_in_preparation)
+    helpers.add_relationship(store=store, sample=sample_in_sequencing, case=case_in_preparation)
+
+    # Add samples to case that is in sequencing
     helpers.add_relationship(store=store, sample=sample_in_sequencing, case=case_in_sequencing)
     return order
