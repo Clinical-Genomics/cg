@@ -1,4 +1,4 @@
-{% from "components.html" import accreditation_stamp, header, contact_data, footer %}
+{% from "components.html" import accreditation_stamp, header, contact_data %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -31,7 +31,7 @@
             {{ contact_data(customer_name=customer.name, customer_address=customer.invoice_address)
             }}
           </div>
-          <div class="container">{{ footer() }}</div>
+          <div class="container">{% include "partials/footer.html" %}</div>
         </div>
         <div class="card-footer text-center text-body-secondary">Slut på rapport</div>
       </div>
