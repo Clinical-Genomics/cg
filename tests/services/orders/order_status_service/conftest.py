@@ -5,7 +5,7 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary
 
 from cg.services.orders.order_status_service.order_summary_service import OrderSummaryService
-from cg.store.models import Customer, Order, Sample
+from cg.store.models import Case, Customer, Order, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -31,9 +31,6 @@ def sample_not_received(store: Store, helpers: StoreHelpers) -> Sample:
     return helpers.add_sample(
         store=store,
         internal_id="not_received",
-        received_at=None,
-        prepared_at=None,
-        last_sequenced_at=None,
     )
 
 
@@ -43,8 +40,6 @@ def sample_in_preparation(store: Store, helpers: StoreHelpers) -> Sample:
         store=store,
         internal_id="in_prep",
         received_at=datetime.now(),
-        prepared_at=None,
-        last_sequenced_at=None,
     )
 
 
@@ -55,12 +50,11 @@ def sample_in_sequencing(store: Store, helpers: StoreHelpers) -> Sample:
         internal_id="in_sequencing",
         received_at=datetime.now(),
         prepared_at=datetime.now(),
-        last_sequenced_at=None,
     )
 
 
 @pytest.fixture
-def order_with_case_in_lab(
+def order_with_cases(
     store: Store,
     helpers: StoreHelpers,
     order: Order,
@@ -68,8 +62,28 @@ def order_with_case_in_lab(
     sample_in_sequencing: Sample,
     sample_not_received: Sample,
 ) -> Order:
-    case = helpers.ensure_case(store=store, customer=order.customer, order=order)
-    helpers.add_relationship(store=store, sample=sample_in_preparation, case=case)
-    helpers.add_relationship(store=store, sample=sample_in_sequencing, case=case)
-    helpers.add_relationship(store=store, sample=sample_not_received, case=case)
+    case_not_received: Case = helpers.ensure_case(
+        store=store,
+        customer=order.customer,
+        order=order,
+        case_name="case_not_received",
+        case_id="case_not_received",
+    )
+    case_in_preparation: Case = helpers.ensure_case(
+        store=store,
+        customer=order.customer,
+        order=order,
+        case_name="case_in_preparation",
+        case_id="case_in_preparation",
+    )
+    case_in_sequencing: Case = helpers.ensure_case(
+        store=store,
+        customer=order.customer,
+        order=order,
+        case_name="case_in_sequencing",
+        case_id="case_in_sequencing",
+    )
+    helpers.add_relationship(store=store, sample=sample_not_received, case=case_not_received)
+    helpers.add_relationship(store=store, sample=sample_in_preparation, case=case_in_preparation)
+    helpers.add_relationship(store=store, sample=sample_in_sequencing, case=case_in_sequencing)
     return order

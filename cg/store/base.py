@@ -59,6 +59,13 @@ class BaseHandler:
         """Return join case sample query."""
         return self._get_query(table=CaseSample).join(CaseSample.case).join(CaseSample.sample)
 
+    def _join_sample_and_case(self):
+        return (
+            self.session.query(Case, Sample)
+            .join(CaseSample, Case.id == CaseSample.case_id)
+            .join(Sample, CaseSample.sample_id == Sample.id)
+        )
+
     def _get_join_case_and_sample_query(self) -> Query:
         """Return join case sample query."""
         return self._get_query(table=Case).join(Case.links).join(CaseSample.sample)

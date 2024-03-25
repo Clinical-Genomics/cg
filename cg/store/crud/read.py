@@ -1436,7 +1436,7 @@ class ReadHandler(BaseHandler):
             CaseSampleFilter.BY_ORDER,
             CaseSampleFilter.CASES_WITH_SAMPLES_NOT_RECEIVED,
         ]
-        case_samples: Query = self._get_join_case_and_sample_query()
+        case_samples: Query = self._join_sample_and_case()
         return apply_case_sample_filter(
             case_samples=case_samples,
             filter_functions=filters,
@@ -1449,7 +1449,7 @@ class ReadHandler(BaseHandler):
             CaseSampleFilter.CASES_WITH_ALL_SAMPLES_RECEIVED,
             CaseSampleFilter.CASES_WITH_SAMPLES_NOT_PREPARED,
         ]
-        case_samples: Query = self._get_join_case_and_sample_query()
+        case_samples: Query = self._join_sample_and_case()
         return apply_case_sample_filter(
             case_samples=case_samples,
             filter_functions=filters,
@@ -1463,7 +1463,7 @@ class ReadHandler(BaseHandler):
             CaseSampleFilter.CASES_WITH_ALL_SAMPLES_PREPARED,
             CaseSampleFilter.CASES_WITH_SAMPLES_NOT_SEQUENCED,
         ]
-        case_samples: Query = self._get_join_case_and_sample_query()
+        case_samples: Query = self._join_sample_and_case()
         return apply_case_sample_filter(
             case_samples=case_samples,
             filter_functions=filters,
