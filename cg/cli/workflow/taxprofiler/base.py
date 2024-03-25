@@ -13,6 +13,7 @@ from cg.cli.workflow.nf_analysis import (
     start,
     start_available,
     store,
+    store_available,
     store_housekeeper,
 )
 from cg.constants.constants import MetaApis
@@ -39,3 +40,5 @@ taxprofiler.add_command(start)
 taxprofiler.add_command(start_available)
 taxprofiler.add_command(store_housekeeper)
 taxprofiler.add_command(store)
+taxprofiler.add_command(store_available)
+

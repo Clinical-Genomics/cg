@@ -23,6 +23,7 @@ from cg.clients.janus.api import JanusAPIClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
+from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
@@ -554,6 +555,10 @@ class CGConfig(BaseModel):
             trailblazer_api=self.trailblazer_api,
             config=slurm_upload_config,
         )
+
+    @property
+    def analysis_service(self) -> AnalysisService:
+        return AnalysisService(analysis_client=self.trailblazer_api)
 
     @property
     def scout_api(self) -> ScoutAPI:

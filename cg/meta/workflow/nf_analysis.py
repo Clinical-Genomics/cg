@@ -727,3 +727,13 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.info(f"Storing analysis for {case_id}")
         self.report_deliver(case_id=case_id, dry_run=dry_run)
         self.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run)
+
+    def get_cases_to_store(self) -> list[Case]:
+        """Return cases where analysis finished successfully,
+        and is ready to be stored in Housekeeper."""
+        return [
+            case
+            for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
+            if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
+            or self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
+        ]

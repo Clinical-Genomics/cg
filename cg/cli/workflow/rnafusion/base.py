@@ -14,6 +14,7 @@ from cg.cli.workflow.nf_analysis import (
     start_available,
     store_housekeeper,
     store,
+    store_available,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, MetaApis
@@ -40,24 +41,4 @@ rnafusion.add_command(metrics_deliver)
 rnafusion.add_command(report_deliver)
 rnafusion.add_command(store_housekeeper)
 rnafusion.add_command(store)
-
-
-@rnafusion.command("store-available")
-@DRY_RUN
-@click.pass_context
-def store_available(context: click.Context, dry_run: bool) -> None:
-    """Store bundles for all finished RNAFUSION analyses in Housekeeper."""
-
-    analysis_api: AnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
-
-    exit_code: int = EXIT_SUCCESS
-
-    for case_obj in set([*analysis_api.get_cases_to_qc(), *analysis_api.get_cases_to_store()]):
-        LOG.info(f"Storing RNAFUSION deliverables for {case_obj.internal_id}")
-        try:
-            context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
-        except Exception as error:
-            LOG.error(f"Error storing {case_obj.internal_id}: {error}")
-            exit_code: int = EXIT_FAIL
-    if exit_code:
-        raise click.Abort
+rnafusion.add_command(store_available)
