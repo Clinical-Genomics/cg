@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -146,6 +147,16 @@ def test_store_available(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     request.getfixturevalue(f"{workflow}_mock_deliverable_dir")
     request.getfixturevalue(f"{workflow}_mock_analysis_finish")
+
+    # GIVEN CASE ID where analysis finish is not mocked
+    case_id_fail: str = "case_id_fail"
+
+    # Ensure the config is mocked for fail case to run compound command
+    Path.mkdir(
+        Path(context.meta_apis["analysis_api"].get_case_path(case_id_fail)).parent,
+        exist_ok=True,
+    )
+    Path(context.meta_apis["analysis_api"].get_case_path(case_id_fail)).touch(exist_ok=True)
 
     # GIVEN a mocked deliverables template
     mocker.patch.object(
