@@ -1,3 +1,12 @@
+<!--Accreditation stamp -->
+{% macro accreditation_stamp(is_accredited) %}
+  {% if is_accredited %}
+    <div class="col-auto">
+      <img class="swedac-stamp" src="{{get_base64_from_png(png_path=swedac_logo_path) }}" alt="SWEDAC stamp">
+    </div>
+  {% endif %}
+{% endmacro %}
+
 <!--Header -->
 {% macro header(customer_name, case_name, report_version, report_date) %}
 	<div class="row">

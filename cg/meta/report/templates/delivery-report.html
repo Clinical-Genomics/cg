@@ -1,4 +1,4 @@
-{% from "components.html" import header, contact_data, footer %}
+{% from "components.html" import accreditation_stamp, header, contact_data, footer %}
 
 <!doctype html>
 <html lang="en">
@@ -8,6 +8,7 @@
 	<title>Leveransrapport Clinical Genomics - {{ case.name }}</title>
 	<style>
 		{% include "static/css/bootstrap.min.css" %}
+		{% include "static/css/custom.css" %}
 	</style>
 </head>
 <body>
@@ -18,11 +19,7 @@
 		    <div class="col text-center">
 		      <h3>Leveransrapport Clinical Genomics</h3>
 		    </div>
-	      {% if accredited %}
-		      <div class="col-auto">
-			      <img alt="SWEDAC Logo" style="width: 75px" src="{{get_base64_from_png(png_path=swedac_logo_path) }}">
-		      </div>
-	      {% endif %}
+			  {{ accreditation_stamp(is_accredited=accredited) }}
 		  </div>
 
 		</div>
