@@ -22,6 +22,7 @@ from cg.clients.arnold.api import ArnoldAPIClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
+from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
@@ -532,6 +533,10 @@ class CGConfig(BaseModel):
             trailblazer_api=self.trailblazer_api,
             config=slurm_upload_config,
         )
+
+    @property
+    def analysis_service(self) -> AnalysisService:
+        return AnalysisService(analysis_client=self.trailblazer_api)
 
     @property
     def scout_api(self) -> ScoutAPI:
