@@ -90,9 +90,8 @@ class SampleSheetAPI:
             file_path=sample_sheet_path, bcl_converter=bcl_converter
         )
 
-    def _is_sample_sheet_from_flow_cell_translatable(
-        self, flow_cell: FlowCellDirectoryData
-    ) -> bool:
+    @staticmethod
+    def _is_sample_sheet_from_flow_cell_translatable(flow_cell: FlowCellDirectoryData) -> bool:
         """
         Determine if the sample sheet from the flow cell directory is translatable to BCLConvert.
         """
@@ -110,16 +109,7 @@ class SampleSheetAPI:
                 f"Sample sheet for flow cell {flow_cell.full_name} is not a Bcl2Fastq sample sheet"
             )
             return False
-        try:
-            self.validate_sample_sheet(
-                sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCL2FASTQ
-            )
-            return True
-        except SampleSheetError:
-            LOG.error(
-                f"Bcl2fastq sample sheet for flow cell {flow_cell.full_name} failed validation"
-            )
-            return False
+        return True
 
     @staticmethod
     def _replace_sample_header(sample_sheet_content: list[list[str]]) -> list[list[str]]:
@@ -135,10 +125,10 @@ class SampleSheetAPI:
                 return sample_sheet_content
         raise SampleSheetError("Could not find data header in sample sheet")
 
-    def translate_sample_sheet(self, flow_cell_path: Path) -> None:
+    def translate_sample_sheet(self, flow_cell_name: str) -> None:
         """Translate a Bcl2Fastq sample sheet to a BCLConvert sample sheet."""
-        flow_cell = FlowCellDirectoryData(
-            flow_cell_path=flow_cell_path, bcl_converter=BclConverter.BCLCONVERT
+        flow_cell: FlowCellDirectoryData = self._get_flow_cell(
+            flow_cell_name=flow_cell_name, bcl_converter=BclConverter.BCLCONVERT
         )
         if not self._is_sample_sheet_from_flow_cell_translatable(flow_cell):
             raise SampleSheetError("Could not translate sample sheet")
