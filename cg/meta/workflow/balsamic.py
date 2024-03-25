@@ -281,7 +281,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_exome_argument_if_exome_sample(self, case_id: str) -> bool:
         """Returns the exome argument if the application type in sample_data is wes."""
-        application_type = self.get_case_application_type(case_id)
+        application_type: str = self.get_case_application_type(case_id)
         if application_type == AnalysisType.WHOLE_EXOME_SEQUENCING:
             return True
 
