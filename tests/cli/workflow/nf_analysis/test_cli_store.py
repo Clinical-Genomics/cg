@@ -158,6 +158,13 @@ def test_store_available(
     )
     Path(context.meta_apis["analysis_api"].get_case_path(case_id_fail)).touch(exist_ok=True)
 
+    # GIVEN that fastq files are prepared
+    mocker.patch.object(
+        NfAnalysisAPI,
+        "prepare_fastq_files",
+        return_value=None,
+    )
+
     # GIVEN a mocked deliverables template
     mocker.patch.object(
         NfAnalysisAPI,
