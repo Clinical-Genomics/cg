@@ -1,75 +1,81 @@
 <!--Accreditation stamp -->
-{% macro accreditation_stamp(is_accredited) %}
-  {% if is_accredited %}
-    <div class="col-auto">
-      <img class="swedac-stamp" src="{{get_base64_from_png(png_path=swedac_logo_path) }}" alt="SWEDAC stamp">
-    </div>
-  {% endif %}
-{% endmacro %}
+{% macro accreditation_stamp(is_accredited) %} {% if is_accredited %}
+<div class="col-auto">
+  <img
+    class="swedac-stamp"
+    src="{{get_base64_from_png(png_path=swedac_logo_path) }}"
+    alt="SWEDAC stamp"
+  />
+</div>
+{% endif %} {% endmacro %}
 
 <!--Header -->
 {% macro header(customer_name, case_name, report_version, report_date) %}
-	<div class="row">
-		<div class="col">
-			<b>Leveransrapport</b>: {{ customer_name }}<br>
-			<b>Case</b>: {{ case_name }}
-		</div>
-		<div class="col-auto">
-			<b>Skapad</b>: {{ report_date }}<br>
-			{% if version != 'N/A' %}
-				<b>Version</b>: {{ report_version }}
-			{% endif %}
-		</div>
-	</div>
+<div class="row">
+  <div class="col">
+    <b>Leveransrapport</b>: {{ customer_name }}<br />
+    <b>Case</b>: {{ case_name }}
+  </div>
+  <div class="col-auto">
+    <b>Skapad</b>: {{ report_date }}<br />
+    {% if version != 'N/A' %}
+    <b>Version</b>: {{ report_version }} {% endif %}
+  </div>
+</div>
 {% endmacro %}
 
 <!--Contact Data -->
 {% macro contact_data(customer_name, customer_address) %}
-	<div class="row">
-		<div class="col">
-			<div class="card border-0">
-				<h4 class="card-title">Kontakt Clinical Genomics</h4>
-				<h5 class="card-subtitle text-body-secondary">Clinical Genomics</h5>
-				<div class="card-text">
-					<address class="text-body-secondary">
-						Science for Life Laboratory<br>
-						Tomtebodavägen 23<br>
-						171 65 Solna<br>
-						P: <a class="link-body-emphasis link-opacity-75" href="tel:(08) 524 81 500">(08) 524 81 500</a><br>
-						E-post: <a class="link-body-emphasis link-opacity-75"
-						           href="mailto: support@clinicalgenomics.se">support@clinicalgenomics.se</a>
-					</address>
-				</div>
-			</div>
-		</div>
-		<div class="col-auto">
-			<div class="card border-0">
-				<h4 class="card-title">Kundinformation</h4>
-				<h5 class="card-title text-body-secondary">{{ customer_name }}</h5>
-				<div class="card-text">
-					<address class="text-body-secondary">
-						{{ customer_address | replace("\n", "<br>") | safe }}
-					</address>
-				</div>
-			</div>
-		</div>
-	</div>
+<div class="row">
+  <div class="col">
+    <div class="card border-0">
+      <h4 class="card-title">Kontakt Clinical Genomics</h4>
+      <h5 class="card-subtitle text-body-secondary">Clinical Genomics</h5>
+      <div class="card-text">
+        <address class="text-body-secondary">
+          Science for Life Laboratory<br />
+          Tomtebodavägen 23<br />
+          171 65 Solna<br />
+          P:
+          <a class="link-body-emphasis link-opacity-75" href="tel:(08) 524 81 500"
+            >(08) 524 81 500</a
+          ><br />
+          E-post:
+          <a class="link-body-emphasis link-opacity-75" href="mailto: support@clinicalgenomics.se"
+            >support@clinicalgenomics.se</a
+          >
+        </address>
+      </div>
+    </div>
+  </div>
+  <div class="col-auto">
+    <div class="card border-0">
+      <h4 class="card-title">Kundinformation</h4>
+      <h5 class="card-title text-body-secondary">{{ customer_name }}</h5>
+      <div class="card-text">
+        <address class="text-body-secondary">
+          {{ customer_address | replace("\n", "<br />") | safe }}
+        </address>
+      </div>
+    </div>
+  </div>
+</div>
 {% endmacro %}
 
 <!--Footer -->
 {% macro footer() %}
-	<h4>Signatur för godkännande av rapport</h4>
-	<div class="row">
-		<p>
-			Valtteri Wirta<br>
-			Director, Clinical Genomics
-		</p>
-	</div>
-	<div class="row">
-		<div class="alert alert-info" role="alert">
-			All kommunikation gällande ordern såsom tillägg, avvikelser eller ev undantag i metoden från Clinical Genomics
-			finns tillgängligt i SupportSystem för detta ticket ID. En stängd ticket kan närsomhelst öppnas upp igen för
-			frågor.
-		</div>
-	</div>
+<h4>Signatur för godkännande av rapport</h4>
+<div class="row">
+  <p>
+    Valtteri Wirta<br />
+    Director, Clinical Genomics
+  </p>
+</div>
+<div class="row">
+  <div class="alert alert-info" role="alert">
+    All kommunikation gällande ordern såsom tillägg, avvikelser eller ev undantag i metoden från
+    Clinical Genomics finns tillgängligt i SupportSystem för detta ticket ID. En stängd ticket kan
+    närsomhelst öppnas upp igen för frågor.
+  </div>
+</div>
 {% endmacro %}

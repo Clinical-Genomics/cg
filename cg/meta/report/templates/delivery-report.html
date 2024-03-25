@@ -1,43 +1,40 @@
 {% from "components.html" import accreditation_stamp, header, contact_data, footer %}
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<title>Leveransrapport Clinical Genomics - {{ case.name }}</title>
-	<style>
-		{% include "static/css/bootstrap.min.css" %}
-		{% include "static/css/custom.css" %}
-	</style>
-</head>
-<body>
-<div class="container">
-	<div class="card">
-		<div class="card-header">
-		  <div class="row align-items-center">
-		    <div class="col text-center">
-		      <h3>Leveransrapport Clinical Genomics</h3>
-		    </div>
-			  {{ accreditation_stamp(is_accredited=accredited) }}
-		  </div>
-
-		</div>
-		<div class="card-body">
-			<div class="container mb-5">
-				{{ header(customer_name=customer.name, case_name=case.name, report_version=version, report_date=date) }}
-			</div>
-			<div class="container mb-5">
-				{{ contact_data(customer_name=customer.name, customer_address=customer.invoice_address) }}
-			</div>
-			<div class="container">
-				{{ footer() }}
-			</div>
-		</div>
-		<div class="card-footer text-center text-body-secondary">
-			Slut på rapport
-		</div>
-	</div>
-</div>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Leveransrapport Clinical Genomics - {{ case.name }}</title>
+    <style>
+      {% include "static/css/bootstrap.min.css" %}
+      {% include "static/css/custom.css" %}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <div class="card-header">
+          <div class="row align-items-center">
+            <div class="col text-center">
+              <h3>Leveransrapport Clinical Genomics</h3>
+            </div>
+            {{ accreditation_stamp(is_accredited=accredited) }}
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="container mb-5">
+            {{ header(customer_name=customer.name, case_name=case.name, report_version=version,
+            report_date=date) }}
+          </div>
+          <div class="container mb-5">
+            {{ contact_data(customer_name=customer.name, customer_address=customer.invoice_address)
+            }}
+          </div>
+          <div class="container">{{ footer() }}</div>
+        </div>
+        <div class="card-footer text-center text-body-secondary">Slut på rapport</div>
+      </div>
+    </div>
+  </body>
 </html>
