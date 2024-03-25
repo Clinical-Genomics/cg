@@ -2468,7 +2468,7 @@ def mock_deliverable(
 
 
 @pytest.fixture(scope="function")
-def mock_config(raredisease_dir: Path, raredisease_case_id: str) -> None:
+def raredisease_mock_config(raredisease_dir: Path, raredisease_case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
     Path.mkdir(Path(raredisease_dir, raredisease_case_id), parents=True, exist_ok=True)
     Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet").with_suffix(
@@ -2831,7 +2831,7 @@ def rnafusion_mock_analysis_finish(
 
 
 @pytest.fixture(scope="function")
-def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
+def rnafusion_mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
     Path.mkdir(Path(rnafusion_dir, rnafusion_case_id), parents=True, exist_ok=True)
     Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").with_suffix(
@@ -2875,6 +2875,15 @@ def tomte_nexflow_config_file_path(tomte_dir, tomte_case_id) -> Path:
     return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_nextflow_config").with_suffix(
         FileExtensions.JSON
     )
+
+
+@pytest.fixture(scope="function")
+def tomte_mock_config(tomte_dir: Path, tomte_case_id: str) -> None:
+    """Create Tomte samplesheet.csv file for testing."""
+    Path.mkdir(Path(tomte_dir, tomte_case_id), parents=True, exist_ok=True)
+    Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    ).touch(exist_ok=True)
 
 
 @pytest.fixture(scope="function")
@@ -3275,7 +3284,7 @@ def taxprofiler_mock_analysis_finish(
 
 
 @pytest.fixture(scope="function")
-def mock_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
+def taxprofiler_mock_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
     """Create CSV sample sheet file for testing."""
     Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
     Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(

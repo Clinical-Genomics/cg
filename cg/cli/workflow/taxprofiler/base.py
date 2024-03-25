@@ -21,6 +21,7 @@ from cg.cli.workflow.nf_analysis import (
     run,
     store_housekeeper,
     store,
+    store_available,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, MetaApis
@@ -47,6 +48,7 @@ taxprofiler.add_command(report_deliver)
 taxprofiler.add_command(run)
 taxprofiler.add_command(store_housekeeper)
 taxprofiler.add_command(store)
+taxprofiler.add_command(store_available)
 
 
 @taxprofiler.command("start")
