@@ -11,9 +11,8 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
-def summary_service(trailblazer_api: TrailblazerAPI, store: Store, order: Order):
-    service = OrderSummaryService(analysis_client=trailblazer_api, store=store)
-    service.analysis_client = Mock()
+def summary_service(store: Store, order: Order):
+    service = OrderSummaryService(analysis_client=Mock(), store=store)
     service.analysis_client.get_summaries.return_value = [AnalysisSummary(order_id=order.id)]
     return service
 
