@@ -1,4 +1,4 @@
-{% from "components.html" import accreditation_stamp, header, contact_data %}
+{% from "/macros/header.html" import header, report_data, contact_data %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -15,24 +15,19 @@
     <div class="container">
       <div class="card">
         <div class="card-header">
-          <div class="row align-items-center">
-            <div class="col text-center">
-              <h3>Leveransrapport Clinical Genomics</h3>
-            </div>
-            {{ accreditation_stamp(is_accredited=accredited) }}
-          </div>
+          <!-- Report title -->
+          {{ header(is_accredited=accredited) }}
         </div>
         <div class="card-body">
-          <div class="container mb-5">
-            {{ header(customer_name=customer.name, case_name=case.name, report_version=version,
-            report_date=date) }}
-          </div>
-          <div class="container mb-5">
-            {{ contact_data(customer_name=customer.name, customer_address=customer.invoice_address)
-            }}
-          </div>
+          <!-- Report general data -->
+          {{ report_data(customer_name=customer.name, case_name=case.name, report_version=version,
+          report_date=date) }}
+          <!-- Report contact data -->
+          {{ contact_data(customer_name=customer.name, customer_address=customer.invoice_address) }}
+          <!-- Signature -->
           {% include "partials/signature.html" %}
         </div>
+        <!-- Report footer -->
         {% include "partials/footer.html" %}
       </div>
     </div>
