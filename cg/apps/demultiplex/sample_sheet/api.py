@@ -95,7 +95,9 @@ class SampleSheetAPI:
         """
         Determine if the sample sheet from the flow cell directory is translatable to BCLConvert.
         """
-        if not flow_cell.run_parameters_path.exists():
+        try:
+            flow_cell.run_parameters_path.exists()
+        except FlowCellError:
             LOG.error(f"Run parameters file for flow cell {flow_cell.full_name} does not exist")
             return False
         if not flow_cell.sample_sheet_path.exists():
