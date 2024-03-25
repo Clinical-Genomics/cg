@@ -1,32 +1,33 @@
 import logging
-import click
-from pydantic.v1 import ValidationError
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from pydantic.v1 import ValidationError
+
 from cg.constants import Workflow
-from cg.constants.constants import FileExtensions, FileFormat, MultiQC, WorkflowManager
+from cg.constants.constants import CaseActions, FileExtensions, FileFormat, MultiQC, WorkflowManager
 from cg.constants.nextflow import NFX_WORK_DIR
+from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
+from cg.io.config import write_config_nextflow_style
 from cg.io.controller import ReadFile, WriteFile
-from cg.io.txt import write_txt
+from cg.io.txt import concat_txt, write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import (
-    MetricsBase,
-    MetricsDeliverablesCondition,
-)
+from cg.models.deliverables.metric_deliverables import MetricsBase, MetricsDeliverablesCondition
 from cg.models.fastq import FastqFileMeta
-from cg.models.nf_analysis import FileDeliverable, WorkflowDeliverables
-from cg.models.nf_analysis import NfCommandArgs
+from cg.models.nf_analysis import (
+    FileDeliverable,
+    NfCommandArgs,
+    WorkflowDeliverables,
+    WorkflowParameters,
+)
+from cg.store.models import Case, CaseSample, Sample
 from cg.utils import Process
-from cg.store.models import Sample
-from cg.constants.constants import CaseActions
-from cg.constants.nf_analysis import NfTowerStatus
 
 LOG = logging.getLogger(__name__)
 
@@ -43,6 +44,9 @@ class NfAnalysisAPI(AnalysisAPI):
         self.profile: str | None = None
         self.conda_env: str | None = None
         self.conda_binary: str | None = None
+        self.config_platform: str | None = None
+        self.config_params: str | None = None
+        self.config_resources: str | None = None
         self.tower_binary_path: str | None = None
         self.tower_workflow: str | None = None
         self.account: str | None = None
@@ -67,6 +71,27 @@ class NfAnalysisAPI(AnalysisAPI):
     def process(self, process: Process):
         self._process = process
 
+    @property
+    def use_read_count_threshold(self) -> bool:
+        """Defines whether the threshold for adequate read count should be passed for all samples
+        when determining if the analysis for a case should be automatically started."""
+        return True
+
+    @property
+    def sample_sheet_headers(self) -> list[str]:
+        """Headers for sample sheet."""
+        raise NotImplementedError
+
+    @property
+    def is_params_appended_to_nextflow_config(self) -> bool:
+        """Return True if parameters should be added into the nextflow config file instead of the params file."""
+        return True
+
+    @property
+    def is_multiple_samples_allowed(self) -> bool:
+        """Return whether the analysis supports multiple samples to be linked to the case."""
+        raise NotImplementedError
+
     def get_profile(self, profile: str | None = None) -> str:
         """Get NF profiles."""
         return profile or self.profile
@@ -79,9 +104,28 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get workflow version from config."""
         return self.revision
 
-    def get_nextflow_config_content(self) -> str | None:
+    def get_workflow_parameters(self, case_id: str) -> WorkflowParameters:
+        """Return workflow parameters."""
+        raise NotImplementedError
+
+    def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
-        return None
+        config_files_list: list[str] = [
+            self.config_platform,
+            self.config_params,
+            self.config_resources,
+        ]
+        extra_parameters_str: list[str] = [
+            self.set_cluster_options(case_id=case_id),
+        ]
+        if self.is_params_appended_to_nextflow_config:
+            extra_parameters_str.append(
+                write_config_nextflow_style(self.get_workflow_parameters(case_id=case_id).dict())
+            )
+        return concat_txt(
+            file_paths=config_files_list,
+            str_content=extra_parameters_str,
+        )
 
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
@@ -173,6 +217,36 @@ class NfAnalysisAPI(AnalysisAPI):
             if fastq_file.read_direction == read_direction
         ]
 
+    def get_paired_read_paths(self, sample=Sample) -> tuple[list[str], list[str]]:
+        """Returns a tuple of paired fastq file paths for the forward and reverse read."""
+        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
+        fastq_forward_read_paths: list[str] = self.extract_read_files(
+            metadata=sample_metadata, forward_read=True
+        )
+        fastq_reverse_read_paths: list[str] = self.extract_read_files(
+            metadata=sample_metadata, reverse_read=True
+        )
+        return fastq_forward_read_paths, fastq_reverse_read_paths
+
+    def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
+        """Collect and format information required to build a sample sheet for a single sample."""
+        raise NotImplementedError
+
+    def get_sample_sheet_content(self, case_id: str) -> list[list[Any]]:
+        """Collect and format information required to build a sample sheet for a case.
+        This contains information for all samples linked to the case."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if len(case.links) == 0:
+            raise CgError(f"No samples linked to {case_id}")
+        if nlinks := len(case.links) > 1 and not self.is_multiple_samples_allowed:
+            raise CgError(f"Only one sample per case is allowed. {nlinks} found")
+        sample_sheet_content = []
+        LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
+        LOG.debug("Getting sample sheet information")
+        for link in case.links:
+            sample_sheet_content.extend(self.get_sample_sheet_content_per_sample(case_sample=link))
+        return sample_sheet_content
+
     def verify_sample_sheet_exists(self, case_id: str, dry_run: bool = False) -> None:
         """Raise an error if sample sheet file is not found."""
         if not dry_run and not Path(self.get_sample_sheet_path(case_id=case_id)).exists():
@@ -183,22 +257,16 @@ class NfAnalysisAPI(AnalysisAPI):
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
-    def write_params_file(self, case_id: str, workflow_parameters: dict) -> None:
+    def write_params_file(self, case_id: str, workflow_parameters: dict = None) -> None:
         """Write params-file for analysis."""
         LOG.debug("Writing parameters file")
-        write_yaml_nextflow_style(
-            content=workflow_parameters,
-            file_path=self.get_params_file_path(case_id=case_id),
-        )
-
-    def write_nextflow_config(self, case_id: str) -> None:
-        """Write nextflow config in json format."""
-        if content := self.get_nextflow_config_content():
-            LOG.debug("Writing nextflow config file")
-            write_txt(
-                content=content,
-                file_path=self.get_nextflow_config_path(case_id=case_id),
+        if workflow_parameters:
+            write_yaml_nextflow_style(
+                content=workflow_parameters,
+                file_path=self.get_params_file_path(case_id=case_id),
             )
+        else:
+            self.get_params_file_path(case_id=case_id).touch()
 
     @staticmethod
     def write_sample_sheet(
@@ -234,6 +302,46 @@ class NfAnalysisAPI(AnalysisAPI):
             file_format=FileFormat.YAML,
             file_path=config_path,
         )
+
+    def create_sample_sheet(self, case_id: str, dry_run: bool):
+        """Create sample sheet for a case."""
+        sample_sheet_content: list[list[Any]] = self.get_sample_sheet_content(case_id=case_id)
+        if not dry_run:
+            self.write_sample_sheet(
+                content=sample_sheet_content,
+                file_path=self.get_sample_sheet_path(case_id=case_id),
+                header=self.sample_sheet_headers,
+            )
+
+    def create_params_file(self, case_id: str, dry_run: bool):
+        """Create parameters file for a case."""
+        LOG.debug("Getting parameters information")
+        workflow_parameters = None
+        if not self.is_params_appended_to_nextflow_config:
+            workflow_parameters: dict | None = self.get_workflow_parameters(case_id=case_id).dict()
+        if not dry_run:
+            self.write_params_file(case_id=case_id, workflow_parameters=workflow_parameters)
+
+    def create_nextflow_config(self, case_id: str, dry_run: bool = False) -> None:
+        """Create nextflow config file."""
+        if content := self.get_nextflow_config_content(case_id=case_id):
+            LOG.debug("Writing nextflow config file")
+            if dry_run:
+                return
+            write_txt(
+                content=content,
+                file_path=self.get_nextflow_config_path(case_id=case_id),
+            )
+
+    def config_case(self, case_id: str, dry_run: bool):
+        """Create directory and config files required by a workflow for a case."""
+        if dry_run:
+            LOG.info("Dry run: Config files will not be written")
+        self.status_db.verify_case_exists(case_internal_id=case_id)
+        self.create_case_directory(case_id=case_id, dry_run=dry_run)
+        self.create_sample_sheet(case_id=case_id, dry_run=dry_run)
+        self.create_params_file(case_id=case_id, dry_run=dry_run)
+        self.create_nextflow_config(case_id=case_id, dry_run=dry_run)
 
     def _run_analysis_with_nextflow(
         self, case_id: str, command_args: NfCommandArgs, dry_run: bool
@@ -404,7 +512,8 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return deliverables file template content."""
         raise NotImplementedError
 
-    def get_bundle_filenames_path(self) -> Path | None:
+    @staticmethod
+    def get_bundle_filenames_path() -> Path | None:
         """Return bundle filenames path."""
         return None
 
@@ -551,16 +660,28 @@ class NfAnalysisAPI(AnalysisAPI):
             raise CgError from error
         self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
 
-    def report_deliver(self, case_id: str) -> None:
+    def metrics_deliver(self, case_id: str, dry_run: bool):
+        """Create and validate a metrics deliverables file for given case id."""
+        self.status_db.verify_case_exists(case_internal_id=case_id)
+        self.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
+        self.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
+
+    def report_deliver(self, case_id: str, dry_run: bool) -> None:
         """Write deliverables file."""
-        workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
-        self.write_deliverables_file(
-            deliverables_content=workflow_content.dict(),
-            file_path=self.get_deliverables_file_path(case_id=case_id),
-        )
+
+        self.status_db.verify_case_exists(case_internal_id=case_id)
+        self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+        if not dry_run:
+            workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
+            self.write_deliverables_file(
+                deliverables_content=workflow_content.dict(),
+                file_path=self.get_deliverables_file_path(case_id=case_id),
+            )
         LOG.info(
             f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
         )
+
+        LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
 
     def store_analysis_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
         """Store a finished nextflow analysis in Housekeeper and StatusDB"""
@@ -584,3 +705,25 @@ class NfAnalysisAPI(AnalysisAPI):
             raise HousekeeperStoreError(
                 f"Could not store bundle in Housekeeper and StatusDB: {error}"
             )
+
+    def store(self, case_id: str, dry_run: bool):
+        """Generate deliverable files for a case and store in Housekeeper if they
+        pass QC metrics checks."""
+        is_latest_analysis_qc: bool = self.trailblazer_api.is_latest_analysis_qc(case_id=case_id)
+        if not is_latest_analysis_qc and not self.trailblazer_api.is_latest_analysis_completed(
+            case_id=case_id
+        ):
+            LOG.error(
+                "Case not stored. Trailblazer status must be either QC or COMPLETE to be able to store"
+            )
+            raise ValueError
+
+        if (
+            is_latest_analysis_qc
+            or not self.get_metrics_deliverables_path(case_id=case_id).exists()
+        ):
+            LOG.info(f"Generating metrics file and performing QC checks for {case_id}")
+            self.metrics_deliver(case_id=case_id, dry_run=dry_run)
+        LOG.info(f"Storing analysis for {case_id}")
+        self.report_deliver(case_id=case_id, dry_run=dry_run)
+        self.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run)

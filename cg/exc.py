@@ -286,5 +286,9 @@ class OrderNotDeliverableError(CgError):
     """Exception raised when no analysis is ready for delivery for an order."""
 
 
+class DeliveryMessageNotSupportedError(CgError):
+    """Exception raised when trying to fetch delivery messages for unsupported workflows."""
+
+
 class OverrideCyclesError(CgError):
     """Exception raised when the override cycles are not correct."""

@@ -252,6 +252,18 @@ class ReportAPI(MetaAPI):
         for case_sample in case_samples:
             sample: Sample = case_sample.sample
             lims_sample: dict | None = self.get_lims_sample(sample_id=sample.internal_id)
+            delivered_files: list[File] | None = (
+                self.delivery_api.get_analysis_sample_delivery_files_by_sample(
+                    case=case, sample=sample
+                )
+                if self.delivery_api.is_analysis_delivery(case.data_delivery)
+                else None
+            )
+            delivered_fastq_files: list[File] | None = (
+                self.delivery_api.get_fastq_delivery_files_by_sample(case=case, sample=sample)
+                if self.delivery_api.is_fastq_delivery(case.data_delivery)
+                else None
+            )
             samples.append(
                 SampleModel(
                     name=sample.name,
@@ -269,6 +281,8 @@ class ReportAPI(MetaAPI):
                         case=case, sample=sample, analysis_metadata=analysis_metadata
                     ),
                     timestamps=self.get_sample_timestamp_data(sample=sample),
+                    delivered_files=delivered_files,
+                    delivered_fastq_files=delivered_fastq_files,
                 )
             )
         return samples
@@ -340,6 +354,11 @@ class ReportAPI(MetaAPI):
         analysis_metadata: AnalysisModel,
     ) -> DataAnalysisModel:
         """Return workflow attributes used for data analysis."""
+        delivered_files: list[File] | None = (
+            self.delivery_api.get_analysis_case_delivery_files(case=case)
+            if self.delivery_api.is_analysis_delivery(case.data_delivery)
+            else None
+        )
         return DataAnalysisModel(
             customer_workflow=case.data_analysis,
             data_delivery=case.data_delivery,
@@ -350,6 +369,7 @@ class ReportAPI(MetaAPI):
             variant_callers=self.get_variant_callers(_analysis_metadata=analysis_metadata),
             panels=case.panels,
             scout_files=self.get_scout_uploaded_files(case=case),
+            delivered_files=delivered_files,
         )
 
     def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
