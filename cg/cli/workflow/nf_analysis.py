@@ -8,10 +8,10 @@ from pydantic import ValidationError
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
 from cg.constants.constants import MetaApis
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 from cg.exc import CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.store import Store
 
 
 LOG = logging.getLogger(__name__)
@@ -187,7 +187,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @OPTION_DRY
 @click.pass_obj
 def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Store a finished RNAFUSION and TAXPROFILER analysis in Housekeeper and StatusDB."""
+    """Store a finished nf-analysis in Housekeeper and StatusDB."""
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     try:
         analysis_api.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run)
@@ -209,3 +209,26 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     except Exception as error:
         LOG.error(repr(error))
         raise click.Abort()
+
+
+@click.command("store-available")
+@OPTION_DRY
+@click.pass_context
+def store_available(context: click.Context, dry_run: bool) -> None:
+    """Store cases that are ready to be stored.
+    The condition to be store: cases that are set as running in StatusDB and as completed or qc in Trailblazer.
+    """
+
+    analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
+
+    exit_code: int = EXIT_SUCCESS
+
+    for case in analysis_api.get_cases_to_store():
+        LOG.info(f"Storing deliverables for {case.internal_id}")
+        try:
+            analysis_api.store(case_id=case.internal_id, dry_run=dry_run)
+        except Exception as error:
+            LOG.error(f"Error storing {case.internal_id}: {error}")
+            exit_code: int = EXIT_FAIL
+    if exit_code:
+        raise click.Abort
