@@ -268,7 +268,7 @@
 	            <div class="card-block">
                 <h5 class="card-title">Caesar</h5>
                 <div class="card-text">
-	                <p>Filer som laddats upp till din inkorg: <i>/home/{{ customer.id }}/inbox/{{ case.samples[0].ticket }}</i></p>
+	                <p>Filer som ska laddas upp till din inkorg: <i>/home/{{ customer.id }}/inbox/{{ case.samples[0].ticket }}</i></p>
 	                <ul>
 	                  {% if "analysis" in case.data_analysis.data_delivery %}
 		                  <li><b>Analysfiler</b>:</li>
@@ -293,16 +293,18 @@
 			                  {% endfor %}
 		                  </ul>
 		                {% endif %}
-	                  {% if "analysis" in case.data_analysis.data_delivery %}
+	                  {% if "fastq" in case.data_analysis.data_delivery %}
 			                <li><b>Fastq-filer</b>:</li>
 	                    <ul>
 			                  {% for sample in case.samples %}
-				      			      <li><b>Prov</b>: {{ sample.name }}</li>
-				                  <ul>
-				                    {% for file in sample.delivered_fastq_files %}
-                              <li>{{ file }}</li>
-                            {% endfor %}
-				                  </ul>
+				                  {% if sample.delivered_fastq_files != 'N/A' %}
+				      			        <li><b>Prov</b>: {{ sample.name }}</li>
+				                    <ul>
+				                      {% for file in sample.delivered_fastq_files %}
+                                <li>{{ file }}</li>
+                              {% endfor %}
+				                    </ul>
+				                  {% endif %}
 			                  {% endfor %}
 	                    </ul>
 		                {% endif %}

@@ -3,17 +3,16 @@
 import logging
 
 import click
+from pydantic import ValidationError
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
+
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
 from cg.constants.constants import MetaApis
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 from cg.exc import CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.store import Store
-from pydantic import ValidationError
 
-LOG = logging.getLogger(__name__)
 
 LOG = logging.getLogger(__name__)
 
@@ -90,6 +89,20 @@ OPTION_FROM_START = click.option(
 )
 
 
+@click.command("config-case")
+@ARGUMENT_CASE_ID
+@OPTION_DRY
+@click.pass_obj
+def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
+    """Create config files required by a workflow for a case."""
+    analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+    try:
+        analysis_api.config_case(case_id=case_id, dry_run=dry_run)
+    except (CgError, ValidationError) as error:
+        LOG.error(f"Could not create config files for {case_id}: {error}")
+        raise click.Abort() from error
+
+
 @click.command("run")
 @ARGUMENT_CASE_ID
 @OPTION_LOG
@@ -119,7 +132,7 @@ def run(
     nf_tower_id: str | None,
     dry_run: bool,
 ) -> None:
-    """Run analysis for given CASE ID."""
+    """Run analysis for a case."""
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     try:
         analysis_api.run_nextflow_analysis(
@@ -148,13 +161,9 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Create and validate a metrics deliverables file for given case id.
     If QC metrics are met it sets the status in Trailblazer to complete.
     If failed, it sets it as failed and adds a comment with information of the failed metrics."""
-
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-
     try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
-        analysis_api.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
+        analysis_api.metrics_deliver(case_id=case_id, dry_run=dry_run)
     except CgError as error:
         raise click.Abort() from error
 
@@ -165,17 +174,10 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @click.pass_obj
 def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Create a Housekeeper deliverables file for given case id."""
-
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-
     try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
-        if not dry_run:
-            analysis_api.report_deliver(case_id=case_id)
-        else:
-            LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
-    except Exception as error:
+        analysis_api.report_deliver(case_id=case_id, dry_run=dry_run)
+    except CgError as error:
         LOG.error(f"Could not create report file: {error}")
         raise click.Abort()
 
@@ -185,11 +187,48 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @OPTION_DRY
 @click.pass_obj
 def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Store a finished RNAFUSION and TAXPROFILER analysis in Housekeeper and StatusDB."""
+    """Store a finished nf-analysis in Housekeeper and StatusDB."""
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-
     try:
         analysis_api.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run)
     except HousekeeperStoreError as error:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
         raise click.Abort()
+
+
+@click.command("store")
+@ARGUMENT_CASE_ID
+@OPTION_DRY
+@click.pass_context
+def store(context: click.Context, case_id: str, dry_run: bool) -> None:
+    """Generate deliverable files for a case and store in Housekeeper if they
+    pass QC metrics checks."""
+    analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
+    try:
+        analysis_api.store(case_id=case_id, dry_run=dry_run)
+    except Exception as error:
+        LOG.error(repr(error))
+        raise click.Abort()
+
+
+@click.command("store-available")
+@OPTION_DRY
+@click.pass_context
+def store_available(context: click.Context, dry_run: bool) -> None:
+    """Store cases that are ready to be stored.
+    The condition to be store: cases that are set as running in StatusDB and as completed or qc in Trailblazer.
+    """
+
+    analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
+
+    exit_code: int = EXIT_SUCCESS
+
+    for case in analysis_api.get_cases_to_store():
+        LOG.info(f"Storing deliverables for {case.internal_id}")
+        try:
+            analysis_api.store(case_id=case.internal_id, dry_run=dry_run)
+        except Exception as error:
+            LOG.error(f"Error storing {case.internal_id}: {error}")
+            exit_code: int = EXIT_FAIL
+    if exit_code:
+        raise click.Abort

@@ -111,7 +111,7 @@ class SampleModel(BaseModel):
     timestamps: TimestampModel
     delivered_files: Annotated[
         list[str] | str, BeforeValidator(get_delivered_files_as_file_names)
-    ] = NA_FIELD
+    ] = None
     delivered_fastq_files: Annotated[
         list[str] | str, BeforeValidator(get_delivered_files_as_file_names)
-    ] = NA_FIELD
+    ] = None

@@ -24,6 +24,7 @@ from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.delivery.delivery import DeliveryAPI
+from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.fastq_file_service.fastq_file_service import FastqFileService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
@@ -180,6 +181,23 @@ class RarediseaseConfig(CommonAppConfig):
     config_params: str
     config_resources: str
     launch_directory: str
+    workflow_path: str
+    profile: str
+    references: str
+    revision: str
+    root: str
+    slurm: SlurmConfig
+    tower_workflow: str
+
+
+class TomteConfig(CommonAppConfig):
+    binary_path: str | None = None
+    compute_env: str
+    conda_binary: str | None = None
+    conda_env: str
+    config_platform: str
+    config_params: str
+    config_resources: str
     workflow_path: str
     profile: str
     references: str
@@ -350,6 +368,7 @@ class CGConfig(BaseModel):
     raredisease: RarediseaseConfig = Field(None, alias="raredisease")
     rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
     taxprofiler: TaxprofilerConfig = Field(None, alias="taxprofiler")
+    tomte: TomteConfig = Field(None, alias="tomte")
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
@@ -536,6 +555,10 @@ class CGConfig(BaseModel):
             trailblazer_api=self.trailblazer_api,
             config=slurm_upload_config,
         )
+
+    @property
+    def analysis_service(self) -> AnalysisService:
+        return AnalysisService(analysis_client=self.trailblazer_api)
 
     @property
     def scout_api(self) -> ScoutAPI:
