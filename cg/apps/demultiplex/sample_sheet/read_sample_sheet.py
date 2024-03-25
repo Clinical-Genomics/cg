@@ -104,9 +104,9 @@ def get_flow_cell_samples_from_content(
         ValidationError: if the samples do not have the correct attributes based on their model.
     """
     if not sample_type:
-        sample_type: Type[
-            FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert
-        ] = get_sample_type_from_content(sample_sheet_content)
+        sample_type: Type[FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert] = (
+            get_sample_type_from_content(sample_sheet_content)
+        )
     raw_samples: list[dict[str, str]] = get_raw_samples_from_content(
         sample_sheet_content=sample_sheet_content
     )
