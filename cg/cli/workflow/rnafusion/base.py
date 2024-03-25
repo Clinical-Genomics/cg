@@ -4,7 +4,7 @@ import logging
 
 import click
 
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
+from cg.cli.workflow.commands import resolve_compression
 from cg.cli.workflow.nf_analysis import (
     config_case,
     metrics_deliver,
@@ -12,12 +12,11 @@ from cg.cli.workflow.nf_analysis import (
     run,
     start,
     start_available,
-    store_housekeeper,
     store,
     store_available,
+    store_housekeeper,
 )
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN, MetaApis
+from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 
