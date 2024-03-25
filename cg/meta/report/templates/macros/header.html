@@ -36,8 +36,8 @@
 {% endmacro %}
 
 <!-- Report contact data -->
-{% macro contact_data(customer_name, customer_address) %}
-<div class="container mb-5">
+{% macro contact_data(customer) %}
+<div class="container mb-4">
   <div class="row">
     <div class="col">
       <div class="card border-0">
@@ -67,10 +67,10 @@
     <div class="col-auto">
       <div class="card border-0">
         <h4 class="card-title">Kundinformation</h4>
-        <h5 class="card-title text-body-secondary">{{ customer_name }}</h5>
+        <h5 class="card-title text-body-secondary">{{ customer.name }}</h5>
         <div class="card-text">
           <address class="text-body-secondary">
-            {{ customer_address | replace("\n", "<br />") | safe }}
+            {{ customer.invoice_address | replace("\n", "<br />") | safe }}
           </address>
         </div>
       </div>
