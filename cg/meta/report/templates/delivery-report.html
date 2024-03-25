@@ -31,9 +31,9 @@
             {{ contact_data(customer_name=customer.name, customer_address=customer.invoice_address)
             }}
           </div>
-          <div class="container">{% include "partials/footer.html" %}</div>
+          {% include "partials/signature.html" %}
         </div>
-        <div class="card-footer text-center text-body-secondary">Slut på rapport</div>
+        {% include "partials/footer.html" %}
       </div>
     </div>
   </body>
