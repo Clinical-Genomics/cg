@@ -110,7 +110,7 @@ def user_mail() -> str:
     return "paul@magnolia.com"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def email_address() -> str:
     """Return an email address."""
     return "user.name@scilifelab.se"
@@ -1791,7 +1791,7 @@ def context_config(
             "pon_path": str(cg_dir),
             "root": str(balsamic_dir),
             "slurm": {
-                "mail_user": "test.email@scilifelab.se",
+                "mail_user": email_address,
                 "account": "development",
                 "qos": SlurmQos.LOW,
             },
@@ -1920,7 +1920,7 @@ def context_config(
             "root": str(raredisease_dir),
             "slurm": {
                 "account": "development",
-                "mail_user": "test.email@scilifelab.se",
+                "mail_user": email_address,
             },
             "tower_workflow": "raredisease",
         },
@@ -1939,7 +1939,7 @@ def context_config(
             "root": str(tomte_dir),
             "slurm": {
                 "account": "development",
-                "mail_user": "test.email@scilifelab.se",
+                "mail_user": email_address,
             },
             "tower_workflow": "tomte",
         },
