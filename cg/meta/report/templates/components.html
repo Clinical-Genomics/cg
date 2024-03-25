@@ -15,7 +15,7 @@
 {% endmacro %}
 
 <!--Contact Data -->
-{% macro contact_data(customer_name, customer_address, is_accredited) %}
+{% macro contact_data(customer_name, customer_address) %}
 	<div class="row">
 		<div class="col">
 			<div class="card border-0">
@@ -33,7 +33,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="col">
+		<div class="col-auto">
 			<div class="card border-0">
 				<h4 class="card-title">Kundinformation</h4>
 				<h5 class="card-title text-body-secondary">{{ customer_name }}</h5>
@@ -44,13 +44,6 @@
 				</div>
 			</div>
 		</div>
-		{% if is_accredited %}
-			<div class="col">
-				<div class="card border-0 ">
-					<img alt="SWEDAC Logo" style="width: 125px" src="{{get_base64_from_png(png_path=swedac_logo_path) }}">
-				</div>
-			</div>
-		{% endif %}
 	</div>
 {% endmacro %}
 

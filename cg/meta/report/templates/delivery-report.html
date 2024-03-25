@@ -13,15 +13,25 @@
 <body>
 <div class="container">
 	<div class="card">
-		<div class="card-header text-center">
-			<h3>Leveransrapport Clinical Genomics</h3>
+		<div class="card-header">
+		  <div class="row align-items-center">
+		    <div class="col text-center">
+		      <h3>Leveransrapport Clinical Genomics</h3>
+		    </div>
+	      {% if accredited %}
+		      <div class="col-auto">
+			      <img alt="SWEDAC Logo" style="width: 75px" src="{{get_base64_from_png(png_path=swedac_logo_path) }}">
+		      </div>
+	      {% endif %}
+		  </div>
+
 		</div>
 		<div class="card-body">
 			<div class="container mb-4">
 				{{ header(customer_name=customer.name, case_name=case.name, report_version=version, report_date=date) }}
 			</div>
 			<div class="container mb-4">
-				{{ contact_data(customer_name=customer.name, customer_address=customer.invoice_address, is_accredited=accredited) }}
+				{{ contact_data(customer_name=customer.name, customer_address=customer.invoice_address) }}
 			</div>
 			<div class="container">
 				{{ footer() }}
