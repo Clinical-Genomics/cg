@@ -215,13 +215,15 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
 @OPTION_DRY
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool) -> None:
-    """Store cases that are ready to be stored. The condition to be store: cases that are set as running  in StatusDB and as completed or qc in Trailblazer."""
+    """Store cases that are ready to be stored.
+    The condition to be store: cases that are set as running in StatusDB and as completed or qc in Trailblazer.
+    """
 
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
 
     exit_code: int = EXIT_SUCCESS
 
-    for case in set([*analysis_api.get_cases_to_qc(), *analysis_api.get_cases_to_store()]):
+    for case in analysis_api.get_cases_to_store():
         LOG.info(f"Storing deliverables for {case.internal_id}")
         try:
             analysis_api.store(case_id=case.internal_id, dry_run=dry_run)
