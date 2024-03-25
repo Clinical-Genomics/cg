@@ -1,8 +1,11 @@
 from pathlib import Path
 
+import pytest
 from _pytest.logging import LogCaptureFixture
 
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
+from cg.constants.demultiplexing import BclConverter
+from cg.exc import SampleSheetError
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
@@ -88,4 +91,59 @@ def test_is_sample_sheet_from_flow_cell_translatable_bcl_convert_sample_sheet(
     assert (
         f"Sample sheet for flow cell {hiseq_2500_dual_index_flow_cell.full_name} is not a Bcl2Fastq sample sheet"
         in caplog.text
+    )
+
+
+def test_replace_sample_sheet_header_bcl2fastq(
+    sample_sheet_context: CGConfig,
+    sample_sheet_bcl2fastq_data_header: list[list[str]],
+    sample_sheet_bcl2fastq_data_header_with_replaced_sample_id: list[list[str]],
+):
+    """Test that the header is replaced correctly for a Bcl2Fastq sample sheet."""
+    # GIVEN a sample sheet api
+    api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
+
+    # GIVEN a Bcl2Fastq sample sheet content
+
+    # WHEN replacing the header
+    new_content: list[list[str]] = api._replace_sample_header(sample_sheet_bcl2fastq_data_header)
+
+    # THEN the new header is correct
+    assert new_content == sample_sheet_bcl2fastq_data_header_with_replaced_sample_id
+
+
+def test_replace_sample_sheet_header_bcl_convert(
+    sample_sheet_context: CGConfig,
+    sample_sheet_bcl2fastq_data_header_with_replaced_sample_id: list[list[str]],
+):
+    """Test that the header of a BCLConvert sample sheet can not be replaced."""
+    # GIVEN a sample sheet api
+    api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
+
+    # GIVEN a BCLConvert sample sheet content
+
+    # WHEN replacing the header
+    with pytest.raises(SampleSheetError) as error:
+        # THEN an error is raised
+        api._replace_sample_header(sample_sheet_bcl2fastq_data_header_with_replaced_sample_id)
+    assert "Could not find data header in sample sheet" in str(error.value)
+
+
+def test_translate_sample_sheet(
+    sample_sheet_context_broken_flow_cells: CGConfig,
+    tmp_flow_cell_with_bcl2fastq_sample_sheet: Path,
+):
+    """Test that a Bcl2Fastq sample sheet is translated to BCLConvert format."""
+    # GIVEN a sample sheet api
+    api: SampleSheetAPI = sample_sheet_context_broken_flow_cells.sample_sheet_api
+
+    # GIVEN a flow cell with a translatable sample sheet
+    flow_cell = FlowCellDirectoryData(flow_cell_path=tmp_flow_cell_with_bcl2fastq_sample_sheet)
+
+    # WHEN translating the sample sheet
+    api.translate_sample_sheet(flow_cell_name=flow_cell.full_name)
+
+    # THEN the sample sheet is translated correctly to BCConvert format
+    api.validate_sample_sheet(
+        sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCLCONVERT
     )

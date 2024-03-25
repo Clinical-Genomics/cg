@@ -19,7 +19,11 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import BclConverter
+from cg.constants.demultiplexing import (
+    BclConverter,
+    SampleSheetBcl2FastqSections,
+    SampleSheetBCLConvertSections,
+)
 from cg.exc import FlowCellError, HousekeeperFileMissingError, SampleSheetError
 from cg.io.controller import ReadFile, WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import (
@@ -121,9 +125,11 @@ class SampleSheetAPI:
             SampleSheetError: If the data header is not found in the sample sheet.
         """
         for line in sample_sheet_content:
-            if "SampleID" in line:
-                idx = line.index("SampleID")
-                line[idx] = "Sample_ID"
+            if SampleSheetBcl2FastqSections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ.value in line:
+                idx = line.index(
+                    SampleSheetBcl2FastqSections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ.value
+                )
+                line[idx] = SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID.value
                 return sample_sheet_content
         raise SampleSheetError("Could not find data header in sample sheet")
 
