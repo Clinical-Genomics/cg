@@ -71,14 +71,6 @@ def to_dict(model_instance):
         }
 
 
-flowcell_sample = Table(
-    "flowcell_sample",
-    Base.metadata,
-    Column("flowcell_id", types.Integer, ForeignKey("flowcell.id"), nullable=False),
-    Column("sample_id", types.Integer, ForeignKey("sample.id"), nullable=False),
-    UniqueConstraint("flowcell_id", "sample_id", name="_flowcell_sample_uc"),
-)
-
 customer_user = Table(
     "customer_user",
     Base.metadata,
