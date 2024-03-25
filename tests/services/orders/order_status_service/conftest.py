@@ -61,7 +61,7 @@ def order_with_cases(
     sample_in_preparation: Sample,
     sample_in_sequencing: Sample,
     sample_not_received: Sample,
-) -> Order: 
+) -> Order:
     case_not_received: Case = helpers.ensure_case(
         store=store,
         customer=order.customer,
