@@ -755,12 +755,12 @@ class NfAnalysisAPI(AnalysisAPI):
     def clean_past_run_dirs(self, before_str: str, yes: bool = False, dry_run: bool = False):
         """Clean up of old case run dirs."""
 
-        before = parse_date(before_str)
-        possible_cleanups = self.get_analyses_to_clean(before=before)
+        before: datetime = parse_date(before_str)
+        possible_cleanups: list[Analysis] = self.get_analyses_to_clean(before=before)
         LOG.info(f"Cleaning {len(possible_cleanups)} analyses created before {before}")
 
         for analysis in possible_cleanups:
-            case_id = analysis.case.internal_id
+            case_id:str  = analysis.case.internal_id
             try:
                 LOG.info(f"Cleaning {self.workflow} output for {case_id}")
                 self.clean_workflow_run_dir(yes=yes, case_id=case_id, dry_run=dry_run)
