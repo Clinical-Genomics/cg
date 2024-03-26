@@ -214,7 +214,7 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
             LOG.error(error)
-        except (CgError, Exception) as error:
+        except Exception as error:
             LOG.error(error)
             exit_code = EXIT_FAIL
     if exit_code:
