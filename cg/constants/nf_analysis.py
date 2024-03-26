@@ -15,6 +15,14 @@ class NfTowerStatus(StrEnum):
     UNKNOWN: str = "UNKNOWN"
 
 
+RAREDISEASE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
+    "percent_duplicates": {"norm": "gt", "threshold": 20},
+    "PCT_PF_READS_ALIGNED": {"norm": "lt", "threshold": 0.95},
+    "MEDIAN_TARGET_COVERAGE": {"norm": "lt", "threshold": 26},
+    "PCT_TARGET_BASES_10X": {"norm": "lt", "threshold": 0.95},
+    "PCT_ADAPTER": {"norm": "gt", "threshold": 0.0005},
+}
+
 RNAFUSION_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "uniquely_mapped_percent": {"norm": "gt", "threshold": 60},
     "PCT_MRNA_BASES": {"norm": "gt", "threshold": 80},

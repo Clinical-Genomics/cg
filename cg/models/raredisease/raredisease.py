@@ -1,9 +1,18 @@
+from pydantic import BaseModel
 from enum import StrEnum
-from pathlib import Path
-
-from pydantic.v1 import Field
-
 from cg.models.nf_analysis import NextflowSampleSheetEntry
+
+
+class RarediseaseQCMetrics(BaseModel):
+    """Raredisease QC metrics"""
+
+    percentage_mapped_reads: float | None
+    PCT_TARGET_BASES_10X: float | None
+    MEDIAN_TARGET_COVERAGE: float | None
+    PCT_PF_READS_ALIGNED: float | None
+    PCT_PF_READS_IMPROPER_PAIRS: float | None
+    PCT_ADAPTER: float | None
+    fraction_duplicates: float | None
 
 
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):

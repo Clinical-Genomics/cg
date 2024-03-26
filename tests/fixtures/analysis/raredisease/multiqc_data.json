@@ -1,0 +1,24 @@
+{
+    "report_data_sources": {},
+    "report_general_stats_data": [
+        {
+            "ADM1_1": {
+                "percent_duplicates": 9.864942996595772
+            }
+        },
+        {
+            "ADM1": {
+                "PCT_PF_READS_ALIGNED": 0.99966,
+                "MEDIAN_TARGET_COVERAGE": 28.0,
+                "PCT_TARGET_BASES_10X": 0.975685
+            }
+        }
+    ],
+    "report_saved_raw_data": {
+        "multiqc_picard_AlignmentSummaryMetrics": {
+            "ADM1": {
+                "PCT_ADAPTER": 1e-06
+            }
+        }
+    }
+}
