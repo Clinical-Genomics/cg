@@ -1,7 +1,6 @@
 from datetime import datetime
 from mock import Mock
 import pytest
-from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary
 
 from cg.services.orders.order_status_service.order_summary_service import OrderSummaryService
@@ -21,7 +20,6 @@ def summary_service(store: Store, order: Order):
 def order(store: Store, helpers: StoreHelpers) -> Order:
     customer: Customer = helpers.ensure_customer(store)
     order: Order = helpers.add_order(store=store, customer_id=customer.id, ticket_id="ticket_id")
-    helpers.ensure_case(store=store, customer=customer, order=order)
     return order
 
 
@@ -30,6 +28,14 @@ def sample_not_received(store: Store, helpers: StoreHelpers) -> Sample:
     return helpers.add_sample(
         store=store,
         internal_id="not_received",
+    )
+
+
+@pytest.fixture
+def another_sample_not_received(store: Store, helpers: StoreHelpers) -> Sample:
+    return helpers.add_sample(
+        store=store,
+        internal_id="another_not_received",
     )
 
 
@@ -93,4 +99,24 @@ def order_with_cases(
 
     # Add samples to case that is in sequencing
     helpers.add_relationship(store=store, sample=sample_in_sequencing, case=case_in_sequencing)
+    return order
+
+@pytest.fixture
+def order_with_not_received_samples(
+    store: Store,
+    helpers: StoreHelpers,
+    order: Order,
+    sample_not_received: Sample,
+    another_sample_not_received: Sample,
+) -> Order:
+    case_not_received: Case = helpers.ensure_case(
+        store=store,
+        customer=order.customer,
+        order=order,
+        case_name="case_not_received",
+        case_id="case_not_received",
+    )
+    # Add samples to case that has not been received
+    helpers.add_relationship(store=store, sample=sample_not_received, case=case_not_received)
+    helpers.add_relationship(store=store, sample=another_sample_not_received, case=case_not_received)
     return order

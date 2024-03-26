@@ -43,5 +43,19 @@ def test_in_sequencing(summary_service: OrderSummaryService, order_with_cases: O
     # WHEN creating a summary for the order
     summary: OrderSummary = summary_service.get_summary(order_id)
 
-    # THE summary should contain one case in sequencing
+    # THEN the summary should contain one case in sequencing
     assert summary.in_sequencing == 1
+
+
+def test_bug(summary_service: OrderSummaryService, order_with_not_received_samples: Order):
+    # GIVEN an order containing a case with multiple samples not received
+    order_id: int = order_with_not_received_samples.id
+
+    # WHEN creating a summary for the order
+    summary: OrderSummary = summary_service.get_summary(order_id)
+
+    # THEN the summary should contain one case
+    assert summary.total == 1
+
+    # THE summary should contain one case not received
+    assert summary.not_received == 1
