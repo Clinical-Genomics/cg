@@ -1,8 +1,74 @@
 <!-- Uploaded files -->
 
-{% macro uploaded_files() %}
-<div class="container mb-4">
+{% macro uploaded_files(case=case, customer_id=customer_id) %}
+<div class="container mb-5">
   <h4>Uppladdade filer</h4>
+  {{ scout_files() }} {{ caesar_files(case=case, customer_id=customer_id) }}
 </div>
-
 {% endmacro %}
+
+<!-- Scout files -->
+{% macro scout_files() %} {% endmacro %}
+
+<!-- Caesar files -->
+{% macro caesar_files(case, customer_id) %} {% if "analysis" in case.data_analysis.data_delivery or
+"fastq" in case.data_analysis.data_delivery %}
+<h5>Leveransinkorg (Caesar)</h5>
+<p>
+  Filer som ska laddas upp till din inkorg:
+  <a class="link-body-emphasis link-opacity-75">
+    /home/{{ customer_id }}/inbox/{{ case.samples[0].ticket }}
+  </a>
+</p>
+<table class="table w-auto">
+  <thead>
+    <tr>
+      <th scope="col" colspan="2">Analysfiler</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row" rowspan="3">Fall:</th>
+    </tr>
+    <tr>
+      <td>File 1</td>
+    </tr>
+    <tr>
+      <td>File 2</td>
+    </tr>
+    <tr>
+      <th scope="row" rowspan="4">Prov:</th>
+    </tr>
+    <tr>
+      <td>File 1</td>
+    </tr>
+    <tr>
+      <td>File 2</td>
+    </tr>
+    <tr>
+      <td>File 3</td>
+    </tr>
+  </tbody>
+</table>
+<table class="table w-auto">
+  <thead>
+    <tr>
+      <th scope="col" colspan="2">Fastq-filer</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row" rowspan="4">Prov:</th>
+    </tr>
+    <tr>
+      <td>File 1</td>
+    </tr>
+    <tr>
+      <td>File 2</td>
+    </tr>
+    <tr>
+      <td>File 3</td>
+    </tr>
+  </tbody>
+</table>
+{% endif %} {% endmacro %}

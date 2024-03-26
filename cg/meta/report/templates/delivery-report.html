@@ -1,5 +1,5 @@
 {% from "/macros/header.html" import header, report_data, contact_data %}
-{% from "/macros/uploaded_files.html" import uploaded_files %}
+{% from "/macros/uploaded_files.html.j2" import uploaded_files %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -26,7 +26,7 @@
           <!-- Report contact data -->
           {{ contact_data(customer=customer) }}
           <!-- Uploaded files -->
-          {{ uploaded_files() }}
+          {{ uploaded_files(case=case, customer_id=customer.id) }}
           <!-- Signature -->
           {% include "partials/signature.html" %}
         </div>
