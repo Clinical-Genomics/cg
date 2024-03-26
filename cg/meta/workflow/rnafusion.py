@@ -2,9 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any
 
-from cg import resources
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat, Strandedness
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
@@ -14,14 +12,13 @@ from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
-from cg.models.fastq import FastqFileMeta
 from cg.models.rnafusion.rnafusion import (
     RnafusionAnalysis,
     RnafusionParameters,
     RnafusionSampleSheetEntry,
 )
 from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import Case, CaseSample
 
 LOG = logging.getLogger(__name__)
 
@@ -87,7 +84,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             sample=case_sample.sample
         )
         sample_sheet_entry = RnafusionSampleSheetEntry(
-            name=case_sample.case.internal_id,
+            name=case_sample.sample.internal_id,
             fastq_forward_read_paths=fastq_forward_read_paths,
             fastq_reverse_read_paths=fastq_reverse_read_paths,
             strandedness=Strandedness.REVERSE,
