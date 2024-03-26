@@ -60,15 +60,15 @@ def test_start_available(
     request: FixtureRequest,
     case_id_not_enough_reads: str,
 ):
-    """Test to ensure all parts of compound start-available command are executed given ideal conditions
-    Test that start-available picks up eligible cases and does not pick up ineligible ones."""
+    """
+    Test to ensure all parts of compound start-available command are executed given ideal conditions.
+    Test that start-available picks up eligible cases and does not pick up ineligible ones.
+    """
     caplog.set_level(logging.DEBUG)
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
-    # GIVEN CASE ID of sample where read counts pass threshold
+    # GIVEN a case with enough reads and another case with insufficient reads
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
-
-    # GIVEN a case passing read counts threshold and another one not passing
 
     # GIVEN a mocked config
 
@@ -80,7 +80,7 @@ def test_start_available(
         workflow_cli, [workflow, "start-available", "--dry-run"], obj=context
     )
 
-    # THEN command exits with 0
+    # THEN command exits successfully
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN it should successfully identify the one case eligible for auto-start

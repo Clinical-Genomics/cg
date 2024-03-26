@@ -58,7 +58,7 @@ def test_store_success(
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
-    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
+    HermesApi.convert_deliverables.return_value = CGDeliverables.model_validate(hermes_deliverables)
 
     # GIVEN Hermes parses deliverables and generates a valid response
     mocker.patch.object(HermesApi, "create_housekeeper_bundle")
@@ -151,10 +151,10 @@ def test_store_available_success(
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
-    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
+    HermesApi.convert_deliverables.return_value = CGDeliverables.model_validate(hermes_deliverables)
 
     # GIVEN there is available cases to store
-    context.status_db.get_case_by_internal_id(case_id).action = "running"
+    context.status_db.get_case_by_internal_id(case_id).action = CaseActions.RUNNING
     context.status_db.session.commit()
 
     # WHEN running command
@@ -212,11 +212,11 @@ def test_store_available_fail(
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
-    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
+    HermesApi.convert_deliverables.return_value = CGDeliverables.model_validate(hermes_deliverables)
 
     # GIVEN there is available cases to store
-    context.status_db.get_case_by_internal_id(case_id).action = "running"
-    context.status_db.get_case_by_internal_id(failed_case_id).action = "running"
+    context.status_db.get_case_by_internal_id(case_id).action = CaseActions.RUNNING
+    context.status_db.get_case_by_internal_id(failed_case_id).action = CaseActions.RUNNING
     context.status_db.session.commit()
 
     # WHEN running command
@@ -233,13 +233,13 @@ def test_store_available_fail(
     assert f"Error storing {failed_case_id}" in caplog.text
 
     # THEN case failing store does not have an associated analysis
-    assert len(context.status_db.get_case_by_internal_id(failed_case_id).analyses) == 0
+    assert not context.status_db.get_case_by_internal_id(failed_case_id).analyses
 
     # THEN case with successful store has an associated analysis
     assert len(context.status_db.get_case_by_internal_id(case_id).analyses) == 1
 
     # THEN case failing store does not have an associated Housekeeper bundle
-    assert context.housekeeper_api.bundle(failed_case_id) is None
+    assert not context.housekeeper_api.bundle(failed_case_id)
 
     # THEN bundle can be found in Housekeeper for successful case
     assert context.housekeeper_api.bundle(case_id)
@@ -248,4 +248,4 @@ def test_store_available_fail(
     assert context.status_db.get_case_by_internal_id(failed_case_id).action == CaseActions.RUNNING
 
     # THEN StatusDB action is set to None for successful case
-    assert context.status_db.get_case_by_internal_id(case_id).action is None
+    assert not context.status_db.get_case_by_internal_id(case_id).action
