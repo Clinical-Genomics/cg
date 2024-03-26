@@ -123,3 +123,30 @@ def order_with_not_received_samples(
         store=store, sample=another_sample_not_received, case=case_not_received
     )
     return order
+
+
+@pytest.fixture
+def order_with_two_cases(
+    order: Order,
+    sample_not_received: Sample,
+    store: Store,
+    helpers: StoreHelpers,
+) -> Order:
+    case_1: Case = helpers.ensure_case(
+        store=store,
+        customer=order.customer,
+        order=order,
+        case_name="case_not_received_1",
+        case_id="case_not_received_1",
+    )
+    case_2: Case = helpers.ensure_case(
+        store=store,
+        customer=order.customer,
+        order=order,
+        case_name="case_not_received_2",
+        case_id="case_not_received_2",
+    )
+    # Add samples
+    helpers.add_relationship(store=store, sample=sample_not_received, case=case_1)
+    helpers.add_relationship(store=store, sample=sample_not_received, case=case_2)
+    return order
