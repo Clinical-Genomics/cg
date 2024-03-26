@@ -18,7 +18,7 @@ depends_on = None
 
 
 def upgrade():
-    op.drop_constraint(constraint_name="case_ibfk_2", table_name="case")
+    op.drop_constraint(constraint_name="case_ibfk_2", table_name="case", type_="foreignkey")
     op.drop_column("case", "order_id")
 
 
