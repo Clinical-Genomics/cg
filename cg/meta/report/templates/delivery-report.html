@@ -1,5 +1,6 @@
 {% from "/macros/header.html" import header, report_data, contact_data %}
-{% from "/macros/uploaded_files.html.j2" import uploaded_files %}
+{% from "/macros/uploaded_files.html" import uploaded_files %}
+{% from "/macros/susy.html" import susy_communication %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -7,6 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>Leveransrapport Clinical Genomics - {{ case.name }}</title>
+    <base target="_blank" />
     <style>
       {% include "static/css/bootstrap.min.css" %}
       {% include "static/css/custom.css" %}
@@ -29,6 +31,8 @@
           {{ uploaded_files(case=case, customer_id=customer.id) }}
           <!-- Signature -->
           {% include "partials/signature.html" %}
+          <!-- Susy communication -->
+          {{ susy_communication(ticket_id=case.samples[0].ticket) }}
         </div>
         <!-- Report footer -->
         {% include "partials/footer.html" %}
