@@ -3,7 +3,7 @@ from typing import Callable
 
 from sqlalchemy.orm import Query
 
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import Case, CaseSample, Order, Sample
 
 
 def filter_samples_in_case_by_internal_id(
@@ -19,7 +19,7 @@ def filter_cases_with_sample_by_internal_id(case_samples: Query, sample_internal
 
 
 def filter_by_order(case_samples: Query, order_id: int, **kwargs) -> Query:
-    return case_samples.filter(Case.order_id == order_id)
+    return case_samples.join(Order, Case.orders).filter(Order.id == order_id)
 
 
 def get_not_received_cases(case_samples: Query, **kwargs) -> Query:
