@@ -101,6 +101,7 @@ def order_with_cases(
     helpers.add_relationship(store=store, sample=sample_in_sequencing, case=case_in_sequencing)
     return order
 
+
 @pytest.fixture
 def order_with_not_received_samples(
     store: Store,
@@ -118,5 +119,7 @@ def order_with_not_received_samples(
     )
     # Add samples to case that has not been received
     helpers.add_relationship(store=store, sample=sample_not_received, case=case_not_received)
-    helpers.add_relationship(store=store, sample=another_sample_not_received, case=case_not_received)
+    helpers.add_relationship(
+        store=store, sample=another_sample_not_received, case=case_not_received
+    )
     return order
