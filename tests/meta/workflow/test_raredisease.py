@@ -1,9 +1,7 @@
 """Module for Rnafusion analysis API tests."""
 
 import os
-from pathlib import Path
 
-from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 
@@ -35,7 +33,6 @@ def test_get_sample_sheet_content(
 
 
 def test_write_params_file(raredisease_context: CGConfig, raredisease_case_id: str):
-
     # GIVEN Raredisease analysis API and input (nextflow sample sheet path)/output (case directory) parameters
     analysis_api: RarediseaseAnalysisAPI = raredisease_context.meta_apis["analysis_api"]
 

@@ -72,6 +72,14 @@ def flow_cell_working_directory_bclconvert(
 
 
 @pytest.fixture
+def tmp_flow_cell_with_bcl2fastq_sample_sheet(
+    tmp_broken_flow_cells_directory: Path, hiseq_x_single_index_flow_cell_name: str
+) -> Path:
+    """This is a path to a flow cell directory with a bcl2fastq sample sheet."""
+    return Path(tmp_broken_flow_cells_directory, hiseq_x_single_index_flow_cell_name)
+
+
+@pytest.fixture
 def tmp_flow_cell_without_run_parameters_path(
     tmp_broken_flow_cells_directory: Path, hiseq_2500_custom_index_flow_cell_name: str
 ) -> Path:

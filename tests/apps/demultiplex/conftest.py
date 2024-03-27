@@ -8,7 +8,7 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBCLConvert,
 )
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreatorBcl2Fastq
-from cg.constants.demultiplexing import SampleSheetBcl2FastqSections
+from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
@@ -102,6 +102,27 @@ def sample_sheet_bcl2fastq_data_header() -> list[list[str]]:
             SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID.value,
             SampleSheetBcl2FastqSections.Data.LANE.value,
             SampleSheetBcl2FastqSections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ.value,
+            SampleSheetBcl2FastqSections.Data.SAMPLE_REFERENCE.value,
+            SampleSheetBcl2FastqSections.Data.INDEX_1.value,
+            SampleSheetBcl2FastqSections.Data.INDEX_2.value,
+            SampleSheetBcl2FastqSections.Data.SAMPLE_NAME.value,
+            SampleSheetBcl2FastqSections.Data.CONTROL.value,
+            SampleSheetBcl2FastqSections.Data.RECIPE.value,
+            SampleSheetBcl2FastqSections.Data.OPERATOR.value,
+            SampleSheetBcl2FastqSections.Data.SAMPLE_PROJECT_BCL2FASTQ.value,
+        ],
+    ]
+
+
+@pytest.fixture
+def sample_sheet_bcl2fastq_data_header_with_replaced_sample_id() -> list[list[str]]:
+    """Return the content of a Bcl2fastq sample sheet data header without samples."""
+    return [
+        [SampleSheetBcl2FastqSections.Data.HEADER],
+        [
+            SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID.value,
+            SampleSheetBcl2FastqSections.Data.LANE.value,
+            SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID.value,
             SampleSheetBcl2FastqSections.Data.SAMPLE_REFERENCE.value,
             SampleSheetBcl2FastqSections.Data.INDEX_1.value,
             SampleSheetBcl2FastqSections.Data.INDEX_2.value,

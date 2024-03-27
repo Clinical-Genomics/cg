@@ -35,6 +35,22 @@ def validate_sample_sheet(context: CGConfig, sheet: click.Path):
     LOG.info("Sample sheet passed validation")
 
 
+@sample_sheet_commands.command(name="translate")
+@click.argument("flow-cell-name")
+@DRY_RUN
+@click.pass_obj
+def translate_sample_sheet(context: CGConfig, flow_cell_name: str, dry_run: bool):
+    """
+    Translate a sample sheet from Bcl2Fastq to BclConvert format.
+    'flow-cell-name' is the flow cell run directory name, e.g. '181005_D00410_0735_BHM2LNBCX2' with
+    a Bcl2Fastq sample sheet in it.
+    """
+    LOG.info(f"Translating Bcl2Fastq sample sheet for flow cell {flow_cell_name}")
+    sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
+    sample_sheet_api.set_dry_run(dry_run)
+    sample_sheet_api.translate_sample_sheet(flow_cell_name=flow_cell_name)
+
+
 @sample_sheet_commands.command(name="create")
 @click.argument("flow-cell-name")
 @OPTION_BCL_CONVERTER
@@ -50,7 +66,7 @@ def create_sheet(
 ):
     """Create a sample sheet or hard-link it from Housekeeper in the flow cell directory.
 
-    flow-cell-name is the flow cell run directory name, e.g. '201203_D00483_0200_AHVKJCDRXX'
+    'flow-cell-name' is the flow cell run directory name, e.g. '181005_D00410_0735_BHM2LNBCX2'
 
     Search the flow cell in the directory specified in config.
     """
