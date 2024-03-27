@@ -63,7 +63,7 @@
                 "PCT_UTR_BASES": 24.0282,
                 "PCT_INTRONIC_BASES": 12.0917,
                 "PCT_INTERGENIC_BASES": 19.186700000000002,
-                "PCT_MRNA_BASES": 68.1705,
+                "PCT_MRNA_BASES": 88.1705,
                 "PCT_USABLE_BASES": 67.3343,
                 "PCT_CORRECT_STRAND_READS": 98.48010000000001,
                 "MEDIAN_CV_COVERAGE": 0.371259,

@@ -2897,6 +2897,14 @@ def tomte_metrics_deliverables_path(tomte_dir: Path, tomte_case_id: str) -> Path
 
 
 @pytest.fixture(scope="function")
+def tomte_metrics_deliverables(tomte_analysis_dir: Path) -> list[dict]:
+    """Returns the content of a mock metrics deliverables file."""
+    return read_yaml(
+        file_path=Path(tomte_analysis_dir, "tomte_case_enough_reads_metrics_deliverables.yaml")
+    )
+
+
+@pytest.fixture(scope="function")
 def tomte_deliverable_data(tomte_dir: Path, tomte_case_id: str, sample_id: str) -> dict:
     return {
         "files": [
