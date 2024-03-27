@@ -30,7 +30,7 @@ class TaxprofilerParameters(WorkflowParameters):
     perform_runmerging: bool = True
     run_kraken2: bool = True
     kraken2_save_reads: bool = True
-    kraken2_save_readclassification: bool = True
+    kraken2_save_readclassifications: bool = True
     run_bracken: bool = True
     run_centrifuge: bool = True
     centrifuge_save_reads: bool = True

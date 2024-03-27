@@ -113,7 +113,7 @@ def user_mail() -> str:
     return "paul@magnolia.com"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def email_address() -> str:
     """Return an email address."""
     return "user.name@scilifelab.se"
@@ -1794,7 +1794,7 @@ def context_config(
             "pon_path": str(cg_dir),
             "root": str(balsamic_dir),
             "slurm": {
-                "mail_user": "test.email@scilifelab.se",
+                "mail_user": email_address,
                 "account": "development",
                 "qos": SlurmQos.LOW,
             },
@@ -1923,7 +1923,7 @@ def context_config(
             "root": str(raredisease_dir),
             "slurm": {
                 "account": "development",
-                "mail_user": "test.email@scilifelab.se",
+                "mail_user": email_address,
             },
             "tower_workflow": "raredisease",
         },
@@ -1942,7 +1942,7 @@ def context_config(
             "root": str(tomte_dir),
             "slurm": {
                 "account": "development",
-                "mail_user": "test.email@scilifelab.se",
+                "mail_user": email_address,
             },
             "tower_workflow": "tomte",
         },
@@ -2471,7 +2471,7 @@ def mock_deliverable(
 
 
 @pytest.fixture(scope="function")
-def mock_config(raredisease_dir: Path, raredisease_case_id: str) -> None:
+def raredisease_mock_config(raredisease_dir: Path, raredisease_case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
     Path.mkdir(Path(raredisease_dir, raredisease_case_id), parents=True, exist_ok=True)
     Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet").with_suffix(
@@ -2707,8 +2707,26 @@ def rnafusion_context(
     cg_context.meta_apis["analysis_api"] = RnafusionAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
-    # Create ERROR case with NO SAMPLES
+    # Create case with no associated samples
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+
+    # Create case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Workflow.RNAFUSION,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=apptag_rna,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     # Create textbook case with enough reads
     case_enough_reads: Case = helpers.add_case(
@@ -2731,24 +2749,6 @@ def rnafusion_context(
         case=case_enough_reads,
         sample=sample_rnafusion_case_enough_reads,
     )
-
-    # Create case without enough reads
-    case_not_enough_reads: Case = helpers.add_case(
-        store=status_db,
-        internal_id=case_id_not_enough_reads,
-        name=case_id_not_enough_reads,
-        data_analysis=Workflow.RNAFUSION,
-    )
-
-    sample_not_enough_reads: Sample = helpers.add_sample(
-        status_db,
-        application_tag=apptag_rna,
-        internal_id=sample_id_not_enough_reads,
-        reads=total_sequenced_reads_not_pass,
-        last_sequenced_at=datetime.now(),
-    )
-
-    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     return cg_context
 
@@ -2834,7 +2834,7 @@ def rnafusion_mock_analysis_finish(
 
 
 @pytest.fixture(scope="function")
-def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
+def rnafusion_mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
     Path.mkdir(Path(rnafusion_dir, rnafusion_case_id), parents=True, exist_ok=True)
     Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").with_suffix(
@@ -2878,6 +2878,15 @@ def tomte_nexflow_config_file_path(tomte_dir, tomte_case_id) -> Path:
     return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_nextflow_config").with_suffix(
         FileExtensions.JSON
     )
+
+
+@pytest.fixture(scope="function")
+def tomte_mock_config(tomte_dir: Path, tomte_case_id: str) -> None:
+    """Create Tomte samplesheet.csv file for testing."""
+    Path.mkdir(Path(tomte_dir, tomte_case_id), parents=True, exist_ok=True)
+    Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    ).touch(exist_ok=True)
 
 
 @pytest.fixture(scope="function")
@@ -3139,6 +3148,10 @@ def taxprofiler_context(
     another_sample_name: str,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
+    microbial_application_tag: str,
+    case_id_not_enough_reads: str,
+    sample_id_not_enough_reads: str,
+    total_sequenced_reads_not_pass: int,
 ) -> CGConfig:
     """Context to use in cli."""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
@@ -3146,9 +3159,28 @@ def taxprofiler_context(
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
-    # Create ERROR case with NO SAMPLES
+    # Create case with no associate samples
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
+    # Create case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Workflow.TAXPROFILER,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=microbial_application_tag,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
+    # Create case with associated samples
     taxprofiler_case: Case = helpers.add_case(
         store=status_db,
         internal_id=taxprofiler_case_id,
@@ -3278,7 +3310,7 @@ def taxprofiler_mock_analysis_finish(
 
 
 @pytest.fixture(scope="function")
-def mock_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
+def taxprofiler_mock_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
     """Create CSV sample sheet file for testing."""
     Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
     Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(

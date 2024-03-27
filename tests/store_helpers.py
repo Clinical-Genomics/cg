@@ -521,7 +521,7 @@ class StoreHelpers:
             )
             case.customer = customer
         if order:
-            order.cases = [case]
+            store.link_case_to_order(order_id=order.id, case_id=case.id)
         return case
 
     @staticmethod

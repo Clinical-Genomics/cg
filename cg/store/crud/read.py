@@ -1430,3 +1430,42 @@ class ReadHandler(BaseHandler):
             orders=orders, filters=order_filter_functions, ticket_id=ticket_id
         )
         return orders.first()
+
+    def get_case_not_received_count(self, order_id: int) -> int:
+        filters: list[CaseSampleFilter] = [
+            CaseSampleFilter.BY_ORDER,
+            CaseSampleFilter.CASES_WITH_SAMPLES_NOT_RECEIVED,
+        ]
+        case_samples: Query = self._join_sample_and_case()
+        return apply_case_sample_filter(
+            case_samples=case_samples,
+            filter_functions=filters,
+            order_id=order_id,
+        ).count()
+
+    def get_case_in_preparation_count(self, order_id: int) -> int:
+        filters: list[CaseFilter] = [
+            CaseSampleFilter.BY_ORDER,
+            CaseSampleFilter.CASES_WITH_ALL_SAMPLES_RECEIVED,
+            CaseSampleFilter.CASES_WITH_SAMPLES_NOT_PREPARED,
+        ]
+        case_samples: Query = self._join_sample_and_case()
+        return apply_case_sample_filter(
+            case_samples=case_samples,
+            filter_functions=filters,
+            order_id=order_id,
+        ).count()
+
+    def get_case_in_sequencing_count(self, order_id: int) -> int:
+        filters: list[CaseSampleFilter] = [
+            CaseSampleFilter.BY_ORDER,
+            CaseSampleFilter.CASES_WITH_ALL_SAMPLES_RECEIVED,
+            CaseSampleFilter.CASES_WITH_ALL_SAMPLES_PREPARED,
+            CaseSampleFilter.CASES_WITH_SAMPLES_NOT_SEQUENCED,
+        ]
+        case_samples: Query = self._join_sample_and_case()
+        return apply_case_sample_filter(
+            case_samples=case_samples,
+            filter_functions=filters,
+            order_id=order_id,
+        ).count()
