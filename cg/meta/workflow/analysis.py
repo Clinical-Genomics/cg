@@ -153,13 +153,17 @@ class AnalysisAPI(MetaAPI):
         return AnalysisType.OTHER
 
     def get_case_application_type(self, case_id: str) -> str:
-        application_types = {
-            self.get_application_type(link_object.sample)
-            for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
+        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id)
+        application_types: list[str] = {
+            self.get_application_type(sample)
+            for sample in samples
         }
 
-        if application_types:
-            return application_types.pop().lower()
+        if not application_types:
+            raise CgError("No application_types found for samples: {samples}")
+        
+        return application_types.pop().lower()
+
 
     def is_exome_sample(self, case_id: str) -> bool:
         """Returns true the application type in sample_data is wes."""
