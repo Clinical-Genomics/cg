@@ -17,7 +17,6 @@ from sqlalchemy import Text as SLQText
 from sqlalchemy import UniqueConstraint, orm, types
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
-from sqlalchemy.util import deprecated
 
 from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
@@ -26,9 +25,9 @@ from cg.constants.constants import (
     ControlOptions,
     PrepCategory,
     SexOptions,
-    StatusOptions,
 )
 from cg.constants.priority import SlurmQos
+from cg.constants.subject import PhenotypeStatus
 from cg.constants.symbols import EMPTY_STRING
 
 BigInt = Annotated[int, None]
@@ -618,10 +617,7 @@ class CaseSample(Base):
     id: Mapped[PrimaryKeyInt]
     case_id: Mapped[str] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
     sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id", ondelete="CASCADE"))
-    status: Mapped[str] = mapped_column(
-        types.Enum(*(status.value for status in StatusOptions)), default=StatusOptions.UNKNOWN.value
-    )
-
+    status: Mapped[PhenotypeStatus] = mapped_column(default=PhenotypeStatus.UNKNOWN)
     created_at: Mapped[datetime | None]
     updated_at: Mapped[datetime | None]
 

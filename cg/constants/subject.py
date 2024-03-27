@@ -9,9 +9,9 @@ class Sex(StrEnum):
 
 
 class PhenotypeStatus(StrEnum):
-    UNKNOWN = auto()
-    UNAFFECTED = auto()
     AFFECTED = auto()
+    UNAFFECTED = auto()
+    UNKNOWN = auto()
 
 
 class PlinkPhenotypeStatus(IntEnum):
