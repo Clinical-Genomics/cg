@@ -129,8 +129,7 @@ class FastqSubmitter(Submitter):
                 new_relationship = self.status.relate_sample(
                     case=case, sample=new_sample, status=StatusEnum.unknown
                 )
-                new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
-                self.status.session.add_all([case, new_relationship, new_delivery])
+                self.status.session.add_all([case, new_relationship])
 
         self.status.session.add_all(new_samples)
         self.status.session.commit()
