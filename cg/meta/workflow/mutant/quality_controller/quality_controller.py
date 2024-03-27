@@ -1,24 +1,25 @@
 from pathlib import Path
 from cg.meta.workflow.mutant.metadata_parser.metadata_parser import MetadataParser
+from cg.meta.workflow.mutant.metadata_parser.models import SamplesMetadataMetrics
 from cg.meta.workflow.mutant.metrics_parser import MetricsParser, SampleMetrics
 from cg.meta.workflow.mutant.metrics_parser.models import SampleResultsMetrics
 from cg.meta.workflow.mutant.quality_controller.models import (
+    QualityMetrics,
     SampleQualityResult,
     CaseQualityResult,
     QualityResult,
 )
 
 from cg.meta.workflow.mutant.quality_controller.utils import (
-    external_negative_control_pass_qc,
-    get_percent_reads_guaranteed,
-    get_sample_target_reads,
-    is_sample_external_negative_control,
-    is_sample_negative_control,
+    internal_negative_control_qc_pass,
+    external_negative_control_qc_pass,
+    get_quality_metrics,
     is_valid_total_reads,
     is_valid_total_reads_for_external_negative_control,
+    is_valid_total_reads_for_internal_negative_control,
 )
 from cg.store.api.core import Store
-from cg.store.models import Sample
+from cg.store.models import Case
 
 
 class QualityController:
@@ -27,14 +28,11 @@ class QualityController:
         self.metadata_parser = MetadataParser(status_db)
 
     def quality_control(self, case_results_file_path: Path, case: Case) -> QualityResult:
-        samples_results: SampleResultsMetrics = MetricsParser.parse_samples_results(
-            case_results_file_path
-        )
-
-        samples_metadata: 
-
-        sample_results: list[SampleQualityResult] = self.quality_control_samples()
+        quality_metrics = get_quality_metrics(case_results_file_path, case)
+        sample_results: list[SampleQualityResult] = self.quality_control_samples(quality_metrics)
         case_result: CaseQualityResult = self.quality_control_case(sample_results)
+        return case_result
+
         # TODO
         # report_file: Path = get_report_path(case_metrics_file_path)
         # ReportGenerator.report(out_file=report_file, samples=sample_results, case=case_result)
@@ -46,107 +44,96 @@ class QualityController:
 
     def quality_control_samples(self, quality_metrics: QualityMetrics) -> list[SampleQualityResult]:
         sample_results: list[SampleQualityResult] = []
-        for sample_id, metrics in quality_metrics.samples.items():
-            result = self.quality_control_sample(sample_id=sample_id, metrics=metrics)
+
+        for sample_id in quality_metrics.sample_ids:
+            result = self.quality_control_sample(sample_id, quality_metrics)
             sample_results.append(result)
+
         return sample_results
 
-    def quality_control_sample(self, sample_id: str, metrics: SampleMetrics) -> SampleQualityResult:
-        valid_read_count: bool = self.has_valid_total_reads(sample_id)
-        # valid_10x_coverage: bool = has_valid_10x_coverage(metrics)
-        mutant_qc_pass: bool = self.sample_qc_pass(sample_id, metrics)
+    def quality_control_sample(
+        self, sample_id: str, quality_metrics: QualityMetrics
+    ) -> SampleQualityResult:
+        sample_metadata = quality_metrics.samples_metadata[sample_id]
+        sample_results = quality_metrics.samples_results[sample_id]
 
-        sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
+        valid_read_count: bool = self.has_valid_total_reads(sample_metadata)
 
-        if is_control := is_sample_negative_control(sample):
+        if sample_metadata.is_internal_negative_control:
             sample_quality = SampleQualityResult(
                 sample_id=sample_id,
                 passes_qc=valid_read_count,
-                is_control=is_control,
-                passes_reads_qc=valid_read_count,
+                is_external_negative_control=sample_metadata.is_external_negative_control,
+                is_internal_negative_control=sample_metadata.is_internal_negative_control,
+                passes_reads_threshold=valid_read_count,
             )
-            ResultLogger.log_sample_result(sample_quality)
             return sample_quality
 
-        sample_passes_qc: bool = valid_read_count and mutant_qc_pass
+        sample_passes_qc: bool = valid_read_count and sample_results.qc_pass
 
         sample_quality = SampleQualityResult(
             sample_id=sample_id,
             passes_qc=sample_passes_qc,
-            is_control=is_control,
-            passes_reads_qc=valid_read_count,
-            passes_mutant_qc=mutant_qc_pass,
+            is_external_negative_control=sample_metadata.is_external_negative_control,
+            is_internal_negative_control=sample_metadata.is_internal_negative_control,
+            passes_reads_threshold=valid_read_count,
+            passes_mutant_qc=sample_results.qc_pass,
         )
-        ResultLogger.log_sample_result(sample_quality)
+
+        # ResultLogger.log_sample_result(sample_quality)
         return sample_quality
 
-    def has_valid_total_reads(self, sample_id: str) -> bool:
-        sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
-        target_reads: int = get_sample_target_reads(sample)
-        percent_reads_guaranteed: int = get_percent_reads_guaranteed(sample)
-        sample_reads: int = sample.reads
-
-        if is_sample_external_negative_control(sample):
-            if is_valid_total_reads_for_external_negative_control(
-                reads=sample_reads, target_reads=target_reads
-            ):
+    def has_valid_total_reads(self, sample_metadata: SamplesMetadataMetrics) -> bool:
+        if sample_metadata.is_sample_external_negative_control:
+            if is_valid_total_reads_for_external_negative_control(reads=sample_metadata.reads):
                 return True
             else:
                 return None
                 # TODO: KRAKEN
 
+        if sample_metadata.is_sample_internal_negative_control:
+            return is_valid_total_reads_for_internal_negative_control(reads=sample_metadata.reads)
+
         return is_valid_total_reads(
-            reads=sample_reads,
-            target_reads=target_reads,
-            threshold_percentage=percent_reads_guaranteed,
+            reads=sample_metadata.reads,
+            target_reads=sample_metadata.target_reads,
+            threshold_percentage=sample_metadata.percent_reads_guaranteed,
         )
-
-    def sample_qc_pass(self, sample_id: str, metrics):
-        sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
-
-        sample_metrics = metrics[sample.sample_name]
-
-        return sample_metrics.SampleResults.qc_pass
 
     def quality_control_case(self, sample_results: list[SampleQualityResult]) -> CaseQualityResult:
-        external_control_pass_qc: bool = external_negative_control_pass_qc(sample_results)
+        internal_negative_control_pass_qc: bool = internal_negative_control_qc_pass(sample_results)
+        external_negative_control_pass_qc: bool = external_negative_control_qc_pass(sample_results)
+
         case_pass_qc: bool = self.case_qc_pass(sample_results)
-        case_passes_qc: bool = control_pass_qc and case_pass_qc
 
         result = CaseQualityResult(
-            passes_qc=case_passes_qc,
-            control_passes_qc=external_control_pass_qc,
+            passes_qc=(
+                case_pass_qc
+                and internal_negative_control_pass_qc
+                and external_negative_control_pass_qc
+            ),
+            internal_negative_control_pass_qc=internal_negative_control_pass_qc,
+            external_negative_control_pass_qc=external_negative_control_pass_qc,
         )
-        ResultLogger.log_case_result(result)
+        # ResultLogger.log_case_result(result)
         return result
 
     def case_qc_pass(sample_results: list[SampleQualityResult]) -> bool:
-        total_samples: int = len(sample_results)
+        total_samples: int = len(sample_results) - 1
+
+        total_samples = [
+            sample_result
+            for sample_result in sample_results
+            if not sample_result.is_external_negative_control
+        ]
 
         failed_samples: int = 0
 
         for sample_result in sample_results:
-            if not sample_result.passes_qc:
+            if (
+                not sample_result.passes_qc
+                and not sample_result.is_sample_external_negative_control
+            ):
                 failed_samples = failed_samples + 1
 
-        if failed_samples / total_samples > 0.2:
-            return False
-        else:
-            return True
-
-    # TODO
-    # parse results - check
-    # implement the QC checks - check
-    # create a utils for the QC checks  - check
-
-    # # Look at how the logging is done for trailblazer
-
-    #     sampleresults = parse_sample_results(cls, file_path) #dict[str, SampleResults]
-
-    #     sample_list=get_sample_list(case)
-
-    #     SampleMetadata
-
-    #     SampleMetrics = sampleresults + SampleMetadata
-
-    #     QualityMetrics =  samples: dict[str, SampleMetrics]
+        return failed_samples / total_samples > 0.2  # constant

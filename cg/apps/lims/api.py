@@ -13,6 +13,7 @@ from cg.constants.lims import (
     PROP2UDF,
     DocumentationMethod,
     LimsArtifactTypes,
+    LimsProcess,
 )
 from cg.exc import LimsDataError
 
@@ -433,3 +434,18 @@ class LimsAPI(Lims, OrderHandler):
             sample_id=sample_id
         )
         return self._get_last_used_input_amount(input_amounts=input_amounts)
+
+    def get_latest_artifact_for_sample(
+        self, process_type: LimsProcess, artifact_type: LimsArtifactTypes, sample_internal_id: str
+    ) -> Artifact:
+        """Return latest artifact for a given sample, process and artifact type."""
+
+        artifacts: list[Artifact] = self.get_artifacts(
+            process_type=process_type,
+            type=artifact_type,
+            samplelimsid=sample_internal_id,
+        )
+        try:
+            return artifacts[0]
+        except IndexError as e:
+            raise LimsDataError(e)

@@ -4,7 +4,7 @@ from cg.meta.workflow.mutant.metadata_parser.utils import (
     is_sample_external_negative_control,
 )
 from cg.store.api.core import Store
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 
 
 class MetadataParser:
@@ -32,6 +32,8 @@ class MetadataParser:
                 sample_name=sample.name,
                 is_external_negative_control=is_external_negative_control,
                 reads=sample.reads,
+                target_reads=sample.application_version.application.target_reads,
+                percent_reads_guaranteed=sample.application_version.application.percent_reads_guaranteed,
             )
 
             metadata_for_case[sample.internal_id] = sample_metadata
@@ -39,12 +41,10 @@ class MetadataParser:
         return metadata_for_case
 
     def parse_metadata_for_internal_negative_control(self) -> dict[str, SampleMetadata]:
-        get_internal_negative_control()
+
+ 
+        
         pass
 
-    #         SampleMetadata(BaseModel):
-    # sample_internal_id: str
-    # sample_name: str
-    # is_external_negative_control: bool
-    # is_internal_negative_control: bool = False
-    # reads: int
+
+    def get_lims_artifact
