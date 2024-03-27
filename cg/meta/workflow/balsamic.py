@@ -8,7 +8,7 @@ from housekeeper.store.models import File, Version
 from pydantic.v1 import EmailStr, ValidationError
 
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat, SampleType, AnalysisType
+from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
@@ -279,11 +279,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve a valid sex from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
-    def is_exome_sample(self, case_id: str) -> bool:
-        """Returns true the application type in sample_data is wes."""
-        application_type: str = self.get_case_application_type(case_id)
-        return application_type == AnalysisType.WHOLE_EXOME_SEQUENCING
-
     def get_verified_samples(self, case_id: str) -> dict[str, str]:
         """Return a verified tumor and normal sample dictionary."""
         tumor_samples: list[Sample] = self.status_db.get_samples_by_type(
@@ -521,15 +516,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         self.print_sample_params(case_id=case_id, sample_data=sample_data)
         return sample_data
-
-    def get_case_application_type(self, case_id: str) -> str:
-        application_types = {
-            self.get_application_type(link_object.sample)
-            for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
-        }
-
-        if application_types:
-            return application_types.pop().lower()
 
     def resolve_target_bed(self, panel_bed: str | None, link_object: CaseSample) -> str | None:
         if panel_bed:
