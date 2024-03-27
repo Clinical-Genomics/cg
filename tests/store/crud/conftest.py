@@ -295,7 +295,7 @@ def re_sequenced_sample_store(
     )
 
     helpers.add_relationship(store=re_sequenced_sample_store, case=store_case, sample=store_sample)
-    helpers.add_sample_lane_sequencing_metrics(
+    helpers.ensure_sample_lane_sequencing_metrics(
         store=re_sequenced_sample_store,
         sample_internal_id=store_sample.internal_id,
         flow_cell_name=bcl2fastq_flow_cell_id,

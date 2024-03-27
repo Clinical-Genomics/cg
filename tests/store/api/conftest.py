@@ -46,7 +46,7 @@ def store_failing_sequencing_qc(
     )
 
     helpers.add_relationship(store=store, case=store_case, sample=store_sample)
-    helpers.add_sample_lane_sequencing_metrics(
+    helpers.ensure_sample_lane_sequencing_metrics(
         store=store,
         sample_internal_id=store_sample.internal_id,
         flow_cell_name=bcl2fastq_flow_cell_id,
