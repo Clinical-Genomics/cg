@@ -25,9 +25,9 @@ from cg.constants.constants import (
     ControlOptions,
     PrepCategory,
     SexOptions,
-    StatusOptions,
 )
 from cg.constants.priority import SlurmQos
+from cg.constants.subject import PhenotypeStatus
 from cg.constants.symbols import EMPTY_STRING
 
 BigInt = Annotated[int, None]
@@ -616,10 +616,7 @@ class CaseSample(Base):
     id: Mapped[PrimaryKeyInt]
     case_id: Mapped[str] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
     sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id", ondelete="CASCADE"))
-    status: Mapped[str] = mapped_column(
-        types.Enum(*(status.value for status in StatusOptions)), default=StatusOptions.UNKNOWN.value
-    )
-
+    status: Mapped[PhenotypeStatus] = mapped_column(default=PhenotypeStatus.UNKNOWN)
     created_at: Mapped[datetime | None]
     updated_at: Mapped[datetime | None]
 
