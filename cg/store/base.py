@@ -61,7 +61,7 @@ class BaseHandler:
 
     def _join_sample_and_case(self):
         return (
-            self.session.query(Case)
+            self._get_query(Case)
             .join(CaseSample, Case.id == CaseSample.case_id)
             .join(Sample, CaseSample.sample_id == Sample.id)
         )
