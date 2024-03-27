@@ -154,16 +154,12 @@ class AnalysisAPI(MetaAPI):
 
     def get_case_application_type(self, case_id: str) -> str:
         samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id)
-        application_types: list[str] = [
-            self.get_application_type(sample)
-            for sample in samples
-        ]
+        application_types: list[str] = [self.get_application_type(sample) for sample in samples]
 
         if not application_types:
             raise CgError("No application_types found for samples: {samples}")
 
         return application_types.pop()
-
 
     def is_exome_sample(self, case_id: str) -> bool:
         """Returns true the application type in sample_data is wes."""
@@ -361,9 +357,9 @@ class AnalysisAPI(MetaAPI):
             )
             destination_path = Path(fastq_dir, fastq_file_name)
             linked_reads_paths[fastq_file.read_direction].append(destination_path)
-            concatenated_paths[fastq_file.read_direction] = (
-                f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_file_name)}"
-            )
+            concatenated_paths[
+                fastq_file.read_direction
+            ] = f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_file_name)}"
 
             if not destination_path.exists():
                 LOG.info(f"Linking: {fastq_file.path} -> {destination_path}")
