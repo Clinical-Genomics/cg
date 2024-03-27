@@ -161,8 +161,8 @@ class AnalysisAPI(MetaAPI):
 
         if not application_types:
             raise CgError("No application_types found for samples: {samples}")
-        
-        return application_types.pop().lower()
+
+        return application_types.pop()
 
 
     def is_exome_sample(self, case_id: str) -> bool:
