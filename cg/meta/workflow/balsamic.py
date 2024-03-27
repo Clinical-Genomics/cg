@@ -279,11 +279,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve a valid sex from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
-    def get_exome_argument_if_exome_sample(self, case_id: str) -> bool:
-        """Returns the exome argument if the application type in sample_data is wes."""
+    def is_exome_sample(self, case_id: str) -> bool:
+        """Returns true the application type in sample_data is wes."""
         application_type: str = self.get_case_application_type(case_id)
-        if application_type == AnalysisType.WHOLE_EXOME_SEQUENCING:
-            return True
+        return application_type == AnalysisType.WHOLE_EXOME_SEQUENCING
 
     def get_verified_samples(self, case_id: str) -> dict[str, str]:
         """Return a verified tumor and normal sample dictionary."""
@@ -461,9 +460,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         verified_sex: Sex = sex or self.get_verified_sex(sample_data=sample_data)
 
-        verified_exome_argument: Optional[bool] = self.get_exome_argument_if_exome_sample(
-            case_id=case_id
-        )
+        verified_exome_argument: bool = self.is_exome_sample(case_id=case_id)
 
         config_case: dict[str, str] = {
             "case_id": case_id,
