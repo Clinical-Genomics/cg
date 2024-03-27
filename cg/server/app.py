@@ -18,7 +18,6 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Delivery,
     Flowcell,
     Invoice,
     Organism,
@@ -126,7 +125,6 @@ def _register_admin_views():
     ext.admin.add_view(admin.PoolView(Pool, ext.db.session))
     ext.admin.add_view(admin.FlowcellView(Flowcell, ext.db.session))
     ext.admin.add_view(admin.AnalysisView(Analysis, ext.db.session))
-    ext.admin.add_view(admin.DeliveryView(Delivery, ext.db.session))
     ext.admin.add_view(admin.InvoiceView(Invoice, ext.db.session))
 
 
