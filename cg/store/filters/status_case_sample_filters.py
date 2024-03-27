@@ -27,8 +27,14 @@ def get_not_received_cases(case_samples: Query, **kwargs) -> Query:
 
 
 def get_received_cases(case_samples: Query, **kwargs) -> Query:
-    subquery = case_samples.filter(Sample.received_at == None).subquery()
-    return case_samples.filter((CaseSample.case_id != subquery.c.id)).distinct()
+    not_received = (
+        case_samples.filter(Sample.received_at == None).with_entities(CaseSample.case_id).subquery()
+    )
+    return (
+        case_samples.outerjoin(not_received, CaseSample.case_id == not_received.c.case_id)
+        .filter(not_received.c.case_id == None)
+        .distinct()
+    )
 
 
 def get_not_prepared_cases(case_samples: Query, **kwargs) -> Query:
@@ -36,8 +42,14 @@ def get_not_prepared_cases(case_samples: Query, **kwargs) -> Query:
 
 
 def get_prepared_cases(case_samples: Query, **kwargs) -> Query:
-    subquery = case_samples.filter(Sample.prepared_at == None).subquery()
-    return case_samples.filter((CaseSample.case_id != subquery.c.id)).distinct()
+    not_prepared = (
+        case_samples.filter(Sample.prepared_at == None).with_entities(CaseSample.case_id).subquery()
+    )
+    return (
+        case_samples.outerjoin(not_prepared, CaseSample.case_id == not_prepared.c.case_id)
+        .filter(not_prepared.c.case_id == None)
+        .distinct()
+    )
 
 
 def get_not_sequenced_cases(case_samples: Query, **kwargs) -> Query:
