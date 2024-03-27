@@ -32,7 +32,7 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SequencingPlatform
-from cg.constants.subject import Sex
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
@@ -50,7 +50,10 @@ from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.raredisease.raredisease import RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
+from cg.models.taxprofiler.taxprofiler import (
+    TaxprofilerParameters,
+    TaxprofilerSampleSheetEntry,
+)
 from cg.models.tomte.tomte import TomteSampleSheetHeaders
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
@@ -266,7 +269,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
                 "internal_id": sample_id,
                 "father": "ADM2",
                 "mother": "ADM3",
-                "status": "affected",
+                "status": PhenotypeStatus.AFFECTED,
                 "original_ticket": ticket_id,
                 "reads": 5000000,
                 "capture_kit": "GMSmyeloid",
@@ -275,7 +278,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
                 "name": "father",
                 "sex": Sex.MALE,
                 "internal_id": "ADM2",
-                "status": "unaffected",
+                "status": PhenotypeStatus.UNAFFECTED,
                 "original_ticket": ticket_id,
                 "reads": 6000000,
                 "capture_kit": "GMSmyeloid",
@@ -284,7 +287,7 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
                 "name": "mother",
                 "sex": Sex.FEMALE,
                 "internal_id": "ADM3",
-                "status": "unaffected",
+                "status": PhenotypeStatus.UNAFFECTED,
                 "original_ticket": ticket_id,
                 "reads": 7000000,
                 "capture_kit": "GMSmyeloid",

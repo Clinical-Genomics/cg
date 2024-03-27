@@ -1,4 +1,4 @@
-from enum import IntEnum, StrEnum
+from enum import Enum, IntEnum, StrEnum, auto
 
 
 class Sex(StrEnum):
@@ -9,11 +9,10 @@ class Sex(StrEnum):
     MISSING = ""
 
 
-class PhenotypeStatus(StrEnum):
-    UNKNOWN = "unknown"
-    UNAFFECTED = "unaffected"
-    AFFECTED = "affected"
-    MISSING = ""
+class PhenotypeStatus(Enum):
+    UNKNOWN = auto()
+    UNAFFECTED = auto()
+    AFFECTED = auto()
 
 
 class PlinkPhenotypeStatus(IntEnum):
