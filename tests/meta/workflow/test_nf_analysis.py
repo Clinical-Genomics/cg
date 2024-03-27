@@ -4,48 +4,33 @@ import logging
 from typing import Any
 
 import pytest
+from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
-from pathlib import Path
 
+from cg.constants import Workflow
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from tests.cli.workflow.conftest import deliverables_template_content
 
 
 @pytest.mark.parametrize(
-    ("context", "metrics_deliverables", "case_id", "analysis_finish"),
-    [
-        (
-            "rnafusion_context",
-            "rnafusion_metrics_deliverables",
-            "rnafusion_case_id",
-            "rnafusion_mock_analysis_finish",
-        ),
-        (
-            "taxprofiler_context",
-            "taxprofiler_metrics_deliverables",
-            "taxprofiler_case_id",
-            "taxprofiler_mock_analysis_finish",
-        ),
-    ],
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 def test_create_metrics_deliverables_content(
-    context: str,
-    case_id: str,
-    metrics_deliverables: str,
+    workflow: Workflow,
     caplog: LogCaptureFixture,
-    analysis_finish,
-    request,
+    request: FixtureRequest,
 ):
     """Test metrics deliverables file content function for Taxprofiler and Rnafusion."""
-
     caplog.set_level(logging.INFO)
 
     # GIVEN each fixture is being initialised
-    context: CGConfig = request.getfixturevalue(context)
-    metrics_deliverables: dict = request.getfixturevalue(metrics_deliverables)
-    case_id: str = request.getfixturevalue(case_id)
-    request.getfixturevalue(analysis_finish)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
+
+    metrics_deliverables: dict = request.getfixturevalue(f"{workflow}_metrics_deliverables")
+    case_id: str = request.getfixturevalue(f"{workflow}_case_id")
+    request.getfixturevalue(f"{workflow}_mock_analysis_finish")
 
     # GIVEN a Nextflow workflow analysis API and a list of QC metrics
     analysis_api: NfAnalysisAPI = context.meta_apis["analysis_api"]
@@ -60,34 +45,24 @@ def test_create_metrics_deliverables_content(
 
 
 @pytest.mark.parametrize(
-    ("context", "case_id"),
-    [
-        (
-            "rnafusion_context",
-            "rnafusion_case_id",
-        ),
-        (
-            "taxprofiler_context",
-            "taxprofiler_case_id",
-        ),
-    ],
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 def test_get_formatted_file_deliverable(
-    context: str,
-    case_id: str,
+    workflow: Workflow,
     sample_id: str,
     sample_name: str,
     caplog: LogCaptureFixture,
     deliverables_template_content,
-    request,
+    request: FixtureRequest,
 ):
     """Test the formatted file deliverable with the case and sample attributes for Taxprofiler and Rnafusion."""
 
     caplog.set_level(logging.INFO)
 
     # GIVEN each fixture is being initialised
-    context: CGConfig = request.getfixturevalue(context)
-    case_id: str = request.getfixturevalue(case_id)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
+    case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     caplog.set_level(logging.INFO)
     analysis_api: NfAnalysisAPI = context.meta_apis["analysis_api"]

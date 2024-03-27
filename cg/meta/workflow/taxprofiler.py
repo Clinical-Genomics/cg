@@ -9,13 +9,11 @@ from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.symbols import EMPTY_STRING
 from cg.io.controller import ReadFile
-from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.resources import TAXPROFILER_BUNDLE_FILENAMES_PATH
-from cg.store.models import CaseSample, Sample
+from cg.store.models import CaseSample
 
 LOG = logging.getLogger(__name__)
 
@@ -60,6 +58,11 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """Return whether the analysis supports multiple samples to be linked to the case."""
         return True
 
+    @property
+    def is_multiqc_pattern_search_exact(self) -> bool:
+        """Only exact pattern search is allowed to collect metrics information from multiqc file."""
+        return True
+
     def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
         return MULTIQC_NEXFLOW_CONFIG
@@ -96,35 +99,12 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             priority=self.account,
         )
 
-    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
-        """Return a list of the metrics specified in a MultiQC json file for the case samples."""
-        multiqc_json: list[dict] = MultiqcDataJson(
-            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
-        ).report_general_stats_data
-        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
-        metrics_list: list[MetricsBase] = []
-        for sample in samples:
-            sample_id: str = sample.internal_id
-            metrics_values: dict = self.parse_multiqc_json_for_sample(
-                sample_name=sample.name, multiqc_json=multiqc_json
-            )
-            metric_base_list: list = self.get_metric_base_list(
-                sample_id=sample_id, metrics_values=metrics_values
-            )
-            metrics_list.extend(metric_base_list)
-        return metrics_list
-
-    @staticmethod
-    def parse_multiqc_json_for_sample(sample_name: str, multiqc_json: list[dict]) -> dict:
-        """Parse a multiqc_data.json and returns a dictionary with metric name and metric values for each sample."""
-        metrics_values: dict = {}
-        for stat_dict in multiqc_json:
-            for sample_key, sample_values in stat_dict.items():
-                if sample_key == f"{sample_name}_{sample_name}":
-                    LOG.info(f"Key: {sample_key}, Values: {sample_values}")
-                    metrics_values.update(sample_values)
-
-        return metrics_values
+    def multiqc_search_patterns(self, case_id: str) -> dict:
+        """Get search patterns for multiqc for Taxprofiler."""
+        return {
+            f"{sample.name}_{sample.name}": sample.internal_id
+            for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
+        }
 
     def get_deliverables_template_content(self) -> list[dict[str, str]]:
         """Return deliverables file template content."""
