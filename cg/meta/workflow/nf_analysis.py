@@ -13,12 +13,17 @@ from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.config import write_config_nextflow_style
 from cg.io.controller import ReadFile, WriteFile
+from cg.io.json import read_json
 from cg.io.txt import concat_txt, write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import MetricsBase, MetricsDeliverablesCondition
+from cg.models.deliverables.metric_deliverables import (
+    MetricsBase,
+    MetricsDeliverablesCondition,
+    MultiqcDataJson,
+)
 from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import (
     FileDeliverable,
@@ -91,6 +96,12 @@ class NfAnalysisAPI(AnalysisAPI):
     def is_multiple_samples_allowed(self) -> bool:
         """Return whether the analysis supports multiple samples to be linked to the case."""
         raise NotImplementedError
+
+    @property
+    def is_multiqc_pattern_search_exact(self) -> bool:
+        """Return True if only exact pattern search is allowed to collect metrics information from multiqc file.
+        If false, pattern must be contained but does not need to be exact."""
+        return False
 
     def get_profile(self, profile: str | None = None) -> str:
         """Get NF profiles."""
@@ -587,26 +598,80 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get nf-core workflow metrics constants."""
         return {}
 
+    def multiqc_search_patterns(self, case_id: str) -> dict:
+        """Get search patterns for multiqc. Each key is a search pattern and each value
+        corresponds to the metric id to set in the metrics deliverables file.
+        Multiple search patterns can be added, and ideally it should be
+        {sample_id_1: sample_id_1, sample_id_2: sample_id_2}."""
+        return {
+            sample_id: sample_id
+            for sample_id in self.status_db.get_sample_ids_by_case_id(case_id=case_id)
+        }
+
+    def remove_duplicated_metrics(self, metrics: list[MetricsBase]) -> list[MetricsBase]:
+        """Remove duplicated metrics based on id and sample name. If duplicated entries are found
+        only the first one will be kept."""
+        deduplicated_metric_id_name = set([])
+        deduplicated_metrics: list = []
+        for metric in metrics:
+            if (metric.id, metric.name) not in deduplicated_metric_id_name:
+                deduplicated_metric_id_name.add((metric.id, metric.name))
+                deduplicated_metrics.append(metric)
+        return deduplicated_metrics
+
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Return a list of the metrics specified in a MultiQC json file."""
-        raise NotImplementedError
-
-    def get_metric_base_list(self, sample_id: str, metrics_values: dict) -> list[MetricsBase]:
-        """Return a list of MetricsBase objects for a given sample."""
-        metric_base_list: list[MetricsBase] = []
-        for metric_name, metric_value in metrics_values.items():
-            metric_base_list.append(
-                MetricsBase(
-                    header=None,
-                    id=sample_id,
-                    input=MultiQC.MULTIQC_DATA + FileExtensions.JSON,
-                    name=metric_name,
-                    step=MultiQC.MULTIQC,
-                    value=metric_value,
-                    condition=self.get_workflow_metrics().get(metric_name, None),
-                )
+        multiqc_json: MultiqcDataJson = MultiqcDataJson(
+            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
+        )
+        metrics = []
+        for search_pattern, metric_id in self.multiqc_search_patterns(case_id=case_id).items():
+            metrics_for_pattern: list[MetricsBase] = self.parse_multiqc_json_for_pattern(
+                search_pattern=search_pattern,
+                multiqc_json=multiqc_json,
+                metric_id=metric_id,
+                exact_match=self.is_multiqc_pattern_search_exact,
             )
-        return metric_base_list
+            metrics.extend(metrics_for_pattern)
+        metrics = self.remove_duplicated_metrics(metrics=metrics)
+        return metrics
+
+    def parse_multiqc_json_for_pattern(
+        self,
+        search_pattern: str,
+        multiqc_json: MultiqcDataJson,
+        metric_id: str,
+        exact_match: bool = False,
+    ) -> list[MetricsBase]:
+        """Parse a MultiqcDataJson and returns a list of metrics."""
+        metrics_values = []
+        for section in multiqc_json.report_general_stats_data:
+            for section_name, section_values in section.items():
+                if exact_match:
+                    is_pattern_found: bool = search_pattern == section_name
+                else:
+                    is_pattern_found: bool = search_pattern in section_name
+                if is_pattern_found:
+                    for metric_name, metric_value in section_values.items():
+                        metric: MetricsBase = self.get_multiqc_metric(
+                            metric_name=metric_name, metric_value=metric_value, metric_id=metric_id
+                        )
+                        metrics_values.append(metric)
+        return metrics_values
+
+    def get_multiqc_metric(
+        self, metric_name: str, metric_value: str | int | float, metric_id: str
+    ) -> MetricsBase:
+        """Return a MetricsBase object for a given metric."""
+        return MetricsBase(
+            header=None,
+            id=metric_id,
+            input=MultiQC.MULTIQC_DATA + FileExtensions.JSON,
+            name=metric_name,
+            step=MultiQC.MULTIQC,
+            value=metric_value,
+            condition=self.get_workflow_metrics().get(metric_name, None),
+        )
 
     @staticmethod
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:

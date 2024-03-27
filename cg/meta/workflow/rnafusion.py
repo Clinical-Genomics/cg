@@ -2,26 +2,22 @@
 
 import logging
 from pathlib import Path
-from typing import Any
 
-from cg import resources
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat, Strandedness
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
 from cg.exc import MissingMetrics
 from cg.io.controller import ReadFile
-from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
-from cg.models.fastq import FastqFileMeta
+from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.rnafusion.rnafusion import (
     RnafusionAnalysis,
     RnafusionParameters,
     RnafusionSampleSheetEntry,
 )
 from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import CaseSample
 
 LOG = logging.getLogger(__name__)
 
@@ -111,30 +107,15 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             return genomes_base.absolute()
         return Path(self.references).absolute()
 
-    def parse_multiqc_json_for_case(self, case_id: str) -> dict:
-        """Parse a multiqc_data.json file and returns a dictionary with metric name and metric values for a case."""
-        multiqc_json = MultiqcDataJson(
-            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
-        )
-        metrics_values: dict = {}
-        for key in multiqc_json.report_general_stats_data:
-            if case_id in key:
-                metrics_values.update(list(key.values())[0])
-                LOG.info(f"Key: {key}, Values: {list(key.values())[0]}")
-        return metrics_values
-
-    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
-        """Get a multiqc_data.json file and returns metrics and values formatted."""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_id: str = case.links[0].sample.internal_id
-        metric_values: dict = self.parse_multiqc_json_for_case(case_id=case_id)
-        metric_base_list: list = self.get_metric_base_list(
-            sample_id=sample_id, metrics_values=metric_values
-        )
-        return metric_base_list
+    def multiqc_search_patterns(self, case_id: str) -> dict:
+        """Get search patterns for multiqc for Rnafusion."""
+        return {
+            case_id: sample.internal_id
+            for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
+        }
 
     @staticmethod
-    def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
+    def ensure_mandatory_metrics_present(metrics: set[MetricsBase]) -> None:
         """Check that all mandatory metrics are present. Raise error if missing."""
         given_metrics: set = {metric.name for metric in metrics}
         mandatory_metrics: set = set(RNAFUSION_METRIC_CONDITIONS.keys())
