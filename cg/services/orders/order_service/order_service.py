@@ -7,8 +7,8 @@ from cg.services.orders.order_service.utils import (
     create_order_response,
     create_orders_response,
 )
-from cg.services.orders.order_status_service import OrderStatusService
-from cg.services.orders.order_status_service.dto.order_status_summary import (
+from cg.services.orders.order_status_service import OrderSummaryService
+from cg.services.orders.order_status_service.dto.order_summary import (
     OrderSummary,
 )
 from cg.store.models import Case, Order
@@ -16,7 +16,7 @@ from cg.store.store import Store
 
 
 class OrderService:
-    def __init__(self, store: Store, status_service: OrderStatusService) -> None:
+    def __init__(self, store: Store, status_service: OrderSummaryService) -> None:
         self.store = store
         self.summary_service = status_service
 
@@ -24,13 +24,13 @@ class OrderService:
         order: Order | None = self.store.get_order_by_id(order_id)
         if not order:
             raise OrderNotFoundError(f"Order {order_id} not found.")
-        summary: OrderSummary = self.summary_service.get_status_summary(order_id)
+        summary: OrderSummary = self.summary_service.get_summary(order_id)
         return create_order_response(order=order, summary=summary)
 
     def get_orders(self, orders_request: OrdersRequest) -> OrdersResponse:
         orders, total_count = self.store.get_orders(orders_request)
         order_ids: list[int] = [order.id for order in orders]
-        summaries: list[OrderSummary] = self.summary_service.get_status_summaries(order_ids)
+        summaries: list[OrderSummary] = self.summary_service.get_summaries(order_ids)
         return create_orders_response(orders=orders, summaries=summaries, total=total_count)
 
     def create_order(self, order_data: OrderIn) -> OrderResponse:
