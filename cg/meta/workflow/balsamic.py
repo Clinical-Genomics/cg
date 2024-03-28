@@ -7,14 +7,18 @@ from housekeeper.store.models import File, Version
 from pydantic.v1 import EmailStr, ValidationError
 
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat, SampleType
+from cg.constants.constants import FileFormat, SampleType, CaseActions
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Sex
+from cg.constants.tb import AnalysisStatus
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
+from cg.services.pre_analysis_quality_check.quality_controller.utils import (
+    run_case_pre_analysis_quality_check,
+)
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.balsamic.analysis import BalsamicAnalysis
@@ -67,10 +71,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return self.root_dir
 
     @property
-    def use_read_count_threshold(self) -> bool:
-        return True
-
-    @property
     def fastq_handler(self):
         return BalsamicFastqHandler
 
@@ -88,24 +88,32 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return "CNVkit_PON_reference_v*.cnn"
 
+    def is_case_ready_for_analysis(self, case: Case) -> bool:
+        case_passed_quality_check: bool = run_case_pre_analysis_quality_check(case)
+        case_is_set_to_analyze: bool = case.action == CaseActions.ANALYZE
+        case_has_not_been_analyzed: bool = not case.latest_analyzed
+        case_latest_analysis_failed: bool = (
+            self.trailblazer_api.get_latest_analysis_status(case_id=case.internal_id)
+            == AnalysisStatus.FAILED
+        )
+        return case_passed_quality_check and (
+            case_is_set_to_analyze or case_has_not_been_analyzed or case_latest_analysis_failed
+        )
+
     def get_case_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.root_dir, case_id)
 
-    def get_cases_to_analyze(self) -> list[Case]:
-        cases_query: list[Case] = self.status_db.cases_to_analyze(
-            workflow=self.workflow, threshold=self.use_read_count_threshold
-        )
-        cases_to_analyze = []
-        for case_obj in cases_query:
-            if case_obj.action == "analyze" or not case_obj.latest_analyzed:
-                cases_to_analyze.append(case_obj)
-            elif (
-                self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id)
-                == "failed"
-            ):
-                cases_to_analyze.append(case_obj)
-        return cases_to_analyze
+    def get_cases_ready_for_analysis(self) -> list[Case]:
+        """Returns a list of cases that are ready for analysis."""
+        cases_to_analyze: list[Case] = self.get_cases_to_analyze()
+        cases_ready_for_analysis: list[Case] = []
+
+        for case in cases_to_analyze:
+            if self.is_case_ready_for_analysis(case):
+                cases_ready_for_analysis.append(case)
+
+        return cases_ready_for_analysis
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic deliverables file for the case_id should be located.
@@ -135,7 +143,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         Analysis types are any of ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
         """
-        LOG.debug("Fetch analysis type for %s", case_id)
+        LOG.debug(f"Fetch analysis type for {case_id}")
         number_of_samples: int = len(
             self.status_db.get_case_by_internal_id(internal_id=case_id).links
         )
@@ -149,7 +157,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if application_type != "wgs":
             application_type = "panel"
         analysis_type = "_".join([sample_type, application_type])
-        LOG.info("Found analysis type %s", analysis_type)
+        LOG.info(f"Found analysis type {analysis_type}")
         return analysis_type
 
     def get_sample_fastq_destination_dir(self, case: Case, sample: Sample = None) -> Path:
@@ -334,11 +342,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 )
                 return balsamic_analysis
             except ValidationError as error:
-                LOG.error(
-                    "get_latest_metadata failed for '%s', missing attribute: %s",
-                    case_id,
-                    error,
-                )
+                LOG.error(f"get_latest_metadata failed for '{case_id}', missing attribute: {error}")
                 raise error
         else:
             LOG.error(f"Unable to retrieve the latest metadata for {case_id}")

@@ -16,6 +16,9 @@ from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.meta.workflow.microsalt.quality_controller import QualityController
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.meta.workflow.microsalt.utils import get_most_recent_project_directory
+from cg.services.pre_analysis_quality_check.quality_controller.utils import (
+    run_sample_sequencing_quality_check,
+)
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Sample
 from cg.utils import Process
@@ -31,10 +34,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         self.root_dir = config.microsalt.root
         self.queries_path = config.microsalt.queries_path
         self.quality_checker = QualityController(config.status_db)
-
-    @property
-    def use_read_count_threshold(self) -> bool:
-        return False
 
     @property
     def fastq_handler(self):
@@ -182,6 +181,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         priority = (
             Priority.research.name if sample_obj.priority_int == 0 else Priority.standard.name
         )
+        sequencing_qc: bool = run_sample_sequencing_quality_check(sample_obj)
 
         return {
             "CG_ID_project": self.get_project(sample_id),
@@ -198,7 +198,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             "date_libprep": str(sample_obj.prepared_at or datetime.min),
             "method_libprep": method_library_prep or "Not in LIMS",
             "method_sequencing": method_sequencing or "Not in LIMS",
-            "sequencing_qc_passed": sample_obj.sequencing_qc,
+            "sequencing_qc_passed": sequencing_qc,
         }
 
     def get_project(self, sample_id: str) -> str:

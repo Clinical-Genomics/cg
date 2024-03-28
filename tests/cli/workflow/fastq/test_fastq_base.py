@@ -48,6 +48,7 @@ def test_store_available_fastq_analysis(
     case_obj.data_analysis = Workflow.FASTQ
     case_obj.action = CaseActions.ANALYZE
     case_obj.samples[0].last_sequenced_at = datetime.now()
+    case_obj.samples[0].reads = 1
 
     # WHEN the store_available_fastq_analysis command is invoked
     cli_runner.invoke(store_available_fastq_analysis, ["--dry-run"], obj=fastq_context)

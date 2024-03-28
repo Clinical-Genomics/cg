@@ -64,7 +64,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def is_multiple_samples_allowed(self) -> bool:
         """Return whether the analysis supports multiple samples to be linked to the case."""
         return False
-
+      
     def get_deliverables_template_content(self) -> list[dict]:
         """Return deliverables file template content."""
         return ReadFile.get_content_from_file(
