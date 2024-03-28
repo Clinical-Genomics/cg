@@ -95,7 +95,7 @@ class AnalysisAPI(MetaAPI):
 
     def get_cases_ready_for_analysis(self):
         """
-        Find cases that are ready for analysis.
+        Return cases that are ready for analysis.
 
         Returns:
             cases_ready_for_analysis: list of cases that are ready for analysis

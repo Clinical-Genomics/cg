@@ -7,7 +7,7 @@ class QualityController:
     @staticmethod
     def run_qc(obj: Case | Sample, quality_checks: list[Callable]) -> bool:
         """
-        Run the qc for the case.
+        Run the qc for the case or sample.
 
         Returns:
             bool: True if the case passes any of the quality cheks passed, False otherwise.
