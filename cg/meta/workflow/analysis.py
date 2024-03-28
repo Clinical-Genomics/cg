@@ -153,16 +153,19 @@ class AnalysisAPI(MetaAPI):
         return AnalysisType.OTHER
 
     def get_case_application_type(self, case_id: str) -> str:
+        """Returns the application type for samples in a case."""
         samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id)
         application_types: list[str] = [self.get_application_type(sample) for sample in samples]
 
-        if not application_types:
-            raise CgError("No application_types found for samples: {samples}")
+        if len(set(application_types)) > 1:
+            raise CgError(
+                f"Different application_types found for samples: {samples} ({application_types})"
+            )
 
         return application_types.pop()
 
-    def is_exome_sample(self, case_id: str) -> bool:
-        """Returns true the application type in sample_data is wes."""
+    def has_case_only_exome_samples(self, case_id: str) -> bool:
+        """Returns true if the application type for all samples in a case is wes."""
         application_type: str = self.get_case_application_type(case_id)
         return application_type == AnalysisType.WHOLE_EXOME_SEQUENCING
 
