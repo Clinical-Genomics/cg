@@ -51,7 +51,7 @@ def case_is_not_express_priority(case: Case) -> bool:
         bool: True if the case is lower than express priority, False otherwise.
 
     """
-    return case.priority == Priority.express
+    return case.priority != Priority.express
 
 
 def ready_made_library_sample_has_enough_reads(sample: Sample) -> bool:
