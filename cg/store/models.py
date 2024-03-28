@@ -17,7 +17,6 @@ from sqlalchemy import Text as SLQText
 from sqlalchemy import UniqueConstraint, orm, types
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
-from sqlalchemy.util import deprecated
 
 from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
@@ -463,7 +462,6 @@ class Case(Base, PriorityMixin):
     internal_id: Mapped[UniqueStr]
     is_compressible: Mapped[bool] = mapped_column(default=True)
     name: Mapped[Str128]
-    order_id: Mapped[int | None] = mapped_column(ForeignKey("order.id"))
     ordered_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     _panels: Mapped[Text | None]
 
@@ -531,6 +529,11 @@ class Case(Base, PriorityMixin):
     def samples(self) -> list["Sample"]:
         """Return case samples."""
         return self._get_samples
+
+    @property
+    def sample_ids(self) -> list[str]:
+        """Return a list of internal ids of the case samples."""
+        return [sample.internal_id for sample in self._get_samples]
 
     @property
     def _get_samples(self) -> list["Sample"]:
@@ -773,8 +776,6 @@ class Sample(Base, PriorityMixin):
     id: Mapped[PrimaryKeyInt]
     internal_id: Mapped[UniqueStr]
     invoice_id: Mapped[int | None] = mapped_column(ForeignKey("invoice.id"))
-    invoiced_at: Mapped[datetime | None]  # DEPRECATED
-    _is_external: Mapped[bool | None] = mapped_column("is_external")  # DEPRECATED
     is_tumour: Mapped[bool | None] = mapped_column(default=False)
     loqusdb_id: Mapped[Str64 | None]
     name: Mapped[Str128]
@@ -793,7 +794,6 @@ class Sample(Base, PriorityMixin):
     last_sequenced_at: Mapped[datetime | None]
     received_at: Mapped[datetime | None]
     reference_genome: Mapped[Str255 | None]
-    sequence_start: Mapped[datetime | None]
     sex: Mapped[str] = mapped_column(types.Enum(*(option.value for option in SexOptions)))
     subject_id: Mapped[Str128 | None]
 
@@ -816,15 +816,6 @@ class Sample(Base, PriorityMixin):
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
-
-    @property
-    @deprecated(
-        version="1.4.0",
-        message="This field is deprecated, use sample.application_version.application.is_external",
-    )
-    def is_external(self):
-        """Return if this is an externally sequenced sample."""
-        return self._is_external
 
     @property
     def archive_location(self) -> str:
@@ -870,8 +861,6 @@ class Sample(Base, PriorityMixin):
             return f"Delivered {self.delivered_at.date()}"
         if self.last_sequenced_at:
             return f"Sequenced {self.last_sequenced_at.date()}"
-        if self.sequence_start:
-            return f"Sequencing {self.sequence_start.date()}"
         if self.received_at:
             return f"Received {self.received_at.date()}"
 

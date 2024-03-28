@@ -45,7 +45,6 @@ class BalsamicReportAPI(ReportAPI):
 
     def __init__(self, config: CGConfig, analysis_api: BalsamicAnalysisAPI):
         super().__init__(config=config, analysis_api=analysis_api)
-        self.analysis_api: BalsamicAnalysisAPI = analysis_api
 
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: BalsamicAnalysis

@@ -11,7 +11,7 @@ def get_case_message(case: Case) -> str:
     delivery_path: str = get_fastq_delivery_path(case)
     return (
         f"Hello,\n\n"
-        f"The results have been uploaded to Scout for the following case:\n\n"
+        f"The analysis has been uploaded to Scout for the following case:\n\n"
         f"{scout_link}\n\n"
         f"The analysis files are currently being uploaded to your inbox on Caesar:\n\n"
         f"{delivery_path}"
@@ -24,7 +24,7 @@ def get_cases_message(cases: list[Case]) -> str:
     delivery_path: str = get_fastq_delivery_path(cases[0])
     return (
         f"Hello,\n\n"
-        f"The results have been uploaded to Scout for the following cases:\n\n"
+        f"The analyses have been uploaded to Scout for the following cases:\n\n"
         f"{scout_links_row_separated}\n\n"
         f"The analysis files are currently being uploaded to your inbox on Caesar:\n\n"
         f"{delivery_path}"

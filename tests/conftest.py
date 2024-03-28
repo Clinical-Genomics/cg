@@ -23,6 +23,7 @@ from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.housekeeper.models import InputBundle
 from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
@@ -42,13 +43,15 @@ from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
+from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-
-from cg.models.rnafusion.rnafusion import RnafusionParameters
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters
+from cg.models.raredisease.raredisease import RarediseaseSampleSheetHeaders
+from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
+from cg.models.tomte.tomte import TomteSampleSheetHeaders
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
 from cg.store.store import Store
@@ -76,6 +79,9 @@ pytest_plugins = [
     "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.sample_sheet_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.context_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.bundle_fixtures",
+    "tests.fixture_plugins.delivery_fixtures.path_fixtures",
 ]
 
 # Case fixtures
@@ -104,7 +110,7 @@ def user_mail() -> str:
     return "paul@magnolia.com"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def email_address() -> str:
     """Return an email address."""
     return "user.name@scilifelab.se"
@@ -114,6 +120,11 @@ def email_address() -> str:
 def case_id() -> str:
     """Return a case id."""
     return "yellowhog"
+
+
+@pytest.fixture(scope="session")
+def case_name() -> str:
+    return "C12345"
 
 
 @pytest.fixture(scope="session")
@@ -132,6 +143,12 @@ def another_case_id() -> str:
 def sample_id() -> str:
     """Return a sample id."""
     return "ADM1"
+
+
+@pytest.fixture(scope="session")
+def another_sample_id() -> str:
+    """Return another sample id."""
+    return "another_sample_id"
 
 
 @pytest.fixture(scope="session")
@@ -191,6 +208,11 @@ def customer_id() -> str:
 @pytest.fixture(scope="session")
 def sbatch_job_number() -> int:
     return 123456
+
+
+@pytest.fixture(scope="session")
+def empty_list() -> list:
+    return []
 
 
 @pytest.fixture(scope="session")
@@ -1261,6 +1283,12 @@ def wgs_application_tag() -> str:
 
 
 @pytest.fixture
+def microbial_application_tag() -> str:
+    """Return the WGS microbial application tag."""
+    return "MWRNXTR003"
+
+
+@pytest.fixture
 def store() -> Generator[Store, None, None]:
     """Return a CG store."""
     initialize_database("sqlite:///")
@@ -1665,6 +1693,18 @@ def pdc_archiving_directory(pdc_archiving_dir: Path) -> PDCArchivingDirectory:
     )
 
 
+@pytest.fixture(scope="function")
+def nextflow_binary() -> Path:
+    """Return the path to the nextflow binary."""
+    return Path("path", "to", "bin", "nextflow")
+
+
+@pytest.fixture(scope="function")
+def conda_binary() -> Path:
+    """Return the path to the conda binary."""
+    return Path("path", "to", "bin", "conda")
+
+
 @pytest.fixture(name="cg_uri")
 def cg_uri() -> str:
     """Return a cg URI."""
@@ -1692,15 +1732,18 @@ def context_config(
     housekeeper_dir: Path,
     mip_dir: Path,
     cg_dir: Path,
+    conda_binary: Path,
     balsamic_dir: Path,
     microsalt_dir: Path,
     raredisease_dir: Path,
     rnafusion_dir: Path,
     taxprofiler_dir: Path,
+    tomte_dir: Path,
     illumina_flow_cells_directory: Path,
     illumina_demultiplexed_runs_directory: Path,
     downsample_dir: Path,
     pdc_archiving_directory: PDCArchivingDirectory,
+    nextflow_binary: Path,
     nf_analysis_platform_config_path: Path,
     nf_analysis_pipeline_params_path: Path,
     nf_analysis_pipeline_resource_optimisation_path: Path,
@@ -1748,7 +1791,7 @@ def context_config(
             "pon_path": str(cg_dir),
             "root": str(balsamic_dir),
             "slurm": {
-                "mail_user": "test.email@scilifelab.se",
+                "mail_user": email_address,
                 "account": "development",
                 "qos": SlurmQos.LOW,
             },
@@ -1862,9 +1905,9 @@ def context_config(
             "root": str(mip_dir),
         },
         "raredisease": {
-            "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
+            "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
-            "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
+            "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_raredisease",
             "config_platform": str(nf_analysis_platform_config_path),
             "config_params": str(nf_analysis_pipeline_params_path),
@@ -1877,14 +1920,33 @@ def context_config(
             "root": str(raredisease_dir),
             "slurm": {
                 "account": "development",
-                "mail_user": "test.email@scilifelab.se",
+                "mail_user": email_address,
             },
             "tower_workflow": "raredisease",
         },
-        "rnafusion": {
-            "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
+        "tomte": {
+            "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
-            "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
+            "conda_binary": conda_binary.as_posix(),
+            "conda_env": "S_tomte",
+            "config_platform": str(nf_analysis_platform_config_path),
+            "config_params": str(nf_analysis_pipeline_params_path),
+            "config_resources": str(nf_analysis_pipeline_resource_optimisation_path),
+            "workflow_path": Path("workflow", "path").as_posix(),
+            "profile": "myprofile",
+            "references": Path("path", "to", "references").as_posix(),
+            "revision": "2.2.0",
+            "root": str(tomte_dir),
+            "slurm": {
+                "account": "development",
+                "mail_user": email_address,
+            },
+            "tower_workflow": "tomte",
+        },
+        "rnafusion": {
+            "binary_path": nextflow_binary.as_posix(),
+            "compute_env": "nf_tower_compute_env",
+            "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_RNAFUSION",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_path": Path("workflow", "path").as_posix(),
@@ -1901,10 +1963,10 @@ def context_config(
         "pigz": {"binary_path": "/bin/pigz"},
         "pdc": {"binary_path": "/bin/dsmc"},
         "taxprofiler": {
-            "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
+            "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
             "root": str(taxprofiler_dir),
-            "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
+            "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_taxprofiler",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_path": Path("workflow", "path").as_posix(),
@@ -2212,22 +2274,30 @@ def raredisease_case_id() -> str:
     return "raredisease_case_enough_reads"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def raredisease_sample_sheet_content(
+    sample_id: str,
     raredisease_case_id: str,
     fastq_forward_read_path: Path,
     fastq_reverse_read_path: Path,
     strandedness: str,
 ) -> str:
     """Return the expected sample sheet content  for raredisease."""
-    return ",".join(
+    headers: str = ",".join(RarediseaseSampleSheetHeaders.list())
+    row: str = ",".join(
         [
-            raredisease_case_id,
+            sample_id,
+            "1",
             fastq_forward_read_path.as_posix(),
             fastq_reverse_read_path.as_posix(),
-            strandedness,
+            "2",
+            "0",
+            "",
+            "",
+            raredisease_case_id,
         ]
     )
+    return "\n".join([headers, row])
 
 
 @pytest.fixture(scope="function")
@@ -2398,7 +2468,7 @@ def mock_deliverable(
 
 
 @pytest.fixture(scope="function")
-def mock_config(raredisease_dir: Path, raredisease_case_id: str) -> None:
+def raredisease_mock_config(raredisease_dir: Path, raredisease_case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
     Path.mkdir(Path(raredisease_dir, raredisease_case_id), parents=True, exist_ok=True)
     Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet").with_suffix(
@@ -2428,7 +2498,7 @@ def rnafusion_workflow() -> str:
     return "rnafusion"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def rnafusion_sample_sheet_content(
     rnafusion_case_id: str,
     fastq_forward_read_path: Path,
@@ -2436,7 +2506,8 @@ def rnafusion_sample_sheet_content(
     strandedness: str,
 ) -> str:
     """Return the expected sample sheet content  for rnafusion."""
-    return ",".join(
+    headers: str = ",".join(RnafusionSampleSheetEntry.headers())
+    row: str = ",".join(
         [
             rnafusion_case_id,
             fastq_forward_read_path.as_posix(),
@@ -2444,6 +2515,7 @@ def rnafusion_sample_sheet_content(
             strandedness,
         ]
     )
+    return "\n".join([headers, row])
 
 
 @pytest.fixture(scope="session")
@@ -2538,6 +2610,31 @@ def nf_analysis_pipeline_params_path(nf_analysis_analysis_dir) -> Path:
 
 
 @pytest.fixture(scope="function")
+def rnafusion_deliverables_response_data(
+    create_multiqc_html_file,
+    create_multiqc_json_file,
+    rnafusion_case_id,
+    timestamp_yesterday,
+) -> InputBundle:
+    return InputBundle(
+        **{
+            "files": [
+                {
+                    "path": create_multiqc_json_file.as_posix(),
+                    "tags": ["multiqc-json", rnafusion_case_id],
+                },
+                {
+                    "path": create_multiqc_html_file.as_posix(),
+                    "tags": ["multiqc-html", rnafusion_case_id],
+                },
+            ],
+            "created": timestamp_yesterday,
+            "name": rnafusion_case_id,
+        }
+    )
+
+
+@pytest.fixture(scope="function")
 def nf_analysis_pipeline_resource_optimisation_path(nf_analysis_analysis_dir) -> Path:
     """Path to pipeline resource optimisation file."""
     return Path(nf_analysis_analysis_dir, "pipeline_resource_optimisation").with_suffix(
@@ -2607,8 +2704,26 @@ def rnafusion_context(
     cg_context.meta_apis["analysis_api"] = RnafusionAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
-    # Create ERROR case with NO SAMPLES
+    # Create case with no associated samples
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+
+    # Create case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Workflow.RNAFUSION,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=apptag_rna,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     # Create textbook case with enough reads
     case_enough_reads: Case = helpers.add_case(
@@ -2631,24 +2746,6 @@ def rnafusion_context(
         case=case_enough_reads,
         sample=sample_rnafusion_case_enough_reads,
     )
-
-    # Create case without enough reads
-    case_not_enough_reads: Case = helpers.add_case(
-        store=status_db,
-        internal_id=case_id_not_enough_reads,
-        name=case_id_not_enough_reads,
-        data_analysis=Workflow.RNAFUSION,
-    )
-
-    sample_not_enough_reads: Sample = helpers.add_sample(
-        status_db,
-        application_tag=apptag_rna,
-        internal_id=sample_id_not_enough_reads,
-        reads=total_sequenced_reads_not_pass,
-        last_sequenced_at=datetime.now(),
-    )
-
-    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     return cg_context
 
@@ -2734,12 +2831,150 @@ def rnafusion_mock_analysis_finish(
 
 
 @pytest.fixture(scope="function")
-def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
+def rnafusion_mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
     Path.mkdir(Path(rnafusion_dir, rnafusion_case_id), parents=True, exist_ok=True)
     Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").with_suffix(
         FileExtensions.CSV
     ).touch(exist_ok=True)
+
+
+# Tomte fixtures
+@pytest.fixture(scope="session")
+def tomte_case_id() -> str:
+    """Returns a tomte case id."""
+    return "tomte_case_enough_reads"
+
+
+@pytest.fixture(scope="function")
+def tomte_dir(tmpdir_factory, apps_dir: Path) -> str:
+    """Return the path to the tomte apps dir."""
+    tomte_dir = tmpdir_factory.mktemp("tomte")
+    return Path(tomte_dir).absolute().as_posix()
+
+
+@pytest.fixture(scope="function")
+def tomte_sample_sheet_path(tomte_dir, tomte_case_id) -> Path:
+    """Path to sample sheet."""
+    return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    )
+
+
+@pytest.fixture(scope="function")
+def tomte_params_file_path(tomte_dir, tomte_case_id) -> Path:
+    """Path to parameters file."""
+    return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_params_file").with_suffix(
+        FileExtensions.YAML
+    )
+
+
+@pytest.fixture(scope="function")
+def tomte_nexflow_config_file_path(tomte_dir, tomte_case_id) -> Path:
+    """Path to config file."""
+    return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_nextflow_config").with_suffix(
+        FileExtensions.JSON
+    )
+
+
+@pytest.fixture(scope="function")
+def tomte_mock_config(tomte_dir: Path, tomte_case_id: str) -> None:
+    """Create Tomte samplesheet.csv file for testing."""
+    Path.mkdir(Path(tomte_dir, tomte_case_id), parents=True, exist_ok=True)
+    Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_samplesheet").with_suffix(
+        FileExtensions.CSV
+    ).touch(exist_ok=True)
+
+
+@pytest.fixture(scope="function")
+def tomte_sample_sheet_content(
+    tomte_case_id: str,
+    sample_id: str,
+    fastq_forward_read_path: Path,
+    fastq_reverse_read_path: Path,
+    strandedness: str,
+) -> str:
+    """Return the expected sample sheet content for tomte."""
+    headers: str = ",".join(TomteSampleSheetHeaders.list())
+    row: str = ",".join(
+        [
+            tomte_case_id,
+            sample_id,
+            fastq_forward_read_path.as_posix(),
+            fastq_reverse_read_path.as_posix(),
+            strandedness,
+        ]
+    )
+    return "\n".join([headers, row])
+
+
+@pytest.fixture(scope="function")
+def tomte_context(
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    nf_analysis_housekeeper: HousekeeperAPI,
+    trailblazer_api: MockTB,
+    hermes_api: HermesApi,
+    cg_dir: Path,
+    tomte_case_id: str,
+    sample_id: str,
+    no_sample_case_id: str,
+    total_sequenced_reads_pass: int,
+    apptag_rna: str,
+    case_id_not_enough_reads: str,
+    sample_id_not_enough_reads: str,
+    total_sequenced_reads_not_pass: int,
+) -> CGConfig:
+    """Context to use in CLI."""
+    cg_context.housekeeper_api_ = nf_analysis_housekeeper
+    cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.meta_apis["analysis_api"] = TomteAnalysisAPI(config=cg_context)
+    status_db: Store = cg_context.status_db
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+
+    # Create a textbook case with enough reads
+    case_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=tomte_case_id,
+        name=tomte_case_id,
+        data_analysis=Workflow.TOMTE,
+    )
+
+    sample_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=apptag_rna,
+        internal_id=sample_id,
+        reads=total_sequenced_reads_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=case_enough_reads,
+        sample=sample_enough_reads,
+    )
+
+    # Create a case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Workflow.TOMTE,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=apptag_rna,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
+    return cg_context
 
 
 # Taxprofiler fixtures
@@ -2782,6 +3017,14 @@ def taxprofiler_sample_sheet_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
+def taxprofiler_nexflow_config_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
+    """Path to config file."""
+    return Path(
+        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_nextflow_config"
+    ).with_suffix(FileExtensions.JSON)
+
+
+@pytest.fixture(scope="function")
 def taxprofiler_sample_sheet_content(
     sample_name: str,
     sequencing_platform: str,
@@ -2789,7 +3032,8 @@ def taxprofiler_sample_sheet_content(
     fastq_reverse_read_path: Path,
 ) -> str:
     """Return the expected sample sheet content  for taxprofiler."""
-    return ",".join(
+    headers: str = ",".join(TaxprofilerSampleSheetEntry.headers())
+    row: str = ",".join(
         [
             sample_name,
             sample_name,
@@ -2799,6 +3043,7 @@ def taxprofiler_sample_sheet_content(
             "",
         ]
     )
+    return "\n".join([headers, row])
 
 
 @pytest.fixture(scope="function")
@@ -2900,6 +3145,10 @@ def taxprofiler_context(
     another_sample_name: str,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
+    microbial_application_tag: str,
+    case_id_not_enough_reads: str,
+    sample_id_not_enough_reads: str,
+    total_sequenced_reads_not_pass: int,
 ) -> CGConfig:
     """Context to use in cli."""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
@@ -2907,9 +3156,28 @@ def taxprofiler_context(
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
-    # Create ERROR case with NO SAMPLES
+    # Create case with no associate samples
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
+    # Create case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Workflow.TAXPROFILER,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=microbial_application_tag,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
+    # Create case with associated samples
     taxprofiler_case: Case = helpers.add_case(
         store=status_db,
         internal_id=taxprofiler_case_id,
@@ -3010,7 +3278,7 @@ def taxprofiler_mock_analysis_finish(
     Path(taxprofiler_dir, taxprofiler_case_id, "pipeline_info", software_version_file).touch(
         exist_ok=True
     )
-    Path(taxprofiler_dir, taxprofiler_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
+    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet.csv").touch(
         exist_ok=True
     )
     Path.mkdir(
@@ -3039,7 +3307,7 @@ def taxprofiler_mock_analysis_finish(
 
 
 @pytest.fixture(scope="function")
-def mock_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
+def taxprofiler_mock_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
     """Create CSV sample sheet file for testing."""
     Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
     Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(
@@ -3064,6 +3332,31 @@ def taxprofiler_deliverable_data(
             },
         ]
     }
+
+
+@pytest.fixture(scope="function")
+def taxprofiler_deliverables_response_data(
+    create_multiqc_html_file,
+    create_multiqc_json_file,
+    taxprofiler_case_id,
+    timestamp_yesterday,
+) -> InputBundle:
+    return InputBundle(
+        **{
+            "files": [
+                {
+                    "path": create_multiqc_json_file.as_posix(),
+                    "tags": ["multiqc-json", taxprofiler_case_id],
+                },
+                {
+                    "path": create_multiqc_html_file.as_posix(),
+                    "tags": ["multiqc-html", taxprofiler_case_id],
+                },
+            ],
+            "created": timestamp_yesterday,
+            "name": taxprofiler_case_id,
+        }
+    )
 
 
 @pytest.fixture(scope="function")
