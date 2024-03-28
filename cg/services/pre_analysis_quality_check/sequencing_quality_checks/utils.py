@@ -43,7 +43,7 @@ def sample_has_express_priority(sample: Sample) -> bool:
     return sample.priority == Priority.express
 
 
-def case_has_lower_priority_than_express(case: Case) -> bool:
+def case_is_not_express_priority(case: Case) -> bool:
     """
     Check if a case is lower than express priority.
 
@@ -51,7 +51,7 @@ def case_has_lower_priority_than_express(case: Case) -> bool:
         bool: True if the case is lower than express priority, False otherwise.
 
     """
-    return case.priority < Priority.express
+    return case.priority == Priority.express
 
 
 def ready_made_library_sample_has_enough_reads(sample: Sample) -> bool:
@@ -91,7 +91,7 @@ def get_sequencing_qc_of_case(case: Case) -> bool:
         bool: True if the case pass the qc, False otherwise.
 
     """
-    if case_has_lower_priority_than_express(case):
+    if case_is_not_express_priority(case):
         return all(sample_has_enough_reads(sample) for sample in case.samples)
     return False
 

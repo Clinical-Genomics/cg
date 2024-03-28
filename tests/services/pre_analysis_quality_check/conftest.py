@@ -6,7 +6,7 @@ from cg.store.store import Store
 from tests.conftest import StoreHelpers
 
 
-class ScenariosGenerator:
+class PreAnalysisQCScenarios:
     def __init__(self, store: Store, helpers: StoreHelpers):
         self.store: Store = store
         self.helpers: StoreHelpers = helpers

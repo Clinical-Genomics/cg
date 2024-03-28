@@ -3,24 +3,10 @@ from typing import Callable
 from cg.services.pre_analysis_quality_check.quality_controller.quality_controller import (
     QualityController,
 )
-from cg.constants.sequencing_quality_constants import (
-    CASE_SEQUENCING_QUALITY_CHECKS,
-    SAMPLE_SEQUENCING_QUALITY_CHECKS,
-)
+from cg.services.pre_analysis_quality_check.quality_check_mapper.quality_check_mapper import WorkflowQualityCheckMapper
 from cg.store.models import Case, Sample
 
 
-def get_sequencing_quality_checks_for_case(
-    data_analysis: str,
-) -> list[Callable] | None:
-    sequencing_quality_checks: list[Callable] | None = CASE_SEQUENCING_QUALITY_CHECKS.get(
-        data_analysis, None
-    )
-    if not sequencing_quality_checks:
-        raise NotImplementedError(
-            f"No sequencing quality check have implemented for workflow {data_analysis}."
-        )
-    return sequencing_quality_checks
 
 
 def run_pre_analysis_quality_check(
@@ -33,14 +19,12 @@ def run_pre_analysis_quality_check(
 def run_case_pre_analysis_quality_check(
     case: Case,
 ) -> bool:
-    sequencing_quality_checks: list[Callable] = get_sequencing_quality_checks_for_case(
-        case.data_analysis
+    quality_checks: list[Callable] = WorkflowQualityCheckMapper.get_quality_checks_for_workflow(
+        workflow=case.data_analysis
     )
-
-    quality_checks: list[Callable] = sequencing_quality_checks
-    return run_pre_analysis_quality_check(obj=case, quality_checks=quality_checks)
+    return QualityController.run_qc(obj=case, quality_checks=quality_checks)
 
 
 def run_sample_sequencing_quality_check(sample: Sample) -> bool:
-    quality_checks: list[Callable] = SAMPLE_SEQUENCING_QUALITY_CHECKS
+    quality_checks: list[Callable] = WorkflowQualityCheckMapper.get_sample_quality_checks()
     return run_pre_analysis_quality_check(obj=sample, quality_checks=quality_checks)
