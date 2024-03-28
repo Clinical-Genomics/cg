@@ -455,7 +455,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         verified_sex: Sex = sex or self.get_verified_sex(sample_data=sample_data)
 
-        verified_exome_argument: bool = self.is_exome_sample(case_id=case_id)
+        verified_exome_argument: bool = self.has_case_only_exome_samples(case_id=case_id)
 
         config_case: dict[str, str] = {
             "case_id": case_id,
