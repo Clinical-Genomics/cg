@@ -676,7 +676,6 @@ def test_create_copy_complete_file_exist(
 
     # GIVEN a flow cell that has been decrypted in flow_cell directory
     flow_cell_dir: Path = novaseq_x_flow_cell.path
-    flow_cells: Path = flow_cell_dir.parent
 
     # GIVEN the copy complete to be created
     copy_complete_txt: str = DemultiplexingDirsAndFiles.COPY_COMPLETE
@@ -685,7 +684,7 @@ def test_create_copy_complete_file_exist(
     flow_cell_dir.joinpath(copy_complete_txt).touch()
 
     # WHEN creating a copy complete file
-    backup_api.create_copy_complete(decrypted_flow_cell=flow_cell_dir, run_dir=flow_cells)
+    backup_api.create_copy_complete(flow_cell_dir)
 
     # THEN the copy complete file should exist in the flow cell directory
     assert flow_cell_dir.joinpath(copy_complete_txt).exists() is True
@@ -700,7 +699,6 @@ def test_create_copy_complete_file_does_not_exist(
 
     # GIVEN a flow cell that has been decrypted in flow_cell directory
     flow_cell_dir: Path = novaseq_x_flow_cell.path
-    flow_cells: Path = flow_cell_dir.parent
 
     # GIVEN the copy complete to be created
     copy_complete_txt: str = DemultiplexingDirsAndFiles.COPY_COMPLETE
@@ -709,7 +707,7 @@ def test_create_copy_complete_file_does_not_exist(
     flow_cell_dir.joinpath(copy_complete_txt).unlink(missing_ok=True)
 
     # WHEN creating a copy complete file
-    backup_api.create_copy_complete(decrypted_flow_cell=flow_cell_dir, run_dir=flow_cells)
+    backup_api.create_copy_complete(flow_cell_dir)
 
     # THEN the copy complete file should exist in the flow cell directory
     assert flow_cell_dir.joinpath(copy_complete_txt).exists() is True
