@@ -2,7 +2,6 @@
 
 import logging
 from pathlib import Path
-from typing import Any
 
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat
@@ -14,10 +13,9 @@ from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
-from cg.models.fastq import FastqFileMeta
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.resources import TAXPROFILER_BUNDLE_FILENAMES_PATH
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
