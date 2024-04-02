@@ -13,7 +13,7 @@ from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.resources import TAXPROFILER_BUNDLE_FILENAMES_PATH
-from cg.store.models import CaseSample
+from cg.store.models import CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -99,12 +99,13 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             priority=self.account,
         )
 
-    def multiqc_search_patterns(self, case_id: str) -> dict:
-        """Get search patterns for multiqc for Taxprofiler."""
-        return {
-            f"{sample.name}_{sample.name}": sample.internal_id
-            for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
+    def get_multiqc_search_patterns(self, case_id: str) -> dict:
+        """Return search patterns for MultiQC for Taxprofiler."""
+        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
+        search_patterns: dict[str, str] = {
+            f"{sample.name}_{sample.name}": sample.internal_id for sample in samples
         }
+        return search_patterns
 
     def get_deliverables_template_content(self) -> list[dict[str, str]]:
         """Return deliverables file template content."""

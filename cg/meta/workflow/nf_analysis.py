@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 from pydantic.v1 import ValidationError
 
@@ -99,8 +99,8 @@ class NfAnalysisAPI(AnalysisAPI):
 
     @property
     def is_multiqc_pattern_search_exact(self) -> bool:
-        """Return True if only exact pattern search is allowed to collect metrics information from multiqc file.
-        If false, pattern must be contained but does not need to be exact."""
+        """Return True if only exact pattern search is allowed to collect metrics information from MultiQC file.
+        If false, pattern must be present but does not need to be exact."""
         return False
 
     def get_profile(self, profile: str | None = None) -> str:
@@ -598,18 +598,18 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get nf-core workflow metrics constants."""
         return {}
 
-    def multiqc_search_patterns(self, case_id: str) -> dict:
-        """Get search patterns for multiqc. Each key is a search pattern and each value
-        corresponds to the metric id to set in the metrics deliverables file.
-        Multiple search patterns can be added, and ideally it should be
+    def get_multiqc_search_patterns(self, case_id: str) -> dict:
+        """Return search patterns for MultiQC. Each key is a search pattern and each value
+        corresponds to the metric ID to set in the metrics deliverables file.
+        Multiple search patterns can be added. Ideally patterns used should be sample ids, e.g.
         {sample_id_1: sample_id_1, sample_id_2: sample_id_2}."""
-        return {
-            sample_id: sample_id
-            for sample_id in self.status_db.get_sample_ids_by_case_id(case_id=case_id)
-        }
+        sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
+        search_patterns: dict[str, str] = {sample_id: sample_id for sample_id in sample_ids}
+        return search_patterns
 
-    def remove_duplicated_metrics(self, metrics: list[MetricsBase]) -> list[MetricsBase]:
-        """Remove duplicated metrics based on id and sample name. If duplicated entries are found
+    @staticmethod
+    def get_deduplicated_metrics(metrics: list[MetricsBase]) -> list[MetricsBase]:
+        """Return deduplicated metrics based on metric ID and name. If duplicated entries are found
         only the first one will be kept."""
         deduplicated_metric_id_name = set([])
         deduplicated_metrics: list = []
@@ -621,22 +621,24 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Return a list of the metrics specified in a MultiQC json file."""
-        multiqc_json: MultiqcDataJson = MultiqcDataJson(
+        multiqc_json = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
         )
         metrics = []
-        for search_pattern, metric_id in self.multiqc_search_patterns(case_id=case_id).items():
-            metrics_for_pattern: list[MetricsBase] = self.parse_multiqc_json_for_pattern(
-                search_pattern=search_pattern,
-                multiqc_json=multiqc_json,
-                metric_id=metric_id,
-                exact_match=self.is_multiqc_pattern_search_exact,
+        for search_pattern, metric_id in self.get_multiqc_search_patterns(case_id=case_id).items():
+            metrics_for_pattern: list[MetricsBase] = (
+                self.get_metrics_from_multiqc_json_with_pattern(
+                    search_pattern=search_pattern,
+                    multiqc_json=multiqc_json,
+                    metric_id=metric_id,
+                    exact_match=self.is_multiqc_pattern_search_exact,
+                )
             )
             metrics.extend(metrics_for_pattern)
-        metrics = self.remove_duplicated_metrics(metrics=metrics)
+        metrics = self.get_deduplicated_metrics(metrics=metrics)
         return metrics
 
-    def parse_multiqc_json_for_pattern(
+    def get_metrics_from_multiqc_json_with_pattern(
         self,
         search_pattern: str,
         multiqc_json: MultiqcDataJson,
@@ -644,7 +646,7 @@ class NfAnalysisAPI(AnalysisAPI):
         exact_match: bool = False,
     ) -> list[MetricsBase]:
         """Parse a MultiqcDataJson and returns a list of metrics."""
-        metrics_values = []
+        metrics: list[MetricsBase] = []
         for section in multiqc_json.report_general_stats_data:
             for section_name, section_values in section.items():
                 if exact_match:
@@ -656,8 +658,8 @@ class NfAnalysisAPI(AnalysisAPI):
                         metric: MetricsBase = self.get_multiqc_metric(
                             metric_name=metric_name, metric_value=metric_value, metric_id=metric_id
                         )
-                        metrics_values.append(metric)
-        return metrics_values
+                        metrics.append(metric)
+        return metrics
 
     def get_multiqc_metric(
         self, metric_name: str, metric_value: str | int | float, metric_id: str

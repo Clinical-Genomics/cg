@@ -17,7 +17,7 @@ from cg.models.rnafusion.rnafusion import (
     RnafusionSampleSheetEntry,
 )
 from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
-from cg.store.models import CaseSample
+from cg.store.models import CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -107,16 +107,16 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             return genomes_base.absolute()
         return Path(self.references).absolute()
 
-    def multiqc_search_patterns(self, case_id: str) -> dict:
-        """Get search patterns for multiqc for Rnafusion."""
-        return {
-            case_id: sample.internal_id
-            for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
-        }
+    def get_multiqc_search_patterns(self, case_id: str) -> dict:
+        """Return search patterns for MultiQC for Rnafusion."""
+        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
+        search_patterns: dict[str, str] = {case_id: sample.internal_id for sample in samples}
+        return search_patterns
 
     @staticmethod
-    def ensure_mandatory_metrics_present(metrics: set[MetricsBase]) -> None:
-        """Check that all mandatory metrics are present. Raise error if missing."""
+    def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
+        """Check that all mandatory metrics are present.
+        Raise: MissingMetrics if mandatory metrics are missing."""
         given_metrics: set = {metric.name for metric in metrics}
         mandatory_metrics: set = set(RNAFUSION_METRIC_CONDITIONS.keys())
         LOG.info("Mandatory Metrics Keys:")
