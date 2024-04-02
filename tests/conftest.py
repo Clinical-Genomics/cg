@@ -2320,12 +2320,6 @@ def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
 
 
 @pytest.fixture(scope="function")
-def rnafusion_multiqc_json_metrics(raredisease_analysis_dir) -> dict:
-    """Returns the content of a mock Multiqc JSON file."""
-    return read_json(file_path=Path(raredisease_analysis_dir, multiqc_json_file))
-
-
-@pytest.fixture(scope="function")
 def raredisease_sample_sheet_path(raredisease_dir, raredisease_case_id) -> Path:
     """Path to sample sheet."""
     return Path(
@@ -2587,6 +2581,14 @@ def rnafusion_metrics_deliverables(rnafusion_analysis_dir: Path) -> list[dict]:
             rnafusion_analysis_dir, "rnafusion_case_enough_reads_metrics_deliverables.yaml"
         )
     )
+
+
+@pytest.fixture(scope="function")
+def rnafusion_metrics_deliverables_path(rnafusion_dir: Path, rnafusion_case_id: str) -> Path:
+    """Path to deliverables file."""
+    return Path(
+        rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_metrics_deliverables"
+    ).with_suffix(FileExtensions.YAML)
 
 
 @pytest.fixture(scope="function")
@@ -2887,6 +2889,77 @@ def tomte_mock_config(tomte_dir: Path, tomte_case_id: str) -> None:
 
 
 @pytest.fixture(scope="function")
+def tomte_metrics_deliverables_path(tomte_dir: Path, tomte_case_id: str) -> Path:
+    """Path to deliverables file."""
+    return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_metrics_deliverables").with_suffix(
+        FileExtensions.YAML
+    )
+
+
+@pytest.fixture(scope="function")
+def tomte_metrics_deliverables(tomte_analysis_dir: Path) -> list[dict]:
+    """Returns the content of a mock metrics deliverables file."""
+    return read_yaml(
+        file_path=Path(tomte_analysis_dir, "tomte_case_enough_reads_metrics_deliverables.yaml")
+    )
+
+
+@pytest.fixture(scope="function")
+def tomte_deliverable_data(tomte_dir: Path, tomte_case_id: str, sample_id: str) -> dict:
+    return {
+        "files": [
+            {
+                "path": f"{tomte_dir}/{tomte_case_id}/multiqc/multiqc_report.html",
+                "path_index": "",
+                "step": "report",
+                "tag": ["multiqc-html", "rna"],
+                "id": tomte_case_id,
+                "format": "html",
+                "mandatory": True,
+            },
+        ]
+    }
+
+
+@pytest.fixture(scope="function")
+def tomte_multiqc_json_metrics(tomte_analysis_dir) -> dict:
+    """Returns the content of a mock Multiqc JSON file."""
+    return read_json(file_path=Path(tomte_analysis_dir, multiqc_json_file))
+
+
+@pytest.fixture
+def tomte_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with Tomte analysis files."""
+    return Path(analysis_dir, "tomte")
+
+
+@pytest.fixture(scope="function")
+def tomte_mock_deliverable_dir(
+    tomte_dir: Path, tomte_deliverable_data: dict, tomte_case_id: str
+) -> Path:
+    """Create deliverable file with dummy data and files to deliver."""
+    Path.mkdir(
+        Path(tomte_dir, tomte_case_id),
+        parents=True,
+        exist_ok=True,
+    )
+    Path.mkdir(
+        Path(tomte_dir, tomte_case_id, "multiqc"),
+        parents=True,
+        exist_ok=True,
+    )
+    for report_entry in tomte_deliverable_data["files"]:
+        Path(report_entry["path"]).touch(exist_ok=True)
+    WriteFile.write_file_from_content(
+        content=tomte_deliverable_data,
+        file_format=FileFormat.JSON,
+        file_path=Path(tomte_dir, tomte_case_id, tomte_case_id + deliverables_yaml),
+    )
+
+    return tomte_dir
+
+
+@pytest.fixture(scope="function")
 def tomte_sample_sheet_content(
     tomte_case_id: str,
     sample_id: str,
@@ -2906,6 +2979,39 @@ def tomte_sample_sheet_content(
         ]
     )
     return "\n".join([headers, row])
+
+
+@pytest.fixture(scope="function")
+def tomte_mock_analysis_finish(
+    tomte_dir: Path, tomte_case_id: str, tomte_multiqc_json_metrics: dict, tower_id: int
+) -> None:
+    """Create analysis_finish file for testing."""
+    Path.mkdir(Path(tomte_dir, tomte_case_id, "pipeline_info"), parents=True, exist_ok=True)
+    Path(tomte_dir, tomte_case_id, "pipeline_info", software_version_file).touch(exist_ok=True)
+    Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_samplesheet.csv").touch(exist_ok=True)
+    Path.mkdir(
+        Path(tomte_dir, tomte_case_id, "multiqc", "multiqc_data"),
+        parents=True,
+        exist_ok=True,
+    )
+    write_json(
+        content=tomte_multiqc_json_metrics,
+        file_path=Path(
+            tomte_dir,
+            tomte_case_id,
+            "multiqc",
+            "multiqc_data",
+            "multiqc_data",
+        ).with_suffix(FileExtensions.JSON),
+    )
+    write_yaml(
+        content={tomte_case_id: [tower_id]},
+        file_path=Path(
+            tomte_dir,
+            tomte_case_id,
+            "tower_ids",
+        ).with_suffix(FileExtensions.YAML),
+    )
 
 
 @pytest.fixture(scope="function")
