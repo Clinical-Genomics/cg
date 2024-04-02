@@ -1,10 +1,11 @@
 """Module for Rnafusion analysis API tests."""
 
+import os
+from pathlib import Path
+
+from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.constants import EXIT_SUCCESS
-from pathlib import Path
-import os
 
 
 def test_get_sample_sheet_content(
@@ -37,7 +38,6 @@ def test_write_params_file(raredisease_context: CGConfig, raredisease_case_id: s
 
     # GIVEN Raredisease analysis API and input (nextflow sample sheet path)/output (case directory) parameters
     analysis_api: RarediseaseAnalysisAPI = raredisease_context.meta_apis["analysis_api"]
-    in_out = {"input": "input_path", "output": "output_path"}
 
     # WHEN creating case directory
     analysis_api.create_case_directory(case_id=raredisease_case_id, dry_run=False)
@@ -52,7 +52,7 @@ def test_write_params_file(raredisease_context: CGConfig, raredisease_case_id: s
     assert os.path.isfile(analysis_api.get_params_file_path(case_id=raredisease_case_id))
 
     # WHEN writing config file
-    analysis_api.write_config_file(case_id=raredisease_case_id, workflow_parameters=in_out)
+    analysis_api.create_nextflow_config(case_id=raredisease_case_id)
 
     # THEN the file is created
     assert os.path.isfile(analysis_api.get_nextflow_config_path(case_id=raredisease_case_id))
