@@ -11,7 +11,7 @@ from cg.constants.subject import Sex
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.store.models import Flowcell, Sample
+from cg.store.models import Flowcell
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -96,7 +96,7 @@ def store_with_flow_cell_to_clean(
         store=store,
         has_backup=True,
     )
-    sample: Sample = helpers.add_sample(
+    helpers.add_sample(
         store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
@@ -124,7 +124,7 @@ def store_with_flow_cell_not_to_clean(
         store=store,
         has_backup=True,
     )
-    sample: Sample = helpers.add_sample(
+    helpers.add_sample(
         store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
