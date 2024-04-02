@@ -17,7 +17,7 @@ from cg.models.rnafusion.rnafusion import (
     RnafusionSampleSheetEntry,
 )
 from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
-from cg.store.models import CaseSample, Sample
+from cg.store.models import CaseSample
 
 LOG = logging.getLogger(__name__)
 
@@ -106,12 +106,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         if genomes_base:
             return genomes_base.absolute()
         return Path(self.references).absolute()
-
-    def get_multiqc_search_patterns(self, case_id: str) -> dict:
-        """Return search patterns for MultiQC for Rnafusion."""
-        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
-        search_patterns: dict[str, str] = {case_id: sample.internal_id for sample in samples}
-        return search_patterns
 
     @staticmethod
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:

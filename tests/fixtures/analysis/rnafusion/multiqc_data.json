@@ -2,7 +2,7 @@
     "report_data_sources": {},
     "report_general_stats_data": [
         {
-            "rnafusion_case_enough_reads": {
+            "ADM1": {
                 "PF_BASES": 14818118467.0,
                 "PF_ALIGNED_BASES": 14216931956.0,
                 "RIBOSOMAL_BASES": 93556030.0,
@@ -37,7 +37,7 @@
             }
         },
         {
-            "rnafusion_case_enough_reads": {
+            "ADM1": {
                 "LIBRARY": "Unknown Library",
                 "UNPAIRED_READS_EXAMINED": 589.0,
                 "READ_PAIRS_EXAMINED": 72391566.0,
@@ -51,7 +51,7 @@
             }
         },
         {
-            "rnafusion_case_enough_reads": {
+            "ADM1": {
                 "total_reads": 74557102.0,
                 "avg_input_read_length": 198.0,
                 "uniquely_mapped": 67865050.0,
@@ -81,7 +81,7 @@
             }
         },
         {
-            "rnafusion_case_enough_reads": {
+            "ADM1": {
                 "filtering_result_passed_filter_reads": 149114204.0,
                 "filtering_result_low_quality_reads": 855796.0,
                 "filtering_result_too_many_N_reads": 4992.0,
@@ -105,7 +105,7 @@
             }
         },
         {
-            "rnafusion_case_enough_reads_1": {
+            "ADM1_1": {
             "percent_gc": 51.0,
             "avg_sequence_length": 98.42709962090532,
             "median_sequence_length": 100,
@@ -113,7 +113,7 @@
             "percent_duplicates": 64.54554620264767,
             "percent_fails": 18.181818181818183
         },
-            "rnafusion_case_enough_reads_2": {
+            "ADM1_2": {
             "percent_gc": 51.0,
             "avg_sequence_length": 151.0,
             "median_sequence_length": 151,

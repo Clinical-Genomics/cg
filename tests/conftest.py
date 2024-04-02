@@ -2762,7 +2762,7 @@ def rnafusion_deliverable_data(rnafusion_dir: Path, rnafusion_case_id: str, samp
                 "path_index": "",
                 "step": "report",
                 "tag": ["multiqc-html", "rna"],
-                "id": rnafusion_case_id,
+                "id": sample_id,
                 "format": "html",
                 "mandatory": True,
             },
