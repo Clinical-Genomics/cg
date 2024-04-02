@@ -889,7 +889,7 @@ class Sample(Base, PriorityMixin):
         if links:
             data["links"] = [link_obj.to_dict(family=True, parents=True) for link_obj in self.links]
         if flowcells:
-            data["flowcells"] = [flowcell_obj.to_dict() for flowcell_obj in self.flow_cells]
+            data["flowcells"] = [flow_cell.to_dict() for flow_cell in self.flow_cells]
         return data
 
 
