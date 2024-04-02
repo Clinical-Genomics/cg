@@ -4,6 +4,7 @@ import logging
 
 from cg.constants import Workflow
 from cg.constants.constants import Strandedness
+from cg.constants.nf_analysis import TOMTE_METRIC_CONDITIONS
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import WorkflowParameters
@@ -64,3 +65,6 @@ class TomteAnalysisAPI(NfAnalysisAPI):
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
         )
+
+    def get_workflow_metrics(self) -> dict:
+        return TOMTE_METRIC_CONDITIONS
