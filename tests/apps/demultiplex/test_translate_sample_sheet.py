@@ -34,7 +34,7 @@ def test_is_sample_sheet_from_flow_cell_translatable_no_run_params(
     caplog: LogCaptureFixture,
 ):
     """Test that a flow cell without run parameters can't have its sample sheet translated."""
-    # GIVEN a sample sheet api
+    # GIVEN a sample sheet API
     api: SampleSheetAPI = sample_sheet_context_broken_flow_cells.sample_sheet_api
 
     # GIVEN a flow cell without run parameters
@@ -54,7 +54,7 @@ def test_is_sample_sheet_from_flow_cell_translatable_no_sample_sheet(
     caplog: LogCaptureFixture,
 ):
     """Test that a flow cell without sample sheet can not be translated."""
-    # GIVEN a sample sheet api
+    # GIVEN a sample sheet API
     api: SampleSheetAPI = sample_sheet_context_broken_flow_cells.sample_sheet_api
 
     # GIVEN a flow cell without a sample sheet
@@ -76,7 +76,7 @@ def test_is_sample_sheet_from_flow_cell_translatable_bcl_convert_sample_sheet(
     caplog: LogCaptureFixture,
 ):
     """Test that a flow cell with a BCLConvert sample sheet can not be translated."""
-    # GIVEN a sample sheet api
+    # GIVEN a sample sheet API
     api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
 
     # GIVEN a flow cell with a BCLConvert sample sheet
@@ -100,15 +100,15 @@ def test_replace_sample_sheet_header_bcl2fastq(
     sample_sheet_bcl2fastq_data_header_with_replaced_sample_id: list[list[str]],
 ):
     """Test that the header is replaced to BCLConvert format for a Bcl2Fastq sample sheet."""
-    # GIVEN a sample sheet api
+    # GIVEN a sample sheet API
     api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
 
     # GIVEN a Bcl2Fastq sample sheet content
 
-    # WHEN replacing the header
+    # WHEN replacing the data header
     new_content: list[list[str]] = api._replace_sample_header(sample_sheet_bcl2fastq_data_header)
 
-    # THEN the new header is correct
+    # THEN the new header has BCLConvert column names
     assert new_content == sample_sheet_bcl2fastq_data_header_with_replaced_sample_id
 
 
@@ -117,7 +117,7 @@ def test_replace_sample_sheet_header_bcl_convert(
     sample_sheet_bcl2fastq_data_header_with_replaced_sample_id: list[list[str]],
 ):
     """Test that the header of a BCLConvert sample sheet can not be replaced."""
-    # GIVEN a sample sheet api
+    # GIVEN a sample sheet API
     api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
 
     # GIVEN a BCLConvert sample sheet content
@@ -134,7 +134,7 @@ def test_translate_sample_sheet(
     tmp_flow_cell_with_bcl2fastq_sample_sheet: Path,
 ):
     """Test that a Bcl2Fastq sample sheet is translated to BCLConvert format."""
-    # GIVEN a sample sheet api
+    # GIVEN a sample sheet API
     api: SampleSheetAPI = sample_sheet_context_broken_flow_cells.sample_sheet_api
 
     # GIVEN a flow cell with a translatable sample sheet
