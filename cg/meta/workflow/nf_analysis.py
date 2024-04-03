@@ -738,17 +738,17 @@ class NfAnalysisAPI(AnalysisAPI):
 
         self.status_db.verify_case_exists(case_internal_id=case_id)
         self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
-        if not dry_run:
-            workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
-            self.write_deliverables_file(
-                deliverables_content=workflow_content.dict(),
-                file_path=self.get_deliverables_file_path(case_id=case_id),
-            )
+        if dry_run:
+            LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
+            return
+        workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
+        self.write_deliverables_file(
+            deliverables_content=workflow_content.dict(),
+            file_path=self.get_deliverables_file_path(case_id=case_id),
+        )
         LOG.info(
             f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
         )
-
-        LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
 
     def store_analysis_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
         """Store a finished nextflow analysis in Housekeeper and StatusDB"""
