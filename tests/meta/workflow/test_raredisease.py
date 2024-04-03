@@ -35,7 +35,6 @@ def test_get_sample_sheet_content(
 def test_write_params_file(raredisease_context: CGConfig, raredisease_case_id: str):
     # GIVEN Raredisease analysis API and input (nextflow sample sheet path)/output (case directory) parameters
     analysis_api: RarediseaseAnalysisAPI = raredisease_context.meta_apis["analysis_api"]
-    in_out = {"input": "input_path", "output": "output_path"}
 
     # WHEN creating case directory
     analysis_api.create_case_directory(case_id=raredisease_case_id, dry_run=False)

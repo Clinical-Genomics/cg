@@ -224,6 +224,7 @@ def apply_case_filter(
     workflow_search: str | None = None,
     priority: str | None = None,
     ticket_id: str | None = None,
+    order_id: int | None = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
@@ -245,6 +246,7 @@ def apply_case_filter(
             workflow_search=workflow_search,
             priority=priority,
             ticket_id=ticket_id,
+            order_id=order_id,
         )
     return cases
 
