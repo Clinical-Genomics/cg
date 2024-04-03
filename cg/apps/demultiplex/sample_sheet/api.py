@@ -126,11 +126,9 @@ class SampleSheetAPI:
         """
         Determine if the sample sheet from the flow cell directory is translatable to BCLConvert.
         """
-        if not self._are_necessary_files_in_flow_cell(flow_cell):
-            return False
-        if not self._is_sample_sheet_bcl2fastq(flow_cell):
-            return False
-        return True
+        return self._are_necessary_files_in_flow_cell(
+            flow_cell
+        ) and self._is_sample_sheet_bcl2fastq(flow_cell)
 
     @staticmethod
     def _replace_sample_header(sample_sheet_content: list[list[str]]) -> list[list[str]]:
