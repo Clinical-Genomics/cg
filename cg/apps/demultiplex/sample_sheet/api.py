@@ -148,8 +148,10 @@ class SampleSheetAPI:
         flow_cell_samples: list[FlowCellSampleBCLConvert] = get_flow_cell_samples_from_content(
             sample_sheet_content=old_content, sample_type=FlowCellSampleBCLConvert
         )
-        creator = SampleSheetCreatorBCLConvert(flow_cell=flow_cell, lims_samples=flow_cell_samples)
-        new_content = creator.construct_sample_sheet()
+        bcl_convert_creator = SampleSheetCreatorBCLConvert(
+            flow_cell=flow_cell, lims_samples=flow_cell_samples
+        )
+        new_content = bcl_convert_creator.construct_sample_sheet()
         self.validator.validate_sample_sheet_from_content(
             content=new_content, bcl_convert=BclConverter.BCLCONVERT
         )
