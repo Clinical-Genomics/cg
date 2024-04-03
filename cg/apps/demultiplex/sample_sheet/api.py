@@ -120,7 +120,8 @@ class SampleSheetAPI:
     @staticmethod
     def _replace_sample_header(sample_sheet_content: list[list[str]]) -> list[list[str]]:
         """
-        Replace the old sample id header in the Bcl2Fastq sample sheet content with the new one.
+        Replace the old sample ID header in the Bcl2Fastq sample sheet content with the BCLConvert
+        formatted one.
         Raises:
             SampleSheetError: If the data header is not found in the sample sheet.
         """
