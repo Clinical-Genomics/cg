@@ -3015,6 +3015,57 @@ def tomte_mock_analysis_finish(
 
 
 @pytest.fixture(scope="function")
+def tomte_deliverables_file_path(tomte_dir, tomte_case_id) -> Path:
+    """Path to deliverables file."""
+    return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_deliverables").with_suffix(
+        FileExtensions.YAML
+    )
+
+
+@pytest.fixture(scope="function")
+def tomte_hermes_deliverables(tomte_deliverable_data: dict, tomte_case_id: str) -> dict:
+    hermes_output: dict = {"workflow": "tomte", "bundle_id": tomte_case_id, "files": []}
+    for file_info in tomte_deliverable_data["files"]:
+        tags: list[str] = []
+        if "html" in file_info["format"]:
+            tags.append("multiqc-html")
+        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
+    return hermes_output
+
+
+@pytest.fixture(scope="function")
+def tomte_malformed_hermes_deliverables(tomte_hermes_deliverables: dict) -> dict:
+    malformed_deliverable: dict = tomte_hermes_deliverables.copy()
+    malformed_deliverable.pop("workflow")
+    return malformed_deliverable
+
+
+@pytest.fixture(scope="function")
+def tomte_deliverables_response_data(
+    create_multiqc_html_file,
+    create_multiqc_json_file,
+    tomte_case_id,
+    timestamp_yesterday,
+) -> InputBundle:
+    return InputBundle(
+        **{
+            "files": [
+                {
+                    "path": create_multiqc_json_file.as_posix(),
+                    "tags": ["multiqc-json", tomte_case_id],
+                },
+                {
+                    "path": create_multiqc_html_file.as_posix(),
+                    "tags": ["multiqc-html", tomte_case_id],
+                },
+            ],
+            "created": timestamp_yesterday,
+            "name": tomte_case_id,
+        }
+    )
+
+
+@pytest.fixture(scope="function")
 def tomte_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
