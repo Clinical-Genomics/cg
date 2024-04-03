@@ -140,13 +140,13 @@ class SampleSheetAPI:
         )
         if not self._is_sample_sheet_from_flow_cell_translatable(flow_cell):
             raise SampleSheetError("Could not translate sample sheet")
-        old_content: list[list[str]] = self._replace_sample_header(
-            ReadFile.get_content_from_file(
-                file_format=FileFormat.CSV, file_path=flow_cell.sample_sheet_path
-            )
+        original_content: list[list[str]] = ReadFile.get_content_from_file(
+            file_format=FileFormat.CSV, file_path=flow_cell.sample_sheet_path
         )
+        content_with_fixed_header: list[list[str]] = self._replace_sample_header(original_content)
+
         flow_cell_samples: list[FlowCellSampleBCLConvert] = get_flow_cell_samples_from_content(
-            sample_sheet_content=old_content, sample_type=FlowCellSampleBCLConvert
+            sample_sheet_content=content_with_fixed_header, sample_type=FlowCellSampleBCLConvert
         )
         bcl_convert_creator = SampleSheetCreatorBCLConvert(
             flow_cell=flow_cell, lims_samples=flow_cell_samples
