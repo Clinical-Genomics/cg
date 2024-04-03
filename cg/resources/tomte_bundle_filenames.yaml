@@ -64,6 +64,12 @@
   path_index: ~
   step: gffcompare
   tag: gffcompare
+- format: tab
+  id: SAMPLEID
+  path: PATHTOCASE/alignment/SAMPLEID.ReadsPerGene.out.tab
+  path_index: ~
+  step: star
+  tag: raw-gene-counts
 - format: csv
   id: CASEID
   path: PATHTOCASE/CASEID_samplesheet.csv
@@ -92,13 +98,13 @@
   id: CASEID
   path: PATHTOCASE/multiqc/multiqc_report.html
   path_index: ~
-  step: report
+  step: multiqc
   tag: multiqc-html
 - format: json
   id: CASEID
   path: PATHTOCASE/multiqc/multiqc_data/multiqc_data.json
   path_index: ~
-  step: multiqc-json
+  step: multiqc
   tag: multiqc-json
 - format: json
   id: CASEID
