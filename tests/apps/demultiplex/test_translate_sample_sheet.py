@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
@@ -8,6 +9,37 @@ from cg.constants.demultiplexing import BclConverter
 from cg.exc import SampleSheetError
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+
+
+@pytest.mark.parametrize(
+    "context, flow_cell_path, expected_result",
+    [
+        ("sample_sheet_context", "novaseq_6000_post_1_5_kits_flow_cell_path", False),
+        (
+            "sample_sheet_context_broken_flow_cells",
+            "tmp_flow_cell_with_bcl2fastq_sample_sheet",
+            True,
+        ),
+    ],
+    ids=["BCLConvert", "BCL2FASTQ"],
+)
+def test_is_sample_sheet_bcl2fastq(
+    context: str, flow_cell_path: str, expected_result: bool, request: FixtureRequest
+):
+    """Test that sample sheets type BCL2FASTQ return True, and type BCLConvert return False."""
+    # GIVEN a sample sheet API
+    context: CGConfig = request.getfixturevalue(context)
+    api: SampleSheetAPI = context.sample_sheet_api
+
+    # GIVEN a flow cell with a sample sheet
+    flow_cell_path: Path = request.getfixturevalue(flow_cell_path)
+    flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_path)
+
+    # WHEN checking if the sample sheet is a BCL2FASTQ
+    result: bool = api._is_sample_sheet_bcl2fastq(flow_cell=flow_cell)
+
+    # THEN assert that the sample sheet is detected correctly
+    assert result == expected_result
 
 
 def test_is_sample_sheet_from_flow_cell_translatable_passes(

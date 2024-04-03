@@ -95,10 +95,8 @@ class SampleSheetAPI:
         )
 
     @staticmethod
-    def _is_sample_sheet_from_flow_cell_translatable(flow_cell: FlowCellDirectoryData) -> bool:
-        """
-        Determine if the sample sheet from the flow cell directory is translatable to BCLConvert.
-        """
+    def _are_necessary_files_in_flow_cell(flow_cell: FlowCellDirectoryData) -> bool:
+        """Determine if the flow cell has a Run Parameters file and a sample sheet."""
         try:
             flow_cell.run_parameters_path.exists()
         except FlowCellError:
@@ -107,6 +105,11 @@ class SampleSheetAPI:
         if not flow_cell.sample_sheet_path.exists():
             LOG.error(f"Sample sheet for flow cell {flow_cell.full_name} does not exist")
             return False
+        return True
+
+    @staticmethod
+    def _is_sample_sheet_bcl2fastq(flow_cell: FlowCellDirectoryData) -> bool:
+        """Determine if the sample sheet from the flow cell directory is in BCL2FASTQ format."""
         sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.CSV, file_path=flow_cell.sample_sheet_path
         )
@@ -114,6 +117,18 @@ class SampleSheetAPI:
             LOG.error(
                 f"Sample sheet for flow cell {flow_cell.full_name} is not a Bcl2Fastq sample sheet"
             )
+            return False
+        return True
+
+    def _is_sample_sheet_from_flow_cell_translatable(
+        self, flow_cell: FlowCellDirectoryData
+    ) -> bool:
+        """
+        Determine if the sample sheet from the flow cell directory is translatable to BCLConvert.
+        """
+        if not self._are_necessary_files_in_flow_cell(flow_cell):
+            return False
+        if not self._is_sample_sheet_bcl2fastq(flow_cell):
             return False
         return True
 
