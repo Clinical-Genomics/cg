@@ -1,78 +1,83 @@
 <!-- Uploaded files -->
 {% macro uploaded_files(case, customer_id) %}
-<div class="container mb-5">
-  <h4>Uppladdade filer</h4>
-  {{ scout_files() }} {{ caesar_files(case=case, customer_id=customer_id) }}
-</div>
+  <div class="container mb-5">
+    <h4>Uppladdade filer</h4>
+    {{ scout_files() }}
+    {{ caesar_files(case=case, customer_id=customer_id) }}
+  </div>
 {% endmacro %}
 
 <!-- Scout files -->
-{% macro scout_files() %} {% endmacro %}
+{% macro scout_files() %}
+  <!-- TODO -->
+{% endmacro %}
 
 <!-- Caesar files -->
 {% macro caesar_files(case, customer_id) %}
-<h5>Leveransinkorg (Caesar)</h5>
-<div class="alert alert-light" role="alert">
-  Filer som ska laddas upp till din inkorg:
-  <a class="link-body-emphasis link-opacity-75">
-    /home/{{ customer_id }}/inbox/{{ case.samples[0].ticket }}
-  </a>
-</div>
-<table class="table w-auto">
-  <thead>
+  {% if "analysis" in case.data_analysis.data_delivery or "fastq" in case.data_analysis.data_delivery %}
+    <h5>Leveransinkorg (Caesar)</h5>
+    <div class="alert alert-light" role="alert">
+      Filer som ska laddas upp till din inkorg:
+      <a class="alert-link"> /home/{{ customer_id }}/inbox/{{ case.samples[0].ticket }} </a>
+    </div>
+    {{ analysis_files(case=case) }}
+    {{ fastq_files(case=case) }}
+  {% endif %}
+{% endmacro %}
+
+<!-- Analysis files -->
+{% macro analysis_files(case) %}
+  {% if "analysis" in case.data_analysis.data_delivery %}
+    <table class="table w-auto">
+      <thead>
+        <tr>
+          <th scope="col" colspan="2">Analysfiler</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ delivered_files(row_title=case.name, files=case.data_analysis.delivered_files) }}
+        {% for sample in case.samples %}
+          {{ delivered_files(row_title=sample.name, files=sample.delivered_files) }}
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="alert alert-light" role="alert">
+      Ytterligare information om de specifika levererade filerna finns på:
+      <a href="https://clinical.scilifelab.se/data-delivery" class="alert-link">
+        https://clinical.scilifelab.se/data-delivery
+      </a>
+    </div>
+  {% endif %}
+{% endmacro %}
+
+<!-- Fastq files -->
+{% macro fastq_files(case) %}
+  {% if "fastq" in case.data_analysis.data_delivery %}
+    <table class="table w-auto">
+      <thead>
+        <tr>
+          <th scope="col" colspan="2">Fastq-filer</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sample in case.samples %}
+          {{ delivered_files(row_title=sample.name, files=sample.delivered_fastq_files) }}
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endmacro %}
+
+<!-- Delivered files -->
+{% macro delivered_files(row_title, files) %}
+  {% if files != 'N/A' %}
     <tr>
-      <th scope="col" colspan="2">Analysfiler</th>
+      <th scope="row" rowspan="{{ files | length + 1}}">{{ row_title }}</th>
     </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th scope="row" rowspan="3">Fall:</th>
-    </tr>
-    <tr>
-      <td>File 1</td>
-    </tr>
-    <tr>
-      <td>File 2</td>
-    </tr>
-    <tr>
-      <th scope="row" rowspan="4">Prov:</th>
-    </tr>
-    <tr>
-      <td>File 1</td>
-    </tr>
-    <tr>
-      <td>File 2</td>
-    </tr>
-    <tr>
-      <td>File 3</td>
-    </tr>
-  </tbody>
-</table>
-<div class="alert alert-light" role="alert">
-  Ytterligare information om de specifika levererade filerna finns på:
-  <a href="https://clinical.scilifelab.se/data-delivery" class="link-body-emphasis link-opacity-75">
-    https://clinical.scilifelab.se/data-delivery
-  </a>
-</div>
-<table class="table w-auto">
-  <thead>
-    <tr>
-      <th scope="col" colspan="2">Fastq-filer</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th scope="row" rowspan="4">Prov:</th>
-    </tr>
-    <tr>
-      <td>File 1</td>
-    </tr>
-    <tr>
-      <td>File 2</td>
-    </tr>
-    <tr>
-      <td>File 3</td>
-    </tr>
-  </tbody>
-</table>
+    {% for file in files %}
+      <tr>
+        <td>{{ file }}</td>
+      </tr>
+    {% endfor %}
+  {% endif %}
 {% endmacro %}
