@@ -757,6 +757,9 @@ class NfAnalysisAPI(AnalysisAPI):
             self.status_db.verify_case_exists(case_internal_id=case_id)
             self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
             self.verify_deliverables_file_exists(case_id=case_id)
+            if dry_run:
+                LOG.info(f"Dry-run: Would have stored bundle in Housekeeper for case {case_id}")
+                return
             self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run)
             self.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
             self.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
