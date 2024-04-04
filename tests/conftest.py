@@ -1228,7 +1228,7 @@ def store_with_demultiplexed_samples(
     )
     for i, sample_internal_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_internal_ids):
         helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl_convert_{i}")
-        helpers.add_sample_lane_sequencing_metrics(
+        helpers.ensure_sample_lane_sequencing_metrics(
             store,
             sample_internal_id=sample_internal_id,
             flow_cell_name=flow_cell_name_demultiplexed_with_bcl_convert,
@@ -1236,7 +1236,7 @@ def store_with_demultiplexed_samples(
 
     for i, sample_internal_id in enumerate(bcl2fastq_demultiplexed_flow_cell_sample_internal_ids):
         helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl2fastq_{i}")
-        helpers.add_sample_lane_sequencing_metrics(
+        helpers.ensure_sample_lane_sequencing_metrics(
             store,
             sample_internal_id=sample_internal_id,
             flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
