@@ -157,7 +157,7 @@ class SampleSheetValidator:
                 raise SampleSheetError from error
 
     def _validate_sample_sheet_is_correct_type(self, bcl_converter: str) -> None:
-        """Determine if the sample sheet is of the correct type.
+        """Determine if the sample sheet content corresponds to the provided converter.
         Raises:
             SampleSheetError if the sample sheet is not of the correct type.
         """
@@ -222,16 +222,12 @@ class SampleSheetValidator:
             bcl_convert=bcl_converter,
         )
 
-    def get_sample_sheet_object_from_file(
-        self, file_path: Path, bcl_converter: str | None = None
-    ) -> SampleSheet:
+    def get_sample_sheet_object_from_file(self, file_path: Path, bcl_converter: str) -> SampleSheet:
         """Return a sample sheet object given the path to the file.
         Raises:
             SampleSheetError: If the sample sheet is not valid.
         """
-        sample_type: Type[FlowCellSample] | None = (
-            BCL_CONVERTER_TO_FLOW_CELL_SAMPLE[bcl_converter] if bcl_converter else None
-        )
+        sample_type: Type[FlowCellSample] = BCL_CONVERTER_TO_FLOW_CELL_SAMPLE[bcl_converter]
         self.validate_sample_sheet_from_file(file_path=file_path, bcl_converter=bcl_converter)
         samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
             sample_sheet_content=self.content,
