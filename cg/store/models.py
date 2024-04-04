@@ -684,7 +684,7 @@ class Flowcell(Base):
         return self.name
 
     def to_dict(self, samples: bool = False):
-        """Represent as dictionary."""
+        """Represent as dictionary"""
         data = to_dict(model_instance=Flowcell)
         if samples:
             data["samples"] = [sample.to_dict() for sample in self.samples]
