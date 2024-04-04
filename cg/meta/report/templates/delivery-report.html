@@ -28,7 +28,7 @@
           <!-- Report contact data -->
           {{ contact_data(customer=customer) }}
           <!-- Uploaded files -->
-          {{ uploaded_files(case=case, customer_id=customer.id) }}
+          {{ uploaded_files(case=case, customer=customer) }}
           <!-- Signature -->
           {% include "partials/signature.html" %}
           <!-- Susy communication -->
