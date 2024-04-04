@@ -4,11 +4,9 @@ import logging
 from pathlib import Path
 
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.symbols import EMPTY_STRING
-from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
@@ -106,10 +104,3 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             f"{sample.name}_{sample.name}": sample.internal_id for sample in samples
         }
         return search_patterns
-
-    def get_deliverables_template_content(self) -> list[dict[str, str]]:
-        """Return deliverables file template content."""
-        return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=self.get_bundle_filenames_path(),
-        )

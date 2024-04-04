@@ -5,7 +5,17 @@ import logging
 import click
 
 from cg.cli.workflow.commands import resolve_compression
-from cg.cli.workflow.nf_analysis import config_case, metrics_deliver, run, start, start_available
+from cg.cli.workflow.nf_analysis import (
+    config_case,
+    metrics_deliver,
+    report_deliver,
+    run,
+    start,
+    start_available,
+    store,
+    store_available,
+    store_housekeeper,
+)
 from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
@@ -27,3 +37,7 @@ tomte.add_command(run)
 tomte.add_command(start)
 tomte.add_command(start_available)
 tomte.add_command(metrics_deliver)
+tomte.add_command(report_deliver)
+tomte.add_command(store_housekeeper)
+tomte.add_command(store)
+tomte.add_command(store_available)
