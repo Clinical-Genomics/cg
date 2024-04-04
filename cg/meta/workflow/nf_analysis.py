@@ -519,9 +519,12 @@ class NfAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
 
-    def get_deliverables_template_content(self) -> list[dict]:
+    def get_deliverables_template_content(self) -> list[dict[str, str]]:
         """Return deliverables file template content."""
-        raise NotImplementedError
+        return ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML,
+            file_path=self.get_bundle_filenames_path(),
+        )
 
     @staticmethod
     def get_bundle_filenames_path() -> Path | None:

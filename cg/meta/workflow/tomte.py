@@ -76,10 +76,3 @@ class TomteAnalysisAPI(NfAnalysisAPI):
 
     def get_workflow_metrics(self) -> dict:
         return TOMTE_METRIC_CONDITIONS
-
-    def get_deliverables_template_content(self) -> list[dict[str, str]]:
-        """Return deliverables file template content."""
-        return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=self.get_bundle_filenames_path(),
-        )
