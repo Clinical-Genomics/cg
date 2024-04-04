@@ -1,6 +1,7 @@
 """Module for Tomte Analysis API."""
 
 import logging
+from pathlib import Path
 
 from cg.constants import Workflow
 from cg.constants.constants import Strandedness
@@ -9,6 +10,7 @@ from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import WorkflowParameters
 from cg.models.tomte.tomte import TomteSampleSheetEntry, TomteSampleSheetHeaders
+from cg.resources import TOMTE_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample
 
 LOG = logging.getLogger(__name__)
@@ -44,6 +46,11 @@ class TomteAnalysisAPI(NfAnalysisAPI):
     def sample_sheet_headers(self) -> list[str]:
         """Headers for sample sheet."""
         return TomteSampleSheetHeaders.list()
+
+    @staticmethod
+    def get_bundle_filenames_path() -> Path:
+        """Return path to bundle template."""
+        return TOMTE_BUNDLE_FILENAMES_PATH
 
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
