@@ -2,7 +2,6 @@
 
 import logging
 from pathlib import Path
-from typing import Optional
 
 from housekeeper.store.models import File, Version
 from pydantic.v1 import EmailStr, ValidationError
