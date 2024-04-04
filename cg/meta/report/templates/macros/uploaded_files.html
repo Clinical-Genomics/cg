@@ -1,27 +1,146 @@
 <!-- Uploaded files -->
-{% macro uploaded_files(case, customer_id) %}
-  <div class="container mb-5">
-    <h4>Uppladdade filer</h4>
-    {{ scout_files() }}
-    {{ caesar_files(case=case, customer_id=customer_id) }}
-  </div>
+{% macro uploaded_files(case, customer) %}
+  {% 
+    if "fastq" in case.data_analysis.data_delivery or
+    "analysis" in case.data_analysis.data_delivery or
+    "fastq" in case.data_analysis.data_delivery
+  %}
+    <div class="container mb-5">
+      <h4>Uppladdade filer</h4>
+      {{ scout_files(case=case, customer_id=customer.id, scout_access=customer.scout_access) }}
+      {{ caesar_files(case=case, customer_id=customer.id) }}
+    </div>
+  {% endif %}  
 {% endmacro %}
 
 <!-- Scout files -->
-{% macro scout_files() %}
-  <!-- TODO -->
+{% macro scout_files(case, customer_id, scout_access) %}
+  {% if scout_access and "scout" in case.data_analysis.data_delivery %}
+    <div class="mt-4"> 
+      <h5>Scout</h5>
+      <div class="alert alert-light" role="alert">
+        Varianter finns uppladdade i Scout:
+        <a href="https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}" class="alert-link">
+          https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}
+        </a>
+      </div>
+      {% if "balsamic" in case.data_analysis.workflow %}
+        {{ balsamic_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
+      {% elif "mip-dna" == case.data_analysis.workflow %}
+        {{ mip_dna_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
+      {% elif "rnafusion" == case.data_analysis.workflow %}
+        {{ rnafusion_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
+      {% endif %}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+<!-- BALSAMIC Scout files -->
+{% macro balsamic_scout_files(scout_files, case_id, case_name) %}
+  <table class="table w-auto">
+    <tbody>
+      {% if scout_files.snv_vcf != "N/A" %}
+        <tr>
+          <th scope="row">Kliniskt relevanta förvärvade SNVs och INDELs</th>
+          <td>{{ scout_files.snv_vcf.replace(case_id, case_name) }}</td>
+        </tr>
+      {% endif %}
+      {% if scout_files.snv_research_vcf != "N/A" %}
+        <tr>
+          <th scope="row">Förvärvade SNVs och INDELs för forskning</th>
+          <td>{{ scout_files.snv_research_vcf.replace(case_id, case_name) }}</td>
+        </tr>
+      {% endif %}
+      {% if scout_files.sv_vcf != "N/A" %}
+        <tr>
+          <th scope="row">Kliniskt relevanta förvärvade SVs</th>
+          <td>{{ scout_files.sv_vcf.replace(case_id, case_name) }}</td>
+        </tr>
+      {% endif %}
+      {% if scout_files.sv_research_vcf != "N/A" %}
+        <tr>
+          <th scope="row">Förvärvade SVs för forskning</th>
+          <td>{{ scout_files.sv_research_vcf.replace(case_id, case_name) }}</td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+{% endmacro %}
+
+<!-- MIP-DNA Scout files -->
+{% macro mip_dna_scout_files(scout_files, case_id, case_name) %}
+  <table class="table w-auto">
+    <tbody>
+      {% if scout_files.snv_vcf != "N/A" %}
+        <tr>
+          <th scope="row">Kliniskt relevanta SNVs och INDELs</th>
+          <td>{{ scout_files.snv_vcf.replace(case_id, case_name) }}</td>
+        </tr>
+      {% endif %}
+      {% if scout_files.snv_research_vcf != "N/A" %}
+        <tr>
+          <th scope="row">SNVs och INDELs för forskning</th>
+          <td>{{ scout_files.snv_research_vcf.replace(case_id, case_name) }}</td>
+        </tr>
+      {% endif %}
+      {% if scout_files.sv_vcf != "N/A" %}
+        <tr>
+          <th scope="row">Kliniskt relevanta SVs</th>
+          <td>{{ scout_files.sv_vcf.replace(case_id, case_name) }}</td>
+        </tr>
+      {% endif %}
+      {% if scout_files.sv_research_vcf != "N/A" %}
+        <tr>
+          <th scope="row">SVs för forskning</th>
+          <td>{{ scout_files.sv_research_vcf.replace(case_id, case_name) }}</td>
+        </tr>
+      {% endif %}
+      {% if scout_files.vcf_str != "N/A" %}
+        <tr>
+          <th scope="row">Kliniskt relevanta STRs</th>
+          <td>{{ scout_files.vcf_str.replace(case_id, case_name) }}</td>
+        </tr>
+      {% endif %}
+      {% if scout_files.smn_tsv != "N/A" %}
+        <tr>
+          <th scope="row">SMN CN varianter</th>
+          <td>{{ scout_files.smn_tsv.replace(case_id, case_name) }}</td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+{% endmacro %}
+
+<!-- Rnafusion Scout files -->
+{% macro rnafusion_scout_files(scout_files, case_id, case_name) %}
+  <table class="table w-auto">
+    <tbody>
+      {% if scout_files.vcf_fusion != 'N/A' %}
+        <tr>
+          <th scope="row">Kliniska Fusionsvarianter</th>
+          <td>{{ scout_files.vcf_fusion.replace(case_id, case_name) }}</td>
+        </tr>
+      {% else %}
+        <div class="alert alert-warning" role="alert">
+          Inga fusionsvarianter upptäcktes
+        </div>
+      {% endif %}
+    </tbody>
+  </table>
 {% endmacro %}
 
 <!-- Caesar files -->
 {% macro caesar_files(case, customer_id) %}
   {% if "analysis" in case.data_analysis.data_delivery or "fastq" in case.data_analysis.data_delivery %}
-    <h5>Leveransinkorg (Caesar)</h5>
-    <div class="alert alert-light" role="alert">
-      Filer som ska laddas upp till din inkorg:
-      <a class="alert-link"> /home/{{ customer_id }}/inbox/{{ case.samples[0].ticket }} </a>
+    <div class="mt-4"> 
+      <h5>Leveransinkorg (Caesar)</h5>
+      <div class="alert alert-light" role="alert">
+        Filer som ska laddas upp till din inkorg:
+        <a class="alert-link">/home/{{ customer_id }}/inbox/{{ case.samples[0].ticket }}</a>
+      </div>
+      {{ analysis_files(case=case) }}
+      {{ fastq_files(case=case) }}
     </div>
-    {{ analysis_files(case=case) }}
-    {{ fastq_files(case=case) }}
   {% endif %}
 {% endmacro %}
 
@@ -29,7 +148,7 @@
 {% macro analysis_files(case) %}
   {% if "analysis" in case.data_analysis.data_delivery %}
     <table class="table w-auto">
-      <thead>
+      <thead class="table-light">
         <tr>
           <th scope="col" colspan="2">Analysfiler</th>
         </tr>
@@ -54,7 +173,7 @@
 {% macro fastq_files(case) %}
   {% if "fastq" in case.data_analysis.data_delivery %}
     <table class="table w-auto">
-      <thead>
+      <thead class="table-light">
         <tr>
           <th scope="col" colspan="2">Fastq-filer</th>
         </tr>
@@ -70,7 +189,7 @@
 
 <!-- Delivered files -->
 {% macro delivered_files(row_title, files) %}
-  {% if files != 'N/A' %}
+  {% if files != "N/A" %}
     <tr>
       <th scope="row" rowspan="{{ files | length + 1}}">{{ row_title }}</th>
     </tr>
