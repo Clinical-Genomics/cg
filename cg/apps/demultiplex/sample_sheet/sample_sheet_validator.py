@@ -168,6 +168,7 @@ class SampleSheetValidator:
 
     def _validate_bcl_convert(self):
         """Determine if the BCLConvert sample sheet is valid, which means:
+        - Sample sheet is BCL_Convert
         - All sections are present
         - The index settings are specified in the sample sheet header
         - The read and index cycles are specified in the sample sheet's reads section
@@ -183,6 +184,7 @@ class SampleSheetValidator:
 
     def _validate_bcl2fastq(self):
         """Determine if the Bcl2Fastq sample sheet is valid, which means:
+        - Sample sheet is Bcl2Fastq
         - The samples have the correct attributes
         """
         self._validate_sample_sheet_is_correct_type(bcl_converter=BclConverter.BCL2FASTQ)
