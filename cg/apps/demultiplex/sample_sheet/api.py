@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Type
 
 import click
 
@@ -32,6 +33,11 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
 )
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.utils.files import get_directories_in_path, link_or_overwrite_file
+
+FLOW_CELL_SAMPLE_TO_BCL_CONVERTER: dict[Type[FlowCellSample], str] = {
+    FlowCellSampleBcl2Fastq: BclConverter.BCL2FASTQ,
+    FlowCellSampleBCLConvert: BclConverter.BCLCONVERT,
+}
 
 LOG = logging.getLogger(__name__)
 
@@ -90,8 +96,15 @@ class SampleSheetAPI:
             message: str = f"Sample sheet with path {sample_sheet_path} does not exist"
             LOG.error(message)
             raise SampleSheetError(message)
-        self.validator.validate_sample_sheet_from_file(
-            file_path=sample_sheet_path, bcl_converter=bcl_converter
+        sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
+            file_format=FileFormat.CSV, file_path=sample_sheet_path
+        )
+        if not bcl_converter:
+            bcl_converter: str = FLOW_CELL_SAMPLE_TO_BCL_CONVERTER[
+                get_sample_type_from_content(sample_sheet_content)
+            ]
+        self.validator.validate_sample_sheet_from_content(
+            content=sample_sheet_content, bcl_convert=bcl_converter
         )
 
     @staticmethod

@@ -156,6 +156,16 @@ class SampleSheetValidator:
             except OverrideCyclesError as error:
                 raise SampleSheetError from error
 
+    def _validate_sample_sheet_is_correct_type(self, bcl_converter: str) -> None:
+        """Determine if the sample sheet is of the correct type.
+        Raises:
+            SampleSheetError if the sample sheet is not of the correct type.
+        """
+        expected_type: Type[FlowCellSample] = BCL_CONVERTER_TO_FLOW_CELL_SAMPLE[bcl_converter]
+        if get_sample_type_from_content(self.content) is not expected_type:
+            message: str = f"Sample sheet is not {bcl_converter}"
+            raise SampleSheetError(message)
+
     def _validate_bcl_convert(self):
         """Determine if the BCLConvert sample sheet is valid, which means:
         - All sections are present
@@ -164,14 +174,22 @@ class SampleSheetValidator:
         - The samples have the correct attributes
         - The override cycles are valid
         """
+        self._validate_sample_sheet_is_correct_type(bcl_converter=BclConverter.BCLCONVERT)
         self._validate_all_sections_present()
         self._set_is_index2_reverse_complement()
         self._set_cycles()
         self._validate_samples(sample_type=FlowCellSampleBCLConvert)
         self._validate_override_cycles()
 
+    def _validate_bcl2fastq(self):
+        """Determine if the Bcl2Fastq sample sheet is valid, which means:
+        - The samples have the correct attributes
+        """
+        self._validate_sample_sheet_is_correct_type(bcl_converter=BclConverter.BCL2FASTQ)
+        self._validate_samples(sample_type=FlowCellSampleBcl2Fastq)
+
     def validate_sample_sheet_from_content(
-        self, content: list[list[str]], bcl_convert: str | None = None
+        self, content: list[list[str]], bcl_convert: str
     ) -> None:
         """
         Call the proper validation depending on the sample sheet type or the given bcl converter.
@@ -179,23 +197,19 @@ class SampleSheetValidator:
             SampleSheetError: If the sample sheet is not valid.
         """
         self.set_sample_sheet_content(content)
-        sample_type: Type[FlowCellSample] = (
-            BCL_CONVERTER_TO_FLOW_CELL_SAMPLE[bcl_convert]
-            if bcl_convert
-            else get_sample_type_from_content(self.content)
-        )
-        if sample_type is FlowCellSampleBCLConvert:
+        if bcl_convert == BclConverter.BCLCONVERT:
             LOG.debug("Validating BCLConvert sample sheet")
             self._validate_bcl_convert()
             LOG.info("Samplesheet passed BCLConvert validation")
-        else:
+        elif bcl_convert == BclConverter.BCL2FASTQ:
             LOG.debug("Validating Bcl2fastq sample sheet")
             self._validate_samples(sample_type=FlowCellSampleBcl2Fastq)
             LOG.info("Samplesheet passed Bcl2Fastq validation")
+        else:
+            LOG.error("Could not determine sample sheet type")
+            raise SampleSheetError("Could not determine sample sheet type")
 
-    def validate_sample_sheet_from_file(
-        self, file_path: Path, bcl_converter: str | None = None
-    ) -> None:
+    def validate_sample_sheet_from_file(self, file_path: Path, bcl_converter: str) -> None:
         """
         Validate a sample sheet given the path to the file.
         Raises:
