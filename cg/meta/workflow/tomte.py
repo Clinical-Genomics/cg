@@ -4,9 +4,8 @@ import logging
 from pathlib import Path
 
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat, Strandedness
+from cg.constants.constants import Strandedness
 from cg.constants.nf_analysis import TOMTE_METRIC_CONDITIONS
-from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import WorkflowParameters
