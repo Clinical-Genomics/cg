@@ -166,14 +166,14 @@ def test_cli_workflow_clean_microsalt(
 
 def test_cli_workflow_clean_taxprofiler(
     cli_runner: CliRunner,
-    base_context: CGConfig,
+    taxprofiler_context: CGConfig,
     before_date: str,
 ):
     """Test clean taxprofiler workflow."""
     # GIVEN a before string
 
     # WHEN running command
-    result = cli_runner.invoke(taxprofiler_past_run_dirs, [before_date], obj=base_context)
+    result = cli_runner.invoke(taxprofiler_past_run_dirs, [before_date], obj=taxprofiler_context)
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS

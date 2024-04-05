@@ -28,7 +28,7 @@ from cg.models.nf_analysis import (
     WorkflowDeliverables,
     WorkflowParameters,
 )
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import Case, CaseSample, Sample, Analysis
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -760,7 +760,7 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.info(f"Cleaning {len(possible_cleanups)} analyses created before {before}")
 
         for analysis in possible_cleanups:
-            case_id:str  = analysis.case.internal_id
+            case_id: str = analysis.case.internal_id
             try:
                 LOG.info(f"Cleaning {self.workflow} output for {case_id}")
                 self.clean_workflow_run_dir(yes=yes, case_id=case_id, dry_run=dry_run)
