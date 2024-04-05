@@ -364,13 +364,16 @@ def taxprofiler_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" Taxprofiler case run dirs."""
-    analysis_api: NfAnalysisAPI = NfAnalysisAPI(context.obj, Workflow.TAXPROFILER)
-    exit_code: int = EXIT_SUCCESS
+    context.obj.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(context.obj)
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
-    try:
-        analysis_api.clean_past_run_dirs(yes=yes, dry_run=dry_run, before_str=before_str)
-    except Exception as error:
-        LOG.error(repr(error))
-        exit_code: int = EXIT_FAIL
-    if exit_code:
-        raise click.Abort()
+#analysis_api: NfAnalysisAPI = NfAnalysisAPI(context.obj, Workflow.TAXPROFILER)
+    #exit_code: int = EXIT_SUCCESS
+
+    #try:
+    #    analysis_api.clean_past_run_dirs(yes=yes, dry_run=dry_run, before_str=before_str)
+    #except Exception as error:
+    #    LOG.error(repr(error))
+    #    exit_code: int = EXIT_FAIL
+    #if exit_code:
+    #    raise click.Abort()
