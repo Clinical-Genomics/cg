@@ -17,7 +17,7 @@ from cg.models.cg_config import CGConfig
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_store_success(
     cli_runner: CliRunner,
@@ -76,13 +76,12 @@ def test_store_success(
 
 
 @pytest.mark.parametrize(
-    "workflow,context",
-    [(Workflow.RNAFUSION, "rnafusion_context"), (Workflow.TAXPROFILER, "taxprofiler_context")],
+    "workflow",
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_store_fail(
     cli_runner: CliRunner,
     workflow: Workflow,
-    context: str,
     real_housekeeper_api: HousekeeperAPI,
     deliverables_template_content: list[dict],
     caplog: LogCaptureFixture,
@@ -91,9 +90,7 @@ def test_store_fail(
 ):
     """Test store command fails when a case did not finish for a workflow."""
     caplog.set_level(logging.INFO)
-
-    # GIVEN each fixture is being initialised
-    context: CGConfig = request.getfixturevalue(context)
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
     # GIVEN a case id where analysis finish is not mocked
     case_id_fail: str = request.getfixturevalue(f"{workflow}_case_id")
@@ -121,7 +118,7 @@ def test_store_fail(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_store_available_success(
     cli_runner: CliRunner,
@@ -178,7 +175,7 @@ def test_store_available_success(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_store_available_fail(
     cli_runner: CliRunner,
