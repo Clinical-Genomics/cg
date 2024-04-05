@@ -22,7 +22,7 @@ from cg.utils import Process
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_store_housekeeper_without_options(
     cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest
@@ -44,7 +44,7 @@ def test_store_housekeeper_without_options(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_store_housekeeper_with_missing_case(
     cli_runner: CliRunner,
@@ -75,7 +75,7 @@ def test_store_housekeeper_with_missing_case(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_store_housekeeper_case_not_finished(
     cli_runner: CliRunner,
@@ -102,7 +102,7 @@ def test_store_housekeeper_case_not_finished(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_store_housekeeper_case_with_malformed_deliverables_file(
     cli_runner,
@@ -136,7 +136,7 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_store_housekeeper_valid_case(
     cli_runner,
@@ -183,7 +183,7 @@ def test_store_housekeeper_valid_case(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_valid_case_already_added(
     cli_runner,
@@ -233,7 +233,7 @@ def test_valid_case_already_added(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_dry_run(
     cli_runner: CliRunner,

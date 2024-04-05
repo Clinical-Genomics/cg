@@ -110,7 +110,7 @@ def user_mail() -> str:
     return "paul@magnolia.com"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def email_address() -> str:
     """Return an email address."""
     return "user.name@scilifelab.se"
@@ -1228,7 +1228,7 @@ def store_with_demultiplexed_samples(
     )
     for i, sample_internal_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_internal_ids):
         helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl_convert_{i}")
-        helpers.add_sample_lane_sequencing_metrics(
+        helpers.ensure_sample_lane_sequencing_metrics(
             store,
             sample_internal_id=sample_internal_id,
             flow_cell_name=flow_cell_name_demultiplexed_with_bcl_convert,
@@ -1236,7 +1236,7 @@ def store_with_demultiplexed_samples(
 
     for i, sample_internal_id in enumerate(bcl2fastq_demultiplexed_flow_cell_sample_internal_ids):
         helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl2fastq_{i}")
-        helpers.add_sample_lane_sequencing_metrics(
+        helpers.ensure_sample_lane_sequencing_metrics(
             store,
             sample_internal_id=sample_internal_id,
             flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
@@ -1791,7 +1791,7 @@ def context_config(
             "pon_path": str(cg_dir),
             "root": str(balsamic_dir),
             "slurm": {
-                "mail_user": "test.email@scilifelab.se",
+                "mail_user": email_address,
                 "account": "development",
                 "qos": SlurmQos.LOW,
             },
@@ -1920,7 +1920,7 @@ def context_config(
             "root": str(raredisease_dir),
             "slurm": {
                 "account": "development",
-                "mail_user": "test.email@scilifelab.se",
+                "mail_user": email_address,
             },
             "tower_workflow": "raredisease",
         },
@@ -1939,7 +1939,7 @@ def context_config(
             "root": str(tomte_dir),
             "slurm": {
                 "account": "development",
-                "mail_user": "test.email@scilifelab.se",
+                "mail_user": email_address,
             },
             "tower_workflow": "tomte",
         },
@@ -2320,12 +2320,6 @@ def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
 
 
 @pytest.fixture(scope="function")
-def rnafusion_multiqc_json_metrics(raredisease_analysis_dir) -> dict:
-    """Returns the content of a mock Multiqc JSON file."""
-    return read_json(file_path=Path(raredisease_analysis_dir, multiqc_json_file))
-
-
-@pytest.fixture(scope="function")
 def raredisease_sample_sheet_path(raredisease_dir, raredisease_case_id) -> Path:
     """Path to sample sheet."""
     return Path(
@@ -2590,6 +2584,14 @@ def rnafusion_metrics_deliverables(rnafusion_analysis_dir: Path) -> list[dict]:
 
 
 @pytest.fixture(scope="function")
+def rnafusion_metrics_deliverables_path(rnafusion_dir: Path, rnafusion_case_id: str) -> Path:
+    """Path to deliverables file."""
+    return Path(
+        rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_metrics_deliverables"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
 def rnafusion_deliverables_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to deliverables file."""
     return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_deliverables").with_suffix(
@@ -2704,8 +2706,26 @@ def rnafusion_context(
     cg_context.meta_apis["analysis_api"] = RnafusionAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
-    # Create ERROR case with NO SAMPLES
+    # Create case with no associated samples
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+
+    # Create case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Workflow.RNAFUSION,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=apptag_rna,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     # Create textbook case with enough reads
     case_enough_reads: Case = helpers.add_case(
@@ -2728,24 +2748,6 @@ def rnafusion_context(
         case=case_enough_reads,
         sample=sample_rnafusion_case_enough_reads,
     )
-
-    # Create case without enough reads
-    case_not_enough_reads: Case = helpers.add_case(
-        store=status_db,
-        internal_id=case_id_not_enough_reads,
-        name=case_id_not_enough_reads,
-        data_analysis=Workflow.RNAFUSION,
-    )
-
-    sample_not_enough_reads: Sample = helpers.add_sample(
-        status_db,
-        application_tag=apptag_rna,
-        internal_id=sample_id_not_enough_reads,
-        reads=total_sequenced_reads_not_pass,
-        last_sequenced_at=datetime.now(),
-    )
-
-    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     return cg_context
 
@@ -2887,6 +2889,77 @@ def tomte_mock_config(tomte_dir: Path, tomte_case_id: str) -> None:
 
 
 @pytest.fixture(scope="function")
+def tomte_metrics_deliverables_path(tomte_dir: Path, tomte_case_id: str) -> Path:
+    """Path to deliverables file."""
+    return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_metrics_deliverables").with_suffix(
+        FileExtensions.YAML
+    )
+
+
+@pytest.fixture(scope="function")
+def tomte_metrics_deliverables(tomte_analysis_dir: Path) -> list[dict]:
+    """Returns the content of a mock metrics deliverables file."""
+    return read_yaml(
+        file_path=Path(tomte_analysis_dir, "tomte_case_enough_reads_metrics_deliverables.yaml")
+    )
+
+
+@pytest.fixture(scope="function")
+def tomte_deliverable_data(tomte_dir: Path, tomte_case_id: str, sample_id: str) -> dict:
+    return {
+        "files": [
+            {
+                "path": f"{tomte_dir}/{tomte_case_id}/multiqc/multiqc_report.html",
+                "path_index": "",
+                "step": "report",
+                "tag": ["multiqc-html", "rna"],
+                "id": tomte_case_id,
+                "format": "html",
+                "mandatory": True,
+            },
+        ]
+    }
+
+
+@pytest.fixture(scope="function")
+def tomte_multiqc_json_metrics(tomte_analysis_dir) -> dict:
+    """Returns the content of a mock Multiqc JSON file."""
+    return read_json(file_path=Path(tomte_analysis_dir, multiqc_json_file))
+
+
+@pytest.fixture
+def tomte_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with Tomte analysis files."""
+    return Path(analysis_dir, "tomte")
+
+
+@pytest.fixture(scope="function")
+def tomte_mock_deliverable_dir(
+    tomte_dir: Path, tomte_deliverable_data: dict, tomte_case_id: str
+) -> Path:
+    """Create deliverable file with dummy data and files to deliver."""
+    Path.mkdir(
+        Path(tomte_dir, tomte_case_id),
+        parents=True,
+        exist_ok=True,
+    )
+    Path.mkdir(
+        Path(tomte_dir, tomte_case_id, "multiqc"),
+        parents=True,
+        exist_ok=True,
+    )
+    for report_entry in tomte_deliverable_data["files"]:
+        Path(report_entry["path"]).touch(exist_ok=True)
+    WriteFile.write_file_from_content(
+        content=tomte_deliverable_data,
+        file_format=FileFormat.JSON,
+        file_path=Path(tomte_dir, tomte_case_id, tomte_case_id + deliverables_yaml),
+    )
+
+    return tomte_dir
+
+
+@pytest.fixture(scope="function")
 def tomte_sample_sheet_content(
     tomte_case_id: str,
     sample_id: str,
@@ -2906,6 +2979,90 @@ def tomte_sample_sheet_content(
         ]
     )
     return "\n".join([headers, row])
+
+
+@pytest.fixture(scope="function")
+def tomte_mock_analysis_finish(
+    tomte_dir: Path, tomte_case_id: str, tomte_multiqc_json_metrics: dict, tower_id: int
+) -> None:
+    """Create analysis_finish file for testing."""
+    Path.mkdir(Path(tomte_dir, tomte_case_id, "pipeline_info"), parents=True, exist_ok=True)
+    Path(tomte_dir, tomte_case_id, "pipeline_info", software_version_file).touch(exist_ok=True)
+    Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_samplesheet.csv").touch(exist_ok=True)
+    Path.mkdir(
+        Path(tomte_dir, tomte_case_id, "multiqc", "multiqc_data"),
+        parents=True,
+        exist_ok=True,
+    )
+    write_json(
+        content=tomte_multiqc_json_metrics,
+        file_path=Path(
+            tomte_dir,
+            tomte_case_id,
+            "multiqc",
+            "multiqc_data",
+            "multiqc_data",
+        ).with_suffix(FileExtensions.JSON),
+    )
+    write_yaml(
+        content={tomte_case_id: [tower_id]},
+        file_path=Path(
+            tomte_dir,
+            tomte_case_id,
+            "tower_ids",
+        ).with_suffix(FileExtensions.YAML),
+    )
+
+
+@pytest.fixture(scope="function")
+def tomte_deliverables_file_path(tomte_dir, tomte_case_id) -> Path:
+    """Path to deliverables file."""
+    return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_deliverables").with_suffix(
+        FileExtensions.YAML
+    )
+
+
+@pytest.fixture(scope="function")
+def tomte_hermes_deliverables(tomte_deliverable_data: dict, tomte_case_id: str) -> dict:
+    hermes_output: dict = {"workflow": "tomte", "bundle_id": tomte_case_id, "files": []}
+    for file_info in tomte_deliverable_data["files"]:
+        tags: list[str] = []
+        if "html" in file_info["format"]:
+            tags.append("multiqc-html")
+        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
+    return hermes_output
+
+
+@pytest.fixture(scope="function")
+def tomte_malformed_hermes_deliverables(tomte_hermes_deliverables: dict) -> dict:
+    malformed_deliverable: dict = tomte_hermes_deliverables.copy()
+    malformed_deliverable.pop("workflow")
+    return malformed_deliverable
+
+
+@pytest.fixture(scope="function")
+def tomte_deliverables_response_data(
+    create_multiqc_html_file,
+    create_multiqc_json_file,
+    tomte_case_id,
+    timestamp_yesterday,
+) -> InputBundle:
+    return InputBundle(
+        **{
+            "files": [
+                {
+                    "path": create_multiqc_json_file.as_posix(),
+                    "tags": ["multiqc-json", tomte_case_id],
+                },
+                {
+                    "path": create_multiqc_html_file.as_posix(),
+                    "tags": ["multiqc-html", tomte_case_id],
+                },
+            ],
+            "created": timestamp_yesterday,
+            "name": tomte_case_id,
+        }
+    )
 
 
 @pytest.fixture(scope="function")
@@ -3145,6 +3302,10 @@ def taxprofiler_context(
     another_sample_name: str,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
+    microbial_application_tag: str,
+    case_id_not_enough_reads: str,
+    sample_id_not_enough_reads: str,
+    total_sequenced_reads_not_pass: int,
 ) -> CGConfig:
     """Context to use in cli."""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
@@ -3152,9 +3313,28 @@ def taxprofiler_context(
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
-    # Create ERROR case with NO SAMPLES
+    # Create case with no associate samples
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
+    # Create case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Workflow.TAXPROFILER,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        application_tag=microbial_application_tag,
+        internal_id=sample_id_not_enough_reads,
+        reads=total_sequenced_reads_not_pass,
+        last_sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
+    # Create case with associated samples
     taxprofiler_case: Case = helpers.add_case(
         store=status_db,
         internal_id=taxprofiler_case_id,

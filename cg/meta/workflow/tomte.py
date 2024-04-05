@@ -1,13 +1,16 @@
 """Module for Tomte Analysis API."""
 
 import logging
+from pathlib import Path
 
 from cg.constants import Workflow
 from cg.constants.constants import Strandedness
+from cg.constants.nf_analysis import TOMTE_METRIC_CONDITIONS
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import WorkflowParameters
 from cg.models.tomte.tomte import TomteSampleSheetEntry, TomteSampleSheetHeaders
+from cg.resources import TOMTE_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample
 
 LOG = logging.getLogger(__name__)
@@ -44,6 +47,11 @@ class TomteAnalysisAPI(NfAnalysisAPI):
         """Headers for sample sheet."""
         return TomteSampleSheetHeaders.list()
 
+    @staticmethod
+    def get_bundle_filenames_path() -> Path:
+        """Return path to bundle template."""
+        return TOMTE_BUNDLE_FILENAMES_PATH
+
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
         fastq_forward_read_paths, fastq_reverse_read_paths = self.get_paired_read_paths(
@@ -64,3 +72,6 @@ class TomteAnalysisAPI(NfAnalysisAPI):
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
         )
+
+    def get_workflow_metrics(self) -> dict:
+        return TOMTE_METRIC_CONDITIONS

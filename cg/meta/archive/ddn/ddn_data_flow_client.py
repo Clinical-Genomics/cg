@@ -257,7 +257,7 @@ class DDNDataFlowClient(ArchiveHandler):
 
         url: str = urljoin(self.url, DataflowEndpoints.GET_JOB_STATUS + str(job_id))
         response: Response = APIRequest.api_request_from_content(
-            api_method=APIMethods.POST,
+            api_method=APIMethods.GET,
             url=url,
             headers=headers,
             json={},
