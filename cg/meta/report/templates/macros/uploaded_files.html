@@ -101,7 +101,7 @@
 {% macro delivered_files(row_title, files) %}
   {% if files != "N/A" %}
     <tr>
-      <th scope="row" rowspan="{{ files | length + 1}}">{{ row_title }}</th>
+      <th scope="row" rowspan="{{ files | length + 1}}" class="align-middle">{{ row_title }}</th>
     </tr>
     {% for file in files %}
       <tr>

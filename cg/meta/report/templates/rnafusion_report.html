@@ -9,39 +9,6 @@
             <thead>
               <tr>
                 <th>Prov</th>
-                <th>Beställt</th>
-                <th>Fall</th>
-                <th>Kön</th>
-                <th>Provtyp</th>
-                <th>Ticket</th>
-                <th>Applikation</th>
-                <th>Bioinformatisk analys</th>
-                <th>Tumör</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for sample in case.samples %}
-                <tr>
-                  <td>{{ sample.name }}* ({{ sample.id }})</td>
-                  <td>{{ sample.timestamps.ordered_at }}</td>
-                  <td>{{ case.name }}*</td>
-                  <td>{{ sample.gender }}*</td>
-                  <td>{{ sample.source }}*</td>
-                  <td>{{ sample.ticket }}</td>
-                  <td>{{ sample.application.tag }}*</td>
-                  <td>{{ case.data_analysis.customer_workflow }}*</td>
-                  <td>{{ sample.tumour }}*</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-
-        <div class="card-block">
-          <table class="table table-bordered" aria-describedby="Sample table">
-            <thead>
-              <tr>
-                <th>Prov</th>
                 <th>Ankom</th>
                 <th>Biblioteksberedning</th>
                 <th>Beredd</th>

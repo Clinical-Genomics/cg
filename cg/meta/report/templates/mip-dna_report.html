@@ -9,25 +9,25 @@
           <table class="table table-bordered" aria-describedby="Case table">
             <thead>
               <tr>
-                <th>Prov</th>
-                <th>Beställt</th>
-                <th>Familj</th>
-                <th>Kön</th>
-                <th>Status</th>
-                <th>Vävnad</th>
-                <th>Ticket</th>
-                <th>Applikation</th>
-                <th>Bioinformatisk analys</th>
+                <!-- <th>Prov</th> -->
+                <!-- <th>Beställt</th> -->
+                <!-- <th>Familj</th> -->
+                <!-- <th>Kön</th> -->
+                <!-- <th>Status</th> -->
+                <!-- <th>Vävnad</th> -->
+                <!-- <th>Ticket</th> -->
+                <!-- <th>Applikation</th> -->
+                <!-- <th>Bioinformatisk analys</th> -->
               </tr>
             </thead>
             <tbody>
               {% for sample in case.samples %}
                 <tr>
-                  <td>{{ sample.name }}* ({{ sample.id }})</td>
-                  <td>{{ sample.timestamps.ordered_at }}</td>
-                  <td>{{ case.name }}*</td>
+                  <!-- <td>{{ sample.name }}* ({{ sample.id }})</td> -->
+                  <!-- <td>{{ sample.timestamps.ordered_at }}</td> -->
+                  <!-- <td>{{ case.name }}*</td> -->
                   <td>
-                    {{ sample.gender }}*
+                    <!-- {{ sample.gender }}* -->
                     {%  if sample.metadata.gender != 'N/A'%}
                       (analys:
                       {% if sample.gender != sample.metadata.gender %}
@@ -37,11 +37,11 @@
                       {% endif %}
                     {% endif %}
                   </td>
-                  <td>{{ sample.status }}*</td>
-                  <td>{{ sample.source }}*</td>
-                  <td>{{ sample.ticket }}</td>
-                  <td>{{ sample.application.tag }}*</td>
-                  <td>{{ case.data_analysis.customer_workflow }}*</td>
+                  <!-- <td>{{ sample.status }}*</td> -->
+                  <!-- <td>{{ sample.source }}*</td> -->
+                  <!-- <td>{{ sample.ticket }}</td> -->
+                  <!-- <td>{{ sample.application.tag }}*</td> -->
+                  <!-- <td>{{ case.data_analysis.customer_workflow }}*</td> -->
                 </tr>
               {% endfor %}
             </tbody>

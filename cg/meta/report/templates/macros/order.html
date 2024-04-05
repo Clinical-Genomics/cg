@@ -2,5 +2,49 @@
 {% macro order(case) %}
   <div class="container mb-5">
     <h4>Beställning</h4>
+    <table class="table w-auto text-center">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Fall</th>
+          <th scope="col">Bioinformatisk analys</th>
+          <th scope="col">Prov</th>
+          <th scope="col">Beställt</th>
+          <th scope="col">Ticket</th>
+          <th scope="col">Applikation</th>
+          <th scope="col">Kön</th>
+          <th scope="col">Provtyp</th>
+          {% if "balsamic" in case.data_analysis.customer_workflow or "rnafusion" == case.data_analysis.customer_workflow %}
+            <th scope="col">Tumör</th>
+          {% elif "mip-dna" in case.data_analysis.customer_workflow %}
+            <th scope="col">Status</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row" rowspan="{{ case.samples | length + 1}}" class="align-middle">
+            {{ case.name }}
+          </th>
+          <td scope="row" rowspan="{{ case.samples | length + 1}}" class="align-middle">
+            {{ case.data_analysis.customer_workflow }}
+          </td>
+        </tr>
+        {% for sample in case.samples %}
+          <tr>
+            <td>{{ sample.name }} ({{ sample.id }})</td>
+            <td>{{ sample.timestamps.ordered_at }}</td>
+            <td>{{ sample.ticket }}</td>
+            <td>{{ sample.application.tag }}</td>
+            <td>{{ sample.gender }}</td>
+            <td>{{ sample.source }}</td>
+            {% if "balsamic" in case.data_analysis.customer_workflow or "rnafusion" == case.data_analysis.customer_workflow %}
+              <td>{{ sample.tumour }}</td>
+            {% elif "mip-dna" in case.data_analysis.customer_workflow %}
+              <td>{{ sample.status }}</td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 {% endmacro %}
