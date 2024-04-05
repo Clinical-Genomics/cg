@@ -180,9 +180,8 @@ def test_get_files_for_samples_on_flow_cell_with_tag_missing_sample(
 
     # GIVEN that the flow cell has two samples
     sample: Sample = helpers.add_sample(
-        store=store, customer_id="cust500", internal_id="123", name="123"
+        store=store, customer_id="cust500", internal_id="123", name="123", flowcell=flow_cell
     )
-    flow_cell.samples.append(sample)
     assert len(flow_cell.samples) == 2
     store.session.add(flow_cell)
     store.session.commit()
