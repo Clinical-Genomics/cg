@@ -170,6 +170,7 @@ def test_cli_workflow_clean_taxprofiler(
     before_date: str,
 ):
     """Test clean taxprofiler workflow."""
+
     # GIVEN a before string
 
     # WHEN running command
