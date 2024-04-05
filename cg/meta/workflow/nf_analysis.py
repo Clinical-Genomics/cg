@@ -519,9 +519,12 @@ class NfAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
 
-    def get_deliverables_template_content(self) -> list[dict]:
+    def get_deliverables_template_content(self) -> list[dict[str, str]]:
         """Return deliverables file template content."""
-        raise NotImplementedError
+        return ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML,
+            file_path=self.get_bundle_filenames_path(),
+        )
 
     @staticmethod
     def get_bundle_filenames_path() -> Path | None:
@@ -738,17 +741,17 @@ class NfAnalysisAPI(AnalysisAPI):
 
         self.status_db.verify_case_exists(case_internal_id=case_id)
         self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
-        if not dry_run:
-            workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
-            self.write_deliverables_file(
-                deliverables_content=workflow_content.dict(),
-                file_path=self.get_deliverables_file_path(case_id=case_id),
-            )
+        if dry_run:
+            LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
+            return
+        workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
+        self.write_deliverables_file(
+            deliverables_content=workflow_content.dict(),
+            file_path=self.get_deliverables_file_path(case_id=case_id),
+        )
         LOG.info(
             f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
         )
-
-        LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
 
     def store_analysis_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
         """Store a finished nextflow analysis in Housekeeper and StatusDB"""
@@ -762,10 +765,6 @@ class NfAnalysisAPI(AnalysisAPI):
             self.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
         except ValidationError as error:
             raise HousekeeperStoreError(f"Deliverables file is malformed: {error}")
-        except CgError as error:
-            raise HousekeeperStoreError(
-                f"Could not store bundle in Housekeeper and StatusDB: {error}"
-            )
         except Exception as error:
             self.housekeeper_api.rollback()
             self.status_db.session.rollback()

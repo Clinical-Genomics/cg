@@ -4,10 +4,9 @@ import logging
 from pathlib import Path
 
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat, Strandedness
+from cg.constants.constants import Strandedness
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
 from cg.exc import MissingMetrics
-from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
@@ -60,13 +59,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def is_multiple_samples_allowed(self) -> bool:
         """Return whether the analysis supports multiple samples to be linked to the case."""
         return False
-
-    def get_deliverables_template_content(self) -> list[dict]:
-        """Return deliverables file template content."""
-        return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=self.get_bundle_filenames_path(),
-        )
 
     def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
