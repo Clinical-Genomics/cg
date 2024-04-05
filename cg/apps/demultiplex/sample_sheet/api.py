@@ -283,7 +283,8 @@ class SampleSheetAPI:
         try:
             self._use_sample_sheet_from_housekeeper(flow_cell)
             return
-        except SampleSheetError:
+        except SampleSheetError as error:
+            LOG.warning(str(error))
             LOG.warning(
                 "It was not possible to use sample sheet from Housekeeper, "
                 "trying flow cell sample sheet"
