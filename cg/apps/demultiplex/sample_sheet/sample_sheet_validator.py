@@ -164,6 +164,7 @@ class SampleSheetValidator:
         expected_type: Type[FlowCellSample] = BCL_CONVERTER_TO_FLOW_CELL_SAMPLE[bcl_converter]
         if get_sample_type_from_content(self.content) is not expected_type:
             message: str = f"Sample sheet is not {bcl_converter}"
+            LOG.error(message)
             raise SampleSheetError(message)
 
     def _validate_bcl_convert(self):
