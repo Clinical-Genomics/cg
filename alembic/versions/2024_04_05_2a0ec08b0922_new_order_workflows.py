@@ -7,6 +7,7 @@ Create Date: 2024-04-05 10:57:03.010785
 """
 
 import sqlalchemy as sa
+from sqlalchemy.dialects import mysql
 
 from alembic import op
 
@@ -43,8 +44,8 @@ def upgrade():
     op.alter_column(
         table_name="order",
         column_name="workflow",
-        existing_type=sa.Enum(*old_workflows),
-        type_=sa.Enum(*new_workflows),
+        existing_type=mysql.ENUM(*old_workflows),
+        type_=mysql.ENUM(*new_workflows),
     )
 
 
@@ -52,6 +53,6 @@ def downgrade():
     op.alter_column(
         table_name="order",
         column_name="workflow",
-        existing_type=sa.Enum(*new_workflows),
-        type_=sa.Enum(*old_workflows),
+        existing_type=mysql.ENUM(*new_workflows),
+        type_=mysql.ENUM(*old_workflows),
     )
