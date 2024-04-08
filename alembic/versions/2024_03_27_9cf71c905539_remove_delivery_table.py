@@ -1,4 +1,4 @@
-ª"""remove_delivery_table
+"""remove_delivery_table
 
 Revision ID: 9cf71c905539
 Revises: b614a52759c5
