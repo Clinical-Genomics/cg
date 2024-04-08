@@ -3,11 +3,11 @@ from pydantic import BaseModel
 
 class AnalysisSummary(BaseModel):
     order_id: int
-    cancelled: int | None = None
-    completed: int | None = None
-    delivered: int | None = None
-    failed: int | None = None
-    running: int | None = None
+    cancelled: int
+    completed: int
+    delivered: int
+    failed: int
+    running: int
 
 
 class SummariesResponse(BaseModel):
