@@ -9,7 +9,7 @@ from sqlalchemy.orm import Query, Session
 
 from cg.constants import FlowCellStatus, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
-from cg.exc import CaseNotFoundError, CgError
+from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.store.base import BaseHandler
 from cg.store.filters.status_analysis_filters import (
@@ -1413,14 +1413,17 @@ class ReadHandler(BaseHandler):
             ids=order_ids,
         ).all()
 
-    def get_order_by_id(self, order_id: int) -> Order | None:
+    def get_order_by_id(self, order_id: int) -> Order:
         """Returns the entry in Order matching the given id."""
         orders: Query = self._get_query(table=Order)
         order_filter_functions: list[Callable] = [OrderFilter.BY_ID]
         orders: Query = apply_order_filters(
             orders=orders, filters=order_filter_functions, id=order_id
         )
-        return orders.first()
+        order: Order | None = orders.first()
+        if not order:
+            raise OrderNotFoundError(f"Order with id {order_id} not found")
+        return order
 
     def get_order_by_ticket_id(self, ticket_id: int) -> Order | None:
         """Returns the entry in Order matching the given id."""

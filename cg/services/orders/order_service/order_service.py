@@ -21,9 +21,7 @@ class OrderService:
         self.summary_service = status_service
 
     def get_order(self, order_id: int) -> OrderResponse:
-        order: Order | None = self.store.get_order_by_id(order_id)
-        if not order:
-            raise OrderNotFoundError(f"Order {order_id} not found.")
+        order: Order = self.store.get_order_by_id(order_id)
         summary: OrderSummary = self.summary_service.get_summary(order_id)
         return create_order_response(order=order, summary=summary)
 
@@ -40,3 +38,6 @@ class OrderService:
         for case in cases:
             self.store.link_case_to_order(order_id=order.id, case_id=case.id)
         return create_order_response(order)
+
+    def set_delivery(self, order_id: int, delivered: bool) -> None:
+        self.store.update_order_delivery(order_id=order_id, delivered=delivered)

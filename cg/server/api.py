@@ -42,6 +42,7 @@ from cg.server.dto.delivery_message.delivery_message_request import (
 from cg.server.dto.delivery_message.delivery_message_response import (
     DeliveryMessageResponse,
 )
+from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.ext import db, delivery_message_service, lims, order_service, osticket
@@ -516,6 +517,17 @@ def get_order(order_id: int):
         return make_response(response_dict)
     except OrderNotFoundError as error:
         return make_response(jsonify(error=str(error)), HTTPStatus.NOT_FOUND)
+
+
+@BLUEPRINT.route("/orders/<order_id>/delivered", methods=["PATCH"])
+def set_order_delivered(order_id: int):
+    try:
+        request_data = OrderDeliveredPatch.model_validate(request.json)
+        delivered: bool = request_data.delivered
+        response_data: Order = order_service.set_delivery(order_id=order_id, delivered=delivered)
+        return jsonify(response_data.model_dump()), HTTPStatus.OK
+    except OrderNotFoundError as error:
+        return jsonify(error=str(error)), HTTPStatus.NOT_FOUND
 
 
 @BLUEPRINT.route("/orders/<order_id>/delivery_message")
