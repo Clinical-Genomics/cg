@@ -1,26 +1,57 @@
-<!-- Data analysis results-->
+<!-- Data analysis results -->
 {% macro data_analysis(case) %}
   <div class="container mb-5">
-    <h4 class="mb-4">Dataanalys</h4>
-    <table class="table w-auto text-center">
-      <thead class="table-light">
-        <tr>
-          <th scope="col">Fall</th>
-          <th scope="col">Prov</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th scope="row" rowspan="{{ case.samples | length + 1}}" class="align-middle">
-            {{ case.name }}
-          </th>
-        </tr>
-        {% for sample in case.samples %}
-        <tr>
-          <td>{{ sample.name }} ({{ sample.id }})</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <h4 class="mb-4">Analys</h4>
+    {{ workflow_analysis(case=case) }}
   </div>
+{% endmacro %}
+
+<!-- Workflow analysis -->
+{% macro workflow_analysis(case) %}
+  <h5 class="mt-4 mb-3">Dataanalys</h5>
+  <table class="table w-auto text-center align-middle">
+    <thead class="table-light">
+      <tr>
+        <th scope="col">Fall</th>
+        <th scope="col">Bioinformatisk analys</th>
+        <th scope="col">Genomversion</th>
+        <th scope="col">{{ analysis_type(workflow=case.data_analysis.workflow) }}</th>
+        <th scope="col">{{ gene_panels(workflow=case.data_analysis.workflow) }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>{{ case.name }}</th>
+        <td>{{ case.data_analysis.workflow }} (v{{ case.data_analysis.workflow_version }})</td>
+        <td>{{ case.data_analysis.genome_build }}</td>
+        <td>{{ analysis_type_value(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type) }}</td>
+        <td>{{ gene_panels_value(case=case) }}</td>
+      </tr>
+    </tbody>
+  </table>
+{% endmacro %}
+
+
+{% macro analysis_type(workflow) %}
+  {% if "balsamic" in workflow %}
+    Analystyp
+  {% endif %}
+{% endmacro %}
+
+{% macro analysis_type_value(workflow, analysis_type) %}
+  {% if "balsamic" in workflow %}
+    {{ analysis_type }}
+  {% endif %}
+{% endmacro %}
+
+{% macro gene_panels(workflow) %}
+  {% if "mip-dna" == workflow or "rnafusion" == workflow %}
+    Genpaneler
+  {% endif %}
+{% endmacro %}
+
+{% macro gene_panels_value(case) %}
+  {% if "mip-dna" == case.data_analysis.workflow or "rnafusion" == case.data_analysis.workflow %}
+    {{ case.data_analysis.panels }}
+  {% endif %}
 {% endmacro %}

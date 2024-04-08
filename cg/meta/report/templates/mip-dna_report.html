@@ -8,26 +8,10 @@
         <div class="card-block">
           <table class="table table-bordered" aria-describedby="Case table">
             <thead>
-              <tr>
-                <!-- <th>Prov</th> -->
-                <!-- <th>Beställt</th> -->
-                <!-- <th>Familj</th> -->
-                <!-- <th>Kön</th> -->
-                <!-- <th>Status</th> -->
-                <!-- <th>Vävnad</th> -->
-                <!-- <th>Ticket</th> -->
-                <!-- <th>Applikation</th> -->
-                <!-- <th>Bioinformatisk analys</th> -->
-              </tr>
             </thead>
             <tbody>
-              {% for sample in case.samples %}
                 <tr>
-                  <!-- <td>{{ sample.name }}* ({{ sample.id }})</td> -->
-                  <!-- <td>{{ sample.timestamps.ordered_at }}</td> -->
-                  <!-- <td>{{ case.name }}*</td> -->
                   <td>
-                    <!-- {{ sample.gender }}* -->
                     {%  if sample.metadata.gender != 'N/A'%}
                       (analys:
                       {% if sample.gender != sample.metadata.gender %}
@@ -37,13 +21,6 @@
                       {% endif %}
                     {% endif %}
                   </td>
-                  <!-- <td>{{ sample.status }}*</td> -->
-                  <!-- <td>{{ sample.source }}*</td> -->
-                  <!-- <td>{{ sample.ticket }}</td> -->
-                  <!-- <td>{{ sample.application.tag }}*</td> -->
-                  <!-- <td>{{ case.data_analysis.customer_workflow }}*</td> -->
-                </tr>
-              {% endfor %}
             </tbody>
           </table>
         </div>
@@ -52,49 +29,12 @@
           <table class="table table-bordered" aria-describedby="Case table">
             <thead>
               <tr>
-                <!-- <th>Prov</th> -->
-                <!-- <th>Ankom</th> -->
-                <!-- <th>Biblioteksberedning</th> -->
-                <!-- <th>Beredd</th> -->
-                <!-- <th>Bait set</th> -->
-                <!-- <th>Sekvensering</th> -->
-                <!-- <th>Sekvenserad</th> -->
-                <th>Bioinformatisk analys</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for sample in case.samples %}
-                <tr>
-                  <!-- <td>{{ sample.name }}*</td> -->
-                  <!-- <td>{{ sample.timestamps.received_at }}</td> -->
-                  <!-- <td>{{ sample.methods.library_prep }}</td> -->
-                  <!-- <td>{{ sample.timestamps.prepared_at }}</td> -->
-                  <!-- <td>{{ sample.metadata.bait_set }}</td> -->
-                  <!-- <td>{{ sample.methods.sequencing }}</td> -->
-                  <!-- <td>{{ sample.timestamps.reads_updated_at }}</td> -->
-                  <!-- <td>{{ case.data_analysis.workflow }}</td> -->
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-
-        <div class="card-block">
-          <table class="table table-bordered" aria-describedby="Case table">
-            <thead>
-              <tr>
-                <th>Familj</th>
-                <th>MIP-version</th>
-                <th>Genpaneler</th>
-                <th>Genomversion</th>
+                <!-- <th>Genpaneler</th> -->
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>{{ case.name }}*</td>
-                <td>{{ case.data_analysis.workflow_version }}</td>
-                <td>{{ case.data_analysis.panels }}</td>
-                <td>{{ case.data_analysis.genome_build }}</td>
+                <!-- <td>{{ case.data_analysis.panels }}</td> -->
               </tr>
             </tbody>
           </table>

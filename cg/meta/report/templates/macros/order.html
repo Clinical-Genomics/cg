@@ -2,7 +2,7 @@
 {% macro order(case) %}
   <div class="container mb-5">
     <h4 class="mb-4">Beställning</h4>
-    <table class="table w-auto text-center">
+    <table class="table w-auto text-center align-middle">
       <thead class="table-light">
         <tr>
           <th scope="col">Fall</th>
@@ -18,10 +18,10 @@
       </thead>
       <tbody>
         <tr>
-          <th scope="row" rowspan="{{ case.samples | length + 1}}" class="align-middle">
+          <th scope="row" rowspan="{{ case.samples | length + 1}}">
             {{ case.name }}
           </th>
-          <td scope="row" rowspan="{{ case.samples | length + 1}}" class="align-middle">
+          <td scope="row" rowspan="{{ case.samples | length + 1}}">
             {{ case.data_analysis.customer_workflow }}
           </td>
         </tr>

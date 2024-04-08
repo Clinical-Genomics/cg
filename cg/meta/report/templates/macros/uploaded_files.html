@@ -53,7 +53,7 @@
 <!-- Analysis files -->
 {% macro analysis_files(case) %}
   {% if "analysis" in case.data_analysis.data_delivery %}
-    <table class="table w-auto">
+    <table class="table w-auto align-middle">
       <thead class="table-light">
         <tr>
           <th scope="col" colspan="2">Analysfiler</th>
@@ -78,7 +78,7 @@
 <!-- Fastq files -->
 {% macro fastq_files(case) %}
   {% if "fastq" in case.data_analysis.data_delivery %}
-    <table class="table w-auto">
+    <table class="table w-auto align-middle">
       <thead class="table-light">
         <tr>
           <th scope="col" colspan="2">Fastq-filer</th>
@@ -97,7 +97,7 @@
 {% macro delivered_files(row_title, files) %}
   {% if files != "N/A" %}
     <tr>
-      <th scope="row" rowspan="{{ files | length + 1}}" class="align-middle">{{ row_title }}</th>
+      <th scope="row" rowspan="{{ files | length + 1}}">{{ row_title }}</th>
     </tr>
     {% for file in files %}
       <tr>

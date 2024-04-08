@@ -2,7 +2,7 @@
 {% macro sample_prep(case) %}
   <div class="container mb-5">
     <h4 class="mb-4">Provberedning</h4>
-    <table class="table w-auto text-center">
+    <table class="table w-auto text-center align-middle">
       <thead class="table-light">
         <tr>
           <th scope="col">Fall</th>
@@ -11,13 +11,13 @@
           <th scope="col">Beredd</th>
           <th scope="col">Sekvenserad</th>
           <th scope="col">Biblioteksberedning</th>
-          {{ bait_set(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type) }}
+          <th scope="col">{{ bait_set(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type) }}</th>
           <th scope="col">Sekvensering</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <th scope="row" rowspan="{{ case.samples | length + 1}}" class="align-middle">
+          <th scope="row" rowspan="{{ case.samples | length + 1}}">
             {{ case.name }}
           </th>
         </tr>
@@ -27,9 +27,9 @@
           <td>{{ sample.timestamps.received_at }}</td>
           <td>{{ sample.timestamps.prepared_at }}</td>
           <td>{{ sample.timestamps.reads_updated_at }}</td>
-          <td>{{ sample.methods.library_prep }}</td>
-          {{ bait_set_value(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type, sample=sample) }}
-          <td>{{ sample.methods.sequencing }}</td>
+          <td class="text-start">{{ sample.methods.library_prep }}</td>
+          <td>{{ bait_set_value(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type, sample=sample) }}</td>
+          <td class="text-start">{{ sample.methods.sequencing }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -43,7 +43,7 @@
     ("balsamic" in workflow and "panelsekvensering" in analysis_type) or
     ("mip-dna" == workflow and "wes" == analysis_type)
   %}
-    <th scope="col">Bait Set</th>
+    Bait Set
   {% endif %}
 {% endmacro %}
 
@@ -53,11 +53,9 @@
     ("balsamic" in workflow and "panelsekvensering" in analysis_type) or
     ("mip-dna" == workflow and "wes" == analysis_type)
   %}
-    <td>
-      {{ sample.metadata.bait_set }}
-      {% if "balsamic" in workflow and sample.metadata.bait_set != "N/A" %}
-        (v{{sample.metadata.bait_set_version }})
-      {% endif %}
-    </td>
+    {{ sample.metadata.bait_set }}
+    {% if "balsamic" in workflow and sample.metadata.bait_set != "N/A" %}
+      (v{{sample.metadata.bait_set_version }})
+    {% endif %}
   {% endif %}
 {% endmacro %}
