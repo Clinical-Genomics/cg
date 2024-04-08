@@ -1422,7 +1422,7 @@ class ReadHandler(BaseHandler):
         )
         order: Order | None = orders.first()
         if not order:
-            raise OrderNotFoundError(f"Order with id {order_id} not found")
+            raise OrderNotFoundError(f"Order with ID {order_id} not found.")
         return order
 
     def get_order_by_ticket_id(self, ticket_id: int) -> Order | None:

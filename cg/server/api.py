@@ -29,6 +29,7 @@ from cg.exc import (
     OrderFormError,
     OrderMismatchError,
     OrderNotDeliverableError,
+    OrderNotFoundError,
     TicketCreationError,
 )
 from cg.io.controller import WriteStream
@@ -46,7 +47,6 @@ from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.ext import db, delivery_message_service, lims, order_service, osticket
-from cg.services.orders.order_service.exceptions import OrderNotFoundError
 from cg.store.models import (
     Analysis,
     Application,
@@ -517,6 +517,8 @@ def get_order(order_id: int):
         return make_response(response_dict)
     except OrderNotFoundError as error:
         return make_response(jsonify(error=str(error)), HTTPStatus.NOT_FOUND)
+    except Exception as error:
+        return make_response(jsonify(error=str(error)), HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
 @BLUEPRINT.route("/orders/<order_id>/delivered", methods=["PATCH"])

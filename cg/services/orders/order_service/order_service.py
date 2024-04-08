@@ -2,7 +2,6 @@ from cg.models.orders.order import OrderIn
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order as OrderResponse
 from cg.server.dto.orders.orders_response import OrdersResponse
-from cg.services.orders.order_service.exceptions import OrderNotFoundError
 from cg.services.orders.order_service.utils import (
     create_order_response,
     create_orders_response,
