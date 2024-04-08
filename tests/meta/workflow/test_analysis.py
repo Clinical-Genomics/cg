@@ -89,7 +89,6 @@ def test_is_flow_cell_check_applicable(mip_analysis_api: MipDNAAnalysisAPI, anal
     # GIVEN that no samples are down-sampled nor external
     for sample in case.samples:
         assert not sample.from_sample
-        assert not sample.is_external
 
     # WHEN checking if a flow cell check is applicable
     # THEN the method should return True

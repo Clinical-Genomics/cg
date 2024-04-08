@@ -8,5 +8,6 @@ class OrderSummary(BaseModel):
     running: int | None = None
     cancelled: int | None = None
     failed: int | None = None
-    in_sequencing: int
-    in_lab_preparation: int
+    in_sequencing: int | None = None
+    in_lab_preparation: int | None = None
+    not_received: int | None = None

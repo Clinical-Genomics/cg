@@ -1,5 +1,9 @@
 from cg.constants.constants import DataDelivery, MicrosaltAppTags, Workflow
-from cg.exc import CaseNotFoundError, OrderMismatchError
+from cg.exc import (
+    CaseNotFoundError,
+    DeliveryMessageNotSupportedError,
+    OrderMismatchError,
+)
 from cg.services.delivery_message.messages import (
     AnalysisScoutMessage,
     CovidMessage,
@@ -88,6 +92,11 @@ def validate_cases(cases: list[Case], case_ids: list[str]) -> None:
         raise CaseNotFoundError("Internal id not found in the database")
     if not is_matching_order(cases):
         raise OrderMismatchError("Cases do not belong to the same order")
+    cases_with_mip_rna: list[Case] = [
+        case for case in cases if case.data_analysis == Workflow.MIP_RNA
+    ]
+    if cases_with_mip_rna:
+        raise DeliveryMessageNotSupportedError("Workflow is not supported.")
 
 
 def is_matching_order(cases: list[Case]) -> bool:
