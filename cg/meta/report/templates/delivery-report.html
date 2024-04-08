@@ -1,5 +1,8 @@
-{% from "/macros/header.html" import header, report_data, contact_data %} {% from
-"/macros/order.html" import order %} {% from "/macros/uploaded_files.html" import uploaded_files %}
+{% from "/macros/header.html" import header, report_data, contact_data %}
+{% from "/macros/order.html" import order %}
+{% from "/macros/sample_prep.html" import sample_prep %}
+{% from "/macros/data_analysis.html" import data_analysis %}
+{% from "/macros/uploaded_files.html" import uploaded_files %}
 {% from "/macros/susy.html" import susy_communication %}
 
 <!DOCTYPE html>
@@ -29,6 +32,10 @@
           {{ contact_data(customer=customer) }}
           <!-- Customer's order -->
           {{ order(case=case) }}
+          <!-- Sample preparation -->
+          {{ sample_prep(case=case) }}
+          <!-- Data analysis -->
+          {{ data_analysis(case=case) }}
           <!-- Uploaded files -->
           {{ uploaded_files(case=case, customer=customer) }}
           <!-- Signature -->

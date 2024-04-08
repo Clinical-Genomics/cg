@@ -1,0 +1,26 @@
+<!-- Sample preparation data -->
+{% macro sample_prep(case) %}
+  <div class="container mb-5">
+    <h4 class="mb-4">Beställning</h4>
+    <table class="table w-auto text-center">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Fall</th>
+          <th scope="col">Prov</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row" rowspan="{{ case.samples | length + 1}}" class="align-middle">
+            {{ case.name }}
+          </th>
+        </tr>
+        {% for sample in case.samples %}
+        <tr>
+          <td>{{ sample.name }} ({{ sample.id }})</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endmacro %}
