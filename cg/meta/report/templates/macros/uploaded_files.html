@@ -10,7 +10,7 @@
     "fastq" in case.data_analysis.data_delivery
   %}
     <div class="container mb-5">
-      <h4>Uppladdade filer</h4>
+      <h4 class="mb-4">Uppladdade filer</h4>
       {{ scout_files(case=case, customer_id=customer.id, scout_access=customer.scout_access) }}
       {{ caesar_files(case=case, customer_id=customer.id) }}
     </div>
@@ -20,37 +20,33 @@
 <!-- Scout files -->
 {% macro scout_files(case, customer_id, scout_access) %}
   {% if scout_access and "scout" in case.data_analysis.data_delivery %}
-    <div class="mt-4"> 
-      <h5>Scout</h5>
-      <div class="alert alert-light" role="alert">
-        Varianter finns uppladdade i Scout:
-        <a href="https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}" class="alert-link">
-          https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}
-        </a>
-      </div>
-      {% if "balsamic" in case.data_analysis.workflow %}
-        {{ balsamic_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
-      {% elif "mip-dna" == case.data_analysis.workflow %}
-        {{ mip_dna_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
-      {% elif "rnafusion" == case.data_analysis.workflow %}
-        {{ rnafusion_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
-      {% endif %}
+    <h5 class="mt-4 mb-3">Scout</h5>
+    <div class="alert alert-light" role="alert">
+      Varianter finns uppladdade i Scout:
+      <a href="https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}" class="alert-link">
+        https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}
+      </a>
     </div>
+    {% if "balsamic" in case.data_analysis.workflow %}
+      {{ balsamic_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
+    {% elif "mip-dna" == case.data_analysis.workflow %}
+      {{ mip_dna_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
+    {% elif "rnafusion" == case.data_analysis.workflow %}
+      {{ rnafusion_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
+    {% endif %}
   {% endif %}
 {% endmacro %}
 
 <!-- Caesar files -->
 {% macro caesar_files(case, customer_id) %}
   {% if "analysis" in case.data_analysis.data_delivery or "fastq" in case.data_analysis.data_delivery %}
-    <div class="mt-4"> 
-      <h5>Leveransinkorg (Caesar)</h5>
-      <div class="alert alert-light" role="alert">
-        Filer som ska laddas upp till din inkorg:
-        <a class="alert-link">/home/{{ customer_id }}/inbox/{{ case.samples[0].ticket }}</a>
-      </div>
-      {{ analysis_files(case=case) }}
-      {{ fastq_files(case=case) }}
+    <h5 class="mt-4 mb-3">Leveransinkorg (Caesar)</h5>
+    <div class="alert alert-light" role="alert">
+      Filer som ska laddas upp till din inkorg:
+      <a class="alert-link">/home/{{ customer_id }}/inbox/{{ case.samples[0].ticket }}</a>
     </div>
+    {{ analysis_files(case=case) }}
+    {{ fastq_files(case=case) }}
   {% endif %}
 {% endmacro %}
 
