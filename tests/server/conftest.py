@@ -156,7 +156,9 @@ def client(app: Flask) -> Generator[FlaskClient, None, None]:
 def analysis_summary():
     return AnalysisSummary(
         order_id=1,
-        total=2,
+        cancelled=0,
+        completed=1,
+        running=0,
         delivered=1,
         failed=1,
     )
