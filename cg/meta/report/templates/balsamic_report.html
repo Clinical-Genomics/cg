@@ -8,34 +8,36 @@
           <table class="table table-bordered" aria-describedby="Sample table">
             <thead>
               <tr>
-                <th>Prov</th>
-                <th>Ankom</th>
-                <th>Biblioteksberedning</th>
-                <th>Beredd</th>
-                {% if "panelsekvensering" in case.data_analysis.type %}
+                <!-- <th>Prov</th> -->
+                <!-- <th>Ankom</th> -->
+                <!-- <th>Biblioteksberedning</th> -->
+                <!-- <th>Beredd</th> -->
+                <!-- {% if "panelsekvensering" in case.data_analysis.type %}
                 <th>Bait Set</th>
-                {% endif %}
-                <th>Sekvensering</th>
-                <th>Sekvenserad</th>
+                {% endif %} -->
+                <!-- <th>Sekvensering</th> -->
+                <!-- <th>Sekvenserad</th> -->
                 <th>Bioinformatisk analys</th>
               </tr>
             </thead>
             <tbody>
               {% for sample in case.samples %}
               <tr>
-                <td>{{ sample.name }}*</td>
-                <td>{{ sample.timestamps.received_at }}</td>
-                <td>{{ sample.methods.library_prep }}</td>
-                <td>{{ sample.timestamps.prepared_at }}</td>
-                {% if "panelsekvensering" in case.data_analysis.type %}
+                <!-- <td>{{ sample.name }}*</td> -->
+                <!-- <td>{{ sample.timestamps.received_at }}</td> -->
+                <!-- <td>{{ sample.methods.library_prep }}</td> -->
+                <!-- <td>{{ sample.timestamps.prepared_at }}</td> -->
+                <!-- {% if "panelsekvensering" in case.data_analysis.type %}
                 <td>
-                  {{ sample.metadata.bait_set }} {% if sample.metadata.bait_set != 'N/A' and
-                  sample.metadata.bait_set_version != 'N/A' %} (version: {{
+                  {{ sample.metadata.bait_set }}
+                  {% if sample.metadata.bait_set != 'N/A' and
+                  sample.metadata.bait_set_version != 'N/A' %}
+                  (version: {{
                   sample.metadata.bait_set_version }}) {% endif %}
                 </td>
-                {% endif %}
-                <td>{{ sample.methods.sequencing }}</td>
-                <td>{{ sample.timestamps.reads_updated_at }}</td>
+                {% endif %} -->
+                <!-- <td>{{ sample.methods.sequencing }}</td> -->
+                <!-- <td>{{ sample.timestamps.reads_updated_at }}</td> -->
                 <td>{{ case.data_analysis.workflow }}</td>
               </tr>
               {% endfor %}

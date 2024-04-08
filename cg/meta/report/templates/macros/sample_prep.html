@@ -1,12 +1,18 @@
 <!-- Sample preparation data -->
 {% macro sample_prep(case) %}
   <div class="container mb-5">
-    <h4 class="mb-4">Beställning</h4>
+    <h4 class="mb-4">Provberedning</h4>
     <table class="table w-auto text-center">
       <thead class="table-light">
         <tr>
           <th scope="col">Fall</th>
           <th scope="col">Prov</th>
+          <th scope="col">Ankom</th>
+          <th scope="col">Beredd</th>
+          <th scope="col">Sekvenserad</th>
+          <th scope="col">Biblioteksberedning</th>
+          {{ bait_set(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type) }}
+          <th scope="col">Sekvensering</th>
         </tr>
       </thead>
       <tbody>
@@ -18,9 +24,40 @@
         {% for sample in case.samples %}
         <tr>
           <td>{{ sample.name }} ({{ sample.id }})</td>
+          <td>{{ sample.timestamps.received_at }}</td>
+          <td>{{ sample.timestamps.prepared_at }}</td>
+          <td>{{ sample.timestamps.reads_updated_at }}</td>
+          <td>{{ sample.methods.library_prep }}</td>
+          {{ bait_set_value(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type, sample=sample) }}
+          <td>{{ sample.methods.sequencing }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+{% endmacro %}
+
+<!-- Bait set -->
+{% macro bait_set(workflow, analysis_type) %}
+  {% if
+    ("balsamic" in workflow and "panelsekvensering" in analysis_type) or
+    ("mip-dna" == workflow and "wes" == analysis_type)
+  %}
+    <th scope="col">Bait Set</th>
+  {% endif %}
+{% endmacro %}
+
+<!-- Bait set value -->
+{% macro bait_set_value(workflow, analysis_type, sample) %}
+  {% if
+    ("balsamic" in workflow and "panelsekvensering" in analysis_type) or
+    ("mip-dna" == workflow and "wes" == analysis_type)
+  %}
+    <td>
+      {{ sample.metadata.bait_set }}
+      {% if "balsamic" in workflow and sample.metadata.bait_set != "N/A" %}
+        (v{{sample.metadata.bait_set_version }})
+      {% endif %}
+    </td>
+  {% endif %}
 {% endmacro %}

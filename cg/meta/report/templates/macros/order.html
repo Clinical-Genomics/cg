@@ -13,11 +13,7 @@
           <th scope="col">Applikation</th>
           <th scope="col">Kön</th>
           <th scope="col">Provtyp</th>
-          {% if "balsamic" in case.data_analysis.customer_workflow or "rnafusion" == case.data_analysis.customer_workflow %}
-            <th scope="col">Tumör</th>
-          {% elif "mip-dna" in case.data_analysis.customer_workflow %}
-            <th scope="col">Status</th>
-          {% endif %}
+          {{ sample_status(workflow=case.data_analysis.customer_workflow, sample=sample)}}
         </tr>
       </thead>
       <tbody>
@@ -37,14 +33,28 @@
             <td>{{ sample.application.tag }}</td>
             <td>{{ sample.gender }}</td>
             <td>{{ sample.source }}</td>
-            {% if "balsamic" in case.data_analysis.customer_workflow or "rnafusion" == case.data_analysis.customer_workflow %}
-              <td>{{ sample.tumour }}</td>
-            {% elif "mip-dna" in case.data_analysis.customer_workflow %}
-              <td>{{ sample.status }}</td>
-            {% endif %}
+            {{ sample_status_value(workflow=case.data_analysis.customer_workflow, sample=sample)}}
           </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+{% endmacro %}
+
+<!-- Sample status -->
+{% macro sample_status(workflow, sample) %}
+  {% if "balsamic" in workflow or "rnafusion" == workflow %}
+    <th scope="col">Tumör</th>
+  {% elif "mip-dna" in workflow %}
+    <th scope="col">Status</th>
+  {% endif %}
+{% endmacro %}
+
+<!-- Sample status value -->
+{% macro sample_status_value(workflow, sample) %}
+  {% if "balsamic" in workflow or "rnafusion" == workflow %}
+    <td>{{ sample.tumour }}</td>
+  {% elif "mip-dna" in workflow %}
+    <td>{{ sample.status }}</td>
+  {% endif %}
 {% endmacro %}
