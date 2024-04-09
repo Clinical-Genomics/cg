@@ -209,7 +209,7 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
     """Start workflow for all cases ready for analysis."""
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
     exit_code: int = EXIT_SUCCESS
-    for case in analysis_api.get_cases_to_analyze():
+    for case in analysis_api.get_cases_ready_for_analysis():
         try:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:

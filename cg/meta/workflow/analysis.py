@@ -18,13 +18,12 @@ from cg.constants.constants import (
 )
 from cg.constants.gene_panel import GenePanelCombo
 from cg.constants.scout import ScoutExportFileName
+from cg.constants.tb import AnalysisStatus
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
-from cg.services.pre_analysis_quality_check.quality_controller.utils import (
-    run_case_pre_analysis_quality_check,
-)
+from cg.services.quality_controller import QualityController
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
@@ -93,18 +92,30 @@ class AnalysisAPI(MetaAPI):
             LOG.info(f"No working directory for {case_id} exists")
             raise FileNotFoundError(f"No working directory for {case_id} exists")
 
+    def is_case_ready_for_analysis(self, case: Case) -> bool:
+        case_passed_sequencing_qc: bool = QualityController.case_pass_sequencing_qc(case)
+        case_is_set_to_analyze: bool = case.action == CaseActions.ANALYZE
+        case_has_not_been_analyzed: bool = not case.latest_analyzed
+        case_latest_analysis_failed: bool = (
+            self.trailblazer_api.get_latest_analysis_status(case_id=case.internal_id)
+            == AnalysisStatus.FAILED
+        )
+        return case_passed_sequencing_qc and (
+            case_is_set_to_analyze or case_has_not_been_analyzed or case_latest_analysis_failed
+        )
+
     def get_cases_ready_for_analysis(self):
         """
         Return cases that are ready for analysis. The case is ready if it passes the logic in the
-        get_cases_to_analyze method, and it has passed the pre-analysis quality check.
+        get_cases_to_analyse method, and it has passed the pre-analysis quality check.
         """
-        cases_to_analyze: list[Case] = self.get_cases_to_analyze()
-        cases_passing_pre_analysis_quality_check: list[Case] = []
+        cases_to_analyze: list[Case] = self.get_cases_to_analyse()
+        cases_passing_quality_check: list[Case] = []
         for case in cases_to_analyze:
-            quality_check_passed: bool = run_case_pre_analysis_quality_check(case)
-            if quality_check_passed:
-                cases_passing_pre_analysis_quality_check.append(case)
-        return cases_passing_pre_analysis_quality_check
+            case_passed_sequencing_qc: bool = QualityController.case_pass_sequencing_qc(case)
+            if case_passed_sequencing_qc:
+                cases_passing_quality_check.append(case)
+        return cases_passing_quality_check
 
     def get_priority_for_case(self, case_id: str) -> int:
         """Get priority from the status db case priority"""
@@ -291,7 +302,7 @@ class AnalysisAPI(MetaAPI):
         )
         return analyses_to_clean
 
-    def get_cases_to_analyze(self) -> list[Case]:
+    def get_cases_to_analyse(self) -> list[Case]:
         return self.status_db.cases_to_analyze(workflow=self.workflow)
 
     def get_cases_to_store(self) -> list[Case]:

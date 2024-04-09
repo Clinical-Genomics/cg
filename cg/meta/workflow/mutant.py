@@ -7,9 +7,7 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MutantFastqHandler
-from cg.services.pre_analysis_quality_check.quality_controller.utils import (
-    run_sample_sequencing_quality_check,
-)
+from cg.services.quality_controller.quality_controller import QualityController
 from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
 from cg.store.models import Application, Case, Sample
@@ -126,10 +124,10 @@ class MutantAnalysisAPI(AnalysisAPI):
         samples: list[Sample] = [link.sample for link in case_obj.links]
         case_config_list: list[dict] = []
         for sample in samples:
-            sequencing_qc: bool = run_sample_sequencing_quality_check(sample=sample)
+            sample_passed_sequencing_qc: bool = QualityController.sample_pass_sequencing_qc(sample=sample)
             case_config_list.append(
                 self.get_sample_parameters(
-                    sample_obj=sample, sequencing_qc=sequencing_qc
+                    sample_obj=sample, sequencing_qc=sample_passed_sequencing_qc
                 ).model_dump()
             )
         config_path = self.get_case_config_path(case_id=case_id)

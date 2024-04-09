@@ -6,15 +6,11 @@ from pydantic.v1 import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import FileExtensions, GenePanelMasterList, Workflow
-from cg.constants.constants import FileFormat, CaseActions
+from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
-from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI, add_gene_panel_combo
-from cg.services.pre_analysis_quality_check.quality_controller.utils import (
-    run_case_pre_analysis_quality_check,
-)
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
@@ -270,26 +266,12 @@ class MipAnalysisAPI(AnalysisAPI):
                 return True
         return False
 
-    def is_case_ready_for_analysis(self, case: Case) -> bool:
-        """Check if case is ready for analysis."""
-        case_passed_quality_check: bool = run_case_pre_analysis_quality_check(case)
-        case_is_set_to_analyze: bool = case.action == CaseActions.ANALYZE
-        case_has_not_been_analyzed: bool = not case.latest_analyzed
-        case_latest_analysis_failed: bool = (
-            self.trailblazer_api.get_latest_analysis_status(case_id=case.internal_id)
-            == AnalysisStatus.FAILED
-        )
-        return case_passed_quality_check and (
-            case_is_set_to_analyze or case_latest_analysis_failed or case_has_not_been_analyzed
-        )
-
     def get_cases_ready_for_analysis(self) -> list[Case]:
         """Return cases to analyze."""
-        cases_to_analyze: list[Case] = self.get_cases_to_analyze()
-        cases_ready_for_analysis: list[Case] = []
-        for case in cases_to_analyze:
-            if self.is_case_ready_for_analysis(case):
-                cases_ready_for_analysis.append(case)
+        cases_to_analyze: list[Case] = self.get_cases_to_analyse()
+        cases_ready_for_analysis: list[Case] = [
+            case for case in cases_to_analyze if self.is_case_ready_for_analysis(case)
+        ]
         return cases_ready_for_analysis
 
     @staticmethod

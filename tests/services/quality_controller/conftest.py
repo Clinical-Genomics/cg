@@ -6,7 +6,7 @@ from cg.store.store import Store
 from tests.conftest import StoreHelpers
 
 
-class PreAnalysisQCScenarios:
+class SequencingQCScenarios:
     def __init__(self, store: Store, helpers: StoreHelpers):
         self.store: Store = store
         self.helpers: StoreHelpers = helpers
@@ -36,14 +36,13 @@ class PreAnalysisQCScenarios:
             sample: Sample = self.helpers.add_sample(
                 store=self.store, reads=10, priority=Priority.standard
             )
-            sample.application_version = application_version
-            return sample
         else:
             sample: Sample = self.helpers.add_sample(
                 store=self.store, reads=0, priority=Priority.standard
             )
-            sample.application_version = application_version
-            return sample
+
+        sample.application_version = application_version
+        return sample
 
     def add_express_sample(self, prep_category: PrepCategory, pass_reads: bool) -> Sample:
         """

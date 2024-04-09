@@ -2,22 +2,21 @@ import pytest
 from cg.constants.constants import PrepCategory, Workflow
 from cg.constants.priority import Priority
 from cg.store.models import Case, Sample
-from cg.services.pre_analysis_quality_check.sequencing_quality_checks.utils import (
-    is_sample_ready_made_library,
+from cg.services.quality_controller.quality_checks.utils import (
+    any_sample_in_case_has_reads,
     case_has_express_priority,
-    sample_has_express_priority,
-    case_is_not_express_priority,
+    case_pass_sequencing_qc,
+    express_case_pass_sequencing_qc,
+    express_sample_has_enough_reads,
+    get_express_reads_threshold_for_sample,
+    is_sample_ready_made_library,
+    is_sample_express_priority,
     ready_made_library_sample_has_enough_reads,
     sample_has_enough_reads,
-    get_sequencing_qc_of_case,
-    get_express_reads_threshold_for_sample,
-    express_sample_has_enough_reads,
-    get_express_sequencing_qc_of_case,
-    any_sample_in_case_has_reads,
 )
 from cg.store.store import Store
 from tests.conftest import StoreHelpers
-from tests.services.pre_analysis_quality_check.conftest import PreAnalysisQCScenarios
+from tests.services.quality_controller.conftest import SequencingQCScenarios
 
 
 @pytest.mark.parametrize(
@@ -37,7 +36,7 @@ def test_is_sample_ready_made_library(
     This test verifies if the sample is ready-made library based on its prep category.
     """
     # GIVEN a sample with a prep category
-    scenarios_generator: PreAnalysisQCScenarios = PreAnalysisQCScenarios(
+    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
         store=base_store, helpers=helpers
     )
     sample: Sample = scenarios_generator.sample_scenario(
@@ -66,7 +65,7 @@ def test_case_has_express_priority(
     This test verifies if the case has express priority.
     """
     # GIVEN a case with a priority
-    scenarios_generator: PreAnalysisQCScenarios = PreAnalysisQCScenarios(
+    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
         store=base_store, helpers=helpers
     )
     case: Case = scenarios_generator.case_scenario(
@@ -88,16 +87,16 @@ def test_case_has_express_priority(
     ],
     ids=["express_priority", "standard_priority"],
 )
-def test_sample_has_express_priority(
+def test_is_sample_express_priority(
     priority: Priority, expected_result: bool, base_store: Store, helpers
 ):
     """
-    Test the sample_has_express_priority function.
+    Test the is_sample_express_priority function.
 
     This test verifies if the sample has express priority.
     """
     # GIVEN a sample with a priority
-    scenarios_generator: PreAnalysisQCScenarios = PreAnalysisQCScenarios(
+    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
         store=base_store, helpers=helpers
     )
     sample: Sample = scenarios_generator.sample_scenario(
@@ -106,39 +105,7 @@ def test_sample_has_express_priority(
     # WHEN checking if the sample has express priority
     # THEN the result should be as expected
 
-    assert sample_has_express_priority(sample) == expected_result
-
-
-@pytest.mark.parametrize(
-    "priority, expected_result",
-    [
-        (Priority.express, False),
-        (Priority.standard, True),
-    ],
-    ids=["express_priority", "standard_priority"],
-)
-def test_case_is_not_express_priority(
-    priority: Priority, expected_result: bool, base_store: Store, helpers
-):
-    """
-    Test the case_is_not_express_priority function.
-
-    This test verifies if the case has lower priority than express. It checks if the case has lower priority than express.
-    It checks if the case has lower priority than express.
-    """
-    # GIVEN a case with a priority
-    scenarios_generator: PreAnalysisQCScenarios = PreAnalysisQCScenarios(
-        store=base_store, helpers=helpers
-    )
-    case: Case = scenarios_generator.case_scenario(
-        priority=priority,
-        pass_reads=True,
-        prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING,
-        workflow=Workflow.MIP_DNA,
-    )
-    # WHEN checking if the case has lower priority than express
-    # THEN the result should be as expected
-    assert case_is_not_express_priority(case) == expected_result
+    assert is_sample_express_priority(sample) == expected_result
 
 
 @pytest.mark.parametrize(
@@ -159,7 +126,7 @@ def test_ready_made_library_sample_has_enough_reads(
     library and if it has enough reads if so is the case.
     """
     # GIVEN a ready-made library sample with or without reads
-    scenarios_generator: PreAnalysisQCScenarios = PreAnalysisQCScenarios(
+    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
         store=base_store, helpers=helpers
     )
     sample: Sample = scenarios_generator.ready_made_library_sample_scenario(
@@ -188,7 +155,7 @@ def test_sample_has_enough_reads(
     This test verifies if the sample has enough reads. It checks if the sample has enough reads or not.
     """
     # GIVEN a sample with or without reads
-    scenarios_generator: PreAnalysisQCScenarios = PreAnalysisQCScenarios(
+    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
         store=base_store, helpers=helpers
     )
     sample: Sample = scenarios_generator.sample_scenario(
@@ -218,7 +185,7 @@ def test_get_sequencing_qc_of_case(pass_reads, priority, expected_result, base_s
 
     """
     # GIVEN a case with standard priority and a sample
-    scenarios_generator: PreAnalysisQCScenarios = PreAnalysisQCScenarios(
+    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
         store=base_store, helpers=helpers
     )
     case: Case = scenarios_generator.case_scenario(
@@ -230,7 +197,7 @@ def test_get_sequencing_qc_of_case(pass_reads, priority, expected_result, base_s
     # WHEN getting the sequencing quality check of the case
     # THEN the sequencing quality check of the case should be as expected
 
-    assert get_sequencing_qc_of_case(case) == expected_result
+    assert case_pass_sequencing_qc(case) == expected_result
 
 
 @pytest.mark.parametrize(
@@ -252,7 +219,7 @@ def test_express_sample_has_enough_reads(
 
     """
     # GIVEN an express sample with or without reads
-    scenarios_generator: PreAnalysisQCScenarios = PreAnalysisQCScenarios(
+    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
         store=base_store, helpers=helpers
     )
     sample: Sample = scenarios_generator.sample_scenario(
@@ -273,7 +240,7 @@ def test_get_express_reads_threshold_for_sample(base_store, helpers):
     This test verifies the express reads threshold is correctly calculated for a sample.
     """
     # GIVEN a sample with a target reads value
-    scenarios_generator: PreAnalysisQCScenarios = PreAnalysisQCScenarios(
+    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
         store=base_store, helpers=helpers
     )
     sample: Sample = scenarios_generator.sample_scenario(
@@ -297,7 +264,7 @@ def test_get_express_reads_threshold_for_sample(base_store, helpers):
     ],
     ids=["express_priority", "express_priority_no_reads"],
 )
-def test_get_express_sequencing_qc_of_case(
+def test_express_case_pass_sequencing_qc(
     pass_reads: bool, priority: Priority, expected_result: bool, base_store, helpers
 ):
     """
@@ -308,7 +275,7 @@ def test_get_express_sequencing_qc_of_case(
     """
 
     # GIVEN a case with express priority and a sample
-    scenarios_generator: PreAnalysisQCScenarios = PreAnalysisQCScenarios(
+    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
         store=base_store, helpers=helpers
     )
     case: Case = scenarios_generator.case_scenario(
@@ -318,7 +285,7 @@ def test_get_express_sequencing_qc_of_case(
         workflow=Workflow.MIP_DNA,
     )
     # WHEN getting the express sequencing quality check of the case
-    express_sequencing_qc_of_case: bool = get_express_sequencing_qc_of_case(case)
+    express_sequencing_qc_of_case: bool = express_case_pass_sequencing_qc(case)
     # THEN the express sequencing quality check of the case should be as expected
     assert express_sequencing_qc_of_case == expected_result
 
@@ -340,7 +307,7 @@ def test_any_sample_in_case_has_reads(
     This test verifies if any sample in the case has reads.
     """
     # GIVEN a case with a sample with or without reads
-    scenarios_generator: PreAnalysisQCScenarios = PreAnalysisQCScenarios(
+    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
         store=base_store, helpers=helpers
     )
     case: Case = scenarios_generator.case_scenario(

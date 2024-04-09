@@ -10,6 +10,7 @@ from cg.constants import DataDelivery, Workflow
 from cg.constants.delivery import INBOX_NAME, PIPELINE_ANALYSIS_TAG_MAP
 from cg.models.delivery.delivery import DeliveryFile
 from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.quality_controller.quality_controller import QualityController
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -59,8 +60,11 @@ class DeliveryAPI:
         or is external. The force parameter can be used to override checks.
         """
         is_external: bool = sample.application_version.application.is_external
-        qc_pass: bool = sample.sequencing_qc
-        return is_external or qc_pass or force
+        sample_passed_sequencing_qc: bool = QualityController.sample_pass_sequencing_qc(
+            sample=sample
+        )
+
+        return is_external or sample_passed_sequencing_qc or force
 
     def convert_files_to_delivery_files(
         self,
@@ -95,10 +99,10 @@ class DeliveryAPI:
         sample_tags_with_sample_id: list[set[str]] = [
             tag | {sample.internal_id} for tag in sample_tags
         ]
-        sample_files: list[File] = (
-            self.housekeeper_api.get_files_from_latest_version_containing_tags(
-                bundle_name=case.internal_id, tags=sample_tags_with_sample_id
-            )
+        sample_files: list[
+            File
+        ] = self.housekeeper_api.get_files_from_latest_version_containing_tags(
+            bundle_name=case.internal_id, tags=sample_tags_with_sample_id
         )
         delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
             files=sample_files,
@@ -113,9 +117,9 @@ class DeliveryAPI:
         """Return a complete list of analysis sample files to be delivered."""
         delivery_files: list[DeliveryFile] = []
         for sample in case.samples:
-            sample_delivery_files: list[DeliveryFile] = (
-                self.get_analysis_sample_delivery_files_by_sample(case=case, sample=sample)
-            )
+            sample_delivery_files: list[
+                DeliveryFile
+            ] = self.get_analysis_sample_delivery_files_by_sample(case=case, sample=sample)
             delivery_files.extend(sample_delivery_files)
         return delivery_files
 
@@ -143,10 +147,10 @@ class DeliveryAPI:
         if not self.is_sample_deliverable(sample=sample, force=force):
             LOG.warning(f"Sample {sample.internal_id} is not deliverable")
             return delivery_files
-        fastq_files: list[File] = (
-            self.housekeeper_api.get_files_from_latest_version_containing_tags(
-                bundle_name=sample.internal_id, tags=fastq_tags
-            )
+        fastq_files: list[
+            File
+        ] = self.housekeeper_api.get_files_from_latest_version_containing_tags(
+            bundle_name=sample.internal_id, tags=fastq_tags
         )
         delivery_files: list[DeliveryFile] = self.convert_files_to_delivery_files(
             files=fastq_files,

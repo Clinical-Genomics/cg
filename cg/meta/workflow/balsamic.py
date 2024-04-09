@@ -7,18 +7,14 @@ from housekeeper.store.models import File, Version
 from pydantic.v1 import EmailStr, ValidationError
 
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat, SampleType, CaseActions
+from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Sex
-from cg.constants.tb import AnalysisStatus
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
-from cg.services.pre_analysis_quality_check.quality_controller.utils import (
-    run_case_pre_analysis_quality_check,
-)
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.balsamic.analysis import BalsamicAnalysis
@@ -88,31 +84,16 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return "CNVkit_PON_reference_v*.cnn"
 
-    def is_case_ready_for_analysis(self, case: Case) -> bool:
-        case_passed_quality_check: bool = run_case_pre_analysis_quality_check(case)
-        case_is_set_to_analyze: bool = case.action == CaseActions.ANALYZE
-        case_has_not_been_analyzed: bool = not case.latest_analyzed
-        case_latest_analysis_failed: bool = (
-            self.trailblazer_api.get_latest_analysis_status(case_id=case.internal_id)
-            == AnalysisStatus.FAILED
-        )
-        return case_passed_quality_check and (
-            case_is_set_to_analyze or case_has_not_been_analyzed or case_latest_analysis_failed
-        )
-
     def get_case_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.root_dir, case_id)
 
     def get_cases_ready_for_analysis(self) -> list[Case]:
         """Returns a list of cases that are ready for analysis."""
-        cases_to_analyze: list[Case] = self.get_cases_to_analyze()
-        cases_ready_for_analysis: list[Case] = []
-
-        for case in cases_to_analyze:
-            if self.is_case_ready_for_analysis(case):
-                cases_ready_for_analysis.append(case)
-
+        cases_to_analyze: list[Case] = self.get_cases_to_analyse()
+        cases_ready_for_analysis: list[Case] = [
+            case for case in cases_to_analyze if self.is_case_ready_for_analysis(case)
+        ]
         return cases_ready_for_analysis
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
