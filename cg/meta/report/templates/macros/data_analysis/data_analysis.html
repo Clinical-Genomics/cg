@@ -1,4 +1,3 @@
-{% from "/macros/data_analysis/limitations.html" import apptag_description %}
 {% from "/macros/data_analysis/limitations.html" import apptag_limitations %}
 
 <!-- Data analysis results -->
@@ -6,8 +5,7 @@
   <div class="container mb-5">
   <h4 class="mb-4">Analys</h4>
     {{ workflow_analysis(case=case) }}
-    {{ apptag_description() }}
-    {{ apptag_limitations() }}
+    {{ apptag_limitations(applications=case.applications) }}
   </div>
 {% endmacro %}
 

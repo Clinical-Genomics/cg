@@ -94,22 +94,7 @@
           </table>
 
           <div class="card-body">* Information given av kund</div>
-        </div>
-        
-        {% for application in case.applications %}
-        <div class="card-block">
-          <h4 class="card-title">Teknisk beskrivning av analysen: {{ application.tag }}</h4>
-          <p class="card-text">{{ application.description }}</p>
-          {% if application.details != 'N/A' %}
-          <p class="card-text">{{ application.details }}</p>
-          {% endif %} {% if application.limitations != 'N/A' %}
-          <h4 class="card-title">Begränsningar av analysen: {{ application.tag }}</h4>
-          <p class="card-text">{{ application.limitations }}</p>
-          {% if application.workflow_limitations != 'N/A' %}
-          <p class="card-text">{{ application.workflow_limitations }}</p>
-          {% endif %} {% endif %}
-        </div>
-        {% endfor %}
+        </div>       
     </div>
   </body>
 </html>

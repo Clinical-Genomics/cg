@@ -1,9 +1,26 @@
 <!-- Apptag limitations -->
-{% macro apptag_description() %}
-  <h5 class="mt-4 mb-3">Teknisk beskrivning av analysen</h5>
-{% endmacro %}
-
-
-{% macro apptag_limitations() %}
-  <h5 class="mt-4 mb-3">Begränsningar av analysen</h5>
+{% macro apptag_limitations(applications) %}
+  <h5 class="mt-4 mb-3">Teknisk beskrivning och begränsningar av analysen</h5>
+  <table class="table w-auto text-center align-middle">
+    <thead class="table-secondary">
+      <tr>
+        <th scope="col">Applikation</th>
+        <th scope="col">Beskrivning</th>
+        <th scope="col">Detaljer</th>
+        <th scope="col">Begränsningar</th>
+        <th scope="col">Workflowbegränsningar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for application in applications %}
+      <tr>
+        <th>{{ application.tag }}</th>
+        <td>{{ application.description }}</td>
+        <td>{{ application.details }}</td>
+        <td>{{ application.limitations }}</td>
+        <td>{{ application.workflow_limitations }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% endmacro %}
