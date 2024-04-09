@@ -42,6 +42,10 @@ def filter_orders_by_search(orders: Query, search: str | None, **kwargs) -> Quer
     )
 
 
+def filter_orders_by_delivered(orders: Query, delivered: bool | None, **kwargs) -> Query:
+    return orders.filter(Order.delivered == delivered) if delivered is not None else orders
+
+
 def apply_sorting(
     orders: Query, sort_field: OrderSortField | None, sort_order: SortOrder | None, **kwargs
 ) -> Query:
@@ -59,6 +63,7 @@ class OrderFilter(Enum):
     BY_SEARCH: Callable = filter_orders_by_search
     BY_TICKET_ID: Callable = filter_orders_by_ticket_id
     BY_WORKFLOW: Callable = filter_orders_by_workflow
+    BY_DELIVERED: Callable = filter_orders_by_delivered
     PAGINATE: Callable = apply_pagination
     SORT: Callable = apply_sorting
 
@@ -75,6 +80,7 @@ def apply_order_filters(
     sort_field: OrderSortField = None,
     sort_order: SortOrder = None,
     search: str = None,
+    delivered: bool = None,
 ) -> Query:
     for filter in filters:
         orders: Query = filter(
@@ -88,5 +94,6 @@ def apply_order_filters(
             sort_field=sort_field,
             sort_order=sort_order,
             search=search,
+            delivered=delivered,
         )
     return orders
