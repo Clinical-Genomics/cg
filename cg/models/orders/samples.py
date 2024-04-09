@@ -284,7 +284,7 @@ class SarsCov2Sample(MicrobialSample):
     volume: str | None
 
     @validator("lab_code", pre=True, always=True)
-    def set_lab_code(self):
+    def set_lab_code(cls, value):
         return "SE100 Karolinska"
 
 
