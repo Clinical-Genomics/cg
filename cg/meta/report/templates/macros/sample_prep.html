@@ -11,7 +11,9 @@
           <th scope="col">Beredd</th>
           <th scope="col">Sekvenserad</th>
           <th scope="col">Biblioteksberedning</th>
-          <th scope="col">{{ bait_set(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type) }}</th>
+          <th scope="col">
+            {{ bait_set(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type) }}
+          </th>
           <th scope="col">Sekvensering</th>
         </tr>
       </thead>
@@ -28,12 +30,18 @@
           <td>{{ sample.timestamps.prepared_at }}</td>
           <td>{{ sample.timestamps.reads_updated_at }}</td>
           <td class="text-start">{{ sample.methods.library_prep }}</td>
-          <td>{{ bait_set_value(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type, sample=sample) }}</td>
+          <td>
+            {{ bait_set_value(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type, sample=sample) }}
+          </td>
           <td class="text-start">{{ sample.methods.sequencing }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    <div class="alert alert-light" role="alert">
+      Laboratoriet har inte haft ansvar för provtagningsstadiet och extraktion, resultaten gäller
+      för provet såsom det har mottagits.
+    </div>
   </div>
 {% endmacro %}
 
