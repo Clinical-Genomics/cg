@@ -1,4 +1,7 @@
 {% from "/macros/data_analysis/limitations.html" import apptag_limitations %}
+{% from "/macros/data_analysis/metrics/balsamic_metrics.html" import balsamic_metrics %}
+{% from "/macros/data_analysis/metrics/mip_dna_metrics.html" import mip_dna_metrics %}
+{% from "/macros/data_analysis/metrics/rnafusion_metrics.html" import rnafusion_metrics %}
 
 <!-- Data analysis results -->
 {% macro data_analysis(case) %}
@@ -6,6 +9,14 @@
   <h4 class="mb-4">Analys</h4>
     {{ workflow_analysis(case=case) }}
     {{ apptag_limitations(applications=case.applications) }}
+    <h5 class="mt-4 mb-3">Kvalitetskontrollsmetrik</h5>
+    {% if "balsamic" in case.data_analysis.workflow %}
+      {{ balsamic_metrics() }}
+    {% elif "mip-dna" == case.data_analysis.workflow %}
+      {{ mip_dna_metrics() }}
+    {% elif "rnafusion" == case.data_analysis.workflow %}
+      {{ rnafusion_metrics() }}
+    {% endif %}
   </div>
 {% endmacro %}
 
