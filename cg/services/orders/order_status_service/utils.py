@@ -36,6 +36,7 @@ def create_order_summary(
         delivered=analysis_summary.delivered,
         cancelled=analysis_summary.cancelled,
         failed=analysis_summary.failed,
+        completed=analysis_summary.completed,
     )
 
 
