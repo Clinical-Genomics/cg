@@ -33,11 +33,11 @@ def taxprofiler(context: click.Context) -> None:
 
 taxprofiler.add_command(resolve_compression)
 taxprofiler.add_command(config_case)
-taxprofiler.add_command(metrics_deliver)
-taxprofiler.add_command(report_deliver)
 taxprofiler.add_command(run)
 taxprofiler.add_command(start)
 taxprofiler.add_command(start_available)
+taxprofiler.add_command(metrics_deliver)
+taxprofiler.add_command(report_deliver)
 taxprofiler.add_command(store_housekeeper)
 taxprofiler.add_command(store)
 taxprofiler.add_command(store_available)

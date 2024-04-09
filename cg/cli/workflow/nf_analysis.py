@@ -296,7 +296,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
         try:
             analysis_api.store(case_id=case.internal_id, dry_run=dry_run)
         except Exception as error:
-            LOG.error(f"Error storing {case.internal_id}: {error}")
+            LOG.error(f"Error storing {case.internal_id}: {repr(error)}")
             exit_code: int = EXIT_FAIL
     if exit_code:
         raise click.Abort
