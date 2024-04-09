@@ -14,8 +14,7 @@
       <div class="alert alert-info" role="alert">
         Ytterligare information om de specifika levererade filerna finns på:
         <a href="https://clinical.scilifelab.se/data-delivery" class="alert-link">
-          https://clinical.scilifelab.se/data-delivery
-        </a>
+          https://clinical.scilifelab.se/data-delivery</a>.
       </div>
       {{ scout_files(case=case, customer_id=customer.id, scout_access=customer.scout_access) }}
       {{ caesar_files(case=case, customer_id=customer.id) }}
@@ -30,8 +29,7 @@
     <div class="alert alert-info" role="alert">
       Varianter finns uppladdade i Scout:
       <a href="https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}" class="alert-link">
-        https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}
-      </a>
+        https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}</a>.
     </div>
     {% if "balsamic" in case.data_analysis.workflow %}
       {{ balsamic_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
@@ -49,7 +47,7 @@
     <h5 class="mt-4 mb-3">Leveransinkorg (Caesar)</h5>
     <div class="alert alert-info" role="alert">
       Filer som ska laddas upp till din inkorg:
-      <a class="alert-link">/home/{{ customer_id }}/inbox/{{ case.samples[0].ticket }}</a>
+      <a class="alert-link">/home/{{ customer_id }}/inbox/{{ case.samples[0].ticket }}</a>.
     </div>
     {{ analysis_files(case=case) }}
     {{ fastq_files(case=case) }}

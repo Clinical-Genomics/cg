@@ -7,10 +7,6 @@
           <th scope="row">Kliniska Fusionsvarianter</th>
           <td>{{ scout_files.vcf_fusion.replace(case_id, case_name) }}</td>
         </tr>
-      {% else %}
-        <div class="alert alert-warning" role="alert">
-          Inga fusionsvarianter upptäcktes
-        </div>
       {% endif %}
     </tbody>
   </table>

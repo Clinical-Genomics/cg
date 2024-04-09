@@ -31,7 +31,7 @@
       </tr>
     </tbody>
   </table>
-  {{ data_analysis_alert(workflow=case.data_analysis.workflow) }}
+  {{ data_analysis_alert(case=case) }}
 {% endmacro %}
 
 <!-- Analysis type column -->
@@ -77,21 +77,26 @@
 {% endmacro %}
 
 <!-- Data analysis alert component -->
-{% macro data_analysis_alert(workflow) %}
-  {% if "balsamic" in workflow and workflow != "balsamic-qc" %}
+{% macro data_analysis_alert(case) %}
+  {% if "balsamic" in case.data_analysis.workflow and case.data_analysis.workflow != "balsamic-qc" %}
     <div class="alert alert-info" role="alert">
       Den tillämpade variantanropningsfiltrerna finns på:
       <a href="https://balsamic.readthedocs.io/en/latest/balsamic_filters.html" class="alert-link">
-        https://balsamic.readthedocs.io/en/latest/balsamic_filters.html
-      </a>
+        https://balsamic.readthedocs.io/en/latest/balsamic_filters.html</a>.
     </div>
-  {% elif "rnafusion" == workflow %}
-    <div class="alert alert-primary" role="alert">
-      Ingen filtrering har utförts. Alla upptäckta varianter rapporteras.
-    </div>
+  {% elif "rnafusion" == case.data_analysis.workflow %}
+    {% if case.data_analysis.scout_files.vcf_fusion != "N/A" %}
+      <div class="alert alert-primary" role="alert">
+        Ingen filtrering har utförts. Alla upptäckta varianter rapporteras.
+      </div>
+    {% else %}
+      <div class="alert alert-warning" role="alert">
+        Inga fusionsvarianter upptäcktes.
+      </div>
+    {% endif %}
     <div class="alert alert-info" role="alert">
       Workflowinformation och bioinformatiska verktygsversioner:
-      <a href="https://nf-co.re/rnafusion" class="alert-link">https://nf-co.re/rnafusion</a>
+      <a href="https://nf-co.re/rnafusion" class="alert-link">https://nf-co.re/rnafusion</a>.
     </div>
   {% endif %}
 {% endmacro %}
