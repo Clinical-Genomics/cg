@@ -1420,8 +1420,7 @@ class ReadHandler(BaseHandler):
         orders: Query = apply_order_filters(
             orders=orders, filters=order_filter_functions, id=order_id
         )
-        order: Order | None = orders.first()
-        if not order:
+        if not (order := orders.first()):
             raise OrderNotFoundError(f"Order with ID {order_id} not found.")
         return order
 
