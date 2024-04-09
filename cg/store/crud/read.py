@@ -1472,6 +1472,3 @@ class ReadHandler(BaseHandler):
             filter_functions=filters,
             order_id=order_id,
         ).count()
-
-    def get_case_count_for_order(self, order_id: int) -> int:
-        filters: list[CaseFilter] = [CaseFilter.BY_ORDER]
