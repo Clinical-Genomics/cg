@@ -22,7 +22,7 @@ class SequencingQC(QualityChecks):
     ANY_SAMPLE_IN_CASE_HAS_READS: Callable = any_sample_in_case_has_reads
 
 
-def get_sequencing_quality_checks_for_case(case: Case) -> list[SequencingQC] | None:
+def get_sequencing_quality_check_for_case(case: Case) -> SequencingQC | None:
     """Get the appropriate sequencing quality checks for the workflow for a case."""
     workflow: Workflow = case.data_analysis
 
@@ -47,20 +47,16 @@ def get_sequencing_quality_checks_for_case(case: Case) -> list[SequencingQC] | N
     ]
 
     if workflow in case_passes_workflows:
-        return [SequencingQC.CASE_PASSES]
+        return SequencingQC.CASE_PASSES
     elif workflow in any_sample_in_case_has_reads_workflows:
-        return [SequencingQC.ANY_SAMPLE_IN_CASE_HAS_READS]
+        return SequencingQC.ANY_SAMPLE_IN_CASE_HAS_READS
     else:
         raise ValueError(f"Workflow {workflow} does not have any quality checks.")
 
 
-def get_sample_sequencing_quality_checks() -> list[SequencingQC]:
-    return [SequencingQC.SAMPLE_PASSES]
+def get_sample_sequencing_quality_check() -> SequencingQC:
+    return SequencingQC.SAMPLE_PASSES
 
 
 def run_quality_checks(quality_checks: list[QualityChecks], **kwargs) -> bool:
-    """
-    Apply a quality check.
-    """
-
     return all(quality_check(**kwargs) for quality_check in quality_checks)
