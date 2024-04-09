@@ -8,6 +8,7 @@ def create_order_response(order: DatabaseOrder, summary: OrderSummary | None = N
         ticket_id=order.ticket_id,
         order_date=str(order.order_date.date()),
         id=order.id,
+        is_delivered=order.is_delivered,
         workflow=order.workflow,
         summary=summary,
     )
