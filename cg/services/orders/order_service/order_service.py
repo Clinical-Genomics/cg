@@ -5,6 +5,7 @@ from cg.server.dto.orders.orders_response import OrdersResponse
 from cg.services.orders.order_service.utils import (
     create_order_response,
     create_orders_response,
+    order_is_delivered,
 )
 from cg.services.orders.order_status_service import OrderSummaryService
 from cg.services.orders.order_status_service.dto.order_summary import (
@@ -40,3 +41,12 @@ class OrderService:
 
     def set_delivery(self, order_id: int, delivered: bool) -> None:
         self.store.update_order_delivery(order_id=order_id, delivered=delivered)
+
+    def update_delivered(self, order_id: int, delivered_analyses: int) -> None:
+        """Update the delivery status of an order based on the number of delivered analyses."""
+        order: Order = self.store.get_order_by_id(order_id)
+        case_count: int = len(order.cases)
+        if order_is_delivered(case_count=case_count, delivered_analyses=delivered_analyses):
+            self.set_delivery(order_id=order_id, delivered=True)
+        elif order.is_delivered:
+            self.set_delivery(order_id=order_id, delivered=False)

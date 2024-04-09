@@ -1385,9 +1385,10 @@ class ReadHandler(BaseHandler):
         """Filter, sort and paginate orders based on the provided request."""
         orders: Query = apply_order_filters(
             orders=self._get_query(Order),
-            filters=[OrderFilter.BY_WORKFLOW, OrderFilter.BY_SEARCH],
+            filters=[OrderFilter.BY_WORKFLOW, OrderFilter.BY_SEARCH, OrderFilter.BY_DELIVERED],
             workflow=orders_request.workflow,
             search=orders_request.search,
+            delivered=orders_request.delivered,
         )
         total_count: int = orders.count()
         orders: list[Order] = self.sort_and_paginate_orders(
