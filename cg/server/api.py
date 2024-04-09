@@ -518,8 +518,6 @@ def get_order(order_id: int):
         return make_response(response_dict)
     except OrderNotFoundError as error:
         return make_response(jsonify(error=str(error)), HTTPStatus.NOT_FOUND)
-    except Exception as error:
-        return make_response(jsonify(error=str(error)), HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
 @BLUEPRINT.route("/orders/<order_id>/delivered", methods=["PATCH"])
