@@ -27,3 +27,7 @@ def _add_summaries(orders: list[Order], summaries: list[OrderSummary]) -> list[O
         order = order_map[summary.order_id]
         order.summary = summary
     return orders
+
+
+def order_is_delivered(case_count: int, delivered_analyses: int) -> bool:
+    return delivered_analyses >= case_count
