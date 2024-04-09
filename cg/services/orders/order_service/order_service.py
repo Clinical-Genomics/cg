@@ -48,5 +48,5 @@ class OrderService:
         case_count: int = len(order.cases)
         if order_is_delivered(case_count=case_count, delivered_analyses=delivered_analyses):
             self.set_delivery(order_id=order_id, delivered=True)
-        else:
+        elif order.is_delivered:
             self.set_delivery(order_id=order_id, delivered=False)
