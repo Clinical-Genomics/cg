@@ -1287,10 +1287,12 @@ def microbial_application_tag() -> str:
     """Return the WGS microbial application tag."""
     return "MWRNXTR003"
 
+
 @pytest.fixture
 def metagenomics_application_tag() -> str:
     """Return the metagenomics application tag."""
     return "METPCFR030"
+
 
 @pytest.fixture
 def store() -> Generator[Store, None, None]:

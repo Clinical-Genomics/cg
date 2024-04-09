@@ -9,8 +9,8 @@ LOG = logging.getLogger(__name__)
 
 def case_pass_sequencing_qc(case: Case) -> bool:
     """
-    Get the standard sequencing qc of a case. If the case is express priority, the express qc is
-    used. If the case is a ready made library, the ready made library qc is used.
+    Get the standard sequencing QC of a case. If the case is express priority, the express QC is
+    used. If the case is a ready made library, the ready made library QC is used.
     """
     if is_case_ready_made_library(case):
         return ready_made_library_case_pass_sequencing_qc(case)
@@ -33,7 +33,7 @@ def express_sample_pass_sequencing_qc(sample: Sample) -> bool:
 
 def sample_pass_sequencing_qc(sample: Sample) -> bool:
     """
-    Get the standard sequencing qc of a sample.
+    Get the standard sequencing QC of a sample.
     """
     if is_sample_express_priority(sample):
         return express_sample_pass_sequencing_qc(sample)
@@ -107,7 +107,7 @@ def is_case_ready_made_library(case: Case) -> bool:
 
 def ready_made_library_sample_has_enough_reads(sample: Sample) -> bool:
     """
-    Check if all samples in case are ready made libraries.
+    Check if a given sample from a ready made library has enough reads.
     """
 
     if not sample.has_reads:
@@ -117,7 +117,7 @@ def ready_made_library_sample_has_enough_reads(sample: Sample) -> bool:
 
 def sample_has_enough_reads(sample: Sample) -> bool:
     """
-    Run standard sequencing qc for a sample.
+    Check if the sample has more or equal reads than the expected reads for the sample.
     """
     enough_reads: bool = sample.reads >= sample.expected_reads_for_sample
     if not enough_reads:

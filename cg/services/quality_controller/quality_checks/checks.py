@@ -51,7 +51,7 @@ def get_sequencing_quality_check_for_case(case: Case) -> SequencingQC | None:
     elif workflow in any_sample_in_case_has_reads_workflows:
         return SequencingQC.ANY_SAMPLE_IN_CASE_HAS_READS
     else:
-        raise ValueError(f"Workflow {workflow} does not have any quality checks.")
+        raise ValueError(f"Workflow {workflow} does not have a sequencing quality check.")
 
 
 def get_sample_sequencing_quality_check() -> SequencingQC:

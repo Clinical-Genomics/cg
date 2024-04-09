@@ -124,7 +124,9 @@ class MutantAnalysisAPI(AnalysisAPI):
         samples: list[Sample] = [link.sample for link in case_obj.links]
         case_config_list: list[dict] = []
         for sample in samples:
-            sample_passed_sequencing_qc: bool = QualityController.sample_pass_sequencing_qc(sample=sample)
+            sample_passed_sequencing_qc: bool = QualityController.sample_pass_sequencing_qc(
+                sample=sample
+            )
             case_config_list.append(
                 self.get_sample_parameters(
                     sample_obj=sample, sequencing_qc=sample_passed_sequencing_qc
