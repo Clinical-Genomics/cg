@@ -28,5 +28,5 @@ class UpdateHandler(BaseHandler):
     def update_order_delivery(self, order_id: int, delivered: bool) -> None:
         """Update the delivery status of an order."""
         order: Order = self.get_order_by_id(order_id)
-        order.delivered = delivered
+        order.is_delivered = delivered
         self.session.commit()
