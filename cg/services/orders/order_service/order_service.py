@@ -46,3 +46,5 @@ class OrderService:
         case_count: int = len(order.cases)
         if delivered_analyses >= case_count:
             self.set_delivery(order_id=order_id, delivered=True)
+        else:
+            self.set_delivery(order_id=order_id, delivered=False)
