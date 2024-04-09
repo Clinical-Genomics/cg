@@ -79,17 +79,17 @@
 <!-- Data analysis alert component -->
 {% macro data_analysis_alert(workflow) %}
   {% if "balsamic" in workflow and workflow != "balsamic-qc" %}
-    <div class="alert alert-light" role="alert">
+    <div class="alert alert-info" role="alert">
       Den tillämpade variantanropningsfiltrerna finns på:
       <a href="https://balsamic.readthedocs.io/en/latest/balsamic_filters.html" class="alert-link">
         https://balsamic.readthedocs.io/en/latest/balsamic_filters.html
       </a>
     </div>
   {% elif "rnafusion" == workflow %}
-    <div class="alert alert-light" role="alert">
+    <div class="alert alert-primary" role="alert">
       Ingen filtrering har utförts. Alla upptäckta varianter rapporteras.
     </div>
-    <div class="alert alert-light" role="alert">
+    <div class="alert alert-info" role="alert">
       Workflowinformation och bioinformatiska verktygsversioner:
       <a href="https://nf-co.re/rnafusion" class="alert-link">https://nf-co.re/rnafusion</a>
     </div>
