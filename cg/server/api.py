@@ -44,7 +44,9 @@ from cg.server.dto.delivery_message.delivery_message_request import (
 from cg.server.dto.delivery_message.delivery_message_response import (
     DeliveryMessageResponse,
 )
-from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpdateRequest
+from cg.server.dto.orders.order_delivery_update_request import (
+    OrderDeliveredUpdateRequest,
+)
 from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
@@ -552,8 +554,8 @@ def get_delivery_message_for_order(order_id: int):
         response: DeliveryMessageResponse = delivery_message_service.get_order_message(order_id)
         response_dict: dict = response.model_dump()
         return make_response(response_dict)
-    except OrderNotDeliverableError as error:
-        return make_response(jsonify(message=str(error)), HTTPStatus.NO_CONTENT)
+    except OrderNotDeliverableError:
+        return make_response("", HTTPStatus.NO_CONTENT)
     except OrderNotFoundError as error:
         return make_response(jsonify(error=str(error))), HTTPStatus.NOT_FOUND
 
