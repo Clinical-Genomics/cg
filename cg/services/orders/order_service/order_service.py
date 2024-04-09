@@ -40,3 +40,9 @@ class OrderService:
 
     def set_delivery(self, order_id: int, delivered: bool) -> None:
         self.store.update_order_delivery(order_id=order_id, delivered=delivered)
+
+    def update_delivered(self, order_id: int, delivered_analyses: int) -> None:
+        order: Order = self.store.get_order_by_id(order_id)
+        case_count: int = len(order.cases)
+        if delivered_analyses >= case_count:
+            self.set_delivery(order_id=order_id, delivered=True)
