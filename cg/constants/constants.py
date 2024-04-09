@@ -1,6 +1,6 @@
 """Constants for cg."""
 
-from enum import IntEnum, StrEnum
+from enum import Enum, IntEnum, StrEnum
 
 import click
 
@@ -289,3 +289,9 @@ class MultiQC(StrEnum):
 
 
 NG_UL_SUFFIX: str = " ng/uL"
+
+
+class MachinesTypes(Enum):
+    """Types of machines we use for analysing samples"""
+
+    pass

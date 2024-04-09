@@ -23,6 +23,7 @@ from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import (
     CaseActions,
     ControlOptions,
+    MachinesTypes,
     PrepCategory,
     SexOptions,
     StatusOptions,
@@ -987,3 +988,61 @@ class Order(Base):
 
     def to_dict(self):
         return to_dict(model_instance=self)
+
+
+class DataGenerationUnit(Base):
+    """Model for storing data generation unit information."""
+
+    __tablename__ = "data_generation_unit"
+
+    id: Mapped[PrimaryKeyInt]
+    model: Mapped[Str32]
+    internal_id: Mapped[UniqueStr]
+    type: Mapped[MachinesTypes]
+
+    batch_metrics: Mapped[list["BatchDigitisationMetrics"]] = orm.relationship(
+        back_populates="unit"
+    )
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
+
+
+class BatchDigitisationMetrics(Base):
+    """Model for storing data generation information."""
+
+    __tablename__ = "batch_digitisation_metrics"
+
+    id: Mapped[PrimaryKeyInt]
+    run_started_at: Mapped[datetime]
+    run_finished_at: Mapped[datetime]
+    type: Mapped[MachinesTypes]
+    unit_id: Mapped[int] = mapped_column(ForeignKey("data_generation_unit.id"))
+
+    unit: Mapped["DataGenerationUnit"] = orm.relationship(back_populates="batch_metrics")
+    sample_metrics: Mapped[list["SampleDigitisationMetrics"]] = orm.relationship(
+        back_populates="batch"
+    )
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
+
+
+class SampleDigitisationMetrics(Base):
+    """Model for storing data generation information."""
+
+    __tablename__ = "sample_digitisation_metrics"
+
+    id: Mapped[PrimaryKeyInt]
+    sample_internal_id: Mapped[int] = mapped_column(ForeignKey("sample.internal_id"))
+    type: Mapped[MachinesTypes]
+
+    batch_id: Mapped[int] = mapped_column(ForeignKey("batch_digitisation_metrics.id"))
+    batch: Mapped[BatchDigitisationMetrics] = orm.relationship(back_populates="sample_metrics")
+    sample: Mapped[Sample] = orm.relationship(back_populates="non_illumina_metrics")
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
