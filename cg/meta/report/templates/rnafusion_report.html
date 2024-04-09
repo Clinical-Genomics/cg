@@ -5,25 +5,6 @@
     <div class="container">
       <div class="card">
         <div class="card-block">
-          <table class="table table-bordered" aria-describedby="Case table">
-            <thead>
-              <tr>
-                <!-- <th>Genpaneler</th> -->
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <!-- <td>{{ case.data_analysis.panels }}</td> -->
-              </tr>
-            </tbody>
-            <caption>
-              <strong>Pipelineinformation och bioinformatiska verktygsversioner</strong>:
-              <a href="https://nf-co.re/rnafusion">https://nf-co.re/rnafusion</a>
-            </caption>
-          </table>
-        </div>
-
-        <div class="card-block">
           <table class="table table-bordered" aria-describedby="Sample table">
             {% for sample in case.samples %}
               <tr>

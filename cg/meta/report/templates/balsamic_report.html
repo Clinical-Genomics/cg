@@ -5,21 +5,6 @@
   <body>
     <div class="container">
         <div class="card-block">
-          <table class="table table-bordered" aria-describedby="Case table">
-            </tbody>
-            {% if case.data_analysis.workflow != 'balsamic-qc' %}
-            <caption>
-              <strong>Tillämpade filter för variantanrop</strong
-              >: {{ case.data_analysis.variant_callers }}<br />
-              <a href="https://balsamic.readthedocs.io/en/latest/balsamic_filters.html">
-                https://balsamic.readthedocs.io/en/latest/balsamic_filters.html
-              </a>
-            </caption>
-            {% endif %}
-          </table>
-        </div>
-
-        <div class="card-block">
           <table class="table table-bordered" aria-describedby="Sample table">
             <thead>
               <tr>

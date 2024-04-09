@@ -16,6 +16,7 @@
         <th scope="col">Bioinformatisk analys</th>
         <th scope="col">Genomversion</th>
         <th scope="col">{{ analysis_type(workflow=case.data_analysis.workflow) }}</th>
+        <th scope="col">{{ variant_callers(workflow=case.data_analysis.workflow) }}</th>
         <th scope="col">{{ gene_panels(workflow=case.data_analysis.workflow) }}</th>
       </tr>
     </thead>
@@ -25,33 +26,69 @@
         <td>{{ case.data_analysis.workflow }} (v{{ case.data_analysis.workflow_version }})</td>
         <td>{{ case.data_analysis.genome_build }}</td>
         <td>{{ analysis_type_value(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type) }}</td>
+        <td>{{ variant_callers_value(case=case) }}</td>
         <td>{{ gene_panels_value(case=case) }}</td>
       </tr>
     </tbody>
   </table>
+  {{ data_analysis_alert(workflow=case.data_analysis.workflow) }}
 {% endmacro %}
 
-
+<!-- Analysis type column -->
 {% macro analysis_type(workflow) %}
   {% if "balsamic" in workflow %}
     Analystyp
   {% endif %}
 {% endmacro %}
 
+<!-- Analysis type value -->
 {% macro analysis_type_value(workflow, analysis_type) %}
   {% if "balsamic" in workflow %}
     {{ analysis_type }}
   {% endif %}
 {% endmacro %}
 
+<!-- Gene panels column -->
 {% macro gene_panels(workflow) %}
   {% if "mip-dna" == workflow or "rnafusion" == workflow %}
     Genpaneler
   {% endif %}
 {% endmacro %}
 
+<!-- Gene panels value -->
 {% macro gene_panels_value(case) %}
   {% if "mip-dna" == case.data_analysis.workflow or "rnafusion" == case.data_analysis.workflow %}
     {{ case.data_analysis.panels }}
   {% endif %}
+{% endmacro %}
+
+<!-- Variant callers column -->
+{% macro variant_callers(workflow) %}
+  {% if "balsamic" in workflow and workflow != "balsamic-qc" %}
+    Variantanropare
+  {% endif %}
+{% endmacro %}
+
+<!-- Variant callers value -->
+{% macro variant_callers_value(case) %}
+  {% if "balsamic" in case.data_analysis.workflow and case.data_analysis.workflow != "balsamic-qc" %}
+    {{ case.data_analysis.variant_callers }}
+  {% endif %}
+{% endmacro %}
+
+<!-- Data analysis alert component -->
+{% macro data_analysis_alert(workflow) %}
+  {% if "balsamic" in workflow and workflow != "balsamic-qc" or "rnafusion" == workflow %}
+    <div class="alert alert-light" role="alert">
+      {% if "balsamic" in workflow and workflow != "balsamic-qc" %}
+        Den tillämpade variantanropningsfiltrerna finns på:
+        <a href="https://balsamic.readthedocs.io/en/latest/balsamic_filters.html" class="alert-link">
+          https://balsamic.readthedocs.io/en/latest/balsamic_filters.html
+        </a>
+      {% elif "rnafusion" == workflow %}
+        Workflowinformation och bioinformatiska verktygsversioner:
+        <a href="https://nf-co.re/rnafusion" class="alert-link">https://nf-co.re/rnafusion</a>
+      {% endif %}  
+    </div>  
+  {% endif %}  
 {% endmacro %}
