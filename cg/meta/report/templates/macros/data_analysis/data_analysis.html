@@ -1,8 +1,13 @@
+{% from "/macros/data_analysis/limitations.html" import apptag_description %}
+{% from "/macros/data_analysis/limitations.html" import apptag_limitations %}
+
 <!-- Data analysis results -->
 {% macro data_analysis(case) %}
   <div class="container mb-5">
   <h4 class="mb-4">Analys</h4>
     {{ workflow_analysis(case=case) }}
+    {{ apptag_description() }}
+    {{ apptag_limitations() }}
   </div>
 {% endmacro %}
 
