@@ -1,6 +1,7 @@
 from cg.constants.constants import DataDelivery, MicrosaltAppTags, Workflow
 from cg.exc import (
     CaseNotFoundError,
+    DeliveryMessageNoDeliveryError,
     DeliveryMessageNotSupportedError,
     OrderMismatchError,
 )
@@ -97,6 +98,8 @@ def validate_cases(cases: list[Case], case_ids: list[str]) -> None:
     ]
     if cases_with_mip_rna:
         raise DeliveryMessageNotSupportedError("Workflow is not supported.")
+    if any([case.data_delivery == DataDelivery.NO_DELIVERY for case in cases]):
+        raise DeliveryMessageNoDeliveryError
 
 
 def is_matching_order(cases: list[Case]) -> bool:

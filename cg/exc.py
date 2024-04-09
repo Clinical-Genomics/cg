@@ -290,5 +290,9 @@ class DeliveryMessageNotSupportedError(CgError):
     """Exception raised when trying to fetch delivery messages for unsupported workflows."""
 
 
+class DeliveryMessageNoDeliveryError(CgError):
+    """Exception raised when trying to fetch delivery messages for cases with no data delivery."""
+
+
 class OverrideCyclesError(CgError):
     """Exception raised when the override cycles are not correct."""

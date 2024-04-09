@@ -87,5 +87,4 @@ def test_get_delivery_message_order_missing_cases(
         response = client.get(f"/api/v1/orders/{order.id}/delivery_message")
 
         # THEN the response should not be successful
-        assert response.status_code == HTTPStatus.PRECONDITION_FAILED
-        assert response.json["error"]
+        assert response.status_code == HTTPStatus.NO_CONTENT

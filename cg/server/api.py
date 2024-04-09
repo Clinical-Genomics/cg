@@ -24,6 +24,7 @@ from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.constants import FileFormat
 from cg.exc import (
     CaseNotFoundError,
+    DeliveryMessageNoDeliveryError,
     OrderError,
     OrderExistsError,
     OrderFormError,
@@ -244,6 +245,8 @@ def get_case_delivery_message(case_id: str):
         return jsonify(response.model_dump()), HTTPStatus.OK
     except CaseNotFoundError as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
+    except DeliveryMessageNoDeliveryError:
+        return "", HTTPStatus.NO_CONTENT
 
 
 @BLUEPRINT.route("/families_in_collaboration")
@@ -540,7 +543,7 @@ def get_delivery_message_for_order(order_id: int):
         response_dict: dict = response.model_dump()
         return make_response(response_dict)
     except OrderNotDeliverableError as error:
-        return make_response(jsonify(error=str(error)), HTTPStatus.PRECONDITION_FAILED)
+        return make_response(jsonify(message=str(error)), HTTPStatus.NO_CONTENT)
     except OrderNotFoundError as error:
         return make_response(jsonify(error=str(error))), HTTPStatus.NOT_FOUND
 
