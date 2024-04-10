@@ -10,7 +10,7 @@
     {{ workflow_analysis(case=case) }}
     <h5 class="mt-4 mb-3">Kvalitetskontrollsmetrik</h5>
     {% if "balsamic" in case.data_analysis.workflow %}
-      {{ balsamic_qc_metrics(samples=case.samples) }}
+      {{ balsamic_qc_metrics(samples=case.samples, analysis_type=case.data_analysis.type) }}
     {% elif "mip-dna" == case.data_analysis.workflow %}
       {{ mip_dna_qc_metrics(samples=case.samples) }}
     {% elif "rnafusion" == case.data_analysis.workflow %}
