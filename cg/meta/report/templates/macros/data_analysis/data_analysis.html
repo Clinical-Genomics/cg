@@ -1,22 +1,22 @@
+{% from "/macros/data_analysis/qc_metrics/balsamic_qc_metrics.html" import balsamic_qc_metrics %}
+{% from "/macros/data_analysis/qc_metrics/mip_dna_qc_metrics.html" import mip_dna_qc_metrics %}
+{% from "/macros/data_analysis/qc_metrics/rnafusion_qc_metrics.html" import rnafusion_qc_metrics %}
 {% from "/macros/data_analysis/limitations.html" import apptag_limitations %}
-{% from "/macros/data_analysis/metrics/balsamic_metrics.html" import balsamic_metrics %}
-{% from "/macros/data_analysis/metrics/mip_dna_metrics.html" import mip_dna_metrics %}
-{% from "/macros/data_analysis/metrics/rnafusion_metrics.html" import rnafusion_metrics %}
 
 <!-- Data analysis results -->
 {% macro data_analysis(case) %}
   <div class="container mb-5">
   <h4 class="mb-4">Analys</h4>
     {{ workflow_analysis(case=case) }}
-    {{ apptag_limitations(applications=case.applications) }}
     <h5 class="mt-4 mb-3">Kvalitetskontrollsmetrik</h5>
     {% if "balsamic" in case.data_analysis.workflow %}
-      {{ balsamic_metrics() }}
+      {{ balsamic_qc_metrics(samples=case.samples) }}
     {% elif "mip-dna" == case.data_analysis.workflow %}
-      {{ mip_dna_metrics() }}
+      {{ mip_dna_qc_metrics(samples=case.samples) }}
     {% elif "rnafusion" == case.data_analysis.workflow %}
-      {{ rnafusion_metrics() }}
+      {{ rnafusion_qc_metrics(samples=case.samples) }}
     {% endif %}
+    {{ apptag_limitations(applications=case.applications) }}
   </div>
 {% endmacro %}
 

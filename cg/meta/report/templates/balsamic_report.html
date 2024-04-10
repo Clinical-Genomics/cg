@@ -35,19 +35,19 @@
                 <td>{{ sample.name }}*</td>
                 <td>{{ sample.metadata.million_read_pairs }}</td>
                 {% if "helgenomsekvensering" in case.data_analysis.type %}
-                <td>{{ sample.metadata.median_coverage }}</td>
-                {% if "normal" in case.data_analysis.type %}
-                <td>{{ sample.metadata.pct_15x }}</td>
-                <td>{{ sample.metadata.pct_60x }}</td>
+                  <td>{{ sample.metadata.median_coverage }}</td>
+                  {% if "normal" in case.data_analysis.type %}
+                    <td>{{ sample.metadata.pct_15x }}</td>
+                    <td>{{ sample.metadata.pct_60x }}</td>
+                  {% else %}
+                    <td>{{ sample.metadata.pct_60x }}</td>
+                  {% endif %}
+                  <td>{{ sample.metadata.pct_reads_improper_pairs }}</td>
                 {% else %}
-                <td>{{ sample.metadata.pct_60x }}</td>
-                {% endif %}
-                <td>{{ sample.metadata.pct_reads_improper_pairs }}</td>
-                {% else %}
-                <td>{{ sample.metadata.median_target_coverage }}</td>
-                <td>{{ sample.metadata.pct_250x }}</td>
-                <td>{{ sample.metadata.pct_500x }}</td>
-                <td>{{ sample.metadata.gc_dropout }}</td>
+                  <td>{{ sample.metadata.median_target_coverage }}</td>
+                  <td>{{ sample.metadata.pct_250x }}</td>
+                  <td>{{ sample.metadata.pct_500x }}</td>
+                  <td>{{ sample.metadata.gc_dropout }}</td>
                 {% endif %}
                 <td>{{ sample.metadata.duplicates }}</td>
                 <td>{{ sample.metadata.mean_insert_size }}</td>

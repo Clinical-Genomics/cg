@@ -1,0 +1,10 @@
+{% from "/macros/data_analysis/qc_metrics/qc_metrics.html" import qc_metrics %}
+
+<!-- MIP-DNA QC metrics -->
+{% macro mip_dna_qc_metrics(samples) %}
+  {% set metrics = [
+    {"name": "Läspar [M]", "key": "million_read_pairs", "description": "Bla bla bla"},
+    {"name": "Mediantäckning [baser]", "key": "median_coverage", "description": "des des des"} ]
+  %}
+  {{ qc_metrics(samples=samples, metrics=metrics)}}
+{% endmacro %}
