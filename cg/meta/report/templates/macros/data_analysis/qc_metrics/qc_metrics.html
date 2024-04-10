@@ -17,7 +17,7 @@
         {% for sample in samples %}
           <td>{{ sample.metadata[metric.key] }}</td>
         {% endfor %}
-        <td>{{ metric.description }}</td>
+        <td class="text-start">{{ metric.description }}</td>
       </tr>
       {% endfor %}
     </tbody>
