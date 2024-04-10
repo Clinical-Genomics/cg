@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from cg.constants.constants import AnalysisType
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Sex
