@@ -1,7 +1,8 @@
+from dataclasses import Field
 from enum import StrEnum
 
 from cg.constants.constants import Strandedness
-from cg.models.nf_analysis import NextflowSampleSheetEntry
+from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 
 
 class TomteSampleSheetEntry(NextflowSampleSheetEntry):
@@ -38,3 +39,11 @@ class TomteSampleSheetHeaders(StrEnum):
     @classmethod
     def list(cls) -> list[str]:
         return list(map(lambda header: header.value, cls))
+
+
+class TomteParameters(WorkflowParameters):
+    """Model for Taxprofiler parameters."""
+
+    clusterOptions: str = Field(..., alias="cluster_options")
+    priority: str
+    gene_panel_clinical_filter: str
