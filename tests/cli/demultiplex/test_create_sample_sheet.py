@@ -18,7 +18,7 @@ from cg.io.txt import read_txt
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
-FLOW_CELL_FUNCTION_NAME: str = "cg.apps.demultiplex.sample_sheet.api.get_flow_cell_samples"
+GET_FLOW_CELL_SAMPLES: str = "cg.apps.demultiplex.sample_sheet.api.get_flow_cell_samples"
 
 
 def test_create_sample_sheet_no_run_parameters_fails(
@@ -43,7 +43,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
 
     # GIVEN flow cell samples
     mocker.patch(
-        FLOW_CELL_FUNCTION_NAME,
+        GET_FLOW_CELL_SAMPLES,
         return_value=hiseq_2500_custom_index_bcl_convert_lims_samples,
     )
 
@@ -82,7 +82,7 @@ def test_create_bcl2fastq_sample_sheet(
 
     # GIVEN flow cell samples
     mocker.patch(
-        FLOW_CELL_FUNCTION_NAME,
+        GET_FLOW_CELL_SAMPLES,
         return_value=novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples,
     )
     # GIVEN a sample sheet API and a lims API that returns some samples
@@ -171,7 +171,7 @@ def test_create_v2_sample_sheet(
 
     # GIVEN flow cell samples
     mocker.patch(
-        FLOW_CELL_FUNCTION_NAME,
+        GET_FLOW_CELL_SAMPLES,
         return_value=request.getfixturevalue(scenario.lims_samples),
     )
     # GIVEN a LIMS API that returns samples
@@ -227,7 +227,7 @@ def test_incorrect_bcl2fastq_samplesheet_is_regenerated(
 
     # GIVEN flow cell samples
     mocker.patch(
-        FLOW_CELL_FUNCTION_NAME,
+        GET_FLOW_CELL_SAMPLES,
         return_value=novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples,
     )
     # GIVEN a lims api that returns some samples

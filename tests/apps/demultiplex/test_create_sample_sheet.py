@@ -12,7 +12,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from tests.store_helpers import StoreHelpers
 
-FLOW_CELL_FUNCTION_NAME: str = "cg.apps.demultiplex.sample_sheet.api.get_flow_cell_samples"
+GET_FLOW_CELL_SAMPLES: str = "cg.apps.demultiplex.sample_sheet.api.get_flow_cell_samples"
 
 
 def test_get_create_sample_sheet_hk_has_bcl2fastq_sample_sheet(
@@ -40,7 +40,7 @@ def test_get_create_sample_sheet_hk_has_bcl2fastq_sample_sheet(
 
     # GIVEN that the flow cell samples are in LIMS
     mocker.patch(
-        FLOW_CELL_FUNCTION_NAME,
+        GET_FLOW_CELL_SAMPLES,
         return_value=hiseq_x_single_index_bcl_convert_lims_samples,
     )
 
@@ -88,7 +88,7 @@ def test_get_create_sample_sheet_flow_cell_has_bcl2fastq_sample_sheet(
 
     # GIVEN that the flow cell samples are in LIMS
     mocker.patch(
-        FLOW_CELL_FUNCTION_NAME,
+        GET_FLOW_CELL_SAMPLES,
         return_value=hiseq_x_single_index_bcl_convert_lims_samples,
     )
 
