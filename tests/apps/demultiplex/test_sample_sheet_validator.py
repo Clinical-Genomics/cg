@@ -2,7 +2,7 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
-from cg.constants.demultiplexing import SampleSheetBCLConvertSections
+from cg.constants.demultiplexing import BclConverter, SampleSheetBCLConvertSections
 from cg.exc import SampleSheetError
 
 
@@ -248,19 +248,70 @@ def test_validate_override_cycles_incorrect_cycles(
 
 
 @pytest.mark.parametrize(
-    "sample_sheet_content",
+    "content, bcl_converter",
     [
-        "hiseq_x_single_index_sample_sheet_content",
-        "hiseq_x_single_index_bcl2fastq_sample_sheet_content",
-        "hiseq_x_dual_index_sample_sheet_content",
-        "hiseq_x_dual_index_bcl2fastq_sample_sheet_content",
-        "hiseq_2500_dual_index_sample_sheet_content",
-        "hiseq_2500_dual_index_bcl2fastq_sample_sheet_content",
-        "hiseq_2500_custom_index_sample_sheet_content",
-        "hiseq_2500_custom_index_bcl2fastq_sample_sheet_content",
-        "novaseq_6000_pre_1_5_kits_sample_sheet_content",
-        "novaseq_6000_post_1_5_kits_sample_sheet_content",
-        "novaseq_x_sample_sheet_content",
+        ("hiseq_x_single_index_sample_sheet_content", BclConverter.BCLCONVERT),
+        ("hiseq_x_single_index_bcl2fastq_sample_sheet_content", BclConverter.BCL2FASTQ),
+    ],
+    ids=["bcl_convert", "bcl2fastq"],
+)
+def test_validate_sample_sheet_is_correct_type(
+    sample_sheet_validator: SampleSheetValidator,
+    content: str,
+    bcl_converter: str,
+    request: FixtureRequest,
+):
+    """Test that a sample sheet with the correct type passes validation."""
+    # GIVEN a sample sheet validator with a correct sample sheet content
+    sample_sheet_content: list[list[str]] = request.getfixturevalue(content)
+    sample_sheet_validator.set_sample_sheet_content(sample_sheet_content)
+
+    # WHEN validating the sample sheet type
+    sample_sheet_validator._validate_sample_sheet_is_correct_type(bcl_converter)
+
+    # THEN no error is raised
+
+
+@pytest.mark.parametrize(
+    "content, bcl_converter",
+    [
+        ("hiseq_x_single_index_sample_sheet_content", BclConverter.BCL2FASTQ),
+        ("hiseq_x_single_index_bcl2fastq_sample_sheet_content", BclConverter.BCLCONVERT),
+    ],
+    ids=["bcl_convert", "bcl2fastq"],
+)
+def test_validate_sample_sheet_is_correct_type_incorrect_type(
+    sample_sheet_validator: SampleSheetValidator,
+    content: str,
+    bcl_converter: str,
+    request: FixtureRequest,
+):
+    """Test that a sample sheet with the incorrect type raises an error."""
+    # GIVEN a sample sheet validator with an incorrect sample sheet content
+    sample_sheet_content: list[list[str]] = request.getfixturevalue(content)
+    sample_sheet_validator.set_sample_sheet_content(sample_sheet_content)
+
+    # WHEN validating the sample sheet type
+    with pytest.raises(SampleSheetError) as error_info:
+        # THEN a SampleSheetError is raised
+        sample_sheet_validator._validate_sample_sheet_is_correct_type(bcl_converter)
+    assert f"Sample sheet is not {bcl_converter}" in str(error_info.value)
+
+
+@pytest.mark.parametrize(
+    "sample_sheet_content, bcl_converter",
+    [
+        ("hiseq_x_single_index_sample_sheet_content", BclConverter.BCLCONVERT),
+        ("hiseq_x_single_index_bcl2fastq_sample_sheet_content", BclConverter.BCL2FASTQ),
+        ("hiseq_x_dual_index_sample_sheet_content", BclConverter.BCLCONVERT),
+        ("hiseq_x_dual_index_bcl2fastq_sample_sheet_content", BclConverter.BCL2FASTQ),
+        ("hiseq_2500_dual_index_sample_sheet_content", BclConverter.BCLCONVERT),
+        ("hiseq_2500_dual_index_bcl2fastq_sample_sheet_content", BclConverter.BCL2FASTQ),
+        ("hiseq_2500_custom_index_sample_sheet_content", BclConverter.BCLCONVERT),
+        ("hiseq_2500_custom_index_bcl2fastq_sample_sheet_content", BclConverter.BCL2FASTQ),
+        ("novaseq_6000_pre_1_5_kits_sample_sheet_content", BclConverter.BCLCONVERT),
+        ("novaseq_6000_post_1_5_kits_sample_sheet_content", BclConverter.BCLCONVERT),
+        ("novaseq_x_sample_sheet_content", BclConverter.BCLCONVERT),
     ],
     ids=[
         "HiSeqXSingleIndex",
@@ -277,13 +328,18 @@ def test_validate_override_cycles_incorrect_cycles(
     ],
 )
 def test_validate_sample_sheet_from_content(
-    sample_sheet_validator: SampleSheetValidator, sample_sheet_content: str, request: FixtureRequest
+    sample_sheet_validator: SampleSheetValidator,
+    sample_sheet_content: str,
+    bcl_converter: str,
+    request: FixtureRequest,
 ):
     """Test that a correct sample sheet passes validation."""
     # GIVEN sample sheet validator and a correct sample sheet content
     content: list[list[str]] = request.getfixturevalue(sample_sheet_content)
 
     # WHEN validating the sample sheet
-    sample_sheet_validator.validate_sample_sheet_from_content(content)
+    sample_sheet_validator.validate_sample_sheet_from_content(
+        content=content, bcl_convert=bcl_converter
+    )
 
     # THEN no error is raised
