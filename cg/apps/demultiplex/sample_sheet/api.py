@@ -99,9 +99,10 @@ class SampleSheetAPI:
             file_format=FileFormat.CSV, file_path=sample_sheet_path
         )
         if not bcl_converter:
-            bcl_converter: str = FLOW_CELL_SAMPLE_TO_BCL_CONVERTER[
-                get_sample_type_from_content(sample_sheet_content)
-            ]
+            sample_sheet_type: Type[FlowCellSample] = get_sample_type_from_content(
+                sample_sheet_content
+            )
+            bcl_converter: str = FLOW_CELL_SAMPLE_TO_BCL_CONVERTER[sample_sheet_type]
         self.validator.validate_sample_sheet_from_content(
             content=sample_sheet_content, bcl_convert=bcl_converter
         )
