@@ -815,6 +815,10 @@ class Sample(Base, PriorityMixin):
     )
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="samples")
 
+    _non_illumina_metrics: Mapped["SampleDigitisationMetrics"] = orm.relationship(
+        back_populates="sample"
+    )
+
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
@@ -1039,7 +1043,7 @@ class SampleDigitisationMetrics(Base):
     batch_id: Mapped[int] = mapped_column(ForeignKey("batch_digitisation.id"))
 
     batch: Mapped[BatchDigitisation] = orm.relationship(back_populates="sample_metrics")
-    sample: Mapped[Sample] = orm.relationship(back_populates="non_illumina_metrics")
+    sample: Mapped[Sample] = orm.relationship(back_populates="_non_illumina_metrics")
 
     __mapper_args__ = {
         "polymorphic_on": "type",
