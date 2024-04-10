@@ -93,7 +93,7 @@ def test_run_case_without_samples(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_run_case_without_config_files(
     cli_runner: CliRunner,
@@ -154,7 +154,7 @@ def test_run_case_from_start_dry_run(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_run_case_with_revision_dry_run(
     cli_runner: CliRunner,
@@ -188,7 +188,7 @@ def test_run_case_with_revision_dry_run(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_resume_case_dry_run(
     cli_runner: CliRunner,
@@ -224,7 +224,7 @@ def test_resume_case_dry_run(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_resume_case_with_missing_tower_id(
     cli_runner: CliRunner,
@@ -252,7 +252,7 @@ def test_resume_case_with_missing_tower_id(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_resume_using_nextflow_dry_run(
     cli_runner: CliRunner,

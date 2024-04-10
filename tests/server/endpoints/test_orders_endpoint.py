@@ -1,8 +1,8 @@
 from http import HTTPStatus
 
 import mock.mock
-from flask.testing import FlaskClient
 import pytest
+from flask.testing import FlaskClient
 
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary
@@ -29,7 +29,6 @@ def test_orders_endpoint(
     limit: int | None,
     workflow: str,
     expected_orders: int,
-    analysis_summary,
 ):
     """Tests that orders are returned from the orders endpoint"""
     # GIVEN a store with three orders, two of which are MIP-DNA and the last is BALSAMIC
@@ -40,9 +39,25 @@ def test_orders_endpoint(
         TrailblazerAPI,
         "get_summaries",
         return_value=[
-            AnalysisSummary(order_id=order.id),
-            AnalysisSummary(order_id=order_another.id),
-            AnalysisSummary(order_id=order_balsamic.id),
+            AnalysisSummary(
+                order_id=order.id, cancelled=0, completed=1, delivered=0, failed=0, running=0
+            ),
+            AnalysisSummary(
+                order_id=order_another.id,
+                cancelled=0,
+                completed=1,
+                delivered=0,
+                failed=0,
+                running=0,
+            ),
+            AnalysisSummary(
+                order_id=order_balsamic.id,
+                cancelled=0,
+                completed=1,
+                delivered=0,
+                failed=0,
+                running=0,
+            ),
         ],
     ):
         response = client.get(endpoint, query_string={"pageSize": limit, "workflow": workflow})

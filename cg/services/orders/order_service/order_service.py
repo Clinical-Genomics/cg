@@ -2,10 +2,10 @@ from cg.models.orders.order import OrderIn
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order as OrderResponse
 from cg.server.dto.orders.orders_response import OrdersResponse
-from cg.services.orders.order_service.exceptions import OrderNotFoundError
 from cg.services.orders.order_service.utils import (
     create_order_response,
     create_orders_response,
+    order_is_delivered,
 )
 from cg.services.orders.order_status_service import OrderSummaryService
 from cg.services.orders.order_status_service.dto.order_summary import (
@@ -21,9 +21,7 @@ class OrderService:
         self.summary_service = status_service
 
     def get_order(self, order_id: int) -> OrderResponse:
-        order: Order | None = self.store.get_order_by_id(order_id)
-        if not order:
-            raise OrderNotFoundError(f"Order {order_id} not found.")
+        order: Order = self.store.get_order_by_id(order_id)
         summary: OrderSummary = self.summary_service.get_summary(order_id)
         return create_order_response(order=order, summary=summary)
 
@@ -40,3 +38,15 @@ class OrderService:
         for case in cases:
             self.store.link_case_to_order(order_id=order.id, case_id=case.id)
         return create_order_response(order)
+
+    def set_delivery(self, order_id: int, delivered: bool) -> None:
+        self.store.update_order_delivery(order_id=order_id, delivered=delivered)
+
+    def update_delivered(self, order_id: int, delivered_analyses: int) -> None:
+        """Update the delivery status of an order based on the number of delivered analyses."""
+        order: Order = self.store.get_order_by_id(order_id)
+        case_count: int = len(order.cases)
+        if order_is_delivered(case_count=case_count, delivered_analyses=delivered_analyses):
+            self.set_delivery(order_id=order_id, delivered=True)
+        elif order.is_delivered:
+            self.set_delivery(order_id=order_id, delivered=False)
