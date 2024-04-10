@@ -990,37 +990,34 @@ class Order(Base):
         return to_dict(model_instance=self)
 
 
-class DataGenerationUnit(Base):
-    """Model for storing data generation unit information."""
+class DigitisationUnit(Base):
+    """Parent model representing the consumable units (cells/chips) on which the sample data is generated."""
 
-    __tablename__ = "data_generation_unit"
+    __tablename__ = "digitisation_unit"
 
     id: Mapped[PrimaryKeyInt]
+    type: Mapped[MachinesTypes]
     model: Mapped[Str32]
     internal_id: Mapped[UniqueStr]
-    type: Mapped[MachinesTypes]
 
-    batch_metrics: Mapped[list["BatchDigitisationMetrics"]] = orm.relationship(
-        back_populates="unit"
-    )
+    batch_metrics: Mapped[list["BatchDigitisation"]] = orm.relationship(back_populates="unit")
 
     __mapper_args__ = {
         "polymorphic_on": "type",
     }
 
 
-class BatchDigitisationMetrics(Base):
-    """Model for storing data generation information."""
+class BatchDigitisation(Base):
+    """Parent model representing a digitisation run of samples on a consumable unit."""
 
-    __tablename__ = "batch_digitisation_metrics"
+    __tablename__ = "batch_digitisation"
 
     id: Mapped[PrimaryKeyInt]
-    run_started_at: Mapped[datetime]
-    run_finished_at: Mapped[datetime]
     type: Mapped[MachinesTypes]
-    unit_id: Mapped[int] = mapped_column(ForeignKey("data_generation_unit.id"))
 
-    unit: Mapped["DataGenerationUnit"] = orm.relationship(back_populates="batch_metrics")
+    unit_id: Mapped[int] = mapped_column(ForeignKey("digitisation_unit.id"))
+
+    unit: Mapped["DigitisationUnit"] = orm.relationship(back_populates="batch_metrics")
     sample_metrics: Mapped[list["SampleDigitisationMetrics"]] = orm.relationship(
         back_populates="batch"
     )
@@ -1031,16 +1028,17 @@ class BatchDigitisationMetrics(Base):
 
 
 class SampleDigitisationMetrics(Base):
-    """Model for storing data generation information."""
+    """Parent model for storing per sample metrics from a digitisation run."""
 
     __tablename__ = "sample_digitisation_metrics"
 
     id: Mapped[PrimaryKeyInt]
-    sample_internal_id: Mapped[int] = mapped_column(ForeignKey("sample.internal_id"))
     type: Mapped[MachinesTypes]
 
-    batch_id: Mapped[int] = mapped_column(ForeignKey("batch_digitisation_metrics.id"))
-    batch: Mapped[BatchDigitisationMetrics] = orm.relationship(back_populates="sample_metrics")
+    sample_internal_id: Mapped[int] = mapped_column(ForeignKey("sample.internal_id"))
+    batch_id: Mapped[int] = mapped_column(ForeignKey("batch_digitisation.id"))
+
+    batch: Mapped[BatchDigitisation] = orm.relationship(back_populates="sample_metrics")
     sample: Mapped[Sample] = orm.relationship(back_populates="non_illumina_metrics")
 
     __mapper_args__ = {
