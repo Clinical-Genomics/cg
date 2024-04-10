@@ -147,25 +147,6 @@ class MipAnalysisAPI(AnalysisAPI):
         for link in case.links:
             self.link_fastq_files_for_sample(case=case, sample=link.sample)
 
-    def write_panel(self, case_id: str, content: list[str]) -> None:
-        """Write the gene panel to case dir."""
-        self._write_panel(out_dir=Path(self.root, case_id), content=content)
-
-    @staticmethod
-    def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
-        """Check if customer should use the gene panel master list
-        and if all default panels are included in the gene panel master list.
-        If not, add gene panel combo and OMIM-AUTO.
-        Return an aggregated gene panel."""
-        master_list: list[str] = GenePanelMasterList.get_panel_names()
-        if customer_id in GenePanelMasterList.collaborators() and default_panels.issubset(
-            master_list
-        ):
-            return master_list
-        all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
-        all_panels |= {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
-        return list(all_panels)
-
     def _get_latest_raw_file(self, family_id: str, tags: list[str]) -> Any:
         """Get a python object file for a tag and a family ."""
 

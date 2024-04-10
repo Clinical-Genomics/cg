@@ -6,7 +6,15 @@ from typing import Any, Iterator
 from pydantic.v1 import ValidationError
 
 from cg.constants import Workflow
-from cg.constants.constants import CaseActions, FileExtensions, FileFormat, MultiQC, WorkflowManager
+from cg.constants.constants import (
+    CaseActions,
+    FileExtensions,
+    FileFormat,
+    GenomeVersion,
+    MultiQC,
+    WorkflowManager,
+)
+from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
@@ -101,6 +109,11 @@ class NfAnalysisAPI(AnalysisAPI):
     def is_multiqc_pattern_search_exact(self) -> bool:
         """Return True if only exact pattern search is allowed to collect metrics information from MultiQC file.
         If false, pattern must be present but does not need to be exact."""
+        return False
+
+    @property
+    def is_gene_panel_required(self) -> bool:
+        """Return True if a gene panel is needs to be created using the information in StatusDB and exporting it from Scout."""
         return False
 
     def get_profile(self, profile: str | None = None) -> str:
@@ -344,6 +357,15 @@ class NfAnalysisAPI(AnalysisAPI):
                 file_path=self.get_nextflow_config_path(case_id=case_id),
             )
 
+    def create_gene_panel(self, case_id: str, dry_run: bool):
+        """Create and write an aggregated gene panel file exported from Scout."""
+        LOG.debug("Creating gene panel file")
+        bed_lines: list[str] = self.get_gene_panel(case_id=case_id, dry_run=dry_run)
+        if dry_run:
+            LOG.debug(f"{'\n'.join(bed_lines)}")
+            return
+        self.write_panel(case_id=case_id, content=bed_lines)
+
     def config_case(self, case_id: str, dry_run: bool):
         """Create directory and config files required by a workflow for a case."""
         if dry_run:
@@ -353,6 +375,8 @@ class NfAnalysisAPI(AnalysisAPI):
         self.create_sample_sheet(case_id=case_id, dry_run=dry_run)
         self.create_params_file(case_id=case_id, dry_run=dry_run)
         self.create_nextflow_config(case_id=case_id, dry_run=dry_run)
+        if self.is_gene_panel_required:
+            self.create_gene_panel(case_id=case_id, dry_run=dry_run)
 
     def _run_analysis_with_nextflow(
         self, case_id: str, command_args: NfCommandArgs, dry_run: bool
@@ -803,3 +827,37 @@ class NfAnalysisAPI(AnalysisAPI):
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
             or self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
+
+    def get_reference_genome(self, case_id: str) -> GenomeVersion:
+        """Return reference genome for a case.
+        If this information is not available in StatusDB, it defaults to hg38."""
+        reference_genome: set[str] = {
+            sample.reference_genome
+            for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
+        }
+        if len(reference_genome) == 1:
+            return reference_genome.pop()
+        elif len(reference_genome) > 1:
+            raise CgError(
+                f"Samples linked to case {case_id} have different reference genome versions set"
+            )
+        else:
+            LOG.info(f"No reference genome specified, defaulting to {GenomeVersion.hg38}")
+
+    def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
+        """Return build version of the gene panel for a case."""
+        reference_genome = self.get_reference_genome(case_id=case_id)
+        try:
+            return getattr(GenePanelGenomeBuild, reference_genome)
+        except AttributeError as error:
+            LOG.error(
+                f"Reference {reference_genome} has no associated genome build for panels: {error}"
+            )
+
+    def get_gene_panel(self, case_id: str, dry_run: bool = False) -> list[str]:
+        """Create and return the aggregated gene panel file."""
+        return self._get_gene_panel(
+            case_id=case_id,
+            genome_build=self.get_gene_panel_genome_build(case_id=case_id),
+            dry_run=dry_run,
+        )
