@@ -106,6 +106,7 @@ def test_post_processing_of_flow_cell(
     assert demux_post_processing_api.hk_api.get_files(
         bundle=flow_cell_name, tags=[SequencingFileTag.SAMPLE_SHEET]
     ).all()
+
     # WHEN post-processing the demultiplexed flow cell
     demux_post_processing_api.finish_flow_cell(
         flow_cell_directory_name=flow_cell_demultiplexing_directory,
