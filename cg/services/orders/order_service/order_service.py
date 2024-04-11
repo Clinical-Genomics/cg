@@ -37,8 +37,9 @@ class OrderService:
             self.store.link_case_to_order(order_id=order.id, case_id=case.id)
         return create_order_response(order)
 
-    def set_delivery(self, order_id: int, delivered: bool) -> Order:
-        return self.store.update_order_delivery(order_id=order_id, delivered=delivered)
+    def set_delivery(self, order_id: int, delivered: bool) -> OrderResponse:
+        order: Order = self.store.update_order_delivery(order_id=order_id, delivered=delivered)
+        return create_order_response(order)
 
     def update_delivered(self, order_id: int, delivered_analyses: int) -> None:
         """Update the delivery status of an order based on the number of delivered analyses."""
