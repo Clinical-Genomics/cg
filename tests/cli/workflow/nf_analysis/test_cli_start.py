@@ -14,7 +14,7 @@ from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_start(
     cli_runner: CliRunner,
@@ -49,7 +49,7 @@ def test_start(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_start_available(
     cli_runner: CliRunner,

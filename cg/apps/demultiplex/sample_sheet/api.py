@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Type
 
 import click
 
@@ -33,6 +34,11 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.utils.files import get_directories_in_path, link_or_overwrite_file
 
+FLOW_CELL_SAMPLE_TO_BCL_CONVERTER: dict[Type[FlowCellSample], str] = {
+    FlowCellSampleBcl2Fastq: BclConverter.BCL2FASTQ,
+    FlowCellSampleBCLConvert: BclConverter.BCLCONVERT,
+}
+
 LOG = logging.getLogger(__name__)
 
 
@@ -46,7 +52,6 @@ class SampleSheetAPI:
         self.dry_run: bool = False
         self.force: bool = False
         self.validator = SampleSheetValidator()
-        self.bcl_converter: str | None = None
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run."""
@@ -90,8 +95,16 @@ class SampleSheetAPI:
             message: str = f"Sample sheet with path {sample_sheet_path} does not exist"
             LOG.error(message)
             raise SampleSheetError(message)
-        self.validator.validate_sample_sheet_from_file(
-            file_path=sample_sheet_path, bcl_converter=bcl_converter
+        sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
+            file_format=FileFormat.CSV, file_path=sample_sheet_path
+        )
+        if not bcl_converter:
+            sample_sheet_type: Type[FlowCellSample] = get_sample_type_from_content(
+                sample_sheet_content
+            )
+            bcl_converter: str = FLOW_CELL_SAMPLE_TO_BCL_CONVERTER[sample_sheet_type]
+        self.validator.validate_sample_sheet_from_content(
+            content=sample_sheet_content, bcl_convert=bcl_converter
         )
 
     @staticmethod
@@ -193,7 +206,7 @@ class SampleSheetAPI:
                 f"Sample sheet for flow cell {flow_cell.id} does not exist in Housekeeper"
             )
         self.validate_sample_sheet(
-            sample_sheet_path=sample_sheet_path, bcl_converter=self.bcl_converter
+            sample_sheet_path=sample_sheet_path, bcl_converter=flow_cell.bcl_converter
         )
         LOG.info("Sample sheet from Housekeeper is valid. Copying it to flow cell directory")
         if not self.dry_run:
@@ -202,7 +215,7 @@ class SampleSheetAPI:
     def _use_flow_cell_sample_sheet(self, flow_cell: FlowCellDirectoryData) -> None:
         """Use the sample sheet from the flow cell directory if it is valid."""
         self.validate_sample_sheet(
-            sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=self.bcl_converter
+            sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=flow_cell.bcl_converter
         )
         LOG.info("Sample sheet from flow cell directory is valid. Adding it to Housekeeper")
         if not self.dry_run:
@@ -264,7 +277,6 @@ class SampleSheetAPI:
         Ensure that a valid sample sheet is present in the flow cell directory by fetching it from
         housekeeper or creating it if there is not a valid sample sheet.
         """
-        self.bcl_converter = bcl_converter
         flow_cell: FlowCellDirectoryData = self._get_flow_cell(
             flow_cell_name=flow_cell_name, bcl_converter=bcl_converter
         )
@@ -291,7 +303,8 @@ class SampleSheetAPI:
         for flow_cell_dir in get_directories_in_path(self.flow_cell_runs_dir):
             try:
                 self.get_or_create_sample_sheet(
-                    flow_cell_name=flow_cell_dir.name, bcl_converter=None
+                    flow_cell_name=flow_cell_dir.name,
+                    bcl_converter=BclConverter.BCLCONVERT,
                 )
             except Exception as error:
                 LOG.error(f"Could not create sample sheet for {flow_cell_dir.name}: {error}")

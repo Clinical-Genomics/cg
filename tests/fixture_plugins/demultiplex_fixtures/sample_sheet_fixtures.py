@@ -1,4 +1,6 @@
+from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -159,3 +161,29 @@ def novaseq_6000_post_1_5_kits_sample_sheet_object(
         file_path=novaseq_6000_post_1_5_kits_correct_sample_sheet_path,
         bcl_converter=BclConverter.BCLCONVERT,
     )
+
+
+# HK bundle object
+
+
+@pytest.fixture
+def sample_sheet_bcl2fastq_bundle_data(
+    tmp_flow_cell_with_bcl2fastq_sample_sheet: Path,
+    timestamp_yesterday: datetime,
+) -> dict[str, Any]:
+    """Return a sample sheet bundle data dictionary."""
+    flow_cell_id: str = tmp_flow_cell_with_bcl2fastq_sample_sheet.name[-9:]
+    return {
+        "name": flow_cell_id,
+        "created": timestamp_yesterday,
+        "expires": timestamp_yesterday,
+        "files": [
+            {
+                "path": Path(
+                    tmp_flow_cell_with_bcl2fastq_sample_sheet, "SampleSheet.csv"
+                ).as_posix(),
+                "archive": False,
+                "tags": ["samplesheet", flow_cell_id],
+            },
+        ],
+    }
