@@ -31,9 +31,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
 ):
     """Test that creating a flow cell sample sheet fails if there is no run parameters file."""
     # GIVEN a flow cell directory with a non-existing sample sheet nor RunParameters file
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_without_run_parameters_path
-    )
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_without_run_parameters_path)
 
     # GIVEN that the context's flow cell directory holds the given flow cell
     assert (
