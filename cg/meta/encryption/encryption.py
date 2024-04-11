@@ -287,7 +287,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             ),
             make_tmp_encrypt_dir=self.make_tmp_encrypt_dir(),
             copy_flow_cell_dir_to_tmp=self.copy_flow_cell_dir_to_tmp(),
-            tar_encrypt_flow_cell_dir=self.tar_api.get_compress_cmd(
+            tar_encrypt_tmp_dir=self.tar_api.get_compress_cmd(
                 input_path=self.flow_cell_encrypt_tmp_dir
             ),
             parallel_gzip=f"{self.pigz_binary_path} -p {self.slurm_number_tasks - LIMIT_PIGZ_TASK} --fast -c",
