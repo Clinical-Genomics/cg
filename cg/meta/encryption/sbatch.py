@@ -12,7 +12,11 @@ FLOW_CELL_ENCRYPT_COMMANDS = """
 
 {asymmetrically_encrypt_passphrase}
 
-{tar_encrypt_flow_cell_dir} | {parallel_gzip} | {tee} | {flow_cell_symmetric_encryption}
+{make_tmp_encrypt_dir}
+
+{copy_flow_cell_dir_to_tmp}
+
+{tar_encrypt_tmp_dir} | {parallel_gzip} | {tee} | {flow_cell_symmetric_encryption}
 
 {flow_cell_symmetric_decryption} | {md5sum}
 
@@ -23,4 +27,6 @@ FLOW_CELL_ENCRYPT_COMMANDS = """
 {remove_pending_file}
 
 {flag_as_complete}
+
+{remove_tmp_encrypt_dir}
 """
