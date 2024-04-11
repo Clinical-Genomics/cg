@@ -28,10 +28,6 @@ class TaxprofilerUploadAPI(UploadAPI):
         analysis: Analysis = case.analyses[0]
         self.update_upload_started_at(analysis=analysis)
 
-        # Delivery report generation
-        if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
-            ctx.invoke(generate_delivery_report, case_id=case.internal_id)
-
         # Clinical delivery
         ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
 
