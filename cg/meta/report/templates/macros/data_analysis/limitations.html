@@ -15,10 +15,10 @@
       {% for application in applications %}
       <tr>
         <th>{{ application.tag }}</th>
-        <td>{{ application.description }}</td>
-        <td>{{ application.details }}</td>
-        <td>{{ application.limitations }}</td>
-        <td>{{ application.workflow_limitations }}</td>
+        <td class="text-start">{{ application.description }}</td>
+        <td class="text-start">{{ application.details }}</td>
+        <td class="text-start">{{ application.limitations }}</td>
+        <td class="text-start">{{ application.workflow_limitations }}</td>
       </tr>
       {% endfor %}
     </tbody>
