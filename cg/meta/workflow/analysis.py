@@ -148,6 +148,23 @@ class AnalysisAPI(MetaAPI):
             return prep_category.lower()
         return AnalysisType.OTHER
 
+    def get_case_application_type(self, case_id: str) -> str:
+        """Returns the application type for samples in a case."""
+        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id)
+        application_types: set[str] = {self.get_application_type(sample) for sample in samples}
+
+        if len(application_types) > 1:
+            raise CgError(
+                f"Different application_types found for case: {case_id} ({application_types})"
+            )
+
+        return application_types.pop()
+
+    def has_case_only_exome_samples(self, case_id: str) -> bool:
+        """Returns True if the application type for all samples in a case is WES."""
+        application_type: str = self.get_case_application_type(case_id)
+        return application_type == AnalysisType.WHOLE_EXOME_SEQUENCING
+
     def upload_bundle_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
         """Storing bundle data in Housekeeper for CASE_ID"""
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
