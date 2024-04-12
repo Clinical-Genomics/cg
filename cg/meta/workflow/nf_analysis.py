@@ -369,7 +369,8 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.debug("Creating gene panel file")
         bed_lines: list[str] = self.get_gene_panel(case_id=case_id, dry_run=dry_run)
         if dry_run:
-            LOG.debug(f"{'\n'.join(bed_lines)}")
+            bed_lines: str = "\n".join(bed_lines)
+            LOG.debug(f"{bed_lines}")
             return
         self.write_panel(case_id=case_id, content=bed_lines)
 
