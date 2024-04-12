@@ -1,5 +1,5 @@
-from dataclasses import Field
 from enum import StrEnum
+from pathlib import Path
 
 from cg.constants.constants import Strandedness
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
@@ -42,8 +42,8 @@ class TomteSampleSheetHeaders(StrEnum):
 
 
 class TomteParameters(WorkflowParameters):
-    """Model for Taxprofiler parameters."""
+    """Model for Tomte parameters."""
 
-    clusterOptions: str = Field(..., alias="cluster_options")
-    priority: str
-    gene_panel_clinical_filter: str
+    gene_panel_clinical_filter: Path
+    tissue: str
+    genome: str

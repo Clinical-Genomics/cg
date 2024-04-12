@@ -8,8 +8,7 @@ from cg.constants.constants import Strandedness
 from cg.constants.nf_analysis import TOMTE_METRIC_CONDITIONS
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.nf_analysis import WorkflowParameters
-from cg.models.tomte.tomte import TomteSampleSheetEntry, TomteSampleSheetHeaders
+from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetEntry, TomteSampleSheetHeaders
 from cg.resources import TOMTE_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample
 
@@ -71,11 +70,14 @@ class TomteAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content
 
-    def get_workflow_parameters(self, case_id: str) -> WorkflowParameters:
+    def get_workflow_parameters(self, case_id: str) -> TomteParameters:
         """Return parameters."""
-        return WorkflowParameters(
+        return TomteParameters(
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
+            gene_panel_clinical_filter=self.get_gene_panels_path(case_id=case_id),
+            tissue=self.replace_non_alphanumeric(string=self.get_source_by_case(case_id=case_id)),
+            genome=self.get_reference_genome(case_id=case_id),
         )
 
     def get_workflow_metrics(self) -> dict:

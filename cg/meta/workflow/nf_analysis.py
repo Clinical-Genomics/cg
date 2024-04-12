@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterator
@@ -219,6 +220,12 @@ class NfAnalysisAPI(AnalysisAPI):
         if work_dir:
             return work_dir.absolute()
         return Path(self.get_case_path(case_id), NFX_WORK_DIR)
+
+    def get_gene_panels_path(self, case_id: str) -> Path:
+        """Path to gene panels bed file exported from Scout."""
+        return Path(self.get_case_path(case_id=case_id), "gene_panels").with_suffix(
+            FileExtensions.BED
+        )
 
     def set_cluster_options(self, case_id: str) -> str:
         return f'process.clusterOptions = "-A {self.account} --qos={self.get_slurm_qos_for_case(case_id=case_id)}"\n'
@@ -861,3 +868,34 @@ class NfAnalysisAPI(AnalysisAPI):
             genome_build=self.get_gene_panel_genome_build(case_id=case_id),
             dry_run=dry_run,
         )
+
+    def get_source_from_lims_by_sample_id(self, sample_id: str) -> str | None:
+        """Get the source from LIMS for a given sample ID."""
+        lims_sample: dict | None = self.get_lims_sample(sample_id=sample_id, silent_error=True)
+        return lims_sample.get("source", None) if lims_sample else None
+
+    def get_source_by_case(self, case_id: str) -> str:
+        """Get sources from LIMS for a given case.
+        Returns 'unknown' if sources cannot be retrieved.
+        Raises CgError if different sources are set for the samples linked to a case"""
+        sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
+        sources: set[str] = {
+            source
+            for sample_id in sample_ids
+            if (source := self.get_source_from_lims_by_sample_id(sample_id=sample_id)) is not None
+        }
+        LOG.info(f"sources are {sources}")
+        if not sources:
+            return "unknown"
+        if len(sources) == 1:
+            return sources.pop()
+        if len(sources) > 1:
+            raise CgError(
+                f"All samples in a case must be of the same tissue type. "
+                f"Different sources found for {case_id}: {sources}."
+            )
+
+    @staticmethod
+    def replace_non_alphanumeric(string: str, replace_by="_") -> str:
+        """Replace non-alphanumeric characters from a string."""
+        return re.sub(r"[\W_-]+", replace_by, string)

@@ -6,6 +6,7 @@ from pathlib import Path
 from subprocess import CalledProcessError
 
 import click
+import requests
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
@@ -618,6 +619,19 @@ class AnalysisAPI(MetaAPI):
         all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
         all_panels |= {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
         return list(all_panels)
+
+    def get_lims_sample(self, sample_id: str, silent_error: bool = True) -> dict:
+        """Fetches sample data from LIMS. Returns an empty dictionary if the request was unsuccessful."""
+        lims_sample = {}
+        try:
+            lims_sample: dict = self.lims_api.sample(sample_id)
+        except requests.exceptions.HTTPError as error:
+            message = f"Could not fetch sample {sample_id} from LIMS: {error}"
+            if silent_error:
+                LOG.info(message)
+            else:
+                raise CgError(message)
+        return lims_sample
 
     def run_analysis(self, *args, **kwargs):
         raise NotImplementedError
