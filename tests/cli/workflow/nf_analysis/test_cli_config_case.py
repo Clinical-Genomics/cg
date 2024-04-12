@@ -102,7 +102,7 @@ def test_config_case_without_samples(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.TOMTE],
+    Workflow.get_nf_workflows(),
 )
 def test_config_case_default_parameters(
     cli_runner: CliRunner,

@@ -7,6 +7,7 @@ from cg.constants.constants import CustomerId
 GENOME_BUILD_37: str = "37"
 GENOME_BUILD_38: str = "GRCh38"
 
+
 class GenePanelGenomeBuild(StrEnum):
     hg19: str = GENOME_BUILD_37
     hg38: str = GENOME_BUILD_38

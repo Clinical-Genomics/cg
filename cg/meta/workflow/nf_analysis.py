@@ -364,7 +364,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 file_path=self.get_nextflow_config_path(case_id=case_id),
             )
 
-    def create_gene_panel(self, case_id: str, dry_run: bool):
+    def create_gene_panel(self, case_id: str, dry_run: bool) -> None:
         """Create and write an aggregated gene panel file exported from Scout."""
         LOG.debug("Creating gene panel file")
         bed_lines: list[str] = self.get_gene_panel(case_id=case_id, dry_run=dry_run)
