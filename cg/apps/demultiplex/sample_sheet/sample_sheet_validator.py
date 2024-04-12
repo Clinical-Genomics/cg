@@ -167,71 +167,47 @@ class SampleSheetValidator:
             LOG.error(message)
             raise SampleSheetError(message)
 
-    def _validate_bcl_convert(self):
-        """Determine if the BCLConvert sample sheet is valid, which means:
+    def validate_sample_sheet_from_content(self, content: list[list[str]]) -> None:
+        """
+        Determine if the BCLConvert sample sheet is valid, which means:
         - Sample sheet is BCL_Convert
         - All sections are present
         - The index settings are specified in the sample sheet header
         - The read and index cycles are specified in the sample sheet's reads section
         - The samples have the correct attributes
         - The override cycles are valid
+        Raises:
+            SampleSheetError: If the sample sheet is not valid.
         """
+        self.set_sample_sheet_content(content)
+        LOG.debug("Validating sample sheet")
         self._validate_sample_sheet_is_correct_type(bcl_converter=BclConverter.BCLCONVERT)
         self._validate_all_sections_present()
         self._set_is_index2_reverse_complement()
         self._set_cycles()
         self._validate_samples(sample_type=FlowCellSampleBCLConvert)
         self._validate_override_cycles()
+        LOG.info("Samplesheet passed validation")
 
-    def _validate_bcl2fastq(self):
-        """Determine if the Bcl2Fastq sample sheet is valid, which means:
-        - Sample sheet is Bcl2Fastq
-        - The samples have the correct attributes
-        """
-        self._validate_sample_sheet_is_correct_type(bcl_converter=BclConverter.BCL2FASTQ)
-        self._validate_samples(sample_type=FlowCellSampleBcl2Fastq)
-
-    def validate_sample_sheet_from_content(
-        self, content: list[list[str]], bcl_convert: str
-    ) -> None:
-        """
-        Call the proper validation depending on the sample sheet type or the given bcl converter.
-        Raises:
-            SampleSheetError: If the sample sheet is not valid.
-        """
-        self.set_sample_sheet_content(content)
-        if bcl_convert == BclConverter.BCLCONVERT:
-            LOG.debug("Validating BCLConvert sample sheet")
-            self._validate_bcl_convert()
-            LOG.info("Samplesheet passed BCLConvert validation")
-        elif bcl_convert == BclConverter.BCL2FASTQ:
-            LOG.debug("Validating Bcl2fastq sample sheet")
-            self._validate_samples(sample_type=FlowCellSampleBcl2Fastq)
-            LOG.info("Samplesheet passed Bcl2Fastq validation")
-        else:
-            LOG.error("Could not determine sample sheet type")
-            raise SampleSheetError("Could not determine sample sheet type")
-
-    def validate_sample_sheet_from_file(self, file_path: Path, bcl_converter: str) -> None:
+    def validate_sample_sheet_from_file(self, file_path: Path) -> None:
         """
         Validate a sample sheet given the path to the file.
         Raises:
             SampleSheetError: If the sample sheet is not valid.
         """
-        self.validate_sample_sheet_from_content(
-            content=ReadFile.get_content_from_file(file_format=FileFormat.CSV, file_path=file_path),
-            bcl_convert=bcl_converter,
+        content: list[list[str]] = ReadFile.get_content_from_file(
+            file_format=FileFormat.CSV, file_path=file_path
         )
+        self.validate_sample_sheet_from_content(content)
 
-    def get_sample_sheet_object_from_file(self, file_path: Path, bcl_converter: str) -> SampleSheet:
+    def get_sample_sheet_object_from_file(self, file_path: Path) -> SampleSheet:
         """Return a sample sheet object given the path to the file.
         Raises:
             SampleSheetError: If the sample sheet is not valid.
         """
-        sample_type: Type[FlowCellSample] = BCL_CONVERTER_TO_FLOW_CELL_SAMPLE[bcl_converter]
-        self.validate_sample_sheet_from_file(file_path=file_path, bcl_converter=bcl_converter)
+        self.validate_sample_sheet_from_file(file_path)
         samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
             sample_sheet_content=self.content,
-            sample_type=sample_type,
+            sample_type=FlowCellSampleBCLConvert,
         )
         return SampleSheet(samples=samples)

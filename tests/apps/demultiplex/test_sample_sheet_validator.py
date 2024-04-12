@@ -299,29 +299,21 @@ def test_validate_sample_sheet_is_correct_type_incorrect_type(
 
 
 @pytest.mark.parametrize(
-    "sample_sheet_content, bcl_converter",
+    "sample_sheet_content",
     [
-        ("hiseq_x_single_index_sample_sheet_content", BclConverter.BCLCONVERT),
-        ("hiseq_x_single_index_bcl2fastq_sample_sheet_content", BclConverter.BCL2FASTQ),
-        ("hiseq_x_dual_index_sample_sheet_content", BclConverter.BCLCONVERT),
-        ("hiseq_x_dual_index_bcl2fastq_sample_sheet_content", BclConverter.BCL2FASTQ),
-        ("hiseq_2500_dual_index_sample_sheet_content", BclConverter.BCLCONVERT),
-        ("hiseq_2500_dual_index_bcl2fastq_sample_sheet_content", BclConverter.BCL2FASTQ),
-        ("hiseq_2500_custom_index_sample_sheet_content", BclConverter.BCLCONVERT),
-        ("hiseq_2500_custom_index_bcl2fastq_sample_sheet_content", BclConverter.BCL2FASTQ),
-        ("novaseq_6000_pre_1_5_kits_sample_sheet_content", BclConverter.BCLCONVERT),
-        ("novaseq_6000_post_1_5_kits_sample_sheet_content", BclConverter.BCLCONVERT),
-        ("novaseq_x_sample_sheet_content", BclConverter.BCLCONVERT),
+        "hiseq_x_single_index_sample_sheet_content",
+        "hiseq_x_dual_index_sample_sheet_content",
+        "hiseq_2500_dual_index_sample_sheet_content",
+        "hiseq_2500_custom_index_sample_sheet_content",
+        "novaseq_6000_pre_1_5_kits_sample_sheet_content",
+        "novaseq_6000_post_1_5_kits_sample_sheet_content",
+        "novaseq_x_sample_sheet_content",
     ],
     ids=[
         "HiSeqXSingleIndex",
-        "HiSeqXSingleIndexBcl2Fastq",
         "HiSeqXDualIndex",
-        "HiSeqXDualIndexBcl2Fastq",
         "HiSeq2500DualIndex",
-        "HiSeq2500DualIndexBcl2Fastq",
         "HiSeq2500CustomIndex",
-        "HiSeq2500CustomIndexBcl2Fastq",
         "NovaSeq6000Pre1.5Kits",
         "NovaSeq6000Post1.5Kits",
         "NovaSeqX",
@@ -330,7 +322,6 @@ def test_validate_sample_sheet_is_correct_type_incorrect_type(
 def test_validate_sample_sheet_from_content(
     sample_sheet_validator: SampleSheetValidator,
     sample_sheet_content: str,
-    bcl_converter: str,
     request: FixtureRequest,
 ):
     """Test that a correct sample sheet passes validation."""
@@ -338,8 +329,6 @@ def test_validate_sample_sheet_from_content(
     content: list[list[str]] = request.getfixturevalue(sample_sheet_content)
 
     # WHEN validating the sample sheet
-    sample_sheet_validator.validate_sample_sheet_from_content(
-        content=content, bcl_convert=bcl_converter
-    )
+    sample_sheet_validator.validate_sample_sheet_from_content(content)
 
     # THEN no error is raised

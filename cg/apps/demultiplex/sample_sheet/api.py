@@ -103,9 +103,7 @@ class SampleSheetAPI:
                 sample_sheet_content
             )
             bcl_converter: str = FLOW_CELL_SAMPLE_TO_BCL_CONVERTER[sample_sheet_type]
-        self.validator.validate_sample_sheet_from_content(
-            content=sample_sheet_content, bcl_convert=bcl_converter
-        )
+        self.validator.validate_sample_sheet_from_content(sample_sheet_content)
 
     @staticmethod
     def _are_necessary_files_in_flow_cell(flow_cell: FlowCellDirectoryData) -> bool:
@@ -179,9 +177,7 @@ class SampleSheetAPI:
             flow_cell=flow_cell, lims_samples=flow_cell_samples
         )
         new_content = bcl_convert_creator.construct_sample_sheet()
-        self.validator.validate_sample_sheet_from_content(
-            content=new_content, bcl_convert=BclConverter.BCLCONVERT
-        )
+        self.validator.validate_sample_sheet_from_content(new_content)
         if self.dry_run:
             click.echo(
                 WriteStream.write_stream_from_content(
@@ -248,9 +244,7 @@ class SampleSheetAPI:
         """Create a valid sample sheet in the flow cell directory and add it to Housekeeper."""
         sample_sheet_content: list[list[str]] = self._get_sample_sheet_content(flow_cell)
         if not self.force:
-            self.validator.validate_sample_sheet_from_content(
-                content=sample_sheet_content, bcl_convert=flow_cell.bcl_converter
-            )
+            self.validator.validate_sample_sheet_from_content(sample_sheet_content)
         LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
         if self.dry_run:
             click.echo(
