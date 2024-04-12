@@ -248,57 +248,6 @@ def test_validate_override_cycles_incorrect_cycles(
 
 
 @pytest.mark.parametrize(
-    "content, bcl_converter",
-    [
-        ("hiseq_x_single_index_sample_sheet_content", BclConverter.BCLCONVERT),
-        ("hiseq_x_single_index_bcl2fastq_sample_sheet_content", BclConverter.BCL2FASTQ),
-    ],
-    ids=["bcl_convert", "bcl2fastq"],
-)
-def test_validate_sample_sheet_is_correct_type(
-    sample_sheet_validator: SampleSheetValidator,
-    content: str,
-    bcl_converter: str,
-    request: FixtureRequest,
-):
-    """Test that a sample sheet with the correct type passes validation."""
-    # GIVEN a sample sheet validator with a correct sample sheet content
-    sample_sheet_content: list[list[str]] = request.getfixturevalue(content)
-    sample_sheet_validator.set_sample_sheet_content(sample_sheet_content)
-
-    # WHEN validating the sample sheet type
-    sample_sheet_validator._validate_sample_sheet_is_correct_type(bcl_converter)
-
-    # THEN no error is raised
-
-
-@pytest.mark.parametrize(
-    "content, bcl_converter",
-    [
-        ("hiseq_x_single_index_sample_sheet_content", BclConverter.BCL2FASTQ),
-        ("hiseq_x_single_index_bcl2fastq_sample_sheet_content", BclConverter.BCLCONVERT),
-    ],
-    ids=["bcl_convert", "bcl2fastq"],
-)
-def test_validate_sample_sheet_is_correct_type_incorrect_type(
-    sample_sheet_validator: SampleSheetValidator,
-    content: str,
-    bcl_converter: str,
-    request: FixtureRequest,
-):
-    """Test that a sample sheet with the incorrect type raises an error."""
-    # GIVEN a sample sheet validator with an incorrect sample sheet content
-    sample_sheet_content: list[list[str]] = request.getfixturevalue(content)
-    sample_sheet_validator.set_sample_sheet_content(sample_sheet_content)
-
-    # WHEN validating the sample sheet type
-    with pytest.raises(SampleSheetError) as error_info:
-        # THEN a SampleSheetError is raised
-        sample_sheet_validator._validate_sample_sheet_is_correct_type(bcl_converter)
-    assert f"Sample sheet is not {bcl_converter}" in str(error_info.value)
-
-
-@pytest.mark.parametrize(
     "sample_sheet_content",
     [
         "hiseq_x_single_index_sample_sheet_content",

@@ -156,21 +156,9 @@ class SampleSheetValidator:
             except OverrideCyclesError as error:
                 raise SampleSheetError from error
 
-    def _validate_sample_sheet_is_correct_type(self, bcl_converter: str) -> None:
-        """Determine if the sample sheet content corresponds to the provided converter.
-        Raises:
-            SampleSheetError if the sample sheet is not of the correct type.
-        """
-        expected_type: Type[FlowCellSample] = BCL_CONVERTER_TO_FLOW_CELL_SAMPLE[bcl_converter]
-        if get_sample_type_from_content(self.content) is not expected_type:
-            message: str = f"Sample sheet is not {bcl_converter}"
-            LOG.error(message)
-            raise SampleSheetError(message)
-
     def validate_sample_sheet_from_content(self, content: list[list[str]]) -> None:
         """
         Determine if the BCLConvert sample sheet is valid, which means:
-        - Sample sheet is BCL_Convert
         - All sections are present
         - The index settings are specified in the sample sheet header
         - The read and index cycles are specified in the sample sheet's reads section
@@ -181,7 +169,6 @@ class SampleSheetValidator:
         """
         self.set_sample_sheet_content(content)
         LOG.debug("Validating sample sheet")
-        self._validate_sample_sheet_is_correct_type(bcl_converter=BclConverter.BCLCONVERT)
         self._validate_all_sections_present()
         self._set_is_index2_reverse_complement()
         self._set_cycles()
