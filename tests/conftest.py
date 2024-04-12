@@ -27,8 +27,9 @@ from cg.apps.housekeeper.models import InputBundle
 from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, FileFormat, Strandedness
+from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SequencingPlatform
@@ -2878,6 +2879,12 @@ def tomte_nexflow_config_file_path(tomte_dir, tomte_case_id) -> Path:
         FileExtensions.JSON
     )
 
+@pytest.fixture(scope="function")
+def tomte_gene_panel_path(tomte_dir, tomte_case_id) -> Path:
+    """Path to gene panel file."""
+    return Path(tomte_dir, tomte_case_id, "gene_panels").with_suffix(
+        FileExtensions.BED
+    )
 
 @pytest.fixture(scope="function")
 def tomte_mock_config(tomte_dir: Path, tomte_case_id: str) -> None:
@@ -3097,6 +3104,7 @@ def tomte_context(
         internal_id=tomte_case_id,
         name=tomte_case_id,
         data_analysis=Workflow.TOMTE,
+        panels=[GenePanelMasterList.OMIM_AUTO]
     )
 
     sample_enough_reads: Sample = helpers.add_sample(
@@ -3105,6 +3113,7 @@ def tomte_context(
         internal_id=sample_id,
         reads=total_sequenced_reads_pass,
         last_sequenced_at=datetime.now(),
+        reference_genome=GenomeVersion.hg38,
     )
 
     helpers.add_relationship(
