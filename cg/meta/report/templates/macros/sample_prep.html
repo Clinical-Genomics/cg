@@ -23,11 +23,11 @@
           <td>{{ sample.timestamps.received_at }}</td>
           <td>{{ sample.timestamps.prepared_at }}</td>
           <td>{{ sample.timestamps.reads_updated_at }}</td>
-          <td class="text-start">{{ sample.methods.library_prep }}</td>
+          <td>{{ sample.methods.library_prep }}</td>
           <td>
             {{ bait_set_value(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type, sample=sample) }}
           </td>
-          <td class="text-start">{{ sample.methods.sequencing }}</td>
+          <td>{{ sample.methods.sequencing }}</td>
         </tr>
         {% endfor %}
       </tbody>
