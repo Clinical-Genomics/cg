@@ -40,7 +40,7 @@
         <td>{{ case.data_analysis.workflow }} (v{{ case.data_analysis.workflow_version }})</td>
         <td>{{ case.data_analysis.genome_build }}</td>
         <td>{{ analysis_type_value(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type) }}</td>
-        <td>{{ variant_callers_value(case=case) }}</td>
+        <td class="text-start">{{ variant_callers_value(case=case) }}</td>
         <td>{{ gene_panels_value(case=case) }}</td>
       </tr>
     </tbody>
