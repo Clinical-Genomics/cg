@@ -12,25 +12,12 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_raw_samples_from_content,
     validate_samples_unique_per_lane,
 )
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSample,
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample, FlowCellSampleBCLConvert
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import (
-    NAME_TO_INDEX_SETTINGS,
-    BclConverter,
-    SampleSheetBCLConvertSections,
-)
+from cg.constants.demultiplexing import NAME_TO_INDEX_SETTINGS, SampleSheetBCLConvertSections
 from cg.exc import OverrideCyclesError, SampleSheetError
 from cg.io.controller import ReadFile
-
-BCL_CONVERTER_TO_FLOW_CELL_SAMPLE: dict[str, Type[FlowCellSample]] = {
-    BclConverter.BCL2FASTQ: FlowCellSampleBcl2Fastq,
-    BclConverter.BCLCONVERT: FlowCellSampleBCLConvert,
-}
 
 LOG = logging.getLogger(__name__)
 
