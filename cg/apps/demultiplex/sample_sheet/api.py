@@ -34,11 +34,6 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.utils.files import get_directories_in_path, link_or_overwrite_file
 
-FLOW_CELL_SAMPLE_TO_BCL_CONVERTER: dict[Type[FlowCellSample], str] = {
-    FlowCellSampleBcl2Fastq: BclConverter.BCL2FASTQ,
-    FlowCellSampleBCLConvert: BclConverter.BCLCONVERT,
-}
-
 LOG = logging.getLogger(__name__)
 
 
