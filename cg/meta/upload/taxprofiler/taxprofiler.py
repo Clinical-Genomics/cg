@@ -31,4 +31,7 @@ class TaxprofilerUploadAPI(UploadAPI):
         # Clinical delivery
         ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
 
+      LOG.info(
+            f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}."
+        )
         self.update_uploaded_at(analysis=analysis)
