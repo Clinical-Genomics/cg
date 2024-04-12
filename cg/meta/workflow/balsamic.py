@@ -454,6 +454,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         verified_sex: Sex = sex or self.get_verified_sex(sample_data=sample_data)
 
+        verified_exome_argument: bool = self.has_case_only_exome_samples(case_id=case_id)
+
         config_case: dict[str, str] = {
             "case_id": case_id,
             "analysis_workflow": self.workflow,
@@ -463,7 +465,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "pon_cnn": verified_pon,
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
+            "exome": verified_exome_argument,
         }
+
         config_case.update(self.get_verified_samples(case_id=case_id))
         config_case.update(self.get_parsed_observation_file_paths(observations))
         (
@@ -511,15 +515,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         self.print_sample_params(case_id=case_id, sample_data=sample_data)
         return sample_data
-
-    def get_case_application_type(self, case_id: str) -> str:
-        application_types = {
-            self.get_application_type(link_object.sample)
-            for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
-        }
-
-        if application_types:
-            return application_types.pop().lower()
 
     def resolve_target_bed(self, panel_bed: str | None, link_object: CaseSample) -> str | None:
         if panel_bed:
@@ -580,12 +575,14 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--gnomad-min-af5": arguments.get("gnomad_min_af5"),
                 "--normal-sample-name": arguments.get("normal_sample_name"),
                 "--panel-bed": arguments.get("panel_bed"),
+                "--exome": arguments.get("exome"),
                 "--pon-cnn": arguments.get("pon_cnn"),
                 "--swegen-snv": arguments.get("swegen_snv"),
                 "--swegen-sv": arguments.get("swegen_sv"),
                 "--tumor-sample-name": arguments.get("tumor_sample_name"),
                 "--umi-trim-length": arguments.get("umi_trim_length"),
-            }
+            },
+            exclude_true=True,
         )
         parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
