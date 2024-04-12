@@ -19,7 +19,7 @@
       <tbody>
         {% for sample in case.samples %}
         <tr>
-          <td>{{ sample.name }} ({{ sample.id }})</td>
+          <th scope="row">{{ sample.name }} ({{ sample.id }})</th>
           <td>{{ sample.timestamps.received_at }}</td>
           <td>{{ sample.timestamps.prepared_at }}</td>
           <td>{{ sample.timestamps.reads_updated_at }}</td>
