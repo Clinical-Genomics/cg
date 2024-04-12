@@ -5,7 +5,6 @@
     <table class="table w-auto text-center align-middle">
       <thead class="table-secondary">
         <tr>
-          <th scope="col">Fall</th>
           <th scope="col">Prov</th>
           <th scope="col">Ankom</th>
           <th scope="col">Beredd</th>
@@ -18,11 +17,6 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <th scope="row" rowspan="{{ case.samples | length + 1}}">
-            {{ case.name }}
-          </th>
-        </tr>
         {% for sample in case.samples %}
         <tr>
           <td>{{ sample.name }} ({{ sample.id }})</td>
