@@ -20,7 +20,7 @@ class TaxprofilerUploadAPI(UploadAPI):
     """Taxprofiler upload API."""
 
     def __init__(self, config: CGConfig):
-        self.analysis_api: TaxprofilerAnalysisAPI = TaxprofilerAnalysisAPI(config)
+        self.analysis_api = TaxprofilerAnalysisAPI(config)
         super().__init__(config=config, analysis_api=self.analysis_api)
 
     def upload(self, ctx: click.Context, case: Case, restart: bool) -> None:
