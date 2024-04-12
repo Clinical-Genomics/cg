@@ -52,7 +52,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.raredisease.raredisease import RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
-from cg.models.tomte.tomte import TomteSampleSheetHeaders
+from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
 from cg.store.store import Store
@@ -2879,12 +2879,12 @@ def tomte_nexflow_config_file_path(tomte_dir, tomte_case_id) -> Path:
         FileExtensions.JSON
     )
 
+
 @pytest.fixture(scope="function")
 def tomte_gene_panel_path(tomte_dir, tomte_case_id) -> Path:
     """Path to gene panel file."""
-    return Path(tomte_dir, tomte_case_id, "gene_panels").with_suffix(
-        FileExtensions.BED
-    )
+    return Path(tomte_dir, tomte_case_id, "gene_panels").with_suffix(FileExtensions.BED)
+
 
 @pytest.fixture(scope="function")
 def tomte_mock_config(tomte_dir: Path, tomte_case_id: str) -> None:
@@ -3073,6 +3073,24 @@ def tomte_deliverables_response_data(
 
 
 @pytest.fixture(scope="function")
+def tomte_parameters_default(
+    tomte_dir: Path,
+    tomte_case_id: str,
+    tomte_sample_sheet_path: Path,
+    tomte_gene_panel_path: Path,
+    existing_directory: Path,
+) -> TomteParameters:
+    """Return Tomte parameters."""
+    return TomteParameters(
+        input=tomte_sample_sheet_path,
+        outdir=Path(tomte_dir, tomte_case_id),
+        gene_panel_clinical_filter=tomte_gene_panel_path,
+        tissue="unkown",
+        genome="hg38",
+    )
+
+
+@pytest.fixture(scope="function")
 def tomte_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
@@ -3104,7 +3122,7 @@ def tomte_context(
         internal_id=tomte_case_id,
         name=tomte_case_id,
         data_analysis=Workflow.TOMTE,
-        panels=[GenePanelMasterList.OMIM_AUTO]
+        panels=[GenePanelMasterList.OMIM_AUTO],
     )
 
     sample_enough_reads: Sample = helpers.add_sample(

@@ -7,6 +7,7 @@ from click.testing import CliRunner
 
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from tests.cli.workflow.conftest import mock_analysis_flow_cell
@@ -14,7 +15,7 @@ from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    Workflow.get_nf_workflows(),
 )
 def test_start(
     cli_runner: CliRunner,
@@ -36,6 +37,9 @@ def test_start(
     # GIVEN decompression is not needed
     mocker.patch.object(NfAnalysisAPI, "resolve_decompression", return_value=None)
 
+    # Mocking external LIMS call
+    mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
+
     # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(workflow_cli, [workflow, "start", case_id, "--dry-run"], obj=context)
 
@@ -49,7 +53,7 @@ def test_start(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    Workflow.get_nf_workflows(),
 )
 def test_start_available(
     cli_runner: CliRunner,
@@ -74,6 +78,9 @@ def test_start_available(
 
     # GIVEN decompression is not needed
     mocker.patch.object(NfAnalysisAPI, "resolve_decompression", return_value=None)
+
+    # Mocking external LIMS call
+    mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
 
     # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(
