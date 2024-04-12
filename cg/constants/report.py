@@ -8,7 +8,7 @@ from cg.constants.constants import Workflow
 
 DELIVERY_REPORT_FILE_NAME: str = "delivery-report.html"
 SWEDAC_LOGO_PATH = Path(
-    files("cg"), "meta", "report", "templates", "static", "images", "SWEDAC_LOGO.png"
+    files("cg"), "meta", "report", "templates", "static", "images", "SWEDAC_logo.png"
 )
 
 BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]
