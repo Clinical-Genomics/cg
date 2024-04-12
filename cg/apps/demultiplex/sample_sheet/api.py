@@ -84,9 +84,7 @@ class SampleSheetAPI:
             raise SampleSheetError from error
         return flow_cell
 
-    def validate_sample_sheet(
-        self, sample_sheet_path: Path, bcl_converter: str | None = None
-    ) -> None:
+    def validate_sample_sheet(self, sample_sheet_path: Path) -> None:
         """Return the sample sheet path if it exists and if it passes validation.
         Raises:
             SampleSheetError: If the sample sheet does not exist or does not pass validation.
@@ -98,11 +96,6 @@ class SampleSheetAPI:
         sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.CSV, file_path=sample_sheet_path
         )
-        if not bcl_converter:
-            sample_sheet_type: Type[FlowCellSample] = get_sample_type_from_content(
-                sample_sheet_content
-            )
-            bcl_converter: str = FLOW_CELL_SAMPLE_TO_BCL_CONVERTER[sample_sheet_type]
         self.validator.validate_sample_sheet_from_content(sample_sheet_content)
 
     @staticmethod
@@ -201,18 +194,14 @@ class SampleSheetAPI:
             raise SampleSheetError(
                 f"Sample sheet for flow cell {flow_cell.id} does not exist in Housekeeper"
             )
-        self.validate_sample_sheet(
-            sample_sheet_path=sample_sheet_path, bcl_converter=flow_cell.bcl_converter
-        )
+        self.validate_sample_sheet(sample_sheet_path)
         LOG.info("Sample sheet from Housekeeper is valid. Copying it to flow cell directory")
         if not self.dry_run:
             link_or_overwrite_file(src=sample_sheet_path, dst=flow_cell.sample_sheet_path)
 
     def _use_flow_cell_sample_sheet(self, flow_cell: FlowCellDirectoryData) -> None:
         """Use the sample sheet from the flow cell directory if it is valid."""
-        self.validate_sample_sheet(
-            sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=flow_cell.bcl_converter
-        )
+        self.validate_sample_sheet(flow_cell.sample_sheet_path)
         LOG.info("Sample sheet from flow cell directory is valid. Adding it to Housekeeper")
         if not self.dry_run:
             try:

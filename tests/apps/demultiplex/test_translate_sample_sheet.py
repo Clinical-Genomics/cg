@@ -176,6 +176,4 @@ def test_translate_sample_sheet(
     api.translate_sample_sheet(flow_cell_name=flow_cell.full_name)
 
     # THEN the sample sheet is translated correctly to BCConvert format
-    api.validate_sample_sheet(
-        sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCLCONVERT
-    )
+    api.validate_sample_sheet(flow_cell.sample_sheet_path)

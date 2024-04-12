@@ -50,14 +50,10 @@ def test_get_create_sample_sheet_hk_has_bcl2fastq_sample_sheet(
     )
 
     # THEN the sample sheet in Housekeeper is replaced with the BCLConvert sample sheet
-    sample_sheet_api.validate_sample_sheet(
-        sample_sheet_path=sample_sheet_path_hk, bcl_converter=BclConverter.BCLCONVERT
-    )
+    sample_sheet_api.validate_sample_sheet(sample_sheet_path_hk)
 
     # THEN the sample sheet in the flow cell is replaced with the BCLConvert sample sheet
-    sample_sheet_api.validate_sample_sheet(
-        sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCLCONVERT
-    )
+    sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
 
 
 def test_get_create_sample_sheet_flow_cell_has_bcl2fastq_sample_sheet(
@@ -99,11 +95,7 @@ def test_get_create_sample_sheet_flow_cell_has_bcl2fastq_sample_sheet(
 
     # THEN the sample sheet has been added to Housekeeper and passes BCLConvert validation
     sample_sheet_path_hk: Path = hk_api.get_sample_sheet_path(flow_cell.id)
-    sample_sheet_api.validate_sample_sheet(
-        sample_sheet_path=sample_sheet_path_hk, bcl_converter=BclConverter.BCLCONVERT
-    )
+    sample_sheet_api.validate_sample_sheet(sample_sheet_path_hk)
 
     # THEN the sample sheet in the flow cell directory is replaced with the BCLConvert sample sheet
-    sample_sheet_api.validate_sample_sheet(
-        sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCLCONVERT
-    )
+    sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
