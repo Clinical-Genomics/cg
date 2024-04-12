@@ -898,4 +898,4 @@ class NfAnalysisAPI(AnalysisAPI):
     @staticmethod
     def replace_non_alphanumeric(string: str, replace_by="_") -> str:
         """Replace non-alphanumeric characters from a string."""
-        return re.sub(r"[\W_-]+", replace_by, string)
+        return re.sub(r"\W+", replace_by, string)
