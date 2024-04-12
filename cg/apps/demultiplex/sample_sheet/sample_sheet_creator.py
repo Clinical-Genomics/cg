@@ -1,9 +1,7 @@
 """ Create a sample sheet for NovaSeq flow cells."""
 
 import logging
-from typing import Type
 
-from cg.apps.demultiplex.sample_sheet.index import Index, get_valid_indexes, is_dual_index
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_by_lane
 from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
@@ -28,14 +26,7 @@ class SampleSheetCreator:
         self.flow_cell_id: str = flow_cell.id
         self.lims_samples: list[FlowCellSampleBCLConvert] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
-        self.sample_type: Type[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq] = (
-            flow_cell.sample_type
-        )
         self.index_settings: IndexSettings = self.run_parameters.index_settings
-
-    @property
-    def valid_indexes(self) -> list[Index]:
-        return get_valid_indexes(dual_indexes_only=True)
 
     def convert_sample_to_header_dict(
         self,

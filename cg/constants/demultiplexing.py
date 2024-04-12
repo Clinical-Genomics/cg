@@ -3,7 +3,6 @@
 from enum import StrEnum
 from pathlib import Path
 
-import click
 from pydantic import BaseModel
 
 from cg.constants.sequencing import Sequencers
