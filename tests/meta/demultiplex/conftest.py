@@ -13,7 +13,6 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers

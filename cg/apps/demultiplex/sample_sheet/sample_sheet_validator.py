@@ -10,7 +10,6 @@ from cg.apps.demultiplex.sample_sheet.override_cycles_validator import OverrideC
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_flow_cell_samples_from_content,
     get_raw_samples_from_content,
-    get_sample_type_from_content,
     validate_samples_unique_per_lane,
 )
 from cg.apps.demultiplex.sample_sheet.sample_models import (

@@ -2,7 +2,7 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
-from cg.constants.demultiplexing import BclConverter, SampleSheetBCLConvertSections
+from cg.constants.demultiplexing import SampleSheetBCLConvertSections
 from cg.exc import SampleSheetError
 
 

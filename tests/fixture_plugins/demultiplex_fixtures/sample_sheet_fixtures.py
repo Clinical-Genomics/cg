@@ -7,7 +7,6 @@ import pytest
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import BclConverter
 from cg.io.controller import ReadFile
 
 

@@ -5,7 +5,6 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
-from cg.constants.demultiplexing import BclConverter
 from cg.exc import SampleSheetError
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
