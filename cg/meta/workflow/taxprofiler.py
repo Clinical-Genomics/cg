@@ -65,12 +65,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """Return nextflow config content."""
         return MULTIQC_NEXFLOW_CONFIG
 
-    @property
-    def use_read_count_threshold(self) -> bool:
-        """Defines whether the threshold for adequate read count should be passed for all samples
-        when determining if the analysis for a case should be automatically started."""
-        return False
-
     @staticmethod
     def get_bundle_filenames_path() -> Path:
         """Return Taxprofiler bundle filenames path."""
