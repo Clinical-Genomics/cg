@@ -162,6 +162,10 @@ class RnafusionSample(Of1508Sample):
     _suitable_project = OrderType.RNAFUSION
 
 
+class TomteSample(MipDnaSample):
+    _suitable_project = OrderType.TOMTE
+
+
 class FastqSample(OrderInSample):
     _suitable_project = OrderType.FASTQ
 

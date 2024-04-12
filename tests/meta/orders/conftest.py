@@ -11,6 +11,7 @@ from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.meta.orders.mip_rna_submitter import MipRnaSubmitter
 from cg.meta.orders.rml_submitter import RmlSubmitter
 from cg.meta.orders.ticket_handler import TicketHandler
+from cg.meta.orders.tomte_submitter import TomteSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store.store import Store
 from tests.apps.orderform.conftest import (
@@ -23,6 +24,7 @@ from tests.apps.orderform.conftest import (
     rml_order_to_submit,
     rnafusion_order_to_submit,
     sarscov2_order_to_submit,
+    tomte_order_to_submit,
 )
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.osticket import MockOsTicket
@@ -118,6 +120,14 @@ def rml_status_data(rml_order_to_submit):
     project: OrderType = OrderType.RML
     order: OrderIn = OrderIn.parse_obj(obj=rml_order_to_submit, project=project)
     return RmlSubmitter.order_to_status(order=order)
+
+
+@pytest.fixture
+def tomte_status_data(tomte_order_to_submit: dict):
+    """Parse TOMTE order example."""
+    project: OrderType = OrderType.TOMTE
+    order: OrderIn = OrderIn.parse_obj(obj=tomte_order_to_submit, project=project)
+    return TomteSubmitter.order_to_status(order=order)
 
 
 @pytest.fixture(scope="function")
