@@ -6,9 +6,9 @@
 <!-- Data analysis results -->
 {% macro data_analysis(case) %}
   <div class="container mb-5">
-  <h4 class="mb-4">Analys</h4>
+  <h3 class="mb-4">Analys</h3>
     {{ workflow_analysis(case=case) }}
-    <h5 class="mt-4 mb-3">Kvalitetskontrollsmetrik</h5>
+    <h4 class="mt-4 mb-3">Kvalitetskontrollsmetrik</h4>
     {% if "balsamic" in case.data_analysis.workflow %}
       {{ balsamic_qc_metrics(samples=case.samples, analysis_type=case.data_analysis.type) }}
     {% elif "mip-dna" == case.data_analysis.workflow %}
@@ -22,7 +22,7 @@
 
 <!-- Workflow analysis -->
 {% macro workflow_analysis(case) %}
-  <h5 class="mt-4 mb-3">Dataanalys</h5>
+  <h4 class="mt-4 mb-3">Dataanalys</h4>
   <table class="table w-auto text-center align-middle">
     <thead class="table-secondary">
       <tr>
