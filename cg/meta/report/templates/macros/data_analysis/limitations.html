@@ -8,7 +8,6 @@
         <th scope="col">Beskrivning</th>
         <th scope="col">Detaljer</th>
         <th scope="col">Begränsningar</th>
-        <th scope="col">Workflowbegränsningar</th>
       </tr>
     </thead>
     <tbody>
@@ -17,8 +16,13 @@
         <th>{{ application.tag }}</th>
         <td class="text-start">{{ application.description }}</td>
         <td class="text-start">{{ application.details }}</td>
-        <td class="text-start">{{ application.limitations }}</td>
-        <td class="text-start">{{ application.workflow_limitations }}</td>
+        <td class="text-start">
+          <div>{{ application.limitations }}</div>
+          {% if application.workflow_limitations != "N/A" %}
+            <div class="mt-2">{{ application.workflow_limitations }}</div>
+          {% endif %}
+        </td>
+        <td class="text-start"></td>
       </tr>
       {% endfor %}
     </tbody>

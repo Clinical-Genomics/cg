@@ -2,7 +2,7 @@
 {% macro rnafusion_scout_files(scout_files, case_id, case_name) %}
   <table class="table w-auto">
     <tbody>
-      {% if scout_files.vcf_fusion != 'N/A' %}
+      {% if scout_files.vcf_fusion != "N/A" %}
         <tr>
           <th scope="row">Kliniska Fusionsvarianter</th>
           <td>{{ scout_files.vcf_fusion.replace(case_id, case_name) }}</td>
