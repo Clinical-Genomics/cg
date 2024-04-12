@@ -169,9 +169,9 @@ RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {AlignmentFileTag.CRAM_INDEX},
 ]
 
-TAXPROFILER_ANALYSIS_CASE_TAGS: list[set[str]] = [HermesFileTag.CLINICAL_DELIVERY]
+TAXPROFILER_ANALYSIS_CASE_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
 
-TAXPROFILER_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [HermesFileTag.CLINICAL_DELIVERY]
+TAXPROFILER_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
 
 PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
     Workflow.BALSAMIC: {
