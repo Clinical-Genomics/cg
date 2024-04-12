@@ -11,7 +11,7 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreatorBCLConvert
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -158,7 +158,7 @@ class SampleSheetAPI:
         flow_cell_samples: list[FlowCellSampleBCLConvert] = get_flow_cell_samples_from_content(
             sample_sheet_content=content_with_fixed_header, sample_type=FlowCellSampleBCLConvert
         )
-        bcl_convert_creator = SampleSheetCreatorBCLConvert(
+        bcl_convert_creator = SampleSheetCreator(
             flow_cell=flow_cell, lims_samples=flow_cell_samples
         )
         new_content = bcl_convert_creator.construct_sample_sheet()
@@ -219,7 +219,7 @@ class SampleSheetAPI:
             message: str = f"Could not find any samples in LIMS for {flow_cell.id}"
             LOG.warning(message)
             raise SampleSheetError(message)
-        creator = SampleSheetCreatorBCLConvert(flow_cell=flow_cell, lims_samples=lims_samples)
+        creator = SampleSheetCreator(flow_cell=flow_cell, lims_samples=lims_samples)
         LOG.info(
             f"Constructing sample sheet for the {flow_cell.sequencer_type} flow cell {flow_cell.id}"
         )

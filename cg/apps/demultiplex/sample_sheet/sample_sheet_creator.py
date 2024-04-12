@@ -22,11 +22,11 @@ class SampleSheetCreator:
     def __init__(
         self,
         flow_cell: FlowCellDirectoryData,
-        lims_samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq],
+        lims_samples: list[FlowCellSampleBCLConvert],
     ):
         self.flow_cell: FlowCellDirectoryData = flow_cell
         self.flow_cell_id: str = flow_cell.id
-        self.lims_samples: list[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq] = lims_samples
+        self.lims_samples: list[FlowCellSampleBCLConvert] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
         self.sample_type: Type[FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq] = (
             flow_cell.sample_type
@@ -145,9 +145,3 @@ class SampleSheetCreator:
         self.process_samples_for_sample_sheet()
         sample_sheet_content: list[list[str]] = self.create_sample_sheet_content()
         return sample_sheet_content
-
-
-class SampleSheetCreatorBCLConvert(SampleSheetCreator):
-    """Create a raw sample sheet for BCLConvert flow cells."""
-
-    pass
