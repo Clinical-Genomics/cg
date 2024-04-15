@@ -127,9 +127,7 @@ def test_create_v2_sample_sheet(
     assert flow_cell.sample_sheet_exists()
 
     # THEN the sample sheet passes validation
-    sample_sheet_api.validate_sample_sheet(
-        sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCLCONVERT
-    )
+    sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
 
     # THEN the sample sheet is in Housekeeper
     assert sample_sheet_context.housekeeper_api.get_sample_sheets_from_latest_version(flow_cell.id)

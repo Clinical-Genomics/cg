@@ -61,38 +61,6 @@ def test_validate_sample_sheet_wrong_file_type(
 @pytest.mark.parametrize(
     "sample_sheet_path",
     [
-        "hiseq_x_single_index_bcl2fastq_sample_sheet_path",
-        "hiseq_x_dual_index_bcl2fastq_sample_sheet_path",
-        "hiseq_2500_dual_index_bcl2fastq_sample_sheet_path",
-        "hiseq_2500_custom_index_bcl2fastq_sample_sheet_path",
-    ],
-)
-def test_validate_correct_bcl2fastq_sample_sheet(
-    cli_runner: CliRunner,
-    sample_sheet_path: str,
-    sample_sheet_context: CGConfig,
-    request: pytest.FixtureRequest,
-):
-    """Test validate sample sheet when using a bcl2fastq sample sheet."""
-
-    # GIVEN the path to a correct bcl2fastq sample sheet that exists
-    sample_sheet: Path = request.getfixturevalue(sample_sheet_path)
-    assert sample_sheet.exists()
-
-    # WHEN validating the sample sheet
-    result: Result = cli_runner.invoke(
-        validate_sample_sheet,
-        [str(sample_sheet)],
-        obj=sample_sheet_context,
-    )
-
-    # THEN assert that it exits successfully
-    assert result.exit_code == EXIT_SUCCESS
-
-
-@pytest.mark.parametrize(
-    "sample_sheet_path",
-    [
         "hiseq_x_single_index_sample_sheet_path",
         "hiseq_x_dual_index_sample_sheet_path",
         "hiseq_2500_dual_index_sample_sheet_path",
