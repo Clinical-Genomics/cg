@@ -5,6 +5,7 @@ from cg.constants.housekeeper_tags import (
     HK_DELIVERY_REPORT_TAG,
     AlignmentFileTag,
     AnalysisTag,
+    HermesFileTag,
 )
 
 ONLY_ONE_CASE_PER_TICKET: list[Workflow] = [
@@ -168,6 +169,9 @@ RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {AlignmentFileTag.CRAM_INDEX},
 ]
 
+TAXPROFILER_ANALYSIS_CASE_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
+
+TAXPROFILER_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
 
 PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
     Workflow.BALSAMIC: {
@@ -205,6 +209,10 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
     Workflow.RNAFUSION: {
         "case_tags": RNAFUSION_ANALYSIS_CASE_TAGS,
         "sample_tags": RNAFUSION_ANALYSIS_SAMPLE_TAGS,
+    },
+    Workflow.TAXPROFILER: {
+        "case_tags": TAXPROFILER_ANALYSIS_CASE_TAGS,
+        "sample_tags": TAXPROFILER_ANALYSIS_SAMPLE_TAGS,
     },
 }
 

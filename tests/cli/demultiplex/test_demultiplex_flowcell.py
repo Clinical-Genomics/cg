@@ -15,104 +15,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
-def test_demultiplex_bcl2fastq_flow_cell_dry_run(
-    cli_runner: testing.CliRunner,
-    tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq: Path,
-    demultiplexing_context_for_demux: CGConfig,
-    caplog,
-):
-    caplog.set_level(logging.INFO)
-
-    # GIVEN that all files are present for demultiplexing
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq,
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
-    add_and_include_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq,
-        flow_cell_name=flow_cell.id,
-        hk_api=demultiplexing_context_for_demux.housekeeper_api,
-    )
-
-    # GIVEN an out dir that does not exist
-    demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
-    assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
-    demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
-    unaligned_dir: Path = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
-    assert demux_dir.exists() is False
-    assert unaligned_dir.exists() is False
-
-    # WHEN starting demultiplexing from the CLI with dry run flag
-    result: testing.Result = cli_runner.invoke(
-        demultiplex_flow_cell,
-        [
-            str(tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq),
-            "--dry-run",
-            "-b",
-            BclConverter.BCL2FASTQ,
-        ],
-        obj=demultiplexing_context_for_demux,
-    )
-
-    # THEN assert the command exits without problems
-    assert result.exit_code == 0
-
-    # THEN assert no results folder was created since it is run in dry run mode
-    assert demux_dir.exists() is False
-    assert unaligned_dir.exists() is False
-
-
-def test_demultiplex_bcl2fastq_flow_cell(
-    cli_runner: testing.CliRunner,
-    tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq: Path,
-    demultiplexing_context_for_demux: CGConfig,
-    caplog,
-    mocker,
-):
-    caplog.set_level(logging.INFO)
-
-    # GIVEN that all files are present for bcl2fastq demultiplexing
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq,
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
-    add_and_include_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq,
-        flow_cell_name=flow_cell.id,
-        hk_api=demultiplexing_context_for_demux.housekeeper_api,
-    )
-
-    # GIVEN a flow cell that is ready for demultiplexing
-    demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
-    demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
-    unaligned_dir: Path = Path(demux_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
-    assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
-
-    mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
-
-    # WHEN starting demultiplexing from the CLI with dry run flag
-    result: testing.Result = cli_runner.invoke(
-        demultiplex_flow_cell,
-        [
-            str(tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq),
-            "-b",
-            BclConverter.BCL2FASTQ,
-        ],
-        obj=demultiplexing_context_for_demux,
-    )
-
-    # THEN assert the command exits successfully
-
-    assert result.exit_code == 0
-
-    # THEN assert the results folder was created
-    assert demux_dir.exists()
-    assert unaligned_dir.exists()
-
-    # THEN assert that the sbatch script was created
-    assert demux_api.demultiplex_sbatch_path(flow_cell).exists()
-
-
 def test_demultiplex_dragen_flowcell(
     cli_runner: testing.CliRunner,
     tmp_flow_cell_directory_bclconvert: Path,
@@ -148,7 +50,7 @@ def test_demultiplex_dragen_flowcell(
     # WHEN starting demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
         demultiplex_flow_cell,
-        [str(tmp_flow_cell_directory_bclconvert), "-b", BclConverter.BCLCONVERT],
+        [str(tmp_flow_cell_directory_bclconvert)],
         obj=demultiplexing_context_for_demux,
     )
 
