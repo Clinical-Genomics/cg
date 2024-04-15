@@ -169,29 +169,9 @@ RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {AlignmentFileTag.CRAM_INDEX},
 ]
 
-TAXPROFILER_ANALYSIS_CASE_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
+NF_ANALYSIS_CASE_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
 
-TAXPROFILER_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
-
-TOMTE_ANALYSIS_CASE_TAGS: list[set[str]] = [
-    {AnalysisTag.FRASER, AnalysisTag.CLINICAL},
-    {AnalysisTag.FRASER, AnalysisTag.RESEARCH},
-    {AnalysisTag.OUTRIDER, AnalysisTag.CLINICAL},
-    {AnalysisTag.OUTRIDER, AnalysisTag.RESEARCH},
-    {AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA},
-    {AnalysisTag.MULTIQC_JSON},
-]
-
-TOMTE_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {AlignmentFileTag.CRAM},
-    {AlignmentFileTag.CRAM_INDEX},
-    {AnalysisTag.JUNCTION, AnalysisTag.BED},
-    {AnalysisTag.JUNCTION, AnalysisTag.BED_INDEX},
-    {AnalysisTag.STRINGTIE, AnalysisTag.ASSEMBLY},
-    {AnalysisTag.GFFCOMPARE},
-    {AnalysisTag.GENE_COUNTS},
-]
-
+NF_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
 
 PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
     Workflow.BALSAMIC: {
@@ -231,12 +211,12 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
         "sample_tags": RNAFUSION_ANALYSIS_SAMPLE_TAGS,
     },
     Workflow.TAXPROFILER: {
-        "case_tags": TAXPROFILER_ANALYSIS_CASE_TAGS,
-        "sample_tags": TAXPROFILER_ANALYSIS_SAMPLE_TAGS,
+        "case_tags": NF_ANALYSIS_CASE_TAGS,
+        "sample_tags": NF_ANALYSIS_CASE_TAGS,
     },
     Workflow.TOMTE: {
-        "case_tags": TOMTE_ANALYSIS_CASE_TAGS,
-        "sample_tags": TOMTE_ANALYSIS_SAMPLE_TAGS,
+        "case_tags": NF_ANALYSIS_CASE_TAGS,
+        "sample_tags": NF_ANALYSIS_CASE_TAGS,
     },
 }
 
