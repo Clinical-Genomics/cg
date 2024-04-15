@@ -5,15 +5,16 @@
 
 <!-- Data analysis results -->
 {% macro data_analysis(case) %}
+{% set workflow = case.data_analysis.workflow  %}
   <div class="container mb-5">
   <h3 class="mb-4">Analys</h3>
     {{ workflow_analysis(case=case) }}
     <h4 class="mt-4 mb-3">Kvalitetskontrollsmetrik</h4>
-    {% if "balsamic" in case.data_analysis.workflow %}
+    {% if "balsamic" in workflow %}
       {{ balsamic_qc_metrics(samples=case.samples, analysis_type=case.data_analysis.type) }}
-    {% elif "mip-dna" == case.data_analysis.workflow %}
+    {% elif workflow == "mip-dna" %}
       {{ mip_dna_qc_metrics(samples=case.samples) }}
-    {% elif "rnafusion" == case.data_analysis.workflow %}
+    {% elif workflow == "rnafusion" %}
       {{ rnafusion_qc_metrics(samples=case.samples) }}
     {% endif %}
     {{ apptag_limitations(applications=case.applications) }}
@@ -51,13 +52,14 @@
 
 <!-- Data analysis alert component -->
 {% macro data_analysis_alert(case) %}
-  {% if "balsamic" in case.data_analysis.workflow and case.data_analysis.workflow != "balsamic-qc" %}
+{% set workflow = case.data_analysis.workflow  %}
+  {% if workflow in ("balsamic", "balsamic-umi") %}
     <div class="alert alert-info" role="alert">
       Den tillämpade variantanropningsfiltrerna finns på:
       <a href="https://balsamic.readthedocs.io/en/latest/balsamic_filters.html" class="alert-link">
         https://balsamic.readthedocs.io/en/latest/balsamic_filters.html</a>.
     </div>
-  {% elif "rnafusion" == case.data_analysis.workflow %}
+  {% elif workflow == "rnafusion" %}
     {% if case.data_analysis.scout_files.vcf_fusion != "N/A" %}
       <div class="alert alert-primary" role="alert">
         Ingen filtrering har utförts. Alla upptäckta varianter rapporteras.
