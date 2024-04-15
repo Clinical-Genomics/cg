@@ -448,6 +448,14 @@ class OrganismView(BaseView):
     column_searchable_list = ["internal_id", "name", "reference_genome"]
 
 
+class OrderView(BaseView):
+    """Admin view for Model.Order"""
+
+    column_default_sort = ("order_date", True)
+    create_modal = True
+    edit_modal = True
+
+
 class PanelView(BaseView):
     """Admin view for Model.Panel"""
 
