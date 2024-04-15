@@ -61,11 +61,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """Only exact pattern search is allowed to collect metrics information from multiqc file."""
         return True
 
-    @property
-    def is_delivery_report_generated(self) -> bool:
-        """Delivery report is not yet implemented for Taxprofiler."""
-        return False
-
     def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
         return MULTIQC_NEXFLOW_CONFIG

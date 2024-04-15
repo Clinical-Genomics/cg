@@ -8,7 +8,12 @@ import click
 from cg.cli.generate.report.base import generate_delivery_report
 from cg.cli.upload.clinical_delivery import upload_clinical_delivery
 from cg.cli.upload.scout import upload_to_scout
-from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery, Workflow
+from cg.constants import (
+    REPORT_SUPPORTED_DATA_DELIVERY,
+    REPORT_SUPPORTED_WORKFLOW,
+    DataDelivery,
+    Workflow,
+)
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -31,7 +36,7 @@ class NfAnalysisUploadAPI(UploadAPI):
 
         # Delivery report generation
         if (
-            self.analysis_api.is_delivery_report_generated
+            case.data_analysis in REPORT_SUPPORTED_WORKFLOW
             and case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY
         ):
             ctx.invoke(generate_delivery_report, case_id=case.internal_id)
