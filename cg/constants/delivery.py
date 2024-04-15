@@ -165,7 +165,6 @@ RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 ]
 
 
-
 TOMTE_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {AnalysisTag.FRASER, AnalysisTag.CLINICAL},
     {AnalysisTag.FRASER, AnalysisTag.RESEARCH},

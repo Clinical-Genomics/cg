@@ -30,7 +30,10 @@ class NfAnalysisUploadAPI(UploadAPI):
         self.update_upload_started_at(analysis=analysis)
 
         # Delivery report generation
-        if self.analysis_api.is_delivery_report_generated and case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
+        if (
+            self.analysis_api.is_delivery_report_generated
+            and case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY
+        ):
             ctx.invoke(generate_delivery_report, case_id=case.internal_id)
 
         # Clinical delivery
