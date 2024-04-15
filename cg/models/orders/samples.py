@@ -283,6 +283,10 @@ class SarsCov2Sample(MicrobialSample):
     selection_criteria: str
     volume: str | None
 
+    @validator("lab_code", pre=True, always=True)
+    def set_lab_code(cls, value):
+        return "SE100 Karolinska"
+
 
 def sample_class_for(project: OrderType):
     """Get the sample class for the specified project
