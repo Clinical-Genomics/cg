@@ -1,7 +1,7 @@
 <!-- Quality control metrics -->
 {% macro qc_metrics(samples, metrics) %}
   <table class="table w-auto text-center align-middle">
-    <thead class="table-secondary">
+    <thead class="table-secondary" aria-describedby="qc-metrics-table">
       <tr>
         <th scope="col">Metrik</th>
         {% for sample in samples %}

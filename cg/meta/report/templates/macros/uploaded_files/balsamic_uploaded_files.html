@@ -1,6 +1,6 @@
 <!-- BALSAMIC Scout files -->
 {% macro balsamic_scout_files(scout_files, case_id, case_name) %}
-  <table class="table w-auto align-middle">
+  <table class="table w-auto align-middle" aria-describedby="balsamic-scout-table">
     <tbody>
       {% if scout_files.snv_vcf != "N/A" %}
         <tr>

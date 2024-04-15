@@ -23,7 +23,7 @@
 <!-- Workflow analysis -->
 {% macro workflow_analysis(case) %}
   <h4 class="mt-4 mb-3">Dataanalys</h4>
-  <table class="table w-auto text-center align-middle">
+  <table class="table w-auto text-center align-middle" aria-describedby="data-analysis-table">
     <thead class="table-secondary">
       <tr>
         <th scope="col">Fall</th>
@@ -36,7 +36,7 @@
     </thead>
     <tbody>
       <tr>
-        <th>{{ case.name }}</th>
+        <th scope="row">{{ case.name }}</th>
         <td>{{ case.data_analysis.workflow }} (v{{ case.data_analysis.workflow_version }})</td>
         <td>{{ case.data_analysis.genome_build }}</td>
         <td>{{ analysis_type_value(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type) }}</td>

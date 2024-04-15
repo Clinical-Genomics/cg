@@ -1,7 +1,7 @@
 <!-- Apptag limitations -->
 {% macro apptag_limitations(applications) %}
   <h4 class="mt-4 mb-3">Teknisk beskrivning och begränsningar av analysen</h4>
-  <table class="table w-auto text-center align-middle">
+  <table class="table w-auto text-center align-middle" aria-describedby="limitations-table">
     <thead class="table-secondary">
       <tr>
         <th scope="col">Applikation</th>
@@ -13,7 +13,7 @@
     <tbody>
       {% for application in applications %}
       <tr>
-        <th>{{ application.tag }}</th>
+        <th scope="row">{{ application.tag }}</th>
         <td class="text-start">{{ application.description }}</td>
         <td class="text-start">{{ application.details }}</td>
         <td class="text-start">

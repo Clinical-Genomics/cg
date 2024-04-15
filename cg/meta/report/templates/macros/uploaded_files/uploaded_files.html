@@ -57,7 +57,7 @@
 <!-- Analysis files -->
 {% macro analysis_files(case) %}
   {% if "analysis" in case.data_analysis.data_delivery %}
-    <table class="table w-auto align-middle">
+    <table class="table w-auto align-middle" aria-describedby="uploaded-analysis-files-table">
       <thead class="table-secondary">
         <tr>
           <th scope="col" colspan="2">Analysfiler</th>
@@ -76,7 +76,7 @@
 <!-- Fastq files -->
 {% macro fastq_files(case) %}
   {% if "fastq" in case.data_analysis.data_delivery %}
-    <table class="table w-auto align-middle">
+    <table class="table w-auto align-middle" aria-describedby="uploaded-fastq-files-table">
       <thead class="table-secondary">
         <tr>
           <th scope="col" colspan="2">Fastq-filer</th>
