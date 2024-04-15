@@ -86,7 +86,7 @@ def demultiplex_flow_cell(
     dry_run: bool,
     flow_cell_name: str,
 ):
-    """Demultiplex a flow cell using BclConverter.
+    """Demultiplex a flow cell using BCLConvert.
 
     flow cell name is the flow cell run directory name, e.g. '201203_D00483_0200_AHVKJCDRXX'
     """
