@@ -3,7 +3,7 @@
 {% from "/macros/sample_prep.html" import sample_prep %}
 {% from "/macros/data_analysis/data_analysis.html" import data_analysis %}
 {% from "/macros/uploaded_files/uploaded_files.html" import uploaded_files %}
-{% from "/macros/susy.html" import susy_communication %}
+{% from "/macros/ticket_system.html" import ticket_communication %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -41,7 +41,7 @@
           <!-- Signature -->
           {% include "partials/signature.html" %}
           <!-- Susy communication -->
-          {{ susy_communication(ticket_id=case.samples[0].ticket) }}
+          {{ ticket_communication(ticket_id=case.samples[0].ticket) }}
         </div>
         <!-- Report footer -->
         {% include "partials/footer.html" %}
