@@ -1,7 +1,12 @@
 """Constants for delivery."""
 
 from cg.constants.constants import Workflow
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AlignmentFileTag, AnalysisTag
+from cg.constants.housekeeper_tags import (
+    HK_DELIVERY_REPORT_TAG,
+    AlignmentFileTag,
+    AnalysisTag,
+    HermesFileTag,
+)
 
 ONLY_ONE_CASE_PER_TICKET: list[Workflow] = [
     Workflow.FASTQ,
@@ -164,6 +169,9 @@ RNAFUSION_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {AlignmentFileTag.CRAM_INDEX},
 ]
 
+TAXPROFILER_ANALYSIS_CASE_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
+
+TAXPROFILER_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [{HermesFileTag.CLINICAL_DELIVERY}]
 
 TOMTE_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {AnalysisTag.FRASER, AnalysisTag.CLINICAL},
@@ -221,6 +229,10 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
     Workflow.RNAFUSION: {
         "case_tags": RNAFUSION_ANALYSIS_CASE_TAGS,
         "sample_tags": RNAFUSION_ANALYSIS_SAMPLE_TAGS,
+    },
+    Workflow.TAXPROFILER: {
+        "case_tags": TAXPROFILER_ANALYSIS_CASE_TAGS,
+        "sample_tags": TAXPROFILER_ANALYSIS_SAMPLE_TAGS,
     },
     Workflow.TOMTE: {
         "case_tags": TOMTE_ANALYSIS_CASE_TAGS,

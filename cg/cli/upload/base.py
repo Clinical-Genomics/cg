@@ -38,6 +38,7 @@ from cg.meta.upload.microsalt.microsalt_upload_api import MicrosaltUploadAPI
 from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
 from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
 from cg.meta.upload.nf_analysis import NfAnalysisUploadAPI
+from cg.meta.upload.taxprofiler.taxprofiler import TaxprofilerUploadAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
@@ -83,6 +84,8 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
             upload_api = MicrosaltUploadAPI(config_object)
         elif case.data_analysis in {Workflow.RNAFUSION, Workflow.TOMTE}:
             upload_api = NfAnalysisUploadAPI(config_object)
+        elif case.data_analysis == Workflow.TAXPROFILER:
+            upload_api = TaxprofilerUploadAPI(config_object)
 
         context.obj.meta_apis["upload_api"] = upload_api
         upload_api.upload(ctx=context, case=case, restart=restart)
