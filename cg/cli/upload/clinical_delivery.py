@@ -65,7 +65,9 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
         case_files_present=is_case_delivery,
     )
     RsyncAPI.write_trailblazer_config(
-        {"jobs": [str(job_id)]}, config_path=rsync_api.trailblazer_config_path
+        content={"jobs": [str(job_id)]},
+        config_path=rsync_api.trailblazer_config_path,
+        dry_run=dry_run,
     )
     analysis_name: str = f"{case_id}_rsync" if is_complete_delivery else f"{case_id}_partial"
     order_id: int = case.latest_order.id
