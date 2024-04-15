@@ -13,7 +13,6 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -329,8 +328,8 @@ def bcl2fastq_flow_cell_dir_name(demux_post_processing_api) -> str:
 
 
 @pytest.fixture
-def bcl2fastq_sample_id_with_non_pooled_undetermined_reads() -> str:
-    return "SVE2528A1"
+def bcl_convert_sample_id_with_non_pooled_undetermined_reads() -> str:
+    return "ACC11927A2"
 
 
 @pytest.fixture
