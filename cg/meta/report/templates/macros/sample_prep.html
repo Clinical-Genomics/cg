@@ -43,7 +43,7 @@
 {% macro bait_set(workflow, analysis_type) %}
   {% if
     ("balsamic" in workflow and "panelsekvensering" in analysis_type) or
-    ("mip-dna" == workflow and "wes" == analysis_type)
+    (workflow == "mip-dna" and analysis_type == "wes")
   %}
     Bait Set
   {% endif %}
@@ -53,7 +53,7 @@
 {% macro bait_set_value(workflow, analysis_type, sample) %}
   {% if
     ("balsamic" in workflow and "panelsekvensering" in analysis_type) or
-    ("mip-dna" == workflow and "wes" == analysis_type)
+    (workflow == "mip-dna" and analysis_type == "wes")
   %}
     {{ sample.metadata.bait_set }}
     {% if "balsamic" in workflow and sample.metadata.bait_set != "N/A" %}
