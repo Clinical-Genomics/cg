@@ -272,7 +272,9 @@ class SampleSheetAPI:
             flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id, hk_api=self.hk_api
         )
 
-    def get_or_create_sample_sheet(self, flow_cell_name: str, bcl_converter: str | None) -> None:
+    def get_or_create_sample_sheet(
+        self, flow_cell_name: str, bcl_converter: str | None = None
+    ) -> None:
         """
         Ensure that a valid sample sheet is present in the flow cell directory by fetching it from
         housekeeper or creating it if there is not a valid sample sheet.
