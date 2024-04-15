@@ -14,7 +14,7 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     mark_as_demultiplexed,
     mark_flow_cell_as_queued_for_post_processing,
 )
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError, SampleSheetError
 from cg.meta.demultiplex.utils import (
     create_manifest_file,
@@ -86,7 +86,7 @@ def demultiplex_flow_cell(
     dry_run: bool,
     flow_cell_name: str,
 ):
-    """Demultiplex a flow cell using BclConverter.
+    """Demultiplex a flow cell using BCLConvert.
 
     flow cell name is the flow cell run directory name, e.g. '201203_D00483_0200_AHVKJCDRXX'
     """
