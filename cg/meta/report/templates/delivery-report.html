@@ -21,7 +21,7 @@
     <div class="container">
       <div class="card">
         <div class="card-header">
-          <!-- Report title -->
+          <!-- Report header -->
           {{ header(is_accredited=accredited) }}
         </div>
         <div class="card-body">
@@ -40,7 +40,7 @@
           {{ uploaded_files(case=case, customer=customer) }}
           <!-- Signature -->
           {% include "partials/signature.html" %}
-          <!-- Susy communication -->
+          <!-- Ticket communication -->
           {{ ticket_communication(ticket_id=case.samples[0].ticket) }}
         </div>
         <!-- Report footer -->

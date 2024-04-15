@@ -1,4 +1,3 @@
-<!-- Sample preparation data -->
 {% macro sample_prep(case) %}
   <div class="container mb-5">
     <h3 class="mb-4">Provberedning</h3>
@@ -10,6 +9,7 @@
           <th scope="col">Beredd</th>
           <th scope="col">Sekvenserad</th>
           <th scope="col">Biblioteksberedning</th>
+          <!-- Bait set column -->
           <th scope="col">
             {{ bait_set(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type) }}
           </th>
@@ -24,6 +24,7 @@
           <td>{{ sample.timestamps.prepared_at }}</td>
           <td>{{ sample.timestamps.reads_updated_at }}</td>
           <td>{{ sample.methods.library_prep }}</td>
+          <!-- Bait set value -->
           <td>
             {{ bait_set_value(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type, sample=sample) }}
           </td>
@@ -39,7 +40,6 @@
   </div>
 {% endmacro %}
 
-<!-- Bait set column -->
 {% macro bait_set(workflow, analysis_type) %}
   {% if
     ("balsamic" in workflow and "panelsekvensering" in analysis_type) or
@@ -49,7 +49,6 @@
   {% endif %}
 {% endmacro %}
 
-<!-- Bait set value -->
 {% macro bait_set_value(workflow, analysis_type, sample) %}
   {% if
     ("balsamic" in workflow and "panelsekvensering" in analysis_type) or

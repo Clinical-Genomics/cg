@@ -1,6 +1,5 @@
 {% from "/macros/data_analysis/qc_metrics/qc_metrics.html" import qc_metrics %}
 
-<!-- MIP-DNA QC metrics -->
 {% macro mip_dna_qc_metrics(samples) %}
   {% set 
     metrics = [
@@ -12,5 +11,6 @@
       {"name": "Duplikat [%]",          "key": "duplicates",           "description": "Sekvenseringsläsningar som är duplikat (kopior) och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserat bibliotek eller djup sekvensering."},
     ]
   %}
+  <!-- Quality control metrics -->
   {{ qc_metrics(samples=samples, metrics=metrics) }}
 {% endmacro %}

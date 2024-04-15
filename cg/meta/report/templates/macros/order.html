@@ -1,4 +1,3 @@
-<!-- Customer's order -->
 {% macro order(case) %}
   <div class="container mb-5">
     <h3 class="mb-4">Beställning</h3>
@@ -13,6 +12,7 @@
           <th scope="col">Applikation</th>
           <th scope="col">Kön</th>
           <th scope="col">Provtyp</th>
+          <!-- Sample status -->
           {{ sample_status(workflow=case.data_analysis.customer_workflow) }}
         </tr>
       </thead>
@@ -33,6 +33,7 @@
             <td>{{ sample.application.tag }}</td>
             <td>{{ sample.gender }}</td>
             <td>{{ sample.source }}</td>
+            <!-- Sample status value -->
             {{ sample_status_value(workflow=case.data_analysis.customer_workflow, sample=sample) }}
           </tr>
         {% endfor %}
@@ -41,7 +42,6 @@
   </div>
 {% endmacro %}
 
-<!-- Sample status -->
 {% macro sample_status(workflow) %}
   {% if "balsamic" in workflow or workflow == "rnafusion" %}
     <th scope="col">Tumör</th>
@@ -50,7 +50,6 @@
   {% endif %}
 {% endmacro %}
 
-<!-- Sample status value -->
 {% macro sample_status_value(workflow, sample) %}
   {% if "balsamic" in workflow or workflow == "rnafusion" %}
     <td>{{ sample.tumour }}</td>

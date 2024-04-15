@@ -1,6 +1,5 @@
 {% from "/macros/data_analysis/qc_metrics/qc_metrics.html" import qc_metrics %}
 
-<!-- BALSAMIC QC metrics -->
 {% macro balsamic_qc_metrics(samples, analysis_type) %}
   {% set
     metrics = [
@@ -35,5 +34,6 @@
       ])
     %}
   {% endif %}
+  <!-- Quality control metrics -->
   {{ qc_metrics(samples=samples, metrics=metrics) }}
 {% endmacro %}

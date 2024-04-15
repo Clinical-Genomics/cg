@@ -1,6 +1,5 @@
 {% from "/macros/data_analysis/qc_metrics/qc_metrics.html" import qc_metrics %}
 
-<!-- Rnafusion QC metrics -->
 {% macro rnafusion_qc_metrics(samples) %}
   {% set
     metrics = [
@@ -21,5 +20,6 @@
       {"name": "Ribosomala baser [%]",                         "key": "ribosomal_bases",       "description": "Andel baser i ett prov som härstammar från ribosomalt RNA."},
     ]
   %}
+  <!-- Quality control metrics -->
   {{ qc_metrics(samples=samples, metrics=metrics) }}
 {% endmacro %}

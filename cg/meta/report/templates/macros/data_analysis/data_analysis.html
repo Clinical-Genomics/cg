@@ -3,25 +3,28 @@
 {% from "/macros/data_analysis/qc_metrics/rnafusion_qc_metrics.html" import rnafusion_qc_metrics %}
 {% from "/macros/data_analysis/limitations.html" import apptag_limitations %}
 
-<!-- Data analysis results -->
 {% macro data_analysis(case) %}
 {% set workflow = case.data_analysis.workflow  %}
   <div class="container mb-5">
   <h3 class="mb-4">Analys</h3>
+    <!-- Workflow analysis data -->
     {{ workflow_analysis(case=case) }}
     <h4 class="mt-4 mb-3">Kvalitetskontrollsmetrik</h4>
     {% if "balsamic" in workflow %}
+      <!-- BALSAMIC QC metrics -->
       {{ balsamic_qc_metrics(samples=case.samples, analysis_type=case.data_analysis.type) }}
     {% elif workflow == "mip-dna" %}
+      <!-- MIP-DNA QC metrics -->
       {{ mip_dna_qc_metrics(samples=case.samples) }}
     {% elif workflow == "rnafusion" %}
+      <!-- Rnafusion QC metrics -->
       {{ rnafusion_qc_metrics(samples=case.samples) }}
     {% endif %}
+    <!-- Apptag limitations -->
     {{ apptag_limitations(applications=case.applications) }}
   </div>
 {% endmacro %}
 
-<!-- Workflow analysis -->
 {% macro workflow_analysis(case) %}
 {% set workflow = case.data_analysis.workflow  %}
   <h4 class="mt-4 mb-3">Dataanalys</h4>
@@ -47,10 +50,10 @@
       </tr>
     </tbody>
   </table>
+  <!-- Data analysis alert component -->
   {{ data_analysis_alert(case=case) }}
 {% endmacro %}
 
-<!-- Data analysis alert component -->
 {% macro data_analysis_alert(case) %}
 {% set workflow = case.data_analysis.workflow  %}
   {% if workflow in ("balsamic", "balsamic-umi") %}
