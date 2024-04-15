@@ -8,7 +8,7 @@ import click
 from cg.cli.generate.report.base import generate_delivery_report
 from cg.cli.upload.clinical_delivery import upload_clinical_delivery
 from cg.cli.upload.scout import upload_to_scout
-from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
+from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery, Workflow
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -20,8 +20,8 @@ LOG = logging.getLogger(__name__)
 class NfAnalysisUploadAPI(UploadAPI):
     """Nf analysis upload API."""
 
-    def __init__(self, config: CGConfig):
-        self.analysis_api: NfAnalysisAPI = NfAnalysisAPI(config)
+    def __init__(self, config: CGConfig, workflow: Workflow):
+        self.analysis_api: NfAnalysisAPI = NfAnalysisAPI(config, workflow)
         super().__init__(config=config, analysis_api=self.analysis_api)
 
     def upload(self, ctx: click.Context, case: Case, restart: bool) -> None:
