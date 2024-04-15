@@ -47,6 +47,11 @@ class TomteAnalysisAPI(NfAnalysisAPI):
         """Headers for sample sheet."""
         return TomteSampleSheetHeaders.list()
 
+    @property
+    def is_delivery_report_generated(self) -> bool:
+        """Delivery report is not yet implemented for Tomte."""
+        return False
+
     @staticmethod
     def get_bundle_filenames_path() -> Path:
         """Return path to bundle template."""

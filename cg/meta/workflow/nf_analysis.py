@@ -103,6 +103,11 @@ class NfAnalysisAPI(AnalysisAPI):
         If false, pattern must be present but does not need to be exact."""
         return False
 
+    @property
+    def is_delivery_report_generated(self) -> bool:
+        """Return True if delivery report should be generated."""
+        return True
+
     def get_profile(self, profile: str | None = None) -> str:
         """Get NF profiles."""
         return profile or self.profile

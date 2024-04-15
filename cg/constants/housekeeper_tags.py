@@ -71,10 +71,22 @@ class AnalysisTag(StrEnum):
     FUSIONREPORT: str = "fusionreport"
     GENE_COUNTS: str = "gene-counts"
     MULTIQC_HTML: str = "multiqc-html"
+    MULTIQC_JSON: str = "multiqc-json"
     RESEARCH: str = "research"
     RNA: str = "rna"
     STARFUSION: str = "star-fusion"
     VCF_FUSION: str = "vcf-fusion"
+    FRASER: str = "fraser"
+    OUTRIDER: str = "outrider"
+    COVERAGE: str = "coverage"
+    BIGWIG: str = "bigwig"
+    JUNCTION: str = "junction"
+    BED: str = "bed"
+    BED_INDEX: str = "bed-index"
+    STRINGTIE: str = "stringtie"
+    ASSEMBLY: str = "assembly"
+    GFFCOMPARE: str = "gffcompare"
+    CLINICAL: str = "clinical"
 
 
 class HkMipAnalysisTag:
