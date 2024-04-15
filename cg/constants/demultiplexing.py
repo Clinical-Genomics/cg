@@ -201,16 +201,6 @@ class IndexOverrideCycles(StrEnum):
     INDEX_8_IGNORED_2_REVERSED: str = "N2I8;"
 
 
-OPTION_BCL_CONVERTER = click.option(
-    "-b",
-    "--bcl-converter",
-    type=click.Choice([BclConverter.BCL2FASTQ, BclConverter.BCLCONVERT]),
-    default=None,
-    help="Specify bcl conversion software. Choose between bcl2fastq and dragen. "
-    "If not specified, the software will be determined automatically using the sequencer type.",
-)
-
-
 DEMUX_STATS_PATH: dict[str, dict[str, Path | None]] = {
     BclConverter.BCL2FASTQ: {
         "demultiplexing_stats": Path("Stats", "DemultiplexingStats.xml"),
