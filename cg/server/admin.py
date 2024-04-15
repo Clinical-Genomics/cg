@@ -447,10 +447,13 @@ class OrganismView(BaseView):
     column_editable_list = ["internal_id", "name", "reference_genome", "comment"]
     column_searchable_list = ["internal_id", "name", "reference_genome"]
 
+
 class OrderView(BaseView):
     """Admin view for Model.Order"""
+
     create_modal = True
     edit_modal = True
+
 
 class PanelView(BaseView):
     """Admin view for Model.Panel"""
