@@ -257,5 +257,3 @@ class DemultiplexingAPI:
         output_directory: Path = self.flow_cell_out_dir_path(flow_cell)
         LOG.debug(f"Creating demultiplexing output directory: {output_directory}")
         output_directory.mkdir(exist_ok=False, parents=True)
-        if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
-            self.get_flow_cell_unaligned_dir(flow_cell).mkdir(exist_ok=False, parents=False)
