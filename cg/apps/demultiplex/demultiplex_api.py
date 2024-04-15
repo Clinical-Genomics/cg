@@ -76,7 +76,6 @@ class DemultiplexingAPI:
         demux_dir: Path,
         sample_sheet: Path,
         demux_completed: Path,
-        flow_cell: FlowCellDirectoryData,
         environment: Literal["production", "stage"] = "stage",
     ) -> str:
         """
@@ -93,9 +92,7 @@ class DemultiplexingAPI:
             demux_completed_file=demux_completed.as_posix(),
             environment=environment,
         )
-        return DEMULTIPLEX_COMMAND[flow_cell.bcl_converter].format(
-            **command_parameters.model_dump()
-        )
+        return DEMULTIPLEX_COMMAND.format(**command_parameters.model_dump())
 
     @staticmethod
     def demultiplex_sbatch_path(flow_cell: FlowCellDirectoryData) -> Path:
@@ -224,35 +221,18 @@ class DemultiplexingAPI:
             demux_dir=self.flow_cell_out_dir_path(flow_cell=flow_cell),
             sample_sheet=flow_cell.sample_sheet_path,
             demux_completed=self.demultiplexing_completed_path(flow_cell=flow_cell),
-            flow_cell=flow_cell,
             environment=self.environment,
         )
-
-        if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
-            sbatch_parameters: Sbatch = Sbatch(
-                account=self.slurm_account,
-                commands=commands,
-                email=self.mail,
-                error=error_function,
-                hours=36,
-                job_name=self.get_run_name(flow_cell),
-                log_dir=log_path.parent.as_posix(),
-                memory=125,
-                number_tasks=18,
-                quality_of_service=self.slurm_quality_of_service,
-            )
-        if flow_cell.bcl_converter == BclConverter.BCLCONVERT:
-            sbatch_parameters: SbatchDragen = SbatchDragen(
-                account=self.slurm_account,
-                commands=commands,
-                email=self.mail,
-                error=error_function,
-                hours=36,
-                job_name=self.get_run_name(flow_cell),
-                log_dir=log_path.parent.as_posix(),
-                quality_of_service=self.slurm_quality_of_service,
-            )
-
+        sbatch_parameters: SbatchDragen = SbatchDragen(
+            account=self.slurm_account,
+            commands=commands,
+            email=self.mail,
+            error=error_function,
+            hours=36,
+            job_name=self.get_run_name(flow_cell),
+            log_dir=log_path.parent.as_posix(),
+            quality_of_service=self.slurm_quality_of_service,
+        )
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
             sbatch_parameters=sbatch_parameters
         )
