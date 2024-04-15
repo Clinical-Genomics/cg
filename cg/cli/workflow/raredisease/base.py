@@ -6,7 +6,16 @@ import click
 
 from cg.cli.utils import echo_lines
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY, resolve_compression
-from cg.cli.workflow.nf_analysis import config_case, run, start, start_available
+from cg.cli.workflow.nf_analysis import (
+    config_case,
+    report_deliver,
+    run,
+    start,
+    start_available,
+    store,
+    store_available,
+    store_housekeeper,
+)
 from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -25,9 +34,13 @@ def raredisease(context: click.Context) -> None:
 
 raredisease.add_command(resolve_compression)
 raredisease.add_command(config_case)
+raredisease.add_command(report_deliver)
 raredisease.add_command(run)
 raredisease.add_command(start)
 raredisease.add_command(start_available)
+raredisease.add_command(store)
+raredisease.add_command(store_available)
+raredisease.add_command(store_housekeeper)
 
 
 @raredisease.command("panel")
