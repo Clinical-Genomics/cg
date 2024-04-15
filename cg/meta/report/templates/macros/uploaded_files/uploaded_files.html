@@ -4,11 +4,8 @@
 
 <!-- Uploaded files -->
 {% macro uploaded_files(case, customer) %}
-  {% 
-    if "fastq" in case.data_analysis.data_delivery or
-    "analysis" in case.data_analysis.data_delivery or
-    "fastq" in case.data_analysis.data_delivery
-  %}
+{% set data_delivery = case.data_analysis.data_delivery %}
+  {% if "fastq" in data_delivery or "analysis" in data_delivery or "scout" in data_delivery %}
     <div class="container mb-5">
       <h3 class="mb-4">Uppladdade filer</h3>
       <div class="alert alert-info" role="alert">
@@ -24,6 +21,7 @@
 
 <!-- Scout files -->
 {% macro scout_files(case, customer_id, scout_access) %}
+{% set workflow = case.data_analysis.workflow %}
   {% if scout_access and "scout" in case.data_analysis.data_delivery %}
     <h4 class="mt-4 mb-3">Scout</h4>
     <div class="alert alert-info" role="alert">
@@ -31,11 +29,11 @@
       <a href="https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}" class="alert-link">
         https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}</a>.
     </div>
-    {% if "balsamic" in case.data_analysis.workflow %}
+    {% if "balsamic" in workflow %}
       {{ balsamic_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
-    {% elif "mip-dna" == case.data_analysis.workflow %}
+    {% elif workflow == "mip-dna" %}
       {{ mip_dna_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
-    {% elif "rnafusion" == case.data_analysis.workflow %}
+    {% elif workflow == "rnafusion" %}
       {{ rnafusion_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
     {% endif %}
   {% endif %}
@@ -43,7 +41,8 @@
 
 <!-- Caesar files -->
 {% macro caesar_files(case, customer_id) %}
-  {% if "analysis" in case.data_analysis.data_delivery or "fastq" in case.data_analysis.data_delivery %}
+{% set data_delivery = case.data_analysis.data_delivery %}
+  {% if "fastq" in data_delivery or "analysis" in data_delivery %}
     <h4 class="mt-4 mb-3">Leveransinkorg (Caesar)</h4>
     <div class="alert alert-info" role="alert">
       Filer som ska laddas upp till din inkorg:
