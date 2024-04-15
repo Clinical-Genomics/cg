@@ -99,6 +99,7 @@ class BackupAPI:
         """Process a flow cell from backup. Return elapsed time."""
         start_time: float = get_start_time()
         run_dir: Path = Path(self.flow_cells_dir)
+        flow_cell_output_directory: Path = Path(run_dir, archived_flow_cell.name.split(".")[0])
         self.retrieve_archived_key(archived_key=archived_key, flow_cell=flow_cell, run_dir=run_dir)
         self.retrieve_archived_flow_cell(
             archived_flow_cell=archived_flow_cell, flow_cell=flow_cell, run_dir=run_dir
@@ -113,8 +114,8 @@ class BackupAPI:
             ) = self.decrypt_flow_cell(archived_flow_cell, archived_key, run_dir)
 
             self.extract_flow_cell(decrypted_flow_cell, run_dir)
-            self.create_rta_complete(decrypted_flow_cell, run_dir)
-            self.create_copy_complete(decrypted_flow_cell, run_dir)
+            self.create_rta_complete(flow_cell_output_directory)
+            self.create_copy_complete(flow_cell_output_directory)
             self.unlink_files(
                 decrypted_flow_cell, encryption_key, retrieved_flow_cell, retrieved_key
             )
@@ -157,20 +158,14 @@ class BackupAPI:
             LOG.info(message)
 
     @staticmethod
-    def create_rta_complete(decrypted_flow_cell: Path, run_dir: Path):
+    def create_rta_complete(flow_cell_directory: Path):
         """Create an RTAComplete.txt file in the flow cell run directory."""
-        rta_complete_file = Path(
-            run_dir, decrypted_flow_cell.stem, DemultiplexingDirsAndFiles.RTACOMPLETE
-        )
-        rta_complete_file.touch()
+        Path(flow_cell_directory, DemultiplexingDirsAndFiles.RTACOMPLETE).touch()
 
     @staticmethod
-    def create_copy_complete(decrypted_flow_cell: Path, run_dir: Path):
+    def create_copy_complete(flow_cell_directory: Path):
         """Create a CopyComplete.txt file in the flow cell run directory."""
-        copy_complete_file = Path(
-            run_dir, decrypted_flow_cell.stem, DemultiplexingDirsAndFiles.COPY_COMPLETE
-        )
-        copy_complete_file.touch()
+        Path(flow_cell_directory, DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
 
     def extract_flow_cell(self, decrypted_flow_cell, run_dir):
         """Extract the flow cell tar archive."""

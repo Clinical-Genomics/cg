@@ -100,6 +100,9 @@ class DownsampleData:
             priority=Priority.standard,
             customer=self.original_sample.customer,
             application_version=application_version,
+            received=self.original_sample.received_at,
+            prepared_at=self.original_sample.prepared_at,
+            last_sequenced_at=self.original_sample.last_sequenced_at,
         )
         return downsampled_sample
 

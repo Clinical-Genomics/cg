@@ -592,6 +592,9 @@ class MockHousekeeperAPI:
         """Wrap property in Housekeeper Store"""
         yield True
 
+    def rollback(self) -> None:
+        return None
+
     def __repr__(self):
         return f"HousekeeperMockAPI:version_obj={self._version_obj}"
 
