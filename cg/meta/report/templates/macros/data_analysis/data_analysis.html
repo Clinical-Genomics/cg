@@ -30,8 +30,10 @@
         <th scope="col">Bioinformatisk analys</th>
         <th scope="col">Genomversion</th>
         <th scope="col">{% if "balsamic" in case.data_analysis.workflow %} Analystyp {% endif %}</th>
-        <th scope="col">{{ variant_callers(workflow=case.data_analysis.workflow) }}</th>
-        <th scope="col">{{ gene_panels(workflow=case.data_analysis.workflow) }}</th>
+        <th scope="col">
+          {% if case.data_analysis.workflow in ("balsamic", "balsamic-umi") %} Variantanropare {% endif %}
+        </th>
+        <th scope="col">{% if case.data_analysis.workflow in ("mip-dna", "rnafusion") %} Genpaneler {% endif %}</th>
       </tr>
     </thead>
     <tbody>
@@ -41,40 +43,14 @@
         <td>{{ case.data_analysis.genome_build }}</td>
         <td>{% if "balsamic" in case.data_analysis.workflow %} {{ case.data_analysis.type }} {% endif %}</td>
         <td>{{ analysis_type_value(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type) }}</td>
-        <td class="text-start">{{ variant_callers_value(case=case) }}</td>
-        <td>{{ gene_panels_value(case=case) }}</td>
+        <td class="text-start">
+          {% if case.data_analysis.workflow in ("balsamic", "balsamic-umi") %} {{ case.data_analysis.variant_callers }} {% endif %}
+        </td>
+        <td>{% if case.data_analysis.workflow in ("mip-dna", "rnafusion") %} {{ case.data_analysis.panels }} {% endif %}</td>
       </tr>
     </tbody>
   </table>
   {{ data_analysis_alert(case=case) }}
-{% endmacro %}
-
-<!-- Gene panels column -->
-{% macro gene_panels(workflow) %}
-  {% if "mip-dna" == workflow or "rnafusion" == workflow %}
-    Genpaneler
-  {% endif %}
-{% endmacro %}
-
-<!-- Gene panels value -->
-{% macro gene_panels_value(case) %}
-  {% if "mip-dna" == case.data_analysis.workflow or "rnafusion" == case.data_analysis.workflow %}
-    {{ case.data_analysis.panels }}
-  {% endif %}
-{% endmacro %}
-
-<!-- Variant callers column -->
-{% macro variant_callers(workflow) %}
-  {% if "balsamic" in workflow and workflow != "balsamic-qc" %}
-    Variantanropare
-  {% endif %}
-{% endmacro %}
-
-<!-- Variant callers value -->
-{% macro variant_callers_value(case) %}
-  {% if "balsamic" in case.data_analysis.workflow and case.data_analysis.workflow != "balsamic-qc" %}
-    {{ case.data_analysis.variant_callers }}
-  {% endif %}
 {% endmacro %}
 
 <!-- Data analysis alert component -->
