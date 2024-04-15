@@ -118,17 +118,6 @@ def tmp_bcl_convert_flow_cell(
     )
 
 
-@pytest.fixture
-def unfinished_bcl2fastq_flow_cell(
-    demultiplexed_runs_unfinished_bcl2fastq_flow_cell_directory: Path,
-) -> FlowCellDirectoryData:
-    """Copy the content of a demultiplexed but not finished directory to a temporary location."""
-    return FlowCellDirectoryData(
-        flow_cell_path=demultiplexed_runs_unfinished_bcl2fastq_flow_cell_directory,
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
-
-
 # Flow cell attributes
 
 
