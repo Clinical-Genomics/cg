@@ -22,6 +22,7 @@
 
 <!-- Workflow analysis -->
 {% macro workflow_analysis(case) %}
+{% set workflow = case.data_analysis.workflow  %}
   <h4 class="mt-4 mb-3">Dataanalys</h4>
   <table class="table w-auto text-center align-middle" aria-describedby="data-analysis-table">
     <thead class="table-secondary">
@@ -29,24 +30,19 @@
         <th scope="col">Fall</th>
         <th scope="col">Bioinformatisk analys</th>
         <th scope="col">Genomversion</th>
-        <th scope="col">{% if "balsamic" in case.data_analysis.workflow %} Analystyp {% endif %}</th>
-        <th scope="col">
-          {% if case.data_analysis.workflow in ("balsamic", "balsamic-umi") %} Variantanropare {% endif %}
-        </th>
-        <th scope="col">{% if case.data_analysis.workflow in ("mip-dna", "rnafusion") %} Genpaneler {% endif %}</th>
+        <th scope="col">{% if "balsamic" in workflow %} Analystyp {% endif %}</th>
+        <th scope="col">{% if workflow in ("balsamic", "balsamic-umi") %} Variantanropare {% endif %}</th>
+        <th scope="col">{% if workflow in ("mip-dna", "rnafusion") %} Genpaneler {% endif %}</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <th scope="row">{{ case.name }}</th>
-        <td>{{ case.data_analysis.workflow }} (v{{ case.data_analysis.workflow_version }})</td>
+        <td>{{ workflow }} (v{{ case.data_analysis.workflow_version }})</td>
         <td>{{ case.data_analysis.genome_build }}</td>
-        <td>{% if "balsamic" in case.data_analysis.workflow %} {{ case.data_analysis.type }} {% endif %}</td>
-        <td>{{ analysis_type_value(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type) }}</td>
-        <td class="text-start">
-          {% if case.data_analysis.workflow in ("balsamic", "balsamic-umi") %} {{ case.data_analysis.variant_callers }} {% endif %}
-        </td>
-        <td>{% if case.data_analysis.workflow in ("mip-dna", "rnafusion") %} {{ case.data_analysis.panels }} {% endif %}</td>
+        <td>{% if "balsamic" in workflow %} {{ case.data_analysis.type }} {% endif %}</td>
+        <td class="text-start">{% if workflow in ("balsamic", "balsamic-umi") %} {{ case.data_analysis.variant_callers }} {% endif %}</td>
+        <td>{% if workflow in ("mip-dna", "rnafusion") %} {{ case.data_analysis.panels }} {% endif %}</td>
       </tr>
     </tbody>
   </table>
