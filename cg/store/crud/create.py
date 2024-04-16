@@ -314,7 +314,6 @@ class CreateHandler(BaseHandler):
         customer: Customer,
         name: str,
         order: str,
-        ordered: datetime,
         application_version: ApplicationVersion,
         ticket: str = None,
         comment: str = None,
@@ -327,7 +326,6 @@ class CreateHandler(BaseHandler):
 
         new_record: Pool = Pool(
             name=name,
-            ordered_at=ordered or datetime.now(),
             order=order,
             ticket=ticket,
             received_at=received_at,

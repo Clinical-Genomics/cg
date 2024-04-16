@@ -105,7 +105,6 @@ def test_add_pool(rml_pool_store: Store):
         customer=customer,
         name="pool2",
         order="123456",
-        ordered=dt.now(),
         application_version=app_version,
     )
 

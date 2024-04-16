@@ -747,7 +747,6 @@ class Pool(Base):
     name: Mapped[Str32]
     no_invoice: Mapped[bool | None] = mapped_column(default=False)
     order: Mapped[Str64]
-    ordered_at: Mapped[datetime]
     received_at: Mapped[datetime | None]
     ticket: Mapped[Str32 | None]
 

@@ -855,7 +855,6 @@ class StoreHelpers:
 
         pool = store.add_pool(
             name=name,
-            ordered=datetime.now(),
             application_version=application_version,
             customer=customer,
             order=order,

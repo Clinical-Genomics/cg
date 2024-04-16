@@ -504,7 +504,6 @@ def rml_pool_store(
         customer=new_customer,
         name="Test",
         order="Test",
-        ordered=dt.datetime.now(),
         application_version=app_version,
     )
     store.session.add(new_pool)

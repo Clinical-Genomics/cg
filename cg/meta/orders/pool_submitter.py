@@ -141,7 +141,6 @@ class PoolSubmitter(Submitter):
                 customer=customer,
                 name=pool["name"],
                 order=order,
-                ordered=ordered,
                 ticket=ticket_id,
             )
             sex: SexEnum = SexEnum.unknown
