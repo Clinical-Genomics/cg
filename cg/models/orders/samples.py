@@ -164,6 +164,7 @@ class RnafusionSample(Of1508Sample):
 
 class TomteSample(MipDnaSample):
     _suitable_project = OrderType.TOMTE
+    reference_genome: GenomeVersion | None
 
 
 class FastqSample(OrderInSample):
