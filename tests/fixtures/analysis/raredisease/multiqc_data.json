@@ -55,7 +55,7 @@
                 "PCT_PF_UQ_READS": 0.952489,
                 "PCT_PF_UQ_READS_ALIGNED": 0.999834,
                 "MEAN_TARGET_COVERAGE": 24.546493,
-                "MEDIAN_TARGET_COVERAGE": 25.0,
+                "MEDIAN_TARGET_COVERAGE": 27.0,
                 "MAX_TARGET_COVERAGE": 293.0,
                 "MIN_TARGET_COVERAGE": 0.0,
                 "ZERO_CVG_TARGETS_PCT": 0.011192,
@@ -106,7 +106,7 @@
                 "GENOME_TERRITORY": 2858674663.0,
                 "MEAN_COVERAGE": 25.002304,
                 "SD_COVERAGE": 7.564118,
-                "MEDIAN_COVERAGE": 25.0,
+                "MEDIAN_COVERAGE": 27.0,
                 "MAD_COVERAGE": 4.0,
                 "PCT_EXC_ADAPTER": 3e-06,
                 "PCT_EXC_MAPQ": 0.028096,
@@ -163,12 +163,11 @@
                 "10_x_pc": 91.0,
                 "30_x_pc": 25.0,
                 "50_x_pc": 1.0,
-                "median_coverage": 25
+                "median_coverage": 27
             }
         },
         {
             "ADM1": {
-                "family_id": "funkitten",
                 "paternal_id": 0.0,
                 "maternal_id": 0.0,
                 "sex": 1.0,
@@ -207,12 +206,5 @@
                 "error_sex_check": "True"
             }
         }
-    ],
-    "report_saved_raw_data": {
-        "multiqc_picard_AlignmentSummaryMetrics": {
-            "ADM1": {
-                "PCT_ADAPTER": 1e-06
-            }
-        }
-    }
+    ]
 }
