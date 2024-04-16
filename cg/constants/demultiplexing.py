@@ -79,17 +79,6 @@ class RunParametersXMLNodes(StrEnum):
 class SampleSheetBcl2FastqSections:
     """Class with all necessary constants for building a NovaSeqX sample sheet."""
 
-    class Settings(StrEnum):
-        HEADER: str = "[Settings]"
-
-        @classmethod
-        def barcode_mismatch_index_1(cls) -> list[str]:
-            return ["BarcodeMismatchesIndex1", "0"]
-
-        @classmethod
-        def barcode_mismatch_index_2(cls) -> list[str]:
-            return ["BarcodeMismatchesIndex2", "0"]
-
     class Data(StrEnum):
         HEADER: str = "[Data]"
         FLOW_CELL_ID: str = "FCID"
