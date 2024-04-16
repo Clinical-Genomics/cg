@@ -20,7 +20,7 @@ RAREDISEASE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "PCT_PF_READS_ALIGNED": {"norm": "lt", "threshold": 0.95},
     "MEDIAN_TARGET_COVERAGE": {"norm": "lt", "threshold": 26},
     "PCT_TARGET_BASES_10X": {"norm": "lt", "threshold": 0.95},
-    "PCT_ADAPTER": {"norm": "gt", "threshold": 0.0005},
+    "PCT_EXC_ADAPTER": {"norm": "gt", "threshold": 0.0005},
 }
 
 RNAFUSION_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {

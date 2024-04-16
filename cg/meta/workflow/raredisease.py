@@ -15,7 +15,7 @@ from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetHeaders,
 )
 from cg.models.nf_analysis import WorkflowParameters
-from cg.store.models import CaseSample, Sample
+from cg.store.models import CaseSample
 
 LOG = logging.getLogger(__name__)
 
@@ -134,12 +134,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_managed_variants(self) -> list[str]:
         """Create and return the managed variants."""
         return self._get_managed_variants(genome_build=GENOME_BUILD_37)
-
-    def get_multiqc_search_patterns(self, case_id: str) -> dict:
-        """Return search patterns for MultiQC for Raredisease."""
-        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
-        search_patterns: dict[str, str] = {case_id: sample.internal_id for sample in samples}
-        return search_patterns
 
     def get_workflow_metrics(self) -> dict:
         return RAREDISEASE_METRIC_CONDITIONS
