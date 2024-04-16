@@ -5,6 +5,9 @@ from cg.constants.constants import Workflow
 
 BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]
 
+RNAFUSION_REPORT_ACCREDITED_APPTAGS: list[str] = ["RNAPOAR100"]
+RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT: int = 300
+
 REPORT_SUPPORTED_WORKFLOW: tuple[Workflow, ...] = (
     Workflow.BALSAMIC,
     Workflow.BALSAMIC_UMI,

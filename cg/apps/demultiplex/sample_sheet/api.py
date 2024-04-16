@@ -3,17 +3,15 @@ from pathlib import Path
 
 import click
 
-from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet_content
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_flow_cell_samples_from_content,
     get_sample_type_from_content,
 )
 from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSample,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreatorBCLConvert
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -160,7 +158,7 @@ class SampleSheetAPI:
         flow_cell_samples: list[FlowCellSampleBCLConvert] = get_flow_cell_samples_from_content(
             sample_sheet_content=content_with_fixed_header, sample_type=FlowCellSampleBCLConvert
         )
-        bcl_convert_creator = SampleSheetCreatorBCLConvert(
+        bcl_convert_creator = SampleSheetCreator(
             flow_cell=flow_cell, lims_samples=flow_cell_samples
         )
         new_content = bcl_convert_creator.construct_sample_sheet()
@@ -210,7 +208,7 @@ class SampleSheetAPI:
 
     def _get_sample_sheet_content(self, flow_cell: FlowCellDirectoryData) -> list[list[str]]:
         """Return the sample sheet content for a flow cell."""
-        lims_samples: list[FlowCellSample] = list(
+        lims_samples: list[FlowCellSampleBCLConvert] = list(
             get_flow_cell_samples(
                 lims=self.lims_api,
                 flow_cell_id=flow_cell.id,
@@ -221,7 +219,11 @@ class SampleSheetAPI:
             message: str = f"Could not find any samples in LIMS for {flow_cell.id}"
             LOG.warning(message)
             raise SampleSheetError(message)
-        return create_sample_sheet_content(flow_cell=flow_cell, lims_samples=lims_samples)
+        creator = SampleSheetCreator(flow_cell=flow_cell, lims_samples=lims_samples)
+        LOG.info(
+            f"Constructing sample sheet for the {flow_cell.sequencer_type} flow cell {flow_cell.id}"
+        )
+        return creator.construct_sample_sheet()
 
     def _create_sample_sheet_file(self, flow_cell: FlowCellDirectoryData) -> None:
         """Create a valid sample sheet in the flow cell directory and add it to Housekeeper."""
