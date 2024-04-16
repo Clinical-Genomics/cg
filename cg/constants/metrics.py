@@ -1,10 +1,10 @@
-"""This module contains constants for the BCLConvert metrics files."""
+"""This module contains constants for the sequencing and demultiplex metrics files."""
 
 from enum import StrEnum
 
 
-class BclConvertQualityMetricsColumnNames(StrEnum):
-    """Column names for the BCLConvert quality metrics file."""
+class QualityMetricsColumnNames(StrEnum):
+    """Column names for the quality metrics file."""
 
     LANE: str = "Lane"
     SAMPLE_INTERNAL_ID: str = "SampleID"
@@ -12,8 +12,8 @@ class BclConvertQualityMetricsColumnNames(StrEnum):
     Q30_BASES_PERCENT: str = "% Q30"
 
 
-class BclConvertDemuxMetricsColumnNames(StrEnum):
-    """Column names for the BCLConvert demultiplexing metrics file."""
+class DemuxMetricsColumnNames(StrEnum):
+    """Column names for the demultiplexing metrics file."""
 
     LANE: str = "Lane"
     SAMPLE_INTERNAL_ID: str = "SampleID"
