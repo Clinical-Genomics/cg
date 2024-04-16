@@ -10,28 +10,14 @@ from cg.apps.demultiplex.sample_sheet.override_cycles_validator import OverrideC
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_flow_cell_samples_from_content,
     get_raw_samples_from_content,
-    get_sample_type_from_content,
     validate_samples_unique_per_lane,
 )
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSample,
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample, FlowCellSampleBCLConvert
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import (
-    NAME_TO_INDEX_SETTINGS,
-    BclConverter,
-    SampleSheetBCLConvertSections,
-)
+from cg.constants.demultiplexing import NAME_TO_INDEX_SETTINGS, SampleSheetBCLConvertSections
 from cg.exc import OverrideCyclesError, SampleSheetError
 from cg.io.controller import ReadFile
-
-BCL_CONVERTER_TO_FLOW_CELL_SAMPLE: dict[str, Type[FlowCellSample]] = {
-    BclConverter.BCL2FASTQ: FlowCellSampleBcl2Fastq,
-    BclConverter.BCLCONVERT: FlowCellSampleBCLConvert,
-}
 
 LOG = logging.getLogger(__name__)
 
@@ -156,69 +142,45 @@ class SampleSheetValidator:
             except OverrideCyclesError as error:
                 raise SampleSheetError from error
 
-    def _validate_bcl_convert(self):
-        """Determine if the BCLConvert sample sheet is valid, which means:
+    def validate_sample_sheet_from_content(self, content: list[list[str]]) -> None:
+        """
+        Determine if the BCLConvert sample sheet is valid, which means:
         - All sections are present
         - The index settings are specified in the sample sheet header
         - The read and index cycles are specified in the sample sheet's reads section
         - The samples have the correct attributes
         - The override cycles are valid
+        Raises:
+            SampleSheetError: If the sample sheet is not valid.
         """
+        self.set_sample_sheet_content(content)
+        LOG.debug("Validating sample sheet")
         self._validate_all_sections_present()
         self._set_is_index2_reverse_complement()
         self._set_cycles()
         self._validate_samples(sample_type=FlowCellSampleBCLConvert)
         self._validate_override_cycles()
+        LOG.info("Samplesheet passed validation")
 
-    def validate_sample_sheet_from_content(
-        self, content: list[list[str]], bcl_convert: str | None = None
-    ) -> None:
-        """
-        Call the proper validation depending on the sample sheet type or the given bcl converter.
-        Raises:
-            SampleSheetError: If the sample sheet is not valid.
-        """
-        self.set_sample_sheet_content(content)
-        sample_type: Type[FlowCellSample] = (
-            BCL_CONVERTER_TO_FLOW_CELL_SAMPLE[bcl_convert]
-            if bcl_convert
-            else get_sample_type_from_content(self.content)
-        )
-        if sample_type is FlowCellSampleBCLConvert:
-            LOG.debug("Validating BCLConvert sample sheet")
-            self._validate_bcl_convert()
-            LOG.info("Samplesheet passed BCLConvert validation")
-        else:
-            LOG.debug("Validating Bcl2fastq sample sheet")
-            self._validate_samples(sample_type=FlowCellSampleBcl2Fastq)
-            LOG.info("Samplesheet passed Bcl2Fastq validation")
-
-    def validate_sample_sheet_from_file(
-        self, file_path: Path, bcl_converter: str | None = None
-    ) -> None:
+    def validate_sample_sheet_from_file(self, file_path: Path) -> None:
         """
         Validate a sample sheet given the path to the file.
         Raises:
             SampleSheetError: If the sample sheet is not valid.
         """
-        self.validate_sample_sheet_from_content(
-            content=ReadFile.get_content_from_file(file_format=FileFormat.CSV, file_path=file_path),
-            bcl_convert=bcl_converter,
+        content: list[list[str]] = ReadFile.get_content_from_file(
+            file_format=FileFormat.CSV, file_path=file_path
         )
+        self.validate_sample_sheet_from_content(content)
 
-    def get_sample_sheet_object_from_file(
-        self, file_path: Path, bcl_converter: str | None = None
-    ) -> SampleSheet:
+    def get_sample_sheet_object_from_file(self, file_path: Path) -> SampleSheet:
         """Return a sample sheet object given the path to the file.
         Raises:
             SampleSheetError: If the sample sheet is not valid.
         """
-        sample_type: Type[FlowCellSample] | None = (
-            BCL_CONVERTER_TO_FLOW_CELL_SAMPLE[bcl_converter] if bcl_converter else None
-        )
-        self.validate_sample_sheet_from_file(file_path=file_path, bcl_converter=bcl_converter)
+        self.validate_sample_sheet_from_file(file_path)
         samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
             sample_sheet_content=self.content,
-            sample_type=sample_type,
+            sample_type=FlowCellSampleBCLConvert,
         )
         return SampleSheet(samples=samples)

@@ -3,25 +3,11 @@
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.index import (
-    Index,
     get_hamming_distance_index_1,
     get_hamming_distance_index_2,
     get_reverse_complement_dna_seq,
-    get_valid_indexes,
     is_padding_needed,
 )
-
-
-def test_get_valid_indexes():
-    """Test that the function get_valid_indexes returns a list of Index objects."""
-    # GIVEN a sample sheet API
-
-    # WHEN fetching the indexes
-    indexes: list[Index] = get_valid_indexes()
-
-    # THEN assert that the indexes are correct
-    assert indexes
-    assert isinstance(indexes[0], Index)
 
 
 @pytest.mark.parametrize(

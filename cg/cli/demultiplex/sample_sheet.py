@@ -6,7 +6,6 @@ from pydantic import ValidationError
 
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.constants.constants import DRY_RUN
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import SampleSheetError
 from cg.models.cg_config import CGConfig
 
@@ -23,7 +22,7 @@ def sample_sheet_commands():
 @click.pass_obj
 def validate_sample_sheet(context: CGConfig, sheet: click.Path):
     """
-    Validate a sample sheet. The bcl converter would be determined from the sample sheet content.
+    Validate a sample sheet.
     """
     LOG.info(f"Validating {sheet} sample sheet")
     sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
@@ -53,14 +52,12 @@ def translate_sample_sheet(context: CGConfig, flow_cell_name: str, dry_run: bool
 
 @sample_sheet_commands.command(name="create")
 @click.argument("flow-cell-name")
-@OPTION_BCL_CONVERTER
 @DRY_RUN
 @click.option("--force", is_flag=True, help="Skips the validation of the sample sheet")
 @click.pass_obj
 def create_sheet(
     context: CGConfig,
     flow_cell_name: str,
-    bcl_converter: str | None,
     dry_run: bool,
     force: bool = False,
 ):
@@ -74,9 +71,7 @@ def create_sheet(
     sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     sample_sheet_api.set_dry_run(dry_run)
     sample_sheet_api.set_force(force)
-    sample_sheet_api.get_or_create_sample_sheet(
-        flow_cell_name=flow_cell_name, bcl_converter=bcl_converter
-    )
+    sample_sheet_api.get_or_create_sample_sheet(flow_cell_name)
 
 
 @sample_sheet_commands.command(name="create-all")

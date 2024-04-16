@@ -8,9 +8,7 @@ from cg.apps.demultiplex.sample_sheet.sample_models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleBCLConvert,
 )
-from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
-    SampleSheetCreatorBCLConvert,
-)
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.constants import FileExtensions
 from cg.io.json import read_json
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -95,9 +93,9 @@ def novaseq_x_lims_samples(novaseq_x_flow_cell_directory: Path) -> list[FlowCell
 def bcl_convert_sample_sheet_creator(
     novaseq_x_flow_cell: FlowCellDirectoryData,
     novaseq_x_lims_samples: list[FlowCellSampleBCLConvert],
-) -> SampleSheetCreatorBCLConvert:
+) -> SampleSheetCreator:
     """Returns a sample sheet creator for sample sheet v2."""
-    return SampleSheetCreatorBCLConvert(
+    return SampleSheetCreator(
         flow_cell=novaseq_x_flow_cell,
         lims_samples=novaseq_x_lims_samples,
     )
