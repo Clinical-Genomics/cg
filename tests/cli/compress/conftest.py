@@ -118,7 +118,6 @@ def populated_compress_store(
         store,
         case_info=analysis_family,
         app_tag=compress_case_info.application_tag,
-        ordered_at=compress_case_info.timestamp,
         completed_at=compress_case_info.later_timestamp,
     )
     return store
@@ -154,7 +153,6 @@ def populated_compress_multiple_store(
             store,
             case_info=analysis_family,
             app_tag=compress_case_info.application_tag,
-            ordered_at=compress_case_info.timestamp,
             completed_at=compress_case_info.later_timestamp,
             created_at=dt.datetime.now() - dt.timedelta(days=1000),
         )
