@@ -105,7 +105,6 @@ class SampleSheetCreator:
         sample_sheet_content: list[list[str]] = (
             self.get_additional_sections_sample_sheet() + complete_data_section
         )
-        LOG.debug(f"Use sample sheet header {complete_data_section[1]}")
         for sample in self.lims_samples:
             sample_sheet_content.append(
                 self.convert_sample_to_header_dict(
