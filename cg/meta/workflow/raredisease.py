@@ -142,6 +142,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return search patterns for MultiQC for Raredisease."""
         samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
         search_patterns: dict[str, str] = {
-            f"{sample.name}_{sample.name}": sample.internal_id for sample in samples
+            f"{sample.name}": sample.internal_id for sample in samples
         }
         return search_patterns
