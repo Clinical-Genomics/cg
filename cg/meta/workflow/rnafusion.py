@@ -8,13 +8,10 @@ from cg.constants.constants import Strandedness
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
 from cg.exc import MissingMetrics
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
-from cg.models.rnafusion.rnafusion import (
-    RnafusionAnalysis,
-    RnafusionParameters,
-    RnafusionSampleSheetEntry,
-)
+from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample, Sample
 
@@ -119,7 +116,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             LOG.error(f"Some mandatory metrics are missing: {', '.join(missing_metrics)}")
             raise MissingMetrics()
 
-    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> RnafusionAnalysis:
+    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
         """Parse Rnafusion output analysis files and return analysis model."""
         sample_metrics: dict[str, dict] = {}
         for metric in qc_metrics_raw:
@@ -127,9 +124,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
                 sample_metrics[metric.id].update({metric.name.lower(): metric.value})
             except KeyError:
                 sample_metrics[metric.id] = {metric.name.lower(): metric.value}
-        return RnafusionAnalysis(sample_metrics=sample_metrics)
+        return NextflowAnalysis(sample_metrics=sample_metrics)
 
-    def get_latest_metadata(self, case_id: str) -> RnafusionAnalysis:
+    def get_latest_metadata(self, case_id: str) -> NextflowAnalysis:
         """Return the latest metadata of a specific Rnafusion case."""
         qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
         return self.parse_analysis(qc_metrics_raw=qc_metrics)

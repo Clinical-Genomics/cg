@@ -3,7 +3,6 @@ from pathlib import Path
 from pydantic.v1 import BaseModel, Field
 
 from cg.constants.constants import Strandedness
-from cg.models.analysis import AnalysisModel
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 
 
@@ -58,13 +57,3 @@ class RnafusionSampleSheetEntry(NextflowSampleSheetEntry):
                 self.fastq_forward_read_paths, self.fastq_reverse_read_paths
             )
         ]
-
-
-class RnafusionAnalysis(AnalysisModel):
-    """Rnafusion analysis model.
-
-    Attributes:
-        sample_metrics: retrieved QC metrics associated to a sample
-    """
-
-    sample_metrics: dict[str, RnafusionQCMetrics]
