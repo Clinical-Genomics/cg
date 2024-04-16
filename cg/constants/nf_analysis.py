@@ -30,6 +30,13 @@ RNAFUSION_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.7},
 }
 
+TOMTE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
+    "uniquely_mapped_percent": {"norm": "gt", "threshold": 60},
+    "PCT_MRNA_BASES": {"norm": "gt", "threshold": 80},
+    "PCT_RIBOSOMAL_BASES": {"norm": "lt", "threshold": 5},
+    "pct_duplication": {"norm": "lt", "threshold": 70},
+}
+
 
 MULTIQC_NEXFLOW_CONFIG = """process {
     withName:'MULTIQC' {

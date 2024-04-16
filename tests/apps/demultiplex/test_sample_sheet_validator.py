@@ -251,33 +251,27 @@ def test_validate_override_cycles_incorrect_cycles(
     "sample_sheet_content",
     [
         "hiseq_x_single_index_sample_sheet_content",
-        "hiseq_x_single_index_bcl2fastq_sample_sheet_content",
         "hiseq_x_dual_index_sample_sheet_content",
-        "hiseq_x_dual_index_bcl2fastq_sample_sheet_content",
         "hiseq_2500_dual_index_sample_sheet_content",
-        "hiseq_2500_dual_index_bcl2fastq_sample_sheet_content",
         "hiseq_2500_custom_index_sample_sheet_content",
-        "hiseq_2500_custom_index_bcl2fastq_sample_sheet_content",
         "novaseq_6000_pre_1_5_kits_sample_sheet_content",
         "novaseq_6000_post_1_5_kits_sample_sheet_content",
         "novaseq_x_sample_sheet_content",
     ],
     ids=[
         "HiSeqXSingleIndex",
-        "HiSeqXSingleIndexBcl2Fastq",
         "HiSeqXDualIndex",
-        "HiSeqXDualIndexBcl2Fastq",
         "HiSeq2500DualIndex",
-        "HiSeq2500DualIndexBcl2Fastq",
         "HiSeq2500CustomIndex",
-        "HiSeq2500CustomIndexBcl2Fastq",
         "NovaSeq6000Pre1.5Kits",
         "NovaSeq6000Post1.5Kits",
         "NovaSeqX",
     ],
 )
 def test_validate_sample_sheet_from_content(
-    sample_sheet_validator: SampleSheetValidator, sample_sheet_content: str, request: FixtureRequest
+    sample_sheet_validator: SampleSheetValidator,
+    sample_sheet_content: str,
+    request: FixtureRequest,
 ):
     """Test that a correct sample sheet passes validation."""
     # GIVEN sample sheet validator and a correct sample sheet content
