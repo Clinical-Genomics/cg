@@ -3,7 +3,6 @@
 from enum import StrEnum
 from pathlib import Path
 
-import click
 from pydantic import BaseModel
 
 from cg.constants.sequencing import Sequencers
@@ -80,17 +79,6 @@ class RunParametersXMLNodes(StrEnum):
 
 class SampleSheetBcl2FastqSections:
     """Class with all necessary constants for building a NovaSeqX sample sheet."""
-
-    class Settings(StrEnum):
-        HEADER: str = "[Settings]"
-
-        @classmethod
-        def barcode_mismatch_index_1(cls) -> list[str]:
-            return ["BarcodeMismatchesIndex1", "0"]
-
-        @classmethod
-        def barcode_mismatch_index_2(cls) -> list[str]:
-            return ["BarcodeMismatchesIndex2", "0"]
 
     class Data(StrEnum):
         HEADER: str = "[Data]"
@@ -199,16 +187,6 @@ class IndexOverrideCycles(StrEnum):
     IGNORED_8_INDEX: str = "N8;"
     INDEX_8_IGNORED_2: str = "I8N2;"
     INDEX_8_IGNORED_2_REVERSED: str = "N2I8;"
-
-
-OPTION_BCL_CONVERTER = click.option(
-    "-b",
-    "--bcl-converter",
-    type=click.Choice([BclConverter.BCL2FASTQ, BclConverter.BCLCONVERT]),
-    default=None,
-    help="Specify bcl conversion software. Choose between bcl2fastq and dragen. "
-    "If not specified, the software will be determined automatically using the sequencer type.",
-)
 
 
 DEMUX_STATS_PATH: dict[str, dict[str, Path | None]] = {
