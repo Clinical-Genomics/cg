@@ -4,9 +4,6 @@ import logging
 
 from pydantic import BaseModel
 
-from cg.constants.constants import FileFormat
-from cg.io.controller import ReadFile
-from cg.resources import VALID_INDEXES_PATH
 from cg.utils.utils import get_hamming_distance
 
 LOG = logging.getLogger(__name__)
@@ -28,22 +25,6 @@ class Index(BaseModel):
 
     name: str
     sequence: str
-
-
-def get_valid_indexes(dual_indexes_only: bool = True) -> list[Index]:
-    """Return a list of valid indexes from the valid indexes file."""
-    LOG.info(f"Fetch valid indexes from {VALID_INDEXES_PATH}")
-    indexes: list[Index] = []
-    indexes_csv: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=VALID_INDEXES_PATH
-    )
-    for row in indexes_csv:
-        index_name: str = row[0]
-        index_sequence: str = row[1]
-        if dual_indexes_only and not is_dual_index(index=index_sequence):
-            continue
-        indexes.append(Index(name=index_name, sequence=index_sequence))
-    return indexes
 
 
 def is_padding_needed(index1_cycles: int, index2_cycles: int, sample_index_length: int) -> bool:
