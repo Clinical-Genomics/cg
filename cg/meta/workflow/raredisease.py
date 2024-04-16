@@ -10,16 +10,12 @@ from cg.constants.nf_analysis import RAREDISEASE_METRIC_CONDITIONS
 from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
-from cg.io.json import read_json
-from cg.models.fastq import FastqFileMeta
-from cg.models.nf_analysis import WorkflowParameters
 from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
 )
 from cg.models.nf_analysis import WorkflowParameters
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -139,32 +135,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Create and return the managed variants."""
         return self._get_managed_variants(genome_build=GENOME_BUILD_37)
 
-    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
-        """Return a list of the metrics specified in a MultiQC json file for the case samples."""
-        multiqc_json: list[dict] = MultiqcDataJson(
-            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
-        ).report_general_stats_data
+    def get_multiqc_search_patterns(self, case_id: str) -> dict:
+        """Return search patterns for MultiQC for Raredisease."""
         samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
-        metrics_list: list[MetricsBase] = []
-        for sample in samples:
-            sample_id: str = sample.internal_id
-            metrics_values: dict = self.parse_multiqc_json_for_sample(
-                sample_name=sample_id, multiqc_json=multiqc_json
-            )
-            metric_base_list: list = self.get_metric_base_list(
-                sample_id=sample_id, metrics_values=metrics_values
-            )
-            metrics_list.extend(metric_base_list)
-        return metrics_list
-
-    @staticmethod
-    def parse_multiqc_json_for_sample(sample_name: str, multiqc_json: list[dict]) -> dict:
-        """Parse a multiqc_data.json and returns a dictionary with metric name and metric values for each sample."""
-        metrics_values: dict = {}
-        for stat_dict in multiqc_json:
-            for sample_key, sample_values in stat_dict.items():
-                if sample_name in sample_key:
-                    LOG.info(f"Key: {sample_key}, Values: {sample_values}")
-                    metrics_values.update(sample_values)
-
-        return metrics_values
+        search_patterns: dict[str, str] = {case_id: sample.internal_id for sample in samples}
+        return search_patterns

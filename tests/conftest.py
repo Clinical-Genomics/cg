@@ -2344,6 +2344,25 @@ def raredisease_nexflow_config_file_path(raredisease_dir, raredisease_case_id) -
 
 
 @pytest.fixture(scope="function")
+def raredisease_deliverable_data(
+    raredisease_dir: Path, raredisease_case_id: str, sample_id: str
+) -> dict:
+    return {
+        "files": [
+            {
+                "path": f"{raredisease_dir}/{raredisease_case_id}/multiqc/multiqc_report.html",
+                "path_index": "",
+                "step": "report",
+                "tag": ["multiqc-html", "rna"],
+                "id": raredisease_case_id,
+                "format": "html",
+                "mandatory": True,
+            },
+        ]
+    }
+
+
+@pytest.fixture(scope="function")
 def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> Path:
     """Path to deliverables file."""
     return Path(
@@ -2526,6 +2545,33 @@ def raredisease_mock_analysis_finish(
             "tower_ids",
         ).with_suffix(FileExtensions.YAML),
     )
+
+
+@pytest.fixture(scope="function")
+def raredisease_mock_deliverable_dir(
+    raredisease_dir: Path, raredisease_deliverable_data: dict, raredisease_case_id: str
+) -> Path:
+    """Create raredisease deliverable file with dummy data and files to deliver."""
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id),
+        parents=True,
+        exist_ok=True,
+    )
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id, "multiqc"),
+        parents=True,
+        exist_ok=True,
+    )
+    for report_entry in raredisease_deliverable_data["files"]:
+        Path(report_entry["path"]).touch(exist_ok=True)
+    WriteFile.write_file_from_content(
+        content=raredisease_deliverable_data,
+        file_format=FileFormat.JSON,
+        file_path=Path(
+            raredisease_dir, raredisease_case_id, raredisease_case_id + deliverables_yaml
+        ),
+    )
+    return raredisease_dir
 
 
 @pytest.fixture(scope="function")
