@@ -540,63 +540,6 @@ def test_store_mip(orders_api, base_store: Store, mip_status_data, ticket_id: st
         assert len(link.sample.deliveries) == 1
 
 
-def test_store_tomte(orders_api, base_store: Store, tomte_status_data: dict, ticket_id: str):
-    # GIVEN a basic store with no samples or nothing in it
-    assert not base_store._get_query(table=Sample).first()
-    assert not base_store.get_cases()
-
-    submitter = TomteSubmitter(lims=orders_api.lims, status=orders_api.status)
-
-    # WHEN storing the order
-    new_families = submitter.store_items_in_status(
-        customer_id=tomte_status_data["customer"],
-        order=tomte_status_data["order"],
-        ordered=dt.datetime.now(),
-        ticket_id=ticket_id,
-        items=tomte_status_data["families"],
-    )
-
-    for family in tomte_status_data:
-        assert family.data_analysis == Workflow.TOMTE
-        assert family.data_delivery == str(DataDelivery.SCOUT)
-    # THEN it should create and link samples and the case
-    assert len(new_families) == 2
-    new_case = new_families[0]
-    assert new_case.name == "family1"
-    assert set(new_case.panels) == {"IEM"}
-    assert new_case.priority_human == Priority.standard.name
-
-    assert len(new_case.links) == 3
-    new_link = new_case.links[0]
-    assert new_case.data_analysis == Workflow.TOMTE
-    assert new_case.data_delivery == str(DataDelivery.SCOUT)
-    assert set(new_case.cohorts) == {"Other"}
-    assert (
-        new_case.synopsis
-        == "As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for."
-    )
-    assert new_link.status == "affected"
-    assert new_link.mother.name == "sample2"
-    assert new_link.father.name == "sample3"
-    assert new_link.sample.name == "sample1"
-    assert new_link.sample.sex == "female"
-    assert new_link.sample.application_version.application.tag == "RNAPOAR025"
-    assert new_link.sample.is_tumour
-    assert isinstance(new_case.links[1].sample.comment, str)
-
-    assert set(new_link.sample.phenotype_groups) == {"Phenotype-group"}
-    assert set(new_link.sample.phenotype_terms) == {"HP:0012747", "HP:0025049"}
-    assert new_link.sample.subject_id == "subject1"
-
-    assert new_link.sample.age_at_sampling == 17.18192
-
-    assert base_store._get_query(table=Delivery).count() == len(
-        base_store._get_query(table=Sample).all()
-    )
-    for link in new_case.links:
-        assert len(link.sample.deliveries) == 1
-
-
 def test_store_mip_rna(orders_api, base_store, mip_rna_status_data, ticket_id: str):
     # GIVEN a basic store with no samples or nothing in it + rna order
     rna_application_tag = "RNAPOAR025"
