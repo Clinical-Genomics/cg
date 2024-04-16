@@ -541,7 +541,7 @@ def test_store_mip(orders_api, base_store: Store, mip_status_data, ticket_id: st
 
 
 def test_store_tomte(orders_api, base_store: Store, tomte_status_data: dict, ticket_id: str):
-    # GIVEN a basic store with no samples or nothing in it + scout order
+    # GIVEN a basic store with no samples or nothing in it
     assert not base_store._get_query(table=Sample).first()
     assert not base_store.get_cases()
 
@@ -556,6 +556,9 @@ def test_store_tomte(orders_api, base_store: Store, tomte_status_data: dict, tic
         items=tomte_status_data["families"],
     )
 
+    for family in tomte_status_data:
+        assert family.data_analysis == Workflow.TOMTE
+        assert family.data_delivery == str(DataDelivery.SCOUT)
     # THEN it should create and link samples and the case
     assert len(new_families) == 2
     new_case = new_families[0]
