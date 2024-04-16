@@ -9,7 +9,7 @@ from cg.constants import EXIT_SUCCESS, Workflow
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_workflow_no_args(cli_runner: CliRunner, workflow: Workflow, request):
     """Test to see that workflow is added and prints help when no subcommand is specified."""

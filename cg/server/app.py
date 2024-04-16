@@ -20,6 +20,7 @@ from cg.store.models import (
     Customer,
     Flowcell,
     Invoice,
+    Order,
     Organism,
     Panel,
     Pool,
@@ -112,6 +113,7 @@ def _register_admin_views():
     ext.admin.add_view(admin.CustomerView(Customer, ext.db.session))
     ext.admin.add_view(admin.CollaborationView(Collaboration, ext.db.session))
     ext.admin.add_view(admin.OrganismView(Organism, ext.db.session))
+    ext.admin.add_view(admin.OrderView(Order, ext.db.session))
     ext.admin.add_view(admin.PanelView(Panel, ext.db.session))
     ext.admin.add_view(admin.UserView(User, ext.db.session))
     ext.admin.add_view(

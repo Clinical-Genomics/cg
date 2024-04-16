@@ -24,9 +24,7 @@ class DeliveryMessageService:
         return self._get_delivery_message(set(case_ids))
 
     def get_order_message(self, order_id: int) -> DeliveryMessageResponse:
-        order: Order = self.store.get_order_by_id(order_id)
-        if not order:
-            raise OrderNotFoundError(f"Order with ID {order_id} not found.")
+        self.store.get_order_by_id(order_id)
         analyses: list[TrailblazerAnalysis] = self.trailblazer_api.get_analyses_to_deliver(order_id)
         if not analyses:
             raise OrderNotDeliverableError(

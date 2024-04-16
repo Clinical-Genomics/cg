@@ -206,7 +206,7 @@ metrics:
   input: multiqc_data.json
   name: LIBRARY
   step: multiqc
-  value: Unknown Library
+  value: ''
 - condition: null
   header: null
   id: ADM1
@@ -610,3 +610,45 @@ metrics:
   name: pct_adapter
   step: multiqc
   value: 12.005654574904709
+- condition: null
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: percent_gc
+  step: multiqc
+  value: 51.0
+- condition: null
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: avg_sequence_length
+  step: multiqc
+  value: 98.42709962090532
+- condition: null
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: median_sequence_length
+  step: multiqc
+  value: 100
+- condition: null
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: total_sequences
+  step: multiqc
+  value: 74557102.0
+- condition: null
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: percent_duplicates
+  step: multiqc
+  value: 64.54554620264767
+- condition: null
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: percent_fails
+  step: multiqc
+  value: 18.181818181818183
