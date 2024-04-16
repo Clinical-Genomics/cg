@@ -249,7 +249,7 @@ class FlowCellDirectoryData:
             LOG.warning(f"Copy of sequence data is not ready for flow cell {self.id}")
             return False
         LOG.debug(f"All data has been transferred for flow cell {self.id}")
-        LOG.info(f"Flow cell {self.id} is ready for demultiplexing or encrypting")
+        LOG.info(f"Flow cell {self.id} is ready for downstream processing")
         return True
 
     def __str__(self):
