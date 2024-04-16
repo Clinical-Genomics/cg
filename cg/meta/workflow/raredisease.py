@@ -140,3 +140,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
         search_patterns: dict[str, str] = {case_id: sample.internal_id for sample in samples}
         return search_patterns
+
+    def get_workflow_metrics(self) -> dict:
+        return RAREDISEASE_METRIC_CONDITIONS
