@@ -1037,7 +1037,7 @@ class ReadHandler(BaseHandler):
             workflow=workflow,
         )
 
-        families: list[Query] = list(cases.order_by(Case.ordered_at))
+        families: list[Query] = list(cases.order_by(Case.created_at))
         families = [
             case_obj
             for case_obj in families

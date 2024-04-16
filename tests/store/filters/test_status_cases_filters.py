@@ -22,7 +22,6 @@ from cg.store.filters.status_case_filters import (
     filter_cases_with_scout_data_delivery,
     filter_cases_with_workflow,
     filter_inactive_analysis_cases,
-    filter_newer_cases_by_order_date,
     filter_older_cases_by_creation_date,
     filter_report_supported_data_delivery_cases,
     filter_running_cases,
@@ -944,46 +943,6 @@ def test_filter_cases_by_priority_all_priorities(
 
     # THEN the query should return all cases
     assert len(filtered_cases) == cases_query.count()
-
-
-def test_filter_newer_cases_by_order_date_no_newer_cases(
-    store_with_multiple_cases_and_samples: Store,
-):
-    """Test that no cases are returned when there are no cases with a newer order date."""
-    # GIVEN a store containing cases with different order dates
-    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
-    latest_order_date = max(case.ordered_at for case in cases_query)
-
-    # WHEN filtering cases by a date that is later than the latest order date
-    filtered_cases: Query = filter_newer_cases_by_order_date(
-        cases=cases_query, order_date=latest_order_date
-    )
-
-    # THEN the query should return no cases
-    assert filtered_cases.count() == 0
-
-
-def test_filter_newer_cases_by_order_date_some_newer_cases(
-    store_with_multiple_cases_and_samples: Store,
-):
-    """Test that cases with order dates newer than the given date are returned."""
-    # GIVEN a store containing cases with different order dates
-    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
-    min_order_date = min(case.ordered_at for case in cases_query)
-    max_order_date = max(case.ordered_at for case in cases_query)
-
-    # Calculate an intermediate date between the minimum and maximum order dates
-    some_order_date = min_order_date + (max_order_date - min_order_date) / 2
-
-    # WHEN filtering cases by a date that is earlier than some order dates
-    filtered_cases: Query = filter_newer_cases_by_order_date(
-        cases=cases_query, order_date=some_order_date
-    )
-
-    # THEN the query should return the cases with order dates newer than the given date
-    assert filtered_cases.count() > 0
-    for case in filtered_cases:
-        assert case.ordered_at > some_order_date
 
 
 def test_get_older_cases_by_created_date_no_older_cases(

@@ -454,7 +454,6 @@ class Case(Base, PriorityMixin):
     internal_id: Mapped[UniqueStr]
     is_compressible: Mapped[bool] = mapped_column(default=True)
     name: Mapped[Str128]
-    ordered_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     _panels: Mapped[Text | None]
 
     priority: Mapped[Priority] = mapped_column(

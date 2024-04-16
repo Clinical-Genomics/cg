@@ -163,12 +163,6 @@ def filter_cases_with_scout_data_delivery(cases: Query, **kwargs) -> Query:
     return cases.filter(Case.data_delivery.contains(DataDelivery.SCOUT))
 
 
-def filter_newer_cases_by_order_date(cases: Query, order_date: datetime, **kwargs) -> Query:
-    """Filter cases newer than date."""
-    cases: Query = cases.filter(Case.ordered_at > order_date)
-    return cases.order_by(Case.ordered_at.asc())
-
-
 def filter_inactive_analysis_cases(cases: Query, **kwargs) -> Query:
     """Filter cases which are not set or on hold."""
     return cases.filter(
@@ -272,7 +266,6 @@ class CaseFilter(Enum):
     HAS_SEQUENCE: Callable = filter_cases_has_sequence
     IS_RUNNING: Callable = filter_running_cases
     IS_COMPRESSIBLE: Callable = filter_compressible_cases
-    NEW_BY_ORDER_DATE: Callable = filter_newer_cases_by_order_date
     NOT_ANALYSED: Callable = filter_cases_not_analysed
     OLD_BY_CREATION_DATE: Callable = filter_older_cases_by_creation_date
     REPORT_SUPPORTED: Callable = filter_report_supported_data_delivery_cases

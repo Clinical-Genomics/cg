@@ -3743,7 +3743,7 @@ def store_with_case_and_sample_with_reads(
         store=store,
         customer_id=case.customer_id,
         ticket_id=case.latest_ticket,
-        order_date=case.ordered_at,
+        order_date=datetime.now(),
         workflow=case.data_analysis,
     )
     case.orders.append(order)
