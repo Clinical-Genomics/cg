@@ -1,9 +1,0 @@
----
-metrics:
-  - condition: null
-    header: null
-    id: ADM1
-    input: multiqc_data.json
-    name: paired_aligned_mate_none
-    step: multiqc
-    value: 1000
