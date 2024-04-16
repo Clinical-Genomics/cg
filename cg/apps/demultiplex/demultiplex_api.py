@@ -253,7 +253,7 @@ class DemultiplexingAPI:
             shutil.rmtree(self.flow_cell_out_dir_path(flow_cell=flow_cell), ignore_errors=False)
 
     def create_demultiplexing_output_dir(self, flow_cell: FlowCellDirectoryData) -> None:
-        """Creates the demultiplexing output directory and, if necessary, the unaligned directory."""
+        """Creates the demultiplexing output directory for the flow cell."""
         output_directory: Path = self.flow_cell_out_dir_path(flow_cell)
         LOG.debug(f"Creating demultiplexing output directory: {output_directory}")
         output_directory.mkdir(exist_ok=False, parents=True)
