@@ -172,6 +172,10 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         return Path(self.encryption_dir, self.flow_cell.full_name)
 
     @property
+    def flow_cell_encrypt_tmp_dir(self) -> Path:
+        return Path(self.flow_cell_encryption_dir, "tmp")
+
+    @property
     def flow_cell_encrypt_file_path_prefix(self) -> Path:
         return Path(self.flow_cell_encryption_dir, self.flow_cell.id)
 
@@ -258,6 +262,15 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             )
         return True
 
+    def make_tmp_encrypt_dir(self) -> str:
+        return f"mkdir -p {self.flow_cell_encrypt_tmp_dir}"
+
+    def copy_flow_cell_dir_to_tmp(self) -> str:
+        return f"cp -r {self.flow_cell.path} {self.flow_cell_encrypt_tmp_dir}"
+
+    def remove_tmp_encrypt_dir(self) -> str:
+        return f"rm -rf {self.flow_cell_encrypt_tmp_dir}"
+
     def encrypt_flow_cell(
         self,
     ) -> None:
@@ -272,7 +285,11 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             asymmetrically_encrypt_passphrase=self.get_asymmetrically_encrypt_passphrase_cmd(
                 passphrase_file_path=self.symmetric_passphrase_file_path
             ),
-            tar_encrypt_flow_cell_dir=self.tar_api.get_compress_cmd(input_path=self.flow_cell.path),
+            make_tmp_encrypt_dir=self.make_tmp_encrypt_dir(),
+            copy_flow_cell_dir_to_tmp=self.copy_flow_cell_dir_to_tmp(),
+            tar_encrypt_tmp_dir=self.tar_api.get_compress_cmd(
+                input_path=self.flow_cell_encrypt_tmp_dir
+            ),
             parallel_gzip=f"{self.pigz_binary_path} -p {self.slurm_number_tasks - LIMIT_PIGZ_TASK} --fast -c",
             tee=f"tee >(md5sum > {self.encrypted_md5sum_file_path})",
             flow_cell_symmetric_encryption=self.get_flow_cell_symmetric_encryption_command(
@@ -288,6 +305,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             mv_passphrase_file=f"mv {self.symmetric_passphrase_file_path.with_suffix(FileExtensions.GPG)} {self.final_passphrase_file_path}",
             remove_pending_file=f"rm -f {self.pending_file_path}",
             flag_as_complete=f"touch {self.complete_file_path}",
+            remove_tmp_encrypt_dir=self.remove_tmp_encrypt_dir(),
         )
         sbatch_parameters = Sbatch(
             account=self.slurm_account,

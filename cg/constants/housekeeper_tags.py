@@ -217,6 +217,9 @@ WORKFLOW_PROTECTED_TAGS = {
     Workflow.TAXPROFILER: [
         [HermesFileTag.LONG_TERM_STORAGE],
     ],
+    Workflow.TOMTE: [
+        [HermesFileTag.LONG_TERM_STORAGE],
+    ],
 }
 
 

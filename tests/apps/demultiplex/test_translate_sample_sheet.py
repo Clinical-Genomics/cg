@@ -5,7 +5,6 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
-from cg.constants.demultiplexing import BclConverter
 from cg.exc import SampleSheetError
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -176,6 +175,4 @@ def test_translate_sample_sheet(
     api.translate_sample_sheet(flow_cell_name=flow_cell.full_name)
 
     # THEN the sample sheet is translated correctly to BCConvert format
-    api.validate_sample_sheet(
-        sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=BclConverter.BCLCONVERT
-    )
+    api.validate_sample_sheet(flow_cell.sample_sheet_path)
