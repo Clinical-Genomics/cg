@@ -1,7 +1,4 @@
 from enum import StrEnum
-from pathlib import Path
-
-from pydantic.v1 import Field
 
 from cg.models.nf_analysis import NextflowSampleSheetEntry
 

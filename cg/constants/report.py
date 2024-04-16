@@ -18,10 +18,11 @@ RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT: int = 300
 
 REPORT_SUPPORTED_WORKFLOW: tuple[Workflow, ...] = (
     Workflow.BALSAMIC,
-    Workflow.BALSAMIC_UMI,
     Workflow.BALSAMIC_QC,
+    Workflow.BALSAMIC_UMI,
     Workflow.MIP_DNA,
     Workflow.RNAFUSION,
+    Workflow.TOMTE,
 )
 
 REPORT_SUPPORTED_DATA_DELIVERY: tuple[DataDelivery, ...] = (
