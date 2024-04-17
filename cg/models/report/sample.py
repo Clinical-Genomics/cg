@@ -66,6 +66,7 @@ class TimestampModel(BaseModel):
         prepared_at: library preparation date; source: StatusDB/sample/prepared_at
         reads_updated_at: sequencing date; source: StatusDB/sample/reads_updated_at
     """
+    ordered_at: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
     received_at: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
     prepared_at: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD
     reads_updated_at: Annotated[str, BeforeValidator(get_date_as_string)] = NA_FIELD

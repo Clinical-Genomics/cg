@@ -978,7 +978,7 @@ class ReadHandler(BaseHandler):
                 applications=records,
                 filter_functions=[ApplicationFilter.IS_NOT_EXTERNAL],
             )
-        return records.order_by(Sample.created_at).all()
+        return records.order_by(Sample.ordered_at).all()
 
     def get_samples_to_prepare(self) -> list[Sample]:
         """Return samples to prepare."""
