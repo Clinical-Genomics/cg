@@ -48,7 +48,7 @@ class DeliveryMessageService:
         return [
             analysis
             for analysis in analyses
-            if analysis.uploaded_at and analysis.workflow == order.workflow
+            if analysis.uploaded_at and analysis.workflow.lower() == order.workflow
         ]
 
     def _get_delivery_message(self, case_ids: set[str]) -> str:
