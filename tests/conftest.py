@@ -27,7 +27,7 @@ from cg.apps.housekeeper.models import InputBundle
 from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, FileFormat, Strandedness
+from cg.constants.constants import CaseActions, FileFormat
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -50,7 +50,10 @@ from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.raredisease.raredisease import RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
+from cg.models.taxprofiler.taxprofiler import (
+    TaxprofilerParameters,
+    TaxprofilerSampleSheetEntry,
+)
 from cg.models.tomte.tomte import TomteSampleSheetHeaders
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
@@ -2470,6 +2473,69 @@ def raredisease_mock_config(raredisease_dir: Path, raredisease_case_id: str) -> 
     ).touch(exist_ok=True)
 
 
+@pytest.fixture(scope="function")
+def raredisease_mock_analysis_finish(
+    raredisease_dir: Path,
+    raredisease_case_id: str,
+    raredisease_multiqc_json_metrics: dict,
+    tower_id: int,
+) -> None:
+    """Create analysis_finish file for testing."""
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id, "pipeline_info"), parents=True, exist_ok=True
+    )
+    Path(raredisease_dir, raredisease_case_id, "pipeline_info", software_version_file).touch(
+        exist_ok=True
+    )
+    Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet.csv").touch(
+        exist_ok=True
+    )
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id, "multiqc", "multiqc_data"),
+        parents=True,
+        exist_ok=True,
+    )
+    write_json(
+        content=raredisease_multiqc_json_metrics,
+        file_path=Path(
+            raredisease_dir,
+            raredisease_case_id,
+            "multiqc",
+            "multiqc_data",
+            "multiqc_data",
+        ).with_suffix(FileExtensions.JSON),
+    )
+    write_yaml(
+        content={raredisease_case_id: [tower_id]},
+        file_path=Path(
+            raredisease_dir,
+            raredisease_case_id,
+            "tower_ids",
+        ).with_suffix(FileExtensions.YAML),
+    )
+
+
+@pytest.fixture(scope="function")
+def raredisease_malformed_hermes_deliverables(raredisease_hermes_deliverables: dict) -> dict:
+    malformed_deliverable: dict = raredisease_hermes_deliverables.copy()
+    malformed_deliverable.pop("workflow")
+
+    return malformed_deliverable
+
+
+@pytest.fixture(scope="function")
+def raredisease_hermes_deliverables(
+    raredisease_deliverable_data: dict, raredisease_case_id: str
+) -> dict:
+    hermes_output: dict = {"workflow": "raredisease", "bundle_id": raredisease_case_id, "files": []}
+    for file_info in raredisease_deliverable_data["files"]:
+        tags: list[str] = []
+        if "html" in file_info["format"]:
+            tags.append("multiqc-html")
+        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
+    return hermes_output
+
+
 # Rnafusion fixtures
 
 
@@ -2510,12 +2576,6 @@ def rnafusion_sample_sheet_content(
         ]
     )
     return "\n".join([headers, row])
-
-
-@pytest.fixture(scope="session")
-def strandedness() -> str:
-    """Return a default strandedness."""
-    return Strandedness.REVERSE
 
 
 @pytest.fixture(scope="session")
