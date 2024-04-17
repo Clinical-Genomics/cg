@@ -28,6 +28,11 @@ def get_files_matching_pattern(directory: Path, pattern: str) -> list[Path]:
     return list(directory.glob(pattern))
 
 
+def copy_file(file_path: Path, destination: Path):
+    """Copy a file to a destination."""
+    shutil.copy(src=file_path, dst=destination)
+
+
 def get_all_files_in_dir(base_path: Path) -> set[Path]:
     """Get a set of all files relative to the given base path."""
     return {file.relative_to(base_path) for file in base_path.rglob("*") if file.is_file()}
