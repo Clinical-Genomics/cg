@@ -43,7 +43,6 @@ class DemuxPostProcessingAPI:
     def finish_flow_cell(
         self,
         flow_cell_directory_name: str,
-        bcl_converter: str | None = None,
         force: bool = False,
     ) -> None:
         """Store data for the demultiplexed flow cell and mark it as ready for delivery.
@@ -55,7 +54,6 @@ class DemuxPostProcessingAPI:
             - Creates a delivery file in the flow cell directory
         Args:
             flow_cell_directory_name (str): The name of the flow cell directory to be finalized.
-            bcl_converter (str): The name of the bcl converter used for demultiplexing.
             force (bool): If True, the flow cell will be finalized even when it is already marked for delivery.
         Raises:
             FlowCellError: If the flow cell directory or the data it contains is not valid.
@@ -68,9 +66,7 @@ class DemuxPostProcessingAPI:
 
         flow_cell_out_directory = Path(self.demultiplexed_runs_dir, flow_cell_directory_name)
 
-        flow_cell = FlowCellDirectoryData(
-            flow_cell_path=flow_cell_out_directory, bcl_converter=bcl_converter
-        )
+        flow_cell = FlowCellDirectoryData(flow_cell_out_directory)
 
         sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(flow_cell.id)
         flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
