@@ -94,7 +94,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_cases_to_analyze(self) -> list[Case]:
         cases_query: list[Case] = self.status_db.cases_to_analyze(
-            workflow=self.workflow, threshold=self.use_read_count_threshold
+            workflow=self.workflow, threshold=self.use_read_count_threshold, limit=21
         )
         cases_to_analyze = []
         for case_obj in cases_query:
