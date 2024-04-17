@@ -56,30 +56,6 @@ def test_is_sample_sheet_in_housekeeper_not_in_hk(
     assert not result
 
 
-def test_create_demultiplexing_output_dir_for_bcl2fastq(
-    tmp_bcl2fastq_flow_cell: FlowCellDirectoryData,
-    tmp_path: Path,
-    demultiplexing_api: DemultiplexingAPI,
-):
-    """Test that the correct demultiplexing output directory is created."""
-    # GIVEN a Bcl2Fastq FlowCellDirectoryData object
-
-    # GIVEN that the demultiplexing output directory does not exist
-    demultiplexing_api.demultiplexed_runs_dir = tmp_path
-    output_directory: Path = demultiplexing_api.flow_cell_out_dir_path(tmp_bcl2fastq_flow_cell)
-    unaligned_dir: Path = demultiplexing_api.get_flow_cell_unaligned_dir(tmp_bcl2fastq_flow_cell)
-
-    assert not output_directory.exists()
-    assert not unaligned_dir.exists()
-
-    # WHEN creating the demultiplexing output directory for a bcl2fastq flow cell
-    demultiplexing_api.create_demultiplexing_output_dir(tmp_bcl2fastq_flow_cell)
-
-    # THEN the demultiplexing output directory should exist
-    assert output_directory.exists()
-    assert unaligned_dir.exists()
-
-
 def test_create_demultiplexing_output_dir_for_bcl_convert(
     tmp_bcl_convert_flow_cell: FlowCellDirectoryData,
     tmp_path: Path,
