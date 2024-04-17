@@ -380,7 +380,6 @@ class ReportAPI(MetaAPI):
     def get_sample_timestamp_data(sample: Sample) -> TimestampModel:
         """Return sample processing dates."""
         return TimestampModel(
-            ordered_at=sample.ordered_at,
             received_at=sample.received_at,
             prepared_at=sample.prepared_at,
             reads_updated_at=sample.last_sequenced_at,

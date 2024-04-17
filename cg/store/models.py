@@ -985,6 +985,7 @@ class Order(Base):
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
     workflow: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
     is_delivered: Mapped[bool] = mapped_column(default=False)
+    delivered_at: Mapped[datetime | None] = mapped_column(default=None)
 
     def to_dict(self):
         return to_dict(model_instance=self)

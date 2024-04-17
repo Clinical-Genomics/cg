@@ -1,5 +1,6 @@
 """Handler to update data objects"""
 
+from datetime import datetime
 from sqlalchemy.orm import Session
 
 from cg.store.base import BaseHandler
@@ -29,5 +30,6 @@ class UpdateHandler(BaseHandler):
         """Update the delivery status of an order."""
         order: Order = self.get_order_by_id(order_id)
         order.is_delivered = delivered
+        order.delivered_at = datetime.now()
         self.session.commit()
         return order
