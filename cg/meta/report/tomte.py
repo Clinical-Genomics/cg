@@ -3,9 +3,10 @@
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
-from cg.models.analysis import NextflowAnalysis
+from cg.models.analysis import AnalysisModel, NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.report.metadata import TomteSampleMetadataModel
+from cg.models.report.sample import SampleModel
 from cg.models.tomte.tomte import TomteQCMetrics
 from cg.store.models import Case, Sample
 
@@ -49,3 +50,14 @@ class TomteReportAPI(ReportAPI):
             rin=rin,
             uniquely_mapped_reads=sample_metrics.uniquely_mapped_percent,
         )
+
+    def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
+        """Return the reference genome of an analysis."""
+        # TODO
+        return ""
+
+    def is_report_accredited(
+        self, samples: list[SampleModel], analysis_metadata: AnalysisModel
+    ) -> bool:
+        """Check if the Tomte analysis has been accredited."""
+        return False

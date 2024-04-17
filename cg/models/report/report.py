@@ -82,7 +82,7 @@ class DataAnalysisModel(BaseModel):
     genome_build: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     variant_callers: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
     panels: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
-    scout_files: ScoutReportFiles
+    scout_files: ScoutReportFiles | None = None
     delivered_files: Annotated[
         list[str] | str, BeforeValidator(get_delivered_files_as_file_names)
     ] = None
