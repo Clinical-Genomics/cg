@@ -6,8 +6,6 @@ from typing import Tuple
 
 import click
 
-from cg.apps.downsample.downsample import DownsampleAPI
-from cg.apps.downsample.utils import store_downsampled_sample_bundle
 from cg.constants.constants import DRY_RUN
 from cg.meta.create_validation_cases.validation_cases_api import ValidationCaseAPI
 from cg.models.cg_config import CGConfig
@@ -44,5 +42,5 @@ def create_validation_case(context: CGConfig, case_id: str, case_name: str):
     try:
         validation_case_api.create_validation_case(case_id=case_id, case_name=case_name)
     except Exception as error:
-        LOG.error(f"An error occured {repr(error).}")
+        LOG.error(f"An error occured {repr(error)}.")
         raise click.Abort

@@ -109,6 +109,7 @@ class ValidationCaseData:
         )
         validation_case.orders.append(self.original_case.latest_order)
         validation_case.customer = "cust000"
+        validation_case.is_compressible = False
         return validation_case
 
     @staticmethod
