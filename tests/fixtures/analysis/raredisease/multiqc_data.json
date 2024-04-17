@@ -131,9 +131,7 @@
                 "PCT_100X": 0.000274,
                 "FOLD_80_BASE_PENALTY": 1.250115,
                 "FOLD_90_BASE_PENALTY": 1.562644,
-                "FOLD_95_BASE_PENALTY": 2.083525,
-                "HET_SNP_SENSITIVITY": 0.985998,
-                "HET_SNP_Q": 19.0
+                "FOLD_95_BASE_PENALTY": 2.083525
             }
         },
         {

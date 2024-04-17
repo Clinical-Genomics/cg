@@ -730,14 +730,14 @@ metrics:
   input: multiqc_data.json
   name: HET_SNP_SENSITIVITY
   step: multiqc
-  value: 0.985998
+  value: 0.984192
 - condition: null
   header: null
   id: ADM1
   input: multiqc_data.json
   name: HET_SNP_Q
   step: multiqc
-  value: 19.0
+  value: 18.0
 - condition: null
   header: null
   id: ADM1
