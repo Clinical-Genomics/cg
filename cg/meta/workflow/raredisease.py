@@ -138,11 +138,3 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI, ABC):
 
     def get_workflow_metrics(self) -> dict:
         return RAREDISEASE_METRIC_CONDITIONS
-
-    def get_multiqc_search_patterns(self, case_id: str) -> dict:
-        """Return search patterns for MultiQC for Raredisease."""
-        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
-        search_patterns: dict[str, str] = {
-            f"{sample.name}": sample.internal_id for sample in samples
-        }
-        return search_patterns

@@ -2262,7 +2262,7 @@ def sequencing_platform() -> str:
 
 # Raredisease fixtures
 @pytest.fixture(scope="function")
-def raredisease_dir(tmpdir_factory: Path) -> str:
+def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
     """Return the path to the raredisease apps dir."""
     raredisease_dir = tmpdir_factory.mktemp("raredisease")
     return Path(raredisease_dir).absolute().as_posix()
@@ -2493,7 +2493,9 @@ def raredisease_mock_config(raredisease_dir: Path, raredisease_case_id: str) -> 
 def raredisease_metrics_deliverables(raredisease_analysis_dir: Path) -> list[dict]:
     """Returns the content of a mock metrics deliverables file."""
     return read_yaml(
-        file_path=Path(raredisease_analysis_dir, "raredisease_metrics_deliverables.yaml")
+        file_path=Path(
+            raredisease_analysis_dir, "raredisease_case_enough_reads_metrics_deliverables.yaml"
+        )
     )
 
 

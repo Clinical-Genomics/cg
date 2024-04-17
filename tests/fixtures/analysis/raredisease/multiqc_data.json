@@ -168,6 +168,7 @@
         },
         {
             "ADM1": {
+                "family_id": "raredisease_case_enough_reads",
                 "paternal_id": 0.0,
                 "maternal_id": 0.0,
                 "sex": 1.0,
