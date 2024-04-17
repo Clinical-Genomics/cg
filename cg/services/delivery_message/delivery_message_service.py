@@ -28,23 +28,28 @@ class DeliveryMessageService:
     def get_order_message(self, order_id: int) -> DeliveryMessageOrderResponse:
         order: Order = self.store.get_order_by_id(order_id)
         analyses: list[TrailblazerAnalysis] = self.trailblazer_api.get_analyses_to_deliver(order_id)
-        uploaded_analyses_with_matching_workflow = [
+        validated_analyses: list[TrailblazerAnalysis] = self._get_validated_analyses(
+            analyses=analyses, order=order
+        )
+        if not validated_analyses:
+            raise OrderNotDeliverableError(
+                f"No analyses ready to be delivered for order {order_id}"
+            )
+        case_ids: set[str] = {analysis.case_id for analysis in validated_analyses}
+        message: str = self._get_delivery_message(case_ids)
+        analysis_ids: list[int] = [analysis.id for analysis in validated_analyses]
+        return DeliveryMessageOrderResponse(message=message, analysis_ids=analysis_ids)
+
+    @staticmethod
+    def _get_validated_analyses(
+        analyses: list[TrailblazerAnalysis], order: Order
+    ) -> list[TrailblazerAnalysis]:
+        """Returns only the uploaded analyses with workflow matching the order."""
+        return [
             analysis
             for analysis in analyses
             if analysis.uploaded_at and analysis.workflow == order.workflow
         ]
-        if not uploaded_analyses_with_matching_workflow:
-            raise OrderNotDeliverableError(
-                f"No analyses ready to be delivered for order {order_id}"
-            )
-        case_ids: set[str] = {
-            analysis.case_id for analysis in uploaded_analyses_with_matching_workflow
-        }
-        message: str = self._get_delivery_message(case_ids)
-        analysis_ids: list[int] = [
-            analysis.id for analysis in uploaded_analyses_with_matching_workflow
-        ]
-        return DeliveryMessageOrderResponse(message=message, analysis_ids=analysis_ids)
 
     def _get_delivery_message(self, case_ids: set[str]) -> str:
         cases: list[Case] = self.store.get_cases_by_internal_ids(case_ids)
