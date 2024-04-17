@@ -87,16 +87,13 @@ class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
     pct_reads_improper_pairs: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
 
 
-class RnafusionSampleMetadataModel(SampleMetadataModel):
-    """Metrics and trending data model associated to a specific Rnafusion sample.
+class NextflowSampleMetadataModel(SampleMetadataModel):
+    """Metrics and trending data model associated to a Nextflow sample.
 
     Attributes:
         bias_5_3: bias is the ratio between read counts; source: workflow
         gc_content: percentage of GC bases calculated on trimmed reads; source: workflow
         input_amount: input amount in ng; source: LIMS
-        insert_size: distance between paired-end sequencing reads in a DNA fragment
-        insert_size_peak: insert size length; source: workflow
-        mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
         mean_length_r1: average length of reads that pass QC filters; source: workflow
         mrna_bases:  proportion of bases that originate from messenger RNA; source: workflow
         pct_adapter: proportion of reads that contain adapter sequences; source: workflow
@@ -111,9 +108,6 @@ class RnafusionSampleMetadataModel(SampleMetadataModel):
     bias_5_3: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     gc_content: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
     input_amount: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
-    insert_size: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
-    insert_size_peak: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
-    mapped_reads: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
     mean_length_r1: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     mrna_bases: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     pct_adapter: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
@@ -123,3 +117,29 @@ class RnafusionSampleMetadataModel(SampleMetadataModel):
     ribosomal_bases: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
     rin: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     uniquely_mapped_reads: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+
+
+class RnafusionSampleMetadataModel(NextflowSampleMetadataModel):
+    """Metrics and trending data model associated to a specific Rnafusion sample.
+
+    Attributes:
+        insert_size: distance between paired-end sequencing reads in a DNA fragment
+        insert_size_peak: insert size length; source: workflow
+        mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
+    """
+
+    insert_size: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    insert_size_peak: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    mapped_reads: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
+
+
+class TomteSampleMetadataModel(NextflowSampleMetadataModel):
+    """Metrics and trending data model associated to a Tomte sample.
+
+    Attributes:
+        pct_intergenic_bases: proportion of genomic bases located between genes; source: workflow
+        pct_intronic_bases: proportion of genomic bases within intronic regions; source: workflow
+    """
+
+    pct_intergenic_bases: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    pct_intronic_bases: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
