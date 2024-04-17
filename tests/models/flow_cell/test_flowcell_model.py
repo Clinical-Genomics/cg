@@ -14,13 +14,14 @@ from cg.constants.sequencing import Sequencers
 from cg.exc import FlowCellError
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.utils.flow_cell import get_flow_cell_id
 
 
 def test_flow_cell_id(bcl2fastq_flow_cell_dir: Path):
     """Test parsing of flow cell id."""
     # GIVEN the path to a finished flow cell run
     # GIVEN the flow cell id
-    flowcell_id: str = bcl2fastq_flow_cell_dir.name.split("_")[-1][1:]
+    flowcell_id: str = get_flow_cell_id(bcl2fastq_flow_cell_dir.name)
 
     # WHEN instantiating a flow cell object
     flowcell_obj = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
