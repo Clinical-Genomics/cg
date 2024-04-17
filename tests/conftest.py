@@ -2432,7 +2432,7 @@ def raredisease_context(
 
 
 @pytest.fixture(scope="function")
-def deliverable_data(raredisease_dir: Path, raredisease_case_id: str, sample_id: str) -> dict:
+def raredisease_deliverable_data(raredisease_dir: Path, raredisease_case_id: str, sample_id: str) -> dict:
     return {
         "files": [
             {
@@ -2532,18 +2532,6 @@ def raredisease_malformed_hermes_deliverables(raredisease_hermes_deliverables: d
 
     return malformed_deliverable
 
-
-@pytest.fixture(scope="function")
-def raredisease_hermes_deliverables(
-    raredisease_deliverable_data: dict, raredisease_case_id: str
-) -> dict:
-    hermes_output: dict = {"workflow": "raredisease", "bundle_id": raredisease_case_id, "files": []}
-    for file_info in raredisease_deliverable_data["files"]:
-        tags: list[str] = []
-        if "html" in file_info["format"]:
-            tags.append("multiqc-html")
-        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
-    return hermes_output
 
 
 # Rnafusion fixtures
