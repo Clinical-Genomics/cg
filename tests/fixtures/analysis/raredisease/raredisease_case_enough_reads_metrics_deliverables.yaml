@@ -268,7 +268,9 @@ metrics:
   name: PCT_PF_UQ_READS
   step: multiqc
   value: 0.952489
-- condition: null
+- condition:
+    norm: lt
+    threshold: 0.95
   header: null
   id: ADM1
   input: multiqc_data.json
@@ -321,7 +323,7 @@ metrics:
   value: 0.047463
 - condition:
     norm: gt
-    threshold: 0.0
+    threshold: 0.0005
   header: null
   id: ADM1
   input: multiqc_data.json
