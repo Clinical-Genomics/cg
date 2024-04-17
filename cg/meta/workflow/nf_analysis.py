@@ -692,8 +692,6 @@ class NfAnalysisAPI(AnalysisAPI):
         """Write <case>_metrics_deliverables.yaml file."""
         metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
         content: dict = self.create_metrics_deliverables_content(case_id=case_id)
-        LOG.info(content)
-        LOG.info("content created")
         if dry_run:
             LOG.info(
                 f"Dry-run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
