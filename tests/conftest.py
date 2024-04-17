@@ -2534,7 +2534,9 @@ def raredisease_multiqc_json_metrics(raredisease_analysis_dir) -> dict:
 
 
 @pytest.fixture(scope="function")
-def raredisease_hermes_deliverables(raredisease_deliverable_data: dict, raredisease_case_id: str) -> dict:
+def raredisease_hermes_deliverables(
+    raredisease_deliverable_data: dict, raredisease_case_id: str
+) -> dict:
     hermes_output: dict = {"workflow": "raredisease", "bundle_id": raredisease_case_id, "files": []}
     for file_info in raredisease_deliverable_data["files"]:
         tags: list[str] = []
@@ -2542,7 +2544,6 @@ def raredisease_hermes_deliverables(raredisease_deliverable_data: dict, raredise
             tags.append("multiqc-html")
         hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
     return hermes_output
-
 
 
 @pytest.fixture(scope="function")
