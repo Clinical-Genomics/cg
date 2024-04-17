@@ -179,12 +179,12 @@
   path_index: ~
   step: smncopynumbercaller
   tag: ~
-# - format: meta
-#   id: CASEID
-#   path: /home/proj/stage/rare-disease/references/references_12.0/grch37_expansionhunter_variant_catalog_-5.0.0-.json
-#   path_index: ~
-#   step: expansionhunter
-#   tag: variant_catalog
+- format: meta
+  id: CASEID
+  path: /home/proj/production/workflows/raredisease/references/references_2.0.1_mtp_1/grch37_expansionhunter_variant_catalog_-5.0.0-.json
+  path_index: ~
+  step: expansionhunter
+  tag: variant_catalog
 - format: vcf
   id: CASEID
   path: PATHTOCASE/repeat_expansions/CASEID_repeat_expansion_stranger.vcf.gz
@@ -203,7 +203,6 @@
   path_index: PATHTOCASE/repeat_expansions/SAMPLEID_exphunter_sorted.bam.bai
   step: expansionhunter
   tag: str_alignment
-
 # No present as rd output:
 # - format: meta
 #   id: SAMPLEID
@@ -211,7 +210,6 @@
 #   path_index: ~
 #   step: vcf2cytosure_ar
 #   tag: ~
-
 #gens not executed
 # - format: bed
 #   id: SAMPLEID
@@ -225,17 +223,6 @@
 #   path_index: PATHTOCASE/SAMPLEID/gens_generatedata/SAMPLEID_lanes_1_fastp_sorted_md.cov.bed.gz.tbi
 #   step: gens_generatedata
 #   tag: cov
-
-
-
-#pedigree output?
-
-
-# more multiqc files -> all in the main, remove in rnafusion, taxprofiler, etc
-# fastqc files?
-# trimmed fastq/fastqc files?
-
-
 - format: vcf
   id: CASEID
   path: PATHTOCASE/call_mobile_elements/CASEID_mobile_elements.vcf.gz
@@ -368,6 +355,12 @@
   path_index: ~
   step: peddy
   tag: ped_check
+# - format: meta
+#     id: CASEID
+#     path: PATHTOCASE/TODO/CASEID.ped
+#     path_index: ~
+#     step: TODO
+#     tag: pedigree_fam
 - format: bw
   id: SAMPLEID
   path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz/SAMPLEID_rhocallviz.bw
@@ -858,13 +851,103 @@
   path: PATHTOCASE/multiqc/multiqc_data/multiqc_data.json
   path_index: ~
   step: multiqc
-  tag: json
+  tag: multiqx
 - format: meta
   id: CASEID
   path: PATHTOCASE/multiqc/multiqc_data/multiqc_report.html
   path_index: ~
   step: multiqc
-  tag: html
+  tag: multiqc
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/mosdepth_cov_dist.json
+  path_index: ~
+  step: multiqc
+  tag: multiqc-mosdepth-covdist
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/mosdepth_cumcov_dist.json
+  path_index: ~
+  step: multiqc
+  tag: multiqc-mosdepth-cumcov
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/mosdepth_perchrom.json
+  path_index: ~
+  step: multiqc
+  tag: multiqc-mosdepth-perchrom
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_general_stats.json
+  path_index: ~
+  step: multiqc
+  tag: multiqc-general-stats
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_peddy.json
+  path_index: ~
+  step: multiqc
+  tag: multiqc-peddy
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_AlignmentSummaryMetrics.json
+  path_index: ~
+  step: multiqc
+  tag: multiqc-picard-alignment
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_HsMetrics.json
+  path_index: ~
+  step: multiqc
+  tag: multiqc-picard-hs
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_insertSize.json
+  path_index: ~
+  step: multiqc
+  tag: multiqc-picard-insertsize
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_quality_by_cycle.json
+  path_index: ~
+  step: multiqc
+  tag: multiqc-picard-qualitycycle
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_quality_score_distribution.json
+  path_index: ~
+  step: multiqc
+  tag: multiqc-picard-qualitydistr
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_picard_wgsmetrics.json
+  path_index: ~
+  step: multiqc
+  tag: multiqc-picard-wgs
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/multiqc_qualimap_bamqc_genome_results.json
+  path_index: ~
+  step: multiqc
+  tag: multiqc-picard-bamqc
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/picard_histogram_1.json
+  path_index: ~
+  step: multiqc
+  tag: multiqc-picard-histogram1
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/picard_histogram_2.json
+  path_index: ~
+  step: multiqc
+  tag: multiqc-picard-histogram2
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/multiqc/multiqc_data/picard_histogram_3.json
+  path_index: ~
+  step: multiqc
+  tag: multiqc-picard-histogram3
 - format: csv
   id: CASEID
   path: PATHTOCASE/CASEID_samplesheet.csv
