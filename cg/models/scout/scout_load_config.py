@@ -6,6 +6,7 @@ from pydantic import BaseModel, BeforeValidator, ConfigDict
 from typing_extensions import Annotated, Literal
 
 from cg.constants.scout import UploadTrack
+from cg.constants.subject import PhenotypeStatus
 from cg.models.scout.validators import field_not_none
 
 
@@ -44,7 +45,7 @@ class ScoutIndividual(BaseModel):
     confirmed_sex: bool | None = None
     father: str | None = None
     mother: str | None = None
-    phenotype: str | None = None
+    phenotype: PhenotypeStatus | None = None
     sample_id: Annotated[str, BeforeValidator(field_not_none)] = None
     sample_name: str | None = None
     sex: Annotated[str | None, BeforeValidator(field_not_none)] = None
