@@ -65,7 +65,6 @@
                 "PCT_EXC_BASEQ": 0.011212,
                 "PCT_EXC_OVERLAP": 0.046622,
                 "PCT_EXC_OFF_TARGET": 0.838374,
-                "FOLD_80_BASE_PENALTY": 1.227325,
                 "PCT_TARGET_BASES_1X": 0.986489,
                 "PCT_TARGET_BASES_2X": 0.985327,
                 "PCT_TARGET_BASES_10X": 0.9692,
