@@ -2528,6 +2528,33 @@ def raredisease_mock_analysis_finish(
 
 
 @pytest.fixture(scope="function")
+def raredisease_mock_deliverable_dir(
+    raredisease_dir: Path, raredisease_deliverable_data: dict, raredisease_case_id: str
+) -> Path:
+    """Create deliverable file with dummy data and files to deliver."""
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id),
+        parents=True,
+        exist_ok=True,
+    )
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id, "multiqc"),
+        parents=True,
+        exist_ok=True,
+    )
+    for report_entry in raredisease_deliverable_data["files"]:
+        Path(report_entry["path"]).touch(exist_ok=True)
+    WriteFile.write_file_from_content(
+        content=raredisease_deliverable_data,
+        file_format=FileFormat.JSON,
+        file_path=Path(
+            raredisease_dir, raredisease_case_id, raredisease_case_id + deliverables_yaml
+        ),
+    )
+    return raredisease_dir
+
+
+@pytest.fixture(scope="function")
 def raredisease_multiqc_json_metrics(raredisease_analysis_dir) -> dict:
     """Returns the content of a mock Multiqc JSON file."""
     return read_json(file_path=Path(raredisease_analysis_dir, multiqc_json_file))
@@ -2869,7 +2896,6 @@ def rnafusion_mock_deliverable_dir(
         file_format=FileFormat.JSON,
         file_path=Path(rnafusion_dir, rnafusion_case_id, rnafusion_case_id + deliverables_yaml),
     )
-
     return rnafusion_dir
 
 

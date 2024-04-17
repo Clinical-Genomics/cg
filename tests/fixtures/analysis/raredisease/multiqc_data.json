@@ -1,0 +1,127 @@
+{
+    "report_data_sources": {},
+    "report_general_stats_data": [
+        {
+            "rnafusion_case_enough_reads": {
+                "PF_BASES": 14818118467.0,
+                "PF_ALIGNED_BASES": 14216931956.0,
+                "RIBOSOMAL_BASES": 93556030.0,
+                "CODING_BASES": 8123651685.0,
+                "UTR_BASES": 4099091115.0,
+                "INTRONIC_BASES": 1642902977.0,
+                "INTERGENIC_BASES": 257730149.0,
+                "IGNORED_READS": 0.0,
+                "CORRECT_STRAND_READS": 97603146.0,
+                "INCORRECT_STRAND_READS": 1111278.0,
+                "NUM_R1_TRANSCRIPT_STRAND_READS": 514532.0,
+                "NUM_R2_TRANSCRIPT_STRAND_READS": 48254438.0,
+                "NUM_UNEXPLAINED_READS": 679669.0,
+                "PCT_R1_TRANSCRIPT_STRAND_READS": 1.055,
+                "PCT_R2_TRANSCRIPT_STRAND_READS": 98.94500000000001,
+                "PCT_RIBOSOMAL_BASES": 0.6581,
+                "PCT_CODING_BASES": 57.1407,
+                "PCT_UTR_BASES": 28.8325,
+                "PCT_INTRONIC_BASES": 11.556,
+                "PCT_INTERGENIC_BASES": 1.8127999999999997,
+                "PCT_MRNA_BASES": 85.9731,
+                "PCT_USABLE_BASES": 82.4851,
+                "PCT_CORRECT_STRAND_READS": 98.8742,
+                "MEDIAN_CV_COVERAGE": 0.396435,
+                "MEDIAN_5PRIME_BIAS": 0.784592,
+                "MEDIAN_3PRIME_BIAS": 0.61818,
+                "MEDIAN_5PRIME_TO_3PRIME_BIAS": 1.1211,
+                "SAMPLE": "",
+                "LIBRARY": "",
+                "READ_GROUP": "",
+                "PF_NOT_ALIGNED_BASES": 601186511.0
+            }
+        },
+        {
+            "rnafusion_case_enough_reads": {
+                "LIBRARY": "Unknown Library",
+                "UNPAIRED_READS_EXAMINED": 589.0,
+                "READ_PAIRS_EXAMINED": 72391566.0,
+                "SECONDARY_OR_SUPPLEMENTARY_RDS": 15955495.0,
+                "UNMAPPED_READS": 4330483.0,
+                "UNPAIRED_READ_DUPLICATES": 410.0,
+                "READ_PAIR_DUPLICATES": 20682015.0,
+                "READ_PAIR_OPTICAL_DUPLICATES": 341387.0,
+                "PERCENT_DUPLICATION": 0.285698,
+                "ESTIMATED_LIBRARY_SIZE": 102249865.0
+            }
+        },
+        {
+            "rnafusion_case_enough_reads": {
+                "total_reads": 74557102.0,
+                "avg_input_read_length": 198.0,
+                "uniquely_mapped": 67865050.0,
+                "uniquely_mapped_percent": 91.02,
+                "avg_mapped_read_length": 196.52,
+                "num_splices": 42343777.0,
+                "num_annotated_splices": 42293347.0,
+                "num_GTAG_splices": 41860003.0,
+                "num_GCAG_splices": 401760.0,
+                "num_ATAC_splices": 34732.0,
+                "num_noncanonical_splices": 47282.0,
+                "mismatch_rate": 0.34,
+                "deletion_rate": 0.0,
+                "deletion_length": 1.26,
+                "insertion_rate": 0.01,
+                "insertion_length": 1.75,
+                "multimapped": 4527105.0,
+                "multimapped_percent": 6.07,
+                "multimapped_toomany": 33497.0,
+                "multimapped_toomany_percent": 0.04,
+                "unmapped_mismatches_percent": 0.26,
+                "unmapped_tooshort_percent": 2.56,
+                "unmapped_other_percent": 0.04,
+                "unmapped_mismatches": 193768,
+                "unmapped_tooshort": 1907871,
+                "unmapped_other": 29810
+            }
+        },
+        {
+            "rnafusion_case_enough_reads": {
+                "filtering_result_passed_filter_reads": 149114204.0,
+                "filtering_result_low_quality_reads": 855796.0,
+                "filtering_result_too_many_N_reads": 4992.0,
+                "filtering_result_too_short_reads": 9050.0,
+                "filtering_result_too_long_reads": 0.0,
+                "pct_duplication": 14.8643,
+                "after_filtering_total_reads": 149114204.0,
+                "after_filtering_total_bases": 14818118467.0,
+                "after_filtering_q20_bases": 14445202304.0,
+                "after_filtering_q30_bases": 13773086666.0,
+                "after_filtering_q20_rate": 0.974834,
+                "after_filtering_q30_rate": 0.929476,
+                "after_filtering_read1_mean_length": 99.0,
+                "after_filtering_read2_mean_length": 99.0,
+                "after_filtering_gc_content": 0.516984,
+                "before_filtering_total_reads": 149984042.0,
+                "pct_surviving": 99.42004630065911,
+                "adapter_cutting_adapter_trimmed_reads": 18006566.0,
+                "adapter_cutting_adapter_trimmed_bases": 228026691.0,
+                "pct_adapter": 12.005654574904709
+            }
+        },
+        {
+            "rnafusion_case_enough_reads_1": {
+            "percent_gc": 51.0,
+            "avg_sequence_length": 98.42709962090532,
+            "median_sequence_length": 100,
+            "total_sequences": 74557102.0,
+            "percent_duplicates": 64.54554620264767,
+            "percent_fails": 18.181818181818183
+        },
+            "rnafusion_case_enough_reads_2": {
+            "percent_gc": 51.0,
+            "avg_sequence_length": 151.0,
+            "median_sequence_length": 151,
+            "total_sequences": 74992021.0,
+            "percent_duplicates": 65.06134207022326,
+            "percent_fails": 27.27272727272727
+        }
+        }
+    ],
+    "report_general_stats_headers": []
+}
