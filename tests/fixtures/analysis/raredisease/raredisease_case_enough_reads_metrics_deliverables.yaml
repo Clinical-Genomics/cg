@@ -497,6 +497,20 @@ metrics:
   header: null
   id: ADM1
   input: multiqc_data.json
+  name: HET_SNP_SENSITIVITY
+  step: multiqc
+  value: 0.984192
+- condition: null
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: HET_SNP_Q
+  step: multiqc
+  value: 18.0
+- condition: null
+  header: null
+  id: ADM1
+  input: multiqc_data.json
   name: SAMPLE
   step: multiqc
   value: ''
@@ -724,20 +738,6 @@ metrics:
   name: FOLD_95_BASE_PENALTY
   step: multiqc
   value: 2.083525
-- condition: null
-  header: null
-  id: ADM1
-  input: multiqc_data.json
-  name: HET_SNP_SENSITIVITY
-  step: multiqc
-  value: 0.984192
-- condition: null
-  header: null
-  id: ADM1
-  input: multiqc_data.json
-  name: HET_SNP_Q
-  step: multiqc
-  value: 18.0
 - condition: null
   header: null
   id: ADM1
