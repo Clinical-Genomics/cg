@@ -2432,7 +2432,9 @@ def raredisease_context(
 
 
 @pytest.fixture(scope="function")
-def raredisease_deliverable_data(raredisease_dir: Path, raredisease_case_id: str, sample_id: str) -> dict:
+def raredisease_deliverable_data(
+    raredisease_dir: Path, raredisease_case_id: str, sample_id: str
+) -> dict:
     return {
         "files": [
             {
@@ -2531,7 +2533,6 @@ def raredisease_malformed_hermes_deliverables(raredisease_hermes_deliverables: d
     malformed_deliverable.pop("workflow")
 
     return malformed_deliverable
-
 
 
 # Rnafusion fixtures
