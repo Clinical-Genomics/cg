@@ -473,15 +473,13 @@ class AnalysisAPI(MetaAPI):
         return None
 
     def get_latest_metadata(self, case_id: str) -> AnalysisModel:
-        """Get the latest metadata of a specific case"""
-
+        """Get the latest metadata of a specific case."""
         raise NotImplementedError
 
     def parse_analysis(
         self, config_raw: dict, qc_metrics_raw: dict, sample_info_raw: dict
     ) -> AnalysisModel:
-        """Parses output analysis files"""
-
+        """Parses output analysis files."""
         raise NotImplementedError
 
     def clean_analyses(self, case_id: str) -> None:
