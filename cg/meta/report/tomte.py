@@ -1,11 +1,23 @@
 """Tomte delivery report API."""
 
+from cg.constants import (
+    REQUIRED_APPLICATION_FIELDS,
+    REQUIRED_CASE_FIELDS,
+    REQUIRED_CUSTOMER_FIELDS,
+    REQUIRED_DATA_ANALYSIS_TOMTE_FIELDS,
+    REQUIRED_REPORT_FIELDS,
+    REQUIRED_SAMPLE_METADATA_TOMTE_FIELDS,
+    REQUIRED_SAMPLE_METHODS_FIELDS,
+    REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
+    REQUIRED_SAMPLE_TOMTE_FIELDS,
+)
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.report.metadata import TomteSampleMetadataModel
+from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
 from cg.models.tomte.tomte import TomteQCMetrics
 from cg.store.models import Case, Sample
@@ -61,3 +73,27 @@ class TomteReportAPI(ReportAPI):
     ) -> bool:
         """Check if the Tomte analysis has been accredited."""
         return False
+
+    def get_required_fields(self, case: CaseModel) -> dict:
+        """Return dictionary with the delivery report required fields for Rnafusion."""
+        return {
+            "report": REQUIRED_REPORT_FIELDS,
+            "customer": REQUIRED_CUSTOMER_FIELDS,
+            "case": REQUIRED_CASE_FIELDS,
+            "applications": self.get_application_required_fields(
+                case=case, required_fields=REQUIRED_APPLICATION_FIELDS
+            ),
+            "data_analysis": REQUIRED_DATA_ANALYSIS_TOMTE_FIELDS,
+            "samples": self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_TOMTE_FIELDS
+            ),
+            "methods": self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
+            ),
+            "timestamps": self.get_timestamp_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
+            ),
+            "metadata": self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_METADATA_TOMTE_FIELDS
+            ),
+        }

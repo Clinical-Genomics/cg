@@ -102,6 +102,8 @@ REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS: list[str] = REQUIRED_DATA_ANALYSIS_FIELD
 
 REQUIRED_DATA_ANALYSIS_RNAFUSION_FIELDS: list[str] = REQUIRED_DATA_ANALYSIS_FIELDS
 
+REQUIRED_DATA_ANALYSIS_TOMTE_FIELDS: list[str] = REQUIRED_DATA_ANALYSIS_FIELDS
+
 # Sample required fields
 _REQUIRED_SAMPLE_FIELDS: list[str] = [
     "name",
@@ -124,6 +126,8 @@ REQUIRED_SAMPLE_BALSAMIC_FIELDS: list[str] = _REQUIRED_SAMPLE_FIELDS + [
 ]
 
 REQUIRED_SAMPLE_RNAFUSION_FIELDS: list[str] = REQUIRED_SAMPLE_BALSAMIC_FIELDS
+
+REQUIRED_SAMPLE_TOMTE_FIELDS: list[str] = REQUIRED_SAMPLE_MIP_DNA_FIELDS
 
 # Methods required fields (OPTIONAL: "library_prep", "sequencing")
 REQUIRED_SAMPLE_METHODS_FIELDS: list[str] = []
@@ -184,11 +188,10 @@ REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS: list[str] = (
     ]
 )
 
-REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
+_REQUIRED_SAMPLE_METADATA_NEXTFLOW_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
     "bias_5_3",
     "gc_content",
     "input_amount",
-    "mapped_reads",
     "mean_length_r1",
     "mrna_bases",
     "pct_adapter",
@@ -198,4 +201,14 @@ REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA
     "ribosomal_bases",
     "rin",
     "uniquely_mapped_reads",
+]
+
+REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_NEXTFLOW_FIELDS + [
+    "mapped_reads",
+]
+
+
+REQUIRED_SAMPLE_METADATA_TOMTE_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_NEXTFLOW_FIELDS + [
+    "pct_intergenic_bases",
+    "pct_intronic_bases",
 ]
