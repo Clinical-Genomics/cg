@@ -10,6 +10,8 @@ from cg.constants import (
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_RNAFUSION_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
+    RNAFUSION_REPORT_ACCREDITED_APPTAGS,
+    RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT,
     Workflow,
 )
 from cg.constants.constants import GenomeVersion
@@ -77,11 +79,31 @@ class RnafusionReportAPI(ReportAPI):
         """Return build version of the genome reference of a specific case."""
         return GenomeVersion.hg38.value
 
+    @staticmethod
+    def is_apptag_accredited(samples: list[SampleModel]) -> bool:
+        """Return Rnafusion input application tag accreditation status."""
+        return all(
+            sample.application.tag in RNAFUSION_REPORT_ACCREDITED_APPTAGS for sample in samples
+        )
+
+    @staticmethod
+    def is_input_amount_accredited(samples: list[SampleModel]) -> bool:
+        """Return Rnafusion input amount accreditation status."""
+        try:
+            return all(
+                float(sample.metadata.input_amount) >= RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT
+                for sample in samples
+            )
+        except ValueError:
+            return False
+
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
-        """Check if the report is accredited. Rnafusion is an accredited workflow."""
-        return True
+        """Return whether the Rnafusion delivery report is accredited or not."""
+        is_apptag_accredited: bool = self.is_apptag_accredited(samples)
+        is_input_amount_accredited: bool = self.is_input_amount_accredited(samples)
+        return is_apptag_accredited and is_input_amount_accredited
 
     def get_template_name(self) -> str:
         """Return template name to render the delivery report."""
