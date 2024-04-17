@@ -17,7 +17,7 @@
     "report_saved_raw_data": {
         "multiqc_picard_AlignmentSummaryMetrics": {
             "ADM1": {
-                "PCT_ADAPTER": 1e-06
+                "PCT_EXC_ADAPTER": 1e-06
             }
         }
     }
