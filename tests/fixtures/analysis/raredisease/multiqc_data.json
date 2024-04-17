@@ -205,7 +205,6 @@
                 "het_ratio_sex_check": 0.03753,
                 "predicted_sex_sex_check": "male",
                 "error_sex_check": "True"
->>>>>>> b020e3aec8b9ca3defcb6333f6ceada3c6634cf9
             }
         }
     ]
