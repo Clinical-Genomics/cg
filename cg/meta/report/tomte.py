@@ -75,7 +75,7 @@ class TomteReportAPI(ReportAPI):
         return False
 
     def get_required_fields(self, case: CaseModel) -> dict:
-        """Return dictionary with the delivery report required fields for Rnafusion."""
+        """Return the delivery report required fields for Tomte."""
         return {
             "report": REQUIRED_REPORT_FIELDS,
             "customer": REQUIRED_CUSTOMER_FIELDS,
