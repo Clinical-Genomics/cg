@@ -1,5 +1,7 @@
 from enum import StrEnum
 
+from pydantic.v1 import BaseModel
+
 from cg.constants.constants import Strandedness
 from cg.models.nf_analysis import NextflowSampleSheetEntry
 
@@ -38,3 +40,22 @@ class TomteSampleSheetHeaders(StrEnum):
     @classmethod
     def list(cls) -> list[str]:
         return list(map(lambda header: header.value, cls))
+
+
+class TomteQCMetrics(BaseModel):
+    """Tomte QC metrics."""
+
+    after_filtering_gc_content: float | None
+    after_filtering_q20_rate: float | None
+    after_filtering_q30_rate: float | None
+    after_filtering_read1_mean_length: float | None
+    before_filtering_total_reads: float | None
+    fraction_duplicates: float | None
+    MEDIAN_5PRIME_TO_3PRIME_BIAS: float | None
+    pct_adapter: float | None
+    PCT_INTERGENIC_BASES: float | None
+    PCT_INTRONIC_BASES: float | None
+    PCT_MRNA_BASES: float | None
+    PCT_RIBOSOMAL_BASES: float | None
+    pct_surviving: float | None
+    uniquely_mapped_percent: float | None
