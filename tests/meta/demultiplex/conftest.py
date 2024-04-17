@@ -13,7 +13,6 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -238,32 +237,6 @@ def flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer() -> str:
 
 
 @pytest.fixture(scope="session")
-def bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
-    """Return a folder structure that resembles a bcl2fastq run folder."""
-    base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), BclConverter.BCL2FASTQ)))
-    folders: list[str] = ["l1t21", "l1t11", "l2t11", "l2t21"]
-
-    for folder in folders:
-        new_dir: Path = Path(base_dir, folder)
-        new_dir.mkdir()
-
-    return base_dir
-
-
-@pytest.fixture(scope="function")
-def not_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
-    """Return a folder structure that does not resemble a bcl2fastq run folder."""
-    base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), "not_bcl2fastq")))
-    folders: list[str] = ["just", "some", "folders"]
-
-    for folder in folders:
-        new_dir: Path = Path(base_dir, folder)
-        new_dir.mkdir()
-
-    return base_dir
-
-
-@pytest.fixture(scope="session")
 def base_call_file() -> Path:
     return Path("Data", "Intensities", "BaseCalls", "L001", "C1.1", "L001_1.cbcl")
 
@@ -329,8 +302,8 @@ def bcl2fastq_flow_cell_dir_name(demux_post_processing_api) -> str:
 
 
 @pytest.fixture
-def bcl2fastq_sample_id_with_non_pooled_undetermined_reads() -> str:
-    return "SVE2528A1"
+def bcl_convert_sample_id_with_non_pooled_undetermined_reads() -> str:
+    return "ACC11927A2"
 
 
 @pytest.fixture
