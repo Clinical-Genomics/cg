@@ -27,7 +27,7 @@ from cg.apps.housekeeper.models import InputBundle
 from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, FileFormat
+from cg.constants.constants import CaseActions, FileFormat, Strandedness
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -2528,6 +2528,24 @@ def raredisease_mock_analysis_finish(
 
 
 @pytest.fixture(scope="function")
+def raredisease_multiqc_json_metrics(raredisease_analysis_dir) -> dict:
+    """Returns the content of a mock Multiqc JSON file."""
+    return read_json(file_path=Path(raredisease_analysis_dir, multiqc_json_file))
+
+
+@pytest.fixture(scope="function")
+def raredisease_hermes_deliverables(raredisease_deliverable_data: dict, raredisease_case_id: str) -> dict:
+    hermes_output: dict = {"workflow": "raredisease", "bundle_id": raredisease_case_id, "files": []}
+    for file_info in raredisease_deliverable_data["files"]:
+        tags: list[str] = []
+        if "html" in file_info["format"]:
+            tags.append("multiqc-html")
+        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
+    return hermes_output
+
+
+
+@pytest.fixture(scope="function")
 def raredisease_malformed_hermes_deliverables(raredisease_hermes_deliverables: dict) -> dict:
     malformed_deliverable: dict = raredisease_hermes_deliverables.copy()
     malformed_deliverable.pop("workflow")
@@ -3016,6 +3034,12 @@ def tomte_mock_deliverable_dir(
     )
 
     return tomte_dir
+
+
+@pytest.fixture(scope="session")
+def strandedness() -> str:
+    """Return a default strandedness."""
+    return Strandedness.REVERSE
 
 
 @pytest.fixture(scope="function")
