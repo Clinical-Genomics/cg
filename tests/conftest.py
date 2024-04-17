@@ -2581,6 +2581,31 @@ def raredisease_malformed_hermes_deliverables(raredisease_hermes_deliverables: d
     return malformed_deliverable
 
 
+@pytest.fixture(scope="function")
+def raredisease_deliverables_response_data(
+    create_multiqc_html_file,
+    create_multiqc_json_file,
+    raredisease_case_id,
+    timestamp_yesterday,
+) -> InputBundle:
+    return InputBundle(
+        **{
+            "files": [
+                {
+                    "path": create_multiqc_json_file.as_posix(),
+                    "tags": ["multiqc-json", raredisease_case_id],
+                },
+                {
+                    "path": create_multiqc_html_file.as_posix(),
+                    "tags": ["multiqc-html", raredisease_case_id],
+                },
+            ],
+            "created": timestamp_yesterday,
+            "name": raredisease_case_id,
+        }
+    )
+
+
 # Rnafusion fixtures
 
 
