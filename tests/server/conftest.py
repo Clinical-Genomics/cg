@@ -48,6 +48,7 @@ def order(
         customer_id=customer.id,
         ticket_id=1,
         order_date=datetime.now(),
+        workflow=Workflow.MIP_DNA,
     )
     order.cases.append(server_case)
     order.cases.append(server_case_in_same_order)
@@ -112,6 +113,8 @@ def trailblazer_analysis_for_server_case(server_case: Case):
         completed_at="",
         out_dir="",
         config_path="",
+        uploaded_at="2024-01-01",
+        workflow=Workflow.MIP_DNA,
     )
 
 
@@ -125,6 +128,8 @@ def trailblazer_analysis_for_server_case_in_same_order(server_case_in_same_order
         completed_at="",
         out_dir="",
         config_path="",
+        uploaded_at="2023-01-01",
+        workflow=Workflow.MIP_DNA,
     )
 
 
