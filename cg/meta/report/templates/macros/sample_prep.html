@@ -1,4 +1,5 @@
 {% macro sample_prep(case) %}
+{% set workflow = case.data_analysis.workflow %}
   <div class="container mb-5">
     <h3 class="mb-4">Provberedning</h3>
     <table class="table w-auto text-center align-middle" aria-describedby="sample-prep-table">
@@ -11,7 +12,7 @@
           <th scope="col">Biblioteksberedning</th>
           <!-- Bait set column -->
           <th scope="col">
-            {{ bait_set(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type) }}
+            {{ bait_set(workflow=workflow, analysis_type=case.data_analysis.type) }}
           </th>
           <th scope="col">Sekvensering</th>
         </tr>
@@ -26,7 +27,7 @@
           <td>{{ sample.methods.library_prep }}</td>
           <!-- Bait set value -->
           <td>
-            {{ bait_set_value(workflow=case.data_analysis.workflow, analysis_type=case.data_analysis.type, sample=sample) }}
+            {{ bait_set_value(workflow=workflow, analysis_type=case.data_analysis.type, sample=sample) }}
           </td>
           <td>{{ sample.methods.sequencing }}</td>
         </tr>

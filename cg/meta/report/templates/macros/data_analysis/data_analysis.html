@@ -4,7 +4,7 @@
 {% from "/macros/data_analysis/limitations.html" import apptag_limitations %}
 
 {% macro data_analysis(case) %}
-{% set workflow = case.data_analysis.workflow  %}
+{% set workflow = case.data_analysis.workflow %}
   <div class="container mb-5">
   <h3 class="mb-4">Analys</h3>
     <!-- Workflow analysis data -->
@@ -26,7 +26,7 @@
 {% endmacro %}
 
 {% macro workflow_analysis(case) %}
-{% set workflow = case.data_analysis.workflow  %}
+{% set workflow = case.data_analysis.workflow %}
   <h4 class="mt-4 mb-3">Dataanalys</h4>
   <table class="table w-auto text-center align-middle" aria-describedby="data-analysis-table">
     <thead class="table-secondary">
@@ -55,7 +55,7 @@
 {% endmacro %}
 
 {% macro data_analysis_alert(case) %}
-{% set workflow = case.data_analysis.workflow  %}
+{% set workflow = case.data_analysis.workflow %}
   {% if workflow in ("balsamic", "balsamic-umi") %}
     <div class="alert alert-info" role="alert">
       Den tillämpade variantanropningsfiltrerna finns på:
