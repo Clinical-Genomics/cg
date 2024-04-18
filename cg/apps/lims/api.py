@@ -2,6 +2,7 @@
 
 import datetime as dt
 import logging
+from typing import Any
 
 from dateutil.parser import parse as parse_date
 from genologics.entities import Artifact, Process, Researcher, Sample
@@ -53,10 +54,15 @@ class LimsAPI(Lims, OrderHandler):
     def user(self) -> Researcher:
         return self.get_researchers(username=self.username)[0]
 
-    def sample(self, lims_id: str):
+    def sample(self, lims_id: str) -> dict[str, Any]:
         """Fetch a sample from the LIMS database."""
-        lims_sample = Sample(self, id=lims_id)
-        return self._export_sample(lims_sample)
+        lims_sample = {}
+        try:
+            sample = Sample(self, id=lims_id)
+            lims_sample: dict[str, Any] = self._export_sample(sample)
+        except HTTPError as error:
+            LOG.warning(f"Could not fetch sample {lims_id} from LIMS: {error}")
+        return lims_sample
 
     def samples_in_pools(self, pool_name, projectname):
         """Fetch all samples from a pool"""

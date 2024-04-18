@@ -3,6 +3,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 import requests
 from housekeeper.store.models import File, Version
@@ -251,7 +252,7 @@ class ReportAPI(MetaAPI):
         )
         for case_sample in case_samples:
             sample: Sample = case_sample.sample
-            lims_sample: dict | None = self.get_lims_sample(sample_id=sample.internal_id)
+            lims_sample: dict[str, Any] = self.lims_api.sample(sample.internal_id)
             delivered_files: list[File] | None = (
                 self.delivery_api.get_analysis_sample_delivery_files_by_sample(
                     case=case, sample=sample
@@ -270,7 +271,7 @@ class ReportAPI(MetaAPI):
                     id=sample.internal_id,
                     ticket=sample.original_ticket,
                     gender=sample.sex,
-                    source=lims_sample.get("source") if lims_sample else None,
+                    source=lims_sample.get("source"),
                     tumour=sample.is_tumour,
                     application=self.get_sample_application_data(
                         sample=sample, lims_sample=lims_sample
@@ -287,15 +288,6 @@ class ReportAPI(MetaAPI):
             )
         return samples
 
-    def get_lims_sample(self, sample_id: str) -> dict | None:
-        """Fetches sample data from LIMS. Returns an empty dictionary if the request was unsuccessful."""
-        lims_sample = dict()
-        try:
-            lims_sample: dict = self.lims_api.sample(sample_id)
-        except requests.exceptions.HTTPError as ex:
-            LOG.info(f"Could not fetch sample {sample_id} from LIMS: {ex}")
-        return lims_sample
-
     def get_workflow_accreditation_limitation(self, application_tag: str) -> str | None:
         """Return workflow specific limitations given an application tag."""
         application_limitation: ApplicationLimitations = (
@@ -305,7 +297,9 @@ class ReportAPI(MetaAPI):
         )
         return application_limitation.limitations if application_limitation else None
 
-    def get_sample_application_data(self, sample: Sample, lims_sample: dict) -> ApplicationModel:
+    def get_sample_application_data(
+        self, sample: Sample, lims_sample: dict[str:Any]
+    ) -> ApplicationModel:
         """Retrieves the analysis application attributes."""
         application: Application = self.status_db.get_application_by_tag(
             tag=lims_sample.get("application")
@@ -400,7 +394,7 @@ class ReportAPI(MetaAPI):
         case_sample: Sample = self.status_db.get_case_samples_by_case_id(
             case_internal_id=case.internal_id
         )[0].sample
-        lims_sample: dict | None = self.get_lims_sample(sample_id=case_sample.internal_id)
+        lims_sample: dict[str, Any] = self.lims_api.sample(case_sample.internal_id)
         application: Application = self.status_db.get_application_by_tag(
             tag=lims_sample.get("application")
         )
