@@ -22,7 +22,6 @@ from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
-from cg.models.balsamic.config import BalsamicVarCaller
 from cg.models.balsamic.metrics import (
     BalsamicQCMetrics,
     BalsamicTargetedQCMetrics,
@@ -111,37 +110,6 @@ class BalsamicReportAPI(ReportAPI):
     def get_data_analysis_type(self, case: Case) -> str | None:
         """Return data analysis type carried out."""
         return self.analysis_api.get_bundle_deliverables_type(case_id=case.internal_id)
-
-    def get_variant_callers(self, _analysis_metadata: BalsamicAnalysis) -> list:
-        """
-        Return list of Balsamic variant-calling filters and their versions (if available) from the
-        config.json file.
-        """
-        sequencing_type: str = _analysis_metadata.config.analysis.sequencing_type
-        analysis_type: str = _analysis_metadata.config.analysis.analysis_type
-        var_callers: dict[str, BalsamicVarCaller] = _analysis_metadata.config.vcf
-        tool_versions: dict[str, list] = _analysis_metadata.config.bioinfo_tools_version
-        analysis_var_callers = list()
-        for var_caller_name, var_caller_attributes in var_callers.items():
-            if (
-                sequencing_type in var_caller_attributes.sequencing_type
-                and analysis_type in var_caller_attributes.analysis_type
-            ):
-                version: str = self.get_variant_caller_version(
-                    var_caller_name=var_caller_name, var_caller_versions=tool_versions
-                )
-                analysis_var_callers.append(
-                    f"{var_caller_name} (v{version})" if version else var_caller_name
-                )
-        return analysis_var_callers
-
-    @staticmethod
-    def get_variant_caller_version(var_caller_name: str, var_caller_versions: dict) -> str | None:
-        """Return version of a specific Balsamic tool."""
-        for tool_name, versions in var_caller_versions.items():
-            if tool_name in var_caller_name:
-                return versions[0]
-        return None
 
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: BalsamicAnalysis

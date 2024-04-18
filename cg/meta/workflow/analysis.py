@@ -480,6 +480,10 @@ class AnalysisAPI(MetaAPI):
         """Return the build version of the reference genome."""
         raise NotImplementedError
 
+    def get_variant_callers(self, analysis_metatada: AnalysisModel) -> list[str]:
+        """Return list of variant-calling filters used during analysis."""
+        return []
+
     def parse_analysis(
         self, config_raw: dict, qc_metrics_raw: dict, sample_info_raw: dict
     ) -> AnalysisModel:

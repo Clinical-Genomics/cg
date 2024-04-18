@@ -352,8 +352,8 @@ class ReportAPI(MetaAPI):
             workflow=analysis.workflow,
             workflow_version=analysis.workflow_version,
             type=self.get_data_analysis_type(case=case),
-            genome_build=self.analysis_api.get_genome_build(analysis_metadata=analysis_metadata),
-            variant_callers=self.get_variant_callers(_analysis_metadata=analysis_metadata),
+            genome_build=self.analysis_api.get_genome_build(analysis_metadata),
+            variant_callers=self.analysis_api.get_variant_callers(analysis_metadata),
             panels=case.panels,
             scout_files=self.get_scout_uploaded_files(case=case),
             delivered_files=delivered_files,
@@ -392,10 +392,6 @@ class ReportAPI(MetaAPI):
             tag=lims_sample.get("application")
         )
         return application.analysis_type if application else None
-
-    def get_variant_callers(self, _analysis_metadata: AnalysisModel) -> list:
-        """Return list of variant-calling filters used during analysis."""
-        return []
 
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
