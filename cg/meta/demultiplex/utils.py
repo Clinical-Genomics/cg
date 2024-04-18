@@ -236,13 +236,6 @@ def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
     return are_all_files_synced(files_at_source=files_at_source, target_directory=target_directory)
 
 
-def get_flow_cell_id(flow_cell_dir_name: str) -> str:
-    """Return the flow cell id from the flow cell directory name.
-    Example: 230802_A00689_0857_BHGTMFDSX7 -> HGTMFDSX7
-    """
-    return flow_cell_dir_name.split("_")[-1][1:]
-
-
 def is_manifest_file_required(flow_cell_dir: Path) -> bool:
     """Returns whether a flow cell directory needs a manifest file."""
     illumina_manifest_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST)
