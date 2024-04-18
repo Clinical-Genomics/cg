@@ -6,14 +6,14 @@ from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
     create_undetermined_non_pooled_metrics,
 )
-from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
+from cg.apps.sequencing_metrics_parser.parser import MetricsParser
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.models import SampleLaneSequencingMetrics
 
 
 def test_create_sample_lane_sequencing_metrics_for_flow_cell(
     bcl_convert_metrics_dir_path: Path,
-    parsed_bcl_convert_metrics: BclConvertMetricsParser,
+    parsed_bcl_convert_metrics: MetricsParser,
 ):
     """Test to create sequencing statistics from bcl convert metrics."""
     # GIVEN a parsed bcl convert metrics file

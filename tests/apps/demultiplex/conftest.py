@@ -288,15 +288,6 @@ def bcl_convert_sample_sheet_path(illumina_demultiplexed_runs_directory):
 
 
 @pytest.fixture
-def bcl2fastq_sample_sheet_path(illumina_demultiplexed_runs_directory):
-    return Path(
-        illumina_demultiplexed_runs_directory,
-        "170407_ST-E00198_0209_BHHKVCALXX",
-        "SampleSheet.csv",
-    )
-
-
-@pytest.fixture
 def override_cycles_validator() -> OverrideCyclesValidator:
     """Return an override cycles validator without any initialised attribute."""
     return OverrideCyclesValidator()
