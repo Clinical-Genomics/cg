@@ -48,12 +48,6 @@ class DemultiplexingScenario(BaseModel):
             samples_ids="bcl_convert_demultiplexed_flow_cell_sample_internal_ids",
         ),
         DemultiplexingScenario(
-            flow_cell_directory="flow_cell_directory_name_demultiplexed_with_bcl2fastq",
-            flow_cell_name="flow_cell_name_demultiplexed_with_bcl2fastq",
-            samples_ids="bcl2fastq_demultiplexed_flow_cell_sample_internal_ids",
-            bcl_converter=BclConverter.BCL2FASTQ,
-        ),
-        DemultiplexingScenario(
             flow_cell_directory="flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer",
             flow_cell_name="flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer",
             samples_ids="bcl_convert_demultiplexed_flow_cell_sample_internal_ids",
@@ -64,7 +58,7 @@ class DemultiplexingScenario(BaseModel):
             samples_ids="bcl_convert_demultiplexed_flow_cell_sample_internal_ids",
         ),
     ],
-    ids=["BCLConvert tree", "BCL2FASTQ", "BCLConvert on sequencer", "BCLConvert flat"],
+    ids=["BCLConvert tree", "BCLConvert on sequencer", "BCLConvert flat"],
 )
 def test_post_processing_of_flow_cell(
     scenario: DemultiplexingScenario,
@@ -108,10 +102,7 @@ def test_post_processing_of_flow_cell(
     ).all()
 
     # WHEN post-processing the demultiplexed flow cell
-    demux_post_processing_api.finish_flow_cell(
-        flow_cell_directory_name=flow_cell_demultiplexing_directory,
-        bcl_converter=scenario.bcl_converter,
-    )
+    demux_post_processing_api.finish_flow_cell(flow_cell_demultiplexing_directory)
 
     # THEN a flow cell was created in statusdb
     assert demux_post_processing_api.status_db.get_flow_cell_by_name(flow_cell_name)
@@ -176,35 +167,6 @@ def test_get_all_demultiplexed_flow_cell_out_dirs(
     assert tmp_demultiplexed_runs_bcl2fastq_directory in demultiplexed_flow_cell_dirs
 
 
-def test_post_processing_tracks_undetermined_fastqs_for_bcl2fastq(
-    demux_post_processing_api: DemuxPostProcessingAPI,
-    bcl2fastq_flow_cell_dir_name: str,
-    bcl2fastq_sample_id_with_non_pooled_undetermined_reads: str,
-    bcl2fastq_non_pooled_sample_read_count: int,
-):
-    # GIVEN a flow cell with undetermined fastqs in a non-pooled lane
-
-    # WHEN post processing the flow cell
-    demux_post_processing_api.finish_flow_cell(
-        flow_cell_directory_name=bcl2fastq_flow_cell_dir_name, bcl_converter=BclConverter.BCL2FASTQ
-    )
-
-    # THEN the undetermined fastqs were stored in housekeeper
-    fastq_files: list[File] = demux_post_processing_api.hk_api.get_files(
-        tags=[SequencingFileTag.FASTQ],
-        bundle=bcl2fastq_sample_id_with_non_pooled_undetermined_reads,
-    ).all()
-
-    undetermined_fastq_files = [file for file in fastq_files if "Undetermined" in file.path]
-    assert undetermined_fastq_files
-
-    # THEN the sample read count was updated with the undetermined reads
-    sample: Sample = demux_post_processing_api.status_db.get_sample_by_internal_id(
-        bcl2fastq_sample_id_with_non_pooled_undetermined_reads
-    )
-    assert sample.reads == bcl2fastq_non_pooled_sample_read_count
-
-
 def test_post_processing_tracks_undetermined_fastqs_for_bclconvert(
     demux_post_processing_api: DemuxPostProcessingAPI,
     bclconvert_flow_cell_dir_name: str,
@@ -214,10 +176,7 @@ def test_post_processing_tracks_undetermined_fastqs_for_bclconvert(
     # GIVEN a flow cell with undetermined fastqs in a non-pooled lane
 
     # WHEN post processing the flow cell
-    demux_post_processing_api.finish_flow_cell(
-        flow_cell_directory_name=bclconvert_flow_cell_dir_name,
-        bcl_converter=BclConverter.BCLCONVERT,
-    )
+    demux_post_processing_api.finish_flow_cell(bclconvert_flow_cell_dir_name)
 
     # THEN the undetermined fastqs were stored in housekeeper
     fastq_files: list[File] = demux_post_processing_api.hk_api.get_files(
@@ -237,24 +196,22 @@ def test_post_processing_tracks_undetermined_fastqs_for_bclconvert(
 
 def test_sample_read_count_update_is_idempotent(
     demux_post_processing_api: DemuxPostProcessingAPI,
-    bcl2fastq_flow_cell_dir_name: str,
-    bcl2fastq_sample_id_with_non_pooled_undetermined_reads: str,
+    bclconvert_flow_cell_dir_name: str,
+    bcl_convert_sample_id_with_non_pooled_undetermined_reads: str,
 ):
     """Test that sample read counts are the same if the flow cell is processed twice."""
 
     # GIVEN a demultiplexed flow cell
 
     # WHEN post processing the flow cell twice
-    demux_post_processing_api.finish_flow_cell(
-        flow_cell_directory_name=bcl2fastq_flow_cell_dir_name, bcl_converter=BclConverter.BCL2FASTQ
-    )
+    demux_post_processing_api.finish_flow_cell(bclconvert_flow_cell_dir_name)
     first_sample_read_count: int = demux_post_processing_api.status_db.get_sample_by_internal_id(
-        bcl2fastq_sample_id_with_non_pooled_undetermined_reads
+        bcl_convert_sample_id_with_non_pooled_undetermined_reads
     ).reads
 
-    demux_post_processing_api.finish_flow_cell(bcl2fastq_flow_cell_dir_name)
+    demux_post_processing_api.finish_flow_cell(bclconvert_flow_cell_dir_name)
     second_sample_read_count: int = demux_post_processing_api.status_db.get_sample_by_internal_id(
-        bcl2fastq_sample_id_with_non_pooled_undetermined_reads
+        bcl_convert_sample_id_with_non_pooled_undetermined_reads
     ).reads
 
     # THEN the sample read counts are not zero

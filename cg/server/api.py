@@ -58,6 +58,7 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
     User,
+    ApplicationLimitations,
 )
 
 LOG = logging.getLogger(__name__)
@@ -488,7 +489,15 @@ def parse_application(tag: str):
     application: Application = db.get_application_by_tag(tag=tag)
     if not application:
         return abort(make_response(jsonify(message="Application not found"), HTTPStatus.NOT_FOUND))
-    return jsonify(**application.to_dict())
+
+    application_limitations: list[ApplicationLimitations] = db.get_application_limitations_by_tag(
+        tag
+    )
+    application_dict: dict[str, Any] = application.to_dict()
+    application_dict["workflow_limitations"] = [
+        limitation.to_dict() for limitation in application_limitations
+    ]
+    return jsonify(**application_dict)
 
 
 @BLUEPRINT.route("/applications/<tag>/workflow_limitations")
