@@ -3,8 +3,8 @@
 import logging
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
-import requests
 from housekeeper.store.models import File, Version
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sqlalchemy.orm import Query
@@ -254,7 +254,7 @@ class ReportAPI(MetaAPI):
         )
         for case_sample in case_samples:
             sample: Sample = case_sample.sample
-            lims_sample: dict | None = self.get_lims_sample(sample_id=sample.internal_id)
+            lims_sample: dict[str, Any] = self.lims_api.sample(sample.internal_id)
             delivered_files: list[File] | None = (
                 self.delivery_api.get_analysis_sample_delivery_files_by_sample(
                     case=case, sample=sample
@@ -273,7 +273,7 @@ class ReportAPI(MetaAPI):
                     id=sample.internal_id,
                     ticket=sample.original_ticket,
                     gender=sample.sex,
-                    source=lims_sample.get("source") if lims_sample else None,
+                    source=lims_sample.get("source"),
                     tumour=sample.is_tumour,
                     application=self.get_sample_application_data(
                         sample=sample, lims_sample=lims_sample
@@ -290,15 +290,6 @@ class ReportAPI(MetaAPI):
             )
         return samples
 
-    def get_lims_sample(self, sample_id: str) -> dict | None:
-        """Fetches sample data from LIMS. Returns an empty dictionary if the request was unsuccessful."""
-        lims_sample = dict()
-        try:
-            lims_sample: dict = self.lims_api.sample(sample_id)
-        except requests.exceptions.HTTPError as ex:
-            LOG.info(f"Could not fetch sample {sample_id} from LIMS: {ex}")
-        return lims_sample
-
     def get_workflow_accreditation_limitation(self, application_tag: str) -> str | None:
         """Return workflow specific limitations given an application tag."""
         application_limitation: ApplicationLimitations = (
@@ -308,7 +299,9 @@ class ReportAPI(MetaAPI):
         )
         return application_limitation.limitations if application_limitation else None
 
-    def get_sample_application_data(self, sample: Sample, lims_sample: dict) -> ApplicationModel:
+    def get_sample_application_data(
+        self, sample: Sample, lims_sample: dict[str:Any]
+    ) -> ApplicationModel:
         """Retrieves the analysis application attributes."""
         application: Application = self.status_db.get_application_by_tag(
             tag=lims_sample.get("application")
@@ -340,15 +333,9 @@ class ReportAPI(MetaAPI):
 
     def get_sample_methods_data(self, sample_id: str) -> MethodsModel:
         """Fetches sample library preparation and sequencing methods from LIMS."""
-        library_prep = None
-        sequencing = None
-        try:
-            library_prep = self.lims_api.get_prep_method(lims_id=sample_id)
-            sequencing = self.lims_api.get_sequencing_method(lims_id=sample_id)
-        except requests.exceptions.HTTPError as ex:
-            LOG.info(f"Could not fetch sample ({sample_id}) methods from LIMS: {ex}")
-
-        return MethodsModel(library_prep=library_prep, sequencing=sequencing)
+        prep_method: str | None = self.lims_api.get_prep_method(lims_id=sample_id)
+        sequencing_method: str | None = self.lims_api.get_sequencing_method(lims_id=sample_id)
+        return MethodsModel(library_prep=prep_method, sequencing=sequencing_method)
 
     def get_case_analysis_data(
         self,
@@ -358,7 +345,7 @@ class ReportAPI(MetaAPI):
     ) -> DataAnalysisModel:
         """Return workflow attributes used for data analysis."""
         delivered_files: list[File] | None = (
-            self.delivery_api.get_analysis_case_delivery_files(case=case)
+            self.delivery_api.get_analysis_case_delivery_files(case)
             if self.delivery_api.is_analysis_delivery(case.data_delivery)
             else None
         )
@@ -367,11 +354,11 @@ class ReportAPI(MetaAPI):
             data_delivery=case.data_delivery,
             workflow=analysis.workflow,
             workflow_version=analysis.workflow_version,
-            type=self.get_data_analysis_type(case=case),
-            genome_build=self.get_genome_build(analysis_metadata=analysis_metadata),
-            variant_callers=self.get_variant_callers(_analysis_metadata=analysis_metadata),
+            type=self.analysis_api.get_data_analysis_type(case),
+            genome_build=self.analysis_api.get_genome_build(analysis_metadata),
+            variant_callers=self.analysis_api.get_variant_callers(analysis_metadata),
             panels=case.panels,
-            scout_files=self.get_scout_uploaded_files(case=case),
+            scout_files=self.get_scout_uploaded_files(case),
             delivered_files=delivered_files,
         )
 
@@ -397,25 +384,6 @@ class ReportAPI(MetaAPI):
     ) -> SampleMetadataModel:
         """Return sample metadata to include in the report."""
         raise NotImplementedError
-
-    def get_data_analysis_type(self, case: Case) -> str | None:
-        """Return data analysis type carried out."""
-        case_sample: Sample = self.status_db.get_case_samples_by_case_id(
-            case_internal_id=case.internal_id
-        )[0].sample
-        lims_sample: dict | None = self.get_lims_sample(sample_id=case_sample.internal_id)
-        application: Application = self.status_db.get_application_by_tag(
-            tag=lims_sample.get("application")
-        )
-        return application.analysis_type if application else None
-
-    def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
-        """Return build version of the genome reference of a specific case."""
-        raise NotImplementedError
-
-    def get_variant_callers(self, _analysis_metadata: AnalysisModel) -> list:
-        """Return list of variant-calling filters used during analysis."""
-        return []
 
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel

@@ -176,9 +176,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_parameters(self, sample_obj: Sample) -> dict[str, str]:
         """Fill a dict with case config information for one sample"""
 
-        sample_id = sample_obj.internal_id
-        method_library_prep = self.lims_api.get_prep_method(sample_id)
-        method_sequencing = self.lims_api.get_sequencing_method(sample_id)
+        sample_id: str = sample_obj.internal_id
+        method_library_prep: str | None = self.lims_api.get_prep_method(sample_id)
+        method_sequencing: str | None = self.lims_api.get_sequencing_method(sample_id)
         priority = (
             Priority.research.name if sample_obj.priority_int == 0 else Priority.standard.name
         )

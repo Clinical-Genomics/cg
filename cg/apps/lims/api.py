@@ -2,6 +2,7 @@
 
 import datetime as dt
 import logging
+from typing import Any
 
 from dateutil.parser import parse as parse_date
 from genologics.entities import Artifact, Process, Researcher, Sample
@@ -53,10 +54,15 @@ class LimsAPI(Lims, OrderHandler):
     def user(self) -> Researcher:
         return self.get_researchers(username=self.username)[0]
 
-    def sample(self, lims_id: str):
+    def sample(self, lims_id: str) -> dict[str, Any]:
         """Fetch a sample from the LIMS database."""
-        lims_sample = Sample(self, id=lims_id)
-        return self._export_sample(lims_sample)
+        lims_sample = {}
+        try:
+            sample = Sample(self, id=lims_id)
+            lims_sample: dict[str, Any] = self._export_sample(sample)
+        except HTTPError as error:
+            LOG.warning(f"Could not fetch sample {lims_id} from LIMS: {error}")
+        return lims_sample
 
     def samples_in_pools(self, pool_name, projectname):
         """Fetch all samples from a pool"""
@@ -128,35 +134,31 @@ class LimsAPI(Lims, OrderHandler):
             date = None
         return date
 
-    def capture_kit(self, lims_id: str) -> str:
+    def capture_kit(self, lims_id: str) -> str | None:
         """Get capture kit for a LIMS sample."""
-
         step_names_udfs = MASTER_STEPS_UDFS["capture_kit_step"]
         capture_kits = set()
-
-        lims_sample = Sample(self, id=lims_id)
-        capture_kit = lims_sample.udf.get("Bait Set")
-
-        if capture_kit and capture_kit != "NA":
-            return capture_kit
-
-        for process_type in step_names_udfs:
-            artifacts = self.get_artifacts(
-                samplelimsid=lims_id, process_type=process_type, type="Analyte"
-            )
-            udf_key = step_names_udfs[process_type]
-            capture_kits = capture_kits.union(
-                self._find_capture_kits(artifacts, udf_key)
-                or self._find_twist_capture_kits(artifacts, udf_key)
-            )
-
-        if len(capture_kits) > 1:
-            message = f"Capture kit error: {lims_sample.id} | {capture_kits}"
-            raise LimsDataError(message)
-
-        if len(capture_kits) == 1:
-            return capture_kits.pop()
-
+        try:
+            lims_sample = Sample(self, id=lims_id)
+            capture_kit = lims_sample.udf.get("Bait Set")
+            if capture_kit and capture_kit != "NA":
+                return capture_kit
+            for process_type in step_names_udfs:
+                artifacts = self.get_artifacts(
+                    samplelimsid=lims_id, process_type=process_type, type="Analyte"
+                )
+                udf_key = step_names_udfs[process_type]
+                capture_kits = capture_kits.union(
+                    self._find_capture_kits(artifacts, udf_key)
+                    or self._find_twist_capture_kits(artifacts, udf_key)
+                )
+            if len(capture_kits) > 1:
+                message = f"Capture kit error: {lims_sample.id} | {capture_kits}"
+                raise LimsDataError(message)
+            if len(capture_kits) == 1:
+                return capture_kits.pop()
+        except HTTPError as error:
+            LOG.warning(f"Could not fetch sample {lims_id} from LIMS: {error}")
         return None
 
     def get_samples(self, *args, map_ids=False, **kwargs) -> dict[str, str] | list[Sample]:
@@ -239,19 +241,17 @@ class LimsAPI(Lims, OrderHandler):
             )
         return sample.udf[PROP2UDF[key]]
 
-    def get_prep_method(self, lims_id: str) -> str:
+    def get_prep_method(self, lims_id: str) -> str | None:
         """Get the library preparation method."""
-
         step_names_udfs = MASTER_STEPS_UDFS["prep_method_step"]
+        prep_method: str | None = self._get_methods(step_names_udfs, lims_id)
+        return prep_method
 
-        return self._get_methods(step_names_udfs, lims_id)
-
-    def get_sequencing_method(self, lims_id: str) -> str:
+    def get_sequencing_method(self, lims_id: str) -> str | None:
         """Get the sequencing method."""
-
         step_names_udfs = MASTER_STEPS_UDFS["sequencing_method_step"]
-
-        return self._get_methods(step_names_udfs, lims_id)
+        sequencing_method: str | None = self._get_methods(step_names_udfs, lims_id)
+        return sequencing_method
 
     @staticmethod
     def _sort_by_date_run(sort_list: list):
@@ -266,54 +266,55 @@ class LimsAPI(Lims, OrderHandler):
         """
         return sorted(sort_list, key=lambda sort_tuple: sort_tuple[0], reverse=True)
 
-    def _get_methods(self, step_names_udfs, lims_id):
+    def _get_methods(self, step_names_udfs, lims_id) -> str | None:
         """
         Gets the method, method number and method version for a given list of step names for AM documents.
         Only method name and Atlas version is returned if Atlas documentation instead has been used.
         """
         methods = []
-
-        for process_name in step_names_udfs:
-            artifacts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
-            if not artifacts:
-                continue
-            # Get a list of parent processes for the artifacts
-            processes: list[Process] = self.get_processes_from_artifacts(artifacts=artifacts)
-            for process in processes:
-                # Check which type of method document has been used
-                method_type: str = self.get_method_type(process, step_names_udfs[process_name])
-                udf_key_method_doc, udf_key_version = self.get_method_udf_values(
-                    step_names_udfs[process_name], method_type
-                )
-                methods.append(
-                    (
-                        process.date_run,
-                        self.get_method_document(process, udf_key_method_doc),
-                        self.get_method_version(process, udf_key_version),
-                        method_type,
+        try:
+            for process_name in step_names_udfs:
+                artifacts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
+                if not artifacts:
+                    continue
+                # Get a list of parent processes for the artifacts
+                processes: list[Process] = self.get_processes_from_artifacts(artifacts=artifacts)
+                for process in processes:
+                    # Check which type of method document has been used
+                    method_type: str = self.get_method_type(process, step_names_udfs[process_name])
+                    udf_key_method_doc, udf_key_version = self.get_method_udf_values(
+                        step_names_udfs[process_name], method_type
                     )
-                )
+                    methods.append(
+                        (
+                            process.date_run,
+                            self.get_method_document(process, udf_key_method_doc),
+                            self.get_method_version(process, udf_key_version),
+                            method_type,
+                        )
+                    )
 
-        sorted_methods = self._sort_by_date_run(methods)
+            sorted_methods = self._sort_by_date_run(methods)
 
-        if sorted_methods:
-            method = sorted_methods[METHOD_INDEX]
+            if sorted_methods:
+                method = sorted_methods[METHOD_INDEX]
 
-            if (
-                method[METHOD_TYPE_INDEX] == DocumentationMethod.AM
-                and method[METHOD_DOCUMENT_INDEX] is not None
-            ):
-                method_name = AM_METHODS.get(method[METHOD_DOCUMENT_INDEX])
-                return (
-                    f"{method[METHOD_DOCUMENT_INDEX]}:{method[METHOD_VERSION_INDEX]} - "
-                    f"{method_name}"
-                )
-            elif (
-                method[METHOD_TYPE_INDEX] == DocumentationMethod.ATLAS
-                and method[METHOD_DOCUMENT_INDEX] is not None
-            ):
-                return f"{method[METHOD_DOCUMENT_INDEX]} ({method[METHOD_VERSION_INDEX]})"
-
+                if (
+                    method[METHOD_TYPE_INDEX] == DocumentationMethod.AM
+                    and method[METHOD_DOCUMENT_INDEX] is not None
+                ):
+                    method_name = AM_METHODS.get(method[METHOD_DOCUMENT_INDEX])
+                    return (
+                        f"{method[METHOD_DOCUMENT_INDEX]}:{method[METHOD_VERSION_INDEX]} - "
+                        f"{method_name}"
+                    )
+                elif (
+                    method[METHOD_TYPE_INDEX] == DocumentationMethod.ATLAS
+                    and method[METHOD_DOCUMENT_INDEX] is not None
+                ):
+                    return f"{method[METHOD_DOCUMENT_INDEX]} ({method[METHOD_VERSION_INDEX]})"
+        except HTTPError as error:
+            LOG.warning(f"Could not fetch sample {lims_id} from LIMS: {error}")
         return None
 
     @staticmethod
@@ -395,30 +396,38 @@ class LimsAPI(Lims, OrderHandler):
         """Get the lims-id for the project of the sample"""
         return self.sample(sample_id).get("project").get("id")
 
-    def get_sample_rin(self, sample_id: str) -> float:
+    def get_sample_rin(self, sample_id: str) -> float | None:
         """Return the sample RIN value."""
-        sample_artifact: Artifact = Artifact(self, id=f"{sample_id}PA1")
-        return sample_artifact.udf.get(PROP2UDF["rin"])
+        rin = None
+        try:
+            sample_artifact: Artifact = Artifact(self, id=f"{sample_id}PA1")
+            rin: float = sample_artifact.udf.get(PROP2UDF["rin"])
+        except HTTPError as error:
+            LOG.warning(f"Could not fetch sample {sample_id} from LIMS: {error}")
+        return rin
 
     def _get_rna_input_amounts(self, sample_id: str) -> list[tuple[dt.datetime, float]]:
         """Return all prep input amounts used for an RNA sample in lims."""
         step_names_udfs: dict[str] = MASTER_STEPS_UDFS["rna_prep_step"]
-
         input_amounts: list[tuple[dt.datetime, float]] = []
-
-        for process_type in step_names_udfs:
-            artifacts: list[Artifact] = self.get_artifacts(
-                samplelimsid=sample_id, process_type=process_type, type=LimsArtifactTypes.ANALYTE
-            )
-
-            udf_key: str = step_names_udfs[process_type]
-            for artifact in artifacts:
-                input_amounts.append(
-                    (
-                        artifact.parent_process.date_run,
-                        artifact.udf.get(udf_key),
-                    )
+        try:
+            for process_type in step_names_udfs:
+                artifacts: list[Artifact] = self.get_artifacts(
+                    samplelimsid=sample_id,
+                    process_type=process_type,
+                    type=LimsArtifactTypes.ANALYTE,
                 )
+
+                udf_key: str = step_names_udfs[process_type]
+                for artifact in artifacts:
+                    input_amounts.append(
+                        (
+                            artifact.parent_process.date_run,
+                            artifact.udf.get(udf_key),
+                        )
+                    )
+        except HTTPError as error:
+            LOG.warning(f"Could not fetch sample {sample_id} from LIMS: {error}")
         return input_amounts
 
     def _get_last_used_input_amount(
@@ -432,9 +441,10 @@ class LimsAPI(Lims, OrderHandler):
             return None
         return sorted_input_amounts[0][1]
 
-    def get_latest_rna_input_amount(self, sample_id: str) -> float:
+    def get_latest_rna_input_amount(self, sample_id: str) -> float | None:
         """Return the input amount used in the latest preparation of an RNA sample."""
         input_amounts: list[tuple[dt.datetime, float]] = self._get_rna_input_amounts(
             sample_id=sample_id
         )
-        return self._get_last_used_input_amount(input_amounts=input_amounts)
+        input_amount: float | None = self._get_last_used_input_amount(input_amounts=input_amounts)
+        return input_amount

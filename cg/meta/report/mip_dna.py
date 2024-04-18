@@ -73,10 +73,6 @@ class MipDNAReportAPI(ReportAPI):
         panel_gene_ids = [gene.get("hgnc_id") for gene in panel_genes]
         return panel_gene_ids
 
-    def get_genome_build(self, analysis_metadata: MipAnalysis) -> str:
-        """Return build version of the genome reference of a specific case."""
-        return analysis_metadata.genome_build
-
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: MipAnalysis = None
     ) -> bool:
