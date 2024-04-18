@@ -386,7 +386,7 @@ class AnalysisAPI(MetaAPI):
             sample: Sample = self.status_db.get_sample_by_internal_id(
                 internal_id=sample.from_sample
             )
-        target_bed_shortname: str = self.lims_api.capture_kit(lims_id=sample.internal_id)
+        target_bed_shortname: str | None = self.lims_api.capture_kit(lims_id=sample.internal_id)
         if not target_bed_shortname:
             return None
         bed_version: BedVersion | None = self.status_db.get_bed_version_by_short_name(

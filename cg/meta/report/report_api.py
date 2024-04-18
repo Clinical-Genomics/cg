@@ -5,7 +5,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import requests
 from housekeeper.store.models import File, Version
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sqlalchemy.orm import Query
@@ -331,15 +330,9 @@ class ReportAPI(MetaAPI):
 
     def get_sample_methods_data(self, sample_id: str) -> MethodsModel:
         """Fetches sample library preparation and sequencing methods from LIMS."""
-        library_prep = None
-        sequencing = None
-        try:
-            library_prep = self.lims_api.get_prep_method(lims_id=sample_id)
-            sequencing = self.lims_api.get_sequencing_method(lims_id=sample_id)
-        except requests.exceptions.HTTPError as ex:
-            LOG.info(f"Could not fetch sample ({sample_id}) methods from LIMS: {ex}")
-
-        return MethodsModel(library_prep=library_prep, sequencing=sequencing)
+        prep_method: str | None = self.lims_api.get_prep_method(lims_id=sample_id)
+        sequencing_method: str | None = self.lims_api.get_sequencing_method(lims_id=sample_id)
+        return MethodsModel(library_prep=prep_method, sequencing=sequencing_method)
 
     def get_case_analysis_data(
         self,
