@@ -112,10 +112,6 @@ class BalsamicReportAPI(ReportAPI):
         """Return data analysis type carried out."""
         return self.analysis_api.get_bundle_deliverables_type(case_id=case.internal_id)
 
-    def get_genome_build(self, analysis_metadata: BalsamicAnalysis) -> str:
-        """Returns the build version of the genome reference of a specific case."""
-        return analysis_metadata.config.reference.reference_genome_version
-
     def get_variant_callers(self, _analysis_metadata: BalsamicAnalysis) -> list:
         """
         Return list of Balsamic variant-calling filters and their versions (if available) from the

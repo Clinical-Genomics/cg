@@ -473,8 +473,11 @@ class AnalysisAPI(MetaAPI):
         return None
 
     def get_latest_metadata(self, case_id: str) -> AnalysisModel:
-        """Get the latest metadata of a specific case"""
+        """Get the latest analysis metadata of a specific case."""
+        raise NotImplementedError
 
+    def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
+        """Return the build version of the reference genome."""
         raise NotImplementedError
 
     def parse_analysis(

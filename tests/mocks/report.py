@@ -7,10 +7,14 @@ from pathlib import Path
 from housekeeper.store.models import Version
 
 from cg.apps.coverage import ChanjoAPI
+from cg.constants.constants import GenomeVersion
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.mip.mip_analysis import MipAnalysis
+from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
+from tests.mocks.mip_analysis_mock import create_mip_metrics_deliverables
 
 LOG = logging.getLogger(__name__)
 
@@ -24,6 +28,19 @@ class MockMipDNAAnalysisAPI(MipDNAAnalysisAPI):
     @property
     def root(self):
         return "/root/path"
+
+    @staticmethod
+    def get_latest_metadata(family_id: str = None, **kwargs) -> MipAnalysis:
+        metrics: MIPMetricsDeliverables = create_mip_metrics_deliverables()
+        return MipAnalysis(
+            case=family_id or "yellowhog",
+            genome_build=GenomeVersion.hg19.value,
+            sample_id_metrics=metrics.sample_id_metrics,
+            mip_version="v4.0.20",
+            rank_model_version="1.18",
+            sample_ids=["2018-20203", "2018-20204"],
+            sv_rank_model_version="1.08",
+        )
 
 
 class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):

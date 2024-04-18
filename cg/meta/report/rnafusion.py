@@ -14,7 +14,6 @@ from cg.constants import (
     RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT,
     Workflow,
 )
-from cg.constants.constants import GenomeVersion
 from cg.constants.scout import RNAFUSION_CASE_TAGS
 from cg.meta.report.field_validators import (
     get_mapped_reads_fraction,
@@ -66,10 +65,6 @@ class RnafusionReportAPI(ReportAPI):
             rin=self.lims_api.get_sample_rin(sample.internal_id),
             uniquely_mapped_reads=sample_metrics.uniquely_mapped_percent,
         )
-
-    def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
-        """Return build version of the genome reference of a specific case."""
-        return GenomeVersion.hg38.value
 
     @staticmethod
     def is_apptag_accredited(samples: list[SampleModel]) -> bool:

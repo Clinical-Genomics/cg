@@ -626,3 +626,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
+
+    def get_genome_build(self, analysis_metadata: BalsamicAnalysis) -> str:
+        """Returns the reference genome build version of a Balsamic analysis."""
+        return analysis_metadata.config.reference.reference_genome_version
