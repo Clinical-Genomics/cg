@@ -29,7 +29,7 @@ metrics:
   step: multiqc
   value: 300008747.0
 - condition:
-    norm: gt
+    norm: lt
     threshold: 20.0
   header: null
   id: ADM1
@@ -269,7 +269,7 @@ metrics:
   step: multiqc
   value: 0.952489
 - condition:
-    norm: lt
+    norm: gt
     threshold: 0.95
   header: null
   id: ADM1
@@ -285,7 +285,7 @@ metrics:
   step: multiqc
   value: 24.546493
 - condition:
-    norm: lt
+    norm: gt
     threshold: 26.0
   header: null
   id: ADM1
@@ -322,7 +322,7 @@ metrics:
   step: multiqc
   value: 0.047463
 - condition:
-    norm: gt
+    norm: lt
     threshold: 0.0005
   header: null
   id: ADM1
@@ -373,7 +373,7 @@ metrics:
   step: multiqc
   value: 0.985327
 - condition:
-    norm: lt
+    norm: gt
     threshold: 0.95
   header: null
   id: ADM1
