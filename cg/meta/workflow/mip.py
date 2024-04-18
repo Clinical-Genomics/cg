@@ -34,6 +34,8 @@ CLI_OPTIONS = {
 }
 LOG = logging.getLogger(__name__)
 
+MAX_CASES_TO_START_IN_50_MINUTES = 33
+
 
 class MipAnalysisAPI(AnalysisAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
@@ -269,7 +271,9 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_cases_to_analyze(self) -> list[Case]:
         """Return cases to analyze."""
         cases_query: list[Case] = self.status_db.cases_to_analyze(
-            workflow=self.workflow, threshold=self.use_read_count_threshold
+            workflow=self.workflow,
+            threshold=self.use_read_count_threshold,
+            limit=MAX_CASES_TO_START_IN_50_MINUTES,
         )
         cases_to_analyze = []
         for case_obj in cases_query:
