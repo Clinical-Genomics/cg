@@ -36,6 +36,7 @@ from cg.constants.subject import PhenotypeStatus, Sex
 from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
+from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
@@ -529,6 +530,15 @@ def demultiplexing_api(
     )
     demux_api.slurm_api.process = sbatch_process
     return demux_api
+
+
+@pytest.fixture
+def demux_post_processing_api(
+    demultiplex_context: CGConfig, tmp_illumina_demultiplexed_flow_cells_directory
+) -> DemuxPostProcessingAPI:
+    api = DemuxPostProcessingAPI(demultiplex_context)
+    api.demultiplexed_runs_dir = tmp_illumina_demultiplexed_flow_cells_directory
+    return api
 
 
 @pytest.fixture
