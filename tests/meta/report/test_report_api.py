@@ -291,7 +291,7 @@ def test_get_lims_sample(
     expected_lims_data: dict = lims_samples[0]
 
     # WHEN getting the sample data from lims
-    lims_data: dict = report_api_mip_dna.get_lims_sample(case_samples_data[0].sample.internal_id)
+    lims_data: dict = report_api_mip_dna.lims_api.sample(case_samples_data[0].sample.internal_id)
 
     # THEN check if the extracted lims information match the expected one
     assert lims_data == expected_lims_data
