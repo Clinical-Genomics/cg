@@ -1,3 +1,5 @@
+import pytest
+
 from click.testing import CliRunner
 
 from cg.cli.workflow.commands import (
@@ -11,9 +13,9 @@ from cg.cli.workflow.commands import (
     mip_rna_past_run_dirs,
     mutant_past_run_dirs,
     rnafusion_past_run_dirs,
-    taxprofiler_past_run_dirs,
+    nf_workflow_past_run_dirs,
 )
-from cg.constants import EXIT_SUCCESS
+from cg.constants import EXIT_SUCCESS, Workflow
 from cg.models.cg_config import CGConfig
 
 
@@ -164,17 +166,24 @@ def test_cli_workflow_clean_microsalt(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_cli_workflow_clean_taxprofiler(
+@pytest.mark.parametrize(
+    "workflow",
+    [Workflow.TAXPROFILER],
+)
+def test_cli_nf_workflow_clean(
     cli_runner: CliRunner,
-    taxprofiler_context: CGConfig,
+    workflow: Workflow,
     before_date: str,
+    request,
 ):
     """Test clean taxprofiler workflow."""
 
     # GIVEN a before string
 
+    # GIVEN a NextFlow analysis context
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
     # WHEN running command
-    result = cli_runner.invoke(taxprofiler_past_run_dirs, [before_date], obj=taxprofiler_context)
+    result = cli_runner.invoke(nf_workflow_past_run_dirs, [before_date], obj=context)
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
