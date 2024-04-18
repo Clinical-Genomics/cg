@@ -7,7 +7,8 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.models.validation_cases.validation_case_data import ValidationCaseData
+from cg.meta.create_validation_cases.validation_case_data import ValidationCaseData
+from cg.meta.create_validation_cases.validation_data_input import ValidationDataInput
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 from cg.utils.files import copy_file, get_files_matching_pattern, rename_file
@@ -15,16 +16,18 @@ from cg.utils.files import copy_file, get_files_matching_pattern, rename_file
 LOG = logging.getLogger(__name__)
 
 
-class ValidationCaseAPI:
+class CreateValidationCaseAPI:
 
     def __init__(self, status_db: Store, housekeeper_api: HousekeeperAPI, dry_run: bool = False):
         self.status_db: Store = status_db
         self.hk_api: HousekeeperAPI = housekeeper_api
         self.dry_run = dry_run
 
-    def get_validation_case_data(self, case_id: str, case_name: str):
+    def get_validation_case_data(self, validation_data_input: ValidationDataInput):
         return ValidationCaseData(
-            case_id=case_id, case_name=case_name, status_db=self.status_db, hk_api=self.hk_api
+            status_db=self.status_db,
+            hk_api=self.hk_api,
+            validation_data_input=validation_data_input,
         )
 
     def store_validation_samples(self, validation_case_data: ValidationCaseData) -> None:
@@ -166,10 +169,19 @@ class ValidationCaseAPI:
         self.copy_original_sample_bundle_files(validation_case_data.validation_samples)
         self.rename_and_add_original_sample_bundle_files(validation_case_data.validation_samples)
 
-    def create_validation_case(self, case_id: str, case_name: str) -> None:
+    def create_validation_case(
+        self,
+        case_id: str,
+        case_name: str,
+        data_analysis: str | None = None,
+        delivery: str | None = None,
+    ) -> None:
         """Create the validation case in statusdb and associated sample bundles in housekeeper."""
+        validation_data_input = ValidationDataInput(
+            case_id=case_id, case_name=case_name, data_analysis=data_analysis, delivery=delivery
+        )
         validation_case_data: ValidationCaseData = self.get_validation_case_data(
-            case_id=case_id, case_name=case_name
+            validation_data_input
         )
         self.create_validation_case_in_statusdb(validation_case_data)
         self.create_validation_samples_in_housekeeper(validation_case_data)

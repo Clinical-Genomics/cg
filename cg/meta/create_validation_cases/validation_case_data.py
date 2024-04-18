@@ -5,6 +5,7 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Priority
+from cg.meta.create_validation_cases.validation_data_input import ValidationDataInput
 from cg.store.models import ApplicationVersion, Case, Sample
 from cg.store.store import Store
 from cg.utils.calculations import multiply_by_million
@@ -14,17 +15,14 @@ LOG = logging.getLogger(__name__)
 
 class ValidationCaseData:
     def __init__(
-        self,
-        status_db: Store,
-        hk_api: HousekeeperAPI,
-        case_id: str,
-        case_name: str,
+        self, status_db: Store, hk_api: HousekeeperAPI, validation_data_input: ValidationDataInput
     ):
         """Initialize the validation sample data and perform integrity checks."""
         self.status_db: Store = status_db
         self.housekeeper_api: HousekeeperAPI = hk_api
-        self.case_id: str = case_id
-        self.case_name: str = case_name
+        self.input_data: ValidationDataInput = validation_data_input
+        self.case_id: str = validation_data_input.case_id
+        self.case_name: str = validation_data_input.case_name
         self.original_case: Case = self.get_case_to_copy()
         self.original_samples: list[Sample] = self.get_samples_to_copy()
         self.validation_samples: list[Sample] = self.get_validation_samples()
@@ -100,8 +98,16 @@ class ValidationCaseData:
         if self.status_db.case_with_name_exists(case_name=self.validation_case_name):
             raise ValueError(f"Case with name {self.case_name} already exists.")
         validation_case: Case = self.status_db.add_case(
-            data_analysis=self.original_case.data_analysis,
-            data_delivery=DataDelivery.NO_DELIVERY,
+            data_analysis=(
+                self.input_data.data_analysis
+                if self.input_data.data_analysis
+                else self.original_case.data_analysis
+            ),
+            data_delivery=(
+                self.input_data.delivery
+                if self.input_data.delivery
+                else self.original_case.delivery
+            ),
             name=self.validation_case_name,
             panels=self.original_case.panels,
             priority=self.original_case.priority,
