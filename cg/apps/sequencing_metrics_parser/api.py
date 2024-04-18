@@ -1,18 +1,18 @@
 from datetime import datetime
 from pathlib import Path
 
-from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
-from cg.apps.sequencing_metrics_parser.parsers.utils import get_flow_cell_id
+from cg.apps.sequencing_metrics_parser.parser import MetricsParser
 from cg.constants.demultiplexing import UNDETERMINED
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.models import SampleLaneSequencingMetrics
+from cg.utils.flow_cell import get_flow_cell_id
 
 
 def create_sample_lane_sequencing_metrics_for_flow_cell(
     flow_cell_directory: Path,
 ) -> list[SampleLaneSequencingMetrics]:
     """Parse the demultiplexing metrics data into the sequencing statistics model."""
-    metrics_parser = BclConvertMetricsParser(flow_cell_directory)
+    metrics_parser = MetricsParser(flow_cell_directory)
     sample_internal_ids: list[str] = metrics_parser.get_sample_internal_ids()
     sample_lane_sequencing_metrics: list[SampleLaneSequencingMetrics] = []
 
@@ -33,7 +33,7 @@ def create_undetermined_non_pooled_metrics(
     non_pooled_lanes_and_samples: list[tuple[int, str]] = (
         flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
     )
-    metrics_parser = BclConvertMetricsParser(flow_cell.path)
+    metrics_parser = MetricsParser(flow_cell.path)
     undetermined_metrics: list[SampleLaneSequencingMetrics] = []
 
     for lane, sample_internal_id in non_pooled_lanes_and_samples:
@@ -51,7 +51,7 @@ def create_undetermined_non_pooled_metrics(
 
 
 def _create_bcl_convert_sequencing_metrics(
-    sample_internal_id: str, lane: int, metrics_parser: BclConvertMetricsParser
+    sample_internal_id: str, lane: int, metrics_parser: MetricsParser
 ) -> SampleLaneSequencingMetrics:
     """Create sequencing metrics for a sample in a lane."""
     flow_cell_id: str = get_flow_cell_id(metrics_parser.bcl_convert_demultiplex_dir.name)

@@ -4,17 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
-    BclConvertDemuxMetrics,
-    BclConvertQualityMetrics,
-)
-from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import (
-    BclConvertMetricsParser,
-)
-from cg.constants.bcl_convert_metrics import (
-    BclConvertDemuxMetricsColumnNames,
-    BclConvertQualityMetricsColumnNames,
-)
+from cg.apps.sequencing_metrics_parser.models import DemuxMetrics, SequencingQualityMetrics
+from cg.apps.sequencing_metrics_parser.parser import MetricsParser
+from cg.constants.metrics import DemuxMetricsColumnNames, QualityMetricsColumnNames
 
 
 @pytest.fixture(scope="session")
@@ -59,13 +51,13 @@ def bcl_convert_test_mean_quality_score_per_lane() -> float:
 def bcl_convert_demux_metric_model_with_data(
     test_lane,
     test_sample_internal_id,
-) -> BclConvertDemuxMetrics:
+) -> DemuxMetrics:
     """Return a BclConvertDemuxMetrics model with data."""
-    return BclConvertDemuxMetrics(
+    return DemuxMetrics(
         **{
-            BclConvertDemuxMetricsColumnNames.LANE.value: test_lane,
-            BclConvertDemuxMetricsColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
-            BclConvertDemuxMetricsColumnNames.READ_PAIR_COUNT.value: 15962796,
+            DemuxMetricsColumnNames.LANE.value: test_lane,
+            DemuxMetricsColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
+            DemuxMetricsColumnNames.READ_PAIR_COUNT.value: 15962796,
         }
     )
 
@@ -73,19 +65,19 @@ def bcl_convert_demux_metric_model_with_data(
 @pytest.fixture(scope="session")
 def bcl_convert_quality_metric_model_with_data(
     test_lane, test_sample_internal_id
-) -> BclConvertQualityMetrics:
+) -> SequencingQualityMetrics:
     """Return a BclConvertQualityMetrics model with data."""
-    return BclConvertQualityMetrics(
+    return SequencingQualityMetrics(
         **{
-            BclConvertQualityMetricsColumnNames.LANE.value: test_lane,
-            BclConvertQualityMetricsColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
-            BclConvertQualityMetricsColumnNames.MEAN_QUALITY_SCORE_Q30.value: 36.15,
-            BclConvertQualityMetricsColumnNames.Q30_BASES_PERCENT.value: 0.95,
+            QualityMetricsColumnNames.LANE.value: test_lane,
+            QualityMetricsColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
+            QualityMetricsColumnNames.MEAN_QUALITY_SCORE_Q30.value: 36.15,
+            QualityMetricsColumnNames.Q30_BASES_PERCENT.value: 0.95,
         }
     )
 
 
 @pytest.fixture(scope="session")
-def parsed_bcl_convert_metrics(bcl_convert_metrics_dir_path) -> BclConvertMetricsParser:
+def parsed_bcl_convert_metrics(bcl_convert_metrics_dir_path) -> MetricsParser:
     """Return an object with parsed BCLConvert metrics."""
-    return BclConvertMetricsParser(bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path)
+    return MetricsParser(bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path)

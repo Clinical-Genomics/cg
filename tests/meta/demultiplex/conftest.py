@@ -8,11 +8,6 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_and_include_sample_sheet_path_to_housekeeper,
-)
-from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -276,26 +271,6 @@ def lsyncd_target_directory(lsyncd_source_directory: Path, tmp_path_factory) -> 
     target_directory = Path(lsyncd_source_directory.parent, Path(temp_target_directory, "target"))
     shutil.copytree(lsyncd_source_directory, target_directory)
     return target_directory
-
-
-@pytest.fixture
-def bcl2fastq_flow_cell_dir_name(demux_post_processing_api) -> str:
-    """Return a flow cell name that has been demultiplexed with bcl2fastq."""
-    flow_cell_dir_name = "170407_ST-E00198_0209_BHHKVCALXX"
-    flow_cell_path = Path(demux_post_processing_api.demultiplexed_runs_dir, flow_cell_dir_name)
-
-    add_and_include_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=flow_cell_path,
-        flow_cell_name="HHKVCALXX",
-        hk_api=demux_post_processing_api.hk_api,
-    )
-    return flow_cell_dir_name
-
-
-@pytest.fixture
-def bcl2fastq_non_pooled_sample_read_count() -> int:
-    """Based on the data in 170407_ST-E00198_0209_BHHKVCALXX, the sum of all reads - mapped and undetermined."""
-    return 8000000
 
 
 @pytest.fixture
