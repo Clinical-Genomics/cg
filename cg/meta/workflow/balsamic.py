@@ -98,7 +98,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         cases_query: list[Case] = self.status_db.cases_to_analyze(
             workflow=self.workflow,
             threshold=self.use_read_count_threshold,
-            limit=MAX_CASES_TO_START_IN_50_MINUTES,
         )
         cases_to_analyze = []
         for case_obj in cases_query:
@@ -109,7 +108,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 == "failed"
             ):
                 cases_to_analyze.append(case_obj)
-        return cases_to_analyze
+        return cases_to_analyze[:MAX_CASES_TO_START_IN_50_MINUTES]
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic deliverables file for the case_id should be located.

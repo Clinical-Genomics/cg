@@ -1,4 +1,4 @@
-"""Module for Rnafusion analysis API tests."""
+"""Module for Raredisease analysis API tests."""
 
 import os
 
