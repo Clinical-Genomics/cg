@@ -7,11 +7,11 @@ class RarediseaseQCMetrics(BaseModel):
     """Raredisease QC metrics"""
 
     percentage_mapped_reads: float | None
-    PCT_TARGET_BASES_10X: float | None
-    MEDIAN_TARGET_COVERAGE: float | None
-    PCT_PF_READS_ALIGNED: float | None
-    PCT_PF_READS_IMPROPER_PAIRS: float | None
-    PCT_ADAPTER: float | None
+    pct_target_bases_10x: float | None
+    median_target_coverage: float | None
+    pct_pf_reads_aligned: float | None
+    pct_pf_reads_improper_pairs: float | None
+    pct_adapter: float | None
     fraction_duplicates: float | None
 
 

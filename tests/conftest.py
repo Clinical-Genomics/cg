@@ -2363,7 +2363,7 @@ def raredisease_deliverable_data(
                 "path": f"{raredisease_dir}/{raredisease_case_id}/multiqc/multiqc_report.html",
                 "path_index": "",
                 "step": "report",
-                "tag": ["multiqc-html", "rna"],
+                "tag": ["multiqc-html"],
                 "id": raredisease_case_id,
                 "format": "html",
                 "mandatory": True,

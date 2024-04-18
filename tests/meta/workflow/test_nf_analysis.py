@@ -1,4 +1,4 @@
-"""Module for nf-core analysis API tests."""
+"""Module for nextflow analysis API tests."""
 
 import logging
 from typing import Any
@@ -22,7 +22,7 @@ def test_create_metrics_deliverables_content(
     caplog: LogCaptureFixture,
     request: FixtureRequest,
 ):
-    """Test metrics deliverables file content function for nf-core pipelines."""
+    """Test metrics deliverables file content function for nextflow pipelines."""
     caplog.set_level(logging.INFO)
 
     # GIVEN each fixture is being initialised
@@ -56,7 +56,7 @@ def test_get_formatted_file_deliverable(
     deliverables_template_content,
     request: FixtureRequest,
 ):
-    """Test the formatted file deliverable with the case and sample attributes for nf-core pipelines."""
+    """Test the formatted file deliverable with the case and sample attributes for nextflow pipelines."""
 
     caplog.set_level(logging.INFO)
 

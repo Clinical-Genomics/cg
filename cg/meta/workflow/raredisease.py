@@ -1,7 +1,6 @@
 """Module for Raredisease Analysis API."""
 
 import logging
-from abc import ABC
 from pathlib import Path
 
 from cg.constants import GenePanelMasterList, Workflow
@@ -16,12 +15,12 @@ from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetHeaders,
 )
 from cg.models.nf_analysis import WorkflowParameters
-from cg.store.models import CaseSample, Sample
+from cg.store.models import CaseSample
 
 LOG = logging.getLogger(__name__)
 
 
-class RarediseaseAnalysisAPI(NfAnalysisAPI, ABC):
+class RarediseaseAnalysisAPI(NfAnalysisAPI):
     """Handles communication between RAREDISEASE processes
     and the rest of CG infrastructure."""
 
