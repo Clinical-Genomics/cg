@@ -3,7 +3,6 @@
 from enum import StrEnum
 from pathlib import Path
 
-import click
 from pydantic import BaseModel
 
 from cg.constants.sequencing import Sequencers
@@ -30,7 +29,6 @@ class DemultiplexingDirsAndFiles(StrEnum):
     RUN_PARAMETERS_CAMEL_CASE: str = "runParameters.xml"
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
-    BCL2FASTQ_TILE_DIR_PATTERN: str = r"l\dt\d{2}"
     QUEUED_FOR_POST_PROCESSING: str = "post_processing_queued.txt"
     ANALYSIS_COMPLETED: str = "Secondary_Analysis_Complete.txt"
     ANALYSIS: str = "Analysis"
@@ -80,17 +78,6 @@ class RunParametersXMLNodes(StrEnum):
 
 class SampleSheetBcl2FastqSections:
     """Class with all necessary constants for building a NovaSeqX sample sheet."""
-
-    class Settings(StrEnum):
-        HEADER: str = "[Settings]"
-
-        @classmethod
-        def barcode_mismatch_index_1(cls) -> list[str]:
-            return ["BarcodeMismatchesIndex1", "0"]
-
-        @classmethod
-        def barcode_mismatch_index_2(cls) -> list[str]:
-            return ["BarcodeMismatchesIndex2", "0"]
 
     class Data(StrEnum):
         HEADER: str = "[Data]"
