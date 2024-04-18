@@ -102,10 +102,7 @@ def test_post_processing_of_flow_cell(
     ).all()
 
     # WHEN post-processing the demultiplexed flow cell
-    demux_post_processing_api.finish_flow_cell(
-        flow_cell_directory_name=flow_cell_demultiplexing_directory,
-        bcl_converter=scenario.bcl_converter,
-    )
+    demux_post_processing_api.finish_flow_cell(flow_cell_demultiplexing_directory)
 
     # THEN a flow cell was created in statusdb
     assert demux_post_processing_api.status_db.get_flow_cell_by_name(flow_cell_name)
@@ -179,10 +176,7 @@ def test_post_processing_tracks_undetermined_fastqs_for_bclconvert(
     # GIVEN a flow cell with undetermined fastqs in a non-pooled lane
 
     # WHEN post processing the flow cell
-    demux_post_processing_api.finish_flow_cell(
-        flow_cell_directory_name=bclconvert_flow_cell_dir_name,
-        bcl_converter=BclConverter.BCLCONVERT,
-    )
+    demux_post_processing_api.finish_flow_cell(bclconvert_flow_cell_dir_name)
 
     # THEN the undetermined fastqs were stored in housekeeper
     fastq_files: list[File] = demux_post_processing_api.hk_api.get_files(
@@ -210,17 +204,12 @@ def test_sample_read_count_update_is_idempotent(
     # GIVEN a demultiplexed flow cell
 
     # WHEN post processing the flow cell twice
-    demux_post_processing_api.finish_flow_cell(
-        flow_cell_directory_name=bclconvert_flow_cell_dir_name,
-        bcl_converter=BclConverter.BCLCONVERT,
-    )
+    demux_post_processing_api.finish_flow_cell(bclconvert_flow_cell_dir_name)
     first_sample_read_count: int = demux_post_processing_api.status_db.get_sample_by_internal_id(
         bcl_convert_sample_id_with_non_pooled_undetermined_reads
     ).reads
 
-    demux_post_processing_api.finish_flow_cell(
-        bclconvert_flow_cell_dir_name, bcl_converter=BclConverter.BCLCONVERT
-    )
+    demux_post_processing_api.finish_flow_cell(bclconvert_flow_cell_dir_name)
     second_sample_read_count: int = demux_post_processing_api.status_db.get_sample_by_internal_id(
         bcl_convert_sample_id_with_non_pooled_undetermined_reads
     ).reads
