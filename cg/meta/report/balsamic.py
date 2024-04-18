@@ -17,6 +17,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     Workflow,
 )
+from cg.constants.constants import AnalysisType
 from cg.constants.scout import BALSAMIC_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
@@ -53,7 +54,7 @@ class BalsamicReportAPI(ReportAPI):
             sample.internal_id
         ]
         million_read_pairs: float = get_million_read_pairs(reads=sample.reads)
-        if "wgs" in self.get_data_analysis_type(case=case):
+        if AnalysisType.WHOLE_GENOME_SEQUENCING in self.analysis_api.get_data_analysis_type(case):
             return self.get_wgs_metadata(
                 million_read_pairs=million_read_pairs, sample_metrics=sample_metrics
             )
@@ -106,10 +107,6 @@ class BalsamicReportAPI(ReportAPI):
                 sample_metrics.pct_pf_reads_improper_pairs if sample_metrics else None
             ),
         )
-
-    def get_data_analysis_type(self, case: Case) -> str | None:
-        """Return data analysis type carried out."""
-        return self.analysis_api.get_bundle_deliverables_type(case_id=case.internal_id)
 
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: BalsamicAnalysis

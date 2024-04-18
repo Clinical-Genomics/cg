@@ -342,7 +342,7 @@ class ReportAPI(MetaAPI):
     ) -> DataAnalysisModel:
         """Return workflow attributes used for data analysis."""
         delivered_files: list[File] | None = (
-            self.delivery_api.get_analysis_case_delivery_files(case=case)
+            self.delivery_api.get_analysis_case_delivery_files(case)
             if self.delivery_api.is_analysis_delivery(case.data_delivery)
             else None
         )
@@ -351,11 +351,11 @@ class ReportAPI(MetaAPI):
             data_delivery=case.data_delivery,
             workflow=analysis.workflow,
             workflow_version=analysis.workflow_version,
-            type=self.get_data_analysis_type(case=case),
+            type=self.analysis_api.get_data_analysis_type(case),
             genome_build=self.analysis_api.get_genome_build(analysis_metadata),
             variant_callers=self.analysis_api.get_variant_callers(analysis_metadata),
             panels=case.panels,
-            scout_files=self.get_scout_uploaded_files(case=case),
+            scout_files=self.get_scout_uploaded_files(case),
             delivered_files=delivered_files,
         )
 
@@ -381,17 +381,6 @@ class ReportAPI(MetaAPI):
     ) -> SampleMetadataModel:
         """Return sample metadata to include in the report."""
         raise NotImplementedError
-
-    def get_data_analysis_type(self, case: Case) -> str | None:
-        """Return data analysis type carried out."""
-        case_sample: Sample = self.status_db.get_case_samples_by_case_id(
-            case_internal_id=case.internal_id
-        )[0].sample
-        lims_sample: dict[str, Any] = self.lims_api.sample(case_sample.internal_id)
-        application: Application = self.status_db.get_application_by_tag(
-            tag=lims_sample.get("application")
-        )
-        return application.analysis_type if application else None
 
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel

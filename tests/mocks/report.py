@@ -7,13 +7,14 @@ from pathlib import Path
 from housekeeper.store.models import Version
 
 from cg.apps.coverage import ChanjoAPI
-from cg.constants.constants import GenomeVersion
+from cg.constants.constants import AnalysisType, GenomeVersion
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
+from cg.store.models import Case
 from tests.mocks.mip_analysis_mock import create_mip_metrics_deliverables
 
 LOG = logging.getLogger(__name__)
@@ -41,6 +42,10 @@ class MockMipDNAAnalysisAPI(MipDNAAnalysisAPI):
             sample_ids=["2018-20203", "2018-20204"],
             sv_rank_model_version="1.08",
         )
+
+    def get_data_analysis_type(self, case: Case) -> str | None:
+        """Return data analysis type carried out."""
+        return AnalysisType.WHOLE_GENOME_SEQUENCING
 
 
 class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):

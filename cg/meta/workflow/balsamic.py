@@ -662,3 +662,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                     f"{var_caller_name} (v{version})" if version else var_caller_name
                 )
         return analysis_var_callers
+
+    def get_data_analysis_type(self, case: Case) -> str | None:
+        """Return data analysis type carried out."""
+        return self.get_bundle_deliverables_type(case_id=case.internal_id)

@@ -4,6 +4,7 @@ import os
 import shutil
 from pathlib import Path
 from subprocess import CalledProcessError
+from typing import Any
 
 import click
 from housekeeper.store.models import Bundle, Version
@@ -26,7 +27,7 @@ from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
+from cg.store.models import Analysis, Application, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -631,3 +632,14 @@ class AnalysisAPI(MetaAPI):
 
     def run_analysis(self, *args, **kwargs):
         raise NotImplementedError
+
+    def get_data_analysis_type(self, case: Case) -> str | None:
+        """Return data analysis type carried out."""
+        case_sample: Sample = self.status_db.get_case_samples_by_case_id(
+            case_internal_id=case.internal_id
+        )[0].sample
+        lims_sample: dict[str, Any] = self.lims_api.sample(case_sample.internal_id)
+        application: Application = self.status_db.get_application_by_tag(
+            tag=lims_sample.get("application")
+        )
+        return application.analysis_type if application else None
