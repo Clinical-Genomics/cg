@@ -89,7 +89,7 @@ def seven_canonical_flow_cells(
     novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData,
     novaseq_x_flow_cell: FlowCellDirectoryData,
 ) -> list[FlowCellDirectoryData]:
-    """Return a list of seven canonical flow cells."""
+    """Return a list with the seven canonical flow cells."""
     return [
         hiseq_x_single_index_flow_cell,
         hiseq_x_dual_index_flow_cell,
