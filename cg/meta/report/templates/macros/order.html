@@ -1,4 +1,5 @@
 {% macro order(case) %}
+{% set customer_workflow = case.data_analysis.customer_workflow %}
   <div class="container mb-5">
     <h3 class="mb-4">Beställning</h3>
     <table class="table w-auto text-center align-middle" aria-describedby="order-table">
@@ -13,7 +14,7 @@
           <th scope="col">Kön</th>
           <th scope="col">Provtyp</th>
           <!-- Sample status -->
-          {{ sample_status(workflow=case.data_analysis.customer_workflow) }}
+          {{ sample_status(workflow=customer_workflow) }}
         </tr>
       </thead>
       <tbody>
@@ -34,7 +35,7 @@
             <td>{{ sample.gender }}</td>
             <td>{{ sample.source }}</td>
             <!-- Sample status value -->
-            {{ sample_status_value(workflow=case.data_analysis.customer_workflow, sample=sample) }}
+            {{ sample_status_value(workflow=customer_workflow, sample=sample) }}
           </tr>
         {% endfor %}
       </tbody>
