@@ -8,6 +8,7 @@ from cg.cli.utils import echo_lines
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY, resolve_compression
 from cg.cli.workflow.nf_analysis import (
     config_case,
+    metrics_deliver,
     report_deliver,
     run,
     start,
@@ -32,6 +33,7 @@ def raredisease(context: click.Context) -> None:
     context.obj.meta_apis[MetaApis.ANALYSIS_API] = RarediseaseAnalysisAPI(config=context.obj)
 
 
+raredisease.add_command(metrics_deliver)
 raredisease.add_command(resolve_compression)
 raredisease.add_command(config_case)
 raredisease.add_command(report_deliver)

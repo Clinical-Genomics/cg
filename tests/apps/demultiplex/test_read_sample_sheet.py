@@ -130,12 +130,12 @@ def test_get_sample_type_for_bcl_convert(bcl_convert_sample_sheet_path: Path):
     assert sample_type is FlowCellSampleBCLConvert
 
 
-def test_get_sample_type_for_bcl2fastq(bcl2fastq_sample_sheet_path: Path):
+def test_get_sample_type_for_bcl2fastq(hiseq_x_single_index_bcl2fastq_sample_sheet_path: Path):
     # GIVEN a bcl convert sample sheet path
 
     # WHEN getting the sample type
     content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=bcl2fastq_sample_sheet_path
+        file_format=FileFormat.CSV, file_path=hiseq_x_single_index_bcl2fastq_sample_sheet_path
     )
     sample_type: Type[FlowCellSample] = get_sample_type_from_content(content)
 
