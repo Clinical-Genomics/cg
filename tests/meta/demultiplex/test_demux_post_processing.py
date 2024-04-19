@@ -11,6 +11,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.models import Sample
 
 
@@ -40,46 +41,39 @@ class DemultiplexingScenario(BaseModel):
 
 
 @pytest.mark.parametrize(
-    "scenario",
+    "flow_cell_fixture, sample_ids_fixture",
     [
-        DemultiplexingScenario(
-            flow_cell_directory="flow_cell_directory_name_demultiplexed_with_bcl_convert",
-            flow_cell_name="flow_cell_name_demultiplexed_with_bcl_convert",
-            samples_ids="bcl_convert_demultiplexed_flow_cell_sample_internal_ids",
-        ),
-        DemultiplexingScenario(
-            flow_cell_directory="flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer",
-            flow_cell_name="flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer",
-            samples_ids="bcl_convert_demultiplexed_flow_cell_sample_internal_ids",
-        ),
-        DemultiplexingScenario(
-            flow_cell_directory="flow_cell_directory_name_demultiplexed_with_bcl_convert_flat",
-            flow_cell_name="flow_cell_name_demultiplexed_with_bcl_convert",
-            samples_ids="bcl_convert_demultiplexed_flow_cell_sample_internal_ids",
+        ("novaseq_x_flow_cell", "selected_novaseq_x_sample_ids"),
+        (
+            "novaseq_6000_post_1_5_kits_flow_cell",
+            "selected_novaseq_6000_post_1_5_kits_sample_ids",
         ),
     ],
-    ids=["BCLConvert tree", "BCLConvert on sequencer", "BCLConvert flat"],
+    ids=["BCLConvert on sequencer", "BCLConvert flat"],
 )
 def test_post_processing_of_flow_cell(
-    scenario: DemultiplexingScenario,
-    demultiplex_context: CGConfig,
-    request,
+    flow_cell_fixture: str,
+    sample_ids_fixture: str,
+    updated_demultiplex_context: CGConfig,
+    updated_demux_post_processing_api: DemuxPostProcessingAPI,
     tmp_illumina_demultiplexed_flow_cells_directory: Path,
+    request: pytest.FixtureRequest,
 ):
     """Test adding a demultiplexed flow cell to the databases with. Runs on each type of
     demultiplexing software and setting used."""
 
     # GIVEN a demultiplexed flow cell
-    flow_cell_demultiplexing_directory: str = request.getfixturevalue(scenario.flow_cell_directory)
-    flow_cell_name: str = request.getfixturevalue(scenario.flow_cell_name)
-    sample_internal_ids: list[str] = request.getfixturevalue(scenario.samples_ids)
+    flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture)
+    flow_cell_demultiplexing_directory: str = flow_cell.full_name
+    flow_cell_name: str = flow_cell.id
+    sample_internal_ids: list[str] = request.getfixturevalue(sample_ids_fixture)
 
     # GIVEN the sample_internal_ids are present in statusdb
     for sample_internal_id in sample_internal_ids:
-        assert demultiplex_context.status_db.get_sample_by_internal_id(sample_internal_id)
+        assert updated_demultiplex_context.status_db.get_sample_by_internal_id(sample_internal_id)
 
     # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+    demux_post_processing_api = DemuxPostProcessingAPI(updated_demultiplex_context)
 
     # GIVEN a directory with a flow cell demultiplexed with BCL Convert
     demux_post_processing_api.demultiplexed_runs_dir = (
@@ -88,59 +82,54 @@ def test_post_processing_of_flow_cell(
 
     # GIVEN that the sample sheet is in housekeeper
     add_and_include_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=Path(
-            tmp_illumina_demultiplexed_flow_cells_directory,
-            flow_cell_demultiplexing_directory,
-        ),
+        flow_cell_directory=flow_cell.path,
         flow_cell_name=flow_cell_name,
-        hk_api=demux_post_processing_api.hk_api,
+        hk_api=updated_demux_post_processing_api.hk_api,
     )
-
-    # THEN the sample sheet is in housekeeper
-    assert demux_post_processing_api.hk_api.get_files(
+    assert updated_demux_post_processing_api.hk_api.get_files(
         bundle=flow_cell_name, tags=[SequencingFileTag.SAMPLE_SHEET]
     ).all()
 
     # WHEN post-processing the demultiplexed flow cell
-    demux_post_processing_api.finish_flow_cell(flow_cell_demultiplexing_directory)
+    updated_demux_post_processing_api.finish_flow_cell(flow_cell_demultiplexing_directory)
 
     # THEN a flow cell was created in statusdb
-    assert demux_post_processing_api.status_db.get_flow_cell_by_name(flow_cell_name)
+    assert updated_demux_post_processing_api.status_db.get_flow_cell_by_name(flow_cell_name)
 
     # THEN sequencing metrics were created for the flow cell
-    assert demux_post_processing_api.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(
+    assert updated_demux_post_processing_api.status_db.get_sample_lane_sequencing_metrics_by_flow_cell_name(
         flow_cell_name=flow_cell_name
     )
     # THEN the read count was calculated for all samples in the flow cell directory
     for sample_internal_id in sample_internal_ids:
-        sample: Sample = demux_post_processing_api.status_db.get_sample_by_internal_id(
+        sample: Sample = updated_demux_post_processing_api.status_db.get_sample_by_internal_id(
             sample_internal_id
         )
         assert isinstance(sample.reads, int)
 
     # THEN a bundle was added to Housekeeper for the flow cell
-    assert demux_post_processing_api.hk_api.bundle(flow_cell_name)
+    assert updated_demux_post_processing_api.hk_api.bundle(flow_cell_name)
 
     # THEN a bundle was added to Housekeeper for each sample
     for sample_internal_id in sample_internal_ids:
-        assert demux_post_processing_api.hk_api.bundle(sample_internal_id)
+        assert updated_demux_post_processing_api.hk_api.bundle(sample_internal_id)
 
     # THEN a sample sheet was added to Housekeeper
-    assert demux_post_processing_api.hk_api.get_files(
+    assert updated_demux_post_processing_api.hk_api.get_files(
         tags=[SequencingFileTag.SAMPLE_SHEET],
         bundle=flow_cell_name,
     ).all()
 
     # THEN sample fastq files were added to Housekeeper tagged with FASTQ and the flow cell name
     for sample_internal_id in sample_internal_ids:
-        assert demux_post_processing_api.hk_api.get_files(
+        assert updated_demux_post_processing_api.hk_api.get_files(
             tags=[SequencingFileTag.FASTQ, flow_cell_name],
             bundle=sample_internal_id,
         ).all()
 
     # THEN a delivery file was created in the flow cell directory
     delivery_path = Path(
-        demux_post_processing_api.demultiplexed_runs_dir,
+        updated_demux_post_processing_api.demultiplexed_runs_dir,
         flow_cell_demultiplexing_directory,
         DemultiplexingDirsAndFiles.DELIVERY,
     )
@@ -168,51 +157,58 @@ def test_get_all_demultiplexed_flow_cell_out_dirs(
 
 
 def test_post_processing_tracks_undetermined_fastqs_for_bclconvert(
-    demux_post_processing_api: DemuxPostProcessingAPI,
-    bclconvert_flow_cell_dir_name: str,
-    bcl_convert_sample_id_with_non_pooled_undetermined_reads: str,
-    bcl_convert_non_pooled_sample_read_count: int,
+    updated_demux_post_processing_api: DemuxPostProcessingAPI,
+    hiseq_x_single_index_flow_cell: FlowCellDirectoryData,
 ):
     # GIVEN a flow cell with undetermined fastqs in a non-pooled lane
+    add_and_include_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=hiseq_x_single_index_flow_cell.path,
+        flow_cell_name=hiseq_x_single_index_flow_cell.id,
+        hk_api=updated_demux_post_processing_api.hk_api,
+    )
 
     # WHEN post processing the flow cell
-    demux_post_processing_api.finish_flow_cell(bclconvert_flow_cell_dir_name)
+    updated_demux_post_processing_api.finish_flow_cell(hiseq_x_single_index_flow_cell.full_name)
 
     # THEN the undetermined fastqs were stored in housekeeper
-    fastq_files: list[File] = demux_post_processing_api.hk_api.get_files(
+    fastq_files: list[File] = updated_demux_post_processing_api.hk_api.get_files(
         tags=[SequencingFileTag.FASTQ],
-        bundle=bcl_convert_sample_id_with_non_pooled_undetermined_reads,
+        bundle="SVE2648A1",
     ).all()
 
     undetermined_fastq_files = [file for file in fastq_files if "Undetermined" in file.path]
     assert undetermined_fastq_files
 
     # THEN the sample read count was updated with the undetermined reads
-    sample: Sample = demux_post_processing_api.status_db.get_sample_by_internal_id(
-        bcl_convert_sample_id_with_non_pooled_undetermined_reads
+    sample: Sample = updated_demux_post_processing_api.status_db.get_sample_by_internal_id(
+        "SVE2648A1"
     )
-    assert sample.reads == bcl_convert_non_pooled_sample_read_count
+    assert sample.reads == 807050152
 
 
 def test_sample_read_count_update_is_idempotent(
-    demux_post_processing_api: DemuxPostProcessingAPI,
-    bclconvert_flow_cell_dir_name: str,
-    bcl_convert_sample_id_with_non_pooled_undetermined_reads: str,
+    updated_demux_post_processing_api: DemuxPostProcessingAPI,
+    hiseq_x_single_index_flow_cell: FlowCellDirectoryData,
 ):
     """Test that sample read counts are the same if the flow cell is processed twice."""
 
-    # GIVEN a demultiplexed flow cell
+    # GIVEN a demultiplexed flow cell with the sample sheet in housekeeper
+    add_and_include_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=hiseq_x_single_index_flow_cell.path,
+        flow_cell_name=hiseq_x_single_index_flow_cell.id,
+        hk_api=updated_demux_post_processing_api.hk_api,
+    )
 
     # WHEN post processing the flow cell twice
-    demux_post_processing_api.finish_flow_cell(bclconvert_flow_cell_dir_name)
-    first_sample_read_count: int = demux_post_processing_api.status_db.get_sample_by_internal_id(
-        bcl_convert_sample_id_with_non_pooled_undetermined_reads
-    ).reads
+    updated_demux_post_processing_api.finish_flow_cell(hiseq_x_single_index_flow_cell.full_name)
+    first_sample_read_count: int = (
+        updated_demux_post_processing_api.status_db.get_sample_by_internal_id("ACC2655A1").reads
+    )
 
-    demux_post_processing_api.finish_flow_cell(bclconvert_flow_cell_dir_name)
-    second_sample_read_count: int = demux_post_processing_api.status_db.get_sample_by_internal_id(
-        bcl_convert_sample_id_with_non_pooled_undetermined_reads
-    ).reads
+    updated_demux_post_processing_api.finish_flow_cell(hiseq_x_single_index_flow_cell.full_name)
+    second_sample_read_count: int = (
+        updated_demux_post_processing_api.status_db.get_sample_by_internal_id("ACC2655A1").reads
+    )
 
     # THEN the sample read counts are not zero
     assert first_sample_read_count

@@ -79,19 +79,39 @@ def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
     return FlowCellDirectoryData(novaseq_x_flow_cell_dir)
 
 
+@pytest.fixture
+def seven_canonical_flow_cells(
+    hiseq_x_single_index_flow_cell: FlowCellDirectoryData,
+    hiseq_x_dual_index_flow_cell: FlowCellDirectoryData,
+    hiseq_2500_dual_index_flow_cell: FlowCellDirectoryData,
+    hiseq_2500_custom_index_flow_cell: FlowCellDirectoryData,
+    novaseq_6000_pre_1_5_kits_flow_cell: FlowCellDirectoryData,
+    novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData,
+    novaseq_x_flow_cell: FlowCellDirectoryData,
+) -> list[FlowCellDirectoryData]:
+    """Return a list of seven canonical flow cells."""
+    return [
+        hiseq_x_single_index_flow_cell,
+        hiseq_x_dual_index_flow_cell,
+        hiseq_2500_dual_index_flow_cell,
+        hiseq_2500_custom_index_flow_cell,
+        novaseq_6000_pre_1_5_kits_flow_cell,
+        novaseq_6000_post_1_5_kits_flow_cell,
+        novaseq_x_flow_cell,
+    ]
+
+
 # Demultiplexed runs
 
 
 @pytest.fixture
 def novaseqx_flow_cell_with_sample_sheet_no_fastq(
-    novaseqx_flow_cell_directory: Path, novaseqx_demultiplexed_flow_cell: Path
+    tmp_demultiplexed_flow_cell_no_fastq_files: Path,
 ) -> FlowCellDirectoryData:
     """Return a flow cell from a tmp dir with a sample sheet and no sample fastq files."""
-    novaseqx_flow_cell_directory.mkdir(parents=True, exist_ok=True)
-    flow_cell = FlowCellDirectoryData(novaseqx_flow_cell_directory)
-    sample_sheet_path = Path(
-        novaseqx_demultiplexed_flow_cell, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-    )
+    tmp_demultiplexed_flow_cell_no_fastq_files.mkdir(parents=True, exist_ok=True)
+    flow_cell = FlowCellDirectoryData(tmp_demultiplexed_flow_cell_no_fastq_files)
+    sample_sheet_path = Path(flow_cell.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
     flow_cell._sample_sheet_path_hk = sample_sheet_path
     return flow_cell
 
