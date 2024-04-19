@@ -44,7 +44,7 @@ class TomteReportAPI(ReportAPI):
 
         return TomteSampleMetadataModel(
             bias_5_3=sample_metrics.median_5prime_to_3prime_bias,
-            duplicates=sample_metrics.fraction_duplicates,
+            duplicates=sample_metrics.pct_duplication,
             gc_content=sample_metrics.after_filtering_gc_content,
             input_amount=input_amount,
             mean_length_r1=sample_metrics.after_filtering_read1_mean_length,
