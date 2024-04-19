@@ -4,7 +4,7 @@ ENV PYTHON_VERSION=3.11
 
 RUN yum -y update && \
     yum -y install gcc openssl-devel bzip2-devel libffi-devel zlib-devel make wget && \
-    yum -y install gnupg2 pigz tar && \  # Install gpg, pigz, and tar
+    yum -y install gnupg2 pigz tar && \
     yum clean all
 
 
