@@ -12,6 +12,7 @@ from cg.services.orders.order_status_service.dto.order_summary import OrderSumma
 from cg.store.models import Case, Order
 from cg.store.store import Store
 
+import logging
 
 class OrderService:
     def __init__(self, store: Store, status_service: OrderSummaryService) -> None:
