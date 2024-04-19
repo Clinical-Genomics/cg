@@ -8,10 +8,6 @@ class AnalysisModel(BaseModel):
     """Metadata analysis model"""
 
 
-class QCMetrics(BaseModel):
-    """QC metrics analysis model."""
-
-
 class NextflowAnalysis(AnalysisModel):
     """Nextflow's analysis results model."""
 

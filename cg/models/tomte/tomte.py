@@ -1,9 +1,8 @@
 from enum import StrEnum
 
-from pydantic.v1 import BaseModel
-
 from cg.constants.constants import Strandedness
 from cg.models.nf_analysis import NextflowSampleSheetEntry
+from cg.models.qc_metrics import QCMetrics
 
 
 class TomteSampleSheetEntry(NextflowSampleSheetEntry):
@@ -42,20 +41,20 @@ class TomteSampleSheetHeaders(StrEnum):
         return list(map(lambda header: header.value, cls))
 
 
-class TomteQCMetrics(BaseModel):
+class TomteQCMetrics(QCMetrics):
     """Tomte QC metrics."""
 
-    after_filtering_gc_content: float | None
-    after_filtering_q20_rate: float | None
-    after_filtering_q30_rate: float | None
-    after_filtering_read1_mean_length: float | None
-    before_filtering_total_reads: float | None
-    median_5prime_to_3prime_bias: float | None
-    pct_adapter: float | None
-    pct_duplication: float | None
-    pct_intergenic_bases: float | None
-    pct_intronic_bases: float | None
-    pct_mrna_bases: float | None
-    pct_ribosomal_bases: float | None
-    pct_surviving: float | None
-    uniquely_mapped_percent: float | None
+    after_filtering_gc_content: float
+    after_filtering_q20_rate: float
+    after_filtering_q30_rate: float
+    after_filtering_read1_mean_length: float
+    before_filtering_total_reads: float
+    median_5prime_to_3prime_bias: float
+    pct_adapter: float
+    pct_duplication: float
+    pct_intergenic_bases: float
+    pct_intronic_bases: float
+    pct_mrna_bases: float
+    pct_ribosomal_bases: float
+    pct_surviving: float
+    uniquely_mapped_percent: float
