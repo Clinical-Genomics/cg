@@ -362,9 +362,9 @@ class ReportAPI(MetaAPI):
             delivered_files=delivered_files,
         )
 
-    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles | None:
+    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
-        return None
+        return ScoutReportFiles()
 
     @staticmethod
     def get_sample_timestamp_data(sample: Sample) -> TimestampModel:
