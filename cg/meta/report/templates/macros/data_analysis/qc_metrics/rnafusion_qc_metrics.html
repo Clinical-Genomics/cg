@@ -3,7 +3,7 @@
 {% macro rnafusion_qc_metrics(samples) %}
   {% set
     metrics = [
-      {"name": "RIN",                                          "key": "rin",                   "description": "Mått på skala från 1 till 10 för kvalitet och integritet hos RNA-prover."},
+      {"name": "RIN (RNA Integrity Number)",                   "key": "rin",                   "description": "Mått på skala från 1 till 10 för kvalitet och integritet hos RNA-prover."},
       {"name": "Ingående mängd [ng]",                          "key": "input_amount",          "description": "Mängd RNA som används för sekvensering."},
       {"name": "Läspar [M]",                                   "key": "million_read_pairs",    "description": "Antal sekvenseringsläsningar i miljoner läspar."},
       {"name": "Mappade sekvenser [%]",                        "key": "mapped_reads",          "description": "Procent sekvenser som matchar en eller flera positioner i referensgenomet."},
