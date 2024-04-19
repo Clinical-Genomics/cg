@@ -29,7 +29,5 @@ def test_get_sample_metadata(
         case=case, sample=sample, analysis_metadata=latest_metadata
     )
 
-    print(sample_metadata)
-
     # THEN the sample metadata should be correctly retrieved and match the expected metrics
     assert sample_metadata.model_dump() == tomte_validated_metrics
