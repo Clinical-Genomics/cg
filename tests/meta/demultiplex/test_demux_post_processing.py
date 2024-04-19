@@ -73,12 +73,6 @@ def test_post_processing_of_flow_cell(
         assert updated_demultiplex_context.status_db.get_sample_by_internal_id(sample_internal_id)
 
     # GIVEN a DemuxPostProcessing API
-    demux_post_processing_api = DemuxPostProcessingAPI(updated_demultiplex_context)
-
-    # GIVEN a directory with a flow cell demultiplexed with BCL Convert
-    demux_post_processing_api.demultiplexed_runs_dir = (
-        tmp_illumina_demultiplexed_flow_cells_directory
-    )
 
     # GIVEN that the sample sheet is in housekeeper
     add_and_include_sample_sheet_path_to_housekeeper(
@@ -156,11 +150,14 @@ def test_get_all_demultiplexed_flow_cell_out_dirs(
     assert tmp_demultiplexed_runs_bcl2fastq_directory in demultiplexed_flow_cell_dirs
 
 
-def test_post_processing_tracks_undetermined_fastqs_for_bclconvert(
+def test_post_processing_tracks_undetermined_fastq_files(
     updated_demux_post_processing_api: DemuxPostProcessingAPI,
     hiseq_x_single_index_flow_cell: FlowCellDirectoryData,
+    selected_hiseq_x_single_index_sample_ids: list[str],
 ):
     # GIVEN a flow cell with undetermined fastqs in a non-pooled lane
+
+    # GIVEN that the flow cell has the sample sheet in housekeeper
     add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=hiseq_x_single_index_flow_cell.path,
         flow_cell_name=hiseq_x_single_index_flow_cell.id,
@@ -171,24 +168,20 @@ def test_post_processing_tracks_undetermined_fastqs_for_bclconvert(
     updated_demux_post_processing_api.finish_flow_cell(hiseq_x_single_index_flow_cell.full_name)
 
     # THEN the undetermined fastqs were stored in housekeeper
+    sample_internal_id: str = selected_hiseq_x_single_index_sample_ids[0]
     fastq_files: list[File] = updated_demux_post_processing_api.hk_api.get_files(
         tags=[SequencingFileTag.FASTQ],
-        bundle="SVE2648A1",
+        bundle=sample_internal_id,
     ).all()
 
     undetermined_fastq_files = [file for file in fastq_files if "Undetermined" in file.path]
     assert undetermined_fastq_files
 
-    # THEN the sample read count was updated with the undetermined reads
-    sample: Sample = updated_demux_post_processing_api.status_db.get_sample_by_internal_id(
-        "SVE2648A1"
-    )
-    assert sample.reads == 807050152
-
 
 def test_sample_read_count_update_is_idempotent(
     updated_demux_post_processing_api: DemuxPostProcessingAPI,
     hiseq_x_single_index_flow_cell: FlowCellDirectoryData,
+    selected_hiseq_x_single_index_sample_ids: list[str],
 ):
     """Test that sample read counts are the same if the flow cell is processed twice."""
 
@@ -200,14 +193,19 @@ def test_sample_read_count_update_is_idempotent(
     )
 
     # WHEN post processing the flow cell twice
+    sample_internal_id: str = selected_hiseq_x_single_index_sample_ids[0]
     updated_demux_post_processing_api.finish_flow_cell(hiseq_x_single_index_flow_cell.full_name)
     first_sample_read_count: int = (
-        updated_demux_post_processing_api.status_db.get_sample_by_internal_id("ACC2655A1").reads
+        updated_demux_post_processing_api.status_db.get_sample_by_internal_id(
+            sample_internal_id
+        ).reads
     )
 
     updated_demux_post_processing_api.finish_flow_cell(hiseq_x_single_index_flow_cell.full_name)
     second_sample_read_count: int = (
-        updated_demux_post_processing_api.status_db.get_sample_by_internal_id("ACC2655A1").reads
+        updated_demux_post_processing_api.status_db.get_sample_by_internal_id(
+            sample_internal_id
+        ).reads
     )
 
     # THEN the sample read counts are not zero

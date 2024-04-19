@@ -4,10 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSampleBCLConvert
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.constants import FileExtensions
 from cg.io.json import read_json
@@ -28,7 +25,7 @@ def hiseq_x_single_index_bcl_convert_lims_samples(
 @pytest.fixture
 def selected_hiseq_x_single_index_sample_ids() -> list[str]:
     """Return a list of sample ids for a HiSeqX single index flow cell."""
-    return ["ACC2655A1", "SVE2648A1"]
+    return ["SVE2648A1", "ACC2655A1"]
 
 
 @pytest.fixture
@@ -74,15 +71,6 @@ def hiseq_2500_custom_index_bcl_convert_lims_samples(
 def selected_hiseq_2500_custom_index_sample_ids() -> list[str]:
     """Return a list of sample ids for a HiSeqX single index flow cell."""
     return ["ACC4842A47", "ACC4551A1"]
-
-
-@pytest.fixture
-def novaseq_6000_pre_1_5_kits_bcl2fastq_lims_samples(
-    novaseq_6000_pre_1_5_kits_flow_cell_path: Path,
-) -> list[FlowCellSampleBcl2Fastq]:
-    """Return a list of Bcl2Fastq samples parsed from LIMS for a NovaSeq6000 pre 1.5 flow cell."""
-    path = Path(novaseq_6000_pre_1_5_kits_flow_cell_path, "HLYWYDSXX_bcl2fastq_raw.json")
-    return [FlowCellSampleBcl2Fastq.model_validate(sample) for sample in read_json(path)]
 
 
 @pytest.fixture
