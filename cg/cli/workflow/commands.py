@@ -8,6 +8,7 @@ from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants.constants import MetaApis
 from cg.constants.constants import Workflow
 from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.exc import FlowCellsNeededError
@@ -364,7 +365,7 @@ def taxprofiler_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" Taxprofiler case run dirs."""
-    analysis_api: NfAnalysisAPI = NfAnalysisAPI(context.obj, Workflow.TAXPROFILER)
+    analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
     exit_code: int = EXIT_SUCCESS
 
     try:
