@@ -63,8 +63,8 @@
   {% if workflow in ("balsamic", "balsamic-umi") %}
     <div class="alert alert-info" role="alert">
       Den tillämpade variantanropningsfiltrerna finns på:
-      <a href="https://balsamic.readthedocs.io/en/latest/balsamic_filters.html" class="alert-link">
-        https://balsamic.readthedocs.io/en/latest/balsamic_filters.html</a>.
+      <a href="https://balsamic.readthedocs.io/en/v{{ case.data_analysis.workflow_version }}/balsamic_filters.html" class="alert-link">
+        https://balsamic.readthedocs.io/en/v{{ case.data_analysis.workflow_version }}/balsamic_filters.html</a>.
     </div>
   {% elif workflow == "rnafusion" %}
     {% if case.data_analysis.scout_files.vcf_fusion != "N/A" %}
