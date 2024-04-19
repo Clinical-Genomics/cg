@@ -2637,6 +2637,12 @@ def raredisease_deliverables_response_data(
     )
 
 
+@pytest.fixture(scope="function")
+def raredisease_multiqc_json_metrics(raredisease_analysis_dir: Path) -> list[dict]:
+    """Returns the content of a mock Multiqc JSON file."""
+    return read_json(file_path=Path(raredisease_analysis_dir, "multiqc_data.json"))
+
+
 # Rnafusion fixtures
 
 
