@@ -203,26 +203,24 @@
   path_index: PATHTOCASE/repeat_expansions/SAMPLEID_exphunter_sorted.bam.bai
   step: expansionhunter
   tag: str_alignment
-# No present as rd output:
-# - format: meta
-#   id: SAMPLEID
-#   path: PATHTOCASE/vcf2cytosure/CASEID_cyto.SAMPLEID.cgh
-#   path_index: ~
-#   step: vcf2cytosure_ar
-#   tag: ~
-#gens not executed
-# - format: bed
-#   id: SAMPLEID
-#   path: PATHTOCASE/SAMPLEID/gens_generatedata/SAMPLEID_lanes_1_fastp_sorted_md.baf.bed.gz
-#   path_index: PATHTOCASE/SAMPLEID/gens_generatedata/SAMPLEID_lanes_1_fastp_sorted_md.baf.bed.gz.tbi
-#   step: gens_generatedata
-#   tag: baf
-# - format: bed
-#   id: SAMPLEID
-#   path: PATHTOCASE/SAMPLEID/gens_generatedata/SAMPLEID_lanes_1_fastp_sorted_md.cov.bed.gz
-#   path_index: PATHTOCASE/SAMPLEID/gens_generatedata/SAMPLEID_lanes_1_fastp_sorted_md.cov.bed.gz.tbi
-#   step: gens_generatedata
-#   tag: cov
+- format: meta
+  id: SAMPLEID
+  path: PATHTOCASE/vcf2cytosure/SAMPLEID.cgh
+  path_index: ~
+  step: vcf2cytosure
+  tag: ~
+- format: bed
+  id: SAMPLEID
+  path: PATHTOCASE/gens/SAMPLEID/SAMPLEID_gens.baf.bed.gz
+  path_index: PATHTOCASE/gens/SAMPLEID/SAMPLEID_gens.baf.bed.gz.tbi
+  step: gens_generatedata
+  tag: baf
+- format: bed
+  id: SAMPLEID
+  path: PATHTOCASE/gens/SAMPLEID/SAMPLEID_gens.cov.bed.gz
+  path_index: PATHTOCASE/gens/SAMPLEID/SAMPLEID_gens.cov.bed.gz.tbi
+  step: gens_generatedata
+  tag: cov
 - format: vcf
   id: CASEID
   path: PATHTOCASE/call_mobile_elements/CASEID_mobile_elements.vcf.gz
@@ -355,12 +353,12 @@
   path_index: ~
   step: peddy
   tag: ped_check
-# - format: meta
-#     id: CASEID
-#     path: PATHTOCASE/TODO/CASEID.ped
-#     path_index: ~
-#     step: TODO
-#     tag: pedigree_fam
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/pedigree/CASEID.ped
+  path_index: ~
+  step: TODO
+  tag: pedigree_fam
 - format: bw
   id: SAMPLEID
   path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz/SAMPLEID_rhocallviz.bw
