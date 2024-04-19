@@ -63,11 +63,6 @@ class TomteReportAPI(ReportAPI):
             uniquely_mapped_reads=sample_metrics.uniquely_mapped_percent,
         )
 
-    def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
-        """Return the reference genome of an analysis."""
-        # TODO
-        return ""
-
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:

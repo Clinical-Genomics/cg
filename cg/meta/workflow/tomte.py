@@ -7,6 +7,7 @@ from cg.constants import Workflow
 from cg.constants.constants import Strandedness
 from cg.constants.nf_analysis import TOMTE_METRIC_CONDITIONS
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import WorkflowParameters
 from cg.models.tomte.tomte import TomteSampleSheetEntry, TomteSampleSheetHeaders
@@ -75,3 +76,8 @@ class TomteAnalysisAPI(NfAnalysisAPI):
 
     def get_workflow_metrics(self) -> dict:
         return TOMTE_METRIC_CONDITIONS
+
+    def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
+        """Return the reference genome of an analysis."""
+        # TODO
+        return ""
