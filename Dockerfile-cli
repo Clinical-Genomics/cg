@@ -16,13 +16,16 @@ RUN ln -s /usr/bin/gpg /home/bin/gpg && \
     ln -s /usr/bin/tar /home/bin/tar
 
 RUN cd /usr/src && \
-    wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz && \
-    tar xzf Python-${PYTHON_VERSION}.tgz && \
-    cd Python-${PYTHON_VERSION} && \
+    wget https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz && \
+    tar xzf Python-3.11.9.tgz && \
+    cd Python-3.11.9 && \
     ./configure --enable-optimizations && \
     make altinstall
 
-ENV PATH="/usr/local/bin:${PATH}"
+RUN rm -rf /usr/src/Python-3.11.9*
+
+RUN ln -s /usr/local/bin/python3.11 /usr/bin/python3 && \
+    ln -s /usr/local/bin/pip3.11 /usr/bin/pip3
 
 RUN groupadd --system nonroot && \
     useradd --system --gid nonroot --create-home --no-log-init nonroot
