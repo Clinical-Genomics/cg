@@ -5,6 +5,7 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Priority
+from cg.constants.constants import CaseActions, CustomerId
 from cg.meta.create_validation_cases.validation_data_input import ValidationDataInput
 from cg.store.models import ApplicationVersion, Case, Sample
 from cg.store.store import Store
@@ -14,12 +15,9 @@ LOG = logging.getLogger(__name__)
 
 
 class ValidationCaseData:
-    def __init__(
-        self, status_db: Store, hk_api: HousekeeperAPI, validation_data_input: ValidationDataInput
-    ):
+    def __init__(self, status_db: Store, validation_data_input: ValidationDataInput):
         """Initialize the validation sample data and perform integrity checks."""
         self.status_db: Store = status_db
-        self.housekeeper_api: HousekeeperAPI = hk_api
         self.input_data: ValidationDataInput = validation_data_input
         self.case_id: str = validation_data_input.case_id
         self.case_name: str = validation_data_input.case_name
@@ -30,9 +28,9 @@ class ValidationCaseData:
         LOG.info(f"Validation Data checks completed for {self.case_id}")
 
     @staticmethod
-    def _validation_sample_name(sample: Sample) -> str:
+    def _validation_sample_id(sample: Sample) -> str:
         """Return a new validation sample identifier. The identifier removes "ACC" and prepends "VAL"."""
-        return sample.internal_id.replace("ACC", "VAL")
+        return "VAL" + sample.internal_id[3:]
 
     @property
     def validation_case_name(
@@ -46,7 +44,7 @@ class ValidationCaseData:
         Return samples associated to a case.
         """
         case: Case = self.status_db.get_case_by_internal_id(self.case_id)
-        return [sample.internal_id for sample in case._get_samples]
+        return [sample for sample in case.samples]
 
     def get_case_to_copy(self) -> Case:
         """
@@ -67,16 +65,16 @@ class ValidationCaseData:
         The new sample contains the original sample internal id and meta data
         """
         application_version: ApplicationVersion = self._get_application_version(original_sample)
-        sample_name: str = self._validation_sample_name(original_sample)
+        sample_id: str = self._validation_sample_id(original_sample)
         validation_sample: Sample = self.status_db.add_sample(
-            name=sample_name,
-            internal_id=sample_name,
+            name=sample_id,
+            internal_id=sample_id,
             sex=original_sample.sex,
             order=original_sample.order,
             from_sample=original_sample.internal_id,
             tumour=original_sample.is_tumour,
             priority=Priority.standard,
-            customer=original_sample.customer,
+            customer=CustomerId.CG_INTERNAL_CUSTOMER,
             application_version=application_version,
             received=original_sample.received_at,
             prepared_at=original_sample.prepared_at,
@@ -98,24 +96,17 @@ class ValidationCaseData:
         if self.status_db.case_with_name_exists(case_name=self.validation_case_name):
             raise ValueError(f"Case with name {self.case_name} already exists.")
         validation_case: Case = self.status_db.add_case(
-            data_analysis=(
-                self.input_data.data_analysis
-                if self.input_data.data_analysis
-                else self.original_case.data_analysis
-            ),
-            data_delivery=(
-                self.input_data.delivery
-                if self.input_data.delivery
-                else self.original_case.delivery
-            ),
+            data_analysis=(self.input_data.data_analysis or self.original_case.data_analysis),
+            data_delivery=(self.input_data.delivery or self.original_case.data_delivery),
             name=self.validation_case_name,
             panels=self.original_case.panels,
-            priority=self.original_case.priority,
+            priority=Priority.standard,
             ticket=self.original_case.latest_ticket,
         )
         validation_case.orders.append(self.original_case.latest_order)
-        validation_case.customer = "cust000"
+        validation_case.customer = CustomerId.CG_INTERNAL_CUSTOMER
         validation_case.is_compressible = False
+        validation_case.action = CaseActions.HOLD
         return validation_case
 
     @staticmethod

@@ -2051,19 +2051,25 @@ def case_id_not_enough_reads():
 @pytest.fixture(scope="session")
 def sample_id_in_single_case():
     """Return a sample id that should be associated with a single case."""
-    return "ASM1"
+    return "ACC1231241"
 
 
 @pytest.fixture(scope="session")
 def sample_id_in_multiple_cases():
     """Return a sample id that should be associated with multiple cases."""
-    return "ASM2"
+    return "ACC12312442"
 
 
 @pytest.fixture(scope="session")
 def sample_id_not_enough_reads():
     """Return a sample id without enough reads."""
-    return "ASM3"
+    return "ACC12312411231"
+
+
+@pytest.fixture(scope="session")
+def validation_sample_id():
+    """Return a sample id without enough reads."""
+    return "VAL12312442"
 
 
 @pytest.fixture(name="store_with_multiple_cases_and_samples")

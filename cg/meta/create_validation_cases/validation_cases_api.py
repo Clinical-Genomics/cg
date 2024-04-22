@@ -26,7 +26,6 @@ class CreateValidationCaseAPI:
     def get_validation_case_data(self, validation_data_input: ValidationDataInput):
         return ValidationCaseData(
             status_db=self.status_db,
-            hk_api=self.hk_api,
             validation_data_input=validation_data_input,
         )
 

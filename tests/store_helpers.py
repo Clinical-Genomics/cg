@@ -662,7 +662,10 @@ class StoreHelpers:
         return sample
 
     @staticmethod
-    def add_samples(store: Store, nr_samples: int = 5) -> list[Sample]:
+    def add_samples(
+        store: Store,
+        nr_samples: int = 5,
+    ) -> list[Sample]:
         """Utility function to add a number of samples to use in tests."""
         nr_samples = max(nr_samples, 2)
         return [
@@ -799,26 +802,40 @@ class StoreHelpers:
         case_id: str,
         nr_samples: int,
         sequenced_at: datetime = datetime.now(),
+        ticket_id: int = 1,
     ) -> Case:
         """Utility function to add one case with many samples and return the case."""
 
-        samples: list[Sample] = cls.add_samples(store=base_store, nr_samples=nr_samples)
+        samples: list[Sample] = cls.add_samples(
+            store=base_store,
+            nr_samples=nr_samples,
+        )
         for sample in samples:
             sample.last_sequenced_at: datetime = sequenced_at
+
         case: Case = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
+        order = cls.add_order(store=base_store, customer_id=1, ticket_id=ticket_id)
+        case.orders.append(order)
         cls.relate_samples(base_store=base_store, case=case, samples=samples)
         return case
 
     @classmethod
     def add_cases_with_samples(
-        cls, base_store: Store, nr_cases: int, sequenced_at: datetime
+        cls,
+        base_store: Store,
+        nr_cases: int,
+        sequenced_at: datetime,
     ) -> list[Case]:
         """Utility function to add many cases with two samples to use in tests."""
 
         cases: list[Case] = []
         for i in range(nr_cases):
-            case: list[Case] = cls.add_case_with_samples(
-                base_store, f"f{i}", 2, sequenced_at=sequenced_at
+            case: Case = cls.add_case_with_samples(
+                base_store,
+                f"f{i}",
+                2,
+                sequenced_at=sequenced_at,
+                ticket_id=i,
             )
             cases.append(case)
         return cases
