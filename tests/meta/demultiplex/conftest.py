@@ -198,40 +198,6 @@ def flow_cell_name_housekeeper_api(
 
 
 @pytest.fixture(scope="session")
-def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
-    return "HY7FFDRX2"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl_convert(
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-):
-    return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl_convert_flat(
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-):
-    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert using a flat output directory structure."""
-    return f"230505_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer(
-    flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer: str,
-):
-    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert on the NovaseqX sequencer."""
-    return f"20230508_LH00188_0003_A{flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer}"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer() -> str:
-    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert on the NovaseqX sequencer."""
-    return "22522YLT3"
-
-
-@pytest.fixture(scope="session")
 def base_call_file() -> Path:
     return Path("Data", "Intensities", "BaseCalls", "L001", "C1.1", "L001_1.cbcl")
 
@@ -271,17 +237,6 @@ def lsyncd_target_directory(lsyncd_source_directory: Path, tmp_path_factory) -> 
     target_directory = Path(lsyncd_source_directory.parent, Path(temp_target_directory, "target"))
     shutil.copytree(lsyncd_source_directory, target_directory)
     return target_directory
-
-
-@pytest.fixture
-def bcl_convert_sample_id_with_non_pooled_undetermined_reads() -> str:
-    return "ACC11927A2"
-
-
-@pytest.fixture
-def bcl_convert_non_pooled_sample_read_count() -> int:
-    """Based on the data in 230504_A00689_0804_BHY7FFDRX2, the sum of all reads - mapped and undetermined."""
-    return 4000000
 
 
 def get_all_files_in_directory_tree(directory: Path) -> list[Path]:

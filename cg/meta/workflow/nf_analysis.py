@@ -827,6 +827,6 @@ class NfAnalysisAPI(AnalysisAPI):
         qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
         return self.parse_analysis(qc_metrics_raw=qc_metrics)
 
-    def get_genome_build(self, **kwargs) -> str:
+    def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
         """Return the reference genome build version of Nextflow analysis."""
         return GenomeVersion.hg38.value
