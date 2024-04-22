@@ -2313,23 +2313,23 @@ def raredisease_sample_sheet_content(
     return "\n".join([headers, row])
 
 
-@pytest.fixture(scope="function")
-def hermes_deliverables(deliverable_data: dict, raredisease_case_id: str) -> dict:
-    hermes_output: dict = {"pipeline": "raredisease", "bundle_id": raredisease_case_id, "files": []}
-    for file_info in deliverable_data["files"]:
-        tags: list[str] = []
-        if "html" in file_info["format"]:
-            tags.append("multiqc-html")
-        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
-    return hermes_output
+# @pytest.fixture(scope="function")
+# def hermes_deliverables(deliverable_data: dict, raredisease_case_id: str) -> dict:
+#     hermes_output: dict = {"pipeline": "raredisease", "bundle_id": raredisease_case_id, "files": []}
+#     for file_info in deliverable_data["files"]:
+#         tags: list[str] = []
+#         if "html" in file_info["format"]:
+#             tags.append("multiqc-html")
+#         hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
+#     return hermes_output
 
 
-@pytest.fixture(scope="function")
-def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
-    malformed_deliverable: dict = hermes_deliverables.copy()
-    malformed_deliverable.pop("pipeline")
+# @pytest.fixture(scope="function")
+# def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
+#     malformed_deliverable: dict = hermes_deliverables.copy()
+#     malformed_deliverable.pop("pipeline")
 
-    return malformed_deliverable
+#     return malformed_deliverable
 
 
 @pytest.fixture(scope="function")
@@ -2449,24 +2449,6 @@ def raredisease_context(
 
     return cg_context
 
-
-@pytest.fixture(scope="function")
-def raredisease_deliverable_data(
-    raredisease_dir: Path, raredisease_case_id: str, sample_id: str
-) -> dict:
-    return {
-        "files": [
-            {
-                "path": f"{raredisease_dir}/{raredisease_case_id}/multiqc/multiqc_report.html",
-                "path_index": "",
-                "step": "report",
-                "tag": ["multiqc-html", "rna"],
-                "id": raredisease_case_id,
-                "format": "html",
-                "mandatory": True,
-            },
-        ]
-    }
 
 
 @pytest.fixture(scope="function")
