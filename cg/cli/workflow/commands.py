@@ -364,7 +364,7 @@ def taxprofiler_past_run_dirs(
 ) -> None:
     """Clean up of "old" nextflow case run dirs."""
     analysis_api = NfAnalysisAPI()
-    context.obj.meta_apis['analysis_api'] = analysis_api
+    context.obj.meta_apis["analysis_api"] = analysis_api
 
     exit_code: int = EXIT_SUCCESS
 
