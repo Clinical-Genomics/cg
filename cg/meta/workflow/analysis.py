@@ -160,6 +160,33 @@ class AnalysisAPI(MetaAPI):
 
         return application_types.pop()
 
+    def get_source_from_lims_by_sample_id(
+        self, sample_id: str, raise_error_on_lims_fetch_failure: bool
+    ) -> str:
+        """Get the source from LIMS for a given sample ID. If no source information is set, it returns 'unknown'."""
+        lims_sample: dict = self.get_lims_sample(
+            sample_id=sample_id, raise_error_on_lims_fetch_failure=raise_error_on_lims_fetch_failure
+        )
+        if lims_sample:
+            return lims_sample.get("source", SourceType.UNKNOWN)
+
+    def get_case_source_type(self, case_id: str, raise_error_on_lims_fetch_failure: bool) -> str:
+        """Returns the source type for samples in a case.
+        Raises CgError if different sources are set for the samples linked to a case."""
+        sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
+        source_types: set[str] = {
+            self.get_source_from_lims_by_sample_id(
+                sample_id=sample_id,
+                raise_error_on_lims_fetch_failure=raise_error_on_lims_fetch_failure,
+            )
+            for sample_id in sample_ids
+        }
+
+        if len(source_types) > 1:
+            raise CgError(f"Different source types found for case: {case_id} ({source_types})")
+
+        return source_types.pop()
+
     def has_case_only_exome_samples(self, case_id: str) -> bool:
         """Returns True if the application type for all samples in a case is WES."""
         application_type: str = self.get_case_application_type(case_id)
@@ -637,17 +664,19 @@ class AnalysisAPI(MetaAPI):
         all_panels |= {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
         return list(all_panels)
 
-    def get_lims_sample(self, sample_id: str, silent_error: bool = True) -> dict:
+    def get_lims_sample(
+        self, sample_id: str, raise_error_on_lims_fetch_failure: bool = False
+    ) -> dict:
         """Fetches sample data from LIMS. Returns an empty dictionary if the request was unsuccessful."""
         lims_sample = {}
         try:
             lims_sample: dict = self.lims_api.sample(sample_id)
         except requests.exceptions.HTTPError as error:
             message = f"Could not fetch sample {sample_id} from LIMS: {error}"
-            if silent_error:
-                LOG.info(message)
-            else:
+            if raise_error_on_lims_fetch_failure:
                 raise CgError(message)
+            else:
+                LOG.info(message)
         return lims_sample
 
     def run_analysis(self, *args, **kwargs):

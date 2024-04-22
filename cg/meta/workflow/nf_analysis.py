@@ -858,7 +858,9 @@ class NfAnalysisAPI(AnalysisAPI):
         try:
             return getattr(GenePanelGenomeBuild, reference_genome)
         except AttributeError as error:
-            raise CgError(f"Reference {reference_genome} has no associated genome build for panels: {error}") from error
+            raise CgError(
+                f"Reference {reference_genome} has no associated genome build for panels: {error}"
+            ) from error
 
     def get_gene_panel(self, case_id: str, dry_run: bool = False) -> list[str]:
         """Create and return the aggregated gene panel file."""
@@ -867,32 +869,6 @@ class NfAnalysisAPI(AnalysisAPI):
             genome_build=self.get_gene_panel_genome_build(case_id=case_id),
             dry_run=dry_run,
         )
-
-    def get_source_from_lims_by_sample_id(self, sample_id: str) -> str | None:
-        """Get the source from LIMS for a given sample ID."""
-        lims_sample: dict | None = self.get_lims_sample(sample_id=sample_id, silent_error=True)
-        return lims_sample.get("source", None) if lims_sample else None
-
-    def get_case_source_type(self, case_id: str) -> str:
-        """Get sources from LIMS for a given case.
-        Returns 'unknown' if sources cannot be retrieved.
-        Raises CgError if different sources are set for the samples linked to a case"""
-        sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
-        sources: set[str] = {
-            source
-            for sample_id in sample_ids
-            if (source := self.get_source_from_lims_by_sample_id(sample_id=sample_id)) is not None
-        }
-        LOG.info(f"sources are {sources}")
-        if not sources:
-            return "unknown"
-        if len(sources) == 1:
-            return sources.pop()
-        if len(sources) > 1:
-            raise CgError(
-                f"All samples in a case must be of the same tissue type. "
-                f"Different sources found for {case_id}: {sources}."
-            )
 
     @staticmethod
     def replace_non_alphanumeric(string: str, replace_by="_") -> str:
