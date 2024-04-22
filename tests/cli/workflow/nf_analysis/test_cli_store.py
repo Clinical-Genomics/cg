@@ -143,13 +143,6 @@ def test_store_available_success(
     request.getfixturevalue(f"{workflow}_mock_deliverable_dir")
     request.getfixturevalue(f"{workflow}_mock_analysis_finish")
 
-    # GIVEN a mocked deliverables template
-    mocker.patch.object(
-        NfAnalysisAPI,
-        "get_deliverables_template_content",
-        return_value=deliverables_template_content,
-    )
-
     # GIVEN that the Housekeeper store is empty
     context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
     context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
@@ -201,13 +194,6 @@ def test_store_available_fail(
     """
     caplog.set_level(logging.INFO)
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
-
-    # GIVEN a mocked deliverables template
-    mocker.patch.object(
-        NfAnalysisAPI,
-        "get_deliverables_template_content",
-        return_value=deliverables_template_content,
-    )
 
     # GIVEN a case for which we mocked files created after a successful run
     hermes_deliverables: dict = request.getfixturevalue(f"{workflow}_hermes_deliverables")
