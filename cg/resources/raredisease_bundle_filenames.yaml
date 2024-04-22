@@ -166,7 +166,6 @@
   path_index: ~
   step: chromograph_cov
   tag: tcov
-
 - format: meta
   id: CASEID
   path: PATHTOCASE/smncopynumbercaller/out/CASEID.tsv
