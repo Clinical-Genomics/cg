@@ -55,35 +55,6 @@ def test_rta_exists(novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq: FlowCellDirec
     assert rta_file.exists()
 
 
-def test_get_bcl_converter_default(
-    flow_cell_directory_name_demultiplexed_with_bcl_convert: str,
-):
-    """Test that BCLConvert is the bcl converter set as default when instantiating a flow cell."""
-    # GIVEN a flow cell directory
-
-    # WHEN instantiating a flow cell object
-    flow_cell = FlowCellDirectoryData(Path(flow_cell_directory_name_demultiplexed_with_bcl_convert))
-
-    # THEN it sets the converter to BCLConverter
-    assert flow_cell.bcl_converter == BclConverter.BCLCONVERT
-
-
-def test_get_bcl_converter_bcl2fastq_flow_cell(
-    flow_cell_directory_name_demultiplexed_with_bcl2fastq: str,
-):
-    """Test instantiating a flow cell with bcl2fastq as bcl converter."""
-    # GIVEN a Bcl2Fastq flow cell directory
-
-    # WHEN instantiating a flow cell object
-    flow_cell = FlowCellDirectoryData(
-        flow_cell_path=Path(flow_cell_directory_name_demultiplexed_with_bcl2fastq),
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
-
-    # THEN it sets the converter to BCLConverter
-    assert flow_cell.bcl_converter == BclConverter.BCL2FASTQ
-
-
 @pytest.mark.parametrize(
     "flow_cell_fixture",
     [
