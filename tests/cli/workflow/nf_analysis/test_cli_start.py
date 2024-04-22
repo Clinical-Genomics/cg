@@ -7,7 +7,7 @@ from click.testing import CliRunner
 
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
-from cg.constants.nextflow import NFX_WORKFLOWS
+from cg.constants.nextflow import NXF_WORKFLOWS
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from tests.cli.workflow.conftest import mock_analysis_flow_cell
@@ -15,7 +15,7 @@ from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
 @pytest.mark.parametrize(
     "workflow",
-    NFX_WORKFLOWS,
+    NXF_WORKFLOWS,
 )
 def test_start(
     cli_runner: CliRunner,
@@ -50,7 +50,7 @@ def test_start(
 
 @pytest.mark.parametrize(
     "workflow",
-    NFX_WORKFLOWS,
+    NXF_WORKFLOWS,
 )
 def test_start_available(
     cli_runner: CliRunner,

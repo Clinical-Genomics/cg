@@ -5,7 +5,7 @@ from click.testing import CliRunner
 
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
-from cg.constants.nextflow import NFX_WORKFLOWS
+from cg.constants.nextflow import NXF_WORKFLOWS
 
 
 @pytest.mark.parametrize(
