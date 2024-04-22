@@ -69,7 +69,7 @@ for sub_cmd in [
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
     microsalt_past_run_dirs,
-    taxprofiler_past_run_dirs,
+    nf_workflow_past_run_dirs,
 ]:
     clean.add_command(sub_cmd)
 
