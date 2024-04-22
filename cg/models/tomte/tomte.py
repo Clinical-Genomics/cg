@@ -1,8 +1,11 @@
 from enum import StrEnum
 from pathlib import Path
 
+from pydantic.v1 import validator
+
 from cg.constants.constants import Strandedness
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
+from cg.utils.utils import replace_non_alphanumeric
 
 
 class TomteSampleSheetEntry(NextflowSampleSheetEntry):
@@ -47,3 +50,7 @@ class TomteParameters(WorkflowParameters):
     gene_panel_clinical_filter: Path
     tissue: str
     genome: str
+
+    @validator("tissue")
+    def replace_non_alphanumeric(cls, tissue: str) -> str | None:
+        return replace_non_alphanumeric(string=tissue)

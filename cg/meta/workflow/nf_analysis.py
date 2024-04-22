@@ -1,5 +1,4 @@
 import logging
-import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterator
@@ -869,8 +868,3 @@ class NfAnalysisAPI(AnalysisAPI):
             genome_build=self.get_gene_panel_genome_build(case_id=case_id),
             dry_run=dry_run,
         )
-
-    @staticmethod
-    def replace_non_alphanumeric(string: str, replace_by="_") -> str:
-        """Replace non-alphanumeric characters from a string."""
-        return re.sub(r"\W+", replace_by, string)
