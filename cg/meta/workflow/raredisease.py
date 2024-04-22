@@ -104,7 +104,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     @staticmethod
     def get_bundle_filenames_path() -> Path:
-        """Return Rnafusion bundle filenames path."""
+        """Return Raredisease bundle filenames path."""
         return RAREDISEASE_BUNDLE_FILENAMES_PATH
 
     @property
