@@ -10,7 +10,13 @@ from cg.constants.nextflow import NFX_WORKFLOWS
 
 @pytest.mark.parametrize(
     "workflow",
-    NFX_WORKFLOWS,
+    [
+        Workflow.JASEN,
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+    ],
 )
 def test_workflow_no_args(cli_runner: CliRunner, workflow: Workflow, request):
     """Test to see that workflow is added and prints help when no subcommand is specified."""
