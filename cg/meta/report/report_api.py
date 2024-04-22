@@ -11,7 +11,7 @@ from sqlalchemy.orm import Query
 
 from cg.constants import DELIVERY_REPORT_FILE_NAME, SWEDAC_LOGO_PATH, Workflow
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, HermesFileTag
 from cg.exc import DeliveryReportError
 from cg.io.controller import ReadFile, WriteStream
 from cg.meta.meta import MetaAPI
@@ -87,7 +87,14 @@ class ReportAPI(MetaAPI):
         """Add a delivery report file to a case bundle and return its file object."""
         LOG.info(f"Adding a new delivery report to housekeeper for {case_id}")
         file: File = self.housekeeper_api.add_file(
-            path=delivery_report_file, version_obj=version, tags=[case_id, HK_DELIVERY_REPORT_TAG]
+            path=delivery_report_file,
+            version_obj=version,
+            tags=[
+                case_id,
+                HK_DELIVERY_REPORT_TAG,
+                HermesFileTag.CLINICAL_DELIVERY,
+                HermesFileTag.LONG_TERM_STORAGE,
+            ],
         )
         self.housekeeper_api.include_file(file, version)
         self.housekeeper_api.add_commit(file)
