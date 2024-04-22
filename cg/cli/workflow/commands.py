@@ -8,7 +8,7 @@ from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import MetaApis
+from cg.constants.constants import Workflow, MetaApis
 from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.exc import FlowCellsNeededError
 from cg.meta.rsync import RsyncAPI
@@ -362,7 +362,7 @@ def microsalt_past_run_dirs(
 def taxprofiler_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
-    """Clean up of "old" Taxprofiler case run dirs."""
+    """Clean up of "old" nextflow case run dirs."""
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
     exit_code: int = EXIT_SUCCESS
 
