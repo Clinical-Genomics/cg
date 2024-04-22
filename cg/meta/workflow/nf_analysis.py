@@ -366,7 +366,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def create_gene_panel(self, case_id: str, dry_run: bool) -> None:
         """Create and write an aggregated gene panel file exported from Scout."""
-        LOG.debug("Creating gene panel file")
+        LOG.info("Creating gene panel file")
         bed_lines: list[str] = self.get_gene_panel(case_id=case_id, dry_run=dry_run)
         if dry_run:
             bed_lines: str = "\n".join(bed_lines)
@@ -854,13 +854,11 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
         """Return build version of the gene panel for a case."""
-        reference_genome = self.get_reference_genome(case_id=case_id)
+        reference_genome: GenomeVersion = self.get_reference_genome(case_id=case_id)
         try:
             return getattr(GenePanelGenomeBuild, reference_genome)
         except AttributeError as error:
-            LOG.error(
-                f"Reference {reference_genome} has no associated genome build for panels: {error}"
-            )
+            raise CgError(f"Reference {reference_genome} has no associated genome build for panels: {error}") from error
 
     def get_gene_panel(self, case_id: str, dry_run: bool = False) -> list[str]:
         """Create and return the aggregated gene panel file."""
@@ -875,7 +873,7 @@ class NfAnalysisAPI(AnalysisAPI):
         lims_sample: dict | None = self.get_lims_sample(sample_id=sample_id, silent_error=True)
         return lims_sample.get("source", None) if lims_sample else None
 
-    def get_source_by_case(self, case_id: str) -> str:
+    def get_case_source_type(self, case_id: str) -> str:
         """Get sources from LIMS for a given case.
         Returns 'unknown' if sources cannot be retrieved.
         Raises CgError if different sources are set for the samples linked to a case"""

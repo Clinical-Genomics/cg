@@ -122,7 +122,8 @@ def test_config_case_default_parameters(
 
     # Mocking external Scout call
     mocker.patch.object(Process, "run_command", return_value=None)
-    # Mocking external LIMS call
+
+    # GIVEN that the sample does not exist in LIMS
     mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
 
     # GIVEN a valid case
@@ -207,7 +208,7 @@ def test_config_case_dry_run(
 
     # GIVEN a valid case
 
-    # Mocking external LIMS call
+    # GIVEN that the sample does not exist in LIMS
     mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
 
     # WHEN invoking the command with dry-run specified

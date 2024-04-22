@@ -37,7 +37,7 @@ def test_start(
     # GIVEN decompression is not needed
     mocker.patch.object(NfAnalysisAPI, "resolve_decompression", return_value=None)
 
-    # Mocking external LIMS call
+    # GIVEN that the sample does not exist in LIMS
     mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
 
     # WHEN invoking the command with dry-run specified
@@ -79,7 +79,7 @@ def test_start_available(
     # GIVEN decompression is not needed
     mocker.patch.object(NfAnalysisAPI, "resolve_decompression", return_value=None)
 
-    # Mocking external LIMS call
+    # GIVEN that the sample does not exist in LIMS
     mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
 
     # WHEN invoking the command with dry-run specified

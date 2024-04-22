@@ -76,7 +76,7 @@ class TomteAnalysisAPI(NfAnalysisAPI):
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             gene_panel_clinical_filter=self.get_gene_panels_path(case_id=case_id),
-            tissue=self.replace_non_alphanumeric(string=self.get_source_by_case(case_id=case_id)),
+            tissue=self.replace_non_alphanumeric(string=self.get_case_source_type(case_id=case_id)),
             genome=self.get_reference_genome(case_id=case_id),
         )
 
