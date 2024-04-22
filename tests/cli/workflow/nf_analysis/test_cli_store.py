@@ -180,6 +180,7 @@ def test_store_available_success(
     # THEN command exits successfully
     assert result.exit_code == EXIT_SUCCESS
 
+
 @pytest.mark.parametrize(
     "workflow",
     NFX_WORKFLOWS,
@@ -200,6 +201,13 @@ def test_store_available_fail(
     """
     caplog.set_level(logging.INFO)
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
+
+    # GIVEN a mocked deliverables template
+    mocker.patch.object(
+        NfAnalysisAPI,
+        "get_deliverables_template_content",
+        return_value=deliverables_template_content,
+    )
 
     # GIVEN a case for which we mocked files created after a successful run
     hermes_deliverables: dict = request.getfixturevalue(f"{workflow}_hermes_deliverables")
