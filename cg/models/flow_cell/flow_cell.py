@@ -36,7 +36,7 @@ RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
 class FlowCellDirectoryData:
     """Class to collect information about flow cell directories and their particular files."""
 
-    def __init__(self, flow_cell_path: Path, bcl_converter: str | None = None):
+    def __init__(self, flow_cell_path: Path):
         LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
         self.path: Path = flow_cell_path
         self.machine_name: str = EMPTY_STRING
