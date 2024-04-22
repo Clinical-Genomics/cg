@@ -752,7 +752,7 @@ class NfAnalysisAPI(AnalysisAPI):
             )
             MetricsDeliverablesCondition(**qc_metrics_raw)
         except MetricsQCError as error:
-            LOG.error(f"QC metrics failed for {case_id}")
+            LOG.error(f"QC metrics failed for {case_id}, with: {error}")
             self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)
             self.trailblazer_api.add_comment(case_id=case_id, comment=str(error))
             raise MetricsQCError from error

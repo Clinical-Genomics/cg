@@ -3,11 +3,11 @@
 import logging
 from pathlib import Path
 
-from cg.constants import GenePanelMasterList, Workflow
+from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
 from cg.constants.gene_panel import GENOME_BUILD_37
+from cg.constants.nf_analysis import RAREDISEASE_METRIC_CONDITIONS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
-from cg.meta.workflow.analysis import add_gene_panel_combo
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import WorkflowParameters
@@ -115,3 +115,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_managed_variants(self) -> list[str]:
         """Create and return the managed variants."""
         return self._get_managed_variants(genome_build=GENOME_BUILD_37)
+
+    def get_workflow_metrics(self) -> dict:
+        return RAREDISEASE_METRIC_CONDITIONS
