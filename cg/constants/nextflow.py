@@ -13,7 +13,7 @@ DELIVER_FILE_HEADERS = ["format", "id", "path", "path_index", "step", "tag"]
 NXF_PID_FILE_ENV = "NXF_PID_FILE"
 NXF_JVM_ARGS_ENV = "NXF_JVM_ARGS"
 JAVA_MEMORY_HEADJOB = "-Xmx5g"
-NFX_WORKFLOWS = [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE]
+NXF_WORKFLOWS = [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE]
 
 
 class SlurmHeadJobDefaults(IntEnum):
