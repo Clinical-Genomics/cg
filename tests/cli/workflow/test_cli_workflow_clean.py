@@ -1,3 +1,6 @@
+import pytest
+from _pytest.fixtures import FixtureRequest
+
 from click.testing import CliRunner
 
 from cg.cli.workflow.commands import (
@@ -13,7 +16,7 @@ from cg.cli.workflow.commands import (
     rnafusion_past_run_dirs,
     taxprofiler_past_run_dirs,
 )
-from cg.constants import EXIT_SUCCESS
+from cg.constants import EXIT_SUCCESS, Workflow
 from cg.models.cg_config import CGConfig
 
 
@@ -164,17 +167,23 @@ def test_cli_workflow_clean_microsalt(
     assert result.exit_code == EXIT_SUCCESS
 
 
+@pytest.mark.parametrize(
+    "workflow",
+    [Workflow.TAXPROFILER],
+)
 def test_cli_workflow_clean_taxprofiler(
     cli_runner: CliRunner,
-    taxprofiler_context: CGConfig,
+    workflow: Workflow,
     before_date: str,
+    request: FixtureRequest,
 ):
     """Test clean taxprofiler workflow."""
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
     # GIVEN a before string
 
     # WHEN running command
-    result = cli_runner.invoke(taxprofiler_past_run_dirs, [before_date], obj=taxprofiler_context)
+    result = cli_runner.invoke(taxprofiler_past_run_dirs, [before_date], obj=context)
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
