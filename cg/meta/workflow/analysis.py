@@ -474,7 +474,7 @@ class AnalysisAPI(MetaAPI):
         return None
 
     def get_latest_metadata(self, case_id: str) -> AnalysisModel:
-        """Get the latest analysis metadata of a specific case."""
+        """Return the latest analysis metadata of a specific case."""
         raise NotImplementedError
 
     def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:

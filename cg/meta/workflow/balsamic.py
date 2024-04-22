@@ -326,7 +326,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
 
     def get_latest_metadata(self, case_id: str) -> BalsamicAnalysis:
-        """Get the latest metadata of a specific BALSAMIC case"""
+        """Return the latest metadata of a specific BALSAMIC case."""
 
         config_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.CONFIG)
         metrics_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.QC_METRICS)
@@ -648,7 +648,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         analysis_type: str = analysis_metadata.config.analysis.analysis_type
         var_callers: dict[str, BalsamicVarCaller] = analysis_metadata.config.vcf
         tool_versions: dict[str, list] = analysis_metadata.config.bioinfo_tools_version
-        analysis_var_callers = list()
+        analysis_var_callers = []
         for var_caller_name, var_caller_attributes in var_callers.items():
             if (
                 sequencing_type in var_caller_attributes.sequencing_type
