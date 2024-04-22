@@ -392,14 +392,21 @@ class LimsAPI(Lims, OrderHandler):
             if artifact.udf.get(udf_key) is not None
         }
 
-    def get_sample_comment(self, sample_id: str) -> str:
-        """Get the comment of the sample"""
-        lims_sample = self.sample(sample_id)
-        return lims_sample.get("comment")
+    def get_sample_comment(self, sample_id: str) -> str | None:
+        """Return the comment of the sample."""
+        lims_sample: dict[str, Any] = self.sample(sample_id)
+        comment = None
+        if lims_sample:
+            comment: str = lims_sample.get("comment")
+        return comment
 
-    def get_sample_project(self, sample_id: str) -> str:
-        """Get the lims-id for the project of the sample"""
-        return self.sample(sample_id).get("project").get("id")
+    def get_sample_project(self, sample_id: str) -> str | None:
+        """Return the LIMS ID of the sample associated project if sample exists in LIMS."""
+        lims_sample: dict[str, Any] = self.sample(sample_id)
+        project_id = None
+        if lims_sample:
+            project_id: str = lims_sample.get("project").get("id")
+        return project_id
 
     def get_sample_rin(self, sample_id: str) -> float | None:
         """Return the sample RIN value."""
