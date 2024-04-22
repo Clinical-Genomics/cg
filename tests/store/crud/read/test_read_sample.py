@@ -7,9 +7,6 @@ from sqlalchemy.orm import Query
 
 from cg.store.models import Customer, Invoice, Sample
 from cg.store.store import Store
-from tests.meta.demultiplex.conftest import (
-    flow_cell_name_demultiplexed_with_bcl_convert,
-)
 from tests.store_helpers import StoreHelpers
 
 
