@@ -354,12 +354,12 @@ def microsalt_past_run_dirs(
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
-@click.command("taxprofiler-past-run-dirs")
+@click.command("nf-workflow-past-run-dirs")
 @OPTION_YES
 @OPTION_DRY
 @ARGUMENT_BEFORE_STR
 @click.pass_context
-def taxprofiler_past_run_dirs(
+def nf_workflow_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" nextflow case run dirs."""
