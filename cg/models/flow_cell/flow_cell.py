@@ -8,10 +8,6 @@ from typing import Type
 
 from typing_extensions import Literal
 
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
@@ -125,15 +121,6 @@ class FlowCellDirectoryData:
                 run_parameters_path=self.run_parameters_path
             )
         return self._run_parameters
-
-    @property
-    def sample_type(
-        self,
-    ) -> Type[FlowCellSampleBcl2Fastq] | Type[FlowCellSampleBCLConvert]:
-        """Return the sample class used in the flow cell."""
-        if self.bcl_converter == BclConverter.BCL2FASTQ:
-            return FlowCellSampleBcl2Fastq
-        return FlowCellSampleBCLConvert
 
     @property
     def sequencer_type(

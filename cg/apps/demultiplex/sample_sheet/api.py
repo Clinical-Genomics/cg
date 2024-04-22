@@ -212,7 +212,6 @@ class SampleSheetAPI:
             get_flow_cell_samples(
                 lims=self.lims_api,
                 flow_cell_id=flow_cell.id,
-                flow_cell_sample_type=flow_cell.sample_type,
             )
         )
         if not lims_samples:

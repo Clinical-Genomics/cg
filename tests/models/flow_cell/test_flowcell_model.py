@@ -55,30 +55,6 @@ def test_rta_exists(novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq: FlowCellDirec
     assert rta_file.exists()
 
 
-@pytest.mark.parametrize(
-    "flow_cell_fixture_name, model",
-    [
-        ("novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq", FlowCellSampleBcl2Fastq),
-        ("novaseq_6000_post_1_5_kits_flow_cell", FlowCellSampleBCLConvert),
-        ("novaseq_x_flow_cell", FlowCellSampleBCLConvert),
-    ],
-)
-def test_get_sample_model(
-    flow_cell_fixture_name: str,
-    model: Type[FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert],
-    request: FixtureRequest,
-):
-    """Test getting the sample model of a flow cell returns the correct value."""
-    # GIVEN a flow cell
-    flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture_name)
-
-    # WHEN getting the sample model
-    sample_model: Type[FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert] = flow_cell.sample_type
-
-    # THEN it is the expected model
-    assert sample_model == model
-
-
 def test_get_bcl_converter_default(
     flow_cell_directory_name_demultiplexed_with_bcl_convert: str,
 ):
