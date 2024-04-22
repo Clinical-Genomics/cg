@@ -741,7 +741,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
         self.status_db.verify_case_exists(case_internal_id=case_id)
 
-        if (self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)):
+        if self.trailblazer_api.is_latest_analysis_completed(case_id=case_id):
             if dry_run:
                 LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
                 return
