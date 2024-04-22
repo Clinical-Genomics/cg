@@ -584,7 +584,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 sample=sample, case_id=case_id, template=deliverable_template
             )
             files.extend(bundle for bundle in bundles_per_sample if bundle not in files)
-
+        LOG.info("Got workflow deliverables")
         return WorkflowDeliverables(files=files)
 
     def get_multiqc_json_path(self, case_id: str) -> Path:
@@ -746,6 +746,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
                 return
             workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
+
             self.write_deliverables_file(
                 deliverables_content=workflow_content.dict(),
                 file_path=self.get_deliverables_file_path(case_id=case_id),
