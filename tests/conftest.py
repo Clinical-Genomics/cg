@@ -2028,43 +2028,43 @@ def cg_context(
 
 
 @pytest.fixture(scope="session")
-def case_id_with_single_sample():
+def case_id_with_single_sample()-> str:
     """Return a case id that should only be associated with one sample."""
     return "exhaustedcrocodile"
 
 
 @pytest.fixture(scope="session")
-def case_id_with_multiple_samples():
+def case_id_with_multiple_samples()-> str:
     """Return a case id that should be associated with multiple samples."""
     return "righteouspanda"
 
 
 @pytest.fixture(scope="session")
-def case_id_without_samples():
+def case_id_without_samples()-> str:
     """Return a case id that should not be associated with any samples."""
     return "confusedtrout"
 
 
 @pytest.fixture(scope="session")
-def case_id_not_enough_reads():
+def case_id_not_enough_reads()-> str:
     """Return a case id associated to a sample without enough reads."""
     return "tiredwalrus"
 
 
 @pytest.fixture(scope="session")
-def sample_id_in_single_case():
+def sample_id_in_single_case()-> str:
     """Return a sample id that should be associated with a single case."""
     return "ASM1"
 
 
 @pytest.fixture(scope="session")
-def sample_id_in_multiple_cases():
+def sample_id_in_multiple_cases()-> str:
     """Return a sample id that should be associated with multiple cases."""
     return "ASM2"
 
 
 @pytest.fixture(scope="session")
-def sample_id_not_enough_reads():
+def sample_id_not_enough_reads()-> str:
     """Return a sample id without enough reads."""
     return "ASM3"
 
@@ -2293,7 +2293,6 @@ def raredisease_sample_sheet_content(
     raredisease_case_id: str,
     fastq_forward_read_path: Path,
     fastq_reverse_read_path: Path,
-    strandedness: str,
 ) -> str:
     """Return the expected sample sheet content  for raredisease."""
     headers: str = ",".join(RarediseaseSampleSheetHeaders.list())
@@ -2370,6 +2369,8 @@ def raredisease_context(
     helpers: StoreHelpers,
     nf_analysis_housekeeper: HousekeeperAPI,
     trailblazer_api: MockTB,
+    hermes_api: HermesApi,
+    cg_dir: Path,
     raredisease_case_id: str,
     sample_id: str,
     no_sample_case_id: str,
