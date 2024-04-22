@@ -69,9 +69,7 @@ class SampleSheetAPI:
             LOG.warning(message)
             raise SampleSheetError(message)
         try:
-            flow_cell = FlowCellDirectoryData(
-                flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
-            )
+            flow_cell = FlowCellDirectoryData(flow_cell_path)
         except FlowCellError as error:
             raise SampleSheetError from error
         return flow_cell

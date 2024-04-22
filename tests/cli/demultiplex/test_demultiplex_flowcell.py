@@ -26,9 +26,7 @@ def test_demultiplex_dragen_flowcell(
 
     # GIVEN that all files are present for Dragen demultiplexing
 
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_directory_bclconvert, bcl_converter=BclConverter.BCLCONVERT
-    )
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
     add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_flow_cell_directory_bclconvert,
         flow_cell_name=flow_cell.id,

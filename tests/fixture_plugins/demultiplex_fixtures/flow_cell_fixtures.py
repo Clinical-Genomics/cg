@@ -117,25 +117,11 @@ def novaseqx_flow_cell_with_sample_sheet_no_fastq(
 
 
 @pytest.fixture
-def tmp_bcl2fastq_flow_cell(
-    tmp_demultiplexed_runs_bcl2fastq_directory: Path,
-) -> FlowCellDirectoryData:
-    """Create a flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
-        flow_cell_path=tmp_demultiplexed_runs_bcl2fastq_directory,
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
-
-
-@pytest.fixture
 def tmp_bcl_convert_flow_cell(
     tmp_flow_cell_directory_bclconvert: Path,
 ) -> FlowCellDirectoryData:
     """Create a flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_directory_bclconvert,
-        bcl_converter=BclConverter.BCLCONVERT,
-    )
+    return FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
 
 
 @pytest.fixture

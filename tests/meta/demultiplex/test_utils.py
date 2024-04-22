@@ -260,8 +260,9 @@ def test_get_sample_sheet_path_not_found(tmp_path: Path):
 
 
 def test_parse_flow_cell_directory_data_invalid():
+    """Test that a FlowCellDirectoryData object is not created when the given path is invalid."""
     with pytest.raises(FlowCellError):
-        FlowCellDirectoryData(Path("dummy_path"), "dummy_bcl_converter")
+        FlowCellDirectoryData(Path("invalid_path"))
 
 
 def test_parse_flow_cell_directory_data_valid():

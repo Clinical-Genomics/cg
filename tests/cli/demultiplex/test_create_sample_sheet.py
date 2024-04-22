@@ -93,9 +93,7 @@ def test_create_v2_sample_sheet(
 
     # GIVEN a flow cell directory with some run parameters
     flow_cell_directory: Path = request.getfixturevalue(scenario.flow_cell_directory)
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=flow_cell_directory, bcl_converter=BclConverter.BCLCONVERT
-    )
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_directory)
     assert flow_cell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet in the flow cell dir
