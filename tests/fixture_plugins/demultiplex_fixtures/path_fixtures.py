@@ -50,6 +50,17 @@ def tmp_illumina_flow_cells_demux_all_directory(
     return Path(shutil.copytree(original_dir, tmp_dir))
 
 
+@pytest.fixture
+def tmp_illumina_flow_cells_demux_results_not_finished_directory(
+    tmp_path: Path, illumina_demux_results_not_finished_dir: Path
+) -> Path:
+    """Return the path to a temporary flow cells directory with unfinished demultiplexing results."""
+    original_dir = illumina_demux_results_not_finished_dir
+    tmp_dir = Path(tmp_path, "demultiplexed-runs-unfinished")
+
+    return Path(shutil.copytree(original_dir, tmp_dir))
+
+
 @pytest.fixture(name="tmp_flow_cell_directory_bcl2fastq")
 def flow_cell_working_directory_bcl2fastq(
     bcl2fastq_flow_cell_dir: Path, tmp_illumina_flow_cells_directory
@@ -171,6 +182,18 @@ def tmp_demultiplexed_runs_not_finished_flow_cells_directory(
     original_dir = illumina_novaseq_demux_results_not_finished_dir
     tmp_dir = Path(tmp_path, "demultiplexed-runs-unfinished")
     return Path(shutil.copytree(original_dir, tmp_dir))
+
+
+@pytest.fixture
+def tmp_demultiplexed_flow_cell_no_fastq_files(
+    tmp_illumina_flow_cells_demux_results_not_finished_directory: Path,
+    novaseq_6000_post_1_5_kits_flow_cell_full_name: str,
+) -> Path:
+    """Return the path to a demultiplexed flow cell directory without fastq files."""
+    return Path(
+        tmp_illumina_flow_cells_demux_results_not_finished_directory,
+        novaseq_6000_post_1_5_kits_flow_cell_full_name,
+    )
 
 
 @pytest.fixture
