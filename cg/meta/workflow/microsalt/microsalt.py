@@ -184,7 +184,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         )
 
         return {
-            "CG_ID_project": self.get_project(sample_id),
+            "CG_ID_project": self.lims_api.get_sample_project(sample_id),
             "Customer_ID_project": sample_obj.original_ticket,
             "CG_ID_sample": sample_obj.internal_id,
             "Customer_ID_sample": sample_obj.name,
@@ -200,10 +200,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             "method_sequencing": method_sequencing or "Not in LIMS",
             "sequencing_qc_passed": sample_obj.sequencing_qc,
         }
-
-    def get_project(self, sample_id: str) -> str:
-        """Get LIMS project for a sample"""
-        return self.lims_api.get_sample_project(sample_id)
 
     def resolve_case_sample_id(
         self, sample: bool, ticket: bool, unique_id: Any

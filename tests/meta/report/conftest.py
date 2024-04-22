@@ -89,7 +89,7 @@ def case_samples_data(case_id: str, report_api_mip_dna: MipDNAReportAPI):
 
 
 @pytest.fixture(scope="function")
-def mip_analysis_api(cg_context: CGConfig) -> MockMipDNAAnalysisAPI:
+def mip_dna_analysis_api(cg_context: CGConfig) -> MockMipDNAAnalysisAPI:
     """MIP DNA analysis mock data."""
     return MockMipDNAAnalysisAPI(config=cg_context)
 

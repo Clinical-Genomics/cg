@@ -154,7 +154,7 @@ class ScoutConfigBuilder:
         return self.get_file_from_hk(hk_tags=tags)
 
     def get_file_from_hk(self, hk_tags: set[str], latest: bool | None = False) -> str | None:
-        """Get a file from Housekeeper and return the path as a string."""
+        """Return the Housekeeper file path as a string."""
         LOG.info(f"Get file with tags {hk_tags}")
         if not hk_tags:
             LOG.debug("No tags provided, skipping")
