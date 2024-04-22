@@ -16,4 +16,4 @@ COPY . /app/
 
 USER nonroot
 
-CMD ["poetry", "run", "cg"]
+ENTRYPOINT ["poetry", "run", "cg"]
