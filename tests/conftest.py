@@ -2313,25 +2313,6 @@ def raredisease_sample_sheet_content(
     return "\n".join([headers, row])
 
 
-# @pytest.fixture(scope="function")
-# def hermes_deliverables(deliverable_data: dict, raredisease_case_id: str) -> dict:
-#     hermes_output: dict = {"pipeline": "raredisease", "bundle_id": raredisease_case_id, "files": []}
-#     for file_info in deliverable_data["files"]:
-#         tags: list[str] = []
-#         if "html" in file_info["format"]:
-#             tags.append("multiqc-html")
-#         hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
-#     return hermes_output
-
-
-# @pytest.fixture(scope="function")
-# def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
-#     malformed_deliverable: dict = hermes_deliverables.copy()
-#     malformed_deliverable.pop("pipeline")
-
-#     return malformed_deliverable
-
-
 @pytest.fixture(scope="function")
 def raredisease_sample_sheet_path(raredisease_dir, raredisease_case_id) -> Path:
     """Path to sample sheet."""
@@ -2393,7 +2374,7 @@ def raredisease_context(
     sample_id: str,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
-    apptag_rna: str,
+    wgs_application_tag: str,
     case_id_not_enough_reads: str,
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
@@ -2420,7 +2401,7 @@ def raredisease_context(
         internal_id=sample_id,
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
-        application_tag=apptag_rna,
+        application_tag=wgs_application_tag,
     )
 
     helpers.add_relationship(
@@ -2442,13 +2423,12 @@ def raredisease_context(
         internal_id=sample_id_not_enough_reads,
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_not_pass,
-        application_tag=apptag_rna,
+        application_tag=wgs_application_tag,
     )
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     return cg_context
-
 
 
 @pytest.fixture(scope="function")
