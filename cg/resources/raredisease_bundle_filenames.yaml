@@ -4,7 +4,7 @@
   path_index: PATHTOCASE/alignment/SAMPLEID_sorted_md.cram.crai
   step: alignment
   tag: ~
-- format: bam
+- format: cram
   id: SAMPLEID
   path: PATHTOCASE/alignment/SAMPLEID_mt_subsample.cram
   path_index: PATHTOCASE/alignment/SAMPLEID_mt_subsample.cram.crai
@@ -322,13 +322,13 @@
   path: PATHTOCASE/rank_and_filter/CASEID_mt_ranked_clinical.vcf.gz
   path_index: PATHTOCASE/rank_and_filter/CASEID_mt_ranked_clinical.vcf.gz.tbi
   step: rank_and_filter
-  tag: clinical
+  tag: clinical_mt
 - format: vcf
   id: CASEID
   path: PATHTOCASE/rank_and_filter/CASEID_mt_ranked_research.vcf.gz
   path_index: PATHTOCASE/rank_and_filter/CASEID_mt_ranked_research.vcf.gz.tbi
   step: rank_and_filter
-  tag: research
+  tag: research_mt
 - format: tsv
   id: CASEID
   path: PATHTOCASE/ngsbits_samplegender/CASEID_ngsbits_sex.tsv
@@ -849,7 +849,7 @@
   path: PATHTOCASE/multiqc/multiqc_data/multiqc_data.json
   path_index: ~
   step: multiqc
-  tag: multiqx
+  tag: multiqc
 - format: meta
   id: CASEID
   path: PATHTOCASE/multiqc/multiqc_data/multiqc_report.html

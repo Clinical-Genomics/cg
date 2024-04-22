@@ -530,7 +530,7 @@ class NfAnalysisAPI(AnalysisAPI):
     @staticmethod
     def get_bundle_filenames_path() -> Path | None:
         """Return bundle filenames path."""
-        return None
+        raise NotImplementedError
 
     @staticmethod
     def get_formatted_file_deliverable(

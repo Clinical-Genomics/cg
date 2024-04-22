@@ -15,6 +15,7 @@ from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetHeaders,
 )
 from cg.models.nf_analysis import WorkflowParameters
+from cg.resources import RAREDISEASE_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample
 
 LOG = logging.getLogger(__name__)
@@ -100,6 +101,11 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         except KeyError:
             raise ValueError(f"{sex} is not a valid sex")
         return code
+
+    @staticmethod
+    def get_bundle_filenames_path() -> Path:
+        """Return Rnafusion bundle filenames path."""
+        return RAREDISEASE_BUNDLE_FILENAMES_PATH
 
     @property
     def root(self) -> str:
