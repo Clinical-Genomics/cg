@@ -386,7 +386,7 @@ class ReportAPI(MetaAPI):
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
-        """Check if the report is accredited."""
+        """Return whether the delivery report is accredited."""
         raise NotImplementedError
 
     def get_required_fields(self, case: CaseModel) -> dict:

@@ -58,7 +58,7 @@ class TomteReportAPI(ReportAPI):
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
-        """Check if the Tomte analysis has been accredited."""
+        """Return whether the Tomte delivery report is accredited."""
         return False
 
     def get_required_fields(self, case: CaseModel) -> dict:

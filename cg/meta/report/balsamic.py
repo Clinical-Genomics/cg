@@ -111,7 +111,7 @@ class BalsamicReportAPI(ReportAPI):
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: BalsamicAnalysis
     ) -> bool:
-        """Check if the Balsamic report is accredited."""
+        """Return whether the Balsamic delivery report is accredited."""
         if analysis_metadata.config.analysis.sequencing_type == "targeted" and next(
             (
                 panel
