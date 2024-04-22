@@ -2,7 +2,7 @@
 
 from cg.meta.report.tomte import TomteReportAPI
 from cg.models.analysis import NextflowAnalysis
-from cg.models.report.metadata import RnafusionSampleMetadataModel
+from cg.models.report.metadata import TomteSampleMetadataModel
 from cg.store.models import Case, Sample
 
 
@@ -25,7 +25,7 @@ def test_get_sample_metadata(
     )
 
     # WHEN getting the sample metadata
-    sample_metadata: RnafusionSampleMetadataModel = report_api_tomte.get_sample_metadata(
+    sample_metadata: TomteSampleMetadataModel = report_api_tomte.get_sample_metadata(
         case=case, sample=sample, analysis_metadata=latest_metadata
     )
 
