@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 # Functional flow cell runs

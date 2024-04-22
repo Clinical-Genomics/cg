@@ -6,7 +6,6 @@ from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSampleBCLConvert
-from cg.constants.demultiplexing import BclConverter
 from cg.exc import HousekeeperFileMissingError
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
