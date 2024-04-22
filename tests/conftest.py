@@ -2028,43 +2028,43 @@ def cg_context(
 
 
 @pytest.fixture(scope="session")
-def case_id_with_single_sample()-> str:
+def case_id_with_single_sample() -> str:
     """Return a case id that should only be associated with one sample."""
     return "exhaustedcrocodile"
 
 
 @pytest.fixture(scope="session")
-def case_id_with_multiple_samples()-> str:
+def case_id_with_multiple_samples() -> str:
     """Return a case id that should be associated with multiple samples."""
     return "righteouspanda"
 
 
 @pytest.fixture(scope="session")
-def case_id_without_samples()-> str:
+def case_id_without_samples() -> str:
     """Return a case id that should not be associated with any samples."""
     return "confusedtrout"
 
 
 @pytest.fixture(scope="session")
-def case_id_not_enough_reads()-> str:
+def case_id_not_enough_reads() -> str:
     """Return a case id associated to a sample without enough reads."""
     return "tiredwalrus"
 
 
 @pytest.fixture(scope="session")
-def sample_id_in_single_case()-> str:
+def sample_id_in_single_case() -> str:
     """Return a sample id that should be associated with a single case."""
     return "ASM1"
 
 
 @pytest.fixture(scope="session")
-def sample_id_in_multiple_cases()-> str:
+def sample_id_in_multiple_cases() -> str:
     """Return a sample id that should be associated with multiple cases."""
     return "ASM2"
 
 
 @pytest.fixture(scope="session")
-def sample_id_not_enough_reads()-> str:
+def sample_id_not_enough_reads() -> str:
     """Return a sample id without enough reads."""
     return "ASM3"
 
