@@ -2433,32 +2433,6 @@ def raredisease_context(
 
 
 @pytest.fixture(scope="function")
-def mock_deliverable(
-    raredisease_dir: Path, deliverable_data: dict, raredisease_case_id: str
-) -> None:
-    """Create deliverable file with dummy data and files to deliver."""
-    Path.mkdir(
-        Path(raredisease_dir, raredisease_case_id),
-        parents=True,
-        exist_ok=True,
-    )
-    Path.mkdir(
-        Path(raredisease_dir, raredisease_case_id, "multiqc"),
-        parents=True,
-        exist_ok=True,
-    )
-    for report_entry in deliverable_data["files"]:
-        Path(report_entry["path"]).touch(exist_ok=True)
-    WriteFile.write_file_from_content(
-        content=deliverable_data,
-        file_format=FileFormat.JSON,
-        file_path=Path(
-            raredisease_dir, raredisease_case_id, raredisease_case_id + deliverables_yaml
-        ),
-    )
-
-
-@pytest.fixture(scope="function")
 def raredisease_mock_config(raredisease_dir: Path, raredisease_case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
     Path.mkdir(Path(raredisease_dir, raredisease_case_id), parents=True, exist_ok=True)

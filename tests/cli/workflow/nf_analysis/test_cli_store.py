@@ -143,6 +143,13 @@ def test_store_available_success(
     request.getfixturevalue(f"{workflow}_mock_deliverable_dir")
     request.getfixturevalue(f"{workflow}_mock_analysis_finish")
 
+    # GIVEN a mocked deliverables template
+    mocker.patch.object(
+        NfAnalysisAPI,
+        "get_deliverables_template_content",
+        return_value=deliverables_template_content,
+    )
+
     # GIVEN that the Housekeeper store is empty
     context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
     context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
@@ -158,9 +165,6 @@ def test_store_available_success(
     # WHEN running command
     result = cli_runner.invoke(workflow_cli, [workflow, "store-available"], obj=context)
 
-    # THEN command exits successfully
-    assert result.exit_code == EXIT_SUCCESS
-
     # THEN all expected cases are picked up for storing
     assert f"Storing deliverables for {case_id}" in caplog.text
 
@@ -173,6 +177,8 @@ def test_store_available_success(
     # THEN StatusDB action is set to None
     assert context.status_db.get_case_by_internal_id(case_id).action is None
 
+    # THEN command exits successfully
+    assert result.exit_code == EXIT_SUCCESS
 
 @pytest.mark.parametrize(
     "workflow",
