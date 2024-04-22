@@ -521,7 +521,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_deliverables_template_content(self) -> list[dict[str, str]]:
         """Return deliverables file template content."""
-        LOG.info("Get deliverables file template content")
+        LOG.debug("Getting deliverables file template content")
         return ReadFile.get_content_from_file(
             file_format=FileFormat.YAML,
             file_path=self.get_bundle_filenames_path(),
