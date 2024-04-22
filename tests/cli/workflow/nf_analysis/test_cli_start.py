@@ -38,7 +38,11 @@ def test_start(
     mocker.patch.object(NfAnalysisAPI, "resolve_decompression", return_value=None)
 
     # GIVEN that the sample does not exist in LIMS
-    mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
+    #mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
+
+    # GIVEN that the sample source in LIMS is set
+    mocker.patch.object(AnalysisAPI, "get_source_from_lims_by_sample_id", return_value="blood")
+
 
     # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(workflow_cli, [workflow, "start", case_id, "--dry-run"], obj=context)
@@ -80,7 +84,10 @@ def test_start_available(
     mocker.patch.object(NfAnalysisAPI, "resolve_decompression", return_value=None)
 
     # GIVEN that the sample does not exist in LIMS
-    mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
+    #mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
+
+    # GIVEN that the sample source in LIMS is set
+    mocker.patch.object(AnalysisAPI, "get_source_from_lims_by_sample_id", return_value="blood")
 
     # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(

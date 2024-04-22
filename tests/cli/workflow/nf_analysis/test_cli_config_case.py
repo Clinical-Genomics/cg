@@ -124,7 +124,11 @@ def test_config_case_default_parameters(
     mocker.patch.object(Process, "run_command", return_value=None)
 
     # GIVEN that the sample does not exist in LIMS
-    mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
+    #mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
+
+    # GIVEN that the sample source in LIMS is set
+    mocker.patch.object(AnalysisAPI, "get_source_from_lims_by_sample_id", return_value="blood")
+
 
     # GIVEN a valid case
 
@@ -209,7 +213,10 @@ def test_config_case_dry_run(
     # GIVEN a valid case
 
     # GIVEN that the sample does not exist in LIMS
-    mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
+    #mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
+
+    # GIVEN that the sample source in LIMS is set
+    mocker.patch.object(AnalysisAPI, "get_source_from_lims_by_sample_id", return_value="blood")
 
     # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(workflow_cli, [workflow, "config-case", case_id, "-d"], obj=context)
