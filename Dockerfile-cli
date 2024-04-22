@@ -15,3 +15,5 @@ RUN poetry config virtualenvs.create false \
 COPY . /app/
 
 USER nonroot
+
+CMD ["poetry", "run", "cg"]
