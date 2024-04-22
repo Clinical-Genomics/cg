@@ -206,6 +206,10 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
         "case_tags": MUTANT_ANALYSIS_CASE_TAGS,
         "sample_tags": MUTANT_ANALYSIS_SAMPLE_TAGS,
     },
+    Workflow.RAREDISEASE: {
+        "case_tags": NF_ANALYSIS_CASE_TAGS,
+        "sample_tags": NF_ANALYSIS_CASE_TAGS,
+    },
     Workflow.RNAFUSION: {
         "case_tags": RNAFUSION_ANALYSIS_CASE_TAGS,
         "sample_tags": RNAFUSION_ANALYSIS_SAMPLE_TAGS,
