@@ -147,6 +147,13 @@ def test_store_available_success(
     context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
     context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
+    # GIVEN a mocked deliverables template
+    mocker.patch.object(
+        NfAnalysisAPI,
+        "get_deliverables_template_content",
+        return_value=deliverables_template_content,
+    )
+
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables.model_validate(hermes_deliverables)
@@ -203,6 +210,13 @@ def test_store_available_fail(
 
     # GIVEN a case where analysis finish is not mocked
     failed_case_id: str = case_id_not_enough_reads
+
+    # GIVEN a mocked deliverables template
+    mocker.patch.object(
+        NfAnalysisAPI,
+        "get_deliverables_template_content",
+        return_value=deliverables_template_content,
+    )
 
     # GIVEN that the Housekeeper store is empty
     context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
