@@ -87,8 +87,8 @@ class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
     pct_reads_improper_pairs: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
 
 
-class NextflowSampleMetadataModel(SampleMetadataModel):
-    """Metrics and trending data model associated to a Nextflow sample.
+class WTSSampleMetadataModel(SampleMetadataModel):
+    """Metrics and trending data model associated to a WTS sample.
 
     Attributes:
         bias_5_3: bias is the ratio between read counts; source: workflow
@@ -119,7 +119,7 @@ class NextflowSampleMetadataModel(SampleMetadataModel):
     uniquely_mapped_reads: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
 
 
-class RnafusionSampleMetadataModel(NextflowSampleMetadataModel):
+class RnafusionSampleMetadataModel(WTSSampleMetadataModel):
     """Metrics and trending data model associated to a specific Rnafusion sample.
 
     Attributes:
@@ -133,7 +133,7 @@ class RnafusionSampleMetadataModel(NextflowSampleMetadataModel):
     mapped_reads: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
 
 
-class TomteSampleMetadataModel(NextflowSampleMetadataModel):
+class TomteSampleMetadataModel(WTSSampleMetadataModel):
     """Metrics and trending data model associated to a Tomte sample.
 
     Attributes:
