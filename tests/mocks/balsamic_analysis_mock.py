@@ -25,7 +25,7 @@ class MockBalsamicAnalysis(BalsamicAnalysisAPI):
     """Mock a BALSAMIC analysis object"""
 
     def get_latest_metadata(self, case_id: str):
-        """Get the latest metadata of a specific BALSAMIC case"""
+        """Return the latest metadata of a specific BALSAMIC case"""
 
         config, metrics = get_balsamic_raw_data()
         return self.parse_analysis(config, metrics)

@@ -297,7 +297,7 @@ def test_get_lims_sample(
     assert lims_data == expected_lims_data
 
 
-def test_get_sample_application_data(
+def test_get_sample_application(
     report_api_mip_dna: MipDNAReportAPI,
     case_samples_data: list[CaseSample],
     lims_samples: list[dict],
@@ -311,7 +311,7 @@ def test_get_sample_application_data(
     expected_application_data: dict = sample.to_dict().get("application")
 
     # WHEN retrieving application data from status DB
-    application_data: ApplicationModel = report_api_mip_dna.get_sample_application_data(
+    application_data: ApplicationModel = report_api_mip_dna.get_sample_application(
         sample=sample, lims_sample=lims_samples[0]
     )
 
