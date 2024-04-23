@@ -4,11 +4,14 @@ from typing import Callable
 from sqlalchemy import asc, desc, or_
 from sqlalchemy.orm import Query
 
+from cg.constants import Workflow
 from cg.server.dto.orders.orders_request import OrderSortField, SortOrder
 from cg.store.models import Customer, Order
 
 
 def filter_orders_by_workflow(orders: Query, workflow: str | None, **kwargs) -> Query:
+    if workflow == Workflow.BALSAMIC:
+        return orders.filter(Order.workflow.startswith(workflow))
     return orders.filter(Order.workflow == workflow) if workflow else orders
 
 

@@ -1,0 +1,3 @@
+Lane,SampleID,Index,# Reads,# Perfect Index Reads,# One Mismatch Index Reads,# Two Mismatch Index Reads,% Reads,% Perfect Index Reads,% One Mismatch Index Reads,% Two Mismatch Index Reads
+1,ACC13169A1,CACGAGCG-TGGCAGAT,26372432,25348221,1024211,0,0.0235,0.9612,0.0388,0.0000
+2,ACC13170A6,TTGCCTAG-TAAGTGGT,38876691,35473602,3403089,0,0.0347,0.9125,0.0875,0.0000
