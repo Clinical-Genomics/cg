@@ -64,16 +64,6 @@ class LimsAPI(Lims, OrderHandler):
         """Fetch all samples from a pool"""
         return self.get_samples(udf={"pool name": str(pool_name)}, projectname=projectname)
 
-    def sample(self, lims_id: str) -> dict[str, Any]:
-        """Return sample by ID from the LIMS database."""
-        lims_sample = {}
-        try:
-            sample = Sample(self, id=lims_id)
-            lims_sample: dict[str, Any] = self._export_sample(sample)
-        except HTTPError as error:
-            LOG.warning(f"Sample {lims_id} not found in LIMS: {error}")
-        return lims_sample
-
     def get_source(self, lims_id: str) -> str:
         """Return the source from LIMS for a given sample ID.
         If no source information is set, it returns 'unknown'."""
