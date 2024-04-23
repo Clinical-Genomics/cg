@@ -837,7 +837,8 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_reference_genome(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a case.
-        If this information is not available in StatusDB, it defaults to hg38."""
+        Raises CgError if this information is missing or inconsistent for the samples linked to a case.
+        """
         reference_genome: set[str] = {
             sample.reference_genome
             for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
@@ -849,7 +850,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 f"Samples linked to case {case_id} have different reference genome versions set"
             )
         else:
-            LOG.info(f"No reference genome specified, defaulting to {GenomeVersion.hg38}")
+            raise CgError("No reference genome specified")
 
     def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
         """Return build version of the gene panel for a case."""
