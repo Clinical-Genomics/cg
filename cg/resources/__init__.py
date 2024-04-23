@@ -20,7 +20,7 @@ TOMTE_BUNDLE_FILENAMES: str = (
     Path("resources", "tomte_bundle_filenames").with_suffix(FileExtensions.YAML).as_posix()
 )
 
-RAREDISEASE_BUNDLE_FILENAMES_PATH: Path = Path(
+RAREDISEASE_BUNDLE_FILENAMES_PATH = Path(
     pkg_resources.resource_filename("cg", RAREDISEASE_BUNDLE_FILENAMES)
 )
 

@@ -528,7 +528,7 @@ class NfAnalysisAPI(AnalysisAPI):
         )
 
     @staticmethod
-    def get_bundle_filenames_path() -> Path | None:
+    def get_bundle_filenames_path() -> Path:
         """Return bundle filenames path."""
         raise NotImplementedError
 
