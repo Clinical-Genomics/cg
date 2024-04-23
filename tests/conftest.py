@@ -387,7 +387,7 @@ def demultiplexing_context_for_demux(
     return cg_context
 
 
-@pytest.fixture(name="demultiplex_context")
+@pytest.fixture
 def demultiplex_context(
     demultiplexing_api: DemultiplexingAPI,
     real_housekeeper_api: HousekeeperAPI,
@@ -398,6 +398,20 @@ def demultiplex_context(
     cg_context.demultiplex_api_ = demultiplexing_api
     cg_context.housekeeper_api_ = real_housekeeper_api
     cg_context.status_db_ = store_with_demultiplexed_samples
+    return cg_context
+
+
+@pytest.fixture
+def updated_demultiplex_context(
+    demultiplexing_api: DemultiplexingAPI,
+    real_housekeeper_api: HousekeeperAPI,
+    cg_context: CGConfig,
+    updated_store_with_demultiplexed_samples: Store,
+) -> CGConfig:
+    """Return cg context with a demultiplex context."""
+    cg_context.demultiplex_api_ = demultiplexing_api
+    cg_context.housekeeper_api_ = real_housekeeper_api
+    cg_context.status_db_ = updated_store_with_demultiplexed_samples
     return cg_context
 
 
@@ -538,6 +552,16 @@ def demux_post_processing_api(
     demultiplex_context: CGConfig, tmp_illumina_demultiplexed_flow_cells_directory
 ) -> DemuxPostProcessingAPI:
     api = DemuxPostProcessingAPI(demultiplex_context)
+    api.demultiplexed_runs_dir = tmp_illumina_demultiplexed_flow_cells_directory
+    return api
+
+
+@pytest.fixture
+def updated_demux_post_processing_api(
+    updated_demultiplex_context: CGConfig,
+    tmp_illumina_demultiplexed_flow_cells_directory,
+) -> DemuxPostProcessingAPI:
+    api = DemuxPostProcessingAPI(updated_demultiplex_context)
     api.demultiplexed_runs_dir = tmp_illumina_demultiplexed_flow_cells_directory
     return api
 
@@ -1254,6 +1278,26 @@ def store_with_demultiplexed_samples(
             store,
             sample_internal_id=sample_internal_id,
             flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
+        )
+    return store
+
+
+@pytest.fixture
+def updated_store_with_demultiplexed_samples(
+    store: Store,
+    helpers: StoreHelpers,
+    seven_canonical_flow_cells: list[FlowCellDirectoryData],
+    seven_canonical_flow_cells_selected_sample_ids: list[list[str]],
+) -> Store:
+    """Return a store with the 7 canonical flow cells with samples added to store."""
+    for flow_cell, sample_internal_ids in zip(
+        seven_canonical_flow_cells, seven_canonical_flow_cells_selected_sample_ids
+    ):
+        helpers.add_flow_cell_and_samples_with_sequencing_metrics(
+            flow_cell_name=flow_cell.id,
+            sequencer=flow_cell.sequencer_type,
+            sample_ids=sample_internal_ids,
+            store=store,
         )
     return store
 
