@@ -49,7 +49,7 @@ CG is using github flow branching model as described in our [development manual]
 
 This section guides you through submitting a bug report to CG. Following these
 guidelines helps other developers and contributors understand your report
-:pencil:, reproduce the behavior :computer: :computer:, and find related issues
+:pencil: reproduce the behavior :computer: :computer: and find related issues
 and reports :mag_right:
 
 Before creating bug reports, please try to search the issues (opened and
@@ -188,10 +188,7 @@ accepted.
 
 We use black to format all files, this is done automatically with each push on
 GitHub so don't forget to update your local branch with `git pull` after
-pushing to the origin. More details are described in the general [development manual][development-guidelines].
-
-- [development-guidelines](http://www.clinicalgenomics.se/development/python/conventions/)
-- [development-branch-model](http://www.clinicalgenomics.se/development/dev/githubflow/)
+pushing to the origin. More details are described in the general [development manual](https://atlas.scilifelab.se/infrastructure/development/).
 
 ## Design decisions
 
@@ -274,7 +271,7 @@ analysis performance and limitations.
 
 ### Cli
 
-The command line code is written in the [Click][click] framework.
+The command line code is written in the [Click](https://click.palletsprojects.com/en/8.1.x/) framework.
 
 #### Add
 
@@ -426,7 +423,7 @@ part of which invoice.
 
 ### Server
 
-The REST API server handles a number of actions. It's written in [Flask][flask]
+The REST API server handles a number of actions. It's written in [Flask](https://flask.palletsprojects.com/)
 and exposes an admin interface for quickly editing information in the backend
 MySQL database. The admin interface is served under a hidden route but the plan
 is to move it to Google OAuth.
@@ -464,8 +461,8 @@ across the package.
 - [chanjo](https://github.com/Clinical-Genomics/chanjo)
 - [scout](https://github.com/Clinical-Genomics/scout)
 - [mip](https://github.com/Clinical-Genomics/mip)
-- [scilife](https://www.scilifelab.se/)
-- [flask](http://flask.pocoo.org/)
-- [click](http://click.pocoo.org/5/)
+- [scilifelab](https://www.scilifelab.se/)
+- [flask](https://flask.palletsprojects.com/)
+- [click](https://click.palletsprojects.com/)
 - [cgweb](https://github.com/Clinical-Genomics/cgweb)
 - [servers](https://github.com/Clinical-Genomics/servers)
