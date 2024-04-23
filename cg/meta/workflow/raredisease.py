@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 from cg.constants import Workflow
+from cg.constants.constants import GenomeVersion
 from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nf_analysis import RAREDISEASE_METRIC_CONDITIONS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
@@ -55,6 +56,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def is_multiple_samples_allowed(self) -> bool:
         """Return whether the analysis supports multiple samples to be linked to the case."""
         return True
+
+    def get_reference_genome(self, case_id: str) -> GenomeVersion:
+        """Return reference genome for a case. Currently fixed for hg19."""
+        return GenomeVersion.hg19
 
     def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
