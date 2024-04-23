@@ -3,7 +3,7 @@
 {% macro rnafusion_qc_metrics(samples) %}
   {% set
     metrics = [
-      {"name": "RIN (RNA Integrity Number)",                   "key": "rin",                   "description": "Mått på skala från 1 till 10 för kvalitet och integritet hos RNA-prover."},
+      {"name": "RNA Integrity Number (RIN)",                   "key": "rin",                   "description": "Mått på skala från 1 till 10 för kvalitet och integritet hos RNA-prover."},
       {"name": "Ingående mängd [ng]",                          "key": "input_amount",          "description": "Mängd RNA som används för sekvensering."},
       {"name": "Läspar [M]",                                   "key": "million_read_pairs",    "description": "Antal sekvenseringsläsningar i miljoner läspar."},
       {"name": "Mappade sekvenser [%]",                        "key": "mapped_reads",          "description": "Procent sekvenser som matchar en eller flera positioner i referensgenomet."},
@@ -15,8 +15,8 @@
       {"name": "Genomsnittlig läslängd efter filtrering [bp]", "key": "mean_length_r1",        "description": "Genomsnittlig längd på läsningar som passerar kvalitetskontrollfilter."},
       {"name": "Q20-baser [%]",                                "key": "q20_rate",              "description": "Andel baser med en Phred-poäng på minst 20."},
       {"name": "Q30-baser [%]",                                "key": "q30_rate",              "description": "Andel baser med en Phred-poäng på minst 30."},
-      {"name": "GC-innehåll [%]",                              "key": "gc_content",            "description": "Andel guanin- och cytosinbaser i ett prov, beräknat på trimmade läsningar."},
-      {"name": "mRNA-baser [%]",                               "key": "mrna_bases",            "description": "Andel baser i ett prov som härstammar från budbärar-RNA."},
+      {"name": "GC innehåll [%]",                              "key": "gc_content",            "description": "Andel guanin- och cytosinbaser i ett prov, beräknat på trimmade läsningar."},
+      {"name": "mRNA baser [%]",                               "key": "mrna_bases",            "description": "Andel baser i ett prov som härstammar från budbärar-RNA."},
       {"name": "Ribosomala baser [%]",                         "key": "ribosomal_bases",       "description": "Andel baser i ett prov som härstammar från ribosomalt RNA."},
     ]
   %}
