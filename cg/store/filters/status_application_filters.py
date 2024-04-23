@@ -13,7 +13,7 @@ def filter_applications_by_tag(applications: Query, tag: str, **kwargs) -> Query
 
 def filter_applications_is_not_archived(applications: Query, **kwargs) -> Query:
     """Return application which is not archived."""
-    return applications.filter(Application.is_archived.is_(False))
+    return applications.filter(Application.is_archived == False)
 
 
 def filter_applications_is_external(applications: Query, **kwargs) -> Query:
