@@ -54,7 +54,9 @@ class BalsamicReportAPI(ReportAPI):
             sample.internal_id
         ]
         million_read_pairs: float = get_million_read_pairs(reads=sample.reads)
-        if AnalysisType.WHOLE_GENOME_SEQUENCING in self.analysis_api.get_data_analysis_type(case):
+        if AnalysisType.WHOLE_GENOME_SEQUENCING in self.analysis_api.get_data_analysis_type(
+            case.internal_id
+        ):
             return self.get_wgs_metadata(
                 million_read_pairs=million_read_pairs, sample_metrics=sample_metrics
             )

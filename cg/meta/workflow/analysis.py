@@ -632,11 +632,11 @@ class AnalysisAPI(MetaAPI):
     def run_analysis(self, *args, **kwargs):
         raise NotImplementedError
 
-    def get_data_analysis_type(self, case: Case) -> str | None:
+    def get_data_analysis_type(self, case_id: str) -> str | None:
         """Return data analysis type carried out."""
-        case_sample: Sample = self.status_db.get_case_samples_by_case_id(
-            case_internal_id=case.internal_id
-        )[0].sample
+        case_sample: Sample = self.status_db.get_case_samples_by_case_id(case_internal_id=case_id)[
+            0
+        ].sample
         lims_sample: dict[str, Any] = self.lims_api.sample(case_sample.internal_id)
         application: Application = self.status_db.get_application_by_tag(
             tag=lims_sample.get("application")

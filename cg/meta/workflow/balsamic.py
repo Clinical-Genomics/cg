@@ -664,6 +664,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 )
         return analysis_var_callers
 
-    def get_data_analysis_type(self, case: Case) -> str | None:
+    def get_data_analysis_type(self, case_id: str) -> str | None:
         """Return data analysis type carried out."""
-        return self.get_bundle_deliverables_type(case_id=case.internal_id)
+        return self.get_bundle_deliverables_type(case_id)

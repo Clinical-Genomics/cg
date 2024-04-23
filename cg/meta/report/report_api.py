@@ -352,15 +352,15 @@ class ReportAPI(MetaAPI):
             data_delivery=case.data_delivery,
             workflow=analysis.workflow,
             workflow_version=analysis.workflow_version,
-            type=self.analysis_api.get_data_analysis_type(case),
+            type=self.analysis_api.get_data_analysis_type(case.internal_id),
             genome_build=self.analysis_api.get_genome_build(case.internal_id),
             variant_callers=self.analysis_api.get_variant_callers(case.internal_id),
             panels=case.panels,
-            scout_files=self.get_scout_uploaded_files(case),
+            scout_files=self.get_scout_uploaded_files(case.internal_id),
             delivered_files=delivered_files,
         )
 
-    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
+    def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
         return ScoutReportFiles()
 

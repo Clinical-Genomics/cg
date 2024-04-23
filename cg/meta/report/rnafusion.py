@@ -91,12 +91,10 @@ class RnafusionReportAPI(ReportAPI):
         is_input_amount_accredited: bool = self.is_input_amount_accredited(samples)
         return is_apptag_accredited and is_input_amount_accredited
 
-    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
+    def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
         return ScoutReportFiles(
-            vcf_fusion=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="vcf_fusion"
-            )
+            vcf_fusion=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="vcf_fusion")
         )
 
     def get_required_fields(self, case: CaseModel) -> dict:

@@ -85,21 +85,13 @@ class MipDNAReportAPI(ReportAPI):
                 return False
         return True
 
-    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
+    def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
         return ScoutReportFiles(
-            snv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="snv_vcf"
-            ),
-            sv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="sv_vcf"
-            ),
-            vcf_str=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="vcf_str"
-            ),
-            smn_tsv=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="smn_tsv"
-            ),
+            snv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="snv_vcf"),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="sv_vcf"),
+            vcf_str=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="vcf_str"),
+            smn_tsv=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="smn_tsv"),
         )
 
     def get_required_fields(self, case: CaseModel) -> dict:
