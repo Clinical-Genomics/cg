@@ -2,9 +2,8 @@ from pathlib import Path
 
 import pytest
 from housekeeper.store.models import File
-from pydantic import BaseModel
 
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.housekeeper_storage_functions import (
@@ -31,13 +30,6 @@ def test_set_dry_run(
 
     # THEN dry run should be True
     assert post_demux_api.dry_run is True
-
-
-class DemultiplexingScenario(BaseModel):
-    flow_cell_directory: str
-    flow_cell_name: str
-    samples_ids: str
-    bcl_converter: str = BclConverter.BCLCONVERT
 
 
 @pytest.mark.parametrize(
