@@ -7,13 +7,13 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_samples_by_lane,
     validate_samples_are_unique,
 )
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample, FlowCellSampleBcl2Fastq
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample, FlowCellSampleBCLConvert
 from cg.exc import SampleSheetError
 
 
 def test_validate_samples_are_unique(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
-    novaseq6000_flow_cell_sample_2: FlowCellSampleBcl2Fastq,
+    novaseq6000_flow_cell_sample_1: FlowCellSampleBCLConvert,
+    novaseq6000_flow_cell_sample_2: FlowCellSampleBCLConvert,
 ):
     """Test that validating two different samples finishes successfully."""
     # GIVEN two different NovaSeq samples
@@ -28,7 +28,7 @@ def test_validate_samples_are_unique(
 
 
 def test_validate_samples_are_unique_when_not_unique(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq, caplog
+    novaseq6000_flow_cell_sample_1: FlowCellSampleBCLConvert, caplog
 ):
     """Test that validating two identical samples fails."""
     # GIVEN two identical NovaSeq samples
@@ -48,8 +48,8 @@ def test_validate_samples_are_unique_when_not_unique(
 
 
 def test_get_samples_by_lane(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
-    novaseq6000_flow_cell_sample_2: FlowCellSampleBcl2Fastq,
+    novaseq6000_flow_cell_sample_1: FlowCellSampleBCLConvert,
+    novaseq6000_flow_cell_sample_2: FlowCellSampleBCLConvert,
 ):
     """Test that grouping two samples with different lanes returns two groups."""
     # GIVEN two samples on two different lanes

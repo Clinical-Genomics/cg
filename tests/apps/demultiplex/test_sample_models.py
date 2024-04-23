@@ -1,24 +1,8 @@
-from unittest.mock import Mock
-
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.index import (
-    INDEX_ONE_PAD_SEQUENCE,
-    INDEX_TWO_PAD_SEQUENCE,
-    LONG_INDEX_CYCLE_NR,
-    SHORT_SAMPLE_INDEX_LENGTH,
-    get_reverse_complement_dna_seq,
-)
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
-from cg.constants.demultiplexing import (
-    NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS,
-    NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS,
-    IndexOverrideCycles,
-    IndexSettings,
-)
+from cg.apps.demultiplex.sample_sheet.index import get_reverse_complement_dna_seq
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSampleBCLConvert
+from cg.constants.demultiplexing import IndexOverrideCycles
 from cg.constants.symbols import EMPTY_STRING
 from cg.models.demultiplex.run_parameters import RunParameters
 
@@ -86,88 +70,6 @@ def test_separate_indexes_single_run(
     # THEN the index should be separated
     assert bcl_convert_flow_cell_sample.index == index1_8_nt_sequence_from_lims
     assert bcl_convert_flow_cell_sample.index2 == EMPTY_STRING
-
-
-@pytest.mark.parametrize(
-    "index_settings, expected_index2",
-    [
-        (NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS, f"{INDEX_TWO_PAD_SEQUENCE}GCCAAGGT"),
-        (NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS, f"GCCAAGGT{INDEX_TWO_PAD_SEQUENCE}"),
-    ],
-    ids=["reverse complement", "no reverse complement"],
-)
-def test_pad_indexes_needs_padding(index_settings: IndexSettings, expected_index2: str):
-    """Test that indexes that need to be padded are padded with and without reverse complement."""
-    # GIVEN an IndexSettings object
-
-    # GIVEN a run parameters file with 10-nt indexes and the index settings
-    mock_run_parameters = Mock(
-        spec=RunParameters,
-        get_index_1_cycles=Mock(return_value=10),
-        get_index_2_cycles=Mock(return_value=10),
-        index_settings=index_settings,
-    )
-
-    # GIVEN a FlowCellSampleBcl2Fastq with 8-nt indexes
-    sample = FlowCellSampleBcl2Fastq(
-        lane=1, index="GTCTACAC-GCCAAGGT", sample_id="ACC123", project="project", sample_name="name"
-    )
-    sample.separate_indexes(is_run_single_index=False)
-
-    # WHEN padding the indexes
-    sample._pad_indexes_if_necessary(run_parameters=mock_run_parameters)
-
-    # THEN the indexes were correctly padded
-    assert_correct_padding(
-        sample=sample,
-        index_length=LONG_INDEX_CYCLE_NR,
-        index1_value=f"GTCTACAC{INDEX_ONE_PAD_SEQUENCE}",
-        index2_value=expected_index2,
-    )
-
-
-def assert_correct_padding(
-    sample: FlowCellSampleBcl2Fastq, index_length: int, index1_value: str, index2_value: str
-):
-    """Assert that the indexes have the correct length and are correctly padded."""
-    assert len(sample.index) == index_length
-    assert sample.index == index1_value
-    # THEN the second index was correctly padded
-    assert len(sample.index2) == index_length
-    assert sample.index2 == index2_value
-
-
-def test_pad_indexes_no_padding():
-    """Test that indexes that do not need to be padded are not padded."""
-    # GIVEN a RunParameters with 8-nt indexes
-    mock_run_parameters = Mock(
-        spec=RunParameters,
-        get_index_1_cycles=Mock(return_value=8),
-        get_index_2_cycles=Mock(return_value=8),
-    )
-
-    # GIVEN a FlowCellSampleBcl2Fastq with 8-nt indexes
-    initial_index1: str = "GTCTACAC"
-    initial_index2: str = "GCCAAGGT"
-    sample = FlowCellSampleBcl2Fastq(
-        lane=1,
-        index=f"{initial_index1}-{initial_index2}",
-        sample_id="ACC123",
-        project="project",
-        sample_name="name",
-    )
-    sample.separate_indexes(is_run_single_index=False)
-
-    # WHEN trying to pad the indexes
-    sample._pad_indexes_if_necessary(run_parameters=mock_run_parameters)
-
-    # THEN the indexes were not padded
-    assert_correct_padding(
-        sample=sample,
-        index_length=SHORT_SAMPLE_INDEX_LENGTH,
-        index1_value=initial_index1,
-        index2_value=initial_index2,
-    )
 
 
 @pytest.mark.parametrize(
@@ -401,7 +303,7 @@ def test_process_indexes_bcl_convert(
     # GIVEN a run parameters object
     run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
 
-    # GIVEN a FlowCellSampleBcl2Fastq with 8-nt indexes
+    # GIVEN a FlowCellSampleBclConvert with 8-nt indexes
 
     # WHEN processing the sample for a sample sheet
     bcl_convert_flow_cell_sample.process_indexes(run_parameters=run_parameters)

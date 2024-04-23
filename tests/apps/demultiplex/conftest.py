@@ -3,10 +3,7 @@ from pathlib import Path
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.override_cycles_validator import OverrideCyclesValidator
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSampleBCLConvert
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
 
 
@@ -179,64 +176,44 @@ def sample_sheet_bcl2fastq_duplicate_different_lane(
 
 
 @pytest.fixture
-def novaseq6000_flow_cell_sample_1() -> FlowCellSampleBcl2Fastq:
+def novaseq6000_flow_cell_sample_1() -> FlowCellSampleBCLConvert:
     """Return a NovaSeq sample."""
-    return FlowCellSampleBcl2Fastq(
-        FCID="HWHMWDMXX",
-        Lane=1,
-        SampleID="ACC7628A68",
-        SampleRef="hg19",
+    return FlowCellSampleBCLConvert(
+        lane=1,
+        sample_id="ACC7628A68",
         index="ATTCCACACT",
         index2="TGGTCTTGTT",
-        SampleName="814206",
-        Control="N",
-        Recipe="R1",
-        Operator="script",
-        Project="814206",
     )
 
 
 @pytest.fixture
-def novaseq6000_flow_cell_sample_2() -> FlowCellSampleBcl2Fastq:
+def novaseq6000_flow_cell_sample_2() -> FlowCellSampleBCLConvert:
     """Return a NovaSeq sample."""
-    return FlowCellSampleBcl2Fastq(
-        FCID="HWHMWDMXX",
-        Lane=2,
-        SampleID="ACC7628A1",
-        SampleRef="hg19",
+    return FlowCellSampleBCLConvert(
+        lane=2,
+        sample_id="ACC7628A1",
         index="ATTCCACACT",
         index2="TGGTCTTGTT",
-        SampleName="814206",
-        Control="N",
-        Recipe="R1",
-        Operator="script",
-        Project="814206",
     )
 
 
 @pytest.fixture
-def novaseq6000_flow_cell_sample_no_dual_index() -> FlowCellSampleBcl2Fastq:
+def novaseq6000_flow_cell_sample_no_dual_index() -> FlowCellSampleBCLConvert:
     """Return a NovaSeq sample without dual indexes."""
-    return FlowCellSampleBcl2Fastq(
-        FCID="HWHMWDMXX",
-        Lane=2,
-        SampleID="ACC7628A1",
+    return FlowCellSampleBCLConvert(
+        lane=2,
+        sample_id="ACC7628A1",
         index="ATTCCACACT",
-        SampleName="814206",
-        Project="814206",
     )
 
 
 @pytest.fixture
-def novaseq6000_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleBcl2Fastq:
+def novaseq6000_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleBCLConvert:
     """Return a NovaSeq sample without dual indexes."""
-    return FlowCellSampleBcl2Fastq(
-        FCID="HWHMWDMXX",
-        Lane=2,
-        SampleID="ACC7628A1",
+    return FlowCellSampleBCLConvert(
+        lane=2,
+        sample_id="ACC7628A1",
         index="ATTCCACACT-TGGTCTTGTT",
-        SampleName="814206",
-        Project="814206",
     )
 
 
