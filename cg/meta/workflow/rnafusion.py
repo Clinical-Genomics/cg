@@ -4,10 +4,11 @@ import logging
 from pathlib import Path
 
 from cg.constants import Workflow
-from cg.constants.constants import Strandedness
+from cg.constants.constants import GenomeVersion, Strandedness
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
 from cg.exc import MissingMetrics
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.rnafusion.rnafusion import (
@@ -136,3 +137,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_workflow_metrics(self) -> dict:
         return RNAFUSION_METRIC_CONDITIONS
+
+    def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
+        """Return the reference genome build version of a Rnafusion analysis."""
+        return GenomeVersion.hg38.value

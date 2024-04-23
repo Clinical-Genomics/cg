@@ -220,7 +220,7 @@ def test_get_report_version_version(
 
 def test_get_case_data(
     report_api_mip_dna: MipDNAReportAPI,
-    mip_analysis_api: MipDNAAnalysisAPI,
+    mip_dna_analysis_api: MipDNAAnalysisAPI,
     case_mip_dna: Case,
     family_name: str,
 ):
@@ -229,7 +229,7 @@ def test_get_case_data(
     # GIVEN a pre-built case
 
     # GIVEN a mip analysis mock metadata
-    mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
+    mip_metadata: MipAnalysis = mip_dna_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
 
     # WHEN retrieving case specific information
     case_data: CaseModel = report_api_mip_dna.get_case_data(
@@ -245,7 +245,7 @@ def test_get_case_data(
 
 def test_get_samples_data(
     report_api_mip_dna: MipDNAReportAPI,
-    mip_analysis_api: MipDNAAnalysisAPI,
+    mip_dna_analysis_api: MipDNAAnalysisAPI,
     case_mip_dna: Case,
     case_samples_data: list[CaseSample],
     lims_samples: list[dict],
@@ -259,7 +259,7 @@ def test_get_samples_data(
     expected_sample_data: CaseSample = case_samples_data[0]
 
     # GIVEN a mip analysis mock metadata
-    mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
+    mip_metadata: MipAnalysis = mip_dna_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
 
     # WHEN extracting the samples of a specific case
     samples_data: SampleModel = report_api_mip_dna.get_samples_data(case_mip_dna, mip_metadata)[0]
@@ -291,13 +291,13 @@ def test_get_lims_sample(
     expected_lims_data: dict = lims_samples[0]
 
     # WHEN getting the sample data from lims
-    lims_data: dict = report_api_mip_dna.get_lims_sample(case_samples_data[0].sample.internal_id)
+    lims_data: dict = report_api_mip_dna.lims_api.sample(case_samples_data[0].sample.internal_id)
 
     # THEN check if the extracted lims information match the expected one
     assert lims_data == expected_lims_data
 
 
-def test_get_sample_application_data(
+def test_get_sample_application(
     report_api_mip_dna: MipDNAReportAPI,
     case_samples_data: list[CaseSample],
     lims_samples: list[dict],
@@ -311,7 +311,7 @@ def test_get_sample_application_data(
     expected_application_data: dict = sample.to_dict().get("application")
 
     # WHEN retrieving application data from status DB
-    application_data: ApplicationModel = report_api_mip_dna.get_sample_application_data(
+    application_data: ApplicationModel = report_api_mip_dna.get_sample_application(
         sample=sample, lims_sample=lims_samples[0]
     )
 
@@ -325,12 +325,12 @@ def test_get_sample_application_data(
 
 
 def test_get_unique_applications(
-    report_api_mip_dna: MipDNAReportAPI, mip_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Case
+    report_api_mip_dna: MipDNAReportAPI, mip_dna_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Case
 ):
     """Tests unique applications filtering."""
 
     # GIVEN a list of samples sharing the same application
-    mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
+    mip_metadata: MipAnalysis = mip_dna_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
     samples: list[SampleModel] = report_api_mip_dna.get_samples_data(case_mip_dna, mip_metadata)
 
     # WHEN calling the application filtering function
@@ -364,14 +364,14 @@ def test_get_sample_methods_data(
 
 
 def test_get_case_analysis_data(
-    report_api_mip_dna: MipDNAReportAPI, mip_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Case
+    report_api_mip_dna: MipDNAReportAPI, mip_dna_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Case
 ):
     """Tests data analysis parameters retrieval."""
 
     # GIVEN a pre-built case
 
     # GIVEN a mip analysis mock metadata
-    mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
+    mip_metadata: MipAnalysis = mip_dna_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
 
     # WHEN retrieving analysis information
     case_analysis_data: DataAnalysisModel = report_api_mip_dna.get_case_analysis_data(
@@ -386,7 +386,7 @@ def test_get_case_analysis_data(
 
 def test_get_case_analysis_data_workflow_match_error(
     report_api_mip_dna: MipDNAReportAPI,
-    mip_analysis_api: MipDNAAnalysisAPI,
+    mip_dna_analysis_api: MipDNAAnalysisAPI,
     case_mip_dna: Case,
     caplog: LogCaptureFixture,
 ):
@@ -397,7 +397,7 @@ def test_get_case_analysis_data_workflow_match_error(
     mip_analysis.workflow = Workflow.BALSAMIC
 
     # GIVEN a mip analysis mock metadata
-    mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
+    mip_metadata: MipAnalysis = mip_dna_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
 
     # WHEN retrieving analysis information
 
@@ -414,7 +414,7 @@ def test_get_case_analysis_data_workflow_match_error(
 
 def test_get_case_analysis_data_workflow_not_supported(
     report_api_mip_dna: MipDNAReportAPI,
-    mip_analysis_api: MipDNAAnalysisAPI,
+    mip_dna_analysis_api: MipDNAAnalysisAPI,
     case_mip_dna: Case,
     caplog: LogCaptureFixture,
 ):
@@ -426,7 +426,7 @@ def test_get_case_analysis_data_workflow_not_supported(
     mip_analysis.workflow = Workflow.MICROSALT
 
     # GIVEN a mip analysis mock metadata
-    mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
+    mip_metadata: MipAnalysis = mip_dna_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
 
     # WHEN retrieving data analysis information
 

@@ -177,7 +177,7 @@ class MipAnalysisAPI(AnalysisAPI):
         return ReadFile.get_content_from_file(file_format=FileFormat.YAML, file_path=full_file_path)
 
     def get_latest_metadata(self, family_id: str) -> MipAnalysis:
-        """Get the latest trending data for a family"""
+        """Return the latest trending data for a family."""
 
         mip_config_raw = self._get_latest_raw_file(
             family_id=family_id, tags=HkMipAnalysisTag.CONFIG
