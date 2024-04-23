@@ -11,14 +11,14 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat, Workflow
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisTypes
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import WriteFile
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.models.slurm.sbatch import Sbatch, SbatchDragen
+from cg.models.slurm.sbatch import SbatchDragen
 
 LOG = logging.getLogger(__name__)
 

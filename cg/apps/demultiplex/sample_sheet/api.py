@@ -17,11 +17,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import (
-    BclConverter,
-    SampleSheetBcl2FastqSections,
-    SampleSheetBCLConvertSections,
-)
+from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
 from cg.exc import FlowCellError, HousekeeperFileMissingError, SampleSheetError
 from cg.io.controller import ReadFile, WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import (
@@ -55,9 +51,7 @@ class SampleSheetAPI:
         LOG.debug(f"Set force to {force}")
         self.force = force
 
-    def _get_flow_cell(
-        self, flow_cell_name: str, bcl_converter: str | None
-    ) -> FlowCellDirectoryData:
+    def _get_flow_cell(self, flow_cell_name: str) -> FlowCellDirectoryData:
         """
         Return a flow cell given a path and the bcl converter.
         Raises:
@@ -69,9 +63,7 @@ class SampleSheetAPI:
             LOG.warning(message)
             raise SampleSheetError(message)
         try:
-            flow_cell = FlowCellDirectoryData(
-                flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
-            )
+            flow_cell = FlowCellDirectoryData(flow_cell_path)
         except FlowCellError as error:
             raise SampleSheetError from error
         return flow_cell
@@ -145,9 +137,7 @@ class SampleSheetAPI:
 
     def translate_sample_sheet(self, flow_cell_name: str) -> None:
         """Translate a Bcl2Fastq sample sheet to a BCLConvert sample sheet."""
-        flow_cell: FlowCellDirectoryData = self._get_flow_cell(
-            flow_cell_name=flow_cell_name, bcl_converter=BclConverter.BCLCONVERT
-        )
+        flow_cell: FlowCellDirectoryData = self._get_flow_cell(flow_cell_name)
         if not self._is_sample_sheet_from_flow_cell_translatable(flow_cell):
             raise SampleSheetError("Could not translate sample sheet")
         original_content: list[list[str]] = ReadFile.get_content_from_file(
@@ -212,7 +202,6 @@ class SampleSheetAPI:
             get_flow_cell_samples(
                 lims=self.lims_api,
                 flow_cell_id=flow_cell.id,
-                flow_cell_sample_type=flow_cell.sample_type,
             )
         )
         if not lims_samples:
@@ -251,16 +240,12 @@ class SampleSheetAPI:
             flow_cell_directory=flow_cell.path, flow_cell_name=flow_cell.id, hk_api=self.hk_api
         )
 
-    def get_or_create_sample_sheet(
-        self, flow_cell_name: str, bcl_converter: str | None = None
-    ) -> None:
+    def get_or_create_sample_sheet(self, flow_cell_name: str) -> None:
         """
         Ensure that a valid sample sheet is present in the flow cell directory by fetching it from
         housekeeper or creating it if there is not a valid sample sheet.
         """
-        flow_cell: FlowCellDirectoryData = self._get_flow_cell(
-            flow_cell_name=flow_cell_name, bcl_converter=bcl_converter
-        )
+        flow_cell: FlowCellDirectoryData = self._get_flow_cell(flow_cell_name)
         LOG.info("Fetching and validating sample sheet from Housekeeper")
         try:
             self._use_sample_sheet_from_housekeeper(flow_cell)
@@ -283,10 +268,7 @@ class SampleSheetAPI:
         """Ensure that a valid sample sheet is present in all flow cell directories."""
         for flow_cell_dir in get_directories_in_path(self.flow_cell_runs_dir):
             try:
-                self.get_or_create_sample_sheet(
-                    flow_cell_name=flow_cell_dir.name,
-                    bcl_converter=BclConverter.BCLCONVERT,
-                )
+                self.get_or_create_sample_sheet(flow_cell_dir.name)
             except Exception as error:
                 LOG.error(f"Could not create sample sheet for {flow_cell_dir.name}: {error}")
                 continue

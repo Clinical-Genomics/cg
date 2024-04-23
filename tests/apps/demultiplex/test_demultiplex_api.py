@@ -14,43 +14,47 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 def test_is_sample_sheet_in_housekeeper_exists(
-    demultiplexing_context_for_demux: CGConfig, tmp_bcl2fastq_flow_cell: FlowCellDirectoryData
+    demultiplexing_context_for_demux: CGConfig, tmp_bcl_convert_flow_cell: FlowCellDirectoryData
 ):
     """Test that checking the existence of an existing sample sheet in Housekeeper returns True."""
     # GIVEN a DemultiplexAPI and a flow cell with a sample sheet
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     demultiplexing_context_for_demux.illumina_flow_cells_directory = (
-        tmp_bcl2fastq_flow_cell.path.parent
+        tmp_bcl_convert_flow_cell.path.parent
     )
 
     # GIVEN that the sample sheet is in Housekeeper
     add_and_include_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=tmp_bcl2fastq_flow_cell.path,
-        flow_cell_name=tmp_bcl2fastq_flow_cell.id,
+        flow_cell_directory=tmp_bcl_convert_flow_cell.path,
+        flow_cell_name=tmp_bcl_convert_flow_cell.id,
         hk_api=demultiplexing_context_for_demux.housekeeper_api,
     )
 
     # WHEN testing if the sample sheet is in Housekeeper
-    result: bool = demux_api.is_sample_sheet_in_housekeeper(flow_cell_id=tmp_bcl2fastq_flow_cell.id)
+    result: bool = demux_api.is_sample_sheet_in_housekeeper(
+        flow_cell_id=tmp_bcl_convert_flow_cell.id
+    )
 
     # THEN the sample sheet should be in Housekeeper
     assert result
 
 
 def test_is_sample_sheet_in_housekeeper_not_in_hk(
-    demultiplexing_context_for_demux: CGConfig, tmp_bcl2fastq_flow_cell: FlowCellDirectoryData
+    demultiplexing_context_for_demux: CGConfig, tmp_bcl_convert_flow_cell: FlowCellDirectoryData
 ):
     """Test that checking the existence of a non-existing sample sheet in Housekeeper returns False."""
     # GIVEN a DemultiplexAPI and a flow cell with a sample sheet
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     demultiplexing_context_for_demux.illumina_flow_cells_directory = (
-        tmp_bcl2fastq_flow_cell.path.parent
+        tmp_bcl_convert_flow_cell.path.parent
     )
 
     # GIVEN that the sample sheet is not in Housekeeper
 
     # WHEN testing if the sample sheet is in Housekeeper
-    result: bool = demux_api.is_sample_sheet_in_housekeeper(flow_cell_id=tmp_bcl2fastq_flow_cell.id)
+    result: bool = demux_api.is_sample_sheet_in_housekeeper(
+        flow_cell_id=tmp_bcl_convert_flow_cell.id
+    )
 
     # THEN the sample sheet should be in Housekeeper
     assert not result
