@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 # Functional flow cell runs
@@ -49,17 +49,6 @@ def novaseq_6000_pre_1_5_kits_flow_cell(
     """Return a Novaseq6000 flow cell with index settings pre 1.5 kits."""
     return FlowCellDirectoryData(
         Path(illumina_flow_cells_directory, "190927_A00689_0069_BHLYWYDSXX")
-    )
-
-
-@pytest.fixture
-def novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq(
-    illumina_flow_cells_directory: Path,
-) -> FlowCellDirectoryData:
-    """Return a Novaseq6000 flow cell with index settings pre 1.5 kits set as Bcl2Fastq."""
-    return FlowCellDirectoryData(
-        Path(illumina_flow_cells_directory, "190927_A00689_0069_BHLYWYDSXX"),
-        bcl_converter=BclConverter.BCL2FASTQ,
     )
 
 
@@ -117,25 +106,11 @@ def novaseqx_flow_cell_with_sample_sheet_no_fastq(
 
 
 @pytest.fixture
-def tmp_bcl2fastq_flow_cell(
-    tmp_demultiplexed_runs_bcl2fastq_directory: Path,
-) -> FlowCellDirectoryData:
-    """Create a flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
-        flow_cell_path=tmp_demultiplexed_runs_bcl2fastq_directory,
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
-
-
-@pytest.fixture
 def tmp_bcl_convert_flow_cell(
     tmp_flow_cell_directory_bclconvert: Path,
 ) -> FlowCellDirectoryData:
     """Create a flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_directory_bclconvert,
-        bcl_converter=BclConverter.BCLCONVERT,
-    )
+    return FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
 
 
 @pytest.fixture
@@ -152,11 +127,9 @@ def bcl_convert_flow_cell(
 
 
 @pytest.fixture
-def bcl2fastq_flow_cell_id(
-    novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq: FlowCellDirectoryData,
-) -> str:
+def bcl2fastq_flow_cell_id() -> str:
     """Return flow cell id from bcl2fastq flow cell object."""
-    return novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq.id
+    return "HLYWYDSXX"
 
 
 @pytest.fixture
