@@ -124,12 +124,8 @@ def test_config_case_default_parameters(
     # Mocking external Scout call
     mocker.patch.object(Process, "run_command", return_value=None)
 
-    # GIVEN that the sample does not exist in LIMS
-    #mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
-
     # GIVEN that the sample source in LIMS is set
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
-
 
     # GIVEN a valid case
 
@@ -212,9 +208,6 @@ def test_config_case_dry_run(
     nexflow_config_file_path: Path = request.getfixturevalue(f"{workflow}_nexflow_config_file_path")
 
     # GIVEN a valid case
-
-    # GIVEN that the sample does not exist in LIMS
-    #mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
 
     # GIVEN that the sample source in LIMS is set
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
