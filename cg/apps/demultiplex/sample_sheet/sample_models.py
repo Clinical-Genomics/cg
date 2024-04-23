@@ -9,17 +9,9 @@ from cg.apps.demultiplex.sample_sheet.index import (
     get_hamming_distance_index_2,
     get_reverse_complement_dna_seq,
     is_dual_index,
-    is_padding_needed,
-    pad_index_one,
-    pad_index_two,
 )
 from cg.apps.demultiplex.sample_sheet.validators import SampleId
-from cg.constants.constants import GenomeVersion
-from cg.constants.demultiplexing import (
-    CUSTOM_INDEX_TAIL,
-    SampleSheetBcl2FastqSections,
-    SampleSheetBCLConvertSections,
-)
+from cg.constants.demultiplexing import CUSTOM_INDEX_TAIL, SampleSheetBCLConvertSections
 from cg.constants.symbols import EMPTY_STRING
 from cg.exc import SampleSheetError
 from cg.models.demultiplex.run_parameters import RunParameters
@@ -54,57 +46,6 @@ class FlowCellSample(BaseModel):
     ) -> None:
         """Update the barcode_mismatches_1 and barcode_mismatches_2 attributes."""
         pass
-
-
-class FlowCellSampleBcl2Fastq(FlowCellSample):
-    """Class that represents a Bcl2Fastq sample."""
-
-    flowcell_id: str = Field("", alias=SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID)
-    lane: int = Field(..., alias=SampleSheetBcl2FastqSections.Data.LANE)
-    sample_ref: str = Field(
-        GenomeVersion.hg19, alias=SampleSheetBcl2FastqSections.Data.SAMPLE_REFERENCE
-    )
-    index: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.INDEX_1)
-    index2: str = Field("", alias=SampleSheetBcl2FastqSections.Data.INDEX_2)
-    sample_name: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_NAME)
-    control: str = Field("N", alias=SampleSheetBcl2FastqSections.Data.CONTROL)
-    recipe: str = Field("R1", alias=SampleSheetBcl2FastqSections.Data.RECIPE)
-    operator: str = Field("script", alias=SampleSheetBcl2FastqSections.Data.OPERATOR)
-
-    sample_id: SampleId = Field(
-        ..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ
-    )
-    project: str = Field(..., alias=SampleSheetBcl2FastqSections.Data.SAMPLE_PROJECT_BCL2FASTQ)
-
-    def _pad_indexes_if_necessary(self, run_parameters: RunParameters) -> None:
-        index_length: int = len(self.index)
-        if is_padding_needed(
-            index1_cycles=run_parameters.get_index_1_cycles(),
-            index2_cycles=run_parameters.get_index_2_cycles(),
-            sample_index_length=index_length,
-        ):
-            LOG.debug("Padding indexes")
-            self.index = pad_index_one(index_string=self.index)
-            self.index2 = pad_index_two(
-                index_string=self.index2,
-                reverse_complement=run_parameters.index_settings.should_i5_be_reverse_complemented,
-            )
-            return
-        LOG.debug(f"Padding not necessary for sample {self.sample_id}")
-
-    def process_indexes(self, run_parameters: RunParameters):
-        """Parses, pads and reverse complement the indexes if necessary."""
-        reverse_index2: bool = run_parameters.index_settings.should_i5_be_reverse_complemented
-        self.separate_indexes(is_run_single_index=run_parameters.is_single_index)
-        self._pad_indexes_if_necessary(run_parameters=run_parameters)
-        if reverse_index2:
-            self.index2 = get_reverse_complement_dna_seq(self.index2)
-
-    def update_barcode_mismatches(
-        self, samples_to_compare: list, is_run_single_index: bool, is_reverse_complement: bool
-    ) -> None:
-        """No updating of barcode mismatch values for Bcl2Fastq samples."""
-        LOG.debug(f"No updating of barcode mismatch values for Bcl2Fastq sample {self.sample_id}")
 
 
 class FlowCellSampleBCLConvert(FlowCellSample):
