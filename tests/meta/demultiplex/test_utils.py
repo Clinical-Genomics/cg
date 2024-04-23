@@ -260,22 +260,22 @@ def test_get_sample_sheet_path_not_found(tmp_path: Path):
 
 
 def test_parse_flow_cell_directory_data_invalid():
+    """Test that a FlowCellDirectoryData object is not created when the given path is invalid."""
     with pytest.raises(FlowCellError):
-        FlowCellDirectoryData(Path("dummy_path"), "dummy_bcl_converter")
+        FlowCellDirectoryData(Path("invalid_path"))
 
 
 def test_parse_flow_cell_directory_data_valid():
     # GIVEN a flow cell directory which is valid
     # WHEN parsing the flow cell directory data
     flow_cell_run_directory = "20230508_LH00188_0003_A22522YLT3"
-    result = FlowCellDirectoryData(Path(flow_cell_run_directory), "dummy_bcl_converter")
+    result = FlowCellDirectoryData(Path(flow_cell_run_directory))
 
     # THEN a FlowCellDirectoryData object should be returned
     assert isinstance(result, FlowCellDirectoryData)
 
     # THEN the flow cell path and bcl converter should be set
     assert result.path == Path(flow_cell_run_directory)
-    assert result.bcl_converter == "dummy_bcl_converter"
 
 
 def test_parse_manifest_file(novaseq_x_manifest_file: Path):
