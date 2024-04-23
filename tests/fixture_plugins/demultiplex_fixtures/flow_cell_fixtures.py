@@ -127,12 +127,6 @@ def bcl_convert_flow_cell(
 
 
 @pytest.fixture
-def bcl2fastq_flow_cell_id() -> str:
-    """Return flow cell id from bcl2fastq flow cell object."""
-    return "HLYWYDSXX"
-
-
-@pytest.fixture
 def bcl_convert_flow_cell_id(novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData) -> str:
     """Return flow cell id from bcl_convert flow cell object."""
     return novaseq_6000_post_1_5_kits_flow_cell.id

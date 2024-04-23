@@ -7,32 +7,16 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
 )
 
 
-@pytest.fixture
-def tmp_flow_cell_name_malformed_sample_sheet() -> str:
-    """ "Returns the name of a flow cell directory ready for demultiplexing with BCL convert.
-    Contains a sample sheet with malformed headers.
-    """
-    return "201203_A00689_0200_AHVKJCDRXY"
-
-
-@pytest.fixture(name="tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq")
-def tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq() -> str:
-    """Returns the name of a flow cell directory ready for demultiplexing with bcl2fastq."""
-    return "211101_D00483_0615_AHLG5GDRXY"
-
-
 @pytest.fixture(scope="session")
 def flow_cell_name_demultiplexed_with_bcl2fastq() -> str:
     """Return the name of a flow cell that has been demultiplexed with BCL2Fastq."""
     return "HHKVCALXX"
 
 
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl2fastq(
-    flow_cell_name_demultiplexed_with_bcl2fastq: str,
-) -> str:
-    """Return the name of a flow cell directory that has been demultiplexed with BCL2Fastq."""
-    return f"170407_ST-E00198_0209_B{flow_cell_name_demultiplexed_with_bcl2fastq}"
+@pytest.fixture
+def bcl2fastq_flow_cell_id() -> str:
+    """Return flow cell id from bcl2fastq flow cell object."""
+    return "HLYWYDSXX"
 
 
 @pytest.fixture(scope="session")
@@ -41,43 +25,15 @@ def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
 
 
 @pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl_convert(
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-) -> str:
-    return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
+def hiseq_x_single_index_flow_cell_id() -> str:
+    """Return the id of a HiSeqX single-index flow cell."""
+    return "HJCFFALXX"
 
 
 @pytest.fixture(scope="session")
-def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
-    return "HY7FFDRX2"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl_convert_flat(
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-):
-    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert using a flat output directory structure."""
-    return f"230505_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer(
-    flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer: str,
-):
-    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert on the NovaseqX sequencer."""
-    return f"20230508_LH00188_0003_A{flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer}"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer() -> str:
-    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert on the NovaseqX sequencer."""
-    return "22522YLT3"
-
-
-@pytest.fixture(scope="session")
-def hiseq_x_single_index_flow_cell_name() -> str:
+def hiseq_x_single_index_flow_cell_name(hiseq_x_single_index_flow_cell_id) -> str:
     """Return the full name of a HiSeqX flow cell with only one index."""
-    return "170517_ST-E00266_0210_BHJCFFALXX"
+    return f"170517_ST-E00266_0210_B{hiseq_x_single_index_flow_cell_id}"
 
 
 @pytest.fixture(scope="session")
@@ -148,12 +104,6 @@ def bclconvert_flow_cell_dir_name(demux_post_processing_api) -> str:
         hk_api=demux_post_processing_api.hk_api,
     )
     return flow_cell_dir_name
-
-
-@pytest.fixture(scope="session")
-def bcl2fastq_sample_sheet_file_name() -> str:
-    """Return the name of a BCL2Fastq sample sheet."""
-    return "SampleSheet_bcl2fastq.csv"
 
 
 # Lists

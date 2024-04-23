@@ -123,31 +123,11 @@ def tmp_novaseq_x_without_sample_sheet_flow_cell_path(
 
 
 @pytest.fixture
-def tmp_flow_cells_directory_malformed_sample_sheet(
-    tmp_flow_cell_name_malformed_sample_sheet: str, tmp_illumina_flow_cells_directory
-) -> Path:
-    """This is a path to a flow cell directory with a sample sheet with malformed headers."""
-    return Path(tmp_illumina_flow_cells_directory, tmp_flow_cell_name_malformed_sample_sheet)
-
-
-@pytest.fixture
 def tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert(
     bcl_convert_flow_cell_full_name: str, tmp_illumina_flow_cells_directory
 ) -> Path:
     """This is a path to a flow cell directory with the run parameters missing."""
     return Path(tmp_illumina_flow_cells_directory, bcl_convert_flow_cell_full_name)
-
-
-@pytest.fixture
-def tmp_flow_cells_directory_ready_for_demultiplexing_bcl2fastq(
-    tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq: str,
-    tmp_illumina_flow_cells_directory,
-) -> Path:
-    """This is a path to a flow cell directory with the run parameters missing."""
-    return Path(
-        tmp_illumina_flow_cells_directory,
-        tmp_flow_cell_name_ready_for_demultiplexing_bcl2fastq,
-    )
 
 
 # Temporary demultiplexed runs fixtures
@@ -342,15 +322,6 @@ def hiseq_x_single_index_sample_sheet_path(hiseq_x_single_index_flow_cell_dir: P
     )
 
 
-@pytest.fixture
-def hiseq_x_single_index_bcl2fastq_sample_sheet_path(
-    hiseq_x_single_index_flow_cell_dir: Path,
-    bcl2fastq_sample_sheet_file_name: str,
-) -> Path:
-    """Return the path to a single-index HiSeqX Bcl2fastq sample sheet."""
-    return Path(hiseq_x_single_index_flow_cell_dir, bcl2fastq_sample_sheet_file_name)
-
-
 @pytest.fixture(scope="session")
 def hiseq_x_dual_index_flow_cell_dir(
     illumina_flow_cells_directory, hiseq_x_dual_index_flow_cell_name: str
@@ -363,15 +334,6 @@ def hiseq_x_dual_index_flow_cell_dir(
 def hiseq_x_dual_index_sample_sheet_path(hiseq_x_dual_index_flow_cell_dir: Path) -> Path:
     """Return the path to a dual-index HiSeqX sample sheet."""
     return Path(hiseq_x_dual_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
-
-
-@pytest.fixture
-def hiseq_x_dual_index_bcl2fastq_sample_sheet_path(
-    hiseq_x_dual_index_flow_cell_dir: Path,
-    bcl2fastq_sample_sheet_file_name: str,
-) -> Path:
-    """Return the path to a dual-index HiSeqX Bcl2fastq sample sheet."""
-    return Path(hiseq_x_dual_index_flow_cell_dir, bcl2fastq_sample_sheet_file_name)
 
 
 @pytest.fixture(scope="session")
@@ -390,15 +352,6 @@ def hiseq_2500_dual_index_sample_sheet_path(hiseq_2500_dual_index_flow_cell_dir:
     )
 
 
-@pytest.fixture
-def hiseq_2500_dual_index_bcl2fastq_sample_sheet_path(
-    hiseq_2500_dual_index_flow_cell_dir: Path,
-    bcl2fastq_sample_sheet_file_name: str,
-) -> Path:
-    """Return the path to a dual-index HiSeq2500 Bcl2fastq sample sheet."""
-    return Path(hiseq_2500_dual_index_flow_cell_dir, bcl2fastq_sample_sheet_file_name)
-
-
 @pytest.fixture(scope="session")
 def hiseq_2500_custom_index_flow_cell_dir(
     illumina_flow_cells_directory, hiseq_2500_custom_index_flow_cell_name: str
@@ -413,15 +366,6 @@ def hiseq_2500_custom_index_sample_sheet_path(hiseq_2500_custom_index_flow_cell_
     return Path(
         hiseq_2500_custom_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
-
-
-@pytest.fixture
-def hiseq_2500_custom_index_bcl2fastq_sample_sheet_path(
-    hiseq_2500_custom_index_flow_cell_dir: Path,
-    bcl2fastq_sample_sheet_file_name: str,
-) -> Path:
-    """Return the path to a custom-index HiSeq2500 Bcl2fastq sample sheet."""
-    return Path(hiseq_2500_custom_index_flow_cell_dir, bcl2fastq_sample_sheet_file_name)
 
 
 @pytest.fixture
@@ -444,18 +388,6 @@ def bcl_convert_flow_cell_dir(
 ) -> Path:
     """Return the path to the bcl_convert flow cell demultiplex fixture directory."""
     return Path(illumina_flow_cells_directory, bcl_convert_flow_cell_full_name)
-
-
-@pytest.fixture(scope="session")
-def novaseq_bcl2fastq_sample_sheet_path(bcl2fastq_flow_cell_dir: Path) -> Path:
-    """Return the path to a NovaSeq6000 Bcl2fastq sample sheet."""
-    return Path(bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
-
-
-@pytest.fixture(scope="session")
-def novaseq_bcl_convert_sample_sheet_path(bcl_convert_flow_cell_dir: Path) -> Path:
-    """Return the path to a NovaSeq6000 bcl_convert sample sheet."""
-    return Path(bcl_convert_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
 
 
 @pytest.fixture
@@ -576,14 +508,6 @@ def demultiplexed_flow_cell(
 ) -> Path:
     """Return the path to a demultiplexed flow cell with bcl2fastq."""
     return Path(illumina_demultiplexed_runs_directory, bcl2fastq_flow_cell_full_name)
-
-
-@pytest.fixture
-def bcl_convert_demultiplexed_flow_cell(
-    illumina_demultiplexed_runs_directory, bcl_convert_flow_cell_full_name: str
-) -> Path:
-    """Return the path to a demultiplexed flow cell with BCLConvert."""
-    return Path(illumina_demultiplexed_runs_directory, bcl_convert_flow_cell_full_name)
 
 
 # Fixtures for test demultiplex flow cell
