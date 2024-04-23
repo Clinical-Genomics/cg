@@ -9,15 +9,11 @@ from genologics.entities import Artifact, Process, Researcher, Sample
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
-from cg.constants.lims import (
-    MASTER_STEPS_UDFS,
-    PROP2UDF,
-    DocumentationMethod,
-    LimsArtifactTypes,
-)
+from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod, LimsArtifactTypes
 from cg.exc import LimsDataError
 
 from ...constants import Priority
+from ...constants.sample_sources import SourceType
 from .order import OrderHandler
 
 SEX_MAP = {"F": "female", "M": "male", "Unknown": "unknown", "unknown": "unknown"}
@@ -67,6 +63,22 @@ class LimsAPI(Lims, OrderHandler):
     def samples_in_pools(self, pool_name, projectname):
         """Fetch all samples from a pool"""
         return self.get_samples(udf={"pool name": str(pool_name)}, projectname=projectname)
+
+    def sample(self, lims_id: str) -> dict[str, Any]:
+        """Return sample by ID from the LIMS database."""
+        lims_sample = {}
+        try:
+            sample = Sample(self, id=lims_id)
+            lims_sample: dict[str, Any] = self._export_sample(sample)
+        except HTTPError as error:
+            LOG.warning(f"Sample {lims_id} not found in LIMS: {error}")
+        return lims_sample
+
+    def get_source(self, lims_id: str) -> str:
+        """Return the source from LIMS for a given sample ID.
+        If no source information is set, it returns 'unknown'."""
+        if lims_sample := self.sample(lims_id=lims_id):
+            return lims_sample.get("source", SourceType.UNKNOWN)
 
     @staticmethod
     def _export_project(lims_project) -> dict:

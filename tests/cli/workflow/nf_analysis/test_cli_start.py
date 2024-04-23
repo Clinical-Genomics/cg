@@ -5,6 +5,7 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
+from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -41,7 +42,7 @@ def test_start(
     #mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
 
     # GIVEN that the sample source in LIMS is set
-    mocker.patch.object(AnalysisAPI, "get_source_from_lims_by_sample_id", return_value="blood")
+    mocker.patch.object(LimsAPI, "get_source", return_value="blood")
 
 
     # WHEN invoking the command with dry-run specified
@@ -87,7 +88,7 @@ def test_start_available(
     #mocker.patch.object(AnalysisAPI, "get_lims_sample", return_value={})
 
     # GIVEN that the sample source in LIMS is set
-    mocker.patch.object(AnalysisAPI, "get_source_from_lims_by_sample_id", return_value="blood")
+    mocker.patch.object(LimsAPI, "get_source", return_value="blood")
 
     # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(

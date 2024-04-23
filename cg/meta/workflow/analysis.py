@@ -161,18 +161,12 @@ class AnalysisAPI(MetaAPI):
 
         return application_types.pop()
 
-    def get_source_from_lims_by_sample_id(self, sample_id: str) -> str:
-        """Get the source from LIMS for a given sample ID. If no source information is set, it returns 'unknown'."""
-        lims_sample: dict = self.lims_api.sample(lims_id=sample_id)
-        if lims_sample:
-            return lims_sample.get("source", SourceType.UNKNOWN)
-
     def get_case_source_type(self, case_id: str) -> str:
         """Returns the source type for samples in a case.
         Raises CgError if different sources are set for the samples linked to a case."""
         sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
         source_types: set[str] = {
-            self.get_source_from_lims_by_sample_id(sample_id=sample_id) for sample_id in sample_ids
+            self.lims_api.get_source(lims_id=sample_id) for sample_id in sample_ids
         }
 
         if len(source_types) > 1:
