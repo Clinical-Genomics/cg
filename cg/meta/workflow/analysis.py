@@ -641,6 +641,10 @@ class AnalysisAPI(MetaAPI):
         )
         return self.scout_api.export_panels(build=genome_build, panels=all_panels, dry_run=dry_run)
 
+    def get_gene_panel(self, case_id: str, dry_run: bool = False) -> list[str]:
+        """Create and return the aggregated gene panel file."""
+        raise NotImplementedError
+
     def _get_managed_variants(self, genome_build: str) -> list[str]:
         """Create and return the managed variants."""
         return self.scout_api.export_managed_variants(genome_build=genome_build)
