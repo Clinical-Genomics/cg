@@ -89,7 +89,7 @@ def test_replace_sample_sheet_header_bcl2fastq(
 
 def test_replace_sample_sheet_header_bcl_convert(
     sample_sheet_context: CGConfig,
-    sample_sheet_bcl2fastq_data_header_with_replaced_sample_id: list[list[str]],
+    sample_sheet_bcl_convert_data_header: list[list[str]],
 ):
     """Test that the header of a BCLConvert sample sheet can not be replaced."""
     # GIVEN a sample sheet API
@@ -100,7 +100,7 @@ def test_replace_sample_sheet_header_bcl_convert(
     # WHEN replacing the header
     with pytest.raises(SampleSheetError) as error:
         # THEN an error is raised
-        api._replace_sample_header(sample_sheet_bcl2fastq_data_header_with_replaced_sample_id)
+        api._replace_sample_header(sample_sheet_bcl_convert_data_header)
     assert "Could not find BCL2FASTQ data header in sample sheet" in str(error.value)
 
 
