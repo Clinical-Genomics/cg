@@ -2409,27 +2409,6 @@ def raredisease_context(
     # Create ERROR case with NO SAMPLES
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
-    # Create textbook case with enough reads
-    case_enough_reads: Case = helpers.add_case(
-        store=status_db,
-        internal_id=raredisease_case_id,
-        name=raredisease_case_id,
-        data_analysis=Workflow.RAREDISEASE,
-    )
-
-    sample_raredisease_case_enough_reads: Sample = helpers.add_sample(
-        status_db,
-        internal_id=sample_id,
-        last_sequenced_at=datetime.now(),
-        reads=total_sequenced_reads_pass,
-        application_tag=wgs_application_tag,
-    )
-
-    helpers.add_relationship(
-        status_db,
-        case=case_enough_reads,
-        sample=sample_raredisease_case_enough_reads,
-    )
 
     # Create case without enough reads
     case_not_enough_reads: Case = helpers.add_case(
@@ -2448,6 +2427,29 @@ def raredisease_context(
     )
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
+
+    # Create textbook case with enough reads
+    case_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=raredisease_case_id,
+        name=raredisease_case_id,
+        data_analysis=Workflow.RAREDISEASE,
+    )
+
+    sample_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=sample_id,
+        last_sequenced_at=datetime.now(),
+        reads=total_sequenced_reads_pass,
+        application_tag=wgs_application_tag,
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=case_enough_reads,
+        sample=sample_enough_reads,
+    )
 
     return cg_context
 
@@ -2490,7 +2492,7 @@ def raredisease_mock_analysis_finish(
     Path.mkdir(
         Path(raredisease_dir, raredisease_case_id, "pipeline_info"), parents=True, exist_ok=True
     )
-    Path(raredisease_dir, raredisease_case_id, "pipeline_info", "software_versions.yml").touch(
+    Path(raredisease_dir, raredisease_case_id, "pipeline_info", software_version_file).touch(
         exist_ok=True
     )
     Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet.csv").touch(
@@ -2565,7 +2567,6 @@ def raredisease_hermes_deliverables(
 def raredisease_malformed_hermes_deliverables(raredisease_hermes_deliverables: dict) -> dict:
     malformed_deliverable: dict = raredisease_hermes_deliverables.copy()
     malformed_deliverable.pop("workflow")
-
     return malformed_deliverable
 
 
