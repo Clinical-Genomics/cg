@@ -52,7 +52,6 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
         LOG.info(f"Found directory {sub_dir}")
         try:
             flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir)
-            LOG.info(f"Using {flow_cell.bcl_converter} for demultiplexing.")
         except FlowCellError:
             continue
 
