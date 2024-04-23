@@ -14,7 +14,6 @@ from cg.constants import (
     RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT,
     Workflow,
 )
-from cg.constants.constants import GenomeVersion
 from cg.constants.scout import RNAFUSION_CASE_TAGS
 from cg.meta.report.field_validators import (
     get_mapped_reads_fraction,
@@ -42,19 +41,11 @@ class RnafusionReportAPI(ReportAPI):
     ) -> RnafusionSampleMetadataModel:
         """Return sample metadata to include in the report."""
         sample_metrics: RnafusionQCMetrics = analysis_metadata.sample_metrics[sample.internal_id]
-
-        # Skip LIMS data collection if down sampled
-        input_amount = None
-        rin = None
-        if not sample.downsampled_to:
-            input_amount = self.lims_api.get_latest_rna_input_amount(sample_id=sample.internal_id)
-            rin = self.lims_api.get_sample_rin(sample_id=sample.internal_id)
-
         return RnafusionSampleMetadataModel(
             bias_5_3=sample_metrics.median_5prime_to_3prime_bias,
             duplicates=sample_metrics.pct_duplication,
             gc_content=sample_metrics.after_filtering_gc_content,
-            input_amount=input_amount,
+            input_amount=self.lims_api.get_latest_rna_input_amount(sample.internal_id),
             insert_size=None,
             insert_size_peak=None,
             mapped_reads=get_mapped_reads_fraction(
@@ -71,13 +62,9 @@ class RnafusionReportAPI(ReportAPI):
             q20_rate=sample_metrics.after_filtering_q20_rate,
             q30_rate=sample_metrics.after_filtering_q30_rate,
             ribosomal_bases=sample_metrics.pct_ribosomal_bases,
-            rin=rin,
+            rin=self.lims_api.get_sample_rin(sample.internal_id),
             uniquely_mapped_reads=sample_metrics.uniquely_mapped_percent,
         )
-
-    def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
-        """Return build version of the genome reference of a specific case."""
-        return GenomeVersion.hg38.value
 
     @staticmethod
     def is_apptag_accredited(samples: list[SampleModel]) -> bool:
