@@ -1,7 +1,3 @@
 .swedac-stamp {
   width: 75px;
 }
-
-tr {
-  page-break-inside: avoid;
-}
