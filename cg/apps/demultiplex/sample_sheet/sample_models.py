@@ -1,5 +1,4 @@
 import logging
-from abc import abstractmethod
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -28,25 +27,6 @@ class FlowCellSample(BaseModel):
     index2: str = EMPTY_STRING
     model_config = ConfigDict(populate_by_name=True)
 
-    def separate_indexes(self, is_run_single_index: bool) -> None:
-        """Update values for index and index2 splitting the original LIMS dual index."""
-        if is_dual_index(self.index):
-            index1, index2 = self.index.split("-")
-            self.index = index1.strip().replace(CUSTOM_INDEX_TAIL, EMPTY_STRING)
-            self.index2 = index2.strip() if not is_run_single_index else EMPTY_STRING
-
-    @abstractmethod
-    def process_indexes(self, run_parameters: RunParameters):
-        """Update index attributes with the final values for the sample sheet."""
-        pass
-
-    @abstractmethod
-    def update_barcode_mismatches(
-        self, samples_to_compare: list, is_run_single_index: bool, is_reverse_complement: bool
-    ) -> None:
-        """Update the barcode_mismatches_1 and barcode_mismatches_2 attributes."""
-        pass
-
 
 class FlowCellSampleBCLConvert(FlowCellSample):
     """Class that represents a BCLConvert sample."""
@@ -64,6 +44,14 @@ class FlowCellSampleBCLConvert(FlowCellSample):
     barcode_mismatches_2: int | str = Field(
         1, alias=SampleSheetBCLConvertSections.Data.BARCODE_MISMATCHES_2
     )
+    model_config = ConfigDict(populate_by_name=True)
+
+    def separate_indexes(self, is_run_single_index: bool) -> None:
+        """Update values for index and index2 splitting the original LIMS dual index."""
+        if is_dual_index(self.index):
+            index1, index2 = self.index.split("-")
+            self.index = index1.strip().replace(CUSTOM_INDEX_TAIL, EMPTY_STRING)
+            self.index2 = index2.strip() if not is_run_single_index else EMPTY_STRING
 
     def _get_index1_override_cycles(self, len_index1_cycles: int) -> str:
         """Create the index 1 sub-string for the override cycles attribute."""
