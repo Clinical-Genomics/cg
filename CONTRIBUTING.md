@@ -29,8 +29,6 @@ This is a guide for contributing to the CG package. Please check here first if y
   * [store](#store)
 
 
-
-
 ## Code of Conduct
 
 Communicating around code can be a sensitive thing so please do your best to keep a positive tone. Remember that people are putting significant amount of work behind a PR or a review, stay humble :star:
@@ -89,7 +87,6 @@ Enhancement suggestions are tracked as [GitHub issues](https://guides.github.com
 * **Provide specific examples to demonstrate the steps**. Include copy/pasteable snippets which you use in those examples, as [Markdown code blocks](https://help.github.com/articles/markdown-basics/#multiple-lines).
 * **Describe the current behavior** and **explain which behavior you expected to see instead** and why.
 * **Explain why this enhancement would be useful**
-
 
 #### Local Development
 
@@ -194,7 +191,6 @@ Interface to Scout. For uploading analysis results to Scout. It's also used to a
 
 Module to generate Delivery Reports. This module is designed to convey the results of genetic analysis to the customer. It includes information on sample characteristics, laboratory preparation, sequencing attributes, as well as data analysis performance and limitations.
 
-~~~~
 
 ### Cli
 
