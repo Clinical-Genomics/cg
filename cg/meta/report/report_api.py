@@ -246,9 +246,7 @@ class ReportAPI(MetaAPI):
         return CaseModel(
             name=case.name,
             id=case.internal_id,
-            data_analysis=self.get_case_analysis_data(
-                case=case, analysis=analysis, analysis_metadata=analysis_metadata
-            ),
+            data_analysis=self.get_case_analysis_data(case=case, analysis=analysis),
             samples=samples,
             applications=unique_applications,
         )
@@ -342,12 +340,7 @@ class ReportAPI(MetaAPI):
         sequencing_method: str | None = self.lims_api.get_sequencing_method(lims_id=sample_id)
         return MethodsModel(library_prep=prep_method, sequencing=sequencing_method)
 
-    def get_case_analysis_data(
-        self,
-        case: Case,
-        analysis: Analysis,
-        analysis_metadata: AnalysisModel,
-    ) -> DataAnalysisModel:
+    def get_case_analysis_data(self, case: Case, analysis: Analysis) -> DataAnalysisModel:
         """Return workflow attributes used for data analysis."""
         delivered_files: list[File] | None = (
             self.delivery_api.get_analysis_case_delivery_files(case)
@@ -360,8 +353,8 @@ class ReportAPI(MetaAPI):
             workflow=analysis.workflow,
             workflow_version=analysis.workflow_version,
             type=self.analysis_api.get_data_analysis_type(case),
-            genome_build=self.analysis_api.get_genome_build(analysis_metadata),
-            variant_callers=self.analysis_api.get_variant_callers(analysis_metadata),
+            genome_build=self.analysis_api.get_genome_build(case.internal_id),
+            variant_callers=self.analysis_api.get_variant_callers(case.internal_id),
             panels=case.panels,
             scout_files=self.get_scout_uploaded_files(case),
             delivered_files=delivered_files,

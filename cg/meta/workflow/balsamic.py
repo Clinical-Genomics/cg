@@ -627,8 +627,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
-    def get_genome_build(self, analysis_metadata: BalsamicAnalysis) -> str:
+    def get_genome_build(self, case_id: str) -> str:
         """Returns the reference genome build version of a Balsamic analysis."""
+        analysis_metadata: BalsamicAnalysis = self.get_latest_metadata(case_id)
         return analysis_metadata.config.reference.reference_genome_version
 
     @staticmethod
@@ -639,11 +640,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 return versions[0]
         return None
 
-    def get_variant_callers(self, analysis_metadata: BalsamicAnalysis) -> list[str]:
+    def get_variant_callers(self, case_id: str) -> list[str]:
         """
         Return list of Balsamic variant-calling filters and their versions (if available) from the
         config.json file.
         """
+        analysis_metadata: BalsamicAnalysis = self.get_latest_metadata(case_id)
         sequencing_type: str = analysis_metadata.config.analysis.sequencing_type
         analysis_type: str = analysis_metadata.config.analysis.analysis_type
         var_callers: dict[str, BalsamicVarCaller] = analysis_metadata.config.vcf

@@ -477,11 +477,11 @@ class AnalysisAPI(MetaAPI):
         """Return the latest analysis metadata of a specific case."""
         raise NotImplementedError
 
-    def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
+    def get_genome_build(self, case_id: str) -> str:
         """Return the build version of the reference genome."""
         raise NotImplementedError
 
-    def get_variant_callers(self, analysis_metatada: AnalysisModel) -> list[str]:
+    def get_variant_callers(self, case_id: str) -> list[str]:
         """Return list of variant-calling filters used during analysis."""
         return []
 
