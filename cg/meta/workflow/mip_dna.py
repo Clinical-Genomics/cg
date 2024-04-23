@@ -4,6 +4,7 @@ from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.pedigree import Pedigree
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.mip.mip_analysis import MipAnalysis
 from cg.store.models import CaseSample
 from cg.utils import Process
 
@@ -71,3 +72,7 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
     def get_managed_variants(self) -> list[str]:
         """Create and return the managed variants."""
         return self._get_managed_variants(genome_build=GENOME_BUILD_37)
+
+    def get_genome_build(self, analysis_metadata: MipAnalysis) -> str:
+        """Return the reference genome build version of a MIP-DNA analysis."""
+        return analysis_metadata.genome_build

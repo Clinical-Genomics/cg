@@ -18,6 +18,7 @@ from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.balsamic.analysis import BalsamicAnalysis
+from cg.models.balsamic.config import BalsamicVarCaller
 from cg.models.balsamic.metrics import (
     BalsamicMetricsBase,
     BalsamicTargetedQCMetrics,
@@ -325,7 +326,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
 
     def get_latest_metadata(self, case_id: str) -> BalsamicAnalysis:
-        """Get the latest metadata of a specific BALSAMIC case"""
+        """Return the latest metadata of a specific BALSAMIC case."""
 
         config_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.CONFIG)
         metrics_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.QC_METRICS)
@@ -625,3 +626,42 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
+
+    def get_genome_build(self, analysis_metadata: BalsamicAnalysis) -> str:
+        """Returns the reference genome build version of a Balsamic analysis."""
+        return analysis_metadata.config.reference.reference_genome_version
+
+    @staticmethod
+    def get_variant_caller_version(var_caller_name: str, var_caller_versions: dict) -> str | None:
+        """Return the version of a specific Balsamic bioinformatic tool."""
+        for tool_name, versions in var_caller_versions.items():
+            if tool_name in var_caller_name:
+                return versions[0]
+        return None
+
+    def get_variant_callers(self, analysis_metadata: BalsamicAnalysis) -> list[str]:
+        """
+        Return list of Balsamic variant-calling filters and their versions (if available) from the
+        config.json file.
+        """
+        sequencing_type: str = analysis_metadata.config.analysis.sequencing_type
+        analysis_type: str = analysis_metadata.config.analysis.analysis_type
+        var_callers: dict[str, BalsamicVarCaller] = analysis_metadata.config.vcf
+        tool_versions: dict[str, list] = analysis_metadata.config.bioinfo_tools_version
+        analysis_var_callers = []
+        for var_caller_name, var_caller_attributes in var_callers.items():
+            if (
+                sequencing_type in var_caller_attributes.sequencing_type
+                and analysis_type in var_caller_attributes.analysis_type
+            ):
+                version: str = self.get_variant_caller_version(
+                    var_caller_name=var_caller_name, var_caller_versions=tool_versions
+                )
+                analysis_var_callers.append(
+                    f"{var_caller_name} (v{version})" if version else var_caller_name
+                )
+        return analysis_var_callers
+
+    def get_data_analysis_type(self, case: Case) -> str | None:
+        """Return data analysis type carried out."""
+        return self.get_bundle_deliverables_type(case_id=case.internal_id)
