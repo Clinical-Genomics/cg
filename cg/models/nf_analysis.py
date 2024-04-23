@@ -68,7 +68,7 @@ class FileDeliverable(BaseModel):
     path: str
     path_index: str | None
     step: str
-    tag: str | None
+    tag: str
 
     @validator("path", "path_index", pre=True)
     def set_path_as_string(cls, file_path: str | Path) -> str | None:
