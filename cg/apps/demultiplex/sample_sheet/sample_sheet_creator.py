@@ -3,10 +3,7 @@
 import logging
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_by_lane
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSampleBCLConvert
 from cg.constants.demultiplexing import IndexSettings, SampleSheetBCLConvertSections
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -30,7 +27,7 @@ class SampleSheetCreator:
 
     def convert_sample_to_header_dict(
         self,
-        sample: FlowCellSampleBCLConvert | FlowCellSampleBcl2Fastq,
+        sample: FlowCellSampleBCLConvert,
         data_column_names: list[str],
     ) -> list[str]:
         """Convert a lims sample object to a list that corresponds to the sample sheet headers."""

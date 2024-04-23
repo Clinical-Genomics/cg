@@ -1,23 +1,14 @@
 import logging
-from pathlib import Path
-from typing import Type
 
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_raw_samples_from_content,
-    get_sample_type_from_content,
     get_samples_by_lane,
     validate_samples_are_unique,
 )
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSample,
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
-from cg.constants.constants import FileFormat
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample, FlowCellSampleBcl2Fastq
 from cg.exc import SampleSheetError
-from cg.io.controller import ReadFile
 
 
 def test_validate_samples_are_unique(
@@ -115,29 +106,3 @@ def test_get_raw_samples_no_samples(sample_sheet_bcl2fastq_data_header: list[lis
 
     # THEN an exception is raised because of the missing samples
     assert "Could not find any samples in sample sheet" in caplog.text
-
-
-def test_get_sample_type_for_bcl_convert(bcl_convert_sample_sheet_path: Path):
-    # GIVEN a bcl convert sample sheet path
-
-    # WHEN getting the sample type
-    content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=bcl_convert_sample_sheet_path
-    )
-    sample_type: Type[FlowCellSample] = get_sample_type_from_content(content)
-
-    # THEN the sample type is FlowCellSampleBCLConvert
-    assert sample_type is FlowCellSampleBCLConvert
-
-
-def test_get_sample_type_for_bcl2fastq(hiseq_x_single_index_bcl2fastq_sample_sheet_path: Path):
-    # GIVEN a bcl convert sample sheet path
-
-    # WHEN getting the sample type
-    content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=hiseq_x_single_index_bcl2fastq_sample_sheet_path
-    )
-    sample_type: Type[FlowCellSample] = get_sample_type_from_content(content)
-
-    # THEN the sample type is FlowCellSampleBCLConvert
-    assert sample_type is FlowCellSampleBcl2Fastq
