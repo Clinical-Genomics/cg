@@ -40,7 +40,7 @@ work behind a PR or a review, stay humble :star:
 
 ## Branch Model
 
-CG is using github flow branching model as described in our [development manual][development-branch-model].
+CG is using github flow branching model as described in our [development manual](https://atlas.scilifelab.se/infrastructure/development/development_flow/).
 
 
 ## How Can I Contribute?
