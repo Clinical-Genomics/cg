@@ -17,7 +17,7 @@
       <!-- Caesar files -->
       {{ caesar_files(case=case, customer_id=customer.id) }}
     </div>
-  {% endif %}  
+  {% endif %}
 {% endmacro %}
 
 {% macro scout_files(case, customer_id, scout_access) %}
@@ -33,7 +33,7 @@
       <!-- BALSAMIC Scout files -->
       {{ balsamic_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
     {% elif workflow == "mip-dna" %}
-      <!-- MIP-DNA Scout files --> 
+      <!-- MIP-DNA Scout files -->
       {{ mip_dna_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
     {% elif workflow == "rnafusion" %}
       <!-- Rnafusion Scout files -->
