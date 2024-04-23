@@ -2453,7 +2453,6 @@ def raredisease_context(
     # Create ERROR case with NO SAMPLES
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
-
     # Create case without enough reads
     case_not_enough_reads: Case = helpers.add_case(
         store=status_db,
@@ -2471,7 +2470,6 @@ def raredisease_context(
     )
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
-
 
     # Create textbook case with enough reads
     case_enough_reads: Case = helpers.add_case(
