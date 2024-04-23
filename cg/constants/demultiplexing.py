@@ -1,18 +1,10 @@
 """Constants related to demultiplexing."""
 
 from enum import StrEnum
-from pathlib import Path
 
 from pydantic import BaseModel
 
 from cg.constants.sequencing import Sequencers
-
-
-class BclConverter(StrEnum):
-    """Define the BCL converter."""
-
-    BCL2FASTQ: str = "bcl2fastq"
-    BCLCONVERT: str = "bcl_convert"
 
 
 class DemultiplexingDirsAndFiles(StrEnum):
@@ -187,21 +179,6 @@ class IndexOverrideCycles(StrEnum):
     INDEX_8_IGNORED_2: str = "I8N2;"
     INDEX_8_IGNORED_2_REVERSED: str = "N2I8;"
 
-
-DEMUX_STATS_PATH: dict[str, dict[str, Path | None]] = {
-    BclConverter.BCL2FASTQ: {
-        "demultiplexing_stats": Path("Stats", "DemultiplexingStats.xml"),
-        "conversion_stats": Path("Stats", "ConversionStats.xml"),
-        "runinfo": None,
-    },
-    BclConverter.BCLCONVERT: {
-        "demultiplexing_stats": Path("Reports", "Demultiplex_Stats.csv"),
-        "conversion_stats": Path("Reports", "Demultiplex_Stats.csv"),
-        "adapter_metrics_stats": Path("Reports", "Adapter_Metrics.csv"),
-        "runinfo": Path("Reports", "RunInfo.xml"),
-        "quality_metrics": Path("Reports", "Quality_Metrics.csv"),
-    },
-}
 
 BCL2FASTQ_METRICS_DIRECTORY_NAME: str = "Stats"
 BCL2FASTQ_METRICS_FILE_NAME: str = "Stats.json"

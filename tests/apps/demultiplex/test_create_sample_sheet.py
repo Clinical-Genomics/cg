@@ -6,7 +6,6 @@ from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSampleBCLConvert
-from cg.constants.demultiplexing import BclConverter
 from cg.exc import HousekeeperFileMissingError
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
@@ -29,10 +28,7 @@ def test_get_create_sample_sheet_hk_has_bcl2fastq_sample_sheet(
     hk_api = sample_sheet_context_broken_flow_cells.housekeeper_api
 
     # GIVEN a a flow cell with a BCL2FASTQ sample sheet going to be updated to BCLConvert
-    flow_cell = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_with_bcl2fastq_sample_sheet,
-        bcl_converter=BclConverter.BCLCONVERT,
-    )
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_with_bcl2fastq_sample_sheet)
 
     # GIVEN that the sample sheet is in Housekeeper
     helpers.ensure_hk_bundle(store=hk_api, bundle_data=sample_sheet_bcl2fastq_bundle_data)
@@ -45,9 +41,7 @@ def test_get_create_sample_sheet_hk_has_bcl2fastq_sample_sheet(
     )
 
     # WHEN getting the sample sheet in BCLConvert format
-    sample_sheet_api.get_or_create_sample_sheet(
-        flow_cell_name=flow_cell.full_name, bcl_converter=BclConverter.BCLCONVERT
-    )
+    sample_sheet_api.get_or_create_sample_sheet(flow_cell.full_name)
 
     # THEN the sample sheet in Housekeeper is replaced with the BCLConvert sample sheet
     sample_sheet_api.validate_sample_sheet(sample_sheet_path_hk)
@@ -72,10 +66,7 @@ def test_get_create_sample_sheet_flow_cell_has_bcl2fastq_sample_sheet(
     hk_api = sample_sheet_context_broken_flow_cells.housekeeper_api
 
     # GIVEN a a flow cell with a BCL2FASTQ sample sheet going to be updated to BCLConvert
-    flow_cell = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_with_bcl2fastq_sample_sheet,
-        bcl_converter=BclConverter.BCLCONVERT,
-    )
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_with_bcl2fastq_sample_sheet)
 
     # GIVEN that the sample sheet is not in Housekeeper
     with pytest.raises(HousekeeperFileMissingError):
@@ -89,9 +80,7 @@ def test_get_create_sample_sheet_flow_cell_has_bcl2fastq_sample_sheet(
     )
 
     # WHEN getting the sample sheet in BCLConvert format
-    sample_sheet_api.get_or_create_sample_sheet(
-        flow_cell_name=flow_cell.full_name, bcl_converter=BclConverter.BCLCONVERT
-    )
+    sample_sheet_api.get_or_create_sample_sheet(flow_cell.full_name)
 
     # THEN the sample sheet has been added to Housekeeper and passes BCLConvert validation
     sample_sheet_path_hk: Path = hk_api.get_sample_sheet_path(flow_cell.id)
