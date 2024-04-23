@@ -10,19 +10,19 @@ from cg.services.quality_controller.quality_checks.utils import (
 )
 
 
-class QualityChecks(Enum):
+class QualityCheck(Enum):
     """
     Parent class for the quality checks.
     """
 
 
-class SequencingQC(QualityChecks):
+class SequencingQCCheck(QualityCheck):
     CASE_PASSES: Callable = case_pass_sequencing_qc
     SAMPLE_PASSES: Callable = sample_pass_sequencing_qc
     ANY_SAMPLE_IN_CASE_HAS_READS: Callable = any_sample_in_case_has_reads
 
 
-def get_sequencing_quality_check_for_case(case: Case) -> SequencingQC | None:
+def get_sequencing_quality_check_for_case(case: Case) -> Callable:
     """Get the appropriate sequencing quality checks for the workflow for a case."""
     workflow: Workflow = case.data_analysis
 
@@ -47,15 +47,15 @@ def get_sequencing_quality_check_for_case(case: Case) -> SequencingQC | None:
     ]
 
     if workflow in case_passes_workflows:
-        return SequencingQC.CASE_PASSES
+        return SequencingQCCheck.CASE_PASSES
     elif workflow in any_sample_in_case_has_reads_workflows:
-        return SequencingQC.ANY_SAMPLE_IN_CASE_HAS_READS
+        return SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS
     raise ValueError(f"Workflow {workflow} does not have a sequencing quality check.")
 
 
-def get_sample_sequencing_quality_check() -> SequencingQC:
-    return SequencingQC.SAMPLE_PASSES
+def get_sample_sequencing_quality_check() -> Callable:
+    return SequencingQCCheck.SAMPLE_PASSES
 
 
-def run_quality_checks(quality_checks: list[QualityChecks], **kwargs) -> bool:
+def run_quality_checks(quality_checks: list[QualityCheck], **kwargs) -> bool:
     return all(quality_check(**kwargs) for quality_check in quality_checks)

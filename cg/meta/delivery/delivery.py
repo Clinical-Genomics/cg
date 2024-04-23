@@ -10,7 +10,7 @@ from cg.constants import DataDelivery, Workflow
 from cg.constants.delivery import INBOX_NAME, PIPELINE_ANALYSIS_TAG_MAP
 from cg.models.delivery.delivery import DeliveryFile
 from cg.services.fastq_file_service.fastq_file_service import FastqFileService
-from cg.services.quality_controller.quality_controller import QualityController
+from cg.services.quality_controller.quality_controller_service import QualityControllerService
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -60,7 +60,7 @@ class DeliveryAPI:
         or is external. The force parameter can be used to override checks.
         """
         is_external: bool = sample.application_version.application.is_external
-        sample_passed_sequencing_qc: bool = QualityController.sample_pass_sequencing_qc(
+        sample_passed_sequencing_qc: bool = QualityControllerService.sample_pass_sequencing_qc(
             sample=sample
         )
 

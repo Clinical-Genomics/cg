@@ -14,7 +14,7 @@ def case_pass_sequencing_qc(case: Case) -> bool:
     """
     if is_case_ready_made_library(case):
         return ready_made_library_case_pass_sequencing_qc(case)
-    if case_has_express_priority(case):
+    if is_case_express_priority(case):
         return express_case_pass_sequencing_qc(case)
     return all(sample_has_enough_reads(sample) for sample in case.samples)
 
@@ -66,7 +66,7 @@ def any_sample_in_case_has_reads(case: Case) -> bool:
     return passed_quality_check
 
 
-def case_has_express_priority(case: Case) -> bool:
+def is_case_express_priority(case: Case) -> bool:
     """
     Check if a case is express priority.
     """

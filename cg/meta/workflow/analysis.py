@@ -23,7 +23,7 @@ from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, 
 from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
-from cg.services.quality_controller import QualityController
+from cg.services.quality_controller import QualityControllerService
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
@@ -93,7 +93,9 @@ class AnalysisAPI(MetaAPI):
             raise FileNotFoundError(f"No working directory for {case_id} exists")
 
     def is_case_ready_for_analysis(self, case: Case) -> bool:
-        case_passed_sequencing_qc: bool = QualityController.case_pass_sequencing_qc(case)
+        """Check if case is ready for analysis. If case passes sequencing QC and is set to analyze,
+        or has not been analyzed yet, or the latest analysis failed, the case is ready for analysis."""
+        case_passed_sequencing_qc: bool = QualityControllerService.case_pass_sequencing_qc(case)
         case_is_set_to_analyze: bool = case.action == CaseActions.ANALYZE
         case_has_not_been_analyzed: bool = not case.latest_analyzed
         case_latest_analysis_failed: bool = (
@@ -112,7 +114,7 @@ class AnalysisAPI(MetaAPI):
         cases_to_analyze: list[Case] = self.get_cases_to_analyse()
         cases_passing_quality_check: list[Case] = []
         for case in cases_to_analyze:
-            case_passed_sequencing_qc: bool = QualityController.case_pass_sequencing_qc(case)
+            case_passed_sequencing_qc: bool = QualityControllerService.case_pass_sequencing_qc(case)
             if case_passed_sequencing_qc:
                 cases_passing_quality_check.append(case)
         return cases_passing_quality_check

@@ -17,7 +17,7 @@ from cg.meta.workflow.microsalt.quality_controller import MicroSALTQualityContro
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.meta.workflow.microsalt.utils import get_most_recent_project_directory
 from cg.models.cg_config import CGConfig
-from cg.services.quality_controller.quality_controller import QualityController
+from cg.services.quality_controller.quality_controller_service import QualityControllerService
 from cg.store.models import Case, Sample
 from cg.utils import Process
 
@@ -179,7 +179,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         priority = (
             Priority.research.name if sample_obj.priority_int == 0 else Priority.standard.name
         )
-        sequencing_qc: bool = QualityController.sample_pass_sequencing_qc(sample_obj)
+        sequencing_qc: bool = QualityControllerService.sample_pass_sequencing_qc(sample_obj)
 
         return {
             "CG_ID_project": self.get_project(sample_id),

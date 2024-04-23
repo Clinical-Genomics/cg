@@ -4,7 +4,7 @@ from cg.constants.priority import Priority
 from cg.store.models import Case, Sample
 from cg.services.quality_controller.quality_checks.utils import (
     any_sample_in_case_has_reads,
-    case_has_express_priority,
+    is_case_express_priority,
     case_pass_sequencing_qc,
     express_case_pass_sequencing_qc,
     express_sample_has_enough_reads,
@@ -16,19 +16,21 @@ from cg.services.quality_controller.quality_checks.utils import (
 )
 from cg.store.store import Store
 from tests.conftest import StoreHelpers
-from tests.services.quality_controller.conftest import SequencingQCScenarios
+from tests.services.quality_controller.sequencing_qc_check_scenarios import (
+    SequencingQCCheckScenarios,
+)
 
 
 @pytest.mark.parametrize(
-    "prep_category, expected_result",
+    "sample_fixture, expected_result",
     [
-        (PrepCategory.READY_MADE_LIBRARY, True),
-        (PrepCategory.WHOLE_GENOME_SEQUENCING, False),
+        ("ready_made_library_sample_pass_sequencing_qc", True),
+        ("sample_pass_sequencing_qc", False),
     ],
     ids=["ready_made_library", "whole_genome_sequencing"],
 )
 def test_is_sample_ready_made_library(
-    prep_category: PrepCategory, expected_result: bool, base_store: Store, helpers
+    sample_fixture: str, expected_result: bool, request: pytest.FixtureRequest
 ):
     """
     Test the is_sample_ready_made_library function.
@@ -36,12 +38,7 @@ def test_is_sample_ready_made_library(
     This test verifies if the sample is ready-made library based on its prep category.
     """
     # GIVEN a sample with a prep category
-    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
-        store=base_store, helpers=helpers
-    )
-    sample: Sample = scenarios_generator.sample_scenario(
-        priority=Priority.standard, prep_category=prep_category, pass_reads=True
-    )
+    sample: Sample = request.getfixturevalue(sample_fixture)
     # WHEN checking if the sample is a ready-made library
     # THEN the result should be as expected
 
@@ -49,46 +46,39 @@ def test_is_sample_ready_made_library(
 
 
 @pytest.mark.parametrize(
-    "priority, expected_result",
+    "case_fixture, expected_result",
     [
-        (Priority.express, True),
-        (Priority.standard, False),
+        ("express_case_pass_sequencing_qc", True),
+        ("case_pass_sequencing_qc", False),
     ],
     ids=["express_priority", "standard_priority"],
 )
-def test_case_has_express_priority(
-    priority: Priority, expected_result: bool, base_store: Store, helpers
+def test_is_case_express_priority(
+    case_fixture: str, expected_result: bool, request: pytest.FixtureRequest
 ):
     """
-    Test the case_has_express_priority function.
+    Test the is_case_express_priority function.
 
     This test verifies if the case has express priority.
     """
     # GIVEN a case with a priority
-    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
-        store=base_store, helpers=helpers
-    )
-    case: Case = scenarios_generator.case_scenario(
-        priority=priority,
-        pass_reads=True,
-        prep_category=PrepCategory.READY_MADE_LIBRARY,
-        workflow=Workflow.MIP_DNA,
-    )
+    case: Case = request.getfixturevalue(case_fixture)
+
     # WHEN checking if the case has express priority
     # THEN the result should be as expected
-    assert case_has_express_priority(case) == expected_result
+    assert is_case_express_priority(case) == expected_result
 
 
 @pytest.mark.parametrize(
-    "priority, expected_result",
+    "sample_fixture, expected_result",
     [
-        (Priority.express, True),
-        (Priority.standard, False),
+        ("express_sample_pass_sequencing_qc", True),
+        ("sample_pass_sequencing_qc", False),
     ],
     ids=["express_priority", "standard_priority"],
 )
 def test_is_sample_express_priority(
-    priority: Priority, expected_result: bool, base_store: Store, helpers
+    sample_fixture: str, expected_result: bool, request: pytest.FixtureRequest
 ):
     """
     Test the is_sample_express_priority function.
@@ -96,12 +86,8 @@ def test_is_sample_express_priority(
     This test verifies if the sample has express priority.
     """
     # GIVEN a sample with a priority
-    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
-        store=base_store, helpers=helpers
-    )
-    sample: Sample = scenarios_generator.sample_scenario(
-        priority=priority, prep_category=PrepCategory.READY_MADE_LIBRARY, pass_reads=True
-    )
+    sample: Sample = request.getfixturevalue(sample_fixture)
+
     # WHEN checking if the sample has express priority
     # THEN the result should be as expected
 
@@ -109,15 +95,17 @@ def test_is_sample_express_priority(
 
 
 @pytest.mark.parametrize(
-    "pass_reads, expected_result",
+    "sample_fixture, expected_result",
     [
-        (True, True),
-        (False, False),
+        ("ready_made_library_sample_pass_sequencing_qc", True),
+        ("ready_made_library_sample_fail_sequencing_qc", False),
     ],
-    ids=["pass_reads", "no_reads"],
+    ids=["pass_sequencing_qc", "no_reads"],
 )
 def test_ready_made_library_sample_has_enough_reads(
-    pass_reads: bool, expected_result: bool, base_store: Store, helpers
+    sample_fixture: str,
+    expected_result: bool,
+    request: pytest.FixtureRequest,
 ):
     """
     Test the ready_made_library_sample_has_enough_reads function.
@@ -126,28 +114,23 @@ def test_ready_made_library_sample_has_enough_reads(
     library and if it has enough reads if so is the case.
     """
     # GIVEN a ready-made library sample with or without reads
-    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
-        store=base_store, helpers=helpers
-    )
-    sample: Sample = scenarios_generator.ready_made_library_sample_scenario(
-        priority=Priority.standard,
-        pass_reads=pass_reads,
-    )
+    sample: Sample = request.getfixturevalue(sample_fixture)
+
     # WHEN checking if the ready-made library sample has enough reads
     # THEN the result should be as expected
     assert ready_made_library_sample_has_enough_reads(sample) == expected_result
 
 
 @pytest.mark.parametrize(
-    "pass_reads, expected_result",
+    "sample_fixture, expected_result",
     [
-        (True, True),
-        (False, False),
+        ("sample_pass_sequencing_qc", True),
+        ("sample_fail_sequencing_qc", False),
     ],
-    ids=["pass_reads", "no_reads"],
+    ids=["pass_sequencing_qc", "no_reads"],
 )
 def test_sample_has_enough_reads(
-    pass_reads: bool, expected_result: bool, base_store: Store, helpers
+    sample_fixture: str, expected_result: bool, request: pytest.FixtureRequest
 ):
     """
     Test the sample_has_enough_reads function.
@@ -155,28 +138,24 @@ def test_sample_has_enough_reads(
     This test verifies if the sample has enough reads. It checks if the sample has enough reads or not.
     """
     # GIVEN a sample with or without reads
-    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
-        store=base_store, helpers=helpers
-    )
-    sample: Sample = scenarios_generator.sample_scenario(
-        priority=Priority.standard,
-        prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING,
-        pass_reads=pass_reads,
-    )
+    sample: Sample = request.getfixturevalue(sample_fixture)
+
     # WHEN checking if the sample has enough reads
     # THEN the result should be as expected
     assert sample_has_enough_reads(sample) == expected_result
 
 
 @pytest.mark.parametrize(
-    "pass_reads, priority, expected_result",
+    "case_fixture, expected_result",
     [
-        (True, Priority.standard, True),
-        (False, Priority.standard, False),
+        ("case_pass_sequencing_qc", True),
+        ("case_fail_sequencing_qc", False),
     ],
     ids=["standard_priority", "standard_priority_no_reads"],
 )
-def test_get_sequencing_qc_of_case(pass_reads, priority, expected_result, base_store, helpers):
+def test_get_sequencing_qc_of_case(
+    case_fixture: str, expected_result: bool, request: pytest.FixtureRequest
+):
     """
     Test the get_sequencing_qc_of_case function.
 
@@ -185,15 +164,7 @@ def test_get_sequencing_qc_of_case(pass_reads, priority, expected_result, base_s
 
     """
     # GIVEN a case with standard priority and a sample
-    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
-        store=base_store, helpers=helpers
-    )
-    case: Case = scenarios_generator.case_scenario(
-        priority=priority,
-        pass_reads=pass_reads,
-        prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING,
-        workflow=Workflow.MIP_DNA,
-    )
+    case: Case = request.getfixturevalue(case_fixture)
     # WHEN getting the sequencing quality check of the case
     # THEN the sequencing quality check of the case should be as expected
 
@@ -201,15 +172,15 @@ def test_get_sequencing_qc_of_case(pass_reads, priority, expected_result, base_s
 
 
 @pytest.mark.parametrize(
-    "pass_reads, priority, expected_result",
+    "sample_fixture, expected_result",
     [
-        (True, Priority.express, True),
-        (False, Priority.express, False),
+        ("express_sample_pass_sequencing_qc", True),
+        ("express_sample_fail_sequencing_qc", False),
     ],
     ids=["express_priority", "express_priority_no_reads"],
 )
 def test_express_sample_has_enough_reads(
-    pass_reads, priority, expected_result, base_store, helpers
+    sample_fixture: str, expected_result: bool, request: pytest.FixtureRequest
 ):
     """
     Test the express_sample_has_enough_reads function.
@@ -219,53 +190,40 @@ def test_express_sample_has_enough_reads(
 
     """
     # GIVEN an express sample with or without reads
-    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
-        store=base_store, helpers=helpers
-    )
-    sample: Sample = scenarios_generator.sample_scenario(
-        priority=priority,
-        prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING,
-        pass_reads=pass_reads,
-    )
+    sample: Sample = request.getfixturevalue(sample_fixture)
     # WHEN checking if the express sample has enough reads
     # THEN the result should be as expected
 
     assert express_sample_has_enough_reads(sample) == expected_result
 
 
-def test_get_express_reads_threshold_for_sample(base_store, helpers):
+def test_get_express_reads_threshold_for_sample(express_sample_pass_sequencing_qc: Sample):
     """
     Test the get_express_reads_threshold_for_sample function.
 
     This test verifies the express reads threshold is correctly calculated for a sample.
     """
-    # GIVEN a sample with a target reads value
-    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
-        store=base_store, helpers=helpers
-    )
-    sample: Sample = scenarios_generator.sample_scenario(
-        priority=Priority.express,
-        prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING,
-        pass_reads=True,
-    )
-    sample.application_version.application.target_reads = 10
+    # GIVEN a sample with a target reads value of 10 and an expected threshold of 5
+    express_sample_pass_sequencing_qc.application_version.application.target_reads = 10
     expected_express_reads_threshold = 5
     # WHEN getting the express reads threshold for the sample
-    express_reads_threshold: int = get_express_reads_threshold_for_sample(sample)
+    express_reads_threshold: int = get_express_reads_threshold_for_sample(
+        express_sample_pass_sequencing_qc
+    )
     # THEN the express reads threshold should be half of the target reads
     assert express_reads_threshold == expected_express_reads_threshold == 5
 
 
 @pytest.mark.parametrize(
-    "pass_reads, priority, expected_result",
+    "case_fixture, expected_result",
     [
-        (True, Priority.express, True),
-        (False, Priority.express, False),
+        ("express_case_pass_sequencing_qc", True),
+        ("express_case_fail_sequencing_qc", False),
     ],
     ids=["express_priority", "express_priority_no_reads"],
 )
 def test_express_case_pass_sequencing_qc(
-    pass_reads: bool, priority: Priority, expected_result: bool, base_store, helpers
+    case_fixture: str, expected_result: bool, request: pytest.FixtureRequest
 ):
     """
     Test the get_express_sequencing_qc_of_case function.
@@ -275,15 +233,7 @@ def test_express_case_pass_sequencing_qc(
     """
 
     # GIVEN a case with express priority and a sample
-    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
-        store=base_store, helpers=helpers
-    )
-    case: Case = scenarios_generator.case_scenario(
-        priority=priority,
-        pass_reads=pass_reads,
-        prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING,
-        workflow=Workflow.MIP_DNA,
-    )
+    case: Case = request.getfixturevalue(case_fixture)
     # WHEN getting the express sequencing quality check of the case
     express_sequencing_qc_of_case: bool = express_case_pass_sequencing_qc(case)
     # THEN the express sequencing quality check of the case should be as expected
@@ -291,15 +241,20 @@ def test_express_case_pass_sequencing_qc(
 
 
 @pytest.mark.parametrize(
-    "pass_reads, expected_result",
+    "case_fixture, expected_result",
     [
-        (True, True),
-        (False, False),
+        ("any_sample_in_case_has_reads", True),
+        ("any_sample_in_case_no_reads", False),
     ],
-    ids=["on_sample_with_reads", "no_sample_with_reads"],
+    ids=["one_sample_with_reads", "no_sample_with_reads"],
 )
 def test_any_sample_in_case_has_reads(
-    pass_reads: bool, expected_result: bool, base_store: Store, helpers: StoreHelpers
+    case_fixture: str,
+    expected_result: bool,
+    request: pytest.FixtureRequest,
+    sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
+    base_store: Store,
+    helpers: StoreHelpers,
 ):
     """
     Test the any_sample_in_case_has_reads function.
@@ -307,18 +262,10 @@ def test_any_sample_in_case_has_reads(
     This test verifies if any sample in the case has reads.
     """
     # GIVEN a case with a sample with or without reads
-    scenarios_generator: SequencingQCScenarios = SequencingQCScenarios(
-        store=base_store, helpers=helpers
-    )
-    case: Case = scenarios_generator.case_scenario(
-        priority=Priority.standard,
-        pass_reads=pass_reads,
-        prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING,
-        workflow=Workflow.MIP_DNA,
-    )
+    case: Case = request.getfixturevalue(case_fixture)
     # GIVEN that another sample on the case has no reads
-    another_sample: Sample = scenarios_generator.add_sample(
-        prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING, pass_reads=False
+    another_sample: Sample = sequencing_qc_check_scenarios.add_sample(
+        prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING, pass_sequencing_qc=False
     )
     helpers.add_relationship(store=base_store, sample=another_sample, case=case)
     # WHEN checking if any sample in the case has reads

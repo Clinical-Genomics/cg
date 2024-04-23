@@ -82,6 +82,8 @@ pytest_plugins = [
     "tests.fixture_plugins.delivery_fixtures.context_fixtures",
     "tests.fixture_plugins.delivery_fixtures.bundle_fixtures",
     "tests.fixture_plugins.delivery_fixtures.path_fixtures",
+    "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
+    "tests.services.quality_controller.sequencing_qc_check_scenarios"
 ]
 
 # Case fixtures
