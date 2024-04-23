@@ -19,17 +19,7 @@ LOG = logging.getLogger(__name__)
 
 
 class FlowCellSample(BaseModel):
-    """Base class for flow cell samples."""
-
-    lane: int
-    sample_id: SampleId
-    index: str
-    index2: str = EMPTY_STRING
-    model_config = ConfigDict(populate_by_name=True)
-
-
-class FlowCellSampleBCLConvert(FlowCellSample):
-    """Class that represents a BCLConvert sample."""
+    """Class that represents a flow cell sample."""
 
     lane: int = Field(..., alias=SampleSheetBCLConvertSections.Data.LANE)
     sample_id: SampleId = Field(..., alias=SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID)
@@ -91,9 +81,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
         )
         self.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
-    def _update_barcode_mismatches_1(
-        self, samples_to_compare: list["FlowCellSampleBCLConvert"]
-    ) -> None:
+    def _update_barcode_mismatches_1(self, samples_to_compare: list["FlowCellSample"]) -> None:
         """Assign zero to barcode_mismatches_1 if the hamming distance between self.index
         and the index1 of any sample in the lane is below the minimum threshold."""
         for sample in samples_to_compare:
@@ -109,7 +97,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
 
     def _update_barcode_mismatches_2(
         self,
-        samples_to_compare: list["FlowCellSampleBCLConvert"],
+        samples_to_compare: list["FlowCellSample"],
         is_reverse_complement: bool,
     ) -> None:
         """Assign zero to barcode_mismatches_2 if the hamming distance between self.index2
@@ -143,7 +131,7 @@ class FlowCellSampleBCLConvert(FlowCellSample):
 
     def update_barcode_mismatches(
         self,
-        samples_to_compare: list["FlowCellSampleBCLConvert"],
+        samples_to_compare: list["FlowCellSample"],
         is_run_single_index: bool,
         is_reverse_complement: bool,
     ) -> None:

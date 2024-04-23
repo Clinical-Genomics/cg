@@ -2,7 +2,7 @@ import logging
 
 from pydantic import TypeAdapter
 
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample, FlowCellSampleBCLConvert
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
 from cg.exc import SampleSheetError
 
@@ -73,7 +73,7 @@ def get_samples_by_lane(
 
 def get_flow_cell_samples_from_content(
     sample_sheet_content: list[list[str]],
-) -> list[FlowCellSampleBCLConvert]:
+) -> list[FlowCellSample]:
     """
     Return the samples in a sample sheet as a list of FlowCellSample objects.
     Raises:
@@ -82,5 +82,5 @@ def get_flow_cell_samples_from_content(
     raw_samples: list[dict[str, str]] = get_raw_samples_from_content(
         sample_sheet_content=sample_sheet_content
     )
-    adapter = TypeAdapter(list[FlowCellSampleBCLConvert])
+    adapter = TypeAdapter(list[FlowCellSample])
     return adapter.validate_python(raw_samples)
