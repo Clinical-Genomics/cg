@@ -8,7 +8,7 @@ from cg.apps.sequencing_metrics_parser.models import DemuxMetrics, SequencingQua
 from cg.apps.sequencing_metrics_parser.parser import MetricsParser
 
 
-def test_parse_bcl_convert_metrics(
+def test_parse_metrics(
     bcl_convert_metrics_dir_path: Path,
 ):
     """Test to parse BCLConvert metrics."""
@@ -33,7 +33,7 @@ def test_parse_metrics_files_not_existing():
         MetricsParser(bcl_convert_metrics_dir_path=Path("non-existing-path"))
 
 
-def test_parse_bcl_convert_quality_metrics(
+def test_parse_quality_metrics(
     parsed_bcl_convert_metrics: MetricsParser,
     bcl_convert_quality_metric_model_with_data: SequencingQualityMetrics,
 ):
@@ -51,7 +51,7 @@ def test_parse_bcl_convert_quality_metrics(
         assert getattr(bcl_convert_quality_metric_model_with_data, attr_name) == attr_value
 
 
-def test_parse_bcl_convert_demux_metrics(
+def test_parse_demux_metrics(
     parsed_bcl_convert_metrics: MetricsParser,
     bcl_convert_demux_metric_model_with_data: DemuxMetrics,
 ):

@@ -14,8 +14,6 @@ class DemultiplexingDirsAndFiles(StrEnum):
     DELIVERY: str = "delivery.txt"
     DEMUX_STARTED: str = "demuxstarted.txt"
     DEMUX_COMPLETE: str = "demuxcomplete.txt"
-    HISEQ_X_COPY_COMPLETE: str = "copycomplete.txt"
-    HISEQ_X_TILE_DIR: str = "l1t11"
     RTACOMPLETE: str = "RTAComplete.txt"
     RUN_PARAMETERS_PASCAL_CASE: str = "RunParameters.xml"
     RUN_PARAMETERS_CAMEL_CASE: str = "runParameters.xml"
@@ -84,22 +82,6 @@ class SampleSheetBcl2FastqSections:
         RECIPE: str = "Recipe"
         OPERATOR: str = "Operator"
         SAMPLE_PROJECT_BCL2FASTQ: str = "Project"
-
-        @classmethod
-        def column_names(cls) -> list[str]:
-            return [
-                cls.FLOW_CELL_ID,
-                cls.LANE,
-                cls.SAMPLE_INTERNAL_ID_BCL2FASTQ,
-                cls.SAMPLE_REFERENCE,
-                cls.INDEX_1,
-                cls.INDEX_2,
-                cls.SAMPLE_NAME,
-                cls.CONTROL,
-                cls.RECIPE,
-                cls.OPERATOR,
-                cls.SAMPLE_PROJECT_BCL2FASTQ,
-            ]
 
 
 class SampleSheetBCLConvertSections:
@@ -180,12 +162,8 @@ class IndexOverrideCycles(StrEnum):
     INDEX_8_IGNORED_2_REVERSED: str = "N2I8;"
 
 
-BCL2FASTQ_METRICS_DIRECTORY_NAME: str = "Stats"
-BCL2FASTQ_METRICS_FILE_NAME: str = "Stats.json"
 CUSTOM_INDEX_TAIL = "NNNNNNNNN"
-DRAGEN_PASSED_FILTER_PCT: float = 100.00000
 FASTQ_FILE_SUFFIXES: list[str] = [".fastq", ".gz"]
-INDEX_CHECK: str = "indexcheck"
 UNDETERMINED: str = "Undetermined"
 
 NEW_NOVASEQ_CONTROL_SOFTWARE_VERSION: str = "1.7.0"
