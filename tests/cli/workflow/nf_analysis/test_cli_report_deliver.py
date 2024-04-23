@@ -11,7 +11,7 @@ from click.testing import CliRunner
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileFormat
-from cg.constants.nextflow import NXF_WORKFLOWS
+from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -21,7 +21,7 @@ LOG = logging.getLogger(__name__)
 
 @pytest.mark.parametrize(
     "workflow",
-    NXF_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS,
 )
 def test_report_deliver_without_options(
     cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest
@@ -42,7 +42,7 @@ def test_report_deliver_without_options(
 
 @pytest.mark.parametrize(
     "workflow",
-    NXF_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS,
 )
 def test_report_deliver_with_missing_case(
     cli_runner: CliRunner,
@@ -73,7 +73,7 @@ def test_report_deliver_with_missing_case(
 
 @pytest.mark.parametrize(
     "workflow",
-    NXF_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS,
 )
 def test_report_deliver_without_samples(
     cli_runner: CliRunner,
@@ -103,7 +103,7 @@ def test_report_deliver_without_samples(
 
 @pytest.mark.parametrize(
     "workflow",
-    NXF_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS,
 )
 def test_report_deliver_successful(
     cli_runner: CliRunner,
