@@ -3,25 +3,25 @@
   path: PATHTOCASE/alignment/SAMPLEID_sorted_md.cram
   path_index: PATHTOCASE/alignment/SAMPLEID_sorted_md.cram.crai
   step: alignment
-  tag: ~
+  tag: alignment
 - format: cram
   id: SAMPLEID
   path: PATHTOCASE/alignment/SAMPLEID_mt_subsample.cram
   path_index: PATHTOCASE/alignment/SAMPLEID_mt_subsample.cram.crai
   step: alignment
-  tag: ~
+  tag: alignment_mt
 - format: txt
   id: SAMPLEID
   path: PATHTOCASE/alignment/SAMPLEID_sorted_md.MarkDuplicates.metrics.txt
   path_index: ~
   step: alignment
-  tag: ~
+  tag: alignment_markduplicates
 - format: bw
   id: SAMPLEID
   path: PATHTOCASE/qc_bam/SAMPLEID_qualimap/SAMPLEID_tidditcov.bw
   path_index: ~
   step: tiddit_coverage
-  tag: ~
+  tag: tiddit_coverage
 - format: png
   id: SAMPLEID
   path: PATHTOCASE/qc_bam/SAMPLEID_chromographcov/SAMPLEID_tidditcov_1.png
@@ -171,13 +171,13 @@
   path: PATHTOCASE/smncopynumbercaller/out/CASEID.tsv
   path_index: ~
   step: smncopynumbercaller
-  tag: ~
+  tag: tsv
 - format: json
   id: CASEID
   path: PATHTOCASE/smncopynumbercaller/out/CASEID.json
   path_index: ~
   step: smncopynumbercaller
-  tag: ~
+  tag: json
 - format: meta
   id: CASEID
   path: /home/proj/production/workflows/raredisease/references/references_2.0.1_mtp_1/grch37_expansionhunter_variant_catalog_-5.0.0-.json
@@ -207,7 +207,7 @@
   path: PATHTOCASE/vcf2cytosure/SAMPLEID.cgh
   path_index: ~
   step: vcf2cytosure
-  tag: ~
+  tag: vcf2cytosure
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/gens/SAMPLEID/SAMPLEID_gens.baf.bed.gz
@@ -225,7 +225,7 @@
   path: PATHTOCASE/call_mobile_elements/CASEID_mobile_elements.vcf.gz
   path_index: PATHTOCASE/call_mobile_elements/CASEID_mobile_elements.vcf.gz.tbi
   step: call_mobile_elements
-  tag: ~
+  tag: call_mobile_elements
 - format: vcf
   id: CASEID
   path: PATHTOCASE/annotate_mobile_elements/CASEID_me_annotated_clinical.vcf.gz
@@ -243,55 +243,55 @@
   path: PATHTOCASE/call_snv/genome/CASEID_snv.vcf.gz
   path_index: PATHTOCASE/call_snv/genome/CASEID_snv.vcf.gz.tbi
   step: call_snv
-  tag: ~
+  tag: call_snv
 - format: vcf
   id: CASEID
   path: PATHTOCASE/call_snv/mitochondria/CASEID_mitochondria.vcf.gz
   path_index: PATHTOCASE/call_snv/genome/CASEID_mitochondria.vcf.gz.tbi
   step: call_snv_mt
-  tag: ~
+  tag: call_snv_mt
 - format: vcf
   id: CASEID
   path: PATHTOCASE/call_sv/genome/CASEID_sv.vcf.gz
   path_index: PATHTOCASE/call_snv/genome/CASEID_sv.vcf.gz.tbi
   step: call_sv
-  tag: ~
+  tag: call_sv
 - format: vcf
   id: CASEID
   path: PATHTOCASE/call_snv/mitochondria/CASEID_mitochondria.vcf.gz
   path_index: PATHTOCASEme/call_snv/genome/CASEID_mitochondria.vcf.gz.tbi
   step: call_sv_mt
-  tag: ~
+  tag: call_sv_mt
 - format: meta
   id: SAMPLEID
   path: PATHTOCASE/call_sv/mitochondria/SAMPLEID_mitochondria_deletions.txt
   path_index: ~
   step: call_sv_mt
-  tag: ~
+  tag: call_sv_mt_del
 - format: csv
   id: SAMPLEID
   path: PATHTOCASE/call_sv/mitochondria/eKLIPse_SAMPLEID_deletions.csv
   path_index: ~
   step: call_sv_mt
-  tag: ~
+  tag: eklipse_del
 - format: png
   id: SAMPLEID
   path: PATHTOCASE/call_sv/mitochondria/eKLIPse_SAMPLEID.png
   path_index: ~
   step: call_sv_mt
-  tag: ~
+  tag: eklipse_png
 - format: csv
   id: SAMPLEID
   path: PATHTOCASE/call_sv/mitochondria/eKLIPse_SAMPLEID_genes.csv
   path_index: ~
   step: call_sv_mt
-  tag: ~
+  tag: eklipse_genes
 - format: vcf
   id: CASEID
   path: PATHTOCASE/annotate_sv/CASEID_svdbquery_vep.vcf.gz
   path_index: PATHTOCASE/annotate_sv/CASEID_svdbquery_vep.vcf.gz
   step: annotate_sv
-  tag: ~
+  tag: svdbquery
 - format: vcf
   id: CASEID
   path: PATHTOCASE/rank_and_filter/CASEID_snv_ranked_clinical.vcf.gz
@@ -333,7 +333,7 @@
   path: PATHTOCASE/ngsbits_samplegender/CASEID_ngsbits_sex.tsv
   path_index: ~
   step: ngsbits_samplegender
-  tag: ~
+  tag: ngsbits_samplegender
 - format: meta
   id: CASEID
   path: PATHTOCASE/peddy/CASEID.peddy.ped
@@ -363,25 +363,25 @@
   path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz/SAMPLEID_rhocallviz.bw
   path_index: ~
   step: annotate_snv
-  tag: ~
+  tag: annotate_snv
 - format: vcf
   id: CASEID
   path: PATHTOCASE/annotate_snv/genome/CASEID_rohann_vcfanno_filter_cadd_vep.vcf.gz
   path_index: PATHTOCASE/annotate_snv/genome/CASEID_rohann_vcfanno_filter_cadd_vep.vcf.gz.tbi
   step: annotate_snv_mt
-  tag: ~
+  tag: annotate_snv_mt
 - format: vcf
   id: CASEID
   path: PATHTOCASE/annotate_snv/genome/CASEID_mitochondria_cadd_vep_vcfanno_hmtnote.vcf.gz
   path_index: PATHTOCASE/annotate_snv/genome/CASEID_mitochondria_cadd_vep_vcfanno_hmtnote.vcf.gz.tbi
   step: annotate_snv_mt
-  tag: ~
+  tag: annotate_snv_mt
 - format: meta
   id: CASEID
   path: PATHTOCASE/annotate_snv/genome/CASEID_mitochondria_cadd_vep_haplogrep.txt
   path_index: ~
   step: annotate_snv_mt
-  tag: ~
+  tag: annotate_snv_mt
 - format: png
   id: SAMPLEID
   path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_1.png
