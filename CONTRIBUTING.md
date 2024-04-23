@@ -216,7 +216,8 @@ an external package will affect the rest of the system.
 
 #### Coverage
 
-Interface to [Chanjo][chanjo]. It's used to load coverage information from Sambamba output.
+Interface to [Chanjo](https://clinical-genomics.github.io/chanjo/).
+It is used to load coverage information from Sambamba output.
 
 #### Invoice
 
