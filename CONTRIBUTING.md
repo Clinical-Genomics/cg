@@ -363,7 +363,7 @@ sample.
 
 Includes: `status`, `hk`, `coverage`
 
-The API will fetch information about an analysis like name and family ID and
+The API will fetch information about an analysis like name and case ID and
 related samples from `status`. It will get the Sambamba output from `hk` and
 use the `coverage` app interface to upload the data to Chanjo for each
 individual sample.
