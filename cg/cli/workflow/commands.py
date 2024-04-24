@@ -24,7 +24,6 @@ from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-from cg.meta.clean.nf_analysis import NfAnalysisCleanAPI
 
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
@@ -365,7 +364,8 @@ def nf_workflow_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" nextflow case run dirs."""
-    analysis_api: NfAnalysisAPI = NfAnalysisAPI(context.obj, Workflow.TAXPROFILER)
+
+    analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
     exit_code: int = EXIT_SUCCESS
 
     try:

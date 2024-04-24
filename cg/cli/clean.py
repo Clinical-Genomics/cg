@@ -36,6 +36,8 @@ from cg.store.store import Store
 from cg.utils.date import get_date_days_ago, get_timedelta_from_date
 from cg.utils.dispatcher import Dispatcher
 from cg.utils.files import get_directories_in_path
+from cg.constants.constants import MetaApis
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -52,9 +54,10 @@ FLOW_CELL_OUTPUT_HEADERS = [
 
 
 @click.group()
-def clean():
+@click.pass_context
+def clean(context: click.Context) -> None:
     """Clean up processes."""
-    return
+    context.obj.meta_apis[MetaApis.ANALYSIS_API] = NfAnalysisAPI(config=context.obj)
 
 
 for sub_cmd in [

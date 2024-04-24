@@ -16,7 +16,7 @@ from cg.cli.workflow.commands import (
     rnafusion_past_run_dirs,
     nf_workflow_past_run_dirs,
 )
-from cg.constants import EXIT_SUCCESS, Workflow
+from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
 
@@ -167,12 +167,12 @@ def test_cli_workflow_clean_microsalt(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_cli_workflow_clean_taxprofiler(
+def test_cli_workflow_clean_nf_workflow(
     cli_runner: CliRunner,
     taxprofiler_context: CGConfig,
     before_date: str,
 ):
-    """Test clean taxprofiler workflow."""
+    """Test clean nf-workflows."""
     # GIVEN a before string
 
     # WHEN running command
