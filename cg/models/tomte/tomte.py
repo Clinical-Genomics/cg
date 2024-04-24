@@ -48,7 +48,7 @@ class TomteParameters(WorkflowParameters):
     """Model for Tomte parameters."""
 
     gene_panel_clinical_filter: Path
-    tissue: str
+    tissue: str | None
     genome: str
 
     @validator("tissue")
