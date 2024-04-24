@@ -14,6 +14,12 @@ def flow_cell_name_demultiplexed_with_bcl2fastq() -> str:
 
 
 @pytest.fixture
+def flow_cell_name() -> str:
+    """Return flow cell name."""
+    return "HVKJCDRXX"
+
+
+@pytest.fixture
 def bcl2fastq_flow_cell_id() -> str:
     """Return flow cell id from bcl2fastq flow cell object."""
     return "HLYWYDSXX"
@@ -22,6 +28,18 @@ def bcl2fastq_flow_cell_id() -> str:
 @pytest.fixture(scope="session")
 def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
     return "HY7FFDRX2"
+
+
+@pytest.fixture(scope="session")
+def bcl2fastq_flow_cell_full_name() -> str:
+    """Return full flow cell name."""
+    return "201203_D00483_0200_AHVKJCDRXX"
+
+
+@pytest.fixture(scope="session")
+def bcl_convert_flow_cell_full_name() -> str:
+    """Return the full name of a bcl_convert flow cell."""
+    return "211101_A00187_0615_AHLG5GDRZZ"
 
 
 @pytest.fixture(scope="session")
@@ -52,18 +70,6 @@ def hiseq_2500_dual_index_flow_cell_name() -> str:
 def hiseq_2500_custom_index_flow_cell_name() -> str:
     """Return the full name of a HiSeq2500 flow cell with double indexes."""
     return "180509_D00450_0598_BHGYFNBCX2"
-
-
-@pytest.fixture(scope="session")
-def bcl2fastq_flow_cell_full_name() -> str:
-    """Return full flow cell name."""
-    return "201203_D00483_0200_AHVKJCDRXX"
-
-
-@pytest.fixture(scope="session")
-def bcl_convert_flow_cell_full_name() -> str:
-    """Return the full name of a bcl_convert flow cell."""
-    return "211101_A00187_0615_AHLG5GDRZZ"
 
 
 @pytest.fixture(scope="session")

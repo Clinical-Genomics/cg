@@ -513,19 +513,20 @@ def assert_file_contains_all_file_paths(manifest_file: Path, files_in_file: list
 
 
 def test_add_flow_cell_name_to_fastq_file_path(
-    bcl2fastq_flow_cell_id: str, demultiplex_fastq_file_path
+    hiseq_x_single_index_flow_cell_id: str, demultiplex_fastq_file_path
 ):
     # GIVEN a fastq file path and a flow cell name
 
     # WHEN adding the flow cell name to the fastq file path
     rename_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
-        fastq_file_path=demultiplex_fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
+        fastq_file_path=demultiplex_fastq_file_path,
+        flow_cell_name=hiseq_x_single_index_flow_cell_id,
     )
 
     # THEN the fastq file path should be returned with the flow cell name added
     assert rename_fastq_file_path == Path(
         demultiplex_fastq_file_path.parent,
-        f"{bcl2fastq_flow_cell_id}_{demultiplex_fastq_file_path.name}",
+        f"{hiseq_x_single_index_flow_cell_id}_{demultiplex_fastq_file_path.name}",
     )
 
 

@@ -3735,12 +3735,6 @@ def expected_total_reads() -> int:
 
 
 @pytest.fixture
-def flow_cell_name() -> str:
-    """Return flow cell name."""
-    return "HVKJCDRXX"
-
-
-@pytest.fixture
 def flow_cell_full_name(flow_cell_name: str) -> str:
     """Return flow cell full name."""
     return f"201203_D00483_0200_A{flow_cell_name}"

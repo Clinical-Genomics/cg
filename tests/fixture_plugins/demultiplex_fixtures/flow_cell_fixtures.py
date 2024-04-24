@@ -7,7 +7,7 @@ import pytest
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
-# Functional flow cell runs
+# Canonical flow cell runs
 
 
 @pytest.fixture(scope="module")
