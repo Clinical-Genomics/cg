@@ -384,7 +384,7 @@ Includes: `status`, `hk`, `loqus`
 
 Given an analysis record, it will fetch required files from `hk` and upload the
 variants to the observation cound database using `loqus`. This only works for
-families with at least one affected individual.
+cases with at least one affected individual.
 
 ##### Scoutapi
 
