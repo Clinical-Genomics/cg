@@ -180,10 +180,6 @@ class BalsamicReportAPI(ReportAPI):
             ),
         }
 
-    def get_template_name(self) -> str:
-        """Return template name to render the delivery report."""
-        return Workflow.BALSAMIC + "_report.html"
-
     def get_upload_case_tags(self) -> dict:
         """Return Balsamic upload case tags."""
         return BALSAMIC_CASE_TAGS

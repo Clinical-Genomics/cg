@@ -12,7 +12,6 @@ from cg.constants import (
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     RNAFUSION_REPORT_ACCREDITED_APPTAGS,
     RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT,
-    Workflow,
 )
 from cg.constants.scout import RNAFUSION_CASE_TAGS
 from cg.meta.report.field_validators import (
@@ -91,10 +90,6 @@ class RnafusionReportAPI(ReportAPI):
         is_apptag_accredited: bool = self.is_apptag_accredited(samples)
         is_input_amount_accredited: bool = self.is_input_amount_accredited(samples)
         return is_apptag_accredited and is_input_amount_accredited
-
-    def get_template_name(self) -> str:
-        """Return template name to render the delivery report."""
-        return Workflow.RNAFUSION + "_report.html"
 
     def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""

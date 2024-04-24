@@ -1,7 +1,15 @@
 """Delivery report constants."""
 
+from importlib.resources import files
+from pathlib import Path
+
 from cg.constants import DataDelivery
-from cg.constants.constants import Workflow
+from cg.constants.constants import FileExtensions, Workflow
+
+DELIVERY_REPORT_FILE_NAME: str = f"delivery-report{FileExtensions.HTML}"
+SWEDAC_LOGO_PATH = Path(
+    files("cg"), "meta", "report", "templates", "static", "images", "SWEDAC_logo.png"
+)
 
 BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]
 

@@ -9,11 +9,11 @@ from housekeeper.store.models import File, Version
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sqlalchemy.orm import Query
 
-from cg.constants import Workflow
+from cg.constants import DELIVERY_REPORT_FILE_NAME, SWEDAC_LOGO_PATH, Workflow
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.exc import DeliveryReportError
-from cg.io.controller import WriteStream
+from cg.io.controller import ReadFile, WriteStream
 from cg.meta.meta import MetaAPI
 from cg.meta.report.field_validators import (
     get_empty_report_data,
@@ -76,7 +76,7 @@ class ReportAPI(MetaAPI):
         delivery_report: str = self.create_delivery_report(
             case_id=case_id, analysis_date=analysis_date, force_report=force_report
         )
-        report_file_path: Path = Path(directory, "delivery-report.html")
+        report_file_path: Path = Path(directory, DELIVERY_REPORT_FILE_NAME)
         with open(report_file_path, "w") as delivery_report_stream:
             delivery_report_stream.write(delivery_report)
         return report_file_path
@@ -117,13 +117,16 @@ class ReportAPI(MetaAPI):
             return None
         return uploaded_file.full_path
 
-    def render_delivery_report(self, report_data: dict) -> str:
+    @staticmethod
+    def render_delivery_report(report_data: dict) -> str:
         """Renders the report on the Jinja template."""
-        env: Environment = Environment(
+        env = Environment(
             loader=PackageLoader("cg", "meta/report/templates"),
             autoescape=select_autoescape(["html", "xml"]),
         )
-        template: Template = env.get_template(self.get_template_name())
+        env.globals["get_content_from_file"] = ReadFile.get_content_from_file
+        env.globals["swedac_logo_path"] = SWEDAC_LOGO_PATH
+        template: Template = env.get_template(name=DELIVERY_REPORT_FILE_NAME)
         return template.render(**report_data)
 
     def get_cases_without_delivery_report(self, workflow: Workflow) -> list[Case]:
@@ -388,10 +391,6 @@ class ReportAPI(MetaAPI):
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Return dictionary with the delivery report required fields."""
-        raise NotImplementedError
-
-    def get_template_name(self) -> str:
-        """Return workflow specific template name."""
         raise NotImplementedError
 
     @staticmethod

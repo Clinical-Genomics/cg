@@ -11,6 +11,7 @@ from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.constants import DELIVERY_REPORT_FILE_NAME
 from cg.constants.constants import FileFormat, Workflow
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.housekeeper_tags import (
@@ -245,7 +246,7 @@ class MockScoutUploadApi(UploadScoutAPI):
         self.madeline_api = MockMadelineAPI()
         self.analysis = MockAnalysisApi()
         self.config = ScoutLoadConfig(
-            delivery_report=Path("path", "to", "delivery-report.html").as_posix()
+            delivery_report=Path("path", "to", DELIVERY_REPORT_FILE_NAME).as_posix()
         )
         self.file_exists = False
         self.lims = MockLims()
