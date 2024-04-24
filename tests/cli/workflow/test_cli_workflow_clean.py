@@ -1,4 +1,8 @@
 import pytest
+<<<<<<< HEAD
+=======
+from _pytest.fixtures import FixtureRequest
+>>>>>>> 79d6abc13f69027ed176385a684bc78833a0603f
 
 from click.testing import CliRunner
 
@@ -170,13 +174,14 @@ def test_cli_workflow_clean_microsalt(
     "workflow",
     [Workflow.TAXPROFILER],
 )
-def test_cli_nf_workflow_clean(
+def test_cli_workflow_clean_nf_workflow(
     cli_runner: CliRunner,
     workflow: Workflow,
     before_date: str,
-    request,
+    request: FixtureRequest,
 ):
     """Test clean taxprofiler workflow."""
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
     # GIVEN a before string
 

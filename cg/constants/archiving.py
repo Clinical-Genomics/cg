@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-DEFAULT_SPRING_ARCHIVE_COUNT = 200
+DEFAULT_SPRING_ARCHIVE_COUNT = 100
 
 
 class ArchiveLocations(StrEnum):

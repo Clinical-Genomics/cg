@@ -8,7 +8,6 @@ from pydantic import BaseModel
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSampleBCLConvert
 from cg.cli.demultiplex.sample_sheet import create_sheet
-from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
 from cg.io.txt import read_txt
 from cg.models.cg_config import CGConfig
@@ -93,9 +92,7 @@ def test_create_v2_sample_sheet(
 
     # GIVEN a flow cell directory with some run parameters
     flow_cell_directory: Path = request.getfixturevalue(scenario.flow_cell_directory)
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=flow_cell_directory, bcl_converter=BclConverter.BCLCONVERT
-    )
+    flow_cell = FlowCellDirectoryData(flow_cell_directory)
     assert flow_cell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet in the flow cell dir

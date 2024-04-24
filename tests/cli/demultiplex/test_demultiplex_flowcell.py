@@ -7,7 +7,7 @@ from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
@@ -26,9 +26,7 @@ def test_demultiplex_dragen_flowcell(
 
     # GIVEN that all files are present for Dragen demultiplexing
 
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_directory_bclconvert, bcl_converter=BclConverter.BCLCONVERT
-    )
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
     add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_flow_cell_directory_bclconvert,
         flow_cell_name=flow_cell.id,

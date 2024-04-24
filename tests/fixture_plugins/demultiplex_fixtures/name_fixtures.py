@@ -48,6 +48,33 @@ def flow_cell_directory_name_demultiplexed_with_bcl_convert(
 
 
 @pytest.fixture(scope="session")
+def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
+    return "HY7FFDRX2"
+
+
+@pytest.fixture(scope="session")
+def flow_cell_directory_name_demultiplexed_with_bcl_convert_flat(
+    flow_cell_name_demultiplexed_with_bcl_convert: str,
+):
+    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert using a flat output directory structure."""
+    return f"230505_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
+
+
+@pytest.fixture(scope="session")
+def flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer(
+    flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer: str,
+):
+    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert on the NovaseqX sequencer."""
+    return f"20230508_LH00188_0003_A{flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer}"
+
+
+@pytest.fixture(scope="session")
+def flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer() -> str:
+    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert on the NovaseqX sequencer."""
+    return "22522YLT3"
+
+
+@pytest.fixture(scope="session")
 def hiseq_x_single_index_flow_cell_name() -> str:
     """Return the full name of a HiSeqX flow cell with only one index."""
     return "170517_ST-E00266_0210_BHJCFFALXX"
@@ -84,9 +111,29 @@ def bcl_convert_flow_cell_full_name() -> str:
 
 
 @pytest.fixture(scope="session")
-def novaseq_x_flow_cell_full_name() -> str:
+def novaseq_6000_post_1_5_kits_flow_cell_id() -> str:
+    """Return the id of a NovaSeqX flow cell."""
+    return "HK33MDRX3"
+
+
+@pytest.fixture(scope="session")
+def novaseq_6000_post_1_5_kits_flow_cell_full_name(
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
+) -> str:
     """Return the full name of a NovaSeqX flow cell."""
-    return "20230508_LH00188_0003_A22522YLT3"
+    return f"230912_A00187_1009_A{novaseq_6000_post_1_5_kits_flow_cell_id}"
+
+
+@pytest.fixture(scope="session")
+def novaseq_x_flow_cell_id() -> str:
+    """Return the id of a NovaSeqX flow cell."""
+    return "22F52TLT3"
+
+
+@pytest.fixture(scope="session")
+def novaseq_x_flow_cell_full_name(novaseq_x_flow_cell_id: str) -> str:
+    """Return the full name of a NovaSeqX flow cell."""
+    return f"20231108_LH00188_0028_B{novaseq_x_flow_cell_id}"
 
 
 @pytest.fixture
