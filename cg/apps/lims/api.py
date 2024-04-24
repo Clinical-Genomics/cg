@@ -64,12 +64,14 @@ class LimsAPI(Lims, OrderHandler):
         """Fetch all samples from a pool"""
         return self.get_samples(udf={"pool name": str(pool_name)}, projectname=projectname)
 
-    def get_source(self, lims_id: str) -> str | None:
+    def get_source(self, lims_id: str) -> str:
         """Return the source from LIMS for a given sample ID.
-        Return None if sample is not found or cannot be fetched from LIMS.
-        If no source information is set, it returns 'unknown'."""
+        Return 'unknown' if no source information is set or
+        if sample is not found or cannot be fetched from LIMS."""
         if lims_sample := self.sample(lims_id=lims_id):
             return lims_sample.get("source", SourceType.UNKNOWN)
+        else:
+            return SourceType.UNKNOWN
 
     @staticmethod
     def _export_project(lims_project) -> dict:
