@@ -322,10 +322,6 @@ all samples on the flow cell it will:
    flowcell.
 
 
-The command will update the _total_ read counts of each sample and check
-against the application for the sample if it has been fully sequenced. It will
-also make sure to link the related FASTQ files to Housekeeper. You can run the
-command over and over - only additional information will be updated.
 
 
 ### Meta
