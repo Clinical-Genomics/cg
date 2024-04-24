@@ -167,23 +167,16 @@ def test_cli_workflow_clean_microsalt(
     assert result.exit_code == EXIT_SUCCESS
 
 
-@pytest.mark.parametrize(
-    "workflow",
-    [Workflow.TAXPROFILER],
-)
-def test_cli_workflow_clean_nf_workflow(
+def test_cli_workflow_clean_taxprofiler(
     cli_runner: CliRunner,
-    workflow: Workflow,
+    taxprofiler_context: CGConfig,
     before_date: str,
-    request: FixtureRequest,
 ):
     """Test clean taxprofiler workflow."""
     # GIVEN a before string
 
-    # GIVEN a NextFlow analysis context
-    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
     # WHEN running command
-    result = cli_runner.invoke(nf_workflow_past_run_dirs, [before_date], obj=context)
+    result = cli_runner.invoke(nf_workflow_past_run_dirs, [before_date], obj=taxprofiler_context)
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
