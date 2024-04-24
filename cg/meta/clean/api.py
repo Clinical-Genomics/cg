@@ -10,14 +10,23 @@ from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.store.models import Analysis
 from cg.store.store import Store
+from cg.models.cg_config import CGConfig
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
 
 class CleanAPI:
-    def __init__(self, status_db: Store, housekeeper_api: HousekeeperAPI):
+    def __init__(
+        self,
+        status_db: Store,
+        housekeeper_api: HousekeeperAPI,
+        config: CGConfig,
+        workflow: Workflow,
+    ):
         self.status_db = status_db
         self.housekeeper_api = housekeeper_api
+        self.analysis_api: NfAnalysisAPI = NfAnalysisAPI(config, workflow)
 
     def get_bundle_files(self, before: datetime, workflow: Workflow) -> Iterator[list[File]]:
         """Get any bundle files for a specific version."""
