@@ -52,7 +52,7 @@ class TomteParameters(WorkflowParameters):
     tissue: str
     genome: str
 
-    @validator("tissue")
+    @validator("tissue", pre=True)
     def replace_non_alphanumeric(cls, tissue: str) -> str:
         if tissue:
             return replace_non_alphanumeric(string=tissue)
