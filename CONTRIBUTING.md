@@ -321,13 +321,6 @@ all samples on the flow cell it will:
    filled in (`status`) according to the sequencing date of the most recent
    flowcell.
 
-Another common task is to transfer data and FASTQ files from the demux/cgstats
-interface when a demultiplexing task completes. This is as easy as determining
-the flowcell of interest and running:
-
-```bash
-cg transfer flowcell HGF2KBCXX
-```
 
 The command will update the _total_ read counts of each sample and check
 against the application for the sample if it has been fully sequenced. It will
