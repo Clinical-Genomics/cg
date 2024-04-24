@@ -1,0 +1,51 @@
+{% from "/macros/header.html" import header, report_data, contact_data %}
+{% from "/macros/order.html" import order %}
+{% from "/macros/sample_prep.html" import sample_prep %}
+{% from "/macros/data_analysis/data_analysis.html" import data_analysis %}
+{% from "/macros/uploaded_files/uploaded_files.html" import uploaded_files %}
+{% from "/macros/ticket_system.html" import ticket_communication %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Leveransrapport Clinical Genomics - {{ case.name }}</title>
+    <base target="_blank" />
+    <style>
+      {% include "static/css/bootstrap.min.css" %}
+      {% include "static/css/custom.css" %}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <div class="card-header">
+          <!-- Report header -->
+          {{ header(is_accredited=accredited) }}
+        </div>
+        <div class="card-body">
+          <!-- Report general data -->
+          {{ report_data(customer_name=customer.name, case_name=case.name, report_version=version,
+          report_date=date) }}
+          <!-- Report contact data -->
+          {{ contact_data(customer=customer) }}
+          <!-- Customer's order -->
+          {{ order(case=case) }}
+          <!-- Sample preparation -->
+          {{ sample_prep(case=case) }}
+          <!-- Data analysis -->
+          {{ data_analysis(case=case) }}
+          <!-- Uploaded files -->
+          {{ uploaded_files(case=case, customer=customer) }}
+          <!-- Signature -->
+          {% include "partials/signature.html" %}
+          <!-- Ticket communication -->
+          {{ ticket_communication(ticket_id=case.samples[0].ticket) }}
+        </div>
+        <!-- Report footer -->
+        {% include "partials/footer.html" %}
+      </div>
+    </div>
+  </body>
+</html>
