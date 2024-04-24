@@ -33,17 +33,6 @@ class SequencingQCCheckScenarios:
         sample.application_version = application_version
         return sample
 
-    def add_express_sample(self, prep_category: PrepCategory, pass_sequencing_qc: bool) -> Sample:
-        """
-        Add an express sample to the store. The sample will have the specified PrepCategory. The
-        sample will have reads if pass_sequencing_qc is True.
-        """
-        return self.add_sample(
-            prep_category=prep_category,
-            pass_sequencing_qc=pass_sequencing_qc,
-            priority=Priority.express,
-        )
-
     def add_case(
         self,
         pass_sequencing_qc: bool,
@@ -65,22 +54,7 @@ class SequencingQCCheckScenarios:
         self.helpers.add_relationship(store=self.store, sample=sample, case=case)
         return case
 
-    def add_express_case(
-        self, pass_sequencing_qc: bool, prep_category: PrepCategory, workflow: Workflow
-    ) -> Case:
-        """
-        Add an express case to the store. The case will have a sample with the specified PrepCategory.
-        The sample will have reads if pass_sequencing_qc is True. The case will have the specified
-        workflow.
-        """
-        return self.add_case(
-            pass_sequencing_qc=pass_sequencing_qc,
-            prep_category=prep_category,
-            workflow=workflow,
-            priority=Priority.express,
-        )
-
-    def sample_scenario(
+    def get_sample_scenario(
         self, priority: Priority, prep_category: PrepCategory, pass_sequencing_qc: bool
     ) -> Sample:
         """
@@ -91,20 +65,7 @@ class SequencingQCCheckScenarios:
             prep_category=prep_category, pass_sequencing_qc=pass_sequencing_qc, priority=priority
         )
 
-    def ready_made_library_sample_scenario(
-        self, pass_sequencing_qc: bool, priority: Priority
-    ) -> Sample:
-        """
-        Create a ready-made library sample scenario. The sample will have reads if pass_sequencing_qc
-        is True.
-        """
-        return self.sample_scenario(
-            priority=priority,
-            prep_category=PrepCategory.READY_MADE_LIBRARY,
-            pass_sequencing_qc=pass_sequencing_qc,
-        )
-
-    def case_scenario(
+    def get_case_scenario(
         self,
         priority: Priority,
         pass_sequencing_qc: bool,

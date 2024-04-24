@@ -210,7 +210,7 @@ def test_get_express_reads_threshold_for_sample(express_sample_passing_sequencin
         express_sample_passing_sequencing_qc
     )
     # THEN the express reads threshold should be half of the target reads
-    assert express_reads_threshold == expected_express_reads_threshold == 5
+    assert express_reads_threshold == expected_express_reads_threshold
 
 
 @pytest.mark.parametrize(
