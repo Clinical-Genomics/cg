@@ -4,6 +4,7 @@ import os
 import shutil
 from pathlib import Path
 from subprocess import CalledProcessError
+from typing import Any
 
 import click
 from housekeeper.store.models import Bundle, Version
@@ -28,7 +29,7 @@ from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
+from cg.store.models import Analysis, Application, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -174,6 +175,23 @@ class AnalysisAPI(MetaAPI):
         }:
             return prep_category.lower()
         return AnalysisType.OTHER
+
+    def get_case_application_type(self, case_id: str) -> str:
+        """Returns the application type for samples in a case."""
+        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id)
+        application_types: set[str] = {self.get_application_type(sample) for sample in samples}
+
+        if len(application_types) > 1:
+            raise CgError(
+                f"Different application_types found for case: {case_id} ({application_types})"
+            )
+
+        return application_types.pop()
+
+    def has_case_only_exome_samples(self, case_id: str) -> bool:
+        """Returns True if the application type for all samples in a case is WES."""
+        application_type: str = self.get_case_application_type(case_id)
+        return application_type == AnalysisType.WHOLE_EXOME_SEQUENCING
 
     def upload_bundle_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
         """Storing bundle data in Housekeeper for CASE_ID"""
@@ -390,7 +408,7 @@ class AnalysisAPI(MetaAPI):
             sample: Sample = self.status_db.get_sample_by_internal_id(
                 internal_id=sample.from_sample
             )
-        target_bed_shortname: str = self.lims_api.capture_kit(lims_id=sample.internal_id)
+        target_bed_shortname: str | None = self.lims_api.capture_kit(lims_id=sample.internal_id)
         if not target_bed_shortname:
             return None
         bed_version: BedVersion | None = self.status_db.get_bed_version_by_short_name(
@@ -477,15 +495,21 @@ class AnalysisAPI(MetaAPI):
         return None
 
     def get_latest_metadata(self, case_id: str) -> AnalysisModel:
-        """Get the latest metadata of a specific case"""
-
+        """Return the latest analysis metadata of a specific case."""
         raise NotImplementedError
+
+    def get_genome_build(self, case_id: str) -> str:
+        """Return the build version of the reference genome."""
+        raise NotImplementedError
+
+    def get_variant_callers(self, case_id: str) -> list[str]:
+        """Return list of variant-calling filters used during analysis."""
+        return []
 
     def parse_analysis(
         self, config_raw: dict, qc_metrics_raw: dict, sample_info_raw: dict
     ) -> AnalysisModel:
-        """Parses output analysis files"""
-
+        """Parses output analysis files."""
         raise NotImplementedError
 
     def clean_analyses(self, case_id: str) -> None:
@@ -628,3 +652,14 @@ class AnalysisAPI(MetaAPI):
 
     def run_analysis(self, *args, **kwargs):
         raise NotImplementedError
+
+    def get_data_analysis_type(self, case_id: str) -> str | None:
+        """Return data analysis type carried out."""
+        case_sample: Sample = self.status_db.get_case_samples_by_case_id(case_internal_id=case_id)[
+            0
+        ].sample
+        lims_sample: dict[str, Any] = self.lims_api.sample(case_sample.internal_id)
+        application: Application = self.status_db.get_application_by_tag(
+            tag=lims_sample.get("application")
+        )
+        return application.analysis_type if application else None

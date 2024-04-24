@@ -123,7 +123,7 @@ class ReadHandler(BaseHandler):
             .sample.application_version.application
         )
 
-    def get_application_limitations_by_tag(self, tag: str) -> list[ApplicationLimitations] | None:
+    def get_application_limitations_by_tag(self, tag: str) -> list[ApplicationLimitations]:
         """Return application limitations given the application tag."""
         return apply_application_limitations_filter(
             filter_functions=[ApplicationLimitationsFilter.BY_TAG],

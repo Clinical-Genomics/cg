@@ -62,7 +62,7 @@ class GenePanelMasterList(StrEnum):
 
 class GenePanelCombo:
     COMBO_1: dict[str, set[str]] = {
-        "DSD": {"DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"},
+        "DSD": {"DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET", "POI"},
         "CM": {"CNM", "CM"},
         "Horsel": {"Horsel", "141217", "141201"},
         "OPHTHALMO": {

@@ -34,6 +34,8 @@ CLI_OPTIONS = {
 }
 LOG = logging.getLogger(__name__)
 
+MAX_CASES_TO_START_IN_50_MINUTES = 33
+
 
 class MipAnalysisAPI(AnalysisAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
@@ -194,7 +196,7 @@ class MipAnalysisAPI(AnalysisAPI):
         return ReadFile.get_content_from_file(file_format=FileFormat.YAML, file_path=full_file_path)
 
     def get_latest_metadata(self, family_id: str) -> MipAnalysis:
-        """Get the latest trending data for a family"""
+        """Return the latest trending data for a family."""
 
         mip_config_raw = self._get_latest_raw_file(
             family_id=family_id, tags=HkMipAnalysisTag.CONFIG
@@ -272,7 +274,7 @@ class MipAnalysisAPI(AnalysisAPI):
         cases_ready_for_analysis: list[Case] = [
             case for case in cases_to_analyse if self.is_case_ready_for_analysis(case)
         ]
-        return cases_ready_for_analysis
+        return cases_ready_for_analysis[:MAX_CASES_TO_START_IN_50_MINUTES]
 
     @staticmethod
     def _append_value_for_non_flags(parameters: list, value) -> None:

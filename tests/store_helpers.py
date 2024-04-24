@@ -970,6 +970,20 @@ class StoreHelpers:
         return metrics
 
     @classmethod
+    def add_flow_cell_and_samples_with_sequencing_metrics(
+        cls, flow_cell_name: str, sequencer: str, sample_ids: list[str], store: Store
+    ) -> None:
+        """Add a flow cell and the given samples with sequencing metrics to a store."""
+        cls.add_flow_cell(store=store, flow_cell_name=flow_cell_name, sequencer_type=sequencer)
+        for i, sample_id in enumerate(sample_ids):
+            cls.add_sample(store=store, internal_id=sample_id, name=f"sample_{i}")
+            cls.ensure_sample_lane_sequencing_metrics(
+                store=store,
+                sample_internal_id=sample_id,
+                flow_cell_name=flow_cell_name,
+            )
+
+    @classmethod
     def add_multiple_sample_lane_sequencing_metrics_entries(cls, metrics_data: list, store) -> None:
         """Add multiple sample lane sequencing metrics to a store."""
 

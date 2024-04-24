@@ -83,7 +83,11 @@ class DeliveryAPI:
         if analysis_sample_files:
             subfolder = Path(case.name, external_id)
         for file in files:
-            destination_file_name: str = Path(file.full_path).name.replace(internal_id, external_id)
+            destination_file_name: str = (
+                Path(file.full_path)
+                .name.replace(internal_id, external_id)
+                .replace(case.internal_id, external_id)
+            )
             destination_path = Path(destination_path, subfolder, destination_file_name)
             delivery_file = DeliveryFile(
                 source_path=Path(file.full_path), destination_path=destination_path

@@ -1,28 +1,19 @@
 import logging
-from pathlib import Path
-from typing import Type
 
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_raw_samples_from_content,
-    get_sample_type_from_content,
     get_samples_by_lane,
     validate_samples_are_unique,
 )
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSample,
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
-from cg.constants.constants import FileFormat
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.exc import SampleSheetError
-from cg.io.controller import ReadFile
 
 
 def test_validate_samples_are_unique(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
-    novaseq6000_flow_cell_sample_2: FlowCellSampleBcl2Fastq,
+    novaseq6000_flow_cell_sample_1: FlowCellSample,
+    novaseq6000_flow_cell_sample_2: FlowCellSample,
 ):
     """Test that validating two different samples finishes successfully."""
     # GIVEN two different NovaSeq samples
@@ -37,7 +28,7 @@ def test_validate_samples_are_unique(
 
 
 def test_validate_samples_are_unique_when_not_unique(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq, caplog
+    novaseq6000_flow_cell_sample_1: FlowCellSample, caplog
 ):
     """Test that validating two identical samples fails."""
     # GIVEN two identical NovaSeq samples
@@ -57,8 +48,8 @@ def test_validate_samples_are_unique_when_not_unique(
 
 
 def test_get_samples_by_lane(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
-    novaseq6000_flow_cell_sample_2: FlowCellSampleBcl2Fastq,
+    novaseq6000_flow_cell_sample_1: FlowCellSample,
+    novaseq6000_flow_cell_sample_2: FlowCellSample,
 ):
     """Test that grouping two samples with different lanes returns two groups."""
     # GIVEN two samples on two different lanes
@@ -115,51 +106,3 @@ def test_get_raw_samples_no_samples(sample_sheet_bcl2fastq_data_header: list[lis
 
     # THEN an exception is raised because of the missing samples
     assert "Could not find any samples in sample sheet" in caplog.text
-
-
-def test_get_sample_type_for_bcl_convert(bcl_convert_sample_sheet_path: Path):
-    # GIVEN a bcl convert sample sheet path
-
-    # WHEN getting the sample type
-    content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=bcl_convert_sample_sheet_path
-    )
-    sample_type: Type[FlowCellSample] = get_sample_type_from_content(content)
-
-    # THEN the sample type is FlowCellSampleBCLConvert
-    assert sample_type is FlowCellSampleBCLConvert
-
-
-def test_get_sample_type_for_bcl2fastq(bcl2fastq_sample_sheet_path: Path):
-    # GIVEN a bcl convert sample sheet path
-
-    # WHEN getting the sample type
-    content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=bcl2fastq_sample_sheet_path
-    )
-    sample_type: Type[FlowCellSample] = get_sample_type_from_content(content)
-
-    # THEN the sample type is FlowCellSampleBCLConvert
-    assert sample_type is FlowCellSampleBcl2Fastq
-
-
-def test_validate_sample_sheet_bcl2fastq_duplicate_same_lane(
-    sample_sheet_bcl2fastq_duplicate_same_lane: list[list[str]],
-):
-    """Test that creating a Bcl2fastq sample sheet with duplicated samples in a lane fails."""
-    # GIVEN a Bcl2fastq sample sheet with a sample duplicated in a lane
-
-    # WHEN creating the sample sheet object
-
-    # THEN a sample sheet error is raised
-
-
-def test_validate_sample_sheet_bcl2fastq_duplicate_different_lanes(
-    sample_sheet_bcl2fastq_duplicate_different_lane: list[list[str]],
-):
-    """Test that Bcl2fastq a sample sheet created with duplicated samples in different lanes has samples."""
-    # GIVEN a Bcl2fastq sample sheet with same sample duplicated in different lanes
-
-    # WHEN creating the sample sheet object
-
-    # THEN a sample sheet is returned with samples in it

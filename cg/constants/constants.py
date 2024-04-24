@@ -127,6 +127,7 @@ class Workflow(StrEnum):
     DEMULTIPLEX: str = "demultiplex"
     FASTQ: str = "fastq"
     FLUFFY: str = "fluffy"
+    JASEN: str = "jasen"
     MICROSALT: str = "microsalt"
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"
@@ -140,13 +141,14 @@ class Workflow(StrEnum):
 
 
 class FileFormat(StrEnum):
+    CSV: str = "csv"
     FASTQ: str = "fastq"
     JSON: str = "json"
-    YAML: str = "yaml"
-    CSV: str = "csv"
-    XML: str = "xml"
-    TXT: str = "txt"
+    PNG: str = "png"
     TSV: str = "tsv"
+    TXT: str = "txt"
+    XML: str = "xml"
+    YAML: str = "yaml"
 
 
 class GenomeVersion(StrEnum):
@@ -197,6 +199,7 @@ class FileExtensions(StrEnum):
     NO_EXTENSION: str = ""
     PASS_PHRASE: str = ".passphrase"
     PENDING: str = ".pending"
+    PNG: str = ".png"
     SBATCH: str = ".sbatch"
     SPRING: str = ".spring"
     TAR: str = ".tar"

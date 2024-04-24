@@ -36,10 +36,12 @@ from cg.constants.subject import Sex
 from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
+from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
+from cg.meta.workflow.jasen import JasenAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
@@ -384,7 +386,7 @@ def demultiplexing_context_for_demux(
     return cg_context
 
 
-@pytest.fixture(name="demultiplex_context")
+@pytest.fixture
 def demultiplex_context(
     demultiplexing_api: DemultiplexingAPI,
     real_housekeeper_api: HousekeeperAPI,
@@ -395,6 +397,20 @@ def demultiplex_context(
     cg_context.demultiplex_api_ = demultiplexing_api
     cg_context.housekeeper_api_ = real_housekeeper_api
     cg_context.status_db_ = store_with_demultiplexed_samples
+    return cg_context
+
+
+@pytest.fixture
+def updated_demultiplex_context(
+    demultiplexing_api: DemultiplexingAPI,
+    real_housekeeper_api: HousekeeperAPI,
+    cg_context: CGConfig,
+    updated_store_with_demultiplexed_samples: Store,
+) -> CGConfig:
+    """Return cg context with a demultiplex context."""
+    cg_context.demultiplex_api_ = demultiplexing_api
+    cg_context.housekeeper_api_ = real_housekeeper_api
+    cg_context.status_db_ = updated_store_with_demultiplexed_samples
     return cg_context
 
 
@@ -528,6 +544,25 @@ def demultiplexing_api(
     )
     demux_api.slurm_api.process = sbatch_process
     return demux_api
+
+
+@pytest.fixture
+def demux_post_processing_api(
+    demultiplex_context: CGConfig, tmp_illumina_demultiplexed_flow_cells_directory
+) -> DemuxPostProcessingAPI:
+    api = DemuxPostProcessingAPI(demultiplex_context)
+    api.demultiplexed_runs_dir = tmp_illumina_demultiplexed_flow_cells_directory
+    return api
+
+
+@pytest.fixture
+def updated_demux_post_processing_api(
+    updated_demultiplex_context: CGConfig,
+    tmp_illumina_demultiplexed_flow_cells_directory,
+) -> DemuxPostProcessingAPI:
+    api = DemuxPostProcessingAPI(updated_demultiplex_context)
+    api.demultiplexed_runs_dir = tmp_illumina_demultiplexed_flow_cells_directory
+    return api
 
 
 @pytest.fixture
@@ -1242,6 +1277,26 @@ def store_with_demultiplexed_samples(
             store,
             sample_internal_id=sample_internal_id,
             flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
+        )
+    return store
+
+
+@pytest.fixture
+def updated_store_with_demultiplexed_samples(
+    store: Store,
+    helpers: StoreHelpers,
+    seven_canonical_flow_cells: list[FlowCellDirectoryData],
+    seven_canonical_flow_cells_selected_sample_ids: list[list[str]],
+) -> Store:
+    """Return a store with the 7 canonical flow cells with samples added to store."""
+    for flow_cell, sample_internal_ids in zip(
+        seven_canonical_flow_cells, seven_canonical_flow_cells_selected_sample_ids
+    ):
+        helpers.add_flow_cell_and_samples_with_sequencing_metrics(
+            flow_cell_name=flow_cell.id,
+            sequencer=flow_cell.sequencer_type,
+            sample_ids=sample_internal_ids,
+            store=store,
         )
     return store
 
@@ -2219,6 +2274,25 @@ def store_with_cases_and_customers(
     yield store
 
 
+# Jasen fixtures
+
+
+@pytest.fixture(scope="function")
+def jasen_context(
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    nf_analysis_housekeeper: HousekeeperAPI,
+    trailblazer_api: MockTB,
+    hermes_api: HermesApi,
+    cg_dir: Path,
+) -> CGConfig:
+    """Context to use in CLI."""
+    cg_context.housekeeper_api_ = nf_analysis_housekeeper
+    cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.meta_apis["analysis_api"] = JasenAnalysisAPI(config=cg_context)
+    return cg_context
+
+
 # NF analysis fixtures
 
 
@@ -2270,7 +2344,7 @@ def sequencing_platform() -> str:
 
 # Raredisease fixtures
 @pytest.fixture(scope="function")
-def raredisease_dir(tmpdir_factory: Path) -> str:
+def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
     """Return the path to the raredisease apps dir."""
     raredisease_dir = tmpdir_factory.mktemp("raredisease")
     return Path(raredisease_dir).absolute().as_posix()
@@ -2349,6 +2423,25 @@ def raredisease_nexflow_config_file_path(raredisease_dir, raredisease_case_id) -
     return Path(
         raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_nextflow_config"
     ).with_suffix(FileExtensions.JSON)
+
+
+@pytest.fixture(scope="function")
+def raredisease_deliverable_data(
+    raredisease_dir: Path, raredisease_case_id: str, sample_id: str
+) -> dict:
+    return {
+        "files": [
+            {
+                "path": f"{raredisease_dir}/{raredisease_case_id}/multiqc/multiqc_report.html",
+                "path_index": "",
+                "step": "report",
+                "tag": ["multiqc-html"],
+                "id": raredisease_case_id,
+                "format": "html",
+                "mandatory": True,
+            },
+        ]
+    }
 
 
 @pytest.fixture(scope="function")
@@ -2476,6 +2569,99 @@ def raredisease_mock_config(raredisease_dir: Path, raredisease_case_id: str) -> 
     Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet").with_suffix(
         FileExtensions.CSV
     ).touch(exist_ok=True)
+
+
+@pytest.fixture(scope="function")
+def raredisease_metrics_deliverables(raredisease_analysis_dir: Path) -> list[dict]:
+    """Returns the content of a mock metrics deliverables file."""
+    return read_yaml(
+        file_path=Path(
+            raredisease_analysis_dir, "raredisease_case_enough_reads_metrics_deliverables.yaml"
+        )
+    )
+
+
+@pytest.fixture(scope="function")
+def raredisease_metrics_deliverables_path(raredisease_dir: Path, raredisease_case_id: str) -> Path:
+    """Path to deliverables file."""
+    return Path(
+        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_metrics_deliverables"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
+def raredisease_mock_analysis_finish(
+    raredisease_dir: Path,
+    raredisease_case_id: str,
+    raredisease_multiqc_json_metrics: dict,
+    tower_id: int,
+) -> None:
+    """Create analysis finish file for testing."""
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id, "pipeline_info"), parents=True, exist_ok=True
+    )
+    Path(raredisease_dir, raredisease_case_id, "pipeline_info", "software_versions.yml").touch(
+        exist_ok=True
+    )
+    Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet.csv").touch(
+        exist_ok=True
+    )
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id, "multiqc", "multiqc_data"),
+        parents=True,
+        exist_ok=True,
+    )
+    write_json(
+        content=raredisease_multiqc_json_metrics,
+        file_path=Path(
+            raredisease_dir,
+            raredisease_case_id,
+            "multiqc",
+            "multiqc_data",
+            "multiqc_data",
+        ).with_suffix(FileExtensions.JSON),
+    )
+    write_yaml(
+        content={raredisease_case_id: [tower_id]},
+        file_path=Path(
+            raredisease_dir,
+            raredisease_case_id,
+            "tower_ids",
+        ).with_suffix(FileExtensions.YAML),
+    )
+
+
+@pytest.fixture(scope="function")
+def raredisease_mock_deliverable_dir(
+    raredisease_dir: Path, raredisease_deliverable_data: dict, raredisease_case_id: str
+) -> Path:
+    """Create raredisease deliverable file with dummy data and files to deliver."""
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id),
+        parents=True,
+        exist_ok=True,
+    )
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id, "multiqc"),
+        parents=True,
+        exist_ok=True,
+    )
+    for report_entry in raredisease_deliverable_data["files"]:
+        Path(report_entry["path"]).touch(exist_ok=True)
+    WriteFile.write_file_from_content(
+        content=raredisease_deliverable_data,
+        file_format=FileFormat.JSON,
+        file_path=Path(
+            raredisease_dir, raredisease_case_id, raredisease_case_id + deliverables_yaml
+        ),
+    )
+    return raredisease_dir
+
+
+@pytest.fixture(scope="function")
+def raredisease_multiqc_json_metrics(raredisease_analysis_dir: Path) -> list[dict]:
+    """Returns the content of a mock Multiqc JSON file."""
+    return read_json(file_path=Path(raredisease_analysis_dir, "multiqc_data.json"))
 
 
 # Rnafusion fixtures

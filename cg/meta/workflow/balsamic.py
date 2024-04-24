@@ -18,6 +18,7 @@ from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.balsamic.analysis import BalsamicAnalysis
+from cg.models.balsamic.config import BalsamicVarCaller
 from cg.models.balsamic.metrics import (
     BalsamicMetricsBase,
     BalsamicTargetedQCMetrics,
@@ -29,6 +30,8 @@ from cg.utils import Process
 from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
 
 LOG = logging.getLogger(__name__)
+
+MAX_CASES_TO_START_IN_50_MINUTES = 21
 
 
 class BalsamicAnalysisAPI(AnalysisAPI):
@@ -94,7 +97,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         cases_ready_for_analysis: list[Case] = [
             case for case in cases_to_analyse if self.is_case_ready_for_analysis(case)
         ]
-        return cases_ready_for_analysis
+        return cases_to_analyse[:MAX_CASES_TO_START_IN_50_MINUTES]
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic deliverables file for the case_id should be located.
@@ -311,7 +314,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
 
     def get_latest_metadata(self, case_id: str) -> BalsamicAnalysis:
-        """Get the latest metadata of a specific BALSAMIC case"""
+        """Return the latest metadata of a specific BALSAMIC case."""
 
         config_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.CONFIG)
         metrics_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.QC_METRICS)
@@ -439,6 +442,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         verified_sex: Sex = sex or self.get_verified_sex(sample_data=sample_data)
 
+        verified_exome_argument: bool = self.has_case_only_exome_samples(case_id=case_id)
+
         config_case: dict[str, str] = {
             "case_id": case_id,
             "analysis_workflow": self.workflow,
@@ -448,7 +453,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "pon_cnn": verified_pon,
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
+            "exome": verified_exome_argument,
         }
+
         config_case.update(self.get_verified_samples(case_id=case_id))
         config_case.update(self.get_parsed_observation_file_paths(observations))
         (
@@ -496,15 +503,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         self.print_sample_params(case_id=case_id, sample_data=sample_data)
         return sample_data
-
-    def get_case_application_type(self, case_id: str) -> str:
-        application_types = {
-            self.get_application_type(link_object.sample)
-            for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
-        }
-
-        if application_types:
-            return application_types.pop().lower()
 
     def resolve_target_bed(self, panel_bed: str | None, link_object: CaseSample) -> str | None:
         if panel_bed:
@@ -565,12 +563,14 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--gnomad-min-af5": arguments.get("gnomad_min_af5"),
                 "--normal-sample-name": arguments.get("normal_sample_name"),
                 "--panel-bed": arguments.get("panel_bed"),
+                "--exome": arguments.get("exome"),
                 "--pon-cnn": arguments.get("pon_cnn"),
                 "--swegen-snv": arguments.get("swegen_snv"),
                 "--swegen-sv": arguments.get("swegen_sv"),
                 "--tumor-sample-name": arguments.get("tumor_sample_name"),
                 "--umi-trim-length": arguments.get("umi_trim_length"),
-            }
+            },
+            exclude_true=True,
         )
         parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
@@ -610,3 +610,44 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
+
+    def get_genome_build(self, case_id: str) -> str:
+        """Returns the reference genome build version of a Balsamic analysis."""
+        analysis_metadata: BalsamicAnalysis = self.get_latest_metadata(case_id)
+        return analysis_metadata.config.reference.reference_genome_version
+
+    @staticmethod
+    def get_variant_caller_version(var_caller_name: str, var_caller_versions: dict) -> str | None:
+        """Return the version of a specific Balsamic bioinformatic tool."""
+        for tool_name, versions in var_caller_versions.items():
+            if tool_name in var_caller_name:
+                return versions[0]
+        return None
+
+    def get_variant_callers(self, case_id: str) -> list[str]:
+        """
+        Return list of Balsamic variant-calling filters and their versions (if available) from the
+        config.json file.
+        """
+        analysis_metadata: BalsamicAnalysis = self.get_latest_metadata(case_id)
+        sequencing_type: str = analysis_metadata.config.analysis.sequencing_type
+        analysis_type: str = analysis_metadata.config.analysis.analysis_type
+        var_callers: dict[str, BalsamicVarCaller] = analysis_metadata.config.vcf
+        tool_versions: dict[str, list] = analysis_metadata.config.bioinfo_tools_version
+        analysis_var_callers = []
+        for var_caller_name, var_caller_attributes in var_callers.items():
+            if (
+                sequencing_type in var_caller_attributes.sequencing_type
+                and analysis_type in var_caller_attributes.analysis_type
+            ):
+                version: str = self.get_variant_caller_version(
+                    var_caller_name=var_caller_name, var_caller_versions=tool_versions
+                )
+                analysis_var_callers.append(
+                    f"{var_caller_name} (v{version})" if version else var_caller_name
+                )
+        return analysis_var_callers
+
+    def get_data_analysis_type(self, case_id: str) -> str | None:
+        """Return data analysis type carried out."""
+        return self.get_bundle_deliverables_type(case_id)

@@ -1,14 +1,17 @@
 from enum import Enum
 from typing import Callable
+
 from sqlalchemy import asc, desc, or_
-
 from sqlalchemy.orm import Query
-from cg.server.dto.orders.orders_request import OrderSortField, SortOrder
 
+from cg.constants import Workflow
+from cg.server.dto.orders.orders_request import OrderSortField, SortOrder
 from cg.store.models import Customer, Order
 
 
 def filter_orders_by_workflow(orders: Query, workflow: str | None, **kwargs) -> Query:
+    if workflow == Workflow.BALSAMIC:
+        return orders.filter(Order.workflow.startswith(workflow))
     return orders.filter(Order.workflow == workflow) if workflow else orders
 
 
@@ -43,7 +46,7 @@ def filter_orders_by_search(orders: Query, search: str | None, **kwargs) -> Quer
 
 
 def filter_orders_by_delivered(orders: Query, delivered: bool | None, **kwargs) -> Query:
-    return orders.filter(Order.delivered == delivered) if delivered is not None else orders
+    return orders.filter(Order.is_delivered == delivered) if delivered is not None else orders
 
 
 def apply_sorting(

@@ -94,23 +94,6 @@ def get_sample_fastqs_from_flow_cell(
     # The flat output structure for NovaseqX flow cells demultiplexed with BCLConvert on hasta
     root_pattern = f"{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
-    # The default structure for flow cells demultiplexed with bcl2fastq
-    unaligned_pattern = (
-        f"Unaligned*/Project_*/Sample_{sample_internal_id}"
-        f"/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-    )
-
-    # Alternative structure for bcl2fastq flow cells whose fastq files have a trailing sequence
-    unaligned_alt_pattern = (
-        f"Unaligned*/Project_*/Sample_{sample_internal_id}"
-        f"_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-    )
-
-    # The default structure for flow cells demultiplexed with bclconvert
-    bcl_convert_pattern = (
-        f"Unaligned*/*/{sample_internal_id}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-    )
-
     # The pattern for novaseqx flow cells demultiplexed on board of the dragen
     demux_on_sequencer_pattern = (
         f"BCLConvert/fastq/{sample_internal_id}"
@@ -119,9 +102,6 @@ def get_sample_fastqs_from_flow_cell(
 
     for pattern in [
         root_pattern,
-        unaligned_pattern,
-        unaligned_alt_pattern,
-        bcl_convert_pattern,
         demux_on_sequencer_pattern,
     ]:
         sample_fastqs: list[Path] = get_files_matching_pattern(
@@ -179,12 +159,7 @@ def get_undetermined_fastqs(lane: int, flow_cell_path: Path) -> list[Path]:
         directory=flow_cell_path,
         pattern=undetermined_pattern,
     )
-    unaligned_path = Path(flow_cell_path, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
-    undetermined_in_unaligned: list[Path] = get_files_matching_pattern(
-        directory=unaligned_path,
-        pattern=undetermined_pattern,
-    )
-    return undetermined_in_root + undetermined_in_unaligned
+    return undetermined_in_root
 
 
 def parse_manifest_file(manifest_file: Path) -> list[Path]:
@@ -234,13 +209,6 @@ def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
 
     files_at_source: list[Path] = parse_manifest_file(existing_manifest_file)
     return are_all_files_synced(files_at_source=files_at_source, target_directory=target_directory)
-
-
-def get_flow_cell_id(flow_cell_dir_name: str) -> str:
-    """Return the flow cell id from the flow cell directory name.
-    Example: 230802_A00689_0857_BHGTMFDSX7 -> HGTMFDSX7
-    """
-    return flow_cell_dir_name.split("_")[-1][1:]
 
 
 def is_manifest_file_required(flow_cell_dir: Path) -> bool:

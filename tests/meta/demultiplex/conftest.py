@@ -7,13 +7,7 @@ from pathlib import Path
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
-from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_and_include_sample_sheet_path_to_housekeeper,
-)
-from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -204,66 +198,6 @@ def flow_cell_name_housekeeper_api(
 
 
 @pytest.fixture(scope="session")
-def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
-    return "HY7FFDRX2"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl_convert(
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-):
-    return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl_convert_flat(
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-):
-    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert using a flat output directory structure."""
-    return f"230505_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer(
-    flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer: str,
-):
-    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert on the NovaseqX sequencer."""
-    return f"20230508_LH00188_0003_A{flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer}"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer() -> str:
-    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert on the NovaseqX sequencer."""
-    return "22522YLT3"
-
-
-@pytest.fixture(scope="session")
-def bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
-    """Return a folder structure that resembles a bcl2fastq run folder."""
-    base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), BclConverter.BCL2FASTQ)))
-    folders: list[str] = ["l1t21", "l1t11", "l2t11", "l2t21"]
-
-    for folder in folders:
-        new_dir: Path = Path(base_dir, folder)
-        new_dir.mkdir()
-
-    return base_dir
-
-
-@pytest.fixture(scope="function")
-def not_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
-    """Return a folder structure that does not resemble a bcl2fastq run folder."""
-    base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), "not_bcl2fastq")))
-    folders: list[str] = ["just", "some", "folders"]
-
-    for folder in folders:
-        new_dir: Path = Path(base_dir, folder)
-        new_dir.mkdir()
-
-    return base_dir
-
-
-@pytest.fixture(scope="session")
 def base_call_file() -> Path:
     return Path("Data", "Intensities", "BaseCalls", "L001", "C1.1", "L001_1.cbcl")
 
@@ -303,65 +237,6 @@ def lsyncd_target_directory(lsyncd_source_directory: Path, tmp_path_factory) -> 
     target_directory = Path(lsyncd_source_directory.parent, Path(temp_target_directory, "target"))
     shutil.copytree(lsyncd_source_directory, target_directory)
     return target_directory
-
-
-@pytest.fixture
-def demux_post_processing_api(
-    demultiplex_context: CGConfig, tmp_illumina_demultiplexed_flow_cells_directory
-) -> DemuxPostProcessingAPI:
-    api = DemuxPostProcessingAPI(demultiplex_context)
-    api.demultiplexed_runs_dir = tmp_illumina_demultiplexed_flow_cells_directory
-    return api
-
-
-@pytest.fixture
-def bcl2fastq_flow_cell_dir_name(demux_post_processing_api) -> str:
-    """Return a flow cell name that has been demultiplexed with bcl2fastq."""
-    flow_cell_dir_name = "170407_ST-E00198_0209_BHHKVCALXX"
-    flow_cell_path = Path(demux_post_processing_api.demultiplexed_runs_dir, flow_cell_dir_name)
-
-    add_and_include_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=flow_cell_path,
-        flow_cell_name="HHKVCALXX",
-        hk_api=demux_post_processing_api.hk_api,
-    )
-    return flow_cell_dir_name
-
-
-@pytest.fixture
-def bcl2fastq_sample_id_with_non_pooled_undetermined_reads() -> str:
-    return "SVE2528A1"
-
-
-@pytest.fixture
-def bcl2fastq_non_pooled_sample_read_count() -> int:
-    """Based on the data in 170407_ST-E00198_0209_BHHKVCALXX, the sum of all reads - mapped and undetermined."""
-    return 8000000
-
-
-@pytest.fixture
-def bclconvert_flow_cell_dir_name(demux_post_processing_api) -> str:
-    """Return a flow cell name that has been demultiplexed with bclconvert."""
-    flow_cell_dir_name = "230504_A00689_0804_BHY7FFDRX2"
-    flow_cell_path = Path(demux_post_processing_api.demultiplexed_runs_dir, flow_cell_dir_name)
-
-    add_and_include_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=flow_cell_path,
-        flow_cell_name="HY7FFDRX2",
-        hk_api=demux_post_processing_api.hk_api,
-    )
-    return flow_cell_dir_name
-
-
-@pytest.fixture
-def bcl_convert_sample_id_with_non_pooled_undetermined_reads() -> str:
-    return "ACC11927A2"
-
-
-@pytest.fixture
-def bcl_convert_non_pooled_sample_read_count() -> int:
-    """Based on the data in 230504_A00689_0804_BHY7FFDRX2, the sum of all reads - mapped and undetermined."""
-    return 4000000
 
 
 def get_all_files_in_directory_tree(directory: Path) -> list[Path]:

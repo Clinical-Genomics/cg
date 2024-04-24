@@ -8,9 +8,7 @@ from cg.services.orders.order_service.utils import (
     order_is_delivered,
 )
 from cg.services.orders.order_status_service import OrderSummaryService
-from cg.services.orders.order_status_service.dto.order_summary import (
-    OrderSummary,
-)
+from cg.services.orders.order_status_service.dto.order_summary import OrderSummary
 from cg.store.models import Case, Order
 from cg.store.store import Store
 
@@ -28,6 +26,8 @@ class OrderService:
     def get_orders(self, orders_request: OrdersRequest) -> OrdersResponse:
         orders, total_count = self.store.get_orders(orders_request)
         order_ids: list[int] = [order.id for order in orders]
+        if not order_ids:
+            return OrdersResponse(orders=[], total_count=0)
         summaries: list[OrderSummary] = self.summary_service.get_summaries(order_ids)
         return create_orders_response(orders=orders, summaries=summaries, total=total_count)
 
@@ -39,8 +39,9 @@ class OrderService:
             self.store.link_case_to_order(order_id=order.id, case_id=case.id)
         return create_order_response(order)
 
-    def set_delivery(self, order_id: int, delivered: bool) -> None:
-        self.store.update_order_delivery(order_id=order_id, delivered=delivered)
+    def set_delivery(self, order_id: int, delivered: bool) -> OrderResponse:
+        order: Order = self.store.update_order_delivery(order_id=order_id, delivered=delivered)
+        return create_order_response(order)
 
     def update_delivered(self, order_id: int, delivered_analyses: int) -> None:
         """Update the delivery status of an order based on the number of delivered analyses."""
