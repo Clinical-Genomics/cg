@@ -169,8 +169,8 @@ def invoice(invoice_id):
 
     if not (kth_inv and ki_inv):
         flash(" ,".join(list(set(api.log))))
-        undo_invoice(invoice_id)
-        return redirect(request.referrer)
+        url = undo_invoice(invoice_id)
+        return redirect(url)
 
     if not invoice_obj.price:
         final_price = api.total_price()
