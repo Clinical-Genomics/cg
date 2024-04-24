@@ -42,7 +42,7 @@ def test_are_necessary_files_in_flow_cell_no_run_params(
     # WHEN checking if the flow cell has the necessary files
     result: bool = api._are_necessary_files_in_flow_cell(flow_cell)
 
-    # THEN it returns False and informs that the ru parameters is not present
+    # THEN it returns False and informs that the run parameters are not present
     assert not result
     assert f"Run parameters file for flow cell {flow_cell.full_name} does not exist" in caplog.text
 
