@@ -118,7 +118,7 @@ def binary_path() -> str:
 def stats_sample_data(
     sample_id: str,
     novaseq_6000_pre_1_5_kits_flow_cell_id: str,
-    bcl_convert_flow_cell_id: str,
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
 ) -> dict:
     return {
         "samples": [
@@ -131,7 +131,7 @@ def stats_sample_data(
             {
                 "name": "ADM1136A3",
                 "index": "ACGTACAT",
-                "flowcell": bcl_convert_flow_cell_id,
+                "flowcell": novaseq_6000_post_1_5_kits_flow_cell_id,
                 "type": Sequencers.NOVASEQ,
             },
         ]

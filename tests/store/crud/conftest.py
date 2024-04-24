@@ -250,7 +250,7 @@ def store_with_multiple_pools_for_customer(
 @pytest.fixture
 def re_sequenced_sample_store(
     store: Store,
-    bcl_convert_flow_cell_id: str,
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
     case_id: str,
     family_name: str,
     novaseq_6000_pre_1_5_kits_flow_cell_id: str,
@@ -282,7 +282,7 @@ def re_sequenced_sample_store(
 
     helpers.add_flow_cell(
         store=re_sequenced_sample_store,
-        flow_cell_name=bcl_convert_flow_cell_id,
+        flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id,
         samples=[store_sample],
         date=timestamp_now,
     )

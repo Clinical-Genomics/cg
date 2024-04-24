@@ -45,20 +45,22 @@ def hiseq_2500_custom_index_flow_cell(
 @pytest.fixture
 def novaseq_6000_pre_1_5_kits_flow_cell(
     illumina_flow_cells_directory: Path,
+    novaseq_6000_pre_1_5_kits_flow_cell_full_name: str,
 ) -> FlowCellDirectoryData:
     """Return a Novaseq6000 flow cell with index settings pre 1.5 kits."""
     return FlowCellDirectoryData(
-        Path(illumina_flow_cells_directory, "190927_A00689_0069_BHLYWYDSXX")
+        Path(illumina_flow_cells_directory, novaseq_6000_pre_1_5_kits_flow_cell_full_name)
     )
 
 
 @pytest.fixture
 def novaseq_6000_post_1_5_kits_flow_cell(
     illumina_flow_cells_directory: Path,
+    novaseq_6000_post_1_5_kits_flow_cell_full_name: str,
 ) -> FlowCellDirectoryData:
     """Return a Novaseq6000 flow cell with index settings post 1.5 kits."""
     return FlowCellDirectoryData(
-        Path(illumina_flow_cells_directory, "230912_A00187_1009_AHK33MDRX3")
+        Path(illumina_flow_cells_directory, novaseq_6000_post_1_5_kits_flow_cell_full_name)
     )
 
 
@@ -121,12 +123,3 @@ def bcl_convert_flow_cell(
     """Return a flow cell object with flow cell that is demultiplexed."""
     path = Path(illumina_demultiplexed_runs_directory, bclconvert_flow_cell_dir_name)
     return FlowCellDirectoryData(flow_cell_path=path)
-
-
-# Flow cell attributes
-
-
-@pytest.fixture
-def bcl_convert_flow_cell_id(novaseq_6000_post_1_5_kits_flow_cell: FlowCellDirectoryData) -> str:
-    """Return flow cell id from bcl_convert flow cell object."""
-    return novaseq_6000_post_1_5_kits_flow_cell.id
