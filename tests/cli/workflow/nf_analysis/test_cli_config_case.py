@@ -103,7 +103,7 @@ def test_config_case_without_samples(
 
 @pytest.mark.parametrize(
     "workflow",
-    Workflow.get_nf_workflows(),
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_config_case_default_parameters(
     cli_runner: CliRunner,
@@ -190,7 +190,7 @@ def test_config_case_default_parameters(
 
 @pytest.mark.parametrize(
     "workflow",
-    Workflow.get_nf_workflows(),
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_config_case_dry_run(
     cli_runner: CliRunner,
