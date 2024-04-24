@@ -9,11 +9,11 @@ from genologics.entities import Artifact, Process, Researcher, Sample
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
+from cg.constants import Priority
 from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod, LimsArtifactTypes
+from cg.constants.sample_sources import SourceType
 from cg.exc import LimsDataError
 
-from ...constants import Priority
-from ...constants.sample_sources import SourceType
 from .order import OrderHandler
 
 SEX_MAP = {"F": "female", "M": "male", "Unknown": "unknown", "unknown": "unknown"}
@@ -64,8 +64,9 @@ class LimsAPI(Lims, OrderHandler):
         """Fetch all samples from a pool"""
         return self.get_samples(udf={"pool name": str(pool_name)}, projectname=projectname)
 
-    def get_source(self, lims_id: str) -> str:
+    def get_source(self, lims_id: str) -> str | None:
         """Return the source from LIMS for a given sample ID.
+        Return None if sample is not found or cannot be fetched from LIMS.
         If no source information is set, it returns 'unknown'."""
         if lims_sample := self.sample(lims_id=lims_id):
             return lims_sample.get("source", SourceType.UNKNOWN)
