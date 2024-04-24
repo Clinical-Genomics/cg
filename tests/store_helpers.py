@@ -448,6 +448,7 @@ class StoreHelpers:
         internal_id: str = None,
         customer_id: str = "cust000",
         panels: list[str] = [],
+        priority: str = PriorityTerms.STANDARD,
         case_obj: Case = None,
         ticket: str = "123456",
     ) -> Case:
@@ -474,6 +475,7 @@ class StoreHelpers:
                 name=name,
                 panels=panels,
                 ticket=ticket,
+                priority=priority,
             )
         if action:
             case_obj.action = action

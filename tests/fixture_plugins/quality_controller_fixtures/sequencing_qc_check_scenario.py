@@ -15,16 +15,11 @@ class SequencingQCCheckScenarios:
         self,
         prep_category: PrepCategory,
         pass_sequencing_qc: bool,
+        priority: Priority,
     ) -> Sample:
         """
-        Add a sample to the store.
-
-        Args:
-            prep_category: The prep category of the sample.
-            pass_sequencing_qc: Whether the sample has reads or not.
-
-        Returns:
-            Sample: The added sample.
+        Add a sample to the store with a specified PrepCategory. The sample
+        will have reads if pass_sequencing_qc is True.
         """
         application: Application = self.helpers.ensure_application(
             store=self.store, tag="test_tag", target_reads=10, prep_category=prep_category
@@ -32,55 +27,40 @@ class SequencingQCCheckScenarios:
         application_version: ApplicationVersion = self.helpers.ensure_application_version(
             store=self.store, application_tag=application.tag, version=0
         )
-        if pass_sequencing_qc:
-            sample: Sample = self.helpers.add_sample(
-                store=self.store, reads=10, priority=Priority.standard
-            )
-        else:
-            sample: Sample = self.helpers.add_sample(
-                store=self.store, reads=0, priority=Priority.standard
-            )
+        reads: int = 10 if pass_sequencing_qc else 0
+        sample: Sample = self.helpers.add_sample(store=self.store, reads=reads, priority=priority)
 
         sample.application_version = application_version
         return sample
 
     def add_express_sample(self, prep_category: PrepCategory, pass_sequencing_qc: bool) -> Sample:
         """
-        Add an express sample to the store.
-
-        Args:
-            prep_category: The prep category of the sample.
-            pass_sequencing_qc: Whether the sample has reads or not.
-
-        Returns:
-            Sample: The added express sample.
+        Add an express sample to the store. The sample will have the specified PrepCategory. The
+        sample will have reads if pass_sequencing_qc is True.
         """
-        express_sample: Sample = self.add_sample(
-            prep_category=prep_category, pass_sequencing_qc=pass_sequencing_qc
+        return self.add_sample(
+            prep_category=prep_category,
+            pass_sequencing_qc=pass_sequencing_qc,
+            priority=Priority.express,
         )
-        express_sample.priority = Priority.express
-        if not pass_sequencing_qc:
-            express_sample.reads = 4
-        return express_sample
 
     def add_case(
-        self, pass_sequencing_qc: bool, prep_category: PrepCategory, workflow: Workflow
+        self,
+        pass_sequencing_qc: bool,
+        prep_category: PrepCategory,
+        workflow: Workflow,
+        priority: Priority = Priority.standard,
     ) -> Case:
         """
-        Add a case to the store.
-
-        Args:
-            pass_sequencing_qc: Whether the sample has reads or not.
-            prep_category: The prep category of the sample.
-            workflow: The workflow of the case.
-
-        Returns:
-            Case: The added case.
+        Add a case to the store. The case will have a sample with the specified PrepCategory. The
+        sample will have reads if pass_sequencing_qc is True. The case will have the specified
+        workflow.
         """
-        case: Case = self.helpers.add_case(store=self.store, data_analysis=workflow)
-        case.priority = Priority.standard
+        case: Case = self.helpers.add_case(
+            store=self.store, data_analysis=workflow, priority=priority
+        )
         sample: Sample = self.add_sample(
-            prep_category=prep_category, pass_sequencing_qc=pass_sequencing_qc
+            prep_category=prep_category, pass_sequencing_qc=pass_sequencing_qc, priority=priority
         )
         self.helpers.add_relationship(store=self.store, sample=sample, case=case)
         return case
@@ -89,65 +69,40 @@ class SequencingQCCheckScenarios:
         self, pass_sequencing_qc: bool, prep_category: PrepCategory, workflow: Workflow
     ) -> Case:
         """
-        Add an express case to the store.
-
-        Args:
-            pass_sequencing_qc: Whether the sample has reads or not.
-            prep_category: The prep category of the sample.
-            workflow: The workflow of the case.
-
-        Returns:
-            Case: The added express case.
+        Add an express case to the store. The case will have a sample with the specified PrepCategory.
+        The sample will have reads if pass_sequencing_qc is True. The case will have the specified
+        workflow.
         """
-        express_case: Case = self.helpers.add_case(store=self.store, data_analysis=workflow)
-        express_case.priority = Priority.express
-        express_sample: Sample = self.add_express_sample(
-            prep_category=prep_category, pass_sequencing_qc=pass_sequencing_qc
+        return self.add_case(
+            pass_sequencing_qc=pass_sequencing_qc,
+            prep_category=prep_category,
+            workflow=workflow,
+            priority=Priority.express,
         )
-        self.helpers.add_relationship(store=self.store, sample=express_sample, case=express_case)
-        return express_case
 
     def sample_scenario(
         self, priority: Priority, prep_category: PrepCategory, pass_sequencing_qc: bool
     ) -> Sample:
         """
-        Create a sample scenario.
-
-        Args:
-            priority: The priority of the sample.
-            prep_category: The prep category of the sample.
-            pass_sequencing_qc: Whether the sample has reads or not.
-
-        Returns:
-            Sample: A sample instance.
+        Create a sample scenario. The sample will have reads if pass_sequencing_qc is True. The
+        sample will have the specified PrepCategory.
         """
-        if priority == Priority.express:
-            return self.add_express_sample(
-                prep_category=prep_category, pass_sequencing_qc=pass_sequencing_qc
-            )
-        return self.add_sample(prep_category=prep_category, pass_sequencing_qc=pass_sequencing_qc)
+        return self.add_sample(
+            prep_category=prep_category, pass_sequencing_qc=pass_sequencing_qc, priority=priority
+        )
 
     def ready_made_library_sample_scenario(
         self, pass_sequencing_qc: bool, priority: Priority
     ) -> Sample:
         """
-        Create a ready-made library sample scenario.
-
-        Args:
-            pass_sequencing_qc: Whether the sample has reads or not.
-            priority: The priority of the sample.
-
-        Returns:
-            Sample: A ready-made library sample instance.
+        Create a ready-made library sample scenario. The sample will have reads if pass_sequencing_qc
+        is True.
         """
-        sample: Sample = self.sample_scenario(
+        return self.sample_scenario(
             priority=priority,
             prep_category=PrepCategory.READY_MADE_LIBRARY,
             pass_sequencing_qc=pass_sequencing_qc,
         )
-        if not pass_sequencing_qc:
-            sample.reads = 0
-        return sample
 
     def case_scenario(
         self,
@@ -157,23 +112,13 @@ class SequencingQCCheckScenarios:
         workflow: Workflow,
     ) -> Case:
         """
-        Create a case scenario.
-
-        Args:
-            priority: The priority of the case.
-            pass_sequencing_qc: Whether the sample has reads or not.
-            prep_category: The prep category of the sample.
-            workflow: The workflow of the case.
-
-        Returns:
-            Case: A case instance.
+        Create a case scenario. The case will have a sample with the specified PrepCategory. The
+        sample will have reads if pass_sequencing_qc is True. The case will have the specified
+        workflow.
         """
-        if priority == Priority.express:
-            return self.add_express_case(
-                pass_sequencing_qc=pass_sequencing_qc,
-                prep_category=prep_category,
-                workflow=workflow,
-            )
         return self.add_case(
-            pass_sequencing_qc=pass_sequencing_qc, prep_category=prep_category, workflow=workflow
+            pass_sequencing_qc=pass_sequencing_qc,
+            prep_category=prep_category,
+            workflow=workflow,
+            priority=priority,
         )

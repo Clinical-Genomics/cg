@@ -23,7 +23,7 @@ class SequencingQCCheck(QualityCheck):
 
 
 def get_sequencing_quality_check_for_case(case: Case) -> Callable:
-    """Get the appropriate sequencing quality checks for the workflow for a case."""
+    """Return the appropriate sequencing quality checks for the workflow for a case."""
     workflow: Workflow = case.data_analysis
 
     case_passes_workflows = [

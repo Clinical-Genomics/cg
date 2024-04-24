@@ -9,8 +9,14 @@ LOG = logging.getLogger(__name__)
 
 def case_pass_sequencing_qc(case: Case) -> bool:
     """
-    Get the standard sequencing QC of a case. If the case is express priority, the express QC is
-    used. If the case is a ready made library, the ready made library QC is used.
+    Get the sequencing QC of a case. The checks are performed in the following order:
+    1. If the case is a ready-made library, the ready made library QC is used.
+    2. If the case is express priority, the express QC is used.
+    3. If neither of the above conditions are met, it checks if all samples have enough reads.
+
+    The order of these checks is important because the ready-made library QC is more relaxed,
+    and should be checked before the express QC, and the express QC should be checked before the
+    standard QC.
     """
     if is_case_ready_made_library(case):
         return ready_made_library_case_pass_sequencing_qc(case)
@@ -23,7 +29,6 @@ def express_case_pass_sequencing_qc(case: Case) -> bool:
     """
     Checks if all samples in an express case have enough reads.
     """
-
     return all(express_sample_has_enough_reads(sample) for sample in case.samples)
 
 
@@ -33,7 +38,13 @@ def express_sample_pass_sequencing_qc(sample: Sample) -> bool:
 
 def sample_pass_sequencing_qc(sample: Sample) -> bool:
     """
-    Get the standard sequencing QC of a sample.
+    Get the standard sequencing QC of a sample. The checks are performed in the following order:
+    1. If the sample is express priority, the express QC is used.
+    2. If the sample is a ready-made library, the ready made library QC is used.
+    3. If neither of the above conditions are met, it checks if the sample has enough reads.
+    
+    The order of these checks is important because the express QC is more relaxed, and should be
+    checked before the standard QC.
     """
     if is_sample_express_priority(sample):
         return express_sample_pass_sequencing_qc(sample)
@@ -78,7 +89,6 @@ def express_sample_has_enough_reads(sample: Sample) -> bool:
     Checks if given express sample has enough reads. Gets the threshold from the sample's
     application version.
     """
-
     express_reads_threshold: int = get_express_reads_threshold_for_sample(sample)
     enough_reads: bool = sample.reads >= express_reads_threshold
     if not enough_reads:
@@ -90,7 +100,6 @@ def get_express_reads_threshold_for_sample(sample: Sample) -> int:
     """
     Get the express reads threshold for a sample.
     """
-
     return round(sample.application_version.application.target_reads / 2)
 
 
@@ -109,7 +118,6 @@ def ready_made_library_sample_has_enough_reads(sample: Sample) -> bool:
     """
     Check if a given sample from a ready made library has enough reads.
     """
-
     if not sample.has_reads:
         LOG.warning(f"Sample {sample.internal_id} has no reads.")
     return sample.has_reads

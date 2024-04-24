@@ -1,7 +1,6 @@
 import pytest
-from cg.constants.constants import PrepCategory, Workflow
-from cg.constants.priority import Priority
 from cg.store.models import Case, Sample
+from cg.constants.constants import PrepCategory
 from cg.services.quality_controller.quality_checks.utils import (
     any_sample_in_case_has_reads,
     is_case_express_priority,
@@ -16,7 +15,7 @@ from cg.services.quality_controller.quality_checks.utils import (
 )
 from cg.store.store import Store
 from tests.conftest import StoreHelpers
-from tests.services.quality_controller.sequencing_qc_check_scenarios import (
+from tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario import (
     SequencingQCCheckScenarios,
 )
 
@@ -24,8 +23,8 @@ from tests.services.quality_controller.sequencing_qc_check_scenarios import (
 @pytest.mark.parametrize(
     "sample_fixture, expected_result",
     [
-        ("ready_made_library_sample_pass_sequencing_qc", True),
-        ("sample_pass_sequencing_qc", False),
+        ("ready_made_library_sample_passing_sequencing_qc", True),
+        ("sample_passing_sequencing_qc", False),
     ],
     ids=["ready_made_library", "whole_genome_sequencing"],
 )
@@ -48,8 +47,8 @@ def test_is_sample_ready_made_library(
 @pytest.mark.parametrize(
     "case_fixture, expected_result",
     [
-        ("express_case_pass_sequencing_qc", True),
-        ("case_pass_sequencing_qc", False),
+        ("express_case_passing_sequencing_qc", True),
+        ("case_passing_sequencing_qc", False),
     ],
     ids=["express_priority", "standard_priority"],
 )
@@ -72,8 +71,8 @@ def test_is_case_express_priority(
 @pytest.mark.parametrize(
     "sample_fixture, expected_result",
     [
-        ("express_sample_pass_sequencing_qc", True),
-        ("sample_pass_sequencing_qc", False),
+        ("express_sample_passing_sequencing_qc", True),
+        ("sample_passing_sequencing_qc", False),
     ],
     ids=["express_priority", "standard_priority"],
 )
@@ -97,8 +96,8 @@ def test_is_sample_express_priority(
 @pytest.mark.parametrize(
     "sample_fixture, expected_result",
     [
-        ("ready_made_library_sample_pass_sequencing_qc", True),
-        ("ready_made_library_sample_fail_sequencing_qc", False),
+        ("ready_made_library_sample_passing_sequencing_qc", True),
+        ("ready_made_library_sample_failing_sequencing_qc", False),
     ],
     ids=["pass_sequencing_qc", "no_reads"],
 )
@@ -124,8 +123,8 @@ def test_ready_made_library_sample_has_enough_reads(
 @pytest.mark.parametrize(
     "sample_fixture, expected_result",
     [
-        ("sample_pass_sequencing_qc", True),
-        ("sample_fail_sequencing_qc", False),
+        ("sample_passing_sequencing_qc", True),
+        ("sample_failing_sequencing_qc", False),
     ],
     ids=["pass_sequencing_qc", "no_reads"],
 )
@@ -148,8 +147,8 @@ def test_sample_has_enough_reads(
 @pytest.mark.parametrize(
     "case_fixture, expected_result",
     [
-        ("case_pass_sequencing_qc", True),
-        ("case_fail_sequencing_qc", False),
+        ("case_passing_sequencing_qc", True),
+        ("case_failing_sequencing_qc", False),
     ],
     ids=["standard_priority", "standard_priority_no_reads"],
 )
@@ -174,8 +173,8 @@ def test_get_sequencing_qc_of_case(
 @pytest.mark.parametrize(
     "sample_fixture, expected_result",
     [
-        ("express_sample_pass_sequencing_qc", True),
-        ("express_sample_fail_sequencing_qc", False),
+        ("express_sample_passing_sequencing_qc", True),
+        ("express_sample_failing_sequencing_qc", False),
     ],
     ids=["express_priority", "express_priority_no_reads"],
 )
@@ -197,18 +196,18 @@ def test_express_sample_has_enough_reads(
     assert express_sample_has_enough_reads(sample) == expected_result
 
 
-def test_get_express_reads_threshold_for_sample(express_sample_pass_sequencing_qc: Sample):
+def test_get_express_reads_threshold_for_sample(express_sample_passing_sequencing_qc: Sample):
     """
     Test the get_express_reads_threshold_for_sample function.
 
     This test verifies the express reads threshold is correctly calculated for a sample.
     """
     # GIVEN a sample with a target reads value of 10 and an expected threshold of 5
-    express_sample_pass_sequencing_qc.application_version.application.target_reads = 10
+    express_sample_passing_sequencing_qc.application_version.application.target_reads = 10
     expected_express_reads_threshold = 5
     # WHEN getting the express reads threshold for the sample
     express_reads_threshold: int = get_express_reads_threshold_for_sample(
-        express_sample_pass_sequencing_qc
+        express_sample_passing_sequencing_qc
     )
     # THEN the express reads threshold should be half of the target reads
     assert express_reads_threshold == expected_express_reads_threshold == 5
@@ -217,8 +216,8 @@ def test_get_express_reads_threshold_for_sample(express_sample_pass_sequencing_q
 @pytest.mark.parametrize(
     "case_fixture, expected_result",
     [
-        ("express_case_pass_sequencing_qc", True),
-        ("express_case_fail_sequencing_qc", False),
+        ("express_case_passing_sequencing_qc", True),
+        ("express_case_failing_sequencing_qc", False),
     ],
     ids=["express_priority", "express_priority_no_reads"],
 )
@@ -243,8 +242,8 @@ def test_express_case_pass_sequencing_qc(
 @pytest.mark.parametrize(
     "case_fixture, expected_result",
     [
-        ("any_sample_in_case_has_reads", True),
-        ("any_sample_in_case_no_reads", False),
+        ("one_sample_in_case_has_reads", True),
+        ("no_sample_in_case_has_reads", False),
     ],
     ids=["one_sample_with_reads", "no_sample_with_reads"],
 )
@@ -265,7 +264,9 @@ def test_any_sample_in_case_has_reads(
     case: Case = request.getfixturevalue(case_fixture)
     # GIVEN that another sample on the case has no reads
     another_sample: Sample = sequencing_qc_check_scenarios.add_sample(
-        prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING, pass_sequencing_qc=False
+        prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING,
+        pass_sequencing_qc=False,
+        priority=case.priority,
     )
     helpers.add_relationship(store=base_store, sample=another_sample, case=case)
     # WHEN checking if any sample in the case has reads

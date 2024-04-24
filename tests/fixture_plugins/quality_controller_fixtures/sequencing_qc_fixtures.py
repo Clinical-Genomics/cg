@@ -15,7 +15,7 @@ def sequencing_qc_check_scenarios(store, helpers) -> SequencingQCCheckScenarios:
 
 
 @pytest.fixture(scope="function")
-def ready_made_library_sample_pass_sequencing_qc(
+def ready_made_library_sample_passing_sequencing_qc(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
 ) -> Sample:
     return sequencing_qc_check_scenarios.sample_scenario(
@@ -26,7 +26,7 @@ def ready_made_library_sample_pass_sequencing_qc(
 
 
 @pytest.fixture(scope="function")
-def ready_made_library_sample_fail_sequencing_qc(
+def ready_made_library_sample_failing_sequencing_qc(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
 ) -> Sample:
     return sequencing_qc_check_scenarios.sample_scenario(
@@ -37,7 +37,7 @@ def ready_made_library_sample_fail_sequencing_qc(
 
 
 @pytest.fixture(scope="function")
-def express_sample_pass_sequencing_qc(
+def express_sample_passing_sequencing_qc(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
 ) -> Sample:
     return sequencing_qc_check_scenarios.sample_scenario(
@@ -48,7 +48,7 @@ def express_sample_pass_sequencing_qc(
 
 
 @pytest.fixture(scope="function")
-def express_sample_fail_sequencing_qc(
+def express_sample_failing_sequencing_qc(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
 ) -> Sample:
     return sequencing_qc_check_scenarios.sample_scenario(
@@ -59,7 +59,7 @@ def express_sample_fail_sequencing_qc(
 
 
 @pytest.fixture(scope="function")
-def sample_pass_sequencing_qc(
+def sample_passing_sequencing_qc(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
 ) -> Sample:
     return sequencing_qc_check_scenarios.sample_scenario(
@@ -70,7 +70,7 @@ def sample_pass_sequencing_qc(
 
 
 @pytest.fixture(scope="function")
-def sample_fail_sequencing_qc(
+def sample_failing_sequencing_qc(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
 ) -> Sample:
     return sequencing_qc_check_scenarios.sample_scenario(
@@ -81,7 +81,7 @@ def sample_fail_sequencing_qc(
 
 
 @pytest.fixture(scope="function")
-def case_pass_sequencing_qc(
+def case_passing_sequencing_qc(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
 ) -> Sample:
     return sequencing_qc_check_scenarios.case_scenario(
@@ -93,7 +93,7 @@ def case_pass_sequencing_qc(
 
 
 @pytest.fixture(scope="function")
-def case_fail_sequencing_qc(
+def case_failing_sequencing_qc(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
 ) -> Sample:
     return sequencing_qc_check_scenarios.case_scenario(
@@ -105,7 +105,7 @@ def case_fail_sequencing_qc(
 
 
 @pytest.fixture(scope="function")
-def express_case_pass_sequencing_qc(
+def express_case_passing_sequencing_qc(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
 ) -> Sample:
     return sequencing_qc_check_scenarios.case_scenario(
@@ -117,7 +117,7 @@ def express_case_pass_sequencing_qc(
 
 
 @pytest.fixture(scope="function")
-def express_case_fail_sequencing_qc(
+def express_case_failing_sequencing_qc(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
 ) -> Sample:
     return sequencing_qc_check_scenarios.case_scenario(
@@ -128,23 +128,23 @@ def express_case_fail_sequencing_qc(
     )
 
 @pytest.fixture(scope="function")
-def any_sample_in_case_has_reads(
+def one_sample_in_case_has_reads(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
 ) -> Sample:
     return sequencing_qc_check_scenarios.case_scenario(
         priority=Priority.standard,
         pass_sequencing_qc=True,
-        prep_category=PrepCategory.WHOLE_GENOME_SEQUENCING,
-        workflow=Workflow.MIP_DNA,
+        prep_category=PrepCategory.MICROBIAL,
+        workflow=Workflow.MICROSALT,
     )
     
 @pytest.fixture(scope="function")
-def any_sample_in_case_no_reads(
+def no_sample_in_case_has_reads(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
 ) -> Sample:
     return sequencing_qc_check_scenarios.case_scenario(
         priority=Priority.standard,
         pass_sequencing_qc=False,
-        prep_category=PrepCategory.WHOLE_GENOME_SEQUENCING,
-        workflow=Workflow.MIP_DNA,
+        prep_category=PrepCategory.MICROBIAL,
+        workflow=Workflow.MICROSALT,
     )
