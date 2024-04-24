@@ -1,8 +1,8 @@
 """Test module for the Rnafusion delivery report API."""
 
 from cg.meta.report.rnafusion import RnafusionReportAPI
+from cg.models.analysis import NextflowAnalysis
 from cg.models.report.metadata import RnafusionSampleMetadataModel
-from cg.models.rnafusion.rnafusion import RnafusionAnalysis
 from cg.store.models import Case, Sample
 
 
@@ -22,7 +22,7 @@ def test_get_sample_metadata(
     sample: Sample = report_api_rnafusion.status_db.get_sample_by_internal_id(internal_id=sample_id)
 
     # GIVEN an analysis metadata object
-    latest_metadata: RnafusionAnalysis = report_api_rnafusion.analysis_api.get_latest_metadata(
+    latest_metadata: NextflowAnalysis = report_api_rnafusion.analysis_api.get_latest_metadata(
         case_id=rnafusion_case_id
     )
 

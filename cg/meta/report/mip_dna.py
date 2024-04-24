@@ -14,7 +14,6 @@ from cg.constants import (
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_MIP_DNA_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
-    Workflow,
 )
 from cg.constants.scout import MIP_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
@@ -77,27 +76,22 @@ class MipDNAReportAPI(ReportAPI):
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: MipAnalysis = None
     ) -> bool:
-        """Check if the MIP-DNA report is accredited by evaluating each of the sample process accreditations."""
+        """
+        Return whether the MIP-DNA delivery report is accredited by evaluating each of the sample
+        process accreditations.
+        """
         for sample in samples:
             if not sample.application.accredited:
                 return False
         return True
 
-    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
+    def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
         return ScoutReportFiles(
-            snv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="snv_vcf"
-            ),
-            sv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="sv_vcf"
-            ),
-            vcf_str=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="vcf_str"
-            ),
-            smn_tsv=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="smn_tsv"
-            ),
+            snv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="snv_vcf"),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="sv_vcf"),
+            vcf_str=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="vcf_str"),
+            smn_tsv=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="smn_tsv"),
         )
 
     def get_required_fields(self, case: CaseModel) -> dict:
@@ -134,10 +128,6 @@ class MipDNAReportAPI(ReportAPI):
             )
             required_sample_metadata_fields.update({sample.id: required_fields})
         return required_sample_metadata_fields
-
-    def get_template_name(self) -> str:
-        """Return template name to render the delivery report."""
-        return Workflow.MIP_DNA + "_report.html"
 
     def get_upload_case_tags(self) -> dict:
         """Return MIP DNA upload case tags."""

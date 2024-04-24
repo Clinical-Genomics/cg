@@ -6,6 +6,7 @@ from pydantic.v1 import validator
 from cg.constants.constants import GenomeVersion, Strandedness
 from cg.constants.sample_sources import SourceType
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
+from cg.models.qc_metrics import QCMetrics
 from cg.utils.utils import replace_non_alphanumeric
 
 
@@ -64,4 +65,22 @@ class TomteParameters(WorkflowParameters):
             return "GRCh38"
         elif genome == GenomeVersion.hg19:
             return "GRCh37"
-        
+
+
+class TomteQCMetrics(QCMetrics):
+    """Tomte QC metrics."""
+
+    after_filtering_gc_content: float
+    after_filtering_q20_rate: float
+    after_filtering_q30_rate: float
+    after_filtering_read1_mean_length: float
+    before_filtering_total_reads: float
+    median_5prime_to_3prime_bias: float
+    pct_adapter: float
+    pct_duplication: float
+    pct_intergenic_bases: float
+    pct_intronic_bases: float
+    pct_mrna_bases: float
+    pct_ribosomal_bases: float
+    pct_surviving: float
+    uniquely_mapped_percent: float

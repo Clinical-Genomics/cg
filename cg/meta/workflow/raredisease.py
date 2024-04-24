@@ -57,7 +57,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return whether the analysis supports multiple samples to be linked to the case."""
         return True
 
-    def get_reference_genome(self, case_id: str) -> GenomeVersion:
+    def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a case. Currently fixed for hg19."""
         return GenomeVersion.hg19
 

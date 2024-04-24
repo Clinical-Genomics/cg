@@ -26,6 +26,7 @@ from cg.io.txt import concat_txt, write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
+from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
@@ -835,8 +836,8 @@ class NfAnalysisAPI(AnalysisAPI):
             or self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
 
-    def get_reference_genome(self, case_id: str) -> GenomeVersion:
-        """Return reference genome for a case.
+    def get_genome_build(self, case_id: str) -> GenomeVersion:
+        """Return reference genome version for a case.
         Raises CgError if this information is missing or inconsistent for the samples linked to a case.
         """
         reference_genome: set[str] = {
@@ -854,7 +855,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
         """Return build version of the gene panel for a case."""
-        reference_genome: GenomeVersion = self.get_reference_genome(case_id=case_id)
+        reference_genome: GenomeVersion = self.get_genome_build(case_id=case_id)
         try:
             return getattr(GenePanelGenomeBuild, reference_genome)
         except AttributeError as error:
@@ -869,3 +870,18 @@ class NfAnalysisAPI(AnalysisAPI):
             genome_build=self.get_gene_panel_genome_build(case_id=case_id),
             dry_run=dry_run,
         )
+
+    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
+        """Parse Nextflow output analysis files and return an analysis model."""
+        sample_metrics: dict[str, dict] = {}
+        for metric in qc_metrics_raw:
+            try:
+                sample_metrics[metric.id].update({metric.name.lower(): metric.value})
+            except KeyError:
+                sample_metrics[metric.id] = {metric.name.lower(): metric.value}
+        return NextflowAnalysis(sample_metrics=sample_metrics)
+
+    def get_latest_metadata(self, case_id: str) -> NextflowAnalysis:
+        """Return analysis output of a Nextflow case."""
+        qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
+        return self.parse_analysis(qc_metrics_raw=qc_metrics)
