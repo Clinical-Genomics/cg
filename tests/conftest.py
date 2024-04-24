@@ -1249,15 +1249,15 @@ def analysis_store_single_case(
 def store_with_demultiplexed_samples(
     store: Store,
     helpers: StoreHelpers,
-    bcl_convert_demultiplexed_flow_cell_sample_internal_ids: list[str],
-    bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: list[str],
+    selected_novaseq_6000_post_1_5_kits_sample_ids: list[str],
+    selected_hiseq_x_dual_index_sample_ids: list[str],
     hiseq_x_dual_index_flow_cell_id: str,
     novaseq_6000_post_1_5_kits_flow_cell_id: str,
 ) -> Store:
     """Return a store with samples that have been demultiplexed with BCL Convert and BCL2Fastq."""
     helpers.add_flow_cell(store, novaseq_6000_post_1_5_kits_flow_cell_id, sequencer_type="novaseq")
     helpers.add_flow_cell(store, hiseq_x_dual_index_flow_cell_id, sequencer_type="hiseqx")
-    for i, sample_internal_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_internal_ids):
+    for i, sample_internal_id in enumerate(selected_novaseq_6000_post_1_5_kits_sample_ids):
         helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl_convert_{i}")
         helpers.ensure_sample_lane_sequencing_metrics(
             store,
@@ -1265,7 +1265,7 @@ def store_with_demultiplexed_samples(
             flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id,
         )
 
-    for i, sample_internal_id in enumerate(bcl2fastq_demultiplexed_flow_cell_sample_internal_ids):
+    for i, sample_internal_id in enumerate(selected_hiseq_x_dual_index_sample_ids):
         helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl2fastq_{i}")
         helpers.ensure_sample_lane_sequencing_metrics(
             store,

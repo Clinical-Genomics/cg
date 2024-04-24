@@ -105,24 +105,3 @@ def novaseq_x_flow_cell_id() -> str:
 def novaseq_x_flow_cell_full_name(novaseq_x_flow_cell_id: str) -> str:
     """Return the full name of a NovaSeqX flow cell."""
     return f"20231108_LH00188_0028_B{novaseq_x_flow_cell_id}"
-
-
-# Lists
-
-
-@pytest.fixture(scope="session")
-def bcl_convert_demultiplexed_flow_cell_sample_internal_ids() -> list[str]:
-    """
-    Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
-    cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/230504_A00689_0804_BHY7FFDRX2.
-    """
-    return ["ACC11927A2", "ACC11927A5"]
-
-
-@pytest.fixture(scope="session")
-def bcl2fastq_demultiplexed_flow_cell_sample_internal_ids() -> list[str]:
-    """
-    Sample id:s present in sample sheet for dummy flow cell demultiplexed with BCL Convert in
-    cg/tests/fixtures/apps/demultiplexing/demultiplexed-runs/170407_A00689_0209_BHHKVCALXX.
-    """
-    return ["SVE2528A1"]
