@@ -1251,14 +1251,12 @@ def store_with_demultiplexed_samples(
     helpers: StoreHelpers,
     bcl_convert_demultiplexed_flow_cell_sample_internal_ids: list[str],
     bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: list[str],
-    flow_cell_name_demultiplexed_with_bcl2fastq: str,
+    hiseq_x_dual_index_flow_cell_id: str,
     novaseq_6000_post_1_5_kits_flow_cell_id: str,
 ) -> Store:
     """Return a store with samples that have been demultiplexed with BCL Convert and BCL2Fastq."""
     helpers.add_flow_cell(store, novaseq_6000_post_1_5_kits_flow_cell_id, sequencer_type="novaseq")
-    helpers.add_flow_cell(
-        store, flow_cell_name_demultiplexed_with_bcl2fastq, sequencer_type="hiseqx"
-    )
+    helpers.add_flow_cell(store, hiseq_x_dual_index_flow_cell_id, sequencer_type="hiseqx")
     for i, sample_internal_id in enumerate(bcl_convert_demultiplexed_flow_cell_sample_internal_ids):
         helpers.add_sample(store, internal_id=sample_internal_id, name=f"sample_bcl_convert_{i}")
         helpers.ensure_sample_lane_sequencing_metrics(
@@ -1272,7 +1270,7 @@ def store_with_demultiplexed_samples(
         helpers.ensure_sample_lane_sequencing_metrics(
             store,
             sample_internal_id=sample_internal_id,
-            flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
+            flow_cell_name=hiseq_x_dual_index_flow_cell_id,
         )
     return store
 
@@ -3764,17 +3762,17 @@ def store_with_sequencing_metrics(
     expected_total_reads: int,
     flow_cell_name: str,
     novaseq_6000_post_1_5_kits_flow_cell_id: str,
-    flow_cell_name_demultiplexed_with_bcl2fastq: str,
+    hiseq_x_dual_index_flow_cell_id: str,
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
     sample_sequencing_metrics_details: list[str | int | float] = [
         (sample_id, flow_cell_name, 1, expected_total_reads / 2, 90.5, 32),
         (sample_id, flow_cell_name, 2, expected_total_reads / 2, 90.4, 31),
-        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 2, 2_000_000, 85.5, 30),
-        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 1, 2_000_000, 80.5, 30),
-        (father_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 2, 2_000_000, 83.5, 30),
-        (father_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 1, 2_000_000, 81.5, 30),
+        (mother_sample_id, hiseq_x_dual_index_flow_cell_id, 2, 2_000_000, 85.5, 30),
+        (mother_sample_id, hiseq_x_dual_index_flow_cell_id, 1, 2_000_000, 80.5, 30),
+        (father_sample_id, hiseq_x_dual_index_flow_cell_id, 2, 2_000_000, 83.5, 30),
+        (father_sample_id, hiseq_x_dual_index_flow_cell_id, 1, 2_000_000, 81.5, 30),
         (mother_sample_id, novaseq_6000_post_1_5_kits_flow_cell_id, 3, 1_500_000, 80.5, 33),
         (mother_sample_id, novaseq_6000_post_1_5_kits_flow_cell_id, 2, 1_500_000, 80.5, 33),
     ]

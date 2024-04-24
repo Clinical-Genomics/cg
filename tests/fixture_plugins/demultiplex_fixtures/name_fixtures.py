@@ -1,36 +1,4 @@
-from pathlib import Path
-
 import pytest
-
-from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_and_include_sample_sheet_path_to_housekeeper,
-)
-
-
-@pytest.fixture(scope="session")
-def flow_cell_name_demultiplexed_with_bcl2fastq() -> str:
-    """Comes from 170407_A00689_0209_BHHKVCALXX."""
-    return "HHKVCALXX"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
-    """Comes from "230622_A00621_0864_AHY7FFDRX2"""
-    return "HY7FFDRX2"
-
-
-@pytest.fixture
-def bclconvert_flow_cell_dir_name(demux_post_processing_api) -> str:
-    """Return a flow cell name that has been demultiplexed with bclconvert."""
-    flow_cell_dir_name = "230504_A00689_0804_BHY7FFDRX2"
-    flow_cell_path = Path(demux_post_processing_api.demultiplexed_runs_dir, flow_cell_dir_name)
-
-    add_and_include_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=flow_cell_path,
-        flow_cell_name="HY7FFDRX2",
-        hk_api=demux_post_processing_api.hk_api,
-    )
-    return flow_cell_dir_name
 
 
 @pytest.fixture
