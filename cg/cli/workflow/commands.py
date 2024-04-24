@@ -24,6 +24,8 @@ from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.clean.nf_analysis import NfAnalysisCleanAPI
+
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
@@ -363,13 +365,13 @@ def nf_workflow_past_run_dirs(
     context: CGConfig, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" nextflow case run dirs."""
-    analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+    analysis_api: NfAnalysisCleanAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     exit_code: int = EXIT_SUCCESS
 
-    try:
-        analysis_api.clean_past_run_dirs(yes=yes, dry_run=dry_run, before_str=before_str)
-    except Exception as error:
-        LOG.error(repr(error))
-        exit_code: int = EXIT_FAIL
-    if exit_code:
-        raise click.Abort()
+    # try:
+    #    analysis_api.clean_past_run_dirs(yes=yes, dry_run=dry_run, before_str=before_str)
+    # except Exception as error:
+    #    LOG.error(repr(error))
+    #    exit_code: int = EXIT_FAIL
+    # if exit_code:
+    #    raise click.Abort()
