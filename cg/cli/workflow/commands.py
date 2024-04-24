@@ -359,7 +359,7 @@ def microsalt_past_run_dirs(
 @OPTION_YES
 @OPTION_DRY
 @ARGUMENT_BEFORE_STR
-@click.pass_context
+@click.pass_obj
 def nf_workflow_past_run_dirs(
     context: CGConfig, before_str: str, yes: bool = False, dry_run: bool = False
 ):
