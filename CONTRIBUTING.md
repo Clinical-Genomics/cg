@@ -311,7 +311,7 @@ cg transfer lims --status delivered
 Includes: `stats`, `hk`, `status`
 
 The API accepts the name of a flow cell which will be looked up in `stats`. For
-all samples on the flowcell it will:
+all samples on the flow cell it will:
 
 1. Check if the quality (Q30) is good enough to include the sequencing results
 2. update the number of reads that the sample has been sequenced _overall_ and
