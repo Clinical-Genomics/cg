@@ -42,7 +42,7 @@ def sample_pass_sequencing_qc(sample: Sample) -> bool:
     1. If the sample is express priority, the express QC is used.
     2. If the sample is a ready-made library, the ready made library QC is used.
     3. If neither of the above conditions are met, it checks if the sample has enough reads.
-    
+
     The order of these checks is important because the express QC is more relaxed, and should be
     checked before the standard QC.
     """

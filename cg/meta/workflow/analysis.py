@@ -95,7 +95,8 @@ class AnalysisAPI(MetaAPI):
 
     def is_case_ready_for_analysis(self, case: Case) -> bool:
         """Check if case is ready for analysis. If case passes sequencing QC and is set to analyze,
-        or has not been analyzed yet, or the latest analysis failed, the case is ready for analysis."""
+        or has not been analyzed yet, or the latest analysis failed, the case is ready for analysis.
+        """
         case_passed_sequencing_qc: bool = QualityControllerService.case_pass_sequencing_qc(case)
         case_is_set_to_analyze: bool = case.action == CaseActions.ANALYZE
         case_has_not_been_analyzed: bool = not case.latest_analyzed
