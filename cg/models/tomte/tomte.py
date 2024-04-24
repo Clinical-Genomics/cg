@@ -54,8 +54,11 @@ class TomteParameters(WorkflowParameters):
     genome: str
 
     @validator("tissue", pre=True)
-    def restrict_tissue_values(cls, tissue: str) -> str:
-        return replace_non_alphanumeric(string=tissue)
+    def restrict_tissue_values(cls, tissue: str | None) -> str:
+        if tissue:
+            return replace_non_alphanumeric(string=tissue)
+        else:
+            return SourceType.UNKNOWN
 
     @validator("genome", pre=True)
     def restrict_genome_values(cls, genome: str) -> str:

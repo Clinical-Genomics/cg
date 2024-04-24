@@ -11,7 +11,6 @@ from requests.exceptions import HTTPError
 
 from cg.constants import Priority
 from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod, LimsArtifactTypes
-from cg.constants.sample_sources import SourceType
 from cg.exc import LimsDataError
 
 from .order import OrderHandler
@@ -64,14 +63,12 @@ class LimsAPI(Lims, OrderHandler):
         """Fetch all samples from a pool"""
         return self.get_samples(udf={"pool name": str(pool_name)}, projectname=projectname)
 
-    def get_source(self, lims_id: str) -> str:
+    def get_source(self, lims_id: str) -> str | None:
         """Return the source from LIMS for a given sample ID.
-        Return 'unknown' if no source information is set or
+        Return 'None' if no source information is set or
         if sample is not found or cannot be fetched from LIMS."""
         if lims_sample := self.sample(lims_id=lims_id):
-            return lims_sample.get("source", SourceType.UNKNOWN)
-        else:
-            return SourceType.UNKNOWN
+            return lims_sample.get("source")
 
     @staticmethod
     def _export_project(lims_project) -> dict:

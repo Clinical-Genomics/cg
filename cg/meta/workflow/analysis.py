@@ -161,7 +161,7 @@ class AnalysisAPI(MetaAPI):
 
         return application_types.pop()
 
-    def get_case_source_type(self, case_id: str) -> str:
+    def get_case_source_type(self, case_id: str) -> str | None:
         """Returns the source type for samples in a case.
         Raises:
             CgError: If different sources are set for the samples linked to a case."""
