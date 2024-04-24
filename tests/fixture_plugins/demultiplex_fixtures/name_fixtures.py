@@ -9,12 +9,13 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
 
 @pytest.fixture(scope="session")
 def flow_cell_name_demultiplexed_with_bcl2fastq() -> str:
-    """Return the name of a flow cell that has been demultiplexed with BCL2Fastq."""
+    """Comes from 170407_A00689_0209_BHHKVCALXX."""
     return "HHKVCALXX"
 
 
 @pytest.fixture(scope="session")
 def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
+    """Comes from "230622_A00621_0864_AHY7FFDRX2"""
     return "HY7FFDRX2"
 
 

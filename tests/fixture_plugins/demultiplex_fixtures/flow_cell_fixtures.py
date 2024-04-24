@@ -123,3 +123,16 @@ def bcl_convert_flow_cell(
     """Return a flow cell object with flow cell that is demultiplexed."""
     path = Path(illumina_demultiplexed_runs_directory, bclconvert_flow_cell_dir_name)
     return FlowCellDirectoryData(flow_cell_path=path)
+
+
+@pytest.fixture
+def hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet(
+    illumina_demultiplexed_runs_directory: Path,
+    hiseq_x_single_index_flow_cell_name: str,
+    hiseq_x_single_index_sample_sheet_path: Path,
+) -> FlowCellDirectoryData:
+    """Return a Novaseq6000 flow cell with a sample sheet."""
+    path = Path(illumina_demultiplexed_runs_directory, hiseq_x_single_index_flow_cell_name)
+    flow_cell = FlowCellDirectoryData(path)
+    flow_cell.set_sample_sheet_path_hk(hiseq_x_single_index_sample_sheet_path)
+    return flow_cell

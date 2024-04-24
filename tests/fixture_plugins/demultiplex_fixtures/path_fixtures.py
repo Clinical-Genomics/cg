@@ -185,21 +185,6 @@ def demultiplexed_runs_unfinished_bcl2fastq_flow_cell_directory(
     return Path(tmp_demultiplexed_runs_not_finished_directory, bcl2fastq_flow_cell_full_name)
 
 
-@pytest.fixture
-def novaseq6000_bcl_convert_sample_sheet_path() -> Path:
-    """Return the path to a NovaSeq 6000 BCL convert sample sheet."""
-    return Path(
-        "tests",
-        "fixtures",
-        "apps",
-        "sequencing_metrics_parser",
-        "230622_A00621_0864_AHY7FFDRX2",
-        "Unaligned",
-        "Reports",
-        "SampleSheet.csv",
-    )
-
-
 # Directory fixtures
 
 
@@ -267,8 +252,10 @@ def illumina_demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
 
 
 @pytest.fixture
-def novaseq_6000_post_1_5_kits_flow_cell_path(tmp_illumina_flow_cells_directory: Path) -> Path:
-    return Path(tmp_illumina_flow_cells_directory, "230912_A00187_1009_AHK33MDRX3")
+def novaseq_6000_post_1_5_kits_flow_cell_path(
+    tmp_illumina_flow_cells_directory: Path, novaseq_6000_post_1_5_kits_flow_cell_full_name: str
+) -> Path:
+    return Path(tmp_illumina_flow_cells_directory, novaseq_6000_post_1_5_kits_flow_cell_full_name)
 
 
 @pytest.fixture

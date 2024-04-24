@@ -1252,12 +1252,10 @@ def store_with_demultiplexed_samples(
     bcl_convert_demultiplexed_flow_cell_sample_internal_ids: list[str],
     bcl2fastq_demultiplexed_flow_cell_sample_internal_ids: list[str],
     flow_cell_name_demultiplexed_with_bcl2fastq: str,
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
 ) -> Store:
     """Return a store with samples that have been demultiplexed with BCL Convert and BCL2Fastq."""
-    helpers.add_flow_cell(
-        store, flow_cell_name_demultiplexed_with_bcl_convert, sequencer_type="novaseq"
-    )
+    helpers.add_flow_cell(store, novaseq_6000_post_1_5_kits_flow_cell_id, sequencer_type="novaseq")
     helpers.add_flow_cell(
         store, flow_cell_name_demultiplexed_with_bcl2fastq, sequencer_type="hiseqx"
     )
@@ -1266,7 +1264,7 @@ def store_with_demultiplexed_samples(
         helpers.ensure_sample_lane_sequencing_metrics(
             store,
             sample_internal_id=sample_internal_id,
-            flow_cell_name=flow_cell_name_demultiplexed_with_bcl_convert,
+            flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id,
         )
 
     for i, sample_internal_id in enumerate(bcl2fastq_demultiplexed_flow_cell_sample_internal_ids):
@@ -3765,7 +3763,7 @@ def store_with_sequencing_metrics(
     mother_sample_id: str,
     expected_total_reads: int,
     flow_cell_name: str,
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
     flow_cell_name_demultiplexed_with_bcl2fastq: str,
     helpers: StoreHelpers,
 ) -> Store:
@@ -3777,8 +3775,8 @@ def store_with_sequencing_metrics(
         (mother_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 1, 2_000_000, 80.5, 30),
         (father_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 2, 2_000_000, 83.5, 30),
         (father_sample_id, flow_cell_name_demultiplexed_with_bcl2fastq, 1, 2_000_000, 81.5, 30),
-        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 3, 1_500_000, 80.5, 33),
-        (mother_sample_id, flow_cell_name_demultiplexed_with_bcl_convert, 2, 1_500_000, 80.5, 33),
+        (mother_sample_id, novaseq_6000_post_1_5_kits_flow_cell_id, 3, 1_500_000, 80.5, 33),
+        (mother_sample_id, novaseq_6000_post_1_5_kits_flow_cell_id, 2, 1_500_000, 80.5, 33),
     ]
     helpers.add_flow_cell(store=store, flow_cell_name=flow_cell_name)
     helpers.add_sample(
