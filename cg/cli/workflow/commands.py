@@ -365,7 +365,7 @@ def nf_workflow_past_run_dirs(
 ):
     """Clean up of "old" nextflow case run dirs."""
 
-    analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
+    analysis_api: NfAnalysisAPI = context.obj.meta_apis["analysis_api"]
     exit_code: int = EXIT_SUCCESS
 
     try:
