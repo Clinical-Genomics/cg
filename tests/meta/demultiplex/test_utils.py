@@ -265,17 +265,17 @@ def test_parse_flow_cell_directory_data_invalid():
         FlowCellDirectoryData(Path("invalid_path"))
 
 
-def test_parse_flow_cell_directory_data_valid():
+def test_parse_flow_cell_directory_data_valid(novaseq_6000_post_1_5_kits_flow_cell_full_name: str):
     # GIVEN a flow cell directory which is valid
+
     # WHEN parsing the flow cell directory data
-    flow_cell_run_directory = "20230508_LH00188_0003_A22522YLT3"
-    result = FlowCellDirectoryData(Path(flow_cell_run_directory))
+    result = FlowCellDirectoryData(Path(novaseq_6000_post_1_5_kits_flow_cell_full_name))
 
     # THEN a FlowCellDirectoryData object should be returned
     assert isinstance(result, FlowCellDirectoryData)
 
     # THEN the flow cell path and bcl converter should be set
-    assert result.path == Path(flow_cell_run_directory)
+    assert result.path == Path(novaseq_6000_post_1_5_kits_flow_cell_full_name)
 
 
 def test_parse_manifest_file(novaseq_x_manifest_file: Path):
