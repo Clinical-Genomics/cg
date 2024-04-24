@@ -135,21 +135,9 @@ poetry install
 
 On our servers where the production and stage versions of CG are run the
 packages are maintained by using conda environments. For local development it
-is suggested to follow the [python packaging
-guidelines](https://packaging.python.org/tutorials/managing-dependencies/)
+is suggested to follow the [python packaging guidelines](https://packaging.python.org/tutorials/managing-dependencies/)
 where it is suggested to manage your local python environment with
-[pipenv](https://pipenv.pypa.io). CG has a Pipfile.lock file which
-will ensure that the installation will work if the environment is set up in the
-correct way. To use a **combination of conda and pipenv** make sure that you
-point to the conda installation of python when creating your pipenv virtual
-environment (`pipenv --python=$(conda run which python) --site-packages`) more
-about that
-[here](https://pipenv.pypa.io/en/latest/advanced/#pipenv-and-other-python-distributions)
-and in [this](https://stackoverflow.com/questions/50546339/pipenv-with-conda)
-stack overflow thread. (It is not necessary to use conda on for local
-development)
-
-When pipenv is installed just create a new environment and run `pipenv install`
+[poetry](https://python-poetry.org/).
 
 ### Pull Requests
 
