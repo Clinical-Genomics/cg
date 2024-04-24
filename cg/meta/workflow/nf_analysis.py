@@ -6,7 +6,14 @@ from typing import Any, Iterator
 from pydantic.v1 import ValidationError
 
 from cg.constants import Workflow
-from cg.constants.constants import CaseActions, FileExtensions, FileFormat, MultiQC, WorkflowManager
+from cg.constants.constants import (
+    CaseActions,
+    FileExtensions,
+    FileFormat,
+    GenomeVersion,
+    MultiQC,
+    WorkflowManager,
+)
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
@@ -18,6 +25,7 @@ from cg.io.txt import concat_txt, write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
+from cg.models.analysis import NextflowAnalysis, AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
@@ -803,3 +811,22 @@ class NfAnalysisAPI(AnalysisAPI):
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
             or self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
+
+    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
+        """Parse Nextflow output analysis files and return an analysis model."""
+        sample_metrics: dict[str, dict] = {}
+        for metric in qc_metrics_raw:
+            try:
+                sample_metrics[metric.id].update({metric.name.lower(): metric.value})
+            except KeyError:
+                sample_metrics[metric.id] = {metric.name.lower(): metric.value}
+        return NextflowAnalysis(sample_metrics=sample_metrics)
+
+    def get_latest_metadata(self, case_id: str) -> NextflowAnalysis:
+        """Return analysis output of a Nextflow case."""
+        qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
+        return self.parse_analysis(qc_metrics_raw=qc_metrics)
+
+    def get_genome_build(self, case_id: str) -> str:
+        """Return the reference genome build version of Nextflow analysis."""
+        return GenomeVersion.hg38.value

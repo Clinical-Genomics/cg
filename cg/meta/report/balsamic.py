@@ -54,7 +54,9 @@ class BalsamicReportAPI(ReportAPI):
             sample.internal_id
         ]
         million_read_pairs: float = get_million_read_pairs(reads=sample.reads)
-        if AnalysisType.WHOLE_GENOME_SEQUENCING in self.analysis_api.get_data_analysis_type(case):
+        if AnalysisType.WHOLE_GENOME_SEQUENCING in self.analysis_api.get_data_analysis_type(
+            case.internal_id
+        ):
             return self.get_wgs_metadata(
                 million_read_pairs=million_read_pairs, sample_metrics=sample_metrics
             )
@@ -111,7 +113,7 @@ class BalsamicReportAPI(ReportAPI):
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: BalsamicAnalysis
     ) -> bool:
-        """Check if the Balsamic report is accredited."""
+        """Return whether the Balsamic delivery report is accredited."""
         if analysis_metadata.config.analysis.sequencing_type == "targeted" and next(
             (
                 panel
@@ -123,15 +125,11 @@ class BalsamicReportAPI(ReportAPI):
             return True
         return False
 
-    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
+    def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
         return ScoutReportFiles(
-            snv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="snv_vcf"
-            ),
-            sv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="sv_vcf"
-            ),
+            snv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="snv_vcf"),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="sv_vcf"),
         )
 
     def get_required_fields(self, case: CaseModel) -> dict:

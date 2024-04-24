@@ -73,6 +73,7 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
         """Create and return the managed variants."""
         return self._get_managed_variants(genome_build=GENOME_BUILD_37)
 
-    def get_genome_build(self, analysis_metadata: MipAnalysis) -> str:
+    def get_genome_build(self, case_id: str) -> str:
         """Return the reference genome build version of a MIP-DNA analysis."""
+        analysis_metadata: MipAnalysis = self.get_latest_metadata(case_id)
         return analysis_metadata.genome_build

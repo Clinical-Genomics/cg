@@ -7,6 +7,7 @@ from cg.models.report.metadata import (
     BalsamicWGSSampleMetadataModel,
     MipDNASampleMetadataModel,
     RnafusionSampleMetadataModel,
+    TomteSampleMetadataModel,
 )
 from cg.models.report.validators import (
     get_boolean_as_string,
@@ -107,6 +108,7 @@ class SampleModel(BaseModel):
         | BalsamicTargetedSampleMetadataModel
         | BalsamicWGSSampleMetadataModel
         | RnafusionSampleMetadataModel
+        | TomteSampleMetadataModel
     )
     timestamps: TimestampModel
     delivered_files: Annotated[
