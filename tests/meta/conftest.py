@@ -117,7 +117,7 @@ def binary_path() -> str:
 @pytest.fixture
 def stats_sample_data(
     sample_id: str,
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     bcl_convert_flow_cell_id: str,
 ) -> dict:
     return {
@@ -125,7 +125,7 @@ def stats_sample_data(
             {
                 "name": sample_id,
                 "index": "ACGTACAT",
-                "flowcell": bcl2fastq_flow_cell_id,
+                "flowcell": novaseq_6000_pre_1_5_kits_flow_cell_id,
                 "type": Sequencers.NOVASEQ,
             },
             {

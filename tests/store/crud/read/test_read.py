@@ -580,23 +580,25 @@ def test_get_flow_cells(re_sequenced_sample_store: Store):
     assert isinstance(flow_cells[0], Flowcell)
 
 
-def test_get_flow_cell(bcl2fastq_flow_cell_id: str, re_sequenced_sample_store: Store):
+def test_get_flow_cell(
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str, re_sequenced_sample_store: Store
+):
     """Test returning the latest flow cell from the database."""
 
     # GIVEN a store with two flow cells
 
     # WHEN fetching the latest flow cell
     flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell_by_name(
-        flow_cell_name=bcl2fastq_flow_cell_id
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id
     )
 
     # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cell.name == bcl2fastq_flow_cell_id
+    assert flow_cell.name == novaseq_6000_pre_1_5_kits_flow_cell_id
 
 
 def test_get_flow_cells_by_case(
     base_store: Store,
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     bcl_convert_flow_cell_id: str,
     case: Case,
     helpers: StoreHelpers,
@@ -605,7 +607,9 @@ def test_get_flow_cells_by_case(
     """Test returning the latest flow cell from the database by case."""
 
     # GIVEN a store with two flow cell
-    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
+    helpers.add_flow_cell(
+        store=base_store, flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id, samples=[sample]
+    )
 
     helpers.add_flow_cell(store=base_store, flow_cell_name=bcl_convert_flow_cell_id)
 
@@ -618,7 +622,7 @@ def test_get_flow_cells_by_case(
             assert sample in case.samples
 
     # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cells[0].name == bcl2fastq_flow_cell_id
+    assert flow_cells[0].name == novaseq_6000_pre_1_5_kits_flow_cell_id
 
 
 def test_get_flow_cells_by_statuses(
@@ -682,7 +686,7 @@ def test_get_flow_cells_by_statuses_when_incorrect_status(re_sequenced_sample_st
 
 
 def test_get_flow_cell_by_enquiry_and_status(
-    bcl2fastq_flow_cell_id: str, re_sequenced_sample_store: Store
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str, re_sequenced_sample_store: Store
 ):
     """Test returning the latest flow cell from the database by enquiry and status."""
 
@@ -690,18 +694,19 @@ def test_get_flow_cell_by_enquiry_and_status(
 
     # WHEN fetching the latest flow cell
     flow_cell: list[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_name_pattern_and_status(
-        flow_cell_statuses=[FlowCellStatus.ON_DISK], name_pattern=bcl2fastq_flow_cell_id[:4]
+        flow_cell_statuses=[FlowCellStatus.ON_DISK],
+        name_pattern=novaseq_6000_pre_1_5_kits_flow_cell_id[:4],
     )
 
     # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cell[0].name == bcl2fastq_flow_cell_id
+    assert flow_cell[0].name == novaseq_6000_pre_1_5_kits_flow_cell_id
 
     # THEN the returned flow cell should have the same status as the query
     assert flow_cell[0].status == FlowCellStatus.ON_DISK
 
 
 def test_get_samples_from_flow_cell(
-    bcl2fastq_flow_cell_id: str, sample_id: str, re_sequenced_sample_store: Store
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str, sample_id: str, re_sequenced_sample_store: Store
 ):
     """Test returning samples present on the latest flow cell from the database."""
 
@@ -709,7 +714,7 @@ def test_get_samples_from_flow_cell(
 
     # WHEN fetching the samples from the latest flow cell
     samples: list[Sample] = re_sequenced_sample_store.get_samples_from_flow_cell(
-        flow_cell_id=bcl2fastq_flow_cell_id
+        flow_cell_id=novaseq_6000_pre_1_5_kits_flow_cell_id
     )
 
     # THEN the returned sample id should have the same id as the one in the database
@@ -717,13 +722,13 @@ def test_get_samples_from_flow_cell(
 
 
 def test_get_latest_flow_cell_on_case(
-    re_sequenced_sample_store: Store, case_id: str, bcl2fastq_flow_cell_id: str
+    re_sequenced_sample_store: Store, case_id: str, novaseq_6000_pre_1_5_kits_flow_cell_id: str
 ):
     """Test returning the latest sequenced flow cell on a case."""
 
     # GIVEN a store with two flow cells in it, one being the latest sequenced of the two
     latest_flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell_by_name(
-        flow_cell_name=bcl2fastq_flow_cell_id
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id
     )
 
     # WHEN fetching the latest flow cell on a case with a sample that has been sequenced on both flow cells
@@ -756,7 +761,7 @@ def test_is_all_flow_cells_on_disk_when_no_flow_cell(
 def test_are_all_flow_cells_on_disk_when_not_on_disk(
     base_store: Store,
     caplog,
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     bcl_convert_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
@@ -767,7 +772,7 @@ def test_are_all_flow_cells_on_disk_when_not_on_disk(
     # GIVEN a store with two flow cell
     helpers.add_flow_cell(
         store=base_store,
-        flow_cell_name=bcl2fastq_flow_cell_id,
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.PROCESSING,
     )
@@ -789,7 +794,7 @@ def test_are_all_flow_cells_on_disk_when_not_on_disk(
 def test_are_all_flow_cells_on_disk_when_requested(
     base_store: Store,
     caplog,
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     bcl_convert_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
@@ -801,7 +806,7 @@ def test_are_all_flow_cells_on_disk_when_requested(
     # GIVEN a store with two flow cell
     helpers.add_flow_cell(
         store=base_store,
-        flow_cell_name=bcl2fastq_flow_cell_id,
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.REMOVED,
     )
@@ -822,7 +827,7 @@ def test_are_all_flow_cells_on_disk_when_requested(
 def test_are_all_flow_cells_on_disk(
     base_store: Store,
     caplog,
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     bcl_convert_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
@@ -832,7 +837,9 @@ def test_are_all_flow_cells_on_disk(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a store with two flow cell
-    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
+    helpers.add_flow_cell(
+        store=base_store, flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id, samples=[sample]
+    )
     helpers.add_flow_cell(store=base_store, flow_cell_name=bcl_convert_flow_cell_id)
 
     # WHEN fetching the latest flow cell

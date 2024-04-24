@@ -531,18 +531,19 @@ def test_add_flow_cell_name_to_fastq_file_path(
 
 
 def test_add_flow_cell_name_to_fastq_file_path_when_flow_cell_name_already_in_name(
-    bcl2fastq_flow_cell_id: str, demultiplex_fastq_file_path
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str, demultiplex_fastq_file_path
 ):
     # GIVEN a fastq file path and a flow cell name
 
     # GIVEN that the flow cell name is already in the fastq file path
     demultiplex_fastq_file_path = Path(
-        f"{bcl2fastq_flow_cell_id}_{demultiplex_fastq_file_path.name}"
+        f"{novaseq_6000_pre_1_5_kits_flow_cell_id}_{demultiplex_fastq_file_path.name}"
     )
 
     # WHEN adding the flow cell name to the fastq file path
     renamed_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
-        fastq_file_path=demultiplex_fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
+        fastq_file_path=demultiplex_fastq_file_path,
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
     )
 
     # THEN the fastq file path should be returned equal to the original fastq file path

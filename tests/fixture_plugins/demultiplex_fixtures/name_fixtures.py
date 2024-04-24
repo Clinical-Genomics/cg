@@ -13,21 +13,29 @@ def flow_cell_name_demultiplexed_with_bcl2fastq() -> str:
     return "HHKVCALXX"
 
 
+@pytest.fixture(scope="session")
+def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
+    return "HY7FFDRX2"
+
+
+@pytest.fixture
+def bclconvert_flow_cell_dir_name(demux_post_processing_api) -> str:
+    """Return a flow cell name that has been demultiplexed with bclconvert."""
+    flow_cell_dir_name = "230504_A00689_0804_BHY7FFDRX2"
+    flow_cell_path = Path(demux_post_processing_api.demultiplexed_runs_dir, flow_cell_dir_name)
+
+    add_and_include_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=flow_cell_path,
+        flow_cell_name="HY7FFDRX2",
+        hk_api=demux_post_processing_api.hk_api,
+    )
+    return flow_cell_dir_name
+
+
 @pytest.fixture
 def flow_cell_name() -> str:
     """Return flow cell name."""
     return "HVKJCDRXX"
-
-
-@pytest.fixture
-def bcl2fastq_flow_cell_id() -> str:
-    """Return flow cell id from bcl2fastq flow cell object."""
-    return "HLYWYDSXX"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
-    return "HY7FFDRX2"
 
 
 @pytest.fixture(scope="session")
@@ -55,21 +63,53 @@ def hiseq_x_single_index_flow_cell_name(hiseq_x_single_index_flow_cell_id) -> st
 
 
 @pytest.fixture(scope="session")
-def hiseq_x_dual_index_flow_cell_name() -> str:
+def hiseq_x_dual_index_flow_cell_id() -> str:
+    """Return the id of a HiSeqX flow cell with two indexes."""
+    return "HL32LCCXY"
+
+
+@pytest.fixture(scope="session")
+def hiseq_x_dual_index_flow_cell_name(hiseq_x_dual_index_flow_cell_id: str) -> str:
     """Return the full name of a HiSeqX flow cell with two indexes."""
-    return "180508_ST-E00269_0269_AHL32LCCXY"
+    return f"180508_ST-E00269_0269_A{hiseq_x_dual_index_flow_cell_id}"
 
 
 @pytest.fixture(scope="session")
-def hiseq_2500_dual_index_flow_cell_name() -> str:
-    """Return the full name of a HiSeq2500 flow cell with double indexes."""
-    return "181005_D00410_0735_BHM2LNBCX2"
+def hiseq_2500_dual_index_flow_cell_id() -> str:
+    """Return the id of a HiSeq2500 flow cell with double indexes."""
+    return "HM2LNBCX2"
 
 
 @pytest.fixture(scope="session")
-def hiseq_2500_custom_index_flow_cell_name() -> str:
+def hiseq_2500_dual_index_flow_cell_name(hiseq_2500_dual_index_flow_cell_id: str) -> str:
     """Return the full name of a HiSeq2500 flow cell with double indexes."""
-    return "180509_D00450_0598_BHGYFNBCX2"
+    return f"181005_D00410_0735_B{hiseq_2500_dual_index_flow_cell_id}"
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_custom_index_flow_cell_id() -> str:
+    """Return the id of a HiSeq2500 flow cell with double indexes."""
+    return "HGYFNBCX2"
+
+
+@pytest.fixture(scope="session")
+def hiseq_2500_custom_index_flow_cell_name(hiseq_2500_custom_index_flow_cell_id) -> str:
+    """Return the full name of a HiSeq2500 flow cell with double indexes."""
+    return f"180509_D00450_0598_B{hiseq_2500_custom_index_flow_cell_id}"
+
+
+@pytest.fixture(scope="session")
+def novaseq_6000_pre_1_5_kits_flow_cell_id() -> str:
+    """Return the id of a NovaSeqX flow cell."""
+    return "HLYWYDSXX"
+
+
+@pytest.fixture(scope="session")
+def novaseq_6000_pre_1_5_kits_flow_cell_full_name(
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
+) -> str:
+    """Return the full name of a NovaSeqX flow cell."""
+    return f"190927_A00689_0069_B{novaseq_6000_pre_1_5_kits_flow_cell_id}"
 
 
 @pytest.fixture(scope="session")
@@ -96,20 +136,6 @@ def novaseq_x_flow_cell_id() -> str:
 def novaseq_x_flow_cell_full_name(novaseq_x_flow_cell_id: str) -> str:
     """Return the full name of a NovaSeqX flow cell."""
     return f"20231108_LH00188_0028_B{novaseq_x_flow_cell_id}"
-
-
-@pytest.fixture
-def bclconvert_flow_cell_dir_name(demux_post_processing_api) -> str:
-    """Return a flow cell name that has been demultiplexed with bclconvert."""
-    flow_cell_dir_name = "230504_A00689_0804_BHY7FFDRX2"
-    flow_cell_path = Path(demux_post_processing_api.demultiplexed_runs_dir, flow_cell_dir_name)
-
-    add_and_include_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=flow_cell_path,
-        flow_cell_name="HY7FFDRX2",
-        hk_api=demux_post_processing_api.hk_api,
-    )
-    return flow_cell_dir_name
 
 
 # Lists

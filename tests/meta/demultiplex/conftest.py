@@ -75,16 +75,10 @@ def tmp_flow_cell_demux_base_path(project_dir: Path, bcl2fastq_flow_cell_full_na
     return tmp_flow_cell_demux_path
 
 
-@pytest.fixture(name="flow_cell_project_id")
-def flow_cell_project_id() -> int:
-    """Return flow cell run project id."""
-    return 174578
-
-
 @pytest.fixture(name="populated_flow_cell_store")
 def populated_flow_cell_store(
     family_name: str,
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     sample_id: str,
     store: Store,
     helpers: StoreHelpers,
@@ -101,7 +95,7 @@ def populated_flow_cell_store(
     )
     helpers.add_flow_cell(
         store=populated_flow_cell_store,
-        flow_cell_name=bcl2fastq_flow_cell_id,
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
         sequencer_type="novaseq",
         samples=[sample],
     )
@@ -111,7 +105,7 @@ def populated_flow_cell_store(
 @pytest.fixture(name="active_flow_cell_store")
 def active_flow_cell_store(
     family_name: str,
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     sample_id: str,
     base_store: Store,
     helpers: StoreHelpers,
@@ -129,7 +123,7 @@ def active_flow_cell_store(
     )
     helpers.add_flow_cell(
         store=active_flow_cell_store,
-        flow_cell_name=bcl2fastq_flow_cell_id,
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
         sequencer_type="novaseq",
         samples=[sample],
     )
@@ -138,7 +132,7 @@ def active_flow_cell_store(
 
 @pytest.fixture(name="sample_level_housekeeper_api")
 def sample_level_housekeeper_api(
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     real_housekeeper_api: HousekeeperAPI,
     sample_id: str,
     tmp_fastq_paths: list[Path],
@@ -151,7 +145,11 @@ def sample_level_housekeeper_api(
         "created": datetime.now(),
         "version": "1.0",
         "files": [
-            {"path": path.as_posix(), "tags": ["fastq", bcl2fastq_flow_cell_id], "archive": False}
+            {
+                "path": path.as_posix(),
+                "tags": ["fastq", novaseq_6000_pre_1_5_kits_flow_cell_id],
+                "archive": False,
+            }
             for path in tmp_fastq_paths
         ],
     }
@@ -161,7 +159,7 @@ def sample_level_housekeeper_api(
 
 @pytest.fixture(name="flow_cell_name_housekeeper_api")
 def flow_cell_name_housekeeper_api(
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     real_housekeeper_api: HousekeeperAPI,
     sample_id: str,
     tmp_fastq_paths: list[Path],
@@ -175,18 +173,22 @@ def flow_cell_name_housekeeper_api(
         "created": datetime.now(),
         "version": "1.0",
         "files": [
-            {"path": path.as_posix(), "tags": ["fastq", bcl2fastq_flow_cell_id], "archive": False}
+            {
+                "path": path.as_posix(),
+                "tags": ["fastq", novaseq_6000_pre_1_5_kits_flow_cell_id],
+                "archive": False,
+            }
             for path in tmp_fastq_paths
         ],
     }
     flow_cell_bundle_data = {
-        "name": bcl2fastq_flow_cell_id,
+        "name": novaseq_6000_pre_1_5_kits_flow_cell_id,
         "created": datetime.now(),
         "version": "1.0",
         "files": [
             {
                 "path": tmp_sample_sheet_path.as_posix(),
-                "tags": ["samplesheet", bcl2fastq_flow_cell_id],
+                "tags": ["samplesheet", novaseq_6000_pre_1_5_kits_flow_cell_id],
                 "archive": False,
             }
         ],

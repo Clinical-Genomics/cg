@@ -253,7 +253,7 @@ def re_sequenced_sample_store(
     bcl_convert_flow_cell_id: str,
     case_id: str,
     family_name: str,
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     sample_id: str,
     ticket_id: str,
     timestamp_now: datetime,
@@ -289,7 +289,7 @@ def re_sequenced_sample_store(
 
     helpers.add_flow_cell(
         store=re_sequenced_sample_store,
-        flow_cell_name=bcl2fastq_flow_cell_id,
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
         samples=[store_sample],
         date=one_day_ahead_of_now,
     )
@@ -298,7 +298,7 @@ def re_sequenced_sample_store(
     helpers.ensure_sample_lane_sequencing_metrics(
         store=re_sequenced_sample_store,
         sample_internal_id=store_sample.internal_id,
-        flow_cell_name=bcl2fastq_flow_cell_id,
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
         flow_cell_lane_number=1,
         sample_total_reads_in_lane=120000000,
         sample_base_percentage_passing_q30=90,
