@@ -814,7 +814,6 @@ class NfAnalysisAPI(AnalysisAPI):
             or self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
 
-
     def clean_workflow_run_dir(self, yes: bool, case_id: str, dry_run: bool = False):
         """Remove workflow run directory."""
 
@@ -864,4 +863,3 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_genome_build(self, case_id: str) -> str:
         """Return the reference genome build version of Nextflow analysis."""
         return GenomeVersion.hg38.value
-
