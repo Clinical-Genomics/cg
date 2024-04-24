@@ -138,7 +138,7 @@ packages are maintained by using conda environments. For local development it
 is suggested to follow the [python packaging
 guidelines](https://packaging.python.org/tutorials/managing-dependencies/)
 where it is suggested to manage your local python environment with
-[pipenv](https://pipenv.pypa.io/en/latest/). CG has a Pipfile.lock file which
+[pipenv](https://pipenv.pypa.io). CG has a Pipfile.lock file which
 will ensure that the installation will work if the environment is set up in the
 correct way. To use a **combination of conda and pipenv** make sure that you
 point to the conda installation of python when creating your pipenv virtual
@@ -271,7 +271,7 @@ analysis performance and limitations.
 
 ### Cli
 
-The command line code is written in the [Click](https://click.palletsprojects.com/en/8.1.x/) framework.
+The command line code is written in the [Click](https://click.palletsprojects.com) framework.
 
 #### Add
 
