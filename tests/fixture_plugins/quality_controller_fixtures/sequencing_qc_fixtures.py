@@ -1,6 +1,6 @@
 import pytest
 
-from cg.store.models import Sample
+from cg.store.models import Case, Sample
 from cg.constants.priority import Priority
 from cg.constants.constants import PrepCategory, Workflow
 
@@ -83,7 +83,7 @@ def sample_failing_sequencing_qc(
 @pytest.fixture(scope="function")
 def case_passing_sequencing_qc(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
-) -> Sample:
+) -> Case:
     return sequencing_qc_check_scenarios.case_scenario(
         priority=Priority.standard,
         pass_sequencing_qc=True,
@@ -95,7 +95,7 @@ def case_passing_sequencing_qc(
 @pytest.fixture(scope="function")
 def case_failing_sequencing_qc(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
-) -> Sample:
+) -> Case:
     return sequencing_qc_check_scenarios.case_scenario(
         priority=Priority.standard,
         pass_sequencing_qc=False,
@@ -107,7 +107,7 @@ def case_failing_sequencing_qc(
 @pytest.fixture(scope="function")
 def express_case_passing_sequencing_qc(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
-) -> Sample:
+) -> Case:
     return sequencing_qc_check_scenarios.case_scenario(
         priority=Priority.express,
         pass_sequencing_qc=True,
@@ -119,7 +119,7 @@ def express_case_passing_sequencing_qc(
 @pytest.fixture(scope="function")
 def express_case_failing_sequencing_qc(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
-) -> Sample:
+) -> Case:
     return sequencing_qc_check_scenarios.case_scenario(
         priority=Priority.express,
         pass_sequencing_qc=False,
@@ -130,7 +130,7 @@ def express_case_failing_sequencing_qc(
 @pytest.fixture(scope="function")
 def one_sample_in_case_has_reads(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
-) -> Sample:
+) -> Case:
     return sequencing_qc_check_scenarios.case_scenario(
         priority=Priority.standard,
         pass_sequencing_qc=True,
@@ -141,7 +141,7 @@ def one_sample_in_case_has_reads(
 @pytest.fixture(scope="function")
 def no_sample_in_case_has_reads(
     sequencing_qc_check_scenarios: SequencingQCCheckScenarios,
-) -> Sample:
+) -> Case:
     return sequencing_qc_check_scenarios.case_scenario(
         priority=Priority.standard,
         pass_sequencing_qc=False,
