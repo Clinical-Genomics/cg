@@ -4,7 +4,7 @@ import os
 import shutil
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Any
+from typing import Any, Iterator
 
 import click
 import requests

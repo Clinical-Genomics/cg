@@ -139,10 +139,6 @@ class Workflow(StrEnum):
     TAXPROFILER: str = "taxprofiler"
     TOMTE: str = "tomte"
 
-    @classmethod
-    def get_nf_workflows(cls) -> set:
-        return {cls.RNAFUSION, cls.TAXPROFILER, cls.RAREDISEASE, cls.TOMTE}
-
 
 class FileFormat(StrEnum):
     CSV: str = "csv"

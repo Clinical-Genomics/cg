@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from cg.constants import Workflow
-from cg.constants.constants import Strandedness
+from cg.constants.constants import GenomeVersion, Strandedness
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
 from cg.exc import MissingMetrics
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -56,6 +56,10 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def is_multiple_samples_allowed(self) -> bool:
         """Return whether the analysis supports multiple samples to be linked to the case."""
         return False
+
+    def get_genome_build(self, case_id: str) -> GenomeVersion:
+        """Return reference genome for a case. Currently fixed for hg19."""
+        return GenomeVersion.hg38
 
     def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""

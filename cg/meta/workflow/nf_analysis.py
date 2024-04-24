@@ -846,12 +846,11 @@ class NfAnalysisAPI(AnalysisAPI):
         }
         if len(reference_genome) == 1:
             return reference_genome.pop()
-        elif len(reference_genome) > 1:
+        if len(reference_genome) > 1:
             raise CgError(
                 f"Samples linked to case {case_id} have different reference genome versions set"
             )
-        else:
-            raise CgError("No reference genome specified")
+        raise CgError(f"No reference genome specified for case {case_id}")
 
     def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
         """Return build version of the gene panel for a case."""
