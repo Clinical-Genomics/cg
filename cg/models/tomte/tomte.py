@@ -3,7 +3,7 @@ from pathlib import Path
 
 from pydantic.v1 import validator
 
-from cg.constants.constants import Strandedness
+from cg.constants.constants import GenomeVersion, Strandedness
 from cg.constants.sample_sources import SourceType
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 from cg.utils.utils import replace_non_alphanumeric
@@ -53,7 +53,15 @@ class TomteParameters(WorkflowParameters):
     genome: str
 
     @validator("tissue", pre=True)
-    def replace_non_alphanumeric(cls, tissue: str) -> str:
+    def restrict_tissue_values(cls, tissue: str) -> str:
         if tissue:
             return replace_non_alphanumeric(string=tissue)
         return SourceType.UNKNOWN
+
+    @validator("genome", pre=True)
+    def restrict_genome_values(cls, genome: str) -> str:
+        if genome == GenomeVersion.hg38:
+            return "GRCh38"
+        elif genome == GenomeVersion.hg19:
+            return "GRCh37"
+        
