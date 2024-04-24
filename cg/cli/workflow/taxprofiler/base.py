@@ -41,4 +41,3 @@ taxprofiler.add_command(report_deliver)
 taxprofiler.add_command(store_housekeeper)
 taxprofiler.add_command(store)
 taxprofiler.add_command(store_available)
-
