@@ -1318,7 +1318,7 @@ def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
 def test_get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
     store_with_sequencing_metrics: Store,
     hiseq_x_dual_index_flow_cell_id: str,
-    expected_total_reads_flow_cell_bcl2fastq: int,
+    expected_total_reads_hiseq_x_flow_cell: int,
 ):
     # GIVEN a store with sequencing metrics
     # WHEN getting total read counts for a flow cell
@@ -1326,7 +1326,7 @@ def test_get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
         flow_cell_name=hiseq_x_dual_index_flow_cell_id
     )
     # THEN assert that the total read count is correct
-    assert reads == expected_total_reads_flow_cell_bcl2fastq
+    assert reads == expected_total_reads_hiseq_x_flow_cell
 
 
 def test_get_average_bases_above_q30_for_sample_from_metrics(
