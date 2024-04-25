@@ -27,8 +27,9 @@ from cg.apps.housekeeper.models import InputBundle
 from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, FileFormat, Strandedness
+from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SequencingPlatform
@@ -53,7 +54,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.raredisease.raredisease import RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
-from cg.models.tomte.tomte import TomteSampleSheetHeaders
+from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
 from cg.store.store import Store
@@ -3070,6 +3071,12 @@ def tomte_nexflow_config_file_path(tomte_dir, tomte_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
+def tomte_gene_panel_path(tomte_dir, tomte_case_id) -> Path:
+    """Path to gene panel file."""
+    return Path(tomte_dir, tomte_case_id, "gene_panels").with_suffix(FileExtensions.BED)
+
+
+@pytest.fixture(scope="function")
 def tomte_mock_config(tomte_dir: Path, tomte_case_id: str) -> None:
     """Create Tomte samplesheet.csv file for testing."""
     Path.mkdir(Path(tomte_dir, tomte_case_id), parents=True, exist_ok=True)
@@ -3256,6 +3263,24 @@ def tomte_deliverables_response_data(
 
 
 @pytest.fixture(scope="function")
+def tomte_parameters_default(
+    tomte_dir: Path,
+    tomte_case_id: str,
+    tomte_sample_sheet_path: Path,
+    tomte_gene_panel_path: Path,
+    existing_directory: Path,
+) -> TomteParameters:
+    """Return Tomte parameters."""
+    return TomteParameters(
+        input=tomte_sample_sheet_path,
+        outdir=Path(tomte_dir, tomte_case_id),
+        gene_panel_clinical_filter=tomte_gene_panel_path,
+        tissue="unkown",
+        genome="hg38",
+    )
+
+
+@pytest.fixture(scope="function")
 def tomte_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
@@ -3287,6 +3312,7 @@ def tomte_context(
         internal_id=tomte_case_id,
         name=tomte_case_id,
         data_analysis=Workflow.TOMTE,
+        panels=[GenePanelMasterList.OMIM_AUTO],
     )
 
     sample_enough_reads: Sample = helpers.add_sample(
@@ -3295,6 +3321,7 @@ def tomte_context(
         internal_id=sample_id,
         reads=total_sequenced_reads_pass,
         last_sequenced_at=datetime.now(),
+        reference_genome=GenomeVersion.hg38,
     )
 
     helpers.add_relationship(
