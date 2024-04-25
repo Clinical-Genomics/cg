@@ -40,14 +40,14 @@ def test_get_flow_cell_id_when_hiseqx(
 def test_get_flow_cell_id_when_novaseq(
     compress_api: CompressAPI,
     novaseq_6000_pre_1_5_kits_flow_cell_id: str,
-    bcl2fastq_flow_cell_full_name: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_full_name: str,
 ):
     """Test extracting the flow cell id from a fastq file path."""
 
     # GIVEN a CompressAPI and a flow cell id within a fastq file path
     fastq_path: Path = compress_api.demux_root.joinpath(
         Path(
-            bcl2fastq_flow_cell_full_name,
+            novaseq_6000_pre_1_5_kits_flow_cell_full_name,
             f"{novaseq_6000_pre_1_5_kits_flow_cell_id}_ACC10950A36_S36_L001_R1_001.fastq.gz",
         )
     )

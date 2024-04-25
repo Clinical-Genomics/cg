@@ -254,19 +254,20 @@ class CustomerView(BaseView):
         "scout_access",
     ]
     column_list = [
-        "comment",
-        "delivery_contact",
         "internal_id",
-        "lab_contact",
         "name",
+        "data_archive_location",
+        "comment",
         "primary_contact",
+        "delivery_contact",
+        "lab_contact",
         "priority",
         "project_account_KI",
         "project_account_kth",
         "return_samples",
         "scout_access",
     ]
-    column_filters = ["priority", "scout_access"]
+    column_filters = ["priority", "scout_access", "data_archive_location"]
     column_searchable_list = ["internal_id", "name"]
     form_excluded_columns = ["families", "samples", "pools", "orders", "invoices"]
 
