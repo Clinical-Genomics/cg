@@ -289,14 +289,6 @@ def tmp_flow_cells_directory_ready_for_demultiplexing(
 
 
 @pytest.fixture
-def tmp_demultiplexed_runs_bcl2fastq_directory(
-    tmp_illumina_demultiplexed_flow_cells_directory: Path,
-) -> Path:
-    """Return the path to a temporary demultiplex-runs bcl2fastq flow cell directory."""
-    return Path(tmp_illumina_demultiplexed_flow_cells_directory, "201203_D00483_0200_AHVKJCDRXX")
-
-
-@pytest.fixture
 def tmp_demultiplexed_flow_cell_no_fastq_files(
     tmp_illumina_flow_cells_demux_results_not_finished_directory: Path,
     novaseq_6000_post_1_5_kits_flow_cell_full_name: str,
