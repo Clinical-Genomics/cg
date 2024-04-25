@@ -214,7 +214,7 @@ def tmp_illumina_flow_cells_demux_results_not_finished_directory(
     tmp_path: Path, illumina_demux_results_not_finished_dir: Path
 ) -> Path:
     """Return the path to a temporary flow cells directory with unfinished demultiplexing results."""
-    original_dir = illumina_demux_results_not_finished_dir
+    original_dir: Path = illumina_demux_results_not_finished_dir
     tmp_dir = Path(tmp_path, "demultiplexed-runs-unfinished")
 
     return Path(shutil.copytree(original_dir, tmp_dir))
@@ -313,7 +313,7 @@ def novaseqx_latest_analysis_version() -> str:
 
 
 def add_novaseqx_analysis_data(novaseqx_flow_cell_directory: Path, analysis_version: str):
-    """Add NovaseqX analysis data to a flow cell directory."""
+    """Add NovaSeqX analysis data to a flow cell directory."""
     analysis_path: Path = Path(
         novaseqx_flow_cell_directory, DemultiplexingDirsAndFiles.ANALYSIS, analysis_version
     )
@@ -322,7 +322,6 @@ def add_novaseqx_analysis_data(novaseqx_flow_cell_directory: Path, analysis_vers
     data = analysis_path.joinpath(DemultiplexingDirsAndFiles.DATA)
     data.mkdir()
     data.joinpath(DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED).touch()
-    return analysis_path
 
 
 @pytest.fixture(scope="function")
