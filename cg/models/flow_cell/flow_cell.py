@@ -54,7 +54,7 @@ class FlowCellDirectoryData:
         """Parse relevant information from flow cell name.
         This will assume that the flow cell naming convention is used. If not we skip the flow cell.
         Convention is: <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>
-        Example: '201203_D00483_0200_AHVKJCDRXX'.
+        Example: '230912_A00187_1009_AHK33MDRX3'.
         """
 
         self.validate_flow_cell_dir_name()
@@ -139,16 +139,6 @@ class FlowCellDirectoryData:
         return Path(self.path, DemultiplexingDirsAndFiles.COPY_COMPLETE)
 
     @property
-    def hiseq_x_copy_complete_path(self) -> Path:
-        """Return copy complete path for HiSeqX."""
-        return Path(self.path, DemultiplexingDirsAndFiles.HISEQ_X_COPY_COMPLETE)
-
-    @property
-    def hiseq_x_delivery_started_path(self) -> Path:
-        """Return delivery started path for HiSeqX."""
-        return Path(self.path, DemultiplexingDirsAndFiles.DELIVERY)
-
-    @property
     def demultiplexing_started_path(self) -> Path:
         """Return demux started path."""
         return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_STARTED)
@@ -172,7 +162,7 @@ class FlowCellDirectoryData:
         """
         Validate on the following criteria:
         Convention is: <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>
-        Example: '201203_D00483_0200_AHVKJCDRXX'.
+        Example: '230912_A00187_1009_AHK33MDRX3'.
         """
         if len(self.split_flow_cell_name) != 4:
             message = f"Flowcell {self.full_name} does not follow the flow cell naming convention"

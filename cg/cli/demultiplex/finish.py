@@ -24,7 +24,7 @@ def finish_group():
 def finish_flow_cell(context: CGConfig, flow_cell_directory_name: str, force: bool, dry_run: bool):
     """Command to finish up a flow cell after demultiplexing.
 
-    flow-cell-name is full flow cell name, e.g. '201203_D00483_0200_AHVKJCDRXX'.
+    flow-cell-name is full flow cell name, e.g. '230912_A00187_1009_AHK33MDRX3'.
     """
     demux_post_processing_api = DemuxPostProcessingAPI(config=context)
     demux_post_processing_api.set_dry_run(dry_run=dry_run)

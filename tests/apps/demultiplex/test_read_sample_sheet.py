@@ -1,28 +1,19 @@
 import logging
-from pathlib import Path
-from typing import Type
 
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_raw_samples_from_content,
-    get_sample_type_from_content,
     get_samples_by_lane,
     validate_samples_are_unique,
 )
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSample,
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
-from cg.constants.constants import FileFormat
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.exc import SampleSheetError
-from cg.io.controller import ReadFile
 
 
 def test_validate_samples_are_unique(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
-    novaseq6000_flow_cell_sample_2: FlowCellSampleBcl2Fastq,
+    novaseq6000_flow_cell_sample_1: FlowCellSample,
+    novaseq6000_flow_cell_sample_2: FlowCellSample,
 ):
     """Test that validating two different samples finishes successfully."""
     # GIVEN two different NovaSeq samples
@@ -37,7 +28,7 @@ def test_validate_samples_are_unique(
 
 
 def test_validate_samples_are_unique_when_not_unique(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq, caplog
+    novaseq6000_flow_cell_sample_1: FlowCellSample, caplog
 ):
     """Test that validating two identical samples fails."""
     # GIVEN two identical NovaSeq samples
@@ -57,8 +48,8 @@ def test_validate_samples_are_unique_when_not_unique(
 
 
 def test_get_samples_by_lane(
-    novaseq6000_flow_cell_sample_1: FlowCellSampleBcl2Fastq,
-    novaseq6000_flow_cell_sample_2: FlowCellSampleBcl2Fastq,
+    novaseq6000_flow_cell_sample_1: FlowCellSample,
+    novaseq6000_flow_cell_sample_2: FlowCellSample,
 ):
     """Test that grouping two samples with different lanes returns two groups."""
     # GIVEN two samples on two different lanes
@@ -74,70 +65,46 @@ def test_get_samples_by_lane(
     assert len(samples_per_lane) == 2
 
 
-def test_get_raw_samples_valid_sample_sheet(valid_sample_sheet_bcl2fastq: list[list[str]]):
+def test_get_raw_samples_valid_sample_sheet(
+    hiseq_x_single_index_sample_sheet_content: list[list[str]],
+):
     """Test that getting raw samples from a valid sample sheet gets a correct list of dictionaries."""
     # GIVEN a valid sample sheet
 
     # WHEN getting the list of raw samples from it
     raw_samples: list[dict[str, str]] = get_raw_samples_from_content(
-        sample_sheet_content=valid_sample_sheet_bcl2fastq
+        sample_sheet_content=hiseq_x_single_index_sample_sheet_content
     )
 
     # THEN it returns a list with 2 dictionaries
-    assert len(raw_samples) == 2
+    assert len(raw_samples) == 9
     # THEN the list contains dictionaries
     assert isinstance(raw_samples[0], dict)
     # THEN the sample contains the key "Lane"
     assert "Lane" in raw_samples[0].keys()
 
 
-def test_get_raw_samples_no_header(sample_sheet_samples_no_header: list[list[str]], caplog):
+def test_get_raw_samples_no_header(sample_sheet_samples_no_column_names: list[list[str]], caplog):
     """Test that getting samples from a sample sheet without header fails."""
     # GIVEN a sample sheet without header
     caplog.set_level(logging.INFO)
 
     # WHEN trying to get the samples from the sample sheet
     with pytest.raises(SampleSheetError):
-        get_raw_samples_from_content(sample_sheet_content=sample_sheet_samples_no_header)
+        get_raw_samples_from_content(sample_sheet_content=sample_sheet_samples_no_column_names)
 
     # THEN an exception is raised because of the missing header
     assert "Could not find header in sample sheet" in caplog.text
 
 
-def test_get_raw_samples_no_samples(sample_sheet_bcl2fastq_data_header: list[list[str]], caplog):
+def test_get_raw_samples_no_samples(sample_sheet_bcl_convert_data_header: list[list[str]], caplog):
     """Test that getting samples from a sample sheet without samples fails."""
     # GIVEN a sample sheet without samples
     caplog.set_level(logging.INFO)
 
     # WHEN trying to get the samples from the sample sheet
     with pytest.raises(SampleSheetError):
-        get_raw_samples_from_content(sample_sheet_content=sample_sheet_bcl2fastq_data_header)
+        get_raw_samples_from_content(sample_sheet_content=sample_sheet_bcl_convert_data_header)
 
     # THEN an exception is raised because of the missing samples
     assert "Could not find any samples in sample sheet" in caplog.text
-
-
-def test_get_sample_type_for_bcl_convert(bcl_convert_sample_sheet_path: Path):
-    # GIVEN a bcl convert sample sheet path
-
-    # WHEN getting the sample type
-    content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=bcl_convert_sample_sheet_path
-    )
-    sample_type: Type[FlowCellSample] = get_sample_type_from_content(content)
-
-    # THEN the sample type is FlowCellSampleBCLConvert
-    assert sample_type is FlowCellSampleBCLConvert
-
-
-def test_get_sample_type_for_bcl2fastq(hiseq_x_single_index_bcl2fastq_sample_sheet_path: Path):
-    # GIVEN a bcl convert sample sheet path
-
-    # WHEN getting the sample type
-    content: list[list[str]] = ReadFile.get_content_from_file(
-        file_format=FileFormat.CSV, file_path=hiseq_x_single_index_bcl2fastq_sample_sheet_path
-    )
-    sample_type: Type[FlowCellSample] = get_sample_type_from_content(content)
-
-    # THEN the sample type is FlowCellSampleBCLConvert
-    assert sample_type is FlowCellSampleBcl2Fastq
