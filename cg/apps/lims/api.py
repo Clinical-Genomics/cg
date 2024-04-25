@@ -67,8 +67,8 @@ class LimsAPI(Lims, OrderHandler):
         """Return the source from LIMS for a given sample ID.
         Return 'None' if no source information is set or
         if sample is not found or cannot be fetched from LIMS."""
-        if lims_sample := self.sample(lims_id=lims_id):
-            return lims_sample.get("source")
+        lims_sample: dict[str, Any] = self.sample(lims_id=lims_id)
+        return lims_sample.get("source")
 
     @staticmethod
     def _export_project(lims_project) -> dict:
