@@ -17,7 +17,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 def test_demultiplex_dragen_flowcell(
     cli_runner: testing.CliRunner,
-    tmp_flow_cell_directory_bclconvert: Path,
+    tmp_flow_cell_directory_bcl_convert: Path,
     demultiplexing_context_for_demux: CGConfig,
     caplog,
     mocker,
@@ -26,9 +26,9 @@ def test_demultiplex_dragen_flowcell(
 
     # GIVEN that all files are present for Dragen demultiplexing
 
-    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bcl_convert)
     add_and_include_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=tmp_flow_cell_directory_bclconvert,
+        flow_cell_directory=tmp_flow_cell_directory_bcl_convert,
         flow_cell_name=flow_cell.id,
         hk_api=demultiplexing_context_for_demux.housekeeper_api,
     )
@@ -48,7 +48,7 @@ def test_demultiplex_dragen_flowcell(
     # WHEN starting demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
         demultiplex_flow_cell,
-        [str(tmp_flow_cell_directory_bclconvert)],
+        [str(tmp_flow_cell_directory_bcl_convert)],
         obj=demultiplexing_context_for_demux,
     )
 

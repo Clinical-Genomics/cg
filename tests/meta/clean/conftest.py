@@ -50,9 +50,9 @@ def flow_cell_clean_api_can_not_be_removed(
 
 
 @pytest.fixture(scope="function")
-def tmp_flow_cell_to_clean_path(tmp_flow_cell_directory_bclconvert: Path):
+def tmp_flow_cell_to_clean_path(tmp_flow_cell_directory_bcl_convert: Path):
     """Returns the path to a flow cell fulfilling all cleaning criteria."""
-    return tmp_flow_cell_directory_bclconvert
+    return tmp_flow_cell_directory_bcl_convert
 
 
 @pytest.fixture(scope="function")

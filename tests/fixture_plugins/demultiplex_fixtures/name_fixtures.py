@@ -5,7 +5,7 @@ import pytest
 
 @pytest.fixture
 def flow_cell_name() -> str:
-    """Return flow cell name."""
+    """Return flow cell name (novaseq pre 1.5 I think)."""
     return "HVKJCDRXX"
 
 
