@@ -1,6 +1,7 @@
 {% from "/macros/data_analysis/qc_metrics/balsamic_qc_metrics.html" import balsamic_qc_metrics %}
 {% from "/macros/data_analysis/qc_metrics/mip_dna_qc_metrics.html" import mip_dna_qc_metrics %}
 {% from "/macros/data_analysis/qc_metrics/rnafusion_qc_metrics.html" import rnafusion_qc_metrics %}
+{% from "/macros/data_analysis/qc_metrics/taxprofiler_qc_metrics.html" import taxprofiler_qc_metrics %}
 {% from "/macros/data_analysis/qc_metrics/tomte_qc_metrics.html" import tomte_qc_metrics %}
 {% from "/macros/data_analysis/limitations.html" import apptag_limitations %}
 
@@ -20,6 +21,10 @@
     {% elif workflow == "rnafusion" %}
       <!-- Rnafusion QC metrics -->
       {{ rnafusion_qc_metrics(samples=case.samples) }}
+    {% elif workflow == "taxprofiler" %}
+      <!-- Taxprofiler QC metrics -->
+      {{ taxprofiler_qc_metrics(samples=case.samples) }}
+    {% endif %}
 	  {% elif workflow == "tomte" %}
       <!-- Tomte QC metrics -->
       {{ tomte_qc_metrics(samples=case.samples) }}
