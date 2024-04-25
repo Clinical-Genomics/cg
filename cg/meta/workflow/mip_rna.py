@@ -49,9 +49,9 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
             sample_data[Pedigree.FATHER.value]: str = link_obj.father.internal_id
         return sample_data
 
-    def get_gene_panel(self, case_id: str) -> list[str]:
+    def get_gene_panel(self, case_id: str, dry_run: bool = False) -> list[str]:
         """Create and return the aggregated gene panel file."""
-        return self._get_gene_panel(case_id=case_id, genome_build=GENOME_BUILD_38)
+        return self._get_gene_panel(case_id=case_id, genome_build=GENOME_BUILD_38, dry_run=dry_run)
 
     def get_managed_variants(self) -> list[str]:
         """Create and return the managed variants."""
