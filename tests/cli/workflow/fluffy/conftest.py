@@ -59,11 +59,6 @@ def sample() -> Sample:
 
 
 @pytest.fixture(scope="function")
-def samplesheet_path():
-    return Path("tests/fixtures/data/SampleSheet.csv").absolute()
-
-
-@pytest.fixture(scope="function")
 def fluffy_fastq_file_path(config_root_dir):
     path = Path(config_root_dir)
     path.mkdir(parents=True, exist_ok=True)
@@ -125,14 +120,14 @@ def fluffy_fastq_hk_bundle_data(fluffy_fastq_file_path, fluffy_sample_lims_id) -
 
 
 @pytest.fixture(scope="function")
-def fluffy_samplesheet_bundle_data(samplesheet_path) -> dict:
+def fluffy_samplesheet_bundle_data(novaseq_6000_post_1_5_kits_correct_sample_sheet_path) -> dict:
     return {
         "name": "flowcell",
         "created": dt.datetime.now(),
         "version": "1.0",
         "files": [
             {
-                "path": str(samplesheet_path),
+                "path": str(novaseq_6000_post_1_5_kits_correct_sample_sheet_path),
                 "tags": ["flowcell", "samplesheet"],
                 "archive": False,
             }

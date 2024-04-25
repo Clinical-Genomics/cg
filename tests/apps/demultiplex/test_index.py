@@ -6,38 +6,7 @@ from cg.apps.demultiplex.sample_sheet.index import (
     get_hamming_distance_index_1,
     get_hamming_distance_index_2,
     get_reverse_complement_dna_seq,
-    is_padding_needed,
 )
-
-
-@pytest.mark.parametrize(
-    "index1_cycles, index2_cycles, sample_index_length, expected_is_padding_needed",
-    [
-        (10, 10, 8, True),
-        (10, 10, 10, False),
-        (17, 8, 17, False),
-        (8, 8, 10, False),
-        (8, 8, 8, False),
-    ],
-)
-def test_is_padding_needed(
-    index1_cycles: int,
-    index2_cycles: int,
-    sample_index_length: int,
-    expected_is_padding_needed: bool,
-):
-    """Test that evaluating if a situation needs padding returns the expected value."""
-    # GIVEN a sample index length and the number of index cycles reads stated in the run parameters
-
-    # WHEN checking if padding is needed
-    padding_needed: bool = is_padding_needed(
-        index1_cycles=index1_cycles,
-        index2_cycles=index2_cycles,
-        sample_index_length=sample_index_length,
-    )
-
-    # THEN assert that the result is the expected
-    assert padding_needed == expected_is_padding_needed
 
 
 def test_get_reverse_complement():

@@ -49,7 +49,9 @@ class ScoutAPI:
         self.process.run_command(load_command)
         LOG.debug("Case loaded successfully to Scout")
 
-    def export_panels(self, panels: list[str], build: str = GENOME_BUILD_37) -> list[str]:
+    def export_panels(
+        self, panels: list[str], build: str = GENOME_BUILD_37, dry_run: bool = False
+    ) -> list[str]:
         """Pass through to export of a list of gene panels.
 
         Return list of lines in bed format
@@ -61,7 +63,7 @@ class ScoutAPI:
             export_panels_command.extend(["--build", build])
 
         try:
-            self.process.run_command(export_panels_command)
+            self.process.run_command(export_panels_command, dry_run=dry_run)
             if not self.process.stdout:
                 return []
         except CalledProcessError:
