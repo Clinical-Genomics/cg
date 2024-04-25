@@ -47,7 +47,7 @@ class SampleSheetAPI:
 
     def _get_flow_cell(self, flow_cell_name: str) -> FlowCellDirectoryData:
         """
-        Return a flow cell given a path and the bcl converter.
+        Return a flow cell given a path.
         Raises:
             SampleSheetError: If the flow cell directory or the data it contains is not valid.
         """
