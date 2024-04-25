@@ -5,7 +5,6 @@ import shutil
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Any
-from dateutil.parser import parse as parse_date
 
 import click
 from housekeeper.store.models import Bundle, Version
@@ -643,53 +642,3 @@ class AnalysisAPI(MetaAPI):
             tag=lims_sample.get("application")
         )
         return application.analysis_type if application else None
-
-    def clean_past_run_dirs(self, before_str: str, yes: bool = False, dry_run: bool = False):
-        """Clean up of old case run dirs."""
-
-        before: dt.datetime = parse_date(before_str)
-        possible_cleanups: list[Analysis] = self.get_analyses_to_clean(before=before)
-        LOG.info(f"Cleaning {len(possible_cleanups)} analyses created before {before}")
-
-        for analysis in possible_cleanups:
-            case_id: str = analysis.case.internal_id
-            try:
-                LOG.info(f"Cleaning {self.workflow} output for {case_id}")
-                self.clean_workflow_run_dir(yes=yes, case_id=case_id, dry_run=dry_run)
-            except FileNotFoundError:
-                continue
-            except Exception as error:
-                LOG.error(f"Failed to clean directories for case {case_id} - {repr(error)}")
-
-        LOG.info(f"Done cleaning {self.workflow} output")
-
-    def clean_workflow_run_dir(self, yes: bool, case_id: str, dry_run: bool = False):
-        """Remove workflow run directory."""
-
-        self.check_analysis_ongoing(case_id=case_id)
-        analysis_path: list[Path] | Path = self.get_case_path(case_id)
-
-        if dry_run:
-            LOG.info(f"Would have deleted: {analysis_path}")
-            return EXIT_SUCCESS
-
-        self.clean_run_dir(case_id=case_id, yes=yes, case_path=analysis_path)
-
-    def clean_past_run_dirs(self, before_str: str, yes: bool = False, dry_run: bool = False):
-        """Clean up of old case run dirs."""
-
-        before: dt.datetime = parse_date(before_str)
-        possible_cleanups: list[Analysis] = self.get_analyses_to_clean(before=before)
-        LOG.info(f"Cleaning {len(possible_cleanups)} analyses created before {before}")
-
-        for analysis in possible_cleanups:
-            case_id: str = analysis.case.internal_id
-            try:
-                LOG.info(f"Cleaning {self.workflow} output for {case_id}")
-                self.clean_workflow_run_dir(yes=yes, case_id=case_id, dry_run=dry_run)
-            except FileNotFoundError:
-                continue
-            except Exception as error:
-                LOG.error(f"Failed to clean directories for case {case_id} - {repr(error)}")
-
-        LOG.info(f"Done cleaning {self.workflow} output")
