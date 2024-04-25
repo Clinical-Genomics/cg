@@ -1212,7 +1212,7 @@ def store_with_demultiplexed_samples(
     hiseq_x_dual_index_flow_cell_id: str,
     novaseq_6000_post_1_5_kits_flow_cell_id: str,
 ) -> Store:
-    """Return a store with samples that have been demultiplexed with BCL Convert and BCL2Fastq."""
+    """Return a store with samples that have been demultiplexed."""
     helpers.add_flow_cell(store, novaseq_6000_post_1_5_kits_flow_cell_id, sequencer_type="novaseq")
     helpers.add_flow_cell(store, hiseq_x_dual_index_flow_cell_id, sequencer_type="hiseqx")
     for i, sample_internal_id in enumerate(selected_novaseq_6000_post_1_5_kits_sample_ids):
