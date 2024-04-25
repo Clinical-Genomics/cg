@@ -104,6 +104,18 @@ def tmp_demultiplexed_runs_flow_cell_directory(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
+def tmp_illumina_demultiplexed_flow_cells_directory(
+    tmp_path: Path, illumina_demultiplexed_runs_directory
+) -> Path:
+    """Return the path to a temporary demultiplex-runs directory.
+    Generates a copy of the original demultiplexed-runs
+    """
+    original_dir = illumina_demultiplexed_runs_directory
+    tmp_dir = Path(tmp_path, "demultiplexed-runs")
+    return Path(shutil.copytree(original_dir, tmp_dir))
+
+
+@pytest.fixture
 def tmp_illumina_flow_cells_demux_all_directory(
     tmp_path: Path, illumina_demux_all_directory: Path
 ) -> Path:
@@ -220,7 +232,7 @@ def tmp_flow_cell_directory_bcl_convert(tmp_illumina_flow_cells_directory: Path)
 def tmp_flow_cell_with_bcl2fastq_sample_sheet(
     tmp_broken_flow_cells_directory: Path, hiseq_x_single_index_flow_cell_name: str
 ) -> Path:
-    """This is a path to a flow cell directory with a bcl2fastq sample sheet."""
+    """Return a path to a flow cell directory with a BCL2FASTQ sample sheet for translation."""
     return Path(tmp_broken_flow_cells_directory, hiseq_x_single_index_flow_cell_name)
 
 
@@ -259,8 +271,8 @@ def tmp_novaseq_x_without_sample_sheet_flow_cell_path(
     return Path(tmp_broken_flow_cells_directory, novaseq_x_flow_cell_full_name)
 
 
-@pytest.fixture(scope="function")
-def novaseqx_flow_cell_directory(tmp_path: Path, novaseq_x_flow_cell_full_name: str) -> Path:
+@pytest.fixture
+def tmp_novaseqx_flow_cell_directory(tmp_path: Path, novaseq_x_flow_cell_full_name: str) -> Path:
     """Return the path to a NovaseqX flow cell directory."""
     return Path(tmp_path, novaseq_x_flow_cell_full_name)
 
@@ -274,16 +286,6 @@ def tmp_flow_cells_directory_ready_for_demultiplexing(
 
 
 # Temporary demultiplexed runs fixtures
-@pytest.fixture
-def tmp_illumina_demultiplexed_flow_cells_directory(
-    tmp_path: Path, illumina_demultiplexed_runs_directory
-) -> Path:
-    """Return the path to a temporary demultiplex-runs directory.
-    Generates a copy of the original demultiplexed-runs
-    """
-    original_dir = illumina_demultiplexed_runs_directory
-    tmp_dir = Path(tmp_path, "demultiplexed-runs")
-    return Path(shutil.copytree(original_dir, tmp_dir))
 
 
 @pytest.fixture
@@ -335,13 +337,13 @@ def add_novaseqx_analysis_data(novaseqx_flow_cell_directory: Path, analysis_vers
 
 @pytest.fixture(scope="function")
 def novaseqx_flow_cell_dir_with_analysis_data(
-    novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
+    tmp_novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
 ) -> Path:
     """Return the path to a NovaseqX flow cell directory with multiple analysis data directories."""
-    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "0")
-    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "1")
-    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, novaseqx_latest_analysis_version)
-    return novaseqx_flow_cell_directory
+    add_novaseqx_analysis_data(tmp_novaseqx_flow_cell_directory, "0")
+    add_novaseqx_analysis_data(tmp_novaseqx_flow_cell_directory, "1")
+    add_novaseqx_analysis_data(tmp_novaseqx_flow_cell_directory, novaseqx_latest_analysis_version)
+    return tmp_novaseqx_flow_cell_directory
 
 
 @pytest.fixture(scope="function")
@@ -356,24 +358,24 @@ def post_processed_novaseqx_flow_cell(novaseqx_flow_cell_dir_with_analysis_data:
 
 @pytest.fixture(scope="function")
 def novaseqx_flow_cell_analysis_incomplete(
-    novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
+    tmp_novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
 ) -> Path:
     """
     Return the path to a flow cell for which the analysis is not complete.
     It misses the ANALYSIS_COMPLETED file.
     """
     Path(
-        novaseqx_flow_cell_directory,
+        tmp_novaseqx_flow_cell_directory,
         DemultiplexingDirsAndFiles.ANALYSIS,
         novaseqx_latest_analysis_version,
     ).mkdir(parents=True)
     Path(
-        novaseqx_flow_cell_directory,
+        tmp_novaseqx_flow_cell_directory,
         DemultiplexingDirsAndFiles.ANALYSIS,
         novaseqx_latest_analysis_version,
         DemultiplexingDirsAndFiles.COPY_COMPLETE,
     ).touch()
-    return novaseqx_flow_cell_directory
+    return tmp_novaseqx_flow_cell_directory
 
 
 @pytest.fixture(scope="function")
