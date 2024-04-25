@@ -31,10 +31,6 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
         return self.config.mip_rd_rna.script
 
     @property
-    def use_read_count_threshold(self) -> bool:
-        return True
-
-    @property
     def process(self) -> Process:
         if not self._process:
             self._process = Process(

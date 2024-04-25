@@ -19,10 +19,12 @@ from cg.constants.constants import (
 )
 from cg.constants.gene_panel import GenePanelCombo
 from cg.constants.scout import ScoutExportFileName
+from cg.constants.tb import AnalysisStatus
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
+from cg.services.quality_controller import QualityControllerService
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
@@ -55,12 +57,6 @@ class AnalysisAPI(MetaAPI):
     @property
     def root(self):
         raise NotImplementedError
-
-    @property
-    def use_read_count_threshold(self) -> bool:
-        """Defines whether the threshold for adequate read count should be passed for all samples
-        when determining if the analysis for a case should be automatically started"""
-        return False
 
     @property
     def process(self):
@@ -96,6 +92,34 @@ class AnalysisAPI(MetaAPI):
         if not self.get_case_path(case_id=case_id).exists():
             LOG.info(f"No working directory for {case_id} exists")
             raise FileNotFoundError(f"No working directory for {case_id} exists")
+
+    def is_case_ready_for_analysis(self, case: Case) -> bool:
+        """Check if case is ready for analysis. If case passes sequencing QC and is set to analyze,
+        or has not been analyzed yet, or the latest analysis failed, the case is ready for analysis.
+        """
+        case_passed_sequencing_qc: bool = QualityControllerService.case_pass_sequencing_qc(case)
+        case_is_set_to_analyze: bool = case.action == CaseActions.ANALYZE
+        case_has_not_been_analyzed: bool = not case.latest_analyzed
+        case_latest_analysis_failed: bool = (
+            self.trailblazer_api.get_latest_analysis_status(case_id=case.internal_id)
+            == AnalysisStatus.FAILED
+        )
+        return case_passed_sequencing_qc and (
+            case_is_set_to_analyze or case_has_not_been_analyzed or case_latest_analysis_failed
+        )
+
+    def get_cases_ready_for_analysis(self):
+        """
+        Return cases that are ready for analysis. The case is ready if it passes the logic in the
+        get_cases_to_analyse method, and it has passed the pre-analysis quality check.
+        """
+        cases_to_analyse: list[Case] = self.get_cases_to_analyse()
+        cases_passing_quality_check: list[Case] = [
+            case
+            for case in cases_to_analyse
+            if QualityControllerService.case_pass_sequencing_qc(case)
+        ]
+        return cases_passing_quality_check
 
     def get_priority_for_case(self, case_id: str) -> int:
         """Get priority from the status db case priority"""
@@ -299,10 +323,8 @@ class AnalysisAPI(MetaAPI):
         )
         return analyses_to_clean
 
-    def get_cases_to_analyze(self) -> list[Case]:
-        return self.status_db.cases_to_analyze(
-            workflow=self.workflow, threshold=self.use_read_count_threshold
-        )
+    def get_cases_to_analyse(self) -> list[Case]:
+        return self.status_db.cases_to_analyse(workflow=self.workflow)
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,
@@ -536,7 +558,7 @@ class AnalysisAPI(MetaAPI):
         if not self.status_db.are_all_flow_cells_on_disk(case_id=case_id):
             self.status_db.request_flow_cells_for_case(case_id)
 
-    def is_case_ready_for_analysis(self, case_id: str) -> bool:
+    def is_raw_data_ready_for_analysis(self, case_id: str) -> bool:
         """Returns True if no files need to be retrieved from an external location and if all Spring files are
         decompressed."""
         if self.does_any_file_need_to_be_retrieved(case_id):
@@ -566,7 +588,7 @@ class AnalysisAPI(MetaAPI):
         is raised."""
         self.ensure_files_are_present(case_id)
         self.resolve_decompression(case_id=case_id, dry_run=dry_run)
-        if not self.is_case_ready_for_analysis(case_id):
+        if not self.is_raw_data_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
 
     def ensure_files_are_present(self, case_id: str):

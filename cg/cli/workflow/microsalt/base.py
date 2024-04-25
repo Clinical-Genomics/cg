@@ -201,9 +201,9 @@ def start_available(context: click.Context, dry_run: bool = False):
     analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case_obj in analysis_api.get_cases_to_analyze():
+    for case in analysis_api.get_cases_ready_for_analysis():
         try:
-            context.invoke(start, unique_id=case_obj.internal_id, dry_run=dry_run)
+            context.invoke(start, unique_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
             LOG.error(error)
         except CgError as error:
