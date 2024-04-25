@@ -3723,19 +3723,19 @@ def expected_total_reads() -> int:
     return 1_000_000
 
 
-@pytest.fixture(name="expected_average_q30_for_sample")
+@pytest.fixture
 def expected_average_q30_for_sample() -> float:
     """Return expected average Q30 for a sample."""
     return (85.5 + 80.5) / 2
 
 
-@pytest.fixture(name="expected_average_q30_for_flow_cell")
+@pytest.fixture
 def expected_average_q30_for_flow_cell() -> float:
     return (((85.5 + 80.5) / 2) + ((83.5 + 81.5) / 2)) / 2
 
 
-@pytest.fixture(name="expected_total_reads_flow_cell_bcl2fastq")
-def expected_total_reads_flow_cell_2() -> int:
+@pytest.fixture
+def expected_total_reads_hiseq_x_flow_cell() -> int:
     """Return an expected read count"""
     return 8_000_000
 
