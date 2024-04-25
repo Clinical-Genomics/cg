@@ -87,35 +87,45 @@ class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
     pct_reads_improper_pairs: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
 
 
-class WTSSampleMetadataModel(SampleMetadataModel):
+class SequencingSampleMetadataModel(SampleMetadataModel):
+    """Metrics and trending data model associated to the sequencing of a sample."
+
+    Attributes:
+        gc_content: percentage of GC bases calculated on trimmed reads; source: workflow
+        input_amount: input amount in ng; source: LIMS
+        mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
+        mean_length_r1: average length of reads that pass QC filters; source: workflow
+        rin: RNA integrity number; source: LIMS
+    """
+
+    gc_content: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
+    input_amount: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    mapped_reads: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
+    mean_length_r1: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    rin: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+
+
+class WTSSampleMetadataModel(SequencingSampleMetadataModel):
     """Metrics and trending data model associated to a WTS sample.
 
     Attributes:
         bias_5_3: bias is the ratio between read counts; source: workflow
-        gc_content: percentage of GC bases calculated on trimmed reads; source: workflow
-        input_amount: input amount in ng; source: LIMS
-        mean_length_r1: average length of reads that pass QC filters; source: workflow
         mrna_bases:  proportion of bases that originate from messenger RNA; source: workflow
         pct_adapter: proportion of reads that contain adapter sequences; source: workflow
         pct_surviving: percentage of reads that pass quality control filters; source: workflow
         q20_rate: proportion of bases with a minimum Phred score of 20; source: workflow
         q30_rate: proportion of bases with a minimum Phred score of 30; source: workflow
         ribosomal_bases: proportion of bases that originate from ribosomal RNA; source: workflow
-        rin: RNA integrity number; source: LIMS
         uniquely_mapped_reads: percentage of mapped reads; source: workflow
     """
 
     bias_5_3: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
-    gc_content: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
-    input_amount: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
-    mean_length_r1: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     mrna_bases: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     pct_adapter: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     pct_surviving: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     q20_rate: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
     q30_rate: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
     ribosomal_bases: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
-    rin: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     uniquely_mapped_reads: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
 
 
@@ -125,12 +135,26 @@ class RnafusionSampleMetadataModel(WTSSampleMetadataModel):
     Attributes:
         insert_size: distance between paired-end sequencing reads in a DNA fragment
         insert_size_peak: insert size length; source: workflow
-        mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
     """
 
     insert_size: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     insert_size_peak: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
-    mapped_reads: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
+
+
+class TaxprofilerSampleMetadataModel(SequencingSampleMetadataModel):
+    """Metrics and trending data model associated to a Taxprofiler sample.
+
+    Attributes:
+        average_read_length: average length of reads; source: workflow
+        mean_length_r2: average length of reads for read2; source: workflow
+        million_read_pairs_after_filtering: number of reads after filtering; source: workflow
+    """
+
+    average_read_length: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    mean_length_r2: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    million_read_pairs_after_filtering: Annotated[str, BeforeValidator(get_float_as_string)] = (
+        NA_FIELD
+    )
 
 
 class TomteSampleMetadataModel(WTSSampleMetadataModel):
