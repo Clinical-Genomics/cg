@@ -165,18 +165,3 @@ def test_cli_workflow_clean_microsalt(
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
-
-
-def test_cli_workflow_clean_nf_workflow(
-    cli_runner: CliRunner,
-    taxprofiler_context: CGConfig,
-    before_date: str,
-):
-    """Test clean nf-workflows."""
-    # GIVEN a before string
-
-    # WHEN running command
-    result = cli_runner.invoke(nf_workflow_past_run_dirs, [before_date], obj=taxprofiler_context)
-
-    # THEN command should exit successfully
-    assert result.exit_code == EXIT_SUCCESS
