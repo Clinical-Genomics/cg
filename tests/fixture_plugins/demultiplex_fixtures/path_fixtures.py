@@ -124,10 +124,10 @@ def tmp_novaseq_x_without_sample_sheet_flow_cell_path(
 
 @pytest.fixture
 def tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert(
-    bcl_convert_flow_cell_full_name: str, tmp_illumina_flow_cells_directory
+    hiseq_2500_dual_index_flow_cell_name: str, tmp_illumina_flow_cells_directory
 ) -> Path:
     """This is a path to a flow cell directory with the run parameters missing."""
-    return Path(tmp_illumina_flow_cells_directory, bcl_convert_flow_cell_full_name)
+    return Path(tmp_illumina_flow_cells_directory, hiseq_2500_dual_index_flow_cell_name)
 
 
 # Temporary demultiplexed runs fixtures
