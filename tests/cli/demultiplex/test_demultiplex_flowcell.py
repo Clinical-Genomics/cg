@@ -105,12 +105,12 @@ def test_demultiplex_all_novaseq(
     assert f"Flow cell {flow_cell.id} is ready for downstream processing" in caplog.text
 
 
-def test_is_demultiplexing_complete(tmp_flow_cell_directory_bcl2fastq: Path):
+def test_is_demultiplexing_complete(tmp_novaseq_6000_pre_1_5_kits_flow_cell_path: Path):
     """Tests the is_demultiplexing_complete property of FlowCellDirectoryData."""
 
     # GIVEN a demultiplexing directory with no demuxcomplete.txt file
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_directory_bcl2fastq
+        flow_cell_path=tmp_novaseq_6000_pre_1_5_kits_flow_cell_path
     )
     assert not flow_cell.is_demultiplexing_complete
 

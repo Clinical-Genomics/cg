@@ -203,6 +203,13 @@ def novaseq_x_flow_cell_dir(
 
 
 @pytest.fixture
+def tmp_novaseq_6000_pre_1_5_kits_flow_cell_path(
+    tmp_illumina_flow_cells_directory: Path, novaseq_6000_pre_1_5_kits_flow_cell_full_name: str
+) -> Path:
+    return Path(tmp_illumina_flow_cells_directory, novaseq_6000_pre_1_5_kits_flow_cell_full_name)
+
+
+@pytest.fixture
 def tmp_illumina_flow_cells_demux_results_not_finished_directory(
     tmp_path: Path, illumina_demux_results_not_finished_dir: Path
 ) -> Path:
@@ -211,15 +218,6 @@ def tmp_illumina_flow_cells_demux_results_not_finished_directory(
     tmp_dir = Path(tmp_path, "demultiplexed-runs-unfinished")
 
     return Path(shutil.copytree(original_dir, tmp_dir))
-
-
-@pytest.fixture
-def tmp_flow_cell_directory_bcl2fastq(tmp_illumina_flow_cells_directory: Path) -> Path:
-    """Return the path to a working directory that will be deleted after test is run.
-
-    This is a path to a flow cell directory with the run parameters present.
-    """
-    return Path(tmp_illumina_flow_cells_directory, "201203_D00483_0200_AHVKJCDRXX")
 
 
 @pytest.fixture
