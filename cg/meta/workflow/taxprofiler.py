@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 from cg.constants import Workflow
+from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.symbols import EMPTY_STRING
@@ -104,3 +105,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             f"{sample.name}_{sample.name}": sample.internal_id for sample in samples
         }
         return search_patterns
+
+    def get_genome_build(self, case_id: str) -> str:
+        """Return the reference genome build version of a Taxprofiler analysis."""
+        return GenomeVersion.T2T_CHM13.value
