@@ -17,11 +17,11 @@ FlowCellInfo = namedtuple("FlowCellInfo", "directory name sample_internal_ids")
 
 @pytest.fixture(name="tmp_demulitplexing_dir")
 def tmp_illumina_novaseq_demulitplexing_dir(
-    illumina_demultiplexed_runs_directory: Path, bcl2fastq_flow_cell_full_name: str
+    illumina_demultiplexed_runs_directory: Path, novaseq_6000_pre_1_5_kits_flow_cell_full_name: str
 ) -> Path:
     """Return a tmp directory in demultiplexed-runs."""
     tmp_demulitplexing_dir: Path = Path(
-        illumina_demultiplexed_runs_directory, bcl2fastq_flow_cell_full_name
+        illumina_demultiplexed_runs_directory, novaseq_6000_pre_1_5_kits_flow_cell_full_name
     )
     tmp_demulitplexing_dir.mkdir(exist_ok=True, parents=True)
     return tmp_demulitplexing_dir
@@ -46,33 +46,13 @@ def demultiplex_fastq_file_path() -> Path:
     return Path("path/to/sample_internal_id_S1_L001_R1_001.fastq.gz")
 
 
-@pytest.fixture(name="tmp_sample_sheet_path")
-def tmp_samplesheet_path(tmp_demulitplexing_dir: Path) -> Path:
+@pytest.fixture
+def tmp_sample_sheet_path(tmp_demulitplexing_dir: Path) -> Path:
     """Return SampleSheet in temporary demuliplexing folder."""
     tmp_sample_sheet_path = Path(tmp_demulitplexing_dir, "SampleSheet.csv")
     with tmp_sample_sheet_path.open("w+") as fh:
         fh.write("content")
     return tmp_sample_sheet_path
-
-
-@pytest.fixture(name="tmp_flow_cell_run_base_path")
-def tmp_flow_cell_run_base_path(project_dir: Path, bcl2fastq_flow_cell_full_name: str) -> Path:
-    """Flow cell run directory in temporary folder."""
-
-    tmp_flow_cell_run_path: Path = Path(project_dir, "flow_cells")
-    tmp_flow_cell_run_path.mkdir(exist_ok=True, parents=True)
-
-    return tmp_flow_cell_run_path
-
-
-@pytest.fixture(name="tmp_flow_cell_demux_base_path")
-def tmp_flow_cell_demux_base_path(project_dir: Path, bcl2fastq_flow_cell_full_name: str) -> Path:
-    """Flow cell demux directory in temporary folder."""
-
-    tmp_flow_cell_demux_path: Path = Path(project_dir, "demultiplexed-runs")
-    tmp_flow_cell_demux_path.mkdir(exist_ok=True, parents=True)
-
-    return tmp_flow_cell_demux_path
 
 
 @pytest.fixture(name="populated_flow_cell_store")
@@ -102,7 +82,7 @@ def populated_flow_cell_store(
     return populated_flow_cell_store
 
 
-@pytest.fixture(name="active_flow_cell_store")
+@pytest.fixture
 def active_flow_cell_store(
     family_name: str,
     novaseq_6000_pre_1_5_kits_flow_cell_id: str,
