@@ -14,7 +14,6 @@ from cg.cli.workflow.commands import (
     mip_rna_past_run_dirs,
     mutant_past_run_dirs,
     rnafusion_past_run_dirs,
-    nf_workflow_past_run_dirs,
 )
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig

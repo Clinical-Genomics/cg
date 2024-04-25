@@ -22,7 +22,6 @@ from cg.cli.workflow.commands import (
     mutant_past_run_dirs,
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
-    nf_workflow_past_run_dirs,
 )
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
@@ -69,7 +68,6 @@ for sub_cmd in [
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
     microsalt_past_run_dirs,
-    nf_workflow_past_run_dirs,
 ]:
     clean.add_command(sub_cmd)
 
