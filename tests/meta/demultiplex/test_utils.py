@@ -265,17 +265,17 @@ def test_parse_flow_cell_directory_data_invalid():
         FlowCellDirectoryData(Path("invalid_path"))
 
 
-def test_parse_flow_cell_directory_data_valid():
+def test_parse_flow_cell_directory_data_valid(novaseq_6000_post_1_5_kits_flow_cell_full_name: str):
     # GIVEN a flow cell directory which is valid
+
     # WHEN parsing the flow cell directory data
-    flow_cell_run_directory = "20230508_LH00188_0003_A22522YLT3"
-    result = FlowCellDirectoryData(Path(flow_cell_run_directory))
+    result = FlowCellDirectoryData(Path(novaseq_6000_post_1_5_kits_flow_cell_full_name))
 
     # THEN a FlowCellDirectoryData object should be returned
     assert isinstance(result, FlowCellDirectoryData)
 
     # THEN the flow cell path and bcl converter should be set
-    assert result.path == Path(flow_cell_run_directory)
+    assert result.path == Path(novaseq_6000_post_1_5_kits_flow_cell_full_name)
 
 
 def test_parse_manifest_file(novaseq_x_manifest_file: Path):
@@ -513,35 +513,37 @@ def assert_file_contains_all_file_paths(manifest_file: Path, files_in_file: list
 
 
 def test_add_flow_cell_name_to_fastq_file_path(
-    bcl2fastq_flow_cell_id: str, demultiplex_fastq_file_path
+    hiseq_x_single_index_flow_cell_id: str, demultiplex_fastq_file_path
 ):
     # GIVEN a fastq file path and a flow cell name
 
     # WHEN adding the flow cell name to the fastq file path
     rename_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
-        fastq_file_path=demultiplex_fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
+        fastq_file_path=demultiplex_fastq_file_path,
+        flow_cell_name=hiseq_x_single_index_flow_cell_id,
     )
 
     # THEN the fastq file path should be returned with the flow cell name added
     assert rename_fastq_file_path == Path(
         demultiplex_fastq_file_path.parent,
-        f"{bcl2fastq_flow_cell_id}_{demultiplex_fastq_file_path.name}",
+        f"{hiseq_x_single_index_flow_cell_id}_{demultiplex_fastq_file_path.name}",
     )
 
 
 def test_add_flow_cell_name_to_fastq_file_path_when_flow_cell_name_already_in_name(
-    bcl2fastq_flow_cell_id: str, demultiplex_fastq_file_path
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str, demultiplex_fastq_file_path
 ):
     # GIVEN a fastq file path and a flow cell name
 
     # GIVEN that the flow cell name is already in the fastq file path
     demultiplex_fastq_file_path = Path(
-        f"{bcl2fastq_flow_cell_id}_{demultiplex_fastq_file_path.name}"
+        f"{novaseq_6000_pre_1_5_kits_flow_cell_id}_{demultiplex_fastq_file_path.name}"
     )
 
     # WHEN adding the flow cell name to the fastq file path
     renamed_fastq_file_path: Path = add_flow_cell_name_to_fastq_file_path(
-        fastq_file_path=demultiplex_fastq_file_path, flow_cell_name=bcl2fastq_flow_cell_id
+        fastq_file_path=demultiplex_fastq_file_path,
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
     )
 
     # THEN the fastq file path should be returned equal to the original fastq file path
