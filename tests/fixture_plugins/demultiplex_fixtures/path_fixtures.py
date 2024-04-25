@@ -238,7 +238,7 @@ def tmp_flow_cell_with_bcl2fastq_sample_sheet(
 def tmp_flow_cell_without_run_parameters_path(
     tmp_broken_flow_cells_directory: Path, hiseq_2500_custom_index_flow_cell_name: str
 ) -> Path:
-    """This is a path to a flow cell directory with the run parameters missing."""
+    """Return a path to a flow cell directory with the run parameters missing."""
     return Path(tmp_broken_flow_cells_directory, hiseq_2500_custom_index_flow_cell_name)
 
 
@@ -247,7 +247,7 @@ def tmp_novaseq_6000_pre_1_5_kits_flow_cell_without_sample_sheet_path(
     tmp_broken_flow_cells_directory: Path,
     novaseq_6000_pre_1_5_kits_flow_cell_full_name: str,
 ) -> Path:
-    """This is a path to a flow cell directory with the sample sheet missing."""
+    """Return a path to a flow cell directory with the sample sheet missing."""
     return Path(tmp_broken_flow_cells_directory, novaseq_6000_pre_1_5_kits_flow_cell_full_name)
 
 
@@ -256,7 +256,7 @@ def tmp_novaseq_6000_post_1_5_kits_flow_cell_without_sample_sheet_path(
     tmp_broken_flow_cells_directory: Path,
     novaseq_6000_post_1_5_kits_flow_cell_full_name: str,
 ) -> Path:
-    """This is a path to a flow cell directory with the sample sheet missing."""
+    """Return a path to a flow cell directory with the sample sheet missing."""
     return Path(tmp_broken_flow_cells_directory, novaseq_6000_post_1_5_kits_flow_cell_full_name)
 
 
@@ -265,7 +265,7 @@ def tmp_novaseq_x_without_sample_sheet_flow_cell_path(
     tmp_broken_flow_cells_directory: Path,
     novaseq_x_flow_cell_full_name: str,
 ) -> Path:
-    """This is a path to a flow cell directory with the sample sheet missing."""
+    """Return a path to a flow cell directory with the sample sheet missing."""
     return Path(tmp_broken_flow_cells_directory, novaseq_x_flow_cell_full_name)
 
 
@@ -279,7 +279,7 @@ def tmp_novaseqx_flow_cell_directory(tmp_path: Path, novaseq_x_flow_cell_full_na
 def tmp_flow_cells_directory_ready_for_demultiplexing(
     hiseq_2500_dual_index_flow_cell_name: str, tmp_illumina_flow_cells_directory
 ) -> Path:
-    """This is a path to a flow cell directory with the run parameters missing."""
+    """Return a path to a flow cell directory with the run parameters missing."""
     return Path(tmp_illumina_flow_cells_directory, hiseq_2500_dual_index_flow_cell_name)
 
 
