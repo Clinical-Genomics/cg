@@ -687,18 +687,6 @@ def data_dir(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture
-def fastq_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the fastq files dir."""
-    return Path(demultiplex_fixtures, "fastq")
-
-
-@pytest.fixture
-def spring_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the fastq files dir."""
-    return Path(demultiplex_fixtures, "spring")
-
-
-@pytest.fixture
 def project_dir(tmpdir_factory) -> Generator[Path, None, None]:
     """Path to a temporary directory where intermediate files can be stored."""
     yield Path(tmpdir_factory.mktemp("data"))
@@ -859,36 +847,6 @@ def sample_crams(
 def vcf_file(mip_dna_store_files: Path) -> Path:
     """Return the path to a VCF file."""
     return Path(mip_dna_store_files, "yellowhog_clinical_selected.vcf")
-
-
-@pytest.fixture(name="fastq_file")
-def fastq_file(fastq_dir: Path) -> Path:
-    """Return the path to a FASTQ file."""
-    return Path(fastq_dir, "dummy_run_R1_001.fastq.gz")
-
-
-@pytest.fixture(name="fastq_file_father")
-def fastq_file_father(fastq_dir: Path) -> Path:
-    """Return the path to a FASTQ file."""
-    return Path(fastq_dir, "fastq_run_R1_001.fastq.gz")
-
-
-@pytest.fixture(name="spring_file")
-def spring_file(spring_dir: Path) -> Path:
-    """Return the path to an existing spring file."""
-    return Path(spring_dir, "dummy_run_001.spring")
-
-
-@pytest.fixture(name="spring_meta_data_file")
-def spring_meta_data_file(spring_dir: Path) -> Path:
-    """Return the path to an existing spring file."""
-    return Path(spring_dir, "dummy_spring_meta_data.json")
-
-
-@pytest.fixture(name="spring_file_father")
-def spring_file_father(spring_dir: Path) -> Path:
-    """Return the path to a second existing spring file."""
-    return Path(spring_dir, "dummy_run_002.spring")
 
 
 @pytest.fixture(name="madeline_output")

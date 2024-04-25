@@ -45,12 +45,6 @@ def nanopore_flow_cells_dir(demultiplex_fixtures: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
-def raw_lims_sample_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the raw samples fixture directory."""
-    return Path(demultiplex_fixtures, "raw_lims_samples")
-
-
-@pytest.fixture(scope="session")
 def run_parameters_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the run parameters fixture directory."""
     return Path(demultiplex_fixtures, "run_parameters")
@@ -60,6 +54,18 @@ def run_parameters_dir(demultiplex_fixtures: Path) -> Path:
 def sample_sheet_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the sample sheet fixture directory."""
     return Path(demultiplex_fixtures, "sample_sheets")
+
+
+@pytest.fixture
+def fastq_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to the fastq files dir."""
+    return Path(demultiplex_fixtures, "fastq")
+
+
+@pytest.fixture
+def spring_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to the fastq files dir."""
+    return Path(demultiplex_fixtures, "spring")
 
 
 @pytest.fixture(scope="session")
@@ -308,77 +314,7 @@ def tmp_demultiplexed_flow_cell_no_fastq_files(
     )
 
 
-# Path to sample sheets
-
-
-@pytest.fixture
-def hiseq_x_single_index_sample_sheet_path(hiseq_x_single_index_flow_cell_dir: Path) -> Path:
-    """Return the path to a single-index HiSeqX sample sheet."""
-    return Path(
-        hiseq_x_single_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-    )
-
-
-@pytest.fixture
-def hiseq_x_dual_index_sample_sheet_path(hiseq_x_dual_index_flow_cell_dir: Path) -> Path:
-    """Return the path to a dual-index HiSeqX sample sheet."""
-    return Path(hiseq_x_dual_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
-
-
-@pytest.fixture
-def hiseq_2500_dual_index_sample_sheet_path(hiseq_2500_dual_index_flow_cell_dir: Path) -> Path:
-    """Return the path to a dual-index HiSeq2500 sample sheet."""
-    return Path(
-        hiseq_2500_dual_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-    )
-
-
-@pytest.fixture
-def hiseq_2500_custom_index_sample_sheet_path(hiseq_2500_custom_index_flow_cell_dir: Path) -> Path:
-    """Return the path to a custom-index HiSeq2500 sample sheet."""
-    return Path(
-        hiseq_2500_custom_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-    )
-
-
-@pytest.fixture
-def novaseq_6000_pre_1_5_kits_correct_sample_sheet_path(
-    novaseq_6000_pre_1_5_kits_flow_cell_path: Path,
-) -> Path:
-    return Path(novaseq_6000_pre_1_5_kits_flow_cell_path, CORRECT_SAMPLE_SHEET)
-
-
-@pytest.fixture
-def novaseq_6000_post_1_5_kits_correct_sample_sheet_path(
-    novaseq_6000_post_1_5_kits_flow_cell_path: Path,
-) -> Path:
-    return Path(novaseq_6000_post_1_5_kits_flow_cell_path, CORRECT_SAMPLE_SHEET)
-
-
-@pytest.fixture
-def novaseq_x_correct_sample_sheet(novaseq_x_flow_cell_dir: Path) -> Path:
-    return Path(novaseq_x_flow_cell_dir, CORRECT_SAMPLE_SHEET)
-
-
-@pytest.fixture
-def novaseq_6000_sample_sheet_with_reversed_cycles(sample_sheet_dir: Path) -> Path:
-    """Return the path to a NovaSeq6000 sample sheet with reversed index2 cycles."""
-    return Path(sample_sheet_dir, "novaseq_6000_sample_sheet_with_reversed_cycles.csv")
-
-
-@pytest.fixture
-def novaseq_x_sample_sheet_with_forward_cycles(sample_sheet_dir: Path) -> Path:
-    """Return the path to a NovaSeqX sample sheet with forward index2 cycles."""
-    return Path(sample_sheet_dir, "novaseq_x_sample_sheet_with_forward_cycles.csv")
-
-
-# Path to other flow cell attributes
-
-
-@pytest.fixture
-def novaseq_x_manifest_file(novaseq_x_flow_cell_dir: Path) -> Path:
-    """Return the path to a NovaSeqX manifest file."""
-    return Path(novaseq_x_flow_cell_dir, "Manifest.tsv")
+# Path to run parameter files
 
 
 @pytest.fixture(scope="session")
@@ -469,10 +405,107 @@ def run_parameters_missing_versions_path(
     return Path(run_parameters_dir, "RunParameters_novaseq_no_software_nor_reagent_version.xml")
 
 
-@pytest.fixture(name="lims_novaseq_samples_file")
-def lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
-    """Return the path to a file with sample info in lims format."""
-    return Path(raw_lims_sample_dir, "raw_samplesheet_novaseq.json")
+# Path to sample sheets
+
+
+@pytest.fixture
+def hiseq_x_single_index_sample_sheet_path(hiseq_x_single_index_flow_cell_dir: Path) -> Path:
+    """Return the path to a single-index HiSeqX sample sheet."""
+    return Path(
+        hiseq_x_single_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+
+
+@pytest.fixture
+def hiseq_x_dual_index_sample_sheet_path(hiseq_x_dual_index_flow_cell_dir: Path) -> Path:
+    """Return the path to a dual-index HiSeqX sample sheet."""
+    return Path(hiseq_x_dual_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+
+
+@pytest.fixture
+def hiseq_2500_dual_index_sample_sheet_path(hiseq_2500_dual_index_flow_cell_dir: Path) -> Path:
+    """Return the path to a dual-index HiSeq2500 sample sheet."""
+    return Path(
+        hiseq_2500_dual_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+
+
+@pytest.fixture
+def hiseq_2500_custom_index_sample_sheet_path(hiseq_2500_custom_index_flow_cell_dir: Path) -> Path:
+    """Return the path to a custom-index HiSeq2500 sample sheet."""
+    return Path(
+        hiseq_2500_custom_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+
+
+@pytest.fixture
+def novaseq_6000_pre_1_5_kits_correct_sample_sheet_path(
+    novaseq_6000_pre_1_5_kits_flow_cell_path: Path,
+) -> Path:
+    return Path(novaseq_6000_pre_1_5_kits_flow_cell_path, CORRECT_SAMPLE_SHEET)
+
+
+@pytest.fixture
+def novaseq_6000_post_1_5_kits_correct_sample_sheet_path(
+    novaseq_6000_post_1_5_kits_flow_cell_path: Path,
+) -> Path:
+    return Path(novaseq_6000_post_1_5_kits_flow_cell_path, CORRECT_SAMPLE_SHEET)
+
+
+@pytest.fixture
+def novaseq_x_correct_sample_sheet(novaseq_x_flow_cell_dir: Path) -> Path:
+    return Path(novaseq_x_flow_cell_dir, CORRECT_SAMPLE_SHEET)
+
+
+@pytest.fixture
+def novaseq_6000_sample_sheet_with_reversed_cycles(sample_sheet_dir: Path) -> Path:
+    """Return the path to a NovaSeq6000 sample sheet with reversed index2 cycles."""
+    return Path(sample_sheet_dir, "novaseq_6000_sample_sheet_with_reversed_cycles.csv")
+
+
+@pytest.fixture
+def novaseq_x_sample_sheet_with_forward_cycles(sample_sheet_dir: Path) -> Path:
+    """Return the path to a NovaSeqX sample sheet with forward index2 cycles."""
+    return Path(sample_sheet_dir, "novaseq_x_sample_sheet_with_forward_cycles.csv")
+
+
+# Path to other flow cell attributes
+
+
+@pytest.fixture
+def novaseq_x_manifest_file(novaseq_x_flow_cell_dir: Path) -> Path:
+    """Return the path to a NovaSeqX manifest file."""
+    return Path(novaseq_x_flow_cell_dir, "Manifest.tsv")
+
+
+@pytest.fixture(name="fastq_file")
+def fastq_file(fastq_dir: Path) -> Path:
+    """Return the path to a FASTQ file."""
+    return Path(fastq_dir, "dummy_run_R1_001.fastq.gz")
+
+
+@pytest.fixture(name="fastq_file_father")
+def fastq_file_father(fastq_dir: Path) -> Path:
+    """Return the path to a FASTQ file."""
+    return Path(fastq_dir, "fastq_run_R1_001.fastq.gz")
+
+
+@pytest.fixture(name="spring_file")
+def spring_file(spring_dir: Path) -> Path:
+    """Return the path to an existing spring file."""
+    return Path(spring_dir, "dummy_run_001.spring")
+
+
+@pytest.fixture(name="spring_meta_data_file")
+def spring_meta_data_file(spring_dir: Path) -> Path:
+    """Return the path to an existing spring file."""
+    return Path(spring_dir, "dummy_spring_meta_data.json")
+
+
+@pytest.fixture(name="spring_file_father")
+def spring_file_father(spring_dir: Path) -> Path:
+    """Return the path to a second existing spring file."""
+    return Path(spring_dir, "dummy_run_002.spring")
 
 
 # Fixtures for test demultiplex flow cell
