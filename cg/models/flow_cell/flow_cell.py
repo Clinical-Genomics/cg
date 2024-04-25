@@ -139,16 +139,6 @@ class FlowCellDirectoryData:
         return Path(self.path, DemultiplexingDirsAndFiles.COPY_COMPLETE)
 
     @property
-    def hiseq_x_copy_complete_path(self) -> Path:
-        """Return copy complete path for HiSeqX."""
-        return Path(self.path, DemultiplexingDirsAndFiles.HISEQ_X_COPY_COMPLETE)
-
-    @property
-    def hiseq_x_delivery_started_path(self) -> Path:
-        """Return delivery started path for HiSeqX."""
-        return Path(self.path, DemultiplexingDirsAndFiles.DELIVERY)
-
-    @property
     def demultiplexing_started_path(self) -> Path:
         """Return demux started path."""
         return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_STARTED)
