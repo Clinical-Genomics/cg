@@ -3688,12 +3688,6 @@ def expected_total_reads() -> int:
     return 1_000_000
 
 
-@pytest.fixture
-def flow_cell_full_name(flow_cell_name: str) -> str:
-    """Return flow cell full name."""
-    return f"201203_D00483_0200_A{flow_cell_name}"
-
-
 @pytest.fixture(name="expected_average_q30_for_sample")
 def expected_average_q30_for_sample() -> float:
     """Return expected average Q30 for a sample."""

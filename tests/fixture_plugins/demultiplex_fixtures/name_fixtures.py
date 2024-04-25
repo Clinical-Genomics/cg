@@ -9,6 +9,12 @@ def flow_cell_name() -> str:
     return "HVKJCDRXX"
 
 
+@pytest.fixture
+def flow_cell_full_name(flow_cell_name: str) -> str:
+    """Return flow cell full name."""
+    return "201203_D00483_0200_AHVKJCDRXX"
+
+
 @pytest.fixture(scope="session")
 def hiseq_x_single_index_flow_cell_id() -> str:
     """Return the id of a HiSeqX flow cell with only one index."""
