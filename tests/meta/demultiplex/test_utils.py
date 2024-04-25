@@ -486,15 +486,13 @@ def test_is_flow_cell_sync_confirmed(
     assert is_synced == expected_result
 
 
-def test_create_manifest_file(tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert: Path):
+def test_create_manifest_file(tmp_flow_cells_directory_ready_for_demultiplexing: Path):
     # GIVEN a flow cell directory with files
     all_files: list[Path] = get_all_files_in_directory_tree(
-        tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert
+        tmp_flow_cells_directory_ready_for_demultiplexing
     )
     # WHEN creating a manifest file
-    manifest_file: Path = create_manifest_file(
-        tmp_flow_cells_directory_ready_for_demultiplexing_bcl_convert
-    )
+    manifest_file: Path = create_manifest_file(tmp_flow_cells_directory_ready_for_demultiplexing)
 
     # THEN a manifest file should be created
     assert manifest_file.exists()
