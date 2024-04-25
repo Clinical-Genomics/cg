@@ -132,6 +132,8 @@ REQUIRED_SAMPLE_BALSAMIC_FIELDS: list[str] = _REQUIRED_SAMPLE_CANCER_FIELDS
 
 REQUIRED_SAMPLE_RNAFUSION_FIELDS: list[str] = _REQUIRED_SAMPLE_CANCER_FIELDS
 
+REQUIRED_SAMPLE_TAXPROFILER_FIELDS: list[str] = _REQUIRED_SAMPLE_FIELDS
+
 REQUIRED_SAMPLE_TOMTE_FIELDS: list[str] = _REQUIRED_SAMPLE_RARE_DISEASE_FIELDS
 
 # Methods required fields (OPTIONAL: "library_prep", "sequencing")
@@ -193,24 +195,38 @@ REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS: list[str] = (
     ]
 )
 
-_REQUIRED_SAMPLE_METADATA_WTS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
-    "bias_5_3",
+_REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
     "gc_content",
     "input_amount",
     "mean_length_r1",
+    "rin",
+]
+
+_REQUIRED_SAMPLE_METADATA_WTS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS + [
+    "bias_5_3",
     "mrna_bases",
     "pct_adapter",
     "pct_surviving",
     "q20_rate",
     "q30_rate",
     "ribosomal_bases",
-    "rin",
     "uniquely_mapped_reads",
 ]
 
 REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_WTS_FIELDS + [
     "mapped_reads",
 ]
+
+
+REQUIRED_SAMPLE_METADATA_TAXPROFILER_FIELDS: list[str] = (
+    _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS
+    + [
+        "average_read_length",
+        "mapped_reads",
+        "mean_length_r2",
+        "million_read_pairs_after_filtering",
+    ]
+)
 
 
 REQUIRED_SAMPLE_METADATA_TOMTE_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_WTS_FIELDS + [

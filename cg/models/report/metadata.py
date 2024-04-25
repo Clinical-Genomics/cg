@@ -93,14 +93,12 @@ class SequencingSampleMetadataModel(SampleMetadataModel):
     Attributes:
         gc_content: percentage of GC bases calculated on trimmed reads; source: workflow
         input_amount: input amount in ng; source: LIMS
-        mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
         mean_length_r1: average length of reads that pass QC filters; source: workflow
         rin: RNA integrity number; source: LIMS
     """
 
     gc_content: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
     input_amount: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
-    mapped_reads: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
     mean_length_r1: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     rin: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
 
@@ -135,10 +133,12 @@ class RnafusionSampleMetadataModel(WTSSampleMetadataModel):
     Attributes:
         insert_size: distance between paired-end sequencing reads in a DNA fragment
         insert_size_peak: insert size length; source: workflow
+        mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
     """
 
     insert_size: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     insert_size_peak: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    mapped_reads: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
 
 
 class TaxprofilerSampleMetadataModel(SequencingSampleMetadataModel):
@@ -146,11 +146,13 @@ class TaxprofilerSampleMetadataModel(SequencingSampleMetadataModel):
 
     Attributes:
         average_read_length: average length of reads; source: workflow
+        mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
         mean_length_r2: average length of reads for read2; source: workflow
         million_read_pairs_after_filtering: number of reads after filtering; source: workflow
     """
 
     average_read_length: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    mapped_reads: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
     mean_length_r2: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     million_read_pairs_after_filtering: Annotated[str, BeforeValidator(get_float_as_string)] = (
         NA_FIELD
