@@ -1,4 +1,4 @@
-"""Fixtures for flow cell objects."""
+"""Fixtures for Illumina flow cell objects."""
 
 from pathlib import Path
 

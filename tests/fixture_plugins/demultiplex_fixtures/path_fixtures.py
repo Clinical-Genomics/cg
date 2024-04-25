@@ -187,6 +187,7 @@ def novaseq_x_flow_cell_dir(
     return Path(illumina_flow_cells_directory, novaseq_x_flow_cell_full_name)
 
 
+# TODO: REMOVE THIS FIXTURE
 @pytest.fixture(scope="session")
 def bcl2fastq_flow_cell_dir(illumina_flow_cells_directory: Path) -> Path:
     """Return the path to the bcl2fastq flow cell demultiplex fixture directory."""
@@ -363,10 +364,13 @@ def hiseq_2500_custom_index_run_parameters_path(
     )
 
 
-@pytest.fixture(scope="session")
-def novaseq_6000_run_parameters_path(bcl2fastq_flow_cell_dir: Path) -> Path:
+@pytest.fixture
+def novaseq_6000_run_parameters_path(novaseq_6000_pre_1_5_kits_flow_cell_path: Path) -> Path:
     """Return the path to a NovaSeq6000 run parameters file."""
-    return Path(bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
+    return Path(
+        novaseq_6000_pre_1_5_kits_flow_cell_path,
+        DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE,
+    )
 
 
 @pytest.fixture
