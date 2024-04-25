@@ -11,7 +11,7 @@ from cg.meta.workflow.microsalt.quality_controller.models import (
     SampleQualityResult,
 )
 from cg.meta.workflow.microsalt.quality_controller.quality_controller import (
-    QualityController,
+    MicroSALTQualityController,
 )
 from cg.store.store import Store
 
@@ -116,5 +116,5 @@ def case_result():
 
 
 @pytest.fixture
-def quality_controller(store: Store) -> QualityController:
-    return QualityController(store)
+def quality_controller(store: Store) -> MicroSALTQualityController:
+    return MicroSALTQualityController(store)

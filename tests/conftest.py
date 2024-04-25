@@ -85,6 +85,8 @@ pytest_plugins = [
     "tests.fixture_plugins.delivery_fixtures.context_fixtures",
     "tests.fixture_plugins.delivery_fixtures.bundle_fixtures",
     "tests.fixture_plugins.delivery_fixtures.path_fixtures",
+    "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
+    "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
 ]
 
 # Case fixtures
@@ -1338,6 +1340,12 @@ def wgs_application_tag() -> str:
 def microbial_application_tag() -> str:
     """Return the WGS microbial application tag."""
     return "MWRNXTR003"
+
+
+@pytest.fixture
+def metagenomics_application_tag() -> str:
+    """Return the metagenomics application tag."""
+    return "METPCFR030"
 
 
 @pytest.fixture
@@ -2863,7 +2871,7 @@ def total_sequenced_reads_pass() -> int:
 
 @pytest.fixture(scope="session")
 def total_sequenced_reads_not_pass() -> int:
-    return 1
+    return 0
 
 
 @pytest.fixture(scope="function")
@@ -3511,7 +3519,7 @@ def taxprofiler_context(
     another_sample_name: str,
     no_sample_case_id: str,
     total_sequenced_reads_pass: int,
-    microbial_application_tag: str,
+    metagenomics_application_tag: str,
     case_id_not_enough_reads: str,
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
@@ -3535,7 +3543,7 @@ def taxprofiler_context(
 
     sample_not_enough_reads: Sample = helpers.add_sample(
         status_db,
-        application_tag=microbial_application_tag,
+        application_tag=metagenomics_application_tag,
         internal_id=sample_id_not_enough_reads,
         reads=total_sequenced_reads_not_pass,
         last_sequenced_at=datetime.now(),
