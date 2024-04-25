@@ -268,22 +268,13 @@ class MipAnalysisAPI(AnalysisAPI):
                 return True
         return False
 
-    def get_cases_to_analyze(self) -> list[Case]:
+    def get_cases_ready_for_analysis(self) -> list[Case]:
         """Return cases to analyze."""
-        cases_query: list[Case] = self.status_db.cases_to_analyze(
-            workflow=self.workflow,
-            threshold=self.use_read_count_threshold,
-        )
-        cases_to_analyze = []
-        for case_obj in cases_query:
-            if case_obj.action == "analyze" or not case_obj.latest_analyzed:
-                cases_to_analyze.append(case_obj)
-            elif (
-                self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id)
-                == "failed"
-            ):
-                cases_to_analyze.append(case_obj)
-        return cases_to_analyze[:MAX_CASES_TO_START_IN_50_MINUTES]
+        cases_to_analyse: list[Case] = self.get_cases_to_analyse()
+        cases_ready_for_analysis: list[Case] = [
+            case for case in cases_to_analyse if self.is_case_ready_for_analysis(case)
+        ]
+        return cases_ready_for_analysis[:MAX_CASES_TO_START_IN_50_MINUTES]
 
     @staticmethod
     def _append_value_for_non_flags(parameters: list, value) -> None:
