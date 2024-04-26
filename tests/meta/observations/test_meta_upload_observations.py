@@ -6,11 +6,7 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 
 from cg.apps.loqus import LoqusdbAPI
-from cg.constants.observations import (
-    LoqusdbInstance,
-    LoqusdbMipCustomers,
-    MipDNALoadParameters,
-)
+from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import (
     CaseNotFoundError,
@@ -29,6 +25,7 @@ from tests.store_helpers import StoreHelpers
 
 def test_observations_upload(
     case_id: str,
+    customer_rare_diseases: Customer,
     mip_dna_observations_api: MipDNAObservationsAPI,
     observations_input_files: MipDNAObservationsInputFiles,
     nr_of_loaded_variants: int,
@@ -40,7 +37,7 @@ def test_observations_upload(
 
     # GIVEN a mocked observations API and a list of mocked observations files
     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
-    case.customer.internal_id = LoqusdbMipCustomers.KLINISK_IMMUNOLOGI.value
+    case.customer.internal_id = customer_rare_diseases.internal_id
     mocker.patch.object(
         mip_dna_observations_api,
         "get_observations_input_files",
@@ -149,7 +146,7 @@ def test_is_duplicate_loqusdb_id(
     assert is_duplicate is True
 
 
-def test_check_customer_loqusdb_permissions(
+def test_is_customer_eligible_for_observations_upload(
     customer_rare_diseases: Customer,
     customer_balsamic: Customer,
     mip_dna_observations_api: MipDNAObservationsAPI,
@@ -161,12 +158,20 @@ def test_check_customer_loqusdb_permissions(
     # GIVEN a MIP observations API, a Rare Disease customer and a Cancer customer
 
     # WHEN verifying the permissions for Loqusdb upload
-    mip_dna_observations_api.check_customer_loqusdb_permissions(customer_rare_diseases)
+    is_eligible_rare_diseases: bool = (
+        mip_dna_observations_api.is_customer_eligible_for_observations_upload(
+            customer_rare_diseases.internal_id
+        )
+    )
+    is_eligible_cancer: bool = (
+        mip_dna_observations_api.is_customer_eligible_for_observations_upload(
+            customer_balsamic.internal_id
+        )
+    )
 
     # THEN it should be only possible to upload data from a RD customer
-    assert f"Valid customer {customer_rare_diseases.internal_id} for Loqusdb uploads" in caplog.text
-    with pytest.raises(LoqusdbUploadCaseError):
-        mip_dna_observations_api.check_customer_loqusdb_permissions(customer_balsamic)
+    assert is_eligible_rare_diseases
+    assert not is_eligible_cancer
 
 
 def test_mip_dna_get_loqusdb_instance(mip_dna_observations_api: MipDNAObservationsAPI):

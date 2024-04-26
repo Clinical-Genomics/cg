@@ -7,11 +7,11 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import (
+    LOQSUDB_CANCER_CUSTOMERS,
     LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
     LOQUSDB_ID,
     BalsamicLoadParameters,
     BalsamicObservationsAnalysisTag,
-    LoqusdbBalsamicCustomers,
     LoqusdbInstance,
 )
 from cg.constants.sequencing import SequencingMethod
@@ -131,6 +131,6 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case.internal_id} from Loqusdb")
 
-    def get_loqusdb_customers(self) -> LoqusdbBalsamicCustomers:
-        """Returns the customers that are entitled to Cancer Loqusdb uploads."""
-        return LoqusdbBalsamicCustomers
+    def get_loqusdb_customers(self) -> list[str]:
+        """Return customers that are eligible for cancer Loqusdb uploads."""
+        return LOQSUDB_CANCER_CUSTOMERS

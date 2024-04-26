@@ -27,8 +27,7 @@ from cg.apps.housekeeper.models import InputBundle
 from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.constants import CaseActions, FileFormat, GenomeVersion, Strandedness
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -53,7 +52,10 @@ from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.raredisease.raredisease import RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
+from cg.models.taxprofiler.taxprofiler import (
+    TaxprofilerParameters,
+    TaxprofilerSampleSheetEntry,
+)
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
@@ -88,6 +90,7 @@ pytest_plugins = [
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
 ]
+
 
 # Case fixtures
 
@@ -1266,8 +1269,8 @@ def collaboration_id() -> str:
 def customer_rare_diseases(collaboration_id: str, customer_id: str) -> Customer:
     """Return a Rare Disease customer."""
     return Customer(
-        name="CMMS",
-        internal_id="cust003",
+        name="Klinisk Immunologi",
+        internal_id="cust004",
         loqus_upload=True,
     )
 
@@ -2408,73 +2411,6 @@ def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> 
 
 
 @pytest.fixture(scope="function")
-def raredisease_context(
-    cg_context: CGConfig,
-    helpers: StoreHelpers,
-    nf_analysis_housekeeper: HousekeeperAPI,
-    trailblazer_api: MockTB,
-    raredisease_case_id: str,
-    sample_id: str,
-    no_sample_case_id: str,
-    total_sequenced_reads_pass: int,
-    apptag_rna: str,
-    case_id_not_enough_reads: str,
-    sample_id_not_enough_reads: str,
-    total_sequenced_reads_not_pass: int,
-) -> CGConfig:
-    """context to use in cli"""
-    cg_context.housekeeper_api_ = nf_analysis_housekeeper
-    cg_context.trailblazer_api_ = trailblazer_api
-    cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
-    status_db: Store = cg_context.status_db
-
-    # Create ERROR case with NO SAMPLES
-    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
-
-    # Create textbook case with enough reads
-    case_enough_reads: Case = helpers.add_case(
-        store=status_db,
-        internal_id=raredisease_case_id,
-        name=raredisease_case_id,
-        data_analysis=Workflow.RAREDISEASE,
-    )
-
-    sample_raredisease_case_enough_reads: Sample = helpers.add_sample(
-        status_db,
-        internal_id=sample_id,
-        last_sequenced_at=datetime.now(),
-        reads=total_sequenced_reads_pass,
-        application_tag=apptag_rna,
-    )
-
-    helpers.add_relationship(
-        status_db,
-        case=case_enough_reads,
-        sample=sample_raredisease_case_enough_reads,
-    )
-
-    # Create case without enough reads
-    case_not_enough_reads: Case = helpers.add_case(
-        store=status_db,
-        internal_id=case_id_not_enough_reads,
-        name=case_id_not_enough_reads,
-        data_analysis=Workflow.RAREDISEASE,
-    )
-
-    sample_not_enough_reads: Sample = helpers.add_sample(
-        status_db,
-        internal_id=sample_id_not_enough_reads,
-        last_sequenced_at=datetime.now(),
-        reads=total_sequenced_reads_not_pass,
-        application_tag=apptag_rna,
-    )
-
-    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
-
-    return cg_context
-
-
-@pytest.fixture(scope="function")
 def deliverable_data(raredisease_dir: Path, raredisease_case_id: str, sample_id: str) -> dict:
     return {
         "files": [
@@ -3387,14 +3323,6 @@ def taxprofiler_params_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_nexflow_config_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
-    """Path to config file."""
-    return Path(
-        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_nextflow_config"
-    ).with_suffix(FileExtensions.JSON)
-
-
-@pytest.fixture(scope="function")
 def taxprofiler_hermes_deliverables(
     taxprofiler_deliverable_data: dict, taxprofiler_case_id: str
 ) -> dict:
@@ -3548,25 +3476,6 @@ def taxprofiler_context(
     )
 
     return cg_context
-
-
-@pytest.fixture(scope="function")
-def taxprofiler_deliverable_data(
-    taxprofiler_dir: Path, taxprofiler_case_id: str, sample_id: str
-) -> dict:
-    return {
-        "files": [
-            {
-                "path": f"{taxprofiler_dir}/{taxprofiler_case_id}/multiqc/multiqc_report.html",
-                "path_index": "",
-                "step": "report",
-                "tag": ["multiqc-html", "rna"],
-                "id": taxprofiler_case_id,
-                "format": "html",
-                "mandatory": True,
-            },
-        ]
-    }
 
 
 @pytest.fixture(scope="function")
