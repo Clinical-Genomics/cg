@@ -39,10 +39,10 @@ class SequencingFileTag(StrEnum):
     CGSTATS_LOG: str = "log"
     DEMUX_LOG: str = "log"
     FASTQ: str = "fastq"
+    RUN_PARAMETERS: str = "run-parameters"
     SAMPLE_SHEET: str = "samplesheet"
     SPRING: str = "spring"
     SPRING_METADATA: str = "spring-metadata"
-    RUN_PARAMETERS: str = "run-parameters"
 
 
 HK_MULTIQC_HTML_TAG = ["multiqc-html"]
