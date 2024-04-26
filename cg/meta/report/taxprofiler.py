@@ -4,12 +4,12 @@ from cg.constants import (
     REQUIRED_REPORT_FIELDS,
     REQUIRED_CUSTOMER_FIELDS,
     REQUIRED_CASE_FIELDS,
-    REQUIRED_DATA_ANALYSIS_TOMTE_FIELDS,
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_SAMPLE_TAXPROFILER_FIELDS,
     REQUIRED_SAMPLE_METADATA_TAXPROFILER_FIELDS,
+    REQUIRED_DATA_ANALYSIS_TAXPROFILER_FIELDS,
 )
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
@@ -64,7 +64,7 @@ class TaxprofilerReportAPI(ReportAPI):
             "applications": self.get_application_required_fields(
                 case=case, required_fields=REQUIRED_APPLICATION_FIELDS
             ),
-            "data_analysis": REQUIRED_DATA_ANALYSIS_TOMTE_FIELDS,
+            "data_analysis": REQUIRED_DATA_ANALYSIS_TAXPROFILER_FIELDS,
             "samples": self.get_sample_required_fields(
                 case=case, required_fields=REQUIRED_SAMPLE_TAXPROFILER_FIELDS
             ),
