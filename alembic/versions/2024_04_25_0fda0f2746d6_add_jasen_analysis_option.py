@@ -1,7 +1,7 @@
 """Add Jasen analysis option
 
 Revision ID: 0fda0f2746d6
-Revises: ac5a804a9f47
+Revises: f7a1394cf7cd
 Create Date: 2024-04-25 12:17:39.250700
 
 """
@@ -12,7 +12,7 @@ from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
 revision = "0fda0f2746d6"
-down_revision = "ac5a804a9f47"
+down_revision = "f7a1394cf7cd"
 branch_labels = None
 depends_on = None
 
