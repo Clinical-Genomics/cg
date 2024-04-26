@@ -42,7 +42,9 @@ def store_flow_cell_data_in_housekeeper(
     add_demux_logs_to_housekeeper(
         flow_cell=flow_cell, hk_api=hk_api, flow_cell_run_dir=flow_cell_run_dir
     )
-    add_run_parameters_file_to_housekeeper(flow_cell=flow_cell, hk_api=hk_api)
+    add_run_parameters_file_to_housekeeper(
+        flow_cell_name=flow_cell.full_name, flow_cell_run_dir=flow_cell_run_dir, hk_api=hk_api
+    )
 
 
 def store_undetermined_fastq_files(
@@ -94,9 +96,11 @@ def add_demux_logs_to_housekeeper(
 
 
 def add_run_parameters_file_to_housekeeper(
-    flow_cell: FlowCellDirectoryData, hk_api: HousekeeperAPI
+    flow_cell_name: str, flow_cell_run_dir: Path, hk_api: HousekeeperAPI
 ) -> None:
     """Add run parameters file to Housekeeper."""
+    flow_cell_path = Path(flow_cell_run_dir, flow_cell_name)
+    flow_cell = FlowCellDirectoryData(flow_cell_path)
     run_parameters_file_path: Path = flow_cell.run_parameters_path
     tag_names: list[str] = [SequencingFileTag.RUN_PARAMETERS, flow_cell.id]
     hk_api.add_file_to_bundle_if_non_existent(

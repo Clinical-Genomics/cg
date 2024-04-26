@@ -226,10 +226,17 @@ def test_add_run_parameters_to_housekeeper(
     hk_api.add_bundle_and_version_if_non_existent(bundle_name=novaseq_x_flow_cell.id)
 
     # WHEN adding the run parameters file to housekeeper
-    add_run_parameters_file_to_housekeeper(flow_cell=novaseq_x_flow_cell, hk_api=hk_api)
+    add_run_parameters_file_to_housekeeper(
+        flow_cell_name=novaseq_x_flow_cell.full_name,
+        flow_cell_run_dir=demultiplex_context.demultiplex_api.flow_cells_dir,
+        hk_api=hk_api,
+    )
 
     # THEN the run parameters file was added to housekeeper
-    assert hk_api.files(tags=[SequencingFileTag.RUN_PARAMETERS, novaseq_x_flow_cell.id]).all()
+    run_parameters_file: File = hk_api.files(
+        tags=[SequencingFileTag.RUN_PARAMETERS, novaseq_x_flow_cell.id]
+    ).first()
+    assert run_parameters_file.path.endswith("RunParameters.xml")
 
 
 def test_store_fastq_path_in_housekeeper_correct_tags(
