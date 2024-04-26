@@ -690,18 +690,6 @@ def data_dir(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture
-def fastq_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the fastq files dir."""
-    return Path(demultiplex_fixtures, "fastq")
-
-
-@pytest.fixture
-def spring_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the fastq files dir."""
-    return Path(demultiplex_fixtures, "spring")
-
-
-@pytest.fixture
 def project_dir(tmpdir_factory) -> Generator[Path, None, None]:
     """Path to a temporary directory where intermediate files can be stored."""
     yield Path(tmpdir_factory.mktemp("data"))
@@ -862,36 +850,6 @@ def sample_crams(
 def vcf_file(mip_dna_store_files: Path) -> Path:
     """Return the path to a VCF file."""
     return Path(mip_dna_store_files, "yellowhog_clinical_selected.vcf")
-
-
-@pytest.fixture(name="fastq_file")
-def fastq_file(fastq_dir: Path) -> Path:
-    """Return the path to a FASTQ file."""
-    return Path(fastq_dir, "dummy_run_R1_001.fastq.gz")
-
-
-@pytest.fixture(name="fastq_file_father")
-def fastq_file_father(fastq_dir: Path) -> Path:
-    """Return the path to a FASTQ file."""
-    return Path(fastq_dir, "fastq_run_R1_001.fastq.gz")
-
-
-@pytest.fixture(name="spring_file")
-def spring_file(spring_dir: Path) -> Path:
-    """Return the path to an existing spring file."""
-    return Path(spring_dir, "dummy_run_001.spring")
-
-
-@pytest.fixture(name="spring_meta_data_file")
-def spring_meta_data_file(spring_dir: Path) -> Path:
-    """Return the path to an existing spring file."""
-    return Path(spring_dir, "dummy_spring_meta_data.json")
-
-
-@pytest.fixture(name="spring_file_father")
-def spring_file_father(spring_dir: Path) -> Path:
-    """Return the path to a second existing spring file."""
-    return Path(spring_dir, "dummy_run_002.spring")
 
 
 @pytest.fixture(name="madeline_output")
@@ -1257,7 +1215,7 @@ def store_with_demultiplexed_samples(
     hiseq_x_dual_index_flow_cell_id: str,
     novaseq_6000_post_1_5_kits_flow_cell_id: str,
 ) -> Store:
-    """Return a store with samples that have been demultiplexed with BCL Convert and BCL2Fastq."""
+    """Return a store with samples that have been demultiplexed."""
     helpers.add_flow_cell(store, novaseq_6000_post_1_5_kits_flow_cell_id, sequencer_type="novaseq")
     helpers.add_flow_cell(store, hiseq_x_dual_index_flow_cell_id, sequencer_type="hiseqx")
     for i, sample_internal_id in enumerate(selected_novaseq_6000_post_1_5_kits_sample_ids):
@@ -3766,24 +3724,18 @@ def expected_total_reads() -> int:
 
 
 @pytest.fixture
-def flow_cell_full_name(flow_cell_name: str) -> str:
-    """Return flow cell full name."""
-    return f"201203_D00483_0200_A{flow_cell_name}"
-
-
-@pytest.fixture(name="expected_average_q30_for_sample")
 def expected_average_q30_for_sample() -> float:
     """Return expected average Q30 for a sample."""
     return (85.5 + 80.5) / 2
 
 
-@pytest.fixture(name="expected_average_q30_for_flow_cell")
+@pytest.fixture
 def expected_average_q30_for_flow_cell() -> float:
     return (((85.5 + 80.5) / 2) + ((83.5 + 81.5) / 2)) / 2
 
 
-@pytest.fixture(name="expected_total_reads_flow_cell_bcl2fastq")
-def expected_total_reads_flow_cell_2() -> int:
+@pytest.fixture
+def expected_total_reads_hiseq_x_flow_cell() -> int:
     """Return an expected read count"""
     return 8_000_000
 
@@ -3819,90 +3771,6 @@ def store_with_sequencing_metrics(
         metrics_data=sample_sequencing_metrics_details, store=store
     )
     return store
-
-
-@pytest.fixture(scope="function")
-def novaseqx_latest_analysis_version() -> str:
-    """Return the latest analysis version for NovaseqX analysis data directory."""
-    return "2"
-
-
-@pytest.fixture(scope="function")
-def novaseqx_flow_cell_directory(tmp_path: Path, novaseq_x_flow_cell_full_name: str) -> Path:
-    """Return the path to a NovaseqX flow cell directory."""
-    return Path(tmp_path, novaseq_x_flow_cell_full_name)
-
-
-@pytest.fixture(scope="function")
-def demultiplexed_runs_flow_cell_directory(tmp_path: Path) -> Path:
-    """Return the path to a demultiplexed flow cell run directory."""
-    demultiplexed_runs = Path(
-        tmp_path, DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME
-    )
-    demultiplexed_runs.mkdir()
-    return demultiplexed_runs
-
-
-def add_novaseqx_analysis_data(novaseqx_flow_cell_directory: Path, analysis_version: str):
-    """Add NovaseqX analysis data to a flow cell directory."""
-    analysis_path: Path = Path(
-        novaseqx_flow_cell_directory, DemultiplexingDirsAndFiles.ANALYSIS, analysis_version
-    )
-    analysis_path.mkdir(parents=True)
-    analysis_path.joinpath(DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
-    data = analysis_path.joinpath(DemultiplexingDirsAndFiles.DATA)
-    data.mkdir()
-    data.joinpath(DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED).touch()
-    return analysis_path
-
-
-@pytest.fixture(scope="function")
-def novaseqx_flow_cell_dir_with_analysis_data(
-    novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
-) -> Path:
-    """Return the path to a NovaseqX flow cell directory with multiple analysis data directories."""
-    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "0")
-    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, "1")
-    add_novaseqx_analysis_data(novaseqx_flow_cell_directory, novaseqx_latest_analysis_version)
-    return novaseqx_flow_cell_directory
-
-
-@pytest.fixture(scope="function")
-def post_processed_novaseqx_flow_cell(novaseqx_flow_cell_dir_with_analysis_data: Path) -> Path:
-    """Return the path to a NovaseqX flow cell that is post processed."""
-    Path(
-        novaseqx_flow_cell_dir_with_analysis_data,
-        DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING,
-    ).touch()
-    return novaseqx_flow_cell_dir_with_analysis_data
-
-
-@pytest.fixture(scope="function")
-def novaseqx_flow_cell_analysis_incomplete(
-    novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
-) -> Path:
-    """
-    Return the path to a flow cell for which the analysis is not complete.
-    It misses the ANALYSIS_COMPLETED file.
-    """
-    Path(
-        novaseqx_flow_cell_directory,
-        DemultiplexingDirsAndFiles.ANALYSIS,
-        novaseqx_latest_analysis_version,
-    ).mkdir(parents=True)
-    Path(
-        novaseqx_flow_cell_directory,
-        DemultiplexingDirsAndFiles.ANALYSIS,
-        novaseqx_latest_analysis_version,
-        DemultiplexingDirsAndFiles.COPY_COMPLETE,
-    ).touch()
-    return novaseqx_flow_cell_directory
-
-
-@pytest.fixture(scope="function")
-def demultiplex_not_complete_novaseqx_flow_cell(tmp_file: Path) -> Path:
-    """Return the path to a NovaseqX flow cell for which demultiplexing is not complete."""
-    return tmp_file
 
 
 @pytest.fixture
