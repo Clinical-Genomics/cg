@@ -121,7 +121,7 @@ def test_store_case(
 def test_store_flow_cell(
     caplog,
     cli_runner: CliRunner,
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     mocker,
     populated_compress_context: CGConfig,
     sample_id: str,
@@ -141,7 +141,7 @@ def test_store_flow_cell(
 
     # WHEN running the store flow cell command
     res = cli_runner.invoke(
-        store_flow_cell, [bcl2fastq_flow_cell_id], obj=populated_compress_context
+        store_flow_cell, [novaseq_6000_pre_1_5_kits_flow_cell_id], obj=populated_compress_context
     )
 
     # THEN assert that the command exits successfully
@@ -180,7 +180,7 @@ def test_store_ticket(
 def test_store_store_demultiplexed_flow_cell(
     caplog,
     cli_runner: CliRunner,
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     helpers,
     mocker,
     real_populated_compress_context: CGConfig,
@@ -200,7 +200,9 @@ def test_store_store_demultiplexed_flow_cell(
 
     # WHEN running the store demultiplexed flow cell command
     res = cli_runner.invoke(
-        store_demultiplexed_flow_cell, [bcl2fastq_flow_cell_id], obj=real_populated_compress_context
+        store_demultiplexed_flow_cell,
+        [novaseq_6000_pre_1_5_kits_flow_cell_id],
+        obj=real_populated_compress_context,
     )
 
     # THEN assert that the command exits successfully

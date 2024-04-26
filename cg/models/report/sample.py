@@ -7,10 +7,12 @@ from cg.models.report.metadata import (
     BalsamicWGSSampleMetadataModel,
     MipDNASampleMetadataModel,
     RnafusionSampleMetadataModel,
+    TomteSampleMetadataModel,
 )
 from cg.models.report.validators import (
     get_boolean_as_string,
     get_date_as_string,
+    get_delivered_files_as_file_names,
     get_gender_as_string,
     get_prep_category_as_string,
     get_report_string,
@@ -88,6 +90,8 @@ class SampleModel(BaseModel):
         methods: sample processing methods model
         metadata: sample associated metrics and trending data model
         timestamps: processing timestamp attributes
+        delivered_files: list of analysis sample files to be delivered
+        delivered_fastq_files: list of fastq sample files to be delivered
     """
 
     name: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
@@ -104,5 +108,12 @@ class SampleModel(BaseModel):
         | BalsamicTargetedSampleMetadataModel
         | BalsamicWGSSampleMetadataModel
         | RnafusionSampleMetadataModel
+        | TomteSampleMetadataModel
     )
     timestamps: TimestampModel
+    delivered_files: Annotated[
+        list[str] | str, BeforeValidator(get_delivered_files_as_file_names)
+    ] = None
+    delivered_fastq_files: Annotated[
+        list[str] | str, BeforeValidator(get_delivered_files_as_file_names)
+    ] = None

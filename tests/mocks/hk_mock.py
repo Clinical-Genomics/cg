@@ -191,7 +191,12 @@ class MockHousekeeperAPI:
             raise HousekeeperBundleVersionMissingError
         return self.files(version=version.id, tags=tags).first()
 
-    def get_files_from_latest_version(self, bundle_name: str, tags: list[str]) -> list[File] | None:
+    def get_files_from_latest_version_containing_tags(self, **_kwargs) -> list[File]:
+        return self._files.all()
+
+    def get_files_from_latest_version(
+        self, bundle_name: str, tags: list[str] | None = None
+    ) -> list[File] | None:
         """Return files in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
         if not version:
@@ -586,6 +591,9 @@ class MockHousekeeperAPI:
     def session_no_autoflush(self):
         """Wrap property in Housekeeper Store"""
         yield True
+
+    def rollback(self) -> None:
+        return None
 
     def __repr__(self):
         return f"HousekeeperMockAPI:version_obj={self._version_obj}"

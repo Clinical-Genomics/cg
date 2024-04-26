@@ -55,12 +55,12 @@ def test_is_flow_cell_ready_for_delivery_false(tmp_path: Path):
     result = is_flow_cell_ready_for_delivery(tmp_path)
 
     # THEN the result should be False
-    assert result == False
+    assert not result
 
 
-def test_validate_sample_sheet_exists_raises_error(bcl2fastq_flow_cell_dir: Path):
+def test_validate_sample_sheet_exists_raises_error(hiseq_2500_custom_index_flow_cell_dir: Path):
     # GIVEN a flow cell without a sample sheet in housekeeper
-    flow_cell = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    flow_cell = FlowCellDirectoryData(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
     flow_cell._sample_sheet_path_hk = None
     # WHEN validating the existence of the sample sheet
     # THEN it should raise a FlowCellError
@@ -68,12 +68,12 @@ def test_validate_sample_sheet_exists_raises_error(bcl2fastq_flow_cell_dir: Path
         validate_sample_sheet_exists(flow_cell=flow_cell)
 
 
-def test_validate_sample_sheet_exists(bcl2fastq_flow_cell_dir: Path):
+def test_validate_sample_sheet_exists(hiseq_2500_custom_index_flow_cell_dir: Path):
     # GIVEN a path with a sample sheet
     # GIVEN a flow cell without a sample sheet in housekeeper
-    flow_cell = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    flow_cell = FlowCellDirectoryData(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
     sample_sheet_path = Path(
-        bcl2fastq_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        hiseq_2500_custom_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
     sample_sheet_path.touch()
     flow_cell._sample_sheet_path_hk = sample_sheet_path

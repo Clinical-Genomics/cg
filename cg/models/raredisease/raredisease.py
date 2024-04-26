@@ -1,10 +1,20 @@
-from pathlib import Path
-
-from pydantic.v1 import Field
 from enum import StrEnum
 
+from pydantic import BaseModel
 
 from cg.models.nf_analysis import NextflowSampleSheetEntry
+
+
+class RarediseaseQCMetrics(BaseModel):
+    """Raredisease QC metrics"""
+
+    percentage_mapped_reads: float | None
+    pct_target_bases_10x: float | None
+    median_target_coverage: float | None
+    pct_pf_reads_aligned: float | None
+    pct_pf_reads_improper_pairs: float | None
+    pct_adapter: float | None
+    fraction_duplicates: float | None
 
 
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
@@ -50,5 +60,5 @@ class RarediseaseSampleSheetHeaders(StrEnum):
     case_id: str = "case_id"
 
     @classmethod
-    def headers(cls) -> list[str]:
+    def list(cls) -> list[str]:
         return list(map(lambda header: header.value, cls))

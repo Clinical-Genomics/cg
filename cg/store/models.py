@@ -17,7 +17,6 @@ from sqlalchemy import Text as SLQText
 from sqlalchemy import UniqueConstraint, orm, types
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
-from sqlalchemy.util import deprecated
 
 from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
@@ -71,14 +70,6 @@ def to_dict(model_instance):
             if not isinstance(getattr(model_instance, column.name), InstrumentedAttribute)
         }
 
-
-flowcell_sample = Table(
-    "flowcell_sample",
-    Base.metadata,
-    Column("flowcell_id", types.Integer, ForeignKey("flowcell.id"), nullable=False),
-    Column("sample_id", types.Integer, ForeignKey("sample.id"), nullable=False),
-    UniqueConstraint("flowcell_id", "sample_id", name="_flowcell_sample_uc"),
-)
 
 customer_user = Table(
     "customer_user",
@@ -463,7 +454,6 @@ class Case(Base, PriorityMixin):
     internal_id: Mapped[UniqueStr]
     is_compressible: Mapped[bool] = mapped_column(default=True)
     name: Mapped[Str128]
-    order_id: Mapped[int | None] = mapped_column(ForeignKey("order.id"))
     ordered_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     _panels: Mapped[Text | None]
 
@@ -524,16 +514,6 @@ class Case(Base, PriorityMixin):
                 sequenced_dates.append(link.sample.last_sequenced_at)
         return max(sequenced_dates, default=None)
 
-    @property
-    def all_samples_pass_qc(self) -> bool:
-        pass_qc = []
-        for link in self.links:
-            if link.sample.application_version.application.is_external or link.sample.sequencing_qc:
-                pass_qc.append(True)
-            else:
-                pass_qc.append(False)
-        return all(pass_qc)
-
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
@@ -541,6 +521,11 @@ class Case(Base, PriorityMixin):
     def samples(self) -> list["Sample"]:
         """Return case samples."""
         return self._get_samples
+
+    @property
+    def sample_ids(self) -> list[str]:
+        """Return a list of internal ids of the case samples."""
+        return [sample.internal_id for sample in self._get_samples]
 
     @property
     def _get_samples(self) -> list["Sample"]:
@@ -675,14 +660,15 @@ class Flowcell(Base):
     archived_at: Mapped[datetime | None]
     has_backup: Mapped[bool] = mapped_column(default=False)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=datetime.now)
-
-    samples: Mapped[list["Sample"]] = orm.relationship(
-        secondary=flowcell_sample, back_populates="flowcells"
-    )
     sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
         back_populates="flowcell",
         cascade="all, delete, delete-orphan",
     )
+
+    @property
+    def samples(self) -> list["Sample"]:
+        """Return samples sequenced on the flow cell."""
+        return list({metric.sample for metric in self.sequencing_metrics})
 
     def __str__(self):
         return self.name
@@ -813,9 +799,6 @@ class Sample(Base, PriorityMixin):
     father_links: Mapped[list[CaseSample]] = orm.relationship(
         foreign_keys=[CaseSample.father_id], back_populates="father"
     )
-    flowcells: Mapped[list[Flowcell]] = orm.relationship(
-        secondary=flowcell_sample, back_populates="samples"
-    )
     sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
         back_populates="sample"
     )
@@ -825,16 +808,23 @@ class Sample(Base, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
-    def sequencing_qc(self) -> bool:
-        """Return sequencing qc passed or failed."""
-        application = self.application_version.application
-        # Express priority needs to be analyzed at a lower threshold for primary analysis
-        if self.priority == Priority.express:
-            one_half_of_target_reads = application.target_reads / 2
-            return self.reads >= one_half_of_target_reads
-        if self.application_version.application.prep_category == PrepCategory.READY_MADE_LIBRARY:
-            return bool(self.reads)
-        return self.reads > application.expected_reads
+    def archive_location(self) -> str:
+        """Returns the data_archive_location if the customer linked to the sample."""
+        return self.customer.data_archive_location
+
+    @property
+    def expected_reads_for_sample(self) -> int:
+        """Return the expected reads of the sample."""
+        return self.application_version.application.expected_reads
+
+    @property
+    def has_reads(self) -> bool:
+        return bool(self.reads)
+
+    @property
+    def flow_cells(self) -> list[Flowcell]:
+        """Return the flow cells a sample has been sequenced on."""
+        return list({metric.flowcell for metric in self.sequencing_metrics})
 
     @property
     def phenotype_groups(self) -> list[str]:
@@ -871,15 +861,6 @@ class Sample(Base, PriorityMixin):
 
         return f"Ordered {self.ordered_at.date()}"
 
-    @property
-    def archive_location(self) -> str:
-        """Returns the data_archive_location if the customer linked to the sample."""
-        return self.customer.data_archive_location
-
-    @property
-    def has_reads(self) -> bool:
-        return bool(self.reads)
-
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
         data = to_dict(model_instance=self)
@@ -890,7 +871,7 @@ class Sample(Base, PriorityMixin):
         if links:
             data["links"] = [link_obj.to_dict(family=True, parents=True) for link_obj in self.links]
         if flowcells:
-            data["flowcells"] = [flowcell_obj.to_dict() for flowcell_obj in self.flowcells]
+            data["flowcells"] = [flow_cell.to_dict() for flow_cell in self.flow_cells]
         return data
 
 
@@ -986,6 +967,7 @@ class Order(Base):
     order_date: Mapped[datetime] = mapped_column(default=datetime.now())
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
     workflow: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
+    is_delivered: Mapped[bool] = mapped_column(default=False)
 
     def to_dict(self):
         return to_dict(model_instance=self)
