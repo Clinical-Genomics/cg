@@ -24,7 +24,6 @@
     {% elif workflow == "taxprofiler" %}
       <!-- Taxprofiler QC metrics -->
       {{ taxprofiler_qc_metrics(samples=case.samples) }}
-    {% endif %}
 	  {% elif workflow == "tomte" %}
       <!-- Tomte QC metrics -->
       {{ tomte_qc_metrics(samples=case.samples) }}
