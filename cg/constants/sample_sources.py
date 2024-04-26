@@ -1,4 +1,4 @@
-"""Constants that specify sample sources"""
+"""Constants that specify sample sources."""
 
 from enum import StrEnum
 
@@ -32,4 +32,5 @@ ANALYSIS_SOURCES = (
 
 
 class SourceType(StrEnum):
+    FFPE: str = "FFPE"
     UNKNOWN: str = "unknown"

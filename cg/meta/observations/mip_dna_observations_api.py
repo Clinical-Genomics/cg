@@ -6,10 +6,10 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import (
+    LOQSUDB_RARE_DISEASE_CUSTOMERS,
     LOQUSDB_ID,
     LOQUSDB_MIP_SEQUENCING_METHODS,
     LoqusdbInstance,
-    LoqusdbMipCustomers,
     MipDNALoadParameters,
     MipDNAObservationsAnalysisTag,
 )
@@ -52,10 +52,6 @@ class MipDNAObservationsAPI(ObservationsAPI):
 
     def load_observations(self, case: Case, input_files: MipDNAObservationsInputFiles) -> None:
         """Load observation counts to Loqusdb for a MIP-DNA case."""
-        if case.tumour_samples:
-            LOG.error(f"Case {case.internal_id} has tumour samples. Cancelling upload.")
-            raise LoqusdbUploadCaseError
-
         if self.is_duplicate(
             case=case,
             loqusdb_api=self.loqusdb_api,
@@ -117,6 +113,22 @@ class MipDNAObservationsAPI(ObservationsAPI):
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case.internal_id} from {repr(self.loqusdb_api)}")
 
-    def get_loqusdb_customers(self) -> LoqusdbMipCustomers:
-        """Returns the customers that are entitled to Rare Disease Loqusdb uploads."""
-        return LoqusdbMipCustomers
+    def get_loqusdb_customers(self) -> list[str]:
+        """Return customers that are eligible for rare disease Loqusdb uploads."""
+        return LOQSUDB_RARE_DISEASE_CUSTOMERS
+
+    def is_case_eligible_for_observations_upload(self, case: Case) -> bool:
+        """Return whether a MIP DNA case is eligible for observations upload."""
+        is_customer_eligible_for_observations_upload: bool = (
+            self.is_customer_eligible_for_observations_upload(case.customer.internal_id)
+        )
+        are_case_samples_non_tumor: bool = self.are_case_samples_non_tumor(case)
+        return is_customer_eligible_for_observations_upload and are_case_samples_non_tumor
+
+    @staticmethod
+    def are_case_samples_non_tumor(case: Case) -> bool:
+        """Return whether a MIP DNA case is free of tumor samples."""
+        if case.tumour_samples:
+            LOG.error(f"Case {case.internal_id} has tumour samples")
+            return False
+        return True

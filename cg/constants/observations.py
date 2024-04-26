@@ -7,25 +7,10 @@ from cg.constants.sequencing import SequencingMethod
 
 LOQUSDB_ID = "_id"
 LOQUSDB_SUPPORTED_WORKFLOWS = [Workflow.MIP_DNA, Workflow.BALSAMIC]
+LOQSUDB_RARE_DISEASE_CUSTOMERS = ["cust002", "cust003", "cust004"]
+LOQSUDB_CANCER_CUSTOMERS = ["cust110", "cust127", "cust143", "cust147"]
 LOQUSDB_MIP_SEQUENCING_METHODS = [SequencingMethod.WGS, SequencingMethod.WES]
 LOQUSDB_BALSAMIC_SEQUENCING_METHODS = [SequencingMethod.WGS]
-
-
-class LoqusdbMipCustomers(StrEnum):
-    """Loqusdb Rare Disease customers."""
-
-    KLINISK_GENETIK: str = "cust002"
-    CMMS: str = "cust003"
-    KLINISK_IMMUNOLOGI: str = "cust004"
-
-
-class LoqusdbBalsamicCustomers(StrEnum):
-    """Loqusdb Balsamic customers."""
-
-    AML: str = "cust110"
-    BTB_GMS: str = "cust127"
-    ONKPAT_HAGLUND: str = "cust143"
-    BTB_GMS_LINKOPING: str = "cust147"
 
 
 class LoqusdbInstance(StrEnum):
