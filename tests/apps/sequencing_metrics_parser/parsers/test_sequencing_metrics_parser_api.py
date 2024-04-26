@@ -37,16 +37,14 @@ def test_create_sample_lane_sequencing_metrics_for_flow_cell(
 
 
 def test_create_undetermined_non_pooled_metrics(
-    bcl_convert_flow_cell: FlowCellDirectoryData,
+    hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet: FlowCellDirectoryData,
 ):
     """Test creating undetermined sequencing statistics from demultiplex metrics."""
     # GIVEN a directory with a demultiplexed flow cell with undetermined reads
-    sample_sheet_path = Path(bcl_convert_flow_cell.path, "SampleSheet.csv")
-    bcl_convert_flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
 
     # WHEN creating undetermined sequencing statistics from bcl convert metrics
     metrics: list[SampleLaneSequencingMetrics] = create_undetermined_non_pooled_metrics(
-        flow_cell=bcl_convert_flow_cell
+        flow_cell=hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet
     )
 
     # THEN metrics are created for the undetermined reads

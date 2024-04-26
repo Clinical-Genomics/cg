@@ -47,7 +47,7 @@ class MetricsParser:
     def parse_metrics_file(
         self, metrics_file_path, metrics_model: Callable
     ) -> list[SequencingQualityMetrics | DemuxMetrics]:
-        """Parse specified BCL convert metrics file."""
+        """Parse specified metrics file."""
         LOG.info(f"Parsing BCLConvert metrics file: {metrics_file_path}")
         parsed_metrics: list[SequencingQualityMetrics | DemuxMetrics] = []
         metrics_content: list[dict] = ReadFile.get_content_from_file(
