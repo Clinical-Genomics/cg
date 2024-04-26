@@ -11,7 +11,7 @@
           <th scope="col">Beställt</th>
           <th scope="col">Ticket</th>
           <th scope="col">Applikation</th>
-          <th scope="col">{% if workflow != "taxprofiler" %} Kön {% endif %}</th>
+          <th scope="col">{% if customer_workflow != "taxprofiler" %} Kön {% endif %}</th>
           <th scope="col">Provtyp</th>
           <!-- Sample status -->
           {{ sample_status(workflow=customer_workflow) }}
@@ -32,7 +32,7 @@
             <td>{{ sample.timestamps.ordered_at }}</td>
             <td>{{ sample.ticket }}</td>
             <td>{{ sample.application.tag }}</td>
-            <td>{% if workflow != "taxprofiler" %} {{ sample.gender }} {% endif %}</td>
+            <td>{% if customer_workflow != "taxprofiler" %} {{ sample.gender }} {% endif %}</td>
             <td>{{ sample.source }}</td>
             <!-- Sample status value -->
             {{ sample_status_value(workflow=customer_workflow, sample=sample) }}
