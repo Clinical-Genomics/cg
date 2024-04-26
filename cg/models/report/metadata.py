@@ -146,13 +146,13 @@ class TaxprofilerSampleMetadataModel(SequencingSampleMetadataModel):
 
     Attributes:
         average_read_length: average length of reads; source: workflow
-        mapped_reads: percentage of reads aligned to the reference sequence; source: workflow
+        mapped_reads: reads aligned to the reference sequence; source: workflow
         mean_length_r2: average length of reads for read2; source: workflow
         million_read_pairs_after_filtering: number of reads after filtering; source: workflow
     """
 
     average_read_length: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
-    mapped_reads: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
+    mapped_reads: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     mean_length_r2: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     million_read_pairs_after_filtering: Annotated[str, BeforeValidator(get_float_as_string)] = (
         NA_FIELD
