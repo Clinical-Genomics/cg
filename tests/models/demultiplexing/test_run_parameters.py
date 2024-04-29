@@ -29,7 +29,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
     [
         "hiseq_x_single_index_run_parameters_path",
         "hiseq_2500_dual_index_run_parameters_path",
-        "novaseq_6000_run_parameters_path",
+        "novaseq_6000_run_parameters_pre_1_5_kits_path",
         "novaseq_x_run_parameters_path",
     ],
 )
@@ -52,7 +52,11 @@ def test_run_parameters_parent_class_fails(
     [
         ("hiseq_x_single_index_run_parameters_path", RunParametersHiSeq, Sequencers.HISEQX),
         ("hiseq_2500_dual_index_run_parameters_path", RunParametersHiSeq, Sequencers.HISEQGA),
-        ("novaseq_6000_run_parameters_path", RunParametersNovaSeq6000, Sequencers.NOVASEQ),
+        (
+            "novaseq_6000_run_parameters_pre_1_5_kits_path",
+            RunParametersNovaSeq6000,
+            Sequencers.NOVASEQ,
+        ),
         ("novaseq_x_run_parameters_path", RunParametersNovaSeqX, Sequencers.NOVASEQX),
     ],
 )
@@ -85,7 +89,7 @@ class RunParametersScenario(BaseModel):
     "scenario",
     [
         RunParametersScenario(
-            wrong_run_parameters_path_fixture="novaseq_6000_run_parameters_path",
+            wrong_run_parameters_path_fixture="novaseq_6000_run_parameters_pre_1_5_kits_path",
             constructor=RunParametersHiSeq,
             error_msg=f"Could not find node {RunParametersXMLNodes.APPLICATION_NAME} in the run parameters file.",
         ),
@@ -110,7 +114,7 @@ class RunParametersScenario(BaseModel):
             error_msg=f"Could not find node {RunParametersXMLNodes.INSTRUMENT_TYPE} in the run parameters file.",
         ),
         RunParametersScenario(
-            wrong_run_parameters_path_fixture="novaseq_6000_run_parameters_path",
+            wrong_run_parameters_path_fixture="novaseq_6000_run_parameters_pre_1_5_kits_path",
             constructor=RunParametersNovaSeqX,
             error_msg=f"Could not find node {RunParametersXMLNodes.INSTRUMENT_TYPE} in the run parameters file.",
         ),
@@ -160,12 +164,16 @@ def test_reagent_kit_version_hiseq_and_novaseq_x(
     assert not run_parameters.reagent_kit_version
 
 
-def test_reagent_kit_version_novaseq_6000(novaseq_6000_run_parameters: RunParametersNovaSeq6000):
-    """Test that getting reagent kit version from a correct file returns an expected value."""
+def test_reagent_kit_version_novaseq_6000_post_1_5_kits(
+    novaseq_6000_run_parameters_post_1_5_kits: RunParametersNovaSeq6000,
+):
+    """
+    Test that getting reagent kit version from a NovaSeq6000 post 1.5 kits does not return unknown.
+    """
     # GIVEN a valid RunParameters object for NovaSeq6000
 
     # WHEN fetching the reagent kit version
-    reagent_kit_version: str = novaseq_6000_run_parameters.reagent_kit_version
+    reagent_kit_version: str = novaseq_6000_run_parameters_post_1_5_kits.reagent_kit_version
 
     # THEN the reagent kit version exists and is not "unknown"
     assert reagent_kit_version
@@ -194,13 +202,15 @@ def test_control_software_version_hiseq_and_novaseq_x(
 
 
 def test_control_software_version_novaseq_6000(
-    novaseq_6000_run_parameters: RunParametersNovaSeq6000,
+    novaseq_6000_run_parameters_pre_1_5_kits: RunParametersNovaSeq6000,
 ):
     """Test that getting control software version from a correct file returns an expected value."""
     # GIVEN a valid RunParameters object for NovaSeq6000
 
     # WHEN fetching the control software version
-    control_software_version: str = novaseq_6000_run_parameters.control_software_version
+    control_software_version: str = (
+        novaseq_6000_run_parameters_pre_1_5_kits.control_software_version
+    )
 
     # THEN the control software version is a non-empty string
     assert isinstance(control_software_version, str)
@@ -226,9 +236,10 @@ def test_novaseq_6000_no_version(run_parameters_missing_versions_path: Path, cap
 @pytest.mark.parametrize(
     "run_parameters_fixture",
     [
-        "hiseq_2500_dual_index_run_parameters",
         "hiseq_x_single_index_run_parameters",
-        "novaseq_6000_run_parameters",
+        "hiseq_2500_dual_index_run_parameters",
+        "novaseq_6000_run_parameters_pre_1_5_kits",
+        "novaseq_6000_run_parameters_post_1_5_kits",
         "novaseq_x_run_parameters",
     ],
 )

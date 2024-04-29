@@ -12,24 +12,24 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.utils.flow_cell import get_flow_cell_id
 
 
-def test_flow_cell_id(bcl2fastq_flow_cell_dir: Path):
+def test_flow_cell_id(hiseq_2500_dual_index_flow_cell_dir: Path):
     """Test parsing of flow cell id."""
     # GIVEN the path to a finished flow cell run
     # GIVEN the flow cell id
-    flowcell_id: str = get_flow_cell_id(bcl2fastq_flow_cell_dir.name)
+    flowcell_id: str = get_flow_cell_id(hiseq_2500_dual_index_flow_cell_dir.name)
 
     # WHEN instantiating a flow cell object
-    flowcell_obj = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    flowcell_obj = FlowCellDirectoryData(flow_cell_path=hiseq_2500_dual_index_flow_cell_dir)
 
     # THEN assert that the flow cell id is parsed
     assert flowcell_obj.id == flowcell_id
 
 
-def test_flow_cell_position(bcl2fastq_flow_cell_dir: Path):
+def test_flow_cell_position(hiseq_2500_dual_index_flow_cell_dir: Path):
     """Test getting flow cell position."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
-    flow_cell = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    flow_cell = FlowCellDirectoryData(flow_cell_path=hiseq_2500_dual_index_flow_cell_dir)
 
     # WHEN fetching the flow cell position
     position = flow_cell.position
@@ -111,9 +111,9 @@ def test_flow_cell_run_parameters_type(
     assert run_parameters.sequencer == expected_sequencer
 
 
-def test_has_demultiplexing_started_locally_false(tmp_flow_cell_directory_bclconvert: Path):
+def test_has_demultiplexing_started_locally_false(tmp_flow_cell_directory_bcl_convert: Path):
     # GIVEN a flow cell without a demuxstarted.txt file
-    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bcl_convert)
     assert not Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).exists()
 
     # WHEN checking if the flow cell has started demultiplexing
@@ -124,10 +124,10 @@ def test_has_demultiplexing_started_locally_false(tmp_flow_cell_directory_bclcon
 
 
 def test_has_demultiplexing_started_locally_true(
-    tmp_flow_cell_directory_bclconvert: Path,
+    tmp_flow_cell_directory_bcl_convert: Path,
 ):
     # GIVEN a flow cell with a demuxstarted.txt file
-    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bcl_convert)
     Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).touch()
 
     # WHEN checking if the flow cell has started demultiplexing
