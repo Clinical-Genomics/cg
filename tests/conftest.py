@@ -3532,7 +3532,7 @@ def taxprofiler_context(
 
     sample_not_enough_reads: Sample = helpers.add_sample(
         status_db,
-        application_tag=microbial_application_tag,
+        application_tag=metagenomics_application_tag,
         internal_id=sample_id_not_enough_reads,
         reads=total_sequenced_reads_not_pass,
         last_sequenced_at=datetime.now(),
