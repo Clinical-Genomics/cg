@@ -104,18 +104,19 @@ def downgrade():
     session = sa.orm.Session(bind=bind)
 
     # Analysis
-    for analysis in session.query(Analysis).filter(Analysis.pipeline == "jasen"):
-        analysis.pipeline = "fastq"
+    for analysis in session.query(Analysis).filter(Analysis.workflow == "jasen"):
+        analysis.workflow = "fastq"
 
     # Application limitations
     for application_limitations in session.query(ApplicationLimitations).filter(
         ApplicationLimitations.workflow == "jasen"
     ):
-        application_limitations = "fastq"
+        application_limitations.workflow = "fastq"
 
-    # Case
-    for family in session.query(Case).filter(Case.data_analysis == "jasen"):
-        family.data_analysis = "fastq"
+    # Case Using underscore in the variable name to not clash with python case
+    # keyword.
+    for case_ in session.query(Case).filter(Case.data_analysis == "jasen"):
+        case_.data_analysis = "fastq"
 
     # Order
     for order in session.query(Order).filter(Order.workflow == "jasen"):
