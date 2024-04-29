@@ -52,11 +52,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Headers for sample sheet."""
         return RarediseaseSampleSheetHeaders.list()
 
-    @property
-    def is_multiple_samples_allowed(self) -> bool:
-        """Return whether the analysis supports multiple samples to be linked to the case."""
-        return True
-
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a case. Currently fixed for hg19."""
         return GenomeVersion.hg19

@@ -1,6 +1,7 @@
 {% from "/macros/data_analysis/qc_metrics/balsamic_qc_metrics.html" import balsamic_qc_metrics %}
 {% from "/macros/data_analysis/qc_metrics/mip_dna_qc_metrics.html" import mip_dna_qc_metrics %}
 {% from "/macros/data_analysis/qc_metrics/rnafusion_qc_metrics.html" import rnafusion_qc_metrics %}
+{% from "/macros/data_analysis/qc_metrics/taxprofiler_qc_metrics.html" import taxprofiler_qc_metrics %}
 {% from "/macros/data_analysis/qc_metrics/tomte_qc_metrics.html" import tomte_qc_metrics %}
 {% from "/macros/data_analysis/limitations.html" import apptag_limitations %}
 
@@ -20,6 +21,9 @@
     {% elif workflow == "rnafusion" %}
       <!-- Rnafusion QC metrics -->
       {{ rnafusion_qc_metrics(samples=case.samples) }}
+    {% elif workflow == "taxprofiler" %}
+      <!-- Taxprofiler QC metrics -->
+      {{ taxprofiler_qc_metrics(samples=case.samples) }}
 	  {% elif workflow == "tomte" %}
       <!-- Tomte QC metrics -->
       {{ tomte_qc_metrics(samples=case.samples) }}
@@ -79,6 +83,11 @@
     <div class="alert alert-info" role="alert">
       Workflowinformation och bioinformatiska verktygsversioner:
       <a href="https://nf-co.re/rnafusion" class="alert-link">https://nf-co.re/rnafusion</a>.
+    </div>
+	{% elif workflow == "taxprofiler" %}
+    <div class="alert alert-info" role="alert">
+      Workflowinformation och bioinformatiska verktygsversioner:
+      <a href="https://github.com/nf-core/taxprofiler" class="alert-link">https://github.com/nf-core/taxprofiler</a>.
     </div>
   {% elif workflow == "tomte" %}
     <div class="alert alert-info" role="alert">

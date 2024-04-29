@@ -106,7 +106,7 @@ class NfAnalysisAPI(AnalysisAPI):
     @property
     def is_multiple_samples_allowed(self) -> bool:
         """Return whether the analysis supports multiple samples to be linked to the case."""
-        raise NotImplementedError
+        return True
 
     @property
     def is_multiqc_pattern_search_exact(self) -> bool:
