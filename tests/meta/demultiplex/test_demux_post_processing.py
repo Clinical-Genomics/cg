@@ -106,6 +106,12 @@ def test_post_processing_of_flow_cell(
         bundle=flow_cell_name,
     ).all()
 
+    # THEN a run parameters file was added to Housekeeper
+    assert updated_demux_post_processing_api.hk_api.get_files(
+        tags=[SequencingFileTag.RUN_PARAMETERS],
+        bundle=flow_cell_name,
+    ).all()
+
     # THEN sample fastq files were added to Housekeeper tagged with FASTQ and the flow cell name
     for sample_internal_id in sample_internal_ids:
         assert updated_demux_post_processing_api.hk_api.get_files(
