@@ -15,6 +15,7 @@ from cg.constants.constants import (
     MultiQC,
     WorkflowManager,
 )
+from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
@@ -27,7 +28,7 @@ from cg.io.txt import concat_txt, write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
-from cg.models.analysis import NextflowAnalysis, AnalysisModel
+from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
@@ -105,12 +106,17 @@ class NfAnalysisAPI(AnalysisAPI):
     @property
     def is_multiple_samples_allowed(self) -> bool:
         """Return whether the analysis supports multiple samples to be linked to the case."""
-        raise NotImplementedError
+        return True
 
     @property
     def is_multiqc_pattern_search_exact(self) -> bool:
         """Return True if only exact pattern search is allowed to collect metrics information from MultiQC file.
         If false, pattern must be present but does not need to be exact."""
+        return False
+
+    @property
+    def is_gene_panel_required(self) -> bool:
+        """Return True if a gene panel is needs to be created using the information in StatusDB and exporting it from Scout."""
         return False
 
     def get_profile(self, profile: str | None = None) -> str:
@@ -216,6 +222,12 @@ class NfAnalysisAPI(AnalysisAPI):
         if work_dir:
             return work_dir.absolute()
         return Path(self.get_case_path(case_id), NFX_WORK_DIR)
+
+    def get_gene_panels_path(self, case_id: str) -> Path:
+        """Path to gene panels bed file exported from Scout."""
+        return Path(self.get_case_path(case_id=case_id), "gene_panels").with_suffix(
+            FileExtensions.BED
+        )
 
     def set_cluster_options(self, case_id: str) -> str:
         return f'process.clusterOptions = "-A {self.account} --qos={self.get_slurm_qos_for_case(case_id=case_id)}"\n'
@@ -354,6 +366,16 @@ class NfAnalysisAPI(AnalysisAPI):
                 file_path=self.get_nextflow_config_path(case_id=case_id),
             )
 
+    def create_gene_panel(self, case_id: str, dry_run: bool) -> None:
+        """Create and write an aggregated gene panel file exported from Scout."""
+        LOG.info("Creating gene panel file")
+        bed_lines: list[str] = self.get_gene_panel(case_id=case_id, dry_run=dry_run)
+        if dry_run:
+            bed_lines: str = "\n".join(bed_lines)
+            LOG.debug(f"{bed_lines}")
+            return
+        self.write_panel(case_id=case_id, content=bed_lines)
+
     def config_case(self, case_id: str, dry_run: bool):
         """Create directory and config files required by a workflow for a case."""
         if dry_run:
@@ -363,6 +385,8 @@ class NfAnalysisAPI(AnalysisAPI):
         self.create_sample_sheet(case_id=case_id, dry_run=dry_run)
         self.create_params_file(case_id=case_id, dry_run=dry_run)
         self.create_nextflow_config(case_id=case_id, dry_run=dry_run)
+        if self.is_gene_panel_required:
+            self.create_gene_panel(case_id=case_id, dry_run=dry_run)
 
     def _run_analysis_with_nextflow(
         self, case_id: str, command_args: NfCommandArgs, dry_run: bool
@@ -844,6 +868,40 @@ class NfAnalysisAPI(AnalysisAPI):
                 LOG.error(f"Failed to clean directories for case {case_id} - {repr(error)}")
 
         LOG.info(f"Done cleaning {self.workflow} output")
+=======
+    def get_genome_build(self, case_id: str) -> GenomeVersion:
+        """Return reference genome version for a case.
+        Raises CgError if this information is missing or inconsistent for the samples linked to a case.
+        """
+        reference_genome: set[str] = {
+            sample.reference_genome
+            for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
+        }
+        if len(reference_genome) == 1:
+            return reference_genome.pop()
+        if len(reference_genome) > 1:
+            raise CgError(
+                f"Samples linked to case {case_id} have different reference genome versions set"
+            )
+        raise CgError(f"No reference genome specified for case {case_id}")
+
+    def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
+        """Return build version of the gene panel for a case."""
+        reference_genome: GenomeVersion = self.get_genome_build(case_id=case_id)
+        try:
+            return getattr(GenePanelGenomeBuild, reference_genome)
+        except AttributeError as error:
+            raise CgError(
+                f"Reference {reference_genome} has no associated genome build for panels: {error}"
+            ) from error
+
+    def get_gene_panel(self, case_id: str, dry_run: bool = False) -> list[str]:
+        """Create and return the aggregated gene panel file."""
+        return self._get_gene_panel(
+            case_id=case_id,
+            genome_build=self.get_gene_panel_genome_build(case_id=case_id),
+            dry_run=dry_run,
+        )
 
     def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
         """Parse Nextflow output analysis files and return an analysis model."""
@@ -859,7 +917,3 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return analysis output of a Nextflow case."""
         qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
         return self.parse_analysis(qc_metrics_raw=qc_metrics)
-
-    def get_genome_build(self, case_id: str) -> str:
-        """Return the reference genome build version of Nextflow analysis."""
-        return GenomeVersion.hg38.value

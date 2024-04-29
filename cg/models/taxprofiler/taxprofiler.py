@@ -8,10 +8,14 @@ from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 class TaxprofilerQCMetrics(BaseModel):
     """Taxprofiler QC metrics."""
 
-    after_filtering_total_reads: float | None
-    reads_mapped: float | None
-    before_filtering_total_reads: float | None
-    paired_aligned_none: float | None
+    after_filtering_gc_content: float
+    after_filtering_read1_mean_length: float
+    after_filtering_read2_mean_length: float
+    after_filtering_total_reads: float
+    average_length: float
+    pct_duplication: float
+    raw_total_sequences: float
+    reads_mapped: float
 
 
 class TaxprofilerParameters(WorkflowParameters):

@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 from cg.constants import Workflow
+from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.symbols import EMPTY_STRING
@@ -50,11 +51,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def is_params_appended_to_nextflow_config(self) -> bool:
         """Return True if parameters should be added into the nextflow config file instead of the params file."""
         return False
-
-    @property
-    def is_multiple_samples_allowed(self) -> bool:
-        """Return whether the analysis supports multiple samples to be linked to the case."""
-        return True
 
     @property
     def is_multiqc_pattern_search_exact(self) -> bool:
@@ -104,3 +100,7 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
             f"{sample.name}_{sample.name}": sample.internal_id for sample in samples
         }
         return search_patterns
+
+    def get_genome_build(self, case_id: str) -> str:
+        """Return the reference genome build version of a Taxprofiler analysis."""
+        return GenomeVersion.T2T_CHM13.value
