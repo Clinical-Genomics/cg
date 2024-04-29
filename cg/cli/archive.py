@@ -116,14 +116,14 @@ def retrieve_spring_files_for_case(context: CGConfig, case_id: str):
     spring_archive_api.retrieve_spring_files_for_case(case_id=case_id)
 
 
-@retrieve_spring.command("order")
+@retrieve_spring.command("ticket")
 @click.pass_obj
 @click.argument("ticket_id", required=True)
-def retrieve_spring_files_for_order(context: CGConfig, ticket_id: int):
+def retrieve_spring_files_for_ticket(context: CGConfig, ticket_id: int):
     """Retrieve spring files for an order."""
     spring_archive_api = SpringArchiveAPI(
         status_db=context.status_db,
         housekeeper_api=context.housekeeper_api,
         data_flow_config=context.data_flow,
     )
-    spring_archive_api.retrieve_spring_files_for_order(ticket_id=ticket_id)
+    spring_archive_api.retrieve_spring_files_for_ticket(ticket_id)
