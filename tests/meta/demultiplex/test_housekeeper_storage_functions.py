@@ -217,10 +217,10 @@ def test_add_run_parameters_to_housekeeper(
     demultiplex_context: CGConfig, novaseq_x_flow_cell: FlowCellDirectoryData
 ):
     """Test that the run parameters file of a flow cell is added to Housekeeper."""
-    # GIVEN a flow cell with a run parameters file and a housekeeper API
+    # GIVEN a flow cell with a run parameters file and a Housekeeper API
     hk_api = demultiplex_context.housekeeper_api
 
-    # GIVEN that a run parameters file does not exist for the flow cell in housekeeper
+    # GIVEN that a run parameters file does not exist for the flow cell in Housekeeper
     assert not hk_api.files(tags=[SequencingFileTag.RUN_PARAMETERS, novaseq_x_flow_cell.id]).all()
 
     # GIVEN that a bundle and version exists in housekeeper
