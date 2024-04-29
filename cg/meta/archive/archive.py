@@ -328,3 +328,12 @@ class SpringArchiveAPI:
             file_and_sample=file_and_sample, archive_location=archive_location
         )
         self.housekeeper_api.delete_file(file.id)
+
+    def retrieve_spring_files_for_case(self, case_id):
+        pass
+
+    def retrieve_spring_files_for_order(self, ticket_id):
+        pass
+
+    def retrieve_spring_files_for_sample(self, sample_id):
+        pass
