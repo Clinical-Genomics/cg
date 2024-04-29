@@ -16,12 +16,14 @@ from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.report.rnafusion import RnafusionReportAPI
+from cg.meta.report.taxprofiler import TaxprofilerReportAPI
 from cg.meta.report.tomte import TomteReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.store.models import Case
 
@@ -98,6 +100,9 @@ def get_report_api_workflow(context: click.Context, workflow: Workflow) -> Repor
         ),
         Workflow.RNAFUSION: RnafusionReportAPI(
             config=context.obj, analysis_api=RnafusionAnalysisAPI(config=context.obj)
+        ),
+        Workflow.TAXPROFILER: TaxprofilerReportAPI(
+            config=context.obj, analysis_api=TaxprofilerAnalysisAPI(config=context.obj)
         ),
         Workflow.TOMTE: TomteReportAPI(
             config=context.obj, analysis_api=TomteAnalysisAPI(config=context.obj)
