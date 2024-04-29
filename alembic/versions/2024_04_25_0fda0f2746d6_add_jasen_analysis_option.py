@@ -5,6 +5,7 @@ Revises: f7a1394cf7cd
 Create Date: 2024-04-25 12:17:39.250700
 
 """
+
 from alembic import op
 from enum import StrEnum
 import sqlalchemy as sa
