@@ -466,7 +466,9 @@ def test_retrieve_order(
         "api_request_from_content",
         return_value=ok_miria_response,
     ) as mock_request_submitter:
-        spring_archive_api.retrieve_spring_files_for_ticket(sample.original_ticket)
+        spring_archive_api.retrieve_spring_files_for_order(
+            id_=sample.original_ticket, is_order_id=False
+        )
 
     retrieve_request_json["pathInfo"][0]["source"] += "/" + Path(files[0].path).name
 

@@ -330,8 +330,11 @@ class SpringArchiveAPI:
         )
         self.housekeeper_api.delete_file(file.id)
 
-    def retrieve_spring_files_for_ticket(self, ticket_id: int) -> None:
-        order: Order = self.status_db.get_order_by_ticket_id(ticket_id)
+    def retrieve_spring_files_for_order(self, id_: int, is_order_id: bool) -> None:
+        if is_order_id:
+            order: Order = self.status_db.get_order_by_id(id_)
+        else:
+            order = self.status_db.get_order_by_ticket_id(id_)
         for case in order.cases:
             self.retrieve_spring_files_for_case(case.internal_id)
 
