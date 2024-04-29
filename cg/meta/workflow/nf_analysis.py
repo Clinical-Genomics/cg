@@ -868,7 +868,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 LOG.error(f"Failed to clean directories for case {case_id} - {repr(error)}")
 
         LOG.info(f"Done cleaning {self.workflow} output")
-=======
+
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome version for a case.
         Raises CgError if this information is missing or inconsistent for the samples linked to a case.
