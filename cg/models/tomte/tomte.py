@@ -1,8 +1,13 @@
 from enum import StrEnum
+from pathlib import Path
 
-from cg.constants.constants import Strandedness
-from cg.models.nf_analysis import NextflowSampleSheetEntry
+from pydantic.v1 import validator
+
+from cg.constants.constants import GenomeVersion, Strandedness
+from cg.constants.sample_sources import SourceType
+from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 from cg.models.qc_metrics import QCMetrics
+from cg.utils.utils import replace_non_alphanumeric
 
 
 class TomteSampleSheetEntry(NextflowSampleSheetEntry):
@@ -39,6 +44,28 @@ class TomteSampleSheetHeaders(StrEnum):
     @classmethod
     def list(cls) -> list[str]:
         return list(map(lambda header: header.value, cls))
+
+
+class TomteParameters(WorkflowParameters):
+    """Model for Tomte parameters."""
+
+    gene_panel_clinical_filter: Path
+    tissue: str
+    genome: str
+
+    @validator("tissue", pre=True)
+    def restrict_tissue_values(cls, tissue: str | None) -> str:
+        if tissue:
+            return replace_non_alphanumeric(string=tissue)
+        else:
+            return SourceType.UNKNOWN
+
+    @validator("genome", pre=True)
+    def restrict_genome_values(cls, genome: str) -> str:
+        if genome == GenomeVersion.hg38:
+            return "GRCh38"
+        elif genome == GenomeVersion.hg19:
+            return "GRCh37"
 
 
 class TomteQCMetrics(QCMetrics):

@@ -2,7 +2,6 @@
 
 import logging
 from pathlib import Path
-from typing import Type
 
 from pydantic import ValidationError
 
@@ -12,7 +11,7 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_raw_samples_from_content,
     validate_samples_unique_per_lane,
 )
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample, FlowCellSampleBCLConvert
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import NAME_TO_INDEX_SETTINGS, SampleSheetBCLConvertSections
@@ -105,7 +104,7 @@ class SampleSheetValidator:
             cycle_name=SampleSheetBCLConvertSections.Reads.INDEX_CYCLES_2, nullable=True
         )
 
-    def _validate_samples(self, sample_type: Type[FlowCellSample] | None = None) -> None:
+    def _validate_samples(self) -> None:
         """
         Determine if the samples have the correct attributes and are unique per lane.
         Raises:
@@ -115,7 +114,7 @@ class SampleSheetValidator:
         LOG.debug("Validating samples")
         try:
             validated_samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
-                sample_sheet_content=self.content, sample_type=sample_type
+                sample_sheet_content=self.content
             )
         except ValidationError as error:
             LOG.error("Sample sheet failed validation: samples are not in the correct format")
@@ -158,7 +157,7 @@ class SampleSheetValidator:
         self._validate_all_sections_present()
         self._set_is_index2_reverse_complement()
         self._set_cycles()
-        self._validate_samples(sample_type=FlowCellSampleBCLConvert)
+        self._validate_samples()
         self._validate_override_cycles()
         LOG.info("Samplesheet passed validation")
 
@@ -179,8 +178,5 @@ class SampleSheetValidator:
             SampleSheetError: If the sample sheet is not valid.
         """
         self.validate_sample_sheet_from_file(file_path)
-        samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
-            sample_sheet_content=self.content,
-            sample_type=FlowCellSampleBCLConvert,
-        )
+        samples: list[FlowCellSample] = get_flow_cell_samples_from_content(self.content)
         return SampleSheet(samples=samples)
