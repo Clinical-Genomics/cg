@@ -1,0 +1,20 @@
+{% from "/macros/data_analysis/qc_metrics/qc_metrics.html" import qc_metrics %}
+
+{% macro taxprofiler_qc_metrics(samples) %}
+  {% set
+    metrics = [
+      {"name": "RNA Integrity Number (RIN)",                        "key": "rin",                                "description": "Mått på skala från 1 till 10 för kvalitet och integritet hos RNA-prover."},
+      {"name": "Ingående mängd [ng]",                               "key": "input_amount",                       "description": "Mängd RNA som användes för tillredning av biblioteket."},
+      {"name": "Läspar [M]",                                        "key": "million_read_pairs",                 "description": "Antal sekvenseringsläsningar i miljoner läspar."},
+      {"name": "Läspar efter filtrering [M]",                       "key": "million_read_pairs_after_filtering", "description": "Antal sekvenseringsläsningar efter filtrering."},
+      {"name": "Genomsnnittlig läslängd [bp]",                      "key": "average_read_length",                "description": "Genomsnittlig längd på läsningar."},
+      {"name": "Genomsnittlig läslängd efter trimmning read1 [bp]", "key": "mean_length_r1",                     "description": "Genomsnittlig längd på läsningar för read1."},
+      {"name": "Genomsnittlig läslängd efter trimmning read2 [bp]", "key": "mean_length_r2",                     "description": "Genomsnittlig längd på läsningar för read2."},
+      {"name": "Duplikat [%]",                                      "key": "duplicates",                         "description": "Sekvenseringsläsningar som är duplikat (kopior) och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserat bibliotek eller djup sekvensering."},
+      {"name": "GC innehåll [%]",                                   "key": "gc_content",                         "description": "Andel guanin- och cytosinbaser i ett prov, beräknat på trimmade läsningar."},
+      {"name": "Mappade sekvenser [M]",                             "key": "mapped_reads",                       "description": "Antal sekvenserinsgläsningar som matchar en eller flera positioner i referensgenomet."},
+    ]
+  %}
+  <!-- Quality control metrics -->
+  {{ qc_metrics(samples=samples, metrics=metrics) }}
+{% endmacro %}
