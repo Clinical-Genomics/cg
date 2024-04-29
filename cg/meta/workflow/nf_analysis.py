@@ -903,7 +903,6 @@ class NfAnalysisAPI(AnalysisAPI):
             dry_run=dry_run,
         )
 
-
     def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
         """Parse Nextflow output analysis files and return an analysis model."""
         sample_metrics: dict[str, dict] = {}
