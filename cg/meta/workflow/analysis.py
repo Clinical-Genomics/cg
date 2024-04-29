@@ -7,12 +7,16 @@ from subprocess import CalledProcessError
 from typing import Any, Iterator
 
 import click
-import requests
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
-from cg.constants.constants import AnalysisType, CaseActions, FileFormat, WorkflowManager
+from cg.constants.constants import (
+    AnalysisType,
+    CaseActions,
+    FileFormat,
+    WorkflowManager,
+)
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
 from cg.constants.scout import ScoutExportFileName
 from cg.constants.tb import AnalysisStatus
@@ -20,11 +24,11 @@ from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, 
 from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
-from cg.services.quality_controller import QualityControllerService
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
+from cg.services.quality_controller import QualityControllerService
 from cg.store.models import Analysis, Application, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
@@ -612,7 +616,7 @@ class AnalysisAPI(MetaAPI):
                 housekeeper_api=self.housekeeper_api,
                 data_flow_config=self.config.data_flow,
             )
-            spring_archive_api.retrieve_case(case_id)
+            spring_archive_api.retrieve_spring_files_for_case(case_id)
 
     def are_all_spring_files_present(self, case_id: str) -> bool:
         """Return True if no Spring files for the case are archived in the data location used by the customer."""

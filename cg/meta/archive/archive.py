@@ -12,7 +12,7 @@ from cg.exc import ArchiveJobFailedError
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
-from cg.store.models import Case, Sample
+from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -40,8 +40,9 @@ class SpringArchiveAPI:
         self.status_db: Store = status_db
         self.data_flow_config: DataFlowConfig = data_flow_config
 
+    @staticmethod
     def archive_file_to_location(
-        self, file_and_sample: FileAndSample, archive_handler: ArchiveHandler
+        file_and_sample: FileAndSample, archive_handler: ArchiveHandler
     ) -> int:
         return archive_handler.archive_file(file_and_sample=file_and_sample)
 
@@ -82,7 +83,7 @@ class SpringArchiveAPI:
             archive_task_id=job_id,
         )
 
-    def retrieve_case(self, case_id: str) -> None:
+    def retrieve_spring_files_for_case(self, case_id: str) -> None:
         """Submits jobs to retrieve any archived files belonging to the given case, and updates the Archive entries
         with the retrieval job id."""
         case: Case = self.status_db.get_case_by_internal_id(case_id)
@@ -329,11 +330,15 @@ class SpringArchiveAPI:
         )
         self.housekeeper_api.delete_file(file.id)
 
-    def retrieve_spring_files_for_case(self, case_id):
-        pass
+    def retrieve_spring_files_for_order(self, ticket_id) -> None:
+        order: Order = self.status_db.get_order_by_ticket_id(ticket_id)
+        for case in order.cases:
+            self.retrieve_spring_files_for_case(case.internal_id)
 
-    def retrieve_spring_files_for_order(self, ticket_id):
-        pass
-
-    def retrieve_spring_files_for_sample(self, sample_id):
-        pass
+    def retrieve_spring_files_for_sample(self, sample_id) -> None:
+        sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
+        files_to_retrieve: list[File] = self.get_archived_files_from_samples([sample])
+        files_and_samples: list[FileAndSample] = self.add_samples_to_files(files_to_retrieve)
+        self.retrieve_files_from_archive_location(
+            files_and_samples=files_and_samples, archive_location=sample.archive_location
+        )
