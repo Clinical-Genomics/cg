@@ -55,7 +55,7 @@ class ExternalDataAPI(MetaAPI):
         """Returns the path to where the sample files are fetched from"""
         return Path(self.source_path % self.customer_id, self.ticket, cust_sample_id)
 
-    def get_destination_path(self, lims_sample_id: str | None = "") -> Path:
+    def _get_destination_path(self, lims_sample_id: str | None = "") -> Path:
         """Returns the path to where the files are to be transferred"""
         return Path(self.destination_path % self.customer_id, lims_sample_id)
 
@@ -68,7 +68,7 @@ class ExternalDataAPI(MetaAPI):
 
         command: str = RSYNC_CONTENTS_COMMAND.format(
             source_path=self.get_source_path(),
-            destination_path=self.get_destination_path(),
+            destination_path=self._get_destination_path(),
         )
         sbatch_parameters = Sbatch(
             job_name=self.ticket + self.RSYNC_FILE_POSTFIX,
@@ -104,7 +104,7 @@ class ExternalDataAPI(MetaAPI):
 
     def get_all_paths(self, lims_sample_id: str) -> list[Path]:
         """Returns the paths of all fastq files associated to the sample"""
-        fastq_folder: Path = self.get_destination_path(lims_sample_id=lims_sample_id)
+        fastq_folder: Path = self._get_destination_path(lims_sample_id=lims_sample_id)
         all_fastq_in_folder: list[Path] = self.get_all_fastq(sample_folder=fastq_folder)
         return all_fastq_in_folder
 
@@ -143,7 +143,7 @@ class ExternalDataAPI(MetaAPI):
         )
         return fastq_paths_to_add
 
-    def curate_sample_folder(self, sample_folder: Path) -> None:
+    def _curate_sample_folder(self, sample_folder: Path) -> None:
         """Changes the name of the folder to the internal_id."""
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=self.customer_id
@@ -173,9 +173,9 @@ class ExternalDataAPI(MetaAPI):
 
     def _get_available_sample_ids(self) -> list[str]:
         """Return a list of samples available for adding to Housekeeper."""
-        destination_folder_path: Path = self.get_destination_path()
+        destination_folder_path: Path = self._get_destination_path()
         for sample_folder in destination_folder_path.iterdir():
-            self.curate_sample_folder(sample_folder=sample_folder)
+            self._curate_sample_folder(sample_folder=sample_folder)
         available_sample_ids: list[str] = self._get_sample_ids_from_folder(destination_folder_path)
         return available_sample_ids
 

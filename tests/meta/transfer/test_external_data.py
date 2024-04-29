@@ -59,7 +59,7 @@ def test_get_destination_path(
     # GIVEN an External API with a customer id and an internal sample id
     external_data_api.customer_id = customer_id
     # WHEN the function creates the destination path
-    destination_path = external_data_api.get_destination_path(lims_sample_id=sample_id)
+    destination_path = external_data_api._get_destination_path(lims_sample_id=sample_id)
 
     # THEN the destination path should contain the customer_id, ticket_id and sample_id
     assert destination_path == Path("/path/on/hasta/cust000/ADM1/")
@@ -225,7 +225,7 @@ def test_curate_sample_folder(
     assert sample
     # WHEN the sample folder is curated
     tmp_folder = Path(tmpdir_factory.mktemp(sample.name, numbered=False))
-    external_data_api.curate_sample_folder(sample_folder=tmp_folder)
+    external_data_api._curate_sample_folder(sample_folder=tmp_folder)
     # THEN the sample folder should be created
     assert (tmp_folder.parent / sample.internal_id).exists()
     assert not tmp_folder.exists()
