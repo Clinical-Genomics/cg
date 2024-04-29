@@ -6,7 +6,7 @@ from pathlib import Path
 from housekeeper.store.models import Version
 
 from cg.meta.transfer.external_data import ExternalDataAPI
-from cg.store.models import Sample
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 from tests.cli.workflow.conftest import dna_case
@@ -14,17 +14,20 @@ from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store.conftest import sample_obj
 
 
-def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_id: str):
-    """Test generating the directory for logging."""
+def test_create_log_dir_dry_run(caplog, external_data_api: ExternalDataAPI, ticket_id: str):
+    """Test that the directory for logging would have been created."""
     caplog.set_level(logging.INFO)
+    # GIVEN an External API with a ticket and dry run set to True
+    external_data_api.ticket = ticket_id
+    external_data_api.dry_run = True
 
     # WHEN the log directory is created
-    log_dir = external_data_api.create_log_dir(ticket=ticket_id, dry_run=True)
+    log_dir = external_data_api.create_log_dir()
 
     # THEN the path is not created since it is a dry run
     assert "Would have created path" in caplog.text
 
-    # THEN the created path should start with 2 dirs and then the ticket id
+    # THEN the path should start with 2 dirs and then the ticket id
     assert str(log_dir).startswith(f"/another/path/{ticket_id}")
 
 
@@ -35,14 +38,13 @@ def test_get_source_path(
     ticket_id: str,
 ):
     """Test generating the source path."""
-    # GIVEN a ticket number a customer and a customer sample id
+    # GIVEN an External API with a ticket number, a customer and a customer sample id
+    external_data_api.ticket = ticket_id
+    customer_id: str = external_data_api.status_db.get_customer_id_from_ticket(ticket=ticket_id)
+    external_data_api.customer_id = customer_id
 
     # WHEN the function is called and assigned
-    source_path = external_data_api.get_source_path(
-        ticket=ticket_id,
-        customer=customer_id,
-        cust_sample_id=cust_sample_id,
-    )
+    source_path = external_data_api.get_source_path(cust_sample_id=cust_sample_id)
 
     # THEN the return should be
     assert source_path == Path("server.name.se:/path/cust000/on/caesar/123456/child/")
@@ -54,11 +56,10 @@ def test_get_destination_path(
     sample_id: str,
 ):
     """Test generating the destination path."""
-    # GIVEN a customer and an internal sample id
+    # GIVEN an External API with a customer id and an internal sample id
+    external_data_api.customer_id = customer_id
     # WHEN the function creates the destination path
-    destination_path = external_data_api.get_destination_path(
-        customer=customer_id, lims_sample_id=sample_id
-    )
+    destination_path = external_data_api.get_destination_path(lims_sample_id=sample_id)
 
     # THEN the destination path should contain the customer_id, ticket_id and sample_id
     assert destination_path == Path("/path/on/hasta/cust000/ADM1/")
@@ -203,9 +204,8 @@ def test_get_available_samples(
 ):
     # GIVEN one such sample exists
     tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample.internal_id, numbered=False))
-    available_samples = external_data_api.get_available_samples(
-        folder=tmp_dir_path.parent, ticket=ticket_id
-    )
+    external_data_api.ticket = ticket_id
+    available_samples = external_data_api.get_available_samples(folder=tmp_dir_path.parent)
     # THEN the function should return a list containing the sample object
     assert available_samples == [sample]
     tmp_dir_path.rmdir()
@@ -214,12 +214,17 @@ def test_get_available_samples(
 def test_curate_sample_folder(
     case_id, customer_id, external_data_api: ExternalDataAPI, tmpdir_factory
 ):
-    case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
+    # GIVEN a External API with a customer id
+    external_data_api.force = False
+    external_data_api.customer_id = customer_id
+    # GIVEN a case with a sample
+    case: Case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
     sample: Sample = case.links[0].sample
+    assert sample
+    # WHEN the sample folder is curated
     tmp_folder = Path(tmpdir_factory.mktemp(sample.name, numbered=False))
-    external_data_api.curate_sample_folder(
-        cust_name=customer_id, sample_folder=tmp_folder, force=False
-    )
+    external_data_api.curate_sample_folder(sample_folder=tmp_folder)
+    # THEN the sample folder should be created
     assert (tmp_folder.parent / sample.internal_id).exists()
     assert not tmp_folder.exists()
 
@@ -231,9 +236,8 @@ def test_get_available_samples_no_samples_avail(
 ):
     # GIVEN that the empty directory created does not contain any correct folders
     tmp_dir_path: Path = Path(tmpdir_factory.mktemp("not_sample_id", numbered=False))
-    available_samples = external_data_api.get_available_samples(
-        folder=tmp_dir_path, ticket=ticket_id
-    )
+    external_data_api.ticket = ticket_id
+    available_samples = external_data_api.get_available_samples(folder=tmp_dir_path)
     # THEN the function should return an empty list
     assert available_samples == []
 
