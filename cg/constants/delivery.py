@@ -75,6 +75,11 @@ BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 
 BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS.extend(BALSAMIC_ANALYSIS_SAMPLE_TAGS)
 
+FASTQ_ANALYSIS_CASE_TAGS: list[set[str]] = []
+
+FASTQ_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
+    {"fastq"},
+]
 
 MIP_DNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"delivery-report"},
@@ -134,12 +139,6 @@ MICROSALT_ANALYSIS_CASE_TAGS = [{"qc-report"}, {"typing-report"}]
 
 MICROSALT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = []
 
-FASTQ_ANALYSIS_CASE_TAGS: list[set[str]] = []
-
-FASTQ_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
-    {"fastq"},
-]
-
 MUTANT_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"pangolin"},
     {"ks-delivery"},
@@ -148,6 +147,29 @@ MUTANT_ANALYSIS_CASE_TAGS: list[set[str]] = [
 MUTANT_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
     {"fastq"},
     {"vcf", "vcf-report", "fohm-delivery"},
+]
+
+RAREDISEASE_ANALYSIS_CASE_TAGS: list[set[str]] = [
+    {HK_DELIVERY_REPORT_TAG},
+    {"vcf-snv"},
+    {"vcf-snv-index"},
+    {"vcf-sv"},
+    {"vcf-sv-index"},
+    {"vcf-snv-clinical"},
+    {"vcf-snv-clinical-index"},
+    {"vcf-snv-research"},
+    {"vcf-snv-research-index"},
+    {"vcf-sv-clinical"},
+    {"vcf-sv-clinical-index"},
+    {"vcf-sv-research"},
+    {"vcf-sv-research-index"},
+]
+
+RAREDISEASE_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
+    {AlignmentFileTag.BAM},
+    {AlignmentFileTag.BAM_BAI},
+    {AlignmentFileTag.CRAM},
+    {AlignmentFileTag.CRAM_INDEX},
 ]
 
 RNAFUSION_ANALYSIS_CASE_TAGS: list[set[str]] = [
@@ -208,8 +230,8 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
         "sample_tags": MUTANT_ANALYSIS_SAMPLE_TAGS,
     },
     Workflow.RAREDISEASE: {
-        "case_tags": NF_ANALYSIS_CASE_TAGS,
-        "sample_tags": NF_ANALYSIS_CASE_TAGS,
+        "case_tags": RAREDISEASE_ANALYSIS_CASE_TAGS,
+        "sample_tags": RAREDISEASE_ANALYSIS_SAMPLE_TAGS,
     },
     Workflow.RNAFUSION: {
         "case_tags": RNAFUSION_ANALYSIS_CASE_TAGS,

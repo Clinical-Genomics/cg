@@ -202,6 +202,21 @@ WORKFLOW_PROTECTED_TAGS = {
         ["gisaid-log"],
         ["gisaid-csv"],
     ],
+    Workflow.RAREDISEASE: [
+        ["vcf-snv-clinical"],
+        ["vcf-snv-research"],
+        ["vcf-str"], # not unique, problem? (also in addition to mitochondira)
+        ["vcf-snv"], #-> ["snv-gbcf", "snv-bcf"],
+        ["qc-metrics"],
+        ["smn-calling"],
+        ["vcf-sv"], #->["sv-bcf"],
+        ["vcf-sv-clinical"],
+        ["vcf-sv-research"],
+        ["vcf2cytosure"],
+        [HK_DELIVERY_REPORT_TAG],
+        [AnalysisTag.MULTIQC_HTML],
+        [HermesFileTag.LONG_TERM_STORAGE],
+    ],
     Workflow.RNAFUSION: [
         [AnalysisTag.FUSION, AnalysisTag.ARRIBA],
         [AnalysisTag.FUSION, AnalysisTag.STARFUSION],
