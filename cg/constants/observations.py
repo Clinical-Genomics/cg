@@ -57,6 +57,16 @@ class MipDNAObservationsAnalysisTag(StrEnum):
     FAMILY_PED: str = "pedigree"
 
 
+class RarediseaseObservationsAnalysisTag(StrEnum):
+    """Rare disease observations files analysis tags."""
+
+    SNV_VCF: str = "deepvariant"
+    SV_VCF: str = "vcf-sv-research"
+    PROFILE_GBCF: str = "snv-gbcf"
+    FAMILY_PED: str = "pedigree"
+
+
+
 class MipDNALoadParameters(Enum):
     """Rare disease Loqusdb load command parameters."""
 
