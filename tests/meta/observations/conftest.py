@@ -18,6 +18,7 @@ from tests.apps.loqus.conftest import (
     nr_of_loaded_variants,
 )
 from tests.cli.conftest import base_context
+from tests.mocks.limsmock import MockLimsAPI
 from tests.models.observations.conftest import (
     balsamic_observations_input_files,
     balsamic_observations_input_files_raw,
@@ -69,24 +70,28 @@ def mock_loqusdb_api(filled_file) -> MockLoqusdbAPI:
 
 @pytest.fixture(name="mip_dna_observations_api")
 def mip_dna_observations_api(
-    cg_config_object: CGConfig, mock_loqusdb_api: MockLoqusdbAPI, analysis_store: Store
+    cg_context: CGConfig,
+    mock_loqusdb_api: MockLoqusdbAPI,
+    analysis_store: Store,
+    lims_api: MockLimsAPI,
 ) -> MipDNAObservationsAPI:
     """Rare diseases observations API fixture."""
     mip_dna_observations_api: MipDNAObservationsAPI = MipDNAObservationsAPI(
-        config=cg_config_object, sequencing_method=SequencingMethod.WGS
+        config=cg_context, sequencing_method=SequencingMethod.WGS
     )
     mip_dna_observations_api.store = analysis_store
+    mip_dna_observations_api.analysis_api.lims_api = lims_api
     mip_dna_observations_api.loqusdb_api = mock_loqusdb_api
     return mip_dna_observations_api
 
 
 @pytest.fixture(name="balsamic_observations_api")
 def balsamic_observations_api(
-    cg_config_object: CGConfig, mock_loqusdb_api: MockLoqusdbAPI, analysis_store: Store
+    cg_context: CGConfig, mock_loqusdb_api: MockLoqusdbAPI, analysis_store: Store
 ) -> BalsamicObservationsAPI:
     """Rare diseases observations API fixture."""
     balsamic_observations_api: BalsamicObservationsAPI = BalsamicObservationsAPI(
-        config=cg_config_object, sequencing_method=SequencingMethod.WGS
+        config=cg_context, sequencing_method=SequencingMethod.WGS
     )
     balsamic_observations_api.store = analysis_store
     balsamic_observations_api.loqusdb_somatic_api = mock_loqusdb_api
