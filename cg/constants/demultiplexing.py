@@ -25,7 +25,6 @@ class DemultiplexingDirsAndFiles(StrEnum):
     DATA: str = "Data"
     BCL_CONVERT: str = "BCLConvert"
     FLOW_CELLS_DIRECTORY_NAME: str = "flow_cells"
-    DEMULTIPLEXED_RUNS_DIRECTORY_NAME: str = "demultiplexed_runs"
     ILLUMINA_FILE_MANIFEST: str = "Manifest.tsv"
     CG_FILE_MANIFEST: str = "file_manifest.tsv"
     INTER_OP: str = "InterOp"

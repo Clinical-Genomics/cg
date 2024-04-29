@@ -104,9 +104,9 @@ def selected_novaseq_6000_post_1_5_kits_sample_ids() -> list[str]:
 
 
 @pytest.fixture
-def novaseq_x_lims_samples(novaseq_x_flow_cell_directory: Path) -> list[FlowCellSample]:
+def novaseq_x_lims_samples(novaseq_x_flow_cell_dir: Path) -> list[FlowCellSample]:
     """Return a list of BCLConvert samples parsed from LIMS for a NovaSeqX flow cell."""
-    path = Path(novaseq_x_flow_cell_directory, "22F52TLT3_raw.json")
+    path = Path(novaseq_x_flow_cell_dir, "22F52TLT3_raw.json")
     return [FlowCellSample.model_validate(sample) for sample in read_json(path)]
 
 

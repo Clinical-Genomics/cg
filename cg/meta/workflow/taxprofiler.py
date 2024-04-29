@@ -52,11 +52,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         return False
 
     @property
-    def is_multiple_samples_allowed(self) -> bool:
-        """Return whether the analysis supports multiple samples to be linked to the case."""
-        return True
-
-    @property
     def is_multiqc_pattern_search_exact(self) -> bool:
         """Only exact pattern search is allowed to collect metrics information from multiqc file."""
         return True
