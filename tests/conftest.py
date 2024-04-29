@@ -2281,7 +2281,7 @@ def sequencing_platform() -> str:
 
 # Raredisease fixtures
 @pytest.fixture(scope="function")
-def raredisease_dir(tmpdir_factory: Path) -> str:
+def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
     """Return the path to the raredisease apps dir."""
     raredisease_dir = tmpdir_factory.mktemp("raredisease")
     return Path(raredisease_dir).absolute().as_posix()
@@ -2360,6 +2360,25 @@ def raredisease_nexflow_config_file_path(raredisease_dir, raredisease_case_id) -
     return Path(
         raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_nextflow_config"
     ).with_suffix(FileExtensions.JSON)
+
+
+@pytest.fixture(scope="function")
+def raredisease_deliverable_data(
+    raredisease_dir: Path, raredisease_case_id: str, sample_id: str
+) -> dict:
+    return {
+        "files": [
+            {
+                "path": f"{raredisease_dir}/{raredisease_case_id}/multiqc/multiqc_report.html",
+                "path_index": "",
+                "step": "report",
+                "tag": ["multiqc-html"],
+                "id": raredisease_case_id,
+                "format": "html",
+                "mandatory": True,
+            },
+        ]
+    }
 
 
 @pytest.fixture(scope="function")
@@ -2487,6 +2506,99 @@ def raredisease_mock_config(raredisease_dir: Path, raredisease_case_id: str) -> 
     Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet").with_suffix(
         FileExtensions.CSV
     ).touch(exist_ok=True)
+
+
+@pytest.fixture(scope="function")
+def raredisease_metrics_deliverables(raredisease_analysis_dir: Path) -> list[dict]:
+    """Returns the content of a mock metrics deliverables file."""
+    return read_yaml(
+        file_path=Path(
+            raredisease_analysis_dir, "raredisease_case_enough_reads_metrics_deliverables.yaml"
+        )
+    )
+
+
+@pytest.fixture(scope="function")
+def raredisease_metrics_deliverables_path(raredisease_dir: Path, raredisease_case_id: str) -> Path:
+    """Path to deliverables file."""
+    return Path(
+        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_metrics_deliverables"
+    ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
+def raredisease_mock_analysis_finish(
+    raredisease_dir: Path,
+    raredisease_case_id: str,
+    raredisease_multiqc_json_metrics: dict,
+    tower_id: int,
+) -> None:
+    """Create analysis finish file for testing."""
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id, "pipeline_info"), parents=True, exist_ok=True
+    )
+    Path(raredisease_dir, raredisease_case_id, "pipeline_info", "software_versions.yml").touch(
+        exist_ok=True
+    )
+    Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet.csv").touch(
+        exist_ok=True
+    )
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id, "multiqc", "multiqc_data"),
+        parents=True,
+        exist_ok=True,
+    )
+    write_json(
+        content=raredisease_multiqc_json_metrics,
+        file_path=Path(
+            raredisease_dir,
+            raredisease_case_id,
+            "multiqc",
+            "multiqc_data",
+            "multiqc_data",
+        ).with_suffix(FileExtensions.JSON),
+    )
+    write_yaml(
+        content={raredisease_case_id: [tower_id]},
+        file_path=Path(
+            raredisease_dir,
+            raredisease_case_id,
+            "tower_ids",
+        ).with_suffix(FileExtensions.YAML),
+    )
+
+
+@pytest.fixture(scope="function")
+def raredisease_mock_deliverable_dir(
+    raredisease_dir: Path, raredisease_deliverable_data: dict, raredisease_case_id: str
+) -> Path:
+    """Create raredisease deliverable file with dummy data and files to deliver."""
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id),
+        parents=True,
+        exist_ok=True,
+    )
+    Path.mkdir(
+        Path(raredisease_dir, raredisease_case_id, "multiqc"),
+        parents=True,
+        exist_ok=True,
+    )
+    for report_entry in raredisease_deliverable_data["files"]:
+        Path(report_entry["path"]).touch(exist_ok=True)
+    WriteFile.write_file_from_content(
+        content=raredisease_deliverable_data,
+        file_format=FileFormat.JSON,
+        file_path=Path(
+            raredisease_dir, raredisease_case_id, raredisease_case_id + deliverables_yaml
+        ),
+    )
+    return raredisease_dir
+
+
+@pytest.fixture(scope="function")
+def raredisease_multiqc_json_metrics(raredisease_analysis_dir: Path) -> list[dict]:
+    """Returns the content of a mock Multiqc JSON file."""
+    return read_json(file_path=Path(raredisease_analysis_dir, "multiqc_data.json"))
 
 
 # Rnafusion fixtures
