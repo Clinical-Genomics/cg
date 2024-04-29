@@ -169,8 +169,10 @@ def test_add_transfer_to_housekeeper(
     mocker.patch.object(Path, "iterdir")
     Path.iterdir.return_value = []
 
-    mocker.patch.object(ExternalDataAPI, "get_available_samples")
-    ExternalDataAPI.get_available_samples.return_value = samples[:-1]
+    mocker.patch.object(ExternalDataAPI, "_get_available_sample_ids")
+    ExternalDataAPI._get_available_sample_ids.return_value = [
+        sample.internal_id for sample in samples[:-1]
+    ]
 
     mocker.patch.object(Store, "set_case_action")
     Store.set_case_action.return_value = None
@@ -196,7 +198,7 @@ def test_add_transfer_to_housekeeper(
     assert samples[-1].internal_id not in [added_sample.name for added_sample in added_samples]
 
 
-def test_get_available_samples(
+def test_get_sample_ids_from_folder(
     external_data_api: ExternalDataAPI,
     sample: Sample,
     ticket_id: str,
@@ -205,9 +207,9 @@ def test_get_available_samples(
     # GIVEN one such sample exists
     tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample.internal_id, numbered=False))
     external_data_api.ticket = ticket_id
-    available_samples = external_data_api.get_available_samples(folder=tmp_dir_path.parent)
+    available_samples = external_data_api._get_sample_ids_from_folder(folder=tmp_dir_path.parent)
     # THEN the function should return a list containing the sample object
-    assert available_samples == [sample]
+    assert available_samples == [sample.internal_id]
     tmp_dir_path.rmdir()
 
 
@@ -229,7 +231,7 @@ def test_curate_sample_folder(
     assert not tmp_folder.exists()
 
 
-def test_get_available_samples_no_samples_avail(
+def test_get_sample_ids_from_folder_no_samples_available(
     external_data_api: ExternalDataAPI,
     ticket_id: str,
     tmpdir_factory,
@@ -237,7 +239,7 @@ def test_get_available_samples_no_samples_avail(
     # GIVEN that the empty directory created does not contain any correct folders
     tmp_dir_path: Path = Path(tmpdir_factory.mktemp("not_sample_id", numbered=False))
     external_data_api.ticket = ticket_id
-    available_samples = external_data_api.get_available_samples(folder=tmp_dir_path)
+    available_samples = external_data_api._get_sample_ids_from_folder(folder=tmp_dir_path)
     # THEN the function should return an empty list
     assert available_samples == []
 
