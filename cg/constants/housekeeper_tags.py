@@ -44,6 +44,8 @@ class SequencingFileTag(StrEnum):
     DEMUX_LOG: str = "log"
 
 
+VALIDATION_TAG: str = "validation"
+
 HK_MULTIQC_HTML_TAG = ["multiqc-html"]
 
 HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]

@@ -7,7 +7,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Priority
 from cg.constants.constants import CaseActions, CustomerId
 from cg.meta.create_validation_cases.validation_data_input import ValidationDataInput
-from cg.store.models import ApplicationVersion, Case, Sample
+from cg.store.models import ApplicationVersion, Case, Sample, Customer
 from cg.store.store import Store
 from cg.utils.calculations import multiply_by_million
 
@@ -66,6 +66,9 @@ class ValidationCaseData:
         """
         application_version: ApplicationVersion = self._get_application_version(original_sample)
         sample_id: str = self._validation_sample_id(original_sample)
+        customer_id: int = self.status_db.get_customer_by_internal_id(
+            CustomerId.CG_INTERNAL_CUSTOMER.value
+        ).id
         validation_sample: Sample = self.status_db.add_sample(
             name=sample_id,
             internal_id=sample_id,
@@ -74,7 +77,7 @@ class ValidationCaseData:
             from_sample=original_sample.internal_id,
             tumour=original_sample.is_tumour,
             priority=Priority.standard,
-            customer=CustomerId.CG_INTERNAL_CUSTOMER,
+            customer_id=customer_id,
             application_version=application_version,
             received=original_sample.received_at,
             prepared_at=original_sample.prepared_at,
@@ -104,7 +107,10 @@ class ValidationCaseData:
             ticket=self.original_case.latest_ticket,
         )
         validation_case.orders.append(self.original_case.latest_order)
-        validation_case.customer = CustomerId.CG_INTERNAL_CUSTOMER
+        customer: Customer = self.status_db.get_customer_by_internal_id(
+            CustomerId.CG_INTERNAL_CUSTOMER
+        )
+        validation_case.customer = customer
         validation_case.is_compressible = False
         validation_case.action = CaseActions.HOLD
         return validation_case

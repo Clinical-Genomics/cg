@@ -1,12 +1,14 @@
 """Module that holds the api to create validation cases."""
 
 import logging
+import os
 from pathlib import Path
 
 from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
+from cg.constants.housekeeper_tags import VALIDATION_TAG
 from cg.meta.create_validation_cases.validation_case_data import ValidationCaseData
 from cg.meta.create_validation_cases.validation_data_input import ValidationDataInput
 from cg.store.models import Case, CaseSample, Sample
@@ -31,7 +33,7 @@ class CreateValidationCaseAPI:
 
     def store_validation_samples(self, validation_case_data: ValidationCaseData) -> None:
         """
-        Add a downsampled sample entry to StatusDB.
+        Add a validation sample entry to StatusDB.
         Raises:
             ValueError
         """
@@ -39,9 +41,8 @@ class CreateValidationCaseAPI:
             if self.status_db.sample_with_id_exists(sample_id=sample.internal_id):
                 raise ValueError(f"Sample {sample.internal_id} already exists in StatusDB.")
             LOG.info(
-                f"New downsampled sample created: {sample.internal_id} from {sample.from_sample}"
+                f"New validation sample created: {sample.internal_id} from {sample.from_sample}"
                 f"Application tag set to: {sample.application_version.application.tag}"
-                f"Customer set to: {sample.customer}"
             )
             if not self.dry_run:
                 self.status_db.session.add(sample)
@@ -49,7 +50,7 @@ class CreateValidationCaseAPI:
 
     def store_validation_case(self, validation_case_data: ValidationCaseData) -> None:
         """
-        Add a down sampled case entry to StatusDB.
+        Add a validation case entry to StatusDB.
         """
         validation_case: Case = validation_case_data.validation_case
         if self.status_db.case_with_name_exists(case_name=validation_case.name):
@@ -57,7 +58,7 @@ class CreateValidationCaseAPI:
             return
         if not self.dry_run:
             self.status_db.session.add(validation_case)
-            LOG.info(f"New down sampled case created: {validation_case.internal_id}")
+            LOG.info(f"New validation case created: {validation_case.internal_id}")
 
     def _link_sample_to_case(self, validation_case_data: ValidationCaseData) -> None:
         """Create a link between sample and case in statusDB."""
@@ -105,6 +106,8 @@ class CreateValidationCaseAPI:
             validation_bundle_path: Path = self.hk_api.get_latest_bundle_version(
                 bundle_name=validation_sample.internal_id
             ).full_path
+            if not validation_bundle_path.exists():
+                os.makedirs(validation_bundle_path)
             for fastq_file in fastq_files:
                 copy_file(file_path=Path(fastq_file.full_path), destination=validation_bundle_path)
 
@@ -115,7 +118,7 @@ class CreateValidationCaseAPI:
                 bundle_name=validation_sample.internal_id
             ).full_path
             fastq_files: list[Path] = get_files_matching_pattern(
-                directory=validation_bundle_path, pattern=SequencingFileTag.FASTQ
+                directory=validation_bundle_path, pattern=SequencingFileTag.FASTQ.value
             )
             for fastq_file in fastq_files:
                 new_fast_file_path = Path(
@@ -139,7 +142,7 @@ class CreateValidationCaseAPI:
             bundle_name=validation_sample.from_sample, tags=[SequencingFileTag.FASTQ]
         )
         original_tags: list[str] = self.hk_api.get_tag_names_from_file(hk_files[0])
-        new_tags: list[str] = [validation_sample.internal_id]
+        new_tags: list[str] = [validation_sample.internal_id, VALIDATION_TAG]
         for tag in original_tags:
             if tag != validation_sample.from_sample:
                 new_tags.append(tag)
@@ -155,7 +158,7 @@ class CreateValidationCaseAPI:
     def add_validation_samples_to_hk(
         self, sample_id: str, file_path: Path, tags: list[str]
     ) -> None:
-        """Add the new validation sample bundle to housekeeoer."""
+        """Add the new validation sample bundle to Housekeeper."""
         version: Version = self.hk_api.get_latest_bundle_version(sample_id)
         self.hk_api.add_file(
             path=file_path.absolute().as_posix(),
