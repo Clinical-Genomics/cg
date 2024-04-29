@@ -13,6 +13,7 @@ from cg.constants.observations import (
     MipDNALoadParameters,
     MipDNAObservationsAnalysisTag,
 )
+from cg.constants.sample_sources import SourceType
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import (
     CaseNotFoundError,
@@ -20,6 +21,7 @@ from cg.exc import (
     LoqusdbUploadCaseError,
 )
 from cg.meta.observations.observations_api import ObservationsAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
 from cg.store.models import Case
@@ -33,6 +35,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
 
     def __init__(self, config: CGConfig, sequencing_method: SequencingMethod):
         super().__init__(config)
+        self.analysis_api = MipDNAAnalysisAPI(config)
         self.sequencing_method: SequencingMethod = sequencing_method
         self.loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(self.get_loqusdb_instance())
 
@@ -123,7 +126,12 @@ class MipDNAObservationsAPI(ObservationsAPI):
             self.is_customer_eligible_for_observations_upload(case.customer.internal_id)
         )
         are_case_samples_non_tumor: bool = self.are_case_samples_non_tumor(case)
-        return is_customer_eligible_for_observations_upload and are_case_samples_non_tumor
+        is_sample_source_not_ffpe: bool = self.is_sample_source_not_ffpe(case.internal_id)
+        return (
+            is_customer_eligible_for_observations_upload
+            and are_case_samples_non_tumor
+            and is_sample_source_not_ffpe
+        )
 
     @staticmethod
     def are_case_samples_non_tumor(case: Case) -> bool:
@@ -132,3 +140,10 @@ class MipDNAObservationsAPI(ObservationsAPI):
             LOG.error(f"Case {case.internal_id} has tumour samples")
             return False
         return True
+
+    def is_sample_source_not_ffpe(self, case_id: str) -> bool:
+        """Check if a sample source is not FFPE."""
+        source_type: str | None = self.analysis_api.get_case_source_type(case_id)
+        if source_type and SourceType.FFPE.lower() not in source_type.lower():
+            return True
+        return False

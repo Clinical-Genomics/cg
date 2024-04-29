@@ -7,6 +7,7 @@ from pathlib import Path
 from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.exc import LoqusdbUploadCaseError
@@ -27,6 +28,7 @@ class ObservationsAPI:
     def __init__(self, config: CGConfig):
         self.store: Store = config.status_db
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
+        self.lims_api: LimsAPI = config.lims_api
         self.loqusdb_config: CommonAppConfig = config.loqusdb
         self.loqusdb_wes_config: CommonAppConfig = config.loqusdb_wes
         self.loqusdb_somatic_config: CommonAppConfig = config.loqusdb_somatic
