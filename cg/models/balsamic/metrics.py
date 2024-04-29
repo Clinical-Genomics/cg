@@ -1,6 +1,7 @@
-from pydantic.v1 import BaseModel, validator
+from pydantic.v1 import validator
 
 from cg.models.deliverables.metric_deliverables import MetricCondition, MetricsBase
+from cg.models.qc_metrics import QCMetrics
 
 
 def percent_value_validation(cls, value: float) -> float:
@@ -19,7 +20,7 @@ class BalsamicMetricsBase(MetricsBase):
     condition: MetricCondition | None
 
 
-class BalsamicQCMetrics(BaseModel):
+class BalsamicQCMetrics(QCMetrics):
     """BALSAMIC common QC metrics"""
 
     fold_80_base_penalty: float | None

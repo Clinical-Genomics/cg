@@ -37,7 +37,7 @@ def test_finish_flow_cell_dry_run(
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
     tmp_illumina_demultiplexed_flow_cells_directory,
-    bcl2fastq_flow_cell_full_name: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_full_name: str,
 ):
     caplog.set_level(logging.INFO)
 
@@ -50,7 +50,7 @@ def test_finish_flow_cell_dry_run(
     # WHEN starting post-processing for new demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
         finish_flow_cell,
-        ["--dry-run", bcl2fastq_flow_cell_full_name],
+        ["--dry-run", novaseq_6000_pre_1_5_kits_flow_cell_full_name],
         obj=demultiplex_context,
     )
 

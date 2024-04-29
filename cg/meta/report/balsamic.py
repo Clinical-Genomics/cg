@@ -17,12 +17,12 @@ from cg.constants import (
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     Workflow,
 )
+from cg.constants.constants import AnalysisType
 from cg.constants.scout import BALSAMIC_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
-from cg.models.balsamic.config import BalsamicVarCaller
 from cg.models.balsamic.metrics import (
     BalsamicQCMetrics,
     BalsamicTargetedQCMetrics,
@@ -54,7 +54,9 @@ class BalsamicReportAPI(ReportAPI):
             sample.internal_id
         ]
         million_read_pairs: float = get_million_read_pairs(reads=sample.reads)
-        if "wgs" in self.get_data_analysis_type(case=case):
+        if AnalysisType.WHOLE_GENOME_SEQUENCING in self.analysis_api.get_data_analysis_type(
+            case.internal_id
+        ):
             return self.get_wgs_metadata(
                 million_read_pairs=million_read_pairs, sample_metrics=sample_metrics
             )
@@ -108,49 +110,10 @@ class BalsamicReportAPI(ReportAPI):
             ),
         )
 
-    def get_data_analysis_type(self, case: Case) -> str | None:
-        """Return data analysis type carried out."""
-        return self.analysis_api.get_bundle_deliverables_type(case_id=case.internal_id)
-
-    def get_genome_build(self, analysis_metadata: BalsamicAnalysis) -> str:
-        """Returns the build version of the genome reference of a specific case."""
-        return analysis_metadata.config.reference.reference_genome_version
-
-    def get_variant_callers(self, _analysis_metadata: BalsamicAnalysis) -> list:
-        """
-        Return list of Balsamic variant-calling filters and their versions (if available) from the
-        config.json file.
-        """
-        sequencing_type: str = _analysis_metadata.config.analysis.sequencing_type
-        analysis_type: str = _analysis_metadata.config.analysis.analysis_type
-        var_callers: dict[str, BalsamicVarCaller] = _analysis_metadata.config.vcf
-        tool_versions: dict[str, list] = _analysis_metadata.config.bioinfo_tools_version
-        analysis_var_callers = list()
-        for var_caller_name, var_caller_attributes in var_callers.items():
-            if (
-                sequencing_type in var_caller_attributes.sequencing_type
-                and analysis_type in var_caller_attributes.analysis_type
-            ):
-                version: str = self.get_variant_caller_version(
-                    var_caller_name=var_caller_name, var_caller_versions=tool_versions
-                )
-                analysis_var_callers.append(
-                    f"{var_caller_name} (v{version})" if version else var_caller_name
-                )
-        return analysis_var_callers
-
-    @staticmethod
-    def get_variant_caller_version(var_caller_name: str, var_caller_versions: dict) -> str | None:
-        """Return version of a specific Balsamic tool."""
-        for tool_name, versions in var_caller_versions.items():
-            if tool_name in var_caller_name:
-                return versions[0]
-        return None
-
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: BalsamicAnalysis
     ) -> bool:
-        """Check if the Balsamic report is accredited."""
+        """Return whether the Balsamic delivery report is accredited."""
         if analysis_metadata.config.analysis.sequencing_type == "targeted" and next(
             (
                 panel
@@ -162,15 +125,11 @@ class BalsamicReportAPI(ReportAPI):
             return True
         return False
 
-    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
+    def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
         return ScoutReportFiles(
-            snv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="snv_vcf"
-            ),
-            sv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case.internal_id, scout_tag="sv_vcf"
-            ),
+            snv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="snv_vcf"),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(case_id=case_id, scout_tag="sv_vcf"),
         )
 
     def get_required_fields(self, case: CaseModel) -> dict:
@@ -218,10 +177,6 @@ class BalsamicReportAPI(ReportAPI):
                 case=case, required_fields=required_sample_metadata_fields
             ),
         }
-
-    def get_template_name(self) -> str:
-        """Return template name to render the delivery report."""
-        return Workflow.BALSAMIC + "_report.html"
 
     def get_upload_case_tags(self) -> dict:
         """Return Balsamic upload case tags."""

@@ -17,11 +17,11 @@ FlowCellInfo = namedtuple("FlowCellInfo", "directory name sample_internal_ids")
 
 @pytest.fixture(name="tmp_demulitplexing_dir")
 def tmp_illumina_novaseq_demulitplexing_dir(
-    illumina_demultiplexed_runs_directory: Path, bcl2fastq_flow_cell_full_name: str
+    illumina_demultiplexed_runs_directory: Path, novaseq_6000_pre_1_5_kits_flow_cell_full_name: str
 ) -> Path:
     """Return a tmp directory in demultiplexed-runs."""
     tmp_demulitplexing_dir: Path = Path(
-        illumina_demultiplexed_runs_directory, bcl2fastq_flow_cell_full_name
+        illumina_demultiplexed_runs_directory, novaseq_6000_pre_1_5_kits_flow_cell_full_name
     )
     tmp_demulitplexing_dir.mkdir(exist_ok=True, parents=True)
     return tmp_demulitplexing_dir
@@ -46,8 +46,8 @@ def demultiplex_fastq_file_path() -> Path:
     return Path("path/to/sample_internal_id_S1_L001_R1_001.fastq.gz")
 
 
-@pytest.fixture(name="tmp_sample_sheet_path")
-def tmp_samplesheet_path(tmp_demulitplexing_dir: Path) -> Path:
+@pytest.fixture
+def tmp_sample_sheet_path(tmp_demulitplexing_dir: Path) -> Path:
     """Return SampleSheet in temporary demuliplexing folder."""
     tmp_sample_sheet_path = Path(tmp_demulitplexing_dir, "SampleSheet.csv")
     with tmp_sample_sheet_path.open("w+") as fh:
@@ -55,36 +55,10 @@ def tmp_samplesheet_path(tmp_demulitplexing_dir: Path) -> Path:
     return tmp_sample_sheet_path
 
 
-@pytest.fixture(name="tmp_flow_cell_run_base_path")
-def tmp_flow_cell_run_base_path(project_dir: Path, bcl2fastq_flow_cell_full_name: str) -> Path:
-    """Flow cell run directory in temporary folder."""
-
-    tmp_flow_cell_run_path: Path = Path(project_dir, "flow_cells")
-    tmp_flow_cell_run_path.mkdir(exist_ok=True, parents=True)
-
-    return tmp_flow_cell_run_path
-
-
-@pytest.fixture(name="tmp_flow_cell_demux_base_path")
-def tmp_flow_cell_demux_base_path(project_dir: Path, bcl2fastq_flow_cell_full_name: str) -> Path:
-    """Flow cell demux directory in temporary folder."""
-
-    tmp_flow_cell_demux_path: Path = Path(project_dir, "demultiplexed-runs")
-    tmp_flow_cell_demux_path.mkdir(exist_ok=True, parents=True)
-
-    return tmp_flow_cell_demux_path
-
-
-@pytest.fixture(name="flow_cell_project_id")
-def flow_cell_project_id() -> int:
-    """Return flow cell run project id."""
-    return 174578
-
-
 @pytest.fixture(name="populated_flow_cell_store")
 def populated_flow_cell_store(
     family_name: str,
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     sample_id: str,
     store: Store,
     helpers: StoreHelpers,
@@ -101,17 +75,17 @@ def populated_flow_cell_store(
     )
     helpers.add_flow_cell(
         store=populated_flow_cell_store,
-        flow_cell_name=bcl2fastq_flow_cell_id,
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
         sequencer_type="novaseq",
         samples=[sample],
     )
     return populated_flow_cell_store
 
 
-@pytest.fixture(name="active_flow_cell_store")
+@pytest.fixture
 def active_flow_cell_store(
     family_name: str,
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     sample_id: str,
     base_store: Store,
     helpers: StoreHelpers,
@@ -129,7 +103,7 @@ def active_flow_cell_store(
     )
     helpers.add_flow_cell(
         store=active_flow_cell_store,
-        flow_cell_name=bcl2fastq_flow_cell_id,
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
         sequencer_type="novaseq",
         samples=[sample],
     )
@@ -138,7 +112,7 @@ def active_flow_cell_store(
 
 @pytest.fixture(name="sample_level_housekeeper_api")
 def sample_level_housekeeper_api(
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     real_housekeeper_api: HousekeeperAPI,
     sample_id: str,
     tmp_fastq_paths: list[Path],
@@ -151,7 +125,11 @@ def sample_level_housekeeper_api(
         "created": datetime.now(),
         "version": "1.0",
         "files": [
-            {"path": path.as_posix(), "tags": ["fastq", bcl2fastq_flow_cell_id], "archive": False}
+            {
+                "path": path.as_posix(),
+                "tags": ["fastq", novaseq_6000_pre_1_5_kits_flow_cell_id],
+                "archive": False,
+            }
             for path in tmp_fastq_paths
         ],
     }
@@ -161,7 +139,7 @@ def sample_level_housekeeper_api(
 
 @pytest.fixture(name="flow_cell_name_housekeeper_api")
 def flow_cell_name_housekeeper_api(
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     real_housekeeper_api: HousekeeperAPI,
     sample_id: str,
     tmp_fastq_paths: list[Path],
@@ -175,18 +153,22 @@ def flow_cell_name_housekeeper_api(
         "created": datetime.now(),
         "version": "1.0",
         "files": [
-            {"path": path.as_posix(), "tags": ["fastq", bcl2fastq_flow_cell_id], "archive": False}
+            {
+                "path": path.as_posix(),
+                "tags": ["fastq", novaseq_6000_pre_1_5_kits_flow_cell_id],
+                "archive": False,
+            }
             for path in tmp_fastq_paths
         ],
     }
     flow_cell_bundle_data = {
-        "name": bcl2fastq_flow_cell_id,
+        "name": novaseq_6000_pre_1_5_kits_flow_cell_id,
         "created": datetime.now(),
         "version": "1.0",
         "files": [
             {
                 "path": tmp_sample_sheet_path.as_posix(),
-                "tags": ["samplesheet", bcl2fastq_flow_cell_id],
+                "tags": ["samplesheet", novaseq_6000_pre_1_5_kits_flow_cell_id],
                 "archive": False,
             }
         ],
@@ -195,40 +177,6 @@ def flow_cell_name_housekeeper_api(
     helpers.ensure_hk_bundle(store=flow_cell_housekeeper_api, bundle_data=bundle_data)
     helpers.ensure_hk_bundle(store=flow_cell_housekeeper_api, bundle_data=flow_cell_bundle_data)
     return flow_cell_housekeeper_api
-
-
-@pytest.fixture(scope="session")
-def flow_cell_name_demultiplexed_with_bcl_convert() -> str:
-    return "HY7FFDRX2"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl_convert(
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-):
-    return f"230504_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl_convert_flat(
-    flow_cell_name_demultiplexed_with_bcl_convert: str,
-):
-    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert using a flat output directory structure."""
-    return f"230505_A00689_0804_B{flow_cell_name_demultiplexed_with_bcl_convert}"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_directory_name_demultiplexed_with_bcl_convert_on_sequencer(
-    flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer: str,
-):
-    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert on the NovaseqX sequencer."""
-    return f"20230508_LH00188_0003_A{flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer}"
-
-
-@pytest.fixture(scope="session")
-def flow_cell_name_demultiplexed_with_bcl_convert_on_sequencer() -> str:
-    """Return the name of a flow cell directory that has been demultiplexed with Bcl Convert on the NovaseqX sequencer."""
-    return "22522YLT3"
 
 
 @pytest.fixture(scope="session")
@@ -271,17 +219,6 @@ def lsyncd_target_directory(lsyncd_source_directory: Path, tmp_path_factory) -> 
     target_directory = Path(lsyncd_source_directory.parent, Path(temp_target_directory, "target"))
     shutil.copytree(lsyncd_source_directory, target_directory)
     return target_directory
-
-
-@pytest.fixture
-def bcl_convert_sample_id_with_non_pooled_undetermined_reads() -> str:
-    return "ACC11927A2"
-
-
-@pytest.fixture
-def bcl_convert_non_pooled_sample_read_count() -> int:
-    """Based on the data in 230504_A00689_0804_BHY7FFDRX2, the sum of all reads - mapped and undetermined."""
-    return 4000000
 
 
 def get_all_files_in_directory_tree(directory: Path) -> list[Path]:
