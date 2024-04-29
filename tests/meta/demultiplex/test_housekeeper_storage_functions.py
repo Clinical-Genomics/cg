@@ -7,6 +7,7 @@ from housekeeper.store.models import File
 from mock import MagicMock, call
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.housekeeper_storage_functions import (
@@ -236,7 +237,7 @@ def test_add_run_parameters_to_housekeeper(
     run_parameters_file: File = hk_api.files(
         tags=[SequencingFileTag.RUN_PARAMETERS, novaseq_x_flow_cell.id]
     ).first()
-    assert run_parameters_file.path.endswith("RunParameters.xml")
+    assert run_parameters_file.path.endswith(DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
 
 
 def test_store_fastq_path_in_housekeeper_correct_tags(

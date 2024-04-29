@@ -106,7 +106,9 @@ def add_run_parameters_file_to_housekeeper(
     hk_api.add_file_to_bundle_if_non_existent(
         file_path=run_parameters_file_path, bundle_name=flow_cell.id, tag_names=tag_names
     )
-    LOG.info(f"Added run parameters file {run_parameters_file_path} to Housekeeper.")
+    LOG.info(
+        f"Added run parameters file {run_parameters_file_path} to {flow_cell.id} in Housekeeper."
+    )
 
 
 def add_sample_fastq_files_to_housekeeper(
