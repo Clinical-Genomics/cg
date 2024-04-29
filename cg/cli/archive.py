@@ -84,7 +84,7 @@ def delete_file(context: CGConfig, dry_run: bool, file_path: str):
     spring_archive_api.delete_file(file_path=file_path, dry_run=dry_run)
 
 
-@archive.group("retrieve-spring")
+@archive.group("retrieve")
 def retrieve_spring():
     """Retrieve spring files."""
     pass
@@ -93,7 +93,7 @@ def retrieve_spring():
 @retrieve_spring.command("sample")
 @click.pass_obj
 @click.argument("sample_id", required=True)
-def retrieve_spring_sample(context: CGConfig, sample_id: str):
+def retrieve_spring_files_for_sample(context: CGConfig, sample_id: str):
     """Retrieve spring files for a sample."""
     spring_archive_api = SpringArchiveAPI(
         status_db=context.status_db,
@@ -106,7 +106,7 @@ def retrieve_spring_sample(context: CGConfig, sample_id: str):
 @retrieve_spring.command("case")
 @click.pass_obj
 @click.argument("case_id", required=True)
-def retrieve_spring_case(context: CGConfig, case_id: str):
+def retrieve_spring_files_for_case(context: CGConfig, case_id: str):
     """Retrieve spring files for a case."""
     spring_archive_api = SpringArchiveAPI(
         status_db=context.status_db,
@@ -119,7 +119,7 @@ def retrieve_spring_case(context: CGConfig, case_id: str):
 @retrieve_spring.command("order")
 @click.pass_obj
 @click.argument("ticket_id", required=True)
-def retrieve_spring_order(context: CGConfig, ticket_id: str):
+def retrieve_spring_files_for_order(context: CGConfig, ticket_id: int):
     """Retrieve spring files for an order."""
     spring_archive_api = SpringArchiveAPI(
         status_db=context.status_db,
