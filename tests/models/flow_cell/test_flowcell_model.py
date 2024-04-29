@@ -1,15 +1,10 @@
 from pathlib import Path
-from typing import Type
 
 import pytest
 from _pytest.fixtures import FixtureRequest
 
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers
 from cg.exc import FlowCellError
 from cg.models.demultiplex.run_parameters import RunParameters
@@ -17,24 +12,24 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.utils.flow_cell import get_flow_cell_id
 
 
-def test_flow_cell_id(bcl2fastq_flow_cell_dir: Path):
+def test_flow_cell_id(hiseq_2500_dual_index_flow_cell_dir: Path):
     """Test parsing of flow cell id."""
     # GIVEN the path to a finished flow cell run
     # GIVEN the flow cell id
-    flowcell_id: str = get_flow_cell_id(bcl2fastq_flow_cell_dir.name)
+    flowcell_id: str = get_flow_cell_id(hiseq_2500_dual_index_flow_cell_dir.name)
 
     # WHEN instantiating a flow cell object
-    flowcell_obj = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    flowcell_obj = FlowCellDirectoryData(flow_cell_path=hiseq_2500_dual_index_flow_cell_dir)
 
     # THEN assert that the flow cell id is parsed
     assert flowcell_obj.id == flowcell_id
 
 
-def test_flow_cell_position(bcl2fastq_flow_cell_dir: Path):
+def test_flow_cell_position(hiseq_2500_dual_index_flow_cell_dir: Path):
     """Test getting flow cell position."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
-    flow_cell = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    flow_cell = FlowCellDirectoryData(flow_cell_path=hiseq_2500_dual_index_flow_cell_dir)
 
     # WHEN fetching the flow cell position
     position = flow_cell.position
@@ -43,69 +38,16 @@ def test_flow_cell_position(bcl2fastq_flow_cell_dir: Path):
     assert position in ["A", "B"]
 
 
-def test_rta_exists(novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq: FlowCellDirectoryData):
+def test_rta_exists(novaseq_6000_pre_1_5_kits_flow_cell: FlowCellDirectoryData):
     """Test return of RTS file."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
 
     # WHEN fetching the path to the RTA file
-    rta_file: Path = novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq.rta_complete_path
+    rta_file: Path = novaseq_6000_pre_1_5_kits_flow_cell.rta_complete_path
 
     # THEN assert that the file exists
     assert rta_file.exists()
-
-
-@pytest.mark.parametrize(
-    "flow_cell_fixture_name, model",
-    [
-        ("novaseq_6000_pre_1_5_kits_flow_cell_bcl2fastq", FlowCellSampleBcl2Fastq),
-        ("novaseq_6000_post_1_5_kits_flow_cell", FlowCellSampleBCLConvert),
-        ("novaseq_x_flow_cell", FlowCellSampleBCLConvert),
-    ],
-)
-def test_get_sample_model(
-    flow_cell_fixture_name: str,
-    model: Type[FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert],
-    request: FixtureRequest,
-):
-    """Test getting the sample model of a flow cell returns the correct value."""
-    # GIVEN a flow cell
-    flow_cell: FlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture_name)
-
-    # WHEN getting the sample model
-    sample_model: Type[FlowCellSampleBcl2Fastq | FlowCellSampleBCLConvert] = flow_cell.sample_type
-
-    # THEN it is the expected model
-    assert sample_model == model
-
-
-def test_get_bcl_converter_default(
-    flow_cell_directory_name_demultiplexed_with_bcl_convert: str,
-):
-    """Test that BCLConvert is the bcl converter set as default when instantiating a flow cell."""
-    # GIVEN a flow cell directory
-
-    # WHEN instantiating a flow cell object
-    flow_cell = FlowCellDirectoryData(Path(flow_cell_directory_name_demultiplexed_with_bcl_convert))
-
-    # THEN it sets the converter to BCLConverter
-    assert flow_cell.bcl_converter == BclConverter.BCLCONVERT
-
-
-def test_get_bcl_converter_bcl2fastq_flow_cell(
-    flow_cell_directory_name_demultiplexed_with_bcl2fastq: str,
-):
-    """Test instantiating a flow cell with bcl2fastq as bcl converter."""
-    # GIVEN a Bcl2Fastq flow cell directory
-
-    # WHEN instantiating a flow cell object
-    flow_cell = FlowCellDirectoryData(
-        flow_cell_path=Path(flow_cell_directory_name_demultiplexed_with_bcl2fastq),
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
-
-    # THEN it sets the converter to BCLConverter
-    assert flow_cell.bcl_converter == BclConverter.BCL2FASTQ
 
 
 @pytest.mark.parametrize(
@@ -169,9 +111,9 @@ def test_flow_cell_run_parameters_type(
     assert run_parameters.sequencer == expected_sequencer
 
 
-def test_has_demultiplexing_started_locally_false(tmp_flow_cell_directory_bclconvert: Path):
+def test_has_demultiplexing_started_locally_false(tmp_flow_cell_directory_bcl_convert: Path):
     # GIVEN a flow cell without a demuxstarted.txt file
-    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bcl_convert)
     assert not Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).exists()
 
     # WHEN checking if the flow cell has started demultiplexing
@@ -182,10 +124,10 @@ def test_has_demultiplexing_started_locally_false(tmp_flow_cell_directory_bclcon
 
 
 def test_has_demultiplexing_started_locally_true(
-    tmp_flow_cell_directory_bclconvert: Path,
+    tmp_flow_cell_directory_bcl_convert: Path,
 ):
     # GIVEN a flow cell with a demuxstarted.txt file
-    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bclconvert)
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bcl_convert)
     Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_STARTED).touch()
 
     # WHEN checking if the flow cell has started demultiplexing

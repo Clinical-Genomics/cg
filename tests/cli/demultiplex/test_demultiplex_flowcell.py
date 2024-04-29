@@ -7,7 +7,7 @@ from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
@@ -17,7 +17,7 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 def test_demultiplex_dragen_flowcell(
     cli_runner: testing.CliRunner,
-    tmp_flow_cell_directory_bclconvert: Path,
+    tmp_flow_cell_directory_bcl_convert: Path,
     demultiplexing_context_for_demux: CGConfig,
     caplog,
     mocker,
@@ -26,11 +26,9 @@ def test_demultiplex_dragen_flowcell(
 
     # GIVEN that all files are present for Dragen demultiplexing
 
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_directory_bclconvert, bcl_converter=BclConverter.BCLCONVERT
-    )
+    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bcl_convert)
     add_and_include_sample_sheet_path_to_housekeeper(
-        flow_cell_directory=tmp_flow_cell_directory_bclconvert,
+        flow_cell_directory=tmp_flow_cell_directory_bcl_convert,
         flow_cell_name=flow_cell.id,
         hk_api=demultiplexing_context_for_demux.housekeeper_api,
     )
@@ -50,7 +48,7 @@ def test_demultiplex_dragen_flowcell(
     # WHEN starting demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
         demultiplex_flow_cell,
-        [str(tmp_flow_cell_directory_bclconvert)],
+        [str(tmp_flow_cell_directory_bcl_convert)],
         obj=demultiplexing_context_for_demux,
     )
 
@@ -107,12 +105,12 @@ def test_demultiplex_all_novaseq(
     assert f"Flow cell {flow_cell.id} is ready for downstream processing" in caplog.text
 
 
-def test_is_demultiplexing_complete(tmp_flow_cell_directory_bcl2fastq: Path):
+def test_is_demultiplexing_complete(tmp_novaseq_6000_pre_1_5_kits_flow_cell_path: Path):
     """Tests the is_demultiplexing_complete property of FlowCellDirectoryData."""
 
     # GIVEN a demultiplexing directory with no demuxcomplete.txt file
     flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_flow_cell_directory_bcl2fastq
+        flow_cell_path=tmp_novaseq_6000_pre_1_5_kits_flow_cell_path
     )
     assert not flow_cell.is_demultiplexing_complete
 

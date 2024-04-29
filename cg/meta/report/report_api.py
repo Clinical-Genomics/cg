@@ -9,16 +9,13 @@ from housekeeper.store.models import File, Version
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sqlalchemy.orm import Query
 
-from cg.constants import Workflow
+from cg.constants import DELIVERY_REPORT_FILE_NAME, SWEDAC_LOGO_PATH, Workflow
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE, FileFormat
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, HermesFileTag
 from cg.exc import DeliveryReportError
-from cg.io.controller import WriteStream
+from cg.io.controller import ReadFile, WriteStream
 from cg.meta.meta import MetaAPI
-from cg.meta.report.field_validators import (
-    get_empty_report_data,
-    get_missing_report_data,
-)
+from cg.meta.report.field_validators import get_empty_report_data, get_missing_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
@@ -30,20 +27,8 @@ from cg.models.report.report import (
     ReportModel,
     ScoutReportFiles,
 )
-from cg.models.report.sample import (
-    ApplicationModel,
-    MethodsModel,
-    SampleModel,
-    TimestampModel,
-)
-from cg.store.models import (
-    Analysis,
-    Application,
-    ApplicationLimitations,
-    Case,
-    CaseSample,
-    Sample,
-)
+from cg.models.report.sample import ApplicationModel, MethodsModel, SampleModel, TimestampModel
+from cg.store.models import Analysis, Application, ApplicationLimitations, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -76,7 +61,7 @@ class ReportAPI(MetaAPI):
         delivery_report: str = self.create_delivery_report(
             case_id=case_id, analysis_date=analysis_date, force_report=force_report
         )
-        report_file_path: Path = Path(directory, "delivery-report.html")
+        report_file_path: Path = Path(directory, DELIVERY_REPORT_FILE_NAME)
         with open(report_file_path, "w") as delivery_report_stream:
             delivery_report_stream.write(delivery_report)
         return report_file_path
@@ -87,7 +72,14 @@ class ReportAPI(MetaAPI):
         """Add a delivery report file to a case bundle and return its file object."""
         LOG.info(f"Adding a new delivery report to housekeeper for {case_id}")
         file: File = self.housekeeper_api.add_file(
-            path=delivery_report_file, version_obj=version, tags=[case_id, HK_DELIVERY_REPORT_TAG]
+            path=delivery_report_file,
+            version_obj=version,
+            tags=[
+                case_id,
+                HK_DELIVERY_REPORT_TAG,
+                HermesFileTag.CLINICAL_DELIVERY,
+                HermesFileTag.LONG_TERM_STORAGE,
+            ],
         )
         self.housekeeper_api.include_file(file, version)
         self.housekeeper_api.add_commit(file)
@@ -117,13 +109,16 @@ class ReportAPI(MetaAPI):
             return None
         return uploaded_file.full_path
 
-    def render_delivery_report(self, report_data: dict) -> str:
+    @staticmethod
+    def render_delivery_report(report_data: dict) -> str:
         """Renders the report on the Jinja template."""
-        env: Environment = Environment(
+        env = Environment(
             loader=PackageLoader("cg", "meta/report/templates"),
             autoescape=select_autoescape(["html", "xml"]),
         )
-        template: Template = env.get_template(self.get_template_name())
+        env.globals["get_content_from_file"] = ReadFile.get_content_from_file
+        env.globals["swedac_logo_path"] = SWEDAC_LOGO_PATH
+        template: Template = env.get_template(name=DELIVERY_REPORT_FILE_NAME)
         return template.render(**report_data)
 
     def get_cases_without_delivery_report(self, workflow: Workflow) -> list[Case]:
@@ -236,9 +231,7 @@ class ReportAPI(MetaAPI):
         return CaseModel(
             name=case.name,
             id=case.internal_id,
-            data_analysis=self.get_case_analysis_data(
-                case=case, analysis=analysis, analysis_metadata=analysis_metadata
-            ),
+            data_analysis=self.get_case_analysis_data(case=case, analysis=analysis),
             samples=samples,
             applications=unique_applications,
         )
@@ -332,12 +325,7 @@ class ReportAPI(MetaAPI):
         sequencing_method: str | None = self.lims_api.get_sequencing_method(lims_id=sample_id)
         return MethodsModel(library_prep=prep_method, sequencing=sequencing_method)
 
-    def get_case_analysis_data(
-        self,
-        case: Case,
-        analysis: Analysis,
-        analysis_metadata: AnalysisModel,
-    ) -> DataAnalysisModel:
+    def get_case_analysis_data(self, case: Case, analysis: Analysis) -> DataAnalysisModel:
         """Return workflow attributes used for data analysis."""
         delivered_files: list[File] | None = (
             self.delivery_api.get_analysis_case_delivery_files(case)
@@ -349,17 +337,17 @@ class ReportAPI(MetaAPI):
             data_delivery=case.data_delivery,
             workflow=analysis.workflow,
             workflow_version=analysis.workflow_version,
-            type=self.analysis_api.get_data_analysis_type(case),
-            genome_build=self.analysis_api.get_genome_build(analysis_metadata),
-            variant_callers=self.analysis_api.get_variant_callers(analysis_metadata),
+            type=self.analysis_api.get_data_analysis_type(case.internal_id),
+            genome_build=self.analysis_api.get_genome_build(case.internal_id),
+            variant_callers=self.analysis_api.get_variant_callers(case.internal_id),
             panels=case.panels,
-            scout_files=self.get_scout_uploaded_files(case),
+            scout_files=self.get_scout_uploaded_files(case.internal_id),
             delivered_files=delivered_files,
         )
 
-    def get_scout_uploaded_files(self, case: Case) -> ScoutReportFiles:
+    def get_scout_uploaded_files(self, case_id: str) -> ScoutReportFiles:
         """Return files that will be uploaded to Scout."""
-        raise NotImplementedError
+        return ScoutReportFiles()
 
     @staticmethod
     def get_sample_timestamp_data(sample: Sample) -> TimestampModel:
@@ -383,15 +371,11 @@ class ReportAPI(MetaAPI):
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
-        """Check if the report is accredited."""
+        """Return whether the delivery report is accredited."""
         raise NotImplementedError
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Return dictionary with the delivery report required fields."""
-        raise NotImplementedError
-
-    def get_template_name(self) -> str:
-        """Return workflow specific template name."""
         raise NotImplementedError
 
     @staticmethod
