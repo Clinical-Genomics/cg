@@ -19,14 +19,6 @@ NEXTFLOW_WORKFLOWS = [
     Workflow.TAXPROFILER,
     Workflow.TOMTE,
 ]
-NEXTFLOW_WORKFLOWS_DEV = [
-    Workflow.JASEN,
-    Workflow.RAREDISEASE,
-    Workflow.RNAFUSION,
-    Workflow.TAXPROFILER,
-    Workflow.TOMTE,
-]
-
 
 class SlurmHeadJobDefaults(IntEnum):
     """Default parameters for slurm head jobs."""
