@@ -21,7 +21,11 @@ def get_observations_case(context: CGConfig, case_id: str, upload: bool) -> Case
     """Return a verified Loqusdb case."""
     status_db: Store = context.status_db
     case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
-    if not case or case.data_analysis not in LOQUSDB_SUPPORTED_WORKFLOWS:
+    if (
+        not case
+        or case.data_analysis not in LOQUSDB_SUPPORTED_WORKFLOWS
+        or not case.customer.loqus_upload
+    ):
         LOG.error("Invalid case ID. Retrieving available cases for Loqusdb actions.")
         cases_to_process: Query = (
             status_db.observations_to_upload() if upload else status_db.observations_uploaded()
@@ -32,20 +36,7 @@ def get_observations_case(context: CGConfig, case_id: str, upload: bool) -> Case
             LOG.info("Provide one of the following case IDs: ")
             for case in cases_to_process:
                 LOG.info(f"{case.internal_id} ({case.data_analysis})")
-
         raise CaseNotFoundError
-    return case
-
-
-def get_observations_case_to_upload(context: CGConfig, case_id: str) -> Case:
-    """Return a verified case ready to be uploaded to Loqusdb."""
-    case: Case = get_observations_case(context, case_id, upload=True)
-    if not case.customer.loqus_upload:
-        LOG.error(
-            f"Customer {case.customer.internal_id} is not whitelisted for upload to Loqusdb. Canceling upload for "
-            f"case {case.internal_id}."
-        )
-        raise LoqusdbUploadCaseError
     return case
 
 

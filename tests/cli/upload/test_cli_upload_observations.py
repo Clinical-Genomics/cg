@@ -10,7 +10,6 @@ from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.observations.utils import (
     get_observations_api,
     get_observations_case,
-    get_observations_case_to_upload,
     get_sequencing_method,
 )
 from cg.constants import EXIT_SUCCESS
@@ -36,7 +35,7 @@ def test_observations(
     case: Case = helpers.add_case(store)
     case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(store, application_type=SequencingMethod.WES)
-    link = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    link: CaseSample = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
     store.session.add(link)
 
     # WHEN trying to do a dry run upload to Loqusdb
@@ -55,9 +54,10 @@ def test_get_observations_case(base_context: CGConfig, helpers: StoreHelpers):
 
     # GIVEN an observations valid case
     case: Case = helpers.add_case(store)
+    case.customer.loqus_upload = True
 
     # WHEN retrieving a case given a specific case ID
-    extracted_case = get_observations_case(base_context, case.internal_id, upload=True)
+    extracted_case: Case = get_observations_case(base_context, case.internal_id, upload=True)
 
     # THEN the extracted case should match the stored one
     assert extracted_case == case
@@ -84,7 +84,7 @@ def test_get_observations_case_to_upload(base_context: CGConfig, helpers: StoreH
     case.customer.loqus_upload = True
 
     # WHEN retrieving a case given a specific case ID
-    extracted_case = get_observations_case_to_upload(base_context, case.internal_id)
+    extracted_case: Case = get_observations_case(base_context, case.internal_id, upload=True)
 
     # THEN the extracted case should match the stored one
     assert extracted_case == case
@@ -97,7 +97,7 @@ def test_get_observations_api(base_context: CGConfig, helpers: StoreHelpers):
     # GIVEN a Loqusdb supported case
     case: Case = helpers.add_case(store, data_analysis=Workflow.MIP_DNA)
     sample: Sample = helpers.add_sample(store, application_type=SequencingMethod.WES)
-    link = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    link: CaseSample = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
     store.session.add(link)
 
     # WHEN retrieving the observation API
@@ -115,7 +115,7 @@ def test_get_sequencing_method(base_context: CGConfig, helpers: StoreHelpers):
     # GIVEN a case object with a WGS sequencing method
     case: Case = helpers.add_case(store)
     sample: Sample = helpers.add_sample(store, application_type=SequencingMethod.WGS)
-    link = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    link: CaseSample = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
     store.session.add(link)
 
     # WHEN getting the sequencing method

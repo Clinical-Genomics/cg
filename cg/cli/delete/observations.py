@@ -25,16 +25,13 @@ LOG = logging.getLogger(__name__)
 @click.pass_obj
 def delete_observations(context: CGConfig, case_id: str, dry_run: bool, yes: bool):
     """Delete a case from Loqusdb and reset the Loqusdb IDs in StatusDB."""
-
-    case: Case = get_observations_case(context, case_id, upload=False)
+    case: Case = get_observations_case(context=context, case_id=case_id, upload=False)
     observations_api: MipDNAObservationsAPI | BalsamicObservationsAPI = get_observations_api(
-        context, case
+        context=context, case=case
     )
-
     if dry_run:
         LOG.info(f"Dry run. This would delete all variants in Loqusdb for case: {case.internal_id}")
         return
-
     LOG.info(f"This will delete all variants in Loqusdb for case: {case.internal_id}")
     if yes or click.confirm("Do you want to continue?", abort=True):
         observations_api.delete_case(case)
@@ -49,12 +46,11 @@ def delete_available_observations(
     context: click.Context, workflow: Workflow | None, dry_run: bool, yes: bool
 ):
     """Delete available observation from Loqusdb."""
-
     status_db: Store = context.obj.status_db
     uploaded_observations: Query = status_db.observations_uploaded(workflow)
-
     LOG.info(
-        f"This would delete observations for the following cases: {[case.internal_id for case in uploaded_observations]}"
+        f"This would delete observations for the following cases: "
+        f"{[case.internal_id for case in uploaded_observations]}"
     )
     if yes or click.confirm("Do you want to continue?", abort=True):
         for case in uploaded_observations:
