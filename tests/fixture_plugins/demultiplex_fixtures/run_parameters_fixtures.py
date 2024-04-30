@@ -64,14 +64,6 @@ def hiseq_2500_custom_index_run_parameters(
     return RunParametersHiSeq(run_parameters_path=hiseq_2500_custom_index_run_parameters_path)
 
 
-@pytest.fixture(scope="session")
-def novaseq_6000_run_parameters(
-    novaseq_6000_run_parameters_path: Path,
-) -> RunParametersNovaSeq6000:
-    """Return a NovaSeq6000 run parameters object."""
-    return RunParametersNovaSeq6000(run_parameters_path=novaseq_6000_run_parameters_path)
-
-
 @pytest.fixture
 def novaseq_6000_run_parameters_pre_1_5_kits(
     novaseq_6000_run_parameters_pre_1_5_kits_path: Path,

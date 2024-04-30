@@ -144,6 +144,46 @@ def test_convert_sample_files_to_delivery_files(
     assert sample.internal_id not in delivery_file.destination_path.as_posix()
 
 
+def test_convert_sample_files_to_delivery_files_with_case_id(
+    delivery_context_balsamic: CGConfig, case_id: str, sample_id: str
+):
+    """
+    Test Housekeeper sample files conversion to delivery files when sample files have case ID in
+    their name.
+    """
+
+    # GIVEN a delivery context
+    delivery_api: DeliveryAPI = delivery_context_balsamic.delivery_api
+    housekeeper_api: HousekeeperAPI = delivery_context_balsamic.housekeeper_api
+    status_db: Store = delivery_context_balsamic.status_db
+
+    # GIVEN a case, a sample object, and a list of sample Housekeeper files with case ID in their
+    # name to be delivered
+    case: Case = status_db.get_case_by_internal_id(case_id)
+    sample: Sample = status_db.get_sample_by_internal_id(sample_id)
+    hk_sample_files: list[File] = housekeeper_api.get_files(bundle=case_id, tags=[sample_id]).all()
+    hk_case_files: list[File] = housekeeper_api.get_files(bundle=case_id, tags=[case_id]).all()
+    hk_files: list[File] = hk_sample_files + hk_case_files
+
+    # WHEN converting Housekeeper sample files to delivery files
+    delivery_files: list[DeliveryFile] = delivery_api.convert_files_to_delivery_files(
+        files=hk_files,
+        case=case,
+        internal_id=sample.internal_id,
+        external_id=sample.name,
+        analysis_sample_files=True,
+    )
+
+    print(delivery_files)
+
+    # THEN the delivery sample files should be correctly formatted and not contain case or sample
+    # internal IDs
+    for delivery_file in delivery_files:
+        assert sample.name in delivery_file.destination_path.as_posix()
+        assert sample.internal_id not in delivery_file.destination_path.as_posix()
+        assert case.internal_id not in delivery_file.destination_path.as_posix()
+
+
 def test_get_fastq_delivery_files_by_sample(
     delivery_context_microsalt: CGConfig,
     case_id: str,

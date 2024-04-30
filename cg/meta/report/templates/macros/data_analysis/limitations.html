@@ -1,0 +1,29 @@
+{% macro apptag_limitations(applications) %}
+  <h4 class="mt-4 mb-3">Teknisk beskrivning och begränsningar av analysen</h4>
+  <table class="table w-auto text-center" aria-describedby="limitations-table">
+    <thead class="table-secondary">
+      <tr>
+        <th scope="col">Applikation</th>
+        <th scope="col">Beskrivning</th>
+        <th scope="col">Detaljer</th>
+        <th scope="col">Begränsningar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for application in applications %}
+      <tr>
+        <th scope="row">{{ application.tag }}</th>
+        <td class="text-start">{{ application.description }}</td>
+        <td class="text-start">{{ application.details }}</td>
+        <td class="text-start">
+          <div>{{ application.limitations }}</div>
+          {% if application.workflow_limitations != "N/A" %}
+            <div class="mt-2">{{ application.workflow_limitations }}</div>
+          {% endif %}
+        </td>
+        <td class="text-start"></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endmacro %}

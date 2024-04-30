@@ -141,19 +141,21 @@ class Workflow(StrEnum):
 
 
 class FileFormat(StrEnum):
+    CSV: str = "csv"
     FASTQ: str = "fastq"
     JSON: str = "json"
-    YAML: str = "yaml"
-    CSV: str = "csv"
-    XML: str = "xml"
-    TXT: str = "txt"
+    PNG: str = "png"
     TSV: str = "tsv"
+    TXT: str = "txt"
+    XML: str = "xml"
+    YAML: str = "yaml"
 
 
 class GenomeVersion(StrEnum):
     hg19: str = "hg19"
     hg38: str = "hg38"
     canfam3: str = "canfam3"
+    T2T_CHM13: str = "T2T-CHM13v2.0"
 
 
 class SampleType(StrEnum):
@@ -198,6 +200,7 @@ class FileExtensions(StrEnum):
     NO_EXTENSION: str = ""
     PASS_PHRASE: str = ".passphrase"
     PENDING: str = ".pending"
+    PNG: str = ".png"
     SBATCH: str = ".sbatch"
     SPRING: str = ".spring"
     TAR: str = ".tar"

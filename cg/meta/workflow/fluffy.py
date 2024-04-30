@@ -80,10 +80,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
         super().__init__(workflow, config)
 
     @property
-    def use_read_count_threshold(self) -> bool:
-        return False
-
-    @property
     def process(self) -> Process:
         if not self._process:
             self._process = Process(binary=self.config.fluffy.binary_path)
