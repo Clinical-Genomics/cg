@@ -5,11 +5,12 @@ import logging
 from housekeeper.store.models import File, Version
 
 from cg.apps.loqus import LoqusdbAPI
+from cg.constants.constants import CustomerId
 from cg.constants.observations import (
+    LOQSUDB_RARE_DISEASE_CUSTOMERS,
     LOQUSDB_ID,
-    LOQUSDB_MIP_SEQUENCING_METHODS,
+    LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
     LoqusdbInstance,
-    LoqusdbMipCustomers,
     MipDNALoadParameters,
     MipDNAObservationsAnalysisTag,
 )
@@ -38,7 +39,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
 
     def get_loqusdb_instance(self) -> LoqusdbInstance:
         """Return the Loqusdb instance associated to the sequencing method."""
-        if self.sequencing_method not in LOQUSDB_MIP_SEQUENCING_METHODS:
+        if self.sequencing_method not in LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS:
             LOG.error(
                 f"Sequencing method {self.sequencing_method} is not supported by Loqusdb. Cancelling upload."
             )
@@ -117,6 +118,6 @@ class MipDNAObservationsAPI(ObservationsAPI):
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case.internal_id} from {repr(self.loqusdb_api)}")
 
-    def get_loqusdb_customers(self) -> LoqusdbMipCustomers:
-        """Returns the customers that are entitled to Rare Disease Loqusdb uploads."""
-        return LoqusdbMipCustomers
+    def get_loqusdb_customers(self) -> list[CustomerId]:
+        """Return customers that are eligible for rare disease Loqusdb uploads."""
+        return LOQSUDB_RARE_DISEASE_CUSTOMERS

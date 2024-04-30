@@ -6,12 +6,13 @@ from pathlib import Path
 from housekeeper.store.models import File, Version
 
 from cg.apps.loqus import LoqusdbAPI
+from cg.constants.constants import CustomerId
 from cg.constants.observations import (
-    LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
+    LOQSUDB_CANCER_CUSTOMERS,
+    LOQUSDB_CANCER_SEQUENCING_METHODS,
     LOQUSDB_ID,
     BalsamicLoadParameters,
     BalsamicObservationsAnalysisTag,
-    LoqusdbBalsamicCustomers,
     LoqusdbInstance,
 )
 from cg.constants.sequencing import SequencingMethod
@@ -40,7 +41,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
 
     def load_observations(self, case: Case, input_files: BalsamicObservationsInputFiles) -> None:
         """Load observation counts to Loqusdb for a Balsamic case."""
-        if self.sequencing_method not in LOQUSDB_BALSAMIC_SEQUENCING_METHODS:
+        if self.sequencing_method not in LOQUSDB_CANCER_SEQUENCING_METHODS:
             LOG.error(
                 f"Sequencing method {self.sequencing_method} is not supported by Loqusdb. Cancelling upload."
             )
@@ -131,6 +132,6 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case.internal_id} from Loqusdb")
 
-    def get_loqusdb_customers(self) -> LoqusdbBalsamicCustomers:
-        """Returns the customers that are entitled to Cancer Loqusdb uploads."""
-        return LoqusdbBalsamicCustomers
+    def get_loqusdb_customers(self) -> list[CustomerId]:
+        """Return customers that are eligible for cancer Loqusdb uploads."""
+        return LOQSUDB_CANCER_CUSTOMERS

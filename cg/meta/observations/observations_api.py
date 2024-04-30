@@ -8,11 +8,8 @@ from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.loqus import LoqusdbAPI
-from cg.constants.observations import (
-    LoqusdbBalsamicCustomers,
-    LoqusdbInstance,
-    LoqusdbMipCustomers,
-)
+from cg.constants.constants import CustomerId
+from cg.constants.observations import LoqusdbInstance
 from cg.exc import LoqusdbUploadCaseError
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import (
@@ -108,8 +105,8 @@ class ObservationsAPI:
             raise LoqusdbUploadCaseError
         LOG.info(f"Valid customer {customer.internal_id} for Loqusdb uploads")
 
-    def get_loqusdb_customers(self) -> LoqusdbMipCustomers | LoqusdbBalsamicCustomers:
-        """Returns the customers that are entitled to Loqusdb uploads."""
+    def get_loqusdb_customers(self) -> list[CustomerId]:
+        """Return customers that are eligible for Loqusdb uploads."""
         raise NotImplementedError
 
     def load_observations(
