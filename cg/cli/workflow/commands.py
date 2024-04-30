@@ -33,6 +33,7 @@ OPTION_DRY = click.option(
 )
 OPTION_YES = click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)
+ARGUMENT_WORKFLOW = click.argument("workflow", type=Workflow)
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_ANALYSIS_PARAMETERS_CONFIG = click.option(
     "--config-artic", type=str, help="Config with computational and lab related settings"
@@ -356,7 +357,7 @@ def microsalt_past_run_dirs(
 
 
 @click.command("nf-workflow-past-run-dirs")
-@click.argument("workflow", type=click.Choice(Workflow), help="Specify workflow to clean up.")
+@ARGUMENT_WORKFLOW
 @OPTION_YES
 @OPTION_DRY
 @ARGUMENT_BEFORE_STR
