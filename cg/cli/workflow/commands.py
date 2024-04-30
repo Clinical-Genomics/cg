@@ -356,16 +356,21 @@ def microsalt_past_run_dirs(
 
 
 @click.command("nf-workflow-past-run-dirs")
+@click.argument("workflow", type=click.Choice(Workflow), help="Specify workflow to clean up.")
 @OPTION_YES
 @OPTION_DRY
 @ARGUMENT_BEFORE_STR
-@click.pass_context
+@click.pass_obj
 def nf_workflow_past_run_dirs(
-    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+    context: CGConfig,
+    before_str: str,
+    workflow: Workflow,
+    yes: bool = False,
+    dry_run: bool = False,
 ):
     """Clean up of "old" nextflow case run dirs."""
 
-    analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
+    analysis_api = NfAnalysisAPI(config=context, workflow=workflow)
     exit_code: int = EXIT_SUCCESS
 
     try:
