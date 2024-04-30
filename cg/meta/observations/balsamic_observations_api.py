@@ -22,6 +22,7 @@ from cg.exc import (
     LoqusdbUploadCaseError,
 )
 from cg.meta.observations.observations_api import ObservationsAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
 from cg.store.models import Case
@@ -34,7 +35,8 @@ class BalsamicObservationsAPI(ObservationsAPI):
     """API to manage Balsamic observations."""
 
     def __init__(self, config: CGConfig, sequencing_method: SequencingMethod):
-        super().__init__(config)
+        self.analysis_api = BalsamicAnalysisAPI(config)
+        super().__init__(config=config, analysis_api=self.analysis_api)
         self.sequencing_method: SequencingMethod = sequencing_method
         self.loqusdb_somatic_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.SOMATIC)
         self.loqusdb_tumor_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.TUMOR)

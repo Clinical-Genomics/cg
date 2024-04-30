@@ -11,6 +11,7 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CustomerId
 from cg.constants.observations import LoqusdbInstance
 from cg.exc import LoqusdbUploadCaseError
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
@@ -25,9 +26,10 @@ LOG = logging.getLogger(__name__)
 class ObservationsAPI:
     """API to manage Loqusdb observations."""
 
-    def __init__(self, config: CGConfig):
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
         self.store: Store = config.status_db
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
+        self.analysis_api: AnalysisAPI = analysis_api
         self.loqusdb_config: CommonAppConfig = config.loqusdb
         self.loqusdb_wes_config: CommonAppConfig = config.loqusdb_wes
         self.loqusdb_somatic_config: CommonAppConfig = config.loqusdb_somatic

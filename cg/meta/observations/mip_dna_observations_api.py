@@ -21,6 +21,7 @@ from cg.exc import (
     LoqusdbUploadCaseError,
 )
 from cg.meta.observations.observations_api import ObservationsAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
 from cg.store.models import Case
@@ -33,7 +34,8 @@ class MipDNAObservationsAPI(ObservationsAPI):
     """API to manage MIP-DNA observations."""
 
     def __init__(self, config: CGConfig, sequencing_method: SequencingMethod):
-        super().__init__(config)
+        self.analysis_api = MipDNAAnalysisAPI(config)
+        super().__init__(config=config, analysis_api=self.analysis_api)
         self.sequencing_method: SequencingMethod = sequencing_method
         self.loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(self.get_loqusdb_instance())
 
