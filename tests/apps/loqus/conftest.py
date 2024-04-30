@@ -100,10 +100,16 @@ LOQUSDB_DELETE_NONEXISTING_STDERR = b"""2022-09-22 11:40:04 username loqusdb.com
 def loqusdb_config_dict() -> dict[LoqusdbInstance, dict]:
     """Return Loqusdb config dictionary."""
     return {
-        LoqusdbInstance.WGS: {"binary_path": "binary", "config_path": "config"},
-        LoqusdbInstance.WES: {"binary_path": "binary_wes", "config_path": "config_wes"},
-        LoqusdbInstance.SOMATIC: {"binary_path": "binary_somatic", "config_path": "config_somatic"},
-        LoqusdbInstance.TUMOR: {"binary_path": "binary_tumor", "config_path": "config_tumor"},
+        LoqusdbInstance.WGS: {"binary_path": "loqusdb", "config_path": "loqusdb.yaml"},
+        LoqusdbInstance.WES: {"binary_path": "loqusdb-wes", "config_path": "loqusdb-wes.yaml"},
+        LoqusdbInstance.SOMATIC: {
+            "binary_path": "loqusdb-somatic",
+            "config_path": "loqusdb-somatic.yaml",
+        },
+        LoqusdbInstance.TUMOR: {
+            "binary_path": "loqusdb-tumor",
+            "config_path": "loqusdb-tumor.yaml",
+        },
     }
 
 

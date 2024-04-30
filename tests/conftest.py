@@ -332,22 +332,6 @@ def base_config_dict() -> dict:
             "sender_email": "test@gmail.com",
             "sender_password": "",
         },
-        "loqusdb": {
-            "binary_path": "binary",
-            "config_path": "config",
-        },
-        "loqusdb-wes": {
-            "binary_path": "binary_wes",
-            "config_path": "config_wes",
-        },
-        "loqusdb-somatic": {
-            "binary_path": "binary_somatic",
-            "config_path": "config_somatic",
-        },
-        "loqusdb-tumor": {
-            "binary_path": "binary_tumor",
-            "config_path": "config_tumor",
-        },
     }
 
 
@@ -1892,10 +1876,13 @@ def context_config(
             "password": "password",
             "username": "user",
         },
-        "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb-stage.yaml"},
-        "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
-        "loqusdb-somatic": {"binary_path": "loqusdb", "config_path": "loqusdb-somatic-stage.yaml"},
-        "loqusdb-tumor": {"binary_path": "loqusdb", "config_path": "loqusdb-tumor-stage.yaml"},
+        "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb.yaml"},
+        "loqusdb-wes": {"binary_path": "loqusdb-wes", "config_path": "loqusdb-wes.yaml"},
+        "loqusdb-somatic": {
+            "binary_path": "loqusdb-somatic",
+            "config_path": "loqusdb-somatic.yaml",
+        },
+        "loqusdb-tumor": {"binary_path": "loqusdb-tumor", "config_path": "loqusdb-tumor.yaml"},
         "microsalt": {
             "binary_path": "echo",
             "conda_binary": "a_conda_binary",
