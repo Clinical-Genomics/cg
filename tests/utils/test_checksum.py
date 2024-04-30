@@ -38,7 +38,7 @@ def test_extract_checksum(fastq_file: Path):
     ids=["Existing correct file", "Existing incorrect file", "Non existing file"],
 )
 def test_is_md5sum_correct(file_fixture: str, expected: bool, request: pytest.FixtureRequest):
-    """Tests if the function correctly checks if the md5sum is correct."""
+    """Test that the function correctly checks if the md5sum is correct."""
     # GIVEN a file
     file_path: Path = request.getfixturevalue(file_fixture)
 
