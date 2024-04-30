@@ -651,3 +651,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_data_analysis_type(self, case_id: str) -> str | None:
         """Return data analysis type carried out."""
         return self.get_bundle_deliverables_type(case_id)
+
+    def is_analysis_normal_only(self, case_id: str) -> bool:
+        """Return whether the analysis is normal only."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if case.non_tumour_samples and not case.tumour_samples:
+            return True
+        return False

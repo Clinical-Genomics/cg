@@ -538,9 +538,19 @@ class Case(Base, PriorityMixin):
         return self._get_tumour_samples
 
     @property
+    def non_tumour_samples(self) -> list["Sample"]:
+        """Return tumour samples."""
+        return self._get_non_tumour_samples
+
+    @property
     def _get_tumour_samples(self) -> list["Sample"]:
         """Extract tumour samples."""
         return [link.sample for link in self.links if link.sample.is_tumour]
+
+    @property
+    def _get_non_tumour_samples(self) -> list["Sample"]:
+        """Extract non tumour samples."""
+        return [link.sample for link in self.links if not link.sample.is_tumour]
 
     @property
     def loqusdb_uploaded_samples(self) -> list["Sample"]:

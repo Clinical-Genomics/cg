@@ -6,8 +6,7 @@ from sqlalchemy.orm import Query
 
 from cg.constants.constants import Workflow
 from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
-from cg.constants.sequencing import SequencingMethod
-from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
+from cg.exc import CaseNotFoundError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
@@ -45,19 +44,7 @@ def get_observations_api(
 ) -> MipDNAObservationsAPI | BalsamicObservationsAPI:
     """Return an observations API given a specific case object."""
     observations_apis = {
-        Workflow.MIP_DNA: MipDNAObservationsAPI(context, get_sequencing_method(case)),
-        Workflow.BALSAMIC: BalsamicObservationsAPI(context, get_sequencing_method(case)),
+        Workflow.MIP_DNA: MipDNAObservationsAPI(context),
+        Workflow.BALSAMIC: BalsamicObservationsAPI(context),
     }
     return observations_apis[case.data_analysis]
-
-
-def get_sequencing_method(case: Case) -> SequencingMethod:
-    """Returns the sequencing method for the given case object."""
-    analysis_types = [
-        link.sample.application_version.application.analysis_type for link in case.links
-    ]
-    if len(set(analysis_types)) != 1:
-        LOG.error(f"Case {case.internal_id} has a mixed analysis type. Cancelling action.")
-        raise LoqusdbUploadCaseError
-
-    return analysis_types[0]

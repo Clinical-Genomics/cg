@@ -7,16 +7,12 @@ from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
 from cg.cli.upload.observations import upload_observations_to_loqusdb
-from cg.cli.upload.observations.utils import (
-    get_observations_api,
-    get_observations_case,
-    get_sequencing_method,
-)
+from cg.cli.upload.observations.utils import get_observations_api, get_observations_case
 from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import Workflow
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
-from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
+from cg.exc import CaseNotFoundError
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, CaseSample, Sample
@@ -106,54 +102,3 @@ def test_get_observations_api(cg_context: CGConfig, helpers: StoreHelpers):
     # THEN a MIP-DNA API should be returned
     assert observations_api
     assert isinstance(observations_api, MipDNAObservationsAPI)
-
-
-def test_get_sequencing_method(cg_context: CGConfig, helpers: StoreHelpers):
-    """Test sequencing method extraction for Loqusdb upload."""
-    store: Store = cg_context.status_db
-
-    # GIVEN a case object with a WGS sequencing method
-    case: Case = helpers.add_case(store)
-    sample: Sample = helpers.add_sample(store, application_type=SequencingMethod.WGS)
-    link: CaseSample = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
-    store.session.add(link)
-
-    # WHEN getting the sequencing method
-    sequencing_method: SequencingMethod = get_sequencing_method(case)
-
-    # THEN the obtained sequencing method should be WGS
-    assert sequencing_method == SequencingMethod.WGS
-
-
-def test_get_sequencing_method_exception(
-    cg_context: CGConfig,
-    helpers: StoreHelpers,
-    wgs_application_tag: str,
-    external_wes_application_tag: str,
-    caplog: LogCaptureFixture,
-):
-    """Test sequencing method extraction for Loqusdb upload when a case contains multiple sequencing types."""
-    store: Store = cg_context.status_db
-
-    # GIVEN a case object with a WGS and WES mixed sequencing methods
-    case: Case = helpers.add_case(store)
-    sample_wgs: Sample = helpers.add_sample(
-        store, application_tag=wgs_application_tag, application_type=SequencingMethod.WGS
-    )
-    sample_wes: Sample = helpers.add_sample(
-        store, application_tag=external_wes_application_tag, application_type=SequencingMethod.WES
-    )
-    link_1: CaseSample = store.relate_sample(
-        case=case, sample=sample_wgs, status=PhenotypeStatus.UNKNOWN
-    )
-    link_2: CaseSample = store.relate_sample(
-        case=case, sample=sample_wes, status=PhenotypeStatus.UNKNOWN
-    )
-    store.session.add_all([link_1, link_2])
-
-    # WHEN getting the sequencing method
-    with pytest.raises(LoqusdbUploadCaseError):
-        # THEN a LoqusdbUploadCaseError should be raised
-        get_sequencing_method(case)
-
-    assert f"Case {case.internal_id} has a mixed analysis type. Cancelling action." in caplog.text

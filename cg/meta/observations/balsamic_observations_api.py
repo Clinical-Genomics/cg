@@ -15,12 +15,7 @@ from cg.constants.observations import (
     BalsamicObservationsAnalysisTag,
     LoqusdbInstance,
 )
-from cg.constants.sequencing import SequencingMethod
-from cg.exc import (
-    CaseNotFoundError,
-    LoqusdbDuplicateRecordError,
-    LoqusdbUploadCaseError,
-)
+from cg.exc import CaseNotFoundError, LoqusdbDuplicateRecordError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -34,21 +29,47 @@ LOG = logging.getLogger(__name__)
 class BalsamicObservationsAPI(ObservationsAPI):
     """API to manage Balsamic observations."""
 
-    def __init__(self, config: CGConfig, sequencing_method: SequencingMethod):
+    def __init__(self, config: CGConfig):
         self.analysis_api = BalsamicAnalysisAPI(config)
         super().__init__(config=config, analysis_api=self.analysis_api)
-        self.sequencing_method: SequencingMethod = sequencing_method
         self.loqusdb_somatic_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.SOMATIC)
         self.loqusdb_tumor_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.TUMOR)
 
+    def get_loqusdb_customers(self) -> list[CustomerId]:
+        """Return customers that are eligible for cancer Loqusdb uploads."""
+        return LOQSUDB_CANCER_CUSTOMERS
+
+    def get_loqusdb_sequencing_methods(self) -> list[str]:
+        """Return sequencing methods that are eligible for cancer Loqusdb uploads."""
+        return LOQUSDB_CANCER_SEQUENCING_METHODS
+
+    def is_analysis_type_eligible_for_observations_upload(self, case_id) -> bool:
+        """Return whether the cancer analysis type is eligible for cancer Loqusdb uploads."""
+        is_analysis_normal_only: bool = self.analysis_api.is_analysis_normal_only(case_id)
+        if is_analysis_normal_only:
+            LOG.error(f"Normal only analysis {case_id} is not supported for Loqusdb uploads")
+            return False
+        return True
+
+    def is_case_eligible_for_observations_upload(self, case: Case) -> bool:
+        """Return whether a cancer case is eligible for observations upload."""
+        is_customer_eligible_for_observations_upload: bool = (
+            self.is_customer_eligible_for_observations_upload(case.customer.internal_id)
+        )
+        is_sequencing_method_eligible_for_observations_upload: bool = (
+            self.is_sequencing_method_eligible_for_observations_upload(case.internal_id)
+        )
+        is_analysis_type_eligible_for_observations_upload: bool = (
+            self.is_analysis_type_eligible_for_observations_upload(case.internal_id)
+        )
+        return (
+            is_customer_eligible_for_observations_upload
+            and is_sequencing_method_eligible_for_observations_upload
+            and is_analysis_type_eligible_for_observations_upload
+        )
+
     def load_observations(self, case: Case, input_files: BalsamicObservationsInputFiles) -> None:
         """Load observation counts to Loqusdb for a Balsamic case."""
-        if self.sequencing_method not in LOQUSDB_CANCER_SEQUENCING_METHODS:
-            LOG.error(
-                f"Sequencing method {self.sequencing_method} is not supported by Loqusdb. Cancelling upload."
-            )
-            raise LoqusdbUploadCaseError
-
         loqusdb_upload_apis: list[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
         for loqusdb_api in loqusdb_upload_apis:
             if self.is_duplicate(
@@ -133,7 +154,3 @@ class BalsamicObservationsAPI(ObservationsAPI):
             loqusdb_api.delete_case(case.internal_id)
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case.internal_id} from Loqusdb")
-
-    def get_loqusdb_customers(self) -> list[CustomerId]:
-        """Return customers that are eligible for cancer Loqusdb uploads."""
-        return LOQSUDB_CANCER_CUSTOMERS
