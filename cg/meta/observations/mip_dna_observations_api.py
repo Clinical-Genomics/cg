@@ -8,18 +8,14 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import (
     LOQSUDB_RARE_DISEASE_CUSTOMERS,
     LOQUSDB_ID,
-    LOQUSDB_MIP_SEQUENCING_METHODS,
+    LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
     LoqusdbInstance,
     MipDNALoadParameters,
     MipDNAObservationsAnalysisTag,
 )
 from cg.constants.sample_sources import SourceType
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import (
-    CaseNotFoundError,
-    LoqusdbDuplicateRecordError,
-    LoqusdbUploadCaseError,
-)
+from cg.exc import CaseNotFoundError, LoqusdbDuplicateRecordError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -33,20 +29,13 @@ LOG = logging.getLogger(__name__)
 class MipDNAObservationsAPI(ObservationsAPI):
     """API to manage MIP-DNA observations."""
 
-    def __init__(self, config: CGConfig, sequencing_method: SequencingMethod):
+    def __init__(self, config: CGConfig):
         super().__init__(config)
         self.analysis_api = MipDNAAnalysisAPI(config)
-        self.sequencing_method: SequencingMethod = sequencing_method
         self.loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(self.get_loqusdb_instance())
 
     def get_loqusdb_instance(self) -> LoqusdbInstance:
         """Return the Loqusdb instance associated to the sequencing method."""
-        if self.sequencing_method not in LOQUSDB_MIP_SEQUENCING_METHODS:
-            LOG.error(
-                f"Sequencing method {self.sequencing_method} is not supported by Loqusdb. Cancelling upload."
-            )
-            raise LoqusdbUploadCaseError
-
         loqusdb_instances: dict[SequencingMethod, LoqusdbInstance] = {
             SequencingMethod.WGS: LoqusdbInstance.WGS,
             SequencingMethod.WES: LoqusdbInstance.WES,
@@ -120,6 +109,10 @@ class MipDNAObservationsAPI(ObservationsAPI):
         """Return customers that are eligible for rare disease Loqusdb uploads."""
         return LOQSUDB_RARE_DISEASE_CUSTOMERS
 
+    def get_loqusdb_sequencing_methods(self) -> list[str]:
+        """Return sequencing methods that are eligible for cancer Loqusdb uploads."""
+        return LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS
+
     def is_case_eligible_for_observations_upload(self, case: Case) -> bool:
         """Return whether a MIP DNA case is eligible for observations upload."""
         is_customer_eligible_for_observations_upload: bool = (
@@ -146,4 +139,5 @@ class MipDNAObservationsAPI(ObservationsAPI):
         source_type: str | None = self.analysis_api.get_case_source_type(case_id)
         if source_type and SourceType.FFPE.lower() not in source_type.lower():
             return True
+        LOG.error(f"Source type '{source_type}' is not supported for observation uploads")
         return False

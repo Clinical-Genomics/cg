@@ -112,8 +112,19 @@ class ObservationsAPI:
             sample.loqusdb_id = loqusdb_id
         self.store.session.commit()
 
+    def is_sequencing_method_eligible_for_observations_upload(self):
+        """Return whether a sequencing method is valid for observations upload."""
+        if self.sequencing_method not in self.get_loqusdb_sequencing_methods():
+            LOG.error(f"Sequencing method {self.sequencing_method} is not supported by Loqusdb")
+            return False
+        return True
+
     def get_loqusdb_customers(self) -> list[str]:
         """Return customers that are eligible for Loqusdb uploads."""
+        raise NotImplementedError
+
+    def get_loqusdb_sequencing_methods(self) -> list[str]:
+        """Return sequencing methods that are eligible for Loqusdb uploads."""
         raise NotImplementedError
 
     def load_observations(

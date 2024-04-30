@@ -28,9 +28,8 @@ LOG = logging.getLogger(__name__)
 class BalsamicObservationsAPI(ObservationsAPI):
     """API to manage Balsamic observations."""
 
-    def __init__(self, config: CGConfig, sequencing_method: SequencingMethod):
+    def __init__(self, config: CGConfig):
         super().__init__(config)
-        self.sequencing_method: SequencingMethod = sequencing_method
         self.loqusdb_somatic_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.SOMATIC)
         self.loqusdb_tumor_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.TUMOR)
 
@@ -125,6 +124,10 @@ class BalsamicObservationsAPI(ObservationsAPI):
         """Return customers that are eligible for cancer Loqusdb uploads."""
         return LOQSUDB_CANCER_CUSTOMERS
 
+    def get_loqusdb_sequencing_methods(self) -> list[str]:
+        """Return sequencing methods that are eligible for cancer Loqusdb uploads."""
+        return LOQUSDB_BALSAMIC_SEQUENCING_METHODS
+
     def is_case_eligible_for_observations_upload(self, case: Case) -> bool:
         """Return whether a Balsamic case is eligible for observations upload."""
         is_customer_eligible_for_observations_upload: bool = (
@@ -138,9 +141,14 @@ class BalsamicObservationsAPI(ObservationsAPI):
             and is_sequencing_method_eligible_for_observations_upload
         )
 
-    def is_sequencing_method_eligible_for_observations_upload(self):
-        """Return whether a sequencing method is valid for observations upload."""
-        if self.sequencing_method not in LOQUSDB_BALSAMIC_SEQUENCING_METHODS:
-            LOG.error(f"Sequencing method {self.sequencing_method} is not supported by Loqusdb")
-            return False
-        return True
+
+def get_sequencing_method(case: Case) -> SequencingMethod:
+    """Returns the sequencing method for the given case object."""
+    analysis_types = [
+        link.sample.application_version.application.analysis_type for link in case.links
+    ]
+    if len(set(analysis_types)) != 1:
+        LOG.error(f"Case {case.internal_id} has a mixed analysis type. Cancelling action.")
+        raise LoqusdbUploadCaseError
+
+    return analysis_types[0]

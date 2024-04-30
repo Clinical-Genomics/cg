@@ -7,6 +7,7 @@ from _pytest.logging import LogCaptureFixture
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters
+from cg.constants.sample_sources import SourceType
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import (
     CaseNotFoundError,
@@ -15,6 +16,7 @@ from cg.exc import (
 )
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
     MipDNAObservationsInputFiles,
@@ -271,6 +273,31 @@ def test_mip_dna_upload_observations_tumor_case(
         mip_dna_observations_api.upload(case)
 
     assert f"Case {case.internal_id} has tumour samples" in caplog.text
+
+
+def test_mip_dna_upload_observations_ffpe_source(
+    case_id: str,
+    mip_dna_observations_api: MipDNAObservationsAPI,
+    observations_input_files: MipDNAObservationsInputFiles,
+    caplog: LogCaptureFixture,
+    mocker,
+):
+    """Test loading of a FFPE sample to Loqusdb."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a MIP DNA observations API and a case object with FFPE as a source
+    case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
+    mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=False)
+    mocker.patch.object(AnalysisAPI, "get_case_source_type", return_value=SourceType.FFPE)
+
+    # WHEN getting the Loqusdb API
+    with pytest.raises(LoqusdbUploadCaseError):
+        # THEN an upload error should be raised and the execution aborted
+        mip_dna_observations_api.upload(case)
+
+    assert (
+        f"Source type '{SourceType.FFPE}' is not supported for observation uploads" in caplog.text
+    )
 
 
 def test_mip_dna_delete_case(
