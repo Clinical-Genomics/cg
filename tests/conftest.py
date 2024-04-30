@@ -4101,7 +4101,7 @@ def validation_hk_api(
 
 
 @pytest.fixture()
-def validation_case_id(case_id_with_multiple_samples: str) -> str:
+def validation_case_name(case_id_with_multiple_samples: str) -> str:
     return case_id_with_multiple_samples + "_validation"
 
 
