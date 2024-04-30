@@ -22,7 +22,7 @@ def test_create_log_dir_dry_run(caplog, external_data_api: ExternalDataAPI, tick
     external_data_api.dry_run = True
 
     # WHEN the log directory is created
-    log_dir = external_data_api.create_log_dir()
+    log_dir = external_data_api._create_log_dir()
 
     # THEN the path is not created since it is a dry run
     assert "Would have created path" in caplog.text

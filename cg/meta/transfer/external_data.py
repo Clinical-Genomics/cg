@@ -5,13 +5,14 @@ from pathlib import Path
 from housekeeper.store.models import Version
 
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.constants import HK_FASTQ_TAGS
+from cg.constants import HK_FASTQ_TAGS, FileExtensions
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import ERROR_RSYNC_FUNCTION, RSYNC_CONTENTS_COMMAND
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store.models import Case, Customer, Sample
-from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
+from cg.utils.checksum.checksum import check_file_md5sum
+from cg.utils.files import get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ class ExternalDataAPI(MetaAPI):
         self.force = force
         self.customer_id = self.status_db.get_customer_id_from_ticket(ticket=self.ticket)
 
-    def create_log_dir(self) -> Path:
+    def _create_log_dir(self) -> Path:
         """Creates a directory for log file to be stored"""
         timestamp: dt.datetime = dt.datetime.now()
         timestamp_str: str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
@@ -62,7 +63,7 @@ class ExternalDataAPI(MetaAPI):
     def transfer_sample_files_from_source(self, dry_run: bool, ticket: str) -> None:
         """Transfers all sample files, related to given ticket, from source to destination"""
         self._set_parameters(ticket=ticket, dry_run=dry_run)
-        log_dir: Path = self.create_log_dir()
+        log_dir: Path = self._create_log_dir()
         error_function: str = ERROR_RSYNC_FUNCTION.format()
         Path(self.destination_path % self.customer_id).mkdir(exist_ok=True)
 
@@ -108,13 +109,6 @@ class ExternalDataAPI(MetaAPI):
         all_fastq_in_folder: list[Path] = self.get_all_fastq(sample_folder=fastq_folder)
         return all_fastq_in_folder
 
-    def check_fastq_md5sum(self, fastq_path) -> Path | None:
-        """Returns the path of the input file if it does not match its md5sum"""
-        if Path(str(fastq_path) + ".md5").exists():
-            given_md5sum: str = extract_md5sum(md5sum_file=Path(str(fastq_path) + ".md5"))
-            if not check_md5sum(file_path=fastq_path, md5sum=given_md5sum):
-                return fastq_path
-
     def add_files_to_bundles(
         self, fastq_paths: list[Path], last_version: Version, lims_sample_id: str
     ):
@@ -128,7 +122,7 @@ class ExternalDataAPI(MetaAPI):
     def get_failed_fastq_paths(self, fastq_paths_to_add: list[Path]) -> list[Path]:
         failed_sum_paths: list[Path] = []
         for path in fastq_paths_to_add:
-            failed_path: Path | None = self.check_fastq_md5sum(path)
+            failed_path: Path | None = check_file_md5sum(path)
             if failed_path:
                 failed_sum_paths.append(failed_path)
         return failed_sum_paths
@@ -144,10 +138,13 @@ class ExternalDataAPI(MetaAPI):
         return fastq_paths_to_add
 
     def _curate_sample_folder(self, sample_folder: Path) -> None:
-        """Changes the name of the folder to the internal_id."""
-        customer: Customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=self.customer_id
-        )
+        """
+        Changes the name of the folder to the sample internal_id. If force is set to True,
+        replaces any previous folder.
+        Raises:
+            Exception if the sample from the folder is not present in statusdb.
+        """
+        customer: Customer = self.status_db.get_customer_by_internal_id(self.customer_id)
         customer_folder: Path = sample_folder.parent
         sample: Sample = self.status_db.get_sample_by_customer_and_name(
             customer_entry_id=[customer.id], sample_name=sample_folder.name
@@ -158,7 +155,8 @@ class ExternalDataAPI(MetaAPI):
             sample_folder.rename(customer_folder.joinpath(sample.internal_id))
         elif not sample and not self.status_db.get_sample_by_internal_id(sample_folder.name):
             raise Exception(
-                f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
+                f"{sample_folder} is not a sample present in statusdb. "
+                "Move or remove it to continue"
             )
 
     def _get_sample_ids_from_folder(self, folder: Path) -> list[str]:
@@ -178,6 +176,46 @@ class ExternalDataAPI(MetaAPI):
             self._curate_sample_folder(sample_folder=sample_folder)
         available_sample_ids: list[str] = self._get_sample_ids_from_folder(destination_folder_path)
         return available_sample_ids
+
+    def _get_fastq_paths_to_add(self, sample_id: str) -> list[Path]:
+        """Return the paths of fastq files that have not been added to the Housekeeper bundle."""
+        sample_folder: Path = self._get_destination_path(sample_id)
+        file_paths: list[Path] = [
+            sample_folder.joinpath(path)
+            for path in get_files_matching_pattern(
+                directory=sample_folder, pattern=FileExtensions.FASTQ_GZ
+            )
+        ]
+        hk_version: Version = self.housekeeper_api.get_or_create_version(bundle_name=sample_id)
+        fastq_paths_to_add: list[Path] = self.housekeeper_api.check_bundle_files(
+            file_paths=file_paths,
+            bundle_name=sample_id,
+            last_version=hk_version,
+            tags=HK_FASTQ_TAGS,
+        )
+        return fastq_paths_to_add
+
+    def _add_and_include_files_to_bundles(
+        self, fastq_paths: list[Path], lims_sample_id: str
+    ) -> None:
+        """Add the given fastq files to the the Housekeeper bundle."""
+        if self.dry_run:
+            LOG.info("No changes will be committed since this is a dry-run")
+            return
+        for path in fastq_paths:
+            LOG.info(f"Adding path {path} to bundle {lims_sample_id} in housekeeper")
+            self.housekeeper_api.add_and_include_file_to_latest_version(
+                bundle_name=lims_sample_id, file=path, tags=HK_FASTQ_TAGS
+            )
+
+    def _start_cases(self, cases: list[Case]) -> None:
+        """Starts the cases that have not been analysed."""
+        if self.dry_run:
+            LOG.info("No cases will be started since this is a dry-run")
+            return
+        for case in cases:
+            self.status_db.set_case_action(case_internal_id=case.internal_id, action="analyze")
+            LOG.info(f"Case {case.internal_id} has been set to 'analyze'")
 
     def add_transfer_to_housekeeper(
         self, ticket: str, dry_run: bool = False, force: bool = False
