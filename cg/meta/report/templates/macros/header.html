@@ -1,0 +1,73 @@
+{% macro header(is_accredited) %}
+  <div class="row align-items-center">
+    <div class="col text-center">
+      <h2>Leveransrapport Clinical Genomics</h2>
+    </div>
+    {% if is_accredited %}
+      <div class="col-auto">
+        <img
+          class="swedac-stamp"
+          src="{{get_content_from_file(file_format='png', file_path=swedac_logo_path) }}"
+          alt="SWEDAC stamp"
+        />
+      </div>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro report_data(customer_name, case_name, report_version, report_date) %}
+  <div class="container mb-5">
+    <div class="row">
+      <div class="col">
+        <b>Leveransrapport</b>: {{ customer_name }}<br />
+        <b>Fall</b>: {{ case_name }}
+      </div>
+      <div class="col-auto">
+        <b>Skapad</b>: {{ report_date }}<br />
+        {% if version != "N/A" %}
+          <b>Version</b>: {{ report_version }}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endmacro %}
+
+{% macro contact_data(customer) %}
+  <div class="container mb-5">
+    <div class="row">
+      <div class="col">
+        <div class="card border-0">
+          <h4 class="card-title">Kontakt Clinical Genomics</h4>
+          <h5 class="card-subtitle text-body-secondary">Clinical Genomics</h5>
+          <div class="card-text">
+            <address class="text-body-secondary">
+              Science for Life Laboratory<br />
+              Tomtebodavägen 23<br />
+              171 65 Solna<br />
+              P:
+              <a href="tel:(08) 524 81 500" class="link-body-emphasis link-opacity-75">
+                (08) 524 81 500
+              </a>
+              <br />
+              E-post:
+              <a href="mailto: support@clinicalgenomics.se" class="link-body-emphasis link-opacity-75">
+                support@clinicalgenomics.se
+              </a>
+            </address>
+          </div>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="card border-0">
+          <h4 class="card-title">Kundinformation</h4>
+          <h5 class="card-title text-body-secondary">{{ customer.name }}</h5>
+          <div class="card-text">
+            <address class="text-body-secondary">
+              {{ customer.invoice_address | replace("\n", "<br />") | safe }}
+            </address>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endmacro %}

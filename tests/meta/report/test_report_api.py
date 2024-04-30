@@ -363,19 +363,14 @@ def test_get_sample_methods_data(
     assert sample_methods.model_dump() == expected_sample_methods
 
 
-def test_get_case_analysis_data(
-    report_api_mip_dna: MipDNAReportAPI, mip_dna_analysis_api: MipDNAAnalysisAPI, case_mip_dna: Case
-):
+def test_get_case_analysis_data(report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case):
     """Tests data analysis parameters retrieval."""
 
     # GIVEN a pre-built case
 
-    # GIVEN a mip analysis mock metadata
-    mip_metadata: MipAnalysis = mip_dna_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
-
     # WHEN retrieving analysis information
     case_analysis_data: DataAnalysisModel = report_api_mip_dna.get_case_analysis_data(
-        case_mip_dna, case_mip_dna.analyses[0], mip_metadata
+        case_mip_dna, case_mip_dna.analyses[0]
     )
 
     # THEN check if the retrieved analysis data is correct
@@ -385,10 +380,7 @@ def test_get_case_analysis_data(
 
 
 def test_get_case_analysis_data_workflow_match_error(
-    report_api_mip_dna: MipDNAReportAPI,
-    mip_dna_analysis_api: MipDNAAnalysisAPI,
-    case_mip_dna: Case,
-    caplog: LogCaptureFixture,
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case, caplog: LogCaptureFixture
 ):
     """Test validation error if a customer requested workflow does not match the data analysis."""
 
@@ -396,16 +388,11 @@ def test_get_case_analysis_data_workflow_match_error(
     mip_analysis: Analysis = case_mip_dna.analyses[0]
     mip_analysis.workflow = Workflow.BALSAMIC
 
-    # GIVEN a mip analysis mock metadata
-    mip_metadata: MipAnalysis = mip_dna_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
-
     # WHEN retrieving analysis information
 
     # THEN a validation error should be raised
     with pytest.raises(ValueError):
-        report_api_mip_dna.get_case_analysis_data(
-            case=case_mip_dna, analysis=mip_analysis, analysis_metadata=mip_metadata
-        )
+        report_api_mip_dna.get_case_analysis_data(case=case_mip_dna, analysis=mip_analysis)
     assert (
         f"The analysis requested by the customer ({Workflow.MIP_DNA}) does not match the one executed "
         f"({mip_analysis.workflow})" in caplog.text
@@ -413,10 +400,7 @@ def test_get_case_analysis_data_workflow_match_error(
 
 
 def test_get_case_analysis_data_workflow_not_supported(
-    report_api_mip_dna: MipDNAReportAPI,
-    mip_dna_analysis_api: MipDNAAnalysisAPI,
-    case_mip_dna: Case,
-    caplog: LogCaptureFixture,
+    report_api_mip_dna: MipDNAReportAPI, case_mip_dna: Case, caplog: LogCaptureFixture
 ):
     """Test validation error if the analysis workflow is not supported by the delivery report workflow."""
 
@@ -425,16 +409,11 @@ def test_get_case_analysis_data_workflow_not_supported(
     mip_analysis: Analysis = case_mip_dna.analyses[0]
     mip_analysis.workflow = Workflow.MICROSALT
 
-    # GIVEN a mip analysis mock metadata
-    mip_metadata: MipAnalysis = mip_dna_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
-
     # WHEN retrieving data analysis information
 
     # THEN a validation error should be raised
     with pytest.raises(ValueError):
-        report_api_mip_dna.get_case_analysis_data(
-            case=case_mip_dna, analysis=mip_analysis, analysis_metadata=mip_metadata
-        )
+        report_api_mip_dna.get_case_analysis_data(case=case_mip_dna, analysis=mip_analysis)
     assert (
         f"The workflow {case_mip_dna.data_analysis} does not support delivery report generation"
         in caplog.text

@@ -2,9 +2,8 @@ from pathlib import Path
 
 import pytest
 from housekeeper.store.models import File
-from pydantic import BaseModel
 
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.demultiplex.housekeeper_storage_functions import (
@@ -31,13 +30,6 @@ def test_set_dry_run(
 
     # THEN dry run should be True
     assert post_demux_api.dry_run is True
-
-
-class DemultiplexingScenario(BaseModel):
-    flow_cell_directory: str
-    flow_cell_name: str
-    samples_ids: str
-    bcl_converter: str = BclConverter.BCLCONVERT
 
 
 @pytest.mark.parametrize(
@@ -114,6 +106,12 @@ def test_post_processing_of_flow_cell(
         bundle=flow_cell_name,
     ).all()
 
+    # THEN a run parameters file was added to Housekeeper
+    assert updated_demux_post_processing_api.hk_api.get_files(
+        tags=[SequencingFileTag.RUN_PARAMETERS],
+        bundle=flow_cell_name,
+    ).all()
+
     # THEN sample fastq files were added to Housekeeper tagged with FASTQ and the flow cell name
     for sample_internal_id in sample_internal_ids:
         assert updated_demux_post_processing_api.hk_api.get_files(
@@ -134,7 +132,7 @@ def test_post_processing_of_flow_cell(
 def test_get_all_demultiplexed_flow_cell_out_dirs(
     demultiplex_context: CGConfig,
     tmp_illumina_demultiplexed_flow_cells_directory,
-    tmp_demultiplexed_runs_bcl2fastq_directory: Path,
+    hiseq_x_single_index_flow_cell_name: str,
 ):
     """Test returning all flow cell directories from the demultiplexing run directory."""
     # GIVEN a demultiplex flow cell finished output directory that exist
@@ -147,7 +145,10 @@ def test_get_all_demultiplexed_flow_cell_out_dirs(
     demultiplexed_flow_cell_dirs: list[Path] = demux_api.get_all_demultiplexed_flow_cell_dirs()
 
     # THEN the demultiplexed flow cells run directories should be returned
-    assert tmp_demultiplexed_runs_bcl2fastq_directory in demultiplexed_flow_cell_dirs
+    demuxed_flow_cell_path = Path(
+        tmp_illumina_demultiplexed_flow_cells_directory, hiseq_x_single_index_flow_cell_name
+    )
+    assert demuxed_flow_cell_path in demultiplexed_flow_cell_dirs
 
 
 def test_post_processing_tracks_undetermined_fastq_files(

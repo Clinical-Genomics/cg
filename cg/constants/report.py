@@ -1,7 +1,15 @@
 """Delivery report constants."""
 
+from importlib.resources import files
+from pathlib import Path
+
 from cg.constants import DataDelivery
-from cg.constants.constants import Workflow
+from cg.constants.constants import FileExtensions, Workflow
+
+DELIVERY_REPORT_FILE_NAME: str = f"delivery-report{FileExtensions.HTML}"
+SWEDAC_LOGO_PATH = Path(
+    files("cg"), "meta", "report", "templates", "static", "images", "SWEDAC_logo.png"
+)
 
 BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]
 
@@ -10,10 +18,12 @@ RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT: int = 300
 
 REPORT_SUPPORTED_WORKFLOW: tuple[Workflow, ...] = (
     Workflow.BALSAMIC,
-    Workflow.BALSAMIC_UMI,
     Workflow.BALSAMIC_QC,
+    Workflow.BALSAMIC_UMI,
     Workflow.MIP_DNA,
     Workflow.RNAFUSION,
+    Workflow.TAXPROFILER,
+    Workflow.TOMTE,
 )
 
 REPORT_SUPPORTED_DATA_DELIVERY: tuple[DataDelivery, ...] = (
@@ -93,6 +103,10 @@ REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS: list[str] = REQUIRED_DATA_ANALYSIS_FIELD
 
 REQUIRED_DATA_ANALYSIS_RNAFUSION_FIELDS: list[str] = REQUIRED_DATA_ANALYSIS_FIELDS
 
+REQUIRED_DATA_ANALYSIS_TAXPROFILER_FIELDS: list[str] = REQUIRED_DATA_ANALYSIS_FIELDS
+
+REQUIRED_DATA_ANALYSIS_TOMTE_FIELDS: list[str] = REQUIRED_DATA_ANALYSIS_FIELDS
+
 # Sample required fields
 _REQUIRED_SAMPLE_FIELDS: list[str] = [
     "name",
@@ -106,15 +120,23 @@ _REQUIRED_SAMPLE_FIELDS: list[str] = [
     "timestamps",
 ]
 
-REQUIRED_SAMPLE_MIP_DNA_FIELDS: list[str] = _REQUIRED_SAMPLE_FIELDS + [
+_REQUIRED_SAMPLE_RARE_DISEASE_FIELDS: list[str] = _REQUIRED_SAMPLE_FIELDS + [
     "status",
 ]
 
-REQUIRED_SAMPLE_BALSAMIC_FIELDS: list[str] = _REQUIRED_SAMPLE_FIELDS + [
+_REQUIRED_SAMPLE_CANCER_FIELDS: list[str] = _REQUIRED_SAMPLE_FIELDS + [
     "tumour",
 ]
 
-REQUIRED_SAMPLE_RNAFUSION_FIELDS: list[str] = REQUIRED_SAMPLE_BALSAMIC_FIELDS
+REQUIRED_SAMPLE_MIP_DNA_FIELDS: list[str] = _REQUIRED_SAMPLE_RARE_DISEASE_FIELDS
+
+REQUIRED_SAMPLE_BALSAMIC_FIELDS: list[str] = _REQUIRED_SAMPLE_CANCER_FIELDS
+
+REQUIRED_SAMPLE_RNAFUSION_FIELDS: list[str] = _REQUIRED_SAMPLE_CANCER_FIELDS
+
+REQUIRED_SAMPLE_TAXPROFILER_FIELDS: list[str] = _REQUIRED_SAMPLE_FIELDS
+
+REQUIRED_SAMPLE_TOMTE_FIELDS: list[str] = _REQUIRED_SAMPLE_RARE_DISEASE_FIELDS
 
 # Methods required fields (OPTIONAL: "library_prep", "sequencing")
 REQUIRED_SAMPLE_METHODS_FIELDS: list[str] = []
@@ -175,18 +197,41 @@ REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS: list[str] = (
     ]
 )
 
-REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
-    "bias_5_3",
+_REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
     "gc_content",
     "input_amount",
-    "mapped_reads",
     "mean_length_r1",
+    "rin",
+]
+
+_REQUIRED_SAMPLE_METADATA_WTS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS + [
+    "bias_5_3",
     "mrna_bases",
     "pct_adapter",
     "pct_surviving",
     "q20_rate",
     "q30_rate",
     "ribosomal_bases",
-    "rin",
     "uniquely_mapped_reads",
+]
+
+REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_WTS_FIELDS + [
+    "mapped_reads",
+]
+
+
+REQUIRED_SAMPLE_METADATA_TAXPROFILER_FIELDS: list[str] = (
+    _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS
+    + [
+        "average_read_length",
+        "mapped_reads",
+        "mean_length_r2",
+        "million_read_pairs_after_filtering",
+    ]
+)
+
+
+REQUIRED_SAMPLE_METADATA_TOMTE_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_WTS_FIELDS + [
+    "pct_intergenic_bases",
+    "pct_intronic_bases",
 ]

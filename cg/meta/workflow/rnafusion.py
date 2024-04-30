@@ -11,11 +11,7 @@ from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
-from cg.models.rnafusion.rnafusion import (
-    RnafusionAnalysis,
-    RnafusionParameters,
-    RnafusionSampleSheetEntry,
-)
+from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample, Sample
 
@@ -60,6 +56,10 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def is_multiple_samples_allowed(self) -> bool:
         """Return whether the analysis supports multiple samples to be linked to the case."""
         return False
+
+    def get_genome_build(self, case_id: str) -> GenomeVersion:
+        """Return reference genome for a case. Currently fixed for hg38."""
+        return GenomeVersion.hg38
 
     def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
@@ -120,24 +120,5 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             LOG.error(f"Some mandatory metrics are missing: {', '.join(missing_metrics)}")
             raise MissingMetrics()
 
-    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> RnafusionAnalysis:
-        """Parse Rnafusion output analysis files and return analysis model."""
-        sample_metrics: dict[str, dict] = {}
-        for metric in qc_metrics_raw:
-            try:
-                sample_metrics[metric.id].update({metric.name.lower(): metric.value})
-            except KeyError:
-                sample_metrics[metric.id] = {metric.name.lower(): metric.value}
-        return RnafusionAnalysis(sample_metrics=sample_metrics)
-
-    def get_latest_metadata(self, case_id: str) -> RnafusionAnalysis:
-        """Return the latest metadata of a specific Rnafusion case."""
-        qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
-        return self.parse_analysis(qc_metrics_raw=qc_metrics)
-
     def get_workflow_metrics(self) -> dict:
         return RNAFUSION_METRIC_CONDITIONS
-
-    def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
-        """Return the reference genome build version of a Rnafusion analysis."""
-        return GenomeVersion.hg38.value
