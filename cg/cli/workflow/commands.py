@@ -31,6 +31,7 @@ OPTION_DRY = click.option(
 )
 OPTION_YES = click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)
+ARGUMENT_WORKFLOW = click.argument("workflow", type=Workflow)
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_ANALYSIS_PARAMETERS_CONFIG = click.option(
     "--config-artic", type=str, help="Config with computational and lab related settings"
@@ -353,16 +354,21 @@ def microsalt_past_run_dirs(
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 @click.command("nf-workflow-past-run-dirs")
+@ARGUMENT_WORKFLOW
 @OPTION_YES
 @OPTION_DRY
 @ARGUMENT_BEFORE_STR
-@click.pass_context
+@click.pass_obj
 def nf_workflow_past_run_dirs(
-    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+    context: CGConfig,
+    before_str: str,
+    workflow: Workflow,
+    yes: bool = False,
+    dry_run: bool = False,
 ):
     """Clean up of "old" nextflow case run dirs."""
 
-    analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
+    analysis_api = NfAnalysisAPI(config=context, workflow=workflow)
     exit_code: int = EXIT_SUCCESS
 
     try:

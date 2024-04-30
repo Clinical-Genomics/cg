@@ -15,7 +15,7 @@ from cg.cli.workflow.commands import (
     mutant_past_run_dirs,
     rnafusion_past_run_dirs,
 )
-from cg.constants import EXIT_SUCCESS
+from cg.constants import EXIT_SUCCESS, Workflow
 from cg.models.cg_config import CGConfig
 
 
@@ -161,6 +161,27 @@ def test_cli_workflow_clean_microsalt(
 
     # WHEN running command
     result = cli_runner.invoke(microsalt_past_run_dirs, [before_date], obj=base_context)
+
+    # THEN command should exit successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+
+@pytest.mark.parametrize(
+    "workflow",
+    [Workflow.TAXPROFILER, Workflow.TOMTE],
+)
+def test_cli_workflow_clean_nf_workflow(
+    cli_runner: CliRunner,
+    workflow: Workflow,
+    before_date: str,
+    request: FixtureRequest,
+):
+    """Test clean nf-workflows."""
+    context: CGConfig = request.getfixturevalue(f"{workflow}_context")
+    # GIVEN a before string
+
+    # WHEN running command
+    result = cli_runner.invoke(nf_workflow_past_run_dirs, [workflow, before_date], obj=context)
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
