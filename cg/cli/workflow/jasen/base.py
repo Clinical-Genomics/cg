@@ -22,3 +22,18 @@ def jasen(context: click.Context) -> None:
     context.obj.meta_apis[MetaApis.ANALYSIS_API] = JasenAnalysisAPI(config=context.obj)
 
 jasen.add_command(config_case)
+
+# -------------------------------------------------------
+# Checking through the Tomte config-case PR:
+# https://github.com/Clinical-Genomics/cg/pull/3046/files
+# -------------------------------------------------------
+# [>] Add JASEN dir in cg_uri()
+# [ ] Add JASEN fixtures to tests/conftest.py
+# [ ] Add JASEN to test_config_case_without_options()
+# [ ] Add JASEN to test_config_case_with_missing_case()
+# [ ] Add JASEN to test_config_case_without_samples()
+# [ ] Add JASEN to test_config_case_default_parameters()
+# [ ] Add JASEN to test_config_case_dry_run()
+# [ ] Implement config models in cg/models/cg_config.py
+# [ ] Add SampleSheet classes in cg/models/jasen/jasen.py
+# -------------------------------------------------------
