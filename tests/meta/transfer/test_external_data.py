@@ -34,7 +34,6 @@ def test_create_log_dir_dry_run(caplog, external_data_api: ExternalDataAPI, tick
 
 def test_get_source_path(
     cust_sample_id: str,
-    customer_id: str,
     external_data_api: ExternalDataAPI,
     ticket_id: str,
 ):
