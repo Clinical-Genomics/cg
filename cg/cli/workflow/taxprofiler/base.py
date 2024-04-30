@@ -15,7 +15,6 @@ from cg.cli.workflow.nf_analysis import (
     store,
     store_available,
     store_housekeeper,
-    clean,
 )
 from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
