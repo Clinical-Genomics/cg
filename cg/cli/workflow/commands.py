@@ -371,15 +371,13 @@ def nf_workflow_past_run_dirs(
 ):
     """Clean up of "old" nextflow case run dirs."""
 
-    #analysis_api = NfAnalysisAPI(config=context.obj, workflow=workflow)
-    #exit_code: int = EXIT_SUCCESS
-    context.obj.meta_apis["analysis_api"]: NfAnalysisAPI = NfAnalysisAPI(context.obj, workflow)
-    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+    analysis_api = NfAnalysisAPI(config=context.obj, workflow=workflow)
+    exit_code: int = EXIT_SUCCESS
 
-    #try:
-    #    analysis_api.clean_past_run_dirs(yes=yes, dry_run=dry_run, before_str=before_str)
-    #except Exception as error:
-    #    LOG.error(repr(error))
-    #    exit_code: int = EXIT_FAIL
-    #if exit_code:
-    #    raise click.Abort()
+    try:
+        analysis_api.clean_past_run_dirs(yes=yes, dry_run=dry_run, before_str=before_str)
+    except Exception as error:
+        LOG.error(repr(error))
+        exit_code: int = EXIT_FAIL
+    if exit_code:
+        raise click.Abort()
