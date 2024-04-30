@@ -302,23 +302,3 @@ def store_available(context: click.Context, dry_run: bool) -> None:
             exit_code: int = EXIT_FAIL
     if exit_code:
         raise click.Abort
-
-
-@click.command("clean")
-@OPTION_YES
-@OPTION_DRY
-@ARGUMENT_BEFORE_STR
-@click.pass_obj
-def clean(context: CGConfig, before_str: str, yes: bool = False, dry_run: bool = False):
-    """Clean up of "old" nextflow case run dirs."""
-
-    analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    exit_code: int = EXIT_SUCCESS
-
-    try:
-        analysis_api.clean_past_run_dirs(yes=yes, dry_run=dry_run, before_str=before_str)
-    except Exception as error:
-        LOG.error(repr(error))
-        exit_code: int = EXIT_FAIL
-    if exit_code:
-        raise click.Abort()
