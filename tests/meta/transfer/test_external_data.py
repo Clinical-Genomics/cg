@@ -3,10 +3,14 @@
 import logging
 from pathlib import Path
 
+from housekeeper.store.models import File
+from pytest_mock import MockFixture
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.constants import CaseActions
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.store.models import Case, Sample
 from cg.store.store import Store
-from tests.cli.workflow.conftest import dna_case
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store.conftest import sample_obj
 
@@ -41,10 +45,10 @@ def test_get_source_path(
     external_data_api.customer_id = customer_id
 
     # WHEN the function is called and assigned
-    source_path = external_data_api._get_source_path(cust_sample_id=cust_sample_id)
+    source_path = external_data_api._get_source_path()
 
     # THEN the return should be
-    assert source_path == Path("server.name.se:/path/cust000/on/caesar/123456/child/")
+    assert source_path == Path("server.name.se:/path/cust000/on/caesar/123456/")
 
 
 def test_get_destination_path(
@@ -99,11 +103,105 @@ def test_transfer_sample_files_from_source(
     assert str(external_data_directory) in caplog.text
 
 
+def test_curate_sample_folder(
+    case_id: str, customer_id: str, external_data_api: ExternalDataAPI, tmpdir_factory
+):
+    # GIVEN an External API with a customer id
+    external_data_api.force = False
+    external_data_api.customer_id = customer_id
+
+    # GIVEN a case with a sample
+    case: Case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
+    sample: Sample = case.links[0].sample
+    assert sample
+
+    # GIVEN that the sample folder has the sample name
+    tmp_folder = Path(tmpdir_factory.mktemp(sample.name, numbered=False))
+
+    # WHEN the sample folder is curated
+    external_data_api._curate_sample_folder(sample_folder=tmp_folder)
+
+    # THEN the sample folder with the sample name does not exist anymore
+    assert not tmp_folder.exists()
+    # THEN the sample folder with the sample internal id exists
+    assert (tmp_folder.parent / sample.internal_id).exists()
+
+
+def test_get_sample_ids_from_folder(
+    external_data_api: ExternalDataAPI,
+    sample: Sample,
+    ticket_id: str,
+    tmp_path: Path,
+):
+    """Test getting the sample ids from a folder."""
+    # GIVEN a sample folder
+    tmp_dir_path = Path(tmp_path, sample.internal_id)
+    tmp_dir_path.mkdir()
+    # GIVEN an External API with a ticket number
+    external_data_api.ticket = ticket_id
+    # WHEN getting the sample ids from the folder
+    available_samples = external_data_api._get_sample_ids_from_folder(folder=tmp_dir_path.parent)
+    # THEN the function should return a list containing the sample object
+    assert available_samples == [sample.internal_id]
+    tmp_dir_path.rmdir()
+
+
+def test_get_sample_ids_from_folder_no_samples_available(
+    external_data_api: ExternalDataAPI,
+    ticket_id: str,
+    tmpdir_factory,
+):
+    # GIVEN that the empty directory created does not contain any correct folders
+    tmp_dir_path: Path = Path(tmpdir_factory.mktemp("not_sample_id", numbered=False))
+    external_data_api.ticket = ticket_id
+    available_samples = external_data_api._get_sample_ids_from_folder(folder=tmp_dir_path)
+    # THEN the function should return an empty list
+    assert available_samples == []
+
+
+def test_add_and_include_files_to_bundles(
+    external_data_api: ExternalDataAPI, sample: Sample, fastq_file: Path
+):
+    """Test adding and including files to bundles."""
+    # GIVEN an External API
+
+    # GIVEN a sample that does not have any fastq files in Housekeeper
+    hk_api: HousekeeperAPI = external_data_api.housekeeper_api
+    assert not hk_api.files(tags=set("fastq"), bundle=sample.internal_id).all()
+
+    # WHEN the fastq file is added and included to Housekeeper
+    external_data_api._add_and_include_files_to_bundles(
+        fastq_paths=[fastq_file], lims_sample_id=sample.internal_id
+    )
+
+    # THEN the files should be in Housekeeper
+    file: File = hk_api.files(tags=set("fastq"), bundle=sample.internal_id).first()
+    assert file.path.endswith(fastq_file.name)
+
+
+def test_start_cases(external_data_api: ExternalDataAPI, case_id: str):
+    """Test starting cases."""
+    # GIVEN an External API
+
+    # GIVEN a case that has not started
+    case_not_started: Case = external_data_api.status_db.get_case_by_internal_id(
+        internal_id=case_id
+    )
+    assert case_not_started.action is not CaseActions.ANALYZE
+
+    # WHEN the cases are started
+    external_data_api._start_cases(cases=[case_not_started])
+
+    # THEN the case action should be set to analyze
+    case_started: Case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
+    assert case_started.action == CaseActions.ANALYZE
+
+
 def test_add_transfer_to_housekeeper(
-    case_id,
+    case_id: str,
     external_data_api: ExternalDataAPI,
     fastq_file: Path,
-    mocker,
+    mocker: MockFixture,
     ticket_id: str,
 ):
     """Test adding samples from a case to Housekeeper"""
@@ -142,7 +240,7 @@ def test_add_transfer_to_housekeeper(
     # WHEN the sample bundles are added to housekeeper
     external_data_api.add_transfer_to_housekeeper(ticket=ticket_id)
 
-    # THEN two sample bundles exist in housekeeper and the file has been added to those bundles bundles
+    # THEN two sample bundles exist in housekeeper and the file has been added to those bundles
     added_samples = list(external_data_api.housekeeper_api.bundles())
     assert all(
         sample.internal_id in [added_sample.name for added_sample in added_samples]
@@ -151,57 +249,5 @@ def test_add_transfer_to_housekeeper(
     assert all(
         sample.versions[0].files[0].path == str(fastq_file.absolute()) for sample in added_samples
     )
-    # Then the sample that is not available should not exists
+    # THEN the sample that is not available should not exist
     assert samples[-1].internal_id not in [added_sample.name for added_sample in added_samples]
-
-
-def test_get_sample_ids_from_folder(
-    external_data_api: ExternalDataAPI,
-    sample: Sample,
-    ticket_id: str,
-    tmpdir_factory,
-):
-    # GIVEN one such sample exists
-    tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample.internal_id, numbered=False))
-    external_data_api.ticket = ticket_id
-    available_samples = external_data_api._get_sample_ids_from_folder(folder=tmp_dir_path.parent)
-    # THEN the function should return a list containing the sample object
-    assert available_samples == [sample.internal_id]
-    tmp_dir_path.rmdir()
-
-
-def test_curate_sample_folder(
-    case_id: str, customer_id: str, external_data_api: ExternalDataAPI, tmpdir_factory
-):
-    # GIVEN a External API with a customer id
-    external_data_api.force = False
-    external_data_api.customer_id = customer_id
-
-    # GIVEN a case with a sample
-    case: Case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
-    sample: Sample = case.links[0].sample
-    assert sample
-
-    # GIVEN that the sample folder has the sample name
-    tmp_folder = Path(tmpdir_factory.mktemp(sample.name, numbered=False))
-
-    # WHEN the sample folder is curated
-    external_data_api._curate_sample_folder(sample_folder=tmp_folder)
-
-    # THEN the sample folder with the sample name does not exist anymore
-    assert not tmp_folder.exists()
-    # THEN the sample folder with the sample internal id exists
-    assert (tmp_folder.parent / sample.internal_id).exists()
-
-
-def test_get_sample_ids_from_folder_no_samples_available(
-    external_data_api: ExternalDataAPI,
-    ticket_id: str,
-    tmpdir_factory,
-):
-    # GIVEN that the empty directory created does not contain any correct folders
-    tmp_dir_path: Path = Path(tmpdir_factory.mktemp("not_sample_id", numbered=False))
-    external_data_api.ticket = ticket_id
-    available_samples = external_data_api._get_sample_ids_from_folder(folder=tmp_dir_path)
-    # THEN the function should return an empty list
-    assert available_samples == []

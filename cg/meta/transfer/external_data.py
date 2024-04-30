@@ -6,6 +6,7 @@ from housekeeper.store.models import Version
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import HK_FASTQ_TAGS, FileExtensions
+from cg.constants.constants import CaseActions
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import ERROR_RSYNC_FUNCTION, RSYNC_CONTENTS_COMMAND
 from cg.meta.transfer.utils import are_all_fastq_valid
@@ -52,20 +53,19 @@ class ExternalDataAPI(MetaAPI):
         log_dir.mkdir(parents=True, exist_ok=False)
         return log_dir
 
-    def _get_source_path(self, cust_sample_id: str | None = "") -> Path:
+    def _get_source_path(self) -> Path:
         """Returns the path to where the sample files are fetched from"""
-        return Path(self.source_path % self.customer_id, self.ticket, cust_sample_id)
+        return Path(self.source_path % self.customer_id, self.ticket)
 
     def _get_destination_path(self, lims_sample_id: str | None = "") -> Path:
         """Returns the path to where the files are to be transferred"""
         return Path(self.destination_path % self.customer_id, lims_sample_id)
 
-    def transfer_sample_files_from_source(self, dry_run: bool, ticket: str) -> None:
+    def transfer_sample_files_from_source(self, ticket: str, dry_run: bool = False) -> None:
         """Transfers all sample files, related to given ticket, from source to destination"""
         self._set_parameters(ticket=ticket, dry_run=dry_run)
         log_dir: Path = self._create_log_dir()
-        error_function: str = ERROR_RSYNC_FUNCTION.format()
-        Path(self.destination_path % self.customer_id).mkdir(exist_ok=True)
+        self._get_destination_path().mkdir(exist_ok=True)
 
         command: str = RSYNC_CONTENTS_COMMAND.format(
             source_path=self._get_source_path(),
@@ -80,19 +80,13 @@ class ExternalDataAPI(MetaAPI):
             email=self.mail_user,
             hours=24,
             commands=command,
-            error=error_function,
+            error=ERROR_RSYNC_FUNCTION.format(),
         )
         self.slurm_api.set_dry_run(dry_run=dry_run)
-        sbatch_content: str = self.slurm_api.generate_sbatch_content(
-            sbatch_parameters=sbatch_parameters
-        )
-        sbatch_path: Path = Path(log_dir, self.ticket + self.RSYNC_FILE_POSTFIX + ".sh")
+        sbatch_content: str = self.slurm_api.generate_sbatch_content(sbatch_parameters)
+        sbatch_path = Path(log_dir, self.ticket + self.RSYNC_FILE_POSTFIX + ".sh")
         self.slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
-        LOG.info(
-            "The folder {src_path} is now being rsynced to hasta".format(
-                src_path=self._get_source_path()
-            )
-        )
+        LOG.info(f"The folder {self._get_source_path().as_posix()} is now being rsynced to hasta")
 
     def _curate_sample_folder(self, sample_folder: Path) -> None:
         """
@@ -171,8 +165,10 @@ class ExternalDataAPI(MetaAPI):
             LOG.info("No cases will be started since this is a dry-run")
             return
         for case in cases:
-            self.status_db.set_case_action(case_internal_id=case.internal_id, action="analyze")
-            LOG.info(f"Case {case.internal_id} has been set to 'analyze'")
+            self.status_db.set_case_action(
+                case_internal_id=case.internal_id, action=CaseActions.ANALYZE
+            )
+            LOG.info(f"Case {case.internal_id} has been set to '{CaseActions.ANALYZE}'")
 
     def add_transfer_to_housekeeper(
         self, ticket: str, dry_run: bool = False, force: bool = False
