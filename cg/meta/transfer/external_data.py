@@ -8,10 +8,10 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import HK_FASTQ_TAGS, FileExtensions
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import ERROR_RSYNC_FUNCTION, RSYNC_CONTENTS_COMMAND
+from cg.meta.transfer.utils import are_all_fastq_valid
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store.models import Case, Customer, Sample
-from cg.utils.checksum.checksum import check_file_md5sum
 from cg.utils.files import get_files_matching_pattern
 
 LOG = logging.getLogger(__name__)
@@ -94,49 +94,6 @@ class ExternalDataAPI(MetaAPI):
             )
         )
 
-    def get_all_fastq(self, sample_folder: Path) -> list[Path]:
-        """Returns a list of all fastq.gz files in given folder"""
-        all_fastqs: list[Path] = []
-        for leaf in sample_folder.glob("*fastq.gz"):
-            abs_path: Path = sample_folder.joinpath(leaf)
-            LOG.info(f"Found file {str(abs_path)} inside folder {sample_folder}")
-            all_fastqs.append(abs_path)
-        return all_fastqs
-
-    def get_all_paths(self, lims_sample_id: str) -> list[Path]:
-        """Returns the paths of all fastq files associated to the sample"""
-        fastq_folder: Path = self._get_destination_path(lims_sample_id=lims_sample_id)
-        all_fastq_in_folder: list[Path] = self.get_all_fastq(sample_folder=fastq_folder)
-        return all_fastq_in_folder
-
-    def add_files_to_bundles(
-        self, fastq_paths: list[Path], last_version: Version, lims_sample_id: str
-    ):
-        """Adds the given fastq files to the hk-bundle"""
-        for path in fastq_paths:
-            LOG.info(f"Adding path {path} to bundle {lims_sample_id} in housekeeper")
-            self.housekeeper_api.add_file(
-                path=path.as_posix(), version_obj=last_version, tags=HK_FASTQ_TAGS
-            )
-
-    def get_failed_fastq_paths(self, fastq_paths_to_add: list[Path]) -> list[Path]:
-        failed_sum_paths: list[Path] = []
-        for path in fastq_paths_to_add:
-            failed_path: Path | None = check_file_md5sum(path)
-            if failed_path:
-                failed_sum_paths.append(failed_path)
-        return failed_sum_paths
-
-    def get_fastq_paths_to_add(self, hk_version: Version, lims_sample_id: str) -> list[Path]:
-        paths: list[Path] = self.get_all_paths(lims_sample_id=lims_sample_id)
-        fastq_paths_to_add: list[Path] = self.housekeeper_api.check_bundle_files(
-            file_paths=paths,
-            bundle_name=lims_sample_id,
-            last_version=hk_version,
-            tags=HK_FASTQ_TAGS,
-        )
-        return fastq_paths_to_add
-
     def _curate_sample_folder(self, sample_folder: Path) -> None:
         """
         Changes the name of the folder to the sample internal_id. If force is set to True,
@@ -183,7 +140,7 @@ class ExternalDataAPI(MetaAPI):
         file_paths: list[Path] = [
             sample_folder.joinpath(path)
             for path in get_files_matching_pattern(
-                directory=sample_folder, pattern=FileExtensions.FASTQ_GZ
+                directory=sample_folder, pattern=FileExtensions.FASTQ_GZ.value
             )
         ]
         hk_version: Version = self.housekeeper_api.get_or_create_version(bundle_name=sample_id)
@@ -221,41 +178,25 @@ class ExternalDataAPI(MetaAPI):
         self, ticket: str, dry_run: bool = False, force: bool = False
     ) -> None:
         """
-        Create sample bundles in housekeeper and add the available files corresponding to the ticket
-        to the bundle. If force is True, replace any previous folder.
+        Add and include available ticket fastq files to a Housekeeper bundle if they are not
+        corrupted and start cases associated with the ticket.
         """
         self._set_parameters(ticket=ticket, dry_run=dry_run, force=force)
-        failed_paths: list[Path] = []
         available_sample_ids: list[str] = self._get_available_sample_ids()
-        cases_to_start: list[Case] = []
         for sample_id in available_sample_ids:
-            cases_to_start.extend(
-                self.status_db.get_not_analysed_cases_by_sample_internal_id(
-                    sample_internal_id=sample_id
+            fastq_paths_to_add: list[Path] = self._get_fastq_paths_to_add(sample_id=sample_id)
+            if are_all_fastq_valid(fastq_paths=fastq_paths_to_add):
+                self._add_and_include_files_to_bundles(
+                    fastq_paths=fastq_paths_to_add,
+                    lims_sample_id=sample_id,
                 )
-            )
-            last_version: Version = self.housekeeper_api.get_or_create_version(
-                bundle_name=sample_id
-            )
-            fastq_paths_to_add: list[Path] = self.get_fastq_paths_to_add(
-                hk_version=last_version, lims_sample_id=sample_id
-            )
-            self.add_files_to_bundles(
-                fastq_paths=fastq_paths_to_add,
-                last_version=last_version,
-                lims_sample_id=sample_id,
-            )
-            failed_paths.extend(self.get_failed_fastq_paths(fastq_paths_to_add=fastq_paths_to_add))
-        if failed_paths:
-            LOG.info(
-                "The following samples did not match the given md5sum: "
-                + ", ".join([str(path) for path in failed_paths])
-            )
-            LOG.info("Changes in housekeeper will not be committed and no cases will be added")
-            return
-        if dry_run:
-            LOG.info("No changes will be committed since this is a dry-run")
-            return
-        self.housekeeper_api.commit()
-        for case in cases_to_start:
-            self.status_db.set_case_action(case_internal_id=case.internal_id, action="analyze")
+                self._start_cases(
+                    cases=self.status_db.get_not_analysed_cases_by_sample_internal_id(
+                        sample_internal_id=sample_id
+                    )
+                )
+            else:
+                LOG.warning(
+                    f"Some files in {sample_id} did not match the given md5sum."
+                    " Changes in housekeeper will not be committed and no cases will be started"
+                )

@@ -39,8 +39,8 @@ def extract_md5sum(md5sum_file: Path) -> str:
 
 def is_md5sum_correct(file_path: Path) -> bool:
     """Return True if the given file exists and matches its md5sum."""
-    if Path(str(file_path) + ".md5").exists():
-        given_md5sum: str = extract_md5sum(md5sum_file=Path(str(file_path) + FileExtensions.MD5SUM))
+    if Path(str(file_path) + FileExtensions.MD5).exists():
+        given_md5sum: str = extract_md5sum(md5sum_file=Path(str(file_path) + FileExtensions.MD5))
         return check_md5sum(file_path=file_path, md5sum=given_md5sum)
     return False
 
@@ -54,11 +54,3 @@ def sha512_checksum(file: Path) -> str:
             sha512_hash.update(chunk)
     LOG.debug("Result: %s", sha512_hash.hexdigest())
     return sha512_hash.hexdigest()
-
-
-def check_file_md5sum(path) -> Path | None:
-    """Returns the path of the input file if it does not match its md5sum."""
-    if Path(str(path) + ".md5").exists():
-        given_md5sum: str = extract_md5sum(md5sum_file=Path(str(path) + ".md5"))
-        if not check_md5sum(file_path=path, md5sum=given_md5sum):
-            return path

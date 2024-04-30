@@ -3,8 +3,6 @@
 import logging
 from pathlib import Path
 
-from housekeeper.store.models import Version
-
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.store.models import Case, Sample
 from cg.store.store import Store
@@ -102,46 +100,6 @@ def test_transfer_sample_files_from_source(
     assert str(external_data_directory) in caplog.text
 
 
-def test_get_all_fastq(external_data_api: ExternalDataAPI, external_data_directory: Path):
-    """Test the finding of fastq.gz files in customer directories"""
-    # GIVEN a folder containing two folders with both fastq and md5 files
-    for folder in external_data_directory.iterdir():
-        # WHEN the list of file paths is created
-        files = external_data_api.get_all_fastq(
-            sample_folder=external_data_directory.joinpath(folder)
-        )
-        # THEN only fast.gz files are returned
-        assert all(tmp.suffixes == [".fastq", ".gz"] for tmp in files)
-
-
-def test_get_failed_fastq_paths(external_data_api: ExternalDataAPI, fastq_file: Path):
-    bad_md5sum_file_path: Path = fastq_file.parent.joinpath("fastq_run_R1_001.fastq.gz")
-    # GIVEN a list of paths with one fastq_file with a correct md5sum and one with an incorrect md5sum
-    # When the failed paths are extracted
-    failed_paths: list[Path] = external_data_api.get_failed_fastq_paths(
-        [fastq_file, bad_md5sum_file_path]
-    )
-    # THEN only the path to the failed file should be in the list
-    assert failed_paths == [bad_md5sum_file_path]
-
-
-def test_add_files_to_bundles(
-    external_data_api: ExternalDataAPI, fastq_file: Path, hk_version: Version, sample_id: str
-):
-    """Tests adding files to Housekeeper."""
-    # GIVEN a file to be added
-
-    # WHEN the files are added.
-    external_data_api.add_files_to_bundles(
-        fastq_paths=[fastq_file],
-        last_version=hk_version,
-        lims_sample_id=sample_id,
-    )
-
-    # THEN the function should return True and the file should have benn added.
-    assert str(fastq_file.absolute()) in [idx.path for idx in hk_version.files]
-
-
 def test_add_transfer_to_housekeeper(
     case_id,
     external_data_api: ExternalDataAPI,
@@ -157,8 +115,8 @@ def test_add_transfer_to_housekeeper(
     samples = [fam_sample.sample for fam_sample in case.links]
 
     # GIVEN a list of paths and only two samples being available
-    mocker.patch.object(ExternalDataAPI, "get_all_paths")
-    ExternalDataAPI.get_all_paths.return_value = [fastq_file]
+    mocker.patch.object(ExternalDataAPI, "_get_fastq_paths_to_add")
+    ExternalDataAPI._get_fastq_paths_to_add.return_value = [fastq_file]
 
     mocker.patch.object(MockHousekeeperAPI, "last_version")
     MockHousekeeperAPI.last_version.return_value = None

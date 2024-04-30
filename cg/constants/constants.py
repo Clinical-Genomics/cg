@@ -196,6 +196,7 @@ class FileExtensions(StrEnum):
     JSON: str = ".json"
     KEY: str = ".key"
     LOG: str = ".log"
+    MD5: str = ".md5"
     MD5SUM: str = ".md5sum"
     NO_EXTENSION: str = ""
     PASS_PHRASE: str = ".passphrase"
