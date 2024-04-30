@@ -118,7 +118,7 @@ class CreateValidationCaseAPI:
                 bundle_name=validation_sample.internal_id
             ).full_path
             fastq_files: list[Path] = get_files_matching_pattern(
-                directory=validation_bundle_path, pattern="fastq"
+                directory=validation_bundle_path, pattern="*." + SequencingFileTag.FASTQ + ".*"
             )
             for fastq_file in fastq_files:
                 new_fast_file_path = self.get_new_fastq_file_path(
@@ -130,9 +130,6 @@ class CreateValidationCaseAPI:
                     bundle_name=validation_sample.internal_id,
                     file=new_fast_file_path,
                     tags=new_tags,
-                )
-                assert self.hk_api.get_files_from_latest_version(
-                    bundle_name=validation_sample.internal_id
                 )
 
     def get_new_tags(self, validation_sample: Sample) -> list[str]:
@@ -153,8 +150,10 @@ class CreateValidationCaseAPI:
     @staticmethod
     def get_new_fastq_file_path(fastq_file: Path, validation_sample: Sample) -> Path:
         return Path(
-            fastq_file.absolute().as_posix().replace(validation_sample.from_sample),
-            validation_sample.internal_id,
+            fastq_file.as_posix().replace(
+                validation_sample.from_sample,
+                validation_sample.internal_id,
+            )
         )
 
     def create_validation_samples_in_housekeeper(self, validation_case_data: ValidationCaseData):

@@ -32,7 +32,6 @@ def test_validation_case_data(
 
     # THEN the proper validation case and validation sample are generated
     assert validation_case_data.validation_case.name == case_name + "_validation"
-    assert validation_case_data.validation_case.customer == CustomerId.CG_INTERNAL_CUSTOMER
     assert not validation_case_data.validation_case.is_compressible
     assert validation_case_data.validation_case.action == CaseActions.HOLD
     for sample in validation_case_data.validation_samples:

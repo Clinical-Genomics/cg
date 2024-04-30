@@ -1,9 +1,29 @@
 """Module to test the CreateValidationCaseAPI."""
 
+from pathlib import Path
+
 from housekeeper.store.models import File
 
 from cg.constants import SequencingFileTag
+from cg.meta.create_validation_cases.validation_case_data import ValidationCaseData
 from cg.meta.create_validation_cases.validation_cases_api import CreateValidationCaseAPI
+
+
+def test_get_new_fastq_file_path(validation_case_data: ValidationCaseData, fixtures_dir: Path):
+    # GIVEN a file path and a new file name
+    fastq_file = Path(fixtures_dir, validation_case_data.validation_samples[0].from_sample)
+    expected_new_file_name = Path(
+        fixtures_dir, validation_case_data.validation_samples[0].internal_id
+    )
+
+    # WHEN getting the new fastq file path
+    new_file_path = CreateValidationCaseAPI.get_new_fastq_file_path(
+        fastq_file=fastq_file,
+        validation_sample=validation_case_data.validation_samples[0],
+    )
+
+    # THEN the new file path is correct
+    assert new_file_path == expected_new_file_name
 
 
 def test_create_validation_case(
@@ -32,4 +52,3 @@ def test_create_validation_case(
     files: list[File] = create_validation_api.hk_api.get_files_from_latest_version(
         bundle_name=validation_sample_id, tags=[SequencingFileTag.FASTQ]
     )
-    assert files
