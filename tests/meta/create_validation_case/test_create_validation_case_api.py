@@ -49,6 +49,6 @@ def test_create_validation_case(
     assert create_validation_api.hk_api.get_latest_bundle_version(validation_sample_id)
 
     # THEN validation sample fastq files are created in Housekeeper
-    files: list[File] = create_validation_api.hk_api.get_files_from_latest_version(
+    assert create_validation_api.hk_api.get_files_from_latest_version(
         bundle_name=validation_sample_id, tags=[SequencingFileTag.FASTQ]
     )
