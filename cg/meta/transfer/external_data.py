@@ -52,7 +52,7 @@ class ExternalDataAPI(MetaAPI):
         log_dir.mkdir(parents=True, exist_ok=False)
         return log_dir
 
-    def get_source_path(self, cust_sample_id: str | None = "") -> Path:
+    def _get_source_path(self, cust_sample_id: str | None = "") -> Path:
         """Returns the path to where the sample files are fetched from"""
         return Path(self.source_path % self.customer_id, self.ticket, cust_sample_id)
 
@@ -68,7 +68,7 @@ class ExternalDataAPI(MetaAPI):
         Path(self.destination_path % self.customer_id).mkdir(exist_ok=True)
 
         command: str = RSYNC_CONTENTS_COMMAND.format(
-            source_path=self.get_source_path(),
+            source_path=self._get_source_path(),
             destination_path=self._get_destination_path(),
         )
         sbatch_parameters = Sbatch(
@@ -90,7 +90,7 @@ class ExternalDataAPI(MetaAPI):
         self.slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
         LOG.info(
             "The folder {src_path} is now being rsynced to hasta".format(
-                src_path=self.get_source_path()
+                src_path=self._get_source_path()
             )
         )
 

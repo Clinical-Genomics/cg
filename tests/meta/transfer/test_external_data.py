@@ -6,7 +6,6 @@ from pathlib import Path
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.store.models import Case, Sample
 from cg.store.store import Store
-from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 from tests.cli.workflow.conftest import dna_case
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store.conftest import sample_obj
@@ -42,7 +41,7 @@ def test_get_source_path(
     external_data_api.customer_id = customer_id
 
     # WHEN the function is called and assigned
-    source_path = external_data_api.get_source_path(cust_sample_id=cust_sample_id)
+    source_path = external_data_api._get_source_path(cust_sample_id=cust_sample_id)
 
     # THEN the return should be
     assert source_path == Path("server.name.se:/path/cust000/on/caesar/123456/child/")
@@ -84,8 +83,8 @@ def test_transfer_sample_files_from_source(
     mocker.patch.object(Store, "get_customer_id_from_ticket")
     Store.get_customer_id_from_ticket.return_value = customer_id
 
-    mocker.patch.object(ExternalDataAPI, "get_source_path")
-    external_data_api.get_source_path.return_value = external_data_directory
+    mocker.patch.object(ExternalDataAPI, "_get_source_path")
+    external_data_api._get_source_path.return_value = external_data_directory
 
     external_data_api.source_path = str(Path("").joinpath(*external_data_directory.parts[:-2]))
     external_data_api.destination_path = str(
@@ -172,21 +171,27 @@ def test_get_sample_ids_from_folder(
 
 
 def test_curate_sample_folder(
-    case_id, customer_id, external_data_api: ExternalDataAPI, tmpdir_factory
+    case_id: str, customer_id: str, external_data_api: ExternalDataAPI, tmpdir_factory
 ):
     # GIVEN a External API with a customer id
     external_data_api.force = False
     external_data_api.customer_id = customer_id
+
     # GIVEN a case with a sample
     case: Case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
     sample: Sample = case.links[0].sample
     assert sample
-    # WHEN the sample folder is curated
+
+    # GIVEN that the sample folder has the sample name
     tmp_folder = Path(tmpdir_factory.mktemp(sample.name, numbered=False))
+
+    # WHEN the sample folder is curated
     external_data_api._curate_sample_folder(sample_folder=tmp_folder)
-    # THEN the sample folder should be created
-    assert (tmp_folder.parent / sample.internal_id).exists()
+
+    # THEN the sample folder with the sample name does not exist anymore
     assert not tmp_folder.exists()
+    # THEN the sample folder with the sample internal id exists
+    assert (tmp_folder.parent / sample.internal_id).exists()
 
 
 def test_get_sample_ids_from_folder_no_samples_available(
@@ -200,27 +205,3 @@ def test_get_sample_ids_from_folder_no_samples_available(
     available_samples = external_data_api._get_sample_ids_from_folder(folder=tmp_dir_path)
     # THEN the function should return an empty list
     assert available_samples == []
-
-
-def test_checksum(fastq_file: Path):
-    """Tests if the function correctly calculates md5sum and returns the correct result."""
-    # GIVEN a fastq file with corresponding correct md5 file and a fastq file with a corresponding incorrect md5 file
-    bad_md5sum_file_path: Path = fastq_file.parent.joinpath("fastq_run_R1_001.fastq.gz")
-
-    # THEN a file with a correct md5 sum should return true
-    assert check_md5sum(file_path=fastq_file, md5sum="a95cbb265540a2261fce941059784fd1")
-
-    # THEN a file with an incorrect md5 sum should return false
-    assert not check_md5sum(
-        file_path=bad_md5sum_file_path, md5sum="c690b0124173772ec4cbbc43709d84ee"
-    )
-
-
-def test_extract_checksum(fastq_file: Path):
-    """Tests if the function successfully extract the correct md5sum."""
-
-    # Given a file containing a md5sum
-    md5sum_file = Path(f"{fastq_file.as_posix()}.md5")
-
-    # Then the function should extract it
-    assert extract_md5sum(md5sum_file=md5sum_file) == "a95cbb265540a2261fce941059784fd1"
