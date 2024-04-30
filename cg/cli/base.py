@@ -24,6 +24,7 @@ from cg.cli.set.base import set_cmd
 from cg.cli.store.base import store as store_cmd
 from cg.cli.transfer import transfer_group
 from cg.cli.upload.base import upload
+from cg.cli.validation import validation
 from cg.cli.workflow.base import workflow as workflow_cmd
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
@@ -115,3 +116,4 @@ base.add_command(deliver_cmd)
 base.add_command(demultiplex_cmd)
 base.add_command(generate_cmd)
 base.add_command(downsample)
+base.add_command(validation)
