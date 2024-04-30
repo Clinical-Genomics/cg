@@ -55,6 +55,7 @@ class MockLimsAPI(LimsAPI):
         )
         self._sequencing_method = "CG002 - Cluster Generation (HiSeq X)"
         self._delivery_method = "CG002 - Delivery"
+        self._source = "cell-free DNA"
 
     def set_prep_method(self, method: str = "1337:00 Test prep method"):
         """Mock function"""
@@ -64,8 +65,8 @@ class MockLimsAPI(LimsAPI):
         """Mock function"""
         self._prep_method = method
 
-    def sample(self, sample_id: str) -> dict | None:
-        return next((sample for sample in self._samples if sample["id"] == sample_id), None)
+    def sample(self, lims_id: str) -> dict | None:
+        return next((sample for sample in self._samples if sample["id"] == lims_id), None)
 
     def add_sample(self, internal_id: str):
         self.sample_vars[internal_id] = {}
@@ -88,6 +89,9 @@ class MockLimsAPI(LimsAPI):
 
     def get_delivery_method(self, lims_id: str) -> str:
         return self._delivery_method
+
+    def get_source(self, lims_id: str) -> str | None:
+        return self._source
 
     def get_sample_comment(self, sample_id: str) -> str:
         lims_sample: dict[str, Any] = self.sample(sample_id)
