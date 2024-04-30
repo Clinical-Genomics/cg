@@ -167,6 +167,7 @@ class CreateValidationCaseAPI:
         case_name: str,
         data_analysis: str | None = None,
         delivery: str | None = None,
+        dry_run: bool | None = False,
     ) -> None:
         """Create the validation case in statusdb and associated sample bundles in housekeeper."""
         validation_data_input = ValidationDataInput(
@@ -175,5 +176,10 @@ class CreateValidationCaseAPI:
         validation_case_data: ValidationCaseData = self.get_validation_case_data(
             validation_data_input
         )
+        if dry_run:
+            LOG.info(
+                f"Would have created validation case {validation_case_data.validation_case.name}"
+            )
+            return
         self.create_validation_case_in_statusdb(validation_case_data)
         self.create_validation_samples_in_housekeeper(validation_case_data)

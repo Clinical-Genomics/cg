@@ -46,7 +46,12 @@ def validation():
 @DRY_RUN
 @click.pass_obj
 def create_validation_case(
-    context: CGConfig, case_id: str, case_name: str, delivery: str, data_analysis: str
+    context: CGConfig,
+    case_id: str,
+    case_name: str,
+    delivery: str,
+    data_analysis: str,
+    dry_run: bool,
 ):
     """Create a validation case to be used in workflow validation."""
     validation_case_api = CreateValidationCaseAPI(
@@ -55,7 +60,11 @@ def create_validation_case(
 
     try:
         validation_case_api.create_validation_case(
-            case_id=case_id, case_name=case_name, delivery=delivery, data_analysis=data_analysis
+            case_id=case_id,
+            case_name=case_name,
+            delivery=delivery,
+            data_analysis=data_analysis,
+            dry_run=dry_run,
         )
     except Exception as error:
         LOG.error(f"An error occured {repr(error)}.")
