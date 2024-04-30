@@ -1,4 +1,4 @@
-"""Constants that specify sample sources"""
+"""Constants that specify sample sources."""
 
 from enum import StrEnum
 
@@ -13,6 +13,7 @@ METAGENOME_SOURCES = (
     "unknown",
     "other",
 )
+
 ANALYSIS_SOURCES = (
     "blood",
     "buccal swab",
@@ -32,4 +33,5 @@ ANALYSIS_SOURCES = (
 
 
 class SourceType(StrEnum):
+    FFPE: str = "FFPE"
     UNKNOWN: str = "unknown"
