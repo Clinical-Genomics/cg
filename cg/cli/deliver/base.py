@@ -7,6 +7,7 @@ import click
 
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
+from cg.constants.constants import DRY_RUN
 from cg.meta.deliver import DeliverAPI
 from cg.meta.deliver import DeliverTicketAPI
 from cg.meta.rsync.rsync_api import RsyncAPI
@@ -17,7 +18,6 @@ from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
-DRY_RUN = click.option("--dry-run", is_flag=True)
 DELIVERY_TYPE = click.option(
     "-d",
     "--delivery-type",
