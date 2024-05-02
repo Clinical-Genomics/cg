@@ -1753,6 +1753,7 @@ def context_config(
     conda_binary: Path,
     balsamic_dir: Path,
     microsalt_dir: Path,
+    jasen_dir: Path,
     raredisease_dir: Path,
     rnafusion_dir: Path,
     taxprofiler_dir: Path,
@@ -1879,6 +1880,27 @@ def context_config(
         },
         "hermes": {"binary_path": "hermes"},
         "housekeeper": {"database": hk_uri, "root": str(housekeeper_dir)},
+        # START: JASEN-CONF
+        "jasen": {
+            "binary_path": nextflow_binary.as_posix(),
+            "compute_env": "nf_tower_compute_env",
+            "conda_binary": conda_binary.as_posix(),
+            "conda_env": "S_jasen",
+            "config_platform": str(nf_analysis_platform_config_path),
+            "config_params": str(nf_analysis_pipeline_params_path),
+            "config_resources": str(nf_analysis_pipeline_resource_optimisation_path),
+            "workflow_path": Path("workflow", "path").as_posix(),
+            "profile": "myprofile", # Choose profile here
+            "references": Path("path", "to", "references").as_posix(), # Set references
+            "revision": "2.2.0", # TODO: What is this
+            "root": str(jasen_dir),
+            "slurm": {
+                "account": "development",
+                "mail_user": email_address,
+            },
+            "tower_workflow": "jasen",
+        },
+        # END: JASEN-CONF
         "lims": {
             "host": "https://lims.scilifelab.se",
             "password": "password",
@@ -4014,3 +4036,6 @@ def fastq_file_meta_raw(flow_cell_name: str) -> dict:
         "flow_cell_id": flow_cell_name,
         "undetermined": None,
     }
+
+# TODO: 
+# FIXME:

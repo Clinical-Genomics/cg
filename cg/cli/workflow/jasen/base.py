@@ -27,7 +27,9 @@ jasen.add_command(config_case)
 # Checking through the Tomte config-case PR:
 # https://github.com/Clinical-Genomics/cg/pull/3046/files
 # -------------------------------------------------------
-# [>] Add JASEN dir in cg_uri()
+# [x] Add JASEN dir in conftest_config() (in tests/conftest.py)
+# [>] Create conda env for jasen
+#
 # [ ] Add JASEN fixtures to tests/conftest.py
 # [ ] Add JASEN to test_config_case_without_options()
 # [ ] Add JASEN to test_config_case_with_missing_case()
