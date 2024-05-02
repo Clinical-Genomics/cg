@@ -353,7 +353,7 @@ def link_sample_to_case(
     help="Ticket id",
     required=True,
 )
-@click.option("--dry-run", is_flag=True)
+
 @click.pass_obj
 def download_external_delivery_data_to_hpc(context: CGConfig, ticket: str, dry_run: bool):
     """Downloads external data from the delivery server and places it in appropriate folder on
@@ -370,7 +370,7 @@ def download_external_delivery_data_to_hpc(context: CGConfig, ticket: str, dry_r
     help="Ticket id",
     required=True,
 )
-@click.option("--dry-run", is_flag=True)
+
 @click.option(
     "--force", help="Overwrites any any previous samples in the customer directory", is_flag=True
 )
