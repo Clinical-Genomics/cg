@@ -19,7 +19,6 @@ from cg.constants.constants import (
 )
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
 from cg.constants.scout import ScoutExportFileName
-from cg.constants.sequencing import SequencingMethod
 from cg.constants.tb import AnalysisStatus
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.io.controller import WriteFile
@@ -191,9 +190,12 @@ class AnalysisAPI(MetaAPI):
         return application_types.pop()
 
     def get_case_source_type(self, case_id: str) -> str | None:
-        """Returns the source type for samples in a case.
+        """
+        Return the sample source type of a case.
+
         Raises:
-            CgError: If different sources are set for the samples linked to a case."""
+            CgError: If different sources are set for the samples linked to a case.
+        """
         sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
         source_types: set[str | None] = {
             self.lims_api.get_source(sample_id) for sample_id in sample_ids
@@ -201,17 +203,6 @@ class AnalysisAPI(MetaAPI):
         if len(source_types) > 1:
             raise CgError(f"Different source types found for case: {case_id} ({source_types})")
         return source_types.pop()
-
-    def get_case_sequencing_method(self, case_id: str) -> SequencingMethod | None:
-        """Returns the sequencing method for the given case."""
-        sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
-        sequencing_methods: set[str | None] = {
-            self.lims_api.get_sequencing_method(sample_id) for sample_id in sample_ids
-        }
-        if len(sequencing_methods) > 1:
-            LOG.error(f"Case {case_id} has a mixed sequencing type ({sequencing_methods})")
-            raise CgError
-        return sequencing_methods.pop()
 
     def has_case_only_exome_samples(self, case_id: str) -> bool:
         """Returns True if the application type for all samples in a case is WES."""

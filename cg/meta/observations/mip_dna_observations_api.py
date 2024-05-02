@@ -4,7 +4,6 @@ import logging
 
 from housekeeper.store.models import File, Version
 
-from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CustomerId, SampleType
 from cg.constants.observations import (
     LOQSUDB_RARE_DISEASE_CUSTOMERS,
@@ -16,11 +15,7 @@ from cg.constants.observations import (
 )
 from cg.constants.sample_sources import SourceType
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import (
-    CaseNotFoundError,
-    LoqusdbDuplicateRecordError,
-    LoqusdbUploadCaseError,
-)
+from cg.exc import CaseNotFoundError, LoqusdbDuplicateRecordError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -36,9 +31,8 @@ class MipDNAObservationsAPI(ObservationsAPI):
 
     def __init__(self, config: CGConfig):
         self.analysis_api = MipDNAAnalysisAPI(config)
+        self.loqusdb_api = None
         super().__init__(config=config, analysis_api=self.analysis_api)
-        self.loqusdb_wes_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.WES)
-        self.loqusdb_wgs_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.WGS)
 
     def get_loqusdb_customers(self) -> list[CustomerId]:
         """Return customers that are eligible for rare disease Loqusdb uploads."""
@@ -85,20 +79,19 @@ class MipDNAObservationsAPI(ObservationsAPI):
             and is_sample_source_eligible_for_observations_upload
         )
 
-    def get_loqusdb_instance(self) -> LoqusdbInstance:
+    def set_loqusdb_instance(self, case_id: str) -> None:
         """Return the Loqusdb instance associated to the sequencing method."""
+        sequencing_method: SequencingMethod = self.analysis_api.get_data_analysis_type(case_id)
         loqusdb_instances: dict[SequencingMethod, LoqusdbInstance] = {
             SequencingMethod.WGS: LoqusdbInstance.WGS,
             SequencingMethod.WES: LoqusdbInstance.WES,
         }
-        return loqusdb_instances[self.sequencing_method]
+        self.loqusdb_api = self.get_loqusdb_api(loqusdb_instances[sequencing_method])
 
-    def load_observations(self, case: Case, input_files: MipDNAObservationsInputFiles) -> None:
+    def load_observations(self, case: Case) -> None:
         """Load observation counts to Loqusdb for a MIP-DNA case."""
-        if case.tumour_samples:
-            LOG.error(f"Case {case.internal_id} has tumour samples. Cancelling upload.")
-            raise LoqusdbUploadCaseError
-
+        self.set_loqusdb_instance(case.internal_id)
+        input_files: MipDNAObservationsInputFiles = self.get_observations_input_files(case)
         if self.is_duplicate(
             case=case,
             loqusdb_api=self.loqusdb_api,
@@ -125,7 +118,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
         LOG.info(f"Uploaded {load_output['variants']} variants to {repr(self.loqusdb_api)}")
 
     def extract_observations_files_from_hk(
-        self, hk_version: Version
+        self, hk_version: Version, case_id: str = None
     ) -> MipDNAObservationsInputFiles:
         """Extract observations files given a housekeeper version for rare diseases."""
         input_files: dict[str, File] = {
@@ -136,7 +129,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
                 self.housekeeper_api.files(
                     version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SV_VCF]
                 ).first()
-                if self.sequencing_method == SequencingMethod.WGS
+                if self.analysis_api.get_data_analysis_type(case_id) == SequencingMethod.WGS
                 else None
             ),
             "profile_vcf_path": self.housekeeper_api.files(

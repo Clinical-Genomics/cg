@@ -2,9 +2,9 @@
 
 import pytest
 
+from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LOQUSDB_ID
-from cg.constants.sequencing import SequencingMethod
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
@@ -69,26 +69,24 @@ def mock_loqusdb_api(filled_file) -> MockLoqusdbAPI:
 
 @pytest.fixture(name="mip_dna_observations_api")
 def mip_dna_observations_api(
-    cg_context: CGConfig, mock_loqusdb_api: MockLoqusdbAPI, analysis_store: Store
+    cg_context: CGConfig, mock_loqusdb_api: MockLoqusdbAPI, analysis_store: Store, lims_api: LimsAPI
 ) -> MipDNAObservationsAPI:
     """Rare diseases observations API fixture."""
-    mip_dna_observations_api: MipDNAObservationsAPI = MipDNAObservationsAPI(
-        config=cg_context, sequencing_method=SequencingMethod.WGS
-    )
+    mip_dna_observations_api: MipDNAObservationsAPI = MipDNAObservationsAPI(cg_context)
     mip_dna_observations_api.store = analysis_store
+    mip_dna_observations_api.analysis_api.lims_api = lims_api
     mip_dna_observations_api.loqusdb_api = mock_loqusdb_api
     return mip_dna_observations_api
 
 
 @pytest.fixture(name="balsamic_observations_api")
 def balsamic_observations_api(
-    cg_context: CGConfig, mock_loqusdb_api: MockLoqusdbAPI, analysis_store: Store
+    cg_context: CGConfig, mock_loqusdb_api: MockLoqusdbAPI, analysis_store: Store, lims_api: LimsAPI
 ) -> BalsamicObservationsAPI:
     """Rare diseases observations API fixture."""
-    balsamic_observations_api: BalsamicObservationsAPI = BalsamicObservationsAPI(
-        config=cg_context, sequencing_method=SequencingMethod.WGS
-    )
+    balsamic_observations_api: BalsamicObservationsAPI = BalsamicObservationsAPI(cg_context)
     balsamic_observations_api.store = analysis_store
+    balsamic_observations_api.lims_api = lims_api
     balsamic_observations_api.loqusdb_somatic_api = mock_loqusdb_api
     balsamic_observations_api.loqusdb_tumor_api = mock_loqusdb_api
     return balsamic_observations_api

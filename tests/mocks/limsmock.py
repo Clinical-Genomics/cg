@@ -65,8 +65,8 @@ class MockLimsAPI(LimsAPI):
         """Mock function"""
         self._prep_method = method
 
-    def sample(self, lims_id: str) -> dict | None:
-        return next((sample for sample in self._samples if sample["id"] == lims_id), None)
+    def sample(self, lims_id: str) -> dict:
+        return next((sample for sample in self._samples if sample["id"] == lims_id), {})
 
     def add_sample(self, internal_id: str):
         self.sample_vars[internal_id] = {}

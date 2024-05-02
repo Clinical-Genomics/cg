@@ -42,10 +42,7 @@ class ObservationsAPI:
             case
         )
         if is_case_eligible_for_loqusdb_upload:
-            input_files: MipDNAObservationsInputFiles | BalsamicObservationsInputFiles = (
-                self.get_observations_input_files(case)
-            )
-            self.load_observations(case=case, input_files=input_files)
+            self.load_observations(case=case)
         else:
             LOG.error(f"Case {case.internal_id} is not eligible for observations upload")
             raise LoqusdbUploadCaseError
@@ -114,7 +111,7 @@ class ObservationsAPI:
 
     def is_sequencing_method_eligible_for_observations_upload(self, case_id: str):
         """Return whether a sequencing method is valid for observations upload."""
-        sequencing_method: SequencingMethod | None = self.analysis_api.get_case_sequencing_method(
+        sequencing_method: SequencingMethod | None = self.analysis_api.get_data_analysis_type(
             case_id
         )
         if sequencing_method not in self.get_loqusdb_sequencing_methods():
@@ -122,11 +119,7 @@ class ObservationsAPI:
             return False
         return True
 
-    def load_observations(
-        self,
-        case: Case,
-        input_files: MipDNAObservationsInputFiles | BalsamicObservationsInputFiles,
-    ) -> None:
+    def load_observations(self, case: Case) -> None:
         """Load observation counts to Loqusdb."""
         raise NotImplementedError
 
@@ -143,7 +136,7 @@ class ObservationsAPI:
         raise NotImplementedError
 
     def extract_observations_files_from_hk(
-        self, hk_version: Version
+        self, hk_version: Version, case_id: str = None
     ) -> MipDNAObservationsInputFiles | BalsamicObservationsInputFiles:
         """Extract observations files given a housekeeper version."""
         raise NotImplementedError

@@ -68,7 +68,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             and is_analysis_type_eligible_for_observations_upload
         )
 
-    def load_observations(self, case: Case, input_files: BalsamicObservationsInputFiles) -> None:
+    def load_observations(self, case: Case) -> None:
         """Load observation counts to Loqusdb for a Balsamic case."""
         loqusdb_upload_apis: list[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
         for loqusdb_api in loqusdb_upload_apis:
@@ -81,6 +81,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
                 LOG.error(f"Case {case.internal_id} has already been uploaded to Loqusdb")
                 raise LoqusdbDuplicateRecordError
 
+        input_files: BalsamicObservationsInputFiles = self.get_observations_input_files(case)
         for loqusdb_api in loqusdb_upload_apis:
             self.load_cancer_observations(
                 case=case, input_files=input_files, loqusdb_api=loqusdb_api
@@ -121,7 +122,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         LOG.info(f"Uploaded {load_output['variants']} variants to {repr(loqusdb_api)}")
 
     def extract_observations_files_from_hk(
-        self, hk_version: Version
+        self, hk_version: Version, case_id: str = None
     ) -> BalsamicObservationsInputFiles:
         """Extract observations files given a housekeeper version for cancer."""
         input_files: dict[str, File] = {
