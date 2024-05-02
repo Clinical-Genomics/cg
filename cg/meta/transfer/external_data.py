@@ -180,12 +180,15 @@ class ExternalDataAPI(MetaAPI):
         corrupted and start cases associated with the ticket.
         """
         self._set_parameters(ticket=ticket, dry_run=dry_run, force=force)
-        LOG.debug(
+        LOG.info(
             f"Adding fastq files to Housekeeper for ticket {self.ticket} of customer {self.customer_id}"
         )
         available_sample_ids: list[str] = self._get_available_sample_ids()
         for sample_id in available_sample_ids:
             fastq_paths_to_add: list[Path] = self._get_fastq_paths_to_add(sample_id=sample_id)
+            if not fastq_paths_to_add:
+                LOG.info(f"Did not find any fastq file to add for sample {sample_id}, skipping")
+                continue
             if are_all_fastq_valid(fastq_paths=fastq_paths_to_add):
                 self._add_and_include_files_to_bundles(
                     fastq_paths=fastq_paths_to_add,
