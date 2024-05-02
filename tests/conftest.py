@@ -95,6 +95,10 @@ pytest_plugins = [
     "tests.fixture_plugins.delivery_fixtures.path_fixtures",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
+    "tests.fixture_plugins.loqusdb_fixtures.loqusdb_api_fixtures",
+    "tests.fixture_plugins.loqusdb_fixtures.loqusdb_output_fixtures",
+    "tests.fixture_plugins.observations_fixtures.observations_api_fixtures",
+    "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
 ]
 
 # Case fixtures
@@ -1255,7 +1259,7 @@ def collaboration_id() -> str:
 
 
 @pytest.fixture
-def customer_rare_diseases(collaboration_id: str, customer_id: str) -> Customer:
+def mip_dna_customer(collaboration_id: str, customer_id: str) -> Customer:
     """Return a Rare Disease customer."""
     return Customer(
         name="Klinisk Immunologi",
@@ -1265,7 +1269,7 @@ def customer_rare_diseases(collaboration_id: str, customer_id: str) -> Customer:
 
 
 @pytest.fixture
-def customer_cancer(collaboration_id: str, customer_id: str) -> Customer:
+def balsamic_customer(collaboration_id: str, customer_id: str) -> Customer:
     """Return a Cancer customer."""
     return Customer(
         name="AML",

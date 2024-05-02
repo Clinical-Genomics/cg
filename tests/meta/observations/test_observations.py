@@ -1,47 +1,54 @@
-# """Test observations API methods."""
-#
-# import logging
-#
-# import pytest
-# from _pytest.logging import LogCaptureFixture
-# from pytest_mock import MockFixture
-#
-# from cg.apps.loqus import LoqusdbAPI
-# from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters
-# from cg.constants.sequencing import SequencingMethod
-# from cg.exc import (
-#     CaseNotFoundError,
-#     LoqusdbDuplicateRecordError,
-#     LoqusdbUploadCaseError,
-# )
-# from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
-# from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
-# from cg.meta.workflow.analysis import AnalysisAPI
-# from cg.models.observations.input_files import (
-#     BalsamicObservationsInputFiles,
-#     MipDNAObservationsInputFiles,
-# )
-# from cg.store.models import Case, Customer
-# from tests.store_helpers import StoreHelpers
-#
-#
+"""Test observations API methods."""
+
+import logging
+
+from _pytest.fixtures import FixtureRequest
+from _pytest.logging import LogCaptureFixture
+from pytest_mock import MockFixture
+
+from cg.constants import Workflow
+from cg.meta.observations.observations_api import ObservationsAPI
+from cg.models.observations.input_files import ObservationsInputFiles
+from cg.store.models import Case, Customer
+
+
+def test_mip_dna_observations_upload(
+    case_id: str,
+    number_of_loaded_variants: int,
+    caplog: LogCaptureFixture,
+    mocker: MockFixture,
+):
+    """Test upload of observations."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an observations API, a list of observation input files, and workflow customers
+
+    # GIVEN a case
+    # case: Case = observations_api.store.get_case_by_internal_id(internal_id=case_id)
+
+    # GIVEN
+    # mocker.patch.object(ObservationsAPI, "get_observations_input_files", return_value=input_files)
+
+    # WHEN uploading the case observations to Loqusdb
+    # observations_api.upload(case)
+
+    # THEN the case should be successfully uploaded
+    # assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
+
+
 # def test_observations_upload(
 #     case_id: str,
-#     customer_rare_diseases: Customer,
 #     mip_dna_observations_api: MipDNAObservationsAPI,
 #     observations_input_files: MipDNAObservationsInputFiles,
 #     nr_of_loaded_variants: int,
 #     caplog: LogCaptureFixture,
-#     mocker: MockFixture,
+#     mocker,
 # ):
 #     """Test upload observations method."""
-#     caplog.set_level(logging.DEBUG)
 #
 #     # GIVEN a mocked observations API and a list of mocked observations files
-#     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
-#     case.customer.internal_id = customer_rare_diseases.internal_id
-#     mocker.patch.object(AnalysisAPI, "get_data_analysis_type", return_value=SequencingMethod.WGS)
-#     mocker.patch.object(mip_dna_observations_api, "set_loqusdb_instance", return_value=None)
+#
+#     case.customer.internal_id = LoqusdbMipCustomers.KLINISK_IMMUNOLOGI.value
 #     mocker.patch.object(
 #         mip_dna_observations_api,
 #         "get_observations_input_files",
@@ -49,11 +56,11 @@
 #     )
 #     mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=False)
 #
-#     # WHEN uploading the case observations to Loqusdb
-#     mip_dna_observations_api.upload(case)
 #
-#     # THEN the case should be successfully uploaded
-#     assert f"Uploaded {nr_of_loaded_variants} variants to Loqusdb" in caplog.text
+#
+#
+#
+#
 #
 #
 # def test_get_loqusdb_api(
@@ -80,14 +87,14 @@
 #     case_id: str,
 #     mip_dna_observations_api: MipDNAObservationsAPI,
 #     observations_input_files: MipDNAObservationsInputFiles,
-#     mocker: MockFixture,
+#     mocker,
 # ):
 #     """Test duplicate extraction for a case that is not in Loqusdb."""
 #
 #     # GIVEN a Loqusdb instance with no case duplicates
 #     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
-#     mocker.patch.object(LoqusdbAPI, "get_case", return_value=None)
-#     mocker.patch.object(LoqusdbAPI, "get_duplicate", return_value=False)
+#     mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_case", return_value=None)
+#     mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_duplicate", return_value=False)
 #
 #     # WHEN checking that a case has not been uploaded to Loqusdb
 #     is_duplicate: bool = mip_dna_observations_api.is_duplicate(
@@ -128,7 +135,7 @@
 #     loqusdb_id: str,
 #     mip_dna_observations_api: MipDNAObservationsAPI,
 #     observations_input_files: MipDNAObservationsInputFiles,
-#     mocker: MockFixture,
+#     mocker,
 # ):
 #     """Test duplicate extraction for a case that already exists in Loqusdb."""
 #
@@ -150,12 +157,65 @@
 #     assert is_duplicate is True
 #
 #
+# def test_check_customer_loqusdb_permissions(
+#     customer_rare_diseases: Customer,
+#     customer_balsamic: Customer,
+#     mip_dna_observations_api: MipDNAObservationsAPI,
+#     caplog: LogCaptureFixture,
+# ):
+#     """Test customers Loqusdb permissions."""
+#     caplog.set_level(logging.DEBUG)
+#
+#     # GIVEN a MIP observations API, a Rare Disease customer and a Cancer customer
+#
+#     # WHEN verifying the permissions for Loqusdb upload
+#     mip_dna_observations_api.check_customer_loqusdb_permissions(customer_rare_diseases)
+#
+#     # THEN it should be only possible to upload data from a RD customer
+#     assert f"Valid customer {customer_rare_diseases.internal_id} for Loqusdb uploads" in caplog.text
+#     with pytest.raises(LoqusdbUploadCaseError):
+#         mip_dna_observations_api.check_customer_loqusdb_permissions(customer_balsamic)
+#
+#
+# def test_mip_dna_get_loqusdb_instance(mip_dna_observations_api: MipDNAObservationsAPI):
+#     """Test Loqusdb instance retrieval given a sequencing method."""
+#
+#     # GIVEN a rare disease observations API with a WES as sequencing method
+#     mip_dna_observations_api.sequencing_method = SequencingMethod.WES
+#
+#     # WHEN getting the Loqusdb instance
+#     loqusdb_instance = mip_dna_observations_api.get_loqusdb_instance()
+#
+#     # THEN the correct loqusdb instance should be returned
+#     assert loqusdb_instance == LoqusdbInstance.WES
+#
+#
+# def test_mip_dna_get_loqusdb_instance_not_supported(
+#     mip_dna_observations_api: MipDNAObservationsAPI, caplog: LogCaptureFixture
+# ):
+#     """Test Loqusdb instance retrieval given a not supported sequencing method."""
+#
+#     # GIVEN a rare disease observations API with a WTS sequencing method
+#     mip_dna_observations_api.sequencing_method = SequencingMethod.WTS
+#
+#     # WHEN getting the Loqusdb instance
+#     with pytest.raises(LoqusdbUploadCaseError):
+#         # THEN the upload should be canceled
+#         mip_dna_observations_api.get_loqusdb_instance()
+#
+#     assert (
+#         f"Sequencing method {SequencingMethod.WTS} is not supported by Loqusdb. Cancelling upload."
+#         in caplog.text
+#     )
+#
+#
 # def test_mip_dna_load_observations(
 #     case_id: str,
 #     mip_dna_observations_api: MipDNAObservationsAPI,
+#     observations_input_files: MipDNAObservationsInputFiles,
 #     nr_of_loaded_variants: int,
 #     caplog: LogCaptureFixture,
-#     mocker: MockFixture,
+#     mocker,
 # ):
 #     """Test loading of case observations for rare disease."""
 #     caplog.set_level(logging.DEBUG)
@@ -165,7 +225,7 @@
 #     mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=False)
 #
 #     # WHEN loading the case to Loqusdb
-#     mip_dna_observations_api.load_observations(case)
+#     mip_dna_observations_api.load_observations(case, observations_input_files)
 #
 #     # THEN the observations should be loaded without any errors
 #     assert f"Uploaded {nr_of_loaded_variants} variants to Loqusdb" in caplog.text
@@ -176,7 +236,7 @@
 #     mip_dna_observations_api: MipDNAObservationsAPI,
 #     observations_input_files: MipDNAObservationsInputFiles,
 #     caplog: LogCaptureFixture,
-#     mocker: MockFixture,
+#     mocker,
 # ):
 #     """Test upload case duplicate to Loqusdb."""
 #     caplog.set_level(logging.DEBUG)
@@ -198,7 +258,7 @@
 #     mip_dna_observations_api: MipDNAObservationsAPI,
 #     observations_input_files: MipDNAObservationsInputFiles,
 #     caplog: LogCaptureFixture,
-#     mocker: MockFixture,
+#     mocker,
 # ):
 #     """Test loading of a tumor case to Loqusdb."""
 #     caplog.set_level(logging.DEBUG)
@@ -207,18 +267,11 @@
 #     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
 #     mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=False)
 #     case.links[0].sample.is_tumour = True
-#     mocker.patch.object(AnalysisAPI, "get_data_analysis_type", return_value=SequencingMethod.WGS)
-#     mocker.patch.object(mip_dna_observations_api, "set_loqusdb_instance", return_value=None)
-#     mocker.patch.object(
-#         mip_dna_observations_api,
-#         "get_observations_input_files",
-#         return_value=observations_input_files,
-#     )
 #
 #     # WHEN getting the Loqusdb API
 #     with pytest.raises(LoqusdbUploadCaseError):
 #         # THEN an upload error should be raised and the execution aborted
-#         mip_dna_observations_api.load_observations(case)
+#         mip_dna_observations_api.load_observations(case, observations_input_files)
 #
 #     assert f"Case {case.internal_id} has tumour samples. Cancelling upload." in caplog.text
 #
@@ -271,7 +324,7 @@
 #     balsamic_observations_input_files: BalsamicObservationsInputFiles,
 #     nr_of_loaded_variants: int,
 #     caplog: LogCaptureFixture,
-#     mocker: MockFixture,
+#     mocker,
 # ):
 #     """Test loading of cancer case observations."""
 #     caplog.set_level(logging.DEBUG)
@@ -279,14 +332,9 @@
 #     # GIVEN a mock BALSAMIC observations API and a list of observations input files
 #     case: Case = balsamic_observations_api.store.get_case_by_internal_id(internal_id=case_id)
 #     mocker.patch.object(balsamic_observations_api, "is_duplicate", return_value=False)
-#     mocker.patch.object(AnalysisAPI, "get_data_analysis_type", return_value=SequencingMethod.WGS)
-#     mocker.patch.object(
-#         balsamic_observations_api,
-#         "get_observations_input_files",
-#         return_value=balsamic_observations_input_files,
-#     )
+#
 #     # WHEN loading the case to Loqusdb
-#     balsamic_observations_api.load_observations(case)
+#     balsamic_observations_api.load_observations(case, balsamic_observations_input_files)
 #
 #     # THEN the observations should be loaded successfully
 #     assert f"Uploaded {nr_of_loaded_variants} variants to Loqusdb" in caplog.text
@@ -294,22 +342,22 @@
 #
 # def test_balsamic_load_observations_duplicate(
 #     case_id: str,
-#     balsamic_observations_api: BalsamicObservationsAPI,
+#     mip_dna_observations_api: MipDNAObservationsAPI,
 #     observations_input_files: MipDNAObservationsInputFiles,
 #     caplog: LogCaptureFixture,
-#     mocker: MockFixture,
+#     mocker,
 # ):
 #     """Test upload cancer duplicate case observations to Loqusdb."""
 #     caplog.set_level(logging.DEBUG)
 #
 #     # GIVEN a balsamic observations API and a case object that has already been uploaded to Loqusdb
-#     case: Case = balsamic_observations_api.store.get_case_by_internal_id(internal_id=case_id)
-#     mocker.patch.object(balsamic_observations_api, "is_duplicate", return_value=True)
+#     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
+#     mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=True)
 #
 #     # WHEN uploading the case observations to Loqusdb
 #     with pytest.raises(LoqusdbDuplicateRecordError):
 #         # THEN a duplicate record error should be raised
-#         balsamic_observations_api.load_observations(case)
+#         mip_dna_observations_api.load_observations(case, observations_input_files)
 #
 #     assert f"Case {case.internal_id} has already been uploaded to Loqusdb" in caplog.text
 #
