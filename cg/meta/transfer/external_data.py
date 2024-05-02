@@ -136,7 +136,7 @@ class ExternalDataAPI(MetaAPI):
         file_paths: list[Path] = [
             sample_folder.joinpath(path)
             for path in get_files_matching_pattern(
-                directory=sample_folder, pattern=FileExtensions.FASTQ_GZ.value
+                directory=sample_folder, pattern=FileExtensions.FASTQ_GZ
             )
         ]
         LOG.debug(f"Found {len(file_paths)} fastq files for sample {sample_id}")
@@ -147,7 +147,7 @@ class ExternalDataAPI(MetaAPI):
             last_version=hk_version,
             tags=HK_FASTQ_TAGS,
         )
-        LOG.debug(f"Found {len(file_paths)} fastq files for sample {sample_id}")
+        LOG.debug(f"{len(fastq_paths_to_add)} samples are not yet in Housekeeper for {sample_id}")
         return fastq_paths_to_add
 
     def _add_and_include_files_to_bundles(
