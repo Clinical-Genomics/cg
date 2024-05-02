@@ -32,7 +32,7 @@ LOG = logging.getLogger(__name__)
 @click.command("delivery-report")
 @ARGUMENT_CASE_ID
 @OPTION_FORCE_REPORT
-@OPTION_DRY_RUN
+@DRY_RUN
 @OPTION_STARTED_AT
 @click.pass_context
 def generate_delivery_report(
@@ -87,7 +87,7 @@ def generate_delivery_report(
 @click.command("available-delivery-reports")
 @OPTION_WORKFLOW
 @OPTION_FORCE_REPORT
-@OPTION_DRY_RUN
+@DRY_RUN
 @click.pass_context
 def generate_available_delivery_reports(
     context: click.Context, workflow: Workflow, force_report: bool, dry_run: bool
