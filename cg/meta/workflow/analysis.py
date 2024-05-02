@@ -11,7 +11,12 @@ from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
-from cg.constants.constants import AnalysisType, CaseActions, FileFormat, WorkflowManager
+from cg.constants.constants import (
+    AnalysisType,
+    CaseActions,
+    FileFormat,
+    WorkflowManager,
+)
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
 from cg.constants.scout import ScoutExportFileName
 from cg.constants.tb import AnalysisStatus
@@ -615,7 +620,7 @@ class AnalysisAPI(MetaAPI):
                 housekeeper_api=self.housekeeper_api,
                 data_flow_config=self.config.data_flow,
             )
-            spring_archive_api.retrieve_case(case_id)
+            spring_archive_api.retrieve_spring_files_for_case(case_id)
 
     def are_all_spring_files_present(self, case_id: str) -> bool:
         """Return True if no Spring files for the case are archived in the data location used by the customer."""
