@@ -113,4 +113,3 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_workflow_metrics(self) -> dict:
         return RAREDISEASE_METRIC_CONDITIONS
-
