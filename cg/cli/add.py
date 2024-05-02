@@ -4,7 +4,7 @@ import click
 
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
-from cg.constants.constants import StatusOptions
+from cg.constants.constants import StatusOptions, DRY_RUN
 from cg.constants.subject import Sex
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
@@ -353,7 +353,7 @@ def link_sample_to_case(
     help="Ticket id",
     required=True,
 )
-
+@DRY_RUN
 @click.pass_obj
 def download_external_delivery_data_to_hpc(context: CGConfig, ticket: str, dry_run: bool):
     """Downloads external data from the delivery server and places it in appropriate folder on
@@ -370,7 +370,7 @@ def download_external_delivery_data_to_hpc(context: CGConfig, ticket: str, dry_r
     help="Ticket id",
     required=True,
 )
-
+@DRY_RUN
 @click.option(
     "--force", help="Overwrites any any previous samples in the customer directory", is_flag=True
 )
