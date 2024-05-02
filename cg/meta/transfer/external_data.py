@@ -133,10 +133,11 @@ class ExternalDataAPI(MetaAPI):
     def _get_fastq_paths_to_add(self, sample_id: str) -> list[Path]:
         """Return the paths of fastq files that have not been added to the Housekeeper bundle."""
         sample_folder: Path = self._get_destination_path(sample_id)
+        LOG.debug(f"Checking fastq files in {sample_folder}")
         file_paths: list[Path] = [
             sample_folder.joinpath(path)
             for path in get_files_matching_pattern(
-                directory=sample_folder, pattern=FileExtensions.FASTQ_GZ
+                directory=sample_folder, pattern=FileExtensions.FASTQ_GZ.value
             )
         ]
         LOG.debug(f"Found {len(file_paths)} fastq files for sample {sample_id}")
