@@ -89,7 +89,7 @@ class NfAnalysisAPI(AnalysisAPI):
     def use_read_count_threshold(self) -> bool:
         """Defines whether the threshold for adequate read count should be passed for all samples
         when determining if the analysis for a case should be automatically started."""
-        return NotImplementedError
+        return True
 
     @property
     def sample_sheet_headers(self) -> list[str]:
