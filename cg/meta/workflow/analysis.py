@@ -229,7 +229,7 @@ class AnalysisAPI(MetaAPI):
         )
 
     def get_analysis_started_date(self, case_id: str) -> datetime.date:
-        """Return the start date of the Balsamic analysis for a given case."""
+        """Return the start date of the analysis for a given case."""
         return self.get_date_from_file_path(self.get_job_ids_path(case_id))
 
     def upload_bundle_statusdb(self, case_id: str, dry_run: bool = False) -> None:
