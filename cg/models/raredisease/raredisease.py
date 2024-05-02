@@ -1,5 +1,7 @@
-from pydantic import BaseModel
 from enum import StrEnum
+
+from pydantic import BaseModel
+
 from cg.models.nf_analysis import NextflowSampleSheetEntry
 
 

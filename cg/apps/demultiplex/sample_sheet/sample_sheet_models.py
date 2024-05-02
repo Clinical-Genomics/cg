@@ -3,11 +3,7 @@ from collections import defaultdict
 
 from pydantic import BaseModel
 
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSample,
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
+from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 
 LOG = logging.getLogger(__name__)
 
@@ -36,11 +32,3 @@ class SampleSheet(BaseModel):
         for sample in self.samples:
             sample_internal_ids.append(sample.sample_id)
         return list(set(sample_internal_ids))
-
-
-class SampleSheetBcl2Fastq(SampleSheet):
-    samples: list[FlowCellSampleBcl2Fastq]
-
-
-class SampleSheetBCLConvert(SampleSheet):
-    samples: list[FlowCellSampleBCLConvert]

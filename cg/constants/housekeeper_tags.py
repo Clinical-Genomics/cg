@@ -37,11 +37,12 @@ class SequencingFileTag(StrEnum):
     """Tags for sequencing files."""
 
     CGSTATS_LOG: str = "log"
+    DEMUX_LOG: str = "log"
     FASTQ: str = "fastq"
+    RUN_PARAMETERS: str = "run-parameters"
     SAMPLE_SHEET: str = "samplesheet"
     SPRING: str = "spring"
     SPRING_METADATA: str = "spring-metadata"
-    DEMUX_LOG: str = "log"
 
 
 VALIDATION_TAG: str = "validation"

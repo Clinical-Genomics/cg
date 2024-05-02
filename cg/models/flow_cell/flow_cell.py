@@ -8,15 +8,11 @@ from typing import Type
 
 from typing_extensions import Literal
 
-from cg.apps.demultiplex.sample_sheet.sample_models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleBCLConvert,
-)
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.constants.constants import LENGTH_LONG_DATE
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
 from cg.constants.symbols import EMPTY_STRING
 from cg.exc import FlowCellError
@@ -40,7 +36,7 @@ RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
 class FlowCellDirectoryData:
     """Class to collect information about flow cell directories and their particular files."""
 
-    def __init__(self, flow_cell_path: Path, bcl_converter: str | None = None):
+    def __init__(self, flow_cell_path: Path):
         LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
         self.path: Path = flow_cell_path
         self.machine_name: str = EMPTY_STRING
@@ -51,7 +47,6 @@ class FlowCellDirectoryData:
         self.id: str = EMPTY_STRING
         self.position: Literal["A", "B"] = "A"
         self.parse_flow_cell_dir_name()
-        self.bcl_converter: str = bcl_converter or BclConverter.BCLCONVERT
         self._sample_sheet_path_hk: Path | None = None
         self.sample_sheet_validator = SampleSheetValidator()
 
@@ -59,7 +54,7 @@ class FlowCellDirectoryData:
         """Parse relevant information from flow cell name.
         This will assume that the flow cell naming convention is used. If not we skip the flow cell.
         Convention is: <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>
-        Example: '201203_D00483_0200_AHVKJCDRXX'.
+        Example: '230912_A00187_1009_AHK33MDRX3'.
         """
 
         self.validate_flow_cell_dir_name()
@@ -127,15 +122,6 @@ class FlowCellDirectoryData:
         return self._run_parameters
 
     @property
-    def sample_type(
-        self,
-    ) -> Type[FlowCellSampleBcl2Fastq] | Type[FlowCellSampleBCLConvert]:
-        """Return the sample class used in the flow cell."""
-        if self.bcl_converter == BclConverter.BCL2FASTQ:
-            return FlowCellSampleBcl2Fastq
-        return FlowCellSampleBCLConvert
-
-    @property
     def sequencer_type(
         self,
     ) -> Literal[Sequencers.HISEQX, Sequencers.HISEQGA, Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
@@ -151,16 +137,6 @@ class FlowCellDirectoryData:
     def copy_complete_path(self) -> Path:
         """Return copy complete path."""
         return Path(self.path, DemultiplexingDirsAndFiles.COPY_COMPLETE)
-
-    @property
-    def hiseq_x_copy_complete_path(self) -> Path:
-        """Return copy complete path for HiSeqX."""
-        return Path(self.path, DemultiplexingDirsAndFiles.HISEQ_X_COPY_COMPLETE)
-
-    @property
-    def hiseq_x_delivery_started_path(self) -> Path:
-        """Return delivery started path for HiSeqX."""
-        return Path(self.path, DemultiplexingDirsAndFiles.DELIVERY)
 
     @property
     def demultiplexing_started_path(self) -> Path:
@@ -186,7 +162,7 @@ class FlowCellDirectoryData:
         """
         Validate on the following criteria:
         Convention is: <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>
-        Example: '201203_D00483_0200_AHVKJCDRXX'.
+        Example: '230912_A00187_1009_AHK33MDRX3'.
         """
         if len(self.split_flow_cell_name) != 4:
             message = f"Flowcell {self.full_name} does not follow the flow cell naming convention"
