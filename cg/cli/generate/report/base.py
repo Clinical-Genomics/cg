@@ -10,7 +10,6 @@ from housekeeper.store.models import Version
 
 from cg.cli.generate.report.options import (
     ARGUMENT_CASE_ID,
-    OPTION_DRY_RUN,
     OPTION_FORCE_REPORT,
     OPTION_STARTED_AT,
     OPTION_WORKFLOW,
@@ -22,6 +21,7 @@ from cg.cli.generate.report.utils import (
     get_report_case,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
+from cg.constants.constants import DRY_RUN
 from cg.exc import CgError
 from cg.meta.report.report_api import ReportAPI
 from cg.store.models import Case
