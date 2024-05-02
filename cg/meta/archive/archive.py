@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
-from cg.exc import ArchiveJobFailedError
+from cg.exc import ArchiveJobFailedError, MissingFilesError
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
@@ -88,6 +88,8 @@ class SpringArchiveAPI:
         with the retrieval job id."""
         case: Case = self.status_db.get_case_by_internal_id(case_id)
         files_to_retrieve: list[File] = self.get_files_to_retrieve(case)
+        if not files_to_retrieve:
+            raise MissingFilesError(f"No files to retrieve for case {case_id}")
         self.retrieve_files_from_archive_location(
             files_and_samples=self.add_samples_to_files(files=files_to_retrieve),
             archive_location=case.customer.data_archive_location,
@@ -336,7 +338,11 @@ class SpringArchiveAPI:
         else:
             order = self.status_db.get_order_by_ticket_id(id_)
         for case in order.cases:
-            self.retrieve_spring_files_for_case(case.internal_id)
+            try:
+                self.retrieve_spring_files_for_case(case.internal_id)
+            except MissingFilesError as error:
+                LOG.info(error)
+                continue
 
     def retrieve_spring_files_for_sample(self, sample_id: str) -> None:
         sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
