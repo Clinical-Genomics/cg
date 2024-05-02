@@ -1,13 +1,12 @@
-import datetime as dt
 import logging
 import os
 import shutil
+from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Any, Iterator
 
 import click
-import requests
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
@@ -20,11 +19,11 @@ from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, 
 from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
-from cg.services.quality_controller import QualityControllerService
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
+from cg.services.quality_controller import QualityControllerService
 from cg.store.models import Analysis, Application, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
@@ -234,12 +233,12 @@ class AnalysisAPI(MetaAPI):
 
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
         case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        analysis_start: dt.datetime = self.get_bundle_created_date(case_id=case_id)
+        analysis_start: datetime = self.get_bundle_created_date(case_id=case_id)
         workflow_version: str = self.get_workflow_version(case_id=case_id)
         new_analysis: Case = self.status_db.add_analysis(
             workflow=self.workflow,
             version=workflow_version,
-            completed_at=dt.datetime.now(),
+            completed_at=datetime.now(),
             primary=(len(case_obj.analyses) == 0),
             started_at=analysis_start,
         )
@@ -296,7 +295,7 @@ class AnalysisAPI(MetaAPI):
             created=self.get_bundle_created_date(case_id),
         ).model_dump()
 
-    def get_bundle_created_date(self, case_id: str) -> dt.datetime:
+    def get_bundle_created_date(self, case_id: str) -> datetime:
         return self.get_date_from_file_path(self.get_deliverables_file_path(case_id=case_id))
 
     def get_workflow_version(self, case_id: str) -> str:
@@ -327,7 +326,7 @@ class AnalysisAPI(MetaAPI):
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
         )
 
-    def get_analyses_to_clean(self, before: dt.datetime) -> list[Analysis]:
+    def get_analyses_to_clean(self, before: datetime) -> list[Analysis]:
         analyses_to_clean = self.status_db.get_analyses_to_clean(
             before=before, workflow=self.workflow
         )
@@ -496,11 +495,11 @@ class AnalysisAPI(MetaAPI):
         self.prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
 
     @staticmethod
-    def get_date_from_file_path(file_path: Path) -> dt.datetime.date:
+    def get_date_from_file_path(file_path: Path) -> datetime.date:
         """
         Get date from deliverables path using date created metadata.
         """
-        return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
+        return datetime.fromtimestamp(int(os.path.getctime(file_path)))
 
     def get_lims_naming_metadata(self, sample: Sample) -> str | None:
         return None
@@ -528,7 +527,7 @@ class AnalysisAPI(MetaAPI):
         analyses: list = self.status_db.get_case_by_internal_id(internal_id=case_id).analyses
         LOG.info(f"Adding a cleaned at date for case {case_id}")
         for analysis_obj in analyses:
-            analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
+            analysis_obj.cleaned_at = analysis_obj.cleaned_at or datetime.now()
             self.status_db.session.commit()
 
     def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
