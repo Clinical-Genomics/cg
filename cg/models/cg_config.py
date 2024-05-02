@@ -156,6 +156,23 @@ class BalsamicConfig(CommonAppConfig):
     swegen_path: str
 
 
+class JasenConfig(CommonAppConfig):
+    binary_path: str | None = None
+    compute_env: str
+    conda_binary: str | None = None
+    conda_env: str
+    config_platform: str
+    config_params: str
+    config_resources: str
+    workflow_path: str
+    profile: str
+    references: str
+    revision: str
+    root: str
+    slurm: SlurmConfig
+    tower_workflow: str
+
+
 class MutantConfig(BaseModel):
     binary_path: str
     conda_binary: str | None = None

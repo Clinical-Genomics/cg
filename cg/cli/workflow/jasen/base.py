@@ -28,10 +28,9 @@ jasen.add_command(config_case)
 # https://github.com/Clinical-Genomics/cg/pull/3046/files
 # -------------------------------------------------------
 # [x] Add JASEN dir in conftest_config() (in tests/conftest.py)
-# [>] Create conda env for jasen
-#
-# [ ] Add JASEN fixtures to tests/conftest.py
-# [ ] Add JASEN to test_config_case_without_options()
+# [x] Create conda env for jasen
+# [x] Add JASEN fixtures to tests/conftest.py
+# [x] Add JASEN to test_config_case_without_options()
 # [ ] Add JASEN to test_config_case_with_missing_case()
 # [ ] Add JASEN to test_config_case_without_samples()
 # [ ] Add JASEN to test_config_case_default_parameters()
