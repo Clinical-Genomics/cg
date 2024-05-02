@@ -64,6 +64,7 @@ class ExternalDataAPI(MetaAPI):
     def transfer_sample_files_from_source(self, ticket: str, dry_run: bool = False) -> None:
         """Transfers all sample files, related to given ticket, from source to destination"""
         self._set_parameters(ticket=ticket, dry_run=dry_run)
+        LOG.debug(f"Transferring files for ticket {self.ticket} of customer {self.customer_id}")
         log_dir: Path = self._create_log_dir()
         self._get_destination_path().mkdir(exist_ok=True)
 
@@ -123,6 +124,7 @@ class ExternalDataAPI(MetaAPI):
     def _get_available_sample_ids(self) -> list[str]:
         """Return a list of samples available for adding to Housekeeper."""
         destination_folder_path: Path = self._get_destination_path()
+        LOG.debug(f"Checking available samples in {destination_folder_path}")
         for sample_folder in destination_folder_path.iterdir():
             self._curate_sample_folder(sample_folder=sample_folder)
         available_sample_ids: list[str] = self._get_sample_ids_from_folder(destination_folder_path)
@@ -151,7 +153,7 @@ class ExternalDataAPI(MetaAPI):
     ) -> None:
         """Add the given fastq files to the the Housekeeper bundle."""
         if self.dry_run:
-            LOG.info("No changes will be committed since this is a dry-run")
+            LOG.info(f"No files will be added for sample {lims_sample_id} since this is a dry-run")
             return
         for path in fastq_paths:
             LOG.info(f"Adding path {path} to bundle {lims_sample_id} in housekeeper")
@@ -178,6 +180,9 @@ class ExternalDataAPI(MetaAPI):
         corrupted and start cases associated with the ticket.
         """
         self._set_parameters(ticket=ticket, dry_run=dry_run, force=force)
+        LOG.debug(
+            f"Adding fastq files to Housekeeper for ticket {self.ticket} of customer {self.customer_id}"
+        )
         available_sample_ids: list[str] = self._get_available_sample_ids()
         for sample_id in available_sample_ids:
             fastq_paths_to_add: list[Path] = self._get_fastq_paths_to_add(sample_id=sample_id)
