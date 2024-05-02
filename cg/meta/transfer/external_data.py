@@ -139,6 +139,7 @@ class ExternalDataAPI(MetaAPI):
                 directory=sample_folder, pattern=FileExtensions.FASTQ_GZ.value
             )
         ]
+        LOG.debug(f"Found {len(file_paths)} fastq files for sample {sample_id}")
         hk_version: Version = self.housekeeper_api.get_or_create_version(bundle_name=sample_id)
         fastq_paths_to_add: list[Path] = self.housekeeper_api.check_bundle_files(
             file_paths=file_paths,
@@ -146,6 +147,7 @@ class ExternalDataAPI(MetaAPI):
             last_version=hk_version,
             tags=HK_FASTQ_TAGS,
         )
+        LOG.debug(f"Found {len(file_paths)} fastq files for sample {sample_id}")
         return fastq_paths_to_add
 
     def _add_and_include_files_to_bundles(
