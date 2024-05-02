@@ -30,11 +30,11 @@ jasen.add_command(config_case)
 # [x] Add JASEN dir in conftest_config() (in tests/conftest.py)
 # [x] Create conda env for jasen
 # [x] Add JASEN fixtures to tests/conftest.py
-# [x] Add JASEN to test_config_case_without_options()
+# [x] Implement config models in cg/models/cg_config.py
+# [>] Add SampleSheet classes in cg/models/jasen/jasen.py
+# [ ] Add JASEN to test_config_case_without_options()
 # [ ] Add JASEN to test_config_case_with_missing_case()
 # [ ] Add JASEN to test_config_case_without_samples()
 # [ ] Add JASEN to test_config_case_default_parameters()
 # [ ] Add JASEN to test_config_case_dry_run()
-# [ ] Implement config models in cg/models/cg_config.py
-# [ ] Add SampleSheet classes in cg/models/jasen/jasen.py
 # -------------------------------------------------------
