@@ -1,7 +1,6 @@
 """Tests CLI common methods to store deliverable files into Housekeeper for NF analyses."""
 
 import logging
-from datetime import datetime
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -16,7 +15,6 @@ from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteStream
-from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 from cg.utils import Process
@@ -163,7 +161,6 @@ def test_store_housekeeper_valid_case(
     assert not store.get_case_by_internal_id(internal_id=case_id).analyses
 
     # GIVEN that HermesAPI returns a deliverables output
-    mocker.patch.object(AnalysisAPI, "get_analysis_started_date", return_value=datetime.now())
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
@@ -213,7 +210,6 @@ def test_valid_case_already_added(
     assert not context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
     # GIVEN that HermesAPI returns a deliverables output
-    mocker.patch.object(AnalysisAPI, "get_analysis_started_date", return_value=datetime.now())
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
@@ -261,7 +257,6 @@ def test_dry_run(
     context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # GIVEN that HermesAPI returns a deliverables output
-    mocker.patch.object(AnalysisAPI, "get_analysis_started_date", return_value=datetime.now())
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
