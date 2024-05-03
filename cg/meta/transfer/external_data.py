@@ -10,7 +10,7 @@ from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import ERROR_RSYNC_FUNCTION, RSYNC_CONTENTS_COMMAND
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
-from cg.store.models import Customer, Sample
+from cg.store.models import Case, Customer, Sample
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 
 LOG = logging.getLogger(__name__)
@@ -180,7 +180,7 @@ class ExternalDataAPI(MetaAPI):
         available_samples: list[Sample] = self.get_available_samples(
             folder=destination_folder_path, ticket=ticket
         )
-        cases_to_start: list[dict] = []
+        cases_to_start: list[Case] = []
         for sample in available_samples:
             cases_to_start.extend(
                 self.status_db.get_not_analysed_cases_by_sample_internal_id(
@@ -211,4 +211,4 @@ class ExternalDataAPI(MetaAPI):
             return
         self.housekeeper_api.commit()
         for case in cases_to_start:
-            self.status_db.set_case_action(case_internal_id=case["internal_id"], action="analyze")
+            self.status_db.set_case_action(case_internal_id=case.internal_id, action="analyze")
