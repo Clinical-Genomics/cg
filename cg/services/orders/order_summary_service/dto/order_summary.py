@@ -8,8 +8,8 @@ class OrderSummary(BaseModel):
     completed: int
     delivered: int
     failed: int
+    failed_sequencing_qc: int
     in_lab_preparation: int
     in_sequencing: int
-    in_topup: int
     not_received: int
     running: int

@@ -38,7 +38,7 @@ def create_order_summary(
         cancelled=analysis_summary.cancelled,
         failed=analysis_summary.failed,
         completed=analysis_summary.completed,
-        in_topup=case_summary.in_topup,
+        failed_sequencing_qc=case_summary.failed_sequencing_qc,
     )
 
 
@@ -50,10 +50,10 @@ def _get_case_map(case_summaries: list[CaseSummary]) -> dict:
     return {summary.order_id: summary for summary in case_summaries}
 
 
-def _is_case_in_topup(case: Case) -> bool:
+def _is_case_failed_sequencing_qc(case: Case) -> bool:
     return case.latest_sequenced and not QualityControllerService.case_pass_sequencing_qc(case)
 
 
-def get_cases_in_topup_count(order: Order) -> int:
+def get_cases_failed_sequencing_qc_count(order: Order) -> int:
     cases: list[Case] = order.cases
-    return sum(1 for case in cases if case.latest_sequenced and _is_case_in_topup(case))
+    return sum(1 for case in cases if case.latest_sequenced and _is_case_failed_sequencing_qc(case))
