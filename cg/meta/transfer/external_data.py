@@ -25,15 +25,15 @@ class ExternalDataAPI(MetaAPI):
         self.base_path: str = config.data_delivery.base_path
         self.customer_id: str | None = None
         self.destination_path: str = config.external.hasta
-        self.dry_run: bool | None = None
-        self.force: bool | None = None
+        self.dry_run: bool = False
+        self.force: bool = False
         self.mail_user: str = config.data_delivery.mail_user
         self.RSYNC_FILE_POSTFIX: str = "_rsync_external_data"
         self.slurm_api: SlurmAPI = SlurmAPI()
         self.source_path: str = config.external.caesar
         self.ticket: str | None = None
 
-    def _set_parameters(self, ticket: str, dry_run: bool, force: bool | None = False):
+    def _set_parameters(self, ticket: str, dry_run: bool, force: bool = False):
         """Set the parameters for the API."""
         self.ticket = ticket
         self.dry_run = dry_run
@@ -42,18 +42,17 @@ class ExternalDataAPI(MetaAPI):
 
     def _create_log_dir(self) -> Path:
         """Creates a directory for log file to be stored"""
-        timestamp: dt.datetime = dt.datetime.now()
-        timestamp_str: str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
-        folder_name = Path("_".join([self.ticket, timestamp_str]))
+        timestamp: str = dt.datetime.now().strftime("%y%m%d_%H_%M_%S_%f")
+        folder_name = Path("_".join([self.ticket, timestamp]))
         log_dir: Path = Path(self.base_path, folder_name)
-        LOG.info(f"Creating folder: {log_dir}")
+        LOG.debug(f"Creating folder: {log_dir}")
         if self.dry_run:
             LOG.info(f"Would have created path {log_dir}, but this is a dry run")
             return log_dir
         log_dir.mkdir(parents=True, exist_ok=False)
         return log_dir
 
-    def _get_source_path(self) -> Path:
+    def _get_customer_source_path(self) -> Path:
         """Returns the path to where the sample files are fetched from."""
         return Path(self.source_path % self.customer_id, self.ticket)
 
@@ -69,7 +68,7 @@ class ExternalDataAPI(MetaAPI):
         self._get_destination_path().mkdir(exist_ok=True)
 
         command: str = RSYNC_CONTENTS_COMMAND.format(
-            source_path=self._get_source_path(),
+            source_path=self._get_customer_source_path(),
             destination_path=self._get_destination_path(),
         )
         sbatch_parameters = Sbatch(
@@ -85,9 +84,11 @@ class ExternalDataAPI(MetaAPI):
         )
         self.slurm_api.set_dry_run(dry_run=dry_run)
         sbatch_content: str = self.slurm_api.generate_sbatch_content(sbatch_parameters)
-        sbatch_path = Path(log_dir, self.ticket + self.RSYNC_FILE_POSTFIX + ".sh")
+        sbatch_path = Path(log_dir, self.ticket + self.RSYNC_FILE_POSTFIX + FileExtensions.SH)
         self.slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
-        LOG.info(f"The folder {self._get_source_path().as_posix()} is now being Rsynced to destination")
+        LOG.info(
+            f"The folder {self._get_customer_source_path().as_posix()} is now being Rsynced to destination"
+        )
 
     def _curate_sample_folder(self, sample_folder: Path) -> None:
         """
@@ -147,7 +148,7 @@ class ExternalDataAPI(MetaAPI):
             last_version=hk_version,
             tags=HK_FASTQ_TAGS,
         )
-        LOG.debug(f"{len(fastq_paths_to_add)} samples are not yet in Housekeeper for {sample_id}")
+        LOG.debug(f"{len(fastq_paths_to_add)} files are not yet in Housekeeper for {sample_id}")
         return fastq_paths_to_add
 
     def _add_and_include_files_to_bundles(

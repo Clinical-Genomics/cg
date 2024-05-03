@@ -44,7 +44,7 @@ def test_get_source_path(
     external_data_api.customer_id = customer_id
 
     # WHEN the function is called and assigned
-    source_path = external_data_api._get_source_path()
+    source_path = external_data_api._get_customer_source_path()
 
     # THEN the return should be
     assert source_path == Path("server.name.se:/path/cust000/on/caesar/123456/")
@@ -87,7 +87,7 @@ def test_transfer_sample_files_from_source(
     Store.get_customer_id_from_ticket.return_value = customer_id
 
     mocker.patch.object(ExternalDataAPI, "_get_source_path")
-    external_data_api._get_source_path.return_value = external_data_directory
+    external_data_api._get_customer_source_path.return_value = external_data_directory
 
     external_data_api.source_path = str(Path("").joinpath(*external_data_directory.parts[:-2]))
     external_data_api.destination_path = str(
@@ -137,11 +137,11 @@ def test_get_sample_ids_from_folder(
     tmp_dir_path.mkdir()
     # GIVEN an External API with a ticket number
     external_data_api.ticket = ticket_id
-    
+
     # WHEN getting the sample ids from the folder
     available_samples = external_data_api._get_sample_ids_from_folder(folder=tmp_dir_path.parent)
 
-     # THEN the function should return a list containing the sample object
+    # THEN the function should return a list containing the sample object
     assert available_samples == [sample.internal_id]
     tmp_dir_path.rmdir()
 

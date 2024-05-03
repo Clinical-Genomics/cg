@@ -204,6 +204,7 @@ class FileExtensions(StrEnum):
     PNG: str = ".png"
     SBATCH: str = ".sbatch"
     SPRING: str = ".spring"
+    SH: str = ".sh"
     TAR: str = ".tar"
     TMP: str = ".tmp"
     TSV: str = ".tsv"
