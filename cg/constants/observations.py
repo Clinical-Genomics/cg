@@ -75,7 +75,6 @@ class RarediseaseObservationsAnalysisTag(StrEnum):
     FAMILY_PED: str = "pedigree"
 
 
-
 class MipDNALoadParameters(Enum):
     """Rare disease Loqusdb load command parameters."""
 
