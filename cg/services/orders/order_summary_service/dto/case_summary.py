@@ -6,3 +6,4 @@ class CaseSummary(BaseModel):
     not_received: int | None = None
     in_preparation: int | None = None
     in_sequencing: int | None = None
+    in_topup: int | None = None

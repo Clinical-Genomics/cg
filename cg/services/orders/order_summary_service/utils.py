@@ -1,7 +1,8 @@
 from cg.apps.tb.dto.summary_response import AnalysisSummary
-from cg.services.orders.order_status_service.dto.case_summary import CaseSummary
-from cg.services.orders.order_status_service.dto.order_summary import OrderSummary
-from cg.store.models import Order
+from cg.services.orders.order_summary_service.dto.case_summary import CaseSummary
+from cg.services.orders.order_summary_service.dto.order_summary import OrderSummary
+from cg.services.quality_controller import QualityControllerService
+from cg.store.models import Case, Order
 
 
 def create_summaries(
@@ -37,6 +38,7 @@ def create_order_summary(
         cancelled=analysis_summary.cancelled,
         failed=analysis_summary.failed,
         completed=analysis_summary.completed,
+        in_topup=case_summary.in_topup,
     )
 
 
@@ -46,3 +48,12 @@ def _get_analysis_map(analysis_summaries: list[AnalysisSummary]) -> dict:
 
 def _get_case_map(case_summaries: list[CaseSummary]) -> dict:
     return {summary.order_id: summary for summary in case_summaries}
+
+
+def _is_case_in_topup(case: Case) -> bool:
+    return case.latest_sequenced and not QualityControllerService.case_pass_sequencing_qc(case)
+
+
+def get_cases_in_topup_count(order: Order) -> int:
+    cases: list[Case] = order.cases
+    return sum(1 for case in cases if case.latest_sequenced and _is_case_in_topup(case))

@@ -10,5 +10,6 @@ class OrderSummary(BaseModel):
     failed: int
     in_lab_preparation: int
     in_sequencing: int
+    in_topup: int
     not_received: int
     running: int
