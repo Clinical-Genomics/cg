@@ -2,7 +2,7 @@
 
 from enum import Enum, StrEnum
 
-from cg.constants.constants import CustomerId, Workflow
+from cg.constants.constants import CancerAnalysisType, CustomerId, Workflow
 from cg.constants.sequencing import SequencingMethod
 
 LOQUSDB_ID = "_id"
@@ -15,7 +15,10 @@ LOQSUDB_CANCER_CUSTOMERS = [
     CustomerId.CUST147,
 ]
 LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS = [SequencingMethod.WGS, SequencingMethod.WES]
-LOQUSDB_CANCER_SEQUENCING_METHODS = [SequencingMethod.WGS]
+LOQUSDB_CANCER_SEQUENCING_METHODS = [
+    CancerAnalysisType.TUMOR_WGS,
+    CancerAnalysisType.TUMOR_NORMAL_WGS,
+]
 
 
 class LoqusdbInstance(StrEnum):

@@ -96,6 +96,13 @@ class AnalysisType(StrEnum):
     OTHER: str = "other"
 
 
+class CancerAnalysisType(StrEnum):
+    TUMOR_WGS: str = "tumor_wgs"
+    TUMOR_NORMAL_WGS: str = "tumor_normal_wgs"
+    TUMOR_PANEL: str = "tumor_panel"
+    TUMOR_NORMAL_PANEL: str = "tumor_normal_panel"
+
+
 class PrepCategory(StrEnum):
     COVID: str = "cov"
     MICROBIAL: str = "mic"

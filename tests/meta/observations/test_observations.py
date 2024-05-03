@@ -8,10 +8,14 @@ from pytest_mock import MockFixture
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LOQUSDB_ID
 from cg.constants.sequencing import SequencingMethod
+from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.models.observations.input_files import MipDNAObservationsInputFiles
+from cg.models.observations.input_files import (
+    BalsamicObservationsInputFiles,
+    MipDNAObservationsInputFiles,
+)
 from cg.store.models import Case, Customer
 
 
@@ -22,15 +26,15 @@ def test_mip_dna_observations_upload(
     number_of_loaded_variants: int,
     mip_dna_observations_api: MipDNAObservationsAPI,
     mip_dna_observations_input_files: MipDNAObservationsInputFiles,
-    caplog: LogCaptureFixture,
     mocker: MockFixture,
+    caplog: LogCaptureFixture,
 ):
     """Test upload of observations."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN an observations API, a list of observation input files, and workflow customers
+    # GIVEN an observations API, a list of observation input files, and a workflow customer
 
-    # GIVEN a case eligible for loqusdb uploads
+    # GIVEN a case eligible for Loqusdb uploads
     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
     case.customer.internal_id = mip_dna_customer.internal_id
 
@@ -54,33 +58,46 @@ def test_mip_dna_observations_upload(
     assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
 
 
-# def test_observations_upload(
-#     case_id: str,
-#     mip_dna_observations_api: MipDNAObservationsAPI,
-#     observations_input_files: MipDNAObservationsInputFiles,
-#     nr_of_loaded_variants: int,
-#     caplog: LogCaptureFixture,
-#     mocker,
-# ):
-#     """Test upload observations method."""
-#
-#     # GIVEN a mocked observations API and a list of mocked observations files
-#
-#     case.customer.internal_id = LoqusdbMipCustomers.KLINISK_IMMUNOLOGI.value
-#     mocker.patch.object(
-#         mip_dna_observations_api,
-#         "get_observations_input_files",
-#         return_value=observations_input_files,
-#     )
-#     mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=False)
-#
-#
-#
-#
-#
-#
-#
-#
+def test_balsamic_observations_upload(
+    case_id: str,
+    loqusdb_id: str,
+    balsamic_customer: Customer,
+    number_of_loaded_variants: int,
+    balsamic_observations_api: BalsamicObservationsAPI,
+    balsamic_observations_input_files: BalsamicObservationsInputFiles,
+    mocker: MockFixture,
+    caplog: LogCaptureFixture,
+):
+    """Test upload of observations."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an observations API, a list of observation input files, and a workflow customer
+
+    # GIVEN a case eligible for Loqusdb uploads
+    case: Case = balsamic_observations_api.store.get_case_by_internal_id(internal_id=case_id)
+    case.customer.internal_id = balsamic_customer.internal_id
+    case.samples[0].is_tumour = True
+
+    # GIVEN a mock scenario for a successful upload
+    mocker.patch.object(AnalysisAPI, "get_data_analysis_type", return_value=SequencingMethod.WGS)
+    mocker.patch.object(
+        ObservationsAPI,
+        "get_observations_input_files",
+        return_value=balsamic_observations_input_files,
+    )
+    mocker.patch.object(ObservationsAPI, "is_duplicate", return_value=False)
+    mocker.patch.object(LoqusdbAPI, "load", return_value={"variants": number_of_loaded_variants})
+    mocker.patch.object(
+        LoqusdbAPI, "get_case", return_value={"case_id": case_id, LOQUSDB_ID: loqusdb_id}
+    )
+
+    # WHEN uploading the case observations to Loqusdb
+    balsamic_observations_api.upload(case)
+
+    # THEN the case should be successfully uploaded
+    assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
+
+
 # def test_get_loqusdb_api(
 #     mip_dna_observations_api: MipDNAObservationsAPI,
 #     loqusdb_config_dict: dict[LoqusdbInstance, dict],
