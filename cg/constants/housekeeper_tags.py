@@ -205,11 +205,11 @@ WORKFLOW_PROTECTED_TAGS = {
     Workflow.RAREDISEASE: [
         ["vcf-snv-clinical"],
         ["vcf-snv-research"],
-        ["vcf-str"], # not unique, problem? (also in addition to mitochondira)
-        ["vcf-snv"], #-> ["snv-gbcf", "snv-bcf"],
+        ["vcf-str"],  # not unique, problem? (also in addition to mitochondira)
+        ["vcf-snv"],  # -> ["snv-gbcf", "snv-bcf"],
         ["qc-metrics"],
         ["smn-calling"],
-        ["vcf-sv"], #->["sv-bcf"],
+        ["vcf-sv"],  # ->["sv-bcf"],
         ["vcf-sv-clinical"],
         ["vcf-sv-research"],
         ["vcf2cytosure"],
