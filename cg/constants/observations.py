@@ -20,7 +20,6 @@ LOQUSDB_CANCER_SEQUENCING_METHODS = [
     CancerAnalysisType.TUMOR_NORMAL_WGS,
 ]
 
-
 class LoqusdbInstance(StrEnum):
     """Observations instances."""
 
@@ -59,9 +58,17 @@ class RarediseaseObservationsAnalysisTag(StrEnum):
     FAMILY_PED: str = "pedigree"
 
 
-
 class MipDNALoadParameters(Enum):
     """Rare disease Loqusdb load command parameters."""
+
+    PROFILE_THRESHOLD: float = 0.95
+    GQ_THRESHOLD: int = 10
+    HARD_THRESHOLD: float = 0.95
+    SOFT_THRESHOLD: float = 0.90
+
+
+class RarediseaseLoadParameters(Enum):
+    """Raredisease Loqusdb load command parameters."""
 
     PROFILE_THRESHOLD: float = 0.95
     GQ_THRESHOLD: int = 10
