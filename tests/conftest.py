@@ -101,6 +101,7 @@ pytest_plugins = [
     "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
 ]
 
+
 # Case fixtures
 
 
@@ -1729,12 +1730,6 @@ def cg_uri() -> str:
 def hk_uri() -> str:
     """Return a Housekeeper URI."""
     return "sqlite:///"
-
-
-@pytest.fixture(name="loqusdb_id")
-def loqusdb_id() -> str:
-    """Returns a Loqusdb mock ID."""
-    return "01ab23cd"
 
 
 @pytest.fixture(name="context_config")

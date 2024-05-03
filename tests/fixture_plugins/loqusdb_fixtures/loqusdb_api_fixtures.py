@@ -8,6 +8,12 @@ from tests.mocks.process_mock import ProcessMock
 
 
 @pytest.fixture
+def loqusdb_id() -> str:
+    """Returns a Loqusdb mock ID."""
+    return "01ab23cd"
+
+
+@pytest.fixture
 def loqusdb_binary_path(cg_context: CGConfig) -> str:
     """Return Loqusdb binary path."""
     return cg_context.loqusdb.binary_path

@@ -2,19 +2,26 @@
 
 import logging
 
-from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
-from cg.constants import Workflow
+from cg.apps.loqus import LoqusdbAPI
+from cg.constants.observations import LOQUSDB_ID
+from cg.constants.sequencing import SequencingMethod
+from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.meta.observations.observations_api import ObservationsAPI
-from cg.models.observations.input_files import ObservationsInputFiles
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.models.observations.input_files import MipDNAObservationsInputFiles
 from cg.store.models import Case, Customer
 
 
 def test_mip_dna_observations_upload(
     case_id: str,
+    loqusdb_id: str,
+    mip_dna_customer: Customer,
     number_of_loaded_variants: int,
+    mip_dna_observations_api: MipDNAObservationsAPI,
+    mip_dna_observations_input_files: MipDNAObservationsInputFiles,
     caplog: LogCaptureFixture,
     mocker: MockFixture,
 ):
@@ -23,17 +30,28 @@ def test_mip_dna_observations_upload(
 
     # GIVEN an observations API, a list of observation input files, and workflow customers
 
-    # GIVEN a case
-    # case: Case = observations_api.store.get_case_by_internal_id(internal_id=case_id)
+    # GIVEN a case eligible for loqusdb uploads
+    case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
+    case.customer.internal_id = mip_dna_customer.internal_id
 
-    # GIVEN
-    # mocker.patch.object(ObservationsAPI, "get_observations_input_files", return_value=input_files)
+    # GIVEN a mock scenario for a successful upload
+    mocker.patch.object(AnalysisAPI, "get_data_analysis_type", return_value=SequencingMethod.WGS)
+    mocker.patch.object(
+        ObservationsAPI,
+        "get_observations_input_files",
+        return_value=mip_dna_observations_input_files,
+    )
+    mocker.patch.object(ObservationsAPI, "is_duplicate", return_value=False)
+    mocker.patch.object(LoqusdbAPI, "load", return_value={"variants": number_of_loaded_variants})
+    mocker.patch.object(
+        LoqusdbAPI, "get_case", return_value={"case_id": case_id, LOQUSDB_ID: loqusdb_id}
+    )
 
     # WHEN uploading the case observations to Loqusdb
-    # observations_api.upload(case)
+    mip_dna_observations_api.upload(case)
 
     # THEN the case should be successfully uploaded
-    # assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
+    assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
 
 
 # def test_observations_upload(
