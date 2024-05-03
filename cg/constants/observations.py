@@ -8,11 +8,20 @@ from cg.constants.sequencing import SequencingMethod
 LOQUSDB_ID = "_id"
 LOQUSDB_SUPPORTED_WORKFLOWS = [Workflow.MIP_DNA, Workflow.BALSAMIC]
 LOQUSDB_MIP_SEQUENCING_METHODS = [SequencingMethod.WGS, SequencingMethod.WES]
+LOQUSDB_RAREDISEASE_SEQUENCING_METHODS = [SequencingMethod.WGS, SequencingMethod.WES]
 LOQUSDB_BALSAMIC_SEQUENCING_METHODS = [SequencingMethod.WGS]
 
 
 class LoqusdbMipCustomers(StrEnum):
     """Loqusdb Rare Disease customers."""
+
+    KLINISK_GENETIK: str = "cust002"
+    CMMS: str = "cust003"
+    KLINISK_IMMUNOLOGI: str = "cust004"
+
+
+class LoqusdbRarediseaseCustomers(StrEnum):
+    """Loqusdb Raredisease customers."""
 
     KLINISK_GENETIK: str = "cust002"
     CMMS: str = "cust003"
@@ -69,6 +78,15 @@ class RarediseaseObservationsAnalysisTag(StrEnum):
 
 class MipDNALoadParameters(Enum):
     """Rare disease Loqusdb load command parameters."""
+
+    PROFILE_THRESHOLD: float = 0.95
+    GQ_THRESHOLD: int = 10
+    HARD_THRESHOLD: float = 0.95
+    SOFT_THRESHOLD: float = 0.90
+
+
+class RarediseaseLoadParameters(Enum):
+    """Raredisease Loqusdb load command parameters."""
 
     PROFILE_THRESHOLD: float = 0.95
     GQ_THRESHOLD: int = 10

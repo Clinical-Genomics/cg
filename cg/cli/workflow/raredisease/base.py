@@ -22,10 +22,9 @@ def raredisease(context: click.Context) -> None:
     AnalysisAPI.get_help(context)
     context.obj.meta_apis[MetaApis.ANALYSIS_API] = RarediseaseAnalysisAPI(config=context.obj)
 
-
+raredisease.add_command(config_case)
 raredisease.add_command(metrics_deliver)
 raredisease.add_command(resolve_compression)
-raredisease.add_command(config_case)
 raredisease.add_command(run)
 raredisease.add_command(start)
 raredisease.add_command(start_available)

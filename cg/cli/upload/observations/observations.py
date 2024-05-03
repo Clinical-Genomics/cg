@@ -21,6 +21,7 @@ from cg.constants.constants import Workflow
 from cg.exc import CaseNotFoundError, LoqusdbError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.meta.observations.raredisease_observations_api import RarediseaseObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from cg.store.store import Store
@@ -39,7 +40,7 @@ def upload_observations_to_loqusdb(context: CGConfig, case_id: str | None, dry_r
 
     with contextlib.suppress(LoqusdbError):
         case: Case = get_observations_case_to_upload(context, case_id)
-        observations_api: MipDNAObservationsAPI | BalsamicObservationsAPI = get_observations_api(
+        observations_api: RarediseaseObservationsAPI | MipDNAObservationsAPI | BalsamicObservationsAPI = get_observations_api(
             context, case
         )
 
