@@ -158,6 +158,7 @@ class CreateValidationCaseAPI:
 
     def create_validation_samples_in_housekeeper(self, validation_case_data: ValidationCaseData):
         self.create_validation_sample_bundles(validation_case_data.validation_samples)
+        LOG.info("Copying fastq files, this can take a while...")
         self.copy_original_sample_bundle_files(validation_case_data.validation_samples)
         self.rename_and_add_original_sample_bundle_files(validation_case_data.validation_samples)
 
