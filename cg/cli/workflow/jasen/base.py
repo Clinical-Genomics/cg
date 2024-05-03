@@ -32,6 +32,8 @@ jasen.add_command(config_case)
 # [x] Add JASEN fixtures to tests/conftest.py
 # [x] Implement config models in cg/models/cg_config.py
 # [>] Add SampleSheet classes in cg/models/jasen/jasen.py
+# [>] Add translation from CG to workflow specific naming in
+#     cg/meta/workflow/jasen.py
 # [ ] Add JASEN to test_config_case_without_options()
 # [ ] Add JASEN to test_config_case_with_missing_case()
 # [ ] Add JASEN to test_config_case_without_samples()
