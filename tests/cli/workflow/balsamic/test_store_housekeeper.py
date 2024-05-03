@@ -143,7 +143,6 @@ def test_valid_case(
     assert not balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
     # GIVEN that HermesAPI returns a deliverables output
-    mocker.patch.object(AnalysisAPI, "get_analysis_started_date", return_value=datetime.now())
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 

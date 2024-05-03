@@ -84,8 +84,7 @@ def test_store(
     # Make sure analysis not already stored in ClinicalDB
     assert not balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
-    # GIVEN a started analysis and a HermesAPI returning a deliverables output
-    mocker.patch.object(AnalysisAPI, "get_analysis_started_date", return_value=datetime.now())
+    # GIVEN a HermesAPI returning a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
@@ -173,7 +172,6 @@ def test_store_available(
 
     # GIVEN that HermesAPI returns a deliverables output and config case performed
     hermes_deliverables["bundle_id"] = case_id_success
-    mocker.patch.object(AnalysisAPI, "get_analysis_started_date", return_value=datetime.now())
     mocker.patch.object(
         HermesApi, "convert_deliverables", return_value=CGDeliverables(**hermes_deliverables)
     )
