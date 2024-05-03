@@ -137,9 +137,11 @@ def test_get_sample_ids_from_folder(
     tmp_dir_path.mkdir()
     # GIVEN an External API with a ticket number
     external_data_api.ticket = ticket_id
+    
     # WHEN getting the sample ids from the folder
     available_samples = external_data_api._get_sample_ids_from_folder(folder=tmp_dir_path.parent)
-    # THEN the function should return a list containing the sample object
+
+     # THEN the function should return a list containing the sample object
     assert available_samples == [sample.internal_id]
     tmp_dir_path.rmdir()
 
@@ -172,6 +174,7 @@ def test_get_fastq_paths_to_add(
 
     # GIVEN a sample id
     sample_id: str = "fastq"
+
     # WHEN getting the fastq paths to add
     fastq_paths: list[Path] = external_data_api._get_fastq_paths_to_add(sample_id=sample_id)
 

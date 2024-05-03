@@ -44,7 +44,7 @@ class ExternalDataAPI(MetaAPI):
         """Creates a directory for log file to be stored"""
         timestamp: dt.datetime = dt.datetime.now()
         timestamp_str: str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
-        folder_name: Path = Path("_".join([self.ticket, timestamp_str]))
+        folder_name = Path("_".join([self.ticket, timestamp_str]))
         log_dir: Path = Path(self.base_path, folder_name)
         LOG.info(f"Creating folder: {log_dir}")
         if self.dry_run:
@@ -54,15 +54,15 @@ class ExternalDataAPI(MetaAPI):
         return log_dir
 
     def _get_source_path(self) -> Path:
-        """Returns the path to where the sample files are fetched from"""
+        """Returns the path to where the sample files are fetched from."""
         return Path(self.source_path % self.customer_id, self.ticket)
 
     def _get_destination_path(self, lims_sample_id: str | None = "") -> Path:
-        """Returns the path to where the files are to be transferred"""
+        """Returns the path to where the files are to be transferred."""
         return Path(self.destination_path % self.customer_id, lims_sample_id)
 
     def transfer_sample_files_from_source(self, ticket: str, dry_run: bool = False) -> None:
-        """Transfers all sample files, related to given ticket, from source to destination"""
+        """Transfers all sample files on given ticket, from source to destination."""
         self._set_parameters(ticket=ticket, dry_run=dry_run)
         LOG.debug(f"Transferring files for ticket {self.ticket} of customer {self.customer_id}")
         log_dir: Path = self._create_log_dir()
@@ -87,14 +87,14 @@ class ExternalDataAPI(MetaAPI):
         sbatch_content: str = self.slurm_api.generate_sbatch_content(sbatch_parameters)
         sbatch_path = Path(log_dir, self.ticket + self.RSYNC_FILE_POSTFIX + ".sh")
         self.slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
-        LOG.info(f"The folder {self._get_source_path().as_posix()} is now being rsynced to hasta")
+        LOG.info(f"The folder {self._get_source_path().as_posix()} is now being Rsynced to destination")
 
     def _curate_sample_folder(self, sample_folder: Path) -> None:
         """
         Changes the name of the folder to the sample internal_id. If force is set to True,
         replaces any previous folder.
         Raises:
-            Exception if the sample from the folder is not present in statusdb.
+            Exception if the sample from the folder is not present in StatusDB.
         """
         # TODO: Implement dry-run
         customer: Customer = self.status_db.get_customer_by_internal_id(self.customer_id)
@@ -108,7 +108,7 @@ class ExternalDataAPI(MetaAPI):
             sample_folder.rename(customer_folder.joinpath(sample.internal_id))
         elif not sample and not self.status_db.get_sample_by_internal_id(sample_folder.name):
             raise Exception(
-                f"{sample_folder} is not a sample present in statusdb. "
+                f"{sample_folder} is not a sample present in StatusDB. "
                 "Move or remove it to continue"
             )
 
@@ -158,7 +158,7 @@ class ExternalDataAPI(MetaAPI):
             LOG.info(f"No files will be added for sample {lims_sample_id} since this is a dry-run")
             return
         for path in fastq_paths:
-            LOG.info(f"Adding path {path} to bundle {lims_sample_id} in housekeeper")
+            LOG.info(f"Adding path {path} to bundle {lims_sample_id} in Housekeeper")
             self.housekeeper_api.add_and_include_file_to_latest_version(
                 bundle_name=lims_sample_id, file=path, tags=HK_FASTQ_TAGS
             )
@@ -204,5 +204,5 @@ class ExternalDataAPI(MetaAPI):
             else:
                 LOG.warning(
                     f"Some files in {sample_id} did not match the given md5sum."
-                    " Changes in housekeeper will not be committed and no cases will be started"
+                    " Changes in Housekeeper will not be committed and no cases will be started"
                 )
