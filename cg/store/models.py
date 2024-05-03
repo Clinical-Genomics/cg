@@ -27,6 +27,7 @@ from cg.constants.constants import (
     SexOptions,
     StatusOptions,
 )
+from cg.constants.devices import DeviceType
 from cg.constants.priority import SlurmQos
 from cg.constants.symbols import EMPTY_STRING
 
