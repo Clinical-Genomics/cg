@@ -98,7 +98,6 @@ def test_transfer_sample_files_from_source(
     external_data_api.transfer_sample_files_from_source(ticket=ticket_id, dry_run=True)
 
     # THEN only the two samples present in the source directory are included in the rsync
-
     assert str(external_data_directory) in caplog.text
 
 
@@ -150,12 +149,35 @@ def test_get_sample_ids_from_folder_no_samples_available(
     ticket_id: str,
     tmpdir_factory,
 ):
+    # GIVEN an External API with a ticket number
+    external_data_api.ticket = ticket_id
     # GIVEN that the empty directory created does not contain any correct folders
     tmp_dir_path: Path = Path(tmpdir_factory.mktemp("not_sample_id", numbered=False))
-    external_data_api.ticket = ticket_id
+    # WHEN getting the sample ids from the folder
     available_samples = external_data_api._get_sample_ids_from_folder(folder=tmp_dir_path)
     # THEN the function should return an empty list
     assert available_samples == []
+
+
+def test_get_fastq_paths_to_add(
+    external_data_api: ExternalDataAPI,
+    fastq_dir: Path,
+    mocker: MockFixture,
+):
+    """Test that getting fastq files to add finds the files in the origin folder."""
+
+    # GIVEN an External API with a sample destination path that has fastq files
+    mocker.patch.object(ExternalDataAPI, "_get_destination_path")
+    ExternalDataAPI._get_destination_path.return_value = fastq_dir
+
+    # GIVEN a sample id
+    sample_id: str = "fastq"
+    # WHEN getting the fastq paths to add
+    fastq_paths: list[Path] = external_data_api._get_fastq_paths_to_add(sample_id=sample_id)
+
+    # THEN the function should return a list of fastq file paths
+    assert isinstance(fastq_paths[0], Path)
+    assert fastq_paths[0].as_posix().endswith(".fastq.gz")
 
 
 def test_add_and_include_files_to_bundles(

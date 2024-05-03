@@ -96,6 +96,7 @@ class ExternalDataAPI(MetaAPI):
         Raises:
             Exception if the sample from the folder is not present in statusdb.
         """
+        # TODO: Implement dry-run
         customer: Customer = self.status_db.get_customer_by_internal_id(self.customer_id)
         customer_folder: Path = sample_folder.parent
         sample: Sample = self.status_db.get_sample_by_customer_and_name(
@@ -136,7 +137,7 @@ class ExternalDataAPI(MetaAPI):
         LOG.debug(f"Checking fastq files in {sample_folder}")
         file_paths: list[Path] = [
             sample_folder.joinpath(path)
-            for path in get_files_matching_pattern(directory=sample_folder, pattern=".fastq.gz")
+            for path in get_files_matching_pattern(directory=sample_folder, pattern="*.fastq.gz")
         ]
         LOG.debug(f"Found {len(file_paths)} fastq files for sample {sample_id}")
         hk_version: Version = self.housekeeper_api.get_or_create_version(bundle_name=sample_id)
