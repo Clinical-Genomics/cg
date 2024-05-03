@@ -136,9 +136,7 @@ class ExternalDataAPI(MetaAPI):
         LOG.debug(f"Checking fastq files in {sample_folder}")
         file_paths: list[Path] = [
             sample_folder.joinpath(path)
-            for path in get_files_matching_pattern(
-                directory=sample_folder, pattern=FileExtensions.FASTQ_GZ.value
-            )
+            for path in get_files_matching_pattern(directory=sample_folder, pattern=".fastq.gz")
         ]
         LOG.debug(f"Found {len(file_paths)} fastq files for sample {sample_id}")
         hk_version: Version = self.housekeeper_api.get_or_create_version(bundle_name=sample_id)
