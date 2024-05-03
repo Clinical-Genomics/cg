@@ -971,3 +971,46 @@ class Order(Base):
 
     def to_dict(self):
         return to_dict(model_instance=self)
+
+
+class RunDevice(Base):
+    """Model for storing run devices."""
+
+    __tablename__ = "run_device"
+
+    id: Mapped[PrimaryKeyInt]
+    type: DeviceType = mapped_column(types.Enum(*(device.value for device in DeviceType)))
+    device_id: Mapped[int] = mapped_column(ForeignKey("device.id"))
+
+    __mapper_args__ = {
+        "polymorphic_identity": "run_device",
+        "polymorphic_on": "type",
+    }
+
+
+class RunDevice(Base):
+    """Model for storing run devices."""
+
+    __tablename__ = "run_device"
+
+    id: Mapped[PrimaryKeyInt]
+    type: DeviceType = mapped_column(types.Enum(*(device.value for device in DeviceType)))
+    device_id: Mapped[int] = mapped_column(ForeignKey("device.id"))
+
+    __mapper_args__ = {
+        "polymorphic_identity": "run_device",
+        "polymorphic_on": "type",
+    }
+
+
+class SampleRunMetrics(Base):
+    __tablename__ = "sample_run_metrics"
+    id: Mapped[PrimaryKeyInt]
+    sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id"))
+    run_metrics_id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"))
+    type: DeviceType = mapped_column(types.Enum(*(device.value for device in DeviceType)))
+
+    __mapper_args__ = {
+        "polymorphic_identity": "sample_run_metrics",
+        "polymorphic_on": "type",
+    }
