@@ -22,7 +22,7 @@ def upgrade():
     op.create_table(
         "run_device",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("type", sa.String(128), nullable=False),
+        sa.Column("type", sa.String(32), nullable=False),
         sa.Column("device_id", sa.String(128), nullable=False),
     )
 
