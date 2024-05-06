@@ -1,17 +1,19 @@
 """Test observations API methods."""
 
 import logging
+from pathlib import Path
 
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
 from cg.apps.loqus import LoqusdbAPI
-from cg.constants.observations import LOQUSDB_ID
+from cg.constants.observations import LOQUSDB_ID, LoqusdbInstance
 from cg.constants.sequencing import SequencingMethod
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
     MipDNAObservationsInputFiles,
@@ -98,26 +100,24 @@ def test_balsamic_observations_upload(
     assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
 
 
-# def test_get_loqusdb_api(
-#     mip_dna_observations_api: MipDNAObservationsAPI,
-#     loqusdb_config_dict: dict[LoqusdbInstance, dict],
-# ):
-#     """Test Loqusdb API retrieval given a Loqusdb instance."""
-#
-#     # GIVEN the expected Loqusdb config dictionary
-#
-#     # GIVEN a WES Loqusdb instance and an observations API
-#     loqusdb_instance = LoqusdbInstance.WES
-#
-#     # WHEN calling the Loqusdb API get method
-#     loqusdb_api: LoqusdbAPI = mip_dna_observations_api.get_loqusdb_api(loqusdb_instance)
-#
-#     # THEN a WES loqusdb api should be returned
-#     assert isinstance(loqusdb_api, LoqusdbAPI)
-#     assert loqusdb_api.binary_path == loqusdb_config_dict[LoqusdbInstance.WES]["binary_path"]
-#     assert loqusdb_api.config_path == loqusdb_config_dict[LoqusdbInstance.WES]["config_path"]
-#
-#
+def test_get_loqusdb_api(cg_context: CGConfig, mip_dna_observations_api: MipDNAObservationsAPI):
+    """Test Loqusdb API retrieval given a Loqusdb instance."""
+
+    # GIVEN a WES Loqusdb instance and an observations API
+    loqusdb_instance = LoqusdbInstance.WES
+
+    # GIVEN the expected Loqusdb config dictionary
+    loqusdb_wes_config: dict[str, Path] = cg_context.loqusdb_wes
+
+    # WHEN calling the Loqusdb API get method
+    loqusdb_api: LoqusdbAPI = mip_dna_observations_api.get_loqusdb_api(loqusdb_instance)
+
+    # THEN a WES Loqusdb API should be returned
+    assert isinstance(loqusdb_api, LoqusdbAPI)
+    assert loqusdb_api.binary_path == loqusdb_wes_config.binary_path
+    assert loqusdb_api.config_path == loqusdb_wes_config.config_path
+
+
 # def test_is_duplicate(
 #     case_id: str,
 #     mip_dna_observations_api: MipDNAObservationsAPI,
