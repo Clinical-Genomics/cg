@@ -32,6 +32,8 @@ def downgrade():
         sa.Column(
             "destination", sa.Enum(*("caesar", "pdc", "uppmax", "mh", "custom")), default="caesar"
         ),
+        sa.Column("sample_id", sa.Integer, nullable=True),
+        sa.Column("pool_id", sa.Integer, nullable=True),
         sa.ForeignKeyConstraint(["sample_id"], ["sample.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["pool_id"], ["pool.id"], ondelete="CASCADE"),
         sa.Column("comment", sa.types.TEXT, nullable=True),
