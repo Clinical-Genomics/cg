@@ -103,7 +103,7 @@ class ObservationsAPI:
         self.store.session.commit()
 
     def is_customer_eligible_for_observations_upload(self, customer_id: str) -> bool:
-        """Return whether the customer is whitelisted for uploading observations."""
+        """Return whether the customer has been whitelisted for uploading observations."""
         if customer_id not in self.get_loqusdb_customers():
             LOG.error(f"Customer {customer_id} is not whitelisted for Loqusdb uploads")
             return False

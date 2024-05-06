@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
 from cg.apps.loqus import LoqusdbAPI
@@ -9,7 +10,7 @@ from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
-from cg.store.models import Case
+from cg.store.models import Case, Customer
 
 
 def test_get_loqusdb_api(cg_context: CGConfig, mip_dna_observations_api: MipDNAObservationsAPI):
@@ -109,3 +110,40 @@ def test_is_duplicate_loqusdb_id(
 
     # THEN a duplicated upload should be identified
     assert is_duplicate is True
+
+
+def test_is_customer_eligible_for_observations_upload(
+    mip_dna_customer: Customer, mip_dna_observations_api: MipDNAObservationsAPI
+):
+    """Test if customer is eligible for MIP-DNA observations upload."""
+
+    # GIVEN a MIP-DNA customer and observations API
+    customer_id: str = mip_dna_customer.internal_id
+
+    # WHEN verifying if the customer is eligible for Balsamic observations upload
+    is_customer_eligible_for_observations_upload: bool = (
+        mip_dna_observations_api.is_customer_eligible_for_observations_upload(customer_id)
+    )
+
+    # THEN the customer's data should be eligible for uploads
+    assert is_customer_eligible_for_observations_upload
+
+
+def test_is_customer_eligible_for_observations_upload_false(
+    balsamic_customer: Customer,
+    mip_dna_observations_api: MipDNAObservationsAPI,
+    caplog: LogCaptureFixture,
+):
+    """Test if customer is not eligible for MIP-DNA observations upload."""
+
+    # GIVEN a Balsamic customer and observations API
+    customer_id: str = balsamic_customer.internal_id
+
+    # WHEN verifying if the customer is eligible for Balsamic observations upload
+    is_customer_eligible_for_observations_upload: bool = (
+        mip_dna_observations_api.is_customer_eligible_for_observations_upload(customer_id)
+    )
+
+    # THEN the customer's data should not be eligible for uploads
+    assert not is_customer_eligible_for_observations_upload
+    assert f"Customer {customer_id} is not whitelisted for Loqusdb uploads" in caplog.text
