@@ -11,6 +11,7 @@ from cg.constants.sequencing import SequencingMethod
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
 from cg.store.models import Case, Customer
 
@@ -53,6 +54,48 @@ def test_balsamic_observations_upload(
 
     # THEN the case should be successfully uploaded
     assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
+
+
+def test_is_analysis_type_eligible_for_observations_upload(
+    case_id: str, balsamic_observations_api: BalsamicObservationsAPI, mocker: MockFixture
+):
+    """Test if the analysis type is eligible for observation uploads."""
+
+    # GIVEN a case ID and a Balsamic observations API
+
+    # GIVEN a case with tumor samples
+    mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
+
+    # WHEN checking analysis type eligibility for a case
+    is_analysis_type_eligible_for_observations_upload: bool = (
+        balsamic_observations_api.is_analysis_type_eligible_for_observations_upload(case_id)
+    )
+
+    # THEN the analysis type should be eligible for observation uploads
+    assert is_analysis_type_eligible_for_observations_upload
+
+
+def test_is_analysis_type_eligible_for_observations_upload_false(
+    case_id: str,
+    balsamic_observations_api: BalsamicObservationsAPI,
+    mocker: MockFixture,
+    caplog: LogCaptureFixture,
+):
+    """Test if the analysis type is not eligible for observation uploads."""
+
+    # GIVEN a case ID and a Balsamic observations API
+
+    # GIVEN a case without tumor samples (normal-only analysis)
+    mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=True)
+
+    # WHEN checking analysis type eligibility for a case
+    is_analysis_type_eligible_for_observations_upload: bool = (
+        balsamic_observations_api.is_analysis_type_eligible_for_observations_upload(case_id)
+    )
+
+    # THEN the analysis type should not be eligible for observation uploads
+    assert not is_analysis_type_eligible_for_observations_upload
+    assert f"Normal only analysis {case_id} is not supported for Loqusdb uploads" in caplog.text
 
 
 # def test_balsamic_load_observations(
