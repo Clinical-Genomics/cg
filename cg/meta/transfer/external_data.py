@@ -167,10 +167,13 @@ class ExternalDataAPI(MetaAPI):
                 bundle_name=lims_sample_id, file=path, tags=HK_FASTQ_TAGS
             )
 
-    def _start_cases(self, cases: list[Case]) -> None:
+    def _start_cases(self, cases: list[Case] | None) -> None:
         """Starts the cases that have not been analysed."""
         if self.dry_run:
             LOG.info("No cases will be started since this is a dry-run")
+            return
+        if not cases:
+            LOG.info("No cases to start")
             return
         for case in cases:
             self.status_db.set_case_action(
