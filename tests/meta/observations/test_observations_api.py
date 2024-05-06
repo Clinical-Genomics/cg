@@ -6,8 +6,11 @@ from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
 from cg.apps.loqus import LoqusdbAPI
+from cg.constants.constants import CustomerId
 from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters
+from cg.constants.sequencing import SequencingMethod
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
 from cg.store.models import Case, Customer
@@ -115,7 +118,7 @@ def test_is_duplicate_loqusdb_id(
 def test_is_customer_eligible_for_observations_upload(
     mip_dna_customer: Customer, mip_dna_observations_api: MipDNAObservationsAPI
 ):
-    """Test if customer is eligible for MIP-DNA observations upload."""
+    """Test if customer is eligible for observations upload."""
 
     # GIVEN a MIP-DNA customer and observations API
     customer_id: str = mip_dna_customer.internal_id
@@ -130,14 +133,12 @@ def test_is_customer_eligible_for_observations_upload(
 
 
 def test_is_customer_eligible_for_observations_upload_false(
-    balsamic_customer: Customer,
-    mip_dna_observations_api: MipDNAObservationsAPI,
-    caplog: LogCaptureFixture,
+    mip_dna_observations_api: MipDNAObservationsAPI, caplog: LogCaptureFixture
 ):
-    """Test if customer is not eligible for MIP-DNA observations upload."""
+    """Test if customer is not eligible for observations upload."""
 
-    # GIVEN a Balsamic customer and observations API
-    customer_id: str = balsamic_customer.internal_id
+    # GIVEN a CG internal customer ID and observations API
+    customer_id: str = CustomerId.CG_INTERNAL_CUSTOMER
 
     # WHEN verifying if the customer is eligible for Balsamic observations upload
     is_customer_eligible_for_observations_upload: bool = (
@@ -147,3 +148,51 @@ def test_is_customer_eligible_for_observations_upload_false(
     # THEN the customer's data should not be eligible for uploads
     assert not is_customer_eligible_for_observations_upload
     assert f"Customer {customer_id} is not whitelisted for Loqusdb uploads" in caplog.text
+
+
+def test_is_sequencing_method_eligible_for_observations_upload(
+    case_id: str,
+    mip_dna_observations_api: MipDNAObservationsAPI,
+    mocker: MockFixture,
+):
+    """Test if the sequencing method is eligible for observations uploads."""
+
+    # GIVEN a MIP-DNA case ID and an observations API
+
+    # GIVEN a supported data analysis type
+    sequencing_method = SequencingMethod.WGS
+    mocker.patch.object(AnalysisAPI, "get_data_analysis_type", return_value=sequencing_method)
+
+    # WHEN verifying that the sequencing method is eligible for observations uploads
+    is_sequencing_method_eligible_for_observations_upload: bool = (
+        mip_dna_observations_api.is_sequencing_method_eligible_for_observations_upload(case_id)
+    )
+
+    # THEN the sequencing method should be eligible for observations uploads
+    assert is_sequencing_method_eligible_for_observations_upload
+
+
+def test_is_sequencing_method_eligible_for_observations_upload_false(
+    case_id: str,
+    mip_dna_observations_api: MipDNAObservationsAPI,
+    mocker: MockFixture,
+    caplog: LogCaptureFixture,
+):
+    """Test if the sequencing method is eligible for observations uploads."""
+
+    # GIVEN a MIP-DNA case ID and an observations API
+
+    # GIVEN a non-supported data analysis type
+    sequencing_method = SequencingMethod.WTS
+    mocker.patch.object(AnalysisAPI, "get_data_analysis_type", return_value=sequencing_method)
+
+    # WHEN verifying that the sequencing method is eligible for observations uploads
+    is_sequencing_method_eligible_for_observations_upload: bool = (
+        mip_dna_observations_api.is_sequencing_method_eligible_for_observations_upload(case_id)
+    )
+
+    # THEN the sequencing method should not be eligible for observations uploads
+    assert not is_sequencing_method_eligible_for_observations_upload
+    assert (
+        f"Sequencing method {sequencing_method} is not supported by Loqusdb uploads" in caplog.text
+    )
