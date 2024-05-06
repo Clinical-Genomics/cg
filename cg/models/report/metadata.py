@@ -1,7 +1,7 @@
-from pydantic import BaseModel, BeforeValidator
+from pydantic import BaseModel, BeforeValidator, field_validator
 from typing_extensions import Annotated
 
-from cg.constants import NA_FIELD
+from cg.constants import NA_FIELD, RIN_MIN_THRESHOLD, RIN_MAX_THRESHOLD
 from cg.models.report.validators import (
     get_float_as_percentage,
     get_gender_as_string,
@@ -101,6 +101,13 @@ class SequencingSampleMetadataModel(SampleMetadataModel):
     input_amount: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     mean_length_r1: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     rin: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+
+    @field_validator("rin")
+    def ensure_rin_thresholds(cls, rin: str) -> str:
+        rin_value = float(rin)
+        if rin_value < RIN_MIN_THRESHOLD or rin_value > RIN_MAX_THRESHOLD:
+            return NA_FIELD
+        return rin
 
 
 class WTSSampleMetadataModel(SequencingSampleMetadataModel):
