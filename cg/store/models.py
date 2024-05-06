@@ -1009,7 +1009,7 @@ class SampleRunMetrics(Base):
     id: Mapped[PrimaryKeyInt]
     sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id"))
     run_metrics_id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"))
-    type: DeviceType = mapped_column(types.Enum(*(device.value for device in DeviceType)))
+    type: DeviceType
 
     __mapper_args__ = {
         "polymorphic_identity": "sample_run_metrics",
