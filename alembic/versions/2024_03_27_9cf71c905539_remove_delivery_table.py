@@ -20,14 +20,9 @@ depends_on = None
 def upgrade():
 
     op.drop_table(table_name="delivery")
-    op.drop_column(table_name="pool", column_name="deliveries")
-    op.drop_column(table_name="sample", column_name="deliveries")
 
 
 def downgrade():
-
-    op.add_column("pool", sa.Column("deliveries", sa.TEXT))
-    op.add_column("sample", sa.Column("deliveries", sa.TEXT))
 
     op.create_table(
         "delivery",
