@@ -980,26 +980,23 @@ class RunDevice(Base):
     __tablename__ = "run_device"
 
     id: Mapped[PrimaryKeyInt]
-    type: DeviceType
-    device_id: Mapped[int] = mapped_column(ForeignKey("device.id"))
+    type: Mapped[DeviceType]
 
     __mapper_args__ = {
-        "polymorphic_identity": "run_device",
         "polymorphic_on": "type",
     }
 
 
-class RunDevice(Base):
+class RunMetrics(Base):
     """Model for storing run devices."""
 
-    __tablename__ = "run_device"
+    __tablename__ = "run_metrics"
 
     id: Mapped[PrimaryKeyInt]
-    type: DeviceType
-    device_id: Mapped[int] = mapped_column(ForeignKey("device.id"))
+    type: Mapped[DeviceType]
+    device_id: Mapped[int] = mapped_column(ForeignKey("run_device.id"))
 
     __mapper_args__ = {
-        "polymorphic_identity": "run_device",
         "polymorphic_on": "type",
     }
 
@@ -1009,9 +1006,8 @@ class SampleRunMetrics(Base):
     id: Mapped[PrimaryKeyInt]
     sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id"))
     run_metrics_id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"))
-    type: DeviceType
+    type: Mapped[DeviceType]
 
     __mapper_args__ = {
-        "polymorphic_identity": "sample_run_metrics",
         "polymorphic_on": "type",
     }
