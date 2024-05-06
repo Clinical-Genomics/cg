@@ -2270,6 +2270,13 @@ def jasen_context(
     return cg_context
 
 
+@pytest.fixture(scope="function")
+def jasen_dir(tmpdir_factory, apps_dir: Path) -> Path:
+    """Return the path to a temporary Jasen directory."""
+    jasen_dir = tmpdir_factory.mktemp("jasen")
+    return Path(jasen_dir).absolute().as_posix()
+
+
 # NF analysis fixtures
 
 
