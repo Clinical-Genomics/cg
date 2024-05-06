@@ -980,7 +980,7 @@ class RunDevice(Base):
     __tablename__ = "run_device"
 
     id: Mapped[PrimaryKeyInt]
-    type: DeviceType = mapped_column(types.Enum(*(device.value for device in DeviceType)))
+    type: DeviceType
     device_id: Mapped[int] = mapped_column(ForeignKey("device.id"))
 
     __mapper_args__ = {
