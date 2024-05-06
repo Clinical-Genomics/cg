@@ -850,7 +850,9 @@ metrics:
   name: maternal_id
   step: multiqc
   value: 0.0
-- condition: null
+- condition:
+    norm: eq
+    threshold: 1.0
   header: null
   id: ADM1
   input: multiqc_data.json

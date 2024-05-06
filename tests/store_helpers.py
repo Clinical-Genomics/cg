@@ -358,7 +358,7 @@ class StoreHelpers:
         application_type: str = "tgs",
         control: str = "",
         customer_id: str = None,
-        sex: str = Sex.FEMALE,
+        sex: str = Sex.MALE,
         is_external: bool = False,
         is_rna: bool = False,
         is_tumour: bool = False,

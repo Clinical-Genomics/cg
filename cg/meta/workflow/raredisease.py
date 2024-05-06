@@ -15,7 +15,7 @@ from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
 )
-from cg.store.models import CaseSample
+from cg.store.models import CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -111,5 +111,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Create and return the managed variants."""
         return self._get_managed_variants(genome_build=GenePanelGenomeBuild.hg19)
 
-    def get_workflow_metrics(self) -> dict:
+    def get_workflow_metrics(self, sample_id: str) -> dict:
+        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
+        RAREDISEASE_METRIC_CONDITIONS["sex"]["threshold"] = self.get_sex_code(sample.sex)
         return RAREDISEASE_METRIC_CONDITIONS
