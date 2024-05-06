@@ -850,15 +850,13 @@ metrics:
   name: maternal_id
   step: multiqc
   value: 0.0
-- condition:
-    norm: eq
-    threshold: 1.0
+- condition: null
   header: null
   id: ADM1
   input: multiqc_data.json
   name: sex
   step: multiqc
-  value: 1.0
+  value: 2.0
 - condition: null
   header: null
   id: ADM1
@@ -1047,7 +1045,7 @@ metrics:
   input: multiqc_data.json
   name: ped_sex_sex_check
   step: multiqc
-  value: male
+  value: female
 - condition: null
   header: null
   id: ADM1
@@ -1076,13 +1074,15 @@ metrics:
   name: het_ratio_sex_check
   step: multiqc
   value: 0.03753
-- condition: null
+- condition:
+    norm: eq
+    threshold: female
   header: null
   id: ADM1
   input: multiqc_data.json
   name: predicted_sex_sex_check
   step: multiqc
-  value: male
+  value: female
 - condition: null
   header: null
   id: ADM1
