@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from cg.constants import FileExtensions
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum, is_md5sum_correct
 
 
@@ -23,7 +24,7 @@ def test_extract_checksum(fastq_file: Path):
     """Tests if the function successfully extract the correct md5sum."""
 
     # GIVEN a file containing a md5sum
-    md5sum_file = Path(f"{fastq_file.as_posix()}.md5")
+    md5sum_file = Path(f"{fastq_file.as_posix()}{FileExtensions.MD5}")
 
     # WHEN extracting the md5 sum
     extracted_sum: str = extract_md5sum(md5sum_file=md5sum_file)
