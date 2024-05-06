@@ -29,7 +29,7 @@ def upgrade():
     op.create_table(
         "run_metrics",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("type", sa.String(128), nullable=False),
+        sa.Column("type", sa.String(32), nullable=False),
     )
 
     op.create_table(
@@ -37,7 +37,7 @@ def upgrade():
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("sample_id", sa.Integer(), nullable=False),
         sa.Column("run_metrics_id", sa.Integer(), nullable=False),
-        sa.Column("type", sa.String(128), nullable=False),
+        sa.Column("type", sa.String(32), nullable=False),
     )
 
 
