@@ -91,7 +91,7 @@ def test_transfer_sample_files_from_source(
     external_data_api._get_customer_source_path.return_value = external_data_directory
 
     external_data_api.source_path = str(Path("").joinpath(*external_data_directory.parts[:-2]))
-    external_data_api.destination_path = str(
+    external_data_api.destination_path_stub = str(
         Path("").joinpath(*external_data_directory.parts[:-1], "%s")
     )
 

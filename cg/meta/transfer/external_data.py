@@ -24,7 +24,7 @@ class ExternalDataAPI(MetaAPI):
         self.account: str = config.data_delivery.account
         self.base_path: str = config.data_delivery.base_path
         self.customer_id: str | None = None
-        self.destination_path: str = config.external.hasta
+        self.destination_path_stub: str = config.external.hasta
         self.dry_run: bool = False
         self.force: bool = False
         self.mail_user: str = config.data_delivery.mail_user
@@ -58,7 +58,7 @@ class ExternalDataAPI(MetaAPI):
 
     def _get_destination_path(self, lims_sample_id: str | None = "") -> Path:
         """Returns the path to where the files are to be transferred."""
-        return Path(self.destination_path % self.customer_id, lims_sample_id)
+        return Path(self.destination_path_stub % self.customer_id, lims_sample_id)
 
     def transfer_sample_files_from_source(self, ticket: str, dry_run: bool = False) -> None:
         """Transfers all sample files on given ticket, from source to destination."""
