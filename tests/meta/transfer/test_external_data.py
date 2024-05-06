@@ -7,6 +7,7 @@ from housekeeper.store.models import File
 from pytest_mock import MockFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import SequencingFileTag
 from cg.constants.constants import CaseActions
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.store.models import Case, Sample
@@ -191,7 +192,7 @@ def test_add_and_include_files_to_bundles(
 
     # GIVEN a sample that does not have any fastq files in Housekeeper
     hk_api: HousekeeperAPI = external_data_api.housekeeper_api
-    assert not hk_api.files(tags=set("fastq"), bundle=sample.internal_id).all()
+    assert not hk_api.files(tags=set(SequencingFileTag.FASTQ), bundle=sample.internal_id).all()
 
     # WHEN the fastq file is added and included to Housekeeper
     external_data_api._add_and_include_files_to_bundles(
@@ -199,7 +200,7 @@ def test_add_and_include_files_to_bundles(
     )
 
     # THEN the files should be in Housekeeper
-    file: File = hk_api.files(tags=set("fastq"), bundle=sample.internal_id).first()
+    file: File = hk_api.files(tags=set(SequencingFileTag.FASTQ), bundle=sample.internal_id).first()
     assert file.path.endswith(fastq_file.name)
 
 
