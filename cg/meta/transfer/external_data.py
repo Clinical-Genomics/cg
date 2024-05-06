@@ -97,21 +97,24 @@ class ExternalDataAPI(MetaAPI):
         Raises:
             Exception if the sample from the folder is not present in StatusDB.
         """
-        # TODO: Implement dry-run
         customer: Customer = self.status_db.get_customer_by_internal_id(self.customer_id)
         customer_folder: Path = sample_folder.parent
-        sample: Sample = self.status_db.get_sample_by_customer_and_name(
+        sample_by_name: Sample | None = self.status_db.get_sample_by_customer_and_name(
             customer_entry_id=[customer.id], sample_name=sample_folder.name
         )
-        if (sample and not customer_folder.joinpath(sample.internal_id).exists()) or (
-            sample and self.force
-        ):
-            sample_folder.rename(customer_folder.joinpath(sample.internal_id))
-        elif not sample and not self.status_db.get_sample_by_internal_id(sample_folder.name):
+        sample_by_id: Sample | None = self.status_db.get_sample_by_internal_id(sample_folder.name)
+        if not (sample_by_name or sample_by_id):
             raise Exception(
                 f"{sample_folder} is not a sample present in StatusDB. "
                 "Move or remove it to continue"
             )
+        sample: Sample = sample_by_name or sample_by_id
+        new_folder: Path = customer_folder.joinpath(sample.internal_id)
+        if not new_folder.exists() or self.force:
+            if self.dry_run:
+                LOG.debug(f"Dry-run: Would have renamed folder {sample_folder} to {new_folder}")
+                return
+            sample_folder.rename(new_folder)
 
     def _get_sample_ids_from_folder(self, folder: Path) -> list[str]:
         """Returns the valid samples present in the provided folder."""
