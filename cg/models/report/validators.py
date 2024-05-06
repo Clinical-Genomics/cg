@@ -33,14 +33,18 @@ def get_boolean_as_string(value: bool | None) -> str:
     return NA_FIELD
 
 
-def get_float_as_string(value: float | None) -> str:
-    """Return string representation of a float value."""
-    return str(round(float(value), PRECISION)) if value or isinstance(value, float) else NA_FIELD
+def get_number_as_string(value: int | float | None) -> str:
+    """Return string representation of a number."""
+    return (
+        str(round(float(value), PRECISION))
+        if value or isinstance(value, (int, float))
+        else NA_FIELD
+    )
 
 
 def get_float_as_percentage(value: float | None) -> str:
     """Return string percentage representation of a float value."""
-    return get_float_as_string(value * 100) if value or isinstance(value, float) else NA_FIELD
+    return get_number_as_string(value * 100) if value or isinstance(value, float) else NA_FIELD
 
 
 def get_date_as_string(date: datetime | None) -> str:

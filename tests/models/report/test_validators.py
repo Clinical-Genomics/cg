@@ -18,13 +18,13 @@ from cg.models.report.validators import (
     get_boolean_as_string,
     get_date_as_string,
     get_delivered_files_as_file_names,
-    get_float_as_percentage,
-    get_float_as_string,
     get_gender_as_string,
     get_list_as_string,
     get_path_as_string,
     get_prep_category_as_string,
     get_report_string,
+    get_number_as_string,
+    get_float_as_percentage,
 )
 
 
@@ -63,27 +63,53 @@ def test_get_boolean_as_string():
     assert validated_not_bool_field == NA_FIELD
 
 
-def test_get_float_as_string():
+def test_get_float_number_as_string():
     """Test the validation of a float value."""
 
     # GIVEN a valid float input
     float_value: float = 12.3456789
 
     # WHEN performing the validation
-    validated_float_value: str = get_float_as_string(float_value)
+    validated_float_value: str = get_number_as_string(float_value)
 
     # THEN check if the input value was formatted correctly
     assert validated_float_value == "12.35"
 
 
-def test_get_float_as_string_zero_input():
+def test_get_float_nomber_as_string_zero_input():
     """Tests the validation of a float value when input is zero."""
 
     # GIVEN a valid float input
     float_value: float = 0.0
 
     # WHEN performing the validation
-    validated_float_value: str = get_float_as_string(float_value)
+    validated_float_value: str = get_number_as_string(float_value)
+
+    # THEN check if the input value was formatted correctly
+    assert validated_float_value == "0.0"
+
+
+def test_get_int_number_as_string():
+    """Test the validation of an integer."""
+
+    # GIVEN a valid integer input
+    int_value: float = 5
+
+    # WHEN performing the validation
+    validated_float_value: str = get_number_as_string(int_value)
+
+    # THEN check if the input value was formatted correctly
+    assert validated_float_value == "5.0"
+
+
+def test_get_int_number_as_string_zero_input():
+    """Tests the validation of an integer when input is zero."""
+
+    # GIVEN a valid float input
+    int_value: int = 0
+
+    # WHEN performing the validation
+    validated_float_value: str = get_number_as_string(int_value)
 
     # THEN check if the input value was formatted correctly
     assert validated_float_value == "0.0"
