@@ -12,13 +12,6 @@ class MockLoqusdbAPI(LoqusdbAPI):
         super().__init__(binary_path, config_path)
 
     @staticmethod
-    def get_duplicate(*args, **kwargs) -> dict | None:
-        """Mock get_duplicate method."""
-        _ = args
-        _ = kwargs
-        return {"case_id": "case_id"}
-
-    @staticmethod
     def delete_case(*args, **kwargs) -> None:
         """Mock delete_case method."""
         _ = args
