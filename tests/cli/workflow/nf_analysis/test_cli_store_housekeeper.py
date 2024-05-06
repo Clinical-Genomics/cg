@@ -1,6 +1,7 @@
 """Tests CLI common methods to store deliverable files into Housekeeper for NF analyses."""
 
 import logging
+from datetime import datetime
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -15,6 +16,7 @@ from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteStream
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 from cg.utils import Process

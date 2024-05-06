@@ -1,0 +1,132 @@
+{
+  "name": "#123456",
+  "customer": "cust003",
+  "comment": "",
+  "samples": [
+    {
+      "age_at_sampling": "17.18192",
+      "application": "RNAPOAR025",
+      "cohorts":["Other"],
+      "comment": "comment",
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "data_analysis": "tomte",
+      "data_delivery": "scout",
+      "family_name": "family1",
+      "father": "sample3",
+      "mother": "sample2",
+      "name": "sample1",
+      "panels": [
+        "IEM"
+      ],
+      "phenotype_groups":["Phenotype-group"],
+      "phenotype_terms":["HP:0012747","HP:0025049"],
+      "priority": "standard",
+      "quantity": "220",
+      "reference_genome": "hg19",
+      "sex": "female",
+      "source": "fibroblast",
+      "status": "affected",
+      "subject_id": "subject1",
+      "synopsis":"As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for.",
+      "tumour": true,
+      "volume": "1",
+      "well_position": "A:1"
+    },
+    {
+      "age_at_sampling": "2.0",
+      "application": "RNAPOAR025",
+      "cohorts": ["Other"],
+      "comment": "this is a sample comment",
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "data_analysis": "tomte",
+      "data_delivery": "scout",
+      "family_name": "family1",
+      "name": "sample2",
+      "panels": [
+        "IEM"
+      ],
+      "synopsis":"As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for.",
+      "phenotype_groups": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "priority": "standard",
+      "quantity": "220",
+      "reference_genome": "hg19",
+      "sex": "female",
+      "source": "fibroblast",
+      "status": "affected",
+      "subject_id": "subject2",
+      "tumour": false,
+      "volume": "2",
+      "well_position": "B:1"
+    },
+    {
+      "age_at_sampling": "3.0",
+      "application": "RNAPOAR025",
+      "cohorts": ["Other"],
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "data_analysis": "tomte",
+      "data_delivery": "scout",
+      "family_name": "family1",
+      "name": "sample3",
+      "panels": [
+        "IEM"
+      ],
+      "phenotype_groups": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "priority": "standard",
+      "quantity": "220",
+      "reference_genome": "hg19",
+      "sex": "male",
+      "source": "tissue (fresh frozen)",
+      "status": "affected",
+      "subject_id": "subject3",
+      "synopsis":"As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for.",
+      "tumour": false,
+      "volume": "3",
+      "well_position": "C:1"
+    },
+    {
+      "age_at_sampling": "4.0",
+      "application": "RNAPOAR025",
+      "cohorts": ["Other"],
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "data_analysis": "tomte",
+      "data_delivery": "scout",
+      "family_name": "family2",
+      "name": "sample4",
+      "panels": [
+        "IEM"
+      ],
+      "phenotype_groups": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "priority": "standard",
+      "quantity": "220",
+      "reference_genome": "hg19",
+      "sex": "female",
+      "source": "tissue (fresh frozen)",
+      "status": "affected",
+      "subject_id": "subjectsample4",
+      "synopsis": "As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for.",
+      "tumour": false,
+      "volume": "4",
+      "well_position": "D:1"
+    }
+  ]
+}
+
