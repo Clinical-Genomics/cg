@@ -5,6 +5,6 @@ from enum import Enum, auto
 
 class DeviceType(Enum):
     ILLUMINA = auto()
-    SEPHYR = auto()
+    BIONANO = auto()
     OXFORD_NANOPORE = auto()
     PACBIO = auto()
