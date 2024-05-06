@@ -175,7 +175,7 @@ class ExternalDataAPI(MetaAPI):
             )
             LOG.info(f"Case {case.internal_id} has been set to '{CaseActions.ANALYZE}'")
 
-    def add_transfer_to_housekeeper(
+    def add_external_data_to_housekeeper(
         self, ticket: str, dry_run: bool = False, force: bool = False
     ) -> None:
         """

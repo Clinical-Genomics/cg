@@ -86,7 +86,7 @@ def test_transfer_sample_files_from_source(
     mocker.patch.object(Store, "get_customer_id_from_ticket")
     Store.get_customer_id_from_ticket.return_value = customer_id
 
-    mocker.patch.object(ExternalDataAPI, "_get_source_path")
+    mocker.patch.object(ExternalDataAPI, "_get_customer_source_path")
     external_data_api._get_customer_source_path.return_value = external_data_directory
 
     external_data_api.source_path = str(Path("").joinpath(*external_data_directory.parts[:-2]))
@@ -262,7 +262,7 @@ def test_add_transfer_to_housekeeper(
     )
 
     # WHEN the sample bundles are added to housekeeper
-    external_data_api.add_transfer_to_housekeeper(ticket=ticket_id)
+    external_data_api.add_external_data_to_housekeeper(ticket=ticket_id)
 
     # THEN two sample bundles exist in housekeeper and the file has been added to those bundles
     added_samples = list(external_data_api.housekeeper_api.bundles())
