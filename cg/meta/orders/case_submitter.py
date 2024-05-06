@@ -171,7 +171,7 @@ class CaseSubmitter(Submitter):
             )
 
             panels: set[str] = set()
-            if data_analysis == Workflow.MIP_DNA:
+            if data_analysis in [Workflow.MIP_DNA, Workflow.TOMTE]:
                 panels: set[str] = {
                     panel for sample in case_samples for panel in sample.panels if panel
                 }
