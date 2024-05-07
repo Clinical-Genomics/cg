@@ -114,7 +114,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     @property
     def is_gene_panel_required(self) -> bool:
-        """Return True if a gene panel is needs to be created using the information in StatusDB and exporting it from Scout."""
+        """Return True if a gene panel needs to be created using the information in StatusDB and exporting it from Scout."""
         return False
 
     def get_profile(self, profile: str | None = None) -> str:
@@ -206,7 +206,7 @@ class NfAnalysisAPI(AnalysisAPI):
             Path(self.get_case_path(case_id=case_id)).mkdir(parents=True, exist_ok=True)
 
     def get_log_path(self, case_id: str, workflow: str, log: str = None) -> Path:
-        """Path to NF log."""
+        """Generates a path to the Nextflow log file."""
         if log:
             return log
         launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
@@ -240,7 +240,9 @@ class NfAnalysisAPI(AnalysisAPI):
         elif reverse_read and not forward_read:
             read_direction = 2
         else:
-            raise ValueError("Either forward or reverse needs to be specified")
+            raise ValueError(
+                "One and only one of forward_read or reverse_read needs to be specified"
+            )
         sorted_metadata: list = sorted(metadata, key=lambda k: k.path)
         return [
             fastq_file.path
@@ -249,7 +251,7 @@ class NfAnalysisAPI(AnalysisAPI):
         ]
 
     def get_paired_read_paths(self, sample=Sample) -> tuple[list[str], list[str]]:
-        """Returns a tuple of paired fastq file paths for the forward and reverse read."""
+        """Returns a tuple of paired fastq file paths for the forward and reverse reads."""
         sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
         fastq_forward_read_paths: list[str] = self.extract_read_files(
             metadata=sample_metadata, forward_read=True
