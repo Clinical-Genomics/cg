@@ -95,7 +95,9 @@ class BalsamicObservationsAPI(ObservationsAPI):
     ) -> None:
         """Load cancer observations to a specific Loqusdb API."""
         is_somatic_db: bool = "somatic" in str(loqusdb_api.config_path)
-        is_paired_analysis: bool = len(self.store.get_samples_by_case_id(case.internal_id)) == 2
+        is_paired_analysis: bool = "tumor_normal" in self.analysis_api.get_data_analysis_type(
+            case.internal_id
+        )
         if is_somatic_db:
             if not is_paired_analysis:
                 return

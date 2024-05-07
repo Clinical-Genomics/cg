@@ -12,7 +12,7 @@
 #     caplog.set_level(logging.DEBUG)
 #
 #     # GIVEN a mock MIP DNA observations API and a list of observations input files
-#     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
+#     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(case_id)
 #     mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=False)
 #
 #     # WHEN loading the case to Loqusdb
@@ -33,7 +33,7 @@
 #     caplog.set_level(logging.DEBUG)
 #
 #     # GIVEN a mocked observations API and a case object that has already been uploaded to Loqusdb
-#     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
+#     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(case_id)
 #     mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=True)
 #
 #     # WHEN uploading the case observations to Loqusdb
@@ -55,7 +55,7 @@
 #     caplog.set_level(logging.DEBUG)
 #
 #     # GIVEN a MIP DNA observations API and a case object with a tumour sample
-#     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
+#     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(case_id)
 #     mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=False)
 #     case.links[0].sample.is_tumour = True
 #
@@ -76,7 +76,7 @@
 #     caplog.set_level(logging.DEBUG)
 #
 #     # GIVEN a Loqusdb instance filled with a case
-#     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
+#     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(case_id)
 #
 #     # WHEN deleting a case
 #     mip_dna_observations_api.delete_case(case)

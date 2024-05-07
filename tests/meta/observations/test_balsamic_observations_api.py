@@ -1,13 +1,20 @@
 """Test Balsamic observations API."""
 
+import logging
+
+import pytest
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
 from cg.apps.lims import LimsAPI
+from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CancerAnalysisType
+from cg.constants.observations import LOQUSDB_ID
 from cg.constants.sample_sources import SourceType
+from cg.exc import LoqusdbDuplicateRecordError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.models.observations.input_files import BalsamicObservationsInputFiles
 from cg.store.models import Case, Customer
 
 
@@ -110,73 +117,96 @@ def test_is_case_not_eligible_for_observations_upload(
     assert not is_case_eligible_for_observations_upload
 
 
-# def test_balsamic_load_observations(
-#     case_id: str,
-#     balsamic_observations_api: BalsamicObservationsAPI,
-#     balsamic_observations_input_files: BalsamicObservationsInputFiles,
-#     nr_of_loaded_variants: int,
-#     caplog: LogCaptureFixture,
-#     mocker,
-# ):
-#     """Test loading of cancer case observations."""
-#     caplog.set_level(logging.DEBUG)
-#
-#     # GIVEN a mock BALSAMIC observations API and a list of observations input files
-#     case: Case = balsamic_observations_api.store.get_case_by_internal_id(internal_id=case_id)
-#     mocker.patch.object(balsamic_observations_api, "is_duplicate", return_value=False)
-#
-#     # WHEN loading the case to Loqusdb
-#     balsamic_observations_api.load_observations(case, balsamic_observations_input_files)
-#
-#     # THEN the observations should be loaded successfully
-#     assert f"Uploaded {nr_of_loaded_variants} variants to Loqusdb" in caplog.text
-#
-#
-# def test_balsamic_load_observations_duplicate(
-#     case_id: str,
-#     mip_dna_observations_api: MipDNAObservationsAPI,
-#     observations_input_files: MipDNAObservationsInputFiles,
-#     caplog: LogCaptureFixture,
-#     mocker,
-# ):
-#     """Test upload cancer duplicate case observations to Loqusdb."""
-#     caplog.set_level(logging.DEBUG)
-#
-#     # GIVEN a balsamic observations API and a case object that has already been uploaded to Loqusdb
-#     case: Case = mip_dna_observations_api.store.get_case_by_internal_id(internal_id=case_id)
-#     mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=True)
-#
-#     # WHEN uploading the case observations to Loqusdb
-#     with pytest.raises(LoqusdbDuplicateRecordError):
-#         # THEN a duplicate record error should be raised
-#         mip_dna_observations_api.load_observations(case, observations_input_files)
-#
-#     assert f"Case {case.internal_id} has already been uploaded to Loqusdb" in caplog.text
-#
-#
-# def test_balsamic_load_cancer_observations(
-#     case_id: str,
-#     balsamic_observations_api: BalsamicObservationsAPI,
-#     balsamic_observations_input_files: BalsamicObservationsInputFiles,
-#     nr_of_loaded_variants: int,
-#     caplog: LogCaptureFixture,
-# ):
-#     """Test loading of case observations for cancer."""
-#     caplog.set_level(logging.DEBUG)
-#
-#     # GIVEN a mock BALSAMIC observations API and a list of observations input files
-#     case: Case = balsamic_observations_api.store.get_case_by_internal_id(internal_id=case_id)
-#
-#     # WHEN loading the case to a somatic Loqusdb instance
-#     balsamic_observations_api.load_cancer_observations(
-#         case, balsamic_observations_input_files, balsamic_observations_api.loqusdb_somatic_api
-#     )
-#
-#     # THEN the observations should be loaded successfully
-#     assert f"Uploaded {nr_of_loaded_variants} variants to Loqusdb" in caplog.text
-#     print(caplog.text)
-#
-#
+def test_load_observations(
+    case_id: str,
+    loqusdb_id: str,
+    balsamic_observations_api: BalsamicObservationsAPI,
+    balsamic_observations_input_files: BalsamicObservationsInputFiles,
+    number_of_loaded_variants: int,
+    caplog: LogCaptureFixture,
+    mocker: MockFixture,
+):
+    """Test loading of Balsamic case observations."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN an observations API and a list of input files for upload
+    case: Case = balsamic_observations_api.store.get_case_by_internal_id(case_id)
+    mocker.patch.object(
+        BalsamicObservationsAPI,
+        "get_observations_input_files",
+        return_value=balsamic_observations_input_files,
+    )
+
+    # GIVEN a Loqusdb mocked scenario
+    mocker.patch.object(BalsamicObservationsAPI, "is_duplicate", return_value=False)
+    mocker.patch.object(LoqusdbAPI, "load", return_value={"variants": number_of_loaded_variants})
+    mocker.patch.object(
+        LoqusdbAPI, "get_case", return_value={"case_id": case_id, LOQUSDB_ID: loqusdb_id}
+    )
+
+    # WHEN loading the case to Loqusdb
+    balsamic_observations_api.load_observations(case)
+
+    # THEN the observations should be loaded successfully
+    assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
+
+
+def test_load_duplicated_observations(
+    case_id: str,
+    balsamic_observations_api: BalsamicObservationsAPI,
+    caplog: LogCaptureFixture,
+    mocker: MockFixture,
+):
+    """Test loading of Balsamic case observations."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN an observations API and a Balsamic case
+    case: Case = balsamic_observations_api.store.get_case_by_internal_id(case_id)
+
+    # GIVEN a duplicate case in Loqusdb
+    mocker.patch.object(BalsamicObservationsAPI, "is_duplicate", return_value=True)
+
+    # WHEN loading the case to Loqusdb
+    with pytest.raises(LoqusdbDuplicateRecordError):
+        balsamic_observations_api.load_observations(case)
+
+    # THEN the observations upload should be aborted
+    assert f"Case {case.internal_id} has already been uploaded to Loqusdb" in caplog.text
+
+
+def test_load_cancer_observations(
+    case_id: str,
+    balsamic_observations_api: BalsamicObservationsAPI,
+    balsamic_observations_input_files: BalsamicObservationsInputFiles,
+    number_of_loaded_variants: int,
+    mocker: MockFixture,
+    caplog: LogCaptureFixture,
+):
+    """Test loading of case observations for Balsamic."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a Balsamic observations API, a list of input files, and a cancer case
+    case: Case = balsamic_observations_api.store.get_case_by_internal_id(case_id)
+
+    # GIVEN a mocked return from the Loqusdb API
+    mocker.patch.object(LoqusdbAPI, "load", return_value={"variants": number_of_loaded_variants})
+    mocker.patch.object(
+        BalsamicAnalysisAPI,
+        "get_data_analysis_type",
+        return_value=CancerAnalysisType.TUMOR_NORMAL_WGS,
+    )
+
+    # WHEN loading the case to a somatic Loqusdb instance
+    balsamic_observations_api.load_cancer_observations(
+        case=case,
+        input_files=balsamic_observations_input_files,
+        loqusdb_api=balsamic_observations_api.loqusdb_somatic_api,
+    )
+
+    # THEN the observations should be loaded successfully
+    assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
+
+
 # def test_balsamic_delete_case(
 #     case_id: str,
 #     balsamic_observations_api: BalsamicObservationsAPI,
@@ -186,7 +216,7 @@ def test_is_case_not_eligible_for_observations_upload(
 #     caplog.set_level(logging.DEBUG)
 #
 #     # GIVEN a Loqusdb instance and a case that has been uploaded to both somatic and tumor instances
-#     case: Case = balsamic_observations_api.store.get_case_by_internal_id(internal_id=case_id)
+#     case: Case = balsamic_observations_api.store.get_case_by_internal_id(case_id)
 #
 #     # WHEN deleting the case
 #     balsamic_observations_api.delete_case(case)

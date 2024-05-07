@@ -44,7 +44,7 @@ def test_observations_upload(
     caplog: LogCaptureFixture,
 ):
     """Test upload of observations."""
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
 
     # GIVEN an observations API, a list of observation input files, and a workflow customer
     observations_api: ObservationsAPI = request.getfixturevalue(
@@ -56,7 +56,7 @@ def test_observations_upload(
     customer: Customer = request.getfixturevalue(f"{workflow.replace('-', '_')}_customer")
 
     # GIVEN a case eligible for Loqusdb uploads
-    case: Case = observations_api.store.get_case_by_internal_id(internal_id=case_id)
+    case: Case = observations_api.store.get_case_by_internal_id(case_id)
     case.customer.internal_id = customer.internal_id
     case.samples[0].is_tumour = is_tumour
 
@@ -99,7 +99,7 @@ def test_observations_upload_not_eligible(
     caplog: LogCaptureFixture,
 ):
     """Test upload of observations."""
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
 
     # GIVEN an observations API, a list of observation input files, and a workflow customer
     observations_api: ObservationsAPI = request.getfixturevalue(
@@ -111,7 +111,7 @@ def test_observations_upload_not_eligible(
     customer: Customer = request.getfixturevalue(f"{workflow.replace('-', '_')}_customer")
 
     # GIVEN a case eligible for Loqusdb uploads
-    case: Case = observations_api.store.get_case_by_internal_id(internal_id=case_id)
+    case: Case = observations_api.store.get_case_by_internal_id(case_id)
     case.customer.internal_id = customer.internal_id
     case.samples[0].is_tumour = is_tumour
 
@@ -187,7 +187,7 @@ def test_is_not_duplicate(
     )
 
     # GIVEN a Loqusdb instance with no case duplicates
-    case: Case = observations_api.store.get_case_by_internal_id(internal_id=case_id)
+    case: Case = observations_api.store.get_case_by_internal_id(case_id)
     loqusdb_api: LoqusdbAPI = observations_api.get_loqusdb_api(loqusdb_instance)
     mocker.patch.object(LoqusdbAPI, "get_case", return_value=None)
     mocker.patch.object(LoqusdbAPI, "get_duplicate", return_value=False)
@@ -226,7 +226,7 @@ def test_is_duplicate(
     )
 
     # GIVEN a Loqusdb instance with a duplicated case
-    case: Case = observations_api.store.get_case_by_internal_id(internal_id=case_id)
+    case: Case = observations_api.store.get_case_by_internal_id(case_id)
     loqusdb_api: LoqusdbAPI = observations_api.get_loqusdb_api(loqusdb_instance)
     mocker.patch.object(LoqusdbAPI, "get_case", return_value=None)
     mocker.patch.object(LoqusdbAPI, "get_duplicate", return_value={"case_id": case_id})
@@ -266,7 +266,7 @@ def test_is_duplicate_loqusdb_id(
     )
 
     # GIVEN a Loqusdb instance with a duplicated case and whose samples already have a Loqusdb ID
-    case: Case = observations_api.store.get_case_by_internal_id(internal_id=case_id)
+    case: Case = observations_api.store.get_case_by_internal_id(case_id)
     loqusdb_api: LoqusdbAPI = observations_api.get_loqusdb_api(loqusdb_instance)
     case.links[0].sample.loqusdb_id = loqusdb_id
     mocker.patch.object(LoqusdbAPI, "get_case", return_value=None)
