@@ -5,9 +5,11 @@ import logging
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
+from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CancerAnalysisType
 from cg.constants.observations import LOQUSDB_ID
+from cg.constants.sample_sources import SourceType
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -49,6 +51,7 @@ def test_balsamic_observations_upload(
     mocker.patch.object(
         LoqusdbAPI, "get_case", return_value={"case_id": case_id, LOQUSDB_ID: loqusdb_id}
     )
+    mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
 
     # WHEN uploading the case observations to Loqusdb
     balsamic_observations_api.upload(case)
@@ -116,6 +119,7 @@ def test_is_case_eligible_for_observations_upload(
         BalsamicAnalysisAPI, "get_data_analysis_type", return_value=CancerAnalysisType.TUMOR_WGS
     )
     mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
+    mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
 
     # WHEN checking the upload eligibility for a case
     is_case_eligible_for_observations_upload: bool = (
@@ -144,6 +148,7 @@ def test_is_case_eligible_for_observations_upload_false(
         BalsamicAnalysisAPI, "get_data_analysis_type", return_value=CancerAnalysisType.TUMOR_PANEL
     )
     mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
+    mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
 
     # WHEN checking the upload eligibility for a case
     is_case_eligible_for_observations_upload: bool = (

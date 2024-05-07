@@ -5,8 +5,10 @@ import logging
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
+from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LOQUSDB_ID
+from cg.constants.sample_sources import SourceType
 from cg.constants.sequencing import SequencingMethod
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.meta.observations.observations_api import ObservationsAPI
@@ -46,6 +48,7 @@ def test_mip_dna_observations_upload(
     mocker.patch.object(
         LoqusdbAPI, "get_case", return_value={"case_id": case_id, LOQUSDB_ID: loqusdb_id}
     )
+    mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
 
     # WHEN uploading the case observations to Loqusdb
     mip_dna_observations_api.upload(case)

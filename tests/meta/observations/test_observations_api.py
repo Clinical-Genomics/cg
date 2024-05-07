@@ -5,6 +5,7 @@ from pathlib import Path
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
+from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CustomerId
 from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters
@@ -15,7 +16,6 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
 from cg.store.models import Case, Customer
-from tests.mocks.limsmock import MockLimsAPI
 
 
 def test_get_loqusdb_api(cg_context: CGConfig, mip_dna_observations_api: MipDNAObservationsAPI):
@@ -201,13 +201,15 @@ def test_is_sequencing_method_eligible_for_observations_upload_false(
 
 
 def test_is_sample_source_eligible_for_observations_upload(
-    case_id: str, mip_dna_observations_api: MipDNAObservationsAPI
+    case_id: str, mip_dna_observations_api: MipDNAObservationsAPI, mocker: MockFixture
 ):
     """Test if the sample source is eligible for observations uploads."""
 
     # GIVEN a MIP-DNA case ID and an observations API
 
     # GIVEN a supported sample source
+    source_type = SourceType.TISSUE
+    mocker.patch.object(LimsAPI, "get_source", return_value=source_type)
 
     # WHEN verifying that the sample source is eligible for observations uploads
     is_sample_source_eligible_for_observations_upload: bool = (
@@ -229,8 +231,8 @@ def test_is_sample_source_eligible_for_observations_upload_false(
     # GIVEN a MIP-DNA case ID and an observations API
 
     # GIVEN a not supported sample source
-    source_type = SourceType.FFPE
-    mocker.patch.object(MockLimsAPI, "get_source", return_value=source_type)
+    source_type = SourceType.TISSUE_FFPE
+    mocker.patch.object(LimsAPI, "get_source", return_value=source_type)
 
     # WHEN verifying that the sample source is eligible for observations uploads
     is_sample_source_eligible_for_observations_upload: bool = (

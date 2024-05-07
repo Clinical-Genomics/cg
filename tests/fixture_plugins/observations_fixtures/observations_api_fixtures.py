@@ -16,7 +16,6 @@ def balsamic_observations_api(
     """Cancer observations API fixture."""
     balsamic_observations_api: BalsamicObservationsAPI = BalsamicObservationsAPI(cg_context)
     balsamic_observations_api.store = analysis_store
-    balsamic_observations_api.lims_api = lims_api
     return balsamic_observations_api
 
 
@@ -27,5 +26,4 @@ def mip_dna_observations_api(
     """Rare diseases observations API fixture."""
     mip_dna_observations_api: MipDNAObservationsAPI = MipDNAObservationsAPI(cg_context)
     mip_dna_observations_api.store = analysis_store
-    mip_dna_observations_api.analysis_api.lims_api = lims_api
     return mip_dna_observations_api
