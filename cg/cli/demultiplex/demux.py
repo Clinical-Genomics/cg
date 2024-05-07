@@ -29,7 +29,6 @@ from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 LOG = logging.getLogger(__name__)
 
 
-
 @click.command(name="all")
 @click.option("--flow-cells-directory", type=click.Path(exists=True, file_okay=False))
 @DRY_RUN
