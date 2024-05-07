@@ -151,7 +151,6 @@ class BalsamicObservationsAPI(ObservationsAPI):
                     f"Case {case.internal_id} could not be found in Loqusdb. Skipping case deletion."
                 )
                 raise CaseNotFoundError
-
         for loqusdb_api in loqusdb_apis:
             loqusdb_api.delete_case(case.internal_id)
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)

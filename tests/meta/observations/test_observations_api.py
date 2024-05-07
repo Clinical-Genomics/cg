@@ -14,7 +14,7 @@ from cg.constants.constants import CancerAnalysisType, CustomerId, Workflow
 from cg.constants.observations import LOQUSDB_ID, LoqusdbInstance, MipDNALoadParameters
 from cg.constants.sample_sources import SourceType
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import LoqusdbUploadCaseError
+from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -451,3 +451,84 @@ def test_is_sample_source_not_eligible_for_observations_upload(
     # THEN the source type should not be eligible for observations uploads
     assert not is_sample_source_eligible_for_observations_upload
     assert f"Source type {source_type} is not supported for Loqusdb uploads" in caplog.text
+
+
+@pytest.mark.parametrize(
+    "workflow, analysis_api, sequencing_method",
+    [
+        (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_WGS),
+        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SequencingMethod.WGS),
+    ],
+)
+def test_delete_case(
+    case_id: str,
+    loqusdb_id: str,
+    workflow: Workflow,
+    analysis_api: AnalysisAPI,
+    sequencing_method: str,
+    request: FixtureRequest,
+    mocker: MockFixture,
+    caplog: LogCaptureFixture,
+):
+    """Test delete case from Loqusdb."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a case and an observations API
+    observations_api: ObservationsAPI = request.getfixturevalue(
+        f"{workflow.replace('-', '_')}_observations_api"
+    )
+    case: Case = observations_api.store.get_case_by_internal_id(case_id)
+
+    # GIVEN a case uploaded to Loqusdb
+    mocker.patch.object(
+        LoqusdbAPI, "get_case", return_value={"case_id": case_id, LOQUSDB_ID: loqusdb_id}
+    )
+    mocker.patch.object(analysis_api, "get_data_analysis_type", return_value=sequencing_method)
+    mocker.patch.object(LoqusdbAPI, "delete_case", return_value=None)
+
+    # WHEN deleting a case
+    observations_api.delete_case(case)
+
+    # THEN the case should be deleted from Loqusdb
+    assert f"Removed observations for case {case.internal_id}" in caplog.text
+
+
+@pytest.mark.parametrize(
+    "workflow, analysis_api, sequencing_method",
+    [
+        (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_WGS),
+        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SequencingMethod.WGS),
+    ],
+)
+def test_delete_case_not_found(
+    case_id: str,
+    loqusdb_id: str,
+    workflow: Workflow,
+    analysis_api: AnalysisAPI,
+    sequencing_method: str,
+    request: FixtureRequest,
+    mocker: MockFixture,
+    caplog: LogCaptureFixture,
+):
+    """Test delete case from Loqusdb that has not been uploaded."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a case and an observations API
+    observations_api: ObservationsAPI = request.getfixturevalue(
+        f"{workflow.replace('-', '_')}_observations_api"
+    )
+    case: Case = observations_api.store.get_case_by_internal_id(case_id)
+
+    # GIVEN a case that has not been uploaded to Loqusdb
+    mocker.patch.object(LoqusdbAPI, "get_case", return_value=None)
+    mocker.patch.object(analysis_api, "get_data_analysis_type", return_value=sequencing_method)
+
+    # WHEN deleting a case
+    with pytest.raises(CaseNotFoundError):
+        observations_api.delete_case(case)
+
+    # THEN a CaseNotFoundError should be raised
+    assert (
+        f"Case {case.internal_id} could not be found in Loqusdb. Skipping case deletion."
+        in caplog.text
+    )
