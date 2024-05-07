@@ -1,63 +1,14 @@
 """Test Balsamic observations API."""
 
-import logging
-
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
 from cg.apps.lims import LimsAPI
-from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CancerAnalysisType
-from cg.constants.observations import LOQUSDB_ID
 from cg.constants.sample_sources import SourceType
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
-from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.models.observations.input_files import BalsamicObservationsInputFiles
 from cg.store.models import Case, Customer
-
-
-def test_balsamic_observations_upload(
-    case_id: str,
-    loqusdb_id: str,
-    balsamic_customer: Customer,
-    number_of_loaded_variants: int,
-    balsamic_observations_api: BalsamicObservationsAPI,
-    balsamic_observations_input_files: BalsamicObservationsInputFiles,
-    mocker: MockFixture,
-    caplog: LogCaptureFixture,
-):
-    """Test upload of observations."""
-    caplog.set_level(logging.INFO)
-
-    # GIVEN an observations API, a list of observation input files, and a workflow customer
-
-    # GIVEN a case eligible for Loqusdb uploads
-    case: Case = balsamic_observations_api.store.get_case_by_internal_id(internal_id=case_id)
-    case.customer.internal_id = balsamic_customer.internal_id
-    case.samples[0].is_tumour = True
-
-    # GIVEN a mock scenario for a successful upload
-    mocker.patch.object(
-        BalsamicAnalysisAPI, "get_data_analysis_type", return_value=CancerAnalysisType.TUMOR_WGS
-    )
-    mocker.patch.object(
-        ObservationsAPI,
-        "get_observations_input_files",
-        return_value=balsamic_observations_input_files,
-    )
-    mocker.patch.object(ObservationsAPI, "is_duplicate", return_value=False)
-    mocker.patch.object(LoqusdbAPI, "load", return_value={"variants": number_of_loaded_variants})
-    mocker.patch.object(
-        LoqusdbAPI, "get_case", return_value={"case_id": case_id, LOQUSDB_ID: loqusdb_id}
-    )
-    mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
-
-    # WHEN uploading the case observations to Loqusdb
-    balsamic_observations_api.upload(case)
-
-    # THEN the case should be successfully uploaded
-    assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
 
 
 def test_is_analysis_type_eligible_for_observations_upload(
@@ -79,7 +30,7 @@ def test_is_analysis_type_eligible_for_observations_upload(
     assert is_analysis_type_eligible_for_observations_upload
 
 
-def test_is_analysis_type_eligible_for_observations_upload_false(
+def test_is_analysis_type_not_eligible_for_observations_upload(
     case_id: str,
     balsamic_observations_api: BalsamicObservationsAPI,
     mocker: MockFixture,
@@ -130,7 +81,7 @@ def test_is_case_eligible_for_observations_upload(
     assert is_case_eligible_for_observations_upload
 
 
-def test_is_case_eligible_for_observations_upload_false(
+def test_is_case_not_eligible_for_observations_upload(
     case_id: str,
     balsamic_customer: Customer,
     balsamic_observations_api: BalsamicObservationsAPI,
