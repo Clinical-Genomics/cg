@@ -6,11 +6,10 @@ from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
 from cg.apps.loqus import LoqusdbAPI
+from cg.constants.constants import CancerAnalysisType
 from cg.constants.observations import LOQUSDB_ID
-from cg.constants.sequencing import SequencingMethod
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.observations_api import ObservationsAPI
-from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
 from cg.store.models import Case, Customer
@@ -37,7 +36,9 @@ def test_balsamic_observations_upload(
     case.samples[0].is_tumour = True
 
     # GIVEN a mock scenario for a successful upload
-    mocker.patch.object(AnalysisAPI, "get_data_analysis_type", return_value=SequencingMethod.WGS)
+    mocker.patch.object(
+        BalsamicAnalysisAPI, "get_data_analysis_type", return_value=CancerAnalysisType.TUMOR_WGS
+    )
     mocker.patch.object(
         ObservationsAPI,
         "get_observations_input_files",
@@ -96,6 +97,61 @@ def test_is_analysis_type_eligible_for_observations_upload_false(
     # THEN the analysis type should not be eligible for observation uploads
     assert not is_analysis_type_eligible_for_observations_upload
     assert f"Normal only analysis {case_id} is not supported for Loqusdb uploads" in caplog.text
+
+
+def test_is_case_eligible_for_observations_upload(
+    case_id: str,
+    balsamic_customer: Customer,
+    balsamic_observations_api: BalsamicObservationsAPI,
+    mocker: MockFixture,
+):
+    """Test whether a case is eligible for Balsamic observation uploads."""
+
+    # GIVEN a case and a Balsamic observations API
+    case: Case = balsamic_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
+
+    # GIVEN a balsamic customer, and eligible sequencing method, and a case with tumor samples
+    case.customer.internal_id = balsamic_customer.internal_id
+    mocker.patch.object(
+        BalsamicAnalysisAPI, "get_data_analysis_type", return_value=CancerAnalysisType.TUMOR_WGS
+    )
+    mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
+
+    # WHEN checking the upload eligibility for a case
+    is_case_eligible_for_observations_upload: bool = (
+        balsamic_observations_api.is_case_eligible_for_observations_upload(case)
+    )
+
+    # THEN the case should be eligible for observation uploads
+    assert is_case_eligible_for_observations_upload
+
+
+def test_is_case_eligible_for_observations_upload_false(
+    case_id: str,
+    balsamic_customer: Customer,
+    balsamic_observations_api: BalsamicObservationsAPI,
+    mocker: MockFixture,
+    caplog: LogCaptureFixture,
+):
+    """Test whether a case is eligible for Balsamic observation uploads."""
+
+    # GIVEN a case and a Balsamic observations API
+    case: Case = balsamic_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
+
+    # GIVEN a balsamic customer, a case with tumor samples, and an invalid sequencing type
+    case.customer.internal_id = balsamic_customer.internal_id
+    mocker.patch.object(
+        BalsamicAnalysisAPI, "get_data_analysis_type", return_value=CancerAnalysisType.TUMOR_PANEL
+    )
+    mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
+
+    # WHEN checking the upload eligibility for a case
+    is_case_eligible_for_observations_upload: bool = (
+        balsamic_observations_api.is_case_eligible_for_observations_upload(case)
+    )
+
+    # THEN the case should not be eligible for observation uploads
+    assert not is_case_eligible_for_observations_upload
 
 
 # def test_balsamic_load_observations(
