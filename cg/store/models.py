@@ -416,22 +416,6 @@ class Collaboration(Base):
         }
 
 
-class Delivery(Base):
-    __tablename__ = "delivery"
-    id: Mapped[PrimaryKeyInt]
-    delivered_at: Mapped[datetime | None]
-    removed_at: Mapped[datetime | None]
-    destination: Mapped[str | None] = mapped_column(
-        types.Enum("caesar", "pdc", "uppmax", "mh", "custom"), default="caesar"
-    )
-    sample_id: Mapped[int | None] = mapped_column(ForeignKey("sample.id", ondelete="CASCADE"))
-    pool_id: Mapped[int | None] = mapped_column(ForeignKey("pool.id", ondelete="CASCADE"))
-    comment: Mapped[Text | None]
-
-    def to_dict(self):
-        return to_dict(model_instance=self)
-
-
 class Case(Base, PriorityMixin):
     __tablename__ = "case"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
@@ -731,7 +715,6 @@ class Pool(Base):
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     delivered_at: Mapped[datetime | None]
-    deliveries: Mapped[list[Delivery]] = orm.relationship(backref="pool")
     id: Mapped[PrimaryKeyInt]
     invoice_id: Mapped[int | None] = mapped_column(ForeignKey("invoice.id"))
     name: Mapped[Str32]
@@ -763,7 +746,6 @@ class Sample(Base, PriorityMixin):
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     delivered_at: Mapped[datetime | None]
-    deliveries: Mapped[list[Delivery]] = orm.relationship(backref="sample")
     downsampled_to: Mapped[BigInt | None]
     from_sample: Mapped[Str128 | None]
     id: Mapped[PrimaryKeyInt]
