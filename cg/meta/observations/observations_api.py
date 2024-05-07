@@ -10,6 +10,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CustomerId
 from cg.constants.observations import LoqusdbInstance
+from cg.constants.sample_sources import SourceType
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import LoqusdbUploadCaseError
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -118,6 +119,14 @@ class ObservationsAPI:
             LOG.error(f"Sequencing method {sequencing_method} is not supported by Loqusdb uploads")
             return False
         return True
+
+    def is_sample_source_eligible_for_observations_upload(self, case_id: str) -> bool:
+        """Check if the sample source is FFPE."""
+        source_type: str | None = self.analysis_api.get_case_source_type(case_id)
+        if source_type and SourceType.FFPE.lower() not in source_type.lower():
+            return True
+        LOG.error(f"Source type {source_type} is not supported for Loqusdb uploads")
+        return False
 
     def load_observations(self, case: Case) -> None:
         """Load observation counts to Loqusdb."""

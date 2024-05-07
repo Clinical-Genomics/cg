@@ -8,12 +8,14 @@ from pytest_mock import MockFixture
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CustomerId
 from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters
+from cg.constants.sample_sources import SourceType
 from cg.constants.sequencing import SequencingMethod
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
 from cg.store.models import Case, Customer
+from tests.mocks.limsmock import MockLimsAPI
 
 
 def test_get_loqusdb_api(cg_context: CGConfig, mip_dna_observations_api: MipDNAObservationsAPI):
@@ -196,3 +198,45 @@ def test_is_sequencing_method_eligible_for_observations_upload_false(
     assert (
         f"Sequencing method {sequencing_method} is not supported by Loqusdb uploads" in caplog.text
     )
+
+
+def test_is_sample_source_eligible_for_observations_upload(
+    case_id: str, mip_dna_observations_api: MipDNAObservationsAPI
+):
+    """Test if the sample source is eligible for observations uploads."""
+
+    # GIVEN a MIP-DNA case ID and an observations API
+
+    # GIVEN a supported sample source
+
+    # WHEN verifying that the sample source is eligible for observations uploads
+    is_sample_source_eligible_for_observations_upload: bool = (
+        mip_dna_observations_api.is_sample_source_eligible_for_observations_upload(case_id)
+    )
+
+    # THEN the source type should be eligible for observations uploads
+    assert is_sample_source_eligible_for_observations_upload
+
+
+def test_is_sample_source_eligible_for_observations_upload_false(
+    case_id: str,
+    mip_dna_observations_api: MipDNAObservationsAPI,
+    mocker: MockFixture,
+    caplog: LogCaptureFixture,
+):
+    """Test if the sample source is not eligible for observations uploads."""
+
+    # GIVEN a MIP-DNA case ID and an observations API
+
+    # GIVEN a not supported sample source
+    source_type = SourceType.FFPE
+    mocker.patch.object(MockLimsAPI, "get_source", return_value=source_type)
+
+    # WHEN verifying that the sample source is eligible for observations uploads
+    is_sample_source_eligible_for_observations_upload: bool = (
+        mip_dna_observations_api.is_sample_source_eligible_for_observations_upload(case_id)
+    )
+
+    # THEN the source type should not be eligible for observations uploads
+    assert not is_sample_source_eligible_for_observations_upload
+    assert f"Source type {source_type} is not supported for Loqusdb uploads" in caplog.text

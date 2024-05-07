@@ -13,7 +13,6 @@ from cg.constants.observations import (
     MipDNALoadParameters,
     MipDNAObservationsAnalysisTag,
 )
-from cg.constants.sample_sources import SourceType
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CaseNotFoundError, LoqusdbDuplicateRecordError
 from cg.meta.observations.observations_api import ObservationsAPI
@@ -49,14 +48,6 @@ class MipDNAObservationsAPI(ObservationsAPI):
             LOG.error(f"Sample type {SampleType.TUMOR} is not supported for Loqusdb uploads")
             return False
         return True
-
-    def is_sample_source_eligible_for_observations_upload(self, case_id: str) -> bool:
-        """Check if the sample source is FFPE."""
-        source_type: str | None = self.analysis_api.get_case_source_type(case_id)
-        if source_type and SourceType.FFPE.lower() not in source_type.lower():
-            return True
-        LOG.error(f"Source type {source_type} is not supported for Loqusdb uploads")
-        return False
 
     def is_case_eligible_for_observations_upload(self, case: Case) -> bool:
         """Return whether a rare disease case is eligible for observations upload."""

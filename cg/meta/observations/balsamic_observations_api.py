@@ -62,10 +62,14 @@ class BalsamicObservationsAPI(ObservationsAPI):
         is_analysis_type_eligible_for_observations_upload: bool = (
             self.is_analysis_type_eligible_for_observations_upload(case.internal_id)
         )
+        is_sample_source_eligible_for_observations_upload: bool = (
+            self.is_sample_source_eligible_for_observations_upload(case.internal_id)
+        )
         return (
             is_customer_eligible_for_observations_upload
             and is_sequencing_method_eligible_for_observations_upload
             and is_analysis_type_eligible_for_observations_upload
+            and is_sample_source_eligible_for_observations_upload
         )
 
     def load_observations(self, case: Case) -> None:
