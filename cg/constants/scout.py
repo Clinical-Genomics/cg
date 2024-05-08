@@ -77,6 +77,8 @@ RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
 TOMTE_CASE_TAGS: dict[str, set[str]] = dict(
     multiqc_rna={"multiqc-html", "rna"},
     delivery_report={"delivery-report"},
+    vcf_snv_research={"research-vcf", "snv"},
+    vcf_snv={"clinical-vcf", "snv"},
 )
 
 
