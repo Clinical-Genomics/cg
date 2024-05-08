@@ -42,7 +42,6 @@ def upload_observations_to_loqusdb(context: CGConfig, case_id: str | None, dry_r
         observations_api.upload(case)
     except CgError as error:
         LOG.error(f"Could not upload {case_id} to Loqusdb: {error}")
-        raise
 
 
 @click.command("available-observations")
