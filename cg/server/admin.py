@@ -454,6 +454,7 @@ class OrderView(BaseView):
 
     column_default_sort = ("order_date", True)
     column_editable_list = ["is_delivered"]
+    column_searchable_list = ["id", "ticket_id"]
     column_display_pk = True
     create_modal = True
     edit_modal = True
