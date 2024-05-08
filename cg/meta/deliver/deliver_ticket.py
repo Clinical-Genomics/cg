@@ -10,7 +10,7 @@ from cg.constants.delivery import INBOX_NAME
 from cg.exc import CgError
 from cg.meta.meta import MetaAPI
 from cg.models.cg_config import CGConfig
-from cg.services.fastq_file_service.fastq_file_service import FastqConcatenationService
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import FastqConcatenationService
 from cg.meta.deliver.fastq_path_generator import (
     generate_forward_concatenated_fastq_delivery_path,
     generate_reverse_concatenated_fastq_delivery_path,

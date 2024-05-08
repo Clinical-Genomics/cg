@@ -27,7 +27,7 @@ from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.services.fastq_file_service.fastq_file_service import FastqConcatenationService
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import FastqConcatenationService
 from cg.store.models import Analysis
 from cg.store.store import Store
 from tests.meta.upload.scout.conftest import mip_load_config

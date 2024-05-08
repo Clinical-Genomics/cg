@@ -15,7 +15,7 @@ from cg.constants.tb import AnalysisTypes
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
-from cg.services.fastq_file_service.fastq_file_service import FastqConcatenationService
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import FastqConcatenationService
 from cg.store.models import Case
 from cg.store.store import Store
 

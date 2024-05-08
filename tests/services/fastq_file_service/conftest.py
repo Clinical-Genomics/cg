@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytest
 
-from cg.services.fastq_file_service.fastq_file_service import FastqConcatenationService
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import FastqConcatenationService
 
 
 @pytest.fixture
