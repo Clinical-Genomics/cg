@@ -20,6 +20,7 @@ from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Case
@@ -255,6 +256,7 @@ def get_upload_api(case: Case, cg_config: CGConfig) -> UploadAPI:
         Workflow.MIP_RNA: MipRNAAnalysisAPI,
         Workflow.MIP_DNA: MipDNAAnalysisAPI,
         Workflow.RNAFUSION: RnafusionAnalysisAPI,
+        Workflow.TOMTE: TomteAnalysisAPI,
     }
 
     return UploadAPI(
