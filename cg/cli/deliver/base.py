@@ -11,7 +11,7 @@ from cg.meta.deliver import DeliverAPI
 from cg.meta.deliver import DeliverTicketAPI
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
-from cg.services.fastq_concatenation_service.fastq_concatenation_service import FastqConcatenationService
+from cg.services.fastq_concatenation_service import FastqConcatenationService
 from cg.store.models import Case
 from cg.store.store import Store
 

@@ -25,7 +25,7 @@ from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
-from cg.services.fastq_concatenation_service.fastq_concatenation_service import FastqConcatenationService
+from cg.services.fastq_concatenation_service import FastqConcatenationService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig

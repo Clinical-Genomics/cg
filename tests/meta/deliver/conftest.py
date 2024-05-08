@@ -8,7 +8,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
-from cg.services.fastq_concatenation_service.fastq_concatenation_service import FastqConcatenationService
+from cg.services.fastq_concatenation_service import FastqConcatenationService
 from cg.store.models import Case
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
