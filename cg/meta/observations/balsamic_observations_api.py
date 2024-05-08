@@ -142,16 +142,15 @@ class BalsamicObservationsAPI(ObservationsAPI):
         }
         return BalsamicObservationsInputFiles(**get_full_path_dictionary(input_files))
 
-    def delete_case(self, case: Case) -> None:
+    def delete_case(self, case_id: str) -> None:
         """Delete cancer case observations from Loqusdb."""
+        case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
         loqusdb_apis: list[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
         for loqusdb_api in loqusdb_apis:
-            if not loqusdb_api.get_case(case.internal_id):
-                LOG.error(
-                    f"Case {case.internal_id} could not be found in Loqusdb. Skipping case deletion."
-                )
+            if not loqusdb_api.get_case(case_id):
+                LOG.error(f"Case {case_id} could not be found in Loqusdb. Skipping case deletion.")
                 raise CaseNotFoundError
         for loqusdb_api in loqusdb_apis:
-            loqusdb_api.delete_case(case.internal_id)
+            loqusdb_api.delete_case(case_id)
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
-        LOG.info(f"Removed observations for case {case.internal_id} from Loqusdb")
+        LOG.info(f"Removed observations for case {case_id} from Loqusdb")

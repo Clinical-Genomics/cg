@@ -73,7 +73,7 @@ def test_observations_upload(
     mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
 
     # WHEN uploading the case observations to Loqusdb
-    observations_api.upload(case)
+    observations_api.upload(case_id)
 
     # THEN the case should be successfully uploaded
     assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
@@ -129,10 +129,10 @@ def test_observations_upload_not_eligible(
 
     # WHEN uploading the case observations to Loqusdb
     with pytest.raises(LoqusdbUploadCaseError):
-        observations_api.upload(case)
+        observations_api.upload(case_id)
 
     # THEN an upload error should be caught and the upload cancelled
-    assert f"Case {case.internal_id} is not eligible for observations upload" in caplog.text
+    assert f"Case {case_id} is not eligible for observations upload" in caplog.text
 
 
 @pytest.mark.parametrize(
@@ -473,11 +473,10 @@ def test_delete_case(
     """Test delete case from Loqusdb."""
     caplog.set_level(logging.DEBUG)
 
-    # GIVEN a case and an observations API
+    # GIVEN a case ID and an observations API
     observations_api: ObservationsAPI = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_api"
     )
-    case: Case = observations_api.store.get_case_by_internal_id(case_id)
 
     # GIVEN a case uploaded to Loqusdb
     mocker.patch.object(
@@ -487,10 +486,10 @@ def test_delete_case(
     mocker.patch.object(LoqusdbAPI, "delete_case", return_value=None)
 
     # WHEN deleting a case
-    observations_api.delete_case(case)
+    observations_api.delete_case(case_id)
 
     # THEN the case should be deleted from Loqusdb
-    assert f"Removed observations for case {case.internal_id}" in caplog.text
+    assert f"Removed observations for case {case_id}" in caplog.text
 
 
 @pytest.mark.parametrize(
@@ -513,11 +512,10 @@ def test_delete_case_not_found(
     """Test delete case from Loqusdb that has not been uploaded."""
     caplog.set_level(logging.DEBUG)
 
-    # GIVEN a case and an observations API
+    # GIVEN a case ID and an observations API
     observations_api: ObservationsAPI = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_api"
     )
-    case: Case = observations_api.store.get_case_by_internal_id(case_id)
 
     # GIVEN a case that has not been uploaded to Loqusdb
     mocker.patch.object(LoqusdbAPI, "get_case", return_value=None)
@@ -525,10 +523,7 @@ def test_delete_case_not_found(
 
     # WHEN deleting a case
     with pytest.raises(CaseNotFoundError):
-        observations_api.delete_case(case)
+        observations_api.delete_case(case_id)
 
     # THEN a CaseNotFoundError should be raised
-    assert (
-        f"Case {case.internal_id} could not be found in Loqusdb. Skipping case deletion."
-        in caplog.text
-    )
+    assert f"Case {case_id} could not be found in Loqusdb. Skipping case deletion." in caplog.text

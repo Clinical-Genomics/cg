@@ -132,14 +132,13 @@ class MipDNAObservationsAPI(ObservationsAPI):
         }
         return MipDNAObservationsInputFiles(**get_full_path_dictionary(input_files))
 
-    def delete_case(self, case: Case) -> None:
+    def delete_case(self, case_id: str) -> None:
         """Delete rare disease case observations from Loqusdb."""
-        self.set_loqusdb_instance(case.internal_id)
-        if not self.loqusdb_api.get_case(case.internal_id):
-            LOG.error(
-                f"Case {case.internal_id} could not be found in Loqusdb. Skipping case deletion."
-            )
+        case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
+        self.set_loqusdb_instance(case_id)
+        if not self.loqusdb_api.get_case(case_id):
+            LOG.error(f"Case {case_id} could not be found in Loqusdb. Skipping case deletion.")
             raise CaseNotFoundError
-        self.loqusdb_api.delete_case(case.internal_id)
+        self.loqusdb_api.delete_case(case_id)
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
-        LOG.info(f"Removed observations for case {case.internal_id} from {repr(self.loqusdb_api)}")
+        LOG.info(f"Removed observations for case {case_id} from {repr(self.loqusdb_api)}")

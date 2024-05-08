@@ -97,7 +97,9 @@ def test_get_observations_api(cg_context: CGConfig, helpers: StoreHelpers):
     store.session.add(link)
 
     # WHEN retrieving the observation API
-    observations_api: MipDNAObservationsAPI = get_observations_api(cg_context, case)
+    observations_api: MipDNAObservationsAPI = get_observations_api(
+        context=cg_context, case_id=case.internal_id, upload=True
+    )
 
     # THEN a MIP-DNA API should be returned
     assert observations_api

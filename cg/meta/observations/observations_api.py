@@ -37,8 +37,9 @@ class ObservationsAPI:
         self.loqusdb_somatic_config: CommonAppConfig = config.loqusdb_somatic
         self.loqusdb_tumor_config: CommonAppConfig = config.loqusdb_tumor
 
-    def upload(self, case: Case) -> None:
+    def upload(self, case_id: str) -> None:
         """Upload observations to Loqusdb."""
+        case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
         is_case_eligible_for_loqusdb_upload: bool = self.is_case_eligible_for_observations_upload(
             case
         )

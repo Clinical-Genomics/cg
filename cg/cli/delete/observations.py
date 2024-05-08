@@ -5,14 +5,13 @@ import logging
 import click
 from sqlalchemy.orm import Query
 
-from cg.cli.upload.observations.utils import get_observations_api, get_observations_case
+from cg.cli.upload.observations.utils import get_observations_api
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_LOQUSDB_SUPPORTED_WORKFLOW
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Workflow
 from cg.exc import CaseNotFoundError, LoqusdbError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -25,16 +24,15 @@ LOG = logging.getLogger(__name__)
 @click.pass_obj
 def delete_observations(context: CGConfig, case_id: str, dry_run: bool, yes: bool):
     """Delete a case from Loqusdb and reset the Loqusdb IDs in StatusDB."""
-    case: Case = get_observations_case(context=context, case_id=case_id, upload=False)
     observations_api: MipDNAObservationsAPI | BalsamicObservationsAPI = get_observations_api(
-        context=context, case=case
+        context=context, case_id=case_id, upload=False
     )
     if dry_run:
-        LOG.info(f"Dry run. This would delete all variants in Loqusdb for case: {case.internal_id}")
+        LOG.info(f"Dry run. This would delete all variants in Loqusdb for case: {case_id}")
         return
-    LOG.info(f"This will delete all variants in Loqusdb for case: {case.internal_id}")
+    LOG.info(f"This will delete all variants in Loqusdb for case: {case_id}")
     if yes or click.confirm("Do you want to continue?", abort=True):
-        observations_api.delete_case(case)
+        observations_api.delete_case(case_id)
 
 
 @click.command("available-observations")

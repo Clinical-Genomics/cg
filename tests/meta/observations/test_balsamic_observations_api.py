@@ -171,7 +171,7 @@ def test_load_duplicated_observations(
         balsamic_observations_api.load_observations(case)
 
     # THEN the observations upload should be aborted
-    assert f"Case {case.internal_id} has already been uploaded to Loqusdb" in caplog.text
+    assert f"Case {case_id} has already been uploaded to Loqusdb" in caplog.text
 
 
 def test_load_cancer_observations(
