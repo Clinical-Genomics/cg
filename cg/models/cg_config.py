@@ -85,6 +85,12 @@ class DemultiplexConfig(BaseModel):
     slurm: SlurmConfig
 
 
+class DownsampleConfig(BaseModel):
+    downsample_dir: str
+    downsample_script: str
+    account: str
+
+
 class JanusConfig(BaseModel):
     host: str
 
@@ -296,9 +302,8 @@ class DataFlowConfig(BaseModel):
 class CGConfig(BaseModel):
     database: str
     delivery_path: str
+    downsample: DownsampleConfig
     illumina_demultiplexed_runs_directory: str
-    downsample_dir: str
-    downsample_script: str
     email_base_settings: EmailBaseSettings
     environment: Literal["production", "stage"] = "stage"
     illumina_flow_cells_directory: str

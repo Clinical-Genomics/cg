@@ -32,7 +32,7 @@ class DownsampleWorkflow:
         self.original_sample: Sample = original_sample
         self.output_fastq_dir: str = output_fastq_dir
         self.slurm_api: SlurmAPI = SlurmAPI()
-        self._account: str = "production"
+        self._account: str = self.config.downsample.account
         self._memory: str = "100"
         self._number_tasks: str = "2"
         self._time: str = "10:00:00"
@@ -50,7 +50,7 @@ class DownsampleWorkflow:
     @property
     def downsample_script_path(self) -> str:
         """The path to the downsample.sh script on Hasta."""
-        return self.config.downsample_script
+        return self.config.downsample.downsample_script
 
     @property
     def job_name(self) -> str:
