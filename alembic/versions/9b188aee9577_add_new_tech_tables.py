@@ -1,7 +1,7 @@
 """add_new_tech_tables
 
 Revision ID: 9b188aee9577
-Revises: 0fda0f2746d6
+Revises: 9cf71c905539
 Create Date: 2024-05-03 15:28:55.342488
 
 """
@@ -12,7 +12,7 @@ from sqlalchemy.orm import declarative_base
 
 # revision identifiers, used by Alembic.
 revision = "9b188aee9577"
-down_revision = "0fda0f2746d6"
+down_revision = "9cf71c905539"
 branch_labels = None
 depends_on = None
 Base = declarative_base()
