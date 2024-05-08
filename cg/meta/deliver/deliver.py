@@ -12,7 +12,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery, Workflow
 from cg.exc import MissingFilesError
-from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.fastq_file_service.fastq_file_service import FastqConcatenationService
 from cg.services.quality_controller.quality_controller_service import QualityControllerService
 from cg.meta.deliver.fastq_path_generator import (
     generate_forward_concatenated_fastq_delivery_path,
@@ -35,7 +35,7 @@ class DeliverAPI:
         sample_tags: list[set[str]],
         project_base_path: Path,
         delivery_type: str,
-        fastq_file_service: FastqFileService,
+        fastq_file_service: FastqConcatenationService,
         force_all: bool = False,
         ignore_missing_bundles: bool = False,
     ):

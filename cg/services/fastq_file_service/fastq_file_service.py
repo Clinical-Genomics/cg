@@ -10,7 +10,7 @@ from cg.services.fastq_file_service.utils import (
 LOG = logging.getLogger(__name__)
 
 
-class FastqFileService:
+class FastqConcatenationService:
 
     def concatenate(
         self,

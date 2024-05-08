@@ -27,7 +27,7 @@ from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.fastq_file_service.fastq_file_service import FastqConcatenationService
 from cg.store.models import Analysis
 from cg.store.store import Store
 from tests.meta.upload.scout.conftest import mip_load_config
@@ -203,7 +203,7 @@ def fastq_context(
         sample_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.FASTQ]["sample_tags"],
         delivery_type="fastq",
         project_base_path=Path(base_context.delivery_path),
-        fastq_file_service=FastqFileService(),
+        fastq_file_service=FastqConcatenationService(),
     )
     base_context.meta_apis["rsync_api"] = RsyncAPI(cg_context)
     base_context.trailblazer_api_ = trailblazer_api
