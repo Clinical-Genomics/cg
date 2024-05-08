@@ -1,7 +1,13 @@
 """Test MIP-DNA observations API."""
 
+from pytest_mock import MockFixture
+
+from cg.apps.lims import LimsAPI
+from cg.constants.sample_sources import SourceType
+from cg.constants.sequencing import SequencingMethod
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
-from cg.store.models import Case
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.store.models import Case, Customer
 
 
 def test_is_sample_type_eligible_for_observations_upload(
@@ -37,6 +43,60 @@ def test_is_sample_type_not_eligible_for_observations_upload(
 
     # THEN the analysis type should not be eligible for observation uploads
     assert not is_sample_type_eligible_for_observations_upload
+
+
+def test_is_case_eligible_for_observations_upload(
+    case_id: str,
+    mip_dna_customer: Customer,
+    mip_dna_observations_api: MipDNAObservationsAPI,
+    mocker: MockFixture,
+):
+    """Test whether a case is eligible for MIP-DNA observation uploads."""
+
+    # GIVEN a case and a MIP-DNA observations API
+    case: Case = mip_dna_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
+
+    # GIVEN a MIP-DNA customer and a scenario for Loqusdb uploads
+    case.customer.internal_id = mip_dna_customer.internal_id
+    mocker.patch.object(
+        MipDNAAnalysisAPI, "get_data_analysis_type", return_value=SequencingMethod.WGS
+    )
+    mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
+
+    # WHEN checking the upload eligibility for a case
+    is_case_eligible_for_observations_upload: bool = (
+        mip_dna_observations_api.is_case_eligible_for_observations_upload(case)
+    )
+
+    # THEN the case should be eligible for observation uploads
+    assert is_case_eligible_for_observations_upload
+
+
+def test_is_case_not_eligible_for_observations_upload(
+    case_id: str,
+    mip_dna_customer: Customer,
+    mip_dna_observations_api: MipDNAObservationsAPI,
+    mocker: MockFixture,
+):
+    """Test whether a case is not eligible for MIP-DNA observation uploads."""
+
+    # GIVEN a case and a MIP-DNA observations API
+    case: Case = mip_dna_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
+
+    # GIVEN a MIP-DNA customer and a scenario for Loqusdb uploads with an invalid sequencing method
+    case.customer.internal_id = mip_dna_customer.internal_id
+    mocker.patch.object(
+        MipDNAAnalysisAPI, "get_data_analysis_type", return_value=SequencingMethod.WTS
+    )
+    mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
+
+    # WHEN checking the upload eligibility for a case
+    is_case_eligible_for_observations_upload: bool = (
+        mip_dna_observations_api.is_case_eligible_for_observations_upload(case)
+    )
+
+    # THEN the case should not be eligible for observation uploads
+    assert not is_case_eligible_for_observations_upload
 
 
 # def test_mip_dna_load_observations(
