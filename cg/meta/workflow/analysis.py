@@ -234,17 +234,12 @@ class AnalysisAPI(MetaAPI):
             f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
         )
 
-    def get_analysis_started_date(self, case_id: str) -> datetime.date:
-        """Return the start date of the analysis for a given case."""
-        return self.get_date_from_file_path(self.get_job_ids_path(case_id))
-
     def upload_bundle_statusdb(self, case_id: str, dry_run: bool = False) -> None:
-        """Storing analysis bundle in StatusDB for CASE_ID"""
-
+        """Storing an analysis bundle in StatusDB for a provided case."""
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        analysis_start: datetime.date = self.get_analysis_started_date(case_id)
-        workflow_version: str = self.get_workflow_version(case_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(case_id)
+        analysis_start: datetime.date = self.get_bundle_created_date(case_id)
+        workflow_version: str = self.get_workflow_version(case_id)
         new_analysis: Case = self.status_db.add_analysis(
             workflow=self.workflow,
             version=workflow_version,
