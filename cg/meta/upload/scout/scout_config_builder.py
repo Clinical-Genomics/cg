@@ -147,6 +147,24 @@ class ScoutConfigBuilder:
             hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
         )
 
+    def include_sample_rna_alignment_file(self, config_sample: ScoutIndividual) -> None:
+        """Include the RNA sample alignment file."""
+        config_sample.rna_alignment_path = self.get_sample_file(
+            hk_tags=self.sample_tags.alignment_file, sample_id=config_sample.sample_id
+        )
+
+    def include_sample_splice_junctions_bed(self, config_sample: ScoutIndividual) -> None:
+        """Include the splice junctions bed file."""
+        config_sample.rna_alignment_path = self.get_sample_file(
+            hk_tags=self.sample_tags.splice_junctions_bed, sample_id=config_sample.sample_id
+        )
+
+    def include_sample_rna_coverage_bigwig(self, config_sample: ScoutIndividual) -> None:
+        """Include the RNA coverage bigwig file."""
+        config_sample.rna_alignment_path = self.get_sample_file(
+            hk_tags=self.sample_tags.rna_coverage_bigwig, sample_id=config_sample.sample_id
+        )
+
     def get_sample_file(self, hk_tags: set[str], sample_id: str) -> str | None:
         """Return a file that is specific for an individual from Housekeeper."""
         tags: set = hk_tags.copy()

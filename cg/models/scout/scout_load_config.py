@@ -75,6 +75,10 @@ class ScoutCancerIndividual(ScoutIndividual):
     vcf2cytosure: str | None = None
 
 
+class ScoutRnaIndividual(ScoutIndividual):
+    splice_junctions_bed: str | None = None
+    rna_coverage_bigwig: str | None = None
+
 class ScoutLoadConfig(BaseModel):
     owner: Annotated[str, BeforeValidator(field_not_none)] = None
     family: Annotated[str, BeforeValidator(field_not_none)] = None
@@ -145,3 +149,8 @@ class RnafusionLoadConfig(ScoutLoadConfig):
     RNAfusion_report_research: str | None = None
     samples: list[ScoutCancerIndividual] = []
     vcf_fusion: str | None = None
+
+
+class TomteLoadConfig(ScoutLoadConfig):
+    multiqc_rna: str | None = None
+    samples: list[ScoutRnaIndividual] = []

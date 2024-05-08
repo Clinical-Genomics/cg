@@ -67,3 +67,5 @@ class SampleTags(BaseModel):
     reviewer_alignment_index: set[str] | None = None
     reviewer_vcf: set[str] | None = None
     mitodel_file: set[str] | None = None
+    splice_junctions_bed: set[str] | None = None
+    rna_coverage_bigwig: set[str] | None = None

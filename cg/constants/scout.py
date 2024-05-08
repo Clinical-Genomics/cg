@@ -74,6 +74,12 @@ RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
     vcf_fusion={"vcf-fusion"},
 )
 
+TOMTE_CASE_TAGS: dict[str, set[str]] = dict(
+    multiqc_rna={"multiqc-html", "rna"},
+    delivery_report={"delivery-report"},
+)
+
+
 MIP_SAMPLE_TAGS = dict(
     bam_file={"bam"},
     alignment_file={"cram"},
@@ -103,4 +109,10 @@ BALSAMIC_UMI_SAMPLE_TAGS = dict(
 
 RNAFUSION_SAMPLE_TAGS = dict(
     alignment_file={AlignmentFileTag.CRAM},
+)
+
+TOMTE_SAMPLE_TAGS = dict(
+    alignment_file={AlignmentFileTag.CRAM},
+    splice_junctions_bed={"junction", "bed"},
+    rna_coverage_bigwig={"coverage", "bigwig"},
 )
