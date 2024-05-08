@@ -145,7 +145,8 @@ class DownsampleAPI(MetaAPI):
             return
         LOG.debug("No Decompression needed.")
         self.store_downsampled_sample_case(downsample_data=downsample_data)
-        downsample_data.create_down_sampling_working_directory()
+        if not self.dry_run:
+            downsample_data.create_down_sampling_working_directory()
         submitted_job: int = self.start_downsample_job(
             downsample_data=downsample_data,
         )
