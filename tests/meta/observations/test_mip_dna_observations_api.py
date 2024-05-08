@@ -1,5 +1,44 @@
 """Test MIP-DNA observations API."""
 
+from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.store.models import Case
+
+
+def test_is_sample_type_eligible_for_observations_upload(
+    case_id: str, mip_dna_observations_api: MipDNAObservationsAPI
+):
+    """Test if the sample type is eligible for observation uploads."""
+
+    # GIVEN a case without tumor samples and a MIP-DNA observations API
+    case: Case = mip_dna_observations_api.store.get_case_by_internal_id(case_id)
+
+    # WHEN checking sample type eligibility for a case
+    is_sample_type_eligible_for_observations_upload: bool = (
+        mip_dna_observations_api.is_sample_type_eligible_for_observations_upload(case)
+    )
+
+    # THEN the analysis type should be eligible for observation uploads
+    assert is_sample_type_eligible_for_observations_upload
+
+
+def test_is_sample_type_not_eligible_for_observations_upload(
+    case_id: str, mip_dna_observations_api: MipDNAObservationsAPI
+):
+    """Test if the sample type is not eligible for observation uploads."""
+
+    # GIVEN a case with tumor samples and a MIP-DNA observations API
+    case: Case = mip_dna_observations_api.store.get_case_by_internal_id(case_id)
+    case.samples[0].is_tumour = True
+
+    # WHEN checking sample type eligibility for a case
+    is_sample_type_eligible_for_observations_upload: bool = (
+        mip_dna_observations_api.is_sample_type_eligible_for_observations_upload(case)
+    )
+
+    # THEN the analysis type should not be eligible for observation uploads
+    assert not is_sample_type_eligible_for_observations_upload
+
+
 # def test_mip_dna_load_observations(
 #     case_id: str,
 #     mip_dna_observations_api: MipDNAObservationsAPI,
