@@ -68,13 +68,13 @@ class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
         return [
             [
                 self.name,
-                self.run_accession,
+                run_accession + 1,
                 self.instrument_platform,
                 fastq_forward_read_path,
                 fastq_reverse_read_path,
                 self.fasta,
             ]
-            for fastq_forward_read_path, fastq_reverse_read_path in zip(
-                self.fastq_forward_read_paths, self.fastq_reverse_read_paths
+            for run_accession, (fastq_forward_read_path, fastq_reverse_read_path) in enumerate(
+                zip(self.fastq_forward_read_paths, self.fastq_reverse_read_paths)
             )
         ]
