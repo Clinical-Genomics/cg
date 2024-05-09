@@ -32,6 +32,8 @@ class TaxprofilerParameters(WorkflowParameters):
     save_hostremoval_mapped: bool = True
     save_hostremoval_unmapped: bool = True
     perform_runmerging: bool = True
+    shortread_qc_mergepairs: bool = True
+    shortread_qc_includeunmerged: bool = True
     run_kraken2: bool = True
     kraken2_save_reads: bool = True
     kraken2_save_readclassifications: bool = True
