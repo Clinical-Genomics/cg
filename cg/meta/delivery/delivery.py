@@ -9,7 +9,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Workflow
 from cg.constants.delivery import INBOX_NAME, PIPELINE_ANALYSIS_TAG_MAP
 from cg.models.delivery.delivery import DeliveryFile
-from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
 from cg.services.quality_controller.quality_controller_service import QualityControllerService
 from cg.store.models import Case, Sample
 from cg.store.store import Store
@@ -26,12 +28,12 @@ class DeliveryAPI:
     def __init__(
         self,
         delivery_path: Path,
-        fastq_file_service: FastqFileService,
+        fastq_concatenation_service: FastqConcatenationService,
         housekeeper_api: HousekeeperAPI,
         store: Store,
     ):
         self.delivery_path: Path = delivery_path
-        self.fastq_file_service: FastqFileService = fastq_file_service
+        self.fastq_file_service: FastqConcatenationService = fastq_concatenation_service
         self.housekeeper_api: HousekeeperAPI = housekeeper_api
         self.store: Store = store
 

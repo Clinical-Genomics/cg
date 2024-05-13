@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from cg.services.fastq_file_service.utils import (
+from cg.services.fastq_concatenation_service.utils import (
     concatenate_forward_reads,
     concatenate_reverse_reads,
     remove_raw_fastqs,
@@ -10,7 +10,7 @@ from cg.services.fastq_file_service.utils import (
 LOG = logging.getLogger(__name__)
 
 
-class FastqFileService:
+class FastqConcatenationService:
 
     def concatenate(
         self,
