@@ -40,7 +40,8 @@ def downsample():
 @click.option(
     "-a",
     "--account",
-    required=True,
+    required=False,
+    default=None,
     help="Please specify the account to use for the downsampling.",
 )
 @click.option(
@@ -58,7 +59,7 @@ def downsample_sample(
     context: CGConfig,
     case_id: str,
     case_name: str,
-    account: str,
+    account: str | None,
     input_data: Tuple[str, float],
     dry_run: bool,
 ):

@@ -127,7 +127,12 @@ class DownsampleAPI(MetaAPI):
         return downsample_work_flow.write_and_submit_sbatch_script()
 
     def downsample_sample(
-        self, sample_id: str, case_name: str, case_id: str, number_of_reads: float, account: str
+        self,
+        sample_id: str,
+        case_name: str,
+        case_id: str,
+        number_of_reads: float,
+        account: str | None = None,
     ) -> int | None:
         """Downsample a sample."""
         LOG.info(f"Starting Downsampling for sample {sample_id}.")
