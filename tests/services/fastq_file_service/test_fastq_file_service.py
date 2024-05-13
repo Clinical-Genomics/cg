@@ -1,5 +1,5 @@
 from pathlib import Path
-from cg.services.fastq_concatenation_service.fastq_concatenation_service import FastqConcatenationService
+from cg.services.fastq_file_service.fastq_file_service import FastqConcatenationService
 
 
 def test_empty_directory(fastq_file_service: FastqConcatenationService, tmp_path):
