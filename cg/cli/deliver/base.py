@@ -12,7 +12,9 @@ from cg.meta.deliver import DeliverAPI
 from cg.meta.deliver import DeliverTicketAPI
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
-from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -94,7 +96,7 @@ def deliver_analysis(
             delivery_type=delivery,
             force_all=force_all,
             ignore_missing_bundles=ignore_missing_bundles,
-            fastq_file_service=FastqFileService(),
+            fastq_file_service=FastqConcatenationService(),
         )
         deliver_api.set_dry_run(dry_run)
         cases: list[Case] = []

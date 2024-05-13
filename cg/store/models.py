@@ -27,6 +27,7 @@ from cg.constants.constants import (
     SexOptions,
     StatusOptions,
 )
+from cg.constants.devices import DeviceType
 from cg.constants.priority import SlurmQos
 from cg.constants.symbols import EMPTY_STRING
 
@@ -953,3 +954,42 @@ class Order(Base):
 
     def to_dict(self):
         return to_dict(model_instance=self)
+
+
+class RunDevice(Base):
+    """Model for storing run devices."""
+
+    __tablename__ = "run_device"
+
+    id: Mapped[PrimaryKeyInt]
+    type: Mapped[DeviceType]
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
+
+
+class RunMetrics(Base):
+    """Model for storing run devices."""
+
+    __tablename__ = "run_metrics"
+
+    id: Mapped[PrimaryKeyInt]
+    type: Mapped[DeviceType]
+    device_id: Mapped[int] = mapped_column(ForeignKey("run_device.id"))
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
+
+
+class SampleRunMetrics(Base):
+    __tablename__ = "sample_run_metrics"
+    id: Mapped[PrimaryKeyInt]
+    sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id"))
+    run_metrics_id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"))
+    type: Mapped[DeviceType]
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
