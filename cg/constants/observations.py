@@ -54,7 +54,7 @@ class RarediseaseObservationsAnalysisTag(StrEnum):
 
     SNV_VCF: str = "deepvariant"
     SV_VCF: str = "vcf-sv-research"
-    PROFILE_GBCF: str = "snv-gbcf"
+    PROFILE_GBCF: str = "vcf-snv"
     FAMILY_PED: str = "pedigree"
 
 
