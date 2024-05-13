@@ -20,7 +20,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.observations.input_files import MipDNAObservationsInputFiles
+from cg.models.observations.input_files import ObservationsInputFiles
 from cg.store.models import Case, Customer
 
 
@@ -50,7 +50,7 @@ def test_observations_upload(
     observations_api: ObservationsAPI = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_api"
     )
-    observations_input_files: MipDNAObservationsInputFiles = request.getfixturevalue(
+    observations_input_files: ObservationsInputFiles = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_input_files"
     )
     customer: Customer = request.getfixturevalue(f"{workflow.replace('-', '_')}_customer")
@@ -105,7 +105,7 @@ def test_observations_upload_not_eligible(
     observations_api: ObservationsAPI = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_api"
     )
-    observations_input_files: MipDNAObservationsInputFiles = request.getfixturevalue(
+    observations_input_files: ObservationsInputFiles = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_input_files"
     )
     customer: Customer = request.getfixturevalue(f"{workflow.replace('-', '_')}_customer")
@@ -182,7 +182,7 @@ def test_is_not_duplicate(
     observations_api: ObservationsAPI = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_api"
     )
-    observations_input_files: MipDNAObservationsInputFiles = request.getfixturevalue(
+    observations_input_files: ObservationsInputFiles = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_input_files"
     )
 
@@ -221,7 +221,7 @@ def test_is_duplicate(
     observations_api: ObservationsAPI = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_api"
     )
-    observations_input_files: MipDNAObservationsInputFiles = request.getfixturevalue(
+    observations_input_files: ObservationsInputFiles = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_input_files"
     )
 
@@ -261,7 +261,7 @@ def test_is_duplicate_loqusdb_id(
     observations_api: ObservationsAPI = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_api"
     )
-    observations_input_files: MipDNAObservationsInputFiles = request.getfixturevalue(
+    observations_input_files: ObservationsInputFiles = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_input_files"
     )
 
