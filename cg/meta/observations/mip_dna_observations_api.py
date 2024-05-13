@@ -30,8 +30,8 @@ class MipDNAObservationsAPI(ObservationsAPI):
 
     def __init__(self, config: CGConfig):
         self.analysis_api = MipDNAAnalysisAPI(config)
-        self.loqusdb_api = None
         super().__init__(config=config, analysis_api=self.analysis_api)
+        self.loqusdb_api = None
 
     def get_loqusdb_customers(self) -> list[CustomerId]:
         """Return customers that are eligible for rare disease Loqusdb uploads."""
