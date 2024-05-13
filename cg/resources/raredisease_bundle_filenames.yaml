@@ -10,21 +10,21 @@
   path_index: ~
   step: alignment
   tag: alignment_markduplicates_index
-- format: cram
+- format: bam
   id: SAMPLEID
-  path: PATHTOCASE/alignment/SAMPLEID_mt_subsample.cram
+  path: PATHTOCASE/alignment/SAMPLEID_mt_subsample.bam
   path_index: ~
   step: alignment
   tag: alignment_mt
-- format: cram
+- format: bam
   id: SAMPLEID
-  path: PATHTOCASE/alignment/SAMPLEID_mt_subsample.cram.crai
+  path: PATHTOCASE/alignment/SAMPLEID_mt_subsample.bam.bai
   path_index: ~
   step: alignment
   tag: alignment_mt_index
 - format: bw
   id: SAMPLEID
-  path: PATHTOCASE/qc_bam/SAMPLEID_qualimap/SAMPLEID_tidditcov.bw
+  path: PATHTOCASE/qc_bam/SAMPLEID_tidditcov.bw
   path_index: ~
   step: tiddit_coverage
   tag: tiddit_coverage
@@ -234,25 +234,25 @@
   tag: vcf2cytosure
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/gens/SAMPLEID/SAMPLEID_gens.baf.bed.gz
+  path: PATHTOCASE/gens/SAMPLEID_gens.baf.bed.gz
   path_index: ~
   step: gens_generatedata
   tag: baf
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/gens/SAMPLEID/SAMPLEID_gens.baf.bed.gz.tbi
+  path: PATHTOCASE/gens/SAMPLEID_gens.baf.bed.gz.tbi
   path_index: ~
   step: gens_generatedata
   tag: baf_index
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/gens/SAMPLEID/SAMPLEID_gens.cov.bed.gz
+  path: PATHTOCASE/gens/SAMPLEID_gens.cov.bed.gz
   path_index: ~
   step: gens_generatedata
   tag: cov
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/gens/SAMPLEID/SAMPLEID_gens.cov.bed.gz.tbi
+  path: PATHTOCASE/gens/SAMPLEID_gens.cov.bed.gz.tbi
   path_index: ~
   step: gens_generatedata
   tag: cov_index
