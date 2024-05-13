@@ -978,7 +978,7 @@
   tag: multiqc-json
 - format: meta
   id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_report.html
+  path: PATHTOCASE/multiqc/multiqc_report.html
   path_index: ~
   step: multiqc
   tag: multiqc-html
