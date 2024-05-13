@@ -50,7 +50,6 @@ class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
     """Taxprofiler sample model is used when building the sample sheet."""
 
     instrument_platform: SequencingPlatform
-    run_accession: str
     fasta: str
 
     @staticmethod
@@ -67,16 +66,17 @@ class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
 
     def reformat_sample_content(self) -> list[list[str]]:
         """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
-        return [
-            [
+        reformatted_content = []
+        for run_accession, (forward_path, reverse_path) in enumerate(
+            zip(self.fastq_forward_read_paths, self.fastq_reverse_read_paths)
+        ):
+            line = [
                 self.name,
                 run_accession + 1,
                 self.instrument_platform,
-                fastq_forward_read_path,
-                fastq_reverse_read_path,
+                forward_path,
+                reverse_path,
                 self.fasta,
             ]
-            for run_accession, (fastq_forward_read_path, fastq_reverse_read_path) in enumerate(
-                zip(self.fastq_forward_read_paths, self.fastq_reverse_read_paths)
-            )
-        ]
+            reformatted_content.append(line)
+        return reformatted_content
