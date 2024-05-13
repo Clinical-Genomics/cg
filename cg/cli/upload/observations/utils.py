@@ -16,7 +16,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-def get_observations_case(context: CGConfig, case_id: str | None, upload: bool) -> Case:
+def get_observations_verified_case(context: CGConfig, case_id: str | None, upload: bool) -> Case:
     """Return a verified Loqusdb case."""
     status_db: Store = context.status_db
     case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
@@ -39,7 +39,7 @@ def get_observations_api(
     context: CGConfig, case_id: str | None, upload: bool
 ) -> MipDNAObservationsAPI | BalsamicObservationsAPI:
     """Return an observations API given a specific case object."""
-    case: Case = get_observations_case(context=context, case_id=case_id, upload=upload)
+    case: Case = get_observations_verified_case(context=context, case_id=case_id, upload=upload)
     observations_apis = {
         Workflow.MIP_DNA: MipDNAObservationsAPI(context),
         Workflow.BALSAMIC: BalsamicObservationsAPI(context),

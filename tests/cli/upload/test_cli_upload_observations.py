@@ -7,7 +7,10 @@ from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
 from cg.cli.upload.observations import upload_observations_to_loqusdb
-from cg.cli.upload.observations.utils import get_observations_api, get_observations_case
+from cg.cli.upload.observations.utils import (
+    get_observations_api,
+    get_observations_verified_case,
+)
 from cg.constants import EXIT_SUCCESS
 from cg.constants.constants import Workflow
 from cg.constants.sequencing import SequencingMethod
@@ -53,7 +56,7 @@ def test_get_observations_case(cg_context: CGConfig, helpers: StoreHelpers):
     case.customer.loqus_upload = True
 
     # WHEN retrieving a case given a specific case ID
-    extracted_case: Case = get_observations_case(cg_context, case.internal_id, upload=True)
+    extracted_case: Case = get_observations_verified_case(cg_context, case.internal_id, upload=True)
 
     # THEN the extracted case should match the stored one
     assert extracted_case == case
@@ -66,7 +69,7 @@ def test_get_observations_case_invalid_id(cg_context: CGConfig, caplog: LogCaptu
     # WHEN retrieving a case given a specific case ID
     with pytest.raises(CaseNotFoundError):
         # THEN a CaseNotFoundError should be raised
-        get_observations_case(cg_context, "invalid_case_id", upload=True)
+        get_observations_verified_case(cg_context, "invalid_case_id", upload=True)
 
     assert "Invalid case ID. Retrieving available cases for Loqusdb actions." in caplog.text
 
@@ -80,7 +83,7 @@ def test_get_observations_case_to_upload(cg_context: CGConfig, helpers: StoreHel
     case.customer.loqus_upload = True
 
     # WHEN retrieving a case given a specific case ID
-    extracted_case: Case = get_observations_case(cg_context, case.internal_id, upload=True)
+    extracted_case: Case = get_observations_verified_case(cg_context, case.internal_id, upload=True)
 
     # THEN the extracted case should match the stored one
     assert extracted_case == case
