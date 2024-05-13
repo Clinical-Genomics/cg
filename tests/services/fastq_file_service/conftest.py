@@ -1,12 +1,14 @@
 from pathlib import Path
 import pytest
 
-from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
 
 
 @pytest.fixture
 def fastq_file_service():
-    return FastqFileService()
+    return FastqConcatenationService()
 
 
 def create_fastqs_directory(number_forward_reads, number_reverse_reads, tmp_path):
