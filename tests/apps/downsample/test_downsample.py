@@ -103,7 +103,7 @@ def test_downsample_api_adding_a_second_sample_to_case(
         case_id=downsample_case_internal_id,
         case_name=downsample_case_name,
         number_of_reads=50,
-        out_dir=Path(downsample_context.downsample_dir),
+        out_dir=Path(downsample_context.downsample.downsample_dir),
     )
 
     # THEN adding the sample to statusDB adds the sample and generates the links
