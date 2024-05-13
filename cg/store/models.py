@@ -45,6 +45,7 @@ VarChar128 = Annotated[str, 128]
 
 PrimaryKeyInt = Annotated[int, mapped_column(primary_key=True)]
 UniqueStr = Annotated[str, mapped_column(String(32), unique=True)]
+UniqueStr64 = Annotated[str, mapped_column(String(64), unique=True)]
 
 
 class Base(DeclarativeBase):
@@ -963,6 +964,7 @@ class RunDevice(Base):
 
     id: Mapped[PrimaryKeyInt]
     type: Mapped[DeviceType]
+    internal_id: Mapped[UniqueStr64]
 
     __mapper_args__ = {
         "polymorphic_on": "type",
