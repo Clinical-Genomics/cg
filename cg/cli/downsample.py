@@ -38,6 +38,13 @@ def downsample():
     help="Case name that is used as name for the downsampled case.",
 )
 @click.option(
+    "-a",
+    "--account",
+    required=False,
+    default=None,
+    help="Please specify the account to use for the downsampling. Defaults to production (production) or development (stage) account if not specified.",
+)
+@click.option(
     "-i",
     "--input-data",
     required=True,
@@ -49,7 +56,12 @@ def downsample():
 @DRY_RUN
 @click.pass_obj
 def downsample_sample(
-    context: CGConfig, case_id: str, case_name: str, input_data: Tuple[str, float], dry_run: bool
+    context: CGConfig,
+    case_id: str,
+    case_name: str,
+    account: str | None,
+    input_data: Tuple[str, float],
+    dry_run: bool,
 ):
     """Downsample reads in one or multiple samples."""
     downsample_api = DownsampleAPI(config=context, dry_run=dry_run)
@@ -60,6 +72,7 @@ def downsample_sample(
                 sample_id=sample_id,
                 number_of_reads=float(reads),
                 case_name=case_name,
+                account=account,
             )
         except Exception as error:
             LOG.info(repr(error))
@@ -77,7 +90,7 @@ def downsample_sample(
 def store_downsampled_samples(context: CGConfig, sample_ids: list[str]):
     """Store fastq files for downsampled samples in Housekeeper."""
     for sample_id in sample_ids:
-        downsample_dir: str = str(Path(context.downsample_dir, sample_id))
+        downsample_dir: str = str(Path(context.downsample.downsample_dir, sample_id))
         LOG.debug(f"Searching for fastq files in : {downsample_dir}")
         try:
             store_downsampled_sample_bundle(
