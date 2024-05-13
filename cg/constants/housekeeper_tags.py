@@ -88,6 +88,10 @@ class BalsamicAnalysisTag:
     CONFIG: list[str] = ["balsamic-config"]
     QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
 
+class RarediseaseAnalysisTag:
+    QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
+
+
 
 class GensAnalysisTag:
     COVERAGE: list[str] = ["gens", "coverage", "bed"]
@@ -205,7 +209,7 @@ WORKFLOW_PROTECTED_TAGS = {
     Workflow.RAREDISEASE: [
         ["vcf-snv-clinical"],
         ["vcf-snv-research"],
-        ["vcf-str"],  # not unique, problem? (also in addition to mitochondira)
+        ["vcf-str"],  # not unique, problem? (also in addition to mitochondria)
         ["vcf-snv"],  # -> ["snv-gbcf", "snv-bcf"],
         ["qc-metrics"],
         ["smn-calling"],
