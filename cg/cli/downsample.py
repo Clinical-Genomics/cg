@@ -42,7 +42,7 @@ def downsample():
     "--account",
     required=False,
     default=None,
-    help="Please specify the account to use for the downsampling.",
+    help="Please specify the account to use for the downsampling. Defaults to production (production) or development (stage) account if not specified.",
 )
 @click.option(
     "-i",
