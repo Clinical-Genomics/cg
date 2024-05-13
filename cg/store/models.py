@@ -501,7 +501,7 @@ class Case(Base, PriorityMixin):
 
     @property
     def are_all_samples_sequenced(self) -> bool:
-        return all([link.sample.last_sequenced_at] for link in self.links)
+        return all([link.sample.last_sequenced_at for link in self.links])
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
