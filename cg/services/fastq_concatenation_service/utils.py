@@ -3,7 +3,7 @@ import re
 import shutil
 import uuid
 
-from cg.services.fastq_file_service.exceptions import ConcatenationError
+from cg.services.fastq_concatenation_service.exceptions import ConcatenationError
 from cg.constants.constants import ReadDirection
 from cg.constants import FileExtensions
 
