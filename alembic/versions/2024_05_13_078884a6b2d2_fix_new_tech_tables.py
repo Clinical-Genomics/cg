@@ -19,7 +19,14 @@ depends_on = None
 
 def upgrade():
     op.drop_column("run_device", "device_id")
-    op.add_column("run_metrics", sa.Column("device_id", sa.Integer(), sa.ForeignKey("run_device.id", name="fk_device_id",  nullable=False))
+    op.add_column(
+        "run_metrics",
+        sa.Column(
+            "device_id",
+            sa.Integer(),
+            sa.ForeignKey("run_device.id", name="fk_device_id", nullable=False),
+        ),
+    )
 
 
 def downgrade():
