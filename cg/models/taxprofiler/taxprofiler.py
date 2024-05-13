@@ -68,11 +68,11 @@ class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
         """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
         reformatted_content = []
         for run_accession, (forward_path, reverse_path) in enumerate(
-            zip(self.fastq_forward_read_paths, self.fastq_reverse_read_paths)
+            zip(self.fastq_forward_read_paths, self.fastq_reverse_read_paths), start=1
         ):
             line = [
                 self.name,
-                run_accession + 1,
+                run_accession,
                 self.instrument_platform,
                 forward_path,
                 reverse_path,
