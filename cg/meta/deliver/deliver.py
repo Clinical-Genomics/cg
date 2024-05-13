@@ -64,7 +64,7 @@ class DeliverAPI:
             self.delivery_type in constants.SKIP_MISSING or ignore_missing_bundles
         )
         self.deliver_failed_samples = force_all
-        self.fastq_file_service = fastq_file_service
+        self.fastq_concatenation_service = fastq_file_service
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run."""
@@ -239,7 +239,7 @@ class DeliverAPI:
         reverse_output_path: Path = generate_reverse_concatenated_fastq_delivery_path(
             fastq_directory=sample_directory, sample_name=sample_name
         )
-        self.fastq_file_service.concatenate(
+        self.fastq_concatenation_service.concatenate(
             fastq_directory=sample_directory,
             forward_output_path=forward_output_path,
             reverse_output_path=reverse_output_path,

@@ -591,7 +591,7 @@ class CGConfig(BaseModel):
         return api
 
     @property
-    def fastq_file_service(self) -> FastqConcatenationService:
+    def fastq_concatenation_service(self) -> FastqConcatenationService:
         return FastqConcatenationService()
 
     @property
@@ -601,7 +601,7 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating delivery api")
             api = DeliveryAPI(
                 delivery_path=Path(self.delivery_path),
-                fastq_file_service=self.fastq_file_service,
+                fastq_concatenation_service=self.fastq_concatenation_service,
                 housekeeper_api=self.housekeeper_api,
                 store=self.status_db,
             )

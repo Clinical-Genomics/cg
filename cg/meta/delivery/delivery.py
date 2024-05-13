@@ -28,12 +28,12 @@ class DeliveryAPI:
     def __init__(
         self,
         delivery_path: Path,
-        fastq_file_service: FastqConcatenationService,
+        fastq_concatenation_service: FastqConcatenationService,
         housekeeper_api: HousekeeperAPI,
         store: Store,
     ):
         self.delivery_path: Path = delivery_path
-        self.fastq_file_service: FastqConcatenationService = fastq_file_service
+        self.fastq_file_service: FastqConcatenationService = fastq_concatenation_service
         self.housekeeper_api: HousekeeperAPI = housekeeper_api
         self.store: Store = store
 
