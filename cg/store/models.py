@@ -499,6 +499,10 @@ class Case(Base, PriorityMixin):
                 sequenced_dates.append(link.sample.last_sequenced_at)
         return max(sequenced_dates, default=None)
 
+    @property
+    def are_all_samples_sequenced(self) -> bool:
+        return all([link.sample.last_sequenced_at] for link in self.links)
+
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 

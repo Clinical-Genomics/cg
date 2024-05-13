@@ -51,9 +51,11 @@ def _get_case_map(case_summaries: list[CaseSummary]) -> dict:
 
 
 def _is_case_failed_sequencing_qc(case: Case) -> bool:
-    return case.latest_sequenced and not QualityControllerService.case_pass_sequencing_qc(case)
+    return case.are_all_samples_sequenced and not QualityControllerService.case_pass_sequencing_qc(
+        case
+    )
 
 
 def get_cases_failed_sequencing_qc_count(order: Order) -> int:
     cases: list[Case] = order.cases
-    return sum(1 for case in cases if case.latest_sequenced and _is_case_failed_sequencing_qc(case))
+    return sum(1 for case in cases if _is_case_failed_sequencing_qc(case))
