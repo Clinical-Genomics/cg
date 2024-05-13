@@ -12,7 +12,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery, Workflow
 from cg.exc import MissingFilesError
-from cg.services.fastq_concatenation_service import FastqConcatenationService
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import FastqConcatenationService
 from cg.services.quality_controller.quality_controller_service import QualityControllerService
 from cg.meta.deliver.fastq_path_generator import (
     generate_forward_concatenated_fastq_delivery_path,
