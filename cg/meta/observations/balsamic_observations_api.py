@@ -73,7 +73,12 @@ class BalsamicObservationsAPI(ObservationsAPI):
         )
 
     def load_observations(self, case: Case) -> None:
-        """Load observation counts to Loqusdb for a Balsamic case."""
+        """
+        Load observation counts to Loqusdb for a Balsamic case.
+
+        Raises:
+            LoqusdbDuplicateRecordError if case is already uploaded.
+        """
         loqusdb_upload_apis: list[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
         for loqusdb_api in loqusdb_upload_apis:
             if self.is_duplicate(case=case, loqusdb_api=loqusdb_api):

@@ -80,7 +80,12 @@ class MipDNAObservationsAPI(ObservationsAPI):
         self.loqusdb_api = self.get_loqusdb_api(loqusdb_instances[sequencing_method])
 
     def load_observations(self, case: Case) -> None:
-        """Load observation counts to Loqusdb for a MIP-DNA case."""
+        """
+        Load observation counts to Loqusdb for a MIP-DNA case.
+
+        Raises:
+            LoqusdbDuplicateRecordError if case is already uploaded.
+        """
         self.set_loqusdb_instance(case.internal_id)
         input_files: MipDNAObservationsInputFiles = self.get_observations_input_files(case)
         if self.is_duplicate(
