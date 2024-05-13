@@ -3381,7 +3381,7 @@ def taxprofiler_sample_sheet_content(
     row: str = ",".join(
         [
             sample_name,
-            sample_name,
+            "1",
             sequencing_platform,
             fastq_forward_read_path.as_posix(),
             fastq_reverse_read_path.as_posix(),
