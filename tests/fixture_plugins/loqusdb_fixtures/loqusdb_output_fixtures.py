@@ -5,7 +5,7 @@ import pytest
 LOQUSDB_OUTPUT = (
     b"2018-11-29 08:41:38 130-229-8-20-dhcp.local "
     b"mongo_adapter.client[77135] INFO Connecting to "
-    b"uri:mongodb://None:None@localhost:27017\n"
+    b"uri:mongodb://None@localhost:27017\n"
     b"2018-11-29 08:41:38 130-229-8-20-dhcp.local "
     b"mongo_adapter.client[77135] INFO Connection "
     b"established\n2018-11-29 08:41:38 130-229-8-20-dhcp.local "
@@ -73,7 +73,7 @@ LOQUSDB_DUPLICATE_OUTPUT = (
 )
 
 LOQUSDB_DELETE_STDERR = b"""2022-09-22 12:30:07 username loqusdb.commands.cli[20689] INFO Running loqusdb version 2.6.9
-2022-09-22 12:30:07 username mongo_adapter.client[20689] INFO Connecting to uri:mongodb://None:None@localhost:27017
+2022-09-22 12:30:07 username mongo_adapter.client[20689] INFO Connecting to uri:mongodb://None@localhost:27017
 2022-09-22 12:30:07 username mongo_adapter.client[20689] INFO Connection established
 2022-09-22 12:30:07 username mongo_adapter.adapter[20689] INFO Use database loqusdb
 2022-09-22 12:30:07 username loqusdb.plugins.mongo.case[20689] INFO Removing case yellowhog from database
@@ -81,7 +81,7 @@ LOQUSDB_DELETE_STDERR = b"""2022-09-22 12:30:07 username loqusdb.commands.cli[20
 2022-09-22 12:30:07 username loqusdb.utils.delete[20689] INFO Start deleting chromosome 1"""
 
 LOQUSDB_DELETE_NONEXISTING_STDERR = b"""2022-09-22 11:40:04 username loqusdb.commands.cli[19944] INFO Running loqusdb version 2.6.9
-2022-09-22 11:40:04 username mongo_adapter.client[19944] INFO Connecting to uri:mongodb://None:None@localhost:27017
+2022-09-22 11:40:04 username mongo_adapter.client[19944] INFO Connecting to uri:mongodb://None@localhost:27017
 2022-09-22 11:40:04 username mongo_adapter.client[19944] INFO Connection established
 2022-09-22 11:40:04 username mongo_adapter.adapter[19944] INFO Use database loqusdb
 2022-09-22 11:40:04 username loqusdb.commands.delete[19944] WARNING Case yellowhog does not exist in database"""
