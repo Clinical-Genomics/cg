@@ -493,168 +493,168 @@
   tag: annotate_snv_index
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/annotate_snv/genome/CASEID_mitochondria_cadd_vep_vcfanno_hmtnote.vcf.gz
+  path: PATHTOCASE/annotate_snv/mitochondria/CASEID_mitochondria_cadd_vep_vcfanno_hmtnote.vcf.gz
   path_index: ~
   step: annotate_snv_mt
   tag: annotate_snv_mt
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/annotate_snv/genome/CASEID_mitochondria_cadd_vep_vcfanno_hmtnote.vcf.gz.tbi
+  path: PATHTOCASE/annotate_snv/mitochondria/CASEID_mitochondria_cadd_vep_vcfanno_hmtnote.vcf.gz.tbi
   path_index: ~
   step: annotate_snv_mt
   tag: annotate_snv_mt_index
 - format: meta
   id: CASEID
-  path: PATHTOCASE/annotate_snv/genome/CASEID_mitochondria_cadd_vep_haplogrep.txt
+  path: PATHTOCASE/annotate_snv/mitochondria/CASEID_mitochondria_cadd_vep_haplogrep.txt
   path_index: ~
   step: annotate_snv_mt
   tag: haplogrep
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_1.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_1.png
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_2.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_2.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_3.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_3.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_4.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_4.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_5.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_5.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_6.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_6.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_7.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_7.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_8.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_8.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_9.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_9.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_10.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_10.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_11.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_11.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_12.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_12.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_13.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_13.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_14.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_14.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_15.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_15.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_16.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_16.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_17.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_17.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_18.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_18.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_19.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_19.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_20.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_20.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_21.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_21.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_22.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_22.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_X.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_X.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_Y.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_Y.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID__rhocallviz_M.png
+  path: PATHTOCASE/annotate_snv/genome/SAMPLEID_rhocallviz_autozyg_chromograph/SAMPLEID_rhocallviz_M.png
   path_index: ~
   step: chromograph_rhoviz
   tag: autozyg
@@ -966,7 +966,7 @@
   tag: qc-metrics
 - format: yml
   id: CASEID
-  path: PATHTOCASE/pipeline_info/rnafusionsoftware_mqc_versions.yml
+  path: PATHTOCASE/pipeline_info/nf_core_pipeline_software_mqc_versions.yml
   path_index: ~
   step: software-versions
   tag: software-versions
