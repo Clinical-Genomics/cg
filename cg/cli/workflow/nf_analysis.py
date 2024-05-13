@@ -85,6 +85,8 @@ OPTION_FROM_START = click.option(
     show_default=True,
     help="Start workflow from start without resuming execution",
 )
+OPTION_YES = click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
+ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)
 
 
 @click.command("config-case")

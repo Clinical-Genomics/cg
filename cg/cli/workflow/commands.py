@@ -7,7 +7,7 @@ import click
 from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.exc import FlowCellsNeededError
 from cg.meta.rsync import RsyncAPI
@@ -22,6 +22,9 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+
+
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
@@ -30,6 +33,7 @@ OPTION_DRY = click.option(
 )
 OPTION_YES = click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)
+ARGUMENT_WORKFLOW = click.argument("workflow", type=Workflow)
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_ANALYSIS_PARAMETERS_CONFIG = click.option(
     "--config-artic", type=str, help="Config with computational and lab related settings"
@@ -350,3 +354,30 @@ def microsalt_past_run_dirs(
 
     context.obj.meta_apis["analysis_api"]: MicrosaltAnalysisAPI = MicrosaltAnalysisAPI(context.obj)
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+
+@click.command("nf-workflow-past-run-dirs")
+@ARGUMENT_WORKFLOW
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_obj
+def nf_workflow_past_run_dirs(
+    context: CGConfig,
+    before_str: str,
+    workflow: Workflow,
+    yes: bool = False,
+    dry_run: bool = False,
+):
+    """Clean up of "old" nextflow case run dirs."""
+
+    analysis_api = NfAnalysisAPI(config=context, workflow=workflow)
+    exit_code: int = EXIT_SUCCESS
+
+    try:
+        analysis_api.clean_past_run_dirs(yes=yes, dry_run=dry_run, before_str=before_str)
+    except Exception as error:
+        LOG.error(repr(error))
+        exit_code: int = EXIT_FAIL
+    if exit_code:
+        raise click.Abort()

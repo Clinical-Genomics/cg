@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
+from dateutil.parser import parse as parse_date
 from typing import Any, Iterator
 
 from pydantic.v1 import ValidationError
@@ -18,6 +19,7 @@ from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.config import write_config_nextflow_style
 from cg.io.controller import ReadFile, WriteFile
@@ -40,7 +42,7 @@ from cg.models.nf_analysis import (
     WorkflowDeliverables,
     WorkflowParameters,
 )
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import Case, CaseSample, Sample, Analysis
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -835,6 +837,37 @@ class NfAnalysisAPI(AnalysisAPI):
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
             or self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
+
+    def clean_workflow_run_dir(self, yes: bool, case_id: str, dry_run: bool = False):
+        """Remove workflow run directory."""
+
+        self.check_analysis_ongoing(case_id=case_id)
+        analysis_path: list[Path] | Path = self.get_case_path(case_id)
+
+        if dry_run:
+            LOG.info(f"Would have deleted: {analysis_path}")
+            return EXIT_SUCCESS
+
+        self.clean_run_dir(case_id=case_id, yes=yes, case_path=analysis_path)
+
+    def clean_past_run_dirs(self, before_str: str, yes: bool = False, dry_run: bool = False):
+        """Clean up of old case run dirs."""
+
+        before: datetime = parse_date(before_str)
+        possible_cleanups: list[Analysis] = self.get_analyses_to_clean(before=before)
+        LOG.info(f"Cleaning {len(possible_cleanups)} analyses created before {before}")
+
+        for analysis in possible_cleanups:
+            case_id: str = analysis.case.internal_id
+            try:
+                LOG.info(f"Cleaning {self.workflow} output for {case_id}")
+                self.clean_workflow_run_dir(yes=yes, case_id=case_id, dry_run=dry_run)
+            except FileNotFoundError:
+                continue
+            except Exception as error:
+                LOG.error(f"Failed to clean directories for case {case_id} - {repr(error)}")
+
+        LOG.info(f"Done cleaning {self.workflow} output")
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome version for a case.
