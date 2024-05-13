@@ -8,7 +8,7 @@ import click
 
 from cg.cli.workflow.commands import resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, DRY_RUN
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.io.controller import WriteFile, WriteStream
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -18,12 +18,6 @@ from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
-OPTION_DRY_RUN = click.option(
-    "-d",
-    "--dry-run",
-    help="Print command to console without executing",
-    is_flag=True,
-)
 OPTION_SAMPLE = click.option(
     "-s",
     "--sample",
@@ -55,7 +49,7 @@ microsalt.add_command(resolve_compression)
 @microsalt.command()
 @OPTION_TICKET
 @OPTION_SAMPLE
-@OPTION_DRY_RUN
+@DRY_RUN
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_obj
 def link(context: CGConfig, ticket: bool, sample: bool, unique_id: str, dry_run: bool) -> None:
@@ -73,7 +67,7 @@ def link(context: CGConfig, ticket: bool, sample: bool, unique_id: str, dry_run:
 
 
 @microsalt.command("config-case")
-@OPTION_DRY_RUN
+@DRY_RUN
 @OPTION_TICKET
 @OPTION_SAMPLE
 @ARGUMENT_UNIQUE_IDENTIFIER
@@ -108,7 +102,7 @@ def config_case(
 
 
 @microsalt.command()
-@OPTION_DRY_RUN
+@DRY_RUN
 @OPTION_TICKET
 @OPTION_SAMPLE
 @ARGUMENT_UNIQUE_IDENTIFIER
@@ -175,7 +169,7 @@ def run(
 
 @microsalt.command()
 @ARGUMENT_UNIQUE_IDENTIFIER
-@OPTION_DRY_RUN
+@DRY_RUN
 @OPTION_TICKET
 @OPTION_SAMPLE
 @click.pass_context
@@ -193,7 +187,7 @@ def start(
 
 
 @microsalt.command("start-available")
-@OPTION_DRY_RUN
+@DRY_RUN
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False):
     """Start full analysis workflow for all cases ready for analysis"""

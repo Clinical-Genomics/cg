@@ -5,6 +5,7 @@ import traceback
 
 import click
 
+from cg.constants.constants import DRY_RUN
 from cg.constants.nipt import Q30_THRESHOLD
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.nipt import NiptUploadAPI
@@ -25,7 +26,7 @@ def nipt():
 
 @nipt.command("case")
 @click.argument("case_id", required=True)
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.option("--force", is_flag=True, help="Force upload of case to databases, despite qc")
 @click.pass_context
 def nipt_upload_case(context: click.Context, case_id: str | None, dry_run: bool, force: bool):
@@ -56,7 +57,7 @@ def nipt_upload_case(context: click.Context, case_id: str | None, dry_run: bool,
 
 
 @nipt.command("all")
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.pass_context
 def nipt_upload_all(context: click.Context, dry_run: bool):
     """Upload NIPT result files for all cases"""
