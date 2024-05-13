@@ -444,8 +444,8 @@
   step: rank_and_filter
   tag: mt_research_index
 - format: tsv
-  id: CASEID
-  path: PATHTOCASE/ngsbits_samplegender/CASEID_ngsbits_sex.tsv
+  id: SAMPLEID
+  path: PATHTOCASE/ngsbits_samplegender/SAMPLEID_ngsbits_sex.tsv
   path_index: ~
   step: ngsbits_samplegender
   tag: ngsbits_samplegender
