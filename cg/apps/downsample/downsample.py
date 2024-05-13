@@ -107,6 +107,7 @@ class DownsampleAPI(MetaAPI):
     def start_downsample_job(
         self,
         downsample_data: DownsampleData,
+        account: str,
     ) -> int:
         """
         Start a down sample job for a sample.
@@ -120,12 +121,13 @@ class DownsampleAPI(MetaAPI):
             input_fastq_dir=str(downsample_data.fastq_file_input_directory),
             original_sample=downsample_data.original_sample,
             downsampled_sample=downsample_data.downsampled_sample,
+            account=account,
             dry_run=self.dry_run,
         )
         return downsample_work_flow.write_and_submit_sbatch_script()
 
     def downsample_sample(
-        self, sample_id: str, case_name: str, case_id: str, number_of_reads: float
+        self, sample_id: str, case_name: str, case_id: str, number_of_reads: float, account: str
     ) -> int | None:
         """Downsample a sample."""
         LOG.info(f"Starting Downsampling for sample {sample_id}.")
@@ -148,6 +150,6 @@ class DownsampleAPI(MetaAPI):
         if not self.dry_run:
             downsample_data.create_down_sampling_working_directory()
         submitted_job: int = self.start_downsample_job(
-            downsample_data=downsample_data,
+            downsample_data=downsample_data, account=account
         )
         return submitted_job

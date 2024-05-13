@@ -38,6 +38,12 @@ def downsample():
     help="Case name that is used as name for the downsampled case.",
 )
 @click.option(
+    "-a",
+    "--account",
+    required=True,
+    help="Please specify the account to use for the downsampling.",
+)
+@click.option(
     "-i",
     "--input-data",
     required=True,
@@ -49,7 +55,12 @@ def downsample():
 @DRY_RUN
 @click.pass_obj
 def downsample_sample(
-    context: CGConfig, case_id: str, case_name: str, input_data: Tuple[str, float], dry_run: bool
+    context: CGConfig,
+    case_id: str,
+    case_name: str,
+    account: str,
+    input_data: Tuple[str, float],
+    dry_run: bool,
 ):
     """Downsample reads in one or multiple samples."""
     downsample_api = DownsampleAPI(config=context, dry_run=dry_run)
@@ -60,6 +71,7 @@ def downsample_sample(
                 sample_id=sample_id,
                 number_of_reads=float(reads),
                 case_name=case_name,
+                account=account,
             )
         except Exception as error:
             LOG.info(repr(error))
