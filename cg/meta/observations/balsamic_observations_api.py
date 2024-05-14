@@ -6,7 +6,7 @@ from pathlib import Path
 from housekeeper.store.models import File, Version
 
 from cg.apps.loqus import LoqusdbAPI
-from cg.constants.constants import CustomerId
+from cg.constants.constants import CancerAnalysisType, CustomerId
 from cg.constants.observations import (
     LOQSUDB_CANCER_CUSTOMERS,
     LOQUSDB_CANCER_SEQUENCING_METHODS,
@@ -99,9 +99,10 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self, case: Case, input_files: BalsamicObservationsInputFiles, loqusdb_api: LoqusdbAPI
     ) -> None:
         """Load cancer observations to a specific Loqusdb API."""
-        is_somatic_db: bool = "somatic" in str(loqusdb_api.config_path)
-        is_paired_analysis: bool = "tumor_normal" in self.analysis_api.get_data_analysis_type(
-            case.internal_id
+        is_somatic_db: bool = LoqusdbInstance.SOMATIC in str(loqusdb_api.config_path)
+        is_paired_analysis: bool = (
+            CancerAnalysisType.TUMOR_NORMAL
+            in self.analysis_api.get_data_analysis_type(case.internal_id)
         )
         if is_somatic_db:
             if not is_paired_analysis:
