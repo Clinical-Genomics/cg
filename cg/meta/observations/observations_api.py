@@ -45,10 +45,10 @@ class ObservationsAPI:
             LoqusdbUploadCaseError: If case is not eligible for Loqusdb uploads
         """
         case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
-        is_case_eligible_for_loqusdb_upload: bool = self.is_case_eligible_for_observations_upload(
-            case
+        is_case_eligible_for_observations_upload: bool = (
+            self.is_case_eligible_for_observations_upload(case)
         )
-        if is_case_eligible_for_loqusdb_upload:
+        if is_case_eligible_for_observations_upload:
             self.load_observations(case=case)
         else:
             LOG.error(f"Case {case.internal_id} is not eligible for observations upload")
