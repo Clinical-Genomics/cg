@@ -1,6 +1,6 @@
 """Constants for cg."""
 
-from enum import IntEnum, StrEnum
+from enum import IntEnum, StrEnum, auto
 
 import click
 
@@ -97,11 +97,11 @@ class AnalysisType(StrEnum):
 
 
 class CancerAnalysisType(StrEnum):
-    TUMOR_NORMAL: str = "tumor_normal"
-    TUMOR_NORMAL_PANEL: str = "tumor_normal_panel"
-    TUMOR_NORMAL_WGS: str = "tumor_normal_wgs"
-    TUMOR_PANEL: str = "tumor_panel"
-    TUMOR_WGS: str = "tumor_wgs"
+    TUMOR_NORMAL: str = auto()
+    TUMOR_NORMAL_PANEL: str = auto()
+    TUMOR_NORMAL_WGS: str = auto()
+    TUMOR_PANEL: str = auto()
+    TUMOR_WGS: str = auto()
 
 
 class PrepCategory(StrEnum):
