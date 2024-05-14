@@ -116,7 +116,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
     def extract_observations_files_from_hk(
         self, hk_version: Version, case_id: str = None
     ) -> MipDNAObservationsInputFiles:
-        """Extract observations files given a housekeeper version for rare diseases."""
+        """Extract observations files given a Housekeeper version for rare diseases."""
         input_files: dict[str, File] = {
             "snv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SNV_VCF]

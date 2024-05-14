@@ -130,7 +130,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
     def extract_observations_files_from_hk(
         self, hk_version: Version, case_id: str = None
     ) -> BalsamicObservationsInputFiles:
-        """Extract observations files given a housekeeper version for cancer."""
+        """Extract observations files given a Housekeeper version for cancer."""
         input_files: dict[str, File] = {
             "snv_germline_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SNV_GERMLINE_VCF]

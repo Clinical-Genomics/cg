@@ -148,7 +148,7 @@ class ObservationsAPI:
     def extract_observations_files_from_hk(
         self, hk_version: Version, case_id: str = None
     ) -> MipDNAObservationsInputFiles | BalsamicObservationsInputFiles:
-        """Extract observations files given a housekeeper version."""
+        """Extract observations files given a Housekeeper version."""
         raise NotImplementedError
 
     def delete_case(self, case: Case) -> None:
