@@ -46,7 +46,12 @@ class ValidatePacbioFileTransferService(ValidateFileTransferService):
         return True
 
     def get_run_ids(self) -> list[str]:
-        return [run_dir.name for run_dir in get_directories_in_path(Path(self.data_dir))]
+        run_ids: list[str] = []
+        run_dirs: list[Path] = get_directories_in_path(Path(self.data_dir))
+        for run_dir in run_dirs:
+            if run_dir.name.startswith("r"):
+                run_ids.append(run_dir.name)
+        return run_ids
 
     def validate_all_transfer_done(self) -> bool:
         run_ids: list[str] = self.get_run_ids()

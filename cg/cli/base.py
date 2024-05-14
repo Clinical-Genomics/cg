@@ -9,7 +9,7 @@ import coloredlogs
 from sqlalchemy.orm import scoped_session
 
 import cg
-from cg.cli import validate
+from cg.cli.validate import validate
 from cg.cli.add import add as add_cmd
 from cg.cli.archive import archive
 from cg.cli.backup import backup
