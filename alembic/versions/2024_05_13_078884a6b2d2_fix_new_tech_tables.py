@@ -28,17 +28,10 @@ def upgrade():
             nullable=False,
         ),
     )
-    op.create_foreign_key(
-        constraint_name="fk_device_id",
-        source_table="run_metrics",
-        referent_table="run_device",
-        local_cols=["device_id"],
-        remote_cols=["id"],
-    )
 
 
 def downgrade():
-    # op.drop_constraint(constraint_name="fk_device_id", table_name="run_metrics", type_="foreignkey")
+    op.drop_constraint(constraint_name="fk_device_id", table_name="run_metrics", type_="foreignkey")
     op.drop_column(table_name="run_metrics", column_name="device_id")
     op.add_column(
         table_name="run_device", column=sa.Column("device_id", sa.Integer(), nullable=False)
