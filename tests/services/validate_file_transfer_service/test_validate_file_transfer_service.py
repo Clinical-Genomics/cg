@@ -20,7 +20,7 @@ def test_get_manifest_content(
         manifest_file=manifest_file, manifest_file_format=FileFormat.TXT
     )
 
-    # THEN assert that the content is a dictionary
+    # THEN assert that the content is a list
     assert isinstance(manifest_content, list)
 
 
@@ -92,5 +92,5 @@ def test_validate_by_manifest_file_fail(
         manifest_file=manifest_file_fail, source_dir=source_dir, manifest_file_format=FileFormat.TXT
     )
 
-    # THEN assert that the files in the manifest are in the directory
+    # THEN assert that the files in the manifest are not in the directory
     assert not is_valid
