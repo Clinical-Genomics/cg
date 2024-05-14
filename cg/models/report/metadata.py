@@ -104,10 +104,11 @@ class SequencingSampleMetadataModel(SampleMetadataModel):
 
     @field_validator("rin")
     def ensure_rin_thresholds(cls, rin: str) -> str:
-        rin_value = float(rin)
-        if rin_value < RIN_MIN_THRESHOLD or rin_value > RIN_MAX_THRESHOLD:
-            return NA_FIELD
-        return rin
+        if rin != NA_FIELD:
+            rin_number = float(rin)
+            if RIN_MIN_THRESHOLD <= rin_number <= RIN_MAX_THRESHOLD:
+                return str(rin_number)
+        return NA_FIELD
 
 
 class WTSSampleMetadataModel(SequencingSampleMetadataModel):
