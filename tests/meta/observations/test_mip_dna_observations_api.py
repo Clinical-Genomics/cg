@@ -15,7 +15,7 @@ from cg.exc import LoqusdbDuplicateRecordError
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
-from cg.store.models import Case, Customer
+from cg.store.models import Case
 
 
 def test_is_sample_type_eligible_for_observations_upload(
@@ -54,18 +54,14 @@ def test_is_sample_type_not_eligible_for_observations_upload(
 
 
 def test_is_case_eligible_for_observations_upload(
-    case_id: str,
-    mip_dna_customer: Customer,
-    mip_dna_observations_api: MipDNAObservationsAPI,
-    mocker: MockFixture,
+    case_id: str, mip_dna_observations_api: MipDNAObservationsAPI, mocker: MockFixture
 ):
     """Test whether a case is eligible for MIP-DNA observation uploads."""
 
     # GIVEN a case and a MIP-DNA observations API
     case: Case = mip_dna_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
-    # GIVEN a MIP-DNA customer and a scenario for Loqusdb uploads
-    case.customer.internal_id = mip_dna_customer.internal_id
+    # GIVEN a MIP-DNA scenario for Loqusdb uploads
     mocker.patch.object(
         MipDNAAnalysisAPI, "get_data_analysis_type", return_value=SequencingMethod.WGS
     )
@@ -81,18 +77,14 @@ def test_is_case_eligible_for_observations_upload(
 
 
 def test_is_case_not_eligible_for_observations_upload(
-    case_id: str,
-    mip_dna_customer: Customer,
-    mip_dna_observations_api: MipDNAObservationsAPI,
-    mocker: MockFixture,
+    case_id: str, mip_dna_observations_api: MipDNAObservationsAPI, mocker: MockFixture
 ):
     """Test whether a case is not eligible for MIP-DNA observation uploads."""
 
     # GIVEN a case and a MIP-DNA observations API
     case: Case = mip_dna_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
-    # GIVEN a MIP-DNA customer and a scenario for Loqusdb uploads with an invalid sequencing method
-    case.customer.internal_id = mip_dna_customer.internal_id
+    # GIVEN a MIP-DNA scenario for Loqusdb uploads with an invalid sequencing method
     mocker.patch.object(
         MipDNAAnalysisAPI, "get_data_analysis_type", return_value=SequencingMethod.WTS
     )

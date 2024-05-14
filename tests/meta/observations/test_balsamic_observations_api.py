@@ -15,7 +15,7 @@ from cg.exc import LoqusdbDuplicateRecordError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
-from cg.store.models import Case, Customer
+from cg.store.models import Case
 
 
 def test_is_analysis_type_eligible_for_observations_upload(
@@ -61,18 +61,14 @@ def test_is_analysis_type_not_eligible_for_observations_upload(
 
 
 def test_is_case_eligible_for_observations_upload(
-    case_id: str,
-    balsamic_customer: Customer,
-    balsamic_observations_api: BalsamicObservationsAPI,
-    mocker: MockFixture,
+    case_id: str, balsamic_observations_api: BalsamicObservationsAPI, mocker: MockFixture
 ):
     """Test whether a case is eligible for Balsamic observation uploads."""
 
     # GIVEN a case and a Balsamic observations API
     case: Case = balsamic_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
-    # GIVEN a balsamic customer, and eligible sequencing method, and a case with tumor samples
-    case.customer.internal_id = balsamic_customer.internal_id
+    # GIVEN an eligible sequencing method, a case with tumor samples, and a valid source type
     mocker.patch.object(
         BalsamicAnalysisAPI, "get_data_analysis_type", return_value=CancerAnalysisType.TUMOR_WGS
     )
@@ -90,7 +86,6 @@ def test_is_case_eligible_for_observations_upload(
 
 def test_is_case_not_eligible_for_observations_upload(
     case_id: str,
-    balsamic_customer: Customer,
     balsamic_observations_api: BalsamicObservationsAPI,
     mocker: MockFixture,
     caplog: LogCaptureFixture,
@@ -100,8 +95,7 @@ def test_is_case_not_eligible_for_observations_upload(
     # GIVEN a case and a Balsamic observations API
     case: Case = balsamic_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
-    # GIVEN a balsamic customer, a case with tumor samples, and an invalid sequencing type
-    case.customer.internal_id = balsamic_customer.internal_id
+    # GIVEN a case with tumor sample, an invalid sequencing type, and a valid source
     mocker.patch.object(
         BalsamicAnalysisAPI, "get_data_analysis_type", return_value=CancerAnalysisType.TUMOR_PANEL
     )

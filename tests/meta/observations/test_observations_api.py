@@ -25,10 +25,10 @@ from cg.store.models import Case, Customer
 
 
 @pytest.mark.parametrize(
-    "workflow, analysis_api, sequencing_method, is_tumour",
+    "workflow, analysis_api, sequencing_method",
     [
-        (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_WGS, True),
-        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SequencingMethod.WGS, False),
+        (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_WGS),
+        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SequencingMethod.WGS),
     ],
 )
 def test_observations_upload(
@@ -38,7 +38,6 @@ def test_observations_upload(
     workflow: Workflow,
     analysis_api: AnalysisAPI,
     sequencing_method: str,
-    is_tumour: bool,
     request: FixtureRequest,
     mocker: MockFixture,
     caplog: LogCaptureFixture,
@@ -46,19 +45,15 @@ def test_observations_upload(
     """Test upload of observations."""
     caplog.set_level(logging.DEBUG)
 
-    # GIVEN an observations API, a list of observation input files, and a workflow customer
+    # GIVEN an observations API and a list of observation input files
     observations_api: ObservationsAPI = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_api"
     )
     observations_input_files: ObservationsInputFiles = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_input_files"
     )
-    customer: Customer = request.getfixturevalue(f"{workflow.replace('-', '_')}_customer")
 
     # GIVEN a case eligible for Loqusdb uploads
-    case: Case = observations_api.store.get_case_by_internal_id(case_id)
-    case.customer.internal_id = customer.internal_id
-    case.samples[0].is_tumour = is_tumour
 
     # GIVEN a mock scenario for a successful upload
     mocker.patch.object(analysis_api, "get_data_analysis_type", return_value=sequencing_method)
@@ -80,10 +75,10 @@ def test_observations_upload(
 
 
 @pytest.mark.parametrize(
-    "workflow, analysis_api, sequencing_method, is_tumour",
+    "workflow, analysis_api, sequencing_method",
     [
-        (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_WGS, True),
-        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SequencingMethod.WGS, False),
+        (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_WGS),
+        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SequencingMethod.WGS),
     ],
 )
 def test_observations_upload_not_eligible(
@@ -93,7 +88,6 @@ def test_observations_upload_not_eligible(
     workflow: Workflow,
     analysis_api: AnalysisAPI,
     sequencing_method: str,
-    is_tumour: bool,
     request: FixtureRequest,
     mocker: MockFixture,
     caplog: LogCaptureFixture,
@@ -101,19 +95,15 @@ def test_observations_upload_not_eligible(
     """Test upload of observations."""
     caplog.set_level(logging.DEBUG)
 
-    # GIVEN an observations API, a list of observation input files, and a workflow customer
+    # GIVEN an observations API and a list of observation input files
     observations_api: ObservationsAPI = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_api"
     )
     observations_input_files: ObservationsInputFiles = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_input_files"
     )
-    customer: Customer = request.getfixturevalue(f"{workflow.replace('-', '_')}_customer")
 
     # GIVEN a case eligible for Loqusdb uploads
-    case: Case = observations_api.store.get_case_by_internal_id(case_id)
-    case.customer.internal_id = customer.internal_id
-    case.samples[0].is_tumour = is_tumour
 
     # GIVEN a mock scenario for an upload with an invalid source type
     mocker.patch.object(analysis_api, "get_data_analysis_type", return_value=sequencing_method)
