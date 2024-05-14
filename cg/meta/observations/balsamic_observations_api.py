@@ -77,7 +77,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         Load observation counts to Loqusdb for a Balsamic case.
 
         Raises:
-            LoqusdbDuplicateRecordError if case is already uploaded.
+            LoqusdbDuplicateRecordError: If case has already been uploaded.
         """
         loqusdb_upload_apis: list[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
         for loqusdb_api in loqusdb_upload_apis:

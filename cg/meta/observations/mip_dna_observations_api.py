@@ -84,7 +84,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
         Load observation counts to Loqusdb for a MIP-DNA case.
 
         Raises:
-            LoqusdbDuplicateRecordError if case is already uploaded.
+            LoqusdbDuplicateRecordError: If case has already been uploaded.
         """
         self.set_loqusdb_instance(case.internal_id)
         input_files: MipDNAObservationsInputFiles = self.get_observations_input_files(case)
