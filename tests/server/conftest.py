@@ -14,7 +14,7 @@ from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import DataDelivery, Workflow
 from cg.server.ext import db as store
 from cg.store.database import create_all_tables, drop_all_tables
-from cg.store.models import Case, Customer, Order
+from cg.store.models import Case, Customer, Order, Sample
 from tests.store_helpers import StoreHelpers
 
 os.environ["CG_SQL_DATABASE_URI"] = "sqlite:///"
@@ -76,7 +76,17 @@ def order_balsamic(helpers: StoreHelpers, customer_another: Customer) -> Order:
 
 
 @pytest.fixture
-def server_case(helpers: StoreHelpers) -> Case:
+def server_samples(helpers: StoreHelpers) -> list[Sample]:
+    return helpers.add_samples(store=store, nr_samples=2)
+
+
+@pytest.fixture
+def server_samples_for_another_case(helpers: StoreHelpers) -> list[Sample]:
+    return helpers.add_samples(store=store, nr_samples=2)
+
+
+@pytest.fixture
+def server_case(helpers: StoreHelpers, server_samples: list[Sample]) -> Case:
     case: Case = helpers.add_case(
         customer_id=1,
         data_analysis=Workflow.MIP_DNA,
@@ -86,11 +96,14 @@ def server_case(helpers: StoreHelpers) -> Case:
         ticket="123",
         store=store,
     )
+    helpers.relate_samples(base_store=store, case=case, samples=server_samples)
     return case
 
 
 @pytest.fixture
-def server_case_in_same_order(helpers: StoreHelpers) -> Case:
+def server_case_in_same_order(
+    helpers: StoreHelpers, server_samples_for_another_case: list[Sample]
+) -> Case:
     case: Case = helpers.add_case(
         customer_id=1,
         data_analysis=Workflow.MIP_DNA,
@@ -100,6 +113,7 @@ def server_case_in_same_order(helpers: StoreHelpers) -> Case:
         ticket="123",
         store=store,
     )
+    helpers.relate_samples(base_store=store, case=case, samples=server_samples_for_another_case)
     return case
 
 
