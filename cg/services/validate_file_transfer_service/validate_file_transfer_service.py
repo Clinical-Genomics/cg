@@ -31,9 +31,11 @@ class ValidateFileTransferService:
     @staticmethod
     def is_file_in_directory_tree(file_name: str, source_dir: Path) -> bool:
         """Check if a file is present in the directory tree."""
-        if get_file_in_directory(directory=source_dir, file_name=file_name):
-            return True
-        return False
+        try:
+            if get_file_in_directory(directory=source_dir, file_name=file_name):
+                return True
+        except FileNotFoundError:
+            return False
 
     def validate_by_manifest_file(
         self, manifest_file: Path, source_dir: Path, manifest_file_format: str
@@ -44,9 +46,6 @@ class ValidateFileTransferService:
         )
         files_to_validate: list[str] = self.extract_file_names_from_manifest(manifest_content)
         for file_name in files_to_validate:
-            try:
-                if not self.is_file_in_directory_tree(file_name=file_name, source_dir=source_dir):
-                    return False
-            except FileNotFoundError:
+            if not self.is_file_in_directory_tree(file_name=file_name, source_dir=source_dir):
                 return False
         return True

@@ -311,6 +311,7 @@ class CGConfig(BaseModel):
     illumina_flow_cells_directory: str
     madeline_exe: str
     nanopore_data_directory: str
+    pacbio_data_directory: str
     tower_binary_path: str
     max_flowcells: int | None
     data_input: DataInput | None = None

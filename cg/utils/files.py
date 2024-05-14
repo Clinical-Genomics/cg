@@ -23,6 +23,21 @@ def get_file_in_directory(directory: Path, file_name: str) -> Path:
     raise FileNotFoundError(f"File {file_name} not found in {directory}")
 
 
+def get_file_in_directory_with_pattern(directory: Path, pattern: str) -> Path:
+    """Get a file in a directory and subdirectories.
+    Raises:
+        FileNotFoundError: If the directory does not exist.
+    """
+    if not directory.is_dir() or not directory.exists():
+        raise FileNotFoundError(f"Directory {directory} does not exist")
+    for directory_path, _, files in os.walk(directory):
+        for file in files:
+            if pattern in file:
+                path_to_file = Path(directory_path, file)
+                return path_to_file
+    raise FileNotFoundError(f"File with pattern {pattern} not found in {directory}")
+
+
 def get_files_matching_pattern(directory: Path, pattern: str) -> list[Path]:
     """Search for all files in a directory that match a pattern."""
     return list(directory.glob(pattern))
