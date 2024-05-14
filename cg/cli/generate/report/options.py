@@ -29,11 +29,3 @@ OPTION_FORCE_REPORT = click.option(
     default=False,
     help="Overrule report validation",
 )
-
-OPTION_DRY_RUN = click.option(
-    "-d",
-    "--dry-run",
-    is_flag=True,
-    default=False,
-    help="Print to console instead of generating an html report file",
-)
