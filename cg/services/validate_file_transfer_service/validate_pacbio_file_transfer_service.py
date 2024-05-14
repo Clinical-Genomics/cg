@@ -63,7 +63,7 @@ class ValidatePacbioFileTransferService(ValidateFileTransferService):
         content: any = reader.get_content_from_file(
             file_path=Path(trigger_file), file_format=FileFormat.TXT
         )
-        content.append(flow_cell_path.name)
+        content.append(str(flow_cell_path) + "\n")
         writer = WriteFile()
         writer.write_file_from_content(
             file_path=Path(trigger_file), file_format=FileFormat.TXT, content=content
