@@ -157,7 +157,7 @@ def test_load_duplicated_observations(
     caplog: LogCaptureFixture,
     mocker: MockFixture,
 ):
-    """Test loading of Balsamic case observations."""
+    """Test raise of a duplicate exception when loading Balsamic case observations."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN an observations API and a Balsamic case
@@ -182,7 +182,7 @@ def test_load_cancer_observations(
     mocker: MockFixture,
     caplog: LogCaptureFixture,
 ):
-    """Test loading of case observations for Balsamic."""
+    """Test loading of cancer case observations for Balsamic."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a Balsamic observations API, a list of input files, and a cancer case
