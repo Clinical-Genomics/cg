@@ -34,8 +34,10 @@ class ValidatePacbioFileTransferService(ValidateFileTransferService):
     def validate_transfer_done(self, run_id: str) -> bool:
         flow_cell_paths: list[Path] = self.get_flow_cell_paths(run_id)
         for flow_cell_path in flow_cell_paths:
-            manifest_file: Path = self.get_manifest_file_path(flow_cell_path)
-            if not manifest_file:
+            try:
+                manifest_file: Path = self.get_manifest_file_path(flow_cell_path)
+            except FileNotFoundError:
+                LOG.error(f"Manifest file not found for run {run_id}")
                 return False
             if not self.validate_by_manifest_file(
                 manifest_file=manifest_file,
