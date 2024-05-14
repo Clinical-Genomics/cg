@@ -18,13 +18,17 @@ depends_on = None
 
 
 def upgrade():
+    op.create_primary_key(constraint_name="pk_run_device", table_name="run_device", columns=["id"])
+    op.create_primary_key(
+        constraint_name="pk_run_metrics", table_name="run_metrics", columns=["id"]
+    )
     op.drop_column(table_name="run_device", column_name="device_id")
     op.add_column(
         table_name="run_metrics",
         column=sa.Column(
             "device_id",
             sa.Integer(),
-            sa.ForeignKey(column="run_device.id", name="fk_device_id", nullable=False),
+            sa.ForeignKey(column="run_device.id", name="fk_device_id"),
             nullable=False,
         ),
     )
@@ -35,5 +39,6 @@ def downgrade():
     op.drop_column(table_name="run_metrics", column_name="device_id")
     op.add_column(
         table_name="run_device",
-        column=sa.Column(__name_pos="device_id", __type_pos=sa.Integer(), nullable=False),
+        column=sa.Column("device_id", sa.Integer(), nullable=False),
     )
+    op.drop_constraint(constraint_name="pk_run_device", table_name="run_device", type_="primary")
