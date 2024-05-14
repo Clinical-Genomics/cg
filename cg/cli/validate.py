@@ -15,8 +15,8 @@ def validate():
     """Validation of processes in cg."""
 
 
-@click.pass_obj
 @validate.command("pacbio-transfer")
+@click.pass_obj
 def validate_pacbio_transfer(context: CGConfig):
     """Validate that the PacBio transfer is correct."""
     validate_service = ValidatePacbioFileTransferService(config=context)
