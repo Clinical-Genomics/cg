@@ -220,15 +220,10 @@ REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA
 ]
 
 
-REQUIRED_SAMPLE_METADATA_TAXPROFILER_FIELDS: list[str] = (
-    _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS
-    + [
-        "average_read_length",
-        "mapped_reads",
-        "mean_length_r2",
-        "million_read_pairs_after_filtering",
-    ]
-)
+REQUIRED_SAMPLE_METADATA_TAXPROFILER_FIELDS: list[str] = [
+    "input_amount",
+    "rin",
+]
 
 
 REQUIRED_SAMPLE_METADATA_TOMTE_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_WTS_FIELDS + [
