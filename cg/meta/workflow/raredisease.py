@@ -114,5 +114,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_workflow_metrics(self, sample_id: str) -> dict:
         sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
         metric_conditions: dict[str, dict[str, Any]] = dict(RAREDISEASE_METRIC_CONDITIONS)
-        metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
+        self.perform_sex_check(sample, metric_conditions)
         return metric_conditions
+
+    def perform_sex_check(self, sample: Sample, metric_conditions: dict) -> None:
+        metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
