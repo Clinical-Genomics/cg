@@ -20,6 +20,7 @@ class ValidatePacbioFileTransferService(ValidateFileTransferService):
         super().__init__()
         self.config: CGConfig = config
         self.data_dir: str = self.config.pacbio_data_directory
+        self.trigger_file: str = self.config.pacbio_data_directory + "/validated_flow_cell_runs"
 
     def get_run_path(self, run_id: str) -> Path:
         return Path(self.data_dir, run_id)
@@ -57,16 +58,23 @@ class ValidatePacbioFileTransferService(ValidateFileTransferService):
                 run_ids.append(run_dir.name)
         return run_ids
 
+    def ensure_trigger_file_exists(self):
+        if not Path(self.trigger_file).exists():
+            writer = WriteFile()
+            writer.write_file_from_content(
+                file_path=Path(self.trigger_file), file_format=FileFormat.TXT, content=[]
+            )
+
     def write_flow_cell_path_to_trigger(self, flow_cell_path: Path):
         reader = ReadFile()
-        trigger_file: str = self.config.pacbio_data_directory + "/validated_flow_cell_runs"
+        self.ensure_trigger_file_exists()
         content: any = reader.get_content_from_file(
-            file_path=Path(trigger_file), file_format=FileFormat.TXT
+            file_path=Path(self.trigger_file), file_format=FileFormat.TXT
         )
         content.append(str(flow_cell_path) + "\n")
         writer = WriteFile()
         writer.write_file_from_content(
-            file_path=Path(trigger_file), file_format=FileFormat.TXT, content=content
+            file_path=Path(self.trigger_file), file_format=FileFormat.TXT, content=content
         )
 
     def validate_all_transfer_done(self) -> bool:
