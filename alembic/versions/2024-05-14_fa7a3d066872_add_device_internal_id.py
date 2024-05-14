@@ -1,8 +1,8 @@
 """add_device_internal_id
 
-Revision ID: 92a0b4c8fe24
-Revises: 078884a6b2d2
-Create Date: 2024-05-13 16:15:45.639070
+Revision ID: fa7a3d066872
+Revises: e5c6bf847e25
+Create Date: 2024-05-14 16:02:06.382170
 
 """
 
@@ -11,8 +11,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "92a0b4c8fe24"
-down_revision = "078884a6b2d2"
+revision = "fa7a3d066872"
+down_revision = "e5c6bf847e25"
 branch_labels = None
 depends_on = None
 
