@@ -59,7 +59,7 @@ class ValidatePacbioFileTransferService(ValidateFileTransferService):
 
     def write_flow_cell_path_to_trigger(self, flow_cell_path: Path):
         reader = ReadFile()
-        trigger_file: str = self.config.pacbio_data_directory + "validated_flow_cell_runs"
+        trigger_file: str = self.config.pacbio_data_directory + "/validated_flow_cell_runs"
         content: any = reader.get_content_from_file(
             file_path=Path(trigger_file), file_format=FileFormat.TXT
         )
