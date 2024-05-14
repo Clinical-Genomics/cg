@@ -11,7 +11,7 @@ from pytest_mock import MockFixture
 from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CancerAnalysisType, CustomerId, Workflow
-from cg.constants.observations import LOQUSDB_ID, LoqusdbInstance, MipDNALoadParameters
+from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters
 from cg.constants.sample_sources import SourceType
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
@@ -61,10 +61,6 @@ def test_observations_upload(
         ObservationsAPI, "get_observations_input_files", return_value=observations_input_files
     )
     mocker.patch.object(ObservationsAPI, "is_duplicate", return_value=False)
-    mocker.patch.object(LoqusdbAPI, "load", return_value={"variants": number_of_loaded_variants})
-    mocker.patch.object(
-        LoqusdbAPI, "get_case", return_value={"case_id": case_id, LOQUSDB_ID: loqusdb_id}
-    )
     mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
 
     # WHEN uploading the case observations to Loqusdb
@@ -111,10 +107,6 @@ def test_observations_upload_not_eligible(
         ObservationsAPI, "get_observations_input_files", return_value=observations_input_files
     )
     mocker.patch.object(ObservationsAPI, "is_duplicate", return_value=False)
-    mocker.patch.object(LoqusdbAPI, "load", return_value={"variants": number_of_loaded_variants})
-    mocker.patch.object(
-        LoqusdbAPI, "get_case", return_value={"case_id": case_id, LOQUSDB_ID: loqusdb_id}
-    )
     mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE_FFPE)
 
     # WHEN uploading the case observations to Loqusdb
@@ -469,9 +461,6 @@ def test_delete_case(
     )
 
     # GIVEN a case uploaded to Loqusdb
-    mocker.patch.object(
-        LoqusdbAPI, "get_case", return_value={"case_id": case_id, LOQUSDB_ID: loqusdb_id}
-    )
     mocker.patch.object(analysis_api, "get_data_analysis_type", return_value=sequencing_method)
     mocker.patch.object(LoqusdbAPI, "delete_case", return_value=None)
 

@@ -7,8 +7,6 @@ from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
 from cg.apps.lims import LimsAPI
-from cg.apps.loqus import LoqusdbAPI
-from cg.constants.observations import LOQUSDB_ID
 from cg.constants.sample_sources import SourceType
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import LoqusdbDuplicateRecordError
@@ -124,10 +122,6 @@ def test_load_observations(
         return_value=mip_dna_observations_input_files,
     )
     mocker.patch.object(MipDNAObservationsAPI, "is_duplicate", return_value=False)
-    mocker.patch.object(LoqusdbAPI, "load", return_value={"variants": number_of_loaded_variants})
-    mocker.patch.object(
-        LoqusdbAPI, "get_case", return_value={"case_id": case_id, LOQUSDB_ID: loqusdb_id}
-    )
 
     # WHEN loading the case to Loqusdb
     mip_dna_observations_api.load_observations(case)

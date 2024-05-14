@@ -7,9 +7,7 @@ from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
 from cg.apps.lims import LimsAPI
-from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CancerAnalysisType
-from cg.constants.observations import LOQUSDB_ID
 from cg.constants.sample_sources import SourceType
 from cg.exc import LoqusdbDuplicateRecordError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
@@ -131,12 +129,8 @@ def test_load_observations(
         return_value=balsamic_observations_input_files,
     )
 
-    # GIVEN a Loqusdb mocked scenario
+    # GIVEN an observations API mocked scenario
     mocker.patch.object(BalsamicObservationsAPI, "is_duplicate", return_value=False)
-    mocker.patch.object(LoqusdbAPI, "load", return_value={"variants": number_of_loaded_variants})
-    mocker.patch.object(
-        LoqusdbAPI, "get_case", return_value={"case_id": case_id, LOQUSDB_ID: loqusdb_id}
-    )
 
     # WHEN loading the case to Loqusdb
     balsamic_observations_api.load_observations(case)
@@ -182,8 +176,7 @@ def test_load_cancer_observations(
     # GIVEN a Balsamic observations API, a list of input files, and a cancer case
     case: Case = balsamic_observations_api.store.get_case_by_internal_id(case_id)
 
-    # GIVEN a mocked return from the Loqusdb API
-    mocker.patch.object(LoqusdbAPI, "load", return_value={"variants": number_of_loaded_variants})
+    # GIVEN an observations API mocked scenario
     mocker.patch.object(
         BalsamicAnalysisAPI,
         "get_data_analysis_type",
