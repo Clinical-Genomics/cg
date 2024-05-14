@@ -4,7 +4,7 @@ import pytest
 from mock import Mock
 
 from cg.apps.tb.dto.summary_response import AnalysisSummary
-from cg.services.orders.order_status_service.order_summary_service import (
+from cg.services.orders.order_summary_service.order_summary_service import (
     OrderSummaryService,
 )
 from cg.store.models import Case, Customer, Order, Sample
