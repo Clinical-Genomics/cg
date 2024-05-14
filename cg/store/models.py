@@ -524,7 +524,7 @@ class Case(Base, PriorityMixin):
 
     @property
     def non_tumour_samples(self) -> list["Sample"]:
-        """Return tumour samples."""
+        """Return non-tumour samples."""
         return self._get_non_tumour_samples
 
     @property
@@ -534,7 +534,7 @@ class Case(Base, PriorityMixin):
 
     @property
     def _get_non_tumour_samples(self) -> list["Sample"]:
-        """Extract non tumour samples."""
+        """Extract non-tumour samples."""
         return [link.sample for link in self.links if not link.sample.is_tumour]
 
     @property
