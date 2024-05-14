@@ -9,14 +9,30 @@ from cg.utils.files import (
     get_file_in_directory,
     remove_directory_and_contents,
     rename_file,
+    get_file_in_directory_with_pattern,
 )
 
 
 def test_get_file_in_directory(nested_directory_with_file: Path, some_file: str):
     """Test function to get a file in a directory and subdirectories."""
     # GIVEN a directory with subdirectories with a file
+
     # WHEN getting the file
     file_path: Path = get_file_in_directory(nested_directory_with_file, some_file)
+
+    # THEN assert that the file is returned
+    assert file_path.exists()
+
+
+def test_get_file_in_directory_by_pattern(nested_directory_with_file: Path, some_file: str):
+    """Test function to get a file in a directory and subdirectories."""
+    # GIVEN a directory with subdirectories with a file
+
+    # WHEN getting the file
+    file_path: Path = get_file_in_directory_with_pattern(
+        directory=nested_directory_with_file, pattern=some_file
+    )
+
     # THEN assert that the file is returned
     assert file_path.exists()
 

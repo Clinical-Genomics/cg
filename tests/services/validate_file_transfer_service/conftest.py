@@ -48,3 +48,18 @@ def expected_file_names_in_manifest() -> list[str]:
     for i in range(1, 6):
         file_names.append(f"file{i}")
     return file_names
+
+
+@pytest.fixture
+def pacbio_run_id() -> str:
+    """Return a PacBio run ID."""
+    return "r1123_221421_12321"
+
+
+@pytest.fixture
+def pacbio_runs_dir(tmp_path: Path, pacbio_run_id: str) -> Path:
+    """Return the path to a directory with PacBio runs."""
+    tmp_path.mkdir(exist_ok=True)
+    tmp_path.joinpath(pacbio_run_id).mkdir()
+    tmp_path.joinpath("not_this_dir").mkdir()
+    return tmp_path
