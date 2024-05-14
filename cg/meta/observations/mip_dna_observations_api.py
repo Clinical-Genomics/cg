@@ -6,8 +6,8 @@ from housekeeper.store.models import File, Version
 
 from cg.constants.constants import CustomerId, SampleType
 from cg.constants.observations import (
-    LOQSUDB_RARE_DISEASE_CUSTOMERS,
     LOQUSDB_ID,
+    LOQUSDB_RARE_DISEASE_CUSTOMERS,
     LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
     LoqusdbInstance,
     MipDNALoadParameters,
@@ -36,7 +36,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
     @property
     def loqusdb_customers(self) -> list[CustomerId]:
         """Customers that are eligible for rare disease Loqusdb uploads."""
-        return LOQSUDB_RARE_DISEASE_CUSTOMERS
+        return LOQUSDB_RARE_DISEASE_CUSTOMERS
 
     @property
     def loqusdb_sequencing_methods(self) -> list[str]:

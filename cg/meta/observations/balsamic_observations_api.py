@@ -8,7 +8,7 @@ from housekeeper.store.models import File, Version
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CancerAnalysisType, CustomerId
 from cg.constants.observations import (
-    LOQSUDB_CANCER_CUSTOMERS,
+    LOQUSDB_CANCER_CUSTOMERS,
     LOQUSDB_CANCER_SEQUENCING_METHODS,
     LOQUSDB_ID,
     BalsamicLoadParameters,
@@ -38,7 +38,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
     @property
     def loqusdb_customers(self) -> list[CustomerId]:
         """Customers that are eligible for cancer Loqusdb uploads."""
-        return LOQSUDB_CANCER_CUSTOMERS
+        return LOQUSDB_CANCER_CUSTOMERS
 
     @property
     def loqusdb_sequencing_methods(self) -> list[str]:
