@@ -25,10 +25,36 @@ from cg.store.models import Case, Customer
 
 
 @pytest.mark.parametrize(
-    "workflow, analysis_api, sequencing_method",
+    "workflow, analysis_api, sequencing_method, is_eligible, expected_message",
     [
-        (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_WGS),
-        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SequencingMethod.WGS),
+        (
+            Workflow.BALSAMIC,
+            BalsamicAnalysisAPI,
+            CancerAnalysisType.TUMOR_WGS,
+            True,
+            "Uploaded {number_of_loaded_variants} variants to Loqusdb",
+        ),
+        (
+            Workflow.MIP_DNA,
+            MipDNAAnalysisAPI,
+            SequencingMethod.WGS,
+            True,
+            "Uploaded {number_of_loaded_variants} variants to Loqusdb",
+        ),
+        (
+            Workflow.BALSAMIC,
+            BalsamicAnalysisAPI,
+            CancerAnalysisType.TUMOR_WGS,
+            False,
+            "Case {case_id} is not eligible for observations upload",
+        ),
+        (
+            Workflow.MIP_DNA,
+            MipDNAAnalysisAPI,
+            SequencingMethod.WGS,
+            False,
+            "Case {case_id} is not eligible for observations upload",
+        ),
     ],
 )
 def test_observations_upload(
@@ -38,6 +64,8 @@ def test_observations_upload(
     workflow: Workflow,
     analysis_api: AnalysisAPI,
     sequencing_method: str,
+    is_eligible: bool,
+    expected_message: str,
     request: FixtureRequest,
     mocker: MockFixture,
     caplog: LogCaptureFixture,
@@ -52,8 +80,6 @@ def test_observations_upload(
     observations_input_files: ObservationsInputFiles = request.getfixturevalue(
         f"{workflow.replace('-', '_')}_observations_input_files"
     )
-
-    # GIVEN a case eligible for Loqusdb uploads
 
     # GIVEN a mock scenario for a successful upload
     mocker.patch.object(analysis_api, "get_data_analysis_type", return_value=sequencing_method)
@@ -62,58 +88,24 @@ def test_observations_upload(
     )
     mocker.patch.object(ObservationsAPI, "is_duplicate", return_value=False)
 
-    # WHEN uploading the case observations to Loqusdb
-    observations_api.upload(case_id)
-
-    # THEN the case should be successfully uploaded
-    assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
-
-
-@pytest.mark.parametrize(
-    "workflow, analysis_api, sequencing_method",
-    [
-        (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_WGS),
-        (Workflow.MIP_DNA, MipDNAAnalysisAPI, SequencingMethod.WGS),
-    ],
-)
-def test_observations_upload_not_eligible(
-    case_id: str,
-    loqusdb_id: str,
-    number_of_loaded_variants: int,
-    workflow: Workflow,
-    analysis_api: AnalysisAPI,
-    sequencing_method: str,
-    request: FixtureRequest,
-    mocker: MockFixture,
-    caplog: LogCaptureFixture,
-):
-    """Test upload of observations."""
-    caplog.set_level(logging.DEBUG)
-
-    # GIVEN an observations API and a list of observation input files
-    observations_api: ObservationsAPI = request.getfixturevalue(
-        f"{workflow.replace('-', '_')}_observations_api"
-    )
-    observations_input_files: ObservationsInputFiles = request.getfixturevalue(
-        f"{workflow.replace('-', '_')}_observations_input_files"
-    )
-
-    # GIVEN a case eligible for Loqusdb uploads
-
-    # GIVEN a mock scenario for an upload with an invalid source type
-    mocker.patch.object(analysis_api, "get_data_analysis_type", return_value=sequencing_method)
-    mocker.patch.object(
-        ObservationsAPI, "get_observations_input_files", return_value=observations_input_files
-    )
-    mocker.patch.object(ObservationsAPI, "is_duplicate", return_value=False)
-    mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE_FFPE)
+    # GIVEN a case not eligible for Loqusdb uploads
+    if not is_eligible:
+        mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE_FFPE)
 
     # WHEN uploading the case observations to Loqusdb
-    with pytest.raises(LoqusdbUploadCaseError):
+    if is_eligible:
         observations_api.upload(case_id)
+    else:
+        with pytest.raises(LoqusdbUploadCaseError):
+            observations_api.upload(case_id)
 
-    # THEN an upload error should be caught and the upload cancelled
-    assert f"Case {case_id} is not eligible for observations upload" in caplog.text
+    # THEN the expected log message should be present
+    assert (
+        expected_message.format(
+            case_id=case_id, number_of_loaded_variants=number_of_loaded_variants
+        )
+        in caplog.text
+    )
 
 
 @pytest.mark.parametrize(
