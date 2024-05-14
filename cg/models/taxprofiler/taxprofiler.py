@@ -32,6 +32,8 @@ class TaxprofilerParameters(WorkflowParameters):
     save_hostremoval_mapped: bool = True
     save_hostremoval_unmapped: bool = True
     perform_runmerging: bool = True
+    shortread_qc_mergepairs: bool = True
+    shortread_qc_includeunmerged: bool = True
     run_kraken2: bool = True
     kraken2_save_reads: bool = True
     kraken2_save_readclassifications: bool = True
@@ -48,7 +50,6 @@ class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
     """Taxprofiler sample model is used when building the sample sheet."""
 
     instrument_platform: SequencingPlatform
-    run_accession: str
     fasta: str
 
     @staticmethod
@@ -65,16 +66,17 @@ class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
 
     def reformat_sample_content(self) -> list[list[str]]:
         """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
-        return [
-            [
+        reformatted_content = []
+        for run_accession, (forward_path, reverse_path) in enumerate(
+            zip(self.fastq_forward_read_paths, self.fastq_reverse_read_paths), 1
+        ):
+            line = [
                 self.name,
-                self.run_accession,
+                run_accession,
                 self.instrument_platform,
-                fastq_forward_read_path,
-                fastq_reverse_read_path,
+                forward_path,
+                reverse_path,
                 self.fasta,
             ]
-            for fastq_forward_read_path, fastq_reverse_read_path in zip(
-                self.fastq_forward_read_paths, self.fastq_reverse_read_paths
-            )
-        ]
+            reformatted_content.append(line)
+        return reformatted_content

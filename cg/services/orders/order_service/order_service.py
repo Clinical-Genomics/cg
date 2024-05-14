@@ -7,8 +7,10 @@ from cg.services.orders.order_service.utils import (
     create_orders_response,
     order_is_delivered,
 )
-from cg.services.orders.order_status_service import OrderSummaryService
-from cg.services.orders.order_status_service.dto.order_summary import OrderSummary
+from cg.services.orders.order_summary_service.dto.order_summary import OrderSummary
+from cg.services.orders.order_summary_service.order_summary_service import (
+    OrderSummaryService,
+)
 from cg.store.models import Case, Order
 from cg.store.store import Store
 
