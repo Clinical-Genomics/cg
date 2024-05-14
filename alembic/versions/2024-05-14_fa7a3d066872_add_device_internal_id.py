@@ -20,7 +20,7 @@ depends_on = None
 def upgrade():
     op.add_column(
         table_name="run_device",
-        column=sa.Column(__name_pos="internal_id", __type_pos=sa.String(length=64), nullable=False),
+        column=sa.Column("internal_id", sa.String(length=64), nullable=False),
     )
     op.create_unique_constraint(
         constraint_name="uq_internal_id", table_name="run_device", columns=["internal_id"]
