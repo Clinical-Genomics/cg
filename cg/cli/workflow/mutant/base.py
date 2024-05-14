@@ -5,13 +5,13 @@ import click
 from cg.cli.workflow.commands import (
     ARGUMENT_CASE_ID,
     OPTION_ANALYSIS_PARAMETERS_CONFIG,
-    OPTION_DRY,
     link,
     resolve_compression,
     store,
     store_available,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants.constants import DRY_RUN
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
@@ -35,7 +35,7 @@ mutant.add_command(store_available)
 
 
 @mutant.command("config-case")
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def config_case(context: CGConfig, dry_run: bool, case_id: str) -> None:
@@ -45,7 +45,7 @@ def config_case(context: CGConfig, dry_run: bool, case_id: str) -> None:
 
 
 @mutant.command("run")
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def run(context: CGConfig, dry_run: bool, case_id: str, config_artic: str = None) -> None:
@@ -63,7 +63,7 @@ def run(context: CGConfig, dry_run: bool, case_id: str, config_artic: str = None
 
 
 @mutant.command("start")
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_CASE_ID
 @OPTION_ANALYSIS_PARAMETERS_CONFIG
 @click.pass_context
@@ -78,7 +78,7 @@ def start(context: click.Context, dry_run: bool, case_id: str, config_artic: str
 
 
 @mutant.command("start-available")
-@OPTION_DRY
+@DRY_RUN
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False):
     """Start full analysis workflow for all cases ready for analysis"""
