@@ -97,11 +97,11 @@ class AnalysisType(StrEnum):
 
 
 class CancerAnalysisType(StrEnum):
-    TUMOR_NORMAL: str = auto()
-    TUMOR_NORMAL_PANEL: str = auto()
-    TUMOR_NORMAL_WGS: str = auto()
-    TUMOR_PANEL: str = auto()
-    TUMOR_WGS: str = auto()
+    TUMOR_NORMAL = auto()
+    TUMOR_NORMAL_PANEL = auto()
+    TUMOR_NORMAL_WGS = auto()
+    TUMOR_PANEL = auto()
+    TUMOR_WGS = auto()
 
 
 class PrepCategory(StrEnum):
