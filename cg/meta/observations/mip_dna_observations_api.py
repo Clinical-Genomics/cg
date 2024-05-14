@@ -33,12 +33,14 @@ class MipDNAObservationsAPI(ObservationsAPI):
         super().__init__(config=config, analysis_api=self.analysis_api)
         self.loqusdb_api = None
 
-    def get_loqusdb_customers(self) -> list[CustomerId]:
-        """Return customers that are eligible for rare disease Loqusdb uploads."""
+    @property
+    def loqusdb_customers(self) -> list[CustomerId]:
+        """Customers that are eligible for rare disease Loqusdb uploads."""
         return LOQSUDB_RARE_DISEASE_CUSTOMERS
 
-    def get_loqusdb_sequencing_methods(self) -> list[str]:
-        """Return sequencing methods that are eligible for cancer Loqusdb uploads."""
+    @property
+    def loqusdb_sequencing_methods(self) -> list[str]:
+        """Sequencing methods that are eligible for cancer Loqusdb uploads."""
         return LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS
 
     @staticmethod

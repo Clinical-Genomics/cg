@@ -111,7 +111,7 @@ class ObservationsAPI:
 
     def is_customer_eligible_for_observations_upload(self, customer_id: str) -> bool:
         """Return whether the customer has been whitelisted for uploading observations."""
-        if customer_id not in self.get_loqusdb_customers():
+        if customer_id not in self.loqusdb_customers:
             LOG.error(f"Customer {customer_id} is not whitelisted for Loqusdb uploads")
             return False
         return True
@@ -121,7 +121,7 @@ class ObservationsAPI:
         sequencing_method: SequencingMethod | None = self.analysis_api.get_data_analysis_type(
             case_id
         )
-        if sequencing_method not in self.get_loqusdb_sequencing_methods():
+        if sequencing_method not in self.loqusdb_sequencing_methods:
             LOG.error(f"Sequencing method {sequencing_method} is not supported by Loqusdb uploads")
             return False
         return True
@@ -134,20 +134,22 @@ class ObservationsAPI:
         LOG.error(f"Source type {source_type} is not supported for Loqusdb uploads")
         return False
 
+    @property
+    def loqusdb_customers(self) -> list[CustomerId]:
+        """Customers that are eligible for Loqusdb uploads."""
+        raise NotImplementedError
+
+    @property
+    def loqusdb_sequencing_methods(self) -> list[str]:
+        """Sequencing methods that are eligible for Loqusdb uploads."""
+        raise NotImplementedError
+
     def load_observations(self, case: Case) -> None:
         """Load observation counts to Loqusdb."""
         raise NotImplementedError
 
     def is_case_eligible_for_observations_upload(self, case: Case) -> bool:
         """Return whether a case is eligible for observations upload."""
-        raise NotImplementedError
-
-    def get_loqusdb_sequencing_methods(self) -> list[str]:
-        """Return sequencing methods that are eligible for Loqusdb uploads."""
-        raise NotImplementedError
-
-    def get_loqusdb_customers(self) -> list[CustomerId]:
-        """Return customers that are eligible for Loqusdb uploads."""
         raise NotImplementedError
 
     def extract_observations_files_from_hk(

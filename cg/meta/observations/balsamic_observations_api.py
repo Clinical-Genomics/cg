@@ -35,11 +35,13 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self.loqusdb_somatic_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.SOMATIC)
         self.loqusdb_tumor_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.TUMOR)
 
-    def get_loqusdb_customers(self) -> list[CustomerId]:
-        """Return customers that are eligible for cancer Loqusdb uploads."""
+    @property
+    def loqusdb_customers(self) -> list[CustomerId]:
+        """Customers that are eligible for cancer Loqusdb uploads."""
         return LOQSUDB_CANCER_CUSTOMERS
 
-    def get_loqusdb_sequencing_methods(self) -> list[str]:
+    @property
+    def loqusdb_sequencing_methods(self) -> list[str]:
         """Return sequencing methods that are eligible for cancer Loqusdb uploads."""
         return LOQUSDB_CANCER_SEQUENCING_METHODS
 
