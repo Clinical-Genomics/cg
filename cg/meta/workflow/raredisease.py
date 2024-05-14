@@ -114,7 +114,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_workflow_metrics(self, sample_id: str) -> dict:
         sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
         metric_conditions: dict[str, dict[str, Any]] = dict(RAREDISEASE_METRIC_CONDITIONS)
-        self.perform_sex_check(sample, metric_conditions)
+        self.set_order_sex_for_sample(sample, metric_conditions)
         return metric_conditions
 
     def set_order_sex_for_sample(self, sample: Sample, metric_conditions: dict) -> None:

@@ -60,7 +60,7 @@ class MetricCondition(BaseModel):
     """
 
     norm: str
-    threshold: float | str
+    threshold: float | Sex
 
     @validator("norm")
     def validate_operator(cls, norm: str) -> str:
