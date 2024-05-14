@@ -61,7 +61,6 @@ def test_observations_upload(
         ObservationsAPI, "get_observations_input_files", return_value=observations_input_files
     )
     mocker.patch.object(ObservationsAPI, "is_duplicate", return_value=False)
-    mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
 
     # WHEN uploading the case observations to Loqusdb
     observations_api.upload(case_id)
@@ -394,8 +393,6 @@ def test_is_sample_source_eligible_for_observations_upload(
     )
 
     # GIVEN a supported sample source
-    source_type = SourceType.TISSUE
-    mocker.patch.object(LimsAPI, "get_source", return_value=source_type)
 
     # WHEN verifying that the sample source is eligible for observations uploads
     is_sample_source_eligible_for_observations_upload: bool = (

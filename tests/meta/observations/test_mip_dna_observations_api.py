@@ -6,8 +6,6 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
-from cg.apps.lims import LimsAPI
-from cg.constants.sample_sources import SourceType
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import LoqusdbDuplicateRecordError
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
@@ -63,7 +61,6 @@ def test_is_case_eligible_for_observations_upload(
     mocker.patch.object(
         MipDNAAnalysisAPI, "get_data_analysis_type", return_value=SequencingMethod.WGS
     )
-    mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
 
     # WHEN checking the upload eligibility for a case
     is_case_eligible_for_observations_upload: bool = (
@@ -86,7 +83,6 @@ def test_is_case_not_eligible_for_observations_upload(
     mocker.patch.object(
         MipDNAAnalysisAPI, "get_data_analysis_type", return_value=SequencingMethod.WTS
     )
-    mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
 
     # WHEN checking the upload eligibility for a case
     is_case_eligible_for_observations_upload: bool = (

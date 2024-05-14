@@ -6,9 +6,7 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
-from cg.apps.lims import LimsAPI
 from cg.constants.constants import CancerAnalysisType
-from cg.constants.sample_sources import SourceType
 from cg.exc import LoqusdbDuplicateRecordError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -66,12 +64,11 @@ def test_is_case_eligible_for_observations_upload(
     # GIVEN a case and a Balsamic observations API
     case: Case = balsamic_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
-    # GIVEN an eligible sequencing method, a case with tumor samples, and a valid source type
+    # GIVEN an eligible sequencing method and a case with tumor samples
     mocker.patch.object(
         BalsamicAnalysisAPI, "get_data_analysis_type", return_value=CancerAnalysisType.TUMOR_WGS
     )
     mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
-    mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
 
     # WHEN checking the upload eligibility for a case
     is_case_eligible_for_observations_upload: bool = (
@@ -93,12 +90,11 @@ def test_is_case_not_eligible_for_observations_upload(
     # GIVEN a case and a Balsamic observations API
     case: Case = balsamic_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
-    # GIVEN a case with tumor sample, an invalid sequencing type, and a valid source
+    # GIVEN a case with tumor sample and an invalid sequencing type
+    mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
     mocker.patch.object(
         BalsamicAnalysisAPI, "get_data_analysis_type", return_value=CancerAnalysisType.TUMOR_PANEL
     )
-    mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
-    mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
 
     # WHEN checking the upload eligibility for a case
     is_case_eligible_for_observations_upload: bool = (

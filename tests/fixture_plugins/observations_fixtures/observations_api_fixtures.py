@@ -6,6 +6,7 @@ from pytest_mock import MockFixture
 from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LOQUSDB_ID
+from cg.constants.sample_sources import SourceType
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
@@ -42,6 +43,9 @@ def balsamic_observations_api(
         LoqusdbAPI, "get_case", return_value={"case_id": case_id, LOQUSDB_ID: loqusdb_id}
     )
 
+    # Mocked LIMS API scenario
+    mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
+
     return balsamic_observations_api
 
 
@@ -71,5 +75,8 @@ def mip_dna_observations_api(
     mocker.patch.object(
         LoqusdbAPI, "get_case", return_value={"case_id": case_id, LOQUSDB_ID: loqusdb_id}
     )
+
+    # Mocked LIMS API scenario
+    mocker.patch.object(LimsAPI, "get_source", return_value=SourceType.TISSUE)
 
     return mip_dna_observations_api
