@@ -117,5 +117,5 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.perform_sex_check(sample, metric_conditions)
         return metric_conditions
 
-    def perform_sex_check(self, sample: Sample, metric_conditions: dict) -> None:
+    def set_order_sex_for_sample(self, sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
