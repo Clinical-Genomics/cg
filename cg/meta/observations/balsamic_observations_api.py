@@ -52,23 +52,13 @@ class BalsamicObservationsAPI(ObservationsAPI):
 
     def is_case_eligible_for_observations_upload(self, case: Case) -> bool:
         """Return whether a cancer case is eligible for observations upload."""
-        is_customer_eligible_for_observations_upload: bool = (
-            self.is_customer_eligible_for_observations_upload(case.customer.internal_id)
-        )
-        is_sequencing_method_eligible_for_observations_upload: bool = (
-            self.is_sequencing_method_eligible_for_observations_upload(case.internal_id)
-        )
-        is_analysis_type_eligible_for_observations_upload: bool = (
-            self.is_analysis_type_eligible_for_observations_upload(case.internal_id)
-        )
-        is_sample_source_eligible_for_observations_upload: bool = (
-            self.is_sample_source_eligible_for_observations_upload(case.internal_id)
-        )
-        return (
-            is_customer_eligible_for_observations_upload
-            and is_sequencing_method_eligible_for_observations_upload
-            and is_analysis_type_eligible_for_observations_upload
-            and is_sample_source_eligible_for_observations_upload
+        return all(
+            [
+                self.is_customer_eligible_for_observations_upload(case.customer.internal_id),
+                self.is_sequencing_method_eligible_for_observations_upload(case.internal_id),
+                self.is_analysis_type_eligible_for_observations_upload(case.internal_id),
+                self.is_sample_source_eligible_for_observations_upload(case.internal_id),
+            ]
         )
 
     def load_observations(self, case: Case) -> None:

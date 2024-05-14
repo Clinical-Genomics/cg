@@ -51,23 +51,13 @@ class MipDNAObservationsAPI(ObservationsAPI):
 
     def is_case_eligible_for_observations_upload(self, case: Case) -> bool:
         """Return whether a rare disease case is eligible for observations upload."""
-        is_customer_eligible_for_observations_upload: bool = (
-            self.is_customer_eligible_for_observations_upload(case.customer.internal_id)
-        )
-        is_sequencing_method_eligible_for_observations_upload: bool = (
-            self.is_sequencing_method_eligible_for_observations_upload(case.internal_id)
-        )
-        is_sample_type_eligible_for_observations_upload: bool = (
-            self.is_sample_type_eligible_for_observations_upload(case)
-        )
-        is_sample_source_eligible_for_observations_upload: bool = (
-            self.is_sample_source_eligible_for_observations_upload(case.internal_id)
-        )
-        return (
-            is_customer_eligible_for_observations_upload
-            and is_sequencing_method_eligible_for_observations_upload
-            and is_sample_type_eligible_for_observations_upload
-            and is_sample_source_eligible_for_observations_upload
+        return all(
+            [
+                self.is_customer_eligible_for_observations_upload(case.customer.internal_id),
+                self.is_sequencing_method_eligible_for_observations_upload(case.internal_id),
+                self.is_sample_type_eligible_for_observations_upload(case),
+                self.is_sample_source_eligible_for_observations_upload(case.internal_id),
+            ]
         )
 
     def set_loqusdb_instance(self, case_id: str) -> None:
