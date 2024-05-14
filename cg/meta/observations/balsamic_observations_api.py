@@ -45,8 +45,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
 
     def is_analysis_type_eligible_for_observations_upload(self, case_id) -> bool:
         """Return whether the cancer analysis type is eligible for cancer Loqusdb uploads."""
-        is_analysis_normal_only: bool = self.analysis_api.is_analysis_normal_only(case_id)
-        if is_analysis_normal_only:
+        if self.analysis_api.is_analysis_normal_only(case_id):
             LOG.error(f"Normal only analysis {case_id} is not supported for Loqusdb uploads")
             return False
         return True

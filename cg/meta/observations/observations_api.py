@@ -116,7 +116,7 @@ class ObservationsAPI:
             return False
         return True
 
-    def is_sequencing_method_eligible_for_observations_upload(self, case_id: str):
+    def is_sequencing_method_eligible_for_observations_upload(self, case_id: str) -> bool:
         """Return whether a sequencing method is valid for observations upload."""
         sequencing_method: SequencingMethod | None = self.analysis_api.get_data_analysis_type(
             case_id
