@@ -34,5 +34,6 @@ def downgrade():
     op.drop_constraint(constraint_name="fk_device_id", table_name="run_metrics", type_="foreignkey")
     op.drop_column(table_name="run_metrics", column_name="device_id")
     op.add_column(
-        table_name="run_device", column=sa.Column("device_id", sa.Integer(), nullable=False)
+        table_name="run_device",
+        column=sa.Column(__name_pos="device_id", __type_pos=sa.Integer(), nullable=False),
     )
