@@ -8,11 +8,10 @@ from cg.constants.constants import GenomeVersion
 from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nf_analysis import RAREDISEASE_METRIC_CONDITIONS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
-from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.nf_analysis import WorkflowParameters
 from cg.models.raredisease.raredisease import (
+    RarediseaseParameters,
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
 )
@@ -89,13 +88,13 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             sample_analysis_type = sample_analysis_type_tmp
         return sample_analysis_type
 
-    def get_workflow_parameters(self, case_id: str) -> WorkflowParameters:
+    def get_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
-        return WorkflowParameters(
+        return RarediseaseParameters(
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             target_bed=self.get_target_bed_from_lims(case_id=case_id),
-            analysis_type=self.get_analysis_type(case_id=case_id),
+            analysis_type=self.get_analysis_type(case_id=case_id)
         )
 
     @staticmethod

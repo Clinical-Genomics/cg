@@ -64,7 +64,7 @@ class RarediseaseSampleSheetHeaders(StrEnum):
         return list(map(lambda header: header.value, cls))
 
 
-class Raredisease(WorkflowParameters):
+class RarediseaseParameters(WorkflowParameters):
     """Model for Raredisease parameters."""
 
     target_bed: str
