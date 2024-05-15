@@ -259,6 +259,9 @@ class CaseSubmitter(Submitter):
                     )
                     case_samples[sample["name"]] = new_sample
                 else:
+                    self._update_reference_genome(
+                        existing_sample=existing_sample, new_sample_data=sample
+                    )
                     case_samples[sample["name"]] = existing_sample
 
             for sample in case["samples"]:
@@ -287,6 +290,11 @@ class CaseSubmitter(Submitter):
             self.status.session.add_all(new_cases)
             self.status.session.commit()
         return new_cases
+
+    @staticmethod
+    def _update_reference_genome(existing_sample: Sample, new_sample_data: dict) -> None:
+        if reference_genome := new_sample_data.get("reference_genome"):
+            existing_sample.reference_genome = reference_genome
 
     @staticmethod
     def _update_case_panel(panels: list[str], case: Case) -> None:
