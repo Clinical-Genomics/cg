@@ -33,21 +33,7 @@ class TaxprofilerReportAPI(ReportAPI):
         self, case: Case, sample: Sample, analysis_metadata: NextflowAnalysis
     ) -> TaxprofilerSampleMetadataModel:
         """Return Taxprofiler sample metadata to include in the delivery report."""
-        sample_metrics: TaxprofilerQCMetrics = analysis_metadata.sample_metrics[sample.internal_id]
-        return TaxprofilerSampleMetadataModel(
-            average_read_length=sample_metrics.average_length,
-            duplicates=sample_metrics.pct_duplication,
-            gc_content=sample_metrics.after_filtering_gc_content,
-            input_amount=self.lims_api.get_latest_rna_input_amount(sample.internal_id),
-            mapped_reads=get_million_read_pairs(sample_metrics.reads_mapped),
-            mean_length_r1=sample_metrics.after_filtering_read1_mean_length,
-            mean_length_r2=sample_metrics.after_filtering_read2_mean_length,
-            million_read_pairs=get_million_read_pairs(sample_metrics.raw_total_sequences),
-            million_read_pairs_after_filtering=get_million_read_pairs(
-                sample_metrics.after_filtering_total_reads
-            ),
-            rin=self.lims_api.get_sample_rin(sample.internal_id),
-        )
+        return TaxprofilerSampleMetadataModel()
 
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: AnalysisModel
