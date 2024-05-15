@@ -3,8 +3,6 @@
 {% macro taxprofiler_qc_metrics(samples) %}
   {% set
     metrics = [
-      {"name": "RNA Integrity Number (RIN)", "key": "rin",          "description": "Mått på skala från 1 till 10 för kvalitet och integritet hos RNA-prover."},
-      {"name": "Ingående mängd [ng]",        "key": "input_amount", "description": "Mängd RNA som användes för tillredning av biblioteket."},
     ]
   %}
   <!-- Quality control metrics -->

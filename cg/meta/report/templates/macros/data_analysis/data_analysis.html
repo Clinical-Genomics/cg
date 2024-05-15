@@ -11,7 +11,6 @@
   <h3 class="mb-4">Analys</h3>
     <!-- Workflow analysis data -->
     {{ workflow_analysis(case=case) }}
-    <h4 class="mt-4 mb-3">Kvalitetskontrollsmetrik</h4>
     {% if "balsamic" in workflow %}
       <!-- BALSAMIC QC metrics -->
       {{ balsamic_qc_metrics(samples=case.samples, analysis_type=case.data_analysis.type) }}
@@ -21,9 +20,6 @@
     {% elif workflow == "rnafusion" %}
       <!-- Rnafusion QC metrics -->
       {{ rnafusion_qc_metrics(samples=case.samples) }}
-    {% elif workflow == "taxprofiler" %}
-      <!-- Taxprofiler QC metrics -->
-      {{ taxprofiler_qc_metrics(samples=case.samples) }}
 	  {% elif workflow == "tomte" %}
       <!-- Tomte QC metrics -->
       {{ tomte_qc_metrics(samples=case.samples) }}
