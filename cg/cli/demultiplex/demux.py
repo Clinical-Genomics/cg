@@ -15,6 +15,7 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     mark_flow_cell_as_queued_for_post_processing,
 )
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.constants import DRY_RUN
 from cg.exc import FlowCellError, SampleSheetError
 from cg.meta.demultiplex.utils import (
     create_manifest_file,
@@ -26,8 +27,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
-
-DRY_RUN = click.option("--dry-run", is_flag=True)
 
 
 @click.command(name="all")

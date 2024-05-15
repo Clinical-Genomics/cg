@@ -27,6 +27,7 @@ from cg.constants.constants import (
     SexOptions,
     StatusOptions,
 )
+from cg.constants.devices import DeviceType
 from cg.constants.priority import SlurmQos
 from cg.constants.symbols import EMPTY_STRING
 
@@ -44,6 +45,7 @@ VarChar128 = Annotated[str, 128]
 
 PrimaryKeyInt = Annotated[int, mapped_column(primary_key=True)]
 UniqueStr = Annotated[str, mapped_column(String(32), unique=True)]
+UniqueStr64 = Annotated[str, mapped_column(String(64), unique=True)]
 
 
 class Base(DeclarativeBase):
@@ -416,22 +418,6 @@ class Collaboration(Base):
         }
 
 
-class Delivery(Base):
-    __tablename__ = "delivery"
-    id: Mapped[PrimaryKeyInt]
-    delivered_at: Mapped[datetime | None]
-    removed_at: Mapped[datetime | None]
-    destination: Mapped[str | None] = mapped_column(
-        types.Enum("caesar", "pdc", "uppmax", "mh", "custom"), default="caesar"
-    )
-    sample_id: Mapped[int | None] = mapped_column(ForeignKey("sample.id", ondelete="CASCADE"))
-    pool_id: Mapped[int | None] = mapped_column(ForeignKey("pool.id", ondelete="CASCADE"))
-    comment: Mapped[Text | None]
-
-    def to_dict(self):
-        return to_dict(model_instance=self)
-
-
 class Case(Base, PriorityMixin):
     __tablename__ = "case"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
@@ -513,6 +499,10 @@ class Case(Base, PriorityMixin):
             elif link.sample.last_sequenced_at:
                 sequenced_dates.append(link.sample.last_sequenced_at)
         return max(sequenced_dates, default=None)
+
+    @property
+    def are_all_samples_sequenced(self) -> bool:
+        return all([link.sample.last_sequenced_at for link in self.links])
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -731,7 +721,6 @@ class Pool(Base):
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     delivered_at: Mapped[datetime | None]
-    deliveries: Mapped[list[Delivery]] = orm.relationship(backref="pool")
     id: Mapped[PrimaryKeyInt]
     invoice_id: Mapped[int | None] = mapped_column(ForeignKey("invoice.id"))
     name: Mapped[Str32]
@@ -763,7 +752,6 @@ class Sample(Base, PriorityMixin):
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     delivered_at: Mapped[datetime | None]
-    deliveries: Mapped[list[Delivery]] = orm.relationship(backref="sample")
     downsampled_to: Mapped[BigInt | None]
     from_sample: Mapped[Str128 | None]
     id: Mapped[PrimaryKeyInt]
@@ -971,3 +959,43 @@ class Order(Base):
 
     def to_dict(self):
         return to_dict(model_instance=self)
+
+
+class RunDevice(Base):
+    """Model for storing run devices."""
+
+    __tablename__ = "run_device"
+
+    id: Mapped[PrimaryKeyInt]
+    type: Mapped[DeviceType]
+    internal_id: Mapped[UniqueStr64]
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
+
+
+class RunMetrics(Base):
+    """Model for storing run devices."""
+
+    __tablename__ = "run_metrics"
+
+    id: Mapped[PrimaryKeyInt]
+    type: Mapped[DeviceType]
+    device_id: Mapped[int] = mapped_column(ForeignKey("run_device.id"))
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
+
+
+class SampleRunMetrics(Base):
+    __tablename__ = "sample_run_metrics"
+    id: Mapped[PrimaryKeyInt]
+    sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id"))
+    run_metrics_id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"))
+    type: Mapped[DeviceType]
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
