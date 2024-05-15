@@ -127,6 +127,12 @@ def test_config_case_default_parameters(
     nexflow_config_file_path: Path = request.getfixturevalue(f"{workflow}_nexflow_config_file_path")
     sample_sheet_content_expected: str = request.getfixturevalue(f"{workflow}_sample_sheet_content")
 
+    # In the RAREDISEASE case, we need to mock lims fetching of the target bed file
+    if workflow == Workflow.RAREDISEASE:
+        mocker.patch.object(RarediseaseAnalysisAPI, "get_target_bed_from_lims")
+        RarediseaseAnalysisAPI.get_target_bed_from_lims.return_value = "some_target_bed_file"
+
+
     # Mocking external Scout call
     mocker.patch.object(Process, "run_command", return_value=None)
 
@@ -217,6 +223,12 @@ def test_config_case_dry_run(
 
     # GIVEN that the sample source in LIMS is set
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
+
+
+    # In the RAREDISEASE case, we need to mock lims fetching of the target bed file
+    if workflow == Workflow.RAREDISEASE:
+        mocker.patch.object(RarediseaseAnalysisAPI, "get_target_bed_from_lims")
+        RarediseaseAnalysisAPI.get_target_bed_from_lims.return_value = "some_target_bed_file"
 
     # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(workflow_cli, [workflow, "config-case", case_id, "-d"], obj=context)

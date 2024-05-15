@@ -8,6 +8,7 @@ from click.testing import CliRunner
 from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from tests.cli.workflow.conftest import mock_analysis_flow_cell
@@ -39,6 +40,12 @@ def test_start(
 
     # GIVEN that the sample source in LIMS is set
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
+
+    # In the RAREDISEASE case, we need to mock lims fetching of the target bed file
+    if workflow == Workflow.RAREDISEASE:
+        mocker.patch.object(RarediseaseAnalysisAPI, "get_target_bed_from_lims")
+        RarediseaseAnalysisAPI.get_target_bed_from_lims.return_value = "some_target_bed_file"
+
 
     # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(workflow_cli, [workflow, "start", case_id, "--dry-run"], obj=context)
