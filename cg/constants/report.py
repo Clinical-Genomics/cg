@@ -199,19 +199,19 @@ REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS: list[str] = (
 
 _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
     "gc_content",
-    "input_amount",
     "mean_length_r1",
-    "rin",
 ]
 
 _REQUIRED_SAMPLE_METADATA_WTS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS + [
     "bias_5_3",
+    "input_amount",
     "mrna_bases",
     "pct_adapter",
     "pct_surviving",
     "q20_rate",
     "q30_rate",
     "ribosomal_bases",
+    "rin",
     "uniquely_mapped_reads",
 ]
 
@@ -220,10 +220,7 @@ REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA
 ]
 
 
-REQUIRED_SAMPLE_METADATA_TAXPROFILER_FIELDS: list[str] = [
-    "input_amount",
-    "rin",
-]
+REQUIRED_SAMPLE_METADATA_TAXPROFILER_FIELDS: list[str] = []
 
 
 REQUIRED_SAMPLE_METADATA_TOMTE_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_WTS_FIELDS + [

@@ -38,7 +38,6 @@ class TaxprofilerReportAPI(ReportAPI):
             average_read_length=sample_metrics.average_length,
             duplicates=sample_metrics.pct_duplication,
             gc_content=sample_metrics.after_filtering_gc_content,
-            input_amount=self.lims_api.get_latest_rna_input_amount(sample.internal_id),
             mapped_reads=get_million_read_pairs(sample_metrics.reads_mapped),
             mean_length_r1=sample_metrics.after_filtering_read1_mean_length,
             mean_length_r2=sample_metrics.after_filtering_read2_mean_length,
@@ -46,7 +45,6 @@ class TaxprofilerReportAPI(ReportAPI):
             million_read_pairs_after_filtering=get_million_read_pairs(
                 sample_metrics.after_filtering_total_reads
             ),
-            rin=self.lims_api.get_sample_rin(sample.internal_id),
         )
 
     def is_report_accredited(
