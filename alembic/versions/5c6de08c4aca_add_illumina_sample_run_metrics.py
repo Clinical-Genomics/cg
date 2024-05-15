@@ -22,7 +22,7 @@ def upgrade():
         "illumina_sample_run_metrics",
         sa.Column("id", sa.Integer(), sa.ForeignKey("sample_run_metrics.id"), primary_key=True),
         sa.Column("flow_cell_lane", sa.Integer(), nullable=False),
-        sa.Column("reads_in_lane", sa.BigInteger(), nullable=False),
+        sa.Column("total_reads_in_lane", sa.BigInteger(), nullable=False),
         sa.Column("base_passing_q30_percent", sa.Numeric(6, 2), nullable=False),
         sa.Column("base_mean_quality_score", sa.Numeric(6, 2), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=False),
