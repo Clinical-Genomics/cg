@@ -1,7 +1,7 @@
 """add_illumina_sample_run_metrics
 
 Revision ID: 5c6de08c4aca
-Revises: e5c6bf847e25
+Revises: fa7a3d066872
 Create Date: 2024-05-15 09:02:42.837904
 
 """
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "5c6de08c4aca"
-down_revision = "e5c6bf847e25"
+down_revision = "fa7a3d066872"
 branch_labels = None
 depends_on = None
 
