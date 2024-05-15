@@ -168,7 +168,7 @@
                 "family_id": "raredisease_case_enough_reads",
                 "paternal_id": 0.0,
                 "maternal_id": 0.0,
-                "sex": 1.0,
+                "sex": 2.0,
                 "phenotype": 1.0,
                 "het_call_rate": 1.0,
                 "het_ratio": 0.46773785425101216,
@@ -195,12 +195,12 @@
                 "PC2_het_check": -1.337,
                 "PC3_het_check": -0.4439,
                 "PC4_het_check": -0.8576,
-                "ped_sex_sex_check": "male",
+                "ped_sex_sex_check": "female",
                 "hom_ref_count_sex_check": 4313.0,
                 "het_count_sex_check": 178.0,
                 "hom_alt_count_sex_check": 4743.0,
                 "het_ratio_sex_check": 0.03753,
-                "predicted_sex_sex_check": "male",
+                "predicted_sex_sex_check": "female",
                 "error_sex_check": "True"
             }
         }
