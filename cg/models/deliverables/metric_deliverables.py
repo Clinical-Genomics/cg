@@ -4,7 +4,6 @@ from typing import Any, Callable
 from pydantic.v1 import BaseModel, Field, validator
 
 from cg.constants import PRECISION
-from cg.constants.subject import Sex
 from cg.exc import CgError, MetricsQCError
 from cg.models.qc_metrics import QCMetrics
 
@@ -60,7 +59,7 @@ class MetricCondition(BaseModel):
     """
 
     norm: str
-    threshold: float | Sex
+    threshold: float | str
 
     @validator("norm")
     def validate_operator(cls, norm: str) -> str:

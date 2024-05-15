@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import Any
 
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
@@ -117,5 +118,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.set_order_sex_for_sample(sample, metric_conditions)
         return metric_conditions
 
-    def set_order_sex_for_sample(self, sample: Sample, metric_conditions: dict) -> None:
+    @staticmethod
+    def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
