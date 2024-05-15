@@ -3,8 +3,8 @@
 import logging
 from pathlib import Path
 
-from cg.constants import Workflow
-from cg.constants.constants import GenomeVersion
+from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
+from cg.constants.constants import AnalysisType, GenomeVersion
 from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nf_analysis import RAREDISEASE_METRIC_CONDITIONS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
@@ -88,13 +88,26 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             sample_analysis_type = sample_analysis_type_tmp
         return sample_analysis_type
 
+    def set_target_bed(self, case_id: str, analysis_type: str) -> str:
+        if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
+            target_bed = self.get_target_bed_from_lims(
+                case_id=case_id) or DEFAULT_CAPTURE_KIT
+        else:
+            target_bed = self.get_target_bed_from_lims(
+                case_id=case_id
+            )
+        return target_bed
+
     def get_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
+        analysis_type=self.get_analysis_type(case_id=case_id)
+        target_bed=self.set_target_bed(case_id=case_id, analysis_type=analysis_type)
         return RarediseaseParameters(
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
-            target_bed=self.get_target_bed_from_lims(case_id=case_id),
-            analysis_type=self.get_analysis_type(case_id=case_id)
+            analysis_type=analysis_type,
+            target_bed=target_bed
+
         )
 
     @staticmethod
