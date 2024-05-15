@@ -301,6 +301,27 @@ class DataFlowConfig(BaseModel):
     archive_repository: str
 
 
+class PacbioConfig(BaseModel):
+    data_dir: str
+    systemd_trigger_dir: str
+
+
+class OxfordNanoporeConfig(BaseModel):
+    data_dir: str
+    systemd_trigger_dir: str
+
+
+class IlluminaConfig(BaseModel):
+    flow_cell_runs_dir: str
+    demultiplexed_runs_dir: str
+
+
+class RunInstruments(BaseModel):
+    pacbio: PacbioConfig
+    nanopore: OxfordNanoporeConfig
+    illumina: IlluminaConfig
+
+
 class CGConfig(BaseModel):
     database: str
     delivery_path: str
@@ -311,10 +332,10 @@ class CGConfig(BaseModel):
     illumina_flow_cells_directory: str
     madeline_exe: str
     nanopore_data_directory: str
-    pacbio_data_directory: str
     tower_binary_path: str
     max_flowcells: int | None
     data_input: DataInput | None = None
+    run_instruments: RunInstruments
     # Base APIs that always should exist
     status_db_: Store | None = None
     housekeeper: HousekeeperConfig

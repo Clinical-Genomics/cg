@@ -9,7 +9,7 @@ from cg.utils.files import (
     get_file_in_directory,
     remove_directory_and_contents,
     rename_file,
-    get_file_in_directory_with_pattern,
+    get_files_in_directory_with_pattern,
 )
 
 
@@ -24,17 +24,18 @@ def test_get_file_in_directory(nested_directory_with_file: Path, some_file: str)
     assert file_path.exists()
 
 
-def test_get_file_in_directory_by_pattern(nested_directory_with_file: Path, some_file: str):
-    """Test function to get a file in a directory and subdirectories."""
+def test_get_files_in_directory_by_pattern(nested_directory_with_file: Path, some_file: str):
+    """Test function to get files with a pattern in a directory and subdirectories."""
     # GIVEN a directory with subdirectories with a file
 
     # WHEN getting the file
-    file_path: Path = get_file_in_directory_with_pattern(
+    file_paths: list[Path] = get_files_in_directory_with_pattern(
         directory=nested_directory_with_file, pattern=some_file
     )
 
     # THEN assert that the file is returned
-    assert file_path.exists()
+    for file_path in file_paths:
+        assert file_path.exists()
 
 
 def test_rename_file(tmp_path: Path):

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.io.controller import ReadFile
-from cg.utils.files import get_file_in_directory
+from cg.utils.files import get_file_in_directory, get_files_in_directory_with_pattern
 
 
 class ValidateFileTransferService:
@@ -36,6 +36,10 @@ class ValidateFileTransferService:
                 return True
         except FileNotFoundError:
             return False
+
+    @staticmethod
+    def get_manifest_file_paths(source_dir: Path, pattern: str) -> list[Path]:
+        return get_files_in_directory_with_pattern(directory=source_dir, pattern=pattern)
 
     def validate_by_manifest_file(
         self, manifest_file: Path, source_dir: Path, manifest_file_format: str
