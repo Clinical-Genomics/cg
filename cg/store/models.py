@@ -1002,12 +1002,12 @@ class SampleRunMetrics(Base):
 class IlluminaSampleRunMetrics(SampleRunMetrics):
     __tablename__ = "illumina_sample_run_metrics"
 
-    id: Mapped[PrimaryKeyInt]
+    id: Mapped[int] = mapped_column(ForeignKey(SampleRunMetrics.id))
     flow_cell_lane_number: Mapped[int | None]
     sample_total_reads_in_lane: Mapped[BigInt | None]
     sample_base_percentage_passing_q30: Mapped[Num_6_2 | None]
     sample_base_mean_quality_score: Mapped[Num_6_2 | None]
     created_at: Mapped[datetime | None]
     __mapper_args__ = {
-        "polymorphic_identity": "type",
+        "polymorphic_identity": "illumina_sample_run_metrics",
     }
