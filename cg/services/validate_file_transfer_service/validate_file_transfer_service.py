@@ -16,14 +16,17 @@ class ValidateFileTransferService:
         )
 
     @staticmethod
-    def extract_file_names_from_manifest(manifest_content: any) -> list[str]:
+    def is_valid_path(line: str):
+        return "/" in line
+
+    def extract_file_names_from_manifest(self, manifest_content: any) -> list[str]:
         """
         Extract the file paths from the manifest content.
         A file path is expected to contain at least one '/' character.
         """
         file_names: list[str] = []
         for line in manifest_content:
-            if "/" in line:
+            if self.is_valid_path(line):
                 formatted_line: str = line.rstrip()
                 file_names.append(Path(formatted_line).name)
         return file_names
@@ -41,15 +44,27 @@ class ValidateFileTransferService:
     def get_manifest_file_paths(source_dir: Path, pattern: str) -> list[Path]:
         return get_files_in_directory_with_pattern(directory=source_dir, pattern=pattern)
 
-    def validate_by_manifest_file(
-        self, manifest_file: Path, source_dir: Path, manifest_file_format: str
-    ) -> bool:
-        """Validate all files listed in the manifest are present in the directory tree."""
+    def get_files_in_manifest(self, manifest_file: Path, manifest_file_format: str) -> list[str]:
+        """Get the files listed in the manifest file."""
         manifest_content: any = self.get_manifest_file_content(
             manifest_file=manifest_file, manifest_file_format=manifest_file_format
         )
-        files_to_validate: list[str] = self.extract_file_names_from_manifest(manifest_content)
+        return self.extract_file_names_from_manifest(manifest_content)
+
+    def are_all_files_present(self, files_to_validate: list[str], source_dir: Path) -> bool:
+        """Check if all files are present in the directory tree."""
         for file_name in files_to_validate:
             if not self.is_file_in_directory_tree(file_name=file_name, source_dir=source_dir):
                 return False
         return True
+
+    def is_transfer_completed(
+        self, manifest_file: Path, source_dir: Path, manifest_file_format: str
+    ) -> bool:
+        """Validate all files listed in the manifest are present in the directory tree."""
+        files_in_manifest: list[str] = self.get_files_in_manifest(
+            manifest_file=manifest_file, manifest_file_format=manifest_file_format
+        )
+        return self.are_all_files_present(
+            files_to_validate=files_in_manifest, source_dir=source_dir
+        )

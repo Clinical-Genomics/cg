@@ -1799,12 +1799,12 @@ def context_config(
         "nanopore_data_directory": "path/to/nanopore_data_directory",
         "run_instruments": {
             "pacbio": {
-                "data_dir": "path/to/data_directory",
-                "systemd_trigger_dir": "path/to/trigger_directory",
+                "data_dir": "path/to/pacbio_data__directory",
+                "systemd_trigger_dir": "path/to/pacbio_trigger_directory",
             },
             "nanopore": {
-                "data_dir": "path/to/data_directory",
-                "systemd_trigger_dir": "path/to/ptrigger_directory",
+                "data_dir": "path/to/nanopore_data_directory",
+                "systemd_trigger_dir": "path/to/nanopore_trigger_directory",
             },
             "illumina": {
                 "flow_cell_runs_dir": str(illumina_flow_cells_directory),

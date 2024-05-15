@@ -5,6 +5,9 @@ import pytest
 from cg.services.validate_file_transfer_service.validate_file_transfer_service import (
     ValidateFileTransferService,
 )
+from cg.services.validate_file_transfer_service.validate_pacbio_file_transfer_service import (
+    ValidatePacbioFileTransferService,
+)
 
 
 @pytest.fixture
@@ -57,9 +60,43 @@ def pacbio_run_id() -> str:
 
 
 @pytest.fixture
-def pacbio_runs_dir(tmp_path: Path, pacbio_run_id: str) -> Path:
+def smrt_cell_id() -> str:
+    """Return a PacBio smrt cell ID."""
+    return "1_A1_0"
+
+
+@pytest.fixture
+def metadata_dir_name() -> str:
+    """Return a metadata directory name."""
+    return "metadata"
+
+
+@pytest.fixture
+def tmp_manifest_file_name(pacbio_run_id: str, smrt_cell_id: str) -> str:
+    """Return a temporary manifest file name."""
+    return f"{pacbio_run_id}_{smrt_cell_id}.transferdone"
+
+
+@pytest.fixture
+def pacbio_runs_dir(
+    tmp_path: Path, pacbio_run_id: str, smrt_cell_id, metadata_dir_name: str, tmp_manifest_file_name
+) -> Path:
     """Return the path to a directory with PacBio runs."""
     tmp_path.mkdir(exist_ok=True)
     tmp_path.joinpath(pacbio_run_id).mkdir()
+    tmp_path.joinpath(pacbio_run_id).joinpath(smrt_cell_id).mkdir()
+    tmp_path.joinpath(pacbio_run_id).joinpath(smrt_cell_id).joinpath(metadata_dir_name).mkdir()
+    tmp_path.joinpath(pacbio_run_id).joinpath(smrt_cell_id).joinpath(metadata_dir_name).joinpath(
+        tmp_manifest_file_name
+    ).touch()
     tmp_path.joinpath("not_this_dir").mkdir()
     return tmp_path
+
+
+@pytest.fixture
+def validate_pacbio_service(cg_context) -> ValidatePacbioFileTransferService:
+    """Return a PacBio file transfer service."""
+    validate_pacbio_file_transfer_service = ValidatePacbioFileTransferService(config=cg_context)
+    validate_pacbio_file_transfer_service.data_dir = pacbio_runs_dir
+    validate_pacbio_file_transfer_service.trigger_dir = pacbio_runs_dir
+    return validate_pacbio_file_transfer_service

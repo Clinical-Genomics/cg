@@ -71,7 +71,7 @@ def test_validate_by_manifest_file(
     # GIVEN a manifest file and a source directory
 
     # WHEN validating the files in the manifest file
-    is_valid = validate_file_transfer_service.validate_by_manifest_file(
+    is_valid = validate_file_transfer_service.is_transfer_completed(
         manifest_file=manifest_file, source_dir=source_dir, manifest_file_format=FileFormat.TXT
     )
 
@@ -88,9 +88,25 @@ def test_validate_by_manifest_file_fail(
     # GIVEN a manifest file and a source directory
 
     # WHEN validating the files in the manifest file
-    is_valid = validate_file_transfer_service.validate_by_manifest_file(
+    is_valid = validate_file_transfer_service.is_transfer_completed(
         manifest_file=manifest_file_fail, source_dir=source_dir, manifest_file_format=FileFormat.TXT
     )
 
     # THEN assert that the files in the manifest are not in the directory
     assert not is_valid
+
+
+def test_get_manifest_file_paths(expected_file_names_in_manifest: list[str], source_dir: Path):
+    """Test the get manifest file paths method."""
+    # GIVEN a source directory
+    validate_file_transfer_service = ValidateFileTransferService()
+
+    # WHEN getting the using a pattern
+    manifest_file_paths = validate_file_transfer_service.get_manifest_file_paths(
+        source_dir=source_dir, pattern="file"
+    )
+
+    # THEN assert that the manifest file paths are a list
+    assert len(manifest_file_paths) == len(expected_file_names_in_manifest)
+    for manifest_file_path in manifest_file_paths:
+        assert manifest_file_path.name in expected_file_names_in_manifest
