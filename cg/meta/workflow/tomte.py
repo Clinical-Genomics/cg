@@ -80,5 +80,5 @@ class TomteAnalysisAPI(NfAnalysisAPI):
             genome=self.get_genome_build(case_id=case_id),
         )
 
-    def get_workflow_metrics(self) -> dict:
+    def get_workflow_metrics(self, metric_id: str) -> dict:
         return TOMTE_METRIC_CONDITIONS
