@@ -1002,7 +1002,7 @@ class SampleRunMetrics(Base):
 class IlluminaSampleRunMetrics(SampleRunMetrics):
     __tablename__ = "illumina_sample_run_metrics"
 
-    id: Mapped[int] = mapped_column(ForeignKey(SampleRunMetrics.id))
+    id: Mapped[int] = mapped_column(ForeignKey(SampleRunMetrics.id), primary_key=True)
     flow_cell_lane_number: Mapped[int | None]
     sample_total_reads_in_lane: Mapped[BigInt | None]
     sample_base_percentage_passing_q30: Mapped[Num_6_2 | None]
