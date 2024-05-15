@@ -1,6 +1,5 @@
 from cg.apps.lims.api import LimsAPI
-from cg.constants.lims import LimsArtifactTypes, LimsProcess
-from cg.meta.workflow.mutant.metadata_parser.models import SampleMetadata, SamplesMetadata
+from cg.meta.workflow.mutant.metadata_parser.models import SampleMetadata, SamplesMetadataMetrics
 from cg.meta.workflow.mutant.metadata_parser.utils import (
     get_internal_negative_control_id,
     is_sample_external_negative_control,
@@ -15,18 +14,17 @@ class MetadataParser:
         self.status_db: Store = config.status_db
         self.lims: LimsAPI = config.lims_api
 
-    def parse_metadata(self, case_internal_id: str) -> SamplesMetadata:
-        metadata_for_case = self.parse_metadata_for_case(case_internal_id)
+    def parse_metadata(self, case: Case) -> SamplesMetadataMetrics:
+        metadata_for_case = self.parse_metadata_for_case(case)
         metadata_for_internal_negative_control = self.parse_metadata_for_internal_negative_control(
             metadata_for_case
         )
 
         metadata = metadata_for_case | metadata_for_internal_negative_control
 
-        return SamplesMetadata.model_validate(metadata)
+        return SamplesMetadataMetrics.model_validate(metadata)
 
-    def parse_metadata_for_case(self, case_internal_id: str) -> dict[str, SampleMetadata]:
-        case: Case = self.status_db.get_case_by_internal_id(case_internal_id)
+    def parse_metadata_for_case(self, case: Case) -> dict[str, SampleMetadata]:
 
         metadata_for_case: dict[str, SampleMetadata] = {}
 
@@ -47,7 +45,7 @@ class MetadataParser:
         return metadata_for_case
 
     def parse_metadata_for_internal_negative_control(
-        self, metadata_for_case: SamplesMetadata
+        self, metadata_for_case: SamplesMetadataMetrics
     ) -> dict[str, SampleMetadata]:
         internal_negative_control_id: Sample = get_internal_negative_control_id(
             self.lims, metadata_for_case

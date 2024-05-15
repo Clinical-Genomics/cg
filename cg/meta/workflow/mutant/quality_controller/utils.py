@@ -11,6 +11,22 @@ from cg.store.models import Case, Sample
 
 from pathlib import Path
 
+def has_valid_total_reads(sample_metadata: SamplesMetadataMetrics) -> bool:
+        if sample_metadata.is_sample_external_negative_control:
+            if is_valid_total_reads_for_external_negative_control(reads=sample_metadata.reads):
+                return True
+            else:
+                return None
+                # TODO: KRAKEN
+
+        if sample_metadata.is_sample_internal_negative_control:
+            return is_valid_total_reads_for_internal_negative_control(reads=sample_metadata.reads)
+
+        return is_valid_total_reads(
+            reads=sample_metadata.reads,
+            target_reads=sample_metadata.target_reads,
+            threshold_percentage=sample_metadata.percent_reads_guaranteed,
+        )
 
 def is_valid_total_reads(reads: int, target_reads: int, threshold_percentage: int) -> bool:
     return reads > target_reads * threshold_percentage / 100
@@ -51,6 +67,6 @@ def get_quality_metrics(case_results_file_path: Path, case: Case) -> QualityMetr
         case_results_file_path
     )
 
-    samples_metadata: SamplesMetadataMetrics = MetadataParser.parse_metadata(case.internal_id)
+    samples_metadata: SamplesMetadataMetrics = MetadataParser.parse_metadata(case)
 
     return QualityMetrics.model_validate(samples_results, samples_metadata)
