@@ -105,7 +105,7 @@ def test_get_int_number_as_string():
 def test_get_int_number_as_string_zero_input():
     """Tests the validation of an integer when input is zero."""
 
-    # GIVEN a valid float input
+    # GIVEN a valid integer input
     int_value: int = 0
 
     # WHEN performing the validation

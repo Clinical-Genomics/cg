@@ -35,7 +35,11 @@ def get_boolean_as_string(value: bool | None) -> str:
 
 def get_number_as_string(value: int | float | None) -> str:
     """Return string representation of a number."""
-    return str(round(float(value), PRECISION)) if isinstance(value, (int, float)) else NA_FIELD
+    return (
+        str(round(float(value), PRECISION))
+        if value or isinstance(value, (int, float))
+        else NA_FIELD
+    )
 
 
 def get_float_as_percentage(value: float | None) -> str:
