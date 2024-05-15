@@ -1,4 +1,5 @@
 from pathlib import Path
+from cg.constants.constants import MutantQC
 from cg.meta.workflow.mutant.metadata_parser.metadata_parser import MetadataParser
 from cg.meta.workflow.mutant.metadata_parser.models import SamplesMetadataMetrics
 from cg.meta.workflow.mutant.metrics_parser import MetricsParser, SampleMetrics
@@ -85,8 +86,6 @@ class QualityController:
         ResultLogger.log_sample_result(sample_quality)
         return sample_quality
 
-    
-
     def quality_control_case(self, sample_results: list[SampleQualityResult]) -> CaseQualityResult:
         internal_negative_control_pass_qc: bool = internal_negative_control_qc_pass(sample_results)
         external_negative_control_pass_qc: bool = external_negative_control_qc_pass(sample_results)
@@ -102,25 +101,20 @@ class QualityController:
             internal_negative_control_pass_qc=internal_negative_control_pass_qc,
             external_negative_control_pass_qc=external_negative_control_pass_qc,
         )
-        # ResultLogger.log_case_result(result)
+        ResultLogger.log_case_result(result)
         return result
 
     def case_qc_pass(sample_results: list[SampleQualityResult]) -> bool:
-        total_samples: int = len(sample_results) - 1
-
-        total_samples = [
-            sample_result
-            for sample_result in sample_results
-            if not sample_result.is_external_negative_control
-        ]
-
+        total_samples: int = 0
         failed_samples: int = 0
 
         for sample_result in sample_results:
             if (
-                not sample_result.passes_qc
-                and not sample_result.is_sample_external_negative_control
+                not sample_result.is_external_negative_control
+                and not sample_result.is_internal_negative_control
             ):
-                failed_samples = failed_samples + 1
+                total_samples += 1
+                if not sample_result.passes_qc:
+                    failed_samples += 1
 
-        return failed_samples / total_samples > 0.2  # constant
+        return failed_samples / total_samples > MutantQC.FRACTION_OF_SAMPLES_WITH_FAILED_QC_TRESHOLD 

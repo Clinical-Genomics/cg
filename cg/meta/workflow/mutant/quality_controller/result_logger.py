@@ -39,6 +39,8 @@ class ResultLogger:
     def log_case_result(result: CaseQualityResult) -> None:
         if not result.passes_qc:
             LOG.warning("Case failed QC.")
+        else:
+            LOG.warning("Case passed QC.")
 
 
 def get_case_fail_message(case: CaseQualityResult) -> str:
@@ -59,7 +61,6 @@ def sample_result_message(samples: list[SampleQualityResult]) -> str:
     total_count: int = len(samples)
     failed_count: int = len(failed_samples)
     passed_count: int = len(passed_samples)
-    
 
     return f"Sample results: {total_count} total, {failed_count} failed, {passed_count} passed."
 
