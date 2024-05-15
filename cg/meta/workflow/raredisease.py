@@ -8,6 +8,7 @@ from cg.constants.constants import GenomeVersion
 from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nf_analysis import RAREDISEASE_METRIC_CONDITIONS
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nf_analysis import WorkflowParameters
@@ -73,11 +74,24 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content
 
+    def get_analysis_type(self, case_id: str)
+        case = self.get_case_from_string(case_id)
+        sample_analysis_type = ""
+        for link in case.links:
+            case_sample=link
+            sample_analysis_type_tmp = case_sample.sample.application_version.application.analysis_type
+            if sample_analysis_type_tmp != sample_analysis_type and sample_analysis_type != "":
+                raise ValueError(f"{sample_analysis_type_tmp} has not the same analysis type as other samples in the case")
+            sample_analysis_type = sample_analysis_type_tmp
+        return sample_analysis_type
+
     def get_workflow_parameters(self, case_id: str) -> WorkflowParameters:
         """Return parameters."""
         return WorkflowParameters(
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
+            target_bed=self.get_target_bed_from_lims(case_id=case_id),
+            analysis_type=self.get_analysis_type(case_id=case_id)
         )
 
     @staticmethod

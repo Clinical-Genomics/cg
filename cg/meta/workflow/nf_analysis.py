@@ -263,15 +263,19 @@ class NfAnalysisAPI(AnalysisAPI):
         """Collect and format information required to build a sample sheet for a single sample."""
         raise NotImplementedError
 
-    def get_sample_sheet_content(self, case_id: str) -> list[list[Any]]:
-        """Collect and format information required to build a sample sheet for a case.
-        This contains information for all samples linked to the case."""
+    def get_case_from_string(self, case_id: str) -> Case:
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         if len(case.links) == 0:
             raise CgError(f"No samples linked to {case_id}")
         if nlinks := len(case.links) > 1 and not self.is_multiple_samples_allowed:
             raise CgError(f"Only one sample per case is allowed. {nlinks} found")
+        return case
+
+    def get_sample_sheet_content(self, case_id: str) -> list[list[Any]]:
+        """Collect and format information required to build a sample sheet for a case.
+        This contains information for all samples linked to the case."""
         sample_sheet_content = []
+        case = self.get_case_from_string(case_id)
         LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
         LOG.debug("Getting sample sheet information")
         for link in case.links:
