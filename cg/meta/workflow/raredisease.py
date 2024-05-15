@@ -74,14 +74,18 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content
 
-    def get_analysis_type(self, case_id: str)
+    def get_analysis_type(self, case_id: str):
         case = self.get_case_from_string(case_id)
         sample_analysis_type = ""
         for link in case.links:
-            case_sample=link
-            sample_analysis_type_tmp = case_sample.sample.application_version.application.analysis_type
+            case_sample = link
+            sample_analysis_type_tmp = (
+                case_sample.sample.application_version.application.analysis_type
+            )
             if sample_analysis_type_tmp != sample_analysis_type and sample_analysis_type != "":
-                raise ValueError(f"{sample_analysis_type_tmp} has not the same analysis type as other samples in the case")
+                raise ValueError(
+                    f"{sample_analysis_type_tmp} has not the same analysis type as other samples in the case"
+                )
             sample_analysis_type = sample_analysis_type_tmp
         return sample_analysis_type
 
@@ -91,7 +95,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
             target_bed=self.get_target_bed_from_lims(case_id=case_id),
-            analysis_type=self.get_analysis_type(case_id=case_id)
+            analysis_type=self.get_analysis_type(case_id=case_id),
         )
 
     @staticmethod
