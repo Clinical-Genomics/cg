@@ -1,4 +1,5 @@
 """API that handles downsampling of samples."""
+
 import logging
 from pathlib import Path
 
@@ -8,7 +9,7 @@ from cg.meta.meta import MetaAPI
 from cg.meta.workflow.downsample.downsample import DownsampleWorkflow
 from cg.models.cg_config import CGConfig
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.store.models import Case, FamilySample, Sample
+from cg.store.models import Case, CaseSample, Sample
 from cg.utils.calculations import multiply_by_million
 
 LOG = logging.getLogger(__name__)
@@ -80,8 +81,8 @@ class DownsampleAPI(MetaAPI):
         self, downsample_data: DownsampleData, sample: Sample, case: Case
     ) -> None:
         """Create a link between sample and case in statusDB."""
-        sample_case_link: FamilySample = self.status_db.relate_sample(
-            family=case,
+        sample_case_link: CaseSample = self.status_db.relate_sample(
+            case=case,
             sample=sample,
             status=downsample_data.get_sample_status(),
         )

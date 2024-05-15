@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
@@ -37,7 +37,7 @@ jobs:
 
       - name: Test with pytest & Coveralls
         run: |
-          pytest --cov=cg/
+          pytest -n auto --cov=cg/
           coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Coveralls Finished
-        uses: coverallsapp/github-action@1.1.3
+        uses: coverallsapp/github-action@v2.2.3
         with:
           github-token: ${{ secrets.github_token }}
           parallel-finished: true

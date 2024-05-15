@@ -1,23 +1,19 @@
 """Delete observations CLI."""
 
 import logging
-from typing import Optional, Union
 
 import click
 from sqlalchemy.orm import Query
 
 from cg.cli.upload.observations.utils import get_observations_api, get_observations_case
-from cg.cli.workflow.commands import (
-    ARGUMENT_CASE_ID,
-    OPTION_LOQUSDB_SUPPORTED_PIPELINES,
-)
-from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Pipeline
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_LOQUSDB_SUPPORTED_WORKFLOW
+from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Workflow
 from cg.exc import CaseNotFoundError, LoqusdbError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Case
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -31,7 +27,7 @@ def delete_observations(context: CGConfig, case_id: str, dry_run: bool, yes: boo
     """Delete a case from Loqusdb and reset the Loqusdb IDs in StatusDB."""
 
     case: Case = get_observations_case(context, case_id, upload=False)
-    observations_api: Union[MipDNAObservationsAPI, BalsamicObservationsAPI] = get_observations_api(
+    observations_api: MipDNAObservationsAPI | BalsamicObservationsAPI = get_observations_api(
         context, case
     )
 
@@ -45,17 +41,17 @@ def delete_observations(context: CGConfig, case_id: str, dry_run: bool, yes: boo
 
 
 @click.command("available-observations")
-@OPTION_LOQUSDB_SUPPORTED_PIPELINES
+@OPTION_LOQUSDB_SUPPORTED_WORKFLOW
 @SKIP_CONFIRMATION
 @DRY_RUN
 @click.pass_context
 def delete_available_observations(
-    context: click.Context, pipeline: Optional[Pipeline], dry_run: bool, yes: bool
+    context: click.Context, workflow: Workflow | None, dry_run: bool, yes: bool
 ):
     """Delete available observation from Loqusdb."""
 
     status_db: Store = context.obj.status_db
-    uploaded_observations: Query = status_db.observations_uploaded(pipeline)
+    uploaded_observations: Query = status_db.observations_uploaded(workflow)
 
     LOG.info(
         f"This would delete observations for the following cases: {[case.internal_id for case in uploaded_observations]}"

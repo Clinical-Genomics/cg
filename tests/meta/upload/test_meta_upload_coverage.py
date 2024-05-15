@@ -5,8 +5,8 @@ from datetime import datetime
 from cg.apps.coverage.api import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.coverage import UploadCoverageApi
-from cg.store import Store
 from cg.store.models import Case
+from cg.store.store import Store
 
 
 class MockAnalysis:
@@ -14,6 +14,7 @@ class MockAnalysis:
 
     def __init__(self, case_obj: Case, started_at: datetime):
         self.case_obj = case_obj
+        self.case = case_obj
         self.started_at = started_at
 
     @property

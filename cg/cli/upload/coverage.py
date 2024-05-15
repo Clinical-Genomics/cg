@@ -4,8 +4,8 @@ import click
 
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Case
+from cg.store.store import Store
 
 from .utils import suggest_cases_to_upload
 

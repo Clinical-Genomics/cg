@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 
 from cg.apps.lims import LimsAPI
 from cg.models.orders.order import OrderIn
-from cg.store import Store
-from cg.store.models import Model, Sample
+from cg.store.models import Base, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class Submitter(ABC):
     @abstractmethod
     def store_items_in_status(
         self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: int, items: list[dict]
-    ) -> list[Model]:
+    ) -> list[Base]:
         pass
 
     @staticmethod

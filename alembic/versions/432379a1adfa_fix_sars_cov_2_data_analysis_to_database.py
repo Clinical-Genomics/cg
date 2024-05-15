@@ -5,13 +5,14 @@ Revises: 6d74453565f2
 Create Date: 2021-03-16 12:05:13.275423
 
 """
+
 import sqlalchemy as sa
 from sqlalchemy import Column, orm, types
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import declarative_base
 
 from alembic import op
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import DataDelivery, Workflow
 
 Base = declarative_base()
 
@@ -28,7 +29,7 @@ class Case(Base):
     id = sa.Column(sa.types.Integer, primary_key=True)
     internal_id = sa.Column(sa.types.String(32), unique=True, nullable=False)
     name = sa.Column(sa.types.String(128), nullable=False)
-    data_analysis = Column(types.Enum(*list(Pipeline)))
+    data_analysis = Column(types.Enum(*list(Workflow)))
     data_delivery = Column(types.Enum(*list(DataDelivery)))
 
     def __str__(self) -> str:
@@ -57,7 +58,7 @@ def upgrade():
         .filter(Case.data_analysis == "")
     ):
         print(f"Altering family: {str(family)}")
-        family.data_analysis = str(Pipeline.SARS_COV_2)
+        family.data_analysis = str(Workflow.SARS_COV_2)
         print(f"Altered family: {str(family)}")
 
     session.commit()

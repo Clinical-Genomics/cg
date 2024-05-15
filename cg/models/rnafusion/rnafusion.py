@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional, Union
 
 from pydantic.v1 import BaseModel, Field
 
@@ -11,19 +10,19 @@ from cg.models.nf_analysis import NextflowSampleSheetEntry, PipelineParameters
 class RnafusionQCMetrics(BaseModel):
     """RNAfusion QC metrics."""
 
-    after_filtering_gc_content: Optional[float]
-    after_filtering_q20_rate: Optional[float]
-    after_filtering_q30_rate: Optional[float]
-    after_filtering_read1_mean_length: Optional[float]
-    before_filtering_total_reads: Optional[float]
-    bias_5_3: Optional[float]
-    pct_adapter: Optional[float]
-    pct_mrna_bases: Optional[float]
-    pct_ribosomal_bases: Optional[float]
-    pct_surviving: Optional[float]
-    pct_duplication: Optional[float]
-    reads_aligned: Optional[float]
-    uniquely_mapped_percent: Optional[float]
+    after_filtering_gc_content: float | None
+    after_filtering_q20_rate: float | None
+    after_filtering_q30_rate: float | None
+    after_filtering_read1_mean_length: float | None
+    before_filtering_total_reads: float | None
+    median_5prime_to_3prime_bias: float | None
+    pct_adapter: float | None
+    pct_mrna_bases: float | None
+    pct_ribosomal_bases: float | None
+    pct_surviving: float | None
+    pct_duplication: float | None
+    read_pairs_examined: float | None
+    uniquely_mapped_percent: float | None
 
 
 class RnafusionParameters(PipelineParameters):
@@ -37,32 +36,27 @@ class RnafusionParameters(PipelineParameters):
     cram: str = "arriba,starfusion"
     fastp_trim: bool = True
     fusioncatcher: bool = True
-    fusioninspector_filter: bool = False
-    fusionreport_filter: bool = False
-    pizzly: bool = False
-    squid: bool = False
     starfusion: bool = True
-    trim: bool = False
     trim_tail: int = 50
 
 
 class CommandArgs(BaseModel):
     """Model for arguments and options supported."""
 
-    log: Optional[Union[str, Path]]
-    resume: Optional[bool]
-    profile: Optional[str]
-    stub: Optional[bool]
-    config: Optional[Union[str, Path]]
-    name: Optional[str]
-    revision: Optional[str]
-    wait: Optional[str]
-    id: Optional[str]
-    with_tower: Optional[bool]
-    use_nextflow: Optional[bool]
-    compute_env: Optional[str]
-    work_dir: Optional[Union[str, Path]]
-    params_file: Optional[Union[str, Path]]
+    log: str | Path | None
+    resume: bool | None
+    profile: str | None
+    stub: bool | None
+    config: str | Path | None
+    name: str | None
+    revision: str | None
+    wait: str | None
+    id: str | None
+    with_tower: bool | None
+    use_nextflow: bool | None
+    compute_env: str | None
+    work_dir: str | Path | None
+    params_file: str | Path | None
 
 
 class RnafusionSampleSheetEntry(NextflowSampleSheetEntry):

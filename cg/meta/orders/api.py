@@ -6,8 +6,8 @@ The normal entry for information is through the REST API which will pass a JSON
 document with all information about samples in the submission. The input will
 be validated and if passing all checks be accepted as new samples.
 """
+
 import logging
-from typing import Optional
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
@@ -26,7 +26,7 @@ from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.meta.orders.submitter import Submitter
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
-from cg.store import Store
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ class OrdersAPI:
         submit_handler.validate_order(order=order_in)
 
         # detect manual ticket assignment
-        ticket_number: Optional[str] = TicketHandler.parse_ticket_number(order_in.name)
+        ticket_number: str | None = TicketHandler.parse_ticket_number(order_in.name)
         if not ticket_number:
             ticket_number = self.ticket_handler.create_ticket(
                 order=order_in, user_name=user_name, user_mail=user_mail, project=project

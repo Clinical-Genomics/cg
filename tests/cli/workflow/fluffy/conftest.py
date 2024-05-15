@@ -5,7 +5,7 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Sample
@@ -160,13 +160,13 @@ def fluffy_context(
         fluffy_analysis_api.status_db,
         internal_id=fluffy_case_id_existing,
         name=fluffy_case_id_existing,
-        data_analysis=Pipeline.FLUFFY,
+        data_analysis=Workflow.FLUFFY,
     )
     example_fluffy_sample = helpers.add_sample(
         fluffy_analysis_api.status_db,
-        internal_id=fluffy_sample_lims_id,
-        is_tumour=False,
         application_type="tgs",
+        is_tumour=False,
+        internal_id=fluffy_sample_lims_id,
         reads=100,
         last_sequenced_at=dt.datetime.now(),
     )

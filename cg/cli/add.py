@@ -1,24 +1,25 @@
 import logging
-from typing import Optional
 
 import click
 
-from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline, Priority
-from cg.constants.subject import Gender
+from cg.constants import DataDelivery, Priority, Workflow
+from cg.constants.archiving import PDC_ARCHIVE_LOCATION
+from cg.constants.constants import StatusOptions
+from cg.constants.subject import Sex
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import (
     Application,
     ApplicationVersion,
+    Case,
+    CaseSample,
     Collaboration,
     Customer,
-    Case,
-    FamilySample,
     Panel,
     Sample,
     User,
 )
+from cg.store.store import Store
 from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)
@@ -59,7 +60,7 @@ def add():
     "--data-archive-location",
     "data_archive_location",
     help="Specifies where to store data for the customer.",
-    default="PDC",
+    default=PDC_ARCHIVE_LOCATION,
     show_default=True,
     required=False,
 )
@@ -79,7 +80,7 @@ def add_customer(
     context: CGConfig,
     internal_id: str,
     name: str,
-    collaboration_internal_ids: Optional[list[str]],
+    collaboration_internal_ids: list[str] | None,
     invoice_address: str,
     invoice_reference: str,
     data_archive_location: str,
@@ -156,7 +157,7 @@ def add_user(context: CGConfig, admin: bool, customer_id: str, email: str, name:
 @click.option(
     "-s",
     "--sex",
-    type=EnumChoice(Gender, use_value=False),
+    type=EnumChoice(Sex, use_value=False),
     required=True,
     help="Sample pedigree sex",
 )
@@ -173,10 +174,10 @@ def add_user(context: CGConfig, admin: bool, customer_id: str, email: str, name:
 @click.pass_obj
 def add_sample(
     context: CGConfig,
-    lims_id: Optional[str],
-    down_sampled: Optional[int],
-    sex: Gender,
-    order: Optional[str],
+    lims_id: str | None,
+    down_sampled: int | None,
+    sex: Sex,
+    order: str | None,
     application_tag: str,
     priority: Priority,
     customer_id: str,
@@ -225,7 +226,7 @@ def add_sample(
     "data_analysis",
     help="Analysis workflow",
     required=True,
-    type=EnumChoice(Pipeline),
+    type=EnumChoice(Workflow),
 )
 @click.option(
     "-dd",
@@ -243,7 +244,7 @@ def add_case(
     context: CGConfig,
     priority: Priority,
     panel_abbreviations: tuple[str],
-    data_analysis: Pipeline,
+    data_analysis: Workflow,
     data_delivery: DataDelivery,
     customer_id: str,
     name: str,
@@ -282,50 +283,50 @@ def add_case(
 @add.command("relationship")
 @click.option("-m", "--mother-id", help="Sample ID for mother of sample")
 @click.option("-f", "--father-id", help="Sample ID for father of sample")
-@click.option("-s", "--status", type=click.Choice(STATUS_OPTIONS), required=True)
+@click.option("-s", "--status", type=EnumChoice(StatusOptions), required=True)
 @click.argument("case-id")
 @click.argument("sample-id")
 @click.pass_obj
 def link_sample_to_case(
     context: CGConfig,
-    mother_id: Optional[str],
-    father_id: Optional[str],
+    mother_id: str | None,
+    father_id: str | None,
     status: str,
     case_id: str,
     sample_id: str,
 ):
     """Create a link between a case id and a sample id."""
     status_db: Store = context.status_db
-    mother: Optional[Sample] = None
-    father: Optional[Sample] = None
+    mother: Sample | None = None
+    father: Sample | None = None
     case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     if case_obj is None:
-        LOG.error("%s: family not found", case_id)
+        LOG.error(f"{case_id}: family not found")
         raise click.Abort
 
     sample: Sample = status_db.get_sample_by_internal_id(internal_id=sample_id)
     if sample is None:
-        LOG.error("%s: sample not found", sample_id)
+        LOG.error(f"{sample_id}: sample not found")
         raise click.Abort
 
     if mother_id:
         mother: Sample = status_db.get_sample_by_internal_id(internal_id=mother_id)
         if mother is None:
-            LOG.error("%s: mother not found", mother_id)
+            LOG.error(f"{mother_id}: mother not found")
             raise click.Abort
 
     if father_id:
         father: Sample = status_db.get_sample_by_internal_id(internal_id=father_id)
         if father is None:
-            LOG.error("%s: father not found", father_id)
+            LOG.error(f"{father_id}: father not found")
             raise click.Abort
 
-    new_record: FamilySample = status_db.relate_sample(
-        family=case_obj, sample=sample, status=status, mother=mother, father=father
+    new_record: CaseSample = status_db.relate_sample(
+        case=case_obj, sample=sample, status=status, mother=mother, father=father
     )
     status_db.session.add(new_record)
     status_db.session.commit()
-    LOG.info("related %s to %s", case_obj.internal_id, sample.internal_id)
+    LOG.info(f"related {case_id} to {sample_id}")
 
 
 @add.command("external")

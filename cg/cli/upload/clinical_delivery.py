@@ -1,20 +1,19 @@
 """Code that handles CLI commands to upload"""
+
 import datetime as dt
 import logging
-from pathlib import Path
 
 import click
 
 from cg.apps.tb import TrailblazerAPI
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.apps.tb.models import TrailblazerAnalysis
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, Workflow
 from cg.constants.constants import DRY_RUN
-from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.constants.tb import AnalysisTypes
-from cg.meta.deliver import DeliverAPI
+from cg.meta.deliver.utils import get_delivery_scope
 from cg.meta.rsync import RsyncAPI
-from cg.store import Store
 from cg.store.models import Case
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -29,31 +28,22 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
 
     click.echo(click.style("----------------- Clinical-delivery -----------------"))
 
-    case: Case = context.obj.status_db.get_case_by_internal_id(internal_id=case_id)
-    delivery_types: set[str] = case.get_delivery_arguments()
+    case: Case = context.obj.status_db.get_case_by_internal_id(case_id)
+    workflows: set[str] = case.get_delivery_arguments()
     is_sample_delivery: bool
     is_case_delivery: bool
     is_complete_delivery: bool
     job_id: int
-    is_sample_delivery, is_case_delivery = DeliverAPI.get_delivery_scope(
-        delivery_arguments=delivery_types
-    )
-    if not delivery_types:
+    is_sample_delivery, is_case_delivery = get_delivery_scope(workflows)
+    if not workflows:
         LOG.info(f"No delivery of files requested for case {case_id}")
         return
 
-    LOG.debug("Delivery types are: %s", delivery_types)
-    for delivery_type in delivery_types:
-        DeliverAPI(
-            store=context.obj.status_db,
-            hk_api=context.obj.housekeeper_api,
-            case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],
-            sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
-            delivery_type=delivery_type,
-            project_base_path=Path(context.obj.delivery_path),
-        ).deliver_files(case_obj=case)
+    LOG.debug(f"Delivery types are: {workflows}")
+    for delivery_type in workflows:
+        context.obj.delivery_api.deliver_files(case=case, workflow=delivery_type)
 
-    rsync_api: RsyncAPI = RsyncAPI(context.obj)
+    rsync_api = RsyncAPI(context.obj)
     is_complete_delivery, job_id = rsync_api.slurm_rsync_single_case(
         case=case,
         dry_run=dry_run,
@@ -65,16 +55,18 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
     )
     analysis_name: str = f"{case_id}_rsync" if is_complete_delivery else f"{case_id}_partial"
     if not dry_run:
-        context.obj.trailblazer_api.add_pending_analysis(
+        trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
+        analysis: TrailblazerAnalysis = trailblazer_api.add_pending_analysis(
             case_id=analysis_name,
             analysis_type=AnalysisTypes.OTHER,
             config_path=rsync_api.trailblazer_config_path.as_posix(),
             out_dir=rsync_api.log_dir.as_posix(),
-            slurm_quality_of_service=PRIORITY_TO_SLURM_QOS[case.priority],
-            data_analysis=Pipeline.RSYNC,
+            slurm_quality_of_service=Priority.priority_to_slurm_qos().get(case.priority),
+            workflow=Workflow.RSYNC,
             ticket=case.latest_ticket,
         )
-    LOG.info("Transfer of case %s started with SLURM job id %s", case_id, job_id)
+        trailblazer_api.add_upload_job_to_analysis(analysis_id=analysis.id, slurm_id=job_id)
+    LOG.info(f"Transfer of case {case_id} started with SLURM job id {job_id}")
 
 
 @click.command("all-fastq")
@@ -86,26 +78,24 @@ def auto_fastq(context: click.Context, dry_run: bool):
     exit_code: int = EXIT_SUCCESS
     status_db: Store = context.obj.status_db
     trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
-    for analysis_obj in status_db.get_analyses_to_upload(pipeline=Pipeline.FASTQ):
-        if analysis_obj.family.analyses[0].uploaded_at:
+    for analysis_obj in status_db.get_analyses_to_upload(workflow=Workflow.FASTQ):
+        if analysis_obj.case.analyses[0].uploaded_at:
             LOG.debug(
-                f"Newer analysis already uploaded for {analysis_obj.family.internal_id}, skipping"
+                f"Newer analysis already uploaded for {analysis_obj.case.internal_id}, skipping"
             )
             continue
         if analysis_obj.upload_started_at:
-            if trailblazer_api.is_latest_analysis_completed(
-                case_id=analysis_obj.family.internal_id
-            ):
+            if trailblazer_api.is_latest_analysis_completed(case_id=analysis_obj.case.internal_id):
                 LOG.info(
-                    f"The upload for {analysis_obj.family.internal_id} is completed, setting uploaded at to {dt.datetime.now()}"
+                    f"The upload for {analysis_obj.case.internal_id} is completed, setting uploaded at to {dt.datetime.now()}"
                 )
                 analysis_obj.uploaded_at = dt.datetime.now()
             else:
                 LOG.debug(
-                    f"Upload to clinical-delivery for {analysis_obj.family.internal_id} has already started, skipping"
+                    f"Upload to clinical-delivery for {analysis_obj.case.internal_id} has already started, skipping"
                 )
             continue
-        case: Case = analysis_obj.family
+        case: Case = analysis_obj.case
         LOG.info(f"Uploading family: {case.internal_id}")
         analysis_obj.upload_started_at = dt.datetime.now()
         try:

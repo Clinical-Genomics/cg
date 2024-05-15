@@ -1,11 +1,12 @@
 """This script tests the cli methods to set flow cells in status-db."""
+
 from click.testing import CliRunner
 
 from cg.cli.set.base import flowcell
-from cg.constants import FLOWCELL_STATUS
+from cg.constants import FlowCellStatus
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Flowcell
+from cg.store.store import Store
 
 SUCCESS = 0
 
@@ -43,7 +44,7 @@ def test_set_flowcell_status(
     """Test that the updated flow_cell get the status we send in."""
     # GIVEN a database with a flow cell
     flow_cell_name = helpers.add_flow_cell(base_store).name
-    status = FLOWCELL_STATUS[2]
+    status = FlowCellStatus.statuses()[2]
     flow_cell_query = base_store._get_query(table=Flowcell)
     assert flow_cell_query.first().status != status
 

@@ -1,5 +1,3 @@
-from typing import Optional
-
 from cg.apps.tb.models import TrailblazerAnalysis
 
 
@@ -14,9 +12,6 @@ class MockTB:
     def add_pending_analysis(self, *args, **kwargs) -> None:
         return None
 
-    def mark_analyses_deleted(self, *args, **kwargs) -> None:
-        return None
-
     def add_commit(self, *args, **kwargs) -> None:
         return None
 
@@ -26,7 +21,7 @@ class MockTB:
     def analyses(self, *args, **kwargs) -> list:
         return self.analyses_response
 
-    def get_latest_analysis(self, case_id: str) -> Optional[TrailblazerAnalysis]:
+    def get_latest_analysis(self, case_id: str) -> TrailblazerAnalysis | None:
         return self.get_latest_analysis_response.get(case_id)
 
     def ensure_analyses_response(self, analyses_list: list) -> None:
@@ -35,9 +30,9 @@ class MockTB:
         ]
 
     def ensure_get_latest_analysis_response(self, analysis_dict: dict) -> None:
-        self.get_latest_analysis_response[
-            analysis_dict["family"]
-        ] = TrailblazerAnalysis.model_validate(analysis_dict)
+        self.get_latest_analysis_response[analysis_dict["family"]] = (
+            TrailblazerAnalysis.model_validate(analysis_dict)
+        )
 
     def is_latest_analysis_completed(self, case_id: str):
         return True
@@ -46,4 +41,7 @@ class MockTB:
         return True
 
     def set_analysis_status(self, case_id: str, status: str):
+        return
+
+    def add_comment(self, case_id: str, comment: str):
         return

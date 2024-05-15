@@ -1,6 +1,5 @@
 """Common CLI workflow functions"""
 
-
 import click
 
 from cg.cli.workflow.balsamic.base import balsamic

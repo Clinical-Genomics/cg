@@ -1,9 +1,6 @@
-from typing import Optional
-
 from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus
-from cg.store import Store
 from cg.store.filters.status_flow_cell_filters import (
     filter_flow_cell_by_name,
     filter_flow_cell_by_name_search,
@@ -11,6 +8,7 @@ from cg.store.filters.status_flow_cell_filters import (
     filter_flow_cells_with_statuses,
 )
 from cg.store.models import Case, Flowcell, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -29,7 +27,7 @@ def test_get_flow_cells_by_case(
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell: Optional[list[Flowcell]] = filter_flow_cells_by_case(
+    returned_flow_cell: list[Flowcell] | None = filter_flow_cells_by_case(
         flow_cells=base_store._get_join_flow_cell_sample_links_query(), case=case
     )
 
@@ -49,7 +47,7 @@ def test_get_flow_cells_by_case_when_no_flow_cell_for_case(
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell: Optional[list[Flowcell]] = filter_flow_cells_by_case(
+    returned_flow_cell: list[Flowcell] | None = filter_flow_cells_by_case(
         flow_cells=base_store._get_join_flow_cell_sample_links_query(), case=case
     )
 

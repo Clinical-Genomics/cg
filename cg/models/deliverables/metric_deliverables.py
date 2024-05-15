@@ -1,5 +1,5 @@
 import operator
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 from pydantic.v1 import BaseModel, Field, validator
 
@@ -75,13 +75,13 @@ class MetricCondition(BaseModel):
 class MetricsBase(BaseModel):
     """Definition for elements in deliverables metrics file."""
 
-    header: Optional[str]
+    header: str | None
     id: str
     input: str
     name: str
     step: str
     value: Any
-    condition: Optional[MetricCondition]
+    condition: MetricCondition | None
 
 
 class SampleMetric(BaseModel):
@@ -122,7 +122,7 @@ class MetricsDeliverables(BaseModel):
     """Specification for a metric general deliverables file"""
 
     metrics_: list[MetricsBase] = Field(..., alias="metrics")
-    sample_ids: Optional[set]
+    sample_ids: set | None
 
     @validator("sample_ids", always=True)
     def set_sample_ids(cls, _, values: dict) -> set:
@@ -161,5 +161,5 @@ class MetricsDeliverablesCondition(BaseModel):
 class MultiqcDataJson(BaseModel):
     """Multiqc data json model."""
 
-    report_general_stats_data: Optional[list[dict]]
-    report_data_sources: Optional[dict]
+    report_general_stats_data: list[dict] | None
+    report_data_sources: dict | None

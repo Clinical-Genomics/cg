@@ -1,7 +1,7 @@
 """Models used by hermes <-> cg interactions"""
+
 import logging
 from pathlib import Path
-from typing import Optional
 
 from pydantic import BaseModel, field_validator
 
@@ -15,13 +15,13 @@ class CGTag(BaseModel):
 
     path: str
     tags: list[str]
-    mandatory: Optional[bool] = False
+    mandatory: bool | None = False
 
 
 class CGDeliverables(BaseModel):
-    """Class that specifies the output from hermes"""
+    """Class that specifies the output from Hermes."""
 
-    pipeline: str
+    workflow: str
     bundle_id: str
     files: list[CGTag]
 
@@ -29,7 +29,7 @@ class CGDeliverables(BaseModel):
     @classmethod
     def remove_missing_files(cls, files: list[CGTag]) -> list[CGTag]:
         """Validates that the files in a suggested CGDeliverables object are correct.
-        I.e. if a file doesn't exist an error is raised if the file was mandatory,
+        I.e., if a file doesn't exist, an error is raised if the file was mandatory,
         otherwise it is simply removed from the list of files."""
         filtered_files: list[CGTag] = files.copy()
         for file in files:

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable, Optional
+from typing import Callable
 
 from sqlalchemy.orm import Query
 
@@ -20,7 +20,7 @@ class PanelFilter(Enum):
 def apply_panel_filter(
     panels: Query,
     filters: list[PanelFilter],
-    abbreviation: Optional[str] = None,
+    abbreviation: str | None = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for filter_function in filters:

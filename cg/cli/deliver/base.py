@@ -1,18 +1,14 @@
 """CLI for delivering files with CG"""
-import logging
-from pathlib import Path
-from typing import Optional
 
+import logging
 import click
 
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
-from cg.meta.deliver import DeliverAPI
+from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS
+from cg.meta.deliver import DeliveryAPI
 from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
-from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -61,55 +57,28 @@ def deliver():
 @click.pass_obj
 def deliver_analysis(
     context: CGConfig,
-    case_id: Optional[str],
-    ticket: Optional[str],
+    case_id: str | None,
+    ticket: str | None,
     delivery_type: list[str],
     dry_run: bool,
     force_all: bool,
     ignore_missing_bundles: bool,
 ):
-    """Deliver analysis files to customer inbox
-
+    """Deliver analysis files to customer inbox.
     Files can be delivered either on case level or for all cases connected to a ticket.
-    Any of those needs to be specified.
     """
     if not (case_id or ticket):
         LOG.info("Please provide a case-id or ticket-id")
         return
 
-    inbox: str = context.delivery_path
-    if not inbox:
-        LOG.info("Please specify the root path for where files should be delivered")
-        return
+    delivery_api: DeliveryAPI = context.delivery_api
 
-    status_db: Store = context.status_db
-    for delivery in delivery_type:
-        deliver_api = DeliverAPI(
-            store=status_db,
-            hk_api=context.housekeeper_api,
-            case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["case_tags"],
-            sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"],
-            project_base_path=Path(inbox),
-            delivery_type=delivery,
-            force_all=force_all,
-            ignore_missing_bundles=ignore_missing_bundles,
-        )
-        deliver_api.set_dry_run(dry_run)
-        cases: list[Case] = []
-        if case_id:
-            case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
-            if not case_obj:
-                LOG.warning("Could not find case %s", case_id)
-                return
-            cases.append(case_obj)
-        else:
-            cases: list[Case] = status_db.get_cases_by_ticket_id(ticket_id=ticket)
-            if not cases:
-                LOG.warning("Could not find cases for ticket %s", ticket)
-                return
+    delivery_api.dry_run = dry_run
+    delivery_api.deliver_failed_samples = force_all
+    delivery_api.ignore_missing_bundles = ignore_missing_bundles
 
-        for case_obj in cases:
-            deliver_api.deliver_files(case_obj=case_obj)
+    for workflow in delivery_type:
+        delivery_api.deliver(case_id=case_id, ticket=ticket, workflow=workflow)
 
 
 @deliver.command(name="rsync")
@@ -123,7 +92,7 @@ def rsync(context: CGConfig, ticket: str, dry_run: bool):
     tb_api: TrailblazerAPI = context.trailblazer_api
     rsync_api: RsyncAPI = RsyncAPI(config=context)
     slurm_id = rsync_api.run_rsync_on_slurm(ticket=ticket, dry_run=dry_run)
-    LOG.info("Rsync to the delivery server running as job %s", slurm_id)
+    LOG.info(f"Rsync to the delivery server running as job {slurm_id}")
     rsync_api.add_to_trailblazer_api(
         tb_api=tb_api, slurm_job_id=slurm_id, ticket=ticket, dry_run=dry_run
     )

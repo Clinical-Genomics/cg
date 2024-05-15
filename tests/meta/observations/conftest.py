@@ -1,7 +1,5 @@
 """Fixtures for observations."""
 
-from typing import Optional
-
 import pytest
 
 from cg.apps.loqus import LoqusdbAPI
@@ -10,7 +8,7 @@ from cg.constants.sequencing import SequencingMethod
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 from tests.apps.loqus.conftest import (
     loqusdb_api,
     loqusdb_binary_path,
@@ -42,14 +40,14 @@ class MockLoqusdbAPI(LoqusdbAPI):
         return dict(variants=15)
 
     @staticmethod
-    def get_case(*args, **kwargs) -> Optional[dict]:
+    def get_case(*args, **kwargs) -> dict | None:
         """Mock get_case method."""
         _ = args
         _ = kwargs
         return {"case_id": "case_id", LOQUSDB_ID: "123"}
 
     @staticmethod
-    def get_duplicate(*args, **kwargs) -> Optional[dict]:
+    def get_duplicate(*args, **kwargs) -> dict | None:
         """Mock get_duplicate method."""
         _ = args
         _ = kwargs

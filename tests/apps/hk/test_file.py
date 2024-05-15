@@ -1,4 +1,5 @@
 """Test how the api handles files."""
+
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -640,9 +641,9 @@ def test_get_non_archived_spring_path_and_bundle_name(populated_housekeeper_api:
     # GIVEN a housekeeper_api containing spring_files which are not archived
 
     # WHEN fetching all non-archived spring baths and bundle names
-    files_and_bundle_names: list[
-        tuple[str, str]
-    ] = populated_housekeeper_api.get_non_archived_spring_path_and_bundle_name()
+    files_and_bundle_names: list[tuple[str, str]] = (
+        populated_housekeeper_api.get_non_archived_spring_path_and_bundle_name()
+    )
     assert len(files_and_bundle_names) > 0
     # THEN each file should be a spring file
     # THEN none of the files should have an archive
@@ -652,3 +653,14 @@ def test_get_non_archived_spring_path_and_bundle_name(populated_housekeeper_api:
         assert SequencingFileTag.SPRING in [tag.name for tag in housekeeper_file.tags]
         assert not housekeeper_file.archive
         assert bundle_name == housekeeper_file.version.bundle.name
+
+
+def test_get_file_insensitive_path(bed_file: Path, populated_housekeeper_api: HousekeeperAPI):
+    """Test that a file is fetched given its path."""
+    # GIVEN the path of a file in Housekeeper API
+
+    # WHEN getting the file though the path
+    file: File = populated_housekeeper_api.get_file_insensitive_path(path=bed_file)
+
+    # THEN the file is fetched correctly
+    assert file

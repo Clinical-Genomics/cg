@@ -7,7 +7,7 @@ from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
 
 
 @pytest.mark.parametrize(
-    "q30_yield, total_yield, expected_result", [(100, 200, (100 / 200) * 100), (0, 0, 0)]
+    "q30_yield, total_yield, expected_result", [(100, 200, 0.5 * 100), (0, 0, 0)]
 )
 def test_calculate_bases_with_q30_percentage(
     q30_yield: int, total_yield: int, expected_result: float
@@ -23,7 +23,7 @@ def test_calculate_bases_with_q30_percentage(
 
 
 @pytest.mark.parametrize(
-    "total_quality_score, total_yield, expected_result", [(100, 200, 100 / 200), (0, 0, 0)]
+    "total_quality_score, total_yield, expected_result", [(100, 200, 0.5), (0, 0, 0)]
 )
 def test_calculate_lane_mean_quality_score(
     total_quality_score: int, total_yield: int, expected_result: float

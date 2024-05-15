@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable, Optional
+from typing import Callable
 
 from sqlalchemy.orm import Query
 
@@ -21,9 +21,9 @@ def get_cases_with_sample_by_internal_id(case_samples: Query, sample_internal_id
 def apply_case_sample_filter(
     filter_functions: list[Callable],
     case_samples: Query,
-    case_internal_id: Optional[str] = None,
-    sample_entry_id: Optional[int] = None,
-    sample_internal_id: Optional[str] = None,
+    case_internal_id: str | None = None,
+    sample_entry_id: int | None = None,
+    sample_internal_id: str | None = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 

@@ -1,4 +1,5 @@
 """Test module cg.cli.upload.nipt"""
+
 import datetime
 import logging
 
@@ -6,7 +7,7 @@ from click.testing import CliRunner
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.cli.upload.nipt.base import nipt_upload_all, nipt_upload_case
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.meta.upload.nipt import NiptUploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis
@@ -31,7 +32,7 @@ def test_nipt_statina_upload_case(
     caplog.set_level(logging.DEBUG)
 
     analysis_obj: Analysis = helpers.add_analysis(store=upload_context.status_db)
-    case_id = analysis_obj.family.internal_id
+    case_id = analysis_obj.case.internal_id
     assert not analysis_obj.upload_started_at
     assert not analysis_obj.uploaded_at
 
@@ -71,7 +72,7 @@ def test_nipt_statina_upload_case_dry_run(
     caplog.set_level(logging.DEBUG)
 
     analysis_obj: Analysis = helpers.add_analysis(store=upload_context.status_db)
-    case_id = analysis_obj.family.internal_id
+    case_id = analysis_obj.case.internal_id
     assert not analysis_obj.upload_started_at
     assert not analysis_obj.uploaded_at
 
@@ -112,7 +113,7 @@ def test_nipt_statina_upload_auto(
     analysis_obj: Analysis = helpers.add_analysis(
         store=upload_context.status_db,
         completed_at=datetime.datetime.now(),
-        pipeline=Pipeline.FLUFFY,
+        workflow=Workflow.FLUFFY,
     )
     assert analysis_obj.completed_at
     assert not analysis_obj.uploaded_at
@@ -172,9 +173,9 @@ def test_nipt_statina_upload_auto_analysis_without_case(
     analysis_obj: Analysis = helpers.add_analysis(
         store=upload_context.status_db,
         completed_at=datetime.datetime.now(),
-        pipeline=Pipeline.FLUFFY,
+        workflow=Workflow.FLUFFY,
     )
-    analysis_obj.family = None
+    analysis_obj.case = None
     mocker.patch.object(NiptUploadAPI, "get_all_upload_analyses", return_value=[analysis_obj])
     # WHEN uploading all NIPT cases
     result = cli_runner.invoke(cli=nipt_upload_all, args=[], obj=upload_context)
@@ -194,7 +195,7 @@ def test_nipt_statina_upload_auto_dry_run(
     analysis_obj: Analysis = helpers.add_analysis(
         store=upload_context.status_db,
         completed_at=datetime.datetime.now(),
-        pipeline=Pipeline.FLUFFY,
+        workflow=Workflow.FLUFFY,
     )
     assert analysis_obj.completed_at
     assert not analysis_obj.uploaded_at
@@ -232,7 +233,7 @@ def test_nipt_statina_upload_force_failed_case(
     caplog.set_level(logging.DEBUG)
 
     analysis_obj: Analysis = helpers.add_analysis(store=upload_context.status_db)
-    case_id = analysis_obj.family.internal_id
+    case_id = analysis_obj.case.internal_id
 
     # WHEN uploading of a specified NIPT case AND the qc fails but it forced to upload
     mocker.patch.object(NiptUploadAPI, "get_statina_files", return_value=MockStatinaUploadFiles())

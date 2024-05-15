@@ -1,16 +1,17 @@
 import datetime as dt
 
 from cg.constants import DataDelivery
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
+from cg.constants.subject import Sex
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import MicrobialSample
 from cg.store.models import (
     ApplicationVersion,
-    Customer,
     Case,
-    FamilySample,
+    CaseSample,
+    Customer,
     Organism,
     Sample,
 )
@@ -63,7 +64,7 @@ class MicrobialSubmitter(Submitter):
             ticket_id=order.ticket,
             items=status_data["samples"],
             comment=status_data["comment"],
-            data_analysis=Pipeline(status_data["data_analysis"]),
+            data_analysis=Workflow(status_data["data_analysis"]),
             data_delivery=DataDelivery(status_data["data_delivery"]),
         )
         return {"project": project_data, "records": samples}
@@ -72,7 +73,7 @@ class MicrobialSubmitter(Submitter):
         self,
         comment: str,
         customer_id: str,
-        data_analysis: Pipeline,
+        data_analysis: Workflow,
         data_delivery: DataDelivery,
         order: str,
         ordered: dt.datetime,
@@ -128,7 +129,7 @@ class MicrobialSubmitter(Submitter):
 
                 new_sample = self.status.add_sample(
                     name=sample_data["name"],
-                    sex="unknown",
+                    sex=Sex.UNKNOWN,
                     comment=sample_data["comment"],
                     control=sample_data["control"],
                     internal_id=sample_data.get("internal_id"),
@@ -144,8 +145,8 @@ class MicrobialSubmitter(Submitter):
 
                 priority = new_sample.priority
                 sample_objs.append(new_sample)
-                link: FamilySample = self.status.relate_sample(
-                    family=case, sample=new_sample, status="unknown"
+                link: CaseSample = self.status.relate_sample(
+                    case=case, sample=new_sample, status="unknown"
                 )
                 self.status.session.add(link)
                 new_samples.append(new_sample)

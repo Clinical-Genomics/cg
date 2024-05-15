@@ -55,7 +55,7 @@ class OrderHandler:
         lims_project = Project.create(
             self, researcher=Researcher(self, id=researcher_id), name=project_name
         )
-        LOG.info("%s: created new LIMS project", lims_project.id)
+        LOG.info(f"{lims_project.id}: created new LIMS project")
 
         containers_data = [
             batch.build_container(
@@ -64,7 +64,7 @@ class OrderHandler:
             for container in containers
         ]
         container_details = batch.build_container_batch(containers_data)
-        LOG.debug("%s: saving containers", lims_project.name)
+        LOG.debug(f"{lims_project.name}: saving containers")
         container_map = self.save_containers(container_details)
 
         reagentlabel_samples = [
@@ -77,7 +77,7 @@ class OrderHandler:
         samples_data = []
         for container in containers:
             for sample in container["samples"]:
-                LOG.debug("%s: adding sample to container: %s", sample["name"], container["name"])
+                LOG.debug(f"{sample['name']}: adding sample to container: {container['name']}")
                 lims_container = container_map[container["name"]]
                 sample_data = batch.build_sample(
                     name=sample["name"],

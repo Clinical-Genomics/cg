@@ -2,14 +2,14 @@ import datetime as dt
 import logging
 
 from cg.constants import DataDelivery, Priority
-from cg.constants.constants import CaseActions, Pipeline
+from cg.constants.constants import CaseActions, Workflow
 from cg.constants.pedigree import Pedigree
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
-from cg.store.models import ApplicationVersion, Customer, Case, FamilySample, Sample
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -171,7 +171,7 @@ class CaseSubmitter(Submitter):
             )
 
             panels: set[str] = set()
-            if data_analysis == Pipeline.MIP_DNA:
+            if data_analysis == Workflow.MIP_DNA:
                 panels: set[str] = {
                     panel for sample in case_samples for panel in sample.panels if panel
                 }
@@ -202,9 +202,9 @@ class CaseSubmitter(Submitter):
                         "name": sample.name,
                         "phenotype_groups": list(sample.phenotype_groups),
                         "phenotype_terms": list(sample.phenotype_terms),
-                        "reference_genome": sample.reference_genome
-                        if hasattr(sample, "reference_genome")
-                        else None,
+                        "reference_genome": (
+                            sample.reference_genome if hasattr(sample, "reference_genome") else None
+                        ),
                         "sex": sample.sex,
                         "status": sample.status if hasattr(sample, "status") else None,
                         "subject_id": sample.subject_id,
@@ -265,12 +265,12 @@ class CaseSubmitter(Submitter):
                 sample_mother: Sample = case_samples.get(sample.get(Pedigree.MOTHER))
                 sample_father: Sample = case_samples.get(sample.get(Pedigree.FATHER))
                 with self.status.session.no_autoflush:
-                    case_sample: FamilySample = self.status.get_case_sample_link(
+                    case_sample: CaseSample = self.status.get_case_sample_link(
                         case_internal_id=status_db_case.internal_id,
                         sample_internal_id=sample["internal_id"],
                     )
                 if not case_sample:
-                    case_sample: FamilySample = self._create_link(
+                    case_sample: CaseSample = self._create_link(
                         case_obj=status_db_case,
                         family_samples=case_samples,
                         father_obj=sample_father,
@@ -311,7 +311,7 @@ class CaseSubmitter(Submitter):
 
     def _create_link(self, case_obj, family_samples, father_obj, mother_obj, sample):
         link_obj = self.status.relate_sample(
-            family=case_obj,
+            case=case_obj,
             sample=family_samples[sample["name"]],
             status=sample["status"],
             mother=mother_obj,
@@ -353,7 +353,7 @@ class CaseSubmitter(Submitter):
     def _create_case(self, case: dict, customer_obj: Customer, ticket: str):
         case_obj = self.status.add_case(
             cohorts=case["cohorts"],
-            data_analysis=Pipeline(case["data_analysis"]),
+            data_analysis=Workflow(case["data_analysis"]),
             data_delivery=DataDelivery(case["data_delivery"]),
             name=case["name"],
             priority=case["priority"],

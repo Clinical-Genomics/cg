@@ -1,4 +1,5 @@
 """Module for building the rsync command to send files to customer inbox on the delivery server."""
+
 import datetime as dt
 import glob
 import logging
@@ -7,7 +8,7 @@ from typing import Iterable
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.priority import SlurmAccount, SlurmQos
@@ -34,12 +35,12 @@ class RsyncAPI(MetaAPI):
         self.account: str = config.data_delivery.account
         self.log_dir: Path = Path(config.data_delivery.base_path)
         self.mail_user: str = config.data_delivery.mail_user
-        self.pipeline: str = Pipeline.RSYNC
+        self.workflow: str = Workflow.RSYNC
 
     @property
     def slurm_quality_of_service(self) -> str:
         """Return the slurm quality of service depending on the slurm account."""
-        return SlurmQos.HIGH if self.account == SlurmAccount.PRODUCTION.value else SlurmQos.LOW
+        return SlurmQos.HIGH if self.account == SlurmAccount.PRODUCTION else SlurmQos.LOW
 
     @property
     def trailblazer_config_path(self) -> Path:
@@ -135,7 +136,7 @@ class RsyncAPI(MetaAPI):
             out_dir=self.log_dir.as_posix(),
             slurm_quality_of_service=self.slurm_quality_of_service,
             email=self.mail_user,
-            data_analysis=Pipeline.RSYNC,
+            workflow=Workflow.RSYNC,
             ticket=ticket,
         )
 
@@ -155,11 +156,11 @@ class RsyncAPI(MetaAPI):
     def create_log_dir(self, dry_run: bool) -> None:
         """Create log dir."""
         log_dir: Path = self.log_dir
-        LOG.info("Creating folder: %s", log_dir)
+        LOG.info(f"Creating folder: {log_dir}")
         if log_dir.exists():
-            LOG.warning("Could not create %s, this folder already exist", log_dir)
+            LOG.warning(f"Could not create {log_dir}, this folder already exist")
         elif dry_run:
-            LOG.info("Would have created path %s, but this is a dry run", log_dir)
+            LOG.info(f"Would have created path {log_dir}, but this is a dry run")
         else:
             log_dir.mkdir(parents=True, exist_ok=True)
 
@@ -230,7 +231,7 @@ class RsyncAPI(MetaAPI):
         source_and_destination_paths: dict[str, Path] = self.get_source_and_destination_paths(
             ticket=ticket, customer_internal_id=customer_internal_id
         )
-        if cases[0].data_analysis == Pipeline.SARS_COV_2:
+        if cases[0].data_analysis == Workflow.MUTANT:
             LOG.info("Delivering report for SARS-COV-2 analysis")
             commands = COVID_RSYNC.format(
                 source_path=source_and_destination_paths["delivery_source_path"],

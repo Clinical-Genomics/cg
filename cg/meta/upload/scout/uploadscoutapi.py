@@ -2,18 +2,18 @@
 
 import logging
 from pathlib import Path
-from typing import Optional
 
 from housekeeper.store.models import File, Version
-from pydantic.v1.dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.constants import HK_MULTIQC_HTML_TAG, Pipeline
+from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
 from cg.constants.constants import FileFormat, PrepCategory
-from cg.constants.scout_upload import ScoutCustomCaseReportTags
+from cg.constants.housekeeper_tags import AlignmentFileTag
+from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
@@ -23,8 +23,8 @@ from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.store import Store
-from cg.store.models import Analysis, Customer, Case, Sample
+from cg.store.models import Analysis, Case, Customer, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -58,18 +58,17 @@ class UploadScoutAPI:
         self.lims = lims_api
         self.status_db = status_db
 
-    def generate_config(self, analysis_obj: Analysis) -> ScoutLoadConfig:
+    def generate_config(self, analysis: Analysis) -> ScoutLoadConfig:
         """Fetch data about an analysis to load Scout."""
         LOG.info("Generate scout load config")
 
         # Fetch last version from housekeeper
         # This should be safe since analyses are only added if data is analysed
-        hk_version_obj: Version = self.housekeeper.last_version(analysis_obj.family.internal_id)
-        LOG.debug("Found housekeeper version %s", hk_version_obj.id)
+        hk_version_obj: Version = self.housekeeper.last_version(analysis.case.internal_id)
+        LOG.debug(f"Found housekeeper version {hk_version_obj.id}")
 
-        load_config: ScoutLoadConfig
-        LOG.info("Found pipeline %s", analysis_obj.pipeline)
-        config_builder = self.get_config_builder(analysis=analysis_obj, hk_version=hk_version_obj)
+        LOG.info(f"Found workflow {analysis.pipeline}")
+        config_builder = self.get_config_builder(analysis=analysis, hk_version=hk_version_obj)
 
         config_builder.build_load_config()
 
@@ -98,7 +97,7 @@ class UploadScoutAPI:
         LOG.info(f"Adding load config {config_file_path} to Housekeeper.")
         tag_name: str = self.get_load_config_tag()
         version: Version = self.housekeeper.last_version(case_id)
-        uploaded_config_file: Optional[File] = self.housekeeper.get_latest_file_from_version(
+        uploaded_config_file: File | None = self.housekeeper.get_latest_file_from_version(
             version=version, tags={tag_name}
         )
         if uploaded_config_file:
@@ -117,10 +116,10 @@ class UploadScoutAPI:
         return file_obj
 
     def get_multiqc_html_report(
-        self, case_id: str, pipeline: Pipeline
-    ) -> tuple[ScoutCustomCaseReportTags, Optional[File]]:
+        self, case_id: str, workflow: Workflow
+    ) -> tuple[ScoutCustomCaseReportTags, File | None]:
         """Return a multiqc report for a case in Housekeeper."""
-        if pipeline == Pipeline.MIP_RNA:
+        if workflow == Workflow.MIP_RNA:
             return (
                 ScoutCustomCaseReportTags.MULTIQC_RNA,
                 self.housekeeper.files(bundle=case_id, tags=HK_MULTIQC_HTML_TAG).first(),
@@ -130,7 +129,7 @@ class UploadScoutAPI:
             self.housekeeper.files(bundle=case_id, tags=HK_MULTIQC_HTML_TAG).first(),
         )
 
-    def get_fusion_report(self, case_id: str, research: bool) -> Optional[File]:
+    def get_fusion_report(self, case_id: str, research: bool) -> File | None:
         """Return a fusion report for a case in housekeeper."""
 
         tags = {"fusion"}
@@ -141,11 +140,11 @@ class UploadScoutAPI:
 
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
-    def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> Optional[File]:
+    def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> File | None:
         """Return a splice junctions bed file for a case in Housekeeper."""
 
         tags: set[str] = {"junction", "bed", sample_id}
-        splice_junctions_bed: Optional[File] = None
+        splice_junctions_bed: File | None = None
         try:
             splice_junctions_bed = self.housekeeper.get_file_from_latest_version(
                 bundle_name=case_id, tags=tags
@@ -155,7 +154,7 @@ class UploadScoutAPI:
 
         return splice_junctions_bed
 
-    def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> Optional[File]:
+    def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> File | None:
         """Return an RNA coverage bigwig file for a case in Housekeeper."""
 
         tags: set[str] = {"coverage", "bigwig", sample_id}
@@ -171,6 +170,48 @@ class UploadScoutAPI:
             unique_dna_cases_related_to_rna_case.update(rna_dna_collection.dna_case_ids)
         return unique_dna_cases_related_to_rna_case
 
+    def get_rna_alignment_cram(self, case_id: str, sample_id: str) -> File | None:
+        """Return an RNA alignment CRAM file for a case in Housekeeper."""
+        tags: set[str] = {AlignmentFileTag.CRAM, sample_id}
+        rna_alignment_cram: File | None = None
+        try:
+            rna_alignment_cram = self.housekeeper.get_file_from_latest_version(
+                bundle_name=case_id, tags=tags
+            )
+        except HousekeeperBundleVersionMissingError:
+            LOG.warning(f"Could not find bundle for {case_id}")
+        return rna_alignment_cram
+
+    def upload_rna_alignment_file(self, case_id: str, dry_run: bool) -> None:
+        """Upload RNA alignment file to Scout."""
+        rna_case: Case = self.status_db.get_case_by_internal_id(case_id)
+        rna_dna_collections: list[RNADNACollection] = self.create_rna_dna_collections(rna_case)
+        for rna_dna_collection in rna_dna_collections:
+            rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
+            dna_sample_name: str = rna_dna_collection.dna_sample_name
+            rna_alignment_cram: File | None = self.get_rna_alignment_cram(
+                case_id=case_id, sample_id=rna_sample_internal_id
+            )
+            if not rna_alignment_cram:
+                raise FileNotFoundError(
+                    f"No RNA alignment CRAM file was found in Housekeeper for {rna_sample_internal_id}"
+                )
+            LOG.debug(f"RNA alignment CRAM file {rna_alignment_cram.path} found")
+            for dna_case_id in rna_dna_collection.dna_case_ids:
+                LOG.info(
+                    f"Uploading RNA alignment CRAM file for sample {dna_sample_name} to case {dna_case_id}"
+                )
+                if dry_run:
+                    continue
+                self.scout_api.upload_rna_alignment_file(
+                    case_id=dna_case_id,
+                    customer_sample_id=dna_sample_name,
+                    file_path=rna_alignment_cram.full_path,
+                )
+        for upload_statement in self.get_rna_alignment_file_upload_summary(rna_dna_collections):
+            LOG.info(upload_statement)
+        LOG.info("Upload RNA alignment CRAM file finished!")
+
     def upload_fusion_report_to_scout(
         self, dry_run: bool, case_id: str, research: bool = False
     ) -> None:
@@ -178,8 +219,8 @@ class UploadScoutAPI:
 
         report_type: str = "Research" if research else "Clinical"
 
-        fusion_report: Optional[File] = self.get_fusion_report(case_id, research)
-        if fusion_report is None:
+        fusion_report: File | None = self.get_fusion_report(case_id, research)
+        if not fusion_report:
             raise FileNotFoundError(
                 f"{report_type} fusion report was not found in Housekeeper for {case_id}."
             )
@@ -257,11 +298,11 @@ class UploadScoutAPI:
         for rna_dna_collection in rna_dna_collections:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
-            rna_coverage_bigwig: Optional[File] = self.get_rna_coverage_bigwig(
+            rna_coverage_bigwig: File | None = self.get_rna_coverage_bigwig(
                 case_id=case_id, sample_id=rna_sample_internal_id
             )
 
-            if rna_coverage_bigwig is None:
+            if not rna_coverage_bigwig:
                 raise FileNotFoundError(
                     f"No RNA coverage bigwig file was found in housekeeper for {rna_sample_internal_id}."
                 )
@@ -295,18 +336,16 @@ class UploadScoutAPI:
         for rna_dna_collection in rna_dna_collections:
             rna_sample_internal_id: str = rna_dna_collection.rna_sample_internal_id
             dna_sample_name: str = rna_dna_collection.dna_sample_name
-            splice_junctions_bed: Optional[File] = self.get_splice_junctions_bed(
+            splice_junctions_bed: File | None = self.get_splice_junctions_bed(
                 case_id=case_id, sample_id=rna_sample_internal_id
             )
 
-            if splice_junctions_bed is None:
+            if not splice_junctions_bed:
                 raise FileNotFoundError(
                     f"No splice junctions bed file was found in Housekeeper for {rna_sample_internal_id}."
                 )
 
             LOG.debug(f"Splice junctions bed file {splice_junctions_bed.path} found")
-            dna_sample_id: str
-            dna_cases: list[str]
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
                     f"Uploading splice junctions bed file for sample {dna_sample_name} "
@@ -324,6 +363,18 @@ class UploadScoutAPI:
         for upload_statement in self.get_rna_splice_junctions_upload_summary(rna_dna_collections):
             LOG.info(upload_statement)
         LOG.info("Upload splice junctions bed file finished!")
+
+    @staticmethod
+    def get_rna_alignment_file_upload_summary(
+        rna_dna_collections: list[RNADNACollection],
+    ) -> list[str]:
+        upload_summary: list[str] = []
+        for rna_dna_collection in rna_dna_collections:
+            upload_summary.extend(
+                f"Uploaded RNA alignment CRAM file for sample {rna_dna_collection.dna_sample_name} in case {dna_case}"
+                for dna_case in rna_dna_collection.dna_case_ids
+            )
+        return upload_summary
 
     @staticmethod
     def get_rna_splice_junctions_upload_summary(
@@ -356,27 +407,27 @@ class UploadScoutAPI:
 
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
         config_builders = {
-            Pipeline.BALSAMIC: BalsamicConfigBuilder(
+            Workflow.BALSAMIC: BalsamicConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
-            Pipeline.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
+            Workflow.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
-            Pipeline.MIP_DNA: MipConfigBuilder(
+            Workflow.MIP_DNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
                 mip_analysis_api=self.mip_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
-            Pipeline.MIP_RNA: MipConfigBuilder(
+            Workflow.MIP_RNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
                 mip_analysis_api=self.mip_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
             ),
-            Pipeline.RNAFUSION: RnafusionConfigBuilder(
+            Workflow.RNAFUSION: RnafusionConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
         }
@@ -395,12 +446,12 @@ class UploadScoutAPI:
             )
 
         collaborators: set[Customer] = rna_sample.customer.collaborators
-        subject_id_samples: list[
-            Sample
-        ] = self.status_db.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
-            customer_ids=[customer.id for customer in collaborators],
-            subject_id=rna_sample.subject_id,
-            is_tumour=rna_sample.is_tumour,
+        subject_id_samples: list[Sample] = (
+            self.status_db.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
+                customer_ids=[customer.id for customer in collaborators],
+                subject_id=rna_sample.subject_id,
+                is_tumour=rna_sample.is_tumour,
+            )
         )
 
         subject_id_dna_samples: list[Sample] = self._get_application_prep_category(
@@ -426,9 +477,7 @@ class UploadScoutAPI:
         self, dna_sample: Sample, collaborators: set[Customer]
     ) -> list[str]:
         """Maps a list of uploaded DNA cases linked to DNA sample."""
-        potential_cases_related_to_dna_sample: list[Case] = [
-            dna_sample_family_relation.family for dna_sample_family_relation in dna_sample.links
-        ]
+        potential_cases_related_to_dna_sample: list[Case] = [link.case for link in dna_sample.links]
         return self.filter_cases_related_to_dna_sample(
             list_of_dna_cases=potential_cases_related_to_dna_sample, collaborators=collaborators
         )
@@ -438,15 +487,15 @@ class UploadScoutAPI:
         list_of_dna_cases: list[Case], collaborators: set[Customer]
     ) -> list[str]:
         """Filters the given list of DNA samples and returns a subset of uploaded cases ordered by customers in the
-        specified list of collaborators and within the correct pipeline."""
+        specified list of collaborators and within the correct workflow."""
         filtered_dna_cases: list[str] = []
         for case in list_of_dna_cases:
             if (
                 case.data_analysis
                 in [
-                    Pipeline.MIP_DNA,
-                    Pipeline.BALSAMIC,
-                    Pipeline.BALSAMIC_UMI,
+                    Workflow.MIP_DNA,
+                    Workflow.BALSAMIC,
+                    Workflow.BALSAMIC_UMI,
                 ]
                 and case.customer in collaborators
             ):
@@ -460,9 +509,9 @@ class UploadScoutAPI:
     @staticmethod
     def _get_application_prep_category(
         subject_id_samples: list[Sample],
-    ) -> list[Optional[Sample]]:
+    ) -> list[Sample | None]:
         """Filter a models Sample list, returning DNA samples selected on their preparation category."""
-        subject_id_dna_samples: list[Optional[Sample]] = [
+        subject_id_dna_samples: list[Sample | None] = [
             sample
             for sample in subject_id_samples
             if sample.prep_category

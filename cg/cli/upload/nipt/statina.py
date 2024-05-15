@@ -37,7 +37,7 @@ def batch(configs: CGConfig, case_id: str, dry_run: bool, force: bool):
     ):
         nipt_upload_api.upload_to_statina_database(statina_files=statina_files)
     else:
-        LOG.error("Uploading case failed: %s", case_id)
+        LOG.error(f"Uploading case failed: {case_id}")
         LOG.error(
             f"Flowcell did not pass one of the following QC parameters:\n"
             f"target_reads={nipt_upload_api.target_reads(case_id=case_id)}, Q30_threshold={Q30_THRESHOLD}"

@@ -1,4 +1,5 @@
 """Constants related to sequencing."""
+
 from enum import StrEnum
 
 
@@ -13,7 +14,7 @@ class Sequencers(StrEnum):
     OTHER: str = "other"
 
 
-sequencer_types = {
+SEQUENCER_TYPES = {
     "D00134": Sequencers.HISEQGA,
     "D00410": Sequencers.HISEQGA,
     "D00415": Sequencers.HISEQGA,

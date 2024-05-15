@@ -24,8 +24,8 @@ class SampleSchema(Schema):
             ]
         ),
     )
-    father = fields.Str(dump_default=RelationshipStatus.HAS_NO_PARENT.value)
-    mother = fields.Str(dump_default=RelationshipStatus.HAS_NO_PARENT.value)
+    father = fields.Str(dump_default=RelationshipStatus.HAS_NO_PARENT)
+    mother = fields.Str(dump_default=RelationshipStatus.HAS_NO_PARENT)
     phenotype = fields.Str(
         required=True,
         validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
@@ -80,10 +80,10 @@ class ConfigHandler:
             LOG.info("setting 'unknown' phenotype to 'unaffected'")
             data_copy["samples"][0]["phenotype"] = "unaffected"
         for sample_data in data_copy["samples"]:
-            sample_data["mother"] = (
+            sample_data["mother"]: str = (
                 sample_data.get("mother") or RelationshipStatus.HAS_NO_PARENT.value
             )
-            sample_data["father"] = (
+            sample_data["father"]: str = (
                 sample_data.get("father") or RelationshipStatus.HAS_NO_PARENT.value
             )
             if sample_data["analysis_type"] == "wgs" and sample_data.get("capture_kit") is None:

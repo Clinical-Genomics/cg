@@ -13,7 +13,6 @@ LOG = logging.getLogger(__name__)
 
 
 class MutaccAutoAPI:
-
     """
     API for mutacc-auto
     """
@@ -76,5 +75,5 @@ def run_command(command: list):
     completed_process = subprocess.run(args=command, check=False)
     returncode = completed_process.returncode
     if returncode != 0:
-        LOG.warning("process %s ended with exitcode %d", " ".join(command), returncode)
+        LOG.warning(f"process {' '.join(command)} ended with exitcode {returncode}")
         raise subprocess.CalledProcessError(returncode=returncode, cmd=command)

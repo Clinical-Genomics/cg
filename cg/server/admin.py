@@ -1,7 +1,7 @@
 """Module for Flask-Admin views"""
+
 from datetime import datetime
 from gettext import gettext
-from typing import Union
 
 from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
@@ -9,7 +9,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 
-from cg.constants.constants import CaseActions, DataDelivery, Pipeline
+from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.server.ext import db
 from cg.store.models import Sample
 from cg.utils.flask.enum import SelectEnumField
@@ -33,14 +33,14 @@ def view_priority(unused1, unused2, model, unused3):
     return Markup("%s" % model.priority.name) if model else ""
 
 
-def view_family_sample_link(unused1, unused2, model, unused3):
-    """column formatter to open the family-sample view"""
+def view_case_sample_link(unused1, unused2, model, unused3):
+    """column formatter to open the case-sample view"""
 
     del unused1, unused2, unused3
 
     return Markup(
         "<a href='%s'>%s</a>"
-        % (url_for("familysample.index_view", search=model.internal_id), model.internal_id)
+        % (url_for("casesample.index_view", search=model.internal_id), model.internal_id)
     )
 
 
@@ -54,7 +54,7 @@ def view_sample_concentration_minimum(unused1, unused2, model, unused3):
     """Column formatter to append unit"""
     del unused1, unused2, unused3
     return (
-        str(model.sample_concentration_minimum) + " ng/uL"
+        str(model.sample_concentration_minimum) + NG_UL_SUFFIX
         if model.sample_concentration_minimum
         else None
     )
@@ -64,8 +64,28 @@ def view_sample_concentration_maximum(unused1, unused2, model, unused3):
     """Column formatter to append unit"""
     del unused1, unused2, unused3
     return (
-        str(model.sample_concentration_maximum) + " ng/uL"
+        str(model.sample_concentration_maximum) + NG_UL_SUFFIX
         if model.sample_concentration_maximum
+        else None
+    )
+
+
+def view_sample_concentration_minimum_cfdna(unused1, unused2, model, unused3):
+    """Column formatter to append unit"""
+    del unused1, unused2, unused3
+    return (
+        str(model.sample_concentration_minimum_cfdna) + NG_UL_SUFFIX
+        if model.sample_concentration_minimum_cfdna
+        else None
+    )
+
+
+def view_sample_concentration_maximum_cfdna(unused1, unused2, model, unused3):
+    """Column formatter to append unit"""
+    del unused1, unused2, unused3
+    return (
+        str(model.sample_concentration_maximum_cfdna) + NG_UL_SUFFIX
+        if model.sample_concentration_maximum_cfdna
         else None
     )
 
@@ -85,6 +105,10 @@ class ApplicationView(BaseView):
         "is_external",
         "turnaround_time",
         "sample_concentration",
+        "sample_concentration_minimum",
+        "sample_concentration_maximum",
+        "sample_concentration_minimum_cfdna",
+        "sample_concentration_maximum_cfdna",
         "priority_processing",
         "is_archived",
     ]
@@ -101,6 +125,8 @@ class ApplicationView(BaseView):
     column_formatters = {
         "sample_concentration_minimum": view_sample_concentration_minimum,
         "sample_concentration_maximum": view_sample_concentration_maximum,
+        "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
+        "sample_concentration_maximum_cfdna": view_sample_concentration_maximum_cfdna,
     }
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
@@ -135,11 +161,23 @@ class ApplicationVersionView(BaseView):
         "price_clinical_trials",
         "price_research",
     ]
+    column_list = (
+        "application",
+        "version",
+        "valid_from",
+        "price_standard",
+        "price_priority",
+        "price_express",
+        "price_clinical_trials",
+        "price_research",
+        "comment",
+    )
     column_exclude_list = ["created_at", "updated_at"]
     column_filters = ["version", "application.tag"]
     column_formatters = {"application": ApplicationView.view_application_link}
     column_searchable_list = ["application.tag"]
     edit_modal = True
+    create_modal = True
     form_excluded_columns = ["samples", "pools", "microbial_samples"]
 
 
@@ -159,7 +197,7 @@ class ApplicationLimitationsView(BaseView):
     column_searchable_list = ["application.tag"]
     column_editable_list = ["comment"]
     form_excluded_columns = ["created_at", "updated_at"]
-    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Pipeline)}
+    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Workflow)}
     create_modal = True
     edit_modal = True
 
@@ -258,7 +296,7 @@ class CaseView(BaseView):
         "tickets",
     ]
     column_formatters = {
-        "internal_id": view_family_sample_link,
+        "internal_id": view_case_sample_link,
         "priority": view_priority,
     }
     column_searchable_list = [
@@ -274,19 +312,19 @@ class CaseView(BaseView):
         "synopsis",
     ]
     form_extra_fields = {
-        "data_analysis": SelectEnumField(enum_class=Pipeline),
+        "data_analysis": SelectEnumField(enum_class=Workflow),
         "data_delivery": SelectEnumField(enum_class=DataDelivery),
     }
 
     @staticmethod
-    def view_family_link(unused1, unused2, model, unused3):
+    def view_case_link(unused1, unused2, model, unused3):
         """column formatter to open this view"""
         del unused1, unused2, unused3
         markup = ""
-        if model.family:
+        if model.case:
             markup += Markup(
                 " <a href='%s'>%s</a>"
-                % (url_for("family.index_view", search=model.family.internal_id), model.family)
+                % (url_for("case.index_view", search=model.case.internal_id), model.case)
             )
 
         return markup
@@ -307,12 +345,12 @@ class CaseView(BaseView):
     def action_set_empty(self, ids: list[str]):
         self.set_action_for_cases(action=None, case_entry_ids=ids)
 
-    def set_action_for_cases(self, action: Union[CaseActions, None], case_entry_ids: list[str]):
+    def set_action_for_cases(self, action: CaseActions | None, case_entry_ids: list[str]):
         try:
             for entry_id in case_entry_ids:
-                family = db.get_case_by_entry_id(entry_id=entry_id)
-                if family:
-                    family.action = action
+                case = db.get_case_by_entry_id(entry_id=entry_id)
+                if case:
+                    case.action = action
 
             db.session.commit()
 
@@ -328,7 +366,7 @@ class CaseView(BaseView):
             if not self.handle_view_exception(ex):
                 raise
 
-            flash(gettext(f"Failed to set family action. {str(ex)}"))
+            flash(gettext(f"Failed to set case action. {str(ex)}"))
 
 
 class FlowcellView(BaseView):
@@ -376,9 +414,11 @@ class InvoiceView(BaseView):
                 "<a href='%s'>%s</a>"
                 % (
                     url_for("invoice.index_view", search=model.invoice.id),
-                    model.invoice.invoiced_at.date()
-                    if model.invoice.invoiced_at
-                    else "In progress",
+                    (
+                        model.invoice.invoiced_at.date()
+                        if model.invoice.invoiced_at
+                        else "In progress"
+                    ),
                 )
             )
             if model.invoice
@@ -392,12 +432,12 @@ class AnalysisView(BaseView):
     column_default_sort = ("created_at", True)
     column_editable_list = ["is_primary"]
     column_filters = ["pipeline", "pipeline_version", "is_primary"]
-    column_formatters = {"family": CaseView.view_family_link}
+    column_formatters = {"case": CaseView.view_case_link}
     column_searchable_list = [
-        "family.internal_id",
-        "family.name",
+        "case.internal_id",
+        "case.name",
     ]
-    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Pipeline)}
+    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Workflow)}
 
 
 class OrganismView(BaseView):
@@ -448,7 +488,7 @@ class SampleView(BaseView):
     column_filters = ["customer.internal_id", "priority", "sex", "application_version.application"]
     column_formatters = {
         "is_external": is_external_application,
-        "internal_id": view_family_sample_link,
+        "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
         "priority": view_priority,
     }
@@ -504,7 +544,7 @@ class SampleView(BaseView):
             sample: Sample = db.get_sample_by_entry_id(entry_id=int(entry_id))
 
             sample_case_ids: list[str] = [
-                case_sample.family.internal_id for case_sample in sample.links
+                case_sample.case.internal_id for case_sample in sample.links
             ]
             all_associated_case_ids.update(sample_case_ids)
 
@@ -525,7 +565,7 @@ class SampleView(BaseView):
         date: str = datetime.now().strftime("%Y-%m-%d")
         comment: str = f"Cancelled {date} by {user_name}"
 
-        db.add_sample_comment(sample=sample, comment=comment)
+        db.update_sample_comment(sample=sample, comment=comment)
 
     def display_cancel_confirmation(
         self, sample_entry_ids: list[str], remaining_cases: list[str]
@@ -563,17 +603,17 @@ class DeliveryView(BaseView):
     edit_modal = True
 
 
-class FamilySampleView(BaseView):
-    """Admin view for Model.FamilySample"""
+class CaseSampleView(BaseView):
+    """Admin view for Model.caseSample"""
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["status"]
     column_filters = ["status"]
     column_formatters = {
-        "family": CaseView.view_family_link,
+        "case": CaseView.view_case_link,
         "sample": SampleView.view_sample_link,
     }
-    column_searchable_list = ["family.internal_id", "family.name", "sample.internal_id"]
+    column_searchable_list = ["case.internal_id", "case.name", "sample.internal_id"]
     create_modal = True
     edit_modal = True
 

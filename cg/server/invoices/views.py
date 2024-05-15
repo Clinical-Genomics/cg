@@ -2,7 +2,6 @@ import http
 import os
 import tempfile
 from datetime import date
-from typing import Union
 
 from flask import (
     Blueprint,
@@ -41,7 +40,7 @@ def logged_in():
 def undo_invoice(invoice_id):
     invoice_obj: Invoice = db.get_invoice_by_entry_id(entry_id=invoice_id)
     record_type: str = invoice_obj.record_type
-    records: list[Union[Pool, Sample]] = db.get_pools_and_samples_for_invoice_by_invoice_id(
+    records: list[Pool | Sample] = db.get_pools_and_samples_for_invoice_by_invoice_id(
         invoice_id=invoice_id
     )
     db.session.delete(invoice_obj)
@@ -140,14 +139,12 @@ def new(record_type):
     customer_id = request.args.get("customer", "cust002")
     customer: Customer = db.get_customer_by_internal_id(customer_internal_id=customer_id)
     if record_type == "Sample":
-        records: list[Union[Pool, Sample]] = db.get_samples_to_invoice_for_customer(
-            customer=customer
-        )
+        records: list[Pool | Sample] = db.get_samples_to_invoice_for_customer(customer=customer)
         customers_to_invoice: list[Customer] = db.get_customers_to_invoice(
             records=db.get_samples_to_invoice_query()
         )
     elif record_type == "Pool":
-        records: list[Union[Pool, Sample]] = db.get_pools_to_invoice_for_customer(customer=customer)
+        records: list[Pool | Sample] = db.get_pools_to_invoice_for_customer(customer=customer)
         customers_to_invoice: list[Customer] = db.get_customers_to_invoice(
             records=db.get_pools_to_invoice_query()
         )

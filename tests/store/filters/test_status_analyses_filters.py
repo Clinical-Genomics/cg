@@ -2,25 +2,25 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Query
 
-from cg.constants.constants import Pipeline
-from cg.store import Store
+from cg.constants.constants import Workflow
 from cg.store.filters.status_analysis_filters import (
     filter_analyses_by_case_entry_id,
     filter_analyses_by_started_at,
     filter_analyses_not_cleaned,
     filter_analyses_started_before,
     filter_analyses_with_delivery_report,
-    filter_analyses_with_pipeline,
+    filter_analyses_with_workflow,
     filter_analyses_without_delivery_report,
     filter_completed_analyses,
     filter_not_uploaded_analyses,
-    filter_report_analyses_by_pipeline,
+    filter_report_analyses_by_workflow,
     filter_uploaded_analyses,
     filter_valid_analyses_in_production,
     order_analyses_by_completed_at_asc,
     order_analyses_by_uploaded_at_asc,
 )
 from cg.store.models import Analysis, Case
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -52,18 +52,18 @@ def test_filter_valid_analyses_in_production(
     assert outdated_analysis not in analyses
 
 
-def test_filter_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers, case: Case):
-    """Test analyses filtering by pipeline."""
+def test_filter_analyses_with_workflow(base_store: Store, helpers: StoreHelpers, case: Case):
+    """Test analyses filtering by workflow."""
 
     # GIVEN a set of mock analyses
-    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, pipeline=Pipeline.BALSAMIC)
+    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, workflow=Workflow.BALSAMIC)
     mip_analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=case, pipeline=Pipeline.MIP_DNA
+        store=base_store, case=case, workflow=Workflow.MIP_DNA
     )
 
     # WHEN extracting the analyses
-    analyses: Query = filter_analyses_with_pipeline(
-        analyses=base_store._get_query(table=Analysis), pipeline=Pipeline.BALSAMIC
+    analyses: Query = filter_analyses_with_workflow(
+        analyses=base_store._get_query(table=Analysis), workflow=Workflow.BALSAMIC
     )
 
     # ASSERT that analyses is a query
@@ -166,18 +166,18 @@ def test_filter_analyses_without_delivery_report(base_store: Store, helpers: Sto
     assert analysis_without_delivery_report in analyses
 
 
-def test_filter_report_analyses_by_pipeline(base_store: Store, helpers: StoreHelpers, case: Case):
-    """Test filtering delivery report related analysis by pipeline."""
+def test_filter_report_analyses_by_workflow(base_store: Store, helpers: StoreHelpers, case: Case):
+    """Test filtering delivery report related analysis by workflow."""
 
     # GIVEN a set of mock analysis
-    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, pipeline=Pipeline.BALSAMIC)
+    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, workflow=Workflow.BALSAMIC)
     fluffy_analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=case, pipeline=Pipeline.FLUFFY
+        store=base_store, case=case, workflow=Workflow.FLUFFY
     )
 
     # WHEN filtering delivery report related analyses
-    analyses: Query = filter_report_analyses_by_pipeline(
-        analyses=base_store._get_query(table=Analysis), pipeline=Pipeline.BALSAMIC
+    analyses: Query = filter_report_analyses_by_workflow(
+        analyses=base_store._get_query(table=Analysis), workflow=Workflow.BALSAMIC
     )
 
     # ASSERT that analyses is a query
@@ -249,7 +249,7 @@ def test_filter_analysis_by_case(base_store: Store, helpers: StoreHelpers, case:
     # THEN only the analysis belonging to the case should be retrieved
     assert analysis not in analyses
     assert analysis_other_case in analyses
-    assert analysis_other_case.family == case
+    assert analysis_other_case.case == case
 
 
 def test_filter_analysis_started_before(
@@ -262,7 +262,7 @@ def test_filter_analysis_started_before(
         store=base_store, started_at=timestamp_now - timedelta(days=1)
     )
     analysis: Analysis = helpers.add_analysis(
-        store=base_store, started_at=timestamp_now, case=analysis_old.family
+        store=base_store, case=analysis_old.case, started_at=timestamp_now
     )
 
     # WHEN filtering the analyses by started_at
@@ -286,7 +286,7 @@ def test_filter_analysis_not_cleaned(
     # GIVEN a set of mock analyses
     analysis_cleaned: Analysis = helpers.add_analysis(store=base_store, cleaned_at=timestamp_now)
     analysis: Analysis = helpers.add_analysis(
-        store=base_store, cleaned_at=None, case=analysis_cleaned.family
+        store=base_store, case=analysis_cleaned.case, cleaned_at=None
     )
 
     # WHEN filtering the analyses by cleaned_at
@@ -310,9 +310,7 @@ def test_filter_analyses_by_started_at(
         store=base_store, started_at=timestamp_now
     )
     analysis_started_old: Analysis = helpers.add_analysis(
-        store=base_store,
-        started_at=timestamp_yesterday,
-        case=analysis_started_now.family,
+        store=base_store, case=analysis_started_now.case, started_at=timestamp_yesterday
     )
 
     # WHEN filtering the analyses by started_at

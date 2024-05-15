@@ -1,13 +1,12 @@
 """This script tests the cli methods to get samples in status-db"""
 
-
 from click.testing import CliRunner
 
 from cg.cli.get import get
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Case, Flowcell, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -155,7 +154,7 @@ def test_get_sample_no_cases_with_case(
     # THEN all related cases should be listed in the output
     assert result.exit_code == EXIT_SUCCESS
     for family_sample in disk_store._get_query(table=Sample).first().links:
-        assert family_sample.family.internal_id not in result.output
+        assert family_sample.case.internal_id not in result.output
 
 
 def test_get_sample_cases_without_case(
@@ -188,7 +187,7 @@ def test_get_sample_cases_with_case(
     # THEN all related families should be listed in the output
     assert result.exit_code == EXIT_SUCCESS
     for link in disk_store._get_query(table=Sample).first().links:
-        assert link.family.internal_id in result.output
+        assert link.case.internal_id in result.output
 
 
 def test_hide_sample_flowcells_without_flowcell(

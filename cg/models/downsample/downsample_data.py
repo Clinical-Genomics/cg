@@ -1,11 +1,12 @@
 """Model for down sampling meta data."""
+
 import logging
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Priority
-from cg.store import Store
+from cg.constants import DataDelivery, Priority
 from cg.store.models import ApplicationVersion, Case, Sample
+from cg.store.store import Store
 from cg.utils.calculations import multiply_by_million
 
 LOG = logging.getLogger(__name__)
@@ -41,8 +42,10 @@ class DownsampleData:
     def downsampled_sample_name(
         self,
     ) -> str:
-        """Return a new sample name with the number of reads to which it is down sampled in millions appended."""
-        return f"{self.sample_id}_{self.number_of_reads}M"
+        """Return a new sample name with the number of reads to which it is down sampled in millions
+        appended. DS stands for downsampled. The number of reads is converted to a string and the
+        decimal point is replaced with a C."""
+        return f"{self.sample_id}DS{self.convert_number_of_reads_to_string}M"
 
     @property
     def downsampled_case_name(
@@ -50,6 +53,11 @@ class DownsampleData:
     ) -> str:
         """Return a case name with _downsampled appended."""
         return f"{self.case_name}_downsampled"
+
+    @property
+    def convert_number_of_reads_to_string(self) -> str:
+        """Convert the number of reads to a string."""
+        return str(self.number_of_reads).replace(".", "C")
 
     def get_sample_to_downsample(self) -> Sample:
         """
@@ -103,7 +111,7 @@ class DownsampleData:
             return self.status_db.get_case_by_name(self.downsampled_case_name)
         downsampled_case: Case = self.status_db.add_case(
             data_analysis=self.original_case.data_analysis,
-            data_delivery=self.original_case.data_delivery,
+            data_delivery=DataDelivery.NO_DELIVERY,
             name=self.downsampled_case_name,
             panels=self.original_case.panels,
             priority=self.original_case.priority,

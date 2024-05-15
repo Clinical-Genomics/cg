@@ -1,4 +1,5 @@
 """Constants specific for compression."""
+
 import datetime
 
 # Constants for crunchy

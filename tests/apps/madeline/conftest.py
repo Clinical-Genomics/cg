@@ -1,7 +1,6 @@
 """Fixtures for testing the madeline cg app"""
 
 from pathlib import Path
-from typing import Optional
 
 import pytest
 
@@ -32,7 +31,7 @@ def madeline_columns() -> dict[str, str]:
 
 
 @pytest.fixture
-def mother() -> dict[str, Optional[str]]:
+def mother() -> dict[str, str | None]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "mother",
@@ -44,7 +43,7 @@ def mother() -> dict[str, Optional[str]]:
 
 
 @pytest.fixture
-def father() -> dict[str, Optional[str]]:
+def father() -> dict[str, str | None]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "father",
@@ -56,7 +55,7 @@ def father() -> dict[str, Optional[str]]:
 
 
 @pytest.fixture
-def proband() -> dict[str, Optional[str]]:
+def proband() -> dict[str, str | None]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "proband",
@@ -71,7 +70,7 @@ def proband() -> dict[str, Optional[str]]:
 
 
 @pytest.fixture
-def trio(proband: dict, mother: dict, father: dict) -> list[dict[str, Optional[str]]]:
+def trio(proband: dict, mother: dict, father: dict) -> list[dict[str, str | None]]:
     """return a list with a trio"""
     return [proband, mother, father]
 

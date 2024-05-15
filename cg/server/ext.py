@@ -7,8 +7,8 @@ from flask_wtf.csrf import CSRFProtect
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
-from cg.store.api.core import Store
 from cg.store.database import initialize_database
+from cg.store.store import Store
 
 
 class FlaskLims(LimsAPI):

@@ -31,7 +31,7 @@ class UploadAPI(MetaAPI):
         )
 
     def upload(self, ctx: click.Context, case: Case, restart: bool) -> None:
-        """Uploads pipeline specific analysis data and files"""
+        """Uploads workflow specific analysis data and files."""
 
         raise NotImplementedError
 
@@ -48,7 +48,7 @@ class UploadAPI(MetaAPI):
 
         self.status_db.session.commit()
         self.trailblazer_api.set_analysis_uploaded(
-            case_id=analysis.family.internal_id, uploaded_at=analysis.uploaded_at
+            case_id=analysis.case.internal_id, uploaded_at=analysis.uploaded_at
         )
 
     @staticmethod

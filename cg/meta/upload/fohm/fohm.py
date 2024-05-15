@@ -4,7 +4,6 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Optional
 
 import pandas as pd
 import paramiko
@@ -16,15 +15,15 @@ from cg.constants.constants import SARS_COV_REGEX
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
-from cg.store import Store
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 from cg.utils.email import send_mail
 
 LOG = logging.getLogger(__name__)
 
 
 class FOHMUploadAPI:
-    def __init__(self, config: CGConfig, dry_run: bool = False, datestr: Optional[str] = None):
+    def __init__(self, config: CGConfig, dry_run: bool = False, datestr: str | None = None):
         self.config: CGConfig = config
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.lims_api: LimsAPI = config.lims_api
@@ -171,7 +170,7 @@ class FOHMUploadAPI:
         """Hardlink samples rawdata files to fohm delivery folder."""
         for sample_id in self.aggregation_dataframe["internal_id"]:
             sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
-            bundle_name = sample.links[0].family.internal_id
+            bundle_name = sample.links[0].case.internal_id
             version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
             files = self.housekeeper_api.files(version=version_obj.id, tags=[sample_id]).all()
             for file in files:

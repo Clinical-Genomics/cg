@@ -1,8 +1,8 @@
 """NIPT ftp upload API"""
+
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import Optional
 
 import paramiko
 import requests
@@ -11,12 +11,12 @@ from requests import Response
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
 from cg.meta.upload.nipt.models import FlowCellQ30AndReads, StatinaUploadFiles
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Analysis, Case, Flowcell
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -76,7 +76,7 @@ class NiptUploadAPI:
         LOG.debug(f"Flow cell {flow_cell.name} passed QC for case {case_id}.")
         return True
 
-    def get_housekeeper_results_file(self, case_id: str, tags: Optional[list] = None) -> str:
+    def get_housekeeper_results_file(self, case_id: str, tags: list | None = None) -> str:
         """Get the result file for a NIPT analysis from Housekeeper"""
 
         if not tags:
@@ -105,7 +105,7 @@ class NiptUploadAPI:
 
     def get_all_upload_analyses(self) -> list[Analysis]:
         """Gets all nipt analyses that are ready to be uploaded"""
-        return self.status_db.get_latest_analysis_to_upload_for_pipeline(pipeline=Pipeline.FLUFFY)
+        return self.status_db.get_latest_analysis_to_upload_for_workflow(workflow=Workflow.FLUFFY)
 
     def upload_to_ftp_server(self, results_file: Path) -> None:
         """Upload the result file to the ftp server"""

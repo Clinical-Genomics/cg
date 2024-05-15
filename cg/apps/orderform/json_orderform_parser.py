@@ -1,5 +1,5 @@
 from cg.apps.orderform.orderform_parser import OrderformParser
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import DataDelivery, Workflow
 from cg.exc import OrderFormError
 from cg.models.orders.json_sample import JsonSample
 from cg.models.orders.order import OrderType
@@ -7,9 +7,9 @@ from cg.models.orders.order import OrderType
 
 class JsonOrderformParser(OrderformParser):
     ACCEPTED_DATA_ANALYSES: list[str] = [
-        str(Pipeline.MIP_DNA),
-        str(Pipeline.FLUFFY),
-        str(Pipeline.BALSAMIC),
+        Workflow.MIP_DNA,
+        Workflow.FLUFFY,
+        Workflow.BALSAMIC,
     ]
     NO_VALUE: str = "no_value"
     samples: list[JsonSample] = []
@@ -32,11 +32,11 @@ class JsonOrderformParser(OrderformParser):
     def project_type_to_order_type(project_type: str) -> str:
         """In the case where data delivery was not defined we map from project type"""
         project_to_order = {
-            str(OrderType.METAGENOME): DataDelivery.FASTQ,
-            str(OrderType.FASTQ): DataDelivery.FASTQ,
-            str(OrderType.RML): DataDelivery.FASTQ,
-            str(OrderType.MIP_RNA): DataDelivery.ANALYSIS_FILES,
-            str(OrderType.FLUFFY): DataDelivery.STATINA,
+            OrderType.METAGENOME: DataDelivery.FASTQ,
+            OrderType.FASTQ: DataDelivery.FASTQ,
+            OrderType.RML: DataDelivery.FASTQ,
+            OrderType.MIP_RNA: DataDelivery.ANALYSIS_FILES,
+            OrderType.FLUFFY: DataDelivery.STATINA,
         }
         if project_type not in project_to_order:
             raise OrderFormError(f"Could not find data delivery for: {project_type}")

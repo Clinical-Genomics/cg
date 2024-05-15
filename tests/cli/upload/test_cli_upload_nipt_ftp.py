@@ -92,7 +92,7 @@ def test_nipt_upload_case_not_changing_uploaded_at(
     caplog.set_level(logging.DEBUG)
 
     analysis_obj = helpers.add_analysis(store=upload_context.status_db)
-    case_id = analysis_obj.family.internal_id
+    case_id = analysis_obj.case.internal_id
     assert not analysis_obj.upload_started_at
     assert not analysis_obj.uploaded_at
 

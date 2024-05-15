@@ -3,7 +3,6 @@
   <Side>A</Side>
   <Application>control-software</Application>
   <SystemSuiteVersion>1.0.1.7385</SystemSuiteVersion>
-  <OutputFolder>//ngi-nas.scilifelab.se/ngi_data/Runs/20230508_LH00188_0003_A22522YLT3</OutputFolder>
   <CloudUploadMode>InstrumentPerformance</CloudUploadMode>
   <InstrumentType>NovaSeqXPlus</InstrumentType>
   <InstrumentSerialNumber>LH00188</InstrumentSerialNumber>

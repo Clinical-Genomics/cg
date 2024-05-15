@@ -1,4 +1,5 @@
 """Tests the config part of Crunchy."""
+
 from pathlib import Path
 from typing import Any
 

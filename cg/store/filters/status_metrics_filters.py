@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable, Optional
+from typing import Callable
 
 from sqlalchemy import func
 from sqlalchemy.orm import Query
@@ -60,10 +60,10 @@ class SequencingMetricsFilter(Enum):
 def apply_metrics_filter(
     metrics: Query,
     filter_functions: list[Callable],
-    sample_internal_id: Optional[str] = None,
-    flow_cell_name: Optional[str] = None,
-    lane: Optional[int] = None,
-    q30_threshold: Optional[int] = None,
+    sample_internal_id: str | None = None,
+    flow_cell_name: str | None = None,
+    lane: int | None = None,
+    q30_threshold: int | None = None,
 ) -> Query:
     for filter_function in filter_functions:
         metrics: Query = filter_function(

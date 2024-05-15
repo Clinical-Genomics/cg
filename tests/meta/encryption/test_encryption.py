@@ -1,4 +1,5 @@
 """Tests for the meta EncryptionAPIs."""
+
 import logging
 import pathlib
 import shutil

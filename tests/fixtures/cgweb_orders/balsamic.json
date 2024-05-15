@@ -12,6 +12,7 @@
       ],
       "comment": "other Elution buffer",
       "container": "96 well plate",
+      "concentration_ng_ul": "18",
       "container_name": "p1",
       "data_analysis": "balsamic",
       "data_delivery": "fastq-analysis-scout",

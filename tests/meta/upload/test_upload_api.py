@@ -1,4 +1,5 @@
 """Test for upload API."""
+
 import datetime as dt
 
 from cg.meta.upload.upload_api import UploadAPI

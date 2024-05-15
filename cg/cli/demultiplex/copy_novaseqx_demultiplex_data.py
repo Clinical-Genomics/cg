@@ -2,7 +2,6 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Optional
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 
@@ -28,7 +27,7 @@ def is_flow_cell_in_demultiplexed_runs(flow_cell_name: str, demultiplexed_runs: 
     return Path(demultiplexed_runs, flow_cell_name).exists()
 
 
-def get_latest_analysis_path(flow_cell_dir: Path) -> Optional[Path]:
+def get_latest_analysis_path(flow_cell_dir: Path) -> Path | None:
     """
     Get the latest analysis directory for a Novaseqx flow cell.
     The latest analysis directory is the one with the highest integer name.

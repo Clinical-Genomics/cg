@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from pydantic.v1 import BaseModel, EmailStr, Field
 from typing_extensions import Literal
@@ -7,6 +6,7 @@ from typing_extensions import Literal
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -20,8 +20,14 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
-from cg.store import Store
+from cg.meta.deliver.delivery_api import DeliveryAPI
+from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
+from cg.services.slurm_service.slurm_service import SlurmService
+from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
+from cg.services.slurm_upload_service.slurm_upload_service import SlurmUploadService
 from cg.store.database import initialize_database
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -34,22 +40,31 @@ class Sequencers(BaseModel):
 
 class SlurmConfig(BaseModel):
     account: str
-    hours: Optional[int]
+    hours: int | None
     mail_user: EmailStr
-    memory: Optional[int]
-    number_tasks: Optional[int]
-    conda_env: Optional[str]
+    memory: int | None
+    number_tasks: int | None
+    conda_env: str | None
     qos: SlurmQos = SlurmQos.LOW
 
 
-class EncryptionDirectories(BaseModel):
+class Encryption(BaseModel):
+    encryption_dir: str
+    binary_path: str
+
+
+class PDCArchivingDirectory(BaseModel):
     current: str
     nas: str
     pre_nas: str
 
 
+class DataInput(BaseModel):
+    input_dir_path: str
+
+
 class BackupConfig(BaseModel):
-    encryption_directories: EncryptionDirectories
+    pdc_archiving_directory: PDCArchivingDirectory
     slurm_flow_cell_encryption: SlurmConfig
 
 
@@ -69,7 +84,7 @@ class TrailblazerConfig(BaseModel):
 
 
 class StatinaConfig(BaseModel):
-    host: Optional[str]
+    host: str | None
     user: str
     key: str
     api_url: str
@@ -78,8 +93,8 @@ class StatinaConfig(BaseModel):
 
 
 class CommonAppConfig(BaseModel):
-    binary_path: str
-    config_path: Optional[str]
+    binary_path: str | None
+    config_path: str | None
 
 
 class FluffyUploadConfig(BaseModel):
@@ -102,7 +117,7 @@ class LimsConfig(BaseModel):
 
 
 class CrunchyConfig(BaseModel):
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     cram_reference: str
     slurm: SlurmConfig
 
@@ -115,6 +130,12 @@ class BalsamicConfig(CommonAppConfig):
     balsamic_cache: str
     bed_path: str
     binary_path: str
+    cadd_path: str
+    genome_interval_path: str
+    gnomad_af5_path: str
+    gens_coverage_female_path: str
+    gens_coverage_male_path: str
+    conda_binary: str
     conda_env: str
     loqusdb_path: str
     pon_path: str
@@ -125,54 +146,67 @@ class BalsamicConfig(CommonAppConfig):
 
 class MutantConfig(BaseModel):
     binary_path: str
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     conda_env: str
     root: str
 
 
 class MipConfig(BaseModel):
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     conda_env: str
     mip_config: str
-    pipeline: str
+    workflow: str
     root: str
     script: str
+
+
+class RareDiseaseConfig(CommonAppConfig):
+    compute_env: str
+    conda_binary: str | None = None
+    conda_env: str
+    launch_directory: str
+    workflow_path: str
+    profile: str
+    references: str
+    revision: str
+    root: str
+    slurm: SlurmConfig
+    tower_workflow: str
 
 
 class RnafusionConfig(CommonAppConfig):
     root: str
     references: str
     binary_path: str
-    pipeline_path: str
+    workflow_path: str
     conda_env: str
     compute_env: str
     profile: str
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     launch_directory: str
     revision: str
     slurm: SlurmConfig
-    tower_binary_path: str
-    tower_pipeline: str
+    tower_workflow: str
 
 
 class TaxprofilerConfig(CommonAppConfig):
-    root: str
     binary_path: str
+    conda_binary: str | None = None
     conda_env: str
-    profile: str
-    pipeline_path: str
-    revision: str
-    conda_binary: Optional[str] = None
-    hostremoval_reference: str
+    compute_env: str
     databases: str
+    hostremoval_reference: str
+    workflow_path: str
+    profile: str
+    revision: str
+    root: str
     slurm: SlurmConfig
-    tower_binary_path: str
-    tower_pipeline: str
+    tower_workflow: str
 
 
 class MicrosaltConfig(BaseModel):
     binary_path: str
-    conda_binary: Optional[str] = None
+    conda_binary: str | None = None
     conda_env: str
     queries_path: str
     root: str
@@ -228,17 +262,20 @@ class DataFlowConfig(BaseModel):
 
 class CGConfig(BaseModel):
     database: str
-    environment: Literal["production", "stage"] = "stage"
-    madeline_exe: str
     delivery_path: str
-    max_flowcells: Optional[int]
-    email_base_settings: EmailBaseSettings
-    flow_cells_dir: str
-    demultiplexed_flow_cells_dir: str
+    illumina_demultiplexed_runs_directory: str
     downsample_dir: str
     downsample_script: str
+    email_base_settings: EmailBaseSettings
+    environment: Literal["production", "stage"] = "stage"
+    illumina_flow_cells_directory: str
+    madeline_exe: str
+    nanopore_data_directory: str
+    tower_binary_path: str
+    max_flowcells: int | None
+    data_input: DataInput | None = None
     # Base APIs that always should exist
-    status_db_: Store = None
+    status_db_: Store | None = None
     housekeeper: HousekeeperConfig
     housekeeper_api_: HousekeeperAPI = None
 
@@ -249,10 +286,10 @@ class CGConfig(BaseModel):
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
-    data_flow_config: Optional[DataFlowConfig] = None
+    data_flow: DataFlowConfig | None = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
-    encryption: Optional[CommonAppConfig] = None
+    encryption: Encryption | None = None
     external: ExternalConfig = None
     genotype: CommonAppConfig = None
     genotype_api_: GenotypeAPI = None
@@ -270,25 +307,28 @@ class CGConfig(BaseModel):
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
-    pigz: Optional[CommonAppConfig] = None
-    pdc: Optional[CommonAppConfig] = None
-    pdc_api_: Optional[PdcAPI]
+    pigz: CommonAppConfig | None = None
+    pdc: CommonAppConfig | None = None
+    pdc_api_: PdcAPI | None
+    sample_sheet_api_: SampleSheetAPI | None = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
-    tar: Optional[CommonAppConfig] = None
+    tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
+    delivery_api_: DeliveryAPI | None = None
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
     statina: StatinaConfig = None
-    fohm: Optional[FOHMConfig] = None
+    fohm: FOHMConfig | None = None
     fluffy: FluffyConfig = None
     microsalt: MicrosaltConfig = None
     gisaid: GisaidConfig = None
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig = None
+    raredisease: RareDiseaseConfig = Field(None, alias="raredisease")
     rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
     taxprofiler: TaxprofilerConfig = Field(None, alias="taxprofiler")
 
@@ -429,11 +469,41 @@ class CGConfig(BaseModel):
         return api
 
     @property
+    def sample_sheet_api(self) -> SampleSheetAPI:
+        sample_sheet_api = self.__dict__.get("sample_sheet_api_")
+        if sample_sheet_api is None:
+            LOG.debug("Instantiating sample sheet API")
+            sample_sheet_api = SampleSheetAPI(
+                flow_cell_dir=self.illumina_flow_cells_directory,
+                hk_api=self.housekeeper_api,
+                lims_api=self.lims_api,
+            )
+            self.sample_sheet_api_ = sample_sheet_api
+        return sample_sheet_api
+
+    @property
+    def slurm_service(self) -> SlurmService:
+        return SlurmCLIService()
+
+    @property
+    def slurm_upload_service(self) -> SlurmUploadService:
+        slurm_upload_config = SlurmUploadConfig(
+            email=self.data_delivery.mail_user,
+            account=self.data_delivery.account,
+            log_dir=self.data_delivery.base_path,
+        )
+        return SlurmUploadService(
+            slurm_service=self.slurm_service,
+            trailblazer_api=self.trailblazer_api,
+            config=slurm_upload_config,
+        )
+
+    @property
     def scout_api(self) -> ScoutAPI:
         api = self.__dict__.get("scout_api_")
         if api is None:
             LOG.debug("Instantiating scout api")
-            api = ScoutAPI(config=self.dict())
+            api = ScoutAPI(config=self.dict(), slurm_upload_service=self.slurm_upload_service)
             self.scout_api_ = api
         return api
 
@@ -454,4 +524,22 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating trailblazer api")
             api = TrailblazerAPI(config=self.dict())
             self.trailblazer_api_ = api
+        return api
+
+    @property
+    def fastq_file_service(self) -> FastqFileService:
+        return FastqFileService()
+
+    @property
+    def delivery_api(self) -> DeliveryAPI:
+        api = self.__dict__.get("delivery_api_")
+        if api is None:
+            LOG.debug("Instantiating delivery api")
+            api = DeliveryAPI(
+                store=self.status_db,
+                hk_api=self.housekeeper_api,
+                customers_folder=self.delivery_path,
+                fastq_file_service=self.fastq_file_service,
+            )
+            self.delivery_api_ = api
         return api

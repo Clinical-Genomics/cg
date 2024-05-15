@@ -15,7 +15,6 @@ TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
 
 
 class OsTicket(object):
-
     """Interface to ticket system"""
 
     def __init__(self):
@@ -60,7 +59,7 @@ class OsTicket(object):
         res = requests.post(self.url, json=data, headers=self.headers)
         if res.ok:
             return res.text
-        LOG.error("res.text: %s, reason: %s", res.text, res.reason)
+        LOG.error(f"res.text: {res.text}, reason: {res.reason}")
         raise TicketCreationError(res)
 
     @staticmethod

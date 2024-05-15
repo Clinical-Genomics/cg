@@ -1,11 +1,10 @@
 """Module to parse dates."""
-import datetime
+
 import logging
 import re
 from datetime import datetime, timedelta
-from typing import Optional
 
-from cg.constants.symbols import DASH, DOT, FWD_SLASH, SPACE
+from cg.constants.symbols import SPACE
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 DATETIME_FORMAT_DATE = "%Y-%m-%d %H:%M:%S"
@@ -20,7 +19,7 @@ def match_date(date: str) -> bool:
     return bool(re.match(date_pattern, date))
 
 
-def get_date(date: Optional[str] = None, date_format: Optional[str] = None) -> datetime:
+def get_date(date: str | None = None, date_format: str | None = None) -> datetime:
     """Return a datetime object if there is a valid date.
 
     Raise exception if date is not valid.
@@ -45,7 +44,7 @@ def get_date(date: Optional[str] = None, date_format: Optional[str] = None) -> d
         except ValueError:
             LOG.info("Date is not in standard format")
 
-    for separator in [DASH, SPACE, DOT, FWD_SLASH]:
+    for separator in ["-", SPACE, ".", "/"]:
         date_parts = date.split(separator)
         if len(date_parts) == 3:
             return datetime(*(int(number) for number in date_parts))

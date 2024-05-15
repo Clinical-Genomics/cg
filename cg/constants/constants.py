@@ -33,27 +33,43 @@ CAPTUREKIT_OPTIONS = (
 )
 
 
+class JobType(StrEnum):
+    UPLOAD: str = "upload"
+    ANALYSIS: str = "analysis"
+
+
 class CaseActions(StrEnum):
     ANALYZE: str = "analyze"
     HOLD: str = "hold"
     RUNNING: str = "running"
 
+    @classmethod
+    def actions(cls) -> list[str]:
+        return list(map(lambda action: action.value, cls))
 
-CASE_ACTIONS = [action.value for action in CaseActions]
-
-COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
-
-COMBOS = {
-    "DSD": ("DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"),
-    "CM": ("CNM", "CM"),
-    "Horsel": ("Horsel", "141217", "141201"),
-}
 
 CONTAINER_OPTIONS = ("Tube", "96 well plate", "No container")
 
-CONTROL_OPTIONS = ("", "negative", "positive")
+
+class ControlOptions(StrEnum):
+    NEGATIVE: str = "negative"
+    POSITIVE: str = "positive"
+    EMPTY: str = ""
+
 
 DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
+
+
+class CustomerId(StrEnum):
+    CG_INTERNAL_CUSTOMER: str = "cust000"
+    CUST001: str = "cust001"
+    CUST002: str = "cust002"
+    CUST003: str = "cust003"
+    CUST004: str = "cust004"
+    CUST032: str = "cust032"
+    CUST042: str = "cust042"
+    CUST132: str = "cust132"
+    CUST999: str = "cust999"
 
 
 class FlowCellStatus(StrEnum):
@@ -63,8 +79,9 @@ class FlowCellStatus(StrEnum):
     PROCESSING: str = "processing"
     RETRIEVED: str = "retrieved"
 
-
-FLOWCELL_STATUS = [status.value for status in FlowCellStatus]
+    @classmethod
+    def statuses(cls) -> list[str]:
+        return list(map(lambda status: status.value, cls))
 
 
 class AnalysisType(StrEnum):
@@ -85,30 +102,38 @@ class PrepCategory(StrEnum):
     WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
 
 
-PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
+class SexOptions(StrEnum):
+    MALE: str = "male"
+    FEMALE: str = "female"
+    UNKNOWN: str = "unknown"
 
-SEX_OPTIONS = ("male", "female", "unknown")
 
 SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
-class Pipeline(StrEnum):
+class StatusOptions(StrEnum):
+    AFFECTED: str = "affected"
+    UNAFFECTED: str = "unaffected"
+    UNKNOWN: str = "unknown"
+
+
+class Workflow(StrEnum):
     BALSAMIC: str = "balsamic"
+    BALSAMIC_PON: str = "balsamic-pon"
     BALSAMIC_QC: str = "balsamic-qc"
     BALSAMIC_UMI: str = "balsamic-umi"
-    BALSAMIC_PON: str = "balsamic-pon"
     DEMULTIPLEX: str = "demultiplex"
     FASTQ: str = "fastq"
     FLUFFY: str = "fluffy"
     MICROSALT: str = "microsalt"
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"
+    MUTANT: str = "mutant"
     RAREDISEASE: str = "raredisease"
     RNAFUSION: str = "rnafusion"
     RSYNC: str = "rsync"
-    SARS_COV_2: str = "sars-cov-2"
     SPRING: str = "spring"
     TAXPROFILER: str = "taxprofiler"
 
@@ -204,10 +229,15 @@ SKIP_CONFIRMATION = click.option(
 
 
 class MicrosaltQC:
-    QC_PERCENT_THRESHOLD_MWX: float = 0.1
+    AVERAGE_COVERAGE_THRESHOLD: int = 10
+    MWX_THRESHOLD_SAMPLES_PASSING: float = 0.9
     COVERAGE_10X_THRESHOLD: float = 0.75
+    DUPLICATION_RATE_THRESHOLD: float = 0.8
+    INSERT_SIZE_THRESHOLD: int = 100
+    MAPPED_RATE_THRESHOLD: float = 0.3
     NEGATIVE_CONTROL_READS_THRESHOLD: float = 0.2
     TARGET_READS: int = 6000000
+    TARGET_READS_FAIL_THRESHOLD: float = 0.7
 
 
 class MicrosaltAppTags(StrEnum):
@@ -243,4 +273,14 @@ class Strandedness(StrEnum):
     UNSTRANDED: str = "unstranded"
 
 
-PIPELINES_USING_PARTIAL_ANALYSES: list[Pipeline] = [Pipeline.MICROSALT, Pipeline.SARS_COV_2]
+PIPELINES_USING_PARTIAL_ANALYSES: list[Workflow] = [Workflow.MICROSALT, Workflow.MUTANT]
+
+
+class MultiQC(StrEnum):
+    """MultiQC constants"""
+
+    MULTIQC: str = "multiqc"
+    MULTIQC_DATA: str = "multiqc_data"
+
+
+NG_UL_SUFFIX: str = " ng/uL"

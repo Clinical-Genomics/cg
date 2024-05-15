@@ -2,14 +2,13 @@ import datetime as dt
 import logging
 import shutil
 from pathlib import Path
-from typing import Union
 
 import click
 from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
+from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.exc import FlowCellsNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -24,7 +23,7 @@ from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant.mutant import MutantAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 
 OPTION_DRY = click.option(
     "-d", "--dry-run", help="Simulate process without executing", is_flag=True
@@ -35,10 +34,10 @@ ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_ANALYSIS_PARAMETERS_CONFIG = click.option(
     "--config-artic", type=str, help="Config with computational and lab related settings"
 )
-OPTION_LOQUSDB_SUPPORTED_PIPELINES = click.option(
-    "--pipeline",
-    type=click.Choice(LOQUSDB_SUPPORTED_PIPELINES),
-    help="Limit observations upload to a specific pipeline",
+OPTION_LOQUSDB_SUPPORTED_WORKFLOW = click.option(
+    "--workflow",
+    type=click.Choice(LOQUSDB_SUPPORTED_WORKFLOWS),
+    help="Limit observations upload to a specific workflow",
 )
 
 LOG = logging.getLogger(__name__)
@@ -48,7 +47,7 @@ LOG = logging.getLogger(__name__)
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def ensure_flow_cells_on_disk(context: CGConfig, case_id: str):
-    """Check if flow cells are on disk for given case. If not, request flow cells and raise FlowcellsNeededError."""
+    """Check if flow cells are on disk for a given case. If not, request flow cells and raise FlowcellsNeededError."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     status_db: Store = context.status_db
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
@@ -103,7 +102,7 @@ def store(context: CGConfig, case_id: str, dry_run: bool):
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
     if dry_run:
-        LOG.info("Dry run: Would have stored deliverables for %s", case_id)
+        LOG.info(f"Dry run: Would have stored deliverables for {case_id}")
         return
     try:
         analysis_api.upload_bundle_housekeeper(case_id=case_id)
@@ -112,7 +111,7 @@ def store(context: CGConfig, case_id: str, dry_run: bool):
     except Exception as exception_object:
         housekeeper_api.rollback()
         status_db.session.rollback()
-        LOG.error("Error storing deliverables for case %s - %s", case_id, exception_object)
+        LOG.error(f"Error storing deliverables for case {case_id} - {exception_object}")
         raise
 
 
@@ -126,11 +125,11 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_store():
-        LOG.info("Storing deliverables for %s", case_obj.internal_id)
+        LOG.info(f"Storing deliverables for {case_obj.internal_id}")
         try:
             context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
         except Exception as exception_object:
-            LOG.error("Error storing %s: %s", case_obj.internal_id, exception_object)
+            LOG.error(f"Error storing {case_obj.internal_id}: {exception_object}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
@@ -171,7 +170,7 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.check_analysis_ongoing(case_id=case_id)
 
-    analysis_path: Union[list[Path], Path] = analysis_api.get_case_path(case_id)
+    analysis_path: list[Path] | Path = analysis_api.get_case_path(case_id)
 
     if dry_run:
         LOG.info(f"Would have deleted: {analysis_path}")
@@ -198,9 +197,9 @@ def past_run_dirs(
     LOG.info(f"Cleaning {len(possible_cleanups)} analyses created before {before}")
 
     for analysis in possible_cleanups:
-        case_id = analysis.family.internal_id
+        case_id = analysis.case.internal_id
         try:
-            LOG.info("Cleaning %s output for %s", analysis_api.pipeline, case_id)
+            LOG.info(f"Cleaning {analysis_api.workflow} output for {case_id}")
             context.invoke(clean_run_dir, yes=yes, case_id=case_id, dry_run=dry_run)
         except FileNotFoundError:
             continue
@@ -210,7 +209,7 @@ def past_run_dirs(
 
     if exit_code:
         raise click.Abort
-    LOG.info("Done cleaning %s output ", analysis_api.pipeline)
+    LOG.info(f"Done cleaning {analysis_api.workflow} output")
 
 
 @click.command("balsamic-past-run-dirs")

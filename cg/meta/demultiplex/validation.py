@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import Optional
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError, MissingFilesError
@@ -47,7 +46,7 @@ def validate_flow_cell_has_fastq_files(flow_cell: FlowCellDirectoryData) -> None
     """
     sample_ids: list[str] = flow_cell.sample_sheet.get_sample_ids()
     for sample_id in sample_ids:
-        fastq_files: Optional[list[Path]] = get_sample_fastqs_from_flow_cell(
+        fastq_files: list[Path] | None = get_sample_fastqs_from_flow_cell(
             flow_cell_directory=flow_cell.path, sample_internal_id=sample_id
         )
         if fastq_files:

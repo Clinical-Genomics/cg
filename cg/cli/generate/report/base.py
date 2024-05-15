@@ -1,9 +1,9 @@
 """Commands to generate delivery reports."""
+
 import logging
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 import click
 from housekeeper.store.models import Version
@@ -12,16 +12,16 @@ from cg.cli.generate.report.options import (
     ARGUMENT_CASE_ID,
     OPTION_DRY_RUN,
     OPTION_FORCE_REPORT,
-    OPTION_PIPELINE,
     OPTION_STARTED_AT,
+    OPTION_WORKFLOW,
 )
 from cg.cli.generate.report.utils import (
     get_report_analysis_started,
     get_report_api,
-    get_report_api_pipeline,
+    get_report_api_workflow,
     get_report_case,
 )
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.exc import CgError
 from cg.meta.report.report_api import ReportAPI
 from cg.store.models import Case
@@ -57,7 +57,7 @@ def generate_delivery_report(
         return
 
     version: Version = report_api.housekeeper_api.version(bundle=case_id, date=analysis_date)
-    delivery_report: Optional[str] = report_api.get_delivery_report_from_hk(
+    delivery_report: str | None = report_api.get_delivery_report_from_hk(
         case_id=case_id, version=version
     )
     if delivery_report:
@@ -85,23 +85,23 @@ def generate_delivery_report(
 
 
 @click.command("available-delivery-reports")
-@OPTION_PIPELINE
+@OPTION_WORKFLOW
 @OPTION_FORCE_REPORT
 @OPTION_DRY_RUN
 @click.pass_context
 def generate_available_delivery_reports(
-    context: click.Context, pipeline: Pipeline, force_report: bool, dry_run: bool
+    context: click.Context, workflow: Workflow, force_report: bool, dry_run: bool
 ) -> None:
-    """Generates delivery reports for all cases that need one and stores them in housekeeper."""
+    """Generates delivery reports for all cases that need one and stores them in Housekeeper."""
 
     click.echo(click.style("--------------- AVAILABLE DELIVERY REPORTS ---------------"))
 
     exit_code = EXIT_SUCCESS
 
-    report_api: ReportAPI = get_report_api_pipeline(context, pipeline)
-    context.obj.meta_apis["report_api"] = report_api if pipeline else None
+    report_api: ReportAPI = get_report_api_workflow(context=context, workflow=workflow)
+    context.obj.meta_apis["report_api"] = report_api if workflow else None
 
-    cases_without_delivery_report = report_api.get_cases_without_delivery_report(pipeline)
+    cases_without_delivery_report = report_api.get_cases_without_delivery_report(workflow)
     if not cases_without_delivery_report:
         click.echo(
             click.style(
@@ -112,7 +112,7 @@ def generate_available_delivery_reports(
     else:
         for case in cases_without_delivery_report:
             case_id: str = case.internal_id
-            LOG.info("Generating delivery report for case: %s", case_id)
+            LOG.info(f"Generating delivery report for case: {case_id}")
             try:
                 context.invoke(
                     generate_delivery_report,
@@ -122,23 +122,15 @@ def generate_available_delivery_reports(
                 )
             except FileNotFoundError as error:
                 LOG.error(
-                    "The delivery report generation is missing a file for case: %s, %s",
-                    case_id,
-                    error,
+                    f"The delivery report generation is missing a file for case: {case_id}, {error}"
                 )
                 exit_code = EXIT_FAIL
             except CgError as error:
-                LOG.error(
-                    "The delivery report generation failed for case: %s, %s",
-                    case_id,
-                    error,
-                )
+                LOG.error(f"The delivery report generation failed for case: {case_id}, {error}")
                 exit_code = EXIT_FAIL
             except Exception as error:
                 LOG.error(
-                    "Unspecified error when generating the delivery report for case: %s, %s",
-                    case_id,
-                    error,
+                    f"Unspecified error when generating the delivery report for case: {case_id}, {error}"
                 )
                 exit_code = EXIT_FAIL
 

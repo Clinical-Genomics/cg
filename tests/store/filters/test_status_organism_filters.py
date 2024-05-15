@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Query
 
-from cg.store.api.core import Store
 from cg.store.filters.status_organism_filters import filter_organism_by_internal_id
 from cg.store.models import Organism
+from cg.store.store import Store
 
 
 def test_filter_organism_by_internal_id_returns_correct_organism(store_with_organisms: Store):

@@ -1,12 +1,10 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 
 class StatinaUploadFiles(BaseModel):
     result_file: str
-    multiqc_report: Optional[str] = None
-    segmental_calls: Optional[str] = None
+    multiqc_report: str | None = None
+    segmental_calls: str | None = None
 
 
 class FlowCellQ30AndReads(BaseModel):

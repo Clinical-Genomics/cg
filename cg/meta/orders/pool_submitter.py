@@ -1,21 +1,14 @@
 import datetime as dt
 
 from cg.constants import DataDelivery
-from cg.constants.constants import Pipeline
+from cg.constants.constants import Workflow
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import SexEnum
 from cg.models.orders.samples import RmlSample
-from cg.store.models import (
-    ApplicationVersion,
-    Customer,
-    Case,
-    FamilySample,
-    Pool,
-    Sample,
-)
+from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Pool, Sample
 
 
 class PoolSubmitter(Submitter):
@@ -130,7 +123,7 @@ class PoolSubmitter(Submitter):
                 customer=customer, case_name=case_name
             )
             if not case:
-                data_analysis: Pipeline = Pipeline(pool["data_analysis"])
+                data_analysis: Workflow = Workflow(pool["data_analysis"])
                 data_delivery: DataDelivery = DataDelivery(pool["data_delivery"])
                 case = self.status.add_case(
                     data_analysis=data_analysis,
@@ -168,8 +161,8 @@ class PoolSubmitter(Submitter):
                     no_invoice=True,
                 )
                 new_samples.append(new_sample)
-                link: FamilySample = self.status.relate_sample(
-                    family=case, sample=new_sample, status="unknown"
+                link: CaseSample = self.status.relate_sample(
+                    case=case, sample=new_sample, status="unknown"
                 )
                 self.status.session.add(link)
             new_delivery = self.status.add_delivery(destination="caesar", pool=new_pool)

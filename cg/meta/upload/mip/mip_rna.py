@@ -1,4 +1,5 @@
 """MIP-RNA upload API."""
+
 import logging
 from subprocess import CalledProcessError
 

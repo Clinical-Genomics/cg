@@ -1,9 +1,7 @@
 """Helper functions."""
 
-from typing import Optional
 
-
-def get_string_from_list_by_pattern(strings: list[str], pattern: str) -> Optional[str]:
+def get_string_from_list_by_pattern(strings: list[str], pattern: str) -> str | None:
     """Returns the full string from a list given a specific pattern."""
 
     return next((string for string in strings if pattern in string), None) if strings else None

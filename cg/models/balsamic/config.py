@@ -1,8 +1,9 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Union
 
 from pydantic.v1 import BaseModel, validator
+
+from cg.constants.constants import SampleType
 
 
 class BalsamicConfigAnalysis(BaseModel):
@@ -22,25 +23,23 @@ class BalsamicConfigAnalysis(BaseModel):
     analysis_workflow: str
     sequencing_type: str
     BALSAMIC_version: str
-    config_creation_date: Union[datetime, str]
+    config_creation_date: datetime | str
 
 
 class BalsamicConfigSample(BaseModel):
-    """Sample attributes used for BALSAMIC analysis
+    """Sample attributes used for Balsamic analysis.
 
     Attributes:
-        file_prefix: sample basename
-        sample_name: sample internal ID
-        type: sample type (tumor or normal)
+        type (str): sample type (tumor or normal)
     """
 
-    file_prefix: str
-    sample_name: str
-    type: str
+    type: SampleType
+    name: str
+    fastq_info: dict[str, dict[str, Path]]
 
 
 class BalsamicConfigReference(BaseModel):
-    """Metadata of reference files
+    """Metadata of reference files.
 
     Attributes:
         reference_genome: reference genome fasta file
@@ -48,12 +47,12 @@ class BalsamicConfigReference(BaseModel):
     """
 
     reference_genome: Path
-    reference_genome_version: Optional[str]
+    reference_genome_version: str | None
 
     @validator("reference_genome_version", always=True)
-    def extract_genome_version_from_path(cls, value: Optional[str], values: dict) -> str:
+    def extract_genome_version_from_path(cls, value: str | None, values: dict) -> str:
         """
-        Returns the genome version from the reference path:
+        Return the genome version from the reference path:
         /home/proj/stage/cancer/balsamic_cache/X.X.X/hg19/genome/human_g1k_v37.fasta
         """
 
@@ -61,7 +60,7 @@ class BalsamicConfigReference(BaseModel):
 
 
 class BalsamicConfigPanel(BaseModel):
-    """Balsamic attributes of a panel BED file
+    """Balsamic attributes of a panel BED file.
 
     Attributes:
         capture_kit: string representation of a panel BED filename
@@ -70,7 +69,7 @@ class BalsamicConfigPanel(BaseModel):
     """
 
     capture_kit: str
-    capture_kit_version: Optional[str]
+    capture_kit_version: str | None
     chrom: list[str]
 
     @validator("capture_kit", pre=True)
@@ -80,14 +79,14 @@ class BalsamicConfigPanel(BaseModel):
 
     @validator("capture_kit_version", always=True)
     def extract_capture_kit_name_from_name(
-        cls, capture_kit_version: Optional[str], values: dict
+        cls, capture_kit_version: str | None, values: dict
     ) -> str:
         """Return the panel bed version from its filename (e.g. gicfdna_3.1_hg19_design.bed)."""
         return values["capture_kit"].split("_")[-3]
 
 
 class BalsamicConfigQC(BaseModel):
-    """Config QC attributes
+    """Config QC attributes.
 
     Attributes:
         picard_rmdup: if the duplicates has been removed or not
@@ -100,16 +99,16 @@ class BalsamicConfigQC(BaseModel):
     """
 
     picard_rmdup: bool
-    adapter: Optional[str]
+    adapter: str | None
     quality_trim: bool
     adapter_trim: bool
     umi_trim: bool
-    min_seq_length: Optional[str]
-    umi_trim_length: Optional[str]
+    min_seq_length: str | None
+    umi_trim_length: str | None
 
 
 class BalsamicVarCaller(BaseModel):
-    """Variant caller attributes model
+    """Variant caller attributes model.
 
     Attributes:
         mutation: if it addresses somatic or germline mutations
@@ -120,14 +119,14 @@ class BalsamicVarCaller(BaseModel):
     """
 
     mutation: str
-    type: str
+    mutation_type: str
     analysis_type: list[str]
     sequencing_type: list[str]
     workflow_solution: list[str]
 
 
 class BalsamicConfigJSON(BaseModel):
-    """Model for BALSAMIC analysis config validation
+    """Model for BALSAMIC analysis config validation.
 
     Attributes:
         analysis: config analysis attributes
@@ -137,9 +136,9 @@ class BalsamicConfigJSON(BaseModel):
     """
 
     analysis: BalsamicConfigAnalysis
-    samples: dict[str, BalsamicConfigSample]
+    samples: list[BalsamicConfigSample]
     reference: BalsamicConfigReference
-    panel: Optional[BalsamicConfigPanel]
+    panel: BalsamicConfigPanel | None
     QC: BalsamicConfigQC
     vcf: dict[str, BalsamicVarCaller]
     bioinfo_tools_version: dict[str, list[str]]

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable, Optional
+from typing import Callable
 
 from sqlalchemy.orm import Query
 
@@ -13,12 +13,12 @@ def filter_pools_by_customer_id(pools: Query, customer_ids: list[int], **kwargs)
 
 def filter_pools_by_name_enquiry(pools: Query, name_enquiry: str, **kwargs) -> Query:
     """Return pools by name enquiry."""
-    return pools.filter(Pool.name.like(f"%{name_enquiry}%"))
+    return pools.filter(Pool.name.contains(name_enquiry))
 
 
 def filter_pools_by_order_enquiry(pools: Query, order_enquiry: str, **kwargs) -> Query:
     """Return pools by order enquiry."""
-    return pools.filter(Pool.order.like(f"%{order_enquiry}%"))
+    return pools.filter(Pool.order.contains(order_enquiry))
 
 
 def filter_pools_by_entry_id(pools: Query, entry_id: int, **kwargs) -> Query:
@@ -74,13 +74,13 @@ def filter_pools_by_customer(pools: Query, customer: Customer, **kwargs) -> Quer
 def apply_pool_filter(
     filter_functions: list[Callable],
     pools: Query,
-    invoice_id: Optional[int] = None,
-    entry_id: Optional[int] = None,
-    name: Optional[str] = None,
-    customer_ids: Optional[list[int]] = None,
-    name_enquiry: Optional[str] = None,
-    order_enquiry: Optional[str] = None,
-    customer: Optional[Customer] = None,
+    invoice_id: int | None = None,
+    entry_id: int | None = None,
+    name: str | None = None,
+    customer_ids: list[int] | None = None,
+    name_enquiry: str | None = None,
+    order_enquiry: str | None = None,
+    customer: Customer | None = None,
 ) -> Query:
     """Apply filtering functions to the pool queries and return filtered results"""
 

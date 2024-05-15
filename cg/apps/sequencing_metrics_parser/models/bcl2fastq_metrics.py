@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, Field
 
 
@@ -33,7 +31,7 @@ class ConversionResult(BaseModel):
 
     lane: int = Field(..., alias="LaneNumber", gt=0)
     tile_reads: list[TileReads] = Field(..., alias="DemuxResults")
-    tile_undetermined_reads: Optional[UndeterminedTileReads] = Field(None, alias="Undetermined")
+    tile_undetermined_reads: UndeterminedTileReads | None = Field(None, alias="Undetermined")
 
 
 class SampleLaneTileMetrics(BaseModel):

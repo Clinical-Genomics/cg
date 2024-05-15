@@ -7,13 +7,13 @@ from pydantic.v1 import ValidationError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.balsamic.options import (
+    OPTION_CACHE_VERSION,
     OPTION_GENDER,
     OPTION_GENOME_VERSION,
     OPTION_OBSERVATIONS,
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
     OPTION_QOS,
-    OPTION_RUN_ANALYSIS,
 )
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -22,7 +22,7 @@ from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -34,9 +34,7 @@ def balsamic(context: click.Context):
     AnalysisAPI.get_help(context)
 
     config = context.obj
-    context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(
-        config=config,
-    )
+    context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(config=config)
 
 
 balsamic.add_command(resolve_compression)
@@ -50,6 +48,7 @@ balsamic.add_command(link)
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
 @OPTION_OBSERVATIONS
+@OPTION_CACHE_VERSION
 @DRY_RUN
 @click.pass_obj
 def config_case(
@@ -60,6 +59,7 @@ def config_case(
     panel_bed: str,
     pon_cnn: click.Path,
     observations: list[click.Path],
+    cache_version: str,
     dry_run: bool,
 ):
     """Create config file for BALSAMIC analysis for a given CASE_ID."""
@@ -75,6 +75,7 @@ def config_case(
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
             observations=observations,
+            cache_version=cache_version,
             dry_run=dry_run,
         )
     except CgError as error:
@@ -89,11 +90,9 @@ def config_case(
 @ARGUMENT_CASE_ID
 @DRY_RUN
 @OPTION_QOS
-@OPTION_RUN_ANALYSIS
 @click.pass_obj
 def run(
     context: CGConfig,
-    run_analysis: bool,
     slurm_quality_of_service: str,
     case_id: str,
     dry_run: bool,
@@ -102,15 +101,14 @@ def run(
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.verify_case_config_file_exists(case_id=case_id)
+        analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.check_analysis_ongoing(case_id)
         analysis_api.run_analysis(
             case_id=case_id,
-            run_analysis=run_analysis,
             slurm_quality_of_service=slurm_quality_of_service,
             dry_run=dry_run,
         )
-        if dry_run or not run_analysis:
+        if dry_run:
             return
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
@@ -182,17 +180,19 @@ def store_housekeeper(context: CGConfig, case_id: str):
 @DRY_RUN
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
-@OPTION_RUN_ANALYSIS
+@OPTION_CACHE_VERSION
+@OPTION_OBSERVATIONS
 @click.pass_context
 def start(
     context: click.Context,
     case_id: str,
     gender: str,
     genome_version: str,
+    cache_version: str,
     panel_bed: str,
     pon_cnn: str,
+    observations: list[click.Path],
     slurm_quality_of_service: str,
-    run_analysis: bool,
     dry_run: bool,
 ):
     """Start full workflow for case ID."""
@@ -205,15 +205,16 @@ def start(
         case_id=case_id,
         gender=gender,
         genome_version=genome_version,
+        cache_version=cache_version,
         panel_bed=panel_bed,
         pon_cnn=pon_cnn,
+        observations=observations,
         dry_run=dry_run,
     )
     context.invoke(
         run,
         case_id=case_id,
         slurm_quality_of_service=slurm_quality_of_service,
-        run_analysis=run_analysis,
         dry_run=dry_run,
     )
 
@@ -229,14 +230,14 @@ def start_available(context: click.Context, dry_run: bool = False):
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
-            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run, run_analysis=True)
+            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
             LOG.error(error)
         except CgError as error:
             LOG.error(error)
             exit_code = EXIT_FAIL
         except Exception as error:
-            LOG.error("Unspecified error occurred: %s", error)
+            LOG.error(f"Unspecified error occurred: {error}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
@@ -263,11 +264,11 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_store():
-        LOG.info("Storing deliverables for %s", case_obj.internal_id)
+        LOG.info(f"Storing deliverables for {case_obj.internal_id}")
         try:
             context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
         except Exception as exception_object:
-            LOG.error("Error storing %s: %s", case_obj.internal_id, exception_object)
+            LOG.error(f"Error storing {case_obj.internal_id}: {exception_object}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

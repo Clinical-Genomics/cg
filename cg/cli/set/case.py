@@ -1,26 +1,27 @@
 """Set case attributes in the status database."""
+
 import logging
-from typing import Optional
 
 import click
 
-from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline, Priority
+from cg.constants import DataDelivery, Priority, Workflow
+from cg.constants.constants import CaseActions
 from cg.models.cg_config import CGConfig
-from cg.store import Store
-from cg.store.models import Customer, Case, Panel
+from cg.store.models import Case, Customer, Panel
+from cg.store.store import Store
 from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)
 
 
 @click.command("case")
-@click.option("-a", "--action", type=click.Choice(CASE_ACTIONS), help="update case action")
+@click.option("-a", "--action", type=click.Choice(CaseActions.actions()), help="update case action")
 @click.option("-c", "--customer-id", type=click.STRING, help="update customer")
 @click.option(
     "-d",
     "--data-analysis",
     "data_analysis",
-    type=EnumChoice(Pipeline),
+    type=EnumChoice(Workflow),
     help="Update case data analysis",
 )
 @click.option(
@@ -38,13 +39,13 @@ LOG = logging.getLogger(__name__)
 @click.pass_obj
 def set_case(
     context: CGConfig,
-    action: Optional[str],
-    data_analysis: Optional[Pipeline],
-    data_delivery: Optional[DataDelivery],
-    priority: Optional[Priority],
-    panel_abbreviations: Optional[tuple[str]],
+    action: str | None,
+    data_analysis: Workflow | None,
+    data_delivery: DataDelivery | None,
+    priority: Priority | None,
+    panel_abbreviations: tuple[str] | None,
     case_id: str,
-    customer_id: Optional[str],
+    customer_id: str | None,
 ):
     """Update information about a case."""
 
@@ -108,14 +109,14 @@ def update_customer(case: Case, customer_id: str, status_db: Store) -> None:
     customer_obj: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
 
     if customer_obj is None:
-        LOG.error("Unknown customer: %s", customer_id)
+        LOG.error(f"Unknown customer: {customer_id}")
         raise click.Abort
 
     LOG.info(f"Update customer: {case.customer.internal_id} -> {customer_id}")
     case.customer = customer_obj
 
 
-def update_data_analysis(case: Case, data_analysis: Pipeline) -> None:
+def update_data_analysis(case: Case, data_analysis: Workflow) -> None:
     LOG.info(f"Update data_analysis: {case.data_analysis or 'NA'} -> {data_analysis}")
     case.data_analysis = data_analysis
 

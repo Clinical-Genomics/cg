@@ -1,7 +1,8 @@
 """Mock models from the store. Used for processing them without using the store"""
+
 import datetime
 
-from cg.store.models import Analysis, Customer, Case
+from cg.store.models import Analysis, Case, Customer
 
 
 class Customer(Customer):
@@ -28,4 +29,4 @@ class Analysis(Analysis):
     def __init__(self):
         self.id = 1
         self.completed_at = datetime.datetime.now()
-        self.family: Case = Case()
+        self.case: Case = Case()

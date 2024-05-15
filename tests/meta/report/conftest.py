@@ -3,15 +3,15 @@ from pathlib import Path
 
 import pytest
 
-from cg.constants import Pipeline
+from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.report.rnafusion import RnafusionReportAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from cg.store.models import Case
+from cg.store.store import Store
 from tests.apps.scout.conftest import MockScoutApi
 from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.limsmock import MockLimsAPI
@@ -25,7 +25,7 @@ def report_api_mip_dna(
 ) -> MipDNAReportAPI:
     """MIP DNA ReportAPI fixture."""
     cg_context.meta_apis["analysis_api"] = MockMipAnalysis(
-        config=cg_context, pipeline=Pipeline.MIP_DNA
+        config=cg_context, workflow=Workflow.MIP_DNA
     )
     cg_context.status_db_ = report_store
     cg_context.lims_api_ = MockLimsAPI(cg_context, lims_samples)
@@ -77,7 +77,7 @@ def case_samples_data(case_id: str, report_api_mip_dna: MipDNAReportAPI):
 @pytest.fixture(scope="function")
 def mip_analysis_api(cg_context: CGConfig) -> MockMipAnalysis:
     """MIP analysis mock data."""
-    return MockMipAnalysis(config=cg_context, pipeline=Pipeline.MIP_DNA)
+    return MockMipAnalysis(config=cg_context, workflow=Workflow.MIP_DNA)
 
 
 @pytest.fixture(scope="session")
@@ -99,9 +99,9 @@ def report_store(analysis_store, helpers, timestamp_yesterday):
     """A mock store instance for report testing."""
     case = analysis_store.get_cases()[0]
     helpers.add_analysis(
-        analysis_store, case, pipeline=Pipeline.MIP_DNA, started_at=timestamp_yesterday
+        analysis_store, case, started_at=timestamp_yesterday, workflow=Workflow.MIP_DNA
     )
-    helpers.add_analysis(analysis_store, case, pipeline=Pipeline.MIP_DNA, started_at=datetime.now())
+    helpers.add_analysis(analysis_store, case, started_at=datetime.now(), workflow=Workflow.MIP_DNA)
     # Mock sample dates to calculate processing times
     for family_sample in analysis_store.get_case_samples_by_case_id(
         case_internal_id=case.internal_id
@@ -129,7 +129,7 @@ def rnafusion_validated_metrics() -> dict[str, str]:
         "insert_size_peak": "N/A",
         "mean_length_r1": "99.0",
         "million_read_pairs": "75.0",
-        "bias_5_3": "1.07",
+        "bias_5_3": "1.12",
         "pct_adapter": "12.01",
         "duplicates": "14.86",
         "mrna_bases": "85.97",

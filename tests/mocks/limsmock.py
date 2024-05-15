@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic.v1 import BaseModel
 from typing_extensions import Literal
 
@@ -64,7 +62,7 @@ class MockLimsAPI(LimsAPI):
         """Mock function"""
         self._prep_method = method
 
-    def sample(self, sample_id: str) -> Optional[dict]:
+    def sample(self, sample_id: str) -> dict | None:
         return next((sample for sample in self._samples if sample["id"] == sample_id), None)
 
     def add_sample(self, internal_id: str):
