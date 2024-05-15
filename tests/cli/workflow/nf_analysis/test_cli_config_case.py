@@ -13,6 +13,7 @@ from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileFormat, MetaApis
 from cg.io.controller import ReadFile
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
@@ -46,6 +47,7 @@ def test_config_case_without_options(
 )
 def test_config_with_missing_case(
     cli_runner: CliRunner,
+    mocker,
     caplog: LogCaptureFixture,
     case_id_does_not_exist: str,
     workflow: Workflow,
@@ -54,6 +56,11 @@ def test_config_with_missing_case(
     """Test config_case for workflow with a missing case."""
     caplog.set_level(logging.ERROR)
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
+
+    # In the RAREDISEASE case, we need to mock lims fetching of the target bed file
+    if workflow == Workflow.RAREDISEASE:
+        mocker.patch.object(RarediseaseAnalysisAPI, "get_target_bed_from_lims")
+        RarediseaseAnalysisAPI.get_target_bed_from_lims.return_value = "some_target_bed_file"
 
     # GIVEN a case not in the StatusDB database
     assert not context.status_db.get_case_by_internal_id(internal_id=case_id_does_not_exist)
