@@ -92,15 +92,11 @@ class SequencingSampleMetadataModel(SampleMetadataModel):
 
     Attributes:
         gc_content: percentage of GC bases calculated on trimmed reads; source: workflow
-        input_amount: input amount in ng; source: LIMS
         mean_length_r1: average length of reads that pass QC filters; source: workflow
-        rin: RNA integrity number; source: LIMS
     """
 
     gc_content: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
-    input_amount: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     mean_length_r1: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
-    rin: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
 
 
 class WTSSampleMetadataModel(SequencingSampleMetadataModel):
@@ -108,22 +104,26 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
 
     Attributes:
         bias_5_3: bias is the ratio between read counts; source: workflow
+        input_amount: input amount in ng; source: LIMS
         mrna_bases:  proportion of bases that originate from messenger RNA; source: workflow
         pct_adapter: proportion of reads that contain adapter sequences; source: workflow
         pct_surviving: percentage of reads that pass quality control filters; source: workflow
         q20_rate: proportion of bases with a minimum Phred score of 20; source: workflow
         q30_rate: proportion of bases with a minimum Phred score of 30; source: workflow
         ribosomal_bases: proportion of bases that originate from ribosomal RNA; source: workflow
+        rin: RNA integrity number; source: LIMS
         uniquely_mapped_reads: percentage of mapped reads; source: workflow
     """
 
     bias_5_3: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    input_amount: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     mrna_bases: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     pct_adapter: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     pct_surviving: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     q20_rate: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
     q30_rate: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
     ribosomal_bases: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
+    rin: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
     uniquely_mapped_reads: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
 
 
