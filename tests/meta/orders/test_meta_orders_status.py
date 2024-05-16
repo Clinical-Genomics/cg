@@ -5,7 +5,7 @@ import pytest
 
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.constants import CaseActions, PrepCategory
-from cg.constants.subject import PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.exc import OrderError
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.api import FastqSubmitter
@@ -170,7 +170,7 @@ def test_cases_to_status(mip_order_to_submit):
     assert first_sample["application"] == "WGSPCFC030"
     assert first_sample["phenotype_groups"] == ["Phenotype-group"]
     assert first_sample["phenotype_terms"] == ["HP:0012747", "HP:0025049"]
-    assert first_sample["sex"] == "female"
+    assert first_sample["sex"] == Sex.FEMALE
     assert first_sample["status"] == PhenotypeStatus.AFFECTED
     assert first_sample["subject_id"] == "subject1"
     assert first_sample["mother"] == "sample2"
@@ -287,7 +287,7 @@ def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data, tic
     )
 
     # THEN the sample sex should be stored
-    assert new_samples[0].sex == "male"
+    assert new_samples[0].sex == Sex.MALE
 
 
 def test_store_fastq_samples_non_tumour_wgs_to_mip(orders_api, base_store, fastq_status_data):
@@ -516,7 +516,7 @@ def test_store_mip(orders_api, base_store: Store, mip_status_data, ticket_id: st
     assert new_link.mother.name == "sample2"
     assert new_link.father.name == "sample3"
     assert new_link.sample.name == "sample1"
-    assert new_link.sample.sex == "female"
+    assert new_link.sample.sex == Sex.FEMALE
     assert new_link.sample.application_version.application.tag == "WGSPCFC030"
     assert new_link.sample.is_tumour
     assert isinstance(new_case.links[1].sample.comment, str)
@@ -638,7 +638,7 @@ def test_store_cancer_samples(
     assert len(new_case.links) == 1
     new_link = new_case.links[0]
     assert new_link.sample.name == "s1"
-    assert new_link.sample.sex == "male"
+    assert new_link.sample.sex == Sex.MALE
     assert new_link.sample.application_version.application.tag == "WGSPCFC030"
     assert new_link.sample.comment == "other Elution buffer"
     assert new_link.sample.is_tumour

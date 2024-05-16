@@ -36,7 +36,7 @@ def mother() -> dict[str, str | None]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "mother",
-        "sex": "female",
+        "sex": Sex.FEMALE,
         "proband": False,
         "status": "unaffected",
     }
@@ -60,7 +60,7 @@ def proband() -> dict[str, str | None]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "proband",
-        "sex": "female",
+        "sex": Sex.FEMALE,
         "father": "father",
         "mother": "mother",
         "deceased": False,

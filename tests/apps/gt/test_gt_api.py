@@ -43,7 +43,7 @@ def test_update_sample_sex(genotype_api: GenotypeAPI, caplog):
     caplog.set_level(logging.DEBUG)
     # GIVEN a sample id and a sex
     sample = "sample"
-    sex = "female"
+    sex = Sex.FEMALE
 
     # WHEN running the update sample sex command
     genotype_api.update_sample_sex(sample, sex)
@@ -57,7 +57,7 @@ def test_update_analysis_sex(genotype_api: GenotypeAPI, caplog):
     caplog.set_level(logging.DEBUG)
     # GIVEN a sample id and a sex
     sample = "sample"
-    sex = "female"
+    sex = Sex.FEMALE
 
     # WHEN running the update sample sex command
     genotype_api.update_analysis_sex(sample, sex)
