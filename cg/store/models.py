@@ -27,6 +27,7 @@ from cg.constants.constants import (
     SexOptions,
     StatusOptions,
 )
+from cg.constants.demultiplexing import IlluminaFlowCellType
 from cg.constants.devices import DeviceType
 from cg.constants.priority import SlurmQos
 from cg.constants.symbols import EMPTY_STRING
@@ -973,6 +974,18 @@ class RunDevice(Base):
     __mapper_args__ = {
         "polymorphic_on": "type",
     }
+
+
+class IlluminaFlowCellDevice(RunDevice):
+    """Model for storing Illumina flow cells."""
+
+    __tablename__ = "illumina_flow_cell"
+
+    id: Mapped[int] = mapped_column(ForeignKey("run_device.id"), primary_key=True)
+    flow_cell_type: Mapped[IlluminaFlowCellType | None]
+    flow_cell_name: Mapped[UniqueStr64 | None]
+
+    __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
 
 
 class RunMetrics(Base):

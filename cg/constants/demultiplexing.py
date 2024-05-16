@@ -212,3 +212,14 @@ NAME_TO_INDEX_SETTINGS: dict[str, IndexSettings] = {
     "NovaSeq6000Post1.5Kits": NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS,
     "NoReverseComplements": NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS,
 }
+
+
+class IlluminaFlowCellType(StrEnum):
+    # "10B"
+    # "25B"
+    # "1.5B"
+    # "S4"
+    # "S1"
+    # "SP"
+    # "S2"
+    pass
