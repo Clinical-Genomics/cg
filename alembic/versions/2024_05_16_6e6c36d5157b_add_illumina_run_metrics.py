@@ -19,23 +19,11 @@ branch_labels = None
 depends_on = None
 
 
-# Define the enum type for sequencer_type
-class Sequencers(StrEnum):
-    """Sequencer instruments."""
-
-    ALL: str = "all"
-    HISEQX: str = "hiseqx"
-    HISEQGA: str = "hiseqga"
-    NOVASEQ: str = "novaseq"
-    NOVASEQX: str = "novaseqx"
-    OTHER: str = "other"
-
-
 def upgrade():
     op.create_table(
         "illumina_run_metrics",
         sa.Column("id", sa.ForeignKey("run_metrics.id"), nullable=False, primary_key=True),
-        sa.Column("sequencer_type", sa.String(length=8), nullable=True),
+        sa.Column("sequencer_type", sa.String(length=32), nullable=True),
         sa.Column("sequencer_name", sa.String(length=32), nullable=True),
         sa.Column("sequenced_at", sa.DateTime(), nullable=True),
         sa.Column("data_availability", sa.String(length=7), nullable=True),
