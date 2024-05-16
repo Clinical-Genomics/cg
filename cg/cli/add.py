@@ -2,9 +2,10 @@ import logging
 
 import click
 
+from cg.cli.utils import is_case_name_allowed
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
-from cg.constants.constants import StatusOptions, DRY_RUN
+from cg.constants.constants import DRY_RUN, StatusOptions
 from cg.constants.subject import Sex
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
@@ -270,6 +271,10 @@ def add_case(
         if panel is None:
             LOG.error(f"{panel_abbreviation}: panel not found")
             raise click.Abort
+
+    if not is_case_name_allowed(name):
+        LOG.error(f"Case name {name} is only allowed to contain letters, digits and dashes.")
+        raise click.Abort
 
     new_case: Case = status_db.add_case(
         data_analysis=data_analysis,
