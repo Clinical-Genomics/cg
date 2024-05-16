@@ -263,7 +263,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Collect and format information required to build a sample sheet for a single sample."""
         raise NotImplementedError
 
-    def get_case_from_string(self, case_id: str) -> Case:
+    def get_validated_case(self, case_id: str) -> Case:
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         if len(case.links) == 0:
             raise CgError(f"No samples linked to {case_id}")
