@@ -4,6 +4,7 @@ from pydantic import BaseModel, BeforeValidator, ConfigDict, constr
 from typing_extensions import Annotated
 
 from cg.constants import DataDelivery, Workflow
+from cg.constants.subject import PhenotypeStatus
 from cg.models.orders.validators.sample_base_validators import snake_case
 from cg.store.models import Application, Case, Customer, Pool, Sample
 
@@ -32,12 +33,6 @@ class ContainerEnum(StrEnum):
     no_container = "No container"
     plate = "96 well plate"
     tube = "Tube"
-
-
-class StatusEnum(StrEnum):
-    affected = "affected"
-    unaffected = "unaffected"
-    unknown = "unknown"
 
 
 NAME_PATTERN = r"^[A-Za-z0-9-]*$"
@@ -112,7 +107,7 @@ class OrderSample(BaseModel):
     selection_criteria: str | None = None
     sex: SexEnum = SexEnum.unknown
     source: str | None = None
-    status: StatusEnum = StatusEnum.unknown
+    status: PhenotypeStatus = PhenotypeStatus.UNKNOWN
     subject_id: (
         constr(pattern=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length)
         | None

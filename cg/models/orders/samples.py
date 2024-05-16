@@ -2,6 +2,7 @@ from pydantic.v1 import BaseModel, constr, validator
 
 from cg.constants import DataDelivery
 from cg.constants.constants import GenomeVersion, Workflow
+from cg.constants.subject import PhenotypeStatus
 from cg.models.orders.order import OrderType
 from cg.models.orders.sample_base import (
     NAME_PATTERN,
@@ -9,7 +10,6 @@ from cg.models.orders.sample_base import (
     ControlEnum,
     PriorityEnum,
     SexEnum,
-    StatusEnum,
 )
 from cg.store.models import Application, Case, Organism, Panel, Pool, Sample
 
@@ -138,7 +138,7 @@ class MipDnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_DNA
     # "Required if data analysis in Scout or vcf delivery"
     panels: list[constr(min_length=1, max_length=Panel.abbrev.property.columns[0].type.length)]
-    status: StatusEnum
+    status: PhenotypeStatus
 
 
 class BalsamicSample(Of1508Sample):

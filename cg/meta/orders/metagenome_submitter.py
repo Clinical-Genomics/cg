@@ -2,12 +2,11 @@ import datetime as dt
 
 from cg.constants import DataDelivery
 from cg.constants.constants import Workflow
-from cg.constants.subject import Sex
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
-from cg.models.orders.sample_base import StatusEnum
 from cg.models.orders.samples import MetagenomeSample
 from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Sample
 
@@ -130,7 +129,7 @@ class MetagenomeSubmitter(Submitter):
                     self.status.session.commit()
 
                 new_relationship: CaseSample = self.status.relate_sample(
-                    case=case, sample=new_sample, status=StatusEnum.unknown
+                    case=case, sample=new_sample, status=PhenotypeStatus.UNKNOWN
                 )
                 self.status.session.add(new_relationship)
 
