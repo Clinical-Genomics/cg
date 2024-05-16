@@ -1,5 +1,6 @@
 """Test MIP metrics deliverables"""
 
+from cg.constants.subject import Sex
 from cg.models.mip.mip_metrics_deliverables import (
     DuplicateReads,
     MeanInsertSize,
@@ -163,7 +164,7 @@ def test_instantiate_mip_metrics_set_sample_id_metrics(mip_metrics_deliverables_
             assert sample_id_metric.mapped_reads_step == "bamstats"
             assert sample_id_metric.mean_insert_size == 422.0
             assert sample_id_metric.mean_insert_size_step == "collectmultiplemetricsinsertsize"
-            assert sample_id_metric.predicted_sex == "female"
+            assert sample_id_metric.predicted_sex == Sex.FEMALE
             assert sample_id_metric.predicted_sex_step == "chanjo_sexcheck"
 
 

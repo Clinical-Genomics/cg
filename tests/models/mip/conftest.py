@@ -159,7 +159,7 @@ def mip_metrics_deliverables_raw() -> dict:
                 "input": "some_input",
                 "name": "gender",
                 "step": "chanjo_sexcheck",
-                "value": "female",
+                "value": Sex.FEMALE,
             },
             {
                 "id": "another_id",
