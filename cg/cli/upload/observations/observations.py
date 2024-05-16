@@ -14,10 +14,9 @@ from cg.cli.upload.observations.utils import (
 )
 from cg.cli.workflow.commands import (
     ARGUMENT_CASE_ID,
-    OPTION_DRY,
     OPTION_LOQUSDB_SUPPORTED_WORKFLOW,
 )
-from cg.constants.constants import Workflow
+from cg.constants.constants import Workflow, DRY_RUN
 from cg.exc import CaseNotFoundError, LoqusdbError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
@@ -30,7 +29,7 @@ LOG = logging.getLogger(__name__)
 
 @click.command("observations")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @click.pass_obj
 def upload_observations_to_loqusdb(context: CGConfig, case_id: str | None, dry_run: bool):
     """Upload observations from an analysis to Loqusdb."""
@@ -52,7 +51,7 @@ def upload_observations_to_loqusdb(context: CGConfig, case_id: str | None, dry_r
 
 @click.command("available-observations")
 @OPTION_LOQUSDB_SUPPORTED_WORKFLOW
-@OPTION_DRY
+@DRY_RUN
 @click.pass_context
 def upload_available_observations_to_loqusdb(
     context: click.Context, workflow: Workflow | None, dry_run: bool

@@ -1,9 +1,10 @@
-import datetime as dt
 import logging
 import os
 import shutil
+from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
+from typing import Any, Iterator
 
 import click
 from housekeeper.store.models import Bundle, Version
@@ -16,8 +17,9 @@ from cg.constants.constants import (
     FileFormat,
     WorkflowManager,
 )
-from cg.constants.gene_panel import GenePanelCombo
+from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
 from cg.constants.scout import ScoutExportFileName
+from cg.constants.tb import AnalysisStatus
 from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
 from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
@@ -26,7 +28,8 @@ from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
+from cg.services.quality_controller import QualityControllerService
+from cg.store.models import Analysis, Application, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -54,12 +57,6 @@ class AnalysisAPI(MetaAPI):
     @property
     def root(self):
         raise NotImplementedError
-
-    @property
-    def use_read_count_threshold(self) -> bool:
-        """Defines whether the threshold for adequate read count should be passed for all samples
-        when determining if the analysis for a case should be automatically started"""
-        return False
 
     @property
     def process(self):
@@ -95,6 +92,34 @@ class AnalysisAPI(MetaAPI):
         if not self.get_case_path(case_id=case_id).exists():
             LOG.info(f"No working directory for {case_id} exists")
             raise FileNotFoundError(f"No working directory for {case_id} exists")
+
+    def is_case_ready_for_analysis(self, case: Case) -> bool:
+        """Check if case is ready for analysis. If case passes sequencing QC and is set to analyze,
+        or has not been analyzed yet, or the latest analysis failed, the case is ready for analysis.
+        """
+        case_passed_sequencing_qc: bool = QualityControllerService.case_pass_sequencing_qc(case)
+        case_is_set_to_analyze: bool = case.action == CaseActions.ANALYZE
+        case_has_not_been_analyzed: bool = not case.latest_analyzed
+        case_latest_analysis_failed: bool = (
+            self.trailblazer_api.get_latest_analysis_status(case_id=case.internal_id)
+            == AnalysisStatus.FAILED
+        )
+        return case_passed_sequencing_qc and (
+            case_is_set_to_analyze or case_has_not_been_analyzed or case_latest_analysis_failed
+        )
+
+    def get_cases_ready_for_analysis(self):
+        """
+        Return cases that are ready for analysis. The case is ready if it passes the logic in the
+        get_cases_to_analyse method, and it has passed the pre-analysis quality check.
+        """
+        cases_to_analyse: list[Case] = self.get_cases_to_analyse()
+        cases_passing_quality_check: list[Case] = [
+            case
+            for case in cases_to_analyse
+            if QualityControllerService.case_pass_sequencing_qc(case)
+        ]
+        return cases_passing_quality_check
 
     def get_priority_for_case(self, case_id: str) -> int:
         """Get priority from the status db case priority"""
@@ -152,6 +177,37 @@ class AnalysisAPI(MetaAPI):
             return prep_category.lower()
         return AnalysisType.OTHER
 
+    def get_case_application_type(self, case_id: str) -> str:
+        """Returns the application type for samples in a case."""
+        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id)
+        application_types: set[str] = {self.get_application_type(sample) for sample in samples}
+
+        if len(application_types) > 1:
+            raise CgError(
+                f"Different application_types found for case: {case_id} ({application_types})"
+            )
+
+        return application_types.pop()
+
+    def get_case_source_type(self, case_id: str) -> str | None:
+        """Returns the source type for samples in a case.
+        Raises:
+            CgError: If different sources are set for the samples linked to a case."""
+        sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
+        source_types: set[str | None] = {
+            self.lims_api.get_source(lims_id=sample_id) for sample_id in sample_ids
+        }
+
+        if len(source_types) > 1:
+            raise CgError(f"Different source types found for case: {case_id} ({source_types})")
+
+        return source_types.pop()
+
+    def has_case_only_exome_samples(self, case_id: str) -> bool:
+        """Returns True if the application type for all samples in a case is WES."""
+        application_type: str = self.get_case_application_type(case_id)
+        return application_type == AnalysisType.WHOLE_EXOME_SEQUENCING
+
     def upload_bundle_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
         """Storing bundle data in Housekeeper for CASE_ID"""
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
@@ -178,16 +234,15 @@ class AnalysisAPI(MetaAPI):
         )
 
     def upload_bundle_statusdb(self, case_id: str, dry_run: bool = False) -> None:
-        """Storing analysis bundle in StatusDB for CASE_ID"""
-
+        """Storing an analysis bundle in StatusDB for a provided case."""
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        analysis_start: dt.datetime = self.get_bundle_created_date(case_id=case_id)
-        workflow_version: str = self.get_workflow_version(case_id=case_id)
+        case_obj: Case = self.status_db.get_case_by_internal_id(case_id)
+        analysis_start: datetime.date = self.get_bundle_created_date(case_id)
+        workflow_version: str = self.get_workflow_version(case_id)
         new_analysis: Case = self.status_db.add_analysis(
             workflow=self.workflow,
             version=workflow_version,
-            completed_at=dt.datetime.now(),
+            completed_at=datetime.now(),
             primary=(len(case_obj.analyses) == 0),
             started_at=analysis_start,
         )
@@ -244,7 +299,7 @@ class AnalysisAPI(MetaAPI):
             created=self.get_bundle_created_date(case_id),
         ).model_dump()
 
-    def get_bundle_created_date(self, case_id: str) -> dt.datetime:
+    def get_bundle_created_date(self, case_id: str) -> datetime.date:
         return self.get_date_from_file_path(self.get_deliverables_file_path(case_id=case_id))
 
     def get_workflow_version(self, case_id: str) -> str:
@@ -275,16 +330,14 @@ class AnalysisAPI(MetaAPI):
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
         )
 
-    def get_analyses_to_clean(self, before: dt.datetime) -> list[Analysis]:
+    def get_analyses_to_clean(self, before: datetime) -> list[Analysis]:
         analyses_to_clean = self.status_db.get_analyses_to_clean(
             before=before, workflow=self.workflow
         )
         return analyses_to_clean
 
-    def get_cases_to_analyze(self) -> list[Case]:
-        return self.status_db.cases_to_analyze(
-            workflow=self.workflow, threshold=self.use_read_count_threshold
-        )
+    def get_cases_to_analyse(self) -> list[Case]:
+        return self.status_db.cases_to_analyse(workflow=self.workflow)
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,
@@ -369,7 +422,7 @@ class AnalysisAPI(MetaAPI):
             sample: Sample = self.status_db.get_sample_by_internal_id(
                 internal_id=sample.from_sample
             )
-        target_bed_shortname: str = self.lims_api.capture_kit(lims_id=sample.internal_id)
+        target_bed_shortname: str | None = self.lims_api.capture_kit(lims_id=sample.internal_id)
         if not target_bed_shortname:
             return None
         bed_version: BedVersion | None = self.status_db.get_bed_version_by_short_name(
@@ -446,25 +499,31 @@ class AnalysisAPI(MetaAPI):
         self.prepare_fastq_api.add_decompressed_fastq_files_to_housekeeper(case_id)
 
     @staticmethod
-    def get_date_from_file_path(file_path: Path) -> dt.datetime.date:
+    def get_date_from_file_path(file_path: Path) -> datetime.date:
         """
         Get date from deliverables path using date created metadata.
         """
-        return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
+        return datetime.fromtimestamp(int(os.path.getctime(file_path)))
 
     def get_lims_naming_metadata(self, sample: Sample) -> str | None:
         return None
 
     def get_latest_metadata(self, case_id: str) -> AnalysisModel:
-        """Get the latest metadata of a specific case"""
-
+        """Return the latest analysis metadata of a specific case."""
         raise NotImplementedError
+
+    def get_genome_build(self, case_id: str) -> str:
+        """Return the build version of the reference genome."""
+        raise NotImplementedError
+
+    def get_variant_callers(self, case_id: str) -> list[str]:
+        """Return list of variant-calling filters used during analysis."""
+        return []
 
     def parse_analysis(
         self, config_raw: dict, qc_metrics_raw: dict, sample_info_raw: dict
     ) -> AnalysisModel:
-        """Parses output analysis files"""
-
+        """Parses output analysis files."""
         raise NotImplementedError
 
     def clean_analyses(self, case_id: str) -> None:
@@ -472,7 +531,7 @@ class AnalysisAPI(MetaAPI):
         analyses: list = self.status_db.get_case_by_internal_id(internal_id=case_id).analyses
         LOG.info(f"Adding a cleaned at date for case {case_id}")
         for analysis_obj in analyses:
-            analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
+            analysis_obj.cleaned_at = analysis_obj.cleaned_at or datetime.now()
             self.status_db.session.commit()
 
     def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
@@ -512,7 +571,7 @@ class AnalysisAPI(MetaAPI):
         if not self.status_db.are_all_flow_cells_on_disk(case_id=case_id):
             self.status_db.request_flow_cells_for_case(case_id)
 
-    def is_case_ready_for_analysis(self, case_id: str) -> bool:
+    def is_raw_data_ready_for_analysis(self, case_id: str) -> bool:
         """Returns True if no files need to be retrieved from an external location and if all Spring files are
         decompressed."""
         if self.does_any_file_need_to_be_retrieved(case_id):
@@ -542,7 +601,7 @@ class AnalysisAPI(MetaAPI):
         is raised."""
         self.ensure_files_are_present(case_id)
         self.resolve_decompression(case_id=case_id, dry_run=dry_run)
-        if not self.is_case_ready_for_analysis(case_id):
+        if not self.is_raw_data_ready_for_analysis(case_id):
             raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
 
     def ensure_files_are_present(self, case_id: str):
@@ -556,7 +615,7 @@ class AnalysisAPI(MetaAPI):
                 housekeeper_api=self.housekeeper_api,
                 data_flow_config=self.config.data_flow,
             )
-            spring_archive_api.retrieve_case(case_id)
+            spring_archive_api.retrieve_spring_files_for_case(case_id)
 
     def are_all_spring_files_present(self, case_id: str) -> bool:
         """Return True if no Spring files for the case are archived in the data location used by the customer."""
@@ -585,7 +644,7 @@ class AnalysisAPI(MetaAPI):
 
     @staticmethod
     def _write_panel(out_dir: Path, content: list[str]) -> None:
-        """Write the managed variants to case dir."""
+        """Write the gene panel to case dir."""
         out_dir.mkdir(parents=True, exist_ok=True)
         WriteFile.write_file_from_content(
             content="\n".join(content),
@@ -593,17 +652,51 @@ class AnalysisAPI(MetaAPI):
             file_path=Path(out_dir, ScoutExportFileName.PANELS),
         )
 
-    def _get_gene_panel(self, case_id: str, genome_build: str) -> list[str]:
+    def _get_gene_panel(self, case_id: str, genome_build: str, dry_run: bool = False) -> list[str]:
         """Create and return the aggregated gene panel file."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         all_panels: list[str] = self.get_aggregated_panels(
             customer_id=case.customer.internal_id, default_panels=set(case.panels)
         )
-        return self.scout_api.export_panels(build=genome_build, panels=all_panels)
+        return self.scout_api.export_panels(build=genome_build, panels=all_panels, dry_run=dry_run)
+
+    def get_gene_panel(self, case_id: str, dry_run: bool = False) -> list[str]:
+        """Create and return the aggregated gene panel file."""
+        raise NotImplementedError
 
     def _get_managed_variants(self, genome_build: str) -> list[str]:
         """Create and return the managed variants."""
         return self.scout_api.export_managed_variants(genome_build=genome_build)
 
+    def write_panel(self, case_id: str, content: list[str]) -> None:
+        """Write the gene panel to case dir."""
+        self._write_panel(out_dir=Path(self.root, case_id), content=content)
+
+    @staticmethod
+    def get_aggregated_panels(customer_id: str, default_panels: set[str]) -> list[str]:
+        """Check if customer should use the gene panel master list
+        and if all default panels are included in the gene panel master list.
+        If not, add gene panel combo and OMIM-AUTO.
+        Return an aggregated gene panel."""
+        master_list: list[str] = GenePanelMasterList.get_panel_names()
+        if customer_id in GenePanelMasterList.collaborators() and default_panels.issubset(
+            master_list
+        ):
+            return master_list
+        all_panels: set[str] = add_gene_panel_combo(default_panels=default_panels)
+        all_panels |= {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
+        return list(all_panels)
+
     def run_analysis(self, *args, **kwargs):
         raise NotImplementedError
+
+    def get_data_analysis_type(self, case_id: str) -> str | None:
+        """Return data analysis type carried out."""
+        case_sample: Sample = self.status_db.get_case_samples_by_case_id(case_internal_id=case_id)[
+            0
+        ].sample
+        lims_sample: dict[str, Any] = self.lims_api.sample(case_sample.internal_id)
+        application: Application = self.status_db.get_application_by_tag(
+            tag=lims_sample.get("application")
+        )
+        return application.analysis_type if application else None

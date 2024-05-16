@@ -171,7 +171,7 @@ class CaseSubmitter(Submitter):
             )
 
             panels: set[str] = set()
-            if data_analysis == Workflow.MIP_DNA:
+            if data_analysis in [Workflow.MIP_DNA, Workflow.TOMTE]:
                 panels: set[str] = {
                     panel for sample in case_samples for panel in sample.panels if panel
                 }
@@ -346,8 +346,6 @@ class CaseSubmitter(Submitter):
                 self.status.get_current_application_version_by_tag(tag=application_tag)
             )
         self.status.session.add(sample_obj)
-        new_delivery = self.status.add_delivery(destination="caesar", sample=sample_obj)
-        self.status.session.add(new_delivery)
         return sample_obj
 
     def _create_case(self, case: dict, customer_obj: Customer, ticket: str):

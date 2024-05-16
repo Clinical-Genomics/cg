@@ -2,26 +2,18 @@
 
 import logging
 from pathlib import Path
-from typing import Any
 
-from cg import resources
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat, Strandedness
+from cg.constants.constants import GenomeVersion, Strandedness
 from cg.constants.nf_analysis import MULTIQC_NEXFLOW_CONFIG, RNAFUSION_METRIC_CONDITIONS
 from cg.exc import MissingMetrics
-from cg.io.controller import ReadFile
-from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
-from cg.models.fastq import FastqFileMeta
-from cg.models.rnafusion.rnafusion import (
-    RnafusionAnalysis,
-    RnafusionParameters,
-    RnafusionSampleSheetEntry,
-)
+from cg.models.deliverables.metric_deliverables import MetricsBase
+from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -65,12 +57,9 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         """Return whether the analysis supports multiple samples to be linked to the case."""
         return False
 
-    def get_deliverables_template_content(self) -> list[dict]:
-        """Return deliverables file template content."""
-        return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=self.get_bundle_filenames_path(),
-        )
+    def get_genome_build(self, case_id: str) -> GenomeVersion:
+        """Return reference genome for a case. Currently fixed for hg38."""
+        return GenomeVersion.hg38
 
     def get_nextflow_config_content(self, case_id: str) -> str:
         """Return nextflow config content."""
@@ -111,31 +100,16 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             return genomes_base.absolute()
         return Path(self.references).absolute()
 
-    def parse_multiqc_json_for_case(self, case_id: str) -> dict:
-        """Parse a multiqc_data.json file and returns a dictionary with metric name and metric values for a case."""
-        multiqc_json = MultiqcDataJson(
-            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
-        )
-        metrics_values: dict = {}
-        for key in multiqc_json.report_general_stats_data:
-            if case_id in key:
-                metrics_values.update(list(key.values())[0])
-                LOG.info(f"Key: {key}, Values: {list(key.values())[0]}")
-        return metrics_values
-
-    def get_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
-        """Get a multiqc_data.json file and returns metrics and values formatted."""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_id: str = case.links[0].sample.internal_id
-        metric_values: dict = self.parse_multiqc_json_for_case(case_id=case_id)
-        metric_base_list: list = self.get_metric_base_list(
-            sample_id=sample_id, metrics_values=metric_values
-        )
-        return metric_base_list
+    def get_multiqc_search_patterns(self, case_id: str) -> dict:
+        """Return search patterns for MultiQC for Rnafusion."""
+        samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
+        search_patterns: dict[str, str] = {case_id: sample.internal_id for sample in samples}
+        return search_patterns
 
     @staticmethod
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
-        """Check that all mandatory metrics are present. Raise error if missing."""
+        """Check that all mandatory metrics are present.
+        Raise: MissingMetrics if mandatory metrics are missing."""
         given_metrics: set = {metric.name for metric in metrics}
         mandatory_metrics: set = set(RNAFUSION_METRIC_CONDITIONS.keys())
         LOG.info("Mandatory Metrics Keys:")
@@ -146,20 +120,5 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             LOG.error(f"Some mandatory metrics are missing: {', '.join(missing_metrics)}")
             raise MissingMetrics()
 
-    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> RnafusionAnalysis:
-        """Parse Rnafusion output analysis files and return analysis model."""
-        sample_metrics: dict[str, dict] = {}
-        for metric in qc_metrics_raw:
-            try:
-                sample_metrics[metric.id].update({metric.name.lower(): metric.value})
-            except KeyError:
-                sample_metrics[metric.id] = {metric.name.lower(): metric.value}
-        return RnafusionAnalysis(sample_metrics=sample_metrics)
-
-    def get_latest_metadata(self, case_id: str) -> RnafusionAnalysis:
-        """Return the latest metadata of a specific Rnafusion case."""
-        qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
-        return self.parse_analysis(qc_metrics_raw=qc_metrics)
-
-    def get_workflow_metrics(self) -> dict:
+    def get_workflow_metrics(self, metric_id: str) -> dict:
         return RNAFUSION_METRIC_CONDITIONS

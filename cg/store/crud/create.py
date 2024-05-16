@@ -20,7 +20,6 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Delivery,
     Flowcell,
     Invoice,
     Order,
@@ -175,8 +174,10 @@ class CreateHandler(BaseHandler):
         control: str = None,
         downsampled_to: int = None,
         internal_id: str = None,
+        last_sequenced_at: datetime = None,
         order: str = None,
         ordered: datetime = None,
+        prepared_at: datetime = None,
         priority: Priority = None,
         received: datetime = None,
         original_ticket: str = None,
@@ -193,10 +194,12 @@ class CreateHandler(BaseHandler):
             downsampled_to=downsampled_to,
             internal_id=internal_id,
             is_tumour=tumour,
+            last_sequenced_at=last_sequenced_at,
             name=name,
             order=order,
             ordered_at=ordered or datetime.now(),
             original_ticket=original_ticket,
+            prepared_at=prepared_at,
             priority=priority,
             received_at=received,
             sex=sex,
@@ -334,22 +337,6 @@ class CreateHandler(BaseHandler):
         )
         new_record.customer = customer
         new_record.application_version = application_version
-        return new_record
-
-    def add_delivery(
-        self,
-        destination: str,
-        sample: Sample = None,
-        pool: Pool = None,
-        comment: str = None,
-    ) -> Delivery:
-        """Build a new Delivery record."""
-
-        if not any([sample, pool]):
-            raise ValueError("you have to provide a sample or a pool")
-        new_record: Delivery = Delivery(destination=destination, comment=comment)
-        new_record.sample = sample
-        new_record.pool = pool
         return new_record
 
     def add_invoice(

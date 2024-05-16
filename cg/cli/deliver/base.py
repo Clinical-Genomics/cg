@@ -7,17 +7,19 @@ import click
 
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
+from cg.constants.constants import DRY_RUN
 from cg.meta.deliver import DeliverAPI
 from cg.meta.deliver import DeliverTicketAPI
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
-from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
 from cg.store.models import Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
-DRY_RUN = click.option("--dry-run", is_flag=True)
 DELIVERY_TYPE = click.option(
     "-d",
     "--delivery-type",
@@ -94,7 +96,7 @@ def deliver_analysis(
             delivery_type=delivery,
             force_all=force_all,
             ignore_missing_bundles=ignore_missing_bundles,
-            fastq_file_service=FastqFileService(),
+            fastq_file_service=FastqConcatenationService(),
         )
         deliver_api.set_dry_run(dry_run)
         cases: list[Case] = []

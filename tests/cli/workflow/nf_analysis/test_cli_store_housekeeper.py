@@ -1,6 +1,7 @@
 """Tests CLI common methods to store deliverable files into Housekeeper for NF analyses."""
 
 import logging
+from datetime import datetime
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -15,6 +16,7 @@ from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteStream
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 from cg.utils import Process
@@ -22,7 +24,7 @@ from cg.utils import Process
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_store_housekeeper_without_options(
     cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest
@@ -44,7 +46,7 @@ def test_store_housekeeper_without_options(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_store_housekeeper_with_missing_case(
     cli_runner: CliRunner,
@@ -75,7 +77,7 @@ def test_store_housekeeper_with_missing_case(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_store_housekeeper_case_not_finished(
     cli_runner: CliRunner,
@@ -102,7 +104,7 @@ def test_store_housekeeper_case_not_finished(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_store_housekeeper_case_with_malformed_deliverables_file(
     cli_runner,
@@ -136,7 +138,7 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_store_housekeeper_valid_case(
     cli_runner,
@@ -183,7 +185,7 @@ def test_store_housekeeper_valid_case(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_valid_case_already_added(
     cli_runner,
@@ -233,7 +235,7 @@ def test_valid_case_already_added(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_dry_run(
     cli_runner: CliRunner,

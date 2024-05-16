@@ -20,12 +20,8 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
-from cg.constants.constants import (
-    CaseActions,
-    ControlOptions,
-    PrepCategory,
-    SexOptions,
-)
+from cg.constants.constants import CaseActions, ControlOptions, PrepCategory, SexOptions
+from cg.constants.devices import DeviceType
 from cg.constants.priority import SlurmQos
 from cg.constants.subject import PhenotypeStatus
 from cg.constants.symbols import EMPTY_STRING
@@ -44,6 +40,7 @@ VarChar128 = Annotated[str, 128]
 
 PrimaryKeyInt = Annotated[int, mapped_column(primary_key=True)]
 UniqueStr = Annotated[str, mapped_column(String(32), unique=True)]
+UniqueStr64 = Annotated[str, mapped_column(String(64), unique=True)]
 
 
 class Base(DeclarativeBase):
@@ -70,14 +67,6 @@ def to_dict(model_instance):
             if not isinstance(getattr(model_instance, column.name), InstrumentedAttribute)
         }
 
-
-flowcell_sample = Table(
-    "flowcell_sample",
-    Base.metadata,
-    Column("flowcell_id", types.Integer, ForeignKey("flowcell.id"), nullable=False),
-    Column("sample_id", types.Integer, ForeignKey("sample.id"), nullable=False),
-    UniqueConstraint("flowcell_id", "sample_id", name="_flowcell_sample_uc"),
-)
 
 customer_user = Table(
     "customer_user",
@@ -424,22 +413,6 @@ class Collaboration(Base):
         }
 
 
-class Delivery(Base):
-    __tablename__ = "delivery"
-    id: Mapped[PrimaryKeyInt]
-    delivered_at: Mapped[datetime | None]
-    removed_at: Mapped[datetime | None]
-    destination: Mapped[str | None] = mapped_column(
-        types.Enum("caesar", "pdc", "uppmax", "mh", "custom"), default="caesar"
-    )
-    sample_id: Mapped[int | None] = mapped_column(ForeignKey("sample.id", ondelete="CASCADE"))
-    pool_id: Mapped[int | None] = mapped_column(ForeignKey("pool.id", ondelete="CASCADE"))
-    comment: Mapped[Text | None]
-
-    def to_dict(self):
-        return to_dict(model_instance=self)
-
-
 class Case(Base, PriorityMixin):
     __tablename__ = "case"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
@@ -462,7 +435,6 @@ class Case(Base, PriorityMixin):
     internal_id: Mapped[UniqueStr]
     is_compressible: Mapped[bool] = mapped_column(default=True)
     name: Mapped[Str128]
-    order_id: Mapped[int | None] = mapped_column(ForeignKey("order.id"))
     ordered_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     _panels: Mapped[Text | None]
 
@@ -524,14 +496,8 @@ class Case(Base, PriorityMixin):
         return max(sequenced_dates, default=None)
 
     @property
-    def all_samples_pass_qc(self) -> bool:
-        pass_qc = []
-        for link in self.links:
-            if link.sample.application_version.application.is_external or link.sample.sequencing_qc:
-                pass_qc.append(True)
-            else:
-                pass_qc.append(False)
-        return all(pass_qc)
+    def are_all_samples_sequenced(self) -> bool:
+        return all([link.sample.last_sequenced_at for link in self.links])
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -676,14 +642,15 @@ class Flowcell(Base):
     archived_at: Mapped[datetime | None]
     has_backup: Mapped[bool] = mapped_column(default=False)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=datetime.now)
-
-    samples: Mapped[list["Sample"]] = orm.relationship(
-        secondary=flowcell_sample, back_populates="flowcells"
-    )
     sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
         back_populates="flowcell",
         cascade="all, delete, delete-orphan",
     )
+
+    @property
+    def samples(self) -> list["Sample"]:
+        """Return samples sequenced on the flow cell."""
+        return list({metric.sample for metric in self.sequencing_metrics})
 
     def __str__(self):
         return self.name
@@ -746,7 +713,6 @@ class Pool(Base):
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     delivered_at: Mapped[datetime | None]
-    deliveries: Mapped[list[Delivery]] = orm.relationship(backref="pool")
     id: Mapped[PrimaryKeyInt]
     invoice_id: Mapped[int | None] = mapped_column(ForeignKey("invoice.id"))
     name: Mapped[Str32]
@@ -778,7 +744,6 @@ class Sample(Base, PriorityMixin):
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     delivered_at: Mapped[datetime | None]
-    deliveries: Mapped[list[Delivery]] = orm.relationship(backref="sample")
     downsampled_to: Mapped[BigInt | None]
     from_sample: Mapped[Str128 | None]
     id: Mapped[PrimaryKeyInt]
@@ -814,9 +779,6 @@ class Sample(Base, PriorityMixin):
     father_links: Mapped[list[CaseSample]] = orm.relationship(
         foreign_keys=[CaseSample.father_id], back_populates="father"
     )
-    flowcells: Mapped[list[Flowcell]] = orm.relationship(
-        secondary=flowcell_sample, back_populates="samples"
-    )
     sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
         back_populates="sample"
     )
@@ -826,16 +788,23 @@ class Sample(Base, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
-    def sequencing_qc(self) -> bool:
-        """Return sequencing qc passed or failed."""
-        application = self.application_version.application
-        # Express priority needs to be analyzed at a lower threshold for primary analysis
-        if self.priority == Priority.express:
-            one_half_of_target_reads = application.target_reads / 2
-            return self.reads >= one_half_of_target_reads
-        if self.application_version.application.prep_category == PrepCategory.READY_MADE_LIBRARY:
-            return bool(self.reads)
-        return self.reads > application.expected_reads
+    def archive_location(self) -> str:
+        """Returns the data_archive_location if the customer linked to the sample."""
+        return self.customer.data_archive_location
+
+    @property
+    def expected_reads_for_sample(self) -> int:
+        """Return the expected reads of the sample."""
+        return self.application_version.application.expected_reads
+
+    @property
+    def has_reads(self) -> bool:
+        return bool(self.reads)
+
+    @property
+    def flow_cells(self) -> list[Flowcell]:
+        """Return the flow cells a sample has been sequenced on."""
+        return list({metric.flowcell for metric in self.sequencing_metrics})
 
     @property
     def phenotype_groups(self) -> list[str]:
@@ -872,15 +841,6 @@ class Sample(Base, PriorityMixin):
 
         return f"Ordered {self.ordered_at.date()}"
 
-    @property
-    def archive_location(self) -> str:
-        """Returns the data_archive_location if the customer linked to the sample."""
-        return self.customer.data_archive_location
-
-    @property
-    def has_reads(self) -> bool:
-        return bool(self.reads)
-
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
         data = to_dict(model_instance=self)
@@ -891,7 +851,7 @@ class Sample(Base, PriorityMixin):
         if links:
             data["links"] = [link_obj.to_dict(family=True, parents=True) for link_obj in self.links]
         if flowcells:
-            data["flowcells"] = [flowcell_obj.to_dict() for flowcell_obj in self.flowcells]
+            data["flowcells"] = [flow_cell.to_dict() for flow_cell in self.flow_cells]
         return data
 
 
@@ -987,6 +947,61 @@ class Order(Base):
     order_date: Mapped[datetime] = mapped_column(default=datetime.now())
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
     workflow: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
+    is_delivered: Mapped[bool] = mapped_column(default=False)
 
     def to_dict(self):
         return to_dict(model_instance=self)
+
+
+class RunDevice(Base):
+    """Model for storing run devices."""
+
+    __tablename__ = "run_device"
+
+    id: Mapped[PrimaryKeyInt]
+    type: Mapped[DeviceType]
+    internal_id: Mapped[UniqueStr64]
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
+
+
+class RunMetrics(Base):
+    """Model for storing run devices."""
+
+    __tablename__ = "run_metrics"
+
+    id: Mapped[PrimaryKeyInt]
+    type: Mapped[DeviceType]
+    device_id: Mapped[int] = mapped_column(ForeignKey("run_device.id"))
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
+
+
+class SampleRunMetrics(Base):
+    __tablename__ = "sample_run_metrics"
+    id: Mapped[PrimaryKeyInt]
+    sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id"))
+    run_metrics_id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"))
+    type: Mapped[DeviceType]
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
+
+
+class IlluminaSampleRunMetrics(SampleRunMetrics):
+    """Sequencing metrics for a sample sequenced on an Illumina instrument. The metrics are per sample, per lane, per flow cell."""
+
+    __tablename__ = "illumina_sample_run_metrics"
+
+    id: Mapped[int] = mapped_column(ForeignKey("sample_run_metrics.id"), primary_key=True)
+    flow_cell_lane: Mapped[int | None]
+    total_reads_in_lane: Mapped[BigInt | None]
+    base_passing_q30_percent: Mapped[Num_6_2 | None]
+    base_mean_quality_score: Mapped[Num_6_2 | None]
+    created_at: Mapped[datetime | None]
+    __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}

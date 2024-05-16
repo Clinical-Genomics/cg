@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic.v1 import BaseModel
 from typing_extensions import Literal
 
@@ -87,11 +89,19 @@ class MockLimsAPI(LimsAPI):
     def get_delivery_method(self, lims_id: str) -> str:
         return self._delivery_method
 
-    def get_sample_project(self, sample_id: str) -> str:
-        return self.sample(sample_id).get("project").get("id")
-
     def get_sample_comment(self, sample_id: str) -> str:
-        return self.sample(sample_id).get("comment")
+        lims_sample: dict[str, Any] = self.sample(sample_id)
+        comment = None
+        if lims_sample:
+            comment: str = lims_sample.get("comment")
+        return comment
+
+    def get_sample_project(self, sample_id: str) -> str | None:
+        lims_sample: dict[str, Any] = self.sample(sample_id)
+        project_id = None
+        if lims_sample:
+            project_id: str = lims_sample.get("project").get("id")
+        return project_id
 
     def update_sample(
         self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs

@@ -93,7 +93,7 @@ def test_run_case_without_samples(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_run_case_without_config_files(
     cli_runner: CliRunner,
@@ -126,7 +126,6 @@ def test_run_case_from_start_dry_run(
     cli_runner: CliRunner,
     workflow: Workflow,
     caplog: LogCaptureFixture,
-    mock_config,
     request: FixtureRequest,
 ):
     """Test dry-run for a case with existing config files."""
@@ -137,6 +136,7 @@ def test_run_case_from_start_dry_run(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN mocked config files
+    request.getfixturevalue(f"{workflow}_mock_config")
 
     # WHEN invoking a command with dry-run specified
     result = cli_runner.invoke(
@@ -154,13 +154,12 @@ def test_run_case_from_start_dry_run(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_run_case_with_revision_dry_run(
     cli_runner: CliRunner,
     workflow: Workflow,
     caplog: LogCaptureFixture,
-    mock_config,
     request: FixtureRequest,
 ):
     """Test dry-run for a case with existing config files with a given revision."""
@@ -171,6 +170,7 @@ def test_run_case_with_revision_dry_run(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN a mocked config
+    request.getfixturevalue(f"{workflow}_mock_config")
 
     # WHEN invoking a command with dry-run and revision specified
     result = cli_runner.invoke(
@@ -188,13 +188,12 @@ def test_run_case_with_revision_dry_run(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_resume_case_dry_run(
     cli_runner: CliRunner,
     workflow: Workflow,
     caplog: LogCaptureFixture,
-    mock_config,
     tower_id,
     request: FixtureRequest,
 ):
@@ -206,6 +205,7 @@ def test_resume_case_dry_run(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
 
     # GIVEN a mocked config
+    # request.getfixturevalue(f"{workflow}_mock_config")
 
     # WHEN invoking a command with dry-run and nf-tower-id specified
     result = cli_runner.invoke(
@@ -224,13 +224,13 @@ def test_resume_case_dry_run(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_resume_case_with_missing_tower_id(
     cli_runner: CliRunner,
     workflow: Workflow,
     caplog: LogCaptureFixture,
-    mock_config,
+    raredisease_mock_config,
     request: FixtureRequest,
 ):
     """Test resume command without providing NF-Tower ID and without existing Trailblazer config file."""
@@ -252,13 +252,13 @@ def test_resume_case_with_missing_tower_id(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_resume_using_nextflow_dry_run(
     cli_runner: CliRunner,
     workflow: Workflow,
     caplog: LogCaptureFixture,
-    mock_config,
+    raredisease_mock_config,
     request: FixtureRequest,
 ):
     """Test command with case_id and config file using nextflow."""

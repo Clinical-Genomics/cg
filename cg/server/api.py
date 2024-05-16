@@ -29,6 +29,7 @@ from cg.exc import (
     OrderFormError,
     OrderMismatchError,
     OrderNotDeliverableError,
+    OrderNotFoundError,
     TicketCreationError,
 )
 from cg.io.controller import WriteStream
@@ -42,10 +43,11 @@ from cg.server.dto.delivery_message.delivery_message_request import (
 from cg.server.dto.delivery_message.delivery_message_response import (
     DeliveryMessageResponse,
 )
+from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpdateRequest
+from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
 from cg.server.ext import db, delivery_message_service, lims, order_service, osticket
-from cg.services.orders.order_service.exceptions import OrderNotFoundError
 from cg.store.models import (
     Analysis,
     Application,
@@ -56,6 +58,7 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
     User,
+    ApplicationLimitations,
 )
 
 LOG = logging.getLogger(__name__)
@@ -486,7 +489,15 @@ def parse_application(tag: str):
     application: Application = db.get_application_by_tag(tag=tag)
     if not application:
         return abort(make_response(jsonify(message="Application not found"), HTTPStatus.NOT_FOUND))
-    return jsonify(**application.to_dict())
+
+    application_limitations: list[ApplicationLimitations] = db.get_application_limitations_by_tag(
+        tag
+    )
+    application_dict: dict[str, Any] = application.to_dict()
+    application_dict["workflow_limitations"] = [
+        limitation.to_dict() for limitation in application_limitations
+    ]
+    return jsonify(**application_dict)
 
 
 @BLUEPRINT.route("/applications/<tag>/workflow_limitations")
@@ -516,6 +527,28 @@ def get_order(order_id: int):
         return make_response(response_dict)
     except OrderNotFoundError as error:
         return make_response(jsonify(error=str(error)), HTTPStatus.NOT_FOUND)
+
+
+@BLUEPRINT.route("/orders/<order_id>/delivered", methods=["PATCH"])
+def set_order_delivered(order_id: int):
+    try:
+        request_data = OrderDeliveredPatch.model_validate(request.json)
+        delivered: bool = request_data.delivered
+        response_data: Order = order_service.set_delivery(order_id=order_id, delivered=delivered)
+        return jsonify(response_data.model_dump()), HTTPStatus.OK
+    except OrderNotFoundError as error:
+        return jsonify(error=str(error)), HTTPStatus.NOT_FOUND
+
+
+@BLUEPRINT.route("/orders/<order_id>/update-delivery-status", methods=["POST"])
+def update_order_delivered(order_id: int):
+    """Update the delivery status of an order based on the number of delivered analyses."""
+    try:
+        request_data = OrderDeliveredUpdateRequest.model_validate(request.json)
+        delivered_analyses: int = request_data.delivered_analyses_count
+        order_service.update_delivered(order_id=order_id, delivered_analyses=delivered_analyses)
+    except OrderNotFoundError as error:
+        return jsonify(error=str(error)), HTTPStatus.NOT_FOUND
 
 
 @BLUEPRINT.route("/orders/<order_id>/delivery_message")

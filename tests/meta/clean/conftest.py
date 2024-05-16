@@ -11,7 +11,7 @@ from cg.constants.subject import Sex
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.store.models import Flowcell, Sample
+from cg.store.models import Flowcell
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -50,9 +50,9 @@ def flow_cell_clean_api_can_not_be_removed(
 
 
 @pytest.fixture(scope="function")
-def tmp_flow_cell_to_clean_path(tmp_flow_cell_directory_bclconvert: Path):
+def tmp_flow_cell_to_clean_path(tmp_flow_cell_directory_bcl_convert: Path):
     """Returns the path to a flow cell fulfilling all cleaning criteria."""
-    return tmp_flow_cell_directory_bclconvert
+    return tmp_flow_cell_directory_bcl_convert
 
 
 @pytest.fixture(scope="function")
@@ -62,9 +62,9 @@ def tmp_flow_cell_to_clean(tmp_flow_cell_to_clean_path: Path) -> FlowCellDirecto
 
 
 @pytest.fixture(scope="function")
-def tmp_flow_cell_not_to_clean_path(tmp_flow_cell_directory_bcl2fastq: Path):
+def tmp_flow_cell_not_to_clean_path(tmp_novaseq_6000_pre_1_5_kits_flow_cell_path: Path):
     """Return the path to a flow cell not fulfilling all cleaning criteria."""
-    return tmp_flow_cell_directory_bcl2fastq
+    return tmp_novaseq_6000_pre_1_5_kits_flow_cell_path
 
 
 @pytest.fixture(scope="function")
@@ -96,13 +96,12 @@ def store_with_flow_cell_to_clean(
         store=store,
         has_backup=True,
     )
-    sample: Sample = helpers.add_sample(
+    helpers.add_sample(
         store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
     )
-    flow_cell.samples = [sample]
     store.session.add(flow_cell)
     store.session.commit()
     return store
@@ -125,13 +124,12 @@ def store_with_flow_cell_not_to_clean(
         store=store,
         has_backup=True,
     )
-    sample: Sample = helpers.add_sample(
+    helpers.add_sample(
         store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
     )
-    flow_cell.samples = [sample]
     store.session.add(flow_cell)
     store.session.commit()
     return store

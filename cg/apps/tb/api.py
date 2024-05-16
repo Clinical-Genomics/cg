@@ -180,8 +180,10 @@ class TrailblazerAPI:
         return response_data.summaries
 
     def get_analyses_to_deliver(self, order_id: int) -> list[TrailblazerAnalysis]:
-        """Return the analyses in the order which have a 'Completed' status."""
-        endpoint = f"analyses?orderId={order_id}&status[]={AnalysisStatus.COMPLETED}"
+        """Return the analyses in the order ready to be delivered."""
+        endpoint = (
+            f"analyses?orderId={order_id}&status[]={AnalysisStatus.COMPLETED}&delivered=false"
+        )
         raw_response = self.query_trailblazer(
             command=endpoint, request_body={}, method=APIMethods.GET
         )

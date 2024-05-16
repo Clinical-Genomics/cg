@@ -11,14 +11,14 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat, Workflow
-from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisTypes
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import WriteFile
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.models.slurm.sbatch import Sbatch, SbatchDragen
+from cg.models.slurm.sbatch import SbatchDragen
 
 LOG = logging.getLogger(__name__)
 
@@ -76,7 +76,6 @@ class DemultiplexingAPI:
         demux_dir: Path,
         sample_sheet: Path,
         demux_completed: Path,
-        flow_cell: FlowCellDirectoryData,
         environment: Literal["production", "stage"] = "stage",
     ) -> str:
         """
@@ -93,9 +92,7 @@ class DemultiplexingAPI:
             demux_completed_file=demux_completed.as_posix(),
             environment=environment,
         )
-        return DEMULTIPLEX_COMMAND[flow_cell.bcl_converter].format(
-            **command_parameters.model_dump()
-        )
+        return DEMULTIPLEX_COMMAND.format(**command_parameters.model_dump())
 
     @staticmethod
     def demultiplex_sbatch_path(flow_cell: FlowCellDirectoryData) -> Path:
@@ -224,35 +221,18 @@ class DemultiplexingAPI:
             demux_dir=self.flow_cell_out_dir_path(flow_cell=flow_cell),
             sample_sheet=flow_cell.sample_sheet_path,
             demux_completed=self.demultiplexing_completed_path(flow_cell=flow_cell),
-            flow_cell=flow_cell,
             environment=self.environment,
         )
-
-        if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
-            sbatch_parameters: Sbatch = Sbatch(
-                account=self.slurm_account,
-                commands=commands,
-                email=self.mail,
-                error=error_function,
-                hours=36,
-                job_name=self.get_run_name(flow_cell),
-                log_dir=log_path.parent.as_posix(),
-                memory=125,
-                number_tasks=18,
-                quality_of_service=self.slurm_quality_of_service,
-            )
-        if flow_cell.bcl_converter == BclConverter.BCLCONVERT:
-            sbatch_parameters: SbatchDragen = SbatchDragen(
-                account=self.slurm_account,
-                commands=commands,
-                email=self.mail,
-                error=error_function,
-                hours=36,
-                job_name=self.get_run_name(flow_cell),
-                log_dir=log_path.parent.as_posix(),
-                quality_of_service=self.slurm_quality_of_service,
-            )
-
+        sbatch_parameters: SbatchDragen = SbatchDragen(
+            account=self.slurm_account,
+            commands=commands,
+            email=self.mail,
+            error=error_function,
+            hours=36,
+            job_name=self.get_run_name(flow_cell),
+            log_dir=log_path.parent.as_posix(),
+            quality_of_service=self.slurm_quality_of_service,
+        )
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
             sbatch_parameters=sbatch_parameters
         )
@@ -273,9 +253,7 @@ class DemultiplexingAPI:
             shutil.rmtree(self.flow_cell_out_dir_path(flow_cell=flow_cell), ignore_errors=False)
 
     def create_demultiplexing_output_dir(self, flow_cell: FlowCellDirectoryData) -> None:
-        """Creates the demultiplexing output directory and, if necessary, the unaligned directory."""
+        """Creates the demultiplexing output directory for the flow cell."""
         output_directory: Path = self.flow_cell_out_dir_path(flow_cell)
         LOG.debug(f"Creating demultiplexing output directory: {output_directory}")
         output_directory.mkdir(exist_ok=False, parents=True)
-        if flow_cell.bcl_converter == BclConverter.BCL2FASTQ:
-            self.get_flow_cell_unaligned_dir(flow_cell).mkdir(exist_ok=False, parents=False)

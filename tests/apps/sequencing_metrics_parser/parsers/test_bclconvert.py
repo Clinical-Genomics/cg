@@ -4,30 +4,25 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
-    BclConvertDemuxMetrics,
-    BclConvertQualityMetrics,
-)
-from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import (
-    BclConvertMetricsParser,
-)
+from cg.apps.sequencing_metrics_parser.models import DemuxMetrics, SequencingQualityMetrics
+from cg.apps.sequencing_metrics_parser.parser import MetricsParser
 
 
-def test_parse_bcl_convert_metrics(
+def test_parse_metrics(
     bcl_convert_metrics_dir_path: Path,
 ):
     """Test to parse BCLConvert metrics."""
     # GIVEN paths to a BCLConvert metrics files
     # WHEN parsing the files
-    bcl_convert_metrics_parser = BclConvertMetricsParser(
+    bcl_convert_metrics_parser = MetricsParser(
         bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path
     )
 
     # THEN assert that the metrics are parsed
     assert bcl_convert_metrics_parser.quality_metrics
-    assert isinstance(bcl_convert_metrics_parser.quality_metrics[0], BclConvertQualityMetrics)
+    assert isinstance(bcl_convert_metrics_parser.quality_metrics[0], SequencingQualityMetrics)
     assert bcl_convert_metrics_parser.demux_metrics
-    assert isinstance(bcl_convert_metrics_parser.demux_metrics[0], BclConvertDemuxMetrics)
+    assert isinstance(bcl_convert_metrics_parser.demux_metrics[0], DemuxMetrics)
 
 
 def test_parse_metrics_files_not_existing():
@@ -35,39 +30,39 @@ def test_parse_metrics_files_not_existing():
     # GIVEN paths to a BCLConvert metrics files that do not exist
     # WHEN parsing the files assert that a FileNotFoundError is raised
     with pytest.raises(FileNotFoundError):
-        BclConvertMetricsParser(bcl_convert_metrics_dir_path=Path("non-existing-path"))
+        MetricsParser(bcl_convert_metrics_dir_path=Path("non-existing-path"))
 
 
-def test_parse_bcl_convert_quality_metrics(
-    parsed_bcl_convert_metrics: BclConvertMetricsParser,
-    bcl_convert_quality_metric_model_with_data: BclConvertQualityMetrics,
+def test_parse_quality_metrics(
+    parsed_bcl_convert_metrics: MetricsParser,
+    bcl_convert_quality_metric_model_with_data: SequencingQualityMetrics,
 ):
     """Test to parse BCLConvert quality metrics."""
     # GIVEN a parsed BCLConvert metrics
 
     # ASSERT that the parsed quality metrics are correct
-    quality_metrics_model: BclConvertQualityMetrics = parsed_bcl_convert_metrics.quality_metrics[0]
+    quality_metrics_model: SequencingQualityMetrics = parsed_bcl_convert_metrics.quality_metrics[0]
 
     # ASSERT that the parsed quality metrics are of the correct type
-    assert isinstance(quality_metrics_model, BclConvertQualityMetrics)
+    assert isinstance(quality_metrics_model, SequencingQualityMetrics)
 
     # ASSERT that the parsed quality metrics has the correct values
     for attr_name, attr_value in quality_metrics_model.model_dump().items():
         assert getattr(bcl_convert_quality_metric_model_with_data, attr_name) == attr_value
 
 
-def test_parse_bcl_convert_demux_metrics(
-    parsed_bcl_convert_metrics: BclConvertMetricsParser,
-    bcl_convert_demux_metric_model_with_data: BclConvertDemuxMetrics,
+def test_parse_demux_metrics(
+    parsed_bcl_convert_metrics: MetricsParser,
+    bcl_convert_demux_metric_model_with_data: DemuxMetrics,
 ):
     """Test to parse BCLConvert demux metrics."""
     # GIVEN a parsed BCLConvert metrics
 
     # ASSERT that the parsed demux metrics are correct
-    demux_metrics_model: BclConvertDemuxMetrics = parsed_bcl_convert_metrics.demux_metrics[0]
+    demux_metrics_model: DemuxMetrics = parsed_bcl_convert_metrics.demux_metrics[0]
 
     # ASSERT that the parsed demux metrics are of the correct type
-    assert isinstance(demux_metrics_model, BclConvertDemuxMetrics)
+    assert isinstance(demux_metrics_model, DemuxMetrics)
 
     # ASSERT that the parsed demux metrics has the correct values
     for attr_name, attr_value in demux_metrics_model.model_dump().items():
@@ -75,7 +70,7 @@ def test_parse_bcl_convert_demux_metrics(
 
 
 def test_get_sample_internal_ids(
-    parsed_bcl_convert_metrics: BclConvertMetricsParser,
+    parsed_bcl_convert_metrics: MetricsParser,
     test_sample_internal_id: str,
 ):
     """Test to get sample internal ids from BclConvertMetricsParser."""
@@ -95,7 +90,7 @@ def test_get_sample_internal_ids(
 
 
 def test_get_lanes_for_sample_internal_id(
-    parsed_bcl_convert_metrics: BclConvertMetricsParser, test_sample_internal_id: str
+    parsed_bcl_convert_metrics: MetricsParser, test_sample_internal_id: str
 ):
     """Test to get lanes for a sample internal id from BclConvertMetricsParser."""
     # GIVEN a parsed BCLConvert metrics
@@ -113,27 +108,27 @@ def test_get_lanes_for_sample_internal_id(
 
 
 def test_get_metrics_for_sample_internal_id_and_lane(
-    parsed_bcl_convert_metrics: BclConvertMetricsParser, test_sample_internal_id: str
+    parsed_bcl_convert_metrics: MetricsParser, test_sample_internal_id: str
 ):
     """Test to get metrics for a sample internal id and lane from BclConvertMetricsParser."""
 
     # GIVEN a parsed BCLConvert metrics
 
     # WHEN getting metrics for a sample internal id and lane
-    metrics: BclConvertDemuxMetrics = parsed_bcl_convert_metrics.get_metrics_for_sample_and_lane(
+    metrics: DemuxMetrics = parsed_bcl_convert_metrics.get_metrics_for_sample_and_lane(
         metrics=parsed_bcl_convert_metrics.demux_metrics,
         sample_internal_id=test_sample_internal_id,
         lane=1,
     )
 
     # THEN assert that the metrics are of the correct type
-    assert isinstance(metrics, BclConvertDemuxMetrics)
+    assert isinstance(metrics, DemuxMetrics)
     assert metrics.sample_internal_id == test_sample_internal_id
     assert metrics.lane == 1
 
 
 def test_calculate_total_reads_per_lane(
-    parsed_bcl_convert_metrics: BclConvertMetricsParser,
+    parsed_bcl_convert_metrics: MetricsParser,
     test_sample_internal_id: str,
     bcl_convert_reads_for_test_sample: int,
     test_lane: int,
@@ -171,7 +166,7 @@ def test_get_q30_bases_percent_per_lane(
 
 
 def test_get_mean_quality_score_per_lane(
-    parsed_bcl_convert_metrics: BclConvertMetricsParser,
+    parsed_bcl_convert_metrics: MetricsParser,
     test_sample_internal_id: str,
     test_lane: int,
     bcl_convert_test_mean_quality_score_per_lane: float,
