@@ -35,7 +35,7 @@ def upgrade():
         sa.Column("mean_quality_score", sa.Numeric(precision=6, scale=2), nullable=True),
         sa.Column("total_yield", sa.BigInteger(), nullable=True),
         sa.Column("yield_q30", sa.Numeric(precision=6, scale=2), nullable=True),
-        sa.Column("cycles", sa.Integer(), nullable=False),
+        sa.Column("cycles", sa.Integer(), nullable=True),
         sa.Column("demultiplexing_software", sa.String(length=32), nullable=True),
         sa.Column("demultiplexing_version", sa.String(length=32), nullable=True),
         sa.Column("sequencing_started_at", sa.DateTime(), nullable=True),
