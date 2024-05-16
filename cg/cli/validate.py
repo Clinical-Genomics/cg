@@ -8,7 +8,7 @@ from cg.services.create_validation_cases.validation_cases_service import CreateV
 from cg.services.validate_file_transfer_service.validate_pacbio_file_transfer_service import (
     ValidatePacbioFileTransferService,
 )
-
+from cg.constants.constants import DRY_RUN
 
 LOG = logging.getLogger(__name__)
 
