@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from cg.apps.madeline.api import MadelineAPI
+from cg.constants.subject import Sex
 
 
 def get_ind_info(columns, line):
@@ -48,7 +49,7 @@ def test_generate_madeline_input_no_sex(madeline_columns, proband):
 
     # GIVEN a case id and a ind with unknown sex
     case_id = "test"
-    proband["sex"] = "unknown"
+    proband["sex"] = Sex.UNKNOWN
     inds = [proband]
     # WHEN generating madeline formated lines
     madeline_lines = MadelineAPI.make_ped(case_id, inds)

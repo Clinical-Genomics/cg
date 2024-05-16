@@ -2,7 +2,7 @@ import datetime as dt
 
 from cg.constants import DataDelivery
 from cg.constants.constants import Workflow
-from cg.constants.subject import Sex
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
@@ -162,7 +162,7 @@ class PoolSubmitter(Submitter):
                 )
                 new_samples.append(new_sample)
                 link: CaseSample = self.status.relate_sample(
-                    case=case, sample=new_sample, status="unknown"
+                    case=case, sample=new_sample, status=PhenotypeStatus.UNKNOWN
                 )
                 self.status.session.add(link)
             new_pools.append(new_pool)

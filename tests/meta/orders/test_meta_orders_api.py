@@ -445,7 +445,7 @@ def test_validate_sex_unknown_new_sex(
             name=sample.name,
             subject_id=sample.subject_id,
         )
-        sample.sex = "unknown"
+        sample.sex = Sex.UNKNOWN
         store.session.add(sample_obj)
         store.session.commit()
 

@@ -13,7 +13,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import DataDelivery, FileFormat, Workflow
-from cg.constants.subject import Sex
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.archive.ddn.constants import ROOT_TO_TRIM
@@ -282,7 +282,7 @@ def archive_store(
         ticket="123",
         customer_id=customer_ddn.id,
     )
-    base_store.relate_sample(case=case, sample=new_samples[0], status="unknown")
+    base_store.relate_sample(case=case, sample=new_samples[0], status=PhenotypeStatus.UNKNOWN)
     order = Order(
         customer_id=customer_ddn.id,
         ticket_id=new_samples[0].original_ticket,

@@ -1,4 +1,5 @@
 from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
+from cg.constants.subject import Sex
 from cg.models.orders.sample_base import PriorityEnum
 
 
@@ -59,7 +60,7 @@ def convert_sex(sex: str) -> str | None:
     if not sex:
         return None
     sex = sex.strip()
-    return REV_SEX_MAP.get(sex, "unknown")
+    return REV_SEX_MAP.get(sex, Sex.UNKNOWN)
 
 
 def convert_to_lower(value: str) -> str:

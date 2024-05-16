@@ -4,6 +4,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
+from cg.constants import Sex
+from cg.constants.subject import PhenotypeStatus
 from cg.meta.upload.gisaid.constants import AUTHORS
 
 
@@ -57,9 +59,9 @@ class GisaidSample(BaseModel):
     covv_passage: str | None = "Original"
     covv_location: str | None = None
     covv_host: str | None = "Human"
-    covv_gender: str | None = "unknown"
+    covv_gender: str | None = Sex.UNKNOWN
     covv_patient_age: str | None = "unknown"
-    covv_patient_status: str | None = "unknown"
+    covv_patient_status: str | None = PhenotypeStatus.UNKNOWN
     covv_seq_technology: str | None = "Illumina NovaSeq"
     covv_orig_lab_addr: str | None = None
     covv_subm_lab: str | None = "Karolinska University Hospital"

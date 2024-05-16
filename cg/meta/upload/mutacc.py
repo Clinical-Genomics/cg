@@ -145,7 +145,7 @@ def resolve_parent(scout_parent: str) -> str:
 
 def resolve_phenotype(scout_phenotype: int) -> str:
     """Convert scout phenotype to mutacc phenotype"""
-    mutacc_phenotype = "unknown"
+    mutacc_phenotype = PhenotypeStatus.UNKNOWN
     if scout_phenotype == 1:
         mutacc_phenotype = PhenotypeStatus.UNAFFECTED
     if scout_phenotype == 2:
