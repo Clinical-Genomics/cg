@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 
 @click.command("process-solved")
 @click.option("-c", "--case-id", help="internal case id, leave empty to process all")
-@click.option("-d", "--days-ago", type=int, default=1, help="days since solved")
+@click.option("--days-ago", type=int, default=1, help="days since solved")
 @click.option("-C", "--customers", type=str, multiple=True, help="Filter on customers")
 @DRY_RUN
 @click.pass_obj
