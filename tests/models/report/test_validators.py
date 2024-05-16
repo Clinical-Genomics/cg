@@ -18,13 +18,13 @@ from cg.models.report.validators import (
     get_boolean_as_string,
     get_date_as_string,
     get_delivered_files_as_file_names,
-    get_float_as_percentage,
-    get_float_as_string,
     get_gender_as_string,
     get_list_as_string,
     get_path_as_string,
     get_prep_category_as_string,
     get_report_string,
+    get_number_as_string,
+    get_float_as_percentage,
 )
 
 
@@ -63,30 +63,36 @@ def test_get_boolean_as_string():
     assert validated_not_bool_field == NA_FIELD
 
 
-def test_get_float_as_string():
-    """Test the validation of a float value."""
+@pytest.mark.parametrize(
+    "input_value, expected_output",
+    [
+        (12.3456789, "12.35"),  # Test for a valid float input
+        (0.0, "0.0"),  # Test for float zero input
+        (5, "5.0"),  # Test for a valid integer input
+        (0, "0.0"),  # Test for integer zero input
+        (None, NA_FIELD),  # Test for None input
+        ("1.2", "1.2"),  # Test for valid string input
+        ("invalid", ValueError),  # Test for an invalid string input
+    ],
+)
+def test_get_number_as_string(input_value: Any, expected_output: str, caplog: LogCaptureFixture):
+    """Test the validation and formatting of numbers."""
 
-    # GIVEN a valid float input
-    float_value: float = 12.3456789
+    # GIVEN a list of number inputs and their expected values
 
-    # WHEN performing the validation
-    validated_float_value: str = get_float_as_string(float_value)
+    if expected_output == ValueError:
+        # WHEN getting a string representation of a number
+        with pytest.raises(ValueError):
+            get_number_as_string(input_value)
 
-    # THEN check if the input value was formatted correctly
-    assert validated_float_value == "12.35"
+        # THEN a ValueError should have been raised for an invalid number input
+        assert f"Value {input_value} cannot be converted to float" in caplog.text
+    else:
+        # WHEN getting a string representation of a number
+        validated_float_value = get_number_as_string(input_value)
 
-
-def test_get_float_as_string_zero_input():
-    """Tests the validation of a float value when input is zero."""
-
-    # GIVEN a valid float input
-    float_value: float = 0.0
-
-    # WHEN performing the validation
-    validated_float_value: str = get_float_as_string(float_value)
-
-    # THEN check if the input value was formatted correctly
-    assert validated_float_value == "0.0"
+        # THEN the expected output should be correctly formatted
+        assert validated_float_value == expected_output
 
 
 def test_get_float_as_percentage():
