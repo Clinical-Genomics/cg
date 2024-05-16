@@ -21,7 +21,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 DELIVERY_TYPE = click.option(
-    "-d",
+    "-dt",
     "--delivery-type",
     multiple=True,
     type=click.Choice(PIPELINE_ANALYSIS_OPTIONS),
