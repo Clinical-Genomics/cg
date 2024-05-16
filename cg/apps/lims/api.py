@@ -10,12 +10,18 @@ from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
 from cg.constants import Priority
-from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod, LimsArtifactTypes
+from cg.constants.lims import (
+    MASTER_STEPS_UDFS,
+    PROP2UDF,
+    DocumentationMethod,
+    LimsArtifactTypes,
+)
 from cg.exc import LimsDataError
 
+from ...constants.subject import Sex
 from .order import OrderHandler
 
-SEX_MAP = {"F": "female", "M": "male", "Unknown": "unknown", "unknown": "unknown"}
+SEX_MAP = {"F": Sex.FEMALE, "M": Sex.MALE, "Unknown": Sex.UNKNOWN, "unknown": Sex.UNKNOWN}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 AM_METHODS = {
     "1464": "Automated TruSeq DNA PCR-free library preparation method",
