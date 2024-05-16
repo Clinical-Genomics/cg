@@ -5,6 +5,7 @@ from pathlib import Path
 
 from cg.constants import DataDelivery
 from cg.constants.constants import FileExtensions, Workflow
+from cg.constants.subject import Sex
 
 DELIVERY_REPORT_FILE_NAME: str = f"delivery-report{FileExtensions.HTML}"
 SWEDAC_LOGO_PATH = Path(
@@ -42,9 +43,9 @@ NO_FIELD: str = "Nej"
 PRECISION: int = 2
 
 REPORT_GENDER: dict[str, str] = {
-    "unknown": "Okänd",
-    "female": "Kvinna",
-    "male": "Man",
+    Sex.UNKNOWN: "Okänd",
+    Sex.FEMALE: "Kvinna",
+    Sex.MALE: "Man",
 }
 
 BALSAMIC_ANALYSIS_TYPE: dict[str, str] = {
