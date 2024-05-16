@@ -14,6 +14,7 @@ from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mutant.mutant import MutantAnalysisAPI
+from cg.meta.workflow.mutant.quality_controller.models import QualityResult
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 
@@ -31,6 +32,7 @@ def mutant(context: click.Context) -> None:
 mutant.add_command(resolve_compression)
 mutant.add_command(link)
 mutant.add_command(store)
+
 
 @mutant.command("config-case")
 @OPTION_DRY
@@ -97,18 +99,19 @@ def start_available(context: click.Context, dry_run: bool = False):
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
-    
+
+
 @mutant.command("store-available")
 @OPTION_DRY
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool) -> None:
-    """Store bundles for all finished analyses in Housekeeper."""
+    """Run QC checks and store bundles for all finished analyses in Housekeeper."""
 
     analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
 
-    analysis_api.run_qc_and_fail_cases(dry_run=dry_run)
+    analysis_api.run_qc_and_fail_analyses(dry_run=dry_run)
 
     for case_obj in analysis_api.get_cases_to_store():
         LOG.info("Storing deliverables for %s", case_obj.internal_id)
@@ -119,19 +122,17 @@ def store_available(context: click.Context, dry_run: bool) -> None:
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
-    
+
 
 @mutant.command("run-qc")
 @OPTION_DRY
 @click.pass_context
 def run_qc(context: click.Context, dry_run: bool, case_id: str) -> None:
     """
-    TODO
+    Run QC on case and generate QC_report file.
     """
     analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     case: Case = analysis_api.status_db.get_case_by_internal_id(case_id)
 
-    if analysis_api.qc_check_fails(case):
-        if not dry_run:
-            analysis_api.fail_case(case)
+    analysis_api.run_qc(case=case)

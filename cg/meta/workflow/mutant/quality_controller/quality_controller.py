@@ -1,6 +1,6 @@
 from pathlib import Path
 from cg.constants.constants import MutantQC
-from cg.meta.workflow.mutant.mutant import get_case_results_file_path, get_case_path
+from cg.meta.workflow.mutant.mutant import get_case_results_file_path
 from cg.meta.workflow.mutant.metadata_parser.metadata_parser import MetadataParser
 from cg.meta.workflow.mutant.quality_controller.models import (
     QualityMetrics,
@@ -15,6 +15,7 @@ from cg.meta.workflow.mutant.quality_controller.utils import (
     internal_negative_control_qc_pass,
     external_negative_control_qc_pass,
     get_quality_metrics,
+    get_report_path,
 )
 from cg.meta.workflow.mutant.quality_controller.report_generator import ReportGenerator
 from cg.models.cg_config import CGConfig
@@ -32,7 +33,7 @@ class QualityController:
         sample_results: list[SampleQualityResult] = self.quality_control_samples(quality_metrics)
         case_result: CaseQualityResult = self.quality_control_case(sample_results)
 
-        report_file: Path = get_case_path(case.internal_id)
+        report_file: Path = get_report_path(case)
         ReportGenerator.report(out_file=report_file, samples=sample_results, case=case_result)
         ResultLogger.log_results(case=case_result, samples=sample_results, report=report_file)
         summary: str = ReportGenerator.get_summary(

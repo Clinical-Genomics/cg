@@ -6,9 +6,12 @@ from typing import Any, Optional
 
 from cg.constants import SequencingFileTag, Workflow
 from cg.constants.constants import FileFormat
+from cg.constants.tb import AnalysisStatus
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MutantFastqHandler
+from cg.meta.workflow.mutant.quality_controller.models import QualityResult
+from cg.meta.workflow.mutant.quality_controller.quality_controller import QualityController
 from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
 from cg.store.models import Application, Case, Sample
@@ -25,6 +28,7 @@ class MutantAnalysisAPI(AnalysisAPI):
     ):
         super().__init__(workflow=workflow, config=config)
         self.root_dir = config.mutant.root
+        self.quality_checker = QualityController(config)
 
     @property
     def conda_binary(self) -> str:
@@ -189,8 +193,8 @@ class MutantAnalysisAPI(AnalysisAPI):
             )
 
     def get_cases_to_store(self) -> list[Case]:
-        """Return cases where analysis has a deliverables file,
-        and is ready to be stored in Housekeeper."""
+        """Return cases with completed analysis on Trailblazer, a deliverables file in the case directory,
+        and ready to be stored in Housekeeper."""
         return [
             case
             for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
@@ -251,59 +255,6 @@ class MutantAnalysisAPI(AnalysisAPI):
         self.fastq_handler.concatenate(read_paths, concatenated_path)
         self.fastq_handler.remove_files(read_paths)
 
-    def qc_check_fails(self, case: Case) -> bool:
-        """TODO: Checks result file and counts False"""
-
-        # fetch the negctrl
-        # process_results_file
-
-        # check_negative_control
-        #     check_read_counts
-        #     #In the future run kraken
-
-        # check_all_samples
-
-        failed_samples, number_of_samples = self.process_results_file(
-            self.get_case_results_file_path(case)  # , negative_control
-        )
-
-        return (
-            True
-            if failed_samples / number_of_samples
-            > MutantQC.FRACTION_OF_SAMPLES_WITH_FAILED_QC_TRESHOLD
-            else False
-        )
-
-    def parse_results_file(results_file: Path, negative_control: str) -> tuple[int, int]:
-        with open(results_file, "r") as file:
-            results: dict[str, Any] = csv.DictReader(file)
-
-        #Parse the values without "" to get the 'clean' string
-        # a = {
-        #     "Sample": "23CS102364",
-        #     "Selection": "Allmän övervakning",
-        #     "Region Code": "01",
-        #     "Ticket": "841080",
-        #     "%N_bases": "0.23",
-        #     "%10X_coverage": "99.64",
-        #     "QC_pass": "TRUE",
-        #     "Lineage": "JD.1.1",
-        #     "Pangolin_data_version": "PUSHER-v1.23.1",
-        #     "VOC": "No",
-        #     "Mutations": "S373P;S375F;N440K;G446S;A475V;S477N;T478K;E484A;F490S;Q498R;N501Y;Y505H;D614G;H655Y;N679K;P681H;N764K;D796Y;Q954H;N969K",
-        # }
-        # if 0provsek gets true
-
-        # Later do QC check of ration
-        number_of_samples: int = 0
-        failed_samples: int = 0
-        for sample in results:
-            if sample["QC_pass"] == "FAIL":
-                # TODO: turn "FAIL" into constant
-                failed_samples += 1
-            number_of_samples += 1
-        return (failed_samples, number_of_samples)
-
     def run_analysis(self, case_id: str, dry_run: bool, config_artic: str = None) -> None:
         if self.get_case_output_path(case_id=case_id).exists():
             LOG.info("Found old output files, directory will be cleaned!")
@@ -338,17 +289,30 @@ class MutantAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
 
-    def run_qc_and_fail_cases(self, dry_run: bool) -> None:
-        """TODO: Fails cases that fail QC."""
-
+    def run_qc_and_fail_analyses(self, dry_run: bool) -> None:
+        """Run qc check and fail cases that fail QC."""
         for case in self.get_cases_to_store():
-            if self.qc_check_fails(case):
-                if not dry_run:
-                    self.fail_case(case)
+            # TODO: print qc summary on TB
 
-    def fail_case(self, case: Case) -> None:
-        """TODO:Fails case on TB and set to none on StatusDB"""
+            if not self.case_passes_qc(self, case):
+                if not dry_run:
+                    self.fail_analysis(case)
+
+    def case_passes_qc(self, case: Case) -> bool:
+        qc_result: QualityResult = self.get_qc_result(case=case)
+        return qc_result.case.passes_qc
+
+    def get_qc_result(self, case: Case) -> QualityResult:
+        qc_result: QualityResult = self.quality_checker.quality_control(case=case)
+        return qc_result
+
+    def fail_analysis(self, case: Case) -> None:
+        """Fail analysis on TB and set case status to hold in StatusDB."""
         self.trailblazer_api.set_analysis_status(
             case_id=case.internal_id, status=AnalysisStatus.FAILED
         )
         self.set_statusdb_action(case_id=case.internal_id, action="hold")
+
+    def run_qc(self, case: Case) -> None:
+        LOG.info("Running QC on case %s", case.internal_id)
+        self.get_qc_result
