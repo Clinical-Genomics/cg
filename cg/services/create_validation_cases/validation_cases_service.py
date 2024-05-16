@@ -45,8 +45,7 @@ class CreateValidationCaseService:
                 f"Application tag set to: {sample.application_version.application.tag}"
             )
             if not self.dry_run:
-                self.status_db.add_sample(sample)
-
+                self.status_db.persist_record_to_db(sample)
                 LOG.info(f"Added {sample.name} to StatusDB.")
 
     def store_validation_case(self, validation_case_data: ValidationCaseData) -> None:
@@ -58,7 +57,7 @@ class CreateValidationCaseService:
             LOG.info(f"Case with name {validation_case.name} already exists in StatusDB.")
             return
         if not self.dry_run:
-            self.status_db.session.add(validation_case)
+            self.status_db.persist_record_to_db(validation_case)
             LOG.info(f"New validation case created: {validation_case.internal_id}")
 
     def _link_sample_to_case(self, validation_case_data: ValidationCaseData) -> None:
@@ -71,7 +70,7 @@ class CreateValidationCaseService:
             )
             if self.dry_run:
                 return
-            self.status_db.session.add(sample_case_link)
+            self.status_db.persist_record_to_db(sample_case_link)
             LOG.info(
                 f"Related sample {sample.internal_id} to {validation_case_data.validation_case.internal_id}"
             )
@@ -89,7 +88,6 @@ class CreateValidationCaseService:
             self.store_validation_samples(validation_case_data)
             self.store_validation_case(validation_case_data)
             self._link_sample_to_case(validation_case_data)
-            self.status_db.session.commit()
         except Exception as error:
             LOG.warning(f"An error occurred {repr(error)}")
             self.status_db.session.rollback()

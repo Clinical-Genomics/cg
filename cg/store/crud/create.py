@@ -415,3 +415,10 @@ class CreateHandler(BaseHandler):
         session = get_session()
         session.execute(insert_statement)
         session.commit()
+
+    @staticmethod
+    def persist_record_to_db(record):
+        session = get_session()
+        session.add(record)
+        session.commit()
+        return record
