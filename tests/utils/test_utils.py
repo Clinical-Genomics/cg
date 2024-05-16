@@ -2,6 +2,7 @@
 
 import pytest
 
+from cg.cli.utils import is_case_name_allowed
 from cg.utils.utils import get_hamming_distance, get_string_from_list_by_pattern
 
 
@@ -64,3 +65,15 @@ def test_get_hamming_distance_different_lengths():
             str(exc_info.value)
             == "The two strings must have the same length to calculate distance!"
         )
+
+
+@pytest.mark.parametrize(
+    "case_name, expected_behaviour",
+    [
+        ("valid-case-name123", True),
+        ("invalid_case_name", False),
+        ("invalid-special-character()", False),
+    ],
+)
+def test_is_case_name_valid(case_name: str, expected_behaviour: bool):
+    assert is_case_name_allowed(case_name) == expected_behaviour
