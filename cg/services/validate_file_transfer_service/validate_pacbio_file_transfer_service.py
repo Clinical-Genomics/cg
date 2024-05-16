@@ -46,9 +46,11 @@ class ValidatePacbioFileTransferService(ValidateFileTransferService):
         return Path(self.transfer_validated_file_name(manifest_file_path)).exists()
 
     def create_systemd_trigger_file(self, manifest_file_path: Path) -> None:
-        systemd_trigger_file_name = Path(
-            f"{self.trigger_dir}/{self.get_run_id(manifest_file_path)}-{self.get_smrt_cell_id(manifest_file_path)}"
+        systemd_trigger_file_name: Path = Path(
+            self.trigger_dir,
+            f"{self.get_run_id(manifest_file_path)}-{self.get_smrt_cell_id(manifest_file_path)}",
         )
+
         writer = WriteFile()
         writer.write_file_from_content(
             file_path=systemd_trigger_file_name, content="", file_format=FileFormat.TXT
