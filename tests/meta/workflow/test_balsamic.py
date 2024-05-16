@@ -19,15 +19,15 @@ def test_get_verified_sex():
 
     # GIVEN a sample object
     sample_obj = {
-        "ACC0000A0": {"sex": "female"},
-        "ACC0000A1": {"sex": "female"},
+        "ACC0000A0": {"sex": Sex.FEMALE},
+        "ACC0000A1": {"sex": Sex.FEMALE},
     }
 
     # WHEN extracting the sex
     retrieved_sex: Sex = BalsamicAnalysisAPI.get_verified_sex(sample_obj)
 
     # THEN sex must match the expected one
-    assert retrieved_sex == "female"
+    assert retrieved_sex == Sex.FEMALE
 
 
 def test_get_verified_sex_error():
@@ -49,8 +49,8 @@ def test_get_verified_sex_unknown(caplog):
 
     # GIVEN a sample object with different sexes
     sample_obj = {
-        "ACC0000A0": {"sex": "unknown"},
-        "ACC0000A1": {"sex": "unknown"},
+        "ACC0000A0": {"sex": Sex.UNKNOWN},
+        "ACC0000A1": {"sex": Sex.UNKNOWN},
     }
 
     # WHEN extracting the sex

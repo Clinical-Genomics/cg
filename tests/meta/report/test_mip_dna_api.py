@@ -1,4 +1,5 @@
 from cg.constants import REPORT_GENDER
+from cg.constants.subject import Sex
 from tests.store_helpers import StoreHelpers
 
 
