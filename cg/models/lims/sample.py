@@ -2,8 +2,9 @@ from pydantic.v1 import BaseModel, validator
 from typing_extensions import Literal
 
 from cg.constants import Priority
+from cg.constants.subject import Sex
 
-SEX_MAP = {"male": "M", "female": "F"}
+SEX_MAP = {Sex.MALE: "M", Sex.FEMALE: "F"}
 
 
 class Udf(BaseModel):
