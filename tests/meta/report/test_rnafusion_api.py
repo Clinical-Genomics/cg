@@ -1,8 +1,9 @@
 """Test module for the Rnafusion delivery report API."""
 
+import pytest
 from pytest_mock import MockFixture
 
-from cg.constants import NA_FIELD, RIN_MAX_THRESHOLD
+from cg.constants import NA_FIELD, RIN_MAX_THRESHOLD, RIN_MIN_THRESHOLD
 from cg.meta.report.rnafusion import RnafusionReportAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.report.metadata import RnafusionSampleMetadataModel
@@ -39,9 +40,20 @@ def test_get_sample_metadata(
     assert sample_metadata.model_dump() == rnafusion_validated_metrics
 
 
+@pytest.mark.parametrize(
+    "input_rin, expected_rin",
+    [
+        (RIN_MAX_THRESHOLD, str(float(RIN_MAX_THRESHOLD))),  # Test for a valid integer input
+        (RIN_MAX_THRESHOLD + 1, NA_FIELD),  # Test for an integer above the allowed threshold
+        (RIN_MIN_THRESHOLD - 1, NA_FIELD),  # Test for an integer below the allowed threshold
+        (None, NA_FIELD),  # Test for a None input
+    ],
+)
 def test_ensure_rin_thresholds(
     rnafusion_case_id: str,
     sample_id: str,
+    input_rin: int | float,
+    expected_rin: str,
     report_api_rnafusion: RnafusionReportAPI,
     rnafusion_mock_analysis_finish: None,
     mocker: MockFixture,
@@ -59,13 +71,13 @@ def test_ensure_rin_thresholds(
         case_id=rnafusion_case_id
     )
 
-    # GIVEN a RIN value outside the range of supported values
-    mocker.patch.object(MockLimsAPI, "get_sample_rin", return_value=RIN_MAX_THRESHOLD + 1)
+    # GIVEN a specific RIN value
+    mocker.patch.object(MockLimsAPI, "get_sample_rin", return_value=input_rin)
 
     # WHEN getting the sample metadata
     sample_metadata: RnafusionSampleMetadataModel = report_api_rnafusion.get_sample_metadata(
         case=case, sample=sample, analysis_metadata=latest_metadata
     )
 
-    # THEN the sample RIN value should be N/A
-    assert sample_metadata.rin == NA_FIELD
+    # THEN the sample RIN value should match the expected RIN value
+    assert sample_metadata.rin == expected_rin

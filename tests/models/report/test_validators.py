@@ -70,18 +70,27 @@ def test_get_boolean_as_string():
         (0.0, "0.0"),  # Test for float zero input
         (5, "5.0"),  # Test for a valid integer input
         (0, "0.0"),  # Test for integer zero input
-        (None, "N/A"),  # Test for None input
+        (None, NA_FIELD),  # Test for None input
         ("invalid", ValueError),  # Test for None input
     ],
 )
-def test_get_number_as_string(input_value: Any, expected_output: Any, caplog: LogCaptureFixture):
+def test_get_number_as_string(input_value: Any, expected_output: str, caplog: LogCaptureFixture):
     """Test the validation and formatting of numbers."""
+
+    # GIVEN a list of number inputs and their expected values
+
     if expected_output == ValueError:
+        # WHEN getting a string representation of a number
         with pytest.raises(ValueError):
             get_number_as_string(input_value)
+
+        # THEN a ValueError should have been raised for an invalid number input
         assert f"Value {input_value} cannot be converted to float" in caplog.text
     else:
+        # WHEN getting a string representation of a number
         validated_float_value = get_number_as_string(input_value)
+
+        # THEN the expected output should be correctly formatted
         assert validated_float_value == expected_output
 
 
