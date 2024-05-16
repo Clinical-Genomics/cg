@@ -33,13 +33,21 @@ def get_boolean_as_string(value: bool | None) -> str:
     return NA_FIELD
 
 
-def get_number_as_string(value: int | float | None) -> str:
-    """Return string representation of a number."""
-    return (
-        str(round(float(value), PRECISION))
-        if value or isinstance(value, (int, float))
-        else NA_FIELD
-    )
+def get_number_as_string(value: Any) -> str:
+    """
+    Return string representation of a number. If None is provided, then it returns N/A.
+
+    Raises:
+        ValueError: If the input value cannot be converted to a float.
+    """
+    try:
+        result: str = str(round(float(value), PRECISION))
+        return result
+    except TypeError:
+        return NA_FIELD
+    except ValueError:
+        LOG.error(f"Value {value} cannot be converted to float")
+        raise
 
 
 def get_float_as_percentage(value: float | None) -> str:
