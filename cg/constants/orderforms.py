@@ -1,9 +1,10 @@
 from enum import StrEnum
 
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
+from cg.constants.subject import Sex
 from cg.models.orders.order import OrderType
 
-SEX_MAP = {"male": "M", "female": "F", "unknown": "unknown"}
+SEX_MAP = {Sex.MALE: "M", Sex.FEMALE: "F", Sex.UNKNOWN: "unknown"}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 CONTAINER_TYPES = ["Tube", "96 well plate"]
 SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)

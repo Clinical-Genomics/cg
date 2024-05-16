@@ -4,7 +4,7 @@ from pydantic import BaseModel, BeforeValidator, ConfigDict, constr
 from typing_extensions import Annotated
 
 from cg.constants import DataDelivery, Workflow
-from cg.constants.subject import PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.models.orders.validators.sample_base_validators import snake_case
 from cg.store.models import Application, Case, Customer, Pool, Sample
 
@@ -13,12 +13,6 @@ class ControlEnum(StrEnum):
     not_control = ""
     positive = "positive"
     negative = "negative"
-
-
-class SexEnum(StrEnum):
-    male = "male"
-    female = "female"
-    unknown = "unknown"
 
 
 class PriorityEnum(StrEnum):
@@ -105,7 +99,7 @@ class OrderSample(BaseModel):
     require_qc_ok: bool = False
     rml_plate_name: str | None = None
     selection_criteria: str | None = None
-    sex: SexEnum = SexEnum.unknown
+    sex: Sex = Sex.UNKNOWN
     source: str | None = None
     status: PhenotypeStatus = PhenotypeStatus.UNKNOWN
     subject_id: (

@@ -2,14 +2,13 @@ from pydantic.v1 import BaseModel, constr, validator
 
 from cg.constants import DataDelivery
 from cg.constants.constants import GenomeVersion, Workflow
-from cg.constants.subject import PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.models.orders.order import OrderType
 from cg.models.orders.sample_base import (
     NAME_PATTERN,
     ContainerEnum,
     ControlEnum,
     PriorityEnum,
-    SexEnum,
 )
 from cg.store.models import Application, Case, Organism, Panel, Pool, Sample
 
@@ -72,7 +71,7 @@ class Of1508Sample(OrderInSample):
         max_length=Case.name.property.columns[0].type.length,
     )
     case_internal_id: constr(max_length=Sample.internal_id.property.columns[0].type.length) | None
-    sex: SexEnum = SexEnum.unknown
+    sex: Sex = Sex.UNKNOWN
     tumour: bool = False
     source: str | None
     control: ControlEnum | None
@@ -173,7 +172,7 @@ class FastqSample(OrderInSample):
     # Orderform 1508
     # "required"
     container: ContainerEnum | None
-    sex: SexEnum = SexEnum.unknown
+    sex: Sex = Sex.UNKNOWN
     source: str
     tumour: bool
     # "required if plate"
