@@ -64,7 +64,7 @@ class ValidatePacbioFileTransferService(ValidateFileTransferService):
             manifest_file_format=FileFormat.TXT,
         ):
             LOG.debug(
-                f"Transfer not done for run {self.get_run_id(manifest_file_path)} and smrt cell {self.get_smrt_cell_id()}"
+                f"Transfer not done for run {self.get_run_id(manifest_file_path)} and smrt cell {self.get_smrt_cell_id(manifest_file_path)}"
             )
             return
         self.create_validated_transfer_file(manifest_file_path)
