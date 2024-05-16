@@ -100,7 +100,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
-        analysis_type = self.get_analysis_type(case_id=case_id)
+        analysis_type: AnalysisType = self.get_analysis_type(case_id=case_id)
         target_bed = self.set_target_bed(case_id=case_id, analysis_type=analysis_type)
         return RarediseaseParameters(
             input=self.get_sample_sheet_path(case_id=case_id),
