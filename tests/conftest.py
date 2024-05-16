@@ -231,6 +231,13 @@ def sbatch_process(sbatch_job_number: int) -> ProcessMock:
     return slurm_process
 
 
+@pytest.fixture(scope="function")
+def dna_case(analysis_store, helpers) -> Case:
+    """Case with DNA application"""
+    cust = helpers.ensure_customer(analysis_store)
+    return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="dna_case")
+
+
 @pytest.fixture
 def analysis_family_single_case(
     case_id: str, family_name: str, sample_id: str, ticket_id: str
@@ -315,8 +322,11 @@ def base_config_dict() -> dict:
         "illumina_flow_cells_directory": "path/to/flow_cells",
         "illumina_demultiplexed_runs_directory": "path/to/demultiplexed_flow_cells_dir",
         "nanopore_data_directory": "path/to/nanopore_data_directory",
-        "downsample_dir": "path/to/downsample_dir",
-        "downsample_script": "downsample.sh",
+        "downsample": {
+            "downsample_dir": "path/to/downsample_dir",
+            "downsample_script": "downsample.sh",
+            "account": "development",
+        },
         "housekeeper": {
             "database": "sqlite:///",
             "root": "path/to/root",
@@ -1776,8 +1786,11 @@ def context_config(
         "illumina_flow_cells_directory": str(illumina_flow_cells_directory),
         "illumina_demultiplexed_runs_directory": str(illumina_demultiplexed_runs_directory),
         "nanopore_data_directory": "path/to/nanopore_data_directory",
-        "downsample_dir": str(downsample_dir),
-        "downsample_script": "downsample.sh",
+        "downsample": {
+            "downsample_dir": str(downsample_dir),
+            "downsample_script": "downsample.sh",
+            "account": "development",
+        },
         "email_base_settings": {
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",
@@ -3377,7 +3390,7 @@ def taxprofiler_sample_sheet_content(
     row: str = ",".join(
         [
             sample_name,
-            sample_name,
+            "1",
             sequencing_platform,
             fastq_forward_read_path.as_posix(),
             fastq_reverse_read_path.as_posix(),
@@ -3933,7 +3946,7 @@ def downsample_data(
         case_id=downsample_case_internal_id,
         case_name=downsample_case_name,
         number_of_reads=number_of_reads_in_millions,
-        out_dir=Path(downsample_context.downsample_dir),
+        out_dir=Path(downsample_context.downsample.downsample_dir),
     )
 
 

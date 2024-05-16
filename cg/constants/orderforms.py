@@ -33,7 +33,7 @@ class Orderform(StrEnum):
     def get_current_orderform_version(order_form: str) -> str:
         """Returns the current version of the given order form."""
         current_order_form_versions = {
-            Orderform.MIP_DNA: "30",
+            Orderform.MIP_DNA: "31",
             Orderform.RML: "17",
             Orderform.MICROSALT: "11",
             Orderform.SARS_COV_2: "9",
