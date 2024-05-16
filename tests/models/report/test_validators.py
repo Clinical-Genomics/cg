@@ -71,7 +71,8 @@ def test_get_boolean_as_string():
         (5, "5.0"),  # Test for a valid integer input
         (0, "0.0"),  # Test for integer zero input
         (None, NA_FIELD),  # Test for None input
-        ("invalid", ValueError),  # Test for None input
+        ("1.2", "1.2"),  # Test for valid string input
+        ("invalid", ValueError),  # Test for an invalid string input
     ],
 )
 def test_get_number_as_string(input_value: Any, expected_output: str, caplog: LogCaptureFixture):
