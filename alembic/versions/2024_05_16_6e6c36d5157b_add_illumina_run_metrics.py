@@ -60,4 +60,3 @@ def upgrade():
 def downgrade():
 
     op.drop_table("illumina_run_metrics")
-    sequencer_type_enum.drop(op.get_bind(), checkfirst=False)
