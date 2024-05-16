@@ -118,4 +118,3 @@ base.add_command(demultiplex_cmd)
 base.add_command(generate_cmd)
 base.add_command(downsample)
 base.add_command(validate)
-

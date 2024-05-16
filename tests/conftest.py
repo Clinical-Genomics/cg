@@ -38,7 +38,7 @@ from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
 from cg.meta.create_validation_cases.validation_case_data import ValidationCaseData
-from cg.meta.create_validation_cases.validation_cases_api import CreateValidationCaseAPI
+from cg.meta.create_validation_cases.validation_cases_api import CreateValidationCaseService
 from cg.meta.create_validation_cases.validation_data_input import ValidationDataInput
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
@@ -4122,7 +4122,7 @@ def validation_case_data(
 @pytest.fixture
 def create_validation_api(
     store_with_multiple_cases_and_samples: Store, validation_hk_api: HousekeeperAPI
-) -> CreateValidationCaseAPI:
-    return CreateValidationCaseAPI(
+) -> CreateValidationCaseService:
+    return CreateValidationCaseService(
         status_db=store_with_multiple_cases_and_samples, housekeeper_api=validation_hk_api
     )

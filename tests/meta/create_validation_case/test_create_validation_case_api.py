@@ -6,7 +6,7 @@ from housekeeper.store.models import File
 
 from cg.constants import SequencingFileTag
 from cg.meta.create_validation_cases.validation_case_data import ValidationCaseData
-from cg.meta.create_validation_cases.validation_cases_api import CreateValidationCaseAPI
+from cg.meta.create_validation_cases.validation_cases_api import CreateValidationCaseService
 
 
 def test_get_new_fastq_file_path(validation_case_data: ValidationCaseData, fixtures_dir: Path):
@@ -17,7 +17,7 @@ def test_get_new_fastq_file_path(validation_case_data: ValidationCaseData, fixtu
     )
 
     # WHEN getting the new fastq file path
-    new_file_path = CreateValidationCaseAPI.get_new_fastq_file_path(
+    new_file_path = CreateValidationCaseService.get_new_fastq_file_path(
         fastq_file=fastq_file,
         validation_sample=validation_case_data.validation_samples[0],
     )
@@ -27,7 +27,7 @@ def test_get_new_fastq_file_path(validation_case_data: ValidationCaseData, fixtu
 
 
 def test_create_validation_case(
-    create_validation_api: CreateValidationCaseAPI,
+    create_validation_api: CreateValidationCaseService,
     case_id_with_multiple_samples: str,
     validation_sample_id: str,
     validation_case_name: str,

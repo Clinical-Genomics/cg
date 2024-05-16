@@ -18,7 +18,7 @@ from cg.utils.files import copy_file, get_files_matching_pattern, rename_file
 LOG = logging.getLogger(__name__)
 
 
-class CreateValidationCaseAPI:
+class CreateValidationCaseService:
 
     def __init__(self, status_db: Store, housekeeper_api: HousekeeperAPI, dry_run: bool = False):
         self.status_db: Store = status_db

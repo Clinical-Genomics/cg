@@ -29,8 +29,8 @@ class ValidationCaseData:
 
     @staticmethod
     def _validation_sample_id(sample: Sample) -> str:
-        """Return a new validation sample identifier. The identifier removes "ACC" and prepends "VAL"."""
-        return "VAL" + sample.internal_id[3:]
+        """Return a new validation sample identifier by prepending VAL_."""
+        return "VAL_" + sample.internal_id
 
     @property
     def validation_case_name(
