@@ -8,7 +8,7 @@ on:
 
 jobs:
   tests-coverage:
-    runs-on: Beefy_Linux
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
@@ -37,7 +37,7 @@ jobs:
 
       - name: Test with pytest & Coveralls
         run: |
-          pytest -n logical --cov=cg/
+          pytest -n auto --cov=cg/
           coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
