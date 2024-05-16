@@ -1,9 +1,7 @@
 from pathlib import Path
 from cg.constants.constants import MutantQC
+from cg.meta.workflow.mutant.mutant import get_case_results_file_path, get_case_path
 from cg.meta.workflow.mutant.metadata_parser.metadata_parser import MetadataParser
-from cg.meta.workflow.mutant.metadata_parser.models import SamplesMetadataMetrics
-from cg.meta.workflow.mutant.metrics_parser import MetricsParser, SampleMetrics
-from cg.meta.workflow.mutant.metrics_parser.models import SampleResultsMetrics
 from cg.meta.workflow.mutant.quality_controller.models import (
     QualityMetrics,
     SampleQualityResult,
@@ -17,33 +15,30 @@ from cg.meta.workflow.mutant.quality_controller.utils import (
     internal_negative_control_qc_pass,
     external_negative_control_qc_pass,
     get_quality_metrics,
-    is_valid_total_reads,
-    is_valid_total_reads_for_external_negative_control,
-    is_valid_total_reads_for_internal_negative_control,
 )
-from cg.store.store import Store
+from cg.meta.workflow.mutant.quality_controller.report_generator import ReportGenerator
+from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 
 
 class QualityController:
-    def __init__(self, status_db: Store):
-        # self.status_db = status_db
-        self.metadata_parser = MetadataParser(status_db)
+    def __init__(self, config: CGConfig):
+        self.metadata_parser = MetadataParser(config)
 
-    def quality_control(self, case_results_file_path: Path, case: Case) -> QualityResult:
+    def quality_control(self, case: Case) -> QualityResult:
+        """Perform QC check on a case and generate the QC_report."""
+        case_results_file_path: Path = get_case_results_file_path(case)
         quality_metrics: QualityMetrics = get_quality_metrics(case_results_file_path, case)
         sample_results: list[SampleQualityResult] = self.quality_control_samples(quality_metrics)
         case_result: CaseQualityResult = self.quality_control_case(sample_results)
-        return case_result
 
-        # TODO
-        # report_file: Path = get_report_path(case_metrics_file_path)
-        # ReportGenerator.report(out_file=report_file, samples=sample_results, case=case_result)
-        # ResultLogger.log_results(case=case_result, samples=sample_results, report=report_file)
-        # summary: str = ReportGenerator.get_summary(
-        #     case=case_result, samples=sample_results, report_path=report_file
-        # )
-        # return QualityResult(case=case_result, samples=sample_results, summary=summary)
+        report_file: Path = get_case_path(case.internal_id)
+        ReportGenerator.report(out_file=report_file, samples=sample_results, case=case_result)
+        ResultLogger.log_results(case=case_result, samples=sample_results, report=report_file)
+        summary: str = ReportGenerator.get_summary(
+            case=case_result, samples=sample_results, report_path=report_file
+        )
+        return QualityResult(case=case_result, samples=sample_results, summary=summary)
 
     def quality_control_samples(self, quality_metrics: QualityMetrics) -> list[SampleQualityResult]:
         sample_results: list[SampleQualityResult] = []
@@ -117,4 +112,4 @@ class QualityController:
                 if not sample_result.passes_qc:
                     failed_samples += 1
 
-        return failed_samples / total_samples > MutantQC.FRACTION_OF_SAMPLES_WITH_FAILED_QC_TRESHOLD 
+        return failed_samples / total_samples > MutantQC.FRACTION_OF_SAMPLES_WITH_FAILED_QC_TRESHOLD

@@ -1,4 +1,5 @@
 from cg.constants.constants import MutantQC
+from cg.meta.workflow.mutant.constants import QUALITY_REPORT_FILE_NAME
 from cg.meta.workflow.mutant.metadata_parser.metadata_parser import MetadataParser
 from cg.meta.workflow.mutant.metadata_parser.models import SamplesMetadataMetrics
 from cg.meta.workflow.mutant.metrics_parser.metrics_parser import MetricsParser
