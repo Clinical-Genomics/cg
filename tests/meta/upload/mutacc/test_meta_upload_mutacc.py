@@ -3,7 +3,7 @@
 import os
 
 from cg.apps.scout.scout_export import ScoutExportCase
-from cg.constants.subject import PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.meta.upload.mutacc import (
     UploadToMutaccAPI,
     resolve_parent,
@@ -114,9 +114,9 @@ def test_resolve_sex():
     mutacc_unknown = resolve_sex(scout_unknown)
 
     # THEN the sex codes should have been converted
-    assert mutacc_male == "male"
-    assert mutacc_female == "female"
-    assert mutacc_unknown == "unknown"
+    assert mutacc_male == Sex.MALE
+    assert mutacc_female == Sex.FEMALE
+    assert mutacc_unknown == Sex.UNKNOWN
 
 
 def test_resolve_parent():

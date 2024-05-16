@@ -35,8 +35,8 @@ def test_get_verified_sex_error():
 
     # GIVEN a sample object with different sexes
     sample_obj = {
-        "ACC0000A0": {"sex": "male"},
-        "ACC0000A1": {"sex": "female"},
+        "ACC0000A0": {"sex": Sex.MALE},
+        "ACC0000A1": {"sex": Sex.FEMALE},
     }
 
     # WHEN extracting the sex

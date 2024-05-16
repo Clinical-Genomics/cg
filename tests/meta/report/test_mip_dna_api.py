@@ -17,7 +17,7 @@ def test_get_sample_metadata(
         "million_read_pairs": "N/A",
         "duplicates": "4.01",
         "bait_set": "N/A",
-        "gender": REPORT_GENDER.get("male"),
+        "gender": REPORT_GENDER.get(Sex.MALE),
         "mapped_reads": "99.77",
         "mean_target_coverage": "38.34",
         "pct_10x": "99.1",
