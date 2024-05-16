@@ -5,6 +5,7 @@ import pytest
 
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.constants import CaseActions, PrepCategory
+from cg.constants.subject import PhenotypeStatus
 from cg.exc import OrderError
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.api import FastqSubmitter
@@ -170,7 +171,7 @@ def test_cases_to_status(mip_order_to_submit):
     assert first_sample["phenotype_groups"] == ["Phenotype-group"]
     assert first_sample["phenotype_terms"] == ["HP:0012747", "HP:0025049"]
     assert first_sample["sex"] == "female"
-    assert first_sample["status"] == "affected"
+    assert first_sample["status"] == PhenotypeStatus.AFFECTED
     assert first_sample["subject_id"] == "subject1"
     assert first_sample["mother"] == "sample2"
     assert first_sample["father"] == "sample3"
@@ -511,7 +512,7 @@ def test_store_mip(orders_api, base_store: Store, mip_status_data, ticket_id: st
         new_case.synopsis
         == "As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for."
     )
-    assert new_link.status == "affected"
+    assert new_link.status == PhenotypeStatus.AFFECTED
     assert new_link.mother.name == "sample2"
     assert new_link.father.name == "sample3"
     assert new_link.sample.name == "sample1"

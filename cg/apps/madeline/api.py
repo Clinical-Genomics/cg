@@ -5,6 +5,7 @@ import pathlib
 import tempfile
 from typing import Iterable
 
+from cg.constants.subject import PhenotypeStatus
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -31,7 +32,7 @@ class MadelineAPI:
             "status": "Affected",
         }
         sex_gender = {"male": "M", "female": "F"}
-        status_affected = {"affected": "Y", "unaffected": "N"}
+        status_affected = {PhenotypeStatus.AFFECTED: "Y", PhenotypeStatus.UNAFFECTED: "N"}
         LOG.info("Generating madeline input lines")
 
         yield "\t".join(columns.values())

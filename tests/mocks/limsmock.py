@@ -4,6 +4,7 @@ from pydantic.v1 import BaseModel
 from typing_extensions import Literal
 
 from cg.apps.lims import LimsAPI
+from cg.constants.subject import PhenotypeStatus
 
 
 class LimsProject(BaseModel):
@@ -25,7 +26,9 @@ class LimsSample(BaseModel):
     sex: Literal["male", "female", "unknown"] = None
     father: str = None
     mother: str = None
-    status: Literal["affected", "unaffected", "unknown"] = None
+    status: Literal[
+        PhenotypeStatus.AFFECTED, PhenotypeStatus.UNAFFECTED, PhenotypeStatus.UNKNOWN
+    ] = None
     application: str = None
     application_version: str = None
     family: str = None

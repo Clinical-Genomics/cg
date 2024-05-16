@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from cg.apps.madeline.api import MadelineAPI
+from cg.constants.subject import PhenotypeStatus
 from tests.mocks.process_mock import ProcessMock
 
 
@@ -64,7 +65,7 @@ def proband() -> dict[str, str | None]:
         "mother": "mother",
         "deceased": False,
         "proband": True,
-        "status": "affected",
+        "status": PhenotypeStatus.AFFECTED,
     }
     return ind_info
 

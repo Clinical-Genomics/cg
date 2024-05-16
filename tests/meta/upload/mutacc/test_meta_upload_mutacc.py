@@ -3,6 +3,7 @@
 import os
 
 from cg.apps.scout.scout_export import ScoutExportCase
+from cg.constants.subject import PhenotypeStatus
 from cg.meta.upload.mutacc import (
     UploadToMutaccAPI,
     resolve_parent,
@@ -147,5 +148,5 @@ def test_resolve_phenotype():
     mutacc_unaffected = resolve_phenotype(scout_unaffected)
 
     # THEN the phenotype codes should have been converted
-    assert mutacc_affected == "affected"
-    assert mutacc_unaffected == "unaffected"
+    assert mutacc_affected == PhenotypeStatus.AFFECTED
+    assert mutacc_unaffected == PhenotypeStatus.UNAFFECTED

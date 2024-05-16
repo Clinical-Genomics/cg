@@ -3,7 +3,7 @@
 import pytest
 
 from cg.constants import FileExtensions
-from cg.constants.subject import Sex
+from cg.constants.subject import PhenotypeStatus, Sex
 
 
 def create_file(tmpdir, flowcell, lane, read, file_content):
@@ -51,7 +51,7 @@ def valid_config():
         analysis_type="wes",
         father="0",
         mother="0",
-        phenotype="affected",
+        phenotype=PhenotypeStatus.AFFECTED,
         sex=Sex.MALE,
         expected_coverage=15,
         capture_kit="agilent_sureselect_cre.v1",
@@ -70,7 +70,7 @@ def invalid_config_analysis_type():
         analysis_type="nonexisting",
         father="0",
         mother="0",
-        phenotype="affected",
+        phenotype=PhenotypeStatus.AFFECTED,
         sex=Sex.MALE,
         expected_coverage=15,
         capture_kit="agilent_sureselect_cre.v1",
@@ -91,7 +91,7 @@ def invalid_config_unknown_field():
         analysis_type="wes",
         father="0",
         mother="0",
-        phenotype="affected",
+        phenotype=PhenotypeStatus.AFFECTED,
         sex=Sex.MALE,
         expected_coverage=15,
         capture_kit="agilent_sureselect_cre.v1",
@@ -112,7 +112,7 @@ def invalid_config_unknown_field_sample_id():
         analysis_type="wes",
         father="0",
         mother="0",
-        phenotype="affected",
+        phenotype=PhenotypeStatus.AFFECTED,
         sex=Sex.MALE,
         expected_coverage=15,
         capture_kit="agilent_sureselect_cre.v1",
@@ -133,7 +133,7 @@ def invalid_config_unknown_field_analysis_type():
         analysis_type="nonexisting",
         father="0",
         mother="0",
-        phenotype="affected",
+        phenotype=PhenotypeStatus.AFFECTED,
         sex=Sex.MALE,
         expected_coverage=15,
         capture_kit="agilent_sureselect_cre.v1",
