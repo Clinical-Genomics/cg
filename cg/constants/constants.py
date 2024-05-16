@@ -110,14 +110,6 @@ class SexOptions(StrEnum):
 
 SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 
-STATUS_OPTIONS = ("affected", "unaffected", "unknown")
-
-
-class StatusOptions(StrEnum):
-    AFFECTED: str = "affected"
-    UNAFFECTED: str = "unaffected"
-    UNKNOWN: str = "unknown"
-
 
 class Workflow(StrEnum):
     BALSAMIC: str = "balsamic"
