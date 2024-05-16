@@ -322,6 +322,20 @@ def base_config_dict() -> dict:
         "illumina_flow_cells_directory": "path/to/flow_cells",
         "illumina_demultiplexed_runs_directory": "path/to/demultiplexed_flow_cells_dir",
         "nanopore_data_directory": "path/to/nanopore_data_directory",
+        "run_instruments": {
+            "pacbio": {
+                "data_dir": "path/to/data_directory",
+                "systemd_trigger_dir": "path/to/trigger_directory",
+            },
+            "nanopore": {
+                "data_dir": "path/to/data_directory",
+                "systemd_trigger_dir": "path/to/ptrigger_directory",
+            },
+            "illumina": {
+                "flow_cell_runs_dir": "path/to/flow_cells",
+                "demultiplexed_runs_dir": "path/to/demultiplexed_flow_cells_dir",
+            },
+        },
         "downsample": {
             "downsample_dir": "path/to/downsample_dir",
             "downsample_script": "downsample.sh",
@@ -1786,6 +1800,20 @@ def context_config(
         "illumina_flow_cells_directory": str(illumina_flow_cells_directory),
         "illumina_demultiplexed_runs_directory": str(illumina_demultiplexed_runs_directory),
         "nanopore_data_directory": "path/to/nanopore_data_directory",
+        "run_instruments": {
+            "pacbio": {
+                "data_dir": "path/to/pacbio_data__directory",
+                "systemd_trigger_dir": "path/to/pacbio_trigger_directory",
+            },
+            "nanopore": {
+                "data_dir": "path/to/nanopore_data_directory",
+                "systemd_trigger_dir": "path/to/nanopore_trigger_directory",
+            },
+            "illumina": {
+                "flow_cell_runs_dir": str(illumina_flow_cells_directory),
+                "demultiplexed_runs_dir": str(illumina_demultiplexed_runs_directory),
+            },
+        },
         "downsample": {
             "downsample_dir": str(downsample_dir),
             "downsample_script": "downsample.sh",

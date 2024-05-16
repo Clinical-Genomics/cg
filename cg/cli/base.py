@@ -9,6 +9,7 @@ import coloredlogs
 from sqlalchemy.orm import scoped_session
 
 import cg
+from cg.cli.validate import validate
 from cg.cli.add import add as add_cmd
 from cg.cli.archive import archive
 from cg.cli.backup import backup
@@ -116,4 +117,5 @@ base.add_command(deliver_cmd)
 base.add_command(demultiplex_cmd)
 base.add_command(generate_cmd)
 base.add_command(downsample)
-base.add_command(validation)
+base.add_command(validate)
+
