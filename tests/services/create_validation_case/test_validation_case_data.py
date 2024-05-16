@@ -1,8 +1,9 @@
 """Module to test the ValidationCaseData class."""
 
-from cg.constants.constants import CaseActions, CustomerId
-from cg.meta.create_validation_cases.validation_case_data import ValidationCaseData
-from cg.meta.create_validation_cases.validation_data_input import ValidationDataInput
+from cg.constants.constants import CaseActions
+from cg.services.create_validation_cases.validation_case_data import ValidationCaseData
+from cg.services.create_validation_cases.validation_data_input import ValidationDataInput
+
 from cg.store.store import Store
 
 

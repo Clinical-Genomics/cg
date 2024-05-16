@@ -2,11 +2,9 @@
 
 from pathlib import Path
 
-from housekeeper.store.models import File
-
 from cg.constants import SequencingFileTag
-from cg.meta.create_validation_cases.validation_case_data import ValidationCaseData
-from cg.meta.create_validation_cases.validation_cases_api import CreateValidationCaseService
+from cg.services.create_validation_cases.validation_case_data import ValidationCaseData
+from cg.services.create_validation_cases.validation_cases_service import CreateValidationCaseService
 
 
 def test_get_new_fastq_file_path(validation_case_data: ValidationCaseData, fixtures_dir: Path):
@@ -27,7 +25,7 @@ def test_get_new_fastq_file_path(validation_case_data: ValidationCaseData, fixtu
 
 
 def test_create_validation_case(
-    create_validation_api: CreateValidationCaseService,
+    create_validation_service: CreateValidationCaseService,
     case_id_with_multiple_samples: str,
     validation_sample_id: str,
     validation_case_name: str,
@@ -36,19 +34,19 @@ def test_create_validation_case(
     # GIVEN a CreateValidationCaseAPI and a case id
 
     # WHEN creating a validation case
-    create_validation_api.create_validation_case(
+    create_validation_service.create_validation_case(
         case_id=case_id_with_multiple_samples, case_name=case_id_with_multiple_samples
     )
 
     # THEN a validation case is created in statusDB
-    assert create_validation_api.status_db.get_case_by_name(validation_case_name)
+    assert create_validation_service.status_db.get_case_by_name(validation_case_name)
     # THEN validation samples are created in statusDB
-    assert create_validation_api.status_db.get_sample_by_internal_id(validation_sample_id)
+    assert create_validation_service.status_db.get_sample_by_internal_id(validation_sample_id)
 
     # THEN validation sample bundles are created in Housekeeper
-    assert create_validation_api.hk_api.get_latest_bundle_version(validation_sample_id)
+    assert create_validation_service.hk_api.get_latest_bundle_version(validation_sample_id)
 
     # THEN validation sample fastq files are created in Housekeeper
-    assert create_validation_api.hk_api.get_files_from_latest_version(
+    assert create_validation_service.hk_api.get_files_from_latest_version(
         bundle_name=validation_sample_id, tags=[SequencingFileTag.FASTQ]
     )

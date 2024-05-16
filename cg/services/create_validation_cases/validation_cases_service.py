@@ -1,16 +1,16 @@
-"""Module that holds the api to create validation cases."""
+"""Module that holds the service to create validation cases."""
 
 import logging
 import os
 from pathlib import Path
 
-from housekeeper.store.models import File, Version
+from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.housekeeper_tags import VALIDATION_TAG
-from cg.meta.create_validation_cases.validation_case_data import ValidationCaseData
-from cg.meta.create_validation_cases.validation_data_input import ValidationDataInput
+from cg.services.create_validation_cases.validation_case_data import ValidationCaseData
+from cg.services.create_validation_cases.validation_data_input import ValidationDataInput
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 from cg.utils.files import copy_file, get_files_matching_pattern, rename_file
@@ -45,7 +45,8 @@ class CreateValidationCaseService:
                 f"Application tag set to: {sample.application_version.application.tag}"
             )
             if not self.dry_run:
-                self.status_db.session.add(sample)
+                self.status_db.add_sample(sample)
+
                 LOG.info(f"Added {sample.name} to StatusDB.")
 
     def store_validation_case(self, validation_case_data: ValidationCaseData) -> None:

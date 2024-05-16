@@ -27,8 +27,7 @@ from cg.apps.housekeeper.models import InputBundle
 from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.constants import CaseActions, FileFormat, GenomeVersion, Strandedness
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -37,9 +36,7 @@ from cg.constants.subject import Sex
 from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
-from cg.meta.create_validation_cases.validation_case_data import ValidationCaseData
-from cg.meta.create_validation_cases.validation_cases_api import CreateValidationCaseService
-from cg.meta.create_validation_cases.validation_data_input import ValidationDataInput
+
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
@@ -58,6 +55,9 @@ from cg.models.raredisease.raredisease import RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
+from cg.services.create_validation_cases.validation_case_data import ValidationCaseData
+from cg.services.create_validation_cases.validation_cases_service import CreateValidationCaseService
+from cg.services.create_validation_cases.validation_data_input import ValidationDataInput
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
 from cg.store.store import Store
@@ -4120,7 +4120,7 @@ def validation_case_data(
 
 
 @pytest.fixture
-def create_validation_api(
+def create_validation_service(
     store_with_multiple_cases_and_samples: Store, validation_hk_api: HousekeeperAPI
 ) -> CreateValidationCaseService:
     return CreateValidationCaseService(

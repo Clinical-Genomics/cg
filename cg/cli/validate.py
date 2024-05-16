@@ -2,8 +2,9 @@ import logging
 
 import click
 
-from cg.meta.create_validation_cases.validation_cases_api import CreateValidationCaseService
+
 from cg.models.cg_config import CGConfig
+from cg.services.create_validation_cases.validation_cases_service import CreateValidationCaseService
 from cg.services.validate_file_transfer_service.validate_pacbio_file_transfer_service import (
     ValidatePacbioFileTransferService,
 )

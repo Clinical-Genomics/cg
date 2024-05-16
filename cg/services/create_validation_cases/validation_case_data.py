@@ -1,15 +1,12 @@
 """Model for down sampling meta data."""
 
 import logging
-from pathlib import Path
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import DataDelivery, Priority
+from cg.constants import Priority
 from cg.constants.constants import CaseActions, CustomerId
-from cg.meta.create_validation_cases.validation_data_input import ValidationDataInput
+from cg.services.create_validation_cases.validation_data_input import ValidationDataInput
 from cg.store.models import ApplicationVersion, Case, Sample, Customer
 from cg.store.store import Store
-from cg.utils.calculations import multiply_by_million
 
 LOG = logging.getLogger(__name__)
 
