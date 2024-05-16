@@ -7,6 +7,7 @@ import logging
 import pytest
 
 from cg.apps.gt import GenotypeAPI
+from cg.constants.subject import Sex
 from cg.exc import CaseNotFoundError
 
 
@@ -27,7 +28,7 @@ def test_genotype_api_upload(genotype_api: GenotypeAPI, caplog):
     caplog.set_level(logging.DEBUG)
     # GIVEN a genotype api and a samples sex dictionary and a bcf_path
     sample_id = "a_sample_id"
-    samples_sex = {sample_id: {"pedigree": "Female", "analysis": "Female"}}
+    samples_sex = {sample_id: {"pedigree": Sex.FEMALE, "analysis": Sex.FEMALE}}
     bcf_path = "path_to_file.bcf"
 
     # WHEN running the update command

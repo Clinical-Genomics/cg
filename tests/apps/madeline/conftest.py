@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from cg.apps.madeline.api import MadelineAPI
-from cg.constants.subject import PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus, Sex
 from tests.mocks.process_mock import ProcessMock
 
 
@@ -48,7 +48,7 @@ def father() -> dict[str, str | None]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "father",
-        "sex": "male",
+        "sex": Sex.MALE,
         "proband": False,
         "status": "unaffected",
     }
