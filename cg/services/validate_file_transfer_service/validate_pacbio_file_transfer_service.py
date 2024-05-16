@@ -23,14 +23,29 @@ class ValidatePacbioFileTransferService(ValidateFileTransferService):
 
     @staticmethod
     def get_run_id(manifest_file_path: Path) -> str:
-        return manifest_file_path.parent.parent.parent.name
+        """
+        Get the run name from the path of the manifest file.
+        Example: r84202_20240307_145215/1_C01/metadata/m84202_240307_145611_s3.transferdone
+        will return r84202_20240307_145215.
+        """
+        return manifest_file_path.parts[-4]
 
     def get_smrt_cell_id(self, manifest_file_path: Path) -> str:
+        """
+        Get the run name from the path of the manifest file.
+        Example: r84202_20240307_145215/1_C01/metadata/m84202_240307_145611_s3.transferdone
+        will return 1_C01.
+        """
         return self.get_smrt_cell_path(manifest_file_path).name
 
     @staticmethod
     def get_smrt_cell_path(manifest_file_path: Path) -> Path:
-        return manifest_file_path.parent.parent
+        """
+        Get the run name from the path of the manifest file.
+        Example: r84202_20240307_145215/1_C01/metadata/m84202_240307_145611_s3.transferdone
+        will return r84202_20240307_145215/1_C01.
+        """
+        return Path(manifest_file_path.parts[-3])
 
     @staticmethod
     def transfer_validated_file_name(manifest_file_path: Path) -> str:
@@ -63,12 +78,15 @@ class ValidatePacbioFileTransferService(ValidateFileTransferService):
             source_dir=self.get_smrt_cell_path(manifest_file_path),
             manifest_file_format=FileFormat.TXT,
         ):
-            LOG.debug(
+            LOG.info(
                 f"Transfer not done for run {self.get_run_id(manifest_file_path)} and smrt cell {self.get_smrt_cell_id(manifest_file_path)}"
             )
             return
         self.create_validated_transfer_file(manifest_file_path)
         self.create_systemd_trigger_file(manifest_file_path)
+        LOG.info(
+            f"Transfer validated for run {self.get_run_id(manifest_file_path)} and smrt cell {self.get_smrt_cell_id(manifest_file_path)}"
+        )
 
     def validate_all_transfer_done(self) -> None:
         manifest_file_paths = self.get_manifest_file_paths(

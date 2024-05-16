@@ -61,7 +61,7 @@ def test_get_run_id(
     )[0]
 
     # WHEN getting the run ID
-    extracted_run_id = validate_pacbio_service.get_run_id(manifest_file_path=manifest_file)
+    extracted_run_id: str = validate_pacbio_service.get_run_id(manifest_file_path=manifest_file)
 
     # THEN it is the expected run id
     assert extracted_run_id == pacbio_run_id
@@ -80,7 +80,7 @@ def test_get_smrt_cell_id(
     )[0]
 
     # WHEN getting the smrt cell ID
-    extracted_smrt_cell_id = validate_pacbio_service.get_smrt_cell_id(
+    extracted_smrt_cell_id: str = validate_pacbio_service.get_smrt_cell_id(
         manifest_file_path=manifest_file
     )
 

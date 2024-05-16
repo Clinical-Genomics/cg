@@ -26,7 +26,7 @@ def manifest_file_fail(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture
-def source_dir(tmp_path: Path) -> Path:
+def transfer_source_dir(tmp_path: Path) -> Path:
     """Return the path to a source directory with files in different directories."""
     tmp_path.mkdir(exist_ok=True)
     tmp_path.joinpath("tree_1").mkdir()

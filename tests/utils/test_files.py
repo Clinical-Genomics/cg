@@ -36,6 +36,7 @@ def test_get_files_in_directory_by_pattern(nested_directory_with_file: Path, som
     # THEN assert that the file is returned
     for file_path in file_paths:
         assert file_path.exists()
+        assert some_file in file_path.as_posix()
 
 
 def test_rename_file(tmp_path: Path):

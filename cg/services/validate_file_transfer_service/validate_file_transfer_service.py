@@ -8,7 +8,7 @@ class ValidateFileTransferService:
     """Service to validate file transfers."""
 
     @staticmethod
-    def get_manifest_file_content(manifest_file: Path, manifest_file_format: str) -> dict:
+    def get_manifest_file_content(manifest_file: Path, manifest_file_format: str) -> list[str]:
         """Get the content of the manifest file."""
         file_reader = ReadFile()
         return file_reader.get_content_from_file(
@@ -46,7 +46,7 @@ class ValidateFileTransferService:
 
     def get_files_in_manifest(self, manifest_file: Path, manifest_file_format: str) -> list[str]:
         """Get the files listed in the manifest file."""
-        manifest_content: any = self.get_manifest_file_content(
+        manifest_content: list[str] = self.get_manifest_file_content(
             manifest_file=manifest_file, manifest_file_format=manifest_file_format
         )
         return self.extract_file_names_from_manifest(manifest_content)
