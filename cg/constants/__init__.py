@@ -14,7 +14,6 @@ from cg.constants.constants import (
     FileExtensions,
     FlowCellStatus,
     PrepCategory,
-    SexOptions,
 )
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import (

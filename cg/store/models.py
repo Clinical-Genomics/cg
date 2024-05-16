@@ -20,10 +20,10 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
-from cg.constants.constants import CaseActions, ControlOptions, PrepCategory, SexOptions
+from cg.constants.constants import CaseActions, ControlOptions, PrepCategory
 from cg.constants.devices import DeviceType
 from cg.constants.priority import SlurmQos
-from cg.constants.subject import PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.constants.symbols import EMPTY_STRING
 
 BigInt = Annotated[int, None]
@@ -767,7 +767,7 @@ class Sample(Base, PriorityMixin):
     last_sequenced_at: Mapped[datetime | None]
     received_at: Mapped[datetime | None]
     reference_genome: Mapped[Str255 | None]
-    sex: Mapped[str] = mapped_column(types.Enum(*(option.value for option in SexOptions)))
+    sex: Mapped[Sex]
     subject_id: Mapped[Str128 | None]
 
     links: Mapped[list[CaseSample]] = orm.relationship(
