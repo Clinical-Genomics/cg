@@ -1011,7 +1011,7 @@ class IlluminaRunMetrics(RunMetrics):
     yield_q30: Mapped[Num_6_2 | None]
     cycles: Mapped[int | None]
     demultiplexing_software: Mapped[Str32 | None]
-    demultiplexing_version: Mapped[Str32 | None]
+    demultiplexing_software_version: Mapped[Str32 | None]
     sequencing_started_at: Mapped[datetime | None]
     sequencing_completed_at: Mapped[datetime | None]
     demultiplexing_started_at: Mapped[datetime | None]
