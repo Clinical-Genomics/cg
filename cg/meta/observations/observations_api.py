@@ -61,7 +61,7 @@ class ObservationsAPI:
         analysis: Analysis = case.analyses[0]
         analysis_date: datetime = analysis.started_at or analysis.completed_at
         hk_version: Version = self.housekeeper_api.version(analysis.case.internal_id, analysis_date)
-        return self.extract_observations_files_from_hk(hk_version)
+        return self.get_observations_files_from_hk(hk_version=hk_version, case_id=case.internal_id)
 
     def get_loqusdb_api(self, loqusdb_instance: LoqusdbInstance) -> LoqusdbAPI:
         """Returns a Loqusdb API for the given Loqusdb instance."""
@@ -152,10 +152,10 @@ class ObservationsAPI:
         """Return whether a case is eligible for observations upload."""
         raise NotImplementedError
 
-    def extract_observations_files_from_hk(
-        self, hk_version: Version, case_id: str = None
+    def get_observations_files_from_hk(
+        self, hk_version: Version, case_id: str
     ) -> MipDNAObservationsInputFiles | BalsamicObservationsInputFiles:
-        """Extract observations files given a Housekeeper version."""
+        """Return observations files given a Housekeeper version."""
         raise NotImplementedError
 
     def delete_case(self, case: Case) -> None:

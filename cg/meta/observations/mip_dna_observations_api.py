@@ -105,10 +105,10 @@ class MipDNAObservationsAPI(ObservationsAPI):
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
         LOG.info(f"Uploaded {load_output['variants']} variants to {repr(self.loqusdb_api)}")
 
-    def extract_observations_files_from_hk(
-        self, hk_version: Version, case_id: str = None
+    def get_observations_files_from_hk(
+        self, hk_version: Version, case_id: str
     ) -> MipDNAObservationsInputFiles:
-        """Extract observations files given a Housekeeper version for rare diseases."""
+        """Return observations files given a Housekeeper version for rare diseases."""
         input_files: dict[str, File] = {
             "snv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SNV_VCF]
