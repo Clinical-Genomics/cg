@@ -141,7 +141,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if application_type != "wgs":
             application_type = "panel"
         analysis_type = "_".join([sample_type, application_type])
-        LOG.info(f"Found analysis type {analysis_type}")
+        LOG.debug(f"Found analysis type {analysis_type}")
         return analysis_type
 
     def get_sample_fastq_destination_dir(self, case: Case, sample: Sample = None) -> Path:
