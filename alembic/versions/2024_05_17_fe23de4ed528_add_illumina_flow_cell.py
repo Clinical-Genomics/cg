@@ -20,7 +20,9 @@ depends_on = None
 def upgrade():
     op.create_table(
         "illumina_flow_cell",
-        sa.Column("id", sa.ForeignKey("run_device.id"), nullable=False, primary_key=True),
+        sa.Column(
+            "id", sa.Integer(), sa.ForeignKey("run_device.id"), nullable=False, primary_key=True
+        ),
         sa.Column("model", sa.String(length=32), nullable=False),
     )
 
