@@ -5,7 +5,7 @@ import logging
 import click
 
 from cg.cli.utils import echo_lines
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY, resolve_compression
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
     config_case,
     metrics_deliver,
@@ -17,7 +17,7 @@ from cg.cli.workflow.nf_analysis import (
     store_available,
     store_housekeeper,
 )
-from cg.constants.constants import MetaApis
+from cg.constants.constants import MetaApis, DRY_RUN
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -46,7 +46,7 @@ raredisease.add_command(store_housekeeper)
 
 
 @raredisease.command("panel")
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
@@ -63,7 +63,7 @@ def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
 
 @raredisease.command("managed-variants")
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def managed_variants(context: CGConfig, case_id: str, dry_run: bool) -> None:

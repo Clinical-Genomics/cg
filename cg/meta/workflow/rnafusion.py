@@ -120,5 +120,5 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             LOG.error(f"Some mandatory metrics are missing: {', '.join(missing_metrics)}")
             raise MissingMetrics()
 
-    def get_workflow_metrics(self) -> dict:
+    def get_workflow_metrics(self, metric_id: str) -> dict:
         return RNAFUSION_METRIC_CONDITIONS

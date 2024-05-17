@@ -87,6 +87,12 @@ class DemultiplexConfig(BaseModel):
     slurm: SlurmConfig
 
 
+class DownsampleConfig(BaseModel):
+    downsample_dir: str
+    downsample_script: str
+    account: str
+
+
 class JanusConfig(BaseModel):
     host: str
 
@@ -295,12 +301,32 @@ class DataFlowConfig(BaseModel):
     archive_repository: str
 
 
+class PacbioConfig(BaseModel):
+    data_dir: str
+    systemd_trigger_dir: str
+
+
+class OxfordNanoporeConfig(BaseModel):
+    data_dir: str
+    systemd_trigger_dir: str
+
+
+class IlluminaConfig(BaseModel):
+    flow_cell_runs_dir: str
+    demultiplexed_runs_dir: str
+
+
+class RunInstruments(BaseModel):
+    pacbio: PacbioConfig
+    nanopore: OxfordNanoporeConfig
+    illumina: IlluminaConfig
+
+
 class CGConfig(BaseModel):
     database: str
     delivery_path: str
+    downsample: DownsampleConfig
     illumina_demultiplexed_runs_directory: str
-    downsample_dir: str
-    downsample_script: str
     email_base_settings: EmailBaseSettings
     environment: Literal["production", "stage"] = "stage"
     illumina_flow_cells_directory: str
@@ -309,6 +335,7 @@ class CGConfig(BaseModel):
     tower_binary_path: str
     max_flowcells: int | None
     data_input: DataInput | None = None
+    run_instruments: RunInstruments
     # Base APIs that always should exist
     status_db_: Store | None = None
     housekeeper: HousekeeperConfig
