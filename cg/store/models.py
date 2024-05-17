@@ -27,7 +27,6 @@ from cg.constants.constants import (
     SexOptions,
     StatusOptions,
 )
-from cg.constants.demultiplexing import IlluminaFlowCellModels
 from cg.constants.devices import DeviceType
 from cg.constants.priority import SlurmQos
 from cg.constants.symbols import EMPTY_STRING
@@ -982,13 +981,8 @@ class IlluminaFlowCell(RunDevice):
     __tablename__ = "illumina_flow_cell"
 
     id: Mapped[int] = mapped_column(ForeignKey("run_device.id"), primary_key=True)
-    model: Mapped[IlluminaFlowCellModels | None] = mapped_column(
-        types.Enum(
-            IlluminaFlowCellModels,
-            values_callable=lambda: [
-                flow_cell_type.value for flow_cell_type in IlluminaFlowCellModels
-            ],
-        )
+    model: Mapped[str | None] = mapped_column(
+        types.Enum("10B", "25B", "1.5B", "S1", "S2", "S4", "SP")
     )
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
