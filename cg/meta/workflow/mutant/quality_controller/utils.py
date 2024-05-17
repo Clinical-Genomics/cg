@@ -19,7 +19,7 @@ def has_valid_total_reads(sample_metadata: SamplesMetadataMetrics) -> bool:
         if is_valid_total_reads_for_external_negative_control(reads=sample_metadata.reads):
             return True
         else:
-            return None
+            return False
             # TODO: KRAKEN
 
     if sample_metadata.is_sample_internal_negative_control:
@@ -66,14 +66,17 @@ def get_percent_reads_guaranteed(sample: Sample) -> int:
     return sample.application_version.application.percent_reads_guaranteed
 
 
-def get_quality_metrics(case_results_file_path: Path, case: Case) -> QualityMetrics:
+def get_quality_metrics(case_results_file_path: Path, case: Case) -> QualityMetrics | None:
     samples_results: SamplesResultsMetrics = MetricsParser.parse_samples_results(
         case_results_file_path
     )
 
     samples_metadata: SamplesMetadataMetrics = MetadataParser.parse_metadata(case)
 
-    return QualityMetrics.model_validate(samples_results, samples_metadata)
+    if not samples_metadata:
+        return None
+    else:
+        return QualityMetrics.model_validate(samples_results, samples_metadata)
 
 
 def get_report_path(case: Case) -> Path:

@@ -26,20 +26,25 @@ class QualityController:
     def __init__(self, config: CGConfig):
         self.metadata_parser = MetadataParser(config)
 
-    def quality_control(self, case: Case) -> QualityResult:
+    def quality_control(self, case: Case) -> QualityResult | None:
         """Perform QC check on a case and generate the QC_report."""
         case_results_file_path: Path = get_case_results_file_path(case)
         quality_metrics: QualityMetrics = get_quality_metrics(case_results_file_path, case)
-        sample_results: list[SampleQualityResult] = self.quality_control_samples(quality_metrics)
-        case_result: CaseQualityResult = self.quality_control_case(sample_results)
+        if not quality_metrics:
+            return None
+        else:
+            sample_results: list[SampleQualityResult] = self.quality_control_samples(
+                quality_metrics
+            )
+            case_result: CaseQualityResult = self.quality_control_case(sample_results)
 
-        report_file: Path = get_report_path(case)
-        ReportGenerator.report(out_file=report_file, samples=sample_results, case=case_result)
-        ResultLogger.log_results(case=case_result, samples=sample_results, report=report_file)
-        summary: str = ReportGenerator.get_summary(
-            case=case_result, samples=sample_results, report_path=report_file
-        )
-        return QualityResult(case=case_result, samples=sample_results, summary=summary)
+            report_file: Path = get_report_path(case)
+            ReportGenerator.report(out_file=report_file, samples=sample_results, case=case_result)
+            ResultLogger.log_results(case=case_result, samples=sample_results, report=report_file)
+            summary: str = ReportGenerator.get_summary(
+                case=case_result, samples=sample_results, report_path=report_file
+            )
+            return QualityResult(case=case_result, samples=sample_results, summary=summary)
 
     def quality_control_samples(self, quality_metrics: QualityMetrics) -> list[SampleQualityResult]:
         sample_results: list[SampleQualityResult] = []

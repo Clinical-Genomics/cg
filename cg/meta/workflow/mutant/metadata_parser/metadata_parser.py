@@ -1,10 +1,11 @@
 from cg.apps.lims.api import LimsAPI
+from cg.exc import CgError
 from cg.meta.workflow.mutant.metadata_parser.models import SampleMetadata, SamplesMetadataMetrics
 from cg.meta.workflow.mutant.metadata_parser.utils import (
     get_internal_negative_control_id,
     is_sample_external_negative_control,
 )
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import LOG, CGConfig
 from cg.store.store import Store
 from cg.store.models import Case, Sample
 
@@ -14,18 +15,19 @@ class MetadataParser:
         self.status_db: Store = config.status_db
         self.lims: LimsAPI = config.lims_api
 
-    def parse_metadata(self, case: Case) -> SamplesMetadataMetrics:
+    def parse_metadata(self, case: Case) -> SamplesMetadataMetrics | None:
         metadata_for_case = self.parse_metadata_for_case(case)
         metadata_for_internal_negative_control = self.parse_metadata_for_internal_negative_control(
             metadata_for_case
         )
-
-        metadata = metadata_for_case | metadata_for_internal_negative_control
-
-        return SamplesMetadataMetrics.model_validate(metadata)
+        if not metadata_for_internal_negative_control:
+            LOG.error(f"Could not find an internal negative control for {case.internal_id}")
+            return None
+        else:
+            metadata = metadata_for_case | metadata_for_internal_negative_control
+            return SamplesMetadataMetrics.model_validate(metadata)
 
     def parse_metadata_for_case(self, case: Case) -> dict[str, SampleMetadata]:
-
         metadata_for_case: dict[str, SampleMetadata] = {}
 
         for sample in case.samples:
@@ -46,7 +48,7 @@ class MetadataParser:
 
     def parse_metadata_for_internal_negative_control(
         self, metadata_for_case: SamplesMetadataMetrics
-    ) -> dict[str, SampleMetadata]:
+    ) -> dict[str, SampleMetadata] | None:
         internal_negative_control_id: Sample = get_internal_negative_control_id(
             self.lims, metadata_for_case
         )
@@ -56,7 +58,8 @@ class MetadataParser:
         )
 
         if not internal_negative_control:
-            return None  # TODO: How should this exception be handled.
+            return None
+
         else:
             internal_negative_control_metadata = SampleMetadata(
                 sample_internal_id=internal_negative_control.internal_id,
