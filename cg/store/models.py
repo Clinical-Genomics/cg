@@ -990,7 +990,7 @@ class RunMetrics(Base):
 
 
 class IlluminaRunMetrics(RunMetrics):
-    __tablename__ = "illumina_run_metrics"
+    __tablename__ = "illumina_sequencing_metrics"
 
     id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"), primary_key=True)
     sequencer_type: Mapped[str | None] = mapped_column(

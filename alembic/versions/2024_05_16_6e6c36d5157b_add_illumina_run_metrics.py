@@ -21,7 +21,7 @@ depends_on = None
 
 def upgrade():
     op.create_table(
-        "illumina_run_metrics",
+        "illumina_sequencing_metrics",
         sa.Column("id", sa.ForeignKey("run_metrics.id"), nullable=False, primary_key=True),
         sa.Column("sequencer_type", sa.String(length=32), nullable=True),
         sa.Column("sequencer_name", sa.String(length=32), nullable=True),
