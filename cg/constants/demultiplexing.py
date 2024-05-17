@@ -1,6 +1,6 @@
 """Constants related to demultiplexing."""
 
-from enum import StrEnum
+from enum import Enum, StrEnum
 
 from pydantic import BaseModel
 
@@ -214,7 +214,7 @@ NAME_TO_INDEX_SETTINGS: dict[str, IndexSettings] = {
 }
 
 
-class IlluminaFlowCellType(StrEnum):
+class IlluminaFlowCellType(Enum):
     # "10B"
     # "25B"
     # "1.5B"

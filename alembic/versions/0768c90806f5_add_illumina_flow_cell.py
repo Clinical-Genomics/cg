@@ -1,7 +1,7 @@
 """add_illumina_flow_cell
 
 Revision ID: 0768c90806f5
-Revises: 5c6de08c4aca
+Revises: 6e6c36d5157b
 Create Date: 2024-05-16 16:07:05.877295
 
 """
@@ -12,7 +12,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "0768c90806f5"
-down_revision = "5c6de08c4aca"
+down_revision = "6e6c36d5157b"
 branch_labels = None
 depends_on = None
 
