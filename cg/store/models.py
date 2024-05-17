@@ -989,6 +989,37 @@ class RunMetrics(Base):
     }
 
 
+class IlluminaRunMetrics(RunMetrics):
+    __tablename__ = "illumina_sequencing_metrics"
+
+    id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"), primary_key=True)
+    sequencer_type: Mapped[str | None] = mapped_column(
+        types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx")
+    )
+    sequencer_name: Mapped[Str32 | None]
+    sequenced_at: Mapped[datetime | None]
+    data_availability: Mapped[str | None] = mapped_column(
+        types.Enum(*(status.value for status in FlowCellStatus)), default="ondisk"
+    )
+    archived_at: Mapped[datetime | None]
+    has_backup: Mapped[bool] = mapped_column(default=False)
+    total_reads: Mapped[BigInt | None]
+    total_undetermined_reads: Mapped[BigInt | None]
+    percent_q30: Mapped[Num_6_2 | None]
+    mean_quality_score: Mapped[Num_6_2 | None]
+    total_yield: Mapped[BigInt | None]
+    yield_q30: Mapped[Num_6_2 | None]
+    cycles: Mapped[int | None]
+    demultiplexing_software: Mapped[Str32 | None]
+    demultiplexing_software_version: Mapped[Str32 | None]
+    sequencing_started_at: Mapped[datetime | None]
+    sequencing_completed_at: Mapped[datetime | None]
+    demultiplexing_started_at: Mapped[datetime | None]
+    demultiplexing_completed_at: Mapped[datetime | None]
+
+    __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
+
+
 class SampleRunMetrics(Base):
     __tablename__ = "sample_run_metrics"
     id: Mapped[PrimaryKeyInt]
