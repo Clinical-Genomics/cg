@@ -158,40 +158,6 @@ class MutantAnalysisAPI(AnalysisAPI):
 
         return f"{region_code}_{lab_code}_{sample.name}"
 
-    def run_analysis(self, case_id: str, dry_run: bool, config_artic: str = None) -> None:
-        if self.get_case_output_path(case_id=case_id).exists():
-            LOG.info("Found old output files, directory will be cleaned!")
-            shutil.rmtree(self.get_case_output_path(case_id=case_id), ignore_errors=True)
-
-        if config_artic:
-            self.process.run_command(
-                [
-                    "analyse",
-                    "sarscov2",
-                    "--config_case",
-                    self.get_case_config_path(case_id=case_id).as_posix(),
-                    "--config_artic",
-                    config_artic,
-                    "--outdir",
-                    self.get_case_output_path(case_id=case_id).as_posix(),
-                    self.get_case_fastq_dir(case_id=case_id).as_posix(),
-                ],
-                dry_run=dry_run,
-            )
-        else:
-            self.process.run_command(
-                [
-                    "analyse",
-                    "sarscov2",
-                    "--config_case",
-                    self.get_case_config_path(case_id=case_id).as_posix(),
-                    "--outdir",
-                    self.get_case_output_path(case_id=case_id).as_posix(),
-                    self.get_case_fastq_dir(case_id=case_id).as_posix(),
-                ],
-                dry_run=dry_run,
-            )
-
     def get_cases_to_store(self) -> list[Case]:
         """Return cases with completed analysis on Trailblazer, a deliverables file in the case directory,
         and ready to be stored in Housekeeper."""
@@ -290,21 +256,22 @@ class MutantAnalysisAPI(AnalysisAPI):
             )
 
     def run_qc_and_fail_analyses(self, dry_run: bool) -> None:
-        """Run qc check and fail cases that fail QC."""
+        """Run qc check, report qc summaries on Trailblazer and fail analyses that fail QC."""
         for case in self.get_cases_to_store():
-            # TODO: print qc summary on TB
+            qc_result: QualityResult = self.get_qc_result(case=case)
 
-            if not self.case_passes_qc(self, case):
+            self.report_qc_on_trailblazer(case=case, qc_result=qc_result)
+
+            if not qc_result.case.passes_qc:
                 if not dry_run:
                     self.fail_analysis(case)
-
-    def case_passes_qc(self, case: Case) -> bool:
-        qc_result: QualityResult = self.get_qc_result(case=case)
-        return qc_result.case.passes_qc
 
     def get_qc_result(self, case: Case) -> QualityResult:
         qc_result: QualityResult = self.quality_checker.quality_control(case=case)
         return qc_result
+
+    def report_qc_on_trailblazer(self, case: Case, qc_result: QualityResult) -> None:
+        self.trailblazer_api.add_comment(case_id=case.internal_id, comment=qc_result.summary)
 
     def fail_analysis(self, case: Case) -> None:
         """Fail analysis on TB and set case status to hold in StatusDB."""
