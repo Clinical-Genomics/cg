@@ -125,9 +125,8 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
 
 @mutant.command("run-qc")
-@OPTION_DRY
 @click.pass_context
-def run_qc(context: click.Context, dry_run: bool, case_id: str) -> None:
+def run_qc(context: click.Context, case_id: str) -> None:
     """
     Run QC on case and generate QC_report file.
     """
