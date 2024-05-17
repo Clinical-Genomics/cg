@@ -976,7 +976,7 @@ class RunDevice(Base):
     }
 
 
-class IlluminaFlowCellDevice(RunDevice):
+class IlluminaFlowCell(RunDevice):
     """Model for storing Illumina flow cells."""
 
     __tablename__ = "illumina_flow_cell"
