@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.sequencing_metrics_parser.models import DemuxMetrics, SequencingQualityMetrics
-from cg.apps.sequencing_metrics_parser.parser import MetricsParser
+from cg.services.bcl_convert_metrics_service.models import SequencingQualityMetrics, DemuxMetrics
+from cg.services.bcl_convert_metrics_service.parser import MetricsParser
 
 
 def test_parse_metrics(
