@@ -2,30 +2,23 @@
 
 from enum import Enum, StrEnum
 
-from cg.constants.constants import Workflow
+from cg.constants.constants import CancerAnalysisType, CustomerId, Workflow
 from cg.constants.sequencing import SequencingMethod
 
 LOQUSDB_ID = "_id"
 LOQUSDB_SUPPORTED_WORKFLOWS = [Workflow.MIP_DNA, Workflow.BALSAMIC]
-LOQUSDB_MIP_SEQUENCING_METHODS = [SequencingMethod.WGS, SequencingMethod.WES]
-LOQUSDB_BALSAMIC_SEQUENCING_METHODS = [SequencingMethod.WGS]
-
-
-class LoqusdbMipCustomers(StrEnum):
-    """Loqusdb Rare Disease customers."""
-
-    KLINISK_GENETIK: str = "cust002"
-    CMMS: str = "cust003"
-    KLINISK_IMMUNOLOGI: str = "cust004"
-
-
-class LoqusdbBalsamicCustomers(StrEnum):
-    """Loqusdb Balsamic customers."""
-
-    AML: str = "cust110"
-    BTB_GMS: str = "cust127"
-    ONKPAT_HAGLUND: str = "cust143"
-    BTB_GMS_LINKOPING: str = "cust147"
+LOQUSDB_RARE_DISEASE_CUSTOMERS = [CustomerId.CUST002, CustomerId.CUST003, CustomerId.CUST004]
+LOQUSDB_CANCER_CUSTOMERS = [
+    CustomerId.CUST110,
+    CustomerId.CUST127,
+    CustomerId.CUST143,
+    CustomerId.CUST147,
+]
+LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS = [SequencingMethod.WGS, SequencingMethod.WES]
+LOQUSDB_CANCER_SEQUENCING_METHODS = [
+    CancerAnalysisType.TUMOR_WGS,
+    CancerAnalysisType.TUMOR_NORMAL_WGS,
+]
 
 
 class LoqusdbInstance(StrEnum):

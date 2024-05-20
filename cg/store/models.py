@@ -510,36 +510,26 @@ class Case(Base, PriorityMixin):
     @property
     def samples(self) -> list["Sample"]:
         """Return case samples."""
-        return self._get_samples
+        return [link.sample for link in self.links]
 
     @property
     def sample_ids(self) -> list[str]:
         """Return a list of internal ids of the case samples."""
-        return [sample.internal_id for sample in self._get_samples]
-
-    @property
-    def _get_samples(self) -> list["Sample"]:
-        """Extract samples from a case."""
-        return [link.sample for link in self.links]
+        return [sample.internal_id for sample in self.samples]
 
     @property
     def tumour_samples(self) -> list["Sample"]:
         """Return tumour samples."""
-        return self._get_tumour_samples
+        return [link.sample for link in self.links if link.sample.is_tumour]
 
     @property
-    def _get_tumour_samples(self) -> list["Sample"]:
-        """Extract tumour samples."""
-        return [link.sample for link in self.links if link.sample.is_tumour]
+    def non_tumour_samples(self) -> list["Sample"]:
+        """Return non-tumour samples."""
+        return [link.sample for link in self.links if not link.sample.is_tumour]
 
     @property
     def loqusdb_uploaded_samples(self) -> list["Sample"]:
         """Return uploaded samples to Loqusdb."""
-        return self._get_loqusdb_uploaded_samples
-
-    @property
-    def _get_loqusdb_uploaded_samples(self) -> list["Sample"]:
-        """Extract samples uploaded to Loqusdb."""
         return [link.sample for link in self.links if link.sample.loqusdb_id]
 
     @property
