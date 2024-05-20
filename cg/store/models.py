@@ -782,6 +782,8 @@ class Sample(Base, PriorityMixin):
     )
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="samples")
 
+    _new_run_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(back_populates="sample")
+
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
@@ -838,6 +840,11 @@ class Sample(Base, PriorityMixin):
             return f"Received {self.received_at.date()}"
 
         return f"Ordered {self.ordered_at.date()}"
+
+    @property
+    def _run_devices(self) -> list["RunDevice"]:
+        """Return the devices a sample has been sequenced on."""
+        return list({metric.run_metrics.device for metric in self._new_run_metrics})
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
@@ -960,6 +967,19 @@ class RunDevice(Base):
     type: Mapped[DeviceType]
     internal_id: Mapped[UniqueStr64]
 
+    run_metrics: Mapped[list["RunMetrics"]] = orm.relationship(back_populates="device")
+
+    @property
+    def _samples(self) -> list[Sample]:
+        """Return the samples sequenced in this device."""
+        return list(
+            {
+                sample_run_metric.sample
+                for run in self.run_metrics
+                for sample_run_metric in run.sample_run_metrics
+            }
+        )
+
     __mapper_args__ = {
         "polymorphic_on": "type",
     }
@@ -986,6 +1006,11 @@ class RunMetrics(Base):
     id: Mapped[PrimaryKeyInt]
     type: Mapped[DeviceType]
     device_id: Mapped[int] = mapped_column(ForeignKey("run_device.id"))
+
+    device: Mapped[RunDevice] = orm.relationship(back_populates="run_metrics")
+    sample_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(
+        back_populates="run_metrics"
+    )
 
     __mapper_args__ = {
         "polymorphic_on": "type",
@@ -1029,6 +1054,9 @@ class SampleRunMetrics(Base):
     sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id"))
     run_metrics_id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"))
     type: Mapped[DeviceType]
+
+    run_metrics: Mapped[RunMetrics] = orm.relationship(back_populates="sample_metrics")
+    sample: Mapped[Sample] = orm.relationship(back_populates="_new_run_metrics")
 
     __mapper_args__ = {
         "polymorphic_on": "type",
