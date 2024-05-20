@@ -975,6 +975,19 @@ class RunDevice(Base):
     }
 
 
+class IlluminaFlowCell(RunDevice):
+    """Model for storing Illumina flow cells."""
+
+    __tablename__ = "illumina_flow_cell"
+
+    id: Mapped[int] = mapped_column(ForeignKey("run_device.id"), primary_key=True)
+    model: Mapped[str | None] = mapped_column(
+        types.Enum("10B", "25B", "1.5B", "S1", "S2", "S4", "SP")
+    )
+
+    __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
+
+
 class RunMetrics(Base):
     """Model for storing run devices."""
 
