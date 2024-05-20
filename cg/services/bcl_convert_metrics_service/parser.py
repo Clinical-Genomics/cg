@@ -14,7 +14,7 @@ from cg.constants.metrics import (
     QUALITY_METRICS_FILE_NAME,
 )
 from cg.io.controller import ReadFile
-from cg.services.bcl_convert_metrics_service.models import SequencingQualityMetrics, DemuxMetrics
+from cg.services.bcl_convert_metrics_service.models import DemuxMetrics, SequencingQualityMetrics
 from cg.utils.files import get_file_in_directory
 
 LOG = logging.getLogger(__name__)
