@@ -6,6 +6,9 @@ import pytest
 
 
 from cg.constants.metrics import DemuxMetricsColumnNames, QualityMetricsColumnNames
+from cg.services.bcl_convert_metrics_service.bcl_convert_metrics_service import (
+    BCLConvertMetricsService,
+)
 from cg.services.bcl_convert_metrics_service.models import DemuxMetrics, SequencingQualityMetrics
 from cg.services.bcl_convert_metrics_service.parser import MetricsParser
 

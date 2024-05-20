@@ -9,9 +9,9 @@ from cg.meta.demultiplex.combine_sequencing_metrics import combine_mapped_metric
 from cg.meta.demultiplex.utils import get_q30_threshold
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.services.bcl_convert_metrics_service.bcl_convert_metrics_service import (
-    create_sample_lane_sequencing_metrics_for_flow_cell,
-    create_undetermined_non_pooled_metrics,
+    BCLConvertMetricsService,
 )
+
 from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
 from cg.store.store import Store
 
@@ -44,11 +44,14 @@ def store_flow_cell_data_in_status_db(
 
 
 def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, store: Store) -> None:
+    metrics_service = BCLConvertMetricsService()
     mapped_metrics: list[SampleLaneSequencingMetrics] = (
-        create_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_directory=flow_cell.path)
+        metrics_service.create_sample_lane_sequencing_metrics_for_flow_cell(
+            flow_cell_directory=flow_cell.path
+        )
     )
     undetermined_metrics: list[SampleLaneSequencingMetrics] = (
-        create_undetermined_non_pooled_metrics(flow_cell)
+        metrics_service.create_undetermined_non_pooled_metrics(flow_cell)
     )
 
     combined_metrics = combine_mapped_metrics_with_undetermined(
