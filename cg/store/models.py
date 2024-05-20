@@ -782,7 +782,9 @@ class Sample(Base, PriorityMixin):
     )
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="samples")
 
-    _new_run_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(back_populates="sample")
+    _new_run_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(
+        back_populates="sample", cascade="all, delete"
+    )
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -967,7 +969,9 @@ class RunDevice(Base):
     type: Mapped[DeviceType]
     internal_id: Mapped[UniqueStr64]
 
-    run_metrics: Mapped[list["RunMetrics"]] = orm.relationship(back_populates="device")
+    run_metrics: Mapped[list["RunMetrics"]] = orm.relationship(
+        back_populates="device", cascade="all, delete"
+    )
 
     @property
     def _samples(self) -> list[Sample]:
@@ -1009,7 +1013,7 @@ class RunMetrics(Base):
 
     device: Mapped[RunDevice] = orm.relationship(back_populates="run_metrics")
     sample_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(
-        back_populates="run_metrics"
+        back_populates="run_metrics", cascade="all, delete"
     )
 
     __mapper_args__ = {
