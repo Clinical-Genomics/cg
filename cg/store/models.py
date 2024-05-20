@@ -797,7 +797,7 @@ class Sample(Base, PriorityMixin):
 
     @property
     def archive_location(self) -> str:
-        """Returns the data_archive_location if the customer linked to the sample."""
+        """Returns the data_archive_lodddcation if the customer linked to the sample."""
         return self.customer.data_archive_location
 
     @property
