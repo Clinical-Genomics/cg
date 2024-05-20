@@ -15,7 +15,7 @@ class JsonOrderformParser(OrderformParser):
     samples: list[JsonSample] = []
 
     def get_project_type(self) -> str:
-        """Determine the project type."""
+        """Determine the project typssse."""
 
         data_analyses: set[str] = {sample.data_analysis.lower() for sample in self.samples}
 
