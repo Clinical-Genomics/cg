@@ -8,8 +8,8 @@ from sqlalchemy.orm import Query
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
 from cg.constants.constants import CaseActions, DataDelivery, Workflow
 from cg.constants.observations import (
-    LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
-    LOQUSDB_MIP_SEQUENCING_METHODS,
+    LOQUSDB_CANCER_SEQUENCING_METHODS,
+    LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
     LOQUSDB_SUPPORTED_WORKFLOWS,
 )
 from cg.store.models import Analysis, Application, Case, Customer, Sample
@@ -148,8 +148,8 @@ def filter_cases_with_loqusdb_supported_sequencing_method(
 ) -> Query:
     """Filter cases with Loqusdb supported sequencing method."""
     supported_sequencing_methods = {
-        Workflow.MIP_DNA: LOQUSDB_MIP_SEQUENCING_METHODS,
-        Workflow.BALSAMIC: LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
+        Workflow.MIP_DNA: LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
+        Workflow.BALSAMIC: LOQUSDB_CANCER_SEQUENCING_METHODS,
     }
     return (
         cases.filter(Application.prep_category.in_(supported_sequencing_methods[workflow]))
