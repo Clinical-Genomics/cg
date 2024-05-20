@@ -43,7 +43,7 @@ class JsonOrderformParser(OrderformParser):
         return project_to_order[project_type]
 
     def get_data_delivery(self) -> str:
-        """Determine the order_data delivery type."""
+        """Determine the order_data delivery type..."""
 
         data_deliveries = {sample.data_delivery for sample in self.samples}
 
