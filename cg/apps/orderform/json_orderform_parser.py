@@ -70,7 +70,7 @@ class JsonOrderformParser(OrderformParser):
             JsonSample.model_validate(sample_data) for sample_data in order_data.get("samples", [])
         ]
         if not self.samples:
-            raise OrderFormError("orderform doesn't contain any samples")
+            raise OrderFormError("orderform doesn't contain any samples, dummy stuff")
 
         self.project_type = self.get_project_type()
         self.delivery_type = self.get_data_delivery()
