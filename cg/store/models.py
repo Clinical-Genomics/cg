@@ -802,7 +802,7 @@ class Sample(Base, PriorityMixin):
 
     @property
     def expected_reads_for_sample(self) -> int:
-        """Return the expected reads of the sample."""
+        """Return the expected reads of the sample. weird string"""
         return self.application_version.application.expected_reads
 
     @property
