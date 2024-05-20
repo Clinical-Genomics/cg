@@ -4,16 +4,21 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.sequencing_metrics_parser.models import DemuxMetrics, SequencingQualityMetrics
-from cg.apps.sequencing_metrics_parser.parser import MetricsParser
+
 from cg.constants.metrics import DemuxMetricsColumnNames, QualityMetricsColumnNames
+from cg.services.bcl_convert_metrics_service.models import DemuxMetrics, SequencingQualityMetrics
+from cg.services.bcl_convert_metrics_service.parser import MetricsParser
 
 
 @pytest.fixture(scope="session")
 def bcl_convert_metrics_dir_path() -> Path:
     """Return a path to a BCLConvert metrics directory."""
     return Path(
-        "tests", "fixtures", "apps", "sequencing_metrics_parser", "230622_A00621_0864_AHY7FFDRX2"
+        "tests",
+        "fixtures",
+        "services",
+        "bcl_convert_metrics_service",
+        "230622_A00621_0864_AHY7FFDRX2",
     )
 
 

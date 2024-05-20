@@ -2,12 +2,12 @@
 
 from pathlib import Path
 
-from cg.apps.sequencing_metrics_parser.api import (
+from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.services.bcl_convert_metrics_service.bcl_convert_metrics_service import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
     create_undetermined_non_pooled_metrics,
 )
-from cg.apps.sequencing_metrics_parser.parser import MetricsParser
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.services.bcl_convert_metrics_service.parser import MetricsParser
 from cg.store.models import SampleLaneSequencingMetrics
 
 

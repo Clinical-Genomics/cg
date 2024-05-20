@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Callable
 
 from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
-from cg.apps.sequencing_metrics_parser.models import DemuxMetrics, SequencingQualityMetrics
+
 from cg.constants.constants import SCALE_TO_READ_PAIRS, FileFormat
 from cg.constants.demultiplexing import UNDETERMINED
 from cg.constants.metrics import (
@@ -14,6 +14,7 @@ from cg.constants.metrics import (
     QUALITY_METRICS_FILE_NAME,
 )
 from cg.io.controller import ReadFile
+from cg.services.bcl_convert_metrics_service.models import SequencingQualityMetrics, DemuxMetrics
 from cg.utils.files import get_file_in_directory
 
 LOG = logging.getLogger(__name__)
@@ -44,8 +45,9 @@ class MetricsParser:
             metrics_model=DemuxMetrics,
         )
 
+    @staticmethod
     def parse_metrics_file(
-        self, metrics_file_path, metrics_model: Callable
+        metrics_file_path, metrics_model: Callable
     ) -> list[SequencingQualityMetrics | DemuxMetrics]:
         """Parse specified metrics file."""
         LOG.info(f"Parsing BCLConvert metrics file: {metrics_file_path}")
@@ -75,8 +77,8 @@ class MetricsParser:
                 lanes_for_sample.append(sample_demux_metric.lane)
         return lanes_for_sample
 
+    @staticmethod
     def get_metrics_for_sample_and_lane(
-        self,
         metrics: list[SequencingQualityMetrics | DemuxMetrics],
         sample_internal_id: str,
         lane: int,

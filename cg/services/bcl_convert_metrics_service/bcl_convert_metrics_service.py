@@ -1,9 +1,10 @@
 from datetime import datetime
 from pathlib import Path
 
-from cg.apps.sequencing_metrics_parser.parser import MetricsParser
+
 from cg.constants.demultiplexing import UNDETERMINED
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.services.bcl_convert_metrics_service.parser import MetricsParser
 from cg.store.models import SampleLaneSequencingMetrics
 from cg.utils.flow_cell import get_flow_cell_id
 
