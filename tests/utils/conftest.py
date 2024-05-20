@@ -25,7 +25,7 @@ def stderr_output():
     lines = (
         "2018-11-29 08:41:38 130-229-8-20-dhcp.local "
         "mongo_adapter.client[77135] INFO Connecting to "
-        "uri:mongodb://None:None@localhost:27017\n"
+        "uri:mongodb://None@localhost:27017\n"
         "2018-11-29 08:41:38 130-229-8-20-dhcp.local "
         "mongo_adapter.client[77135] INFO Connection "
         "established\n"

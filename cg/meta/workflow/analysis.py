@@ -190,17 +190,18 @@ class AnalysisAPI(MetaAPI):
         return application_types.pop()
 
     def get_case_source_type(self, case_id: str) -> str | None:
-        """Returns the source type for samples in a case.
+        """
+        Return the sample source type of a case.
+
         Raises:
-            CgError: If different sources are set for the samples linked to a case."""
+            CgError: If different sources are set for the samples linked to a case.
+        """
         sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
         source_types: set[str | None] = {
-            self.lims_api.get_source(lims_id=sample_id) for sample_id in sample_ids
+            self.lims_api.get_source(sample_id) for sample_id in sample_ids
         }
-
         if len(source_types) > 1:
             raise CgError(f"Different source types found for case: {case_id} ({source_types})")
-
         return source_types.pop()
 
     def has_case_only_exome_samples(self, case_id: str) -> bool:
