@@ -27,5 +27,5 @@ def run_parameters_without_model() -> Path:
         "demultiplexing",
         "flow_cells",
         "170517_ST-E00266_0210_BHJCFFALXX",
-        "RunParameters.xml",
+        "runParameters.xml",
     )
