@@ -51,6 +51,12 @@ class CaseTags(BaseModel):
     vcf_mei_research: set[str] | None = Field(
         None, description="VCF with mobile element insertions, research"
     )
+    vcf_snv: set[str] | None = Field(
+        None, description="VCF with SNVs, clinical"
+    )
+    vcf_snv_research: set[str] | None = Field(
+        None, description="VCF with SNVs, research"
+    )
 
 
 class SampleTags(BaseModel):
