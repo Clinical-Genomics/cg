@@ -8,6 +8,7 @@ from cg.store.models import (
     Organism,
     Sample,
     User,
+    IlluminaFlowCell,
 )
 from cg.store.store import Store
 
@@ -114,3 +115,19 @@ def test_add_pool(rml_pool_store: Store):
     # THEN the new pool should have no_invoice = False
     pool = rml_pool_store.get_pool_by_entry_id(entry_id=2)
     assert pool.no_invoice is False
+
+
+def test_add_illumina_flow_cell(
+    illumina_flow_cell: IlluminaFlowCell, illumina_flow_cell_internal_id: str, store: Store
+):
+    # GIVEN an illumina flow cell
+    assert not store.get_illumina_flow_cell_by_internal_id(illumina_flow_cell_internal_id)
+
+    # WHEN adding a new illumina flow cell to the store
+    store.add_illumina_flow_cell(illumina_flow_cell)
+
+    # THEN it should be stored in the database
+    assert (
+        store.get_illumina_flow_cell_by_internal_id(illumina_flow_cell_internal_id)
+        == illumina_flow_cell
+    )

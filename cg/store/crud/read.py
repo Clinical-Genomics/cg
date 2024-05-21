@@ -50,6 +50,10 @@ from cg.store.filters.status_flow_cell_filters import (
     FlowCellFilter,
     apply_flow_cell_filter,
 )
+from cg.store.filters.status_illumina_flow_cell_filters import (
+    apply_illumina_flow_cell_filters,
+    IlluminaFlowCellFilter,
+)
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
 from cg.store.filters.status_metrics_filters import (
     SequencingMetricsFilter,
@@ -84,6 +88,7 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
     User,
+    IlluminaFlowCell,
 )
 
 LOG = logging.getLogger(__name__)
@@ -1468,3 +1473,11 @@ class ReadHandler(BaseHandler):
             filter_functions=filters,
             order_id=order_id,
         ).count()
+
+    def get_illumina_flow_cell_by_internal_id(self, internal_id: str) -> IlluminaFlowCell:
+        """Return a flow cell by internal id."""
+        return apply_illumina_flow_cell_filters(
+            filter_functions=[IlluminaFlowCellFilter.BY_INTERNAL_ID],
+            flow_cells=self._get_query(table=IlluminaFlowCell),
+            internal_id=internal_id,
+        ).first()

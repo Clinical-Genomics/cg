@@ -16,6 +16,7 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
 from cg.constants.symbols import EMPTY_STRING
 from cg.exc import FlowCellError
+
 from cg.models.demultiplex.run_parameters import (
     RunParameters,
     RunParametersHiSeq,

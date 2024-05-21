@@ -5,7 +5,7 @@ import pytest
 from cg.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError, MissingFilesError
-from cg.meta.demultiplex.validation import (
+from cg.services.illumina_post_processing_service.validation import (
     is_demultiplexing_complete,
     is_flow_cell_ready_for_delivery,
     validate_demultiplexing_complete,
