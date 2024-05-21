@@ -92,7 +92,7 @@ class IlluminaPostProcessingService:
             LOG.warning(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
             return
         try:
-            self.store_illumina_run_data(flow_cell)
+            self.store_illumina_flow_cell_data(flow_cell)
         except Exception as e:
             LOG.error(f"Failed to store flow cell data: {str(e)}")
             raise
