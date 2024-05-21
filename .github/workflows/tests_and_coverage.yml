@@ -8,7 +8,7 @@ on:
 
 jobs:
   tests-coverage:
-    runs-on: Beefy_Linux
+    runs-on: 8_core_linux
 
     steps:
       - name: Checkout Repository
