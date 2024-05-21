@@ -40,10 +40,13 @@ class IlluminaPostProcessingService:
         flow_cell = IlluminaFlowCell(
             internal_id=flow_cell.id, type=DeviceType.ILLUMINA, model=model
         )
-        return store.add_illumina_flow_cell(flow_cell)
+        new_flow_cell: IlluminaFlowCell = store.add_illumina_flow_cell(flow_cell)
+        if not flow_cell:
+            raise ValueError(f"Failed to store flow cell {flow_cell.id}")
+        return new_flow_cell
 
     @staticmethod
-    def store_illumina_sequencing_metrics():
+    def store_illumina_sequencing_metrics(flow_cell: IlluminaFlowCell) -> None:
         """Store illumina run metrics in the status database."""
         pass
 
@@ -54,8 +57,10 @@ class IlluminaPostProcessingService:
 
     def store_illumina_flow_cell_data(self, flow_cell: FlowCellDirectoryData) -> None:
         """Store flow cell data in the status database."""
-        self.store_illumina_flow_cell(flow_cell=flow_cell, store=self.status_db)
-        self.store_illumina_sequencing_metrics()
+        flow_cell: IlluminaFlowCell | None = self.store_illumina_flow_cell(
+            flow_cell=flow_cell, store=self.status_db
+        )
+        self.store_illumina_sequencing_metrics(flow_cell)
         self.store_illumina_sample_sequencing_metrics()
         self.status_db.commit_to_store()
 
