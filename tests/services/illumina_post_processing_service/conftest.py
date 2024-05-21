@@ -6,9 +6,10 @@ import pytest
 
 
 @pytest.fixture
-def run_paramters_with_flow_cell_mode_node_name(fixtures_dir: Path) -> Path:
+def run_paramters_with_flow_cell_mode_node_name() -> Path:
     return Path(
-        fixtures_dir,
+        "tests",
+        "fixtures",
         "apps",
         "demultiplexing",
         "flow_cells",
@@ -18,9 +19,10 @@ def run_paramters_with_flow_cell_mode_node_name(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture
-def run_parameters_without_model(fixtures_dir: Path) -> Path:
+def run_parameters_without_model() -> Path:
     return Path(
-        fixtures_dir,
+        "tests",
+        "fixtures",
         "apps",
         "demultiplexing",
         "flow_cells",
