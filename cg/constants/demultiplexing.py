@@ -15,7 +15,7 @@ class DemultiplexingDirsAndFiles(StrEnum):
     DEMUX_STARTED: str = "demuxstarted.txt"
     DEMUX_COMPLETE: str = "demuxcomplete.txt"
     RTACOMPLETE: str = "RTAComplete.txt"
-    RUN_PARAMETERS_PASCAL_CASE: str = "RunParameters.xml"
+    RUN_PARAMETERS_PASCAL_CASE: str = "runParameters.xml"
     RUN_PARAMETERS_CAMEL_CASE: str = "runParameters.xml"
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
