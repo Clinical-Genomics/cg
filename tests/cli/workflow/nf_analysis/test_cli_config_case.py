@@ -47,7 +47,7 @@ def test_config_case_without_options(
 )
 def test_config_with_missing_case(
     cli_runner: CliRunner,
-    mocker,
+    mocker: MockFixture,
     caplog: LogCaptureFixture,
     case_id_does_not_exist: str,
     workflow: Workflow,
