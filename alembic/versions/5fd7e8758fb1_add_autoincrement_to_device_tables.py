@@ -29,7 +29,6 @@ def upgrade():
     op.alter_column(
         "illumina_flow_cell", "model", existing_type=sa.String(length=32), nullable=True
     )
-    # op.execute("ALTER TABLE illumina_flow_cell MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT")
     op.create_foreign_key(
         constraint_name="fk_device_id",
         source_table="run_metrics",
@@ -44,17 +43,47 @@ def upgrade():
         local_cols=["id"],
         remote_cols=["id"],
     )
-    # op.drop_constraint(
-    #     "illumina_sample_run_metrics_ibfk_1", "illumina_sample_run_metrics", type_="foreignkey"
-    # )
-    # op.execute("ALTER TABLE run_metrics MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT")
-    # op.drop_constraint(
-    #     "illumina_sequencing_metrics_ibfk_1", "illumina_sequencing_metrics", type_="foreignkey"
-    # )
-    # op.execute("ALTER TABLE sample_run_metrics MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT")
+
+    # Modify run metrics primary key
+    op.drop_constraint(
+        constraint_name="illumina_sequencing_metrics_ibfk_1",
+        table_name="illumina_sequencing_metrics",
+        type_="foreignkey",
+    )
+    op.execute("ALTER TABLE run_metrics MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT")
+    op.create_foreign_key(
+        constraint_name="illumina_sequencing_metrics_ibfk_1",
+        source_table="illumina_sequencing_metrics",
+        referent_table="run_metrics",
+        local_cols=["id"],
+        remote_cols=["id"],
+    )
+    op.create_foreign_key(
+        constraint_name="fk_run_metrics_id",
+        source_table="sample_run_metrics",
+        referent_table="run_metrics",
+        local_cols=["run_metrics_id"],
+        remote_cols=["id"],
+    )
+
+    # Modify sample run metrics primary key
+    op.drop_constraint(
+        constraint_name="illumina_sample_run_metrics_ibfk_1",
+        table_name="illumina_sample_run_metrics",
+        type_="foreignkey",
+    )
+    op.execute("ALTER TABLE sample_run_metrics MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT")
+    op.create_foreign_key(
+        constraint_name="illumina_sample_run_metrics_ibfk_1",
+        source_table="illumina_sample_run_metrics",
+        referent_table="sample_run_metrics",
+        local_cols=["id"],
+        remote_cols=["id"],
+    )
 
 
 def downgrade():
+    # Downgrade illumina flow cell primary key
     op.drop_constraint(
         constraint_name="illumina_flow_cell_ibfk_1",
         table_name="illumina_flow_cell",
@@ -80,5 +109,35 @@ def downgrade():
         remote_cols=["id"],
     )
 
-    # op.execute("ALTER TABLE run_metrics MODIFY COLUMN id INT NOT NULL")
-    # op.execute("ALTER TABLE sample_run_metrics MODIFY COLUMN id INT NOT NULL")
+    # Downgrade illumina run metrics primary key
+    op.drop_constraint(
+        constraint_name="fk_run_metrics_id", table_name="sample_run_metrics", type_="foreignkey"
+    )
+    op.drop_constraint(
+        constraint_name="illumina_sequencing_metrics_ibfk_1",
+        table_name="illumina_sequencing_metrics",
+        type_="foreignkey",
+    )
+    op.execute("ALTER TABLE run_metrics MODIFY COLUMN id INT NOT NULL")
+    op.create_foreign_key(
+        constraint_name="illumina_sequencing_metrics_ibfk_1",
+        source_table="illumina_sequencing_metrics",
+        referent_table="run_metrics",
+        local_cols=["id"],
+        remote_cols=["id"],
+    )
+
+    # Downgrade illumina run sample metrics primary key
+    op.drop_constraint(
+        constraint_name="illumina_sample_run_metrics_ibfk_1",
+        table_name="illumina_sample_run_metrics",
+        type_="foreignkey",
+    )
+    op.execute("ALTER TABLE sample_run_metrics MODIFY COLUMN id INT NOT NULL")
+    op.create_foreign_key(
+        constraint_name="illumina_sample_run_metrics_ibfk_1",
+        source_table="illumina_sample_run_metrics",
+        referent_table="sample_run_metrics",
+        local_cols=["id"],
+        remote_cols=["id"],
+    )
