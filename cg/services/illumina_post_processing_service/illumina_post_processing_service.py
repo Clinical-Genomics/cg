@@ -57,7 +57,7 @@ class IlluminaPostProcessingService:
 
     def store_illumina_flow_cell_data(self, flow_cell: FlowCellDirectoryData) -> None:
         """Store flow cell data in the status database."""
-        flow_cell: IlluminaFlowCell | None = self.store_illumina_flow_cell(
+        flow_cell: IlluminaFlowCell = self.store_illumina_flow_cell(
             flow_cell=flow_cell, store=self.status_db
         )
         self.store_illumina_sequencing_metrics(flow_cell)
