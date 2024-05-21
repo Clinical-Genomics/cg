@@ -27,6 +27,7 @@ from cg.constants.constants import (
     SexOptions,
     StatusOptions,
 )
+from cg.constants.devices import DeviceType
 from cg.constants.priority import SlurmQos
 from cg.constants.symbols import EMPTY_STRING
 
@@ -44,6 +45,7 @@ VarChar128 = Annotated[str, 128]
 
 PrimaryKeyInt = Annotated[int, mapped_column(primary_key=True)]
 UniqueStr = Annotated[str, mapped_column(String(32), unique=True)]
+UniqueStr64 = Annotated[str, mapped_column(String(64), unique=True)]
 
 
 class Base(DeclarativeBase):
@@ -498,42 +500,36 @@ class Case(Base, PriorityMixin):
                 sequenced_dates.append(link.sample.last_sequenced_at)
         return max(sequenced_dates, default=None)
 
+    @property
+    def are_all_samples_sequenced(self) -> bool:
+        return all([link.sample.last_sequenced_at for link in self.links])
+
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
     @property
     def samples(self) -> list["Sample"]:
         """Return case samples."""
-        return self._get_samples
+        return [link.sample for link in self.links]
 
     @property
     def sample_ids(self) -> list[str]:
         """Return a list of internal ids of the case samples."""
-        return [sample.internal_id for sample in self._get_samples]
-
-    @property
-    def _get_samples(self) -> list["Sample"]:
-        """Extract samples from a case."""
-        return [link.sample for link in self.links]
+        return [sample.internal_id for sample in self.samples]
 
     @property
     def tumour_samples(self) -> list["Sample"]:
         """Return tumour samples."""
-        return self._get_tumour_samples
+        return [link.sample for link in self.links if link.sample.is_tumour]
 
     @property
-    def _get_tumour_samples(self) -> list["Sample"]:
-        """Extract tumour samples."""
-        return [link.sample for link in self.links if link.sample.is_tumour]
+    def non_tumour_samples(self) -> list["Sample"]:
+        """Return non-tumour samples."""
+        return [link.sample for link in self.links if not link.sample.is_tumour]
 
     @property
     def loqusdb_uploaded_samples(self) -> list["Sample"]:
         """Return uploaded samples to Loqusdb."""
-        return self._get_loqusdb_uploaded_samples
-
-    @property
-    def _get_loqusdb_uploaded_samples(self) -> list["Sample"]:
-        """Extract samples uploaded to Loqusdb."""
         return [link.sample for link in self.links if link.sample.loqusdb_id]
 
     @property
@@ -953,3 +949,101 @@ class Order(Base):
 
     def to_dict(self):
         return to_dict(model_instance=self)
+
+
+class RunDevice(Base):
+    """Model for storing run devices."""
+
+    __tablename__ = "run_device"
+
+    id: Mapped[PrimaryKeyInt]
+    type: Mapped[DeviceType]
+    internal_id: Mapped[UniqueStr64]
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
+
+
+class IlluminaFlowCell(RunDevice):
+    """Model for storing Illumina flow cells."""
+
+    __tablename__ = "illumina_flow_cell"
+
+    id: Mapped[int] = mapped_column(ForeignKey("run_device.id"), primary_key=True)
+    model: Mapped[str | None] = mapped_column(
+        types.Enum("10B", "25B", "1.5B", "S1", "S2", "S4", "SP")
+    )
+
+    __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
+
+
+class RunMetrics(Base):
+    """Model for storing run devices."""
+
+    __tablename__ = "run_metrics"
+
+    id: Mapped[PrimaryKeyInt]
+    type: Mapped[DeviceType]
+    device_id: Mapped[int] = mapped_column(ForeignKey("run_device.id"))
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
+
+
+class IlluminaRunMetrics(RunMetrics):
+    __tablename__ = "illumina_sequencing_metrics"
+
+    id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"), primary_key=True)
+    sequencer_type: Mapped[str | None] = mapped_column(
+        types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx")
+    )
+    sequencer_name: Mapped[Str32 | None]
+    sequenced_at: Mapped[datetime | None]
+    data_availability: Mapped[str | None] = mapped_column(
+        types.Enum(*(status.value for status in FlowCellStatus)), default="ondisk"
+    )
+    archived_at: Mapped[datetime | None]
+    has_backup: Mapped[bool] = mapped_column(default=False)
+    total_reads: Mapped[BigInt | None]
+    total_undetermined_reads: Mapped[BigInt | None]
+    percent_q30: Mapped[Num_6_2 | None]
+    mean_quality_score: Mapped[Num_6_2 | None]
+    total_yield: Mapped[BigInt | None]
+    yield_q30: Mapped[Num_6_2 | None]
+    cycles: Mapped[int | None]
+    demultiplexing_software: Mapped[Str32 | None]
+    demultiplexing_software_version: Mapped[Str32 | None]
+    sequencing_started_at: Mapped[datetime | None]
+    sequencing_completed_at: Mapped[datetime | None]
+    demultiplexing_started_at: Mapped[datetime | None]
+    demultiplexing_completed_at: Mapped[datetime | None]
+
+    __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
+
+
+class SampleRunMetrics(Base):
+    __tablename__ = "sample_run_metrics"
+    id: Mapped[PrimaryKeyInt]
+    sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id"))
+    run_metrics_id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"))
+    type: Mapped[DeviceType]
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
+
+
+class IlluminaSampleRunMetrics(SampleRunMetrics):
+    """Sequencing metrics for a sample sequenced on an Illumina instrument. The metrics are per sample, per lane, per flow cell."""
+
+    __tablename__ = "illumina_sample_run_metrics"
+
+    id: Mapped[int] = mapped_column(ForeignKey("sample_run_metrics.id"), primary_key=True)
+    flow_cell_lane: Mapped[int | None]
+    total_reads_in_lane: Mapped[BigInt | None]
+    base_passing_q30_percent: Mapped[Num_6_2 | None]
+    base_mean_quality_score: Mapped[Num_6_2 | None]
+    created_at: Mapped[datetime | None]
+    __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}

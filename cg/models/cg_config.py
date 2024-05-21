@@ -25,7 +25,9 @@ from cg.constants.priority import SlurmQos
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
-from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
@@ -83,6 +85,12 @@ class HousekeeperConfig(BaseModel):
 
 class DemultiplexConfig(BaseModel):
     slurm: SlurmConfig
+
+
+class DownsampleConfig(BaseModel):
+    downsample_dir: str
+    downsample_script: str
+    account: str
 
 
 class JanusConfig(BaseModel):
@@ -293,12 +301,32 @@ class DataFlowConfig(BaseModel):
     archive_repository: str
 
 
+class PacbioConfig(BaseModel):
+    data_dir: str
+    systemd_trigger_dir: str
+
+
+class OxfordNanoporeConfig(BaseModel):
+    data_dir: str
+    systemd_trigger_dir: str
+
+
+class IlluminaConfig(BaseModel):
+    flow_cell_runs_dir: str
+    demultiplexed_runs_dir: str
+
+
+class RunInstruments(BaseModel):
+    pacbio: PacbioConfig
+    nanopore: OxfordNanoporeConfig
+    illumina: IlluminaConfig
+
+
 class CGConfig(BaseModel):
     database: str
     delivery_path: str
+    downsample: DownsampleConfig
     illumina_demultiplexed_runs_directory: str
-    downsample_dir: str
-    downsample_script: str
     email_base_settings: EmailBaseSettings
     environment: Literal["production", "stage"] = "stage"
     illumina_flow_cells_directory: str
@@ -307,6 +335,7 @@ class CGConfig(BaseModel):
     tower_binary_path: str
     max_flowcells: int | None
     data_input: DataInput | None = None
+    run_instruments: RunInstruments
     # Base APIs that always should exist
     status_db_: Store | None = None
     housekeeper: HousekeeperConfig
@@ -589,8 +618,8 @@ class CGConfig(BaseModel):
         return api
 
     @property
-    def fastq_file_service(self) -> FastqFileService:
-        return FastqFileService()
+    def fastq_concatenation_service(self) -> FastqConcatenationService:
+        return FastqConcatenationService()
 
     @property
     def delivery_api(self) -> DeliveryAPI:
@@ -599,7 +628,7 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating delivery api")
             api = DeliveryAPI(
                 delivery_path=Path(self.delivery_path),
-                fastq_file_service=self.fastq_file_service,
+                fastq_concatenation_service=self.fastq_concatenation_service,
                 housekeeper_api=self.housekeeper_api,
                 store=self.status_db,
             )
