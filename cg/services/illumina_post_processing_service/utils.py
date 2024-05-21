@@ -22,5 +22,4 @@ def get_flow_cell_model_from_run_parameters(run_parameters_path: Path) -> str | 
             return node.text
         except XMLError:
             continue
-    if not node:
-        return None
+    return node

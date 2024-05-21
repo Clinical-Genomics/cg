@@ -31,7 +31,7 @@ class IlluminaPostProcessingService:
     def store_illumina_flow_cell(
         flow_cell: FlowCellDirectoryData,
         store: Store,
-    ) -> None:
+    ) -> IlluminaFlowCell:
         """
         Create flow cell from the parsed and validated flow cell data.
         And add the samples on the flow cell to the model.
@@ -40,7 +40,7 @@ class IlluminaPostProcessingService:
         flow_cell = IlluminaFlowCell(
             internal_id=flow_cell.id, type=DeviceType.ILLUMINA, model=model
         )
-        store.add_illumina_flow_cell(flow_cell)
+        return store.add_illumina_flow_cell(flow_cell)
 
     @staticmethod
     def store_illumina_sequencing_metrics():
@@ -57,6 +57,7 @@ class IlluminaPostProcessingService:
         self.store_illumina_flow_cell(flow_cell=flow_cell, store=self.status_db)
         self.store_illumina_sequencing_metrics()
         self.store_illumina_sample_sequencing_metrics()
+        self.status_db.commit_to_store()
 
     def post_process_illumina_flow_cell(
         self,
