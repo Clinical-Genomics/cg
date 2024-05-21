@@ -21,6 +21,7 @@ from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBu
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
+from cg.meta.upload.scout.tomte_config_builder import TomteConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Analysis, Case, Customer, Sample
@@ -428,6 +429,9 @@ class UploadScoutAPI:
                 madeline_api=self.madeline_api,
             ),
             Workflow.RNAFUSION: RnafusionConfigBuilder(
+                hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
+            ),
+            Workflow.TOMTE: TomteConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
         }
