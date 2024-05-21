@@ -42,9 +42,19 @@ class IlluminaPostProcessingService:
         )
         store.add_illumina_flow_cell(flow_cell)
 
+    @staticmethod
+    def store_illumina_sequencing_metrics():
+        pass
+
+    @staticmethod
+    def store_illumina_sample_sequencing_metrics():
+        pass
+
     def store_illumina_flow_cell_data(self, flow_cell: FlowCellDirectoryData) -> None:
         """Store flow cell data in the status database."""
         self.store_illumina_flow_cell(flow_cell=flow_cell, store=self.status_db)
+        self.store_illumina_sequencing_metrics()
+        self.store_illumina_sample_sequencing_metrics()
 
     def post_process_illumina_flow_cell(
         self,
