@@ -40,10 +40,7 @@ class IlluminaPostProcessingService:
         new_flow_cell = IlluminaFlowCell(
             internal_id=flow_cell.id, type=DeviceType.ILLUMINA, model=model
         )
-        new_flow_cell: IlluminaFlowCell | None = store.add_illumina_flow_cell(new_flow_cell)
-        if not new_flow_cell:
-            raise ValueError(f"Failed to store flow cell {flow_cell.id}")
-        return new_flow_cell
+        return store.add_illumina_flow_cell(new_flow_cell)
 
     @staticmethod
     def store_illumina_sequencing_metrics(flow_cell: IlluminaFlowCell) -> None:
@@ -79,9 +76,7 @@ class IlluminaPostProcessingService:
         Raises:
             FlowCellError: If the flow cell directory or the data it contains is not valid.
         """
-        if self.dry_run:
-            LOG.info(f"Dry run will not finish flow cell {flow_cell_directory_name}")
-            return
+
         LOG.info(f"Post-process flow cell {flow_cell_directory_name}")
         flow_cell_out_directory = Path(demultiplexed_runs_dir, flow_cell_directory_name)
         flow_cell = FlowCellDirectoryData(flow_cell_out_directory)
@@ -96,6 +91,9 @@ class IlluminaPostProcessingService:
             )
         except (FlowCellError, MissingFilesError) as e:
             LOG.warning(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
+            return
+        if self.dry_run:
+            LOG.info(f"Dry run will not finish flow cell {flow_cell_directory_name}")
             return
         try:
             self.store_illumina_flow_cell_data(flow_cell)
