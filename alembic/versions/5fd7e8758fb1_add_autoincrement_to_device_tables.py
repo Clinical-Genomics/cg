@@ -26,6 +26,9 @@ def upgrade():
     )
     op.drop_constraint(constraint_name="fk_device_id", table_name="run_metrics", type_="foreignkey")
     op.execute("ALTER TABLE run_device MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT")
+    op.alter_column(
+        "illumina_flow_cell", "model", existing_type=sa.String(length=32), nullable=True
+    )
     # op.execute("ALTER TABLE illumina_flow_cell MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT")
     op.create_foreign_key(
         constraint_name="fk_device_id",
@@ -58,6 +61,9 @@ def downgrade():
         type_="foreignkey",
     )
     op.drop_constraint(constraint_name="fk_device_id", table_name="run_metrics", type_="foreignkey")
+    op.alter_column(
+        "illumina_flow_cell", "model", existing_type=sa.String(length=32), nullable=False
+    )
     op.execute("ALTER TABLE run_device MODIFY COLUMN id INT NOT NULL")
     op.create_foreign_key(
         constraint_name="fk_device_id",
