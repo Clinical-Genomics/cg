@@ -44,10 +44,12 @@ class IlluminaPostProcessingService:
 
     @staticmethod
     def store_illumina_sequencing_metrics():
+        """Store illumina run metrics in the status database."""
         pass
 
     @staticmethod
     def store_illumina_sample_sequencing_metrics():
+        """Store illumina sample sequencing metrics in the status database."""
         pass
 
     def store_illumina_flow_cell_data(self, flow_cell: FlowCellDirectoryData) -> None:
