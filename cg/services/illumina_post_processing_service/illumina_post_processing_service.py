@@ -37,11 +37,11 @@ class IlluminaPostProcessingService:
         And add the samples on the flow cell to the model.
         """
         model: str | None = get_flow_cell_model_from_run_parameters(flow_cell.run_parameters_path)
-        flow_cell = IlluminaFlowCell(
+        new_flow_cell = IlluminaFlowCell(
             internal_id=flow_cell.id, type=DeviceType.ILLUMINA, model=model
         )
-        new_flow_cell: IlluminaFlowCell = store.add_illumina_flow_cell(flow_cell)
-        if not flow_cell:
+        new_flow_cell: IlluminaFlowCell | None = store.add_illumina_flow_cell(new_flow_cell)
+        if not new_flow_cell:
             raise ValueError(f"Failed to store flow cell {flow_cell.id}")
         return new_flow_cell
 
@@ -57,7 +57,7 @@ class IlluminaPostProcessingService:
 
     def store_illumina_flow_cell_data(self, flow_cell: FlowCellDirectoryData) -> None:
         """Store flow cell data in the status database."""
-        flow_cell: IlluminaFlowCell | None = self.store_illumina_flow_cell(
+        flow_cell: IlluminaFlowCell = self.store_illumina_flow_cell(
             flow_cell=flow_cell, store=self.status_db
         )
         self.store_illumina_sequencing_metrics(flow_cell)

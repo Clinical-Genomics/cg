@@ -417,7 +417,7 @@ class CreateHandler(BaseHandler):
         session.execute(insert_statement)
         session.commit()
 
-    def add_illumina_flow_cell(self, flow_cell: IlluminaFlowCell) -> IlluminaFlowCell:
+    def add_illumina_flow_cell(self, flow_cell: IlluminaFlowCell) -> IlluminaFlowCell | None:
         """Add a new Illumina flow cell to the status database as a pending transaction."""
         if not self.get_illumina_flow_cell_by_internal_id(flow_cell.internal_id):
             session = get_session()
@@ -425,4 +425,4 @@ class CreateHandler(BaseHandler):
             LOG.debug(f"Flow cell added to status db: {flow_cell.id}.")
             return flow_cell
         LOG.debug(f"Flow cell already exists in status db: {flow_cell.id}.")
-        return flow_cell
+        return None
