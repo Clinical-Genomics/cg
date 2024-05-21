@@ -13,12 +13,12 @@ def run_paramters_with_flow_cell_mode_node_name(fixtures_dir: Path) -> Path:
         "demultiplexing",
         "flow_cells",
         "230912_A00187_1009_AHK33MDRX3",
-        "RunParameters.xml",
+        "runParameters.xml",
     )
 
 
 @pytest.fixture
-def run_parameters_without_model(fixtures_dir: Path) -> Path:
+def run_parameters_without_mode(fixtures_dir: Path) -> Path:
     return Path(
         fixtures_dir,
         "apps",
