@@ -79,6 +79,7 @@ class ScoutRnaIndividual(ScoutIndividual):
     splice_junctions_bed: str | None = None
     rna_coverage_bigwig: str | None = None
 
+
 class ScoutLoadConfig(BaseModel):
     owner: Annotated[str, BeforeValidator(field_not_none)] = None
     family: Annotated[str, BeforeValidator(field_not_none)] = None
