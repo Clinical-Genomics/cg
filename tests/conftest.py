@@ -2434,6 +2434,7 @@ def raredisease_context(
     case_id_not_enough_reads: str,
     sample_id_not_enough_reads: str,
     total_sequenced_reads_not_pass: int,
+    mocker,
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
@@ -2483,6 +2484,9 @@ def raredisease_context(
     )
 
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
+    mocker.patch.object(RarediseaseAnalysisAPI, "get_target_bed_from_lims")
+    RarediseaseAnalysisAPI.get_target_bed_from_lims.return_value = "some_target_bed_file"
 
     return cg_context
 
