@@ -263,7 +263,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Collect and format information required to build a sample sheet for a single sample."""
         raise NotImplementedError
 
-    def get_case_from_string(self, case_id: str) -> Case:
+    def get_validated_case(self, case_id: str) -> Case:
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         if len(case.links) == 0:
             raise CgError(f"No samples linked to {case_id}")
@@ -272,7 +272,7 @@ class NfAnalysisAPI(AnalysisAPI):
         return case
 
     def get_sample_sheet_content(self, case_id: str) -> list[list[Any]]:
-        """Collect and format information required to build a sample sheet for a case.
+        """Return formatted information required to build a sample sheet for a case.
         This contains information for all samples linked to the case."""
         sample_sheet_content = []
         case = self.get_case_from_string(case_id)
@@ -633,7 +633,7 @@ class NfAnalysisAPI(AnalysisAPI):
             MultiQC.MULTIQC_DATA + FileExtensions.JSON,
         )
 
-    def get_workflow_metrics(self) -> dict:
+    def get_workflow_metrics(self, metric_id: str) -> dict:
         """Get nf-core workflow metrics constants."""
         return {}
 
@@ -711,7 +711,7 @@ class NfAnalysisAPI(AnalysisAPI):
             name=metric_name,
             step=MultiQC.MULTIQC,
             value=metric_value,
-            condition=self.get_workflow_metrics().get(metric_name, None),
+            condition=self.get_workflow_metrics(metric_id).get(metric_name, None),
         )
 
     @staticmethod

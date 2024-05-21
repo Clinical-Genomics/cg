@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import Any
 
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType, GenomeVersion
@@ -15,7 +16,7 @@ from cg.models.raredisease.raredisease import (
     RarediseaseSampleSheetEntry,
     RarediseaseSampleSheetHeaders,
 )
-from cg.store.models import CaseSample
+from cg.store.models import CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -99,8 +100,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
-        analysis_type = self.get_analysis_type(case_id=case_id)
-        target_bed = self.set_target_bed(case_id=case_id, analysis_type=analysis_type)
+        analysis_type: AnalysisType = self.get_analysis_type(case_id=case_id)
+        target_bed: str = self.set_target_bed(case_id=case_id, analysis_type=analysis_type)
         return RarediseaseParameters(
             input=self.get_sample_sheet_path(case_id=case_id),
             outdir=self.get_case_path(case_id=case_id),
@@ -139,5 +140,12 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Create and return the managed variants."""
         return self._get_managed_variants(genome_build=GenePanelGenomeBuild.hg19)
 
-    def get_workflow_metrics(self) -> dict:
-        return RAREDISEASE_METRIC_CONDITIONS
+    def get_workflow_metrics(self, sample_id: str) -> dict:
+        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
+        metric_conditions: dict[str, dict[str, Any]] = dict(RAREDISEASE_METRIC_CONDITIONS)
+        self.set_order_sex_for_sample(sample, metric_conditions)
+        return metric_conditions
+
+    @staticmethod
+    def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
+        metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
