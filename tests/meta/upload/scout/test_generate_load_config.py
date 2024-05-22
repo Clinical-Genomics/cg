@@ -11,6 +11,7 @@ from cg.models.scout.scout_load_config import (
     RnafusionLoadConfig,
     ScoutLoadConfig,
     ScoutMipIndividual,
+    TomteLoadConfig,
 )
 from cg.store.models import Analysis
 
@@ -138,3 +139,23 @@ def test_generate_config_adds_case_paths(
 
     # THEN the config should contain the multiqc file path
     assert result_data.multiqc
+
+
+def test_generate_tomte_load_config(
+    tomte_analysis_obj: Analysis,
+    upload_tomte_analysis_scout_api: UploadScoutAPI,
+):
+    """Test that a tomte config is generated."""
+
+    # GIVEN an analysis object that have been run with tomte
+    assert tomte_analysis_obj.workflow == Workflow.TOMTE
+
+    # GIVEN an upload scout api with some tomte information
+
+    # WHEN generating a load config
+    config: ScoutLoadConfig = upload_tomte_analysis_scout_api.generate_config(
+        analysis=tomte_analysis_obj
+    )
+
+    # THEN assert that the config is a tomte config
+    assert isinstance(config, TomteLoadConfig)

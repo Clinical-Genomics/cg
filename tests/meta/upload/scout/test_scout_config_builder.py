@@ -8,6 +8,7 @@ from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
+from cg.meta.upload.scout.tomte_config_builder import TomteConfigBuilder
 from cg.store.models import Analysis
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
@@ -216,3 +217,20 @@ def test_extract_generic_filepath(mip_config_builder: MipConfigBuilder):
     # THEN
     assert mip_config_builder.extract_generic_filepath(file_path1) == generic_path
     assert mip_config_builder.extract_generic_filepath(file_path2) == generic_path
+
+
+def test_tomte_config_builder(
+    hk_version: Version,
+    tomte_analysis_obj: Analysis,
+    lims_api: MockLimsAPI,
+):
+    """Test Tomte config builder class."""
+    # GIVEN a tomte file handler
+
+    # WHEN instantiating
+    file_handler = TomteConfigBuilder(
+        hk_version_obj=hk_version, analysis_obj=tomte_analysis_obj, lims_api=lims_api
+    )
+
+    # THEN assert that the correct case tags was used
+    assert isinstance(file_handler.case_tags, CaseTags)

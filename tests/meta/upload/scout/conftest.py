@@ -481,6 +481,43 @@ def rnafusion_analysis_hk_bundle_data(
     }
 
 
+@pytest.fixture(scope="function")
+def tomte_analysis_hk_bundle_data(
+    case_id: str,
+    timestamp: datetime,
+    tomte_analysis_dir: Path,
+    delivery_report_html: Path,
+) -> dict:
+    """Get some bundle data for housekeeper."""
+    return {
+        "name": case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [
+            {
+                "path": str(tomte_analysis_dir / "multiqc.html"),
+                "archive": False,
+                "tags": ["multiqc-html", "rna"],
+            },
+            {
+                "path": delivery_report_html.as_posix(),
+                "archive": False,
+                "tags": [HK_DELIVERY_REPORT_TAG],
+            },
+            {
+                "path": str(tomte_analysis_dir / "vep_research.vcf.gz"),
+                "archive": False,
+                "tags": ["research", "vcf", "snv"],
+            },
+            {
+                "path": str(tomte_analysis_dir / "vep_clinical.vcf.gz"),
+                "archive": False,
+                "tags": ["clinical", "vcf", "snv"],
+            },
+        ],
+    }
+
+
 @pytest.fixture
 def balsamic_analysis_hk_version(
     housekeeper_api: MockHousekeeperAPI, balsamic_analysis_hk_bundle_data: dict, helpers
@@ -530,6 +567,15 @@ def rnafusion_analysis_hk_api(
 ) -> MockHousekeeperAPI:
     """Return a housekeeper api populated with some rnafusion analysis files"""
     helpers.ensure_hk_version(housekeeper_api, rnafusion_analysis_hk_bundle_data)
+    return housekeeper_api
+
+
+@pytest.fixture
+def tomte_analysis_hk_api(
+    housekeeper_api: MockHousekeeperAPI, tomte_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    """Return a housekeeper api populated with some tomte analysis files"""
+    helpers.ensure_hk_version(housekeeper_api, tomte_analysis_hk_bundle_data)
     return housekeeper_api
 
 
@@ -594,6 +640,19 @@ def rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
             PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING
         )
         link_object.case.data_analysis = Workflow.RNAFUSION
+        link_object.case.panels = None
+    return analysis_obj
+
+
+@pytest.fixture
+def tomte_analysis_obj(analysis_obj: Analysis) -> Analysis:
+    """Return a tomte analysis object."""
+    analysis_obj.workflow = Workflow.TOMTE
+    for link_object in analysis_obj.case.links:
+        link_object.sample.application_version.application.prep_category = (
+            PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING
+        )
+        link_object.case.data_analysis = Workflow.TOMTE
         link_object.case.panels = None
     return analysis_obj
 
@@ -762,6 +821,31 @@ def upload_rnafusion_analysis_scout_api(
 
     _api = UploadScoutAPI(
         hk_api=rnafusion_analysis_hk_api,
+        scout_api=scout_api,
+        madeline_api=madeline_api,
+        analysis_api=analysis_mock,
+        lims_api=lims_api,
+        status_db=store,
+    )
+
+    return _api
+
+
+@pytest.fixture
+def upload_tomte_analysis_scout_api(
+    cg_context: CGConfig,
+    scout_api: MockScoutAPI,
+    madeline_api: MockMadelineAPI,
+    lims_samples: list[dict],
+    tomte_analysis_hk_api: MockHousekeeperAPI,
+    store: Store,
+) -> UploadScoutAPI:
+    """Fixture for upload_scout_api."""
+    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.TOMTE)
+    lims_api = MockLimsAPI(samples=lims_samples)
+
+    _api = UploadScoutAPI(
+        hk_api=tomte_analysis_hk_api,
         scout_api=scout_api,
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
