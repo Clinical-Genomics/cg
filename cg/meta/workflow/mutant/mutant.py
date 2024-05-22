@@ -156,6 +156,49 @@ class MutantAnalysisAPI(AnalysisAPI):
 
         return f"{region_code}_{lab_code}_{sample.name}"
 
+    def run_analysis(self, case_id: str, dry_run: bool, config_artic: str = None) -> None:
+        if self.get_case_output_path(case_id=case_id).exists():
+            LOG.info("Found old output files, directory will be cleaned!")
+            shutil.rmtree(self.get_case_output_path(case_id=case_id), ignore_errors=True)
+
+        if config_artic:
+            self.process.run_command(
+                [
+                    "analyse",
+                    "sarscov2",
+                    "--config_case",
+                    self.get_case_config_path(case_id=case_id).as_posix(),
+                    "--config_artic",
+                    config_artic,
+                    "--outdir",
+                    self.get_case_output_path(case_id=case_id).as_posix(),
+                    self.get_case_fastq_dir(case_id=case_id).as_posix(),
+                ],
+                dry_run=dry_run,
+            )
+        else:
+            self.process.run_command(
+                [
+                    "analyse",
+                    "sarscov2",
+                    "--config_case",
+                    self.get_case_config_path(case_id=case_id).as_posix(),
+                    "--outdir",
+                    self.get_case_output_path(case_id=case_id).as_posix(),
+                    self.get_case_fastq_dir(case_id=case_id).as_posix(),
+                ],
+                dry_run=dry_run,
+            )
+
+    def get_cases_to_store(self) -> list[Case]:
+        """Return cases with completed analysis on Trailblazer, a deliverables file in the case directory,
+        and ready to be stored in Housekeeper."""
+        return [
+            case
+            for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
+            if Path(self.get_deliverables_file_path(case_id=case.internal_id)).exists()
+        ]
+
     def get_metadata_for_nanopore_sample(self, sample: Sample) -> list[dict]:
         return [
             self.fastq_handler.parse_nanopore_file_data(file_obj.full_path)
@@ -210,49 +253,6 @@ class MutantAnalysisAPI(AnalysisAPI):
         self.fastq_handler.concatenate(read_paths, concatenated_path)
         self.fastq_handler.remove_files(read_paths)
 
-    def run_analysis(self, case_id: str, dry_run: bool, config_artic: str = None) -> None:
-        if self.get_case_output_path(case_id=case_id).exists():
-            LOG.info("Found old output files, directory will be cleaned!")
-            shutil.rmtree(self.get_case_output_path(case_id=case_id), ignore_errors=True)
-
-        if config_artic:
-            self.process.run_command(
-                [
-                    "analyse",
-                    "sarscov2",
-                    "--config_case",
-                    self.get_case_config_path(case_id=case_id).as_posix(),
-                    "--config_artic",
-                    config_artic,
-                    "--outdir",
-                    self.get_case_output_path(case_id=case_id).as_posix(),
-                    self.get_case_fastq_dir(case_id=case_id).as_posix(),
-                ],
-                dry_run=dry_run,
-            )
-        else:
-            self.process.run_command(
-                [
-                    "analyse",
-                    "sarscov2",
-                    "--config_case",
-                    self.get_case_config_path(case_id=case_id).as_posix(),
-                    "--outdir",
-                    self.get_case_output_path(case_id=case_id).as_posix(),
-                    self.get_case_fastq_dir(case_id=case_id).as_posix(),
-                ],
-                dry_run=dry_run,
-            )
-
-    def get_cases_to_store(self) -> list[Case]:
-        """Return cases with completed analysis on Trailblazer, a deliverables file in the case directory,
-        and ready to be stored in Housekeeper."""
-        return [
-            case
-            for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
-            if Path(self.get_deliverables_file_path(case_id=case.internal_id)).exists()
-        ]
-
     def run_qc_and_fail_analyses(self, dry_run: bool) -> None:
         """Run qc check, report qc summaries on Trailblazer and fail analyses that fail QC."""
         for case in self.get_cases_to_store():
@@ -284,6 +284,9 @@ class MutantAnalysisAPI(AnalysisAPI):
         )
         self.set_statusdb_action(case_id=case.internal_id, action="hold")
 
-    def run_qc(self, case: Case) -> None:
-        LOG.info("Running QC on case %s", case.internal_id)
-        self.get_qc_result
+    def run_qc(self, case_id: str) -> None:
+        LOG.info(f"Running QC on case {case_id}.")
+
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+
+        self.get_qc_result(case=case)

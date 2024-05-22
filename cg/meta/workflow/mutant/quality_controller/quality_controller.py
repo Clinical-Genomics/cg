@@ -19,17 +19,22 @@ from cg.meta.workflow.mutant.quality_controller.utils import (
 )
 from cg.meta.workflow.mutant.quality_controller.report_generator import ReportGenerator
 from cg.models.cg_config import CGConfig
+from cg.apps.lims.api import LimsAPI
+from cg.store.store import Store
 from cg.store.models import Case
 
 
 class QualityController:
     def __init__(self, config: CGConfig):
-        self.metadata_parser = MetadataParser(config)
+        status_db: Store = config.status_db
+        lims: LimsAPI = config.lims_api
 
     def quality_control(self, case: Case) -> QualityResult | None:
         """Perform QC check on a case and generate the QC_report."""
         case_results_file_path: Path = get_case_results_file_path(case)
-        quality_metrics: QualityMetrics = get_quality_metrics(case_results_file_path, case)
+        quality_metrics: QualityMetrics = get_quality_metrics(
+            case_results_file_path, case, self.status_db, self.lims
+        )
         if not quality_metrics:
             return None
         else:

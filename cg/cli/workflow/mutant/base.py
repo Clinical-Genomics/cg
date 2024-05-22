@@ -114,7 +114,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
     analysis_api.run_qc_and_fail_analyses(dry_run=dry_run)
 
     for case_obj in analysis_api.get_cases_to_store():
-        LOG.info("Storing deliverables for %s", case_obj.internal_id)
+        LOG.info(f"Storing deliverables for {case_obj.internal_id}")
         try:
             context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
         except Exception as exception_object:
@@ -132,6 +132,4 @@ def run_qc(context: click.Context, case_id: str) -> None:
     """
     analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
-    case: Case = analysis_api.status_db.get_case_by_internal_id(case_id)
-
-    analysis_api.run_qc(case=case)
+    analysis_api.run_qc(case_id=case_id)

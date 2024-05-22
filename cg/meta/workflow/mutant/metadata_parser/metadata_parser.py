@@ -1,19 +1,18 @@
 from cg.apps.lims.api import LimsAPI
-from cg.exc import CgError
 from cg.meta.workflow.mutant.metadata_parser.models import SampleMetadata, SamplesMetadataMetrics
 from cg.meta.workflow.mutant.metadata_parser.utils import (
     get_internal_negative_control_id,
     is_sample_external_negative_control,
 )
-from cg.models.cg_config import LOG, CGConfig
+from cg.models.cg_config import LOG
 from cg.store.store import Store
 from cg.store.models import Case, Sample
 
 
 class MetadataParser:
-    def __init__(self, config: CGConfig) -> None:
-        self.status_db: Store = config.status_db
-        self.lims: LimsAPI = config.lims_api
+    def __init__(self, status_db: Store, lims: LimsAPI) -> None:
+        self.status_db = status_db
+        self.lims = lims
 
     def parse_metadata(self, case: Case) -> SamplesMetadataMetrics | None:
         metadata_for_case = self.parse_metadata_for_case(case)
