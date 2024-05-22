@@ -969,7 +969,7 @@ class RunDevice(Base):
     type: Mapped[DeviceType]
     internal_id: Mapped[UniqueStr64]
 
-    run_metrics: Mapped[list["RunMetrics"]] = orm.relationship(
+    run_metrics: Mapped[list["InstrumentRun"]] = orm.relationship(
         back_populates="device", cascade="all, delete"
     )
 
@@ -1002,10 +1002,10 @@ class IlluminaFlowCell(RunDevice):
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
 
 
-class RunMetrics(Base):
+class InstrumentRun(Base):
     """Model for storing run devices."""
 
-    __tablename__ = "run_metrics"
+    __tablename__ = "instrument_run"
 
     id: Mapped[PrimaryKeyInt]
     type: Mapped[DeviceType]
@@ -1021,7 +1021,7 @@ class RunMetrics(Base):
     }
 
 
-class IlluminaRunMetrics(RunMetrics):
+class IlluminaSequencingMetrics(InstrumentRun):
     __tablename__ = "illumina_sequencing_metrics"
 
     id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"), primary_key=True)
@@ -1056,10 +1056,10 @@ class SampleRunMetrics(Base):
     __tablename__ = "sample_run_metrics"
     id: Mapped[PrimaryKeyInt]
     sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id"))
-    run_metrics_id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"))
+    instrument_run_id: Mapped[int] = mapped_column(ForeignKey("instrument_run.id"))
     type: Mapped[DeviceType]
 
-    run_metrics: Mapped[RunMetrics] = orm.relationship(back_populates="sample_metrics")
+    instrument_run: Mapped[InstrumentRun] = orm.relationship(back_populates="sample_metrics")
     sample: Mapped[Sample] = orm.relationship(back_populates="_new_run_metrics")
 
     __mapper_args__ = {
@@ -1067,7 +1067,7 @@ class SampleRunMetrics(Base):
     }
 
 
-class IlluminaSampleRunMetrics(SampleRunMetrics):
+class IlluminaSampleSequencingMetrics(SampleRunMetrics):
     """Sequencing metrics for a sample sequenced on an Illumina instrument. The metrics are per sample, per lane, per flow cell."""
 
     __tablename__ = "illumina_sample_sequencing_metrics"
