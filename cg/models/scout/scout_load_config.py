@@ -155,3 +155,5 @@ class RnafusionLoadConfig(ScoutLoadConfig):
 class TomteLoadConfig(ScoutLoadConfig):
     multiqc_rna: str | None = None
     samples: list[ScoutRnaIndividual] = []
+    vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None
+    vcf_snv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
