@@ -155,13 +155,13 @@ class ScoutConfigBuilder:
 
     def include_sample_splice_junctions_bed(self, config_sample: ScoutIndividual) -> None:
         """Include the splice junctions bed file."""
-        config_sample.rna_alignment_path = self.get_sample_file(
+        config_sample.splice_junctions_bed = self.get_sample_file(
             hk_tags=self.sample_tags.splice_junctions_bed, sample_id=config_sample.sample_id
         )
 
     def include_sample_rna_coverage_bigwig(self, config_sample: ScoutIndividual) -> None:
         """Include the RNA coverage bigwig file."""
-        config_sample.rna_alignment_path = self.get_sample_file(
+        config_sample.rna_coverage_bigwig = self.get_sample_file(
             hk_tags=self.sample_tags.rna_coverage_bigwig, sample_id=config_sample.sample_id
         )
 
