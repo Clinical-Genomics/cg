@@ -969,7 +969,7 @@ class RunDevice(Base):
     type: Mapped[DeviceType]
     internal_id: Mapped[UniqueStr64]
 
-    run_metrics: Mapped[list["InstrumentRun"]] = orm.relationship(
+    instrument_run: Mapped[list["InstrumentRun"]] = orm.relationship(
         back_populates="device", cascade="all, delete"
     )
 
