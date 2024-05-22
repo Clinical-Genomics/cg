@@ -15,11 +15,11 @@ from cg.constants.demultiplexing import (
 )
 from cg.constants.sequencing import Sequencers
 from cg.exc import RunParametersError, XMLError
-from cg.services.run_parameters_service.run_parameters_service import (
-    RunParametersService,
-    RunParametersServiceHiSeq,
-    RunParametersServiceNovaSeq6000,
-    RunParametersServiceNovaSeqX,
+from cg.models.demultiplex.run_parameters import (
+    RunParameters,
+    RunParametersHiSeq,
+    RunParametersNovaSeq6000,
+    RunParametersNovaSeqX,
 )
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
@@ -43,30 +43,30 @@ def test_run_parameters_parent_class_fails(
     # WHEN trying to instantiate the parent class with a RunParameters path
     with pytest.raises(NotImplementedError) as exc_info:
         # THEN an NotImplementedError is raised
-        RunParametersService(run_parameters_path=run_parameters_path)
+        RunParameters(run_parameters_path=run_parameters_path)
     assert "Parent class instantiated" in str(exc_info)
 
 
 @pytest.mark.parametrize(
     "run_parameters_path, constructor, sequencer",
     [
-        ("hiseq_x_single_index_run_parameters_path", RunParametersServiceHiSeq, Sequencers.HISEQX),
+        ("hiseq_x_single_index_run_parameters_path", RunParametersHiSeq, Sequencers.HISEQX),
         (
             "hiseq_2500_dual_index_run_parameters_path",
-            RunParametersServiceHiSeq,
+            RunParametersHiSeq,
             Sequencers.HISEQGA,
         ),
         (
             "novaseq_6000_run_parameters_pre_1_5_kits_path",
-            RunParametersServiceNovaSeq6000,
+            RunParametersNovaSeq6000,
             Sequencers.NOVASEQ,
         ),
-        ("novaseq_x_run_parameters_path", RunParametersServiceNovaSeqX, Sequencers.NOVASEQX),
+        ("novaseq_x_run_parameters_path", RunParametersNovaSeqX, Sequencers.NOVASEQX),
     ],
 )
 def test_run_parameters_init(
     run_parameters_path: str,
-    constructor: Type[RunParametersService],
+    constructor: Type[RunParameters],
     sequencer: str,
     request: FixtureRequest,
 ):
@@ -75,7 +75,7 @@ def test_run_parameters_init(
     run_parameters_path: Path = request.getfixturevalue(run_parameters_path)
 
     # WHEN initialising the correct RunParameters class
-    run_parameters: RunParametersService = constructor(run_parameters_path=run_parameters_path)
+    run_parameters: RunParameters = constructor(run_parameters_path=run_parameters_path)
 
     # THEN the object is instantiated correctly and is of the correct type
     assert isinstance(run_parameters, constructor)
@@ -85,7 +85,7 @@ def test_run_parameters_init(
 
 class RunParametersScenario(BaseModel):
     wrong_run_parameters_path_fixture: str
-    constructor: Type[RunParametersService]
+    constructor: Type[RunParameters]
     error_msg: str
 
 
@@ -94,32 +94,32 @@ class RunParametersScenario(BaseModel):
     [
         RunParametersScenario(
             wrong_run_parameters_path_fixture="novaseq_6000_run_parameters_pre_1_5_kits_path",
-            constructor=RunParametersServiceHiSeq,
+            constructor=RunParametersHiSeq,
             error_msg=f"Could not find node {RunParametersXMLNodes.APPLICATION_NAME} in the run parameters file.",
         ),
         RunParametersScenario(
             wrong_run_parameters_path_fixture="novaseq_x_run_parameters_path",
-            constructor=RunParametersServiceHiSeq,
+            constructor=RunParametersHiSeq,
             error_msg=f"Could not find node {RunParametersXMLNodes.APPLICATION_NAME} in the run parameters file.",
         ),
         RunParametersScenario(
             wrong_run_parameters_path_fixture="novaseq_x_run_parameters_path",
-            constructor=RunParametersServiceNovaSeq6000,
+            constructor=RunParametersNovaSeq6000,
             error_msg=f"The file parsed does not correspond to {RunParametersXMLNodes.NOVASEQ_6000_APPLICATION}",
         ),
         RunParametersScenario(
             wrong_run_parameters_path_fixture="hiseq_x_single_index_run_parameters_path",
-            constructor=RunParametersServiceNovaSeq6000,
+            constructor=RunParametersNovaSeq6000,
             error_msg=f"Could not find node {RunParametersXMLNodes.APPLICATION} in the run parameters file.",
         ),
         RunParametersScenario(
             wrong_run_parameters_path_fixture="hiseq_x_single_index_run_parameters_path",
-            constructor=RunParametersServiceNovaSeqX,
+            constructor=RunParametersNovaSeqX,
             error_msg=f"Could not find node {RunParametersXMLNodes.INSTRUMENT_TYPE} in the run parameters file.",
         ),
         RunParametersScenario(
             wrong_run_parameters_path_fixture="novaseq_6000_run_parameters_pre_1_5_kits_path",
-            constructor=RunParametersServiceNovaSeqX,
+            constructor=RunParametersNovaSeqX,
             error_msg=f"Could not find node {RunParametersXMLNodes.INSTRUMENT_TYPE} in the run parameters file.",
         ),
     ],
@@ -160,7 +160,7 @@ def test_reagent_kit_version_hiseq_and_novaseq_x(
 ):
     """Test that getting reagent kit version from a HiSeq or NovaSeqX RunParameters returns None."""
     # GIVEN a valid RunParameters object
-    run_parameters: RunParametersService = request.getfixturevalue(run_parameters_fixture)
+    run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
 
     # WHEN fetching the reagent kit version
 
@@ -169,7 +169,7 @@ def test_reagent_kit_version_hiseq_and_novaseq_x(
 
 
 def test_reagent_kit_version_novaseq_6000_post_1_5_kits(
-    novaseq_6000_run_parameters_post_1_5_kits: RunParametersServiceNovaSeq6000,
+    novaseq_6000_run_parameters_post_1_5_kits: RunParametersNovaSeq6000,
 ):
     """
     Test that getting reagent kit version from a NovaSeq6000 post 1.5 kits does not return unknown.
@@ -197,7 +197,7 @@ def test_control_software_version_hiseq_and_novaseq_x(
 ):
     """Test that getting control software version from HiSeq/NovaSeqX RunParameters returns None."""
     # GIVEN a valid RunParameters object
-    run_parameters: RunParametersService = request.getfixturevalue(run_parameters_fixture)
+    run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
 
     # WHEN fetching the control software version
 
@@ -206,7 +206,7 @@ def test_control_software_version_hiseq_and_novaseq_x(
 
 
 def test_control_software_version_novaseq_6000(
-    novaseq_6000_run_parameters_pre_1_5_kits: RunParametersServiceNovaSeq6000,
+    novaseq_6000_run_parameters_pre_1_5_kits: RunParametersNovaSeq6000,
 ):
     """Test that getting control software version from a correct file returns an expected value."""
     # GIVEN a valid RunParameters object for NovaSeq6000
@@ -229,7 +229,7 @@ def test_novaseq_6000_no_version(run_parameters_missing_versions_path: Path, cap
     # WHEN instantiating the object
     with pytest.raises(XMLError):
         # THEN assert that an exception was raised since the control software version was not found
-        RunParametersServiceNovaSeq6000(run_parameters_missing_versions_path)
+        RunParametersNovaSeq6000(run_parameters_missing_versions_path)
 
     assert (
         f"Could not find node with name {RunParametersXMLNodes.APPLICATION_VERSION} in XML tree"
@@ -250,7 +250,7 @@ def test_novaseq_6000_no_version(run_parameters_missing_versions_path: Path, cap
 def test_get_cycles(run_parameters_fixture: str, request: FixtureRequest):
     """Test that the read and index cycles are read correctly for any RunParameters object."""
     # GIVEN a RunParameters object
-    run_parameters: RunParametersService = request.getfixturevalue(run_parameters_fixture)
+    run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
 
     # WHEN getting any read cycle
     read_cycles: list[int] = [
@@ -322,7 +322,7 @@ def test_get_flow_cell_mode(
 ):
     """Test that the correct flow cell mode is returned for each RunParameters object."""
     # GIVEN a RunParameters object
-    run_parameters: RunParametersService = request.getfixturevalue(run_parameters_fixture)
+    run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
     # WHEN getting the flow cell mode
     result: str | None = run_parameters.get_flow_cell_model()
     # THEN the correct flow cell mode is returned

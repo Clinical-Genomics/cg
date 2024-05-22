@@ -14,20 +14,20 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
 from cg.constants.symbols import EMPTY_STRING
 from cg.exc import FlowCellError
-from cg.services.run_parameters_service.run_parameters_service import (
-    RunParametersService,
-    RunParametersServiceHiSeq,
-    RunParametersServiceNovaSeq6000,
-    RunParametersServiceNovaSeqX,
+from cg.models.demultiplex.run_parameters import (
+    RunParameters,
+    RunParametersHiSeq,
+    RunParametersNovaSeq6000,
+    RunParametersNovaSeqX,
 )
 from cg.models.flow_cell.utils import parse_date
 
 LOG = logging.getLogger(__name__)
 RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
-    Sequencers.HISEQGA: RunParametersServiceHiSeq,
-    Sequencers.HISEQX: RunParametersServiceHiSeq,
-    Sequencers.NOVASEQ: RunParametersServiceNovaSeq6000,
-    Sequencers.NOVASEQX: RunParametersServiceNovaSeqX,
+    Sequencers.HISEQGA: RunParametersHiSeq,
+    Sequencers.HISEQX: RunParametersHiSeq,
+    Sequencers.NOVASEQ: RunParametersNovaSeq6000,
+    Sequencers.NOVASEQX: RunParametersNovaSeqX,
 }
 
 
@@ -38,7 +38,7 @@ class FlowCellDirectoryData:
         LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
         self.path: Path = flow_cell_path
         self.machine_name: str = EMPTY_STRING
-        self._run_parameters: RunParametersService | None = None
+        self._run_parameters: RunParameters | None = None
         self.run_date: datetime.datetime = datetime.datetime.now()
         self.machine_number: int = 0
         self.base_name: str = EMPTY_STRING  # Base name is flow cell-id + flow cell position
@@ -111,7 +111,7 @@ class FlowCellDirectoryData:
             raise FlowCellError(message)
 
     @property
-    def run_parameters(self) -> RunParametersService:
+    def run_parameters(self) -> RunParameters:
         """Return run parameters object."""
         if not self._run_parameters:
             self._run_parameters = RUN_PARAMETERS_CONSTRUCTOR[self.sequencer_type](

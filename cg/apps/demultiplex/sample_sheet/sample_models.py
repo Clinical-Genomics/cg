@@ -13,7 +13,7 @@ from cg.apps.demultiplex.sample_sheet.validators import SampleId
 from cg.constants.demultiplexing import CUSTOM_INDEX_TAIL, SampleSheetBCLConvertSections
 from cg.constants.symbols import EMPTY_STRING
 from cg.exc import SampleSheetError
-from cg.services.run_parameters_service.run_parameters_service import RunParametersService
+from cg.models.demultiplex.run_parameters import RunParameters
 
 LOG = logging.getLogger(__name__)
 
@@ -67,7 +67,7 @@ class FlowCellSample(BaseModel):
             )
         return cycles_format
 
-    def update_override_cycles(self, run_parameters: RunParametersService) -> None:
+    def update_override_cycles(self, run_parameters: RunParameters) -> None:
         """Updates the override cycles attribute."""
         reverse_index2_cycles: bool = (
             run_parameters.index_settings.are_i5_override_cycles_reverse_complemented
@@ -122,7 +122,7 @@ class FlowCellSample(BaseModel):
                 self.barcode_mismatches_2 = 0
                 break
 
-    def process_indexes(self, run_parameters: RunParametersService):
+    def process_indexes(self, run_parameters: RunParameters):
         """Parse and reverse complement the indexes and updates override cycles."""
         self.separate_indexes(is_run_single_index=run_parameters.is_single_index)
         if run_parameters.index_settings.should_i5_be_reverse_complemented:

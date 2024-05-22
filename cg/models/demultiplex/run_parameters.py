@@ -23,7 +23,7 @@ from cg.io.xml import get_tree_node, read_xml
 LOG = logging.getLogger(__name__)
 
 
-class RunParametersService:
+class RunParameters:
     """Base class with basic functions to handle the run parameters from a sequencing run."""
 
     def __init__(self, run_parameters_path: Path):
@@ -146,7 +146,7 @@ class RunParametersService:
         )
 
 
-class RunParametersServiceHiSeq(RunParametersService):
+class RunParametersHiSeq(RunParameters):
     """Specific class for parsing run parameters of HiSeq2500 sequencing."""
 
     def validate_instrument(self) -> None:
@@ -197,7 +197,7 @@ class RunParametersServiceHiSeq(RunParametersService):
         return None
 
 
-class RunParametersServiceNovaSeq6000(RunParametersService):
+class RunParametersNovaSeq6000(RunParameters):
     """Specific class for parsing run parameters of NovaSeq6000 sequencing."""
 
     def validate_instrument(self) -> None:
@@ -255,7 +255,7 @@ class RunParametersServiceNovaSeq6000(RunParametersService):
         return self._get_node_string_value(node_name=node_name)
 
 
-class RunParametersServiceNovaSeqX(RunParametersService):
+class RunParametersNovaSeqX(RunParameters):
     """Specific class for parsing run parameters of NovaSeqX sequencing."""
 
     def validate_instrument(self) -> None:
