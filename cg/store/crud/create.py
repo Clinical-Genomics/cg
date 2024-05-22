@@ -431,9 +431,4 @@ class CreateHandler(BaseHandler):
         self, sequencing_metrics: IlluminaSequencingMetrics
     ) -> IlluminaSequencingMetrics:
         """Add a new Illumina flow cell to the status database as a pending transaction."""
-        if self.get_illumina_flow_cell_by_internal_id(flow_cell.internal_id):
-            raise ValueError(f"Flow cell with {flow_cell.id} already exists.")
-        session = get_session()
-        session.add(flow_cell)
-        LOG.debug(f"Flow cell added to status db: {flow_cell.id}.")
-        return flow_cell
+        pass
