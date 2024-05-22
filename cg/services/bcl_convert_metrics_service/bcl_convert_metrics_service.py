@@ -3,9 +3,11 @@ from pathlib import Path
 
 
 from cg.constants.demultiplexing import UNDETERMINED
+from cg.constants.devices import DeviceType
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.services.bcl_convert_metrics_service.parser import MetricsParser
-from cg.store.models import SampleLaneSequencingMetrics
+from cg.store.models import SampleLaneSequencingMetrics, IlluminaSampleRunMetrics
+from cg.store.store import Store
 from cg.utils.flow_cell import get_flow_cell_id
 
 
@@ -75,5 +77,37 @@ class BCLConvertMetricsService:
             sample_total_reads_in_lane=total_reads,
             sample_base_percentage_passing_q30=q30_bases_percent,
             sample_base_mean_quality_score=mean_quality_score,
+            created_at=datetime.now(),
+        )
+
+    @staticmethod
+    def create_sample_run_metrics(
+        sample_internal_id: str,
+        lane: int,
+        run_metrics_id: int,
+        metrics_parser: MetricsParser,
+        store: Store,
+    ) -> IlluminaSampleRunMetrics:
+        """Create sequencing metrics for all lanes in a flow cell."""
+
+        total_reads: int = metrics_parser.calculate_total_reads_for_sample_in_lane(
+            sample_internal_id=sample_internal_id, lane=lane
+        )
+        q30_bases_percent: float = metrics_parser.get_q30_bases_percent_for_sample_in_lane(
+            sample_internal_id=sample_internal_id, lane=lane
+        )
+        mean_quality_score: float = metrics_parser.get_mean_quality_score_for_sample_in_lane(
+            sample_internal_id=sample_internal_id, lane=lane
+        )
+        sample_id: int = store.get_sample_by_internal_id(sample_internal_id).id
+
+        return IlluminaSampleRunMetrics(
+            run_metrics_id=run_metrics_id,
+            sample_id=sample_id,
+            type=DeviceType.ILLUMINA,
+            flow_cell_lane=lane,
+            total_reads_in_lane=total_reads,
+            base_percentage_passing_q30=q30_bases_percent,
+            base_mean_quality_score=mean_quality_score,
             created_at=datetime.now(),
         )
