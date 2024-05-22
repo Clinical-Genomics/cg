@@ -1,5 +1,7 @@
 from datetime import datetime as dt
 
+import pytest
+
 from cg.constants.subject import Sex
 from cg.store.models import (
     ApplicationVersion,
@@ -131,3 +133,16 @@ def test_add_illumina_flow_cell(
         store.get_illumina_flow_cell_by_internal_id(illumina_flow_cell_internal_id)
         == illumina_flow_cell
     )
+
+
+def test_add_illumina_flow_cell_already_exists(
+    illumina_flow_cell: IlluminaFlowCell, illumina_flow_cell_internal_id: str, store: Store
+):
+    # GIVEN an Illumina flow cell not in store
+    store.add_illumina_flow_cell(illumina_flow_cell)
+    assert store.get_illumina_flow_cell_by_internal_id(illumina_flow_cell_internal_id)
+
+    # WHEN adding the flow cell to the store
+    # THEN a ValueError should be raised
+    with pytest.raises(ValueError):
+        store.add_illumina_flow_cell(illumina_flow_cell)

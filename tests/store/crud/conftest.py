@@ -1,11 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Generator
-
 import pytest
-
 from cg.constants import Workflow
 from cg.constants.constants import CustomerId, PrepCategory
-
 from cg.constants.subject import PhenotypeStatus
 from cg.store.models import CaseSample, Order
 from cg.store.store import Store
