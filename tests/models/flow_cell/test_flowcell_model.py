@@ -7,7 +7,7 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysi
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers
 from cg.exc import FlowCellError
-from cg.models.demultiplex.run_parameters import RunParameters
+from cg.services.run_parameters_service.run_parameters_service import RunParametersService
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.utils.flow_cell import get_flow_cell_id
 
@@ -105,7 +105,7 @@ def test_flow_cell_run_parameters_type(
     assert not flow_cell._run_parameters
 
     # WHEN creating the run parameters of the flow cell
-    run_parameters: RunParameters = flow_cell.run_parameters
+    run_parameters: RunParametersService = flow_cell.run_parameters
 
     # THEN the run parameters sequencer is the same as of the flow cell
     assert run_parameters.sequencer == expected_sequencer

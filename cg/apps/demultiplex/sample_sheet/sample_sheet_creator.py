@@ -5,7 +5,7 @@ import logging
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_by_lane
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.constants.demultiplexing import IndexSettings, SampleSheetBCLConvertSections
-from cg.models.demultiplex.run_parameters import RunParameters
+from cg.services.run_parameters_service.run_parameters_service import RunParametersService
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ class SampleSheetCreator:
         self.flow_cell: FlowCellDirectoryData = flow_cell
         self.flow_cell_id: str = flow_cell.id
         self.lims_samples: list[FlowCellSample] = lims_samples
-        self.run_parameters: RunParameters = flow_cell.run_parameters
+        self.run_parameters: RunParametersService = flow_cell.run_parameters
         self.index_settings: IndexSettings = self.run_parameters.index_settings
 
     def convert_sample_to_header_dict(

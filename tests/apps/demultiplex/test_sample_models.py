@@ -4,7 +4,7 @@ from cg.apps.demultiplex.sample_sheet.index import get_reverse_complement_dna_se
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.constants.demultiplexing import IndexOverrideCycles
 from cg.constants.symbols import EMPTY_STRING
-from cg.models.demultiplex.run_parameters import RunParameters
+from cg.services.run_parameters_service.run_parameters_service import RunParametersService
 
 
 @pytest.mark.parametrize(
@@ -159,7 +159,7 @@ def test_update_override_cycles(
 ):
     """Test that updating a sample's override cycles works for different run parameters objects."""
     # GIVEN a run parameters object
-    run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
+    run_parameters: RunParametersService = request.getfixturevalue(run_parameters_fixture)
 
     # GIVEN a FlowCellSampleBCLConvert without override cycles
     assert bcl_convert_flow_cell_sample.override_cycles == EMPTY_STRING
@@ -256,7 +256,7 @@ def test_process_indexes_for_sample_sheet_bcl_convert(
 ):
     """Test that indexes are processed correctly for a BCLConvert sample."""
     # GIVEN a run parameters object and a list of BCLConvert samples from a flow cell
-    run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
+    run_parameters: RunParametersService = request.getfixturevalue(run_parameters_fixture)
     raw_lims_samples: list[FlowCellSample] = request.getfixturevalue(raw_lims_samples_fixture)
 
     # GIVEN a FlowCellSampleBCLConvert
@@ -299,7 +299,7 @@ def test_process_indexes_bcl_convert(
 ):
     """Test that processing indexes of a BCLConvert sample from different sequencers work."""
     # GIVEN a run parameters object
-    run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
+    run_parameters: RunParametersService = request.getfixturevalue(run_parameters_fixture)
 
     # GIVEN a FlowCellSampleBclConvert with 8-nt indexes
 

@@ -1021,7 +1021,7 @@ class RunMetrics(Base):
     }
 
 
-class IlluminaRunMetrics(RunMetrics):
+class IlluminaSequencingMetrics(RunMetrics):
     __tablename__ = "illumina_sequencing_metrics"
 
     id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"), primary_key=True)
@@ -1067,7 +1067,7 @@ class SampleRunMetrics(Base):
     }
 
 
-class IlluminaSampleRunMetrics(SampleRunMetrics):
+class IlluminaSampleSequencingMetrics(SampleRunMetrics):
     """Sequencing metrics for a sample sequenced on an Illumina instrument. The metrics are per sample, per lane, per flow cell."""
 
     __tablename__ = "illumina_sample_run_metrics"
