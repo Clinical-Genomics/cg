@@ -214,7 +214,6 @@ _REQUIRED_SAMPLE_METADATA_WTS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_SEQU
     "q20_rate",
     "q30_rate",
     "ribosomal_bases",
-    "rin",
     "uniquely_mapped_reads",
 ]
 
