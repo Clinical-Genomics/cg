@@ -234,7 +234,6 @@ class APIMethods(StrEnum):
 
 
 DRY_RUN = click.option(
-    "-d",
     "--dry-run",
     is_flag=True,
     default=False,
