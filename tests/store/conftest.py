@@ -8,6 +8,7 @@ from typing import Generator
 import pytest
 
 from cg.constants import Workflow
+from cg.constants.devices import DeviceType
 from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus, Sex
 from cg.meta.orders.pool_submitter import PoolSubmitter
@@ -19,6 +20,7 @@ from cg.store.models import (
     Customer,
     Organism,
     Sample,
+    IlluminaFlowCell,
 )
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -586,3 +588,24 @@ def store_with_samples_for_multiple_customers(
             delivered_at=timestamp_now,
         )
     yield store
+
+
+@pytest.fixture
+def illumina_flow_cell_internal_id() -> str:
+    return "FC123456"
+
+
+@pytest.fixture
+def illumina_flow_cell_model_s1() -> str:
+    return "S1"
+
+
+@pytest.fixture
+def illumina_flow_cell(
+    illumina_flow_cell_internal_id: str, illumina_flow_cell_model_s1: str
+) -> IlluminaFlowCell:
+    return IlluminaFlowCell(
+        internal_id=illumina_flow_cell_internal_id,
+        type=DeviceType.ILLUMINA,
+        model=illumina_flow_cell_model_s1,
+    )
