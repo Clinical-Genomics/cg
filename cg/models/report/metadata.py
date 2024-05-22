@@ -1,12 +1,12 @@
 from pydantic import BaseModel, BeforeValidator, field_validator
 from typing_extensions import Annotated
 
-from cg.constants import NA_FIELD, RIN_MIN_THRESHOLD, RIN_MAX_THRESHOLD
+from cg.constants import NA_FIELD, RIN_MAX_THRESHOLD, RIN_MIN_THRESHOLD
 from cg.models.report.validators import (
     get_float_as_percentage,
     get_gender_as_string,
-    get_report_string,
     get_number_as_string,
+    get_report_string,
 )
 
 
@@ -104,6 +104,7 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
 
     Attributes:
         bias_5_3: bias is the ratio between read counts; source: workflow
+        dv200: percentage of RNA fragments > 200 nucleotides; source: LIMS
         input_amount: input amount in ng; source: LIMS
         mrna_bases:  proportion of bases that originate from messenger RNA; source: workflow
         pct_adapter: proportion of reads that contain adapter sequences; source: workflow
@@ -116,6 +117,7 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
     """
 
     bias_5_3: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    dv200: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     input_amount: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     mrna_bases: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_adapter: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
