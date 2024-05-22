@@ -120,10 +120,10 @@ def test_add_pool(rml_pool_store: Store):
 def test_add_illumina_flow_cell(
     illumina_flow_cell: IlluminaFlowCell, illumina_flow_cell_internal_id: str, store: Store
 ):
-    # GIVEN an illumina flow cell
+    # GIVEN an Illumina flow cell not in store
     assert not store.get_illumina_flow_cell_by_internal_id(illumina_flow_cell_internal_id)
 
-    # WHEN adding a new illumina flow cell to the store
+    # WHEN adding the flow cell to the store
     store.add_illumina_flow_cell(illumina_flow_cell)
 
     # THEN it should be stored in the database

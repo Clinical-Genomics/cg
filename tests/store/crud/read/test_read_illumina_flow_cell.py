@@ -7,14 +7,14 @@ from cg.store.store import Store
 def test_get_illumina_flow_cell_by_internal_id(
     illumina_flow_cell: IlluminaFlowCell, illumina_flow_cell_internal_id: str, store: Store
 ):
-    # GIVEN an illumina flow cell
+    # GIVEN an Illumina flow cell in store
     store.add_illumina_flow_cell(illumina_flow_cell)
 
-    # WHEN adding a new illumina flow cell to the store
+    # WHEN getting the flow cell from the store
     flow_cell: IlluminaFlowCell = store.get_illumina_flow_cell_by_internal_id(
         illumina_flow_cell_internal_id
     )
 
-    # THEN it should be stored in the database
+    # THEN the correct flow cell should be returned
     assert isinstance(flow_cell, IlluminaFlowCell)
     assert flow_cell.internal_id == illumina_flow_cell_internal_id
