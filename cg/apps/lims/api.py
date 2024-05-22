@@ -10,7 +10,12 @@ from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
 from cg.constants import Priority
-from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod, LimsArtifactTypes
+from cg.constants.lims import (
+    MASTER_STEPS_UDFS,
+    PROP2UDF,
+    DocumentationMethod,
+    LimsArtifactTypes,
+)
 from cg.exc import LimsDataError
 
 from .order import OrderHandler
@@ -419,6 +424,16 @@ class LimsAPI(Lims, OrderHandler):
         except HTTPError as error:
             LOG.warning(f"Sample {sample_id} not found in LIMS: {error}")
         return rin
+
+    def get_sample_dv200(self, sample_id: str) -> float | None:
+        """Return the sample's percentage of RNA fragments greater than 200 nucleotides."""
+        dv200 = None
+        try:
+            sample_artifact: Artifact = Artifact(self, id=f"{sample_id}PA1")
+            dv200: float = sample_artifact.udf.get(PROP2UDF["dv200"])
+        except HTTPError as error:
+            LOG.warning(f"Sample {sample_id} not found in LIMS: {error}")
+        return dv200
 
     def _get_rna_input_amounts(self, sample_id: str) -> list[tuple[datetime, float]]:
         """Return all prep input amounts used for an RNA sample in lims."""
