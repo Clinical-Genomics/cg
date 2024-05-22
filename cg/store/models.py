@@ -1070,7 +1070,7 @@ class SampleRunMetrics(Base):
 class IlluminaSampleRunMetrics(SampleRunMetrics):
     """Sequencing metrics for a sample sequenced on an Illumina instrument. The metrics are per sample, per lane, per flow cell."""
 
-    __tablename__ = "illumina_sample_run_metrics"
+    __tablename__ = "illumina_sample_sequencing_metrics"
 
     id: Mapped[int] = mapped_column(ForeignKey("sample_run_metrics.id"), primary_key=True)
     flow_cell_lane: Mapped[int | None]

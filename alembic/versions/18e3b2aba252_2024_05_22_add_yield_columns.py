@@ -26,8 +26,16 @@ def upgrade():
         table_name="illumina_sample_run_metrics",
         column=sa.Column("yield_q30", sa.Integer(), nullable=True),
     )
+    op.rename_table(
+        old_table_name="illumina_sample_run_metrics",
+        new_table_name="illumina_sample_sequencing_metrics",
+    )
 
 
 def downgrade():
     op.drop_column(table_name="illumina_sample_run_metrics", column_name="yield")
     op.drop_column(table_name="illumina_sample_run_metrics", column_name="yield_q30")
+    op.rename_table(
+        new_table_name="illumina_sample_run_metrics",
+        old_table_name="illumina_sample_sequencing_metrics",
+    )
