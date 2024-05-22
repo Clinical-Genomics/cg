@@ -15,6 +15,7 @@ from cg.constants.lims import (
     PROP2UDF,
     DocumentationMethod,
     LimsArtifactTypes,
+    ReceptionQCFLag,
 )
 from cg.exc import LimsDataError
 
@@ -434,6 +435,16 @@ class LimsAPI(Lims, OrderHandler):
         except HTTPError as error:
             LOG.warning(f"Sample {sample_id} not found in LIMS: {error}")
         return dv200
+
+    def get_sample_reception_qc_flag(self, sample_id: str) -> ReceptionQCFLag | None:
+        """Return the sample reception QC flag."""
+        qc_flag = None
+        try:
+            sample_artifact: Artifact = Artifact(self, id=f"{sample_id}PA1")
+            qc_flag: ReceptionQCFLag = sample_artifact.qc_flag
+        except HTTPError as error:
+            LOG.warning(f"Sample {sample_id} not found in LIMS: {error}")
+        return qc_flag
 
     def _get_rna_input_amounts(self, sample_id: str) -> list[tuple[datetime, float]]:
         """Return all prep input amounts used for an RNA sample in lims."""

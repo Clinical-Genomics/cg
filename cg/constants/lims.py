@@ -157,3 +157,8 @@ class DocumentationMethod(StrEnum):
 class LimsArtifactTypes(StrEnum):
     ANALYTE: str = "Analyte"
     RESULT_FILE: str = "ResultFile"
+
+
+class ReceptionQCFLag(StrEnum):
+    PASSED: str = "PASSED"
+    FAILED: str = "FAILED"
