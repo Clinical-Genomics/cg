@@ -32,7 +32,7 @@ def upgrade():
     # add column yield_q30
     op.add_column(
         table_name="illumina_sample_sequencing_metrics",
-        column=sa.Column("yield_q30", sa.Integer(), nullable=True),
+        column=sa.Column("yield_q30", sa.Float(), nullable=True),
     )
     # rename  table run metrics to InstrumentRun
     op.rename_table(

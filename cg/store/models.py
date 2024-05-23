@@ -961,7 +961,7 @@ class Order(Base):
 
 
 class RunDevice(Base):
-    """Model for storing run devices."""
+    """Parent model for the different types of run devices."""
 
     __tablename__ = "run_device"
 
@@ -1003,7 +1003,7 @@ class IlluminaFlowCell(RunDevice):
 
 
 class InstrumentRun(Base):
-    """Model for storing instrument runs."""
+    """Parent model for the different types of instrument runs."""
 
     __tablename__ = "instrument_run"
 
@@ -1053,6 +1053,8 @@ class IlluminaSequencingRun(InstrumentRun):
 
 
 class SampleRunMetrics(Base):
+    """Parent model for the different types of sample run metrics."""
+
     __tablename__ = "sample_run_metrics"
     id: Mapped[PrimaryKeyInt]
     sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id"))
