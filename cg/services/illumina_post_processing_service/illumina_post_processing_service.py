@@ -42,15 +42,18 @@ class IlluminaPostProcessingService:
         )
         return new_flow_cell
 
-    def aggregate_illumina_sample_metrics() -> IlluminaSequencingRun:
+    @staticmethod
+    def aggregate_illumina_sample_metrics(
+        sequencing_metrics: list[IlluminaSampleSequencingMetrics],
+    ) -> IlluminaSequencingRun:
         pass
 
-    @staticmethod
     def get_illumina_sequencing_run(
-        flow_cell: IlluminaFlowCell, sequencing_metrics: list[IlluminaSampleSequencingMetrics]
+        self,
+        sequencing_metrics: list[IlluminaSampleSequencingMetrics],
     ) -> IlluminaSequencingRun:
         """Store illumina run metrics in the status database."""
-        pass
+        return self.aggregate_illumina_sample_metrics(sequencing_metrics)
 
     def get_illumina_sample_sequencing_metrics(
         self,
@@ -92,7 +95,6 @@ class IlluminaPostProcessingService:
         sequencing_metrics: list[IlluminaSampleSequencingMetrics] = (
             self.get_illumina_sample_sequencing_metrics(flow_cell.path)
         )
-
         sequencing_run: IlluminaSequencingRun = self.get_illumina_sequencing_run()
         illumina_flow_cell, sequencing_run = self.relate_illumina_flow_cell_to_run(
             flow_cell=illumina_flow_cell, sequencing_run=sequencing_run
