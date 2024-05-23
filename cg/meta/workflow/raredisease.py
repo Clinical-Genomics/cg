@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import Any
 
 from cg.constants import Workflow
 from cg.constants.constants import AnalysisType, GenomeVersion
@@ -75,7 +76,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""
-        analysis_type: AnalysisType = self.get_analysis_type(case_id=case_id)
+        analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
         target_bed: str = self.get_target_bed(case_id=case_id, analysis_type=analysis_type)
         return RarediseaseParameters(
             input=self.get_sample_sheet_path(case_id=case_id),

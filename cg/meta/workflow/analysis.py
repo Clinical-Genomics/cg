@@ -4,7 +4,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Any, Iterator
+from typing import Iterator
 
 import click
 from housekeeper.store.models import Bundle, Version
@@ -30,7 +30,7 @@ from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
 from cg.services.quality_controller import QualityControllerService
-from cg.store.models import Analysis, Application, BedVersion, Case, CaseSample, Sample
+from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -425,12 +425,14 @@ class AnalysisAPI(MetaAPI):
             self.fastq_handler.remove_files(value)
 
     def get_target_bed(self, case_id: str, analysis_type: str) -> str:
-        if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
-            target_bed = self.get_target_bed_from_lims(case_id=case_id) or DEFAULT_CAPTURE_KIT
-        else:
-            target_bed = self.get_target_bed_from_lims(case_id=case_id)
-            if not target_bed:
-                raise ValueError("No capture kit was found in LIMS")
+        """
+        Call the extraction of the target bed file from lims and use default capture kit for WGS
+        """
+        target_bed: str = self.get_target_bed_from_lims(case_id=case_id)
+        if not target_bed:
+            if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
+                return DEFAULT_CAPTURE_KIT
+            raise ValueError("No capture kit was found in LIMS")
         return target_bed
 
     def get_target_bed_from_lims(self, case_id: str) -> str | None:
@@ -710,26 +712,18 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     def get_data_analysis_type(self, case_id: str) -> str | None:
-        """Return data analysis type carried out."""
-        case_sample: Sample = self.status_db.get_case_samples_by_case_id(case_internal_id=case_id)[
-            0
-        ].sample
-        lims_sample: dict[str, Any] = self.lims_api.sample(case_sample.internal_id)
-        application: Application = self.status_db.get_application_by_tag(
-            tag=lims_sample.get("application")
-        )
-        return application.analysis_type if application else None
-
-    def get_analysis_type(self, case_id: str) -> str:
+        """Return data analysis type carried out. Raise an error is samples in a case have not the same analysis type"""
         case: Case = self.get_validated_case(case_id)
-        sample_analysis_type: str = ""
+        sample_analysis_type: str = None
         for link in case.links:
             sample_analysis_type_tmp: str = (
                 link.sample.application_version.application.analysis_type
             )
-            if not sample_analysis_type_tmp:
-                sample_analysis_type_tmp = ""
-            if sample_analysis_type_tmp != sample_analysis_type and sample_analysis_type != "":
+            if (
+                sample_analysis_type_tmp != sample_analysis_type
+                and sample_analysis_type
+                and sample_analysis_type_tmp
+            ):
                 raise ValueError(
                     f"{sample_analysis_type_tmp} has not the same analysis type as other samples in the case"
                 )
