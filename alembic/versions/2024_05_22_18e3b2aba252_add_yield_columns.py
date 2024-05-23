@@ -18,22 +18,22 @@ depends_on = None
 
 
 def upgrade():
-    # add column yield
-    op.add_column(
-        table_name="illumina_sample_run_metrics",
-        column=sa.Column("yield", sa.Integer(), nullable=True),
-    )
-    # add column yield_q30
-    op.add_column(
-        table_name="illumina_sample_run_metrics",
-        column=sa.Column("yield_q30", sa.Integer(), nullable=True),
-    )
+
     # rename table IlluminaSampleRunMetrics to IlluminaSampleSequencingMetrics
     op.rename_table(
         old_table_name="illumina_sample_run_metrics",
         new_table_name="illumina_sample_sequencing_metrics",
     )
-
+    # add column yield
+    op.add_column(
+        table_name="illumina_sample_sequencing_metrics",
+        column=sa.Column("yield", sa.Integer(), nullable=True),
+    )
+    # add column yield_q30
+    op.add_column(
+        table_name="illumina_sample_sequencing_metrics",
+        column=sa.Column("yield_q30", sa.Integer(), nullable=True),
+    )
     # rename  table run metrics to InstrumentRun
     op.rename_table(
         old_table_name="run_metrics",
@@ -44,26 +44,41 @@ def upgrade():
         table_name="sample_run_metrics",
         column_name="run_metrics_id",
         new_column_name="instrument_run_id",
+        type_=sa.Integer(),
+    )
+    # rename illumina_sequencing_metrics to illumina_sequencing_run
+    op.rename_table(
+        old_table_name="illumina_sequencing_metrics",
+        new_table_name="illumina_sequencing_run",
     )
 
 
 def downgrade():
-    # drop columns yield and yield_q30
-    op.drop_column(table_name="illumina_sample_run_metrics", column_name="yield")
-    op.drop_column(table_name="illumina_sample_run_metrics", column_name="yield_q30")
-    # rename table IlluminaSampleSequencingMetrics to IlluminaSampleRunMetrics
+    # rename illumina_sequencing_metrics to illumina_sequencing_run
     op.rename_table(
-        new_table_name="illumina_sample_run_metrics",
-        old_table_name="illumina_sample_sequencing_metrics",
+        new_table_name="illumina_sequencing_metrics",
+        old_table_name="illumina_sequencing_run",
+    )
+
+    # on SampleRunMetrics change run_metrics_id to instrument_run_id
+    op.alter_column(
+        table_name="sample_run_metrics",
+        new_column_name="run_metrics_id",
+        column_name="instrument_run_id",
+        type_=sa.Integer(),
     )
     # rename run metrics -> InstrumentRun
     op.rename_table(
         new_table_name="run_metrics",
         old_table_name="instrument_run",
     )
-    # on SampleRunMetrics change run_metrics_id to instrument_run_id
-    op.alter_column(
-        table_name="sample_run_metrics",
-        new_column_name="run_metrics_id",
-        column_name="instrument_run_id",
+
+    # drop columns yield and yield_q30
+    op.drop_column(table_name="illumina_sample_sequencing_metrics", column_name="yield")
+    op.drop_column(table_name="illumina_sample_sequencing_metrics", column_name="yield_q30")
+
+    # rename table IlluminaSampleSequencingMetrics to IlluminaSampleRunMetrics
+    op.rename_table(
+        new_table_name="illumina_sample_run_metrics",
+        old_table_name="illumina_sample_sequencing_metrics",
     )
