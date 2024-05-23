@@ -41,9 +41,7 @@ class TomteReportAPI(ReportAPI):
             gc_content=sample_metrics.after_filtering_gc_content,
             input_amount=self.lims_api.get_latest_rna_input_amount(sample.internal_id),
             mean_length_r1=sample_metrics.after_filtering_read1_mean_length,
-            million_read_pairs=get_million_read_pairs(
-                reads=sample_metrics.before_filtering_total_reads
-            ),
+            million_read_pairs=get_million_read_pairs(sample_metrics.before_filtering_total_reads),
             mrna_bases=sample_metrics.pct_mrna_bases,
             pct_adapter=sample_metrics.pct_adapter,
             pct_intergenic_bases=sample_metrics.pct_intergenic_bases,
@@ -51,6 +49,7 @@ class TomteReportAPI(ReportAPI):
             pct_surviving=sample_metrics.pct_surviving,
             q20_rate=sample_metrics.after_filtering_q20_rate,
             q30_rate=sample_metrics.after_filtering_q30_rate,
+            reception_qc_flag=self.lims_api.get_sample_reception_qc_flag(sample.internal_id),
             ribosomal_bases=sample_metrics.pct_ribosomal_bases,
             rin=self.lims_api.get_sample_rin(sample.internal_id),
             uniquely_mapped_reads=sample_metrics.uniquely_mapped_percent,

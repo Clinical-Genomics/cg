@@ -18,7 +18,7 @@ class SampleMetadataModel(BaseModel):
     Attributes:
         duplicates: fraction of mapped sequence that is marked as duplicate; source: workflow
         million_read_pairs: number of million read pairs obtained; source: StatusDB/sample/reads (/2*10^6)
-        reception_qc_flag: reception quality control; source: LIMS
+        reception_qc_flag: reception quality control flag; source: LIMS
     """
 
     duplicates: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD

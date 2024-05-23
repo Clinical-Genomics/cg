@@ -59,7 +59,7 @@ BALSAMIC_ANALYSIS_TYPE: dict[str, str] = {
     CancerAnalysisType.TUMOR_WGS: "Tumör-endast (helgenomsekvensering)",
 }
 
-REPORT_QC_FLAG: dict[str, str] = {
+REPORT_QC_FLAG: dict[ReceptionQCFLag, str] = {
     ReceptionQCFLag.PASSED: "Godkänd",
     ReceptionQCFLag.FAILED: "Underkänd",
 }
@@ -159,8 +159,9 @@ REQUIRED_SAMPLE_TIMESTAMP_FIELDS: list[str] = [
 
 # Metadata required fields
 _REQUIRED_SAMPLE_METADATA_FIELDS: list[str] = [
-    "million_read_pairs",
     "duplicates",
+    "million_read_pairs",
+    "reception_qc_flag",
 ]
 
 REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [

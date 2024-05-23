@@ -14,13 +14,14 @@ def test_get_sample_metadata(
 
     # GIVEN the expected output
     expected_metadata = {
-        "million_read_pairs": "N/A",
-        "duplicates": "4.01",
         "bait_set": "N/A",
+        "duplicates": "4.01",
         "gender": REPORT_SEX.get("male"),
         "mapped_reads": "99.77",
         "mean_target_coverage": "38.34",
+        "million_read_pairs": "N/A",
         "pct_10x": "99.1",
+        "reception_qc_flag": "Godkänd",
     }
 
     # WHEN retrieving the sample metadata

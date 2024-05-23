@@ -18,6 +18,7 @@ from cg.constants import (
     Workflow,
 )
 from cg.constants.constants import AnalysisType
+from cg.constants.lims import ReceptionQCFLag
 from cg.constants.scout import BALSAMIC_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
@@ -53,22 +54,29 @@ class BalsamicReportAPI(ReportAPI):
         sample_metrics: dict[str, BalsamicQCMetrics] = analysis_metadata.sample_metrics[
             sample.internal_id
         ]
-        million_read_pairs: float = get_million_read_pairs(reads=sample.reads)
+        million_read_pairs: float = get_million_read_pairs(sample.reads)
+        reception_qc_flag: ReceptionQCFLag = self.lims_api.get_sample_reception_qc_flag(
+            sample.internal_id
+        )
         if AnalysisType.WHOLE_GENOME_SEQUENCING in self.analysis_api.get_data_analysis_type(
             case.internal_id
         ):
             return self.get_wgs_metadata(
-                million_read_pairs=million_read_pairs, sample_metrics=sample_metrics
+                million_read_pairs=million_read_pairs,
+                reception_qc_flag=reception_qc_flag,
+                sample_metrics=sample_metrics,
             )
         return self.get_panel_metadata(
-            million_read_pairs=million_read_pairs,
-            sample_metrics=sample_metrics,
             analysis_metadata=analysis_metadata,
+            million_read_pairs=million_read_pairs,
+            reception_qc_flag=reception_qc_flag,
+            sample_metrics=sample_metrics,
         )
 
     def get_panel_metadata(
         self,
         million_read_pairs: float,
+        reception_qc_flag: ReceptionQCFLag,
         sample_metrics: BalsamicTargetedQCMetrics,
         analysis_metadata: BalsamicAnalysis,
     ) -> BalsamicTargetedSampleMetadataModel:
@@ -80,34 +88,38 @@ class BalsamicReportAPI(ReportAPI):
         return BalsamicTargetedSampleMetadataModel(
             bait_set=bed.name if bed else None,
             bait_set_version=analysis_metadata.config.panel.capture_kit_version,
-            million_read_pairs=million_read_pairs,
+            duplicates=sample_metrics.percent_duplication if sample_metrics else None,
+            fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
+            gc_dropout=sample_metrics.gc_dropout if sample_metrics else None,
+            mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
             median_target_coverage=(
                 sample_metrics.median_target_coverage if sample_metrics else None
             ),
+            million_read_pairs=million_read_pairs,
             pct_250x=sample_metrics.pct_target_bases_250x if sample_metrics else None,
             pct_500x=sample_metrics.pct_target_bases_500x if sample_metrics else None,
-            duplicates=sample_metrics.percent_duplication if sample_metrics else None,
-            mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
-            fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
-            gc_dropout=sample_metrics.gc_dropout if sample_metrics else None,
+            reception_qc_flag=reception_qc_flag,
         )
 
     @staticmethod
     def get_wgs_metadata(
-        million_read_pairs: float, sample_metrics: BalsamicWGSQCMetrics
+        million_read_pairs: float,
+        reception_qc_flag: ReceptionQCFLag,
+        sample_metrics: BalsamicWGSQCMetrics,
     ) -> BalsamicWGSSampleMetadataModel:
         """Return report metadata for Balsamic WGS analysis."""
         return BalsamicWGSSampleMetadataModel(
-            million_read_pairs=million_read_pairs,
+            duplicates=sample_metrics.percent_duplication if sample_metrics else None,
+            fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
+            mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
             median_coverage=sample_metrics.median_coverage if sample_metrics else None,
+            million_read_pairs=million_read_pairs,
             pct_15x=sample_metrics.pct_15x if sample_metrics else None,
             pct_60x=sample_metrics.pct_60x if sample_metrics else None,
-            duplicates=sample_metrics.percent_duplication if sample_metrics else None,
-            mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
-            fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
             pct_reads_improper_pairs=(
                 sample_metrics.pct_pf_reads_improper_pairs if sample_metrics else None
             ),
+            reception_qc_flag=reception_qc_flag,
         )
 
     def is_report_accredited(
