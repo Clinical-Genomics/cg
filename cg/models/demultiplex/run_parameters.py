@@ -194,6 +194,7 @@ class RunParametersHiSeq(RunParameters):
         return self._get_node_integer_value(node_name=node_name)
 
     def get_flow_cell_model(self) -> None:
+        """Return None for run parameters associated with HiSeq sequencing."""
         return None
 
 
@@ -250,7 +251,7 @@ class RunParametersNovaSeq6000(RunParameters):
         return self._get_node_integer_value(node_name=node_name)
 
     def get_flow_cell_model(self) -> str:
-        """Return the control software version."""
+        """Return the flow cell model referred to as 'FlowCellMode' in the run parameters file."""
         node_name: str = RunParametersXMLNodes.FLOW_CELL_MODE
         return self._get_node_string_value(node_name=node_name)
 
@@ -313,7 +314,7 @@ class RunParametersNovaSeqX(RunParameters):
         return self._read_parser.get(RunParametersXMLNodes.READ_2_NOVASEQ_X)
 
     def get_flow_cell_model(self) -> str:
-        """Return flow cell model."""
+        """Return the flow cell model referred to as 'Mode' or 'Name' in the run parameters file."""
         consumable_infos = self.tree.findall(".//ConsumableInfo")
         for consumable_info in consumable_infos:
             type_element = consumable_info.find("Type")
