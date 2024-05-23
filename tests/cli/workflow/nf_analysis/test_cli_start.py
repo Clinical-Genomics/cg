@@ -41,11 +41,6 @@ def test_start(
     # GIVEN that the sample source in LIMS is set
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
 
-    # In the RAREDISEASE case, we need to mock lims fetching of the target bed file
-    if workflow == Workflow.RAREDISEASE:
-        mocker.patch.object(RarediseaseAnalysisAPI, "get_target_bed_from_lims")
-        RarediseaseAnalysisAPI.get_target_bed_from_lims.return_value = "some_target_bed_file"
-
     # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(workflow_cli, [workflow, "start", case_id, "--dry-run"], obj=context)
 
@@ -87,11 +82,6 @@ def test_start_available(
 
     # GIVEN that the sample source in LIMS is set
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
-
-    # In the RAREDISEASE case, we need to mock lims fetching of the target bed file
-    if workflow == Workflow.RAREDISEASE:
-        mocker.patch.object(RarediseaseAnalysisAPI, "get_target_bed_from_lims")
-        RarediseaseAnalysisAPI.get_target_bed_from_lims.return_value = "some_target_bed_file"
 
     # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(
