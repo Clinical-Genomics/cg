@@ -9,9 +9,9 @@ from cg.models.qc_metrics import QCMetrics
 class RarediseaseQCMetrics(QCMetrics):
     """Raredisease QC metrics"""
 
-    percentage_mapped_reads: float | None
-    predicted_sex: float | None
-    fraction_duplicates: float | None
+    percentage_mapped_reads: float
+    predicted_sex: float
+    fraction_duplicates: float
 
 
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):

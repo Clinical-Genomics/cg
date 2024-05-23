@@ -1,3 +1,18 @@
+from typing import Iterable
+
+from cg.constants import (
+    REQUIRED_REPORT_FIELDS,
+    REQUIRED_CUSTOMER_FIELDS,
+    REQUIRED_CASE_FIELDS,
+    REQUIRED_APPLICATION_FIELDS,
+    REQUIRED_SAMPLE_RAREDISEASE_FIELDS,
+    REQUIRED_DATA_ANALYSIS_RAREDISEASE_FIELDS,
+    REQUIRED_SAMPLE_METHODS_FIELDS,
+    REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
+    REQUIRED_SAMPLE_METADATA_RAREDISEASE_WGS_FIELDS,
+    REQUIRED_SAMPLE_METADATA_RAREDISEASE_FIELDS,
+)
+from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
 from cg.models.analysis import NextflowAnalysis
@@ -6,7 +21,12 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.models.raredisease.raredisease import RarediseaseQCMetrics
 from cg.models.report.metadata import RarediseaseSampleMetadataModel
+from cg.models.report.report import ScoutReportFiles, CaseModel
+from cg.models.report.sample import SampleModel
 from cg.store.models import Case, Sample
+from housekeeper.store.models import File, Version
+
+LOG = logging.getLogger(__name__)
 
 
 class RarediseaseReportAPI(ReportAPI):
@@ -74,7 +94,7 @@ class RarediseaseReportAPI(ReportAPI):
         )
 
     def get_required_fields(self, case: CaseModel) -> dict:
-        """Return dictionary with the delivery report required fields for MIP DNA."""
+        """Return dictionary with the delivery report required fields for Raredisease."""
         return {
             "report": REQUIRED_REPORT_FIELDS,
             "customer": REQUIRED_CUSTOMER_FIELDS,
@@ -82,9 +102,9 @@ class RarediseaseReportAPI(ReportAPI):
             "applications": self.get_application_required_fields(
                 case=case, required_fields=REQUIRED_APPLICATION_FIELDS
             ),
-            "data_analysis": REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS,
+            "data_analysis": REQUIRED_DATA_ANALYSIS_RAREDISEASE_FIELDS,
             "samples": self.get_sample_required_fields(
-                case=case, required_fields=REQUIRED_SAMPLE_MIP_DNA_FIELDS
+                case=case, required_fields=REQUIRED_SAMPLE_RAREDISEASE_FIELDS
             ),
             "methods": self.get_sample_required_fields(
                 case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
@@ -101,16 +121,16 @@ class RarediseaseReportAPI(ReportAPI):
         required_sample_metadata_fields = dict()
         for sample in case.samples:
             required_fields = (
-                REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS
+                REQUIRED_SAMPLE_METADATA_RAREDISEASE_WGS_FIELDS
                 if "wgs" in sample.application.prep_category.lower()
-                else REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS
+                else REQUIRED_SAMPLE_METADATA_RAREDISEASE_FIELDS
             )
             required_sample_metadata_fields.update({sample.id: required_fields})
         return required_sample_metadata_fields
 
     def get_upload_case_tags(self) -> dict:
-        """Return MIP DNA upload case tags."""
-        return MIP_CASE_TAGS
+        """Return DNA upload case tags."""
+        return RAREDISEASE_CASE_TAGS
 
     def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
         """Return file path of the uploaded to Scout file given its tag."""
