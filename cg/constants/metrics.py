@@ -10,6 +10,8 @@ class QualityMetricsColumnNames(StrEnum):
     SAMPLE_INTERNAL_ID: str = "SampleID"
     MEAN_QUALITY_SCORE_Q30: str = "Mean Quality Score (PF)"
     Q30_BASES_PERCENT: str = "% Q30"
+    YIELD: str = "Yield"
+    YIELD_Q30: str = "YieldQ30"
 
 
 class DemuxMetricsColumnNames(StrEnum):
