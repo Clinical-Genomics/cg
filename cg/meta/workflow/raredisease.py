@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from cg.constants import Workflow
+from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType, GenomeVersion
 from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nf_analysis import RAREDISEASE_METRIC_CONDITIONS
@@ -73,6 +73,17 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             case_id=case_sample.case.internal_id,
         )
         return sample_sheet_entry.reformat_sample_content
+
+    def get_target_bed(self, case_id: str, analysis_type: str) -> str:
+        """
+        Return the target bed file from LIMS and use default capture kit for WGS.
+        """
+        target_bed: str = self.get_target_bed_from_lims(case_id=case_id)
+        if not target_bed:
+            if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
+                return DEFAULT_CAPTURE_KIT
+            raise ValueError("No capture kit was found in LIMS")
+        return target_bed
 
     def get_workflow_parameters(self, case_id: str) -> RarediseaseParameters:
         """Return parameters."""

@@ -424,17 +424,6 @@ class AnalysisAPI(MetaAPI):
             self.fastq_handler.concatenate(linked_reads_paths[read], concatenated_paths[read])
             self.fastq_handler.remove_files(value)
 
-    def get_target_bed(self, case_id: str, analysis_type: str) -> str:
-        """
-        Return the target bed file from LIMS and use default capture kit for WGS.
-        """
-        target_bed: str = self.get_target_bed_from_lims(case_id=case_id)
-        if not target_bed:
-            if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
-                return DEFAULT_CAPTURE_KIT
-            raise ValueError("No capture kit was found in LIMS")
-        return target_bed
-
     def get_target_bed_from_lims(self, case_id: str) -> str | None:
         """Get target bed filename from LIMS."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -714,7 +703,7 @@ class AnalysisAPI(MetaAPI):
     def get_data_analysis_type(self, case_id: str) -> str | None:
         """Return data analysis type carried out. Raise an error is samples in a case have not the same analysis type"""
         case: Case = self.get_validated_case(case_id)
-            analysis_types: set[str] = {link.sample.application_version.application.analysis_type for link in case.links}
-            if len(analysis_types) > 1:
-                raise ValueError(...)
-            return analysis_types.pop() if analysis_types else None                
+        analysis_types: set[str] = {link.sample.application_version.application.analysis_type for link in case.links}
+        if len(analysis_types) > 1:
+            raise ValueError(...)
+        return analysis_types.pop() if analysis_types else None
