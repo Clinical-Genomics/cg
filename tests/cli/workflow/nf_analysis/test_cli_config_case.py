@@ -212,7 +212,9 @@ def test_config_case_dry_run(
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
 
     # WHEN invoking the command with dry-run specified
-    result = cli_runner.invoke(workflow_cli, [workflow, "config-case", case_id, "-d"], obj=context)
+    result = cli_runner.invoke(
+        workflow_cli, [workflow, "config-case", case_id, "--dry-run"], obj=context
+    )
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS

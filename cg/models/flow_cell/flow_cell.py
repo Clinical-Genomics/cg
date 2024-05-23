@@ -5,9 +5,7 @@ import logging
 import os
 from pathlib import Path
 from typing import Type
-
 from typing_extensions import Literal
-
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path

@@ -1,4 +1,4 @@
-"""Constants that specify sample sources"""
+"""Constants that specify sample sources."""
 
 from enum import StrEnum
 
@@ -13,6 +13,7 @@ METAGENOME_SOURCES = (
     "unknown",
     "other",
 )
+
 ANALYSIS_SOURCES = (
     "blood",
     "buccal swab",
@@ -33,4 +34,20 @@ ANALYSIS_SOURCES = (
 
 
 class SourceType(StrEnum):
+    BLOOD: str = "blood"
+    BONE_MARROW: str = "bone marrow"
+    BUCCAL_SWAB: str = "buccal swab"
+    CELL_FREE_DNA: str = "cell-free DNA"
+    CELL_LINE: str = "cell line"
+    CYTOLOGY: str = "cytology (not fixed/fresh)"
+    CYTOLOGY_FFPE: str = "cytology (FFPE)"
+    FFPE: str = "FFPE"
+    FIBROBLAST: str = "fibroblast"
+    MUSCLE: str = "muscle"
+    NAIL: str = "nail"
+    OTHER: str = "other"
+    SALIVA: str = "saliva"
+    SKIN: str = "skin"
+    TISSUE: str = "tissue (fresh frozen)"
+    TISSUE_FFPE: str = "tissue (FFPE)"
     UNKNOWN: str = "unknown"

@@ -42,6 +42,9 @@ YES_FIELD: str = "Ja"
 NO_FIELD: str = "Nej"
 PRECISION: int = 2
 
+RIN_MAX_THRESHOLD: int = 10
+RIN_MIN_THRESHOLD: int = 1
+
 REPORT_GENDER: dict[str, str] = {
     "unknown": "Okänd",
     "female": "Kvinna",
@@ -206,19 +209,19 @@ REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS: list[str] = (
 
 _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
     "gc_content",
-    "input_amount",
     "mean_length_r1",
-    "rin",
 ]
 
 _REQUIRED_SAMPLE_METADATA_WTS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS + [
     "bias_5_3",
+    "input_amount",
     "mrna_bases",
     "pct_adapter",
     "pct_surviving",
     "q20_rate",
     "q30_rate",
     "ribosomal_bases",
+    "rin",
     "uniquely_mapped_reads",
 ]
 
@@ -241,15 +244,7 @@ REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA
 ]
 
 
-REQUIRED_SAMPLE_METADATA_TAXPROFILER_FIELDS: list[str] = (
-    _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS
-    + [
-        "average_read_length",
-        "mapped_reads",
-        "mean_length_r2",
-        "million_read_pairs_after_filtering",
-    ]
-)
+REQUIRED_SAMPLE_METADATA_TAXPROFILER_FIELDS: list[str] = []
 
 
 REQUIRED_SAMPLE_METADATA_TOMTE_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_WTS_FIELDS + [
