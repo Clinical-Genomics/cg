@@ -214,9 +214,9 @@ _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS: list[str] = _REQUIRED_SAMPLE_METADA
     "mean_length_r1",
 ]
 
+# WTS metadata required fields (OPTIONAL: "rin", "dv200")
 _REQUIRED_SAMPLE_METADATA_WTS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS + [
     "bias_5_3",
-    "dv200",
     "input_amount",
     "mrna_bases",
     "pct_adapter",
