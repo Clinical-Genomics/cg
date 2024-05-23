@@ -4,7 +4,9 @@ from importlib.resources import files
 from pathlib import Path
 
 from cg.constants import DataDelivery
-from cg.constants.constants import FileExtensions, Workflow
+from cg.constants.constants import CancerAnalysisType, FileExtensions, Workflow
+from cg.constants.lims import ReceptionQCFLag
+from cg.constants.subject import Sex
 
 DELIVERY_REPORT_FILE_NAME: str = f"delivery-report{FileExtensions.HTML}"
 SWEDAC_LOGO_PATH = Path(
@@ -44,17 +46,22 @@ PRECISION: int = 2
 RIN_MAX_THRESHOLD: int = 10
 RIN_MIN_THRESHOLD: int = 1
 
-REPORT_GENDER: dict[str, str] = {
-    "unknown": "Okänd",
-    "female": "Kvinna",
-    "male": "Man",
+REPORT_SEX: dict[str, str] = {
+    Sex.FEMALE: "Kvinna",
+    Sex.MALE: "Man",
+    Sex.UNKNOWN: "Okänd",
 }
 
 BALSAMIC_ANALYSIS_TYPE: dict[str, str] = {
-    "tumor_wgs": "Tumör-endast (helgenomsekvensering)",
-    "tumor_normal_wgs": "Tumör/normal (helgenomsekvensering)",
-    "tumor_panel": "Tumör-endast (panelsekvensering)",
-    "tumor_normal_panel": "Tumör/normal (panelsekvensering)",
+    CancerAnalysisType.TUMOR_NORMAL_PANEL: "Tumör/normal (panelsekvensering)",
+    CancerAnalysisType.TUMOR_NORMAL_WGS: "Tumör/normal (helgenomsekvensering)",
+    CancerAnalysisType.TUMOR_PANEL: "Tumör-endast (panelsekvensering)",
+    CancerAnalysisType.TUMOR_WGS: "Tumör-endast (helgenomsekvensering)",
+}
+
+REPORT_QC_FLAG: dict[str, str] = {
+    ReceptionQCFLag.PASSED: "Godkänd",
+    ReceptionQCFLag.FAILED: "Underkänd",
 }
 
 # Report required fields (OPTIONAL: "version")
