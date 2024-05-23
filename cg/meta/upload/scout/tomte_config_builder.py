@@ -9,6 +9,7 @@ from cg.constants.scout import TOMTE_CASE_TAGS, TOMTE_SAMPLE_TAGS, GenomeBuild, 
 from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
+from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.scout.scout_load_config import ScoutRnaIndividual, TomteLoadConfig
 from cg.store.models import Analysis, CaseSample
 
@@ -18,7 +19,13 @@ LOG = logging.getLogger(__name__)
 class TomteConfigBuilder(ScoutConfigBuilder):
     """Class for handling Tomte information and files to be included in Scout upload."""
 
-    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI):
+    def __init__(
+        self,
+        hk_version_obj: Version,
+        analysis_obj: Analysis,
+        analysis_api: TomteAnalysisAPI,
+        lims_api: LimsAPI,
+    ):
         super().__init__(
             hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api
         )
@@ -28,12 +35,24 @@ class TomteConfigBuilder(ScoutConfigBuilder):
             track=UploadTrack.RARE_DISEASE.value,
             delivery_report=self.get_file_from_hk({HK_DELIVERY_REPORT_TAG}),
         )
+        self.analysis_api: TomteAnalysisAPI = analysis_api
 
     def build_load_config(self) -> None:
         """Build a Tomte-specific load config for uploading a case to scout."""
         LOG.info("Build load config for tomte case")
         self.add_common_info_to_load_config()
-        self.load_config.human_genome_build = GenomeBuild.hg38
+        self.load_config.human_genome_build = getattr(
+            GenomeBuild,
+            self.analysis_api.get_genome_build(case_id=self.analysis_obj.case.internal_id),
+        )
+        self.load_config.gene_panels: list[str] | None = (
+            self.analysis_api.get_aggregated_panels(
+                customer_id=self.analysis_obj.case.customer.internal_id,
+                default_panels=set(self.analysis_obj.case.panels),
+            )
+            or None
+        )
+
         self.include_case_files()
 
         LOG.info("Building samples")
