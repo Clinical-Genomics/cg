@@ -36,7 +36,7 @@ class IlluminaPostProcessingService:
         Create flow cell from the parsed and validated flow cell data.
         And add the samples on the flow cell to the model.
         """
-        model: str | None = get_flow_cell_model_from_run_parameters(flow_cell.run_parameters_path)
+        model: str | None = flow_cell.run_parameters.get_flow_cell_model()
         new_flow_cell = IlluminaFlowCell(
             internal_id=flow_cell.id, type=DeviceType.ILLUMINA, model=model
         )
