@@ -6,7 +6,7 @@ from cg.constants.demultiplexing import UNDETERMINED
 from cg.constants.devices import DeviceType
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.services.bcl_convert_metrics_service.parser import MetricsParser
-from cg.store.models import SampleLaneSequencingMetrics, IlluminaSampleRunMetrics
+from cg.store.models import SampleLaneSequencingMetrics, IlluminaSampleSequencingMetrics
 from cg.store.store import Store
 from cg.utils.flow_cell import get_flow_cell_id
 
@@ -87,7 +87,7 @@ class BCLConvertMetricsService:
         run_metrics_id: int,
         metrics_parser: MetricsParser,
         store: Store,
-    ) -> IlluminaSampleRunMetrics:
+    ) -> IlluminaSampleSequencingMetrics:
         """Create sequencing metrics for all lanes in a flow cell."""
 
         total_reads: int = metrics_parser.calculate_total_reads_for_sample_in_lane(
@@ -101,7 +101,7 @@ class BCLConvertMetricsService:
         )
         sample_id: int = store.get_sample_by_internal_id(sample_internal_id).id
 
-        return IlluminaSampleRunMetrics(
+        return IlluminaSampleSequencingMetrics(
             run_metrics_id=run_metrics_id,
             sample_id=sample_id,
             type=DeviceType.ILLUMINA,
