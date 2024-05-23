@@ -6,7 +6,7 @@ from cg.constants.demultiplexing import UNDETERMINED
 from cg.constants.devices import DeviceType
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.services.bcl_convert_metrics_service.parser import MetricsParser
-from cg.store.models import SampleLaneSequencingMetrics, IlluminaSampleRunMetrics
+from cg.store.models import SampleLaneSequencingMetrics, IlluminaSampleSequencingMetrics
 from cg.store.store import Store
 from cg.utils.flow_cell import get_flow_cell_id
 
@@ -87,7 +87,7 @@ class BCLConvertMetricsService:
         run_metrics_id: int,
         metrics_parser: MetricsParser,
         store: Store,
-    ) -> IlluminaSampleRunMetrics:
+    ) -> IlluminaSampleSequencingMetrics:
         """Create sequencing metrics for all lanes in a flow cell."""
 
         total_reads: int = metrics_parser.calculate_total_reads_for_sample_in_lane(
@@ -101,7 +101,7 @@ class BCLConvertMetricsService:
         )
         sample_id: int = store.get_sample_by_internal_id(sample_internal_id).id
 
-        return IlluminaSampleRunMetrics(
+        return IlluminaSampleSequencingMetrics(
             run_metrics_id=run_metrics_id,
             sample_id=sample_id,
             type=DeviceType.ILLUMINA,
@@ -111,3 +111,26 @@ class BCLConvertMetricsService:
             base_mean_quality_score=mean_quality_score,
             created_at=datetime.now(),
         )
+
+    def create_sample_sequencing_metrics_for_flow_cell(
+        self,
+        flow_cell_directory: Path,
+        run_metrics_id: int,
+        store: Store,
+    ) -> list[IlluminaSampleSequencingMetrics]:
+        """Parse the demultiplexing metrics data into the sequencing statistics model."""
+        metrics_parser = MetricsParser(flow_cell_directory)
+        sample_internal_ids: list[str] = metrics_parser.get_sample_internal_ids()
+        sample_lane_sequencing_metrics: list[IlluminaSampleSequencingMetrics] = []
+
+        for sample_internal_id in sample_internal_ids:
+            for lane in metrics_parser.get_lanes_for_sample(sample_internal_id=sample_internal_id):
+                metrics: IlluminaSampleSequencingMetrics = self.create_sample_run_metrics(
+                    sample_internal_id=sample_internal_id,
+                    lane=lane,
+                    metrics_parser=metrics_parser,
+                    run_metrics_id=run_metrics_id,
+                    store=store,
+                )
+                sample_lane_sequencing_metrics.append(metrics)
+        return sample_lane_sequencing_metrics
