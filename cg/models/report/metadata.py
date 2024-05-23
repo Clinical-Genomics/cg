@@ -148,9 +148,9 @@ class RarediseaseSampleMetadataModel(SampleMetadataModel):
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     gender: Annotated[str, BeforeValidator(get_gender_as_string)] = NA_FIELD
-    mapped_reads: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
-    mean_target_coverage: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
-    pct_10x: Annotated[str, BeforeValidator(get_float_as_string)] = NA_FIELD
+    mapped_reads: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    mean_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    pct_10x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
 
 
 class RnafusionSampleMetadataModel(WTSSampleMetadataModel):

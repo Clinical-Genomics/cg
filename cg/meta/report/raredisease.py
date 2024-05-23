@@ -24,7 +24,6 @@ from cg.models.report.metadata import RarediseaseSampleMetadataModel
 from cg.models.report.report import ScoutReportFiles, CaseModel
 from cg.models.report.sample import SampleModel
 from cg.store.models import Case, Sample
-from housekeeper.store.models import File, Version
 
 LOG = logging.getLogger(__name__)
 
