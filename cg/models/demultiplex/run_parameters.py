@@ -3,7 +3,7 @@
 import logging
 from abc import abstractmethod
 from pathlib import Path
-from xml.etree.ElementTree import Element
+from xml.etree.ElementTree import Element, ElementTree
 
 from packaging.version import parse
 
@@ -44,9 +44,7 @@ class RunParameters:
         Raises:
             RunParametersError if the node does not have the expected value."""
         try:
-            application: ElementTree.Element | None = get_tree_node(
-                tree=self.tree, node_name=node_name
-            )
+            application: Element | None = get_tree_node(tree=self.tree, node_name=node_name)
         except XMLError:
             raise RunParametersError(
                 f"Could not find node {node_name} in the run parameters file. "
@@ -218,7 +216,7 @@ class RunParametersNovaSeq6000(RunParameters):
     def reagent_kit_version(self) -> str:
         """Return the reagent kit version if existent, return 'unknown' otherwise."""
         node_name: str = RunParametersXMLNodes.REAGENT_KIT_VERSION
-        xml_node: ElementTree.Element | None = self.tree.find(node_name)
+        xml_node: Element | None = self.tree.find(node_name)
         if xml_node is None:
             LOG.warning("Could not determine reagent kit version")
             LOG.info("Set reagent kit version to 'unknown'")
@@ -285,12 +283,10 @@ class RunParametersNovaSeqX(RunParameters):
     def _read_parser(self) -> dict[str, int]:
         """Return read and index cycle values parsed as a dictionary."""
         cycle_mapping: dict[str, int] = {}
-        planned_reads_tree: ElementTree.Element = get_tree_node(
+        planned_reads_tree: Element = get_tree_node(
             tree=self.tree, node_name=RunParametersXMLNodes.PLANNED_READS_NOVASEQ_X
         )
-        planned_reads: list[ElementTree.Element] = planned_reads_tree.findall(
-            RunParametersXMLNodes.INNER_READ
-        )
+        planned_reads: list[Element] = planned_reads_tree.findall(RunParametersXMLNodes.INNER_READ)
         for read_elem in planned_reads:
             read_name: str = read_elem.get(RunParametersXMLNodes.READ_NAME)
             cycles: int = int(read_elem.get(RunParametersXMLNodes.CYCLES))
