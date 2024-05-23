@@ -979,7 +979,7 @@ class RunDevice(Base):
         return list(
             {
                 sample_run_metric.sample
-                for run in self.run_metrics
+                for run in self.instrument_run
                 for sample_run_metric in run.sample_run_metrics
             }
         )
@@ -1003,7 +1003,7 @@ class IlluminaFlowCell(RunDevice):
 
 
 class InstrumentRun(Base):
-    """Model for storing run devices."""
+    """Model for storing instrument runs."""
 
     __tablename__ = "instrument_run"
 
@@ -1011,9 +1011,9 @@ class InstrumentRun(Base):
     type: Mapped[DeviceType]
     device_id: Mapped[int] = mapped_column(ForeignKey("run_device.id"))
 
-    device: Mapped[RunDevice] = orm.relationship(back_populates="run_metrics")
+    device: Mapped[RunDevice] = orm.relationship(back_populates="instrument_run")
     sample_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(
-        back_populates="run_metrics", cascade="all, delete"
+        back_populates="instrument_run", cascade="all, delete"
     )
 
     __mapper_args__ = {
@@ -1024,7 +1024,7 @@ class InstrumentRun(Base):
 class IlluminaSequencingMetrics(InstrumentRun):
     __tablename__ = "illumina_sequencing_metrics"
 
-    id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"), primary_key=True)
+    id: Mapped[int] = mapped_column(ForeignKey("instrument_run.id"), primary_key=True)
     sequencer_type: Mapped[str | None] = mapped_column(
         types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx")
     )
