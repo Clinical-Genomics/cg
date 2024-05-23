@@ -445,6 +445,10 @@ class IlluminaFlowCell(BaseView):
     pass
 
 
+class IlluminaSequencingRun(BaseView):
+    pass
+
+
 class OrganismView(BaseView):
     """Admin view for Model.Organism"""
 

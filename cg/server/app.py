@@ -19,6 +19,8 @@ from cg.store.models import (
     Collaboration,
     Customer,
     Flowcell,
+    IlluminaFlowCell,
+    IlluminaSequencingRun,
     Invoice,
     Order,
     Organism,
@@ -27,7 +29,6 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
     User,
-    IlluminaRunMetrics,
 )
 
 from . import admin, api, ext, invoices
@@ -129,7 +130,7 @@ def _register_admin_views():
     ext.admin.add_view(admin.FlowcellView(Flowcell, ext.db.session))
     ext.admin.add_view(admin.AnalysisView(Analysis, ext.db.session))
     ext.admin.add_view(admin.InvoiceView(Invoice, ext.db.session))
-    ext.admin.add_view(admin.IlluminaFlowCell(IlluminaRunMetrics, ext.db.session))
+    ext.admin.add_view(admin.IlluminaFlowCell(IlluminaSequencingRun, ext.db.session))
 
 
 def _register_teardowns(app: Flask):
