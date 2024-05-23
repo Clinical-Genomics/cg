@@ -112,6 +112,20 @@ class MetricsParser:
         )
         return self.calculate_mean_read_pair_q30_bases_percent(metrics=metrics)
 
+    def get_yield_for_sample_in_lane(self, sample_internal_id: str, lane: int) -> float:
+        """Return the yield for a sample and lane."""
+        metrics: list[SequencingQualityMetrics] = self.get_read_pair_metrics_for_sample_and_lane(
+            sample_internal_id=sample_internal_id, lane=lane
+        )
+        return self.calculate_mean_yield(metrics=metrics)
+
+    def get_yield_q30_for_sample_in_lane(self, sample_internal_id: str, lane: int) -> float:
+        """Return the yield Q30 for a sample and lane."""
+        metrics: list[SequencingQualityMetrics] = self.get_read_pair_metrics_for_sample_and_lane(
+            sample_internal_id=sample_internal_id, lane=lane
+        )
+        return self.calculate_mean_yield_q30(metrics=metrics)
+
     @classmethod
     def calculate_mean_read_pair_q30_bases_percent(
         cls, metrics: list[SequencingQualityMetrics]
@@ -129,6 +143,22 @@ class MetricsParser:
         for metric in metrics:
             total_q_score += metric.mean_quality_score_q30
         return round(total_q_score / SCALE_TO_READ_PAIRS, 2)
+
+    @classmethod
+    def calculate_mean_yield(cls, metrics: list[SequencingQualityMetrics]) -> float:
+        """Calculate the mean yield for a list of metrics."""
+        total_yield: float = 0
+        for metric in metrics:
+            total_yield += metric.yield_
+        return round(total_yield / SCALE_TO_READ_PAIRS, 2)
+
+    @classmethod
+    def calculate_mean_yield_q30(cls, metrics: list[SequencingQualityMetrics]) -> float:
+        """Calculate the mean yield Q30 for a list of metrics."""
+        total_yield_q30: float = 0
+        for metric in metrics:
+            total_yield_q30 += metric.yield_q30
+        return round(total_yield_q30 / SCALE_TO_READ_PAIRS, 2)
 
     def get_mean_quality_score_for_sample_in_lane(
         self, sample_internal_id: str, lane: int

@@ -81,6 +81,8 @@ def bcl_convert_quality_metric_model_with_data(
             QualityMetricsColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
             QualityMetricsColumnNames.MEAN_QUALITY_SCORE_Q30.value: 36.15,
             QualityMetricsColumnNames.Q30_BASES_PERCENT.value: 0.95,
+            QualityMetricsColumnNames.YIELD.value: 415032696,
+            QualityMetricsColumnNames.YIELD_Q30.value: 393745856,
         }
     )
 
