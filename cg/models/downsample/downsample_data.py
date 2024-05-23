@@ -52,7 +52,7 @@ class DownsampleData:
         self,
     ) -> str:
         """Return a case name with _downsampled appended."""
-        return f"{self.case_name}_downsampled"
+        return f"{self.case_name}-downsampled"
 
     @property
     def convert_number_of_reads_to_string(self) -> str:

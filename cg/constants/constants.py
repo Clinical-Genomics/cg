@@ -1,6 +1,6 @@
 """Constants for cg."""
 
-from enum import IntEnum, StrEnum
+from enum import IntEnum, StrEnum, auto
 
 import click
 
@@ -68,7 +68,11 @@ class CustomerId(StrEnum):
     CUST004: str = "cust004"
     CUST032: str = "cust032"
     CUST042: str = "cust042"
+    CUST110: str = "cust110"
+    CUST127: str = "cust127"
     CUST132: str = "cust132"
+    CUST143: str = "cust143"
+    CUST147: str = "cust147"
     CUST999: str = "cust999"
 
 
@@ -90,6 +94,14 @@ class AnalysisType(StrEnum):
     WHOLE_GENOME_SEQUENCING: str = "wgs"
     WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
     OTHER: str = "other"
+
+
+class CancerAnalysisType(StrEnum):
+    TUMOR_NORMAL = auto()
+    TUMOR_NORMAL_PANEL = auto()
+    TUMOR_NORMAL_WGS = auto()
+    TUMOR_PANEL = auto()
+    TUMOR_WGS = auto()
 
 
 class PrepCategory(StrEnum):
@@ -196,6 +208,7 @@ class FileExtensions(StrEnum):
     JSON: str = ".json"
     KEY: str = ".key"
     LOG: str = ".log"
+    MD5: str = ".md5"
     MD5SUM: str = ".md5sum"
     NO_EXTENSION: str = ""
     PASS_PHRASE: str = ".passphrase"
@@ -203,6 +216,7 @@ class FileExtensions(StrEnum):
     PNG: str = ".png"
     SBATCH: str = ".sbatch"
     SPRING: str = ".spring"
+    SH: str = ".sh"
     TAR: str = ".tar"
     TMP: str = ".tmp"
     TSV: str = ".tsv"
@@ -220,7 +234,6 @@ class APIMethods(StrEnum):
 
 
 DRY_RUN = click.option(
-    "-d",
     "--dry-run",
     is_flag=True,
     default=False,

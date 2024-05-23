@@ -1,6 +1,6 @@
 """Constants related to demultiplexing."""
 
-from enum import StrEnum
+from enum import Enum, StrEnum
 
 from pydantic import BaseModel
 
@@ -57,6 +57,8 @@ class RunParametersXMLNodes(StrEnum):
     READ_NAME: str = "ReadName"
     REAGENT_KIT_VERSION: str = "./RfidsInfo/SbsConsumableVersion"
     SEQUENCER_ID: str = ".//ScannerID"
+    FLOW_CELL_MODE: str = ".//FlowCellMode"
+    MODE: str = ".//Mode"
 
     # Node Values
     HISEQ_APPLICATION: str = "HiSeq Control Software"

@@ -165,8 +165,6 @@ class PoolSubmitter(Submitter):
                     case=case, sample=new_sample, status="unknown"
                 )
                 self.status.session.add(link)
-            new_delivery = self.status.add_delivery(destination="caesar", pool=new_pool)
-            self.status.session.add(new_delivery)
             new_pools.append(new_pool)
         self.status.session.add_all(new_pools)
         self.status.session.commit()

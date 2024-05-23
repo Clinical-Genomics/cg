@@ -26,7 +26,9 @@ def run_parameters_novaseq_6000_different_index(
 
 
 @pytest.fixture(scope="function")
-def run_parameters_novaseq_x_different_index(run_parameters_dir: Path) -> RunParametersNovaSeqX:
+def run_parameters_novaseq_x_different_index(
+    run_parameters_dir: Path,
+) -> RunParametersNovaSeqX:
     """Return a NovaSeqX RunParameters object with different index cycles."""
     path = Path(run_parameters_dir, "RunParameters_novaseq_X_different_index_cycles.xml")
     return RunParametersNovaSeqX(run_parameters_path=path)

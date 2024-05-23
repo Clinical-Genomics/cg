@@ -20,7 +20,6 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Delivery,
     Flowcell,
     Invoice,
     Order,
@@ -31,6 +30,8 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     User,
     order_case,
+    IlluminaFlowCell,
+    IlluminaSequencingRun,
 )
 
 LOG = logging.getLogger(__name__)
@@ -340,22 +341,6 @@ class CreateHandler(BaseHandler):
         new_record.application_version = application_version
         return new_record
 
-    def add_delivery(
-        self,
-        destination: str,
-        sample: Sample = None,
-        pool: Pool = None,
-        comment: str = None,
-    ) -> Delivery:
-        """Build a new Delivery record."""
-
-        if not any([sample, pool]):
-            raise ValueError("you have to provide a sample or a pool")
-        new_record: Delivery = Delivery(destination=destination, comment=comment)
-        new_record.sample = sample
-        new_record.pool = pool
-        return new_record
-
     def add_invoice(
         self,
         customer: Customer,
@@ -432,3 +417,18 @@ class CreateHandler(BaseHandler):
         session = get_session()
         session.execute(insert_statement)
         session.commit()
+
+    def add_illumina_flow_cell(self, flow_cell: IlluminaFlowCell) -> IlluminaFlowCell:
+        """Add a new Illumina flow cell to the status database as a pending transaction."""
+        if self.get_illumina_flow_cell_by_internal_id(flow_cell.internal_id):
+            raise ValueError(f"Flow cell with {flow_cell.id} already exists.")
+        session = get_session()
+        session.add(flow_cell)
+        LOG.debug(f"Flow cell added to status db: {flow_cell.id}.")
+        return flow_cell
+
+    def add_illumina_sequencing_metrics(
+        self, sequencing_metrics: IlluminaSequencingRun
+    ) -> IlluminaSequencingRun:
+        """Add a new Illumina flow cell to the status database as a pending transaction."""
+        pass
