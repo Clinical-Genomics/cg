@@ -41,7 +41,7 @@ class IlluminaPostProcessingService:
         return store.add_illumina_flow_cell(new_flow_cell)
 
     @staticmethod
-    def store_illumina_sequencing_metrics(sequencing_run: IlluminaFlowCell) -> None:
+    def store_illumina_sequencing_metrics(flow_cell: IlluminaFlowCell) -> None:
         """Store illumina run metrics in the status database."""
 
     @staticmethod
