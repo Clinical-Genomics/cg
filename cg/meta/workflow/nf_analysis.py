@@ -764,6 +764,14 @@ class NfAnalysisAPI(AnalysisAPI):
         self.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
         self.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
 
+    def get_validated_case(self, case_id: str) -> Case:
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if not case.links:
+            raise CgError(f"No samples linked to {case_id}")
+        if nlinks := len(case.links) > 1 and not self.is_multiple_samples_allowed:
+            raise CgError(f"Only one sample per case is allowed. {nlinks} found")
+        return case
+
     def report_deliver(self, case_id: str, dry_run: bool) -> None:
         """Write deliverables file."""
 

@@ -4,7 +4,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Iterator, Optional
+from typing import Iterator
 
 import click
 from housekeeper.store.models import Bundle, Version
@@ -13,7 +13,6 @@ from cg.apps.environ import environ_email
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
     AnalysisType,
-    DEFAULT_CAPTURE_KIT,
     CaseActions,
     FileFormat,
     WorkflowManager,
@@ -82,14 +81,6 @@ class AnalysisAPI(MetaAPI):
     def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
         if not Path(self.get_case_config_path(case_id=case_id)).exists() and not dry_run:
             raise CgError(f"No config file found for case {case_id}")
-
-    def get_validated_case(self, case_id: str) -> Case:
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        if not case.links:
-            raise CgError(f"No samples linked to {case_id}")
-        if nlinks := len(case.links) > 1 and not self.is_multiple_samples_allowed:
-            raise CgError(f"Only one sample per case is allowed. {nlinks} found")
-        return case
 
     def check_analysis_ongoing(self, case_id: str) -> None:
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
