@@ -714,18 +714,7 @@ class AnalysisAPI(MetaAPI):
     def get_data_analysis_type(self, case_id: str) -> str | None:
         """Return data analysis type carried out. Raise an error is samples in a case have not the same analysis type"""
         case: Case = self.get_validated_case(case_id)
-        sample_analysis_type: Optional[str] = None
-        for link in case.links:
-            sample_analysis_type_tmp: str = (
-                link.sample.application_version.application.analysis_type
-            )
-            if (
-                sample_analysis_type_tmp != sample_analysis_type
-                and sample_analysis_type
-                and sample_analysis_type_tmp
-            ):
-                raise ValueError(
-                    f"{sample_analysis_type_tmp} has not the same analysis type as other samples in the case"
-                )
-            sample_analysis_type = sample_analysis_type_tmp
-        return sample_analysis_type
+            analysis_types: set[str] = {link.sample.application_version.application.analysis_type for link in case.links}
+            if len(analysis_types) > 1:
+                raise ValueError(...)
+            return analysis_types.pop() if analysis_types else None                
