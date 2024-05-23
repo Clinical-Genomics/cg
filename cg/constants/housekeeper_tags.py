@@ -88,9 +88,9 @@ class BalsamicAnalysisTag:
     CONFIG: list[str] = ["balsamic-config"]
     QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
 
+
 class RarediseaseAnalysisTag:
     QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
-
 
 
 class GensAnalysisTag:
