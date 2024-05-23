@@ -2461,7 +2461,7 @@ def raredisease_context(
     total_sequenced_reads_not_pass: int,
     mocker,
 ) -> CGConfig:
-    """context to use in cli"""
+    """Context to use in CLI."""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
