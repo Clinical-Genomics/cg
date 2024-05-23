@@ -40,10 +40,11 @@ def upgrade():
         new_table_name="instrument_run",
     )
     # on SampleRunMetrics change run_metrics_id to instrument_run_id
-    op.alter_column(table_name="sample_run_metrics",
-                     column_name="run_metrics_id",
-                    new_column_name="instrument_run_id")
-
+    op.alter_column(
+        table_name="sample_run_metrics",
+        column_name="run_metrics_id",
+        new_column_name="instrument_run_id",
+    )
 
 
 def downgrade():
@@ -61,6 +62,8 @@ def downgrade():
         old_table_name="instrument_run",
     )
     # on SampleRunMetrics change run_metrics_id to instrument_run_id
-    op.alter_column(table_name="sample_run_metrics",
-                    new_column_name="run_metrics_id",
-                    column_name="instrument_run_id"
+    op.alter_column(
+        table_name="sample_run_metrics",
+        new_column_name="run_metrics_id",
+        column_name="instrument_run_id",
+    )
