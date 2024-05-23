@@ -17,7 +17,9 @@ from cg.meta.workflow.microsalt.quality_controller import MicroSALTQualityContro
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.meta.workflow.microsalt.utils import get_most_recent_project_directory
 from cg.models.cg_config import CGConfig
-from cg.services.quality_controller.quality_controller_service import QualityControllerService
+from cg.services.quality_controller.quality_controller_service import (
+    QualityControllerService,
+)
 from cg.store.models import Case, Sample
 from cg.utils import Process
 
@@ -60,7 +62,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
             self.clean_analyses(case_id=case_id)
             return EXIT_SUCCESS
-
+        if isinstance(case_path, Path):
+            case_path: list[Path] = [case_path]
         for analysis_path in case_path:
             if yes or click.confirm(
                 f"Are you sure you want to remove all files in {analysis_path}?"

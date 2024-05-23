@@ -27,8 +27,13 @@ from cg.apps.housekeeper.models import InputBundle
 from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.constants import (
+    CaseActions,
+    CustomerId,
+    FileFormat,
+    GenomeVersion,
+    Strandedness,
+)
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -53,8 +58,14 @@ from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.models.raredisease.raredisease import RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
+from cg.models.taxprofiler.taxprofiler import (
+    TaxprofilerParameters,
+    TaxprofilerSampleSheetEntry,
+)
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
+from cg.services.bcl_convert_metrics_service.bcl_convert_metrics_service import (
+    BCLConvertMetricsService,
+)
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
 from cg.store.store import Store
@@ -87,7 +98,12 @@ pytest_plugins = [
     "tests.fixture_plugins.delivery_fixtures.path_fixtures",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_fixtures",
     "tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario",
+    "tests.fixture_plugins.loqusdb_fixtures.loqusdb_api_fixtures",
+    "tests.fixture_plugins.loqusdb_fixtures.loqusdb_output_fixtures",
+    "tests.fixture_plugins.observations_fixtures.observations_api_fixtures",
+    "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
 ]
+
 
 # Case fixtures
 
@@ -319,6 +335,20 @@ def base_config_dict() -> dict:
         "illumina_flow_cells_directory": "path/to/flow_cells",
         "illumina_demultiplexed_runs_directory": "path/to/demultiplexed_flow_cells_dir",
         "nanopore_data_directory": "path/to/nanopore_data_directory",
+        "run_instruments": {
+            "pacbio": {
+                "data_dir": "path/to/data_directory",
+                "systemd_trigger_dir": "path/to/trigger_directory",
+            },
+            "nanopore": {
+                "data_dir": "path/to/data_directory",
+                "systemd_trigger_dir": "path/to/ptrigger_directory",
+            },
+            "illumina": {
+                "flow_cell_runs_dir": "path/to/flow_cells",
+                "demultiplexed_runs_dir": "path/to/demultiplexed_flow_cells_dir",
+            },
+        },
         "downsample": {
             "downsample_dir": "path/to/downsample_dir",
             "downsample_script": "downsample.sh",
@@ -333,22 +363,6 @@ def base_config_dict() -> dict:
             "smtp_server": "smtp.gmail.com",
             "sender_email": "test@gmail.com",
             "sender_password": "",
-        },
-        "loqusdb": {
-            "binary_path": "binary",
-            "config_path": "config",
-        },
-        "loqusdb-wes": {
-            "binary_path": "binary_wes",
-            "config_path": "config_wes",
-        },
-        "loqusdb-somatic": {
-            "binary_path": "binary_somatic",
-            "config_path": "config_somatic",
-        },
-        "loqusdb-tumor": {
-            "binary_path": "binary_tumor",
-            "config_path": "config_tumor",
         },
     }
 
@@ -1266,39 +1280,39 @@ def updated_store_with_demultiplexed_samples(
     return store
 
 
-@pytest.fixture(name="collaboration_id")
+@pytest.fixture
 def collaboration_id() -> str:
     """Return a default customer group."""
     return "hospital_collaboration"
 
 
-@pytest.fixture(name="customer_rare_diseases")
-def customer_rare_diseases(collaboration_id: str, customer_id: str) -> Customer:
+@pytest.fixture
+def mip_dna_customer(collaboration_id: str, customer_id: str) -> Customer:
     """Return a Rare Disease customer."""
     return Customer(
-        name="CMMS",
-        internal_id="cust003",
+        name="Klinisk Immunologi",
+        internal_id=CustomerId.CUST004,
         loqus_upload=True,
     )
 
 
-@pytest.fixture(name="customer_balsamic")
-def customer_balsamic(collaboration_id: str, customer_id: str) -> Customer:
+@pytest.fixture
+def balsamic_customer(collaboration_id: str, customer_id: str) -> Customer:
     """Return a Cancer customer."""
     return Customer(
         name="AML",
-        internal_id="cust110",
+        internal_id=CustomerId.CUST110,
         loqus_upload=True,
     )
 
 
-@pytest.fixture(name="external_wes_application_tag")
+@pytest.fixture
 def external_wes_application_tag() -> str:
     """Return the external whole exome sequencing application tag."""
     return "EXXCUSR000"
 
 
-@pytest.fixture(name="wgs_application_tag")
+@pytest.fixture
 def wgs_application_tag() -> str:
     """Return the WGS application tag."""
     return "WGSPCFC030"
@@ -1326,43 +1340,43 @@ def store() -> Generator[Store, None, None]:
     drop_all_tables()
 
 
-@pytest.fixture(name="apptag_rna")
+@pytest.fixture
 def apptag_rna() -> str:
     """Return the RNA application tag."""
     return "RNAPOAR025"
 
 
-@pytest.fixture(name="bed_name")
+@pytest.fixture
 def bed_name() -> str:
     """Return a bed model name attribute."""
     return "Bed"
 
 
-@pytest.fixture(name="bed_version_file_name")
-def bed_version_filename(bed_name: str) -> str:
+@pytest.fixture
+def bed_version_file_name(bed_name: str) -> str:
     """Return a bed version model file name attribute."""
     return f"{bed_name}.bed"
 
 
-@pytest.fixture(name="bed_version_short_name")
+@pytest.fixture
 def bed_version_short_name() -> str:
     """Return a bed version model short name attribute."""
     return "bed_short_name_0.0"
 
 
-@pytest.fixture(name="invoice_address")
+@pytest.fixture
 def invoice_address() -> str:
     """Return an invoice address."""
     return "Test street"
 
 
-@pytest.fixture(name="invoice_reference")
+@pytest.fixture
 def invoice_reference() -> str:
     """Return an invoice reference."""
     return "ABCDEF"
 
 
-@pytest.fixture(name="prices")
+@pytest.fixture
 def prices() -> dict[str, int]:
     """Return dictionary with prices for each priority status."""
     return {"standard": 10, "priority": 20, "express": 30, "research": 5}
@@ -1745,12 +1759,6 @@ def hk_uri() -> str:
     return "sqlite:///"
 
 
-@pytest.fixture(name="loqusdb_id")
-def loqusdb_id() -> str:
-    """Returns a Loqusdb mock ID."""
-    return "01ab23cd"
-
-
 @pytest.fixture(name="context_config")
 def context_config(
     cg_uri: str,
@@ -1783,6 +1791,20 @@ def context_config(
         "illumina_flow_cells_directory": str(illumina_flow_cells_directory),
         "illumina_demultiplexed_runs_directory": str(illumina_demultiplexed_runs_directory),
         "nanopore_data_directory": "path/to/nanopore_data_directory",
+        "run_instruments": {
+            "pacbio": {
+                "data_dir": "path/to/pacbio_data__directory",
+                "systemd_trigger_dir": "path/to/pacbio_trigger_directory",
+            },
+            "nanopore": {
+                "data_dir": "path/to/nanopore_data_directory",
+                "systemd_trigger_dir": "path/to/nanopore_trigger_directory",
+            },
+            "illumina": {
+                "flow_cell_runs_dir": str(illumina_flow_cells_directory),
+                "demultiplexed_runs_dir": str(illumina_demultiplexed_runs_directory),
+            },
+        },
         "downsample": {
             "downsample_dir": str(downsample_dir),
             "downsample_script": "downsample.sh",
@@ -1897,10 +1919,13 @@ def context_config(
             "password": "password",
             "username": "user",
         },
-        "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb-stage.yaml"},
-        "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
-        "loqusdb-somatic": {"binary_path": "loqusdb", "config_path": "loqusdb-somatic-stage.yaml"},
-        "loqusdb-tumor": {"binary_path": "loqusdb", "config_path": "loqusdb-tumor-stage.yaml"},
+        "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb.yaml"},
+        "loqusdb-wes": {"binary_path": "loqusdb-wes", "config_path": "loqusdb-wes.yaml"},
+        "loqusdb-somatic": {
+            "binary_path": "loqusdb-somatic",
+            "config_path": "loqusdb-somatic.yaml",
+        },
+        "loqusdb-tumor": {"binary_path": "loqusdb-tumor", "config_path": "loqusdb-tumor.yaml"},
         "microsalt": {
             "binary_path": "echo",
             "conda_binary": "a_conda_binary",
@@ -2436,7 +2461,7 @@ def raredisease_context(
     total_sequenced_reads_not_pass: int,
     mocker,
 ) -> CGConfig:
-    """context to use in cli"""
+    """Context to use in CLI."""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
@@ -3404,14 +3429,6 @@ def taxprofiler_params_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_nexflow_config_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
-    """Path to config file."""
-    return Path(
-        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_nextflow_config"
-    ).with_suffix(FileExtensions.JSON)
-
-
-@pytest.fixture(scope="function")
 def taxprofiler_hermes_deliverables(
     taxprofiler_deliverable_data: dict, taxprofiler_case_id: str
 ) -> dict:
@@ -3662,25 +3679,6 @@ def taxprofiler_mock_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> 
     Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(
         FileExtensions.CSV
     ).touch(exist_ok=True)
-
-
-@pytest.fixture(scope="function")
-def taxprofiler_deliverable_data(
-    taxprofiler_dir: Path, taxprofiler_case_id: str, sample_id: str
-) -> dict:
-    return {
-        "files": [
-            {
-                "path": f"{taxprofiler_dir}/{taxprofiler_case_id}/multiqc/multiqc_report.html",
-                "path_index": "",
-                "step": "report",
-                "tag": ["multiqc-html"],
-                "id": taxprofiler_case_id,
-                "format": "html",
-                "mandatory": True,
-            },
-        ]
-    }
 
 
 @pytest.fixture(scope="function")
@@ -3964,3 +3962,8 @@ def fastq_file_meta_raw(flow_cell_name: str) -> dict:
         "flow_cell_id": flow_cell_name,
         "undetermined": None,
     }
+
+
+@pytest.fixture()
+def bcl_convert_metrics_service() -> BCLConvertMetricsService:
+    return BCLConvertMetricsService()
