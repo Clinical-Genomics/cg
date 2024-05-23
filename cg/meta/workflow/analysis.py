@@ -692,7 +692,11 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     def get_data_analysis_type(self, case_id: str) -> str | None:
-        """Return data analysis type carried out. Raise an error is samples in a case have not the same analysis type"""
+        """
+        Return data analysis type carried out.
+        Raises:
+            ValueError: If the samples in a case have not the same analysis type.
+        """
         case: Case = self.get_validated_case(case_id)
         analysis_types: set[str] = {
             link.sample.application_version.application.analysis_type for link in case.links
