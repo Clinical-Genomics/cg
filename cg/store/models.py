@@ -1021,7 +1021,7 @@ class InstrumentRun(Base):
     }
 
 
-class IlluminaSequencingMetrics(InstrumentRun):
+class IlluminaSequencingRun(InstrumentRun):
     __tablename__ = "illumina_sequencing_metrics"
 
     id: Mapped[int] = mapped_column(ForeignKey("instrument_run.id"), primary_key=True)
