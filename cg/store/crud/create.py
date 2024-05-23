@@ -31,7 +31,7 @@ from cg.store.models import (
     User,
     order_case,
     IlluminaFlowCell,
-    IlluminaSequencingMetrics,
+    IlluminaSequencingRun,
 )
 
 LOG = logging.getLogger(__name__)
@@ -428,7 +428,7 @@ class CreateHandler(BaseHandler):
         return flow_cell
 
     def add_illumina_sequencing_metrics(
-        self, sequencing_metrics: IlluminaSequencingMetrics
-    ) -> IlluminaSequencingMetrics:
+        self, sequencing_metrics: IlluminaSequencingRun
+    ) -> IlluminaSequencingRun:
         """Add a new Illumina flow cell to the status database as a pending transaction."""
         pass
