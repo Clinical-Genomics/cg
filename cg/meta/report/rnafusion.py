@@ -30,7 +30,7 @@ from cg.store.models import Case, Sample
 
 
 class RnafusionReportAPI(ReportAPI):
-    """API to create RNAfusion delivery reports."""
+    """API to create Rnafusion delivery reports."""
 
     def __init__(self, config: CGConfig, analysis_api: RnafusionAnalysisAPI):
         super().__init__(config=config, analysis_api=analysis_api)
@@ -122,5 +122,5 @@ class RnafusionReportAPI(ReportAPI):
         }
 
     def get_upload_case_tags(self) -> dict:
-        """Return Balsamic UMI upload case tags."""
+        """Return Rnafusion upload case tags."""
         return RNAFUSION_CASE_TAGS
