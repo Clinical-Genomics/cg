@@ -34,12 +34,6 @@ def view_priority(unused1, unused2, model, unused3):
     return Markup("%s" % model.priority.name) if model else ""
 
 
-def view_flow_cell_internal_id(unused1, unused2, model, unused3):
-    """column formatter for priority"""
-    del unused1, unused2, unused3
-    return Markup("%s" % model.device.internal_id) if model else ""
-
-
 def view_case_sample_link(unused1, unused2, model, unused3):
     """column formatter to open the case-sample view"""
 
