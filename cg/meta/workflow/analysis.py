@@ -4,7 +4,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Iterator
+from typing import Iterator, Optional
 
 import click
 from housekeeper.store.models import Bundle, Version
@@ -714,7 +714,7 @@ class AnalysisAPI(MetaAPI):
     def get_data_analysis_type(self, case_id: str) -> str | None:
         """Return data analysis type carried out. Raise an error is samples in a case have not the same analysis type"""
         case: Case = self.get_validated_case(case_id)
-        sample_analysis_type: str = None
+        sample_analysis_type: Optional[str] = None
         for link in case.links:
             sample_analysis_type_tmp: str = (
                 link.sample.application_version.application.analysis_type
