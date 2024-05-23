@@ -969,7 +969,7 @@ class RunDevice(Base):
     type: Mapped[DeviceType]
     internal_id: Mapped[UniqueStr64]
 
-    instrument_run: Mapped[list["InstrumentRun"]] = orm.relationship(
+    instrument_runs: Mapped[list["InstrumentRun"]] = orm.relationship(
         back_populates="device", cascade="all, delete"
     )
 
@@ -1011,7 +1011,7 @@ class InstrumentRun(Base):
     type: Mapped[DeviceType]
     device_id: Mapped[int] = mapped_column(ForeignKey("run_device.id"))
 
-    device: Mapped[RunDevice] = orm.relationship(back_populates="instrument_run")
+    device: Mapped[RunDevice] = orm.relationship(back_populates="instrument_runs")
     sample_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(
         back_populates="instrument_run", cascade="all, delete"
     )
