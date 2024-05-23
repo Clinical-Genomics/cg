@@ -66,6 +66,11 @@ class AnalysisAPI(MetaAPI):
     def fastq_handler(self):
         return FastqHandler
 
+    @property
+    def is_multiple_samples_allowed(self) -> bool:
+        """Return whether the analysis supports multiple samples to be linked to the case."""
+        return True
+
     @staticmethod
     def get_help(context):
         """
@@ -369,6 +374,14 @@ class AnalysisAPI(MetaAPI):
                 bundle=sample.internal_id, tags={SequencingFileTag.FASTQ}
             )
         ]
+
+    def get_validated_case(self, case_id: str) -> Case:
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if not case.links:
+            raise CgError(f"No samples linked to {case_id}")
+        if nlinks := len(case.links) > 1 and not self.is_multiple_samples_allowed:
+            raise CgError(f"Only one sample per case is allowed. {nlinks} found")
+        return case
 
     def link_fastq_files_for_sample(
         self, case: Case, sample: Sample, concatenate: bool = False

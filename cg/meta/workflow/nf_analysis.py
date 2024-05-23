@@ -102,11 +102,6 @@ class NfAnalysisAPI(AnalysisAPI):
         return True
 
     @property
-    def is_multiple_samples_allowed(self) -> bool:
-        """Return whether the analysis supports multiple samples to be linked to the case."""
-        return True
-
-    @property
     def is_multiqc_pattern_search_exact(self) -> bool:
         """Return True if only exact pattern search is allowed to collect metrics information from MultiQC file.
         If false, pattern must be present but does not need to be exact."""
@@ -763,14 +758,6 @@ class NfAnalysisAPI(AnalysisAPI):
         self.status_db.verify_case_exists(case_internal_id=case_id)
         self.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
         self.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
-
-    def get_validated_case(self, case_id: str) -> Case:
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        if not case.links:
-            raise CgError(f"No samples linked to {case_id}")
-        if nlinks := len(case.links) > 1 and not self.is_multiple_samples_allowed:
-            raise CgError(f"Only one sample per case is allowed. {nlinks} found")
-        return case
 
     def report_deliver(self, case_id: str, dry_run: bool) -> None:
         """Write deliverables file."""
