@@ -16,9 +16,9 @@ from cg.constants.lims import (
     DocumentationMethod,
     LimsArtifactTypes,
 )
+from cg.constants.subject import Sex
 from cg.exc import LimsDataError
 
-from ...constants.subject import Sex
 from .order import OrderHandler
 
 SEX_MAP = {"F": Sex.FEMALE, "M": Sex.MALE, "Unknown": Sex.UNKNOWN, "unknown": Sex.UNKNOWN}
