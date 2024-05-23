@@ -83,6 +83,10 @@ FASTQ_ANALYSIS_SAMPLE_TAGS: list[set[str]] = [
 
 MIP_DNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"delivery-report"},
+    {"vcf-clinical-sv-bin"},
+    {"vcf-clinical-sv-bin-index"},
+    {"vcf-research-sv-bin"},
+    {"vcf-research-sv-bin-index"},
     {"gbcf"},
     {"gbcf-index"},
     {"snv-gbcf"},
