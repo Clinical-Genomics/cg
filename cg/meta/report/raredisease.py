@@ -15,7 +15,7 @@ from cg.constants import (
 from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
-from cg.models.analysis import NextflowAnalysis
+from cg.models.analysis import NextflowAnalysis, AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
@@ -73,7 +73,7 @@ class RarediseaseReportAPI(ReportAPI):
         return panel_gene_ids
 
     def is_report_accredited(
-        self, samples: list[SampleModel], analysis_metadata: NextflowAnalysis = None
+        self, samples: list[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
         """
         Return whether the delivery report is accredited by evaluating each of the sample
@@ -131,17 +131,3 @@ class RarediseaseReportAPI(ReportAPI):
     def get_upload_case_tags(self) -> dict:
         """Return DNA upload case tags."""
         return RAREDISEASE_CASE_TAGS
-
-    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> str | None:
-        """Return file path of the uploaded to Scout file given its tag."""
-        version: Version = self.housekeeper_api.last_version(bundle=case_id)
-        tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
-        uploaded_files: Iterable[File] = self.housekeeper_api.get_files(
-            bundle=case_id, tags=tags, version=version.id
-        )
-        if not tags or not any(uploaded_files):
-            LOG.info(
-                f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
-            )
-            return None
-        return uploaded_files[0].full_path
