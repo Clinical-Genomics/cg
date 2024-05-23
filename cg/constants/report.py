@@ -21,6 +21,7 @@ REPORT_SUPPORTED_WORKFLOW: tuple[Workflow, ...] = (
     Workflow.BALSAMIC_QC,
     Workflow.BALSAMIC_UMI,
     Workflow.MIP_DNA,
+    Workflow.RAREDISEASE,
     Workflow.RNAFUSION,
     Workflow.TAXPROFILER,
     Workflow.TOMTE,
