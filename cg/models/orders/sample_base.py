@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from pydantic.v1 import BaseModel, BeforeValidator, ConfigDict, constr
+from pydantic import BaseModel, BeforeValidator, ConfigDict, constr
 from typing_extensions import Annotated
 
 from cg.constants import DataDelivery, Workflow
