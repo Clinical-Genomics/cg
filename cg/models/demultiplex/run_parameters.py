@@ -319,6 +319,8 @@ class RunParametersNovaSeqX(RunParameters):
         for consumable_info in consumable_infos:
             type_element: ElementTree.Element | None = consumable_info.find("Type")
             if type_element and type_element.text == "FlowCell":
-                name_element: ElementTree.Element | None = consumable_info.find("Name") or consumable_info.find("Mode")
+                name_element: ElementTree.Element | None = consumable_info.find(
+                    "Name"
+                ) or consumable_info.find("Mode")
                 if name_element is not None:
                     return name_element.text

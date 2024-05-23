@@ -1021,7 +1021,6 @@ class InstrumentRun(Base):
     }
 
 
-
 class IlluminaSequencingRun(InstrumentRun):
     __tablename__ = "illumina_sequencing_run"
 
