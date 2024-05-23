@@ -126,7 +126,6 @@ class BCLConvertMetricsService:
     def create_sample_sequencing_metrics_for_flow_cell(
         self,
         flow_cell_directory: Path,
-        sequencing_run: IlluminaSequencingRun,
         store: Store,
     ) -> list[IlluminaSampleSequencingMetrics]:
         """Parse the demultiplexing metrics data into the sequencing statistics model."""
@@ -142,6 +141,5 @@ class BCLConvertMetricsService:
                     metrics_parser=metrics_parser,
                     store=store,
                 )
-                sample_lane_sequencing_metrics.instrument_run = sequencing_run
                 sample_lane_sequencing_metrics.append(metrics)
         return sample_lane_sequencing_metrics
