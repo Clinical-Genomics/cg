@@ -30,6 +30,7 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     User,
     order_case,
+    IlluminaFlowCell,
 )
 
 LOG = logging.getLogger(__name__)
@@ -415,3 +416,12 @@ class CreateHandler(BaseHandler):
         session = get_session()
         session.execute(insert_statement)
         session.commit()
+
+    def add_illumina_flow_cell(self, flow_cell: IlluminaFlowCell) -> IlluminaFlowCell:
+        """Add a new Illumina flow cell to the status database as a pending transaction."""
+        if self.get_illumina_flow_cell_by_internal_id(flow_cell.internal_id):
+            raise ValueError(f"Flow cell with {flow_cell.id} already exists.")
+        session = get_session()
+        session.add(flow_cell)
+        LOG.debug(f"Flow cell added to status db: {flow_cell.id}.")
+        return flow_cell

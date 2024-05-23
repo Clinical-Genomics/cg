@@ -141,7 +141,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if application_type != "wgs":
             application_type = "panel"
         analysis_type = "_".join([sample_type, application_type])
-        LOG.info(f"Found analysis type {analysis_type}")
+        LOG.debug(f"Found analysis type {analysis_type}")
         return analysis_type
 
     def get_sample_fastq_destination_dir(self, case: Case, sample: Sample = None) -> Path:
@@ -651,3 +651,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_data_analysis_type(self, case_id: str) -> str | None:
         """Return data analysis type carried out."""
         return self.get_bundle_deliverables_type(case_id)
+
+    def is_analysis_normal_only(self, case_id: str) -> bool:
+        """Return whether the analysis is normal only."""
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if case.non_tumour_samples and not case.tumour_samples:
+            return True
+        return False
