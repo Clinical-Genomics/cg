@@ -441,6 +441,10 @@ class AnalysisView(BaseView):
     form_extra_fields = {"workflow": SelectEnumField(enum_class=Workflow)}
 
 
+class IlluminaFlowCell(BaseView):
+    pass
+
+
 class OrganismView(BaseView):
     """Admin view for Model.Organism"""
 
