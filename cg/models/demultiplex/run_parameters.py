@@ -3,7 +3,7 @@
 import logging
 from abc import abstractmethod
 from pathlib import Path
-from xml.etree import ElementTree
+from xml.etree.ElementTree import Element
 
 from packaging.version import parse
 
@@ -315,12 +315,12 @@ class RunParametersNovaSeqX(RunParameters):
 
     def get_flow_cell_model(self) -> str:
         """Return the flow cell model referred to as 'Mode' or 'Name' in the run parameters file."""
-        consumable_infos: list[ElementTree.Element] = self.tree.findall(".//ConsumableInfo")
+        consumable_infos: list[Element] = self.tree.findall(".//ConsumableInfo")
         for consumable_info in consumable_infos:
-            type_element: ElementTree.Element | None = consumable_info.find("Type")
-            if type_element and type_element.text == "FlowCell":
-                name_element: ElementTree.Element | None = consumable_info.find(
-                    "Name"
-                ) or consumable_info.find("Mode")
+            type_element: Element | None = consumable_info.find("Type")
+            if type_element is not None and type_element.text == "FlowCell":
+                name_element: Element | None = consumable_info.find("Name") or consumable_info.find(
+                    "Mode"
+                )
                 if name_element is not None:
                     return name_element.text
