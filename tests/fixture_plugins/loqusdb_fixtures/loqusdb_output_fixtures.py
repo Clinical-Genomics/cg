@@ -1,20 +1,11 @@
-""" Conftest for Loqusdb API."""
+"""Loqusdb upload output fixtures."""
 
 import pytest
-
-from cg.apps.loqus import LoqusdbAPI
-from cg.constants.observations import LoqusdbInstance
-from cg.models.cg_config import CGConfig, CommonAppConfig
-from tests.mocks.process_mock import ProcessMock
-from tests.models.observations.conftest import (
-    observations_input_files,
-    observations_input_files_raw,
-)
 
 LOQUSDB_OUTPUT = (
     b"2018-11-29 08:41:38 130-229-8-20-dhcp.local "
     b"mongo_adapter.client[77135] INFO Connecting to "
-    b"uri:mongodb://None:None@localhost:27017\n"
+    b"uri:mongodb://None@localhost:27017\n"
     b"2018-11-29 08:41:38 130-229-8-20-dhcp.local "
     b"mongo_adapter.client[77135] INFO Connection "
     b"established\n2018-11-29 08:41:38 130-229-8-20-dhcp.local "
@@ -82,7 +73,7 @@ LOQUSDB_DUPLICATE_OUTPUT = (
 )
 
 LOQUSDB_DELETE_STDERR = b"""2022-09-22 12:30:07 username loqusdb.commands.cli[20689] INFO Running loqusdb version 2.6.9
-2022-09-22 12:30:07 username mongo_adapter.client[20689] INFO Connecting to uri:mongodb://None:None@localhost:27017
+2022-09-22 12:30:07 username mongo_adapter.client[20689] INFO Connecting to uri:mongodb://None@localhost:27017
 2022-09-22 12:30:07 username mongo_adapter.client[20689] INFO Connection established
 2022-09-22 12:30:07 username mongo_adapter.adapter[20689] INFO Use database loqusdb
 2022-09-22 12:30:07 username loqusdb.plugins.mongo.case[20689] INFO Removing case yellowhog from database
@@ -90,79 +81,10 @@ LOQUSDB_DELETE_STDERR = b"""2022-09-22 12:30:07 username loqusdb.commands.cli[20
 2022-09-22 12:30:07 username loqusdb.utils.delete[20689] INFO Start deleting chromosome 1"""
 
 LOQUSDB_DELETE_NONEXISTING_STDERR = b"""2022-09-22 11:40:04 username loqusdb.commands.cli[19944] INFO Running loqusdb version 2.6.9
-2022-09-22 11:40:04 username mongo_adapter.client[19944] INFO Connecting to uri:mongodb://None:None@localhost:27017
+2022-09-22 11:40:04 username mongo_adapter.client[19944] INFO Connecting to uri:mongodb://None@localhost:27017
 2022-09-22 11:40:04 username mongo_adapter.client[19944] INFO Connection established
 2022-09-22 11:40:04 username mongo_adapter.adapter[19944] INFO Use database loqusdb
 2022-09-22 11:40:04 username loqusdb.commands.delete[19944] WARNING Case yellowhog does not exist in database"""
-
-
-@pytest.fixture
-def loqusdb_config_dict() -> dict[LoqusdbInstance, dict]:
-    """Return Loqusdb config dictionary."""
-    return {
-        LoqusdbInstance.WGS: {"binary_path": "binary", "config_path": "config"},
-        LoqusdbInstance.WES: {"binary_path": "binary_wes", "config_path": "config_wes"},
-        LoqusdbInstance.SOMATIC: {"binary_path": "binary_somatic", "config_path": "config_somatic"},
-        LoqusdbInstance.TUMOR: {"binary_path": "binary_tumor", "config_path": "config_tumor"},
-    }
-
-
-@pytest.fixture
-def cg_config_locusdb(
-    loqusdb_config_dict: dict[LoqusdbInstance, dict], cg_config_object: CGConfig
-) -> CGConfig:
-    """Return CG config for Loqusdb."""
-    cg_config_object.loqusdb = CommonAppConfig(**loqusdb_config_dict[LoqusdbInstance.WGS])
-    cg_config_object.loqusdb_wes = CommonAppConfig(**loqusdb_config_dict[LoqusdbInstance.WES])
-    cg_config_object.loqusdb_somatic = CommonAppConfig(
-        **loqusdb_config_dict[LoqusdbInstance.SOMATIC]
-    )
-    cg_config_object.loqusdb_tumor = CommonAppConfig(**loqusdb_config_dict[LoqusdbInstance.TUMOR])
-    return cg_config_object
-
-
-@pytest.fixture
-def loqusdb_binary_path(loqusdb_config_dict: dict[LoqusdbInstance, dict]) -> str:
-    """Return Loqusdb binary path."""
-    return loqusdb_config_dict[LoqusdbInstance.WGS]["binary_path"]
-
-
-@pytest.fixture
-def loqusdb_config_path(loqusdb_config_dict: dict[LoqusdbInstance, dict]) -> str:
-    """Return Loqusdb config dictionary."""
-    return loqusdb_config_dict[LoqusdbInstance.WGS]["config_path"]
-
-
-@pytest.fixture
-def loqusdb_process(loqusdb_binary_path: str, loqusdb_config_path: str) -> ProcessMock:
-    """Return mocked process instance."""
-    return ProcessMock(binary=loqusdb_binary_path, config=loqusdb_config_path)
-
-
-@pytest.fixture
-def loqusdb_process_exception(loqusdb_binary_path: str, loqusdb_config_path: str) -> ProcessMock:
-    """Return error process instance."""
-    return ProcessMock(binary=loqusdb_binary_path, config=loqusdb_config_path, error=True)
-
-
-@pytest.fixture
-def loqusdb_api(
-    loqusdb_binary_path: str, loqusdb_config_path: str, loqusdb_process: ProcessMock
-) -> LoqusdbAPI:
-    """Return Loqusdb API."""
-    loqusdb_api = LoqusdbAPI(binary_path=loqusdb_binary_path, config_path=loqusdb_config_path)
-    loqusdb_api.process = loqusdb_process
-    return loqusdb_api
-
-
-@pytest.fixture
-def loqusdb_api_exception(
-    loqusdb_binary_path: str, loqusdb_config_path: str, loqusdb_process_exception: ProcessMock
-) -> LoqusdbAPI:
-    """Return Loqusdb API with mocked error process."""
-    loqusdb_api = LoqusdbAPI(binary_path=loqusdb_binary_path, config_path=loqusdb_config_path)
-    loqusdb_api.process = loqusdb_process_exception
-    return loqusdb_api
 
 
 @pytest.fixture
@@ -196,6 +118,6 @@ def loqusdb_delete_non_existing_stderr() -> bytes:
 
 
 @pytest.fixture
-def nr_of_loaded_variants() -> int:
+def number_of_loaded_variants() -> int:
     """Return number of loaded variants."""
     return 15

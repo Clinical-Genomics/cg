@@ -15,12 +15,12 @@ from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
 
 
-def test_instantiate(cg_config_locusdb: CGConfig):
+def test_instantiate(cg_context: CGConfig):
     """Test instantiation of Loqusdb API."""
 
     # GIVEN a Loqusdb binary and config paths
-    binary_path: str = cg_config_locusdb.loqusdb.binary_path
-    config_path: str = cg_config_locusdb.loqusdb.config_path
+    binary_path: str = cg_context.loqusdb.binary_path
+    config_path: str = cg_context.loqusdb.config_path
 
     # WHEN instantiating a Loqusdb api
     loqusdb_api = LoqusdbAPI(binary_path=binary_path, config_path=config_path)
@@ -34,9 +34,9 @@ def test_instantiate(cg_config_locusdb: CGConfig):
 def test_load(
     case_id: str,
     loqusdb_api: LoqusdbAPI,
-    observations_input_files: MipDNAObservationsInputFiles,
+    mip_dna_observations_input_files: MipDNAObservationsInputFiles,
     loqusdb_load_stderr: bytes,
-    nr_of_loaded_variants: int,
+    number_of_loaded_variants: int,
 ):
     """Test loading of case to Loqusdb."""
 
@@ -46,23 +46,23 @@ def test_load(
     loqusdb_api.process.stderr = loqusdb_load_stderr.decode("utf-8")
     output: dict = loqusdb_api.load(
         case_id=case_id,
-        snv_vcf_path=observations_input_files.snv_vcf_path,
-        sv_vcf_path=observations_input_files.sv_vcf_path,
-        profile_vcf_path=observations_input_files.profile_vcf_path,
-        family_ped_path=observations_input_files.family_ped_path,
+        snv_vcf_path=mip_dna_observations_input_files.snv_vcf_path,
+        sv_vcf_path=mip_dna_observations_input_files.sv_vcf_path,
+        profile_vcf_path=mip_dna_observations_input_files.profile_vcf_path,
+        family_ped_path=mip_dna_observations_input_files.family_ped_path,
         gq_threshold=MipDNALoadParameters.GQ_THRESHOLD.value,
         hard_threshold=MipDNALoadParameters.HARD_THRESHOLD.value,
         soft_threshold=MipDNALoadParameters.SOFT_THRESHOLD.value,
     )
 
     # THEN assert that the number of variants is the expected one
-    assert output["variants"] == nr_of_loaded_variants
+    assert output["variants"] == number_of_loaded_variants
 
 
 def test_load_parameters(
     case_id: str,
     loqusdb_api: LoqusdbAPI,
-    observations_input_files: MipDNAObservationsInputFiles,
+    mip_dna_observations_input_files: MipDNAObservationsInputFiles,
     loqusdb_load_stderr: bytes,
     caplog: LogCaptureFixture,
 ):
@@ -75,10 +75,10 @@ def test_load_parameters(
     loqusdb_api.process.stderr = loqusdb_load_stderr.decode("utf-8")
     loqusdb_api.load(
         case_id=case_id,
-        snv_vcf_path=observations_input_files.snv_vcf_path,
-        sv_vcf_path=observations_input_files.sv_vcf_path,
-        profile_vcf_path=observations_input_files.profile_vcf_path,
-        family_ped_path=observations_input_files.family_ped_path,
+        snv_vcf_path=mip_dna_observations_input_files.snv_vcf_path,
+        sv_vcf_path=mip_dna_observations_input_files.sv_vcf_path,
+        profile_vcf_path=mip_dna_observations_input_files.profile_vcf_path,
+        family_ped_path=mip_dna_observations_input_files.family_ped_path,
         gq_threshold=MipDNALoadParameters.GQ_THRESHOLD.value,
         hard_threshold=MipDNALoadParameters.HARD_THRESHOLD.value,
         soft_threshold=None,
@@ -86,20 +86,20 @@ def test_load_parameters(
 
     # THEN assert that the expected params are included in the call
     assert f"--case-id {case_id}" in caplog.text
-    assert f"--variant-file {observations_input_files.snv_vcf_path}" in caplog.text
-    assert f"--sv-variants" not in caplog.text
-    assert f"--check-profile {observations_input_files.profile_vcf_path}" in caplog.text
-    assert f"--family-file {observations_input_files.family_ped_path}" in caplog.text
-    assert f"--max-window" not in caplog.text
+    assert f"--variant-file {mip_dna_observations_input_files.snv_vcf_path}" in caplog.text
+    assert "--sv-variants" not in caplog.text
+    assert f"--check-profile {mip_dna_observations_input_files.profile_vcf_path}" in caplog.text
+    assert f"--family-file {mip_dna_observations_input_files.family_ped_path}" in caplog.text
+    assert "--max-window" not in caplog.text
     assert f"--gq-threshold {MipDNALoadParameters.GQ_THRESHOLD.value}" in caplog.text
     assert f"--hard-threshold {MipDNALoadParameters.HARD_THRESHOLD.value}" in caplog.text
-    assert f"--soft-threshold" not in caplog.text
+    assert "--soft-threshold" not in caplog.text
 
 
 def test_load_exception(
     case_id: str,
     loqusdb_api_exception: LoqusdbAPI,
-    observations_input_files: MipDNAObservationsInputFiles,
+    mip_dna_observations_input_files: MipDNAObservationsInputFiles,
 ):
     """Test Loqusdb load command with a failed output."""
 
@@ -109,7 +109,7 @@ def test_load_exception(
 
     # THEN an error should be raised
     with pytest.raises(CalledProcessError):
-        loqusdb_api_exception.load(case_id, observations_input_files.snv_vcf_path)
+        loqusdb_api_exception.load(case_id, mip_dna_observations_input_files.snv_vcf_path)
 
 
 def test_get_case(case_id: str, loqusdb_api: LoqusdbAPI, loqusdb_case_output: bytes):
@@ -143,7 +143,7 @@ def test_get_case_non_existing(case_id: str, loqusdb_api: LoqusdbAPI, caplog: Lo
 def test_get_duplicate(
     loqusdb_api: LoqusdbAPI,
     loqusdb_duplicate_output: bytes,
-    observations_input_files: MipDNAObservationsInputFiles,
+    mip_dna_observations_input_files: MipDNAObservationsInputFiles,
 ):
     """Test find matching profiles in Loqusdb."""
 
@@ -157,7 +157,7 @@ def test_get_duplicate(
 
     # WHEN retrieving the duplicated entry
     duplicate: dict = loqusdb_api.get_duplicate(
-        profile_vcf_path=observations_input_files.profile_vcf_path,
+        profile_vcf_path=mip_dna_observations_input_files.profile_vcf_path,
         profile_threshold=MipDNALoadParameters.PROFILE_THRESHOLD.value,
     )
 
@@ -167,7 +167,7 @@ def test_get_duplicate(
 
 def test_get_duplicate_non_existing(
     loqusdb_api: LoqusdbAPI,
-    observations_input_files: MipDNAObservationsInputFiles,
+    mip_dna_observations_input_files: MipDNAObservationsInputFiles,
     caplog: LogCaptureFixture,
 ):
     """Test when there are no duplicates in Loqusdb."""
@@ -177,14 +177,14 @@ def test_get_duplicate_non_existing(
 
     # WHEN extracting the duplicate
     duplicate: dict = loqusdb_api.get_duplicate(
-        profile_vcf_path=observations_input_files.profile_vcf_path,
+        profile_vcf_path=mip_dna_observations_input_files.profile_vcf_path,
         profile_threshold=MipDNALoadParameters.PROFILE_THRESHOLD.value,
     )
 
     # THEN the duplicate should be empty
     assert not duplicate
     assert (
-        f"No duplicates found for profile: {observations_input_files.profile_vcf_path}"
+        f"No duplicates found for profile: {mip_dna_observations_input_files.profile_vcf_path}"
         in caplog.text
     )
 
@@ -229,7 +229,7 @@ def test_delete_case_non_existing(
 
 
 def test_get_nr_of_variants_in_file(
-    loqusdb_api: LoqusdbAPI, loqusdb_load_stderr: bytes, nr_of_loaded_variants: int
+    loqusdb_api: LoqusdbAPI, loqusdb_load_stderr: bytes, number_of_loaded_variants: int
 ):
     """Test getting the number of variants from a Loqusdb uploaded file."""
 
@@ -240,7 +240,7 @@ def test_get_nr_of_variants_in_file(
     output = loqusdb_api.get_nr_of_variants_in_file()
 
     # THEN assert that the number of retrieved variants is correctly retrieved
-    assert output["variants"] == nr_of_loaded_variants
+    assert output["variants"] == number_of_loaded_variants
 
 
 def test_repr_string(loqusdb_api: LoqusdbAPI, loqusdb_binary_path: str, loqusdb_config_path: str):

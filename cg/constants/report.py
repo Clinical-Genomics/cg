@@ -42,6 +42,9 @@ YES_FIELD: str = "Ja"
 NO_FIELD: str = "Nej"
 PRECISION: int = 2
 
+RIN_MAX_THRESHOLD: int = 10
+RIN_MIN_THRESHOLD: int = 1
+
 REPORT_GENDER: dict[str, str] = {
     Sex.UNKNOWN: "Okänd",
     Sex.FEMALE: "Kvinna",

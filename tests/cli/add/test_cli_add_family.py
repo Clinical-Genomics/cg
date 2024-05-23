@@ -24,7 +24,7 @@ def test_add_case_required(
     customer_id = customer.internal_id
     panel: Panel = helpers.ensure_panel(store=disk_store)
     panel_id = panel.name
-    name = "case_name"
+    name = "case-name"
 
     # WHEN adding a panel
     result = cli_runner.invoke(
@@ -209,7 +209,7 @@ def test_add_case_priority(
     panel: Panel = helpers.ensure_panel(store=disk_store)
     panel_id = panel.name
 
-    name = "case_name"
+    name = "case-name"
     priority = "priority"
 
     result = cli_runner.invoke(
