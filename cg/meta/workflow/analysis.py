@@ -13,6 +13,7 @@ from cg.apps.environ import environ_email
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
     AnalysisType,
+    DEFAULT_CAPTURE_KIT,
     CaseActions,
     FileFormat,
     WorkflowManager,
@@ -81,6 +82,14 @@ class AnalysisAPI(MetaAPI):
     def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
         if not Path(self.get_case_config_path(case_id=case_id)).exists() and not dry_run:
             raise CgError(f"No config file found for case {case_id}")
+
+    def get_validated_case(self, case_id: str) -> Case:
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if len(case.links) == 0:
+            raise CgError(f"No samples linked to {case_id}")
+        if nlinks := len(case.links) > 1 and not self.is_multiple_samples_allowed:
+            raise CgError(f"Only one sample per case is allowed. {nlinks} found")
+        return case
 
     def check_analysis_ongoing(self, case_id: str) -> None:
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
@@ -414,6 +423,15 @@ class AnalysisAPI(MetaAPI):
             self.fastq_handler.concatenate(linked_reads_paths[read], concatenated_paths[read])
             self.fastq_handler.remove_files(value)
 
+    def get_target_bed(self, case_id: str, analysis_type: str) -> str:
+        if analysis_type == AnalysisType.WHOLE_GENOME_SEQUENCING:
+            target_bed = self.get_target_bed_from_lims(case_id=case_id) or DEFAULT_CAPTURE_KIT
+        else:
+            target_bed = self.get_target_bed_from_lims(case_id=case_id)
+            if not target_bed:
+                raise ValueError("No capture kit was found in LIMS")
+        return target_bed
+
     def get_target_bed_from_lims(self, case_id: str) -> str | None:
         """Get target bed filename from LIMS."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -700,3 +718,19 @@ class AnalysisAPI(MetaAPI):
             tag=lims_sample.get("application")
         )
         return application.analysis_type if application else None
+
+    def get_analysis_type(self, case_id: str) -> str:
+        case: Case = self.get_validated_case(case_id)
+        sample_analysis_type: str = ""
+        for link in case.links:
+            sample_analysis_type_tmp: str = (
+                link.sample.application_version.application.analysis_type
+            )
+            if not sample_analysis_type_tmp:
+                sample_analysis_type_tmp = ""
+            if sample_analysis_type_tmp != sample_analysis_type and sample_analysis_type != "":
+                raise ValueError(
+                    f"{sample_analysis_type_tmp} has not the same analysis type as other samples in the case"
+                )
+            sample_analysis_type = sample_analysis_type_tmp
+        return sample_analysis_type
