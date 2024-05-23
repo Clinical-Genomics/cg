@@ -15,6 +15,7 @@
             {{ bait_set(workflow=workflow, analysis_type=case.data_analysis.type) }}
           </th>
           <th scope="col">Sekvensering</th>
+          <th scope="col">Mottagningskvalitetskontroll</th>
         </tr>
       </thead>
       <tbody>
@@ -30,6 +31,7 @@
             {{ bait_set_value(workflow=workflow, analysis_type=case.data_analysis.type, sample=sample) }}
           </td>
           <td>{{ sample.methods.sequencing }}</td>
+          <td>{{ sample.metadata.reception_qc_flag }}</td>
         </tr>
         {% endfor %}
       </tbody>
