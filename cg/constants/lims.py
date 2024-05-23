@@ -160,5 +160,6 @@ class LimsArtifactTypes(StrEnum):
 
 
 class ReceptionQCFLag(StrEnum):
-    PASSED: str = "PASSED"
     FAILED: str = "FAILED"
+    PASSED: str = "PASSED"
+    UNKNOWN: str = "UNKNOWN"

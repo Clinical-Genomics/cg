@@ -60,8 +60,9 @@ BALSAMIC_ANALYSIS_TYPE: dict[str, str] = {
 }
 
 REPORT_QC_FLAG: dict[ReceptionQCFLag, str] = {
-    ReceptionQCFLag.PASSED: "Godkänd",
     ReceptionQCFLag.FAILED: "Underkänd",
+    ReceptionQCFLag.PASSED: "Godkänd",
+    ReceptionQCFLag.UNKNOWN: "Okänd",
 }
 
 # Report required fields (OPTIONAL: "version")
