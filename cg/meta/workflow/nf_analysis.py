@@ -265,7 +265,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_validated_case(self, case_id: str) -> Case:
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        if len(case.links) == 0:
+        if not case.links:
             raise CgError(f"No samples linked to {case_id}")
         if nlinks := len(case.links) > 1 and not self.is_multiple_samples_allowed:
             raise CgError(f"Only one sample per case is allowed. {nlinks} found")
