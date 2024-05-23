@@ -8,10 +8,11 @@ from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
+from sqlalchemy.orm import aliased
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.server.ext import db
-from cg.store.models import Sample
+from cg.store.models import RunDevice, Sample
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -459,11 +460,35 @@ class IlluminaFlowCellView(BaseView):
         "has_backup",
     )
     column_formatters = {
-        "flow_cell": view_flow_cell_internal_id,
+        "flow_cell": lambda v, c, m, p: m.flow_cell,
     }
     column_default_sort = ("sequenced_at", True)
     column_filters = ["sequencer_type", "sequencer_name", "data_availability"]
     column_editable_list = ["data_availability"]
+    column_searchable_list = ["flow_cell", "sequencer_type", "sequencer_name"]
+    column_sortable_list = ["flow_cell", "sequenced_at", "sequencer_type", "sequencer_name"]
+
+    def scaffold_sortable_columns(self):
+        columns = super(IlluminaFlowCellView, self).scaffold_sortable_columns()
+        columns["flow_cell"] = "flow_cell"
+        return columns
+
+    def scaffold_search(self, search_term):
+        if not search_term:
+            return None
+
+        # Generate the base query
+        query = super(IlluminaFlowCellView, self).scaffold_search(search_term)
+
+        # Add a search for the hybrid property 'flow_cell'
+        device_alias = aliased(RunDevice)
+        flow_cell_search = (
+            self.session.query(self.model)
+            .join(device_alias, self.model.device)
+            .filter(device_alias.internal_id.ilike(f"%{search_term}%"))
+        )
+
+        return query.union(flow_cell_search)
 
 
 class OrganismView(BaseView):
