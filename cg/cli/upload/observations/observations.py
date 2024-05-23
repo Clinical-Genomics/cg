@@ -28,9 +28,9 @@ def upload_observations_to_loqusdb(context: CGConfig, case_id: str | None, dry_r
     """Upload observations from an analysis to Loqusdb."""
     click.echo(click.style("----------------- OBSERVATIONS -----------------"))
     try:
-        observations_api: RarediseaseObservationsAPI |MipDNAObservationsAPI | BalsamicObservationsAPI = get_observations_api(
-            context=context, case_id=case_id, upload=True
-        )
+        observations_api: (
+            RarediseaseObservationsAPI | MipDNAObservationsAPI | BalsamicObservationsAPI
+        ) = get_observations_api(context=context, case_id=case_id, upload=True)
         if dry_run:
             LOG.info(f"Dry run. Would upload observations for {case_id}.")
             return
