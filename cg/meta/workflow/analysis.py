@@ -702,5 +702,5 @@ class AnalysisAPI(MetaAPI):
             link.sample.application_version.application.analysis_type for link in case.links
         }
         if len(analysis_types) > 1:
-            raise ValueError(...)
+            raise ValueError("Case samples have different analysis types")
         return analysis_types.pop() if analysis_types else None
