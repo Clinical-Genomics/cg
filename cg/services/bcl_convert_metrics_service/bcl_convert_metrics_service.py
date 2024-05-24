@@ -118,7 +118,7 @@ class BCLConvertMetricsService:
             total_reads_in_lane=total_reads,
             base_percentage_passing_q30=q30_bases_percent,
             base_mean_quality_score=mean_quality_score,
-            _yield=yield_,
+            yield_=yield_,
             yield_q30=yield_q30,
             created_at=datetime.now(),
         )
