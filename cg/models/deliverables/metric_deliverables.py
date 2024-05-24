@@ -102,7 +102,11 @@ class MeanInsertSize(SampleMetric):
         """Convert raw value from float to int"""
         return int(value)
 
+
 class rdmetric(SampleMetric):
+    """Definition of median target coverage"""
+
+    value: int
 
 
 class MedianTargetCoverage(SampleMetric):

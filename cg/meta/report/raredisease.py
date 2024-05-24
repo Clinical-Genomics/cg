@@ -1,4 +1,4 @@
-from typing import Iterable
+import logging
 
 from cg.constants import (
     REQUIRED_REPORT_FIELDS,
