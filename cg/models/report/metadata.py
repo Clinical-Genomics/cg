@@ -136,7 +136,7 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
 
 
 class RarediseaseSampleMetadataModel(SampleMetadataModel):
-    """Metrics and trending data model associated to a specific MIP DNA sample.
+    """Metrics and trending data model associated to a specific Raredisease sample.
 
     Attributes:
         bait_set: panel bed used for the analysis; source: LIMS
