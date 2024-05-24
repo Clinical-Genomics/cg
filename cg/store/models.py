@@ -1002,6 +1002,16 @@ class IlluminaFlowCell(RunDevice):
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
 
 
+class PacBioSMRTCell(RunDevice):
+    """Model for storing PacBio SMRT cells."""
+
+    __tablename__ = "pacbio_smrt_cell"
+
+    id: Mapped[int] = mapped_column(ForeignKey("run_device.id"), primary_key=True)
+
+    __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
+
+
 class InstrumentRun(Base):
     """Parent model for the different types of instrument runs."""
 
