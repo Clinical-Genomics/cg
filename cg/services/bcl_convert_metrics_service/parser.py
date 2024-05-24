@@ -189,7 +189,7 @@ class MetricsParser:
         return self.calculate_total_reads_for_metrics(read_pair_count=aggregate_read_pairs)
 
     def get_aggregate_undetermined_reads_for_metrics(self) -> int:
-        """Calculate the total undermined reads to the demux metrics excluding indexchecks."""
+        """Calculate the total undetermined reads to the demux metrics excluding indexchecks."""
         aggregate_undetermined_read_pairs: int = 0
         for demux_metric in self.demux_metrics:
             if demux_metric.sample_internal_id == UNDETERMINED:
