@@ -12,12 +12,10 @@ from sqlalchemy import (
     Numeric,
     String,
     Table,
-    select,
 )
 from sqlalchemy import Text as SLQText
 from sqlalchemy import UniqueConstraint, orm, types
-from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import DeclarativeBase, Mapped, aliased, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
@@ -1050,19 +1048,6 @@ class IlluminaSequencingRun(InstrumentRun):
     demultiplexing_completed_at: Mapped[datetime | None]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
-
-    @hybrid_property
-    def flow_cell(self):
-        return self.device.internal_id if self.device else None
-
-    @flow_cell.expression
-    def flow_cell(cls):
-        device_alias = aliased(RunDevice)
-        return (
-            select(device_alias.internal_id)
-            .where(device_alias.id == cls.device_id)
-            .scalar_subquery()
-        )
 
 
 class SampleRunMetrics(Base):

@@ -8,11 +8,10 @@ from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
-from sqlalchemy.orm import aliased
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.server.ext import db
-from cg.store.models import RunDevice, Sample
+from cg.store.models import Sample
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -32,6 +31,12 @@ def view_priority(unused1, unused2, model, unused3):
     """column formatter for priority"""
     del unused1, unused2, unused3
     return Markup("%s" % model.priority.name) if model else ""
+
+
+def view_flow_cell_internal_id(unused1, unused2, model, unused3):
+    """column formatter for priority"""
+    del unused1, unused2, unused3
+    return Markup("%s" % model.device.internal_id)
 
 
 def view_case_sample_link(unused1, unused2, model, unused3):
@@ -446,43 +451,47 @@ class IlluminaFlowCellView(BaseView):
     """Admin view for Model.IlluminaSequencingRun"""
 
     column_list = (
-        "flow_cell",
+        "internal_id",
         "sequencer_type",
         "sequencer_name",
         "sequenced_at",
         "data_availability",
         "has_backup",
+        "total_reads",
+        "total_undetermined_reads",
+        "percent_q30",
+        "mean_quality_score",
+        "total_yield",
+        "yield_q30",
+        "cycles",
+        "demultiplexing_software",
+        "demultiplexing_software_version",
+        "sequencing_started_at",
+        "sequencing_completed_at",
+        "demultiplexing_started_at",
+        "demultiplexing_completed_at",
+        "archived_at",
     )
     column_formatters = {
-        "flow_cell": lambda v, c, m, p: m.flow_cell,
+        "internal_id": view_flow_cell_internal_id,
     }
+
     column_default_sort = ("sequenced_at", True)
     column_filters = ["sequencer_type", "sequencer_name", "data_availability"]
     column_editable_list = ["data_availability"]
-    column_searchable_list = ["flow_cell", "sequencer_type", "sequencer_name"]
-    column_sortable_list = ["flow_cell", "sequenced_at", "sequencer_type", "sequencer_name"]
-
-    def scaffold_sortable_columns(self):
-        columns = super(IlluminaFlowCellView, self).scaffold_sortable_columns()
-        columns["flow_cell"] = "flow_cell"
-        return columns
-
-    def scaffold_search(self, search_term):
-        if not search_term:
-            return None
-
-        # Generate the base query
-        query = super(IlluminaFlowCellView, self).scaffold_search(search_term)
-
-        # Add a search for the hybrid property 'flow_cell'
-        device_alias = aliased(RunDevice)
-        flow_cell_search = (
-            self.session.query(self.model)
-            .join(device_alias, self.model.device)
-            .filter(device_alias.internal_id.ilike(f"%{search_term}%"))
-        )
-
-        return query.union(flow_cell_search)
+    column_searchable_list = ["sequencer_type", "sequencer_name", "device.internal_id"]
+    column_sortable_list = [
+        "sequenced_at",
+        "sequencer_type",
+        "sequencer_name",
+        "data_availability",
+        "has_backup",
+        "sequencing_started_at",
+        "sequencing_completed_at",
+        "demultiplexing_started_at",
+        "demultiplexing_completed_at",
+        "archived_at",
+    ]
 
 
 class OrganismView(BaseView):
