@@ -493,6 +493,21 @@ class IlluminaFlowCellView(BaseView):
         "archived_at",
     ]
 
+    @staticmethod
+    def view_flow_cell_link(unused1, unused2, model, unused3):
+        """column formatter to open this view"""
+        del unused1, unused2, unused3
+        return Markup(
+            "<a href='%s'>%s</a>"
+            % (
+                url_for(
+                    "illuminasequencingrun.index_view",
+                    search=model.instrument_run.device.internal_id,
+                ),
+                model.instrument_run.device.internal_id,
+            )
+        )
+
 
 class OrganismView(BaseView):
     """Admin view for Model.Organism"""
@@ -691,6 +706,25 @@ class UserView(BaseView):
     column_searchable_list = ["name", "email"]
     create_modal = True
     edit_modal = True
+
+
+class IlluminaSampleSequencingMetricsView(BaseView):
+    column_list = [
+        "flow_cell",
+        "sample",
+        "flow_cell_lane",
+        "total_reads_in_lane",
+        "base_passing_q30_percent",
+        "base_mean_quality_score",
+        "_yield",
+        "yield_q30",
+        "created_at",
+    ]
+    column_formatters = {
+        "flow_cell": IlluminaFlowCellView.view_flow_cell_link,
+        "sample": SampleView.view_sample_link,
+    }
+    column_searchable_list = ["sample_id", "instrument_run.device.internal_id"]
 
 
 class SampleLaneSequencingMetricsView(BaseView):
