@@ -66,7 +66,6 @@ def bcl_convert_demux_metric_model_with_data(
             DemuxMetricsColumnNames.LANE.value: test_lane,
             DemuxMetricsColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
             DemuxMetricsColumnNames.READ_PAIR_COUNT.value: 15962796,
-            DemuxMetricsColumnNames.PROJECT.value: "405887",
         }
     )
 
@@ -84,7 +83,6 @@ def bcl_convert_quality_metric_model_with_data(
             QualityMetricsColumnNames.Q30_BASES_PERCENT.value: 0.95,
             QualityMetricsColumnNames.YIELD.value: 415032696,
             QualityMetricsColumnNames.YIELD_Q30.value: 393745856,
-            QualityMetricsColumnNames.PROJECT.value: "405887",
         }
     )
 
