@@ -418,7 +418,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_sample_rin(self, sample_id: str) -> float | None:
         """Return the sample RIN value."""
-        rin = None
+        rin: float | None = None
         try:
             sample_artifact: Artifact = Artifact(self, id=f"{sample_id}PA1")
             rin: float = sample_artifact.udf.get(PROP2UDF["rin"])
@@ -428,7 +428,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_sample_dv200(self, sample_id: str) -> float | None:
         """Return the sample's percentage of RNA fragments greater than 200 nucleotides."""
-        dv200 = None
+        dv200: float | None = None
         try:
             sample_artifact: Artifact = Artifact(self, id=f"{sample_id}PA1")
             dv200: float = sample_artifact.udf.get(PROP2UDF["dv200"])
@@ -438,7 +438,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_sample_reception_qc_flag(self, sample_id: str) -> ReceptionQCFLag | None:
         """Return the sample reception QC flag."""
-        qc_flag = None
+        qc_flag: ReceptionQCFLag | None = None
         try:
             sample_artifact: Artifact = Artifact(self, id=f"{sample_id}PA1")
             qc_flag: ReceptionQCFLag = sample_artifact.qc_flag
