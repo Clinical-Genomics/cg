@@ -31,6 +31,7 @@ from cg.store.models import (
     User,
     order_case,
     IlluminaFlowCell,
+    IlluminaSequencingRun,
 )
 
 LOG = logging.getLogger(__name__)
@@ -425,3 +426,9 @@ class CreateHandler(BaseHandler):
         session.add(flow_cell)
         LOG.debug(f"Flow cell added to status db: {flow_cell.id}.")
         return flow_cell
+
+    def add_illumina_sequencing_metrics(
+        self, sequencing_metrics: IlluminaSequencingRun
+    ) -> IlluminaSequencingRun:
+        """Add a new Illumina flow cell to the status database as a pending transaction."""
+        pass
