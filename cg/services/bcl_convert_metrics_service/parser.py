@@ -175,3 +175,62 @@ class MetricsParser:
             metrics=self.quality_metrics, sample_internal_id=UNDETERMINED, lane=lane
         )
         return bool(metrics)
+
+    @classmethod
+    def calculate_total_reads_for_metrics(cls, read_pair_count: int) -> int:
+        """Scale to read pair number up to single reads."""
+        return read_pair_count * SCALE_TO_READ_PAIRS
+
+    def get_aggregate_total_reads_for_metrics(self):
+        """Return the aggregate reads for the whole demux metrics excluding indexchecks."""
+        aggregate_read_pairs: int = 0
+        for demux_metric in self.demux_metrics:
+            if demux_metric.project != "indexcheck":
+                aggregate_read_pairs += demux_metric.read_pair_count
+        return self.calculate_total_reads_for_metrics(read_pair_count=aggregate_read_pairs)
+
+    def get_aggregate_undetermined_reads_for_metrics(self) -> int:
+        """Calculate the total undermined reads to the demux metrics excluding indexchecks."""
+        aggregate_undetermined_read_pairs: int = 0
+        for demux_metric in self.demux_metrics:
+            if demux_metric.sample_internal_id == UNDETERMINED:
+                aggregate_undetermined_read_pairs += demux_metric.read_pair_count
+        return self.calculate_total_reads_for_metrics(
+            read_pair_count=aggregate_undetermined_read_pairs
+        )
+
+    def get_aggregate_percent_q30_for_metrics(self) -> float:
+        """Calculate the aggregate percent Q30 for the demux metrics excluding indexchecks."""
+        aggregate_q30_bases: int = 0
+        non_index_count: int = 0
+        for quality_metric in self.quality_metrics:
+            if quality_metric.project != "indexcheck":
+                non_index_count += 1
+                aggregate_q30_bases += quality_metric.q30_bases_percent
+        return round(aggregate_q30_bases / non_index_count, 2)
+
+    def get_aggregate_quality_score_for_metrics(self) -> float:
+        """Calculate the aggregate quality score for the demux metrics excluding indexchecks."""
+        aggregate_quality_score: int = 0
+        non_index_count: int = 0
+        for quality_metric in self.quality_metrics:
+            if quality_metric.project != "indexcheck":
+                non_index_count += 1
+                aggregate_quality_score += quality_metric.mean_quality_score_q30
+        return round(aggregate_quality_score / non_index_count, 2)
+
+    def get_aggregate_yield_for_metrics(self) -> int:
+        """Calculate the aggregate yield for the demux metrics excluding indexchecks."""
+        aggregate_yield: int = 0
+        for quality_metric in self.quality_metrics:
+            if quality_metric.project != "indexcheck":
+                aggregate_yield += quality_metric.yield_
+        return aggregate_yield
+
+    def get_aggregate_yield_q30_for_metrics(self) -> int:
+        """Calculate the aggregate yield Q30 for the demux metrics excluding indexchecks."""
+        aggregate_yield_q30: int = 0
+        for quality_metric in self.quality_metrics:
+            if quality_metric.project != "indexcheck":
+                aggregate_yield_q30 += quality_metric.yield_q30
+        return aggregate_yield_q30
