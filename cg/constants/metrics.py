@@ -8,7 +8,6 @@ class QualityMetricsColumnNames(StrEnum):
 
     LANE: str = "Lane"
     SAMPLE_INTERNAL_ID: str = "SampleID"
-    PROJECT: str = "Sample_Project"
     MEAN_QUALITY_SCORE_Q30: str = "Mean Quality Score (PF)"
     Q30_BASES_PERCENT: str = "% Q30"
     YIELD: str = "Yield"
@@ -21,7 +20,6 @@ class DemuxMetricsColumnNames(StrEnum):
     LANE: str = "Lane"
     SAMPLE_INTERNAL_ID: str = "SampleID"
     READ_PAIR_COUNT: str = "# Reads"
-    PROJECT: str = "Sample_Project"
 
 
 DEMUX_METRICS_FILE_NAME: str = "Demultiplex_Stats.csv"
