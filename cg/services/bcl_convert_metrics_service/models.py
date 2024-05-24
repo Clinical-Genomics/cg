@@ -11,7 +11,6 @@ class SequencingQualityMetrics(BaseModel):
     mean_quality_score_q30: float = Field(
         ..., alias=QualityMetricsColumnNames.MEAN_QUALITY_SCORE_Q30
     )
-    project: str = Field(..., alias=QualityMetricsColumnNames.PROJECT)
     q30_bases_percent: float = Field(..., alias=QualityMetricsColumnNames.Q30_BASES_PERCENT)
     yield_: int = Field(..., alias=QualityMetricsColumnNames.YIELD)
     yield_q30: int = Field(..., alias=QualityMetricsColumnNames.YIELD_Q30)
@@ -23,4 +22,3 @@ class DemuxMetrics(BaseModel):
     lane: int = Field(..., alias=DemuxMetricsColumnNames.LANE)
     sample_internal_id: str = Field(..., alias=DemuxMetricsColumnNames.SAMPLE_INTERNAL_ID)
     read_pair_count: int = Field(..., alias=DemuxMetricsColumnNames.READ_PAIR_COUNT)
-    project: str = Field(..., alias=DemuxMetricsColumnNames.PROJECT)

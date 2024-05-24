@@ -110,22 +110,22 @@ def expected_aggregated_undetermined_reads() -> int:
 @pytest.fixture(scope="session")
 def expected_aggregated_percent_q30() -> float:
     """Return the expected aggregated percent Q30 for metrics file."""
-    return 0.94
+    return 0.93
 
 
 @pytest.fixture(scope="session")
 def expected_aggregated_quality_score() -> float:
     """Return the expected aggregated quality score for metrics file."""
-    return 35.88
+    return 35.76
 
 
 @pytest.fixture(scope="session")
 def expected_aggegrated_yield() -> int:
     """Return the expected aggregated yield for metrics file."""
-    return 80123526032
+    return 84610417748
 
 
 @pytest.fixture(scope="session")
 def expected_aggegrated_yield_q30() -> int:
     """Return the expected aggregated yield Q30 for metrics file."""
-    return 74474466450
+    return 78046839027
