@@ -183,3 +183,91 @@ def test_get_mean_quality_score_per_lane(
 
     # THEN assert that the mean quality score per lane is correct
     assert mean_quality_score_per_lane == bcl_convert_test_mean_quality_score_per_lane
+
+
+def test_get_aggregate_total_reads_for_metrics(
+    parsed_bcl_convert_metrics: MetricsParser,
+    expected_aggegrated_reads: int,
+):
+    """Test to get the aggregate total reads for metrics."""
+    # GIVEN a parsed BCLConvert metrics
+
+    # WHEN getting the aggregate total reads for metrics
+    aggregate_total_reads: int = parsed_bcl_convert_metrics.get_total_reads_for_flow_cell()
+
+    # THEN assert that the aggregate total reads is correct
+    assert aggregate_total_reads == expected_aggegrated_reads
+
+
+def test_get_aggregate_undetermined_reads_for_metrics(
+    parsed_bcl_convert_metrics: MetricsParser,
+    expected_aggregated_undetermined_reads: int,
+):
+    """Test to get the aggregated undetermined reads for metrics."""
+    # GIVEN a parsed BCLConvert metrics
+
+    # WHEN getting the aggregated undetermined reads for metrics
+    aggregated_undetermined_reads: int = (
+        parsed_bcl_convert_metrics.get_undetermined_reads_for_flow_cell()
+    )
+
+    # THEN assert that the aggregated undetermined reads is correct
+    assert aggregated_undetermined_reads == expected_aggregated_undetermined_reads
+
+
+def test_get_aggregate_percent_q30_for_metrics(
+    parsed_bcl_convert_metrics: MetricsParser,
+    expected_aggregated_percent_q30: float,
+):
+    """Test to get the aggregate percent q30 for metrics."""
+    # GIVEN a parsed BCLConvert metrics
+
+    # WHEN getting the aggregate percent q30 for metrics
+    aggregate_percent_q30: float = parsed_bcl_convert_metrics.get_mean_percent_q30_for_flow_cell()
+
+    # THEN assert that the aggregate percent q30 is correct
+    assert aggregate_percent_q30 == expected_aggregated_percent_q30
+
+
+def test_get_aggregate_quality_score_for_metrics(
+    parsed_bcl_convert_metrics: MetricsParser,
+    expected_aggregated_quality_score: float,
+):
+    """Test to get the aggregate quality score for metrics."""
+    # GIVEN a parsed BCLConvert metrics
+
+    # WHEN getting the aggregate quality score for metrics
+    aggregate_quality_score: float = (
+        parsed_bcl_convert_metrics.get_mean_quality_score_sum_for_flow_cell()
+    )
+
+    # THEN assert that the aggregate quality score is correct
+    assert aggregate_quality_score == expected_aggregated_quality_score
+
+
+def test_get_aggregate_yield_for_metrics(
+    parsed_bcl_convert_metrics: MetricsParser,
+    expected_aggegrated_yield: int,
+):
+    """Test to get the aggregate yield for metrics."""
+    # GIVEN a parsed BCLConvert metrics
+
+    # WHEN getting the aggregate yield for metrics
+    aggregate_yield: int = parsed_bcl_convert_metrics.get_yield_for_flow_cell()
+
+    # THEN assert that the aggregate yield is correct
+    assert aggregate_yield == expected_aggegrated_yield
+
+
+def test_get_aggregate_yield_q30_for_metrics(
+    parsed_bcl_convert_metrics: MetricsParser,
+    expected_aggegrated_yield_q30: int,
+):
+    """Test to get the aggregate yield Q30 for metrics."""
+    # GIVEN a parsed BCLConvert metrics
+
+    # WHEN getting the aggregate yield Q30 for metrics
+    aggregate_yield_q30: int = parsed_bcl_convert_metrics.get_yield_q30_for_flow_cell()
+
+    # THEN assert that the aggregate yield Q30 is correct
+    assert aggregate_yield_q30 == expected_aggegrated_yield_q30
