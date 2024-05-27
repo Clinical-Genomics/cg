@@ -1,5 +1,4 @@
 from decimal import Decimal
-from enum import Enum
 from json import JSONEncoder
 
 from flask_admin import Admin
