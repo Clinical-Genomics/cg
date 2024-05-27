@@ -9,7 +9,7 @@ from cg.utils.date import get_date_days_ago
 LOG = logging.getLogger(__name__)
 
 
-def clean_directories(directory_to_clean: Path, days_old: int, dry_run: bool):
+def clean_directory(directory_to_clean: Path, days_old: int, dry_run: bool):
     """Cleans the old /analysis/cases directories."""
     date_threshold: datetime = get_date_days_ago(days_old)
     for case_dir in directory_to_clean.iterdir():

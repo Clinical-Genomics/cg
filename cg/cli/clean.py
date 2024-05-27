@@ -27,7 +27,7 @@ from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
 from cg.exc import CleanFlowCellFailedError, FlowCellError
 from cg.meta.clean.api import CleanAPI
-from cg.meta.clean.clean_case_directories import clean_directories
+from cg.meta.clean.clean_case_directories import clean_directory
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
 from cg.models.cg_config import CGConfig
@@ -320,4 +320,4 @@ def _get_confirm_question(bundle, file_obj) -> str:
 def clean_analysis_cases(context: CGConfig, days_old: int, dry_run: bool):
     """Clean the ~/analysis/cases directory of old files"""
     directory_to_clean = Path(context.tomte.root)
-    clean_directories(directory_to_clean=directory_to_clean, days_old=days_old, dry_run=dry_run)
+    clean_directory(directory_to_clean=directory_to_clean, days_old=days_old, dry_run=dry_run)

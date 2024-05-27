@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.meta.clean.clean_case_directories import clean_directories
+from cg.meta.clean.clean_case_directories import clean_directory
 
 
 @pytest.mark.parametrize("days_since_modification, should_be_cleaned", [(1, False), (100, True)])
@@ -22,7 +22,7 @@ def test_clean_case_directories(
     utime(path=file_path, times=(datetime.now().timestamp(), modified_date.timestamp()))
 
     # WHEN cleaning the tmp_path/cases directory of old files
-    clean_directories(directory_to_clean=tmp_path, days_old=60, dry_run=False)
+    clean_directory(directory_to_clean=tmp_path, days_old=60, dry_run=False)
 
     # THEN the file should be deleted if it was old.
     assert file_path.exists() != should_be_cleaned
