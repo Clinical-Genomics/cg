@@ -9,7 +9,6 @@ from cg.services.bcl_convert_metrics_service.parser import MetricsParser
 from cg.store.models import (
     SampleLaneSequencingMetrics,
     IlluminaSampleSequencingMetrics,
-    IlluminaSequencingRun,
 )
 from cg.store.store import Store
 from cg.utils.flow_cell import get_flow_cell_id
