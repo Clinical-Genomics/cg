@@ -1045,7 +1045,7 @@ class IlluminaSequencingRun(InstrumentRun):
     percent_q30: Mapped[Num_6_2 | None]
     mean_quality_score: Mapped[Num_6_2 | None]
     total_yield: Mapped[BigInt | None]
-    yield_q30: Mapped[Num_6_2 | None]
+    yield_q30: Mapped[BigInt | None]
     cycles: Mapped[int | None]
     demultiplexing_software: Mapped[Str32 | None]
     demultiplexing_software_version: Mapped[Str32 | None]
