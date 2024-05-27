@@ -6,6 +6,9 @@ from pydantic import BaseModel
 
 from cg.constants.sequencing import Sequencers
 
+DEMULTIPLEXED_RUNS: str = "demultiplexed_runs"
+FLOW_CELL_RUNS: str = "flow_cells"
+
 
 class DemultiplexingDirsAndFiles(StrEnum):
     """Demultiplexing related directories and files."""
