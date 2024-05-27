@@ -309,6 +309,6 @@ NG_UL_SUFFIX: str = " ng/uL"
 
 
 class SequencingQCStatus(Enum):
-    FAILED = "failed"
-    PASSED = "passed"
-    PENDING = "pending"
+    FAILED = auto()
+    PASSED = auto()
+    PENDING = auto()
