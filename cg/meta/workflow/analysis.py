@@ -28,7 +28,7 @@ from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.services.sequencing_qc_service import QualityControllerService
+from cg.services.sequencing_qc_service import SequencingQCService
 from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
@@ -102,7 +102,7 @@ class AnalysisAPI(MetaAPI):
         """Check if case is ready for analysis. If case passes sequencing QC and is set to analyze,
         or has not been analyzed yet, or the latest analysis failed, the case is ready for analysis.
         """
-        case_passed_sequencing_qc: bool = QualityControllerService.case_pass_sequencing_qc(case)
+        case_passed_sequencing_qc: bool = SequencingQCService.case_pass_sequencing_qc(case)
         case_is_set_to_analyze: bool = case.action == CaseActions.ANALYZE
         case_has_not_been_analyzed: bool = not case.latest_analyzed
         case_latest_analysis_failed: bool = (
@@ -122,7 +122,7 @@ class AnalysisAPI(MetaAPI):
         cases_passing_quality_check: list[Case] = [
             case
             for case in cases_to_analyse
-            if QualityControllerService.case_pass_sequencing_qc(case)
+            if SequencingQCService.case_pass_sequencing_qc(case)
         ]
         return cases_passing_quality_check
 
