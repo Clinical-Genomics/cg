@@ -240,7 +240,7 @@ def test_get_aggregate_quality_score_for_metrics(
 
     # WHEN getting the aggregate quality score for metrics
     aggregate_quality_score: float = (
-        parsed_bcl_convert_metrics.get_mean_quality_score_for_aggregated_metrics()
+        parsed_bcl_convert_metrics.get_mean_quality_score_sum_for_aggregated_metrics()
     )
 
     # THEN assert that the aggregate quality score is correct

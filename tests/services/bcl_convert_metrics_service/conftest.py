@@ -81,6 +81,7 @@ def bcl_convert_quality_metric_model_with_data(
             QualityMetricsColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
             QualityMetricsColumnNames.MEAN_QUALITY_SCORE_Q30.value: 36.15,
             QualityMetricsColumnNames.Q30_BASES_PERCENT.value: 0.95,
+            QualityMetricsColumnNames.QUALITY_SCORE_SUM.value: 15004333259,
             QualityMetricsColumnNames.YIELD.value: 415032696,
             QualityMetricsColumnNames.YIELD_Q30.value: 393745856,
         }
@@ -108,13 +109,13 @@ def expected_aggregated_undetermined_reads() -> int:
 @pytest.fixture(scope="session")
 def expected_aggregated_percent_q30() -> float:
     """Return the expected aggregated percent Q30 for metrics file."""
-    return 0.93
+    return 0.92
 
 
 @pytest.fixture(scope="session")
 def expected_aggregated_quality_score() -> float:
     """Return the expected aggregated quality score for metrics file."""
-    return 35.76
+    return 35.6
 
 
 @pytest.fixture(scope="session")
