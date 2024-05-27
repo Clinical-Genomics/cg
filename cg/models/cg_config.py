@@ -638,4 +638,4 @@ class CGConfig(BaseModel):
 
     @property
     def sequencing_qc_service(self) -> SequencingQCService:
-        return SequencingQCService()
+        return SequencingQCService(self.status_db)

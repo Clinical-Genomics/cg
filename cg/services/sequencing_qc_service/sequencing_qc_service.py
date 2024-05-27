@@ -13,6 +13,7 @@ from cg.services.sequencing_qc_service.quality_checks.checks import (
 )
 from cg.store.store import Store
 
+LOG = logging.getLogger(__name__)
 
 class SequencingQCService:
 
@@ -26,6 +27,7 @@ class SequencingQCService:
             passes_qc: bool = self.case_pass_sequencing_qc(case)
             qc_status: SequencingQCStatus = qc_bool_to_status(passes_qc)
             self.store.update_sequencing_qc_status(case=case, status=qc_status)
+            LOG.info(f"Sequencing QC status for case {case.internal_id}: {passes_qc}")
 
     @staticmethod
     def case_pass_sequencing_qc(case: Case) -> bool:
