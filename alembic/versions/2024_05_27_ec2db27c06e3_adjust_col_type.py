@@ -21,7 +21,7 @@ def upgrade():
     op.alter_column(
         table_name="illumina_sequencing_run",
         column_name="yield_q30",
-        type_=sa.types.Integer(),
+        type_=sa.types.BigInteger(),
         existing_type=sa.types.Float(),
     )
 
@@ -31,5 +31,5 @@ def downgrade():
         table_name="illumina_sequencing_run",
         column_name="yield_q30",
         type_=sa.types.Float(),
-        existing_type=sa.types.Integer(),
+        existing_type=sa.types.BigInteger(),
     )
