@@ -11,4 +11,4 @@ LOG = logging.getLogger(__name__)
 @click.pass_obj
 def sequencing_qc(context: CGConfig):
     sequencing_qc_service: SequencingQCService = context.sequencing_qc_service
-    LOG.info("Running sequencing QC")
+    sequencing_qc_service.run_sequencing_qc()
