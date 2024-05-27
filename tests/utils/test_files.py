@@ -5,7 +5,7 @@ import pytest
 
 from cg.utils.files import (
     get_directories_in_path,
-    get_directory_creation_time_stamp,
+    get_source_creation_time_stamp,
     get_file_in_directory,
     remove_directory_and_contents,
     rename_file,
@@ -100,7 +100,7 @@ def test_get_creation_date(tmp_path_factory, timestamp_now: datetime):
     directory_path: Path = tmp_path_factory.mktemp("some_dir")
 
     # WHEN retrieving the creation time stamp
-    creation_time_stamp: float = get_directory_creation_time_stamp(directory_path)
+    creation_time_stamp: float = get_source_creation_time_stamp(directory_path)
 
     # THEN the creation time stamp is returned
     assert isinstance(creation_time_stamp, float)

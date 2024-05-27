@@ -12,8 +12,6 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysi
 from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import (
     DemultiplexingDirsAndFiles,
-    DEMULTIPLEXED_RUNS,
-    FLOW_CELL_RUNS,
 )
 from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
 from cg.constants.symbols import EMPTY_STRING
@@ -25,6 +23,10 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeqX,
 )
 from cg.models.flow_cell.utils import parse_date
+from cg.services.parse_run_completion_status_service.parse_run_completion_status_service import (
+    ParseRunCompletionStatusService,
+)
+from cg.utils.files import get_source_creation_time_stamp
 
 LOG = logging.getLogger(__name__)
 RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
@@ -101,10 +103,19 @@ class FlowCellDirectoryData:
         return self._sample_sheet_path_hk
 
     def get_flow_cell_run_dir(self) -> Path:
-        """Return the flow cells run directory if the FlowCellsDirectoryData was initialised with Demultiplexed runs dir."""
+        """
+        Return the flow cells run directory
+        if the FlowCellsDirectoryData was initialised with Demultiplexed runs dir.
+        """
         current_path: str = self.path.as_posix()
-        if DEMULTIPLEXED_RUNS in current_path:
-            return Path(str.replace(current_path, DEMULTIPLEXED_RUNS, FLOW_CELL_RUNS))
+        if DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME in current_path:
+            return Path(
+                str.replace(
+                    current_path,
+                    DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME,
+                    DemultiplexingDirsAndFiles.FLOW_CELLS_DIRECTORY_NAME,
+                )
+            )
         return self.path
 
     @property
@@ -237,6 +248,44 @@ class FlowCellDirectoryData:
         LOG.debug(f"All data has been transferred for flow cell {self.id}")
         LOG.info(f"Flow cell {self.id} is ready for downstream processing")
         return True
+
+    def get_run_completion_status(self) -> Path | None:
+        """Return the run completion status path."""
+        flow_cells_dir: Path = self.get_flow_cell_run_dir()
+        file_path = Path(flow_cells_dir, DemultiplexingDirsAndFiles.RUN_COMPLETION_STATUS)
+        if file_path.exists():
+            return file_path
+        return None
+
+    @property
+    def sequencing_started_at(self) -> datetime.datetime | None:
+        parser = ParseRunCompletionStatusService()
+        file_path: Path = self.get_run_completion_status()
+        return parser.get_start_time(file_path) if file_path else None
+
+    @property
+    def sequenced_ended_at(self) -> datetime.datetime | None:
+        parser = ParseRunCompletionStatusService()
+        file_path: Path = self.get_run_completion_status()
+        return parser.get_end_time(file_path) if file_path else None
+
+    @property
+    def demultiplexing_started_at(self) -> datetime:
+        """Get the demultiplexing started time stamp from the flow cell run dir."""
+        flow_cell_dir = self.get_flow_cell_run_dir()
+        demux_started_path = Path(flow_cell_dir, DemultiplexingDirsAndFiles.DEMUX_STARTED)
+        if not demux_started_path.exists():
+            return None
+        return get_source_creation_time_stamp(demux_started_path)
+
+    @property
+    def demultiplexing_ended_at(self) -> datetime:
+        """Get the demultiplexing ended time stamp from the demultiplexed runs dir."""
+        if DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME in self.path.as_posix():
+            demux_complete_path = Path(self.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE)
+            if demux_complete_path.exists():
+                return get_source_creation_time_stamp(demux_complete_path)
+        return None
 
     def __str__(self):
         return f"FlowCell(path={self.path},run_parameters_path={self.run_parameters_path})"
