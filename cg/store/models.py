@@ -1,3 +1,4 @@
+from enum import Enum
 import re
 from datetime import datetime
 from typing import Annotated
@@ -66,12 +67,19 @@ class Base(DeclarativeBase):
 
 
 def to_dict(model_instance):
+    def serialize_value(value):
+        if isinstance(value, InstrumentedAttribute):
+            return None
+        if isinstance(value, Enum):
+            return value.value
+        return value
+
     if hasattr(model_instance, "__table__"):
         return {
-            column.name: getattr(model_instance, column.name)
+            column.name: serialize_value(getattr(model_instance, column.name))
             for column in model_instance.__table__.columns
-            if not isinstance(getattr(model_instance, column.name), InstrumentedAttribute)
         }
+    return {}
 
 
 customer_user = Table(
