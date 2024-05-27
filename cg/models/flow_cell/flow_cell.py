@@ -10,7 +10,11 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.constants.constants import LENGTH_LONG_DATE
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import (
+    DemultiplexingDirsAndFiles,
+    DEMULTIPLEXED_RUNS,
+    FLOW_CELL_RUNS,
+)
 from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
 from cg.constants.symbols import EMPTY_STRING
 from cg.exc import FlowCellError
@@ -96,17 +100,25 @@ class FlowCellDirectoryData:
             raise FlowCellError("Attribute _sample_sheet_path_hk has not been assigned yet")
         return self._sample_sheet_path_hk
 
+    def get_flow_cell_run_dir(self) -> Path:
+        """Return the flow cells run directory if the FlowCellsDirectoryData was initialised with Demultiplexed runs dir."""
+        current_path: str = self.path.as_posix()
+        if DEMULTIPLEXED_RUNS in current_path:
+            return Path(str.replace(current_path, DEMULTIPLEXED_RUNS, FLOW_CELL_RUNS))
+        return self.path
+
     @property
     def run_parameters_path(self) -> Path:
         """Return path to run parameters file if it exists.
         Raises:
             FlowCellError if the flow cell has no run parameters file."""
-        if DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE in os.listdir(self.path):
-            return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
-        elif DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE in os.listdir(self.path):
-            return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE)
+        flow_cell_run_dir: Path = self.get_flow_cell_run_dir()
+        if DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE in os.listdir(flow_cell_run_dir):
+            return Path(flow_cell_run_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
+        elif DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE in os.listdir(flow_cell_run_dir):
+            return Path(flow_cell_run_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE)
         else:
-            message: str = f"No run parameters file found in flow cell {self.path}"
+            message: str = f"No run parameters file found in flow cell {flow_cell_run_dir}"
             LOG.error(message)
             raise FlowCellError(message)
 
