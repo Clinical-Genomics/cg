@@ -3,7 +3,7 @@ from enum import Enum
 
 from cg.constants import Workflow
 from cg.store.models import Case
-from cg.services.quality_controller.quality_checks.utils import (
+from cg.services.sequencing_qc_service.quality_checks.utils import (
     case_pass_sequencing_qc,
     sample_pass_sequencing_qc,
     any_sample_in_case_has_reads,
