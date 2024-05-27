@@ -120,9 +120,7 @@ class AnalysisAPI(MetaAPI):
         """
         cases_to_analyse: list[Case] = self.get_cases_to_analyse()
         cases_passing_quality_check: list[Case] = [
-            case
-            for case in cases_to_analyse
-            if SequencingQCService.case_pass_sequencing_qc(case)
+            case for case in cases_to_analyse if SequencingQCService.case_pass_sequencing_qc(case)
         ]
         return cases_passing_quality_check
 
