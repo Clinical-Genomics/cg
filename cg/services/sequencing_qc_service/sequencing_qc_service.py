@@ -3,6 +3,8 @@ from typing import Callable
 
 from cg.constants.constants import SequencingQCStatus
 from cg.services.sequencing_qc_service.utils import qc_bool_to_status
+from typing import Callable
+
 from cg.store.models import Case, Sample
 from cg.services.sequencing_qc_service.quality_checks.checks import (
     run_quality_checks,
@@ -12,6 +14,7 @@ from cg.services.sequencing_qc_service.quality_checks.checks import (
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
+
 
 
 class SequencingQCService:
