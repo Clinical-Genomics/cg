@@ -43,7 +43,9 @@ from cg.server.dto.delivery_message.delivery_message_request import (
 from cg.server.dto.delivery_message.delivery_message_response import (
     DeliveryMessageResponse,
 )
-from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpdateRequest
+from cg.server.dto.orders.order_delivery_update_request import (
+    OrderDeliveredUpdateRequest,
+)
 from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
@@ -51,6 +53,7 @@ from cg.server.ext import db, delivery_message_service, lims, order_service, ost
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationLimitations,
     Case,
     Customer,
     Flowcell,
@@ -58,7 +61,6 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
     User,
-    ApplicationLimitations,
 )
 
 LOG = logging.getLogger(__name__)
@@ -194,7 +196,7 @@ def get_cases():
 
     nr_cases: int = len(cases)
     cases_with_links: list[dict] = [case.to_dict(links=True) for case in cases]
-    return jsonify(families=cases_with_links, total=nr_cases)
+    return jsonify(families=cases_with_links, total=nr_cases, default=str)
 
 
 def _get_current_customers() -> list[Customer] | None:
@@ -221,7 +223,7 @@ def parse_case(case_id):
         return abort(HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
         return abort(HTTPStatus.FORBIDDEN)
-    return jsonify(**case.to_dict(links=True, analyses=True))
+    return jsonify(**case.to_dict(links=True, analyses=True, default=str))
 
 
 @BLUEPRINT.route("/cases/delivery_message", methods=["GET"])
