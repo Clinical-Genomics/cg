@@ -4,7 +4,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Any, Iterator
+from typing import Iterator
 
 import click
 from housekeeper.store.models import Bundle, Version
@@ -29,7 +29,7 @@ from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
 from cg.services.quality_controller import QualityControllerService
-from cg.store.models import Analysis, Application, BedVersion, Case, CaseSample, Sample
+from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -65,6 +65,11 @@ class AnalysisAPI(MetaAPI):
     @property
     def fastq_handler(self):
         return FastqHandler
+
+    @property
+    def is_multiple_samples_allowed(self) -> bool:
+        """Return whether the analysis supports multiple samples to be linked to the case."""
+        return True
 
     @staticmethod
     def get_help(context):
@@ -369,6 +374,14 @@ class AnalysisAPI(MetaAPI):
                 bundle=sample.internal_id, tags={SequencingFileTag.FASTQ}
             )
         ]
+
+    def get_validated_case(self, case_id: str) -> Case:
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if not case.links:
+            raise CgError(f"No samples linked to {case_id}")
+        if nlinks := len(case.links) > 1 and not self.is_multiple_samples_allowed:
+            raise CgError(f"Only one sample per case is allowed. {nlinks} found")
+        return case
 
     def link_fastq_files_for_sample(
         self, case: Case, sample: Sample, concatenate: bool = False
@@ -692,12 +705,17 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     def get_data_analysis_type(self, case_id: str) -> str | None:
-        """Return data analysis type carried out."""
-        case_sample: Sample = self.status_db.get_case_samples_by_case_id(case_internal_id=case_id)[
-            0
-        ].sample
-        lims_sample: dict[str, Any] = self.lims_api.sample(case_sample.internal_id)
-        application: Application = self.status_db.get_application_by_tag(
-            tag=lims_sample.get("application")
-        )
-        return application.analysis_type if application else None
+        """
+        Return data analysis type carried out.
+        Raises:
+            ValueError: If the samples in a case have not the same analysis type.
+        """
+        case: Case = self.get_validated_case(case_id)
+        analysis_types: set[str] = {
+            link.sample.application_version.application.analysis_type for link in case.links
+        }
+        if len(analysis_types) > 1:
+            raise ValueError(
+                f"Case samples have different analysis types {', '.join(analysis_types)}"
+            )
+        return analysis_types.pop() if analysis_types else None
