@@ -12,7 +12,7 @@ from cg.models.delivery.delivery import DeliveryFile
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
-from cg.services.quality_controller.quality_controller_service import SequencingQCService
+from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 

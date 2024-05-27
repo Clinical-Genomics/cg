@@ -1,1 +1,1 @@
-from cg.services.quality_controller.quality_controller_service import SequencingQCService
+from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService

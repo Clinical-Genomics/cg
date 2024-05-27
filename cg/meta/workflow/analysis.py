@@ -28,7 +28,7 @@ from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.services.quality_controller import SequencingQCService
+from cg.services.sequencing_qc_service import SequencingQCService
 from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
@@ -120,9 +120,7 @@ class AnalysisAPI(MetaAPI):
         """
         cases_to_analyse: list[Case] = self.get_cases_to_analyse()
         cases_passing_quality_check: list[Case] = [
-            case
-            for case in cases_to_analyse
-            if SequencingQCService.case_pass_sequencing_qc(case)
+            case for case in cases_to_analyse if SequencingQCService.case_pass_sequencing_qc(case)
         ]
         return cases_passing_quality_check
 

@@ -15,7 +15,7 @@ from cg.exc import MissingFilesError
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
-from cg.services.quality_controller.quality_controller_service import SequencingQCService
+from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.meta.deliver.fastq_path_generator import (
     generate_forward_concatenated_fastq_delivery_path,
     generate_reverse_concatenated_fastq_delivery_path,
