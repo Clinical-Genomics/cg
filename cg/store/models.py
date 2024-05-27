@@ -1042,7 +1042,6 @@ class IlluminaSequencingRun(InstrumentRun):
         types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx")
     )
     sequencer_name: Mapped[Str32 | None]
-    sequenced_at: Mapped[datetime | None]
     data_availability: Mapped[str | None] = mapped_column(
         types.Enum(*(status.value for status in FlowCellStatus)), default="ondisk"
     )
@@ -1050,6 +1049,7 @@ class IlluminaSequencingRun(InstrumentRun):
     has_backup: Mapped[bool] = mapped_column(default=False)
     total_reads: Mapped[BigInt | None]
     total_undetermined_reads: Mapped[BigInt | None]
+    percent_undetermined_reads: Mapped[Num_6_2 | None]
     percent_q30: Mapped[Num_6_2 | None]
     mean_quality_score: Mapped[Num_6_2 | None]
     total_yield: Mapped[BigInt | None]
