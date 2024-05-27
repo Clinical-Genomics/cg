@@ -1,8 +1,8 @@
-"""Add sequencing QC
+"""Add sequencing qc to case
 
-Revision ID: 769f8c6595a4
+Revision ID: 37224833a73a
 Revises: ec2db27c06e3
-Create Date: 2024-05-27 10:41:06.062540
+Create Date: 2024-05-27 11:11:34.637752
 
 """
 
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = "769f8c6595a4"
+revision = "37224833a73a"
 down_revision = "ec2db27c06e3"
 branch_labels = None
 depends_on = None
@@ -23,7 +23,8 @@ def upgrade():
         sa.Column(
             "sequencing_qc_status",
             sa.Enum("FAILED", "PASSED", "PENDING", name="sequencingqcstatus"),
-            nullable=True,
+            nullable=False,
+            server_default="PENDING",
         ),
     )
 
