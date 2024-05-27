@@ -448,7 +448,7 @@ class Case(Base, PriorityMixin):
         default=Priority.standard,
     )
 
-    sequencing_qc_status: Mapped[str | None] = mapped_column(
+    sequencing_qc_status: Mapped[SequencingQCStatus | None] = mapped_column(
         types.Enum(SequencingQCStatus), default=SequencingQCStatus.PENDING
     )
     synopsis: Mapped[Text | None]
@@ -1045,7 +1045,7 @@ class IlluminaSequencingRun(InstrumentRun):
     percent_q30: Mapped[Num_6_2 | None]
     mean_quality_score: Mapped[Num_6_2 | None]
     total_yield: Mapped[BigInt | None]
-    yield_q30: Mapped[BigInt | None]
+    yield_q30: Mapped[Num_6_2 | None]
     cycles: Mapped[int | None]
     demultiplexing_software: Mapped[Str32 | None]
     demultiplexing_software_version: Mapped[Str32 | None]
