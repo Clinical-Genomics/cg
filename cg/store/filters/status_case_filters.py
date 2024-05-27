@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Callable
 
-from sqlalchemy import and_, not_, or_
+from sqlalchemy import and_, exists, not_, or_
 from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
@@ -12,7 +12,7 @@ from cg.constants.observations import (
     LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
     LOQUSDB_SUPPORTED_WORKFLOWS,
 )
-from cg.store.models import Analysis, Application, Case, Customer, Sample
+from cg.store.models import Analysis, Application, Case, CaseSample, Customer, Sample
 
 
 def filter_cases_by_action(cases: Query, action: str, **kwargs) -> Query:
@@ -214,6 +214,8 @@ def filter_cases_pending_or_failed_sequencing_qc(cases: Query, **kwargs) -> Quer
         )
     )
 
+def filter_cases_has_samples(cases: Query, **kwargs) -> Query:
+    return cases.filter(exists().where(CaseSample.case_id == Case.id))
 
 def apply_case_filter(
     cases: Query,
@@ -294,3 +296,4 @@ class CaseFilter(Enum):
     WITH_SCOUT_DELIVERY: Callable = filter_cases_with_scout_data_delivery
     ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at
     PENDING_OR_FAILED_SEQUENCING_QC: Callable = filter_cases_pending_or_failed_sequencing_qc
+    HAS_SAMPLES: Callable = filter_cases_has_samples

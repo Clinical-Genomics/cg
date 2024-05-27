@@ -1486,5 +1486,5 @@ class ReadHandler(BaseHandler):
         """Return all cases that are ready for sequencing QC."""
         return apply_case_filter(
             cases=self._get_query(table=Case),
-            filter_functions=[CaseFilter.PENDING_OR_FAILED_SEQUENCING_QC],
+            filter_functions=[CaseFilter.PENDING_OR_FAILED_SEQUENCING_QC, CaseFilter.HAS_SAMPLES],
         ).all()
