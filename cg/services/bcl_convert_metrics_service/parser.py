@@ -219,3 +219,10 @@ class MetricsParser:
         for metric in metrics:
             aggregate_value += getattr(metric, attr_name)
         return aggregate_value
+
+    def get_percent_undetermined_reads_for_flow_cell(self) -> float:
+        """Calculate the percent of undetermined reads on flow cell."""
+        return round(
+            (self.get_undetermined_reads_for_flow_cell() / self.get_total_reads_for_flow_cell()),
+            2,
+        )
