@@ -6,7 +6,11 @@ from cg.constants.demultiplexing import UNDETERMINED
 from cg.constants.devices import DeviceType
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.services.bcl_convert_metrics_service.parser import MetricsParser
-from cg.store.models import SampleLaneSequencingMetrics, IlluminaSampleSequencingMetrics
+from cg.store.models import (
+    SampleLaneSequencingMetrics,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
+)
 from cg.store.store import Store
 from cg.utils.flow_cell import get_flow_cell_id
 
@@ -84,8 +88,8 @@ class BCLConvertMetricsService:
     def create_sample_run_metrics(
         sample_internal_id: str,
         lane: int,
-        run_metrics_id: int,
         metrics_parser: MetricsParser,
+        instrument_run_id: int,
         store: Store,
     ) -> IlluminaSampleSequencingMetrics:
         """Create sequencing metrics for all lanes in a flow cell."""
@@ -101,21 +105,30 @@ class BCLConvertMetricsService:
         )
         sample_id: int = store.get_sample_by_internal_id(sample_internal_id).id
 
+        yield_: float = metrics_parser.get_yield_for_sample_in_lane(
+            sample_internal_id=sample_internal_id, lane=lane
+        )
+        yield_q30: float = metrics_parser.get_yield_q30_for_sample_in_lane(
+            sample_internal_id=sample_internal_id, lane=lane
+        )
+
         return IlluminaSampleSequencingMetrics(
-            run_metrics_id=run_metrics_id,
             sample_id=sample_id,
+            instrument_run_id=instrument_run_id,
             type=DeviceType.ILLUMINA,
             flow_cell_lane=lane,
             total_reads_in_lane=total_reads,
             base_percentage_passing_q30=q30_bases_percent,
             base_mean_quality_score=mean_quality_score,
+            yield_=yield_,
+            yield_q30=yield_q30,
             created_at=datetime.now(),
         )
 
     def create_sample_sequencing_metrics_for_flow_cell(
         self,
         flow_cell_directory: Path,
-        run_metrics_id: int,
+        instrument_run_id: int,
         store: Store,
     ) -> list[IlluminaSampleSequencingMetrics]:
         """Parse the demultiplexing metrics data into the sequencing statistics model."""
@@ -129,7 +142,7 @@ class BCLConvertMetricsService:
                     sample_internal_id=sample_internal_id,
                     lane=lane,
                     metrics_parser=metrics_parser,
-                    run_metrics_id=run_metrics_id,
+                    instrument_run_id=instrument_run_id,
                     store=store,
                 )
                 sample_lane_sequencing_metrics.append(metrics)
