@@ -20,6 +20,7 @@ class SequencingQCService:
         self.store = store
 
     def run_sequencing_qc(self) -> None:
+        """Run the sequencing QC for all cases that are pending QC or failed it previously."""
         cases: list[Case] = self.store.get_cases_for_sequencing_qc()
         for case in cases:
             passes_qc: bool = self.case_pass_sequencing_qc(case)
