@@ -174,14 +174,14 @@ class MetricsParser:
         return read_pair_count * SCALE_TO_READ_PAIRS
 
     def get_aggregate_total_reads_for_metrics(self):
-        """Return the aggregate reads for the whole demux metrics excluding indexchecks."""
+        """Return the aggregate reads for the whole demux metrics."""
         aggregate_read_pairs: int = self.get_aggregate_for_attribute(
             metrics=self.demux_metrics, attr_name="read_pair_count"
         )
         return self.calculate_total_reads_for_metrics(read_pair_count=aggregate_read_pairs)
 
     def get_aggregate_undetermined_reads_for_metrics(self) -> int:
-        """Calculate the total undetermined reads to the demux metrics excluding indexchecks."""
+        """Calculate the total undetermined reads to the demux metrics."""
         aggregate_undetermined_read_pairs: int = 0
         for demux_metric in self.demux_metrics:
             if demux_metric.sample_internal_id == UNDETERMINED:
@@ -191,25 +191,25 @@ class MetricsParser:
         )
 
     def get_aggregate_percent_q30_for_metrics(self) -> float:
-        """Calculate the aggregate percent Q30 for the demux metrics excluding indexchecks."""
+        """Calculate the aggregate percent Q30 for the demux metrics."""
         aggregate_q30_bases: int = self.get_aggregate_for_attribute(
             metrics=self.quality_metrics, attr_name="q30_bases_percent"
         )
         return round(aggregate_q30_bases / len(self.quality_metrics), 2)
 
     def get_aggregate_quality_score_for_metrics(self) -> float:
-        """Calculate the aggregate quality score for the demux metrics excluding indexchecks."""
+        """Calculate the aggregate quality score for the demux metrics."""
         aggregate_quality_score: int = self.get_aggregate_for_attribute(
             self.quality_metrics, "mean_quality_score_q30"
         )
         return round(aggregate_quality_score / len(self.quality_metrics), 2)
 
     def get_aggregate_yield_for_metrics(self) -> int:
-        """Calculate the aggregate yield for the demux metrics excluding indexchecks."""
+        """Calculate the aggregate yield for the demux metrics."""
         return self.get_aggregate_for_attribute(metrics=self.quality_metrics, attr_name="yield_")
 
     def get_aggregate_yield_q30_for_metrics(self) -> int:
-        """Calculate the aggregate yield Q30 for the demux metrics excluding indexchecks."""
+        """Calculate the aggregate yield Q30 for the demux metrics."""
         return self.get_aggregate_for_attribute(metrics=self.quality_metrics, attr_name="yield_q30")
 
     @staticmethod
