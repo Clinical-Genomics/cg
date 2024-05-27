@@ -144,21 +144,13 @@ class MetricsParser:
             total_q_score += metric.mean_quality_score_q30
         return round(total_q_score / SCALE_TO_READ_PAIRS, 2)
 
-    @classmethod
-    def sum_yield(cls, metrics: list[SequencingQualityMetrics]) -> int:
+    def sum_yield(self, metrics: list[SequencingQualityMetrics]) -> int:
         """Calculate the mean yield for a list of metrics."""
-        total_yield: int = 0
-        for metric in metrics:
-            total_yield += metric.yield_
-        return total_yield
+        return self.get_aggregate_for_attribute(metrics=metrics, attr_name="yield_")
 
-    @classmethod
-    def sum_yield_q30(cls, metrics: list[SequencingQualityMetrics]) -> int:
+    def sum_yield_q30(self, metrics: list[SequencingQualityMetrics]) -> int:
         """Calculate the mean yield Q30 for a list of metrics."""
-        total_yield_q30: int = 0
-        for metric in metrics:
-            total_yield_q30 += metric.yield_q30
-        return total_yield_q30
+        return self.get_aggregate_for_attribute(metrics=metrics, attr_name="yield_q30")
 
     def get_mean_quality_score_for_sample_in_lane(
         self, sample_internal_id: str, lane: int
@@ -175,3 +167,55 @@ class MetricsParser:
             metrics=self.quality_metrics, sample_internal_id=UNDETERMINED, lane=lane
         )
         return bool(metrics)
+
+    @classmethod
+    def calculate_total_reads_for_metrics(cls, read_pair_count: int) -> int:
+        """Scale to read pair number up to single reads."""
+        return read_pair_count * SCALE_TO_READ_PAIRS
+
+    def get_total_reads_for_flow_cell(self):
+        """Return the aggregate reads for the whole demux metrics."""
+        aggregate_read_pairs: int = self.get_aggregate_for_attribute(
+            metrics=self.demux_metrics, attr_name="read_pair_count"
+        )
+        return self.calculate_total_reads_for_metrics(read_pair_count=aggregate_read_pairs)
+
+    def get_undetermined_reads_for_flow_cell(self) -> int:
+        """Calculate the total undetermined reads to the demux metrics."""
+        aggregate_undetermined_read_pairs: int = 0
+        for demux_metric in self.demux_metrics:
+            if demux_metric.sample_internal_id == UNDETERMINED:
+                aggregate_undetermined_read_pairs += demux_metric.read_pair_count
+        return self.calculate_total_reads_for_metrics(
+            read_pair_count=aggregate_undetermined_read_pairs
+        )
+
+    def get_mean_percent_q30_for_flow_cell(self) -> float:
+        """Calculate the mean percent Q30 for the aggregated quality metrics."""
+        aggregate_yield: int = self.get_yield_for_flow_cell()
+        aggregate_yield_q30: int = self.get_yield_q30_for_flow_cell()
+        return round(aggregate_yield_q30 / aggregate_yield, 2)
+
+    def get_mean_quality_score_sum_for_flow_cell(self) -> float:
+        """Calculate the mean quality score for the aggregated quality metrics."""
+        aggregate_quality_score: int = self.get_aggregate_for_attribute(
+            self.quality_metrics, "quality_score_sum"
+        )
+        aggregate_yield: int = self.get_yield_for_flow_cell()
+        return round(aggregate_quality_score / aggregate_yield, 2)
+
+    def get_yield_for_flow_cell(self) -> int:
+        """Calculate the aggregate yield for the quality metrics."""
+        return self.get_aggregate_for_attribute(metrics=self.quality_metrics, attr_name="yield_")
+
+    def get_yield_q30_for_flow_cell(self) -> int:
+        """Calculate the aggregate yield Q30 for the quality metrics."""
+        return self.get_aggregate_for_attribute(metrics=self.quality_metrics, attr_name="yield_q30")
+
+    @staticmethod
+    def get_aggregate_for_attribute(metrics: list, attr_name: str) -> int:
+        """Calculate the aggregate sum of a specified attribute for a given list of objects."""
+        aggregate_value: int = 0
+        for metric in metrics:
+            aggregate_value += getattr(metric, attr_name)
+        return aggregate_value
