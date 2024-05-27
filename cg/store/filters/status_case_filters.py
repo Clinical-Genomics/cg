@@ -214,8 +214,10 @@ def filter_cases_pending_or_failed_sequencing_qc(cases: Query, **kwargs) -> Quer
         )
     )
 
+
 def filter_cases_has_samples(cases: Query, **kwargs) -> Query:
     return cases.filter(exists().where(CaseSample.case_id == Case.id))
+
 
 def apply_case_filter(
     cases: Query,

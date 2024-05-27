@@ -15,6 +15,7 @@ from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
+
 class SequencingQCService:
 
     def __init__(self, store: Store):
