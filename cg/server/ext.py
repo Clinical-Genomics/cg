@@ -1,4 +1,5 @@
 from decimal import Decimal
+from enum import Enum
 from json import JSONEncoder
 
 from flask_admin import Admin
@@ -48,6 +49,8 @@ class CustomJSONEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Decimal):
             return float(obj)
+        if isinstance(obj, Enum):
+            return obj.value
         return super().default(obj)
 
 
