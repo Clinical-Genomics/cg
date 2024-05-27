@@ -191,25 +191,25 @@ class MetricsParser:
         )
 
     def get_mean_percent_q30_for_aggregated_metrics(self) -> float:
-        """Calculate the aggregate percent Q30 for the demux metrics."""
+        """Calculate the mean percent Q30 for the aggregated quality metrics."""
         aggregate_q30_bases: int = self.get_aggregate_for_attribute(
             metrics=self.quality_metrics, attr_name="q30_bases_percent"
         )
         return round(aggregate_q30_bases / len(self.quality_metrics), 2)
 
     def get_mean_quality_score_for_aggregated_metrics(self) -> float:
-        """Calculate the aggregate quality score for the demux metrics."""
+        """Calculate the mean quality score for the aggregated quality metrics."""
         aggregate_quality_score: int = self.get_aggregate_for_attribute(
             self.quality_metrics, "mean_quality_score_q30"
         )
         return round(aggregate_quality_score / len(self.quality_metrics), 2)
 
     def get_aggregate_yield_for_metrics(self) -> int:
-        """Calculate the aggregate yield for the demux metrics."""
+        """Calculate the aggregate yield for the quality metrics."""
         return self.get_aggregate_for_attribute(metrics=self.quality_metrics, attr_name="yield_")
 
     def get_aggregate_yield_q30_for_metrics(self) -> int:
-        """Calculate the aggregate yield Q30 for the demux metrics."""
+        """Calculate the aggregate yield Q30 for the quality metrics."""
         return self.get_aggregate_for_attribute(metrics=self.quality_metrics, attr_name="yield_q30")
 
     @staticmethod
