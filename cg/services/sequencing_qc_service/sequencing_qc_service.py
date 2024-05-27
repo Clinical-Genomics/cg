@@ -13,9 +13,6 @@ from cg.services.sequencing_qc_service.quality_checks.checks import (
 )
 from cg.store.store import Store
 
-LOG = logging.getLogger(__name__)
-
-
 
 class SequencingQCService:
 
@@ -23,7 +20,7 @@ class SequencingQCService:
         self.store = store
 
     def run_sequencing_qc(self) -> None:
-        """Run the sequencing QC for all cases that are pending QC or failed it previously."""
+        """Run sequencing QC for all pending or failed cases."""
         cases: list[Case] = self.store.get_cases_for_sequencing_qc()
         for case in cases:
             passes_qc: bool = self.case_pass_sequencing_qc(case)
@@ -36,9 +33,7 @@ class SequencingQCService:
         Run the QC for the case or sample.
         """
         sequencing_quality_check: Callable = get_sequencing_quality_check_for_case(case)
-        qc_result: bool = run_quality_checks(quality_checks=[sequencing_quality_check], case=case)
-        LOG.info(f"Sequencing QC result for case {case.internal_id}: {qc_result}")
-        return qc_result
+        return run_quality_checks(quality_checks=[sequencing_quality_check], case=case)
 
     @staticmethod
     def sample_pass_sequencing_qc(sample: Sample) -> bool:
