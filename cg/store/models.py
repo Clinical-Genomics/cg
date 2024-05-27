@@ -24,6 +24,7 @@ from cg.constants.constants import (
     CaseActions,
     ControlOptions,
     PrepCategory,
+    SequencingQCStatus,
     SexOptions,
     StatusOptions,
 )
@@ -445,6 +446,10 @@ class Case(Base, PriorityMixin):
 
     priority: Mapped[Priority] = mapped_column(
         default=Priority.standard,
+    )
+
+    sequencing_qc_status: Mapped[SequencingQCStatus] = mapped_column(
+        types.Enum(SequencingQCStatus), default=SequencingQCStatus.PENDING
     )
     synopsis: Mapped[Text | None]
     tickets: Mapped[VarChar128 | None]
