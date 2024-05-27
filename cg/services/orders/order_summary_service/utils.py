@@ -1,7 +1,7 @@
 from cg.apps.tb.dto.summary_response import AnalysisSummary
 from cg.services.orders.order_summary_service.dto.case_summary import CaseSummary
 from cg.services.orders.order_summary_service.dto.order_summary import OrderSummary
-from cg.services.quality_controller import QualityControllerService
+from cg.services.sequencing_qc_service import QualityControllerService
 from cg.store.models import Case, Order
 
 

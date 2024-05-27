@@ -7,7 +7,7 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MutantFastqHandler
-from cg.services.quality_controller.quality_controller_service import QualityControllerService
+from cg.services.sequencing_qc_service.sequencing_qc_service import QualityControllerService
 from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
 from cg.store.models import Application, Case, Sample
