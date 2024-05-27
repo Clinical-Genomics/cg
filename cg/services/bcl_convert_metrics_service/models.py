@@ -12,6 +12,8 @@ class SequencingQualityMetrics(BaseModel):
         ..., alias=QualityMetricsColumnNames.MEAN_QUALITY_SCORE_Q30
     )
     q30_bases_percent: float = Field(..., alias=QualityMetricsColumnNames.Q30_BASES_PERCENT)
+    yield_: int = Field(..., alias=QualityMetricsColumnNames.YIELD)
+    yield_q30: float = Field(..., alias=QualityMetricsColumnNames.YIELD_Q30)
 
 
 class DemuxMetrics(BaseModel):

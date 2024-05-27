@@ -1040,7 +1040,7 @@ class IlluminaSequencingRun(InstrumentRun):
     percent_q30: Mapped[Num_6_2 | None]
     mean_quality_score: Mapped[Num_6_2 | None]
     total_yield: Mapped[BigInt | None]
-    yield_q30: Mapped[Num_6_2 | None]
+    yield_q30: Mapped[BigInt | None]
     cycles: Mapped[int | None]
     demultiplexing_software: Mapped[Str32 | None]
     demultiplexing_software_version: Mapped[Str32 | None]
@@ -1079,7 +1079,7 @@ class IlluminaSampleSequencingMetrics(SampleRunMetrics):
     total_reads_in_lane: Mapped[BigInt | None]
     base_passing_q30_percent: Mapped[Num_6_2 | None]
     base_mean_quality_score: Mapped[Num_6_2 | None]
-    _yield: Mapped[BigInt | None] = mapped_column("yield", quote=True)
+    yield_: Mapped[BigInt | None] = mapped_column("yield", quote=True)
     yield_q30: Mapped[Num_6_2 | None]
     created_at: Mapped[datetime | None]
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
