@@ -1,8 +1,8 @@
 """add_pacbio_smrt_cell
 
-Revision ID: 5b58fb58b949
-Revises: 18e3b2aba252
-Create Date: 2024-05-24 15:54:54.680918
+Revision ID: 6c98ed61b29e
+Revises: dc8b9a53d972
+Create Date: 2024-05-27 14:17:59.848488
 
 """
 
@@ -11,8 +11,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "5b58fb58b949"
-down_revision = "18e3b2aba252"
+revision = "6c98ed61b29e"
+down_revision = "dc8b9a53d972"
 branch_labels = None
 depends_on = None
 
