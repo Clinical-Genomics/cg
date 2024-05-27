@@ -1,6 +1,6 @@
 """Constants for cg."""
 
-from enum import IntEnum, StrEnum, auto
+from enum import Enum, IntEnum, StrEnum, auto
 
 import click
 
@@ -306,3 +306,9 @@ class MultiQC(StrEnum):
 
 
 NG_UL_SUFFIX: str = " ng/uL"
+
+
+class SequencingQCStatus(Enum):
+    FAILED = "failed"
+    PASSED = "passed"
+    PENDING = "pending"
