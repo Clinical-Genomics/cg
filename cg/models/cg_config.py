@@ -28,6 +28,7 @@ from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
+from cg.services.quality_controller.quality_controller_service import QualityControllerService
 from cg.services.slurm_service.slurm_cli_service import SlurmCLIService
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
@@ -571,6 +572,10 @@ class CGConfig(BaseModel):
     @property
     def slurm_service(self) -> SlurmService:
         return SlurmCLIService()
+
+    @property
+    def sequencing_qc_service(self) -> QualityControllerService:
+        return QualityControllerService()
 
     @property
     def slurm_upload_service(self) -> SlurmUploadService:
