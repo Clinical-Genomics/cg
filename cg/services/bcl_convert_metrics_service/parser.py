@@ -190,14 +190,14 @@ class MetricsParser:
             read_pair_count=aggregate_undetermined_read_pairs
         )
 
-    def get_aggregate_percent_q30_for_metrics(self) -> float:
+    def get_mean_percent_q30_for_aggregated_metrics(self) -> float:
         """Calculate the aggregate percent Q30 for the demux metrics."""
         aggregate_q30_bases: int = self.get_aggregate_for_attribute(
             metrics=self.quality_metrics, attr_name="q30_bases_percent"
         )
         return round(aggregate_q30_bases / len(self.quality_metrics), 2)
 
-    def get_aggregate_quality_score_for_metrics(self) -> float:
+    def get_mean_quality_score_for_aggregated_metrics(self) -> float:
         """Calculate the aggregate quality score for the demux metrics."""
         aggregate_quality_score: int = self.get_aggregate_for_attribute(
             self.quality_metrics, "mean_quality_score_q30"

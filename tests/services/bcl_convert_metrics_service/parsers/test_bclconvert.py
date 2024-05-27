@@ -224,7 +224,7 @@ def test_get_aggregate_percent_q30_for_metrics(
 
     # WHEN getting the aggregate percent q30 for metrics
     aggregate_percent_q30: float = (
-        parsed_bcl_convert_metrics.get_aggregate_percent_q30_for_metrics()
+        parsed_bcl_convert_metrics.get_mean_percent_q30_for_aggregated_metrics()
     )
 
     # THEN assert that the aggregate percent q30 is correct
@@ -240,7 +240,7 @@ def test_get_aggregate_quality_score_for_metrics(
 
     # WHEN getting the aggregate quality score for metrics
     aggregate_quality_score: float = (
-        parsed_bcl_convert_metrics.get_aggregate_quality_score_for_metrics()
+        parsed_bcl_convert_metrics.get_mean_quality_score_for_aggregated_metrics()
     )
 
     # THEN assert that the aggregate quality score is correct
