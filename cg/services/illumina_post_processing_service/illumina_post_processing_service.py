@@ -7,10 +7,8 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.devices import DeviceType
 from cg.exc import MissingFilesError, FlowCellError
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.services.illumina_post_processing_service.database_utils import store_illumina_flow_cell
 from cg.services.illumina_post_processing_service.utils import (
     create_delivery_file_in_flow_cell_directory,
-    get_flow_cell_model_from_run_parameters,
 )
 from cg.services.illumina_post_processing_service.validation import (
     is_flow_cell_ready_for_postprocessing,
@@ -36,7 +34,7 @@ class IlluminaPostProcessingService:
         Create flow cell from the parsed and validated flow cell data.
         And add the samples on the flow cell to the model.
         """
-        model: str | None = get_flow_cell_model_from_run_parameters(flow_cell.run_parameters_path)
+        model: str | None = flow_cell.run_parameters.get_flow_cell_model()
         new_flow_cell = IlluminaFlowCell(
             internal_id=flow_cell.id, type=DeviceType.ILLUMINA, model=model
         )
