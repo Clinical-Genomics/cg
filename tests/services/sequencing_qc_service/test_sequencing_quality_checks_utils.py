@@ -1,7 +1,7 @@
 import pytest
 from cg.store.models import Case, Sample
 from cg.constants.constants import PrepCategory
-from cg.services.quality_controller.quality_checks.utils import (
+from cg.services.sequencing_qc_service.quality_checks.utils import (
     any_sample_in_case_has_reads,
     is_case_express_priority,
     case_pass_sequencing_qc,
