@@ -264,7 +264,7 @@ class FlowCellDirectoryData:
         return parser.get_start_time(file_path) if file_path else None
 
     @property
-    def sequenced_ended_at(self) -> datetime.datetime | None:
+    def sequenced_completed_at(self) -> datetime.datetime | None:
         parser = ParseRunCompletionStatusService()
         file_path: Path = self.get_run_completion_status()
         return parser.get_end_time(file_path) if file_path else None
