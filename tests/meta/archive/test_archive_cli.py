@@ -53,7 +53,7 @@ def test_archive_spring_files_success(
 
     # GIVEN a CLI runner and a context
 
-    # GIVEN a spring file belonging to a customer with archive location 'karolinska_bucket'
+    # GIVEN a spring file belonging to a customer with archive location 'KAROLINSKA_HOSPITAL'
     all_non_archived_spring_files: list[File] = (
         archive_context.housekeeper_api.get_non_archived_spring_files()
     )
@@ -208,7 +208,7 @@ def test_delete_file_raises_http_error(
 
     # GIVEN a spring file which is archived via Miria
     spring_file: File = archive_context.housekeeper_api.files(
-        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET}
+        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_HOSPITAL}
     ).first()
     spring_file_path: str = spring_file.path
     if not spring_file.archive:
@@ -253,7 +253,7 @@ def test_delete_file_success(
 
     # GIVEN a spring file which is archived via Miria
     spring_file: File = archive_context.housekeeper_api.files(
-        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_BUCKET}
+        tags={SequencingFileTag.SPRING, ArchiveLocations.KAROLINSKA_HOSPITAL}
     ).first()
     spring_file_id: int = spring_file.id
     if not spring_file.archive:

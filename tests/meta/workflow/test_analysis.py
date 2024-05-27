@@ -356,7 +356,7 @@ def test_prepare_fastq_files_request_miria(
 
     # GIVEN a case belonging to a non-PDC customer with at least one archived spring file
     case: Case = analysis_store.get_cases()[0]
-    case.customer.data_archive_location = ArchiveLocations.KAROLINSKA_BUCKET
+    case.customer.data_archive_location = ArchiveLocations.KAROLINSKA_HOSPITAL
 
     # GIVEN that at least one file is archived and not retrieved
     with mock.patch.object(
@@ -386,7 +386,7 @@ def test_prepare_fastq_files_does_not_request_miria(
 
     # GIVEN that no files have entries in the Archive table
     case: Case = analysis_store.get_cases()[0]
-    case.customer.data_archive_location = ArchiveLocations.KAROLINSKA_BUCKET
+    case.customer.data_archive_location = ArchiveLocations.KAROLINSKA_HOSPITAL
 
     # GIVEN that all flow cells have status on disk
     helpers.add_flow_cell(
