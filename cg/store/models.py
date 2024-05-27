@@ -71,7 +71,7 @@ def to_dict(model_instance):
         if isinstance(value, InstrumentedAttribute):
             return None
         if isinstance(value, Enum):
-            return value.value
+            return value.name
         return value
 
     if hasattr(model_instance, "__table__"):

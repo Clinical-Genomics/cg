@@ -49,8 +49,6 @@ class CustomJSONEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Decimal):
             return float(obj)
-        if isinstance(obj, Enum):
-            return obj.value
         return super().default(obj)
 
 
