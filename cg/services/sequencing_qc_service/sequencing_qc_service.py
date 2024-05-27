@@ -6,9 +6,13 @@ from cg.services.quality_controller.quality_checks.checks import (
     get_sequencing_quality_check_for_case,
     get_sample_sequencing_quality_check,
 )
+from cg.store.store import Store
 
 
 class SequencingQCService:
+
+    def __init__(self, store: Store):
+        self.store = store
 
     @staticmethod
     def case_pass_sequencing_qc(case: Case) -> bool:
