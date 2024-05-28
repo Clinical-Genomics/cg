@@ -7,10 +7,10 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.devices import DeviceType
 from cg.exc import MissingFilesError, FlowCellError
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.services.illumina_post_processing_service.utils import (
+from cg.services.illumina_services.illumina_post_processing_service.utils import (
     create_delivery_file_in_flow_cell_directory,
 )
-from cg.services.illumina_post_processing_service.validation import (
+from cg.services.illumina_services.illumina_post_processing_service.validation import (
     is_flow_cell_ready_for_postprocessing,
 )
 from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun
@@ -24,13 +24,6 @@ class IlluminaPostProcessingService:
         self.status_db: Store = status_db
         self.hk_api: HousekeeperAPI = housekeeper_api
         self.dry_run: bool = False
-
-
-    def _generate_sequencing_run_metrics(self,illumina_flow_cell: IlluminaFlowCell, flow_cell_data: FlowCellDirectoryData) -> IlluminaSequencingRun:
-
-
-
-
 
     @staticmethod
     def store_illumina_flow_cell(
@@ -47,7 +40,9 @@ class IlluminaPostProcessingService:
         )
         return store.add_illumina_flow_cell(new_flow_cell)
 
-    def store_illumina_sequencing_run(self,illumina_flow_cell: IlluminaFlowCell, flow_cell_data: FlowCellDirectoryData) -> None:
+    def store_illumina_sequencing_run(
+        self, illumina_flow_cell: IlluminaFlowCell, flow_cell_data: FlowCellDirectoryData
+    ) -> None:
         """Store illumina run metrics in the status database."""
         self._generate_sequencing_run_metrics(illumina_flow_cell, flow_cell_data)
 

@@ -63,9 +63,10 @@ from cg.models.taxprofiler.taxprofiler import (
     TaxprofilerSampleSheetEntry,
 )
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
-from cg.services.bcl_convert_metrics_service.bcl_convert_metrics_service import (
-    BCLConvertMetricsService,
+from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_service import (
+    IlluminaMetricsService,
 )
+
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
 from cg.store.store import Store
@@ -3965,5 +3966,5 @@ def fastq_file_meta_raw(flow_cell_name: str) -> dict:
 
 
 @pytest.fixture()
-def bcl_convert_metrics_service() -> BCLConvertMetricsService:
-    return BCLConvertMetricsService()
+def illumina_metrics_service() -> IlluminaMetricsService:
+    return IlluminaMetricsService()
