@@ -231,7 +231,10 @@ def test_tomte_config_builder(
 
     # WHEN instantiating
     file_handler = TomteConfigBuilder(
-        hk_version_obj=hk_version, analysis_obj=tomte_analysis_obj, analysis_api=tomte_context.meta_apis["analysis_api"], lims_api=lims_api
+        hk_version_obj=hk_version,
+        analysis_obj=tomte_analysis_obj,
+        analysis_api=tomte_context.meta_apis["analysis_api"],
+        lims_api=lims_api,
     )
 
     # THEN assert that the correct case tags was used

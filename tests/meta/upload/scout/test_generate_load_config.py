@@ -145,7 +145,9 @@ def test_generate_config_adds_case_paths(
 
 
 def test_generate_tomte_load_config(
-    tomte_analysis_obj: Analysis, upload_tomte_analysis_scout_api: UploadScoutAPI, mocker: MockFixture
+    tomte_analysis_obj: Analysis,
+    upload_tomte_analysis_scout_api: UploadScoutAPI,
+    mocker: MockFixture,
 ):
     """Test that a tomte config is generated."""
 
