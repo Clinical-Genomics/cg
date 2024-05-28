@@ -2,10 +2,7 @@ from cg.meta.workflow.mutant.metadata_parser import MetadataParser
 from cg.store.models import Case
 
 
-
-
-# TODO: How to access the database
-status_db = Store()
+# TODO: How to access the apis?
 
 
 def test_parse_metadata():
@@ -32,7 +29,6 @@ def test_parse_metadata_for_case():
     # THEN no error is thrown
 
 
-# TODO: How to initialise the lims api?
 # parse_metadata_for_internal_negative_control(
 #    self, metadata_for_case: SamplesMetadataMetrics
 # ) -> dict[str, SampleMetadata]:
