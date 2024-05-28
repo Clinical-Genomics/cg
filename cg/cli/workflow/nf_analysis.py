@@ -7,7 +7,8 @@ from pydantic import ValidationError
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import MetaApis, DRY_RUN
+from cg.constants.cli_options import DRY_RUN
+from cg.constants.constants import MetaApis
 from cg.exc import AnalysisNotReadyError, CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig

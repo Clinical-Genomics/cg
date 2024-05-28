@@ -5,7 +5,8 @@ import click
 from cg.cli.utils import is_case_name_allowed
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
-from cg.constants.constants import DRY_RUN, StatusOptions
+from cg.constants.cli_options import DRY_RUN
+from cg.constants.constants import StatusOptions
 from cg.constants.subject import Sex
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig

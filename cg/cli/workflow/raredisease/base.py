@@ -6,8 +6,15 @@ import click
 
 from cg.cli.utils import echo_lines
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
-from cg.cli.workflow.nf_analysis import config_case, metrics_deliver, run, start, start_available
-from cg.constants.constants import MetaApis, DRY_RUN
+from cg.cli.workflow.nf_analysis import (
+    config_case,
+    metrics_deliver,
+    run,
+    start,
+    start_available,
+)
+from cg.constants.cli_options import DRY_RUN
+from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig

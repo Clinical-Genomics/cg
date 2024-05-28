@@ -5,7 +5,7 @@ import click
 from pydantic import ValidationError
 
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN
 from cg.exc import SampleSheetError
 from cg.models.cg_config import CGConfig
 

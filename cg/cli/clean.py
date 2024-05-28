@@ -23,7 +23,8 @@ from cg.cli.workflow.commands import (
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
 )
-from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Workflow
+from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION
+from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
 from cg.exc import CleanFlowCellFailedError, FlowCellError
 from cg.meta.clean.api import CleanAPI

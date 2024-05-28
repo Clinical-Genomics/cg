@@ -21,7 +21,7 @@ from cg.cli.generate.report.utils import (
     get_report_case,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN
 from cg.exc import CgError
 from cg.meta.report.report_api import ReportAPI
 from cg.store.models import Case

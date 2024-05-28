@@ -9,7 +9,8 @@ import housekeeper.store.models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.constants.constants import DRY_RUN, FlowCellStatus
+from cg.constants.cli_options import DRY_RUN
+from cg.constants.constants import FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import (
     DsmcAlreadyRunningError,

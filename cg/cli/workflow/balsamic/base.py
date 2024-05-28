@@ -8,17 +8,17 @@ from pydantic.v1 import ValidationError
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.balsamic.options import (
     OPTION_CACHE_VERSION,
+    OPTION_CLUSTER_CONFIG,
     OPTION_GENDER,
     OPTION_GENOME_VERSION,
     OPTION_OBSERVATIONS,
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
     OPTION_QOS,
-    OPTION_CLUSTER_CONFIG,
 )
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI

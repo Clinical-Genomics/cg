@@ -8,7 +8,7 @@ import click
 
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.downsample.utils import store_downsampled_sample_bundle
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
