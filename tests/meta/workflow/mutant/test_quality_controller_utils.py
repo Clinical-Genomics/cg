@@ -1,22 +1,8 @@
-# from cg.constants.constants import MutantQC
-# from cg.meta.workflow.mutant.constants import QUALITY_REPORT_FILE_NAME
-# from cg.meta.workflow.mutant.mutant import get_case_path
-# from cg.meta.workflow.mutant.metadata_parser.metadata_parser import MetadataParser
-# from cg.meta.workflow.mutant.metadata_parser.models import SamplesMetadataMetrics
-# from cg.meta.workflow.mutant.metrics_parser.metrics_parser import MetricsParser
-# from cg.meta.workflow.mutant.metrics_parser.models import SamplesResultsMetrics
-# from cg.meta.workflow.mutant.quality_controller.models import (
-#     QualityMetrics,
-#     SampleQualityResult,
-# )
-# from cg.store.models import Case, Sample
-
-# from pathlib import Path
-
+from cg.meta.workflow.mutant.quality_controller import utils
 
 # def has_valid_total_reads(sample_metadata: SamplesMetadataMetrics) -> bool:
-#         if is_valid_total_reads_for_external_negative_control(reads=sample_metadata.reads):
-
+#         
+#    if is_valid_total_reads_for_external_negative_control(reads=sample_metadata.reads):
 #         return is_valid_total_reads_for_internal_negative_control(reads=sample_metadata.reads)
 
 #     return is_valid_total_reads(
