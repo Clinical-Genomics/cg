@@ -45,7 +45,7 @@ class CreateValidationCaseService:
                 f"Application tag set to: {sample.application_version.application.tag}"
             )
             if not self.dry_run:
-                self.status_db.persist_record_to_db(sample)
+                self.status_db.commit_to_store(sample)
                 LOG.info(f"Added {sample.name} to StatusDB.")
 
     def store_validation_case(self, validation_case_data: ValidationCaseData) -> None:
