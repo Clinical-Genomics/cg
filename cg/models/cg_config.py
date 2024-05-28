@@ -442,6 +442,14 @@ class CGConfig(BaseModel):
             self.chanjo_api_ = api
         return api
 
+    def chanjo2_api(self) -> Chanjo2API:
+        api = self.__dict__.get("chanjo2_api_")
+        if api is None:
+            LOG.debug("Instantiating chanjo2 api")
+            api = Chanjo2API(config=self.dict())
+            self.chanjo_api_ = api
+        return api
+
     @property
     def crunchy_api(self) -> CrunchyAPI:
         api = self.__dict__.get("crunchy_api_")

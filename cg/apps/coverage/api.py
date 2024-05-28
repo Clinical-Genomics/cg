@@ -87,3 +87,7 @@ class ChanjoAPI:
         return ReadStream.get_content_from_stream(
             file_format=FileFormat.JSON, stream=self.process.stdout
         ).get(sample_id)
+
+
+class ChanjoAPI:
+    """Interface to Chanjo2, the coverage analysis tool"""
