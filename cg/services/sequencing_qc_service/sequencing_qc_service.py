@@ -1,15 +1,14 @@
 from typing import Callable
 
 from cg.store.models import Case, Sample
-from cg.services.quality_controller.quality_checks.checks import (
+from cg.services.sequencing_qc_service.quality_checks.checks import (
     run_quality_checks,
     get_sequencing_quality_check_for_case,
     get_sample_sequencing_quality_check,
 )
 
 
-class QualityControllerService:
-    """Quality controller class. This class is used to run the quality checks for the samples and cases."""
+class SequencingQCService:
 
     @staticmethod
     def case_pass_sequencing_qc(case: Case) -> bool:

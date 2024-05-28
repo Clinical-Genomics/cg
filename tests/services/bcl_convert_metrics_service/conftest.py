@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-
+from cg.constants.constants import SCALE_TO_READ_PAIRS
 from cg.constants.metrics import DemuxMetricsColumnNames, QualityMetricsColumnNames
 from cg.services.bcl_convert_metrics_service.bcl_convert_metrics_service import (
     BCLConvertMetricsService,
@@ -81,6 +81,9 @@ def bcl_convert_quality_metric_model_with_data(
             QualityMetricsColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
             QualityMetricsColumnNames.MEAN_QUALITY_SCORE_Q30.value: 36.15,
             QualityMetricsColumnNames.Q30_BASES_PERCENT.value: 0.95,
+            QualityMetricsColumnNames.QUALITY_SCORE_SUM.value: 15004333259,
+            QualityMetricsColumnNames.YIELD.value: 415032696,
+            QualityMetricsColumnNames.YIELD_Q30.value: 393745856,
         }
     )
 
@@ -89,3 +92,39 @@ def bcl_convert_quality_metric_model_with_data(
 def parsed_bcl_convert_metrics(bcl_convert_metrics_dir_path) -> MetricsParser:
     """Return an object with parsed BCLConvert metrics."""
     return MetricsParser(bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path)
+
+
+@pytest.fixture(scope="session")
+def expected_aggegrated_reads() -> int:
+    """Return the expected aggregated reads for metrics file."""
+    return 1458658700
+
+
+@pytest.fixture(scope="session")
+def expected_aggregated_undetermined_reads() -> int:
+    """Return the expected aggregated undetermined reads for metrics file."""
+    return 154578798
+
+
+@pytest.fixture(scope="session")
+def expected_aggregated_percent_q30() -> float:
+    """Return the expected aggregated percent Q30 for metrics file."""
+    return 0.92
+
+
+@pytest.fixture(scope="session")
+def expected_aggregated_quality_score() -> float:
+    """Return the expected aggregated quality score for metrics file."""
+    return 35.6
+
+
+@pytest.fixture(scope="session")
+def expected_aggegrated_yield() -> int:
+    """Return the expected aggregated yield for metrics file."""
+    return 84610417748
+
+
+@pytest.fixture(scope="session")
+def expected_aggegrated_yield_q30() -> int:
+    """Return the expected aggregated yield Q30 for metrics file."""
+    return 78046839027
