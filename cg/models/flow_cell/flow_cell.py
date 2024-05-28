@@ -25,6 +25,7 @@ from cg.services.parse_run_completion_status_service.parse_run_completion_status
     ParseRunCompletionStatusService,
 )
 from cg.utils.files import get_source_creation_time_stamp
+from cg.utils.time import format_time_from_string, format_time_from_ctime
 
 LOG = logging.getLogger(__name__)
 RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
@@ -289,18 +290,20 @@ class FlowCellDirectoryData:
         return parser.get_end_time(file_path) if file_path else None
 
     @property
-    def demultiplexing_started_at(self) -> datetime | None:
+    def demultiplexing_started_at(self) -> datetime.datetime | None:
         """Get the demultiplexing started time stamp from the flow cell run dir."""
         try:
-            return get_source_creation_time_stamp(self.demultiplexing_started_path)
+            time: float = get_source_creation_time_stamp(self.demultiplexing_started_path)
+            return format_time_from_ctime(time)
         except FileNotFoundError:
             return None
 
     @property
-    def demultiplexing_completed_at(self) -> datetime | None:
+    def demultiplexing_completed_at(self) -> datetime.datetime | None:
         """Get the demultiplexing completed time stamp from the demultiplexed runs dir."""
         try:
-            return get_source_creation_time_stamp(self.demux_complete_path)
+            time: float = get_source_creation_time_stamp(self.demux_complete_path)
+            return format_time_from_ctime(time)
         except FileNotFoundError:
             return None
 

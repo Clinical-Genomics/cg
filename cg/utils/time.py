@@ -16,11 +16,21 @@ def get_start_time() -> float:
     return time.time()
 
 
-def format_time(time: str) -> datetime:
+def format_time_from_string(time_stamp: str) -> datetime:
     """Format the time by removing microseconds and time zone."""
-    no_microseconds: str = re.sub(r"\.\d+", "", time)
+    no_microseconds: str = re.sub(r"\.\d+", "", time_stamp)
     no_microseconds_no_time_zone = re.sub(r"[+-]\d{2}:\d{2}$", "", no_microseconds)
     return datetime.strptime(no_microseconds_no_time_zone, DATE_TIME_FORMAT)
+
+
+def format_time_from_ctime(time_stamp: float) -> datetime:
+    """Format the time by removing microseconds and time zone."""
+    dt: datetime = datetime.fromtimestamp(
+        time_stamp,
+        tz=None,
+    )
+    dt_without_microseconds: datetime = dt.replace(microsecond=0)
+    return dt_without_microseconds
 
 
 def get_elapsed_time(start_time: float) -> float:
