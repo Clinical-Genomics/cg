@@ -833,7 +833,7 @@ def upload_rnafusion_analysis_scout_api(
 
 @pytest.fixture
 def upload_tomte_analysis_scout_api(
-    cg_context: CGConfig,
+    tomte_context: CGConfig,
     scout_api: MockScoutAPI,
     madeline_api: MockMadelineAPI,
     lims_samples: list[dict],
@@ -841,14 +841,13 @@ def upload_tomte_analysis_scout_api(
     store: Store,
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api."""
-    analysis_mock = MockMipAnalysis(config=cg_context, workflow=Workflow.TOMTE)
     lims_api = MockLimsAPI(samples=lims_samples)
 
     _api = UploadScoutAPI(
         hk_api=tomte_analysis_hk_api,
         scout_api=scout_api,
         madeline_api=madeline_api,
-        analysis_api=analysis_mock,
+        analysis_api=tomte_context.meta_apis["analysis_api"],
         lims_api=lims_api,
         status_db=store,
     )
