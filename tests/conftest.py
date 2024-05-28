@@ -33,6 +33,7 @@ from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
+from cg.constants.tb import AnalysisTypes
 from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
@@ -2441,13 +2442,14 @@ def raredisease_parameters_default(
     raredisease_dir: Path,
     raredisease_case_id: str,
     raredisease_sample_sheet_path: Path,
+    bed_version_file_name,
 ) -> RarediseaseParameters:
     """Return Tomte parameters."""
     return RarediseaseParameters(
         input=raredisease_sample_sheet_path,
         outdir=Path(raredisease_dir, raredisease_case_id),
-        target_bed="some_target_bed_file",
-        analysis_type="wes",
+        target_bed=bed_version_file_name,
+        analysis_type=AnalysisTypes.WES,
     )
 
 
