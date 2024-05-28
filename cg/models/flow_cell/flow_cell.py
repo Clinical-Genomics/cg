@@ -102,8 +102,7 @@ class FlowCellDirectoryData:
 
     def get_flow_cell_run_dir(self) -> Path:
         """
-        Return the flow cells run directory
-        if the FlowCellsDirectoryData was initialised with Demultiplexed runs dir.
+        Return the flow cells run directory regardless of the path used to initialise the FlowCellsDirectoryData.
         """
         current_path: str = self.path.as_posix()
         if DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME in current_path:
