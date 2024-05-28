@@ -10,9 +10,7 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.constants.constants import LENGTH_LONG_DATE
-from cg.constants.demultiplexing import (
-    DemultiplexingDirsAndFiles,
-)
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
 from cg.constants.symbols import EMPTY_STRING
 from cg.exc import FlowCellError
