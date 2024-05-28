@@ -22,10 +22,10 @@ class IlluminaDemuxVersionService:
         for line in self._parse_demux_version_file(demux_version_file):
             return line.replace("\n", "")
 
-    def get_demux_software(self, demux_version_file) -> str:
+    def get_demux_software(self, demux_version_file: Path) -> str:
         """Get the demultiplexing software used."""
         return self.get_dragen_software_info(demux_version_file).split(SPACE)[0]
 
-    def get_demux_software_version(self, demux_version_file) -> str:
+    def get_demux_software_version(self, demux_version_file: Path) -> str:
         """Get the demultiplexing software version."""
         return self.get_dragen_software_info(demux_version_file).split(SPACE)[-1]
