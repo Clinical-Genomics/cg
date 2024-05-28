@@ -71,6 +71,7 @@ from cg.services.create_validation_cases.validation_data_input import Validation
 
 from cg.services.bcl_convert_metrics_service.bcl_convert_metrics_service import (
     BCLConvertMetricsService,
+)
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
 from cg.store.store import Store
@@ -3975,7 +3976,6 @@ def fastq_file_meta_raw(flow_cell_name: str) -> dict:
     }
 
 
-
 @pytest.fixture
 def validation_hk_api(
     store_with_multiple_cases_and_samples: Store,
@@ -4037,7 +4037,7 @@ def create_validation_service(
         status_db=store_with_multiple_cases_and_samples, housekeeper_api=validation_hk_api
     )
 
+
 @pytest.fixture()
 def bcl_convert_metrics_service() -> BCLConvertMetricsService:
     return BCLConvertMetricsService()
-
