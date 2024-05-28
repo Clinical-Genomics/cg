@@ -1,12 +1,15 @@
 from datetime import datetime
 from pathlib import Path
 
-
+from cg.constants import FlowCellStatus
 from cg.constants.demultiplexing import UNDETERMINED
 from cg.constants.devices import DeviceType
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.services.illumina_services.illumina_metrics_service.bcl_convert_metrics_parser import (
     BCLConvertMetricsParser,
+)
+from cg.services.illumina_services.illumina_metrics_service.illumina_demux_version_service import (
+    IlluminaDemuxVersionService,
 )
 from cg.store.models import (
     SampleLaneSequencingMetrics,
@@ -94,7 +97,6 @@ class IlluminaMetricsService:
         sample_internal_id: str,
         lane: int,
         metrics_parser: BCLConvertMetricsParser,
-        instrument_run_id: int,
         store: Store,
     ) -> IlluminaSampleSequencingMetrics:
         """Create sequencing metrics for all lanes in a flow cell."""
@@ -133,7 +135,6 @@ class IlluminaMetricsService:
     def create_sample_sequencing_metrics_for_flow_cell(
         self,
         flow_cell_directory: Path,
-        instrument_run_id: int,
         store: Store,
     ) -> list[IlluminaSampleSequencingMetrics]:
         """Parse the demultiplexing metrics data into the sequencing statistics model."""
@@ -147,14 +148,14 @@ class IlluminaMetricsService:
                     sample_internal_id=sample_internal_id,
                     lane=lane,
                     metrics_parser=metrics_parser,
-                    instrument_run_id=instrument_run_id,
                     store=store,
                 )
                 sample_lane_sequencing_metrics.append(metrics)
         return sample_lane_sequencing_metrics
 
+    @staticmethod
     def create_illumina_sequencing_run(
-        self, illumina_flow_cell: IlluminaFlowCell, flow_cell_dir_data: FlowCellDirectoryData
+        flow_cell_dir_data: FlowCellDirectoryData,
     ) -> IlluminaSequencingRun:
         metrics_parser = BCLConvertMetricsParser(flow_cell_dir_data.path)
         total_reads: int = metrics_parser.get_total_reads_for_flow_cell()
@@ -165,5 +166,40 @@ class IlluminaMetricsService:
         percent_q30: float = metrics_parser.get_mean_percent_q30_for_flow_cell()
         mean_quality_score: float = metrics_parser.get_mean_quality_score_sum_for_flow_cell()
         total_yield: int = metrics_parser.get_yield_for_flow_cell()
-        yield_30: int = metrics_parser.get_yield_q30_for_flow_cell()
+        yield_q30: int = metrics_parser.get_yield_q30_for_flow_cell()
         cycles: int = flow_cell_dir_data.run_parameters.get_read_1_cycles()
+        software_service = IlluminaDemuxVersionService()
+        demux_software: str = software_service.get_demux_software(
+            flow_cell_dir_data.demultiplex_software_info_path
+        )
+        demux_software_version: str = software_service.get_demux_software_version(
+            flow_cell_dir_data.demultiplex_software_info_path
+        )
+        sequencing_started_at: datetime = flow_cell_dir_data.sequencing_started_at
+        sequencing_comleted_at: datetime = flow_cell_dir_data.sequencing_completed_at
+        demultiplexing_started_at: datetime = flow_cell_dir_data.demultiplexing_started_at
+        demultiplexing_completed_at: datetime = flow_cell_dir_data.demultiplexing_completed_at
+        sequencer_type: str = flow_cell_dir_data.sequencer_type
+        sequencer_name: str = flow_cell_dir_data.machine_name
+
+        return IlluminaSequencingRun(
+            sequencer_type=sequencer_type,
+            sequencer_name=sequencer_name,
+            data_availablilty=FlowCellStatus.ON_DISK,
+            archived_at=None,
+            has_backup=False,
+            total_reads=total_reads,
+            total_undetermined_reads=total_undetermined_reads,
+            percent_undetermined_reads=percent_undetermined_reads,
+            percent_q30=percent_q30,
+            mean_quality_score=mean_quality_score,
+            total_yield=total_yield,
+            yield_q30=yield_q30,
+            cycles=cycles,
+            demux_software=demux_software,
+            demux_software_version=demux_software_version,
+            sequencing_started_at=sequencing_started_at,
+            sequencing_comleted_at=sequencing_comleted_at,
+            demultiplexing_started_at=demultiplexing_started_at,
+            demultiplexing_completed_at=demultiplexing_completed_at,
+        )

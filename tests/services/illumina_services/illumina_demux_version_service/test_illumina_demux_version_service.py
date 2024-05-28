@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from cg.services.illumina_services.illumina_metrics_service.illumina_demux_log_service import (
+from cg.services.illumina_services.illumina_metrics_service.illumina_demux_version_service import (
     IlluminaDemuxVersionService,
 )
 

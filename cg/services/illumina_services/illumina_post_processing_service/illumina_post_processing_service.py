@@ -7,13 +7,16 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.devices import DeviceType
 from cg.exc import MissingFilesError, FlowCellError
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_service import (
+    IlluminaMetricsService,
+)
 from cg.services.illumina_services.illumina_post_processing_service.utils import (
     create_delivery_file_in_flow_cell_directory,
 )
 from cg.services.illumina_services.illumina_post_processing_service.validation import (
     is_flow_cell_ready_for_postprocessing,
 )
-from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun
+from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun, IlluminaSampleSequencingMetrics
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -27,37 +30,51 @@ class IlluminaPostProcessingService:
 
     @staticmethod
     def store_illumina_flow_cell(
-        flow_cell: FlowCellDirectoryData,
+        flow_cell_dir_data: FlowCellDirectoryData,
         store: Store,
     ) -> IlluminaFlowCell:
         """
         Create flow cell from the parsed and validated flow cell data.
         And add the samples on the flow cell to the model.
         """
-        model: str | None = flow_cell.run_parameters.get_flow_cell_model()
+        model: str | None = flow_cell_dir_data.run_parameters.get_flow_cell_model()
         new_flow_cell = IlluminaFlowCell(
-            internal_id=flow_cell.id, type=DeviceType.ILLUMINA, model=model
+            internal_id=flow_cell_dir_data.id, type=DeviceType.ILLUMINA, model=model
         )
         return store.add_illumina_flow_cell(new_flow_cell)
 
-    def store_illumina_sequencing_run(
-        self, illumina_flow_cell: IlluminaFlowCell, flow_cell_data: FlowCellDirectoryData
-    ) -> None:
-        """Store illumina run metrics in the status database."""
-        self._generate_sequencing_run_metrics(illumina_flow_cell, flow_cell_data)
-
     @staticmethod
-    def store_illumina_sample_sequencing_metrics():
-        """Store illumina sample sequencing metrics in the status database."""
-        pass
+    def get_illumina_sequencing_run(
+        flow_cell_dir_data: FlowCellDirectoryData,
+    ) -> IlluminaSequencingRun:
+        """Store illumina run metrics in the status database."""
+        metrics_service = IlluminaMetricsService()
+        return metrics_service.create_illumina_sequencing_run(flow_cell_dir_data)
 
-    def store_illumina_flow_cell_data(self, flow_cell: FlowCellDirectoryData) -> None:
+    def get_illumina_sample_sequencing_metrics(
+        self,
+        flow_cell_dir_data: FlowCellDirectoryData,
+    ) -> list[IlluminaSampleSequencingMetrics]:
+        """Store illumina sample sequencing metrics in the status database."""
+        metrics_service = IlluminaMetricsService()
+        return metrics_service.create_sample_sequencing_metrics_for_flow_cell(
+            flow_cell_directory=flow_cell_dir_data.path, store=self.status_db
+        )
+
+    def store_illumina_flow_cell_data(self, flow_cell_dir_data: FlowCellDirectoryData) -> None:
         """Store flow cell data in the status database."""
         flow_cell: IlluminaFlowCell = self.store_illumina_flow_cell(
-            flow_cell=flow_cell, store=self.status_db
+            flow_cell_dir_data=flow_cell_dir_data, store=self.status_db
         )
-        self.store_illumina_sequencing_run(flow_cell)
-        self.store_illumina_sample_sequencing_metrics()
+        sequencing_run: IlluminaSequencingRun = self.get_illumina_sequencing_run(flow_cell_dir_data)
+        sample_metrics: list[IlluminaSampleSequencingMetrics] = (
+            self.get_illumina_sample_sequencing_metrics(flow_cell_dir_data)
+        )
+        sequencing_run.device = flow_cell
+        sequencing_run.sample_metrics = sample_metrics
+        self.status_db.add_illumina_flow_cell(flow_cell)
+        self.status_db.add_illumina_sequencing_run(sequencing_run)
+        self.status_db.add_illumina_sample_metrics(sample_metrics)
         self.status_db.commit_to_store()
 
     def post_process_illumina_flow_cell(
