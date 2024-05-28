@@ -297,7 +297,7 @@ class FlowCellDirectoryData:
             return None
 
     @property
-    def demultiplexing_completed_at(self) -> datetime:
+    def demultiplexing_completed_at(self) -> datetime | None:
         """Get the demultiplexing completed time stamp from the demultiplexed runs dir."""
         try:
             return get_source_creation_time_stamp(self.demux_complete_path)
