@@ -27,13 +27,7 @@ from cg.apps.housekeeper.models import InputBundle
 from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import (
-    CaseActions,
-    CustomerId,
-    FileFormat,
-    GenomeVersion,
-    Strandedness,
-)
+from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -56,12 +50,9 @@ from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.models.raredisease.raredisease import RarediseaseSampleSheetHeaders
+from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
-from cg.models.taxprofiler.taxprofiler import (
-    TaxprofilerParameters,
-    TaxprofilerSampleSheetEntry,
-)
+from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
 from cg.services.bcl_convert_metrics_service.bcl_convert_metrics_service import (
     BCLConvertMetricsService,
@@ -2443,6 +2434,21 @@ def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> 
     return Path(
         raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_deliverables"
     ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture(scope="function")
+def raredisease_parameters_default(
+    raredisease_dir: Path,
+    raredisease_case_id: str,
+    raredisease_sample_sheet_path: Path,
+) -> RarediseaseParameters:
+    """Return Tomte parameters."""
+    return RarediseaseParameters(
+        input=raredisease_sample_sheet_path,
+        outdir=Path(raredisease_dir, raredisease_case_id),
+        target_bed="some_target_bed_file",
+        analysis_type="wes",
+    )
 
 
 @pytest.fixture(scope="function")
