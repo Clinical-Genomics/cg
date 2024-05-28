@@ -2446,6 +2446,77 @@ def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> 
 
 
 @pytest.fixture(scope="function")
+def raredisease_context(
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    nf_analysis_housekeeper: HousekeeperAPI,
+    trailblazer_api: MockTB,
+    raredisease_case_id: str,
+    sample_id: str,
+    no_sample_case_id: str,
+    total_sequenced_reads_pass: int,
+    apptag_rna: str,
+    case_id_not_enough_reads: str,
+    sample_id_not_enough_reads: str,
+    total_sequenced_reads_not_pass: int,
+    mocker,
+) -> CGConfig:
+    """Context to use in CLI."""
+    cg_context.housekeeper_api_ = nf_analysis_housekeeper
+    cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
+    status_db: Store = cg_context.status_db
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+
+    # Create textbook case with enough reads
+    case_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=raredisease_case_id,
+        name=raredisease_case_id,
+        data_analysis=Workflow.RAREDISEASE,
+    )
+
+    sample_raredisease_case_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=sample_id,
+        last_sequenced_at=datetime.now(),
+        reads=total_sequenced_reads_pass,
+        application_tag=apptag_rna,
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=case_enough_reads,
+        sample=sample_raredisease_case_enough_reads,
+    )
+
+    # Create case without enough reads
+    case_not_enough_reads: Case = helpers.add_case(
+        store=status_db,
+        internal_id=case_id_not_enough_reads,
+        name=case_id_not_enough_reads,
+        data_analysis=Workflow.RAREDISEASE,
+    )
+
+    sample_not_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=sample_id_not_enough_reads,
+        last_sequenced_at=datetime.now(),
+        reads=total_sequenced_reads_not_pass,
+        application_tag=apptag_rna,
+    )
+
+    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
+
+    mocker.patch.object(RarediseaseAnalysisAPI, "get_target_bed_from_lims")
+    RarediseaseAnalysisAPI.get_target_bed_from_lims.return_value = "some_target_bed_file"
+
+    return cg_context
+
+
+@pytest.fixture(scope="function")
 def deliverable_data(raredisease_dir: Path, raredisease_case_id: str, sample_id: str) -> dict:
     return {
         "files": [
@@ -3880,73 +3951,6 @@ def downsample_api(
     return DownsampleAPI(
         config=downsample_context,
     )
-
-
-@pytest.fixture(scope="function")
-def raredisease_context(
-    cg_context: CGConfig,
-    helpers: StoreHelpers,
-    nf_analysis_housekeeper: HousekeeperAPI,
-    trailblazer_api: MockTB,
-    sample_id: str,
-    no_sample_case_id: str,
-    total_sequenced_reads_pass: int,
-    apptag_rna: str,
-    raredisease_case_id: str,
-    case_id_not_enough_reads: str,
-    sample_id_not_enough_reads: str,
-    total_sequenced_reads_not_pass: int,
-) -> CGConfig:
-    """Raredisease context to use in CLI."""
-    cg_context.housekeeper_api_ = nf_analysis_housekeeper
-    cg_context.trailblazer_api_ = trailblazer_api
-    cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
-    status_db: Store = cg_context.status_db
-
-    # Create ERROR case with NO SAMPLES
-    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
-
-    # Create a textbook case with enough reads
-    case_enough_reads: Case = helpers.add_case(
-        store=status_db,
-        internal_id=raredisease_case_id,
-        name=raredisease_case_id,
-        data_analysis=Workflow.RAREDISEASE,
-    )
-
-    sample_raredisease_case_enough_reads: Sample = helpers.add_sample(
-        status_db,
-        application_tag=apptag_rna,
-        internal_id=sample_id,
-        reads=total_sequenced_reads_pass,
-        last_sequenced_at=datetime.now(),
-    )
-
-    helpers.add_relationship(
-        status_db,
-        case=case_enough_reads,
-        sample=sample_raredisease_case_enough_reads,
-    )
-
-    # Create a case without enough reads
-    case_not_enough_reads: Case = helpers.add_case(
-        store=status_db,
-        internal_id=case_id_not_enough_reads,
-        name=case_id_not_enough_reads,
-        data_analysis=Workflow.RAREDISEASE,
-    )
-
-    sample_not_enough_reads: Sample = helpers.add_sample(
-        status_db,
-        application_tag=apptag_rna,
-        internal_id=sample_id_not_enough_reads,
-        reads=total_sequenced_reads_not_pass,
-        last_sequenced_at=datetime.now(),
-    )
-
-    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
-
-    return cg_context
 
 
 @pytest.fixture
