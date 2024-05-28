@@ -7,7 +7,7 @@ log "dragen --bcl-conversion-only true \
 --force
 touch {demux_completed_file}"
 
-dragen --version > {demux_dir}/dragen_version.txt
+dragen --version > {demux_dir}/demux_version.txt
 
 dragen --bcl-conversion-only true \
 --bcl-input-directory {run_dir} \
