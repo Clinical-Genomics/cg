@@ -5,21 +5,14 @@ from pathlib import Path
 
 import pytest
 
-from cg.services.parse_run_completion_status_service.parse_run_completion_status_service import (
-    DATE_TIME_FORMAT,
-)
+from cg.utils.time import DATE_TIME_FORMAT
 
 
 @pytest.fixture()
-def run_completion_status_path() -> Path:
+def run_completion_status_path(novaseq_x_flow_cell_dir) -> Path:
     """Return the path to the run completion status file."""
     return Path(
-        "tests",
-        "fixtures",
-        "apps",
-        "demultiplexing",
-        "flow_cells",
-        "20231108_LH00188_0028_B22F52TLT3",
+        novaseq_x_flow_cell_dir,
         "RunCompletionStatus.xml",
     )
 

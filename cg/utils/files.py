@@ -63,17 +63,12 @@ def is_pattern_in_file_path_name(file_path: Path, pattern: str) -> bool:
 
 def get_source_creation_time_stamp(source_path: Path) -> float:
     """
-    Return time stamp that a directory is created.
+    Return time stamp that a source is created.
     Raises:
-        FileNotFoundError if the directory does not exist.
-        ValueError if the specified path is not a directory.
+        FileNotFoundError if the source does not exist.
     """
     if not source_path.exists():
         raise FileNotFoundError(f"Directory with path {source_path} is not found.")
-
-    if not source_path.is_dir():
-        raise ValueError(f"Specified path {source_path} is not a directory.")
-
     return os.stat(source_path).st_ctime
 
 

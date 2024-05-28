@@ -93,7 +93,7 @@ def test_rename_file_original_does_not_exist(tmp_path: Path):
         rename_file(file_path=file_path, renamed_file_path=renamed_file_path)
 
 
-def test_get_creation_date(tmp_path_factory, timestamp_now: datetime):
+def test_get_creation_date_for_dir(tmp_path_factory):
     """Test to retrieve the creation date of a directory."""
 
     # GIVEN a directory that is created now
@@ -101,6 +101,21 @@ def test_get_creation_date(tmp_path_factory, timestamp_now: datetime):
 
     # WHEN retrieving the creation time stamp
     creation_time_stamp: float = get_source_creation_time_stamp(directory_path)
+
+    # THEN the creation time stamp is returned
+    assert isinstance(creation_time_stamp, float)
+
+
+def test_get_creation_date_for_file(tmp_path_factory):
+    """Test to retrieve the creation date of a directory."""
+
+    # GIVEN a file that is created now
+    directory_path: Path = tmp_path_factory.mktemp("some_dir")
+    file_path: Path = Path(directory_path, "some_file")
+    file_path.touch()
+
+    # WHEN retrieving the creation time stamp
+    creation_time_stamp: float = get_source_creation_time_stamp(file_path)
 
     # THEN the creation time stamp is returned
     assert isinstance(creation_time_stamp, float)

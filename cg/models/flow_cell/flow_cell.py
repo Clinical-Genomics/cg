@@ -118,6 +118,22 @@ class FlowCellDirectoryData:
             )
         return self.path
 
+    def get_demultiplexed_runs_dir(self) -> Path:
+        """
+        Return the flow cells run directory
+        if the FlowCellsDirectoryData was initialised with Demultiplexed runs dir.
+        """
+        current_path: str = self.path.as_posix()
+        if DemultiplexingDirsAndFiles.FLOW_CELLS_DIRECTORY_NAME in current_path:
+            return Path(
+                str.replace(
+                    current_path,
+                    DemultiplexingDirsAndFiles.FLOW_CELLS_DIRECTORY_NAME,
+                    DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME,
+                )
+            )
+        return self.path
+
     @property
     def run_parameters_path(self) -> Path:
         """Return path to run parameters file if it exists.
@@ -162,7 +178,14 @@ class FlowCellDirectoryData:
     @property
     def demultiplexing_started_path(self) -> Path:
         """Return demux started path."""
-        return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_STARTED)
+        flow_cell_run_dir: Path = self.get_flow_cell_run_dir()
+        return Path(flow_cell_run_dir, DemultiplexingDirsAndFiles.DEMUX_STARTED)
+
+    @property
+    def demux_complete_path(self) -> Path:
+        """Return demux complete path."""
+        demux_run_dir = self.get_demultiplexed_runs_dir()
+        return Path(demux_run_dir, DemultiplexingDirsAndFiles.DEMUX_COMPLETE)
 
     @property
     def trailblazer_config_path(self) -> Path:
@@ -171,7 +194,7 @@ class FlowCellDirectoryData:
 
     @property
     def is_demultiplexing_complete(self) -> bool:
-        return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
+        return Path(self.demux_complete_path).exists()
 
     def _parse_date(self):
         """Return the parsed date in the correct format."""
@@ -264,7 +287,7 @@ class FlowCellDirectoryData:
         return parser.get_start_time(file_path) if file_path else None
 
     @property
-    def sequenced_completed_at(self) -> datetime.datetime | None:
+    def sequencing_completed_at(self) -> datetime.datetime | None:
         parser = ParseRunCompletionStatusService()
         file_path: Path = self.get_run_completion_status()
         return parser.get_end_time(file_path) if file_path else None
@@ -272,20 +295,18 @@ class FlowCellDirectoryData:
     @property
     def demultiplexing_started_at(self) -> datetime:
         """Get the demultiplexing started time stamp from the flow cell run dir."""
-        flow_cell_dir = self.get_flow_cell_run_dir()
-        demux_started_path = Path(flow_cell_dir, DemultiplexingDirsAndFiles.DEMUX_STARTED)
-        if not demux_started_path.exists():
+        try:
+            return get_source_creation_time_stamp(self.demultiplexing_started_path)
+        except FileNotFoundError:
             return None
-        return get_source_creation_time_stamp(demux_started_path)
 
     @property
-    def demultiplexing_ended_at(self) -> datetime:
-        """Get the demultiplexing ended time stamp from the demultiplexed runs dir."""
-        if DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME in self.path.as_posix():
-            demux_complete_path = Path(self.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE)
-            if demux_complete_path.exists():
-                return get_source_creation_time_stamp(demux_complete_path)
-        return None
+    def demultiplexing_completed_at(self) -> datetime:
+        """Get the demultiplexing completed time stamp from the demultiplexed runs dir."""
+        try:
+            return get_source_creation_time_stamp(self.demux_complete_path)
+        except FileNotFoundError:
+            return None
 
     def __str__(self):
         return f"FlowCell(path={self.path},run_parameters_path={self.run_parameters_path})"
