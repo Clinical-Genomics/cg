@@ -14,3 +14,10 @@ SKIP_CONFIRMATION = click.option(
     default=False,
     help="Skip confirmation",
 )
+
+FORCE = click.option(
+    "-f",
+    "--force",
+    is_flag=True,
+    help="Override any warnings or confirmation prompts.",
+)
