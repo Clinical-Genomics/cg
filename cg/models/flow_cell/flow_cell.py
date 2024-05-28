@@ -290,7 +290,7 @@ class FlowCellDirectoryData:
         return parser.get_end_time(file_path) if file_path else None
 
     @property
-    def demultiplexing_started_at(self) -> datetime:
+    def demultiplexing_started_at(self) -> datetime | None:
         """Get the demultiplexing started time stamp from the flow cell run dir."""
         try:
             return get_source_creation_time_stamp(self.demultiplexing_started_path)
