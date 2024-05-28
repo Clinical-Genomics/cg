@@ -1,6 +1,6 @@
 """Constants for cg."""
 
-from enum import IntEnum, StrEnum
+from enum import Enum, IntEnum, StrEnum, auto
 
 import click
 
@@ -57,7 +57,7 @@ class ControlOptions(StrEnum):
     EMPTY: str = ""
 
 
-DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
+DEFAULT_CAPTURE_KIT = "twistexomecomprehensive_10.2_hg19_design.bed"
 
 
 class CustomerId(StrEnum):
@@ -68,7 +68,11 @@ class CustomerId(StrEnum):
     CUST004: str = "cust004"
     CUST032: str = "cust032"
     CUST042: str = "cust042"
+    CUST110: str = "cust110"
+    CUST127: str = "cust127"
     CUST132: str = "cust132"
+    CUST143: str = "cust143"
+    CUST147: str = "cust147"
     CUST999: str = "cust999"
 
 
@@ -90,6 +94,14 @@ class AnalysisType(StrEnum):
     WHOLE_GENOME_SEQUENCING: str = "wgs"
     WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
     OTHER: str = "other"
+
+
+class CancerAnalysisType(StrEnum):
+    TUMOR_NORMAL = auto()
+    TUMOR_NORMAL_PANEL = auto()
+    TUMOR_NORMAL_WGS = auto()
+    TUMOR_PANEL = auto()
+    TUMOR_WGS = auto()
 
 
 class PrepCategory(StrEnum):
@@ -222,7 +234,6 @@ class APIMethods(StrEnum):
 
 
 DRY_RUN = click.option(
-    "-d",
     "--dry-run",
     is_flag=True,
     default=False,
@@ -295,3 +306,9 @@ class MultiQC(StrEnum):
 
 
 NG_UL_SUFFIX: str = " ng/uL"
+
+
+class SequencingQCStatus(Enum):
+    FAILED = auto()
+    PASSED = auto()
+    PENDING = auto()

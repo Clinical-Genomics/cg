@@ -4,7 +4,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Any, Iterator
+from typing import Iterator
 
 import click
 from housekeeper.store.models import Bundle, Version
@@ -28,8 +28,8 @@ from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.services.quality_controller import QualityControllerService
-from cg.store.models import Analysis, Application, BedVersion, Case, CaseSample, Sample
+from cg.services.sequencing_qc_service import SequencingQCService
+from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -66,6 +66,11 @@ class AnalysisAPI(MetaAPI):
     def fastq_handler(self):
         return FastqHandler
 
+    @property
+    def is_multiple_samples_allowed(self) -> bool:
+        """Return whether the analysis supports multiple samples to be linked to the case."""
+        return True
+
     @staticmethod
     def get_help(context):
         """
@@ -97,7 +102,7 @@ class AnalysisAPI(MetaAPI):
         """Check if case is ready for analysis. If case passes sequencing QC and is set to analyze,
         or has not been analyzed yet, or the latest analysis failed, the case is ready for analysis.
         """
-        case_passed_sequencing_qc: bool = QualityControllerService.case_pass_sequencing_qc(case)
+        case_passed_sequencing_qc: bool = SequencingQCService.case_pass_sequencing_qc(case)
         case_is_set_to_analyze: bool = case.action == CaseActions.ANALYZE
         case_has_not_been_analyzed: bool = not case.latest_analyzed
         case_latest_analysis_failed: bool = (
@@ -115,9 +120,7 @@ class AnalysisAPI(MetaAPI):
         """
         cases_to_analyse: list[Case] = self.get_cases_to_analyse()
         cases_passing_quality_check: list[Case] = [
-            case
-            for case in cases_to_analyse
-            if QualityControllerService.case_pass_sequencing_qc(case)
+            case for case in cases_to_analyse if SequencingQCService.case_pass_sequencing_qc(case)
         ]
         return cases_passing_quality_check
 
@@ -190,17 +193,18 @@ class AnalysisAPI(MetaAPI):
         return application_types.pop()
 
     def get_case_source_type(self, case_id: str) -> str | None:
-        """Returns the source type for samples in a case.
+        """
+        Return the sample source type of a case.
+
         Raises:
-            CgError: If different sources are set for the samples linked to a case."""
+            CgError: If different sources are set for the samples linked to a case.
+        """
         sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
         source_types: set[str | None] = {
-            self.lims_api.get_source(lims_id=sample_id) for sample_id in sample_ids
+            self.lims_api.get_source(sample_id) for sample_id in sample_ids
         }
-
         if len(source_types) > 1:
             raise CgError(f"Different source types found for case: {case_id} ({source_types})")
-
         return source_types.pop()
 
     def has_case_only_exome_samples(self, case_id: str) -> bool:
@@ -368,6 +372,14 @@ class AnalysisAPI(MetaAPI):
                 bundle=sample.internal_id, tags={SequencingFileTag.FASTQ}
             )
         ]
+
+    def get_validated_case(self, case_id: str) -> Case:
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if not case.links:
+            raise CgError(f"No samples linked to {case_id}")
+        if nlinks := len(case.links) > 1 and not self.is_multiple_samples_allowed:
+            raise CgError(f"Only one sample per case is allowed. {nlinks} found")
+        return case
 
     def link_fastq_files_for_sample(
         self, case: Case, sample: Sample, concatenate: bool = False
@@ -691,12 +703,17 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     def get_data_analysis_type(self, case_id: str) -> str | None:
-        """Return data analysis type carried out."""
-        case_sample: Sample = self.status_db.get_case_samples_by_case_id(case_internal_id=case_id)[
-            0
-        ].sample
-        lims_sample: dict[str, Any] = self.lims_api.sample(case_sample.internal_id)
-        application: Application = self.status_db.get_application_by_tag(
-            tag=lims_sample.get("application")
-        )
-        return application.analysis_type if application else None
+        """
+        Return data analysis type carried out.
+        Raises:
+            ValueError: If the samples in a case have not the same analysis type.
+        """
+        case: Case = self.get_validated_case(case_id)
+        analysis_types: set[str] = {
+            link.sample.application_version.application.analysis_type for link in case.links
+        }
+        if len(analysis_types) > 1:
+            raise ValueError(
+                f"Case samples have different analysis types {', '.join(analysis_types)}"
+            )
+        return analysis_types.pop() if analysis_types else None

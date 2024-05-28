@@ -51,7 +51,11 @@ def test_run_parameters_parent_class_fails(
     "run_parameters_path, constructor, sequencer",
     [
         ("hiseq_x_single_index_run_parameters_path", RunParametersHiSeq, Sequencers.HISEQX),
-        ("hiseq_2500_dual_index_run_parameters_path", RunParametersHiSeq, Sequencers.HISEQGA),
+        (
+            "hiseq_2500_dual_index_run_parameters_path",
+            RunParametersHiSeq,
+            Sequencers.HISEQGA,
+        ),
         (
             "novaseq_6000_run_parameters_pre_1_5_kits_path",
             RunParametersNovaSeq6000,
@@ -301,3 +305,25 @@ def test_get_index_settings(
     settings: IndexSettings = flow_cell.run_parameters.index_settings
     # THEN the correct index settings are returned
     assert settings == correct_settings
+
+
+@pytest.mark.parametrize(
+    "run_parameters_fixture, expected_result",
+    [
+        ("hiseq_x_single_index_run_parameters", None),
+        ("hiseq_2500_dual_index_run_parameters", None),
+        ("novaseq_6000_run_parameters_pre_1_5_kits", "S4"),
+        ("novaseq_6000_run_parameters_post_1_5_kits", "S1"),
+        ("novaseq_x_run_parameters", "10B"),
+    ],
+)
+def test_get_flow_cell_mode(
+    run_parameters_fixture: str, expected_result: str | None, request: FixtureRequest
+):
+    """Test that the correct flow cell mode is returned for each RunParameters object."""
+    # GIVEN a RunParameters object
+    run_parameters: RunParameters = request.getfixturevalue(run_parameters_fixture)
+    # WHEN getting the flow cell mode
+    result: str | None = run_parameters.get_flow_cell_model()
+    # THEN the correct flow cell mode is returned
+    assert result == expected_result

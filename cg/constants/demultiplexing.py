@@ -1,6 +1,6 @@
 """Constants related to demultiplexing."""
 
-from enum import StrEnum
+from enum import Enum, StrEnum
 
 from pydantic import BaseModel
 
@@ -25,9 +25,11 @@ class DemultiplexingDirsAndFiles(StrEnum):
     DATA: str = "Data"
     BCL_CONVERT: str = "BCLConvert"
     FLOW_CELLS_DIRECTORY_NAME: str = "flow_cells"
+    DEMULTIPLEXED_RUNS_DIRECTORY_NAME: str = "demultiplexed_runs"
     ILLUMINA_FILE_MANIFEST: str = "Manifest.tsv"
     CG_FILE_MANIFEST: str = "file_manifest.tsv"
     INTER_OP: str = "InterOp"
+    RUN_COMPLETION_STATUS: str = "RunCompletionStatus.xml"
 
 
 class RunParametersXMLNodes(StrEnum):
@@ -57,6 +59,8 @@ class RunParametersXMLNodes(StrEnum):
     READ_NAME: str = "ReadName"
     REAGENT_KIT_VERSION: str = "./RfidsInfo/SbsConsumableVersion"
     SEQUENCER_ID: str = ".//ScannerID"
+    FLOW_CELL_MODE: str = ".//FlowCellMode"
+    MODE: str = ".//Mode"
 
     # Node Values
     HISEQ_APPLICATION: str = "HiSeq Control Software"
@@ -212,3 +216,8 @@ NAME_TO_INDEX_SETTINGS: dict[str, IndexSettings] = {
     "NovaSeq6000Post1.5Kits": NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS,
     "NoReverseComplements": NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS,
 }
+
+
+class RunCompletionStatusNodes(StrEnum):
+    RUN_START: str = ".//RunStartTime"
+    RUN_END: str = ".//RunEndTime"

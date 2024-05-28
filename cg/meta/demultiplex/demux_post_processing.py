@@ -16,7 +16,9 @@ from cg.meta.demultiplex.status_db_storage_functions import (
     store_sequencing_metrics_in_status_db,
 )
 from cg.meta.demultiplex.utils import create_delivery_file_in_flow_cell_directory
-from cg.meta.demultiplex.validation import is_flow_cell_ready_for_postprocessing
+from cg.services.illumina_post_processing_service.validation import (
+    is_flow_cell_ready_for_postprocessing,
+)
 from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 from cg.store.store import Store
@@ -29,8 +31,10 @@ class DemuxPostProcessingAPI:
 
     def __init__(self, config: CGConfig) -> None:
         self.config: CGConfig = config
-        self.flow_cells_dir: Path = Path(config.illumina_flow_cells_directory)
-        self.demultiplexed_runs_dir: Path = Path(config.illumina_demultiplexed_runs_directory)
+        self.flow_cells_dir: Path = Path(config.run_instruments.illumina.flow_cell_runs_dir)
+        self.demultiplexed_runs_dir: Path = Path(
+            config.run_instruments.illumina.demultiplexed_runs_dir
+        )
         self.status_db: Store = config.status_db
         self.hk_api: HousekeeperAPI = config.housekeeper_api
         self.dry_run: bool = False
