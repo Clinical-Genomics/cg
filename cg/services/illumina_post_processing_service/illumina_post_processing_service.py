@@ -13,7 +13,7 @@ from cg.services.illumina_post_processing_service.utils import (
 from cg.services.illumina_post_processing_service.validation import (
     is_flow_cell_ready_for_postprocessing,
 )
-from cg.store.models import IlluminaFlowCell
+from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -24,6 +24,13 @@ class IlluminaPostProcessingService:
         self.status_db: Store = status_db
         self.hk_api: HousekeeperAPI = housekeeper_api
         self.dry_run: bool = False
+
+
+    def _generate_sequencing_run_metrics(self,illumina_flow_cell: IlluminaFlowCell, flow_cell_data: FlowCellDirectoryData) -> IlluminaSequencingRun:
+
+
+
+
 
     @staticmethod
     def store_illumina_flow_cell(
@@ -40,10 +47,9 @@ class IlluminaPostProcessingService:
         )
         return store.add_illumina_flow_cell(new_flow_cell)
 
-    @staticmethod
-    def store_illumina_sequencing_metrics(flow_cell: IlluminaFlowCell) -> None:
+    def store_illumina_sequencing_run(self,illumina_flow_cell: IlluminaFlowCell, flow_cell_data: FlowCellDirectoryData) -> None:
         """Store illumina run metrics in the status database."""
-        pass
+        self._generate_sequencing_run_metrics(illumina_flow_cell, flow_cell_data)
 
     @staticmethod
     def store_illumina_sample_sequencing_metrics():
@@ -55,7 +61,7 @@ class IlluminaPostProcessingService:
         flow_cell: IlluminaFlowCell = self.store_illumina_flow_cell(
             flow_cell=flow_cell, store=self.status_db
         )
-        self.store_illumina_sequencing_metrics(flow_cell)
+        self.store_illumina_sequencing_run(flow_cell)
         self.store_illumina_sample_sequencing_metrics()
         self.status_db.commit_to_store()
 
