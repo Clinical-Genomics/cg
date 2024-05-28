@@ -15,7 +15,6 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
-    IlluminaFlowCell,
 )
 from cg.store.store import Store
 from cg.utils.flow_cell import get_flow_cell_id
@@ -121,7 +120,6 @@ class IlluminaMetricsService:
 
         return IlluminaSampleSequencingMetrics(
             sample_id=sample_id,
-            instrument_run_id=instrument_run_id,
             type=DeviceType.ILLUMINA,
             flow_cell_lane=lane,
             total_reads_in_lane=total_reads,
