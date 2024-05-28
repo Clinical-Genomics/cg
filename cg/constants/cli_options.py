@@ -19,5 +19,5 @@ FORCE = click.option(
     "-f",
     "--force",
     is_flag=True,
-    help="Override any warnings or confirmation prompts.",
+    help="Override any warnings or confirmation prompts",
 )

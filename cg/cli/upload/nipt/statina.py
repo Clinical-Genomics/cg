@@ -2,7 +2,7 @@ import logging
 
 import click
 
-from cg.constants.cli_options import DRY_RUN
+from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.constants.nipt import Q30_THRESHOLD
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.nipt.models import StatinaUploadFiles
@@ -21,7 +21,7 @@ def statina():
 @statina.command("case")
 @click.argument("case_id", required=True)
 @DRY_RUN
-@click.option("--force", is_flag=True, help="Force upload of case to databases, despite qc")
+@FORCE
 @click.pass_obj
 def batch(configs: CGConfig, case_id: str, dry_run: bool, force: bool):
     """Loading batch into the NIPT database"""
