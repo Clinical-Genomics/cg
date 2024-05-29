@@ -30,7 +30,7 @@ class DemultiplexingDirsAndFiles(StrEnum):
     CG_FILE_MANIFEST: str = "file_manifest.tsv"
     INTER_OP: str = "InterOp"
     RUN_COMPLETION_STATUS: str = "RunCompletionStatus.xml"
-    DEMUX_VERSION_FILE: str = "demux_version.txt"
+    DEMUX_VERSION_FILE: str = "dragen-replay.json"
 
 
 class RunParametersXMLNodes(StrEnum):

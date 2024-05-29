@@ -12,7 +12,15 @@ from cg.services.illumina_services.illumina_metrics_service.illumina_demux_versi
 @pytest.fixture
 def demux_version_file() -> Path:
     """Return the path to a demultiplexing log file."""
-    return Path("tests", "fixtures", "services", "illumina_demux_software", "demux_version.txt")
+    return Path(
+        "tests",
+        "fixtures",
+        "apps",
+        "demultiplexing",
+        "demultiplexed-runs",
+        "20231108_LH00188_0028_B22F52TLT3",
+        "dragen-replay.json",
+    )
 
 
 @pytest.fixture
