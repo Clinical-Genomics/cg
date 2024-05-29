@@ -5,7 +5,6 @@ from pathlib import Path
 
 from cg.constants import DataDelivery
 from cg.constants.constants import CancerAnalysisType, FileExtensions, Workflow
-from cg.constants.lims import LimsQCFlag
 from cg.constants.subject import Sex
 
 DELIVERY_REPORT_FILE_NAME: str = f"delivery-report{FileExtensions.HTML}"
@@ -59,10 +58,10 @@ BALSAMIC_ANALYSIS_TYPE: dict[str, str] = {
     CancerAnalysisType.TUMOR_WGS: "Tumör-endast (helgenomsekvensering)",
 }
 
-REPORT_QC_FLAG: dict[LimsQCFlag, str] = {
-    LimsQCFlag.FAILED: "Underkänd",
-    LimsQCFlag.PASSED: "Godkänd",
-    LimsQCFlag.UNKNOWN: "Okänd",
+REPORT_QC_FLAG: dict[bool | None, str] = {
+    False: "Underkänd",
+    True: "Godkänd",
+    None: "Okänd",
 }
 
 # Report required fields (OPTIONAL: "version")
