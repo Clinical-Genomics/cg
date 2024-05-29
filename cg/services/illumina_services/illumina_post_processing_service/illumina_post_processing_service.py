@@ -70,16 +70,15 @@ class IlluminaPostProcessingService:
         sequencing_run.sample_metrics = sample_metrics
         return flow_cell, sequencing_run, sample_metrics
 
-    @staticmethod
     def add_illumina_models_to_store(
+        self,
         flow_cell: IlluminaFlowCell,
         sequencing_run: IlluminaSequencingRun,
         sample_metrics: list[IlluminaSampleSequencingMetrics],
-        store: Store,
     ) -> None:
-        store.add_illumina_flow_cell(flow_cell)
-        store.add_illumina_sequencing_run(sequencing_run)
-        store.add_illumina_sample_metrics(sample_metrics)
+        self.status_db.add_illumina_flow_cell(flow_cell)
+        self.status_db.add_illumina_sequencing_run(sequencing_run)
+        self.status_db.add_illumina_sample_metrics(sample_metrics)
 
     def store_illumina_flow_cell_data(self, flow_cell_dir_data: FlowCellDirectoryData) -> None:
         """Store flow cell data in the status database."""
