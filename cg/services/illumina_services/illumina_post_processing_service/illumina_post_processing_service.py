@@ -26,7 +26,7 @@ class IlluminaPostProcessingService:
     def __init__(self, status_db: Store, housekeeper_api: HousekeeperAPI, dry_run: bool) -> None:
         self.status_db: Store = status_db
         self.hk_api: HousekeeperAPI = housekeeper_api
-        self.dry_run: bool = False
+        self.dry_run: bool = dry_run
 
     @staticmethod
     def get_illumina_flow_cell(
