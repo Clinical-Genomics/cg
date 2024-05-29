@@ -1,6 +1,6 @@
-from enum import Enum
 import re
 from datetime import datetime
+from enum import Enum
 from typing import Annotated
 
 from sqlalchemy import (
@@ -1073,6 +1073,37 @@ class IlluminaSequencingRun(InstrumentRun):
     demultiplexing_completed_at: Mapped[datetime | None]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
+
+
+class PacBioSequencingRun(InstrumentRun):
+    __tablename__ = "pacbio_sequencing_run"
+
+    id: Mapped[int] = mapped_column(ForeignKey("instrument_run.id"), primary_key=True)
+    well: Mapped[Str32 | None]
+    plate: Mapped[int | None]
+    movie_time_hours: Mapped[int | None]
+    hifi_reads: Mapped[BigInt | None]
+    hifi_yield: Mapped[BigInt | None]
+    hifi_mean_read_length: Mapped[BigInt | None]
+    hifi_median_read_quality: Mapped[Str32 | None]
+    percent_reads_over_q30: Mapped[Num_6_2 | None]
+    productive_zmw: Mapped[BigInt | None]
+    p0_zmw: Mapped[BigInt | None]
+    p1_zmw: Mapped[BigInt | None]
+    p2_zmw: Mapped[BigInt | None]
+    percentage_p0: Mapped[Num_6_2 | None]
+    percentage_p1: Mapped[Num_6_2 | None]
+    percentage_p2: Mapped[Num_6_2 | None]
+    polymerase_mean_read_length: Mapped[BigInt | None]
+    polymerase_read_length_n50: Mapped[BigInt | None]
+    polymerase_mean_longest_subread: Mapped[BigInt | None]
+    polymerase_longest_subread_n50: Mapped[BigInt | None]
+    control_reads: Mapped[BigInt | None]
+    control_mean_read_length: Mapped[BigInt | None]
+    control_mean_read_concordance: Mapped[Num_6_2 | None]
+    control_mode_read_concordance: Mapped[Num_6_2 | None]
+
+    __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
 
 class SampleRunMetrics(Base):
