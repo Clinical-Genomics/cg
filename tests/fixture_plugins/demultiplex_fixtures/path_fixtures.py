@@ -381,6 +381,14 @@ def novaseq_x_demux_runs_dir(
     return Path(illumina_demultiplexed_runs_directory, novaseq_x_flow_cell_full_name)
 
 
+@pytest.fixture
+def hiseq_2500_dual_index_demux_runs_dir(
+    illumina_flow_cells_directory, hiseq_2500_dual_index_flow_cell_name: str
+) -> Path:
+    """Return the path to a HiSeq2500 flow cell."""
+    return Path(illumina_flow_cells_directory, hiseq_2500_dual_index_flow_cell_name)
+
+
 # Path to run parameter files
 
 

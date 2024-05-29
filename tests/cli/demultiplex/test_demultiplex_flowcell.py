@@ -123,17 +123,17 @@ def test_is_demultiplexing_complete(
 
 
 def test_is_demultiplexing_not_complete(
-    novaseq_x_flow_cell: FlowCellDirectoryData,
+    hiseq_2500_dual_index_demux_runs_flow_cell: FlowCellDirectoryData,
 ):
     """Tests the is_demultiplexing_complete property of FlowCellDirectoryData."""
 
     # GIVEN a demultiplexing directory with a demuxcomplete.txt file
     assert not Path(
-        novaseq_x_flow_cell.path,
+        hiseq_2500_dual_index_demux_runs_flow_cell.path,
         DemultiplexingDirsAndFiles.DEMUX_COMPLETE,
     ).exists()
 
     # WHEN checking if the demultiplexing is complete
 
     # THEN the property should return true
-    assert not novaseq_x_flow_cell.is_demultiplexing_complete
+    assert not hiseq_2500_dual_index_demux_runs_flow_cell.is_demultiplexing_complete
