@@ -10,15 +10,10 @@ from cg.services.illumina_services.illumina_metrics_service.illumina_demux_versi
 
 
 @pytest.fixture
-def demux_version_file() -> Path:
+def demux_version_file(novaseq_x_demux_runs_dir) -> Path:
     """Return the path to a demultiplexing log file."""
     return Path(
-        "tests",
-        "fixtures",
-        "apps",
-        "demultiplexing",
-        "demultiplexed-runs",
-        "20231108_LH00188_0028_B22F52TLT3",
+        novaseq_x_demux_runs_dir,
         "dragen-replay.json",
     )
 
