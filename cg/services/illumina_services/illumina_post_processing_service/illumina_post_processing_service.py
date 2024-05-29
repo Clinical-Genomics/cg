@@ -29,9 +29,8 @@ class IlluminaPostProcessingService:
         self.dry_run: bool = False
 
     @staticmethod
-    def store_illumina_flow_cell(
+    def get_illumina_flow_cell(
         flow_cell_dir_data: FlowCellDirectoryData,
-        store: Store,
     ) -> IlluminaFlowCell:
         """
         Create flow cell from the parsed and validated flow cell data.
@@ -41,7 +40,7 @@ class IlluminaPostProcessingService:
         new_flow_cell = IlluminaFlowCell(
             internal_id=flow_cell_dir_data.id, type=DeviceType.ILLUMINA, model=model
         )
-        return store.add_illumina_flow_cell(new_flow_cell)
+        return new_flow_cell
 
     @staticmethod
     def get_illumina_sequencing_run(
@@ -63,8 +62,8 @@ class IlluminaPostProcessingService:
 
     def store_illumina_flow_cell_data(self, flow_cell_dir_data: FlowCellDirectoryData) -> None:
         """Store flow cell data in the status database."""
-        flow_cell: IlluminaFlowCell = self.store_illumina_flow_cell(
-            flow_cell_dir_data=flow_cell_dir_data, store=self.status_db
+        flow_cell: IlluminaFlowCell = self.get_illumina_flow_cell(
+            flow_cell_dir_data=flow_cell_dir_data
         )
         sequencing_run: IlluminaSequencingRun = self.get_illumina_sequencing_run(flow_cell_dir_data)
         sample_metrics: list[IlluminaSampleSequencingMetrics] = (

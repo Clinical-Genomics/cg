@@ -373,6 +373,14 @@ def demultiplex_not_complete_novaseqx_flow_cell(tmp_file: Path) -> Path:
     return tmp_file
 
 
+@pytest.fixture
+def novaseq_x_demux_runs_dir(
+    illumina_demultiplexed_runs_directory: Path, novaseq_x_flow_cell_full_name: str
+) -> Path:
+    """Return the path to a NovaSeqX flow cell."""
+    return Path(illumina_demultiplexed_runs_directory, novaseq_x_flow_cell_full_name)
+
+
 # Path to run parameter files
 
 
