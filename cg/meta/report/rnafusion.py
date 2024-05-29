@@ -45,6 +45,7 @@ class RnafusionReportAPI(ReportAPI):
             duplicates=sample_metrics.pct_duplication,
             dv200=self.lims_api.get_sample_dv200(sample.internal_id),
             gc_content=sample_metrics.after_filtering_gc_content,
+            initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
             input_amount=self.lims_api.get_latest_rna_input_amount(sample.internal_id),
             mapped_reads=get_mapped_reads_fraction(
                 mapped_reads=sample_metrics.read_pairs_examined * 2,
@@ -57,7 +58,6 @@ class RnafusionReportAPI(ReportAPI):
             pct_surviving=sample_metrics.pct_surviving,
             q20_rate=sample_metrics.after_filtering_q20_rate,
             q30_rate=sample_metrics.after_filtering_q30_rate,
-            reception_qc_flag=self.lims_api.get_sample_reception_qc_flag(sample.internal_id),
             ribosomal_bases=sample_metrics.pct_ribosomal_bases,
             rin=self.lims_api.get_sample_rin(sample.internal_id),
             uniquely_mapped_reads=sample_metrics.uniquely_mapped_percent,
