@@ -162,6 +162,11 @@ class RnafusionSample(Of1508Sample):
     _suitable_project = OrderType.RNAFUSION
 
 
+class TomteSample(MipDnaSample):
+    _suitable_project = OrderType.TOMTE
+    reference_genome: GenomeVersion | None
+
+
 class FastqSample(OrderInSample):
     _suitable_project = OrderType.FASTQ
 
@@ -282,6 +287,10 @@ class SarsCov2Sample(MicrobialSample):
     region_code: str
     selection_criteria: str
     volume: str | None
+
+    @validator("lab_code", pre=True, always=True)
+    def set_lab_code(cls, value):
+        return "SE100 Karolinska"
 
 
 def sample_class_for(project: OrderType):

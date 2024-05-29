@@ -1,25 +1,26 @@
 from pathlib import Path
-
-from pydantic import Field, BaseModel
+from pydantic.v1 import BaseModel, Field
 
 from cg.constants.sequencing import SequencingPlatform
-from cg.models.nf_analysis import NextflowSampleSheetEntry, PipelineParameters
+from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 
 
 class TaxprofilerQCMetrics(BaseModel):
     """Taxprofiler QC metrics."""
 
-    after_filtering_total_reads: float | None
-    reads_mapped: float | None
-    before_filtering_total_reads: float | None
-    paired_aligned_none: float | None
+    after_filtering_gc_content: float
+    after_filtering_read1_mean_length: float
+    after_filtering_read2_mean_length: float
+    after_filtering_total_reads: float
+    average_length: float
+    pct_duplication: float
+    raw_total_sequences: float
+    reads_mapped: float
 
 
-class TaxprofilerParameters(PipelineParameters):
+class TaxprofilerParameters(WorkflowParameters):
     """Model for Taxprofiler parameters."""
 
-    input: Path = Field(..., alias="sample_sheet_path")
-    outdir: Path
     databases: Path
     save_preprocessed_reads: bool = True
     perform_shortread_qc: bool = True
@@ -33,16 +34,20 @@ class TaxprofilerParameters(PipelineParameters):
     perform_runmerging: bool = True
     run_kraken2: bool = True
     kraken2_save_reads: bool = True
-    kraken2_save_readclassification: bool = True
+    kraken2_save_readclassifications: bool = True
+    run_bracken: bool = True
+    run_centrifuge: bool = True
+    centrifuge_save_reads: bool = True
     run_krona: bool = True
     run_profile_standardisation: bool = True
+    clusterOptions: str = Field(..., alias="cluster_options")
+    priority: str
 
 
 class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
     """Taxprofiler sample model is used when building the sample sheet."""
 
     instrument_platform: SequencingPlatform
-    run_accession: str
     fasta: str
 
     @staticmethod
@@ -59,16 +64,17 @@ class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
 
     def reformat_sample_content(self) -> list[list[str]]:
         """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
-        return [
-            [
+        reformatted_content = []
+        for run_accession, (forward_path, reverse_path) in enumerate(
+            zip(self.fastq_forward_read_paths, self.fastq_reverse_read_paths), 1
+        ):
+            line = [
                 self.name,
-                self.run_accession,
+                run_accession,
                 self.instrument_platform,
-                fastq_forward_read_path,
-                fastq_reverse_read_path,
+                forward_path,
+                reverse_path,
                 self.fasta,
             ]
-            for fastq_forward_read_path, fastq_reverse_read_path in zip(
-                self.fastq_forward_read_paths, self.fastq_reverse_read_paths
-            )
-        ]
+            reformatted_content.append(line)
+        return reformatted_content

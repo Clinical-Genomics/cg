@@ -2,9 +2,10 @@ import logging
 
 import click
 
+from cg.cli.utils import is_case_name_allowed
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
-from cg.constants.constants import StatusOptions
+from cg.constants.constants import DRY_RUN, StatusOptions
 from cg.constants.subject import Sex
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
@@ -15,6 +16,7 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
+    Order,
     Panel,
     Sample,
     User,
@@ -169,6 +171,9 @@ def add_user(context: CGConfig, admin: bool, customer_id: str, email: str, name:
     default="standard",
     help="Set the priority for the samples",
 )
+@click.option(
+    "-t", "--original-ticket", required=True, help="Original ticket this sample is associated to."
+)
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_obj
@@ -182,6 +187,7 @@ def add_sample(
     priority: Priority,
     customer_id: str,
     name: str,
+    original_ticket: str,
 ):
     """Add a sample for CUSTOMER_ID with a NAME (display)."""
     status_db: Store = context.status_db
@@ -193,8 +199,8 @@ def add_sample(
     application: Application = status_db.get_application_by_tag(tag=application_tag)
     if not application:
         LOG.error(f"Application: {application_tag} not found")
-
         raise click.Abort
+
     new_record: Sample = status_db.add_sample(
         name=name,
         sex=sex,
@@ -202,6 +208,7 @@ def add_sample(
         internal_id=lims_id,
         order=order,
         priority=priority,
+        original_ticket=original_ticket,
     )
     new_record.application_version: ApplicationVersion = (
         status_db.get_current_application_version_by_tag(tag=application_tag)
@@ -265,6 +272,10 @@ def add_case(
             LOG.error(f"{panel_abbreviation}: panel not found")
             raise click.Abort
 
+    if not is_case_name_allowed(name):
+        LOG.error(f"Case name {name} is only allowed to contain letters, digits and dashes.")
+        raise click.Abort
+
     new_case: Case = status_db.add_case(
         data_analysis=data_analysis,
         data_delivery=data_delivery,
@@ -273,6 +284,16 @@ def add_case(
         priority=priority,
         ticket=ticket,
     )
+    order: Order = status_db.get_order_by_ticket_id(int(ticket))
+    if not order:
+        LOG.warning(f"No order found with ticket_id {ticket}")
+        click.confirm("No order found for the given ticket, proceed?", default=False, abort=True)
+        order = Order(
+            customer_id=customer.id,
+            ticket_id=int(ticket),
+            workflow=data_analysis,
+        )
+    new_case.orders.append(order)
 
     new_case.customer: Customer = customer
     status_db.session.add(new_case)
@@ -337,7 +358,7 @@ def link_sample_to_case(
     help="Ticket id",
     required=True,
 )
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.pass_obj
 def download_external_delivery_data_to_hpc(context: CGConfig, ticket: str, dry_run: bool):
     """Downloads external data from the delivery server and places it in appropriate folder on
@@ -354,7 +375,7 @@ def download_external_delivery_data_to_hpc(context: CGConfig, ticket: str, dry_r
     help="Ticket id",
     required=True,
 )
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.option(
     "--force", help="Overwrites any any previous samples in the customer directory", is_flag=True
 )
@@ -362,4 +383,4 @@ def download_external_delivery_data_to_hpc(context: CGConfig, ticket: str, dry_r
 def add_external_data_to_hk(context: CGConfig, ticket: str, dry_run: bool, force):
     """Adds external data to Housekeeper"""
     external_data_api = ExternalDataAPI(config=context)
-    external_data_api.add_transfer_to_housekeeper(dry_run=dry_run, ticket=ticket, force=force)
+    external_data_api.add_external_data_to_housekeeper(ticket=ticket, dry_run=dry_run, force=force)

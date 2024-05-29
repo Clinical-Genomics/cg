@@ -6,7 +6,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from cg.constants import DataDelivery, FlowCellStatus, Workflow
+from cg.constants import DataDelivery, FileExtensions, FlowCellStatus, Workflow
 from cg.models.cg_config import CGConfig
 from cg.store.crud.read import ReadHandler
 from cg.store.models import Case
@@ -92,13 +92,6 @@ def fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_id: str) 
             },
         ],
     }
-
-
-@pytest.fixture(scope="function")
-def dna_case(analysis_store, helpers) -> Case:
-    """Case with DNA application"""
-    cust = helpers.ensure_customer(analysis_store)
-    return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="dna_case")
 
 
 @pytest.fixture(scope="function")
@@ -242,3 +235,27 @@ def mock_analysis_flow_cell(mocker) -> None:
     flow_cell.status = FlowCellStatus.ON_DISK
     mocker.patch.object(ReadHandler, "get_flow_cells_by_case")
     ReadHandler.get_flow_cells_by_case.return_value = [flow_cell]
+
+
+@pytest.fixture(scope="session")
+def deliverables_template_content() -> list[dict]:
+    return [
+        {
+            "format": "yml",
+            "id": "CASEID",
+            "path": Path("PATHTOCASE", "pipeline_info", "software_versions.yml").as_posix(),
+            "path_index": None,
+            "step": "software-versions",
+            "tag": "software-versions",
+        },
+        {
+            "format": "json",
+            "id": "CASEID",
+            "path": Path("PATHTOCASE", "multiqc", "multiqc_data", "multiqc_data")
+            .with_suffix(FileExtensions.JSON)
+            .as_posix(),
+            "path_index": None,
+            "step": "multiqc-json",
+            "tag": "multiqc-json",
+        },
+    ]

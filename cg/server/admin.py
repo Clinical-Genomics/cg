@@ -186,18 +186,18 @@ class ApplicationLimitationsView(BaseView):
 
     column_list = (
         "application",
-        "pipeline",
+        "workflow",
         "limitations",
         "comment",
         "created_at",
         "updated_at",
     )
     column_formatters = {"application": ApplicationView.view_application_link}
-    column_filters = ["application.tag", "pipeline"]
+    column_filters = ["application.tag", "workflow"]
     column_searchable_list = ["application.tag"]
     column_editable_list = ["comment"]
     form_excluded_columns = ["created_at", "updated_at"]
-    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Workflow)}
+    form_extra_fields = {"workflow": SelectEnumField(enum_class=Workflow)}
     create_modal = True
     edit_modal = True
 
@@ -254,19 +254,20 @@ class CustomerView(BaseView):
         "scout_access",
     ]
     column_list = [
-        "comment",
-        "delivery_contact",
         "internal_id",
-        "lab_contact",
         "name",
+        "data_archive_location",
+        "comment",
         "primary_contact",
+        "delivery_contact",
+        "lab_contact",
         "priority",
         "project_account_KI",
         "project_account_kth",
         "return_samples",
         "scout_access",
     ]
-    column_filters = ["priority", "scout_access"]
+    column_filters = ["priority", "scout_access", "data_archive_location"]
     column_searchable_list = ["internal_id", "name"]
     form_excluded_columns = ["families", "samples", "pools", "orders", "invoices"]
 
@@ -431,13 +432,13 @@ class AnalysisView(BaseView):
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["is_primary"]
-    column_filters = ["pipeline", "pipeline_version", "is_primary"]
+    column_filters = ["workflow", "workflow_version", "is_primary"]
     column_formatters = {"case": CaseView.view_case_link}
     column_searchable_list = [
         "case.internal_id",
         "case.name",
     ]
-    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Workflow)}
+    form_extra_fields = {"workflow": SelectEnumField(enum_class=Workflow)}
 
 
 class OrganismView(BaseView):
@@ -446,6 +447,17 @@ class OrganismView(BaseView):
     column_default_sort = ("created_at", True)
     column_editable_list = ["internal_id", "name", "reference_genome", "comment"]
     column_searchable_list = ["internal_id", "name", "reference_genome"]
+
+
+class OrderView(BaseView):
+    """Admin view for Model.Order"""
+
+    column_default_sort = ("order_date", True)
+    column_editable_list = ["is_delivered"]
+    column_searchable_list = ["id", "ticket_id"]
+    column_display_pk = True
+    create_modal = True
+    edit_modal = True
 
 
 class PanelView(BaseView):
@@ -473,7 +485,6 @@ class SampleView(BaseView):
 
     column_exclude_list = [
         "age_at_sampling",
-        "invoiced_at",
         "_phenotype_groups",
         "_phenotype_terms",
     ]
@@ -504,9 +515,7 @@ class SampleView(BaseView):
         "deliveries",
         "father_links",
         "flowcells",
-        "invoiced_at",
         "invoice",
-        "is_external",
         "_phenotype_groups",
         "_phenotype_terms",
         "links",

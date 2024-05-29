@@ -52,7 +52,9 @@ def validate_flow_cell_has_fastq_files(flow_cell: FlowCellDirectoryData) -> None
         if fastq_files:
             LOG.debug(f"Flow cell {flow_cell.id} has at least one sample with fastq files")
             return
-    raise MissingFilesError(f"No fastq files were found for any sample in flow cell {flow_cell.id}")
+    raise MissingFilesError(
+        f"No fastq files were found for any sample in flow cell {flow_cell.id} path: {flow_cell.path}"
+    )
 
 
 def is_flow_cell_ready_for_postprocessing(

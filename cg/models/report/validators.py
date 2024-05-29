@@ -15,6 +15,7 @@ from cg.constants import (
 )
 from cg.constants.constants import PrepCategory, Workflow
 from cg.constants.subject import Sex
+from cg.models.delivery.delivery import DeliveryFile
 from cg.models.orders.constants import OrderType
 
 LOG = logging.getLogger(__name__)
@@ -32,14 +33,26 @@ def get_boolean_as_string(value: bool | None) -> str:
     return NA_FIELD
 
 
-def get_float_as_string(value: float | None) -> str:
-    """Return string representation of a float value."""
-    return str(round(float(value), PRECISION)) if value or isinstance(value, float) else NA_FIELD
+def get_number_as_string(value: Any) -> str:
+    """
+    Return string representation of a number. If None is provided, then it returns N/A.
+
+    Raises:
+        ValueError: If the input value cannot be converted to a float.
+    """
+    try:
+        result: str = str(round(float(value), PRECISION))
+        return result
+    except TypeError:
+        return NA_FIELD
+    except ValueError:
+        LOG.error(f"Value {value} cannot be converted to float")
+        raise
 
 
 def get_float_as_percentage(value: float | None) -> str:
     """Return string percentage representation of a float value."""
-    return get_float_as_string(value * 100) if value or isinstance(value, float) else NA_FIELD
+    return get_number_as_string(value * 100) if value or isinstance(value, float) else NA_FIELD
 
 
 def get_date_as_string(date: datetime | None) -> str:
@@ -50,6 +63,11 @@ def get_date_as_string(date: datetime | None) -> str:
 def get_list_as_string(value: list[str] | None) -> str:
     """Return list elements as comma separated individual string values."""
     return ", ".join(v for v in value) if value else NA_FIELD
+
+
+def get_delivered_files_as_file_names(delivery_files: list[DeliveryFile] | None) -> list[str] | str:
+    """Return a list of validated file names given a list of delivery files."""
+    return [file.destination_path.name for file in delivery_files] if delivery_files else NA_FIELD
 
 
 def get_path_as_string(file_path: str | None) -> str:

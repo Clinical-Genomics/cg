@@ -3,16 +3,15 @@
 import datetime
 import logging
 
-from cg.apps.sequencing_metrics_parser.api import (
-    create_sample_lane_sequencing_metrics_for_flow_cell,
-    create_undetermined_non_pooled_metrics,
-)
+
 from cg.constants import FlowCellStatus
-from cg.meta.demultiplex.combine_sequencing_metrics import (
-    combine_mapped_metrics_with_undetermined,
-)
+from cg.meta.demultiplex.combine_sequencing_metrics import combine_mapped_metrics_with_undetermined
 from cg.meta.demultiplex.utils import get_q30_threshold
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.services.bcl_convert_metrics_service.bcl_convert_metrics_service import (
+    BCLConvertMetricsService,
+)
+
 from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
 from cg.store.store import Store
 
@@ -39,41 +38,20 @@ def store_flow_cell_data_in_status_db(
     else:
         LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}.")
         flow_cell.status = FlowCellStatus.ON_DISK
-
-    sample_internal_ids: list[str] = parsed_flow_cell.sample_sheet.get_sample_ids()
-    add_samples_to_flow_cell_in_status_db(
-        flow_cell=flow_cell,
-        sample_internal_ids=sample_internal_ids,
-        store=store,
-    )
     LOG.info(f"Added samples to flow cell: {parsed_flow_cell.id}.")
     store.session.add(flow_cell)
     store.session.commit()
 
 
-def add_samples_to_flow_cell_in_status_db(
-    flow_cell: Flowcell, sample_internal_ids: list[str], store: Store
-) -> Flowcell:
-    """Adds samples to a flow cell in status db."""
-    samples: set[Sample] = {
-        store.get_sample_by_internal_id(sample_internal_id)
-        for sample_internal_id in sample_internal_ids
-    }
-    for sample in samples:
-        if isinstance(sample, Sample) and sample not in flow_cell.samples:
-            flow_cell.samples.append(sample)
-    return flow_cell
-
-
 def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, store: Store) -> None:
+    metrics_service = BCLConvertMetricsService()
     mapped_metrics: list[SampleLaneSequencingMetrics] = (
-        create_sample_lane_sequencing_metrics_for_flow_cell(
-            flow_cell_directory=flow_cell.path,
-            bcl_converter=flow_cell.bcl_converter,
+        metrics_service.create_sample_lane_sequencing_metrics_for_flow_cell(
+            flow_cell_directory=flow_cell.path
         )
     )
     undetermined_metrics: list[SampleLaneSequencingMetrics] = (
-        create_undetermined_non_pooled_metrics(flow_cell)
+        metrics_service.create_undetermined_non_pooled_metrics(flow_cell)
     )
 
     combined_metrics = combine_mapped_metrics_with_undetermined(

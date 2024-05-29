@@ -25,24 +25,32 @@ from cg.constants.constants import FileFormat
 from cg.exc import (
     CaseNotFoundError,
     OrderError,
+    OrderExistsError,
     OrderFormError,
+    OrderMismatchError,
+    OrderNotDeliverableError,
     OrderNotFoundError,
     TicketCreationError,
 )
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
+from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.server.dto.delivery_message_response import DeliveryMessageResponse
+from cg.server.dto.delivery_message.delivery_message_request import (
+    DeliveryMessageRequest,
+)
+from cg.server.dto.delivery_message.delivery_message_response import (
+    DeliveryMessageResponse,
+)
+from cg.server.dto.orders.order_delivery_update_request import OrderDeliveredUpdateRequest
+from cg.server.dto.orders.order_patch_request import OrderDeliveredPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
-from cg.server.ext import db, lims, osticket
-from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
-from cg.services.orders.order_service import OrderService
+from cg.server.ext import db, delivery_message_service, lims, order_service, osticket
 from cg.store.models import (
     Analysis,
     Application,
-    ApplicationLimitations,
     Case,
     Customer,
     Flowcell,
@@ -50,6 +58,7 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
     User,
+    ApplicationLimitations,
 )
 
 LOG = logging.getLogger(__name__)
@@ -128,6 +137,9 @@ def submit_order(order_type):
         )
         project = OrderType(order_type)
         order_in = OrderIn.parse_obj(request_json, project=project)
+        existing_ticket: str | None = TicketHandler.parse_ticket_number(order_in.name)
+        if existing_ticket and order_service.store.get_order_by_ticket_id(existing_ticket):
+            raise OrderExistsError(f"Order with ticket id {existing_ticket} already exists.")
 
         result: dict = api.submit(
             project=project,
@@ -135,11 +147,11 @@ def submit_order(order_type):
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )
-        order_service = OrderService(db)
         order_service.create_order(order_in)
 
     except (  # user misbehaviour
         OrderError,
+        OrderExistsError,
         OrderFormError,
         ValidationError,
         ValueError,
@@ -212,11 +224,25 @@ def parse_case(case_id):
     return jsonify(**case.to_dict(links=True, analyses=True))
 
 
+@BLUEPRINT.route("/cases/delivery_message", methods=["GET"])
+def get_cases_delivery_message():
+    delivery_message_request = DeliveryMessageRequest.model_validate(request.args)
+    try:
+        response: DeliveryMessageResponse = delivery_message_service.get_cases_message(
+            delivery_message_request
+        )
+        return jsonify(response.model_dump()), HTTPStatus.OK
+    except (CaseNotFoundError, OrderMismatchError) as error:
+        return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
+
+
 @BLUEPRINT.route("/cases/<case_id>/delivery_message", methods=["GET"])
 def get_case_delivery_message(case_id: str):
-    service = DeliveryMessageService(db)
+    delivery_message_request = DeliveryMessageRequest(case_ids=[case_id])
     try:
-        response: DeliveryMessageResponse = service.get_delivery_message(case_id)
+        response: DeliveryMessageResponse = delivery_message_service.get_cases_message(
+            delivery_message_request
+        )
         return jsonify(response.model_dump()), HTTPStatus.OK
     except CaseNotFoundError as error:
         return jsonify({"error": str(error)}), HTTPStatus.BAD_REQUEST
@@ -463,40 +489,79 @@ def parse_application(tag: str):
     application: Application = db.get_application_by_tag(tag=tag)
     if not application:
         return abort(make_response(jsonify(message="Application not found"), HTTPStatus.NOT_FOUND))
-    return jsonify(**application.to_dict())
 
-
-@BLUEPRINT.route("/applications/<tag>/pipeline_limitations")
-@is_public
-def get_application_pipeline_limitations(tag: str):
-    """Return application pipeline specific limitations."""
     application_limitations: list[ApplicationLimitations] = db.get_application_limitations_by_tag(
         tag
     )
-    if not application_limitations:
+    application_dict: dict[str, Any] = application.to_dict()
+    application_dict["workflow_limitations"] = [
+        limitation.to_dict() for limitation in application_limitations
+    ]
+    return jsonify(**application_dict)
+
+
+@BLUEPRINT.route("/applications/<tag>/workflow_limitations")
+@is_public
+def get_application_workflow_limitations(tag: str):
+    """Return application workflow specific limitations."""
+    if application_limitations := db.get_application_limitations_by_tag(tag):
+        return jsonify([limitation.to_dict() for limitation in application_limitations])
+    else:
         return jsonify(message="Application limitations not found"), HTTPStatus.NOT_FOUND
-    return jsonify([limitation.to_dict() for limitation in application_limitations])
 
 
 @BLUEPRINT.route("/orders")
 def get_orders():
     """Return the latest orders."""
-    orders_request: OrdersRequest = OrdersRequest.model_validate(request.args.to_dict())
-    order_service = OrderService(db)
-    response: OrdersResponse = order_service.get_orders(orders_request)
+    data = OrdersRequest.model_validate(request.args.to_dict())
+    response: OrdersResponse = order_service.get_orders(data)
     return make_response(response.model_dump())
 
 
 @BLUEPRINT.route("/orders/<order_id>")
 def get_order(order_id: int):
     """Return an order."""
-    order_service = OrderService(db)
     try:
         response: Order = order_service.get_order(order_id)
         response_dict: dict = response.model_dump()
         return make_response(response_dict)
     except OrderNotFoundError as error:
         return make_response(jsonify(error=str(error)), HTTPStatus.NOT_FOUND)
+
+
+@BLUEPRINT.route("/orders/<order_id>/delivered", methods=["PATCH"])
+def set_order_delivered(order_id: int):
+    try:
+        request_data = OrderDeliveredPatch.model_validate(request.json)
+        delivered: bool = request_data.delivered
+        response_data: Order = order_service.set_delivery(order_id=order_id, delivered=delivered)
+        return jsonify(response_data.model_dump()), HTTPStatus.OK
+    except OrderNotFoundError as error:
+        return jsonify(error=str(error)), HTTPStatus.NOT_FOUND
+
+
+@BLUEPRINT.route("/orders/<order_id>/update-delivery-status", methods=["POST"])
+def update_order_delivered(order_id: int):
+    """Update the delivery status of an order based on the number of delivered analyses."""
+    try:
+        request_data = OrderDeliveredUpdateRequest.model_validate(request.json)
+        delivered_analyses: int = request_data.delivered_analyses_count
+        order_service.update_delivered(order_id=order_id, delivered_analyses=delivered_analyses)
+    except OrderNotFoundError as error:
+        return jsonify(error=str(error)), HTTPStatus.NOT_FOUND
+
+
+@BLUEPRINT.route("/orders/<order_id>/delivery_message")
+def get_delivery_message_for_order(order_id: int):
+    """Return the delivery message for an order."""
+    try:
+        response: DeliveryMessageResponse = delivery_message_service.get_order_message(order_id)
+        response_dict: dict = response.model_dump()
+        return make_response(response_dict)
+    except OrderNotDeliverableError as error:
+        return make_response(jsonify(error=str(error)), HTTPStatus.PRECONDITION_FAILED)
+    except OrderNotFoundError as error:
+        return make_response(jsonify(error=str(error))), HTTPStatus.NOT_FOUND
 
 
 @BLUEPRINT.route("/orderform", methods=["POST"])

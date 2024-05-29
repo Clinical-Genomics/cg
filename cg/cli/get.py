@@ -64,7 +64,7 @@ def get_sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample
             case_ids: list[str] = [link_obj.case.internal_id for link_obj in existing_sample.links]
             context.invoke(get_case, case_ids=case_ids, samples=False)
         if not hide_flow_cell:
-            for sample_flow_cell in existing_sample.flowcells:
+            for sample_flow_cell in existing_sample.flow_cells:
                 LOG.debug(f"Get info on flow cell: {sample_flow_cell.name}")
                 context.invoke(get_flow_cell, flow_cell_id=sample_flow_cell.name, samples=False)
 
@@ -84,8 +84,8 @@ def get_analysis(context: CGConfig, case_id: str):
     for case_analysis in case.analyses:
         row = [
             case_analysis.started_at,
-            case_analysis.pipeline,
-            case_analysis.pipeline_version,
+            case_analysis.workflow,
+            case_analysis.workflow_version,
         ]
         click.echo(tabulate([row], headers=ANALYSIS_HEADERS, tablefmt="psql"))
 

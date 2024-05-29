@@ -37,11 +37,12 @@ class SequencingFileTag(StrEnum):
     """Tags for sequencing files."""
 
     CGSTATS_LOG: str = "log"
+    DEMUX_LOG: str = "log"
     FASTQ: str = "fastq"
+    RUN_PARAMETERS: str = "run-parameters"
     SAMPLE_SHEET: str = "samplesheet"
     SPRING: str = "spring"
     SPRING_METADATA: str = "spring-metadata"
-    DEMUX_LOG: str = "log"
 
 
 HK_MULTIQC_HTML_TAG = ["multiqc-html"]
@@ -49,6 +50,13 @@ HK_MULTIQC_HTML_TAG = ["multiqc-html"]
 HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]
 
 HK_DELIVERY_REPORT_TAG = "delivery-report"
+
+
+class HermesFileTag(StrEnum):
+    """Tags for hermes."""
+
+    CLINICAL_DELIVERY: str = "clinical-delivery"
+    LONG_TERM_STORAGE: str = "long-term-storage"
 
 
 class AnalysisTag(StrEnum):
@@ -207,4 +215,29 @@ WORKFLOW_PROTECTED_TAGS = {
         [AnalysisTag.VCF_FUSION],
         [AnalysisTag.GENE_COUNTS],
     ],
+    Workflow.TAXPROFILER: [
+        [HermesFileTag.LONG_TERM_STORAGE],
+    ],
+    Workflow.TOMTE: [
+        [HermesFileTag.LONG_TERM_STORAGE],
+    ],
 }
+
+
+class JanusTags:
+    """Tags to communicate with the JanusAPI."""
+
+    tags_to_retrieve: list[str] = ["qc-metrics", "janus"]
+    multi_qc_file_tags: list[str] = [
+        "picard-alignment",
+        "picard-duplicates",
+        "picard-hs",
+        "picard-insert-size",
+        "picard-wgs",
+        "samtools-stats",
+        "somalier",
+        "picard-rnaseq",
+        "fastp",
+        "star",
+        "general-stats",
+    ]

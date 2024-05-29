@@ -31,7 +31,7 @@ def test_get_latest_nipt_analysis_to_upload(
     for analysis in analyses:
         assert analysis.started_at == timestamp_now
         assert analysis.uploaded_at is None
-        assert analysis.pipeline == workflow
+        assert analysis.workflow == workflow
 
 
 def test_get_latest_microsalt_analysis_to_upload(
@@ -53,7 +53,7 @@ def test_get_latest_microsalt_analysis_to_upload(
     for analysis in analyses:
         assert analysis.started_at == timestamp_now
         assert analysis.uploaded_at is None
-        assert analysis.pipeline == workflow
+        assert analysis.workflow == workflow
 
 
 def test_get_analyses_to_deliver_for_pipeline(
@@ -71,7 +71,7 @@ def test_get_analyses_to_deliver_for_pipeline(
     for analysis in analyses:
         assert analysis.case.internal_id in ["test_case_1", "yellowhog"]
         assert analysis.uploaded_at is None
-        assert analysis.pipeline == workflow
+        assert analysis.workflow == workflow
 
 
 def test_get_analyses(store_with_analyses_for_cases: Store):
@@ -114,7 +114,7 @@ def test_get_families_with_extended_models(
     assert cases
 
     # THEN analysis should be part of cases attributes
-    assert case.analyses[0].pipeline == Workflow.MIP_DNA
+    assert case.analyses[0].workflow == Workflow.MIP_DNA
 
 
 def test_get_families_with_extended_models_when_no_case(base_store: Store):
@@ -165,7 +165,7 @@ def test_that_many_cases_can_have_one_sample_each(
     )
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyze(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.MIP_DNA)
 
     # THEN cases should contain all cases since they are to be analysed
     assert len(cases) == len(test_cases)
@@ -193,7 +193,7 @@ def test_that_cases_can_have_many_samples(
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyze(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.MIP_DNA)
 
     # THEN cases should be returned
     assert cases
@@ -226,7 +226,7 @@ def test_external_sample_to_re_analyse(
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyze(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.MIP_DNA)
 
     # THEN cases should be returned
     assert cases
@@ -249,7 +249,7 @@ def test_new_external_case_not_in_result(base_store: Store, helpers: StoreHelper
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyze(workflow=Workflow.BALSAMIC)
+    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.BALSAMIC)
 
     # THEN cases should not contain the test case
     assert test_case not in cases
@@ -275,7 +275,7 @@ def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers, timestamp_
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyze(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.MIP_DNA)
 
     # THEN cases should be returned
     assert cases
@@ -304,7 +304,7 @@ def test_all_samples_and_analysis_completed(
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyze(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.MIP_DNA)
 
     # THEN cases should not contain the test case
     assert not cases
@@ -326,7 +326,7 @@ def test_specified_analysis_in_result(
     base_store.session.add(link)
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyze(workflow=Workflow.BALSAMIC)
+    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.BALSAMIC)
 
     # THEN cases should be returned
     assert cases
@@ -352,41 +352,10 @@ def test_exclude_other_pipeline_analysis_from_result(
     base_store.session.add(link)
 
     # WHEN getting cases to analyse for another workflow
-    cases: list[Case] = base_store.cases_to_analyze(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.MIP_DNA)
 
     # THEN cases should not contain the test case
     assert test_case not in cases
-
-
-def test_one_of_two_sequenced_samples(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
-):
-    """Test that a case with one sequenced sample and one not sequenced sample do not show up among the
-    cases to analyse."""
-
-    # GIVEN a case
-    test_case: Case = helpers.add_case(base_store)
-
-    # GIVEN a sequenced sample
-    sequenced_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
-
-    # GIVEN a NOT sequenced sample
-    not_sequenced_sample: Sample = helpers.add_sample(base_store, last_sequenced_at=None)
-
-    # GIVEN a database with a case with one of one sequenced samples and no analysis
-    link_1: CaseSample = base_store.relate_sample(
-        test_case, sequenced_sample, PhenotypeStatus.UNKNOWN
-    )
-    link_2: CaseSample = base_store.relate_sample(
-        test_case, not_sequenced_sample, PhenotypeStatus.UNKNOWN
-    )
-    base_store.session.add_all([link_1, link_2])
-
-    # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyze(workflow=Workflow.MIP_DNA, threshold=True)
-
-    # THEN no cases should be returned
-    assert not cases
 
 
 def test_one_of_one_sequenced_samples(
@@ -407,7 +376,7 @@ def test_one_of_one_sequenced_samples(
     assert test_sample.last_sequenced_at is not None
 
     # WHEN getting cases to analyse
-    cases: list[Case] = base_store.cases_to_analyze(workflow=Workflow.MIP_DNA)
+    cases: list[Case] = base_store.cases_to_analyse(workflow=Workflow.MIP_DNA)
 
     # THEN cases should be returned
     assert cases
@@ -437,7 +406,7 @@ def test_get_analyses_for_case_and_pipeline_before(
     for analysis in analyses:
         assert analysis.started_at < timestamp_now
         assert analysis.case.internal_id == case_id
-        assert analysis.pipeline == workflow
+        assert analysis.workflow == workflow
 
 
 def test_get_analyses_for_case_before(
@@ -482,7 +451,7 @@ def test_get_analyses_for_pipeline_before(
     # THEN assert that the analyses before the given date are returned
     for analysis in analyses:
         assert analysis.started_at < timestamp_now
-        assert analysis.pipeline == workflow
+        assert analysis.workflow == workflow
 
 
 def test_get_analyses_before(

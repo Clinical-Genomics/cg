@@ -8,6 +8,11 @@ GENOME_BUILD_37: str = "37"
 GENOME_BUILD_38: str = "GRCh38"
 
 
+class GenePanelGenomeBuild(StrEnum):
+    hg19: str = GENOME_BUILD_37
+    hg38: str = GENOME_BUILD_38
+
+
 class GenePanelMasterList(StrEnum):
     BRAIN: str = "BRAIN"
     CARDIOLOGY: str = "Cardiology"
@@ -62,7 +67,7 @@ class GenePanelMasterList(StrEnum):
 
 class GenePanelCombo:
     COMBO_1: dict[str, set[str]] = {
-        "DSD": {"DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"},
+        "DSD": {"DSD", "DSD-S", "HYP", "POI"},
         "CM": {"CNM", "CM"},
         "Horsel": {"Horsel", "141217", "141201"},
         "OPHTHALMO": {

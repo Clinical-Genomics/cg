@@ -1,36 +1,34 @@
 from pathlib import Path
 
-from pydantic.v1 import BaseModel, Field
+from pydantic.v1 import Field
 
 from cg.constants.constants import Strandedness
-from cg.models.analysis import AnalysisModel
-from cg.models.nf_analysis import NextflowSampleSheetEntry, PipelineParameters
+from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
+from cg.models.qc_metrics import QCMetrics
 
 
-class RnafusionQCMetrics(BaseModel):
+class RnafusionQCMetrics(QCMetrics):
     """RNAfusion QC metrics."""
 
-    after_filtering_gc_content: float | None
-    after_filtering_q20_rate: float | None
-    after_filtering_q30_rate: float | None
-    after_filtering_read1_mean_length: float | None
-    before_filtering_total_reads: float | None
-    median_5prime_to_3prime_bias: float | None
-    pct_adapter: float | None
-    pct_mrna_bases: float | None
-    pct_ribosomal_bases: float | None
-    pct_surviving: float | None
-    pct_duplication: float | None
-    read_pairs_examined: float | None
-    uniquely_mapped_percent: float | None
+    after_filtering_gc_content: float
+    after_filtering_q20_rate: float
+    after_filtering_q30_rate: float
+    after_filtering_read1_mean_length: float
+    before_filtering_total_reads: float
+    median_5prime_to_3prime_bias: float
+    pct_adapter: float
+    pct_mrna_bases: float
+    pct_ribosomal_bases: float
+    pct_surviving: float
+    pct_duplication: float
+    read_pairs_examined: float
+    uniquely_mapped_percent: float
 
 
-class RnafusionParameters(PipelineParameters):
+class RnafusionParameters(WorkflowParameters):
     """Rnafusion parameters."""
 
     genomes_base: Path
-    input: Path = Field(..., alias="sample_sheet_path")
-    outdir: Path
     all: bool = False
     arriba: bool = True
     cram: str = "arriba,starfusion"
@@ -38,25 +36,8 @@ class RnafusionParameters(PipelineParameters):
     fusioncatcher: bool = True
     starfusion: bool = True
     trim_tail: int = 50
-
-
-class CommandArgs(BaseModel):
-    """Model for arguments and options supported."""
-
-    log: str | Path | None
-    resume: bool | None
-    profile: str | None
-    stub: bool | None
-    config: str | Path | None
-    name: str | None
-    revision: str | None
-    wait: str | None
-    id: str | None
-    with_tower: bool | None
-    use_nextflow: bool | None
-    compute_env: str | None
-    work_dir: str | Path | None
-    params_file: str | Path | None
+    clusterOptions: str = Field(..., alias="cluster_options")
+    priority: str
 
 
 class RnafusionSampleSheetEntry(NextflowSampleSheetEntry):
@@ -77,13 +58,3 @@ class RnafusionSampleSheetEntry(NextflowSampleSheetEntry):
                 self.fastq_forward_read_paths, self.fastq_reverse_read_paths
             )
         ]
-
-
-class RnafusionAnalysis(AnalysisModel):
-    """Rnafusion analysis model.
-
-    Attributes:
-        sample_metrics: retrieved QC metrics associated to a sample
-    """
-
-    sample_metrics: dict[str, RnafusionQCMetrics]

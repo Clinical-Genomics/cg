@@ -18,9 +18,9 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Delivery,
     Flowcell,
     Invoice,
+    Order,
     Organism,
     Panel,
     Pool,
@@ -56,6 +56,7 @@ def _configure_extensions(app: Flask):
     ext.csrf.init_app(app)
     ext.db.init_app(app)
     ext.lims.init_app(app)
+    ext.analysis_client.init_app(app)
     if app.config["OSTICKET_API_KEY"]:
         ext.osticket.init_app(app)
     ext.admin.init_app(app, index_view=AdminIndexView(endpoint="admin"))
@@ -112,6 +113,7 @@ def _register_admin_views():
     ext.admin.add_view(admin.CustomerView(Customer, ext.db.session))
     ext.admin.add_view(admin.CollaborationView(Collaboration, ext.db.session))
     ext.admin.add_view(admin.OrganismView(Organism, ext.db.session))
+    ext.admin.add_view(admin.OrderView(Order, ext.db.session))
     ext.admin.add_view(admin.PanelView(Panel, ext.db.session))
     ext.admin.add_view(admin.UserView(User, ext.db.session))
     ext.admin.add_view(
@@ -125,7 +127,6 @@ def _register_admin_views():
     ext.admin.add_view(admin.PoolView(Pool, ext.db.session))
     ext.admin.add_view(admin.FlowcellView(Flowcell, ext.db.session))
     ext.admin.add_view(admin.AnalysisView(Analysis, ext.db.session))
-    ext.admin.add_view(admin.DeliveryView(Delivery, ext.db.session))
     ext.admin.add_view(admin.InvoiceView(Invoice, ext.db.session))
 
 

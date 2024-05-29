@@ -8,6 +8,7 @@ from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants.constants import DRY_RUN
 from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.exc import FlowCellsNeededError
 from cg.meta.rsync import RsyncAPI
@@ -25,9 +26,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
-OPTION_DRY = click.option(
-    "-d", "--dry-run", help="Simulate process without executing", is_flag=True
-)
+
 OPTION_YES = click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
@@ -66,7 +65,7 @@ def ensure_flow_cells_on_disk(context: CGConfig, case_id: str):
 
 @click.command("resolve-compression")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @click.pass_obj
 def resolve_compression(context: CGConfig, case_id: str, dry_run: bool):
     """Handles cases where decompression is needed before starting analysis."""
@@ -78,7 +77,7 @@ def resolve_compression(context: CGConfig, case_id: str, dry_run: bool):
 
 @click.command("link")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @click.pass_obj
 def link(context: CGConfig, case_id: str, dry_run: bool):
     """Link FASTQ files for all samples in a case."""
@@ -91,7 +90,7 @@ def link(context: CGConfig, case_id: str, dry_run: bool):
 
 @click.command("store")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @click.pass_obj
 def store(context: CGConfig, case_id: str, dry_run: bool):
     """Store finished analysis files in Housekeeper."""
@@ -116,7 +115,7 @@ def store(context: CGConfig, case_id: str, dry_run: bool):
 
 
 @click.command("store-available")
-@OPTION_DRY
+@DRY_RUN
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool) -> None:
     """Store bundles for all finished analyses in Housekeeper."""
@@ -137,7 +136,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
 @click.command("rsync-past-run-dirs")
 @OPTION_YES
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_obj
 def rsync_past_run_dirs(context: CGConfig, before_str: str, dry_run: bool, yes: bool) -> None:
@@ -161,7 +160,7 @@ def rsync_past_run_dirs(context: CGConfig, before_str: str, dry_run: bool, yes: 
 
 @click.command("clean-run-dir")
 @OPTION_YES
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = False):
@@ -181,7 +180,7 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
 
 @click.command("past-run-dirs")
 @OPTION_YES
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def past_run_dirs(
@@ -214,7 +213,7 @@ def past_run_dirs(
 
 @click.command("balsamic-past-run-dirs")
 @OPTION_YES
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def balsamic_past_run_dirs(
@@ -228,7 +227,7 @@ def balsamic_past_run_dirs(
 
 @click.command("balsamic-qc-past-run-dirs")
 @OPTION_YES
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def balsamic_qc_past_run_dirs(
@@ -242,7 +241,7 @@ def balsamic_qc_past_run_dirs(
 
 @click.command("balsamic-umi-past-run-dirs")
 @OPTION_YES
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def balsamic_umi_past_run_dirs(
@@ -256,7 +255,7 @@ def balsamic_umi_past_run_dirs(
 
 @click.command("balsamic-pon-past-run-dirs")
 @OPTION_YES
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def balsamic_pon_past_run_dirs(
@@ -270,7 +269,7 @@ def balsamic_pon_past_run_dirs(
 
 @click.command("fluffy-past-run-dirs")
 @OPTION_YES
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def fluffy_past_run_dirs(
@@ -284,7 +283,7 @@ def fluffy_past_run_dirs(
 
 @click.command("mip-dna-past-run-dirs")
 @OPTION_YES
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def mip_dna_past_run_dirs(
@@ -298,7 +297,7 @@ def mip_dna_past_run_dirs(
 
 @click.command("mip-rna-past-run-dirs")
 @OPTION_YES
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def mip_rna_past_run_dirs(
@@ -312,7 +311,7 @@ def mip_rna_past_run_dirs(
 
 @click.command("mutant-past-run-dirs")
 @OPTION_YES
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def mutant_past_run_dirs(
@@ -326,7 +325,7 @@ def mutant_past_run_dirs(
 
 @click.command("rnafusion-past-run-dirs")
 @OPTION_YES
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def rnafusion_past_run_dirs(
@@ -340,7 +339,7 @@ def rnafusion_past_run_dirs(
 
 @click.command("microsalt-past-run-dirs")
 @OPTION_YES
-@OPTION_DRY
+@DRY_RUN
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def microsalt_past_run_dirs(

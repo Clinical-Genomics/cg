@@ -1,32 +1,102 @@
 from enum import Enum
 from typing import Callable
 
+from sqlalchemy import asc, desc, or_
 from sqlalchemy.orm import Query
 
-from cg.store.models import Order
+from cg.constants import Workflow
+from cg.server.dto.orders.orders_request import OrderSortField, SortOrder
+from cg.store.models import Customer, Order
 
 
-def filter_orders_by_workflow(orders: Query, workflow: str, **kwargs) -> Query:
-    """Return orders filtered on workflow."""
+def filter_orders_by_workflow(orders: Query, workflow: str | None, **kwargs) -> Query:
+    if workflow == Workflow.BALSAMIC:
+        return orders.filter(Order.workflow.startswith(workflow))
     return orders.filter(Order.workflow == workflow) if workflow else orders
 
 
-def filter_orders_by_id(orders: Query, id: int, **kwargs) -> Query:
-    """Return orders filtered on id."""
-    return orders.filter(Order.id == id)
+def filter_orders_by_id(orders: Query, id: int | None, **kwargs) -> Query:
+    return orders.filter(Order.id == id) if id else orders
 
 
-def apply_order_filters(
-    filter_functions: list[Callable], orders: Query, id: int = None, workflow: str = None
+def filter_orders_by_ids(orders: Query, ids: list[int] | None, **kwargs) -> Query:
+    return orders.filter(Order.id.in_(ids))
+
+
+def apply_pagination(orders: Query, page: int | None, page_size: int | None, **kwargs) -> Query:
+    return orders.limit(page_size).offset((page - 1) * page_size) if page and page_size else orders
+
+
+def filter_orders_by_ticket_id(orders: Query, ticket_id: int | None, **kwargs) -> Query:
+    return orders.filter(Order.ticket_id == ticket_id) if ticket_id else orders
+
+
+def filter_orders_by_search(orders: Query, search: str | None, **kwargs) -> Query:
+    if not search:
+        return orders
+
+    orders = orders.join(Order.customer)
+    return orders.filter(
+        or_(
+            Order.id == search,
+            Order.ticket_id == search,
+            Customer.internal_id.icontains(search),
+        )
+    )
+
+
+def filter_orders_by_delivered(orders: Query, delivered: bool | None, **kwargs) -> Query:
+    return orders.filter(Order.is_delivered == delivered) if delivered is not None else orders
+
+
+def apply_sorting(
+    orders: Query, sort_field: OrderSortField | None, sort_order: SortOrder | None, **kwargs
 ) -> Query:
-    """Apply filtering functions to the order queries and return filtered results."""
-    for filter_function in filter_functions:
-        orders: Query = filter_function(orders=orders, id=id, workflow=workflow)
+    if sort_field:
+        column = getattr(Order, sort_field)
+        if sort_order == "asc":
+            return orders.order_by(asc(column))
+        return orders.order_by(desc(column))
     return orders
 
 
 class OrderFilter(Enum):
-    """Define order filter functions."""
+    BY_ID: Callable = filter_orders_by_id
+    BY_IDS: Callable = filter_orders_by_ids
+    BY_SEARCH: Callable = filter_orders_by_search
+    BY_TICKET_ID: Callable = filter_orders_by_ticket_id
+    BY_WORKFLOW: Callable = filter_orders_by_workflow
+    BY_DELIVERED: Callable = filter_orders_by_delivered
+    PAGINATE: Callable = apply_pagination
+    SORT: Callable = apply_sorting
 
-    FILTER_ORDERS_BY_ID: Callable = filter_orders_by_id
-    FILTER_ORDERS_BY_WORKFLOW: Callable = filter_orders_by_workflow
+
+def apply_order_filters(
+    filters: list[OrderFilter],
+    orders: Query,
+    id: int = None,
+    ids: list[int] = None,
+    ticket_id: int = None,
+    workflow: SortOrder = None,
+    page: int = None,
+    page_size: int = None,
+    sort_field: OrderSortField = None,
+    sort_order: SortOrder = None,
+    search: str = None,
+    delivered: bool = None,
+) -> Query:
+    for filter in filters:
+        orders: Query = filter(
+            orders=orders,
+            id=id,
+            ids=ids,
+            workflow=workflow,
+            page=page,
+            page_size=page_size,
+            ticket_id=ticket_id,
+            sort_field=sort_field,
+            sort_order=sort_order,
+            search=search,
+            delivered=delivered,
+        )
+    return orders

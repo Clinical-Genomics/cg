@@ -17,7 +17,6 @@ from sqlalchemy import Text as SLQText
 from sqlalchemy import UniqueConstraint, orm, types
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
-from sqlalchemy.util import deprecated
 
 from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
@@ -28,7 +27,9 @@ from cg.constants.constants import (
     SexOptions,
     StatusOptions,
 )
+from cg.constants.devices import DeviceType
 from cg.constants.priority import SlurmQos
+from cg.constants.symbols import EMPTY_STRING
 
 BigInt = Annotated[int, None]
 Blob = Annotated[bytes, None]
@@ -44,6 +45,7 @@ VarChar128 = Annotated[str, 128]
 
 PrimaryKeyInt = Annotated[int, mapped_column(primary_key=True)]
 UniqueStr = Annotated[str, mapped_column(String(32), unique=True)]
+UniqueStr64 = Annotated[str, mapped_column(String(64), unique=True)]
 
 
 class Base(DeclarativeBase):
@@ -70,14 +72,6 @@ def to_dict(model_instance):
             if not isinstance(getattr(model_instance, column.name), InstrumentedAttribute)
         }
 
-
-flowcell_sample = Table(
-    "flowcell_sample",
-    Base.metadata,
-    Column("flowcell_id", types.Integer, ForeignKey("flowcell.id"), nullable=False),
-    Column("sample_id", types.Integer, ForeignKey("sample.id"), nullable=False),
-    UniqueConstraint("flowcell_id", "sample_id", name="_flowcell_sample_uc"),
-)
 
 customer_user = Table(
     "customer_user",
@@ -240,7 +234,7 @@ class ApplicationLimitations(Base):
 
     id: Mapped[PrimaryKeyInt]
     application_id: Mapped[int] = mapped_column(ForeignKey(Application.id))
-    pipeline: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
+    workflow: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
     limitations: Mapped[Text | None]
     comment: Mapped[Text | None]
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
@@ -249,7 +243,7 @@ class ApplicationLimitations(Base):
     application: Mapped[Application] = orm.relationship(back_populates="pipeline_limitations")
 
     def __str__(self):
-        return f"{self.application.tag} – {self.pipeline}"
+        return f"{self.application.tag} – {self.workflow}"
 
     def to_dict(self):
         return to_dict(model_instance=self)
@@ -259,10 +253,10 @@ class Analysis(Base):
     __tablename__ = "analysis"
 
     id: Mapped[PrimaryKeyInt]
-    pipeline: Mapped[str | None] = mapped_column(
+    workflow: Mapped[str | None] = mapped_column(
         types.Enum(*(workflow.value for workflow in Workflow))
     )
-    pipeline_version: Mapped[Str32 | None]
+    workflow_version: Mapped[Str32 | None]
     started_at: Mapped[datetime | None]
     completed_at: Mapped[datetime | None]
     delivery_report_created_at: Mapped[datetime | None]
@@ -424,22 +418,6 @@ class Collaboration(Base):
         }
 
 
-class Delivery(Base):
-    __tablename__ = "delivery"
-    id: Mapped[PrimaryKeyInt]
-    delivered_at: Mapped[datetime | None]
-    removed_at: Mapped[datetime | None]
-    destination: Mapped[str | None] = mapped_column(
-        types.Enum("caesar", "pdc", "uppmax", "mh", "custom"), default="caesar"
-    )
-    sample_id: Mapped[int | None] = mapped_column(ForeignKey("sample.id", ondelete="CASCADE"))
-    pool_id: Mapped[int | None] = mapped_column(ForeignKey("pool.id", ondelete="CASCADE"))
-    comment: Mapped[Text | None]
-
-    def to_dict(self):
-        return to_dict(model_instance=self)
-
-
 class Case(Base, PriorityMixin):
     __tablename__ = "case"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
@@ -462,7 +440,6 @@ class Case(Base, PriorityMixin):
     internal_id: Mapped[UniqueStr]
     is_compressible: Mapped[bool] = mapped_column(default=True)
     name: Mapped[Str128]
-    order_id: Mapped[int | None] = mapped_column(ForeignKey("order.id"))
     ordered_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     _panels: Mapped[Text | None]
 
@@ -502,6 +479,14 @@ class Case(Base, PriorityMixin):
         return self.tickets.split(sep=",")[-1] if self.tickets else None
 
     @property
+    def latest_order(self) -> "Order":
+        """Returns the latest order this case was included in."""
+        sorted_orders: list[Order] = sorted(
+            self.orders, key=lambda order: order.order_date, reverse=True
+        )
+        return sorted_orders[0]
+
+    @property
     def latest_analyzed(self) -> datetime | None:
         return self.analyses[0].completed_at if self.analyses else None
 
@@ -516,14 +501,8 @@ class Case(Base, PriorityMixin):
         return max(sequenced_dates, default=None)
 
     @property
-    def all_samples_pass_qc(self) -> bool:
-        pass_qc = []
-        for link in self.links:
-            if link.sample.application_version.application.is_external or link.sample.sequencing_qc:
-                pass_qc.append(True)
-            else:
-                pass_qc.append(False)
-        return all(pass_qc)
+    def are_all_samples_sequenced(self) -> bool:
+        return all([link.sample.last_sequenced_at for link in self.links])
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -531,31 +510,26 @@ class Case(Base, PriorityMixin):
     @property
     def samples(self) -> list["Sample"]:
         """Return case samples."""
-        return self._get_samples
+        return [link.sample for link in self.links]
 
     @property
-    def _get_samples(self) -> list["Sample"]:
-        """Extract samples from a case."""
-        return [link.sample for link in self.links]
+    def sample_ids(self) -> list[str]:
+        """Return a list of internal ids of the case samples."""
+        return [sample.internal_id for sample in self.samples]
 
     @property
     def tumour_samples(self) -> list["Sample"]:
         """Return tumour samples."""
-        return self._get_tumour_samples
+        return [link.sample for link in self.links if link.sample.is_tumour]
 
     @property
-    def _get_tumour_samples(self) -> list["Sample"]:
-        """Extract tumour samples."""
-        return [link.sample for link in self.links if link.sample.is_tumour]
+    def non_tumour_samples(self) -> list["Sample"]:
+        """Return non-tumour samples."""
+        return [link.sample for link in self.links if not link.sample.is_tumour]
 
     @property
     def loqusdb_uploaded_samples(self) -> list["Sample"]:
         """Return uploaded samples to Loqusdb."""
-        return self._get_loqusdb_uploaded_samples
-
-    @property
-    def _get_loqusdb_uploaded_samples(self) -> list["Sample"]:
-        """Extract samples uploaded to Loqusdb."""
         return [link.sample for link in self.links if link.sample.loqusdb_id]
 
     @property
@@ -640,6 +614,16 @@ class CaseSample(Base):
     def __str__(self) -> str:
         return f"{self.case.internal_id} | {self.sample.internal_id}"
 
+    @property
+    def get_maternal_sample_id(self) -> str:
+        """Return parental id."""
+        return self.mother.internal_id if self.mother else EMPTY_STRING
+
+    @property
+    def get_paternal_sample_id(self) -> str:
+        """Return parental id."""
+        return self.father.internal_id if self.father else EMPTY_STRING
+
 
 class Flowcell(Base):
     __tablename__ = "flowcell"
@@ -651,19 +635,20 @@ class Flowcell(Base):
     sequencer_name: Mapped[Str32 | None]
     sequenced_at: Mapped[datetime | None]
     status: Mapped[str | None] = mapped_column(
-        types.Enum(*(status.value for status in FlowCellStatus), default="ondisk")
+        types.Enum(*(status.value for status in FlowCellStatus)), default="ondisk"
     )
     archived_at: Mapped[datetime | None]
     has_backup: Mapped[bool] = mapped_column(default=False)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=datetime.now)
-
-    samples: Mapped[list["Sample"]] = orm.relationship(
-        secondary=flowcell_sample, back_populates="flowcells"
-    )
     sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
         back_populates="flowcell",
         cascade="all, delete, delete-orphan",
     )
+
+    @property
+    def samples(self) -> list["Sample"]:
+        """Return samples sequenced on the flow cell."""
+        return list({metric.sample for metric in self.sequencing_metrics})
 
     def __str__(self):
         return self.name
@@ -726,7 +711,6 @@ class Pool(Base):
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     delivered_at: Mapped[datetime | None]
-    deliveries: Mapped[list[Delivery]] = orm.relationship(backref="pool")
     id: Mapped[PrimaryKeyInt]
     invoice_id: Mapped[int | None] = mapped_column(ForeignKey("invoice.id"))
     name: Mapped[Str32]
@@ -758,14 +742,11 @@ class Sample(Base, PriorityMixin):
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
     delivered_at: Mapped[datetime | None]
-    deliveries: Mapped[list[Delivery]] = orm.relationship(backref="sample")
     downsampled_to: Mapped[BigInt | None]
     from_sample: Mapped[Str128 | None]
     id: Mapped[PrimaryKeyInt]
     internal_id: Mapped[UniqueStr]
     invoice_id: Mapped[int | None] = mapped_column(ForeignKey("invoice.id"))
-    invoiced_at: Mapped[datetime | None]  # DEPRECATED
-    _is_external: Mapped[bool | None] = mapped_column("is_external")  # DEPRECATED
     is_tumour: Mapped[bool | None] = mapped_column(default=False)
     loqusdb_id: Mapped[Str64 | None]
     name: Mapped[Str128]
@@ -784,7 +765,6 @@ class Sample(Base, PriorityMixin):
     last_sequenced_at: Mapped[datetime | None]
     received_at: Mapped[datetime | None]
     reference_genome: Mapped[Str255 | None]
-    sequence_start: Mapped[datetime | None]
     sex: Mapped[str] = mapped_column(types.Enum(*(option.value for option in SexOptions)))
     subject_id: Mapped[Str128 | None]
 
@@ -797,9 +777,6 @@ class Sample(Base, PriorityMixin):
     father_links: Mapped[list[CaseSample]] = orm.relationship(
         foreign_keys=[CaseSample.father_id], back_populates="father"
     )
-    flowcells: Mapped[list[Flowcell]] = orm.relationship(
-        secondary=flowcell_sample, back_populates="samples"
-    )
     sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
         back_populates="sample"
     )
@@ -809,25 +786,23 @@ class Sample(Base, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
-    @deprecated(
-        version="1.4.0",
-        message="This field is deprecated, use sample.application_version.application.is_external",
-    )
-    def is_external(self):
-        """Return if this is an externally sequenced sample."""
-        return self._is_external
+    def archive_location(self) -> str:
+        """Returns the data_archive_location if the customer linked to the sample."""
+        return self.customer.data_archive_location
 
     @property
-    def sequencing_qc(self) -> bool:
-        """Return sequencing qc passed or failed."""
-        application = self.application_version.application
-        # Express priority needs to be analyzed at a lower threshold for primary analysis
-        if self.priority == Priority.express:
-            one_half_of_target_reads = application.target_reads / 2
-            return self.reads >= one_half_of_target_reads
-        if self.application_version.application.prep_category == PrepCategory.READY_MADE_LIBRARY:
-            return bool(self.reads)
-        return self.reads > application.expected_reads
+    def expected_reads_for_sample(self) -> int:
+        """Return the expected reads of the sample."""
+        return self.application_version.application.expected_reads
+
+    @property
+    def has_reads(self) -> bool:
+        return bool(self.reads)
+
+    @property
+    def flow_cells(self) -> list[Flowcell]:
+        """Return the flow cells a sample has been sequenced on."""
+        return list({metric.flowcell for metric in self.sequencing_metrics})
 
     @property
     def phenotype_groups(self) -> list[str]:
@@ -859,21 +834,10 @@ class Sample(Base, PriorityMixin):
             return f"Delivered {self.delivered_at.date()}"
         if self.last_sequenced_at:
             return f"Sequenced {self.last_sequenced_at.date()}"
-        if self.sequence_start:
-            return f"Sequencing {self.sequence_start.date()}"
         if self.received_at:
             return f"Received {self.received_at.date()}"
 
         return f"Ordered {self.ordered_at.date()}"
-
-    @property
-    def archive_location(self) -> str:
-        """Returns the data_archive_location if the customer linked to the sample."""
-        return self.customer.data_archive_location
-
-    @property
-    def has_reads(self) -> bool:
-        return bool(self.reads)
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
@@ -885,7 +849,7 @@ class Sample(Base, PriorityMixin):
         if links:
             data["links"] = [link_obj.to_dict(family=True, parents=True) for link_obj in self.links]
         if flowcells:
-            data["flowcells"] = [flowcell_obj.to_dict() for flowcell_obj in self.flowcells]
+            data["flowcells"] = [flow_cell.to_dict() for flow_cell in self.flow_cells]
         return data
 
 
@@ -981,6 +945,105 @@ class Order(Base):
     order_date: Mapped[datetime] = mapped_column(default=datetime.now())
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
     workflow: Mapped[str] = mapped_column(types.Enum(*(workflow.value for workflow in Workflow)))
+    is_delivered: Mapped[bool] = mapped_column(default=False)
 
     def to_dict(self):
         return to_dict(model_instance=self)
+
+
+class RunDevice(Base):
+    """Model for storing run devices."""
+
+    __tablename__ = "run_device"
+
+    id: Mapped[PrimaryKeyInt]
+    type: Mapped[DeviceType]
+    internal_id: Mapped[UniqueStr64]
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
+
+
+class IlluminaFlowCell(RunDevice):
+    """Model for storing Illumina flow cells."""
+
+    __tablename__ = "illumina_flow_cell"
+
+    id: Mapped[int] = mapped_column(ForeignKey("run_device.id"), primary_key=True)
+    model: Mapped[str | None] = mapped_column(
+        types.Enum("10B", "25B", "1.5B", "S1", "S2", "S4", "SP")
+    )
+
+    __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
+
+
+class RunMetrics(Base):
+    """Model for storing run devices."""
+
+    __tablename__ = "run_metrics"
+
+    id: Mapped[PrimaryKeyInt]
+    type: Mapped[DeviceType]
+    device_id: Mapped[int] = mapped_column(ForeignKey("run_device.id"))
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
+
+
+class IlluminaRunMetrics(RunMetrics):
+    __tablename__ = "illumina_sequencing_metrics"
+
+    id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"), primary_key=True)
+    sequencer_type: Mapped[str | None] = mapped_column(
+        types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx")
+    )
+    sequencer_name: Mapped[Str32 | None]
+    sequenced_at: Mapped[datetime | None]
+    data_availability: Mapped[str | None] = mapped_column(
+        types.Enum(*(status.value for status in FlowCellStatus)), default="ondisk"
+    )
+    archived_at: Mapped[datetime | None]
+    has_backup: Mapped[bool] = mapped_column(default=False)
+    total_reads: Mapped[BigInt | None]
+    total_undetermined_reads: Mapped[BigInt | None]
+    percent_q30: Mapped[Num_6_2 | None]
+    mean_quality_score: Mapped[Num_6_2 | None]
+    total_yield: Mapped[BigInt | None]
+    yield_q30: Mapped[Num_6_2 | None]
+    cycles: Mapped[int | None]
+    demultiplexing_software: Mapped[Str32 | None]
+    demultiplexing_software_version: Mapped[Str32 | None]
+    sequencing_started_at: Mapped[datetime | None]
+    sequencing_completed_at: Mapped[datetime | None]
+    demultiplexing_started_at: Mapped[datetime | None]
+    demultiplexing_completed_at: Mapped[datetime | None]
+
+    __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
+
+
+class SampleRunMetrics(Base):
+    __tablename__ = "sample_run_metrics"
+    id: Mapped[PrimaryKeyInt]
+    sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id"))
+    run_metrics_id: Mapped[int] = mapped_column(ForeignKey("run_metrics.id"))
+    type: Mapped[DeviceType]
+
+    __mapper_args__ = {
+        "polymorphic_on": "type",
+    }
+
+
+class IlluminaSampleRunMetrics(SampleRunMetrics):
+    """Sequencing metrics for a sample sequenced on an Illumina instrument. The metrics are per sample, per lane, per flow cell."""
+
+    __tablename__ = "illumina_sample_run_metrics"
+
+    id: Mapped[int] = mapped_column(ForeignKey("sample_run_metrics.id"), primary_key=True)
+    flow_cell_lane: Mapped[int | None]
+    total_reads_in_lane: Mapped[BigInt | None]
+    base_passing_q30_percent: Mapped[Num_6_2 | None]
+    base_mean_quality_score: Mapped[Num_6_2 | None]
+    created_at: Mapped[datetime | None]
+    __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}

@@ -8,8 +8,8 @@ from sqlalchemy.orm import Query
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
 from cg.constants.constants import CaseActions, DataDelivery, Workflow
 from cg.constants.observations import (
-    LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
-    LOQUSDB_MIP_SEQUENCING_METHODS,
+    LOQUSDB_CANCER_SEQUENCING_METHODS,
+    LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
     LOQUSDB_SUPPORTED_WORKFLOWS,
 )
 from cg.store.models import Analysis, Application, Case, Customer, Sample
@@ -54,6 +54,11 @@ def filter_cases_by_entry_id(cases: Query, entry_id: int, **kwargs) -> Query:
 def filter_case_by_internal_id(cases: Query, internal_id: str, **kwargs) -> Query:
     """Filter cases with matching internal id."""
     return cases.filter(Case.internal_id == internal_id)
+
+
+def filter_cases_by_internal_ids(cases: Query, internal_ids: list[str], **kwargs) -> Query:
+    """Filter cases with internal ids."""
+    return cases.filter(Case.internal_id.in_(internal_ids))
 
 
 def filter_cases_by_internal_id_search(cases: Query, internal_id_search: str, **kwargs) -> Query:
@@ -143,8 +148,8 @@ def filter_cases_with_loqusdb_supported_sequencing_method(
 ) -> Query:
     """Filter cases with Loqusdb supported sequencing method."""
     supported_sequencing_methods = {
-        Workflow.MIP_DNA: LOQUSDB_MIP_SEQUENCING_METHODS,
-        Workflow.BALSAMIC: LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
+        Workflow.MIP_DNA: LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
+        Workflow.BALSAMIC: LOQUSDB_CANCER_SEQUENCING_METHODS,
     }
     return (
         cases.filter(Application.prep_category.in_(supported_sequencing_methods[workflow]))
@@ -210,6 +215,7 @@ def apply_case_filter(
     customer_entry_ids: list[int] | None = None,
     entry_id: int | None = None,
     internal_id: str | None = None,
+    internal_ids: list[str] | None = None,
     internal_id_search: str | None = None,
     name: str | None = None,
     name_search: str | None = None,
@@ -218,6 +224,7 @@ def apply_case_filter(
     workflow_search: str | None = None,
     priority: str | None = None,
     ticket_id: str | None = None,
+    order_id: int | None = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
@@ -230,6 +237,7 @@ def apply_case_filter(
             customer_entry_ids=customer_entry_ids,
             entry_id=entry_id,
             internal_id=internal_id,
+            internal_ids=internal_ids,
             internal_id_search=internal_id_search,
             name=name,
             name_search=name_search,
@@ -238,6 +246,7 @@ def apply_case_filter(
             workflow_search=workflow_search,
             priority=priority,
             ticket_id=ticket_id,
+            order_id=order_id,
         )
     return cases
 
@@ -245,31 +254,32 @@ def apply_case_filter(
 class CaseFilter(Enum):
     """Define case filters."""
 
-    FILTER_BY_ACTION: Callable = filter_cases_by_action
-    FILTER_BY_CASE_SEARCH: Callable = filter_cases_by_case_search
-    FILTER_BY_CUSTOMER_ENTRY_ID: Callable = filter_cases_by_customer_entry_id
-    FILTER_BY_CUSTOMER_ENTRY_IDS: Callable = filter_cases_by_customer_entry_ids
-    FILTER_BY_ENTRY_ID: Callable = filter_cases_by_entry_id
-    FILTER_BY_INTERNAL_ID: Callable = filter_case_by_internal_id
-    FILTER_BY_INTERNAL_ID_SEARCH: Callable = filter_cases_by_internal_id_search
-    FILTER_BY_NAME: Callable = filter_cases_by_name
-    FILTER_BY_NAME_SEARCH: Callable = filter_cases_by_name_search
-    FILTER_BY_WORKFLOW_SEARCH: Callable = filter_cases_by_workflow_search
-    FILTER_BY_PRIORITY: Callable = filter_cases_by_priority
-    FILTER_BY_TICKET: Callable = filter_cases_by_ticket_id
-    FILTER_FOR_ANALYSIS: Callable = filter_cases_for_analysis
-    FILTER_HAS_INACTIVE_ANALYSIS: Callable = filter_inactive_analysis_cases
-    FILTER_HAS_SEQUENCE: Callable = filter_cases_has_sequence
-    FILTER_IS_RUNNING: Callable = filter_running_cases
-    FILTER_IS_COMPRESSIBLE: Callable = filter_compressible_cases
-    FILTER_NEW_BY_ORDER_DATE: Callable = filter_newer_cases_by_order_date
-    FILTER_NOT_ANALYSED: Callable = filter_cases_not_analysed
-    FILTER_OLD_BY_CREATION_DATE: Callable = filter_older_cases_by_creation_date
-    FILTER_REPORT_SUPPORTED: Callable = filter_report_supported_data_delivery_cases
-    FILTER_WITH_LOQUSDB_SUPPORTED_WORKFLOW: Callable = filter_cases_with_loqusdb_supported_workflow
-    FILTER_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD: Callable = (
+    BY_ACTION: Callable = filter_cases_by_action
+    BY_CASE_SEARCH: Callable = filter_cases_by_case_search
+    BY_CUSTOMER_ENTRY_ID: Callable = filter_cases_by_customer_entry_id
+    BY_CUSTOMER_ENTRY_IDS: Callable = filter_cases_by_customer_entry_ids
+    BY_ENTRY_ID: Callable = filter_cases_by_entry_id
+    BY_INTERNAL_ID: Callable = filter_case_by_internal_id
+    BY_INTERNAL_IDS: Callable = filter_cases_by_internal_ids
+    BY_INTERNAL_ID_SEARCH: Callable = filter_cases_by_internal_id_search
+    BY_NAME: Callable = filter_cases_by_name
+    BY_NAME_SEARCH: Callable = filter_cases_by_name_search
+    BY_WORKFLOW_SEARCH: Callable = filter_cases_by_workflow_search
+    BY_PRIORITY: Callable = filter_cases_by_priority
+    BY_TICKET: Callable = filter_cases_by_ticket_id
+    FOR_ANALYSIS: Callable = filter_cases_for_analysis
+    HAS_INACTIVE_ANALYSIS: Callable = filter_inactive_analysis_cases
+    HAS_SEQUENCE: Callable = filter_cases_has_sequence
+    IS_RUNNING: Callable = filter_running_cases
+    IS_COMPRESSIBLE: Callable = filter_compressible_cases
+    NEW_BY_ORDER_DATE: Callable = filter_newer_cases_by_order_date
+    NOT_ANALYSED: Callable = filter_cases_not_analysed
+    OLD_BY_CREATION_DATE: Callable = filter_older_cases_by_creation_date
+    REPORT_SUPPORTED: Callable = filter_report_supported_data_delivery_cases
+    WITH_LOQUSDB_SUPPORTED_WORKFLOW: Callable = filter_cases_with_loqusdb_supported_workflow
+    WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD: Callable = (
         filter_cases_with_loqusdb_supported_sequencing_method
     )
-    FILTER_WITH_WORKFLOW: Callable = filter_cases_with_workflow
-    FILTER_WITH_SCOUT_DELIVERY: Callable = filter_cases_with_scout_data_delivery
+    WITH_WORKFLOW: Callable = filter_cases_with_workflow
+    WITH_SCOUT_DELIVERY: Callable = filter_cases_with_scout_data_delivery
     ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at

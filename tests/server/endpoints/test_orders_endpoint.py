@@ -1,10 +1,12 @@
 from http import HTTPStatus
 
+import mock.mock
 import pytest
 from flask.testing import FlaskClient
 
-from cg.constants import Workflow
-from cg.services.orders.utils import create_order_response
+from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.dto.summary_response import AnalysisSummary
+from cg.constants.constants import Workflow
 from cg.store.models import Order
 
 
@@ -33,7 +35,32 @@ def test_orders_endpoint(
 
     # WHEN a request is made to get all orders
     endpoint: str = "/api/v1/orders"
-    response = client.get(endpoint, query_string={"limit": limit, "workflow": workflow})
+    with mock.patch.object(
+        TrailblazerAPI,
+        "get_summaries",
+        return_value=[
+            AnalysisSummary(
+                order_id=order.id, cancelled=0, completed=1, delivered=0, failed=0, running=0
+            ),
+            AnalysisSummary(
+                order_id=order_another.id,
+                cancelled=0,
+                completed=1,
+                delivered=0,
+                failed=0,
+                running=0,
+            ),
+            AnalysisSummary(
+                order_id=order_balsamic.id,
+                cancelled=0,
+                completed=1,
+                delivered=0,
+                failed=0,
+                running=0,
+            ),
+        ],
+    ):
+        response = client.get(endpoint, query_string={"pageSize": limit, "workflow": workflow})
 
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
@@ -43,24 +70,22 @@ def test_orders_endpoint(
 
 
 def test_order_endpoint(
-    client: FlaskClient,
-    order: Order,
-    order_another: Order,
+    client: FlaskClient, order: Order, order_another: Order, analysis_summary: AnalysisSummary
 ):
     """Tests that the order endpoint returns the order with matching id"""
     # GIVEN a store with two orders
-
     order_id_to_fetch: int = order.id
 
     # WHEN a request is made to get a specific order
     endpoint: str = f"/api/v1/orders/{order_id_to_fetch}"
-    response = client.get(endpoint)
+    with mock.patch.object(TrailblazerAPI, "get_summaries", return_value=[analysis_summary]):
+        response = client.get(endpoint)
 
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
 
-    # THEN the response should only contain the specified order
-    assert response.json == create_order_response(order).model_dump()
+    # THEN the response contains the specified order
+    assert response.json["id"] == order_id_to_fetch
 
 
 def test_order_endpoint_not_found(

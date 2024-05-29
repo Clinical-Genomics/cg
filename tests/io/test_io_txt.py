@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.io.txt import read_txt, write_txt
+from cg.io.txt import concat_txt, read_txt, write_txt
 
 
 def test_read_txt_to_list(txt_file_path: Path):
@@ -65,3 +65,30 @@ def test_write_txt(txt_temp_path: Path, txt_file_path: Path):
 
     # THEN the content should match the original content
     assert content == read_txt(file_path=txt_temp_path)
+
+
+def test_concat_txt(txt_file_path: Path, txt_file_path_2: Path):
+    """Test concatenating two files, no optional string content"""
+    # GIVEN a list of file paths to concatenate
+
+    # WHEN concatenating two files
+    content: str = concat_txt(file_paths=[txt_file_path, txt_file_path_2], str_content=None)
+
+    # THEN the content of the files should have been concatenated
+    expected_content: str = "Line 1\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\n"
+    assert content == expected_content
+
+
+def test_concat_txt_with_string(txt_file_path: Path, txt_file_path_2: Path, csv_stream: str):
+    """Test concatenating two files, no optional string content"""
+    # GIVEN a list of file paths to concatenate
+
+    # WHEN concatenating two files
+    content: str = concat_txt(
+        file_paths=[txt_file_path, txt_file_path_2],
+        str_content=[csv_stream],
+    )
+
+    # THEN the content of the files should have been concatenated
+    expected_content: str = "Lorem,ipsum,sit,amet\nLine 1\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\n"
+    assert content == expected_content

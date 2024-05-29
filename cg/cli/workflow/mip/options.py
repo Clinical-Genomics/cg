@@ -17,13 +17,6 @@ START_WITH_PROGRAM = click.option(
 OPTION_BWA_MEM = click.option(
     "--use-bwa-mem", is_flag=True, default=False, help="Use BWA-mem instead of the default BWA-mem2"
 )
-OPTION_DRY = click.option(
-    "-d",
-    "--dry-run",
-    is_flag=True,
-    default=False,
-    help="Print to console instead of executing",
-)
 OPTION_MIP_DRY_RUN = click.option("--mip-dry-run", is_flag=True, help="Run MIP in dry-run mode")
 OPTION_PANEL_BED = click.option(
     "--panel-bed",

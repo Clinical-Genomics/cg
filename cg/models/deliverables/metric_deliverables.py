@@ -5,6 +5,7 @@ from pydantic.v1 import BaseModel, Field, validator
 
 from cg.constants import PRECISION
 from cg.exc import CgError, MetricsQCError
+from cg.models.qc_metrics import QCMetrics
 
 
 def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> Any:
@@ -58,7 +59,7 @@ class MetricCondition(BaseModel):
     """
 
     norm: str
-    threshold: float
+    threshold: float | str
 
     @validator("norm")
     def validate_operator(cls, norm: str) -> str:
@@ -108,7 +109,7 @@ class MedianTargetCoverage(SampleMetric):
     value: int
 
 
-class ParsedMetrics(BaseModel):
+class ParsedMetrics(QCMetrics):
     """Defines parsed metrics"""
 
     sample_id: str

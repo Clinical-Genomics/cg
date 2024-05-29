@@ -14,7 +14,8 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     mark_as_demultiplexed,
     mark_flow_cell_as_queued_for_post_processing,
 )
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.constants import DRY_RUN
 from cg.exc import FlowCellError, SampleSheetError
 from cg.meta.demultiplex.utils import (
     create_manifest_file,
@@ -26,8 +27,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
-
-DRY_RUN = click.option("--dry-run", is_flag=True)
 
 
 @click.command(name="all")
@@ -52,7 +51,6 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
         LOG.info(f"Found directory {sub_dir}")
         try:
             flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir)
-            LOG.info(f"Using {flow_cell.bcl_converter} for demultiplexing.")
         except FlowCellError:
             continue
 
@@ -61,7 +59,7 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
             continue
 
         try:
-            sample_sheet_api.validate_sample_sheet(sample_sheet_path=flow_cell.sample_sheet_path)
+            sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
         except (SampleSheetError, ValidationError):
             LOG.warning(
                 f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}"
@@ -80,20 +78,18 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
 @click.command(name="flow-cell")
 @click.argument("flow-cell-name")
 @DRY_RUN
-@OPTION_BCL_CONVERTER
 @click.pass_obj
 def demultiplex_flow_cell(
     context: CGConfig,
     dry_run: bool,
     flow_cell_name: str,
-    bcl_converter: str,
 ):
-    """Demultiplex a flow cell.
+    """Demultiplex a flow cell using BCLConvert.
 
-    flow cell name is the flow cell run directory name, e.g. '201203_D00483_0200_AHVKJCDRXX'
+    flow cell name is the flow cell run directory name, e.g. '230912_A00187_1009_AHK33MDRX3'
     """
 
-    LOG.info(f"Running cg demultiplex flow cell, using {bcl_converter}")
+    LOG.info(f"Starting demultiplexing of flow cell {flow_cell_name}")
     sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     flow_cell_directory: Path = Path(context.demultiplex_api.flow_cells_dir, flow_cell_name)
@@ -102,9 +98,7 @@ def demultiplex_flow_cell(
     LOG.info(f"setting demultiplexed runs dir to {demultiplex_api.demultiplexed_runs_dir}")
 
     try:
-        flow_cell = FlowCellDirectoryData(
-            flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
-        )
+        flow_cell = FlowCellDirectoryData(flow_cell_directory)
     except FlowCellError as error:
         raise click.Abort from error
 
@@ -113,9 +107,7 @@ def demultiplex_flow_cell(
         return
 
     try:
-        sample_sheet_api.validate_sample_sheet(
-            sample_sheet_path=flow_cell.sample_sheet_path, bcl_converter=bcl_converter
-        )
+        sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
     except (SampleSheetError, ValidationError) as error:
         LOG.warning(
             f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}"

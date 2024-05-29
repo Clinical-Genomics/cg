@@ -8,6 +8,7 @@ from cg.models.report.sample import ApplicationModel, SampleModel
 from cg.models.report.validators import (
     get_analysis_type_as_string,
     get_date_as_string,
+    get_delivered_files_as_file_names,
     get_list_as_string,
     get_path_as_string,
     get_report_string,
@@ -63,13 +64,14 @@ class DataAnalysisModel(BaseModel):
     Attributes:
         customer_workflow: data analysis requested by the customer; source: StatusDB/family/data_analysis
         data_delivery: data delivery requested by the customer; source: StatusDB/family/data_delivery
-        workflow: actual workflow used for analysis; source: statusDB/analysis/pipeline
-        workflow_version: workflow version; source: statusDB/analysis/pipeline_version
+        workflow: actual workflow used for analysis; source: statusDB/analysis/workflow
+        workflow_version: workflow version; source: statusDB/analysis/workflow_version
         type: analysis type carried out; source: workflow
         genome_build: build version of the genome reference; source: workflow
         variant_callers: variant-calling filters; source: workflow
         panels: list of case specific panels; source: StatusDB/family/panels
         scout_files: list of file names uploaded to Scout
+        delivered_files: list of analysis case files to be delivered
     """
 
     customer_workflow: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
@@ -81,6 +83,9 @@ class DataAnalysisModel(BaseModel):
     variant_callers: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
     panels: Annotated[str, BeforeValidator(get_list_as_string)] = NA_FIELD
     scout_files: ScoutReportFiles
+    delivered_files: Annotated[
+        list[str] | str, BeforeValidator(get_delivered_files_as_file_names)
+    ] = None
 
     @model_validator(mode="after")
     def check_supported_workflow(self) -> "DataAnalysisModel":

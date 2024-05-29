@@ -8,6 +8,7 @@ from cg.constants import FlowCellStatus, Priority
 from cg.constants.constants import CaseActions, MicrosaltAppTags, Workflow
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CgError
+from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.store.models import (
     Analysis,
     Application,
@@ -245,17 +246,17 @@ def test_analyses_to_upload_when_analysis_has_workflow(helpers, sample_store, ti
 def test_analyses_to_upload_when_filtering_with_workflow(helpers, sample_store, timestamp):
     """Test analyses to upload to when existing workflow and using it in filtering."""
     # GIVEN a store with an analysis that is analysed with MIP
-    pipeline = Workflow.MIP_DNA
-    helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=pipeline)
+    workflow = Workflow.MIP_DNA
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=workflow)
 
-    # WHEN fetching all pipelines that are analysed with MIP
+    # WHEN fetching all workflows that are analysed with MIP
     records: list[Analysis] = [
-        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=pipeline)
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=workflow)
     ]
 
     for analysis_obj in records:
         # THEN the workflow should be MIP in the analysis object
-        assert analysis_obj.pipeline == str(pipeline)
+        assert analysis_obj.workflow == workflow
 
 
 def test_analyses_to_upload_with_workflow_and_no_complete_at(helpers, sample_store, timestamp):
@@ -301,44 +302,6 @@ def test_set_case_action(analysis_store: Store, case_id):
 
     # Then the action should be set to analyze
     assert new_action == "analyze"
-
-
-def test_sequencing_qc_priority_express_sample_with_one_half_of_the_reads(
-    base_store: Store, helpers, timestamp_now
-):
-    """Test if priority express sample(s), having more than 50% of the application target reads, pass sample QC."""
-
-    # GIVEN a database with a case which has an express sample with half the number of reads
-    sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
-    application: Application = sample.application_version.application
-    application.target_reads = 40
-    sample.reads = 20
-    sample.priority = Priority.express
-
-    # WHEN retrieving the sequencing qc property of a express sample
-    sequencing_qc_ok: bool = sample.sequencing_qc
-
-    # THEN the qc property should be True
-    assert sequencing_qc_ok
-
-
-def test_sequencing_qc_priority_standard_sample_with_one_half_of_the_reads(
-    base_store: Store, helpers, timestamp_now
-):
-    """Test if priority standard sample(s), having more than 50% of the application target reads, pass sample QC."""
-
-    # GIVEN a database with a case which has a normal sample with half the number of reads
-    sample: Sample = helpers.add_sample(base_store, last_sequenced_at=timestamp_now)
-    application: Application = sample.application_version.application
-    application.target_reads = 40
-    sample.reads = 20
-    sample.priority = Priority.standard
-
-    # WHEN retrieving the sequencing qc property of a normal sample
-    sequencing_qc_ok: bool = sample.sequencing_qc
-
-    # THEN the qc property should be False
-    assert not sequencing_qc_ok
 
 
 def test_get_applications(microbial_store: Store, expected_number_of_applications):
@@ -579,24 +542,26 @@ def test_get_flow_cells(re_sequenced_sample_store: Store):
     assert isinstance(flow_cells[0], Flowcell)
 
 
-def test_get_flow_cell(bcl2fastq_flow_cell_id: str, re_sequenced_sample_store: Store):
+def test_get_flow_cell(
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str, re_sequenced_sample_store: Store
+):
     """Test returning the latest flow cell from the database."""
 
     # GIVEN a store with two flow cells
 
     # WHEN fetching the latest flow cell
     flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell_by_name(
-        flow_cell_name=bcl2fastq_flow_cell_id
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id
     )
 
     # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cell.name == bcl2fastq_flow_cell_id
+    assert flow_cell.name == novaseq_6000_pre_1_5_kits_flow_cell_id
 
 
 def test_get_flow_cells_by_case(
     base_store: Store,
-    bcl2fastq_flow_cell_id: str,
-    bcl_convert_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
     case: Case,
     helpers: StoreHelpers,
     sample: Sample,
@@ -604,9 +569,11 @@ def test_get_flow_cells_by_case(
     """Test returning the latest flow cell from the database by case."""
 
     # GIVEN a store with two flow cell
-    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
+    helpers.add_flow_cell(
+        store=base_store, flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id, samples=[sample]
+    )
 
-    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl_convert_flow_cell_id)
+    helpers.add_flow_cell(store=base_store, flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id)
 
     # WHEN fetching the latest flow cell
     flow_cells: list[Flowcell] = base_store.get_flow_cells_by_case(case=case)
@@ -617,11 +584,11 @@ def test_get_flow_cells_by_case(
             assert sample in case.samples
 
     # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cells[0].name == bcl2fastq_flow_cell_id
+    assert flow_cells[0].name == novaseq_6000_pre_1_5_kits_flow_cell_id
 
 
 def test_get_flow_cells_by_statuses(
-    bcl_convert_flow_cell_id: str, re_sequenced_sample_store: Store
+    novaseq_6000_post_1_5_kits_flow_cell_id: str, re_sequenced_sample_store: Store
 ):
     """Test returning the latest flow cell from the database by statuses."""
 
@@ -637,7 +604,7 @@ def test_get_flow_cells_by_statuses(
         assert flow_cell.status == FlowCellStatus.ON_DISK
 
     # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cells[0].name == bcl_convert_flow_cell_id
+    assert flow_cells[0].name == novaseq_6000_post_1_5_kits_flow_cell_id
 
 
 def test_get_flow_cells_by_statuses_when_multiple_matches(re_sequenced_sample_store: Store):
@@ -681,7 +648,7 @@ def test_get_flow_cells_by_statuses_when_incorrect_status(re_sequenced_sample_st
 
 
 def test_get_flow_cell_by_enquiry_and_status(
-    bcl2fastq_flow_cell_id: str, re_sequenced_sample_store: Store
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str, re_sequenced_sample_store: Store
 ):
     """Test returning the latest flow cell from the database by enquiry and status."""
 
@@ -689,18 +656,19 @@ def test_get_flow_cell_by_enquiry_and_status(
 
     # WHEN fetching the latest flow cell
     flow_cell: list[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_name_pattern_and_status(
-        flow_cell_statuses=[FlowCellStatus.ON_DISK], name_pattern=bcl2fastq_flow_cell_id[:4]
+        flow_cell_statuses=[FlowCellStatus.ON_DISK],
+        name_pattern=novaseq_6000_pre_1_5_kits_flow_cell_id[:4],
     )
 
     # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cell[0].name == bcl2fastq_flow_cell_id
+    assert flow_cell[0].name == novaseq_6000_pre_1_5_kits_flow_cell_id
 
     # THEN the returned flow cell should have the same status as the query
     assert flow_cell[0].status == FlowCellStatus.ON_DISK
 
 
 def test_get_samples_from_flow_cell(
-    bcl2fastq_flow_cell_id: str, sample_id: str, re_sequenced_sample_store: Store
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str, sample_id: str, re_sequenced_sample_store: Store
 ):
     """Test returning samples present on the latest flow cell from the database."""
 
@@ -708,7 +676,7 @@ def test_get_samples_from_flow_cell(
 
     # WHEN fetching the samples from the latest flow cell
     samples: list[Sample] = re_sequenced_sample_store.get_samples_from_flow_cell(
-        flow_cell_id=bcl2fastq_flow_cell_id
+        flow_cell_id=novaseq_6000_pre_1_5_kits_flow_cell_id
     )
 
     # THEN the returned sample id should have the same id as the one in the database
@@ -716,13 +684,13 @@ def test_get_samples_from_flow_cell(
 
 
 def test_get_latest_flow_cell_on_case(
-    re_sequenced_sample_store: Store, case_id: str, bcl2fastq_flow_cell_id: str
+    re_sequenced_sample_store: Store, case_id: str, novaseq_6000_pre_1_5_kits_flow_cell_id: str
 ):
     """Test returning the latest sequenced flow cell on a case."""
 
     # GIVEN a store with two flow cells in it, one being the latest sequenced of the two
     latest_flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell_by_name(
-        flow_cell_name=bcl2fastq_flow_cell_id
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id
     )
 
     # WHEN fetching the latest flow cell on a case with a sample that has been sequenced on both flow cells
@@ -755,8 +723,8 @@ def test_is_all_flow_cells_on_disk_when_no_flow_cell(
 def test_are_all_flow_cells_on_disk_when_not_on_disk(
     base_store: Store,
     caplog,
-    bcl2fastq_flow_cell_id: str,
-    bcl_convert_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
     sample: Sample,
@@ -766,14 +734,14 @@ def test_are_all_flow_cells_on_disk_when_not_on_disk(
     # GIVEN a store with two flow cell
     helpers.add_flow_cell(
         store=base_store,
-        flow_cell_name=bcl2fastq_flow_cell_id,
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.PROCESSING,
     )
 
     helpers.add_flow_cell(
         store=base_store,
-        flow_cell_name=bcl_convert_flow_cell_id,
+        flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.RETRIEVED,
     )
@@ -788,8 +756,8 @@ def test_are_all_flow_cells_on_disk_when_not_on_disk(
 def test_are_all_flow_cells_on_disk_when_requested(
     base_store: Store,
     caplog,
-    bcl2fastq_flow_cell_id: str,
-    bcl_convert_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
     sample: Sample,
@@ -800,13 +768,13 @@ def test_are_all_flow_cells_on_disk_when_requested(
     # GIVEN a store with two flow cell
     helpers.add_flow_cell(
         store=base_store,
-        flow_cell_name=bcl2fastq_flow_cell_id,
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.REMOVED,
     )
     helpers.add_flow_cell(
         store=base_store,
-        flow_cell_name=bcl_convert_flow_cell_id,
+        flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id,
         samples=[sample],
         status=FlowCellStatus.REQUESTED,
     )
@@ -821,8 +789,8 @@ def test_are_all_flow_cells_on_disk_when_requested(
 def test_are_all_flow_cells_on_disk(
     base_store: Store,
     caplog,
-    bcl2fastq_flow_cell_id: str,
-    bcl_convert_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
     sample: Sample,
@@ -831,8 +799,10 @@ def test_are_all_flow_cells_on_disk(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a store with two flow cell
-    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
-    helpers.add_flow_cell(store=base_store, flow_cell_name=bcl_convert_flow_cell_id)
+    helpers.add_flow_cell(
+        store=base_store, flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id, samples=[sample]
+    )
+    helpers.add_flow_cell(store=base_store, flow_cell_name=novaseq_6000_post_1_5_kits_flow_cell_id)
 
     # WHEN fetching the latest flow cell
     is_on_disk = base_store.are_all_flow_cells_on_disk(case_id=case_id)
@@ -937,7 +907,7 @@ def test_get_application_limitation_by_tag_and_workflow(
     assert (
         application_limitation
         and application_limitation.application.tag == tag
-        and application_limitation.pipeline == workflow
+        and application_limitation.workflow == workflow
     )
 
 
@@ -1347,30 +1317,30 @@ def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
 
 def test_get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
     store_with_sequencing_metrics: Store,
-    flow_cell_name_demultiplexed_with_bcl2fastq: str,
-    expected_total_reads_flow_cell_bcl2fastq: int,
+    hiseq_x_dual_index_flow_cell_id: str,
+    expected_total_reads_hiseq_x_flow_cell: int,
 ):
     # GIVEN a store with sequencing metrics
     # WHEN getting total read counts for a flow cell
     reads = store_with_sequencing_metrics.get_number_of_reads_for_flow_cell(
-        flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq
+        flow_cell_name=hiseq_x_dual_index_flow_cell_id
     )
     # THEN assert that the total read count is correct
-    assert reads == expected_total_reads_flow_cell_bcl2fastq
+    assert reads == expected_total_reads_hiseq_x_flow_cell
 
 
 def test_get_average_bases_above_q30_for_sample_from_metrics(
     store_with_sequencing_metrics: Store,
     expected_average_q30_for_sample: float,
     mother_sample_id: str,
-    flow_cell_name_demultiplexed_with_bcl2fastq: str,
+    hiseq_x_dual_index_flow_cell_id: str,
 ):
     # GIVEN a store with sequencing metrics
 
     # WHEN getting average bases above q30 for a sample
     average_bases_above_q30 = store_with_sequencing_metrics.get_average_q30_for_sample_on_flow_cell(
         sample_internal_id=mother_sample_id,
-        flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
+        flow_cell_name=hiseq_x_dual_index_flow_cell_id,
     )
 
     # THEN assert that the average bases above q30 is correct
@@ -1380,14 +1350,14 @@ def test_get_average_bases_above_q30_for_sample_from_metrics(
 def test_get_average_passing_q30_for_sample_from_metrics(
     store_with_sequencing_metrics: Store,
     expected_average_q30_for_flow_cell: float,
-    flow_cell_name_demultiplexed_with_bcl2fastq: str,
+    hiseq_x_dual_index_flow_cell_id: str,
 ):
     # GIVEN a store with sequencing metrics
 
     # WHEN getting average passing q30 for a sample
     average_passing_q30 = (
         store_with_sequencing_metrics.get_average_percentage_passing_q30_for_flow_cell(
-            flow_cell_name=flow_cell_name_demultiplexed_with_bcl2fastq,
+            flow_cell_name=hiseq_x_dual_index_flow_cell_id,
         )
     )
 
@@ -1528,33 +1498,45 @@ def test_get_orders_empty_store(store: Store):
     # GIVEN a store without any orders
 
     # WHEN fetching orders
+    orders, total = store.get_orders(OrdersRequest())
+
     # THEN none should be returned
-    assert not store.get_orders_by_workflow()
+    assert not orders
+    assert not total
 
 
 def test_get_orders_populated_store(store: Store, order: Order, order_another: Order):
     # GIVEN a store with two orders
 
     # WHEN fetching orders
+    orders, total = store.get_orders(OrdersRequest())
+
     # THEN both should be returned
-    assert len(store.get_orders_by_workflow()) == 2
+    assert len(orders) == 2
+    assert total == 2
 
 
 def test_get_orders_limited(store: Store, order: Order, order_another: Order):
     # GIVEN a store with two orders
+    orders_request = OrdersRequest(pageSize=1, page=1)
 
     # WHEN fetching a limited amount of orders
+    orders, total = store.get_orders(orders_request)
+
     # THEN only one should be returned
-    assert len(store.get_orders_by_workflow(limit=1)) == 1
+    assert total == 2
+    assert len(orders) == 1
 
 
 def test_get_orders_workflow_filter(
     store: Store, order: Order, order_another: Order, order_balsamic: Order
 ):
     # GIVEN a store with three orders, one of which is a Balsamic order
+    orders_request = OrdersRequest(workflow=Workflow.BALSAMIC)
 
     # WHEN fetching only balsamic orders
-    orders: list[Order] = store.get_orders_by_workflow(workflow=Workflow.BALSAMIC)
+    orders, _ = store.get_orders(orders_request)
+
     # THEN only one should be returned
     assert len(orders) == 1 and orders[0].workflow == Workflow.BALSAMIC
 
@@ -1577,9 +1559,9 @@ def test_get_orders_mip_dna_and_limit_filter(
     expected_returned: int,
 ):
     # GIVEN a store with three orders, two of which are MIP-DNA orders
-
+    orders_request = OrdersRequest(workflow=Workflow.MIP_DNA, pageSize=limit)
     # WHEN fetching only MIP-DNA orders
-    orders: list[Order] = store.get_orders_by_workflow(workflow=Workflow.MIP_DNA, limit=limit)
+    orders, _ = store.get_orders(orders_request)
 
     # THEN we should get the expected number of orders returned
     assert len(orders) == expected_returned

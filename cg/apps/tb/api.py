@@ -8,6 +8,7 @@ from google.auth import jwt
 from google.auth.crypt import RSASigner
 
 from cg.apps.tb.dto.create_job_request import CreateJobRequest
+from cg.apps.tb.dto.summary_response import AnalysisSummary, SummariesResponse
 from cg.apps.tb.models import AnalysesResponse, TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
@@ -109,6 +110,7 @@ class TrailblazerAPI:
         out_dir: str,
         slurm_quality_of_service: SlurmQos,
         email: str = None,
+        order_id: int | None = None,
         workflow: Workflow = None,
         ticket: str = None,
         workflow_manager: str = WorkflowManager.Slurm,
@@ -118,6 +120,7 @@ class TrailblazerAPI:
             "email": email,
             "type": analysis_type,
             "config_path": config_path,
+            "order_id": order_id,
             "out_dir": out_dir,
             "priority": slurm_quality_of_service,
             "workflow": workflow.upper(),
@@ -168,3 +171,21 @@ class TrailblazerAPI:
             request_body=request_body,
             method=APIMethods.POST,
         )
+
+    def get_summaries(self, order_ids: list[int]) -> list[AnalysisSummary]:
+        orders_param = "orderIds=" + ",".join(map(str, order_ids))
+        endpoint = f"summary?{orders_param}"
+        response = self.query_trailblazer(command=endpoint, request_body={}, method=APIMethods.GET)
+        response_data = SummariesResponse.model_validate(response)
+        return response_data.summaries
+
+    def get_analyses_to_deliver(self, order_id: int) -> list[TrailblazerAnalysis]:
+        """Return the analyses in the order ready to be delivered."""
+        endpoint = (
+            f"analyses?orderId={order_id}&status[]={AnalysisStatus.COMPLETED}&delivered=false"
+        )
+        raw_response = self.query_trailblazer(
+            command=endpoint, request_body={}, method=APIMethods.GET
+        )
+        validated_response = AnalysesResponse.model_validate(raw_response)
+        return validated_response.analyses

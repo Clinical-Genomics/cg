@@ -1,6 +1,6 @@
 """Constants for cg."""
 
-from enum import StrEnum
+from enum import IntEnum, StrEnum, auto
 
 import click
 
@@ -68,7 +68,11 @@ class CustomerId(StrEnum):
     CUST004: str = "cust004"
     CUST032: str = "cust032"
     CUST042: str = "cust042"
+    CUST110: str = "cust110"
+    CUST127: str = "cust127"
     CUST132: str = "cust132"
+    CUST143: str = "cust143"
+    CUST147: str = "cust147"
     CUST999: str = "cust999"
 
 
@@ -90,6 +94,14 @@ class AnalysisType(StrEnum):
     WHOLE_GENOME_SEQUENCING: str = "wgs"
     WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
     OTHER: str = "other"
+
+
+class CancerAnalysisType(StrEnum):
+    TUMOR_NORMAL = auto()
+    TUMOR_NORMAL_PANEL = auto()
+    TUMOR_NORMAL_WGS = auto()
+    TUMOR_PANEL = auto()
+    TUMOR_WGS = auto()
 
 
 class PrepCategory(StrEnum):
@@ -127,6 +139,7 @@ class Workflow(StrEnum):
     DEMULTIPLEX: str = "demultiplex"
     FASTQ: str = "fastq"
     FLUFFY: str = "fluffy"
+    JASEN: str = "jasen"
     MICROSALT: str = "microsalt"
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"
@@ -136,22 +149,25 @@ class Workflow(StrEnum):
     RSYNC: str = "rsync"
     SPRING: str = "spring"
     TAXPROFILER: str = "taxprofiler"
+    TOMTE: str = "tomte"
 
 
 class FileFormat(StrEnum):
+    CSV: str = "csv"
     FASTQ: str = "fastq"
     JSON: str = "json"
-    YAML: str = "yaml"
-    CSV: str = "csv"
-    XML: str = "xml"
-    TXT: str = "txt"
+    PNG: str = "png"
     TSV: str = "tsv"
+    TXT: str = "txt"
+    XML: str = "xml"
+    YAML: str = "yaml"
 
 
 class GenomeVersion(StrEnum):
     hg19: str = "hg19"
     hg38: str = "hg38"
     canfam3: str = "canfam3"
+    T2T_CHM13: str = "T2T-CHM13v2.0"
 
 
 class SampleType(StrEnum):
@@ -181,20 +197,26 @@ class HastaSlurmPartitions(StrEnum):
 class FileExtensions(StrEnum):
     BED: str = ".bed"
     COMPLETE: str = ".complete"
+    CONFIG: str = ".config"
     CRAM: str = ".cram"
     CSV: str = ".csv"
     FASTQ: str = ".fastq"
+    FASTQ_GZ: str = ".fastq.gz"
     GPG: str = ".gpg"
     GZIP: str = ".gz"
+    HTML: str = ".html"
     JSON: str = ".json"
     KEY: str = ".key"
     LOG: str = ".log"
+    MD5: str = ".md5"
     MD5SUM: str = ".md5sum"
     NO_EXTENSION: str = ""
     PASS_PHRASE: str = ".passphrase"
     PENDING: str = ".pending"
+    PNG: str = ".png"
     SBATCH: str = ".sbatch"
     SPRING: str = ".spring"
+    SH: str = ".sh"
     TAR: str = ".tar"
     TMP: str = ".tmp"
     TSV: str = ".tsv"
@@ -243,6 +265,7 @@ class MicrosaltQC:
 class MicrosaltAppTags(StrEnum):
     MWRNXTR003: str = "MWRNXTR003"
     MWXNXTR003: str = "MWXNXTR003"
+    VWGNXTR001: str = "VWGNXTR001"
     PREP_CATEGORY: str = "mic"
 
 
@@ -270,6 +293,13 @@ class Strandedness(StrEnum):
     FORWARD: str = "forward"
     REVERSE: str = "reverse"
     UNSTRANDED: str = "unstranded"
+
+
+class ReadDirection(IntEnum):
+    """Read direction types."""
+
+    FORWARD: int = 1
+    REVERSE: int = 2
 
 
 PIPELINES_USING_PARTIAL_ANALYSES: list[Workflow] = [Workflow.MICROSALT, Workflow.MUTANT]

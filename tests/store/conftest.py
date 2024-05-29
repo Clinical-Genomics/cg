@@ -31,7 +31,7 @@ class StoreConstants(enum.Enum):
     CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES: str = "1"
     SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES: str = "test_subject_id"
     ORGANISM_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
-    LOCUSDB_ID_SAMPLE_WITH_ATTRIBUTES: str = "locusdb_id"
+    LOQUSDB_ID_SAMPLE_WITH_ATTRIBUTES: str = "loqusdb_id"
     READS_SAMPLE_WITH_ATTRIBUTES: int = 100
     DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES: int = 1
     AGE_AT_SAMPLING_SAMPLE_WITH_ATTRIBUTES: float = 45
@@ -219,17 +219,15 @@ def store_with_a_sample_that_has_many_attributes_and_one_without(
         original_ticket=StoreConstants.ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES.value,
         ordered_at=timestamp_now,
         created_at=timestamp_now,
-        sequence_start=timestamp_now,
         delivered_at=timestamp_now,
         received_at=timestamp_now,
         last_sequenced_at=timestamp_now,
         prepared_at=timestamp_now,
-        invoiced_at=timestamp_now,
         application_version_id=StoreConstants.APPLICATION_VERSION_ID_SAMPLE_WITH_ATTRIBUTES.value,
         subject_id=StoreConstants.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
         invoice_id=StoreConstants.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
         organism_id=StoreConstants.ORGANISM_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        loqusdb_id=StoreConstants.LOCUSDB_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        loqusdb_id=StoreConstants.LOQUSDB_ID_SAMPLE_WITH_ATTRIBUTES.value,
         downsampled_to=StoreConstants.DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES.value,
         no_invoice=False,
         age_at_sampling=StoreConstants.AGE_AT_SAMPLING_SAMPLE_WITH_ATTRIBUTES.value,
@@ -290,11 +288,10 @@ def store_with_a_pool_with_and_without_attributes(
     return store
 
 
-@pytest.fixture(name="store_with_an_application_with_and_without_attributes")
+@pytest.fixture
 def store_with_an_application_with_and_without_attributes(
     store: Store,
     helpers: StoreHelpers,
-    timestamp_now=dt.datetime.now(),
 ) -> Store:
     """Return a store with an application with and without attributes."""
     helpers.ensure_application(
@@ -316,7 +313,7 @@ def store_with_an_application_with_and_without_attributes(
     return store
 
 
-@pytest.fixture(name="store_with_application_limitations")
+@pytest.fixture
 def store_with_application_limitations(
     store_with_an_application_with_and_without_attributes: Store, helpers: StoreHelpers
 ) -> Store:

@@ -21,7 +21,7 @@ from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import AuthToken, MiriaObject, TransferPayload
 from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import CGConfig, DataFlowConfig
-from cg.store.models import Case, Customer, Sample
+from cg.store.models import Case, Customer, Order, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -247,16 +247,19 @@ def archive_store(
             name=sample_name,
             sex=Sex.MALE,
             internal_id=sample_id,
+            original_ticket=str(1),
         ),
         base_store.add_sample(
             name="sample_2_with_ddn_customer",
             sex=Sex.MALE,
             internal_id=mother_sample_id,
+            original_ticket=str(2),
         ),
         base_store.add_sample(
             name="sample_without_ddn_customer",
             sex=Sex.MALE,
             internal_id=father_sample_id,
+            original_ticket=str(3),
         ),
     ]
     new_samples[0].customer = customer_ddn
@@ -280,8 +283,15 @@ def archive_store(
         customer_id=customer_ddn.id,
     )
     base_store.relate_sample(case=case, sample=new_samples[0], status="unknown")
+    order = Order(
+        customer_id=customer_ddn.id,
+        ticket_id=new_samples[0].original_ticket,
+        workflow=case.data_analysis,
+    )
+    base_store.session.add(order)
     base_store.session.add(case)
     base_store.session.commit()
+    base_store.link_case_to_order(order.id, case.id)
     return base_store
 
 

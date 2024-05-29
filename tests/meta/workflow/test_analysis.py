@@ -89,7 +89,6 @@ def test_is_flow_cell_check_applicable(mip_analysis_api: MipDNAAnalysisAPI, anal
     # GIVEN that no samples are down-sampled nor external
     for sample in case.samples:
         assert not sample.from_sample
-        assert not sample.is_external
 
     # WHEN checking if a flow cell check is applicable
     # THEN the method should return True
@@ -244,7 +243,7 @@ def test_is_case_ready_for_analysis_true(
     ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=False):
         # WHEN running is_case_ready_for_analysis
         # THEN the result should be true
-        assert mip_analysis_api.is_case_ready_for_analysis(case_id=case.internal_id)
+        assert mip_analysis_api.is_raw_data_ready_for_analysis(case_id=case.internal_id)
 
 
 def test_is_case_ready_for_analysis_decompression_needed(
@@ -271,7 +270,7 @@ def test_is_case_ready_for_analysis_decompression_needed(
     ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=False):
         # WHEN running is_case_ready_for_analysis
         # THEN the result should be false
-        assert not mip_analysis_api.is_case_ready_for_analysis(case_id=case.internal_id)
+        assert not mip_analysis_api.is_raw_data_ready_for_analysis(case_id=case.internal_id)
 
 
 def test_is_case_ready_for_analysis_decompression_running(
@@ -301,7 +300,7 @@ def test_is_case_ready_for_analysis_decompression_running(
     ), mock.patch.object(PrepareFastqAPI, "is_spring_decompression_running", return_value=True):
         # WHEN running is_case_ready_for_analysis
         # THEN the result should be false
-        assert not mip_analysis_api.is_case_ready_for_analysis(case_id=case.internal_id)
+        assert not mip_analysis_api.is_raw_data_ready_for_analysis(case_id=case.internal_id)
 
 
 @pytest.mark.parametrize(
@@ -367,7 +366,7 @@ def test_prepare_fastq_files_request_miria(
     ), mock.patch.object(
         PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper", return_value=None
     ), mock.patch.object(
-        SpringArchiveAPI, "retrieve_case"
+        SpringArchiveAPI, "retrieve_spring_files_for_case"
     ) as request_submitter:
         with pytest.raises(AnalysisNotReadyError):
             # WHEN running prepare_fastq_files
@@ -462,7 +461,7 @@ def test_ensure_files_are_present(
 
     with mock.patch.object(AnalysisAPI, "ensure_flow_cells_on_disk"), mock.patch.object(
         SpringArchiveAPI,
-        "retrieve_case",
+        "retrieve_spring_files_for_case",
     ) as request_submitter:
         mip_analysis_api.ensure_files_are_present(case_id)
 

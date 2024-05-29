@@ -11,21 +11,25 @@ from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.constants import FileFormat
+from cg.constants import DELIVERY_REPORT_FILE_NAME
+from cg.constants.constants import FileFormat, Workflow
+from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.housekeeper_tags import (
     HK_DELIVERY_REPORT_TAG,
     GensAnalysisTag,
     HkMipAnalysisTag,
 )
 from cg.io.controller import ReadFile
-from cg.meta.deliver import DeliveryAPI
+from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
 from cg.store.models import Analysis
 from cg.store.store import Store
 from tests.meta.upload.scout.conftest import mip_load_config
@@ -194,12 +198,14 @@ def fastq_context(
 ) -> CGConfig:
     """Fastq context to use in cli"""
 
-    base_context.delivery_api = DeliveryAPI(
+    base_context.meta_apis["delivery_api"] = DeliverAPI(
         store=base_context.status_db,
         hk_api=base_context.housekeeper_api,
-        pipeline="fastq",
-        customers_folder=Path(base_context.delivery_path),
-        fastq_file_service=FastqFileService(),
+        case_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.FASTQ]["case_tags"],
+        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.FASTQ]["sample_tags"],
+        delivery_type="fastq",
+        project_base_path=Path(base_context.delivery_path),
+        fastq_file_service=FastqConcatenationService(),
     )
     base_context.meta_apis["rsync_api"] = RsyncAPI(cg_context)
     base_context.trailblazer_api_ = trailblazer_api
@@ -242,7 +248,7 @@ class MockScoutUploadApi(UploadScoutAPI):
         self.madeline_api = MockMadelineAPI()
         self.analysis = MockAnalysisApi()
         self.config = ScoutLoadConfig(
-            delivery_report=Path("path", "to", "delivery-report.html").as_posix()
+            delivery_report=Path("path", "to", DELIVERY_REPORT_FILE_NAME).as_posix()
         )
         self.file_exists = False
         self.lims = MockLims()
