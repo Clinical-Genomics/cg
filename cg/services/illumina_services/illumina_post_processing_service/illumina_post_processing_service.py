@@ -33,7 +33,7 @@ class IlluminaPostProcessingService:
         flow_cell_dir_data: FlowCellDirectoryData,
     ) -> IlluminaFlowCell:
         """
-        Create flow cell from the parsed and validated flow cell data.
+        Create Illumina flow cell from the parsed and validated flow cell directory data.
         And add the samples on the flow cell to the model.
         """
         model: str | None = flow_cell_dir_data.run_parameters.get_flow_cell_model()
