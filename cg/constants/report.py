@@ -160,8 +160,8 @@ REQUIRED_SAMPLE_TIMESTAMP_FIELDS: list[str] = [
 # Metadata required fields
 _REQUIRED_SAMPLE_METADATA_FIELDS: list[str] = [
     "duplicates",
+    "initial_qc",
     "million_read_pairs",
-    "reception_qc_flag",
 ]
 
 REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [

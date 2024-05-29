@@ -31,7 +31,7 @@
             {{ bait_set_value(workflow=workflow, analysis_type=case.data_analysis.type, sample=sample) }}
           </td>
           <td>{{ sample.methods.sequencing }}</td>
-          <td>{{ sample.metadata.reception_qc_flag }}</td>
+          <td>{{ sample.metadata.initial_qc }}</td>
         </tr>
         {% endfor %}
       </tbody>

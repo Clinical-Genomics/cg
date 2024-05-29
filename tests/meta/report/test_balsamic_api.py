@@ -34,12 +34,12 @@ def test_get_sample_metadata(
         "duplicates": "93.1",
         "fold_80": "1.16",
         "gc_dropout": "1.01",
+        "initial_qc": "Godkänd",
         "mean_insert_size": "178.19",
         "median_target_coverage": "5323.0",
         "million_read_pairs": "10.0",
         "pct_250x": "N/A",
         "pct_500x": "N/A",
-        "reception_qc_flag": "Godkänd",
     }
 
     # WHEN retrieving the sample metadata
