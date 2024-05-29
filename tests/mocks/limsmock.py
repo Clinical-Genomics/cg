@@ -4,7 +4,7 @@ from pydantic.v1 import BaseModel
 from typing_extensions import Literal
 
 from cg.apps.lims import LimsAPI
-from cg.constants.lims import ReceptionQCFLag
+from cg.constants.lims import LimsQCFlag
 
 
 class LimsProject(BaseModel):
@@ -138,6 +138,6 @@ class MockLimsAPI(LimsAPI):
         """Mock return sample's percentage of RNA fragments greater than 200 nucleotides."""
         return 75.0
 
-    def get_sample_reception_qc_flag(self, sample_id: str) -> ReceptionQCFLag:
+    def get_sample_reception_qc_flag(self, sample_id: str) -> LimsQCFlag:
         """Mock return of the sample reception QC flag."""
-        return ReceptionQCFLag.PASSED
+        return LimsQCFlag.PASSED

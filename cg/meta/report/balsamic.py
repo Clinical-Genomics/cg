@@ -18,7 +18,7 @@ from cg.constants import (
     Workflow,
 )
 from cg.constants.constants import AnalysisType
-from cg.constants.lims import ReceptionQCFLag
+from cg.constants.lims import LimsQCFlag
 from cg.constants.scout import BALSAMIC_CASE_TAGS
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.report.report_api import ReportAPI
@@ -55,7 +55,7 @@ class BalsamicReportAPI(ReportAPI):
             sample.internal_id
         ]
         million_read_pairs: float = get_million_read_pairs(sample.reads)
-        reception_qc_flag: ReceptionQCFLag = self.lims_api.get_sample_reception_qc_flag(
+        reception_qc_flag: LimsQCFlag = self.lims_api.get_sample_reception_qc_flag(
             sample.internal_id
         )
         if AnalysisType.WHOLE_GENOME_SEQUENCING in self.analysis_api.get_data_analysis_type(
@@ -76,7 +76,7 @@ class BalsamicReportAPI(ReportAPI):
     def get_panel_metadata(
         self,
         million_read_pairs: float,
-        reception_qc_flag: ReceptionQCFLag,
+        reception_qc_flag: LimsQCFlag,
         sample_metrics: BalsamicTargetedQCMetrics,
         analysis_metadata: BalsamicAnalysis,
     ) -> BalsamicTargetedSampleMetadataModel:
@@ -104,7 +104,7 @@ class BalsamicReportAPI(ReportAPI):
     @staticmethod
     def get_wgs_metadata(
         million_read_pairs: float,
-        reception_qc_flag: ReceptionQCFLag,
+        reception_qc_flag: LimsQCFlag,
         sample_metrics: BalsamicWGSQCMetrics,
     ) -> BalsamicWGSSampleMetadataModel:
         """Return report metadata for Balsamic WGS analysis."""
