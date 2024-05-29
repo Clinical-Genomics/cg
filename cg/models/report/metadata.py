@@ -4,8 +4,8 @@ from typing_extensions import Annotated
 from cg.constants import NA_FIELD, RIN_MAX_THRESHOLD, RIN_MIN_THRESHOLD
 from cg.models.report.validators import (
     get_float_as_percentage,
+    get_initial_qc_as_string,
     get_number_as_string,
-    get_qc_flag_as_string,
     get_report_string,
     get_sex_as_string,
 )
@@ -18,12 +18,12 @@ class SampleMetadataModel(BaseModel):
     Attributes:
         duplicates: fraction of mapped sequence that is marked as duplicate; source: workflow
         million_read_pairs: number of million read pairs obtained; source: StatusDB/sample/reads (/2*10^6)
-        reception_qc_flag: reception quality control flag; source: LIMS
+        initial_qc: initial QC protocol flag; source: LIMS
     """
 
     duplicates: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     million_read_pairs: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    reception_qc_flag: Annotated[str, BeforeValidator(get_qc_flag_as_string)] = NA_FIELD
+    initial_qc: Annotated[str, BeforeValidator(get_initial_qc_as_string)] = NA_FIELD
 
 
 class MipDNASampleMetadataModel(SampleMetadataModel):

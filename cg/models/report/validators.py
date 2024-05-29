@@ -14,7 +14,6 @@ from cg.constants import (
     YES_FIELD,
 )
 from cg.constants.constants import PrepCategory, Workflow
-from cg.constants.lims import LimsQCFlag
 from cg.constants.report import REPORT_QC_FLAG
 from cg.constants.subject import Sex
 from cg.models.delivery.delivery import DeliveryFile
@@ -97,6 +96,6 @@ def get_analysis_type_as_string(analysis_type: str | None, info: ValidationInfo)
     return get_report_string(analysis_type)
 
 
-def get_qc_flag_as_string(qc_flag: LimsQCFlag | None) -> str:
-    """Return a report adapted reception quality control flag."""
+def get_initial_qc_as_string(qc_flag: bool | None) -> str:
+    """Return a report adapted initial quality control flag."""
     return get_report_string(REPORT_QC_FLAG.get(qc_flag))
