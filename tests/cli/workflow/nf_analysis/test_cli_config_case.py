@@ -156,27 +156,13 @@ def test_config_case_default_parameters(
     )
     assert sample_sheet_content_expected in sample_sheet_content_created
 
-    # WHEN workflow is not raredisease nor tomte
-    # Note this will need to be unified once all workflows are standarised
-    if workflow not in {Workflow.RAREDISEASE, Workflow.TOMTE}:
-        # THEN the params file should contain all parameters
-        parameters_default = vars(request.getfixturevalue(f"{workflow}_parameters_default"))
-        params_content: list[list[str]] = ReadFile.get_content_from_file(
-            file_format=FileFormat.TXT, file_path=params_file_path, read_to_string=True
-        )
-        for parameter in parameters_default:
-            assert parameter in params_content
-
-    # Check that parameters are written in the config file for tomte
-    # Note this will need to be unified once all workflows are standarised
-    if workflow in {Workflow.TOMTE}:
-        # THEN the params file should contain all parameters
-        parameters_default = vars(request.getfixturevalue(f"{workflow}_parameters_default"))
-        params_content: list[list[str]] = ReadFile.get_content_from_file(
-            file_format=FileFormat.TXT, file_path=nexflow_config_file_path, read_to_string=True
-        )
-        for parameter in parameters_default:
-            assert f"params.{parameter}" in params_content
+    # THEN the params file should contain all parameters
+    parameters_default = vars(request.getfixturevalue(f"{workflow}_parameters_default"))
+    params_content: list[list[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.TXT, file_path=params_file_path, read_to_string=True
+    )
+    for parameter in parameters_default:
+        assert parameter in params_content
 
     # WHEN the workflow requires a gene panel
     # THEN information about the panel being generated should be logged and the file should be written
@@ -212,7 +198,9 @@ def test_config_case_dry_run(
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
 
     # WHEN invoking the command with dry-run specified
-    result = cli_runner.invoke(workflow_cli, [workflow, "config-case", case_id, "-d"], obj=context)
+    result = cli_runner.invoke(
+        workflow_cli, [workflow, "config-case", case_id, "--dry-run"], obj=context
+    )
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS

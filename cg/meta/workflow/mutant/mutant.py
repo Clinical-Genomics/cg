@@ -8,7 +8,7 @@ from cg.exc import CgError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MutantFastqHandler
-from cg.services.quality_controller.quality_controller_service import QualityControllerService
+from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.meta.workflow.mutant.quality_controller.models import QualityResult
 from cg.meta.workflow.mutant.quality_controller.quality_controller import QualityController
 from cg.models.cg_config import CGConfig
@@ -89,7 +89,7 @@ class MutantAnalysisAPI(AnalysisAPI):
                     case=case_obj, sample=sample_obj, concatenate=True
                 )
                 continue
-            if not QualityControllerService.sample_pass_sequencing_qc(sample_obj):
+            if not SequencingQCService.sample_pass_sequencing_qc(sample_obj):
                 LOG.info(f"Sample {sample_obj.internal_id} read count below threshold, skipping!")
                 continue
             self.link_fastq_files_for_sample(case=case_obj, sample=sample_obj, concatenate=True)
@@ -131,7 +131,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         samples: list[Sample] = [link.sample for link in case_obj.links]
         case_config_list: list[dict] = []
         for sample in samples:
-            sample_passed_sequencing_qc: bool = QualityControllerService.sample_pass_sequencing_qc(
+            sample_passed_sequencing_qc: bool = SequencingQCService.sample_pass_sequencing_qc(
                 sample=sample
             )
             case_config_list.append(
