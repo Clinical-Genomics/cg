@@ -441,5 +441,5 @@ class CreateHandler(BaseHandler):
     def add_illumina_sample_metrics(sample_metrics: list[IlluminaSampleSequencingMetrics]):
         session: Session = get_session()
         session.add_all(sample_metrics)
-        LOG.debug(f"Sample metrics added to status db.")
+        LOG.debug("Sample metrics added to status db.")
         return sample_metrics
