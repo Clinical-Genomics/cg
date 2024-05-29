@@ -37,6 +37,7 @@ from cg.constants.tb import AnalysisTypes
 from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
+
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.meta.encryption.encryption import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
@@ -55,6 +56,11 @@ from cg.models.raredisease.raredisease import RarediseaseParameters, Raredisease
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
+
+from cg.services.create_validation_cases.validation_case_data import ValidationCaseData
+from cg.services.create_validation_cases.validation_cases_service import CreateValidationCaseService
+from cg.services.create_validation_cases.validation_data_input import ValidationDataInput
+
 from cg.services.bcl_convert_metrics_service.bcl_convert_metrics_service import (
     BCLConvertMetricsService,
 )
@@ -2089,19 +2095,25 @@ def case_id_not_enough_reads():
 @pytest.fixture(scope="session")
 def sample_id_in_single_case():
     """Return a sample id that should be associated with a single case."""
-    return "ASM1"
+    return "ACC1231241"
 
 
 @pytest.fixture(scope="session")
 def sample_id_in_multiple_cases():
     """Return a sample id that should be associated with multiple cases."""
-    return "ASM2"
+    return "ACC12312442"
 
 
 @pytest.fixture(scope="session")
 def sample_id_not_enough_reads():
     """Return a sample id without enough reads."""
-    return "ASM3"
+    return "ACC12312411231"
+
+
+@pytest.fixture(scope="session")
+def validation_sample_id():
+    """Return a sample id without enough reads."""
+    return "VAL12312442"
 
 
 @pytest.fixture(name="store_with_multiple_cases_and_samples")
@@ -3970,6 +3982,68 @@ def fastq_file_meta_raw(flow_cell_name: str) -> dict:
         "flow_cell_id": flow_cell_name,
         "undetermined": None,
     }
+
+
+@pytest.fixture
+def validation_hk_api(
+    store_with_multiple_cases_and_samples: Store,
+    case_id_with_multiple_samples: str,
+    real_housekeeper_api: HousekeeperAPI,
+    timestamp_yesterday: datetime,
+    tmp_path,
+    helpers: StoreHelpers,
+) -> HousekeeperAPI:
+    """Return a Housekeeper API with a real database."""
+    samples: list[Sample] = store_with_multiple_cases_and_samples.get_samples_by_case_id(
+        case_id_with_multiple_samples
+    )
+    for sample in samples:
+        tmp_fastq_file = tmp_path / f"{sample.internal_id}.fastq.gz"
+        tmp_fastq_file.touch()
+        validation_bundle: dict = {
+            "name": sample.internal_id,
+            "created": timestamp_yesterday,
+            "expires": timestamp_yesterday,
+            "files": [
+                {
+                    "path": tmp_fastq_file.as_posix(),
+                    "archive": False,
+                    "tags": [SequencingFileTag.FASTQ, sample.internal_id],
+                }
+            ],
+        }
+        helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=validation_bundle)
+    return real_housekeeper_api
+
+
+@pytest.fixture()
+def validation_case_name(case_id_with_multiple_samples: str) -> str:
+    return case_id_with_multiple_samples + "_validation"
+
+
+@pytest.fixture
+def validation_data_input(case_id_with_multiple_samples: str) -> ValidationDataInput:
+    return ValidationDataInput(
+        case_id=case_id_with_multiple_samples, case_name=case_id_with_multiple_samples
+    )
+
+
+@pytest.fixture
+def validation_case_data(
+    store_with_multiple_cases_and_samples: Store, validation_data_input: ValidationDataInput
+) -> ValidationCaseData:
+    return ValidationCaseData(
+        status_db=store_with_multiple_cases_and_samples, validation_data_input=validation_data_input
+    )
+
+
+@pytest.fixture
+def create_validation_service(
+    store_with_multiple_cases_and_samples: Store, validation_hk_api: HousekeeperAPI
+) -> CreateValidationCaseService:
+    return CreateValidationCaseService(
+        status_db=store_with_multiple_cases_and_samples, housekeeper_api=validation_hk_api
+    )
 
 
 @pytest.fixture()
