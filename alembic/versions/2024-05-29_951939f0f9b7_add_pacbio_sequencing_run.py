@@ -24,7 +24,29 @@ def upgrade():
         sa.Column(
             "id", sa.Integer(), sa.ForeignKey("run_metrics.id"), nullable=False, primary_key=True
         ),
-        ## TODO: Add columns with correct type here
+        sa.Column("well", sa.String(length=32), nullable=False),
+        sa.Column("plate", sa.Integer, nullable=False),
+        sa.Column("movie_time_hours", sa.Integer(), nullable=False),
+        sa.Column("hi_fi_reads", sa.BigInteger(), nullable=False),
+        sa.Column("hi_fi_yield", sa.BigInteger(), nullable=False),
+        sa.Column("hifi_mean_read_length", sa.BigInteger(), nullable=False),
+        sa.Column("hifi_median_read_quality", sa.String(length=32), nullable=False),
+        sa.Column("percent_reads_passing_q30", sa.Numeric(precision=6, scale=2), nullable=False),
+        sa.Column("p0_percent", sa.Numeric(precision=6, scale=2), nullable=False),
+        sa.Column("p1_percent", sa.Numeric(precision=6, scale=2), nullable=False),
+        sa.Column("p2_percent", sa.Numeric(precision=6, scale=2), nullable=False),
+        sa.Column("polymerase_mean_read_length", sa.BigInteger(), nullable=False),
+        sa.Column("polymerase_read_length_n50", sa.BigInteger(), nullable=False),
+        sa.Column("polymerase_mean_longest_subread", sa.BigInteger(), nullable=False),
+        sa.Column("polymerase_longest_subread_n50", sa.BigInteger(), nullable=False),
+        sa.Column("control_reads", sa.BigInteger(), nullable=False),
+        sa.Column("control_mean_read_length", sa.BigInteger(), nullable=False),
+        sa.Column(
+            "control_mean_read_concordance", sa.Numeric(precision=6, scale=2), nullable=False
+        ),
+        sa.Column(
+            "control_mode_read_concordance", sa.Numeric(precision=6, scale=2), nullable=False
+        ),
     )
 
 
