@@ -105,17 +105,35 @@ def test_demultiplex_all_novaseq(
     assert f"Flow cell {flow_cell.id} is ready for downstream processing" in caplog.text
 
 
-def test_is_demultiplexing_complete(tmp_novaseq_6000_pre_1_5_kits_flow_cell_path: Path):
+def test_is_demultiplexing_complete(
+    hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet: FlowCellDirectoryData,
+):
     """Tests the is_demultiplexing_complete property of FlowCellDirectoryData."""
 
-    # GIVEN a demultiplexing directory with no demuxcomplete.txt file
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_novaseq_6000_pre_1_5_kits_flow_cell_path
-    )
-    assert not flow_cell.is_demultiplexing_complete
+    # GIVEN a demultiplexing directory with a demuxcomplete.txt file
+    assert Path(
+        hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet.path,
+        DemultiplexingDirsAndFiles.DEMUX_COMPLETE,
+    ).exists()
 
-    # WHEN creating the demuxcomplete.txt file
-    Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
+    # WHEN checking if the demultiplexing is complete
 
     # THEN the property should return true
-    assert flow_cell.is_demultiplexing_complete
+    assert hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet.is_demultiplexing_complete
+
+
+def test_is_demultiplexing_not_complete(
+    hiseq_2500_dual_index_demux_runs_flow_cell: FlowCellDirectoryData,
+):
+    """Tests the is_demultiplexing_complete property of FlowCellDirectoryData."""
+
+    # GIVEN a demultiplexing directory with a demuxcomplete.txt file
+    assert not Path(
+        hiseq_2500_dual_index_demux_runs_flow_cell.path,
+        DemultiplexingDirsAndFiles.DEMUX_COMPLETE,
+    ).exists()
+
+    # WHEN checking if the demultiplexing is complete
+
+    # THEN the property should return true
+    assert not hiseq_2500_dual_index_demux_runs_flow_cell.is_demultiplexing_complete

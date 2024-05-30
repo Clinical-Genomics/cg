@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from enum import Enum
 from typing import Annotated
 
 from sqlalchemy import (
@@ -24,6 +25,7 @@ from cg.constants.constants import (
     CaseActions,
     ControlOptions,
     PrepCategory,
+    SequencingQCStatus,
     SexOptions,
     StatusOptions,
 )
@@ -65,12 +67,19 @@ class Base(DeclarativeBase):
 
 
 def to_dict(model_instance):
+    def serialize_value(value):
+        if isinstance(value, InstrumentedAttribute):
+            return None
+        if isinstance(value, Enum):
+            return value.name
+        return value
+
     if hasattr(model_instance, "__table__"):
         return {
-            column.name: getattr(model_instance, column.name)
+            column.name: serialize_value(getattr(model_instance, column.name))
             for column in model_instance.__table__.columns
-            if not isinstance(getattr(model_instance, column.name), InstrumentedAttribute)
         }
+    return {}
 
 
 customer_user = Table(
@@ -445,6 +454,10 @@ class Case(Base, PriorityMixin):
 
     priority: Mapped[Priority] = mapped_column(
         default=Priority.standard,
+    )
+
+    sequencing_qc_status: Mapped[SequencingQCStatus] = mapped_column(
+        types.Enum(SequencingQCStatus), default=SequencingQCStatus.PENDING
     )
     synopsis: Mapped[Text | None]
     tickets: Mapped[VarChar128 | None]
@@ -979,7 +992,7 @@ class RunDevice(Base):
         return list(
             {
                 sample_run_metric.sample
-                for run in self.instrument_run
+                for run in self.instrument_runs
                 for sample_run_metric in run.sample_run_metrics
             }
         )
@@ -1000,6 +1013,16 @@ class IlluminaFlowCell(RunDevice):
     )
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
+
+
+class PacBioSMRTCell(RunDevice):
+    """Model for storing PacBio SMRT cells."""
+
+    __tablename__ = "pacbio_smrt_cell"
+
+    id: Mapped[int] = mapped_column(ForeignKey("run_device.id"), primary_key=True)
+
+    __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
 
 class InstrumentRun(Base):
@@ -1029,7 +1052,6 @@ class IlluminaSequencingRun(InstrumentRun):
         types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx")
     )
     sequencer_name: Mapped[Str32 | None]
-    sequenced_at: Mapped[datetime | None]
     data_availability: Mapped[str | None] = mapped_column(
         types.Enum(*(status.value for status in FlowCellStatus)), default="ondisk"
     )
@@ -1037,6 +1059,7 @@ class IlluminaSequencingRun(InstrumentRun):
     has_backup: Mapped[bool] = mapped_column(default=False)
     total_reads: Mapped[BigInt | None]
     total_undetermined_reads: Mapped[BigInt | None]
+    percent_undetermined_reads: Mapped[Num_6_2 | None]
     percent_q30: Mapped[Num_6_2 | None]
     mean_quality_score: Mapped[Num_6_2 | None]
     total_yield: Mapped[BigInt | None]
@@ -1050,6 +1073,33 @@ class IlluminaSequencingRun(InstrumentRun):
     demultiplexing_completed_at: Mapped[datetime | None]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
+
+
+class PacBioSequencingRun(InstrumentRun):
+    __tablename__ = "pacbio_sequencing_run"
+
+    id: Mapped[int] = mapped_column(ForeignKey("instrument_run.id"), primary_key=True)
+    well: Mapped[Str32]
+    plate: Mapped[int]
+    movie_time_hours: Mapped[int]
+    hifi_reads: Mapped[BigInt]
+    hifi_yield: Mapped[BigInt]
+    hifi_mean_read_length: Mapped[BigInt]
+    hifi_median_read_quality: Mapped[Str32]
+    percent_reads_passing_q30: Mapped[Num_6_2]
+    p0_percent: Mapped[Num_6_2]
+    p1_percent: Mapped[Num_6_2]
+    p2_percent: Mapped[Num_6_2]
+    polymerase_mean_read_length: Mapped[BigInt]
+    polymerase_read_length_n50: Mapped[BigInt]
+    polymerase_mean_longest_subread: Mapped[BigInt]
+    polymerase_longest_subread_n50: Mapped[BigInt]
+    control_reads: Mapped[BigInt]
+    control_mean_read_length: Mapped[BigInt]
+    control_mean_read_concordance: Mapped[Num_6_2]
+    control_mode_read_concordance: Mapped[Num_6_2]
+
+    __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
 
 class SampleRunMetrics(Base):
