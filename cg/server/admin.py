@@ -33,12 +33,6 @@ def view_priority(unused1, unused2, model, unused3):
     return Markup("%s" % model.priority.name) if model else ""
 
 
-def view_flow_cell_internal_id(unused1, unused2, model, unused3):
-    """column formatter for priority"""
-    del unused1, unused2, unused3
-    return Markup("%s" % model.device.internal_id)
-
-
 def view_case_sample_link(unused1, unused2, model, unused3):
     """column formatter to open the case-sample view"""
 
@@ -445,52 +439,6 @@ class AnalysisView(BaseView):
         "case.name",
     ]
     form_extra_fields = {"workflow": SelectEnumField(enum_class=Workflow)}
-
-
-class IlluminaFlowCellView(BaseView):
-    """Admin view for Model.IlluminaSequencingRun"""
-
-    column_list = (
-        "internal_id",
-        "sequencer_type",
-        "sequencer_name",
-        "data_availability",
-        "has_backup",
-        "total_reads",
-        "total_undetermined_reads",
-        "percent_undetermined_reads",
-        "percent_q30",
-        "mean_quality_score",
-        "total_yield",
-        "yield_q30",
-        "cycles",
-        "demultiplexing_software",
-        "demultiplexing_software_version",
-        "sequencing_started_at",
-        "sequencing_completed_at",
-        "demultiplexing_started_at",
-        "demultiplexing_completed_at",
-        "archived_at",
-    )
-    column_formatters = {
-        "internal_id": view_flow_cell_internal_id,
-    }
-
-    column_default_sort = ("sequencing_completed_at", True)
-    column_filters = ["sequencer_type", "sequencer_name", "data_availability"]
-    column_editable_list = ["data_availability"]
-    column_searchable_list = ["sequencer_type", "sequencer_name", "device.internal_id"]
-    column_sortable_list = [
-        "sequencer_type",
-        "sequencer_name",
-        "data_availability",
-        "has_backup",
-        "sequencing_started_at",
-        "sequencing_completed_at",
-        "demultiplexing_started_at",
-        "demultiplexing_completed_at",
-        "archived_at",
-    ]
 
 
 class OrganismView(BaseView):
