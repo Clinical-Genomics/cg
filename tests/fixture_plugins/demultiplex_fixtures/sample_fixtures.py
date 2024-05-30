@@ -8,8 +8,8 @@ from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.constants import FileExtensions
 from cg.io.json import read_json
-from cg.models.illumina_flow_cell_dir_data.illumina_flow_cell_dir_data import (
-    IlluminaFlowCellDirectoryData,
+from cg.models.instrument_run_directory_data.instrument_run_directory_data import (
+    IlluminaRunDirectoryData,
 )
 
 
@@ -145,7 +145,7 @@ def seven_canonical_flow_cells_selected_sample_ids(
 
 @pytest.fixture
 def bcl_convert_sample_sheet_creator(
-    novaseq_x_flow_cell: IlluminaFlowCellDirectoryData,
+    novaseq_x_flow_cell: IlluminaRunDirectoryData,
     novaseq_x_lims_samples: list[FlowCellSample],
 ) -> SampleSheetCreator:
     """Returns a sample sheet creator for sample sheet v2."""

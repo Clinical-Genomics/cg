@@ -12,8 +12,8 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.illumina_flow_cell_dir_data.illumina_flow_cell_dir_data import (
-    IlluminaFlowCellDirectoryData,
+from cg.models.instrument_run_directory_data.instrument_run_directory_data import (
+    IlluminaRunDirectoryData,
 )
 
 
@@ -28,7 +28,7 @@ def test_demultiplex_dragen_flowcell(
 
     # GIVEN that all files are present for Dragen demultiplexing
 
-    flow_cell = IlluminaFlowCellDirectoryData(tmp_flow_cell_directory_bcl_convert)
+    flow_cell = IlluminaRunDirectoryData(tmp_flow_cell_directory_bcl_convert)
     add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_flow_cell_directory_bcl_convert,
         flow_cell_name=flow_cell.id,
@@ -82,9 +82,7 @@ def test_demultiplex_all_novaseq(
 
     # GIVEN sequenced flow cells with their sample sheet in Housekeeper
     for flow_cell_dir in tmp_illumina_flow_cells_demux_all_directory.iterdir():
-        flow_cell: IlluminaFlowCellDirectoryData = IlluminaFlowCellDirectoryData(
-            flow_cell_path=flow_cell_dir
-        )
+        flow_cell: IlluminaRunDirectoryData = IlluminaRunDirectoryData(flow_cell_path=flow_cell_dir)
         add_and_include_sample_sheet_path_to_housekeeper(
             flow_cell_directory=flow_cell_dir,
             flow_cell_name=flow_cell.id,
@@ -110,7 +108,7 @@ def test_demultiplex_all_novaseq(
 
 
 def test_is_demultiplexing_complete(
-    hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet: IlluminaFlowCellDirectoryData,
+    hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet: IlluminaRunDirectoryData,
 ):
     """Tests the is_demultiplexing_complete property of FlowCellDirectoryData."""
 
@@ -127,7 +125,7 @@ def test_is_demultiplexing_complete(
 
 
 def test_is_demultiplexing_not_complete(
-    hiseq_2500_dual_index_demux_runs_flow_cell: IlluminaFlowCellDirectoryData,
+    hiseq_2500_dual_index_demux_runs_flow_cell: IlluminaRunDirectoryData,
 ):
     """Tests the is_demultiplexing_complete property of FlowCellDirectoryData."""
 

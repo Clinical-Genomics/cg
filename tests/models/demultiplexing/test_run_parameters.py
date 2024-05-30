@@ -21,8 +21,8 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
-from cg.models.illumina_flow_cell_dir_data.illumina_flow_cell_dir_data import (
-    IlluminaFlowCellDirectoryData,
+from cg.models.instrument_run_directory_data.instrument_run_directory_data import (
+    IlluminaRunDirectoryData,
 )
 
 
@@ -280,7 +280,7 @@ def test_is_novaseq6000_post_1_5_kit(
 ):
     """Test that the correct index settings are returned for each NovaSeq flow cell type."""
     # GIVEN run parameters from a flow cell
-    flow_cell: IlluminaFlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture)
+    flow_cell: IlluminaRunDirectoryData = request.getfixturevalue(flow_cell_fixture)
     # WHEN checking if the flow cell was sequenced after the NovaSeq 6000 1.5 kits
     result: bool = flow_cell.run_parameters._is_novaseq6000_post_1_5_kit()
     # THEN the correct index settings are returned
@@ -302,7 +302,7 @@ def test_get_index_settings(
 ):
     """Test that the correct index settings are returned for each NovaSeq flow cell type."""
     # GIVEN run parameters for a flow cell
-    flow_cell: IlluminaFlowCellDirectoryData = request.getfixturevalue(flow_cell)
+    flow_cell: IlluminaRunDirectoryData = request.getfixturevalue(flow_cell)
     # WHEN getting the index settings
     settings: IndexSettings = flow_cell.run_parameters.index_settings
     # THEN the correct index settings are returned

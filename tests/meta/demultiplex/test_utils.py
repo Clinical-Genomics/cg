@@ -30,8 +30,8 @@ from cg.meta.demultiplex.utils import (
     is_valid_sample_fastq_file,
     parse_manifest_file,
 )
-from cg.models.illumina_flow_cell_dir_data.illumina_flow_cell_dir_data import (
-    IlluminaFlowCellDirectoryData,
+from cg.models.instrument_run_directory_data.instrument_run_directory_data import (
+    IlluminaRunDirectoryData,
 )
 from tests.meta.demultiplex.conftest import get_all_files_in_directory_tree
 
@@ -264,17 +264,17 @@ def test_get_sample_sheet_path_not_found(tmp_path: Path):
 def test_parse_flow_cell_directory_data_invalid():
     """Test that a FlowCellDirectoryData object is not created when the given path is invalid."""
     with pytest.raises(FlowCellError):
-        IlluminaFlowCellDirectoryData(Path("invalid_path"))
+        IlluminaRunDirectoryData(Path("invalid_path"))
 
 
 def test_parse_flow_cell_directory_data_valid(novaseq_6000_post_1_5_kits_flow_cell_full_name: str):
     # GIVEN a flow cell directory which is valid
 
     # WHEN parsing the flow cell directory data
-    result = IlluminaFlowCellDirectoryData(Path(novaseq_6000_post_1_5_kits_flow_cell_full_name))
+    result = IlluminaRunDirectoryData(Path(novaseq_6000_post_1_5_kits_flow_cell_full_name))
 
     # THEN a FlowCellDirectoryData object should be returned
-    assert isinstance(result, IlluminaFlowCellDirectoryData)
+    assert isinstance(result, IlluminaRunDirectoryData)
 
     # THEN the flow cell path and bcl converter should be set
     assert result.path == Path(novaseq_6000_post_1_5_kits_flow_cell_full_name)

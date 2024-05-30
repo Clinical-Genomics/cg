@@ -10,8 +10,8 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.illumina_flow_cell_dir_data.illumina_flow_cell_dir_data import (
-    IlluminaFlowCellDirectoryData,
+from cg.models.instrument_run_directory_data.instrument_run_directory_data import (
+    IlluminaRunDirectoryData,
 )
 from cg.store.models import Sample
 
@@ -57,7 +57,7 @@ def test_post_processing_of_flow_cell(
     demultiplexing software and setting used."""
 
     # GIVEN a demultiplexed flow cell
-    flow_cell: IlluminaFlowCellDirectoryData = request.getfixturevalue(flow_cell_fixture)
+    flow_cell: IlluminaRunDirectoryData = request.getfixturevalue(flow_cell_fixture)
     flow_cell_demultiplexing_directory: str = flow_cell.full_name
     flow_cell_name: str = flow_cell.id
     sample_internal_ids: list[str] = request.getfixturevalue(sample_ids_fixture)
@@ -155,7 +155,7 @@ def test_get_all_demultiplexed_flow_cell_out_dirs(
 
 def test_post_processing_tracks_undetermined_fastq_files(
     updated_demux_post_processing_api: DemuxPostProcessingAPI,
-    hiseq_x_single_index_flow_cell: IlluminaFlowCellDirectoryData,
+    hiseq_x_single_index_flow_cell: IlluminaRunDirectoryData,
     selected_hiseq_x_single_index_sample_ids: list[str],
 ):
     # GIVEN a flow cell with undetermined fastqs in a non-pooled lane
@@ -183,7 +183,7 @@ def test_post_processing_tracks_undetermined_fastq_files(
 
 def test_sample_read_count_update_is_idempotent(
     updated_demux_post_processing_api: DemuxPostProcessingAPI,
-    hiseq_x_single_index_flow_cell: IlluminaFlowCellDirectoryData,
+    hiseq_x_single_index_flow_cell: IlluminaRunDirectoryData,
     selected_hiseq_x_single_index_sample_ids: list[str],
 ):
     """Test that sample read counts are the same if the flow cell is processed twice."""

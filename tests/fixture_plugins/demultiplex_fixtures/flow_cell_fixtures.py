@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.models.illumina_flow_cell_dir_data.illumina_flow_cell_dir_data import (
-    IlluminaFlowCellDirectoryData,
+from cg.models.instrument_run_directory_data.instrument_run_directory_data import (
+    IlluminaRunDirectoryData,
 )
 
 # Canonical flow cell runs
@@ -15,42 +15,42 @@ from cg.models.illumina_flow_cell_dir_data.illumina_flow_cell_dir_data import (
 @pytest.fixture(scope="module")
 def hiseq_x_single_index_flow_cell(
     hiseq_x_single_index_flow_cell_dir: Path,
-) -> IlluminaFlowCellDirectoryData:
+) -> IlluminaRunDirectoryData:
     """Return a single-index HiSeqX flow cell."""
-    return IlluminaFlowCellDirectoryData(flow_cell_path=hiseq_x_single_index_flow_cell_dir)
+    return IlluminaRunDirectoryData(flow_cell_path=hiseq_x_single_index_flow_cell_dir)
 
 
 @pytest.fixture(scope="module")
 def hiseq_x_dual_index_flow_cell(
     hiseq_x_dual_index_flow_cell_dir: Path,
-) -> IlluminaFlowCellDirectoryData:
+) -> IlluminaRunDirectoryData:
     """Return a dual-index HiSeqX flow cell."""
-    return IlluminaFlowCellDirectoryData(flow_cell_path=hiseq_x_dual_index_flow_cell_dir)
+    return IlluminaRunDirectoryData(flow_cell_path=hiseq_x_dual_index_flow_cell_dir)
 
 
 @pytest.fixture(scope="module")
 def hiseq_2500_dual_index_flow_cell(
     hiseq_2500_dual_index_flow_cell_dir: Path,
-) -> IlluminaFlowCellDirectoryData:
+) -> IlluminaRunDirectoryData:
     """Return a dual-index HiSeq2500 flow cell."""
-    return IlluminaFlowCellDirectoryData(flow_cell_path=hiseq_2500_dual_index_flow_cell_dir)
+    return IlluminaRunDirectoryData(flow_cell_path=hiseq_2500_dual_index_flow_cell_dir)
 
 
 @pytest.fixture(scope="module")
 def hiseq_2500_custom_index_flow_cell(
     hiseq_2500_custom_index_flow_cell_dir: Path,
-) -> IlluminaFlowCellDirectoryData:
+) -> IlluminaRunDirectoryData:
     """Return a custom-index HiSeq2500 flow cell."""
-    return IlluminaFlowCellDirectoryData(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
+    return IlluminaRunDirectoryData(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
 
 
 @pytest.fixture
 def novaseq_6000_pre_1_5_kits_flow_cell(
     illumina_flow_cells_directory: Path,
     novaseq_6000_pre_1_5_kits_flow_cell_full_name: str,
-) -> IlluminaFlowCellDirectoryData:
+) -> IlluminaRunDirectoryData:
     """Return a Novaseq6000 flow cell with index settings pre 1.5 kits."""
-    return IlluminaFlowCellDirectoryData(
+    return IlluminaRunDirectoryData(
         Path(illumina_flow_cells_directory, novaseq_6000_pre_1_5_kits_flow_cell_full_name)
     )
 
@@ -59,29 +59,29 @@ def novaseq_6000_pre_1_5_kits_flow_cell(
 def novaseq_6000_post_1_5_kits_flow_cell(
     illumina_flow_cells_directory: Path,
     novaseq_6000_post_1_5_kits_flow_cell_full_name: str,
-) -> IlluminaFlowCellDirectoryData:
+) -> IlluminaRunDirectoryData:
     """Return a Novaseq6000 flow cell with index settings post 1.5 kits."""
-    return IlluminaFlowCellDirectoryData(
+    return IlluminaRunDirectoryData(
         Path(illumina_flow_cells_directory, novaseq_6000_post_1_5_kits_flow_cell_full_name)
     )
 
 
 @pytest.fixture
-def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> IlluminaFlowCellDirectoryData:
+def novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> IlluminaRunDirectoryData:
     """Return a NovaSeqX flow cell."""
-    return IlluminaFlowCellDirectoryData(novaseq_x_flow_cell_dir)
+    return IlluminaRunDirectoryData(novaseq_x_flow_cell_dir)
 
 
 @pytest.fixture
 def seven_canonical_flow_cells(
-    hiseq_x_single_index_flow_cell: IlluminaFlowCellDirectoryData,
-    hiseq_x_dual_index_flow_cell: IlluminaFlowCellDirectoryData,
-    hiseq_2500_dual_index_flow_cell: IlluminaFlowCellDirectoryData,
-    hiseq_2500_custom_index_flow_cell: IlluminaFlowCellDirectoryData,
-    novaseq_6000_pre_1_5_kits_flow_cell: IlluminaFlowCellDirectoryData,
-    novaseq_6000_post_1_5_kits_flow_cell: IlluminaFlowCellDirectoryData,
-    novaseq_x_flow_cell: IlluminaFlowCellDirectoryData,
-) -> list[IlluminaFlowCellDirectoryData]:
+    hiseq_x_single_index_flow_cell: IlluminaRunDirectoryData,
+    hiseq_x_dual_index_flow_cell: IlluminaRunDirectoryData,
+    hiseq_2500_dual_index_flow_cell: IlluminaRunDirectoryData,
+    hiseq_2500_custom_index_flow_cell: IlluminaRunDirectoryData,
+    novaseq_6000_pre_1_5_kits_flow_cell: IlluminaRunDirectoryData,
+    novaseq_6000_post_1_5_kits_flow_cell: IlluminaRunDirectoryData,
+    novaseq_x_flow_cell: IlluminaRunDirectoryData,
+) -> list[IlluminaRunDirectoryData]:
     """Return a list with the seven canonical flow cells."""
     return [
         hiseq_x_single_index_flow_cell,
@@ -100,10 +100,10 @@ def seven_canonical_flow_cells(
 @pytest.fixture
 def novaseqx_flow_cell_with_sample_sheet_no_fastq(
     tmp_demultiplexed_flow_cell_no_fastq_files: Path,
-) -> IlluminaFlowCellDirectoryData:
+) -> IlluminaRunDirectoryData:
     """Return a flow cell from a tmp dir with a sample sheet and no sample fastq files."""
     tmp_demultiplexed_flow_cell_no_fastq_files.mkdir(parents=True, exist_ok=True)
-    flow_cell = IlluminaFlowCellDirectoryData(tmp_demultiplexed_flow_cell_no_fastq_files)
+    flow_cell = IlluminaRunDirectoryData(tmp_demultiplexed_flow_cell_no_fastq_files)
     sample_sheet_path = Path(flow_cell.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
     flow_cell._sample_sheet_path_hk = sample_sheet_path
     return flow_cell
@@ -112,9 +112,9 @@ def novaseqx_flow_cell_with_sample_sheet_no_fastq(
 @pytest.fixture
 def tmp_bcl_convert_flow_cell(
     tmp_flow_cell_directory_bcl_convert: Path,
-) -> IlluminaFlowCellDirectoryData:
+) -> IlluminaRunDirectoryData:
     """Create a flow cell object with flow cell that is demultiplexed."""
-    return IlluminaFlowCellDirectoryData(tmp_flow_cell_directory_bcl_convert)
+    return IlluminaRunDirectoryData(tmp_flow_cell_directory_bcl_convert)
 
 
 @pytest.fixture
@@ -122,23 +122,23 @@ def hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet(
     illumina_demultiplexed_runs_directory: Path,
     hiseq_x_single_index_flow_cell_name: str,
     hiseq_x_single_index_sample_sheet_path: Path,
-) -> IlluminaFlowCellDirectoryData:
+) -> IlluminaRunDirectoryData:
     """Return a Novaseq6000 flow cell with a sample sheet."""
     path = Path(illumina_demultiplexed_runs_directory, hiseq_x_single_index_flow_cell_name)
-    flow_cell = IlluminaFlowCellDirectoryData(path)
+    flow_cell = IlluminaRunDirectoryData(path)
     flow_cell.set_sample_sheet_path_hk(hiseq_x_single_index_sample_sheet_path)
     return flow_cell
 
 
 @pytest.fixture
-def novaseq_x_demux_runs_flow_cell(novaseq_x_demux_runs_dir: Path) -> IlluminaFlowCellDirectoryData:
+def novaseq_x_demux_runs_flow_cell(novaseq_x_demux_runs_dir: Path) -> IlluminaRunDirectoryData:
     """Return a NovaSeqX flow cell."""
-    return IlluminaFlowCellDirectoryData(novaseq_x_demux_runs_dir)
+    return IlluminaRunDirectoryData(novaseq_x_demux_runs_dir)
 
 
 @pytest.fixture
 def hiseq_2500_dual_index_demux_runs_flow_cell(
     hiseq_2500_dual_index_demux_runs_dir: Path,
-) -> IlluminaFlowCellDirectoryData:
+) -> IlluminaRunDirectoryData:
     """Return a HiSeq2500 flow cell."""
-    return IlluminaFlowCellDirectoryData(hiseq_2500_dual_index_demux_runs_dir)
+    return IlluminaRunDirectoryData(hiseq_2500_dual_index_demux_runs_dir)
