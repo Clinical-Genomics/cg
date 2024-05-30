@@ -1086,7 +1086,7 @@ class PacBioSequencingRun(InstrumentRun):
     hifi_yield: Mapped[BigInt | None]
     hifi_mean_read_length: Mapped[BigInt | None]
     hifi_median_read_quality: Mapped[Str32 | None]
-    percent_reads_over_q30: Mapped[Num_6_2 | None]
+    percent_reads_passing_q30: Mapped[Num_6_2 | None]
     productive_zmw: Mapped[BigInt | None]
     p0_zmw: Mapped[BigInt | None]
     p1_zmw: Mapped[BigInt | None]
