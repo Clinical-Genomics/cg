@@ -112,8 +112,6 @@ class IlluminaMetricsService:
         mean_quality_score: float = metrics_parser.get_mean_quality_score_for_sample_in_lane(
             sample_internal_id=sample_internal_id, lane=lane
         )
-        sample_internal_id: str = sample_internal_id
-
         yield_: float = metrics_parser.get_yield_for_sample_in_lane(
             sample_internal_id=sample_internal_id, lane=lane
         )
