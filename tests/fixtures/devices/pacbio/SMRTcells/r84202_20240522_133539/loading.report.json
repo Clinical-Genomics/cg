@@ -1,0 +1,122 @@
+{
+    "_comment": "Generated with pbcommand version  at 2024-05-24T03:07:11.971933",
+    "attributes": [
+        {
+            "id": "loading_xml_report.productive_zmws",
+            "name": "Productive ZMWs",
+            "value": 25165824
+        },
+        {
+            "id": "loading_xml_report.productivity_0_n",
+            "name": "Productivity 0",
+            "value": 10012557
+        },
+        {
+            "id": "loading_xml_report.productivity_1_n",
+            "name": "Productivity 1",
+            "value": 15048838
+        },
+        {
+            "id": "loading_xml_report.productivity_2_n",
+            "name": "Productivity 2",
+            "value": 104429
+        }
+    ],
+    "dataset_uuids": [
+        "a662e714-45f2-4cf3-b8d2-c138e1deebd0"
+    ],
+    "id": "loading_xml_report",
+    "plotGroups": [
+        {
+            "id": "loading_xml_report.raw_read_length_plot_group",
+            "legend": null,
+            "plots": [
+                {
+                    "caption": "HQ Region Filtering Evaluation",
+                    "id": "loading_xml_report.raw_read_length_plot_group.raw_read_length_plot",
+                    "image": "raw_read_length_plot.png",
+                    "plotType": "image",
+                    "thumbnail": "raw_read_length_plot_thumb.png",
+                    "title": "HQ Region Filtering Evaluation"
+                }
+            ],
+            "thumbnail": "raw_read_length_plot_thumb.png",
+            "title": "HQ Region Filtering Evaluation"
+        }
+    ],
+    "tables": [
+        {
+            "columns": [
+                {
+                    "header": "Collection Context",
+                    "id": "loading_xml_report.loading_xml_table.collection_context",
+                    "values": [
+                        "m84202_240522_135641_s1"
+                    ]
+                },
+                {
+                    "header": "Total ZMWs",
+                    "id": "loading_xml_report.loading_xml_table.productive_zmws",
+                    "values": [
+                        25165824
+                    ]
+                },
+                {
+                    "header": "Productivity 0",
+                    "id": "loading_xml_report.loading_xml_table.productivity_0_n",
+                    "values": [
+                        10012557
+                    ]
+                },
+                {
+                    "header": "P0 (%)",
+                    "id": "loading_xml_report.loading_xml_table.productivity_0_pct",
+                    "values": [
+                        39.786
+                    ]
+                },
+                {
+                    "header": "Productivity 1",
+                    "id": "loading_xml_report.loading_xml_table.productivity_1_n",
+                    "values": [
+                        15048838
+                    ]
+                },
+                {
+                    "header": "P1 (%)",
+                    "id": "loading_xml_report.loading_xml_table.productivity_1_pct",
+                    "values": [
+                        59.799
+                    ]
+                },
+                {
+                    "header": "Productivity 2",
+                    "id": "loading_xml_report.loading_xml_table.productivity_2_n",
+                    "values": [
+                        104429
+                    ]
+                },
+                {
+                    "header": "P2 (%)",
+                    "id": "loading_xml_report.loading_xml_table.productivity_2_pct",
+                    "values": [
+                        0.415
+                    ]
+                },
+                {
+                    "header": "Loading type",
+                    "id": "loading_xml_report.loading_xml_table.loading_type",
+                    "values": [
+                        "Workflow_Kestrel.py"
+                    ]
+                }
+            ],
+            "id": "loading_xml_report.loading_xml_table",
+            "title": "Loading Statistics"
+        }
+    ],
+    "tags": [],
+    "title": "Loading Report",
+    "uuid": "f939d4a7-044a-4bee-a30e-b87a3f6af918",
+    "version": "1.0.1"
+}
