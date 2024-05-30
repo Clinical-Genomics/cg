@@ -7,7 +7,6 @@ Create Date: 2024-05-29 14:03:54.754736
 """
 
 import sqlalchemy as sa
-from sqlalchemy.dialects import mysql
 
 from alembic import op
 
