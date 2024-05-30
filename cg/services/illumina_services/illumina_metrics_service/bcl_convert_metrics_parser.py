@@ -14,13 +14,18 @@ from cg.constants.metrics import (
     QUALITY_METRICS_FILE_NAME,
 )
 from cg.io.controller import ReadFile
-from cg.services.bcl_convert_metrics_service.models import DemuxMetrics, SequencingQualityMetrics
+from cg.services.illumina_services.illumina_metrics_service.models import (
+    DemuxMetrics,
+    SequencingQualityMetrics,
+)
 from cg.utils.files import get_file_in_directory
 
 LOG = logging.getLogger(__name__)
 
 
-class MetricsParser:
+class BCLConvertMetricsParser:
+    """Parser file for BCLConvert metrics used for illumina flow cells."""
+
     def __init__(
         self,
         bcl_convert_metrics_dir_path: Path,

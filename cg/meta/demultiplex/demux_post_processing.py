@@ -16,7 +16,7 @@ from cg.meta.demultiplex.status_db_storage_functions import (
     store_sequencing_metrics_in_status_db,
 )
 from cg.meta.demultiplex.utils import create_delivery_file_in_flow_cell_directory
-from cg.services.illumina_post_processing_service.validation import (
+from cg.services.illumina_services.illumina_post_processing_service.validation import (
     is_flow_cell_ready_for_postprocessing,
 )
 from cg.models.cg_config import CGConfig
