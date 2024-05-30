@@ -6,9 +6,6 @@ from pydantic import BaseModel
 
 from cg.constants.sequencing import Sequencers
 
-DEMULTIPLEXED_RUNS: str = "demultiplexed_runs"
-FLOW_CELL_RUNS: str = "flow_cells"
-
 
 class DemultiplexingDirsAndFiles(StrEnum):
     """Demultiplexing related directories and files."""
@@ -28,9 +25,12 @@ class DemultiplexingDirsAndFiles(StrEnum):
     DATA: str = "Data"
     BCL_CONVERT: str = "BCLConvert"
     FLOW_CELLS_DIRECTORY_NAME: str = "flow_cells"
+    DEMULTIPLEXED_RUNS_DIRECTORY_NAME: str = "demultiplexed-runs"
     ILLUMINA_FILE_MANIFEST: str = "Manifest.tsv"
     CG_FILE_MANIFEST: str = "file_manifest.tsv"
     INTER_OP: str = "InterOp"
+    RUN_COMPLETION_STATUS: str = "RunCompletionStatus.xml"
+    DEMUX_VERSION_FILE: str = "dragen-replay.json"
 
 
 class RunParametersXMLNodes(StrEnum):
@@ -217,3 +217,8 @@ NAME_TO_INDEX_SETTINGS: dict[str, IndexSettings] = {
     "NovaSeq6000Post1.5Kits": NOVASEQ_6000_POST_1_5_KITS_INDEX_SETTINGS,
     "NoReverseComplements": NO_REVERSE_COMPLEMENTS_INDEX_SETTINGS,
 }
+
+
+class RunCompletionStatusNodes(StrEnum):
+    RUN_START: str = ".//RunStartTime"
+    RUN_END: str = ".//RunEndTime"
