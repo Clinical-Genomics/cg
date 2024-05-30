@@ -21,7 +21,7 @@ def upgrade():
     op.create_table(
         "pacbio_sequencing_run",
         sa.Column(
-            "id", sa.Integer(), sa.ForeignKey("run_metrics.id"), nullable=False, primary_key=True
+            "id", sa.Integer(), sa.ForeignKey("instrument_run.id"), nullable=False, primary_key=True
         ),
         sa.Column("well", sa.String(length=32), nullable=False),
         sa.Column("plate", sa.Integer, nullable=False),
