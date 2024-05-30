@@ -454,11 +454,11 @@ class IlluminaFlowCellView(BaseView):
         "internal_id",
         "sequencer_type",
         "sequencer_name",
-        "sequenced_at",
         "data_availability",
         "has_backup",
         "total_reads",
         "total_undetermined_reads",
+        "percent_undetermined_reads",
         "percent_q30",
         "mean_quality_score",
         "total_yield",
@@ -476,12 +476,11 @@ class IlluminaFlowCellView(BaseView):
         "internal_id": view_flow_cell_internal_id,
     }
 
-    column_default_sort = ("sequenced_at", True)
+    column_default_sort = ("sequencing_completed_at", True)
     column_filters = ["sequencer_type", "sequencer_name", "data_availability"]
     column_editable_list = ["data_availability"]
     column_searchable_list = ["sequencer_type", "sequencer_name", "device.internal_id"]
     column_sortable_list = [
-        "sequenced_at",
         "sequencer_type",
         "sequencer_name",
         "data_availability",
@@ -492,21 +491,6 @@ class IlluminaFlowCellView(BaseView):
         "demultiplexing_completed_at",
         "archived_at",
     ]
-
-    @staticmethod
-    def view_flow_cell_link(unused1, unused2, model, unused3):
-        """column formatter to open this view"""
-        del unused1, unused2, unused3
-        return Markup(
-            "<a href='%s'>%s</a>"
-            % (
-                url_for(
-                    "illuminasequencingrun.index_view",
-                    search=model.instrument_run.device.internal_id,
-                ),
-                model.instrument_run.device.internal_id,
-            )
-        )
 
 
 class OrganismView(BaseView):
