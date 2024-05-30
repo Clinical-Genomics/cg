@@ -57,7 +57,7 @@ def test_get_illumina_sample_sequencing_metrics(
 
     # WHEN creating Illumina sample sequencing metrics
     sample_metrics: list[IlluminaSampleSequencingMetrics] = (
-        illumina_post_postprocessing_service.get_illumina_sample_sequencing_metrics(
+        illumina_post_postprocessing_service.store_illumina_sample_sequencing_metrics(
             flow_cell_dir_data=novaseq_x_demux_runs_flow_cell,
             sequencing_run=sequencing_run,
         )

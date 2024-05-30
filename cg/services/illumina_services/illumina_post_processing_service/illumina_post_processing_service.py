@@ -61,7 +61,7 @@ class IlluminaPostProcessingService:
             sequencing_run_dto=sequencing_run_dto, flow_cell=flow_cell
         )
 
-    def get_illumina_sample_sequencing_metrics(
+    def store_illumina_sample_sequencing_metrics(
         self,
         flow_cell_dir_data: FlowCellDirectoryData,
         sequencing_run: IlluminaSequencingRun,
@@ -85,7 +85,7 @@ class IlluminaPostProcessingService:
         sequencing_run: IlluminaSequencingRun = self.store_illumina_sequencing_run(
             flow_cell_dir_data=flow_cell_dir_data, flow_cell=flow_cell
         )
-        self.get_illumina_sample_sequencing_metrics(
+        self.store_illumina_sample_sequencing_metrics(
             flow_cell_dir_data=flow_cell_dir_data, sequencing_run=sequencing_run
         )
         self.status_db.commit_to_store()
