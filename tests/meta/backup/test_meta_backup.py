@@ -19,7 +19,9 @@ from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.models.cg_config import PDCArchivingDirectory
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.illumina_flow_cell_dir_data.illumina_flow_cell_dir_data import (
+    IlluminaFlowCellDirectoryData,
+)
 from tests.mocks.hk_mock import MockFile
 
 
@@ -669,12 +671,12 @@ def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
 
 def test_create_copy_complete_file_exist(
     backup_api: BackupAPI,
-    novaseq_x_flow_cell: FlowCellDirectoryData,
+    novaseq_x_flow_cell: IlluminaFlowCellDirectoryData,
 ):
     """Tests creating a copy complete file in the flow cell directory. There are two cases: when
     the file exists and when it does not exist."""
 
-    # GIVEN a flow cell that has been decrypted in flow_cell directory
+    # GIVEN a flow cell that has been decrypted in illumina_flow_cell_dir_data directory
     flow_cell_dir: Path = novaseq_x_flow_cell.path
 
     # GIVEN the copy complete to be created
@@ -692,12 +694,12 @@ def test_create_copy_complete_file_exist(
 
 def test_create_copy_complete_file_does_not_exist(
     backup_api: BackupAPI,
-    novaseq_x_flow_cell: FlowCellDirectoryData,
+    novaseq_x_flow_cell: IlluminaFlowCellDirectoryData,
 ):
     """Tests creating a copy complete file in the flow cell directory. There are two cases: when
     the file exists and when it does not exist."""
 
-    # GIVEN a flow cell that has been decrypted in flow_cell directory
+    # GIVEN a flow cell that has been decrypted in illumina_flow_cell_dir_data directory
     flow_cell_dir: Path = novaseq_x_flow_cell.path
 
     # GIVEN the copy complete to be created

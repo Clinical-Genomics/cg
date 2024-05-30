@@ -94,7 +94,7 @@ def backup_file_path() -> str:
 @pytest.fixture
 def archived_flow_cell() -> Path:
     """Path of archived flow cell"""
-    return Path("/path/to/archived/flow_cell.tar.gz.gpg")
+    return Path("/path/to/archived/illumina_flow_cell_dir_data.tar.gz.gpg")
 
 
 @pytest.fixture

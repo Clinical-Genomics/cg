@@ -2,7 +2,9 @@
 
 from pathlib import Path
 
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.illumina_flow_cell_dir_data.illumina_flow_cell_dir_data import (
+    IlluminaFlowCellDirectoryData,
+)
 
 
 from cg.services.illumina_services.illumina_metrics_service.bcl_convert_metrics_parser import (
@@ -41,7 +43,7 @@ def test_create_sample_lane_sequencing_metrics_for_flow_cell(
 
 
 def test_create_undetermined_non_pooled_metrics(
-    hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet: FlowCellDirectoryData,
+    hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet: IlluminaFlowCellDirectoryData,
     illumina_metrics_service: IlluminaMetricsService,
 ):
     """Test creating undetermined sequencing statistics from demultiplex metrics."""
@@ -69,7 +71,7 @@ def test_create_undetermined_non_pooled_metrics_for_existing_lane_without_undete
     """
 
     # GIVEN a directory with a demultiplexed flow cell without undetermined reads in a lane
-    flow_cell = FlowCellDirectoryData(bcl_convert_metrics_dir_path)
+    flow_cell = IlluminaFlowCellDirectoryData(bcl_convert_metrics_dir_path)
     sample_sheet_path = Path(bcl_convert_metrics_dir_path, "SampleSheet.csv")
     flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
 

@@ -16,7 +16,9 @@ from cg.meta.encryption.sbatch import (
     FLOW_CELL_ENCRYPT_ERROR,
 )
 from cg.meta.tar.tar import TarAPI
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.illumina_flow_cell_dir_data.illumina_flow_cell_dir_data import (
+    IlluminaFlowCellDirectoryData,
+)
 from cg.models.slurm.sbatch import Sbatch
 from cg.utils import Process
 from cg.utils.checksum.checksum import sha512_checksum
@@ -147,7 +149,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         self,
         binary_path: str,
         encryption_dir: Path,
-        flow_cell: FlowCellDirectoryData,
+        flow_cell: IlluminaFlowCellDirectoryData,
         pigz_binary_path: str,
         sbatch_parameter: dict[str, str | int],
         slurm_api: SlurmAPI,
@@ -155,7 +157,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         dry_run: bool = False,
     ):
         super().__init__(binary_path=binary_path, dry_run=dry_run)
-        self.flow_cell: FlowCellDirectoryData = flow_cell
+        self.flow_cell: IlluminaFlowCellDirectoryData = flow_cell
         self.encryption_dir: Path = encryption_dir
         self.tar_api: TarAPI = tar_api
         self.pigz_binary_path: str = pigz_binary_path

@@ -6,7 +6,9 @@ from _pytest.logging import LogCaptureFixture
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.exc import SampleSheetError
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.illumina_flow_cell_dir_data.illumina_flow_cell_dir_data import (
+    IlluminaFlowCellDirectoryData,
+)
 
 
 def test_are_necessary_files_in_flow_cell_passes(
@@ -18,7 +20,9 @@ def test_are_necessary_files_in_flow_cell_passes(
     api: SampleSheetAPI = sample_sheet_context_broken_flow_cells.sample_sheet_api
 
     # GIVEN a flow cell with a sample sheet
-    flow_cell = FlowCellDirectoryData(flow_cell_path=tmp_flow_cell_with_bcl2fastq_sample_sheet)
+    flow_cell = IlluminaFlowCellDirectoryData(
+        flow_cell_path=tmp_flow_cell_with_bcl2fastq_sample_sheet
+    )
 
     # WHEN checking if the flow cell has the necessary files
     result: bool = api._are_necessary_files_in_flow_cell(flow_cell=flow_cell)
@@ -37,7 +41,9 @@ def test_are_necessary_files_in_flow_cell_no_run_params(
     api: SampleSheetAPI = sample_sheet_context_broken_flow_cells.sample_sheet_api
 
     # GIVEN a flow cell without run parameters
-    flow_cell = FlowCellDirectoryData(flow_cell_path=tmp_flow_cell_without_run_parameters_path)
+    flow_cell = IlluminaFlowCellDirectoryData(
+        flow_cell_path=tmp_flow_cell_without_run_parameters_path
+    )
 
     # WHEN checking if the flow cell has the necessary files
     result: bool = api._are_necessary_files_in_flow_cell(flow_cell)
@@ -57,7 +63,7 @@ def test_are_necessary_files_in_flow_cell_no_sample_sheet(
     api: SampleSheetAPI = sample_sheet_context_broken_flow_cells.sample_sheet_api
 
     # GIVEN a flow cell without a sample sheet
-    flow_cell = FlowCellDirectoryData(
+    flow_cell = IlluminaFlowCellDirectoryData(
         flow_cell_path=tmp_novaseq_x_without_sample_sheet_flow_cell_path
     )
 
@@ -113,7 +119,9 @@ def test_translate_sample_sheet(
     api: SampleSheetAPI = sample_sheet_context_broken_flow_cells.sample_sheet_api
 
     # GIVEN a flow cell with a translatable sample sheet
-    flow_cell = FlowCellDirectoryData(flow_cell_path=tmp_flow_cell_with_bcl2fastq_sample_sheet)
+    flow_cell = IlluminaFlowCellDirectoryData(
+        flow_cell_path=tmp_flow_cell_with_bcl2fastq_sample_sheet
+    )
 
     # WHEN translating the sample sheet
     api.translate_sample_sheet(flow_cell_name=flow_cell.full_name)

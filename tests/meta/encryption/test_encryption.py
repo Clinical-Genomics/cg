@@ -14,7 +14,9 @@ from cg.meta.encryption.encryption import (
     FlowCellEncryptionAPI,
     SpringEncryptionAPI,
 )
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.illumina_flow_cell_dir_data.illumina_flow_cell_dir_data import (
+    IlluminaFlowCellDirectoryData,
+)
 
 
 @mock.patch("cg.utils.Process")
@@ -382,8 +384,8 @@ def test_is_encryption_possible(flow_cell_encryption_api: FlowCellEncryptionAPI,
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
-    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
-    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
+    mocker.patch.object(IlluminaFlowCellDirectoryData, "is_flow_cell_ready")
+    IlluminaFlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # WHEN checking if encryption is possible
     is_possible: bool = flow_cell_encryption_api.is_encryption_possible()
@@ -400,8 +402,8 @@ def test_is_encryption_possible_when_sequencing_not_ready(
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is not ready
-    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
-    FlowCellDirectoryData.is_flow_cell_ready.return_value = False
+    mocker.patch.object(IlluminaFlowCellDirectoryData, "is_flow_cell_ready")
+    IlluminaFlowCellDirectoryData.is_flow_cell_ready.return_value = False
 
     # WHEN checking if encryption is possible
     with pytest.raises(FlowCellError):
@@ -417,8 +419,8 @@ def test_is_encryption_possible_when_encryption_is_completed(
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
-    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
-    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
+    mocker.patch.object(IlluminaFlowCellDirectoryData, "is_flow_cell_ready")
+    IlluminaFlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # GIVEN that encryption is completed
     flow_cell_encryption_api.flow_cell_encryption_dir.mkdir(parents=True)
@@ -441,8 +443,8 @@ def test_is_encryption_possible_when_encryption_is_pending(
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
-    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
-    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
+    mocker.patch.object(IlluminaFlowCellDirectoryData, "is_flow_cell_ready")
+    IlluminaFlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # GIVEN that encryption is pending
     flow_cell_encryption_api.flow_cell_encryption_dir.mkdir(parents=True)
@@ -466,8 +468,8 @@ def test_encrypt_flow_cell(
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
-    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
-    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
+    mocker.patch.object(IlluminaFlowCellDirectoryData, "is_flow_cell_ready")
+    IlluminaFlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # WHEN encrypting flow cell
     flow_cell_encryption_api.encrypt_flow_cell()
@@ -483,8 +485,8 @@ def test_start_encryption(
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
-    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
-    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
+    mocker.patch.object(IlluminaFlowCellDirectoryData, "is_flow_cell_ready")
+    IlluminaFlowCellDirectoryData.is_flow_cell_ready.return_value = True
 
     # WHEN trying to start encrypting flow cell
     flow_cell_encryption_api.start_encryption()
