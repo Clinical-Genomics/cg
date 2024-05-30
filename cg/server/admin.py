@@ -447,6 +447,7 @@ class AnalysisView(BaseView):
     form_extra_fields = {"workflow": SelectEnumField(enum_class=Workflow)}
 
 
+## Dummy comment
 class IlluminaFlowCellView(BaseView):
     """Admin view for Model.IlluminaSequencingRun"""
 
