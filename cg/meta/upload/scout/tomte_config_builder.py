@@ -62,17 +62,9 @@ class TomteConfigBuilder(ScoutConfigBuilder):
     def include_case_files(self) -> None:
         """Include case level files for Tomte case."""
         LOG.info("Including Tomte specific case level files")
-        for scout_key in TOMTE_CASE_TAGS.keys():
-            self._include_file(scout_key)
-
-    def _include_file(self, scout_key) -> None:
-        """Include the file path associated to a Scout configuration parameter if the corresponding housekeeper tags
-        are found. Otherwise return None."""
-        setattr(
-            self.load_config,
-            scout_key,
-            self.get_file_from_hk(getattr(self.case_tags, scout_key)),
-        )
+        self.load_config.vcf_snv = self.get_file_from_hk(self.case_tags.snv_vcf)
+        self.load_config.vcf_snv_research = self.get_file_from_hk(self.case_tags.snv_research_vcf)
+        self.load_config.multiqc_rna = self.get_file_from_hk(self.case_tags.multiqc_rna)
 
     def include_sample_files(self, config_sample: ScoutRnaIndividual) -> None:
         """Include sample level files that are optional."""
