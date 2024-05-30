@@ -716,7 +716,7 @@ class IlluminaSampleSequencingMetricsView(BaseView):
         "total_reads_in_lane",
         "base_passing_q30_percent",
         "base_mean_quality_score",
-        "_yield",
+        "yield_",
         "yield_q30",
         "created_at",
     ]
