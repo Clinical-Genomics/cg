@@ -14,7 +14,7 @@ def test_get_illumina_flow_cell(
     # GIVEN a flow cell directory data and an Illumina post processing service
 
     # WHEN creating an Illumina flow cell
-    flow_cell: IlluminaFlowCell = illumina_post_postprocessing_service.get_illumina_flow_cell(
+    flow_cell: IlluminaFlowCell = illumina_post_postprocessing_service.store_illumina_flow_cell(
         flow_cell_dir_data=novaseq_x_demux_runs_flow_cell
     )
 
@@ -25,14 +25,15 @@ def test_get_illumina_flow_cell(
 
 def test_get_illumina_sequencing_run(
     novaseq_x_demux_runs_flow_cell: FlowCellDirectoryData,
+    illumina_flow_cell: IlluminaFlowCell,
     illumina_post_postprocessing_service: IlluminaPostProcessingService,
 ):
     # GIVEN a flow cell directory data and an Illumina post processing service
 
     # WHEN creating an Illumina sequencing run
     sequencing_run: IlluminaSequencingRun = (
-        illumina_post_postprocessing_service.get_illumina_sequencing_run(
-            flow_cell_dir_data=novaseq_x_demux_runs_flow_cell
+        illumina_post_postprocessing_service.store_illumina_sequencing_run(
+            flow_cell_dir_data=novaseq_x_demux_runs_flow_cell, flow_cell=illumina_flow_cell
         )
     )
 
@@ -45,11 +46,20 @@ def test_get_illumina_sample_sequencing_metrics(
     illumina_post_postprocessing_service: IlluminaPostProcessingService,
 ):
     # GIVEN a flow cell directory data and an Illumina post processing service
+    flow_cell: IlluminaFlowCell = illumina_post_postprocessing_service.store_illumina_flow_cell(
+        novaseq_x_demux_runs_flow_cell
+    )
+    sequencing_run: IlluminaSequencingRun = (
+        illumina_post_postprocessing_service.store_illumina_sequencing_run(
+            flow_cell_dir_data=novaseq_x_demux_runs_flow_cell, flow_cell=flow_cell
+        )
+    )
 
     # WHEN creating Illumina sample sequencing metrics
     sample_metrics: list[IlluminaSampleSequencingMetrics] = (
         illumina_post_postprocessing_service.get_illumina_sample_sequencing_metrics(
-            flow_cell_dir_data=novaseq_x_demux_runs_flow_cell
+            flow_cell_dir_data=novaseq_x_demux_runs_flow_cell,
+            sequencing_run=sequencing_run,
         )
     )
 

@@ -11,6 +11,10 @@ from cg.services.illumina_services.illumina_metrics_service.bcl_convert_metrics_
 from cg.services.illumina_services.illumina_metrics_service.illumina_demux_version_service import (
     IlluminaDemuxVersionService,
 )
+from cg.services.illumina_services.illumina_metrics_service.models import (
+    IlluminaSequencingRunDTO,
+    IlluminaSampleSequencingMetricsDTO,
+)
 from cg.store.models import (
     SampleLaneSequencingMetrics,
     IlluminaSampleSequencingMetrics,
@@ -97,10 +101,8 @@ class IlluminaMetricsService:
         sample_internal_id: str,
         lane: int,
         metrics_parser: BCLConvertMetricsParser,
-        store: Store,
-    ) -> IlluminaSampleSequencingMetrics:
+    ) -> IlluminaSampleSequencingMetricsDTO:
         """Create sequencing metrics for all lanes in a flow cell."""
-
         total_reads: int = metrics_parser.calculate_total_reads_for_sample_in_lane(
             sample_internal_id=sample_internal_id, lane=lane
         )
@@ -110,7 +112,7 @@ class IlluminaMetricsService:
         mean_quality_score: float = metrics_parser.get_mean_quality_score_for_sample_in_lane(
             sample_internal_id=sample_internal_id, lane=lane
         )
-        sample: Sample = store.get_sample_by_internal_id(sample_internal_id)
+        sample_internal_id: str = sample_internal_id
 
         yield_: float = metrics_parser.get_yield_for_sample_in_lane(
             sample_internal_id=sample_internal_id, lane=lane
@@ -119,8 +121,8 @@ class IlluminaMetricsService:
             sample_internal_id=sample_internal_id, lane=lane
         )
 
-        return IlluminaSampleSequencingMetrics(
-            sample_id=sample.id,
+        return IlluminaSampleSequencingMetricsDTO(
+            sample_id=sample_internal_id,
             type=DeviceType.ILLUMINA,
             flow_cell_lane=lane,
             total_reads_in_lane=total_reads,
@@ -129,26 +131,23 @@ class IlluminaMetricsService:
             yield_=yield_,
             yield_q30=yield_q30,
             created_at=datetime.now(),
-            sample=sample,
         )
 
     def create_sample_sequencing_metrics_for_flow_cell(
         self,
         flow_cell_directory: Path,
-        store: Store,
-    ) -> list[IlluminaSampleSequencingMetrics]:
+    ) -> list[IlluminaSampleSequencingMetricsDTO]:
         """Parse the demultiplexing metrics data into the sequencing statistics model."""
         metrics_parser = BCLConvertMetricsParser(flow_cell_directory)
         sample_internal_ids: list[str] = metrics_parser.get_sample_internal_ids()
-        sample_lane_sequencing_metrics: list[IlluminaSampleSequencingMetrics] = []
+        sample_lane_sequencing_metrics: list[IlluminaSampleSequencingMetricsDTO] = []
 
         for sample_internal_id in sample_internal_ids:
             for lane in metrics_parser.get_lanes_for_sample(sample_internal_id=sample_internal_id):
-                metrics: IlluminaSampleSequencingMetrics = self.create_sample_run_metrics(
+                metrics: IlluminaSampleSequencingMetricsDTO = self.create_sample_run_metrics(
                     sample_internal_id=sample_internal_id,
                     lane=lane,
                     metrics_parser=metrics_parser,
-                    store=store,
                 )
                 sample_lane_sequencing_metrics.append(metrics)
         return sample_lane_sequencing_metrics
@@ -156,7 +155,7 @@ class IlluminaMetricsService:
     @staticmethod
     def create_illumina_sequencing_run(
         flow_cell_dir_data: FlowCellDirectoryData,
-    ) -> IlluminaSequencingRun:
+    ) -> IlluminaSequencingRunDTO:
         metrics_parser = BCLConvertMetricsParser(flow_cell_dir_data.path)
         total_reads: int = metrics_parser.get_total_reads_for_flow_cell()
         total_undetermined_reads: int = metrics_parser.get_undetermined_reads_for_flow_cell()
@@ -182,7 +181,7 @@ class IlluminaMetricsService:
         sequencer_type: str = flow_cell_dir_data.sequencer_type
         sequencer_name: str = flow_cell_dir_data.machine_name
 
-        return IlluminaSequencingRun(
+        return IlluminaSequencingRunDTO(
             sequencer_type=sequencer_type,
             sequencer_name=sequencer_name,
             data_availability=FlowCellStatus.ON_DISK,
