@@ -204,7 +204,7 @@
   tag: case_sv_str_index
 - format: vcf
   id: SAMPLEID
-  path: PATHTOCASE/repeat_expansions/SAMPLEID_repeat_expansion.vcf.gz
+  path: PATHTOCASE/repeat_expansions/SAMPLEID_repeat_expansion.vcf
   path_index: ~
   step: expansionhunter
   tag: str_variants
@@ -491,18 +491,6 @@
   path_index: ~
   step: annotate_snv
   tag: annotate_snv_index
-- format: vcf
-  id: CASEID
-  path: PATHTOCASE/annotate_snv/mitochondria/CASEID_mitochondria_cadd_vep_vcfanno_hmtnote.vcf.gz
-  path_index: ~
-  step: annotate_snv_mt
-  tag: annotate_snv_mt
-- format: vcf
-  id: CASEID
-  path: PATHTOCASE/annotate_snv/mitochondria/CASEID_mitochondria_cadd_vep_vcfanno_hmtnote.vcf.gz.tbi
-  path_index: ~
-  step: annotate_snv_mt
-  tag: annotate_snv_mt_index
 - format: meta
   id: CASEID
   path: PATHTOCASE/annotate_snv/mitochondria/CASEID_mitochondria_cadd_vep_haplogrep.txt
