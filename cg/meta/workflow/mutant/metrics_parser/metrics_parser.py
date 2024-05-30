@@ -8,7 +8,7 @@ from cg.meta.workflow.mutant.metrics_parser.models import (
 
 
 class MutantResultsHeaderData:
-    SAMPLE_NAME: str = "sample"
+    SAMPLE_NAME: str = "sample_name"
     SELECTION: str = "selection"
     REGION_CODE: str = "region_code"
     TICKET: str = "ticket"
@@ -60,10 +60,9 @@ class MetricsParser:
 
     @classmethod
     def parse_samples_results(cls, file_path: Path) -> SamplesResultsMetrics:
-        with open(file_path, mode="r") as file:
-            raw_results: list[dict[str, Any]] = [
-                metric for metric in read_csv(file, read_to_dict=True)
-            ]
+        raw_results: list[dict[str, Any]] = [
+            metric for metric in read_csv(file_path=file_path, read_to_dict=True)
+        ]
 
         results = [cls.alter_metric_keys(metric) for metric in raw_results]
 
@@ -73,4 +72,5 @@ class MetricsParser:
                 result[MutantResultsHeaderData.SAMPLE_NAME]
             ] = SampleResults.model_validate(result)
 
-        return SamplesResultsMetrics.model_validate(validated_results)
+        sample_results_metrics: dict = {"samples": validated_results}
+        return SamplesResultsMetrics.model_validate(sample_results_metrics)

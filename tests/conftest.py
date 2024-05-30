@@ -686,6 +686,10 @@ def microsalt_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the analysis dir."""
     return Path(analysis_dir, "microsalt")
 
+@pytest.fixture(scope="session")
+def mutant_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the mutant analysis directory"""
+    return Path(analysis_dir, "mutant")
 
 @pytest.fixture(scope="session")
 def apps_dir(fixtures_dir: Path) -> Path:

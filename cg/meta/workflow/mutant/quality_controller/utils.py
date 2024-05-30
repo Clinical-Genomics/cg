@@ -1,7 +1,6 @@
 from cg.apps.lims.api import LimsAPI
 from cg.constants.constants import MutantQC
 from cg.meta.workflow.mutant.constants import QUALITY_REPORT_FILE_NAME
-from cg.meta.workflow.mutant.mutant import get_case_path
 from cg.meta.workflow.mutant.metadata_parser.metadata_parser import MetadataParser
 from cg.meta.workflow.mutant.metadata_parser.models import SamplesMetadataMetrics
 from cg.meta.workflow.mutant.metrics_parser.metrics_parser import MetricsParser
@@ -69,12 +68,16 @@ def get_percent_reads_guaranteed(sample: Sample) -> int:
     return sample.application_version.application.percent_reads_guaranteed
 
 
-def get_quality_metrics(case_results_file_path: Path, case: Case, status_db: Store, lims: LimsAPI) -> QualityMetrics | None:
+def get_quality_metrics(
+    case_results_file_path: Path, case: Case, status_db: Store, lims: LimsAPI
+) -> QualityMetrics | None:
     samples_results: SamplesResultsMetrics = MetricsParser.parse_samples_results(
         case_results_file_path
     )
 
-    samples_metadata: SamplesMetadataMetrics = MetadataParser(status_db=status_db, lims=lims).parse_metadata(case)
+    samples_metadata: SamplesMetadataMetrics = MetadataParser(
+        status_db=status_db, lims=lims
+    ).parse_metadata(case)
 
     if not samples_metadata:
         return None
@@ -82,7 +85,5 @@ def get_quality_metrics(case_results_file_path: Path, case: Case, status_db: Sto
         return QualityMetrics.model_validate(samples_results, samples_metadata)
 
 
-def get_report_path(case: Case) -> Path:
-    case_path = get_case_path(case.internal_id)
-
+def get_report_path(case_path: Path) -> Path:
     return case_path.joinpath(QUALITY_REPORT_FILE_NAME)

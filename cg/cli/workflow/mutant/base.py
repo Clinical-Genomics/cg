@@ -102,7 +102,7 @@ def start_available(context: click.Context, dry_run: bool = False):
 
 
 @mutant.command("store-available")
-@OPTION_DRY
+@DRY_RUN
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool) -> None:
     """Run QC checks and store bundles for all finished analyses in Housekeeper."""

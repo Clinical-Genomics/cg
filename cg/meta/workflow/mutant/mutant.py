@@ -276,7 +276,11 @@ class MutantAnalysisAPI(AnalysisAPI):
                         self.fail_analysis(case)
 
     def get_qc_result(self, case: Case) -> QualityResult | None:
-        qc_result: QualityResult = self.quality_checker.quality_control(case=case)
+        case_path: Path = self.get_case_path(case.internal_id)
+        case_results_file_path: Path = self.get_case_path(case.internal_id)
+        qc_result: QualityResult = self.quality_checker.quality_control(
+            case=case, case_path=case_path, case_results_file_path=case_results_file_path
+        )
         return qc_result
 
     def report_qc_on_trailblazer(self, case: Case, qc_result: QualityResult) -> None:

@@ -87,10 +87,4 @@ Sample,Selection,Region Code,Ticket,%N_bases,%10X_coverage,QC_pass,Lineage,Pango
 23CS102345,Allmän övervakning,01,841080,0.23,99.62,TRUE,JN.2,PUSHER-v1.23.1,No,S373P;S375F;N440K;G446S;S477N;T478K;N481K;GV482G;E484K;Q498R;N501Y;Y505H;D614G;H655Y;N679K;P681R;N764K;D796Y;Q954H;N969K
 23CS102332,Allmän övervakning,01,841080,88.62,11.38,FALSE,Unassigned,PUSHER-v1.23.1,No,-
 Neg-kontroll,Information saknas,01,841080,99.90,0.10,FALSE,Unassigned,PUSHER-v1.23.1,No,-
-23CS102331,Allmän övervakning,01,841080,99.80,0.20,FALSE,Unassigned,PUSHER-v1.23.1,No,-
-23CS102329,Allmän övervakning,01,841080,79.98,20.03,FALSE,Unassigned,PUSHER-v1.23.1,No,-
-23CS102341,Allmän övervakning,01,841080,99.87,0.13,FALSE,Unassigned,PUSHER-v1.23.1,No,-
-23CS102369,Allmän övervakning,01,841080,93.60,6.40,FALSE,Unassigned,PUSHER-v1.23.1,No,-
-23CS102330,Allmän övervakning,01,841080,84.59,15.42,FALSE,Unassigned,PUSHER-v1.23.1,No,-
-23CS102409,Allmän övervakning,01,841080,78.84,21.16,FALSE,Unassigned,PUSHER-v1.23.1,No,D614G
-23CS102420,Allmän övervakning,01,841080,96.71,3.29,FALSE,Unassigned,PUSHER-v1.23.1,No,-
+
