@@ -406,9 +406,7 @@ class Customer(Base):
 class Collaboration(Base):
     __tablename__ = "collaboration"
     id: Mapped[PrimaryKeyInt]
-    internal_id: Mapped[Str32] = mapped_column(
-        unique=True,
-    )
+    internal_id: Mapped[Str32] = mapped_column(unique=True)
     name: Mapped[Str128]
     customers: Mapped[list[Customer]] = orm.relationship(
         secondary="customer_collaboration", back_populates="collaborations"
@@ -992,7 +990,7 @@ class RunDevice(Base):
         return list(
             {
                 sample_run_metric.sample
-                for run in self.instrument_run
+                for run in self.instrument_runs
                 for sample_run_metric in run.sample_run_metrics
             }
         )

@@ -126,3 +126,17 @@ def hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet(
     flow_cell = FlowCellDirectoryData(path)
     flow_cell.set_sample_sheet_path_hk(hiseq_x_single_index_sample_sheet_path)
     return flow_cell
+
+
+@pytest.fixture
+def novaseq_x_demux_runs_flow_cell(novaseq_x_demux_runs_dir: Path) -> FlowCellDirectoryData:
+    """Return a NovaSeqX flow cell."""
+    return FlowCellDirectoryData(novaseq_x_demux_runs_dir)
+
+
+@pytest.fixture
+def hiseq_2500_dual_index_demux_runs_flow_cell(
+    hiseq_2500_dual_index_demux_runs_dir: Path,
+) -> FlowCellDirectoryData:
+    """Return a HiSeq2500 flow cell."""
+    return FlowCellDirectoryData(hiseq_2500_dual_index_demux_runs_dir)

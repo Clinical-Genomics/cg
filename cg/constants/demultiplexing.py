@@ -25,11 +25,12 @@ class DemultiplexingDirsAndFiles(StrEnum):
     DATA: str = "Data"
     BCL_CONVERT: str = "BCLConvert"
     FLOW_CELLS_DIRECTORY_NAME: str = "flow_cells"
-    DEMULTIPLEXED_RUNS_DIRECTORY_NAME: str = "demultiplexed_runs"
+    DEMULTIPLEXED_RUNS_DIRECTORY_NAME: str = "demultiplexed-runs"
     ILLUMINA_FILE_MANIFEST: str = "Manifest.tsv"
     CG_FILE_MANIFEST: str = "file_manifest.tsv"
     INTER_OP: str = "InterOp"
     RUN_COMPLETION_STATUS: str = "RunCompletionStatus.xml"
+    DEMUX_VERSION_FILE: str = "dragen-replay.json"
 
 
 class RunParametersXMLNodes(StrEnum):

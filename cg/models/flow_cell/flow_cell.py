@@ -179,6 +179,12 @@ class FlowCellDirectoryData:
         return Path(flow_cell_run_dir, DemultiplexingDirsAndFiles.DEMUX_STARTED)
 
     @property
+    def demultiplex_software_info_path(self) -> Path:
+        """Return demultiplex software info path."""
+        demux_run_dir = self.get_demultiplexed_runs_dir()
+        return Path(demux_run_dir, DemultiplexingDirsAndFiles.DEMUX_VERSION_FILE)
+
+    @property
     def demux_complete_path(self) -> Path:
         """Return demux complete path."""
         demux_run_dir = self.get_demultiplexed_runs_dir()
