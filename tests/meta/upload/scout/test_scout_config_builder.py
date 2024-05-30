@@ -222,17 +222,17 @@ def test_extract_generic_filepath(mip_config_builder: MipConfigBuilder):
 
 def test_tomte_config_builder(
     hk_version: Version,
-    tomte_analysis_obj: Analysis,
+        tomte_analysis: Analysis,
     lims_api: MockLimsAPI,
     tomte_context: CGConfig,
 ):
     """Test Tomte config builder class."""
-    # GIVEN a tomte file handler
+    # GIVEN a Tomte file handler
 
     # WHEN instantiating
     file_handler = TomteConfigBuilder(
         hk_version_obj=hk_version,
-        analysis_obj=tomte_analysis_obj,
+        analysis_obj=tomte_analysis,
         analysis_api=tomte_context.meta_apis["analysis_api"],
         lims_api=lims_api,
     )

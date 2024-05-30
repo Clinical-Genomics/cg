@@ -1,7 +1,7 @@
 from enum import StrEnum
 
 from cg.constants import FileExtensions
-from cg.constants.housekeeper_tags import AlignmentFileTag
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AlignmentFileTag, AnalysisTag
 
 
 class GenomeBuild(StrEnum):
@@ -75,10 +75,10 @@ RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
 )
 
 TOMTE_CASE_TAGS: dict[str, set[str]] = dict(
-    multiqc_rna={"multiqc-html", "rna"},
-    delivery_report={"delivery-report"},
-    vcf_snv_research={"research", "vcf", "snv"},
-    vcf_snv={"clinical", "vcf", "snv"},
+    multiqc_rna={AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA},
+    delivery_report={HK_DELIVERY_REPORT_TAG},
+    vcf_snv_research={AnalysisTag.RESEARCH, AnalysisTag.VCF, AnalysisTag.SNV},
+    vcf_snv={AnalysisTag.CLINICAL, AnalysisTag.VCF, AnalysisTag.SNV},
 )
 
 

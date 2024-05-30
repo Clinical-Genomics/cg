@@ -1,4 +1,4 @@
-"""Test the methods that generate a scout load config"""
+"""Test the methods that generate a Scout load config"""
 
 import pytest
 from pytest_mock import MockFixture
@@ -145,23 +145,23 @@ def test_generate_config_adds_case_paths(
 
 
 def test_generate_tomte_load_config(
-    tomte_analysis_obj: Analysis,
+        tomte_analysis: Analysis,
     upload_tomte_analysis_scout_api: UploadScoutAPI,
     mocker: MockFixture,
 ):
-    """Test that a tomte config is generated."""
+    """Test that a Tomte config is generated."""
 
-    # GIVEN an analysis object that have been run with tomte
-    assert tomte_analysis_obj.workflow == Workflow.TOMTE
+    # GIVEN an analysis object that has been run with Tomte
+    assert tomte_analysis.workflow == Workflow.TOMTE
 
-    # GIVEN an upload scout api with some tomte information
+    # GIVEN an upload Scout API with some Tomte information
 
     # GIVEN a genome build
     mocker.patch.object(TomteAnalysisAPI, "get_genome_build", return_value=GenomeVersion.hg19)
 
     # WHEN generating a load config
     config: ScoutLoadConfig = upload_tomte_analysis_scout_api.generate_config(
-        analysis=tomte_analysis_obj
+        analysis=tomte_analysis
     )
 
     # THEN assert that the config is a tomte config

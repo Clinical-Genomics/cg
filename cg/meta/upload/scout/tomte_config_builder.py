@@ -11,7 +11,7 @@ from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.scout.scout_load_config import ScoutRnaIndividual, TomteLoadConfig
-from cg.store.models import Analysis, CaseSample
+from cg.store.models import Analysis, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -38,19 +38,17 @@ class TomteConfigBuilder(ScoutConfigBuilder):
         self.analysis_api: TomteAnalysisAPI = analysis_api
 
     def build_load_config(self) -> None:
-        """Build a Tomte-specific load config for uploading a case to scout."""
-        LOG.info("Build load config for tomte case")
+        """Build a Tomte-specific load config for uploading a case to Scout."""
+        LOG.info("Build load config for Tomte case")
         self.add_common_info_to_load_config()
         self.load_config.human_genome_build = getattr(
             GenomeBuild,
             self.analysis_api.get_genome_build(case_id=self.analysis_obj.case.internal_id),
         )
-        self.load_config.gene_panels: list[str] | None = (
-            self.analysis_api.get_aggregated_panels(
-                customer_id=self.analysis_obj.case.customer.internal_id,
-                default_panels=set(self.analysis_obj.case.panels),
-            )
-            or None
+
+        self.load_config.gene_panels: list[str] = self.analysis_api.get_aggregated_panels(
+            customer_id=self.analysis_obj.case.customer.internal_id,
+            default_panels=set(self.analysis_obj.case.panels),
         )
 
         self.include_case_files()
@@ -68,7 +66,7 @@ class TomteConfigBuilder(ScoutConfigBuilder):
             self._include_file(scout_key)
 
     def _include_file(self, scout_key) -> None:
-        """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
+        """Include the file path associated to a Scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
         setattr(
             self.load_config,
@@ -77,7 +75,7 @@ class TomteConfigBuilder(ScoutConfigBuilder):
         )
 
     def include_sample_files(self, config_sample: ScoutRnaIndividual) -> None:
-        """Include sample level files that are optional for mip samples"""
+        """Include sample level files that are optional."""
         LOG.info("Including Tomte specific sample level files")
         self.include_sample_rna_alignment_file(config_sample=config_sample)
         self.include_sample_splice_junctions_bed(config_sample=config_sample)
@@ -88,13 +86,13 @@ class TomteConfigBuilder(ScoutConfigBuilder):
         config_sample = ScoutRnaIndividual()
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
         self.include_sample_files(config_sample)
-        config_sample.analysis_type = PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
-        config_sample.father = (
+        config_sample.analysis_type: str = PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
+        config_sample.father: Sample | str = (
             case_sample.father.internal_id
             if case_sample.father
             else RelationshipStatus.HAS_NO_PARENT
         )
-        config_sample.mother = (
+        config_sample.mother: Sample | str = (
             case_sample.mother.internal_id
             if case_sample.mother
             else RelationshipStatus.HAS_NO_PARENT
