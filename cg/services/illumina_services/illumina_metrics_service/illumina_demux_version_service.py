@@ -25,7 +25,7 @@ class IlluminaDemuxVersionService:
         return DemuxSoftware(**system_info)
 
     def get_demux_software(self, demux_version_file: Path):
-        """Get first line of the demux version file and remove new line."""
+        """Get the demux software."""
         demux_software: DemuxSoftware = self._parse_demux_version_file(demux_version_file)
         return demux_software.software
 

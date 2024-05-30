@@ -424,22 +424,21 @@ class CreateHandler(BaseHandler):
         """Add a new Illumina flow cell to the status database as a pending transaction."""
         if self.get_illumina_flow_cell_by_internal_id(flow_cell.internal_id):
             raise ValueError(f"Flow cell with {flow_cell.id} already exists.")
-        session: Session = get_session()
-        session.add(flow_cell)
+
+        self.session.add(flow_cell)
         LOG.debug(f"Flow cell added to status db: {flow_cell.id}.")
         return flow_cell
 
-    @staticmethod
-    def add_illumina_sequencing_run(sequencing_run: IlluminaSequencingRun) -> IlluminaSequencingRun:
+    def add_illumina_sequencing_run(
+        self, sequencing_run: IlluminaSequencingRun
+    ) -> IlluminaSequencingRun:
         """Add a new Illumina flow cell to the status database as a pending transaction."""
-        session: Session = get_session()
-        session.add(sequencing_run)
+        self.session.add(sequencing_run)
         LOG.debug(f"Sequencing run added to status db: {sequencing_run.id}.")
         return sequencing_run
 
-    @staticmethod
-    def add_illumina_sample_metrics(sample_metrics: list[IlluminaSampleSequencingMetrics]):
-        session: Session = get_session()
-        session.add_all(sample_metrics)
+    def add_illumina_sample_metrics(self, sample_metrics: list[IlluminaSampleSequencingMetrics]):
+        """Add new IlluminaSampleSequencingMetrics as a pending transaction."""
+        self.session.add_all(sample_metrics)
         LOG.debug("Sample metrics added to status db.")
         return sample_metrics

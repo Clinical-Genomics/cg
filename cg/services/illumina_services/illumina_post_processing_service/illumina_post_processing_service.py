@@ -90,7 +90,7 @@ class IlluminaPostProcessingService:
             self.get_illumina_sample_sequencing_metrics(flow_cell_dir_data)
         )
         flow_cell, sequencing_run, sample_metrics = self.relate_illumina_models(
-            flow_cell, sequencing_run, sample_metrics
+            flow_cell=flow_cell, sequencing_run=sequencing_run, sample_metrics=sample_metrics
         )
         self.add_illumina_models_to_store(
             flow_cell=flow_cell, sequencing_run=sequencing_run, sample_metrics=sample_metrics

@@ -15,6 +15,7 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
+    Sample,
 )
 from cg.store.store import Store
 from cg.utils.flow_cell import get_flow_cell_id
@@ -109,7 +110,7 @@ class IlluminaMetricsService:
         mean_quality_score: float = metrics_parser.get_mean_quality_score_for_sample_in_lane(
             sample_internal_id=sample_internal_id, lane=lane
         )
-        sample_id: int = store.get_sample_by_internal_id(sample_internal_id).id
+        sample: Sample = store.get_sample_by_internal_id(sample_internal_id)
 
         yield_: float = metrics_parser.get_yield_for_sample_in_lane(
             sample_internal_id=sample_internal_id, lane=lane
@@ -119,7 +120,7 @@ class IlluminaMetricsService:
         )
 
         return IlluminaSampleSequencingMetrics(
-            sample_id=sample_id,
+            sample_id=sample.id,
             type=DeviceType.ILLUMINA,
             flow_cell_lane=lane,
             total_reads_in_lane=total_reads,
@@ -128,6 +129,7 @@ class IlluminaMetricsService:
             yield_=yield_,
             yield_q30=yield_q30,
             created_at=datetime.now(),
+            sample=sample,
         )
 
     def create_sample_sequencing_metrics_for_flow_cell(
@@ -200,4 +202,5 @@ class IlluminaMetricsService:
             sequencing_completed_at=sequencing_comleted_at,
             demultiplexing_started_at=demultiplexing_started_at,
             demultiplexing_completed_at=demultiplexing_completed_at,
+            type=DeviceType.ILLUMINA,
         )
