@@ -1,13 +1,8 @@
 """Module to parse the illumina demultiplexing log file."""
 
-from pathlib import Path
-
-from pydantic import BaseModel, Field
-
-from cg.constants import SPACE
-from cg.constants.constants import FileFormat
-from cg.io.controller import ReadFile
 from cg.io.json import read_json
+from pathlib import Path
+from pydantic import BaseModel, Field
 
 
 class DemuxSoftware(BaseModel):

@@ -6,7 +6,6 @@ from cg.constants import FlowCellStatus
 from cg.constants.devices import DeviceType
 from cg.constants.metrics import DemuxMetricsColumnNames, QualityMetricsColumnNames
 from cg.constants.sequencing import Sequencers
-from cg.store.models import IlluminaFlowCell
 
 
 class SequencingQualityMetrics(BaseModel):

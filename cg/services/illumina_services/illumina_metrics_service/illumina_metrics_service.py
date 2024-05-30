@@ -17,11 +17,7 @@ from cg.services.illumina_services.illumina_metrics_service.models import (
 )
 from cg.store.models import (
     SampleLaneSequencingMetrics,
-    IlluminaSampleSequencingMetrics,
-    IlluminaSequencingRun,
-    Sample,
 )
-from cg.store.store import Store
 from cg.utils.flow_cell import get_flow_cell_id
 
 
@@ -97,7 +93,7 @@ class IlluminaMetricsService:
         )
 
     @staticmethod
-    def create_sample_run_metrics(
+    def create_sample_run_metrics_dto(
         sample_internal_id: str,
         lane: int,
         metrics_parser: BCLConvertMetricsParser,
@@ -131,7 +127,7 @@ class IlluminaMetricsService:
             created_at=datetime.now(),
         )
 
-    def create_sample_sequencing_metrics_for_flow_cell(
+    def create_sample_sequencing_metrics_dto_for_flow_cell(
         self,
         flow_cell_directory: Path,
     ) -> list[IlluminaSampleSequencingMetricsDTO]:
@@ -142,7 +138,7 @@ class IlluminaMetricsService:
 
         for sample_internal_id in sample_internal_ids:
             for lane in metrics_parser.get_lanes_for_sample(sample_internal_id=sample_internal_id):
-                metrics: IlluminaSampleSequencingMetricsDTO = self.create_sample_run_metrics(
+                metrics: IlluminaSampleSequencingMetricsDTO = self.create_sample_run_metrics_dto(
                     sample_internal_id=sample_internal_id,
                     lane=lane,
                     metrics_parser=metrics_parser,
@@ -151,7 +147,7 @@ class IlluminaMetricsService:
         return sample_lane_sequencing_metrics
 
     @staticmethod
-    def create_illumina_sequencing_run(
+    def create_illumina_sequencing_dto(
         flow_cell_dir_data: FlowCellDirectoryData,
     ) -> IlluminaSequencingRunDTO:
         metrics_parser = BCLConvertMetricsParser(flow_cell_dir_data.path)
