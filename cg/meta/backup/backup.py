@@ -59,7 +59,7 @@ class BackupAPI:
         )
         return flow_cell[0] if flow_cell else None
 
-    def fetch_flow_cell(self, flow_cell: Flowcell | None = None) -> float | None:
+    def fetch_sequencing_run_for_flow_cell(self, flow_cell: Flowcell | None = None) -> float | None:
         """Start fetching a flow cell from backup if possible.
 
         1. The processing queue is not full.
@@ -73,7 +73,7 @@ class BackupAPI:
             flow_cell: Flowcell | None = self.get_first_flow_cell()
 
         if not flow_cell:
-            LOG.info("No flow cells requested")
+            LOG.info("No sequencing runs requested")
             return None
 
         flow_cell.status = FlowCellStatus.PROCESSING

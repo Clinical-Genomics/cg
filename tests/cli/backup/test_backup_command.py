@@ -134,7 +134,7 @@ def test_encrypt_flow_cells(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN communicate flow cell encryption is submitted
-    assert f"Flow cell encryption running as job {sbatch_job_number}" in caplog.text
+    assert f"Sequencing run encryption running as job {sbatch_job_number}" in caplog.text
 
 
 def test_encrypt_flow_cells_when_already_backed_up(
@@ -175,7 +175,7 @@ def test_encrypt_flow_cells_when_sequencing_not_done(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN flow cells that are being sequenced
-    mocker.patch.object(IlluminaRunDirectory, "is_flow_cell_ready")
+    mocker.patch.object(IlluminaRunDirectory, "is_sequencing_run_ready")
     IlluminaRunDirectory.is_sequencing_run_ready.return_value = False
 
     # GIVEN a flow cells directory
@@ -187,7 +187,7 @@ def test_encrypt_flow_cells_when_sequencing_not_done(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN communicate flow cell is not ready
-    assert f"Flow cell: {flow_cell_name} is not ready" in caplog.text
+    assert f"Sequencing run: {flow_cell_name} is not ready" in caplog.text
 
 
 def test_encrypt_flow_cell_when_encryption_already_started(
@@ -203,7 +203,7 @@ def test_encrypt_flow_cell_when_encryption_already_started(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN flow cells that are ready
-    mocker.patch.object(IlluminaRunDirectory, "is_flow_cell_ready")
+    mocker.patch.object(IlluminaRunDirectory, "is_sequencing_run_ready")
     IlluminaRunDirectory.is_sequencing_run_ready.return_value = True
 
     # GIVEN a pending flag file
@@ -220,7 +220,7 @@ def test_encrypt_flow_cell_when_encryption_already_started(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN communicate flow cell encryption already started
-    assert f"Encryption already started for flow cell: {flow_cell_name}" in caplog.text
+    assert f"Encryption already started for sequencing run: {flow_cell_name}" in caplog.text
 
 
 def test_encrypt_flow_cell_when_encryption_already_completed(
@@ -236,7 +236,7 @@ def test_encrypt_flow_cell_when_encryption_already_completed(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN flow cells that are ready
-    mocker.patch.object(IlluminaRunDirectory, "is_flow_cell_ready")
+    mocker.patch.object(IlluminaRunDirectory, "is_sequencing_run_ready")
     IlluminaRunDirectory.is_sequencing_run_ready.return_value = True
 
     # GIVEN a complete flag file
@@ -253,7 +253,7 @@ def test_encrypt_flow_cell_when_encryption_already_completed(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN communicate flow cell encryption already completed
-    assert f"Encryption already completed for flow cell: {flow_cell_name}" in caplog.text
+    assert f"Encryption already completed for sequencing run: {flow_cell_name}" in caplog.text
 
 
 def test_run_fetch_flow_cell_dry_run_no_flow_cell_specified(
@@ -277,7 +277,7 @@ def test_run_fetch_flow_cell_dry_run_no_flow_cell_specified(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN assert that it is communicated that no flow cells are requested
-    assert "No flow cells requested" in caplog.text
+    assert "No sequencing runs requested" in caplog.text
 
 
 def test_run_fetch_flow_cell_dry_run_retrieval_time(

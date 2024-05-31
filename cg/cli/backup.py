@@ -150,7 +150,9 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: str | None =
     if not flow_cell_id:
         LOG.info("Fetching first flow cell in queue")
 
-    retrieval_time: float | None = backup_api.fetch_flow_cell(flow_cell=flow_cell)
+    retrieval_time: float | None = backup_api.fetch_sequencing_run_for_flow_cell(
+        flow_cell=flow_cell
+    )
 
     if retrieval_time:
         hours = retrieval_time / 60 / 60

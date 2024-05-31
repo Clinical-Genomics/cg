@@ -262,11 +262,11 @@ class SequencingRunEncryptionAPI(EncryptionAPI):
             raise SequencingRunError(f"Sequencing run: {self.sequencing_run.id} is not ready")
         if self.complete_file_path.exists():
             raise SequencingRunEncryptionError(
-                f"Encryption already completed for flow cell: {self.sequencing_run.id}"
+                f"Encryption already completed for sequencing run: {self.sequencing_run.id}"
             )
         if self.pending_file_path.exists():
             raise SequencingRunEncryptionError(
-                f"Encryption already started for flow cell: {self.sequencing_run.id}"
+                f"Encryption already started for sequencing run: {self.sequencing_run.id}"
             )
         return True
 
@@ -282,7 +282,7 @@ class SequencingRunEncryptionAPI(EncryptionAPI):
     def encrypt_sequencing_run(
         self,
     ) -> None:
-        """Encrypt flow cell via GPG and SLURM."""
+        """Encrypt sequencing run via GPG and SLURM."""
         error_function: str = SEQUENCING_RUN_ENCRYPT_ERROR.format(
             pending_file_path=self.pending_file_path
         )

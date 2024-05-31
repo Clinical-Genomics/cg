@@ -216,7 +216,7 @@ def test_fetch_flow_cell_processing_queue_full(mock_flow_cell, mock_check_proces
 
     # WHEN the processing queue is full
     backup_api.check_processing.return_value = False
-    result = backup_api.fetch_flow_cell(mock_flow_cell)
+    result = backup_api.fetch_sequencing_run_for_flow_cell(mock_flow_cell)
 
     # THEN no flow cell will be fetched and a log message indicates that the processing queue is
     # full
@@ -254,7 +254,7 @@ def test_fetch_flow_cell_no_flow_cells_requested(
     # AND no flow cell has been specified
     mock_flow_cell = None
 
-    result = backup_api.fetch_flow_cell(mock_flow_cell)
+    result = backup_api.fetch_sequencing_run_for_flow_cell(mock_flow_cell)
 
     # THEN no flow cell will be fetched and a log message indicates that no flow cells have been
     # requested
@@ -308,7 +308,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     backup_api.get_archived_encryption_key_path.return_value = archived_key
     backup_api.get_archived_flow_cell_path.return_value = archived_flow_cell
     backup_api.tar_api.run_tar_command.return_value = None
-    result = backup_api.fetch_flow_cell(flow_cell=None)
+    result = backup_api.fetch_sequencing_run_for_flow_cell(flow_cell=None)
 
     # THEN the process to retrieve the flow cell from PDC is started
     assert "retrieving from PDC" in caplog.text
@@ -372,7 +372,7 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     backup_api.get_archived_encryption_key_path.return_value = archived_key
     backup_api.get_archived_flow_cell_path.return_value = archived_flow_cell
     backup_api.tar_api.run_tar_command.return_value = None
-    result = backup_api.fetch_flow_cell(flow_cell=mock_flow_cell)
+    result = backup_api.fetch_sequencing_run_for_flow_cell(flow_cell=mock_flow_cell)
 
     # THEN no flow cell is taken form statusdb
     mock_get_first_flow_cell.assert_not_called()
@@ -436,7 +436,7 @@ def test_fetch_flow_cell_integration(
     mock_query.return_value = dsmc_q_archive_output
 
     backup_api.tar_api.run_tar_command.return_value = None
-    result = backup_api.fetch_flow_cell(flow_cell=mock_flow_cell)
+    result = backup_api.fetch_sequencing_run_for_flow_cell(flow_cell=mock_flow_cell)
 
     # THEN the process to retrieve the flow cell from PDC is started
     assert "retrieving from PDC" in caplog.text
