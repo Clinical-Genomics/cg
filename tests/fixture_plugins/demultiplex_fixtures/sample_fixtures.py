@@ -150,6 +150,6 @@ def bcl_convert_sample_sheet_creator(
 ) -> SampleSheetCreator:
     """Returns a sample sheet creator for sample sheet v2."""
     return SampleSheetCreator(
-        flow_cell=novaseq_x_flow_cell,
+        sequencing_run=novaseq_x_flow_cell,
         lims_samples=novaseq_x_lims_samples,
     )

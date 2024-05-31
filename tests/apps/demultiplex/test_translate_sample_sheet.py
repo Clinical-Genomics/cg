@@ -23,7 +23,7 @@ def test_are_necessary_files_in_flow_cell_passes(
     flow_cell = IlluminaRunDirectory(flow_cell_path=tmp_flow_cell_with_bcl2fastq_sample_sheet)
 
     # WHEN checking if the flow cell has the necessary files
-    result: bool = api._are_necessary_files_in_flow_cell(flow_cell=flow_cell)
+    result: bool = api._are_necessary_files_in_flow_cell(sequencing_run_dir=flow_cell)
 
     # THEN assert that all files are present
     assert result
@@ -118,7 +118,7 @@ def test_translate_sample_sheet(
     flow_cell = IlluminaRunDirectory(flow_cell_path=tmp_flow_cell_with_bcl2fastq_sample_sheet)
 
     # WHEN translating the sample sheet
-    api.translate_sample_sheet(flow_cell_name=flow_cell.full_name)
+    api.translate_sample_sheet(sequencing_run_name=flow_cell.full_name)
 
     # THEN the sample sheet is translated correctly to BCConvert format
     api.validate_sample_sheet(flow_cell.sample_sheet_path)

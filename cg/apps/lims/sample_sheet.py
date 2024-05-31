@@ -68,11 +68,11 @@ def get_index(lims: Lims, label: str) -> str:
 
 def get_flow_cell_samples(
     lims: Lims,
-    flow_cell_id: str,
+    sequencing_run_id: str,
 ) -> Iterable[FlowCellSample]:
     """Return samples from LIMS for a given flow cell."""
-    LOG.info(f"Fetching samples from lims for flowcell {flow_cell_id}")
-    containers: list[Container] = lims.get_containers(name=flow_cell_id)
+    LOG.info(f"Fetching samples from lims for flowcell {sequencing_run_id}")
+    containers: list[Container] = lims.get_containers(name=sequencing_run_id)
     if not containers:
         return []
     container: Container = containers[-1]  # only take the last one. See ÖA#217.

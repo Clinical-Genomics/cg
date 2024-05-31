@@ -18,13 +18,13 @@ class SampleSheetCreator:
 
     def __init__(
         self,
-        flow_cell: IlluminaRunDirectory,
+        sequencing_run: IlluminaRunDirectory,
         lims_samples: list[FlowCellSample],
     ):
-        self.flow_cell: IlluminaRunDirectory = flow_cell
-        self.flow_cell_id: str = flow_cell.id
+        self.flow_cell: IlluminaRunDirectory = sequencing_run
+        self.flow_cell_id: str = sequencing_run.id
         self.lims_samples: list[FlowCellSample] = lims_samples
-        self.run_parameters: RunParameters = flow_cell.run_parameters
+        self.run_parameters: RunParameters = sequencing_run.run_parameters
         self.index_settings: IndexSettings = self.run_parameters.index_settings
 
     def convert_sample_to_header_dict(

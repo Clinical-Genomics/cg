@@ -47,7 +47,7 @@ def translate_sample_sheet(context: CGConfig, flow_cell_name: str, dry_run: bool
     LOG.info(f"Translating Bcl2Fastq sample sheet for flow cell {flow_cell_name}")
     sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     sample_sheet_api.set_dry_run(dry_run)
-    sample_sheet_api.translate_sample_sheet(flow_cell_name=flow_cell_name)
+    sample_sheet_api.translate_sample_sheet(sequencing_run_name=flow_cell_name)
 
 
 @sample_sheet_commands.command(name="create")
