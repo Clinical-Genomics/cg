@@ -58,7 +58,6 @@ from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
 from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_service import (
     IlluminaMetricsService,
 )
-
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
 from cg.store.store import Store
@@ -704,6 +703,12 @@ def cgweb_orders_dir(fixtures_dir: Path) -> Path:
 def data_dir(fixtures_dir: Path) -> Path:
     """Return the path to the data dir."""
     return Path(fixtures_dir, "data")
+
+
+@pytest.fixture(scope="session")
+def devices_dir(fixtures_dir: Path) -> Path:
+    """Return the path to the device dir."""
+    return Path(fixtures_dir, "devices")
 
 
 @pytest.fixture
