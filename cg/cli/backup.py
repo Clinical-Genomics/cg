@@ -29,7 +29,7 @@ from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
 from cg.models.illumina_run_directory_data.illumina_run_directory import (
     IlluminaRunDirectory,
-    get_flow_cells_from_path,
+    get_sequencing_runs_from_path,
 )
 from cg.store.models import Flowcell, Sample
 from cg.store.store import Store
@@ -52,16 +52,18 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
     pdc_api = context.pdc_api
     pdc_api.dry_run = dry_run
     status_db: Store = context.status_db
-    flow_cells: list[IlluminaRunDirectory] = get_flow_cells_from_path(
-        flow_cells_dir=Path(context.illumina_flow_cells_directory)
+    sequencing_runs: list[IlluminaRunDirectory] = get_sequencing_runs_from_path(
+        sequencing_runs_dir=Path(context.illumina_flow_cells_directory)
     )
-    for flow_cell in flow_cells:
-        db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell.id)
+    for sequencing_run in sequencing_runs:
+        flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(
+            flow_cell_name=sequencing_run.id
+        )
         flow_cell_encryption_api = FlowCellEncryptionAPI(
             binary_path=context.encryption.binary_path,
             dry_run=dry_run,
             encryption_dir=Path(context.encryption.encryption_dir),
-            flow_cell=flow_cell,
+            flow_cell=sequencing_run,
             pigz_binary_path=context.pigz.binary_path,
             slurm_api=SlurmAPI(),
             sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
@@ -69,7 +71,7 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
         )
         try:
             pdc_api.start_flow_cell_backup(
-                db_flow_cell=db_flow_cell,
+                db_flow_cell=flow_cell,
                 flow_cell_encryption_api=flow_cell_encryption_api,
                 status_db=status_db,
             )
@@ -88,19 +90,21 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
 def encrypt_flow_cells(context: CGConfig, dry_run: bool):
     """Encrypt flow cells."""
     status_db: Store = context.status_db
-    flow_cells: list[IlluminaRunDirectory] = get_flow_cells_from_path(
-        flow_cells_dir=Path(context.illumina_flow_cells_directory)
+    sequencing_runs: list[IlluminaRunDirectory] = get_sequencing_runs_from_path(
+        sequencing_runs_dir=Path(context.illumina_flow_cells_directory)
     )
-    for flow_cell in flow_cells:
-        db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell.id)
-        if db_flow_cell and db_flow_cell.has_backup:
-            LOG.debug(f"Flow cell: {flow_cell.id} is already backed-up")
+    for sequencing_run in sequencing_runs:
+        flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(
+            flow_cell_name=sequencing_run.id
+        )
+        if flow_cell and flow_cell.has_backup:
+            LOG.debug(f"Flow cell: {sequencing_run.id} is already backed-up")
             continue
         flow_cell_encryption_api = FlowCellEncryptionAPI(
             binary_path=context.encryption.binary_path,
             dry_run=dry_run,
             encryption_dir=Path(context.encryption.encryption_dir),
-            flow_cell=flow_cell,
+            flow_cell=sequencing_run,
             pigz_binary_path=context.pigz.binary_path,
             slurm_api=SlurmAPI(),
             sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
@@ -241,7 +245,7 @@ def _get_samples(status_api: Store, object_type: str, identifier: str) -> list[S
     get_samples = {
         "sample": status_api.sample,
         "case": status_api.get_samples_by_case_id,
-        "illumina_run_directory_data": status_api.get_samples_from_flow_cell,
+        "flow_cell": status_api.get_samples_from_flow_cell,
     }
     samples: Sample | list[Sample] = get_samples[object_type](identifier)
     return samples if isinstance(samples, list) else [samples]

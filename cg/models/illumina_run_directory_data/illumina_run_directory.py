@@ -317,11 +317,11 @@ class IlluminaRunDirectory:
         return f"FlowCell(path={self.path},run_parameters_path={self.run_parameters_path})"
 
 
-def get_flow_cells_from_path(flow_cells_dir: Path) -> list[IlluminaRunDirectory]:
+def get_sequencing_runs_from_path(sequencing_runs_dir: Path) -> list[IlluminaRunDirectory]:
     """Return flow cell objects from flow cell dir."""
     flow_cells: list[IlluminaRunDirectory] = []
-    LOG.debug(f"Search for flow cells ready to encrypt in {flow_cells_dir}")
-    for flow_cell_dir in flow_cells_dir.iterdir():
+    LOG.debug(f"Search for flow cells ready to encrypt in {sequencing_runs_dir}")
+    for flow_cell_dir in sequencing_runs_dir.iterdir():
         if not flow_cell_dir.is_dir():
             continue
         LOG.debug(f"Found directory: {flow_cell_dir}")
