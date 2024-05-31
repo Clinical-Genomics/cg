@@ -49,9 +49,9 @@ class SampleSheetAPI:
 
     def _get_sequencing_run(self, run_name: str) -> IlluminaRunDirectory:
         """
-        Return a flow cell given a path.
+        Return a sequencing run given a path.
         Raises:
-            SampleSheetError: If the flow cell directory or the data it contains is not valid.
+            SampleSheetError: If the sequencing run directory or the data it contains is not valid.
         """
         sequencing_run_path: Path = Path(self.sequencing_runs_dir, run_name)
         if not sequencing_run_path.exists():
@@ -80,16 +80,18 @@ class SampleSheetAPI:
 
     @staticmethod
     def _are_necessary_files_in_flow_cell(sequencing_run_dir: IlluminaRunDirectory) -> bool:
-        """Determine if the flow cell has a Run Parameters file and a sample sheet."""
+        """Determine if the sequencing run has a Run Parameters file and a sample sheet."""
         try:
             sequencing_run_dir.run_parameters_path.exists()
         except FlowCellError:
             LOG.error(
-                f"Run parameters file for flow cell {sequencing_run_dir.full_name} does not exist"
+                f"Run parameters file for sequencing run {sequencing_run_dir.full_name} does not exist"
             )
             return False
         if not sequencing_run_dir.sample_sheet_path.exists():
-            LOG.error(f"Sample sheet for flow cell {sequencing_run_dir.full_name} does not exist")
+            LOG.error(
+                f"Sample sheet for sequencing run {sequencing_run_dir.full_name} does not exist"
+            )
             return False
         return True
 
@@ -143,23 +145,23 @@ class SampleSheetAPI:
 
     def _use_sample_sheet_from_housekeeper(self, sequencing_run: IlluminaRunDirectory) -> None:
         """
-        Copy the sample sheet from Housekeeper to the flow cell directory if it exists and is valid.
+        Copy the sample sheet from Housekeeper to the sequencing run directory if it exists and is valid.
         """
         try:
             sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(sequencing_run.id)
         except HousekeeperFileMissingError:
             raise SampleSheetError(
-                f"Sample sheet for flow cell {sequencing_run.id} does not exist in Housekeeper"
+                f"Sample sheet for sequencing run {sequencing_run.id} does not exist in Housekeeper"
             )
         self.validate_sample_sheet(sample_sheet_path)
-        LOG.info("Sample sheet from Housekeeper is valid. Copying it to flow cell directory")
+        LOG.info("Sample sheet from Housekeeper is valid. Copying it to sequencing run directory")
         if not self.dry_run:
             link_or_overwrite_file(src=sample_sheet_path, dst=sequencing_run.sample_sheet_path)
 
     def _use_sequencing_run_sample_sheet(self, sequencing_run: IlluminaRunDirectory) -> None:
-        """Use the sample sheet from the flow cell directory if it is valid."""
+        """Use the sample sheet from the sequencing run directory if it is valid."""
         self.validate_sample_sheet(sequencing_run.sample_sheet_path)
-        LOG.info("Sample sheet from flow cell directory is valid. Adding it to Housekeeper")
+        LOG.info("Sample sheet from sequencing run directory is valid. Adding it to Housekeeper")
         if not self.dry_run:
             try:
                 delete_sample_sheet_from_housekeeper(
@@ -174,7 +176,7 @@ class SampleSheetAPI:
             )
 
     def _get_sample_sheet_content(self, sequencing_run: IlluminaRunDirectory) -> list[list[str]]:
-        """Return the sample sheet content for a flow cell."""
+        """Return the sample sheet content for a sequencing run."""
         lims_samples: list[FlowCellSample] = list(
             get_flow_cell_samples(
                 lims=self.lims_api,
@@ -187,12 +189,12 @@ class SampleSheetAPI:
             raise SampleSheetError(message)
         creator = SampleSheetCreator(sequencing_run=sequencing_run, lims_samples=lims_samples)
         LOG.info(
-            f"Constructing sample sheet for the {sequencing_run.sequencer_type} flow cell {sequencing_run.id}"
+            f"Constructing sample sheet for the {sequencing_run.sequencer_type} sequencing run {sequencing_run.id}"
         )
         return creator.construct_sample_sheet()
 
     def _create_sample_sheet_file(self, sequencing_run: IlluminaRunDirectory) -> None:
-        """Create a valid sample sheet in the flow cell directory and add it to Housekeeper."""
+        """Create a valid sample sheet in the sequencing run directory and add it to Housekeeper."""
         sample_sheet_content: list[list[str]] = self._get_sample_sheet_content(sequencing_run)
         if not self.force:
             self.validator.validate_sample_sheet_from_content(sample_sheet_content)
@@ -221,7 +223,7 @@ class SampleSheetAPI:
 
     def get_or_create_sample_sheet(self, sequencing_run_name: str) -> None:
         """
-        Ensure that a valid sample sheet is present in the flow cell directory by fetching it from
+        Ensure that a valid sample sheet is present in the sequencing run directory by fetching it from
         housekeeper or creating it if there is not a valid sample sheet.
         """
         sequencing_run: IlluminaRunDirectory = self._get_sequencing_run(sequencing_run_name)
@@ -244,7 +246,7 @@ class SampleSheetAPI:
         self._create_sample_sheet_file(sequencing_run)
 
     def get_or_create_all_sample_sheets(self):
-        """Ensure that a valid sample sheet is present in all flow cell directories."""
+        """Ensure that a valid sample sheet is present in all sequencing run directories."""
         for sequencing_run_dir in get_directories_in_path(self.sequencing_runs_dir):
             try:
                 self.get_or_create_sample_sheet(sequencing_run_dir.name)
