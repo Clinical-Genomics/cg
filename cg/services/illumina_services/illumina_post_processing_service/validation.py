@@ -4,8 +4,8 @@ from pathlib import Path
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError, MissingFilesError
 from cg.meta.demultiplex.utils import get_sample_fastqs_from_flow_cell
-from cg.models.instrument_run_directory_data.instrument_run_directory_data import (
-    IlluminaRunDirectoryData,
+from cg.models.illumina_run_directory_data.illumina_run_directory import (
+    IlluminaRunDirectory,
 )
 
 LOG = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ def is_flow_cell_ready_for_delivery(flow_cell_directory: Path) -> bool:
     return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).exists()
 
 
-def validate_sample_sheet_exists(flow_cell: IlluminaRunDirectoryData) -> None:
+def validate_sample_sheet_exists(flow_cell: IlluminaRunDirectory) -> None:
     sample_sheet_path: Path = flow_cell.get_sample_sheet_path_hk()
     if not sample_sheet_path or not sample_sheet_path.exists():
         raise FlowCellError(f"Sample sheet {sample_sheet_path} does not exist in housekeeper.")
@@ -41,7 +41,7 @@ def validate_flow_cell_delivery_status(flow_cell_output_directory: Path, force: 
         )
 
 
-def validate_flow_cell_has_fastq_files(flow_cell: IlluminaRunDirectoryData) -> None:
+def validate_flow_cell_has_fastq_files(flow_cell: IlluminaRunDirectory) -> None:
     """Check if any sample from the flow cell has fastq files.
     Raises: MissingFilesError
         When all samples have missing fastq files in the flow cell
@@ -61,7 +61,7 @@ def validate_flow_cell_has_fastq_files(flow_cell: IlluminaRunDirectoryData) -> N
 
 def is_flow_cell_ready_for_postprocessing(
     flow_cell_output_directory: Path,
-    flow_cell: IlluminaRunDirectoryData,
+    flow_cell: IlluminaRunDirectory,
     force: bool = False,
 ) -> None:
     validate_flow_cell_delivery_status(

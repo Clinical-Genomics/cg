@@ -13,8 +13,8 @@ from cg.exc import (
     HousekeeperBundleVersionMissingError,
     HousekeeperFileMissingError,
 )
-from cg.models.instrument_run_directory_data.instrument_run_directory_data import (
-    IlluminaRunDirectoryData,
+from cg.models.illumina_run_directory_data.illumina_run_directory import (
+    IlluminaRunDirectory,
 )
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.store.store import Store
@@ -44,7 +44,7 @@ class CleanFlowCellAPI:
     ):
         self.status_db: Store = status_db
         self.hk_api: HousekeeperAPI = housekeeper_api
-        self.flow_cell = IlluminaRunDirectoryData(flow_cell_path=flow_cell_path)
+        self.flow_cell = IlluminaRunDirectory(flow_cell_path=flow_cell_path)
         self.dry_run: bool = dry_run
         LOG.info(f"Trying to delete {flow_cell_path}")
 

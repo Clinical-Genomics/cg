@@ -17,8 +17,8 @@ from cg.meta.demultiplex.utils import (
     get_undetermined_fastqs,
     rename_fastq_file_if_needed,
 )
-from cg.models.instrument_run_directory_data.instrument_run_directory_data import (
-    IlluminaRunDirectoryData,
+from cg.models.illumina_run_directory_data.illumina_run_directory import (
+    IlluminaRunDirectory,
 )
 from cg.store.store import Store
 from cg.utils.files import get_files_matching_pattern
@@ -27,7 +27,7 @@ LOG = logging.getLogger(__name__)
 
 
 def store_flow_cell_data_in_housekeeper(
-    flow_cell: IlluminaRunDirectoryData,
+    flow_cell: IlluminaRunDirectory,
     hk_api: HousekeeperAPI,
     flow_cell_run_dir: Path,
     store: Store,
@@ -50,7 +50,7 @@ def store_flow_cell_data_in_housekeeper(
 
 
 def store_undetermined_fastq_files(
-    flow_cell: IlluminaRunDirectoryData, hk_api: HousekeeperAPI, store: Store
+    flow_cell: IlluminaRunDirectory, hk_api: HousekeeperAPI, store: Store
 ) -> None:
     """Store undetermined fastq files for non-pooled samples in Housekeeper."""
     non_pooled_lanes_and_samples: list[tuple[int, str]] = (
@@ -78,7 +78,7 @@ def store_undetermined_fastq_files(
 
 
 def add_demux_logs_to_housekeeper(
-    flow_cell: IlluminaRunDirectoryData, hk_api: HousekeeperAPI, flow_cell_run_dir: Path
+    flow_cell: IlluminaRunDirectory, hk_api: HousekeeperAPI, flow_cell_run_dir: Path
 ) -> None:
     """Add demux logs to Housekeeper."""
     log_file_name_pattern: str = r"*_demultiplex.std*"
@@ -102,7 +102,7 @@ def add_run_parameters_file_to_housekeeper(
 ) -> None:
     """Add run parameters file to Housekeeper."""
     flow_cell_path = Path(flow_cell_run_dir, flow_cell_name)
-    flow_cell = IlluminaRunDirectoryData(flow_cell_path)
+    flow_cell = IlluminaRunDirectory(flow_cell_path)
     run_parameters_file_path: Path = flow_cell.run_parameters_path
     tag_names: list[str] = [SequencingFileTag.RUN_PARAMETERS, flow_cell.id]
     hk_api.add_file_to_bundle_if_non_existent(
@@ -114,7 +114,7 @@ def add_run_parameters_file_to_housekeeper(
 
 
 def add_sample_fastq_files_to_housekeeper(
-    flow_cell: IlluminaRunDirectoryData, hk_api: HousekeeperAPI, store: Store
+    flow_cell: IlluminaRunDirectory, hk_api: HousekeeperAPI, store: Store
 ) -> None:
     """Add sample fastq files from flow cell to Housekeeper."""
     sample_internal_ids: list[str] = flow_cell.sample_sheet.get_sample_ids()

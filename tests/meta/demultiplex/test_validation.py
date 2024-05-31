@@ -13,8 +13,8 @@ from cg.services.illumina_services.illumina_post_processing_service.validation i
     validate_flow_cell_has_fastq_files,
     validate_sample_sheet_exists,
 )
-from cg.models.instrument_run_directory_data.instrument_run_directory_data import (
-    IlluminaRunDirectoryData,
+from cg.models.illumina_run_directory_data.illumina_run_directory import (
+    IlluminaRunDirectory,
 )
 
 
@@ -62,7 +62,7 @@ def test_is_flow_cell_ready_for_delivery_false(tmp_path: Path):
 
 def test_validate_sample_sheet_exists_raises_error(hiseq_2500_custom_index_flow_cell_dir: Path):
     # GIVEN a flow cell without a sample sheet in housekeeper
-    flow_cell = IlluminaRunDirectoryData(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
+    flow_cell = IlluminaRunDirectory(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
     flow_cell._sample_sheet_path_hk = None
     # WHEN validating the existence of the sample sheet
     # THEN it should raise a FlowCellError
@@ -73,7 +73,7 @@ def test_validate_sample_sheet_exists_raises_error(hiseq_2500_custom_index_flow_
 def test_validate_sample_sheet_exists(hiseq_2500_custom_index_flow_cell_dir: Path):
     # GIVEN a path with a sample sheet
     # GIVEN a flow cell without a sample sheet in housekeeper
-    flow_cell = IlluminaRunDirectoryData(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
+    flow_cell = IlluminaRunDirectory(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
     sample_sheet_path = Path(
         hiseq_2500_custom_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
@@ -135,7 +135,7 @@ def test_validate_flow_cell_delivery_status_forced(tmp_path: Path):
 
 
 def test_validate_samples_have_fastq_files_passes(
-    novaseqx_flow_cell_with_sample_sheet_no_fastq: IlluminaRunDirectoryData,
+    novaseqx_flow_cell_with_sample_sheet_no_fastq: IlluminaRunDirectory,
 ):
     """Test the check of a flow cells with one sample fastq file does not raise an error."""
     # GIVEN a demultiplexed flow cell with no fastq files and a sample sheet

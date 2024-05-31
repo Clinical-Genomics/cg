@@ -18,8 +18,8 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     delete_sequencing_data_from_housekeeper,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.instrument_run_directory_data.instrument_run_directory_data import (
-    IlluminaRunDirectoryData,
+from cg.models.illumina_run_directory_data.illumina_run_directory import (
+    IlluminaRunDirectory,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -102,7 +102,7 @@ def test_add_tags_if_all_exist(demultiplex_context: CGConfig):
 
 def test_add_fastq_files_without_sample_id(
     demultiplex_context: CGConfig,
-    novaseq_6000_post_1_5_kits_flow_cell: IlluminaRunDirectoryData,
+    novaseq_6000_post_1_5_kits_flow_cell: IlluminaRunDirectory,
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
@@ -133,7 +133,7 @@ def test_add_fastq_files_without_sample_id(
 
 def test_add_existing_sample_sheet(
     demultiplex_context: CGConfig,
-    novaseq_6000_post_1_5_kits_flow_cell: IlluminaRunDirectoryData,
+    novaseq_6000_post_1_5_kits_flow_cell: IlluminaRunDirectory,
     tmp_illumina_flow_cells_directory: Path,
 ):
     # GIVEN a DemuxPostProcessing API
@@ -167,7 +167,7 @@ def test_add_existing_sample_sheet(
 
 def test_add_demux_logs_to_housekeeper(
     demultiplex_context: CGConfig,
-    novaseq_6000_post_1_5_kits_flow_cell: IlluminaRunDirectoryData,
+    novaseq_6000_post_1_5_kits_flow_cell: IlluminaRunDirectory,
 ):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
@@ -218,7 +218,7 @@ def test_add_demux_logs_to_housekeeper(
 
 
 def test_add_run_parameters_to_housekeeper(
-    demultiplex_context: CGConfig, novaseq_x_flow_cell: IlluminaRunDirectoryData
+    demultiplex_context: CGConfig, novaseq_x_flow_cell: IlluminaRunDirectory
 ):
     """Test that the run parameters file of a flow cell is added to Housekeeper."""
     # GIVEN a flow cell with a run parameters file and a Housekeeper API
@@ -233,7 +233,7 @@ def test_add_run_parameters_to_housekeeper(
     # WHEN adding the run parameters file to housekeeper
     add_run_parameters_file_to_housekeeper(
         flow_cell_name=novaseq_x_flow_cell.full_name,
-        flow_cell_run_dir=demultiplex_context.demultiplex_api.flow_cells_dir,
+        flow_cell_run_dir=demultiplex_context.demultiplex_api.runs_dir,
         hk_api=hk_api,
     )
 

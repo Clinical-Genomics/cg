@@ -4,8 +4,8 @@ from pathlib import Path
 from cg.constants import FlowCellStatus
 from cg.constants.demultiplexing import UNDETERMINED
 from cg.constants.devices import DeviceType
-from cg.models.instrument_run_directory_data.instrument_run_directory_data import (
-    IlluminaRunDirectoryData,
+from cg.models.illumina_run_directory_data.illumina_run_directory import (
+    IlluminaRunDirectory,
 )
 from cg.services.illumina_services.illumina_metrics_service.bcl_convert_metrics_parser import (
     BCLConvertMetricsParser,
@@ -45,7 +45,7 @@ class IlluminaMetricsService:
 
     def create_undetermined_non_pooled_metrics(
         self,
-        flow_cell: IlluminaRunDirectoryData,
+        flow_cell: IlluminaRunDirectory,
     ) -> list[SampleLaneSequencingMetrics]:
         """Return sequencing metrics for any undetermined reads in non-pooled lanes."""
 
@@ -150,7 +150,7 @@ class IlluminaMetricsService:
 
     @staticmethod
     def create_illumina_sequencing_dto(
-        flow_cell_dir_data: IlluminaRunDirectoryData,
+        flow_cell_dir_data: IlluminaRunDirectory,
     ) -> IlluminaSequencingRunDTO:
         metrics_parser = BCLConvertMetricsParser(flow_cell_dir_data.path)
         total_reads: int = metrics_parser.get_total_reads_for_flow_cell()

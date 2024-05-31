@@ -20,7 +20,7 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
-from cg.models.instrument_run_directory_data.utils import parse_date
+from cg.models.illumina_run_directory_data.utils import parse_date
 from cg.services.parse_run_completion_status_service.parse_run_completion_status_service import (
     ParseRunCompletionStatusService,
 )
@@ -36,11 +36,7 @@ RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
 }
 
 
-class InstrumentRunDirectoryData:
-    pass
-
-
-class IlluminaRunDirectoryData(InstrumentRunDirectoryData):
+class IlluminaRunDirectory:
     """Class to collect information about flow cell directories and their particular files."""
 
     def __init__(self, flow_cell_path: Path):
@@ -321,16 +317,16 @@ class IlluminaRunDirectoryData(InstrumentRunDirectoryData):
         return f"FlowCell(path={self.path},run_parameters_path={self.run_parameters_path})"
 
 
-def get_flow_cells_from_path(flow_cells_dir: Path) -> list[IlluminaRunDirectoryData]:
+def get_flow_cells_from_path(flow_cells_dir: Path) -> list[IlluminaRunDirectory]:
     """Return flow cell objects from flow cell dir."""
-    flow_cells: list[IlluminaRunDirectoryData] = []
+    flow_cells: list[IlluminaRunDirectory] = []
     LOG.debug(f"Search for flow cells ready to encrypt in {flow_cells_dir}")
     for flow_cell_dir in flow_cells_dir.iterdir():
         if not flow_cell_dir.is_dir():
             continue
         LOG.debug(f"Found directory: {flow_cell_dir}")
         try:
-            flow_cell = IlluminaRunDirectoryData(flow_cell_path=flow_cell_dir)
+            flow_cell = IlluminaRunDirectory(flow_cell_path=flow_cell_dir)
         except FlowCellError:
             continue
         flow_cells.append(flow_cell)

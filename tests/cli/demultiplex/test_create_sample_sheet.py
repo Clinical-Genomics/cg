@@ -11,8 +11,8 @@ from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.process import EXIT_SUCCESS
 from cg.io.txt import read_txt
 from cg.models.cg_config import CGConfig
-from cg.models.instrument_run_directory_data.instrument_run_directory_data import (
-    IlluminaRunDirectoryData,
+from cg.models.illumina_run_directory_data.illumina_run_directory import (
+    IlluminaRunDirectory,
 )
 
 GET_FLOW_CELL_SAMPLES: str = "cg.apps.demultiplex.sample_sheet.api.get_flow_cell_samples"
@@ -28,7 +28,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
 ):
     """Test that creating a flow cell sample sheet fails if there is no run parameters file."""
     # GIVEN a flow cell directory with a non-existing sample sheet nor RunParameters file
-    flow_cell = IlluminaRunDirectoryData(tmp_flow_cell_without_run_parameters_path)
+    flow_cell = IlluminaRunDirectory(tmp_flow_cell_without_run_parameters_path)
 
     # GIVEN that the context's flow cell directory holds the given flow cell
     assert (
@@ -94,7 +94,7 @@ def test_create_v2_sample_sheet(
 
     # GIVEN a flow cell directory with some run parameters
     flow_cell_directory: Path = request.getfixturevalue(scenario.flow_cell_directory)
-    flow_cell = IlluminaRunDirectoryData(flow_cell_directory)
+    flow_cell = IlluminaRunDirectory(flow_cell_directory)
     assert flow_cell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet in the flow cell dir
