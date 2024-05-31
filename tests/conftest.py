@@ -94,6 +94,10 @@ pytest_plugins = [
     "tests.fixture_plugins.loqusdb_fixtures.loqusdb_output_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_api_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.metrics_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.name_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.path_fixtures",
+    "tests.fixture_plugins.pacbio_fixtures.service_fixtures",
 ]
 
 

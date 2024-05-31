@@ -16,7 +16,7 @@ class MetricsParser:
         self.report_path = Path(smrt_cell_path, "statistics")
         # For HiFi metrics
         self.css_report_path: Path = get_file_in_directory(
-            directory=self.report_path, file_name=PacBioDirsAndFiles.CSS_REPORT
+            directory=self.report_path, file_name=PacBioDirsAndFiles.CCS_REPORT
         )
         # For control metrics
         self.control_report_path: Path = get_file_in_directory(
