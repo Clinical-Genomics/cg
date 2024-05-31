@@ -62,7 +62,7 @@ def test_is_flow_cell_ready_for_delivery_false(tmp_path: Path):
 
 def test_validate_sample_sheet_exists_raises_error(hiseq_2500_custom_index_flow_cell_dir: Path):
     # GIVEN a flow cell without a sample sheet in housekeeper
-    flow_cell = IlluminaRunDirectory(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
+    flow_cell = IlluminaRunDirectory(sequencing_run_path=hiseq_2500_custom_index_flow_cell_dir)
     flow_cell._sample_sheet_path_hk = None
     # WHEN validating the existence of the sample sheet
     # THEN it should raise a FlowCellError
@@ -73,7 +73,7 @@ def test_validate_sample_sheet_exists_raises_error(hiseq_2500_custom_index_flow_
 def test_validate_sample_sheet_exists(hiseq_2500_custom_index_flow_cell_dir: Path):
     # GIVEN a path with a sample sheet
     # GIVEN a flow cell without a sample sheet in housekeeper
-    flow_cell = IlluminaRunDirectory(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
+    flow_cell = IlluminaRunDirectory(sequencing_run_path=hiseq_2500_custom_index_flow_cell_dir)
     sample_sheet_path = Path(
         hiseq_2500_custom_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )

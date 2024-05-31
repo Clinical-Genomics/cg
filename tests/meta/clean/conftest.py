@@ -8,7 +8,7 @@ import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.subject import Sex
-from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
+from cg.meta.clean.clean_flow_cells import CleanIlluminaRunsAPI
 from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
 from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
@@ -24,15 +24,15 @@ def flow_cell_clean_api_can_be_removed(
     store_with_flow_cell_to_clean: Store,
     housekeeper_api_with_flow_cell_to_clean: HousekeeperAPI,
     tmp_sample_sheet_clean_flow_cell_path: Path,
-) -> CleanFlowCellAPI:
+) -> CleanIlluminaRunsAPI:
     """Return a CleanFlowCellAPI with a flow cell that can be removed."""
-    clean_flow_cell_api = CleanFlowCellAPI(
-        flow_cell_path=tmp_flow_cell_to_clean_path,
+    clean_flow_cell_api = CleanIlluminaRunsAPI(
+        sequencing_run_path=tmp_flow_cell_to_clean_path,
         status_db=store_with_flow_cell_to_clean,
         housekeeper_api=housekeeper_api_with_flow_cell_to_clean,
         dry_run=False,
     )
-    clean_flow_cell_api.flow_cell._sample_sheet_path_hk = tmp_sample_sheet_clean_flow_cell_path
+    clean_flow_cell_api.sequencing_run._sample_sheet_path_hk = tmp_sample_sheet_clean_flow_cell_path
     return clean_flow_cell_api
 
 
@@ -41,10 +41,10 @@ def flow_cell_clean_api_can_not_be_removed(
     tmp_flow_cell_not_to_clean_path: Path,
     store_with_flow_cell_not_to_clean: Store,
     real_housekeeper_api: HousekeeperAPI,
-) -> CleanFlowCellAPI:
+) -> CleanIlluminaRunsAPI:
     """Return a CleanFlowCellAPI with a flow cell that can not be removed."""
-    return CleanFlowCellAPI(
-        flow_cell_path=tmp_flow_cell_not_to_clean_path,
+    return CleanIlluminaRunsAPI(
+        sequencing_run_path=tmp_flow_cell_not_to_clean_path,
         status_db=store_with_flow_cell_not_to_clean,
         housekeeper_api=real_housekeeper_api,
         dry_run=False,

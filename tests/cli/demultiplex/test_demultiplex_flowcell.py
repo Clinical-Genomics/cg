@@ -82,7 +82,7 @@ def test_demultiplex_all_novaseq(
 
     # GIVEN sequenced flow cells with their sample sheet in Housekeeper
     for flow_cell_dir in tmp_illumina_flow_cells_demux_all_directory.iterdir():
-        flow_cell: IlluminaRunDirectory = IlluminaRunDirectory(flow_cell_path=flow_cell_dir)
+        flow_cell: IlluminaRunDirectory = IlluminaRunDirectory(sequencing_run_path=flow_cell_dir)
         add_and_include_sample_sheet_path_to_housekeeper(
             flow_cell_directory=flow_cell_dir,
             flow_cell_name=flow_cell.id,

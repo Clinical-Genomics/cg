@@ -22,7 +22,7 @@ def test_flow_cell_id(hiseq_2500_dual_index_flow_cell_dir: Path):
     flowcell_id: str = get_flow_cell_id(hiseq_2500_dual_index_flow_cell_dir.name)
 
     # WHEN instantiating a flow cell object
-    flowcell_obj = IlluminaRunDirectory(flow_cell_path=hiseq_2500_dual_index_flow_cell_dir)
+    flowcell_obj = IlluminaRunDirectory(sequencing_run_path=hiseq_2500_dual_index_flow_cell_dir)
 
     # THEN assert that the flow cell id is parsed
     assert flowcell_obj.id == flowcell_id
@@ -32,7 +32,7 @@ def test_flow_cell_position(hiseq_2500_dual_index_flow_cell_dir: Path):
     """Test getting flow cell position."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
-    flow_cell = IlluminaRunDirectory(flow_cell_path=hiseq_2500_dual_index_flow_cell_dir)
+    flow_cell = IlluminaRunDirectory(sequencing_run_path=hiseq_2500_dual_index_flow_cell_dir)
 
     # WHEN fetching the flow cell position
     position = flow_cell.position
@@ -81,7 +81,7 @@ def test_run_parameters_path(flow_cell_fixture: str, request: FixtureRequest):
 def test_run_parameters_path_when_non_existing(tmp_flow_cell_without_run_parameters_path: Path):
     """Test that getting the path of the run parameters path fails if the file does not exist."""
     # GIVEN a flowcell object with a directory without a run parameters file
-    flow_cell = IlluminaRunDirectory(flow_cell_path=tmp_flow_cell_without_run_parameters_path)
+    flow_cell = IlluminaRunDirectory(sequencing_run_path=tmp_flow_cell_without_run_parameters_path)
 
     # WHEN fetching the run parameters path
     with pytest.raises(FlowCellError) as exc:

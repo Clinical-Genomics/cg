@@ -60,7 +60,7 @@ class ChecksumFailedError(CgError):
     """
 
 
-class CleanFlowCellFailedError(CgError):
+class CleanSequencingRunFailedError(CgError):
     """
     Exception raised when the cleaning of a flow cell failed.
     """

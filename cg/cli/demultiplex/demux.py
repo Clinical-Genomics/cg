@@ -9,7 +9,7 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
-    hardlink_flow_cell_analysis_data,
+    hardlink_sequencing_run_analysis_data,
     is_ready_for_post_processing,
     mark_as_demultiplexed,
     mark_flow_cell_as_queued_for_post_processing,
@@ -52,7 +52,7 @@ def demultiplex_all(context: CGConfig, flow_cell_runs_directory: click.Path, dry
             continue
         LOG.info(f"Found directory {sub_dir}")
         try:
-            run_dir = IlluminaRunDirectory(flow_cell_path=sub_dir)
+            run_dir = IlluminaRunDirectory(sequencing_run_path=sub_dir)
         except FlowCellError:
             continue
 
@@ -137,8 +137,8 @@ def copy_novaseqx_flow_cells(context: CGConfig):
             sequencing_run_dir=sequencing_run_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
         ):
             LOG.info(f"Copying {sequencing_run_dir.name} to {demultiplexed_runs_dir}")
-            hardlink_flow_cell_analysis_data(
-                flow_cell_dir=sequencing_run_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
+            hardlink_sequencing_run_analysis_data(
+                sequencing_run_dir=sequencing_run_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
             )
             demultiplexed_runs_flow_cell_dir: Path = Path(
                 demultiplexed_runs_dir, sequencing_run_dir.name

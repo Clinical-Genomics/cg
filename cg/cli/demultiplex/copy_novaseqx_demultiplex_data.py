@@ -13,7 +13,7 @@ def is_demultiplexing_copied(analysis_directory: Path) -> bool:
     return Path(analysis_directory, DemultiplexingDirsAndFiles.COPY_COMPLETE).exists()
 
 
-def is_flow_cell_demultiplexed(analysis_directory: Path) -> bool:
+def is_sequencing_run_demultiplexed(analysis_directory: Path) -> bool:
     """Determine whether the flow cell has been demultiplexed for the latest analysis for a Novaseqx flow cell."""
     return Path(
         analysis_directory,
@@ -22,17 +22,19 @@ def is_flow_cell_demultiplexed(analysis_directory: Path) -> bool:
     ).exists()
 
 
-def is_flow_cell_in_demultiplexed_runs(flow_cell_name: str, demultiplexed_runs: Path) -> bool:
+def is_sequencing_run_in_demultiplexed_runs(
+    sequencing_run_name: str, demultiplexed_runs: Path
+) -> bool:
     """Determine whether the flow cell is in the demultiplexed runs directory."""
-    return Path(demultiplexed_runs, flow_cell_name).exists()
+    return Path(demultiplexed_runs, sequencing_run_name).exists()
 
 
-def get_latest_analysis_path(flow_cell_dir: Path) -> Path | None:
+def get_latest_analysis_path(sequencing_run_dir: Path) -> Path | None:
     """
     Get the latest analysis directory for a Novaseqx flow cell.
     The latest analysis directory is the one with the highest integer name.
     """
-    analysis_path: Path = Path(flow_cell_dir, DemultiplexingDirsAndFiles.ANALYSIS)
+    analysis_path: Path = Path(sequencing_run_dir, DemultiplexingDirsAndFiles.ANALYSIS)
     if not analysis_path.exists():
         return None
     analysis_versions: list[Path] = get_sorted_analysis_versions(analysis_path)
@@ -51,27 +53,31 @@ def get_sorted_analysis_versions(analysis_path: Path) -> list[Path]:
     return sorted(analysis_versions_paths, key=sort_by_name, reverse=True)
 
 
-def is_queued_for_post_processing(flow_cell_dir: Path) -> bool:
+def is_queued_for_post_processing(demultiplexed_run_dir: Path) -> bool:
     """Determine whether the flow cell is queued for post processing."""
-    return Path(flow_cell_dir, DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING).exists()
+    return Path(
+        demultiplexed_run_dir, DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING
+    ).exists()
 
 
-def hardlink_flow_cell_analysis_data(flow_cell_dir: Path, demultiplexed_runs_dir: Path) -> None:
+def hardlink_sequencing_run_analysis_data(
+    sequencing_run_dir: Path, demultiplexed_runs_dir: Path
+) -> None:
     """Create hardlinks to the latest version of the analysis data for a Novaseqx flow cell."""
-    analysis_path: Path = get_latest_analysis_path(flow_cell_dir)
+    analysis_path: Path = get_latest_analysis_path(sequencing_run_dir)
     analysis_data_path: Path = Path(analysis_path, DemultiplexingDirsAndFiles.DATA)
-    demultiplexed_runs_dir_flow_cell_dir = Path(demultiplexed_runs_dir, flow_cell_dir.name)
+    demultiplexed_runs_dir_flow_cell_dir = Path(demultiplexed_runs_dir, sequencing_run_dir.name)
     hardlink_tree(src=analysis_data_path, dst=demultiplexed_runs_dir_flow_cell_dir)
 
 
-def mark_as_demultiplexed(flow_cell_dir: Path) -> None:
+def mark_as_demultiplexed(demultiplexed_run_dir: Path) -> None:
     """Create the demux_complete.txt file in the specified flow cell directory."""
-    Path(flow_cell_dir, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
+    Path(demultiplexed_run_dir, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
 
 
-def mark_flow_cell_as_queued_for_post_processing(flow_cell_dir: Path) -> None:
+def mark_flow_cell_as_queued_for_post_processing(demultiplexed_run_dir: Path) -> None:
     """Create the queued_for_post_processing.txt file in the specified flow cell directory."""
-    Path(flow_cell_dir, DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING).touch()
+    Path(demultiplexed_run_dir, DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING).touch()
 
 
 def hardlink_tree(src: Path, dst: Path) -> None:
@@ -99,12 +105,12 @@ def is_ready_for_post_processing(sequencing_run_dir: Path, demultiplexed_runs_di
     if not is_demultiplexing_copied(analysis_path):
         LOG.debug(f"Demultiplexing has not been copied for flow cell {sequencing_run_dir.name}.")
         flow_cell_is_ready = False
-    if not is_flow_cell_demultiplexed(analysis_path):
+    if not is_sequencing_run_demultiplexed(analysis_path):
         LOG.debug(f"Flow cell {sequencing_run_dir.name} has not been demultiplexed.")
         flow_cell_is_ready = False
 
-    if is_flow_cell_in_demultiplexed_runs(
-        flow_cell_name=sequencing_run_dir.name, demultiplexed_runs=demultiplexed_runs_dir
+    if is_sequencing_run_in_demultiplexed_runs(
+        sequencing_run_name=sequencing_run_dir.name, demultiplexed_runs=demultiplexed_runs_dir
     ):
         LOG.debug(
             f"Flow cell {sequencing_run_dir.name} is already in the demultiplexed runs directory."

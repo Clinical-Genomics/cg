@@ -39,9 +39,9 @@ RUN_PARAMETERS_CONSTRUCTOR: dict[str, Type] = {
 class IlluminaRunDirectory:
     """Class to collect information about flow cell directories and their particular files."""
 
-    def __init__(self, flow_cell_path: Path):
-        LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
-        self.path: Path = flow_cell_path
+    def __init__(self, sequencing_run_path: Path):
+        LOG.debug(f"Instantiating IlluminaRunDirectory with path {sequencing_run_path}")
+        self.path: Path = sequencing_run_path
         self.machine_name: str = EMPTY_STRING
         self._run_parameters: RunParameters | None = None
         self.run_date: datetime.datetime = datetime.datetime.now()
@@ -326,7 +326,7 @@ def get_sequencing_runs_from_path(sequencing_runs_dir: Path) -> list[IlluminaRun
             continue
         LOG.debug(f"Found directory: {flow_cell_dir}")
         try:
-            flow_cell = IlluminaRunDirectory(flow_cell_path=flow_cell_dir)
+            flow_cell = IlluminaRunDirectory(sequencing_run_path=flow_cell_dir)
         except FlowCellError:
             continue
         flow_cells.append(flow_cell)

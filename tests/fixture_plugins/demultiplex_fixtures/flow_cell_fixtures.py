@@ -17,7 +17,7 @@ def hiseq_x_single_index_flow_cell(
     hiseq_x_single_index_flow_cell_dir: Path,
 ) -> IlluminaRunDirectory:
     """Return a single-index HiSeqX flow cell."""
-    return IlluminaRunDirectory(flow_cell_path=hiseq_x_single_index_flow_cell_dir)
+    return IlluminaRunDirectory(sequencing_run_path=hiseq_x_single_index_flow_cell_dir)
 
 
 @pytest.fixture(scope="module")
@@ -25,7 +25,7 @@ def hiseq_x_dual_index_flow_cell(
     hiseq_x_dual_index_flow_cell_dir: Path,
 ) -> IlluminaRunDirectory:
     """Return a dual-index HiSeqX flow cell."""
-    return IlluminaRunDirectory(flow_cell_path=hiseq_x_dual_index_flow_cell_dir)
+    return IlluminaRunDirectory(sequencing_run_path=hiseq_x_dual_index_flow_cell_dir)
 
 
 @pytest.fixture(scope="module")
@@ -33,7 +33,7 @@ def hiseq_2500_dual_index_flow_cell(
     hiseq_2500_dual_index_flow_cell_dir: Path,
 ) -> IlluminaRunDirectory:
     """Return a dual-index HiSeq2500 flow cell."""
-    return IlluminaRunDirectory(flow_cell_path=hiseq_2500_dual_index_flow_cell_dir)
+    return IlluminaRunDirectory(sequencing_run_path=hiseq_2500_dual_index_flow_cell_dir)
 
 
 @pytest.fixture(scope="module")
@@ -41,7 +41,7 @@ def hiseq_2500_custom_index_flow_cell(
     hiseq_2500_custom_index_flow_cell_dir: Path,
 ) -> IlluminaRunDirectory:
     """Return a custom-index HiSeq2500 flow cell."""
-    return IlluminaRunDirectory(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
+    return IlluminaRunDirectory(sequencing_run_path=hiseq_2500_custom_index_flow_cell_dir)
 
 
 @pytest.fixture
