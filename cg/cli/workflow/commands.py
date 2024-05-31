@@ -10,7 +10,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN
 from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
-from cg.exc import FlowCellsNeededError
+from cg.exc import SequencingRunNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -57,7 +57,7 @@ def ensure_flow_cells_on_disk(context: CGConfig, case_id: str):
         elif analysis_api.status_db.is_case_external(case_id=case_id):
             LOG.debug("All samples are external. Flow cell check not applicable")
             return
-        raise FlowCellsNeededError(
+        raise SequencingRunNeededError(
             "Analysis cannot be started: all flow cells need to be on disk to run the analysis"
         )
     LOG.info("All flow cells present on disk")

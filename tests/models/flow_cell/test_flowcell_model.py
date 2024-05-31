@@ -7,7 +7,7 @@ from _pytest.fixtures import FixtureRequest
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers
-from cg.exc import FlowCellError
+from cg.exc import SequencingRunError
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
@@ -84,7 +84,7 @@ def test_run_parameters_path_when_non_existing(tmp_flow_cell_without_run_paramet
     flow_cell = IlluminaRunDirectory(sequencing_run_path=tmp_flow_cell_without_run_parameters_path)
 
     # WHEN fetching the run parameters path
-    with pytest.raises(FlowCellError) as exc:
+    with pytest.raises(SequencingRunError) as exc:
         # THEN a FlowCellError is raised
         flow_cell.run_parameters_path
     assert "No run parameters file found in flow cell" in str(exc.value)

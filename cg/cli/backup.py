@@ -13,16 +13,16 @@ from cg.constants.constants import DRY_RUN, FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import (
     DsmcAlreadyRunningError,
-    FlowCellAlreadyBackedUpError,
-    FlowCellEncryptionError,
-    FlowCellError,
+    SequencingRunAlreadyBackedUpError,
+    SequencingRunEncryptionError,
+    SequencingRunError,
     PdcError,
 )
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import (
     EncryptionAPI,
-    FlowCellEncryptionAPI,
+    SequencingRunEncryptionAPI,
     SpringEncryptionAPI,
 )
 from cg.meta.tar.tar import TarAPI
@@ -59,11 +59,11 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
         flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(
             flow_cell_name=sequencing_run.id
         )
-        flow_cell_encryption_api = FlowCellEncryptionAPI(
+        flow_cell_encryption_api = SequencingRunEncryptionAPI(
             binary_path=context.encryption.binary_path,
             dry_run=dry_run,
             encryption_dir=Path(context.encryption.encryption_dir),
-            flow_cell=sequencing_run,
+            sequencing_run=sequencing_run,
             pigz_binary_path=context.pigz.binary_path,
             slurm_api=SlurmAPI(),
             sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
@@ -77,8 +77,8 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
             )
         except (
             DsmcAlreadyRunningError,
-            FlowCellAlreadyBackedUpError,
-            FlowCellEncryptionError,
+            SequencingRunAlreadyBackedUpError,
+            SequencingRunEncryptionError,
             PdcError,
         ) as error:
             logging.error(f"{error}")
@@ -100,11 +100,11 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
         if flow_cell and flow_cell.has_backup:
             LOG.debug(f"Flow cell: {sequencing_run.id} is already backed-up")
             continue
-        flow_cell_encryption_api = FlowCellEncryptionAPI(
+        flow_cell_encryption_api = SequencingRunEncryptionAPI(
             binary_path=context.encryption.binary_path,
             dry_run=dry_run,
             encryption_dir=Path(context.encryption.encryption_dir),
-            flow_cell=sequencing_run,
+            sequencing_run=sequencing_run,
             pigz_binary_path=context.pigz.binary_path,
             slurm_api=SlurmAPI(),
             sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
@@ -112,7 +112,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
         )
         try:
             flow_cell_encryption_api.start_encryption()
-        except (FlowCellError, FlowCellEncryptionError) as error:
+        except (SequencingRunError, SequencingRunEncryptionError) as error:
             logging.error(f"{error}")
 
 

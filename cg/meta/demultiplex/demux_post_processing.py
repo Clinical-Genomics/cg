@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.exc import FlowCellError, MissingFilesError
+from cg.exc import SequencingRunError, MissingFilesError
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     delete_sequencing_data_from_housekeeper,
     store_flow_cell_data_in_housekeeper,
@@ -84,7 +84,7 @@ class DemuxPostProcessingAPI:
                 flow_cell=flow_cell,
                 force=force,
             )
-        except (FlowCellError, MissingFilesError) as e:
+        except (SequencingRunError, MissingFilesError) as e:
             LOG.warning(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
             return
 

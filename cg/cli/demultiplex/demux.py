@@ -16,7 +16,7 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
 )
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.constants import DRY_RUN
-from cg.exc import FlowCellError, SampleSheetError
+from cg.exc import SequencingRunError, SampleSheetError
 from cg.meta.demultiplex.utils import (
     create_manifest_file,
     is_flow_cell_sync_confirmed,
@@ -53,7 +53,7 @@ def demultiplex_all(context: CGConfig, flow_cell_runs_directory: click.Path, dry
         LOG.info(f"Found directory {sub_dir}")
         try:
             run_dir = IlluminaRunDirectory(sequencing_run_path=sub_dir)
-        except FlowCellError:
+        except SequencingRunError:
             continue
 
         if not demultiplex_api.is_demultiplexing_possible(run_dir=run_dir):
@@ -101,7 +101,7 @@ def demultiplex_flow_cell(
 
     try:
         run_dir = IlluminaRunDirectory(sequencing_run_directory)
-    except FlowCellError as error:
+    except SequencingRunError as error:
         raise click.Abort from error
 
     if not demultiplex_api.is_demultiplexing_possible(run_dir=run_dir):

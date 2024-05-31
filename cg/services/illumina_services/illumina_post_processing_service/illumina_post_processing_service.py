@@ -5,7 +5,7 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.devices import DeviceType
-from cg.exc import MissingFilesError, FlowCellError
+from cg.exc import MissingFilesError, SequencingRunError
 from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
 )
@@ -120,7 +120,7 @@ class IlluminaPostProcessingService:
                 flow_cell_output_directory=flow_cell_out_directory,
                 flow_cell=flow_cell,
             )
-        except (FlowCellError, MissingFilesError) as e:
+        except (SequencingRunError, MissingFilesError) as e:
             LOG.warning(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
             return
         if self.dry_run:

@@ -8,10 +8,10 @@ from pathlib import Path
 import mock
 import pytest
 
-from cg.exc import FlowCellEncryptionError, FlowCellError
+from cg.exc import SequencingRunEncryptionError, SequencingRunError
 from cg.meta.encryption.encryption import (
     EncryptionAPI,
-    FlowCellEncryptionAPI,
+    SequencingRunEncryptionAPI,
     SpringEncryptionAPI,
 )
 from cg.models.run_devices.illumina_run_directory import (
@@ -305,25 +305,25 @@ def test_cleanup_no_files(
     assert "No existing key file to clean up, cleanup process completed" in caplog.text
 
 
-def test_flow_cell_encryption_api(flow_cell_encryption_api: FlowCellEncryptionAPI):
+def test_flow_cell_encryption_api(flow_cell_encryption_api: SequencingRunEncryptionAPI):
     """Tests instantiating flow cell encryption API."""
     # GIVEN a FlowCellEncryptionAPI
 
     # WHEN instantiating the API
 
     # THEN return a FlowCellEncryptionAPI object
-    assert isinstance(flow_cell_encryption_api, FlowCellEncryptionAPI)
+    assert isinstance(flow_cell_encryption_api, SequencingRunEncryptionAPI)
 
 
 def test_get_flow_cell_symmetric_encryption_command(
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
+    flow_cell_encryption_api: SequencingRunEncryptionAPI,
     output_file_path: Path,
     temporary_passphrase: Path,
 ):
     # GIVEN a FlowCellEncryptionAPI
 
     # WHEN getting the command
-    command: str = flow_cell_encryption_api.get_flow_cell_symmetric_encryption_command(
+    command: str = flow_cell_encryption_api.get_sequencing_run_symmetric_encryption_command(
         output_file=output_file_path, passphrase_file_path=temporary_passphrase
     )
 
@@ -332,14 +332,14 @@ def test_get_flow_cell_symmetric_encryption_command(
 
 
 def test_get_flow_cell_symmetric_decryption_command(
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
+    flow_cell_encryption_api: SequencingRunEncryptionAPI,
     input_file_path: Path,
     temporary_passphrase: Path,
 ):
     # GIVEN a FlowCellEncryptionAPI
 
     # WHEN getting the command
-    command: str = flow_cell_encryption_api.get_flow_cell_symmetric_decryption_command(
+    command: str = flow_cell_encryption_api.get_sequencing_run_symmetric_decryption_command(
         input_file=input_file_path, passphrase_file_path=temporary_passphrase
     )
 
@@ -348,12 +348,12 @@ def test_get_flow_cell_symmetric_decryption_command(
 
 
 def test_create_pending_file(
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
+    flow_cell_encryption_api: SequencingRunEncryptionAPI,
 ):
     # GIVEN a FlowCellEncryptionAPI
 
     # WHEN checking if encryption is possible
-    flow_cell_encryption_api.flow_cell_encryption_dir.mkdir(parents=True)
+    flow_cell_encryption_api.sequencing_run_encryption_dir.mkdir(parents=True)
     flow_cell_encryption_api.dry_run = False
     flow_cell_encryption_api.create_pending_file(
         pending_path=flow_cell_encryption_api.pending_file_path
@@ -363,11 +363,11 @@ def test_create_pending_file(
     assert flow_cell_encryption_api.pending_file_path.exists()
 
     # Clean-up
-    shutil.rmtree(flow_cell_encryption_api.flow_cell_encryption_dir)
+    shutil.rmtree(flow_cell_encryption_api.sequencing_run_encryption_dir)
 
 
 def test_create_pending_file_when_dry_run(
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
+    flow_cell_encryption_api: SequencingRunEncryptionAPI,
 ):
     # GIVEN a FlowCellEncryptionAPI
 
@@ -380,12 +380,12 @@ def test_create_pending_file_when_dry_run(
     assert not flow_cell_encryption_api.pending_file_path.exists()
 
 
-def test_is_encryption_possible(flow_cell_encryption_api: FlowCellEncryptionAPI, mocker):
+def test_is_encryption_possible(flow_cell_encryption_api: SequencingRunEncryptionAPI, mocker):
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
     mocker.patch.object(IlluminaRunDirectory, "is_flow_cell_ready")
-    IlluminaRunDirectory.is_flow_cell_ready.return_value = True
+    IlluminaRunDirectory.is_sequencing_run_ready.return_value = True
 
     # WHEN checking if encryption is possible
     is_possible: bool = flow_cell_encryption_api.is_encryption_possible()
@@ -395,7 +395,7 @@ def test_is_encryption_possible(flow_cell_encryption_api: FlowCellEncryptionAPI,
 
 
 def test_is_encryption_possible_when_sequencing_not_ready(
-    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str, mocker
+    caplog, flow_cell_encryption_api: SequencingRunEncryptionAPI, flow_cell_name: str, mocker
 ):
     caplog.set_level(logging.ERROR)
 
@@ -403,10 +403,10 @@ def test_is_encryption_possible_when_sequencing_not_ready(
 
     # GIVEN that sequencing is not ready
     mocker.patch.object(IlluminaRunDirectory, "is_flow_cell_ready")
-    IlluminaRunDirectory.is_flow_cell_ready.return_value = False
+    IlluminaRunDirectory.is_sequencing_run_ready.return_value = False
 
     # WHEN checking if encryption is possible
-    with pytest.raises(FlowCellError):
+    with pytest.raises(SequencingRunError):
         flow_cell_encryption_api.is_encryption_possible()
 
         # THEN error should be raised
@@ -414,79 +414,79 @@ def test_is_encryption_possible_when_sequencing_not_ready(
 
 
 def test_is_encryption_possible_when_encryption_is_completed(
-    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str, mocker
+    caplog, flow_cell_encryption_api: SequencingRunEncryptionAPI, flow_cell_name: str, mocker
 ):
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
     mocker.patch.object(IlluminaRunDirectory, "is_flow_cell_ready")
-    IlluminaRunDirectory.is_flow_cell_ready.return_value = True
+    IlluminaRunDirectory.is_sequencing_run_ready.return_value = True
 
     # GIVEN that encryption is completed
-    flow_cell_encryption_api.flow_cell_encryption_dir.mkdir(parents=True)
+    flow_cell_encryption_api.sequencing_run_encryption_dir.mkdir(parents=True)
     flow_cell_encryption_api.complete_file_path.touch()
 
     # WHEN checking if encryption is possible
-    with pytest.raises(FlowCellEncryptionError):
+    with pytest.raises(SequencingRunEncryptionError):
         flow_cell_encryption_api.is_encryption_possible()
 
         # THEN error should be raised
         assert f"Encryption already completed for flow cell: {flow_cell_name}" in caplog.text
 
     # Clean-up
-    shutil.rmtree(flow_cell_encryption_api.flow_cell_encryption_dir)
+    shutil.rmtree(flow_cell_encryption_api.sequencing_run_encryption_dir)
 
 
 def test_is_encryption_possible_when_encryption_is_pending(
-    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, flow_cell_name: str, mocker
+    caplog, flow_cell_encryption_api: SequencingRunEncryptionAPI, flow_cell_name: str, mocker
 ):
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
     mocker.patch.object(IlluminaRunDirectory, "is_flow_cell_ready")
-    IlluminaRunDirectory.is_flow_cell_ready.return_value = True
+    IlluminaRunDirectory.is_sequencing_run_ready.return_value = True
 
     # GIVEN that encryption is pending
-    flow_cell_encryption_api.flow_cell_encryption_dir.mkdir(parents=True)
+    flow_cell_encryption_api.sequencing_run_encryption_dir.mkdir(parents=True)
     flow_cell_encryption_api.pending_file_path.touch()
 
     # WHEN checking if encryption is possible
-    with pytest.raises(FlowCellEncryptionError):
+    with pytest.raises(SequencingRunEncryptionError):
         flow_cell_encryption_api.is_encryption_possible()
 
         # THEN error should be raised
         assert f"Encryption already started for flow cell: {flow_cell_name}" in caplog.text
 
     # Clean-up
-    shutil.rmtree(flow_cell_encryption_api.flow_cell_encryption_dir)
+    shutil.rmtree(flow_cell_encryption_api.sequencing_run_encryption_dir)
 
 
 def test_encrypt_flow_cell(
-    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, mocker, sbatch_job_number: int
+    caplog, flow_cell_encryption_api: SequencingRunEncryptionAPI, mocker, sbatch_job_number: int
 ):
     caplog.set_level(logging.INFO)
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
     mocker.patch.object(IlluminaRunDirectory, "is_flow_cell_ready")
-    IlluminaRunDirectory.is_flow_cell_ready.return_value = True
+    IlluminaRunDirectory.is_sequencing_run_ready.return_value = True
 
     # WHEN encrypting flow cell
-    flow_cell_encryption_api.encrypt_flow_cell()
+    flow_cell_encryption_api.encrypt_sequencing_run()
 
     # THEN sbatch should be submitted
     assert f"Flow cell encryption running as job {sbatch_job_number}" in caplog.text
 
 
 def test_start_encryption(
-    caplog, flow_cell_encryption_api: FlowCellEncryptionAPI, mocker, sbatch_job_number: int
+    caplog, flow_cell_encryption_api: SequencingRunEncryptionAPI, mocker, sbatch_job_number: int
 ):
     caplog.set_level(logging.INFO)
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
     mocker.patch.object(IlluminaRunDirectory, "is_flow_cell_ready")
-    IlluminaRunDirectory.is_flow_cell_ready.return_value = True
+    IlluminaRunDirectory.is_sequencing_run_ready.return_value = True
 
     # WHEN trying to start encrypting flow cell
     flow_cell_encryption_api.start_encryption()

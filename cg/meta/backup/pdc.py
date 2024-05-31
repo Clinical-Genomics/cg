@@ -10,11 +10,11 @@ from cg.constants.pdc import DSMCParameters
 from cg.constants.process import EXIT_WARNING
 from cg.exc import (
     DsmcAlreadyRunningError,
-    FlowCellAlreadyBackedUpError,
-    FlowCellEncryptionError,
+    SequencingRunAlreadyBackedUpError,
+    SequencingRunEncryptionError,
     PdcError,
 )
-from cg.meta.encryption.encryption import FlowCellEncryptionAPI
+from cg.meta.encryption.encryption import SequencingRunEncryptionAPI
 from cg.store.models import Flowcell
 from cg.store.store import Store
 from cg.utils import Process
@@ -87,7 +87,7 @@ class PdcAPI:
             raise PdcError(message=f"{error}") from error
 
     def validate_is_flow_cell_backup_possible(
-        self, db_flow_cell: Flowcell, flow_cell_encryption_api: FlowCellEncryptionAPI
+        self, db_flow_cell: Flowcell, flow_cell_encryption_api: SequencingRunEncryptionAPI
     ) -> bool:
         """Check if back-up of flow cell is possible.
         Raises:
@@ -98,12 +98,12 @@ class PdcAPI:
         if self.validate_is_dsmc_running():
             raise DsmcAlreadyRunningError("Too many Dsmc processes are already running")
         if db_flow_cell and db_flow_cell.has_backup:
-            raise FlowCellAlreadyBackedUpError(
+            raise SequencingRunAlreadyBackedUpError(
                 f"Flow cell: {db_flow_cell.name} is already backed-up"
             )
         if not flow_cell_encryption_api.complete_file_path.exists():
-            raise FlowCellEncryptionError(
-                f"Flow cell: {flow_cell_encryption_api.flow_cell.id} encryption process is not complete"
+            raise SequencingRunEncryptionError(
+                f"Flow cell: {flow_cell_encryption_api.sequencing_run.id} encryption process is not complete"
             )
         LOG.debug("Flow cell can be backed up")
 
@@ -121,7 +121,7 @@ class PdcAPI:
     def start_flow_cell_backup(
         self,
         db_flow_cell: Flowcell,
-        flow_cell_encryption_api: FlowCellEncryptionAPI,
+        flow_cell_encryption_api: SequencingRunEncryptionAPI,
         status_db: Store,
     ) -> None:
         """Check if back-up of flow cell is possible and if so starts it."""

@@ -25,7 +25,7 @@ from cg.cli.workflow.commands import (
 )
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
-from cg.exc import CleanSequencingRunFailedError, FlowCellError
+from cg.exc import CleanSequencingRunFailedError, SequencingRunError
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.clean_flow_cells import CleanIlluminaRunsAPI
 from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
@@ -274,7 +274,7 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
                 dry_run=dry_run,
             )
             clean_flow_cell_api.delete_sequencing_run_directory()
-        except (CleanSequencingRunFailedError, FlowCellError) as error:
+        except (CleanSequencingRunFailedError, SequencingRunError) as error:
             LOG.error(repr(error))
             continue
 

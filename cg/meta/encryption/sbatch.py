@@ -1,24 +1,24 @@
 """Hold encryption sbatch templates in variables."""
 
-FLOW_CELL_ENCRYPT_ERROR = """
+SEQUENCING_RUN_ENCRYPT_ERROR = """
 if [[ -e {pending_file_path} ]]
 then
     rm -f {pending_file_path}
 fi
 """
 
-FLOW_CELL_ENCRYPT_COMMANDS = """
+SEQUENCING_RUN_ENCRYPT_COMMANDS = """
 {symmetric_passphrase}
 
 {asymmetrically_encrypt_passphrase}
 
 {make_tmp_encrypt_dir}
 
-{copy_flow_cell_dir_to_tmp}
+{copy_sequencing_run_dir_to_tmp}
 
-{tar_encrypt_tmp_dir} | {parallel_gzip} | {tee} | {flow_cell_symmetric_encryption}
+{tar_encrypt_tmp_dir} | {parallel_gzip} | {tee} | {sequencing_run_symmetric_encryption}
 
-{flow_cell_symmetric_decryption} | {md5sum}
+{sequencing_run_symmetric_decryption} | {md5sum}
 
 {diff}
 

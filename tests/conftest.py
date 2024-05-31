@@ -38,7 +38,7 @@ from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.meta.encryption.encryption import FlowCellEncryptionAPI
+from cg.meta.encryption.encryption import SequencingRunEncryptionAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
@@ -3802,12 +3802,12 @@ def store_with_sequencing_metrics(
 @pytest.fixture
 def flow_cell_encryption_api(
     cg_context: CGConfig, flow_cell_full_name: str
-) -> FlowCellEncryptionAPI:
-    flow_cell_encryption_api = FlowCellEncryptionAPI(
+) -> SequencingRunEncryptionAPI:
+    flow_cell_encryption_api = SequencingRunEncryptionAPI(
         binary_path=cg_context.encryption.binary_path,
         encryption_dir=Path(cg_context.backup.pdc_archiving_directory.current),
         dry_run=True,
-        flow_cell=IlluminaRunDirectory(
+        sequencing_run=IlluminaRunDirectory(
             sequencing_run_path=Path(cg_context.illumina_flow_cells_directory, flow_cell_full_name)
         ),
         pigz_binary_path=cg_context.pigz.binary_path,

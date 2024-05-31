@@ -13,7 +13,7 @@ from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import SEQUENCER_TYPES, Sequencers
 from cg.constants.symbols import EMPTY_STRING
-from cg.exc import FlowCellError
+from cg.exc import SequencingRunError
 from cg.models.demultiplex.run_parameters import (
     RunParameters,
     RunParametersHiSeq,
@@ -98,7 +98,7 @@ class IlluminaRunDirectory:
 
     def get_sample_sheet_path_hk(self) -> Path:
         if not self._sample_sheet_path_hk:
-            raise FlowCellError("Attribute _sample_sheet_path_hk has not been assigned yet")
+            raise SequencingRunError("Attribute _sample_sheet_path_hk has not been assigned yet")
         return self._sample_sheet_path_hk
 
     def get_flow_cell_run_dir(self) -> Path:
@@ -144,7 +144,7 @@ class IlluminaRunDirectory:
         else:
             message: str = f"No run parameters file found in flow cell {flow_cell_run_dir}"
             LOG.error(message)
-            raise FlowCellError(message)
+            raise SequencingRunError(message)
 
     @property
     def run_parameters(self) -> RunParameters:
@@ -214,7 +214,7 @@ class IlluminaRunDirectory:
         if len(self.split_flow_cell_name) != 4:
             message = f"Flowcell {self.full_name} does not follow the flow cell naming convention"
             LOG.warning(message)
-            raise FlowCellError(message)
+            raise SequencingRunError(message)
 
     def has_demultiplexing_started_locally(self) -> bool:
         """Check if demultiplexing has started path exists on the cluster."""
@@ -238,7 +238,7 @@ class IlluminaRunDirectory:
     def sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
         if not self._sample_sheet_path_hk:
-            raise FlowCellError("Sample sheet path has not been assigned yet")
+            raise SequencingRunError("Sample sheet path has not been assigned yet")
         return self.sample_sheet_validator.get_sample_sheet_object_from_file(
             file_path=self._sample_sheet_path_hk
         )
@@ -257,7 +257,7 @@ class IlluminaRunDirectory:
         LOG.info("Check if copy of data from sequence instrument is ready")
         return self.copy_complete_path.exists()
 
-    def is_flow_cell_ready(self) -> bool:
+    def is_sequencing_run_ready(self) -> bool:
         """Check if a flow cell is ready for downstream processing.
 
         A flow cell is ready if the two files RTAComplete.txt and CopyComplete.txt exist in the
@@ -327,7 +327,7 @@ def get_sequencing_runs_from_path(sequencing_runs_dir: Path) -> list[IlluminaRun
         LOG.debug(f"Found directory: {flow_cell_dir}")
         try:
             flow_cell = IlluminaRunDirectory(sequencing_run_path=flow_cell_dir)
-        except FlowCellError:
+        except SequencingRunError:
             continue
         flow_cells.append(flow_cell)
     return flow_cells

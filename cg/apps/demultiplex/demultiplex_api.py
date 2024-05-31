@@ -151,7 +151,7 @@ class DemultiplexingAPI:
         """
         LOG.info(f"Check if demultiplexing is possible for {run_dir.id}")
         demultiplexing_possible = True
-        if not run_dir.is_flow_cell_ready():
+        if not run_dir.is_sequencing_run_ready():
             demultiplexing_possible = False
 
         if not run_dir.sample_sheet_exists():

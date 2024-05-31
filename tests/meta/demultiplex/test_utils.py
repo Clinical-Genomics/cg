@@ -5,7 +5,7 @@ import pytest
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
-from cg.exc import FlowCellError
+from cg.exc import SequencingRunError
 from cg.io.csv import read_csv
 from cg.meta.demultiplex.utils import (
     NANOPORE_SEQUENCING_SUMMARY_PATTERN,
@@ -263,7 +263,7 @@ def test_get_sample_sheet_path_not_found(tmp_path: Path):
 
 def test_parse_flow_cell_directory_data_invalid():
     """Test that a FlowCellDirectoryData object is not created when the given path is invalid."""
-    with pytest.raises(FlowCellError):
+    with pytest.raises(SequencingRunError):
         IlluminaRunDirectory(Path("invalid_path"))
 
 

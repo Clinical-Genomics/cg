@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.exc import FlowCellError, MissingFilesError
+from cg.exc import SequencingRunError, MissingFilesError
 from cg.meta.demultiplex.utils import get_sample_fastqs_from_flow_cell
 from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
@@ -22,20 +22,20 @@ def is_flow_cell_ready_for_delivery(flow_cell_directory: Path) -> bool:
 def validate_sample_sheet_exists(flow_cell: IlluminaRunDirectory) -> None:
     sample_sheet_path: Path = flow_cell.get_sample_sheet_path_hk()
     if not sample_sheet_path or not sample_sheet_path.exists():
-        raise FlowCellError(f"Sample sheet {sample_sheet_path} does not exist in housekeeper.")
+        raise SequencingRunError(f"Sample sheet {sample_sheet_path} does not exist in housekeeper.")
     LOG.debug(f"Found sample sheet {sample_sheet_path} in housekeeper.")
 
 
 def validate_demultiplexing_complete(flow_cell_output_directory: Path) -> None:
     if not is_demultiplexing_complete(flow_cell_output_directory):
-        raise FlowCellError(
+        raise SequencingRunError(
             f"Demultiplexing not completed for flow cell directory {flow_cell_output_directory}."
         )
 
 
 def validate_flow_cell_delivery_status(flow_cell_output_directory: Path, force: bool) -> None:
     if is_flow_cell_ready_for_delivery(flow_cell_output_directory) and not force:
-        raise FlowCellError(
+        raise SequencingRunError(
             f"Flow cell output directory {flow_cell_output_directory}"
             " has already been processed and is ready for delivery."
         )

@@ -62,7 +62,7 @@ class ChecksumFailedError(CgError):
 
 class CleanSequencingRunFailedError(CgError):
     """
-    Exception raised when the cleaning of a flow cell failed.
+    Exception raised when the cleaning of a Sequencing run failed.
     """
 
 
@@ -88,20 +88,20 @@ class EmailNotSentError(CgError):
     """Raised when email not sent."""
 
 
-class FlowCellError(CgError):
-    """Raised when there is a problem with a flow cell."""
+class SequencingRunError(CgError):
+    """Raised when there is a problem with a Sequencing run."""
 
 
-class FlowCellsNeededError(CgError):
+class SequencingRunNeededError(CgError):
     """Raised when fetching flow cells still needed to start analysis."""
 
 
-class FlowCellEncryptionError(CgError):
-    """Raised when there is a problem with encrypting a flow cell."""
+class SequencingRunEncryptionError(CgError):
+    """Raised when there is a problem with encrypting a Sequencing run."""
 
 
-class FlowCellAlreadyBackedUpError(CgError):
-    """Raised when a flow cell is already backed-up."""
+class SequencingRunAlreadyBackedUpError(CgError):
+    """Raised when a Sequencing run is already backed-up."""
 
 
 class HousekeeperFileMissingError(CgError):

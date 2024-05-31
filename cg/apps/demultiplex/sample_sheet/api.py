@@ -12,7 +12,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
-from cg.exc import FlowCellError, HousekeeperFileMissingError, SampleSheetError
+from cg.exc import SequencingRunError, HousekeeperFileMissingError, SampleSheetError
 from cg.io.controller import ReadFile, WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
@@ -60,7 +60,7 @@ class SampleSheetAPI:
             raise SampleSheetError(message)
         try:
             run_dir = IlluminaRunDirectory(sequencing_run_path)
-        except FlowCellError as error:
+        except SequencingRunError as error:
             raise SampleSheetError from error
         return run_dir
 
@@ -83,7 +83,7 @@ class SampleSheetAPI:
         """Determine if the sequencing run has a Run Parameters file and a sample sheet."""
         try:
             sequencing_run_dir.run_parameters_path.exists()
-        except FlowCellError:
+        except SequencingRunError:
             LOG.error(
                 f"Run parameters file for sequencing run {sequencing_run_dir.full_name} does not exist"
             )
