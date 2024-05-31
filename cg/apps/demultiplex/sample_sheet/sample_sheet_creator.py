@@ -1,4 +1,4 @@
-""" Create a sample sheet for NovaSeq flow cells."""
+""" Create a sample sheet for NovaSeq sequencing runs."""
 
 import logging
 
@@ -21,8 +21,8 @@ class SampleSheetCreator:
         sequencing_run: IlluminaRunDirectory,
         lims_samples: list[FlowCellSample],
     ):
-        self.flow_cell: IlluminaRunDirectory = sequencing_run
-        self.flow_cell_id: str = sequencing_run.id
+        self.sequencing_run: IlluminaRunDirectory = sequencing_run
+        self.sequencing_run_id: str = sequencing_run.id
         self.lims_samples: list[FlowCellSample] = lims_samples
         self.run_parameters: RunParameters = sequencing_run.run_parameters
         self.index_settings: IndexSettings = self.run_parameters.index_settings
@@ -47,11 +47,11 @@ class SampleSheetCreator:
         header_section: list[list[str]] = [
             [SampleSheetBCLConvertSections.Header.HEADER.value],
             SampleSheetBCLConvertSections.Header.file_format(),
-            [SampleSheetBCLConvertSections.Header.RUN_NAME.value, self.flow_cell_id],
+            [SampleSheetBCLConvertSections.Header.RUN_NAME.value, self.sequencing_run_id],
             [
                 SampleSheetBCLConvertSections.Header.INSTRUMENT_PLATFORM_TITLE.value,
                 SampleSheetBCLConvertSections.Header.instrument_platform_sequencer().get(
-                    self.flow_cell.sequencer_type
+                    self.sequencing_run.sequencer_type
                 ),
             ],
             SampleSheetBCLConvertSections.Header.index_orientation_forward(),
