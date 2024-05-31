@@ -211,7 +211,7 @@ def test_can_flow_cell_be_deleted(flow_cell_clean_api_can_be_removed: CleanIllum
     # GIVEN a flow cell that can be deleted
 
     with mock.patch(
-        "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.is_directory_older_than_21_days",
+        "cg.meta.clean.clean_flow_cells.CleanIlluminaRunsAPI.is_directory_older_than_21_days",
         return_value=True,
     ):
         # WHEN checking that the flow cell can be deleted
@@ -230,11 +230,11 @@ def test_can_flow_cell_be_deleted_no_spring_with_fastq(
     # GIVEN a flow cell that can be deleted
 
     with mock.patch(
-        "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.is_directory_older_than_21_days",
+        "cg.meta.clean.clean_flow_cells.CleanIlluminaRunsAPI.is_directory_older_than_21_days",
         return_value=True,
     ):
         with mock.patch(
-            "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.has_spring_meta_data_files_for_samples_in_housekeeper",
+            "cg.meta.clean.clean_flow_cells.CleanIlluminaRunsAPI.has_spring_meta_data_files_for_samples_in_housekeeper",
             return_value=False,
         ):
             # WHEN checking that the flow cell can be deleted
@@ -253,11 +253,11 @@ def test_can_flow_cell_be_deleted_spring_no_fastq(
     # GIVEN a flow cell that can be deleted
 
     with mock.patch(
-        "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.is_directory_older_than_21_days",
+        "cg.meta.clean.clean_flow_cells.CleanIlluminaRunsAPI.is_directory_older_than_21_days",
         return_value=True,
     ):
         with mock.patch(
-            "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.has_fastq_files_for_samples_in_housekeeper",
+            "cg.meta.clean.clean_flow_cells.CleanIlluminaRunsAPI.has_fastq_files_for_samples_in_housekeeper",
             return_value=False,
         ):
             # WHEN checking that the flow cell can be deleted
@@ -276,15 +276,15 @@ def test_can_flow_cell_be_deleted_no_spring_no_fastq(
     # GIVEN a flow cell that can be deleted
 
     with mock.patch(
-        "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.is_directory_older_than_21_days",
+        "cg.meta.clean.clean_flow_cells.CleanIlluminaRunsAPI.is_directory_older_than_21_days",
         return_value=True,
     ):
         with mock.patch(
-            "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.has_fastq_files_for_samples_in_housekeeper",
+            "cg.meta.clean.clean_flow_cells.CleanIlluminaRunsAPI.has_fastq_files_for_samples_in_housekeeper",
             return_value=False,
         ):
             with mock.patch(
-                "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.has_spring_meta_data_files_for_samples_in_housekeeper",
+                "cg.meta.clean.clean_flow_cells.CleanIlluminaRunsAPI.has_spring_meta_data_files_for_samples_in_housekeeper",
                 return_value=False,
             ):
                 # WHEN checking that the flow cell can be deleted
@@ -303,7 +303,7 @@ def test_delete_flow_cell_directory(flow_cell_clean_api_can_be_removed: CleanIll
 
     # WHEN removing the flow cell directory
     with mock.patch(
-        "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.is_directory_older_than_21_days",
+        "cg.meta.clean.clean_flow_cells.CleanIlluminaRunsAPI.is_directory_older_than_21_days",
         return_value=True,
     ):
         flow_cell_clean_api_can_be_removed.delete_sequencing_run_directory()

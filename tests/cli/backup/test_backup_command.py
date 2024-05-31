@@ -296,7 +296,10 @@ def test_run_fetch_flow_cell_dry_run_retrieval_time(
 
     # GIVEN that the backup api returns a retrieval time
     expected_time = 60
-    mocker.patch("cg.meta.backup.backup.BackupAPI.fetch_flow_cell", return_value=expected_time)
+    mocker.patch(
+        "cg.meta.backup.backup.BackupAPI.fetch_sequencing_run_for_flow_cell",
+        return_value=expected_time,
+    )
 
     # WHEN running the fetch flow cell command without specifying any flow cell in dry run mode
     result = cli_runner.invoke(fetch_flow_cell, ["--dry-run"], obj=backup_context)

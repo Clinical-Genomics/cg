@@ -259,7 +259,7 @@ def test_fetch_flow_cell_no_flow_cells_requested(
     # THEN no flow cell will be fetched and a log message indicates that no flow cells have been
     # requested
     assert result is None
-    assert "No flow cells requested" in caplog.text
+    assert "No sequencing runs requested" in caplog.text
 
 
 @mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")

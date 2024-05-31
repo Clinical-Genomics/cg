@@ -26,7 +26,7 @@ def test_clean_flow_cells_cmd(
 
     # WHEN running the clean flow cells cli command
     with mock.patch(
-        "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.is_directory_older_than_21_days",
+        "cg.meta.clean.clean_flow_cells.CleanIlluminaRunsAPI.is_directory_older_than_21_days",
         return_value=True,
     ):
         result = cli_runner.invoke(clean_flow_cells, obj=clean_flow_cells_context)
@@ -40,7 +40,7 @@ def test_clean_flow_cells_cmd(
 
     # THEN the flow cell not fulfilling all cleaning criteria is not deleted
     assert tmp_flow_cell_not_to_clean_path.exists()
-    assert "CleanFlowCellFailedError" in caplog.text
+    assert "CleanSequencingRunFailedError" in caplog.text
 
 
 def test_clean_flow_cells_cmd_dry_run(
@@ -59,7 +59,7 @@ def test_clean_flow_cells_cmd_dry_run(
 
     # WHEN running the clean flow cells cli command
     with mock.patch(
-        "cg.meta.clean.clean_flow_cells.CleanFlowCellAPI.is_directory_older_than_21_days",
+        "cg.meta.clean.clean_flow_cells.CleanIlluminaRunsAPI.is_directory_older_than_21_days",
         return_value=True,
     ):
         result = cli_runner.invoke(clean_flow_cells, ["--dry-run"], obj=clean_flow_cells_context)
