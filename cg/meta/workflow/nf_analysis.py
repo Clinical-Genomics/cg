@@ -801,6 +801,7 @@ class NfAnalysisAPI(AnalysisAPI):
             )
 
     def _verify_latest_analysis_is_completed(self, case_id: str) -> None:
+        """Raises an AnalysisNotCompletedError if the latest analysis for the case has not completed"""
         if not self.trailblazer_api.is_latest_analysis_completed(case_id):
             raise AnalysisNotCompletedError(f"The latest analysis for {case_id} has not completed.")
 
