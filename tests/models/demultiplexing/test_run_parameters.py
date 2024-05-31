@@ -21,7 +21,7 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
-from cg.models.illumina_run_directory_data.illumina_run_directory import (
+from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
 )
 

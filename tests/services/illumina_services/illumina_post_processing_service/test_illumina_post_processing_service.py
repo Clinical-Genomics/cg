@@ -1,6 +1,6 @@
 """Module to test the illumina post processing service."""
 
-from cg.models.illumina_run_directory_data.illumina_run_directory import (
+from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
 )
 from cg.services.illumina_services.illumina_post_processing_service.illumina_post_processing_service import (

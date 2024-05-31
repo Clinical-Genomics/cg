@@ -6,7 +6,7 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_by_la
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.constants.demultiplexing import IndexSettings, SampleSheetBCLConvertSections
 from cg.models.demultiplex.run_parameters import RunParameters
-from cg.models.illumina_run_directory_data.illumina_run_directory import (
+from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
 )
 

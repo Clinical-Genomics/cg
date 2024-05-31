@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.models.illumina_run_directory_data.illumina_run_directory import (
+from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
 )
 

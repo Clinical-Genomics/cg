@@ -12,7 +12,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.illumina_run_directory_data.illumina_run_directory import (
+from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
 )
 
@@ -93,7 +93,7 @@ def test_demultiplex_all_novaseq(
     # WHEN running the demultiplex all command
     result: testing.Result = cli_runner.invoke(
         demultiplex_all,
-        ["--sequencing-runs-directory", str(demux_api.runs_dir), "--dry-run"],
+        ["--flow-cell-runs-directory", str(demux_api.runs_dir), "--dry-run"],
         obj=demultiplexing_context_for_demux,
     )
 

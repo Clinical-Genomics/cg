@@ -8,7 +8,7 @@ from pytest_mock import MockFixture
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.exc import HousekeeperFileMissingError
 from cg.models.cg_config import CGConfig
-from cg.models.illumina_run_directory_data.illumina_run_directory import (
+from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
 )
 from tests.store_helpers import StoreHelpers

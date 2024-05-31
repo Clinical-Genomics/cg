@@ -18,7 +18,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     delete_sequencing_data_from_housekeeper,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.illumina_run_directory_data.illumina_run_directory import (
+from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
 )
 from tests.store_helpers import StoreHelpers

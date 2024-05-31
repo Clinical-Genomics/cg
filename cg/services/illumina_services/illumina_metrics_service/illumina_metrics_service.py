@@ -4,7 +4,7 @@ from pathlib import Path
 from cg.constants import FlowCellStatus
 from cg.constants.demultiplexing import UNDETERMINED
 from cg.constants.devices import DeviceType
-from cg.models.illumina_run_directory_data.illumina_run_directory import (
+from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
 )
 from cg.services.illumina_services.illumina_metrics_service.bcl_convert_metrics_parser import (

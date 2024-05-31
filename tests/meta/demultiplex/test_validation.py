@@ -13,7 +13,7 @@ from cg.services.illumina_services.illumina_post_processing_service.validation i
     validate_flow_cell_has_fastq_files,
     validate_sample_sheet_exists,
 )
-from cg.models.illumina_run_directory_data.illumina_run_directory import (
+from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
 )
 

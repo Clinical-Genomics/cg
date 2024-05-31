@@ -20,7 +20,7 @@ from cg.services.illumina_services.illumina_post_processing_service.validation i
     is_flow_cell_ready_for_postprocessing,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.illumina_run_directory_data.illumina_run_directory import (
+from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
 )
 from cg.store.store import Store

@@ -27,7 +27,7 @@ from cg.meta.encryption.encryption import (
 )
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
-from cg.models.illumina_run_directory_data.illumina_run_directory import (
+from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
     get_sequencing_runs_from_path,
 )
@@ -210,9 +210,7 @@ def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
 @DRY_RUN
 @click.option("-s", "--sample-id", "object_type", flag_value="sample", type=str)
 @click.option("-c", "--case-id", "object_type", flag_value="case", type=str)
-@click.option(
-    "-f", "--flow-cell-id", "object_type", flag_value="illumina_run_directory_data", type=str
-)
+@click.option("-f", "--flow-cell-id", "object_type", flag_value="run_devices", type=str)
 @click.argument("identifier", type=str)
 @click.pass_context
 @click.pass_obj

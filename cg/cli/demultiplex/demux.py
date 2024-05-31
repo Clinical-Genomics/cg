@@ -24,7 +24,7 @@ from cg.meta.demultiplex.utils import (
     is_syncing_complete,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.illumina_run_directory_data.illumina_run_directory import (
+from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
 )
 
@@ -32,22 +32,22 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command(name="all")
-@click.option("--sequencing-runs-directory", type=click.Path(exists=True, file_okay=False))
+@click.option("--flow-cell-runs-directory", type=click.Path(exists=True, file_okay=False))
 @DRY_RUN
 @click.pass_obj
-def demultiplex_all(context: CGConfig, sequencing_runs_directory: click.Path, dry_run: bool):
+def demultiplex_all(context: CGConfig, flow_cell_runs_directory: click.Path, dry_run: bool):
     """Demultiplex all flow cells that are ready under the flow cells directory."""
     LOG.info("Running cg demultiplex all ...")
     sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
-    if sequencing_runs_directory:
-        sequencing_runs_directory: Path = Path(str(sequencing_runs_directory))
+    if flow_cell_runs_directory:
+        flow_cell_runs_directory: Path = Path(str(flow_cell_runs_directory))
     else:
-        sequencing_runs_directory: Path = Path(demultiplex_api.runs_dir)
+        flow_cell_runs_directory: Path = Path(demultiplex_api.runs_dir)
 
-    LOG.info(f"Search for flow cells ready to demultiplex in {sequencing_runs_directory}")
-    for sub_dir in sequencing_runs_directory.iterdir():
+    LOG.info(f"Search for flow cells ready to demultiplex in {flow_cell_runs_directory}")
+    for sub_dir in flow_cell_runs_directory.iterdir():
         if not sub_dir.is_dir():
             continue
         LOG.info(f"Found directory {sub_dir}")

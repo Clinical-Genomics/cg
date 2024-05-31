@@ -17,7 +17,7 @@ from cg.constants.tb import AnalysisTypes
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import WriteFile
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
-from cg.models.illumina_run_directory_data.illumina_run_directory import (
+from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
 )
 from cg.models.slurm.sbatch import SbatchDragen

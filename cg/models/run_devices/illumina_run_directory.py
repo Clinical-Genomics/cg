@@ -20,7 +20,7 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
-from cg.models.illumina_run_directory_data.utils import parse_date
+from cg.models.run_devices.utils import parse_date
 from cg.services.parse_run_completion_status_service.parse_run_completion_status_service import (
     ParseRunCompletionStatusService,
 )

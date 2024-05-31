@@ -16,7 +16,7 @@ from cg.meta.encryption.sbatch import (
     FLOW_CELL_ENCRYPT_ERROR,
 )
 from cg.meta.tar.tar import TarAPI
-from cg.models.illumina_run_directory_data.illumina_run_directory import (
+from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
 )
 from cg.models.slurm.sbatch import Sbatch

@@ -6,7 +6,7 @@ from _pytest.logging import LogCaptureFixture
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.exc import SampleSheetError
 from cg.models.cg_config import CGConfig
-from cg.models.illumina_run_directory_data.illumina_run_directory import (
+from cg.models.run_devices.illumina_run_directory import (
     IlluminaRunDirectory,
 )
 
