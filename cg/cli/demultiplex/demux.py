@@ -42,7 +42,7 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
     if flow_cells_directory:
         flow_cells_directory: Path = Path(str(flow_cells_directory))
     else:
-        flow_cells_directory: Path = Path(demultiplex_api.flow_cells_dir)
+        flow_cells_directory: Path = Path(demultiplex_api.sequencing_runs_dir)
 
     LOG.info(f"Search for flow cells ready to demultiplex in {flow_cells_directory}")
     for sub_dir in flow_cells_directory.iterdir():
@@ -54,7 +54,7 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
         except FlowCellError:
             continue
 
-        if not demultiplex_api.is_demultiplexing_possible(flow_cell=flow_cell):
+        if not demultiplex_api.is_demultiplexing_possible(sequencing_run=flow_cell):
             LOG.warning(f"Can not start demultiplexing for flow cell {flow_cell.id}!")
             continue
 
@@ -68,10 +68,10 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
 
         if not dry_run:
             demultiplex_api.prepare_output_directory(flow_cell)
-            slurm_job_id: int = demultiplex_api.start_demultiplexing(flow_cell=flow_cell)
+            slurm_job_id: int = demultiplex_api.start_demultiplexing(sequencing_run=flow_cell)
             tb_api: TrailblazerAPI = context.trailblazer_api
             demultiplex_api.add_to_trailblazer(
-                tb_api=tb_api, slurm_job_id=slurm_job_id, flow_cell=flow_cell
+                tb_api=tb_api, slurm_job_id=slurm_job_id, sequencing_run=flow_cell
             )
 
 
@@ -92,7 +92,7 @@ def demultiplex_flow_cell(
     LOG.info(f"Starting demultiplexing of flow cell {flow_cell_name}")
     sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
-    flow_cell_directory: Path = Path(context.demultiplex_api.flow_cells_dir, flow_cell_name)
+    flow_cell_directory: Path = Path(context.demultiplex_api.sequencing_runs_dir, flow_cell_name)
     demultiplex_api.set_dry_run(dry_run=dry_run)
     LOG.info(f"setting flow cell id to {flow_cell_name}")
     LOG.info(f"setting demultiplexed runs dir to {demultiplex_api.demultiplexed_runs_dir}")
@@ -102,7 +102,7 @@ def demultiplex_flow_cell(
     except FlowCellError as error:
         raise click.Abort from error
 
-    if not demultiplex_api.is_demultiplexing_possible(flow_cell=flow_cell):
+    if not demultiplex_api.is_demultiplexing_possible(sequencing_run=flow_cell):
         LOG.warning("Can not start demultiplexing!")
         return
 
@@ -116,10 +116,10 @@ def demultiplex_flow_cell(
 
     if not dry_run:
         demultiplex_api.prepare_output_directory(flow_cell)
-        slurm_job_id: int = demultiplex_api.start_demultiplexing(flow_cell=flow_cell)
+        slurm_job_id: int = demultiplex_api.start_demultiplexing(sequencing_run=flow_cell)
         tb_api: TrailblazerAPI = context.trailblazer_api
         demultiplex_api.add_to_trailblazer(
-            tb_api=tb_api, slurm_job_id=slurm_job_id, flow_cell=flow_cell
+            tb_api=tb_api, slurm_job_id=slurm_job_id, sequencing_run=flow_cell
         )
 
 
