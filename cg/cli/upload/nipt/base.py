@@ -18,7 +18,7 @@ from .statina import batch, statina
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=click_context_setting_max_content_width())
 def nipt():
     """Upload NIPT result files"""
     pass

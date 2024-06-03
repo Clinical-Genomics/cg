@@ -19,7 +19,7 @@ from cg.cli.workflow.taxprofiler.base import taxprofiler
 from cg.cli.workflow.tomte.base import tomte
 
 
-@click.group()
+@click.group(context_settings=click_context_setting_max_content_width())
 def workflow():
     """Workflows commands"""
 

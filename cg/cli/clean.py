@@ -50,7 +50,7 @@ FLOW_CELL_OUTPUT_HEADERS = [
 ]
 
 
-@click.group()
+@click.group(context_settings=click_context_setting_max_content_width())
 def clean():
     """Clean up processes."""
     return

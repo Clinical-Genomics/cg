@@ -8,7 +8,7 @@ from cg.cli.generate.report.base import (
 )
 
 
-@click.group()
+@click.group(context_settings=click_context_setting_max_content_width())
 def generate():
     """Generates and/or modifies files."""
 

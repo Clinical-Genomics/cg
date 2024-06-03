@@ -24,7 +24,7 @@ OPTION_CASES = click.option(
 )
 
 
-@click.group()
+@click.group(context_settings=click_context_setting_max_content_width())
 @click.pass_obj
 def fohm(context: CGConfig):
     pass

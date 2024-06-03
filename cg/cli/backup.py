@@ -37,7 +37,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=click_context_setting_max_content_width())
 @click.pass_obj
 def backup(context: CGConfig):
     """Backup utilities"""

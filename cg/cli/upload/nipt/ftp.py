@@ -12,7 +12,7 @@ from cg.models.cg_config import CGConfig
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=click_context_setting_max_content_width())
 def ftp():
     """Upload NIPT result files to ftp-server"""
     pass

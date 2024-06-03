@@ -22,7 +22,7 @@ from cg.models.cg_config import CGConfig
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=click_context_setting_max_content_width())
 @click.pass_obj
 def compress(context: CGConfig):
     """Compress files"""
@@ -50,7 +50,7 @@ clean.add_command(clean_fastq)
 clean.add_command(fix_spring)
 
 
-@click.group()
+@click.group(context_settings=click_context_setting_max_content_width())
 @click.pass_obj
 def decompress(context: CGConfig):
     """Decompress files"""

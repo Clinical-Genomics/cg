@@ -21,7 +21,7 @@ from .store import (
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=click_context_setting_max_content_width())
 @click.pass_obj
 def store(context: CGConfig):
     """Command for storing files."""

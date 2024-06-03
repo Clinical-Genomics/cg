@@ -7,7 +7,7 @@ from cg.meta.archive.archive import SpringArchiveAPI
 from cg.models.cg_config import CGConfig
 
 
-@click.group()
+@click.group(context_settings=click_context_setting_max_content_width())
 def archive():
     """Archive utilities."""
     pass

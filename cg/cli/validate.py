@@ -10,7 +10,7 @@ from cg.services.validate_file_transfer_service.validate_pacbio_file_transfer_se
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=click_context_setting_max_content_width())
 def validate():
     """Validation of processes in cg."""
 

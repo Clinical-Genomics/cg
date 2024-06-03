@@ -46,7 +46,7 @@ IGNORE_MISSING_BUNDLES = click.option(
 )
 
 
-@click.group()
+@click.group(context_settings=click_context_setting_max_content_width())
 def deliver():
     """Deliver files with CG."""
     LOG.info("Running CG deliver")
