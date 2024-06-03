@@ -31,6 +31,7 @@ from cg.cli.upload.scout import (
 )
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.cli.upload.validate import validate
+from cg.cli.utils import click_context_setting_max_content_width
 from cg.constants import Workflow
 from cg.exc import AnalysisAlreadyUploadedError
 from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
@@ -47,7 +48,9 @@ from cg.utils.click.EnumChoice import EnumChoice
 LOG = logging.getLogger(__name__)
 
 
-@click.group(invoke_without_command=True)
+@click.group(
+    invoke_without_command=True, context_settings=click_context_setting_max_content_width()
+)
 @click.option("-c", "--case", "case_id", help="Upload to all apps")
 @click.option(
     "-r",
