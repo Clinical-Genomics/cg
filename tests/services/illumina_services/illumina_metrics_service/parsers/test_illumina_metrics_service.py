@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 
 from cg.services.illumina_services.illumina_metrics_service.bcl_convert_metrics_parser import (

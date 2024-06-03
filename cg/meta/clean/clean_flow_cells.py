@@ -13,7 +13,7 @@ from cg.exc import (
     HousekeeperBundleVersionMissingError,
     HousekeeperFileMissingError,
 )
-from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.store.store import Store
 from cg.utils.files import remove_directory_and_contents

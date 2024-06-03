@@ -7,7 +7,7 @@ from psutil import Process
 from cg.cli.backup import backup_flow_cells, encrypt_flow_cells, fetch_flow_cell
 from cg.constants import EXIT_SUCCESS, FileExtensions, FlowCellStatus
 from cg.models.cg_config import CGConfig
-from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from tests.store_helpers import StoreHelpers
 
 

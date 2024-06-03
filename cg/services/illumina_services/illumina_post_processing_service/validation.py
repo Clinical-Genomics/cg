@@ -4,7 +4,7 @@ from pathlib import Path
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError, MissingFilesError
 from cg.meta.demultiplex.utils import get_sample_fastqs_from_flow_cell
-from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 LOG = logging.getLogger(__name__)
 

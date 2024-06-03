@@ -10,7 +10,7 @@ from cg.constants import SequencingFileTag
 from cg.constants.subject import Sex
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
-from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.store.models import Flowcell
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers

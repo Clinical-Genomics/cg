@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 # Canonical flow cell runs
 

@@ -30,7 +30,7 @@ from cg.meta.demultiplex.utils import (
     is_valid_sample_fastq_file,
     parse_manifest_file,
 )
-from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from tests.meta.demultiplex.conftest import get_all_files_in_directory_tree
 
 

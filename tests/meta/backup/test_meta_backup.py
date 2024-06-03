@@ -19,7 +19,7 @@ from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.models.cg_config import PDCArchivingDirectory
-from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from tests.mocks.hk_mock import MockFile
 
 
@@ -674,7 +674,7 @@ def test_create_copy_complete_file_exist(
     """Tests creating a copy complete file in the flow cell directory. There are two cases: when
     the file exists and when it does not exist."""
 
-    # GIVEN a flow cell that has been decrypted in devices directory
+    # GIVEN a flow cell that has been decrypted in run_devices directory
     flow_cell_dir: Path = novaseq_x_flow_cell.path
 
     # GIVEN the copy complete to be created
@@ -697,7 +697,7 @@ def test_create_copy_complete_file_does_not_exist(
     """Tests creating a copy complete file in the flow cell directory. There are two cases: when
     the file exists and when it does not exist."""
 
-    # GIVEN a flow cell that has been decrypted in devices directory
+    # GIVEN a flow cell that has been decrypted in run_devices directory
     flow_cell_dir: Path = novaseq_x_flow_cell.path
 
     # GIVEN the copy complete to be created

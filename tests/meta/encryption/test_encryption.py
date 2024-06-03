@@ -14,7 +14,7 @@ from cg.meta.encryption.encryption import (
     FlowCellEncryptionAPI,
     SpringEncryptionAPI,
 )
-from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 
 @mock.patch("cg.utils.Process")

@@ -13,7 +13,7 @@ from cg.services.illumina_services.illumina_post_processing_service.validation i
     validate_flow_cell_has_fastq_files,
     validate_sample_sheet_exists,
 )
-from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 
 def test_is_demultiplexing_complete_true(tmp_path: Path):

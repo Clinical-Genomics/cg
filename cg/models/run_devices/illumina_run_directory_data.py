@@ -20,7 +20,7 @@ from cg.models.demultiplex.run_parameters import (
     RunParametersNovaSeq6000,
     RunParametersNovaSeqX,
 )
-from cg.models.devices.utils import parse_date
+from cg.models.run_devices.utils import parse_date
 from cg.services.parse_run_completion_status_service.parse_run_completion_status_service import (
     ParseRunCompletionStatusService,
 )
@@ -46,7 +46,7 @@ class IlluminaRunDirectoryData:
         self._run_parameters: RunParameters | None = None
         self.run_date: datetime.datetime = datetime.datetime.now()
         self.machine_number: int = 0
-        self.base_name: str = EMPTY_STRING  # Base name is sequencing run-id + flow cell position
+        self.base_name: str = EMPTY_STRING  # Base name is flow cell-id + flow cell position
         self.id: str = EMPTY_STRING
         self.position: Literal["A", "B"] = "A"
         self.parse_sequencing_run_dir_name()

@@ -41,7 +41,7 @@ def test_set_flowcell_required(
 def test_set_flowcell_status(
     cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
 ):
-    """Test that the updated devices get the status we send in."""
+    """Test that the updated run_devices get the status we send in."""
     # GIVEN a database with a flow cell
     flow_cell_name = helpers.add_flow_cell(base_store).name
     status = FlowCellStatus.statuses()[2]

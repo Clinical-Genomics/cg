@@ -24,7 +24,7 @@ from cg.meta.demultiplex.utils import (
     is_syncing_complete,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 LOG = logging.getLogger(__name__)
 

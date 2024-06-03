@@ -6,7 +6,7 @@ from _pytest.logging import LogCaptureFixture
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.exc import SampleSheetError
 from cg.models.cg_config import CGConfig
-from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 
 def test_are_necessary_files_in_flow_cell_passes(
