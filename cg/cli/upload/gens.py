@@ -23,7 +23,7 @@ LOG = logging.getLogger(__name__)
 @ARGUMENT_CASE_ID
 @DRY_RUN
 @click.pass_obj
-def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool):
+def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool, re_upload : bool):
     """Upload data from an analysis to Gens."""
 
     click.echo(click.style("----------------- GENS -------------------"))
@@ -54,5 +54,6 @@ def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool):
                 case_id=case_id,
                 coverage_path=hk_coverage.full_path,
                 genome_build=GENOME_BUILD_37,
+                replace=re_upload,
                 sample_id=sample.internal_id,
             )

@@ -31,6 +31,7 @@ class GensAPI:
         case_id: str,
         coverage_path: str,
         genome_build: str,
+        replace: bool,
         sample_id: str,
     ) -> None:
         """Load Gens sample file paths into database."""
@@ -41,7 +42,10 @@ class GensAPI:
             "--coverage": coverage_path,
             "--case-id": case_id,
         }
-        load_call_params: list[str] = ["load", "sample"] + get_list_from_dictionary(load_params)
+        load_call_params: list[str] = ["load", "sample"]
+        if replace:
+            load_call_params.append("--force")
+        load_call_params += get_list_from_dictionary(load_params)
         self.process.run_command(parameters=load_call_params, dry_run=self.dry_run)
 
     @staticmethod
