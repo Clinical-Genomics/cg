@@ -239,7 +239,7 @@ def _get_samples(status_api: Store, object_type: str, identifier: str) -> list[S
     get_samples = {
         "sample": status_api.sample,
         "case": status_api.get_samples_by_case_id,
-        "devices": status_api.get_samples_from_flow_cell,
+        "flow_cell": status_api.get_samples_from_flow_cell,
     }
     samples: Sample | list[Sample] = get_samples[object_type](identifier)
     return samples if isinstance(samples, list) else [samples]
