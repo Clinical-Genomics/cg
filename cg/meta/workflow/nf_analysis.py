@@ -18,12 +18,7 @@ from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
-from cg.exc import (
-    AnalysisNotCompletedError,
-    CgError,
-    HousekeeperStoreError,
-    MetricsQCError,
-)
+from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.config import write_config_nextflow_style
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
@@ -768,7 +763,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Write deliverables file."""
 
         self.status_db.verify_case_exists(case_internal_id=case_id)
-        self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+        self.trailblazer_api.verify_latest_analysis_is_completed(case_id)
         if dry_run:
             LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
             return
@@ -786,7 +781,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
         try:
             self.status_db.verify_case_exists(case_internal_id=case_id)
-            self._verify_latest_analysis_is_completed(case_id)
+            self.trailblazer_api.verify_latest_analysis_is_completed(case_id)
             self.verify_deliverables_file_exists(case_id=case_id)
             self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run)
             self.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
@@ -799,11 +794,6 @@ class NfAnalysisAPI(AnalysisAPI):
             raise HousekeeperStoreError(
                 f"Could not store bundle in Housekeeper and StatusDB: {error}"
             )
-
-    def _verify_latest_analysis_is_completed(self, case_id: str) -> None:
-        """Raises an AnalysisNotCompletedError if the latest analysis for the case has not completed."""
-        if not self.trailblazer_api.is_latest_analysis_completed(case_id):
-            raise AnalysisNotCompletedError(f"The latest analysis for {case_id} has not completed.")
 
     def store(self, case_id: str, dry_run: bool):
         """Generate deliverable files for a case and store in Housekeeper if they
