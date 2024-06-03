@@ -5,6 +5,7 @@ import click
 
 from cg.constants.constants import DRY_RUN
 from cg.constants.nipt import Q30_THRESHOLD
+from cg.cli.utils import click_context_setting_max_content_width
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.nipt.nipt import NiptUploadAPI
 from cg.models.cg_config import CGConfig

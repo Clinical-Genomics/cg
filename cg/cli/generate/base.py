@@ -6,6 +6,7 @@ from cg.cli.generate.report.base import (
     generate_available_delivery_reports,
     generate_delivery_report,
 )
+from cg.cli.utils import click_context_setting_max_content_width
 
 
 @click.group(context_settings=click_context_setting_max_content_width())

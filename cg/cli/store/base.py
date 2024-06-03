@@ -6,6 +6,7 @@ import click
 
 from cg.apps.crunchy.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.cli.utils import click_context_setting_max_content_width
 from cg.meta.compress.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 

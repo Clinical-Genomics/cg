@@ -10,6 +10,7 @@ from cg.cli.delete.observations import (
     delete_available_observations,
     delete_observations,
 )
+from cg.cli.utils import click_context_setting_max_content_width
 
 LOG = logging.getLogger(__name__)
 

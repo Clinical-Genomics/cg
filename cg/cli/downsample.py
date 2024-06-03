@@ -8,6 +8,7 @@ import click
 
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.downsample.utils import store_downsampled_sample_bundle
+from cg.cli.utils import click_context_setting_max_content_width
 from cg.constants.constants import DRY_RUN
 from cg.models.cg_config import CGConfig
 

@@ -1,6 +1,8 @@
 import logging
 
 import click
+
+from cg.cli.utils import click_context_setting_max_content_width
 from cg.models.cg_config import CGConfig
 from cg.services.validate_file_transfer_service.validate_pacbio_file_transfer_service import (
     ValidatePacbioFileTransferService,

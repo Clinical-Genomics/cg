@@ -3,6 +3,7 @@ import logging
 import click
 
 from cg.constants.constants import DRY_RUN
+from cg.cli.utils import click_context_setting_max_content_width
 from cg.meta.upload.fohm.fohm import FOHMUploadAPI
 from cg.meta.upload.gisaid import GisaidAPI
 from cg.models.cg_config import CGConfig

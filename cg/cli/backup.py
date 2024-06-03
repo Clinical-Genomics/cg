@@ -34,6 +34,8 @@ from cg.models.flow_cell.flow_cell import (
 from cg.store.models import Flowcell, Sample
 from cg.store.store import Store
 
+from cg.cli.utils import click_context_setting_max_content_width
+
 LOG = logging.getLogger(__name__)
 
 

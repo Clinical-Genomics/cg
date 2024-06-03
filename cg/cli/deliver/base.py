@@ -8,6 +8,7 @@ import click
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.constants import DRY_RUN
+from cg.cli.utils import click_context_setting_max_content_width
 from cg.meta.deliver import DeliverAPI
 from cg.meta.deliver import DeliverTicketAPI
 from cg.meta.rsync.rsync_api import RsyncAPI

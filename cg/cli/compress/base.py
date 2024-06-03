@@ -13,6 +13,7 @@ from cg.cli.compress.fastq import (
     fastq_cmd,
     fix_spring,
 )
+from cg.cli.utils import click_context_setting_max_content_width
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.compress import CompressAPI

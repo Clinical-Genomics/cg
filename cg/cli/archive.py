@@ -5,6 +5,7 @@ from cg.constants.archiving import DEFAULT_SPRING_ARCHIVE_COUNT
 from cg.constants.constants import DRY_RUN
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.models.cg_config import CGConfig
+from cg.cli.utils import click_context_setting_max_content_width
 
 
 @click.group(context_settings=click_context_setting_max_content_width())
