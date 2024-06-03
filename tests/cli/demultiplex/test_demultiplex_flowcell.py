@@ -104,7 +104,7 @@ def test_demultiplex_all_novaseq(
     assert "Found directory" in caplog.text
 
     # THEN assert it found a flow cell that is ready for demultiplexing
-    assert f"Flow cell {flow_cell.id} is ready for downstream processing" in caplog.text
+    assert f"Sequencing run {flow_cell.id} is ready for downstream processing" in caplog.text
 
 
 def test_is_demultiplexing_complete(

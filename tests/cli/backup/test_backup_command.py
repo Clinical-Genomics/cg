@@ -173,7 +173,7 @@ def test_encrypt_flow_cells_when_sequencing_not_done(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN flow cells that are being sequenced
-    mocker.patch.object(IlluminaRunDirectoryData, "is_flow_cell_ready")
+    mocker.patch.object(IlluminaRunDirectoryData, "is_sequencing_run_ready")
     IlluminaRunDirectoryData.is_sequencing_run_ready.return_value = False
 
     # GIVEN a flow cells directory
@@ -201,7 +201,7 @@ def test_encrypt_flow_cell_when_encryption_already_started(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN flow cells that are ready
-    mocker.patch.object(IlluminaRunDirectoryData, "is_flow_cell_ready")
+    mocker.patch.object(IlluminaRunDirectoryData, "is_sequencing_run_ready")
     IlluminaRunDirectoryData.is_sequencing_run_ready.return_value = True
 
     # GIVEN a pending flag file
@@ -234,7 +234,7 @@ def test_encrypt_flow_cell_when_encryption_already_completed(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN flow cells that are ready
-    mocker.patch.object(IlluminaRunDirectoryData, "is_flow_cell_ready")
+    mocker.patch.object(IlluminaRunDirectoryData, "is_sequencing_run_ready")
     IlluminaRunDirectoryData.is_sequencing_run_ready.return_value = True
 
     # GIVEN a complete flag file

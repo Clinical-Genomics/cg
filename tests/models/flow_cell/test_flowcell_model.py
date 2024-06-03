@@ -87,7 +87,7 @@ def test_run_parameters_path_when_non_existing(tmp_flow_cell_without_run_paramet
     with pytest.raises(FlowCellError) as exc:
         # THEN a FlowCellError is raised
         flow_cell.run_parameters_path
-    assert "No run parameters file found in flow cell" in str(exc.value)
+    assert "No run parameters file found in sequencing run" in str(exc.value)
 
 
 @pytest.mark.parametrize(

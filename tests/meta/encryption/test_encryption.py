@@ -382,7 +382,7 @@ def test_is_encryption_possible(flow_cell_encryption_api: FlowCellEncryptionAPI,
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
-    mocker.patch.object(IlluminaRunDirectoryData, "is_flow_cell_ready")
+    mocker.patch.object(IlluminaRunDirectoryData, "is_sequencing_run_ready")
     IlluminaRunDirectoryData.is_sequencing_run_ready.return_value = True
 
     # WHEN checking if encryption is possible
@@ -400,7 +400,7 @@ def test_is_encryption_possible_when_sequencing_not_ready(
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is not ready
-    mocker.patch.object(IlluminaRunDirectoryData, "is_flow_cell_ready")
+    mocker.patch.object(IlluminaRunDirectoryData, "is_sequencing_run_ready")
     IlluminaRunDirectoryData.is_sequencing_run_ready.return_value = False
 
     # WHEN checking if encryption is possible
@@ -417,7 +417,7 @@ def test_is_encryption_possible_when_encryption_is_completed(
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
-    mocker.patch.object(IlluminaRunDirectoryData, "is_flow_cell_ready")
+    mocker.patch.object(IlluminaRunDirectoryData, "is_sequencing_run_ready")
     IlluminaRunDirectoryData.is_sequencing_run_ready.return_value = True
 
     # GIVEN that encryption is completed
@@ -441,7 +441,7 @@ def test_is_encryption_possible_when_encryption_is_pending(
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
-    mocker.patch.object(IlluminaRunDirectoryData, "is_flow_cell_ready")
+    mocker.patch.object(IlluminaRunDirectoryData, "is_sequencing_run_ready")
     IlluminaRunDirectoryData.is_sequencing_run_ready.return_value = True
 
     # GIVEN that encryption is pending
@@ -466,7 +466,7 @@ def test_encrypt_flow_cell(
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
-    mocker.patch.object(IlluminaRunDirectoryData, "is_flow_cell_ready")
+    mocker.patch.object(IlluminaRunDirectoryData, "is_sequencing_run_ready")
     IlluminaRunDirectoryData.is_sequencing_run_ready.return_value = True
 
     # WHEN encrypting flow cell
@@ -483,7 +483,7 @@ def test_start_encryption(
     # GIVEN a FlowCellEncryptionAPI
 
     # GIVEN that sequencing is ready
-    mocker.patch.object(IlluminaRunDirectoryData, "is_flow_cell_ready")
+    mocker.patch.object(IlluminaRunDirectoryData, "is_sequencing_run_ready")
     IlluminaRunDirectoryData.is_sequencing_run_ready.return_value = True
 
     # WHEN trying to start encrypting flow cell
