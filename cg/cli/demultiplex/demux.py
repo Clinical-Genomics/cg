@@ -34,7 +34,7 @@ LOG = logging.getLogger(__name__)
 @DRY_RUN
 @click.pass_obj
 def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run: bool):
-    """Demultiplex all flow cells that are ready under the flow cells directory."""
+    """Demultiplex all sequencing runs that are ready under the sequencing runs directory."""
     LOG.info("Running cg demultiplex all ...")
     sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
@@ -44,7 +44,7 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
     else:
         flow_cells_directory: Path = Path(demultiplex_api.sequencing_runs_dir)
 
-    LOG.info(f"Search for flow cells ready to demultiplex in {flow_cells_directory}")
+    LOG.info(f"Search for sequencing run ready to demultiplex in {flow_cells_directory}")
     for sub_dir in flow_cells_directory.iterdir():
         if not sub_dir.is_dir():
             continue
@@ -55,7 +55,7 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
             continue
 
         if not demultiplex_api.is_demultiplexing_possible(sequencing_run=sequencing_run):
-            LOG.warning(f"Can not start demultiplexing for flow cell {sequencing_run.id}!")
+            LOG.warning(f"Can not start demultiplexing for sequencing run {sequencing_run.id}!")
             continue
 
         try:
@@ -86,19 +86,19 @@ def demultiplex_flow_cell(
 ):
     """Demultiplex a flow cell using BCLConvert.
 
-    flow cell name is the flow cell run directory name, e.g. '230912_A00187_1009_AHK33MDRX3'
+    flow cell name is the sequencing run directory name, e.g. '230912_A00187_1009_AHK33MDRX3'
     """
 
-    LOG.info(f"Starting demultiplexing of flow cell {flow_cell_name}")
+    LOG.info(f"Starting demultiplexing of sequencing run {flow_cell_name}")
     sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
-    flow_cell_directory: Path = Path(context.demultiplex_api.sequencing_runs_dir, flow_cell_name)
+    sequencing_run_dir: Path = Path(context.demultiplex_api.sequencing_runs_dir, flow_cell_name)
     demultiplex_api.set_dry_run(dry_run=dry_run)
     LOG.info(f"setting flow cell id to {flow_cell_name}")
     LOG.info(f"setting demultiplexed runs dir to {demultiplex_api.demultiplexed_runs_dir}")
 
     try:
-        sequencing_run = IlluminaRunDirectoryData(flow_cell_directory)
+        sequencing_run = IlluminaRunDirectoryData(sequencing_run_dir)
     except FlowCellError as error:
         raise click.Abort from error
 
@@ -183,7 +183,7 @@ def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
     help="The path from where the syncing is done.",
 )
 def create_manifest_files(source_directory: str):
-    """Creates a file manifest for each flow cell in the source directory."""
+    """Creates a file manifest for each sequencing run in the source directory."""
     for source_sequencing_run in glob(f"{source_directory}/*"):
         if is_manifest_file_required(Path(source_sequencing_run)):
             create_manifest_file(Path(source_sequencing_run))
