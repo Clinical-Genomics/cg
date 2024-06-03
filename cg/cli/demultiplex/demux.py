@@ -50,28 +50,28 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
             continue
         LOG.info(f"Found directory {sub_dir}")
         try:
-            flow_cell = IlluminaRunDirectoryData(sequencing_run_path=sub_dir)
+            sequencing_run = IlluminaRunDirectoryData(sequencing_run_path=sub_dir)
         except FlowCellError:
             continue
 
-        if not demultiplex_api.is_demultiplexing_possible(sequencing_run=flow_cell):
-            LOG.warning(f"Can not start demultiplexing for flow cell {flow_cell.id}!")
+        if not demultiplex_api.is_demultiplexing_possible(sequencing_run=sequencing_run):
+            LOG.warning(f"Can not start demultiplexing for flow cell {sequencing_run.id}!")
             continue
 
         try:
-            sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
+            sample_sheet_api.validate_sample_sheet(sequencing_run.sample_sheet_path)
         except (SampleSheetError, ValidationError):
             LOG.warning(
-                f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}"
+                f"Malformed sample sheet. Run cg demultiplex samplesheet validate {sequencing_run.sample_sheet_path}"
             )
             continue
 
         if not dry_run:
-            demultiplex_api.prepare_output_directory(flow_cell)
-            slurm_job_id: int = demultiplex_api.start_demultiplexing(sequencing_run=flow_cell)
+            demultiplex_api.prepare_output_directory(sequencing_run)
+            slurm_job_id: int = demultiplex_api.start_demultiplexing(sequencing_run=sequencing_run)
             tb_api: TrailblazerAPI = context.trailblazer_api
             demultiplex_api.add_to_trailblazer(
-                tb_api=tb_api, slurm_job_id=slurm_job_id, sequencing_run=flow_cell
+                tb_api=tb_api, slurm_job_id=slurm_job_id, sequencing_run=sequencing_run
             )
 
 
@@ -98,28 +98,28 @@ def demultiplex_flow_cell(
     LOG.info(f"setting demultiplexed runs dir to {demultiplex_api.demultiplexed_runs_dir}")
 
     try:
-        flow_cell = IlluminaRunDirectoryData(flow_cell_directory)
+        sequencing_run = IlluminaRunDirectoryData(flow_cell_directory)
     except FlowCellError as error:
         raise click.Abort from error
 
-    if not demultiplex_api.is_demultiplexing_possible(sequencing_run=flow_cell):
+    if not demultiplex_api.is_demultiplexing_possible(sequencing_run=sequencing_run):
         LOG.warning("Can not start demultiplexing!")
         return
 
     try:
-        sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
+        sample_sheet_api.validate_sample_sheet(sequencing_run.sample_sheet_path)
     except (SampleSheetError, ValidationError) as error:
         LOG.warning(
-            f"Malformed sample sheet. Run cg demultiplex samplesheet validate {flow_cell.sample_sheet_path}"
+            f"Malformed sample sheet. Run cg demultiplex samplesheet validate {sequencing_run.sample_sheet_path}"
         )
         raise click.Abort from error
 
     if not dry_run:
-        demultiplex_api.prepare_output_directory(flow_cell)
-        slurm_job_id: int = demultiplex_api.start_demultiplexing(sequencing_run=flow_cell)
+        demultiplex_api.prepare_output_directory(sequencing_run)
+        slurm_job_id: int = demultiplex_api.start_demultiplexing(sequencing_run=sequencing_run)
         tb_api: TrailblazerAPI = context.trailblazer_api
         demultiplex_api.add_to_trailblazer(
-            tb_api=tb_api, slurm_job_id=slurm_job_id, sequencing_run=flow_cell
+            tb_api=tb_api, slurm_job_id=slurm_job_id, sequencing_run=sequencing_run
         )
 
 
@@ -127,24 +127,26 @@ def demultiplex_flow_cell(
 @click.pass_obj
 def copy_novaseqx_flow_cells(context: CGConfig):
     """Copy NovaSeq X flow cells ready for post-processing to demultiplexed runs."""
-    flow_cells_dir: Path = Path(context.illumina_flow_cells_directory)
+    sequencing_runs_dir: Path = Path(context.illumina_flow_cells_directory)
     demultiplexed_runs_dir: Path = Path(context.illumina_demultiplexed_runs_directory)
 
-    for flow_cell_dir in flow_cells_dir.iterdir():
+    for sequencing_run_dir in sequencing_runs_dir.iterdir():
         if is_ready_for_post_processing(
-            flow_cell_dir=flow_cell_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
+            flow_cell_dir=sequencing_run_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
         ):
-            LOG.info(f"Copying {flow_cell_dir.name} to {demultiplexed_runs_dir}")
+            LOG.info(f"Copying {sequencing_run_dir.name} to {demultiplexed_runs_dir}")
             hardlink_flow_cell_analysis_data(
-                flow_cell_dir=flow_cell_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
+                flow_cell_dir=sequencing_run_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
             )
             demultiplexed_runs_flow_cell_dir: Path = Path(
-                demultiplexed_runs_dir, flow_cell_dir.name
+                demultiplexed_runs_dir, sequencing_run_dir.name
             )
             mark_as_demultiplexed(demultiplexed_runs_flow_cell_dir)
-            mark_flow_cell_as_queued_for_post_processing(flow_cell_dir)
+            mark_flow_cell_as_queued_for_post_processing(sequencing_run_dir)
         else:
-            LOG.info(f"Flow cell {flow_cell_dir.name} is not ready for post processing, skipping.")
+            LOG.info(
+                f"Flow cell {sequencing_run_dir.name} is not ready for post processing, skipping."
+            )
 
 
 @click.command(name="confirm-flow-cell-sync")
@@ -157,19 +159,19 @@ def copy_novaseqx_flow_cells(context: CGConfig):
 def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
     """Checks if all relevant files for the demultiplexing have been synced.
     If so it creates a CopyComplete.txt file to show that that is the case."""
-    target_flow_cells_directory = Path(context.illumina_flow_cells_directory)
-    for source_flow_cell in Path(source_directory).iterdir():
-        target_flow_cell = Path(target_flow_cells_directory, source_flow_cell.name)
-        if is_flow_cell_sync_confirmed(target_flow_cell):
-            LOG.debug(f"Flow cell {source_flow_cell} has already been confirmed, skipping.")
+    target_sequencing_runs_directory = Path(context.illumina_flow_cells_directory)
+    for source_sequencing_run in Path(source_directory).iterdir():
+        target_sequencig_run = Path(target_sequencing_runs_directory, source_sequencing_run.name)
+        if is_flow_cell_sync_confirmed(target_sequencig_run):
+            LOG.debug(f"Flow cell {source_sequencing_run} has already been confirmed, skipping.")
             continue
         if is_syncing_complete(
-            source_directory=source_flow_cell,
-            target_directory=Path(target_flow_cells_directory, source_flow_cell.name),
+            source_directory=source_sequencing_run,
+            target_directory=Path(target_sequencing_runs_directory, source_sequencing_run.name),
         ):
             Path(
-                target_flow_cells_directory,
-                source_flow_cell.name,
+                target_sequencing_runs_directory,
+                source_sequencing_run.name,
                 DemultiplexingDirsAndFiles.COPY_COMPLETE,
             ).touch()
 
@@ -182,6 +184,6 @@ def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
 )
 def create_manifest_files(source_directory: str):
     """Creates a file manifest for each flow cell in the source directory."""
-    for source_flow_cell in glob(f"{source_directory}/*"):
-        if is_manifest_file_required(Path(source_flow_cell)):
-            create_manifest_file(Path(source_flow_cell))
+    for source_sequencing_run in glob(f"{source_directory}/*"):
+        if is_manifest_file_required(Path(source_sequencing_run)):
+            create_manifest_file(Path(source_sequencing_run))
