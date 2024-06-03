@@ -7,7 +7,7 @@ import logging
 from cg.constants import FlowCellStatus
 from cg.meta.demultiplex.combine_sequencing_metrics import combine_mapped_metrics_with_undetermined
 from cg.meta.demultiplex.utils import get_q30_threshold
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_service import (
     IlluminaMetricsService,
 )
@@ -19,7 +19,7 @@ LOG = logging.getLogger(__name__)
 
 
 def store_flow_cell_data_in_status_db(
-    parsed_flow_cell: FlowCellDirectoryData,
+    parsed_flow_cell: IlluminaRunDirectoryData,
     store: Store,
 ) -> None:
     """
@@ -43,7 +43,9 @@ def store_flow_cell_data_in_status_db(
     store.session.commit()
 
 
-def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, store: Store) -> None:
+def store_sequencing_metrics_in_status_db(
+    flow_cell: IlluminaRunDirectoryData, store: Store
+) -> None:
     metrics_service = IlluminaMetricsService()
     mapped_metrics: list[SampleLaneSequencingMetrics] = (
         metrics_service.create_sample_lane_sequencing_metrics_for_flow_cell(
@@ -103,7 +105,7 @@ def metric_exists_in_status_db(metric: SampleLaneSequencingMetrics, store: Store
     return bool(existing_metrics_entry)
 
 
-def store_sample_data_in_status_db(flow_cell: FlowCellDirectoryData, store: Store) -> None:
+def store_sample_data_in_status_db(flow_cell: IlluminaRunDirectoryData, store: Store) -> None:
     """Update samples on the flow cell with read counts and sequencing date."""
     q30_threshold: int = get_q30_threshold(flow_cell.sequencer_type)
     sample_internal_ids: list[str] = flow_cell.sample_sheet.get_sample_ids()

@@ -8,7 +8,7 @@ from pytest_mock import MockFixture
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.exc import HousekeeperFileMissingError
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from tests.store_helpers import StoreHelpers
 
 GET_FLOW_CELL_SAMPLES: str = "cg.apps.demultiplex.sample_sheet.api.get_flow_cell_samples"
@@ -28,7 +28,7 @@ def test_get_create_sample_sheet_hk_has_bcl2fastq_sample_sheet(
     hk_api = sample_sheet_context_broken_flow_cells.housekeeper_api
 
     # GIVEN a a flow cell with a BCL2FASTQ sample sheet going to be updated to BCLConvert
-    flow_cell = FlowCellDirectoryData(tmp_flow_cell_with_bcl2fastq_sample_sheet)
+    flow_cell = IlluminaRunDirectoryData(tmp_flow_cell_with_bcl2fastq_sample_sheet)
 
     # GIVEN that the sample sheet is in Housekeeper
     helpers.ensure_hk_bundle(store=hk_api, bundle_data=sample_sheet_bcl2fastq_bundle_data)
@@ -66,7 +66,7 @@ def test_get_create_sample_sheet_flow_cell_has_bcl2fastq_sample_sheet(
     hk_api = sample_sheet_context_broken_flow_cells.housekeeper_api
 
     # GIVEN a a flow cell with a BCL2FASTQ sample sheet going to be updated to BCLConvert
-    flow_cell = FlowCellDirectoryData(tmp_flow_cell_with_bcl2fastq_sample_sheet)
+    flow_cell = IlluminaRunDirectoryData(tmp_flow_cell_with_bcl2fastq_sample_sheet)
 
     # GIVEN that the sample sheet is not in Housekeeper
     with pytest.raises(HousekeeperFileMissingError):

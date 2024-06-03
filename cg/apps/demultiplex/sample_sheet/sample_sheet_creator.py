@@ -6,7 +6,7 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_samples_by_la
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.constants.demultiplexing import IndexSettings, SampleSheetBCLConvertSections
 from cg.models.demultiplex.run_parameters import RunParameters
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 LOG = logging.getLogger(__name__)
 
@@ -16,10 +16,10 @@ class SampleSheetCreator:
 
     def __init__(
         self,
-        flow_cell: FlowCellDirectoryData,
+        flow_cell: IlluminaRunDirectoryData,
         lims_samples: list[FlowCellSample],
     ):
-        self.flow_cell: FlowCellDirectoryData = flow_cell
+        self.flow_cell: IlluminaRunDirectoryData = flow_cell
         self.flow_cell_id: str = flow_cell.id
         self.lims_samples: list[FlowCellSample] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters

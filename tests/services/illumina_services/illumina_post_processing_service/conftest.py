@@ -6,7 +6,7 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.devices import DeviceType
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina_services.illumina_post_processing_service.illumina_post_processing_service import (
     IlluminaPostProcessingService,
 )
@@ -31,7 +31,9 @@ def illumina_post_postprocessing_service(
 
 
 @pytest.fixture
-def illumina_flow_cell(novaseq_x_demux_runs_flow_cell: FlowCellDirectoryData) -> IlluminaFlowCell:
+def illumina_flow_cell(
+    novaseq_x_demux_runs_flow_cell: IlluminaRunDirectoryData,
+) -> IlluminaFlowCell:
     """Return an Illumina flow cell."""
     return IlluminaFlowCell(
         internal_id=novaseq_x_demux_runs_flow_cell.id,

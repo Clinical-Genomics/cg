@@ -24,7 +24,7 @@ from cg.meta.demultiplex.utils import (
     is_syncing_complete,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 LOG = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
             continue
         LOG.info(f"Found directory {sub_dir}")
         try:
-            flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir)
+            flow_cell = IlluminaRunDirectoryData(sequencing_run_path=sub_dir)
         except FlowCellError:
             continue
 
@@ -98,7 +98,7 @@ def demultiplex_flow_cell(
     LOG.info(f"setting demultiplexed runs dir to {demultiplex_api.demultiplexed_runs_dir}")
 
     try:
-        flow_cell = FlowCellDirectoryData(flow_cell_directory)
+        flow_cell = IlluminaRunDirectoryData(flow_cell_directory)
     except FlowCellError as error:
         raise click.Abort from error
 

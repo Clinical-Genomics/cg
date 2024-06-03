@@ -50,7 +50,7 @@ from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
@@ -1257,7 +1257,7 @@ def store_with_demultiplexed_samples(
 def updated_store_with_demultiplexed_samples(
     store: Store,
     helpers: StoreHelpers,
-    seven_canonical_flow_cells: list[FlowCellDirectoryData],
+    seven_canonical_flow_cells: list[IlluminaRunDirectoryData],
     seven_canonical_flow_cells_selected_sample_ids: list[list[str]],
 ) -> Store:
     """Return a store with the 7 canonical flow cells with samples added to store."""
@@ -3805,8 +3805,8 @@ def flow_cell_encryption_api(
         binary_path=cg_context.encryption.binary_path,
         encryption_dir=Path(cg_context.backup.pdc_archiving_directory.current),
         dry_run=True,
-        flow_cell=FlowCellDirectoryData(
-            flow_cell_path=Path(cg_context.illumina_flow_cells_directory, flow_cell_full_name)
+        flow_cell=IlluminaRunDirectoryData(
+            sequencing_run_path=Path(cg_context.illumina_flow_cells_directory, flow_cell_full_name)
         ),
         pigz_binary_path=cg_context.pigz.binary_path,
         slurm_api=SlurmAPI(),

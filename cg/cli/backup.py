@@ -27,9 +27,9 @@ from cg.meta.encryption.encryption import (
 )
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import (
-    FlowCellDirectoryData,
-    get_flow_cells_from_path,
+from cg.models.devices.illumina_run_directory_data import (
+    IlluminaRunDirectoryData,
+    get_sequencing_runs_from_path,
 )
 from cg.store.models import Flowcell, Sample
 from cg.store.store import Store
@@ -52,8 +52,8 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
     pdc_api = context.pdc_api
     pdc_api.dry_run = dry_run
     status_db: Store = context.status_db
-    flow_cells: list[FlowCellDirectoryData] = get_flow_cells_from_path(
-        flow_cells_dir=Path(context.illumina_flow_cells_directory)
+    flow_cells: list[IlluminaRunDirectoryData] = get_sequencing_runs_from_path(
+        sequencing_run_dir=Path(context.illumina_flow_cells_directory)
     )
     for flow_cell in flow_cells:
         db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell.id)
@@ -88,8 +88,8 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
 def encrypt_flow_cells(context: CGConfig, dry_run: bool):
     """Encrypt flow cells."""
     status_db: Store = context.status_db
-    flow_cells: list[FlowCellDirectoryData] = get_flow_cells_from_path(
-        flow_cells_dir=Path(context.illumina_flow_cells_directory)
+    flow_cells: list[IlluminaRunDirectoryData] = get_sequencing_runs_from_path(
+        sequencing_run_dir=Path(context.illumina_flow_cells_directory)
     )
     for flow_cell in flow_cells:
         db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell.id)
@@ -206,7 +206,7 @@ def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
 @DRY_RUN
 @click.option("-s", "--sample-id", "object_type", flag_value="sample", type=str)
 @click.option("-c", "--case-id", "object_type", flag_value="case", type=str)
-@click.option("-f", "--flow-cell-id", "object_type", flag_value="flow_cell", type=str)
+@click.option("-f", "--flow-cell-id", "object_type", flag_value="devices", type=str)
 @click.argument("identifier", type=str)
 @click.pass_context
 @click.pass_obj
@@ -239,7 +239,7 @@ def _get_samples(status_api: Store, object_type: str, identifier: str) -> list[S
     get_samples = {
         "sample": status_api.sample,
         "case": status_api.get_samples_by_case_id,
-        "flow_cell": status_api.get_samples_from_flow_cell,
+        "devices": status_api.get_samples_from_flow_cell,
     }
     samples: Sample | list[Sample] = get_samples[object_type](identifier)
     return samples if isinstance(samples, list) else [samples]
