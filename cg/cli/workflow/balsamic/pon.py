@@ -4,6 +4,7 @@ import logging
 
 import click
 
+from cg.cli.utils import click_context_setting_max_content_width
 from cg.cli.workflow.balsamic.base import config_case, run, start
 from cg.cli.workflow.commands import link, resolve_compression
 from cg.meta.workflow.balsamic_pon import BalsamicPonAnalysisAPI
@@ -11,7 +12,11 @@ from cg.meta.workflow.balsamic_pon import BalsamicPonAnalysisAPI
 LOG = logging.getLogger(__name__)
 
 
-@click.group("balsamic-pon", invoke_without_command=True)
+@click.group(
+    "balsamic-pon",
+    invoke_without_command=True,
+    context_settings=click_context_setting_max_content_width(),
+)
 @click.pass_context
 def balsamic_pon(context: click.Context):
     """Cancer PON analysis workflow"""
