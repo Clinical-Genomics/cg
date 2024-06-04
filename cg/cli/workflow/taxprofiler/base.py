@@ -4,6 +4,7 @@ import logging
 
 import click
 
+from cg.cli.utils import click_context_setting_max_content_width
 from cg.cli.workflow.commands import resolve_compression
 from cg.cli.workflow.nf_analysis import (
     config_case,
@@ -23,7 +24,9 @@ from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 LOG = logging.getLogger(__name__)
 
 
-@click.group(invoke_without_command=True)
+@click.group(
+    invoke_without_command=True, context_settings=click_context_setting_max_content_width()
+)
 @click.pass_context
 def taxprofiler(context: click.Context) -> None:
     """nf-core/taxprofiler analysis workflow."""

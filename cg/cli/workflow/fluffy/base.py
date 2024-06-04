@@ -2,6 +2,7 @@ import logging
 
 import click
 
+from cg.cli.utils import click_context_setting_max_content_width
 from cg.cli.workflow.commands import link, resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN
@@ -16,7 +17,9 @@ OPTION_EXTERNAL_REF = click.option("-e", "--external-ref", is_flag=True)
 LOG = logging.getLogger(__name__)
 
 
-@click.group(invoke_without_command=True)
+@click.group(
+    invoke_without_command=True, context_settings=click_context_setting_max_content_width()
+)
 @click.pass_context
 def fluffy(context: click.Context):
     """

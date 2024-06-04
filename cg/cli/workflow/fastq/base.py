@@ -2,6 +2,7 @@ import logging
 
 import click
 
+from cg.cli.utils import click_context_setting_max_content_width
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.fastq.fastq_service import FastqService
 from cg.constants.constants import DRY_RUN, Workflow
@@ -12,7 +13,9 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-@click.group(invoke_without_command=True)
+@click.group(
+    invoke_without_command=True, context_settings=click_context_setting_max_content_width()
+)
 @click.pass_context
 def fastq(context: click.Context):
     """Function for storing fastq-cases"""
