@@ -13,7 +13,7 @@ from sqlalchemy.orm import DeclarativeBase
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "dd2000bcc7ca"
+revision = "ec2db27c06e3"
 down_revision = "18e3b2aba252"
 branch_labels = None
 depends_on = None
