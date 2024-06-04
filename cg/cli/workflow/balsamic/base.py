@@ -6,6 +6,7 @@ import click
 from pydantic.v1 import ValidationError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.cli.utils import click_context_setting_max_content_width
 from cg.cli.workflow.balsamic.options import (
     OPTION_CACHE_VERSION,
     OPTION_GENDER,
@@ -28,7 +29,9 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-@click.group(invoke_without_command=True)
+@click.group(
+    invoke_without_command=True, context_settings=click_context_setting_max_content_width()
+)
 @click.pass_context
 def balsamic(context: click.Context):
     """Cancer analysis workflow"""
