@@ -12,7 +12,7 @@ from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
 )
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 
 def test_demultiplex_dragen_flowcell(
@@ -26,7 +26,7 @@ def test_demultiplex_dragen_flowcell(
 
     # GIVEN that all files are present for Dragen demultiplexing
 
-    flow_cell = FlowCellDirectoryData(tmp_flow_cell_directory_bcl_convert)
+    flow_cell = IlluminaRunDirectoryData(tmp_flow_cell_directory_bcl_convert)
     add_and_include_sample_sheet_path_to_housekeeper(
         flow_cell_directory=tmp_flow_cell_directory_bcl_convert,
         flow_cell_name=flow_cell.id,
@@ -80,7 +80,9 @@ def test_demultiplex_all_novaseq(
 
     # GIVEN sequenced flow cells with their sample sheet in Housekeeper
     for flow_cell_dir in tmp_illumina_flow_cells_demux_all_directory.iterdir():
-        flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=flow_cell_dir)
+        flow_cell: IlluminaRunDirectoryData = IlluminaRunDirectoryData(
+            sequencing_run_path=flow_cell_dir
+        )
         add_and_include_sample_sheet_path_to_housekeeper(
             flow_cell_directory=flow_cell_dir,
             flow_cell_name=flow_cell.id,
@@ -102,20 +104,38 @@ def test_demultiplex_all_novaseq(
     assert "Found directory" in caplog.text
 
     # THEN assert it found a flow cell that is ready for demultiplexing
-    assert f"Flow cell {flow_cell.id} is ready for downstream processing" in caplog.text
+    assert f"Sequencing run {flow_cell.id} is ready for downstream processing" in caplog.text
 
 
-def test_is_demultiplexing_complete(tmp_novaseq_6000_pre_1_5_kits_flow_cell_path: Path):
+def test_is_demultiplexing_complete(
+    hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet: IlluminaRunDirectoryData,
+):
     """Tests the is_demultiplexing_complete property of FlowCellDirectoryData."""
 
-    # GIVEN a demultiplexing directory with no demuxcomplete.txt file
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_path=tmp_novaseq_6000_pre_1_5_kits_flow_cell_path
-    )
-    assert not flow_cell.is_demultiplexing_complete
+    # GIVEN a demultiplexing directory with a demuxcomplete.txt file
+    assert Path(
+        hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet.path,
+        DemultiplexingDirsAndFiles.DEMUX_COMPLETE,
+    ).exists()
 
-    # WHEN creating the demuxcomplete.txt file
-    Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
+    # WHEN checking if the demultiplexing is complete
 
     # THEN the property should return true
-    assert flow_cell.is_demultiplexing_complete
+    assert hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet.is_demultiplexing_complete
+
+
+def test_is_demultiplexing_not_complete(
+    hiseq_2500_dual_index_demux_runs_flow_cell: IlluminaRunDirectoryData,
+):
+    """Tests the is_demultiplexing_complete property of FlowCellDirectoryData."""
+
+    # GIVEN a demultiplexing directory with a demuxcomplete.txt file
+    assert not Path(
+        hiseq_2500_dual_index_demux_runs_flow_cell.path,
+        DemultiplexingDirsAndFiles.DEMUX_COMPLETE,
+    ).exists()
+
+    # WHEN checking if the demultiplexing is complete
+
+    # THEN the property should return true
+    assert not hiseq_2500_dual_index_demux_runs_flow_cell.is_demultiplexing_complete

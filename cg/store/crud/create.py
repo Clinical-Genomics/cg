@@ -3,10 +3,16 @@ from datetime import datetime
 
 import petname
 from sqlalchemy import Insert
+from sqlalchemy.orm import Session
 
 from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.models.orders.order import OrderIn
+from cg.services.illumina_services.illumina_metrics_service.models import (
+    IlluminaFlowCellDTO,
+    IlluminaSequencingRunDTO,
+    IlluminaSampleSequencingMetricsDTO,
+)
 from cg.store.base import BaseHandler
 from cg.store.database import get_session
 from cg.store.models import (
@@ -31,6 +37,8 @@ from cg.store.models import (
     User,
     order_case,
     IlluminaFlowCell,
+    IlluminaSequencingRun,
+    IlluminaSampleSequencingMetrics,
 )
 
 LOG = logging.getLogger(__name__)
@@ -405,7 +413,7 @@ class CreateHandler(BaseHandler):
             ticket_id=order_data.ticket,
             workflow=workflow,
         )
-        session = get_session()
+        session: Session = get_session()
         session.add(order)
         session.commit()
         return order
@@ -413,15 +421,77 @@ class CreateHandler(BaseHandler):
     @staticmethod
     def link_case_to_order(order_id: int, case_id: int):
         insert_statement: Insert = order_case.insert().values(order_id=order_id, case_id=case_id)
-        session = get_session()
+        session: Session = get_session()
         session.execute(insert_statement)
         session.commit()
 
-    def add_illumina_flow_cell(self, flow_cell: IlluminaFlowCell) -> IlluminaFlowCell:
+    def add_illumina_flow_cell(self, flow_cell_dto: IlluminaFlowCellDTO) -> IlluminaFlowCell:
         """Add a new Illumina flow cell to the status database as a pending transaction."""
-        if self.get_illumina_flow_cell_by_internal_id(flow_cell.internal_id):
-            raise ValueError(f"Flow cell with {flow_cell.id} already exists.")
-        session = get_session()
-        session.add(flow_cell)
-        LOG.debug(f"Flow cell added to status db: {flow_cell.id}.")
-        return flow_cell
+        if self.get_illumina_flow_cell_by_internal_id(flow_cell_dto.internal_id):
+            raise ValueError(f"Flow cell with {flow_cell_dto.internal_id} already exists.")
+        new_flow_cell = IlluminaFlowCell(
+            internal_id=flow_cell_dto.internal_id,
+            type=flow_cell_dto.type,
+            model=flow_cell_dto.model,
+        )
+        self.session.add(new_flow_cell)
+        LOG.debug(f"Flow cell added to status db: {new_flow_cell.id}.")
+        return new_flow_cell
+
+    def add_illumina_sequencing_run(
+        self, sequencing_run_dto: IlluminaSequencingRunDTO, flow_cell: IlluminaFlowCell
+    ) -> IlluminaSequencingRun:
+        """Add a new Illumina flow cell to the status database as a pending transaction."""
+        new_sequencing_run = IlluminaSequencingRun(
+            type=sequencing_run_dto.type,
+            device=flow_cell,
+            sequencer_type=sequencing_run_dto.sequencer_type,
+            sequencer_name=sequencing_run_dto.sequencer_name,
+            data_availability=sequencing_run_dto.data_availability,
+            archived_at=sequencing_run_dto.archived_at,
+            has_backup=sequencing_run_dto.has_backup,
+            total_reads=sequencing_run_dto.total_reads,
+            total_undetermined_reads=sequencing_run_dto.total_undetermined_reads,
+            percent_undetermined_reads=sequencing_run_dto.percent_undetermined_reads,
+            percent_q30=sequencing_run_dto.percent_q30,
+            mean_quality_score=sequencing_run_dto.mean_quality_score,
+            total_yield=sequencing_run_dto.total_yield,
+            yield_q30=sequencing_run_dto.yield_q30,
+            cycles=sequencing_run_dto.cycles,
+            demultiplexing_software=sequencing_run_dto.demultiplexing_software,
+            demultiplexing_software_version=sequencing_run_dto.demultiplexing_software_version,
+            sequencing_started_at=sequencing_run_dto.sequencing_started_at,
+            sequencing_completed_at=sequencing_run_dto.sequencing_completed_at,
+            demultiplexing_started_at=sequencing_run_dto.demultiplexing_started_at,
+            demultiplexing_completed_at=sequencing_run_dto.demultiplexing_completed_at,
+        )
+        self.session.add(new_sequencing_run)
+        LOG.debug(f"Sequencing run added to status db: {new_sequencing_run.id}.")
+        return new_sequencing_run
+
+    def add_illumina_sample_metrics(
+        self,
+        sample_metrics_dto: list[IlluminaSampleSequencingMetricsDTO],
+        sequencing_run: IlluminaSequencingRun,
+    ) -> list[IlluminaSampleSequencingMetrics]:
+        """Add new IlluminaSampleSequencingMetrics as a pending transaction."""
+        new_sample_metrics: list[IlluminaSampleSequencingMetrics] = []
+        for sample_metric in sample_metrics_dto:
+            sample: Sample = self.get_sample_by_internal_id(sample_metric.sample_id)
+            new_sample_metric = IlluminaSampleSequencingMetrics(
+                sample=sample,
+                instrument_run_id=sequencing_run.id,
+                instrument_run=sequencing_run,
+                type=sample_metric.type,
+                flow_cell_lane=sample_metric.flow_cell_lane,
+                total_reads_in_lane=sample_metric.total_reads_in_lane,
+                base_passing_q30_percent=sample_metric.base_passing_q30_percent,
+                base_mean_quality_score=sample_metric.base_mean_quality_score,
+                yield_=sample_metric.yield_,
+                yield_q30=sample_metric.yield_q30,
+                created_at=sample_metric.created_at,
+            )
+            new_sample_metrics.append(new_sample_metric)
+        self.session.add_all(new_sample_metrics)
+        LOG.debug("Sample metrics added to status db.")
+        return new_sample_metrics
