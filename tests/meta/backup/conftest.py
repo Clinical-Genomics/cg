@@ -9,8 +9,7 @@ from cg.meta.backup.backup import BackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI
 from cg.meta.tar.tar import TarAPI
-from cg.models.cg_config import PDCArchivingDirectory
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.store.store import Store
 
 
@@ -94,7 +93,7 @@ def backup_file_path() -> str:
 @pytest.fixture
 def archived_flow_cell() -> Path:
     """Path of archived flow cell"""
-    return Path("/path/to/archived/flow_cell.tar.gz.gpg")
+    return Path("/path/to/archived/run_devices.tar.gz.gpg")
 
 
 @pytest.fixture

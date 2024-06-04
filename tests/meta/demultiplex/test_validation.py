@@ -5,7 +5,8 @@ import pytest
 from cg.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError, MissingFilesError
-from cg.services.illumina_post_processing_service.validation import (
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.services.illumina_services.illumina_post_processing_service.validation import (
     is_demultiplexing_complete,
     is_flow_cell_ready_for_delivery,
     validate_demultiplexing_complete,
@@ -13,7 +14,6 @@ from cg.services.illumina_post_processing_service.validation import (
     validate_flow_cell_has_fastq_files,
     validate_sample_sheet_exists,
 )
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
 
 
 def test_is_demultiplexing_complete_true(tmp_path: Path):
@@ -60,7 +60,7 @@ def test_is_flow_cell_ready_for_delivery_false(tmp_path: Path):
 
 def test_validate_sample_sheet_exists_raises_error(hiseq_2500_custom_index_flow_cell_dir: Path):
     # GIVEN a flow cell without a sample sheet in housekeeper
-    flow_cell = FlowCellDirectoryData(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
+    flow_cell = IlluminaRunDirectoryData(sequencing_run_path=hiseq_2500_custom_index_flow_cell_dir)
     flow_cell._sample_sheet_path_hk = None
     # WHEN validating the existence of the sample sheet
     # THEN it should raise a FlowCellError
@@ -71,7 +71,7 @@ def test_validate_sample_sheet_exists_raises_error(hiseq_2500_custom_index_flow_
 def test_validate_sample_sheet_exists(hiseq_2500_custom_index_flow_cell_dir: Path):
     # GIVEN a path with a sample sheet
     # GIVEN a flow cell without a sample sheet in housekeeper
-    flow_cell = FlowCellDirectoryData(flow_cell_path=hiseq_2500_custom_index_flow_cell_dir)
+    flow_cell = IlluminaRunDirectoryData(sequencing_run_path=hiseq_2500_custom_index_flow_cell_dir)
     sample_sheet_path = Path(
         hiseq_2500_custom_index_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
@@ -133,7 +133,7 @@ def test_validate_flow_cell_delivery_status_forced(tmp_path: Path):
 
 
 def test_validate_samples_have_fastq_files_passes(
-    novaseqx_flow_cell_with_sample_sheet_no_fastq: FlowCellDirectoryData,
+    novaseqx_flow_cell_with_sample_sheet_no_fastq: IlluminaRunDirectoryData,
 ):
     """Test the check of a flow cells with one sample fastq file does not raise an error."""
     # GIVEN a demultiplexed flow cell with no fastq files and a sample sheet

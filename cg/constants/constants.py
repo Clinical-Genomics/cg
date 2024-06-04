@@ -1,6 +1,6 @@
 """Constants for cg."""
 
-from enum import IntEnum, StrEnum, auto
+from enum import Enum, IntEnum, StrEnum, auto
 
 import click
 
@@ -57,7 +57,7 @@ class ControlOptions(StrEnum):
     EMPTY: str = ""
 
 
-DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
+DEFAULT_CAPTURE_KIT = "twistexomecomprehensive_10.2_hg19_design.bed"
 
 
 class CustomerId(StrEnum):
@@ -292,3 +292,9 @@ class MultiQC(StrEnum):
 
 
 NG_UL_SUFFIX: str = " ng/uL"
+
+
+class SequencingQCStatus(Enum):
+    FAILED = auto()
+    PASSED = auto()
+    PENDING = auto()

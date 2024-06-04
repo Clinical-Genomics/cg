@@ -12,14 +12,14 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery, Workflow
 from cg.exc import MissingFilesError
-from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
-    FastqConcatenationService,
-)
-from cg.services.quality_controller.quality_controller_service import QualityControllerService
 from cg.meta.deliver.fastq_path_generator import (
     generate_forward_concatenated_fastq_delivery_path,
     generate_reverse_concatenated_fastq_delivery_path,
 )
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
+from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
@@ -136,7 +136,7 @@ class DeliverAPI:
         sample_is_external: bool = link.sample.application_version.application.is_external
         deliver_failed_samples: bool = self.deliver_failed_samples
         sample_passes_sequencing_quality_check: bool = (
-            QualityControllerService.sample_pass_sequencing_qc(sample=link.sample)
+            SequencingQCService.sample_pass_sequencing_qc(sample=link.sample)
         )
 
         return (
