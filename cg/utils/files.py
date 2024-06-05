@@ -23,6 +23,23 @@ def get_file_in_directory(directory: Path, file_name: str) -> Path:
     raise FileNotFoundError(f"File {file_name} not found in {directory}")
 
 
+def get_files_in_directory_with_pattern(directory: Path, pattern: str) -> list[Path]:
+    """Get files with a pattern in a directory and subdirectories.
+    Raises:
+        FileNotFoundError: If no files with the pattern can be found.
+    """
+    files_with_pattern: list[Path] = []
+    if not directory.is_dir() or not directory.exists():
+        raise FileNotFoundError(f"Directory {directory} does not exist")
+    for directory_path, _, files in os.walk(directory):
+        for file in files:
+            if pattern in file:
+                files_with_pattern.append(Path(directory_path, file))
+    if not files_with_pattern:
+        raise FileNotFoundError(f"No files with pattern {pattern} found in {directory}")
+    return files_with_pattern
+
+
 def get_files_matching_pattern(directory: Path, pattern: str) -> list[Path]:
     """Search for all files in a directory that match a pattern."""
     return list(directory.glob(pattern))
@@ -44,20 +61,15 @@ def is_pattern_in_file_path_name(file_path: Path, pattern: str) -> bool:
     return pattern in file_path.name
 
 
-def get_directory_creation_time_stamp(directory_path: Path) -> float:
+def get_source_creation_time_stamp(source_path: Path) -> float:
     """
-    Return time stamp that a directory is created.
+    Return time stamp that a source is created.
     Raises:
-        FileNotFoundError if the directory does not exist.
-        ValueError if the specified path is not a directory.
+        FileNotFoundError if the source does not exist.
     """
-    if not directory_path.exists():
-        raise FileNotFoundError(f"Directory with path {directory_path} is not found.")
-
-    if not directory_path.is_dir():
-        raise ValueError(f"Specified path {directory_path} is not a directory.")
-
-    return os.stat(directory_path).st_ctime
+    if not source_path.exists():
+        raise FileNotFoundError(f"Directory with path {source_path} is not found.")
+    return os.stat(source_path).st_ctime
 
 
 def remove_directory_and_contents(directory_path):

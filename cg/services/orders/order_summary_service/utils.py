@@ -1,7 +1,7 @@
 from cg.apps.tb.dto.summary_response import AnalysisSummary
 from cg.services.orders.order_summary_service.dto.case_summary import CaseSummary
 from cg.services.orders.order_summary_service.dto.order_summary import OrderSummary
-from cg.services.quality_controller import QualityControllerService
+from cg.services.sequencing_qc_service import SequencingQCService
 from cg.store.models import Case, Order
 
 
@@ -51,9 +51,7 @@ def _get_case_map(case_summaries: list[CaseSummary]) -> dict:
 
 
 def _is_case_failed_sequencing_qc(case: Case) -> bool:
-    return case.are_all_samples_sequenced and not QualityControllerService.case_pass_sequencing_qc(
-        case
-    )
+    return case.are_all_samples_sequenced and not SequencingQCService.case_pass_sequencing_qc(case)
 
 
 def get_cases_failed_sequencing_qc_count(order: Order) -> int:

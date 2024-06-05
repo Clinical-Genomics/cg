@@ -3,14 +3,15 @@
 import datetime
 import logging
 
-from cg.apps.sequencing_metrics_parser.api import (
-    create_sample_lane_sequencing_metrics_for_flow_cell,
-    create_undetermined_non_pooled_metrics,
-)
+
 from cg.constants import FlowCellStatus
 from cg.meta.demultiplex.combine_sequencing_metrics import combine_mapped_metrics_with_undetermined
 from cg.meta.demultiplex.utils import get_q30_threshold
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_service import (
+    IlluminaMetricsService,
+)
+
 from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
 from cg.store.store import Store
 
@@ -18,7 +19,7 @@ LOG = logging.getLogger(__name__)
 
 
 def store_flow_cell_data_in_status_db(
-    parsed_flow_cell: FlowCellDirectoryData,
+    parsed_flow_cell: IlluminaRunDirectoryData,
     store: Store,
 ) -> None:
     """
@@ -42,12 +43,17 @@ def store_flow_cell_data_in_status_db(
     store.session.commit()
 
 
-def store_sequencing_metrics_in_status_db(flow_cell: FlowCellDirectoryData, store: Store) -> None:
+def store_sequencing_metrics_in_status_db(
+    flow_cell: IlluminaRunDirectoryData, store: Store
+) -> None:
+    metrics_service = IlluminaMetricsService()
     mapped_metrics: list[SampleLaneSequencingMetrics] = (
-        create_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_directory=flow_cell.path)
+        metrics_service.create_sample_lane_sequencing_metrics_for_flow_cell(
+            flow_cell_directory=flow_cell.path
+        )
     )
     undetermined_metrics: list[SampleLaneSequencingMetrics] = (
-        create_undetermined_non_pooled_metrics(flow_cell)
+        metrics_service.create_undetermined_non_pooled_metrics(flow_cell)
     )
 
     combined_metrics = combine_mapped_metrics_with_undetermined(
@@ -99,7 +105,7 @@ def metric_exists_in_status_db(metric: SampleLaneSequencingMetrics, store: Store
     return bool(existing_metrics_entry)
 
 
-def store_sample_data_in_status_db(flow_cell: FlowCellDirectoryData, store: Store) -> None:
+def store_sample_data_in_status_db(flow_cell: IlluminaRunDirectoryData, store: Store) -> None:
     """Update samples on the flow cell with read counts and sequencing date."""
     q30_threshold: int = get_q30_threshold(flow_cell.sequencer_type)
     sample_internal_ids: list[str] = flow_cell.sample_sheet.get_sample_ids()

@@ -7,7 +7,7 @@ from psutil import Process
 from cg.cli.backup import backup_flow_cells, encrypt_flow_cells, fetch_flow_cell
 from cg.constants import EXIT_SUCCESS, FileExtensions, FlowCellStatus
 from cg.models.cg_config import CGConfig
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from tests.store_helpers import StoreHelpers
 
 
@@ -173,8 +173,8 @@ def test_encrypt_flow_cells_when_sequencing_not_done(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN flow cells that are being sequenced
-    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
-    FlowCellDirectoryData.is_flow_cell_ready.return_value = False
+    mocker.patch.object(IlluminaRunDirectoryData, "is_sequencing_run_ready")
+    IlluminaRunDirectoryData.is_sequencing_run_ready.return_value = False
 
     # GIVEN a flow cells directory
 
@@ -201,8 +201,8 @@ def test_encrypt_flow_cell_when_encryption_already_started(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN flow cells that are ready
-    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
-    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
+    mocker.patch.object(IlluminaRunDirectoryData, "is_sequencing_run_ready")
+    IlluminaRunDirectoryData.is_sequencing_run_ready.return_value = True
 
     # GIVEN a pending flag file
     flow_cells_encrypt_dir = Path(cg_context.encryption.encryption_dir, flow_cell_full_name)
@@ -234,8 +234,8 @@ def test_encrypt_flow_cell_when_encryption_already_completed(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN flow cells that are ready
-    mocker.patch.object(FlowCellDirectoryData, "is_flow_cell_ready")
-    FlowCellDirectoryData.is_flow_cell_ready.return_value = True
+    mocker.patch.object(IlluminaRunDirectoryData, "is_sequencing_run_ready")
+    IlluminaRunDirectoryData.is_sequencing_run_ready.return_value = True
 
     # GIVEN a complete flag file
     flow_cells_encrypt_dir = Path(cg_context.encryption.encryption_dir, flow_cell_full_name)

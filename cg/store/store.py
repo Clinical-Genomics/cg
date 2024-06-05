@@ -22,3 +22,7 @@ class Store(
         DeleteDataHandler(self.session)
         ReadHandler(self.session)
         UpdateHandler(self.session)
+
+    def commit_to_store(self):
+        """Commit pending changes to the store."""
+        self.session.commit()

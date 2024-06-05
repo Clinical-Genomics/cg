@@ -99,12 +99,7 @@ class NfAnalysisAPI(AnalysisAPI):
     @property
     def is_params_appended_to_nextflow_config(self) -> bool:
         """Return True if parameters should be added into the nextflow config file instead of the params file."""
-        return True
-
-    @property
-    def is_multiple_samples_allowed(self) -> bool:
-        """Return whether the analysis supports multiple samples to be linked to the case."""
-        return True
+        return False
 
     @property
     def is_multiqc_pattern_search_exact(self) -> bool:
@@ -264,14 +259,10 @@ class NfAnalysisAPI(AnalysisAPI):
         raise NotImplementedError
 
     def get_sample_sheet_content(self, case_id: str) -> list[list[Any]]:
-        """Collect and format information required to build a sample sheet for a case.
+        """Return formatted information required to build a sample sheet for a case.
         This contains information for all samples linked to the case."""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        if len(case.links) == 0:
-            raise CgError(f"No samples linked to {case_id}")
-        if nlinks := len(case.links) > 1 and not self.is_multiple_samples_allowed:
-            raise CgError(f"Only one sample per case is allowed. {nlinks} found")
-        sample_sheet_content = []
+        sample_sheet_content: list = []
+        case: Case = self.get_validated_case(case_id)
         LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
         LOG.debug("Getting sample sheet information")
         for link in case.links:
@@ -629,7 +620,7 @@ class NfAnalysisAPI(AnalysisAPI):
             MultiQC.MULTIQC_DATA + FileExtensions.JSON,
         )
 
-    def get_workflow_metrics(self) -> dict:
+    def get_workflow_metrics(self, metric_id: str) -> dict:
         """Get nf-core workflow metrics constants."""
         return {}
 
@@ -707,7 +698,7 @@ class NfAnalysisAPI(AnalysisAPI):
             name=metric_name,
             step=MultiQC.MULTIQC,
             value=metric_value,
-            condition=self.get_workflow_metrics().get(metric_name, None),
+            condition=self.get_workflow_metrics(metric_id).get(metric_name, None),
         )
 
     @staticmethod
