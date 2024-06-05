@@ -43,6 +43,21 @@ class GensAPI:
         }
         load_call_params: list[str] = ["load", "sample"] + get_list_from_dictionary(load_params)
         self.process.run_command(parameters=load_call_params, dry_run=self.dry_run)
+    
+    def delete(
+        self,
+        case_id: str,
+        genome_build: str,
+        sample_id: str,
+    ) -> None:
+        """Remove a Gens sample from database."""
+        delete_params: dict[str, str] = {
+            "--sample-id": sample_id,
+            "--genome-build": genome_build,
+            "--case-id": case_id,
+        }
+        delete_call_params: list[str] = ["delete", "sample"] + get_list_from_dictionary(load_params)
+        self.process.run_command(parameters=delete_call_params, dry_run=self.dry_run)
 
     @staticmethod
     def is_suitable_for_upload(case: Case) -> bool:
