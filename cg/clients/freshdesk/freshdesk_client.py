@@ -3,7 +3,7 @@ import logging
 import requests
 
 from cg.clients.freshdesk.constants import EndPoints
-from cg.clients.freshdesk.models import Ticket
+from cg.clients.freshdesk.models import TicketCreate, TicketResponse
 
 LOG = logging.getLogger(__name__)
 
@@ -19,14 +19,19 @@ class FreshdeskClient:
         """Set up the client."""
         self.url = url
         self.api_key = api_key
+        self.headers = {"Content-Type": "application/json"}
 
-    def create_ticket(self, ticket: Ticket) -> Ticket:
+    @property
+    def auth_header(self):
+        return (self.api_key, "X")
+
+    def create_ticket(self, ticket: TicketCreate) -> TicketResponse:
         """Create a ticket."""
         LOG.debug(ticket.model_dump_json())
         response = requests.post(
             url=f"{self.url}{EndPoints.TICKETS}",
-            headers={"Content-Type": "application/json"},
-            auth=(self.api_key, "X"),
+            headers=self.headers,
+            auth=self.auth_header,
             json=ticket.model_dump(exclude_none=True),
         )
-        return Ticket.model_validate(response.json())
+        return TicketResponse.model_validate(response.json())
