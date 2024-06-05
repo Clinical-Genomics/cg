@@ -12,10 +12,11 @@ class FreshdeskClient:
     """Client for communicating with the freshdesk REST API."""
 
     def __init__(self):
+        self.headers = None
         self.api_key = None
         self.url = None
 
-    def init_app(self, url, api_key):
+    def init_app(self, url: str, api_key: str):
         """Set up the client."""
         self.url = url
         self.api_key = api_key
@@ -23,7 +24,7 @@ class FreshdeskClient:
 
     @property
     def auth_header(self):
-        return (self.api_key, "X")
+        return self.api_key, "X"
 
     def create_ticket(self, ticket: TicketCreate) -> TicketResponse:
         """Create a ticket."""
