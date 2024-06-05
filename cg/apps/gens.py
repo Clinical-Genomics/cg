@@ -4,7 +4,7 @@ import logging
 
 from cg.constants.constants import PrepCategory
 from cg.store.models import Case
-from cg.utils import Process
+from cg.utils import Process, CalledProcessError
 from cg.utils.dict import get_list_from_dictionary
 
 LOG = logging.getLogger(__name__)
@@ -47,6 +47,8 @@ class GensAPI:
             load_call_params.append("--force")
         load_call_params += get_list_from_dictionary(load_params)
         self.process.run_command(parameters=load_call_params, dry_run=self.dry_run)
+        LOG.warning(self.process.stderr)
+
 
     @staticmethod
     def is_suitable_for_upload(case: Case) -> bool:
