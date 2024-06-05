@@ -712,7 +712,7 @@ class AnalysisAPI(MetaAPI):
         analysis_types: set[str] = {
             link.sample.application_version.application.analysis_type for link in case.links
         }
-        if len(analysis_types) > 1:
+        if len(analysis_types) > 1 and self.workflow != Workflow.MIP_DNA:
             raise ValueError(
                 f"Case samples have different analysis types {', '.join(analysis_types)}"
             )
