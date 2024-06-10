@@ -30,7 +30,7 @@ LOG = logging.getLogger(__name__)
 )
 @click.pass_obj
 def upload_to_gens(
-    context: CGConfig, case_id: str | None, dry_run: bool, replace : bool
+    context: CGConfig, case_id: str | None, dry_run: bool, replace: bool
 ):
     """Upload data from an analysis to Gens."""
 
