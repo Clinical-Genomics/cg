@@ -49,7 +49,6 @@ class GensAPI:
         self.process.run_command(parameters=load_call_params, dry_run=self.dry_run)
         LOG.warning(self.process.stderr)
 
-
     @staticmethod
     def is_suitable_for_upload(case: Case) -> bool:
         """Check if a cancer case supports Gens upload."""
