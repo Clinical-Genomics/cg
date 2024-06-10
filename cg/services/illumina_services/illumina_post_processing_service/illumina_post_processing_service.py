@@ -4,16 +4,23 @@ import logging
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import SequencingFileTag
 from cg.constants.devices import DeviceType
-from cg.exc import MissingFilesError, FlowCellError
+from cg.exc import FlowCellError, MissingFilesError
+from cg.meta.demultiplex.housekeeper_storage_functions import (
+    add_demux_logs_to_housekeeper,
+    add_run_parameters_file_to_housekeeper,
+    add_sample_fastq_files_to_housekeeper,
+    store_undetermined_fastq_files,
+)
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_service import (
     IlluminaMetricsService,
 )
 from cg.services.illumina_services.illumina_metrics_service.models import (
     IlluminaFlowCellDTO,
-    IlluminaSequencingRunDTO,
     IlluminaSampleSequencingMetricsDTO,
+    IlluminaSequencingRunDTO,
 )
 from cg.services.illumina_services.illumina_post_processing_service.utils import (
     create_delivery_file_in_flow_cell_directory,
@@ -75,6 +82,30 @@ class IlluminaPostProcessingService:
         )
         return self.status_db.add_illumina_sample_metrics(
             sample_metrics_dto=sample_metrics, sequencing_run=sequencing_run
+        )
+
+    def store_illumina_data_in_housekeeper(
+        self,
+        flow_cell: IlluminaRunDirectoryData,
+        flow_cell_run_dir: Path,
+        store: Store,
+    ) -> None:
+        LOG.info(f"Add flow cell data to Housekeeper for {flow_cell.id}")
+
+        self.hk_api.add_bundle_and_version_if_non_existent(flow_cell.id)
+
+        tags: list[str] = [SequencingFileTag.FASTQ, SequencingFileTag.RUN_PARAMETERS, flow_cell.id]
+        self.hk_api.add_tags_if_non_existent(tags)
+
+        add_sample_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=self.hk_api, store=store)
+        store_undetermined_fastq_files(flow_cell=flow_cell, hk_api=self.hk_api, store=store)
+        add_demux_logs_to_housekeeper(
+            flow_cell=flow_cell, hk_api=self.hk_api, flow_cell_run_dir=flow_cell_run_dir
+        )
+        add_run_parameters_file_to_housekeeper(
+            flow_cell_name=flow_cell.full_name,
+            flow_cell_run_dir=flow_cell_run_dir,
+            hk_api=self.hk_api,
         )
 
     def store_illumina_flow_cell_data(self, flow_cell_dir_data: IlluminaRunDirectoryData) -> None:
