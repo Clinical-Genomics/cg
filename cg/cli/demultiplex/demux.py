@@ -128,7 +128,7 @@ def demultiplex_flow_cell(
 @click.command(name="copy-completed-sequencing-runs")
 @click.pass_obj
 def copy_novaseqx_sequencing_runs(context: CGConfig):
-    """Copy NovaSeq X flow cells ready for post-processing to demultiplexed runs."""
+    """Copy NovaSeq X sequencing runs ready for post-processing to demultiplexed runs."""
     sequencing_runs_dir: Path = Path(context.illumina_flow_cells_directory)
     demultiplexed_runs_dir: Path = Path(context.illumina_demultiplexed_runs_directory)
 
