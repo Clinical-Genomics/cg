@@ -7,12 +7,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.devices import DeviceType
 from cg.exc import FlowCellError, MissingFilesError
-from cg.meta.demultiplex.housekeeper_storage_functions import (
-    add_demux_logs_to_housekeeper,
-    add_run_parameters_file_to_housekeeper,
-    add_sample_fastq_files_to_housekeeper,
-    store_undetermined_fastq_files,
-)
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_service import (
     IlluminaMetricsService,
@@ -21,6 +15,12 @@ from cg.services.illumina_services.illumina_metrics_service.models import (
     IlluminaFlowCellDTO,
     IlluminaSampleSequencingMetricsDTO,
     IlluminaSequencingRunDTO,
+)
+from cg.services.illumina_services.illumina_post_processing_service.housekeeper_utils import (
+    add_demux_logs_to_housekeeper,
+    add_run_parameters_file_to_housekeeper,
+    add_sample_fastq_files_to_housekeeper,
+    store_undetermined_fastq_files,
 )
 from cg.services.illumina_services.illumina_post_processing_service.utils import (
     create_delivery_file_in_flow_cell_directory,
@@ -85,17 +85,17 @@ class IlluminaPostProcessingService:
         )
 
     def store_illumina_data_in_status_db(
-        self, flow_cell_dir_data: IlluminaRunDirectoryData
+        self, sequencing_run_dir: IlluminaRunDirectoryData
     ) -> None:
         """Store flow cell data in the status database."""
         flow_cell: IlluminaFlowCell = self.store_illumina_flow_cell(
-            flow_cell_dir_data=flow_cell_dir_data
+            flow_cell_dir_data=sequencing_run_dir
         )
         sequencing_run: IlluminaSequencingRun = self.store_illumina_sequencing_run(
-            flow_cell_dir_data=flow_cell_dir_data, flow_cell=flow_cell
+            flow_cell_dir_data=sequencing_run_dir, flow_cell=flow_cell
         )
         self.store_illumina_sample_sequencing_metrics(
-            flow_cell_dir_data=flow_cell_dir_data, sequencing_run=sequencing_run
+            flow_cell_dir_data=sequencing_run_dir, sequencing_run=sequencing_run
         )
         self.status_db.commit_to_store()
 

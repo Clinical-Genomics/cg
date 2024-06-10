@@ -76,7 +76,7 @@ def test_store_illumina_flow_cell_data(
 
     # WHEN storing the flow cell data
     illumina_post_postprocessing_service.store_illumina_data_in_status_db(
-        flow_cell_dir_data=novaseq_x_demux_runs_flow_cell
+        sequencing_run_dir=novaseq_x_demux_runs_flow_cell
     )
 
     # THEN assert there is an IlluminaFlowCell in status db
