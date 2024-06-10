@@ -71,29 +71,31 @@ def test_demultiplex_all_novaseq(
     tmp_illumina_flow_cells_demux_all_directory,
     caplog,
 ):
-    """Test the demultiplex-all command on a directory with newly sequenced NovaSeq6000 flow cells."""
+    """Test the demultiplex-all command on a directory with newly sequenced NovaSeq6000 sequencing runs."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a demultiplexing context with an API and correct structure
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
     assert demux_api.sequencing_runs_dir == tmp_illumina_flow_cells_demux_all_directory
 
-    # GIVEN sequenced flow cells with their sample sheet in Housekeeper
-    for flow_cell_dir in tmp_illumina_flow_cells_demux_all_directory.iterdir():
-        flow_cell: IlluminaRunDirectoryData = IlluminaRunDirectoryData(
-            sequencing_run_path=flow_cell_dir
+    # GIVEN a sequencing run with their sample sheet in Housekeeper
+    for sequencing_run_dir in tmp_illumina_flow_cells_demux_all_directory.iterdir():
+        sequencing_run: IlluminaRunDirectoryData = IlluminaRunDirectoryData(
+            sequencing_run_path=sequencing_run_dir
         )
         add_and_include_sample_sheet_path_to_housekeeper(
-            flow_cell_directory=flow_cell_dir,
-            flow_cell_name=flow_cell.id,
+            flow_cell_directory=sequencing_run_dir,
+            flow_cell_name=sequencing_run.id,
             hk_api=demultiplexing_context_for_demux.housekeeper_api,
         )
-        assert demultiplexing_context_for_demux.housekeeper_api.last_version(bundle=flow_cell.id)
+        assert demultiplexing_context_for_demux.housekeeper_api.last_version(
+            bundle=sequencing_run.id
+        )
 
     # WHEN running the demultiplex all command
     result: testing.Result = cli_runner.invoke(
         demultiplex_all,
-        ["--flow-cells-directory", str(demux_api.sequencing_runs_dir), "--dry-run"],
+        ["--sequencing-runs-directory", str(demux_api.sequencing_runs_dir), "--dry-run"],
         obj=demultiplexing_context_for_demux,
     )
 
@@ -104,13 +106,13 @@ def test_demultiplex_all_novaseq(
     assert "Found directory" in caplog.text
 
     # THEN assert it found a flow cell that is ready for demultiplexing
-    assert f"Sequencing run {flow_cell.id} is ready for downstream processing" in caplog.text
+    assert f"Sequencing run {sequencing_run.id} is ready for downstream processing" in caplog.text
 
 
 def test_is_demultiplexing_complete(
     hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet: IlluminaRunDirectoryData,
 ):
-    """Tests the is_demultiplexing_complete property of FlowCellDirectoryData."""
+    """Tests the is_demultiplexing_complete property of IlluminaRunDirectoryData."""
 
     # GIVEN a demultiplexing directory with a demuxcomplete.txt file
     assert Path(
@@ -127,7 +129,7 @@ def test_is_demultiplexing_complete(
 def test_is_demultiplexing_not_complete(
     hiseq_2500_dual_index_demux_runs_flow_cell: IlluminaRunDirectoryData,
 ):
-    """Tests the is_demultiplexing_complete property of FlowCellDirectoryData."""
+    """Tests the is_demultiplexing_complete property of IlluminaRunDirectoryData."""
 
     # GIVEN a demultiplexing directory with a demuxcomplete.txt file
     assert not Path(

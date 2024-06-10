@@ -30,22 +30,22 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command(name="all")
-@click.option("--flow-cells-directory", type=click.Path(exists=True, file_okay=False))
+@click.option("--sequencing-runs-directory", type=click.Path(exists=True, file_okay=False))
 @DRY_RUN
 @click.pass_obj
-def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run: bool):
+def demultiplex_all(context: CGConfig, sequencing_runs_directory: click.Path, dry_run: bool):
     """Demultiplex all sequencing runs that are ready under the sequencing runs directory."""
     LOG.info("Running cg demultiplex all ...")
     sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
-    if flow_cells_directory:
-        flow_cells_directory: Path = Path(str(flow_cells_directory))
+    if sequencing_runs_directory:
+        sequencing_runs_directory: Path = Path(str(sequencing_runs_directory))
     else:
-        flow_cells_directory: Path = Path(demultiplex_api.sequencing_runs_dir)
+        sequencing_runs_directory: Path = Path(demultiplex_api.sequencing_runs_dir)
 
-    LOG.info(f"Search for sequencing run ready to demultiplex in {flow_cells_directory}")
-    for sub_dir in flow_cells_directory.iterdir():
+    LOG.info(f"Search for sequencing run ready to demultiplex in {sequencing_runs_directory}")
+    for sub_dir in sequencing_runs_directory.iterdir():
         if not sub_dir.is_dir():
             continue
         LOG.info(f"Found directory {sub_dir}")
@@ -75,26 +75,28 @@ def demultiplex_all(context: CGConfig, flow_cells_directory: click.Path, dry_run
             )
 
 
-@click.command(name="flow-cell")
-@click.argument("flow-cell-name")
+@click.command(name="sequencing-run")
+@click.argument("sequencing-run-name")
 @DRY_RUN
 @click.pass_obj
 def demultiplex_flow_cell(
     context: CGConfig,
     dry_run: bool,
-    flow_cell_name: str,
+    sequencing_run_name: str,
 ):
-    """Demultiplex a flow cell using BCLConvert.
+    """Demultiplex a sequencing using BCLConvert.
 
-    flow cell name is the sequencing run directory name, e.g. '230912_A00187_1009_AHK33MDRX3'
+    sequencing run name is the sequencing run directory name, e.g. '230912_A00187_1009_AHK33MDRX3'
     """
 
-    LOG.info(f"Starting demultiplexing of sequencing run {flow_cell_name}")
+    LOG.info(f"Starting demultiplexing of sequencing run {sequencing_run_name}")
     sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
-    sequencing_run_dir: Path = Path(context.demultiplex_api.sequencing_runs_dir, flow_cell_name)
+    sequencing_run_dir: Path = Path(
+        context.demultiplex_api.sequencing_runs_dir, sequencing_run_name
+    )
     demultiplex_api.set_dry_run(dry_run=dry_run)
-    LOG.info(f"setting flow cell id to {flow_cell_name}")
+    LOG.info(f"setting flow cell id to {sequencing_run_name}")
     LOG.info(f"setting demultiplexed runs dir to {demultiplex_api.demultiplexed_runs_dir}")
 
     try:
@@ -123,9 +125,9 @@ def demultiplex_flow_cell(
         )
 
 
-@click.command(name="copy-completed-flow-cell")
+@click.command(name="copy-completed-sequencing-runs")
 @click.pass_obj
-def copy_novaseqx_flow_cells(context: CGConfig):
+def copy_novaseqx_sequencing_runs(context: CGConfig):
     """Copy NovaSeq X flow cells ready for post-processing to demultiplexed runs."""
     sequencing_runs_dir: Path = Path(context.illumina_flow_cells_directory)
     demultiplexed_runs_dir: Path = Path(context.illumina_demultiplexed_runs_directory)
@@ -149,14 +151,14 @@ def copy_novaseqx_flow_cells(context: CGConfig):
             )
 
 
-@click.command(name="confirm-flow-cell-sync")
+@click.command(name="confirm-sequencing-run-sync")
 @click.option(
     "--source-directory",
     required=True,
     help="The path from where the syncing is done.",
 )
 @click.pass_obj
-def confirm_flow_cell_sync(context: CGConfig, source_directory: str):
+def confirm_sequencing_run_sync(context: CGConfig, source_directory: str):
     """Checks if all relevant files for the demultiplexing have been synced.
     If so it creates a CopyComplete.txt file to show that that is the case."""
     target_sequencing_runs_directory = Path(context.illumina_flow_cells_directory)

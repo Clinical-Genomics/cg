@@ -5,8 +5,8 @@ import logging
 import click
 
 from cg.cli.demultiplex.demux import (
-    confirm_flow_cell_sync,
-    copy_novaseqx_flow_cells,
+    confirm_sequencing_run_sync,
+    copy_novaseqx_sequencing_runs,
     create_manifest_files,
     demultiplex_all,
     demultiplex_flow_cell,
@@ -26,11 +26,11 @@ def demultiplex_cmd_group():
 demultiplex_cmd_group: click.Group
 for sub_cmd in [
     create_manifest_files,
-    confirm_flow_cell_sync,
+    confirm_sequencing_run_sync,
     demultiplex_flow_cell,
     demultiplex_all,
     finish_group,
-    copy_novaseqx_flow_cells,
+    copy_novaseqx_sequencing_runs,
     sample_sheet_commands,
 ]:
     demultiplex_cmd_group.add_command(sub_cmd)
