@@ -113,6 +113,7 @@ def test_downsample_api_adding_a_second_sample_to_case(
         new_downsample_data.downsampled_sample.internal_id
     )
     assert new_downsample_data.downsampled_case.name == downsample_data.downsampled_case.name
+    assert new_downsample_data.case_action == downsample_data.case_action
 
 
 def test_start_downsample_job(

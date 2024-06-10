@@ -3946,6 +3946,7 @@ def downsample_input(
         case_id=downsample_case_internal_id,
         case_name=downsample_case_name,
         number_of_reads=number_of_reads_in_millions,
+        action=CaseActions.HOLD,
     )
 
 
