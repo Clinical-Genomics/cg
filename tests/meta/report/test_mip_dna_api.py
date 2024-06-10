@@ -1,4 +1,5 @@
 from cg.constants import REPORT_SEX
+from cg.constants.subject import Sex
 from tests.store_helpers import StoreHelpers
 
 
@@ -16,7 +17,7 @@ def test_get_sample_metadata(
     expected_metadata = {
         "bait_set": "N/A",
         "duplicates": "4.01",
-        "gender": REPORT_SEX.get("male"),
+        "gender": REPORT_SEX.get(Sex.MALE),
         "initial_qc": "Godkänd",
         "mapped_reads": "99.77",
         "mean_target_coverage": "38.34",

@@ -185,7 +185,7 @@ def test_get_sex_as_string():
     validated_invalid_sex: str = get_sex_as_string(invalid_sex)
 
     # THEN check if the sex has been correctly formatted
-    assert validated_sex == REPORT_SEX.get("female")
+    assert validated_sex == REPORT_SEX.get(sex)
     assert validated_invalid_sex == NA_FIELD
 
 
