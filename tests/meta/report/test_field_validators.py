@@ -1,5 +1,6 @@
 """Tests report data validation"""
 
+from cg.constants.report import NA_FIELD
 from cg.meta.report.field_validators import (
     get_empty_report_data,
     get_million_read_pairs,
@@ -18,7 +19,7 @@ def test_get_empty_report_data(report_api_mip_dna, case_mip_dna):
     # GIVEN some empty fields
     report_data.version = None
     report_data.accredited = None
-    report_data.customer.id = "N/A"
+    report_data.customer.id = NA_FIELD
     report_data.customer.scout_access = False
     report_data.case.samples[0].methods.library_prep = ""
     report_data.case.samples[0].metadata.million_read_pairs = None
