@@ -150,7 +150,7 @@ class DemultiplexingAPI:
         """Check if it is possible to start demultiplexing.
 
         This means that
-            - flow cell should be ready for demultiplexing (all files in place)
+            - sequencing run should be ready for demultiplexing (all files in place)
             - sample sheet needs to exist
             - demultiplexing should not be running
         """
@@ -161,7 +161,7 @@ class DemultiplexingAPI:
 
         if not sequencing_run.sample_sheet_exists():
             LOG.warning(
-                f"Could not find sample sheet in flow cell directory for {sequencing_run.id}"
+                f"Could not find sample sheet in sequencing run directory for {sequencing_run.id}"
             )
             demultiplexing_possible = False
 
@@ -217,7 +217,7 @@ class DemultiplexingAPI:
         )
 
     def start_demultiplexing(self, sequencing_run: IlluminaRunDirectoryData):
-        """Start demultiplexing for a flow cell."""
+        """Start demultiplexing for a sequencing run."""
         self.create_demultiplexing_started_file(sequencing_run.demultiplexing_started_path)
         log_path: Path = self.get_stderr_logfile(sequencing_run=sequencing_run)
         error_function: str = self.get_sbatch_error(
@@ -269,7 +269,7 @@ class DemultiplexingAPI:
             )
 
     def create_demultiplexing_output_dir(self, sequencing_run: IlluminaRunDirectoryData) -> None:
-        """Creates the demultiplexing output directory for the flow cell."""
+        """Creates the demultiplexing output directory for the sequencing run."""
         output_directory: Path = self.demultiplexed_run_dir_path(sequencing_run)
         LOG.debug(f"Creating demultiplexing output directory: {output_directory}")
         output_directory.mkdir(exist_ok=False, parents=True)
