@@ -4,8 +4,13 @@ from pathlib import Path
 
 import pytest
 
-from cg.services.bcl_convert_metrics_service.models import SequencingQualityMetrics, DemuxMetrics
-from cg.services.bcl_convert_metrics_service.parser import MetricsParser
+from cg.services.illumina_services.illumina_metrics_service.models import (
+    SequencingQualityMetrics,
+    DemuxMetrics,
+)
+from cg.services.illumina_services.illumina_metrics_service.bcl_convert_metrics_parser import (
+    BCLConvertMetricsParser,
+)
 
 
 def test_parse_metrics(
@@ -14,7 +19,7 @@ def test_parse_metrics(
     """Test to parse BCLConvert metrics."""
     # GIVEN paths to a BCLConvert metrics files
     # WHEN parsing the files
-    bcl_convert_metrics_parser = MetricsParser(
+    bcl_convert_metrics_parser = BCLConvertMetricsParser(
         bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path
     )
 
@@ -30,11 +35,11 @@ def test_parse_metrics_files_not_existing():
     # GIVEN paths to a BCLConvert metrics files that do not exist
     # WHEN parsing the files assert that a FileNotFoundError is raised
     with pytest.raises(FileNotFoundError):
-        MetricsParser(bcl_convert_metrics_dir_path=Path("non-existing-path"))
+        BCLConvertMetricsParser(bcl_convert_metrics_dir_path=Path("non-existing-path"))
 
 
 def test_parse_quality_metrics(
-    parsed_bcl_convert_metrics: MetricsParser,
+    parsed_bcl_convert_metrics: BCLConvertMetricsParser,
     bcl_convert_quality_metric_model_with_data: SequencingQualityMetrics,
 ):
     """Test to parse BCLConvert quality metrics."""
@@ -52,7 +57,7 @@ def test_parse_quality_metrics(
 
 
 def test_parse_demux_metrics(
-    parsed_bcl_convert_metrics: MetricsParser,
+    parsed_bcl_convert_metrics: BCLConvertMetricsParser,
     bcl_convert_demux_metric_model_with_data: DemuxMetrics,
 ):
     """Test to parse BCLConvert demux metrics."""
@@ -70,7 +75,7 @@ def test_parse_demux_metrics(
 
 
 def test_get_sample_internal_ids(
-    parsed_bcl_convert_metrics: MetricsParser,
+    parsed_bcl_convert_metrics: BCLConvertMetricsParser,
     test_sample_internal_id: str,
 ):
     """Test to get sample internal ids from BclConvertMetricsParser."""
@@ -90,7 +95,7 @@ def test_get_sample_internal_ids(
 
 
 def test_get_lanes_for_sample_internal_id(
-    parsed_bcl_convert_metrics: MetricsParser, test_sample_internal_id: str
+    parsed_bcl_convert_metrics: BCLConvertMetricsParser, test_sample_internal_id: str
 ):
     """Test to get lanes for a sample internal id from BclConvertMetricsParser."""
     # GIVEN a parsed BCLConvert metrics
@@ -108,7 +113,7 @@ def test_get_lanes_for_sample_internal_id(
 
 
 def test_get_metrics_for_sample_internal_id_and_lane(
-    parsed_bcl_convert_metrics: MetricsParser, test_sample_internal_id: str
+    parsed_bcl_convert_metrics: BCLConvertMetricsParser, test_sample_internal_id: str
 ):
     """Test to get metrics for a sample internal id and lane from BclConvertMetricsParser."""
 
@@ -128,7 +133,7 @@ def test_get_metrics_for_sample_internal_id_and_lane(
 
 
 def test_calculate_total_reads_per_lane(
-    parsed_bcl_convert_metrics: MetricsParser,
+    parsed_bcl_convert_metrics: BCLConvertMetricsParser,
     test_sample_internal_id: str,
     bcl_convert_reads_for_test_sample: int,
     test_lane: int,
@@ -166,7 +171,7 @@ def test_get_q30_bases_percent_per_lane(
 
 
 def test_get_mean_quality_score_per_lane(
-    parsed_bcl_convert_metrics: MetricsParser,
+    parsed_bcl_convert_metrics: BCLConvertMetricsParser,
     test_sample_internal_id: str,
     test_lane: int,
     bcl_convert_test_mean_quality_score_per_lane: float,
@@ -186,7 +191,7 @@ def test_get_mean_quality_score_per_lane(
 
 
 def test_get_aggregate_total_reads_for_metrics(
-    parsed_bcl_convert_metrics: MetricsParser,
+    parsed_bcl_convert_metrics: BCLConvertMetricsParser,
     expected_aggegrated_reads: int,
 ):
     """Test to get the aggregate total reads for metrics."""
@@ -200,7 +205,7 @@ def test_get_aggregate_total_reads_for_metrics(
 
 
 def test_get_aggregate_undetermined_reads_for_metrics(
-    parsed_bcl_convert_metrics: MetricsParser,
+    parsed_bcl_convert_metrics: BCLConvertMetricsParser,
     expected_aggregated_undetermined_reads: int,
 ):
     """Test to get the aggregated undetermined reads for metrics."""
@@ -216,7 +221,7 @@ def test_get_aggregate_undetermined_reads_for_metrics(
 
 
 def test_get_aggregate_percent_q30_for_metrics(
-    parsed_bcl_convert_metrics: MetricsParser,
+    parsed_bcl_convert_metrics: BCLConvertMetricsParser,
     expected_aggregated_percent_q30: float,
 ):
     """Test to get the aggregate percent q30 for metrics."""
@@ -230,7 +235,7 @@ def test_get_aggregate_percent_q30_for_metrics(
 
 
 def test_get_aggregate_quality_score_for_metrics(
-    parsed_bcl_convert_metrics: MetricsParser,
+    parsed_bcl_convert_metrics: BCLConvertMetricsParser,
     expected_aggregated_quality_score: float,
 ):
     """Test to get the aggregate quality score for metrics."""
@@ -246,7 +251,7 @@ def test_get_aggregate_quality_score_for_metrics(
 
 
 def test_get_aggregate_yield_for_metrics(
-    parsed_bcl_convert_metrics: MetricsParser,
+    parsed_bcl_convert_metrics: BCLConvertMetricsParser,
     expected_aggegrated_yield: int,
 ):
     """Test to get the aggregate yield for metrics."""
@@ -260,7 +265,7 @@ def test_get_aggregate_yield_for_metrics(
 
 
 def test_get_aggregate_yield_q30_for_metrics(
-    parsed_bcl_convert_metrics: MetricsParser,
+    parsed_bcl_convert_metrics: BCLConvertMetricsParser,
     expected_aggegrated_yield_q30: int,
 ):
     """Test to get the aggregate yield Q30 for metrics."""
