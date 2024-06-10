@@ -29,9 +29,7 @@ LOG = logging.getLogger(__name__)
     help="replace existing analysis",
 )
 @click.pass_obj
-def upload_to_gens(
-    context: CGConfig, case_id: str | None, dry_run: bool, replace: bool
-):
+def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool, replace: bool):
     """Upload data from an analysis to Gens."""
 
     click.echo(click.style("----------------- GENS -------------------"))
