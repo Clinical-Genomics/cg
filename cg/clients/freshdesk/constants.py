@@ -19,3 +19,6 @@ class Priority:
     MEDIUM = 2
     HIGH = 3
     URGENT = 4
+
+
+TO_MANY_REQUESTS_CODE = 429
