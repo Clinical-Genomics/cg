@@ -22,6 +22,12 @@ LOG = logging.getLogger(__name__)
 @click.command("gens")
 @ARGUMENT_CASE_ID
 @DRY_RUN
+@click.option(
+    "-r",
+    "--re-upload",
+    is_flag=True,
+    help="re-upload existing analysis",
+)
 @click.pass_obj
 def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool, re_upload : bool):
     """Upload data from an analysis to Gens."""
