@@ -432,7 +432,7 @@ class LimsAPI(Lims, OrderHandler):
         return dv200
 
     def has_sample_passed_initial_qc(self, sample_id: str) -> bool | None:
-        """Return the outcome of the Initial QC protocol of the given sample."""
+        """Return the outcome of the initial QC protocol of the given sample."""
         lims_sample: dict[str, Any] = self.sample(sample_id)
         initial_qc_udf: str | None = lims_sample.get("passed_initial_qc")
         initial_qc: bool | None = eval(initial_qc_udf) if initial_qc_udf else None
