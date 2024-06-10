@@ -90,7 +90,7 @@ def test_sex(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, h
 
     db_sample = helpers.add_sample(base_store, sex=Sex.FEMALE)
     key = "sex"
-    new_value = "male"
+    new_value = Sex.MALE
     assert getattr(db_sample, key) != new_value
 
     # WHEN setting key on sample to new_value

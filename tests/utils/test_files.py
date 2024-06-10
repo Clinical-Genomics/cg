@@ -1,15 +1,14 @@
-from datetime import datetime
 from pathlib import Path
 
 import pytest
 
 from cg.utils.files import (
     get_directories_in_path,
-    get_source_creation_time_stamp,
     get_file_in_directory,
+    get_files_in_directory_with_pattern,
+    get_source_creation_time_stamp,
     remove_directory_and_contents,
     rename_file,
-    get_files_in_directory_with_pattern,
 )
 
 

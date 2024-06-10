@@ -7,7 +7,7 @@ import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Workflow
+from cg.constants import Sex, Workflow
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -85,7 +85,7 @@ def coverage_upload_api(
 @pytest.fixture(name="genotype_analysis_sex")
 def genotype_analysis_sex() -> dict:
     """Return predicted sex per sample_id."""
-    return {"ADM1": "male", "ADM2": "male", "ADM3": "female"}
+    return {"ADM1": Sex.MALE, "ADM2": Sex.MALE, "ADM3": Sex.FEMALE}
 
 
 @pytest.fixture(name="mip_dna_case")

@@ -3,7 +3,9 @@ from pathlib import Path
 
 import click
 
-from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_flow_cell_samples_from_content
+from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
+    get_flow_cell_samples_from_content,
+)
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.apps.demultiplex.sample_sheet.sample_sheet_validator import SampleSheetValidator
@@ -11,7 +13,10 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
+from cg.constants.demultiplexing import (
+    SampleSheetBcl2FastqSections,
+    SampleSheetBCLConvertSections,
+)
 from cg.exc import FlowCellError, HousekeeperFileMissingError, SampleSheetError
 from cg.io.controller import ReadFile, WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import (

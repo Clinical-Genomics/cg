@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Callable
 
 from cg.apps.demultiplex.sample_sheet.validators import is_valid_sample_internal_id
-
 from cg.constants.constants import SCALE_TO_READ_PAIRS, FileFormat
 from cg.constants.demultiplexing import UNDETERMINED
 from cg.constants.metrics import (

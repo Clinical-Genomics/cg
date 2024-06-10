@@ -1,6 +1,5 @@
 """Test for the time utils functions."""
 
-import os
 import time
 from datetime import datetime
 from pathlib import Path
@@ -9,10 +8,9 @@ import mock
 
 from cg.constants.time import TWENTY_ONE_DAYS, TWENTY_ONE_DAYS_IN_SECONDS
 from cg.utils.time import (
-    is_directory_older_than_days_old,
-    format_time_from_string,
-    DATE_TIME_FORMAT,
     format_time_from_ctime,
+    format_time_from_string,
+    is_directory_older_than_days_old,
 )
 
 

@@ -1,18 +1,19 @@
 import pytest
-from cg.store.models import Case, Sample
+
 from cg.constants.constants import PrepCategory
 from cg.services.sequencing_qc_service.quality_checks.utils import (
     any_sample_in_case_has_reads,
-    is_case_express_priority,
     case_pass_sequencing_qc,
     express_case_pass_sequencing_qc,
     express_sample_has_enough_reads,
     get_express_reads_threshold_for_sample,
-    is_sample_ready_made_library,
+    is_case_express_priority,
     is_sample_express_priority,
+    is_sample_ready_made_library,
     ready_made_library_sample_has_enough_reads,
     sample_has_enough_reads,
 )
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.conftest import StoreHelpers
 from tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario import (

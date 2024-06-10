@@ -1,11 +1,12 @@
 """Service to parse the RunInfo.xml file."""
 
-from cg.constants.demultiplexing import RunCompletionStatusNodes
-from cg.io.xml import read_xml
-from cg.utils.time import format_time_from_string
 from datetime import datetime
 from pathlib import Path
 from xml.etree.ElementTree import ElementTree
+
+from cg.constants.demultiplexing import RunCompletionStatusNodes
+from cg.io.xml import read_xml
+from cg.utils.time import format_time_from_string
 
 
 class ParseRunCompletionStatusService:

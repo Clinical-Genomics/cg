@@ -7,6 +7,7 @@ from unittest.mock import Mock
 import pytest
 
 from cg.constants import DataDelivery, FileExtensions, FlowCellStatus, Workflow
+from cg.constants.subject import Sex
 from cg.models.cg_config import CGConfig
 from cg.store.crud.read import ReadHandler
 from cg.store.models import Case
@@ -84,7 +85,7 @@ def fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_id: str) 
         "samples": [
             {
                 "internal_id": sample_id,
-                "sex": "male",
+                "sex": Sex.MALE,
                 "name": cust_sample_id,
                 "original_ticket": ticket_id,
                 "reads": 1000000,

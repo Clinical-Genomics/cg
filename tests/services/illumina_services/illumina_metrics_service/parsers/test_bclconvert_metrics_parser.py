@@ -4,12 +4,12 @@ from pathlib import Path
 
 import pytest
 
-from cg.services.illumina_services.illumina_metrics_service.models import (
-    SequencingQualityMetrics,
-    DemuxMetrics,
-)
 from cg.services.illumina_services.illumina_metrics_service.bcl_convert_metrics_parser import (
     BCLConvertMetricsParser,
+)
+from cg.services.illumina_services.illumina_metrics_service.models import (
+    DemuxMetrics,
+    SequencingQualityMetrics,
 )
 
 

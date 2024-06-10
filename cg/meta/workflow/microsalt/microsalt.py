@@ -17,9 +17,7 @@ from cg.meta.workflow.microsalt.quality_controller import MicroSALTQualityContro
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.meta.workflow.microsalt.utils import get_most_recent_project_directory
 from cg.models.cg_config import CGConfig
-from cg.services.sequencing_qc_service.sequencing_qc_service import (
-    SequencingQCService,
-)
+from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.store.models import Case, Sample
 from cg.utils import Process
 

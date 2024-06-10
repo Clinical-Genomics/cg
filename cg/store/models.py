@@ -26,11 +26,10 @@ from cg.constants.constants import (
     ControlOptions,
     PrepCategory,
     SequencingQCStatus,
-    SexOptions,
-    StatusOptions,
 )
 from cg.constants.devices import DeviceType
 from cg.constants.priority import SlurmQos
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.constants.symbols import EMPTY_STRING
 
 BigInt = Annotated[int, None]
@@ -591,10 +590,7 @@ class CaseSample(Base):
     id: Mapped[PrimaryKeyInt]
     case_id: Mapped[str] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
     sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id", ondelete="CASCADE"))
-    status: Mapped[str] = mapped_column(
-        types.Enum(*(status.value for status in StatusOptions)), default=StatusOptions.UNKNOWN.value
-    )
-
+    status: Mapped[PhenotypeStatus] = mapped_column(default=PhenotypeStatus.UNKNOWN)
     created_at: Mapped[datetime | None]
     updated_at: Mapped[datetime | None]
 
@@ -778,7 +774,7 @@ class Sample(Base, PriorityMixin):
     last_sequenced_at: Mapped[datetime | None]
     received_at: Mapped[datetime | None]
     reference_genome: Mapped[Str255 | None]
-    sex: Mapped[str] = mapped_column(types.Enum(*(option.value for option in SexOptions)))
+    sex: Mapped[Sex]
     subject_id: Mapped[Str128 | None]
 
     links: Mapped[list[CaseSample]] = orm.relationship(

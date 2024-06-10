@@ -8,7 +8,7 @@ from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType, GenomeVersion
 from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nf_analysis import RAREDISEASE_METRIC_CONDITIONS
-from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
+from cg.constants.subject import PhenotypeStatus, PlinkPhenotypeStatus, PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.raredisease.raredisease import (
@@ -97,7 +97,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         )
 
     @staticmethod
-    def get_phenotype_code(phenotype: str) -> int:
+    def get_phenotype_code(phenotype: PhenotypeStatus) -> int:
         """Return Raredisease phenotype code."""
         LOG.debug("Translate phenotype to integer code")
         try:

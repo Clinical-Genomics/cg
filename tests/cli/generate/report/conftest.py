@@ -5,6 +5,7 @@ import pytest
 
 from cg.cli.generate.report.base import generate_delivery_report
 from cg.constants import Workflow
+from cg.constants.subject import PhenotypeStatus
 from cg.models.cg_config import CGConfig
 from tests.mocks.report import MockMipDNAAnalysisAPI, MockMipDNAReportAPI
 
@@ -44,7 +45,7 @@ def mip_dna_context(cg_context, helpers, case_id, real_housekeeper_api) -> CGCon
         store=store,
         sample=sample,
         case=case,
-        status="affected",
+        status=PhenotypeStatus.AFFECTED,
     )
 
     return cg_context

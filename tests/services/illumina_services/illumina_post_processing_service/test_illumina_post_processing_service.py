@@ -4,7 +4,11 @@ from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirecto
 from cg.services.illumina_services.illumina_post_processing_service.illumina_post_processing_service import (
     IlluminaPostProcessingService,
 )
-from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun, IlluminaSampleSequencingMetrics
+from cg.store.models import (
+    IlluminaFlowCell,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
+)
 
 
 def test_get_illumina_flow_cell(

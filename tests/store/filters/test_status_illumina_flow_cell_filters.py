@@ -2,7 +2,9 @@
 
 from sqlalchemy.orm import Query
 
-from cg.services.illumina_services.illumina_metrics_service.models import IlluminaFlowCellDTO
+from cg.services.illumina_services.illumina_metrics_service.models import (
+    IlluminaFlowCellDTO,
+)
 from cg.store.filters.status_illumina_flow_cell_filters import (
     filter_illumina_flow_cell_by_internal_id,
 )

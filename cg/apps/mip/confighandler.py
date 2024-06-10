@@ -4,7 +4,7 @@ from copy import deepcopy
 from marshmallow import Schema, fields, validate
 
 from cg.constants import DEFAULT_CAPTURE_KIT
-from cg.constants.subject import RelationshipStatus
+from cg.constants.subject import PhenotypeStatus, RelationshipStatus, Sex
 from cg.exc import PedigreeConfigError
 
 LOG = logging.getLogger(__name__)
@@ -28,9 +28,13 @@ class SampleSchema(Schema):
     mother = fields.Str(dump_default=RelationshipStatus.HAS_NO_PARENT)
     phenotype = fields.Str(
         required=True,
-        validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
+        validate=validate.OneOf(
+            choices=[PhenotypeStatus.AFFECTED, PhenotypeStatus.UNAFFECTED, PhenotypeStatus.UNKNOWN]
+        ),
     )
-    sex = fields.Str(required=True, validate=validate.OneOf(choices=["female", "male", "unknown"]))
+    sex = fields.Str(
+        required=True, validate=validate.OneOf(choices=[Sex.FEMALE, Sex.MALE, Sex.UNKNOWN])
+    )
     expected_coverage = fields.Float()
     capture_kit = fields.Str(dump_default=DEFAULT_CAPTURE_KIT)
 

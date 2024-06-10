@@ -9,6 +9,7 @@ from collections import namedtuple
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout import scout_export
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.constants.subject import PhenotypeStatus, Sex
 
 LOG = logging.getLogger(__name__)
 
@@ -125,11 +126,11 @@ def remap(input_dict: dict, mapper_list: tuple) -> dict:
 def resolve_sex(scout_sex: str) -> str:
     """Convert scout sex value to mutacc valid value"""
     if scout_sex == "1":
-        mutacc_sex = "male"
+        mutacc_sex = Sex.MALE
     elif scout_sex == "2":
-        mutacc_sex = "female"
+        mutacc_sex = Sex.FEMALE
     else:
-        mutacc_sex = "unknown"
+        mutacc_sex = Sex.UNKNOWN
     return mutacc_sex
 
 
@@ -144,11 +145,11 @@ def resolve_parent(scout_parent: str) -> str:
 
 def resolve_phenotype(scout_phenotype: int) -> str:
     """Convert scout phenotype to mutacc phenotype"""
-    mutacc_phenotype = "unknown"
+    mutacc_phenotype = PhenotypeStatus.UNKNOWN
     if scout_phenotype == 1:
-        mutacc_phenotype = "unaffected"
+        mutacc_phenotype = PhenotypeStatus.UNAFFECTED
     if scout_phenotype == 2:
-        mutacc_phenotype = "affected"
+        mutacc_phenotype = PhenotypeStatus.AFFECTED
     return mutacc_phenotype
 
 

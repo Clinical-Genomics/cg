@@ -5,15 +5,15 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.devices import DeviceType
-from cg.exc import MissingFilesError, FlowCellError
+from cg.exc import FlowCellError, MissingFilesError
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_service import (
     IlluminaMetricsService,
 )
 from cg.services.illumina_services.illumina_metrics_service.models import (
     IlluminaFlowCellDTO,
-    IlluminaSequencingRunDTO,
     IlluminaSampleSequencingMetricsDTO,
+    IlluminaSequencingRunDTO,
 )
 from cg.services.illumina_services.illumina_post_processing_service.utils import (
     create_delivery_file_in_flow_cell_directory,

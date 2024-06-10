@@ -715,7 +715,7 @@ class StoreHelpers:
         store: Store,
         sample: Sample,
         case: Case,
-        status: str = PhenotypeStatus.UNKNOWN,
+        status: PhenotypeStatus = PhenotypeStatus.UNKNOWN,
         father: Sample = None,
         mother: Sample = None,
     ) -> CaseSample:

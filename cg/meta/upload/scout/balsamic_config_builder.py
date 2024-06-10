@@ -59,9 +59,9 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
         self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
         if BalsamicAnalysisAPI.get_sample_type(sample_obj=case_sample.sample) == SampleType.TUMOR:
-            config_sample.phenotype = PhenotypeStatus.AFFECTED.value
+            config_sample.phenotype = PhenotypeStatus.AFFECTED
         else:
-            config_sample.phenotype = PhenotypeStatus.UNAFFECTED.value
+            config_sample.phenotype = PhenotypeStatus.UNAFFECTED
 
         config_sample.analysis_type = self.get_balsamic_analysis_type(sample=case_sample.sample)
 

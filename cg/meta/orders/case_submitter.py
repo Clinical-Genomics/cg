@@ -1,7 +1,7 @@
 import datetime as dt
 import logging
 
-from cg.constants import DataDelivery, Priority
+from cg.constants import DataDelivery, Priority, Sex
 from cg.constants.constants import CaseActions, Workflow
 from cg.constants.pedigree import Pedigree
 from cg.exc import OrderError
@@ -38,7 +38,7 @@ class CaseSubmitter(Submitter):
             if not subject_id:
                 continue
             new_gender: str = sample.sex
-            if new_gender == "unknown":
+            if new_gender == Sex.UNKNOWN:
                 continue
 
             existing_samples: list[Sample] = self.status.get_samples_by_customer_and_subject_id(
@@ -47,7 +47,7 @@ class CaseSubmitter(Submitter):
             existing_sample: Sample
             for existing_sample in existing_samples:
                 previous_gender = existing_sample.sex
-                if previous_gender == "unknown":
+                if previous_gender == Sex.UNKNOWN:
                     continue
 
                 if previous_gender != new_gender:

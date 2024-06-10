@@ -2,8 +2,9 @@ from pydantic.v1 import BaseModel, validator
 from typing_extensions import Literal
 
 from cg.constants import Priority
+from cg.constants.subject import Sex
 
-SEX_MAP = {"male": "M", "female": "F"}
+SEX_MAP = {Sex.MALE: "M", Sex.FEMALE: "F"}
 
 
 class Udf(BaseModel):
@@ -41,7 +42,7 @@ class Udf(BaseModel):
     require_qc_ok: bool = False
     rml_plate_name: str | None
     selection_criteria: str | None
-    sex: Literal["M", "F", "unknown"] = "unknown"
+    sex: Literal["M", "F", "unknown"] = Sex.UNKNOWN
     skip_reception_control: bool | None = None
     source: str = "NA"
     tissue_block_size: str | None
@@ -53,7 +54,7 @@ class Udf(BaseModel):
 
     @validator("sex", pre=True)
     def validate_sex(cls, value: str):
-        return SEX_MAP.get(value, "unknown")
+        return SEX_MAP.get(value, Sex.UNKNOWN)
 
 
 class LimsSample(BaseModel):

@@ -3,11 +3,11 @@ import datetime as dt
 from cg.constants import DataDelivery, GenePanelMasterList
 from cg.constants.constants import CustomerId, PrepCategory, Workflow
 from cg.constants.priority import Priority
+from cg.constants.subject import PhenotypeStatus
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
-from cg.models.orders.sample_base import StatusEnum
 from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Sample
 
 
@@ -69,7 +69,7 @@ class FastqSubmitter(Submitter):
             customer_internal_id=CustomerId.CG_INTERNAL_CUSTOMER
         )
         relationship: CaseSample = self.status.relate_sample(
-            case=case, sample=sample_obj, status=StatusEnum.unknown
+            case=case, sample=sample_obj, status=PhenotypeStatus.UNKNOWN
         )
         self.status.session.add_all([case, relationship])
 
@@ -127,7 +127,7 @@ class FastqSubmitter(Submitter):
                     self.create_maf_case(sample_obj=new_sample)
                 case.customer = customer
                 new_relationship = self.status.relate_sample(
-                    case=case, sample=new_sample, status=StatusEnum.unknown
+                    case=case, sample=new_sample, status=PhenotypeStatus.UNKNOWN
                 )
                 self.status.session.add_all([case, new_relationship])
 

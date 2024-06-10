@@ -1,19 +1,17 @@
-from enum import IntEnum, StrEnum
+from enum import IntEnum, StrEnum, auto
 
 
 class Sex(StrEnum):
-    FEMALE = "female"
-    MALE = "male"
-    UNKNOWN = "unknown"
-    OTHER = "other"
-    MISSING = ""
+    FEMALE = auto()
+    MALE = auto()
+    UNKNOWN = auto()
+    OTHER = auto()
 
 
 class PhenotypeStatus(StrEnum):
-    UNKNOWN = "unknown"
-    UNAFFECTED = "unaffected"
-    AFFECTED = "affected"
-    MISSING = ""
+    AFFECTED = auto()
+    UNAFFECTED = auto()
+    UNKNOWN = auto()
 
 
 class PlinkPhenotypeStatus(IntEnum):

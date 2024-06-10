@@ -1,7 +1,7 @@
 """Module to handle time functions"""
 
-import time
 import re
+import time
 from datetime import datetime
 from pathlib import Path
 

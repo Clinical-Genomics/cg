@@ -10,12 +10,10 @@ from cg.constants.constants import (
     CAPTUREKIT_OPTIONS,
     CONTAINER_OPTIONS,
     DEFAULT_CAPTURE_KIT,
-    STATUS_OPTIONS,
     DataDelivery,
     FileExtensions,
     FlowCellStatus,
     PrepCategory,
-    SexOptions,
 )
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import (

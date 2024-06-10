@@ -12,16 +12,18 @@ from cg.constants.devices import DeviceType
 from cg.constants.priority import PriorityTerms
 from cg.constants.subject import PhenotypeStatus, Sex
 from cg.meta.orders.pool_submitter import PoolSubmitter
-from cg.services.illumina_services.illumina_metrics_service.models import IlluminaFlowCellDTO
+from cg.services.illumina_services.illumina_metrics_service.models import (
+    IlluminaFlowCellDTO,
+)
 from cg.store.models import (
     Analysis,
     Application,
     Case,
     CaseSample,
     Customer,
+    IlluminaFlowCell,
     Organism,
     Sample,
-    IlluminaFlowCell,
 )
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -46,7 +48,7 @@ class StoreConstants(enum.Enum):
     REFERENCE_GENOME_SAMPLE_WITH_ATTRIBUTES: str = "NC_222"
     ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES: str = "ticket"
     FROM_SAMPLE_SAMPLE_WITH_ATTRIBUTES: str = "sample_1"
-    SEX_SAMPLE_WITH_ATTRIBUTES: str = "male"
+    SEX_SAMPLE_WITH_ATTRIBUTES: str = Sex.MALE
     ENTRY_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
     INVOICE_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
     INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES: str = "sample_without_attributes"

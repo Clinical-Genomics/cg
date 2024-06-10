@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from cg.constants.priority import SlurmQos
+from cg.constants.subject import Sex
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 
 
@@ -158,14 +159,14 @@ def mip_metrics_deliverables_raw() -> dict:
                 "input": "some_input",
                 "name": "gender",
                 "step": "chanjo_sexcheck",
-                "value": "female",
+                "value": Sex.FEMALE,
             },
             {
                 "id": "another_id",
                 "input": "some_input",
                 "name": "gender",
                 "step": "chanjo_sexcheck",
-                "value": "male",
+                "value": Sex.MALE,
             },
             {
                 "id": "an_id",

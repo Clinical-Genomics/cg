@@ -10,8 +10,8 @@ from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.models.orders.order import OrderIn
 from cg.services.illumina_services.illumina_metrics_service.models import (
     IlluminaFlowCellDTO,
-    IlluminaSequencingRunDTO,
     IlluminaSampleSequencingMetricsDTO,
+    IlluminaSequencingRunDTO,
 )
 from cg.store.base import BaseHandler
 from cg.store.database import get_session
@@ -27,6 +27,9 @@ from cg.store.models import (
     Collaboration,
     Customer,
     Flowcell,
+    IlluminaFlowCell,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
     Invoice,
     Order,
     Organism,
@@ -36,9 +39,6 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     User,
     order_case,
-    IlluminaFlowCell,
-    IlluminaSequencingRun,
-    IlluminaSampleSequencingMetrics,
 )
 
 LOG = logging.getLogger(__name__)

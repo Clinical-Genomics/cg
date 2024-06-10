@@ -18,13 +18,13 @@ from cg.models.report.validators import (
     get_boolean_as_string,
     get_date_as_string,
     get_delivered_files_as_file_names,
+    get_float_as_percentage,
     get_gender_as_string,
     get_list_as_string,
+    get_number_as_string,
     get_path_as_string,
     get_prep_category_as_string,
     get_report_string,
-    get_number_as_string,
-    get_float_as_percentage,
 )
 
 
@@ -185,7 +185,7 @@ def test_get_gender_as_string():
     validated_invalid_gender: str = get_gender_as_string(invalid_gender)
 
     # THEN check if the gender has been correctly formatted
-    assert validated_gender == REPORT_GENDER.get("female")
+    assert validated_gender == REPORT_GENDER.get(Sex.FEMALE)
     assert validated_invalid_gender == NA_FIELD
 
 

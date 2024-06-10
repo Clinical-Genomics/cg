@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from cg.apps.madeline.api import MadelineAPI
+from cg.constants.subject import PhenotypeStatus, Sex
 from tests.mocks.process_mock import ProcessMock
 
 
@@ -35,7 +36,7 @@ def mother() -> dict[str, str | None]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "mother",
-        "sex": "female",
+        "sex": Sex.FEMALE,
         "proband": False,
         "status": "unaffected",
     }
@@ -47,7 +48,7 @@ def father() -> dict[str, str | None]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "father",
-        "sex": "male",
+        "sex": Sex.MALE,
         "proband": False,
         "status": "unaffected",
     }
@@ -59,12 +60,12 @@ def proband() -> dict[str, str | None]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "proband",
-        "sex": "female",
+        "sex": Sex.FEMALE,
         "father": "father",
         "mother": "mother",
         "deceased": False,
         "proband": True,
-        "status": "affected",
+        "status": PhenotypeStatus.AFFECTED,
     }
     return ind_info
 

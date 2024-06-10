@@ -1,12 +1,13 @@
 """Mock the scout api"""
 
 import logging
-from mock import Mock
 
+from mock import Mock
 from pydantic.v1 import BaseModel, validator
 from typing_extensions import Literal
 
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.constants.subject import Sex
 from tests.mocks.process_mock import ProcessMock
 
 LOG = logging.getLogger(__name__)
@@ -14,7 +15,7 @@ LOG = logging.getLogger(__name__)
 
 class MockScoutIndividual(BaseModel):
     sample_id: str = "sample_id"
-    sex: str = "female"
+    sex: str = Sex.FEMALE
     analysis_type: Literal[
         "external",
         "mixed",

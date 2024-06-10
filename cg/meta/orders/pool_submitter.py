@@ -2,11 +2,11 @@ import datetime as dt
 
 from cg.constants import DataDelivery
 from cg.constants.constants import Workflow
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
-from cg.models.orders.sample_base import SexEnum
 from cg.models.orders.samples import RmlSample
 from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Pool, Sample
 
@@ -144,7 +144,7 @@ class PoolSubmitter(Submitter):
                 ordered=ordered,
                 ticket=ticket_id,
             )
-            sex: SexEnum = SexEnum.unknown
+            sex: Sex = Sex.UNKNOWN
             for sample in pool["samples"]:
                 new_sample = self.status.add_sample(
                     name=sample["name"],
@@ -162,7 +162,7 @@ class PoolSubmitter(Submitter):
                 )
                 new_samples.append(new_sample)
                 link: CaseSample = self.status.relate_sample(
-                    case=case, sample=new_sample, status="unknown"
+                    case=case, sample=new_sample, status=PhenotypeStatus.UNKNOWN
                 )
                 self.status.session.add(link)
             new_pools.append(new_pool)

@@ -12,12 +12,10 @@ from cg.services.illumina_services.illumina_metrics_service.illumina_demux_versi
     IlluminaDemuxVersionService,
 )
 from cg.services.illumina_services.illumina_metrics_service.models import (
-    IlluminaSequencingRunDTO,
     IlluminaSampleSequencingMetricsDTO,
+    IlluminaSequencingRunDTO,
 )
-from cg.store.models import (
-    SampleLaneSequencingMetrics,
-)
+from cg.store.models import SampleLaneSequencingMetrics
 from cg.utils.flow_cell import get_flow_cell_id
 
 

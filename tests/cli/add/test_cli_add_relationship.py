@@ -3,7 +3,7 @@
 from click.testing import CliRunner
 
 from cg.cli.add import add
-from cg.constants.subject import Sex
+from cg.constants.subject import PhenotypeStatus, Sex
 from cg.models.cg_config import CGConfig
 from cg.store.models import CaseSample
 from cg.store.store import Store
@@ -18,7 +18,7 @@ def test_add_relationship_required(cli_runner: CliRunner, base_context: CGConfig
     sample_id = sample.internal_id
     case = helpers.add_case(disk_store)
     case_id = case.internal_id
-    status = "affected"
+    status = PhenotypeStatus.AFFECTED
 
     # WHEN adding a relationship
     result = cli_runner.invoke(
@@ -42,7 +42,7 @@ def test_add_relationship_bad_sample(cli_runner: CliRunner, base_context: CGConf
     case = helpers.add_case(disk_store)
     case_id = case.internal_id
     sample_id = "dummy_sample"
-    status = "affected"
+    status = PhenotypeStatus.AFFECTED
     result = cli_runner.invoke(
         add,
         [
@@ -69,7 +69,7 @@ def test_add_relationship_bad_family(cli_runner: CliRunner, base_context: CGConf
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
 
-    status = "affected"
+    status = PhenotypeStatus.AFFECTED
     result = cli_runner.invoke(
         add,
         [
@@ -128,7 +128,7 @@ def test_add_relationship_mother(
     mother_id = mother.internal_id
     case = helpers.add_case(disk_store)
     case_id = case.internal_id
-    status = "affected"
+    status = PhenotypeStatus.AFFECTED
 
     # WHEN adding a relationship
     result = cli_runner.invoke(
@@ -163,7 +163,7 @@ def test_add_relationship_bad_mother(
     mother_id = "dummy_mother"
     case = helpers.add_case(disk_store)
     case_id = case.internal_id
-    status = "affected"
+    status = PhenotypeStatus.AFFECTED
 
     # WHEN adding a relationship
     result = cli_runner.invoke(
@@ -200,7 +200,7 @@ def test_add_relationship_father(
     case = helpers.add_case(disk_store)
     case_id = case.internal_id
 
-    status = "affected"
+    status = PhenotypeStatus.AFFECTED
 
     # WHEN adding a relationship
     result = cli_runner.invoke(
@@ -237,7 +237,7 @@ def test_add_relationship_bad_father(
     case = helpers.add_case(disk_store)
     case_id = case.internal_id
 
-    status = "affected"
+    status = PhenotypeStatus.AFFECTED
 
     # WHEN adding a relationship
     result = cli_runner.invoke(
