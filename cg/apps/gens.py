@@ -4,7 +4,7 @@ import logging
 
 from cg.constants.constants import PrepCategory
 from cg.store.models import Case
-from cg.utils import Process, CalledProcessError
+from cg.utils import Process
 from cg.utils.dict import get_list_from_dictionary
 
 LOG = logging.getLogger(__name__)
