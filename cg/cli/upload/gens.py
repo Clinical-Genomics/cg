@@ -24,13 +24,13 @@ LOG = logging.getLogger(__name__)
 @DRY_RUN
 @click.option(
     "-r",
-    "--re-upload",
+    "--replace",
     is_flag=True,
-    help="re-upload existing analysis",
+    help="replace existing analysis",
 )
 @click.pass_obj
 def upload_to_gens(
-    context: CGConfig, case_id: str | None, dry_run: bool, re_upload : bool
+    context: CGConfig, case_id: str | None, dry_run: bool, replace : bool
 ):
     """Upload data from an analysis to Gens."""
 
@@ -62,6 +62,6 @@ def upload_to_gens(
                 case_id=case_id,
                 coverage_path=hk_coverage.full_path,
                 genome_build=GENOME_BUILD_37,
-                replace=re_upload,
+                replace=replace,
                 sample_id=sample.internal_id,
             )
