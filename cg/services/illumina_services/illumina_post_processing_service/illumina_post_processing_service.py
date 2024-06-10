@@ -102,24 +102,24 @@ class IlluminaPostProcessingService:
     def store_illumina_data_in_housekeeper(
         self,
         flow_cell: IlluminaRunDirectoryData,
-        flow_cell_run_dir: Path,
         store: Store,
     ) -> None:
-        LOG.info(f"Add flow cell data to Housekeeper for {flow_cell.id}")
+        """Store fastq files, demux logs and run parameters files for flow cell in Housekeeper."""
+        LOG.info(f"Add sequencing and demux data to Housekeeper for run {flow_cell.id}")
 
         self.hk_api.add_bundle_and_version_if_non_existent(flow_cell.id)
-
         tags: list[str] = [SequencingFileTag.FASTQ, SequencingFileTag.RUN_PARAMETERS, flow_cell.id]
         self.hk_api.add_tags_if_non_existent(tags)
-
         add_sample_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=self.hk_api, store=store)
         store_undetermined_fastq_files(flow_cell=flow_cell, hk_api=self.hk_api, store=store)
         add_demux_logs_to_housekeeper(
-            flow_cell=flow_cell, hk_api=self.hk_api, flow_cell_run_dir=flow_cell_run_dir
+            flow_cell=flow_cell,
+            hk_api=self.hk_api,
+            flow_cell_run_dir=flow_cell.get_sequencing_runs_dir(),
         )
         add_run_parameters_file_to_housekeeper(
             flow_cell_name=flow_cell.full_name,
-            flow_cell_run_dir=flow_cell_run_dir,
+            flow_cell_run_dir=flow_cell.get_sequencing_runs_dir(),
             hk_api=self.hk_api,
         )
 
@@ -159,6 +159,10 @@ class IlluminaPostProcessingService:
             return
         try:
             self.store_illumina_data_in_status_db(flow_cell)
+            self.store_illumina_data_in_housekeeper(
+                flow_cell=flow_cell,
+                store=self.status_db,
+            )
         except Exception as e:
             LOG.error(f"Failed to store flow cell data: {str(e)}")
             raise
