@@ -1,7 +1,7 @@
-from enum import StrEnum
+"""Constants related to PacBio sequencing."""
 
 
-class PacBioDirsAndFiles(StrEnum):
+class PacBioDirsAndFiles:
     ADAPTER_REPORT: str = "adapter.report.json"
     CCS_REPORT: str = "ccs.report.json"
     CONTROL_REPORT: str = "control.report.json"
@@ -9,7 +9,7 @@ class PacBioDirsAndFiles(StrEnum):
     RAW_DATA_REPORT: str = "raw_data.report.json"
 
 
-class CCSAttributeIDs(StrEnum):
+class CCSAttributeIDs:
     NUMBER_OF_READS: str = "ccs2.number_of_ccs_reads"
     TOTAL_NUMBER_OF_BASES: str = "ccs2.total_number_of_ccs_bases"
     MEAN_READ_LENGTH: str = "ccs2.mean_ccs_readlength"
