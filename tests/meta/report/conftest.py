@@ -5,6 +5,7 @@ import pytest
 
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat
+from cg.constants.report import NA_FIELD, REPORT_QC_FLAG
 from cg.io.controller import ReadFile
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
@@ -136,10 +137,10 @@ def rnafusion_validated_metrics() -> dict[str, str]:
         "duplicates": "14.86",
         "dv200": "75.0",
         "gc_content": "51.7",
-        "initial_qc": "Godkänd",
+        "initial_qc": REPORT_QC_FLAG.get(True),
         "input_amount": "300.0",
-        "insert_size": "N/A",
-        "insert_size_peak": "N/A",
+        "insert_size": NA_FIELD,
+        "insert_size_peak": NA_FIELD,
         "mapped_reads": "96.53",
         "mean_length_r1": "99.0",
         "million_read_pairs": "75.0",
@@ -162,7 +163,7 @@ def tomte_validated_metrics() -> dict[str, str]:
         "duplicates": "28.94",
         "dv200": "75.0",
         "gc_content": "55.37",
-        "initial_qc": "Godkänd",
+        "initial_qc": REPORT_QC_FLAG.get(True),
         "input_amount": "300.0",
         "mean_length_r1": "134.0",
         "million_read_pairs": "85.0",
