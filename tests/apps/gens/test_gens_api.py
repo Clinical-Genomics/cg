@@ -36,6 +36,7 @@ def test_gens_api_load(
         genome_build=GENOME_BUILD_37,
         baf_path=gens_fracsnp_path.as_posix(),
         coverage_path=gens_coverage_path.as_posix(),
+        replace=False,
         case_id=case_id,
     )
 
