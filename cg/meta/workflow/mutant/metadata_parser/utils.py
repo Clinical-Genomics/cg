@@ -20,7 +20,9 @@ def get_negative_controls_from_list(samples: list[Sample]) -> list[Sample]:
     return negative_controls
 
 
-def get_internal_negative_control_id_from_lims(lims: LimsAPI, sample_internal_id: str) -> str:
+def get_internal_negative_control_id_from_lims(
+    lims: LimsAPI, sample_internal_id: str
+) -> None | str:
     artifact: Artifact = lims.get_latest_artifact_for_sample(
         LimsProcess.COVID_POOLING_STEP, LimsArtifactTypes.ANALYTE, sample_internal_id
     )

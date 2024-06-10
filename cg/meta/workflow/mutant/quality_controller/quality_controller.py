@@ -1,6 +1,5 @@
 from pathlib import Path
 from cg.constants.constants import MutantQC
-from cg.meta.workflow.mutant.metadata_parser.metadata_parser import MetadataParser
 from cg.meta.workflow.mutant.quality_controller.models import (
     QualityMetrics,
     SampleQualityResult,
@@ -17,17 +16,10 @@ from cg.meta.workflow.mutant.quality_controller.utils import (
     get_report_path,
 )
 from cg.meta.workflow.mutant.quality_controller.report_generator import ReportGenerator
-from cg.models.cg_config import CGConfig
-from cg.apps.lims.api import LimsAPI
-from cg.store.store import Store
 from cg.store.models import Case
 
 
 class QualityController:
-    def __init__(self, config: CGConfig):
-        status_db: Store = config.status_db
-        lims: LimsAPI = config.lims_api
-
     def quality_control(
         self, case: Case, case_path: Path, case_results_file_path: Path
     ) -> QualityResult | None:
@@ -96,7 +88,7 @@ class QualityController:
         internal_negative_control_pass_qc: bool = internal_negative_control_qc_pass(sample_results)
         external_negative_control_pass_qc: bool = external_negative_control_qc_pass(sample_results)
 
-        case_pass_qc: bool = self.case_qc_pass(sample_results)
+        case_pass_qc: bool = self.case_qc_pass(sample_results=sample_results)
 
         result = CaseQualityResult(
             passes_qc=(
