@@ -35,8 +35,8 @@ def test_demultiplex_dragen_flowcell(
 
     # GIVEN a flow cell that is ready for demultiplexing
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
-    demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
-    assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
+    demux_dir: Path = demux_api.demultiplexed_run_dir_path(flow_cell)
+    assert demux_api.is_demultiplexing_possible(sequencing_run=flow_cell)
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
 
     # GIVEN an already existing output directory
@@ -76,7 +76,7 @@ def test_demultiplex_all_novaseq(
 
     # GIVEN a demultiplexing context with an API and correct structure
     demux_api: DemultiplexingAPI = demultiplexing_context_for_demux.demultiplex_api
-    assert demux_api.flow_cells_dir == tmp_illumina_flow_cells_demux_all_directory
+    assert demux_api.sequencing_runs_dir == tmp_illumina_flow_cells_demux_all_directory
 
     # GIVEN sequenced flow cells with their sample sheet in Housekeeper
     for flow_cell_dir in tmp_illumina_flow_cells_demux_all_directory.iterdir():
@@ -93,7 +93,7 @@ def test_demultiplex_all_novaseq(
     # WHEN running the demultiplex all command
     result: testing.Result = cli_runner.invoke(
         demultiplex_all,
-        ["--flow-cells-directory", str(demux_api.flow_cells_dir), "--dry-run"],
+        ["--flow-cells-directory", str(demux_api.sequencing_runs_dir), "--dry-run"],
         obj=demultiplexing_context_for_demux,
     )
 
