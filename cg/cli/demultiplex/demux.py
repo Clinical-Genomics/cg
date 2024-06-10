@@ -79,7 +79,7 @@ def demultiplex_all(context: CGConfig, sequencing_runs_directory: click.Path, dr
 @click.argument("sequencing-run-name")
 @DRY_RUN
 @click.pass_obj
-def demultiplex_flow_cell(
+def demultiplex_sequencing_run(
     context: CGConfig,
     dry_run: bool,
     sequencing_run_name: str,

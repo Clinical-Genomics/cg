@@ -6,7 +6,7 @@ from pathlib import Path
 from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell
+from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_sequencing_run
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
@@ -47,7 +47,7 @@ def test_demultiplex_dragen_flowcell(
 
     # WHEN starting demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
-        demultiplex_flow_cell,
+        demultiplex_sequencing_run,
         [str(tmp_flow_cell_directory_bcl_convert)],
         obj=demultiplexing_context_for_demux,
     )
