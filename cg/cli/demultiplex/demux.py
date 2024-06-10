@@ -84,7 +84,8 @@ def demultiplex_sequencing_run(
     dry_run: bool,
     sequencing_run_name: str,
 ):
-    """Demultiplex a sequencing using BCLConvert.
+    """Demultiplex an Illumina sequencing run using BCLConvert.
+
 
     sequencing run name is the sequencing run directory name, e.g. '230912_A00187_1009_AHK33MDRX3'
     """
