@@ -122,12 +122,12 @@ class DownsampleAPI(MetaAPI):
         )
         return downsample_work_flow.write_and_submit_sbatch_script()
 
-    def downsample_sample(self, input: DownsampleInput) -> int | None:
+    def downsample_sample(self, downsample_input: DownsampleInput) -> int | None:
         """Downsample a sample."""
-        LOG.info(f"Starting Downsampling for sample {input.sample_id}.")
-        validate_sample_id(input.sample_id)
+        LOG.info(f"Starting Downsampling for sample {downsample_input.sample_id}.")
+        validate_sample_id(downsample_input.sample_id)
         downsample_data: DownsampleData = self.get_downsample_data(
-            downsample_input=input,
+            downsample_input=downsample_input,
         )
         if self.prepare_fastq_api.is_sample_decompression_needed(
             downsample_data.original_sample.internal_id
@@ -141,6 +141,6 @@ class DownsampleAPI(MetaAPI):
         if not self.dry_run:
             downsample_data.create_down_sampling_working_directory()
         submitted_job: int = self.start_downsample_job(
-            downsample_data=downsample_data, account=account
+            downsample_data=downsample_data, account=downsample_input.account
         )
         return submitted_job

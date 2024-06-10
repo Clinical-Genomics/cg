@@ -19,6 +19,7 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.apps.downsample.downsample import DownsampleAPI
+from cg.apps.downsample.models import DownsampleInput
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -3934,20 +3935,29 @@ def downsample_case_name():
 
 
 @pytest.fixture
-def downsample_data(
-    downsample_context: CGConfig,
+def downsample_input(
     downsample_sample_internal_id_1: str,
     downsample_case_internal_id: str,
     downsample_case_name: str,
     number_of_reads_in_millions: int,
-) -> DownsampleData:
-    return DownsampleData(
-        status_db=downsample_context.status_db_,
-        hk_api=downsample_context.housekeeper_api_,
+) -> DownsampleInput:
+    return DownsampleInput(
         sample_id=downsample_sample_internal_id_1,
         case_id=downsample_case_internal_id,
         case_name=downsample_case_name,
         number_of_reads=number_of_reads_in_millions,
+    )
+
+
+@pytest.fixture
+def downsample_data(
+    downsample_context: CGConfig,
+    downsample_input: DownsampleInput,
+) -> DownsampleData:
+    return DownsampleData(
+        status_db=downsample_context.status_db_,
+        hk_api=downsample_context.housekeeper_api_,
+        downsample_input=downsample_input,
         out_dir=Path(downsample_context.downsample.downsample_dir),
     )
 

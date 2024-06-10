@@ -6,9 +6,9 @@ class DownsampleInput(BaseModel):
     case_name: str
     case_id: str
     number_of_reads: float
-    account: str | None
-    action: str | None
-    ticket: str | None
-    customer_id: str | None
-    data_analysis: str | None
-    data_delivery: str | None
+    account: str | None = None
+    action: str | None = None
+    ticket: str | None = None
+    customer_id: str | None = None
+    data_analysis: str | None = None
+    data_delivery: str | None = None

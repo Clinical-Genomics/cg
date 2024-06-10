@@ -115,7 +115,7 @@ def downsample_sample(
             data_delivery=data_delivery,
         )
         try:
-            downsample_api.downsample_sample(input=downsample_input)
+            downsample_api.downsample_sample(downsample_input=downsample_input)
         except Exception as error:
             LOG.info(repr(error))
             continue

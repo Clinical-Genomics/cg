@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from cg.apps.downsample.downsample import DownsampleAPI
+from cg.apps.downsample.models import DownsampleInput
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.models.downsample.downsample_data import DownsampleData
@@ -87,6 +88,7 @@ def test_downsample_api_adding_a_second_sample_to_case(
     downsample_sample_internal_id_2: str,
     downsample_case_internal_id: str,
     downsample_case_name: str,
+    downsample_input: DownsampleInput,
     downsample_context: CGConfig,
 ):
     """Test that subsequent samples are added to the given case."""
@@ -96,13 +98,11 @@ def test_downsample_api_adding_a_second_sample_to_case(
     downsample_context.housekeeper_api_ = downsample_api.housekeeper_api
 
     # WHEN generating a new DownsampelData for the same case with a different sample
+    downsample_input.sample_id = downsample_sample_internal_id_2
     new_downsample_data = DownsampleData(
         status_db=downsample_context.status_db_,
         hk_api=downsample_context.housekeeper_api_,
-        sample_id=downsample_sample_internal_id_2,
-        case_id=downsample_case_internal_id,
-        case_name=downsample_case_name,
-        number_of_reads=50,
+        downsample_input=downsample_input,
         out_dir=Path(downsample_context.downsample.downsample_dir),
     )
 
@@ -117,10 +117,7 @@ def test_downsample_api_adding_a_second_sample_to_case(
 
 def test_start_downsample_job(
     downsample_api: DownsampleAPI,
-    downsample_sample_internal_id_1: str,
-    downsample_case_internal_id: str,
-    downsample_case_name: str,
-    number_of_reads_in_millions: int,
+    downsample_input: DownsampleInput,
     mocker,
 ):
     """Test that a downsample job can be started."""
@@ -131,10 +128,7 @@ def test_start_downsample_job(
     mocker.patch.object(PrepareFastqAPI, "is_sample_decompression_needed")
     PrepareFastqAPI.is_sample_decompression_needed.return_value = False
     submitted_job: int = downsample_api.downsample_sample(
-        sample_id=downsample_sample_internal_id_1,
-        case_id=downsample_case_internal_id,
-        case_name=downsample_case_name,
-        number_of_reads=number_of_reads_in_millions,
+        downsample_input=downsample_input,
     )
 
     # THEN a job is submitted
