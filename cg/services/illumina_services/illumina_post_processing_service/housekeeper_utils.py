@@ -22,7 +22,7 @@ def _check_if_fastq_path_should_be_stored_in_housekeeper(
     sample_id: str,
     sample_fastq_path: Path,
     sequencer_type: Sequencers,
-    flow_cell_name: str,
+    run_internal_id: str,
     store: Store,
 ) -> bool:
     """
@@ -33,7 +33,7 @@ def _check_if_fastq_path_should_be_stored_in_housekeeper(
     q30_threshold: int = get_q30_threshold(sequencer_type)
 
     metric = store.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-        flow_cell_name=flow_cell_name,
+        flow_cell_name=run_internal_id,
         sample_internal_id=sample_id,
         lane=lane,
     )
@@ -44,27 +44,24 @@ def _check_if_fastq_path_should_be_stored_in_housekeeper(
     LOG.warning(
         f"Skipping fastq file {sample_fastq_path.name} as no metrics entry was found in status db."
     )
-    LOG.warning(f"Flow cell name: {flow_cell_name}, sample id: {sample_id}, lane: {lane} ")
+    LOG.warning(f"Flow cell name: {run_internal_id}, sample id: {sample_id}, lane: {lane} ")
     return False
 
 
 def add_sample_fastq_files_to_housekeeper(
     flow_cell: IlluminaRunDirectoryData, hk_api: HousekeeperAPI, store: Store
 ) -> None:
-    """Add sample fastq files from flow cell to Housekeeper."""
+    """Add sample fastq files from the demultiplex directory to Housekeeper."""
     sample_internal_ids: list[str] = flow_cell.sample_sheet.get_sample_ids()
-
     for sample_internal_id in sample_internal_ids:
         sample_fastq_paths: list[Path] | None = get_sample_fastqs_from_flow_cell(
             flow_cell_directory=flow_cell.path, sample_internal_id=sample_internal_id
         )
-
         if not sample_fastq_paths:
             LOG.warning(
                 f"Cannot find fastq files for sample {sample_internal_id} in {flow_cell.path}. Skipping."
             )
             continue
-
         for sample_fastq_path in sample_fastq_paths:
             sample_fastq_path: Path = rename_fastq_file_if_needed(
                 fastq_file_path=sample_fastq_path, flow_cell_name=flow_cell.id
@@ -73,7 +70,7 @@ def add_sample_fastq_files_to_housekeeper(
                 sample_id=sample_internal_id,
                 sample_fastq_path=sample_fastq_path,
                 sequencer_type=flow_cell.sequencer_type,
-                flow_cell_name=flow_cell.id,
+                run_internal_id=flow_cell.id,
                 store=store,
             ):
                 hk_api.store_fastq_path_in_housekeeper(
@@ -101,7 +98,7 @@ def store_undetermined_fastq_files(
                 sample_id=sample_id,
                 sample_fastq_path=fastq_path,
                 sequencer_type=flow_cell.sequencer_type,
-                flow_cell_name=flow_cell.id,
+                run_internal_id=flow_cell.id,
                 store=store,
             ):
                 hk_api.store_fastq_path_in_housekeeper(
