@@ -41,7 +41,7 @@ def ensure_two_dna_tumour_matches(
     subject_id: str = get_subject_id_from_case(store=rna_store, case_id=rna_case_id)
     set_is_tumour_on_case(store=rna_store, case_id=dna_case_id, is_tumour=True)
     dna_extra_case = helpers.ensure_case(
-        store=rna_store, customer=rna_store.get_case_by_internal_id(dna_case_id).customer
+        store=rna_store, customer=rna_store.get_case_by_internal_id(dna_case_id).customer_id
     )
     another_sample_id = helpers.add_sample(
         store=rna_store,
@@ -65,7 +65,7 @@ def ensure_extra_rna_case_match(
     rna_extra_case = helpers.ensure_case(
         store=rna_store,
         data_analysis=Workflow.MIP_RNA,
-        customer=rna_store.get_case_by_internal_id(rna_case_id).customer,
+        customer=rna_store.get_case_by_internal_id(rna_case_id).customer_id,
     )
     subject_id: str = get_subject_id_from_case(store=rna_store, case_id=rna_case_id)
     another_rna_sample_id = helpers.add_sample(

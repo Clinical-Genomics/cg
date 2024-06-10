@@ -1356,9 +1356,9 @@ class ReadHandler(BaseHandler):
 
     def get_customers_to_invoice(self, records: Query) -> list[Customer]:
         customers_to_invoice: list[Customer] = [
-            record.customer
+            record.customer_id
             for record in records.all()
-            if record.customer.internal_id != CustomerId.CG_INTERNAL_CUSTOMER
+            if record.customer_id.internal_id != CustomerId.CG_INTERNAL_CUSTOMER
         ]
         return list(set(customers_to_invoice))
 

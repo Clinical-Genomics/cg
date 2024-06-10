@@ -3,9 +3,10 @@
 import logging
 from pathlib import Path
 
+from cg.apps.downsample.models import DownsampleInput
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Priority
-from cg.store.models import ApplicationVersion, Case, Sample
+from cg.store.models import ApplicationVersion, Case, Sample, Customer
 from cg.store.store import Store
 from cg.utils.calculations import multiply_by_million
 
@@ -17,20 +18,22 @@ class DownsampleData:
         self,
         status_db: Store,
         hk_api: HousekeeperAPI,
-        sample_id: str,
-        number_of_reads: float,
-        case_id: str,
-        case_name: str,
+        downsample_input: DownsampleInput,
         out_dir: Path,
     ):
         """Initialize the downsample data and perform integrity checks."""
         self.status_db: Store = status_db
         self.housekeeper_api: HousekeeperAPI = hk_api
-        self.sample_id: str = sample_id
-        self.number_of_reads: float = number_of_reads
-        self.case_id: str = case_id
+        self.sample_id: str = downsample_input.sample_id
+        self.number_of_reads: float = downsample_input.number_of_reads
+        self.case_id: str = downsample_input.case_id
         self.out_dir: Path = out_dir
-        self.case_name: str = case_name
+        self.case_name: str = downsample_input.case_name
+        self.case_action: str = downsample_input.action
+        self.customer_id: str = downsample_input.customer_id
+        self.data_analysis: str = downsample_input.data_analysis
+        self.data_delivery: str = downsample_input.data_delivery
+        self.ticket: str = downsample_input.ticket
         self.original_sample: Sample = self.get_sample_to_downsample()
         self.original_case: Case = self.get_case_to_downsample()
         self.validate_enough_reads_to_downsample()
@@ -113,15 +116,25 @@ class DownsampleData:
         if self.status_db.case_with_name_exists(case_name=self.downsampled_case_name):
             return self.status_db.get_case_by_name(self.downsampled_case_name)
         downsampled_case: Case = self.status_db.add_case(
-            data_analysis=self.original_case.data_analysis,
-            data_delivery=DataDelivery.NO_DELIVERY,
+            data_analysis=(
+                self.data_analysis if self.data_analysis else self.original_case.data_analysis
+            ),
+            data_delivery=self.data_delivery if self.data_delivery else DataDelivery.NO_DELIVERY,
             name=self.downsampled_case_name,
             panels=self.original_case.panels,
             priority=self.original_case.priority,
-            ticket=self.original_case.latest_ticket,
+            ticket=self.ticket if self.ticket else self.original_case.latest_ticket,
+        )
+        downsampled_case.action = (
+            self.case_action if self.case_action else self.original_case.action
         )
         downsampled_case.orders.append(self.original_case.latest_order)
-        downsampled_case.customer = self.original_case.customer
+        customer: Customer = (
+            self.status_db.get_customer_by_internal_id(self.customer_id)
+            if self.customer_id
+            else None
+        )
+        downsampled_case.customer = customer if customer else self.original_case.customer
         return downsampled_case
 
     def validate_enough_reads_to_downsample(self) -> None:
