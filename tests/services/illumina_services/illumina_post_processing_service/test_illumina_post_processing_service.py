@@ -4,7 +4,7 @@ from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirecto
 from cg.services.illumina_services.illumina_post_processing_service.illumina_post_processing_service import (
     IlluminaPostProcessingService,
 )
-from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun, IlluminaSampleSequencingMetrics
+from cg.store.models import IlluminaFlowCell, IlluminaSampleSequencingMetrics, IlluminaSequencingRun
 
 
 def test_get_illumina_flow_cell(
@@ -75,7 +75,7 @@ def test_store_illumina_flow_cell_data(
     # GIVEN a flow cell directory data and an Illumina post processing service
 
     # WHEN storing the flow cell data
-    illumina_post_postprocessing_service.store_illumina_flow_cell_data(
+    illumina_post_postprocessing_service.store_illumina_data_in_status_db(
         flow_cell_dir_data=novaseq_x_demux_runs_flow_cell
     )
 

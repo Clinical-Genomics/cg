@@ -84,6 +84,21 @@ class IlluminaPostProcessingService:
             sample_metrics_dto=sample_metrics, sequencing_run=sequencing_run
         )
 
+    def store_illumina_data_in_status_db(
+        self, flow_cell_dir_data: IlluminaRunDirectoryData
+    ) -> None:
+        """Store flow cell data in the status database."""
+        flow_cell: IlluminaFlowCell = self.store_illumina_flow_cell(
+            flow_cell_dir_data=flow_cell_dir_data
+        )
+        sequencing_run: IlluminaSequencingRun = self.store_illumina_sequencing_run(
+            flow_cell_dir_data=flow_cell_dir_data, flow_cell=flow_cell
+        )
+        self.store_illumina_sample_sequencing_metrics(
+            flow_cell_dir_data=flow_cell_dir_data, sequencing_run=sequencing_run
+        )
+        self.status_db.commit_to_store()
+
     def store_illumina_data_in_housekeeper(
         self,
         flow_cell: IlluminaRunDirectoryData,
@@ -107,19 +122,6 @@ class IlluminaPostProcessingService:
             flow_cell_run_dir=flow_cell_run_dir,
             hk_api=self.hk_api,
         )
-
-    def store_illumina_flow_cell_data(self, flow_cell_dir_data: IlluminaRunDirectoryData) -> None:
-        """Store flow cell data in the status database."""
-        flow_cell: IlluminaFlowCell = self.store_illumina_flow_cell(
-            flow_cell_dir_data=flow_cell_dir_data
-        )
-        sequencing_run: IlluminaSequencingRun = self.store_illumina_sequencing_run(
-            flow_cell_dir_data=flow_cell_dir_data, flow_cell=flow_cell
-        )
-        self.store_illumina_sample_sequencing_metrics(
-            flow_cell_dir_data=flow_cell_dir_data, sequencing_run=sequencing_run
-        )
-        self.status_db.commit_to_store()
 
     def post_process_illumina_flow_cell(
         self,
@@ -156,7 +158,7 @@ class IlluminaPostProcessingService:
             LOG.info(f"Dry run will not finish flow cell {flow_cell_directory_name}")
             return
         try:
-            self.store_illumina_flow_cell_data(flow_cell)
+            self.store_illumina_data_in_status_db(flow_cell)
         except Exception as e:
             LOG.error(f"Failed to store flow cell data: {str(e)}")
             raise
