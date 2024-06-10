@@ -40,7 +40,7 @@ class IlluminaRunDirectoryData:
     """Class to collect information about sequencing run directories and their particular files."""
 
     def __init__(self, sequencing_run_path: Path):
-        LOG.debug(f"Instantiating FlowCellDirectoryData with path {sequencing_run_path}")
+        LOG.debug(f"Instantiating IlluminaRunDirectoryData with path {sequencing_run_path}")
         self.path: Path = sequencing_run_path
         self.machine_name: str = EMPTY_STRING
         self._run_parameters: RunParameters | None = None

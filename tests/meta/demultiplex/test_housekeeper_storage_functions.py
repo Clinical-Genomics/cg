@@ -229,7 +229,7 @@ def test_add_run_parameters_to_housekeeper(
     # WHEN adding the run parameters file to housekeeper
     add_run_parameters_file_to_housekeeper(
         flow_cell_name=novaseq_x_flow_cell.full_name,
-        flow_cell_run_dir=demultiplex_context.demultiplex_api.flow_cells_dir,
+        flow_cell_run_dir=demultiplex_context.demultiplex_api.sequencing_runs_dir,
         hk_api=hk_api,
     )
 
