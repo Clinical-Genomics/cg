@@ -17,6 +17,7 @@ from cg.services.illumina_services.illumina_metrics_service.models import (
 )
 from cg.services.illumina_services.illumina_post_processing_service.utils import (
     create_delivery_file_in_flow_cell_directory,
+    combine_sample_metrics_with_undetermined,
 )
 from cg.services.illumina_services.illumina_post_processing_service.validation import (
     is_flow_cell_ready_for_postprocessing,
@@ -73,8 +74,16 @@ class IlluminaPostProcessingService:
                 flow_cell_directory=flow_cell_dir_data.path,
             )
         )
+        undetermined_metrics: list[IlluminaSampleSequencingMetricsDTO] = (
+            metrics_service.create_sample_run_dto_for_undetermined_reads(flow_cell_dir_data)
+        )
+
+        combined_metrics = combine_sample_metrics_with_undetermined(
+            sample_metrics=sample_metrics,
+            undetermined_metrics=undetermined_metrics,
+        )
         return self.status_db.add_illumina_sample_metrics(
-            sample_metrics_dto=sample_metrics, sequencing_run=sequencing_run
+            sample_metrics_dto=combined_metrics, sequencing_run=sequencing_run
         )
 
     def store_illumina_flow_cell_data(self, flow_cell_dir_data: IlluminaRunDirectoryData) -> None:
