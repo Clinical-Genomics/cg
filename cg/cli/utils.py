@@ -16,5 +16,4 @@ def is_case_name_allowed(name: str) -> bool:
     return bool(allowed_pattern.fullmatch(name))
 
 
-def click_context_setting_max_content_width() -> dict[str, int]:
-    return {"max_content_width": shutil.get_terminal_size().columns - 10}
+CLICK_CONTEXT_SETTINGS :dict[str, int] = {"max_content_width": shutil.get_terminal_size().columns - 10}
