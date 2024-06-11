@@ -208,6 +208,8 @@ class StoreHelpers:
         prep_category: str = "wgs",
         description: str = None,
         is_archived: bool = False,
+        target_reads: int = 2000000,
+        percent_reads_guaranteed: int = 75,
         is_accredited: bool = False,
         is_external: bool = False,
         min_sequencing_depth: int = 30,
@@ -226,7 +228,8 @@ class StoreHelpers:
             description=description,
             is_archived=is_archived,
             percent_kth=80,
-            percent_reads_guaranteed=75,
+            target_reads=target_reads,
+            percent_reads_guaranteed=percent_reads_guaranteed,
             is_accredited=is_accredited,
             limitations="A limitation",
             is_external=is_external,
@@ -246,10 +249,10 @@ class StoreHelpers:
         **kwargs,
     ) -> ApplicationLimitations:
         """Ensure that application limitations exist in store."""
-        application_limitation: ApplicationLimitations = (
-            store.get_application_limitation_by_tag_and_workflow(
-                tag=application.tag, workflow=workflow
-            )
+        application_limitation: (
+            ApplicationLimitations
+        ) = store.get_application_limitation_by_tag_and_workflow(
+            tag=application.tag, workflow=workflow
         )
         if application_limitation:
             return application_limitation

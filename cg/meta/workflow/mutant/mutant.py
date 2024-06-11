@@ -27,7 +27,7 @@ class MutantAnalysisAPI(AnalysisAPI):
     ):
         super().__init__(workflow=workflow, config=config)
         self.root_dir = config.mutant.root
-        self.quality_checker = QualityController(config)
+        self.quality_checker = QualityController()
 
     @property
     def conda_binary(self) -> str:

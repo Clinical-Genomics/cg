@@ -14,9 +14,7 @@ from cg.constants.constants import DRY_RUN
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mutant.mutant import MutantAnalysisAPI
-from cg.meta.workflow.mutant.quality_controller.models import QualityResult
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
