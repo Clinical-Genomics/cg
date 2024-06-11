@@ -84,7 +84,7 @@ class IlluminaPostProcessingService:
             sample_metrics_dto=sample_metrics, sequencing_run=sequencing_run
         )
 
-    def store_illumina_data_in_status_db(
+    def store_sequencing_data_in_status_db(
         self, sequencing_run_dir: IlluminaRunDirectoryData
     ) -> None:
         """Store flow cell data in the status database."""
@@ -99,7 +99,7 @@ class IlluminaPostProcessingService:
         )
         self.status_db.commit_to_store()
 
-    def store_illumina_data_in_housekeeper(
+    def store_sequencing_data_in_housekeeper(
         self,
         flow_cell: IlluminaRunDirectoryData,
         store: Store,
@@ -158,8 +158,8 @@ class IlluminaPostProcessingService:
             LOG.info(f"Dry run will not finish flow cell {flow_cell_directory_name}")
             return
         try:
-            self.store_illumina_data_in_status_db(flow_cell)
-            self.store_illumina_data_in_housekeeper(
+            self.store_sequencing_data_in_status_db(flow_cell)
+            self.store_sequencing_data_in_housekeeper(
                 flow_cell=flow_cell,
                 store=self.status_db,
             )
