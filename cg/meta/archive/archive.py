@@ -90,7 +90,7 @@ class SpringArchiveAPI:
         files_to_retrieve: list[File] = self.get_files_to_retrieve(case)
         if not files_to_retrieve:
             raise MissingFilesError(f"No files to retrieve for case {case_id}")
-        files_and_samples: list[FileAndSample] = self.add_samples_to_files(files=files_to_retrieve)
+        files_and_samples: list[FileAndSample] = self.add_samples_to_files(files_to_retrieve)
         self.retrieve_files_from_archive_location(files_and_samples)
 
     def get_files_to_retrieve(self, case: Case) -> list[File]:
