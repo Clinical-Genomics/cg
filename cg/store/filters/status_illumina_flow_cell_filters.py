@@ -1,4 +1,4 @@
-"""Fillters for the Illumina Flow Cells."""
+"""Filters for the Illumina Flow Cells."""
 
 from enum import Enum
 

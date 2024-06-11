@@ -35,8 +35,8 @@ def apply_illumina_metrics_filter(
     for filter_function in filter_functions:
         metrics: Query = filter_function(
             metrics=metrics,
+            run_id=run_id,
             sample_internal_id=sample_internal_id,
-            flow_cell_name=run_id,
             lane=lane,
         )
     return metrics
