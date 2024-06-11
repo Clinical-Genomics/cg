@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+from housekeeper.store.models import Bundle
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.devices import DeviceType
