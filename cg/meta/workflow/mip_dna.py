@@ -75,12 +75,9 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
         return analysis_metadata.genome_build
 
     def get_data_analysis_type(self, case_id: str) -> str:
-        """Return the data analysis type of a MIP-DNA analysis."""
-        """
-        Return data analysis type carried out.
-        Patch for the typical behaviour of the AnalysisAPI function. 
-        It does not raise an error with mutliple analysis types.
-
+        """Return the data analysis type of a MIP-DNA analysis
+        Patch for the typical behaviour of the AnalysisAPI function.
+        It does not raise an error with multiple analysis types.
         """
         case: Case = self.get_validated_case(case_id)
         analysis_types: set[str] = {
