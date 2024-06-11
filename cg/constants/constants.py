@@ -55,7 +55,7 @@ class ControlOptions(StrEnum):
     EMPTY: str = ""
 
 
-DEFAULT_CAPTURE_KIT = "twistexomerefseq_10.2_hg19_design.bed"
+DEFAULT_CAPTURE_KIT = "twistexomecomprehensive_10.2_hg19_design.bed"
 
 
 class CustomerId(StrEnum):

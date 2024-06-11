@@ -4,7 +4,8 @@ from importlib.resources import files
 from pathlib import Path
 
 from cg.constants import DataDelivery
-from cg.constants.constants import FileExtensions, Workflow
+from cg.constants.constants import CancerAnalysisType, FileExtensions, Workflow
+from cg.constants.subject import Sex
 
 DELIVERY_REPORT_FILE_NAME: str = f"delivery-report{FileExtensions.HTML}"
 SWEDAC_LOGO_PATH = Path(
@@ -44,17 +45,23 @@ PRECISION: int = 2
 RIN_MAX_THRESHOLD: int = 10
 RIN_MIN_THRESHOLD: int = 1
 
-REPORT_GENDER: dict[str, str] = {
-    "unknown": "Okänd",
-    "female": "Kvinna",
-    "male": "Man",
+REPORT_SEX: dict[str, str] = {
+    Sex.FEMALE: "Kvinna",
+    Sex.MALE: "Man",
+    Sex.UNKNOWN: "Okänd",
 }
 
 BALSAMIC_ANALYSIS_TYPE: dict[str, str] = {
-    "tumor_wgs": "Tumör-endast (helgenomsekvensering)",
-    "tumor_normal_wgs": "Tumör/normal (helgenomsekvensering)",
-    "tumor_panel": "Tumör-endast (panelsekvensering)",
-    "tumor_normal_panel": "Tumör/normal (panelsekvensering)",
+    CancerAnalysisType.TUMOR_NORMAL_PANEL: "Tumör/normal (panelsekvensering)",
+    CancerAnalysisType.TUMOR_NORMAL_WGS: "Tumör/normal (helgenomsekvensering)",
+    CancerAnalysisType.TUMOR_PANEL: "Tumör-endast (panelsekvensering)",
+    CancerAnalysisType.TUMOR_WGS: "Tumör-endast (helgenomsekvensering)",
+}
+
+REPORT_QC_FLAG: dict[bool | None, str] = {
+    False: "Underkänd",
+    True: "Godkänd",
+    None: "Okänd",
 }
 
 # Report required fields (OPTIONAL: "version")
@@ -152,8 +159,9 @@ REQUIRED_SAMPLE_TIMESTAMP_FIELDS: list[str] = [
 
 # Metadata required fields
 _REQUIRED_SAMPLE_METADATA_FIELDS: list[str] = [
-    "million_read_pairs",
     "duplicates",
+    "initial_qc",
+    "million_read_pairs",
 ]
 
 REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
@@ -205,6 +213,7 @@ _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS: list[str] = _REQUIRED_SAMPLE_METADA
     "mean_length_r1",
 ]
 
+# WTS metadata required fields (OPTIONAL: "rin", "dv200")
 _REQUIRED_SAMPLE_METADATA_WTS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS + [
     "bias_5_3",
     "input_amount",
@@ -214,7 +223,6 @@ _REQUIRED_SAMPLE_METADATA_WTS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_SEQU
     "q20_rate",
     "q30_rate",
     "ribosomal_bases",
-    "rin",
     "uniquely_mapped_reads",
 ]
 

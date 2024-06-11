@@ -4,13 +4,14 @@ from pathlib import Path
 
 import pytest
 
-from cg.constants.constants import SCALE_TO_READ_PAIRS
 from cg.constants.metrics import DemuxMetricsColumnNames, QualityMetricsColumnNames
-from cg.services.bcl_convert_metrics_service.bcl_convert_metrics_service import (
-    BCLConvertMetricsService,
+from cg.services.illumina_services.illumina_metrics_service.models import (
+    DemuxMetrics,
+    SequencingQualityMetrics,
 )
-from cg.services.bcl_convert_metrics_service.models import DemuxMetrics, SequencingQualityMetrics
-from cg.services.bcl_convert_metrics_service.parser import MetricsParser
+from cg.services.illumina_services.illumina_metrics_service.bcl_convert_metrics_parser import (
+    BCLConvertMetricsParser,
+)
 
 
 @pytest.fixture(scope="session")
@@ -20,7 +21,7 @@ def bcl_convert_metrics_dir_path() -> Path:
         "tests",
         "fixtures",
         "services",
-        "bcl_convert_metrics_service",
+        "illumina_metrics_service",
         "230622_A00621_0864_AHY7FFDRX2",
     )
 
@@ -89,9 +90,9 @@ def bcl_convert_quality_metric_model_with_data(
 
 
 @pytest.fixture(scope="session")
-def parsed_bcl_convert_metrics(bcl_convert_metrics_dir_path) -> MetricsParser:
+def parsed_bcl_convert_metrics(bcl_convert_metrics_dir_path) -> BCLConvertMetricsParser:
     """Return an object with parsed BCLConvert metrics."""
-    return MetricsParser(bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path)
+    return BCLConvertMetricsParser(bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path)
 
 
 @pytest.fixture(scope="session")
