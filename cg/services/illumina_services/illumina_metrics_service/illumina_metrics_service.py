@@ -147,7 +147,7 @@ class IlluminaMetricsService:
             metrics: IlluminaSampleSequencingMetricsDTO = self.create_sample_run_metrics_dto(
                 sample_internal_id=UNDETERMINED, lane=lane, metrics_parser=metrics_parser
             )
-            metrics.sample_internal_id = sample_internal_id
+            metrics.sample_id = sample_internal_id
             undetermined_metrics.append(metrics)
         return undetermined_metrics
 
