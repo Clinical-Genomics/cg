@@ -124,7 +124,7 @@ class DownsampleAPI(MetaAPI):
 
     def downsample_sample(self, downsample_input: DownsampleInput) -> int | None:
         """Downsample a sample."""
-        LOG.info(f"Starting Downsampling for sample {downsample_input.sample_id}.")
+        LOG.info(f"Starting downsampling for sample {downsample_input.sample_id}.")
         validate_sample_id(downsample_input.sample_id)
         downsample_data: DownsampleData = self.get_downsample_data(
             downsample_input=downsample_input,
