@@ -49,9 +49,9 @@ def combine_metrics(
 
     combined_q30_percentage: float = weighted_average(
         total_1=existing_metric.total_reads_in_lane,
-        percentage_1=existing_metric.base_percentage_passing_q30,
+        percentage_1=existing_metric.base_passing_q30_percent,
         total_2=new_metric.total_reads_in_lane,
-        percentage_2=new_metric.base_percentage_passing_q30,
+        percentage_2=new_metric.base_passing_q30_percent,
     )
     combined_mean_quality_score: float = weighted_average(
         total_1=existing_metric.total_reads_in_lane,
@@ -68,7 +68,7 @@ def combine_metrics(
     combined_reads: int = existing_metric.total_reads_in_lane + new_metric.total_reads_in_lane
     combined_yield: int = existing_metric.yield_ + new_metric.yield_
 
-    existing_metric.base_percentage_passing_q30 = combined_q30_percentage
+    existing_metric.base_passing_q30_percent = combined_q30_percentage
     existing_metric.base_mean_quality_score = combined_mean_quality_score
     existing_metric.total_reads_in_lane = combined_reads
     existing_metric.yield_ = combined_yield
