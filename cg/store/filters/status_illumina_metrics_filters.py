@@ -20,9 +20,7 @@ def filter_by_run_id_sample_internal_id_and_lane(
 
 
 class IlluminaMetricsFilter(Enum):
-    BY_FLOW_CELL_SAMPLE_INTERNAL_ID_AND_LANE: Callable = (
-        filter_by_run_id_sample_internal_id_and_lane
-    )
+    BY_RUN_ID_SAMPLE_INTERNAL_ID_AND_LANE: Callable = filter_by_run_id_sample_internal_id_and_lane
 
 
 def apply_illumina_metrics_filter(

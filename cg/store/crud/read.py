@@ -437,13 +437,13 @@ class ReadHandler(BaseHandler):
             flow_cell_name=flow_cell_name,
         ).all()
 
-    def get_illumina_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+    def get_illumina_metrics_entry_by_run_id_sample_internal_id_and_lane(
         self, run_id: str, sample_internal_id: str, lane: int
     ) -> IlluminaSampleSequencingMetrics:
         """Get metrics entry by sequencing run id, sample internal id and lane."""
         return apply_illumina_metrics_filter(
             metrics=self._get_query(table=IlluminaSampleSequencingMetrics),
-            filter_functions=[IlluminaMetricsFilter.BY_FLOW_CELL_SAMPLE_INTERNAL_ID_AND_LANE],
+            filter_functions=[IlluminaMetricsFilter.BY_RUN_ID_SAMPLE_INTERNAL_ID_AND_LANE],
             sample_internal_id=sample_internal_id,
             run_id=run_id,
             lane=lane,
