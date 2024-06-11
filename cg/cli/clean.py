@@ -23,7 +23,7 @@ from cg.cli.workflow.commands import (
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
 )
-from cg.cli.utils import click_context_setting_max_content_width
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
 from cg.exc import CleanFlowCellFailedError, FlowCellError
@@ -51,7 +51,7 @@ FLOW_CELL_OUTPUT_HEADERS = [
 ]
 
 
-@click.group(context_settings=click_context_setting_max_content_width())
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def clean():
     """Clean up processes."""
     return

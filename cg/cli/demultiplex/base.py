@@ -4,7 +4,7 @@ import logging
 
 import click
 
-from cg.cli.utils import click_context_setting_max_content_width
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.demultiplex.demux import (
     confirm_flow_cell_sync,
     copy_novaseqx_flow_cells,
@@ -18,7 +18,7 @@ from cg.cli.demultiplex.sample_sheet import sample_sheet_commands
 LOG = logging.getLogger(__name__)
 
 
-@click.group(name="demultiplex", context_settings=click_context_setting_max_content_width())
+@click.group(name="demultiplex", context_settings=CLICK_CONTEXT_SETTINGS)
 def demultiplex_cmd_group():
     """Command group for the demultiplex CLI."""
     LOG.info("Running cg demultiplex.")

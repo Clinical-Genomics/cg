@@ -4,7 +4,7 @@ import logging
 
 import click
 
-from cg.cli.utils import click_context_setting_max_content_width
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.balsamic.base import (
     config_case,
     report_deliver,
@@ -24,7 +24,7 @@ LOG = logging.getLogger(__name__)
 @click.group(
     "balsamic-umi",
     invoke_without_command=True,
-    context_settings=click_context_setting_max_content_width(),
+    context_settings=CLICK_CONTEXT_SETTINGS,
 )
 @click.pass_context
 def balsamic_umi(context: click.Context):

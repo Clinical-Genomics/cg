@@ -5,7 +5,7 @@ import click
 
 from cg.constants.constants import DRY_RUN
 from cg.constants.nipt import Q30_THRESHOLD
-from cg.cli.utils import click_context_setting_max_content_width
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.nipt.nipt import NiptUploadAPI
 from cg.models.cg_config import CGConfig
@@ -13,7 +13,7 @@ from cg.models.cg_config import CGConfig
 LOG = logging.getLogger(__name__)
 
 
-@click.group(context_settings=click_context_setting_max_content_width())
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def ftp():
     """Upload NIPT result files to ftp-server"""
     pass

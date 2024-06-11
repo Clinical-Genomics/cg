@@ -6,7 +6,7 @@ import click
 
 from cg.apps.crunchy.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.utils import click_context_setting_max_content_width
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.meta.compress.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 
@@ -22,7 +22,7 @@ from .store import (
 LOG = logging.getLogger(__name__)
 
 
-@click.group(context_settings=click_context_setting_max_content_width())
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_obj
 def store(context: CGConfig):
     """Command for storing files."""

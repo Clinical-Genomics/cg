@@ -3,7 +3,7 @@ import logging
 import click
 
 from cg.constants.constants import DRY_RUN
-from cg.cli.utils import click_context_setting_max_content_width
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.meta.upload.fohm.fohm import FOHMUploadAPI
 from cg.meta.upload.gisaid import GisaidAPI
 from cg.models.cg_config import CGConfig
@@ -25,7 +25,7 @@ OPTION_CASES = click.option(
 )
 
 
-@click.group(context_settings=click_context_setting_max_content_width())
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_obj
 def fohm(context: CGConfig):
     pass

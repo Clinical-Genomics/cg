@@ -2,7 +2,7 @@
 
 import click
 
-from cg.cli.utils import click_context_setting_max_content_width
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.balsamic.base import balsamic
 from cg.cli.workflow.balsamic.pon import balsamic_pon
 from cg.cli.workflow.balsamic.qc import balsamic_qc
@@ -20,7 +20,7 @@ from cg.cli.workflow.taxprofiler.base import taxprofiler
 from cg.cli.workflow.tomte.base import tomte
 
 
-@click.group(context_settings=click_context_setting_max_content_width())
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def workflow():
     """Workflows commands"""
 

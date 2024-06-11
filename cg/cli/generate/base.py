@@ -6,10 +6,10 @@ from cg.cli.generate.report.base import (
     generate_available_delivery_reports,
     generate_delivery_report,
 )
-from cg.cli.utils import click_context_setting_max_content_width
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 
 
-@click.group(context_settings=click_context_setting_max_content_width())
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def generate():
     """Generates and/or modifies files."""
 

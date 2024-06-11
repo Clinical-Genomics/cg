@@ -6,14 +6,14 @@ from pydantic import ValidationError
 
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
 from cg.constants.constants import DRY_RUN
-from cg.cli.utils import click_context_setting_max_content_width
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.exc import SampleSheetError
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
 
-@click.group(name="samplesheet", context_settings=click_context_setting_max_content_width())
+@click.group(name="samplesheet", context_settings=CLICK_CONTEXT_SETTINGS)
 def sample_sheet_commands():
     """Command group for the sample sheet commands."""
 

@@ -4,7 +4,7 @@ import logging
 
 import click
 
-from cg.cli.utils import click_context_setting_max_content_width
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import (
     ensure_flow_cells_on_disk,
     link,
@@ -29,7 +29,7 @@ LOG = logging.getLogger(__name__)
 @click.group(
     "mip-dna",
     invoke_without_command=True,
-    context_settings=click_context_setting_max_content_width(),
+    context_settings=CLICK_CONTEXT_SETTINGS,
 )
 @click.pass_context
 def mip_dna(

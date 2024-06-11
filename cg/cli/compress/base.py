@@ -13,7 +13,7 @@ from cg.cli.compress.fastq import (
     fastq_cmd,
     fix_spring,
 )
-from cg.cli.utils import click_context_setting_max_content_width
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.compress import CompressAPI
@@ -23,7 +23,7 @@ from cg.models.cg_config import CGConfig
 LOG = logging.getLogger(__name__)
 
 
-@click.group(context_settings=click_context_setting_max_content_width())
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_obj
 def compress(context: CGConfig):
     """Compress files"""
@@ -51,7 +51,7 @@ clean.add_command(clean_fastq)
 clean.add_command(fix_spring)
 
 
-@click.group(context_settings=click_context_setting_max_content_width())
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_obj
 def decompress(context: CGConfig):
     """Decompress files"""

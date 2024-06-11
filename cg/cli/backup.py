@@ -34,12 +34,12 @@ from cg.models.run_devices.illumina_run_directory_data import (
 from cg.store.models import Flowcell, Sample
 from cg.store.store import Store
 
-from cg.cli.utils import click_context_setting_max_content_width
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 
 LOG = logging.getLogger(__name__)
 
 
-@click.group(context_settings=click_context_setting_max_content_width())
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_obj
 def backup(context: CGConfig):
     """Backup utilities"""
