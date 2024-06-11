@@ -10,7 +10,17 @@ LOG = logging.getLogger(__name__)
 
 
 def clean_directory(directory_to_clean: Path, days_old: int, dry_run: bool):
-    """Cleans the old /analysis/cases directories."""
+    """
+    Cleans the old /analysis/cases directories.
+    Criteria for cleaning:
+    - older than xx days
+    -
+    """
+    # requirement to clean seem to be determined here:
+    # analyses_to_clean = self.status_db.get_analyses_to_clean(
+    #        before=before, workflow=self.workflow
+    #    )
+
     date_threshold: datetime = get_date_days_ago(days_old)
     for case_dir in directory_to_clean.iterdir():
         case_modified_time: datetime = datetime.fromtimestamp(getmtime(case_dir))
