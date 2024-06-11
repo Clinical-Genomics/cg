@@ -95,13 +95,12 @@ class SpringArchiveAPI:
     ) -> None:
         """Retrieves the archived spring files for a list of samples and sets retrieval ids in Housekeeper."""
         archive_handler: ArchiveHandler = ARCHIVE_HANDLERS[archive_location](self.data_flow_config)
-        for file_and_sample in files_and_samples:
-            job_id: int = archive_handler.retrieve_files([file_and_sample])
-            LOG.info(f"Retrieval job launched with ID {job_id}")
-            self.set_archive_retrieval_task_ids(
-                retrieval_task_id=job_id,
-                files=[file_and_sample.file],
-            )
+        job_id: int = archive_handler.retrieve_files(files_and_samples)
+        LOG.info(f"Retrieval job launched with ID {job_id}")
+        self.set_archive_retrieval_task_ids(
+            retrieval_task_id=job_id,
+            files=[file_and_sample.file for file_and_sample in files_and_samples],
+        )
 
     def get_archived_files_from_sample(self, sample: Sample) -> list[File]:
         """Gets archived spring files from the bundles corresponding to the given list of samples."""
