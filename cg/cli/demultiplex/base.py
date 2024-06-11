@@ -6,11 +6,11 @@ import click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.demultiplex.demux import (
-    confirm_flow_cell_sync,
-    copy_novaseqx_flow_cells,
+    confirm_sequencing_run_sync,
+    copy_novaseqx_sequencing_runs,
     create_manifest_files,
     demultiplex_all,
-    demultiplex_flow_cell,
+    demultiplex_sequencing_run,
 )
 from cg.cli.demultiplex.finish import finish_group
 from cg.cli.demultiplex.sample_sheet import sample_sheet_commands
@@ -27,11 +27,11 @@ def demultiplex_cmd_group():
 demultiplex_cmd_group: click.Group
 for sub_cmd in [
     create_manifest_files,
-    confirm_flow_cell_sync,
-    demultiplex_flow_cell,
+    confirm_sequencing_run_sync,
+    demultiplex_sequencing_run,
     demultiplex_all,
     finish_group,
-    copy_novaseqx_flow_cells,
+    copy_novaseqx_sequencing_runs,
     sample_sheet_commands,
 ]:
     demultiplex_cmd_group.add_command(sub_cmd)
