@@ -1528,3 +1528,13 @@ class ReadHandler(BaseHandler):
             flow_cells=self._get_query(table=IlluminaFlowCell),
             internal_id=internal_id,
         ).first()
+
+    def get_total_reads_from_illumina_sequencing_run(self, flow_cell_id: str):
+        """Return the number of reads from an IlluminaSequencingRun."""
+        flow_cell: IlluminaFlowCell = self.get_illumina_flow_cell_by_internal_id(flow_cell_id)
+        return flow_cell.instrument_runs[0].total_reads
+
+    def get_percent_q30_illumina_sequencing_run(self, flow_cell_id: str):
+        """Return the percentage of bases passing Q30 from an IlluminaSequencingRun."""
+        flow_cell: IlluminaFlowCell = self.get_illumina_flow_cell_by_internal_id(flow_cell_id)
+        return flow_cell.instrument_runs[0].percent_q30
