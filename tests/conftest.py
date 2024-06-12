@@ -1272,7 +1272,13 @@ def updated_store_with_demultiplexed_samples(
     return store
 
 
-def store_with_illumina_sequencing_data(store: Store) -> Store:
+@pytest.fixture
+def store_with_illumina_sequencing_data(
+    store: Store,
+    helpers: StoreHelpers,
+    seven_canonical_flow_cells: list[IlluminaRunDirectoryData],
+    seven_canonical_flow_cells_selected_sample_ids: list[list[str]],
+) -> Store:
     """Return a store Illumina flow cells and sample sequencing metrics."""
     return store
 

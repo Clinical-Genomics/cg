@@ -10,8 +10,8 @@ from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.models.orders.order import OrderIn
 from cg.services.illumina_services.illumina_metrics_service.models import (
     IlluminaFlowCellDTO,
-    IlluminaSequencingRunDTO,
     IlluminaSampleSequencingMetricsDTO,
+    IlluminaSequencingRunDTO,
 )
 from cg.store.base import BaseHandler
 from cg.store.database import get_session
@@ -27,6 +27,9 @@ from cg.store.models import (
     Collaboration,
     Customer,
     Flowcell,
+    IlluminaFlowCell,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
     Invoice,
     Order,
     Organism,
@@ -36,9 +39,6 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     User,
     order_case,
-    IlluminaFlowCell,
-    IlluminaSequencingRun,
-    IlluminaSampleSequencingMetrics,
 )
 
 LOG = logging.getLogger(__name__)
@@ -495,3 +495,27 @@ class CreateHandler(BaseHandler):
         self.session.add_all(new_sample_metrics)
         LOG.debug("Sample metrics added to status db.")
         return new_sample_metrics
+
+    def add_illumina_metrics_entry(
+        self, metrics_dto: IlluminaSampleSequencingMetricsDTO, sequencing_run: IlluminaSequencingRun
+    ) -> IlluminaSampleSequencingMetrics:
+        """
+        Add a new Illumina Sample Sequencing Metrics entry to the status database as a pending
+        transaction.
+        """
+        sample: Sample = self.get_sample_by_internal_id(metrics_dto.sample_id)
+        new_metric = IlluminaSampleSequencingMetrics(
+            sample=sample,
+            instrument_run=sequencing_run,
+            type=metrics_dto.type,
+            flow_cell_lane=metrics_dto.flow_cell_lane,
+            total_reads_in_lane=metrics_dto.total_reads_in_lane,
+            base_passing_q30_percent=metrics_dto.base_passing_q30_percent,
+            base_mean_quality_score=metrics_dto.base_mean_quality_score,
+            yield_=metrics_dto.yield_,
+            yield_q30=metrics_dto.yield_q30,
+            created_at=metrics_dto.created_at,
+        )
+        self.session.add(new_metric)
+        LOG.debug(f"Sample metrics added to status db: {new_metric.id}.")
+        return new_metric

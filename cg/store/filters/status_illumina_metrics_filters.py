@@ -11,7 +11,7 @@ from cg.store.models import IlluminaSampleSequencingMetrics
 def filter_by_run_id_sample_internal_id_and_lane(
     metrics: Query, run_id: str, sample_internal_id: str, lane: int, **kwargs
 ) -> Query:
-    """Filter metrics by flow cell name, sample internal id and lane."""
+    """Filter metrics by run id, sample internal id and lane."""
     return metrics.filter(
         IlluminaSampleSequencingMetrics.instrument_run_id == run_id,
         IlluminaSampleSequencingMetrics.sample.internal_id == sample_internal_id,

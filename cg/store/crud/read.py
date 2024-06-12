@@ -40,6 +40,10 @@ from cg.store.filters.status_illumina_metrics_filters import (
     IlluminaMetricsFilter,
     apply_illumina_metrics_filter,
 )
+from cg.store.filters.status_illumina_sequencing_run_filters import (
+    IlluminaSequencingRunFilter,
+    apply_illumina_sequencing_run_filter,
+)
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
 from cg.store.filters.status_metrics_filters import SequencingMetricsFilter, apply_metrics_filter
 from cg.store.filters.status_order_filters import OrderFilter, apply_order_filters
@@ -62,6 +66,7 @@ from cg.store.models import (
     Flowcell,
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
     Invoice,
     Order,
     Organism,
@@ -447,6 +452,14 @@ class ReadHandler(BaseHandler):
             sample_internal_id=sample_internal_id,
             run_id=run_id,
             lane=lane,
+        ).first()
+
+    def get_illumina_sequencing_run_by_internal_id(self, run_id: str) -> IlluminaSequencingRun:
+        """Get Illumina sequencing run entry by run id."""
+        return apply_illumina_sequencing_run_filter(
+            metrics=self._get_query(table=IlluminaSequencingRun),
+            filter_functions=[IlluminaSequencingRunFilter.BY_RUN_INTERNAL_ID],
+            run_id=run_id,
         ).first()
 
     def get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
