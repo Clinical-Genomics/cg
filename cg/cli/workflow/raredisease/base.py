@@ -4,7 +4,7 @@ import logging
 
 import click
 
-from cg.cli.utils import echo_lines
+from cg.cli.utils import echo_lines, CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import config_case, metrics_deliver, run, start, start_available
 from cg.constants.constants import MetaApis, DRY_RUN
@@ -15,7 +15,7 @@ from cg.models.cg_config import CGConfig
 LOG = logging.getLogger(__name__)
 
 
-@click.group(invoke_without_command=True)
+@click.group(invoke_without_command=True, context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_context
 def raredisease(context: click.Context) -> None:
     """NF-core/raredisease analysis workflow."""
