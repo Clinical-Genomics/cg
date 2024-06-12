@@ -24,7 +24,8 @@ class MetadataParser:
             return None
         else:
             metadata = metadata_for_case | metadata_for_internal_negative_control
-            return SamplesMetadataMetrics(samples=metadata)
+            samples_metadata: dict = {"samples": metadata}
+            return SamplesMetadataMetrics.model_validate(samples_metadata)
 
     def parse_metadata_for_case(self, case: Case) -> dict[str, SampleMetadata]:
         metadata_for_case: dict[str, SampleMetadata] = {}

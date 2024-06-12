@@ -126,4 +126,3 @@ def mutant_lims(lims_api: MockLimsAPI) -> MockLimsAPI:
     lims_api.add_artifact_for_sample(sample_id=sample_qc_fail.id, samples=samples_qc_fail)
 
     return lims_api
-
