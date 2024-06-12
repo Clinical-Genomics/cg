@@ -25,6 +25,7 @@ from cg.cli.set.base import set_cmd
 from cg.cli.store.base import store as store_cmd
 from cg.cli.transfer import transfer_group
 from cg.cli.upload.base import upload
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.base import workflow as workflow_cmd
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
@@ -47,7 +48,7 @@ def teardown_session():
         registry.remove()
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.option("-c", "--config", type=click.Path(exists=True), help="path to config file")
 @click.option("-d", "--database", help="path/URI of the SQL database")
 @click.option(
