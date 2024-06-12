@@ -768,6 +768,20 @@ class StoreHelpers:
             data_availability=data_availability,
             archived_at=archived_at,
             has_backup=has_backup,
+            total_reads=100,
+            total_undetermined_reads=10,
+            percent_undetermined_reads=0.1,
+            percent_q30=0.9,
+            mean_quality_score=35,
+            total_yield=100,
+            yield_q30=None,
+            cycles=None,
+            demultiplexing_software=None,
+            demultiplexing_software_version=None,
+            sequencing_started_at=None,
+            sequencing_completed_at=None,
+            demultiplexing_started_at=None,
+            demultiplexing_completed_at=None,
         )
         illumina_run: IlluminaSequencingRun = store.add_illumina_sequencing_run(
             sequencing_run_dto=illumina_run_dto, flow_cell=flow_cell
