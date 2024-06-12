@@ -8,13 +8,14 @@ import click
 
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.downsample.utils import store_downsampled_sample_bundle
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.constants import DRY_RUN
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def downsample():
     """Downsample reads in a sample."""
 

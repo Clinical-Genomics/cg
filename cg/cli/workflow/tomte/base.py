@@ -4,6 +4,7 @@ import logging
 
 import click
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import resolve_compression
 from cg.cli.workflow.nf_analysis import (
     config_case,
@@ -23,7 +24,7 @@ from cg.meta.workflow.tomte import TomteAnalysisAPI
 LOG = logging.getLogger(__name__)
 
 
-@click.group(invoke_without_command=True)
+@click.group(invoke_without_command=True, context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_context
 def tomte(context: click.Context) -> None:
     """gms/tomte analysis workflow."""
