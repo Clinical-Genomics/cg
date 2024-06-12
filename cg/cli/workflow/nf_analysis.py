@@ -240,12 +240,13 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @click.command("report-deliver")
 @ARGUMENT_CASE_ID
 @DRY_RUN
+@FORCE
 @click.pass_obj
-def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Create a Housekeeper deliverables file for given case id."""
+def report_deliver(context: CGConfig, case_id: str, dry_run: bool, force: bool) -> None:
+    """Create a Housekeeper deliverables file for a given case ID."""
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     try:
-        analysis_api.report_deliver(case_id=case_id, dry_run=dry_run)
+        analysis_api.report_deliver(case_id=case_id, dry_run=dry_run, force=force)
     except CgError as error:
         LOG.error(f"Could not create report file: {error}")
         raise click.Abort()

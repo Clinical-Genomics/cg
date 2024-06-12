@@ -127,8 +127,9 @@ def run(
 @balsamic.command("report-deliver")
 @ARGUMENT_CASE_ID
 @DRY_RUN
+@FORCE
 @click.pass_obj
-def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
+def report_deliver(context: CGConfig, case_id: str, dry_run: bool, force: bool):
     """Create a housekeeper deliverables file for given CASE ID"""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
@@ -136,7 +137,9 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
     try:
         analysis_api.status_db.verify_case_exists(case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
-        analysis_api.trailblazer_api.verify_latest_analysis_is_completed(case_id)
+        analysis_api.trailblazer_api.verify_latest_analysis_is_completed(
+            caseid=case_id, force=force
+        )
         analysis_api.report_deliver(case_id=case_id, dry_run=dry_run)
     except CgError as error:
         LOG.error(f"Could not create report file: {error}")
@@ -254,12 +257,13 @@ def start_available(context: click.Context, dry_run: bool = False):
 @balsamic.command("store")
 @ARGUMENT_CASE_ID
 @DRY_RUN
+@FORCE
 @click.pass_context
-def store(context: click.Context, case_id: str, dry_run: bool):
+def store(context: click.Context, case_id: str, dry_run: bool, force: bool):
     """Generate Housekeeper report for CASE ID and store in Housekeeper"""
     LOG.info(f"Storing analysis for {case_id}")
-    context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
-    context.invoke(store_housekeeper, case_id=case_id)
+    context.invoke(report_deliver, case_id=case_id, dry_run=dry_run, force=force)
+    context.invoke(store_housekeeper, case_id=case_id, force=force)
 
 
 @balsamic.command("store-available")
