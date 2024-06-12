@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.cli_options import DRY_RUN
+from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.constants.constants import MetaApis
 from cg.exc import AnalysisNotReadyError, CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -254,12 +254,13 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @click.command("store-housekeeper")
 @ARGUMENT_CASE_ID
 @DRY_RUN
+@FORCE
 @click.pass_obj
-def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
+def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool, force: bool) -> None:
     """Store a finished nf-analysis in Housekeeper and StatusDB."""
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     try:
-        analysis_api.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run)
+        analysis_api.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
     except HousekeeperStoreError as error:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
         raise click.Abort()
@@ -268,13 +269,14 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @click.command("store")
 @ARGUMENT_CASE_ID
 @DRY_RUN
+@FORCE
 @click.pass_context
-def store(context: click.Context, case_id: str, dry_run: bool) -> None:
+def store(context: click.Context, case_id: str, dry_run: bool, force: bool) -> None:
     """Generate deliverable files for a case and store in Housekeeper if they
     pass QC metrics checks."""
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
     try:
-        analysis_api.store(case_id=case_id, dry_run=dry_run)
+        analysis_api.store(case_id=case_id, dry_run=dry_run, force=force)
     except Exception as error:
         LOG.error(repr(error))
         raise click.Abort()

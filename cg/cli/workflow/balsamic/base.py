@@ -18,7 +18,7 @@ from cg.cli.workflow.balsamic.options import (
 )
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.cli_options import DRY_RUN
+from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -148,8 +148,9 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
 
 @balsamic.command("store-housekeeper")
 @ARGUMENT_CASE_ID
+@FORCE
 @click.pass_obj
-def store_housekeeper(context: CGConfig, case_id: str):
+def store_housekeeper(context: CGConfig, case_id: str, force: bool):
     """Store a finished analysis in Housekeeper and StatusDB."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
@@ -160,7 +161,7 @@ def store_housekeeper(context: CGConfig, case_id: str):
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
-        analysis_api.upload_bundle_housekeeper(case_id=case_id)
+        analysis_api.upload_bundle_housekeeper(case_id=case_id, force=force)
         analysis_api.upload_bundle_statusdb(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action=None)
     except ValidationError as error:

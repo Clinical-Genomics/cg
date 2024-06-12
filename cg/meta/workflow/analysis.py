@@ -212,10 +212,12 @@ class AnalysisAPI(MetaAPI):
         application_type: str = self.get_case_application_type(case_id)
         return application_type == AnalysisType.WHOLE_EXOME_SEQUENCING
 
-    def upload_bundle_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
+    def upload_bundle_housekeeper(
+        self, case_id: str, dry_run: bool = False, force: bool = False
+    ) -> None:
         """Storing bundle data in Housekeeper for CASE_ID"""
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
-        bundle_data: dict = self.get_hermes_transformed_deliverables(case_id)
+        bundle_data: dict = self.get_hermes_transformed_deliverables(case_id=case_id, force=force)
         bundle_result: tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
             bundle_data=bundle_data
         )
@@ -294,13 +296,14 @@ class AnalysisAPI(MetaAPI):
         case: Case = self.status_db.get_case_by_internal_id(case_id)
         return case.latest_order.id
 
-    def get_hermes_transformed_deliverables(self, case_id: str) -> dict:
+    def get_hermes_transformed_deliverables(self, case_id: str, force: bool = False) -> dict:
         return self.hermes_api.create_housekeeper_bundle(
             bundle_name=case_id,
             deliverables=self.get_deliverables_file_path(case_id=case_id),
             workflow=str(self.workflow),
             analysis_type=self.get_bundle_deliverables_type(case_id),
             created=self.get_bundle_created_date(case_id),
+            force=force,
         ).model_dump()
 
     def get_bundle_created_date(self, case_id: str) -> datetime.date:

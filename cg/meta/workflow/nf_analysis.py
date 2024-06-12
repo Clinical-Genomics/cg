@@ -776,14 +776,15 @@ class NfAnalysisAPI(AnalysisAPI):
             f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
         )
 
-    def store_analysis_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
-        """Store a finished nextflow analysis in Housekeeper and StatusDB"""
-
+    def store_analysis_housekeeper(
+        self, case_id: str, dry_run: bool = False, force: bool = False
+    ) -> None:
+        """Store a finished nextflow analysis in Housekeeper and StatusDB."""
         try:
             self.status_db.verify_case_exists(case_internal_id=case_id)
             self.trailblazer_api.verify_latest_analysis_is_completed(case_id)
             self.verify_deliverables_file_exists(case_id=case_id)
-            self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run)
+            self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
             self.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
             self.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
         except ValidationError as error:
@@ -795,7 +796,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 f"Could not store bundle in Housekeeper and StatusDB: {error}"
             )
 
-    def store(self, case_id: str, dry_run: bool):
+    def store(self, case_id: str, dry_run: bool = False, force: bool = False):
         """Generate deliverable files for a case and store in Housekeeper if they
         pass QC metrics checks."""
         is_latest_analysis_qc: bool = self.trailblazer_api.is_latest_analysis_qc(case_id=case_id)
@@ -815,7 +816,7 @@ class NfAnalysisAPI(AnalysisAPI):
             self.metrics_deliver(case_id=case_id, dry_run=dry_run)
         LOG.info(f"Storing analysis for {case_id}")
         self.report_deliver(case_id=case_id, dry_run=dry_run)
-        self.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run)
+        self.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,
