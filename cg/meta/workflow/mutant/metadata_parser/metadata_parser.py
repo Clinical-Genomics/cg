@@ -70,4 +70,4 @@ class MetadataParser:
                 percent_reads_guaranteed=internal_negative_control.application_version.application.percent_reads_guaranteed,
             )
 
-            return dict[internal_negative_control.internal_id, internal_negative_control_metadata]
+            return {internal_negative_control.internal_id: internal_negative_control_metadata}

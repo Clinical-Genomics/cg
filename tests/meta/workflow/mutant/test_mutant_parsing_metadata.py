@@ -2,37 +2,33 @@ from cg.meta.workflow.mutant.metadata_parser.metadata_parser import MetadataPars
 from cg.store.models import Case
 
 
-# TODO: How to access the apis?
-
-
-
-
-def test_parse_metadata(case_id: str):
-    pass
+def test_parse_metadata(mutant_store, mutant_lims):
     # GIVEN a case object
-    # case: Case = status_db.get_case_by_internal_id("lovingfeline")
+    case: Case = mutant_store.get_case_by_internal_id("mutant_case_qc_pass")
 
     # WHEN parsing the metadata
-    # MetadataParser.parse_metadata(case)
+    MetadataParser(status_db=mutant_store, lims=mutant_lims).parse_metadata(case=case)
 
     # THEN no error is thrown
 
 
-# TODO: Is it necessary to test these functions separately?
-# Particularly parse_metadata_for_internal_negative_control fetches information from LIMS as well.
-
-
-def test_parse_metadata_for_case():
-    pass
+def test_parse_metadata_for_case(mutant_store, mutant_lims):
     # GIVEN a case object
-    # case: Case = status_db.get_case_by_internal_id("lovingfeline")
+    case: Case = mutant_store.get_case_by_internal_id("mutant_case_qc_pass")
 
     # WHEN parsing the metadata
-    # MetadataParser.parse_metadata_for_case(case)
+    MetadataParser(status_db=mutant_store, lims=mutant_lims).parse_metadata_for_case(case=case)
 
     # THEN no error is thrown
 
 
-# parse_metadata_for_internal_negative_control(
-#    self, metadata_for_case: SamplesMetadataMetrics
-# ) -> dict[str, SampleMetadata]:
+def test_parse_metadata_for_internal_negative_control(mutant_store, mutant_lims):
+    # GIVEN a SamplesMetadataMetrics object
+    metadata_parser = MetadataParser(status_db=mutant_store, lims=mutant_lims)
+    case: Case = mutant_store.get_case_by_internal_id("mutant_case_qc_pass")
+    metadata_for_case_qc_pass = metadata_parser.parse_metadata_for_case(case=case)
+
+    # WHEN parsing the metadata
+    metadata_parser.parse_metadata_for_internal_negative_control(metadata_for_case_qc_pass)
+
+    # THEN no error is thrown

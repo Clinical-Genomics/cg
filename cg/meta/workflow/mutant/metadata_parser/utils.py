@@ -3,7 +3,8 @@ from cg.meta.workflow.mutant.metadata_parser.models import SampleMetadata
 from cg.store.models import Sample
 from cg.apps.lims.api import LimsAPI
 from cg.constants.lims import LimsArtifactTypes, LimsProcess
-from genologics.entities import Artifact, Sample
+from genologics.entities import Artifact
+from genologics.entities import Sample as LimsSample
 from cg.models.cg_config import LOG
 
 
@@ -11,7 +12,7 @@ def is_sample_external_negative_control(sample: Sample) -> bool:
     return sample.control == ControlOptions.NEGATIVE
 
 
-def get_negative_controls_from_list(samples: list[Sample]) -> list[Sample]:
+def get_negative_controls_from_list(samples: list[LimsSample]) -> list[LimsSample]:
     """Filter and return a list of internal negative controls from a given sample list."""
     negative_controls = []
     for sample in samples:
@@ -41,7 +42,9 @@ def get_internal_negative_control_id_from_lims(
 
 def get_internal_negative_control_id(lims: LimsAPI, metadata_for_case: SampleMetadata) -> str:
     """Query lims to retrive internal_negative_control_id."""
-    sample_internal_id = metadata_for_case.keys()[0]  # internal_id of sample from covid pool
+    sample_internal_id = list(metadata_for_case.keys())[0]  # internal_id of sample from covid pool
+
+    print(sample_internal_id)
 
     internal_negative_control_id = get_internal_negative_control_id_from_lims(
         lims, sample_internal_id
