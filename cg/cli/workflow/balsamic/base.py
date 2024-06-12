@@ -8,13 +8,13 @@ from pydantic.v1 import ValidationError
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.balsamic.options import (
     OPTION_CACHE_VERSION,
+    OPTION_CLUSTER_CONFIG,
     OPTION_GENDER,
     OPTION_GENOME_VERSION,
     OPTION_OBSERVATIONS,
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
     OPTION_QOS,
-    OPTION_CLUSTER_CONFIG,
 )
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -134,9 +134,9 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
 
     try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
+        analysis_api.status_db.verify_case_exists(case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
-        analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+        analysis_api.trailblazer_api.verify_latest_analysis_is_completed(case_id)
         analysis_api.report_deliver(case_id=case_id, dry_run=dry_run)
     except CgError as error:
         LOG.error(f"Could not create report file: {error}")
@@ -235,9 +235,9 @@ def start_available(context: click.Context, dry_run: bool = False):
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case_obj in analysis_api.get_cases_to_analyze():
+    for case in analysis_api.get_cases_ready_for_analysis():
         try:
-            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+            context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
             LOG.error(error)
         except CgError as error:

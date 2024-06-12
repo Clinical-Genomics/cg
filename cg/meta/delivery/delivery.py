@@ -9,7 +9,10 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Workflow
 from cg.constants.delivery import INBOX_NAME, PIPELINE_ANALYSIS_TAG_MAP
 from cg.models.delivery.delivery import DeliveryFile
-from cg.services.fastq_file_service.fastq_file_service import FastqFileService
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
+from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -25,12 +28,12 @@ class DeliveryAPI:
     def __init__(
         self,
         delivery_path: Path,
-        fastq_file_service: FastqFileService,
+        fastq_concatenation_service: FastqConcatenationService,
         housekeeper_api: HousekeeperAPI,
         store: Store,
     ):
         self.delivery_path: Path = delivery_path
-        self.fastq_file_service: FastqFileService = fastq_file_service
+        self.fastq_file_service: FastqConcatenationService = fastq_concatenation_service
         self.housekeeper_api: HousekeeperAPI = housekeeper_api
         self.store: Store = store
 
@@ -59,8 +62,11 @@ class DeliveryAPI:
         or is external. The force parameter can be used to override checks.
         """
         is_external: bool = sample.application_version.application.is_external
-        qc_pass: bool = sample.sequencing_qc
-        return is_external or qc_pass or force
+        sample_passed_sequencing_qc: bool = SequencingQCService.sample_pass_sequencing_qc(
+            sample=sample
+        )
+
+        return is_external or sample_passed_sequencing_qc or force
 
     def convert_files_to_delivery_files(
         self,
@@ -79,7 +85,11 @@ class DeliveryAPI:
         if analysis_sample_files:
             subfolder = Path(case.name, external_id)
         for file in files:
-            destination_file_name: str = Path(file.full_path).name.replace(internal_id, external_id)
+            destination_file_name: str = (
+                Path(file.full_path)
+                .name.replace(internal_id, external_id)
+                .replace(case.internal_id, external_id)
+            )
             destination_path = Path(destination_path, subfolder, destination_file_name)
             delivery_file = DeliveryFile(
                 source_path=Path(file.full_path), destination_path=destination_path

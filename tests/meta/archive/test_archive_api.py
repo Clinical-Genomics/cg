@@ -329,7 +329,7 @@ def test_retrieve_case(
     archival_job_id: int,
     sample_with_spring_file: str,
 ):
-    """Test retrieving all archived SPRING files tied to a sample for a Miria customer."""
+    """Test retrieving all archived SPRING files tied to a case for a Miria customer."""
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
     # with the DDN customer having two samples, and the non-DDN having one sample.
     files: list[File] = spring_archive_api.housekeeper_api.get_files(
@@ -354,7 +354,121 @@ def test_retrieve_case(
         "api_request_from_content",
         return_value=ok_miria_response,
     ) as mock_request_submitter:
-        spring_archive_api.retrieve_case(sample.links[0].case.internal_id)
+        spring_archive_api.retrieve_spring_files_for_case(sample.links[0].case.internal_id)
+
+    retrieve_request_json["pathInfo"][0]["source"] += "/" + Path(files[0].path).name
+
+    # THEN the DDN archiving function should have been called with the correct destination and source.
+    mock_request_submitter.assert_called_with(
+        api_method=APIMethods.POST,
+        url="some/api/files/retrieve",
+        headers=header_with_test_auth_token,
+        json=retrieve_request_json,
+        verify=False,
+    )
+
+    # THEN the Archive entry should have a retrieval task id set
+    for file in files:
+        assert file.archive.retrieval_task_id
+
+
+def test_retrieve_sample(
+    spring_archive_api: SpringArchiveAPI,
+    caplog,
+    ok_miria_response,
+    trimmed_local_path,
+    local_storage_repository,
+    retrieve_request_json,
+    header_with_test_auth_token,
+    test_auth_token,
+    archival_job_id: int,
+    sample_with_spring_file: str,
+):
+    """Test retrieving all archived SPRING files tied to a sample for a Miria customer."""
+    # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
+    # with the DDN customer having two samples, and the non-DDN having one sample.
+
+    # GIVEN that a sample has archived spring files
+    files: list[File] = spring_archive_api.housekeeper_api.get_files(
+        bundle=sample_with_spring_file, tags=[SequencingFileTag.SPRING]
+    ).all()
+    for file in files:
+        spring_archive_api.housekeeper_api.add_archives(
+            files=[file], archive_task_id=archival_job_id
+        )
+        assert not file.archive.retrieval_task_id
+        assert file.archive
+
+    # WHEN archiving all available files
+    with mock.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=test_auth_token,
+    ), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_miria_response,
+    ) as mock_request_submitter:
+        spring_archive_api.retrieve_spring_files_for_sample(sample_with_spring_file)
+
+    retrieve_request_json["pathInfo"][0]["source"] += "/" + Path(files[0].path).name
+
+    # THEN the DDN archiving function should have been called with the correct destination and source.
+    mock_request_submitter.assert_called_with(
+        api_method=APIMethods.POST,
+        url="some/api/files/retrieve",
+        headers=header_with_test_auth_token,
+        json=retrieve_request_json,
+        verify=False,
+    )
+
+    # THEN the Archive entry should have a retrieval task id set
+    for file in files:
+        assert file.archive.retrieval_task_id
+
+
+def test_retrieve_order(
+    spring_archive_api: SpringArchiveAPI,
+    caplog,
+    ok_miria_response,
+    trimmed_local_path,
+    local_storage_repository,
+    retrieve_request_json,
+    header_with_test_auth_token,
+    test_auth_token,
+    archival_job_id: int,
+    sample_with_spring_file: str,
+):
+    """Test retrieving all archived SPRING files tied to an order for a Miria customer."""
+    # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
+    # with the DDN customer having two samples, and the non-DDN having one sample.
+
+    # GIVEN that a sample has archived spring files
+    files: list[File] = spring_archive_api.housekeeper_api.get_files(
+        bundle=sample_with_spring_file, tags=[SequencingFileTag.SPRING]
+    ).all()
+    for file in files:
+        spring_archive_api.housekeeper_api.add_archives(
+            files=[file], archive_task_id=archival_job_id
+        )
+        assert not file.archive.retrieval_task_id
+        assert file.archive
+
+    sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(sample_with_spring_file)
+
+    # WHEN archiving all available files
+    with mock.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=test_auth_token,
+    ), mock.patch.object(
+        APIRequest,
+        "api_request_from_content",
+        return_value=ok_miria_response,
+    ) as mock_request_submitter:
+        spring_archive_api.retrieve_spring_files_for_order(
+            id_=sample.original_ticket, is_order_id=False
+        )
 
     retrieve_request_json["pathInfo"][0]["source"] += "/" + Path(files[0].path).name
 

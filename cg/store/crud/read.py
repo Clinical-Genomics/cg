@@ -9,7 +9,7 @@ from sqlalchemy.orm import Query, Session
 
 from cg.constants import FlowCellStatus, Workflow
 from cg.constants.constants import CaseActions, CustomerId, PrepCategory, SampleType
-from cg.exc import CaseNotFoundError, CgError
+from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.store.base import BaseHandler
 from cg.store.filters.status_analysis_filters import (
@@ -50,6 +50,10 @@ from cg.store.filters.status_flow_cell_filters import (
     FlowCellFilter,
     apply_flow_cell_filter,
 )
+from cg.store.filters.status_illumina_flow_cell_filters import (
+    apply_illumina_flow_cell_filters,
+    IlluminaFlowCellFilter,
+)
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
 from cg.store.filters.status_metrics_filters import (
     SequencingMetricsFilter,
@@ -84,6 +88,7 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
     User,
+    IlluminaFlowCell,
 )
 
 LOG = logging.getLogger(__name__)
@@ -123,7 +128,7 @@ class ReadHandler(BaseHandler):
             .sample.application_version.application
         )
 
-    def get_application_limitations_by_tag(self, tag: str) -> list[ApplicationLimitations] | None:
+    def get_application_limitations_by_tag(self, tag: str) -> list[ApplicationLimitations]:
         """Return application limitations given the application tag."""
         return apply_application_limitations_filter(
             filter_functions=[ApplicationLimitationsFilter.BY_TAG],
@@ -1022,9 +1027,7 @@ class ReadHandler(BaseHandler):
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
 
-    def cases_to_analyze(
-        self, workflow: Workflow = None, threshold: bool = False, limit: int = None
-    ) -> list[Case]:
+    def cases_to_analyse(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.HAS_SEQUENCE,
@@ -1049,8 +1052,6 @@ class ReadHandler(BaseHandler):
             )
         ]
 
-        if threshold:
-            families = [case_obj for case_obj in families if case_obj.all_samples_pass_qc]
         return families[:limit]
 
     def set_case_action(
@@ -1385,9 +1386,10 @@ class ReadHandler(BaseHandler):
         """Filter, sort and paginate orders based on the provided request."""
         orders: Query = apply_order_filters(
             orders=self._get_query(Order),
-            filters=[OrderFilter.BY_WORKFLOW, OrderFilter.BY_SEARCH],
+            filters=[OrderFilter.BY_WORKFLOW, OrderFilter.BY_SEARCH, OrderFilter.BY_DELIVERED],
             workflow=orders_request.workflow,
             search=orders_request.search,
+            delivered=orders_request.delivered,
         )
         total_count: int = orders.count()
         orders: list[Order] = self.sort_and_paginate_orders(
@@ -1413,14 +1415,16 @@ class ReadHandler(BaseHandler):
             ids=order_ids,
         ).all()
 
-    def get_order_by_id(self, order_id: int) -> Order | None:
+    def get_order_by_id(self, order_id: int) -> Order:
         """Returns the entry in Order matching the given id."""
         orders: Query = self._get_query(table=Order)
         order_filter_functions: list[Callable] = [OrderFilter.BY_ID]
         orders: Query = apply_order_filters(
             orders=orders, filters=order_filter_functions, id=order_id
         )
-        return orders.first()
+        if not (order := orders.first()):
+            raise OrderNotFoundError(f"Order with ID {order_id} not found.")
+        return order
 
     def get_order_by_ticket_id(self, ticket_id: int) -> Order | None:
         """Returns the entry in Order matching the given id."""
@@ -1469,3 +1473,11 @@ class ReadHandler(BaseHandler):
             filter_functions=filters,
             order_id=order_id,
         ).count()
+
+    def get_illumina_flow_cell_by_internal_id(self, internal_id: str) -> IlluminaFlowCell:
+        """Return a flow cell by internal id."""
+        return apply_illumina_flow_cell_filters(
+            filter_functions=[IlluminaFlowCellFilter.BY_INTERNAL_ID],
+            flow_cells=self._get_query(table=IlluminaFlowCell),
+            internal_id=internal_id,
+        ).first()

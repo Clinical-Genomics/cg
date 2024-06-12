@@ -16,7 +16,7 @@ from cg.meta.encryption.sbatch import (
     FLOW_CELL_ENCRYPT_ERROR,
 )
 from cg.meta.tar.tar import TarAPI
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.slurm.sbatch import Sbatch
 from cg.utils import Process
 from cg.utils.checksum.checksum import sha512_checksum
@@ -147,7 +147,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         self,
         binary_path: str,
         encryption_dir: Path,
-        flow_cell: FlowCellDirectoryData,
+        flow_cell: IlluminaRunDirectoryData,
         pigz_binary_path: str,
         sbatch_parameter: dict[str, str | int],
         slurm_api: SlurmAPI,
@@ -155,7 +155,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         dry_run: bool = False,
     ):
         super().__init__(binary_path=binary_path, dry_run=dry_run)
-        self.flow_cell: FlowCellDirectoryData = flow_cell
+        self.flow_cell: IlluminaRunDirectoryData = flow_cell
         self.encryption_dir: Path = encryption_dir
         self.tar_api: TarAPI = tar_api
         self.pigz_binary_path: str = pigz_binary_path
@@ -170,6 +170,10 @@ class FlowCellEncryptionAPI(EncryptionAPI):
     @property
     def flow_cell_encryption_dir(self) -> Path:
         return Path(self.encryption_dir, self.flow_cell.full_name)
+
+    @property
+    def flow_cell_encrypt_tmp_dir(self) -> Path:
+        return Path(self.flow_cell_encryption_dir, "tmp")
 
     @property
     def flow_cell_encrypt_file_path_prefix(self) -> Path:
@@ -246,7 +250,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         Raises:
             FlowCellError if sequencing is not ready, encryption is pending or complete.
         """
-        if not self.flow_cell.is_flow_cell_ready():
+        if not self.flow_cell.is_sequencing_run_ready():
             raise FlowCellError(f"Flow cell: {self.flow_cell.id} is not ready")
         if self.complete_file_path.exists():
             raise FlowCellEncryptionError(
@@ -257,6 +261,15 @@ class FlowCellEncryptionAPI(EncryptionAPI):
                 f"Encryption already started for flow cell: {self.flow_cell.id}"
             )
         return True
+
+    def make_tmp_encrypt_dir(self) -> str:
+        return f"mkdir -p {self.flow_cell_encrypt_tmp_dir}"
+
+    def copy_flow_cell_dir_to_tmp(self) -> str:
+        return f"cp -r {self.flow_cell.path} {self.flow_cell_encrypt_tmp_dir}"
+
+    def remove_tmp_encrypt_dir(self) -> str:
+        return f"rm -rf {self.flow_cell_encrypt_tmp_dir}"
 
     def encrypt_flow_cell(
         self,
@@ -272,7 +285,11 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             asymmetrically_encrypt_passphrase=self.get_asymmetrically_encrypt_passphrase_cmd(
                 passphrase_file_path=self.symmetric_passphrase_file_path
             ),
-            tar_encrypt_flow_cell_dir=self.tar_api.get_compress_cmd(input_path=self.flow_cell.path),
+            make_tmp_encrypt_dir=self.make_tmp_encrypt_dir(),
+            copy_flow_cell_dir_to_tmp=self.copy_flow_cell_dir_to_tmp(),
+            tar_encrypt_tmp_dir=self.tar_api.get_compress_cmd(
+                input_path=self.flow_cell_encrypt_tmp_dir
+            ),
             parallel_gzip=f"{self.pigz_binary_path} -p {self.slurm_number_tasks - LIMIT_PIGZ_TASK} --fast -c",
             tee=f"tee >(md5sum > {self.encrypted_md5sum_file_path})",
             flow_cell_symmetric_encryption=self.get_flow_cell_symmetric_encryption_command(
@@ -288,6 +305,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
             mv_passphrase_file=f"mv {self.symmetric_passphrase_file_path.with_suffix(FileExtensions.GPG)} {self.final_passphrase_file_path}",
             remove_pending_file=f"rm -f {self.pending_file_path}",
             flag_as_complete=f"touch {self.complete_file_path}",
+            remove_tmp_encrypt_dir=self.remove_tmp_encrypt_dir(),
         )
         sbatch_parameters = Sbatch(
             account=self.slurm_account,

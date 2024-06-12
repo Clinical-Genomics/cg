@@ -1,6 +1,6 @@
 """Constants for cg."""
 
-from enum import IntEnum, StrEnum
+from enum import Enum, IntEnum, StrEnum, auto
 
 import click
 
@@ -57,7 +57,7 @@ class ControlOptions(StrEnum):
     EMPTY: str = ""
 
 
-DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
+DEFAULT_CAPTURE_KIT = "twistexomecomprehensive_10.2_hg19_design.bed"
 
 
 class CustomerId(StrEnum):
@@ -68,7 +68,11 @@ class CustomerId(StrEnum):
     CUST004: str = "cust004"
     CUST032: str = "cust032"
     CUST042: str = "cust042"
+    CUST110: str = "cust110"
+    CUST127: str = "cust127"
     CUST132: str = "cust132"
+    CUST143: str = "cust143"
+    CUST147: str = "cust147"
     CUST999: str = "cust999"
 
 
@@ -90,6 +94,14 @@ class AnalysisType(StrEnum):
     WHOLE_GENOME_SEQUENCING: str = "wgs"
     WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
     OTHER: str = "other"
+
+
+class CancerAnalysisType(StrEnum):
+    TUMOR_NORMAL = auto()
+    TUMOR_NORMAL_PANEL = auto()
+    TUMOR_NORMAL_WGS = auto()
+    TUMOR_PANEL = auto()
+    TUMOR_WGS = auto()
 
 
 class PrepCategory(StrEnum):
@@ -127,6 +139,7 @@ class Workflow(StrEnum):
     DEMULTIPLEX: str = "demultiplex"
     FASTQ: str = "fastq"
     FLUFFY: str = "fluffy"
+    JASEN: str = "jasen"
     MICROSALT: str = "microsalt"
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"
@@ -140,19 +153,21 @@ class Workflow(StrEnum):
 
 
 class FileFormat(StrEnum):
+    CSV: str = "csv"
     FASTQ: str = "fastq"
     JSON: str = "json"
-    YAML: str = "yaml"
-    CSV: str = "csv"
-    XML: str = "xml"
-    TXT: str = "txt"
+    PNG: str = "png"
     TSV: str = "tsv"
+    TXT: str = "txt"
+    XML: str = "xml"
+    YAML: str = "yaml"
 
 
 class GenomeVersion(StrEnum):
     hg19: str = "hg19"
     hg38: str = "hg38"
     canfam3: str = "canfam3"
+    T2T_CHM13: str = "T2T-CHM13v2.0"
 
 
 class SampleType(StrEnum):
@@ -193,12 +208,15 @@ class FileExtensions(StrEnum):
     JSON: str = ".json"
     KEY: str = ".key"
     LOG: str = ".log"
+    MD5: str = ".md5"
     MD5SUM: str = ".md5sum"
     NO_EXTENSION: str = ""
     PASS_PHRASE: str = ".passphrase"
     PENDING: str = ".pending"
+    PNG: str = ".png"
     SBATCH: str = ".sbatch"
     SPRING: str = ".spring"
+    SH: str = ".sh"
     TAR: str = ".tar"
     TMP: str = ".tmp"
     TSV: str = ".tsv"
@@ -216,7 +234,6 @@ class APIMethods(StrEnum):
 
 
 DRY_RUN = click.option(
-    "-d",
     "--dry-run",
     is_flag=True,
     default=False,
@@ -289,3 +306,9 @@ class MultiQC(StrEnum):
 
 
 NG_UL_SUFFIX: str = " ng/uL"
+
+
+class SequencingQCStatus(Enum):
+    FAILED = auto()
+    PASSED = auto()
+    PENDING = auto()

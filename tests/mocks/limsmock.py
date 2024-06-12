@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic.v1 import BaseModel
 from typing_extensions import Literal
 
@@ -53,6 +55,7 @@ class MockLimsAPI(LimsAPI):
         )
         self._sequencing_method = "CG002 - Cluster Generation (HiSeq X)"
         self._delivery_method = "CG002 - Delivery"
+        self._source = "cell-free DNA"
 
     def set_prep_method(self, method: str = "1337:00 Test prep method"):
         """Mock function"""
@@ -62,8 +65,8 @@ class MockLimsAPI(LimsAPI):
         """Mock function"""
         self._prep_method = method
 
-    def sample(self, sample_id: str) -> dict | None:
-        return next((sample for sample in self._samples if sample["id"] == sample_id), None)
+    def sample(self, lims_id: str) -> dict:
+        return next((sample for sample in self._samples if sample["id"] == lims_id), {})
 
     def add_sample(self, internal_id: str):
         self.sample_vars[internal_id] = {}
@@ -87,11 +90,22 @@ class MockLimsAPI(LimsAPI):
     def get_delivery_method(self, lims_id: str) -> str:
         return self._delivery_method
 
-    def get_sample_project(self, sample_id: str) -> str:
-        return self.sample(sample_id).get("project").get("id")
+    def get_source(self, lims_id: str) -> str | None:
+        return self._source
 
     def get_sample_comment(self, sample_id: str) -> str:
-        return self.sample(sample_id).get("comment")
+        lims_sample: dict[str, Any] = self.sample(sample_id)
+        comment = None
+        if lims_sample:
+            comment: str = lims_sample.get("comment")
+        return comment
+
+    def get_sample_project(self, sample_id: str) -> str | None:
+        lims_sample: dict[str, Any] = self.sample(sample_id)
+        project_id = None
+        if lims_sample:
+            project_id: str = lims_sample.get("project").get("id")
+        return project_id
 
     def update_sample(
         self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs
@@ -118,3 +132,11 @@ class MockLimsAPI(LimsAPI):
     def get_latest_rna_input_amount(self, sample_id: str) -> float:
         """Mock return input amount used in the latest preparation of an RNA sample."""
         return 300.0
+
+    def get_sample_dv200(self, sample_id: str) -> float:
+        """Mock return sample's percentage of RNA fragments greater than 200 nucleotides."""
+        return 75.0
+
+    def has_sample_passed_initial_qc(self, sample_id: str) -> bool:
+        """Mock return of the sample initial QC flag."""
+        return True

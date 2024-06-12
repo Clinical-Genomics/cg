@@ -26,7 +26,9 @@ def run_parameters_novaseq_6000_different_index(
 
 
 @pytest.fixture(scope="function")
-def run_parameters_novaseq_x_different_index(run_parameters_dir: Path) -> RunParametersNovaSeqX:
+def run_parameters_novaseq_x_different_index(
+    run_parameters_dir: Path,
+) -> RunParametersNovaSeqX:
     """Return a NovaSeqX RunParameters object with different index cycles."""
     path = Path(run_parameters_dir, "RunParameters_novaseq_X_different_index_cycles.xml")
     return RunParametersNovaSeqX(run_parameters_path=path)
@@ -62,14 +64,6 @@ def hiseq_2500_custom_index_run_parameters(
 ) -> RunParametersHiSeq:
     """Return a HiSeq2500 run parameters object with custom index."""
     return RunParametersHiSeq(run_parameters_path=hiseq_2500_custom_index_run_parameters_path)
-
-
-@pytest.fixture(scope="session")
-def novaseq_6000_run_parameters(
-    novaseq_6000_run_parameters_path: Path,
-) -> RunParametersNovaSeq6000:
-    """Return a NovaSeq6000 run parameters object."""
-    return RunParametersNovaSeq6000(run_parameters_path=novaseq_6000_run_parameters_path)
 
 
 @pytest.fixture

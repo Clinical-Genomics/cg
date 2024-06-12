@@ -6,6 +6,8 @@ from cg.cli.delete.case import delete_case
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
+from cg.constants.constants import DRY_RUN
+
 CONFIRM = "Continue?"
 
 LOG = logging.getLogger(__name__)
@@ -29,7 +31,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [Case]:
 
 
 @click.command("cases")
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.option(
     "--sample-identifier",
     "identifiers",

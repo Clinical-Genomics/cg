@@ -65,8 +65,11 @@ class RsyncAPI(MetaAPI):
         return {"jobs": [str(slurm_job_id)]}
 
     @staticmethod
-    def write_trailblazer_config(content: dict, config_path: Path) -> None:
+    def write_trailblazer_config(content: dict, config_path: Path, dry_run: bool = False) -> None:
         """Write slurm job IDs to a .YAML file used as the trailblazer config."""
+        if dry_run:
+            LOG.info(f"Dry-run: it would write slurm jobs to {config_path.as_posix()}")
+            return
         LOG.info(f"Writing slurm jobs to {config_path.as_posix()}")
         WriteFile.write_file_from_content(
             content=content, file_format=FileFormat.YAML, file_path=config_path

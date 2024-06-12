@@ -1,4 +1,4 @@
-"""Module for Rnafusion analysis API tests."""
+"""Module for Raredisease analysis API tests."""
 
 import os
 
@@ -32,7 +32,7 @@ def test_get_sample_sheet_content(
     assert contains_pattern
 
 
-def test_write_params_file(raredisease_context: CGConfig, raredisease_case_id: str):
+def test_write_params_file(raredisease_context: CGConfig, raredisease_case_id: str, mocker):
     # GIVEN Raredisease analysis API and input (nextflow sample sheet path)/output (case directory) parameters
     analysis_api: RarediseaseAnalysisAPI = raredisease_context.meta_apis["analysis_api"]
 
@@ -41,6 +41,9 @@ def test_write_params_file(raredisease_context: CGConfig, raredisease_case_id: s
 
     # THEN care directory is created
     assert os.path.exists(analysis_api.get_case_path(case_id=raredisease_case_id))
+
+    mocker.patch.object(RarediseaseAnalysisAPI, "get_target_bed_from_lims")
+    RarediseaseAnalysisAPI.get_target_bed_from_lims.return_value = "some_target_bed_file"
 
     # WHEN writing parameters file
     analysis_api.write_params_file(case_id=raredisease_case_id)

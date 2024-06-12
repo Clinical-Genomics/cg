@@ -254,19 +254,20 @@ class CustomerView(BaseView):
         "scout_access",
     ]
     column_list = [
-        "comment",
-        "delivery_contact",
         "internal_id",
-        "lab_contact",
         "name",
+        "data_archive_location",
+        "comment",
         "primary_contact",
+        "delivery_contact",
+        "lab_contact",
         "priority",
         "project_account_KI",
         "project_account_kth",
         "return_samples",
         "scout_access",
     ]
-    column_filters = ["priority", "scout_access"]
+    column_filters = ["priority", "scout_access", "data_archive_location"]
     column_searchable_list = ["internal_id", "name"]
     form_excluded_columns = ["families", "samples", "pools", "orders", "invoices"]
 
@@ -446,6 +447,17 @@ class OrganismView(BaseView):
     column_default_sort = ("created_at", True)
     column_editable_list = ["internal_id", "name", "reference_genome", "comment"]
     column_searchable_list = ["internal_id", "name", "reference_genome"]
+
+
+class OrderView(BaseView):
+    """Admin view for Model.Order"""
+
+    column_default_sort = ("order_date", True)
+    column_editable_list = ["is_delivered"]
+    column_searchable_list = ["id", "ticket_id"]
+    column_display_pk = True
+    create_modal = True
+    edit_modal = True
 
 
 class PanelView(BaseView):

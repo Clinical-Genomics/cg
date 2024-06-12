@@ -1,9 +1,12 @@
 from datetime import datetime
-from mock import Mock
-import pytest
-from cg.apps.tb.dto.summary_response import AnalysisSummary
 
-from cg.services.orders.order_status_service.order_summary_service import OrderSummaryService
+import pytest
+from mock import Mock
+
+from cg.apps.tb.dto.summary_response import AnalysisSummary
+from cg.services.orders.order_summary_service.order_summary_service import (
+    OrderSummaryService,
+)
 from cg.store.models import Case, Customer, Order, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -12,7 +15,11 @@ from tests.store_helpers import StoreHelpers
 @pytest.fixture
 def summary_service(store: Store, order: Order):
     service = OrderSummaryService(analysis_client=Mock(), store=store)
-    service.analysis_client.get_summaries.return_value = [AnalysisSummary(order_id=order.id)]
+    service.analysis_client.get_summaries.return_value = [
+        AnalysisSummary(
+            order_id=order.id, cancelled=0, completed=1, delivered=0, failed=0, running=0
+        )
+    ]
     return service
 
 

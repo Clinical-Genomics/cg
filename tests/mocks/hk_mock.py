@@ -505,7 +505,7 @@ class MockHousekeeperAPI:
         self, bundle_name: str, file: Path, tags: list
     ) -> None:
         """Adds and includes a file in the latest version of a bundle."""
-        version: Version = self.last_version(bundle_name)
+        version: Version = self.get_or_create_version(bundle_name)
         if not version:
             LOG.info(f"Bundle: {bundle_name} not found in housekeeper")
             raise HousekeeperBundleVersionMissingError

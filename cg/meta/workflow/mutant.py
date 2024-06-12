@@ -7,6 +7,7 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MutantFastqHandler
+from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
 from cg.store.models import Application, Case, Sample
@@ -41,10 +42,6 @@ class MutantAnalysisAPI(AnalysisAPI):
     @property
     def fastq_handler(self):
         return MutantFastqHandler
-
-    @property
-    def use_read_count_threshold(self) -> bool:
-        return False
 
     def get_case_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id)
@@ -84,19 +81,18 @@ class MutantAnalysisAPI(AnalysisAPI):
                     case=case_obj, sample=sample_obj, concatenate=True
                 )
                 continue
-            if not sample_obj.sequencing_qc:
-                LOG.info("Sample %s read count below threshold, skipping!", sample_obj.internal_id)
+            if not SequencingQCService.sample_pass_sequencing_qc(sample_obj):
+                LOG.info(f"Sample {sample_obj.internal_id} read count below threshold, skipping!")
                 continue
-            else:
-                self.link_fastq_files_for_sample(case=case_obj, sample=sample_obj, concatenate=True)
+            self.link_fastq_files_for_sample(case=case_obj, sample=sample_obj, concatenate=True)
 
-    def get_sample_parameters(self, sample_obj: Sample) -> MutantSampleConfig:
+    def get_sample_parameters(self, sample_obj: Sample, sequencing_qc: bool) -> MutantSampleConfig:
         return MutantSampleConfig(
             CG_ID_sample=sample_obj.internal_id,
             case_ID=sample_obj.links[0].case.internal_id,
             Customer_ID_sample=sample_obj.name,
             customer_id=sample_obj.customer.internal_id,
-            sequencing_qc_pass=sample_obj.sequencing_qc,
+            sequencing_qc_pass=sequencing_qc,
             CG_ID_project=sample_obj.links[0].case.name,
             Customer_ID_project=sample_obj.original_ticket,
             application_tag=sample_obj.application_version.application.tag,
@@ -125,18 +121,27 @@ class MutantAnalysisAPI(AnalysisAPI):
     def create_case_config(self, case_id: str, dry_run: bool) -> None:
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         samples: list[Sample] = [link.sample for link in case_obj.links]
-        case_config_list = [
-            self.get_sample_parameters(sample_obj).model_dump() for sample_obj in samples
-        ]
-        config_path = self.get_case_config_path(case_id=case_id)
+        case_config_list: list[dict] = []
+        for sample in samples:
+            sample_passed_sequencing_qc: bool = SequencingQCService.sample_pass_sequencing_qc(
+                sample=sample
+            )
+            case_config_list.append(
+                self.get_sample_parameters(
+                    sample_obj=sample, sequencing_qc=sample_passed_sequencing_qc
+                ).model_dump()
+            )
+        config_path: Path = self.get_case_config_path(case_id=case_id)
         if dry_run:
-            LOG.info("Dry-run, would have created config at path %s, with content:", config_path)
+            LOG.info(
+                f"Dry-run, would have created config at path {config_path.as_posix()}, with content:"
+            )
             LOG.info(case_config_list)
         config_path.parent.mkdir(parents=True, exist_ok=True)
         WriteFile.write_file_from_content(
             content=case_config_list, file_format=FileFormat.JSON, file_path=config_path
         )
-        LOG.info("Saved config to %s", config_path)
+        LOG.info(f"Saved config to {config_path.as_posix()}")
 
     def get_lims_naming_metadata(self, sample: Sample) -> str | None:
         region_code = self.lims_api.get_sample_attribute(

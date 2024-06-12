@@ -12,7 +12,7 @@ from tests.store_helpers import StoreHelpers
 
 @pytest.fixture(name="store_failing_sequencing_qc")
 def store_failing_sequencing_qc(
-    bcl2fastq_flow_cell_id: str,
+    novaseq_6000_pre_1_5_kits_flow_cell_id: str,
     sample_id: str,
     ticket_id: str,
     timestamp_now: dt.datetime,
@@ -40,16 +40,16 @@ def store_failing_sequencing_qc(
 
     helpers.add_flow_cell(
         store=store,
-        flow_cell_name=bcl2fastq_flow_cell_id,
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
         samples=[store_sample],
         date=timestamp_now,
     )
 
     helpers.add_relationship(store=store, case=store_case, sample=store_sample)
-    helpers.add_sample_lane_sequencing_metrics(
+    helpers.ensure_sample_lane_sequencing_metrics(
         store=store,
         sample_internal_id=store_sample.internal_id,
-        flow_cell_name=bcl2fastq_flow_cell_id,
+        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id,
         flow_cell_lane_number=1,
         sample_total_reads_in_lane=5,
         sample_base_percentage_passing_q30=30,

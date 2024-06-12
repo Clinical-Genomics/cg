@@ -6,7 +6,15 @@ from typing import Any, Iterator
 from pydantic.v1 import ValidationError
 
 from cg.constants import Workflow
-from cg.constants.constants import CaseActions, FileExtensions, FileFormat, MultiQC, WorkflowManager
+from cg.constants.constants import (
+    CaseActions,
+    FileExtensions,
+    FileFormat,
+    GenomeVersion,
+    MultiQC,
+    WorkflowManager,
+)
+from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
@@ -18,6 +26,7 @@ from cg.io.txt import concat_txt, write_txt
 from cg.io.yaml import write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
+from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
     MetricsBase,
@@ -90,17 +99,17 @@ class NfAnalysisAPI(AnalysisAPI):
     @property
     def is_params_appended_to_nextflow_config(self) -> bool:
         """Return True if parameters should be added into the nextflow config file instead of the params file."""
-        return True
-
-    @property
-    def is_multiple_samples_allowed(self) -> bool:
-        """Return whether the analysis supports multiple samples to be linked to the case."""
-        raise NotImplementedError
+        return False
 
     @property
     def is_multiqc_pattern_search_exact(self) -> bool:
         """Return True if only exact pattern search is allowed to collect metrics information from MultiQC file.
         If false, pattern must be present but does not need to be exact."""
+        return False
+
+    @property
+    def is_gene_panel_required(self) -> bool:
+        """Return True if a gene panel is needs to be created using the information in StatusDB and exporting it from Scout."""
         return False
 
     def get_profile(self, profile: str | None = None) -> str:
@@ -207,6 +216,12 @@ class NfAnalysisAPI(AnalysisAPI):
             return work_dir.absolute()
         return Path(self.get_case_path(case_id), NFX_WORK_DIR)
 
+    def get_gene_panels_path(self, case_id: str) -> Path:
+        """Path to gene panels bed file exported from Scout."""
+        return Path(self.get_case_path(case_id=case_id), "gene_panels").with_suffix(
+            FileExtensions.BED
+        )
+
     def set_cluster_options(self, case_id: str) -> str:
         return f'process.clusterOptions = "-A {self.account} --qos={self.get_slurm_qos_for_case(case_id=case_id)}"\n'
 
@@ -244,14 +259,10 @@ class NfAnalysisAPI(AnalysisAPI):
         raise NotImplementedError
 
     def get_sample_sheet_content(self, case_id: str) -> list[list[Any]]:
-        """Collect and format information required to build a sample sheet for a case.
+        """Return formatted information required to build a sample sheet for a case.
         This contains information for all samples linked to the case."""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        if len(case.links) == 0:
-            raise CgError(f"No samples linked to {case_id}")
-        if nlinks := len(case.links) > 1 and not self.is_multiple_samples_allowed:
-            raise CgError(f"Only one sample per case is allowed. {nlinks} found")
-        sample_sheet_content = []
+        sample_sheet_content: list = []
+        case: Case = self.get_validated_case(case_id)
         LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
         LOG.debug("Getting sample sheet information")
         for link in case.links:
@@ -344,6 +355,16 @@ class NfAnalysisAPI(AnalysisAPI):
                 file_path=self.get_nextflow_config_path(case_id=case_id),
             )
 
+    def create_gene_panel(self, case_id: str, dry_run: bool) -> None:
+        """Create and write an aggregated gene panel file exported from Scout."""
+        LOG.info("Creating gene panel file")
+        bed_lines: list[str] = self.get_gene_panel(case_id=case_id, dry_run=dry_run)
+        if dry_run:
+            bed_lines: str = "\n".join(bed_lines)
+            LOG.debug(f"{bed_lines}")
+            return
+        self.write_panel(case_id=case_id, content=bed_lines)
+
     def config_case(self, case_id: str, dry_run: bool):
         """Create directory and config files required by a workflow for a case."""
         if dry_run:
@@ -353,6 +374,8 @@ class NfAnalysisAPI(AnalysisAPI):
         self.create_sample_sheet(case_id=case_id, dry_run=dry_run)
         self.create_params_file(case_id=case_id, dry_run=dry_run)
         self.create_nextflow_config(case_id=case_id, dry_run=dry_run)
+        if self.is_gene_panel_required:
+            self.create_gene_panel(case_id=case_id, dry_run=dry_run)
 
     def _run_analysis_with_nextflow(
         self, case_id: str, command_args: NfCommandArgs, dry_run: bool
@@ -597,7 +620,7 @@ class NfAnalysisAPI(AnalysisAPI):
             MultiQC.MULTIQC_DATA + FileExtensions.JSON,
         )
 
-    def get_workflow_metrics(self) -> dict:
+    def get_workflow_metrics(self, metric_id: str) -> dict:
         """Get nf-core workflow metrics constants."""
         return {}
 
@@ -675,7 +698,7 @@ class NfAnalysisAPI(AnalysisAPI):
             name=metric_name,
             step=MultiQC.MULTIQC,
             value=metric_value,
-            condition=self.get_workflow_metrics().get(metric_name, None),
+            condition=self.get_workflow_metrics(metric_id).get(metric_name, None),
         )
 
     @staticmethod
@@ -720,7 +743,7 @@ class NfAnalysisAPI(AnalysisAPI):
             )
             MetricsDeliverablesCondition(**qc_metrics_raw)
         except MetricsQCError as error:
-            LOG.error(f"QC metrics failed for {case_id}")
+            LOG.error(f"QC metrics failed for {case_id}, with: {error}")
             self.trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)
             self.trailblazer_api.add_comment(case_id=case_id, comment=str(error))
             raise MetricsQCError from error
@@ -740,7 +763,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Write deliverables file."""
 
         self.status_db.verify_case_exists(case_internal_id=case_id)
-        self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+        self.trailblazer_api.verify_latest_analysis_is_completed(case_id)
         if dry_run:
             LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
             return
@@ -758,7 +781,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
         try:
             self.status_db.verify_case_exists(case_internal_id=case_id)
-            self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+            self.trailblazer_api.verify_latest_analysis_is_completed(case_id)
             self.verify_deliverables_file_exists(case_id=case_id)
             self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run)
             self.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
@@ -803,3 +826,52 @@ class NfAnalysisAPI(AnalysisAPI):
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
             or self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
+
+    def get_genome_build(self, case_id: str) -> GenomeVersion:
+        """Return reference genome version for a case.
+        Raises CgError if this information is missing or inconsistent for the samples linked to a case.
+        """
+        reference_genome: set[str] = {
+            sample.reference_genome
+            for sample in self.status_db.get_samples_by_case_id(case_id=case_id)
+        }
+        if len(reference_genome) == 1:
+            return reference_genome.pop()
+        if len(reference_genome) > 1:
+            raise CgError(
+                f"Samples linked to case {case_id} have different reference genome versions set"
+            )
+        raise CgError(f"No reference genome specified for case {case_id}")
+
+    def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
+        """Return build version of the gene panel for a case."""
+        reference_genome: GenomeVersion = self.get_genome_build(case_id=case_id)
+        try:
+            return getattr(GenePanelGenomeBuild, reference_genome)
+        except AttributeError as error:
+            raise CgError(
+                f"Reference {reference_genome} has no associated genome build for panels: {error}"
+            ) from error
+
+    def get_gene_panel(self, case_id: str, dry_run: bool = False) -> list[str]:
+        """Create and return the aggregated gene panel file."""
+        return self._get_gene_panel(
+            case_id=case_id,
+            genome_build=self.get_gene_panel_genome_build(case_id=case_id),
+            dry_run=dry_run,
+        )
+
+    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
+        """Parse Nextflow output analysis files and return an analysis model."""
+        sample_metrics: dict[str, dict] = {}
+        for metric in qc_metrics_raw:
+            try:
+                sample_metrics[metric.id].update({metric.name.lower(): metric.value})
+            except KeyError:
+                sample_metrics[metric.id] = {metric.name.lower(): metric.value}
+        return NextflowAnalysis(sample_metrics=sample_metrics)
+
+    def get_latest_metadata(self, case_id: str) -> NextflowAnalysis:
+        """Return analysis output of a Nextflow case."""
+        qc_metrics: list[MetricsBase] = self.get_multiqc_json_metrics(case_id)
+        return self.parse_analysis(qc_metrics_raw=qc_metrics)

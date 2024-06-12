@@ -5,9 +5,9 @@ import logging
 import click
 from pydantic import ValidationError
 
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import MetaApis
+from cg.constants.constants import MetaApis, DRY_RUN
 from cg.exc import AnalysisNotReadyError, CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -89,7 +89,7 @@ OPTION_FROM_START = click.option(
 
 @click.command("config-case")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @click.pass_obj
 def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Create config files required by a workflow for a case."""
@@ -113,7 +113,7 @@ def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
 @OPTION_TOWER_RUN_ID
-@OPTION_DRY
+@DRY_RUN
 @click.pass_obj
 def run(
     context: CGConfig,
@@ -162,7 +162,7 @@ def run(
 @OPTION_REVISION
 @OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
-@OPTION_DRY
+@DRY_RUN
 @click.pass_obj
 def start(
     context: CGConfig,
@@ -203,13 +203,13 @@ def start(
 
 
 @click.command("start-available")
-@OPTION_DRY
+@DRY_RUN
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False) -> None:
     """Start workflow for all cases ready for analysis."""
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
     exit_code: int = EXIT_SUCCESS
-    for case in analysis_api.get_cases_to_analyze():
+    for case in analysis_api.get_cases_ready_for_analysis():
         try:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
@@ -223,7 +223,7 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
 
 @click.command("metrics-deliver")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @click.pass_obj
 def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Create and validate a metrics deliverables file for given case id.
@@ -238,7 +238,7 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
 @click.command("report-deliver")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @click.pass_obj
 def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Create a Housekeeper deliverables file for given case id."""
@@ -252,7 +252,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
 @click.command("store-housekeeper")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @click.pass_obj
 def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Store a finished nf-analysis in Housekeeper and StatusDB."""
@@ -266,7 +266,7 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
 @click.command("store")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @click.pass_context
 def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     """Generate deliverable files for a case and store in Housekeeper if they
@@ -280,7 +280,7 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
 
 
 @click.command("store-available")
-@OPTION_DRY
+@DRY_RUN
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool) -> None:
     """Store cases that are ready to be stored.

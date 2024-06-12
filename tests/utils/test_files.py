@@ -5,20 +5,38 @@ import pytest
 
 from cg.utils.files import (
     get_directories_in_path,
-    get_directory_creation_time_stamp,
+    get_source_creation_time_stamp,
     get_file_in_directory,
     remove_directory_and_contents,
     rename_file,
+    get_files_in_directory_with_pattern,
 )
 
 
 def test_get_file_in_directory(nested_directory_with_file: Path, some_file: str):
     """Test function to get a file in a directory and subdirectories."""
     # GIVEN a directory with subdirectories with a file
+
     # WHEN getting the file
     file_path: Path = get_file_in_directory(nested_directory_with_file, some_file)
+
     # THEN assert that the file is returned
     assert file_path.exists()
+
+
+def test_get_files_in_directory_by_pattern(nested_directory_with_file: Path, some_file: str):
+    """Test function to get files with a pattern in a directory and subdirectories."""
+    # GIVEN a directory with subdirectories with a file
+
+    # WHEN getting the file
+    file_paths: list[Path] = get_files_in_directory_with_pattern(
+        directory=nested_directory_with_file, pattern=some_file
+    )
+
+    # THEN assert that the file is returned
+    for file_path in file_paths:
+        assert file_path.exists()
+        assert some_file in file_path.as_posix()
 
 
 def test_rename_file(tmp_path: Path):
@@ -75,14 +93,29 @@ def test_rename_file_original_does_not_exist(tmp_path: Path):
         rename_file(file_path=file_path, renamed_file_path=renamed_file_path)
 
 
-def test_get_creation_date(tmp_path_factory, timestamp_now: datetime):
+def test_get_creation_date_for_dir(tmp_path_factory):
     """Test to retrieve the creation date of a directory."""
 
     # GIVEN a directory that is created now
     directory_path: Path = tmp_path_factory.mktemp("some_dir")
 
     # WHEN retrieving the creation time stamp
-    creation_time_stamp: float = get_directory_creation_time_stamp(directory_path)
+    creation_time_stamp: float = get_source_creation_time_stamp(directory_path)
+
+    # THEN the creation time stamp is returned
+    assert isinstance(creation_time_stamp, float)
+
+
+def test_get_creation_date_for_file(tmp_path_factory):
+    """Test to retrieve the creation date of a directory."""
+
+    # GIVEN a file that is created now
+    directory_path: Path = tmp_path_factory.mktemp("some_dir")
+    file_path: Path = Path(directory_path, "some_file")
+    file_path.touch()
+
+    # WHEN retrieving the creation time stamp
+    creation_time_stamp: float = get_source_creation_time_stamp(file_path)
 
     # THEN the creation time stamp is returned
     assert isinstance(creation_time_stamp, float)

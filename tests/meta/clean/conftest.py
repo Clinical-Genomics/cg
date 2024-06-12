@@ -10,8 +10,8 @@ from cg.constants import SequencingFileTag
 from cg.constants.subject import Sex
 from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
 from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
-from cg.store.models import Flowcell, Sample
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.store.models import Flowcell
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -50,27 +50,27 @@ def flow_cell_clean_api_can_not_be_removed(
 
 
 @pytest.fixture(scope="function")
-def tmp_flow_cell_to_clean_path(tmp_flow_cell_directory_bclconvert: Path):
+def tmp_flow_cell_to_clean_path(tmp_flow_cell_directory_bcl_convert: Path):
     """Returns the path to a flow cell fulfilling all cleaning criteria."""
-    return tmp_flow_cell_directory_bclconvert
+    return tmp_flow_cell_directory_bcl_convert
 
 
 @pytest.fixture(scope="function")
-def tmp_flow_cell_to_clean(tmp_flow_cell_to_clean_path: Path) -> FlowCellDirectoryData:
+def tmp_flow_cell_to_clean(tmp_flow_cell_to_clean_path: Path) -> IlluminaRunDirectoryData:
     """Returns a flow cell directory object for a flow cell that fulfills all cleaning criteria."""
-    return FlowCellDirectoryData(tmp_flow_cell_to_clean_path)
+    return IlluminaRunDirectoryData(tmp_flow_cell_to_clean_path)
 
 
 @pytest.fixture(scope="function")
-def tmp_flow_cell_not_to_clean_path(tmp_flow_cell_directory_bcl2fastq: Path):
+def tmp_flow_cell_not_to_clean_path(tmp_novaseq_6000_pre_1_5_kits_flow_cell_path: Path):
     """Return the path to a flow cell not fulfilling all cleaning criteria."""
-    return tmp_flow_cell_directory_bcl2fastq
+    return tmp_novaseq_6000_pre_1_5_kits_flow_cell_path
 
 
 @pytest.fixture(scope="function")
-def tmp_flow_cell_not_to_clean(tmp_flow_cell_not_to_clean_path: Path) -> FlowCellDirectoryData:
+def tmp_flow_cell_not_to_clean(tmp_flow_cell_not_to_clean_path: Path) -> IlluminaRunDirectoryData:
     """Returns a flow cell directory object for a flow cell that does not fulfill all cleaning criteria."""
-    return FlowCellDirectoryData(tmp_flow_cell_not_to_clean_path)
+    return IlluminaRunDirectoryData(tmp_flow_cell_not_to_clean_path)
 
 
 @pytest.fixture(scope="session")
@@ -83,7 +83,7 @@ def tmp_sample_sheet_clean_flow_cell_path(tmp_path_factory) -> Path:
 def store_with_flow_cell_to_clean(
     store: Store,
     sample_id: str,
-    tmp_flow_cell_to_clean: FlowCellDirectoryData,
+    tmp_flow_cell_to_clean: IlluminaRunDirectoryData,
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
@@ -96,13 +96,12 @@ def store_with_flow_cell_to_clean(
         store=store,
         has_backup=True,
     )
-    sample: Sample = helpers.add_sample(
+    helpers.add_sample(
         store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
     )
-    flow_cell.samples = [sample]
     store.session.add(flow_cell)
     store.session.commit()
     return store
@@ -112,7 +111,7 @@ def store_with_flow_cell_to_clean(
 def store_with_flow_cell_not_to_clean(
     store: Store,
     sample_id: str,
-    tmp_flow_cell_not_to_clean: FlowCellDirectoryData,
+    tmp_flow_cell_not_to_clean: IlluminaRunDirectoryData,
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
@@ -125,13 +124,12 @@ def store_with_flow_cell_not_to_clean(
         store=store,
         has_backup=True,
     )
-    sample: Sample = helpers.add_sample(
+    helpers.add_sample(
         store=store, customer_id="cust500", internal_id=sample_id, name=sample_id, sex=Sex.MALE
     )
     helpers.add_multiple_sample_lane_sequencing_metrics_entries(
         metrics_data=sample_sequencing_metrics_details, store=store
     )
-    flow_cell.samples = [sample]
     store.session.add(flow_cell)
     store.session.commit()
     return store
@@ -173,7 +171,7 @@ def housekeeper_api_with_flow_cell_not_to_clean(
 
 @pytest.fixture(scope="function")
 def hk_flow_cell_to_clean_bundle(
-    tmp_flow_cell_to_clean: FlowCellDirectoryData,
+    tmp_flow_cell_to_clean: IlluminaRunDirectoryData,
     timestamp_yesterday: datetime,
     tmp_sample_sheet_clean_flow_cell_path: Path,
 ) -> dict:
@@ -199,7 +197,7 @@ def hk_sample_bundle_for_flow_cell_to_clean(
     spring_file: Path,
     fastq_file: Path,
     spring_meta_data_file: Path,
-    tmp_flow_cell_to_clean: FlowCellDirectoryData,
+    tmp_flow_cell_to_clean: IlluminaRunDirectoryData,
 ) -> dict:
     return {
         "name": sample_id,

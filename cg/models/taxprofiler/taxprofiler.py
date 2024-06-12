@@ -8,10 +8,14 @@ from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 class TaxprofilerQCMetrics(BaseModel):
     """Taxprofiler QC metrics."""
 
-    after_filtering_total_reads: float | None
-    reads_mapped: float | None
-    before_filtering_total_reads: float | None
-    paired_aligned_none: float | None
+    after_filtering_gc_content: float
+    after_filtering_read1_mean_length: float
+    after_filtering_read2_mean_length: float
+    after_filtering_total_reads: float
+    average_length: float
+    pct_duplication: float
+    raw_total_sequences: float
+    reads_mapped: float
 
 
 class TaxprofilerParameters(WorkflowParameters):
@@ -44,7 +48,6 @@ class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
     """Taxprofiler sample model is used when building the sample sheet."""
 
     instrument_platform: SequencingPlatform
-    run_accession: str
     fasta: str
 
     @staticmethod
@@ -61,16 +64,17 @@ class TaxprofilerSampleSheetEntry(NextflowSampleSheetEntry):
 
     def reformat_sample_content(self) -> list[list[str]]:
         """Reformat sample sheet content as a list of list, where each list represents a line in the final file."""
-        return [
-            [
+        reformatted_content = []
+        for run_accession, (forward_path, reverse_path) in enumerate(
+            zip(self.fastq_forward_read_paths, self.fastq_reverse_read_paths), 1
+        ):
+            line = [
                 self.name,
-                self.run_accession,
+                run_accession,
                 self.instrument_platform,
-                fastq_forward_read_path,
-                fastq_reverse_read_path,
+                forward_path,
+                reverse_path,
                 self.fasta,
             ]
-            for fastq_forward_read_path, fastq_reverse_read_path in zip(
-                self.fastq_forward_read_paths, self.fastq_reverse_read_paths
-            )
-        ]
+            reformatted_content.append(line)
+        return reformatted_content
