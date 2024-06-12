@@ -30,7 +30,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
 
     # GIVEN that the context's sequencing run directory holds the given sequencing run
     assert (
-        sample_sheet_context_broken_flow_cells.illumina_demultiplexed_runs_directory
+        sample_sheet_context_broken_flow_cells.run_instruments.illumina.sequencing_runs_dir
         == flow_cell.path.parent.as_posix()
     )
 

@@ -31,7 +31,7 @@ class DemuxPostProcessingAPI:
 
     def __init__(self, config: CGConfig) -> None:
         self.config: CGConfig = config
-        self.flow_cells_dir: Path = Path(config.run_instruments.illumina.flow_cell_runs_dir)
+        self.flow_cells_dir: Path = Path(config.run_instruments.illumina.sequencing_runs_dir)
         self.demultiplexed_runs_dir: Path = Path(
             config.run_instruments.illumina.demultiplexed_runs_dir
         )
