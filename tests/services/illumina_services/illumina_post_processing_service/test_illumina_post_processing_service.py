@@ -1,6 +1,6 @@
 """Module to test the illumina post processing service."""
 
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina_services.illumina_post_processing_service.illumina_post_processing_service import (
     IlluminaPostProcessingService,
 )
@@ -8,7 +8,7 @@ from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun, IlluminaSam
 
 
 def test_get_illumina_flow_cell(
-    novaseq_x_demux_runs_flow_cell: FlowCellDirectoryData,
+    novaseq_x_demux_runs_flow_cell: IlluminaRunDirectoryData,
     illumina_post_postprocessing_service: IlluminaPostProcessingService,
 ):
     # GIVEN a flow cell directory data and an Illumina post processing service
@@ -24,7 +24,7 @@ def test_get_illumina_flow_cell(
 
 
 def test_get_illumina_sequencing_run(
-    novaseq_x_demux_runs_flow_cell: FlowCellDirectoryData,
+    novaseq_x_demux_runs_flow_cell: IlluminaRunDirectoryData,
     illumina_flow_cell: IlluminaFlowCell,
     illumina_post_postprocessing_service: IlluminaPostProcessingService,
 ):
@@ -42,7 +42,7 @@ def test_get_illumina_sequencing_run(
 
 
 def test_get_illumina_sample_sequencing_metrics(
-    novaseq_x_demux_runs_flow_cell: FlowCellDirectoryData,
+    novaseq_x_demux_runs_flow_cell: IlluminaRunDirectoryData,
     illumina_post_postprocessing_service: IlluminaPostProcessingService,
 ):
     # GIVEN a flow cell directory data and an Illumina post processing service
@@ -69,7 +69,7 @@ def test_get_illumina_sample_sequencing_metrics(
 
 
 def test_store_illumina_flow_cell_data(
-    novaseq_x_demux_runs_flow_cell: FlowCellDirectoryData,
+    novaseq_x_demux_runs_flow_cell: IlluminaRunDirectoryData,
     illumina_post_postprocessing_service: IlluminaPostProcessingService,
 ):
     # GIVEN a flow cell directory data and an Illumina post processing service
