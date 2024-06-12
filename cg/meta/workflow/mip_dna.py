@@ -1,3 +1,5 @@
+import logging
+
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType
 from cg.constants.gene_panel import GENOME_BUILD_37
@@ -7,6 +9,8 @@ from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.store.models import CaseSample, Case
 from cg.utils import Process
+
+LOG = logging.getLogger(__name__)
 
 
 class MipDNAAnalysisAPI(MipAnalysisAPI):
@@ -85,6 +89,8 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
             link.sample.application_version.application.analysis_type for link in case.links
         }
         if len(analysis_types) > 1:
-            LOG.warning(f"Multiple analysis types found. Defaulting to {AnalysisType.WHOLE_GENOME_SEQUENCING}.")
+            LOG.warning(
+                f"Multiple analysis types found. Defaulting to {AnalysisType.WHOLE_GENOME_SEQUENCING}."
+            )
             return AnalysisType.WHOLE_GENOME_SEQUENCING
         return analysis_types.pop() if analysis_types else None
