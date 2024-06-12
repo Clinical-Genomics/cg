@@ -35,7 +35,7 @@ def illumina_demultiplexed_runs_directory(demultiplex_fixtures: Path) -> Path:
 @pytest.fixture(scope="session")
 def illumina_demux_all_directory(demultiplex_fixtures: Path) -> Path:
     """Return the path to the sequenced flow cells fixture directory."""
-    return Path(demultiplex_fixtures, "flow_cells_demux_all")
+    return Path(demultiplex_fixtures, "sequencing_runs_demux_all")
 
 
 @pytest.fixture(scope="session")
@@ -71,7 +71,7 @@ def spring_dir(demultiplex_fixtures: Path) -> Path:
 @pytest.fixture(scope="session")
 def broken_flow_cells_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the broken or incomplete flow cells fixture directory."""
-    return Path(demultiplex_fixtures, "flow_cells_broken")
+    return Path(demultiplex_fixtures, "sequencing_runs_broken")
 
 
 @pytest.fixture(scope="session")
@@ -127,7 +127,7 @@ def tmp_illumina_flow_cells_demux_all_directory(
     This fixture is used for testing of the cg demutliplex all cmd.
     """
     original_dir = illumina_demux_all_directory
-    tmp_dir = Path(tmp_path, "flow_cells_demux_all")
+    tmp_dir = Path(tmp_path, "sequencing_runs_demux_all")
 
     return Path(shutil.copytree(original_dir, tmp_dir))
 
