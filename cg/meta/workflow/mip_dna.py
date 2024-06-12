@@ -1,3 +1,5 @@
+import logging
+
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
 from cg.constants.constants import AnalysisType
 from cg.constants.gene_panel import GENOME_BUILD_37
@@ -5,8 +7,10 @@ from cg.constants.pedigree import Pedigree
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.store.models import CaseSample
+from cg.store.models import CaseSample, Case
 from cg.utils import Process
+
+LOG = logging.getLogger(__name__)
 
 
 class MipDNAAnalysisAPI(MipAnalysisAPI):
@@ -73,3 +77,20 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
         """Return the reference genome build version of a MIP-DNA analysis."""
         analysis_metadata: MipAnalysis = self.get_latest_metadata(case_id)
         return analysis_metadata.genome_build
+
+    def get_data_analysis_type(self, case_id: str) -> str:
+        """
+        Return the data analysis type of a MIP-DNA analysis.
+        Patch for the typical behaviour of the AnalysisAPI function.
+        It does not raise an error with multiple analysis types.
+        """
+        case: Case = self.get_validated_case(case_id)
+        analysis_types: set[str] = {
+            link.sample.application_version.application.analysis_type for link in case.links
+        }
+        if len(analysis_types) > 1:
+            LOG.warning(
+                f"Multiple analysis types found. Defaulting to {AnalysisType.WHOLE_GENOME_SEQUENCING}."
+            )
+            return AnalysisType.WHOLE_GENOME_SEQUENCING
+        return analysis_types.pop() if analysis_types else None
