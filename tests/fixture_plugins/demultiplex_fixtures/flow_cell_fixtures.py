@@ -129,9 +129,13 @@ def hiseq_x_single_index_demultiplexed_flow_cell_with_sample_sheet(
 
 
 @pytest.fixture
-def novaseq_x_demux_runs_flow_cell(novaseq_x_demux_runs_dir: Path) -> IlluminaRunDirectoryData:
+def novaseq_x_demux_runs_flow_cell(
+    novaseq_x_demux_runs_dir: Path, novaseq_x_flow_cell: IlluminaRunDirectoryData
+) -> IlluminaRunDirectoryData:
     """Return a NovaSeqX flow cell."""
-    return IlluminaRunDirectoryData(novaseq_x_demux_runs_dir)
+    demux_run = IlluminaRunDirectoryData(novaseq_x_demux_runs_dir)
+    demux_run.set_sample_sheet_path_hk(novaseq_x_flow_cell.path / "SampleSheet.csv")
+    return demux_run
 
 
 @pytest.fixture

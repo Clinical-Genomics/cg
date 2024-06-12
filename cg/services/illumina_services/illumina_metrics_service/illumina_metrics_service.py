@@ -127,6 +127,30 @@ class IlluminaMetricsService:
             created_at=datetime.now(),
         )
 
+    def create_sample_run_dto_for_undetermined_reads(
+        self,
+        flow_cell: IlluminaRunDirectoryData,
+    ) -> list[IlluminaSampleSequencingMetricsDTO]:
+        """Return sequencing metrics for any undetermined reads in non-pooled lanes."""
+        non_pooled_lanes_and_samples: list[tuple[int, str]] = (
+            flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
+        )
+        metrics_parser = BCLConvertMetricsParser(flow_cell.path)
+        undetermined_metrics: list[IlluminaSampleSequencingMetricsDTO] = []
+
+        for lane, sample_internal_id in non_pooled_lanes_and_samples:
+            if not metrics_parser.has_undetermined_reads_in_lane(lane):
+                continue
+
+            # Passing Undetermined as the sample id is required to extract the undetermined reads data.
+            # BclConvert tags undetermined reads in a lane with the sample id "Undetermined".
+            metrics: IlluminaSampleSequencingMetricsDTO = self.create_sample_run_metrics_dto(
+                sample_internal_id=UNDETERMINED, lane=lane, metrics_parser=metrics_parser
+            )
+            metrics.sample_id = sample_internal_id
+            undetermined_metrics.append(metrics)
+        return undetermined_metrics
+
     def create_sample_sequencing_metrics_dto_for_flow_cell(
         self,
         flow_cell_directory: Path,
