@@ -469,34 +469,7 @@ class CreateHandler(BaseHandler):
         LOG.debug(f"Sequencing run added to status db: {new_sequencing_run.id}.")
         return new_sequencing_run
 
-    def add_illumina_sample_metrics(
-        self,
-        sample_metrics_dto: list[IlluminaSampleSequencingMetricsDTO],
-        sequencing_run: IlluminaSequencingRun,
-    ) -> list[IlluminaSampleSequencingMetrics]:
-        """Add new IlluminaSampleSequencingMetrics as a pending transaction."""
-        new_sample_metrics: list[IlluminaSampleSequencingMetrics] = []
-        for sample_metric in sample_metrics_dto:
-            sample: Sample = self.get_sample_by_internal_id(sample_metric.sample_id)
-            new_sample_metric = IlluminaSampleSequencingMetrics(
-                sample=sample,
-                instrument_run_id=sequencing_run.id,
-                instrument_run=sequencing_run,
-                type=sample_metric.type,
-                flow_cell_lane=sample_metric.flow_cell_lane,
-                total_reads_in_lane=sample_metric.total_reads_in_lane,
-                base_passing_q30_percent=sample_metric.base_passing_q30_percent,
-                base_mean_quality_score=sample_metric.base_mean_quality_score,
-                yield_=sample_metric.yield_,
-                yield_q30=sample_metric.yield_q30,
-                created_at=sample_metric.created_at,
-            )
-            new_sample_metrics.append(new_sample_metric)
-        self.session.add_all(new_sample_metrics)
-        LOG.debug("Sample metrics added to status db.")
-        return new_sample_metrics
-
-    def add_illumina_metrics_entry(
+    def add_illumina_sample_metrics_entry(
         self, metrics_dto: IlluminaSampleSequencingMetricsDTO, sequencing_run: IlluminaSequencingRun
     ) -> IlluminaSampleSequencingMetrics:
         """
@@ -517,5 +490,4 @@ class CreateHandler(BaseHandler):
             created_at=metrics_dto.created_at,
         )
         self.session.add(new_metric)
-        LOG.debug(f"Sample metrics added to status db: {new_metric.id}.")
         return new_metric

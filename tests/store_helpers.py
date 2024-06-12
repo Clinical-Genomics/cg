@@ -824,7 +824,7 @@ class StoreHelpers:
             yield_q30=0.9,
             created_at=datetime.now(),
         )
-        metrics: IlluminaSampleSequencingMetrics = store.add_illumina_metrics_entry(
+        metrics: IlluminaSampleSequencingMetrics = store.add_illumina_sample_metrics_entry(
             metrics_dto=metrics_dto, sequencing_run=sequencing_run
         )
         store.session.commit()

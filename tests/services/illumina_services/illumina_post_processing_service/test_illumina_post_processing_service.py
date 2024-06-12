@@ -4,16 +4,21 @@ from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirecto
 from cg.services.illumina_services.illumina_post_processing_service.illumina_post_processing_service import (
     IlluminaPostProcessingService,
 )
-from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun, IlluminaSampleSequencingMetrics
+from cg.store.models import IlluminaFlowCell, IlluminaSampleSequencingMetrics, IlluminaSequencingRun
+from cg.store.store import Store
 
 
-def test_get_illumina_flow_cell(
+def test_store_illumina_flow_cell(
+    store: Store,
     novaseq_x_demux_runs_flow_cell: IlluminaRunDirectoryData,
     illumina_post_postprocessing_service: IlluminaPostProcessingService,
 ):
     # GIVEN a flow cell directory data and an Illumina post processing service
+    assert store._get_query(table=IlluminaFlowCell).count() == 0
 
-    # WHEN creating an Illumina flow cell
+    # GIVEN a store without any Illumina flow cells
+
+    # WHEN storing an Illumina flow cell in the status db
     flow_cell: IlluminaFlowCell = illumina_post_postprocessing_service.store_illumina_flow_cell(
         flow_cell_dir_data=novaseq_x_demux_runs_flow_cell
     )
@@ -22,15 +27,22 @@ def test_get_illumina_flow_cell(
     assert isinstance(flow_cell, IlluminaFlowCell)
     assert flow_cell.internal_id == novaseq_x_demux_runs_flow_cell.id
 
+    # THEN assert that the flow cell is stored in the status db
+    assert store._get_query(table=IlluminaFlowCell).count() == 1
 
-def test_get_illumina_sequencing_run(
+
+def test_store_illumina_sequencing_run(
+    store: Store,
     novaseq_x_demux_runs_flow_cell: IlluminaRunDirectoryData,
     illumina_flow_cell: IlluminaFlowCell,
     illumina_post_postprocessing_service: IlluminaPostProcessingService,
 ):
     # GIVEN a flow cell directory data and an Illumina post processing service
 
-    # WHEN creating an Illumina sequencing run
+    # GIVEN a store without any Illumina sequencing runs
+    assert store._get_query(table=IlluminaSequencingRun).count() == 0
+
+    # WHEN storing an Illumina sequencing run in the status db
     sequencing_run: IlluminaSequencingRun = (
         illumina_post_postprocessing_service.store_illumina_sequencing_run(
             flow_cell_dir_data=novaseq_x_demux_runs_flow_cell, flow_cell=illumina_flow_cell
@@ -40,12 +52,19 @@ def test_get_illumina_sequencing_run(
     # THEN assert that the sequencing run is created
     assert isinstance(sequencing_run, IlluminaSequencingRun)
 
+    # THEN assert that the sequencing run is stored in the status db
+    assert store._get_query(table=IlluminaSequencingRun).count() == 1
 
-def test_get_illumina_sample_sequencing_metrics(
+
+def test_store_illumina_sample_sequencing_metrics(
+    store: Store,
     novaseq_x_demux_runs_flow_cell: IlluminaRunDirectoryData,
     illumina_post_postprocessing_service: IlluminaPostProcessingService,
 ):
-    # GIVEN a flow cell directory data and an Illumina post processing service
+    # GIVEN a store without any Illumina sample sequencing metrics
+    assert store._get_query(table=IlluminaSampleSequencingMetrics).count() == 0
+
+    # GIVEN a flow cell directory data with samples and an Illumina post processing service
     flow_cell: IlluminaFlowCell = illumina_post_postprocessing_service.store_illumina_flow_cell(
         novaseq_x_demux_runs_flow_cell
     )
@@ -55,17 +74,14 @@ def test_get_illumina_sample_sequencing_metrics(
         )
     )
 
-    # WHEN creating Illumina sample sequencing metrics
-    sample_metrics: list[IlluminaSampleSequencingMetrics] = (
-        illumina_post_postprocessing_service.store_illumina_sample_sequencing_metrics(
-            flow_cell_dir_data=novaseq_x_demux_runs_flow_cell,
-            sequencing_run=sequencing_run,
-        )
+    # WHEN storing the Illumina sample sequencing metrics in the status db
+    illumina_post_postprocessing_service.store_illumina_sample_sequencing_metrics(
+        flow_cell_dir_data=novaseq_x_demux_runs_flow_cell,
+        sequencing_run=sequencing_run,
     )
 
-    # THEN assert that the sample metrics are created
-    assert isinstance(sample_metrics, list)
-    assert isinstance(sample_metrics[0], IlluminaSampleSequencingMetrics)
+    # THEN the metrics are found in store
+    assert store._get_query(table=IlluminaSampleSequencingMetrics).count() == 2
 
 
 def test_store_illumina_flow_cell_data(
