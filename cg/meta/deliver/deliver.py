@@ -220,7 +220,7 @@ class DeliverAPI:
                 )
                 number_previously_linked_files += 1
         if number_previously_linked_files == 0 and number_linked_files_now == 0:
-            raise MissingFilesError(f"No files were linked for sample {sample_name}")
+            raise MissingFilesError(f"No files were linked for sample {sample_id} ({sample_name}).")
 
         LOG.info(
             f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case_id}"
