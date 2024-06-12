@@ -20,10 +20,10 @@ def test_filter_illumina_flow_cell_by_internal_id(
     assert flow_cells.count() == 7
 
     # WHEN filtering an Illumina flow cell by internal id
-    flow_cell: Query = filter_illumina_flow_cell_by_internal_id(
+    filtered_flow_cells: Query = filter_illumina_flow_cell_by_internal_id(
         flow_cells=flow_cells, internal_id=novaseq_x_flow_cell_id
     )
 
     # THEN a query with the correct flow cell should be returned
-    assert flow_cell.count() == 1
-    assert flow_cell.first().internal_id == novaseq_x_flow_cell_id
+    assert filtered_flow_cells.count() == 1
+    assert filtered_flow_cells.first().internal_id == novaseq_x_flow_cell_id

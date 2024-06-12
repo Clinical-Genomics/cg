@@ -5,12 +5,13 @@ from typing import Callable
 
 from sqlalchemy.orm import Query
 
-from cg.store.models import IlluminaSequencingRun
+from cg.store.models import IlluminaFlowCell
 
 
-def filter_by_run_internal_id(metrics: Query, run_id: str, **kwargs) -> Query:
+def filter_by_run_internal_id(runs: Query, run_id: str, **kwargs) -> Query:
     """Filter sequencing runs by run internal id."""
-    return metrics.filter(IlluminaSequencingRun.device_id == run_id)
+    joined_query: Query = runs.join(IlluminaFlowCell)
+    return joined_query.filter(IlluminaFlowCell.internal_id == run_id)
 
 
 class IlluminaSequencingRunFilter(Enum):

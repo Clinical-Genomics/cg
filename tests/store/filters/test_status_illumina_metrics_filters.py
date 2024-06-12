@@ -29,6 +29,7 @@ def test_filter_by_run_id_sample_internal_id_and_lane(
 
     # THEN assert that the returned object is a Query with the desired metrics object
     assert filtered_metrics.count() == 1
-    assert filtered_metrics.first().sample.internal_id == sample_id
-    assert filtered_metrics.first().flow_cell_lane == 1
-    assert filtered_metrics.first().instrument_run.device.internal_id == novaseq_x_flow_cell_id
+    metric: IlluminaSampleSequencingMetrics = filtered_metrics.first()
+    assert metric.sample.internal_id == sample_id
+    assert metric.flow_cell_lane == 1
+    assert metric.instrument_run.device.internal_id == novaseq_x_flow_cell_id
