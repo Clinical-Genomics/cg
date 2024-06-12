@@ -4,6 +4,7 @@ import logging
 
 import click
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.demultiplex.demux import (
     confirm_sequencing_run_sync,
     copy_novaseqx_sequencing_runs,
@@ -17,7 +18,7 @@ from cg.cli.demultiplex.sample_sheet import sample_sheet_commands
 LOG = logging.getLogger(__name__)
 
 
-@click.group(name="demultiplex")
+@click.group(name="demultiplex", context_settings=CLICK_CONTEXT_SETTINGS)
 def demultiplex_cmd_group():
     """Command group for the demultiplex CLI."""
     LOG.info("Running cg demultiplex.")
