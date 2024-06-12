@@ -1279,7 +1279,13 @@ def store_with_illumina_sequencing_data(
     seven_canonical_flow_cells: list[IlluminaRunDirectoryData],
     seven_canonical_flow_cells_selected_sample_ids: list[list[str]],
 ) -> Store:
-    """Return a store Illumina flow cells and sample sequencing metrics."""
+    """Return a store with Illumina flow cells, sequencing runs and sample sequencing metrics."""
+    for run_dir, sample_internal_ids in zip(
+        seven_canonical_flow_cells, seven_canonical_flow_cells_selected_sample_ids
+    ):
+        helpers.add_illumina_flow_cell_and_samples_with_sequencing_metrics(
+            run_directory_data=run_dir, sample_ids=sample_internal_ids, store=store
+        )
     return store
 
 

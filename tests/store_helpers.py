@@ -13,6 +13,7 @@ from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import PhenotypeStatus, Sex
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina_services.illumina_metrics_service.models import (
     IlluminaFlowCellDTO,
     IlluminaSampleSequencingMetricsDTO,
@@ -1134,12 +1135,17 @@ class StoreHelpers:
 
     @classmethod
     def add_illumina_flow_cell_and_samples_with_sequencing_metrics(
-        cls, run_id: str, sample_ids: list[str], store: Store
+        cls, run_directory_data: IlluminaRunDirectoryData, sample_ids: list[str], store: Store
     ) -> None:
         """Add an Illumina flow cell and the given samples with sequencing metrics to a store."""
-        flow_cell: IlluminaFlowCell = cls.add_illumina_flow_cell(store=store, run_id=run_id)
+        flow_cell: IlluminaFlowCell = cls.add_illumina_flow_cell(
+            store=store,
+            run_id=run_directory_data.id,
+        )
         sequencing_run: IlluminaSequencingRun = cls.add_illumina_sequencing_run(
-            store=store, flow_cell=flow_cell
+            store=store,
+            flow_cell=flow_cell,
+            sequencer_type=run_directory_data.sequencer_type,
         )
         for i, sample_id in enumerate(sample_ids):
             cls.add_sample(store=store, internal_id=sample_id, name=f"sample_{i}")
@@ -1147,7 +1153,7 @@ class StoreHelpers:
                 store=store,
                 sample_id=sample_id,
                 sequencing_run=sequencing_run,
-                lane=i,
+                lane=i + 1,
             )
 
     @classmethod
