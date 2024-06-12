@@ -35,7 +35,7 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
     # Add samples
     sample_qc_pass = helpers.add_sample(
         store=store,
-        internal_id="ACC0000A1",
+        internal_id="sample_qc_pass",
         name="23CS503186",
         control=ControlOptions.EMPTY,
         reads=861966,
@@ -44,7 +44,7 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
 
     sample_qc_fail = helpers.add_sample(
         store=store,
-        internal_id="ACC0000A2",
+        internal_id="sample_qc_fail",
         name="23CS102408",
         control=ControlOptions.EMPTY,
         reads=438776,
@@ -53,7 +53,7 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
 
     external_negative_control_qc_pass = helpers.add_sample(
         store=store,
-        internal_id="ACC0000A3",
+        internal_id="external_negative_control_qc_pass",
         name="0PROVSEK",
         control=ControlOptions.NEGATIVE,
         reads=20674,
@@ -62,7 +62,7 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
 
     internal_negative_control_qc_pass = helpers.add_sample(
         store=store,
-        internal_id="ACC0000A4",
+        internal_id="internal_negative_control_qc_pass",
         name="NTC-CG-10",
         control=ControlOptions.NEGATIVE,
         reads=0,
@@ -99,13 +99,15 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
 @pytest.fixture(name="mutant_lims")
 def mutant_lims(lims_api: MockLimsAPI) -> MockLimsAPI:
     # Get samples
-    sample_qc_pass = LimsSample(id="ACC0000A1", name="23CS503186")
-    sample_qc_fail = LimsSample(id="ACC0000A2", name="23CS102408")
+    sample_qc_pass = LimsSample(id="sample_qc_pass", name="23CS503186")
+    sample_qc_fail = LimsSample(id="sample_qc_fail", name="23CS102408")
     external_negative_control_qc_pass = LimsSample(
-        id="ACC0000A3", name="0PROVSEK", udf=LimsUDF(control="negative")
+        id="external_negative_control_qc_pass", name="0PROVSEK", udf=LimsUDF(control="negative")
     )
     internal_negative_control_qc_pass = LimsSample(
-        id="ACC0000A4", name="0PROVSEK", udf=LimsUDF(control="negative", customer="cust000")
+        id="internal_negative_control_qc_pass",
+        name="0PROVSEK",
+        udf=LimsUDF(control="negative", customer="cust000"),
     )
 
     # Create pools

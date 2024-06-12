@@ -11,7 +11,7 @@ from cg.meta.workflow.mutant.metadata_parser.utils import get_internal_negative_
 
 def test_get_internal_negative_control_id_from_lims(mutant_lims):
     # GIVEN a sample_internal_id
-    sample_internal_id = "ACC0000A1"
+    sample_internal_id = "sample_qc_pass"
 
     # WHEN parsing the metadata
     internal_negative_control_id = get_internal_negative_control_id_from_lims(
@@ -19,7 +19,7 @@ def test_get_internal_negative_control_id_from_lims(mutant_lims):
     )
 
     # THEN no error is thrown
-    assert internal_negative_control_id == "ACC0000A4"
+    assert internal_negative_control_id == "internal_negative_control_qc_pass"
 
 # def get_internal_negative_control_id(lims: LimsAPI, metadata_for_case: SampleMetadata) -> str:
 #     """Query lims to retrive internal_negative_control_id."""

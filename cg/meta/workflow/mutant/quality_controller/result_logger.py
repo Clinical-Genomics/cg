@@ -24,6 +24,7 @@ class ResultLogger:
 
     @staticmethod
     def log_sample_result(result: SampleQualityResult) -> None:
+        control_message = ""
         if result.is_external_negative_control:
             control_message = "External negative control sample "
         if result.is_internal_negative_control:
