@@ -208,7 +208,7 @@ class StoreHelpers:
         prep_category: str = "wgs",
         description: str = None,
         is_archived: bool = False,
-        target_reads: int = 2000000,
+        target_reads: int = None,
         percent_reads_guaranteed: int = 75,
         is_accredited: bool = False,
         is_external: bool = False,

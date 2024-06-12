@@ -82,7 +82,8 @@ def get_quality_metrics(
     if not samples_metadata:
         return None
     else:
-        return QualityMetrics.model_validate(samples_results, samples_metadata)
+        quality_metrics = {"samples_results": samples_results, "samples_metadata": samples_metadata}
+        return QualityMetrics.model_validate(quality_metrics)
 
 
 def get_report_path(case_path: Path) -> Path:

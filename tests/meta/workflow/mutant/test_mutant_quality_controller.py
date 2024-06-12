@@ -1,25 +1,17 @@
-# from pathlib import Path
-# from cg.constants.constants import MutantQC
-# from cg.meta.workflow.mutant.quality_controller.models import (
-#     QualityMetrics,
-#     SampleQualityResult,
-#     CaseQualityResult,
-#     QualityResult,
-# )
-
-# from cg.meta.workflow.mutant.quality_controller.result_logger import ResultLogger
-# from cg.meta.workflow.mutant.quality_controller.utils import (
-#     has_valid_total_reads,
-#     internal_negative_control_qc_pass,
-#     external_negative_control_qc_pass,
-#     get_quality_metrics,
-#     get_report_path,
-# )
-# from cg.meta.workflow.mutant.quality_controller.report_generator import ReportGenerator
-# from cg.store.models import Case
+from cg.meta.workflow.mutant.quality_controller import QualityController
+from cg.meta.workflow.mutant.quality_controller.utils import get_quality_metrics
 
 
-# class QualityController:
+# def test_quality_control(mutant_store, passing_report_path):
+#     # GIVEN a case object and a corresponding case_results_file_path
+#     mutant_case_qc_pass = mutant_store.get_case_by_internal_id("mutant_case_qc_pass")
+#     # WHEN performing qc
+#     QualityController.quality_control(
+#         case=mutant_case_qc_pass, case_results_file_path=passing_report_path
+#     )
+
+#     # THEN no error is thrown
+
 #     def quality_control(
 #         self, case: Case, case_path: Path, case_results_file_path: Path
 #     ) -> QualityResult | None:
@@ -53,45 +45,22 @@
 
 #         return sample_results
 
-def quality_control_samples(mutant_store, qc_pass_quality_metrics):
-    
-    # GIVEN a case object
 
-    # WHEN parsing the metadata
+def test_quality_control_samples(mutant_store, mutant_lims, passing_report_path):
+    # GIVEN a case object
+    mutant_case_qc_pass = mutant_store.get_case_by_internal_id("mutant_case_qc_pass")
+    quality_metrics = get_quality_metrics(
+        passing_report_path,
+        mutant_case_qc_pass,
+        mutant_store,
+        mutant_lims,
+    )
+
+    # WHEN performing qc on samples
+    QualityController().quality_control_samples(quality_metrics=quality_metrics)
 
     # THEN no error is thrown
 
-#     def quality_control_samples(
-#         self, sample_id: str, quality_metrics: QualityMetrics
-#     ) -> SampleQualityResult:
-#         sample_metadata = quality_metrics.samples_metadata[sample_id]
-#         sample_results = quality_metrics.samples_results[sample_id]
-
-#         valid_read_count: bool = has_valid_total_reads(sample_metadata)
-
-#         if sample_metadata.is_internal_negative_control:
-#             sample_quality = SampleQualityResult(
-#                 sample_id=sample_id,
-#                 passes_qc=valid_read_count,
-#                 is_external_negative_control=sample_metadata.is_external_negative_control,
-#                 is_internal_negative_control=sample_metadata.is_internal_negative_control,
-#                 passes_reads_threshold=valid_read_count,
-#             )
-#             return sample_quality
-
-#         sample_passes_qc: bool = valid_read_count and sample_results.qc_pass
-
-#         sample_quality = SampleQualityResult(
-#             sample_id=sample_id,
-#             passes_qc=sample_passes_qc,
-#             is_external_negative_control=sample_metadata.is_external_negative_control,
-#             is_internal_negative_control=sample_metadata.is_internal_negative_control,
-#             passes_reads_threshold=valid_read_count,
-#             passes_mutant_qc=sample_results.qc_pass,
-#         )
-
-#         ResultLogger.log_sample_result(sample_quality)
-#         return sample_quality
 
 #     def quality_control_case(self, sample_results: list[SampleQualityResult]) -> CaseQualityResult:
 #         internal_negative_control_pass_qc: bool = internal_negative_control_qc_pass(sample_results)
@@ -125,6 +94,3 @@ def quality_control_samples(mutant_store, qc_pass_quality_metrics):
 #                     failed_samples += 1
 
 #         return failed_samples / total_samples > MutantQC.FRACTION_OF_SAMPLES_WITH_FAILED_QC_TRESHOLD
-
-
-

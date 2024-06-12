@@ -55,8 +55,8 @@ class QualityController:
     def quality_control_sample(
         self, sample_id: str, quality_metrics: QualityMetrics
     ) -> SampleQualityResult:
-        sample_metadata = quality_metrics.samples_metadata[sample_id]
-        sample_results = quality_metrics.samples_results[sample_id]
+        sample_metadata = quality_metrics.samples_metadata.samples[sample_id]
+        sample_results = quality_metrics.samples_results.samples[sample_id]
 
         valid_read_count: bool = has_valid_total_reads(sample_metadata)
 

@@ -10,7 +10,9 @@ class QualityMetrics(BaseModel):
 
     @property
     def sample_id_list(self):
-        return self.samples_metadata.keys() #samples_metadata includes internal_negative_control
+        return (
+            self.samples_metadata.samples.keys()
+        )  # samples_metadata includes internal_negative_control
 
 
 class SampleQualityResult(BaseModel):
