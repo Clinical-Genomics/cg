@@ -5,6 +5,7 @@ import click
 from pydantic import ValidationError
 
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.exc import SampleSheetError
 from cg.models.cg_config import CGConfig
@@ -12,7 +13,7 @@ from cg.models.cg_config import CGConfig
 LOG = logging.getLogger(__name__)
 
 
-@click.group(name="samplesheet")
+@click.group(name="samplesheet", context_settings=CLICK_CONTEXT_SETTINGS)
 def sample_sheet_commands():
     """Command group for the sample sheet commands."""
 

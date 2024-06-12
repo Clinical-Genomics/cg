@@ -6,6 +6,7 @@ from pathlib import Path
 import click
 
 from cg.apps.tb import TrailblazerAPI
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI, DeliverTicketAPI
@@ -45,7 +46,7 @@ IGNORE_MISSING_BUNDLES = click.option(
 )
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def deliver():
     """Deliver files with CG."""
     LOG.info("Running CG deliver")

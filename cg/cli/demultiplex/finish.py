@@ -4,6 +4,7 @@ import logging
 
 import click
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.models.cg_config import CGConfig
@@ -11,7 +12,7 @@ from cg.models.cg_config import CGConfig
 LOG = logging.getLogger(__name__)
 
 
-@click.group(name="finish")
+@click.group(name="finish", context_settings=CLICK_CONTEXT_SETTINGS)
 def finish_group():
     """Finish up after demultiplexing."""
 

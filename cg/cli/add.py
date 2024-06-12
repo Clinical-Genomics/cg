@@ -2,7 +2,7 @@ import logging
 
 import click
 
-from cg.cli.utils import is_case_name_allowed
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS, is_case_name_allowed
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.cli_options import DRY_RUN, FORCE
@@ -28,7 +28,7 @@ from cg.utils.click.EnumChoice import EnumChoice
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def add():
     """Add new things to the database."""
     pass

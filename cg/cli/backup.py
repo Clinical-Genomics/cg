@@ -9,6 +9,7 @@ import housekeeper.store.models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.constants import FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
@@ -38,7 +39,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_obj
 def backup(context: CGConfig):
     """Backup utilities"""

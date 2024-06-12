@@ -10,6 +10,7 @@ from housekeeper.store.models import File, Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
     balsamic_pon_past_run_dirs,
@@ -51,7 +52,7 @@ FLOW_CELL_OUTPUT_HEADERS = [
 ]
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def clean():
     """Clean up processes."""
     return
