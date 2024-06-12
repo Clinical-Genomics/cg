@@ -243,6 +243,7 @@ DRY_RUN = click.option(
 SKIP_CONFIRMATION = click.option(
     "-y",
     "--yes",
+    "skip_confirmation",
     is_flag=True,
     default=False,
     help="Skip confirmation",

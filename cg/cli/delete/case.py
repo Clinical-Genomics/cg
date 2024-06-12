@@ -18,7 +18,7 @@ LOG = logging.getLogger(__name__)
 @DRY_RUN
 @SKIP_CONFIRMATION
 @click.pass_context
-def delete_case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
+def delete_case(context: click.Context, case_id: str, dry_run: bool, skip_confirmation: bool):
     """Delete case with links and samples.
 
     The command will stop if the case has any analyses made on it.
@@ -40,13 +40,13 @@ def delete_case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
     context.invoke(print_case, case_ids=[case_id])
 
     if case.links and not (
-        yes or click.confirm(f"Case {case_id} has links: {case.links}, continue?")
+        skip_confirmation or click.confirm(f"Case {case_id} has links: {case.links}, continue?")
     ):
         raise click.Abort
 
-    _delete_links_and_samples(case_obj=case, dry_run=dry_run, status_db=status_db, yes=yes)
+    _delete_links_and_samples(case_obj=case, dry_run=dry_run, status_db=status_db, yes=skip_confirmation)
 
-    if not (yes or click.confirm(f"Do you want to DELETE case: {case}?")):
+    if not (skip_confirmation or click.confirm(f"Do you want to DELETE case: {case}?")):
         raise click.Abort
 
     if dry_run:
