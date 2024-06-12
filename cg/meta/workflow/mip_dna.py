@@ -84,4 +84,6 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
         analysis_types: set[str] = {
             link.sample.application_version.application.analysis_type for link in case.links
         }
+        if len(analysis_types) > 1:
+            return AnalysisType.WHOLE_GENOME_SEQUENCING
         return analysis_types.pop() if analysis_types else None
