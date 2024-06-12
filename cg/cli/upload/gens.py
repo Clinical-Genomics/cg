@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
     "-r",
     "--replace",
     is_flag=True,
-    help="replace existing analysis",
+    help="Replace existing analysis",
 )
 @click.pass_obj
 def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool, replace: bool):
