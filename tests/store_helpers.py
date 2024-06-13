@@ -722,11 +722,11 @@ class StoreHelpers:
 
     @staticmethod
     def add_illumina_flow_cell(
-        store: Store, run_id: str = "flow_cell_test", model: str = "10B"
+        store: Store, flow_cell_id: str = "flow_cell_test", model: str = "10B"
     ) -> IlluminaFlowCell:
         """Add an Illumina flow cell to the store and return it assuming it does not exist."""
         flow_cell_dto = IlluminaFlowCellDTO(
-            internal_id=run_id, type=DeviceType.ILLUMINA, model=model
+            internal_id=flow_cell_id, type=DeviceType.ILLUMINA, model=model
         )
         flow_cell: IlluminaFlowCell = store.add_illumina_flow_cell(flow_cell_dto)
         store.session.commit()
@@ -736,17 +736,17 @@ class StoreHelpers:
     def ensure_illumina_flow_cell(
         cls,
         store: Store,
-        run_id: str = "flow_cell_test",
+        flow_cell_id: str = "flow_cell_test",
         model: str = "10B",
     ) -> IlluminaFlowCell:
         """Return an Illumina flow cell if exists, otherwise add it to the store and return it."""
         flow_cell: IlluminaFlowCell | None = store.get_illumina_flow_cell_by_internal_id(
-            internal_id=run_id
+            internal_id=flow_cell_id
         )
         if flow_cell:
             return flow_cell
         flow_cell: IlluminaFlowCell = cls.add_illumina_flow_cell(
-            store=store, run_id=run_id, model=model
+            store=store, flow_cell_id=flow_cell_id, model=model
         )
         return flow_cell
 
@@ -1156,7 +1156,7 @@ class StoreHelpers:
         """Add an Illumina flow cell and the given samples with sequencing metrics to a store."""
         flow_cell: IlluminaFlowCell = cls.add_illumina_flow_cell(
             store=store,
-            run_id=run_directory_data.id,
+            flow_cell_id=run_directory_data.id,
         )
         sequencing_run: IlluminaSequencingRun = cls.add_illumina_sequencing_run(
             store=store,

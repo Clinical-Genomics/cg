@@ -25,6 +25,6 @@ def apply_illumina_sequencing_run_filter(
     for filter_function in filter_functions:
         runs: Query = filter_function(
             runs=runs,
-            run_id=device_internal_id,
+            device_internal_id=device_internal_id,
         )
     return runs
