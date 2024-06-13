@@ -5,7 +5,6 @@ import logging
 from datetime import datetime
 from typing import Callable, Iterator, Literal
 
-from sqlalchemy import Subquery
 from sqlalchemy.orm import Query, Session
 
 from cg.constants import FlowCellStatus, Workflow
@@ -13,8 +12,14 @@ from cg.constants.constants import CaseActions, CustomerId, PrepCategory, Sample
 from cg.exc import CaseNotFoundError, CgError, OrderNotFoundError
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.store.base import BaseHandler
-from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
-from cg.store.filters.status_application_filters import ApplicationFilter, apply_application_filter
+from cg.store.filters.status_analysis_filters import (
+    AnalysisFilter,
+    apply_analysis_filter,
+)
+from cg.store.filters.status_application_filters import (
+    ApplicationFilter,
+    apply_application_filter,
+)
 from cg.store.filters.status_application_limitations_filters import (
     ApplicationLimitationsFilter,
     apply_application_limitations_filter,
@@ -24,15 +29,27 @@ from cg.store.filters.status_application_version_filters import (
     apply_application_versions_filter,
 )
 from cg.store.filters.status_bed_filters import BedFilter, apply_bed_filter
-from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
+from cg.store.filters.status_bed_version_filters import (
+    BedVersionFilter,
+    apply_bed_version_filter,
+)
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
-from cg.store.filters.status_case_sample_filters import CaseSampleFilter, apply_case_sample_filter
+from cg.store.filters.status_case_sample_filters import (
+    CaseSampleFilter,
+    apply_case_sample_filter,
+)
 from cg.store.filters.status_collaboration_filters import (
     CollaborationFilter,
     apply_collaboration_filter,
 )
-from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
-from cg.store.filters.status_flow_cell_filters import FlowCellFilter, apply_flow_cell_filter
+from cg.store.filters.status_customer_filters import (
+    CustomerFilter,
+    apply_customer_filter,
+)
+from cg.store.filters.status_flow_cell_filters import (
+    FlowCellFilter,
+    apply_flow_cell_filter,
+)
 from cg.store.filters.status_illumina_flow_cell_filters import (
     IlluminaFlowCellFilter,
     apply_illumina_flow_cell_filters,
@@ -46,9 +63,15 @@ from cg.store.filters.status_illumina_sequencing_run_filters import (
     apply_illumina_sequencing_run_filter,
 )
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
-from cg.store.filters.status_metrics_filters import SequencingMetricsFilter, apply_metrics_filter
+from cg.store.filters.status_metrics_filters import (
+    SequencingMetricsFilter,
+    apply_metrics_filter,
+)
 from cg.store.filters.status_order_filters import OrderFilter, apply_order_filters
-from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
+from cg.store.filters.status_organism_filters import (
+    OrganismFilter,
+    apply_organism_filter,
+)
 from cg.store.filters.status_panel_filters import PanelFilter, apply_panel_filter
 from cg.store.filters.status_pool_filters import PoolFilter, apply_pool_filter
 from cg.store.filters.status_sample_filters import SampleFilter, apply_sample_filter
@@ -66,11 +89,8 @@ from cg.store.models import (
     Customer,
     Flowcell,
     IlluminaFlowCell,
-<<<<<<< fix-duplicated-summaries
-=======
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
->>>>>>> master
     Invoice,
     Order,
     Organism,
