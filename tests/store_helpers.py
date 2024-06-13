@@ -116,8 +116,9 @@ class StoreHelpers:
         _bundle = StoreHelpers.ensure_hk_bundle(store, bundle_data)
         return store.last_version(_bundle.name)
 
-    @staticmethod
+    @classmethod
     def ensure_application_version(
+        cls,
         store: Store,
         application_tag: str = "dummy_tag",
         prep_category: str = "wgs",
@@ -137,7 +138,7 @@ class StoreHelpers:
 
         application: Application = store.get_application_by_tag(tag=application_tag)
         if not application:
-            application: Application = StoreHelpers.add_application(
+            application: Application = cls.add_application(
                 store=store,
                 application_tag=application_tag,
                 prep_category=prep_category,
@@ -189,8 +190,9 @@ class StoreHelpers:
         store.session.commit()
         return new_record
 
-    @staticmethod
+    @classmethod
     def ensure_application(
+        cls,
         store: Store,
         tag: str,
         prep_category: str = "wgs",
@@ -201,7 +203,7 @@ class StoreHelpers:
         """Ensure that application exists in store."""
         application: Application = store.get_application_by_tag(tag=tag)
         if not application:
-            application: Application = StoreHelpers.add_application(
+            application: Application = cls.add_application(
                 store=store,
                 application_tag=tag,
                 prep_category=prep_category,
@@ -292,15 +294,16 @@ class StoreHelpers:
             collaboration = store.add_collaboration(collaboration_id, collaboration_id)
         return collaboration
 
-    @staticmethod
+    @classmethod
     def ensure_customer(
+        cls,
         store: Store,
         customer_id: str = "cust000",
         customer_name: str = "Production",
         scout_access: bool = False,
     ) -> Customer:
         """Utility function to return existing or create customer for tests."""
-        collaboration: Collaboration = StoreHelpers.ensure_collaboration(store)
+        collaboration: Collaboration = cls.ensure_collaboration(store)
         customer: Customer = store.get_customer_by_internal_id(customer_internal_id=customer_id)
 
         if not customer:
