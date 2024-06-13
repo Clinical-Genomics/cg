@@ -131,10 +131,8 @@ def run(
 @FORCE
 @click.pass_obj
 def report_deliver(context: CGConfig, case_id: str, dry_run: bool, force: bool):
-    """Create a housekeeper deliverables file for given CASE ID"""
-
+    """Create a Housekeeper deliverables file for a given case ID."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-
     try:
         analysis_api.status_db.verify_case_exists(case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
