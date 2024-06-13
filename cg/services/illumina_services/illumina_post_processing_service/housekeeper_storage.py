@@ -22,7 +22,7 @@ def _check_if_fastq_path_should_be_stored_in_housekeeper(
     sample_id: str,
     sample_fastq_path: Path,
     sequencer_type: Sequencers,
-    run_internal_id: str,
+    device_internal_id: str,
     store: Store,
 ) -> bool:
     """
@@ -32,19 +32,19 @@ def _check_if_fastq_path_should_be_stored_in_housekeeper(
     lane = get_lane_from_sample_fastq(sample_fastq_path)
     q30_threshold: int = get_q30_threshold(sequencer_type)
 
-    metric = store.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-        flow_cell_name=run_internal_id,
+    metric = store.get_illumina_metrics_entry_by_device_sample_and_lane(
+        device_internal_id=device_internal_id,
         sample_internal_id=sample_id,
         lane=lane,
     )
 
     if metric:
-        return metric.sample_base_percentage_passing_q30 >= q30_threshold
+        return metric.base_passing_q30_percent >= q30_threshold
 
     LOG.warning(
         f"Skipping fastq file {sample_fastq_path.name} as no metrics entry was found in status db."
     )
-    LOG.warning(f"Flow cell name: {run_internal_id}, sample id: {sample_id}, lane: {lane} ")
+    LOG.warning(f"Flow cell name: {device_internal_id}, sample id: {sample_id}, lane: {lane} ")
     return False
 
 
@@ -70,7 +70,7 @@ def add_sample_fastq_files_to_housekeeper(
                 sample_id=sample_internal_id,
                 sample_fastq_path=sample_fastq_path,
                 sequencer_type=flow_cell.sequencer_type,
-                run_internal_id=flow_cell.id,
+                device_internal_id=flow_cell.id,
                 store=store,
             ):
                 hk_api.store_fastq_path_in_housekeeper(
@@ -98,7 +98,7 @@ def store_undetermined_fastq_files(
                 sample_id=sample_id,
                 sample_fastq_path=fastq_path,
                 sequencer_type=flow_cell.sequencer_type,
-                run_internal_id=flow_cell.id,
+                device_internal_id=flow_cell.id,
                 store=store,
             ):
                 hk_api.store_fastq_path_in_housekeeper(
