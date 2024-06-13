@@ -464,7 +464,7 @@ class ReadHandler(BaseHandler):
             internal_id=run_id,
         ).subquery()
 
-        query = (
+        joined_query: Query = (
             self._get_query(table=IlluminaSampleSequencingMetrics)
             .select_from(IlluminaSampleSequencingMetrics)
             .join(
@@ -477,7 +477,7 @@ class ReadHandler(BaseHandler):
             )
             .join(filtered_flow_cells, IlluminaSequencingRun.device_id == filtered_flow_cells.c.id)
         )
-        return query.first()
+        return joined_query.first()
 
     def get_illumina_sequencing_run_by_device(self, run_id: str) -> IlluminaSequencingRun:
         """Get Illumina sequencing run entry by device internal id."""
