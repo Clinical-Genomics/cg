@@ -2,15 +2,18 @@ from cg.meta.workflow.mutant.quality_controller import QualityController
 from cg.meta.workflow.mutant.quality_controller.utils import get_quality_metrics
 
 
-# def test_quality_control(mutant_store, passing_report_path):
-#     # GIVEN a case object and a corresponding case_results_file_path
-#     mutant_case_qc_pass = mutant_store.get_case_by_internal_id("mutant_case_qc_pass")
-#     # WHEN performing qc
-#     QualityController.quality_control(
-#         case=mutant_case_qc_pass, case_results_file_path=passing_report_path
-#     )
+def test_quality_control(mutant_store, mutant_lims, passing_report_path):
+    # GIVEN a case object and a corresponding case_results_file_path
+    mutant_case_qc_pass = mutant_store.get_case_by_internal_id("mutant_case_qc_pass")
+    # WHEN performing qc
+    QualityController(status_db=mutant_store, lims=mutant_lims).quality_control(
+        case=mutant_case_qc_pass,
+        case_path="",
+        case_results_file_path=passing_report_path,
+    )
 
-#     # THEN no error is thrown
+    # THEN no error is thrown
+
 
 #     def quality_control(
 #         self, case: Case, case_path: Path, case_results_file_path: Path
@@ -57,7 +60,9 @@ def test_quality_control_samples(mutant_store, mutant_lims, passing_report_path)
     )
 
     # WHEN performing qc on samples
-    QualityController().quality_control_samples(quality_metrics=quality_metrics)
+    QualityController(status_db=mutant_store, lims=mutant_lims).quality_control_samples(
+        quality_metrics=quality_metrics
+    )
 
     # THEN no error is thrown
 

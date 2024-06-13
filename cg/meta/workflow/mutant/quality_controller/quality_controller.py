@@ -1,4 +1,5 @@
 from pathlib import Path
+from cg.apps.lims.api import LimsAPI
 from cg.constants.constants import MutantQC
 from cg.meta.workflow.mutant.quality_controller.models import (
     QualityMetrics,
@@ -17,9 +18,14 @@ from cg.meta.workflow.mutant.quality_controller.utils import (
 )
 from cg.meta.workflow.mutant.quality_controller.report_generator import ReportGenerator
 from cg.store.models import Case
+from cg.store.store import Store
 
 
 class QualityController:
+    def __init__(self, status_db: Store, lims: LimsAPI) -> None:
+        self.status_db = status_db
+        self.lims = lims
+
     def quality_control(
         self, case: Case, case_path: Path, case_results_file_path: Path
     ) -> QualityResult | None:
