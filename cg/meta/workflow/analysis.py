@@ -215,7 +215,7 @@ class AnalysisAPI(MetaAPI):
     def upload_bundle_housekeeper(
         self, case_id: str, dry_run: bool = False, force: bool = False
     ) -> None:
-        """Storing bundle data in Housekeeper for CASE_ID"""
+        """Storing bundle data in Housekeeper for a case."""
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
         bundle_data: dict = self.get_hermes_transformed_deliverables(case_id=case_id, force=force)
         bundle_result: tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
@@ -236,7 +236,7 @@ class AnalysisAPI(MetaAPI):
         self.housekeeper_api.add_commit(bundle_object)
         self.housekeeper_api.add_commit(bundle_version)
         LOG.info(
-            f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
+            f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
         )
 
     def upload_bundle_statusdb(self, case_id: str, dry_run: bool = False) -> None:

@@ -56,7 +56,7 @@ class ReportAPI(MetaAPI):
         self.analysis_api: AnalysisAPI = analysis_api
 
     def create_delivery_report(self, case_id: str, analysis_date: datetime, force: bool) -> str:
-        """Generates the html contents of a delivery report."""
+        """Generates the HTML content of a delivery report."""
         report_data: ReportModel = self.get_report_data(
             case_id=case_id, analysis_date=analysis_date
         )
