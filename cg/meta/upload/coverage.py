@@ -37,11 +37,11 @@ class UploadCoverageApi:
             )
         return data
 
-    def upload(self, data: dict, replace: bool = False):
+    def upload(self, data: dict):
         """Upload coverage to Chanjo from an analysis."""
         for sample_data in data["samples"]:
             chanjo_sample = self.chanjo_api.sample(sample_data["sample"])
-            if chanjo_sample and replace:
+            if chanjo_sample:
                 self.chanjo_api.delete_sample(sample_data["sample"])
             elif chanjo_sample:
                 LOG.warning(f"sample already loaded, skipping: {sample_data['sample']}")
