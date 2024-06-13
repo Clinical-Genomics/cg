@@ -30,7 +30,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
 
     # GIVEN that the context's sequencing run directory holds the given sequencing run
     assert (
-        sample_sheet_context_broken_flow_cells.illumina_demultiplexed_runs_directory
+        sample_sheet_context_broken_flow_cells.run_instruments.illumina.demultiplexed_runs_dir
         == flow_cell.path.parent.as_posix()
     )
 
@@ -53,7 +53,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
 
 
 class SampleSheetScenario(BaseModel):
-    flow_cell_directory: str
+    sequencing_run_directory: str
     lims_samples: str
     correct_sample_sheet: str
 
@@ -62,17 +62,17 @@ class SampleSheetScenario(BaseModel):
     "scenario",
     [
         SampleSheetScenario(
-            flow_cell_directory="tmp_novaseq_6000_pre_1_5_kits_flow_cell_without_sample_sheet_path",
+            sequencing_run_directory="tmp_novaseq_6000_pre_1_5_kits_flow_cell_without_sample_sheet_path",
             lims_samples="novaseq_6000_pre_1_5_kits_bcl_convert_lims_samples",
             correct_sample_sheet="novaseq_6000_pre_1_5_kits_correct_sample_sheet_path",
         ),
         SampleSheetScenario(
-            flow_cell_directory="tmp_novaseq_6000_post_1_5_kits_flow_cell_without_sample_sheet_path",
+            sequencing_run_directory="tmp_novaseq_6000_post_1_5_kits_flow_cell_without_sample_sheet_path",
             lims_samples="novaseq_6000_post_1_5_kits_bcl_convert_lims_samples",
             correct_sample_sheet="novaseq_6000_post_1_5_kits_correct_sample_sheet_path",
         ),
         SampleSheetScenario(
-            flow_cell_directory="tmp_novaseq_x_without_sample_sheet_flow_cell_path",
+            sequencing_run_directory="tmp_novaseq_x_without_sample_sheet_flow_cell_path",
             lims_samples="novaseq_x_lims_samples",
             correct_sample_sheet="novaseq_x_correct_sample_sheet",
         ),
@@ -95,7 +95,7 @@ def test_create_v2_sample_sheet(
     sample_sheet_api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
 
     # GIVEN a sequencing run directory with some run parameters
-    flow_cell_directory: Path = request.getfixturevalue(scenario.flow_cell_directory)
+    flow_cell_directory: Path = request.getfixturevalue(scenario.sequencing_run_directory)
     flow_cell = IlluminaRunDirectoryData(flow_cell_directory)
     assert flow_cell.run_parameters_path.exists()
 
