@@ -14,9 +14,9 @@ def test_store_illumina_flow_cell(
     illumina_post_postprocessing_service: IlluminaPostProcessingService,
 ):
     # GIVEN a flow cell directory data and an Illumina post processing service
-    assert store._get_query(table=IlluminaFlowCell).count() == 0
 
     # GIVEN a store without any Illumina flow cells
+    assert store._get_query(table=IlluminaFlowCell).count() == 0
 
     # WHEN storing an Illumina flow cell in the status db
     flow_cell: IlluminaFlowCell = illumina_post_postprocessing_service.store_illumina_flow_cell(
