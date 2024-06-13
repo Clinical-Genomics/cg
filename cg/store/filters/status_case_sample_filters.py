@@ -57,7 +57,7 @@ def get_not_sequenced_cases(case_samples: Query, **kwargs) -> Query:
 
 
 def exclude_cases(case_samples: Query, cases_to_exclude: list[str], **kwargs) -> Query:
-    return case_samples.filter(Case.internal_id not in cases_to_exclude)
+    return case_samples.filter(Case.internal_id.notin_(cases_to_exclude))
 
 
 def apply_case_sample_filter(
