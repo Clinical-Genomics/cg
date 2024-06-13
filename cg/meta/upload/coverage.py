@@ -46,7 +46,7 @@ class UploadCoverageApi:
             chanjo_sample = self.chanjo_api.sample(sample_data["sample"])
             if chanjo_sample:
                 LOG.warning(
-                    f"sample already loaded, deleting previous entry for re-upload: {sample_data['sample']}"
+                    f"Sample already loaded, deleting previous entry and re-uploading: {sample_data['sample']}"
                 )
                 self.chanjo_api.delete_sample(sample_data["sample"])
 
