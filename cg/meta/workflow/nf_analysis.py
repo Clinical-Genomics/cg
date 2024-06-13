@@ -778,7 +778,12 @@ class NfAnalysisAPI(AnalysisAPI):
     def store_analysis_housekeeper(
         self, case_id: str, dry_run: bool = False, force: bool = False
     ) -> None:
-        """Store a finished nextflow analysis in Housekeeper and StatusDB."""
+        """
+        Store a finished Nextflow analysis in Housekeeper and StatusDB.
+
+        Raises:
+            HousekeeperStoreError: If the deliverables file is malformed or if the bundle could not be stored.
+        """
         try:
             self.status_db.verify_case_exists(case_id)
             self.trailblazer_api.verify_latest_analysis_is_completed(case_id=case_id, force=force)

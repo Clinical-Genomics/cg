@@ -308,6 +308,7 @@ class AnalysisAPI(MetaAPI):
         ).model_dump()
 
     def get_bundle_created_date(self, case_id: str) -> datetime.date:
+        """Return the creation date of the deliverables file for a given case."""
         return self.get_date_from_file_path(self.get_deliverables_file_path(case_id=case_id))
 
     def get_workflow_version(self, case_id: str) -> str:
