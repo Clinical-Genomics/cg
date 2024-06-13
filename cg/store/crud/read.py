@@ -448,7 +448,11 @@ class ReadHandler(BaseHandler):
         """Get metrics entry by sequencing run id, sample internal id and lane."""
         return apply_illumina_metrics_filter(
             metrics=self._get_query(table=IlluminaSampleSequencingMetrics),
-            filter_functions=[IlluminaMetricsFilter.BY_RUN_ID_SAMPLE_INTERNAL_ID_AND_LANE],
+            filter_functions=[
+                IlluminaMetricsFilter.BY_RUN_ID,
+                IlluminaMetricsFilter.BY_SAMPLE_INTERNAL_ID,
+                IlluminaMetricsFilter.BY_LANE,
+            ],
             sample_internal_id=sample_internal_id,
             run_id=run_id,
             lane=lane,
@@ -457,7 +461,7 @@ class ReadHandler(BaseHandler):
     def get_illumina_sequencing_run_by_internal_id(self, run_id: str) -> IlluminaSequencingRun:
         """Get Illumina sequencing run entry by run id."""
         return apply_illumina_sequencing_run_filter(
-            metrics=self._get_query(table=IlluminaSequencingRun),
+            runs=self._get_query(table=IlluminaSequencingRun),
             filter_functions=[IlluminaSequencingRunFilter.BY_RUN_INTERNAL_ID],
             run_id=run_id,
         ).first()

@@ -19,13 +19,13 @@ class IlluminaSequencingRunFilter(Enum):
 
 
 def apply_illumina_sequencing_run_filter(
-    metrics: Query,
+    runs: Query,
     filter_functions: list[Callable],
     run_id: str | None = None,
 ) -> Query:
     for filter_function in filter_functions:
-        metrics: Query = filter_function(
-            metrics=metrics,
+        runs: Query = filter_function(
+            runs=runs,
             run_id=run_id,
         )
-    return metrics
+    return runs

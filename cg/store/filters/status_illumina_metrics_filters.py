@@ -13,20 +13,27 @@ from cg.store.models import (
 )
 
 
-def filter_by_run_id_sample_internal_id_and_lane(
-    metrics: Query, run_id: str, sample_internal_id: str, lane: int, **kwargs
-) -> Query:
-    """Filter metrics by run id, sample internal id and lane."""
-    joined_query: Query = metrics.join(Sample).join(IlluminaSequencingRun).join(IlluminaFlowCell)
-    return joined_query.filter(
-        Sample.internal_id == sample_internal_id,
-        IlluminaFlowCell.internal_id == run_id,
-        IlluminaSampleSequencingMetrics.flow_cell_lane == lane,
-    )
+def filter_by_run_id(metrics: Query, run_id: str, **kwargs) -> Query:
+    """Filter metrics by run id."""
+    joined_query: Query = metrics.join(IlluminaSequencingRun).join(IlluminaFlowCell)
+    return joined_query.filter(IlluminaFlowCell.internal_id == run_id)
+
+
+def filter_by_sample_internal_id(metrics: Query, sample_internal_id: str, **kwargs) -> Query:
+    """Filter metrics by sample internal id."""
+    joined_query: Query = metrics.join(Sample)
+    return joined_query.filter(Sample.internal_id == sample_internal_id)
+
+
+def filter_by_lane(metrics: Query, lane: int, **kwargs) -> Query:
+    """Filter metrics by lane."""
+    return metrics.filter(IlluminaSampleSequencingMetrics.flow_cell_lane == lane)
 
 
 class IlluminaMetricsFilter(Enum):
-    BY_RUN_ID_SAMPLE_INTERNAL_ID_AND_LANE: Callable = filter_by_run_id_sample_internal_id_and_lane
+    BY_RUN_ID: Callable = filter_by_run_id
+    BY_SAMPLE_INTERNAL_ID: Callable = filter_by_sample_internal_id
+    BY_LANE: Callable = filter_by_lane
 
 
 def apply_illumina_metrics_filter(
