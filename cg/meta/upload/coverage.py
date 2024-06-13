@@ -38,7 +38,10 @@ class UploadCoverageApi:
         return data
 
     def upload(self, data: dict):
-        """Upload coverage to Chanjo from an analysis."""
+        """
+        Upload coverage to Chanjo from an analysis.
+        If a previous coverage exists for a sample, it will be deleted before re-uploading.
+        """
         for sample_data in data["samples"]:
             chanjo_sample = self.chanjo_api.sample(sample_data["sample"])
             if chanjo_sample:
