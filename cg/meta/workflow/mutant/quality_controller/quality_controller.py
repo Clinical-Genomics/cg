@@ -65,7 +65,10 @@ class QualityController:
 
         valid_read_count: bool = has_valid_total_reads(sample_metadata)
 
-        if sample_metadata.is_internal_negative_control:
+        if (
+            sample_metadata.is_internal_negative_control
+            or sample_metadata.is_external_negative_control
+        ):
             sample_quality = SampleQualityResult(
                 sample_id=sample_id,
                 passes_qc=valid_read_count,
@@ -103,8 +106,8 @@ class QualityController:
                 and internal_negative_control_pass_qc
                 and external_negative_control_pass_qc
             ),
-            internal_negative_control_pass_qc=internal_negative_control_pass_qc,
-            external_negative_control_pass_qc=external_negative_control_pass_qc,
+            internal_negative_control_passes_qc=internal_negative_control_pass_qc,
+            external_negative_control_passes_qc=external_negative_control_pass_qc,
         )
         ResultLogger.log_case_result(result)
         return result
@@ -122,4 +125,4 @@ class QualityController:
                 if not sample_result.passes_qc:
                     failed_samples += 1
 
-        return failed_samples / total_samples > MutantQC.FRACTION_OF_SAMPLES_WITH_FAILED_QC_TRESHOLD
+        return failed_samples / total_samples < MutantQC.FRACTION_OF_SAMPLES_WITH_FAILED_QC_TRESHOLD

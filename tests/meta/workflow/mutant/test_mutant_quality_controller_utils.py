@@ -1,12 +1,30 @@
-from cg.meta.workflow.mutant.quality_controller import utils
+from cg.meta.workflow.mutant.quality_controller.utils import (
+    internal_negative_control_qc_pass,
+    external_negative_control_qc_pass,
+)
 
-# def has_valid_total_reads(sample_metadata: SamplesMetadataMetrics) -> bool:
-#         
-#    if is_valid_total_reads_for_external_negative_control(reads=sample_metadata.reads):
-#         return is_valid_total_reads_for_internal_negative_control(reads=sample_metadata.reads)
 
-#     return is_valid_total_reads(
-#         reads=sample_metadata.reads,
-#         target_reads=sample_metadata.target_reads,
-#         threshold_percentage=sample_metadata.percent_reads_guaranteed,
-#     )
+def test_internal_negative_control_qc_pass(sample_results_case_qc_pass) -> bool:
+    # GIVEN a sample_results object where the internal_negative_control passes qc
+
+    # WHEN performing qc on the sample
+    internal_negative_control_pass_qc: bool = internal_negative_control_qc_pass(
+        sample_results_case_qc_pass
+    )
+
+    # THEN internal_negative_control_pass_qc=True
+
+    assert internal_negative_control_pass_qc is True
+
+
+def test_external_negative_control_qc_pass(sample_results_case_qc_pass) -> bool:
+    # GIVEN a sample_results object where the external_negative_control passes qc
+
+    # WHEN performing qc on the sample
+    external_negative_control_pass_qc: bool = external_negative_control_qc_pass(
+        sample_results_case_qc_pass
+    )
+
+    # THEN external_negative_control_pass_qc=True
+
+    assert external_negative_control_pass_qc is True

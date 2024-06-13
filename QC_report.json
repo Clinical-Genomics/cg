@@ -1,0 +1,34 @@
+{
+    "summary": "Case failed QC. Sample results: 3 total, 2 failed, 1 passed.",
+    "case": {
+        "passes_qc": false,
+        "internal_negative_control_passes_qc": false,
+        "external_negative_control_passes_qc": false
+    },
+    "samples": [
+        {
+            "sample_id": "sample_qc_pass_with_failing_controls",
+            "passes_qc": true,
+            "is_external_negative_control": false,
+            "is_internal_negative_control": false,
+            "passes_reads_threshold": true,
+            "passes_mutant_qc": true
+        },
+        {
+            "sample_id": "external_negative_control_qc_fail",
+            "passes_qc": false,
+            "is_external_negative_control": true,
+            "is_internal_negative_control": false,
+            "passes_reads_threshold": false,
+            "passes_mutant_qc": false
+        },
+        {
+            "sample_id": "internal_negative_control_qc_fail",
+            "passes_qc": false,
+            "is_external_negative_control": false,
+            "is_internal_negative_control": true,
+            "passes_reads_threshold": false,
+            "passes_mutant_qc": false
+        }
+    ]
+}

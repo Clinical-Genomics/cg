@@ -22,7 +22,6 @@ def has_valid_total_reads(sample_metadata: SampleMetadata) -> bool:
             return True
         else:
             return False
-            # TODO: KRAKEN
 
     if sample_metadata.is_internal_negative_control:
         return is_valid_total_reads_for_internal_negative_control(reads=sample_metadata.reads)
