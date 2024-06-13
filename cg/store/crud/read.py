@@ -51,8 +51,8 @@ from cg.store.filters.status_flow_cell_filters import (
     apply_flow_cell_filter,
 )
 from cg.store.filters.status_illumina_flow_cell_filters import (
-    apply_illumina_flow_cell_filters,
     IlluminaFlowCellFilter,
+    apply_illumina_flow_cell_filters,
 )
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
 from cg.store.filters.status_metrics_filters import (
@@ -80,6 +80,7 @@ from cg.store.models import (
     Collaboration,
     Customer,
     Flowcell,
+    IlluminaFlowCell,
     Invoice,
     Order,
     Organism,
@@ -88,7 +89,6 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
     User,
-    IlluminaFlowCell,
 )
 
 LOG = logging.getLogger(__name__)
@@ -1435,43 +1435,49 @@ class ReadHandler(BaseHandler):
         )
         return orders.first()
 
-    def get_case_not_received_count(self, order_id: int) -> int:
+    def get_case_not_received_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
         filters: list[CaseSampleFilter] = [
             CaseSampleFilter.BY_ORDER,
             CaseSampleFilter.CASES_WITH_SAMPLES_NOT_RECEIVED,
+            CaseSampleFilter.EXCLUDE_CASES,
         ]
         case_samples: Query = self._join_sample_and_case()
         return apply_case_sample_filter(
             case_samples=case_samples,
             filter_functions=filters,
             order_id=order_id,
+            cases_to_exclude=cases_to_exclude,
         ).count()
 
-    def get_case_in_preparation_count(self, order_id: int) -> int:
+    def get_case_in_preparation_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
         filters: list[CaseFilter] = [
             CaseSampleFilter.BY_ORDER,
             CaseSampleFilter.CASES_WITH_ALL_SAMPLES_RECEIVED,
             CaseSampleFilter.CASES_WITH_SAMPLES_NOT_PREPARED,
+            CaseSampleFilter.EXCLUDE_CASES,
         ]
         case_samples: Query = self._join_sample_and_case()
         return apply_case_sample_filter(
             case_samples=case_samples,
             filter_functions=filters,
             order_id=order_id,
+            cases_to_exclude=cases_to_exclude,
         ).count()
 
-    def get_case_in_sequencing_count(self, order_id: int) -> int:
+    def get_case_in_sequencing_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
         filters: list[CaseSampleFilter] = [
             CaseSampleFilter.BY_ORDER,
             CaseSampleFilter.CASES_WITH_ALL_SAMPLES_RECEIVED,
             CaseSampleFilter.CASES_WITH_ALL_SAMPLES_PREPARED,
             CaseSampleFilter.CASES_WITH_SAMPLES_NOT_SEQUENCED,
+            CaseSampleFilter.EXCLUDE_CASES,
         ]
         case_samples: Query = self._join_sample_and_case()
         return apply_case_sample_filter(
             case_samples=case_samples,
             filter_functions=filters,
             order_id=order_id,
+            cases_to_exclude=cases_to_exclude,
         ).count()
 
     def get_illumina_flow_cell_by_internal_id(self, internal_id: str) -> IlluminaFlowCell:
