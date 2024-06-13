@@ -66,7 +66,7 @@ class IlluminaPostProcessingService:
         self,
         flow_cell_dir_data: IlluminaRunDirectoryData,
         sequencing_run: IlluminaSequencingRun,
-    ):
+    ) -> None:
         """Store illumina sample sequencing metrics in the status database."""
         metrics_service = IlluminaMetricsService()
         sample_metrics: list[IlluminaSampleSequencingMetricsDTO] = (
