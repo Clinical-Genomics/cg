@@ -10,8 +10,8 @@ from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.models.orders.order import OrderIn
 from cg.services.illumina_services.illumina_metrics_service.models import (
     IlluminaFlowCellDTO,
-    IlluminaSequencingRunDTO,
     IlluminaSampleSequencingMetricsDTO,
+    IlluminaSequencingRunDTO,
 )
 from cg.store.base import BaseHandler
 from cg.store.database import get_session
@@ -27,6 +27,9 @@ from cg.store.models import (
     Collaboration,
     Customer,
     Flowcell,
+    IlluminaFlowCell,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
     Invoice,
     Order,
     Organism,
@@ -36,9 +39,6 @@ from cg.store.models import (
     SampleLaneSequencingMetrics,
     User,
     order_case,
-    IlluminaFlowCell,
-    IlluminaSequencingRun,
-    IlluminaSampleSequencingMetrics,
 )
 
 LOG = logging.getLogger(__name__)
@@ -469,29 +469,25 @@ class CreateHandler(BaseHandler):
         LOG.debug(f"Sequencing run added to status db: {new_sequencing_run.id}.")
         return new_sequencing_run
 
-    def add_illumina_sample_metrics(
-        self,
-        sample_metrics_dto: list[IlluminaSampleSequencingMetricsDTO],
-        sequencing_run: IlluminaSequencingRun,
-    ) -> list[IlluminaSampleSequencingMetrics]:
-        """Add new IlluminaSampleSequencingMetrics as a pending transaction."""
-        new_sample_metrics: list[IlluminaSampleSequencingMetrics] = []
-        for sample_metric in sample_metrics_dto:
-            sample: Sample = self.get_sample_by_internal_id(sample_metric.sample_id)
-            new_sample_metric = IlluminaSampleSequencingMetrics(
-                sample=sample,
-                instrument_run_id=sequencing_run.id,
-                instrument_run=sequencing_run,
-                type=sample_metric.type,
-                flow_cell_lane=sample_metric.flow_cell_lane,
-                total_reads_in_lane=sample_metric.total_reads_in_lane,
-                base_passing_q30_percent=sample_metric.base_passing_q30_percent,
-                base_mean_quality_score=sample_metric.base_mean_quality_score,
-                yield_=sample_metric.yield_,
-                yield_q30=sample_metric.yield_q30,
-                created_at=sample_metric.created_at,
-            )
-            new_sample_metrics.append(new_sample_metric)
-        self.session.add_all(new_sample_metrics)
-        LOG.debug("Sample metrics added to status db.")
-        return new_sample_metrics
+    def add_illumina_sample_metrics_entry(
+        self, metrics_dto: IlluminaSampleSequencingMetricsDTO, sequencing_run: IlluminaSequencingRun
+    ) -> IlluminaSampleSequencingMetrics:
+        """
+        Add a new Illumina Sample Sequencing Metrics entry to the status database as a pending
+        transaction.
+        """
+        sample: Sample = self.get_sample_by_internal_id(metrics_dto.sample_id)
+        new_metric = IlluminaSampleSequencingMetrics(
+            sample=sample,
+            instrument_run=sequencing_run,
+            type=metrics_dto.type,
+            flow_cell_lane=metrics_dto.flow_cell_lane,
+            total_reads_in_lane=metrics_dto.total_reads_in_lane,
+            base_passing_q30_percent=metrics_dto.base_passing_q30_percent,
+            base_mean_quality_score=metrics_dto.base_mean_quality_score,
+            yield_=metrics_dto.yield_,
+            yield_q30=metrics_dto.yield_q30,
+            created_at=metrics_dto.created_at,
+        )
+        self.session.add(new_metric)
+        return new_metric

@@ -130,8 +130,8 @@ def demultiplex_sequencing_run(
 @click.pass_obj
 def copy_novaseqx_sequencing_runs(context: CGConfig):
     """Copy NovaSeq X sequencing runs ready for post-processing to demultiplexed runs."""
-    sequencing_runs_dir: Path = Path(context.illumina_flow_cells_directory)
-    demultiplexed_runs_dir: Path = Path(context.illumina_demultiplexed_runs_directory)
+    sequencing_runs_dir: Path = Path(context.run_instruments.illumina.sequencing_runs_dir)
+    demultiplexed_runs_dir: Path = Path(context.run_instruments.illumina.demultiplexed_runs_dir)
 
     for sequencing_run_dir in sequencing_runs_dir.iterdir():
         if is_ready_for_post_processing(
@@ -162,7 +162,7 @@ def copy_novaseqx_sequencing_runs(context: CGConfig):
 def confirm_sequencing_run_sync(context: CGConfig, source_directory: str):
     """Checks if all relevant files for the demultiplexing have been synced.
     If so it creates a CopyComplete.txt file to show that that is the case."""
-    target_sequencing_runs_directory = Path(context.illumina_flow_cells_directory)
+    target_sequencing_runs_directory = Path(context.run_instruments.illumina.sequencing_runs_dir)
     for source_sequencing_run in Path(source_directory).iterdir():
         target_sequencig_run = Path(target_sequencing_runs_directory, source_sequencing_run.name)
         if is_flow_cell_sync_confirmed(target_sequencig_run):
