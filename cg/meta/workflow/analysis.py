@@ -297,6 +297,7 @@ class AnalysisAPI(MetaAPI):
         return case.latest_order.id
 
     def get_hermes_transformed_deliverables(self, case_id: str, force: bool = False) -> dict:
+        """Return the Hermes-transformed deliverables bundle to be stored in Housekeeper for a given case."""
         return self.hermes_api.create_housekeeper_bundle(
             bundle_name=case_id,
             deliverables=self.get_deliverables_file_path(case_id=case_id),
