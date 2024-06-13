@@ -7,6 +7,9 @@ from pathlib import Path
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
+from cg.services.illumina_services.illumina_metrics_service.models import (
+    IlluminaSampleSequencingMetricsDTO,
+)
 from cg.utils.files import get_files_matching_pattern, is_pattern_in_file_path_name, rename_file
 
 LOG = logging.getLogger(__name__)
