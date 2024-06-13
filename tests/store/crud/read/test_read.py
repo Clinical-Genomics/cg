@@ -8,7 +8,6 @@ from cg.constants import FlowCellStatus
 from cg.constants.constants import CaseActions, MicrosaltAppTags, Workflow
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CgError
-from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.store.models import (
     Analysis,
@@ -33,7 +32,6 @@ from cg.store.models import (
     User,
 )
 from cg.store.store import Store
-from tests.small_helpers import SmallHelpers
 from tests.store.conftest import StoreConstants
 from tests.store_helpers import StoreHelpers
 
@@ -1431,21 +1429,16 @@ def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
 def test_get_illumina_metrics_entry_by_run_id_sample_internal_id_and_lane(
     store_with_illumina_sequencing_data: Store,
     novaseq_x_flow_cell_id: str,
-    seven_canonical_flow_cells_selected_sample_ids: list[list[str]],
-    small_helpers: SmallHelpers,
+    selected_novaseq_x_sample_ids: list[str],
 ):
     """Test that a Illumina sample sequencing metrics query is filtered by sample, run and lane."""
     # GIVEN a store with Illumina Sample Sequencing Metrics for each sample in the run directories
-    metrics: Query = store_with_illumina_sequencing_data._get_query(
-        table=IlluminaSampleSequencingMetrics
-    )
-    assert metrics.count() == small_helpers.length_of_nested_list(
-        seven_canonical_flow_cells_selected_sample_ids
-    )
+
+    # GIVEN a sample id and a lane
+    sample_id: str = selected_novaseq_x_sample_ids[0]
+    lane: int = 1
 
     # WHEN fetching an Illumina sample sequencing metrics
-    sample_id: str = seven_canonical_flow_cells_selected_sample_ids[-1][0]
-    lane: int = 1
     metrics: IlluminaSampleSequencingMetrics = (
         store_with_illumina_sequencing_data.get_illumina_metrics_entry_by_device_sample_and_lane(
             device_internal_id=novaseq_x_flow_cell_id, sample_internal_id=sample_id, lane=lane
@@ -1462,12 +1455,9 @@ def test_get_illumina_metrics_entry_by_run_id_sample_internal_id_and_lane(
 def test_get_illumina_sequencing_run_by_internal_id(
     store_with_illumina_sequencing_data: Store,
     novaseq_x_flow_cell_id: str,
-    seven_canonical_flow_cells: list[IlluminaRunDirectoryData],
 ):
     """Test that a Illumina sequencing run query is filtered by run internal id."""
     # GIVEN a store with Illumina Sequencing Runs for the canonical Illumina runs
-    runs: Query = store_with_illumina_sequencing_data._get_query(table=IlluminaSequencingRun)
-    assert runs.count() == len(seven_canonical_flow_cells)
 
     # WHEN fetching an Illumina sequencing run by run id
     run: IlluminaSequencingRun = (
