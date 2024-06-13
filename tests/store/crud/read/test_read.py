@@ -1426,12 +1426,12 @@ def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
     assert number_of_reads < total_sample_reads
 
 
-def test_get_illumina_metrics_entry_by_run_id_sample_internal_id_and_lane(
+def test_get_illumina_metrics_entry_by_device_sample_and_lane(
     store_with_illumina_sequencing_data: Store,
     novaseq_x_flow_cell_id: str,
     selected_novaseq_x_sample_ids: list[str],
 ):
-    """Test that a Illumina sample sequencing metrics query is filtered by sample, run and lane."""
+    """Test that Illumina sample sequencing metrics are filtered by sample, device and lane."""
     # GIVEN a store with Illumina Sample Sequencing Metrics for each sample in the run directories
 
     # GIVEN a sample id and a lane
@@ -1452,16 +1452,16 @@ def test_get_illumina_metrics_entry_by_run_id_sample_internal_id_and_lane(
     assert metrics.flow_cell_lane == lane
 
 
-def test_get_illumina_sequencing_run_by_internal_id(
+def test_get_illumina_sequencing_run_by_device_internal_id(
     store_with_illumina_sequencing_data: Store,
     novaseq_x_flow_cell_id: str,
 ):
-    """Test that a Illumina sequencing run query is filtered by run internal id."""
+    """Test that a Illumina sequencing run query is filtered by device internal id."""
     # GIVEN a store with Illumina Sequencing Runs for the canonical Illumina runs
 
-    # WHEN fetching an Illumina sequencing run by run id
+    # WHEN fetching an Illumina sequencing run by device internal id
     run: IlluminaSequencingRun = (
-        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device(
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
             device_internal_id=novaseq_x_flow_cell_id
         )
     )
