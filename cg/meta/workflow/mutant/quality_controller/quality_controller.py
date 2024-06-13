@@ -109,7 +109,7 @@ class QualityController:
         ResultLogger.log_case_result(result)
         return result
 
-    def case_qc_pass(sample_results: list[SampleQualityResult]) -> bool:
+    def case_qc_pass(self, sample_results: list[SampleQualityResult]) -> bool:
         total_samples: int = 0
         failed_samples: int = 0
 

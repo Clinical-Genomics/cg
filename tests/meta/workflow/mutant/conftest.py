@@ -1,6 +1,9 @@
 import pytest
 
 from pathlib import Path
+
+from cg.meta.workflow.mutant.quality_controller.quality_controller import QualityController
+from cg.meta.workflow.mutant.quality_controller.utils import get_quality_metrics
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 from cg.constants.constants import ControlOptions
@@ -128,3 +131,28 @@ def mutant_lims(lims_api: MockLimsAPI) -> MockLimsAPI:
     lims_api.add_artifact_for_sample(sample_id=sample_qc_fail.id, samples=samples_qc_fail)
 
     return lims_api
+
+
+@pytest.fixture(name="quality_controller")
+def quality_controller(mutant_store, mutant_lims):
+    return QualityController(status_db=mutant_store, lims=mutant_lims)
+
+
+@pytest.fixture(name="mutant_case_qc_pass")
+def mutant_case_qc_pass(mutant_store):
+    return mutant_store.get_case_by_internal_id("mutant_case_qc_pass")
+
+
+@pytest.fixture("quality_metrics_case_qc_pass")
+def quality_metrics_case_qc_pass(mutant_store, mutant_lims, passing_report_path):
+    return get_quality_metrics(
+        passing_report_path,
+        mutant_case_qc_pass,
+        mutant_store,
+        mutant_lims,
+    )
+
+
+@pytest.fixture(name="sample_results_case_qc_pass")
+def sample_results_case_qc_pass(quality_controller, quality_metrics_case_qc_pass):
+    return quality_controller.quality_control_samples(quality_metrics_case_qc_pass)
