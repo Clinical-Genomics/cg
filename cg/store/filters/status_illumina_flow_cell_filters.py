@@ -4,8 +4,6 @@ from enum import Enum
 
 from sqlalchemy.orm import Query
 
-from cg.store.models import IlluminaFlowCell
-
 
 def filter_illumina_flow_cell_by_internal_id(
     flow_cells: Query, internal_id: str, **kwargs

@@ -24,7 +24,7 @@ class DemultiplexingDirsAndFiles(StrEnum):
     ANALYSIS: str = "Analysis"
     DATA: str = "Data"
     BCL_CONVERT: str = "BCLConvert"
-    FLOW_CELLS_DIRECTORY_NAME: str = "flow_cells"
+    SEQUENCING_RUNS_DIRECTORY_NAME: str = "sequencing-runs"
     DEMULTIPLEXED_RUNS_DIRECTORY_NAME: str = "demultiplexed-runs"
     ILLUMINA_FILE_MANIFEST: str = "Manifest.tsv"
     CG_FILE_MANIFEST: str = "file_manifest.tsv"

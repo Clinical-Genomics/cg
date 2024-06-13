@@ -6,9 +6,10 @@ from cg.cli.generate.report.base import (
     generate_available_delivery_reports,
     generate_delivery_report,
 )
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def generate():
     """Generates and/or modifies files."""
 

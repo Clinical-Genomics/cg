@@ -34,9 +34,11 @@ class DemultiplexingAPI:
         self.hk_api = housekeeper_api
         self.slurm_account: str = config["demultiplex"]["slurm"]["account"]
         self.mail: str = config["demultiplex"]["slurm"]["mail_user"]
-        self.sequencing_runs_dir: Path = Path(config["illumina_flow_cells_directory"])
+        self.sequencing_runs_dir: Path = Path(
+            config["run_instruments"]["illumina"]["sequencing_runs_dir"]
+        )
         self.demultiplexed_runs_dir: Path = out_dir or Path(
-            config["illumina_demultiplexed_runs_directory"]
+            config["run_instruments"]["illumina"]["demultiplexed_runs_dir"]
         )
         self.environment: str = config.get("environment", "stage")
         LOG.info(f"Set environment to {self.environment}")
