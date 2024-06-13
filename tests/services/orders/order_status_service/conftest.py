@@ -13,13 +13,9 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
-def summary_service(store: Store, order: Order):
+def summary_service(store: Store, order: Order, analysis_summary: AnalysisSummary):
     service = OrderSummaryService(analysis_client=Mock(), store=store)
-    service.analysis_client.get_summaries.return_value = [
-        AnalysisSummary(
-            order_id=order.id, cancelled=0, completed=1, delivered=0, failed=0, running=0
-        )
-    ]
+    service.analysis_client.get_summaries.return_value = [analysis_summary]
     return service
 
 
