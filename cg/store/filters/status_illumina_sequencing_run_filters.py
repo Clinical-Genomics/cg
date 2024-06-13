@@ -7,14 +7,14 @@ from sqlalchemy.orm import Query
 from cg.store.models import IlluminaFlowCell
 
 
-def filter_by_run_internal_id(runs: Query, run_id: str, **kwargs) -> Query:
-    """Filter sequencing runs by run internal id."""
+def filter_by_device_internal_id(runs: Query, run_id: str, **kwargs) -> Query:
+    """Filter sequencing runs by device internal id."""
     joined_query: Query = runs.join(IlluminaFlowCell)
     return joined_query.filter(IlluminaFlowCell.internal_id == run_id)
 
 
 class IlluminaSequencingRunFilter(Enum):
-    BY_RUN_INTERNAL_ID: callable = filter_by_run_internal_id
+    BY_DEVICE_INTERNAL_ID: callable = filter_by_device_internal_id
 
 
 def apply_illumina_sequencing_run_filter(

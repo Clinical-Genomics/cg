@@ -444,10 +444,10 @@ class ReadHandler(BaseHandler):
             flow_cell_name=flow_cell_name,
         ).all()
 
-    def get_illumina_metrics_entry_by_run_id_sample_internal_id_and_lane(
+    def get_illumina_metrics_entry_by_device_sample_and_lane(
         self, run_id: str, sample_internal_id: str, lane: int
     ) -> IlluminaSampleSequencingMetrics:
-        """Get metrics entry by sequencing run id, sample internal id and lane."""
+        """Get metrics entry by sequencing device internal id, sample internal id and lane."""
         filtered_samples: Subquery = apply_sample_filter(
             samples=self._get_query(table=Sample),
             filter_functions=[SampleFilter.BY_INTERNAL_ID],
@@ -479,11 +479,11 @@ class ReadHandler(BaseHandler):
         )
         return query.first()
 
-    def get_illumina_sequencing_run_by_internal_id(self, run_id: str) -> IlluminaSequencingRun:
-        """Get Illumina sequencing run entry by run id."""
+    def get_illumina_sequencing_run_by_device(self, run_id: str) -> IlluminaSequencingRun:
+        """Get Illumina sequencing run entry by device internal id."""
         return apply_illumina_sequencing_run_filter(
             runs=self._get_query(table=IlluminaSequencingRun),
-            filter_functions=[IlluminaSequencingRunFilter.BY_RUN_INTERNAL_ID],
+            filter_functions=[IlluminaSequencingRunFilter.BY_DEVICE_INTERNAL_ID],
             run_id=run_id,
         ).first()
 

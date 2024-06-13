@@ -803,8 +803,8 @@ class StoreHelpers:
         """
         Return an Illumina sequencing run if exists, otherwise add it to the store and return it.
         """
-        illumina_run: IlluminaSequencingRun | None = (
-            store.get_illumina_sequencing_run_by_internal_id(run_id=flow_cell.internal_id)
+        illumina_run: IlluminaSequencingRun | None = store.get_illumina_sequencing_run_by_device(
+            run_id=flow_cell.internal_id
         )
         if illumina_run:
             return illumina_run
@@ -858,7 +858,7 @@ class StoreHelpers:
         otherwise add it to the store and return it.
         """
         illumina_sample_metrics: IlluminaSampleSequencingMetrics | None = (
-            store.get_illumina_metrics_entry_by_run_id_sample_internal_id_and_lane(
+            store.get_illumina_metrics_entry_by_device_sample_and_lane(
                 run_id=sequencing_run.device_id, sample_internal_id=sample_id, lane=lane
             )
         )

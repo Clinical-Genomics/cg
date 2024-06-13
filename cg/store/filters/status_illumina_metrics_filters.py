@@ -4,24 +4,7 @@ from enum import Enum
 
 from sqlalchemy.orm import Query
 
-from cg.store.models import (
-    IlluminaFlowCell,
-    IlluminaSampleSequencingMetrics,
-    IlluminaSequencingRun,
-    Sample,
-)
-
-
-def filter_by_run_id(metrics: Query, run_id: str, **kwargs) -> Query:
-    """Filter metrics by run id."""
-    joined_query: Query = metrics.join(IlluminaSequencingRun).join(IlluminaFlowCell)
-    return joined_query.filter(IlluminaFlowCell.internal_id == run_id)
-
-
-def filter_by_sample_internal_id(metrics: Query, sample_internal_id: str, **kwargs) -> Query:
-    """Filter metrics by sample internal id."""
-    joined_query: Query = metrics.join(Sample)
-    return joined_query.filter(Sample.internal_id == sample_internal_id)
+from cg.store.models import IlluminaSampleSequencingMetrics
 
 
 def filter_by_lane(metrics: Query, lane: int, **kwargs) -> Query:

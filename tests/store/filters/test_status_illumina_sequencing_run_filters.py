@@ -3,7 +3,7 @@
 from sqlalchemy.orm import Query
 
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.store.filters.status_illumina_sequencing_run_filters import filter_by_run_internal_id
+from cg.store.filters.status_illumina_sequencing_run_filters import filter_by_device_internal_id
 from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
 
@@ -22,7 +22,7 @@ def test_filter_by_run_internal_id(
     assert sequencing_runs.count() == number_of_flow_cells_in_store
 
     # WHEN filtering sequencing runs by run internal id
-    filtered_runs: Query = filter_by_run_internal_id(
+    filtered_runs: Query = filter_by_device_internal_id(
         runs=sequencing_runs, run_id=novaseq_x_flow_cell_id
     )
 
