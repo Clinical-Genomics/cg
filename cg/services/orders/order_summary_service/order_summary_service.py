@@ -35,6 +35,7 @@ class OrderSummaryService:
         return order_summaries
 
     def create_order_summary(self, order: Order, summary: AnalysisSummary) -> OrderSummary:
+        """Adds statuses inferred from StatusDB data for any cases not included in the provided summary."""
         order_id = order.id
         counted_cases: list[str] = summary.case_ids if summary else []
         not_received: int = self.store.get_case_not_received_count(
