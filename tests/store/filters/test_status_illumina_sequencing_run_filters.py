@@ -23,7 +23,7 @@ def test_filter_by_run_internal_id(
 
     # WHEN filtering sequencing runs by run internal id
     filtered_runs: Query = filter_by_device_internal_id(
-        runs=sequencing_runs, run_id=novaseq_x_flow_cell_id
+        runs=sequencing_runs, device_internal_id=novaseq_x_flow_cell_id
     )
 
     # THEN assert that the filtered query has the correct run

@@ -1448,7 +1448,7 @@ def test_get_illumina_metrics_entry_by_run_id_sample_internal_id_and_lane(
     lane: int = 1
     metrics: IlluminaSampleSequencingMetrics = (
         store_with_illumina_sequencing_data.get_illumina_metrics_entry_by_device_sample_and_lane(
-            run_id=novaseq_x_flow_cell_id, sample_internal_id=sample_id, lane=lane
+            device_internal_id=novaseq_x_flow_cell_id, sample_internal_id=sample_id, lane=lane
         )
     )
 
@@ -1472,7 +1472,7 @@ def test_get_illumina_sequencing_run_by_internal_id(
     # WHEN fetching an Illumina sequencing run by run id
     run: IlluminaSequencingRun = (
         store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device(
-            run_id=novaseq_x_flow_cell_id
+            device_internal_id=novaseq_x_flow_cell_id
         )
     )
 
