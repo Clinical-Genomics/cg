@@ -29,7 +29,7 @@ from cg.services.illumina_services.illumina_post_processing_service.utils import
 from cg.services.illumina_services.illumina_post_processing_service.validation import (
     is_flow_cell_ready_for_postprocessing,
 )
-from cg.store.models import IlluminaFlowCell, IlluminaSampleSequencingMetrics, IlluminaSequencingRun
+from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -43,27 +43,27 @@ class IlluminaPostProcessingService:
 
     def store_illumina_flow_cell(
         self,
-        flow_cell_dir_data: IlluminaRunDirectoryData,
+        run_directory_data: IlluminaRunDirectoryData,
     ) -> IlluminaFlowCell:
         """
         Create Illumina flow cell from the parsed and validated flow cell directory data.
         And add the samples on the flow cell to the model.
         """
-        model: str | None = flow_cell_dir_data.run_parameters.get_flow_cell_model()
+        model: str | None = run_directory_data.run_parameters.get_flow_cell_model()
         flow_cell_dto = IlluminaFlowCellDTO(
-            internal_id=flow_cell_dir_data.id, type=DeviceType.ILLUMINA, model=model
+            internal_id=run_directory_data.id, type=DeviceType.ILLUMINA, model=model
         )
         return self.status_db.add_illumina_flow_cell(flow_cell_dto)
 
     def store_illumina_sequencing_run(
         self,
-        flow_cell_dir_data: IlluminaRunDirectoryData,
+        run_directory_data: IlluminaRunDirectoryData,
         flow_cell: IlluminaFlowCell,
     ) -> IlluminaSequencingRun:
         """Store illumina run metrics in the status database."""
         metrics_service = IlluminaMetricsService()
         sequencing_run_dto: IlluminaSequencingRunDTO = (
-            metrics_service.create_illumina_sequencing_dto(flow_cell_dir_data)
+            metrics_service.create_illumina_sequencing_dto(run_directory_data)
         )
         return self.status_db.add_illumina_sequencing_run(
             sequencing_run_dto=sequencing_run_dto, flow_cell=flow_cell
@@ -71,18 +71,18 @@ class IlluminaPostProcessingService:
 
     def store_illumina_sample_sequencing_metrics(
         self,
-        flow_cell_dir_data: IlluminaRunDirectoryData,
+        run_directory_data: IlluminaRunDirectoryData,
         sequencing_run: IlluminaSequencingRun,
     ) -> None:
         """Store illumina sample sequencing metrics in the status database."""
         metrics_service = IlluminaMetricsService()
         sample_metrics: list[IlluminaSampleSequencingMetricsDTO] = (
             metrics_service.create_sample_sequencing_metrics_dto_for_flow_cell(
-                flow_cell_directory=flow_cell_dir_data.path,
+                flow_cell_directory=run_directory_data.path,
             )
         )
         undetermined_metrics: list[IlluminaSampleSequencingMetricsDTO] = (
-            metrics_service.create_sample_run_dto_for_undetermined_reads(flow_cell_dir_data)
+            metrics_service.create_sample_run_dto_for_undetermined_reads(run_directory_data)
         )
         combined_metrics: list[IlluminaSampleSequencingMetricsDTO] = (
             combine_sample_metrics_with_undetermined(
@@ -96,41 +96,49 @@ class IlluminaPostProcessingService:
             )
 
     def store_sequencing_data_in_status_db(
-        self, sequencing_run_dir: IlluminaRunDirectoryData
+        self, run_directory_data: IlluminaRunDirectoryData
     ) -> None:
         """Store flow cell data in the status database."""
         flow_cell: IlluminaFlowCell = self.store_illumina_flow_cell(
-            flow_cell_dir_data=sequencing_run_dir
+            run_directory_data=run_directory_data
         )
         sequencing_run: IlluminaSequencingRun = self.store_illumina_sequencing_run(
-            flow_cell_dir_data=sequencing_run_dir, flow_cell=flow_cell
+            run_directory_data=run_directory_data, flow_cell=flow_cell
         )
         self.store_illumina_sample_sequencing_metrics(
-            flow_cell_dir_data=sequencing_run_dir, sequencing_run=sequencing_run
+            run_directory_data=run_directory_data, sequencing_run=sequencing_run
         )
         self.status_db.commit_to_store()
 
     def store_sequencing_data_in_housekeeper(
         self,
-        flow_cell: IlluminaRunDirectoryData,
+        run_directory_data: IlluminaRunDirectoryData,
         store: Store,
     ) -> None:
         """Store fastq files, demux logs and run parameters files for flow cell in Housekeeper."""
-        LOG.info(f"Add sequencing and demux data to Housekeeper for run {flow_cell.id}")
+        LOG.info(f"Add sequencing and demux data to Housekeeper for run {run_directory_data.id}")
 
-        self.hk_api.add_bundle_and_version_if_non_existent(flow_cell.id)
-        tags: list[str] = [SequencingFileTag.FASTQ, SequencingFileTag.RUN_PARAMETERS, flow_cell.id]
+        self.hk_api.add_bundle_and_version_if_non_existent(run_directory_data.id)
+        tags: list[str] = [
+            SequencingFileTag.FASTQ,
+            SequencingFileTag.RUN_PARAMETERS,
+            run_directory_data.id,
+        ]
         self.hk_api.add_tags_if_non_existent(tags)
-        add_sample_fastq_files_to_housekeeper(flow_cell=flow_cell, hk_api=self.hk_api, store=store)
-        store_undetermined_fastq_files(flow_cell=flow_cell, hk_api=self.hk_api, store=store)
+        add_sample_fastq_files_to_housekeeper(
+            flow_cell=run_directory_data, hk_api=self.hk_api, store=store
+        )
+        store_undetermined_fastq_files(
+            flow_cell=run_directory_data, hk_api=self.hk_api, store=store
+        )
         add_demux_logs_to_housekeeper(
-            flow_cell=flow_cell,
+            flow_cell=run_directory_data,
             hk_api=self.hk_api,
-            flow_cell_run_dir=flow_cell.get_sequencing_runs_dir(),
+            flow_cell_run_dir=run_directory_data.get_sequencing_runs_dir(),
         )
         add_run_parameters_file_to_housekeeper(
-            flow_cell_name=flow_cell.full_name,
-            flow_cell_run_dir=flow_cell.get_sequencing_runs_dir(),
+            flow_cell_name=run_directory_data.full_name,
+            flow_cell_run_dir=run_directory_data.get_sequencing_runs_dir(),
             hk_api=self.hk_api,
         )
 
@@ -152,15 +160,15 @@ class IlluminaPostProcessingService:
 
         LOG.info(f"Post-process flow cell {flow_cell_directory_name}")
         flow_cell_out_directory = Path(demultiplexed_runs_dir, flow_cell_directory_name)
-        flow_cell = IlluminaRunDirectoryData(flow_cell_out_directory)
-        sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(flow_cell.id)
-        flow_cell.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
+        run_directory_data = IlluminaRunDirectoryData(flow_cell_out_directory)
+        sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(run_directory_data.id)
+        run_directory_data.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
 
         LOG.debug("Set path for Housekeeper sample sheet in flow cell")
         try:
             is_flow_cell_ready_for_postprocessing(
                 flow_cell_output_directory=flow_cell_out_directory,
-                flow_cell=flow_cell,
+                flow_cell=run_directory_data,
             )
         except (FlowCellError, MissingFilesError) as e:
             LOG.warning(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
@@ -169,9 +177,9 @@ class IlluminaPostProcessingService:
             LOG.info(f"Dry run will not finish flow cell {flow_cell_directory_name}")
             return
         try:
-            self.store_sequencing_data_in_status_db(flow_cell)
+            self.store_sequencing_data_in_status_db(run_directory_data)
             self.store_sequencing_data_in_housekeeper(
-                flow_cell=flow_cell,
+                run_directory_data=run_directory_data,
                 store=self.status_db,
             )
         except Exception as e:
