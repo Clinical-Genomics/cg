@@ -2,10 +2,9 @@ import logging
 from datetime import datetime
 
 import pytest
-from small_helpers import SmallHelpers
 from sqlalchemy.orm import Query
 
-from cg.constants import FlowCellStatus, Priority
+from cg.constants import FlowCellStatus
 from cg.constants.constants import CaseActions, MicrosaltAppTags, Workflow
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CgError
@@ -34,6 +33,7 @@ from cg.store.models import (
     User,
 )
 from cg.store.store import Store
+from tests.small_helpers import SmallHelpers
 from tests.store.conftest import StoreConstants
 from tests.store_helpers import StoreHelpers
 
