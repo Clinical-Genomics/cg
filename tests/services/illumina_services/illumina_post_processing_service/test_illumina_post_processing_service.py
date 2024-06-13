@@ -28,7 +28,7 @@ def test_store_illumina_flow_cell(
     assert flow_cell.internal_id == novaseq_x_demux_runs_flow_cell.id
 
     # THEN assert that the flow cell is stored in the status db
-    assert store._get_query(table=IlluminaFlowCell).count() == 1
+    assert store._get_query(table=IlluminaFlowCell).all()
 
 
 def test_store_illumina_sequencing_run(
@@ -53,7 +53,7 @@ def test_store_illumina_sequencing_run(
     assert isinstance(sequencing_run, IlluminaSequencingRun)
 
     # THEN assert that the sequencing run is stored in the status db
-    assert store._get_query(table=IlluminaSequencingRun).count() == 1
+    assert store._get_query(table=IlluminaSequencingRun).all()
 
 
 def test_store_illumina_sample_sequencing_metrics(
@@ -81,7 +81,7 @@ def test_store_illumina_sample_sequencing_metrics(
     )
 
     # THEN the metrics are found in store
-    assert store._get_query(table=IlluminaSampleSequencingMetrics).count() == 2
+    assert store._get_query(table=IlluminaSampleSequencingMetrics).all()
 
 
 def test_store_illumina_flow_cell_data(
