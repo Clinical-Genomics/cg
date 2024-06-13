@@ -50,15 +50,14 @@ from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
 from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
 from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_service import (
     IlluminaMetricsService,
 )
-
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
 from cg.store.store import Store
@@ -1277,6 +1276,23 @@ def updated_store_with_demultiplexed_samples(
             sequencer=flow_cell.sequencer_type,
             sample_ids=sample_internal_ids,
             store=store,
+        )
+    return store
+
+
+@pytest.fixture
+def store_with_illumina_sequencing_data(
+    store: Store,
+    helpers: StoreHelpers,
+    seven_canonical_flow_cells: list[IlluminaRunDirectoryData],
+    seven_canonical_flow_cells_selected_sample_ids: list[list[str]],
+) -> Store:
+    """Return a store with Illumina flow cells, sequencing runs and sample sequencing metrics."""
+    for run_dir, sample_internal_ids in zip(
+        seven_canonical_flow_cells, seven_canonical_flow_cells_selected_sample_ids
+    ):
+        helpers.add_illumina_flow_cell_and_samples_with_sequencing_metrics(
+            run_directory_data=run_dir, sample_ids=sample_internal_ids, store=store
         )
     return store
 
@@ -3783,7 +3799,7 @@ def store_with_sequencing_metrics(
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
-    sample_sequencing_metrics_details: list[str | int | float] = [
+    sample_sequencing_metrics_details: list[tuple] = [
         (sample_id, flow_cell_name, 1, expected_total_reads / 2, 90.5, 32),
         (sample_id, flow_cell_name, 2, expected_total_reads / 2, 90.4, 31),
         (mother_sample_id, hiseq_x_dual_index_flow_cell_id, 2, 2_000_000, 85.5, 30),
