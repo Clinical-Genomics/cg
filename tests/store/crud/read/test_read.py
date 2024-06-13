@@ -4,7 +4,7 @@ from datetime import datetime
 import pytest
 from sqlalchemy.orm import Query
 
-from cg.constants import FlowCellStatus, Priority
+from cg.constants import FlowCellStatus
 from cg.constants.constants import CaseActions, MicrosaltAppTags, Workflow
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CgError
@@ -21,6 +21,8 @@ from cg.store.models import (
     Collaboration,
     Customer,
     Flowcell,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
     Invoice,
     Order,
     Organism,
@@ -1422,6 +1424,51 @@ def test_get_number_of_reads_for_sample_with_some_not_passing_q30_threshold(
     # THEN assert that the number of reads is less than the total number of reads for the sample
     total_sample_reads = sum([metric.sample_total_reads_in_lane for metric in sample_metrics])
     assert number_of_reads < total_sample_reads
+
+
+def test_get_illumina_metrics_entry_by_device_sample_and_lane(
+    store_with_illumina_sequencing_data: Store,
+    novaseq_x_flow_cell_id: str,
+    selected_novaseq_x_sample_ids: list[str],
+):
+    """Test that Illumina sample sequencing metrics are filtered by sample, device and lane."""
+    # GIVEN a store with Illumina Sample Sequencing Metrics for each sample in the run directories
+
+    # GIVEN a sample id and a lane
+    sample_id: str = selected_novaseq_x_sample_ids[0]
+    lane: int = 1
+
+    # WHEN fetching an Illumina sample sequencing metrics
+    metrics: IlluminaSampleSequencingMetrics = (
+        store_with_illumina_sequencing_data.get_illumina_metrics_entry_by_device_sample_and_lane(
+            device_internal_id=novaseq_x_flow_cell_id, sample_internal_id=sample_id, lane=lane
+        )
+    )
+
+    # THEN assert that the correct metrics object is returned
+    assert metrics
+    assert metrics.sample.internal_id == sample_id
+    assert metrics.instrument_run.device.internal_id == novaseq_x_flow_cell_id
+    assert metrics.flow_cell_lane == lane
+
+
+def test_get_illumina_sequencing_run_by_device_internal_id(
+    store_with_illumina_sequencing_data: Store,
+    novaseq_x_flow_cell_id: str,
+):
+    """Test that a Illumina sequencing run query is filtered by device internal id."""
+    # GIVEN a store with Illumina Sequencing Runs for the canonical Illumina runs
+
+    # WHEN fetching an Illumina sequencing run by device internal id
+    run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            device_internal_id=novaseq_x_flow_cell_id
+        )
+    )
+
+    # THEN assert that the correct run object is returned
+    assert run
+    assert run.device.internal_id == novaseq_x_flow_cell_id
 
 
 def test_get_sample_lane_sequencing_metrics_by_flow_cell_name(
