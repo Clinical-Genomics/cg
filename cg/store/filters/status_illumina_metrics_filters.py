@@ -1,7 +1,6 @@
 """Filters for the Illumina Sample Sequencing Metrics objects."""
 
 from enum import Enum
-from typing import Callable
 
 from sqlalchemy.orm import Query
 
@@ -31,14 +30,12 @@ def filter_by_lane(metrics: Query, lane: int, **kwargs) -> Query:
 
 
 class IlluminaMetricsFilter(Enum):
-    BY_RUN_ID: Callable = filter_by_run_id
-    BY_SAMPLE_INTERNAL_ID: Callable = filter_by_sample_internal_id
-    BY_LANE: Callable = filter_by_lane
+    BY_LANE: callable = filter_by_lane
 
 
 def apply_illumina_metrics_filter(
     metrics: Query,
-    filter_functions: list[Callable],
+    filter_functions: list[callable],
     sample_internal_id: str | None = None,
     run_id: str | None = None,
     lane: int | None = None,

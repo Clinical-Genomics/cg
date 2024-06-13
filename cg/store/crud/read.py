@@ -5,6 +5,7 @@ import logging
 from datetime import datetime
 from typing import Callable, Iterator, Literal
 
+from sqlalchemy import Subquery
 from sqlalchemy.orm import Query, Session
 
 from cg.constants import FlowCellStatus, Workflow
@@ -67,6 +68,7 @@ from cg.store.models import (
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
+    InstrumentRun,
     Invoice,
     Order,
     Organism,
@@ -446,17 +448,36 @@ class ReadHandler(BaseHandler):
         self, run_id: str, sample_internal_id: str, lane: int
     ) -> IlluminaSampleSequencingMetrics:
         """Get metrics entry by sequencing run id, sample internal id and lane."""
-        return apply_illumina_metrics_filter(
+        filtered_samples: Subquery = apply_sample_filter(
+            samples=self._get_query(table=Sample),
+            filter_functions=[SampleFilter.BY_INTERNAL_ID],
+            internal_id=sample_internal_id,
+        ).subquery()
+        filtered_metrics: Subquery = apply_illumina_metrics_filter(
             metrics=self._get_query(table=IlluminaSampleSequencingMetrics),
-            filter_functions=[
-                IlluminaMetricsFilter.BY_RUN_ID,
-                IlluminaMetricsFilter.BY_SAMPLE_INTERNAL_ID,
-                IlluminaMetricsFilter.BY_LANE,
-            ],
-            sample_internal_id=sample_internal_id,
-            run_id=run_id,
+            filter_functions=[IlluminaMetricsFilter.BY_LANE],
             lane=lane,
-        ).first()
+        ).subquery()
+        filtered_flow_cells: Subquery = apply_illumina_flow_cell_filters(
+            flow_cells=self._get_query(table=IlluminaFlowCell),
+            filter_functions=[IlluminaFlowCellFilter.BY_INTERNAL_ID],
+            internal_id=run_id,
+        ).subquery()
+
+        query = (
+            self._get_query(table=IlluminaSampleSequencingMetrics)
+            .select_from(IlluminaSampleSequencingMetrics)
+            .join(
+                filtered_samples, IlluminaSampleSequencingMetrics.sample_id == filtered_samples.c.id
+            )
+            .join(filtered_metrics, IlluminaSampleSequencingMetrics.id == filtered_metrics.c.id)
+            .join(
+                IlluminaSequencingRun,
+                IlluminaSampleSequencingMetrics.instrument_run_id == IlluminaSequencingRun.id,
+            )
+            .join(filtered_flow_cells, IlluminaSequencingRun.device_id == filtered_flow_cells.c.id)
+        )
+        return query.first()
 
     def get_illumina_sequencing_run_by_internal_id(self, run_id: str) -> IlluminaSequencingRun:
         """Get Illumina sequencing run entry by run id."""
