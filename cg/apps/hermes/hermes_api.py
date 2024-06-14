@@ -3,6 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 from cg.apps.housekeeper import models as hk_models
+from cg.io.json import read_json_stream, write_json_stream
 from cg.utils.commands import Process
 
 from .models import CGDeliverables
@@ -37,8 +38,13 @@ class HermesApi:
         if force:
             convert_command.append("--force")
         self.process.run_command(convert_command)
-
-        return CGDeliverables.model_validate_json(self.process.stdout)
+        json_stream: str = self.process.stdout
+        if force:
+            data: dict[str, any] = read_json_stream(json_stream)
+            for file_tag in data["files"]:
+                file_tag["mandatory"] = False
+            json_stream: str = write_json_stream(data)
+        return CGDeliverables.model_validate_json(json_stream)
 
     def create_housekeeper_bundle(
         self,
