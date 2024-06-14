@@ -1117,7 +1117,7 @@ class SampleRunMetrics(Base):
     type: Mapped[DeviceType]
 
     instrument_run: Mapped[InstrumentRun] = orm.relationship(back_populates="sample_metrics")
-    sample: Mapped[Sample] = orm.relationship(back_populates="_new_run_metrics")
+    sample: Mapped[Sample] = orm.relationship(back_populates="_sample_run_metrics")
 
     __mapper_args__ = {
         "polymorphic_on": "type",
