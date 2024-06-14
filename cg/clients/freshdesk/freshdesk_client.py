@@ -29,7 +29,7 @@ class FreshdeskClient:
         LOG.debug(ticket.model_dump_json())
         try:
             response: Response = self.session.post(
-                url=f"{self.base_url}{EndPoints.TICKETS}",
+                url=self._url(EndPoints.TICKETS),
                 json=ticket.model_dump(exclude_none=True),
             )
             response.raise_for_status()
@@ -40,6 +40,10 @@ class FreshdeskClient:
         except ValidationError as error:
             LOG.error(f"Response from Freshdesk does not fit model: {TicketResponse}.\n{error}")
             raise FreshdeskModelException(error) from error
+
+    def _url(self, endpoint: str) -> str:
+        """Get the full URL for the endpoint."""
+        return f"{self.base_url}{endpoint}"
 
     def _get_session(self) -> Session:
         """Configures and sets a session to be used for requests."""
