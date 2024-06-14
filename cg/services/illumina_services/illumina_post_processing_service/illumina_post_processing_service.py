@@ -46,8 +46,8 @@ class IlluminaPostProcessingService:
         run_directory_data: IlluminaRunDirectoryData,
     ) -> IlluminaFlowCell:
         """
-        Create Illumina flow cell from the parsed and validated flow cell directory data.
-        And add the samples on the flow cell to the model.
+        Create Illumina flow cell from the parsed and validated run directory data
+        and add the run samples to the model.
         """
         model: str | None = run_directory_data.run_parameters.get_flow_cell_model()
         flow_cell_dto = IlluminaFlowCellDTO(
@@ -98,7 +98,7 @@ class IlluminaPostProcessingService:
     def store_sequencing_data_in_status_db(
         self, run_directory_data: IlluminaRunDirectoryData
     ) -> None:
-        """Store flow cell data in the status database."""
+        """Store all Illumina sequencing data in the status database."""
         flow_cell: IlluminaFlowCell = self.store_illumina_flow_cell(
             run_directory_data=run_directory_data
         )
@@ -115,7 +115,7 @@ class IlluminaPostProcessingService:
         run_directory_data: IlluminaRunDirectoryData,
         store: Store,
     ) -> None:
-        """Store fastq files, demux logs and run parameters files for flow cell in Housekeeper."""
+        """Store fastq files, demux logs and run parameters for sequencing run in Housekeeper."""
         LOG.info(f"Add sequencing and demux data to Housekeeper for run {run_directory_data.id}")
 
         self.hk_api.add_bundle_and_version_if_non_existent(run_directory_data.id)
@@ -142,7 +142,7 @@ class IlluminaPostProcessingService:
 
     def post_process_illumina_flow_cell(
         self,
-        flow_cell_directory_name: str,
+        sequencing_run_name: str,
         demultiplexed_runs_dir: Path,
     ) -> None:
         """Store data for the demultiplexed flow cell and mark it as ready for delivery.
@@ -156,8 +156,8 @@ class IlluminaPostProcessingService:
             FlowCellError: If the flow cell directory or the data it contains is not valid.
         """
 
-        LOG.info(f"Post-process flow cell {flow_cell_directory_name}")
-        flow_cell_out_directory = Path(demultiplexed_runs_dir, flow_cell_directory_name)
+        LOG.info(f"Post-process flow cell {sequencing_run_name}")
+        flow_cell_out_directory = Path(demultiplexed_runs_dir, sequencing_run_name)
         run_directory_data = IlluminaRunDirectoryData(flow_cell_out_directory)
         sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(run_directory_data.id)
         run_directory_data.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
@@ -169,10 +169,10 @@ class IlluminaPostProcessingService:
                 flow_cell=run_directory_data,
             )
         except (FlowCellError, MissingFilesError) as e:
-            LOG.warning(f"Flow cell {flow_cell_directory_name} will be skipped: {e}")
+            LOG.warning(f"Flow cell {sequencing_run_name} will be skipped: {e}")
             return
         if self.dry_run:
-            LOG.info(f"Dry run will not finish flow cell {flow_cell_directory_name}")
+            LOG.info(f"Dry run will not finish flow cell {sequencing_run_name}")
             return
         try:
             self.store_sequencing_data_in_status_db(run_directory_data)
