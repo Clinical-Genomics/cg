@@ -111,7 +111,7 @@ class IlluminaRunDirectoryData:
                 str.replace(
                     current_path,
                     DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME,
-                    DemultiplexingDirsAndFiles.FLOW_CELLS_DIRECTORY_NAME,
+                    DemultiplexingDirsAndFiles.SEQUENCING_RUNS_DIRECTORY_NAME,
                 )
             )
         return self.path
@@ -121,11 +121,11 @@ class IlluminaRunDirectoryData:
         Return the demultiplexed run directory regardless of the path used to initialise the IlluminaRunDirectoryData.
         """
         current_path: str = self.path.as_posix()
-        if DemultiplexingDirsAndFiles.FLOW_CELLS_DIRECTORY_NAME in current_path:
+        if DemultiplexingDirsAndFiles.SEQUENCING_RUNS_DIRECTORY_NAME in current_path:
             return Path(
                 str.replace(
                     current_path,
-                    DemultiplexingDirsAndFiles.FLOW_CELLS_DIRECTORY_NAME,
+                    DemultiplexingDirsAndFiles.SEQUENCING_RUNS_DIRECTORY_NAME,
                     DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME,
                 )
             )

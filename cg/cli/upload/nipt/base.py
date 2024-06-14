@@ -7,6 +7,7 @@ import click
 
 from cg.constants.constants import DRY_RUN
 from cg.constants.nipt import Q30_THRESHOLD
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.nipt import NiptUploadAPI
 from cg.store.models import Analysis
@@ -18,7 +19,7 @@ from .statina import batch, statina
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def nipt():
     """Upload NIPT result files"""
     pass

@@ -23,6 +23,7 @@ from cg.cli.workflow.commands import (
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
 )
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
 from cg.exc import CleanFlowCellFailedError, FlowCellError
@@ -50,7 +51,7 @@ FLOW_CELL_OUTPUT_HEADERS = [
 ]
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def clean():
     """Clean up processes."""
     return
@@ -260,8 +261,8 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
     directories_to_check: list[Path] = []
     for path in [
         Path(context.data_input.input_dir_path),
-        Path(context.illumina_flow_cells_directory),
-        Path(context.illumina_demultiplexed_runs_directory),
+        Path(context.run_instruments.illumina.sequencing_runs_dir),
+        Path(context.run_instruments.illumina.demultiplexed_runs_dir),
         Path(context.encryption.encryption_dir),
     ]:
         directories_to_check.extend(get_directories_in_path(path))
