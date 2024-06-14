@@ -136,8 +136,7 @@ class IlluminaPostProcessingService:
             hk_api=self.hk_api,
         )
         add_run_parameters_file_to_housekeeper(
-            flow_cell_name=run_directory_data.full_name,
-            run_dir_path=run_directory_data.get_sequencing_runs_dir(),
+            run_directory_data=run_directory_data,
             hk_api=self.hk_api,
         )
 

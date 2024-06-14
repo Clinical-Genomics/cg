@@ -129,18 +129,16 @@ def add_demux_logs_to_housekeeper(
             LOG.error(f"Cannot find demux log file {log_file_path}. Error: {e}.")
 
 
-# TODO: Fix parameters, make only a run directory data
 def add_run_parameters_file_to_housekeeper(
-    flow_cell_name: str, run_dir_path: Path, hk_api: HousekeeperAPI
+    run_directory_data: IlluminaRunDirectoryData, hk_api: HousekeeperAPI
 ) -> None:
     """Add run parameters file to Housekeeper."""
-    flow_cell_path = Path(run_dir_path, flow_cell_name)
-    flow_cell = IlluminaRunDirectoryData(flow_cell_path)
-    run_parameters_file_path: Path = flow_cell.run_parameters_path
-    tag_names: list[str] = [SequencingFileTag.RUN_PARAMETERS, flow_cell.id]
+    run_parameters_file_path: Path = run_directory_data.run_parameters_path
+    tag_names: list[str] = [SequencingFileTag.RUN_PARAMETERS, run_directory_data.id]
     hk_api.add_file_to_bundle_if_non_existent(
-        file_path=run_parameters_file_path, bundle_name=flow_cell.id, tag_names=tag_names
+        file_path=run_parameters_file_path, bundle_name=run_directory_data.id, tag_names=tag_names
     )
     LOG.info(
-        f"Added run parameters file {run_parameters_file_path} to {flow_cell.id} in Housekeeper."
+        f"Added run parameters file {run_parameters_file_path} to {run_directory_data.id}"
+        " in Housekeeper."
     )

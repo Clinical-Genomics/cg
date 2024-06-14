@@ -67,13 +67,13 @@ def test_add_fastq_files_to_housekeeper(
 
 
 def test_add_demux_logs_to_housekeeper(
-    demultiplex_context: CGConfig,
+    new_demultiplex_context: CGConfig,
     novaseq_6000_post_1_5_kits_flow_cell: IlluminaRunDirectoryData,
     demultiplex_log_file_names: list[str],
 ):
     """Test that the demultiplex log files of a sequencing run are added to Housekeeper."""
     # GIVEN a Housekeeper API
-    hk_api: HousekeeperAPI = demultiplex_context.housekeeper_api
+    hk_api: HousekeeperAPI = new_demultiplex_context.housekeeper_api
 
     # GIVEN a bundle and flow cell version exists in Housekeeper
     hk_api.add_bundle_and_version_if_non_existent(
@@ -104,11 +104,11 @@ def test_add_demux_logs_to_housekeeper(
 
 
 def test_add_run_parameters_to_housekeeper(
-    demultiplex_context: CGConfig, novaseq_x_flow_cell: IlluminaRunDirectoryData
+    new_demultiplex_context: CGConfig, novaseq_x_flow_cell: IlluminaRunDirectoryData
 ):
     """Test that the run parameters file of a sequencing run is added to Housekeeper."""
     # GIVEN a flow cell with a run parameters file and a Housekeeper API
-    hk_api = demultiplex_context.housekeeper_api
+    hk_api = new_demultiplex_context.housekeeper_api
 
     # GIVEN that a run parameters file does not exist for the flow cell in Housekeeper
     assert not hk_api.files(tags=[SequencingFileTag.RUN_PARAMETERS, novaseq_x_flow_cell.id]).all()
@@ -118,8 +118,7 @@ def test_add_run_parameters_to_housekeeper(
 
     # WHEN adding the run parameters file to Housekeeper
     add_run_parameters_file_to_housekeeper(
-        flow_cell_name=novaseq_x_flow_cell.full_name,
-        run_dir_path=demultiplex_context.demultiplex_api.sequencing_runs_dir,
+        run_directory_data=novaseq_x_flow_cell,
         hk_api=hk_api,
     )
 
