@@ -101,3 +101,12 @@ def novaseq_x_flow_cell_id() -> str:
 def novaseq_x_flow_cell_full_name(novaseq_x_flow_cell_id: str) -> str:
     """Return the full name of a NovaSeqX flow cell."""
     return f"20231108_LH00188_0028_B{novaseq_x_flow_cell_id}"
+
+
+@pytest.fixture(scope="session")
+def demultiplex_log_file_names(novaseq_6000_post_1_5_kits_flow_cell_id: str) -> list[str]:
+    """Return a list of demultiplex log file names."""
+    return [
+        f"{novaseq_6000_post_1_5_kits_flow_cell_id}_demultiplex.stderr",
+        f"{novaseq_6000_post_1_5_kits_flow_cell_id}_demultiplex.stdout",
+    ]

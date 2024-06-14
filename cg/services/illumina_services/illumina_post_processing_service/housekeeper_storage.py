@@ -49,90 +49,92 @@ def _check_if_fastq_path_should_be_stored_in_housekeeper(
 
 
 def add_sample_fastq_files_to_housekeeper(
-    flow_cell: IlluminaRunDirectoryData, hk_api: HousekeeperAPI, store: Store
+    run_directory_data: IlluminaRunDirectoryData, hk_api: HousekeeperAPI, store: Store
 ) -> None:
     """Add sample fastq files from the demultiplex directory to Housekeeper."""
-    sample_internal_ids: list[str] = flow_cell.sample_sheet.get_sample_ids()
+    sample_internal_ids: list[str] = run_directory_data.sample_sheet.get_sample_ids()
     for sample_internal_id in sample_internal_ids:
         sample_fastq_paths: list[Path] | None = get_sample_fastqs_from_flow_cell(
-            flow_cell_directory=flow_cell.path, sample_internal_id=sample_internal_id
+            flow_cell_directory=run_directory_data.get_demultiplexed_runs_dir(),
+            sample_internal_id=sample_internal_id,
         )
         if not sample_fastq_paths:
             LOG.warning(
-                f"Cannot find fastq files for sample {sample_internal_id} in {flow_cell.path}. Skipping."
+                f"Cannot find fastq files for sample {sample_internal_id} in {run_directory_data.path}. Skipping."
             )
             continue
         for sample_fastq_path in sample_fastq_paths:
             sample_fastq_path: Path = rename_fastq_file_if_needed(
-                fastq_file_path=sample_fastq_path, flow_cell_name=flow_cell.id
+                fastq_file_path=sample_fastq_path, flow_cell_name=run_directory_data.id
             )
             if _check_if_fastq_path_should_be_stored_in_housekeeper(
                 sample_id=sample_internal_id,
                 sample_fastq_path=sample_fastq_path,
-                sequencer_type=flow_cell.sequencer_type,
-                device_internal_id=flow_cell.id,
+                sequencer_type=run_directory_data.sequencer_type,
+                device_internal_id=run_directory_data.id,
                 store=store,
             ):
                 hk_api.store_fastq_path_in_housekeeper(
                     sample_internal_id=sample_internal_id,
                     sample_fastq_path=sample_fastq_path,
-                    flow_cell_id=flow_cell.id,
+                    flow_cell_id=run_directory_data.id,
                 )
 
 
 def store_undetermined_fastq_files(
-    flow_cell: IlluminaRunDirectoryData, hk_api: HousekeeperAPI, store: Store
+    run_directory_data: IlluminaRunDirectoryData, hk_api: HousekeeperAPI, store: Store
 ) -> None:
     """Store undetermined fastq files for non-pooled samples in Housekeeper."""
     non_pooled_lanes_and_samples: list[tuple[int, str]] = (
-        flow_cell.sample_sheet.get_non_pooled_lanes_and_samples()
+        run_directory_data.sample_sheet.get_non_pooled_lanes_and_samples()
     )
 
     for lane, sample_id in non_pooled_lanes_and_samples:
         undetermined_fastqs: list[Path] = get_undetermined_fastqs(
-            lane=lane, flow_cell_path=flow_cell.path
+            lane=lane, flow_cell_path=run_directory_data.path
         )
 
         for fastq_path in undetermined_fastqs:
             if _check_if_fastq_path_should_be_stored_in_housekeeper(
                 sample_id=sample_id,
                 sample_fastq_path=fastq_path,
-                sequencer_type=flow_cell.sequencer_type,
-                device_internal_id=flow_cell.id,
+                sequencer_type=run_directory_data.sequencer_type,
+                device_internal_id=run_directory_data.id,
                 store=store,
             ):
                 hk_api.store_fastq_path_in_housekeeper(
                     sample_internal_id=sample_id,
                     sample_fastq_path=fastq_path,
-                    flow_cell_id=flow_cell.id,
+                    flow_cell_id=run_directory_data.id,
                 )
 
 
 def add_demux_logs_to_housekeeper(
-    flow_cell: IlluminaRunDirectoryData, hk_api: HousekeeperAPI, flow_cell_run_dir: Path
+    run_directory_data: IlluminaRunDirectoryData, hk_api: HousekeeperAPI
 ) -> None:
     """Add demux logs to Housekeeper."""
     log_file_name_pattern: str = r"*_demultiplex.std*"
     demux_log_file_paths: list[Path] = get_files_matching_pattern(
-        directory=Path(flow_cell_run_dir, flow_cell.full_name), pattern=log_file_name_pattern
+        directory=run_directory_data.get_sequencing_runs_dir(), pattern=log_file_name_pattern
     )
 
-    tag_names: list[str] = [SequencingFileTag.DEMUX_LOG, flow_cell.id]
+    tag_names: list[str] = [SequencingFileTag.DEMUX_LOG, run_directory_data.id]
     for log_file_path in demux_log_file_paths:
         try:
             hk_api.add_file_to_bundle_if_non_existent(
-                file_path=log_file_path, bundle_name=flow_cell.id, tag_names=tag_names
+                file_path=log_file_path, bundle_name=run_directory_data.id, tag_names=tag_names
             )
             LOG.info(f"Added demux log file {log_file_path} to Housekeeper.")
         except FileNotFoundError as e:
             LOG.error(f"Cannot find demux log file {log_file_path}. Error: {e}.")
 
 
+# TODO: Fix parameters, make only a run directory data
 def add_run_parameters_file_to_housekeeper(
-    flow_cell_name: str, flow_cell_run_dir: Path, hk_api: HousekeeperAPI
+    flow_cell_name: str, run_dir_path: Path, hk_api: HousekeeperAPI
 ) -> None:
     """Add run parameters file to Housekeeper."""
-    flow_cell_path = Path(flow_cell_run_dir, flow_cell_name)
+    flow_cell_path = Path(run_dir_path, flow_cell_name)
     flow_cell = IlluminaRunDirectoryData(flow_cell_path)
     run_parameters_file_path: Path = flow_cell.run_parameters_path
     tag_names: list[str] = [SequencingFileTag.RUN_PARAMETERS, flow_cell.id]

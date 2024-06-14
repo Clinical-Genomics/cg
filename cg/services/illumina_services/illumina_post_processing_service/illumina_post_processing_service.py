@@ -126,19 +126,18 @@ class IlluminaPostProcessingService:
         ]
         self.hk_api.add_tags_if_non_existent(tags)
         add_sample_fastq_files_to_housekeeper(
-            flow_cell=run_directory_data, hk_api=self.hk_api, store=store
+            run_directory_data=run_directory_data, hk_api=self.hk_api, store=store
         )
         store_undetermined_fastq_files(
-            flow_cell=run_directory_data, hk_api=self.hk_api, store=store
+            run_directory_data=run_directory_data, hk_api=self.hk_api, store=store
         )
         add_demux_logs_to_housekeeper(
-            flow_cell=run_directory_data,
+            run_directory_data=run_directory_data,
             hk_api=self.hk_api,
-            flow_cell_run_dir=run_directory_data.get_sequencing_runs_dir(),
         )
         add_run_parameters_file_to_housekeeper(
             flow_cell_name=run_directory_data.full_name,
-            flow_cell_run_dir=run_directory_data.get_sequencing_runs_dir(),
+            run_dir_path=run_directory_data.get_sequencing_runs_dir(),
             hk_api=self.hk_api,
         )
 

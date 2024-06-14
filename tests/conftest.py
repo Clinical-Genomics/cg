@@ -422,10 +422,24 @@ def updated_demultiplex_context(
     cg_context: CGConfig,
     updated_store_with_demultiplexed_samples: Store,
 ) -> CGConfig:
-    """Return cg context with a demultiplex context."""
+    """Return CG context with populated with the seven canonical flow cells."""
     cg_context.demultiplex_api_ = demultiplexing_api
     cg_context.housekeeper_api_ = real_housekeeper_api
     cg_context.status_db_ = updated_store_with_demultiplexed_samples
+    return cg_context
+
+
+@pytest.fixture
+def new_demultiplex_context(
+    demultiplexing_api: DemultiplexingAPI,
+    real_housekeeper_api: HousekeeperAPI,
+    cg_context: CGConfig,
+    store_with_illumina_sequencing_data: Store,
+) -> CGConfig:
+    """Return a CG context with populated with data using the Illumina models."""
+    cg_context.demultiplex_api_ = demultiplexing_api
+    cg_context.housekeeper_api_ = real_housekeeper_api
+    cg_context.status_db_ = store_with_illumina_sequencing_data
     return cg_context
 
 
