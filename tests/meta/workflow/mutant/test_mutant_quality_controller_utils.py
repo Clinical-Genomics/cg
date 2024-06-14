@@ -1,10 +1,13 @@
+from cg.meta.workflow.mutant.quality_controller.models import SampleQualityResult
 from cg.meta.workflow.mutant.quality_controller.utils import (
     internal_negative_control_qc_pass,
     external_negative_control_qc_pass,
 )
 
 
-def test_internal_negative_control_qc_pass(sample_results_case_qc_pass) -> bool:
+def test_internal_negative_control_qc_pass(
+    sample_results_case_qc_pass: list[SampleQualityResult]
+) -> bool:
     # GIVEN a sample_results object where the internal_negative_control passes qc
 
     # WHEN performing qc on the sample
@@ -17,7 +20,9 @@ def test_internal_negative_control_qc_pass(sample_results_case_qc_pass) -> bool:
     assert internal_negative_control_pass_qc is True
 
 
-def test_external_negative_control_qc_pass(sample_results_case_qc_pass) -> bool:
+def test_external_negative_control_qc_pass(
+    sample_results_case_qc_pass: list[SampleQualityResult]
+) -> bool:
     # GIVEN a sample_results object where the external_negative_control passes qc
 
     # WHEN performing qc on the sample

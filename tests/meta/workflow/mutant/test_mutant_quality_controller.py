@@ -1,16 +1,27 @@
 from pathlib import Path
-from cg.meta.workflow.mutant.quality_controller.models import QualityResult, SampleQualityResult
+from cg.meta.workflow.mutant.quality_controller.models import (
+    QualityMetrics,
+    QualityResult,
+    SampleQualityResult,
+)
+from cg.meta.workflow.mutant.quality_controller.quality_controller import QualityController
+from cg.store.models import Case, Sample
 
 
-def test_quality_control_case_qc_pass(case_qc_pass, quality_controller, report_path_qc_pass):
+def test_quality_control_case_qc_pass(
+    case_qc_pass: Case,
+    quality_controller: QualityController,
+    mutant_analysis_dir_case_qc_pass: Path,
+    mutant_results_file_path_qc_pass: Path,
+):
     # GIVEN a case object and a corresponding case_results_file_path
 
     # WHEN performing qc
 
     case_qc: QualityResult = quality_controller.quality_control(
         case=case_qc_pass,
-        case_path=Path(""),
-        case_results_file_path=report_path_qc_pass,
+        case_path=mutant_analysis_dir_case_qc_pass,
+        case_results_file_path=mutant_results_file_path_qc_pass,
     )
 
     # THEN no error is thrown
@@ -19,24 +30,30 @@ def test_quality_control_case_qc_pass(case_qc_pass, quality_controller, report_p
     assert case_qc.passes_qc is True
 
 
-def test_quality_control_case_qc_fail(case_qc_fail, quality_controller, report_path_qc_fail):
+def test_quality_control_case_qc_fail(
+    case_qc_fail: Case,
+    quality_controller: QualityController,
+    mutant_analysis_dir_case_qc_fail: Path,
+    mutant_results_file_path_qc_fail: Path,
+):
     # GIVEN a case object and a corresponding case_results_file_path
 
     # WHEN performing qc
 
     quality_controller.quality_control(
         case=case_qc_fail,
-        case_path=Path(""),
-        case_results_file_path=report_path_qc_fail,
+        case_path=mutant_analysis_dir_case_qc_fail,
+        case_results_file_path=mutant_results_file_path_qc_fail,
     )
 
     # THEN no error is thrown
 
 
 def test_quality_control_case_qc_fail_with_failing_controls(
-    case_qc_fail_with_failing_controls,
-    quality_controller,
-    report_path_qc_fail_with_failing_controls,
+    case_qc_fail_with_failing_controls: Case,
+    quality_controller: QualityController,
+    mutant_analysis_dir_case_qc_fail_with_failing_controls: Path,
+    mutant_results_file_path_qc_fail_with_failing_controls: Path,
 ):
     # GIVEN a case object and a corresponding case_results_file_path
 
@@ -44,8 +61,8 @@ def test_quality_control_case_qc_fail_with_failing_controls(
 
     case_qc: QualityResult = quality_controller.quality_control(
         case=case_qc_fail_with_failing_controls,
-        case_path=Path(""),
-        case_results_file_path=report_path_qc_fail_with_failing_controls,
+        case_path=mutant_analysis_dir_case_qc_fail_with_failing_controls,
+        case_results_file_path=mutant_results_file_path_qc_fail_with_failing_controls,
     )
 
     # THEN no error is thrown
@@ -54,7 +71,9 @@ def test_quality_control_case_qc_fail_with_failing_controls(
     assert case_qc.passes_qc is False
 
 
-def test_quality_control_samples(quality_controller, quality_metrics_case_qc_pass):
+def test_quality_control_samples(
+    quality_controller: QualityController, quality_metrics_case_qc_pass: QualityMetrics
+):
     # GIVEN a case object
 
     # WHEN performing qc on samples
@@ -68,7 +87,9 @@ def test_quality_control_samples(quality_controller, quality_metrics_case_qc_pas
 
 
 def test_quality_control_sample_pass_qc(
-    quality_controller, sample_qc_pass, quality_metrics_case_qc_pass
+    quality_controller: QualityController,
+    sample_qc_pass: Sample,
+    quality_metrics_case_qc_pass: QualityMetrics,
 ):
     # GIVEN a sample that passes qc and a quality_metrics object for a case containing the sample
     # WHEN performing qc on the sample
@@ -81,7 +102,9 @@ def test_quality_control_sample_pass_qc(
 
 
 def test_quality_control_sample_fail_qc(
-    quality_controller, sample_qc_fail, quality_metrics_case_qc_fail
+    quality_controller: QualityController,
+    sample_qc_fail: Sample,
+    quality_metrics_case_qc_fail: QualityMetrics,
 ):
     # GIVEN a sample that fails qc and a quality_metrics object for a case containing the sample
 
@@ -94,7 +117,9 @@ def test_quality_control_sample_fail_qc(
     assert sample_quality_result.passes_qc is False
 
 
-def test_quality_control_case(quality_controller, sample_results_case_qc_pass):
+def test_quality_control_case(
+    quality_controller: QualityController, sample_results_case_qc_pass: list[SampleQualityResult]
+):
     # GIVEN a case object and a corresponding case_results_file_path
 
     # WHEN performing qc
@@ -104,7 +129,9 @@ def test_quality_control_case(quality_controller, sample_results_case_qc_pass):
     # THEN no error is thrown
 
 
-def test_case_qc_pass(quality_controller, sample_results_case_qc_pass):
+def test_case_qc_pass(
+    quality_controller: QualityController, sample_results_case_qc_pass: list[SampleQualityResult]
+):
     # GIVEN a case object and a corresponding case_results_file_path
 
     # WHEN performing qc

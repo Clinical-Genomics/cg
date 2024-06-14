@@ -1,8 +1,10 @@
 from cg.meta.workflow.mutant.metadata_parser.metadata_parser import MetadataParser
 from cg.store.models import Case
+from cg.store.store import Store
+from tests.mocks.limsmock import MockLimsAPI
 
 
-def test_parse_metadata_for_case(mutant_store, mutant_lims):
+def test_parse_metadata_for_case(mutant_store: Store, mutant_lims: MockLimsAPI):
     # GIVEN a case object
     case: Case = mutant_store.get_case_by_internal_id("case_qc_pass")
 
@@ -12,7 +14,9 @@ def test_parse_metadata_for_case(mutant_store, mutant_lims):
     # THEN no error is thrown
 
 
-def test_parse_metadata_for_internal_negative_control(mutant_store, mutant_lims):
+def test_parse_metadata_for_internal_negative_control(
+    mutant_store: Store, mutant_lims: MockLimsAPI
+):
     # GIVEN a SamplesMetadataMetrics object
     metadata_parser = MetadataParser(status_db=mutant_store, lims=mutant_lims)
     case: Case = mutant_store.get_case_by_internal_id("case_qc_pass")
@@ -24,7 +28,7 @@ def test_parse_metadata_for_internal_negative_control(mutant_store, mutant_lims)
     # THEN no error is thrown
 
 
-def test_parse_metadata(mutant_store, mutant_lims):
+def test_parse_metadata(mutant_store: Store, mutant_lims: MockLimsAPI):
     # GIVEN a case object
     case: Case = mutant_store.get_case_by_internal_id("case_qc_pass")
 

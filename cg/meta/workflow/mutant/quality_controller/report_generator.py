@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 from cg.io.json import write_json
 from cg.meta.workflow.mutant.quality_controller.models import (
@@ -11,7 +10,7 @@ from cg.meta.workflow.mutant.quality_controller.result_logger import sample_resu
 
 class ReportGenerator:
     @staticmethod
-    def report(out_file: Path, case: CaseQualityResult, samples: List[SampleQualityResult]) -> None:
+    def report(out_file: Path, case: CaseQualityResult, samples: list[SampleQualityResult]) -> None:
         summary: str = ReportGenerator.get_summary(case=case, samples=samples)
         report_content = {
             "summary": summary,
@@ -22,7 +21,7 @@ class ReportGenerator:
 
     @staticmethod
     def get_summary(
-        case: CaseQualityResult, samples: List[SampleQualityResult], report_path: Path | None = None
+        case: CaseQualityResult, samples: list[SampleQualityResult], report_path: Path | None = None
     ) -> str:
         case_summary: str = "Case passed QC. " if case.passes_qc else "Case failed QC. "
         if report_path and not case.passes_qc:
