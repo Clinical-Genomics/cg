@@ -14,8 +14,6 @@ from cg.utils.files import get_files_matching_pattern, is_pattern_in_file_path_n
 
 LOG = logging.getLogger(__name__)
 
-NANOPORE_SEQUENCING_SUMMARY_PATTERN: str = r"final_summary_*.txt"
-
 
 def _is_sample_id_in_directory_name(directory: Path, sample_internal_id: str) -> bool:
     """Validate that directory name is formatted as Sample_<sample_id> or Sample_<sample_id>_."""
