@@ -7,7 +7,7 @@ class StatinaUploadFiles(BaseModel):
     segmental_calls: str | None = None
 
 
-class FlowCellQ30AndReads(BaseModel):
+class SequencingRunQ30AndReads(BaseModel):
     """Summaries for Q30 and Reads of a flow cell."""
 
     total_reads_on_flow_cell: int

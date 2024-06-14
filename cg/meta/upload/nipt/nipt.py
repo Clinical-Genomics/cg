@@ -13,9 +13,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow
 from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
-from cg.meta.upload.nipt.models import FlowCellQ30AndReads, StatinaUploadFiles
+from cg.meta.upload.nipt.models import SequencingRunQ30AndReads, StatinaUploadFiles
 from cg.models.cg_config import CGConfig
-from cg.store.models import Analysis, Case, Flowcell
+from cg.store.models import Analysis, Case, Flowcell, IlluminaSequencingRun
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -53,31 +53,27 @@ class NiptUploadAPI:
         Check the average Q30 and the total number of reads for each sample
         in the latest flow cell related to a case.
         """
-        flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
-        average_q30_across_samples: float = (
-            self.status_db.get_average_percentage_passing_q30_for_flow_cell(
-                flow_cell_name=flow_cell.name
-            )
+        sequencing_run: IlluminaSequencingRun = (
+            self.status_db.get_latest_illumina_sequencing_run_for_case(case_id)
         )
-        total_reads_on_flow_cell: int = self.status_db.get_number_of_reads_for_flow_cell(
-            flow_cell_name=flow_cell.name
+        sequencing_run_summary: SequencingRunQ30AndReads = SequencingRunQ30AndReads(
+            average_q30_across_samples=sequencing_run.percent_q30,
+            total_reads_on_flow_cell=sequencing_run.total_reads,
         )
-        flow_cell_summary: FlowCellQ30AndReads = FlowCellQ30AndReads(
-            average_q30_across_samples=average_q30_across_samples,
-            total_reads_on_flow_cell=total_reads_on_flow_cell,
-        )
-        if not flow_cell_summary.passes_q30_threshold(
+        if not sequencing_run_summary.passes_q30_threshold(
             threshold=q30_threshold
-        ) or not flow_cell_summary.passes_read_threshold(
+        ) or not sequencing_run_summary.passes_read_threshold(
             threshold=self.status_db.get_ready_made_library_expected_reads(case_id=case_id)
         ):
             LOG.warning(
-                f"Flow cell {flow_cell.name} did not pass QC for case {case_id} with Q30: "
-                f"{flow_cell_summary.average_q30_across_samples} and reads: {flow_cell_summary.total_reads_on_flow_cell}."
+                f"Sequencing run {sequencing_run.device.internal_id} did not pass QC for case {case_id} with Q30: "
+                f"{sequencing_run_summary.average_q30_across_samples} and reads: {sequencing_run_summary.total_reads_on_flow_cell}."
                 f"Skipping upload."
             )
             return False
-        LOG.debug(f"Flow cell {flow_cell.name} passed QC for case {case_id}.")
+        LOG.debug(
+            f"Sequencing run for {sequencing_run.device.internal_id} passed QC for case {case_id}."
+        )
         return True
 
     def get_housekeeper_results_file(self, case_id: str, tags: list | None = None) -> str:

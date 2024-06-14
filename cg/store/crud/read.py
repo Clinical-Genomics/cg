@@ -99,6 +99,7 @@ from cg.store.models import (
     Sample,
     SampleLaneSequencingMetrics,
     User,
+    SampleRunMetrics,
 )
 
 LOG = logging.getLogger(__name__)
@@ -496,6 +497,25 @@ class ReadHandler(BaseHandler):
             filter_functions=[IlluminaSequencingRunFilter.BY_DEVICE_INTERNAL_ID],
             device_internal_id=device_internal_id,
         ).first()
+
+    def get_latest_illumina_sequencing_run_for_case(
+        self, case_internal_id: str
+    ) -> IlluminaSequencingRun:
+        """Get Illumina sequencing run entry by case internal id."""
+        case: Case = self.get_case_by_internal_id(case_internal_id)
+        samples_on_case: list[Sample] = case.samples
+        sample_metrics: list[SampleRunMetrics] = [
+            sample.sample_run_metrics for sample in samples_on_case
+        ]
+        sequencing_runs: list[IlluminaSequencingRun] = [
+            apply_illumina_sequencing_run_filter(
+                runs=self._get_query(IlluminaSequencingRun),
+                filter_functions=[IlluminaSequencingRunFilter.BY_ENTRY_ID],
+                entry_id=sample_metric.instrument_run_id,
+            ).first()
+            for sample_metric in sample_metrics
+        ]
+        return max(sequencing_runs, key=lambda run: run.demultiplexing_completed_at)
 
     def get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
         self, flow_cell_name: str, sample_internal_id: str, lane: int
