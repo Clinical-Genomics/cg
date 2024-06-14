@@ -83,13 +83,6 @@ class SpringArchiveAPI:
             archive_task_id=job_id,
         )
 
-    def retrieve_spring_files_for_case(self, case_id: str) -> None:
-        """Submits jobs to retrieve any archived files belonging to the given case, and updates the Archive entries
-        with the retrieval job id."""
-        case: Case = self.status_db.get_case_by_internal_id(case_id)
-        for sample in case.samples:
-            self._retrieve_spring_files_for_sample(sample)
-
     def retrieve_files_from_archive_location(
         self, files_and_samples: list[FileAndSample], archive_location: str
     ) -> None:
@@ -317,12 +310,27 @@ class SpringArchiveAPI:
                 LOG.info(error)
                 continue
 
+    def retrieve_spring_files_for_case(self, case_id: str) -> None:
+        """Submits jobs to retrieve any archived files belonging to the given case, and updates the Archive entries
+        with the retrieval job id."""
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        for sample in case.samples:
+            try:
+                self._retrieve_spring_files_for_sample(sample)
+            except MissingFilesError as error:
+                LOG.warning(str(error))
+                continue
+
     def retrieve_spring_files_for_sample(self, sample_id: str) -> None:
         sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
         self._retrieve_spring_files_for_sample(sample)
 
     def _retrieve_spring_files_for_sample(self, sample: Sample) -> None:
         files_to_retrieve: list[File] = self.get_archived_files_from_sample(sample)
+        if not files_to_retrieve:
+            raise MissingFilesError(
+                f"No archived Spring files found for sample {sample.internal_id}."
+            )
         files_and_samples: list[FileAndSample] = self.add_samples_to_files(files_to_retrieve)
         self.retrieve_files_from_archive_location(
             files_and_samples=files_and_samples, archive_location=sample.archive_location
