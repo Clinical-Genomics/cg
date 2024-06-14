@@ -504,9 +504,9 @@ class ReadHandler(BaseHandler):
         """Get Illumina sequencing run entry by case internal id."""
         case: Case = self.get_case_by_internal_id(case_internal_id)
         samples_on_case: list[Sample] = case.samples
-        sample_metrics: list[SampleRunMetrics] = [
-            sample.sample_run_metrics for sample in samples_on_case
-        ]
+        sample_metrics: list[SampleRunMetrics] = []
+        for sample in samples_on_case:
+            sample_metrics.extend(sample.sample_run_metrics)
         sequencing_runs: list[IlluminaSequencingRun] = [
             apply_illumina_sequencing_run_filter(
                 runs=self._get_query(IlluminaSequencingRun),

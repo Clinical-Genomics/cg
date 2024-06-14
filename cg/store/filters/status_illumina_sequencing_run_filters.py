@@ -13,7 +13,7 @@ def filter_by_device_internal_id(runs: Query, device_internal_id: str, **kwargs)
     return joined_query.filter(IlluminaFlowCell.internal_id == device_internal_id)
 
 
-def filter_by_entry_id(runs: Query, entry_id: str, **kwargs) -> Query:
+def filter_by_entry_id(runs: Query, entry_id: int, **kwargs) -> Query:
     """Filter sequencing runs by entry id."""
     return runs.filter(IlluminaSequencingRun.id == entry_id)
 
