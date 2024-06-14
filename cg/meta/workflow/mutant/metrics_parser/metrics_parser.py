@@ -68,9 +68,9 @@ class MetricsParser:
 
         validated_results: dict[str, SampleResults] = {}
         for result in results:
-            validated_results[
-                result[MutantResultsHeaderData.SAMPLE_NAME]
-            ] = SampleResults.model_validate(result)
+            validated_results[result[MutantResultsHeaderData.SAMPLE_NAME]] = (
+                SampleResults.model_validate(result)
+            )
 
         sample_results_metrics: dict = {"samples": validated_results}
         return SamplesResultsMetrics.model_validate(sample_results_metrics)

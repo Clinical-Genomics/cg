@@ -261,10 +261,10 @@ class StoreHelpers:
         **kwargs,
     ) -> ApplicationLimitations:
         """Ensure that application limitations exist in store."""
-        application_limitation: (
-            ApplicationLimitations
-        ) = store.get_application_limitation_by_tag_and_workflow(
-            tag=application.tag, workflow=workflow
+        application_limitation: ApplicationLimitations = (
+            store.get_application_limitation_by_tag_and_workflow(
+                tag=application.tag, workflow=workflow
+            )
         )
         if application_limitation:
             return application_limitation

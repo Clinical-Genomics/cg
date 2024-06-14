@@ -14,7 +14,7 @@ from cg.constants.lims import (
     PROP2UDF,
     DocumentationMethod,
     LimsArtifactTypes,
-    LimsProcess
+    LimsProcess,
 )
 from cg.exc import LimsDataError
 
@@ -483,7 +483,7 @@ class LimsAPI(Lims, OrderHandler):
         )
         input_amount: float | None = self._get_last_used_input_amount(input_amounts=input_amounts)
         return input_amount
-    
+
     def get_latest_artifact_for_sample(
         self, process_type: LimsProcess, artifact_type: LimsArtifactTypes, sample_internal_id: str
     ) -> Artifact:

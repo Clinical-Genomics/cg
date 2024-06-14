@@ -48,7 +48,7 @@ def mutant_results_file_path_qc_fail(mutant_analysis_dir_case_qc_fail: Path) -> 
 
 @pytest.fixture(name="mutant_results_file_path_qc_fail_with_failing_controls")
 def mutant_results_file_path_qc_fail_with_failing_controls(
-    mutant_analysis_dir_case_qc_fail_with_failing_controls: Path
+    mutant_analysis_dir_case_qc_fail_with_failing_controls: Path,
 ) -> Path:
     return Path(
         mutant_analysis_dir_case_qc_fail_with_failing_controls,
