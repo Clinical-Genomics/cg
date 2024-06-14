@@ -57,7 +57,7 @@ def archived_flow_cells(pdc_archiving_directory: PDCArchivingDirectory) -> list[
 
 
 @pytest.fixture
-def backup_api(cg_context: CGConfig, illumina_flow_cells_directory: Path) -> BackupAPI:
+def backup_api(cg_context: CGConfig, illumina_sequencing_runs_directory: Path) -> BackupAPI:
     """Return a BackupAPI instance."""
     encryption_api: EncryptionAPI = EncryptionAPI(
         binary_path=cg_context.encryption.binary_path, dry_run=True
@@ -73,7 +73,7 @@ def backup_api(cg_context: CGConfig, illumina_flow_cells_directory: Path) -> Bac
         tar_api=tar_api,
         pdc_api=pdc_api,
         pdc_archiving_directory=pdc_archiving_directory,
-        flow_cells_dir=illumina_flow_cells_directory,
+        flow_cells_dir=illumina_sequencing_runs_directory,
         dry_run=True,
     )
     return _backup_api

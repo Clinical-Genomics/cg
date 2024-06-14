@@ -5,24 +5,24 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.devices import DeviceType
-from cg.exc import MissingFilesError, FlowCellError
+from cg.exc import FlowCellError, MissingFilesError
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_service import (
     IlluminaMetricsService,
 )
 from cg.services.illumina_services.illumina_metrics_service.models import (
     IlluminaFlowCellDTO,
-    IlluminaSequencingRunDTO,
     IlluminaSampleSequencingMetricsDTO,
+    IlluminaSequencingRunDTO,
 )
 from cg.services.illumina_services.illumina_post_processing_service.utils import (
-    create_delivery_file_in_flow_cell_directory,
     combine_sample_metrics_with_undetermined,
+    create_delivery_file_in_flow_cell_directory,
 )
 from cg.services.illumina_services.illumina_post_processing_service.validation import (
     is_flow_cell_ready_for_postprocessing,
 )
-from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun
+from cg.store.models import IlluminaFlowCell, IlluminaSampleSequencingMetrics, IlluminaSequencingRun
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ class IlluminaPostProcessingService:
         self,
         flow_cell_dir_data: IlluminaRunDirectoryData,
         sequencing_run: IlluminaSequencingRun,
-    ):
+    ) -> None:
         """Store illumina sample sequencing metrics in the status database."""
         metrics_service = IlluminaMetricsService()
         sample_metrics: list[IlluminaSampleSequencingMetricsDTO] = (
@@ -77,14 +77,16 @@ class IlluminaPostProcessingService:
         undetermined_metrics: list[IlluminaSampleSequencingMetricsDTO] = (
             metrics_service.create_sample_run_dto_for_undetermined_reads(flow_cell_dir_data)
         )
-
-        combined_metrics = combine_sample_metrics_with_undetermined(
-            sample_metrics=sample_metrics,
-            undetermined_metrics=undetermined_metrics,
+        combined_metrics: list[IlluminaSampleSequencingMetricsDTO] = (
+            combine_sample_metrics_with_undetermined(
+                sample_metrics=sample_metrics,
+                undetermined_metrics=undetermined_metrics,
+            )
         )
-        return self.status_db.add_illumina_sample_metrics(
-            sample_metrics_dto=combined_metrics, sequencing_run=sequencing_run
-        )
+        for sample_metric in combined_metrics:
+            self.status_db.add_illumina_sample_metrics_entry(
+                metrics_dto=sample_metric, sequencing_run=sequencing_run
+            )
 
     def store_illumina_flow_cell_data(self, flow_cell_dir_data: IlluminaRunDirectoryData) -> None:
         """Store flow cell data in the status database."""
