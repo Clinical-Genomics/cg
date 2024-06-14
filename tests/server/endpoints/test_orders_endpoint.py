@@ -29,6 +29,7 @@ def test_orders_endpoint(
     limit: int | None,
     workflow: str,
     expected_orders: int,
+    analysis_summaries: list[AnalysisSummary],
 ):
     """Tests that orders are returned from the orders endpoint"""
     # GIVEN a store with three orders, two of which are MIP-DNA and the last is BALSAMIC
@@ -38,27 +39,7 @@ def test_orders_endpoint(
     with mock.patch.object(
         TrailblazerAPI,
         "get_summaries",
-        return_value=[
-            AnalysisSummary(
-                order_id=order.id, cancelled=0, completed=1, delivered=0, failed=0, running=0
-            ),
-            AnalysisSummary(
-                order_id=order_another.id,
-                cancelled=0,
-                completed=1,
-                delivered=0,
-                failed=0,
-                running=0,
-            ),
-            AnalysisSummary(
-                order_id=order_balsamic.id,
-                cancelled=0,
-                completed=1,
-                delivered=0,
-                failed=0,
-                running=0,
-            ),
-        ],
+        return_value=analysis_summaries,
     ):
         response = client.get(endpoint, query_string={"pageSize": limit, "workflow": workflow})
 
