@@ -1,7 +1,6 @@
 import json
 from pathlib import Path
 from typing import Any
-from cg.constants.symbols import EMPTY_STRING
 
 
 def read_json(file_path: Path) -> Any:

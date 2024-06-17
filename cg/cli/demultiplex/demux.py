@@ -14,8 +14,8 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     mark_as_demultiplexed,
     mark_flow_cell_as_queued_for_post_processing,
 )
+from cg.constants.cli_options import DRY_RUN
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.constants.constants import DRY_RUN
 from cg.exc import FlowCellError, SampleSheetError
 from cg.meta.demultiplex.utils import (
     create_manifest_file,

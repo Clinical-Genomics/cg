@@ -12,7 +12,7 @@ from cg.cli.compress.helpers import (
     get_cases_to_process,
     update_compress_api,
 )
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig

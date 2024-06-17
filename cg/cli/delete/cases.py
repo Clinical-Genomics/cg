@@ -3,10 +3,9 @@ import logging
 import click
 
 from cg.cli.delete.case import delete_case
+from cg.constants.cli_options import DRY_RUN
 from cg.store.models import Case, Sample
 from cg.store.store import Store
-
-from cg.constants.constants import DRY_RUN
 
 CONFIRM = "Continue?"
 
