@@ -116,7 +116,7 @@ def add_demux_logs_to_housekeeper(
     """Add demux logs to Housekeeper."""
     log_file_name_pattern: str = r"*_demultiplex.std*"
     demux_log_file_paths: list[Path] = get_files_matching_pattern(
-        directory=run_directory_data.get_demultiplexed_runs_dir(), pattern=log_file_name_pattern
+        directory=run_directory_data.get_sequencing_runs_dir(), pattern=log_file_name_pattern
     )
 
     tag_names: list[str] = [SequencingFileTag.DEMUX_LOG, run_directory_data.id]
