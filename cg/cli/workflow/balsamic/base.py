@@ -19,7 +19,7 @@ from cg.cli.workflow.balsamic.options import (
 )
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -128,16 +128,17 @@ def run(
 @balsamic.command("report-deliver")
 @ARGUMENT_CASE_ID
 @DRY_RUN
+@FORCE
 @click.pass_obj
-def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
-    """Create a housekeeper deliverables file for given CASE ID"""
-
+def report_deliver(context: CGConfig, case_id: str, dry_run: bool, force: bool):
+    """Create a Housekeeper deliverables file for a given case ID."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-
     try:
         analysis_api.status_db.verify_case_exists(case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
-        analysis_api.trailblazer_api.verify_latest_analysis_is_completed(case_id)
+        analysis_api.trailblazer_api.verify_latest_analysis_is_completed(
+            case_id=case_id, force=force
+        )
         analysis_api.report_deliver(case_id=case_id, dry_run=dry_run)
     except CgError as error:
         LOG.error(f"Could not create report file: {error}")
@@ -149,8 +150,9 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
 
 @balsamic.command("store-housekeeper")
 @ARGUMENT_CASE_ID
+@FORCE
 @click.pass_obj
-def store_housekeeper(context: CGConfig, case_id: str):
+def store_housekeeper(context: CGConfig, case_id: str, force: bool):
     """Store a finished analysis in Housekeeper and StatusDB."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
@@ -161,7 +163,7 @@ def store_housekeeper(context: CGConfig, case_id: str):
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
-        analysis_api.upload_bundle_housekeeper(case_id=case_id)
+        analysis_api.upload_bundle_housekeeper(case_id=case_id, force=force)
         analysis_api.upload_bundle_statusdb(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action=None)
     except ValidationError as error:
@@ -254,12 +256,13 @@ def start_available(context: click.Context, dry_run: bool = False):
 @balsamic.command("store")
 @ARGUMENT_CASE_ID
 @DRY_RUN
+@FORCE
 @click.pass_context
-def store(context: click.Context, case_id: str, dry_run: bool):
+def store(context: click.Context, case_id: str, dry_run: bool, force: bool):
     """Generate Housekeeper report for CASE ID and store in Housekeeper"""
     LOG.info(f"Storing analysis for {case_id}")
-    context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
-    context.invoke(store_housekeeper, case_id=case_id)
+    context.invoke(report_deliver, case_id=case_id, dry_run=dry_run, force=force)
+    context.invoke(store_housekeeper, case_id=case_id, force=force)
 
 
 @balsamic.command("store-available")
