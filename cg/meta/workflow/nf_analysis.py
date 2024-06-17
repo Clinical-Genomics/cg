@@ -766,14 +766,14 @@ class NfAnalysisAPI(AnalysisAPI):
         if dry_run:
             LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
             return
-            workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
-            self.write_deliverables_file(
-                deliverables_content=workflow_content.dict(),
-                file_path=self.get_deliverables_file_path(case_id=case_id),
-            )
-            LOG.info(
-                f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
-            )
+        workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
+        self.write_deliverables_file(
+            deliverables_content=workflow_content.dict(),
+            file_path=self.get_deliverables_file_path(case_id=case_id),
+        )
+        LOG.info(
+            f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
+        )
 
     def store_analysis_housekeeper(
         self, case_id: str, dry_run: bool = False, force: bool = False
