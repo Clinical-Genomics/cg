@@ -208,12 +208,6 @@
   path_index: ~
   step: expansionhunter
   tag: str_variants
-- format: vcf
-  id: SAMPLEID
-  path: PATHTOCASE/repeat_expansions/SAMPLEID_repeat_expansion.vcf.gz.tbi
-  path_index: ~
-  step: expansionhunter
-  tag: str_variants_index
 - format: bam
   id: SAMPLEID
   path: PATHTOCASE/repeat_expansions/SAMPLEID_exphunter_sorted.bam
@@ -493,7 +487,7 @@
   tag: annotate_snv_index
 - format: meta
   id: CASEID
-  path: PATHTOCASE/annotate_snv/mitochondria/CASEID_mitochondria_cadd_vep_haplogrep.txt
+  path: PATHTOCASE/annotate_snv/mitochondria/CASEID_mitochondria_hmtnote_vcfanno_cadd_vep_haplogrep.txt
   path_index: ~
   step: annotate_snv_mt
   tag: haplogrep
