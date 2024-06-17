@@ -18,7 +18,7 @@ from cg.utils.files import get_files_matching_pattern
 LOG = logging.getLogger(__name__)
 
 
-def _check_if_fastq_path_should_be_stored_in_housekeeper(
+def _should_fastq_path_be_stored_in_housekeeper(
     sample_id: str,
     sample_fastq_path: Path,
     sequencer_type: Sequencers,
@@ -60,14 +60,15 @@ def add_sample_fastq_files_to_housekeeper(
         )
         if not sample_fastq_paths:
             LOG.warning(
-                f"Cannot find fastq files for sample {sample_internal_id} in {run_directory_data.path}. Skipping."
+                f"Cannot find fastq files for sample {sample_internal_id} in "
+                f"{run_directory_data.get_demultiplexed_runs_dir()}. Skipping."
             )
             continue
         for sample_fastq_path in sample_fastq_paths:
             sample_fastq_path: Path = rename_fastq_file_if_needed(
                 fastq_file_path=sample_fastq_path, flow_cell_name=run_directory_data.id
             )
-            if _check_if_fastq_path_should_be_stored_in_housekeeper(
+            if _should_fastq_path_be_stored_in_housekeeper(
                 sample_id=sample_internal_id,
                 sample_fastq_path=sample_fastq_path,
                 sequencer_type=run_directory_data.sequencer_type,
@@ -91,11 +92,11 @@ def store_undetermined_fastq_files(
 
     for lane, sample_id in non_pooled_lanes_and_samples:
         undetermined_fastqs: list[Path] = get_undetermined_fastqs(
-            lane=lane, flow_cell_path=run_directory_data.path
+            lane=lane, flow_cell_path=run_directory_data.get_demultiplexed_runs_dir()
         )
 
         for fastq_path in undetermined_fastqs:
-            if _check_if_fastq_path_should_be_stored_in_housekeeper(
+            if _should_fastq_path_be_stored_in_housekeeper(
                 sample_id=sample_id,
                 sample_fastq_path=fastq_path,
                 sequencer_type=run_directory_data.sequencer_type,
@@ -115,7 +116,7 @@ def add_demux_logs_to_housekeeper(
     """Add demux logs to Housekeeper."""
     log_file_name_pattern: str = r"*_demultiplex.std*"
     demux_log_file_paths: list[Path] = get_files_matching_pattern(
-        directory=run_directory_data.get_sequencing_runs_dir(), pattern=log_file_name_pattern
+        directory=run_directory_data.get_demultiplexed_runs_dir(), pattern=log_file_name_pattern
     )
 
     tag_names: list[str] = [SequencingFileTag.DEMUX_LOG, run_directory_data.id]

@@ -60,7 +60,7 @@ class IlluminaPostProcessingService:
         run_directory_data: IlluminaRunDirectoryData,
         flow_cell: IlluminaFlowCell,
     ) -> IlluminaSequencingRun:
-        """Store illumina run metrics in the status database."""
+        """Store Illumina run metrics in the status database."""
         metrics_service = IlluminaMetricsService()
         sequencing_run_dto: IlluminaSequencingRunDTO = (
             metrics_service.create_illumina_sequencing_dto(run_directory_data)
@@ -74,11 +74,11 @@ class IlluminaPostProcessingService:
         run_directory_data: IlluminaRunDirectoryData,
         sequencing_run: IlluminaSequencingRun,
     ) -> None:
-        """Store illumina sample sequencing metrics in the status database."""
+        """Store Illumina sample sequencing metrics in the status database."""
         metrics_service = IlluminaMetricsService()
         sample_metrics: list[IlluminaSampleSequencingMetricsDTO] = (
             metrics_service.create_sample_sequencing_metrics_dto_for_flow_cell(
-                flow_cell_directory=run_directory_data.path,
+                flow_cell_directory=run_directory_data.get_demultiplexed_runs_dir(),
             )
         )
         undetermined_metrics: list[IlluminaSampleSequencingMetricsDTO] = (
@@ -99,6 +99,7 @@ class IlluminaPostProcessingService:
         self, run_directory_data: IlluminaRunDirectoryData
     ) -> None:
         """Store all Illumina sequencing data in the status database."""
+        LOG.info(f"Add sequencing and demux data to StatusDB for run {run_directory_data.id}")
         flow_cell: IlluminaFlowCell = self.store_illumina_flow_cell(
             run_directory_data=run_directory_data
         )
@@ -145,34 +146,34 @@ class IlluminaPostProcessingService:
         sequencing_run_name: str,
         demultiplexed_runs_dir: Path,
     ) -> None:
-        """Store data for the demultiplexed flow cell and mark it as ready for delivery.
+        """Store data for an Illumina demultiplexed run and mark it as ready for delivery.
         This function:
-            - Stores the flow cell in the status database
+            - Stores the run data in the status database
             - Stores sequencing metrics in the status database
             - Updates sample read counts in the status database
-            - Stores the flow cell data in the housekeeper database
-            - Creates a delivery file in the flow cell directory
+            - Stores the run data in the Housekeeper database
+            - Creates a delivery file in the sequencing run directory
         Raises:
             FlowCellError: If the flow cell directory or the data it contains is not valid.
         """
 
-        LOG.info(f"Post-process flow cell {sequencing_run_name}")
-        flow_cell_out_directory = Path(demultiplexed_runs_dir, sequencing_run_name)
-        run_directory_data = IlluminaRunDirectoryData(flow_cell_out_directory)
+        LOG.info(f"Post-process Illumina run {sequencing_run_name}")
+        demux_run_dir = Path(demultiplexed_runs_dir, sequencing_run_name)
+        run_directory_data = IlluminaRunDirectoryData(demux_run_dir)
         sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(run_directory_data.id)
         run_directory_data.set_sample_sheet_path_hk(hk_path=sample_sheet_path)
 
-        LOG.debug("Set path for Housekeeper sample sheet in flow cell")
+        LOG.debug("Set path for Housekeeper sample sheet in run directory")
         try:
             is_flow_cell_ready_for_postprocessing(
-                flow_cell_output_directory=flow_cell_out_directory,
+                flow_cell_output_directory=demux_run_dir,
                 flow_cell=run_directory_data,
             )
         except (FlowCellError, MissingFilesError) as e:
-            LOG.warning(f"Flow cell {sequencing_run_name} will be skipped: {e}")
+            LOG.warning(f"Run {sequencing_run_name} will be skipped: {e}")
             return
         if self.dry_run:
-            LOG.info(f"Dry run will not finish flow cell {sequencing_run_name}")
+            LOG.info(f"Dry run: will not post-process Illumina run {sequencing_run_name}")
             return
         try:
             self.store_sequencing_data_in_status_db(run_directory_data)
@@ -181,6 +182,6 @@ class IlluminaPostProcessingService:
                 store=self.status_db,
             )
         except Exception as e:
-            LOG.error(f"Failed to store flow cell data: {str(e)}")
+            LOG.error(f"Failed to store Illumina run: {str(e)}")
             raise
-        create_delivery_file_in_flow_cell_directory(flow_cell_out_directory)
+        create_delivery_file_in_flow_cell_directory(demux_run_dir)
