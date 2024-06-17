@@ -120,6 +120,12 @@
   tag: nextflow-config
 - format: yml
   id: CASEID
+  path: PATHTOCASE/CASEID_params_file.yaml
+  path_index: ~
+  step: nextflow-params
+  tag: nextflow-params
+- format: yml
+  id: CASEID
   path: PATHTOCASE/CASEID_metrics_deliverables.yaml
   path_index: ~
   step: qc-metrics

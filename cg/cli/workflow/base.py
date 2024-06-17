@@ -2,6 +2,7 @@
 
 import click
 
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.balsamic.base import balsamic
 from cg.cli.workflow.balsamic.pon import balsamic_pon
 from cg.cli.workflow.balsamic.qc import balsamic_qc
@@ -19,7 +20,7 @@ from cg.cli.workflow.taxprofiler.base import taxprofiler
 from cg.cli.workflow.tomte.base import tomte
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def workflow():
     """Workflows commands"""
 
