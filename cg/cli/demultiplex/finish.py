@@ -5,8 +5,7 @@ import logging
 import click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.models.cg_config import CGConfig
 
@@ -20,8 +19,8 @@ def finish_group():
 
 @finish_group.command(name="flow-cell")
 @click.argument("flow-cell-directory-name")
-@click.option("--force", is_flag=True)
 @DRY_RUN
+@FORCE
 @click.pass_obj
 def finish_flow_cell(context: CGConfig, flow_cell_directory_name: str, force: bool, dry_run: bool):
     """Command to finish up a flow cell after demultiplexing.
