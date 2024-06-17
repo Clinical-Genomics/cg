@@ -63,14 +63,14 @@ def _get_valid_sample_fastqs(fastq_paths: list[Path], sample_internal_id: str) -
 
 
 def get_sample_fastqs_from_flow_cell(
-    flow_cell_directory: Path, sample_internal_id: str
+    demultiplexed_run_path: Path, sample_internal_id: str
 ) -> list[Path] | None:
-    """Retrieve all fastq files for a specific sample in a flow cell directory."""
+    """Retrieve all fastq files for a specific sample in a demultiplex run directory."""
 
-    # The flat output structure for NovaseqX flow cells demultiplexed with BCLConvert on hasta
+    # The flat output structure for runs demultiplexed with BCLConvert on hasta
     root_pattern = f"{sample_internal_id}_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
-    # The pattern for novaseqx flow cells demultiplexed on board of the dragen
+    # The pattern for NovaSeqX flow cells demultiplexed on board of the dragen
     demux_on_sequencer_pattern = (
         f"BCLConvert/fastq/{sample_internal_id}"
         f"_S*_L*_R*_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
@@ -81,7 +81,7 @@ def get_sample_fastqs_from_flow_cell(
         demux_on_sequencer_pattern,
     ]:
         sample_fastqs: list[Path] = get_files_matching_pattern(
-            directory=flow_cell_directory, pattern=pattern
+            directory=demultiplexed_run_path, pattern=pattern
         )
         valid_sample_fastqs: list[Path] = _get_valid_sample_fastqs(
             fastq_paths=sample_fastqs, sample_internal_id=sample_internal_id
@@ -183,11 +183,11 @@ def combine_sample_metrics_with_undetermined(
     return list(metrics.values())
 
 
-def get_undetermined_fastqs(lane: int, flow_cell_path: Path) -> list[Path]:
+def get_undetermined_fastqs(lane: int, demultiplexed_run_path: Path) -> list[Path]:
     """Get the undetermined fastq files for a specific lane on a flow cell."""
     undetermined_pattern = f"Undetermined*_L00{lane}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
     undetermined_in_root: list[Path] = get_files_matching_pattern(
-        directory=flow_cell_path,
+        directory=demultiplexed_run_path,
         pattern=undetermined_pattern,
     )
     return undetermined_in_root

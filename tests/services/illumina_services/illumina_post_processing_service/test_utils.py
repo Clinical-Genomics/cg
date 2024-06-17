@@ -5,6 +5,7 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD, Sequencers
 from cg.services.illumina_services.illumina_metrics_service.models import (
     IlluminaSampleSequencingMetricsDTO,
 )
@@ -20,6 +21,9 @@ from cg.services.illumina_services.illumina_post_processing_service.utils import
     combine_sample_metrics_with_undetermined,
     create_delivery_file_in_flow_cell_directory,
     get_lane_from_sample_fastq,
+    get_q30_threshold,
+    get_sample_fastqs_from_flow_cell,
+    get_undetermined_fastqs,
 )
 
 
@@ -115,6 +119,32 @@ def test_get_valid_sample_fastqs():
     # THEN the result should be the valid fastq file
     assert len(valid_fastqs) == 1
     assert valid_fastqs[0] == Path("Sample_123/sample_L0002.fastq.gz")
+
+
+@pytest.mark.parametrize(
+    "demux_run_path_fixture, sample_internal_id",
+    [
+        ("tmp_demultiplexed_novaseq_6000_post_1_5_kits_path", "ACC12642A7"),
+        ("novaseq_x_demux_runs_dir", "ACC13169A1"),
+    ],
+    ids=["demuxed_on_dragen", "demuxed_on_sequencer"],
+)
+def test_get_sample_fastqs_from_flow_cell(
+    demux_run_path_fixture: str, sample_internal_id: str, request: FixtureRequest
+):
+    # GIVEN a demultiplexed run path and a sample internal id
+    demux_run_path: Path = request.getfixturevalue(demux_run_path_fixture)
+
+    # WHEN getting the sample fastq files from the flow cell directory
+    sample_fastqs: list[Path] = get_sample_fastqs_from_flow_cell(
+        demultiplexed_run_path=demux_run_path, sample_internal_id=sample_internal_id
+    )
+
+    # THEN valid sample fastq files should be returned
+    assert len(sample_fastqs) == 2
+    for fastq in sample_fastqs:
+        assert fastq.name.startswith(sample_internal_id)
+        assert fastq.name.endswith(".fastq.gz")
 
 
 def test_add_flow_cell_name_to_fastq_file_path(
@@ -268,27 +298,32 @@ def test_combine_metrics_with_both_mapped_and_undetermined_metrics_same_lane(
     assert metric.base_mean_quality_score == 25
 
 
-def test_validate_demux_complete_flow_cell_directory_when_it_exists(tmp_path: Path):
-    # GIVEN a temporary directory as the flow cell directory with a demux complete file
-    flow_cell_directory: Path = tmp_path
-    Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
+def test_get_undetermined_fastqs(tmp_demultiplexed_novaseq_6000_post_1_5_kits_path: Path):
+    # GIVEN a demultiplexed run with undetermined fastq files
 
-    # WHEN the create_delivery_file_in_flow_cell_directory function is called
+    # WHEN getting the undetermined fastq files
+    undetermined_fastqs: list[Path] = get_undetermined_fastqs(
+        lane=1, demultiplexed_run_path=tmp_demultiplexed_novaseq_6000_post_1_5_kits_path
+    )
+
+    # THEN the result should be the undetermined fastq file
+    assert len(undetermined_fastqs) == 2
+    assert all(
+        undetermined_fastq.name.startswith("Undetermined")
+        for undetermined_fastq in undetermined_fastqs
+    )
+
+
+def test_create_delivery_file_in_flow_cell_directory(tmp_path: Path):
+    # GIVEN a temporary directory without a delivery file
+    flow_cell_directory: Path = tmp_path
+    assert not (flow_cell_directory / DemultiplexingDirsAndFiles.DELIVERY).exists()
+
+    # WHEN creating a delivery file inside the temporary directory
     create_delivery_file_in_flow_cell_directory(flow_cell_directory)
 
-    # THEN a delivery file should exist in the flow cell directory
-    assert (flow_cell_directory / DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
-
-
-def test_validate_demux_complete_flow_cell_directory_when_it_does_not_exist(tmp_path: Path):
-    # GIVEN a temporary directory as the flow cell directory without a demux complete file
-    flow_cell_directory: Path = tmp_path
-
-    # WHEN the create_delivery_file_in_flow_cell_directory function is called
-    create_delivery_file_in_flow_cell_directory(flow_cell_directory)
-
-    # THEN a delivery file should not exist in the flow cell directory
-    assert not (flow_cell_directory / DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
+    # THEN a delivery file should exist in the temporary directory
+    assert (flow_cell_directory / DemultiplexingDirsAndFiles.DELIVERY).exists()
 
 
 @pytest.mark.parametrize(
@@ -310,3 +345,14 @@ def test_get_lane_from_sample_fastq_file_path(sample_fastq_file_name: str, reque
 
     # THEN we should get the correct lane
     assert result_lane == expected_lane
+
+
+def test_get_q30_threshold():
+    # GIVEN a specific sequencer type
+    sequencer_type: Sequencers = Sequencers.HISEQGA
+
+    # WHEN getting the Q30 threshold for the sequencer type
+    q30_threshold: int = get_q30_threshold(sequencer_type)
+
+    # THEN the correct Q30 threshold should be returned
+    assert q30_threshold == FLOWCELL_Q30_THRESHOLD[sequencer_type]

@@ -49,7 +49,8 @@ def validate_flow_cell_has_fastq_files(flow_cell: IlluminaRunDirectoryData) -> N
     sample_ids: list[str] = flow_cell.sample_sheet.get_sample_ids()
     for sample_id in sample_ids:
         fastq_files: list[Path] | None = get_sample_fastqs_from_flow_cell(
-            flow_cell_directory=flow_cell.path, sample_internal_id=sample_id
+            demultiplexed_run_path=flow_cell.get_demultiplexed_runs_dir(),
+            sample_internal_id=sample_id,
         )
         if fastq_files:
             LOG.debug(f"Flow cell {flow_cell.id} has at least one sample with fastq files")

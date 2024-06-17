@@ -55,7 +55,7 @@ def add_sample_fastq_files_to_housekeeper(
     sample_internal_ids: list[str] = run_directory_data.sample_sheet.get_sample_ids()
     for sample_internal_id in sample_internal_ids:
         sample_fastq_paths: list[Path] | None = get_sample_fastqs_from_flow_cell(
-            flow_cell_directory=run_directory_data.get_demultiplexed_runs_dir(),
+            demultiplexed_run_path=run_directory_data.get_demultiplexed_runs_dir(),
             sample_internal_id=sample_internal_id,
         )
         if not sample_fastq_paths:
@@ -92,7 +92,7 @@ def store_undetermined_fastq_files(
 
     for lane, sample_id in non_pooled_lanes_and_samples:
         undetermined_fastqs: list[Path] = get_undetermined_fastqs(
-            lane=lane, flow_cell_path=run_directory_data.get_demultiplexed_runs_dir()
+            lane=lane, demultiplexed_run_path=run_directory_data.get_demultiplexed_runs_dir()
         )
 
         for fastq_path in undetermined_fastqs:
