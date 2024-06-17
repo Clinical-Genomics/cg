@@ -28,7 +28,13 @@ from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
+from cg.constants.constants import (
+    CaseActions,
+    CustomerId,
+    FileFormat,
+    GenomeVersion,
+    Strandedness,
+)
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -60,7 +66,19 @@ from cg.services.illumina_services.illumina_metrics_service.illumina_metrics_ser
     IlluminaMetricsService,
 )
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
-from cg.store.models import Bed, BedVersion, Case, Customer, Order, Organism, Sample
+from cg.store.models import (
+    Bed,
+    BedVersion,
+    Case,
+    Customer,
+    Order,
+    Organism,
+    Sample,
+    IlluminaSequencingRun,
+    IlluminaFlowCell,
+    Application,
+    ApplicationVersion,
+)
 from cg.store.store import Store
 from cg.utils import Process
 from tests.mocks.crunchy import MockCrunchyAPI
@@ -1302,15 +1320,56 @@ def store_with_illumina_sequencing_data(
     helpers: StoreHelpers,
     seven_canonical_flow_cells: list[IlluminaRunDirectoryData],
     seven_canonical_flow_cells_selected_sample_ids: list[list[str]],
+    seven_canonical_sequencing_runs_selected_case_ids: list[list[str]],
 ) -> Store:
     """Return a store with Illumina flow cells, sequencing runs and sample sequencing metrics."""
-    for run_dir, sample_internal_ids in zip(
-        seven_canonical_flow_cells, seven_canonical_flow_cells_selected_sample_ids
+    for run_dir, sample_internal_ids, case_ids in zip(
+        seven_canonical_flow_cells,
+        seven_canonical_flow_cells_selected_sample_ids,
+        seven_canonical_sequencing_runs_selected_case_ids,
     ):
         helpers.add_illumina_flow_cell_and_samples_with_sequencing_metrics(
-            run_directory_data=run_dir, sample_ids=sample_internal_ids, store=store
+            run_directory_data=run_dir,
+            sample_ids=sample_internal_ids,
+            case_ids=case_ids,
+            store=store,
         )
     return store
+
+
+@pytest.fixture
+def re_sequenced_sample_illumina_data_store(
+    store_with_illumina_sequencing_data: Store,
+    sample_id_sequenced_on_multiple_flow_cells: str,
+    flow_cells_with_the_same_sample: list[str],
+    case_id_for_sample_on_multiple_flow_cells: str,
+    helpers: StoreHelpers,
+) -> Store:
+    """Return a store with re-sequenced samples on illumina flow cells for Fluffy case."""
+    sequencing_run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            flow_cells_with_the_same_sample[1]
+        )
+    )
+    helpers.add_illumina_sample_sequencing_metrics_object(
+        store=store_with_illumina_sequencing_data,
+        sample_id=sample_id_sequenced_on_multiple_flow_cells,
+        sequencing_run=sequencing_run,
+        lane=1,
+    )
+    # Add application and tags to case
+    application: Application = store_with_illumina_sequencing_data.get_application_by_tag(
+        "RMLP05R800"
+    )
+    application_version: ApplicationVersion = (
+        store_with_illumina_sequencing_data.get_current_application_version_by_tag("RMLP05R800")
+    )
+    case: Case = store_with_illumina_sequencing_data.get_case_by_internal_id(
+        case_id_for_sample_on_multiple_flow_cells
+    )
+    case.links[0].sample.application_version = application_version
+    case.links[0].sample.application_version.application = application
+    return store_with_illumina_sequencing_data
 
 
 @pytest.fixture
