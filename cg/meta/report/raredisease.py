@@ -18,7 +18,6 @@ from cg.meta.report.report_api import ReportAPI
 from cg.models.analysis import NextflowAnalysis, AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
-from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.models.raredisease.raredisease import RarediseaseQCMetrics
 from cg.models.report.metadata import RarediseaseSampleMetadataModel
 from cg.models.report.report import ScoutReportFiles, CaseModel
@@ -55,8 +54,8 @@ class RarediseaseReportAPI(ReportAPI):
     def get_sample_coverage(self, sample: Sample, case: Case) -> dict:
         """Return coverage values for a specific sample."""
         genes = self.get_genes_from_scout(panels=case.panels)
-        sample_coverage = self.chanjo_api.sample_coverage(
-            sample_id=sample.internal_id, panel_genes=genes
+        sample_coverage = self.chanjo2_api.sample_coverage(  ###
+            sample_id=sample.internal_id, panel_genes=genes  ###
         )
         if sample_coverage:
             return sample_coverage

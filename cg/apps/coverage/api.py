@@ -95,9 +95,9 @@ class Chanjo2API:
 
     def __init__(self, base_url, config):
         self.base_url = base_url
-        self.chanjo_config = config["chanjo"]["config_path"]
-        self.chanjo_binary = config["chanjo"]["binary_path"]
-        self.process = Process(binary=self.chanjo_binary, config=self.chanjo_config)
+        self.chanjo2_config = config["chanjo2"]["config_path"]
+        self.chanjo2_binary = config["chanjo2"]["binary_path"]
+        self.process = Process(binary=self.chanjo2_binary, config=self.chanjo2_config)
 
     def get_coverage_statistics(
         self, coverage_file_path, intervals_bed_path, completeness_thresholds
@@ -115,31 +115,16 @@ class Chanjo2API:
 
         return ReadStream.get_content_from_stream(file_format="json", stream=response.json())
 
-    def run_local_coverage_calculation(self, sample_id, panel_genes):
-        with tempfile.NamedTemporaryFile(mode="w+t") as tmp_gene_file:
-            tmp_gene_file.write("\n".join([str(gene) for gene in panel_genes]))
-            tmp_gene_file.flush()
-            coverage_parameters = [
-                "calculate",
-                "coverage",
-                "-s",
-                sample_id,
-                "-f",
-                tmp_gene_file.name,
-            ]
-            self.process.run_command(parameters=coverage_parameters)
-
-        return ReadStream.get_content_from_stream(
-            file_format="json", stream=self.process.stdout
-        ).get(sample_id)
+    def sample_coverage(self, sample_id, panel_genes):
+        pass
 
 
 # Example usage:
 if __name__ == "__main__":
-    config = {
+    configuration = {
         "chanjo": {"config_path": "/path/to/chanjo/config", "binary_path": "/path/to/chanjo/binary"}
     }
-    api = Chanjo2API(base_url="http://localhost:8000", config=config)
+    api = Chanjo2API(base_url="http://localhost:8000", configuration=config)
     coverage_file_path = "https://d4-format-testing.s3.us-west-1.amazonaws.com/hg002.d4"
     intervals_bed_path = "<path-to-109_green.bed>"
     completeness_thresholds = [10, 20, 30]
@@ -152,9 +137,6 @@ if __name__ == "__main__":
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
 
-    # Example of running a local coverage calculation
-    sample_id = "sample1"
-    panel_genes = ["BRCA1", "BRCA2"]
     try:
         local_result = api.run_local_coverage_calculation(sample_id, panel_genes)
         print(local_result)

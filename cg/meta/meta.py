@@ -1,4 +1,5 @@
 from cg.apps.coverage import ChanjoAPI
+from cg.apps.coverage import Chanjo2API
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -24,6 +25,7 @@ class MetaAPI:
     def __init__(self, config: CGConfig):
         self.config = config
         self.chanjo_api: ChanjoAPI = config.chanjo_api
+        self.chanjo2_api: Chanjo2API = config.chanjo2_api
         self.crunchy_api: CrunchyAPI = config.crunchy_api
         self.genotype_api: GenotypeAPI = config.genotype_api
         self.hermes_api: HermesApi = config.hermes_api

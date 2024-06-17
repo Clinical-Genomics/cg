@@ -5,6 +5,7 @@ from pydantic.v1 import BaseModel, EmailStr, Field
 from typing_extensions import Literal
 
 from cg.apps.coverage import ChanjoAPI
+from cg.apps.coverage import Chanjo2API
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
@@ -347,6 +348,8 @@ class CGConfig(BaseModel):
     backup: BackupConfig = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
+    chanjo2: CommonAppConfig = None
+    chanjo2_api_: Chanjo2API = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
@@ -407,6 +410,7 @@ class CGConfig(BaseModel):
         fields = {
             "arnold_api_": "arnold_api",
             "chanjo_api_": "chanjo_api",
+            "chanjo2_api_": "chanjo2_api",
             "crunchy_api_": "crunchy_api",
             "demultiplex_api_": "demultiplex_api",
             "genotype_api_": "genotype_api",
@@ -447,7 +451,7 @@ class CGConfig(BaseModel):
         if api is None:
             LOG.debug("Instantiating chanjo2 api")
             api = Chanjo2API(config=self.dict())
-            self.chanjo_api_ = api
+            self.chanjo2_api_ = api
         return api
 
     @property
