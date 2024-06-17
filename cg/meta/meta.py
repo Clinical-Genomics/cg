@@ -38,7 +38,7 @@ class MetaAPI:
             compress_api=CompressAPI(
                 hk_api=config.housekeeper_api,
                 crunchy_api=config.crunchy_api,
-                demux_root=config.illumina_demultiplexed_runs_directory,
+                demux_root=config.run_instruments.illumina.demultiplexed_runs_dir,
                 backup_api=SpringBackupAPI(
                     encryption_api=SpringEncryptionAPI(
                         binary_path=config.dict()["encryption"]["binary_path"]

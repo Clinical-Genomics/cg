@@ -30,6 +30,12 @@ class AnalysisNotReadyError(CgError):
     """
 
 
+class AnalysisNotCompletedError(CgError):
+    """
+    Exception raised when an analysis has not completed.
+    """
+
+
 class BalsamicStartError(CgError):
     """
     Exception raised when Balsamic fails to start.

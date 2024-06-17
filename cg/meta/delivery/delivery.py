@@ -12,7 +12,7 @@ from cg.models.delivery.delivery import DeliveryFile
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
-from cg.services.quality_controller.quality_controller_service import QualityControllerService
+from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -62,7 +62,7 @@ class DeliveryAPI:
         or is external. The force parameter can be used to override checks.
         """
         is_external: bool = sample.application_version.application.is_external
-        sample_passed_sequencing_qc: bool = QualityControllerService.sample_pass_sequencing_qc(
+        sample_passed_sequencing_qc: bool = SequencingQCService.sample_pass_sequencing_qc(
             sample=sample
         )
 

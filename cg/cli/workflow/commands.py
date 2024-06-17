@@ -8,7 +8,7 @@ from dateutil.parser import parse as parse_date
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.exc import FlowCellsNeededError
 from cg.meta.rsync import RsyncAPI
@@ -25,7 +25,6 @@ from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
-
 
 OPTION_YES = click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)
@@ -91,8 +90,9 @@ def link(context: CGConfig, case_id: str, dry_run: bool):
 @click.command("store")
 @ARGUMENT_CASE_ID
 @DRY_RUN
+@FORCE
 @click.pass_obj
-def store(context: CGConfig, case_id: str, dry_run: bool):
+def store(context: CGConfig, case_id: str, dry_run: bool, force: bool):
     """Store finished analysis files in Housekeeper."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
@@ -104,7 +104,7 @@ def store(context: CGConfig, case_id: str, dry_run: bool):
         LOG.info(f"Dry run: Would have stored deliverables for {case_id}")
         return
     try:
-        analysis_api.upload_bundle_housekeeper(case_id=case_id)
+        analysis_api.upload_bundle_housekeeper(case_id=case_id, force=force)
         analysis_api.upload_bundle_statusdb(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action=None)
     except Exception as exception_object:
