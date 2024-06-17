@@ -9,7 +9,9 @@ import housekeeper.store.models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.constants.constants import DRY_RUN, FlowCellStatus
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
+from cg.constants.cli_options import DRY_RUN
+from cg.constants.constants import FlowCellStatus
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import (
     DsmcAlreadyRunningError,
@@ -33,8 +35,6 @@ from cg.models.run_devices.illumina_run_directory_data import (
 )
 from cg.store.models import Flowcell, Sample
 from cg.store.store import Store
-
-from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 
 LOG = logging.getLogger(__name__)
 

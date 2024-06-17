@@ -10,6 +10,7 @@ from housekeeper.store.models import File, Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
     balsamic_pon_past_run_dirs,
@@ -23,8 +24,8 @@ from cg.cli.workflow.commands import (
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
 )
-from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION, Workflow
+from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION
+from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
 from cg.exc import CleanFlowCellFailedError, FlowCellError
 from cg.meta.clean.api import CleanAPI

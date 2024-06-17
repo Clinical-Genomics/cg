@@ -12,7 +12,7 @@ from cg.cli.workflow.commands import (
     store_available,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
