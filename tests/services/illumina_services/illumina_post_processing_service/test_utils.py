@@ -210,50 +210,42 @@ def test_combine_metrics(
     assert existing_metric.yield_ == 200
 
 
-def test_combine_empty_metrics():
-    # GIVEN empty lists for mapped and undetermined metrics
-    mapped_metrics = []
-    undetermined_metrics = []
-
-    # WHEN combining them
-    combined_metrics = combine_sample_metrics_with_undetermined(
-        sample_metrics=mapped_metrics, undetermined_metrics=undetermined_metrics
-    )
-
-    # THEN the result should be an empty list
-    assert combined_metrics == []
-
-
-def test_combine_metrics_with_only_mapped_metrics(
-    mapped_metric: IlluminaSampleSequencingMetricsDTO,
+@pytest.mark.parametrize(
+    "mapped_metrics, undetermined_metrics, expected_result",
+    [
+        ([], [], []),
+        (["mapped_metric"], [], ["mapped_metric"]),
+        ([], ["undetermined_metric"], ["undetermined_metric"]),
+        (["mapped_metric"], ["undetermined_metric"], ["combined_metric"]),
+    ],
+    ids=["empty", "only_mapped", "only_undetermined", "both_mapped_and_undetermined"],
+)
+def test_combine_metrics(
+    mapped_metrics: list[str | None],
+    undetermined_metrics: list[str | None],
+    expected_result: list[str | None],
+    request: FixtureRequest,
 ):
-    # GIVEN one mapped metric and no undetermined
-    mapped_metrics = [mapped_metric]
-    undetermined_metrics = []
+    # GIVEN a combination of mapped and undetermined metrics
+    mapped_metrics: list[IlluminaSampleSequencingMetricsDTO | None] = [
+        request.getfixturevalue(fixture_name) for fixture_name in mapped_metrics
+    ]
+    undetermined_metrics: list[IlluminaSampleSequencingMetricsDTO | None] = [
+        request.getfixturevalue(fixture_name) for fixture_name in undetermined_metrics
+    ]
 
-    # WHEN combining them
-    combined_metrics = combine_sample_metrics_with_undetermined(
-        sample_metrics=mapped_metrics, undetermined_metrics=undetermined_metrics
+    # WHEN combining the metrics
+    combined_metrics: list[IlluminaSampleSequencingMetricsDTO | None] = (
+        combine_sample_metrics_with_undetermined(
+            sample_metrics=mapped_metrics, undetermined_metrics=undetermined_metrics
+        )
     )
 
-    # THEN the result should be the mapped metrics
-    assert combined_metrics == mapped_metrics
-
-
-def test_combine_metrics_with_only_undetermined_metrics(
-    undetermined_metric: IlluminaSampleSequencingMetricsDTO,
-):
-    # GIVEN an empty list of mapped metrics and list of undetermined metrics
-    mapped_metrics = []
-    undetermined_metrics = [undetermined_metric]
-
-    # WHEN combining them
-    combined_metrics = combine_sample_metrics_with_undetermined(
-        sample_metrics=mapped_metrics, undetermined_metrics=undetermined_metrics
-    )
-
-    # THEN the result should be the undetermined metrics
-    assert combined_metrics == undetermined_metrics
+    # THEN the combined metrics should be as expected
+    expected_metrics: list[IlluminaSampleSequencingMetricsDTO | None] = [
+        request.getfixturevalue(fixture_name) for fixture_name in expected_result
+    ]
+    assert combined_metrics == expected_metrics
 
 
 def test_combine_metrics_with_both_mapped_and_undetermined_metrics_different_lanes(
@@ -273,29 +265,6 @@ def test_combine_metrics_with_both_mapped_and_undetermined_metrics_different_lan
     # THEN two metrics should be returned
     assert len(combined_metrics) == 2
     assert combined_metrics[0].flow_cell_lane != combined_metrics[1].flow_cell_lane
-
-
-def test_combine_metrics_with_both_mapped_and_undetermined_metrics_same_lane(
-    mapped_metric: IlluminaSampleSequencingMetricsDTO,
-    undetermined_metric: IlluminaSampleSequencingMetricsDTO,
-):
-    # GIVEN a list of mapped metrics and list of undetermined metrics in the same lane for the same sample
-
-    # WHEN combining them
-    combined_metrics = combine_sample_metrics_with_undetermined(
-        sample_metrics=[mapped_metric], undetermined_metrics=[undetermined_metric]
-    )
-
-    # THEN the combined metrics should be a single metric
-    assert len(combined_metrics) == 1
-
-    # THEN the metrics should be a weighted average of the mapped and undetermined metrics
-    metric: IlluminaSampleSequencingMetricsDTO = combined_metrics[0]
-    assert metric.total_reads_in_lane == 200
-    assert metric.yield_ == 200
-    assert math.isclose(metric.yield_q30, 0.85, rel_tol=1e-9)
-    assert math.isclose(metric.base_passing_q30_percent, 0.85, rel_tol=1e-9)
-    assert metric.base_mean_quality_score == 25
 
 
 def test_get_undetermined_fastqs(tmp_demultiplexed_novaseq_6000_post_1_5_kits_path: Path):
