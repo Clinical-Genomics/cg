@@ -757,6 +757,7 @@ class StoreHelpers:
     def add_illumina_sequencing_run(
         store: Store,
         flow_cell: IlluminaFlowCell,
+        timestamp_now: datetime = datetime.now(),
         sequencer_type: Sequencers = Sequencers.NOVASEQ,
         sequencer_name: str = "dummy_sequencer",
         data_availability: FlowCellStatus = FlowCellStatus.ON_DISK,
@@ -771,20 +772,20 @@ class StoreHelpers:
             data_availability=data_availability,
             archived_at=archived_at,
             has_backup=has_backup,
-            total_reads=100,
+            total_reads=100_000_000,
             total_undetermined_reads=10,
             percent_undetermined_reads=0.1,
-            percent_q30=0.9,
+            percent_q30=90,
             mean_quality_score=35,
             total_yield=100,
-            yield_q30=None,
-            cycles=None,
-            demultiplexing_software=None,
-            demultiplexing_software_version=None,
-            sequencing_started_at=None,
-            sequencing_completed_at=None,
-            demultiplexing_started_at=None,
-            demultiplexing_completed_at=None,
+            yield_q30=50,
+            cycles=151,
+            demultiplexing_software="dragen",
+            demultiplexing_software_version="1.0.0",
+            sequencing_started_at=timestamp_now,
+            sequencing_completed_at=timestamp_now,
+            demultiplexing_started_at=timestamp_now,
+            demultiplexing_completed_at=timestamp_now,
         )
         illumina_run: IlluminaSequencingRun = store.add_illumina_sequencing_run(
             sequencing_run_dto=illumina_run_dto, flow_cell=flow_cell
@@ -1156,7 +1157,11 @@ class StoreHelpers:
 
     @classmethod
     def add_illumina_flow_cell_and_samples_with_sequencing_metrics(
-        cls, run_directory_data: IlluminaRunDirectoryData, sample_ids: list[str], store: Store
+        cls,
+        run_directory_data: IlluminaRunDirectoryData,
+        sample_ids: list[str],
+        case_ids: list[str],
+        store: Store,
     ) -> None:
         """Add an Illumina flow cell and the given samples with sequencing metrics to a store."""
         flow_cell: IlluminaFlowCell = cls.add_illumina_flow_cell(
@@ -1169,7 +1174,13 @@ class StoreHelpers:
             sequencer_type=run_directory_data.sequencer_type,
         )
         for i, sample_id in enumerate(sample_ids):
+            cls.add_case(store=store, internal_id=case_ids[i], name=case_ids[i])
             cls.add_sample(store=store, internal_id=sample_id, name=f"sample_{i}")
+            cls.relate_samples(
+                base_store=store,
+                case=store.get_case_by_internal_id(case_ids[i]),
+                samples=[store.get_sample_by_internal_id(sample_id)],
+            )
             cls.add_illumina_sample_sequencing_metrics_object(
                 store=store,
                 sample_id=sample_id,

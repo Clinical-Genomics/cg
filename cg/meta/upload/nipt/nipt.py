@@ -48,7 +48,7 @@ class NiptUploadAPI:
         LOG.info("Set dry run to %s", dry_run)
         self.dry_run = dry_run
 
-    def flowcell_passed_qc_value(self, case_id: str, q30_threshold: float) -> bool:
+    def sequencing_run_passed_qc_value(self, case_id: str, q30_threshold: float) -> bool:
         """
         Check the average Q30 and the total number of reads for each sample
         in the latest flow cell related to a case.
@@ -60,11 +60,10 @@ class NiptUploadAPI:
             average_q30_across_samples=sequencing_run.percent_q30,
             total_reads_on_flow_cell=sequencing_run.total_reads,
         )
+        threshold: int = self.status_db.get_ready_made_library_expected_reads(case_id=case_id)
         if not sequencing_run_summary.passes_q30_threshold(
             threshold=q30_threshold
-        ) or not sequencing_run_summary.passes_read_threshold(
-            threshold=self.status_db.get_ready_made_library_expected_reads(case_id=case_id)
-        ):
+        ) or not sequencing_run_summary.passes_read_threshold(threshold=threshold):
             LOG.warning(
                 f"Sequencing run {sequencing_run.device.internal_id} did not pass QC for case {case_id} with Q30: "
                 f"{sequencing_run_summary.average_q30_across_samples} and reads: {sequencing_run_summary.total_reads_on_flow_cell}."
