@@ -9,6 +9,7 @@ import click
 
 from cg.cli.set.case import set_case
 from cg.cli.set.cases import set_cases
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants import FlowCellStatus
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
@@ -42,7 +43,7 @@ NOT_CHANGEABLE_SAMPLE_ATTRIBUTES = [
 LOG = logging.getLogger(__name__)
 
 
-@click.group("set")
+@click.group("set", context_settings=CLICK_CONTEXT_SETTINGS)
 def set_cmd():
     """Update information in the database."""
     pass

@@ -6,6 +6,7 @@ import click
 
 from cg.apps.crunchy.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.meta.compress.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 
@@ -21,7 +22,7 @@ from .store import (
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_obj
 def store(context: CGConfig):
     """Command for storing files."""
@@ -32,7 +33,7 @@ def store(context: CGConfig):
     compress_api = CompressAPI(
         hk_api=housekeeper_api,
         crunchy_api=crunchy_api,
-        demux_root=context.illumina_flow_cells_directory,
+        demux_root=context.run_instruments.illumina.sequencing_runs_dir,
     )
     context.meta_apis["compress_api"] = compress_api
 

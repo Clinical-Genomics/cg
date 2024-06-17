@@ -16,7 +16,7 @@ from cg.meta.encryption.sbatch import (
     FLOW_CELL_ENCRYPT_ERROR,
 )
 from cg.meta.tar.tar import TarAPI
-from cg.models.flow_cell.flow_cell import FlowCellDirectoryData
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.slurm.sbatch import Sbatch
 from cg.utils import Process
 from cg.utils.checksum.checksum import sha512_checksum
@@ -147,7 +147,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         self,
         binary_path: str,
         encryption_dir: Path,
-        flow_cell: FlowCellDirectoryData,
+        flow_cell: IlluminaRunDirectoryData,
         pigz_binary_path: str,
         sbatch_parameter: dict[str, str | int],
         slurm_api: SlurmAPI,
@@ -155,7 +155,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         dry_run: bool = False,
     ):
         super().__init__(binary_path=binary_path, dry_run=dry_run)
-        self.flow_cell: FlowCellDirectoryData = flow_cell
+        self.flow_cell: IlluminaRunDirectoryData = flow_cell
         self.encryption_dir: Path = encryption_dir
         self.tar_api: TarAPI = tar_api
         self.pigz_binary_path: str = pigz_binary_path
@@ -250,7 +250,7 @@ class FlowCellEncryptionAPI(EncryptionAPI):
         Raises:
             FlowCellError if sequencing is not ready, encryption is pending or complete.
         """
-        if not self.flow_cell.is_flow_cell_ready():
+        if not self.flow_cell.is_sequencing_run_ready():
             raise FlowCellError(f"Flow cell: {self.flow_cell.id} is not ready")
         if self.complete_file_path.exists():
             raise FlowCellEncryptionError(

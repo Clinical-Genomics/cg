@@ -8,16 +8,16 @@ from cg.models.report.metadata import (
     MipDNASampleMetadataModel,
     RarediseaseSampleMetadataModel,
     RnafusionSampleMetadataModel,
-    TomteSampleMetadataModel,
     TaxprofilerSampleMetadataModel,
+    TomteSampleMetadataModel,
 )
 from cg.models.report.validators import (
     get_boolean_as_string,
     get_date_as_string,
     get_delivered_files_as_file_names,
-    get_gender_as_string,
     get_prep_category_as_string,
     get_report_string,
+    get_sex_as_string,
 )
 
 
@@ -100,7 +100,7 @@ class SampleModel(BaseModel):
     id: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     ticket: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     status: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    gender: Annotated[str, BeforeValidator(get_gender_as_string)] = NA_FIELD
+    gender: Annotated[str, BeforeValidator(get_sex_as_string)] = NA_FIELD
     source: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     tumour: Annotated[str, BeforeValidator(get_boolean_as_string)] = NA_FIELD
     application: ApplicationModel

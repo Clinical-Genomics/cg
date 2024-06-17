@@ -2,8 +2,8 @@ from enum import StrEnum
 
 from pydantic import BaseModel
 
-from cg.models.nf_analysis import NextflowSampleSheetEntry
 from cg.models.qc_metrics import QCMetrics
+from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 
 
 class RarediseaseQCMetrics(QCMetrics):
@@ -59,3 +59,10 @@ class RarediseaseSampleSheetHeaders(StrEnum):
     @classmethod
     def list(cls) -> list[str]:
         return list(map(lambda header: header.value, cls))
+
+
+class RarediseaseParameters(WorkflowParameters):
+    """Model for Raredisease parameters."""
+
+    target_bed: str
+    analysis_type: str

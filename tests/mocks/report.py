@@ -84,22 +84,20 @@ class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
     def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
         super().__init__(config, analysis_api)
 
-    def create_delivery_report(
-        self, case_id: str, analysis_date: datetime, force_report: bool
-    ) -> None:
+    def create_delivery_report(self, case_id: str, analysis_date: datetime, force: bool) -> None:
         """Mocked create_delivery_report method."""
         LOG.info(
             f"create_delivery_report called with the following args: case={case_id}, analysis_date={analysis_date}, "
-            f"force_report={force_report}",
+            f"force={force}",
         )
 
     def create_delivery_report_file(
-        self, case_id: str, directory: Path, analysis_date: datetime, force_report: bool
+        self, case_id: str, directory: Path, analysis_date: datetime, force: bool
     ) -> Path:
         """Return mocked delivery report file path."""
         LOG.info(
             f"create_delivery_report_file called with the following args: case={case_id}, directory={directory}, "
-            f"analysis_date={analysis_date}, force_report={force_report}"
+            f"analysis_date={analysis_date}, force={force}"
         )
         return directory
 

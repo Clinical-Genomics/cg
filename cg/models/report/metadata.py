@@ -1,12 +1,13 @@
 from pydantic import BaseModel, BeforeValidator, field_validator
 from typing_extensions import Annotated
 
-from cg.constants import NA_FIELD, RIN_MIN_THRESHOLD, RIN_MAX_THRESHOLD
+from cg.constants import NA_FIELD, RIN_MAX_THRESHOLD, RIN_MIN_THRESHOLD
 from cg.models.report.validators import (
     get_float_as_percentage,
-    get_gender_as_string,
-    get_report_string,
+    get_initial_qc_as_string,
     get_number_as_string,
+    get_report_string,
+    get_sex_as_string,
 )
 
 
@@ -15,12 +16,14 @@ class SampleMetadataModel(BaseModel):
     Metrics and trending data model associated to a specific sample.
 
     Attributes:
-        million_read_pairs: number of million read pairs obtained; source: StatusDB/sample/reads (/2*10^6)
         duplicates: fraction of mapped sequence that is marked as duplicate; source: workflow
+        million_read_pairs: number of million read pairs obtained; source: StatusDB/sample/reads (/2*10^6)
+        initial_qc: initial QC protocol flag; source: LIMS
     """
 
-    million_read_pairs: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     duplicates: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    million_read_pairs: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    initial_qc: Annotated[str, BeforeValidator(get_initial_qc_as_string)] = NA_FIELD
 
 
 class MipDNASampleMetadataModel(SampleMetadataModel):
@@ -35,7 +38,7 @@ class MipDNASampleMetadataModel(SampleMetadataModel):
     """
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    gender: Annotated[str, BeforeValidator(get_gender_as_string)] = NA_FIELD
+    gender: Annotated[str, BeforeValidator(get_sex_as_string)] = NA_FIELD
     mapped_reads: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     mean_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_10x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
@@ -104,6 +107,7 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
 
     Attributes:
         bias_5_3: bias is the ratio between read counts; source: workflow
+        dv200: percentage of RNA fragments > 200 nucleotides; source: LIMS
         input_amount: input amount in ng; source: LIMS
         mrna_bases:  proportion of bases that originate from messenger RNA; source: workflow
         pct_adapter: proportion of reads that contain adapter sequences; source: workflow
@@ -116,6 +120,7 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
     """
 
     bias_5_3: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    dv200: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     input_amount: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     mrna_bases: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_adapter: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
