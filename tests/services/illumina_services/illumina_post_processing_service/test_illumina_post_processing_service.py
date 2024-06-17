@@ -20,7 +20,7 @@ def test_store_illumina_flow_cell(
 
     # WHEN storing an Illumina flow cell in the status db
     flow_cell: IlluminaFlowCell = illumina_post_postprocessing_service.store_illumina_flow_cell(
-        flow_cell_dir_data=novaseq_x_demux_runs_flow_cell
+        run_directory_data=novaseq_x_demux_runs_flow_cell
     )
 
     # THEN assert that the flow cell is created
@@ -45,7 +45,7 @@ def test_store_illumina_sequencing_run(
     # WHEN storing an Illumina sequencing run in the status db
     sequencing_run: IlluminaSequencingRun = (
         illumina_post_postprocessing_service.store_illumina_sequencing_run(
-            flow_cell_dir_data=novaseq_x_demux_runs_flow_cell, flow_cell=illumina_flow_cell
+            run_directory_data=novaseq_x_demux_runs_flow_cell, flow_cell=illumina_flow_cell
         )
     )
 
@@ -70,13 +70,13 @@ def test_store_illumina_sample_sequencing_metrics(
     )
     sequencing_run: IlluminaSequencingRun = (
         illumina_post_postprocessing_service.store_illumina_sequencing_run(
-            flow_cell_dir_data=novaseq_x_demux_runs_flow_cell, flow_cell=flow_cell
+            run_directory_data=novaseq_x_demux_runs_flow_cell, flow_cell=flow_cell
         )
     )
 
     # WHEN storing the Illumina sample sequencing metrics in the status db
     illumina_post_postprocessing_service.store_illumina_sample_sequencing_metrics(
-        flow_cell_dir_data=novaseq_x_demux_runs_flow_cell,
+        run_directory_data=novaseq_x_demux_runs_flow_cell,
         sequencing_run=sequencing_run,
     )
 
@@ -91,8 +91,8 @@ def test_store_illumina_flow_cell_data(
     # GIVEN a flow cell directory data and an Illumina post processing service
 
     # WHEN storing the flow cell data
-    illumina_post_postprocessing_service.store_illumina_flow_cell_data(
-        flow_cell_dir_data=novaseq_x_demux_runs_flow_cell
+    illumina_post_postprocessing_service.store_sequencing_data_in_status_db(
+        run_directory_data=novaseq_x_demux_runs_flow_cell
     )
 
     # THEN assert there is an IlluminaFlowCell in status db
