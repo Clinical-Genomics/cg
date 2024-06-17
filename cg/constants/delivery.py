@@ -78,6 +78,7 @@ BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS.extend(BALSAMIC_ANALYSIS_SAMPLE_TAGS)
 
 MIP_DNA_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"delivery-report"},
+    {"multiqc-html"},
     {"vcf-clinical-sv-bin"},
     {"vcf-clinical-sv-bin-index"},
     {"vcf-research-sv-bin"},

@@ -1,8 +1,6 @@
 """Constants for cg."""
 
-from enum import IntEnum, StrEnum, auto
-
-import click
+from enum import Enum, IntEnum, StrEnum, auto
 
 from cg.utils.date import get_date
 
@@ -57,7 +55,7 @@ class ControlOptions(StrEnum):
     EMPTY: str = ""
 
 
-DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
+DEFAULT_CAPTURE_KIT = "twistexomecomprehensive_10.2_hg19_design.bed"
 
 
 class CustomerId(StrEnum):
@@ -233,23 +231,6 @@ class APIMethods(StrEnum):
     PATCH: str = "PATCH"
 
 
-DRY_RUN = click.option(
-    "-d",
-    "--dry-run",
-    is_flag=True,
-    default=False,
-    help="Runs the command without making any changes",
-)
-
-SKIP_CONFIRMATION = click.option(
-    "-y",
-    "--yes",
-    is_flag=True,
-    default=False,
-    help="Skip confirmation",
-)
-
-
 class MicrosaltQC:
     AVERAGE_COVERAGE_THRESHOLD: int = 10
     MWX_THRESHOLD_SAMPLES_PASSING: float = 0.9
@@ -307,3 +288,9 @@ class MultiQC(StrEnum):
 
 
 NG_UL_SUFFIX: str = " ng/uL"
+
+
+class SequencingQCStatus(Enum):
+    FAILED = auto()
+    PASSED = auto()
+    PENDING = auto()

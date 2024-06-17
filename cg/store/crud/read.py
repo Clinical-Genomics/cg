@@ -50,6 +50,18 @@ from cg.store.filters.status_flow_cell_filters import (
     FlowCellFilter,
     apply_flow_cell_filter,
 )
+from cg.store.filters.status_illumina_flow_cell_filters import (
+    IlluminaFlowCellFilter,
+    apply_illumina_flow_cell_filters,
+)
+from cg.store.filters.status_illumina_metrics_filters import (
+    IlluminaMetricsFilter,
+    apply_illumina_metrics_filter,
+)
+from cg.store.filters.status_illumina_sequencing_run_filters import (
+    IlluminaSequencingRunFilter,
+    apply_illumina_sequencing_run_filter,
+)
 from cg.store.filters.status_invoice_filters import InvoiceFilter, apply_invoice_filter
 from cg.store.filters.status_metrics_filters import (
     SequencingMetricsFilter,
@@ -76,6 +88,9 @@ from cg.store.models import (
     Collaboration,
     Customer,
     Flowcell,
+    IlluminaFlowCell,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
     Invoice,
     Order,
     Organism,
@@ -450,6 +465,37 @@ class ReadHandler(BaseHandler):
             filter_functions=[SequencingMetricsFilter.BY_FLOW_CELL_NAME],
             flow_cell_name=flow_cell_name,
         ).all()
+
+    def get_illumina_metrics_entry_by_device_sample_and_lane(
+        self, device_internal_id: str, sample_internal_id: str, lane: int
+    ) -> IlluminaSampleSequencingMetrics:
+        """Get metrics entry by sequencing device internal id, sample internal id and lane."""
+        filtered_metrics: Query = apply_illumina_metrics_filter(
+            metrics=self._get_joined_illumina_sample_tables(),
+            filter_functions=[IlluminaMetricsFilter.BY_LANE],
+            lane=lane,
+        )
+        filtered_flow_cells: Query = apply_illumina_flow_cell_filters(
+            flow_cells=filtered_metrics,
+            filter_functions=[IlluminaFlowCellFilter.BY_INTERNAL_ID],
+            internal_id=device_internal_id,
+        )
+        filtered_samples: Query = apply_sample_filter(
+            samples=filtered_flow_cells,
+            filter_functions=[SampleFilter.BY_INTERNAL_ID],
+            internal_id=sample_internal_id,
+        )
+        return filtered_samples.first()
+
+    def get_illumina_sequencing_run_by_device_internal_id(
+        self, device_internal_id: str
+    ) -> IlluminaSequencingRun:
+        """Get Illumina sequencing run entry by device internal id."""
+        return apply_illumina_sequencing_run_filter(
+            runs=self._get_query(table=IlluminaSequencingRun),
+            filter_functions=[IlluminaSequencingRunFilter.BY_DEVICE_INTERNAL_ID],
+            device_internal_id=device_internal_id,
+        ).first()
 
     def get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
         self, flow_cell_name: str, sample_internal_id: str, lane: int
@@ -1430,41 +1476,55 @@ class ReadHandler(BaseHandler):
         )
         return orders.first()
 
-    def get_case_not_received_count(self, order_id: int) -> int:
+    def get_case_not_received_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
         filters: list[CaseSampleFilter] = [
             CaseSampleFilter.BY_ORDER,
             CaseSampleFilter.CASES_WITH_SAMPLES_NOT_RECEIVED,
+            CaseSampleFilter.EXCLUDE_CASES,
         ]
         case_samples: Query = self._join_sample_and_case()
         return apply_case_sample_filter(
             case_samples=case_samples,
             filter_functions=filters,
             order_id=order_id,
+            cases_to_exclude=cases_to_exclude,
         ).count()
 
-    def get_case_in_preparation_count(self, order_id: int) -> int:
+    def get_case_in_preparation_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
         filters: list[CaseFilter] = [
             CaseSampleFilter.BY_ORDER,
             CaseSampleFilter.CASES_WITH_ALL_SAMPLES_RECEIVED,
             CaseSampleFilter.CASES_WITH_SAMPLES_NOT_PREPARED,
+            CaseSampleFilter.EXCLUDE_CASES,
         ]
         case_samples: Query = self._join_sample_and_case()
         return apply_case_sample_filter(
             case_samples=case_samples,
             filter_functions=filters,
             order_id=order_id,
+            cases_to_exclude=cases_to_exclude,
         ).count()
 
-    def get_case_in_sequencing_count(self, order_id: int) -> int:
+    def get_case_in_sequencing_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
         filters: list[CaseSampleFilter] = [
             CaseSampleFilter.BY_ORDER,
             CaseSampleFilter.CASES_WITH_ALL_SAMPLES_RECEIVED,
             CaseSampleFilter.CASES_WITH_ALL_SAMPLES_PREPARED,
             CaseSampleFilter.CASES_WITH_SAMPLES_NOT_SEQUENCED,
+            CaseSampleFilter.EXCLUDE_CASES,
         ]
         case_samples: Query = self._join_sample_and_case()
         return apply_case_sample_filter(
             case_samples=case_samples,
             filter_functions=filters,
             order_id=order_id,
+            cases_to_exclude=cases_to_exclude,
         ).count()
+
+    def get_illumina_flow_cell_by_internal_id(self, internal_id: str) -> IlluminaFlowCell:
+        """Return a flow cell by internal id."""
+        return apply_illumina_flow_cell_filters(
+            filter_functions=[IlluminaFlowCellFilter.BY_INTERNAL_ID],
+            flow_cells=self._get_query(table=IlluminaFlowCell),
+            internal_id=internal_id,
+        ).first()
