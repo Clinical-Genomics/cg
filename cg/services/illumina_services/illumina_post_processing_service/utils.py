@@ -21,11 +21,6 @@ def _is_sample_id_in_directory_name(directory: Path, sample_internal_id: str) ->
     return f"{sample_pattern}_" in directory.name or sample_pattern == directory.name
 
 
-def _is_sample_id_in_file_name(sample_fastq: Path, sample_internal_id: str) -> bool:
-    """Validate that file name contains the sample id formatted as <sample_id>_."""
-    return f"{sample_internal_id}_" in sample_fastq.name
-
-
 def _is_file_path_compressed_fastq(file_path: Path) -> bool:
     return file_path.name.endswith(f"{FileExtensions.FASTQ}{FileExtensions.GZIP}")
 
@@ -44,17 +39,17 @@ def _is_valid_sample_fastq_file(sample_fastq: Path, sample_internal_id: str) -> 
     2. The sample fastq file name contains the lane number formatted as _L<lane_number>
     3. The sample internal id is present in the parent directory name or in the file name.
     """
-    sample_id_in_directory: bool = _is_sample_id_in_directory_name(
+    is_sample_id_in_directory: bool = _is_sample_id_in_directory_name(
         directory=sample_fastq.parent, sample_internal_id=sample_internal_id
     )
-    sample_id_in_file_name: bool = _is_sample_id_in_file_name(
-        sample_fastq=sample_fastq, sample_internal_id=sample_internal_id
+    is_sample_id_in_file_name: bool = is_pattern_in_file_path_name(
+        file_path=sample_fastq, pattern=sample_internal_id
     )
 
     return (
         _is_file_path_compressed_fastq(sample_fastq)
         and _is_lane_in_fastq_file_name(sample_fastq)
-        and (sample_id_in_directory or sample_id_in_file_name)
+        and (is_sample_id_in_directory or is_sample_id_in_file_name)
     )
 
 
@@ -65,32 +60,6 @@ def _get_valid_sample_fastqs(fastq_paths: list[Path], sample_internal_id: str) -
         for fastq in fastq_paths
         if _is_valid_sample_fastq_file(sample_fastq=fastq, sample_internal_id=sample_internal_id)
     ]
-
-
-def _add_flow_cell_name_to_fastq_file_path(fastq_file_path: Path, flow_cell_name: str) -> Path:
-    """Add the flow cell name to the fastq file path if missing."""
-    if is_pattern_in_file_path_name(file_path=fastq_file_path, pattern=flow_cell_name):
-        LOG.debug(
-            f"Flow cell name {flow_cell_name} already in {fastq_file_path}. Skipping renaming."
-        )
-        return fastq_file_path
-    LOG.debug(f"Adding flow cell name {flow_cell_name} to {fastq_file_path}.")
-    return Path(fastq_file_path.parent, f"{flow_cell_name}_{fastq_file_path.name}")
-
-
-def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
-    """
-    Extract the lane number from the sample fastq path.
-    Pre-condition:
-        - The fastq file name contains the lane number formatted as _L<lane_number>
-    """
-    pattern = r"_L(\d+)"
-    lane_match = re.search(pattern, sample_fastq_path.name)
-
-    if lane_match:
-        return int(lane_match.group(1))
-
-    raise ValueError(f"Could not extract lane number from fastq file name {sample_fastq_path.name}")
 
 
 def get_sample_fastqs_from_flow_cell(
@@ -122,32 +91,68 @@ def get_sample_fastqs_from_flow_cell(
             return valid_sample_fastqs
 
 
-def get_q30_threshold(sequencer_type: Sequencers) -> int:
-    return FLOWCELL_Q30_THRESHOLD[sequencer_type]
+def _add_flow_cell_name_to_fastq_file_path(fastq_file_path: Path, flow_cell_id: str) -> Path:
+    """Add the flow cell name to the fastq file path if missing."""
+    if is_pattern_in_file_path_name(file_path=fastq_file_path, pattern=flow_cell_id):
+        LOG.debug(f"Flow cell id {flow_cell_id} already in {fastq_file_path}. Skipping renaming.")
+        return fastq_file_path
+    LOG.debug(f"Adding flow cell id {flow_cell_id} to {fastq_file_path}.")
+    return Path(fastq_file_path.parent, f"{flow_cell_id}_{fastq_file_path.name}")
 
 
 def rename_fastq_file_if_needed(fastq_file_path: Path, flow_cell_name: str) -> Path:
     """Rename the given fastq file path if the renamed fastq file path does not exist."""
     renamed_fastq_file_path: Path = _add_flow_cell_name_to_fastq_file_path(
-        fastq_file_path=fastq_file_path, flow_cell_name=flow_cell_name
+        fastq_file_path=fastq_file_path, flow_cell_id=flow_cell_name
     )
     if fastq_file_path != renamed_fastq_file_path:
         rename_file(file_path=fastq_file_path, renamed_file_path=renamed_fastq_file_path)
     return renamed_fastq_file_path
 
 
-def get_undetermined_fastqs(lane: int, flow_cell_path: Path) -> list[Path]:
-    """Get the undetermined fastq files for a specific lane on a flow cell."""
-    undetermined_pattern = f"Undetermined*_L00{lane}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-    undetermined_in_root: list[Path] = get_files_matching_pattern(
-        directory=flow_cell_path,
-        pattern=undetermined_pattern,
+def _get_weighted_average(
+    total_1: int, percentage_1: float, total_2: int, percentage_2: float
+) -> float:
+    """Calculate the weighted average of two percentages."""
+    if total_1 == 0 and total_2 == 0:
+        return 0
+    return (total_1 * percentage_1 + total_2 * percentage_2) / (total_1 + total_2)
+
+
+def _combine_metrics(
+    existing_metric: IlluminaSampleSequencingMetricsDTO,
+    new_metric: IlluminaSampleSequencingMetricsDTO,
+) -> IlluminaSampleSequencingMetricsDTO:
+    """Update an existing metric with data from a new metric."""
+
+    combined_q30_percentage: float = _get_weighted_average(
+        total_1=existing_metric.total_reads_in_lane,
+        percentage_1=existing_metric.base_passing_q30_percent,
+        total_2=new_metric.total_reads_in_lane,
+        percentage_2=new_metric.base_passing_q30_percent,
     )
-    return undetermined_in_root
+    combined_mean_quality_score: float = _get_weighted_average(
+        total_1=existing_metric.total_reads_in_lane,
+        percentage_1=existing_metric.base_mean_quality_score,
+        total_2=new_metric.total_reads_in_lane,
+        percentage_2=new_metric.base_mean_quality_score,
+    )
+    combined_yield_q30_percentage: float = _get_weighted_average(
+        total_1=existing_metric.yield_,
+        percentage_1=existing_metric.yield_q30,
+        total_2=new_metric.yield_,
+        percentage_2=new_metric.yield_q30,
+    )
+    combined_reads: int = existing_metric.total_reads_in_lane + new_metric.total_reads_in_lane
+    combined_yield: int = existing_metric.yield_ + new_metric.yield_
 
+    existing_metric.base_passing_q30_percent = combined_q30_percentage
+    existing_metric.base_mean_quality_score = combined_mean_quality_score
+    existing_metric.total_reads_in_lane = combined_reads
+    existing_metric.yield_ = combined_yield
+    existing_metric.yield_q30 = combined_yield_q30_percentage
 
-def create_delivery_file_in_flow_cell_directory(flow_cell_directory: Path) -> None:
-    Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).touch()
+    return existing_metric
 
 
 def combine_sample_metrics_with_undetermined(
@@ -169,7 +174,7 @@ def combine_sample_metrics_with_undetermined(
         existing_metric: IlluminaSampleSequencingMetricsDTO = metrics.get(key)
 
         if existing_metric:
-            combined_metric: IlluminaSampleSequencingMetricsDTO = combine_metrics(
+            combined_metric: IlluminaSampleSequencingMetricsDTO = _combine_metrics(
                 existing_metric=existing_metric, new_metric=undetermined_metric
             )
             metrics[key] = combined_metric
@@ -178,44 +183,34 @@ def combine_sample_metrics_with_undetermined(
     return list(metrics.values())
 
 
-def combine_metrics(
-    existing_metric: IlluminaSampleSequencingMetricsDTO,
-    new_metric: IlluminaSampleSequencingMetricsDTO,
-) -> IlluminaSampleSequencingMetricsDTO:
-    """Update an existing metric with data from a new metric."""
-
-    combined_q30_percentage: float = weighted_average(
-        total_1=existing_metric.total_reads_in_lane,
-        percentage_1=existing_metric.base_passing_q30_percent,
-        total_2=new_metric.total_reads_in_lane,
-        percentage_2=new_metric.base_passing_q30_percent,
+def get_undetermined_fastqs(lane: int, flow_cell_path: Path) -> list[Path]:
+    """Get the undetermined fastq files for a specific lane on a flow cell."""
+    undetermined_pattern = f"Undetermined*_L00{lane}_*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    undetermined_in_root: list[Path] = get_files_matching_pattern(
+        directory=flow_cell_path,
+        pattern=undetermined_pattern,
     )
-    combined_mean_quality_score: float = weighted_average(
-        total_1=existing_metric.total_reads_in_lane,
-        percentage_1=existing_metric.base_mean_quality_score,
-        total_2=new_metric.total_reads_in_lane,
-        percentage_2=new_metric.base_mean_quality_score,
-    )
-    combined_yield_q30_percentage: float = weighted_average(
-        total_1=existing_metric.yield_,
-        percentage_1=existing_metric.yield_q30,
-        total_2=new_metric.yield_,
-        percentage_2=new_metric.yield_q30,
-    )
-    combined_reads: int = existing_metric.total_reads_in_lane + new_metric.total_reads_in_lane
-    combined_yield: int = existing_metric.yield_ + new_metric.yield_
-
-    existing_metric.base_passing_q30_percent = combined_q30_percentage
-    existing_metric.base_mean_quality_score = combined_mean_quality_score
-    existing_metric.total_reads_in_lane = combined_reads
-    existing_metric.yield_ = combined_yield
-    existing_metric.yield_q30 = combined_yield_q30_percentage
-
-    return existing_metric
+    return undetermined_in_root
 
 
-def weighted_average(total_1: int, percentage_1: float, total_2: int, percentage_2: float) -> float:
-    """Calculate the weighted average of two percentages."""
-    if total_1 == 0 and total_2 == 0:
-        return 0
-    return (total_1 * percentage_1 + total_2 * percentage_2) / (total_1 + total_2)
+def create_delivery_file_in_flow_cell_directory(flow_cell_directory: Path) -> None:
+    Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).touch()
+
+
+def get_lane_from_sample_fastq(sample_fastq_path: Path) -> int:
+    """
+    Extract the lane number from the sample fastq path.
+    Pre-condition:
+        - The fastq file name contains the lane number formatted as _L<lane_number>
+    """
+    pattern = r"_L(\d+)"
+    lane_match = re.search(pattern, sample_fastq_path.name)
+
+    if lane_match:
+        return int(lane_match.group(1))
+
+    raise ValueError(f"Could not extract lane number from fastq file name {sample_fastq_path.name}")
+
+
+def get_q30_threshold(sequencer_type: Sequencers) -> int:
+    return FLOWCELL_Q30_THRESHOLD[sequencer_type]
