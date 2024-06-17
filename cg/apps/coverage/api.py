@@ -1,6 +1,7 @@
 """Chanjo API"""
 
 import logging
+import requests
 import tempfile
 
 from cg.constants.constants import FileFormat
@@ -89,5 +90,73 @@ class ChanjoAPI:
         ).get(sample_id)
 
 
-class ChanjoAPI:
+class Chanjo2API:
     """Interface to Chanjo2, the coverage analysis tool"""
+
+    def __init__(self, base_url, config):
+        self.base_url = base_url
+        self.chanjo_config = config["chanjo"]["config_path"]
+        self.chanjo_binary = config["chanjo"]["binary_path"]
+        self.process = Process(binary=self.chanjo_binary, config=self.chanjo_config)
+
+    def get_coverage_statistics(
+        self, coverage_file_path, intervals_bed_path, completeness_thresholds
+    ):
+        endpoint = f"{self.base_url}/coverage/d4/interval_file/"
+        headers = {"accept": "application/json", "Content-Type": "application/json"}
+        payload = {
+            "coverage_file_path": coverage_file_path,
+            "intervals_bed_path": intervals_bed_path,
+            "completeness_thresholds": completeness_thresholds,
+        }
+
+        response = requests.post(endpoint, headers=headers, json=payload)
+        response.raise_for_status()
+
+        return ReadStream.get_content_from_stream(file_format="json", stream=response.json())
+
+    def run_local_coverage_calculation(self, sample_id, panel_genes):
+        with tempfile.NamedTemporaryFile(mode="w+t") as tmp_gene_file:
+            tmp_gene_file.write("\n".join([str(gene) for gene in panel_genes]))
+            tmp_gene_file.flush()
+            coverage_parameters = [
+                "calculate",
+                "coverage",
+                "-s",
+                sample_id,
+                "-f",
+                tmp_gene_file.name,
+            ]
+            self.process.run_command(parameters=coverage_parameters)
+
+        return ReadStream.get_content_from_stream(
+            file_format="json", stream=self.process.stdout
+        ).get(sample_id)
+
+
+# Example usage:
+if __name__ == "__main__":
+    config = {
+        "chanjo": {"config_path": "/path/to/chanjo/config", "binary_path": "/path/to/chanjo/binary"}
+    }
+    api = Chanjo2API(base_url="http://localhost:8000", config=config)
+    coverage_file_path = "https://d4-format-testing.s3.us-west-1.amazonaws.com/hg002.d4"
+    intervals_bed_path = "<path-to-109_green.bed>"
+    completeness_thresholds = [10, 20, 30]
+
+    try:
+        result = api.get_coverage_statistics(
+            coverage_file_path, intervals_bed_path, completeness_thresholds
+        )
+        print(result)
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+
+    # Example of running a local coverage calculation
+    sample_id = "sample1"
+    panel_genes = ["BRCA1", "BRCA2"]
+    try:
+        local_result = api.run_local_coverage_calculation(sample_id, panel_genes)
+        print(local_result)
+    except Exception as e:
+        print(f"An error occurred with local calculation: {e}")
