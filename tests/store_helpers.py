@@ -839,7 +839,7 @@ class StoreHelpers:
             type=DeviceType.ILLUMINA,
             flow_cell_lane=lane,
             total_reads_in_lane=100,
-            base_passing_q30_percent=0.9,
+            base_passing_q30_percent=90,
             base_mean_quality_score=35,
             yield_=100,
             yield_q30=0.9,
