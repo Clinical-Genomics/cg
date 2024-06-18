@@ -1366,6 +1366,7 @@ def re_sequenced_sample_illumina_data_store(
     case: Case = store_with_illumina_sequencing_data.get_case_by_internal_id(
         case_id_for_sample_on_multiple_flow_cells
     )
+    case.data_analysis = Workflow.FLUFFY
     case.links[0].sample.application_version = application_version
     case.links[0].sample.application_version.application = application
     return store_with_illumina_sequencing_data

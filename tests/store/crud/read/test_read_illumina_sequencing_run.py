@@ -2,11 +2,15 @@
 
 from datetime import datetime
 
-from cg.store.models import IlluminaSequencingRun
+import pytest
+
+from cg.constants import Workflow
+from cg.exc import CgError
+from cg.store.models import IlluminaSequencingRun, Case
 from cg.store.store import Store
 
 
-def test_get_latest_illumina_sequencing_run_for_case(
+def test_get_latest_illumina_sequencing_run_for_nipt_case(
     re_sequenced_sample_illumina_data_store: Store,
     case_id_for_sample_on_multiple_flow_cells: str,
     flow_cells_with_the_same_sample: list[str],
@@ -37,3 +41,24 @@ def test_get_latest_illumina_sequencing_run_for_case(
 
     # THEN the latest sequencing run is returned
     assert latest_sequencing_run.device.internal_id == second_run.device.internal_id
+
+
+def test_get_latest_illumina_sequencing_run_for_nipt_case_fail(
+    re_sequenced_sample_illumina_data_store: Store,
+    case_id_for_sample_on_multiple_flow_cells: str,
+    flow_cells_with_the_same_sample: list[str],
+    timestamp_yesterday: datetime,
+):
+    # GIVEN a store with a sample that has been sequenced twice but is not a NIPT case
+    case: Case = re_sequenced_sample_illumina_data_store.get_case_by_internal_id(
+        case_id_for_sample_on_multiple_flow_cells
+    )
+    case.data_analysis = Workflow.MIP_DNA
+
+    # WHEN fetching the latest sequencing run for the sample
+
+    # THEN an error is raised
+    with pytest.raises(CgError):
+        re_sequenced_sample_illumina_data_store.get_latest_illumina_sequencing_run_for_nipt_case(
+            case_id_for_sample_on_multiple_flow_cells
+        )
