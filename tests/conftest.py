@@ -28,6 +28,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
+
 from cg.constants.constants import (
     CaseActions,
     CustomerId,
@@ -36,6 +37,7 @@ from cg.constants.constants import (
     Strandedness,
     PrepCategory,
 )
+
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -100,6 +102,7 @@ deliverables_yaml = "_deliverables.yaml"
 pytest_plugins = [
     "tests.fixture_plugins.timestamp_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.flow_cell_fixtures",
+    "tests.fixture_plugins.demultiplex_fixtures.metrics_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.name_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.path_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
@@ -442,10 +445,24 @@ def updated_demultiplex_context(
     cg_context: CGConfig,
     updated_store_with_demultiplexed_samples: Store,
 ) -> CGConfig:
-    """Return cg context with a demultiplex context."""
+    """Return CG context with populated with the seven canonical flow cells."""
     cg_context.demultiplex_api_ = demultiplexing_api
     cg_context.housekeeper_api_ = real_housekeeper_api
     cg_context.status_db_ = updated_store_with_demultiplexed_samples
+    return cg_context
+
+
+@pytest.fixture
+def new_demultiplex_context(
+    demultiplexing_api: DemultiplexingAPI,
+    real_housekeeper_api: HousekeeperAPI,
+    cg_context: CGConfig,
+    store_with_illumina_sequencing_data: Store,
+) -> CGConfig:
+    """Return a CG context with populated with data using the Illumina models."""
+    cg_context.demultiplex_api_ = demultiplexing_api
+    cg_context.housekeeper_api_ = real_housekeeper_api
+    cg_context.status_db_ = store_with_illumina_sequencing_data
     return cg_context
 
 
