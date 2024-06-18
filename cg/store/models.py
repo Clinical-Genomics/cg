@@ -795,7 +795,7 @@ class Sample(Base, PriorityMixin):
     )
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="samples")
 
-    _new_run_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(
+    _sample_run_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(
         back_populates="sample", cascade="all, delete"
     )
 
@@ -859,7 +859,12 @@ class Sample(Base, PriorityMixin):
     @property
     def _run_devices(self) -> list["RunDevice"]:
         """Return the run_devices a sample has been sequenced on."""
-        return list({metric.run_metrics.device for metric in self._new_run_metrics})
+        return list({metric.run_metrics.device for metric in self._sample_run_metrics})
+
+    @property
+    def sample_run_metrics(self) -> list["SampleRunMetrics"]:
+        """Return the sample run metrics for the sample."""
+        return self._sample_run_metrics
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
@@ -1112,7 +1117,7 @@ class SampleRunMetrics(Base):
     type: Mapped[DeviceType]
 
     instrument_run: Mapped[InstrumentRun] = orm.relationship(back_populates="sample_metrics")
-    sample: Mapped[Sample] = orm.relationship(back_populates="_new_run_metrics")
+    sample: Mapped[Sample] = orm.relationship(back_populates="_sample_run_metrics")
 
     __mapper_args__ = {
         "polymorphic_on": "type",
