@@ -19,7 +19,6 @@ class IlluminaMetricsFilter(Enum):
 def apply_illumina_metrics_filter(
     metrics: Query,
     filter_functions: list[callable],
-    sample_id: int | None = None,
     lane: int | None = None,
 ) -> Query:
     for filter_function in filter_functions:
