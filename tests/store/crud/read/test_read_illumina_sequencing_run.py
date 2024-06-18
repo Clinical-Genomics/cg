@@ -29,7 +29,7 @@ def test_get_latest_illumina_sequencing_run_for_case(
     assert first_run.sequencing_completed_at < second_run.sequencing_completed_at
 
     # WHEN fetching the latest sequencing run for the sample
-    latest_sequencing_run = (
+    latest_sequencing_run: IlluminaSequencingRun = (
         re_sequenced_sample_illumina_data_store.get_latest_illumina_sequencing_run_for_case(
             case_id_for_sample_on_multiple_flow_cells
         )
