@@ -2,10 +2,10 @@ from pydantic_settings import BaseSettings
 
 
 class APIConfig(BaseSettings):
-    gunicorn_workers: int
-    gunicorn_threads: int
+    gunicorn_workers: int = 4
+    gunicorn_threads: int = 4
     gunicorn_bind: str
-    gunicorn_timeout: int
+    gunicorn_timeout: int = 400
     cg_sql_database_uri: str
     cg_secret_key: str
     lims_host: str
@@ -17,7 +17,7 @@ class APIConfig(BaseSettings):
     email_uri: str
     google_oauth_client_id: str
     google_oauth_client_secret: str
-    cg_enable_admin: bool
+    cg_enable_admin: bool = False
     trailblazer_host: str
     trailblazer_service_account: str
     trailblazer_service_account_auth_file: str

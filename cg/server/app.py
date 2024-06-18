@@ -45,7 +45,7 @@ def create_app():
 
 
 def _load_config(app: Flask):
-    app.config.from_object(get_api_config())
+    app.config.update(get_api_config().dict())
 
 
 def _configure_extensions(app: Flask):
@@ -58,7 +58,7 @@ def _configure_extensions(app: Flask):
     ext.db.init_app(app)
     ext.lims.init_app(app)
     ext.analysis_client.init_app(app)
-    if app.config["OSTICKET_API_KEY"]:
+    if app.config["osticket_api_key"]:
         ext.osticket.init_app(app)
     ext.admin.init_app(app, index_view=AdminIndexView(endpoint="admin"))
     app.json_provider_class = ext.CustomJSONEncoder
@@ -69,12 +69,12 @@ def _initialize_logging(app):
 
 
 def _register_blueprints(app: Flask):
-    if not app.config["CG_ENABLE_ADMIN"]:
+    if not app.config["cg_enable_admin"]:
         return
 
     oauth_bp = make_google_blueprint(
-        client_id=app.config["GOOGLE_OAUTH_CLIENT_ID"],
-        client_secret=app.config["GOOGLE_OAUTH_CLIENT_SECRET"],
+        client_id=app.config["google_oauth_client_id"],
+        client_secret=app.config["google_oauth_client_secret"],
         scope=["openid", "https://www.googleapis.com/auth/userinfo.email"],
     )
 
