@@ -498,11 +498,17 @@ class ReadHandler(BaseHandler):
             device_internal_id=device_internal_id,
         ).first()
 
-    def get_latest_illumina_sequencing_run_for_case(
+    def get_latest_illumina_sequencing_run_for_nipt_case(
         self, case_internal_id: str
     ) -> IlluminaSequencingRun:
-        """Get Illumina sequencing run entry by case internal id."""
+        """
+        Get Illumina sequencing run entry by case internal id.
+        NIPT runs all samples under a single case on the same sequencing run.
+        """
+
         case: Case = self.get_case_by_internal_id(case_internal_id)
+        if not case.data_analysis == Workflow.FLUFFY:
+            raise CgError(f"Case {case_internal_id} is not a NIPT case")
         samples_on_case: list[Sample] = case.samples
         sample_metrics: list[SampleRunMetrics] = []
         for sample in samples_on_case:

@@ -54,7 +54,7 @@ class NiptUploadAPI:
         in the latest sequencing run related to a case.
         """
         sequencing_run: IlluminaSequencingRun = (
-            self.status_db.get_latest_illumina_sequencing_run_for_case(case_id)
+            self.status_db.get_latest_illumina_sequencing_run_for_nipt_case(case_id)
         )
         sequencing_run_summary: SequencingRunQ30AndReads = SequencingRunQ30AndReads(
             average_q30_across_samples=sequencing_run.percent_q30,

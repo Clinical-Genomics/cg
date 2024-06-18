@@ -30,7 +30,7 @@ def test_get_latest_illumina_sequencing_run_for_case(
 
     # WHEN fetching the latest sequencing run for the sample
     latest_sequencing_run: IlluminaSequencingRun = (
-        re_sequenced_sample_illumina_data_store.get_latest_illumina_sequencing_run_for_case(
+        re_sequenced_sample_illumina_data_store.get_latest_illumina_sequencing_run_for_nipt_case(
             case_id_for_sample_on_multiple_flow_cells
         )
     )
