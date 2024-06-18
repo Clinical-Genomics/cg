@@ -34,6 +34,7 @@ from cg.constants.constants import (
     FileFormat,
     GenomeVersion,
     Strandedness,
+    PrepCategory,
 )
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG

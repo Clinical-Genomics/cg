@@ -51,7 +51,7 @@ class NiptUploadAPI:
     def sequencing_run_passed_qc_value(self, case_id: str, q30_threshold: float) -> bool:
         """
         Check the average Q30 and the total number of reads for each sample
-        in the latest flow cell related to a case.
+        in the latest sequencing run related to a case.
         """
         sequencing_run: IlluminaSequencingRun = (
             self.status_db.get_latest_illumina_sequencing_run_for_case(case_id)
