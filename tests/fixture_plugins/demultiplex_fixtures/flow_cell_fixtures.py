@@ -44,23 +44,23 @@ def hiseq_2500_custom_index_flow_cell(
 
 @pytest.fixture
 def novaseq_6000_pre_1_5_kits_flow_cell(
-    illumina_flow_cells_directory: Path,
+    illumina_sequencing_runs_directory: Path,
     novaseq_6000_pre_1_5_kits_flow_cell_full_name: str,
 ) -> IlluminaRunDirectoryData:
     """Return a Novaseq6000 flow cell with index settings pre 1.5 kits."""
     return IlluminaRunDirectoryData(
-        Path(illumina_flow_cells_directory, novaseq_6000_pre_1_5_kits_flow_cell_full_name)
+        Path(illumina_sequencing_runs_directory, novaseq_6000_pre_1_5_kits_flow_cell_full_name)
     )
 
 
 @pytest.fixture
 def novaseq_6000_post_1_5_kits_flow_cell(
-    illumina_flow_cells_directory: Path,
+    illumina_sequencing_runs_directory: Path,
     novaseq_6000_post_1_5_kits_flow_cell_full_name: str,
 ) -> IlluminaRunDirectoryData:
     """Return a Novaseq6000 flow cell with index settings post 1.5 kits."""
     return IlluminaRunDirectoryData(
-        Path(illumina_flow_cells_directory, novaseq_6000_post_1_5_kits_flow_cell_full_name)
+        Path(illumina_sequencing_runs_directory, novaseq_6000_post_1_5_kits_flow_cell_full_name)
     )
 
 

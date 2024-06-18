@@ -9,7 +9,7 @@ from flask import Flask
 from flask.testing import FlaskClient
 from mock import patch
 
-from cg.apps.tb.dto.summary_response import AnalysisSummary
+from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import DataDelivery, Workflow
 from cg.server.ext import db as store
@@ -172,12 +172,36 @@ def client(app: Flask) -> Generator[FlaskClient, None, None]:
 
 
 @pytest.fixture
-def analysis_summary():
-    return AnalysisSummary(
-        order_id=1,
-        cancelled=0,
-        completed=1,
-        running=0,
-        delivered=1,
-        failed=1,
-    )
+def analysis_summaries(
+    order: Order,
+    order_another: Order,
+    order_balsamic: Order,
+    completed_status_summary: StatusSummary,
+    empty_status_summary: StatusSummary,
+) -> list[AnalysisSummary]:
+    return [
+        AnalysisSummary(
+            order_id=order.id,
+            cancelled=empty_status_summary,
+            completed=completed_status_summary,
+            delivered=empty_status_summary,
+            failed=empty_status_summary,
+            running=empty_status_summary,
+        ),
+        AnalysisSummary(
+            order_id=order_another.id,
+            cancelled=empty_status_summary,
+            completed=completed_status_summary,
+            delivered=empty_status_summary,
+            failed=empty_status_summary,
+            running=empty_status_summary,
+        ),
+        AnalysisSummary(
+            order_id=order_balsamic.id,
+            cancelled=empty_status_summary,
+            completed=completed_status_summary,
+            delivered=empty_status_summary,
+            failed=empty_status_summary,
+            running=empty_status_summary,
+        ),
+    ]

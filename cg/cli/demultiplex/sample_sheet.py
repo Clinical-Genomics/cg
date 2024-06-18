@@ -5,8 +5,8 @@ import click
 from pydantic import ValidationError
 
 from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
-from cg.constants.constants import DRY_RUN
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
+from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.exc import SampleSheetError
 from cg.models.cg_config import CGConfig
 
@@ -54,14 +54,9 @@ def translate_sample_sheet(context: CGConfig, flow_cell_name: str, dry_run: bool
 @sample_sheet_commands.command(name="create")
 @click.argument("flow-cell-name")
 @DRY_RUN
-@click.option("--force", is_flag=True, help="Skips the validation of the sample sheet")
+@FORCE
 @click.pass_obj
-def create_sheet(
-    context: CGConfig,
-    flow_cell_name: str,
-    dry_run: bool,
-    force: bool = False,
-):
+def create_sheet(context: CGConfig, flow_cell_name: str, dry_run: bool, force: bool = False):
     """Create a sample sheet or hard-link it from Housekeeper in the flow cell directory.
 
     'flow-cell-name' is the flow cell run directory name, e.g. '181005_D00410_0735_BHM2LNBCX2'
