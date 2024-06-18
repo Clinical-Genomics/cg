@@ -30,6 +30,7 @@ from cg.store.models import (
 )
 
 from . import admin, api, ext, invoices
+from .api_config import get_api_config
 
 
 def create_app():
@@ -44,7 +45,7 @@ def create_app():
 
 
 def _load_config(app: Flask):
-    app.config.from_object(__name__.replace("app", "config"))
+    app.config.from_object(get_api_config())
 
 
 def _configure_extensions(app: Flask):
