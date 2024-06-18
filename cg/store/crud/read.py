@@ -507,7 +507,7 @@ class ReadHandler(BaseHandler):
         """
 
         case: Case = self.get_case_by_internal_id(case_internal_id)
-        if not case.data_analysis == Workflow.FLUFFY:
+        if case.data_analysis != Workflow.FLUFFY:
             raise CgError(f"Case {case_internal_id} is not a NIPT case")
         samples_on_case: list[Sample] = case.samples
         sample_metrics: list[SampleRunMetrics] = []
