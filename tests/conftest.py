@@ -28,7 +28,6 @@ from cg.apps.lims import LimsAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-
 from cg.constants.constants import (
     CaseActions,
     CustomerId,
@@ -37,7 +36,6 @@ from cg.constants.constants import (
     Strandedness,
     PrepCategory,
 )
-
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
@@ -102,7 +100,6 @@ deliverables_yaml = "_deliverables.yaml"
 pytest_plugins = [
     "tests.fixture_plugins.timestamp_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.flow_cell_fixtures",
-    "tests.fixture_plugins.demultiplex_fixtures.metrics_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.name_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.path_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.run_parameters_fixtures",
@@ -445,24 +442,10 @@ def updated_demultiplex_context(
     cg_context: CGConfig,
     updated_store_with_demultiplexed_samples: Store,
 ) -> CGConfig:
-    """Return CG context with populated with the seven canonical flow cells."""
+    """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api
     cg_context.housekeeper_api_ = real_housekeeper_api
     cg_context.status_db_ = updated_store_with_demultiplexed_samples
-    return cg_context
-
-
-@pytest.fixture
-def new_demultiplex_context(
-    demultiplexing_api: DemultiplexingAPI,
-    real_housekeeper_api: HousekeeperAPI,
-    cg_context: CGConfig,
-    store_with_illumina_sequencing_data: Store,
-) -> CGConfig:
-    """Return a CG context with populated with data using the Illumina models."""
-    cg_context.demultiplex_api_ = demultiplexing_api
-    cg_context.housekeeper_api_ = real_housekeeper_api
-    cg_context.status_db_ = store_with_illumina_sequencing_data
     return cg_context
 
 
@@ -1361,11 +1344,11 @@ def re_sequenced_sample_illumina_data_store(
         lane=1,
     )
     # Add application and tags to case
-    application: Application = store_with_illumina_sequencing_data.get_application_by_tag(
-        "RMLP05R800"
+    application: Application = helpers.ensure_application(
+        store=store_with_illumina_sequencing_data, tag="RMLO05R800", prep_category="rml"
     )
-    application_version: ApplicationVersion = (
-        store_with_illumina_sequencing_data.get_current_application_version_by_tag("RMLP05R800")
+    application_version: ApplicationVersion = helpers.ensure_application_version(
+        store=store_with_illumina_sequencing_data, tag="RMLO05R800", prep_category="rml"
     )
     case: Case = store_with_illumina_sequencing_data.get_case_by_internal_id(
         case_id_for_sample_on_multiple_flow_cells
