@@ -515,7 +515,7 @@ class ReadHandler(BaseHandler):
             ).first()
             for sample_metric in sample_metrics
         ]
-        return max(sequencing_runs, key=lambda run: run.demultiplexing_completed_at)
+        return max(sequencing_runs, key=lambda run: run.sequencing_completed_at)
 
     def get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
         self, flow_cell_name: str, sample_internal_id: str, lane: int
