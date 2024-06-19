@@ -11,13 +11,14 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.constants import CaseActions
+from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS,
 )
 def test_store_success(
     cli_runner: CliRunner,
@@ -77,7 +78,7 @@ def test_store_success(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS,
 )
 def test_store_fail(
     cli_runner: CliRunner,
@@ -118,7 +119,7 @@ def test_store_fail(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS,
 )
 def test_store_available_success(
     cli_runner: CliRunner,
@@ -157,9 +158,6 @@ def test_store_available_success(
     # WHEN running command
     result = cli_runner.invoke(workflow_cli, [workflow, "store-available"], obj=context)
 
-    # THEN command exits successfully
-    assert result.exit_code == EXIT_SUCCESS
-
     # THEN all expected cases are picked up for storing
     assert f"Storing deliverables for {case_id}" in caplog.text
 
@@ -172,10 +170,13 @@ def test_store_available_success(
     # THEN StatusDB action is set to None
     assert context.status_db.get_case_by_internal_id(case_id).action is None
 
+    # THEN command exits successfully
+    assert result.exit_code == EXIT_SUCCESS
+
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS,
 )
 def test_store_available_fail(
     cli_runner: CliRunner,

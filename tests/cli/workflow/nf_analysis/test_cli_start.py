@@ -8,6 +8,7 @@ from click.testing import CliRunner
 from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
+from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -16,7 +17,7 @@ from tests.cli.workflow.conftest import mock_analysis_flow_cell
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS,
 )
 def test_start(
     cli_runner: CliRunner,
@@ -54,7 +55,7 @@ def test_start(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS,
 )
 def test_start_available(
     cli_runner: CliRunner,
