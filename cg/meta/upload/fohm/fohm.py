@@ -11,8 +11,9 @@ from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.constants.constants import SARS_COV_REGEX
+from cg.constants.constants import SARS_COV_REGEX, FileFormat
 from cg.exc import CgError
+from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
 from cg.store.models import Case, Sample
@@ -22,6 +23,22 @@ from cg.utils.email import send_mail
 LOG = logging.getLogger(__name__)
 
 
+def create_daily_deliveries_csv(file_list: list[Path]) -> list[dict]:
+    """Creates a list with all CSV files used in daily delivery."""
+    content = [
+        ReadFile.get_content_from_file(
+            file_format=FileFormat.CSV, file_path=file, read_to_dict=True
+        )
+        for file in file_list
+    ]
+    all_rows = []
+    for file in content:
+        for row in file:
+            all_rows.append(row)
+    return [dict(row_tuple) for row_tuple in {tuple(row.items()) for row in all_rows}]
+
+
+# content:
 class FOHMUploadAPI:
     def __init__(self, config: CGConfig, dry_run: bool = False, datestr: str | None = None):
         self.config: CGConfig = config
