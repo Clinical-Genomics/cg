@@ -71,6 +71,7 @@ urllib3 = "*"
 # Apps
 genologics = "*"
 housekeeper = ">=4.11.3"
+pydantic-settings = "^2.3.3"
 
 
 [tool.poetry.dev-dependencies]
