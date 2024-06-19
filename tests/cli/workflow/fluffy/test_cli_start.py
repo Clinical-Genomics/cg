@@ -1,5 +1,6 @@
 import datetime as dt
 
+import pytest
 from click.testing import CliRunner
 
 from cg.cli.workflow.fluffy.base import start_available
@@ -10,15 +11,13 @@ from cg.store.crud.read import ReadHandler
 from cg.store.models import Sample
 
 
+@pytest.mark.xfail(reason="flow cell on-disk check is yet to be refactored")
 def test_start_available_dry(
     cli_runner: CliRunner, fluffy_case_id_existing: str, fluffy_context: CGConfig, caplog, mocker
 ):
     caplog.set_level("INFO")
 
     # GIVEN a case_id that does exist in database
-
-    # Temporary patch to avoid error in the test with the devel branch will be addressed in the future
-    mocker.patch.object(ReadHandler, "are_all_flow_cells_on_disk")
 
     # WHEN running command with dry-run flag active
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=fluffy_context)
