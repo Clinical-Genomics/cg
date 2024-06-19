@@ -331,14 +331,6 @@ class ReadHandler(BaseHandler):
         """Returns the ticket from the most recent sample in a case."""
         return self.get_case_by_internal_id(internal_id=case_id).latest_ticket
 
-    def get_latest_flow_cell_on_case(self, family_id: str) -> Flowcell:
-        """Fetch the latest sequenced flow cell related to a sample on a case."""
-        flow_cells_on_case: list[Flowcell] = self.get_flow_cells_by_case(
-            case=self.get_case_by_internal_id(internal_id=family_id)
-        )
-        flow_cells_on_case.sort(key=lambda flow_cell: flow_cell.sequenced_at)
-        return flow_cells_on_case[-1] if flow_cells_on_case else None
-
     def _is_case_found(self, case: Case, case_id: str) -> None:
         """Raise error if case is false."""
         if not case:
@@ -407,55 +399,6 @@ class ReadHandler(BaseHandler):
         )
         reads_count: int | None = total_reads_query.scalar()
         return reads_count if reads_count else 0
-
-    def get_average_q30_for_sample_on_flow_cell(
-        self, sample_internal_id: str, flow_cell_name: str
-    ) -> float:
-        """Calculates the average q30 across lanes for a sample on a flow cell."""
-        sample_lanes: list[SampleLaneSequencingMetrics] = apply_metrics_filter(
-            metrics=self._get_query(table=SampleLaneSequencingMetrics),
-            filter_functions=[
-                SequencingMetricsFilter.BY_FLOW_CELL_NAME,
-                SequencingMetricsFilter.BY_SAMPLE_INTERNAL_ID,
-            ],
-            sample_internal_id=sample_internal_id,
-            flow_cell_name=flow_cell_name,
-        ).all()
-
-        return sum(
-            [sample_lane.sample_base_percentage_passing_q30 for sample_lane in sample_lanes]
-        ) / len(sample_lanes)
-
-    def get_average_percentage_passing_q30_for_flow_cell(self, flow_cell_name: str) -> float:
-        """Calculates the average q30 for each sample on a flow cell and returns the average between the samples."""
-        sequencing_metrics: list[SampleLaneSequencingMetrics] = (
-            self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
-        )
-        unique_sample_internal_ids: set[str] = {
-            sequencing_metric.sample_internal_id for sequencing_metric in sequencing_metrics
-        }
-
-        sum_average_q30_across_samples: float = 0
-        for sample_internal_id in unique_sample_internal_ids:
-            sum_average_q30_across_samples += self.get_average_q30_for_sample_on_flow_cell(
-                sample_internal_id=sample_internal_id,
-                flow_cell_name=flow_cell_name,
-            )
-        return (
-            sum_average_q30_across_samples / len(unique_sample_internal_ids)
-            if sum_average_q30_across_samples and unique_sample_internal_ids
-            else 0
-        )
-
-    def get_number_of_reads_for_flow_cell(self, flow_cell_name: str) -> int:
-        """Get total number of reads for a flow cell from sample lane sequencing metrics."""
-        sequencing_metrics: list[SampleLaneSequencingMetrics] = (
-            self.get_sample_lane_sequencing_metrics_by_flow_cell_name(flow_cell_name=flow_cell_name)
-        )
-        read_count: int = 0
-        for sequencing_metric in sequencing_metrics:
-            read_count += sequencing_metric.sample_total_reads_in_lane
-        return read_count
 
     def get_sample_lane_sequencing_metrics_by_flow_cell_name(
         self, flow_cell_name: str

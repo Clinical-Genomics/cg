@@ -685,25 +685,6 @@ def test_get_samples_from_flow_cell(
     assert samples[0].internal_id == sample_id
 
 
-def test_get_latest_flow_cell_on_case(
-    re_sequenced_sample_store: Store, case_id: str, novaseq_6000_pre_1_5_kits_flow_cell_id: str
-):
-    """Test returning the latest sequenced flow cell on a case."""
-
-    # GIVEN a store with two flow cells in it, one being the latest sequenced of the two
-    latest_flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell_by_name(
-        flow_cell_name=novaseq_6000_pre_1_5_kits_flow_cell_id
-    )
-
-    # WHEN fetching the latest flow cell on a case with a sample that has been sequenced on both flow cells
-    latest_flow_cell_on_case: Flowcell = re_sequenced_sample_store.get_latest_flow_cell_on_case(
-        family_id=case_id
-    )
-
-    # THEN the fetched flow cell should have the same name as the other
-    assert latest_flow_cell.name == latest_flow_cell_on_case.name
-
-
 def test_is_all_flow_cells_on_disk_when_no_flow_cell(
     base_store: Store,
     caplog,
@@ -1315,56 +1296,6 @@ def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
     assert metrics_entry.flow_cell_name == flow_cell_name
     assert metrics_entry.flow_cell_lane_number == lane
     assert metrics_entry.sample_internal_id == sample_id
-
-
-def test_get_number_of_reads_for_flow_cell_from_sample_lane_metrics(
-    store_with_sequencing_metrics: Store,
-    hiseq_x_dual_index_flow_cell_id: str,
-    expected_total_reads_hiseq_x_flow_cell: int,
-):
-    # GIVEN a store with sequencing metrics
-    # WHEN getting total read counts for a flow cell
-    reads = store_with_sequencing_metrics.get_number_of_reads_for_flow_cell(
-        flow_cell_name=hiseq_x_dual_index_flow_cell_id
-    )
-    # THEN assert that the total read count is correct
-    assert reads == expected_total_reads_hiseq_x_flow_cell
-
-
-def test_get_average_bases_above_q30_for_sample_from_metrics(
-    store_with_sequencing_metrics: Store,
-    expected_average_q30_for_sample: float,
-    mother_sample_id: str,
-    hiseq_x_dual_index_flow_cell_id: str,
-):
-    # GIVEN a store with sequencing metrics
-
-    # WHEN getting average bases above q30 for a sample
-    average_bases_above_q30 = store_with_sequencing_metrics.get_average_q30_for_sample_on_flow_cell(
-        sample_internal_id=mother_sample_id,
-        flow_cell_name=hiseq_x_dual_index_flow_cell_id,
-    )
-
-    # THEN assert that the average bases above q30 is correct
-    assert average_bases_above_q30 == expected_average_q30_for_sample
-
-
-def test_get_average_passing_q30_for_sample_from_metrics(
-    store_with_sequencing_metrics: Store,
-    expected_average_q30_for_flow_cell: float,
-    hiseq_x_dual_index_flow_cell_id: str,
-):
-    # GIVEN a store with sequencing metrics
-
-    # WHEN getting average passing q30 for a sample
-    average_passing_q30 = (
-        store_with_sequencing_metrics.get_average_percentage_passing_q30_for_flow_cell(
-            flow_cell_name=hiseq_x_dual_index_flow_cell_id,
-        )
-    )
-
-    # THEN assert that the average passing q30 is correct
-    assert average_passing_q30 == expected_average_q30_for_flow_cell
 
 
 def test_get_number_of_reads_for_sample_passing_q30_threshold(
