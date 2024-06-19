@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings
 
 
-class APIConfig(BaseSettings):
+class AppConfig(BaseSettings):
     gunicorn_workers: int = 4
     gunicorn_threads: int = 4
     gunicorn_bind: str
@@ -23,5 +23,4 @@ class APIConfig(BaseSettings):
     trailblazer_service_account_auth_file: str
 
 
-def get_api_config():
-    return APIConfig()
+app_config = AppConfig()

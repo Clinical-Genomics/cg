@@ -6,6 +6,7 @@ from flask_dance.consumer import oauth_authorized
 from flask_dance.contrib.google import google, make_google_blueprint
 from sqlalchemy.orm import scoped_session
 
+from cg.server.app_config import app_config
 from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
     Analysis,
@@ -30,7 +31,6 @@ from cg.store.models import (
 )
 
 from . import admin, api, ext, invoices
-from .api_config import get_api_config
 
 
 def create_app():
@@ -45,7 +45,7 @@ def create_app():
 
 
 def _load_config(app: Flask):
-    app.config.update(get_api_config().dict())
+    app.config.update(app_config().dict())
     app.secret_key = app.config["cg_secret_key"]
 
 
