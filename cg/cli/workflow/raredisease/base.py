@@ -9,9 +9,13 @@ from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
     config_case,
     metrics_deliver,
+    report_deliver,
     run,
     start,
     start_available,
+    store,
+    store_available,
+    store_housekeeper,
 )
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.constants import MetaApis
@@ -36,6 +40,9 @@ raredisease.add_command(resolve_compression)
 raredisease.add_command(run)
 raredisease.add_command(start)
 raredisease.add_command(start_available)
+raredisease.add_command(store)
+raredisease.add_command(store_available)
+raredisease.add_command(store_housekeeper)
 
 
 @raredisease.command("panel")
