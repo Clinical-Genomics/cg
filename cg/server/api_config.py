@@ -7,7 +7,8 @@ class APIConfig(BaseSettings):
     gunicorn_bind: str
     gunicorn_timeout: int = 400
     cg_sql_database_uri: str
-    cg_secret_key: str
+    cg_secret_key: str = "thisIsNotASafeKey"
+    invoice_max_price: int = 750000
     lims_host: str
     lims_username: str
     lims_password: str
@@ -17,7 +18,6 @@ class APIConfig(BaseSettings):
     email_uri: str
     google_oauth_client_id: str
     google_oauth_client_secret: str
-    cg_enable_admin: bool = False
     trailblazer_host: str
     trailblazer_service_account: str
     trailblazer_service_account_auth_file: str

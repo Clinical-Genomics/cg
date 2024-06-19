@@ -46,6 +46,7 @@ def create_app():
 
 def _load_config(app: Flask):
     app.config.update(get_api_config().dict())
+    app.secret_key = app.config["cg_secret_key"]
 
 
 def _configure_extensions(app: Flask):
@@ -69,9 +70,6 @@ def _initialize_logging(app):
 
 
 def _register_blueprints(app: Flask):
-    if not app.config["cg_enable_admin"]:
-        return
-
     oauth_bp = make_google_blueprint(
         client_id=app.config["google_oauth_client_id"],
         client_secret=app.config["google_oauth_client_secret"],
