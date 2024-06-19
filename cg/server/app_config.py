@@ -8,7 +8,7 @@ class AppConfig(BaseSettings):
     gunicorn_timeout: int = 400
     cg_sql_database_uri: str
     cg_secret_key: str = "thisIsNotASafeKey"
-    invoice_max_price: int = 750000
+    invoice_max_price: int = 750_000
     lims_host: str
     lims_username: str
     lims_password: str
