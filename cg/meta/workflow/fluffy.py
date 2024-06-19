@@ -9,7 +9,7 @@ from sqlalchemy.orm import Query
 
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import get_flow_cell_samples_from_content
 from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
-from cg.constants import Workflow
+from cg.constants import Workflow, SequencingFileTag
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -150,7 +150,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         for family_sample in case_obj.links:
             sample_id = family_sample.sample.internal_id
             files: Query = self.housekeeper_api.files(
-                bundle=sample_id, tags=["fastq", sequencing_run.device.internal_id]
+                bundle=sample_id, tags=[SequencingFileTag.FASTQ, sequencing_run.device.internal_id]
             )
 
             sample_path: Path = self.get_fastq_path(case_id=case_id, sample_id=sample_id)
