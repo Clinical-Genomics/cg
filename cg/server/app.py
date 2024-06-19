@@ -45,7 +45,7 @@ def create_app():
 
 
 def _load_config(app: Flask):
-    app.config.update(app_config().dict())
+    app.config.update(app_config.dict())
     app.secret_key = app.config["cg_secret_key"]
 
 
