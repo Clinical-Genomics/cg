@@ -52,6 +52,10 @@ class UploadGenotypesAPI(object):
             data["samples_sex"] = self._get_samples_sex_mip(
                 case_obj=analysis.case, hk_version=hk_version
             )
+        elif analysis.workflow == Workflow.RAREDISEASE:
+            data["samples_sex"] = self._get_samples_sex_raredisease(
+                case_obj=analysis.case, hk_version=hk_version
+            )
         else:
             raise ValueError(f"Workflow {analysis.workflow} does not support Genotype upload")
         return data
@@ -67,6 +71,17 @@ class UploadGenotypesAPI(object):
                 "analysis": analysis_sexes[sample_id],
             }
         return samples_sex
+
+    def _get_samples_sex_raredisease(self, case_obj: Case, hk_version: Version) -> dict:
+        samples_sex = {}
+        for link_obj in case_obj.links:
+            sample_id = link_obj.sample.internal_id
+            samples_sex[sample_id] = {
+                "pedigree": link_obj.sample.sex,
+                "analysis": Sex.UNKNOWN,
+            }
+        return samples_sex
+
 
     def _get_samples_sex_balsamic(self, case_obj: Case) -> dict:
         samples_sex = {}
