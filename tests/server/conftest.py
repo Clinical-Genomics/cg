@@ -23,10 +23,16 @@ os.environ["LIMS_USERNAME"] = "dummy_value"
 os.environ["LIMS_PASSWORD"] = "dummy_value"
 os.environ["GOOGLE_OAUTH_CLIENT_ID"] = "dummy_value"
 os.environ["GOOGLE_OAUTH_CLIENT_SECRET"] = "dummy_value"
-os.environ["CG_ENABLE_ADMIN"] = "1"
 os.environ["TRAILBLAZER_SERVICE_ACCOUNT"] = "dummy_value"
 os.environ["TRAILBLAZER_SERVICE_ACCOUNT_AUTH_FILE"] = "dummy_value"
 os.environ["TRAILBLAZER_HOST"] = "dummy_value"
+os.environ["CG_SECRET_KEY"] = "dummy_value"
+os.environ["GUNICORN_BIND"] = "0.0.0.0:8000"
+os.environ["OSTICKET_API_KEY"] = "dummy_value"
+os.environ["OSTICKET_API_URL"] = "dummy_value"
+os.environ["OSTICKET_DOMAIN"] = "dummy_value"
+os.environ["SUPPORT_SYSTEM_EMAIL"] = "dummy_value"
+os.environ["EMAIL_URI"] = "dummy_value"
 
 
 @pytest.fixture
