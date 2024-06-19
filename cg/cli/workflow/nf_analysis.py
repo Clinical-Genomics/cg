@@ -313,14 +313,10 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
 
-    exit_code: int = EXIT_SUCCESS
-
     for case in analysis_api.get_cases_to_store():
         LOG.info(f"Storing deliverables for {case.internal_id}")
         try:
             analysis_api.store(case_id=case.internal_id, dry_run=dry_run)
         except Exception as error:
             LOG.error(f"Error storing {case.internal_id}: {repr(error)}")
-            exit_code: int = EXIT_FAIL
-    if exit_code:
-        raise click.Abort
+            raise click.Abort
