@@ -6,18 +6,16 @@ from typing import Type
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Query, Session
 
-from cg.store.models import (
-    Analysis,
-    Application,
-    ApplicationLimitations,
-    ApplicationVersion,
-)
+from cg.store.models import Analysis, Application, ApplicationLimitations, ApplicationVersion
 from cg.store.models import Base as ModelBase
 from cg.store.models import (
     Case,
     CaseSample,
     Customer,
     Flowcell,
+    IlluminaFlowCell,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
     Sample,
     SampleLaneSequencingMetrics,
 )
@@ -125,4 +123,13 @@ class BaseHandler:
         """Return a join query for all application limitations."""
         return self._get_query(table=ApplicationLimitations).join(
             ApplicationLimitations.application
+        )
+
+    def _get_joined_illumina_sample_tables(self) -> Query:
+        """Return a join query for all Illumina tables and Sample."""
+        return (
+            self._get_query(table=IlluminaSampleSequencingMetrics)
+            .join(Sample)
+            .join(IlluminaSequencingRun)
+            .join(IlluminaFlowCell)
         )

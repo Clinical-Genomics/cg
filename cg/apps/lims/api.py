@@ -104,6 +104,7 @@ class LimsAPI(Lims, OrderHandler):
             ),
             "comment": udfs.get("comment"),
             "concentration_ng_ul": udfs.get("Concentration (ng/ul)"),
+            "passed_initial_qc": udfs.get("Passed Initial QC"),
         }
 
     def get_received_date(self, lims_id: str) -> date:
@@ -412,13 +413,30 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_sample_rin(self, sample_id: str) -> float | None:
         """Return the sample RIN value."""
-        rin = None
+        rin: float | None = None
         try:
             sample_artifact: Artifact = Artifact(self, id=f"{sample_id}PA1")
             rin: float = sample_artifact.udf.get(PROP2UDF["rin"])
         except HTTPError as error:
             LOG.warning(f"Sample {sample_id} not found in LIMS: {error}")
         return rin
+
+    def get_sample_dv200(self, sample_id: str) -> float | None:
+        """Return the sample's percentage of RNA fragments greater than 200 nucleotides."""
+        dv200: float | None = None
+        try:
+            sample_artifact: Artifact = Artifact(self, id=f"{sample_id}PA1")
+            dv200: float = sample_artifact.udf.get(PROP2UDF["dv200"])
+        except HTTPError as error:
+            LOG.warning(f"Sample {sample_id} not found in LIMS: {error}")
+        return dv200
+
+    def has_sample_passed_initial_qc(self, sample_id: str) -> bool | None:
+        """Return the outcome of the initial QC protocol of the given sample."""
+        lims_sample: dict[str, Any] = self.sample(sample_id)
+        initial_qc_udf: str | None = lims_sample.get("passed_initial_qc")
+        initial_qc: bool | None = eval(initial_qc_udf) if initial_qc_udf else None
+        return initial_qc
 
     def _get_rna_input_amounts(self, sample_id: str) -> list[tuple[datetime, float]]:
         """Return all prep input amounts used for an RNA sample in lims."""

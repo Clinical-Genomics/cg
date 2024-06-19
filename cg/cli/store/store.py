@@ -10,7 +10,7 @@ from cg.cli.compress.helpers import update_compress_api
 from cg.clients.arnold.exceptions import ArnoldClientError, ArnoldServerError
 from cg.clients.janus.exceptions import JanusClientError, JanusServerError
 from cg.constants import SequencingFileTag
-from cg.constants.constants import DRY_RUN
+from cg.constants.cli_options import DRY_RUN
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.qc_metrics.collect_qc_metrics import CollectQCMetricsAPI

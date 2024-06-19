@@ -143,7 +143,7 @@ def clean_context_microsalt(
 
     # Create textbook case for cleaning
     MicrosaltAnalysisAPI.get_case_path.return_value = [
-        Path("home/proj/production/microbial/test/result", microsalt_case_clean)
+        Path(analysis_api.root_dir, microsalt_case_clean)
     ]
 
     case_to_clean = helpers.add_case(
@@ -170,7 +170,7 @@ def clean_context_microsalt(
 
     # Create textbook case for cleaning in dry run
     MicrosaltAnalysisAPI.get_case_path.return_value = [
-        Path("home/proj/production/microbial/test/result", microsalt_case_clean_dry)
+        Path(analysis_api.root_dir, microsalt_case_clean_dry)
     ]
 
     case_to_clean_dry_run = helpers.add_case(
@@ -206,13 +206,13 @@ def clean_context_microsalt(
 @pytest.fixture(scope="function")
 def clean_flow_cells_context(
     cg_context: CGConfig,
-    tmp_illumina_flow_cells_directory,
+    tmp_illumina_sequencing_runs_directory,
     tmp_illumina_demultiplexed_flow_cells_directory,
     store_with_flow_cell_to_clean: Store,
     housekeeper_api_with_flow_cell_to_clean: HousekeeperAPI,
 ) -> CGConfig:
-    cg_context.illumina_flow_cells_directory = tmp_illumina_flow_cells_directory
-    cg_context.illumina_demultiplexed_runs_directory = (
+    cg_context.run_instruments.illumina.sequencing_runs_dir = tmp_illumina_sequencing_runs_directory
+    cg_context.run_instruments.illumina.demultiplexed_runs_dir = (
         tmp_illumina_demultiplexed_flow_cells_directory
     )
     cg_context.housekeeper_api_ = housekeeper_api_with_flow_cell_to_clean

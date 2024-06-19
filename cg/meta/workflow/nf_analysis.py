@@ -99,12 +99,7 @@ class NfAnalysisAPI(AnalysisAPI):
     @property
     def is_params_appended_to_nextflow_config(self) -> bool:
         """Return True if parameters should be added into the nextflow config file instead of the params file."""
-        return True
-
-    @property
-    def is_multiple_samples_allowed(self) -> bool:
-        """Return whether the analysis supports multiple samples to be linked to the case."""
-        return True
+        return False
 
     @property
     def is_multiqc_pattern_search_exact(self) -> bool:
@@ -264,14 +259,10 @@ class NfAnalysisAPI(AnalysisAPI):
         raise NotImplementedError
 
     def get_sample_sheet_content(self, case_id: str) -> list[list[Any]]:
-        """Collect and format information required to build a sample sheet for a case.
+        """Return formatted information required to build a sample sheet for a case.
         This contains information for all samples linked to the case."""
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        if len(case.links) == 0:
-            raise CgError(f"No samples linked to {case_id}")
-        if nlinks := len(case.links) > 1 and not self.is_multiple_samples_allowed:
-            raise CgError(f"Only one sample per case is allowed. {nlinks} found")
-        sample_sheet_content = []
+        sample_sheet_content: list = []
+        case: Case = self.get_validated_case(case_id)
         LOG.info(f"Samples linked to case {case_id}: {len(case.links)}")
         LOG.debug("Getting sample sheet information")
         for link in case.links:
@@ -553,15 +544,16 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_deliverables_template_content(self) -> list[dict[str, str]]:
         """Return deliverables file template content."""
+        LOG.debug("Getting deliverables file template content")
         return ReadFile.get_content_from_file(
             file_format=FileFormat.YAML,
             file_path=self.get_bundle_filenames_path(),
         )
 
     @staticmethod
-    def get_bundle_filenames_path() -> Path | None:
+    def get_bundle_filenames_path() -> Path:
         """Return bundle filenames path."""
-        return None
+        raise NotImplementedError
 
     @staticmethod
     def get_formatted_file_deliverable(
@@ -616,7 +608,6 @@ class NfAnalysisAPI(AnalysisAPI):
                 sample=sample, case_id=case_id, template=deliverable_template
             )
             files.extend(bundle for bundle in bundles_per_sample if bundle not in files)
-
         return WorkflowDeliverables(files=files)
 
     def get_multiqc_json_path(self, case_id: str) -> Path:
@@ -768,11 +759,10 @@ class NfAnalysisAPI(AnalysisAPI):
         self.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
         self.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
 
-    def report_deliver(self, case_id: str, dry_run: bool) -> None:
+    def report_deliver(self, case_id: str, dry_run: bool = False, force: bool = False) -> None:
         """Write deliverables file."""
-
-        self.status_db.verify_case_exists(case_internal_id=case_id)
-        self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
+        self.status_db.verify_case_exists(case_id)
+        self.trailblazer_api.verify_latest_analysis_is_completed(case_id=case_id, force=force)
         if dry_run:
             LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
             return
@@ -785,14 +775,20 @@ class NfAnalysisAPI(AnalysisAPI):
             f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
         )
 
-    def store_analysis_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
-        """Store a finished nextflow analysis in Housekeeper and StatusDB"""
+    def store_analysis_housekeeper(
+        self, case_id: str, dry_run: bool = False, force: bool = False
+    ) -> None:
+        """
+        Store a finished Nextflow analysis in Housekeeper and StatusDB.
 
+        Raises:
+            HousekeeperStoreError: If the deliverables file is malformed or if the bundle could not be stored.
+        """
         try:
-            self.status_db.verify_case_exists(case_internal_id=case_id)
-            self.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
-            self.verify_deliverables_file_exists(case_id=case_id)
-            self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run)
+            self.status_db.verify_case_exists(case_id)
+            self.trailblazer_api.verify_latest_analysis_is_completed(case_id=case_id, force=force)
+            self.verify_deliverables_file_exists(case_id)
+            self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
             self.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
             self.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
         except ValidationError as error:
@@ -804,13 +800,14 @@ class NfAnalysisAPI(AnalysisAPI):
                 f"Could not store bundle in Housekeeper and StatusDB: {error}"
             )
 
-    def store(self, case_id: str, dry_run: bool):
+    def store(self, case_id: str, dry_run: bool = False, force: bool = False):
         """Generate deliverable files for a case and store in Housekeeper if they
         pass QC metrics checks."""
-        is_latest_analysis_qc: bool = self.trailblazer_api.is_latest_analysis_qc(case_id=case_id)
-        if not is_latest_analysis_qc and not self.trailblazer_api.is_latest_analysis_completed(
-            case_id=case_id
-        ):
+        is_latest_analysis_qc: bool = self.trailblazer_api.is_latest_analysis_qc(case_id)
+        is_latest_analysis_completed: bool = self.trailblazer_api.is_latest_analysis_completed(
+            case_id
+        )
+        if not is_latest_analysis_qc and not is_latest_analysis_completed and not force:
             LOG.error(
                 "Case not stored. Trailblazer status must be either QC or COMPLETE to be able to store"
             )
@@ -819,12 +816,13 @@ class NfAnalysisAPI(AnalysisAPI):
         if (
             is_latest_analysis_qc
             or not self.get_metrics_deliverables_path(case_id=case_id).exists()
+            and not force
         ):
             LOG.info(f"Generating metrics file and performing QC checks for {case_id}")
             self.metrics_deliver(case_id=case_id, dry_run=dry_run)
         LOG.info(f"Storing analysis for {case_id}")
-        self.report_deliver(case_id=case_id, dry_run=dry_run)
-        self.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run)
+        self.report_deliver(case_id=case_id, dry_run=dry_run, force=force)
+        self.store_analysis_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,
