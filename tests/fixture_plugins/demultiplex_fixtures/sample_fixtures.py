@@ -100,7 +100,7 @@ def novaseq_6000_post_1_5_kits_bcl_convert_lims_samples(
 @pytest.fixture
 def selected_novaseq_6000_post_1_5_kits_sample_ids() -> list[str]:
     """Return a list of sample ids for a NovaSeq6000 post 1.5 kits flow cell."""
-    return ["ACC12642A4", "ACC12642A7"]
+    return ["ACC12642A7", "ACC12642A4"]
 
 
 @pytest.fixture
