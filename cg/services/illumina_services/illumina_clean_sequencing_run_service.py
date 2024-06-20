@@ -103,31 +103,31 @@ class IlluminaCleanSequencingRunsService:
         )
 
     def is_sequencing_run_in_statusdb(self) -> bool:
-        """Check if flow cell is in statusdb."""
+        """Check if sequencing run is in statusdb."""
         return bool(self.get_sequencing_run_from_status_db())
 
     def is_sequencing_run_backed_up(self) -> bool:
-        """Check if flow cell is backed up on PDC."""
+        """Check if sequencing run is backed up on PDC."""
         return self.get_sequencing_run_from_status_db().has_backup
 
     def has_sequencing_metrics_in_statusdb(self) -> bool:
-        """Check if a flow cell has entries in the SampleLaneSequencingMetrics table."""
+        """Check if a sequencing run has entries in the SampleLaneSequencingMetrics table."""
         return bool(self.get_sequencing_metrics_for_sequencing_run())
 
     def has_sample_sheet_in_housekeeper(self) -> bool:
-        """Check if the flow cell has a sample sheet in housekeeper."""
+        """Check if the sequencing run has a sample sheet in housekeeper."""
         return bool(self.seq_run_dir_data.get_sample_sheet_path_hk())
 
     def has_fastq_files_for_samples_in_housekeeper(self) -> bool:
-        """Check if all samples on the flow cell have fastq files in housekeeper."""
+        """Check if all samples on the sequencing run have fastq files in housekeeper."""
         return bool(self.get_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.FASTQ))
 
     def has_spring_files_for_samples_in_housekeeper(self) -> bool:
-        """Check if all samples on the flow cell have SPRING files in housekeeper."""
+        """Check if all samples on the sequencing run have SPRING files in housekeeper."""
         return bool(self.get_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.SPRING))
 
     def has_spring_meta_data_files_for_samples_in_housekeeper(self) -> bool:
-        """Check if all samples on the flow cell have SPRING metadata files in housekeeper."""
+        """Check if all samples on the sequencing run have SPRING metadata files in housekeeper."""
         return bool(
             self.get_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.SPRING_METADATA)
         )
@@ -143,15 +143,15 @@ class IlluminaCleanSequencingRunsService:
             and self.has_spring_meta_data_files_for_samples_in_housekeeper()
         ):
             raise HousekeeperFileMissingError(
-                f"Flow cell {self.seq_run_dir_data.id} is missing fastq and spring files for some samples."
+                f"sequencing run {self.seq_run_dir_data.id} is missing fastq and spring files for some samples."
             )
         return True
 
     def get_sequencing_run_from_status_db(self) -> IlluminaSequencingRun | None:
         """
-        Get the flow cell entry from StatusDB.
+        Get the sequencing run entry from StatusDB.
         Raises:
-            ValueError if the flow cell is not found in StatusDB.
+            ValueError if the sequencing run is not found in StatusDB.
         """
         sequencing_run: IlluminaSequencingRun = (
             self.status_db.get_illumina_sequencing_run_by_device_internal_id(
@@ -181,7 +181,7 @@ class IlluminaCleanSequencingRunsService:
         return metrics
 
     def get_files_for_samples_on_flow_cell_with_tag(self, tag: str) -> list[File] | None:
-        """Return the files with the specified tag for all samples on a Flow cell."""
+        """Return the files with the specified tag for all samples on a sequencing run."""
         sequencing_run: IlluminaSequencingRun = self.get_sequencing_run_from_status_db()
         bundle_names: list[str] = [
             metrics.sample.internal_id for metrics in sequencing_run.sample_metrics
