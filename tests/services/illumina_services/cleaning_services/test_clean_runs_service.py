@@ -1,4 +1,4 @@
-"""Tests for the clean sequencing runs API."""
+"""Tests for the illumina clean runs service."""
 
 import logging
 import time
