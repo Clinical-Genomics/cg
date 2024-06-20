@@ -51,7 +51,9 @@ def create_komplettering_reports(self, dicts: list[dict]) -> None:
     LOG.info(f"Regions in batch: {unique_region_labs}")
     for region_lab in unique_region_labs:
         LOG.info(f"Aggregating data for {region_lab}")
-        region_lab_reports = [dictionary["region_lab"] == region_lab for dictionary in dicts]
+        region_lab_reports = [
+            dictionary for dictionary in dicts if dictionary["region_lab"] == region_lab
+        ]
         if self._dry_run:
             LOG.info(region_lab_reports)
             continue
