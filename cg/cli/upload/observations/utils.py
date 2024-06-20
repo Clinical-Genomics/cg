@@ -46,6 +46,5 @@ def get_observations_api(
         Workflow.BALSAMIC: BalsamicObservationsAPI(context),
         Workflow.MIP_DNA: MipDNAObservationsAPI(context),
         Workflow.RAREDISEASE: RarediseaseObservationsAPI(context),
-
     }
     return observations_apis[case.data_analysis]
