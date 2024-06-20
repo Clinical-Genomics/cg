@@ -1,4 +1,4 @@
-"""Test for the clean flow cells cmd."""
+"""Test for the clean illumina runs cmd."""
 
 import logging
 from pathlib import Path
@@ -11,7 +11,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 
-def test_clean_illumina_sequencing_runs_cmd(
+def test_clean_illumina_runs_cmd(
     cli_runner: CliRunner,
     clean_illumina_sequencing_runs_context: CGConfig,
     tmp_sequencing_run_to_clean: IlluminaRunDirectoryData,
@@ -52,9 +52,8 @@ def test_clean_illumina_sequencing_runs_cmd(
     assert "IlluminaCleanRunError" in caplog.text
 
 
-def test_clean_sequencing_runs_cmd_dry_run(
+def test_clean_illumina_runs_cmd_dry_run(
     cli_runner: CliRunner,
-    tmp_sequencing_run_to_clean: IlluminaRunDirectoryData,
     clean_illumina_sequencing_runs_context: CGConfig,
     tmp_sequencing_run_to_clean_path: Path,
     tmp_sequencing_run_not_to_clean_path: Path,
