@@ -25,9 +25,9 @@ class FlaskLims(LimsAPI):
     def init_app(self, app):
         config = {
             "lims": {
-                "host": app.config["LIMS_HOST"],
-                "username": app.config["LIMS_USERNAME"],
-                "password": app.config["LIMS_PASSWORD"],
+                "host": app.config["lims_host"],
+                "username": app.config["lims_username"],
+                "password": app.config["lims_password"],
             }
         }
         super(FlaskLims, self).__init__(config)
@@ -39,7 +39,7 @@ class FlaskStore(Store):
             self.init_app(app)
 
     def init_app(self, app):
-        uri = app.config["SQLALCHEMY_DATABASE_URI"]
+        uri = app.config["cg_sql_database_uri"]
         initialize_database(uri)
         super(FlaskStore, self).__init__()
 
@@ -57,9 +57,9 @@ class AnalysisClient(TrailblazerAPI):
             self.init_app(app)
 
     def init_app(self, app):
-        service_account: str = app.config["TRAILBLAZER_SERVICE_ACCOUNT"]
-        service_account_auth_file: str = app.config["TRAILBLAZER_SERVICE_ACCOUNT_AUTH_FILE"]
-        host: str = app.config["TRAILBLAZER_HOST"]
+        service_account: str = app.config["trailblazer_service_account"]
+        service_account_auth_file: str = app.config["trailblazer_service_account_auth_file"]
+        host: str = app.config["trailblazer_host"]
         config = {
             "trailblazer": {
                 "service_account": service_account,
