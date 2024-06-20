@@ -12,7 +12,12 @@ from cg.apps.lims import LimsAPI
 from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
-from cg.exc import FlowCellError, HousekeeperFileMissingError, SampleSheetError
+from cg.exc import (
+    FlowCellError,
+    HousekeeperFileMissingError,
+    SampleSheetContentError,
+    SampleSheetError,
+)
 from cg.io.controller import ReadFile, WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import (
     add_and_include_sample_sheet_path_to_housekeeper,
@@ -221,6 +226,12 @@ class SampleSheetAPI:
         try:
             self._use_sample_sheet_from_housekeeper(flow_cell)
             return
+        except SampleSheetContentError:
+            LOG.warning(
+                "Validation failed for manually modified sample sheet. Sample sheet will not "
+                "be regenerated. Manually run demultiplexing for this flow cell"
+            )
+            return
         except SampleSheetError:
             LOG.warning(
                 "It was not possible to use sample sheet from Housekeeper, "
@@ -228,6 +239,12 @@ class SampleSheetAPI:
             )
         try:
             self._use_flow_cell_sample_sheet(flow_cell)
+            return
+        except SampleSheetContentError:
+            LOG.warning(
+                "Validation failed for manually modified sample sheet. Sample sheet will not "
+                "be regenerated. Manually run demultiplexing for this flow cell"
+            )
             return
         except SampleSheetError:
             LOG.warning(

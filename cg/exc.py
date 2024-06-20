@@ -192,6 +192,10 @@ class SampleSheetError(CgError):
     """Raised when something is wrong with the sample sheet."""
 
 
+class SampleSheetContentError(CgError):
+    """Raised when something is wrong with the sample sheet content."""
+
+
 class ScoutUploadError(CgError):
     """Raised when uploading to Scout fails."""
 
