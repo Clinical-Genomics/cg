@@ -13,17 +13,18 @@ from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
-from tests.meta.clean.conftest import (
+from tests.store_helpers import StoreHelpers
+from tests.services.illumina_services.illumina_cleaning_services.conftest import (
+    tmp_clean_dir,
+    tmp_sequencing_run_to_clean,
+    tmp_sequencing_run_not_to_clean,
+    tmp_sequencing_run_to_clean_path,
+    tmp_sequencing_run_not_to_clean_path,
     housekeeper_api_with_illumina_seq_run_to_clean,
     hk_illumina_sequencing_run_to_clean_bundle,
-    tmp_sequencing_run_to_clean,
-    tmp_sequencing_run_to_clean_path,
     tmp_sample_sheet_clean_illumina_sequencing_run_path,
     hk_sample_bundle_for_illumina_sequencing_run_to_clean,
-    tmp_sequencing_run_not_to_clean_path,
-    tmp_clean_dir,
 )
-from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
