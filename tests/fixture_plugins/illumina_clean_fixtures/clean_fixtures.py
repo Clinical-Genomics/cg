@@ -31,6 +31,8 @@ def illumina_clean_service_can_be_removed(
         )
     )
     sequencing_run_to_clean.has_backup = True
+
+    # Remove a sample metric to fulfill the cleaning criteria
     sample_metric_to_delete = [
         metric
         for metric in sequencing_run_to_clean.sample_metrics
