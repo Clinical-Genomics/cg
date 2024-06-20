@@ -11,9 +11,10 @@ from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.constants import FileExtensions
 from cg.constants.constants import SARS_COV_REGEX, FileFormat
 from cg.exc import CgError
-from cg.io.controller import ReadFile
+from cg.io.controller import ReadFile, WriteFile
 from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
 from cg.store.models import Case, Sample
@@ -44,7 +45,26 @@ def remove_duplicate_dicts(dicts: list[list[dict]]) -> list[dict]:
     ]
 
 
-# content:
+def create_komplettering_reports(self, dicts: list[dict]) -> None:
+    LOG.info("Creating 'komplettering' reports")
+    unique_region_labs: set[str] = {dictionary["region_lab"] for dictionary in dicts}
+    LOG.info(f"Regions in batch: {unique_region_labs}")
+    for region_lab in unique_region_labs:
+        LOG.info(f"Aggregating data for {region_lab}")
+        region_lab_reports = [dictionary["region_lab"] == region_lab for dictionary in dicts]
+        if self._dry_run:
+            LOG.info(region_lab_reports)
+            continue
+        WriteFile.write_file_from_content(
+            content=region_lab_reports,
+            file_format=FileFormat.CSV,
+            file_path=Path(
+                self.daily_report_path,
+                f"{region_lab}_{self.current_datestr}_komplettering{FileExtensions.CSV}",
+            ),
+        )
+
+
 class FOHMUploadAPI:
     def __init__(self, config: CGConfig, dry_run: bool = False, datestr: str | None = None):
         self.config: CGConfig = config
@@ -175,6 +195,21 @@ class FOHMUploadAPI:
         """Creates dataframe with all csv files used in daily delivery"""
         dataframe_list = [pd.read_csv(filename, index_col=None, header=0) for filename in file_list]
         return pd.concat(dataframe_list, axis=0, ignore_index=True)
+
+    def add_internal_id(self, dicts: list[dict]) -> None:
+        """Add key for internal id to dicts."""
+        for dictionary in dicts:
+            dictionary["internal_id"] = self.status_db.get_sample_by_name(
+                name=dictionary["provnummer"]
+            ).internal_id
+
+    def add_region_lab(self, dicts: list[dict]) -> None:
+        """Add key for region lab to dicts."""
+        for dictionary in dicts:
+            dictionary["region_lab"] = (
+                f"""{self.lims_api.get_sample_attribute(lims_id=dictionary["internal_id"], key="region_code").split(' ')[0]}"""
+            )
+            f"""_{self.lims_api.get_sample_attribute(lims_id=dictionary["internal_id"], key="lab_code").split(' ')[0]}"""
 
     def append_metadata_to_aggregation_df(self) -> None:
         """
