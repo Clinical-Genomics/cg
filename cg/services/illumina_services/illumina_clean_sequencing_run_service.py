@@ -63,12 +63,14 @@ class IlluminaCleanSequencingRunsService:
             self.set_sample_sheet_path_from_housekeeper()
             if self.can_sequencing_run_directory_be_deleted():
                 if self.dry_run:
-                    LOG.debug(f"Dry run: Would have removed: {self.seq_run_dir_data.path}")
+                    LOG.debug(
+                        f"Dry run: Would have removed: {self.seq_run_dir_data.get_sequencing_runs_dir()}"
+                    )
                     return
-                remove_directory_and_contents(self.seq_run_dir_data.path)
+                remove_directory_and_contents(self.seq_run_dir_data.get_sequencing_runs_dir())
         except Exception as error:
             raise CleanIlluminaSequencingRunFailedError(
-                f"Flow cell with path {self.seq_run_dir_data.path} not removed: {repr(error)}"
+                f"Sequencing run with path {self.seq_run_dir_data.get_sequencing_runs_dir()} not removed: {repr(error)}"
             )
 
     def set_sample_sheet_path_from_housekeeper(self):
@@ -96,7 +98,7 @@ class IlluminaCleanSequencingRunsService:
     def is_directory_older_than_21_days(self) -> bool:
         """Check if a given directory is older than 21 days."""
         return is_directory_older_than_days_old(
-            directory_path=self.seq_run_dir_data.path,
+            directory_path=self.seq_run_dir_data.get_sequencing_runs_dir(),
             days_old=TWENTY_ONE_DAYS,
         )
 
