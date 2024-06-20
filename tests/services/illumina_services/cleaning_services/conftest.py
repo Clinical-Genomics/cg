@@ -9,6 +9,7 @@ from cg.services.illumina_services.cleaning_services.clean_runs_service import (
     IlluminaCleanRunsService,
 )
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.store.models import IlluminaSequencingRun, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -17,18 +18,24 @@ from tests.store_helpers import StoreHelpers
 def illumina_clean_service_can_be_removed(
     tmp_sequencing_run_to_clean_path: Path,
     store_with_illumina_sequencing_data: Store,
+    selected_novaseq_6000_pre_1_5_kits_sample_ids: str,
     housekeeper_api_with_illumina_seq_run_to_clean: HousekeeperAPI,
     tmp_sample_sheet_clean_illumina_sequencing_run_path: Path,
     tmp_sequencing_run_to_clean: IlluminaRunDirectoryData,
 ) -> IlluminaCleanRunsService:
-    """Return a IlluminaCleanSequencingRunsService with a sequencing run that can be removed."""
+    """Return a IlluminaCleanRunsService with a sequencing run that can be removed."""
     sequencing_run_to_clean: IlluminaSequencingRun = (
         store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
             tmp_sequencing_run_to_clean.id
         )
     )
     sequencing_run_to_clean.has_backup = True
-
+    sample_metric_to_delete = [
+        metric
+        for metric in sequencing_run_to_clean.sample_metrics
+        if metric.sample.internal_id == selected_novaseq_6000_pre_1_5_kits_sample_ids[1]
+    ]
+    store_with_illumina_sequencing_data.session.delete(sample_metric_to_delete[0])
     clean_flow_cell_api = IlluminaCleanRunsService(
         sequencing_run_path=tmp_sequencing_run_to_clean_path,
         status_db=store_with_illumina_sequencing_data,
@@ -47,7 +54,7 @@ def illumina_clean_service_can_not_be_removed(
     store_with_illumina_sequencing_data: Store,
     housekeeper_api_with_sequencing_run_not_to_clean: HousekeeperAPI,
 ) -> IlluminaCleanRunsService:
-    """Return a IlluminaCleanSequencingRunsService with a sequencing run that can not be removed."""
+    """Return a IlluminaCleanRunsService with a sequencing run that can not be removed."""
     return IlluminaCleanRunsService(
         sequencing_run_path=tmp_sequencing_run_not_to_clean_path,
         status_db=store_with_illumina_sequencing_data,

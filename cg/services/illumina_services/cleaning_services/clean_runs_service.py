@@ -202,5 +202,6 @@ class IlluminaCleanRunsService:
                 LOG.warning(
                     f"No files with tag {tag} found on flow cell {self.sequencing_run_dir_data.id}"
                 )
+                LOG.warning(f"Bundle: {bundle_name} not found in Housekeeper.")
                 return None
         return files

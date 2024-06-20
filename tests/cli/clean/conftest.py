@@ -213,16 +213,24 @@ def clean_illumina_sequencing_runs_context(
     tmp_sequencing_run_to_clean: IlluminaRunDirectoryData,
     store_with_illumina_sequencing_data: Store,
     housekeeper_api_with_illumina_seq_run_to_clean: HousekeeperAPI,
+    selected_novaseq_6000_pre_1_5_kits_sample_ids: list[str],
 ) -> CGConfig:
     cg_context.run_instruments.illumina.sequencing_runs_dir = tmp_clean_dir
     cg_context.run_instruments.illumina.demultiplexed_runs_dir = tmp_clean_dir
     cg_context.housekeeper_api_ = housekeeper_api_with_illumina_seq_run_to_clean
+
     sequencing_run: IlluminaSequencingRun = (
         store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
             tmp_sequencing_run_to_clean.id
         )
     )
     sequencing_run.has_backup = True
+    sample_metric_to_delete = [
+        metric
+        for metric in sequencing_run.sample_metrics
+        if metric.sample.internal_id == selected_novaseq_6000_pre_1_5_kits_sample_ids[1]
+    ]
+    store_with_illumina_sequencing_data.session.delete(sample_metric_to_delete[0])
     cg_context.status_db_ = store_with_illumina_sequencing_data
 
     return cg_context

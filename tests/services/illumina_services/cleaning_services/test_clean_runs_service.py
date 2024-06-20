@@ -187,7 +187,7 @@ def test_get_files_for_flow_cell_bundle(
     ids=["fastq", "spring", "spring_metadata"],
 )
 def test_get_files_for_samples_on_flow_cell_with_tag_missing_sample(
-    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
+    illumina_clean_service_can_not_be_removed: IlluminaCleanRunsService,
     helpers: StoreHelpers,
     tag: str,
     selected_novaseq_6000_pre_1_5_kits_sample_ids: list[str],
@@ -199,33 +199,35 @@ def test_get_files_for_samples_on_flow_cell_with_tag_missing_sample(
     # GIVEN a store with a sequencing run to be cleaned
 
     # GIVEN that the sequencing run has two samples
-    sample_to_clean: Sample = (
-        illumina_clean_service_can_be_removed.status_db.get_sample_by_internal_id(
+    first_sample: Sample = (
+        illumina_clean_service_can_not_be_removed.status_db.get_sample_by_internal_id(
             selected_novaseq_6000_pre_1_5_kits_sample_ids[0]
         )
     )
-    sample_not_to_clean: Sample = (
-        illumina_clean_service_can_be_removed.status_db.get_sample_by_internal_id(
+    second_sample: Sample = (
+        illumina_clean_service_can_not_be_removed.status_db.get_sample_by_internal_id(
             selected_novaseq_6000_pre_1_5_kits_sample_ids[1]
         )
     )
-    assert sample_to_clean
-    assert sample_not_to_clean
+    assert first_sample
+    assert second_sample
 
     # GIVEN that one of the samples is not in Housekeeper
-    hk_api: HousekeeperAPI = illumina_clean_service_can_be_removed.hk_api
-    assert not hk_api.bundle(sample_not_to_clean.internal_id)
+    hk_api: HousekeeperAPI = illumina_clean_service_can_not_be_removed.hk_api
+    assert not hk_api.bundle(second_sample.internal_id)
 
     # WHEN getting the sequencing run samples' files
     files: list[File] = (
-        illumina_clean_service_can_be_removed.get_files_for_samples_on_flow_cell_with_tag(tag=tag)
+        illumina_clean_service_can_not_be_removed.get_files_for_samples_on_flow_cell_with_tag(
+            tag=tag
+        )
     )
 
     # THEN files are returned
-    assert files
+    assert not files
 
     # THEN a warning is logged
-    assert f"Bundle: {sample_not_to_clean.internal_id} not found in Housekeeper" in caplog.text
+    assert f"Bundle: {first_sample.internal_id} not found in Housekeeper" in caplog.text
 
 
 def test_can_sequencing_run_be_deleted(
@@ -235,7 +237,7 @@ def test_can_sequencing_run_be_deleted(
     # GIVEN a sequencing run that can be deleted
 
     with mock.patch(
-        "cg.services.illumina_services.illumina_clean_sequencing_run_service.IlluminaCleanSequencingRunsService.is_directory_older_than_21_days",
+        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
         return_value=True,
     ):
         # WHEN checking that the sequencing run can be deleted
@@ -252,11 +254,11 @@ def test_can_sequencing_run_be_deleted_no_spring_with_fastq(
     # GIVEN a sequencing run that can be deleted
 
     with mock.patch(
-        "cg.services.illumina_services.illumina_clean_sequencing_run_service.IlluminaCleanSequencingRunsService.is_directory_older_than_21_days",
+        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
         return_value=True,
     ):
         with mock.patch(
-            "cg.services.illumina_services.illumina_clean_sequencing_run_service.IlluminaCleanSequencingRunsService.has_spring_meta_data_files_for_samples_in_housekeeper",
+            "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_spring_meta_data_files_for_samples_in_housekeeper",
             return_value=False,
         ):
             # WHEN checking that the sequencing run can be deleted
@@ -275,11 +277,11 @@ def test_can_sequencing_run_be_deleted_spring_no_fastq(
     # GIVEN a sequencing run that can be deleted
 
     with mock.patch(
-        "cg.services.illumina_services.illumina_clean_sequencing_run_service.IlluminaCleanSequencingRunsService.is_directory_older_than_21_days",
+        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
         return_value=True,
     ):
         with mock.patch(
-            "cg.services.illumina_services.illumina_clean_sequencing_run_service.IlluminaCleanSequencingRunsService.has_fastq_files_for_samples_in_housekeeper",
+            "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_fastq_files_for_samples_in_housekeeper",
             return_value=False,
         ):
             # WHEN checking that the sequencing run can be deleted
@@ -298,15 +300,15 @@ def test_can_sequencing_run_be_deleted_no_spring_no_fastq(
     # GIVEN a sequencing run that can be deleted
 
     with mock.patch(
-        "cg.services.illumina_services.illumina_clean_sequencing_run_service.IlluminaCleanSequencingRunsService.is_directory_older_than_21_days",
+        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
         return_value=True,
     ):
         with mock.patch(
-            "cg.services.illumina_services.illumina_clean_sequencing_run_service.IlluminaCleanSequencingRunsService.has_fastq_files_for_samples_in_housekeeper",
+            "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_fastq_files_for_samples_in_housekeeper",
             return_value=False,
         ):
             with mock.patch(
-                "cg.services.illumina_services.illumina_clean_sequencing_run_service.IlluminaCleanSequencingRunsService.has_spring_meta_data_files_for_samples_in_housekeeper",
+                "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_spring_meta_data_files_for_samples_in_housekeeper",
                 return_value=False,
             ):
                 # WHEN checking that the sequencing run can be deleted
@@ -327,7 +329,7 @@ def test_delete_sequencing_run_directory(
 
     # WHEN removing the sequencing run directory
     with mock.patch(
-        "cg.services.illumina_services.illumina_clean_sequencing_run_service.IlluminaCleanSequencingRunsService.is_directory_older_than_21_days",
+        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
         return_value=True,
     ):
         illumina_clean_service_can_be_removed.delete_run_directory()
