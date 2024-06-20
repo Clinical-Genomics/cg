@@ -61,7 +61,7 @@ class IlluminaCleanSequencingRunsService:
         """
         try:
             self.set_sample_sheet_path_from_housekeeper()
-            if self.can_sequencing_run_directory_be_deleted():
+            if self.can_run_directory_be_deleted():
                 if self.dry_run:
                     LOG.debug(
                         f"Dry run: Would have removed: {self.seq_run_dir_data.get_sequencing_runs_dir()}"
@@ -82,8 +82,8 @@ class IlluminaCleanSequencingRunsService:
         sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(self.seq_run_dir_data.id)
         self.seq_run_dir_data.set_sample_sheet_path_hk(sample_sheet_path)
 
-    def can_sequencing_run_directory_be_deleted(self) -> bool:
-        """Determine whether a flow cell directory can be deleted."""
+    def can_run_directory_be_deleted(self) -> bool:
+        """Determine whether a sequencing run or demultiplexed run can be deleted."""
         return all(
             [
                 self.is_directory_older_than_21_days(),

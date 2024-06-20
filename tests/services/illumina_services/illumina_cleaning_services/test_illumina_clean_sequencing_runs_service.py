@@ -241,9 +241,7 @@ def test_can_sequencing_run_be_deleted(
         return_value=True,
     ):
         # WHEN checking that the sequencing run can be deleted
-        can_be_deleted: bool = (
-            illumina_clean_service_can_be_removed.can_sequencing_run_directory_be_deleted()
-        )
+        can_be_deleted: bool = illumina_clean_service_can_be_removed.can_run_directory_be_deleted()
 
     # THEN the check whether the sequencing run can be deleted returns True
     assert can_be_deleted
@@ -265,7 +263,7 @@ def test_can_sequencing_run_be_deleted_no_spring_with_fastq(
         ):
             # WHEN checking that the sequencing run can be deleted
             can_be_deleted: bool = (
-                illumina_clean_service_can_be_removed.can_sequencing_run_directory_be_deleted()
+                illumina_clean_service_can_be_removed.can_run_directory_be_deleted()
             )
 
     # THEN the check whether the sequencing run can be deleted returns True
@@ -288,7 +286,7 @@ def test_can_sequencing_run_be_deleted_spring_no_fastq(
         ):
             # WHEN checking that the sequencing run can be deleted
             can_be_deleted: bool = (
-                illumina_clean_service_can_be_removed.can_sequencing_run_directory_be_deleted()
+                illumina_clean_service_can_be_removed.can_run_directory_be_deleted()
             )
 
     # THEN the check whether the sequencing run can be deleted returns True
@@ -317,7 +315,7 @@ def test_can_sequencing_run_be_deleted_no_spring_no_fastq(
 
                 # THEN a HousekeeperFileMissingError is raised
                 with pytest.raises(HousekeeperFileMissingError):
-                    illumina_clean_service_can_be_removed.can_sequencing_run_directory_be_deleted()
+                    illumina_clean_service_can_be_removed.can_run_directory_be_deleted()
 
 
 def test_delete_sequencing_run_directory(

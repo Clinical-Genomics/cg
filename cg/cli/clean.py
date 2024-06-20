@@ -255,11 +255,11 @@ def hk_bundle_files(
     LOG.info(f"Process freed {round(size_cleaned * 0.0000000001, 2)}GB. Dry run: {dry_run}")
 
 
-@clean.command("illumina-sequencing-runs")
+@clean.command("illumina-runs")
 @DRY_RUN
 @click.pass_obj
-def clean_illumina_sequencing_runs(context: CGConfig, dry_run: bool):
-    """Remove raw and demultiplexed illumina sequencing runs from the from hasta."""
+def clean_illumina_runs(context: CGConfig, dry_run: bool):
+    """Remove illumina sequencing and demultiplexed runs from hasta."""
 
     directories_to_check: list[Path] = []
     for path in [

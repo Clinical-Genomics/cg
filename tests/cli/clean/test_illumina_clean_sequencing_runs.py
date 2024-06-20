@@ -6,7 +6,7 @@ from unittest import mock
 
 from click.testing import CliRunner
 
-from cg.cli.clean import clean_illumina_sequencing_runs
+from cg.cli.clean import clean_illumina_runs
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
@@ -38,9 +38,7 @@ def test_clean_illumina_sequencing_runs_cmd(
         "cg.services.illumina_services.illumina_clean_sequencing_run_service.IlluminaCleanSequencingRunsService.is_directory_older_than_21_days",
         return_value=True,
     ):
-        result = cli_runner.invoke(
-            clean_illumina_sequencing_runs, obj=clean_illumina_sequencing_runs_context
-        )
+        result = cli_runner.invoke(clean_illumina_runs, obj=clean_illumina_sequencing_runs_context)
 
     # THEN assert it exits with success
     assert result.exit_code == 0
@@ -74,7 +72,7 @@ def test_clean_sequencing_runs_cmd_dry_run(
         return_value=True,
     ):
         result = cli_runner.invoke(
-            clean_illumina_sequencing_runs,
+            clean_illumina_runs,
             ["--dry-run"],
             obj=clean_illumina_sequencing_runs_context,
         )
