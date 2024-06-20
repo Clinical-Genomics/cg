@@ -23,19 +23,25 @@ from cg.utils.email import send_mail
 LOG = logging.getLogger(__name__)
 
 
-def create_daily_deliveries_csv(file_list: list[Path]) -> list[dict]:
+def create_daily_deliveries_csv(file_paths: list[Path]) -> list[list[dict]]:
     """Creates a list with all CSV files used in daily delivery."""
-    content = [
+    return [
         ReadFile.get_content_from_file(
-            file_format=FileFormat.CSV, file_path=file, read_to_dict=True
+            file_format=FileFormat.CSV, file_path=file_path, read_to_dict=True
         )
-        for file in file_list
+        for file_path in file_paths
     ]
-    all_rows = []
-    for file in content:
-        for row in file:
-            all_rows.append(row)
-    return [dict(row_tuple) for row_tuple in {tuple(row.items()) for row in all_rows}]
+
+
+def remove_duplicate_dicts(dicts: list[list[dict]]) -> list[dict]:
+    """Remove duplicate dict from list."""
+    all_dicts = []
+    for dictionary in dicts:
+        all_dicts.extend(iter(dictionary))
+    return [
+        dict(dictionary_tuple)
+        for dictionary_tuple in {tuple(dictionary.items()) for dictionary in all_dicts}
+    ]
 
 
 # content:
