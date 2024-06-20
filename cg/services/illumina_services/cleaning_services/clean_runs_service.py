@@ -1,4 +1,4 @@
-"""An API that handles the cleaning of flow cells."""
+"""Service to clean Illumina run directories."""
 
 import logging
 from pathlib import Path
@@ -9,7 +9,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS
 from cg.exc import (
-    CleanIlluminaSequencingRunFailedError,
+    IlluminaCleanRunError,
     HousekeeperBundleVersionMissingError,
     HousekeeperFileMissingError,
 )
@@ -25,9 +25,9 @@ from cg.utils.time import is_directory_older_than_days_old
 LOG = logging.getLogger(__name__)
 
 
-class IlluminaCleanSequencingRunsService:
+class IlluminaCleanRunsService:
     """
-    Handles the cleaning of illumina sequencing runs in the sequencing-runs and demultiplexed-runs directories.
+    Handles the cleaning of Illumina runs in the sequencing-runs and demultiplexed-runs directories.
     Requirements for cleaning:
             Sequencing run is older than 21 days
             Sequencing run is backed up
@@ -49,38 +49,42 @@ class IlluminaCleanSequencingRunsService:
     ):
         self.status_db: Store = status_db
         self.hk_api: HousekeeperAPI = housekeeper_api
-        self.seq_run_dir_data = IlluminaRunDirectoryData(sequencing_run_path=sequencing_run_path)
+        self.sequencing_run_dir_data = IlluminaRunDirectoryData(
+            sequencing_run_path=sequencing_run_path
+        )
         self.dry_run: bool = dry_run
         LOG.info(f"Trying to delete {sequencing_run_path}")
 
-    def delete_sequencing_run_directory(self) -> None:
+    def delete_run_directory(self) -> None:
         """
         Delete the sequencing runs and demultiplexed runs directory if it fulfills all requirements.
         Raises:
-            CleanIlluminaSequencingRunFailedError when any exception is caught
+            IlluminaCleanRunError when any exception is caught
         """
         try:
             self.set_sample_sheet_path_from_housekeeper()
             if self.can_run_directory_be_deleted():
                 if self.dry_run:
                     LOG.debug(
-                        f"Dry run: Would have removed: {self.seq_run_dir_data.get_sequencing_runs_dir()}"
+                        f"Dry run: Would have removed: {self.sequencing_run_dir_data.get_sequencing_runs_dir()}"
                     )
                     return
-                remove_directory_and_contents(self.seq_run_dir_data.get_sequencing_runs_dir())
+                remove_directory_and_contents(
+                    self.sequencing_run_dir_data.get_sequencing_runs_dir()
+                )
         except Exception as error:
-            raise CleanIlluminaSequencingRunFailedError(
-                f"Sequencing run with path {self.seq_run_dir_data.get_sequencing_runs_dir()} not removed: {repr(error)}"
+            raise IlluminaCleanRunError(
+                f"Sequencing run with path {self.sequencing_run_dir_data.get_sequencing_runs_dir()} not removed: {repr(error)}"
             )
 
     def set_sample_sheet_path_from_housekeeper(self):
         """
-        Set the sample sheet for a flow cell.
+        Set the sample sheet for a sequencing run.
         Raises:
             HousekeeperFileMissingError when the sample sheet is missing in Housekeeper
         """
-        sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(self.seq_run_dir_data.id)
-        self.seq_run_dir_data.set_sample_sheet_path_hk(sample_sheet_path)
+        sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(self.sequencing_run_dir_data.id)
+        self.sequencing_run_dir_data.set_sample_sheet_path_hk(sample_sheet_path)
 
     def can_run_directory_be_deleted(self) -> bool:
         """Determine whether a sequencing run or demultiplexed run can be deleted."""
@@ -98,12 +102,12 @@ class IlluminaCleanSequencingRunsService:
     def is_directory_older_than_21_days(self) -> bool:
         """Check if a given directory is older than 21 days."""
         return is_directory_older_than_days_old(
-            directory_path=self.seq_run_dir_data.get_sequencing_runs_dir(),
+            directory_path=self.sequencing_run_dir_data.get_sequencing_runs_dir(),
             days_old=TWENTY_ONE_DAYS,
         )
 
     def is_sequencing_run_in_statusdb(self) -> bool:
-        """Check if sequencing run is in statusdb."""
+        """Check if sequencing run is in StatusDB."""
         return bool(self.get_sequencing_run_from_status_db())
 
     def is_sequencing_run_backed_up(self) -> bool:
@@ -111,30 +115,30 @@ class IlluminaCleanSequencingRunsService:
         return self.get_sequencing_run_from_status_db().has_backup
 
     def has_sequencing_metrics_in_statusdb(self) -> bool:
-        """Check if a sequencing run has entries in the SampleLaneSequencingMetrics table."""
+        """Check if a sequencing run has entries in the IlluminaSampleSequencingMetrics table."""
         return bool(self.get_sequencing_metrics_for_sequencing_run())
 
     def has_sample_sheet_in_housekeeper(self) -> bool:
-        """Check if the sequencing run has a sample sheet in housekeeper."""
-        return bool(self.seq_run_dir_data.get_sample_sheet_path_hk())
+        """Check if the sequencing run has a sample sheet in Housekeeper."""
+        return bool(self.sequencing_run_dir_data.get_sample_sheet_path_hk())
 
     def has_fastq_files_for_samples_in_housekeeper(self) -> bool:
-        """Check if all samples on the sequencing run have fastq files in housekeeper."""
+        """Check if all samples on the sequencing run have fastq files in Housekeeper."""
         return bool(self.get_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.FASTQ))
 
     def has_spring_files_for_samples_in_housekeeper(self) -> bool:
-        """Check if all samples on the sequencing run have SPRING files in housekeeper."""
+        """Check if all samples on the sequencing run have SPRING files in Housekeeper."""
         return bool(self.get_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.SPRING))
 
     def has_spring_meta_data_files_for_samples_in_housekeeper(self) -> bool:
-        """Check if all samples on the sequencing run have SPRING metadata files in housekeeper."""
+        """Check if all samples on the sequencing run have SPRING metadata files in Housekeeper."""
         return bool(
             self.get_files_for_samples_on_flow_cell_with_tag(tag=SequencingFileTag.SPRING_METADATA)
         )
 
     def has_sample_fastq_or_spring_files_in_housekeeper(self) -> bool:
         """
-        Check if a flow cell has fastq or spring files in housekeeper.
+        Check if a flow cell has fastq or spring files in Housekeeper.
         Raises:
             HousekeeperFileMissingError
         """
@@ -143,7 +147,7 @@ class IlluminaCleanSequencingRunsService:
             and self.has_spring_meta_data_files_for_samples_in_housekeeper()
         ):
             raise HousekeeperFileMissingError(
-                f"sequencing run {self.seq_run_dir_data.id} is missing fastq and spring files for some samples."
+                f"sequencing run {self.sequencing_run_dir_data.id} is missing fastq and spring files for some samples."
             )
         return True
 
@@ -155,12 +159,12 @@ class IlluminaCleanSequencingRunsService:
         """
         sequencing_run: IlluminaSequencingRun = (
             self.status_db.get_illumina_sequencing_run_by_device_internal_id(
-                self.seq_run_dir_data.id
+                self.sequencing_run_dir_data.id
             )
         )
         if not sequencing_run:
             raise ValueError(
-                f"Sequencing run for flow cell {self.seq_run_dir_data.id} not found in StatusDB."
+                f"Sequencing run for flow cell {self.sequencing_run_dir_data.id} not found in StatusDB."
             )
         return sequencing_run
 
@@ -176,7 +180,7 @@ class IlluminaCleanSequencingRunsService:
         metrics: list[IlluminaSampleSequencingMetrics] = sequencing_run.sample_metrics
         if not metrics:
             raise ValueError(
-                f"No sample sequencing metrics found for {self.seq_run_dir_data.id} in StatusDB."
+                f"No sample sequencing metrics found for {self.sequencing_run_dir_data.id} in StatusDB."
             )
         return metrics
 
@@ -191,12 +195,12 @@ class IlluminaCleanSequencingRunsService:
             try:
                 files.extend(
                     self.hk_api.get_files_from_latest_version(
-                        bundle_name=bundle_name, tags=[tag, self.seq_run_dir_data.id]
+                        bundle_name=bundle_name, tags=[tag, self.sequencing_run_dir_data.id]
                     )
                 )
             except HousekeeperBundleVersionMissingError:
-                continue
-        if not files:
-            LOG.warning(f"No files with tag {tag} found on flow cell {self.seq_run_dir_data.id}")
-            return None
+                LOG.warning(
+                    f"No files with tag {tag} found on flow cell {self.sequencing_run_dir_data.id}"
+                )
+                return None
         return files

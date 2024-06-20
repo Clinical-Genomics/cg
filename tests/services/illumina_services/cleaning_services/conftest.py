@@ -5,8 +5,8 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.services.illumina_services.illumina_clean_sequencing_run_service import (
-    IlluminaCleanSequencingRunsService,
+from cg.services.illumina_services.cleaning_services.clean_runs_service import (
+    IlluminaCleanRunsService,
 )
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.store.store import Store
@@ -20,7 +20,7 @@ def illumina_clean_service_can_be_removed(
     housekeeper_api_with_illumina_seq_run_to_clean: HousekeeperAPI,
     tmp_sample_sheet_clean_illumina_sequencing_run_path: Path,
     tmp_sequencing_run_to_clean: IlluminaRunDirectoryData,
-) -> IlluminaCleanSequencingRunsService:
+) -> IlluminaCleanRunsService:
     """Return a IlluminaCleanSequencingRunsService with a sequencing run that can be removed."""
     sequencing_run_to_clean: IlluminaSequencingRun = (
         store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
@@ -29,13 +29,13 @@ def illumina_clean_service_can_be_removed(
     )
     sequencing_run_to_clean.has_backup = True
 
-    clean_flow_cell_api = IlluminaCleanSequencingRunsService(
+    clean_flow_cell_api = IlluminaCleanRunsService(
         sequencing_run_path=tmp_sequencing_run_to_clean_path,
         status_db=store_with_illumina_sequencing_data,
         housekeeper_api=housekeeper_api_with_illumina_seq_run_to_clean,
         dry_run=False,
     )
-    clean_flow_cell_api.seq_run_dir_data._sample_sheet_path_hk = (
+    clean_flow_cell_api.sequencing_run_dir_data._sample_sheet_path_hk = (
         tmp_sample_sheet_clean_illumina_sequencing_run_path
     )
     return clean_flow_cell_api
@@ -46,9 +46,9 @@ def illumina_clean_service_can_not_be_removed(
     tmp_sequencing_run_not_to_clean_path: Path,
     store_with_illumina_sequencing_data: Store,
     housekeeper_api_with_sequencing_run_not_to_clean: HousekeeperAPI,
-) -> IlluminaCleanSequencingRunsService:
+) -> IlluminaCleanRunsService:
     """Return a IlluminaCleanSequencingRunsService with a sequencing run that can not be removed."""
-    return IlluminaCleanSequencingRunsService(
+    return IlluminaCleanRunsService(
         sequencing_run_path=tmp_sequencing_run_not_to_clean_path,
         status_db=store_with_illumina_sequencing_data,
         housekeeper_api=housekeeper_api_with_sequencing_run_not_to_clean,

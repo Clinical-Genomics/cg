@@ -11,22 +11,20 @@ from housekeeper.store.models import File
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS_IN_SECONDS
-from cg.exc import CleanIlluminaSequencingRunFailedError, HousekeeperFileMissingError
-from cg.services.illumina_services.illumina_clean_sequencing_run_service import (
-    IlluminaCleanSequencingRunsService,
+from cg.exc import IlluminaCleanRunError, HousekeeperFileMissingError
+from cg.services.illumina_services.cleaning_services.clean_runs_service import (
+    IlluminaCleanRunsService,
 )
 from cg.store.models import (
-    Flowcell,
     Sample,
     IlluminaSequencingRun,
     IlluminaSampleSequencingMetrics,
 )
-from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
 def test_get_sequencing_run_from_statusdb(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
 ):
     """Test to get a sequencing run from statusdb."""
 
@@ -42,7 +40,7 @@ def test_get_sequencing_run_from_statusdb(
 
 
 def test_is_sequencing_run_in_statusdb(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
 ):
     """Test to check that a sequencing run is in statusdb."""
     # GIVEN a clean illumina clean sequencing runs service with a store that contains a sequencing run
@@ -55,7 +53,7 @@ def test_is_sequencing_run_in_statusdb(
 
 
 def test_is_sequencing_run_backed_up(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
 ):
     """Test to check that a sequencing run has been backed up."""
     # GIVEN a clean illumina clean sequencing runs service with a sequencing run that has been backed up
@@ -68,7 +66,7 @@ def test_is_sequencing_run_backed_up(
 
 
 def test_is_not_sequencing_run_backed_up(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
 ):
     """Test to check that a sequencing run has been backed up."""
     # GIVEN a clean illumina clean sequencing runs service with a sequencing run that has not been backed up
@@ -82,7 +80,7 @@ def test_is_not_sequencing_run_backed_up(
 
 
 def test_get_sequencing_metrics_for_sequencing_run_from_statusdb(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
 ):
     """Test to get a sequencing metrics for a sequencing run from statusdb."""
 
@@ -98,7 +96,7 @@ def test_get_sequencing_metrics_for_sequencing_run_from_statusdb(
 
 
 def test_has_sequencing_metrics_in_statusdb(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
 ):
     """Test to check that a sequencing run has IlluminaSampleSequencingMetrics entries in statusdb."""
 
@@ -112,7 +110,7 @@ def test_has_sequencing_metrics_in_statusdb(
 
 
 def test_is_directory_older_than_21_days_pass(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
 ):
     """Test to check whether a directory is older than 21 days."""
 
@@ -133,7 +131,7 @@ def test_is_directory_older_than_21_days_pass(
 
 
 def test_is_directory_older_than_21_days_fail(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
 ):
     """Test to check whether a directory is older than 21 days."""
 
@@ -149,7 +147,7 @@ def test_is_directory_older_than_21_days_fail(
 
 
 def test_has_sample_sheet_in_housekeeper(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
 ):
     """Test to check whether a sequencing run has a sample sheet in housekeeper."""
 
@@ -168,7 +166,7 @@ def test_has_sample_sheet_in_housekeeper(
     ids=["fastq", "spring", "spring_metadata"],
 )
 def test_get_files_for_flow_cell_bundle(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService, tag: str
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService, tag: str
 ):
     """Test to get files for a sequencing run bundle from housekeeper."""
 
@@ -189,7 +187,7 @@ def test_get_files_for_flow_cell_bundle(
     ids=["fastq", "spring", "spring_metadata"],
 )
 def test_get_files_for_samples_on_flow_cell_with_tag_missing_sample(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
     helpers: StoreHelpers,
     tag: str,
     selected_novaseq_6000_pre_1_5_kits_sample_ids: list[str],
@@ -231,7 +229,7 @@ def test_get_files_for_samples_on_flow_cell_with_tag_missing_sample(
 
 
 def test_can_sequencing_run_be_deleted(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
 ):
     """Test the sequencing run can be deleted check."""
     # GIVEN a sequencing run that can be deleted
@@ -248,7 +246,7 @@ def test_can_sequencing_run_be_deleted(
 
 
 def test_can_sequencing_run_be_deleted_no_spring_with_fastq(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
 ):
     """Test that a sequencing run can be deleted when it has fastq files but no spring files."""
     # GIVEN a sequencing run that can be deleted
@@ -271,7 +269,7 @@ def test_can_sequencing_run_be_deleted_no_spring_with_fastq(
 
 
 def test_can_sequencing_run_be_deleted_spring_no_fastq(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
 ):
     """Test that a sequencing run can be deleted when it has spring files but no fastq files."""
     # GIVEN a sequencing run that can be deleted
@@ -294,7 +292,7 @@ def test_can_sequencing_run_be_deleted_spring_no_fastq(
 
 
 def test_can_sequencing_run_be_deleted_no_spring_no_fastq(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
 ):
     """Test that a sequencing run can not be deleted when it has no spring files and no fastq files."""
     # GIVEN a sequencing run that can be deleted
@@ -319,51 +317,53 @@ def test_can_sequencing_run_be_deleted_no_spring_no_fastq(
 
 
 def test_delete_sequencing_run_directory(
-    illumina_clean_service_can_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_be_removed: IlluminaCleanRunsService,
 ):
     """Test that a sequencing run directory is removed."""
     # GIVEN a sequencing run that can be removed
 
     # GIVEN that the sequencing run directory exists
-    assert illumina_clean_service_can_be_removed.seq_run_dir_data.path.exists()
+    assert illumina_clean_service_can_be_removed.sequencing_run_dir_data.path.exists()
 
     # WHEN removing the sequencing run directory
     with mock.patch(
         "cg.services.illumina_services.illumina_clean_sequencing_run_service.IlluminaCleanSequencingRunsService.is_directory_older_than_21_days",
         return_value=True,
     ):
-        illumina_clean_service_can_be_removed.delete_sequencing_run_directory()
+        illumina_clean_service_can_be_removed.delete_run_directory()
 
     # THEN the sequencing run directory is removed
-    assert not illumina_clean_service_can_be_removed.seq_run_dir_data.path.exists()
+    assert not illumina_clean_service_can_be_removed.sequencing_run_dir_data.path.exists()
 
 
 def test_delete_sequencing_run_directory_can_not_be_deleted(
-    illumina_clean_service_can_not_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_not_be_removed: IlluminaCleanRunsService,
 ):
     """Test delete a sequencing run that does not pass all checks."""
     # GIVEN a sequencing run that should not be removed.
 
     # GIVEN that the sequencing run directory exists
-    assert illumina_clean_service_can_not_be_removed.seq_run_dir_data.path.exists()
+    assert illumina_clean_service_can_not_be_removed.sequencing_run_dir_data.path.exists()
 
     # WHEN trying to remove the sequencing run
-    with pytest.raises(CleanIlluminaSequencingRunFailedError):
-        illumina_clean_service_can_not_be_removed.delete_sequencing_run_directory()
+    with pytest.raises(IlluminaCleanRunError):
+        illumina_clean_service_can_not_be_removed.delete_run_directory()
 
     # THEN the sequencing run directory still exists
-    illumina_clean_service_can_not_be_removed.seq_run_dir_data.path.exists()
+    illumina_clean_service_can_not_be_removed.sequencing_run_dir_data.path.exists()
 
 
 def test_get_sequencing_run_from_statusdb_does_not_exist(
-    illumina_clean_service_can_not_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_not_be_removed: IlluminaCleanRunsService,
 ):
     """Test retrieving a sequencing run from statusDB that does not exist."""
     # GIVEN a illumina clean sequencing runs service with a sequencing run that is not in statusDB
-    illumina_clean_service_can_not_be_removed.seq_run_dir_data.id = "flow_cell_does_not_exist"
+    illumina_clean_service_can_not_be_removed.sequencing_run_dir_data.id = (
+        "flow_cell_does_not_exist"
+    )
 
     assert not illumina_clean_service_can_not_be_removed.status_db.get_illumina_sequencing_run_by_device_internal_id(
-        illumina_clean_service_can_not_be_removed.seq_run_dir_data.id
+        illumina_clean_service_can_not_be_removed.sequencing_run_dir_data.id
     )
 
     # WHEN retrieving the sequencing run from statusDB
@@ -374,7 +374,7 @@ def test_get_sequencing_run_from_statusdb_does_not_exist(
 
 
 def test_sequencing_run_has_not_fastq_files_in_housekeeper(
-    illumina_clean_service_can_not_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_not_be_removed: IlluminaCleanRunsService,
     caplog,
 ):
     """Test to check wether a sequencing run has files in Housekeeper."""
@@ -391,7 +391,7 @@ def test_sequencing_run_has_not_fastq_files_in_housekeeper(
 
 
 def test_sequencing_run_has_not_spring_files_in_housekeeper(
-    illumina_clean_service_can_not_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_not_be_removed: IlluminaCleanRunsService,
     caplog,
 ):
     """Test to check whether a sequencing run has files in Housekeeper."""
@@ -408,7 +408,7 @@ def test_sequencing_run_has_not_spring_files_in_housekeeper(
 
 
 def test_sequencing_run_has_not_spring_meta_data_files_in_housekeeper(
-    illumina_clean_service_can_not_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_not_be_removed: IlluminaCleanRunsService,
     caplog,
 ):
     """Test to check whether a sequencing run has files in Housekeeper."""
@@ -426,7 +426,7 @@ def test_sequencing_run_has_not_spring_meta_data_files_in_housekeeper(
 
 
 def test_has_no_sample_files_in_housekeeper(
-    illumina_clean_service_can_not_be_removed: IlluminaCleanSequencingRunsService,
+    illumina_clean_service_can_not_be_removed: IlluminaCleanRunsService,
 ):
     # GIVEN a sequencing run that has entries in StatusDB but does not have any files in Housekeeper for its samples
 

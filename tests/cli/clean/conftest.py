@@ -14,7 +14,7 @@ from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirecto
 from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
-from tests.services.illumina_services.illumina_cleaning_services.conftest import (
+from tests.services.illumina_services.cleaning_services.conftest import (
     tmp_clean_dir,
     tmp_sequencing_run_to_clean,
     tmp_sequencing_run_not_to_clean,
