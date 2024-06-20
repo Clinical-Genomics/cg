@@ -102,7 +102,7 @@ class Chanjo2API:
     def get_coverage_statistics(
         self, coverage_file_path, intervals_bed_path, completeness_thresholds
     ):
-        endpoint = f"{self.base_url}/coverage/d4/interval_file/"
+        endpoint = f"{self.base_url}/coverage/d4/genes/summary"
         headers = {"accept": "application/json", "Content-Type": "application/json"}
         payload = {
             "coverage_file_path": coverage_file_path,
@@ -117,28 +117,3 @@ class Chanjo2API:
 
     def sample_coverage(self, sample_id, panel_genes):
         pass
-
-
-# Example usage:
-if __name__ == "__main__":
-    configuration = {
-        "chanjo": {"config_path": "/path/to/chanjo/config", "binary_path": "/path/to/chanjo/binary"}
-    }
-    api = Chanjo2API(base_url="http://localhost:8000", configuration=config)
-    coverage_file_path = "https://d4-format-testing.s3.us-west-1.amazonaws.com/hg002.d4"
-    intervals_bed_path = "<path-to-109_green.bed>"
-    completeness_thresholds = [10, 20, 30]
-
-    try:
-        result = api.get_coverage_statistics(
-            coverage_file_path, intervals_bed_path, completeness_thresholds
-        )
-        print(result)
-    except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
-
-    try:
-        local_result = api.run_local_coverage_calculation(sample_id, panel_genes)
-        print(local_result)
-    except Exception as e:
-        print(f"An error occurred with local calculation: {e}")
