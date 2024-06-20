@@ -10,16 +10,18 @@ from cg.constants import Workflow
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
 from tests.meta.clean.conftest import (
-    hk_flow_cell_to_clean_bundle,
-    hk_sample_bundle_for_flow_cell_to_clean,
-    housekeeper_api_with_flow_cell_to_clean,
-    store_with_flow_cell_to_clean,
-    tmp_flow_cell_not_to_clean_path,
-    tmp_flow_cell_to_clean,
-    tmp_flow_cell_to_clean_path,
-    tmp_sample_sheet_clean_flow_cell_path,
+    housekeeper_api_with_illumina_seq_run_to_clean,
+    hk_illumina_sequencing_run_to_clean_bundle,
+    tmp_sequencing_run_to_clean,
+    tmp_sequencing_run_to_clean_path,
+    tmp_sample_sheet_clean_illumina_sequencing_run_path,
+    hk_sample_bundle_for_illumina_sequencing_run_to_clean,
+    tmp_sequencing_run_not_to_clean_path,
+    tmp_clean_dir,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -204,18 +206,22 @@ def clean_context_microsalt(
 
 
 @pytest.fixture(scope="function")
-def clean_flow_cells_context(
+def clean_illumina_sequencing_runs_context(
     cg_context: CGConfig,
-    tmp_illumina_sequencing_runs_directory,
-    tmp_illumina_demultiplexed_flow_cells_directory,
-    store_with_flow_cell_to_clean: Store,
-    housekeeper_api_with_flow_cell_to_clean: HousekeeperAPI,
+    tmp_clean_dir: Path,
+    tmp_sequencing_run_to_clean: IlluminaRunDirectoryData,
+    store_with_illumina_sequencing_data: Store,
+    housekeeper_api_with_illumina_seq_run_to_clean: HousekeeperAPI,
 ) -> CGConfig:
-    cg_context.run_instruments.illumina.sequencing_runs_dir = tmp_illumina_sequencing_runs_directory
-    cg_context.run_instruments.illumina.demultiplexed_runs_dir = (
-        tmp_illumina_demultiplexed_flow_cells_directory
+    cg_context.run_instruments.illumina.sequencing_runs_dir = tmp_clean_dir
+    cg_context.run_instruments.illumina.demultiplexed_runs_dir = tmp_clean_dir
+    cg_context.housekeeper_api_ = housekeeper_api_with_illumina_seq_run_to_clean
+    sequencing_run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            tmp_sequencing_run_to_clean.id
+        )
     )
-    cg_context.housekeeper_api_ = housekeeper_api_with_flow_cell_to_clean
-    cg_context.status_db_ = store_with_flow_cell_to_clean
+    sequencing_run.has_backup = True
+    cg_context.status_db_ = store_with_illumina_sequencing_data
 
     return cg_context
