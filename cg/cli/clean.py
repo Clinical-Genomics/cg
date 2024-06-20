@@ -27,7 +27,7 @@ from cg.cli.workflow.commands import (
 from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION
 from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
-from cg.exc import CleanFlowCellFailedError, FlowCellError
+from cg.exc import CleanIlluminaSequencingRunFailedError, FlowCellError
 from cg.meta.clean.api import CleanAPI
 from cg.services.illumina_services.illumina_clean_sequencing_run_service import (
     IlluminaCleanSequencingRunsService,
@@ -278,7 +278,7 @@ def clean_illumina_sequencing_runs(context: CGConfig, dry_run: bool):
                 dry_run=dry_run,
             )
             clean_service.delete_sequencing_run_directory()
-        except (CleanFlowCellFailedError, FlowCellError) as error:
+        except (CleanIlluminaSequencingRunFailedError, FlowCellError) as error:
             LOG.error(repr(error))
             continue
 

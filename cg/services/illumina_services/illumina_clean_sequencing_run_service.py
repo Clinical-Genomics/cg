@@ -9,14 +9,12 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS
 from cg.exc import (
-    CleanFlowCellFailedError,
+    CleanIlluminaSequencingRunFailedError,
     HousekeeperBundleVersionMissingError,
     HousekeeperFileMissingError,
 )
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.store.models import (
-    Flowcell,
-    SampleLaneSequencingMetrics,
     IlluminaSequencingRun,
     IlluminaSampleSequencingMetrics,
 )
@@ -59,7 +57,7 @@ class IlluminaCleanSequencingRunsService:
         """
         Delete the sequencing runs and demultiplexed runs directory if it fulfills all requirements.
         Raises:
-            CleanFlowCellFailedError when any exception is caught
+            CleanIlluminaSequencingRunFailedError when any exception is caught
         """
         try:
             self.set_sample_sheet_path_from_housekeeper()
@@ -69,7 +67,7 @@ class IlluminaCleanSequencingRunsService:
                     return
                 remove_directory_and_contents(self.seq_run_dir_data.path)
         except Exception as error:
-            raise CleanFlowCellFailedError(
+            raise CleanIlluminaSequencingRunFailedError(
                 f"Flow cell with path {self.seq_run_dir_data.path} not removed: {repr(error)}"
             )
 

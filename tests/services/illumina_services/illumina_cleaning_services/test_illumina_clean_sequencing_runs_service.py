@@ -11,7 +11,7 @@ from housekeeper.store.models import File
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.time import TWENTY_ONE_DAYS_IN_SECONDS
-from cg.exc import CleanFlowCellFailedError, HousekeeperFileMissingError
+from cg.exc import CleanIlluminaSequencingRunFailedError, HousekeeperFileMissingError
 from cg.services.illumina_services.illumina_clean_sequencing_run_service import (
     IlluminaCleanSequencingRunsService,
 )
@@ -350,7 +350,7 @@ def test_delete_sequencing_run_directory_can_not_be_deleted(
     assert illumina_clean_service_can_not_be_removed.seq_run_dir_data.path.exists()
 
     # WHEN trying to remove the sequencing run
-    with pytest.raises(CleanFlowCellFailedError):
+    with pytest.raises(CleanIlluminaSequencingRunFailedError):
         illumina_clean_service_can_not_be_removed.delete_sequencing_run_directory()
 
     # THEN the sequencing run directory still exists
