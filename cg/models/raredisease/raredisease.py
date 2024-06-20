@@ -3,6 +3,7 @@ from enum import StrEnum
 from pydantic import BaseModel
 
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
+from cg.models.deliverables.metric_deliverables import MetricsDeliverables
 
 
 class RarediseaseQCMetrics(BaseModel):

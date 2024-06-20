@@ -6,9 +6,10 @@ from housekeeper.store.models import File, Version
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import FileFormat, PrepCategory, Workflow
-from cg.constants.housekeeper_tags import HkMipAnalysisTag
+from cg.constants.housekeeper_tags import HkMipAnalysisTag, RarediseaseAnalysisTag
 from cg.constants.subject import Sex
 from cg.io.controller import ReadFile
+from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.store.models import Analysis, Case, Sample
 
@@ -73,15 +74,15 @@ class UploadGenotypesAPI(object):
         return samples_sex
 
     def _get_samples_sex_raredisease(self, case_obj: Case, hk_version: Version) -> dict:
+        qc_metrics_file = self.get_qcmetrics_file_raredisease(hk_version)
         samples_sex = {}
         for link_obj in case_obj.links:
             sample_id = link_obj.sample.internal_id
             samples_sex[sample_id] = {
                 "pedigree": link_obj.sample.sex,
-                "analysis": Sex.UNKNOWN,
+                "analysis": self.analysis_sex_raredisease(qc_metrics_file, sample_id=sample_id),
             }
         return samples_sex
-
 
     def _get_samples_sex_balsamic(self, case_obj: Case) -> dict:
         samples_sex = {}
@@ -103,6 +104,18 @@ class UploadGenotypesAPI(object):
             for sample_id_metric in qc_metrics.sample_id_metrics
         }
 
+    def analysis_sex_raredisease(self, qc_metrics_file: Path, sample_id: Sample) -> dict:
+        """Fetch analysis sex for each sample of an analysis."""
+        qc_metrics: MetricsBase = self.get_parsed_qc_metrics_data_raredisease(qc_metrics_file)
+        return next(
+            (
+                entry
+                for entry in qc_metrics
+                if entry.get("id") == sample_id and entry.get("name") == "predicted_sex_sex_check"
+            ),
+            None,
+        )
+
     def get_bcf_file(self, hk_version_obj: Version) -> File:
         """Fetch a bcf file and return the file object"""
         genotype_files: list = self._get_genotype_files(version_id=hk_version_obj.id)
@@ -120,6 +133,14 @@ class UploadGenotypesAPI(object):
         LOG.debug(f"Found qc metrics file {hk_qcmetrics.full_path}")
         return Path(hk_qcmetrics.full_path)
 
+    def get_qcmetrics_file_raredisease(self, hk_version_obj: Version) -> Path:
+        """Fetch a qc_metrics file and return the path"""
+        hk_qcmetrics = self.hk.files(
+            version=hk_version_obj.id, tags=RarediseaseAnalysisTag.QC_METRICS
+        ).first()
+        LOG.debug(f"Found qc metrics file {hk_qcmetrics.full_path}")
+        return Path(hk_qcmetrics.full_path)
+
     @staticmethod
     def get_parsed_qc_metrics_data(qc_metrics: Path) -> MIPMetricsDeliverables:
         """Parse the information from a qc metrics file"""
@@ -127,6 +148,14 @@ class UploadGenotypesAPI(object):
             file_format=FileFormat.YAML, file_path=qc_metrics
         )
         return MIPMetricsDeliverables(**qcmetrics_raw)
+
+    @staticmethod
+    def get_parsed_qc_metrics_data_raredisease(qc_metrics: Path) -> MetricsBase:
+        """Parse the information from a qc metrics file"""
+        qcmetrics_raw: dict = ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML, file_path=qc_metrics
+        )
+        return MetricsBase(**qcmetrics_raw)
 
     def upload(self, data: dict, replace: bool = False):
         """Upload data about genotypes for a family of samples."""
