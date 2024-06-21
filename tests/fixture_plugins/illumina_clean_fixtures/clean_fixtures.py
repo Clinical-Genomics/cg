@@ -69,7 +69,7 @@ def illumina_clean_service_can_not_be_removed(
 @pytest.fixture(scope="function")
 def tmp_clean_dir(tmp_path: Path) -> Path:
     """Return a temporary directory for cleaning."""
-    clean_path = tmp_path / "clean"
+    clean_path = Path(tmp_path, "clean")
     clean_path.mkdir()
     return clean_path
 
@@ -79,7 +79,7 @@ def tmp_sequencing_run_to_clean_path(
     tmp_novaseq_6000_pre_1_5_kits_flow_cell_path: Path, tmp_clean_dir: Path
 ) -> Path:
     """Returns the path to a sequencing run fulfilling all cleaning criteria."""
-    clean_seq_run_path = tmp_clean_dir / tmp_novaseq_6000_pre_1_5_kits_flow_cell_path.name
+    clean_seq_run_path = Path(tmp_clean_dir, tmp_novaseq_6000_pre_1_5_kits_flow_cell_path.name)
     clean_seq_run_path.mkdir()
     return clean_seq_run_path
 
@@ -108,7 +108,7 @@ def tmp_sequencing_run_not_to_clean(
 
 @pytest.fixture(scope="session")
 def tmp_sample_sheet_clean_illumina_sequencing_run_path(tmp_path_factory) -> Path:
-    sample_sheet_path = tmp_path_factory.mktemp("SampleSheet.csv")
+    sample_sheet_path: Path = tmp_path_factory.mktemp("SampleSheet.csv")
     return sample_sheet_path
 
 
