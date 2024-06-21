@@ -28,7 +28,7 @@ def test_get_sequencing_run_from_statusdb(
 ):
     """Test to get a sequencing run from statusdb."""
 
-    # GIVEN a clean illumina clean sequencing runs service with a store that contains a sequencing run
+    # GIVEN an Illumina clean sequencing runs service with a store that contains a sequencing run
 
     # WHEN retrieving the sequencing run from the store
     sequencing_run: IlluminaSequencingRun = (
