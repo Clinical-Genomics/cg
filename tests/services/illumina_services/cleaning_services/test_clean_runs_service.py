@@ -299,18 +299,13 @@ def test_can_sequencing_run_be_deleted_no_spring_no_fastq(
     """Test that a sequencing run can not be deleted when it has no spring files and no fastq files."""
     # GIVEN a sequencing run that can be deleted
 
-    with mock.patch(
-        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
+    with mock.patch(  "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
         return_value=True,
+    ), with mock.patch(     "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_fastq_files_for_samples_in_housekeeper",
+        return_value=False,
+    ), with mock.patch(            "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_spring_meta_data_files_for_samples_in_housekeeper",
+        return_value=False,
     ):
-        with mock.patch(
-            "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_fastq_files_for_samples_in_housekeeper",
-            return_value=False,
-        ):
-            with mock.patch(
-                "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_spring_meta_data_files_for_samples_in_housekeeper",
-                return_value=False,
-            ):
                 # WHEN checking that the sequencing run can be deleted
 
                 # THEN a HousekeeperFileMissingError is raised
