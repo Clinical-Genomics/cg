@@ -56,9 +56,9 @@ def validate_fohm_reports(reports: list[dict]) -> list[FohmReport]:
     return fohm_reports
 
 
-def get_kompletterings_reports(reports: list[dict]) -> list[dict]:
+def get_kompletterings_reports(reports: list[FohmReport]) -> list[FohmReport]:
     """Return all "kompleterings" reports from multiple cases."""
-    return [report for report in reports if re.search(SARS_COV_REGEX, report["provnummer"])]
+    return [report for report in reports if re.search(SARS_COV_REGEX, report.sample_number)]
 
 
 def get_pangolin_reports(reports: list[dict]) -> list[dict]:
