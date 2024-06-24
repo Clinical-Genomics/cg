@@ -98,7 +98,7 @@ class UploadGenotypesAPI(object):
 
     def analysis_sex(self, qc_metrics_file: Path) -> dict:
         """Fetch analysis sex for each sample of an analysis."""
-        qc_metrics: MIPMetricsDeliverables = self.get_parsed_qc_metrics_data(qc_metrics_file)
+        qc_metrics: MIPMetricsDeliverables = self.get_parsed_qc_metrics_data_mip(qc_metrics_file)
         return {
             sample_id_metric.sample_id: sample_id_metric.predicted_sex
             for sample_id_metric in qc_metrics.sample_id_metrics
@@ -107,14 +107,11 @@ class UploadGenotypesAPI(object):
     def analysis_sex_raredisease(self, qc_metrics_file: Path, sample_id: Sample) -> dict:
         """Fetch analysis sex for each sample of an analysis."""
         qc_metrics: list[MetricsBase] = self.get_parsed_qc_metrics_data_raredisease(qc_metrics_file)
-        return next(
-            (
-                entry
-                for entry in qc_metrics
-                if entry.get("id") == sample_id and entry.get("name") == "predicted_sex_sex_check"
-            ),
-            None,
-        )
+        return {
+            metric.id: metric.name
+            for metric in qc_metrics
+            if metric.name == "predicted_sex_sex_check" and metric.id == sample_id
+        }
 
     def get_bcf_file(self, hk_version_obj: Version) -> File:
         """Fetch a bcf file and return the file object"""
@@ -142,7 +139,7 @@ class UploadGenotypesAPI(object):
         return Path(hk_qcmetrics.full_path)
 
     @staticmethod
-    def get_parsed_qc_metrics_data(qc_metrics: Path) -> MIPMetricsDeliverables:
+    def get_parsed_qc_metrics_data_mip(qc_metrics: Path) -> MIPMetricsDeliverables:
         """Parse the information from a qc metrics file"""
         qcmetrics_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=qc_metrics
