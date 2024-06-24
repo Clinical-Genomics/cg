@@ -66,9 +66,9 @@ class ChecksumFailedError(CgError):
     """
 
 
-class CleanFlowCellFailedError(CgError):
+class IlluminaCleanRunError(CgError):
     """
-    Exception raised when the cleaning of a flow cell failed.
+    Exception raised when the cleaning of an Illumina run failed.
     """
 
 
