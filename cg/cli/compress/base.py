@@ -15,7 +15,7 @@ from cg.cli.compress.fastq import (
 )
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.meta.backup.backup import SpringBackupAPI
-from cg.meta.backup.pdc import PdcAPI
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.compress import CompressAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.models.cg_config import CGConfig
@@ -58,7 +58,7 @@ def decompress(context: CGConfig):
     hk_api = context.housekeeper_api
     crunchy_api = context.crunchy_api
 
-    pdc_api: PdcAPI = PdcAPI(binary_path=context.pdc.binary_path)
+    pdc_api: PdcService = PdcService(binary_path=context.pdc.binary_path)
     spring_encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
         binary_path=context.encryption.binary_path,
     )

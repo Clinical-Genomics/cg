@@ -21,7 +21,7 @@ from cg.exc import (
     PdcError,
 )
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
-from cg.meta.backup.pdc import PdcAPI
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.encryption.encryption import (
     EncryptionAPI,
     FlowCellEncryptionAPI,
@@ -51,7 +51,7 @@ def backup(context: CGConfig):
 @click.pass_obj
 def backup_flow_cells(context: CGConfig, dry_run: bool):
     """Back-up flow cells."""
-    pdc_api = context.pdc_api
+    pdc_api = context.pdc_service
     pdc_api.dry_run = dry_run
     status_db: Store = context.status_db
     flow_cells: list[IlluminaRunDirectoryData] = get_sequencing_runs_from_path(
@@ -121,7 +121,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
 def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: str | None = None):
     """Fetch the first flow cell in the requested queue from backup"""
 
-    pdc_api = context.pdc_api
+    pdc_api = context.pdc_service
     pdc_api.dry_run = dry_run
     encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
     tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
@@ -189,7 +189,7 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
 def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
     """Archive a spring file to PDC"""
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
-    pdc_api: PdcAPI = PdcAPI(binary_path=config.pdc.binary_path, dry_run=dry_run)
+    pdc_api: PdcService = PdcService(binary_path=config.pdc.binary_path, dry_run=dry_run)
     encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
         binary_path=config.encryption.binary_path,
         dry_run=dry_run,
@@ -255,7 +255,7 @@ def retrieve_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool)
     """Retrieve a spring file from PDC"""
     LOG.info(f"Attempting PDC retrieval and decryption file {spring_file_path}")
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
-    pdc_api: PdcAPI = PdcAPI(binary_path=config.pdc.binary_path, dry_run=dry_run)
+    pdc_api: PdcService = PdcService(binary_path=config.pdc.binary_path, dry_run=dry_run)
     encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
         binary_path=config.encryption.binary_path,
         dry_run=dry_run,

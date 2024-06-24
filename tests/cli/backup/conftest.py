@@ -13,7 +13,7 @@ def backup_context(cg_context: CGConfig) -> CGConfig:
         pdc_archiving_directory=cg_context.backup.pdc_archiving_directory,
         status=cg_context.status_db,
         tar_api=TarAPI(binary_path=cg_context.tar.binary_path),
-        pdc_api=cg_context.pdc_api,
+        pdc_api=cg_context.pdc_service,
         flow_cells_dir=cg_context.run_instruments.illumina.sequencing_runs_dir,
     )
     return cg_context

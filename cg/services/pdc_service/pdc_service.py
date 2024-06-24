@@ -26,7 +26,7 @@ NO_FILE_FOUND_ANSWER = "ANS1092W"
 MAX_NR_OF_DSMC_PROCESSES: int = 3
 
 
-class PdcAPI:
+class PdcService:
     """Group PDC related commands"""
 
     def __init__(self, binary_path: str, dry_run: bool = False):

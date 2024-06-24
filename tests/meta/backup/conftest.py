@@ -6,7 +6,7 @@ import pytest
 
 from cg.constants import FileExtensions
 from cg.meta.backup.backup import BackupAPI
-from cg.meta.backup.pdc import PdcAPI
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.encryption.encryption import EncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import PDCArchivingDirectory
@@ -64,7 +64,7 @@ def backup_api(cg_context: CGConfig, illumina_sequencing_runs_directory: Path) -
     )
     store: Store = cg_context.status_db
     tar_api: TarAPI = TarAPI(binary_path=cg_context.tar.binary_path, dry_run=True)
-    pdc_api: PdcAPI = PdcAPI(binary_path=cg_context.pdc.binary_path, dry_run=True)
+    pdc_api: PdcService = PdcService(binary_path=cg_context.pdc.binary_path, dry_run=True)
 
     pdc_archiving_directory: PDCArchivingDirectory = cg_context.backup.pdc_archiving_directory
     _backup_api: BackupAPI = BackupAPI(

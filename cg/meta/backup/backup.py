@@ -11,7 +11,7 @@ from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS
 from cg.constants.constants import FileExtensions, FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import ChecksumFailedError, PdcError, PdcNoFilesMatchingSearchError
-from cg.meta.backup.pdc import PdcAPI
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models import CompressionData
@@ -32,7 +32,7 @@ class BackupAPI:
         pdc_archiving_directory: PDCArchivingDirectory,
         status: Store,
         tar_api: TarAPI,
-        pdc_api: PdcAPI,
+        pdc_api: PdcService,
         flow_cells_dir: str,
         dry_run: bool = False,
     ):
@@ -40,7 +40,7 @@ class BackupAPI:
         self.pdc_archiving_directory: PDCArchivingDirectory = pdc_archiving_directory
         self.status: Store = status
         self.tar_api: TarAPI = tar_api
-        self.pdc: PdcAPI = pdc_api
+        self.pdc: PdcService = pdc_api
         self.flow_cells_dir: str = flow_cells_dir
         self.dry_run: bool = dry_run
 
@@ -298,13 +298,13 @@ class SpringBackupAPI:
     def __init__(
         self,
         encryption_api: SpringEncryptionAPI,
-        pdc_api: PdcAPI,
+        pdc_api: PdcService,
         hk_api: HousekeeperAPI,
         dry_run: bool = False,
     ):
         self.encryption_api: SpringEncryptionAPI = encryption_api
         self.hk_api: HousekeeperAPI = hk_api
-        self.pdc: PdcAPI = pdc_api
+        self.pdc: PdcService = pdc_api
         self.dry_run = dry_run
 
     def encrypt_and_archive_spring_file(self, spring_file_path: Path) -> None:

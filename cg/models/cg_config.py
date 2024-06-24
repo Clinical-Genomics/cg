@@ -22,7 +22,7 @@ from cg.clients.arnold.api import ArnoldAPIClient
 from cg.clients.janus.api import JanusAPIClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
-from cg.meta.backup.pdc import PdcAPI
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
@@ -371,7 +371,7 @@ class CGConfig(BaseModel):
     mutacc_auto_api_: MutaccAutoAPI = None
     pigz: CommonAppConfig | None = None
     pdc: CommonAppConfig | None = None
-    pdc_api_: PdcAPI | None
+    pdc_service_: PdcService | None
     sample_sheet_api_: SampleSheetAPI | None = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
@@ -545,13 +545,13 @@ class CGConfig(BaseModel):
         return api
 
     @property
-    def pdc_api(self) -> PdcAPI:
-        api = self.__dict__.get("pdc_api_")
-        if api is None:
+    def pdc_service(self) -> PdcService:
+        service = self.__dict__.get("pdc_api_")
+        if service is None:
             LOG.debug("Instantiating PDC api")
-            api = PdcAPI(binary_path=self.pdc.binary_path)
-            self.pdc_api_ = api
-        return api
+            service = PdcService(binary_path=self.pdc.binary_path)
+            self.pdc_service_ = service
+        return service
 
     @property
     def sample_sheet_api(self) -> SampleSheetAPI:

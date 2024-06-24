@@ -16,7 +16,7 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers
 from cg.exc import ChecksumFailedError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
-from cg.meta.backup.pdc import PdcAPI
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.models.cg_config import PDCArchivingDirectory
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -460,7 +460,7 @@ def test_fetch_flow_cell_integration(
 @mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI")
 @mock.patch("cg.meta.backup.pdc.PdcAPI")
 def test_encrypt_and_archive_spring_file(
-    mock_pdc_api: PdcAPI,
+    mock_pdc_api: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
     mock_mark_file_as_archived,
@@ -521,7 +521,7 @@ def test_encrypt_and_archive_spring_file(
 @mock.patch("cg.meta.encryption.encryption")
 @mock.patch("cg.meta.backup.pdc")
 def test_encrypt_and_archive_spring_file_checksum_failed(
-    mock_pdc_api: PdcAPI,
+    mock_pdc_api: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
     mock_is_archived,
@@ -556,7 +556,7 @@ def test_encrypt_and_archive_spring_file_checksum_failed(
 @mock.patch("cg.meta.encryption.encryption")
 @mock.patch("cg.meta.backup.pdc")
 def test_mark_file_as_archived(
-    mock_pdc_api: PdcAPI,
+    mock_pdc_api: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
     spring_file_path,
@@ -582,7 +582,7 @@ def test_mark_file_as_archived(
 @mock.patch("cg.meta.encryption.encryption")
 @mock.patch("cg.meta.backup.pdc")
 def test_mark_file_as_archived_dry_run(
-    mock_pdc_api: PdcAPI,
+    mock_pdc_api: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
     caplog,
@@ -611,7 +611,7 @@ def test_mark_file_as_archived_dry_run(
 @mock.patch("cg.meta.encryption.encryption")
 @mock.patch("cg.meta.backup.pdc")
 def test_decrypt_and_retrieve_spring_file(
-    mock_pdc_api: PdcAPI,
+    mock_pdc_api: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
     spring_file_path,
@@ -642,7 +642,7 @@ def test_decrypt_and_retrieve_spring_file(
 @mock.patch("cg.meta.encryption.encryption")
 @mock.patch("cg.meta.backup.pdc")
 def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
-    mock_pdc: PdcAPI,
+    mock_pdc: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
     spring_file_path,
