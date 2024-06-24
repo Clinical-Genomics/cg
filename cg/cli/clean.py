@@ -27,9 +27,11 @@ from cg.cli.workflow.commands import (
 from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION
 from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, ScoutTag
-from cg.exc import CleanFlowCellFailedError, FlowCellError
+from cg.exc import IlluminaCleanRunError, FlowCellError
 from cg.meta.clean.api import CleanAPI
-from cg.meta.clean.clean_flow_cells import CleanFlowCellAPI
+from cg.services.illumina_services.cleaning_services.clean_runs_service import (
+    IlluminaCleanRunsService,
+)
 from cg.meta.clean.clean_retrieved_spring_files import CleanRetrievedSpringFilesAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis
@@ -253,11 +255,11 @@ def hk_bundle_files(
     LOG.info(f"Process freed {round(size_cleaned * 0.0000000001, 2)}GB. Dry run: {dry_run}")
 
 
-@clean.command("flow-cells")
+@clean.command("illumina-runs")
 @DRY_RUN
 @click.pass_obj
-def clean_flow_cells(context: CGConfig, dry_run: bool):
-    """Remove flow cells from the flow cells and demultiplexed runs folder."""
+def clean_illumina_runs(context: CGConfig, dry_run: bool):
+    """Remove Illumina sequencing and demultiplexed runs from hasta."""
 
     directories_to_check: list[Path] = []
     for path in [
@@ -269,14 +271,14 @@ def clean_flow_cells(context: CGConfig, dry_run: bool):
         directories_to_check.extend(get_directories_in_path(path))
     for flow_cell_directory in directories_to_check:
         try:
-            clean_flow_cell_api = CleanFlowCellAPI(
-                flow_cell_path=flow_cell_directory,
+            clean_service = IlluminaCleanRunsService(
+                sequencing_run_path=flow_cell_directory,
                 status_db=context.status_db,
                 housekeeper_api=context.housekeeper_api,
                 dry_run=dry_run,
             )
-            clean_flow_cell_api.delete_flow_cell_directory()
-        except (CleanFlowCellFailedError, FlowCellError) as error:
+            clean_service.delete_run_directory()
+        except (IlluminaCleanRunError, FlowCellError) as error:
             LOG.error(repr(error))
             continue
 
