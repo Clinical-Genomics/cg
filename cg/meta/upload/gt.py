@@ -155,7 +155,7 @@ class UploadGenotypesAPI(object):
         qcmetrics_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=qc_metrics
         )
-        return list[MetricsBase](**qcmetrics_raw)
+        return [MetricsBase(**metric) for metric in qcmetrics_raw]
 
     def upload(self, data: dict, replace: bool = False):
         """Upload data about genotypes for a family of samples."""
