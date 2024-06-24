@@ -138,7 +138,7 @@ class UploadGenotypesAPI(object):
         hk_qcmetrics = self.hk.files(
             version=hk_version_obj.id, tags=RarediseaseAnalysisTag.QC_METRICS
         ).first()
-        LOG.debug(f"Found qc metrics file {hk_qcmetrics.full_path}")
+        LOG.info(f"Found qc metrics file {hk_qcmetrics.full_path}")
         return Path(hk_qcmetrics.full_path)
 
     @staticmethod
