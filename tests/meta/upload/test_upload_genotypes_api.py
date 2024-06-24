@@ -21,12 +21,12 @@ def test_get_analysis_sex(case_qc_metrics_deliverables: Path, genotype_analysis_
     assert sex == genotype_analysis_sex
 
 
-def test_get_parsed_qc_metrics_data(case_qc_metrics_deliverables: Path):
+def test_get_parsed_qc_metrics_data_mip(case_qc_metrics_deliverables: Path):
     """Test to get the predicted sex from a MIP run using the upload genotypes API"""
     # GIVEN a UploadGenotypesAPI and the path to a qc_metrics file with case data
 
     # WHEN fetching the predicted sex
-    metrics_object: MIPMetricsDeliverables = UploadGenotypesAPI.get_parsed_qc_metrics_data(
+    metrics_object: MIPMetricsDeliverables = UploadGenotypesAPI.get_parsed_qc_metrics_data_mip(
         case_qc_metrics_deliverables
     )
 
