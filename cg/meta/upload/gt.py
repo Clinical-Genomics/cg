@@ -106,7 +106,7 @@ class UploadGenotypesAPI(object):
 
     def analysis_sex_raredisease(self, qc_metrics_file: Path, sample_id: Sample) -> dict:
         """Fetch analysis sex for each sample of an analysis."""
-        qc_metrics: MetricsBase = self.get_parsed_qc_metrics_data_raredisease(qc_metrics_file)
+        qc_metrics: list[MetricsBase] = self.get_parsed_qc_metrics_data_raredisease(qc_metrics_file)
         return next(
             (
                 entry
@@ -155,7 +155,7 @@ class UploadGenotypesAPI(object):
         qcmetrics_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=qc_metrics
         )
-        return MetricsBase(**qcmetrics_raw)
+        return list[MetricsBase](**qcmetrics_raw)
 
     def upload(self, data: dict, replace: bool = False):
         """Upload data about genotypes for a family of samples."""
