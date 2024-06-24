@@ -544,15 +544,16 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_deliverables_template_content(self) -> list[dict[str, str]]:
         """Return deliverables file template content."""
+        LOG.debug("Getting deliverables file template content")
         return ReadFile.get_content_from_file(
             file_format=FileFormat.YAML,
             file_path=self.get_bundle_filenames_path(),
         )
 
     @staticmethod
-    def get_bundle_filenames_path() -> Path | None:
+    def get_bundle_filenames_path() -> Path:
         """Return bundle filenames path."""
-        return None
+        raise NotImplementedError
 
     @staticmethod
     def get_formatted_file_deliverable(
@@ -607,7 +608,6 @@ class NfAnalysisAPI(AnalysisAPI):
                 sample=sample, case_id=case_id, template=deliverable_template
             )
             files.extend(bundle for bundle in bundles_per_sample if bundle not in files)
-
         return WorkflowDeliverables(files=files)
 
     def get_multiqc_json_path(self, case_id: str) -> Path:
@@ -766,10 +766,10 @@ class NfAnalysisAPI(AnalysisAPI):
         if dry_run:
             LOG.info(f"Dry-run: Would have created delivery files for case {case_id}")
             return
-        workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id)
+        workflow_content: WorkflowDeliverables = self.get_deliverables_for_case(case_id=case_id)
         self.write_deliverables_file(
             deliverables_content=workflow_content.dict(),
-            file_path=self.get_deliverables_file_path(case_id),
+            file_path=self.get_deliverables_file_path(case_id=case_id),
         )
         LOG.info(
             f"Writing deliverables file in {self.get_deliverables_file_path(case_id=case_id).as_posix()}"
