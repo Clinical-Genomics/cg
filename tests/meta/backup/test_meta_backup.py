@@ -15,7 +15,8 @@ from cg.constants import FileExtensions, FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers
 from cg.exc import ChecksumFailedError
-from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
+from cg.meta.backup.backup import SpringBackupAPI
+from cg.services.illumina_services.backup_services.backup_service import IlluminaBackupService
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.models.cg_config import PDCArchivingDirectory
@@ -37,12 +38,12 @@ def test_query_pdc_for_flow_cell(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a Backup API
-    backup_api = BackupAPI(
+    backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
         pdc_archiving_directory=pdc_archiving_directory,
         status=mock.Mock(),
         tar_api=mock.Mock(),
-        pdc_api=mock.Mock(),
+        pdc_service=mock.Mock(),
         flow_cells_dir=mock.Mock(),
     )
     # GIVEN a mock pdc query method
@@ -62,12 +63,12 @@ def test_get_archived_encryption_key_path(dsmc_q_archive_output: list[str], flow
     # GIVEN an DSMC output and a flow cell id
 
     # GIVEN a Backup API
-    backup_api = BackupAPI(
+    backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
         pdc_archiving_directory=mock.Mock(),
         status=mock.Mock(),
         tar_api=mock.Mock(),
-        pdc_api=mock.Mock(),
+        pdc_service=mock.Mock(),
         flow_cells_dir=mock.Mock(),
     )
 
@@ -89,12 +90,12 @@ def test_get_archived_flow_cell_path(dsmc_q_archive_output: list[str], flow_cell
     # GIVEN an DSMC output and a flow cell id
 
     # GIVEN a Backup API
-    backup_api = BackupAPI(
+    backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
         pdc_archiving_directory=mock.Mock(),
         status=mock.Mock(),
         tar_api=mock.Mock(),
-        pdc_api=mock.Mock(),
+        pdc_service=mock.Mock(),
         flow_cells_dir=mock.Mock(),
     )
 
@@ -115,12 +116,12 @@ def test_get_archived_flow_cell_path(dsmc_q_archive_output: list[str], flow_cell
 def test_maximum_processing_queue_full(mock_store):
     """Tests check_processing method of the backup API"""
     # GIVEN a flow cell needs to be retrieved from PDC
-    backup_api = BackupAPI(
+    backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
         pdc_archiving_directory=mock.Mock(),
         status=mock_store,
         tar_api=mock.Mock(),
-        pdc_api=mock.Mock(),
+        pdc_service=mock.Mock(),
         flow_cells_dir=mock.Mock(),
     )
 
@@ -135,12 +136,12 @@ def test_maximum_processing_queue_full(mock_store):
 def test_maximum_processing_queue_not_full(mock_store):
     """Tests check_processing method of the backup API"""
     # GIVEN a flow cell needs to be retrieved from PDC
-    backup_api = BackupAPI(
+    backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
         pdc_archiving_directory=mock.Mock(),
         status=mock_store,
         tar_api=mock.Mock(),
-        pdc_api=mock.Mock(),
+        pdc_service=mock.Mock(),
         flow_cells_dir=mock.Mock(),
     )
     # WHEN there are no flow cells being retrieved from PDC
@@ -155,12 +156,12 @@ def test_maximum_processing_queue_not_full(mock_store):
 def test_get_first_flow_cell_next_requested(mock_store, mock_flow_cell):
     """Tests get_first_flow_cell method of the backup API when requesting next flow cell"""
     # GIVEN status-db needs to be checked for flow cells to be retrieved from PDC
-    backup_api = BackupAPI(
+    backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
         pdc_archiving_directory=mock.Mock(),
         status=mock_store,
         tar_api=mock.Mock(),
-        pdc_api=mock.Mock(),
+        pdc_service=mock.Mock(),
         flow_cells_dir=mock.Mock(),
     )
 
@@ -177,12 +178,12 @@ def test_get_first_flow_cell_next_requested(mock_store, mock_flow_cell):
 def test_get_first_flow_cell_no_flow_cell_requested(mock_store):
     """Tests get_first_flow_cell method of the backup API when no flow cell requested"""
     # GIVEN status-db needs to be checked for flow cells to be retrieved from PDC
-    backup_api = BackupAPI(
+    backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
         pdc_archiving_directory=mock.Mock(),
         status=mock_store,
         tar_api=mock.Mock(),
-        pdc_api=mock.Mock(),
+        pdc_service=mock.Mock(),
         flow_cells_dir=mock.Mock(),
     )
 
@@ -203,12 +204,12 @@ def test_fetch_flow_cell_processing_queue_full(mock_flow_cell, mock_check_proces
     caplog.set_level(logging.INFO)
 
     # GIVEN we check if a flow cell needs to be retrieved from PDC
-    backup_api = BackupAPI(
+    backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
         pdc_archiving_directory=mock.Mock(),
         status=mock.Mock(),
         tar_api=mock.Mock(),
-        pdc_api=mock.Mock(),
+        pdc_service=mock.Mock(),
         flow_cells_dir=mock.Mock(),
     )
 
@@ -236,12 +237,12 @@ def test_fetch_flow_cell_no_flow_cells_requested(
     caplog.set_level(logging.INFO)
 
     # GIVEN we check if a flow cell needs to be retrieved from PDC
-    backup_api = BackupAPI(
+    backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
         pdc_archiving_directory=mock.Mock(),
         status=mock_store,
         tar_api=mock.Mock(),
-        pdc_api=mock.Mock(),
+        pdc_service=mock.Mock(),
         flow_cells_dir=mock.Mock(),
     )
 
@@ -289,12 +290,12 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     caplog.set_level(logging.INFO)
 
     # GIVEN we check if a flow cell needs to be retrieved from PDC
-    backup_api = BackupAPI(
+    backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
-        pdc_archiving_directory=cg_context.backup.pdc_archiving_directory,
+        pdc_archiving_directory=cg_context.illumina_backup_service.pdc_archiving_directory,
         status=mock_store,
         tar_api=mock_tar,
-        pdc_api=mock.Mock(),
+        pdc_service=mock.Mock(),
         flow_cells_dir="cg_context.flow_cells_dir",
     )
 
@@ -356,12 +357,12 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     caplog.set_level(logging.INFO)
 
     # GIVEN we want to retrieve a specific flow cell from PDC
-    backup_api = BackupAPI(
+    backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
-        pdc_archiving_directory=cg_context.backup.pdc_archiving_directory,
+        pdc_archiving_directory=cg_context.illumina_backup_service.pdc_archiving_directory,
         status=mock_store,
         tar_api=mock_tar,
-        pdc_api=mock.Mock(),
+        pdc_service=mock.Mock(),
         flow_cells_dir="cg_context.flow_cells_dir",
     )
     mock_flow_cell.status = FlowCellStatus.REQUESTED
@@ -420,12 +421,12 @@ def test_fetch_flow_cell_integration(
     caplog.set_level(logging.INFO)
 
     # GIVEN we want to retrieve a specific flow cell from PDC
-    backup_api = BackupAPI(
+    backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
-        pdc_archiving_directory=cg_context.backup.pdc_archiving_directory,
+        pdc_archiving_directory=cg_context.illumina_backup_service.pdc_archiving_directory,
         status=mock_store,
         tar_api=mock_tar,
-        pdc_api=mock.Mock(),
+        pdc_service=mock.Mock(),
         flow_cells_dir=cg_context.run_instruments.illumina.sequencing_runs_dir,
     )
     mock_flow_cell.status = FlowCellStatus.REQUESTED
@@ -460,7 +461,7 @@ def test_fetch_flow_cell_integration(
 @mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI")
 @mock.patch("cg.meta.backup.pdc.PdcAPI")
 def test_encrypt_and_archive_spring_file(
-    mock_pdc_api: PdcService,
+    mock_pdc_service: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
     mock_mark_file_as_archived,
@@ -471,7 +472,9 @@ def test_encrypt_and_archive_spring_file(
     # GIVEN a spring file that needs to be encrypted and archived to PDC and that is not already
     # archived
     spring_backup_api = SpringBackupAPI(
-        encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
+        encryption_api=mock_spring_encryption_api,
+        hk_api=mock_housekeeper,
+        pdc_service=mock_pdc_service,
     )
     mock_is_archived.return_value = False
 
@@ -507,7 +510,7 @@ def test_encrypt_and_archive_spring_file(
             file_path=str(mock_spring_encryption_api.encrypted_key_path.return_value),
         ),
     ]
-    mock_pdc_api.archive_file_to_pdc.assert_has_calls(calls)
+    mock_pdc_service.archive_file_to_pdc.assert_has_calls(calls)
 
     # AND the spring file should be marked as archived in Housekeeper
     mock_mark_file_as_archived.assert_called_once_with(spring_file_path)
@@ -521,7 +524,7 @@ def test_encrypt_and_archive_spring_file(
 @mock.patch("cg.meta.encryption.encryption")
 @mock.patch("cg.meta.backup.pdc")
 def test_encrypt_and_archive_spring_file_checksum_failed(
-    mock_pdc_api: PdcService,
+    mock_pdc_service: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
     mock_is_archived,
@@ -530,7 +533,9 @@ def test_encrypt_and_archive_spring_file_checksum_failed(
 ):
     # GIVEN a spring file that needs to be encrypted and archived to PDC
     spring_backup_api = SpringBackupAPI(
-        encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
+        encryption_api=mock_spring_encryption_api,
+        hk_api=mock_housekeeper,
+        pdc_service=mock_pdc_service,
     )
 
     # WHEN running the encryption and archiving process
@@ -556,7 +561,7 @@ def test_encrypt_and_archive_spring_file_checksum_failed(
 @mock.patch("cg.meta.encryption.encryption")
 @mock.patch("cg.meta.backup.pdc")
 def test_mark_file_as_archived(
-    mock_pdc_api: PdcService,
+    mock_pdc_service: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
     spring_file_path,
@@ -565,7 +570,9 @@ def test_mark_file_as_archived(
     caplog.set_level(logging.INFO)
     # GIVEN a file
     spring_backup_api = SpringBackupAPI(
-        encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
+        encryption_api=mock_spring_encryption_api,
+        hk_api=mock_housekeeper,
+        pdc_service=mock_pdc_service,
     )
     mock_housekeeper_file = MockFile(id=0, path=spring_file_path, to_archive=False)
     mock_housekeeper.files.return_value.first.return_value = mock_housekeeper_file
@@ -582,7 +589,7 @@ def test_mark_file_as_archived(
 @mock.patch("cg.meta.encryption.encryption")
 @mock.patch("cg.meta.backup.pdc")
 def test_mark_file_as_archived_dry_run(
-    mock_pdc_api: PdcService,
+    mock_pdc_service: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
     caplog,
@@ -593,7 +600,7 @@ def test_mark_file_as_archived_dry_run(
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api,
         hk_api=mock_housekeeper,
-        pdc_api=mock_pdc_api,
+        pdc_service=mock_pdc_service,
         dry_run=True,
     )
     mock_housekeeper_file = MockFile(id=0, path=spring_file_path, to_archive=False)
@@ -611,14 +618,16 @@ def test_mark_file_as_archived_dry_run(
 @mock.patch("cg.meta.encryption.encryption")
 @mock.patch("cg.meta.backup.pdc")
 def test_decrypt_and_retrieve_spring_file(
-    mock_pdc_api: PdcService,
+    mock_pdc_service: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
     spring_file_path,
 ):
     # GIVEN a spring file that needs to be decrypted and retrieved from PDC
     spring_backup_api = SpringBackupAPI(
-        encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
+        encryption_api=mock_spring_encryption_api,
+        hk_api=mock_housekeeper,
+        pdc_service=mock_pdc_service,
     )
 
     # WHEN running the decryption and retrieval process
@@ -635,7 +644,7 @@ def test_decrypt_and_retrieve_spring_file(
         call(file_path=str(mock_spring_encryption_api.encrypted_spring_file_path.return_value)),
         call(file_path=str(mock_spring_encryption_api.encrypted_key_path.return_value)),
     ]
-    mock_pdc_api.retrieve_file_from_pdc.assert_has_calls(calls)
+    mock_pdc_service.retrieve_file_from_pdc.assert_has_calls(calls)
 
 
 @mock.patch("cg.apps.housekeeper.hk")
@@ -650,7 +659,7 @@ def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
 ):
     # GIVEN a spring file that needs to be encrypted and archived to PDC
     spring_backup_api = SpringBackupAPI(
-        encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc
+        encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_service=mock_pdc
     )
 
     # WHEN running the encryption and archiving process
@@ -668,7 +677,7 @@ def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
 
 
 def test_create_copy_complete_file_exist(
-    backup_api: BackupAPI,
+    backup_api: IlluminaBackupService,
     novaseq_x_flow_cell: IlluminaRunDirectoryData,
 ):
     """Tests creating a copy complete file in the flow cell directory. There are two cases: when
@@ -691,7 +700,7 @@ def test_create_copy_complete_file_exist(
 
 
 def test_create_copy_complete_file_does_not_exist(
-    backup_api: BackupAPI,
+    backup_api: IlluminaBackupService,
     novaseq_x_flow_cell: IlluminaRunDirectoryData,
 ):
     """Tests creating a copy complete file in the flow cell directory. There are two cases: when

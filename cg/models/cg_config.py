@@ -73,7 +73,7 @@ class DataInput(BaseModel):
     input_dir_path: str
 
 
-class BackupConfig(BaseModel):
+class IlluminaBackupConfig(BaseModel):
     pdc_archiving_directory: PDCArchivingDirectory
     slurm_flow_cell_encryption: SlurmConfig
 
@@ -342,7 +342,7 @@ class CGConfig(BaseModel):
     # App APIs that can be instantiated in CGConfig
     arnold: ArnoldConfig = Field(None, alias="arnold")
     arnold_api_: ArnoldAPIClient | None = None
-    backup: BackupConfig = None
+    illumina_backup_service: IlluminaBackupConfig = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
     crunchy: CrunchyConfig = None
@@ -415,7 +415,7 @@ class CGConfig(BaseModel):
             "loqusdb_api_": "loqusdb_api",
             "madeline_api_": "madeline_api",
             "mutacc_auto_api_": "mutacc_auto_api",
-            "pdc_api_": "pdc_api",
+            "pdc_service_": "pdc_service",
             "scout_api_": "scout_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
@@ -546,9 +546,9 @@ class CGConfig(BaseModel):
 
     @property
     def pdc_service(self) -> PdcService:
-        service = self.__dict__.get("pdc_api_")
+        service = self.__dict__.get("pdc_service_")
         if service is None:
-            LOG.debug("Instantiating PDC api")
+            LOG.debug("Instantiating PDC service")
             service = PdcService(binary_path=self.pdc.binary_path)
             self.pdc_service_ = service
         return service

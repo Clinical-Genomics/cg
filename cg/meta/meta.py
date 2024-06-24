@@ -42,7 +42,7 @@ class MetaAPI:
                         binary_path=config.dict()["encryption"]["binary_path"]
                     ),
                     hk_api=config.housekeeper_api,
-                    pdc_api=PdcService(config.dict()["pdc"]["binary_path"]),
+                    pdc_service=PdcService(config.dict()["pdc"]["binary_path"]),
                 ),
             ),
         )

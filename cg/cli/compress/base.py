@@ -58,14 +58,14 @@ def decompress(context: CGConfig):
     hk_api = context.housekeeper_api
     crunchy_api = context.crunchy_api
 
-    pdc_api: PdcService = PdcService(binary_path=context.pdc.binary_path)
+    pdc_service: PdcService = PdcService(binary_path=context.pdc.binary_path)
     spring_encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
         binary_path=context.encryption.binary_path,
     )
     spring_backup_api: SpringBackupAPI = SpringBackupAPI(
         encryption_api=spring_encryption_api,
         hk_api=hk_api,
-        pdc_api=pdc_api,
+        pdc_service=pdc_service,
     )
     LOG.debug("Start spring retrieval if not dry run")
 
