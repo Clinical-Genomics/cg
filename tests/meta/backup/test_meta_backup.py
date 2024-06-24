@@ -196,7 +196,9 @@ def test_get_first_flow_cell_no_flow_cell_requested(mock_store):
     assert popped_flow_cell is None
 
 
-@mock.patch("cg.meta.backup.backup.BackupAPI.check_processing")
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.check_processing"
+)
 @mock.patch("cg.store.models.Flowcell")
 def test_fetch_flow_cell_processing_queue_full(mock_flow_cell, mock_check_processing, caplog):
     """Tests the fetch_flow_cell method of the backup API when processing queue is full"""
@@ -223,8 +225,12 @@ def test_fetch_flow_cell_processing_queue_full(mock_flow_cell, mock_check_proces
     assert "Processing queue is full" in caplog.text
 
 
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_first_flow_cell")
-@mock.patch("cg.meta.backup.backup.BackupAPI.check_processing")
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_first_flow_cell"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.check_processing"
+)
 @mock.patch("cg.store")
 def test_fetch_flow_cell_no_flow_cells_requested(
     mock_store,
@@ -261,13 +267,27 @@ def test_fetch_flow_cell_no_flow_cells_requested(
     assert "No flow cells requested" in caplog.text
 
 
-@mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
-@mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
-@mock.patch("cg.meta.backup.backup.BackupAPI.create_copy_complete")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell_path")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key_path")
-@mock.patch("cg.meta.backup.backup.BackupAPI.check_processing")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_first_flow_cell")
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.unlink_files"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.create_rta_complete"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.create_copy_complete"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_flow_cell_path"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_encryption_key_path"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.check_processing"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_first_flow_cell"
+)
 @mock.patch("cg.meta.tar.tar.TarAPI")
 @mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.store")
@@ -326,13 +346,27 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     assert result > 0
 
 
-@mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
-@mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
-@mock.patch("cg.meta.backup.backup.BackupAPI.create_copy_complete")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell_path")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key_path")
-@mock.patch("cg.meta.backup.backup.BackupAPI.check_processing")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_first_flow_cell")
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.unlink_files"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.create_rta_complete"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.create_copy_complete"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_flow_cell_path"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_encryption_key_path"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.check_processing"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_first_flow_cell"
+)
 @mock.patch("cg.meta.tar.tar.TarAPI")
 @mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.store")
@@ -393,12 +427,24 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     assert result > 0
 
 
-@mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
-@mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
-@mock.patch("cg.meta.backup.backup.BackupAPI.create_copy_complete")
-@mock.patch("cg.meta.backup.backup.BackupAPI.query_pdc_for_flow_cell")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key_path")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell_path")
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.unlink_files"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.create_rta_complete"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.create_copy_complete"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.query_pdc_for_flow_cell"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_encryption_key_path"
+)
+@mock.patch(
+    "cg.services.illumina_services.backup_services.backup_service.IlluminaBackupService.get_archived_flow_cell_path"
+)
 @mock.patch("cg.meta.tar.tar.TarAPI")
 @mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.store")
@@ -459,7 +505,7 @@ def test_fetch_flow_cell_integration(
 @mock.patch("cg.meta.backup.backup.SpringBackupAPI.mark_file_as_archived")
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI")
-@mock.patch("cg.meta.backup.pdc.PdcAPI")
+@mock.patch("cg.services.pdc_service.pdc_service.PdcService")
 def test_encrypt_and_archive_spring_file(
     mock_pdc_service: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
@@ -522,7 +568,7 @@ def test_encrypt_and_archive_spring_file(
 @mock.patch("cg.meta.backup.backup.SpringBackupAPI.is_spring_file_archived")
 @mock.patch("cg.apps.housekeeper.hk")
 @mock.patch("cg.meta.encryption.encryption")
-@mock.patch("cg.meta.backup.pdc")
+@mock.patch("cg.services.pdc_service.pdc_service.PdcService")
 def test_encrypt_and_archive_spring_file_checksum_failed(
     mock_pdc_service: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
@@ -559,7 +605,7 @@ def test_encrypt_and_archive_spring_file_checksum_failed(
 
 @mock.patch("cg.apps.housekeeper.hk")
 @mock.patch("cg.meta.encryption.encryption")
-@mock.patch("cg.meta.backup.pdc")
+@mock.patch("cg.services.pdc_service.pdc_service.PdcService")
 def test_mark_file_as_archived(
     mock_pdc_service: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
@@ -587,7 +633,7 @@ def test_mark_file_as_archived(
 
 @mock.patch("cg.apps.housekeeper.hk")
 @mock.patch("cg.meta.encryption.encryption")
-@mock.patch("cg.meta.backup.pdc")
+@mock.patch("cg.services.pdc_service.pdc_service.PdcService")
 def test_mark_file_as_archived_dry_run(
     mock_pdc_service: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
@@ -616,7 +662,7 @@ def test_mark_file_as_archived_dry_run(
 
 @mock.patch("cg.apps.housekeeper.hk")
 @mock.patch("cg.meta.encryption.encryption")
-@mock.patch("cg.meta.backup.pdc")
+@mock.patch("cg.services.pdc_service.pdc_service.PdcService")
 def test_decrypt_and_retrieve_spring_file(
     mock_pdc_service: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,
@@ -649,7 +695,7 @@ def test_decrypt_and_retrieve_spring_file(
 
 @mock.patch("cg.apps.housekeeper.hk")
 @mock.patch("cg.meta.encryption.encryption")
-@mock.patch("cg.meta.backup.pdc")
+@mock.patch("cg.services.pdc_service.pdc_service.PdcService")
 def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
     mock_pdc: PdcService,
     mock_spring_encryption_api: SpringEncryptionAPI,

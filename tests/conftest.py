@@ -1910,7 +1910,7 @@ def context_config(
         "madeline_exe": "echo",
         "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
         "pon_path": str(cg_dir),
-        "backup": {
+        "illumina_backup_service": {
             "pdc_archiving_directory": pdc_archiving_directory.dict(),
             "slurm_flow_cell_encryption": {
                 "account": "development",
