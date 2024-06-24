@@ -100,7 +100,7 @@ def test_has_sequencing_metrics_in_statusdb(
 ):
     """Test to check that a sequencing run has IlluminaSampleSequencingMetrics entries in statusdb."""
 
-    # GIVEN a clean illumina clean sequencing runs service with a store that contains a sequencing run with IlluminaSampleSequencingMetrics entries
+    # GIVEN an Illumina clean sequencing runs service with a store that contains a sequencing run with IlluminaSampleSequencingMetrics entries
 
     # WHEN THEN checking whether a sequencing run has IlluminaSampleSequencingMetrics entries'
     has_metrics: bool = illumina_clean_service_can_be_removed.has_sequencing_metrics_in_statusdb()
@@ -114,7 +114,7 @@ def test_is_directory_older_than_21_days_pass(
 ):
     """Test to check whether a directory is older than 21 days."""
 
-    # GIVEN a clean illumina clean sequencing runs service with a sequencing run that can be deleted
+    # GIVEN an Illumina clean sequencing runs service with a sequencing run that can be deleted
 
     # WHEN checking whether a given sequencing run directory is older than 21 days
 
@@ -135,7 +135,7 @@ def test_is_directory_older_than_21_days_fail(
 ):
     """Test to check whether a directory is older than 21 days."""
 
-    # GIVEN a clean illumina clean sequencing runs service with a current time that is set to now.
+    # GIVEN an Illumina clean sequencing runs service with a current time that is set to now.
 
     # WHEN checking whether a given sequencing run directory is older than 21 days
     is_older_than_21_days: bool = (
@@ -151,7 +151,7 @@ def test_has_sample_sheet_in_housekeeper(
 ):
     """Test to check whether a sequencing run has a sample sheet in housekeeper."""
 
-    # GIVEN a clean illumina clean sequencing runs service with a sequencing run that has a sample sheet in housekeeper
+    # GIVEN an Illumina clean sequencing runs service with a sequencing run that has a sample sheet in housekeeper
 
     # WHEN checking whether the sequencing run has a sample sheet in housekeeper
     has_sample_sheet: bool = illumina_clean_service_can_be_removed.has_sample_sheet_in_housekeeper()
@@ -170,7 +170,7 @@ def test_get_files_for_flow_cell_bundle(
 ):
     """Test to get files for a sequencing run bundle from housekeeper."""
 
-    # GIVEN a clean illumina clean sequencing runs service with a sequencing run that has files in housekeeper
+    # GIVEN an Illumina clean sequencing runs service with a sequencing run that has files in housekeeper
 
     # WHEN getting the sequencing run samples' files
     files: list[File] = (
@@ -298,19 +298,21 @@ def test_can_sequencing_run_be_deleted_no_spring_no_fastq(
 ):
     """Test that a sequencing run can not be deleted when it has no spring files and no fastq files."""
     # GIVEN a sequencing run that can be deleted
-
-    with mock.patch(  "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
+    with mock.patch(
+        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.is_directory_older_than_21_days",
         return_value=True,
-    ), with mock.patch(     "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_fastq_files_for_samples_in_housekeeper",
+    ), mock.patch(
+        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_fastq_files_for_samples_in_housekeeper",
         return_value=False,
-    ), with mock.patch(            "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_spring_meta_data_files_for_samples_in_housekeeper",
+    ), mock.patch(
+        "cg.services.illumina_services.cleaning_services.clean_runs_service.IlluminaCleanRunsService.has_spring_meta_data_files_for_samples_in_housekeeper",
         return_value=False,
     ):
-                # WHEN checking that the sequencing run can be deleted
+        # WHEN checking that the sequencing run can be deleted
 
-                # THEN a HousekeeperFileMissingError is raised
-                with pytest.raises(HousekeeperFileMissingError):
-                    illumina_clean_service_can_be_removed.can_run_directory_be_deleted()
+        # THEN a HousekeeperFileMissingError is raised
+        with pytest.raises(HousekeeperFileMissingError):
+            illumina_clean_service_can_be_removed.can_run_directory_be_deleted()
 
 
 def test_delete_sequencing_run_directory(

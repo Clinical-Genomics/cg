@@ -116,7 +116,7 @@ def tmp_sample_sheet_clean_illumina_sequencing_run_path(tmp_path_factory) -> Pat
 def housekeeper_api_with_illumina_seq_run_to_clean(
     real_housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
-    hk_illumina_sequencing_run_to_clean_bundle: dict,
+    hk_illumina_sequencing_run_bundle_to_clean: dict,
     hk_sample_bundle_for_illumina_sequencing_run_to_clean: dict,
 ) -> HousekeeperAPI:
     """
@@ -124,7 +124,7 @@ def housekeeper_api_with_illumina_seq_run_to_clean(
     a sample bundle with a fastq and a SPRING file that are tagged with the flow cell.
     """
     helpers.ensure_hk_bundle(
-        store=real_housekeeper_api, bundle_data=hk_illumina_sequencing_run_to_clean_bundle
+        store=real_housekeeper_api, bundle_data=hk_illumina_sequencing_run_bundle_to_clean
     )
     helpers.ensure_hk_bundle(
         store=real_housekeeper_api,
@@ -150,7 +150,7 @@ def housekeeper_api_with_sequencing_run_not_to_clean(
 
 
 @pytest.fixture(scope="function")
-def hk_illumina_sequencing_run_to_clean_bundle(
+def hk_illumina_sequencing_run_bundle_to_clean(
     tmp_sequencing_run_to_clean: IlluminaRunDirectoryData,
     timestamp_yesterday: datetime,
     tmp_sample_sheet_clean_illumina_sequencing_run_path: Path,
