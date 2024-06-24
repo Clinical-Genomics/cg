@@ -114,6 +114,7 @@ pytest_plugins = [
     "tests.fixture_plugins.observations_fixtures.observations_api_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
     "tests.fixture_plugins.illumina_clean_fixtures.clean_fixtures",
+    "tests.fixture_plugins.backup_fixtures.backup_fixtures",
 ]
 
 

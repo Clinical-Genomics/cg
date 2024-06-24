@@ -54,27 +54,35 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
     """Back-up flow cells."""
     pdc_service = context.pdc_service
     pdc_service.dry_run = dry_run
+    encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
+    tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
+    backup_service = IlluminaBackupService(
+        encryption_api=encryption_api,
+        pdc_archiving_directory=context.illumina_backup_service.pdc_archiving_directory,
+        status=context.status_db,
+        tar_api=tar_api,
+        pdc_service=pdc_service,
+        flow_cells_dir=context.run_instruments.illumina.sequencing_runs_dir,
+        dry_run=dry_run,
+    )
+    backup_service.dry_run = dry_run
     status_db: Store = context.status_db
-    flow_cells: list[IlluminaRunDirectoryData] = get_sequencing_runs_from_path(
+    runs_dir_data: list[IlluminaRunDirectoryData] = get_sequencing_runs_from_path(
         sequencing_run_dir=Path(context.run_instruments.illumina.sequencing_runs_dir)
     )
-    for flow_cell in flow_cells:
-        db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell.id)
-        flow_cell_encryption_api = FlowCellEncryptionAPI(
-            binary_path=context.encryption.binary_path,
-            dry_run=dry_run,
-            encryption_dir=Path(context.encryption.encryption_dir),
-            flow_cell=flow_cell,
-            pigz_binary_path=context.pigz.binary_path,
-            slurm_api=SlurmAPI(),
-            sbatch_parameter=context.illumina_backup_service.slurm_flow_cell_encryption.dict(),
-            tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
+    for run_dir_data in runs_dir_data:
+        db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(
+            flow_cell_name=run_dir_data.id
         )
         try:
-            pdc_service.start_flow_cell_backup(
+            backup_service.start_flow_cell_backup(
+                run_dir_data=run_dir_data,
                 db_flow_cell=db_flow_cell,
-                flow_cell_encryption_api=flow_cell_encryption_api,
                 status_db=status_db,
+                binary_path=context.encryption.binary_path,
+                encryption_dir=Path(context.encryption.encryption_dir),
+                pigz_binary_path=context.pigz.binary_path,
+                sbatch_parameter=context.illumina_backup_service.slurm_flow_cell_encryption.dict(),
             )
         except (
             DsmcAlreadyRunningError,

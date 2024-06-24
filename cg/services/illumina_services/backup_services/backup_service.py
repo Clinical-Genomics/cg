@@ -1,14 +1,22 @@
 import subprocess
 from pathlib import Path
 
+from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FlowCellStatus, FileExtensions
 from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.exc import PdcError, PdcNoFilesMatchingSearchError
+from cg.exc import (
+    PdcError,
+    PdcNoFilesMatchingSearchError,
+    DsmcAlreadyRunningError,
+    FlowCellAlreadyBackedUpError,
+    FlowCellEncryptionError,
+)
 from cg.meta.backup.backup import LOG
-from cg.meta.encryption.encryption import EncryptionAPI
+from cg.meta.encryption.encryption import EncryptionAPI, FlowCellEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import PDCArchivingDirectory
+from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.models import Flowcell
 from cg.store.store import Store
@@ -114,7 +122,7 @@ class IlluminaBackupService:
         except subprocess.CalledProcessError as error:
             LOG.error(f"Decryption failed: {error.stderr}")
             if not self.dry_run:
-                flow_cell.status: str = FlowCellStatus.REQUESTED
+                flow_cell.status = FlowCellStatus.REQUESTED
                 self.status.session.commit()
             raise error
 
@@ -282,3 +290,68 @@ class IlluminaBackupService:
         if archived_encryption_key:
             LOG.info(f"Encryption key found: {archived_encryption_key}")
             return archived_encryption_key
+
+    def validate_is_flow_cell_backup_possible(
+        self, db_flow_cell: Flowcell, flow_cell_encryption_api: FlowCellEncryptionAPI
+    ) -> None:
+        """Check if back-up of flow cell is possible.
+        Raises:
+            DsmcAlreadyRunningError if there is already a Dsmc process ongoing.
+            FlowCellAlreadyBackupError if flow cell is already backed up.
+            FlowCellEncryptionError if encryption is not complete.
+        """
+        if self.pdc.validate_is_dsmc_running():
+            raise DsmcAlreadyRunningError("Too many Dsmc processes are already running")
+        if db_flow_cell and db_flow_cell.has_backup:
+            raise FlowCellAlreadyBackedUpError(
+                f"Flow cell: {db_flow_cell.name} is already backed-up"
+            )
+        if not flow_cell_encryption_api.complete_file_path.exists():
+            raise FlowCellEncryptionError(
+                f"Flow cell: {flow_cell_encryption_api.flow_cell.id} encryption process is not complete"
+            )
+        LOG.debug("Flow cell can be backed up")
+
+    def backup_flow_cell(
+        self, files_to_archive: list[Path], store: Store, db_flow_cell: Flowcell
+    ) -> None:
+        """Back-up flow cell files."""
+        for encrypted_file in files_to_archive:
+            if not self.dry_run:
+                self.pdc.archive_file_to_pdc(file_path=encrypted_file.as_posix())
+        if not self.dry_run:
+            store.update_flow_cell_has_backup(flow_cell=db_flow_cell, has_backup=True)
+            LOG.info(f"Flow cell: {db_flow_cell.name} has been backed up")
+
+    def start_flow_cell_backup(
+        self,
+        db_flow_cell: Flowcell,
+        run_dir_data: IlluminaRunDirectoryData,
+        status_db: Store,
+        binary_path: str,
+        encryption_dir: Path,
+        pigz_binary_path,
+        sbatch_parameter,
+    ) -> None:
+        """Check if back-up of flow cell is possible and if so starts it."""
+        flow_cell_encryption_api = FlowCellEncryptionAPI(
+            binary_path=binary_path,
+            dry_run=self.dry_run,
+            encryption_dir=encryption_dir,
+            flow_cell=run_dir_data,
+            pigz_binary_path=pigz_binary_path,
+            slurm_api=SlurmAPI(),
+            sbatch_parameter=sbatch_parameter,
+            tar_api=self.tar_api,
+        )
+        self.validate_is_flow_cell_backup_possible(
+            db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
+        )
+        self.backup_flow_cell(
+            files_to_archive=[
+                flow_cell_encryption_api.final_passphrase_file_path,
+                flow_cell_encryption_api.encrypted_gpg_file_path,
+            ],
+            store=status_db,
+            db_flow_cell=db_flow_cell,
+        )
