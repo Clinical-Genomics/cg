@@ -13,12 +13,14 @@ from cg.exc import (
     DsmcAlreadyRunningError,
     FlowCellAlreadyBackedUpError,
     PdcError,
-    FlowCellEncryptionError,
+    IlluminaRunEncryptionError,
 )
 
 from cg.services.illumina_services.backup_services.backup_service import IlluminaBackupService
 from cg.services.pdc_service.pdc_service import PdcService
-from cg.services.illumina_services.backup_services.encrypt_service import FlowCellEncryptionAPI
+from cg.services.illumina_services.backup_services.encrypt_service import (
+    IlluminaRunEncryptionService,
+)
 from cg.models.cg_config import PDCArchivingDirectory, CGConfig
 
 from cg.store.models import Flowcell
@@ -509,7 +511,7 @@ def test_validate_is_flow_cell_backup_possible(
     caplog,
     cg_context: CGConfig,
     helpers: StoreHelpers,
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
+    illumina_run_encryption_service: IlluminaRunEncryptionService,
 ):
     """Tests checking if a back-up of flow-cell is possible."""
     caplog.set_level(logging.DEBUG)
@@ -530,17 +532,17 @@ def test_validate_is_flow_cell_backup_possible(
 
     # GIVEN a database flow cell which is not backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
-        flow_cell_name=flow_cell_encryption_api.flow_cell.id,
+        flow_cell_name=illumina_run_encryption_service.run_dir_data.id,
         store=base_store,
     )
 
     # GIVEN that encryption is completed
-    flow_cell_encryption_api.flow_cell_encryption_dir.mkdir(parents=True)
-    flow_cell_encryption_api.complete_file_path.touch()
+    illumina_run_encryption_service.run_encryption_dir.mkdir(parents=True)
+    illumina_run_encryption_service.complete_file_path.touch()
 
     # WHEN checking if back-up is possible
     backup_service.validate_is_flow_cell_backup_possible(
-        db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
+        db_flow_cell=db_flow_cell, illumina_run_encryption_service=illumina_run_encryption_service
     )
 
     # THEN communicate that it passed
@@ -551,7 +553,7 @@ def test_validate_is_flow_cell_backup_when_dsmc_is_already_running(
     base_store: Store,
     cg_context: CGConfig,
     helpers: StoreHelpers,
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
+    illumina_run_encryption_service: IlluminaRunEncryptionService,
     mocker,
 ):
     """Tests checking if a back-up of flow-cell is possible when Dsmc is already running."""
@@ -573,14 +575,15 @@ def test_validate_is_flow_cell_backup_when_dsmc_is_already_running(
 
     # GIVEN a database flow cell which is not backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
-        flow_cell_name=flow_cell_encryption_api.flow_cell.id,
+        flow_cell_name=illumina_run_encryption_service.run_dir_data.id,
         store=base_store,
     )
 
     # WHEN checking if back-up is possible
     with pytest.raises(DsmcAlreadyRunningError):
         backup_service.validate_is_flow_cell_backup_possible(
-            db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
+            db_flow_cell=db_flow_cell,
+            illumina_run_encryption_service=illumina_run_encryption_service,
         )
 
         # THEN error should be raised
@@ -590,7 +593,7 @@ def test_validate_is_flow_cell_backup_when_already_backed_up(
     base_store: Store,
     cg_context: CGConfig,
     helpers: StoreHelpers,
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
+    illumina_run_encryption_service: IlluminaRunEncryptionService,
 ):
     """Tests checking if a back-up of flow-cell is possible when flow cell is already backed up."""
     # GIVEN an instance of the PDC API
@@ -608,13 +611,16 @@ def test_validate_is_flow_cell_backup_when_already_backed_up(
 
     # GIVEN a database flow cell which is backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
-        flow_cell_name=flow_cell_encryption_api.flow_cell.id, store=base_store, has_backup=True
+        flow_cell_name=illumina_run_encryption_service.run_dir_data.id,
+        store=base_store,
+        has_backup=True,
     )
 
     # WHEN checking if back-up is possible
     with pytest.raises(FlowCellAlreadyBackedUpError):
         backup_service.validate_is_flow_cell_backup_possible(
-            db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
+            db_flow_cell=db_flow_cell,
+            illumina_run_encryption_service=illumina_run_encryption_service,
         )
 
         # THEN error should be raised
@@ -624,7 +630,7 @@ def test_validate_is_flow_cell_backup_when_encryption_is_not_complete(
     base_store: Store,
     cg_context: CGConfig,
     helpers: StoreHelpers,
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
+    illumina_run_encryption_service: IlluminaRunEncryptionService,
 ):
     """Tests checking if a back-up of flow-cell is possible when encryption is not complete."""
     # GIVEN an instance of the PDC API
@@ -642,14 +648,15 @@ def test_validate_is_flow_cell_backup_when_encryption_is_not_complete(
 
     # GIVEN a database flow cell which is backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
-        flow_cell_name=flow_cell_encryption_api.flow_cell.id,
+        flow_cell_name=illumina_run_encryption_service.run_dir_data.id,
         store=base_store,
     )
 
     # WHEN checking if back-up is possible
-    with pytest.raises(FlowCellEncryptionError):
+    with pytest.raises(IlluminaRunEncryptionError):
         backup_service.validate_is_flow_cell_backup_possible(
-            db_flow_cell=db_flow_cell, flow_cell_encryption_api=flow_cell_encryption_api
+            db_flow_cell=db_flow_cell,
+            illumina_run_encryption_service=illumina_run_encryption_service,
         )
 
         # THEN error should be raised
@@ -659,7 +666,7 @@ def test_backup_flow_cell(
     base_store: Store,
     cg_context: CGConfig,
     helpers: StoreHelpers,
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
+    illumina_run_encryption_service: IlluminaRunEncryptionService,
     mocker,
 ):
     """Tests back-up flow cell."""
@@ -680,15 +687,15 @@ def test_backup_flow_cell(
 
     # GIVEN a database flow cell which is not backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
-        flow_cell_name=flow_cell_encryption_api.flow_cell.id,
+        flow_cell_name=illumina_run_encryption_service.run_dir_data.id,
         store=base_store,
     )
 
     # WHEN backing up flow cell
     backup_service.backup_flow_cell(
         files_to_archive=[
-            flow_cell_encryption_api.final_passphrase_file_path,
-            flow_cell_encryption_api.encrypted_gpg_file_path,
+            illumina_run_encryption_service.final_passphrase_file_path,
+            illumina_run_encryption_service.encrypted_gpg_file_path,
         ],
         store=base_store,
         db_flow_cell=db_flow_cell,
@@ -702,7 +709,7 @@ def test_backup_flow_cell_when_unable_to_archive(
     base_store: Store,
     cg_context: CGConfig,
     helpers: StoreHelpers,
-    flow_cell_encryption_api: FlowCellEncryptionAPI,
+    illumina_run_encryption_service: IlluminaRunEncryptionService,
     caplog,
 ):
     """Tests back-up flow cell when unable to archive."""
@@ -722,7 +729,7 @@ def test_backup_flow_cell_when_unable_to_archive(
     )
     # GIVEN a database flow cell which is not backed up
     db_flow_cell: Flowcell = helpers.add_flow_cell(
-        flow_cell_name=flow_cell_encryption_api.flow_cell.id,
+        flow_cell_name=illumina_run_encryption_service.run_dir_data.id,
         store=base_store,
     )
 
@@ -737,8 +744,8 @@ def test_backup_flow_cell_when_unable_to_archive(
         with pytest.raises(PdcError):
             backup_service.backup_flow_cell(
                 files_to_archive=[
-                    flow_cell_encryption_api.final_passphrase_file_path,
-                    flow_cell_encryption_api.encrypted_gpg_file_path,
+                    illumina_run_encryption_service.final_passphrase_file_path,
+                    illumina_run_encryption_service.encrypted_gpg_file_path,
                 ],
                 store=base_store,
                 db_flow_cell=db_flow_cell,

@@ -16,7 +16,7 @@ from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import (
     DsmcAlreadyRunningError,
     FlowCellAlreadyBackedUpError,
-    FlowCellEncryptionError,
+    IlluminaRunEncryptionError,
     FlowCellError,
     PdcError,
 )
@@ -27,7 +27,9 @@ from cg.meta.encryption.encryption import (
     EncryptionAPI,
     SpringEncryptionAPI,
 )
-from cg.services.illumina_services.backup_services.encrypt_service import FlowCellEncryptionAPI
+from cg.services.illumina_services.backup_services.encrypt_service import (
+    IlluminaRunEncryptionService,
+)
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import (
@@ -87,7 +89,7 @@ def backup_flow_cells(context: CGConfig, dry_run: bool):
         except (
             DsmcAlreadyRunningError,
             FlowCellAlreadyBackedUpError,
-            FlowCellEncryptionError,
+            IlluminaRunEncryptionError,
             PdcError,
         ) as error:
             logging.error(f"{error}")
@@ -107,19 +109,19 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
         if db_flow_cell and db_flow_cell.has_backup:
             LOG.debug(f"Flow cell: {flow_cell.id} is already backed-up")
             continue
-        flow_cell_encryption_api = FlowCellEncryptionAPI(
+        illumina_run_encryption_service = IlluminaRunEncryptionService(
             binary_path=context.encryption.binary_path,
             dry_run=dry_run,
             encryption_dir=Path(context.encryption.encryption_dir),
-            flow_cell=flow_cell,
+            run_dir_data=flow_cell,
             pigz_binary_path=context.pigz.binary_path,
             slurm_api=SlurmAPI(),
             sbatch_parameter=context.illumina_backup_service.slurm_flow_cell_encryption.dict(),
             tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
         )
         try:
-            flow_cell_encryption_api.start_encryption()
-        except (FlowCellError, FlowCellEncryptionError) as error:
+            illumina_run_encryption_service.start_encryption()
+        except (FlowCellError, IlluminaRunEncryptionError) as error:
             logging.error(f"{error}")
 
 

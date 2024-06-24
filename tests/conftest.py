@@ -45,7 +45,9 @@ from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.services.illumina_services.backup_services.encrypt_service import FlowCellEncryptionAPI
+from cg.services.illumina_services.backup_services.encrypt_service import (
+    IlluminaRunEncryptionService,
+)
 from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
@@ -115,6 +117,7 @@ pytest_plugins = [
     "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
     "tests.fixture_plugins.illumina_clean_fixtures.clean_fixtures",
     "tests.fixture_plugins.backup_fixtures.backup_fixtures",
+    "tests.fixture_plugins.encryption_fixtures.encryption_fixtures",
 ]
 
 
@@ -3928,14 +3931,14 @@ def store_with_sequencing_metrics(
 
 
 @pytest.fixture
-def flow_cell_encryption_api(
+def illumina_run_encryption_service(
     cg_context: CGConfig, flow_cell_full_name: str
-) -> FlowCellEncryptionAPI:
-    flow_cell_encryption_api = FlowCellEncryptionAPI(
+) -> IlluminaRunEncryptionService:
+    illumina_run_encryption_service = IlluminaRunEncryptionService(
         binary_path=cg_context.encryption.binary_path,
         encryption_dir=Path(cg_context.illumina_backup_service.pdc_archiving_directory.current),
         dry_run=True,
-        flow_cell=IlluminaRunDirectoryData(
+        run_dir_data=IlluminaRunDirectoryData(
             sequencing_run_path=Path(
                 cg_context.run_instruments.illumina.sequencing_runs_dir, flow_cell_full_name
             )
@@ -3945,8 +3948,8 @@ def flow_cell_encryption_api(
         sbatch_parameter=cg_context.illumina_backup_service.slurm_flow_cell_encryption.dict(),
         tar_api=TarAPI(binary_path=cg_context.tar.binary_path, dry_run=True),
     )
-    flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=True)
-    return flow_cell_encryption_api
+    illumina_run_encryption_service.slurm_api.set_dry_run(dry_run=True)
+    return illumina_run_encryption_service
 
 
 def create_process_response(
