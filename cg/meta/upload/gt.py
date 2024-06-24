@@ -78,6 +78,7 @@ class UploadGenotypesAPI(object):
         samples_sex = {}
         for link_obj in case_obj.links:
             sample_id = link_obj.sample.internal_id
+            LOG.info(self.analysis_sex_raredisease(qc_metrics_file, sample_id=sample_id))
             samples_sex[sample_id] = {
                 "pedigree": link_obj.sample.sex,
                 "analysis": self.analysis_sex_raredisease(qc_metrics_file, sample_id=sample_id),
@@ -108,7 +109,7 @@ class UploadGenotypesAPI(object):
         """Fetch analysis sex for each sample of an analysis."""
         qc_metrics: list[MetricsBase] = self.get_parsed_qc_metrics_data_raredisease(qc_metrics_file)
         return {
-            metric.id: metric.name
+            metric.id: metric.value
             for metric in qc_metrics
             if metric.name == "predicted_sex_sex_check" and metric.id == sample_id
         }
