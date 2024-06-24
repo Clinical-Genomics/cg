@@ -5,20 +5,12 @@ import logging
 from housekeeper.store.models import File, Version
 
 from cg.apps.loqus import LoqusdbAPI
-<<<<<<< HEAD
-from cg.constants.observations import CustomerId
-from cg.constants.observations import (
-    LOQUSDB_ID,
-    LOQUSDB_RARE_DISEASE_CUSTOMERS,
-    LoqusdbInstance,
-=======
 from cg.constants.constants import CustomerId, SampleType
 from cg.constants.observations import (
     LOQUSDB_ID,
+    LOQUSDB_RARE_DISEASE_CUSTOMERS,
     LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
     LoqusdbInstance,
-    LOQUSDB_RARE_DISEASE_CUSTOMERS,
->>>>>>> 13f482580 (update rd observation APO)
     RarediseaseLoadParameters,
     RarediseaseObservationsAnalysisTag,
 )
@@ -28,6 +20,7 @@ from cg.exc import (
     LoqusdbDuplicateRecordError,
     LoqusdbUploadCaseError,
 )
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import RarediseaseObservationsInputFiles
@@ -41,12 +34,10 @@ class RarediseaseObservationsAPI(ObservationsAPI):
     """API to manage RAREDISEASE observations."""
 
     def __init__(self, config: CGConfig, sequencing_method: SequencingMethod):
-        super().__init__(config)
-        self.sequencing_method: SequencingMethod = sequencing_method
+        self.analysis_api = RarediseaseAnalysisAPI(config)
+        super().__init__(config=config, analysis_api=self.analysis_api)
         self.loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(self.set_loqusdb_instance())
 
-<<<<<<< HEAD
-=======
     @property
     def loqusdb_customers(self) -> list[CustomerId]:
         """Customers that are eligible for rare disease Loqusdb uploads."""
@@ -54,7 +45,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
 
     @property
     def loqusdb_sequencing_methods(self) -> list[str]:
-        """Sequencing methods that are eligible for cancer Loqusdb uploads."""
+        """Sequencing methods that are eligible for Loqusdb uploads."""
         return LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS
 
     @staticmethod
@@ -76,7 +67,6 @@ class RarediseaseObservationsAPI(ObservationsAPI):
             ]
         )
 
->>>>>>> 13f482580 (update rd observation APO)
     def set_loqusdb_instance(self, case_id: str) -> None:
         """Return the Loqusdb instance associated to the sequencing method."""
         sequencing_method: SequencingMethod = self.analysis_api.get_data_analysis_type(case_id)
@@ -88,7 +78,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
 
     def load_observations(self, case: Case) -> None:
         """
-        Load observation counts to Loqusdb for a MIP-DNA case.
+        Load observation counts to Loqusdb for a RAREDISEASE case.
 
         Raises:
             LoqusdbDuplicateRecordError: If case has already been uploaded.
@@ -154,8 +144,3 @@ class RarediseaseObservationsAPI(ObservationsAPI):
         self.loqusdb_api.delete_case(case_id)
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case.internal_id} from {repr(self.loqusdb_api)}")
-
-    @property
-    def loqusdb_customers(self) -> list[CustomerId]:
-        """Customers that are eligible for rare disease Loqusdb uploads."""
-        return LOQUSDB_RARE_DISEASE_CUSTOMERS
