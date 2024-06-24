@@ -20,8 +20,9 @@ from cg.exc import (
     FlowCellError,
     PdcError,
 )
-from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
-from cg.meta.backup.pdc import PdcAPI
+from cg.meta.backup.backup import SpringBackupAPI
+from cg.services.illumina_services.backup_services.backup_service import IlluminaBackupService
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.encryption.encryption import (
     EncryptionAPI,
     FlowCellEncryptionAPI,
@@ -51,29 +52,37 @@ def backup(context: CGConfig):
 @click.pass_obj
 def backup_flow_cells(context: CGConfig, dry_run: bool):
     """Back-up flow cells."""
-    pdc_api = context.pdc_api
-    pdc_api.dry_run = dry_run
+    pdc_service = context.pdc_service
+    pdc_service.dry_run = dry_run
+    encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
+    tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
+    backup_service = IlluminaBackupService(
+        encryption_api=encryption_api,
+        pdc_archiving_directory=context.illumina_backup_service.pdc_archiving_directory,
+        status=context.status_db,
+        tar_api=tar_api,
+        pdc_service=pdc_service,
+        flow_cells_dir=context.run_instruments.illumina.sequencing_runs_dir,
+        dry_run=dry_run,
+    )
+    backup_service.dry_run = dry_run
     status_db: Store = context.status_db
-    flow_cells: list[IlluminaRunDirectoryData] = get_sequencing_runs_from_path(
+    runs_dir_data: list[IlluminaRunDirectoryData] = get_sequencing_runs_from_path(
         sequencing_run_dir=Path(context.run_instruments.illumina.sequencing_runs_dir)
     )
-    for flow_cell in flow_cells:
-        db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell.id)
-        flow_cell_encryption_api = FlowCellEncryptionAPI(
-            binary_path=context.encryption.binary_path,
-            dry_run=dry_run,
-            encryption_dir=Path(context.encryption.encryption_dir),
-            flow_cell=flow_cell,
-            pigz_binary_path=context.pigz.binary_path,
-            slurm_api=SlurmAPI(),
-            sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
-            tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
+    for run_dir_data in runs_dir_data:
+        db_flow_cell: Flowcell | None = status_db.get_flow_cell_by_name(
+            flow_cell_name=run_dir_data.id
         )
         try:
-            pdc_api.start_flow_cell_backup(
+            backup_service.start_flow_cell_backup(
+                run_dir_data=run_dir_data,
                 db_flow_cell=db_flow_cell,
-                flow_cell_encryption_api=flow_cell_encryption_api,
                 status_db=status_db,
+                binary_path=context.encryption.binary_path,
+                encryption_dir=Path(context.encryption.encryption_dir),
+                pigz_binary_path=context.pigz.binary_path,
+                sbatch_parameter=context.illumina_backup_service.slurm_flow_cell_encryption.dict(),
             )
         except (
             DsmcAlreadyRunningError,
@@ -105,7 +114,7 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
             flow_cell=flow_cell,
             pigz_binary_path=context.pigz.binary_path,
             slurm_api=SlurmAPI(),
-            sbatch_parameter=context.backup.slurm_flow_cell_encryption.dict(),
+            sbatch_parameter=context.illumina_backup_service.slurm_flow_cell_encryption.dict(),
             tar_api=TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run),
         )
         try:
@@ -121,20 +130,20 @@ def encrypt_flow_cells(context: CGConfig, dry_run: bool):
 def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: str | None = None):
     """Fetch the first flow cell in the requested queue from backup"""
 
-    pdc_api = context.pdc_api
-    pdc_api.dry_run = dry_run
+    pdc_service = context.pdc_service
+    pdc_service.dry_run = dry_run
     encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
     tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
-    context.meta_apis["backup_api"] = BackupAPI(
+    context.meta_apis["backup_api"] = IlluminaBackupService(
         encryption_api=encryption_api,
-        pdc_archiving_directory=context.backup.pdc_archiving_directory,
+        pdc_archiving_directory=context.illumina_backup_service.pdc_archiving_directory,
         status=context.status_db,
         tar_api=tar_api,
-        pdc_api=pdc_api,
+        pdc_service=pdc_service,
         flow_cells_dir=context.run_instruments.illumina.sequencing_runs_dir,
         dry_run=dry_run,
     )
-    backup_api: BackupAPI = context.meta_apis["backup_api"]
+    backup_api: IlluminaBackupService = context.meta_apis["backup_api"]
 
     status_api: Store = context.status_db
     flow_cell: Flowcell | None = (
@@ -189,7 +198,7 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
 def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
     """Archive a spring file to PDC"""
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
-    pdc_api: PdcAPI = PdcAPI(binary_path=config.pdc.binary_path, dry_run=dry_run)
+    pdc_service: PdcService = PdcService(binary_path=config.pdc.binary_path, dry_run=dry_run)
     encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
         binary_path=config.encryption.binary_path,
         dry_run=dry_run,
@@ -197,7 +206,7 @@ def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
     spring_backup_api: SpringBackupAPI = SpringBackupAPI(
         encryption_api=encryption_api,
         hk_api=housekeeper_api,
-        pdc_api=pdc_api,
+        pdc_service=pdc_service,
         dry_run=dry_run,
     )
     LOG.debug("Start spring encryption/backup")
@@ -255,7 +264,7 @@ def retrieve_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool)
     """Retrieve a spring file from PDC"""
     LOG.info(f"Attempting PDC retrieval and decryption file {spring_file_path}")
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
-    pdc_api: PdcAPI = PdcAPI(binary_path=config.pdc.binary_path, dry_run=dry_run)
+    pdc_service: PdcService = PdcService(binary_path=config.pdc.binary_path, dry_run=dry_run)
     encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
         binary_path=config.encryption.binary_path,
         dry_run=dry_run,
@@ -264,7 +273,7 @@ def retrieve_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool)
     spring_backup_api: SpringBackupAPI = SpringBackupAPI(
         encryption_api=encryption_api,
         hk_api=housekeeper_api,
-        pdc_api=pdc_api,
+        pdc_service=pdc_service,
         dry_run=dry_run,
     )
     spring_backup_api.retrieve_and_decrypt_spring_file(Path(spring_file_path))

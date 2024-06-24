@@ -114,6 +114,7 @@ pytest_plugins = [
     "tests.fixture_plugins.observations_fixtures.observations_api_fixtures",
     "tests.fixture_plugins.observations_fixtures.observations_input_files_fixtures",
     "tests.fixture_plugins.illumina_clean_fixtures.clean_fixtures",
+    "tests.fixture_plugins.backup_fixtures.backup_fixtures",
 ]
 
 
@@ -1910,7 +1911,7 @@ def context_config(
         "madeline_exe": "echo",
         "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
         "pon_path": str(cg_dir),
-        "backup": {
+        "illumina_backup_service": {
             "pdc_archiving_directory": pdc_archiving_directory.dict(),
             "slurm_flow_cell_encryption": {
                 "account": "development",
@@ -3932,7 +3933,7 @@ def flow_cell_encryption_api(
 ) -> FlowCellEncryptionAPI:
     flow_cell_encryption_api = FlowCellEncryptionAPI(
         binary_path=cg_context.encryption.binary_path,
-        encryption_dir=Path(cg_context.backup.pdc_archiving_directory.current),
+        encryption_dir=Path(cg_context.illumina_backup_service.pdc_archiving_directory.current),
         dry_run=True,
         flow_cell=IlluminaRunDirectoryData(
             sequencing_run_path=Path(
@@ -3941,7 +3942,7 @@ def flow_cell_encryption_api(
         ),
         pigz_binary_path=cg_context.pigz.binary_path,
         slurm_api=SlurmAPI(),
-        sbatch_parameter=cg_context.backup.slurm_flow_cell_encryption.dict(),
+        sbatch_parameter=cg_context.illumina_backup_service.slurm_flow_cell_encryption.dict(),
         tar_api=TarAPI(binary_path=cg_context.tar.binary_path, dry_run=True),
     )
     flow_cell_encryption_api.slurm_api.set_dry_run(dry_run=True)

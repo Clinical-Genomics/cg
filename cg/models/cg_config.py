@@ -22,7 +22,7 @@ from cg.clients.arnold.api import ArnoldAPIClient
 from cg.clients.janus.api import JanusAPIClient
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
-from cg.meta.backup.pdc import PdcAPI
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
@@ -73,7 +73,7 @@ class DataInput(BaseModel):
     input_dir_path: str
 
 
-class BackupConfig(BaseModel):
+class IlluminaBackupConfig(BaseModel):
     pdc_archiving_directory: PDCArchivingDirectory
     slurm_flow_cell_encryption: SlurmConfig
 
@@ -342,7 +342,7 @@ class CGConfig(BaseModel):
     # App APIs that can be instantiated in CGConfig
     arnold: ArnoldConfig = Field(None, alias="arnold")
     arnold_api_: ArnoldAPIClient | None = None
-    backup: BackupConfig = None
+    illumina_backup_service: IlluminaBackupConfig = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
     crunchy: CrunchyConfig = None
@@ -371,7 +371,7 @@ class CGConfig(BaseModel):
     mutacc_auto_api_: MutaccAutoAPI = None
     pigz: CommonAppConfig | None = None
     pdc: CommonAppConfig | None = None
-    pdc_api_: PdcAPI | None
+    pdc_service_: PdcService | None
     sample_sheet_api_: SampleSheetAPI | None = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
@@ -415,7 +415,7 @@ class CGConfig(BaseModel):
             "loqusdb_api_": "loqusdb_api",
             "madeline_api_": "madeline_api",
             "mutacc_auto_api_": "mutacc_auto_api",
-            "pdc_api_": "pdc_api",
+            "pdc_service_": "pdc_service",
             "scout_api_": "scout_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
@@ -545,13 +545,13 @@ class CGConfig(BaseModel):
         return api
 
     @property
-    def pdc_api(self) -> PdcAPI:
-        api = self.__dict__.get("pdc_api_")
-        if api is None:
-            LOG.debug("Instantiating PDC api")
-            api = PdcAPI(binary_path=self.pdc.binary_path)
-            self.pdc_api_ = api
-        return api
+    def pdc_service(self) -> PdcService:
+        service = self.__dict__.get("pdc_service_")
+        if service is None:
+            LOG.debug("Instantiating PDC service")
+            service = PdcService(binary_path=self.pdc.binary_path)
+            self.pdc_service_ = service
+        return service
 
     @property
     def sample_sheet_api(self) -> SampleSheetAPI:

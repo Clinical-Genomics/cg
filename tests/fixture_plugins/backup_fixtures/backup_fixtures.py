@@ -5,8 +5,8 @@ from typing import Callable
 import pytest
 
 from cg.constants import FileExtensions
-from cg.meta.backup.backup import BackupAPI
-from cg.meta.backup.pdc import PdcAPI
+from cg.services.illumina_services.backup_services.backup_service import IlluminaBackupService
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.encryption.encryption import EncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import PDCArchivingDirectory
@@ -57,21 +57,25 @@ def archived_flow_cells(pdc_archiving_directory: PDCArchivingDirectory) -> list[
 
 
 @pytest.fixture
-def backup_api(cg_context: CGConfig, illumina_sequencing_runs_directory: Path) -> BackupAPI:
+def backup_api(
+    cg_context: CGConfig, illumina_sequencing_runs_directory: Path
+) -> IlluminaBackupService:
     """Return a BackupAPI instance."""
     encryption_api: EncryptionAPI = EncryptionAPI(
         binary_path=cg_context.encryption.binary_path, dry_run=True
     )
     store: Store = cg_context.status_db
     tar_api: TarAPI = TarAPI(binary_path=cg_context.tar.binary_path, dry_run=True)
-    pdc_api: PdcAPI = PdcAPI(binary_path=cg_context.pdc.binary_path, dry_run=True)
+    pdc_service: PdcService = PdcService(binary_path=cg_context.pdc.binary_path, dry_run=True)
 
-    pdc_archiving_directory: PDCArchivingDirectory = cg_context.backup.pdc_archiving_directory
-    _backup_api: BackupAPI = BackupAPI(
+    pdc_archiving_directory: PDCArchivingDirectory = (
+        cg_context.illumina_backup_service.pdc_archiving_directory
+    )
+    _backup_api: IlluminaBackupService = IlluminaBackupService(
         encryption_api=encryption_api,
         status=store,
         tar_api=tar_api,
-        pdc_api=pdc_api,
+        pdc_service=pdc_service,
         pdc_archiving_directory=pdc_archiving_directory,
         flow_cells_dir=illumina_sequencing_runs_directory,
         dry_run=True,
