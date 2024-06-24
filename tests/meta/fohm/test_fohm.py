@@ -5,9 +5,9 @@ from cg.meta.upload.fohm.fohm import (
     get_kompletterings_reports,
     get_pangolin_reports,
     remove_duplicate_dicts,
-    validate_fohm_reports,
+    validate_fohm_complementary_reports,
 )
-from cg.models.fohm.reports import FohmReport
+from cg.models.fohm.reports import FohmComplementaryReport
 
 
 def test_create_daily_delivery(csv_file_path: Path):
@@ -54,32 +54,36 @@ def test_remove_duplicate_dicts_when_no_duplicates():
     assert len(content[3]) == 2
 
 
-def test_validate_fohm_reports(fohm_reports_raw: dict[str, str]):
+def test_validate_fohm_reports(fohm_complementary_reports_raw: dict[str, str]):
     # GIVEN a list of dicts
 
     # WHEN matching values
-    content: list[FohmReport] = validate_fohm_reports(reports=[fohm_reports_raw])
+    content: list[FohmComplementaryReport] = validate_fohm_complementary_reports(
+        reports=[fohm_complementary_reports_raw]
+    )
 
     # THEN a list of models is returned
-    assert isinstance(content[0], FohmReport)
+    assert isinstance(content[0], FohmComplementaryReport)
 
 
-def test_get_kompletterings_reports(fohm_reports):
+def test_get_kompletterings_reports(fohm_complementary_reports: list[FohmComplementaryReport]):
     # GIVEN a list of reports
 
     # WHEN matching values in reports
-    content: list[FohmReport] = get_kompletterings_reports(reports=fohm_reports)
+    content: list[FohmComplementaryReport] = get_kompletterings_reports(
+        reports=fohm_complementary_reports
+    )
 
     # THEN a list of reports is returned
-    assert isinstance(content[0], FohmReport)
+    assert isinstance(content[0], FohmComplementaryReport)
 
-    # THEN only dict for complementary reports remains
+    # THEN only the report for Sars-cov2 reports remains
     assert len(content) == 1
     assert content[0].sample_number == "44CS000000"
 
 
 def test_get_pangolin_reports():
-    # GIVEN a list of dicts
+    # GIVEN a list of reports
     dicts = [{"taxon": "1CS", "b": 2}, {"c": 1, "taxon": "44CS000001"}]
 
     # WHEN matching values

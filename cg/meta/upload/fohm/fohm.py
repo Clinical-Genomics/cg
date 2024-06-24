@@ -18,7 +18,7 @@ from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
-from cg.models.fohm.reports import FohmReport
+from cg.models.fohm.reports import FohmComplementaryReport
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 from cg.utils.email import send_mail
@@ -46,23 +46,25 @@ def remove_duplicate_dicts(dicts: list[list[dict]]) -> list[dict]:
     ]
 
 
-def validate_fohm_reports(reports: list[dict]) -> list[FohmReport]:
-    """Validate reports.
+def validate_fohm_complementary_reports(reports: list[dict]) -> list[FohmComplementaryReport]:
+    """Validate FOHM complementary reports.
     Raises: ValidateError"""
-    fohm_reports = []
+    complementary_reports = []
     for report in reports:
-        fohm_report = FohmReport.model_validate(report)
-        fohm_reports.append(fohm_report)
-    return fohm_reports
+        complementary_report = FohmComplementaryReport.model_validate(report)
+        complementary_reports.append(complementary_report)
+    return complementary_reports
 
 
-def get_kompletterings_reports(reports: list[FohmReport]) -> list[FohmReport]:
-    """Return all "kompleterings" reports from multiple cases."""
+def get_kompletterings_reports(
+    reports: list[FohmComplementaryReport],
+) -> list[FohmComplementaryReport]:
+    """Return all "Sars-cov2" reports from multiple cases."""
     return [report for report in reports if re.search(SARS_COV_REGEX, report.sample_number)]
 
 
 def get_pangolin_reports(reports: list[dict]) -> list[dict]:
-    """Return all Pangolin reports from multiple cases."""
+    """Return all "Sars-cov2" reports from multiple cases."""
     return [report for report in reports if re.search(SARS_COV_REGEX, report["taxon"])]
 
 
