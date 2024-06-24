@@ -13,7 +13,8 @@ from cg.exc import (
     FlowCellEncryptionError,
 )
 from cg.meta.backup.backup import LOG
-from cg.meta.encryption.encryption import EncryptionAPI, FlowCellEncryptionAPI
+from cg.meta.encryption.encryption import EncryptionAPI
+from cg.services.illumina_services.backup_services.encrypt_service import FlowCellEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import PDCArchivingDirectory
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData

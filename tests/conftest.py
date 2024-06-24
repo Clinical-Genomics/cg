@@ -45,7 +45,7 @@ from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
-from cg.meta.encryption.encryption import FlowCellEncryptionAPI
+from cg.services.illumina_services.backup_services.encrypt_service import FlowCellEncryptionAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.tar.tar import TarAPI
 from cg.meta.transfer.external_data import ExternalDataAPI

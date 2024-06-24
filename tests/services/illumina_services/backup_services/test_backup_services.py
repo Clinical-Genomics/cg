@@ -18,7 +18,7 @@ from cg.exc import (
 
 from cg.services.illumina_services.backup_services.backup_service import IlluminaBackupService
 from cg.services.pdc_service.pdc_service import PdcService
-from cg.meta.encryption.encryption import FlowCellEncryptionAPI
+from cg.services.illumina_services.backup_services.encrypt_service import FlowCellEncryptionAPI
 from cg.models.cg_config import PDCArchivingDirectory, CGConfig
 
 from cg.store.models import Flowcell

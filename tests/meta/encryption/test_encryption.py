@@ -11,9 +11,9 @@ import pytest
 from cg.exc import FlowCellEncryptionError, FlowCellError
 from cg.meta.encryption.encryption import (
     EncryptionAPI,
-    FlowCellEncryptionAPI,
     SpringEncryptionAPI,
 )
+from cg.services.illumina_services.backup_services.encrypt_service import FlowCellEncryptionAPI
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
 

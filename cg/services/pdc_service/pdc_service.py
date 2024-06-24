@@ -14,7 +14,7 @@ from cg.exc import (
     FlowCellEncryptionError,
     PdcError,
 )
-from cg.meta.encryption.encryption import FlowCellEncryptionAPI
+from cg.services.illumina_services.backup_services.encrypt_service import FlowCellEncryptionAPI
 from cg.store.models import Flowcell
 from cg.store.store import Store
 from cg.utils import Process

@@ -25,9 +25,9 @@ from cg.services.illumina_services.backup_services.backup_service import Illumin
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.encryption.encryption import (
     EncryptionAPI,
-    FlowCellEncryptionAPI,
     SpringEncryptionAPI,
 )
+from cg.services.illumina_services.backup_services.encrypt_service import FlowCellEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import (
