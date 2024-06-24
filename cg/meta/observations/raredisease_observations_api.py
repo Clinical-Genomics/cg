@@ -34,7 +34,6 @@ class RarediseaseObservationsAPI(ObservationsAPI):
 
     def __init__(self, config: CGConfig, sequencing_method: SequencingMethod):
         super().__init__(config)
-        self.sequencing_method: SequencingMethod = sequencing_method
         self.loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(self.get_loqusdb_instance())
 
     @property
