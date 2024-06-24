@@ -108,7 +108,7 @@ class UploadGenotypesAPI(object):
     def analysis_sex_raredisease(self, qc_metrics_file: Path, sample_id: Sample) -> dict:
         """Fetch analysis sex for each sample of an analysis."""
         qc_metrics: list[MetricsBase] = self.get_parsed_qc_metrics_data_raredisease(qc_metrics_file)
-        return [metric.value for metric in qc_metrics if metric.name == "predicted_sex_sex_check" and metric.id == sample_id]
+        return str(next(metric.value for metric in qc_metrics if metric.name == "predicted_sex_sex_check" and metric.id == sample_id))
 
     def get_bcf_file(self, hk_version_obj: Version) -> File:
         """Fetch a bcf file and return the file object"""
