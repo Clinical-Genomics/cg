@@ -32,7 +32,7 @@ LOG = logging.getLogger(__name__)
 class RarediseaseObservationsAPI(ObservationsAPI):
     """API to manage RAREDISEASE observations."""
 
-    def __init__(self, config: CGConfig, sequencing_method: SequencingMethod):
+    def __init__(self, config: CGConfig):
         super().__init__(config)
         self.loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(self.get_loqusdb_instance())
 
