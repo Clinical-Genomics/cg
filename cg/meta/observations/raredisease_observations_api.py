@@ -38,6 +38,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
         super().__init__(config=config, analysis_api=self.analysis_api)
         self.loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(self.set_loqusdb_instance())
 
+
     @property
     def loqusdb_customers(self) -> list[CustomerId]:
         """Customers that are eligible for rare disease Loqusdb uploads."""
