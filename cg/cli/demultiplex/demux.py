@@ -16,7 +16,7 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
 )
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.exc import FlowCellError, SampleSheetError
+from cg.exc import CgError, FlowCellError
 from cg.meta.demultiplex.utils import (
     create_manifest_file,
     is_flow_cell_sync_confirmed,
@@ -60,9 +60,10 @@ def demultiplex_all(context: CGConfig, sequencing_runs_directory: click.Path, dr
 
         try:
             sample_sheet_api.validate_sample_sheet(sequencing_run.sample_sheet_path)
-        except (SampleSheetError, ValidationError):
+        except (CgError, ValidationError):
             LOG.warning(
-                f"Malformed sample sheet. Run cg demultiplex samplesheet validate {sequencing_run.sample_sheet_path}"
+                "Malformed sample sheet. Run "
+                f"cg demultiplex samplesheet validate {sequencing_run.sample_sheet_path}"
             )
             continue
 
@@ -111,9 +112,10 @@ def demultiplex_sequencing_run(
 
     try:
         sample_sheet_api.validate_sample_sheet(sequencing_run.sample_sheet_path)
-    except (SampleSheetError, ValidationError) as error:
+    except (CgError, ValidationError) as error:
         LOG.warning(
-            f"Malformed sample sheet. Run cg demultiplex samplesheet validate {sequencing_run.sample_sheet_path}"
+            "Malformed sample sheet. "
+            f"Run cg demultiplex samplesheet validate {sequencing_run.sample_sheet_path}"
         )
         raise click.Abort from error
 

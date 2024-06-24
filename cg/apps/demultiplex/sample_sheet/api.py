@@ -13,10 +13,13 @@ from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import SampleSheetBcl2FastqSections, SampleSheetBCLConvertSections
 from cg.exc import (
+    CgError,
     FlowCellError,
     HousekeeperFileMissingError,
+    LimsDataError,
+    MissingFilesError,
     SampleSheetContentError,
-    SampleSheetError,
+    SampleSheetFormatError,
 )
 from cg.io.controller import ReadFile, WriteFile, WriteStream
 from cg.meta.demultiplex.housekeeper_storage_functions import (
@@ -60,22 +63,21 @@ class SampleSheetAPI:
         if not flow_cell_path.exists():
             message: str = f"Could not find flow cell {flow_cell_path}"
             LOG.warning(message)
-            raise SampleSheetError(message)
-        try:
-            flow_cell = IlluminaRunDirectoryData(flow_cell_path)
-        except FlowCellError as error:
-            raise SampleSheetError from error
+            raise FlowCellError(message)
+        flow_cell = IlluminaRunDirectoryData(flow_cell_path)
         return flow_cell
 
     def validate_sample_sheet(self, sample_sheet_path: Path) -> None:
         """Return the sample sheet path if it exists and if it passes validation.
         Raises:
-            SampleSheetError: If the sample sheet does not exist or does not pass validation.
+            MissingFilesError: If the sample sheet does not exist.
+            SampleSheetError: If the sample sheet content is wrong.
+            SampleSheetFormatError: If the sample sheet format is wrong.
         """
         if not (sample_sheet_path and sample_sheet_path.exists()):
             message: str = f"Sample sheet with path {sample_sheet_path} does not exist"
             LOG.error(message)
-            raise SampleSheetError(message)
+            raise MissingFilesError(message)
         sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.CSV, file_path=sample_sheet_path
         )
@@ -100,7 +102,7 @@ class SampleSheetAPI:
         Replace the old sample ID header in the Bcl2Fastq sample sheet content with the BCLConvert
         formatted one.
         Raises:
-            SampleSheetError: If the data header is not found in the sample sheet.
+            SampleSheetFormatError: If the data header is not found in the sample sheet.
         """
         for line in sample_sheet_content:
             if SampleSheetBcl2FastqSections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ.value in line:
@@ -109,13 +111,13 @@ class SampleSheetAPI:
                 )
                 line[idx] = SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID.value
                 return sample_sheet_content
-        raise SampleSheetError("Could not find BCL2FASTQ data header in sample sheet")
+        raise SampleSheetFormatError("Could not find BCL2FASTQ data header in sample sheet")
 
     def translate_sample_sheet(self, flow_cell_name: str) -> None:
         """Translate a Bcl2Fastq sample sheet to a BCLConvert sample sheet."""
         flow_cell: IlluminaRunDirectoryData = self._get_flow_cell(flow_cell_name)
         if not self._are_necessary_files_in_flow_cell(flow_cell):
-            raise SampleSheetError("Could not translate sample sheet")
+            raise MissingFilesError("Missing necessary files in run directory for translation")
         original_content: list[list[str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.CSV, file_path=flow_cell.sample_sheet_path
         )
@@ -146,12 +148,8 @@ class SampleSheetAPI:
         """
         Copy the sample sheet from Housekeeper to the flow cell directory if it exists and is valid.
         """
-        try:
-            sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(flow_cell.id)
-        except HousekeeperFileMissingError:
-            raise SampleSheetError(
-                f"Sample sheet for flow cell {flow_cell.id} does not exist in Housekeeper"
-            )
+        sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(flow_cell.id)
+        flow_cell.set_sample_sheet_path_hk(sample_sheet_path)
         self.validate_sample_sheet(sample_sheet_path)
         LOG.info("Sample sheet from Housekeeper is valid. Copying it to flow cell directory")
         if not self.dry_run:
@@ -173,7 +171,10 @@ class SampleSheetAPI:
             )
 
     def _get_sample_sheet_content(self, flow_cell: IlluminaRunDirectoryData) -> list[list[str]]:
-        """Return the sample sheet content for a flow cell."""
+        """Return the sample sheet content for a flow cell.
+        Raises:
+             LimsDataError: If no samples are found in LIMS for the flow cell.
+        """
         lims_samples: list[FlowCellSample] = list(
             get_flow_cell_samples(
                 lims=self.lims_api,
@@ -183,7 +184,7 @@ class SampleSheetAPI:
         if not lims_samples:
             message: str = f"Could not find any samples in LIMS for {flow_cell.id}"
             LOG.warning(message)
-            raise SampleSheetError(message)
+            raise LimsDataError(message)
         creator = SampleSheetCreator(flow_cell=flow_cell, lims_samples=lims_samples)
         LOG.info(
             f"Constructing sample sheet for the {flow_cell.sequencer_type} flow cell {flow_cell.id}"
@@ -228,27 +229,28 @@ class SampleSheetAPI:
             return
         except SampleSheetContentError:
             LOG.warning(
-                "Validation failed for manually modified sample sheet. Sample sheet will not "
-                "be regenerated. Manually run demultiplexing for this flow cell"
+                f"Validation failed for {flow_cell.get_sample_sheet_path_hk()}. "
+                "Possibly a manually modified sample sheet. Sample sheet will not be re-generated."
             )
             return
-        except SampleSheetError:
+        except CgError:
             LOG.warning(
-                "It was not possible to use sample sheet from Housekeeper, "
-                "trying flow cell sample sheet"
+                "Sample sheet from Housekeeper is not correctly formatted or does not exist, "
+                "trying sample sheet in sequencing directory"
             )
         try:
             self._use_flow_cell_sample_sheet(flow_cell)
             return
         except SampleSheetContentError:
             LOG.warning(
-                "Validation failed for manually modified sample sheet. Sample sheet will not "
-                "be regenerated. Manually run demultiplexing for this flow cell"
+                f"Validation failed for {flow_cell.sample_sheet_path}. "
+                "Possibly manually modified sample sheet. Sample sheet will not be re-generated."
             )
             return
-        except SampleSheetError:
+        except CgError:
             LOG.warning(
-                "It was not possible to use sample sheet from flow cell, creating new sample sheet"
+                "Sample sheet from sequencing directory is not correctly formatted or does not "
+                "exist, creating new sample sheet"
             )
         self._create_sample_sheet_file(flow_cell)
 
