@@ -5,7 +5,9 @@ from cg.meta.upload.fohm.fohm import (
     get_kompletterings_reports,
     get_pangolin_reports,
     remove_duplicate_dicts,
+    validate_fohm_reports,
 )
+from cg.models.fohm.reports import FohmReport
 
 
 def test_create_daily_delivery(csv_file_path: Path):
@@ -52,6 +54,16 @@ def test_remove_duplicate_dicts_when_no_duplicates():
     assert len(content[3]) == 2
 
 
+def test_validate_fohm_reports(fohm_reports_raw: dict[str, str]):
+    # GIVEN a list of dicts
+
+    # WHEN matching values
+    content: list[FohmReport] = validate_fohm_reports(reports=[fohm_reports_raw])
+
+    # THEN a list of models is returned
+    assert isinstance(content[0], FohmReport)
+
+
 def test_get_kompletterings_reports():
     # GIVEN a list of dicts
     dicts = [{"provnummer": "1CS", "b": 2}, {"c": 1, "provnummer": "44CS000000"}]
@@ -78,5 +90,5 @@ def test_get_pangolin_reports():
     assert isinstance(content[0], dict)
 
     # THEN only dict for Pangolin reports remains
-    assert len(content) == 1
     assert len(content[0]) == 2
+    assert len(content) == 1

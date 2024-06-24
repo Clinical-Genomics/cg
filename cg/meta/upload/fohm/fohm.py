@@ -18,6 +18,7 @@ from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
+from cg.models.fohm.reports import FohmReport
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 from cg.utils.email import send_mail
@@ -36,7 +37,6 @@ def create_daily_deliveries_csv(file_paths: list[Path]) -> list[list[dict]]:
 
 
 def remove_duplicate_dicts(dicts: list[list[dict]]) -> list[dict]:
-    """Remove duplicate dict from list."""
     all_dicts = []
     for dictionary in dicts:
         all_dicts.extend(iter(dictionary))
@@ -44,6 +44,16 @@ def remove_duplicate_dicts(dicts: list[list[dict]]) -> list[dict]:
         dict(dictionary_tuple)
         for dictionary_tuple in {tuple(dictionary.items()) for dictionary in all_dicts}
     ]
+
+
+def validate_fohm_reports(reports: list[dict]) -> list[FohmReport]:
+    """Validate reports.
+    Raises: ValidateError"""
+    fohm_reports = []
+    for report in reports:
+        fohm_report = FohmReport.model_validate(report)
+        fohm_reports.append(fohm_report)
+    return fohm_reports
 
 
 def get_kompletterings_reports(reports: list[dict]) -> list[dict]:

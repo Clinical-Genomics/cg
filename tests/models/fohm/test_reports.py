@@ -7,7 +7,7 @@ def test_instantiate_fohm_report(fohm_reports_raw: dict[str, str]):
     # GIVEN report dicts
 
     # WHEN instantiating a FOHM report object
-    fohm_report = FohmReport(**fohm_reports_raw)
+    fohm_report = FohmReport.model_validate(fohm_reports_raw)
 
     # THEN assert that it was successfully created
     assert isinstance(fohm_report, FohmReport)

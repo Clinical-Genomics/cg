@@ -7,5 +7,5 @@ def fohm_reports_raw() -> dict[str, str]:
     return {
         "provnummer": "a_sample_number",
         "urvalskriterium": "a_selection_criteria",
-        "GISAID_accession": "accession",
+        "GISAID_accession": "an_accession",
     }
