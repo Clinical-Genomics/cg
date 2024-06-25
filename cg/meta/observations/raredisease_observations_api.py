@@ -114,8 +114,6 @@ class RarediseaseObservationsAPI(ObservationsAPI):
         self, hk_version: Version, case_id: str
     ) -> RarediseaseObservationsInputFiles:
         """Return observations files given a Housekeeper version for rare diseases."""
-        LOG.info(self.housekeeper_api.files(
-                version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.PROFILE_GBCF]))
         input_files: dict[str, File] = {
             "snv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.SNV_VCF]
@@ -134,7 +132,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
                 version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.FAMILY_PED]
             ).first(),
         }
-
+        LOG.info(input_files)
         return RarediseaseObservationsInputFiles(**get_full_path_dictionary(input_files))
 
     def delete_case(self, case_id: str) -> None:
