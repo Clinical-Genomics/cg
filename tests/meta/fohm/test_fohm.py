@@ -67,12 +67,12 @@ def test_validate_fohm_complementary_reports(fohm_complementary_report_raw: dict
     assert isinstance(content[0], FohmComplementaryReport)
 
 
-def test_validate_fohm_pangolin_reports(fohm_pangoliny_report_raw: dict[str, str]):
+def test_validate_fohm_pangolin_reports(fohm_pangolin_report_raw: dict[str, str]):
     # GIVEN a list of dicts
 
     # WHEN matching values
     content: list[FohmPangolinReport] = validate_fohm_pangolin_reports(
-        reports=[fohm_pangoliny_report_raw]
+        reports=[fohm_pangolin_report_raw]
     )
 
     # THEN a list of reports is returned
