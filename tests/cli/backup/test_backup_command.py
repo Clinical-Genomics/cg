@@ -71,32 +71,37 @@ def test_backup_flow_cells_when_dsmc_is_running(
     assert "Too many Dsmc processes are already running" in caplog.text
 
 
-def test_backup_flow_cells_when_flow_cell_already_has_backup(
+def test_backup_illumina_run_when_run_already_has_backup(
     cli_runner: CliRunner,
     cg_context: CGConfig,
     caplog,
-    flow_cell_name: str,
-    flow_cell_full_name: str,
+    store_with_illumina_sequencing_data: Store,
+    novaseq_x_flow_cell_id: str,
     helpers: StoreHelpers,
 ):
-    """Test backing-up flow cell in dry run mode when already backed-up."""
+    """Test backing-up an Illumina run in dry run mode when already backed-up."""
     caplog.set_level(logging.DEBUG)
 
-    # GIVEN a flow cells directory
-
-    # GIVEN a flow cell with a back-up
-    helpers.add_flow_cell(
-        store=cg_context.status_db, flow_cell_name=flow_cell_name, has_backup=True
+    # GIVEN a store with a backed up sequencing run
+    cg_context.status_db_ = store_with_illumina_sequencing_data
+    sequencing_run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
     )
+    sequencing_run.has_backup = True
 
-    # WHEN backing up flow cells in dry run mode
+    # WHEN backing up illumina runs in dry run mode
     result = cli_runner.invoke(backup_illumina_runs, ["--dry-run"], obj=cg_context)
 
     # THEN exits without any errors
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN communicate flow cell has already benn backed upped
-    assert f"Flow cell: {flow_cell_name} is already backed-up" in caplog.text
+    # THEN communicate the sequencing run has already benn backed upped
+    assert (
+        f"Sequencing run for flow cell: {novaseq_x_flow_cell_id} is already backed-up"
+        in caplog.text
+    )
 
 
 def test_backup_flow_cells_when_encryption_is_not_completed(
@@ -118,7 +123,10 @@ def test_backup_flow_cells_when_encryption_is_not_completed(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN communicate flow cell encryption is not completed
-    assert f"Flow cell: {flow_cell_name} encryption process is not complete" in caplog.text
+    assert (
+        f"Sequencing run for flow cell: {flow_cell_name} encryption process is not complete"
+        in caplog.text
+    )
 
 
 def test_encrypt_illumina_runs(

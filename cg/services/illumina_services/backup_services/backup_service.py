@@ -320,13 +320,13 @@ class IlluminaBackupService:
             raise DsmcAlreadyRunningError("Too many Dsmc processes are already running")
         if sequencing_run and sequencing_run.has_backup:
             raise IlluminaRunAlreadyBackedUpError(
-                f"Flow cell: {sequencing_run.device.internal_id} is already backed-up"
+                f"Sequencing run for flow cell: {sequencing_run.device.internal_id} is already backed-up"
             )
         if not illumina_run_encryption_service.complete_file_path.exists():
             raise IlluminaRunEncryptionError(
-                f"Flow cell: {illumina_run_encryption_service.run_dir_data.id} encryption process is not complete"
+                f"Sequencing run for flow cell: {illumina_run_encryption_service.run_dir_data.id} encryption process is not complete"
             )
-        LOG.debug("Flow cell can be backed up")
+        LOG.debug("Sequencing run can be backed up")
 
     def backup_run(
         self, files_to_archive: list[Path], store: Store, sequencing_run: IlluminaSequencingRun
