@@ -39,7 +39,7 @@ class MipDNAUploadAPI(UploadAPI):
         ctx.invoke(validate, family_id=case.internal_id)
         ctx.invoke(upload_genotypes, family_id=case.internal_id, re_upload=restart)
         ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
-        ctx.invoke(upload_to_gens, case_id=case.internal_id, replace=restart)
+        ctx.invoke(upload_to_gens, case_id=case.internal_id)
 
         # Delivery report generation
         if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:

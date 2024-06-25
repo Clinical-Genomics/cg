@@ -22,14 +22,8 @@ LOG = logging.getLogger(__name__)
 @click.command("gens")
 @ARGUMENT_CASE_ID
 @DRY_RUN
-@click.option(
-    "-r",
-    "--replace",
-    is_flag=True,
-    help="Replace existing analysis",
-)
 @click.pass_obj
-def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool, replace: bool):
+def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool):
     """Upload data from an analysis to Gens."""
 
     click.echo(click.style("----------------- GENS -------------------"))
@@ -60,6 +54,5 @@ def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool, replac
                 case_id=case_id,
                 coverage_path=hk_coverage.full_path,
                 genome_build=GENOME_BUILD_37,
-                replace=replace,
                 sample_id=sample.internal_id,
             )
