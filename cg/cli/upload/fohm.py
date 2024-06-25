@@ -4,9 +4,16 @@ import click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN
-from cg.meta.upload.fohm.fohm import FOHMUploadAPI
+from cg.meta.upload.fohm.fohm import (
+    FOHMUploadAPI,
+    create_daily_deliveries_csv,
+    remove_duplicate_dicts,
+    validate_fohm_complementary_reports,
+    validate_fohm_pangolin_reports,
+)
 from cg.meta.upload.gisaid import GisaidAPI
 from cg.models.cg_config import CGConfig
+from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
 
 LOG = logging.getLogger(__name__)
 
@@ -43,10 +50,36 @@ def aggregate_delivery(
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     fohm_api.set_cases_to_aggregate(cases=cases)
     fohm_api.create_daily_delivery_folders()
-    fohm_api.append_metadata_to_aggregation_df()
-    fohm_api.create_komplettering_reports()
-    fohm_api.create_pangolin_reports()
-    fohm_api.link_sample_rawdata_files()
+
+    complementary_reports_raw: list[list[dict]] = create_daily_deliveries_csv(
+        fohm_api.daily_reports_list
+    )
+    unique_complementary_reports_raw: list[dict] = remove_duplicate_dicts(complementary_reports_raw)
+    complementary_reports: list[FohmComplementaryReport] = validate_fohm_complementary_reports(
+        unique_complementary_reports_raw
+    )
+    fohm_api.add_sample_internal_id_complementary_report(complementary_reports)
+    fohm_api.add_region_lab_to_reports(complementary_reports)
+    fohm_api.create_complementary_report_csv(complementary_reports)
+    fohm_api.link_sample_rawdata_files_csv(complementary_reports)
+
+    pangolin_reports_raw: list[list[dict]] = create_daily_deliveries_csv(
+        fohm_api.daily_pangolin_list
+    )
+    unique_pangolin_reports_raw: list[dict] = remove_duplicate_dicts(pangolin_reports_raw)
+    pangolin_reports: list[FohmPangolinReport] = validate_fohm_pangolin_reports(
+        unique_pangolin_reports_raw
+    )
+    fohm_api.add_sample_internal_id_pangolin_report(pangolin_reports)
+    fohm_api.add_region_lab_to_reports(pangolin_reports)
+    fohm_api.create_pangolin_report_csv(pangolin_reports)
+    fohm_api.link_sample_rawdata_files_csv(pangolin_reports)
+
+
+#    fohm_api.append_metadata_to_aggregation_df()
+#   fohm_api.create_komplettering_reports()
+#  fohm_api.create_pangolin_reports()
+# fohm_api.link_sample_rawdata_files()
 
 
 @fohm.command("create-komplettering")

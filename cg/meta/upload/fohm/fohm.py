@@ -260,6 +260,24 @@ class FOHMUploadAPI:
                     continue
                 shutil.copy(file.full_path, Path(self.daily_rawdata_path))
 
+    def link_sample_rawdata_files_csv(
+        self, reports: list[FohmComplementaryReport] | list[FohmPangolinReport]
+    ) -> None:
+        """Hardlink samples raw data files to FOHM delivery folder."""
+        for report in reports:
+            for sample_id in report.internal_id:
+                sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
+                bundle_name = sample.links[0].case.internal_id
+                version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
+                files = self.housekeeper_api.files(version=version_obj.id, tags=[sample_id]).all()
+                for file in files:
+                    if self._dry_run:
+                        LOG.info(
+                            f"Would have copied {file.full_path} to {Path(self.daily_rawdata_path)}"
+                        )
+                        continue
+                    shutil.copy(file.full_path, Path(self.daily_rawdata_path))
+
     def create_pangolin_reports(self) -> None:
         LOG.info("Creating pangolin reports")
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
