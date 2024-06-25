@@ -2,12 +2,12 @@ from pathlib import Path
 
 from cg.meta.upload.fohm.fohm import (
     create_daily_deliveries_csv,
-    get_pangolin_reports,
     get_sars_cov_complementary_reports,
+    get_sars_cov_pangolin_reports,
     remove_duplicate_dicts,
     validate_fohm_complementary_reports,
 )
-from cg.models.fohm.reports import FohmComplementaryReport
+from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
 
 
 def test_create_daily_delivery(csv_file_path: Path):
@@ -84,16 +84,15 @@ def test_get_sars_cov_complementary_reports(
     assert content[0].sample_number == "44CS000000"
 
 
-def test_get_pangolin_reports():
+def test_get_pangolin_reports(fohm_pangolin_reports: list[FohmPangolinReport]):
     # GIVEN a list of reports
-    dicts = [{"taxon": "1CS", "b": 2}, {"c": 1, "taxon": "44CS000001"}]
 
     # WHEN matching values
-    content: list[dict] = get_pangolin_reports(reports=dicts)
+    content: list[FohmPangolinReport] = get_sars_cov_pangolin_reports(reports=fohm_pangolin_reports)
 
-    # THEN a list of dicts is returned
-    assert isinstance(content[0], dict)
+    # THEN a list of reports is returned
+    assert isinstance(content[0], FohmPangolinReport)
 
-    # THEN only dict for Pangolin reports remains
-    assert len(content[0]) == 2
+    # THEN only the report for Sars-cov2 reports remains
     assert len(content) == 1
+    assert content[0].taxon == "44CS000000"

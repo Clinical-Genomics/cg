@@ -18,7 +18,7 @@ from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
-from cg.models.fohm.reports import FohmComplementaryReport
+from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 from cg.utils.email import send_mail
@@ -63,9 +63,9 @@ def get_sars_cov_complementary_reports(
     return [report for report in reports if re.search(SARS_COV_REGEX, report.sample_number)]
 
 
-def get_pangolin_reports(reports: list[dict]) -> list[dict]:
+def get_sars_cov_pangolin_reports(reports: list[FohmPangolinReport]) -> list[FohmPangolinReport]:
     """Return all "Sars-cov2" reports from multiple cases."""
-    return [report for report in reports if re.search(SARS_COV_REGEX, report["taxon"])]
+    return [report for report in reports if re.search(SARS_COV_REGEX, report.taxon)]
 
 
 class FOHMUploadAPI:

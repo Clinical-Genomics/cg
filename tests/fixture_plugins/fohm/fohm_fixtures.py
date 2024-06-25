@@ -1,6 +1,6 @@
 import pytest
 
-from cg.models.fohm.reports import FohmComplementaryReport
+from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
 
 
 @pytest.fixture
@@ -60,3 +60,39 @@ def fohm_pangolin_report_raw() -> dict[str, str]:
         "qc_notes": "a_qc_note",
         "note": "a_note",
     }
+
+
+@pytest.fixture
+def fohm_pangolin_report(
+    fohm_pangolin_report_raw: list[dict],
+) -> FohmPangolinReport:
+    """Return FohmPangolinReport."""
+    return FohmPangolinReport.model_validate(fohm_pangolin_report_raw)
+
+
+@pytest.fixture
+def fohm_pangolin_reports(
+    fohm_pangolin_report: FohmPangolinReport,
+) -> list[FohmPangolinReport]:
+    """Return FOHM pangolin reports."""
+    pangolin_report = FohmPangolinReport.model_validate(
+        {
+            "taxon": "44CS000001",
+            "lineage": "a_lineage",
+            "conflict": "a_conflict",
+            "ambiguity_score": "an_ambiguity_score",
+            "scorpio_call": "a_scorpio_call",
+            "scorpio_support": "a_scorpio_support",
+            "scorpio_conflict": "a_scorpio_conflict",
+            "scorpio_notes": "a_scorpio_note",
+            "version": "a_version",
+            "pangolin_version": "a_pangolin_version",
+            "scorpio_version": "a_wcorpio_version",
+            "constellation_version": "a_constellation_vversion",
+            "is_designated": "a_designation",
+            "qc_status": "a_qc_status",
+            "qc_notes": "a_qc_note",
+            "note": "a_note",
+        }
+    )
+    return [fohm_pangolin_report, pangolin_report]
