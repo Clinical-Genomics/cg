@@ -206,7 +206,7 @@ class CaseSubmitter(Submitter):
                             sample.reference_genome if hasattr(sample, "reference_genome") else None
                         ),
                         "sex": sample.sex,
-                        "status": sample.status_db if hasattr(sample, "status") else None,
+                        "status": sample.status if hasattr(sample, "status") else None,
                         "subject_id": sample.subject_id,
                         "tumour": sample.tumour,
                     }
