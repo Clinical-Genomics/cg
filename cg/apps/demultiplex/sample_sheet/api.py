@@ -151,24 +151,35 @@ class SampleSheetAPI:
         sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(flow_cell.id)
         flow_cell.set_sample_sheet_path_hk(sample_sheet_path)
         self.validate_sample_sheet(sample_sheet_path)
-        LOG.info("Sample sheet from Housekeeper is valid. Copying it to flow cell directory")
-        if not self.dry_run:
-            link_or_overwrite_file(src=sample_sheet_path, dst=flow_cell.sample_sheet_path)
+
+        if self.dry_run:
+            LOG.info(
+                f"Sample sheet from Housekeeper is valid, "
+                "would have copied it to sequencing run directory"
+            )
+            return
+        LOG.info("Sample sheet from Housekeeper is valid. Copying it to sequencing run directory")
+        link_or_overwrite_file(src=sample_sheet_path, dst=flow_cell.sample_sheet_path)
 
     def _use_flow_cell_sample_sheet(self, flow_cell: IlluminaRunDirectoryData) -> None:
         """Use the sample sheet from the flow cell directory if it is valid."""
         self.validate_sample_sheet(flow_cell.sample_sheet_path)
-        LOG.info("Sample sheet from flow cell directory is valid. Adding it to Housekeeper")
-        if not self.dry_run:
-            try:
-                delete_sample_sheet_from_housekeeper(flow_cell_id=flow_cell.id, hk_api=self.hk_api)
-            except HousekeeperFileMissingError:
-                pass
-            add_and_include_sample_sheet_path_to_housekeeper(
-                flow_cell_directory=flow_cell.path,
-                flow_cell_name=flow_cell.id,
-                hk_api=self.hk_api,
+        if self.dry_run:
+            LOG.info(
+                "Sample sheet from sequencing run directory is valid, "
+                "would have added it to Housekeeper"
             )
+            return
+        LOG.info("Sample sheet from sequencing run directory is valid. Adding it to Housekeeper")
+        try:
+            delete_sample_sheet_from_housekeeper(flow_cell_id=flow_cell.id, hk_api=self.hk_api)
+        except HousekeeperFileMissingError:
+            pass
+        add_and_include_sample_sheet_path_to_housekeeper(
+            flow_cell_directory=flow_cell.path,
+            flow_cell_name=flow_cell.id,
+            hk_api=self.hk_api,
+        )
 
     def _get_sample_sheet_content(self, flow_cell: IlluminaRunDirectoryData) -> list[list[str]]:
         """Return the sample sheet content for a flow cell.
