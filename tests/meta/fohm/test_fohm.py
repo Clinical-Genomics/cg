@@ -76,7 +76,7 @@ def test_validate_fohm_pangolin_reports(fohm_pangolin_report_raw: dict[str, str]
     )
 
     # THEN a list of reports is returned
-    assert isinstance(content[0], FohmComplementaryReport)
+    assert isinstance(content[0], FohmPangolinReport)
 
 
 def test_get_sars_cov_complementary_reports(
