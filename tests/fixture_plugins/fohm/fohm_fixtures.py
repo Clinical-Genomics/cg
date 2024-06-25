@@ -37,3 +37,26 @@ def fohm_complementary_reports(
         }
     )
     return [fohm_complementary_report, complementary_report, report_1]
+
+
+@pytest.fixture
+def fohm_pangolin_report_raw() -> dict[str, str]:
+    """Return FOHM Pangolin report."""
+    return {
+        "taxon": "a_taxon",
+        "lineage": "a_lineage",
+        "conflict": "a_conflict",
+        "ambiguity_score": "an_ambiguity_score",
+        "scorpio_call": "a_scorpio_call",
+        "scorpio_support": "a_scorpio_support",
+        "scorpio_conflict": "a_scorpio_conflict",
+        "scorpio_notes": "a_scorpio_note",
+        "version": "a_version",
+        "pangolin_version": "a_pangolin_version",
+        "scorpio_version": "a_wcorpio_version",
+        "constellation_version": "a_constellation_vversion",
+        "is_designated": "a_designation",
+        "qc_status": "a_qc_status",
+        "qc_notes": "a_qc_note",
+        "note": "a_note",
+    }
