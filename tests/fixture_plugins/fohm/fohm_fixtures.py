@@ -1,12 +1,10 @@
 import pytest
 from pytest_mock import MockFixture
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.meta.upload.fohm.fohm import FOHMUploadAPI
 from cg.models.cg_config import CGConfig
 from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
-from cg.store.store import Store
 
 
 @pytest.fixture
@@ -107,14 +105,10 @@ def fohm_pangolin_reports(
 @pytest.fixture
 def fohm_upload_api(
     cg_context: CGConfig,
-    status_db: Store,
-    housekeeper_api: HousekeeperAPI,
-    lims_api: LimsAPI,
     mocker: MockFixture,
 ) -> FOHMUploadAPI:
-    """Rare diseases observations API fixture."""
+    """FOHM upload API fixture."""
     fohm_upload_api = FOHMUploadAPI(cg_context)
-    fohm_upload_api.store = status_db
 
     # Mocked LIMS API scenario
     mocker.patch.object(LimsAPI, "get_sample_attribute", return_value="a_str")

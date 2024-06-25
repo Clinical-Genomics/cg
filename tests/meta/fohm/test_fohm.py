@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from cg.constants import FileExtensions
 from cg.meta.upload.fohm.fohm import (
     FOHMUploadAPI,
     create_daily_deliveries_csv,
@@ -160,3 +161,27 @@ def test_add_region_lab_to_reports(
 
     # THEN a region lab has been added
     assert isinstance(fohm_pangolin_reports[0].region_lab, str)
+
+
+def test_create_pangolin_reports_csv(
+    fohm_pangolin_reports: list[FohmPangolinReport], fohm_upload_api: FOHMUploadAPI, tmp_path: Path
+):
+    # GIVEN a list of reports
+
+    # GIVEN report folders exist
+    fohm_upload_api.create_daily_delivery_folders()
+
+    # GIVEN an outdata path for reports
+    pangolin_path = Path(
+        fohm_upload_api.daily_rawdata_path,
+        f"None_{fohm_upload_api.current_datestr}_pangolin_classification_format4{FileExtensions.TXT}",
+    )
+
+    # GIVEN that the Pangolin report path does not exist
+    assert not pangolin_path.exists()
+
+    # WHEN creating reports
+    fohm_upload_api.create_pangolin_reports_csv(fohm_pangolin_reports)
+
+    # THEN a file with reports id generated
+    assert pangolin_path.exists()
