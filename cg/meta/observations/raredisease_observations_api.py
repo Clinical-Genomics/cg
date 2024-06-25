@@ -22,6 +22,7 @@ from cg.exc import (
 )
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.observations.observations_api import ObservationsAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import RarediseaseObservationsInputFiles
 from cg.store.models import Case
@@ -33,11 +34,10 @@ LOG = logging.getLogger(__name__)
 class RarediseaseObservationsAPI(ObservationsAPI):
     """API to manage RAREDISEASE observations."""
 
-    def __init__(self, config: CGConfig, sequencing_method: SequencingMethod):
+    def __init__(self, config: CGConfig):
         self.analysis_api = RarediseaseAnalysisAPI(config)
-        super().__init__(config=config, analysis_api=self.analysis_api)
-        self.loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(self.set_loqusdb_instance())
-
+        super().__init__(config, analysis_api=self.analysis_api)
+        self.loqusdb_api = None
 
     @property
     def loqusdb_customers(self) -> list[CustomerId]:
