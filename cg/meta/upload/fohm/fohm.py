@@ -223,10 +223,10 @@ class FOHMUploadAPI:
         for report in reports:
             report.internal_id = self.status_db.get_sample_by_name(name=report.taxon).internal_id
 
-    def add_region_lab(
+    def add_region_lab_to_reports(
         self, reports: list[FohmComplementaryReport] | list[FohmPangolinReport]
     ) -> None:
-        """Add key for region lab to reports."""
+        """Add region lab to reports."""
         for report in reports:
             report.region_lab = f"""{self.lims_api.get_sample_attribute(lims_id=report.internal_id, key="region_code").split(' ')[0]}"""
             f"""_{self.lims_api.get_sample_attribute(lims_id=report.internal_id, key="lab_code").split(' ')[0]}"""

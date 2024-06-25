@@ -131,7 +131,7 @@ def test_add_sample_internal_id_complementary_report(
 
 
 @pytest.fixture
-def testadd_sample_internal_id_pangolin_report(
+def test_add_sample_internal_id_pangolin_report(
     fohm_pangolin_reports: list[FohmPangolinReport], fohm_upload_api: FOHMUploadAPI
 ):
     """Test adding sample internal id to the reports."""
@@ -144,3 +144,19 @@ def testadd_sample_internal_id_pangolin_report(
 
     # THEN a sample internal id has been added
     assert isinstance(fohm_pangolin_reports[0].internal_id, str)
+
+
+@pytest.fixture
+def test_add_region_lab_to_reports(
+    fohm_pangolin_reports: list[FohmPangolinReport], fohm_upload_api: FOHMUploadAPI
+):
+    """Test adding sample internal id to the reports."""
+    # GIVEN a FOHM upload API
+
+    # GIVEN a list of Pangolin reports
+
+    # WHEN adding region lab
+    fohm_upload_api.add_region_lab_to_reports(reports=fohm_pangolin_reports)
+
+    # THEN a region lab has been added
+    assert isinstance(fohm_pangolin_reports[0].region_lab, str)
