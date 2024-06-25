@@ -230,8 +230,8 @@ PIPELINE_ANALYSIS_TAG_MAP: dict[Workflow, dict] = {
         "sample_tags": MUTANT_ANALYSIS_SAMPLE_TAGS,
     },
     Workflow.RAREDISEASE: {
-        "case_tags": RAREDISEASE_ANALYSIS_CASE_TAGS,
-        "sample_tags": RAREDISEASE_ANALYSIS_SAMPLE_TAGS,
+        "case_tags": [{HermesFileTag.CLINICAL_DELIVERY}],
+        "sample_tags": [{HermesFileTag.CLINICAL_DELIVERY}],
     },
     Workflow.RNAFUSION: {
         "case_tags": RNAFUSION_ANALYSIS_CASE_TAGS,
