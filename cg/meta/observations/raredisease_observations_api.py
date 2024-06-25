@@ -21,6 +21,7 @@ from cg.exc import (
     LoqusdbUploadCaseError,
 )
 from cg.meta.observations.observations_api import ObservationsAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import RarediseaseObservationsInputFiles
 from cg.store.models import Case
@@ -33,8 +34,9 @@ class RarediseaseObservationsAPI(ObservationsAPI):
     """API to manage RAREDISEASE observations."""
 
     def __init__(self, config: CGConfig):
-        super().__init__(config)
-        self.loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(self.get_loqusdb_instance())
+        self.analysis_api = RarediseaseAnalysisAPI(config)
+        super().__init__(config, analysis_api=self.analysis_api)
+        self.loqusdb_api = None
 
     @property
     def loqusdb_customers(self) -> list[CustomerId]:
