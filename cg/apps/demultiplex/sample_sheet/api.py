@@ -154,7 +154,7 @@ class SampleSheetAPI:
 
         if self.dry_run:
             LOG.info(
-                f"Sample sheet from Housekeeper is valid, "
+                "Sample sheet from Housekeeper is valid, "
                 "would have copied it to sequencing run directory"
             )
             return
