@@ -39,7 +39,7 @@ def get_observations_verified_case(context: CGConfig, case_id: str | None, uploa
 
 def get_observations_api(
     context: CGConfig, case_id: str | None, upload: bool
-) -> MipDNAObservationsAPI | BalsamicObservationsAPI | RarediseaseObservationsAPI:
+) -> BalsamicObservationsAPI | MipDNAObservationsAPI | RarediseaseObservationsAPI:
     """Return an observations API given a specific case object."""
     case: Case = get_observations_verified_case(context=context, case_id=case_id, upload=upload)
     observations_apis = {
