@@ -307,6 +307,18 @@ def tmp_demultiplexed_flow_cell_no_fastq_files(
     )
 
 
+@pytest.fixture
+def tmp_demultiplexed_novaseq_6000_post_1_5_kits_path(
+    tmp_illumina_demultiplexed_flow_cells_directory: Path,
+    novaseq_6000_post_1_5_kits_flow_cell_full_name: str,
+) -> Path:
+    """Return the path to a demultiplexed flow cell directory without fastq files."""
+    return Path(
+        tmp_illumina_demultiplexed_flow_cells_directory,
+        novaseq_6000_post_1_5_kits_flow_cell_full_name,
+    )
+
+
 # Fixtures for test demultiplex flow cell
 @pytest.fixture
 def tmp_empty_demultiplexed_runs_directory(

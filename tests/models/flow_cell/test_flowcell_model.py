@@ -51,6 +51,18 @@ def test_rta_exists(novaseq_6000_pre_1_5_kits_flow_cell: IlluminaRunDirectoryDat
     assert rta_file.exists()
 
 
+def test_copy_complete_exists(novaseq_6000_pre_1_5_kits_flow_cell: IlluminaRunDirectoryData):
+    """Test return of CopyComplete file."""
+    # GIVEN the path to a finished flow cell
+    # GIVEN a flow cell object
+
+    # WHEN fetching the path to the RTA file
+    copy_complete: Path = novaseq_6000_pre_1_5_kits_flow_cell.copy_complete_path
+
+    # THEN assert that the file exists
+    assert copy_complete.exists()
+
+
 @pytest.mark.parametrize(
     "flow_cell_fixture",
     [
