@@ -84,7 +84,7 @@ def test_get_sars_cov_complementary_reports(
     assert content[0].sample_number == "44CS000000"
 
 
-def test_get_pangolin_reports(fohm_pangolin_reports: list[FohmPangolinReport]):
+def test_get_sars_cov_pangolin_reports(fohm_pangolin_reports: list[FohmPangolinReport]):
     # GIVEN a list of reports
 
     # WHEN matching values
@@ -95,4 +95,4 @@ def test_get_pangolin_reports(fohm_pangolin_reports: list[FohmPangolinReport]):
 
     # THEN only the report for Sars-cov2 reports remains
     assert len(content) == 1
-    assert content[0].taxon == "44CS000000"
+    assert content[0].taxon == "44CS000001"
