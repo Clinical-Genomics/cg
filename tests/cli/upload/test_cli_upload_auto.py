@@ -44,6 +44,8 @@ def test_upload_auto_with_workflow_raredisease(
 
     # WHEN uploading all analysis from workflow MIP
     caplog.set_level(logging.INFO)
-    cli_runner.invoke(upload_all_completed_analyses, ["--workflow", "raredisease"], obj=upload_context)
+    cli_runner.invoke(
+        upload_all_completed_analyses, ["--workflow", "raredisease"], obj=upload_context
+    )
     # THEN assert that the RAREDISEASE analysis was successfully uploaded
     assert "Uploading analysis for case" in caplog.text
